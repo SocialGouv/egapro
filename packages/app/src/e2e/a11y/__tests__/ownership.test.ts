@@ -27,7 +27,7 @@ const declaredIds = sample.sample.pages.map((p) => p.id);
 
 // The specs that record what the sweep skips, read as text: importing them would declare
 // Playwright tests inside vitest.
-const specs = ["funnels.a11y.ts", "dynamic.a11y.ts"]
+const specs = ["funnels.a11y.ts", "dynamic.a11y.ts", "anonymous.a11y.ts"]
 	.map((f) => readFileSync(join(__dirname, "..", f), "utf8"))
 	.join("\n");
 

@@ -21,4 +21,11 @@ export const SNAPSHOTTED_ELSEWHERE = new Set([
 	"avis-cse-etape-1",
 	// Pages with a dynamic segment: their id comes from the database, so `dynamic.a11y.ts`.
 	"historique-declaration",
+	// Pages that only exist WITHOUT a session: signed in, `/` redirects to the espace and
+	// `/login` redirects into the app, so the sweep correctly skipped both rather than filing
+	// another screen under their name. `anonymous.a11y.ts` drops the storageState and takes
+	// them. They were the two the RGAA report never covered — the first two screens every
+	// visitor meets.
+	"accueil",
+	"login",
 ]);
