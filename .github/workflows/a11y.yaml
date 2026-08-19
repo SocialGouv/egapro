@@ -388,45 +388,52 @@ jobs:
           # Le registre est VERSIONNÉ ; cette étape n'est qu'un rattrapage, pour le cas où un
           # run hebdo aurait tranché des critères que le fichier committé ne porte pas encore.
           # Elle ne doit jamais écraser un registre committé plus riche que l'artefact.
-          committed=$(node -p "try{JSON.parse(require('fs').readFileSync('packages/app/.ultra11y/verdicts/rgaa.json','utf8')).entries.length}catch{0}")
-          # Les DEUX branches, et la branche de tête d'abord : c'est `a11y-pages` en hebdo ou en
-          # manuel qui enrichit le registre, et ces runs-là tournent sur la branche où l'on
-          # travaille — pas sur `alpha`, où ce job ne tourne jamais (son `if` exclut `push`).
-          # Ne regarder que `github.base_ref` cherchait donc l'artefact exactement là où il ne
-          # pouvait pas être : mesuré sur cette PR, l'artefact existait sur la branche de tête
-          # et le job a rapporté « la grille partira vide » à chaque run.
+          # ON FUSIONNE, ON N'ÉCRASE PAS.
+          #
+          # Cette étape comparait des NOMBRES D'ENTRÉES et copiait l'artefact quand il en avait
+          # plus. Mesuré sur le run 32298313904 : « registre restauré depuis le run 32260825526
+          # — 81 verdict(s), contre 64 committé(s) », et le verdict RGAA 12.3 qui venait d'être
+          # committé, relu et poussé a disparu avant même le rejeu. Le critère est reparti à
+          # l'adjudicateur, qui l'a raté, et la grille est restée à 105/106.
+          #
+          # Un compte n'est pas une mesure d'autorité. Un registre COMMITTÉ est passé en revue ;
+          # un artefact ne l'est pas. On prend donc l'union des deux, et le committé l'emporte
+          # sur tout critère que les deux portent — le rattrapage garde son intérêt (les
+          # verdicts qu'un run hebdo a produits et que personne n'a encore committés) sans
+          # jamais pouvoir perdre un verdict relu.
+          cat > /tmp/merge-ledger.mjs <<'MERGE'
+          import { readFileSync, writeFileSync, copyFileSync } from "node:fs";
+          const dest = "packages/app/.ultra11y/verdicts/rgaa.json";
+          const read = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
+          const mine = read(dest);
+          const theirs = read(process.argv[2]);
+          if (!theirs) process.exit(0);
+          if (!mine) { copyFileSync(process.argv[2], dest); console.log("registre absent — artefact adopté tel quel."); process.exit(0); }
+          const key = (e) => `${e.standard ?? ""}|${e.criteriaId}`;
+          const byKey = new Map((theirs.entries ?? []).map((e) => [key(e), e]));
+          const kept = [];
+          for (const e of mine.entries ?? []) { if (byKey.has(key(e))) kept.push(e.criteriaId); byKey.set(key(e), e); }
+          const merged = { ...mine, entries: [...byKey.values()] };
+          writeFileSync(dest, `${JSON.stringify(merged, null, 2)}\n`);
+          console.log(`registre fusionné : ${(mine.entries ?? []).length} committé(s) + ${(theirs.entries ?? []).length} de l'artefact → ${merged.entries.length}${kept.length ? ` (le committé l'emporte sur ${kept.join(", ")})` : ""}.`);
+          MERGE
           for branch in "${HEAD_REF:-}" "$BASE"; do
             [ -n "$branch" ] || continue
             run_id=$(gh run list --workflow=a11y.yaml --branch "$branch" --status success \
               --limit 30 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
             [ -n "$run_id" ] || continue
             tmp=$(mktemp -d)
-            # DEPUIS LE LIVRABLE FUSIONNÉ, et non depuis la partie.
-            #
-            # `a11y-bundle` fusionne les `ultra11y-part-*` en un seul `ultra11y-rgaa` avec
-            # `delete-merged: true` : au moment où cette étape tourne, la partie qui portait le
-            # registre n'existe plus sous son propre nom. On lit donc le LIVRABLE, où l'Action a
-            # recopié le registre à côté du rapport (`verdicts-rgaa.json`). Les noms précédents
-            # sont essayés ensuite, pour un livrable produit avant ce changement.
             gh run download "$run_id" -n ultra11y-rgaa -D "$tmp" 2>/dev/null || continue
-            # Une partie par répertoire depuis `separate-directories` ; on accepte encore la
-            # racine, pour un livrable produit avant ce changement.
             led="$tmp/ultra11y-part-rgaa/verdicts-rgaa.json"
             # Les noms qu'ont portés les livrables précédents, dans l'ordre où on les a eus.
             [ -f "$led" ] || led="$tmp/ultra11y-part-pages/verdicts-rgaa.json"
             [ -f "$led" ] || led="$tmp/ultra11y-part-verdicts/rgaa.json"
             [ -f "$led" ] || led="$tmp/rgaa.json"
             [ -f "$led" ] || continue
-            n=$(node -p "try{JSON.parse(require('fs').readFileSync('$led','utf8')).entries.length}catch{0}")
-            if [ "$n" -gt "$committed" ]; then
-              cp "$led" packages/app/.ultra11y/verdicts/rgaa.json
-              echo "registre restauré depuis le run $run_id ($branch) — $n verdict(s), contre $committed committé(s)."
-              exit 0
-            fi
-            echo "::notice::le run $run_id ($branch) porte $n verdict(s), le registre committé en porte $committed — on garde le committé."
+            node /tmp/merge-ledger.mjs "$led"
             exit 0
           done
-          echo "::notice::aucun artefact de registre à rattraper — le registre committé ($committed verdict(s)) fait foi." 
+          echo "::notice::aucun artefact de registre à rattraper — le registre committé fait foi."
 
       # L'Action n'a plus besoin de `sample`/`storage-state`/`runtime` : `audit` réingère
       # `.ultra11y/pages/` tout seul dès que le répertoire existe. Elle fait le reste — audit
