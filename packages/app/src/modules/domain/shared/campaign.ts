@@ -50,7 +50,12 @@ export function getPathChoiceRound1Deadline(year: number): Date {
 	return new Date(year, 6, 1);
 }
 
-/** Returns the deadline to choose a compliance path for the round the company is in. */
+/**
+ * Returns the deadline to choose a compliance path for the round the company is in.
+ *
+ * Display only — never feed a read-only gate or a write guard with it: the path
+ * choice stays open past the round-1 date (see CompliancePathPage).
+ */
 export function selectPathChoiceDeadline(
 	deadlines: CampaignDeadlines,
 	isSecondRound: boolean,
