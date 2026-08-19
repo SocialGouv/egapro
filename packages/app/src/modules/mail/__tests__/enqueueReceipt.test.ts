@@ -45,6 +45,7 @@ vi.mock("~/server/db", () => ({
 }));
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { getPathChoiceRound1Deadline } from "~/modules/domain";
 import { enqueueReceipt } from "../enqueueReceipt";
 
 const PDF_ATTACHMENT = {
@@ -323,6 +324,21 @@ describe("enqueueReceipt", () => {
 		);
 	});
 
+	it("carries a thrown Error's message onto the audit row when the enqueue fails fatally", async () => {
+		mocks.enqueueNotification.mockRejectedValueOnce(
+			new Error("redis connection lost"),
+		);
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "redis connection lost",
+			}),
+		);
+	});
+
 	it("passes a null userId through when the session has no user id", async () => {
 		await enqueueReceipt({
 			...baseInput,
@@ -369,13 +385,28 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(mocks.getCampaignDeadlines).not.toHaveBeenCalled();
 	});
 
-	it("selects path_to_select and attaches the compliance deadline when a compliance path was chosen", async () => {
+	it("attaches the round-1 deadline to a first declaration and never reads the campaign config", async () => {
 		stubContext({
 			...declarationRow,
 			firstDeclarationPathChoice: "justify",
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(payloadOf().variant).toBe("path_to_select");
+		expect(payloadOf().complianceDeadline).toBe(
+			getPathChoiceRound1Deadline(2025).toISOString(),
+		);
+		expect(mocks.getCampaignDeadlines).not.toHaveBeenCalled();
+	});
+
+	it("attaches the administrable round-2 deadline to a second declaration", async () => {
+		stubContext({
+			...declarationRow,
+			secondDeclarationPathChoice: "justify",
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
 
 		expect(payloadOf().variant).toBe("path_to_select");
 		expect(payloadOf().complianceDeadline).toBe("2025-09-01T00:00:00.000Z");

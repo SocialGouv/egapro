@@ -45,6 +45,11 @@ export function getPathChoiceDeadline(year: number): Date {
 	return new Date(year + 1, 0, 1);
 }
 
+/** Returns the derived round-1 deadline to choose a compliance path (July 1st of the campaign year). */
+export function getPathChoiceRound1Deadline(year: number): Date {
+	return new Date(year, 6, 1);
+}
+
 /** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {

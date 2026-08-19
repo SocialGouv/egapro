@@ -24,7 +24,8 @@ const SIREN = "552100554";
 const YEAR = 2027;
 const DEADLINE = "2027-06-01T00:00:00.000Z";
 const RAISON_SOCIALE = "Société Démo";
-const COMPLIANCE_DEADLINE = "1er septembre 2028";
+const COMPLIANCE_DEADLINE = "2028-09-01T00:00:00.000Z";
+const COMPLIANCE_DEADLINE_FR = "1ᵉʳ septembre 2028";
 
 const PAYLOADS: NotificationPayloadMap = {
 	declaration_confirmation: {
@@ -498,9 +499,22 @@ describe("declaration_confirmation variants", () => {
 		expect(mail.subject).toBe("Egapro - Transmission de la déclaration");
 		expect(mail.html).toContain("Sélectionner le parcours");
 		expect(mail.html).toContain("supérieurs ou égaux à 5 %");
-		expect(mail.html).toContain(COMPLIANCE_DEADLINE);
+		// The verbatim ISO leaking into the mail was the reported bug.
+		expect(mail.html).toContain(COMPLIANCE_DEADLINE_FR);
+		expect(mail.html).not.toContain(COMPLIANCE_DEADLINE);
 		expect(mail.html).toContain(`href="${compliancePathUrl}"`);
 		expect(mail.html).toContain(`>${loginUrl}<`);
+	});
+
+	it("path_to_select: requires the compliance deadline", async () => {
+		await expect(
+			buildMail("declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
 	});
 });
 

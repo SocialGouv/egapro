@@ -1,3 +1,4 @@
+import { formatFrenchDate } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
 import {
 	getAvisCseUrl,
@@ -83,6 +84,12 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 			return { subject, html, text };
 		}
 		case "path_to_select": {
+			if (!complianceDeadline) {
+				throw new Error(
+					"complianceDeadline is required for path_to_select variant",
+				);
+			}
+			const formattedDeadline = formatFrenchDate(complianceDeadline);
 			const subject = "Egapro - Transmission de la déclaration";
 			const previewText =
 				"Un ou plusieurs écarts de rémunération supérieurs ou égaux à 5 % ont été constatés. Vous devez sélectionner un parcours de mise en conformité.";
@@ -96,7 +103,7 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 						salariée fait apparaître un ou plusieurs écarts de rémunération
 						supérieurs ou égaux à 5 %. Vous devez, en conséquence, sélectionner
 						un parcours de mise en conformité au plus tard le{" "}
-						{complianceDeadline}.
+						{formattedDeadline}.
 					</EmailParagraph>
 					<EmailCtaWithLink
 						href={getCompliancePathUrl()}

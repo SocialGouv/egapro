@@ -84,6 +84,18 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 
 		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });
+
+		await test.step("first-declaration receipt states the round-1 path-choice deadline in French (#4207)", async () => {
+			const firstReceipt = await waitForEmail(
+				TEST_USER_EMAIL,
+				(m) => /Transmission de la déclaration/i.test(m.subject),
+				{ since: startedAt },
+			);
+			// Round 1 is July 1st, not the round-2 January deadline.
+			expect(firstReceipt.html).toMatch(/1ᵉʳ juillet/);
+			expect(firstReceipt.html).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+		});
+
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 

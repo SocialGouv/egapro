@@ -6,6 +6,7 @@ export {
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
 	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
 	getRepresentationDeadline,

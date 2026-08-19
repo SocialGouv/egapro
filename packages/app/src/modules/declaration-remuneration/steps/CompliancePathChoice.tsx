@@ -11,7 +11,11 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { type CampaignDeadlines, formatLongDate } from "~/modules/domain";
+import {
+	type CampaignDeadlines,
+	formatLongDate,
+	getPathChoiceRound1Deadline,
+} from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -127,6 +131,16 @@ export function CompliancePathChoice({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
+	const modificationDeadline = isSecondRound
+		? campaignDeadlines.decl2ModificationDeadline
+		: campaignDeadlines.decl1ModificationDeadline;
+	const pathChoiceDeadline = isSecondRound
+		? campaignDeadlines.pathChoiceDeadline
+		: getPathChoiceRound1Deadline(currentYear);
+	const gapNoticeText = isSecondRound
+		? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
+		: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants.";
+
 	const onSubmit = form.handleSubmit((data) => {
 		if (isReadOnly || !data.path) return;
 		mutation.mutate({ path: data.path });
@@ -155,11 +169,7 @@ export function CompliancePathChoice({
 				<DeclarationSuccessBanner
 					email={email}
 					isSecondDeclaration={isSecondRound}
-					modificationDeadline={
-						isSecondRound
-							? campaignDeadlines.decl2ModificationDeadline
-							: campaignDeadlines.decl1ModificationDeadline
-					}
+					modificationDeadline={modificationDeadline}
 					pdfDownloadHref={pdfDownloadHref}
 					year={currentYear}
 				/>
@@ -174,18 +184,14 @@ export function CompliancePathChoice({
 				</h2>
 
 				<div className={common.flexColumnGap1}>
-					<p className={`fr-mb-0 ${styles.instructions}`}>
-						{isSecondRound
-							? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
-							: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants."}
-					</p>
+					<p className={`fr-mb-0 ${styles.instructions}`}>{gapNoticeText}</p>
 
 					<div className="fr-highlight fr-mb-0">
 						<p className="fr-mb-1w">
 							Date limite pour choisir un parcours de mise en conformité
 						</p>
 						<p className="fr-text--xl fr-text--bold fr-mb-0">
-							{formatLongDate(campaignDeadlines.pathChoiceDeadline)}
+							{formatLongDate(pathChoiceDeadline)}
 						</p>
 					</div>
 				</div>

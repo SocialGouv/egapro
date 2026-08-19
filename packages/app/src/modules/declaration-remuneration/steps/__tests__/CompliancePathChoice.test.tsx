@@ -316,14 +316,21 @@ describe("CompliancePathChoice", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the path choice deadline highlight block", () => {
+	it("renders the round-1 path choice deadline highlight block (July 1st of the campaign year)", () => {
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(
 				"Date limite pour choisir un parcours de mise en conformité",
 			),
 		).toBeInTheDocument();
+		expect(screen.getByText("1ᵉʳ juillet 2026")).toBeInTheDocument();
+		expect(screen.queryByText("1ᵉʳ janvier 2027")).not.toBeInTheDocument();
+	});
+
+	it("renders the round-2 path choice deadline (January 1st of the following year) when isSecondRound", () => {
+		render(compliancePathChoice({ isSecondRound: true }));
 		expect(screen.getByText("1ᵉʳ janvier 2027")).toBeInTheDocument();
+		expect(screen.queryByText("1ᵉʳ juillet 2026")).not.toBeInTheDocument();
 	});
 
 	it("renders previous link pointing to step 6", () => {
