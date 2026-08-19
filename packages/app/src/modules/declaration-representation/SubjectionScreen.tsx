@@ -66,7 +66,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 								Nombre de salariés de l'entreprise
 							</legend>
 							<div className="fr-fieldset__element">
-								<div className="fr-radio-group">
+								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "concerned"}
 										id="subjection-concerned"
@@ -89,7 +89,7 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 								</div>
 							</div>
 							<div className="fr-fieldset__element">
-								<div className="fr-radio-group">
+								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "not_concerned"}
 										id="subjection-not-concerned"
