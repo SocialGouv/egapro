@@ -69,9 +69,12 @@ function renderSection(
 describe("DeclarationsSection", () => {
 	it("renders the 'Démarche en cours' heading", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Démarche en cours",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders the table column headers including Échéance and Ressources", () => {
@@ -143,9 +146,12 @@ describe("DeclarationsSection", () => {
 
 	it("renders 'Années précédentes' heading when there are past declarations", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Années précédentes" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Années précédentes",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders 'Rémunération' and 'Représentation' buttons", () => {

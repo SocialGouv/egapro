@@ -97,7 +97,7 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<h2 className="fr-mb-4w" id="demarches-en-cours-title">
+			<h2 className="fr-h3 fr-mb-4w" id="demarches-en-cours-title">
 				Démarche en cours
 			</h2>
 			{visibleCurrentDeclarations.length > 0 && (
@@ -112,7 +112,7 @@ export function DeclarationsSection({
 			)}
 			{visiblePreviousDeclarations.length > 0 && (
 				<>
-					<h2 className="fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
+					<h2 className="fr-h3 fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
 						Années précédentes
 					</h2>
 					<DeclarationsTable
