@@ -283,16 +283,18 @@ describe("StepPageClient — étape invalide (S6)", () => {
 		expect(push).toHaveBeenCalledWith(STEP_4_HREF);
 	});
 
-	it("blocks the next step while the percentages do not sum to 100", async () => {
+	it("keeps the percentages summing to 100 when either field is edited", async () => {
 		renderStep({ step: 2 });
 
 		await enterWomenPercent("35");
 		await retypeMenPercent("50");
+
+		expect(screen.getByLabelText(/Femmes/)).toHaveValue("50");
+		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
+
 		await userEvent.click(nextButton());
 
-		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
-		expect(mutateAsync).not.toHaveBeenCalled();
-		expect(push).not.toHaveBeenCalled();
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
 	});
 
 	it("blocks the next step while the percentages are still incomplete", async () => {
@@ -307,10 +309,8 @@ describe("StepPageClient — étape invalide (S6)", () => {
 	});
 
 	it("advances once the sum is corrected to 100", async () => {
-		renderStep({ step: 2 });
+		renderStep({ step: 2, initialDraft: SAVED_MISMATCHED_EXECUTIVES });
 
-		await enterWomenPercent("35");
-		await retypeMenPercent("50");
 		await userEvent.click(nextButton());
 		expect(push).not.toHaveBeenCalled();
 

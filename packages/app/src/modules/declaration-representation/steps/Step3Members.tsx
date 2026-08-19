@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import type { RepresentationComplianceVerdict } from "~/modules/domain";
 import {
@@ -11,6 +11,7 @@ import {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
+import { membersSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
@@ -21,7 +22,7 @@ function toPercentString(value: number | undefined): string {
 }
 
 function parsePercent(raw: string): number | undefined {
-	if (raw === "") return undefined;
+	if (raw === "" || raw.endsWith(".") || raw.endsWith(",")) return undefined;
 	const parsed = parseNumber(raw);
 	return Number.isFinite(parsed) ? parsed : undefined;
 }
@@ -32,8 +33,32 @@ function isDecidedVerdict(
 	return verdict === "compliant" || verdict === "non_compliant";
 }
 
+function evaluateMembersGap(
+	womenPercent: number | undefined,
+	menPercent: number | undefined,
+	campaignYear: number,
+): { sumError: boolean; verdict: RepresentationComplianceVerdict | undefined } {
+	if (womenPercent === undefined || menPercent === undefined) {
+		return { sumError: false, verdict: undefined };
+	}
+	const result = membersSchema.safeParse({
+		hasManagementBody: true,
+		memberWomenPercent: womenPercent,
+		memberMenPercent: menPercent,
+	});
+	if (!result.success) return { sumError: true, verdict: undefined };
+	return {
+		sumError: false,
+		verdict: computeRepresentationVerdict(
+			womenPercent,
+			menPercent,
+			campaignYear,
+		),
+	};
+}
+
 export function Step3Members() {
-	const { draft, setDraftValues, year, isReadOnly } =
+	const { draft, setDraftValues, year, isReadOnly, registerStepValidator } =
 		useRepresentationDraftContext();
 	const baseId = useId();
 
@@ -68,16 +93,23 @@ export function Step3Members() {
 		});
 	}
 
-	const verdict =
-		hasManagementBody === true &&
-		draft.memberWomenPercent !== undefined &&
-		draft.memberMenPercent !== undefined
-			? computeRepresentationVerdict(
+	const { sumError, verdict } =
+		hasManagementBody === true
+			? evaluateMembersGap(
 					draft.memberWomenPercent,
 					draft.memberMenPercent,
 					campaignYear,
 				)
-			: undefined;
+			: { sumError: false, verdict: undefined };
+	const decidedVerdict = isDecidedVerdict(verdict) ? verdict : undefined;
+	const isStepValid =
+		hasManagementBody !== undefined &&
+		(hasManagementBody === false || decidedVerdict !== undefined);
+
+	useEffect(() => {
+		registerStepValidator(() => isStepValid);
+		return () => registerStepValidator(null);
+	}, [isStepValid, registerStepValidator]);
 
 	return (
 		<div className="fr-mb-4w">
@@ -127,6 +159,11 @@ export function Step3Members() {
 			{hasManagementBody === true ? (
 				<div className="fr-mt-4w">
 					<PercentagePairFields
+						error={
+							sumError
+								? "La somme des pourcentages doit être égale à 100 %."
+								: undefined
+						}
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les membres des instances dirigeantes."
 						onChange={handlePercentageChange}
 						readOnly={isReadOnly}
@@ -135,9 +172,7 @@ export function Step3Members() {
 				</div>
 			) : null}
 			<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
-				{isDecidedVerdict(verdict) ? (
-					<ComplianceBadge verdict={verdict} />
-				) : null}
+				{decidedVerdict ? <ComplianceBadge verdict={decidedVerdict} /> : null}
 			</div>
 
 			<section className="fr-accordion fr-mt-4w">

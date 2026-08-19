@@ -84,8 +84,8 @@ describe("PercentagePairFields — auto-complement (S5)", () => {
 	});
 });
 
-describe("PercentagePairFields — manual override (S6)", () => {
-	it("keeps the auto-filled field editable and stops recomputing the other one", async () => {
+describe("PercentagePairFields — recalcul systématique (S6)", () => {
+	it("recomputes the women field when the men percentage is retyped by hand", async () => {
 		render(<Harness />);
 		const { women, men } = fields();
 
@@ -94,10 +94,10 @@ describe("PercentagePairFields — manual override (S6)", () => {
 		await userEvent.type(men, "70");
 
 		expect(men).toHaveValue("70");
-		expect(women).toHaveValue("35");
+		expect(women).toHaveValue("30");
 	});
 
-	it("no longer complements the men field once it has been edited by hand", async () => {
+	it("recomputes the men field on every edit, even after both fields were touched", async () => {
 		render(<Harness />);
 		const { women, men } = fields();
 
@@ -106,7 +106,13 @@ describe("PercentagePairFields — manual override (S6)", () => {
 		await userEvent.type(women, "10");
 
 		expect(women).toHaveValue("10");
-		expect(men).toHaveValue("70");
+		expect(men).toHaveValue("90");
+
+		await userEvent.clear(men);
+		await userEvent.type(men, "55");
+
+		expect(men).toHaveValue("55");
+		expect(women).toHaveValue("45");
 	});
 });
 

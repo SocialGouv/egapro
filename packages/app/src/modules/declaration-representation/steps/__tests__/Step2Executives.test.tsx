@@ -198,17 +198,17 @@ describe("Step2Executives — saisie des pourcentages (S5)", () => {
 		});
 	});
 
-	it("keeps the auto-filled field editable", async () => {
+	it("recomputes the women percentage when the men field is edited", async () => {
 		const { lastDraft } = renderStep();
 
 		await enterWomenPercent("35");
 		await retypeMenPercent("45");
 
-		expect(percentFields().women).toHaveValue("35");
+		expect(percentFields().women).toHaveValue("55");
 		expect(percentFields().men).toHaveValue("45");
 		expect(lastDraft()).toMatchObject({
 			executiveMenPercent: 45,
-			executiveWomenPercent: 35,
+			executiveWomenPercent: 55,
 		});
 	});
 
@@ -238,11 +238,10 @@ describe("Step2Executives — saisie des pourcentages (S5)", () => {
 });
 
 describe("Step2Executives — somme des pourcentages (S6)", () => {
-	it("blocks the entry with an error when the sum differs from 100", async () => {
-		renderStep();
-
-		await enterWomenPercent("35");
-		await retypeMenPercent("45");
+	it("blocks the entry with an error when the restored sum differs from 100", () => {
+		renderStep({
+			initialDraft: { currentStep: STEP, ...MISMATCHED_EXECUTIVES },
+		});
 
 		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
 		expect(percentFields().women).toHaveAttribute("aria-invalid", "true");
@@ -251,15 +250,18 @@ describe("Step2Executives — somme des pourcentages (S6)", () => {
 		expect(screen.queryByText("Non conforme")).not.toBeInTheDocument();
 	});
 
-	it("clears the error as soon as the sum is back to 100", async () => {
-		renderStep();
+	it("clears the error as soon as an edit brings the sum back to 100", async () => {
+		renderStep({
+			initialDraft: { currentStep: STEP, ...MISMATCHED_EXECUTIVES },
+		});
 
-		await enterWomenPercent("35");
-		await retypeMenPercent("45");
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
+
 		await retypeMenPercent("65");
 
 		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
 		expect(percentFields().women).not.toHaveAttribute("aria-invalid");
+		expect(percentFields().women).toHaveValue("35");
 		expect(screen.getByText("Conforme")).toBeInTheDocument();
 	});
 
@@ -462,31 +464,24 @@ describe("Step2Executives — validité de l'étape (S6)", () => {
 		expect(stepValid()).toBe(false);
 	});
 
-	it("reports the step as invalid while the sum differs from 100", async () => {
-		const { stepValid } = renderStep();
-
-		await enterWomenPercent("35");
-		await retypeMenPercent("45");
-
-		expect(stepValid()).toBe(false);
-	});
-
-	it("reports the step as valid again once the sum is back to 100", async () => {
-		const { stepValid } = renderStep();
-
-		await enterWomenPercent("35");
-		await retypeMenPercent("45");
-		await retypeMenPercent("65");
-
-		expect(stepValid()).toBe(true);
-	});
-
-	it("reports a restored invalid draft as soon as it is mounted", () => {
+	it("reports the step as invalid while the restored sum differs from 100", () => {
 		const { stepValid } = renderStep({
 			initialDraft: { currentStep: STEP, ...MISMATCHED_EXECUTIVES },
 		});
 
 		expect(stepValid()).toBe(false);
+	});
+
+	it("reports the step as valid again once an edit brings the sum back to 100", async () => {
+		const { stepValid } = renderStep({
+			initialDraft: { currentStep: STEP, ...MISMATCHED_EXECUTIVES },
+		});
+
+		expect(stepValid()).toBe(false);
+
+		await retypeMenPercent("65");
+
+		expect(stepValid()).toBe(true);
 	});
 });
 

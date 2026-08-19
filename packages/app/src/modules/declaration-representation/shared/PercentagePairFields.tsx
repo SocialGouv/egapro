@@ -53,16 +53,11 @@ export function PercentagePairFields({
 	const menId = `${baseId}-men`;
 	const hintId = `${baseId}-hint`;
 	const errorId = `${baseId}-error`;
-	const [editedFields, setEditedFields] = useState({
-		women: false,
-		men: false,
-	});
 	const [announcement, setAnnouncement] = useState("");
 
 	function handleWomenChange(raw: string) {
 		if (!isPercentageInput(raw)) return;
-		setEditedFields((previous) => ({ ...previous, women: true }));
-		const complement = editedFields.men ? undefined : complementPercentage(raw);
+		const complement = complementPercentage(raw);
 		setAnnouncement(
 			complement === undefined
 				? ""
@@ -76,10 +71,7 @@ export function PercentagePairFields({
 
 	function handleMenChange(raw: string) {
 		if (!isPercentageInput(raw)) return;
-		setEditedFields((previous) => ({ ...previous, men: true }));
-		const complement = editedFields.women
-			? undefined
-			: complementPercentage(raw);
+		const complement = complementPercentage(raw);
 		setAnnouncement(
 			complement === undefined
 				? ""

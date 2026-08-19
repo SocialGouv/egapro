@@ -50,6 +50,12 @@ export const NON_COMPLIANT_MEMBERS = {
 	memberMenPercent: 75,
 } as const;
 
+export const MISMATCHED_MEMBERS = {
+	hasManagementBody: true,
+	memberWomenPercent: 35,
+	memberMenPercent: 50,
+} as const;
+
 export const NO_MANAGEMENT_BODY = { hasManagementBody: false } as const;
 
 export const WEBSITE_PUBLICATION = {

@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	COMPUTABLE_MEMBERS,
+	MISMATCHED_MEMBERS,
 	REPRESENTATION_YEAR,
+	VALIDATION_MESSAGES,
 } from "~/modules/declaration-representation/__tests__/fixtures";
 import { RepresentationDraftProvider } from "~/modules/declaration-representation/shared/draft/DraftContext";
 import type { RepresentationDraft } from "~/modules/declaration-representation/types";
@@ -20,6 +22,14 @@ const STEP = 3;
 const RAISED_TARGET_YEAR = REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR - 1;
 
 const registerStepValidator = vi.fn();
+
+beforeEach(() => {
+	registerStepValidator.mockClear();
+});
+
+function stepValid() {
+	return registerStepValidator.mock.lastCall?.[0]?.();
+}
 
 const NON_COMPLIANT_MEMBERS = {
 	hasManagementBody: true,
@@ -275,6 +285,72 @@ describe("Step3Members — verdict de conformité (S13–S15)", () => {
 		render(<Harness draft={{ hasManagementBody: true, ...percentages }} />);
 
 		expect(queryBadge()).not.toBeInTheDocument();
+	});
+});
+
+describe("Step3Members — validation de l'étape", () => {
+	it("bloque l'étape tant qu'aucun choix n'est fait", () => {
+		render(<Harness />);
+
+		expect(stepValid()).toBe(false);
+	});
+
+	it("valide l'étape quand aucune instance dirigeante n'est déclarée", async () => {
+		render(<Harness />);
+
+		await userEvent.click(noneRadio());
+
+		expect(stepValid()).toBe(true);
+	});
+
+	it("bloque l'étape tant que les pourcentages sont incomplets", async () => {
+		render(<Harness />);
+
+		await userEvent.click(someRadio());
+
+		expect(stepValid()).toBe(false);
+	});
+
+	it("affiche une erreur, masque le badge et bloque l'étape quand la somme restaurée diffère de 100", () => {
+		render(<Harness draft={MISMATCHED_MEMBERS} />);
+
+		expect(screen.getByText(VALIDATION_MESSAGES.sum)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Femmes/)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		expect(screen.getByLabelText(/Hommes/)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		expect(queryBadge()).not.toBeInTheDocument();
+		expect(stepValid()).toBe(false);
+	});
+
+	it("valide à nouveau l'étape dès qu'une saisie ramène la somme à 100", async () => {
+		render(<Harness draft={MISMATCHED_MEMBERS} />);
+
+		expect(stepValid()).toBe(false);
+
+		const men = screen.getByLabelText(/Hommes/);
+		await userEvent.clear(men);
+		await userEvent.type(men, "65");
+
+		expect(screen.queryByText(VALIDATION_MESSAGES.sum)).not.toBeInTheDocument();
+		expect(screen.getByText("Conforme")).toBeInTheDocument();
+		expect(stepValid()).toBe(true);
+	});
+
+	it("enregistre son validateur auprès de la page d'étape et le libère au démontage", () => {
+		const { unmount } = render(<Harness />);
+
+		expect(registerStepValidator).toHaveBeenLastCalledWith(
+			expect.any(Function),
+		);
+
+		unmount();
+
+		expect(registerStepValidator).toHaveBeenLastCalledWith(null);
 	});
 });
 
