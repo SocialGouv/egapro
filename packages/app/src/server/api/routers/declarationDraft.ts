@@ -7,6 +7,7 @@ import {
 	getDraftInput,
 	saveDraftInput,
 } from "~/modules/declaration-remuneration/shared/draft/schemas";
+import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
@@ -111,7 +112,7 @@ export const declarationDraftRouter = createTRPCRouter({
 				if (lock && lock.userId !== ctx.session.user.id) {
 					throw new TRPCError({
 						code: "CONFLICT",
-						message: "Déclaration verrouillée par un autre utilisateur.",
+						message: DECLARATION_LOCK_CONFLICT_MESSAGE,
 					});
 				}
 			}

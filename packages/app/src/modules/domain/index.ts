@@ -80,6 +80,7 @@ export {
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "./shared/declarationLock";

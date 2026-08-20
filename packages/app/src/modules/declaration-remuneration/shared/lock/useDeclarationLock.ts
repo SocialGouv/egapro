@@ -1,9 +1,13 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-import { LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	LOCK_HEARTBEAT_INTERVAL_MS,
+} from "~/modules/domain";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 export type LockHolder = NonNullable<
@@ -31,6 +35,7 @@ export function useDeclarationLock({
 	modificationClosed = false,
 }: UseDeclarationLockOptions): DeclarationLockState {
 	const session = useSession();
+	const queryClient = useQueryClient();
 	const isImpersonating = Boolean(session.data?.user?.impersonation);
 	const isEnabled =
 		session.status === "authenticated" &&
@@ -100,12 +105,35 @@ export function useDeclarationLock({
 				void heartbeatRef
 					.current({ declarationId })
 					.then((result) => {
-						if (cancelled || result.held) return;
+						if (cancelled) return;
+						if (result.held) {
+							// A heartbeat the server accepts proves this tab still owns the
+							// lock: restore the editable state if a transient acquire
+							// failure had pessimistically flipped it to read-only, which
+							// nothing else would ever undo.
+							isHolderRef.current = true;
+							setIsReadOnly(false);
+							return;
+						}
 						// Lock lost (expired or taken over): re-read the current holder.
 						void refreshOwnership();
 					})
 					.catch(() => {});
 			}, LOCK_HEARTBEAT_INTERVAL_MS);
+		};
+
+		// Re-reads ownership, then resumes the heartbeat if this tab won the lock
+		// back. Called whenever the tab may have drifted from the server state
+		// while it was away: `handleHide` releases the lock as soon as the tab is
+		// hidden, and the heartbeat that would notice is throttled in a background
+		// tab and frozen while the machine sleeps. Without this, a tab left open
+		// overnight comes back believing it still holds a lock the server dropped,
+		// and the first write is rejected with a bogus "locked by another user"
+		// (issue #4186).
+		const reconcileOwnership = async () => {
+			await refreshOwnership();
+			if (cancelled) return;
+			if (isHolderRef.current) startHeartbeat();
 		};
 
 		const handleHide = () => {
@@ -116,8 +144,36 @@ export function useDeclarationLock({
 		};
 
 		const handleVisibilityChange = () => {
-			if (document.visibilityState === "hidden") handleHide();
+			if (document.visibilityState === "hidden") {
+				handleHide();
+				return;
+			}
+			void reconcileOwnership();
 		};
+
+		// Symmetric to the `pagehide` beacon: a bfcache restore resumes a page
+		// whose lock was released on the way out.
+		const handlePageShow = (event: PageTransitionEvent) => {
+			if (!event.persisted) return;
+			void reconcileOwnership();
+		};
+
+		// A write rejected because the lock is not held is the authoritative
+		// signal that this tab's ownership is stale — the step form would
+		// otherwise keep showing an editable form under a red lock error.
+		const unsubscribeFromMutations = queryClient
+			.getMutationCache()
+			.subscribe((event) => {
+				if (event.type !== "updated" || event.action.type !== "error") return;
+				const error = event.action.error;
+				if (
+					!(error instanceof Error) ||
+					error.message !== DECLARATION_LOCK_CONFLICT_MESSAGE
+				) {
+					return;
+				}
+				void reconcileOwnership();
+			});
 
 		setIsLoading(true);
 		void (async () => {
@@ -128,12 +184,15 @@ export function useDeclarationLock({
 		})();
 
 		window.addEventListener("pagehide", handleHide);
+		window.addEventListener("pageshow", handlePageShow);
 		document.addEventListener("visibilitychange", handleVisibilityChange);
 
 		return () => {
 			cancelled = true;
 			stopHeartbeat();
+			unsubscribeFromMutations();
 			window.removeEventListener("pagehide", handleHide);
+			window.removeEventListener("pageshow", handlePageShow);
 			document.removeEventListener("visibilitychange", handleVisibilityChange);
 			// Intentionally NOT releasing on unmount: step-to-step navigation
 			// unmounts then remounts this hook, and a release racing the next step's
@@ -147,6 +206,7 @@ export function useDeclarationLock({
 		isEnabled,
 		isImpersonating,
 		modificationClosed,
+		queryClient,
 		session.status,
 	]);
 

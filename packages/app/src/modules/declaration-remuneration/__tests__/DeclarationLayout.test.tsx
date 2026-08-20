@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
@@ -42,16 +43,23 @@ function LockProbe() {
 }
 
 function declarationLayout(lockAcquisitionSuspended = false) {
+	// The lock hook watches the mutation cache for lock-conflict rejections, so
+	// it needs a query client just like it does under `TRPCReactProvider`.
+	const queryClient = new QueryClient({
+		defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+	});
 	return (
-		<DeclarationLayout
-			company={company}
-			declarationId="decl-1"
-			declarationYear={2024}
-			lockAcquisitionSuspended={lockAcquisitionSuspended}
-		>
-			<p>Step content</p>
-			<LockProbe />
-		</DeclarationLayout>
+		<QueryClientProvider client={queryClient}>
+			<DeclarationLayout
+				company={company}
+				declarationId="decl-1"
+				declarationYear={2024}
+				lockAcquisitionSuspended={lockAcquisitionSuspended}
+			>
+				<p>Step content</p>
+				<LockProbe />
+			</DeclarationLayout>
+		</QueryClientProvider>
 	);
 }
 
