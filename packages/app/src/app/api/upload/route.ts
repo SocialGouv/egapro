@@ -1,6 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	getCurrentYear,
+} from "~/modules/domain";
 import { validateFileName } from "~/modules/shared/fileNameValidation";
 import { parseSiren } from "~/modules/shared/parseSiren";
 import {
@@ -243,7 +246,7 @@ export async function POST(request: Request): Promise<Response> {
 				startedAt,
 			});
 			return Response.json(
-				{ error: "Déclaration verrouillée par un autre utilisateur." },
+				{ error: DECLARATION_LOCK_CONFLICT_MESSAGE },
 				{ status: 409 },
 			);
 		}
