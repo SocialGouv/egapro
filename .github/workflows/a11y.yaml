@@ -109,7 +109,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.15.0
+        uses: maxgfr/ultra11y@v5.16.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -341,7 +341,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.15.0
+        uses: maxgfr/ultra11y@v5.16.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -380,18 +380,23 @@ jobs:
           # ouverts sur CHACUNE des 37 pages — une porte verte au-dessus d'un livrable rempli à
           # 90 %.
           #
-          # `pages` tient chaque grille de page à la même barre, qui est celle sur laquelle un
-          # bilan page par page se juge réellement. Elle est atteignable depuis que le moteur
-          # décide par page ce qu'il a MESURÉ par page (`scope.pageCoverage`) : sur l'audit réel
-          # de cette branche, les 9 « à évaluer » de la page d'accueil tombent à 2 — 11.9 et 12.3,
-          # les deux que l'adjudicateur a explicitement déclarés indécidables.
+          # POURQUOI `true` ET NON `pages`, depuis la suppression du registre.
           #
-          # Ce que ça change : ce job peut rougir. C'est voulu, et c'est la seule chose qui rende
-          # le zéro tenable — sans porte, « à évaluer » redevient une colonne qu'on apprend à
-          # ignorer. Jamais un seuil : ce qui reste ouvert est NOMMÉ. Et depuis la suppression
-          # d'`undecidable.json`, il n'y a plus qu'une seule issue — faire trancher le critère par
-          # l'adjudication, en relançant le workflow si la passe l'a manqué.
-          require-decided: pages
+          # `pages` tient CHAQUE grille de page à la barre, et c'est bien celle sur laquelle un
+          # bilan page par page se juge. Elle n'était atteignable que parce que le registre
+          # fermait la majorité des critères de jugement AVANT que le modèle n'intervienne : sur
+          # l'audit réel de cette branche, les 9 « à évaluer » de la page d'accueil tombaient à 2.
+          #
+          # Sans registre, l'adjudication repart de zéro sur les 59 critères de jugement à chaque
+          # run, et ce dépôt a mesuré ce que ça donne : « il en ratait 3 à 13, différemment à
+          # chaque run ». Garder `pages` reviendrait à câbler une porte qui rougit pour une raison
+          # que personne ne peut corriger — un run raté n'est pas un défaut du code — et une porte
+          # qu'on relance jusqu'à ce qu'elle passe ne garde plus rien.
+          #
+          # `true` tient la grille DU RUN : un critère tranché quelque part compte comme tranché.
+          # C'est plus bas, et c'est dit. Ce qui reste ouvert est NOMMÉ dans le log et dans la
+          # fiche par page ; jamais un seuil. Remonter à `pages` le jour où un registre revient.
+          require-decided: "true"
           # LA COUVERTURE, elle, bloque — et c'est la seule chose qui bloque ici.
           #
           # `require-decided` porte sur les CRITÈRES ; celle-ci porte sur les PAGES, et c'est
