@@ -12,7 +12,7 @@ export function SectionBanner({ title }: { title: string }) {
 
 export function CategoryBanner({ title }: { title: string }) {
 	return (
-		<View minPresenceAhead={60} style={styles.categoryBanner}>
+		<View style={styles.categoryBanner}>
 			<Text style={styles.categoryBannerText}>{title}</Text>
 		</View>
 	);

@@ -85,6 +85,7 @@ type Props = {
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	disabled?: boolean;
+	nextHref?: string;
 	mimoquageNextHref?: string;
 	hasDataOverride?: boolean;
 	isSavingOverride?: boolean;
@@ -142,6 +143,7 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
+	nextHref,
 	mimoquageNextHref,
 	hasDataOverride,
 	isSavingOverride = false,
@@ -400,6 +402,14 @@ export function CategoryForm({
 
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
+				{readOnlyLabel && (
+					<p className="fr-mb-0">
+						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
+						<span className="fr-text--bold">
+							{formatCategorySource(form.watch("source"))}
+						</span>
+					</p>
+				)}
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 
 				{referencePeriodPicker ?? (
@@ -417,14 +427,7 @@ export function CategoryForm({
 					</div>
 				)}
 
-				{readOnlyLabel ? (
-					<p className="fr-mb-0">
-						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
-						<span className="fr-text--bold">
-							{formatCategorySource(form.watch("source"))}
-						</span>
-					</p>
-				) : (
+				{!readOnlyLabel && (
 					<div
 						className={`fr-select-group ${
 							sourceError ? "fr-select-group--error" : ""
@@ -581,6 +584,7 @@ export function CategoryForm({
 				className="fr-mt-0"
 				isSubmitting={isSubmitting}
 				mimoquageNextHref={mimoquageNextHref}
+				nextHref={nextHref}
 				previousHref={previousHref}
 			/>
 

@@ -37,6 +37,12 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 			subtitle,
 			href: `/api/declaration-pdf?year=${declaration.year}`,
 		});
+	}
+
+	if (
+		declaration.hasSubmittedCseOpinion ||
+		declaration.hasJointEvaluationFile
+	) {
 		resources.push({
 			title: "Télécharger le récapitulatif des éléments transmis",
 			subtitle,

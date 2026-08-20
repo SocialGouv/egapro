@@ -7,6 +7,12 @@
 		font-size: 0.875rem;
 		line-height: 1.5rem;
 	}
+
+	// DSFR .fr-link defaults to 16px (MD); Figma table copy is SM 14px.
+	:global(.fr-link) {
+		font-size: 0.875rem;
+		line-height: 1.5rem;
+	}
 }
 
 // DSFR JS sets --table-offset: calc(1px + 1rem) on .fr-table__wrapper to

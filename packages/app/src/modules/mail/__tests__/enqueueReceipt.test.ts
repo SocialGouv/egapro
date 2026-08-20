@@ -45,7 +45,7 @@ vi.mock("~/server/db", () => ({
 }));
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { getPathChoiceRound1Deadline } from "~/modules/domain";
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { enqueueReceipt } from "../enqueueReceipt";
 
 const PDF_ATTACHMENT = {
@@ -60,6 +60,12 @@ const baseInput = {
 	year: 2025,
 	userId: "user-1",
 	isResend: false,
+};
+
+const CAMPAIGN_DEADLINES = {
+	...getDefaultCampaignDeadlines(baseInput.year),
+	// Not the derived default: round 2 is administrable, so the payload must read it from the campaign config.
+	pathChoiceDeadline: new Date("2025-09-01T00:00:00.000Z"),
 };
 
 const declarationRow = {
@@ -91,9 +97,7 @@ describe("enqueueReceipt", () => {
 		vi.clearAllMocks();
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
-		mocks.getCampaignDeadlines.mockResolvedValue({
-			pathChoiceDeadline: new Date("2025-09-01T00:00:00.000Z"),
-		});
+		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "enqueued",
 			id: "job-1",
@@ -360,9 +364,7 @@ describe("enqueueReceipt — variant derivation", () => {
 		vi.clearAllMocks();
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
-		mocks.getCampaignDeadlines.mockResolvedValue({
-			pathChoiceDeadline: new Date("2025-09-01T00:00:00.000Z"),
-		});
+		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "enqueued",
 			id: "job-1",
@@ -385,7 +387,7 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(mocks.getCampaignDeadlines).not.toHaveBeenCalled();
 	});
 
-	it("attaches the round-1 deadline to a first declaration and never reads the campaign config", async () => {
+	it("attaches the round-1 deadline to a first declaration", async () => {
 		stubContext({
 			...declarationRow,
 			firstDeclarationPathChoice: "justify",
@@ -395,9 +397,9 @@ describe("enqueueReceipt — variant derivation", () => {
 
 		expect(payloadOf().variant).toBe("path_to_select");
 		expect(payloadOf().complianceDeadline).toBe(
-			getPathChoiceRound1Deadline(2025).toISOString(),
+			CAMPAIGN_DEADLINES.pathChoiceRound1Deadline.toISOString(),
 		);
-		expect(mocks.getCampaignDeadlines).not.toHaveBeenCalled();
+		expect(mocks.getCampaignDeadlines).toHaveBeenCalledWith(2025);
 	});
 
 	it("attaches the administrable round-2 deadline to a second declaration", async () => {
@@ -409,7 +411,9 @@ describe("enqueueReceipt — variant derivation", () => {
 		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
 
 		expect(payloadOf().variant).toBe("path_to_select");
-		expect(payloadOf().complianceDeadline).toBe("2025-09-01T00:00:00.000Z");
+		expect(payloadOf().complianceDeadline).toBe(
+			CAMPAIGN_DEADLINES.pathChoiceDeadline.toISOString(),
+		);
 		expect(mocks.getCampaignDeadlines).toHaveBeenCalledWith(2025);
 	});
 

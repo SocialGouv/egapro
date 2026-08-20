@@ -69,9 +69,12 @@ function renderSection(
 describe("DeclarationsSection", () => {
 	it("renders the 'Démarche en cours' heading", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Démarche en cours",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders the table column headers including Échéance and Ressources", () => {
@@ -117,7 +120,7 @@ describe("DeclarationsSection", () => {
 	it("renders a Documents link for completed declarations", () => {
 		renderSection();
 		expect(
-			screen.getByRole("button", { name: "Documents (2)" }),
+			screen.getByRole("button", { name: "Documents (1)" }),
 		).toBeInTheDocument();
 	});
 
@@ -137,15 +140,18 @@ describe("DeclarationsSection", () => {
 			],
 		});
 		expect(
-			screen.getByRole("button", { name: "Documents (2)" }),
+			screen.getByRole("button", { name: "Documents (1)" }),
 		).toBeInTheDocument();
 	});
 
 	it("renders 'Années précédentes' heading when there are past declarations", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Années précédentes" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Années précédentes",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders 'Rémunération' and 'Représentation' buttons", () => {
@@ -158,6 +164,17 @@ describe("DeclarationsSection", () => {
 			name: "Représentation",
 		});
 		expect(represButtons).toHaveLength(1);
+	});
+
+	it("uses DSFR SM (14px) link size on every table link", () => {
+		renderSection();
+		const tableLinks = screen.getAllByRole("button", {
+			name: /^(Rémunération|Représentation|Documents \(\d+\))$/,
+		});
+		expect(tableLinks.length).toBeGreaterThan(0);
+		for (const link of tableLinks) {
+			expect(link).toHaveClass("fr-link", "fr-link--sm");
+		}
 	});
 
 	it("shows the first representation step in the 'Étape' column", () => {

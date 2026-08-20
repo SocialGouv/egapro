@@ -98,3 +98,9 @@ export function getCseOpinionPreviousHref({
 	}
 	return FIRST_DECLARATION_RECAP_PATH;
 }
+
+export function getCompliancePathPreviousHref(isSecondRound: boolean): string {
+	return isSecondRound
+		? SECOND_DECLARATION_RECAP_PATH
+		: FIRST_DECLARATION_RECAP_PATH;
+}

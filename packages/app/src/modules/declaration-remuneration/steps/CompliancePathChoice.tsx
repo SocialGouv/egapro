@@ -14,7 +14,7 @@ import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/L
 import {
 	type CampaignDeadlines,
 	formatLongDate,
-	getPathChoiceRound1Deadline,
+	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
@@ -22,7 +22,10 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import common from "../shared/common.module.scss";
-import { getPostComplianceDestination } from "../shared/complianceNavigation";
+import {
+	getCompliancePathPreviousHref,
+	getPostComplianceDestination,
+} from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -134,9 +137,10 @@ export function CompliancePathChoice({
 	const modificationDeadline = isSecondRound
 		? campaignDeadlines.decl2ModificationDeadline
 		: campaignDeadlines.decl1ModificationDeadline;
-	const pathChoiceDeadline = isSecondRound
-		? campaignDeadlines.pathChoiceDeadline
-		: getPathChoiceRound1Deadline(currentYear);
+	const pathChoiceDeadline = selectPathChoiceDeadline(
+		campaignDeadlines,
+		isSecondRound,
+	);
 	const gapNoticeText = isSecondRound
 		? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
 		: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants.";
@@ -279,7 +283,7 @@ export function CompliancePathChoice({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/6"
+					previousHref={getCompliancePathPreviousHref(isSecondRound)}
 				/>
 			</fieldset>
 		</form>

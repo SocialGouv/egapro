@@ -13,6 +13,7 @@ export {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Campaign alignment — temporary recette bridge mapping 2026 → 2027, delete when 2027 arrives

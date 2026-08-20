@@ -25,6 +25,7 @@ describe("DeclarationLink", () => {
 		);
 		const button = screen.getByRole("button", { name: "Rémunération" });
 		expect(button).toBeInTheDocument();
+		expect(button).toHaveClass("fr-link", "fr-link--sm");
 		expect(button).toHaveAttribute(
 			"aria-controls",
 			"declaration-process-panel",
@@ -124,6 +125,7 @@ describe("DeclarationLink", () => {
 		);
 		const button = screen.getByRole("button", { name: "Représentation" });
 		expect(button).toBeInTheDocument();
+		expect(button).toHaveClass("fr-link", "fr-link--sm");
 	});
 
 	it("bypasses missing info modal during admin impersonation", () => {

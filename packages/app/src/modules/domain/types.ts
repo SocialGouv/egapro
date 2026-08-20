@@ -49,4 +49,5 @@ export type CampaignDeadlines = {
 	decl2JustificationDeadline: Date;
 	decl2JointEvaluationDeadline: Date;
 	pathChoiceDeadline: Date;
+	pathChoiceRound1Deadline: Date;
 };

@@ -106,6 +106,7 @@ function renderStep3(
 			declarationYear={2025}
 			secondDeclarationCategories={mockCategories}
 			siren="532847196"
+			status="corrective_actions_chosen"
 			{...overrides}
 		/>,
 	);
@@ -307,6 +308,34 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
 	});
 
+	it("keeps Soumettre while the second declaration is still writable", () => {
+		renderStep3();
+		expect(
+			screen.getByRole("button", { name: /soumettre/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders Suivant to the joint evaluation when the revision path is already chosen", () => {
+		renderStep3({ status: "revised_joint_evaluation_chosen" });
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
+		expect(
+			screen.queryByRole("button", { name: /soumettre/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps Soumettre while awaiting a revision choice", () => {
+		renderStep3({ status: "awaiting_revision_choice" });
+		expect(
+			screen.getByRole("button", { name: /soumettre/i }),
+		).toBeInTheDocument();
+	});
+
 	describe("CSE consultation section gating (issue #3945)", () => {
 		it("hides the CSE consultation section but keeps gap actions and the CSE update button when cseOpinionRequired is false", () => {
 			renderStep3({
@@ -321,7 +350,7 @@ describe("SecondDeclarationStep3Review", () => {
 				screen.queryByText(/obligatoirement informer et consulter le CSE/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText(/avis à transmettre sur le portail/),
+				screen.queryByText(/avis à transmettre lors de la dernière étape/),
 			).not.toBeInTheDocument();
 
 			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
@@ -335,7 +364,7 @@ describe("SecondDeclarationStep3Review", () => {
 			).toBeInTheDocument();
 		});
 
-		it("shows the CSE consultation section when cseOpinionRequired is true", () => {
+		it("shows the CSE consultation section and renders the joint evaluation bullet without the 'Soit' prefix when cseOpinionRequired is true", () => {
 			renderStep3({
 				cseOpinionRequired: true,
 				secondDeclarationCategories: highGapCategories,
@@ -345,13 +374,61 @@ describe("SecondDeclarationStep3Review", () => {
 				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/avis à transmettre sur le portail/),
+				screen.getByText(/avis à transmettre lors de la dernière étape/),
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole("button", {
 					name: "Mettre à jour l'existence d'un CSE",
 				}),
 			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByText("Réaliser une évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText(/Soit réaliser une évaluation conjointe/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/mettre en place des actions correctives/),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("second declaration wording (issue #4214)", () => {
+		it("states that gaps were identified again and that the remaining action is mandatory", () => {
+			renderStep3({ secondDeclarationCategories: highGapCategories });
+
+			expect(
+				screen.getByText(/des écarts ≥ 5 % ont encore été identifiés/),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText(/des écarts ≥ 5 % ont été identifiés/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText(/vous devez :/)).toBeInTheDocument();
+			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
+		});
+
+		it("keeps the mandatory wording when the CSE consultation section is shown", () => {
+			renderStep3({
+				cseOpinionRequired: true,
+				secondDeclarationCategories: highGapCategories,
+			});
+
+			expect(
+				screen.getByText(/des écarts ≥ 5 % ont encore été identifiés/),
+			).toBeInTheDocument();
+			expect(screen.getByText(/vous devez :/)).toBeInTheDocument();
+			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
 		});
 	});
 
