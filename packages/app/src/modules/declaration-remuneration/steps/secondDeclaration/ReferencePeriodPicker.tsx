@@ -1,4 +1,5 @@
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import styles from "./ReferencePeriodPicker.module.scss";
 
 type Props = {
@@ -19,7 +20,9 @@ export function ReferencePeriodPicker({
 	readOnly = false,
 }: Props) {
 	return (
-		<fieldset className={styles.fieldset}>
+		<fieldset
+			className={`${styles.fieldset} ${readOnly ? common.readOnlyFieldset : ""}`}
+		>
 			<legend className={`fr-mb-2w ${styles.legend}`}>
 				<span>
 					Quelle est la période de référence pour le calcul de l&apos;indicateur
