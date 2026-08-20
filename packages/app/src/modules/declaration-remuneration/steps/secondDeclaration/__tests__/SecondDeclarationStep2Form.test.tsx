@@ -103,6 +103,61 @@ describe("SecondDeclarationStep2Form", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("places the source paragraph immediately after the intro paragraph (#4215)", () => {
+		render(
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				initialSource="accord-entreprise"
+			/>,
+		);
+		const introParagraph = screen.getByText(
+			/Cette seconde déclaration reprend les catégories/,
+		);
+		const sourceParagraph = screen
+			.getByText(/Source utilisée pour déterminer/)
+			.closest("p");
+		expect(introParagraph.nextElementSibling).toBe(sourceParagraph);
+	});
+
+	it("places the source paragraph before the obligatoires mention (#4215)", () => {
+		render(
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				initialSource="accord-entreprise"
+			/>,
+		);
+		const sourceParagraph = screen
+			.getByText(/Source utilisée pour déterminer/)
+			.closest("p") as HTMLElement;
+		const obligatoiresParagraph = screen.getByText(
+			"Tous les champs sont obligatoires.",
+		);
+		expect(sourceParagraph.nextElementSibling).toBe(obligatoiresParagraph);
+	});
+
+	it("keeps the source paragraph out of the reference period block (#4215)", () => {
+		render(
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				initialSource="accord-entreprise"
+			/>,
+		);
+		const startDateField = screen.getByLabelText(/Date de début/);
+		const sourceParagraph = screen
+			.getByText(/Source utilisée pour déterminer/)
+			.closest("p") as HTMLElement;
+		expect(
+			startDateField.compareDocumentPosition(sourceParagraph) &
+				Node.DOCUMENT_POSITION_PRECEDING,
+		).toBeTruthy();
+	});
+
 	it("renders reference period date pickers", () => {
 		renderStep2();
 		expect(screen.getByLabelText(/Date de début/)).toBeInTheDocument();

@@ -402,6 +402,14 @@ export function CategoryForm({
 
 			<div className={stepStyles.categoryBlock}>
 				<p className="fr-mb-0">{descriptionText}</p>
+				{readOnlyLabel && (
+					<p className="fr-mb-0">
+						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
+						<span className="fr-text--bold">
+							{formatCategorySource(form.watch("source"))}
+						</span>
+					</p>
+				)}
 				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 
 				{referencePeriodPicker ?? (
@@ -419,14 +427,7 @@ export function CategoryForm({
 					</div>
 				)}
 
-				{readOnlyLabel ? (
-					<p className="fr-mb-0">
-						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
-						<span className="fr-text--bold">
-							{formatCategorySource(form.watch("source"))}
-						</span>
-					</p>
-				) : (
+				{!readOnlyLabel && (
 					<div
 						className={`fr-select-group ${
 							sourceError ? "fr-select-group--error" : ""
