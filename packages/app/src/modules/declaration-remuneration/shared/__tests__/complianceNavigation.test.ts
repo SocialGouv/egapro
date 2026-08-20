@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	getCompliancePathPreviousHref,
 	getCseOpinionPreviousHref,
 	getCurrentStageHref,
 	getPostComplianceDestination,
@@ -90,6 +91,20 @@ describe("getCseOpinionPreviousHref", () => {
 			}),
 		).toBe(
 			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
+	});
+});
+
+describe("getCompliancePathPreviousHref", () => {
+	it("returns the first-declaration recap when the path choice is still round 1", () => {
+		expect(getCompliancePathPreviousHref(false)).toBe(
+			"/declaration-remuneration/etape/6",
+		);
+	});
+
+	it("returns the second-declaration recap when the path choice is round 2", () => {
+		expect(getCompliancePathPreviousHref(true)).toBe(
+			"/declaration-remuneration/parcours-conformite/etape/3",
 		);
 	});
 });

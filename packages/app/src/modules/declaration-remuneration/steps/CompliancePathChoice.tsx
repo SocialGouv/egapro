@@ -22,7 +22,10 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import common from "../shared/common.module.scss";
-import { getPostComplianceDestination } from "../shared/complianceNavigation";
+import {
+	getCompliancePathPreviousHref,
+	getPostComplianceDestination,
+} from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -279,7 +282,7 @@ export function CompliancePathChoice({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref="/declaration-remuneration/etape/6"
+					previousHref={getCompliancePathPreviousHref(isSecondRound)}
 				/>
 			</fieldset>
 		</form>
