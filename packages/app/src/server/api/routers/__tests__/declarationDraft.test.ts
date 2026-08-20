@@ -568,12 +568,12 @@ describe("declarationDraftRouter", () => {
 			]);
 			const caller = await createCaller(db);
 
-			await expect(caller.clear({ siren: SIREN, year: YEAR })).rejects.toMatchObject(
-				{
-					code: "CONFLICT",
-					message: "Déclaration verrouillée par un autre utilisateur.",
-				},
-			);
+			await expect(
+				caller.clear({ siren: SIREN, year: YEAR }),
+			).rejects.toMatchObject({
+				code: "CONFLICT",
+				message: "Déclaration verrouillée par un autre utilisateur.",
+			});
 			expect(mocks.update).not.toHaveBeenCalled();
 		});
 	});
