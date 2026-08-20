@@ -15,6 +15,7 @@ type Props = {
 	fieldId: string;
 	category: EmployeeCategory & { id: number };
 	disabled: boolean;
+	readOnly: boolean;
 	isExpanded: boolean;
 	readOnlyLabel: boolean;
 	showDelete: boolean;
@@ -38,6 +39,7 @@ export function CategoryAccordionItem({
 	fieldId,
 	category,
 	disabled,
+	readOnly,
 	isExpanded,
 	readOnlyLabel,
 	showDelete,
@@ -110,6 +112,7 @@ export function CategoryAccordionItem({
 								disabled={disabled}
 								id={`cat-${index}-name`}
 								maxLength={CATEGORY_NAME_MAX_LENGTH}
+								readOnly={readOnly}
 								{...nameProps}
 								type="text"
 							/>
@@ -126,6 +129,7 @@ export function CategoryAccordionItem({
 						disabled={disabled}
 						onDecimalBlur={onDecimalBlur}
 						onPositiveNumberChange={onPositiveNumberChange}
+						readOnly={readOnly}
 					/>
 					{showDelete && (
 						<div className={stepStyles.deleteRow}>

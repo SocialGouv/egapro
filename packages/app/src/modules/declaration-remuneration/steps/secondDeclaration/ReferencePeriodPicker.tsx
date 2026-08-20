@@ -7,6 +7,7 @@ type Props = {
 	onStartDateChange: (value: string) => void;
 	onEndDateChange: (value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function ReferencePeriodPicker({
@@ -15,6 +16,7 @@ export function ReferencePeriodPicker({
 	onStartDateChange,
 	onEndDateChange,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	return (
 		<fieldset className={styles.fieldset}>
@@ -40,6 +42,7 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-start-date"
 							onChange={(e) => onStartDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={startDate}
 						/>
@@ -56,6 +59,7 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-end-date"
 							onChange={(e) => onEndDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={endDate}
 						/>

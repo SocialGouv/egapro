@@ -22,6 +22,7 @@ type Props = {
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 type StringField = {
@@ -53,6 +54,7 @@ type EuroCellProps = {
 	ariaLabel: string;
 	id: string;
 	disabled: boolean;
+	readOnly: boolean;
 	value: string;
 	onBlur: () => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -62,6 +64,7 @@ function EuroInputCell({
 	ariaLabel,
 	id,
 	disabled,
+	readOnly,
 	value,
 	onBlur,
 	onChange,
@@ -77,6 +80,7 @@ function EuroInputCell({
 					inputMode="decimal"
 					onBlur={onBlur}
 					onChange={onChange}
+					readOnly={readOnly}
 					type="text"
 					value={displayDecimal(value)}
 				/>
@@ -137,6 +141,7 @@ type RemunerationTableProps = {
 	cat: EmployeeCategory;
 	catIndex: number;
 	disabled: boolean;
+	readOnly: boolean;
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
@@ -149,6 +154,7 @@ function RemunerationTable({
 	cat,
 	catIndex,
 	disabled,
+	readOnly,
 	pos,
 	blur,
 	idPrefix,
@@ -185,6 +191,7 @@ function RemunerationTable({
 							id={idFor("base-women")}
 							onBlur={blur(catIndex, fields.baseWomen)}
 							onChange={pos(catIndex, fields.baseWomen, false)}
+							readOnly={readOnly}
 							value={cat[fields.baseWomen]}
 						/>
 						<EuroInputCell
@@ -193,6 +200,7 @@ function RemunerationTable({
 							id={idFor("base-men")}
 							onBlur={blur(catIndex, fields.baseMen)}
 							onChange={pos(catIndex, fields.baseMen, false)}
+							readOnly={readOnly}
 							value={cat[fields.baseMen]}
 						/>
 						<td className={stepStyles.gapCell}>
@@ -214,6 +222,7 @@ function RemunerationTable({
 							id={idFor("variable-women")}
 							onBlur={blur(catIndex, fields.variableWomen)}
 							onChange={pos(catIndex, fields.variableWomen, false)}
+							readOnly={readOnly}
 							value={cat[fields.variableWomen]}
 						/>
 						<EuroInputCell
@@ -222,6 +231,7 @@ function RemunerationTable({
 							id={idFor("variable-men")}
 							onBlur={blur(catIndex, fields.variableMen)}
 							onChange={pos(catIndex, fields.variableMen, false)}
+							readOnly={readOnly}
 							value={cat[fields.variableMen]}
 						/>
 						<td className={stepStyles.gapCell}>
@@ -258,6 +268,7 @@ export function CategoryDataTable({
 	onPositiveNumberChange: pos,
 	onDecimalBlur: blur,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
 	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
@@ -304,6 +315,7 @@ export function CategoryDataTable({
 									inputMode="numeric"
 									onChange={pos(catIndex, "womenCount", true)}
 									pattern="[0-9]*"
+									readOnly={readOnly}
 									type="text"
 									value={cat.womenCount}
 								/>
@@ -317,6 +329,7 @@ export function CategoryDataTable({
 									inputMode="numeric"
 									onChange={pos(catIndex, "menCount", true)}
 									pattern="[0-9]*"
+									readOnly={readOnly}
 									type="text"
 									value={cat.menCount}
 								/>
@@ -334,6 +347,7 @@ export function CategoryDataTable({
 				fields={ANNUAL_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}
+				readOnly={readOnly}
 				scope="annuel"
 				title="Rémunération annuelle brute moyenne"
 			/>
@@ -346,6 +360,7 @@ export function CategoryDataTable({
 				fields={HOURLY_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}
+				readOnly={readOnly}
 				scope="horaire"
 				title="Rémunération horaire brute moyenne"
 			/>

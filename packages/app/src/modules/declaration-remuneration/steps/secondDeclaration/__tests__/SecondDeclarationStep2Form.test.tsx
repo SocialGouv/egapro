@@ -1,8 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep2Form } from "../SecondDeclarationStep2Form";
+
+const { setFieldMock, clearDraftMock } = vi.hoisted(() => ({
+	setFieldMock: vi.fn(),
+	clearDraftMock: vi.fn(),
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
@@ -17,6 +23,25 @@ vi.mock("~/trpc/react", () => ({
 		},
 	},
 }));
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+	() => ({
+		useDeclarationDraft: () => ({
+			draft: {},
+			setField: setFieldMock,
+			clearDraft: clearDraftMock,
+			isLoadingDraft: false,
+		}),
+	}),
+);
+
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDraftHydration",
+	() => ({
+		useDraftHydration: () => true,
+	}),
+);
 
 function makeCategory(
 	overrides: Partial<EmployeeCategoryRow> = {},
@@ -57,15 +82,38 @@ function renderStep2(
 	overrides: Partial<ComponentProps<typeof SecondDeclarationStep2Form>> = {},
 ) {
 	return render(
-		<SecondDeclarationStep2Form
-			declarationSiren="123456789"
-			declarationYear={2025}
-			initialFirstDeclarationCategories={mockCategories}
-			status="corrective_actions_chosen"
-			{...overrides}
-		/>,
+		<LockProvider>
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				status="corrective_actions_chosen"
+				{...overrides}
+			/>
+		</LockProvider>,
 	);
 }
+
+function renderStep2ReadOnly(
+	overrides: Partial<ComponentProps<typeof SecondDeclarationStep2Form>> = {},
+) {
+	return render(
+		<LockProvider isReadOnly>
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				status="corrective_actions_chosen"
+				{...overrides}
+			/>
+		</LockProvider>,
+	);
+}
+
+beforeEach(() => {
+	setFieldMock.mockClear();
+	clearDraftMock.mockClear();
+});
 
 describe("SecondDeclarationStep2Form", () => {
 	it("renders the title and step indicator", () => {
@@ -104,14 +152,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("places the source paragraph immediately after the intro paragraph (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const introParagraph = screen.getByText(
 			/Cette seconde déclaration reprend les catégories/,
 		);
@@ -122,14 +163,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("places the source paragraph before the obligatoires mention (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const sourceParagraph = screen
 			.getByText(/Source utilisée pour déterminer/)
 			.closest("p") as HTMLElement;
@@ -140,14 +174,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("keeps the source paragraph out of the reference period block (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const startDateField = screen.getByLabelText(/Date de début/);
 		const sourceParagraph = screen
 			.getByText(/Source utilisée pour déterminer/)
@@ -232,5 +259,22 @@ describe("SecondDeclarationStep2Form", () => {
 		renderStep2({ status: "revised_joint_evaluation_chosen" });
 		expect(screen.getByLabelText(/Date de début/)).toBeDisabled();
 		expect(screen.getByLabelText(/Date de fin/)).toBeDisabled();
+	});
+
+	it("renders the lock-protected inputs as readOnly instead of disabled", () => {
+		renderStep2ReadOnly();
+
+		const startDate = screen.getByLabelText(/Date de début/);
+		const womenCount = screen.getByLabelText(/Effectif femmes, catégorie 1/);
+
+		expect(startDate).toHaveAttribute("readonly");
+		expect(startDate).not.toBeDisabled();
+		expect(womenCount).toHaveAttribute("readonly");
+		expect(womenCount).not.toBeDisabled();
+	});
+
+	it("does not autosave the draft when the declaration is lock-read-only", () => {
+		renderStep2ReadOnly();
+		expect(setFieldMock).not.toHaveBeenCalled();
 	});
 });
