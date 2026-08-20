@@ -24,38 +24,37 @@ Coupe-circuits du hook : `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une 
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | push + PR | Audit statique JSX/TSX du package. **Bloquant** (`fail-on: blocking`). SARIF + annotations + commentaire de PR sticky (`comment-kind: digest` — les défauts distincts, actionnables en revue). |
-| `a11y-pages` | PR → `alpha`, hebdo, manuel | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** pour les critères de jugement, et — hors PR seulement — fait adjuger le reste par une passe Claude Code (secret `CLAUDE_CODE_OAUTH_TOKEN`). Poste son propre commentaire de PR (`comment-kind: pages`) : une ligne par page avec sa base et ses compteurs (conformes / non conformes / à évaluer), puis les critères non conformes de chaque page en échec. Pas de pourcentage — un taux sur les seuls critères décidés se lit comme une note de page ; il reste dans la fiche de l'artefact, avec sa couverture. Les constats ne bloquent pas — on mesure. Une panne, si. |
-| `a11y-report` | hebdo, manuel | Rapport RGAA daté, sans navigateur. Le plancher garanti si `a11y-pages` tombe — et il rejoue le registre, donc il n'est plus amputé de ses critères de jugement. |
+| `a11y-gate` | manuel | Audit statique JSX/TSX du package. SARIF + annotations. Ne commente pas et ne produit aucun artefact : il fait rougir ou verdir, c'est tout. |
+| `a11y-pages` | manuel | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), puis fait adjuger TOUS les critères de jugement par une passe Claude Code (secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page dans le livrable : une ligne par page avec sa base et ses compteurs, puis les critères non conformes de chaque page en échec. Pas de pourcentage — un taux sur les seuls critères décidés se lit comme une note de page ; il reste dans la fiche de l'artefact, avec sa couverture. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
+| `a11y-bundle` | manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
+
+**Le workflow ne tourne que sur `workflow_dispatch`** — ni `push`, ni `pull_request`, ni cron.
+Conséquence à connaître avant d'y toucher : **il n'y a aucune gate d'accessibilité sur une PR**.
+Une régression RGAA peut être mergée sans rien allumer. C'est un arbitrage assumé, dont la
+contrepartie est que l'adjudication IA, elle, peut tourner à chaque run (`claude-code-action`
+refuse `push`).
 
 `gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
 
-### Le registre de verdicts : comment la CI rend la grille complète, sans modèle
+### Il n'y a plus de registre de verdicts
 
-`packages/app/.ultra11y/verdicts/rgaa.json` est **versionné** (une exception explicite dans
-`packages/app/.gitignore`, qui ignore tout le reste de `.ultra11y/`). Il contient un verdict par
-critère de jugement déjà tranché : son statut, sa justification, ses citations, et une
-**empreinte de l'évidence** contre laquelle il a été rendu.
+`packages/app/.ultra11y/verdicts/rgaa.json` a existé, et il a été **supprimé**. Il portait un
+verdict par critère de jugement déjà tranché — statut, justification, citations, et une empreinte
+de l'évidence contre laquelle il avait été rendu — et les jobs le **rejouaient** avant toute
+adjudication, ce qui rendait la grille complète sans invoquer de modèle.
 
-Les trois jobs le **rejouent** (`ledger:`). Ce n'est pas un cache : chaque verdict repasse la
-même porte que le jour où il a été écrit — mêmes contrôles de couverture dans les deux sens,
-mêmes citations à prouver contre l'évidence propre du critère, même re-grounding du `file:line`
-contre la source réelle. Un verdict qu'on ne peut plus prouver est refusé en CI exactement comme
-il le serait en session.
+Sa raison d'être était l'événement `push`, sur lequel `claude-code-action` refuse de tourner : là,
+seul le rejeu pouvait fermer les critères de jugement. Le workflow ne tourne plus que sur
+`workflow_dispatch`, où le modèle tourne toujours. Le registre n'avait plus rien à couvrir.
 
-Trois propriétés à connaître :
+**Ce que ça coûte, et il faut le savoir avant de lancer un run.** Le rejeu passait avant
+l'adjudication et ne laissait payer que le reliquat ; sur un registre à jour, un run ne coûtait
+rien. Il n'y a plus de reliquat, il n'y a que le total : **16 à 21 $ par run** (mesuré sur ce
+dépôt, voir le tableau plus bas), et **deux runs sur le même commit peuvent rendre deux grilles
+différentes**. Un run manuel est un acte, pas un réflexe.
 
-| Propriété | Conséquence |
-|---|---|
-| **Un verdict périmé est écarté, jamais reconduit** | Quand le code sous un critère change, l'évidence change, l'empreinte ne correspond plus : le critère retourne « à évaluer » en le disant (date d'enregistrement + les deux comptes d'évidence). Le log nomme chaque critère périmé ou absent. |
-| **Un reformatage n'est pas un changement** | L'empreinte ignore les numéros de ligne, et le rejeu **ré-ancre** les citations sur les lignes du jour. Ajouter un commentaire en tête de fichier n'invalide pas les verdicts qu'il contient. |
-| **Un registre absent ou refusé ne casse rien** | Warning, jamais échec : les critères restent « à évaluer », là où ils seraient sans registre. |
-
-**Qui le remplit.** L'adjudication (`adjudicate: agent`) ne tourne plus que sur les runs **hebdo
-et manuel**, et seulement sur ce que le registre ne couvre pas — le rejeu passe avant. Sur une
-**PR**, `adjudicate: none` : la grille est complète, déterministe et **gratuite**. Le registre
-rafraîchi sort dans l'artefact `ultra11y-verdicts-rgaa`, à relire puis committer (la CI ne pousse
-pas elle-même sur une branche protégée pour un fichier de verdicts).
+Il n'y a plus d'`undecidable.json` non plus. `require-decided: pages` reste actif : un critère que
+l'adjudication ne tranche pas fait rougir le job, et la seule issue est de le faire trancher.
 
 En local, la même chose sans CI, depuis `packages/app` :
 
@@ -64,12 +63,8 @@ pnpm exec ultra11y audit src --jsx --graph --standard rgaa --out audits
 pnpm exec ultra11y verify --manual --in audits/audit-latest.json --out audits --standard rgaa
 # … trancher chaque critère (le skill `ultra11y` le pilote) …
 pnpm exec ultra11y verify --apply audits/ADJUDICATE.todo.json --in audits/audit-latest.json \
-  --out audits --standard rgaa --ledger .ultra11y/verdicts/rgaa.json
+  --out audits --standard rgaa
 ```
-
-Le test de parité, celui qui compte : rejouer le registre sur un audit **frais** doit rendre la
-**même grille** que la passe adjugée. Vérifié sur le moteur (`tests/ledger.test.ts`) et de bout
-en bout en pack RGAA.
 
 ### Le fold est fail-closed PAR VERDICT (5.4.0)
 

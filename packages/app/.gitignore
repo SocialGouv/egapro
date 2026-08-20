@@ -66,20 +66,9 @@ src/e2e/.auth/
 # ultra11y a11y audit artifacts (runtime output + scan session state)
 /audits
 /.auth
-# `/.ultra11y/*` et non `/.ultra11y` : git ne descend pas dans un répertoire ignoré, donc une
-# exception à l'intérieur ne peut pas s'appliquer. On ignore le CONTENU, ce qui laisse la porte
-# ouverte au seul fichier qui doit être versionné.
-/.ultra11y/*
-# Le registre de verdicts n'est pas un artefact de run : c'est une affirmation datée sur ce
-# dépôt (« ce critère est conforme, voici la preuve citée »), que la CI rejoue pour rendre la
-# grille complète sans modèle. Versionné exprès, donc relu en revue comme le reste du code.
-# Sous `/.ultra11y` ignoré en bloc, le registre serait resté vide et la CI aurait silencieusement
-# retombé sur « à évaluer » — la panne exacte que ce modèle supprime.
-!/.ultra11y/verdicts/
-/.ultra11y/verdicts/*
-!/.ultra11y/verdicts/*.json
-# Même raisonnement pour la liste des critères déclarés indécidables : c'est une affirmation
-# sur CE code (« personne ne peut trancher ce critère, et voici pourquoi »), elle doit passer
-# en revue avec lui. La garder hors du dépôt reviendrait à laisser une exception d'audit vivre
-# sans relecture — exactement ce que la porte de complétude existe pour empêcher.
-!/.ultra11y/undecidable.json
+# Tout `.ultra11y/` est de la sortie de run : captures de pages, état de scan, rapports.
+# Le registre de verdicts et `undecidable.json` y faisaient exception — ils étaient versionnés
+# pour que la CI les rejoue sur les événements où aucun modèle ne peut tourner. Le workflow ne
+# tourne plus que sur `workflow_dispatch`, où le modèle tourne toujours et tranche tout : il n'y
+# a plus rien ici qui mérite d'être relu en revue.
+/.ultra11y

@@ -7,11 +7,10 @@
 		"clientKind": "git"
 	},
 	"files": {
-		// Le registre de verdicts ultra11y est GÉNÉRÉ par le moteur (JSON à 2 espaces) et
-		// versionné pour que la CI le rejoue. Biome suit .gitignore, et le registre y est
-		// explicitement dé-ignoré : sans cette exclusion, `format:check` échouerait à chaque
-		// régénération parce que ce dépôt formate en tabulations. Un artefact généré n'a rien à
-		// faire dans le formateur du projet — même raison que le rapport Playwright.
+		// `.ultra11y/` est entièrement de la sortie de run — captures, état de scan, rapports —
+		// et le moteur écrit du JSON à 2 espaces là où ce dépôt formate en tabulations. Biome suit
+		// .gitignore, qui ignore désormais tout le répertoire, mais l'exclusion reste explicite :
+		// un run local laisse ces fichiers sur le disque, et `format` ne doit pas les réécrire.
 		"includes": ["**", "!**/.ultra11y/**"]
 	},
 	"assist": {
