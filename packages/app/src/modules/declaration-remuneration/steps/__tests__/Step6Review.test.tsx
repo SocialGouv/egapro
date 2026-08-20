@@ -637,6 +637,11 @@ describe("Step6Review", () => {
 		expect(
 			screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/ont encore été identifiés/),
+		).not.toBeInTheDocument();
+		expect(screen.getByText(/vous pouvez :/)).toBeInTheDocument();
+		expect(screen.queryByText(/vous devez :/)).not.toBeInTheDocument();
 		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /critères objectifs/ }),

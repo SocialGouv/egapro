@@ -403,6 +403,35 @@ describe("SecondDeclarationStep3Review", () => {
 		});
 	});
 
+	describe("second declaration wording (issue #4214)", () => {
+		it("states that gaps were identified again and that the remaining action is mandatory", () => {
+			renderStep3({ secondDeclarationCategories: highGapCategories });
+
+			expect(
+				screen.getByText(/des écarts ≥ 5 % ont encore été identifiés/),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText(/des écarts ≥ 5 % ont été identifiés/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText(/vous devez :/)).toBeInTheDocument();
+			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
+		});
+
+		it("keeps the mandatory wording when the CSE consultation section is shown", () => {
+			renderStep3({
+				cseOpinionRequired: true,
+				secondDeclarationCategories: highGapCategories,
+			});
+
+			expect(
+				screen.getByText(/des écarts ≥ 5 % ont encore été identifiés/),
+			).toBeInTheDocument();
+			expect(screen.getByText(/vous devez :/)).toBeInTheDocument();
+			expect(screen.queryByText(/vous pouvez :/)).not.toBeInTheDocument();
+		});
+	});
+
 	it("closes the modal without submitting when Annuler is clicked", async () => {
 		const user = userEvent.setup();
 		renderStep3();
