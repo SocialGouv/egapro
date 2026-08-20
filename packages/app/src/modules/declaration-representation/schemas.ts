@@ -66,6 +66,29 @@ export function computePeriodStart(end: string): string | undefined {
 	return toIsoDateString(start);
 }
 
+export function nextCalendarDay(isoDate: string): string | undefined {
+	if (!isValidIsoDate(isoDate)) return undefined;
+	const next = parseIsoDate(isoDate);
+	next.setUTCDate(next.getUTCDate() + 1);
+	return toIsoDateString(next);
+}
+
+export function referencePeriodDateBounds(year: number): {
+	startMin: string;
+	startMax: string;
+	endMin: string;
+	endMax: string;
+} {
+	const endMin = `${year}-01-01`;
+	const endMax = `${year}-12-31`;
+	return {
+		startMin: computePeriodStart(endMin) ?? `${year - 1}-01-02`,
+		startMax: computePeriodStart(endMax) ?? `${year}-01-01`,
+		endMin,
+		endMax,
+	};
+}
+
 function sumsToOneHundred(a: number, b: number): boolean {
 	return Math.round((a + b) * 10) / 10 === 100;
 }

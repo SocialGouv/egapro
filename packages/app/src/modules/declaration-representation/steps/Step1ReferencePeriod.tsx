@@ -6,6 +6,7 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import {
 	computePeriodEnd,
 	computePeriodStart,
+	referencePeriodDateBounds,
 	referencePeriodSchema,
 } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
@@ -28,6 +29,7 @@ export function Step1ReferencePeriod() {
 	const referencePeriodEnd = form.watch("referencePeriodEnd") ?? "";
 	const { errors } = form.formState;
 	const [announcement, setAnnouncement] = useState("");
+	const dateBounds = referencePeriodDateBounds(year);
 
 	useEffect(() => {
 		registerStepValidator(async () => {
@@ -122,6 +124,8 @@ export function Step1ReferencePeriod() {
 											: "fr-input"
 									}
 									id="reference-period-start"
+									max={dateBounds.startMax}
+									min={dateBounds.startMin}
 									onChange={handleStartChange}
 									readOnly={isReadOnly}
 									type="date"
@@ -164,6 +168,8 @@ export function Step1ReferencePeriod() {
 											: "fr-input"
 									}
 									id="reference-period-end"
+									max={dateBounds.endMax}
+									min={dateBounds.endMin}
 									onChange={handleEndChange}
 									readOnly={isReadOnly}
 									type="date"

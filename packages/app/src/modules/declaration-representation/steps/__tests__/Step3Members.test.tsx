@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -117,17 +117,24 @@ function spy() {
 }
 
 describe("Step3Members — sélection obligatoire", () => {
-	it("affiche l'erreur de sélection dès le montage de l'étape", () => {
+	it("n'affiche pas l'erreur de sélection au montage de l'étape", () => {
 		render(<Harness />);
+
+		expect(
+			screen.queryByText(VALIDATION_MESSAGES.selectionRequired),
+		).not.toBeInTheDocument();
+	});
+
+	it("affiche l'erreur après une tentative de continuer sans option", () => {
+		render(<Harness />);
+
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
 
 		expect(
 			screen.getByText(VALIDATION_MESSAGES.selectionRequired),
 		).toBeInTheDocument();
-	});
-
-	it("expose l'erreur dans le nom accessible du groupe de radios", () => {
-		render(<Harness />);
-
 		expect(
 			screen.getByRole("group", {
 				name: /Veuillez sélectionner une option pour continuer/,
@@ -138,6 +145,9 @@ describe("Step3Members — sélection obligatoire", () => {
 	it("efface l'erreur dès qu'une option est choisie", async () => {
 		render(<Harness />);
 
+		act(() => {
+			stepValid();
+		});
 		await userEvent.click(noneRadio());
 
 		expect(
@@ -330,7 +340,9 @@ describe("Step3Members — validation de l'étape", () => {
 	it("bloque l'étape tant qu'aucun choix n'est fait", () => {
 		render(<Harness />);
 
-		expect(stepValid()).toBe(false);
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
 	});
 
 	it("valide l'étape quand aucune instance dirigeante n'est déclarée", async () => {

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -383,15 +383,20 @@ describe("Step2Executives — bascule entre les choix", () => {
 });
 
 describe("Step2Executives — sélection obligatoire", () => {
-	it("flags the missing selection as soon as the step is mounted", () => {
+	it("does not flag the missing selection when the step is first mounted", () => {
 		renderStep();
 
-		expect(screen.getByText(SELECTION_REQUIRED)).toBeInTheDocument();
+		expect(screen.queryByText(SELECTION_REQUIRED)).not.toBeInTheDocument();
 	});
 
-	it("exposes the selection error in the accessible name of the radio group", () => {
-		renderStep();
+	it("flags the missing selection after a failed attempt to continue", () => {
+		const { stepValid } = renderStep();
 
+		act(() => {
+			expect(stepValid()).toBe(false);
+		});
+
+		expect(screen.getByText(SELECTION_REQUIRED)).toBeInTheDocument();
 		expect(
 			screen.getByRole("group", {
 				name: /Veuillez sélectionner une option pour continuer/,
@@ -399,15 +404,12 @@ describe("Step2Executives — sélection obligatoire", () => {
 		).toBeInTheDocument();
 	});
 
-	it("reports the step as invalid while no option is selected", () => {
+	it("clears the selection error once an option is picked", async () => {
 		const { stepValid } = renderStep();
 
-		expect(stepValid()).toBe(false);
-	});
-
-	it("clears the selection error once an option is picked", async () => {
-		renderStep();
-
+		act(() => {
+			stepValid();
+		});
 		await userEvent.click(option(OPTIONS.none));
 
 		expect(screen.queryByText(SELECTION_REQUIRED)).not.toBeInTheDocument();

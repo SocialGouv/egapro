@@ -104,12 +104,20 @@ export function Step3Members() {
 	const isStepValid =
 		hasManagementBody !== undefined &&
 		(hasManagementBody === false || decidedVerdict !== undefined);
-	const showSelectionError = hasManagementBody === undefined;
+	const [selectionAttempted, setSelectionAttempted] = useState(false);
+	const showSelectionError =
+		selectionAttempted && hasManagementBody === undefined;
 
 	useEffect(() => {
-		registerStepValidator(() => isStepValid);
+		registerStepValidator(() => {
+			if (hasManagementBody === undefined) {
+				setSelectionAttempted(true);
+				return false;
+			}
+			return isStepValid;
+		});
 		return () => registerStepValidator(null);
-	}, [isStepValid, registerStepValidator]);
+	}, [hasManagementBody, isStepValid, registerStepValidator]);
 
 	return (
 		<div className="fr-mb-4w">

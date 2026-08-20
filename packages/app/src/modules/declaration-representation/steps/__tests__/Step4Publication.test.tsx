@@ -110,6 +110,12 @@ describe("Step4Publication — fields", () => {
 		expect(modalitiesField()).not.toBeInTheDocument();
 	});
 
+	it("greys out publication dates on or before the reference period end", () => {
+		renderStep();
+
+		expect(dateField()).toHaveAttribute("min", "2026-01-01");
+	});
+
 	it("exposes the date and the website answer as required", () => {
 		renderStep();
 

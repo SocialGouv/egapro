@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { referencePeriodSchema } from "~/modules/declaration-representation";
+import {
+	nextCalendarDay,
+	referencePeriodDateBounds,
+	referencePeriodSchema,
+} from "~/modules/declaration-representation/schemas";
 import {
 	issues,
 	VALID_REFERENCE_PERIOD as VALID_PERIOD,
@@ -106,6 +110,23 @@ describe("referencePeriodSchema", () => {
 			VALIDATION_MESSAGES.periodYear(YEAR),
 			VALIDATION_MESSAGES.periodLength,
 		]).not.toContain(reported[0]?.message);
+	});
+
+	it("derives date-picker bounds from the 12-month window ending in the reference year", () => {
+		expect(referencePeriodDateBounds(YEAR)).toEqual({
+			startMin: "2024-01-02",
+			startMax: "2025-01-01",
+			endMin: "2025-01-01",
+			endMax: "2025-12-31",
+		});
+	});
+
+	it.each([
+		["2025-12-31", "2026-01-01"],
+		["2024-02-29", "2024-03-01"],
+		["not-a-date", undefined],
+	])("advances %s to the next calendar day", (isoDate, expected) => {
+		expect(nextCalendarDay(isoDate)).toBe(expected);
 	});
 
 	it("reports one error per malformed date when neither can be read", () => {

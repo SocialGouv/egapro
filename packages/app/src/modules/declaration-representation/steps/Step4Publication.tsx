@@ -6,7 +6,7 @@ import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import { publicationSchema } from "../schemas";
+import { nextCalendarDay, publicationSchema } from "../schemas";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import styles from "./Step4Publication.module.scss";
 
@@ -98,6 +98,10 @@ export function Step4Publication() {
 	const websiteError = errors.hasWebsite?.message;
 	const urlError = errors.publishUrl?.message;
 	const modalitiesError = errors.publishModalities?.message;
+	const publishDateMin =
+		referencePeriodEnd !== undefined
+			? nextCalendarDay(referencePeriodEnd)
+			: undefined;
 
 	return (
 		<div>
@@ -120,6 +124,7 @@ export function Step4Publication() {
 					aria-invalid={dateError ? true : undefined}
 					className="fr-input"
 					id={dateId}
+					min={publishDateMin}
 					readOnly={isReadOnly}
 					required
 					type="date"

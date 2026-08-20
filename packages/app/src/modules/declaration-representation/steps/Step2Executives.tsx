@@ -170,12 +170,19 @@ export function Step2Executives() {
 	const isStepValid =
 		hasSelection &&
 		(draft.executivesCount !== "two_or_more" || knownVerdict !== null);
-	const showSelectionError = !hasSelection;
+	const [selectionAttempted, setSelectionAttempted] = useState(false);
+	const showSelectionError = selectionAttempted && !hasSelection;
 
 	useEffect(() => {
-		registerStepValidator(() => isStepValid);
+		registerStepValidator(() => {
+			if (!hasSelection) {
+				setSelectionAttempted(true);
+				return false;
+			}
+			return isStepValid;
+		});
 		return () => registerStepValidator(null);
-	}, [isStepValid, registerStepValidator]);
+	}, [hasSelection, isStepValid, registerStepValidator]);
 
 	return (
 		<div>

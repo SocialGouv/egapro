@@ -92,6 +92,15 @@ describe("Step1ReferencePeriod — rendering", () => {
 		expect(endInput()).toHaveValue("");
 	});
 
+	it("greys out dates that cannot satisfy the period rules", () => {
+		renderStep1();
+
+		expect(startInput()).toHaveAttribute("min", "2024-01-02");
+		expect(startInput()).toHaveAttribute("max", "2025-01-01");
+		expect(endInput()).toHaveAttribute("min", "2025-01-01");
+		expect(endInput()).toHaveAttribute("max", "2025-12-31");
+	});
+
 	it("pre-fills both dates from the stored draft (S22)", () => {
 		renderStep1({
 			initialDraft: {
