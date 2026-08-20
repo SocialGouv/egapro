@@ -13,7 +13,7 @@
 // Figma spec: label column fixed at 237px next to a fluid value column, pairs
 // laid out as a grid so a value that wraps (communication modalities) cannot
 // push the following label out of line.
-.definitionList {
+:global(dl).definitionList {
 	display: grid;
 	grid-template-columns: 237px minmax(0, 1fr);
 	column-gap: 0.625rem;
@@ -29,6 +29,10 @@
 .definitionList dd {
 	margin: 0;
 	color: var(--text-title-grey);
+}
+
+.definitionList dd :global(.fr-link) {
+	color: var(--text-action-high-blue-france);
 }
 
 .definitionList dt {
@@ -76,6 +80,8 @@
 	gap: 1rem;
 	padding-top: 1.875rem;
 	border-top: 1px solid var(--border-default-grey);
+	// Figma: 16px between Publication and the separator; .review gap is 32px.
+	margin-top: -1rem;
 }
 
 // DSFR renders badges as inline flex boxes; the wrapper keeps the badge hugging

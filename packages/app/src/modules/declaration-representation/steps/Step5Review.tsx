@@ -9,6 +9,7 @@ import {
 	formatShortDate,
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
@@ -27,6 +28,37 @@ const CONFIRMATION_HREF = "/declaration-representation/confirmation";
 
 function formatIsoDate(value: string | undefined): string {
 	return value === undefined ? "—" : formatShortDate(new Date(value));
+}
+
+function toAbsoluteHttpUrl(value: string): string | null {
+	const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+	try {
+		const parsed = new URL(candidate);
+		if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+			return null;
+		}
+		if (!parsed.hostname.includes(".")) return null;
+		return parsed.href;
+	} catch {
+		return null;
+	}
+}
+
+function PublicationUrl({ url }: { url: string | undefined }) {
+	if (url === undefined || url.trim() === "") return "—";
+	const href = toAbsoluteHttpUrl(url);
+	if (href === null) return url;
+	return (
+		<a
+			className="fr-link"
+			href={href}
+			rel="noopener noreferrer"
+			target="_blank"
+		>
+			{url}
+			<NewTabNotice />
+		</a>
+	);
 }
 
 function IndicatorCard({
@@ -141,7 +173,9 @@ export function Step5Review() {
 						{draft.hasWebsite === true ? (
 							<>
 								<dt>Adresse de la page (URL)</dt>
-								<dd>{draft.publishUrl ?? "—"}</dd>
+								<dd>
+									<PublicationUrl url={draft.publishUrl} />
+								</dd>
 							</>
 						) : (
 							<>

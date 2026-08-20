@@ -125,12 +125,37 @@ describe("Step5Review — restitution du brouillon (S18)", () => {
 
 		expect(definitionValue("Date de publication")).toBe("01/03/2026");
 		expect(definitionValue("Site Internet de publication")).toBe("Oui");
-		expect(definitionValue("Adresse de la page (URL)")).toBe(
+		const publicationLink = screen.getByRole("link", {
+			name: new RegExp(
+				`${WEBSITE_PUBLICATION.publishUrl}.*nouvelle fenêtre`,
+				"i",
+			),
+		});
+		expect(publicationLink).toHaveAttribute(
+			"href",
 			WEBSITE_PUBLICATION.publishUrl,
 		);
+		expect(publicationLink).toHaveAttribute("target", "_blank");
+		expect(publicationLink).toHaveAttribute("rel", "noopener noreferrer");
 		expect(
 			screen.queryByText("Modalités de communication", { selector: "dt" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("prefixes a protocol-less publication URL so the link is navigable", () => {
+		renderReview({
+			draft: {
+				...BOTH_COMPUTABLE,
+				hasWebsite: true,
+				publishUrl: "www.exemple.fr/egalite",
+			},
+		});
+
+		expect(
+			screen.getByRole("link", {
+				name: /www\.exemple\.fr\/egalite.*nouvelle fenêtre/i,
+			}),
+		).toHaveAttribute("href", "https://www.exemple.fr/egalite");
 	});
 
 	it("restitutes an offline publication", () => {
