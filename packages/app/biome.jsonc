@@ -11,7 +11,7 @@
 		// et le moteur écrit du JSON à 2 espaces là où ce dépôt formate en tabulations. Biome suit
 		// .gitignore, qui ignore désormais tout le répertoire, mais l'exclusion reste explicite :
 		// un run local laisse ces fichiers sur le disque, et `format` ne doit pas les réécrire.
-		"includes": ["**", "!**/.ultra11y/**"]
+		"includes": ["**", "!**/.ultra11y"]
 	},
 	"assist": {
 		"enabled": true,
