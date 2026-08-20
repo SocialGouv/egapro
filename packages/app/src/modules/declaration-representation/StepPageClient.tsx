@@ -25,6 +25,7 @@ type StepPageClientProps = {
 	campaignYear: number;
 	initialDraft: RepresentationDraft;
 	campaignOpen: boolean;
+	isSubmitted?: boolean;
 };
 
 function isPublicationStepRequired(draft: RepresentationDraft): boolean {
@@ -46,17 +47,19 @@ export function StepPageClient({
 	campaignYear,
 	initialDraft,
 	campaignOpen,
+	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
+	const isReadOnly = !campaignOpen || isSubmitted;
 
 	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
 		useRepresentationDraft({
 			year,
 			step,
 			initialDraft,
-			enabled: campaignOpen,
+			enabled: campaignOpen && !isSubmitted,
 		});
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
@@ -116,7 +119,7 @@ export function StepPageClient({
 				setDraftValues,
 				isSaving,
 				isPendingSave,
-				isReadOnly: !campaignOpen,
+				isReadOnly,
 				previousHref,
 				registerStepValidator,
 			}}

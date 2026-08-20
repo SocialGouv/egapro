@@ -7,6 +7,7 @@ import {
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
 } from "~/modules/declaration-representation/schemas";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import {
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
@@ -183,6 +184,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 						? (payload.publishModalities ?? null)
 						: null,
 				status: "submitted" as const,
+				currentStep: TOTAL_REPRESENTATION_STEPS,
 				submittedAt: now,
 				updatedAt: now,
 				draft: null,

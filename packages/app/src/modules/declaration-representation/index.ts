@@ -30,6 +30,8 @@ export {
 	isPercentageInput,
 	PercentagePairFields,
 } from "./shared/PercentagePairFields";
+export type { RepresentationDeclarationSnapshot } from "./shared/submittedDraft";
+export { representationDraftFromDeclaration } from "./shared/submittedDraft";
 export type { StepDefinition } from "./steps";
 export {
 	getNextStep,

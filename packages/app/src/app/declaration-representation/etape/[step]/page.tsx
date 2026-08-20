@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import {
 	getStepDefinition,
 	parseStepParam,
-	representationDraftSchema,
+	representationDraftFromDeclaration,
 	StepPageClient,
 	stepHref,
 	TOTAL_REPRESENTATION_STEPS,
@@ -58,15 +58,12 @@ export default async function RepresentationStepPage({
 		}
 	}
 
-	const parsedDraft = representationDraftSchema.safeParse(declaration?.draft);
-
 	return (
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={campaignYear}
-			initialDraft={
-				parsedDraft.success ? parsedDraft.data : { currentStep: step }
-			}
+			initialDraft={representationDraftFromDeclaration(declaration, step)}
+			isSubmitted={declaration?.status === "submitted"}
 			step={step}
 			year={year}
 		/>

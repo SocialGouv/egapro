@@ -88,6 +88,7 @@ function stepPageProps() {
 		year: number;
 		campaignYear: number;
 		campaignOpen: boolean;
+		isSubmitted: boolean;
 		initialDraft: RepresentationDraft;
 	};
 }
@@ -275,6 +276,48 @@ describe("RepresentationStepPage — draft hydration", () => {
 		await renderStepPage("2");
 
 		expect(stepPageProps().initialDraft).toEqual({ currentStep: 2 });
+	});
+
+	it("rebuilds the recap from submitted columns when the JSON draft was cleared", async () => {
+		getDeclaration.mockResolvedValue({
+			campaignOpen: true,
+			declaration: {
+				status: "submitted",
+				currentStep: 5,
+				draft: null,
+				referencePeriodStart: "2025-01-01",
+				referencePeriodEnd: "2025-12-31",
+				executiveWomenPercent: "60",
+				executiveMenPercent: "40",
+				notComputableReasonExecutives: null,
+				memberWomenPercent: "55",
+				memberMenPercent: "45",
+				notComputableReasonMembers: null,
+				publishDate: "2026-03-01",
+				publishUrl: "https://exemple.fr/egalite-professionnelle",
+				publishModalities: null,
+			},
+		} as never);
+
+		await renderStepPage("5");
+
+		expect(stepPageProps()).toMatchObject({
+			isSubmitted: true,
+			initialDraft: {
+				currentStep: 5,
+				referencePeriodStart: "2025-01-01",
+				referencePeriodEnd: "2025-12-31",
+				executivesCount: "two_or_more",
+				executiveWomenPercent: 60,
+				executiveMenPercent: 40,
+				hasManagementBody: true,
+				memberWomenPercent: 55,
+				memberMenPercent: 45,
+				hasWebsite: true,
+				publishDate: "2026-03-01",
+				publishUrl: "https://exemple.fr/egalite-professionnelle",
+			},
+		});
 	});
 });
 

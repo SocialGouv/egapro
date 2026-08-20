@@ -76,6 +76,7 @@ type RenderStepOptions = {
 	campaignOpen?: boolean;
 	currentStep?: number;
 	initialDraft?: RepresentationDraft;
+	isSubmitted?: boolean;
 };
 
 function renderStep({
@@ -83,12 +84,14 @@ function renderStep({
 	campaignOpen = true,
 	currentStep = 2,
 	initialDraft,
+	isSubmitted,
 }: RenderStepOptions = {}) {
 	return render(
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
 			initialDraft={initialDraft ?? { currentStep }}
+			isSubmitted={isSubmitted}
 			step={step}
 			year={YEAR}
 		/>,
@@ -142,6 +145,28 @@ describe("StepPageClient — rendering", () => {
 		expect(
 			screen.getByRole("button", { name: "Soumettre" }),
 		).toBeInTheDocument();
+	});
+
+	it("hides submission on a already transmitted declaration", () => {
+		renderStep({
+			step: SUMMARY_STEP,
+			currentStep: SUMMARY_STEP,
+			isSubmitted: true,
+			initialDraft: {
+				currentStep: SUMMARY_STEP,
+				...VALID_REFERENCE_PERIOD,
+				...COMPUTABLE_EXECUTIVES,
+				...WEBSITE_PUBLICATION,
+			},
+		});
+
+		expect(
+			screen.getByText(/Vérifiez les informations avant de soumettre/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Soumettre" }),
+		).not.toBeInTheDocument();
+		expect(screen.getByText("01/01/2025 - 31/12/2025")).toBeInTheDocument();
 	});
 
 	it("renders nothing for a step outside the funnel", () => {

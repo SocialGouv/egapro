@@ -84,6 +84,7 @@ describe("representationDeclarationRouter.submit", () => {
 			publishUrl: "https://exemple.fr/egalite-professionnelle",
 			publishModalities: null,
 			status: "submitted",
+			currentStep: 5,
 			submittedAt: NOW,
 			updatedAt: NOW,
 			draft: null,
