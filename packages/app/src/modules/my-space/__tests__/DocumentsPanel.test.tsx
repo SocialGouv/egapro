@@ -132,11 +132,27 @@ describe("getDocumentResourceCount", () => {
 
 	it.each(
 		SUBMITTED_FSM_STATUSES,
-	)("counts both recap resources once the declaration is submitted (%s)", (fsmStatus) => {
-		expect(getDocumentResourceCount(makeDeclaration({ fsmStatus }))).toBe(2);
+	)("counts the declaration recap alone once submitted, without any transmitted element (%s)", (fsmStatus) => {
+		expect(getDocumentResourceCount(makeDeclaration({ fsmStatus }))).toBe(1);
 	});
 
-	it("counts the prefill and both recaps while the compliance path choice is pending", () => {
+	it("adds the transmitted-elements recap once a CSE opinion has been submitted", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({ hasSubmittedCseOpinion: true }),
+			),
+		).toBe(2);
+	});
+
+	it("adds the transmitted-elements recap once a joint evaluation file has been deposited", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({ hasJointEvaluationFile: true }),
+			),
+		).toBe(2);
+	});
+
+	it("counts only the prefill and the declaration recap while the compliance path choice is pending", () => {
 		expect(
 			getDocumentResourceCount(
 				makeDeclaration({
@@ -144,15 +160,16 @@ describe("getDocumentResourceCount", () => {
 					hasPrefillData: true,
 				}),
 			),
-		).toBe(3);
+		).toBe(2);
 	});
 
-	it("counts every resource when the second declaration was submitted", () => {
+	it("counts every resource when the second declaration and a transmitted element are present", () => {
 		expect(
 			getDocumentResourceCount(
 				makeDeclaration({
 					hasPrefillData: true,
 					hasSubmittedSecondDeclaration: true,
+					hasJointEvaluationFile: true,
 				}),
 			),
 		).toBe(4);
@@ -193,6 +210,7 @@ describe("DocumentsPanel", () => {
 	it("renders one card per available resource, in order", () => {
 		const { links } = renderPanel({
 			hasPrefillData: true,
+			hasJointEvaluationFile: true,
 			hasSubmittedSecondDeclaration: true,
 		});
 
@@ -207,6 +225,7 @@ describe("DocumentsPanel", () => {
 	it("points each card at its own PDF route and dates it with the reference year", () => {
 		const { panel, links } = renderPanel({
 			hasPrefillData: true,
+			hasJointEvaluationFile: true,
 			hasSubmittedSecondDeclaration: true,
 		});
 
@@ -223,10 +242,7 @@ describe("DocumentsPanel", () => {
 	it("omits the prefill card when no DSN data is available", () => {
 		const { links } = renderPanel();
 
-		expect(links().map((link) => link.textContent)).toEqual([
-			RECAP_TITLE,
-			TRANSMITTED_TITLE,
-		]);
+		expect(links().map((link) => link.textContent)).toEqual([RECAP_TITLE]);
 	});
 
 	it.each(
@@ -237,7 +253,7 @@ describe("DocumentsPanel", () => {
 		expect(links().map((link) => link.textContent)).toEqual([PREFILL_TITLE]);
 	});
 
-	it("offers both recap cards as soon as the declaration is submitted, long before the démarche ends", () => {
+	it("hides the transmitted-elements recap while the compliance path choice is pending and nothing has been transmitted", () => {
 		const { links } = renderPanel({
 			fsmStatus: "awaiting_compliance_path_choice",
 			hasPrefillData: true,
@@ -245,6 +261,17 @@ describe("DocumentsPanel", () => {
 
 		expect(links().map((link) => link.textContent)).toEqual([
 			PREFILL_TITLE,
+			RECAP_TITLE,
+		]);
+	});
+
+	it("offers the transmitted-elements recap once a transmitted element exists", () => {
+		const { links } = renderPanel({
+			fsmStatus: "awaiting_cse_opinion",
+			hasSubmittedCseOpinion: true,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([
 			RECAP_TITLE,
 			TRANSMITTED_TITLE,
 		]);
@@ -291,7 +318,9 @@ describe("DocumentsPanel", () => {
 
 	it("announces the pending state and marks the card busy while downloading", () => {
 		vi.stubGlobal("fetch", pendingFetch());
-		const { dialog, panel, links } = renderPanel();
+		const { dialog, panel, links } = renderPanel({
+			hasJointEvaluationFile: true,
+		});
 
 		fireEvent.click(links()[0] as HTMLAnchorElement);
 
@@ -307,7 +336,7 @@ describe("DocumentsPanel", () => {
 
 	it("keeps each card's download state independent", () => {
 		vi.stubGlobal("fetch", pendingFetch());
-		const { links } = renderPanel();
+		const { links } = renderPanel({ hasJointEvaluationFile: true });
 
 		fireEvent.click(links()[0] as HTMLAnchorElement);
 

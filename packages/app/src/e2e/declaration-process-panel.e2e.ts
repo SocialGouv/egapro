@@ -295,6 +295,12 @@ test.describe("Declaration process panel", () => {
 // linked it. The guard now reads "the declaration is submitted", pinned here end
 // to end — seeded FSM state → server payload → cell count → panel → an endpoint
 // that really returns the PDF — which the DocumentsPanel unit tests cannot observe.
+//
+// #4209 — submission alone no longer opens the *transmitted* recap: that PDF only
+// ever carries CSE opinions and the joint evaluation file, so before the démarche
+// produces one it rendered as empty blocks. Both branches are seeded from real
+// rows, because the server derives the two flags gating it from app_file and the
+// status history, not from the declaration record the unit tests hand the panel.
 test.describe("Mon espace — Ressources cell of the rémunération row", () => {
 	test.describe.configure({ mode: "serial" });
 	test.setTimeout(90_000);
@@ -336,23 +342,24 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 		return page.locator(`#${DOCUMENTS_PANEL_ID}`);
 	}
 
-	test.describe("declaration submitted, démarche still running", () => {
+	test.describe("declaration submitted, nothing transmitted yet", () => {
 		test.beforeAll(async () => {
 			await setDeclarationComplianceState({
 				status: "awaiting_compliance_path_choice",
 				currentStep: 6,
 			});
+			await deleteJointEvaluationFiles();
+			await deleteCseOpinions();
 		});
 
-		test("both recaps sit next to the prefill file, and each endpoint serves a PDF", async ({
+		test("the indicators recap sits next to the prefill file, and the transmitted recap stays out until it has content", async ({
 			page,
 		}) => {
 			const panel = await openDocumentsPanel(page);
 
-			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
+			await expect(documentsTrigger(page)).toHaveText("Documents (2)");
 
 			const indicatorsHref = `/api/declaration-pdf?year=${CURRENT_YEAR}`;
-			const transmittedHref = `/api/transmitted-pdf?year=${CURRENT_YEAR}`;
 
 			await expect(
 				panel.getByRole("link", { name: PREFILL_TITLE }),
@@ -362,13 +369,48 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			).toHaveAttribute("href", indicatorsHref);
 			await expect(
 				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
+			).toHaveCount(0);
+
+			const response = await page.request.get(indicatorsHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${indicatorsHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
+		});
+	});
+
+	test.describe("joint evaluation path chosen, its file deposited", () => {
+		test.beforeAll(async () => {
+			await setDeclarationComplianceState({
+				status: "joint_evaluation_chosen",
+				currentStep: 6,
+				firstDeclarationPathChoice: "joint_evaluation",
+			});
+			await insertJointEvaluationFile(CURRENT_YEAR);
+		});
+
+		test.afterAll(async () => {
+			await deleteJointEvaluationFiles();
+		});
+
+		test("the transmitted recap joins the two others, and its endpoint serves a PDF", async ({
+			page,
+		}) => {
+			const panel = await openDocumentsPanel(page);
+
+			await expect(documentsTrigger(page)).toHaveText("Documents (3)");
+
+			const transmittedHref = `/api/transmitted-pdf?year=${CURRENT_YEAR}`;
+
+			await expect(
+				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
 			).toHaveAttribute("href", transmittedHref);
 
-			for (const href of [indicatorsHref, transmittedHref]) {
-				const response = await page.request.get(href, { timeout: 30_000 });
-				expect(response.status(), `GET ${href}`).toBe(200);
-				expect(response.headers()["content-type"]).toContain("pdf");
-			}
+			const response = await page.request.get(transmittedHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${transmittedHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 	});
 

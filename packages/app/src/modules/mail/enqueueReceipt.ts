@@ -8,9 +8,9 @@ import type {
 } from "notifications/queue";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
-	getPathChoiceRound1Deadline,
 	hasStartedSecondDeclaration,
 	isInComplianceProcess,
+	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
@@ -122,10 +122,10 @@ async function buildConfirmationPayload(
 			});
 			if (variant === "path_to_select") {
 				// The first declaration acknowledges round 1, the second round 2.
-				const complianceDeadline =
-					type === "declaration_confirmation"
-						? getPathChoiceRound1Deadline(year)
-						: (await getCampaignDeadlines(year)).pathChoiceDeadline;
+				const complianceDeadline = selectPathChoiceDeadline(
+					await getCampaignDeadlines(year),
+					type !== "declaration_confirmation",
+				);
 				return {
 					...base,
 					variant,

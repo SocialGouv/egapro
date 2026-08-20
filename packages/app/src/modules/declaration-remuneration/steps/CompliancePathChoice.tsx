@@ -14,7 +14,7 @@ import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/L
 import {
 	type CampaignDeadlines,
 	formatLongDate,
-	getPathChoiceRound1Deadline,
+	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
@@ -137,9 +137,10 @@ export function CompliancePathChoice({
 	const modificationDeadline = isSecondRound
 		? campaignDeadlines.decl2ModificationDeadline
 		: campaignDeadlines.decl1ModificationDeadline;
-	const pathChoiceDeadline = isSecondRound
-		? campaignDeadlines.pathChoiceDeadline
-		: getPathChoiceRound1Deadline(currentYear);
+	const pathChoiceDeadline = selectPathChoiceDeadline(
+		campaignDeadlines,
+		isSecondRound,
+	);
 	const gapNoticeText = isSecondRound
 		? "Des écarts ≥ 5 % ont de nouveau été détectés, vous devez engager l'un des parcours suivants."
 		: "Des écarts ≥ 5 % ont été constatés, vous devez engager l'un des parcours suivants.";

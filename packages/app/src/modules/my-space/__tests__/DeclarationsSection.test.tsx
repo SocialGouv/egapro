@@ -120,7 +120,7 @@ describe("DeclarationsSection", () => {
 	it("renders a Documents link for completed declarations", () => {
 		renderSection();
 		expect(
-			screen.getByRole("button", { name: "Documents (2)" }),
+			screen.getByRole("button", { name: "Documents (1)" }),
 		).toBeInTheDocument();
 	});
 
@@ -140,7 +140,7 @@ describe("DeclarationsSection", () => {
 			],
 		});
 		expect(
-			screen.getByRole("button", { name: "Documents (2)" }),
+			screen.getByRole("button", { name: "Documents (1)" }),
 		).toBeInTheDocument();
 	});
 

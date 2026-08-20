@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import type React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { mockRedirect, mockAuth } = vi.hoisted(() => ({
 	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
@@ -163,5 +163,50 @@ describe("CompliancePathPage — skipping the choice page", () => {
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(screen.getByTestId("path-choice")).toBeInTheDocument();
+	});
+});
+
+// The page must keep feeding the read-only gate the round-2 deadline for BOTH
+// rounds. Rebranching it on `selectPathChoiceDeadline` (the display helper) would
+// close the choice on 1 July N instead of 1 January N+1 — 5 months too early —
+// and typecheck would stay green. These two tests are that safety net.
+describe("CompliancePathPage — the path-choice deadline is indicative", () => {
+	beforeEach(() => {
+		mockRedirect.mockClear();
+		mockAuth.mockReset();
+		vi.mocked(CompliancePathChoice).mockClear();
+		vi.useFakeTimers({ toFake: ["Date"] });
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	async function renderRound1ChoiceAt(now: Date) {
+		vi.setSystemTime(now);
+		mockPage({
+			gipWorkforce: 250,
+			hasCse: true,
+			employeeCategories: [HIGH_GAP_CATEGORY],
+		});
+
+		render(await CompliancePathPage());
+
+		return vi.mocked(CompliancePathChoice).mock.calls[0]?.[0];
+	}
+
+	it("leaves the round-1 choice open past 1 July: the deadline nudges, it never closes the action", async () => {
+		const props = await renderRound1ChoiceAt(new Date(2026, 8, 15));
+
+		expect(
+			props?.readOnlyReason,
+			"the round-1 path choice must stay open past 1 July — the gate has to keep reading campaignDeadlines.pathChoiceDeadline (1 January N+1), never selectPathChoiceDeadline",
+		).toBeUndefined();
+	});
+
+	it("closes the choice only once 1 January N+1 has passed", async () => {
+		const props = await renderRound1ChoiceAt(new Date(2027, 0, 15));
+
+		expect(props?.readOnlyReason).toBe("path_choice_deadline_passed");
 	});
 });
