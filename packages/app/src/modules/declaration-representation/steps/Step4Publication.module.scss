@@ -11,3 +11,8 @@
 .dateField :global(.fr-input) {
 	max-width: 17.625rem;
 }
+
+// Figma gap below the radios is 16px, already provided by .fr-fieldset__element.
+.websiteFieldset:global(.fr-fieldset) {
+	margin-bottom: 0;
+}

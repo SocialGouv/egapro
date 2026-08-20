@@ -139,7 +139,7 @@ export function Step4Publication() {
 
 			<fieldset
 				aria-labelledby={`${websiteLegendId} ${websiteMessagesId}`}
-				className={`fr-fieldset fr-mb-4w ${websiteError ? "fr-fieldset--error" : ""}`}
+				className={`fr-fieldset ${styles.websiteFieldset} ${websiteError ? "fr-fieldset--error" : ""}`}
 			>
 				<legend
 					className="fr-fieldset__legend--regular fr-fieldset__legend"
