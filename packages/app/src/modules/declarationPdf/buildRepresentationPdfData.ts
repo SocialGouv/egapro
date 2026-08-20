@@ -8,6 +8,7 @@ import {
 	isRepresentationDeclarationSubmitted,
 	isRepresentationPublicationRequired,
 	type RepresentationComplianceVerdict,
+	toNullableNumber,
 } from "~/modules/domain";
 import { db } from "~/server/db";
 import { companies, representationDeclarations } from "~/server/db/schema";
@@ -55,7 +56,7 @@ const NOT_COMPUTABLE_EXECUTIVES_LABELS: Record<
 const NOT_COMPUTABLE_MEMBERS_LABEL = "Aucune instance dirigeante";
 
 function toPercent(value: string | null): number | null {
-	return value === null ? null : Number(value);
+	return toNullableNumber(value);
 }
 
 export async function buildRepresentationPdfData(

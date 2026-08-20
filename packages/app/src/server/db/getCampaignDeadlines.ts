@@ -9,14 +9,11 @@ import {
 } from "~/modules/domain";
 
 import { db } from ".";
+import { parseCivilDate } from "./parseCivilDate";
 import { campaignDeadlines } from "./schema";
 
-function parseDate(dateStr: string): Date {
-	return new Date(`${dateStr}T00:00:00`);
-}
-
 function parseNullableDate(dateStr: string | null): Date | null {
-	return dateStr ? parseDate(dateStr) : null;
+	return dateStr ? parseCivilDate(dateStr) : null;
 }
 
 /**
@@ -41,12 +38,20 @@ export const getCampaignDeadlines = cache(
 		return {
 			gipPublicationDate: parseNullableDate(row.gipPublicationDate),
 			campaignStartDate: parseNullableDate(row.campaignStartDate),
-			decl1ModificationDeadline: parseDate(row.decl1ModificationDeadline),
-			decl1JustificationDeadline: parseDate(row.decl1JustificationDeadline),
-			decl1JointEvaluationDeadline: parseDate(row.decl1JointEvaluationDeadline),
-			decl2ModificationDeadline: parseDate(row.decl2ModificationDeadline),
-			decl2JustificationDeadline: parseDate(row.decl2JustificationDeadline),
-			decl2JointEvaluationDeadline: parseDate(row.decl2JointEvaluationDeadline),
+			decl1ModificationDeadline: parseCivilDate(row.decl1ModificationDeadline),
+			decl1JustificationDeadline: parseCivilDate(
+				row.decl1JustificationDeadline,
+			),
+			decl1JointEvaluationDeadline: parseCivilDate(
+				row.decl1JointEvaluationDeadline,
+			),
+			decl2ModificationDeadline: parseCivilDate(row.decl2ModificationDeadline),
+			decl2JustificationDeadline: parseCivilDate(
+				row.decl2JustificationDeadline,
+			),
+			decl2JointEvaluationDeadline: parseCivilDate(
+				row.decl2JointEvaluationDeadline,
+			),
 			pathChoiceDeadline: getPathChoiceDeadline(year),
 			pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 		};

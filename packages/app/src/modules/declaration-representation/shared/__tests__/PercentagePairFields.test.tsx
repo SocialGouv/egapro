@@ -7,8 +7,10 @@ import { describe, expect, it } from "vitest";
 import type { PercentagePairValues } from "../PercentagePairFields";
 import {
 	complementPercentage,
+	formatPercentInput,
 	isPercentageInput,
 	PercentagePairFields,
+	parsePercentInput,
 } from "../PercentagePairFields";
 
 const LEGEND = "Écarts de représentation parmi les cadres dirigeants";
@@ -390,6 +392,23 @@ describe("isPercentageInput", () => {
 		"3 5",
 	])("rejects %s", (raw) => {
 		expect(isPercentageInput(raw)).toBe(false);
+	});
+});
+
+describe("parsePercentInput", () => {
+	it("parses a finished number", () => {
+		expect(parsePercentInput("35,5")).toBe(35.5);
+	});
+
+	it.each(["", "35.", "35,"])("returns undefined for in-progress %s", (raw) => {
+		expect(parsePercentInput(raw)).toBeUndefined();
+	});
+});
+
+describe("formatPercentInput", () => {
+	it("stringifies a stored percent and blanks undefined", () => {
+		expect(formatPercentInput(40)).toBe("40");
+		expect(formatPercentInput(undefined)).toBe("");
 	});
 });
 

@@ -1,3 +1,4 @@
+import { toNullableNumber } from "~/modules/domain";
 import { representationDraftSchema } from "../schemas";
 import type { RepresentationDraft } from "../types";
 
@@ -32,9 +33,7 @@ function toIsoDate(
 function toPercent(
 	value: string | number | null | undefined,
 ): number | undefined {
-	if (value == null || value === "") return undefined;
-	const parsed = typeof value === "number" ? value : Number(value);
-	return Number.isFinite(parsed) ? parsed : undefined;
+	return toNullableNumber(value) ?? undefined;
 }
 
 function submittedColumnsToDraft(

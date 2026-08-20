@@ -1,5 +1,5 @@
 import { type companies, representationDeclarations } from "~/server/db/schema";
-import { isCompanyDiffusible } from "./projection";
+import { isCompanyDiffusible, toNumber } from "./projection";
 import type { PublicRepresentationDTO } from "./schemas";
 
 export type PublicRepresentationSource = Pick<
@@ -47,12 +47,6 @@ export const publicRepresentationColumns = {
 	publishUrl: representationDeclarations.publishUrl,
 	publishModalities: representationDeclarations.publishModalities,
 } satisfies Record<keyof PublicRepresentationSource, unknown>;
-
-function toNumber(value: string | null): number | null {
-	if (value === null) return null;
-	const parsed = Number(value);
-	return Number.isNaN(parsed) ? null : parsed;
-}
 
 export function toPublicRepresentation(
 	declaration: PublicRepresentationSource,

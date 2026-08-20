@@ -16,6 +16,7 @@ export {
 	subjectionSchema,
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
+	toAbsoluteHttpUrl,
 } from "./schemas";
 export { ComplianceBadge } from "./shared/ComplianceBadge";
 export type { RepresentationDraftContextValue } from "./shared/draft/DraftContext";
@@ -27,8 +28,10 @@ export { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
 export type { PercentagePairValues } from "./shared/PercentagePairFields";
 export {
 	complementPercentage,
+	formatPercentInput,
 	isPercentageInput,
 	PercentagePairFields,
+	parsePercentInput,
 } from "./shared/PercentagePairFields";
 export type { RepresentationDeclarationSnapshot } from "./shared/submittedDraft";
 export { representationDraftFromDeclaration } from "./shared/submittedDraft";

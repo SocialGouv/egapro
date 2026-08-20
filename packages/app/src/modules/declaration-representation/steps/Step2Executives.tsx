@@ -10,7 +10,6 @@ import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
-	parseNumber,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -19,7 +18,11 @@ import { executivesSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
-import { PercentagePairFields } from "../shared/PercentagePairFields";
+import {
+	formatPercentInput,
+	PercentagePairFields,
+	parsePercentInput,
+} from "../shared/PercentagePairFields";
 import styles from "./Step2Executives.module.scss";
 
 const EXECUTIVES_COUNT_GROUP_NAME = "executives-count";
@@ -50,16 +53,6 @@ const EXECUTIVES_COUNT_OPTIONS: {
 		hint: "L'écart doit être calculé.",
 	},
 ];
-
-function parsePercent(raw: string): number | undefined {
-	if (raw === "" || raw.endsWith(".") || raw.endsWith(",")) return undefined;
-	const value = parseNumber(raw);
-	return Number.isFinite(value) ? value : undefined;
-}
-
-function formatPercent(value: number | undefined): string {
-	return value === undefined ? "" : String(value);
-}
 
 function evaluateExecutivesGap(
 	womenPercent: number | undefined,
@@ -138,8 +131,8 @@ export function Step2Executives() {
 	const { draft, setDraftValues, year, isReadOnly, registerStepValidator } =
 		useRepresentationDraftContext();
 	const [percentInputs, setPercentInputs] = useState<PercentagePairValues>({
-		womenPercent: formatPercent(draft.executiveWomenPercent),
-		menPercent: formatPercent(draft.executiveMenPercent),
+		womenPercent: formatPercentInput(draft.executiveWomenPercent),
+		menPercent: formatPercentInput(draft.executiveMenPercent),
 	});
 
 	function handleCountChange(next: ExecutivesCount) {
@@ -155,8 +148,8 @@ export function Step2Executives() {
 	function handlePercentChange(values: PercentagePairValues) {
 		setPercentInputs(values);
 		setDraftValues({
-			executiveWomenPercent: parsePercent(values.womenPercent),
-			executiveMenPercent: parsePercent(values.menPercent),
+			executiveWomenPercent: parsePercentInput(values.womenPercent),
+			executiveMenPercent: parsePercentInput(values.menPercent),
 		});
 	}
 

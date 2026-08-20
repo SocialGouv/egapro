@@ -208,6 +208,7 @@ export {
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
+	toNullableNumber,
 } from "./shared/number";
 // Percentage & proportion numeric cores
 export { percentageOf, proportionOf } from "./shared/percentage";

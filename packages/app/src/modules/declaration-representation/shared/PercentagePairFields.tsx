@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useId, useState } from "react";
 
+import { parseNumber } from "~/modules/domain";
 import styles from "./PercentagePairFields.module.scss";
 
 const PERCENTAGE_INPUT_PATTERN = /^\d{0,3}([.,]\d?)?$/;
@@ -37,6 +38,16 @@ export function isPercentageInput(raw: string): boolean {
 	if (raw === "") return true;
 	const value = Number(raw.replace(",", "."));
 	return Number.isFinite(value) && value <= 100;
+}
+
+export function parsePercentInput(raw: string): number | undefined {
+	if (raw === "" || raw.endsWith(".") || raw.endsWith(",")) return undefined;
+	const parsed = parseNumber(raw);
+	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function formatPercentInput(value: number | undefined): string {
+	return value === undefined ? "" : String(value);
 }
 
 export function PercentagePairFields({

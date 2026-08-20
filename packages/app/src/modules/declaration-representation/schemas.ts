@@ -1,13 +1,22 @@
 import { z } from "zod";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 
-function isTolerantUrl(value: string): boolean {
+export function toAbsoluteHttpUrl(value: string): string | null {
 	const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
 	try {
-		return new URL(candidate).hostname.includes(".");
+		const parsed = new URL(candidate);
+		if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+			return null;
+		}
+		if (!parsed.hostname.includes(".")) return null;
+		return parsed.href;
 	} catch {
-		return false;
+		return null;
 	}
+}
+
+function isTolerantUrl(value: string): boolean {
+	return toAbsoluteHttpUrl(value) !== null;
 }
 
 function parseIsoDate(value: string): Date {

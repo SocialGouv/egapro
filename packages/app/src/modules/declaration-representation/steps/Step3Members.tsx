@@ -6,7 +6,6 @@ import type { RepresentationComplianceVerdict } from "~/modules/domain";
 import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
-	parseNumber,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -15,21 +14,15 @@ import { membersSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
-import { PercentagePairFields } from "../shared/PercentagePairFields";
+import {
+	formatPercentInput,
+	PercentagePairFields,
+	parsePercentInput,
+} from "../shared/PercentagePairFields";
 import styles from "./Step3Members.module.scss";
 
 const SELECTION_REQUIRED_MESSAGE =
 	"Veuillez sélectionner une option pour continuer.";
-
-function toPercentString(value: number | undefined): string {
-	return value === undefined ? "" : String(value);
-}
-
-function parsePercent(raw: string): number | undefined {
-	if (raw === "" || raw.endsWith(".") || raw.endsWith(",")) return undefined;
-	const parsed = parseNumber(raw);
-	return Number.isFinite(parsed) ? parsed : undefined;
-}
 
 function isDecidedVerdict(
 	verdict: RepresentationComplianceVerdict | undefined,
@@ -74,8 +67,8 @@ export function Step3Members() {
 	// Raw strings, not re-derived from the draft on render (would drop an in-progress decimal separator).
 	const [percentageValues, setPercentageValues] =
 		useState<PercentagePairValues>(() => ({
-			womenPercent: toPercentString(draft.memberWomenPercent),
-			menPercent: toPercentString(draft.memberMenPercent),
+			womenPercent: formatPercentInput(draft.memberWomenPercent),
+			menPercent: formatPercentInput(draft.memberMenPercent),
 		}));
 
 	function handleSelect(next: boolean) {
@@ -94,8 +87,8 @@ export function Step3Members() {
 	function handlePercentageChange(values: PercentagePairValues) {
 		setPercentageValues(values);
 		setDraftValues({
-			memberWomenPercent: parsePercent(values.womenPercent),
-			memberMenPercent: parsePercent(values.menPercent),
+			memberWomenPercent: parsePercentInput(values.womenPercent),
+			memberMenPercent: parsePercentInput(values.menPercent),
 		});
 	}
 
