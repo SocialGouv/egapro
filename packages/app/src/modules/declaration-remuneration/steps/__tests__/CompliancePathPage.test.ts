@@ -225,7 +225,6 @@ describe("getCompliancePathReadOnlyReason", () => {
 			}),
 		).toBe("path_choice_deadline_passed");
 	});
-
 	it("does not lock the second-round revision choice when only the first-round second declaration was submitted", () => {
 		expect(
 			getCompliancePathReadOnlyReason({

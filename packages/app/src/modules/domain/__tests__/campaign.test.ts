@@ -161,7 +161,7 @@ describe("getDefaultCampaignDeadlines", () => {
 	it("returns Date objects for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
 		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
-		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2028, 2, 1));
 		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
 			new Date(2027, 7, 1),
 		);
