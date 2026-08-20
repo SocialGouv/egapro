@@ -106,6 +106,7 @@ function renderStep3(
 			declarationYear={2025}
 			secondDeclarationCategories={mockCategories}
 			siren="532847196"
+			status="corrective_actions_chosen"
 			{...overrides}
 		/>,
 	);
@@ -305,6 +306,34 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders empty state when no categories", () => {
 		renderStep3({ secondDeclarationCategories: [] });
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
+	});
+
+	it("keeps Soumettre while the second declaration is still writable", () => {
+		renderStep3();
+		expect(
+			screen.getByRole("button", { name: /soumettre/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders Suivant to the joint evaluation when the revision path is already chosen", () => {
+		renderStep3({ status: "revised_joint_evaluation_chosen" });
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+		);
+		expect(
+			screen.queryByRole("button", { name: /soumettre/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps Soumettre while awaiting a revision choice", () => {
+		renderStep3({ status: "awaiting_revision_choice" });
+		expect(
+			screen.getByRole("button", { name: /soumettre/i }),
+		).toBeInTheDocument();
 	});
 
 	describe("CSE consultation section gating (issue #3945)", () => {

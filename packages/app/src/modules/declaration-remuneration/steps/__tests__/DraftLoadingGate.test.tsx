@@ -221,6 +221,7 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				initialFirstDeclarationCategories={[]}
+				status="corrective_actions_chosen"
 			/>,
 		);
 		expectLoadingState();

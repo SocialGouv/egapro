@@ -85,6 +85,7 @@ type Props = {
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	disabled?: boolean;
+	nextHref?: string;
 	mimoquageNextHref?: string;
 	hasDataOverride?: boolean;
 	isSavingOverride?: boolean;
@@ -142,6 +143,7 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
+	nextHref,
 	mimoquageNextHref,
 	hasDataOverride,
 	isSavingOverride = false,
@@ -581,6 +583,7 @@ export function CategoryForm({
 				className="fr-mt-0"
 				isSubmitting={isSubmitting}
 				mimoquageNextHref={mimoquageNextHref}
+				nextHref={nextHref}
 				previousHref={previousHref}
 			/>
 
