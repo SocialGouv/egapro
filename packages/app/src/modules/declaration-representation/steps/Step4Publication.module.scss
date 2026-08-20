@@ -7,6 +7,7 @@
 	color: var(--text-title-grey);
 }
 
-.dateField {
+// Cap the date input at the Figma width; the label stays full-width so it does not wrap.
+.dateField :global(.fr-input) {
 	max-width: 17.625rem;
 }
