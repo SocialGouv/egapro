@@ -42,16 +42,26 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # par `adjudicate: agent`, une passe Claude Code avec le secret CLAUDE_CODE_OAUTH_TOKEN déjà
 # utilisé par claude-question.yml : même harness et même token que dans une session locale.
 #
-# IL N'Y A PLUS DE REGISTRE DE VERDICTS. `packages/app/.ultra11y/verdicts/rgaa.json` était
-# versionné et REJOUÉ avant l'adjudication, pour que la grille soit complète sans modèle sur les
-# événements où le modèle ne peut pas tourner. Ces événements ont disparu, et avec eux le rôle du
-# registre : chaque run repart de l'évidence du moment et fait tout trancher.
+# LE REGISTRE DE VERDICTS EST DE RETOUR, et il faut dire pourquoi il était parti. Il était parti
+# parce qu'il « ratait » des critères et rendait la grille irreproductible — un diagnostic exact
+# sur un symptôme dont la cause n'était pas lui : sur 5.16.0, `verify --apply … --ledger --lang
+# fr` écrivait le registre dans un fichier nommé `--lang`, un flag à valeur optionnelle avalant
+# le flag suivant. Le registre n'était donc jamais écrit là où le run suivant le cherchait.
+# Corrigé en amont (5.17.0).
 #
-# Ce que ça coûte, mesuré sur ce dépôt AVANT le registre : 16 à 21 $ par run, et deux runs sur le
-# même commit pouvaient rendre deux grilles différentes. Le rejeu ne payait que le reliquat ; il
-# n'y a plus de reliquat, il n'y a que le total. Un run est donc cher et non reproductible par
-# construction. C'est le prix du « tout par le moteur IA », et la rareté des runs manuels est ce
-# qui le rend tenable.
+# Ce qu'il fait, et ce qu'il ne fait pas : `.ultra11y/verdicts/rgaa.json` enregistre les verdicts
+# que la porte a ACCEPTÉS, et un run ultérieur les REJOUE avant d'appeler le moindre modèle. Ce
+# n'est pas un cache : chaque entrée repasse par la même porte, sur l'évidence re-dérivée de
+# l'audit du moment, et celle dont l'empreinte d'évidence a bougé est abandonnée comme périmée
+# en le disant. Ce qui n'est pas rejoué est ce qui est payé.
+#
+# CE QUE ÇA N'AUTOMATISE PAS : rien ici ne commite ce fichier. Le job tourne en `contents: read`
+# et le registre sort dans l'artefact. Le rendre effectif est un geste humain — relire le diff
+# des verdicts, le commiter — et c'est délibérément dans cet ordre : un registre qu'une CI
+# s'écrit à elle-même n'est plus une décision revue par quiconque.
+#
+# Ce que ça coûte, mesuré sur ce dépôt : 16 à 21 $ par run sans registre. Avec, le premier run
+# paie le total et les suivants ne paient que le reliquat.
 #
 # CE QUI FERME RÉELLEMENT LA GRILLE n'est pas l'adjudication seule, c'est le MOTEUR : il décide
 # par page ce qu'il a mesuré par page, au lieu de ne savoir que répéter le verdict du run. Un
@@ -65,7 +75,31 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # fiche par page. Il n'y a plus d'`undecidable.json` non plus : la seule issue est désormais de
 # faire trancher le critère par l'adjudication, ou de relancer le workflow.
 #
-# CE QUE L'AMONT A CORRIGÉ EN 5.8.0, et qui se voit ici :
+# CE QUE LE PASSAGE DE 5.16.0 À 5.23.0 CORRIGE, et qui est la substance de ce changement :
+#   - `adjudicate-model` ne câblait que le tier API. Choisir le modèle de l'adjudicateur AGENT
+#     était impossible : l'input existait et n'atteignait pas `claude_args`. (5.17.0)
+#   - une conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés,
+#     et `--require-decided=pages` ne pouvait alors passer sur AUCUNE entrée. La barre par page
+#     n'avait pas été abandonnée par excès d'ambition : elle était cassée. (5.17.0)
+#   - `verify --apply … --ledger --lang fr` écrivait le registre dans un fichier nommé `--lang`
+#     — un flag à valeur optionnelle avalait le flag suivant. C'est la cause du « registre raté,
+#     grille restée à 105/106 ». (5.17.0)
+#   - un appel modèle mort sautait rapport, HTML, fiche par page, artefact ET résidu : le run
+#     perdait son livrable pour une panne de modèle. (5.17.0)
+#   - le balayage MESURAIT puis jetait la mesure — ni sondes ni axe ne survivaient à l'écriture
+#     de l'instantané — donc une page pouvait rapporter une violation de rendu et ne jamais
+#     pouvoir conclure à la conformité. (5.20.0)
+#   - la fiche par critère, seul fichier que le prompt CI autorise l'adjudicateur à lire, était
+#     rendue SANS son contrat de verdict : ni « un C exige des citations », ni « une NC nomme son
+#     fichier », ni « la page rendue est sur le disque ». Sept critères sont morts de ça sur un
+#     run vert, et aucun ne demandait un plus gros modèle. (5.22.0)
+#   - RGAA 8.1 (« la page est-elle définie par un type de document ? ») n'était tranchable par
+#     aucun moteur : il ne mappe que sur WCAG 4.1.1, supprimé en 2.2. Pire, le doctype que
+#     chaque producteur enregistre était mangé par la validation du meta d'instantané, donc
+#     l'adjudicateur n'avait pas même l'évidence pour le trancher. C'était, littéralement, le
+#     105/106. Il est désormais décidé par mesure, sur chaque page, sans modèle. (5.23.0)
+#
+# CE QUE L'AMONT AVAIT CORRIGÉ EN 5.8.0, et qui se voit toujours ici :
 #   - une sonde `hover` sans timeout suspendait le test appelant jusqu'à sa mort à 120 s. Deux
 #     specs en sont mortes, et leur groupe série a emporté 15 tests avec elles : 20 pages
 #     enregistrées au lieu de 35, à chaque run. Les sondes sont désormais bornées (timeout par
@@ -109,7 +143,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.16.0
+        uses: maxgfr/ultra11y@v5.23.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -157,8 +191,8 @@ jobs:
     # tunnels), et un job annulé sur timeout emporte le rapport ET l'artefact, ce que
     # `continue-on-error` n'absorbe pas — d'où la marge.
     #
-    # Sans registre à rejouer, CHAQUE run paie l'adjudication complète : ce budget n'est plus
-    # une réserve pour les rares runs qui rafraîchissaient les verdicts, c'est le cas nominal.
+    # Un run SANS registre commité paie l'adjudication complète, et c'est le cas du premier :
+    # ce budget est calé sur lui, pas sur les suivants, qui ne paient que le reliquat.
     # TROIS PASSES D'ADJUDICATION NE TIENNENT PAS EN 75 MINUTES. Mesuré : le job a été coupé
     # à 75:00 pile en pleine adjudication, et un job annulé emporte le rapport ET l'artefact —
     # ce que `continue-on-error` n'absorbe pas. Le budget est donc calé sur le pire cas :
@@ -341,7 +375,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.16.0
+        uses: maxgfr/ultra11y@v5.23.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -368,35 +402,54 @@ jobs:
           # suivantes avant d'invoquer le moindre modèle.
           adjudicate-passes: "3"
           adjudicate-max-turns: "600"
+          # LE MODÈLE, EXPLICITEMENT. Sans cet input l'adjudication prend le défaut de
+          # `claude-code-action`, qui n'est pas une constante de ce dépôt : le tier est facturé
+          # AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et un défaut qui bouge
+          # fait bouger la facture sans que rien ici ne change. On le nomme donc.
+          #
+          # Sonnet 5, et pas plus gros. L'amont a mesuré que ce qu'un adjudicateur bon marché
+          # ratait n'était jamais un manque de modèle : sept critères perdus sur un run vert,
+          # sept défauts d'outil — une fiche par critère rendue sans son contrat de verdict, un
+          # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
+          # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
+          adjudicate-model: claude-sonnet-5
+          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué
+          # au run suivant s'il est commité. Voir l'en-tête — rien ici ne le commite.
+          ledger: .ultra11y/verdicts/rgaa.json
           # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
           gate-adjudicated: "false"
           fail-on: "" # le verdict d'accessibilité ne bloque pas — on mesure
-          # LA COMPLÉTUDE EST DÉSORMAIS IMPOSÉE, ET PAR PAGE.
+          # LA COMPLÉTUDE EST IMPOSÉE, ET PAR PAGE.
           #
-          # `require-decided: "true"` ne portait que sur la grille DU RUN, et les deux questions
-          # se séparent exactement là où ça compte : un critère non conforme quelque part est
-          # TRANCHÉ pour le run, et sur les pages où le défaut n'apparaît pas il peut n'être le
-          # verdict de personne. Mesuré sur ce dépôt : 104/106 décidés pour le run, et 8 à 11
-          # ouverts sur CHACUNE des 37 pages — une porte verte au-dessus d'un livrable rempli à
-          # 90 %.
+          # `true` ne porte que sur la grille DU RUN, et les deux questions se séparent
+          # exactement là où ça compte : un critère non conforme quelque part est TRANCHÉ pour le
+          # run, et sur les pages où le défaut n'apparaît pas il peut n'être le verdict de
+          # personne. Mesuré sur ce dépôt : 104/106 décidés pour le run, et 8 à 11 ouverts sur
+          # CHACUNE des 37 pages — une porte verte au-dessus d'un livrable rempli à 90 %. C'est
+          # la grille par page qu'un bilan page par page se fait lire, donc c'est elle qu'on
+          # tient.
           #
-          # POURQUOI `true` ET NON `pages`, depuis la suppression du registre.
+          # POURQUOI ELLE EST REDEVENUE ATTEIGNABLE, alors qu'elle avait dû être abandonnée.
           #
-          # `pages` tient CHAQUE grille de page à la barre, et c'est bien celle sur laquelle un
-          # bilan page par page se juge. Elle n'était atteignable que parce que le registre
-          # fermait la majorité des critères de jugement AVANT que le modèle n'intervienne : sur
-          # l'audit réel de cette branche, les 9 « à évaluer » de la page d'accueil tombaient à 2.
+          # Elle ne l'avait pas été par excès d'ambition : elle était CASSÉE. Sur 5.16.0 une
+          # conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés,
+          # et `--require-decided=pages` ne pouvait passer sur aucune entrée — la porte ne
+          # mesurait pas une exigence trop haute, elle mesurait un défaut. Corrigé en 5.17.0.
           #
-          # Sans registre, l'adjudication repart de zéro sur les 59 critères de jugement à chaque
-          # run, et ce dépôt a mesuré ce que ça donne : « il en ratait 3 à 13, différemment à
-          # chaque run ». Garder `pages` reviendrait à câbler une porte qui rougit pour une raison
-          # que personne ne peut corriger — un run raté n'est pas un défaut du code — et une porte
-          # qu'on relance jusqu'à ce qu'elle passe ne garde plus rien.
+          # Ce qui restait ouvert PAR PAGE là où le run était décidé tombe avec 5.20.0 : le
+          # balayage mesurait puis jetait la mesure, donc une page pouvait rapporter une
+          # violation de rendu sans jamais pouvoir conclure à la conformité. Et un verdict
+          # d'agent est enregistré à la granularité du référentiel, donc il traverse la
+          # projection par page : ce que l'adjudication ferme pour le run, elle le ferme sur les
+          # 39 pages.
           #
-          # `true` tient la grille DU RUN : un critère tranché quelque part compte comme tranché.
-          # C'est plus bas, et c'est dit. Ce qui reste ouvert est NOMMÉ dans le log et dans la
-          # fiche par page ; jamais un seuil. Remonter à `pages` le jour où un registre revient.
-          require-decided: "true"
+          # Mesuré en amont sur la fixture RGAA, balayée et capturée : 37 critères « à évaluer »
+          # pour le run, et exactement les mêmes 37 sur chacune des pages. `pages` n'est donc
+          # plus une barre plus haute que `true` — c'est la même, vérifiée là où on la lit.
+          #
+          # Ce qui reste ouvert est NOMMÉ dans le log et dans la fiche par page ; jamais un
+          # seuil, jamais un pourcentage.
+          require-decided: "pages"
           # LA COUVERTURE, elle, bloque — et c'est la seule chose qui bloque ici.
           #
           # `require-decided` porte sur les CRITÈRES ; celle-ci porte sur les PAGES, et c'est

@@ -169,8 +169,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       ultra11y:
-        specifier: 5.16.0
-        version: 5.16.0(playwright-core@1.62.1)
+        specifier: 5.23.0
+        version: 5.23.0(playwright-core@1.62.1)
       vite-tsconfig-paths:
         specifier: ^6.1.1
         version: 6.1.1(typescript@6.0.2)(vite@7.3.1(@types/node@25.6.0)(sass@1.99.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
@@ -6345,8 +6345,8 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ultra11y@5.16.0:
-    resolution: {integrity: sha512-Zm/As5fp8WXyK7llJrkpdnGkXU1HKBhaXd0qip/aMQJ0bEAgJfHGXIpFT6ojHvKTRrwI7aIUsGhUqlPQheT0mQ==}
+  ultra11y@5.23.0:
+    resolution: {integrity: sha512-1atcKF5cTPAr1K3Wxhkcs0CwSVc5SKIoNxopPkvXbvspHuVsbe1GEgkc0CZphvXYIl+/RHZvrBlyub7Ze9uevw==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -13284,7 +13284,7 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ultra11y@5.16.0(playwright-core@1.62.1):
+  ultra11y@5.23.0(playwright-core@1.62.1):
     dependencies:
       '@axe-core/playwright': 4.13.0(playwright-core@1.62.1)
       '@babel/parser': 8.0.4
