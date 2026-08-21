@@ -96,8 +96,16 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #   - RGAA 8.1 (« la page est-elle définie par un type de document ? ») n'était tranchable par
 #     aucun moteur : il ne mappe que sur WCAG 4.1.1, supprimé en 2.2. Pire, le doctype que
 #     chaque producteur enregistre était mangé par la validation du meta d'instantané, donc
-#     l'adjudicateur n'avait pas même l'évidence pour le trancher. C'était, littéralement, le
-#     105/106. Il est désormais décidé par mesure, sur chaque page, sans modèle. (5.23.0)
+#     l'adjudicateur n'avait pas même l'évidence pour le trancher. Il est désormais décidé par
+#     mesure, sur chaque page, sans modèle. (5.23.0)
+#   - CINQ critères arrivaient à l'adjudicateur avec un moissonnage VIDE — 7.4, 10.1, 13.2,
+#     13.3, 13.4 — et un critère sans évidence ne peut pas être tranché : un `C` exige une
+#     citation, donc les seules réponses possibles sont `NA` et `manual`, et le modèle est
+#     facturé pour deviner entre les deux. Trois d'entre eux pointaient sur le MAUVAIS SUJET,
+#     hérité d'un mapping WCAG qui répond à une autre question. 10.1 (balises et attributs de
+#     présentation) est désormais décidé par le moteur, 13.3/13.4 sont « non applicables » quand
+#     rien n'est téléchargeable, et 7.4/13.2 reçoivent enfin l'évidence de leur propre question.
+#     Mesuré : c'était le dernier critère que Sonnet 5 ne pouvait pas fermer. (5.24.0)
 #
 # CE QUE L'AMONT AVAIT CORRIGÉ EN 5.8.0, et qui se voit toujours ici :
 #   - une sonde `hover` sans timeout suspendait le test appelant jusqu'à sa mort à 120 s. Deux
@@ -143,7 +151,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.23.0
+        uses: maxgfr/ultra11y@v5.24.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -375,7 +383,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.23.0
+        uses: maxgfr/ultra11y@v5.24.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
