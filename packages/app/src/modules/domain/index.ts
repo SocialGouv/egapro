@@ -15,6 +15,7 @@ export {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";

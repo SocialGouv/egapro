@@ -65,6 +65,22 @@ export function selectPathChoiceDeadline(
 		: deadlines.pathChoiceRound1Deadline;
 }
 
+/**
+ * Returns the deadline to file the joint evaluation report for the round the
+ * company is in.
+ *
+ * Distinct from the CSE opinion deadline (`decl2CseOpinionDeadline`), which
+ * closes a later step of the same compliance path.
+ */
+export function selectJointEvaluationDeadline(
+	deadlines: CampaignDeadlines,
+	isSecondRound: boolean,
+): Date {
+	return isSecondRound
+		? deadlines.decl2JointEvaluationDeadline
+		: deadlines.decl1JointEvaluationDeadline;
+}
+
 /** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
@@ -75,7 +91,8 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl1JointEvaluationDeadline: new Date(year, 7, 1),
 		decl2ModificationDeadline: new Date(year, 11, 1),
 		decl2JustificationDeadline: new Date(year, 11, 1),
-		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
+		decl2JointEvaluationDeadline: new Date(year + 1, 0, 1),
+		decl2CseOpinionDeadline: new Date(year + 1, 1, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};

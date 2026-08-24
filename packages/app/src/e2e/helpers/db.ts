@@ -137,10 +137,12 @@ export async function pushCampaignDeadlinesFarFuture(year?: number) {
 				decl1_joint_evaluation_deadline,
 				decl2_modification_deadline,
 				decl2_justification_deadline,
-				decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
 			)
 			SELECT
 				${targetYear},
+				'2099-12-31'::date,
 				'2099-12-31'::date,
 				'2099-12-31'::date,
 				'2099-12-31'::date,
@@ -153,7 +155,8 @@ export async function pushCampaignDeadlinesFarFuture(year?: number) {
 				decl1_joint_evaluation_deadline = '2099-12-31'::date,
 				decl2_modification_deadline = '2099-12-31'::date,
 				decl2_justification_deadline = '2099-12-31'::date,
-				decl2_joint_evaluation_deadline = '2099-12-31'::date
+				decl2_joint_evaluation_deadline = '2099-12-31'::date,
+				decl2_cse_opinion_deadline = '2099-12-31'::date
 		`;
 	} finally {
 		await sql.end();

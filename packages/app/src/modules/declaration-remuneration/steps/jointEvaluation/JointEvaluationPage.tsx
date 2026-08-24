@@ -4,6 +4,7 @@ import {
 	formatLongDate,
 	getObligationWorkforce,
 	isCseOpinionRequired,
+	selectJointEvaluationDeadline,
 } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -40,7 +41,10 @@ export async function JointEvaluationPage() {
 			declarationDate={declarationDate}
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
-			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
+			jointEvaluationDeadline={selectJointEvaluationDeadline(
+				campaignDeadlines,
+				isRevisedJoint,
+			)}
 		/>
 	);
 }
