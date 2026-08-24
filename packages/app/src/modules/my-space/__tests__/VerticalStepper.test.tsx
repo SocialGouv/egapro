@@ -2,10 +2,14 @@ import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
-import type { DeclarationDisplayContext } from "~/modules/domain";
+import type {
+	DeclarationDisplayContext,
+	DeclarationFsmStatus,
+} from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
+import type { JointEvaluationFileInfo } from "../VerticalStepper";
 
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
@@ -33,6 +37,28 @@ function makeDisplayContext(
 	};
 }
 
+// The panel variant is derived from the FSM status by `computePanelVariant`;
+// a test that pins one must feed the status that actually produces it.
+const VARIANT_FSM_STATUS: Record<PanelVariant, DeclarationFsmStatus | null> = {
+	start: "draft",
+	compliance_choice: "awaiting_compliance_path_choice",
+	compliance: "corrective_actions_chosen",
+	evaluation: "joint_evaluation_chosen",
+	cse: "awaiting_cse_opinion",
+	closed: "demarche_completed",
+};
+
+const DECL1_MODIFY = 'a[href^="/declaration-remuneration/etape/1"]';
+const DECL2_MODIFY =
+	'a[href^="/declaration-remuneration/parcours-conformite/etape/1"]';
+const JOINT_EVALUATION_MODIFY =
+	'a[href^="/declaration-remuneration/parcours-conformite/evaluation-conjointe"]';
+const CSE_MODIFY = 'a[href^="/avis-cse/etape/2"]';
+const DECL1_VIEW =
+	'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]';
+const JOINT_EVALUATION_VIEW = 'a[href^="/api/v1/files/"]';
+const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	cseOpinionRequired: true,
@@ -41,19 +67,22 @@ const BASE_PROPS = {
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
+	jointEvaluationFile: null as JointEvaluationFileInfo | null,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,
 	lockHolder: null,
 };
 
-function renderPanel(
-	variant: PanelVariant,
-	overrides: Partial<typeof BASE_PROPS> = {},
-) {
+type PanelOverrides = Partial<typeof BASE_PROPS> & {
+	declarationFsmStatus?: DeclarationFsmStatus | null;
+};
+
+function renderPanel(variant: PanelVariant, overrides: PanelOverrides = {}) {
 	const { container } = render(
 		<DeclarationProcessPanel
 			{...BASE_PROPS}
+			declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
 			{...overrides}
 			variant={variant}
 		/>,
@@ -135,6 +164,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("2nde déclaration — variant compliance_choice (révision)", () => {
 		it("renders the Modifier link for second declaration when awaiting_revision_choice", () => {
 			const { panel, dialog } = renderPanel("compliance_choice", {
+				declarationFsmStatus: "awaiting_revision_choice",
 				displayContext: makeDisplayContext("corrective_action"),
 				hasSubmittedSecondDeclaration: true,
 			});
@@ -294,13 +324,11 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	});
 
 	describe("TransmittedRow sans viewHref — pas de bouton œil sur ces lignes", () => {
-		it("does not render view link on CSE avis row (closed variant, no decl1 row shown)", () => {
+		it("does not render view link on CSE avis row, while the decl1 row keeps its own", () => {
 			const { dialog } = renderPanel("closed");
-			expect(dialog.querySelector('a[href*="avis-cse"]')).toBeInTheDocument();
-			const links = dialog.querySelectorAll(
-				'a[title="Voir le récapitulatif de la déclaration"]',
-			);
-			expect(links).toHaveLength(0);
+			expect(dialog.querySelector(CSE_MODIFY)).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+			expect(dialog.querySelectorAll(RECAP_VIEW)).toHaveLength(1);
 		});
 
 		it("does not render view link for joint evaluation row (no type=correction link)", () => {
@@ -319,6 +347,155 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			});
 			const correctionLink = dialog.querySelector('a[href*="type=correction"]');
 			expect(correctionLink).not.toBeInTheDocument();
+		});
+	});
+
+	describe("démarche close — l'affordance « Modifier » suit la FSM (#4222)", () => {
+		const CLOSED_OVERRIDES: PanelOverrides = {
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedSecondDeclaration: true,
+			jointEvaluationFile: {
+				id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+				fileName: "rapport-evaluation-conjointe.pdf",
+			},
+		};
+
+		it("keeps the first declaration transmission notice and its view link, without Modifier", () => {
+			const { panel, dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_MODIFY)).not.toBeInTheDocument();
+		});
+
+		it("keeps the second declaration view link but drops its Modifier", () => {
+			const { panel, dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				dialog.querySelector('a[href*="type=correction"]'),
+			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+		});
+
+		it("keeps the joint evaluation report view link but drops its Modifier", () => {
+			const { panel, dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			expect(
+				panel.getByText(
+					"Votre rapport de l'évaluation conjointe a été transmis",
+				),
+			).toBeInTheDocument();
+			expect(dialog.querySelector(JOINT_EVALUATION_VIEW)).toBeInTheDocument();
+			expect(
+				dialog.querySelector(JOINT_EVALUATION_MODIFY),
+			).not.toBeInTheDocument();
+		});
+
+		it("opens the joint evaluation report in a new tab, named after the deposited file", () => {
+			const { dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			const link = dialog.querySelector<HTMLAnchorElement>(
+				JOINT_EVALUATION_VIEW,
+			);
+			if (!link) throw new Error("joint evaluation view link not rendered");
+			expect(link).toHaveAttribute(
+				"href",
+				"/api/v1/files/8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			);
+			expect(link).toHaveAttribute("target", "_blank");
+			expect(link).toHaveAttribute("rel", "noopener noreferrer");
+			expect(link).toHaveAttribute(
+				"title",
+				"Visualiser rapport-evaluation-conjointe.pdf",
+			);
+			expect(
+				within(link).getByText("Visualiser rapport-evaluation-conjointe.pdf"),
+			).toBeInTheDocument();
+			expect(
+				within(link).getByText("(ouvre une nouvelle fenêtre)"),
+			).toBeInTheDocument();
+		});
+
+		it("renders no view link on the joint evaluation row when no report file is available", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				...CLOSED_OVERRIDES,
+				jointEvaluationFile: null,
+			});
+
+			expect(
+				panel.getByText(
+					"Votre rapport de l'évaluation conjointe a été transmis",
+				),
+			).toBeInTheDocument();
+			expect(
+				dialog.querySelector(JOINT_EVALUATION_VIEW),
+			).not.toBeInTheDocument();
+		});
+
+		it("keeps Modifier on the CSE avis row, the only action the FSM still allows", () => {
+			const { panel, dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			const cseModify = dialog.querySelector(CSE_MODIFY);
+			expect(cseModify).toBeInTheDocument();
+			expect(cseModify?.textContent).toContain("Modifier");
+			expect(panel.getAllByText("Modifier")).toHaveLength(1);
+		});
+
+		it("advertises a modification deadline on the CSE avis row only", () => {
+			const { panel } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			expect(panel.getAllByText(/Modifiable jusqu'au/)).toHaveLength(1);
+			expect(
+				panel.queryByText(/Modification close depuis/),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("le « Modifier » suit le statut FSM, pas le variant (#4222)", () => {
+		const SUBMITTED_ROWS: PanelOverrides = {
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedSecondDeclaration: true,
+		};
+
+		it.each<DeclarationFsmStatus>([
+			"corrective_actions_chosen",
+			"awaiting_revision_choice",
+		])("offers Modifier on the second declaration row for the status %s", (declarationFsmStatus) => {
+			const { dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus,
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+		});
+
+		it.each<DeclarationFsmStatus>([
+			"joint_evaluation_chosen",
+			"revised_joint_evaluation_chosen",
+		])("offers Modifier on the joint evaluation row for the status %s", (declarationFsmStatus) => {
+			const { dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus,
+			});
+			expect(dialog.querySelector(JOINT_EVALUATION_MODIFY)).toBeInTheDocument();
+		});
+
+		it.each<DeclarationFsmStatus>([
+			"awaiting_cse_opinion",
+			"demarche_completed",
+		])("withholds both Modifier links for the status %s", (declarationFsmStatus) => {
+			const { dialog } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus,
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+			expect(
+				dialog.querySelector(JOINT_EVALUATION_MODIFY),
+			).not.toBeInTheDocument();
 		});
 	});
 });

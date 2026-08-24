@@ -83,6 +83,7 @@ const BASE_PROPS = {
 	campaignDeadlines,
 	company,
 	declarations,
+	jointEvaluationFile: null,
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	representationCampaign: getDefaultRepresentationCampaign(currentYear),

@@ -1,9 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
@@ -50,6 +57,7 @@ const defaultProps = {
 	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
+	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
 };
 
@@ -208,6 +216,69 @@ describe("JointEvaluationForm", () => {
 		});
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
+		});
+	});
+
+	describe("rapport déjà déposé (#4222)", () => {
+		const existingFile = {
+			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			fileName: "rapport-evaluation-conjointe.pdf",
+			uploadedAt: new Date("2026-06-20T09:30:00"),
+		};
+
+		it("lists the deposited report with a new-tab link to the stored file", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(screen.getByText("Rapport déjà déposé")).toBeInTheDocument();
+
+			const link = screen.getByRole("link", {
+				name: /rapport-evaluation-conjointe\.pdf/,
+			});
+			expect(link).toHaveAttribute(
+				"href",
+				"/api/v1/files/8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			);
+			expect(link).toHaveAttribute("target", "_blank");
+			expect(link).toHaveAttribute("rel", "noopener noreferrer");
+			expect(
+				within(link).getByText("(ouvre une nouvelle fenêtre)"),
+			).toBeInTheDocument();
+		});
+
+		it("states the deposit date of the existing report", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(
+				screen.getByText(
+					`Déposé le ${formatLongDate(existingFile.uploadedAt)}`,
+				),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the upload zone available so the report can still be replaced", () => {
+			const { container } = render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(container.querySelector('input[type="file"]')).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeInTheDocument();
+		});
+
+		it("renders no deposited-report block when no file exists yet", () => {
+			render(<JointEvaluationForm {...defaultProps} />);
+
+			expect(screen.queryByText("Rapport déjà déposé")).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("link", {
+					name: /rapport-evaluation-conjointe\.pdf/,
+				}),
+			).not.toBeInTheDocument();
 		});
 	});
 
