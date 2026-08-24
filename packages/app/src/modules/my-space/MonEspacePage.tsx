@@ -28,9 +28,7 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 			api.declarationLock.getActiveLockForCurrentDeclaration(),
 		]);
 
-	// `jointEvaluation.getFile` is scoped to the current-year declaration, so
-	// it is only safe to call once that declaration row actually exists —
-	// `hasJointEvaluationFile` can only be true when it does.
+	// `getFile` is scoped to the current-year declaration, so it is only safe to call once that row exists.
 	const currentDeclaration = data.declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
 	);

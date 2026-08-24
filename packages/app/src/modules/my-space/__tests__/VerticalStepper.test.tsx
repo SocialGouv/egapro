@@ -37,8 +37,7 @@ function makeDisplayContext(
 	};
 }
 
-// The panel variant is derived from the FSM status by `computePanelVariant`;
-// a test that pins one must feed the status that actually produces it.
+// Pinning a variant means feeding the FSM status `computePanelVariant` derives it from.
 const VARIANT_FSM_STATUS: Record<PanelVariant, DeclarationFsmStatus | null> = {
 	start: "draft",
 	compliance_choice: "awaiting_compliance_path_choice",
@@ -151,7 +150,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				hasSubmittedSecondDeclaration: true,
 			});
 			const correctionLink = dialog.querySelector<HTMLAnchorElement>(
-				'a[href*="type=correction"][title="Voir le récapitulatif de la déclaration"]',
+				'a[href*="type=correction"][title="Voir le récapitulatif de la seconde déclaration"]',
 			);
 			expect(correctionLink).toBeInTheDocument();
 			expect(correctionLink?.getAttribute("href")).toContain(
@@ -224,7 +223,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				hasSubmittedSecondDeclaration: true,
 			});
 			const correctionLink = dialog.querySelector<HTMLAnchorElement>(
-				'a[href*="type=correction"][title="Voir le récapitulatif de la déclaration"]',
+				'a[href*="type=correction"][title="Voir le récapitulatif de la seconde déclaration"]',
 			);
 			expect(correctionLink).toBeInTheDocument();
 			expect(correctionLink?.getAttribute("href")).toContain(
@@ -380,6 +379,17 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				dialog.querySelector('a[href*="type=correction"]'),
 			).toBeInTheDocument();
 			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+		});
+
+		it("gives each view link a distinct accessible name (RGAA 6.1)", () => {
+			const { dialog } = renderPanel("closed", CLOSED_OVERRIDES);
+
+			const titles = Array.from(
+				dialog.querySelectorAll("a.fr-icon-eye-line"),
+				(a) => a.getAttribute("title"),
+			);
+			expect(titles.length).toBeGreaterThan(1);
+			expect(new Set(titles).size).toBe(titles.length);
 		});
 
 		it("keeps the joint evaluation report view link but drops its Modifier", () => {

@@ -22,9 +22,7 @@ const VARIANTS: PanelVariant[] = [
 	"closed",
 ];
 
-// The playground picks a `variant` directly, bypassing `computePanelVariant`.
-// This maps each variant to one representative FSM status so the "Modifier"
-// gating (derived from the FSM, not the variant) can be previewed too.
+// The playground picks a `variant` directly, so each one needs a representative FSM status to preview the "Modifier" gating.
 const VARIANT_FSM_STATUS: Record<PanelVariant, DeclarationFsmStatus | null> = {
 	start: "draft",
 	compliance_choice: "awaiting_compliance_path_choice",

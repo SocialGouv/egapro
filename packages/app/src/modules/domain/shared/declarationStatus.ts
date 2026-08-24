@@ -99,11 +99,10 @@ export function isSecondDeclarationWritable(
 	);
 }
 
-// The joint-evaluation report may only be submitted while its own funnel is
-// open: right after the joint-evaluation path choice, or once the
-// declaration has been re-opened for a revised joint evaluation. Once
-// submitted (or once the démarche reaches `demarche_completed`), the engine
-// no longer exposes a matching transition — see `v2027.1.json`.
+// The joint-evaluation report may only be written while its funnel is actually
+// open: right after the joint-evaluation path choice, or once the declaration
+// has been re-opened for a revised joint evaluation. Any other status — closed
+// démarche included — has no matching transition, so the write is rejected.
 export function isJointEvaluationWritable(
 	status: DeclarationFsmStatus | null,
 ): boolean {
