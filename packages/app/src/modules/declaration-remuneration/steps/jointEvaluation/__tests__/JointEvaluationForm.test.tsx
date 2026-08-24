@@ -45,6 +45,9 @@ const { uploadFile: uploadFileMock } = (await import(
 	"~/modules/shared/uploadFile"
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
+const EMPTY_SELECTION_ERROR =
+	"Veuillez sélectionner le rapport de l'évaluation conjointe avant de soumettre.";
+
 const defaultProps = {
 	cseOpinionRequired: false,
 	declarationDate: "01/06/2026",
@@ -105,15 +108,16 @@ describe("JointEvaluationForm", () => {
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
 	});
 
-	it("shows an error when submitting without a file", () => {
+	it("names the expected document in the error when submitting without a file", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
 		fireEvent.click(submitButton);
 
+		expect(screen.getByText(EMPTY_SELECTION_ERROR)).toBeInTheDocument();
 		expect(
-			screen.getByText(/veuillez sélectionner au moins un fichier/i),
-		).toBeInTheDocument();
+			screen.queryByText(/veuillez sélectionner au moins un fichier/i),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the info boxes", () => {
@@ -148,9 +152,7 @@ describe("JointEvaluationForm", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
 
-		expect(
-			screen.queryByText(/veuillez sélectionner un fichier/i),
-		).not.toBeInTheDocument();
+		expect(screen.queryByText(EMPTY_SELECTION_ERROR)).not.toBeInTheDocument();
 
 		expect(
 			container.querySelector("dialog#joint-evaluation-submit-modal"),
