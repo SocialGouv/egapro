@@ -78,7 +78,7 @@ jobs:
       # the same CLAUDE_CODE_OAUTH_TOKEN secret the action exported.
       - name: Set up Node
         if: steps.collect.outputs.skip == 'false'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
 

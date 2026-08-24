@@ -20,7 +20,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -38,7 +38,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -56,7 +56,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -74,7 +74,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -94,7 +94,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -112,7 +112,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -130,7 +130,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -148,7 +148,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -170,7 +170,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -192,7 +192,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
