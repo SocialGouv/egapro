@@ -6,6 +6,7 @@ import {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatIsoDate,
 	formatMonthDay,
 	formatPercentage,
 	formatShortDate,
@@ -147,6 +148,21 @@ describe("formatShortDate", () => {
 
 	it("returns dash for undefined", () => {
 		expect(formatShortDate(undefined)).toBe("—");
+	});
+});
+
+describe("formatIsoDate", () => {
+	it("formats a persisted ISO date as dd/mm/yyyy", () => {
+		expect(formatIsoDate("2026-03-10")).toBe("10/03/2026");
+	});
+
+	it("pads single-digit days and months", () => {
+		expect(formatIsoDate("2025-01-05")).toBe("05/01/2025");
+	});
+
+	it("keeps the persisted day across a month boundary", () => {
+		expect(formatIsoDate("2025-07-01")).toBe("01/07/2025");
+		expect(formatIsoDate("2026-06-30")).toBe("30/06/2026");
 	});
 });
 
