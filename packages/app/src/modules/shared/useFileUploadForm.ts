@@ -22,6 +22,12 @@ type Options = {
 	 * → upload) used by the other upload forms.
 	 */
 	autoUpload?: boolean;
+	/**
+	 * Message shown when submitting the staged flow with no file selected.
+	 * Defaults to a generic copy — consumers with a single expected document
+	 * (e.g. the joint evaluation report) should pass a more specific message.
+	 */
+	emptySelectionError?: string;
 };
 
 export function useFileUploadForm({
@@ -29,6 +35,7 @@ export function useFileUploadForm({
 	onUploaded,
 	onAllUploaded,
 	autoUpload = false,
+	emptySelectionError = "Veuillez sélectionner au moins un fichier avant de soumettre.",
 }: Options) {
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -109,9 +116,7 @@ export function useFileUploadForm({
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (selectedFiles.length === 0) {
-			setUploadError(
-				"Veuillez sélectionner au moins un fichier avant de soumettre.",
-			);
+			setUploadError(emptySelectionError);
 			return;
 		}
 		setUploadError(null);

@@ -74,6 +74,8 @@ export function JointEvaluationForm({
 		selectedFiles,
 		uploadError,
 	} = useFileUploadForm({
+		emptySelectionError:
+			"Veuillez sélectionner le rapport de l'évaluation conjointe avant de soumettre.",
 		flowType: "joint_evaluation",
 		onAllUploaded,
 	});
