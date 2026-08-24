@@ -27,6 +27,8 @@ const RECAP_TITLE =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
 const TRANSMITTED_TITLE = "Télécharger le récapitulatif des éléments transmis";
 const SECOND_TITLE = "Télécharger le récapitulatif de la seconde déclaration";
+const REPRESENTATION_RECAP_TITLE =
+	"Télécharger le récapitulatif de la déclaration";
 
 const SUBMITTED_FSM_STATUSES = DECLARATION_FSM_STATUSES.filter(
 	(fsmStatus) => fsmStatus !== "draft",
@@ -106,12 +108,22 @@ describe("getDocumentsPanelId", () => {
 });
 
 describe("getDocumentResourceCount", () => {
-	it("counts no resource for a representation declaration", () => {
+	it("counts no resource while the representation declaration is not submitted", () => {
 		expect(
 			getDocumentResourceCount(
-				makeDeclaration({ type: "representation", hasPrefillData: true }),
+				makeDeclaration({
+					type: "representation",
+					fsmStatus: "draft",
+					currentStep: 1,
+				}),
 			),
 		).toBe(0);
+	});
+
+	it("counts the recap once the representation declaration is submitted", () => {
+		expect(
+			getDocumentResourceCount(makeDeclaration({ type: "representation" })),
+		).toBe(1);
 	});
 
 	it.each(
@@ -198,12 +210,34 @@ describe("DocumentsPanel", () => {
 		);
 	});
 
-	it("labels the panel with the representation process title and offers no document", () => {
-		const { panel, links } = renderPanel({ type: "representation" });
+	it("labels the panel with the representation process title", () => {
+		const { panel } = renderPanel({ type: "representation" });
 
 		expect(
 			panel.getByText(`Démarche de représentation ${DECLARATION_YEAR}`),
 		).toBeInTheDocument();
+	});
+
+	it("offers the representation recap once the declaration is submitted", () => {
+		const { panel, links } = renderPanel({ type: "representation" });
+
+		expect(links()).toHaveLength(1);
+		expect(links()[0]).toHaveTextContent(REPRESENTATION_RECAP_TITLE);
+		expect(links()[0]).toHaveAttribute(
+			"href",
+			`/api/representation-pdf?year=${getReferenceYearFor(DECLARATION_YEAR)}`,
+		);
+		expect(panel.getByText(SUBTITLE)).toBeInTheDocument();
+		expect(panel.getByText("PDF")).toBeInTheDocument();
+	});
+
+	it("offers no representation document while the declaration is still a draft", () => {
+		const { links } = renderPanel({
+			type: "representation",
+			fsmStatus: "draft",
+			currentStep: 1,
+		});
+
 		expect(links()).toHaveLength(0);
 	});
 

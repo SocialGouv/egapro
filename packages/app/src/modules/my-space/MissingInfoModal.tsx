@@ -13,6 +13,7 @@ import { api } from "~/trpc/react";
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
 import panelStyles from "./DeclarationProcessPanel.module.scss";
 import styles from "./MissingInfoModal.module.scss";
+import { REPRESENTATION_PROCESS_PANEL_ID } from "./RepresentationProcessPanel";
 import { createMissingInfoSchema } from "./schemas";
 import { useUpdateHasCse } from "./useUpdateHasCse";
 
@@ -108,26 +109,23 @@ export function MissingInfoModal({
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
 			router.refresh();
-			if (openerTypeRef.current === "remuneration") {
-				// Register listener BEFORE closing so we catch the dsfr.conceal event
-				const dialog = dialogRef.current;
-				if (dialog) {
-					dialog.addEventListener(
-						"dsfr.conceal",
-						() => {
-							const panel = document.getElementById(
-								DECLARATION_PROCESS_PANEL_ID,
-							);
-							if (panel) getDsfrModal(panel)?.disclose();
-						},
-						{ once: true },
-					);
-				}
-				closeModal();
-			} else {
-				closeModal();
-				window.location.href = `/declaration-remuneration?siren=${siren}`;
+			// Register listener BEFORE closing so we catch the dsfr.conceal event
+			const dialog = dialogRef.current;
+			if (dialog) {
+				const targetPanelId =
+					openerTypeRef.current === "remuneration"
+						? DECLARATION_PROCESS_PANEL_ID
+						: REPRESENTATION_PROCESS_PANEL_ID;
+				dialog.addEventListener(
+					"dsfr.conceal",
+					() => {
+						const panel = document.getElementById(targetPanelId);
+						if (panel) getDsfrModal(panel)?.disclose();
+					},
+					{ once: true },
+				);
 			}
+			closeModal();
 		} catch {
 			setSubmitError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",

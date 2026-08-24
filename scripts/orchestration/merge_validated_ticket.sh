@@ -22,7 +22,8 @@ fi
 #   1  hard error (PR base ≠ epic/<N>, network, gh permission)
 #   2  PR conflicts with epic/<N> — caller should bump attempt counter and
 #      re-dispatch code-dev to rebase. The script also comments on the PR
-#      and resets the ticket to In progress.
+#      and resets the ticket to To Do (dispatch_plan only picks up To Do,
+#      so In progress would strand the ticket forever).
 #   3  GitHub still computing mergeability — caller should retry next tick
 
 set -euo pipefail
@@ -55,7 +56,7 @@ case "$MERGEABLE" in
         echo "[merge_validated_ticket] PR #$PR conflicts with $BRANCH — comment + reset ticket" >&2
         gh pr comment "$PR" --body "**process_tick_result : conflit avec \`${BRANCH}\`**
 
-Le ticket a été validé techniquement (CI verte, validators IA OK, Sonar OK), mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit avec une PR mergée juste avant. Le ticket repasse en \`In progress\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
+Le ticket a été validé techniquement (CI verte, validators IA OK, Sonar OK), mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit avec une PR mergée juste avant. Le ticket repasse en \`To Do\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
 
 \`\`\`bash
 git fetch origin ${BRANCH}
@@ -65,7 +66,7 @@ git push --force-with-lease
 \`\`\`
 
 Une fois la PR à nouveau verte, le pipeline retentera le squash-merge automatiquement." >/dev/null 2>&1 || true
-        bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null 2>&1 || true
+        bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "To Do" >/dev/null 2>&1 || true
         exit 2
         ;;
     UNKNOWN|"")
@@ -83,7 +84,7 @@ Une fois la PR à nouveau verte, le pipeline retentera le squash-merge automatiq
                     echo "[merge_validated_ticket] PR #$PR conflicts with $BRANCH (detected after $ATTEMPTS poll(s)) — comment + reset ticket" >&2
                     gh pr comment "$PR" --body "**process_tick_result : conflit avec \`${BRANCH}\`**
 
-Le ticket a été validé techniquement mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit. Le ticket repasse en \`In progress\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
+Le ticket a été validé techniquement mais la squash-merge dans \`${BRANCH}\` est impossible à cause d'un conflit. Le ticket repasse en \`To Do\` pour un nouveau dispatch \`code-dev\` qui doit rebaser sur \`${BRANCH}\` :
 
 \`\`\`bash
 git fetch origin ${BRANCH}
@@ -91,7 +92,7 @@ git rebase origin/${BRANCH}
 # résoudre les conflits
 git push --force-with-lease
 \`\`\`" >/dev/null 2>&1 || true
-                    bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "In progress" >/dev/null 2>&1 || true
+                    bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "To Do" >/dev/null 2>&1 || true
                     exit 2
                     ;;
             esac

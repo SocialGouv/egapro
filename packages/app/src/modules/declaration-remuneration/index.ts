@@ -14,6 +14,7 @@ export {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "./schemas";
+export { CompanyBanner } from "./shared/CompanyBanner";
 export { computeIndicatorPercentages } from "./shared/computeIndicatorPercentages";
 export { DevFillButton } from "./shared/DevFillButton";
 export type {

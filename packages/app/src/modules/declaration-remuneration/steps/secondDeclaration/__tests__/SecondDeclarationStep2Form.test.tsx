@@ -104,14 +104,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("places the source paragraph immediately after the intro paragraph (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const introParagraph = screen.getByText(
 			/Cette seconde déclaration reprend les catégories/,
 		);
@@ -122,14 +115,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("places the source paragraph before the obligatoires mention (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const sourceParagraph = screen
 			.getByText(/Source utilisée pour déterminer/)
 			.closest("p") as HTMLElement;
@@ -140,14 +126,7 @@ describe("SecondDeclarationStep2Form", () => {
 	});
 
 	it("keeps the source paragraph out of the reference period block (#4215)", () => {
-		render(
-			<SecondDeclarationStep2Form
-				declarationSiren="123456789"
-				declarationYear={2025}
-				initialFirstDeclarationCategories={mockCategories}
-				initialSource="accord-entreprise"
-			/>,
-		);
+		renderStep2({ initialSource: "accord-entreprise" });
 		const startDateField = screen.getByLabelText(/Date de début/);
 		const sourceParagraph = screen
 			.getByText(/Source utilisée pour déterminer/)

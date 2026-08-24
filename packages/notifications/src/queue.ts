@@ -140,6 +140,14 @@ function validatePayloadForType(
 				? null
 				: "payload.raisonSociale must be a non-empty string";
 		}
+		case "representation_receipt": {
+			if (!isCompanyScoped(p)) {
+				return "payload requires { siren: string, year: number }";
+			}
+			return isNonEmptyString(p.raisonSociale)
+				? null
+				: "payload.raisonSociale must be a non-empty string";
+		}
 		case "cycle_opening_info": {
 			return isDeadlinePayload(p)
 				? null

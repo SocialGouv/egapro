@@ -207,6 +207,136 @@ describe("buildDeclarationList", () => {
 		});
 	});
 
+	it("emits the representation row when visibility is explicitly granted", () => {
+		const result = buildDeclarationList(SIREN, [], 2026, new Set(), true);
+
+		expect(result.map((r) => r.type)).toEqual([
+			"remuneration",
+			"representation",
+		]);
+	});
+
+	it("omits the current year representation row when visibility is denied", () => {
+		const result = buildDeclarationList(SIREN, [], 2026, new Set(), false);
+
+		expect(result).toEqual([
+			{
+				type: "remuneration",
+				siren: SIREN,
+				year: 2026,
+				status: "to_complete",
+				currentStep: 0,
+				updatedAt: null,
+				...PLACEHOLDER_ROW,
+			},
+		]);
+	});
+
+	it("keeps the remuneration prefill flag when representation is hidden", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[],
+			2026,
+			new Set([2026]),
+			false,
+		);
+
+		expect(result).toHaveLength(1);
+		expect(result[0]).toMatchObject({
+			type: "remuneration",
+			hasPrefillData: true,
+		});
+	});
+
+	it("keeps an existing representation draft visible when visibility is denied", () => {
+		const updatedAt = new Date("2026-03-02");
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "representation",
+					year: 2026,
+					status: "in_progress",
+					fsmStatus: "draft",
+					currentStep: 2,
+					updatedAt,
+					...EMPTY_DECLARATION,
+				},
+			],
+			2026,
+			new Set(),
+			false,
+		);
+
+		expect(result).toHaveLength(2);
+		expect(result[1]).toEqual({
+			type: "representation",
+			siren: SIREN,
+			year: 2026,
+			status: "in_progress",
+			fsmStatus: "draft",
+			currentStep: 2,
+			updatedAt,
+			...EMPTY_DECLARATION,
+		});
+	});
+
+	it("keeps a submitted representation declaration visible when visibility is denied", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "representation",
+					year: 2026,
+					status: "done",
+					fsmStatus: "demarche_completed",
+					currentStep: 6,
+					updatedAt: null,
+					...EMPTY_DECLARATION,
+				},
+			],
+			2026,
+			new Set(),
+			false,
+		);
+
+		expect(result).toHaveLength(2);
+		expect(result[1]).toMatchObject({
+			type: "representation",
+			year: 2026,
+			status: "done",
+			fsmStatus: "demarche_completed",
+		});
+	});
+
+	it("keeps previous year representation declarations visible when visibility is denied", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "representation",
+					year: 2025,
+					status: "done",
+					fsmStatus: "demarche_completed",
+					currentStep: 6,
+					updatedAt: null,
+					...EMPTY_DECLARATION,
+				},
+			],
+			2026,
+			new Set(),
+			false,
+		);
+
+		expect(result).toHaveLength(2);
+		expect(result[0]).toMatchObject({ type: "remuneration", year: 2026 });
+		expect(result[1]).toMatchObject({
+			type: "representation",
+			year: 2025,
+			status: "done",
+		});
+	});
+
 	it("propagates cseRequired from DB records", () => {
 		const result = buildDeclarationList(
 			SIREN,

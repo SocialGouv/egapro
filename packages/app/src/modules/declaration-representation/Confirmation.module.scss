@@ -1,0 +1,24 @@
+.confirmation {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+// Figma spec: the success pictogram sits on the same line as the sentence it
+// illustrates, as on the twin end-of-journey screen of the remuneration funnel.
+.successRow {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.block {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+}
+
+.mention {
+	color: var(--text-mention-grey);
+}
