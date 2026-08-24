@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { updateHasCseAsync, updatePhoneAsync, mockRefresh } = vi.hoisted(() => ({
 	updateHasCseAsync: vi.fn().mockResolvedValue(undefined),
@@ -43,13 +43,67 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-import { MissingInfoModal } from "../MissingInfoModal";
+import { DECLARATION_PROCESS_PANEL_ID } from "../DeclarationProcessPanel";
+import { MISSING_INFO_PANEL_ID, MissingInfoModal } from "../MissingInfoModal";
+import { REPRESENTATION_PROCESS_PANEL_ID } from "../RepresentationProcessPanel";
+
+const appended: HTMLElement[] = [];
+
+function appendElement<T extends HTMLElement>(element: T): T {
+	document.body.appendChild(element);
+	appended.push(element);
+	return element;
+}
+
+function appendPanel(id: string): HTMLElement {
+	const panel = document.createElement("div");
+	panel.id = id;
+	return appendElement(panel);
+}
+
+function appendOpener(declarationType?: string): HTMLButtonElement {
+	const opener = document.createElement("button");
+	opener.setAttribute("aria-controls", MISSING_INFO_PANEL_ID);
+	if (declarationType) opener.dataset.declarationType = declarationType;
+	return appendElement(opener);
+}
+
+// Spies capture the resolved element id so tests assert *which* panel was disclosed.
+function stubDsfrModal() {
+	const conceal = vi.fn();
+	const disclose = vi.fn();
+	(
+		window as unknown as {
+			dsfr: (el: HTMLElement) => {
+				modal: { conceal: () => void; disclose: () => void };
+			};
+		}
+	).dsfr = (el) => ({
+		modal: {
+			conceal: () => conceal(el.id),
+			disclose: () => disclose(el.id),
+		},
+	});
+	return { conceal, disclose };
+}
+
+function getDialog(container: HTMLElement): HTMLDialogElement {
+	return container.querySelector(
+		`#${MISSING_INFO_PANEL_ID}`,
+	) as HTMLDialogElement;
+}
 
 describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", () => {
 	beforeEach(() => {
 		mockRefresh.mockClear();
 		updateHasCseAsync.mockClear();
 		updatePhoneAsync.mockClear();
+	});
+
+	afterEach(() => {
+		for (const element of appended) element.remove();
+		appended.length = 0;
+		delete (window as unknown as { dsfr?: unknown }).dsfr;
 	});
 
 	it("calls router.refresh after the CSE mutation resolves", async () => {
@@ -150,131 +204,147 @@ describe("MissingInfoModal — refreshes the RSC props after saving (#4056)", ()
 	});
 
 	it("discloses the declaration process panel once the remuneration modal is concealed", async () => {
-		const disclose = vi.fn();
-		const conceal = vi.fn();
-		(
-			window as unknown as {
-				dsfr: () => { modal: { conceal: () => void; disclose: () => void } };
-			}
-		).dsfr = () => ({ modal: { conceal, disclose } });
+		const { conceal, disclose } = stubDsfrModal();
+		appendPanel(DECLARATION_PROCESS_PANEL_ID);
 
-		const panel = document.createElement("div");
-		panel.id = "declaration-process-panel";
-		document.body.appendChild(panel);
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const dialog = getDialog(container);
 
-		try {
-			const { container } = render(
-				<MissingInfoModal
-					cseApplicable={true}
-					hasCse={null}
-					siren="532847196"
-					userPhone="0122334455"
-				/>,
-			);
-			const dialog = container.querySelector(
-				"#missing-info-modal",
-			) as HTMLDialogElement;
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
 
-			fireEvent.click(screen.getByLabelText("Non"));
-			fireEvent.click(
-				screen.getByRole("button", { name: "Enregistrer", hidden: true }),
-			);
-
-			await waitFor(() => {
-				expect(conceal).toHaveBeenCalled();
-			});
-			// The disclosure listener only fires on the DSFR conceal event.
-			expect(disclose).not.toHaveBeenCalled();
-			dialog.dispatchEvent(new Event("dsfr.conceal"));
-			expect(disclose).toHaveBeenCalled();
-		} finally {
-			document.body.removeChild(panel);
-			delete (window as unknown as { dsfr?: unknown }).dsfr;
-		}
+		await waitFor(() => {
+			expect(conceal).toHaveBeenCalledWith(MISSING_INFO_PANEL_ID);
+		});
+		// The disclosure listener only fires on the DSFR conceal event.
+		expect(disclose).not.toHaveBeenCalled();
+		dialog.dispatchEvent(new Event("dsfr.conceal"));
+		expect(disclose).toHaveBeenCalledWith(DECLARATION_PROCESS_PANEL_ID);
 	});
 
 	it("does not disclose anything on conceal when the process panel is absent", async () => {
-		const disclose = vi.fn();
-		const conceal = vi.fn();
-		(
-			window as unknown as {
-				dsfr: () => { modal: { conceal: () => void; disclose: () => void } };
-			}
-		).dsfr = () => ({ modal: { conceal, disclose } });
+		const { conceal, disclose } = stubDsfrModal();
 
-		try {
-			const { container } = render(
-				<MissingInfoModal
-					cseApplicable={true}
-					hasCse={null}
-					siren="532847196"
-					userPhone="0122334455"
-				/>,
-			);
-			const dialog = container.querySelector(
-				"#missing-info-modal",
-			) as HTMLDialogElement;
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const dialog = getDialog(container);
 
-			fireEvent.click(screen.getByLabelText("Non"));
-			fireEvent.click(
-				screen.getByRole("button", { name: "Enregistrer", hidden: true }),
-			);
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
 
-			await waitFor(() => {
-				expect(conceal).toHaveBeenCalled();
-			});
-			dialog.dispatchEvent(new Event("dsfr.conceal"));
-			expect(disclose).not.toHaveBeenCalled();
-		} finally {
-			delete (window as unknown as { dsfr?: unknown }).dsfr;
-		}
+		await waitFor(() => {
+			expect(conceal).toHaveBeenCalledWith(MISSING_INFO_PANEL_ID);
+		});
+		dialog.dispatchEvent(new Event("dsfr.conceal"));
+		expect(disclose).not.toHaveBeenCalled();
 	});
 
-	it("redirects to declaration-remuneration when opened from the representation entry", async () => {
-		const originalLocation = window.location;
-		const hrefSetter = vi.fn();
-		Object.defineProperty(window, "location", {
-			configurable: true,
-			value: {
-				...originalLocation,
-				set href(value: string) {
-					hrefSetter(value);
-				},
-			},
+	it("discloses the representation process panel when opened from the representation entry", async () => {
+		const { conceal, disclose } = stubDsfrModal();
+		appendPanel(REPRESENTATION_PROCESS_PANEL_ID);
+		appendPanel(DECLARATION_PROCESS_PANEL_ID);
+		const opener = appendOpener("representation");
+
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const dialog = getDialog(container);
+
+		opener.click();
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+
+		await waitFor(() => {
+			expect(conceal).toHaveBeenCalledWith(MISSING_INFO_PANEL_ID);
 		});
+		expect(disclose).not.toHaveBeenCalled();
+		dialog.dispatchEvent(new Event("dsfr.conceal"));
 
-		try {
-			render(
-				<MissingInfoModal
-					cseApplicable={true}
-					hasCse={null}
-					siren="532847196"
-					userPhone="0122334455"
-				/>,
-			);
+		expect(disclose).toHaveBeenCalledWith(REPRESENTATION_PROCESS_PANEL_ID);
+		expect(disclose).not.toHaveBeenCalledWith(DECLARATION_PROCESS_PANEL_ID);
+	});
 
-			const opener = document.createElement("button");
-			opener.setAttribute("aria-controls", "missing-info-modal");
-			opener.dataset.declarationType = "representation";
-			document.body.appendChild(opener);
-			opener.click();
+	it("does not disclose anything on conceal when the representation panel is absent", async () => {
+		const { conceal, disclose } = stubDsfrModal();
+		const opener = appendOpener("representation");
 
-			fireEvent.click(screen.getByLabelText("Non"));
-			fireEvent.click(
-				screen.getByRole("button", { name: "Enregistrer", hidden: true }),
-			);
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const dialog = getDialog(container);
 
-			await waitFor(() => {
-				expect(hrefSetter).toHaveBeenCalledWith(
-					"/declaration-remuneration?siren=532847196",
-				);
-			});
-			document.body.removeChild(opener);
-		} finally {
-			Object.defineProperty(window, "location", {
-				configurable: true,
-				value: originalLocation,
-			});
-		}
+		opener.click();
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+
+		await waitFor(() => {
+			expect(conceal).toHaveBeenCalledWith(MISSING_INFO_PANEL_ID);
+		});
+		dialog.dispatchEvent(new Event("dsfr.conceal"));
+		expect(disclose).not.toHaveBeenCalled();
+	});
+
+	it("targets the declaration process panel again when reopened from the remuneration entry", async () => {
+		const { conceal, disclose } = stubDsfrModal();
+		appendPanel(REPRESENTATION_PROCESS_PANEL_ID);
+		appendPanel(DECLARATION_PROCESS_PANEL_ID);
+		const representationOpener = appendOpener("representation");
+		const remunerationOpener = appendOpener("remuneration");
+
+		const { container } = render(
+			<MissingInfoModal
+				cseApplicable={true}
+				hasCse={null}
+				siren="532847196"
+				userPhone="0122334455"
+			/>,
+		);
+		const dialog = getDialog(container);
+
+		representationOpener.click();
+		remunerationOpener.click();
+		fireEvent.click(screen.getByLabelText("Non"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+
+		await waitFor(() => {
+			expect(conceal).toHaveBeenCalledWith(MISSING_INFO_PANEL_ID);
+		});
+		dialog.dispatchEvent(new Event("dsfr.conceal"));
+
+		expect(disclose).toHaveBeenCalledWith(DECLARATION_PROCESS_PANEL_ID);
+		expect(disclose).not.toHaveBeenCalledWith(REPRESENTATION_PROCESS_PANEL_ID);
 	});
 });

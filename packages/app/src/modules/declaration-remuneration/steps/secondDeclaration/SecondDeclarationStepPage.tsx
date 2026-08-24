@@ -119,6 +119,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 						initialStartDate={
 							data.declaration.secondDeclReferencePeriodStart ?? undefined
 						}
+						status={data.declaration.status}
 					/>
 				</HydrateClient>
 			</>
@@ -144,6 +145,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 					declarationYear={currentYear}
 					secondDeclarationCategories={reviewCategories}
 					siren={data.declaration.siren}
+					status={data.declaration.status}
 				/>
 			</HydrateClient>
 		</>

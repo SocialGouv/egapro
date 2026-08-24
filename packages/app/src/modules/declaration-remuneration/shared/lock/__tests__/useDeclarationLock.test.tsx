@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import {
@@ -10,7 +11,10 @@ import {
 	vi,
 } from "vitest";
 
-import { LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	LOCK_HEARTBEAT_INTERVAL_MS,
+} from "~/modules/domain";
 
 const acquireMutateAsync = vi.fn();
 const heartbeatMutateAsync = vi.fn();
@@ -89,12 +93,46 @@ async function advance(ms: number) {
 }
 
 function renderLockHook(options: { modificationClosed?: boolean } = {}) {
-	return renderHook(() =>
-		useDeclarationLock({
-			declarationId: DECLARATION_ID,
-			modificationClosed: options.modificationClosed,
-		}),
+	const queryClient = new QueryClient({
+		defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+	});
+	const rendered = renderHook(
+		() =>
+			useDeclarationLock({
+				declarationId: DECLARATION_ID,
+				modificationClosed: options.modificationClosed,
+			}),
+		{
+			wrapper: ({ children }) => (
+				<QueryClientProvider client={queryClient}>
+					{children}
+				</QueryClientProvider>
+			),
+		},
 	);
+	return { ...rendered, queryClient };
+}
+
+// Drive a real mutation to failure so the hook sees the same mutation-cache
+// "error" action a rejected step submit produces.
+async function failMutation(queryClient: QueryClient, message: string) {
+	const mutation = queryClient.getMutationCache().build(queryClient, {
+		mutationFn: async () => {
+			throw new Error(message);
+		},
+	});
+	await act(async () => {
+		await mutation.execute(undefined).catch(() => {});
+		await vi.advanceTimersByTimeAsync(0);
+	});
+}
+
+function firePageShow(persisted: boolean) {
+	const event = new Event("pageshow");
+	Object.defineProperty(event, "persisted", { value: persisted });
+	act(() => {
+		window.dispatchEvent(event);
+	});
 }
 
 describe("useDeclarationLock", () => {
@@ -372,6 +410,165 @@ describe("useDeclarationLock", () => {
 		await advance(LOCK_HEARTBEAT_INTERVAL_MS);
 		expect(heartbeatMutateAsync).not.toHaveBeenCalled();
 		expect(releaseMutate).not.toHaveBeenCalled();
+	});
+
+	describe("stale ownership after an idle tab (#4186)", () => {
+		it("re-acquires the lock when the tab becomes visible again", async () => {
+			sendBeaconSpy();
+			acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+			const { result } = renderLockHook();
+			await flush();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+
+			// Hiding the tab releases the lock through the beacon, so coming back
+			// must re-take it instead of assuming the tab still holds it.
+			act(() => {
+				setVisibility("hidden");
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			act(() => {
+				setVisibility("visible");
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			await flush();
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(result.current.isReadOnly).toBe(false);
+		});
+
+		it("becomes read-only when a colleague took the lock while the tab was hidden", async () => {
+			sendBeaconSpy();
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: true,
+				holder: HOLDER,
+			});
+			const { result } = renderLockHook();
+			await flush();
+			expect(result.current.isReadOnly).toBe(false);
+
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: false,
+				holder: HOLDER,
+			});
+			act(() => {
+				setVisibility("hidden");
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			act(() => {
+				setVisibility("visible");
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			await flush();
+
+			expect(result.current.isReadOnly).toBe(true);
+			expect(result.current.holder).toEqual(HOLDER);
+		});
+
+		it("resumes the heartbeat after winning the lock back on return", async () => {
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: true,
+				holder: HOLDER,
+			});
+			heartbeatMutateAsync.mockResolvedValue({ held: false });
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: false,
+				holder: HOLDER,
+			});
+			const { result } = renderLockHook();
+			await flush();
+
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+			expect(result.current.isReadOnly).toBe(true);
+			const heartbeatsWhileLost = heartbeatMutateAsync.mock.calls.length;
+
+			heartbeatMutateAsync.mockResolvedValue({ held: true });
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: true,
+				holder: HOLDER,
+			});
+			act(() => {
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			await flush();
+			expect(result.current.isReadOnly).toBe(false);
+
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+			expect(heartbeatMutateAsync.mock.calls.length).toBeGreaterThan(
+				heartbeatsWhileLost,
+			);
+		});
+
+		it("re-acquires the lock on a bfcache restore", async () => {
+			acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+			renderLockHook();
+			await flush();
+
+			firePageShow(true);
+			await flush();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+		});
+
+		it("ignores a pageshow that is not a bfcache restore", async () => {
+			acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+			renderLockHook();
+			await flush();
+
+			firePageShow(false);
+			await flush();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+		});
+
+		it("restores the editable state when a heartbeat proves the lock is still held", async () => {
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: true,
+				holder: HOLDER,
+			});
+			const { result } = renderLockHook();
+			await flush();
+
+			// Transient failure while re-checking on tab return: pessimistically
+			// read-only, but the lock was never actually lost.
+			acquireMutateAsync.mockRejectedValueOnce(new Error("network"));
+			act(() => {
+				document.dispatchEvent(new Event("visibilitychange"));
+			});
+			await flush();
+			expect(result.current.isReadOnly).toBe(true);
+
+			heartbeatMutateAsync.mockResolvedValue({ held: true });
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+			expect(result.current.isReadOnly).toBe(false);
+		});
+
+		it("re-reads ownership when a write is rejected for a lock conflict", async () => {
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: true,
+				holder: HOLDER,
+			});
+			const { result, queryClient } = renderLockHook();
+			await flush();
+			expect(result.current.isReadOnly).toBe(false);
+
+			acquireMutateAsync.mockResolvedValueOnce({
+				acquired: false,
+				holder: HOLDER,
+			});
+			await failMutation(queryClient, DECLARATION_LOCK_CONFLICT_MESSAGE);
+
+			expect(result.current.isReadOnly).toBe(true);
+			expect(result.current.holder).toEqual(HOLDER);
+		});
+
+		it("ignores a mutation error that is not a lock conflict", async () => {
+			acquireMutateAsync.mockResolvedValue({ acquired: true, holder: HOLDER });
+			const { result, queryClient } = renderLockHook();
+			await flush();
+
+			await failMutation(queryClient, "Une erreur de validation");
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+			expect(result.current.isReadOnly).toBe(false);
+		});
 	});
 
 	describe("modification closed (#3716)", () => {

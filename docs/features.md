@@ -13,14 +13,15 @@ Audience : nouveaux développeurs (onboarding) et équipe métier / PO (référe
 3. [Historique des modifications d'une démarche](#3-historique-des-modifications-dune-démarche)
 4. [Avis du CSE](#4-avis-du-cse)
 5. [Parcours de conformité (seconde déclaration)](#5-parcours-de-conformité-seconde-déclaration)
-6. [Recherche et consultation publique](#6-recherche-et-consultation-publique)
-7. [Référents régionaux](#7-référents-régionaux)
-8. [Aide, FAQ, contact](#8-aide-faq-contact)
-9. [Pages légales et sitemap](#9-pages-légales-et-sitemap)
-10. [PDF et exports](#10-pdf-et-exports)
-11. [Espace administrateur (DGT)](#11-espace-administrateur-dgt)
-12. [Mécanismes transverses](#12-mécanismes-transverses)
-13. [Annexe : tables Drizzle principales](#13-annexe--tables-drizzle-principales)
+6. [Déclaration de représentation équilibrée](#6-déclaration-de-représentation-équilibrée)
+7. [Recherche et consultation publique](#7-recherche-et-consultation-publique)
+8. [Référents régionaux](#8-référents-régionaux)
+9. [Aide, FAQ, contact](#9-aide-faq-contact)
+10. [Pages légales et sitemap](#10-pages-légales-et-sitemap)
+11. [PDF et exports](#11-pdf-et-exports)
+12. [Espace administrateur (DGT)](#12-espace-administrateur-dgt)
+13. [Mécanismes transverses](#13-mécanismes-transverses)
+14. [Annexe : tables Drizzle principales](#14-annexe--tables-drizzle-principales)
 
 Conventions de notation :
 
@@ -53,11 +54,11 @@ Conventions de notation :
 
 **Règles métier-clés** :
 
-- L'authentification utilise **NextAuth + ProConnect**. Le callback JWT injecte le contexte d'impersonation admin si présent (voir §11).
+- L'authentification utilise **NextAuth + ProConnect**. Le callback JWT injecte le contexte d'impersonation admin si présent (voir §12).
 - Le **téléphone est requis** : si la table `profile` n'a pas de ligne pour l'utilisateur, une modale s'ouvre automatiquement à l'accès `/mon-espace`.
 - Les entreprises sont rattachées via la table `userCompanies` (relation N-N entre `users` et `companies`).
 - En environnement local, le fournisseur de test ProConnect est **FIA1V2** (compte `test@fia1.fr`).
-- À la **déconnexion**, tous les verrous de modification détenus par l'utilisateur sont libérés (voir §12.7).
+- À la **déconnexion**, tous les verrous de modification détenus par l'utilisateur sont libérés (voir §13.7).
 
 ---
 
@@ -84,9 +85,9 @@ Conventions de notation :
 **Router tRPC** : `~/server/api/routers/declaration.ts`. Procédures principales :
 
 - `declaration.getOrCreate` — création paresseuse du brouillon (seulement si l'utilisateur est propriétaire ; en mode admin impersonation, un placeholder transient est renvoyé sans écriture)
-- `declaration.updateStep1` … `updateStep4` — sauvegarde par étape (audit `mutation`, une action par étape) — protégées par `declarationLockedWriteProcedure` (voir §12.7)
+- `declaration.updateStep1` … `updateStep4` — sauvegarde par étape (audit `mutation`, une action par étape) — protégées par `declarationLockedWriteProcedure` (voir §13.7)
 - `declaration.updateEmployeeCategories` — sauvegarde de l'indicateur G
-- `declaration.submit` — bascule `status = submitted`, fixe le snapshot `cseRequired` et envoie le reçu (voir §12.1)
+- `declaration.submit` — bascule `status = submitted`, fixe le snapshot `cseRequired` et envoie le reçu (voir §13.1)
 
 **Règles métier-clés** :
 
@@ -94,11 +95,11 @@ Conventions de notation :
 - Le **calcul des écarts** est centralisé dans `computeGap(womenPay, menPay)` (positif si les hommes gagnent plus, négatif sinon).
 - **Seuil d'alerte** : `GAP_ALERT_THRESHOLD = 5%`. Au-delà, une **seconde déclaration** est obligatoire pour les entreprises ≥ 100 salariés (voir §5).
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
-- Une fois `submitted`, la déclaration peut être modifiée jusqu'à la **deadline `decl1ModificationDeadline`** (configurée par l'admin DGT, voir §11) ; après, elle bascule en lecture seule.
+- Une fois `submitted`, la déclaration peut être modifiée jusqu'à la **deadline `decl1ModificationDeadline`** (configurée par l'admin DGT, voir §12) ; après, elle bascule en lecture seule.
 - En **admin impersonation**, l'écriture est bloquée (procédures `companyWriteProcedure` rejettent ; voir `~/modules/auth/useReadOnlyGuard`).
-- **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §12.7).
+- **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §13.7).
 - Chaque transition métier de la démarche (changement d'étape, soumission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
-- **Conservation limitée** : les déclarations dont l'année dépasse la fenêtre de rétention (défaut 6 ans) sont purgées automatiquement, avec toutes leurs données rattachées (voir §12.8).
+- **Conservation limitée** : les déclarations dont l'année dépasse la fenêtre de rétention (défaut 6 ans) sont purgées automatiquement, avec toutes leurs données rattachées (voir §13.8).
 
 **Données persistées** : `declarations`, `jobCategories`, `employeeCategories`, `declarationStatusHistory`, `declarationLocks` (verrou d'édition temporaire).
 
@@ -174,7 +175,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 | `cseOpinion.setFileContentTypes` | mutation | Enregistre (replace-all) les associations fichier ↔ type de contenu |
 | `cseOpinion.finalize` | mutation | Clôt l'avis (`cseStatus = submitted`) après validation des pré-conditions |
 
-**Upload de PDF** : l'upload ne passe **pas** par tRPC mais par la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: cse_opinion` (voir §12.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation CSE via `enqueueReceipt({ kind: "cseOpinion" })` (voir §12.1).
+**Upload de PDF** : l'upload ne passe **pas** par tRPC mais par la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: cse_opinion` (voir §13.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation CSE via `enqueueReceipt({ kind: "cseOpinion" })` (voir §13.1).
 
 **Règles métier-clés** :
 
@@ -214,10 +215,10 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 **Routers tRPC** :
 
 - `declaration.saveCompliancePath` — sauvegarde le chemin de conformité choisi (enum `COMPLIANCE_PATHS`)
-- `declaration.submitSecondDeclaration` — clôture la seconde déclaration et envoie le reçu (voir §12.1)
+- `declaration.submitSecondDeclaration` — clôture la seconde déclaration et envoie le reçu (voir §13.1)
 - `declaration.submitJointEvaluation` — enregistre le dépôt de l'évaluation conjointe
 
-**Upload du PDF d'évaluation conjointe** : l'upload utilise la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: joint_evaluation` (voir §12.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation évaluation conjointe via `enqueueReceipt({ kind: "jointEvaluation" })` (voir §12.1).
+**Upload du PDF d'évaluation conjointe** : l'upload utilise la Route Handler `POST /api/upload` avec l'en-tête `X-Flow-Type: joint_evaluation` (voir §13.6). À la fin d'un upload réussi, la route envoie automatiquement le mail de confirmation évaluation conjointe via `enqueueReceipt({ kind: "jointEvaluation" })` (voir §13.1).
 
 **Règles métier-clés** :
 
@@ -232,7 +233,48 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 ---
 
-## 6. Recherche et consultation publique
+## 6. Déclaration de représentation équilibrée
+
+**Pour qui** : entreprises **≥ 1000 salariés** sur chacun des **3 derniers exercices** (loi Rixain — art. L. 1142-11 et D. 1142-19 du Code du travail).
+
+**À quoi ça sert** : déclarer chaque année l'écart de représentation femmes-hommes parmi les **cadres dirigeants** et au sein des **instances dirigeantes** (conseil d'administration, de surveillance…), et communiquer les objectifs de progression fixés en cas d'écart.
+
+**Routes** :
+
+| Étape | URL | Contenu |
+|---|---|---|
+| assujettissement | `/declaration-representation` | Réponse déclarative « entreprise concernée / non concernée » |
+| 1 | `/declaration-representation/etape/1` | Période de référence (12 mois consécutifs) |
+| 2 | `/declaration-representation/etape/2` | Écarts cadres dirigeants |
+| 3 | `/declaration-representation/etape/3` | Écarts instances dirigeantes |
+| 4 (conditionnelle) | `/declaration-representation/etape/4` | Informations de publication |
+| 5 | `/declaration-representation/etape/5` | Récapitulatif et soumission |
+| — | `/declaration-representation/confirmation` | Confirmation après soumission |
+
+**Modules** : `~/modules/declaration-representation` (funnel, steps, PDF via `~/modules/declarationPdf`), `~/modules/domain/shared/representation.ts` (règles pures).
+
+**Router tRPC** : `~/server/api/routers/representationDeclaration.ts`. 3 procédures, scopées SIREN (`companyProcedure` / `companyWriteProcedure`, même mécanisme que la déclaration index) :
+
+- `representationDeclaration.get` — lecture de la déclaration de l'année + statut d'ouverture de campagne
+- `representationDeclaration.saveDraft` — sauvegarde du brouillon par étape (upsert `ON CONFLICT (siren, year)`)
+- `representationDeclaration.submit` — validation finale (re-parse serveur du payload complet), bascule `status = submitted`, envoie le reçu par mail
+
+**Règles métier-clés** :
+
+- **Seuil d'assujettissement** (présomption) : `REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000` salariés sur `REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3` exercices consécutifs (constantes `~/modules/domain/shared/representation.ts`). En l'absence de donnée GIP-MDS sur la fenêtre, l'entreprise est **présumée assujettie par défaut** (`isPresumedSubjectToRepresentation`) — ce pré-filtre conditionne uniquement la **visibilité** de la ligne dans Mon espace ; la réponse à l'écran d'assujettissement reste déclarative.
+- **Objectif de représentation** : `REPRESENTATION_TARGET_INITIAL = 30` % (chaque sexe), porté à `REPRESENTATION_TARGET_RAISED = 40` % à compter de la campagne `REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029` (`getRepresentationTarget(campaignYear)`). L'année de campagne = année de référence + 1 (`getRepresentationCampaignYear`).
+- **Verdict** (`computeRepresentationVerdict`) : `compliant` si `min(%femmes, %hommes) >= objectif`, `non_compliant` sinon, `not_applicable` si l'indicateur n'est pas calculable (aucun ou un seul cadre dirigeant ; aucune instance dirigeante). Les deux indicateurs (cadres dirigeants / instances dirigeantes) gardent des verdicts **indépendants** — aucun verdict agrégé n'existe.
+- **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
+- **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`). Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
+- **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la soumission. Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace.
+- **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
+- **Reprise V1** : un script ponctuel (`pnpm --filter app import:v1-representation`) importe les déclarations historiques depuis la base legacy ; il ne **jamais** écraser une déclaration saisie nativement en V2.
+
+**Données persistées** : `representationCampaigns` (surcharges de campagne par année), `representationDeclarations` (une ligne par SIREN × année, contrainte unique `(siren, year)`).
+
+---
+
+## 7. Recherche et consultation publique
 
 **Pour qui** : tout citoyen, journaliste, ou organisme de contrôle.
 
@@ -241,7 +283,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 **Routes** :
 
 - `/` — page d'accueil avec formulaire de recherche
-- Téléchargement Excel via `/api/export/declarations` (voir §10)
+- Téléchargement Excel via `/api/export/declarations` (voir §11)
 
 **Module** : `~/modules/home`.
 
@@ -253,7 +295,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 ---
 
-## 7. Référents régionaux
+## 8. Référents régionaux
 
 **Pour qui** :
 
@@ -286,7 +328,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 ---
 
-## 8. Aide, FAQ, contact
+## 9. Aide, FAQ, contact
 
 **Pour qui** : utilisateurs perdus dans le parcours.
 
@@ -302,11 +344,11 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - `/aide` est **dynamique** (`export const dynamic = "force-dynamic"`) parce qu'il lit les deadlines de campagne en BDD.
 - `/faq` est **statique** (contenu en dur dans le code, pas de CMS).
-- Le formulaire `/aide/nous-contacter` envoie un mail via le module `mail` (voir §12).
+- Le formulaire `/aide/nous-contacter` envoie un mail via le module `mail` (voir §13).
 
 ---
 
-## 9. Pages légales et sitemap
+## 10. Pages légales et sitemap
 
 **Pour qui** : tout visiteur (obligation réglementaire).
 
@@ -324,20 +366,20 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
 - Le score Lighthouse RGAA cible **100%** (configuré comme seuil bloquant dans `.lighthouserc.json`).
-- La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §12.8).
+- La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §13.8).
 
 ---
 
-## 10. PDF et exports
+## 11. PDF et exports
 
 L'application génère plusieurs documents officiels et expose une API publique de téléchargement.
 
-### 10.1 PDF de déclaration
+### 11.1 PDF de déclaration
 
 | Type | Quand | Module |
 |---|---|---|
 | `DeclarationPdfDocument` | Pre-fill / aperçu | `~/modules/declarationPdf` |
-| `TransmittedPdfDocument` | Reçu officiel après soumission | `~/modules/declarationPdf` |
+| `TransmittedPdfDocument` | Récapitulatif des avis CSE et de l'évaluation conjointe transmis | `~/modules/declarationPdf` |
 
 Téléchargement déclenché depuis :
 
@@ -345,7 +387,7 @@ Téléchargement déclenché depuis :
 - Page CSE (avis officiel)
 - Vue admin de la déclaration (`/admin/declarations/[id]`)
 
-### 10.2 Export Excel et API publique
+### 11.2 Export Excel et API publique
 
 Routes publiques (aucune authentification, OpenAPI documentée) :
 
@@ -362,7 +404,7 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 
 ---
 
-## 11. Espace administrateur (DGT)
+## 12. Espace administrateur (DGT)
 
 **Pour qui** : agents DGT (Direction Générale du Travail) avec flag `users.isAdmin = true`.
 
@@ -396,15 +438,15 @@ Routes publiques (aucune authentification, OpenAPI documentée) :
 
 ---
 
-## 12. Mécanismes transverses
+## 13. Mécanismes transverses
 
 Fonctionnalités qui ne sont pas des écrans, mais qui sont mobilisées par plusieurs features.
 
-### 12.1 Mails transactionnels
+### 13.1 Mails transactionnels
 
 **Module** : `~/modules/mail`. **Router tRPC** : `mail.resendReceipt`.
 
-#### 12.1.1 Mails event-driven (4 types)
+#### 13.1.1 Mails event-driven (4 types)
 
 Envoyés automatiquement à la suite d'une action utilisateur via le wrapper `enqueueReceipt` :
 
@@ -415,7 +457,7 @@ Envoyés automatiquement à la suite d'une action utilisateur via le wrapper `en
 | `cseOpinion` | `cse_opinion_receipt` | `POST /api/upload` (`X-Flow-Type: cse_opinion`) | `single` / `with_gap` / `first_and_second` |
 | `jointEvaluation` | `joint_evaluation_submitted` | `POST /api/upload` (`X-Flow-Type: joint_evaluation`) | `completed` / `cse_to_deposit` / `cse_first_and_second` |
 
-#### 12.1.2 Moteur de règles d'envoi (`sendRules.ts`)
+#### 13.1.2 Moteur de règles d'envoi (`sendRules.ts`)
 
 La sélection du variant est centralisée dans `~/modules/mail/sendRules.ts`. Chaque fonction prend un contexte de déclaration et retourne la variante applicable :
 
@@ -425,7 +467,7 @@ La sélection du variant est centralisée dans `~/modules/mail/sendRules.ts`. Ch
 | `selectJointEvaluationSubmittedVariant` | `{ hasSecondDeclaration, cseOpinionExpected }` | `cse_first_and_second` si seconde déclaration → `cse_to_deposit` si CSE attendu → `completed` |
 | `selectCseOpinionReceiptVariant` | `{ forFirstAndSecondDeclaration, hasGapAboveThreshold }` | `first_and_second` si deux déclarations → `with_gap` si écart ≥ 5% → `single` |
 
-#### 12.1.3 Lecture du contexte avant envoi
+#### 13.1.3 Lecture du contexte avant envoi
 
 `enqueueReceipt` lit automatiquement le contexte de la déclaration depuis la BDD avant de construire le payload :
 
@@ -440,13 +482,13 @@ Pour le variant `path_to_select`, la deadline de choix de parcours (`pathChoiceD
 
 Toutes les tentatives d'envoi sont auditées (`AUDIT_ACTIONS.NOTIFICATION_ENQUEUE`) avec les champs `type`, `kind`, `year`, `isResend`, `variant` dans le `metadata`.
 
-#### 12.1.4 Renvoi manuel
+#### 13.1.4 Renvoi manuel
 
 L'utilisateur peut **redemander manuellement** le reçu via `mail.resendReceipt` (audit `MAIL_RECEIPT_RESEND`).
 
 > Pour le détail des sujets, corps et logique d'éligibilité des 11 types de mails (4 event-driven + 7 schedule-driven) : [`docs/mails.md`](mails.md).
 
-### 12.2 Audit logging
+### 13.2 Audit logging
 
 **Modules** : `~/modules/audit`, `~/server/audit`.
 
@@ -471,9 +513,9 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 
 Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
 
-**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.mjs`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §12.8).
+**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.mjs`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
 
-### 12.3 Impersonation admin
+### 13.3 Impersonation admin
 
 L'admin DGT peut **incarner** une entreprise pour la dépanner. Le mécanisme :
 
@@ -486,7 +528,7 @@ L'admin DGT peut **incarner** une entreprise pour la dépanner. Le mécanisme :
 
 En mode impersonation, le verrou collaboratif est **désactivé** : le hook `useDeclarationLock` ne tente pas d'acquérir de verrou (l'admin ne peut pas écrire de toute façon).
 
-### 12.4 Pré-remplissage GIP-MDS
+### 13.4 Pré-remplissage GIP-MDS
 
 **Router tRPC** : `gipMds.importFromUrl` (déclenché manuellement par l'admin).
 
@@ -497,11 +539,11 @@ Le GIP-MDS publie chaque année (mars) un CSV des indicateurs A–F pré-calcul�
 3. quand l'employeur ouvre sa déclaration, les valeurs A–F sont **pré-remplies** depuis cette table (voir `~/modules/declaration-remuneration/shared/gipMdsMapping.ts`)
 4. l'utilisateur peut **écraser** les valeurs (le pré-remplissage n'est pas verrouillé)
 
-### 12.5 Sécurité de l'API SUIT (passerelle APISIX)
+### 13.5 Sécurité de l'API SUIT (passerelle APISIX)
 
 L'API privée `/api/v1/*` consommée par **SUIT** (système d'information de l'inspection du travail) est protégée par une **passerelle APISIX** déployée dans le cluster Kubernetes. Voir le [README racine](../README.md#sécurisation-de-lapi-suit-via-passerelle-apisix) pour le détail. Cette feature n'a pas d'écran utilisateur — c'est de l'infra.
 
-### 12.6 Upload de fichiers (mécanisme partagé)
+### 13.6 Upload de fichiers (mécanisme partagé)
 
 L'upload de PDF (avis CSE et évaluation conjointe) est centralisé dans un **pipeline unifié** :
 
@@ -551,7 +593,7 @@ Le schéma Zod `fileNameSchema` (exporté depuis `fileNameValidation.ts`) permet
 | 503 | ClamAV indisponible (transitoire) |
 | 500 | Erreur S3 ou BDD (compensation delete tentée) |
 
-### 12.7 Verrou collaboratif de déclaration
+### 13.7 Verrou collaboratif de déclaration
 
 Le verrou collaboratif empêche deux co-déclarants d'un même SIREN de modifier la déclaration simultanément, évitant les conflits de données.
 
@@ -626,7 +668,7 @@ sequenceDiagram
 | `DECLARATION_LOCK_STATE_READ` | read_sensitive | Lecture de l'état du verrou (procédure `getLockState`) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | mutation | Modification du délai d'expiration |
 
-### 12.8 Purge RGPD des déclarations
+### 13.8 Purge RGPD des déclarations
 
 **À quoi ça sert** : appliquer la **conservation limitée** exigée par le RGPD — les déclarations trop anciennes (et toutes leurs données rattachées, y compris les PDF stockés sur S3) sont supprimées automatiquement, sans intervention humaine.
 
@@ -645,7 +687,7 @@ sequenceDiagram
 
 ---
 
-## 13. Annexe : tables Drizzle principales
+## 14. Annexe : tables Drizzle principales
 
 Tableau de correspondance feature → tables, pour les développeurs qui débarquent.
 
@@ -654,20 +696,22 @@ Tableau de correspondance feature → tables, pour les développeurs qui débarq
 | `users` | Authentification, profil, admin |
 | `userCompanies` | Authentification (rattachement entreprise), garde d'accès historique |
 | `companies` | Authentification, déclaration, admin, mails (raison sociale) |
-| `declarations` | Déclaration index, parcours conformité, mails (contexte variants), purge RGPD (§12.8) |
-| `declarationStatusHistory` | Historique des modifications d'une démarche ; purgé par cascade (§12.8) |
-| `declarationLocks` | Verrou collaboratif (§12.7) ; purgé par cascade (§12.8) |
-| `jobCategories` | Déclaration index (étape 5, optionnel) ; purge RGPD (§12.8) |
-| `employeeCategories` | Déclaration index (indicateur G) ; purge RGPD (§12.8) |
-| `cseOpinions` | Avis CSE (avis textuels) ; purge RGPD (§12.8) |
-| `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) ; purge RGPD (§12.8, + objets S3) |
-| `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) ; purge RGPD (§12.8) |
+| `declarations` | Déclaration index, parcours conformité, mails (contexte variants), purge RGPD (§13.8) |
+| `declarationStatusHistory` | Historique des modifications d'une démarche ; purgé par cascade (§13.8) |
+| `declarationLocks` | Verrou collaboratif (§13.7) ; purgé par cascade (§13.8) |
+| `jobCategories` | Déclaration index (étape 5, optionnel) ; purge RGPD (§13.8) |
+| `employeeCategories` | Déclaration index (indicateur G) ; purge RGPD (§13.8) |
+| `cseOpinions` | Avis CSE (avis textuels) ; purge RGPD (§13.8) |
+| `files` | Avis CSE (`type = cse_opinion`), évaluation conjointe (`type = joint_evaluation`) ; purge RGPD (§13.8, + objets S3) |
+| `cseOpinionFiles` | Avis CSE — associations fichier ↔ type de contenu (`declarationNumber`, `type`) ; purge RGPD (§13.8) |
 | `referents` | Annuaire public, gestion admin |
 | `campaignDeadlines` | Paramétrage admin (deadlines par année), mails (`pathChoiceDeadline`) |
 | `globalSettings` | Paramètres globaux : délai d'expiration du verrou (`declarationLockTimeoutMinutes`) |
 | `gipMdsData` | Pré-remplissage GIP |
 | `adminImpersonationEvents` | Audit impersonation admin |
 | `audit.action_log` | Audit logging (schéma Postgres dédié) ; purgé par `audit-cleanup` (§9.6 architecture) |
+| `representationCampaigns` | Déclaration de représentation équilibrée (§6) — surcharge de campagne par année |
+| `representationDeclarations` | Déclaration de représentation équilibrée (§6) |
 
 ---
 

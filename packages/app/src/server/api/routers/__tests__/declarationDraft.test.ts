@@ -395,7 +395,11 @@ describe("declarationDraftRouter", () => {
 
 	describe("clear", () => {
 		it("sets draft and draftUpdatedAt to null when no kind is given", async () => {
-			const { db, mocks } = createMockDb([[{ siren: SIREN }]]);
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ id: DECLARATION_ID, draft: { main: { step1: { workforce: 50 } } } }],
+				[ownLockHolder()],
+			]);
 			const caller = await createCaller(db);
 
 			const result = await caller.clear({ siren: SIREN, year: YEAR });
@@ -413,7 +417,8 @@ describe("declarationDraftRouter", () => {
 			};
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -435,7 +440,8 @@ describe("declarationDraftRouter", () => {
 			const existingDraft = { main: { step1: { workforce: 50 } } };
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -486,7 +492,8 @@ describe("declarationDraftRouter", () => {
 			};
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -512,7 +519,8 @@ describe("declarationDraftRouter", () => {
 			};
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -534,7 +542,8 @@ describe("declarationDraftRouter", () => {
 			const existingDraft = { main: { "1": { totalWomen: 50 } } };
 			const { db, mocks } = createMockDb([
 				[{ siren: SIREN }],
-				[{ draft: existingDraft }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[ownLockHolder()],
 			]);
 			const caller = await createCaller(db);
 
@@ -548,6 +557,24 @@ describe("declarationDraftRouter", () => {
 			expect(mocks.set).toHaveBeenCalledWith(
 				expect.objectContaining({ draft: null, draftUpdatedAt: null }),
 			);
+		});
+
+		it("throws CONFLICT when another co-declarant holds the declaration lock", async () => {
+			const existingDraft = { main: { step1: { workforce: 50 } } };
+			const { db, mocks } = createMockDb([
+				[{ siren: SIREN }],
+				[{ id: DECLARATION_ID, draft: existingDraft }],
+				[foreignLockHolder()],
+			]);
+			const caller = await createCaller(db);
+
+			await expect(
+				caller.clear({ siren: SIREN, year: YEAR }),
+			).rejects.toMatchObject({
+				code: "CONFLICT",
+				message: "Déclaration verrouillée par un autre utilisateur.",
+			});
+			expect(mocks.update).not.toHaveBeenCalled();
 		});
 	});
 });

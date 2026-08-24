@@ -12,6 +12,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	getCurrentYear,
 	isDeadlinePassed,
 	isDeclarationSubmitted,
@@ -290,7 +291,7 @@ export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
 		if (!lock || lock.userId !== ctx.session.user.id) {
 			throw new TRPCError({
 				code: "CONFLICT",
-				message: "Déclaration verrouillée par un autre utilisateur.",
+				message: DECLARATION_LOCK_CONFLICT_MESSAGE,
 			});
 		}
 		return next();

@@ -190,6 +190,7 @@ describe("DraftLoadingGate", () => {
 					decl2JustificationDeadline: new Date("2026-09-01"),
 					decl2JointEvaluationDeadline: new Date("2026-11-01"),
 					pathChoiceDeadline: new Date("2027-01-01"),
+					pathChoiceRound1Deadline: new Date("2026-07-01"),
 				}}
 				cseOpinionRequired={true}
 				currentYear={2026}
@@ -221,6 +222,7 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				initialFirstDeclarationCategories={[]}
+				status="corrective_actions_chosen"
 			/>,
 		);
 		expectLoadingState();

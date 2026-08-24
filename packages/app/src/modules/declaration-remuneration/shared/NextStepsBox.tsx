@@ -100,8 +100,9 @@ export function NextStepsBox({
 
 						<p className="fr-mb-0">
 							À la suite de l&apos;analyse de vos données de l&apos;indicateur
-							par catégorie de salariés, des écarts &ge; 5 % ont été identifiés.
-							Vous devez engager un des parcours de mise en conformité
+							par catégorie de salariés, des écarts &ge; 5 % ont{" "}
+							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
+							. Vous devez engager un des parcours de mise en conformité
 							suivant&nbsp;:
 						</p>
 
@@ -120,7 +121,8 @@ export function NextStepsBox({
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous pouvez&nbsp;:
+							objectifs et non sexistes, vous{" "}
+							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
 						</p>
 						<ul>
 							{!isSecondDeclaration && (

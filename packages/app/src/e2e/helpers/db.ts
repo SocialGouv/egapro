@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { REPRESENTATION_SUBJECTION_WINDOW_YEARS } from "~/modules/domain";
 import { TEST_GIP_WORKFORCE, TEST_SIREN } from "../constants";
 
 const DEFAULT_DB_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
@@ -511,4 +512,42 @@ export async function setUserPhone(phone: string | null) {
 	} finally {
 		await sql.end();
 	}
+}
+
+/**
+ * Purge every balanced-representation declaration of the test company (#3702).
+ *
+ * Year-agnostic on purpose: the funnel stores the *reference* year while the UI
+ * and the panel reason in campaign years, so a year-scoped delete would silently
+ * leave a row behind whenever a spec and a helper disagree by one.
+ */
+export async function resetRepresentationDeclaration() {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_representation_declaration WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
+ * Seed the GIP workforce of the {@link REPRESENTATION_SUBJECTION_WINDOW_YEARS}
+ * consecutive exercises the représentation pre-filter reads (#3898), ending on
+ * `campaignYear`. Returns the seeded years so a spec can clear the ones that are
+ * not part of the suite baseline.
+ */
+export async function setRepresentationWorkforceWindow(
+	campaignYear: number,
+	workforceEma: number,
+): Promise<number[]> {
+	const years = Array.from(
+		{ length: REPRESENTATION_SUBJECTION_WINDOW_YEARS },
+		(_, offset) => campaignYear - offset,
+	);
+	for (const year of years) {
+		await setGipWorkforce(workforceEma, year);
+	}
+	return years;
 }

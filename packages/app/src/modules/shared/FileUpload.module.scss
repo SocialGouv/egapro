@@ -61,3 +61,14 @@
 	flex-direction: column;
 	gap: 0.25rem;
 }
+
+.dropzoneActions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.messagesGroup:not(:empty) {
+	margin-top: 0.5rem;
+}

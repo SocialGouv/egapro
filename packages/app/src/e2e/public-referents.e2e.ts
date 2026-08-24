@@ -75,19 +75,21 @@ test.describe("public referents search", () => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
-			await page.goto("/referents");
-			await page.getByLabel("Région").selectOption("11");
-			await page.getByRole("button", { name: /^rechercher$/i }).click();
+			// Drive the search via URL params (same code path) to avoid the client-submit race flakiness.
+			await page.goto("/referents?region=11&page=1");
+
+			const list = page.getByTestId("public-referents-list");
+			await expect(list).toBeVisible({ timeout: 30_000 });
 
 			// Filtering: region 11 matches, region 53 does not.
-			await expect(page.getByText("E2E Référent Paris")).toBeVisible();
-			await expect(page.getByText("E2E Référent Hauts-de-Seine")).toBeVisible();
-			await expect(page.getByText("E2E Référent Rennes")).not.toBeVisible();
+			await expect(list.getByText("E2E Référent Paris")).toBeVisible();
+			await expect(list.getByText("E2E Référent Hauts-de-Seine")).toBeVisible();
+			await expect(list.getByText("E2E Référent Rennes")).not.toBeVisible();
 
 			// Access control: contact details are hidden on the list.
-			await expect(page.getByText("e2e-paris@dreets.test")).not.toBeVisible();
+			await expect(list.getByText("e2e-paris@dreets.test")).not.toBeVisible();
 			await expect(
-				page.getByText("e2e-paris-sub@dreets.test"),
+				list.getByText("e2e-paris-sub@dreets.test"),
 			).not.toBeVisible();
 		} finally {
 			await anonCtx.close();

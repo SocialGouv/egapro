@@ -5,6 +5,7 @@ export {
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
@@ -13,6 +14,8 @@ export {
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	isRepresentationCampaignOpen,
+	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
 // Campaign alignment — temporary recette bridge mapping 2026 → 2027, delete when 2027 arrives
@@ -79,6 +82,7 @@ export {
 } from "./shared/declarationFlags";
 // Declaration edit lock constants
 export {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "./shared/declarationLock";
@@ -157,6 +161,7 @@ export {
 	formatGapCompact,
 	formatLongDate,
 	formatMonthDay,
+	formatPercentage,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -203,6 +208,7 @@ export {
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
+	toNullableNumber,
 } from "./shared/number";
 // Percentage & proportion numeric cores
 export { percentageOf, proportionOf } from "./shared/percentage";
@@ -232,6 +238,27 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Representation equilibrium (art. D. 1142-19)
+export type {
+	ExecutivesCount,
+	RepresentationComplianceVerdict,
+	WorkforceHistoryEntry,
+} from "./shared/representation";
+export {
+	computeRepresentationDeclarationStatus,
+	computeRepresentationVerdict,
+	deriveExecutivesNotComputableReason,
+	getRepresentationCampaignYear,
+	getRepresentationTarget,
+	isPresumedSubjectToRepresentation,
+	isRepresentationDeclarationSubmitted,
+	isRepresentationPublicationRequired,
+	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+	REPRESENTATION_TARGET_INITIAL,
+	REPRESENTATION_TARGET_RAISED,
+	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
+} from "./shared/representation";
 // Score brackets for public stats distribution chart
 export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
 export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
@@ -268,5 +295,6 @@ export type {
 	DeclarationType,
 	GapDirection,
 	GapLevel,
+	RepresentationCampaign,
 } from "./types";
 export { DECLARATION_FSM_STATUSES } from "./types";

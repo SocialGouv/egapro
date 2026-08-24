@@ -1,0 +1,5 @@
+.cseFieldset {
+	:global(.fr-fieldset__element--inline) {
+		flex: 1 1 0;
+	}
+}

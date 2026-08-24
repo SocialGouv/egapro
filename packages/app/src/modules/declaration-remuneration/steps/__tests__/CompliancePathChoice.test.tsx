@@ -341,6 +341,14 @@ describe("CompliancePathChoice", () => {
 		);
 	});
 
+	it("renders previous link pointing to the second-declaration recap in round 2", () => {
+		render(compliancePathChoice({ isSecondRound: true }));
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/3",
+		);
+	});
+
 	it("renders the email in the success banner", () => {
 		render(compliancePathChoice({ email: "john@company.fr" }));
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();

@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 
-import type { CampaignDeadlines } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	RepresentationCampaign,
+} from "~/modules/domain";
 import {
 	formatShortDate,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
-	getRepresentationDeadline,
 } from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
@@ -20,6 +22,7 @@ import {
 	getDocumentResourceCount,
 	getDocumentsPanelId,
 } from "./DocumentsPanel";
+import { RepresentationProcessPanel } from "./RepresentationProcessPanel";
 import { StatusBadge } from "./StatusBadge";
 import type { DeclarationItem, DeclarationType } from "./types";
 
@@ -34,14 +37,16 @@ type Props = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	representationCampaign: RepresentationCampaign;
 };
 
 function getDeadlineCell(
 	declaration: DeclarationItem,
 	campaignDeadlines: CampaignDeadlines,
+	representationCampaign: RepresentationCampaign,
 ): string {
 	if (declaration.type === "representation") {
-		return getRepresentationDeadline(declaration.year);
+		return formatShortDate(representationCampaign.declarationDeadline);
 	}
 	const deadline = getDeclarationProcessStepDeadline(
 		declaration.fsmStatus,
@@ -60,12 +65,16 @@ export function DeclarationsSection({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	representationCampaign,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
 		(d) => d.year >= currentYear,
 	);
 	const previousDeclarations = declarations.filter((d) => d.year < currentYear);
+	const currentRepresentationDeclaration = declarations.find(
+		(d) => d.type === "representation" && d.year === currentYear,
+	);
 
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -97,7 +106,7 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<h2 className="fr-mb-4w" id="demarches-en-cours-title">
+			<h2 className="fr-h3 fr-mb-4w" id="demarches-en-cours-title">
 				Démarche en cours
 			</h2>
 			{visibleCurrentDeclarations.length > 0 && (
@@ -107,12 +116,13 @@ export function DeclarationsSection({
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
 					labelledById="demarches-en-cours-title"
+					representationCampaign={representationCampaign}
 					userPhone={userPhone}
 				/>
 			)}
 			{visiblePreviousDeclarations.length > 0 && (
 				<>
-					<h2 className="fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
+					<h2 className="fr-h3 fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
 						Années précédentes
 					</h2>
 					<DeclarationsTable
@@ -121,6 +131,7 @@ export function DeclarationsSection({
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
 						labelledById="annees-precedentes-title"
+						representationCampaign={representationCampaign}
 						userPhone={userPhone}
 					/>
 				</>
@@ -155,6 +166,11 @@ export function DeclarationsSection({
 					totalPages={totalPages}
 				/>
 			)}
+			<RepresentationProcessPanel
+				campaign={representationCampaign}
+				campaignYear={currentYear}
+				declaration={currentRepresentationDeclaration}
+			/>
 		</div>
 	);
 }
@@ -166,6 +182,7 @@ type DeclarationsTableProps = {
 	userPhone: string | null;
 	hasCse: boolean | null;
 	cseApplicable: boolean;
+	representationCampaign: RepresentationCampaign;
 };
 
 function DeclarationsTable({
@@ -175,6 +192,7 @@ function DeclarationsTable({
 	userPhone,
 	hasCse,
 	cseApplicable,
+	representationCampaign,
 }: DeclarationsTableProps) {
 	return (
 		<div className={`fr-table ${styles.tableNoCaptionOffset}`}>
@@ -209,7 +227,13 @@ function DeclarationsTable({
 											</td>
 											<td>{declaration.year}</td>
 											<td>{getDeclarationProcessStepLabel(declaration)}</td>
-											<td>{getDeadlineCell(declaration, campaignDeadlines)}</td>
+											<td>
+												{getDeadlineCell(
+													declaration,
+													campaignDeadlines,
+													representationCampaign,
+												)}
+											</td>
 											<td>
 												<StatusBadge status={declaration.status} />
 											</td>
@@ -218,7 +242,7 @@ function DeclarationsTable({
 													<>
 														<button
 															aria-controls={getDocumentsPanelId(declaration)}
-															className={`fr-link ${styles.linkUnderlined}`}
+															className={`fr-link fr-link--sm ${styles.linkUnderlined}`}
 															data-fr-opened="false"
 															type="button"
 														>

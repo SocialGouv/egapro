@@ -1,4 +1,5 @@
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import styles from "./ReferencePeriodPicker.module.scss";
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 	onStartDateChange: (value: string) => void;
 	onEndDateChange: (value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function ReferencePeriodPicker({
@@ -15,9 +17,12 @@ export function ReferencePeriodPicker({
 	onStartDateChange,
 	onEndDateChange,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	return (
-		<fieldset className={styles.fieldset}>
+		<fieldset
+			className={`${styles.fieldset} ${readOnly ? common.readOnlyFieldset : ""}`}
+		>
 			<legend className={`fr-mb-2w ${styles.legend}`}>
 				<span>
 					Quelle est la période de référence pour le calcul de l&apos;indicateur
@@ -40,6 +45,7 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-start-date"
 							onChange={(e) => onStartDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={startDate}
 						/>
@@ -56,6 +62,7 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-end-date"
 							onChange={(e) => onEndDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={endDate}
 						/>

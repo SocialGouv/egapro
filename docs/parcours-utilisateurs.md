@@ -15,9 +15,9 @@ Audience : équipe métier / PO (référence pour les tests d'acceptance, les re
 5. [Employeur — modification d'une déclaration soumise](#5-employeur--modification-dune-déclaration-soumise)
 6. [Employeur — parcours de conformité (seconde déclaration)](#6-employeur--parcours-de-conformité-seconde-déclaration)
 7. [Employeur — avis du CSE](#7-employeur--avis-du-cse)
-8. [Citoyen — recherche et consultation publique](#8-citoyen--recherche-et-consultation-publique)
-9. [Agent administration DGT](#9-agent-administration-dgt)
-10. [Tableau récapitulatif des branchements clés](#10-tableau-récapitulatif-des-branchements-clés)
+9. [Citoyen — recherche et consultation publique](#9-citoyen--recherche-et-consultation-publique)
+10. [Agent administration DGT](#10-agent-administration-dgt)
+11. [Tableau récapitulatif des branchements clés](#11-tableau-récapitulatif-des-branchements-clés)
 
 Conventions :
 
@@ -394,11 +394,11 @@ Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) 
 
 ---
 
-## 8. Citoyen — recherche et consultation publique
+## 9. Citoyen — recherche et consultation publique
 
 Public, sans authentification. Très peu de friction.
 
-### 8.1 Parcours simple
+### 9.1 Parcours simple
 
 ```mermaid
 flowchart LR
@@ -412,7 +412,7 @@ flowchart LR
     G --> F
 ```
 
-### 8.2 Données exposées
+### 9.2 Données exposées
 
 Pour chaque entreprise déclarante :
 
@@ -421,7 +421,7 @@ Pour chaque entreprise déclarante :
   - L'**indicateur G reste confidentiel** (catégories d'emploi définies par l'entreprise)
   - Les fichiers (CSE, évaluation conjointe) ne sont **pas** exposés au public
 
-### 8.3 Export Excel et API publique
+### 9.3 Export Excel et API publique
 
 Pour les analystes / journalistes / chercheurs :
 
@@ -433,7 +433,7 @@ Pour les analystes / journalistes / chercheurs :
 
 Aucune authentification requise. Les téléchargements sont audités (catégorie `export`, rétention 365 jours).
 
-### 8.4 Annuaire des référents
+### 9.4 Annuaire des référents
 
 `/referents` permet aux entreprises de trouver leur **interlocuteur DREETS / inspection du travail**.
 
@@ -442,11 +442,11 @@ Aucune authentification requise. Les téléchargements sont audités (catégorie
 
 ---
 
-## 9. Agent administration DGT
+## 10. Agent administration DGT
 
 Les agents admin DGT/DREETS arrivent sur `/admin/` après connexion (le middleware Edge garantit `isAdmin === true`).
 
-### 9.1 Tableau de bord
+### 10.1 Tableau de bord
 
 `/admin/` propose des raccourcis vers les sous-sections :
 
@@ -456,7 +456,7 @@ Les agents admin DGT/DREETS arrivent sur `/admin/` après connexion (le middlewa
 - Paramètres de campagne + délai du verrou
 - Stats de campagne
 
-### 9.2 Recherche de déclarations
+### 10.2 Recherche de déclarations
 
 ```mermaid
 flowchart LR
@@ -468,7 +468,7 @@ flowchart LR
 
 Tous les appels sont audités (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_DECLARATION_GET_BY_ID`).
 
-### 9.3 Déverrouillage manuel d'une déclaration
+### 10.3 Déverrouillage manuel d'une déclaration
 
 Sur la page de détail d'une déclaration (`/admin/declarations/<id>`), si un verrou actif est détenu par un utilisateur, l'admin voit le bouton **« Déverrouiller »** :
 
@@ -488,7 +488,7 @@ sequenceDiagram
 
 > **Pourquoi ce déverrouillage manuel ?** Si un co-déclarant ferme son navigateur sans libérer le verrou (crash, perte réseau) et que le délai d'expiration n'est pas encore atteint, une autre personne de l'entreprise peut se retrouver bloquée. L'admin peut débloquer la situation sans attendre l'expiration.
 
-### 9.4 Impersonation
+### 10.4 Impersonation
 
 Pour dépanner une entreprise (problème de saisie, incompréhension), l'agent peut **incarner** un compte employeur :
 
@@ -515,7 +515,7 @@ sequenceDiagram
 
 > **Pourquoi cette double protection ?** Une mutation accidentelle d'un agent admin sur le compte d'une entreprise serait juridiquement très problématique (l'admin signerait à la place du déclarant). La règle « jamais d'écriture en impersonation » est inviolable.
 
-### 9.5 Gestion des référents
+### 10.5 Gestion des référents
 
 `/admin/liste-referents` — CRUD complet :
 
@@ -523,7 +523,7 @@ sequenceDiagram
 - Création / édition / suppression à l'unité
 - **Import CSV** en masse (upsert basé sur région + département + nom)
 
-### 9.6 Paramétrage des deadlines de campagne et du verrou
+### 10.6 Paramétrage des deadlines de campagne et du verrou
 
 `/admin/parametres` — deux sections :
 
@@ -548,11 +548,11 @@ Si une année n'a pas de ligne en BDD, des **valeurs par défaut** sont calculé
 
 Stocké dans `globalSettings.declarationLockTimeoutMinutes`, mis à jour via `adminSettings.updateLockTimeout` (audit `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT`).
 
-### 9.7 Statistiques de campagne
+### 10.7 Statistiques de campagne
 
 `/admin/stats/campagne` — courbes cumulatives de soumission par jour, **segmentées par tranche d'effectif** (`small / medium / large`, voir `COMPANY_SIZE_RANGES`).
 
-### 9.8 Import GIP-MDS
+### 10.8 Import GIP-MDS
 
 Bouton sur la home admin → mutation tRPC `gipMds.importFromUrl` qui :
 
@@ -564,7 +564,7 @@ L'agent fait cet import **manuellement** une fois par campagne, après publicati
 
 ---
 
-## 10. Tableau récapitulatif des branchements clés
+## 11. Tableau récapitulatif des branchements clés
 
 Pour les arbitrages de spec et la priorisation, ces décisions sont les plus structurantes :
 

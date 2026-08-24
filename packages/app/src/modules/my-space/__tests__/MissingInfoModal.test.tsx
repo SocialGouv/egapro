@@ -177,6 +177,12 @@ describe("MissingInfoModal", () => {
 				"Un CSE a-t-il été mis en place dans votre entreprise ?",
 			),
 		).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Oui").closest(".fr-fieldset__element"),
+		).toHaveClass("fr-fieldset__element--inline");
+		expect(
+			screen.getByLabelText("Non").closest(".fr-fieldset__element"),
+		).toHaveClass("fr-fieldset__element--inline");
 	});
 
 	it("does not render CSE radio buttons when hasCse is provided", () => {

@@ -17,11 +17,29 @@ type DocumentResource = {
 	href: string;
 };
 
-function getResources(declaration: DeclarationItem): DocumentResource[] {
-	const resources: DocumentResource[] = [];
-	if (declaration.type !== "remuneration") return resources;
+function resourceSubtitle(declaration: DeclarationItem): string {
+	return `Année ${declaration.year} au titre des données ${getReferenceYearFor(declaration.year)}`;
+}
 
-	const subtitle = `Année ${declaration.year} au titre des données ${getReferenceYearFor(declaration.year)}`;
+function getRepresentationResources(
+	declaration: DeclarationItem,
+): DocumentResource[] {
+	if (declaration.status !== "done") return [];
+	const referenceYear = getReferenceYearFor(declaration.year);
+	return [
+		{
+			title: "Télécharger le récapitulatif de la déclaration",
+			subtitle: resourceSubtitle(declaration),
+			href: `/api/representation-pdf?year=${referenceYear}`,
+		},
+	];
+}
+
+function getRemunerationResources(
+	declaration: DeclarationItem,
+): DocumentResource[] {
+	const resources: DocumentResource[] = [];
+	const subtitle = resourceSubtitle(declaration);
 
 	if (declaration.hasPrefillData) {
 		resources.push({
@@ -37,6 +55,12 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 			subtitle,
 			href: `/api/declaration-pdf?year=${declaration.year}`,
 		});
+	}
+
+	if (
+		declaration.hasSubmittedCseOpinion ||
+		declaration.hasJointEvaluationFile
+	) {
 		resources.push({
 			title: "Télécharger le récapitulatif des éléments transmis",
 			subtitle,
@@ -53,6 +77,16 @@ function getResources(declaration: DeclarationItem): DocumentResource[] {
 	}
 
 	return resources;
+}
+
+function getResources(declaration: DeclarationItem): DocumentResource[] {
+	if (declaration.type === "representation") {
+		return getRepresentationResources(declaration);
+	}
+	if (declaration.type === "remuneration") {
+		return getRemunerationResources(declaration);
+	}
+	return [];
 }
 
 export function getDocumentResourceCount(declaration: DeclarationItem): number {

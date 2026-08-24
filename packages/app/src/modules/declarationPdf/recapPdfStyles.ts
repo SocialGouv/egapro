@@ -241,6 +241,4 @@ export const styles = StyleSheet.create({
 		fontStyle: "italic",
 		marginTop: 4,
 	},
-
-	categoryBlock: {},
 });

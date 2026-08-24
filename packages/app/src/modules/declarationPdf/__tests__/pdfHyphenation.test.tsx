@@ -1,7 +1,5 @@
 // @vitest-environment node
 
-import { createRequire } from "node:module";
-
 import { Document, Font, Page, renderToBuffer } from "@react-pdf/renderer";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -13,28 +11,9 @@ import {
 	extractPositionedRuns,
 	extractTextStream,
 } from "./helpers/pdfTextStream";
+import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
-// Fonts are resolved from node_modules rather than through
-// ensurePdfFontsRegistered(), which reads public/dsfr/fonts — generated at
-// dev/build time and git-ignored. The hyphenation callback, however, IS the
-// production one: registering a local stand-in would let this file pass while
-// the real PDF still hyphenates.
-const resolve = createRequire(import.meta.url).resolve;
-
-Font.register({
-	family: PDF_FONT_FAMILY,
-	fonts: [
-		{
-			src: resolve("@gouvfr/dsfr/dist/fonts/Marianne-Regular.woff"),
-			fontWeight: 400,
-		},
-		{
-			src: resolve("@gouvfr/dsfr/dist/fonts/Marianne-Bold.woff"),
-			fontWeight: 700,
-		},
-	],
-});
-Font.registerHyphenationCallback(splitOnSoftHyphen);
+registerPdfFonts({ hyphenation: true });
 
 const REGULAR = 400;
 const BOLD = 700;

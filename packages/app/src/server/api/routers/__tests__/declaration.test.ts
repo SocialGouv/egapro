@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import {
 	createCaller,
 	mockDeclaration,
@@ -23,6 +24,14 @@ vi.mock("~/server/auth", () => ({
 
 vi.mock("~/server/db", () => ({
 	db: {},
+}));
+
+const { mockGetCampaignDeadlines } = vi.hoisted(() => ({
+	mockGetCampaignDeadlines: vi.fn(),
+}));
+
+vi.mock("~/server/db/getCampaignDeadlines", () => ({
+	getCampaignDeadlines: mockGetCampaignDeadlines,
 }));
 
 vi.mock("../declarationHelpers", async (importOriginal) => {
@@ -1181,6 +1190,32 @@ describe("declarationRouter", () => {
 			expect(purgeCall).toBeDefined();
 			expect(purgeCall?.draft).toBeNull();
 			expect(purgeCall?.draftUpdatedAt).toBeNull();
+		});
+
+		// The path-choice deadline nudges, it never closes the action. Concretely:
+		// `saveCompliancePath` must stay a `declarationLockedWriteProcedure` —
+		// promoting it to `declarationModifiableWriteProcedure` would add the
+		// modification-deadline guard and lock the choice out from 1 June N.
+		it("still saves a compliance path once every campaign deadline has passed", async () => {
+			// A campaign old enough that all of its deadlines are behind us.
+			mockGetCampaignDeadlines.mockResolvedValue(
+				getDefaultCampaignDeadlines(2019),
+			);
+			const declaration = buildDeclaration({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: false,
+			});
+			const ctx = createSimpleSelectDb(declaration);
+			const caller = await createCaller(
+				withLockMiddleware(ctx.db, {
+					declarationStatus: declaration.status,
+					declarationYear: declaration.year,
+				}),
+			);
+
+			await expect(
+				caller.saveCompliancePath({ path: "justify" }),
+			).resolves.toEqual({ success: true });
 		});
 	});
 

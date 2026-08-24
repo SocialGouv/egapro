@@ -12,6 +12,8 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 	const USER_ID = "draft-integration-test-user";
 	const USER_EMAIL = "draft-integration@example.fr";
 	const USER_SIRET = `${SIREN}00015`;
+	const LOCK_USER_ID = "draft-integration-lock-user";
+	const LOCK_USER_EMAIL = "draft-lock@example.fr";
 
 	function createCaller() {
 		return declarationDraftRouter.createCaller({
@@ -36,22 +38,32 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 
 	afterAll(async () => {
 		if (!sql) return;
+		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (${USER_ID}, ${LOCK_USER_ID})`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user_company WHERE user_id = ${LOCK_USER_ID}`;
 		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${LOCK_USER_ID}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 		await sql.end();
 	});
 
 	beforeEach(async () => {
+		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (${USER_ID}, ${LOCK_USER_ID})`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user_company WHERE user_id = ${LOCK_USER_ID}`;
 		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${LOCK_USER_ID}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 
 		await sql`
 			INSERT INTO app_user (id, email)
 			VALUES (${USER_ID}, ${USER_EMAIL})
+		`;
+		await sql`
+			INSERT INTO app_user (id, email)
+			VALUES (${LOCK_USER_ID}, ${LOCK_USER_EMAIL})
 		`;
 		await sql`
 			INSERT INTO app_company (siren, name)
@@ -60,6 +72,10 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 		await sql`
 			INSERT INTO app_user_company (user_id, siren)
 			VALUES (${USER_ID}, ${SIREN})
+		`;
+		await sql`
+			INSERT INTO app_user_company (user_id, siren)
+			VALUES (${LOCK_USER_ID}, ${SIREN})
 		`;
 	});
 
@@ -122,5 +138,54 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 		expect(Date.now() - (draftUpdatedAt as Date).getTime()).toBeLessThan(
 			30 * 24 * 3600 * 1000,
 		);
+	});
+
+	it("rejects clear with CONFLICT when another co-declarant holds the active lock", async () => {
+		const caller = createCaller();
+
+		await caller.save({
+			siren: SIREN,
+			year: YEAR,
+			slice: { kind: "main", step: "step1", data: { workforce: 50 } },
+		});
+
+		const declarationRows = await sql<{ id: string }[]>`
+			SELECT id
+			FROM app_declaration
+			WHERE siren = ${SIREN} AND year = ${YEAR} AND cancelled_at IS NULL
+		`;
+		const declarationId = declarationRows[0]?.id;
+		expect(declarationId).toBeTruthy();
+
+		await sql`
+			INSERT INTO app_declaration_lock (
+				declaration_id,
+				locked_by_user_id,
+				locked_at,
+				last_heartbeat_at,
+				expires_at
+			)
+			VALUES (
+				${declarationId as string},
+				${LOCK_USER_ID},
+				NOW(),
+				NOW(),
+				NOW() + INTERVAL '10 minutes'
+			)
+		`;
+
+		await expect(
+			caller.clear({ siren: SIREN, year: YEAR }),
+		).rejects.toMatchObject({
+			code: "CONFLICT",
+			message: "Déclaration verrouillée par un autre utilisateur.",
+		});
+
+		const draftRows = await sql<{ draft: unknown }[]>`
+			SELECT draft
+			FROM app_declaration
+			WHERE siren = ${SIREN} AND year = ${YEAR} AND cancelled_at IS NULL
+		`;
+		expect(draftRows[0]?.draft).toEqual({ main: { step1: { workforce: 50 } } });
 	});
 });

@@ -7,6 +7,7 @@ import {
 	formatGap,
 	formatGapCompact,
 	formatMonthDay,
+	formatPercentage,
 	formatShortDate,
 	formatShortDateTime,
 	formatTotal,
@@ -102,6 +103,24 @@ describe("computePercentage", () => {
 
 	it("returns '- %' when total is zero", () => {
 		expect(computePercentage(10, 0)).toBe("- %");
+	});
+});
+
+describe("formatPercentage", () => {
+	it.each([
+		[null, "—"],
+		[undefined, "—"],
+		[0, "0 %"],
+		[60, "60 %"],
+		[60.5, "60,5 %"],
+		[33.333, "33,3 %"],
+		[100, "100 %"],
+	])("formats %s as %s", (value, expected) => {
+		expect(formatPercentage(value)).toBe(expected);
+	});
+
+	it("keeps a negative percentage signed", () => {
+		expect(formatPercentage(-12.5)).toBe("-12,5 %");
 	});
 });
 

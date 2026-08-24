@@ -1,4 +1,7 @@
-import type { CampaignDeadlines } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	RepresentationCampaign,
+} from "~/modules/domain";
 import {
 	getCurrentYear,
 	getDeclarationDisplayContext,
@@ -29,6 +32,7 @@ type Props = {
 	declarations: DeclarationItem[];
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
+	representationCampaign: RepresentationCampaign;
 	userPhone: string | null;
 };
 
@@ -54,6 +58,7 @@ export function CompanyDeclarationsPage({
 	declarations,
 	lockedByOther,
 	lockHolder,
+	representationCampaign,
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
@@ -90,6 +95,7 @@ export function CompanyDeclarationsPage({
 				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}
+				representationCampaign={representationCampaign}
 				userPhone={userPhone}
 			/>
 			{hasArchives && <ArchivesSection />}
