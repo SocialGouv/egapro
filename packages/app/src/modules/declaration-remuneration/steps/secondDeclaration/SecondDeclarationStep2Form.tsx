@@ -6,6 +6,7 @@ import { useIsImpersonating } from "~/modules/auth";
 import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
+import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	type DeclarationFsmStatus,
@@ -41,6 +42,7 @@ export function SecondDeclarationStep2Form({
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly: isLocked } = useLockContext();
 	const isWritable = isSecondDeclarationWritable(status);
 	const isFormDisabled = isImpersonating || !isWritable;
 	const [startDate, setStartDate] = useState(initialStartDate);
@@ -77,9 +79,9 @@ export function SecondDeclarationStep2Form({
 	});
 
 	useEffect(() => {
-		if (!draftHydrated) return;
+		if (!draftHydrated || isFormDisabled || isLocked) return;
 		setField({ startDate, endDate });
-	}, [draftHydrated, startDate, endDate, setField]);
+	}, [draftHydrated, endDate, isFormDisabled, isLocked, setField, startDate]);
 
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
@@ -130,6 +132,7 @@ export function SecondDeclarationStep2Form({
 					endDate={endDate}
 					onEndDateChange={setEndDate}
 					onStartDateChange={setStartDate}
+					readOnly={isLocked}
 					startDate={startDate}
 				/>
 			}
@@ -143,6 +146,7 @@ export function SecondDeclarationStep2Form({
 				</h1>
 			}
 			tooltipPrefix="tooltip-second-decl"
+			readOnly={isLocked}
 		/>
 	);
 }
