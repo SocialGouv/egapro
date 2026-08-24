@@ -3,6 +3,17 @@
     "EPIC_MAX_PARALLEL": "5",
     "EPIC_DEFAULT_BASE": "origin/chore/ai-pipeline"
   },
+  "extraKnownMarketplaces": {
+    "ultra11y": {
+      "source": {
+        "source": "github",
+        "repo": "maxgfr/ultra11y"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "ultra11y@ultra11y": true
+  },
   "hooks": {
     "UserPromptSubmit": [
       {

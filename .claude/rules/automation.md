@@ -74,7 +74,7 @@ Because `code-dev` spawns these agents itself (`tu-dev` + the 4 gates + `functio
 
 1. **Validator** — delegate to `.claude/agents/validator/AGENT.md` (typecheck + test + lint + format)
 2. **Structural auditor** — delegate to `.claude/agents/structural-auditor/AGENT.md` on all modified files
-3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` (pilote **ultra11y**, RGAA 4.1.2 / WCAG 2.2 AA — voir `.claude/rules/rgaa.md`) on all modified `.tsx` files. If no `.tsx` files → instant `PASS — no UI files`.
+3. **RGAA auditor** — delegate to `.claude/agents/rgaa-auditor/AGENT.md` (lance le skill ultra11y `review-a11y`, RGAA 4.1.2 / WCAG 2.2 AA — voir `.claude/rules/rgaa.md`) on all modified `.tsx` files. If no `.tsx` files → instant `PASS — no UI files`.
 4. **Security auditor** — delegate to `.claude/agents/security-auditor/AGENT.md` on all modified `.ts/.tsx` in `server/`, `routers/`, or tRPC. If none → instant `SECURE — no server files`.
 
 If any fails → fix → re-run. Only report completion when all 4 pass.
@@ -93,16 +93,7 @@ Before pushing code (`git push`), **always** run `pnpm check:write` (or `pnpm li
 
 Apply these rules **as you write code**, before any agent runs:
 
-**RGAA (accessibility):**
-
-- `<input>` → associated `<label>` via `htmlFor`/`id`
-- Images → `import Image from "next/image"` (raw `<img>` blocked by hook), descriptive `alt` (or `alt=""` if decorative)
-- Decorative icons → `aria-hidden="true"`
-- `target="_blank"` → `<NewTabNotice />` present
-- Modals → `role="dialog"` + `aria-modal="true"` + `aria-labelledby`
-- No redundant `role` on semantic elements
-- Heading hierarchy → no skipped levels (h1 → h3 without h2)
-- Form groups → `<fieldset>` + `<legend>`
+**RGAA (accessibility):** nothing to restate here. The rules live in the ultra11y standards data, the `review-a11y` skill applies them to the code under change, and the Action applies them in CI. A checklist copied into this file is a fourth copy that drifts from the other three.
 
 **Domain layer:**
 
@@ -149,7 +140,7 @@ Agents in `.claude/agents/` are delegated to automatically by skills and quality
 |---|---|---|
 | `validator` | Typecheck + test + lint + format (parallel) | sonnet |
 | `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) | sonnet |
-| `rgaa-auditor` | Audit RGAA 4.1.2 / WCAG 2.2 AA piloté par **ultra11y** | sonnet |
+| `rgaa-auditor` | Lance le skill ultra11y `review-a11y` sur le code modifié (RGAA 4.1.2 / WCAG 2.2 AA) | sonnet |
 | `security-auditor` | OWASP Top 10 + RGS security review | sonnet |
 
 These agents are **read-only** — they report findings but never modify files. Fixes are applied by the main agent after review.
