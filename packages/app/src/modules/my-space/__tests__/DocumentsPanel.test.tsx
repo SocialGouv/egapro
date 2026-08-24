@@ -251,8 +251,8 @@ describe("DocumentsPanel", () => {
 		expect(links().map((link) => link.textContent)).toEqual([
 			PREFILL_TITLE,
 			RECAP_TITLE,
-			TRANSMITTED_TITLE,
 			SECOND_TITLE,
+			TRANSMITTED_TITLE,
 		]);
 	});
 
@@ -266,11 +266,39 @@ describe("DocumentsPanel", () => {
 		expect(links().map((link) => link.getAttribute("href"))).toEqual([
 			`/api/prefill-pdf?year=${DECLARATION_YEAR}`,
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
-			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
 			`/api/declaration-pdf?type=correction&year=${DECLARATION_YEAR}`,
+			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
 		]);
 		expect(panel.getAllByText(SUBTITLE)).toHaveLength(4);
 		expect(panel.getAllByText("PDF")).toHaveLength(4);
+	});
+
+	// "Last" is an absolute position: any resource added later must land ahead of
+	// the transmitted-elements recap, whichever other resources are present.
+	it.each<[string, Partial<Omit<DeclarationItem, "status">>]>([
+		["a CSE opinion alone", { hasSubmittedCseOpinion: true }],
+		["a joint evaluation file alone", { hasJointEvaluationFile: true }],
+		[
+			"prefill data ahead of it",
+			{ hasPrefillData: true, hasSubmittedCseOpinion: true },
+		],
+		[
+			"a second declaration ahead of it",
+			{ hasJointEvaluationFile: true, hasSubmittedSecondDeclaration: true },
+		],
+		[
+			"every other resource ahead of it",
+			{
+				hasJointEvaluationFile: true,
+				hasPrefillData: true,
+				hasSubmittedCseOpinion: true,
+				hasSubmittedSecondDeclaration: true,
+			},
+		],
+	])("closes the list with the transmitted-elements recap, with %s", (_case, overrides) => {
+		const { links } = renderPanel(overrides);
+
+		expect(links().at(-1)?.textContent).toBe(TRANSMITTED_TITLE);
 	});
 
 	it("omits the prefill card when no DSN data is available", () => {
