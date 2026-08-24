@@ -47,9 +47,17 @@ describe("getDeclarationProcessStepDeadline", () => {
 		},
 		{
 			fsm: "awaiting_cse_opinion",
-			deadlineKey: "decl2JointEvaluationDeadline",
+			deadlineKey: "decl2CseOpinionDeadline",
 		},
 	];
+
+	// The two decl2 deadlines were a single overloaded column until #4217; equal
+	// fixture values would make the two cases below indistinguishable.
+	it("uses distinct fixture dates for the round-2 joint evaluation and CSE opinion", () => {
+		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
+			deadlines.decl2CseOpinionDeadline,
+		);
+	});
 
 	for (const { fsm, deadlineKey } of cases) {
 		it(`returns ${deadlineKey} for fsmStatus="${fsm}"`, () => {

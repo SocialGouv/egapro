@@ -35,6 +35,7 @@ function campaignRow({ year, publicDataReleaseDate }: CampaignYear) {
 		decl2ModificationDeadline: filler,
 		decl2JustificationDeadline: filler,
 		decl2JointEvaluationDeadline: filler,
+		decl2CseOpinionDeadline: filler,
 	};
 }
 

@@ -14,6 +14,7 @@ import {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "../shared/campaign";
@@ -159,6 +160,39 @@ describe("selectPathChoiceDeadline", () => {
 	});
 });
 
+describe("selectJointEvaluationDeadline", () => {
+	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00");
+	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00");
+	// Values that differ from the derived defaults prove the selector reads the given deadlines instead of recomputing them.
+	const deadlines = {
+		...getDefaultCampaignDeadlines(2027),
+		decl1JointEvaluationDeadline: ROUND_1_DEADLINE,
+		decl2JointEvaluationDeadline: ROUND_2_DEADLINE,
+	};
+
+	it("returns the round-1 deadline when the company is not in the second round", () => {
+		expect(selectJointEvaluationDeadline(deadlines, false)).toBe(
+			ROUND_1_DEADLINE,
+		);
+	});
+
+	it("returns the round-2 deadline when the company is in the second round", () => {
+		expect(selectJointEvaluationDeadline(deadlines, true)).toBe(
+			ROUND_2_DEADLINE,
+		);
+	});
+
+	it("never returns the CSE opinion deadline, which closes a later step", () => {
+		const defaults = getDefaultCampaignDeadlines(2027);
+		expect(selectJointEvaluationDeadline(defaults, true)).not.toEqual(
+			defaults.decl2CseOpinionDeadline,
+		);
+		expect(selectJointEvaluationDeadline(defaults, false)).not.toEqual(
+			defaults.decl2CseOpinionDeadline,
+		);
+	});
+});
+
 describe("getDefaultCampaignDeadlines", () => {
 	it("returns Date objects for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
@@ -170,7 +204,18 @@ describe("getDefaultCampaignDeadlines", () => {
 		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
 		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
 		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
-			new Date(2028, 1, 1),
+			new Date(2028, 0, 1),
+		);
+		expect(deadlines.decl2CseOpinionDeadline).toEqual(new Date(2028, 1, 1));
+	});
+
+	it("keeps the round-2 joint evaluation and CSE opinion deadlines one month apart", () => {
+		const deadlines = getDefaultCampaignDeadlines(2027);
+		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
+			deadlines.decl2CseOpinionDeadline,
+		);
+		expect(deadlines.decl2JointEvaluationDeadline.getTime()).toBeLessThan(
+			deadlines.decl2CseOpinionDeadline.getTime(),
 		);
 	});
 

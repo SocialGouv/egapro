@@ -189,6 +189,7 @@ describe("DraftLoadingGate", () => {
 					decl1JointEvaluationDeadline: new Date("2026-05-01"),
 					decl2JustificationDeadline: new Date("2026-09-01"),
 					decl2JointEvaluationDeadline: new Date("2026-11-01"),
+					decl2CseOpinionDeadline: new Date("2026-12-01"),
 					pathChoiceDeadline: new Date("2027-01-01"),
 					pathChoiceRound1Deadline: new Date("2026-07-01"),
 				}}
