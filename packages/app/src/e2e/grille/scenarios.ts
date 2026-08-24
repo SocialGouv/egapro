@@ -16,6 +16,7 @@ import {
 	reachStep6Recap,
 	submitFromStep6Recap,
 } from "../helpers/declaration-flows";
+import { clickAndExpectDialogOpen, waitForDsfrModal } from "../helpers/dsfr";
 import { recapStepperLabel } from "../helpers/indicator-g";
 import type { Coordinate } from "./coordinates";
 
@@ -67,6 +68,62 @@ async function expectComplianceOptions(
 			: expect(corrective).not.toBeVisible());
 		if (options.joint) await expect(joint).toBeVisible();
 		if (options.justify) await expect(justify).toBeVisible();
+	});
+}
+
+const PROCESS_PANEL_ID = "declaration-process-panel";
+
+// The row's CSS-module class names are hashed, so its label is the only stable
+// anchor: the label <p> sits in the info column, whose parent is the row itself.
+function transmittedRow(page: Page, label: string) {
+	return page
+		.locator(`#${PROCESS_PANEL_ID}`)
+		.getByText(label, { exact: true })
+		.locator("xpath=../..");
+}
+
+// #4222 — on a closed démarche the panel used to derive "Modifier" from the
+// campaign deadline alone, so it offered edits the FSM then refused. The
+// affordance now follows the FSM, which only still accepts a CSE opinion.
+async function expectPanneauDemarcheClose(page: Page): Promise<void> {
+	await test.step("panneau « Mon espace » d'une démarche close", async () => {
+		await page.goto("/mon-espace");
+		await waitForDsfrModal(page, PROCESS_PANEL_ID);
+		const trigger = page.getByRole("button", { name: "Rémunération" }).first();
+		await expect(trigger).toBeVisible();
+		await clickAndExpectDialogOpen(page, trigger, PROCESS_PANEL_ID);
+
+		const readOnlyRows: Array<{ label: string; view: RegExp | string }> = [
+			{
+				label: "Votre déclaration a été transmise",
+				view: "Voir le récapitulatif de la déclaration",
+			},
+			{
+				label: "Votre seconde déclaration a été transmise",
+				view: "Voir le récapitulatif de la seconde déclaration",
+			},
+			{
+				label: "Votre rapport de l'évaluation conjointe a été transmis",
+				view: /^Visualiser /,
+			},
+		];
+
+		for (const { label, view } of readOnlyRows) {
+			const row = transmittedRow(page, label);
+			// Pin the row before the negative assertions below: a missing row would
+			// otherwise satisfy every toHaveCount(0) without proving anything.
+			await expect(row).toBeVisible();
+			await expect(row.getByRole("link", { name: view })).toBeVisible();
+			await expect(
+				row.getByRole("link", { name: "Modifier", exact: true }),
+			).toHaveCount(0);
+			await expect(row.getByText(/Modifiable jusqu'au/)).toHaveCount(0);
+		}
+
+		const cseRow = transmittedRow(page, "Vos avis du CSE ont été transmis");
+		await expect(
+			cseRow.getByRole("link", { name: "Modifier", exact: true }),
+		).toBeVisible();
 	});
 }
 
@@ -232,6 +289,7 @@ export const FICHE_SCENARIOS = {
 			],
 		});
 		await finDeDemarche(page, { completed: true });
+		await expectPanneauDemarcheClose(page);
 	},
 
 	"CAS-01-6IND": async ({ page, coordinate }) => {
