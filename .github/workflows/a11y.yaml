@@ -71,8 +71,9 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # des verdicts, le commiter — et c'est délibérément dans cet ordre : un registre qu'une CI
 # s'écrit à elle-même n'est plus une décision revue par quiconque.
 #
-# Ce que ça coûte, mesuré sur ce dépôt : 16 à 21 $ par run sans registre. Avec, le premier run
-# paie le total et les suivants ne paient que le reliquat.
+# Ce que ça coûte, mesuré sur ce dépôt : 9,59 $ pour le run du 24/08 (3 passes, aucun registre
+# à rejouer — 5,91 + 2,43 + 1,25). Avec un registre commité, le premier run paie le total et
+# les suivants ne paient que le reliquat.
 #
 # CE QUI FERME RÉELLEMENT LA GRILLE n'est pas l'adjudication seule, c'est le MOTEUR : il décide
 # par page ce qu'il a mesuré par page, au lieu de ne savoir que répéter le verdict du run. Un
@@ -171,7 +172,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.29.0
+        uses: maxgfr/ultra11y@v5.33.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -231,10 +232,13 @@ jobs:
     # deux faits sur la QUALITÉ DU RUN, pas sur le code audité.
     runs-on: ubuntu-22.04
     # Mesuré : 34 min pour 17 pages et une adjudication plafonnée à 60 tours ; 40 min pour le
-    # run complet. Le balayage enregistre aujourd'hui **35 pages** (les 24 de l'échantillon
-    # normatif, moins les 5 portées par un spec dédié, plus les écrans intermédiaires des
-    # tunnels), et un job annulé sur timeout emporte le rapport ET l'artefact, ce que
-    # `continue-on-error` n'absorbe pas — d'où la marge.
+    # run complet. Trois nombres cohabitent et disent trois choses différentes : **24** pages
+    # sont DÉCLARÉES dans `.ultra11yrc.json` (`sample.pages`, ce que vérifie `require-sample`),
+    # **39** sont ENREGISTRÉES par la suite Playwright (sweep 18 + funnels 16 + dynamic 3 +
+    # anonymous 2), et **37** sont effectivement CAPTURÉES — les 2 manquantes étant gardées par
+    # un `test.skip` faute de données (`admin-declaration-detail` sans ligne,
+    # `referent-detail` sans référent publié). Un job annulé sur timeout emporte le rapport ET
+    # l'artefact, ce que `continue-on-error` n'absorbe pas — d'où la marge.
     #
     # Un run SANS registre commité paie l'adjudication complète, et c'est le cas du premier :
     # ce budget est calé sur lui, pas sur les suivants, qui ne paient que le reliquat.
@@ -410,7 +414,7 @@ jobs:
       # « démarrer l'app » ici.
       #
       # `continue-on-error` sur CETTE step seulement : un écran qui coince ne doit pas coûter
-      # le rapport et l'artefact des 34 autres. Une panne d'infra, elle, reste rouge.
+      # le rapport et l'artefact des 36 autres. Une panne d'infra, elle, reste rouge.
       - name: ultra11y — balayage RGAA des pages (Playwright)
         continue-on-error: true
         timeout-minutes: 25
@@ -420,7 +424,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.29.0
+        uses: maxgfr/ultra11y@v5.33.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -434,23 +438,68 @@ jobs:
           graph: "true"
           standard: rgaa
           lang: fr
-          # TOUTE la grille de jugement passe par le modèle, à chaque run. Il n'y a plus de
-          # registre à rejouer avant lui, donc plus de reliquat : ce qu'il ne tranche pas reste
-          # « à évaluer », et `require-decided: pages` plus bas fait rougir le job en le nommant.
+          # TOUTE la grille de jugement passe par le modèle — moins ce que le registre rejoue.
+          # Chaque entrée du registre repasse par la même porte, sur l'évidence re-dérivée de
+          # l'audit du moment ; ce qui n'est pas rejoué est ce qui est payé. Ce que personne ne
+          # tranche reste « à évaluer », et `require-decided: pages` plus bas fait rougir le job
+          # en le nommant.
           adjudicate: agent
-          # TROIS PASSES, et un budget de tours large. Mesuré : l'adjudicateur s'est arrêté à
-          # 22 tours sur 228, sans erreur, en laissant 42 critères `verdict: null` — une passe
-          # unique n'a aucun moyen d'y revenir, et le job finit vert sur une grille que
-          # personne n'a remplie. Chaque passe supplémentaire ne reprend que ce qui est ENCORE
-          # indécis (jamais atteint, ou jugé puis refusé par la porte en portant son motif),
-          # donc elle coûte le reliquat et rien d'autre — et un run qui a tout décidé saute les
-          # suivantes avant d'invoquer le moindre modèle.
+          # LE RUNNER, ET C'EST LE MOTEUR. `action` (le défaut) déplie à la main trois étapes
+          # `claude-code-action` ; `cli` fait spawner au moteur un `claude -p` par lot et replie
+          # les verdicts lui-même. Deux raisons de préférer le second ici : il est le seul à
+          # accepter `adjudicate-grain`, et il ne porte pas la liste d'événements autorisés de
+          # `claude-code-action` — c'est elle qui refuse `push`, et c'est pour elle que ce
+          # workflow passe par un cron. Le CLI est installé dans un préfixe jetable
+          # (`$RUNNER_TEMP`), jamais dans l'arbre audité.
+          adjudicate-runner: cli
+          # UN APPEL PAR CRITÈRE, pas un lot de huit. Ça coûte plus d'appels et ça achète deux
+          # choses : le modèle voit l'évidence d'un seul critère au lieu de huit qui se disputent
+          # son attention, et une passe qui s'arrête tôt perd AU PLUS un critère au lieu de tout
+          # ce qu'elle avait déjà tranché. Exige `adjudicate-runner: cli` — une action composite
+          # ne sait pas boucler sur une étape `uses:`.
+          #
+          # ET IL EST OBLIGATOIRE ICI, pas seulement préférable : le défaut de l'Action est
+          # `worklist`, qu'elle passe tel quel à `judge --grain`, et le moteur n'accepte que
+          # `batch` ou `criterion` (`src/cli.ts:3560`). `runner: cli` au grain par défaut sort
+          # donc en 2 sans appeler le moindre modèle — 40 min de CI, 0 $, et un rouge sur
+          # `require-decided` avec toute la grille « à évaluer ». À rapporter en amont ; en
+          # attendant, `criterion` est la seule moitié saine de la paire.
+          adjudicate-grain: criterion
+          # TROIS PASSES. Mesuré : l'adjudicateur s'est arrêté à 22 tours sur 228, sans erreur,
+          # en laissant 42 critères `verdict: null` — une passe unique n'a aucun moyen d'y
+          # revenir, et le job finit vert sur une grille que personne n'a remplie. Chaque passe
+          # supplémentaire ne reprend que ce qui est ENCORE indécis (jamais atteint, ou jugé puis
+          # refusé par la porte en portant son motif), donc elle coûte le reliquat et rien
+          # d'autre — et un run qui a tout décidé saute les suivantes avant d'invoquer le moindre
+          # modèle. Le runner `cli` les honore comme le chemin `action`.
           adjudicate-passes: "3"
-          adjudicate-max-turns: "600"
-          # LE MODÈLE, EXPLICITEMENT. Sans cet input l'adjudication prend le défaut de
-          # `claude-code-action`, qui n'est pas une constante de ce dépôt : le tier est facturé
-          # AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et un défaut qui bouge
-          # fait bouger la facture sans que rien ici ne change. On le nomme donc.
+          # LE PLAFOND EST EN DOLLARS, ET IL EST PAR APPEL DE MODÈLE — PAS PAR RUN.
+          #
+          # D'abord pourquoi il remplace `adjudicate-max-turns`, qui n'est plus passé ici :
+          # `--max-turns` n'est pas un flag du CLI Claude Code, et un flag inconnu y est avalé
+          # SANS UN MOT. Sous `runner: cli` un budget de tours ressemblerait à un plafond et ne
+          # serait rien du tout — mieux vaut pas de ceinture qu'une ceinture peinte.
+          #
+          # Ensuite, la lecture qui compte, parce qu'elle n'est pas celle que le nom suggère.
+          # `--max-budget-usd` est poussé sur l'argv de CHAQUE `claude -p`
+          # (`src/agent-cli.ts:170`), et `runCli` réessaie jusqu'à `MAX_ATTEMPTS = 4`. Avec
+          # `grain: criterion`, un appel = un critère. Le pire cas est donc
+          # `critères × passes × tentatives × plafond`, et surtout PAS le plafond tout court.
+          # Le seul plafond de RUN qui existe ici reste `timeout-minutes` plus haut.
+          #
+          # D'où la valeur. Mesuré sur le run du 24/08 (5.29.0, 3 passes, aucun registre à
+          # rejouer) : 5,91 $ + 2,43 $ + 1,25 $ = 9,59 $, et la première passe a tranché 48
+          # critères pour 5,91 $ — soit ~0,12 $ par critère en lots de huit. Un appel par critère
+          # perd le contexte partagé du lot, donc compter plus large. 0,40 $ est ~3× l'attendu :
+          # assez haut pour qu'un critère réellement difficile ne soit pas tronqué en cours de
+          # raisonnement, assez bas pour qu'un appel emballé soit coupé.
+          #
+          # Un dépassement coûte son seul critère, jamais le run : le fold est par verdict.
+          adjudicate-budget-usd: "0.40"
+          # LE MODÈLE, EXPLICITEMENT. Sans cet input l'adjudication prend un défaut qui n'est pas
+          # une constante de ce dépôt : le tier est facturé AU CRITÈRE, une worklist RGAA en
+          # compte plusieurs dizaines, et un défaut qui bouge fait bouger la facture sans que
+          # rien ici ne change. On le nomme donc.
           #
           # Sonnet 5, et pas plus gros. L'amont a mesuré que ce qu'un adjudicateur bon marché
           # ratait n'était jamais un manque de modèle : sept critères perdus sur un run vert,
@@ -458,8 +507,9 @@ jobs:
           # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
           # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
           adjudicate-model: claude-sonnet-5
-          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué
-          # au run suivant s'il est commité. Voir l'en-tête — rien ici ne le commite.
+          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
+          # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
+          # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
           ledger: .ultra11y/verdicts/rgaa.json
           # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
           gate-adjudicated: "false"
@@ -486,7 +536,7 @@ jobs:
           # violation de rendu sans jamais pouvoir conclure à la conformité. Et un verdict
           # d'agent est enregistré à la granularité du référentiel, donc il traverse la
           # projection par page : ce que l'adjudication ferme pour le run, elle le ferme sur les
-          # 39 pages.
+          # 37 pages capturées.
           #
           # Mesuré en amont sur la fixture RGAA, balayée et capturée : 37 critères « à évaluer »
           # pour le run, et exactement les mêmes 37 sur chacune des pages. `pages` n'est donc
@@ -501,11 +551,11 @@ jobs:
           # une question différente, un cran en amont : le balayage a-t-il seulement regardé
           # les 24 pages que `.ultra11yrc.json` déclare ? Mesuré sur le run 32135566667 : une
           # sonde suspendue a tué deux specs, le groupe série en a emporté quinze autres, et le
-          # rapport RGAA est sorti avec 20 pages sur 35 — vert, sans nommer une seule des
-          # manquantes. Un rapport plus court se lit exactement comme un rapport complet.
+          # rapport RGAA est sorti amputé — 20 pages seulement, vert, sans nommer une seule
+          # des manquantes. Un rapport plus court se lit exactement comme un rapport complet.
           #
           # Elle se combine avec le `continue-on-error` du balayage plus haut, elle ne le
-          # contredit pas : un écran qui coince ne doit pas coûter le rapport des 23 autres,
+          # contredit pas : un écran qui coince ne doit pas coûter le rapport des autres,
           # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
           # visible ici, nommément.
           require-sample: "true"
