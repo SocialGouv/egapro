@@ -101,6 +101,7 @@ export {
 	isDeclarationWritingClosed,
 	isDraft,
 	isInComplianceProcess,
+	isJointEvaluationWritable,
 	isSecondDeclarationDeadlineApplicable,
 	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";

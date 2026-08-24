@@ -4,16 +4,25 @@ import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/Ordin
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
+	DeclarationFsmStatus,
 } from "~/modules/domain";
 import {
 	getReferenceYearFor,
 	isDeadlinePassed,
+	isJointEvaluationWritable,
+	isSecondDeclarationWritable,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 
 type StepStatus = "pending" | "current" | "complete";
+
+export type JointEvaluationFileInfo = {
+	id: string;
+	fileName: string;
+};
 
 export function getStepStatuses(
 	variant: PanelVariant,
@@ -35,8 +44,10 @@ export function getStepStatuses(
 export function VerticalStepper({
 	campaignDeadlines,
 	cseOpinionRequired,
+	declarationFsmStatus,
 	displayContext,
 	indicatorGRequired,
+	jointEvaluationFile,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -47,8 +58,10 @@ export function VerticalStepper({
 }: {
 	campaignDeadlines: CampaignDeadlines;
 	cseOpinionRequired: boolean;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	indicatorGRequired: boolean;
+	jointEvaluationFile: JointEvaluationFileInfo | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -76,7 +89,9 @@ export function VerticalStepper({
 					<StepCircle number={2} status={step2} />
 					<Step2Content
 						campaignDeadlines={campaignDeadlines}
+						declarationFsmStatus={declarationFsmStatus}
 						displayContext={displayContext}
+						jointEvaluationFile={jointEvaluationFile}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}
 						siren={siren}
 						status={step2}
@@ -204,14 +219,16 @@ function Step1Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				{variant !== "closed" && (
-					<TransmittedRow
-						label="Votre déclaration a été transmise"
-						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
-						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
-						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
-					/>
-				)}
+				<TransmittedRow
+					label="Votre déclaration a été transmise"
+					modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
+					modifyHref={
+						variant === "closed"
+							? undefined
+							: `/declaration-remuneration/etape/1?siren=${siren}`
+					}
+					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
+				/>
 			</div>
 		);
 	}
@@ -221,14 +238,18 @@ function Step1Content({
 
 function Step2Content({
 	campaignDeadlines,
+	declarationFsmStatus,
 	displayContext,
+	jointEvaluationFile,
 	secondDeclarationSubmitted,
 	siren,
 	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
+	jointEvaluationFile: JointEvaluationFileInfo | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	status: StepStatus;
@@ -316,6 +337,11 @@ function Step2Content({
 		);
 	}
 
+	const secondDeclarationWritable =
+		isSecondDeclarationWritable(declarationFsmStatus);
+	const jointEvaluationWritable =
+		isJointEvaluationWritable(declarationFsmStatus);
+
 	return (
 		<div className={styles.stepContent}>
 			{title}
@@ -323,7 +349,11 @@ function Step2Content({
 				<TransmittedRow
 					label="Votre seconde déclaration a été transmise"
 					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
+					modifyHref={
+						secondDeclarationWritable
+							? `/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`
+							: undefined
+					}
 					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 				/>
 			)}
@@ -331,7 +361,22 @@ function Step2Content({
 				<TransmittedRow
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
-					modifyHref={`/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`}
+					modifyHref={
+						jointEvaluationWritable
+							? `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`
+							: undefined
+					}
+					viewHref={
+						jointEvaluationFile
+							? `/api/v1/files/${jointEvaluationFile.id}`
+							: undefined
+					}
+					viewLabel={
+						jointEvaluationFile
+							? `Visualiser ${jointEvaluationFile.fileName}`
+							: undefined
+					}
+					viewOpensNewTab
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
@@ -395,39 +440,56 @@ function TransmittedRow({
 	modifiableUntil,
 	modifyHref,
 	viewHref,
+	viewLabel = "Voir le récapitulatif de la déclaration",
+	viewOpensNewTab = false,
 }: {
 	label: string;
 	modifiableUntil: Date;
-	modifyHref: string;
+	modifyHref?: string;
 	viewHref?: string;
+	viewLabel?: string;
+	viewOpensNewTab?: boolean;
 }) {
 	const deadlinePassed = isDeadlinePassed(modifiableUntil);
+	const canModify = modifyHref !== undefined && !deadlinePassed;
 
 	return (
 		<div className={styles.transmittedRow}>
 			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
-				<p className="fr-text-mention--grey fr-mb-0">
-					{deadlinePassed
-						? "Modification close depuis le "
-						: "Modifiable jusqu'au "}
-					<OrdinalLongDate date={modifiableUntil} />
-				</p>
+				{modifyHref && (
+					<p className="fr-text-mention--grey fr-mb-0">
+						{deadlinePassed
+							? "Modification close depuis le "
+							: "Modifiable jusqu'au "}
+						<OrdinalLongDate date={modifiableUntil} />
+					</p>
+				)}
 			</div>
 			<div className={styles.transmittedActions}>
-				{viewHref && (
+				{viewHref && viewOpensNewTab && (
+					<a
+						className="fr-btn fr-btn--secondary fr-icon-eye-line"
+						href={viewHref}
+						rel="noopener noreferrer"
+						target="_blank"
+						title={viewLabel}
+					>
+						<span className="fr-sr-only">{viewLabel}</span>
+						<NewTabNotice />
+					</a>
+				)}
+				{viewHref && !viewOpensNewTab && (
 					<Link
 						className="fr-btn fr-btn--secondary fr-icon-eye-line"
 						href={viewHref}
-						title="Voir le récapitulatif de la déclaration"
+						title={viewLabel}
 					>
-						<span className="fr-sr-only">
-							Voir le récapitulatif de la déclaration
-						</span>
+						<span className="fr-sr-only">{viewLabel}</span>
 					</Link>
 				)}
-				{!deadlinePassed && (
+				{canModify && (
 					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
 						Modifier
 					</a>

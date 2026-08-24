@@ -99,6 +99,20 @@ export function isSecondDeclarationWritable(
 	);
 }
 
+// The joint-evaluation report may only be submitted while its own funnel is
+// open: right after the joint-evaluation path choice, or once the
+// declaration has been re-opened for a revised joint evaluation. Once
+// submitted (or once the démarche reaches `demarche_completed`), the engine
+// no longer exposes a matching transition — see `v2027.1.json`.
+export function isJointEvaluationWritable(
+	status: DeclarationFsmStatus | null,
+): boolean {
+	return (
+		status === "joint_evaluation_chosen" ||
+		status === "revised_joint_evaluation_chosen"
+	);
+}
+
 export function isCancelled<T extends { cancelledAt: Date | null }>(
 	declaration: T,
 ): declaration is T & { cancelledAt: Date } {

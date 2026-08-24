@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { CampaignDeadlines } from "~/modules/domain";
+import type { CampaignDeadlines, DeclarationFsmStatus } from "~/modules/domain";
 import {
 	getDeclarationDisplayContext,
 	getDefaultCampaignDeadlines,
@@ -21,6 +21,18 @@ const VARIANTS: PanelVariant[] = [
 	"cse",
 	"closed",
 ];
+
+// The playground picks a `variant` directly, bypassing `computePanelVariant`.
+// This maps each variant to one representative FSM status so the "Modifier"
+// gating (derived from the FSM, not the variant) can be previewed too.
+const VARIANT_FSM_STATUS: Record<PanelVariant, DeclarationFsmStatus | null> = {
+	start: "draft",
+	compliance_choice: "awaiting_compliance_path_choice",
+	compliance: "corrective_actions_chosen",
+	evaluation: "joint_evaluation_chosen",
+	cse: "awaiting_cse_opinion",
+	closed: "demarche_completed",
+};
 
 const COMPLIANCE_PATHS = [
 	"corrective_action",
@@ -55,6 +67,8 @@ export function PanelPlayground() {
 	const [compliancePath, setCompliancePath] =
 		useState<(typeof COMPLIANCE_PATHS)[number]>("corrective_action");
 	const [secondDeclarationSubmitted, setSecondDeclarationSubmitted] =
+		useState(true);
+	const [jointEvaluationFileUploaded, setJointEvaluationFileUploaded] =
 		useState(true);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
 	const [indicatorGRequired, setIndicatorGRequired] = useState(true);
@@ -148,6 +162,23 @@ export function PanelPlayground() {
 						/>
 						<label className="fr-label" htmlFor="second-decl-submitted">
 							Seconde déclaration soumise
+						</label>
+					</div>
+
+					<div className="fr-checkbox-group">
+						<input
+							checked={jointEvaluationFileUploaded}
+							id="joint-evaluation-file-uploaded"
+							onChange={(e) =>
+								setJointEvaluationFileUploaded(e.currentTarget.checked)
+							}
+							type="checkbox"
+						/>
+						<label
+							className="fr-label"
+							htmlFor="joint-evaluation-file-uploaded"
+						>
+							Rapport d&apos;évaluation conjointe déposé
 						</label>
 					</div>
 
@@ -255,6 +286,7 @@ export function PanelPlayground() {
 				campaignDeadlines={deadlines}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref="/declaration-remuneration?siren=000000000"
+				declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,
 					secondDeclarationPathChoice: null,
@@ -262,6 +294,14 @@ export function PanelPlayground() {
 				})}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				indicatorGRequired={indicatorGRequired}
+				jointEvaluationFile={
+					jointEvaluationFileUploaded
+						? {
+								id: "00000000-0000-0000-0000-000000000000",
+								fileName: "rapport-evaluation-conjointe.pdf",
+							}
+						: null
+				}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}

@@ -6,9 +6,11 @@ import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
+	DeclarationFsmStatus,
 } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
+import type { JointEvaluationFileInfo } from "./VerticalStepper";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
@@ -25,8 +27,10 @@ export type PanelVariant =
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	cseOpinionRequired: boolean;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	year: number;
 	indicatorGRequired: boolean;
+	jointEvaluationFile: JointEvaluationFileInfo | null;
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
@@ -40,8 +44,10 @@ type Props = {
 export function DeclarationProcessPanel({
 	campaignDeadlines,
 	cseOpinionRequired,
+	declarationFsmStatus,
 	year,
 	indicatorGRequired,
+	jointEvaluationFile,
 	lastActionDate,
 	variant,
 	displayContext,
@@ -90,8 +96,10 @@ export function DeclarationProcessPanel({
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
 							cseOpinionRequired={cseOpinionRequired}
+							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
 							indicatorGRequired={indicatorGRequired}
+							jointEvaluationFile={jointEvaluationFile}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}
 							step1={step1}
