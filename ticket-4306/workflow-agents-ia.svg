@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1660" viewBox="0 0 2560 1660" role="img" aria-label="Graphe des agents IA des skills /analyse et /implement du projet EGAPRO">
+<title>EGAPRO — graphe des agents IA des skills /analyse et /implement</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3A3F45"/>
+  </marker>
+  <marker id="arrowSoft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#9AA0A6"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="2560" height="1660" fill="#FFFFFF"/>
+<text x="48" y="58" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="700" fill="#161616">EGAPRO — graphe des agents IA</text>
+<text x="48" y="90" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="15" fill="#666666">Workflows lancés par les skills /analyse (conception) et /implement (exécution) · sources : .claude/skills/, .claude/agents/, scripts/orchestration/ · généré le 2026-08-24</text>
+<rect x="32" y="128" width="1748" height="430" rx="14" fill="#FBFBFC" stroke="#DDDDDD" stroke-width="1.5"/>
+<text x="54" y="162" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#161616">1 · /analyse &lt;issue#&gt; — CONCEPTION</text>
+<text x="54" y="184" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#666666">Le mode est déduit du type d'issue. Chaque agent obtient une validation utilisateur explicite avant de poster sur GitHub.</text>
+<rect x="1808" y="128" width="720" height="430" rx="14" fill="#FBFBFC" stroke="#DDDDDD" stroke-width="1.5"/>
+<text x="1830" y="162" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#161616">Légende</text>
+<rect x="32" y="584" width="2496" height="560" rx="14" fill="#FBFBFC" stroke="#DDDDDD" stroke-width="1.5"/>
+<text x="54" y="618" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#161616">2 · /implement &lt;issue#&gt; — mode EPIC (issue type Feature)</text>
+<text x="54" y="640" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#666666">epic_loop.sh en background : N sous-tickets en parallèle, PRs squash-mergées dans la branche d'intégration epic/&lt;N&gt;.</text>
+<rect x="790" y="650" width="1430" height="178" rx="12" fill="#FFFFFF" stroke="#B9BEC4" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="808" y="674" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="700" fill="#5A6068">TICK — répété jusqu'à convergence (EPIC_LOOP_MAX_TICKS = 30)</text>
+<rect x="32" y="1172" width="1080" height="460" rx="14" fill="#FBFBFC" stroke="#DDDDDD" stroke-width="1.5"/>
+<text x="54" y="1206" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#161616">3 · /implement &lt;issue#&gt; — mode TASK / BUG</text>
+<text x="54" y="1228" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#666666">Pas de loop : code-dev en CLI foreground bloquant, puis e2e-dev sur le même worktree.</text>
+<rect x="1140" y="1172" width="1388" height="460" rx="14" fill="#FBFBFC" stroke="#DDDDDD" stroke-width="1.5"/>
+<text x="1162" y="1206" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#161616">4 · Zoom code-dev — le seul agent qui spawne des sous-agents</text>
+<text x="1162" y="1228" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#666666">Il tourne comme process CLI main agent : un sous-agent ne peut pas en spawner un autre.</text>
+<path d="M 220 323 H 248" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 428 323 H 474 V 233 H 520" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="444.48" y="267.68" width="59.040000000000006" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="474" y="282.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">Feature</text>
+<path d="M 428 323 H 520" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="454.56" y="303.68" width="38.88" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="474" y="318.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">Task</text>
+<path d="M 428 323 H 474 V 413 H 520" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="457.92" y="357.68" width="32.160000000000004" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="474" y="372.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">Bug</text>
+<path d="M 770 233 H 798" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 918 233 H 946" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1196 233 H 1224" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1344 233 H 1372" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 770 323 H 798" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 918 323 H 946" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 770 413 H 798" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 918 413 H 946" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 230 726 H 254" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 474 726 H 498" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 738 726 H 773 V 724 H 808" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1038 724 H 1054" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1254 724 H 1270" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1475 724 H 1491" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1711 724 H 1727" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1942 724 H 1958" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 2073 756 V 786 H 923 V 756" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<rect x="1451.68" y="766.68" width="92.64000000000001" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="1498" y="781.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">tick suivant</text>
+<path d="M 923 828 L 923 848 L 195 848 L 195 890" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<rect x="362.55999999999995" y="831.68" width="374.88000000000005" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="550" y="846.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#5A6068">quand plus aucune branche ticket/* n'existe sur origin</text>
+<path d="M 320 922 H 390" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="338.92" y="902.68" width="32.160000000000004" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="355" y="917.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">oui</text>
+<path d="M 590 922 H 612" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 822 922 H 844" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 994 922 H 1090" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1005.76" y="902.68" width="72.48" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="1042" y="917.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">validated</text>
+<path d="M 1280 922 H 1302" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1477 922 H 1499" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1709 922 H 1731" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1946 922 H 1968" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 2153 922 H 2263" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="2161.68" y="902.68" width="92.64000000000001" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="2208" y="917.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">tout est bon</text>
+<path d="M 919 954 V 977 H 907.5 V 1000" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="816.53" y="958.68" width="193.44000000000003" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="913.25" y="973.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">regression (gate bloquante)</text>
+<path d="M 790 1032 H 745" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 505 1032 H 465" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 340 1000 V 868 H 1372.5 V 756" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<rect x="942.4" y="848.68" width="415.20000000000005" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="1150" y="863.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">repris au tick suivant · max 3 rounds puis dispatch=escalate</text>
+<path d="M 2054 954 L 2054 1102 L 625 1102 L 625 1064" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<rect x="1329.36" y="1085.68" width="341.28000000000003" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="1500" y="1100.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#5A6068">« demander des changements » → mode user-feedback</text>
+<path d="M 210 1279 H 230" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 405 1279 H 465" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="418.92" y="1259.68" width="32.160000000000004" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="435" y="1274.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">oui</text>
+<path d="M 650 1279 H 668" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 868 1279 H 886" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 986 1308 V 1320 H 172.5 V 1332" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 285 1361 H 305" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 435 1361 H 513" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="437.76" y="1341.68" width="72.48" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="474" y="1356.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">validated</text>
+<path d="M 703 1361 H 721" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 851 1361 H 929" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="853.76" y="1341.68" width="72.48" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="890" y="1356.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">validated</text>
+<path d="M 370 1390 V 1412 H 172.5 V 1440" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="194.69" y="1393.68" width="153.12" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="271.25" y="1408.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">needs_opus_escalation</text>
+<path d="M 370 1390 V 1412 H 412.5 V 1440" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="361.73" y="1393.68" width="59.040000000000006" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="391.25" y="1408.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">refacto</text>
+<path d="M 786 1390 V 1412 H 675 V 1440" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="690.9" y="1393.68" width="79.2" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="730.5" y="1408.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">regression</text>
+<path d="M 60 1469 L 46 1469 L 46 1361 L 60 1361" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<path d="M 1322 1281 H 1340" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1520 1281 H 1538" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1713 1281 H 1731" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1881 1281 H 1899" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 2074 1281 H 2092" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 2267 1281 H 2285" fill="none" stroke="#3A3F45" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M 1430 1310 V 1338 H 1242 V 1310" fill="none" stroke="#9AA0A6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrowSoft)"/>
+<rect x="1286.32" y="1318.68" width="99.36000000000001" height="18" rx="4" fill="#FFFFFF" opacity="0.94"/>
+<text x="1336" y="1333.08" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#444A50">TU REGRESSION</text>
+<path d="M 1625.5 1310 L 1625.5 1330 L 1440 1330 L 1440 1493" fill="none" stroke="#9AA0A6" stroke-width="2"/>
+<path d="M 1440 1367 H 1470" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1440 1409 H 1470" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1440 1451 H 1470" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1440 1493 H 1470" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 2179.5 1310 L 2179.5 1330 L 1990 1330 L 1990 1493" fill="none" stroke="#9AA0A6" stroke-width="2"/>
+<path d="M 1990 1367 H 2020" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1990 1409 H 2020" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1990 1451 H 2020" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<path d="M 1990 1493 H 2020" fill="none" stroke="#9AA0A6" stroke-width="2" marker-end="url(#arrowSoft)"/>
+<rect x="60" y="293" width="160" height="60" rx="9" fill="#000091" stroke="#000091" stroke-width="2"/>
+<text x="140" y="320.34" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="14.5" font-weight="700" fill="#FFFFFF">/analyse #N</text>
+<text x="140" y="336.47999999999996" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#C9C9F5">skill</text>
+<path d="M 264 289 H 412 L 428 323 L 412 357 H 264 L 248 323 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="338" y="320.34" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#161616">issueType ?</text>
+<text x="338" y="336.47999999999996" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#666666">gh issue view</text>
+<rect x="520" y="200" width="250" height="66" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="645" y="230.67000000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">product-owner</text>
+<text x="645" y="246.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6A5A8C">Opus · besoin métier + scénarios PO</text>
+<rect x="798" y="200" width="120" height="66" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="858" y="230.34000000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#7A4400">Gate user</text>
+<text x="858" y="246.48000000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8C6636">validation</text>
+<rect x="946" y="200" width="250" height="66" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="1071" y="230.67000000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">architect</text>
+<text x="1071" y="246.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6A5A8C">Opus · epic-create / epic-enrich</text>
+<rect x="1224" y="200" width="120" height="66" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="1284" y="230.34000000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#7A4400">Gate user</text>
+<text x="1284" y="246.48000000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8C6636">validation</text>
+<rect x="1372" y="200" width="350" height="66" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1547" y="230.67000000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#14522F">Epic #N + N sub-issues</text>
+<text x="1547" y="246.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#3F7458">spec exécutable dans le body</text>
+<rect x="520" y="290" width="250" height="66" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="645" y="320.67" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">architect</text>
+<text x="645" y="336.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6A5A8C">Opus · mode task</text>
+<rect x="798" y="290" width="120" height="66" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="858" y="320.34" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#7A4400">Gate user</text>
+<text x="858" y="336.47999999999996" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8C6636">validation</text>
+<rect x="946" y="290" width="350" height="66" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1121" y="320.16" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#14522F">commentaire ## Analyse architecte</text>
+<text x="1121" y="335.32000000000005" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#3F7458">body du ticket laissé intact</text>
+<rect x="520" y="380" width="250" height="66" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="645" y="411.198" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">bug-analyst</text>
+<text x="645" y="426.03799999999995" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.2" font-weight="400" fill="#6A5A8C">Opus · repro locale / review app / Figma</text>
+<rect x="798" y="380" width="120" height="66" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="858" y="410.34" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#7A4400">Gate user</text>
+<text x="858" y="426.47999999999996" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#8C6636">validation</text>
+<rect x="946" y="380" width="350" height="66" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1121" y="410.16" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#14522F">commentaire ## Analyse du bug</text>
+<text x="1121" y="425.32000000000005" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#3F7458">root cause + vérification one-shot</text>
+<rect x="1830" y="178" width="190" height="34" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="1925" y="199.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#3B2170">Agent Opus</text>
+<rect x="1830" y="220" width="190" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2"/>
+<text x="1925" y="241.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#123C77">Agent Sonnet</text>
+<rect x="1830" y="262" width="190" height="34" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1925" y="283.25" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#2D3238">script.sh</text>
+<rect x="1830" y="304" width="190" height="34" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="1925" y="325.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#7A4400">Gate user</text>
+<rect x="1830" y="346" width="190" height="34" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1925" y="367.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#14522F">artefact GitHub</text>
+<path d="M 1846 388 H 2004 L 2020 405 L 2004 422 H 1846 L 1830 405 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="1925" y="409.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#161616">décision</text>
+<rect x="1830" y="430" width="190" height="34" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="1925" y="451.25" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#2D3238">étape / gate externe</text>
+<rect x="60" y="696" width="170" height="60" rx="9" fill="#000091" stroke="#000091" stroke-width="2"/>
+<text x="145" y="723.34" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="14.5" font-weight="700" fill="#FFFFFF">/implement #N</text>
+<text x="145" y="739.48" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#C9C9F5">mode epic</text>
+<rect x="254" y="696" width="220" height="60" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="364" y="722.82" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">ensure_epic_branch.sh</text>
+<text x="364" y="737.6600000000001" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">epic/&lt;N&gt; depuis alpha</text>
+<rect x="498" y="696" width="240" height="60" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="618" y="722.82" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">nohup epic_loop.sh &amp;</text>
+<text x="618" y="737.6600000000001" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">loop driver background</text>
+<rect x="808" y="692" width="230" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="923" y="720.548" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.2" font-weight="700" fill="#2D3238">cleanup_terminal_worktrees.sh</text>
+<text x="923" y="735.132" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">libère les slots</text>
+<rect x="1054" y="692" width="200" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1154" y="720.82" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">rebase_epic_branch.sh</text>
+<text x="1154" y="735.6600000000001" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">epic/&lt;N&gt; ← alpha</text>
+<rect x="1270" y="692" width="205" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1372.5" y="720.99" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12.5" font-weight="700" fill="#2D3238">dispatch_plan.sh</text>
+<text x="1372.5" y="735.99" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">DAG ## Depends on</text>
+<rect x="1491" y="692" width="220" height="64" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2"/>
+<text x="1601" y="721.934" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#123C77">code-dev × N</text>
+<text x="1601" y="737.1739999999999" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#4C6B95">CLI isolé · worktree + port</text>
+<rect x="1727" y="692" width="215" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1834.5" y="720.948" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.6" font-weight="700" fill="#2D3238">process_tick_result.sh</text>
+<text x="1834.5" y="735.2599999999999" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#6E757D">JSON → mutations board</text>
+<rect x="1958" y="692" width="230" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="2073" y="720.6800000000001" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.2" font-weight="700" fill="#2D3238">merge_validated_ticket.sh</text>
+<text x="2073" y="735.064" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#6E757D">squash-merge → epic/&lt;N&gt;</text>
+<path d="M 76 890 H 304 L 320 922 L 304 954 H 76 L 60 922 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="190" y="919.33" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#161616">tous les sous-tickets</text>
+<text x="190" y="934.6500000000001" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#666666">squash-mergés dans epic/&lt;N&gt; ?</text>
+<rect x="390" y="890" width="200" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="490" y="919.292" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" font-weight="700" fill="#2D3238">run_e2e_dev.sh</text>
+<text x="490" y="934.252" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#6E757D">worktree + stack dédiés</text>
+<rect x="612" y="890" width="210" height="64" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="717" y="920.066" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">e2e-dev</text>
+<text x="717" y="935.106" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="400" fill="#6A5A8C">Opus · suite Playwright complète</text>
+<path d="M 860 890 H 978 L 994 922 L 978 954 H 860 L 844 922 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="919" y="926.93" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#161616">verdict ?</text>
+<rect x="1090" y="890" width="190" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1185" y="926.08" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">run_doc_writer.sh</text>
+<rect x="1302" y="890" width="175" height="64" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2"/>
+<text x="1389.5" y="919.67" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#123C77">doc-writer</text>
+<text x="1389.5" y="935.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#4C6B95">Sonnet · docs/*.md</text>
+<rect x="1499" y="890" width="210" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="1604" y="925.9440000000001" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.6" font-weight="700" fill="#2D3238">open_epic_final_pr.sh</text>
+<rect x="1731" y="890" width="215" height="64" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1838.5" y="919.594" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#14522F">PR epic/&lt;N&gt; → alpha</text>
+<text x="1838.5" y="934.514" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#3F7458">Closes #N par sous-ticket</text>
+<rect x="1968" y="890" width="185" height="64" rx="9" fill="#FFF2E0" stroke="#D97A00" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="2060.5" y="919.292" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#7A4400">Gate d'acceptation</text>
+<text x="2060.5" y="934.252" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#8C6636">l'utilisateur teste</text>
+<rect x="2263" y="890" width="190" height="64" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="2358" y="919.802" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#2D3238">Fin</text>
+<text x="2358" y="935.242" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#5A5F66">l'humain review + merge</text>
+<rect x="790" y="1000" width="235" height="64" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="907.5" y="1035.944" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.6" font-weight="700" fill="#2D3238">run_architect_rework.sh</text>
+<rect x="505" y="1000" width="240" height="64" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="625" y="1030.33" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">architect-rework</text>
+<text x="625" y="1044.97" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6A5A8C">Opus · e2e-regression | user-feedback</text>
+<rect x="215" y="1000" width="250" height="64" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="340" y="1029.3300000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#14522F">tickets Task de fix</text>
+<text x="340" y="1044.65" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#3F7458">créés en To Do</text>
+<rect x="60" y="1250" width="150" height="58" rx="9" fill="#000091" stroke="#000091" stroke-width="2"/>
+<text x="135" y="1283.42" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" font-weight="700" fill="#FFFFFF">/implement #N</text>
+<path d="M 246 1250 H 389 L 405 1279 L 389 1308 H 246 L 230 1279 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="317.5" y="1283.42" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#161616">analyse présente ?</text>
+<rect x="465" y="1250" width="185" height="58" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="557.5" y="1276.084" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">setup-worktree.sh</text>
+<text x="557.5" y="1290.524" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#6E757D">worktree + stack docker</text>
+<rect x="668" y="1250" width="200" height="58" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="768" y="1282.8760000000002" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11.4" font-weight="700" fill="#2D3238">create_linked_branch.sh</text>
+<rect x="886" y="1250" width="200" height="58" rx="9" fill="#F4F5F7" stroke="#8A9099" stroke-width="2"/>
+<text x="986" y="1275.82" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" font-weight="700" fill="#2D3238">set_ticket_status.sh</text>
+<text x="986" y="1290.6599999999999" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="400" fill="#6E757D">→ In progress</text>
+<rect x="60" y="1332" width="225" height="58" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2"/>
+<text x="172.5" y="1359.33" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#123C77">code-dev</text>
+<text x="172.5" y="1373.97" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#4C6B95">CLI foreground · Opus si complexe</text>
+<path d="M 321 1332 H 419 L 435 1361 L 419 1390 H 321 L 305 1361 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="370" y="1365.42" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#161616">verdict ?</text>
+<rect x="513" y="1332" width="190" height="58" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="608" y="1358.934" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">e2e-dev</text>
+<text x="608" y="1374.174" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#6A5A8C">Opus · port 3000 imposé</text>
+<path d="M 737 1332 H 835 L 851 1361 L 835 1390 H 737 L 721 1361 Z" fill="#FFFFFF" stroke="#3A3F45" stroke-width="2"/>
+<text x="786" y="1365.42" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#161616">verdict ?</text>
+<rect x="929" y="1332" width="170" height="58" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="1014" y="1358.934" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#14522F">PR ready</text>
+<text x="1014" y="1374.174" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#3F7458">ticket reste In progress</text>
+<rect x="60" y="1440" width="225" height="58" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="172.5" y="1466.67" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">relance code-dev</text>
+<text x="172.5" y="1482.3100000000002" text-anchor="middle" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace" font-size="11" font-weight="400" fill="#6A5A8C">--model opus</text>
+<rect x="305" y="1440" width="215" height="58" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="412.5" y="1466.462" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#14522F">ticket → To Do</text>
+<text x="412.5" y="1481.582" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#3F7458">re-spec via /analyse</text>
+<rect x="540" y="1440" width="270" height="58" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="675" y="1467.066" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="14.5" font-weight="700" fill="#3B2170">architect-rework</text>
+<text x="675" y="1482.1060000000002" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="400" fill="#6A5A8C">Opus · crée les tickets de fix</text>
+<rect x="1162" y="1252" width="160" height="58" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="1242" y="1278.462" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#2D3238">5 · implémenter</text>
+<text x="1242" y="1293.582" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="400" fill="#5A5F66">aucun test écrit</text>
+<rect x="1340" y="1252" width="180" height="58" rx="9" fill="#F0EAFB" stroke="#6A3FBF" stroke-width="2"/>
+<text x="1430" y="1278.99" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3B2170">5.5 · tu-dev</text>
+<text x="1430" y="1293.31" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#6A5A8C">Opus · vitest TU + intégration</text>
+<rect x="1538" y="1252" width="175" height="58" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="1625.5" y="1278.594" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#2D3238">6 · quality gates</text>
+<text x="1625.5" y="1293.514" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#5A5F66">4 agents en parallèle</text>
+<rect x="1731" y="1252" width="150" height="58" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="1806" y="1278.594" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#2D3238">7 · Figma</text>
+<text x="1806" y="1293.514" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#5A5F66">construction fidèle</text>
+<rect x="1899" y="1252" width="175" height="58" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="1986.5" y="1278.82" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="700" fill="#2D3238">8 · PR draft</text>
+<text x="1986.5" y="1292.98" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10" font-weight="400" fill="#5A5F66">force_pr_issue_link.sh</text>
+<rect x="2092" y="1252" width="175" height="58" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="2179.5" y="1278.594" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#2D3238">9 · validations</text>
+<text x="2179.5" y="1293.514" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#5A5F66">4 axes en parallèle</text>
+<rect x="2285" y="1252" width="170" height="58" rx="9" fill="#E7F5EC" stroke="#2A9159" stroke-width="2"/>
+<text x="2370" y="1278.594" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#14522F">10 · pr ready</text>
+<text x="2370" y="1293.514" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.6" font-weight="400" fill="#3F7458">status: validated</text>
+<rect x="1470" y="1350" width="250" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="1595" y="1370.6720000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="700" fill="#123C77">validator  ·  typecheck · test · lint · format</text>
+<rect x="1470" y="1392" width="250" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="1595" y="1412.6720000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="700" fill="#123C77">structural-auditor  ·  17 règles projet</text>
+<rect x="1470" y="1434" width="250" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="1595" y="1454.6720000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="700" fill="#123C77">rgaa-auditor  ·  si .tsx modifié</text>
+<rect x="1470" y="1476" width="250" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="1595" y="1496.6720000000003" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.8" font-weight="700" fill="#123C77">security-auditor  ·  si fichiers serveur</text>
+<rect x="2020" y="1350" width="270" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="2155" y="1370.536" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="700" fill="#123C77">functional-validator · scénarios PO</text>
+<rect x="2020" y="1392" width="270" height="34" rx="9" fill="#E6F1FC" stroke="#2A6FD6" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="2155" y="1412.536" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="700" fill="#123C77">design-validator · fidélité Figma (UI)</text>
+<rect x="2020" y="1434" width="270" height="34" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="2155" y="1454.536" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="700" fill="#2D3238">9b · CI GitHub Actions</text>
+<rect x="2020" y="1476" width="270" height="34" rx="9" fill="#EEF0F2" stroke="#5A5F66" stroke-width="2"/>
+<text x="2155" y="1496.536" text-anchor="middle" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="10.4" font-weight="700" fill="#2D3238">9c/9d · SonarCloud + bots de review</text>
+<text x="60" y="486" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Chaque ticket feuille reçoit Size + Estimate (set_ticket_size.sh) — ces points alimentent /velocity et /plan-sprint.</text>
+<text x="60" y="510" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Aucune transition de board ici : To Do → In progress est la responsabilité de /implement.</text>
+<text x="2038" y="200" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">raisonnement lourd — conception, tests, rework</text>
+<text x="2038" y="242" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">exécution cadrée, gates qualité</text>
+<text x="2038" y="284" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">orchestration bash — scripts/orchestration/</text>
+<text x="2038" y="326" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">validation utilisateur explicite requise</text>
+<text x="2038" y="368" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">issue, commentaire, PR, branche</text>
+<text x="2038" y="410" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">branchement sur un verdict</text>
+<text x="2038" y="452" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#3A3F45">pas un agent — étape interne, CI, SonarCloud, fin de flux</text>
+<text x="1830" y="496" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">— — —   boucle de reprise / handback vers l'agent précédent</text>
+<text x="1830" y="520" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">cadre pointillé bleu = agent read-only : il rapporte des findings, ne corrige rien</text>
+<text x="1830" y="544" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Un sous-agent ne peut pas en spawner un autre → code-dev tourne comme process CLI.</text>
+<text x="808" y="818" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#666666" font-style="normal">≤ EPIC_MAX_PARALLEL (5) tickets en vol · un process claude CLI par ticket, budget USD isolé</text>
+<text x="60" y="1128" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Suivi : /loop /report &lt;N&gt; (auto-report adaptatif) · état des ticks : .claude/state/epic_run/ · exit 2 = dispatch=escalate, intervention humaine requise.</text>
+<text x="60" y="1540" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Le ticket reste In progress : les transitions In review / Done sont user-only.</text>
+<text x="60" y="1564" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">code-dev n'écrit aucun test — TU + intégration → tu-dev, E2E → e2e-dev.</text>
+<text x="60" y="1588" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">Analyse absente (## Analyse architecte / ## Analyse du bug) → /implement propose /analyse &lt;N&gt; et sort.</text>
+<text x="1162" y="1560" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">3 RETRY sur un axe → needs_opus_escalation (Sonnet) / refacto (Opus). Les 4 auditors + les 2 validators sont read-only : ils rapportent, code-dev corrige.</text>
+<text x="1162" y="1584" font-family="Marianne, 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#666666" font-style="normal">9b / 9c / 9d ne sont pas des agents mais des gates externes : CI GitHub Actions, SonarCloud, bots de review.</text>
+</svg>
