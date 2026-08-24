@@ -24,7 +24,8 @@ const SIREN = "552100554";
 const YEAR = 2027;
 const DEADLINE = "2027-06-01T00:00:00.000Z";
 const RAISON_SOCIALE = "Société Démo";
-const COMPLIANCE_DEADLINE = "1er septembre 2028";
+const COMPLIANCE_DEADLINE = "2028-09-01T00:00:00.000Z";
+const COMPLIANCE_DEADLINE_FR = "1ᵉʳ septembre 2028";
 
 const PAYLOADS: NotificationPayloadMap = {
 	declaration_confirmation: {
@@ -49,6 +50,11 @@ const PAYLOADS: NotificationPayloadMap = {
 		siren: SIREN,
 		year: YEAR,
 		variant: "completed",
+		raisonSociale: RAISON_SOCIALE,
+	},
+	representation_receipt: {
+		siren: SIREN,
+		year: YEAR,
 		raisonSociale: RAISON_SOCIALE,
 	},
 	cycle_opening_info: { siren: SIREN, year: YEAR, deadline: DEADLINE },
@@ -286,6 +292,50 @@ describe("per-type rendering details", () => {
 		).rejects.toThrow(/Unknown joint_evaluation_submitted variant/);
 	});
 
+	it("representation_receipt acknowledges the balanced representation declaration", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.subject).toBe(
+			"Egapro - Représentation équilibrée : accusé de réception",
+		);
+		expect(mail.html).toContain(
+			"la déclaration des indicateurs de représentation équilibrée",
+		);
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("SIREN :");
+		expect(mail.html).toContain(SIREN);
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).toContain("accuse réception de cette transmission");
+		expect(mail.html).toContain("démarche est désormais terminée");
+	});
+
+	it("representation_receipt closes the journey on the user space without any CSE follow-up", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain(getMySpaceUrl());
+		expect(mail.html).not.toContain("/avis-cse");
+		expect(mail.html).not.toContain("/declaration-remuneration");
+	});
+
+	it("representation_receipt escapes the raisonSociale", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: "<script>alert(1)</script>",
+		});
+
+		expect(mail.html).not.toContain("<script>alert(1)</script>");
+	});
+
 	it("cycle_opening_info announces the declaration period", async () => {
 		const mail = await buildMail("cycle_opening_info", {
 			siren: SIREN,
@@ -498,9 +548,22 @@ describe("declaration_confirmation variants", () => {
 		expect(mail.subject).toBe("Egapro - Transmission de la déclaration");
 		expect(mail.html).toContain("Sélectionner le parcours");
 		expect(mail.html).toContain("supérieurs ou égaux à 5 %");
-		expect(mail.html).toContain(COMPLIANCE_DEADLINE);
+		// The verbatim ISO leaking into the mail was the reported bug.
+		expect(mail.html).toContain(COMPLIANCE_DEADLINE_FR);
+		expect(mail.html).not.toContain(COMPLIANCE_DEADLINE);
 		expect(mail.html).toContain(`href="${compliancePathUrl}"`);
 		expect(mail.html).toContain(`>${loginUrl}<`);
+	});
+
+	it("path_to_select: requires the compliance deadline", async () => {
+		await expect(
+			buildMail("declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
 	});
 });
 

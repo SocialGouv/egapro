@@ -41,10 +41,8 @@ export async function buildDeclarationAttachments(
 	siren: string,
 	year: number,
 ): Promise<MailAttachment[]> {
-	return Promise.all([
-		renderDeclarationPdf(siren, year, "initial"),
-		renderTransmittedPdf(siren, year),
-	]);
+	// The transmitted recap is structurally empty at first declaration.
+	return [await renderDeclarationPdf(siren, year, "initial")];
 }
 
 export async function buildSecondDeclarationAttachments(

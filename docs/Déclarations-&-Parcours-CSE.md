@@ -23,14 +23,14 @@
 - Phase 2 (parcours conformité) déclenchée uniquement si les 3 conditions cumulées : **100+** · **7e ind G calculé** · **écart G ≥ 5%**.
 - 50-99 n'entre jamais en Phase 2 (pas de CSE, donc pas de consultation possible), même si G ≥ 5% (2030+).
 - Avis CSE déposé uniquement si l'entreprise a effectivement un CSE constitué.
-- Deadline finale de dépôt avis CSE + publication = **1er mars N+1** (sauf Justifier : 1er octobre N).
+- Deadline finale de dépôt avis CSE + publication = **1er mars N+1** (échéance de justification des écarts alignée sur le 1er mars N+1).
 - Pas de mail d'ouverture en 2027 (première année · pas de base utilisateurs).
 
 ---
 
 ## 2. Flowchart complet 2027
 
-Entrée en vigueur V2 — toutes tranches ≥ 50 obligatoires pour les 6 ind A–F. 7e ind G obligatoire pour 150+ (triennal an 1 pour 150-249 · annuel pour 250+), pas de 7e pour 50-149. Pas de mail d'ouverture (première année). Dépôt avis CSE + confirmation uniquement si CSE existant (fork "A CSE ?" sur tous les chemins). Deadlines spécifiques par chemin (Justifier 1er oct · Éval conjointe 1er sept rapport / 1er mars 2028 avis CSE · Actions correctives 1er jan 2028 / 1er mars 2028). Chemins volontairement dupliqués pour la lisibilité.
+Entrée en vigueur V2 — toutes tranches ≥ 50 obligatoires pour les 6 ind A–F. 7e ind G obligatoire pour 150+ (triennal an 1 pour 150-249 · annuel pour 250+), pas de 7e pour 50-149. Pas de mail d'ouverture (première année). Dépôt avis CSE + confirmation uniquement si CSE existant (fork "A CSE ?" sur tous les chemins). Deadlines spécifiques par chemin (Justifier 1er mars 2028 · Éval conjointe 1er sept rapport / 1er mars 2028 avis CSE · Actions correctives 1er jan 2028 / 1er mars 2028). Chemins volontairement dupliqués pour la lisibilité.
 
 ```mermaid
 flowchart TB
@@ -111,10 +111,10 @@ flowchart TB
     CHOIX --> PA["🔧 Actions correctives"]:::variantPath
     CHOIX --> PE["🤝 Évaluation conjointe"]:::variantPath
 
-    %% ─── Chemin 4b-J : Justifier (dépôt 1er oct · rappel 1er déc si pas déposé) ───
+    %% ─── Chemin 4b-J : Justifier (dépôt 1er mars 2028 · rappel 1er déc si pas déposé) ───
     PJ --> HC_J{"A CSE ?"}:::diamond
-    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er octobre"]:::mail
-    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er octobre"]:::pink
+    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2028"]:::mail
+    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2028"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre<br/>(si pas encore déposé)"]:::mail
     MG_J2 --> S_J["📋 Avis CSE soumis"]:::state
     S_J --> MH_J["📧 Mail confirmation avis CSE"]:::mail
@@ -275,11 +275,11 @@ flowchart TB
     ST2_DONE --> PA["🔧 Actions correctives"]:::variantPath
     ST2_DONE --> PE["🤝 Évaluation conjointe"]:::variantPath
 
-    %% ─── Chemin 4b-J : Justifier (dépôt 1er oct · rappel 1er déc si pas déposé) ───
+    %% ─── Chemin 4b-J : Justifier (dépôt 1er mars 2028 · rappel 1er déc si pas déposé) ───
     PJ --> HC_J{"A CSE ?"}:::diamond
     HC_J -- "OUI" --> ST6J_PROG["🟡 Déposer le ou les<br/>avis CSE — En cours"]:::stageInProgress
-    ST6J_PROG --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er octobre"]:::mail
-    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er octobre"]:::pink
+    ST6J_PROG --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2028"]:::mail
+    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2028"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre<br/>(si pas encore déposé)"]:::mail
     MG_J2 --> S_J["📋 Avis CSE soumis"]:::state
     S_J --> ST6J_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
@@ -447,8 +447,8 @@ flowchart TB
 
     %% ─── 4b-J : Justifier ───
     PJ --> HC_J{"A CSE ?"}:::diamond
-    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er octobre 2028"]:::mail
-    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er octobre 2028"]:::pink
+    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2029"]:::mail
+    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2029"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre 2028<br/>(si pas encore déposé)"]:::mail
     MG_J2 --> MH_J["📧 Mail confirmation avis CSE"]:::mail
     MH_J --> PUB_J["Publication A–F publique"]:::blue
@@ -590,8 +590,8 @@ flowchart TB
 
     %% ─── 4b-J : Justifier ───
     PJ --> HC_J{"A CSE ?"}:::diamond
-    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er octobre 2029"]:::mail
-    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er octobre 2029"]:::pink
+    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2030"]:::mail
+    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2030"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre 2029<br/>(si pas encore déposé)"]:::mail
     MG_J2 --> MH_J["📧 Mail confirmation avis CSE"]:::mail
     MH_J --> PUB_J["Publication A–F publique"]:::blue
@@ -719,8 +719,8 @@ flowchart TB
 
     %% ─── 3b-J : Justifier ───
     PJ --> HC_J{"A CSE ?"}:::diamond
-    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er octobre 2030"]:::mail
-    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er octobre 2030"]:::pink
+    HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2031"]:::mail
+    MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2031"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre 2030<br/>(si pas encore déposé)"]:::mail
     MG_J2 --> MH_J["📧 Mail confirmation avis CSE"]:::mail
     MH_J --> PUB_J["Publication A–F publique"]:::blue

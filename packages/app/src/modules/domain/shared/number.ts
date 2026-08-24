@@ -14,6 +14,15 @@ export function parseNumber(value: string): number {
 	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
 }
 
+/** Coerce a stored numeric (DB string, number, or empty) to a finite number, else null. */
+export function toNullableNumber(
+	value: string | number | null | undefined,
+): number | null {
+	if (value == null || value === "") return null;
+	const parsed = typeof value === "number" ? value : Number(value);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
 /**
  * Normalize a raw decimal input: strip spaces, replace comma with dot,
  * reject any character that is not a digit or a single dot.

@@ -65,6 +65,10 @@ export const AUDIT_ACTIONS = {
 	// ── Admin settings mutations ──────────────────────────
 	ADMIN_SETTINGS_UPSERT_DEADLINES: "admin_settings.upsert_deadlines",
 	ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT: "admin_settings.update_lock_timeout",
+	ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN:
+		"admin_settings.get_representation_campaign",
+	ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN:
+		"admin_settings.upsert_representation_campaign",
 
 	// ── Admin stats reads ─────────────────────────────────
 	ADMIN_STATS_CAMPAIGN_PROGRESSION: "admin_stats.campaign_progression",
@@ -87,6 +91,11 @@ export const AUDIT_ACTIONS = {
 	DRAFT_SAVE: "declaration_draft.save",
 	DRAFT_CLEAR: "declaration_draft.clear",
 
+	// ── Representation declaration ─────────────────────────
+	REPRESENTATION_GET: "representation_declaration.get",
+	REPRESENTATION_SAVE_DRAFT: "representation_declaration.save_draft",
+	REPRESENTATION_SUBMIT: "representation_declaration.submit",
+
 	// ── Sensitive reads ────────────────────────────────────
 	DECLARATION_HISTORY_READ: "declaration_history.read",
 	ADMIN_FILE_DOWNLOAD: "admin.file_download",
@@ -94,6 +103,7 @@ export const AUDIT_ACTIONS = {
 	DECLARATION_READ_GIP_DATA: "declaration.read_gip_data",
 	PDF_DECLARATION_DOWNLOAD: "pdf.declaration_download",
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
+	PDF_REPRESENTATION_DOWNLOAD: "pdf.representation_download",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
 	// ── Exports & external API consumers ──────────────────
@@ -101,6 +111,7 @@ export const AUDIT_ACTIONS = {
 	EXPORT_GENERATE: "export.generate",
 	EXPORT_API_DECLARATIONS: "export.api_declarations",
 	EXPORT_API_FILES: "export.api_files",
+	EXPORT_API_REPRESENTATIONS: "export.api_representations",
 
 	// ── Mail ───────────────────────────────────────────────
 	MAIL_RECEIPT_SEND: "mail.receipt_send",
@@ -116,6 +127,7 @@ export const AUDIT_ACTIONS = {
 	PUBLIC_DECLARATIONS_SEARCH: "public_declarations.search",
 
 	PUBLIC_DECLARATIONS_EXPORT: "public_declarations.export",
+	PUBLIC_REPRESENTATIONS_EXPORT: "public_representations.export",
 
 	// ── Public stats reads ─────────────────────────────────
 	PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE:
@@ -124,6 +136,11 @@ export const AUDIT_ACTIONS = {
 	// ── Public declaration reads ───────────────────────────
 	PUBLIC_DECLARATIONS_BY_SIREN: "public_declarations.by_siren",
 	PUBLIC_DECLARATIONS_BY_SIREN_YEAR: "public_declarations.by_siren_year",
+
+	// ── Public representation reads ────────────────────────
+	PUBLIC_REPRESENTATIONS_SEARCH: "public_representations.search",
+	PUBLIC_REPRESENTATIONS_BY_SIREN: "public_representations.by_siren",
+	PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR: "public_representations.by_siren_year",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
@@ -181,6 +198,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: "mutation",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: "read_sensitive",
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: "mutation",
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: "read_sensitive",
@@ -195,18 +214,23 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DRAFT_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
+	[AUDIT_ACTIONS.REPRESENTATION_GET]: "read_sensitive",
+	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: "mutation",
+	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_HISTORY_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PROFILE_READ]: "read_sensitive",
 	[AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
 	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: "export",
 	[AUDIT_ACTIONS.EXPORT_GENERATE]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_DECLARATIONS]: "export",
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: "export",
+	[AUDIT_ACTIONS.EXPORT_API_REPRESENTATIONS]: "export",
 
 	[AUDIT_ACTIONS.MAIL_RECEIPT_SEND]: "mutation",
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: "mutation",
@@ -219,11 +243,16 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_SEARCH]: "read_sensitive",
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: "export",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: "export",
 
 	[AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE]: "public_search",
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: "read_sensitive",
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: "read_sensitive",
+
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_SEARCH]: "read_sensitive",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: "read_sensitive",
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: "read_sensitive",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",

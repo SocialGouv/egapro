@@ -3,6 +3,7 @@ import { api, HydrateClient } from "~/trpc/server";
 
 import { CampaignDeadlinesForm } from "./CampaignDeadlinesForm";
 import { LockTimeoutForm } from "./LockTimeoutForm";
+import { RepresentationCampaignForm } from "./RepresentationCampaignForm";
 
 export async function AdminSettingsPage() {
 	const overview = await api.adminSettings.getOverview();
@@ -25,6 +26,16 @@ export async function AdminSettingsPage() {
 					configuredYears={overview.configuredYears}
 					initialYear={initialYear}
 				/>
+			</section>
+
+			<section
+				aria-labelledby="representation-campaign-heading"
+				className="fr-mt-4w"
+			>
+				<h2 className="fr-h3" id="representation-campaign-heading">
+					Campagne représentation équilibrée
+				</h2>
+				<RepresentationCampaignForm initialYear={getCurrentYear()} />
 			</section>
 
 			<section aria-labelledby="lock-timeout-heading" className="fr-mt-4w">

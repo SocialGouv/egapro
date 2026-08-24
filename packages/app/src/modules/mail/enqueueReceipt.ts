@@ -10,6 +10,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	hasStartedSecondDeclaration,
 	isInComplianceProcess,
+	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
@@ -30,7 +31,8 @@ export type ReceiptKind =
 	| "declaration"
 	| "secondDeclaration"
 	| "cseOpinion"
-	| "jointEvaluation";
+	| "jointEvaluation"
+	| "representation";
 
 export type EnqueueReceiptInput = {
 	kind: ReceiptKind;
@@ -46,6 +48,7 @@ const KIND_TO_TYPE = {
 	secondDeclaration: "second_declaration_confirmation",
 	cseOpinion: "cse_opinion_receipt",
 	jointEvaluation: "joint_evaluation_submitted",
+	representation: "representation_receipt",
 } as const satisfies Record<ReceiptKind, NotificationType>;
 
 type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
@@ -120,11 +123,15 @@ async function buildConfirmationPayload(
 				cseRequired: context.cseRequired,
 			});
 			if (variant === "path_to_select") {
-				const deadlines = await getCampaignDeadlines(year);
+				// The first declaration acknowledges round 1, the second round 2.
+				const complianceDeadline = selectPathChoiceDeadline(
+					await getCampaignDeadlines(year),
+					type !== "declaration_confirmation",
+				);
 				return {
 					...base,
 					variant,
-					complianceDeadline: deadlines.pathChoiceDeadline.toISOString(),
+					complianceDeadline: complianceDeadline.toISOString(),
 				};
 			}
 			return { ...base, variant };
@@ -146,6 +153,9 @@ async function buildConfirmationPayload(
 					hasGapAboveThreshold: context.hasGapAboveThreshold,
 				}),
 			};
+		}
+		case "representation_receipt": {
+			return base;
 		}
 	}
 }
@@ -278,7 +288,7 @@ export async function enqueueReceipt(
 				kind,
 				year,
 				isResend,
-				variant: payload.variant,
+				...("variant" in payload ? { variant: payload.variant } : {}),
 				...(droppedReason === null ? {} : { attachmentsDropped: true }),
 			},
 		});

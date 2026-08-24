@@ -133,6 +133,8 @@ export async function CompliancePathPage() {
 		hasSubmittedSecondDeclaration: data.hasSubmittedSecondDeclaration,
 		hasSubmittedCseOpinion: data.hasSubmittedCseOpinion,
 		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
+		// Round 2's date on purpose, both rounds: the round-1 date is shown to nudge,
+		// it must not close the choice. Do not swap in selectPathChoiceDeadline.
 		pathChoiceDeadline: campaignDeadlines.pathChoiceDeadline,
 	});
 

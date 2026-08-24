@@ -10,15 +10,35 @@ export type {
 export {
 	isCompanyDiffusible,
 	publicDeclarationColumns,
+	toNumber,
 	toPublicDeclaration,
 } from "./projection";
 export type {
+	PublicRepresentationCompanySource,
+	PublicRepresentationSource,
+} from "./representationProjection";
+export {
+	publicRepresentationColumns,
+	toPublicRepresentation,
+} from "./representationProjection";
+export {
+	getPublicRepresentationBySirenYear,
+	getPublicRepresentationsBySiren,
+	searchPublicRepresentations,
+} from "./representationsBySirenService";
+export type {
 	PublicDeclarationDTO,
+	PublicRepresentationDTO,
+	PublicRepresentationSearchInput,
+	PublicRepresentationSearchResultDTO,
 	PublicSearchInput,
 	PublicSearchResultDTO,
 } from "./schemas";
 export {
 	publicDeclarationDTOSchema,
+	publicRepresentationDTOSchema,
+	publicRepresentationSearchInputSchema,
+	publicRepresentationSearchResultDTOSchema,
 	publicSearchInputSchema,
 	publicSearchResultDTOSchema,
 } from "./schemas";

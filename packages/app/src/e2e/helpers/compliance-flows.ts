@@ -191,6 +191,25 @@ export async function completeSecondDeclaration(
 		await page.getByRole("link", { name: "Suivant" }).click();
 		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/2`);
 
+		// #4215 — on the read-only second declaration, the source line sits between the
+		// intro and "Tous les champs sont obligatoires.", not after the reference period.
+		const categoryBlock = page.locator("#content");
+		const sourceLine = categoryBlock.getByText(
+			"Source utilisée pour déterminer les catégories d'emplois",
+		);
+		const mandatoryLine = categoryBlock.getByText(
+			"Tous les champs sont obligatoires",
+		);
+		await expect(sourceLine).toBeVisible();
+		await expect(mandatoryLine).toBeVisible();
+		const [sourceBox, mandatoryBox] = await Promise.all([
+			sourceLine.boundingBox(),
+			mandatoryLine.boundingBox(),
+		]);
+		expect(sourceBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(
+			mandatoryBox?.y ?? Number.NEGATIVE_INFINITY,
+		);
+
 		// Step 2: Edit correction employee category data
 		// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap
 		const menSalary = options.hasGap ? "1100" : "1020";

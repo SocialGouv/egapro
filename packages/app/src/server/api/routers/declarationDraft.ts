@@ -7,6 +7,7 @@ import {
 	getDraftInput,
 	saveDraftInput,
 } from "~/modules/declaration-remuneration/shared/draft/schemas";
+import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
@@ -111,7 +112,7 @@ export const declarationDraftRouter = createTRPCRouter({
 				if (lock && lock.userId !== ctx.session.user.id) {
 					throw new TRPCError({
 						code: "CONFLICT",
-						message: "Déclaration verrouillée par un autre utilisateur.",
+						message: DECLARATION_LOCK_CONFLICT_MESSAGE,
 					});
 				}
 			}
@@ -168,22 +169,33 @@ export const declarationDraftRouter = createTRPCRouter({
 				isNull(declarations.cancelledAt),
 			);
 
+			const rows = await ctx.db
+				.select({ id: declarations.id, draft: declarations.draft })
+				.from(declarations)
+				.where(where)
+				.limit(1);
+
+			const existing = rows[0];
+
+			if (existing) {
+				const lock = await getActiveLock(ctx.db, existing.id);
+				if (lock && lock.userId !== ctx.session.user.id) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: "Déclaration verrouillée par un autre utilisateur.",
+					});
+				}
+			}
+
 			if (kind === undefined) {
 				await ctx.db
 					.update(declarations)
 					.set({ draft: null, draftUpdatedAt: null })
 					.where(where);
 			} else {
-				const rows = await ctx.db
-					.select({ draft: declarations.draft })
-					.from(declarations)
-					.where(where)
-					.limit(1);
+				if (!existing || existing.draft === null) return { ok: true as const };
 
-				const row = rows[0];
-				if (!row || row.draft === null) return { ok: true as const };
-
-				const current = row.draft as DraftBlob;
+				const current = existing.draft as DraftBlob;
 				let newDraft: DraftBlob | null;
 
 				if (step !== undefined) {

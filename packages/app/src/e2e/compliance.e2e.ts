@@ -432,8 +432,9 @@ test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinn
 // is asserted in missing-info-modal.e2e.ts, and the recap's own null-like-false
 // rendering by Step6Review.test.tsx ("CSE consultation section gating (issue #3945)").
 
-const CSE_OPINION_RECAP_TEXT = /avis du CSE devront être transmis/;
-const CSE_JUSTIFY_PARENTHESIS = /avis à transmettre sur le portail/;
+const CSE_OPINION_RECAP_TEXT = /avis du CSE devra être transmis/;
+const CSE_JUSTIFY_PARENTHESIS =
+	/avis à transmettre lors de la dernière étape de la démarche/;
 const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
 
 test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
@@ -511,6 +512,16 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		).toBeVisible();
 		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toBeVisible();
 		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toBeVisible();
+
+		// First declaration renders both alternative paths, each prefixed "Soit"
+		await expect(
+			page.getByText(/Soit mettre en place des actions correctives/),
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				"Soit réaliser une évaluation conjointe des rémunérations",
+			),
+		).toBeVisible();
 	});
 
 	test("compliance choice page keeps the CSE opinion bullet", async ({

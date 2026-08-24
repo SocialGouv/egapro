@@ -360,4 +360,37 @@ describe("validateJobData — confirmation variants", () => {
 			if (!result.ok) expect(result.reason).toContain("siren");
 		});
 	});
+
+	describe("representation_receipt", () => {
+		it("accepts a company-scoped payload without any variant", () => {
+			const result = validateJobData(
+				buildConfirmation("representation_receipt", {
+					...BASE_SCOPE,
+					raisonSociale: "Société Démo",
+				}),
+			);
+			expect(result.ok).toBe(true);
+		});
+
+		it("rejects an empty raisonSociale", () => {
+			const result = validateJobData(
+				buildConfirmation("representation_receipt", {
+					...BASE_SCOPE,
+					raisonSociale: "",
+				}),
+			);
+			expect(result.ok).toBe(false);
+			if (!result.ok) expect(result.reason).toContain("raisonSociale");
+		});
+
+		it("rejects a payload missing siren/year", () => {
+			const result = validateJobData(
+				buildConfirmation("representation_receipt", {
+					raisonSociale: "Société Démo",
+				}),
+			);
+			expect(result.ok).toBe(false);
+			if (!result.ok) expect(result.reason).toContain("siren");
+		});
+	});
 });

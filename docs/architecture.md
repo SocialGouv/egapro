@@ -366,6 +366,7 @@ Définies dans `src/server/api/trpc.ts`. Les routers (un par domaine) composent 
 | `publicReferents` | `routers/publicReferents.ts` | `search`, `getById` |
 | `gipMds` | `routers/gipMds.ts` | `importFromUrl` |
 | `mail` | `routers/mail.ts` | `resendReceipt` |
+| `representationDeclaration` | `routers/representationDeclaration.ts` | `get`, `saveDraft`, `submit` — déclaration de représentation équilibrée (loi Rixain), scopée SIREN via `companyProcedure`/`companyWriteProcedure` |
 
 ### 6.3 Schémas Zod partagés
 
@@ -400,7 +401,13 @@ Définition dans `src/server/db/`. Tables principales :
 | `globalSettings` | Paramètres globaux (table à une seule ligne, `id = 1`) : `declarationLockTimeoutMinutes` |
 | `gipMdsData` | Pré-remplissage GIP-MDS (par siren + year) |
 | `adminImpersonationEvents` | Trace des impersonations admin |
+| `representationCampaigns` (`representation_campaign`) | Surcharge de campagne par année pour la déclaration de représentation équilibrée (`year` PK, `campaignStartDate`, `campaignEndDate`, `declarationDeadline`) |
+| `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep` |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
+
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). Le middleware tRPC applique une **allowlist de métadonnées** (`METADATA_ALLOWED_KEYS`) sur les procédures `representationDeclaration.*` : seule la clé `year` de l'input brut est conservée dans `audit.action_log.metadata`, pour ne jamais y faire fuiter les pourcentages ou le texte libre du brouillon.
+
+**SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
 #### Table `declarationLocks`
 

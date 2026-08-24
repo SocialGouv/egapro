@@ -1,8 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import {
-	EXPECTED_DECLARATION_TYPES,
-	getReferenceYearFor,
-} from "~/modules/domain";
+import { getReferenceYearFor } from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	getCurrentDbYear,
@@ -458,10 +455,12 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 // db-campaign.resetCampaignYear.integration.test.ts.
 //
 // Two things make the assertion narrower than it looks. The listing carries one
-// row per expected declaration type (rémunération + représentation), so a bare
-// row count would encode that arity instead of the isolation property. And a row
-// cannot be matched on its text: a campaign-year row legitimately mentions N-1,
-// the reference year its figures describe. Only the Année cell discriminates.
+// row per declaration type the company is in scope for — here rémunération only,
+// since #3702 gates the représentation line behind a GIP pre-filter this 250-employee
+// coordinate does not clear — so a bare row count would encode that arity instead of
+// the isolation property. And a row cannot be matched on its text: a campaign-year row
+// legitimately mentions N-1, the reference year its figures describe. Only the Année
+// cell discriminates.
 test.describe("withCampaignYear leaves no residue between two year coordinates (#4067)", () => {
 	test("a run pinned on 2033 leaves no trace of the 2032 coordinate", async ({
 		page,
@@ -488,9 +487,8 @@ test.describe("withCampaignYear leaves no residue between two year coordinates (
 				});
 
 			await expect(rowsForYear("2032")).toHaveCount(0);
-			await expect(rowsForYear("2033")).toHaveCount(
-				EXPECTED_DECLARATION_TYPES.length,
-			);
+			await expect(rowsForYear("2033")).toHaveCount(1);
+			await expect(rowsForYear("2033")).toContainText("Rémunération");
 		});
 	});
 });

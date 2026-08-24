@@ -1,3 +1,9 @@
+// Submodule imports, not the barrel — the barrel drags declaration-remuneration's (server-touching) tree into this client bundle.
+import {
+	REPRESENTATION_FUNNEL_ROOT,
+	stepHref,
+} from "~/modules/declaration-representation/steps";
+import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { isCseOpinionResolved } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import type { DeclarationItem } from "./types";
@@ -65,4 +71,43 @@ export function computeCtaHref(
 				? `/declaration-remuneration?siren=${siren}`
 				: `/avis-cse?siren=${siren}`;
 	}
+}
+
+export type RepresentationPanelVariant =
+	| "start"
+	| "draft"
+	| "submitted"
+	| "closed";
+
+// Representation has no FSM yet — progression is this 3-bucket DeclarationItem.status.
+type RepresentationProgress = "not_started" | "draft" | "submitted";
+
+function getRepresentationProgress(
+	declaration: DeclarationItem | undefined,
+): RepresentationProgress {
+	if (declaration?.status === "done") return "submitted";
+	if (declaration?.status === "in_progress") return "draft";
+	return "not_started";
+}
+
+export function computeRepresentationPanelVariant(
+	declaration: DeclarationItem | undefined,
+	campaignOpen: boolean,
+): RepresentationPanelVariant {
+	if (!campaignOpen) return "closed";
+	const progress = getRepresentationProgress(declaration);
+	return progress === "not_started" ? "start" : progress;
+}
+
+export function computeRepresentationCtaHref(
+	declaration: DeclarationItem | undefined,
+	campaignOpen: boolean,
+): string {
+	if (!campaignOpen) return stepHref(TOTAL_REPRESENTATION_STEPS);
+	const progress = getRepresentationProgress(declaration);
+	if (progress === "submitted") return stepHref(TOTAL_REPRESENTATION_STEPS);
+	if (progress === "draft") {
+		return stepHref(Math.max(declaration?.currentStep ?? 1, 1));
+	}
+	return REPRESENTATION_FUNNEL_ROOT;
 }

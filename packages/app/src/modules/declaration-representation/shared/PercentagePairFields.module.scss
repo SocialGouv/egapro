@@ -1,0 +1,39 @@
+.legend:global(.fr-fieldset__legend) {
+	padding-bottom: 0.5rem;
+	font-weight: 500;
+}
+
+.fieldsRow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 1.5rem;
+}
+
+.field {
+	flex: 0 0 auto;
+	width: 8.25rem;
+}
+
+.inputWithUnit {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.inputWithUnit :global(.fr-input) {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.unit {
+	flex: 0 0 auto;
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+	color: var(--text-default-grey);
+}
+
+.hint:global(.fr-message) {
+	margin-top: 1rem;
+}

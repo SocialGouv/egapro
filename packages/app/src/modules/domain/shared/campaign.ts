@@ -1,4 +1,4 @@
-import type { CampaignDeadlines } from "../types";
+import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
 import { formatLongDate } from "./format";
 
@@ -45,19 +45,60 @@ export function getPathChoiceDeadline(year: number): Date {
 	return new Date(year + 1, 0, 1);
 }
 
+/** Returns the derived round-1 deadline to choose a compliance path (July 1st of the campaign year). */
+export function getPathChoiceRound1Deadline(year: number): Date {
+	return new Date(year, 6, 1);
+}
+
+/**
+ * Returns the deadline to choose a compliance path for the round the company is in.
+ *
+ * Display only — never feed a read-only gate or a write guard with it: the path
+ * choice stays open past the round-1 date (see CompliancePathPage).
+ */
+export function selectPathChoiceDeadline(
+	deadlines: CampaignDeadlines,
+	isSecondRound: boolean,
+): Date {
+	return isSecondRound
+		? deadlines.pathChoiceDeadline
+		: deadlines.pathChoiceRound1Deadline;
+}
+
 /** Returns default campaign deadlines for a given year (fallback when no DB config exists). */
 export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
 		gipPublicationDate: null,
 		campaignStartDate: null,
 		decl1ModificationDeadline: new Date(year, 5, 1),
-		decl1JustificationDeadline: new Date(year, 5, 1),
+		decl1JustificationDeadline: new Date(year + 1, 2, 1),
 		decl1JointEvaluationDeadline: new Date(year, 7, 1),
 		decl2ModificationDeadline: new Date(year, 11, 1),
 		decl2JustificationDeadline: new Date(year, 11, 1),
 		decl2JointEvaluationDeadline: new Date(year + 1, 1, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
+		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};
+}
+
+export function getDefaultRepresentationCampaign(
+	campaignYear: number,
+): RepresentationCampaign {
+	return {
+		campaignStartDate: new Date(campaignYear, 0, 1),
+		campaignEndDate: new Date(campaignYear, 11, 31),
+		declarationDeadline: new Date(campaignYear, 2, 1),
+	};
+}
+
+export function isRepresentationCampaignOpen(
+	campaign: RepresentationCampaign,
+	now: Date,
+): boolean {
+	return (
+		now.getTime() >= campaign.campaignStartDate.getTime() &&
+		now.getTime() <= campaign.campaignEndDate.getTime()
+	);
 }
 
 /** Returns true if the given deadline is strictly in the past. */

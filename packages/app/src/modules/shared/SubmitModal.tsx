@@ -8,6 +8,7 @@ type Props = {
 	description: React.ReactNode;
 	certifyLabel: string;
 	certifyInputId: string;
+	isPending?: boolean;
 	modalRef: React.RefObject<HTMLDialogElement | null>;
 	onClose: () => void;
 	onSubmit: () => void;
@@ -19,6 +20,7 @@ export function SubmitModal({
 	description,
 	certifyLabel,
 	certifyInputId,
+	isPending = false,
 	modalRef,
 	onClose,
 	onSubmit,
@@ -29,6 +31,11 @@ export function SubmitModal({
 		setCertified(false);
 		onClose();
 	}, [onClose]);
+
+	const handleSubmit = useCallback(() => {
+		if (isPending) return;
+		onSubmit();
+	}, [isPending, onSubmit]);
 
 	return (
 		<dialog
@@ -76,12 +83,13 @@ export function SubmitModal({
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 									<li>
 										<button
+											aria-disabled={isPending || undefined}
 											className="fr-btn"
 											disabled={!certified}
-											onClick={onSubmit}
+											onClick={handleSubmit}
 											type="button"
 										>
-											Valider
+											{isPending ? "Envoi en cours…" : "Valider"}
 										</button>
 									</li>
 									<li>
@@ -94,6 +102,9 @@ export function SubmitModal({
 										</button>
 									</li>
 								</ul>
+								<p aria-live="polite" className="fr-sr-only">
+									{isPending ? "Envoi en cours…" : ""}
+								</p>
 							</div>
 						</div>
 					</div>

@@ -8,6 +8,7 @@ import {
 	buildJointEvaluationReminderMail,
 	buildJointEvaluationSubmittedMail,
 	buildNextCycleHandoverMail,
+	buildRepresentationReceiptMail,
 	buildSecondDeclarationConfirmationMail,
 	buildSecondDeclarationReminderMail,
 } from "./builders/index.js";
@@ -31,6 +32,7 @@ export const MAIL_BUILDERS: MailBuilderRegistry = {
 	joint_evaluation_reminder: buildJointEvaluationReminderMail,
 	cse_opinion_reminder: buildCseOpinionReminderMail,
 	next_cycle_handover: buildNextCycleHandoverMail,
+	representation_receipt: buildRepresentationReceiptMail,
 };
 
 export function isNotificationType(value: unknown): value is NotificationType {

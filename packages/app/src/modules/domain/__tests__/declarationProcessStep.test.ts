@@ -27,7 +27,7 @@ describe("getDeclarationProcessStepDeadline", () => {
 		{ fsm: "draft", deadlineKey: "decl1ModificationDeadline" },
 		{
 			fsm: "awaiting_compliance_path_choice",
-			deadlineKey: "decl2ModificationDeadline",
+			deadlineKey: "pathChoiceRound1Deadline",
 		},
 		{
 			fsm: "corrective_actions_chosen",
@@ -35,7 +35,7 @@ describe("getDeclarationProcessStepDeadline", () => {
 		},
 		{
 			fsm: "awaiting_revision_choice",
-			deadlineKey: "decl2JointEvaluationDeadline",
+			deadlineKey: "pathChoiceDeadline",
 		},
 		{
 			fsm: "joint_evaluation_chosen",

@@ -51,6 +51,7 @@ function deadlines(
 		decl2JustificationDeadline: future,
 		decl2JointEvaluationDeadline: future,
 		pathChoiceDeadline: past,
+		pathChoiceRound1Deadline: past,
 		...overrides,
 	};
 }

@@ -3,14 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
+import {
+	getCurrentStageHref,
+	getPostComplianceDestination,
+} from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { hasHighGap } from "~/modules/domain";
+import {
+	type DeclarationFsmStatus,
+	hasHighGap,
+	isSecondDeclarationWritable,
+} from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
@@ -26,6 +33,7 @@ type Props = {
 	declarationYear: number;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
+	status: DeclarationFsmStatus | null;
 };
 
 export function SecondDeclarationStep3Review({
@@ -34,9 +42,11 @@ export function SecondDeclarationStep3Review({
 	declarationYear,
 	secondDeclarationCategories,
 	siren,
+	status,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
+	const isWritable = isSecondDeclarationWritable(status);
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some((cat) =>
@@ -72,8 +82,14 @@ export function SecondDeclarationStep3Review({
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
+		if (!isWritable) return;
 		openModal();
 	}
+
+	const nextHref = isWritable
+		? undefined
+		: getCurrentStageHref(status, cseOpinionRequired);
+	const nextLabel = isWritable ? "Soumettre" : "Suivant";
 
 	return (
 		<form
@@ -158,18 +174,21 @@ export function SecondDeclarationStep3Review({
 			<FormErrors mutationError={mutation.error?.message} />
 
 			<FormActions
-				nextLabel="Soumettre"
+				nextHref={nextHref}
+				nextLabel={nextLabel}
 				previousHref={`${BASE_PATH}/etape/2`}
 			/>
 
-			<SubmitDeclarationModal
-				isPending={mutation.isPending}
-				isSecondDeclaration
-				modalRef={modalRef}
-				onClose={closeModal}
-				onSubmit={() => mutation.mutate()}
-				year={declarationYear}
-			/>
+			{isWritable ? (
+				<SubmitDeclarationModal
+					isPending={mutation.isPending}
+					isSecondDeclaration
+					modalRef={modalRef}
+					onClose={closeModal}
+					onSubmit={() => mutation.mutate()}
+					year={declarationYear}
+				/>
+			) : null}
 		</form>
 	);
 }

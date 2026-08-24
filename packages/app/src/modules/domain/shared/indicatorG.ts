@@ -1,3 +1,4 @@
+import { alignCampaignYear } from "./campaignAlignment";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
 
 export const INDICATOR_G_ANNUAL_MIN = 250;
@@ -6,9 +7,10 @@ export const INDICATOR_G_UNIVERSAL_YEAR = 2030;
 export const INDICATOR_G_TRIENNIAL_BASE_YEAR = 2027;
 
 export function isTriennialYear(year: number): boolean {
+	const aligned = alignCampaignYear(year);
 	return (
-		year >= INDICATOR_G_TRIENNIAL_BASE_YEAR &&
-		(year - INDICATOR_G_TRIENNIAL_BASE_YEAR) % 3 === 0
+		aligned >= INDICATOR_G_TRIENNIAL_BASE_YEAR &&
+		(aligned - INDICATOR_G_TRIENNIAL_BASE_YEAR) % 3 === 0
 	);
 }
 

@@ -112,7 +112,7 @@ export function Step5EmployeeCategories({
 		<CategoryForm
 			accordionId="accordion-step5"
 			defaultValuesOverride={categoryFormDefaultOverride}
-			disabled={isImpersonating || isLocked}
+			disabled={isImpersonating}
 			hasDataOverride={hasInitialData || hasDraft}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
@@ -134,6 +134,7 @@ export function Step5EmployeeCategories({
 			}
 			onValuesChange={(values) => setField(values)}
 			previousHref="/declaration-remuneration/etape/4"
+			readOnly={isLocked}
 			referenceYear={getReferenceYearFor(declarationYear)}
 			stepper={
 				<StepIndicator

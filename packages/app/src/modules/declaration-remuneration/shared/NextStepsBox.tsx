@@ -44,8 +44,8 @@ export function NextStepsBox({
 
 						<div className={styles.ctaGroup}>
 							<p className="fr-mb-0">
-								Le ou les avis du CSE devront être transmis sur le portail lors
-								de la dernière étape.
+								L&apos;avis du CSE devra être transmis lors de la dernière étape
+								de la démarche.
 							</p>
 							<TrackedLink
 								className="fr-link"
@@ -99,9 +99,10 @@ export function NextStepsBox({
 						</div>
 
 						<p className="fr-mb-0">
-							Suite à l&apos;analyse de vos données de l&apos;indicateur par
-							catégorie de salariés, des écarts &ge; 5 % ont été identifiés.
-							Vous devez engager un des parcours de mise en conformité
+							À la suite de l&apos;analyse de vos données de l&apos;indicateur
+							par catégorie de salariés, des écarts &ge; 5 % ont{" "}
+							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
+							. Vous devez engager un des parcours de mise en conformité
 							suivant&nbsp;:
 						</p>
 
@@ -112,27 +113,31 @@ export function NextStepsBox({
 									sexistes.
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
-								le CSE
-								{cseOpinionRequired &&
-									" (avis à transmettre sur le portail lors de la dernière étape)"}
+								le CSE sur cette justification
+								{cseOpinionRequired
+									? " (avis à transmettre lors de la dernière étape de la démarche)."
+									: "."}
 							</li>
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous pouvez&nbsp;:
+							objectifs et non sexistes, vous{" "}
+							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
 						</p>
 						<ul>
 							{!isSecondDeclaration && (
 								<li>
 									<strong>
-										Mettre en place des actions correctives et effectuer une
-										seconde déclaration dans un délai de 6 mois
+										Soit mettre en place des actions correctives et effectuer
+										une seconde déclaration dans un délai de 6 mois
 									</strong>
 								</li>
 							)}
 							<li>
 								<strong>
-									Réaliser une évaluation conjointe des rémunérations
+									{isSecondDeclaration
+										? "Réaliser une évaluation conjointe des rémunérations"
+										: "Soit réaliser une évaluation conjointe des rémunérations"}
 								</strong>
 							</li>
 						</ul>
