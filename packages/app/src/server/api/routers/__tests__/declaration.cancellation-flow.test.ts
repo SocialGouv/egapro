@@ -55,6 +55,8 @@ type StoredRow = {
 	status: string;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	cancelledAt: Date | null;
 	submittedAt: Date | null;
 };
@@ -112,6 +114,8 @@ function buildTx() {
 							status: values.status ?? "draft",
 							totalWomen: null,
 							totalMen: null,
+							hourlyWomen: null,
+							hourlyMen: null,
 							cancelledAt: null,
 							submittedAt: null,
 						};
@@ -239,6 +243,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "submitted",
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 				cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 				submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 			},
@@ -268,6 +274,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "submitted",
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 				cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 				submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 			},
@@ -280,6 +288,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "draft",
 				totalWomen: null,
 				totalMen: null,
+				hourlyWomen: null,
+				hourlyMen: null,
 				cancelledAt: null,
 				submittedAt: null,
 			},
@@ -304,6 +314,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 30,
 			totalMen: 40,
+			hourlyWomen: 30,
+			hourlyMen: 40,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 		};
@@ -316,6 +328,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: 50,
 			totalMen: 60,
+			hourlyWomen: 50,
+			hourlyMen: 60,
 			cancelledAt: null,
 			submittedAt: null,
 		};
@@ -343,6 +357,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 12,
 			totalMen: 18,
+			hourlyWomen: 12,
+			hourlyMen: 18,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 		};
@@ -355,6 +371,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: null,
 			totalMen: null,
+			hourlyWomen: null,
+			hourlyMen: null,
 			cancelledAt: null,
 			submittedAt: null,
 		};
@@ -363,7 +381,12 @@ describe("declaration cancellation redeposit flow", () => {
 		const db = buildDb();
 		const caller = await createLockedCaller(db);
 
-		await caller.updateStep1({ totalWomen: 70, totalMen: 80 });
+		await caller.updateStep1({
+			totalWomen: 70,
+			totalMen: 80,
+			hourlyWomen: 70,
+			hourlyMen: 80,
+		});
 
 		expect(activeRow.totalWomen).toBe(70);
 		expect(activeRow.totalMen).toBe(80);
@@ -381,6 +404,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 30,
 			totalMen: 40,
+			hourlyWomen: 30,
+			hourlyMen: 40,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-01T08:00:00Z`),
 		};
@@ -393,6 +418,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: 50,
 			totalMen: 60,
+			hourlyWomen: 50,
+			hourlyMen: 60,
 			cancelledAt: null,
 			submittedAt: null,
 		};

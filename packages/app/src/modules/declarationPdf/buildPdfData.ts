@@ -162,6 +162,8 @@ export async function buildPdfData(
 		},
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
+		hourlyWomen: declaration.hourlyWomen ?? 0,
+		hourlyMen: declaration.hourlyMen ?? 0,
 		step2Data,
 		step3Data,
 		step4Data,

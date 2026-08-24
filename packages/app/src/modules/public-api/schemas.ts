@@ -27,6 +27,8 @@ export const publicDeclarationDTOSchema = z.object({
 	workforceEma: z.number().nullable(),
 	totalWomen: z.number().int().nullable(),
 	totalMen: z.number().int().nullable(),
+	hourlyWomen: z.number().int().nullable(),
+	hourlyMen: z.number().int().nullable(),
 	globalAnnualMeanGap: z.number().nullable(),
 	globalAnnualMedianGap: z.number().nullable(),
 	globalHourlyMeanGap: z.number().nullable(),

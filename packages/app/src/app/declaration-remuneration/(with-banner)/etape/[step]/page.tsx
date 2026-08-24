@@ -72,12 +72,16 @@ export default async function StepPage({ params }: StepPageProps) {
 	const step1Data = {
 		totalWomen: d.totalWomen ?? gip?.step1.totalWomen ?? 0,
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
+		hourlyWomen: d.hourlyWomen ?? gip?.step1.hourlyWomen ?? 0,
+		hourlyMen: d.hourlyMen ?? gip?.step1.hourlyMen ?? 0,
 	};
 
 	const effectiveGipPrefillData = getEffectiveGipPrefillData(
 		gip,
 		d.totalWomen,
 		d.totalMen,
+		d.hourlyWomen,
+		d.hourlyMen,
 	);
 
 	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =

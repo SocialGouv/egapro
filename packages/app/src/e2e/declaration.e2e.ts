@@ -68,12 +68,24 @@ test.describe("Declaration workflow", () => {
 			page.getByRole("heading", { name: /Effectifs/i }),
 		).toBeVisible();
 
-		// Fill workforce data directly in the table
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		// Fill workforce data directly in the table, one row per pay basis
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("15");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("15");
 
-		// Verify total is computed
-		await expect(page.getByText("25", { exact: true })).toBeVisible();
+		// Verify each row total is computed
+		await expect(page.getByText("25", { exact: true }).first()).toBeVisible();
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
@@ -251,8 +263,20 @@ test.describe("Declaration workflow", () => {
 		await goToStep(page, 1);
 
 		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("");
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("");
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 

@@ -43,6 +43,8 @@ function makeData(step4: Step4Data): DeclarationPdfData {
 		},
 		totalWomen: 0,
 		totalMen: 0,
+		hourlyWomen: 0,
+		hourlyMen: 0,
 		step2Data: {} as DeclarationPdfData["step2Data"],
 		step3Data: {} as DeclarationPdfData["step3Data"],
 		step4Data: step4,

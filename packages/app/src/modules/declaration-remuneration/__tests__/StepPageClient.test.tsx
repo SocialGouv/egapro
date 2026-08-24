@@ -61,6 +61,8 @@ const baseProps = {
 		year: 2025,
 		totalWomen: null,
 		totalMen: null,
+		hourlyWomen: null,
+		hourlyMen: null,
 		status: "awaiting_compliance_path_choice" as const,
 	},
 	companyWorkforce: 120,

@@ -137,9 +137,21 @@ export async function submitStepsThroughQuartiles(
 		// Navigate to create/resume declaration → redirects to step 1
 		await page.goto("/declaration-remuneration");
 		await page.waitForURL("**/declaration-remuneration/etape/1");
-		// 10 women + 15 men = 25 total
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		// 10 women + 15 men = 25 total, on both pay bases
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("15");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("15");
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
