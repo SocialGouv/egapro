@@ -21,6 +21,9 @@ import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../shared/formError/types";
+import { describedByForField, findFieldError } from "../shared/formError/types";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillResetConfirmDialog } from "../shared/PrefillResetConfirmDialog";
@@ -40,6 +43,10 @@ type Step1WorkforceProps = {
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
+
+const WORKFORCE_ALERT_ID = "step1-workforce-error";
+const WOMEN_FIELD_ID = "step1-women";
+const MEN_FIELD_ID = "step1-men";
 
 export function Step1Workforce({
 	declarationSiren,
@@ -93,8 +100,9 @@ export function Step1Workforce({
 	const [menRaw, setMenRaw] = useState(() =>
 		initialData.totalMen > 0 ? String(initialData.totalMen) : "",
 	);
-	const [womenError, setWomenError] = useState<string | null>(null);
-	const [menError, setMenError] = useState<string | null>(null);
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const womenError = findFieldError(fieldErrors, WOMEN_FIELD_ID);
+	const menError = findFieldError(fieldErrors, MEN_FIELD_ID);
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
 		if (typeof d.totalWomen === "number") {
@@ -156,7 +164,7 @@ export function Step1Workforce({
 	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const raw = e.target.value;
 		setWomenRaw(raw);
-		setWomenError(null);
+		setFieldErrors((prev) => prev.filter((e) => e.fieldId !== WOMEN_FIELD_ID));
 		const value = parseIntegerInput(raw);
 		if (value === null) return;
 		form.setValue("totalWomen", value);
@@ -166,7 +174,7 @@ export function Step1Workforce({
 	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const raw = e.target.value;
 		setMenRaw(raw);
-		setMenError(null);
+		setFieldErrors((prev) => prev.filter((e) => e.fieldId !== MEN_FIELD_ID));
 		const value = parseIntegerInput(raw);
 		if (value === null) return;
 		form.setValue("totalMen", value);
@@ -176,16 +184,23 @@ export function Step1Workforce({
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
-		const womenEmpty = womenRaw === "";
-		const menEmpty = menRaw === "";
-
-		if (womenEmpty) {
-			setWomenError("Veuillez renseigner le nombre de femmes.");
+		const missing: FieldError[] = [];
+		if (womenRaw === "") {
+			missing.push({
+				fieldId: WOMEN_FIELD_ID,
+				category: "empty",
+				message: "Renseignez le nombre de femmes.",
+			});
 		}
-		if (menEmpty) {
-			setMenError("Veuillez renseigner le nombre d'hommes.");
+		if (menRaw === "") {
+			missing.push({
+				fieldId: MEN_FIELD_ID,
+				category: "empty",
+				message: "Renseignez le nombre d'hommes.",
+			});
 		}
-		if (womenEmpty || menEmpty) return;
+		setFieldErrors(missing);
+		if (missing.length > 0) return;
 
 		setValidationError(null);
 		if (shouldConfirmReset) {
@@ -299,9 +314,10 @@ export function Step1Workforce({
 																}
 															>
 																<input
-																	aria-describedby={
-																		womenError ? "women-error" : undefined
-																	}
+																	aria-describedby={describedByForField(
+																		WORKFORCE_ALERT_ID,
+																		womenError,
+																	)}
 																	aria-invalid={womenError ? true : undefined}
 																	aria-label="Nombre de femmes"
 																	className={
@@ -310,6 +326,7 @@ export function Step1Workforce({
 																			: `fr-input ${common.numericInput}`
 																	}
 																	disabled={isImpersonating}
+																	id={WOMEN_FIELD_ID}
 																	inputMode="numeric"
 																	onChange={handleWomenChange}
 																	pattern="[0-9]*"
@@ -317,11 +334,6 @@ export function Step1Workforce({
 																	type="text"
 																	value={womenRaw}
 																/>
-																{womenError && (
-																	<p className="fr-error-text" id="women-error">
-																		{womenError}
-																	</p>
-																)}
 															</div>
 														</td>
 														<td>
@@ -333,9 +345,10 @@ export function Step1Workforce({
 																}
 															>
 																<input
-																	aria-describedby={
-																		menError ? "men-error" : undefined
-																	}
+																	aria-describedby={describedByForField(
+																		WORKFORCE_ALERT_ID,
+																		menError,
+																	)}
 																	aria-invalid={menError ? true : undefined}
 																	aria-label="Nombre d'hommes"
 																	className={
@@ -344,6 +357,7 @@ export function Step1Workforce({
 																			: `fr-input ${common.numericInput}`
 																	}
 																	disabled={isImpersonating}
+																	id={MEN_FIELD_ID}
 																	inputMode="numeric"
 																	onChange={handleMenChange}
 																	pattern="[0-9]*"
@@ -351,11 +365,6 @@ export function Step1Workforce({
 																	type="text"
 																	value={menRaw}
 																/>
-																{menError && (
-																	<p className="fr-error-text" id="men-error">
-																		{menError}
-																	</p>
-																)}
 															</div>
 														</td>
 														<td className="fr-cell--right">
@@ -370,6 +379,8 @@ export function Step1Workforce({
 							</div>
 
 							{isPrefilled && <PrefillSource year={declarationYear} />}
+
+							<FieldErrorAlert errors={fieldErrors} id={WORKFORCE_ALERT_ID} />
 
 							{showResetWarning && <PrefillResetWarning />}
 						</div>

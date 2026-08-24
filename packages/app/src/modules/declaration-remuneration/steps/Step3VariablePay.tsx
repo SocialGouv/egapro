@@ -24,6 +24,10 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import { derivePayGapErrors } from "../shared/formError/payGapErrors";
+import type { FieldError } from "../shared/formError/types";
+import { describedByForField, findFieldError } from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep3 } from "../shared/gipToStepData";
@@ -60,6 +64,18 @@ function padStep3(data: Step3Data): Step3Data {
 		),
 	) as Step3Data;
 }
+
+const PAY_GAP_ID_PREFIX = "step3-paygap";
+const PAY_GAP_ALERT_ID = "step3-paygap-error";
+const BENEFICIARIES_ALERT_ID = "step3-beneficiaries-error";
+const BENEFICIARY_FIELD_IDS = {
+	indicatorEWomen: "step3-beneficiaries-f",
+	indicatorEMen: "step3-beneficiaries-h",
+} as const;
+const BENEFICIARY_LABELS = {
+	indicatorEWomen: "de femmes bénéficiaires",
+	indicatorEMen: "d'hommes bénéficiaires",
+} as const;
 
 export function Step3VariablePay({
 	declarationSiren,
@@ -121,12 +137,9 @@ export function Step3VariablePay({
 	const beneficiaryWomen = formData.indicatorEWomen ?? "";
 	const beneficiaryMen = formData.indicatorEMen ?? "";
 
-	const [benefValidationError, setBenefValidationError] = useState<{
-		field: "indicatorEMen" | "indicatorEWomen";
-		message: string;
-	} | null>(null);
+	const [benefErrors, setBenefErrors] = useState<FieldError[]>([]);
 	const hasData = hasSavedData || hasDraft;
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const [payGapErrors, setPayGapErrors] = useState<FieldError[]>([]);
 
 	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => {
@@ -152,33 +165,53 @@ export function Step3VariablePay({
 	) {
 		if (value === "") {
 			form.setValue(field, "");
-			setBenefValidationError(null);
+			setBenefErrors([]);
 			return;
 		}
 		if (/\D/.test(value)) return;
 		const n = Number.parseInt(value, 10);
 		if (Number.isNaN(n) || n < 0) return;
 		if (max !== undefined && n > max) {
-			setBenefValidationError({
-				field,
-				message: `Le nombre de bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-			});
+			setBenefErrors([
+				{
+					fieldId: BENEFICIARY_FIELD_IDS[field],
+					category: "invalid",
+					message: `Le nombre ${BENEFICIARY_LABELS[field]} ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+				},
+			]);
 			return;
 		}
-		setBenefValidationError(null);
+		setBenefErrors([]);
 		form.setValue(field, value);
 	}
 
+	const womenBeneficiaryError = findFieldError(
+		benefErrors,
+		BENEFICIARY_FIELD_IDS.indicatorEWomen,
+	);
+	const menBeneficiaryError = findFieldError(
+		benefErrors,
+		BENEFICIARY_FIELD_IDS.indicatorEMen,
+	);
+
 	const onSubmit = form.handleSubmit(() => {
-		const incompleteRows = rows.some((r) => !r.womenValue || !r.menValue);
-		const incompleteBeneficiaries = !beneficiaryWomen || !beneficiaryMen;
-		if (incompleteRows || incompleteBeneficiaries) {
-			setValidationError(
-				"Veuillez renseigner toutes les données avant de passer à l'étape suivante.",
-			);
-			return;
-		}
-		setValidationError(null);
+		const tableErrors = derivePayGapErrors(PAY_GAP_ID_PREFIX, rows);
+		setPayGapErrors(tableErrors);
+
+		const missingBeneficiaries: FieldError[] = (
+			["indicatorEWomen", "indicatorEMen"] as const
+		)
+			.filter((field) =>
+				field === "indicatorEWomen" ? !beneficiaryWomen : !beneficiaryMen,
+			)
+			.map((field) => ({
+				fieldId: BENEFICIARY_FIELD_IDS[field],
+				category: "empty" as const,
+				message: `Renseignez le nombre ${BENEFICIARY_LABELS[field]}.`,
+			}));
+		if (missingBeneficiaries.length > 0) setBenefErrors(missingBeneficiaries);
+
+		if (tableErrors.length > 0 || missingBeneficiaries.length > 0) return;
 		mutation.mutate(form.getValues() as Step3Data);
 	});
 
@@ -259,6 +292,9 @@ export function Step3VariablePay({
 								<span className="fr-sr-only">Type de rémunération</span>
 							}
 							disabled={isImpersonating}
+							errorAlertId={PAY_GAP_ALERT_ID}
+							errors={payGapErrors}
+							idPrefix={PAY_GAP_ID_PREFIX}
 							onRowChange={handleRowChange}
 							readOnly={isReadOnly}
 							rows={rows}
@@ -270,6 +306,8 @@ export function Step3VariablePay({
 								year={declarationYear}
 							/>
 						)}
+
+						<FieldErrorAlert errors={payGapErrors} id={PAY_GAP_ALERT_ID} />
 					</div>
 
 					<div className={common.flexColumnGap1}>
@@ -320,21 +358,17 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
-															aria-describedby={
-																benefValidationError?.field ===
-																"indicatorEWomen"
-																	? "step3-beneficiaries-error"
-																	: undefined
-															}
+															aria-describedby={describedByForField(
+																BENEFICIARIES_ALERT_ID,
+																womenBeneficiaryError,
+															)}
 															aria-invalid={
-																benefValidationError?.field ===
-																"indicatorEWomen"
-																	? true
-																	: undefined
+																womenBeneficiaryError ? true : undefined
 															}
 															aria-label="Bénéficiaires femmes"
-															className={`fr-input ${common.numericInput}`}
+															className={`fr-input ${womenBeneficiaryError ? "fr-input--error" : ""}${common.numericInput}`}
 															disabled={isImpersonating}
+															id={BENEFICIARY_FIELD_IDS.indicatorEWomen}
 															inputMode="numeric"
 															onChange={(e) =>
 																handleBenefChange(
@@ -365,19 +399,17 @@ export function Step3VariablePay({
 													</td>
 													<td>
 														<input
-															aria-describedby={
-																benefValidationError?.field === "indicatorEMen"
-																	? "step3-beneficiaries-error"
-																	: undefined
-															}
+															aria-describedby={describedByForField(
+																BENEFICIARIES_ALERT_ID,
+																menBeneficiaryError,
+															)}
 															aria-invalid={
-																benefValidationError?.field === "indicatorEMen"
-																	? true
-																	: undefined
+																menBeneficiaryError ? true : undefined
 															}
 															aria-label="Bénéficiaires hommes"
-															className={`fr-input ${common.numericInput}`}
+															className={`fr-input ${menBeneficiaryError ? "fr-input--error" : ""}${common.numericInput}`}
 															disabled={isImpersonating}
+															id={BENEFICIARY_FIELD_IDS.indicatorEMen}
 															inputMode="numeric"
 															onChange={(e) =>
 																handleBenefChange(
@@ -408,16 +440,7 @@ export function Step3VariablePay({
 							</div>
 						</div>
 
-						{benefValidationError && (
-							<div
-								className="fr-alert fr-alert--error fr-alert--sm"
-								role="alert"
-							>
-								<p id="step3-beneficiaries-error">
-									{benefValidationError.message}
-								</p>
-							</div>
-						)}
+						<FieldErrorAlert errors={benefErrors} id={BENEFICIARIES_ALERT_ID} />
 
 						{gipPrefillData && (
 							<PrefillSource
@@ -460,10 +483,7 @@ export function Step3VariablePay({
 					variant="variablePay"
 				/>
 
-				<FormErrors
-					mutationError={mutation.error?.message}
-					validationError={validationError}
-				/>
+				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
 					isSubmitting={mutation.isPending}

@@ -9,6 +9,7 @@ import {
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -16,6 +17,8 @@ import {
 } from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { FieldErrorAlert } from "~/modules/declaration-remuneration/shared/formError/FieldErrorAlert";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
@@ -32,7 +35,6 @@ import {
 	padDecimalToTwo,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
@@ -126,6 +128,11 @@ type Props = {
 	};
 };
 
+const CATEGORY_ALERT_ID = "step5-categories-error";
+// The step-5 checks are form-level (a source not picked, totals that do not
+// reconcile), so they anchor on the form itself rather than on one cell.
+const CATEGORY_FORM_FIELD_ID = "step5-categories";
+
 export function CategoryForm({
 	referenceYear,
 	title,
@@ -187,7 +194,7 @@ export function CategoryForm({
 	const [hasDataInternal, setHasData] = useState(hasInitialData);
 	const hasData =
 		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
-	const [workforceError, setWorkforceError] = useState("");
+	const [categoryErrors, setCategoryErrors] = useState<FieldError[]>([]);
 	const [expandedByFieldId, setExpandedByFieldId] = useState<
 		Record<string, boolean>
 	>({});
@@ -308,22 +315,30 @@ export function CategoryForm({
 	const sourceError = form.formState.errors.source?.message;
 
 	const handleFormSubmit = form.handleSubmit((data) => {
-		setWorkforceError("");
+		setCategoryErrors([]);
 
 		const emptyNames = data.categories.some((cat) => !cat.name.trim());
 		if (emptyNames) {
-			setWorkforceError(
-				"Le nom de chaque catégorie d'emplois est obligatoire.",
-			);
+			setCategoryErrors([
+				{
+					fieldId: CATEGORY_FORM_FIELD_ID,
+					category: "empty",
+					message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+				},
+			]);
 			return;
 		}
 
 		const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
 		const hasDuplicates = names.length !== new Set(names).size;
 		if (hasDuplicates) {
-			setWorkforceError(
-				"Les noms des catégories d'emplois doivent être uniques.",
-			);
+			setCategoryErrors([
+				{
+					fieldId: CATEGORY_FORM_FIELD_ID,
+					category: "invalid",
+					message: "Les noms des catégories d'emplois doivent être uniques.",
+				},
+			]);
 			return;
 		}
 
@@ -342,9 +357,14 @@ export function CategoryForm({
 			);
 		});
 		if (hasIncompleteRemuneration) {
-			setWorkforceError(
-				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
-			);
+			setCategoryErrors([
+				{
+					fieldId: CATEGORY_FORM_FIELD_ID,
+					category: "empty",
+					message:
+						"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+				},
+			]);
 			return;
 		}
 
@@ -365,7 +385,13 @@ export function CategoryForm({
 				);
 			}
 			if (errors.length > 0) {
-				setWorkforceError(errors.join(" "));
+				setCategoryErrors([
+					{
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "inconsistent",
+						message: errors.join(" "),
+					},
+				]);
 				return;
 			}
 		}
@@ -583,10 +609,9 @@ export function CategoryForm({
 				</div>
 			</DefinitionAccordion>
 
-			<FormErrors
-				mutationError={submitError}
-				validationError={workforceError}
-			/>
+			<FieldErrorAlert errors={categoryErrors} id={CATEGORY_ALERT_ID} />
+
+			<FormErrors mutationError={submitError} />
 
 			<FormActions
 				className="fr-mt-0"

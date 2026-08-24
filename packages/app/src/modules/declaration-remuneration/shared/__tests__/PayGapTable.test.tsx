@@ -17,6 +17,7 @@ function renderTable(rows: PayGapRow[]) {
 		<PayGapTable
 			caption="Écarts de rémunération"
 			columnHeader="Rémunération"
+			idPrefix="test-paygap"
 			onRowChange={vi.fn()}
 			rows={rows}
 		/>,
@@ -92,6 +93,7 @@ describe("PayGapTable", () => {
 			<PayGapTable
 				caption="Écarts de rémunération"
 				columnHeader="Rémunération"
+				idPrefix="test-paygap"
 				onRowChange={onRowChange}
 				rows={[gipRow({ womenValue: "", menValue: "" })]}
 			/>,
@@ -115,6 +117,7 @@ describe("PayGapTable", () => {
 			<PayGapTable
 				caption="Écarts de rémunération"
 				columnHeader="Rémunération"
+				idPrefix="test-paygap"
 				onRowChange={onRowChange}
 				rows={[gipRow({ womenValue: "12", menValue: "12" })]}
 			/>,

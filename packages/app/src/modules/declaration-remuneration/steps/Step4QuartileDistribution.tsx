@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared";
@@ -16,6 +16,8 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../shared/formError/types";
 import { getNextStepHref } from "../shared/funnelSteps";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
@@ -65,6 +67,8 @@ type Step4QuartileDistributionProps = {
 	maxMen?: number;
 };
 
+const QUARTILE_ALERT_ID = "step4-error-summary";
+
 export function Step4QuartileDistribution({
 	declarationSiren,
 	declarationYear,
@@ -77,7 +81,6 @@ export function Step4QuartileDistribution({
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly } = useLockContext();
-	const alertRef = useRef<HTMLDivElement | null>(null);
 
 	const hasSavedData =
 		initialData.annual.some(
@@ -269,10 +272,6 @@ export function Step4QuartileDistribution({
 		clearFieldError(tableType, index, field);
 	}
 
-	function focusAlert() {
-		requestAnimationFrame(() => alertRef.current?.focus());
-	}
-
 	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const values = form.getValues();
@@ -280,7 +279,6 @@ export function Step4QuartileDistribution({
 		if (hasAnyError(errors)) {
 			setFieldErrors(errors);
 			setShowRecap(true);
-			focusAlert();
 			return;
 		}
 		setFieldErrors(emptyErrorMap());
@@ -291,8 +289,16 @@ export function Step4QuartileDistribution({
 	const annualMins = computeMinsForTable(annual);
 	const hourlyMins = computeMinsForTable(hourly);
 
-	const recap = buildRecap(fieldErrors);
-	const showAlert = showRecap && recap.length > 0;
+	// The recap is capped at 4 anchors, so the per-cell messages stay inline:
+	// a quartile form can hold up to 24 offending cells (#4235).
+	const recapErrors: FieldError[] = showRecap
+		? buildRecap(fieldErrors).map((entry) => ({
+				fieldId: entry.id,
+				category: "empty",
+				message: entry.label,
+				anchor: true,
+			}))
+		: [];
 
 	const coherenceWarnings = deriveCoherenceWarnings(
 		{ annual, hourly },
@@ -368,26 +374,7 @@ export function Step4QuartileDistribution({
 					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				{showAlert && (
-					<div
-						aria-labelledby="step4-error-summary-title"
-						className="fr-alert fr-alert--error"
-						ref={alertRef}
-						role="alert"
-						tabIndex={-1}
-					>
-						<h3 className="fr-alert__title" id="step4-error-summary-title">
-							Le formulaire contient des erreurs
-						</h3>
-						<ul>
-							{recap.map((entry) => (
-								<li key={entry.id}>
-									<a href={`#${entry.id}`}>{entry.label}</a>
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
+				<FieldErrorAlert errors={recapErrors} id={QUARTILE_ALERT_ID} />
 
 				{/* The live region stays mounted at load; only its content toggles,
 				    otherwise assistive tech misses the announcement. */}

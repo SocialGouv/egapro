@@ -223,7 +223,7 @@ describe("Step1Workforce", () => {
 		});
 	});
 
-	it("shows field-level error messages when submitting with empty inputs", async () => {
+	it("names every empty field in a single error alert on submit", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step1Workforce
@@ -237,12 +237,16 @@ describe("Step1Workforce", () => {
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
 
-		expect(
-			screen.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Veuillez renseigner le nombre d'hommes."),
-		).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(within(alert).getByText("Champ vide")).toBeInTheDocument();
+		expect(alert).toHaveTextContent("Renseignez le nombre de femmes.");
+		expect(alert).toHaveTextContent("Renseignez le nombre d'hommes.");
+		// The maquette keeps the cell free of text: only the error state shows.
+		expect(document.querySelector(".fr-error-text")).toBeNull();
+		expect(screen.getByLabelText("Nombre de femmes")).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
 	});
 
 	it("blocks submit when one field is cleared after having a value", async () => {
@@ -260,9 +264,9 @@ describe("Step1Workforce", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(mockMutate).not.toHaveBeenCalled();
-		expect(
-			screen.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Renseignez le nombre de femmes.",
+		);
 	});
 
 	it("does not render a previous link (exit is handled by the breadcrumb)", () => {

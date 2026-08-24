@@ -17,6 +17,9 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import { derivePayGapErrors } from "../shared/formError/payGapErrors";
+import type { FieldError } from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
@@ -40,6 +43,9 @@ type Step2PayGapProps = {
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
+
+const PAY_GAP_ID_PREFIX = "step2-paygap";
+const PAY_GAP_ALERT_ID = "step2-paygap-error";
 
 export function Step2PayGap({
 	declarationSiren,
@@ -108,7 +114,7 @@ export function Step2PayGap({
 	);
 
 	const hasData = hasInitialData || hasDraft;
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
 
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => {
@@ -128,14 +134,9 @@ export function Step2PayGap({
 	}
 
 	const onSubmit = form.handleSubmit(() => {
-		const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
-		if (incomplete) {
-			setValidationError(
-				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
-			);
-			return;
-		}
-		setValidationError(null);
+		const errors = derivePayGapErrors(PAY_GAP_ID_PREFIX, rows);
+		setFieldErrors(errors);
+		if (errors.length > 0) return;
 		mutation.mutate(form.getValues() as Step2Data);
 	});
 
@@ -208,6 +209,9 @@ export function Step2PayGap({
 								<span className="fr-sr-only">Type de rémunération</span>
 							}
 							disabled={isImpersonating}
+							errorAlertId={PAY_GAP_ALERT_ID}
+							errors={fieldErrors}
+							idPrefix={PAY_GAP_ID_PREFIX}
 							onRowChange={handleRowChange}
 							readOnly={isReadOnly}
 							rows={rows}
@@ -219,6 +223,8 @@ export function Step2PayGap({
 								year={declarationYear}
 							/>
 						)}
+
+						<FieldErrorAlert errors={fieldErrors} id={PAY_GAP_ALERT_ID} />
 					</div>
 
 					<DefinitionAccordion
@@ -261,10 +267,7 @@ export function Step2PayGap({
 
 				<GapInterpretationCallout rows={rows} />
 
-				<FormErrors
-					mutationError={mutation.error?.message}
-					validationError={validationError}
-				/>
+				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
 					isSubmitting={mutation.isPending}

@@ -9,6 +9,9 @@ import {
 } from "~/modules/domain";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
+import { payGapFieldId } from "./formError/payGapErrors";
+import type { FieldError } from "./formError/types";
+import { describedByForField, findFieldError } from "./formError/types";
 import { GAP_LEVEL_LABELS, gapBadgeClass } from "./gapBadge";
 import styles from "./PayGapTable.module.scss";
 
@@ -41,6 +44,11 @@ type PayGapTableProps = {
 	className?: string;
 	disabled?: boolean;
 	readOnly?: boolean;
+	/** Prefix of the generated input ids — also anchors the error messages. */
+	idPrefix: string;
+	/** Base id of the `FieldErrorAlert` the offending inputs point at. */
+	errorAlertId?: string;
+	errors?: readonly FieldError[];
 };
 
 export function PayGapTable({
@@ -51,6 +59,9 @@ export function PayGapTable({
 	className,
 	disabled = false,
 	readOnly = false,
+	idPrefix,
+	errorAlertId,
+	errors = [],
 }: PayGapTableProps) {
 	return (
 		<div
@@ -89,6 +100,10 @@ export function PayGapTable({
 										row.gipReference,
 									);
 									const level = gapLevel(gap);
+									const womenId = payGapFieldId(idPrefix, i, "womenValue");
+									const menId = payGapFieldId(idPrefix, i, "menValue");
+									const womenError = findFieldError(errors, womenId);
+									const menError = findFieldError(errors, menId);
 									return (
 										<tr key={row.label}>
 											<td>
@@ -97,9 +112,16 @@ export function PayGapTable({
 											<td>
 												<span className={styles.inputWithUnit}>
 													<input
+														aria-describedby={
+															errorAlertId
+																? describedByForField(errorAlertId, womenError)
+																: undefined
+														}
+														aria-invalid={womenError ? true : undefined}
 														aria-label={`${row.label} — Femmes`}
-														className={`fr-input ${common.numericInput}`}
+														className={`fr-input ${womenError ? "fr-input--error" : ""}${common.numericInput}`}
 														disabled={disabled}
+														id={womenId}
 														inputMode="decimal"
 														onBlur={() =>
 															padDecimalOnBlur(row.womenValue, (v) =>
@@ -119,9 +141,16 @@ export function PayGapTable({
 											<td>
 												<span className={styles.inputWithUnit}>
 													<input
+														aria-describedby={
+															errorAlertId
+																? describedByForField(errorAlertId, menError)
+																: undefined
+														}
+														aria-invalid={menError ? true : undefined}
 														aria-label={`${row.label} — Hommes`}
-														className={`fr-input ${common.numericInput}`}
+														className={`fr-input ${menError ? "fr-input--error" : ""}${common.numericInput}`}
 														disabled={disabled}
+														id={menId}
 														inputMode="decimal"
 														onBlur={() =>
 															padDecimalOnBlur(row.menValue, (v) =>

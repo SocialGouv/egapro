@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
@@ -270,7 +270,7 @@ describe("Step2PayGap", () => {
 		expect(womenInput).toHaveValue("35\u202f000,00");
 	});
 
-	it("shows validation error on submit when fields are incomplete", async () => {
+	it("names each empty amount in the error alert on submit", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step2PayGap
@@ -284,11 +284,14 @@ describe("Step2PayGap", () => {
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
 
-		expect(
-			screen.getByText(
-				/Veuillez renseigner toutes les données de rémunération/,
-			),
-		).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(within(alert).getByText("Champ vide")).toBeInTheDocument();
+		expect(alert).toHaveTextContent(
+			"Renseignez le montant Annuelle brute moyenne pour les femmes.",
+		);
+		expect(alert).toHaveTextContent(
+			"Renseignez le montant Horaire brute médiane pour les hommes.",
+		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 });

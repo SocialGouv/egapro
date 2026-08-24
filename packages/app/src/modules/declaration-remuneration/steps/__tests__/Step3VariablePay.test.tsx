@@ -271,13 +271,13 @@ describe("Step3VariablePay", () => {
 		expect(womenInput).toHaveAttribute("aria-invalid", "true");
 		expect(womenInput).toHaveAttribute(
 			"aria-describedby",
-			"step3-beneficiaries-error",
+			"step3-beneficiaries-error-invalid",
 		);
 		expect(menInput).not.toHaveAttribute("aria-invalid");
 		expect(menInput).not.toHaveAttribute("aria-describedby");
 		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
 			"id",
-			"step3-beneficiaries-error",
+			"step3-beneficiaries-error-invalid",
 		);
 	});
 
@@ -303,13 +303,13 @@ describe("Step3VariablePay", () => {
 		expect(menInput).toHaveAttribute("aria-invalid", "true");
 		expect(menInput).toHaveAttribute(
 			"aria-describedby",
-			"step3-beneficiaries-error",
+			"step3-beneficiaries-error-invalid",
 		);
 		expect(womenInput).not.toHaveAttribute("aria-invalid");
 		expect(womenInput).not.toHaveAttribute("aria-describedby");
 		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
 			"id",
-			"step3-beneficiaries-error",
+			"step3-beneficiaries-error-invalid",
 		);
 	});
 
