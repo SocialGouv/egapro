@@ -24,39 +24,100 @@ Coupe-circuits du hook : `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une 
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | manuel | Audit statique JSX/TSX du package. SARIF + annotations. Ne commente pas et ne produit aucun artefact : il fait rougir ou verdir, c'est tout. |
-| `a11y-pages` | manuel | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), puis fait adjuger TOUS les critères de jugement par une passe Claude Code (secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page dans le livrable : une ligne par page avec sa base et ses compteurs, puis les critères non conformes de chaque page en échec. Pas de pourcentage — un taux sur les seuls critères décidés se lit comme une note de page ; il reste dans la fiche de l'artefact, avec sa couverture. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
-| `a11y-bundle` | manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
+| `a11y-gate` | **chaque PR** (bloquant), + cron/manuel (muet) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun modèle. **C'est la seule gate de tout le dispositif qui arrête un merge** (`fail-on: blocking`). Sur une PR il parle : SARIF, annotations en ligne, commentaire sticky `digest` nommant les défauts distincts, et son propre rapport (`ultra11y-pr-static`). Sur le run complet il se tait — le livrable est celui d'`a11y-pages`. |
+| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par une passe Claude Code (`adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
+| `a11y-bundle` | cron + manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
-**Le workflow ne tourne que sur `workflow_dispatch`** — ni `push`, ni `pull_request`, ni cron.
-Conséquence à connaître avant d'y toucher : **il n'y a aucune gate d'accessibilité sur une PR**.
-Une régression RGAA peut être mergée sans rien allumer. C'est un arbitrage assumé, dont la
-contrepartie est que l'adjudication IA, elle, peut tourner à chaque run (`claude-code-action`
-refuse `push`).
+**Deux déclenchements, et ils ne paient pas la même chose.** `pull_request` ne lance que la gate
+statique — gratuite, sans modèle, bloquante. `schedule` (hebdo) et `workflow_dispatch` lancent la
+chaîne complète : balayage navigateur, critères de rendu, rejeu du registre puis adjudication IA
+du reliquat, livrable.
+
+**Pourquoi un cron et non `push: alpha`**, alors que c'est bien sur alpha qu'on veut le run
+complet. `adjudicate: agent` passe par `claude-code-action`, **qui refuse l'événement `push`** —
+l'Action y dégrade en avertissement et la grille repart « à évaluer » sans que rien ne rougisse.
+Les événements qu'il accepte sont `pull_request`, `workflow_dispatch`, `schedule`, `workflow_run`
+et `repository_dispatch`. Or **la branche par défaut de ce dépôt est `alpha`** : un `schedule` lit
+le fichier depuis alpha et s'exécute sur alpha. Le cron donne donc ce qu'un `push: alpha` aurait
+donné, avec le modèle en plus, et une facture bornée à un run par semaine au lieu d'un par merge.
+
+Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au
+prochain tick.** Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page
+rendue. C'est l'arbitrage, et c'est celui du coût.
 
 `gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
 
-### Il n'y a plus de registre de verdicts
+### Le registre de verdicts, et pourquoi il est revenu
 
-`packages/app/.ultra11y/verdicts/rgaa.json` a existé, et il a été **supprimé**. Il portait un
-verdict par critère de jugement déjà tranché — statut, justification, citations, et une empreinte
-de l'évidence contre laquelle il avait été rendu — et les jobs le **rejouaient** avant toute
-adjudication, ce qui rendait la grille complète sans invoquer de modèle.
+`packages/app/.ultra11y/verdicts/rgaa.json` est **versionné** (exception explicite dans
+`packages/app/.gitignore`). Il enregistre les verdicts que la porte a ACCEPTÉS, et un run
+ultérieur les **rejoue avant d'appeler le moindre modèle**.
 
-Sa raison d'être était l'événement `push`, sur lequel `claude-code-action` refuse de tourner : là,
-seul le rejeu pouvait fermer les critères de jugement. Le workflow ne tourne plus que sur
-`workflow_dispatch`, où le modèle tourne toujours. Le registre n'avait plus rien à couvrir.
+Il avait été supprimé parce qu'il « ratait » des critères et rendait la grille irreproductible —
+diagnostic exact sur un symptôme dont la cause n'était pas lui : sur 5.16.0,
+`verify --apply … --ledger --lang fr` écrivait le registre dans un fichier nommé `--lang`, un flag
+à valeur optionnelle avalant le suivant. Le registre n'était donc jamais écrit là où le run
+suivant le cherchait. Corrigé en amont (5.17.0).
 
-**Ce que ça coûte, et il faut le savoir avant de lancer un run.** Le rejeu passait avant
-l'adjudication et ne laissait payer que le reliquat ; sur un registre à jour, un run ne coûtait
-rien. Il n'y a plus de reliquat, il n'y a que le total : **16 à 21 $ par run** (mesuré sur ce
-dépôt, voir le tableau plus bas), et **deux runs sur le même commit peuvent rendre deux grilles
-différentes**. Un run manuel est un acte, pas un réflexe.
+**Ce n'est pas un cache.** Chaque entrée repasse par la même porte, sur l'évidence re-dérivée de
+l'audit du moment, et celle dont l'empreinte d'évidence a bougé est abandonnée comme **périmée**
+en le disant. Ce qui n'est pas rejoué est ce qui est payé.
 
-Il n'y a plus d'`undecidable.json` non plus. `require-decided: pages` reste actif : un critère que
-l'adjudication ne tranche pas fait rougir le job, et la seule issue est de le faire trancher.
+**Rien ne le commite automatiquement, et c'est délibéré.** Le workflow tourne en `contents: read`
+et le registre sort dans l'artefact. Le rendre effectif est un geste humain — relire le diff des
+verdicts, le commiter. Un registre qu'une CI s'écrit à elle-même n'est plus une décision revue par
+quiconque. Conséquence pratique : **un run dont personne ne commite le registre fait repayer le
+total au run suivant.**
 
-En local, la même chose sans CI, depuis `packages/app` :
+**Quand le rejeu rougit**, la réponse n'est jamais de régénérer le registre jusqu'à ce qu'il
+passe. Lire quels critères sont périmés : leur verdict porte sur du code qui n'existe plus.
+Ré-adjuger ceux-là, et commiter le résultat.
+
+`undecidable.json` ne revient pas : le workflow n'a plus d'`undecidable-file`. Une exemption est
+le constat qu'un critère n'a pas reçu d'évidence — le correctif appartient au moteur, pas à une
+liste de dispenses versionnée à côté de lui.
+
+### `require-decided: pages`, et pourquoi la barre a pu remonter
+
+`pages` tient CHAQUE grille de page à la barre, pas seulement celle du run. La distinction compte :
+un critère non conforme quelque part est tranché POUR LE RUN, et sur les pages où le défaut
+n'apparaît pas il peut n'être le verdict de personne — mesuré ici, 104/106 décidés pour le run et
+8 à 11 ouverts sur chacune des 37 pages, soit une porte verte au-dessus d'un livrable rempli à 90 %.
+
+Elle avait dû être abandonnée, non par excès d'ambition mais parce qu'elle était **cassée** : sur
+5.16.0 une conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés, et
+`--require-decided=pages` ne pouvait passer sur aucune entrée. Corrigé en 5.17.0, puis 5.20.0 (le
+balayage mesurait puis jetait la mesure). Mesuré en amont sur la fixture RGAA balayée : 37 critères
+« à évaluer » pour le run, et exactement les mêmes 37 sur chacune des pages — `pages` n'est donc
+plus une barre plus haute que `true`, c'est la même, vérifiée là où on la lit.
+
+### Ce que coûte l'adjudication
+
+Sans registre commité : **16 à 21 $ par run**. Avec, le premier run paie le total et les suivants
+ne paient que le reliquat.
+
+Le modèle est **nommé explicitement** (`adjudicate-model: claude-sonnet-5`) : le tier est facturé
+AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et le défaut de `claude-code-action`
+n'est pas une constante de ce dépôt — le laisser implicite ferait bouger la facture sans que rien
+ne change ici. Sonnet 5, et pas plus gros : l'amont a mesuré que ce qu'un adjudicateur bon marché
+ratait n'était jamais un manque de modèle mais un défaut d'outil (fiche par critère rendue sans son
+contrat de verdict, critères sans instrument, critères sans sujet moissonné) — tous corrigés.
+
+Deux garde-fous à connaître avant de lire un log :
+
+- **Le fold est fail-closed PAR VERDICT.** Un verdict refusé coûte **son seul critère** — qui reste
+  « à évaluer » en portant le motif du refus — et laisse les autres passer. Le défaut d'origine :
+  95 verdicts sur 96 corrects, un seul `null`, et un fold au niveau du FICHIER jetait les 96 —
+  16,16 $ pour publier « à évaluer » sur toute la grille, dans un job qui se déclarait vert.
+- **Un job vert ne veut pas dire « tout a été évalué ».** Lire `applied:` / `rejected:` dans le
+  log, les avertissements « périmé » et « absent du registre », ou la colonne « À évaluer ».
+
+`gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une
+fonction pure du commit, quoi qu'un modèle ait dit.
+
+### En local, la même chose sans CI
+
+Depuis `packages/app` :
 
 ```bash
 pnpm exec ultra11y audit src --jsx --graph --standard rgaa --out audits
@@ -66,47 +127,10 @@ pnpm exec ultra11y verify --apply audits/ADJUDICATE.todo.json --in audits/audit-
   --out audits --standard rgaa
 ```
 
-### Le fold est fail-closed PAR VERDICT (5.4.0)
-
-Un verdict refusé coûte **son seul critère** — qui reste « à évaluer » en portant le motif du
-refus — et laisse tous les autres passer. Aucun contrôle n'a été assoupli ; c'est le rayon
-d'explosion qui change. Le défaut mesuré : un run avait rempli 95 verdicts sur 96 correctement,
-un seul revenait `null`, et le fold au niveau du FICHIER a jeté les 96 — donc 16,16 $ pour
-publier « à évaluer » sur toute la grille, dans un job qui se déclarait vert. `--strict` restaure
-l'ancien comportement pour qui veut le tout-ou-rien.
-
-### L'adjudication : ce qu'elle coûte, et le défaut corrigé en 5.3.4
-
-Trois runs successifs du même job, sur cette branche :
-
-| run | coût de la passe agent | résultat |
-|---|---:|---|
-| `32023486480` | **19,81 $** | appliquée (41 critères tranchés, 56 laissés « à évaluer ») |
-| `32033274059` | **21,20 $** | **rejetée** (2 verdicts invalides) |
-| `32061739065` | **16,16 $** | **rejetée** (96 verdicts `null` — l'agent n'avait rien écrit) |
-
-**Le défaut, trouvé et corrigé en amont (ultra11y 5.3.4).** L'Action donne à l'agent
-`Read,Grep,Glob,Edit,Write` et **pas de shell**, puis le renvoyait au RUNBOOK, qui dit de
-remplir les verdicts *dans* `ADJUDICATE.todo.json` et de lancer `verify --apply`. Sous RGAA ce
-fichier fait **536 Ko** (96 critères, 1590 ancres d'évidence) : la consigne était donc 96
-éditions exactes dans un demi-mégaoctet, et chaque commande prescrite était refusée — 17 refus
-de permission, 75 tours sur 424, fichier intact. Le fold étant fail-closed, il a correctement
-tout jeté. `verify --manual` écrit désormais aussi un fichier **verdicts seuls** (37 Ko) et une
-fiche par critère (quelques Ko) ; `verify --apply` accepte les deux et **ré-dérive l'évidence
-depuis l'audit**, donc le gate est identique — mêmes contrôles de couverture, mêmes citations à
-prouver, mêmes refus.
-
-**Ce que 5.4.0 change, et ce qui reste vrai :**
-
-1. **Le coût de 16 à 21 $ par run ne se paie plus sur une PR.** C'était l'arbitrage à trancher ;
-   le registre le supprime plutôt que de l'arbitrer — la PR rejoue, seuls les runs hebdo et
-   manuel adjugent, et seulement ce que le registre ne couvre pas.
-2. **Un seul verdict invalide ne jette plus l'adjudication entière** (fold par verdict). Le
-   critère refusé reste « à évaluer » **en portant le motif du refus**, ce qui est aussi ce qui
-   rend le rapport lisible : plus une case vide, mais une raison.
-3. **Un job vert ne veut toujours pas dire « tout a été évalué ».** Lire `applied:` / `rejected:`
-   dans le log, les avertissements « périmé » et « absent du registre », ou la colonne
-   « À évaluer » du commentaire.
+`verify --manual` écrit aussi un fichier **verdicts seuls** (~37 Ko) et une fiche par critère, en
+plus de l'`ADJUDICATE.todo.json` complet (536 Ko sous RGAA — 96 critères, 1590 ancres). `verify
+--apply` accepte les trois et **ré-dérive l'évidence depuis l'audit** : la porte est identique
+quelle que soit la forme donnée en entrée.
 
 ## Ce qui n'est PAS le dispositif
 
@@ -120,14 +144,20 @@ Les règles ne sont pas recopiées ici : elles vivent dans les données de stand
 
 Le seul principe qui mérite d'être répété, parce qu'il décide de tout le reste : **HTML natif d'abord, ARIA en dernier**. Un `<button>` est accessible ; un `<div role="button">` demande d'écrire à la main le focus, le clavier et l'état, et de ne jamais se tromper. Ne double jamais une sémantique implicite (`role="navigation"` sur `<nav>` est faux, pas redondant).
 
-## Les deux dépendances, et pourquoi elles ne sont pas mortes
+## La dépendance qu'aucun `import` ne cite
 
-`packages/app/package.json` porte deux devDependencies qu'aucun `import` du dépôt ne cite. Les deux sont chargées, et j'ai déjà supprimé la seconde en la croyant morte :
+`packages/app/package.json` porte **`ultra11y`** en devDependency alors qu'aucun `import` du dépôt
+ne la nomme. Elle est chargée : c'est le binaire (`pnpm exec ultra11y`) et le plugin Playwright
+(`ultra11y/playwright`, utilisé par `src/e2e/a11y/`). Ne pas la croire morte.
 
-- **`ultra11y`** — le binaire (`pnpm exec ultra11y`) et le plugin Playwright (`ultra11y/playwright`, utilisé par `src/e2e/a11y/snapshot.ts`).
-- **`@axe-core/playwright`** — **aucun import, et pourtant indispensable**. Le moteur ne l'importe pas non plus : il teste s'il se *résout* (`localAvailable`). Si `@playwright/test` **et** `@axe-core/playwright` se résolvent, `scan` utilise le tier navigateur **local** ; sinon il bascule sur Docker, qui ne sait pas porter de session et refuse alors un balayage authentifié. C'est ce qui décide le contraste calculé, le focus visible, le zoom, le reflow et les régions live. Le retirer ne casse aucun `import` — ça dégrade silencieusement l'audit.
+**`@axe-core/playwright` a été retirée** (commit `b123b1ce6`, « prendre axe depuis ultra11y ») et
+ce n'est pas une régression : depuis 5.13.0 la suite embarque axe via ultra11y, et depuis 5.21.0
+l'Action fournit elle-même le tier navigateur dont un `scan` a besoin. Ne pas la remettre — deux
+copies de Playwright dans un même process se rendent des `Page` que les fixtures de l'autre ne
+reconnaissent pas.
 
-Vérifier en une commande, depuis `packages/app` :
+Ce qui décide encore le tier local (contraste calculé, focus visible, zoom, reflow, régions live)
+se vérifie en une commande, depuis `packages/app` :
 
 ```bash
 pnpm exec ultra11y scan <une-page.html> --runtime local --json | head -3
@@ -136,15 +166,19 @@ pnpm exec ultra11y scan <une-page.html> --runtime local --json | head -3
 
 ## Bump de version
 
-Deux pins délibérés, à bouger ensemble :
+Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-# puis aligner `maxgfr/ultra11y@v<version>` dans .github/workflows/a11y.yaml
-# le plugin se met à jour tout seul depuis sa marketplace
+# puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
+claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.4.0**. À noter si un bump échoue : la publication npm de la 5.3.0 est
+Les deux sont sur **5.29.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
+son cache si le skill `review-a11y` se comporte autrement que la CI.
+
+À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
 que l'échange OIDC avait réussi, et semantic-release ne republie pas un tag existant — le tag
 `v5.3.0` existe donc sans version npm correspondante. C'était transitoire : le commit suivant

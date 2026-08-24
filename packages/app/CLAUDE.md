@@ -221,7 +221,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 
 ## Accessibility (RGAA 4.1.2 / WCAG 2.2 AA)
 
-> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — accessibility has exactly **two** surfaces, both ultra11y: the `rgaa-auditor` agent, which runs the `review-a11y` skill on the code under change, and the `a11y.yaml` workflow, which runs the Action (blocking static gate; plus a Playwright page sweep that decides the rendered criteria and has its judgment criteria adjudicated by a Claude Code pass). No parallel a11y system — Lighthouse reports a score as a warning, and the edit hook enforces DSFR/Next rules that happen to help.
+> **Canonical rule → [`.claude/rules/rgaa.md`](../../.claude/rules/rgaa.md)** — accessibility has exactly **two** surfaces, both ultra11y: the `rgaa-auditor` agent, which runs the `review-a11y` skill on the code under change, and the `a11y.yaml` workflow, which runs the Action (a blocking static gate on every PR; plus — on the weekly cron and on demand — a Playwright page sweep that decides the rendered criteria, replays the committed verdict ledger and has the remaining judgment criteria adjudicated by a Claude Code pass). No parallel a11y system — Lighthouse reports a score as a warning, and the edit hook enforces DSFR/Next rules that happen to help.
 >
 > While developing, `pnpm --filter app a11y:dev` starts the ultra11y side-car (dashboard on `http://127.0.0.1:4111`); `pnpm exec ultra11y dev --next` writes the overlay component to mount. Optional — the gate is the agent and the workflow.
 >

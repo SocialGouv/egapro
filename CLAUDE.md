@@ -251,7 +251,7 @@ GitHub Actions workflows are in `.github/workflows/` :
 | File | Trigger | Role |
 |---|---|---|
 | `ci.yaml` | each push | build · lint · format · typecheck · tests |
-| `a11y.yaml` | push `alpha`/`beta`/`master`, PR, cron hebdo, manual | 3 jobs ultra11y : `a11y-gate` (statique, **bloquant**, SARIF + commentaire de PR), `a11y-pages` (snapshots Playwright → **commentaire de PR page par page**, sous son propre marqueur, non bloquant), `a11y-report` (rapport RGAA hebdo) |
+| `a11y.yaml` | PR, cron hebdo (lundi), manual | 3 jobs ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**, SARIF + annotations + commentaire sticky. Sur **cron/manuel** (donc sur `alpha`, branche par défaut) : la chaîne complète — `a11y-pages` (balayage Playwright 35 pages, critères de rendu, rejeu du registre de verdicts puis adjudication IA du reliquat, non bloquant) et `a11y-bundle` (livrable `ultra11y-rgaa`) |
 | `e2e.yaml` | PR → `alpha`, manual | suite Playwright complète |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
 | `review-auto.yaml` | push sur toute branche sauf `dependabot/**` et `master` | **déploiement des review apps** |

@@ -24,18 +24,29 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
-# DÉCLENCHEMENT MANUEL UNIQUEMENT, ET TOUTE LA GRILLE PAR LE MOTEUR IA.
+# DEUX DÉCLENCHEMENTS, ET ILS NE PAIENT PAS LA MÊME CHOSE.
 #
-# Ce workflow ne tourne plus ni sur `push`, ni sur `pull_request`, ni sur `schedule`. Il se lance
-# à la main — onglet Actions, ou `gh workflow run a11y.yaml`. C'est un audit qu'on COMMANDE, et
-# c'est aussi le seul événement où l'adjudication peut tourner : `claude-code-action` refuse
-# `push`, et l'Action y dégradait en avertissement.
+#   pull_request                  → `a11y-gate` SEUL. Statique, gratuit, quelques secondes,
+#                                   aucun modèle, et BLOQUANT (`fail-on: blocking`).
+#   schedule (hebdo) + dispatch   → la chaîne complète. Balayage des pages, critères de rendu,
+#                                   rejeu du registre puis adjudication IA du reliquat, livrable.
 #
-# CE QUE CE CHOIX SUPPRIME, dit franchement : il n'y a plus aucune gate d'accessibilité sur une
-# PR ni sur un push. Une régression RGAA peut être mergée sans rien allumer, et personne ne
-# l'apprendra avant le prochain run manuel. C'est un arbitrage assumé, pas un oubli — et c'est
-# la raison pour laquelle ce fichier ne parle plus de « bloquant » nulle part : le rouge de
-# `a11y-gate` n'arrête plus rien, il informe celui qui a lancé le run.
+# La moitié chère ne peut pas tourner sur chaque PR : 16 à 21 $ pour un premier run, 40 à 90
+# minutes, et une grille qui n'est pas reproductible d'un run à l'autre. La moitié statique, elle,
+# ne coûte rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce
+# fichier qui arrête un merge.
+#
+# POURQUOI UN CRON ET NON `push: alpha`, puisque c'est bien sur alpha qu'on veut le run complet.
+# `adjudicate: agent` passe par `claude-code-action`, qui REFUSE l'événement `push` — l'Action y
+# dégrade en avertissement et la grille repart « à évaluer » sans que rien ne rougisse. Les
+# événements qu'il accepte sont `pull_request`, `workflow_dispatch`, `schedule`, `workflow_run` et
+# `repository_dispatch`. Or **la branche par défaut de ce dépôt est `alpha`** : un `schedule` lit
+# le fichier depuis alpha et s'exécute sur alpha. Le cron donne donc ce qu'un `push: alpha` aurait
+# donné, avec le modèle en plus, et une facture bornée à un run par semaine au lieu d'un par merge.
+#
+# CE QUE ÇA NE DONNE PAS, dit franchement : une régression RGAA de RENDU peut vivre jusqu'au
+# prochain tick. Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page
+# rendue. C'est l'arbitrage, et c'est celui du coût.
 #
 # LES CRITÈRES DE JUGEMENT SONT ADJUGÉS, TOUS, À CHAQUE RUN. Ceux que le moteur ne peut pas
 # trancher — pertinence des alt, intitulé de lien dans son contexte, ordre de lecture — passent
@@ -124,22 +135,31 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #     cesse d'être listé comme du travail à faire quand il n'y a rien à regarder.
 
 on:
-  # Manuel, et rien d'autre. `push`, `pull_request` et le cron hebdomadaire sont partis
-  # ensemble : l'adjudication ne tourne pas sur `push`, et une grille adjugée à chaque PR
-  # coûtait 16 à 21 $ sans être reproductible d'un run à l'autre.
+  # LA GATE. Statique, gratuite, aucun modèle : elle peut se permettre de tourner sur chaque PR,
+  # et c'est le seul endroit du dispositif qui BLOQUE un merge.
+  pull_request:
+  # LE RUN COMPLET, sur alpha. `schedule` s'exécute sur la branche par défaut du dépôt, qui EST
+  # `alpha` — c'est ce qui rend ce cron équivalent au `push: alpha` que `claude-code-action`
+  # aurait refusé (voir l'en-tête). Lundi 04:00 UTC.
+  schedule:
+    - cron: "0 4 * * 1"
+  # Le même run complet, à la demande, depuis n'importe quelle branche.
   workflow_dispatch:
 
 concurrency:
-  # Un run manuel est un LIVRABLE : deux lancements coup sur coup ne doivent pas s'annuler
-  # l'un l'autre, le second n'ayant aucune raison d'être « plus à jour » que le premier.
-  cancel-in-progress: false
   group: "${{ github.workflow }}-${{ github.ref }}"
+  # Une PR qui repousse annule son run précédent — il n'a plus rien à dire sur un code qui a
+  # changé. Un run complet (cron ou manuel) est un LIVRABLE : deux lancements coup sur coup ne
+  # doivent pas s'annuler l'un l'autre, le second n'ayant aucune raison d'être « plus à jour ».
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
   security-events: write # SARIF → code scanning ; sans ça les annotations prennent le relais
-  # Ni `actions: read` (plus d'artefact de registre à retrouver dans les runs passés), ni
-  # `pull-requests: write` (un run manuel n'a pas de PR où poster).
+  pull-requests: write # le commentaire sticky de la gate, sur une PR uniquement
+  # Pas d'`actions: read` : aucun artefact de registre à retrouver dans les runs passés.
+  # Pas de `contents: write` non plus, et c'est délibéré — voir l'en-tête : le registre de
+  # verdicts sort dans l'artefact et c'est un humain qui le commite, après en avoir relu le diff.
 
 jobs:
   a11y-gate:
@@ -151,43 +171,60 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.24.0
+        uses: maxgfr/ultra11y@v5.29.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
           # qui expanserait le glob lui-même en 6 fichiers (src/app/*.tsx) au lieu des 300
           # du package. Le répertoire laisse le moteur faire son propre globbing.
           paths: src
-          # Le scope complet, explicitement : le défaut `auto` bascule en mode diff selon
-          # l'événement, et un audit qu'on lance à la main doit couvrir tout le package.
+          # Le scope complet, explicitement, ET C'EST LOAD-BEARING SUR UNE PR : le défaut `auto`
+          # y résout la branche de base et n'auditerait que les fichiers touchés. Une gate qui ne
+          # regarde que le diff ne voit pas la régression qu'un changement provoque ailleurs, et
+          # laisse le backlog existant invisible. On audite les 300 fichiers à chaque fois —
+          # l'audit statique est gratuit, il n'y a rien à économiser.
           since: ""
           jsx: "true"
           graph: "true"
           standard: rgaa
           lang: fr
           fail-on: blocking
-          # CETTE GATE NE PRODUIT PLUS RIEN — elle fait rougir ou verdir, c'est tout.
+          # CETTE GATE PARLE SUR UNE PR, ET SE TAIT SUR LE RUN COMPLET.
           #
-          # Elle postait un commentaire et uploadait un rapport complet, et `a11y-pages` aussi :
-          # deux commentaires sticky sur la PR et deux arborescences de rapport dans le ZIP,
-          # dont un lecteur qui veut « le rapport d'accessibilité de ce run » devait deviner
-          # laquelle ouvrir. Pire, le sien était FAUX par construction : sans instantané de page
-          # il annonçait 92 % (15/106) avec 91 critères « à évaluer » là où le tier page en
-          # décidait 104 sur 106 — le même dépôt, le même commit, deux chiffres.
+          # Elle avait été rendue muette parce qu'elle commentait et uploadait EN MÊME TEMPS que
+          # `a11y-pages` : deux commentaires sticky sur la même PR, deux arborescences de rapport
+          # dans le même ZIP, dont un lecteur qui veut « le rapport d'accessibilité de ce run »
+          # devait deviner laquelle ouvrir. Pire, le sien était FAUX par construction : sans
+          # instantané de page il annonçait 92 % (15/106) avec 91 critères « à évaluer » là où le
+          # tier page en décidait 104 sur 106 — le même dépôt, le même commit, deux chiffres.
           #
-          # Rien n'est perdu : `a11y-pages` tourne le MÊME audit du code (`paths: src`, `--jsx`,
-          # `--graph`) avant d'y fondre les instantanés, donc son livrable contient tout ce que
-          # celui-ci portait, y compris ses constats non rattachés à une page. Ce job garde les
-          # annotations en ligne et le SARIF, qui ne sont pas des livrables.
-          report: "false"
-          html: "false"
-          comment: "false"
+          # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR
+          # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire, un seul rapport,
+          # et le taux annoncé est le seul du run. Sur le cron et le dispatch, le livrable reste
+          # celui d'`a11y-pages` et cette gate redevient muette — elle garde les annotations en
+          # ligne et le SARIF, qui ne sont pas des livrables.
+          #
+          # `digest` et non `pages` : sans instantané, cette gate n'a pas de grille par page à
+          # poster. Elle nomme les défauts distincts de l'audit du code, avec leurs emplacements.
+          # Le marqueur sticky de `digest` lui est propre : rien ici ne peut écraser le
+          # commentaire d'un autre tier.
+          comment: ${{ github.event_name == 'pull_request' }}
+          comment-kind: digest
+          report: ${{ github.event_name == 'pull_request' }}
+          html: ${{ github.event_name == 'pull_request' }}
+          # Hors du motif `ultra11y-part-*`, donc jamais happé par la fusion d'`a11y-bundle`.
+          artifact-name: ${{ github.event_name == 'pull_request' && 'ultra11y-pr-static' || '' }}
 
   a11y-pages:
     name: "RGAA · rapport page par page"
+    # JAMAIS SUR UNE PR. C'est la moitié chère — stack docker complète, balayage navigateur,
+    # adjudication IA, 40 à 90 minutes et 16 à 21 $ pour un premier run. La brancher sur chaque PR
+    # reviendrait à facturer une flotte de PR pour un signal qui bouge rarement, sans être
+    # reproductible d'un run à l'autre. Sur une PR, la gate statique fait le travail.
+    if: github.event_name != 'pull_request'
     # Ce tier a besoin de la stack complète — base, S3, ProConnect — et donc des secrets du
-    # dépôt. Sur `workflow_dispatch` ils sont toujours exposés : la condition qui excluait les
-    # PR de fork n'a plus d'objet, un fork ne pouvant pas déclencher ce workflow.
+    # dépôt. Sur `schedule` et `workflow_dispatch` ils sont toujours exposés : la condition qui
+    # excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
     #
     # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
     # grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) —
@@ -209,10 +246,10 @@ jobs:
     # coupé coûte le livrable entier.
     timeout-minutes: 300
     # Ce tier MESURE : `fail-on: ""` sur l'Action, donc aucun constat d'accessibilité ne fait
-    # rougir la PR. Ce n'est pas la même chose que masquer le job. `continue-on-error` au
+    # rougir le run. Ce n'est pas la même chose que masquer le job. `continue-on-error` au
     # niveau du JOB avalait aussi les pannes d'infra — build, base, ProConnect, crash de
-    # l'Action — et une PR de fork, où les secrets sont vides, mourait au build en restant
-    # verte, sans le moindre rapport. Le masque est donc porté par la seule step de balayage,
+    # l'Action — et un run sans secrets mourait au build en restant vert, sans le moindre
+    # rapport. Le masque est donc porté par la seule step de balayage,
     # là où il sert : un écran qui coince ne doit pas coûter le rapport des autres.
     # L'audit page par page a besoin de l'app RENDUE et AUTHENTIFIÉE (le tunnel de déclaration
     # est derrière ProConnect), donc de la même stack que la suite E2E. Les étapes
@@ -383,7 +420,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.24.0
+        uses: maxgfr/ultra11y@v5.29.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -472,7 +509,7 @@ jobs:
           # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
           # visible ici, nommément.
           require-sample: "true"
-          # PLUS DE COMMENTAIRE : sur `workflow_dispatch` il n'y a pas de PR où le poster.
+          # PAS DE COMMENTAIRE : ni `schedule` ni `workflow_dispatch` n'ont de PR où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
           # et ses sévérités, puis un bloc par page en échec — n'est pas perdu : c'est le rapport
@@ -523,7 +560,10 @@ jobs:
   a11y-bundle:
     name: "RGAA · livrable unique"
     needs: [a11y-gate, a11y-pages]
-    if: always()
+    # PAS SUR UNE PR : `a11y-pages` n'y tourne pas, donc il n'y a aucune partie `ultra11y-part-*`
+    # à fusionner. Le rapport de la gate y vit sous son propre nom (`ultra11y-pr-static`), qui ne
+    # matche pas le motif — laisser tourner ce job ne produirait qu'un job vide de plus à lire.
+    if: always() && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Fusionner les parties en un seul artefact
