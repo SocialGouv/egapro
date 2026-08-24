@@ -232,7 +232,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.33.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+Les deux sont sur **5.33.1**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
 se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
 son cache si le skill `review-a11y` se comporte autrement que la CI.
 
