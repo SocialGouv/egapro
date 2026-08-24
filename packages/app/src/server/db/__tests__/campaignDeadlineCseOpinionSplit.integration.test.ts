@@ -4,19 +4,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
 
-// Runnable proof of the #4217 migration backfill, which no unit test can reach:
-// `integration-setup.ts` applies the migrations to an EMPTY container, so both
-// UPDATE statements below touch zero rows there and the asymmetric backfill is
-// never exercised. This file replays the real migration file against a scratch
-// schema holding the pre-migration table shape plus rows that already existed,
-// which is the only state where the backfill does anything.
-//
-// The asymmetry is the whole point: the value stored in
-// `decl2_joint_evaluation_deadline` was entered by an admin under the pre-#4217
-// « Date limite de l'avis du CSE » label, so it must MOVE to the new CSE column
-// (keeping the CSE screens unchanged) while the joint evaluation column is
-// RECOMPUTED on the new rule — carrying the old value over would silently
-// reproduce the bug on every already-configured year.
+// `integration-setup.ts` migrates an EMPTY container, so the backfill only ever runs here.
 
 const MIGRATION_FILE = "0047_volatile_harpoon.sql";
 const SCRATCH_SCHEMA = "migration_4217";
@@ -39,13 +27,12 @@ function toIsoDate(value: Date | string): string {
 	return typeof value === "string" ? value : value.toISOString().slice(0, 10);
 }
 
-describe("#4217 campaign deadline split — migration backfill (real Postgres)", () => {
+describe("#4217 campaign deadline split — migration 0047 replayed on pre-existing rows (real Postgres)", () => {
 	let sql!: ReturnType<typeof postgres>;
 	let statements: string[] = [];
 
 	async function readMigrationStatements(): Promise<string[]> {
-		// `drizzle/` sits outside `src/`, so it has no `~/` alias; vitest always
-		// runs from the package root.
+		// `drizzle/` is outside `src/` so has no `~/` alias; vitest runs from the package root.
 		const file = path.join(process.cwd(), "drizzle", MIGRATION_FILE);
 		const content = await readFile(file, "utf8");
 		return content
@@ -57,9 +44,7 @@ describe("#4217 campaign deadline split — migration backfill (real Postgres)",
 	async function seedPreMigrationTable() {
 		await sql.unsafe(`DROP SCHEMA IF EXISTS ${SCRATCH_SCHEMA} CASCADE`);
 		await sql.unsafe(`CREATE SCHEMA ${SCRATCH_SCHEMA}`);
-		// Copying the live table and dropping the added column reproduces the exact
-		// pre-migration shape without restating the schema here, so this test cannot
-		// drift from `schema.ts`.
+		// Copying the live table minus the added column cannot drift from `schema.ts`.
 		await sql.unsafe(`
 			CREATE TABLE ${SCRATCH_SCHEMA}.app_campaign_deadline
 			(LIKE public.app_campaign_deadline INCLUDING ALL)
@@ -85,8 +70,7 @@ describe("#4217 campaign deadline split — migration backfill (real Postgres)",
 	}
 
 	async function applyMigration() {
-		// `search_path` makes the migration's unqualified "app_campaign_deadline"
-		// resolve to the scratch copy, so the file runs verbatim.
+		// `search_path` points the migration's unqualified table name at the scratch copy.
 		await sql.unsafe(`SET search_path TO ${SCRATCH_SCHEMA}`);
 		for (const statement of statements) {
 			await sql.unsafe(statement);
@@ -154,7 +138,7 @@ describe("#4217 campaign deadline split — migration backfill (real Postgres)",
 		expect(names).not.toContain(NEW_COLUMN);
 	});
 
-	it("moves the legacy value onto the CSE opinion column so CSE screens keep their date", async () => {
+	it("moves the value the admin entered under the old CSE label onto the new CSE column, so CSE screens keep their date", async () => {
 		await applyMigration();
 
 		expect((await readRow(SEED_YEAR)).cseOpinion).toBe(LEGACY_DECL2_DEADLINE);
@@ -163,7 +147,7 @@ describe("#4217 campaign deadline split — migration backfill (real Postgres)",
 		);
 	});
 
-	it("recomputes the joint evaluation deadline to January 1st of year + 1", async () => {
+	it("recomputes the joint evaluation deadline to January 1st of year + 1, rather than carrying the bug over to configured years", async () => {
 		await applyMigration();
 
 		expect((await readRow(SEED_YEAR)).jointEvaluation).toBe("2101-01-01");
@@ -211,8 +195,7 @@ describe("#4217 campaign deadline split — migration backfill (real Postgres)",
 		await applyMigration();
 		const afterFirst = await readRow(SEED_YEAR);
 
-		// The CSE backfill is guarded by `WHERE decl2_cse_opinion_deadline IS NULL`,
-		// so a replay must not overwrite it with the recomputed January date.
+		// The CSE backfill is `IS NULL`-guarded, so a replay must not overwrite it.
 		await sql.unsafe(`SET search_path TO ${SCRATCH_SCHEMA}`);
 		for (const statement of statements.slice(1, 3)) {
 			await sql.unsafe(statement);

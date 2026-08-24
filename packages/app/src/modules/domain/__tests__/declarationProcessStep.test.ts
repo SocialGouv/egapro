@@ -51,9 +51,7 @@ describe("getDeclarationProcessStepDeadline", () => {
 		},
 	];
 
-	// The two decl2 deadlines were a single overloaded column until #4217; equal
-	// fixture values would make the two cases below indistinguishable.
-	it("uses distinct fixture dates for the round-2 joint evaluation and CSE opinion", () => {
+	it("keeps the round-2 joint evaluation and CSE opinion fixtures distinct, so neither case below can pass by accident", () => {
 		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
 			deadlines.decl2CseOpinionDeadline,
 		);

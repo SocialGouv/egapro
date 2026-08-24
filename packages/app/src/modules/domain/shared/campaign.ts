@@ -65,13 +65,7 @@ export function selectPathChoiceDeadline(
 		: deadlines.pathChoiceRound1Deadline;
 }
 
-/**
- * Returns the deadline to file the joint evaluation report for the round the
- * company is in.
- *
- * Distinct from the CSE opinion deadline (`decl2CseOpinionDeadline`), which
- * closes a later step of the same compliance path.
- */
+/** Returns the joint evaluation report deadline for the round the company is in — not the CSE opinion one, which closes a later step. */
 export function selectJointEvaluationDeadline(
 	deadlines: CampaignDeadlines,
 	isSecondRound: boolean,

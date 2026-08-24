@@ -100,7 +100,7 @@ describe("JointEvaluationPage", () => {
 		);
 	});
 
-	it("renders the form when secondDeclarationPathChoice is joint_evaluation (revised round)", async () => {
+	it("serves the round-2 deadline, never the round-1 one, on the revised round", async () => {
 		mockDeclaration(
 			{
 				firstDeclarationPathChoice: "corrective_action",
@@ -118,7 +118,6 @@ describe("JointEvaluationPage", () => {
 				"fr-FR",
 			),
 		);
-		// #4217: the revised round used to be served the round-1 deadline.
 		expect(deadline).not.toHaveTextContent(
 			DEFAULT_DEADLINES.decl1JointEvaluationDeadline.toLocaleDateString(
 				"fr-FR",

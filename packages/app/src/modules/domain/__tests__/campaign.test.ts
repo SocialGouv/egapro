@@ -163,7 +163,6 @@ describe("selectPathChoiceDeadline", () => {
 describe("selectJointEvaluationDeadline", () => {
 	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00");
 	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00");
-	// Values that differ from the derived defaults prove the selector reads the given deadlines instead of recomputing them.
 	const deadlines = {
 		...getDefaultCampaignDeadlines(2027),
 		decl1JointEvaluationDeadline: ROUND_1_DEADLINE,

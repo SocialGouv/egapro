@@ -275,11 +275,9 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	});
 
 	describe("étape 3 — échéance de l'avis du CSE (#4217)", () => {
-		// Since #4217 the CSE opinion has its own deadline; step 3 must read it and
-		// never the round-2 joint evaluation one, which now closes a month earlier.
 		const DEADLINES = getDefaultCampaignDeadlines(FUTURE_YEAR);
 
-		it("uses two distinct default dates for the round-2 deadlines", () => {
+		it("closes the CSE opinion a month after the round-2 joint evaluation", () => {
 			expect(DEADLINES.decl2CseOpinionDeadline).not.toEqual(
 				DEADLINES.decl2JointEvaluationDeadline,
 			);
