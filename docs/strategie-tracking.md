@@ -83,7 +83,7 @@ Saisie des indicateurs A–F jusqu'à la soumission.
 | `step_2` | Écart de rémunération |
 | `step_3` | Écart de rémunération variable |
 | `step_4` | Quartiles de rémunération |
-| `step_5` | Écart par catégorie de salariés |
+| `step_5` | Écart par catégories de salariés |
 | `step_6` | Récapitulatif |
 
 | Événement | Déclencheur précis |
@@ -130,7 +130,7 @@ Seconde déclaration / actions correctives jusqu'au récapitulatif.
 | Clé | Étape |
 |---|---|
 | `step_1` | Actions correctives et seconde déclaration |
-| `step_2` | Seconde déclaration des écarts par catégorie de salariés |
+| `step_2` | Seconde déclaration des écarts par catégories de salariés |
 | `step_3` | Récapitulatif de votre déclaration |
 
 | Événement | Déclencheur précis |

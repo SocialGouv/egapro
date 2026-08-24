@@ -15,7 +15,7 @@ export const DECLARATION_STEPS = [
 	{ step: 2, label: "Écart de rémunération" },
 	{ step: 3, label: "Écart de rémunération variable" },
 	{ step: 4, label: "Quartiles de rémunération" },
-	{ step: 5, label: "Écart par catégorie de salariés" },
+	{ step: 5, label: "Écart par catégories de salariés" },
 	{ step: 6, label: "Récapitulatif" },
 ] as const;
 

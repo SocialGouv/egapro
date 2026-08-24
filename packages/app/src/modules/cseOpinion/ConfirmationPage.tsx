@@ -62,7 +62,7 @@ export function ConfirmationPage({
 					<DownloadCard
 						dataYear={dataYear}
 						href={`/api/declaration-pdf?type=correction&year=${declarationYear}`}
-						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
+						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégories de salariés"
 						year={declarationYear}
 					/>
 				)}

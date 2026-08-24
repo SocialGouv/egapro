@@ -199,7 +199,7 @@ export function FirstRoundOptions({
 				>
 					<p>
 						Vous souhaitez mettre en place des actions correctives, puis
-						recalculer et redéclarer l&apos;indicateur par catégorie
+						recalculer et redéclarer l&apos;indicateur par catégories
 						de&nbsp;salariés :
 					</p>
 					<ul>

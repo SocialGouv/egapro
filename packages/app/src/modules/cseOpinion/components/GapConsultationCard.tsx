@@ -30,7 +30,7 @@ export function GapConsultationCard({
 		<div className={styles.card}>
 			<p className="fr-text--bold fr-mb-3w" id={legendId}>
 				Justification des écarts &ge; 5 % par des critères objectifs et non
-				sexistes de l'indicateur de rémunération par catégorie de salariés
+				sexistes de l'indicateur de rémunération par catégories de salariés
 			</p>
 
 			<fieldset aria-labelledby={legendId} className="fr-fieldset">

@@ -116,7 +116,7 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					/Indicateurs de rémunération par catégorie de salariés à remplir/,
+					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
 		});

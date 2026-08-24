@@ -47,7 +47,7 @@ export function DeclarationSuccessBanner({
 								pendingLabel="Génération du récapitulatif en cours…"
 							>
 								{isSecondDeclaration
-									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégories de salariés"
 									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
 							</FileDownloadLink>
 							{/* The PDF is generated on demand, so only the format is known. */}

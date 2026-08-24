@@ -192,7 +192,7 @@ describe("DeclarationPdfDocument", () => {
 		);
 		expect(
 			screen.getByText(
-				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés 2026",
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés 2026",
 			),
 		).toBeInTheDocument();
 
