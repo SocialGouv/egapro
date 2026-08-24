@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import {
+	formatIsoDate,
 	formatPercentage,
-	formatShortDate,
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -27,8 +27,8 @@ import styles from "./Step5Review.module.scss";
 
 const CONFIRMATION_HREF = "/declaration-representation/confirmation";
 
-function formatIsoDate(value: string | undefined): string {
-	return value === undefined ? "—" : formatShortDate(new Date(value));
+function formatOptionalIsoDate(value: string | undefined): string {
+	return value === undefined ? "—" : formatIsoDate(value);
 }
 
 function PublicationUrl({ url }: { url: string | undefined }) {
@@ -132,8 +132,8 @@ export function Step5Review() {
 					<dd>{year}</dd>
 					<dt>Période de référence</dt>
 					<dd>
-						{formatIsoDate(draft.referencePeriodStart)} -{" "}
-						{formatIsoDate(draft.referencePeriodEnd)}
+						{formatOptionalIsoDate(draft.referencePeriodStart)} -{" "}
+						{formatOptionalIsoDate(draft.referencePeriodEnd)}
 					</dd>
 				</dl>
 			</section>
@@ -154,7 +154,7 @@ export function Step5Review() {
 					<h2 className="fr-text--lg fr-text--bold fr-mb-0">Publication</h2>
 					<dl className={`fr-text--md ${styles.definitionList}`}>
 						<dt>Date de publication</dt>
-						<dd>{formatIsoDate(draft.publishDate)}</dd>
+						<dd>{formatOptionalIsoDate(draft.publishDate)}</dd>
 						<dt>Site Internet de publication</dt>
 						<dd>{draft.hasWebsite === true ? "Oui" : "Non"}</dd>
 						{draft.hasWebsite === true ? (

@@ -26,7 +26,7 @@ import { releaseLockSchema } from "~/modules/admin/schemas";
 import {
 	floorWorkforce,
 	getCurrentYear,
-	getReferencePeriod,
+	getDeclarationReferencePeriod,
 	isCancelled,
 	parseGipWorkforce,
 } from "~/modules/domain";
@@ -426,7 +426,12 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				isCorrection ? "correction" : "initial",
 			);
 			const step5Source = jobs[0]?.source ?? null;
-			const referencePeriod = getReferencePeriod(d.year);
+			const referencePeriod = getDeclarationReferencePeriod(
+				d.year,
+				isCorrection,
+				d.secondDeclReferencePeriodStart,
+				d.secondDeclReferencePeriodEnd,
+			);
 			const declarantName = [row.declarantFirstName, row.declarantLastName]
 				.filter(Boolean)
 				.join(" ");
