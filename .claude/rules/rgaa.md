@@ -25,7 +25,7 @@ Coupe-circuits du hook : `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant), + cron/manuel (muet) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun modèle. **C'est la seule gate de tout le dispositif qui arrête un merge** (`fail-on: blocking`). Sur une PR il parle : SARIF, annotations en ligne, commentaire sticky `digest` nommant les défauts distincts, et son propre rapport (`ultra11y-pr-static`). Sur le run complet il se tait — le livrable est celui d'`a11y-pages`. |
-| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par une passe Claude Code (`adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
+| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par le runner CLI du moteur (`adjudicate-runner: cli`, `adjudicate-grain: criterion`, `adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
 | `a11y-bundle` | cron + manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
 **Deux déclenchements, et ils ne paient pas la même chose.** `pull_request` ne lance que la gate
@@ -91,10 +91,68 @@ balayage mesurait puis jetait la mesure). Mesuré en amont sur la fixture RGAA b
 « à évaluer » pour le run, et exactement les mêmes 37 sur chacune des pages — `pages` n'est donc
 plus une barre plus haute que `true`, c'est la même, vérifiée là où on la lit.
 
+### La ligne de provenance, et pourquoi c'est elle qu'on lit
+
+Depuis 5.33.0, `check --require-decided` ne dit plus seulement *combien* de critères portent un
+verdict : il dit **qui l'a rendu**.
+
+```
+106 criteria — N engine, M measured (scan), P agent, Q declared undecidable, R with no verdict
+```
+
+C'est l'instrument qui répond à « est-ce que tous les critères sont traités ? », et il répond
+autrement qu'un comptage à la main. Compter les entrées du registre contre la worklist répond à la
+mauvaise question : un critère que le MOTEUR a tranché n'apparaît dans ni l'un ni l'autre, si bien
+qu'un run où le moteur en décide 55 se lisait « 51 audités » alors que 106 l'étaient.
+
+`R with no verdict` est le seul nombre qui doit valoir zéro. Les autres sont à surveiller entre deux
+runs pour une raison d'argent : **chaque critère qui passe de `agent` à `engine` ou `scan` est un
+critère que plus personne ne paie à un modèle.**
+
+Ce qui rendait ce compte non démontrable avant 5.33.0 : `derivePackResults` et le prédicat
+`outOfCore` de `coverage.ts` divergeaient — un critère dont tout le mapping WCAG sort du cœur 2.2 AA
+reste décidable quand une règle DÉCLARATIVE du pack s'y applique, et seul le premier le savait. RGAA
+8.1 est le cas d'école : le plan le classait hors périmètre pendant que la projection le tranchait
+depuis `pack:rgaa:doctype-missing`.
+
+### Le référentiel porté jusqu'au bout, et pas seulement à la fin
+
+Jusqu'à 5.32.0, `audit` et `scan --merge` réécrivaient tous deux `audits/audit-latest.json` **sans
+`--standard`**. Le document publié dans l'artefact était donc estampillé `wcag` pendant que tout ce
+qui se rendait à côté — SARIF, annotations, rapport, fiches par page — parlait RGAA, et la porte de
+sévérité comptait les constats du cœur au lieu de ceux du référentiel, qui sous un pack porte aussi
+ses propres règles déclaratives. Deux nombres pour un seul run.
+
+Vérifiable en une commande sur l'artefact d'un run :
+
+```bash
+jq '.standard' audits/audit-latest.json    # doit dire "rgaa", jamais "wcag"
+```
+
 ### Ce que coûte l'adjudication
 
-Sans registre commité : **16 à 21 $ par run**. Avec, le premier run paie le total et les suivants
-ne paient que le reliquat.
+Sans registre à rejouer : **9,59 $**, mesuré sur le run du 24/08/2026 (3 passes — 5,91 + 2,43 +
+1,25). Avec le registre commité, le premier run paie le total et les suivants ne paient que le
+reliquat.
+
+Le plafond est **en dollars et par APPEL DE MODÈLE** (`adjudicate-budget-usd: "0.40"`), pas en
+tours et pas par run. Deux choses à ne pas confondre :
+
+- `adjudicate-max-turns` est le knob du chemin `claude-code-action`. Sous `adjudicate-runner: cli`
+  le CLI avale `--max-turns` sans un mot — un budget de tours y ressemblerait à un plafond et ne
+  serait rien du tout. Il n'est donc plus passé.
+- `--max-budget-usd` est poussé sur l'argv de **chaque `claude -p`** (`src/agent-cli.ts:170`), et
+  `runCli` réessaie jusqu'à `MAX_ATTEMPTS = 4`. Au grain `criterion`, un appel = un critère : le
+  pire cas est `critères × passes × tentatives × plafond`. **Le seul plafond de run reste
+  `timeout-minutes`.**
+
+Calibrage : la première passe du 24/08 a tranché 48 critères pour 5,91 $, soit ~0,12 $ par critère
+en lots de huit ; un appel par critère perd le contexte partagé du lot, donc 0,40 $ ≈ 3× l'attendu.
+
+⚠️ **`adjudicate-grain: criterion` est obligatoire dès qu'on met `adjudicate-runner: cli`** : le
+défaut de l'Action est `worklist`, passé tel quel à `judge --grain`, et le moteur n'accepte que
+`batch` ou `criterion` (`src/cli.ts:3560`). Le couple `cli` + défaut sort en 2 sans appeler de
+modèle, et le job rougit sur `require-decided` avec toute la grille « à évaluer ».
 
 Le modèle est **nommé explicitement** (`adjudicate-model: claude-sonnet-5`) : le tier est facturé
 AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et le défaut de `claude-code-action`
@@ -174,7 +232,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.29.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+Les deux sont sur **5.33.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
 se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
 son cache si le skill `review-a11y` se comporte autrement que la CI.
 

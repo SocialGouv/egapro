@@ -225,7 +225,7 @@ Cascade: 1) DSFR classes → 2) DSFR utilities + CSS custom properties → 3) Sc
 >
 > While developing, `pnpm --filter app a11y:dev` starts the ultra11y side-car (dashboard on `http://127.0.0.1:4111`); `pnpm exec ultra11y dev --next` writes the overlay component to mount. Optional — the gate is the agent and the workflow.
 >
-> RGAA is a **per-page** norm: the normative sample is declared in `.ultra11yrc.json` (`sample.pages`), and its ids must match the `as` passed to `checkA11y` in `src/e2e/a11y/`. `audit` is always WCAG-keyed and ignores `--standard` — chain `report --standard rgaa` for an RGAA-keyed artifact.
+> RGAA is a **per-page** norm: the normative sample is declared in `.ultra11yrc.json` (`sample.pages`), and its ids must match the `as` passed to `checkA11y` in `src/e2e/a11y/`. `audit` honours `--standard` since ultra11y 5.32.0 and writes an RGAA-keyed document: before that it — and `scan --merge` with it — rewrote `audits/audit-latest.json` without the flag, so the published artifact said `wcag` while every rendering beside it spoke RGAA. Check it with `jq '.standard' audits/audit-latest.json`.
 
 ### Mandatory checklist (extract — full rules in the canonical rule)
 

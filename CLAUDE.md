@@ -251,7 +251,7 @@ GitHub Actions workflows are in `.github/workflows/` :
 | File | Trigger | Role |
 |---|---|---|
 | `ci.yaml` | each push | build · lint · format · typecheck · tests |
-| `a11y.yaml` | PR, cron hebdo (lundi), manual | 3 jobs ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**, SARIF + annotations + commentaire sticky. Sur **cron/manuel** (donc sur `alpha`, branche par défaut) : la chaîne complète — `a11y-pages` (balayage Playwright 35 pages, critères de rendu, rejeu du registre de verdicts puis adjudication IA du reliquat, non bloquant) et `a11y-bundle` (livrable `ultra11y-rgaa`) |
+| `a11y.yaml` | PR, cron hebdo (lundi), manual | 3 jobs ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**, SARIF + annotations + commentaire sticky. Sur **cron/manuel** (donc sur `alpha`, branche par défaut) : la chaîne complète — `a11y-pages` (balayage Playwright — 39 pages enregistrées, 37 capturées, 24 déclarées dans `.ultra11yrc.json` —, critères de rendu, rejeu du registre de verdicts puis adjudication IA du reliquat, non bloquant) et `a11y-bundle` (livrable `ultra11y-rgaa`) |
 | `e2e.yaml` | PR → `alpha`, manual | suite Playwright complète |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
 | `review-auto.yaml` | push sur toute branche sauf `dependabot/**` et `master` | **déploiement des review apps** |
