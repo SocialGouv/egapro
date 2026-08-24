@@ -22,11 +22,7 @@ type Options = {
 	 * → upload) used by the other upload forms.
 	 */
 	autoUpload?: boolean;
-	/**
-	 * Message shown when submitting the staged flow with no file selected.
-	 * Defaults to a generic copy — consumers with a single expected document
-	 * (e.g. the joint evaluation report) should pass a more specific message.
-	 */
+	// Overrides the generic default for consumers expecting one specific document.
 	emptySelectionError?: string;
 };
 
