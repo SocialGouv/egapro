@@ -188,6 +188,102 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("étape 1 transmise sur tous les parcours (#4243)", () => {
+		it.each<PanelVariant>([
+			"compliance_choice",
+			"compliance",
+			"evaluation",
+			"cse",
+			"closed",
+		])("announces the transmitted declaration for variant %s", (variant) => {
+			const { panel } = renderPanel(variant);
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the view link on a closed démarche once the deadline has passed", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				year: PAST_YEAR,
+			});
+			expect(
+				dialog.querySelector(
+					'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]',
+				),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByRole("link", { name: "Modifier" }),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("étape 2 — choix du parcours nommé (#4243)", () => {
+		it("names the pending path choice on the first declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceRound1Deadline)}`,
+			);
+		});
+
+		it("names the pending path choice again after the second declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			});
+
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
+		});
+
+		it("names the chosen path and its deadline for corrective actions", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+			});
+
+			expect(
+				panel.getByText("Actions correctives et seconde déclaration"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl2ModificationDeadline)}`,
+			);
+		});
+
+		it("names the chosen path with no deadline for the justification", () => {
+			const { panel } = renderPanel("cse", {
+				displayContext: makeDisplayContext("justify"),
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			const step2 = panel
+				.getByText(/^Parcours de mise en conformité/)
+				.closest("div");
+			expect(step2).not.toBeNull();
+			expect(step2?.parentElement).toHaveTextContent(
+				"Justification des écarts de rémunération",
+			);
+		});
+	});
+
 	describe("2nde déclaration — variant cse avec secondDeclarationSubmitted", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("cse", {
@@ -294,13 +390,17 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	});
 
 	describe("TransmittedRow sans viewHref — pas de bouton œil sur ces lignes", () => {
-		it("does not render view link on CSE avis row (closed variant, no decl1 row shown)", () => {
+		it("does not render view link on CSE avis row (closed variant)", () => {
 			const { dialog } = renderPanel("closed");
 			expect(dialog.querySelector('a[href*="avis-cse"]')).toBeInTheDocument();
-			const links = dialog.querySelectorAll(
+			const links = dialog.querySelectorAll<HTMLAnchorElement>(
 				'a[title="Voir le récapitulatif de la déclaration"]',
 			);
-			expect(links).toHaveLength(0);
+			expect(links).toHaveLength(1);
+			expect(links[0]).toHaveAttribute(
+				"href",
+				"/declaration-remuneration/recapitulatif?siren=532847196",
+			);
 		});
 
 		it("does not render view link for joint evaluation row (no type=correction link)", () => {

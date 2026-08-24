@@ -15,6 +15,20 @@ import styles from "./DeclarationProcessPanel.module.scss";
 
 type StepStatus = "pending" | "current" | "complete";
 
+type CompliancePath = NonNullable<
+	DeclarationDisplayContext["firstDeclarationPathChoice"]
+>;
+
+/** Panel wording for each compliance path. Shorter than the funnel option
+ *  titles, and free of the round suffix the table's step labels carry. */
+const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
+	corrective_action: "Actions correctives et seconde déclaration",
+	joint_evaluation: "Évaluation conjointe des rémunérations",
+	justify: "Justification des écarts de rémunération",
+};
+
+const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
+
 export function getStepStatuses(
 	variant: PanelVariant,
 ): [StepStatus, StepStatus, StepStatus] {
@@ -182,19 +196,13 @@ function Step1Content({
 						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
 					</p>
 				</div>
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">
-						Indicateurs pré-remplis à vérifier et à modifier si nécessaire
-						(issus des données DSN)
-					</p>
-				</div>
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">
-						Indicateurs de rémunération par catégorie de salariés à remplir
-					</p>
-				</div>
+				<BulletRow>
+					Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus
+					des données DSN)
+				</BulletRow>
+				<BulletRow>
+					Indicateurs de rémunération par catégorie de salariés à remplir
+				</BulletRow>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
@@ -204,14 +212,12 @@ function Step1Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				{variant !== "closed" && (
-					<TransmittedRow
-						label="Votre déclaration a été transmise"
-						modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
-						modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
-						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
-					/>
-				)}
+				<TransmittedRow
+					label="Votre déclaration a été transmise"
+					modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
+					modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
+					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
+				/>
 			</div>
 		);
 	}
@@ -261,6 +267,7 @@ function Step2Content({
 						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
 					/>
 				)}
+				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
 				<DeadlineRow date={pathChoiceDeadline} />
 			</div>
 		);
@@ -270,10 +277,7 @@ function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Actions correctives et seconde déclaration</p>
-				</div>
+				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
 				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
@@ -307,10 +311,7 @@ function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				{secondDeclTransmittedRow}
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Évaluation conjointe des rémunérations</p>
-				</div>
+				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
 				<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
 			</div>
 		);
@@ -335,10 +336,7 @@ function Step2Content({
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Justification des écarts de rémunération</p>
-				</div>
+				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
 			)}
 		</div>
 	);
@@ -433,6 +431,15 @@ function TransmittedRow({
 					</a>
 				)}
 			</div>
+		</div>
+	);
+}
+
+function BulletRow({ children }: { children: ReactNode }) {
+	return (
+		<div className={styles.bulletItem}>
+			<span aria-hidden="true" className={styles.bullet} />
+			<p className="fr-mb-0">{children}</p>
 		</div>
 	);
 }
