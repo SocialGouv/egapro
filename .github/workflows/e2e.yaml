@@ -109,10 +109,15 @@ jobs:
             "chrome-headless-shell-linux64"
       - name: Install Playwright system dependencies
         shell: bash
+        timeout-minutes: 15
         run: |
           set -uo pipefail
+          # No inner `timeout` here: it would SIGTERM pnpm without reaching the
+          # sudo'd apt-get child, which keeps holding /var/lib/dpkg/lock-frontend
+          # and makes every subsequent attempt fail instantly on a lock error.
+          # timeout-minutes above is the only kill switch.
           for attempt in 1 2 3; do
-            if timeout 240 pnpm --filter app exec playwright install-deps chromium; then
+            if pnpm --filter app exec playwright install-deps chromium; then
               exit 0
             fi
             echo "::warning::playwright install-deps attempt ${attempt}/3 failed, retrying" >&2
@@ -120,7 +125,6 @@ jobs:
           done
           echo "::error::playwright install-deps failed after 3 attempts" >&2
           exit 1
-        timeout-minutes: 15
         env:
           DEBIAN_FRONTEND: noninteractive
           NEEDRESTART_MODE: a
