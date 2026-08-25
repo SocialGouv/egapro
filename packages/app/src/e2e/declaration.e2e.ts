@@ -317,9 +317,10 @@ test.describe("Declaration workflow", () => {
 // both tables, and the hourly table was checked against the GIP hourly reference (so it
 // was unchecked without a GIP prefill). Both tables are now held to the step 1
 // "Effectifs physiques" counts, divergence blocks the step, and the message sits under
-// the offending table, below its "Source : DSN" note, once per table. The unit tests
-// cover the derivation; what only the browser proves is that "Suivant" no longer
-// navigates and that the focus lands on the message of the table at fault.
+// the offending table, below its "Source : DSN" note when prefill data exists, once
+// per table. The unit tests cover the derivation and source-note ordering; what only
+// the browser proves here is that "Suivant" no longer navigates and that the focus
+// lands on the message of the table at fault.
 test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260)", () => {
 	test.describe.configure({ mode: "serial" });
 
@@ -356,9 +357,11 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			);
 			await expect(hourlyNote).toHaveCount(0);
 
-			// The message belongs to the table it indicts: after the annual table and
-			// below its source note, before the hourly one — not above both, as the
-			// old warning was.
+			// This journey has a GIP workforce row but no DSN prefill payload, so it has
+			// no source note. Its browser-level invariant is that the message belongs to
+			// the table it indicts: after the annual table and before the hourly one —
+			// not above both, as the old warning was. The source-note variant is covered
+			// by Step4QuartileCoherence.test.tsx.
 			const placement = await page.evaluate(() => {
 				const note = document.getElementById("step4-coherence-annual");
 				const captioned = (needle: string) =>
@@ -377,17 +380,11 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 						hourly.compareDocumentPosition(note) &
 							Node.DOCUMENT_POSITION_PRECEDING,
 					),
-					afterSourceNote: Boolean(
-						note.parentElement?.previousElementSibling?.textContent?.startsWith(
-							"Source",
-						),
-					),
 				};
 			});
 			expect(placement).toEqual({
 				afterAnnualTable: true,
 				beforeHourlyTable: true,
-				afterSourceNote: true,
 			});
 		});
 
