@@ -95,42 +95,44 @@ dispense ne survit pas à ce qu'elle excusait — et chacune est imprimée dans 
 renvoi nommé vers l'auditeur humain.
 
 Fichier : `packages/app/.ultra11y/undecidable.json`, versionné (exception dans `.gitignore`),
-câblé par `undecidable-file` dans `a11y.yaml`. Trois entrées, et elles ne sont pas de même nature.
+câblé par `undecidable-file` dans `a11y.yaml`. **Deux entrées : 13.3 et 13.4**, le critère sans
+instrument décrit ci-dessus — il faut ouvrir le `.xlsx`, et personne ici ne le peut.
 
-**13.3 et 13.4 — le critère sans instrument.** Décrit ci-dessus : il faut ouvrir le `.xlsx`, et
-personne ici ne le peut.
+### 12.5, et la démonstration que la liste se nettoie toute seule
 
-**12.5 — le verdict est connu, c'est la CI qui ne sait pas l'enregistrer.** Le critère demande si
-le moteur de recherche est atteignable de manière identique sur un ensemble de pages. Le glossaire
-RGAA définit le *moteur de recherche interne* comme donnant accès à une recherche sur **l'ensemble
-des contenus du site**, et exclut explicitement « tout autre moteur de recherche permettant par
-exemple de faire des recherches sur une partie restreinte du site ».
+12.5 y a figuré, une journée. Ça vaut d'être raconté, parce que c'est la preuve que cette liste
+n'est pas une tolérance.
 
-egapro n'en a aucun. Header, nav et pied de page ne portent aucune fonctionnalité de recherche sur
-les 37 pages capturées — zéro `fr-search`, `role="search"` ou `type="search"` dans
-`src/modules/layout/`. Les deux seuls champs du périmètre sont des outils métier confinés à leur
-page : la recherche d'entreprise de l'accueil (`action="/index-egapro/recherche"`, qui interroge
-l'index des déclarantes) et la recherche de référent de `/referents`. C'est le cas que le glossaire
-exclut. **Le verdict est donc `NA`**, et l'adjudicateur l'a rendu, avec cette justification, sur le
-run 32828633331.
+Le critère demande si le moteur de recherche est atteignable de manière identique sur un ensemble
+de pages. Le glossaire RGAA définit le *moteur de recherche interne* comme donnant accès à une
+recherche sur **l'ensemble des contenus du site**, et exclut « tout autre moteur de recherche
+permettant par exemple de faire des recherches sur une partie restreinte du site ». egapro n'en a
+aucun : header, nav et pied de page ne portent aucune fonctionnalité de recherche sur les 37 pages
+capturées. Les deux seuls champs du périmètre sont des outils métier confinés à leur page — la
+recherche d'entreprise de l'accueil (`action="/index-egapro/recherche"`, qui interroge l'index des
+déclarantes) et la recherche de référent de `/referents`. **Le verdict est `NA`.**
 
-Ce qui l'a fait tomber n'est **pas** un défaut de la porte, et il faut le dire précisément parce
-que l'inverse serait une invitation à l'affaiblir.
+Il a d'abord été refusé trois passes de suite, et la porte avait raison. L'adjudicateur citait le
+**formulaire de recherche** — l'élément même qu'il argumentait être hors sujet — alors que les
+ancres moissonnées pour 12.5 sont `header.fr-header`, `footer#footer.fr-footer`, `nav.fr-breadcrumb`
+et `nav.fr-container`. Une citation qui tombe sur une ancre moissonnée est acceptée sans
+re-vérifier la transcription ; une citation **hors moisson** garde la vérification stricte du
+snippet, délibérément — c'est là qu'une localisation inventée se cacherait. Le snippet retapé y a
+échoué.
 
-L'adjudicateur a cité le **formulaire de recherche d'entreprise** — l'élément même qu'il argumente
-être hors sujet. Or les ancres moissonnées pour 12.5 sont `header.fr-header`,
-`footer#footer.fr-footer`, `nav.fr-breadcrumb` et `nav.fr-container` : **aucun `form`**. Une
-citation qui tombe sur une ancre moissonnée est acceptée sans re-vérifier la transcription (le
-moteur a lu l'élément dans le fichier, il y est par construction). Une citation **hors moisson**
-garde la vérification stricte du snippet, délibérément — c'est là qu'une localisation inventée se
-cacherait. Le snippet retapé, terminé par un backtick parasite, a donc échoué à une vérification
-qui avait raison de s'appliquer.
+**La leçon générale, et elle dépasse 12.5 :** un critère dont le sujet est une *absence* pousse le
+modèle à citer ce qui n'est PAS le sujet, et cet élément-là n'est par définition pas dans la
+moisson. La bonne citation était le `header` ou le `nav` — « voici la zone de navigation, identique
+sur les 37 pages, elle ne porte aucune recherche ».
 
-La leçon n'est pas « la porte est trop stricte », c'est : **un critère dont le sujet est une
-absence pousse le modèle à citer ce qui n'est PAS le sujet**, et cet élément-là n'est par
-définition pas dans la moisson. Pour 12.5, la bonne citation était le `header` ou le `nav` — « voici
-la zone de navigation, identique sur les 37 pages, et elle ne porte aucune recherche ». L'entrée
-sera retirée dès qu'une passe produira cette citation-là.
+Une fois le registre commité, l'adjudicateur n'a plus eu que le reliquat à traiter, et il a rendu
+ce `NA` en citant cette fois `Header/index.tsx` et `Footer/index.tsx`. **Et le job a rougi
+là-dessus** — `Critère 12.5 déclaré indécidable, mais il porte désormais un verdict — retirez-le de
+la liste`. C'est le comportement recherché : une dispense ne survit pas à ce qu'elle excusait, et
+la porte l'exige elle-même plutôt que d'attendre qu'on y pense.
+
+En amont, `maxgfr/ultra11y#36` traite la cause : le refus nomme désormais la moisson du critère au
+lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de citer la région inspectée.
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
