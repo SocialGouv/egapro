@@ -1,0 +1,1039 @@
+{
+  "tool": "ultra11y",
+  "kind": "verdict-ledger",
+  "schemaVersion": 2,
+  "standard": "rgaa",
+  "entries": [
+    {
+      "criteriaId": "1.3",
+      "verdict": "C",
+      "justification": "Les images de la population qui portent effectivement une alternative textuelle non vide (donc porteuses d'information au sens de 1.3) ont une alternative pertinente : l'illustration du bouton d'avis reprend exactement l'intitulé de l'action (alt=\"Je donne mon avis\"), et les graphiques statistiques (funnel, courbes de progression) exposent une légende aria-label qui décrit le contenu du graphique plutot que de le nommer generiquement. Le reste de la population (artworks DSFR, illustrations home/login/aide, icones) porte alt=\"\" et releve de 1.1/1.2 (decoratif), pas d'un jugement de pertinence sous 1.3.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/avis-cse-confirmation/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"Je donne mon avis\" loading=\"lazy\" width=\"200\" height=\"85\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/assets/images/je-donne-mon-av"
+        },
+        {
+          "file": "src/modules/admin/stats/CampaignProgressionChart.tsx",
+          "line": 145,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={CHART_CAPTION} className={styles.chartContainer} role=\"img\" >"
+        },
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:4e65433564258c6ab0c4e60b54dcec49",
+      "evidenceCount": 83,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.4",
+      "verdict": "NA",
+      "justification": "Aucune image du perimetre audite n'est utilisee comme CAPTCHA ou comme image-test : la population harvestee (artworks decoratifs DSFR, illustrations home/login/aide, graphiques statistiques) ne comporte aucune verification anti-robot ni image de quiz/test. Le sujet du critere 1.4 n'existe nulle part dans le site.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"210\" height=\"147\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/asset"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.5",
+      "verdict": "NA",
+      "justification": "Aucune image du perimetre audite n'est utilisee comme CAPTCHA ou comme image-test : la population harvestee pour ce critere (artworks decoratifs, illustrations, graphiques statistiques) ne comporte aucun mecanisme de verification anti-robot ni d'image de quiz/test. Le sujet du critere 1.4 (alternative d'une image-CAPTCHA) n'existe nulle part dans le site.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"210\" height=\"147\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/asset"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.6",
+      "verdict": "NA",
+      "justification": "Aucune image de la population n'est une image complexe necessitant une description detaillee : les artworks DSFR et illustrations portent alt=\"\" (purement decoratives), et les graphiques statistiques exposent deja leur contenu via une legende aria-label descriptive du role=\"img\" (ex. CompletionFunnelChart, CampaignProgressionChart), suffisante pour restituer l'information sans mecanisme de description detaillee separe. Aucune preuve d'un besoin de description detaillee (longdesc, aria-describedby vers un long texte) n'apparait dans le perimetre.",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\">"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.7",
+      "verdict": "NA",
+      "justification": "Ce critere presuppose l'existence d'une image porteuse d'information dotee d'une description detaillee (attribut longdesc, texte adjacent reference, ou aria-describedby vers une description longue). Le critere 1.6 conclut qu'aucune image du perimetre ne necessite ni ne porte de description detaillee : les graphiques exposent leur contenu via un simple aria-label, sans mecanisme de description detaillee separe a juger. Le sujet de 1.7 n'existe donc nulle part dans le site.",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.8",
+      "verdict": "NA",
+      "justification": "Le critère 1.8 vise les « images texte » : du texte typographique figé dans une image (bannière, logo textuel…) qui devrait être remplacé par du vrai texte stylé CSS quand c'est possible. L'évidence moissonnée ne contient aucun élément de cette nature : les <svg> sont des pictogrammes DSFR purement décoratifs (aria-hidden=\"true\"), les <img> sont des illustrations décoratives (alt=\"\") ou des images porteuses d'un sens propre (alt non vide, ex. \"Je donne mon avis\"), et les <canvas>/<div role=\"img\"> sont des visualisations de données (graphiques ECharts) dotées d'une alternative textuelle (aria-label), pas du texte stylisé en image. Aucun des cas particuliers (logo, dénomination commerciale, CAPTCHA) n'est en jeu non plus puisque le sujet lui-même est absent. Le sujet du critère (tests 1.8.1 à 1.8.6) n'existe nulle part dans le périmètre audité.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img.HomeSearch-module-scss-module__-kbqJW__illustration",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"223\" height=\"240\" decoding=\"async\" data-nimg=\"1\" class=\"HomeSearch-module-scss-module_"
+        },
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "1.9",
+      "verdict": "NA",
+      "justification": "Le sujet du critère — une image porteuse d'une légende adjacente structurée (relation <figure>/<figcaption>, ou légende de copyright/date/auteur juxtaposée à l'image) — n'existe nulle part dans le périmètre audité. Les images recensées sont soit purement décoratives (svg.fr-artwork aria-hidden=\"true\", img alt=\"\"), soit intégrées dans une structure de carte DSFR (fr-card) où le titre et la description appartiennent à la carte, pas à une légende d'image au sens RGAA 1.9 : aucun <figcaption> ni texte de légende juxtaposé à une image n'a été relevé dans la moisson.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img.HomeSearch-module-scss-module__-kbqJW__illustration",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"223\" height=\"240\" decoding=\"async\" data-nimg=\"1\" class=\"HomeSearch-module-scss-module_"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"210\" height=\"147\" decoding=\"async\" data-nimg=\"1\" style=\"color:transparent\" src=\"/asset"
+        }
+      ],
+      "evidenceFingerprint": "sha256:4e65433564258c6ab0c4e60b54dcec49",
+      "evidenceCount": 83,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "2.2",
+      "verdict": "C",
+      "justification": "L'unique cadre du perimetre porte un attribut title pertinent : il decrit precisement la fonction du cadre embarque (opt-out de la mesure d'audience Matomo), permettant a l'utilisateur de technologie d'assistance d'identifier le cadre avant d'y entrer.",
+      "citations": [
+        {
+          "file": "src/modules/legal/MatomoOptOut.tsx",
+          "line": 13,
+          "selector": "iframe.{styles.optOut}",
+          "snippet": "<iframe className={styles.optOut} src={optOutUrl} title=\"Refuser ou accepter la mesure d'audience anonyme (Matomo)\" />"
+        }
+      ],
+      "evidenceFingerprint": "sha256:87754bb52d93b5e38376964599913794",
+      "evidenceCount": 1,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "3.1",
+      "verdict": "C",
+      "justification": "Aucune information n'est donnée par la seule couleur. Les éléments recensés sont des liens et boutons DSFR (fr-link, fr-btn, fr-nav__link, fr-footer__*-link) portant systématiquement un intitulé textuel visible ; leur distinction repose sur le texte lui-même, éventuellement une icône (fr-icon-*) ou le soulignement DSFR par défaut — jamais sur la couleur seule. La seule image sans texte porteuse d'un rôle informatif potentiel (illustration d'accueil) est en réalité décorative (alt=\"\"). Aucune propriété CSS de couleur (color/background/border-color) véhiculant une information à elle seule n'a été relevée dans la moisson.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img.HomeSearch-module-scss-module__-kbqJW__illustration",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"223\" height=\"240\" decoding=\"async\" data-nimg=\"1\" class=\"HomeSearch-module-scss-module_"
+        },
+        {
+          "file": "src/modules/layout/Footer/AppVersion.tsx",
+          "line": 25,
+          "selector": "a.fr-footer__bottom-link",
+          "snippet": "<a className=\"fr-footer__bottom-link\" href={href} rel=\"noopener noreferrer\" target=\"_blank\" >"
+        },
+        {
+          "file": "src/modules/layout/Footer/FooterBody.tsx",
+          "line": 29,
+          "selector": "a.fr-footer__content-link",
+          "snippet": "<a className=\"fr-footer__content-link\" href=\"https://info.gouv.fr\" rel=\"noopener noreferrer\" target=\"_blank\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:e1856f1c32ff5d61cee43d9f18abadd0",
+      "evidenceCount": 138,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.7",
+      "verdict": "NA",
+      "justification": "Aucun media temporel (son, video, ou contenu synchronise) n'existe dans le perimetre audite. La population harvestee pour ce critere (artworks decoratifs, illustrations, graphiques canvas/svg) releve des medias non temporels (thematique traitee au critere 4.8), pas de media temporel. Le sujet du critere 4.7 n'existe nulle part dans le site.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.8",
+      "verdict": "C",
+      "justification": "Les médias non temporels recensés relèvent de deux cas couverts par le critère : (1) SVG/images purement décoratives (svg.fr-artwork aria-hidden=\"true\", illustrations alt=\"\") — cas particulier d'exemption explicite (média à des fins décoratives) ; (2) les graphiques du tableau de bord admin (canvas/echarts, div role=\"img\" aria-label) qui sont chacun accompagnés, immédiatement après dans le même écran, d'un tableau de données équivalent (vérifié dans src/modules/admin/stats/StatsDashboard.tsx : chaque <CompletionFunnelChart> est suivi d'un <CompletionFunnelTable> avec les mêmes données) — le figcaption sr-only du graphique l'annonce explicitement (\"Les données équivalentes sont disponibles dans le tableau ci-dessous\", CompletionFunnelChart.tsx).",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "img.HomeSearch-module-scss-module__-kbqJW__illustration",
+          "snippet": "<img alt=\"\" loading=\"lazy\" width=\"223\" height=\"240\" decoding=\"async\" data-nimg=\"1\" class=\"HomeSearch-module-scss-module_"
+        },
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelChart.tsx",
+          "line": 268,
+          "selector": "div.{styles.chartContainer}",
+          "snippet": "<div aria-label={caption} className={styles.chartContainer} role=\"img\" >"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.9",
+      "verdict": "NC",
+      "justification": "Le tableau de remplacement reproduit les valeurs chiffrees du graphique mais pas la totalite de l'information qu'il vehicule : le graphique met en evidence visuellement (couleur rouge + gras, cf. CompletionFunnelChart.tsx dropStyle) chaque chute superieure au seuil d'alerte, une semantique explicitement documentee a l'utilisateur (\"Une chute superieure a X % ... est mise en evidence en rouge\", StatsDashboard.tsx:328-329) ; cette mise en evidence n'a aucune contrepartie dans la table accessible (CompletionFunnelTable.tsx, StepDropoffTable.tsx), qui affiche la valeur brute de chute sans distinguer une ligne alertante d'une ligne normale. L'alternative n'est donc pas pertinente au sens ou elle omet un contenu que le media qu'elle remplace transmet.",
+      "citations": [
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelTable.tsx",
+          "line": 47,
+          "selector": "td",
+          "snippet": "<td>{formatDrop(row.pctDropFromPrev)}</td>"
+        }
+      ],
+      "findings": [
+        {
+          "file": "src/modules/admin/stats/CompletionFunnelTable.tsx",
+          "line": 47,
+          "message": "La colonne \"Chute vs precedente\" affiche la valeur brute (formatDrop) sans aucune marque distinguant une chute qui depasse le seuil d'alerte (dropThreshold) de celle qui ne le depasse pas, alors que le graphique correspondant distingue ce cas par couleur+gras dans son tooltip (CompletionFunnelChart.tsx:159-160).",
+          "snippet": "<td>{formatDrop(row.pctDropFromPrev)}</td>",
+          "normativeRef": "4.9.1"
+        }
+      ],
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.11",
+      "verdict": "NA",
+      "justification": "Aucun media temporel n'existe dans le perimetre audite (aucun element audio/video/synchronise). Le sujet du critere 4.11 n'existe nulle part dans le site ; les elements moissonnes ici (liens de menu deroulant, tabIndex) relevent de la navigation, pas d'un lecteur de media temporel.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "svg.fr-artwork",
+          "snippet": "<svg aria-hidden=\"true\" class=\"fr-artwork\" height=\"40px\" viewBox=\"0 0 80 80\" width=\"40px\"><use class=\"fr-artwork-decorat"
+        }
+      ],
+      "evidenceFingerprint": "sha256:4bc0a704190e9ef760f2b2e853942b0f",
+      "evidenceCount": 9,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.12",
+      "verdict": "C",
+      "justification": "Les composants recensés sont soit des éléments HTML natifs (<a>/<Link>/<button>) — donc opérables au clavier et au pointeur nativement — soit des modales pilotées par le JS DSFR (fr-modal/dialog, gestion Echap + piège de focus standard). Le menu déroulant UserAccountMenu.tsx, seul widget custom du lot, implémente en plus le patron ARIA menu complet à la main (ArrowUp/ArrowDown, Home, End, Escape, Tab qui referme et rend le focus) sur des <Link>/<button>/<a> natifs (rôle menuitem, tabIndex géré en roving-tabindex) — vérifié en lecture de src/modules/layout/Header/UserAccountMenu.tsx. ConsultationNavLink/NavLink ne sont que des <Link> avec un onClick de tracking, sans altération de la sémantique native.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 146,
+          "selector": "Link.{styles.menuLink}",
+          "snippet": "<Link className={styles.menuLink} href=\"/admin\" onClick={close} role=\"menuitem\" tabIndex={-1} >"
+        },
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 156,
+          "selector": "Link.{styles.menuLink}",
+          "snippet": "<Link className={styles.menuLink} href=\"/mon-espace/mes-entreprises\" onClick={close} role=\"menuitem\" tabIndex={-1}"
+        },
+        {
+          "file": "src/modules/layout/shared/ConsultationNavLink.tsx",
+          "line": 20,
+          "selector": "NavLink.{className}",
+          "snippet": "<NavLink className={className} href={href} onClick={() =>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:4bc0a704190e9ef760f2b2e853942b0f",
+      "evidenceCount": 9,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "4.13",
+      "verdict": "C",
+      "justification": "Les composants d'interface personnalisés du périmètre exposent correctement leur nom, rôle et état via l'API d'accessibilité : les boîtes de dialogue (ThemeModal, SubmitModal…) portent aria-modal=\"true\" + aria-labelledby ; le menu utilisateur (UserAccountMenu) porte role=\"menu\"/\"menuitem\" avec aria-expanded/aria-haspopup sur le déclencheur et une gestion de focus complète (cf. 4.12) ; les info-bulles (TooltipButton) relient bouton et bulle via aria-describedby/aria-labelledby ; les zones dynamiques utilisent aria-live/aria-atomic ou role=\"alert\"/\"status\" à bon escient. Aucune reconstruction de composant natif par un <div>/<span> sans rôle ni état n'a été relevée dans l'évidence.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/ThemeModal.tsx",
+          "line": 9,
+          "selector": "div#fr-theme-modal.fr-modal",
+          "snippet": "<div aria-labelledby=\"fr-theme-modal-title\" aria-modal=\"true\" className=\"fr-modal\" id=\"fr-theme-modal\" role=\"dialog\" >"
+        },
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 139,
+          "selector": "div.{styles.menu}",
+          "snippet": "<div aria-labelledby=\"user-account-menu-button\" className={styles.menu} role=\"menu\" >"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/shared/TooltipButton.tsx",
+          "line": 15,
+          "selector": "button.fr-btn--tooltip",
+          "snippet": "<button aria-describedby=\"tooltip-period\" aria-labelledby=\"tooltip-period-label\" class=\"fr-btn--tooltip fr-btn TooltipButton-module-scss-module___1sOuG__button\""
+        }
+      ],
+      "evidenceFingerprint": "sha256:fff8474bf1e9be65eea507badea65251",
+      "evidenceCount": 70,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.1",
+      "verdict": "NC",
+      "justification": "La plupart des tableaux recensés sont simples (un seul thead, en-têtes de ligne cantonnés à la première colonne) et n'entrent pas dans le champ du critère. Mais CategoryRecapTable.tsx (recapitulatif par catégorie d'emplois) est un tableau complexe au sens RGAA : des lignes d'en-tête de section (<th colSpan={4} scope=\"colgroup\">, \"Total salariés\", \"Rémunération annuelle brute\", \"Rémunération horaire brute\") sont intercalées dans le corps, donc hors de la première ligne/colonne de la grille. Sa seule légende est un simple titre (<caption>{heading} – {declarationYear}</caption>, ex. \"Catégorie d'emplois n°1 : Catégorie test – 2026\") qui ne décrit ni les sections ni la structure du tableau : aucun résumé au sens du critère n'est fourni.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/ContentTypeMatrix.tsx",
+          "line": 56,
+          "selector": "table",
+          "snippet": "<table>"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/shared/DataTable.tsx",
+          "line": 47,
+          "selector": "table",
+          "snippet": "<table>"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/shared/PayGapTable.tsx",
+          "line": 62,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "findings": [
+        {
+          "file": "src/modules/declaration-remuneration/recapitulatif/CategoryRecapTable.tsx",
+          "line": 86,
+          "snippet": "<caption>{`${heading} – ${declarationYear}`}</caption>",
+          "message": "Le tableau porte des en-têtes de section (<tr><th colSpan={4} scope=\"colgroup\">Total salariés : …</th></tr>, ligne 104 ; \"Rémunération annuelle brute\", ligne 118 ; \"Rémunération horaire brute\", ligne 164) intercalées dans le corps — un tableau complexe au sens RGAA (en-têtes non cantonnés à la première ligne/colonne). Sa <caption> n'est qu'un titre (\"Catégorie d'emplois n°1 : Catégorie test – 2026\") et ne fournit aucun résumé de la structure ou des sections du tableau, comme l'exige 5.1.1.",
+          "normativeRef": "5.1.1"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.2",
+      "verdict": "NA",
+      "justification": "Les tableaux complexes identifies au critere 5.1 (QuartileTable, CategoryRecapTable) n'ont pas de resume du tout (leur <caption> se limite au titre) : il n'y a donc aucun resume dont juger la pertinence. Les autres tableaux du perimetre sont des tableaux simples (en-tetes sur une seule ligne/colonne, scope=col uniquement), hors du champ de ce critere qui porte specifiquement sur les tableaux complexes.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/steps/step4/QuartileTable.tsx",
+          "line": 76,
+          "selector": "caption",
+          "snippet": "<caption>{title}</caption>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.3",
+      "verdict": "NA",
+      "justification": "Tous les tableaux du perimetre (ContentTypeMatrix, DataTable, PayGapTable, QuartileTable, tableaux d'administration, tableaux de statistiques) sont des tableaux de DONNEES authentiques (en-tetes th scope=col/row, donnees chiffrees ou categorielles) : aucun n'est utilise a des fins de mise en forme visuelle. Le sujet du critere (tableau de mise en forme) n'existe nulle part dans le perimetre audite.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/PayGapTable.tsx",
+          "line": 62,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "5.5",
+      "verdict": "C",
+      "justification": "Les titres (caption) moissonnes decrivent precisement le contenu de chaque tableau plutot qu'un intitule generique : \"Liste des declarations avec SIREN, entreprise, annee...\", \"Ecart de remuneration\", \"Funnel parcours conformite - declarations avec ecart >= 5 %\", \"Duree de conservation des donnees personnelles\". Aucun titre generique (\"Tableau 1\") n'a ete releve.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/admin-declarations/dom.html",
+          "line": 2,
+          "selector": "table > caption",
+          "snippet": "<table data-fr-js-table-element=\"true\" class=\"\"><caption class=\"fr-sr-only\" data-fr-js-table-caption=\"true\">Liste des declarations avec SIREN, entreprise, annee"
+        },
+        {
+          "file": "src/modules/declaration-remuneration/shared/PayGapTable.tsx",
+          "line": 62,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:84ba9e8c9e5c93da5c64529e5704aaa1",
+      "evidenceCount": 48,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.2",
+      "verdict": "NA",
+      "justification": "Aucune alternative a script (noscript, page alternative, mecanisme cote serveur de repli) n'existe dans le perimetre audite : aucun <noscript> n'est present dans le code source. Ce critere juge la PERTINENCE d'une alternative existante ; en l'absence de toute alternative a juger, son sujet n'existe pas ici (l'existence elle-meme releve du critere mecanique 7.1, hors de cette liste).",
+      "evidenceFingerprint": "sha256:4e65433564258c6ab0c4e60b54dcec49",
+      "evidenceCount": 83,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "7.4",
+      "verdict": "C",
+      "justification": "Les changements de contexte scriptes releves (ouverture de la modale de profil, ouverture/fermeture du menu utilisateur) sont tous declenches par un clic explicite de l'utilisateur sur un bouton dedie (onClick), qui lui donne par construction le controle de l'action. Aucun changement de contexte automatique au chargement, au focus ou au onChange d'un select n'a ete releve dans le code source (aucune navigation programmatique liee a un onChange).",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/MobileUserBlock.tsx",
+          "line": 105,
+          "selector": "handler",
+          "snippet": "onClick={openProfileModal}"
+        },
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 118,
+          "selector": "handler",
+          "snippet": "onClick={() => setIsOpen((prev) => !prev)}"
+        }
+      ],
+      "evidenceFingerprint": "sha256:2bd7d22ba53f625ecf9e340e5896b9cb",
+      "evidenceCount": 329,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.4",
+      "verdict": "C",
+      "justification": "Le code de langue lang=\"fr\" declare sur <html> est pertinent : l'integralite du contenu du site (Egapro, plateforme du Ministere du Travail) est redige en francais, sur les 37 pages capturees.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "html",
+          "snippet": "<html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf-8\"><meta name=\""
+        }
+      ],
+      "evidenceFingerprint": "sha256:b08cad7fecabf4c514a10b2e102108a0",
+      "evidenceCount": 1,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.6",
+      "verdict": "C",
+      "justification": "Chaque page porte un titre distinct et descriptif de son contenu propre (Accueil, Administration des declarations - Egapro, Erreur inattendue - Egapro...), suffixe de facon coherente par le nom du service. Aucun titre generique ou duplique entre pages n'a ete releve sur l'echantillon des 37 pages capturees.",
+      "citations": [
+        {
+          "file": "src/app/global-error.tsx",
+          "line": 20,
+          "selector": "title",
+          "snippet": "<title>Erreur inattendue — Egapro</title>"
+        },
+        {
+          "file": ".ultra11y/pages/admin-declarations/dom.html",
+          "line": 2,
+          "selector": "title",
+          "snippet": "<title>Administration des déclarations — Egapro</title><meta name=\"description\" content=\"Indicateurs d'égalité professio"
+        }
+      ],
+      "evidenceFingerprint": "sha256:049bb17f03ba9ec345b0ea7cd343f530",
+      "evidenceCount": 38,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "8.9",
+      "verdict": "C",
+      "justification": "Les balises structurelles moissonnees (h1-h4, ol, ul, table) portent un contenu semantiquement coherent avec leur role : titres de sections reels (\"Connexion de developpement\", \"Prochaines etapes\"), fil d'Ariane en <ol>, listes de liens/actions en <ul> (footer, groupes de boutons fr-btns-group), tableaux de donnees reelles. Aucune balise n'est utilisee uniquement pour un effet visuel (pas de <table> de mise en page, pas de <hN> pour du texte gras sans valeur de titre).",
+      "citations": [
+        {
+          "file": "src/app/dev-login/page.tsx",
+          "line": 32,
+          "selector": "h1",
+          "snippet": "<h1>Connexion de développement</h1>"
+        },
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 36,
+          "selector": "ol.fr-breadcrumb__list",
+          "snippet": "<ol className=\"fr-breadcrumb__list\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:e49b1e75606150e13de049e07f22eaa5",
+      "evidenceCount": 522,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "9.4",
+      "verdict": "NA",
+      "justification": "Aucune citation (balise <blockquote> ou <q>) n'existe dans le code source du site : recherche exhaustive sans resultat sur src/. Le contenu du site (formulaires de declaration, tableaux de donnees, pages d'aide) ne comporte pas de passages cites necessitant une balise de citation. Le sujet du critere n'existe nulle part dans le perimetre.",
+      "evidenceFingerprint": "sha256:e49b1e75606150e13de049e07f22eaa5",
+      "evidenceCount": 522,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.3",
+      "verdict": "C",
+      "justification": "L'ordre naturel du document (hors CSS) reste cohérent : titres hiérarchiques (h1 \"Connexion de développement\", h1#fr-theme-modal-title \"Paramètres d'affichage\"), listes structurées (ol.fr-breadcrumb__list, ul.fr-footer__content-list), tableaux de données correctement balisés (table ContentTypeMatrix). Les seules règles CSS de réordonnancement visuel recensées (order/flex-direction: row-reverse sur .fr-btns-group--inline-reverse, .fr-password__checkbox, .fr-toggle--label-left…) appartiennent au framework DSFR lui-même (référentiel d'État déjà conçu et audité pour le RGAA), pas au code applicatif : elles ne font que réordonner visuellement des groupes de boutons/champs déjà associés par une relation programmatique (label/for, aria-*) indépendante de l'ordre visuel. Désactiver les styles ne fait que révéler l'ordre naturel du document, lui-même cohérent — c'est précisément le test 10.3.1.",
+      "citations": [
+        {
+          "file": "src/app/dev-login/page.tsx",
+          "line": 32,
+          "selector": "h1",
+          "snippet": "<h1>Connexion de développement</h1>"
+        },
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 36,
+          "selector": "ol.fr-breadcrumb__list",
+          "snippet": "<ol className=\"fr-breadcrumb__list\">"
+        },
+        {
+          "file": "src/modules/cseOpinion/components/ContentTypeMatrix.tsx",
+          "line": 56,
+          "selector": "table",
+          "snippet": "<table>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:561439a525f9fa0fc522dc63824ea6ac",
+      "evidenceCount": 566,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.9",
+      "verdict": "C",
+      "justification": "Les occurrences moissonnees ne reposent pas sur une reference purement spatiale/formelle non recuperable hors contexte visuel : \"cliquez sur le bouton ci-dessous\" et \"tableau ci-dessous\" renvoient a un element qui suit immediatement dans le meme ordre de lecture/DOM (donc rencontre dans le meme ordre par un lecteur d'ecran ou en lecture sequentielle), pas a une position purement visuelle (ex. \"a droite\", \"en haut\"). La phrase \"mise en evidence en rouge\" (StatsDashboard.tsx:329) relève de l'information par la couleur (theme 3, critere 3.1), pas de la forme/taille/position de ce critere ; ce point est traite comme une non-conformite specifique au critere 4.9 (alternative de tableau incomplete). Plusieurs correspondances etaient des commentaires de code (non restitues a l'utilisateur), hors du perimetre de ce critere.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/SubmissionBanner.tsx",
+          "line": 43,
+          "selector": "text",
+          "snippet": "Sinon, cliquez sur le bouton ci-dessous."
+        }
+      ],
+      "evidenceFingerprint": "sha256:e3b002da4640c15df0d98ecd8b5c7143",
+      "evidenceCount": 22,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.10",
+      "verdict": "C",
+      "justification": "Les memes occurrences que le critere 10.9 ont ete examinees : les references \"ci-dessous\" pointent systematiquement vers un contenu qui suit immediatement dans le meme ordre de lecture (DOM), donc accessible independamment de toute perception visuelle de la position ; aucune n'est une indication PUREMENT positionnelle (type \"a droite\", \"en haut a gauche\") sans alternative textuelle. Le cas de la mise en evidence en rouge d'une chute de funnel est traite comme non-conformite du critere 4.9 (alternative de tableau incomplete), son sujet relevant du theme couleur/alternative de media, pas de la forme/taille/position implementee ici.",
+      "citations": [
+        {
+          "file": "src/modules/cseOpinion/components/SubmissionBanner.tsx",
+          "line": 43,
+          "selector": "text",
+          "snippet": "Sinon, cliquez sur le bouton ci-dessous."
+        }
+      ],
+      "evidenceFingerprint": "sha256:e3b002da4640c15df0d98ecd8b5c7143",
+      "evidenceCount": 22,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "10.14",
+      "verdict": "C",
+      "justification": "Tous les contenus additionnels reperes (fil d'Ariane repliable, modale de theme, menu mobile, accordeons de definition, modales de confirmation/suppression, tooltip) sont declenches par un <button> avec aria-controls/aria-expanded ou par le moteur JS DSFR (classes fr-collapse/fr-modal togglees en JS, jamais par un selecteur CSS :hover seul). Un declenchement par bouton est actionnable au clavier (Entree/Espace) independamment de tout dispositif de pointage. Le tooltip DSFR (fr-tooltip) est affiche/masque via les classes fr-tooltip--shown/--hidding pilotees par le JS DSFR sur les evenements focus ET hover du bouton referent (pas par :hover CSS seul), donc accessible au clavier.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/TooltipButton.tsx",
+          "line": 26,
+          "selector": "span#{id}.fr-tooltip",
+          "snippet": "<span className=\"fr-tooltip fr-placement\" id={id} role=\"tooltip\">"
+        },
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 26,
+          "selector": "button.fr-breadcrumb__button",
+          "snippet": "<button aria-controls={collapseId} aria-expanded=\"false\" className=\"fr-breadcrumb__button\" suppressHydrationWarning type"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0d94a79f6eecb726b1016b76c4d774fb",
+      "evidenceCount": 285,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.2",
+      "verdict": "C",
+      "justification": "L'echantillon moissonne (radios de theme, opinions CSE, checkboxes de certification, champs de saisie numeriques du formulaire de declaration, champs pourcentage) porte des etiquettes descriptives et specifiques a leur champ (\"Theme clair\", \"Nombre de femmes\", \"Je certifie que les donnees saisies sont exactes\"), associees via <label for> ou aria-label. Aucune etiquette generique (\"Champ 1\", \"Valeur\") n'a ete relevee.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fa680f0510e025a0861c9fe17e535e60",
+      "evidenceCount": 139,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.3",
+      "verdict": "C",
+      "justification": "Les etiquettes portant la meme fonction sont issues des memes composants React partages (ThemeModal pour les 3 radios de theme, AccuracyOpinionCard/GapConsultationCard pour Favorable/Defavorable, champs Nombre de femmes/hommes partages entre etapes de declaration) : leur intitule est donc identique partout ou ils apparaissent par construction, pas duplique a la main avec un risque de derive.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/ThemeModal.tsx",
+          "line": 49,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0dfcf4b47d3012fbc3e2345287c5b392",
+      "evidenceCount": 147,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.4",
+      "verdict": "C",
+      "justification": "Dans tous les composants de formulaire de l'echantillon, le <label> est immediatement adjacent a son champ dans le flux DOM (juste avant pour les champs texte, juste apres pour les radios/checkboxes DSFR), sans contenu intercalaire non lie. Cette adjacence est garantie par les composants DSFR partages (fr-input-group, fr-radio-group) utilises de facon systematique.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/ThemeModal.tsx",
+          "line": 49,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio"
+        }
+      ],
+      "evidenceFingerprint": "sha256:fa680f0510e025a0861c9fe17e535e60",
+      "evidenceCount": 139,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.7",
+      "verdict": "C",
+      "justification": "Les légendes des regroupements de champs de même nature recensés sont systématiquement spécifiques à la question posée, jamais génériques — vérifié en lecture des composants correspondants : \"Existence d'un CSE (obligatoire)\" (CompanyEditModal.tsx:265), \"Un CSE a-t-il été mis en place dans votre entreprise ?\" (MissingInfoModal.tsx:193), \"Type de la valeur\" (ReferentFormFields.tsx:123), \"Choix du parcours de mise en conformité\" (CompliancePathChoice.tsx:231), \"Dates de la période de référence\" (Step1ReferencePeriod.tsx:101). Aucune légende générique du type \"Informations\" (contre-exemple du référentiel) n'a été trouvée sur les regroupements recensés (thème clair/sombre/système, avis CSE favorable/défavorable, oui/non).",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-light",
+          "snippet": "<input id=\"fr-radio-theme-light\" type=\"radio\" name=\"fr-radios-theme\" value=\"light\"><label class=\"fr-label\" for=\"fr-radio"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-dark",
+          "snippet": "<input id=\"fr-radio-theme-dark\" type=\"radio\" name=\"fr-radios-theme\" value=\"dark\"><label class=\"fr-label\" for=\"fr-radio-t"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-system",
+          "snippet": "<input id=\"fr-radio-theme-system\" type=\"radio\" name=\"fr-radios-theme\" value=\"system\"><label class=\"fr-label\" for=\"fr-rad"
+        }
+      ],
+      "evidenceFingerprint": "sha256:13099eede7becbdbe8f379d423b780d3",
+      "evidenceCount": 165,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.11",
+      "verdict": "C",
+      "justification": "Les erreurs de saisie sont accompagnées de suggestions de type/format et d'exemples de valeurs attendues. Le schéma Zod du SIREN (admin/schemas.ts:18, `.regex(/^\\d{9}$/, \"Le SIREN doit contenir exactement 9 chiffres.\")`) restitue un message qui nomme explicitement le format attendu (test 11.11.1). Le champ téléphone affiche un indice de format avant même l'erreur (\"Format attendu : 01 XX XX XX XX\", PhoneField). Tous les champs recensés sont câblés aria-invalid + aria-describedby vers un message d'erreur contextualisé (fr-messages-group / fr-error-text) plutôt qu'un message générique ne précisant ni type ni exemple.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-representation/shared/PercentagePairFields.tsx",
+          "line": 117,
+          "selector": "input#{womenId}.fr-input",
+          "snippet": "<input aria-describedby={describedBy || undefined} aria-invalid={error ? true : undefined} aria-required=\"true\" classNam"
+        },
+        {
+          "file": "src/modules/shared/FileUpload.tsx",
+          "line": 211,
+          "selector": "input#{inputId}.fr-sr-only",
+          "snippet": "<input accept={accept} aria-describedby={messagesId} aria-invalid={error !== null} aria-label=\"Sélectionner des fichiers"
+        },
+        {
+          "file": "src/modules/shared/PhoneField.tsx",
+          "line": 38,
+          "selector": "input#{inputId}.fr-input",
+          "snippet": "<input aria-describedby={messagesId} aria-invalid={error ? \"true\" : undefined} aria-required=\"true\" autoComplete=\"tel\" c"
+        }
+      ],
+      "evidenceFingerprint": "sha256:d4987cfcecd98ad06fd290b170a0b9f6",
+      "evidenceCount": 201,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "11.12",
+      "verdict": "C",
+      "justification": "Le formulaire de declaration (consequences juridiques : indicateurs d'egalite professionnelle transmis au ministere) est un parcours multi-etapes avec bouton \"Precedent\" a chaque etape permettant de revenir modifier une saisie anterieure avant validation finale, et une sauvegarde de brouillon (draft) rechargee automatiquement (DraftLoadingState.tsx). Une fois soumise, la declaration reste consultable et modifiable depuis \"mon-espace\" et \"historique-declaration\" (mise a jour possible via UpdateCseModal, verrou explicite documente par DeclarationLockAlert/DeclarationModificationClosedAlert quand la modification n'est plus permise). Les formulaires de suppression admin (CancelDeclarationButton, DeleteConfirmationModal) exigent une confirmation explicite dans une modale avant execution.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/draft/DraftLoadingState.tsx",
+          "line": 5,
+          "selector": "div.fr-py-4w",
+          "snippet": "<div aria-busy=\"true\" aria-live=\"polite\" className=\"fr-py-4w\" role=\"status\">"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-dark",
+          "snippet": "<input id=\"fr-radio-theme-dark\" type=\"radio\" name=\"fr-radios-theme\" value=\"dark\"><label class=\"fr-label\" for=\"fr-radio-t"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "input#fr-radio-theme-system",
+          "snippet": "<input id=\"fr-radio-theme-system\" type=\"radio\" name=\"fr-radios-theme\" value=\"system\"><label class=\"fr-label\" for=\"fr-rad"
+        }
+      ],
+      "evidenceFingerprint": "sha256:d4987cfcecd98ad06fd290b170a0b9f6",
+      "evidenceCount": 201,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.1",
+      "verdict": "C",
+      "justification": "Chaque page dispose d'au moins trois systemes de navigation distincts et simultanes : le menu principal <nav aria-label=\"Menu principal\"> (Navigation.tsx), le fil d'Ariane <nav aria-label=\"vous etes ici :\"> (Breadcrumb.tsx) sur les pages internes, et un moteur de recherche d'entreprises sur la page d'accueil (HomeSearchForm.tsx, input#search-query). Un plan du site (/plan-du-site) est egalement present et accessible depuis le footer sur toutes les pages.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "nav.fr-breadcrumb",
+          "snippet": "<nav aria-label=\"vous êtes ici :\" class=\"fr-breadcrumb\" data-fr-js-breadcrumb=\"true\"><button aria-controls=\"breadcrumb-_"
+        },
+        {
+          "file": "src/modules/home/HomeSearchForm.tsx",
+          "line": 52,
+          "selector": "input#search-query.fr-input",
+          "snippet": "<input className=\"fr-input\" id=\"search-query\" placeholder=\"[siren] [raison sociale]\" type=\"search\" name=\"query\">"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "nav#navigation-main.fr-nav",
+          "snippet": "<nav aria-label=\"Menu principal\" class=\"fr-nav\" id=\"navigation-main\" data-fr-js-navigation=\"true\"><ul class=\"fr-nav__lis"
+        }
+      ],
+      "evidenceFingerprint": "sha256:8ceaa1603e7199a9d2ff15859273e407",
+      "evidenceCount": 22,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.2",
+      "verdict": "C",
+      "justification": "Le <header> et le <footer> sont rendus une seule fois par le layout racine partage (src/app/layout.tsx qui importe Header/index.tsx et Footer/index.tsx) : leur position et leur contenu sont structurellement identiques sur toutes les pages de l'application, il ne peut pas y avoir de derive page a page. Le fil d'Ariane (Breadcrumb.tsx) est egalement un composant partage place au meme endroit (juste apres le header) sur toutes les pages internes qui l'utilisent.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/index.tsx",
+          "line": 7,
+          "selector": "header.fr-header",
+          "snippet": "<header className=\"fr-header\">"
+        },
+        {
+          "file": "src/modules/layout/Footer/index.tsx",
+          "line": 7,
+          "selector": "footer#footer.fr-footer",
+          "snippet": "<footer className=\"fr-footer\" id=\"footer\">"
+        }
+      ],
+      "evidenceFingerprint": "sha256:cef839a9991e389176874e607ee4ca09",
+      "evidenceCount": 108,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.3",
+      "verdict": "C",
+      "justification": "La page /plan-du-site (SitemapPage.tsx) est représentative de l'arborescence du site : elle regroupe les liens en \"Pages principales\" (Accueil, Aide et ressources, FAQ, Connexion) et \"Pages légales\" (mentions légales, données personnelles, cookies, déclaration d'accessibilité, plan du site) — vérifié en lecture du composant. Chaque lien utilise next/link vers une route existante et son intitulé correspond exactement à la page ciblée (12.3.2, 12.3.3). Les pages non listées (référents, nous-contacter) restent atteignables depuis la page d'accueil de leur rubrique (Aide), ce que la note du critère autorise explicitement.",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "a.fr-footer__bottom-link",
+          "snippet": "<a class=\"fr-footer__bottom-link\" href=\"/plan-du-site\">Plan du site</a></li><li class=\"fr-footer__bottom-item\"><button aria-controls=\"fr-theme-modal\" class=\"fr-"
+        },
+        {
+          "file": ".ultra11y/pages/aide/dom.html",
+          "line": 2,
+          "selector": "nav.fr-breadcrumb",
+          "snippet": "<nav aria-label=\"vous êtes ici :\" class=\"fr-breadcrumb\" data-fr-js-breadcrumb=\"true\"><button aria-controls=\"breadcrumb-_"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "nav#navigation-main.fr-nav",
+          "snippet": "<nav aria-label=\"Menu principal\" class=\"fr-nav\" id=\"navigation-main\" data-fr-js-navigation=\"true\"><ul class=\"fr-nav__lis"
+        }
+      ],
+      "evidenceFingerprint": "sha256:8ceaa1603e7199a9d2ff15859273e407",
+      "evidenceCount": 22,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.4",
+      "verdict": "C",
+      "justification": "Le lien « Plan du site » (href=\"/plan-du-site\") est rendu par FooterBottom.tsx, lui-même monté par le composant Footer partagé inséré une seule fois dans src/app/layout.tsx (racine de l'App Router) — il apparaît donc au même endroit relatif, via le même mécanisme (lien de pied de page), sur toutes les pages publiques du site qui partagent ce layout.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Footer/index.tsx",
+          "line": 7,
+          "selector": "footer#footer.fr-footer",
+          "snippet": "<footer className=\"fr-footer\" id=\"footer\">"
+        },
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "a.fr-footer__bottom-link",
+          "snippet": "<a class=\"fr-footer__bottom-link\" href=\"/plan-du-site\">Plan du site</a></li><li class=\"fr-footer__bottom-item\"><button aria-controls=\"fr-theme-modal\" class=\"fr-"
+        }
+      ],
+      "evidenceFingerprint": "sha256:6b9434d16bcea5e81da6e4be55cf9811",
+      "evidenceCount": 130,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "12.11",
+      "verdict": "C",
+      "justification": "Comme etabli au critere 10.14 (memes elements moissonnes) : chaque contenu additionnel (fil d'Ariane repliable, modale de theme, menu mobile, accordeon, modales, tooltip) est declenche par un <button> avec aria-controls/aria-expanded actionnable au clavier, jamais par un simple :hover CSS. Le tooltip DSFR (fr-tooltip) est affiche/masque en JS sur focus ET hover du bouton referent (classes fr-tooltip--shown/--hidding), donc atteignable au clavier.",
+      "citations": [
+        {
+          "file": "src/modules/declaration-remuneration/shared/TooltipButton.tsx",
+          "line": 26,
+          "selector": "span#{id}.fr-tooltip",
+          "snippet": "<span className=\"fr-tooltip fr-placement\" id={id} role=\"tooltip\">"
+        },
+        {
+          "file": "src/modules/layout/Breadcrumb.tsx",
+          "line": 26,
+          "selector": "button.fr-breadcrumb__button",
+          "snippet": "<button aria-controls={collapseId} aria-expanded=\"false\" className=\"fr-breadcrumb__button\" suppressHydrationWarning type"
+        }
+      ],
+      "evidenceFingerprint": "sha256:0d94a79f6eecb726b1016b76c4d774fb",
+      "evidenceCount": 285,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.2",
+      "verdict": "C",
+      "justification": "Toutes les nouvelles fenetres/onglets (target=\"_blank\") du site sont ouvertes par une action explicite de l'utilisateur (clic sur un lien), jamais automatiquement au chargement de la page ou en arriere-plan (pas de pop-up/pop-under a l'ouverture du document).",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/accueil/dom.html",
+          "line": 2,
+          "selector": "a.fr-footer__content-link",
+          "snippet": "<a class=\"fr-footer__content-link\" href=\"https://info.gouv.fr\" rel=\"noopener noreferrer\" target=\"_blank\">info.gouv.fr<sp"
+        }
+      ],
+      "evidenceFingerprint": "sha256:9fde0459386231ec5a4f97cccf8326a0",
+      "evidenceCount": 1,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.3",
+      "verdict": "manual",
+      "justification": "Un seul document bureautique en telechargement existe (referents-egapro-dreets.xlsx). La methodologie officielle du test 13.3.1 exige d'analyser le fichier lui-meme (structure interne, balisage, en-tetes de colonnes) avec un outil dedie (verificateur d'accessibilite Microsoft Office pour .xlsx) : cette verification ne peut pas se faire depuis le code source de l'application, qui ne fait que referencer le fichier statique par son URL. Aucune version HTML alternative de ce document specifique n'a ete identifiee avec certitude dans le perimetre (la page /referents presente une liste publique de referents mais rien ne confirme qu'elle porte les memes donnees que ce fichier DREETS).",
+      "reason": "undecidable",
+      "citations": [
+        {
+          "file": ".ultra11y/pages/nous-contacter/dom.html",
+          "line": 2,
+          "selector": "a.fr-link",
+          "snippet": "<a class=\"fr-link fr-link--download\" download=\"\" href=\"/assets/documents/referents-egapro-dreets.xlsx\">Télécharger la li"
+        }
+      ],
+      "evidenceFingerprint": "sha256:cdefeb84cc6cd0d7a3d11fcb6a2c3342",
+      "evidenceCount": 1,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.4",
+      "verdict": "manual",
+      "justification": "Le test 13.4.1 exige d'ouvrir le document d'origine (.xlsx) et sa version alternative (la page /referents) et de comparer leur contenu information par information. La moisson statique ne donne accès qu'au lien de téléchargement et au code source de la page HTML — ni au contenu du classeur Excel (fichier binaire hors périmètre de l'audit statique), ni à une preuve que les données qu'il contient (potentiellement maintenu manuellement, cf. absence de tout script de génération depuis la base des référents) correspondent exactement, champ par champ, à celles rendues dynamiquement par /referents. Aucune évidence exploitable ne permet de trancher la parité d'information sans une lecture manuelle des deux documents.",
+      "reason": "undecidable",
+      "evidenceFingerprint": "sha256:cdefeb84cc6cd0d7a3d11fcb6a2c3342",
+      "evidenceCount": 1,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.5",
+      "verdict": "NA",
+      "justification": "Aucun contenu cryptique (art ASCII, emoticone, syntaxe cryptique) n'a ete trouve dans le code source applicatif (recherche des plages Unicode emoji sans resultat en dehors d'un fichier de test) : la population moissonnee pour ce critere (artworks decoratifs, illustrations, graphiques) n'est pas du contenu cryptique. Le sujet du critere n'existe nulle part dans le site.",
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.6",
+      "verdict": "NA",
+      "justification": "Ce critere presuppose l'existence d'un contenu cryptique dote d'une alternative. Le critere 13.5 etablit qu'aucun contenu cryptique (art ASCII, emoticone, syntaxe cryptique) n'existe dans le perimetre audite : il n'y a donc aucune alternative dont juger la pertinence.",
+      "evidenceFingerprint": "sha256:b47e120fdd68662e7dbe1925be84e2cb",
+      "evidenceCount": 13,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.7",
+      "verdict": "NA",
+      "justification": "Les occurrences moissonnees (requestAnimationFrame) servent exclusivement a la gestion du focus et a l'attente de stabilisation du DOM (attendre qu'une modale soit rendue avant d'y deplacer le focus, attendre qu'une alerte soit montee avant de la focaliser) : ce sont des techniques d'accessibilite du focus, pas des effets visuels de flash ou de changement brusque de luminosite. Aucune video, animation strobe, gif clignotant ou effet de flash n'existe dans le perimetre audite.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/MobileUserBlock.tsx",
+          "line": 37,
+          "selector": "motion",
+          "snippet": "// to settle (it polls with requestAnimationFrame until the modal is"
+        },
+        {
+          "file": ".ultra11y/pages/referents/dom.html",
+          "line": 2,
+          "selector": "motion",
+          "snippet": "<html data-fr-scheme=\"system\" lang=\"fr\" data-fr-js=\"true\" data-fr-theme=\"light\"><head><meta charset=\"utf-8\"><meta name=\""
+        }
+      ],
+      "evidenceFingerprint": "sha256:c7872cf3999a7f09a0706c6a6e5efda9",
+      "evidenceCount": 7,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    },
+    {
+      "criteriaId": "13.11",
+      "verdict": "C",
+      "justification": "Ces elements sont des <Link>/<NavLink> Next.js qui se rendent en veritables balises <a href> nativement interactives : l'action se declenche au relachement du bouton de la souris (evenement click natif du navigateur), pas a la pression, et l'utilisateur peut annuler en deplacant le pointeur hors de l'element avant de relacher. Le tabIndex={-1} gere seulement l'ordre de tabulation (roving tabindex dans un menu a navigation flechee) et n'affecte ni le declenchement au relachement ni l'activation clavier par Entree, qui restent celles, natives, d'un lien.",
+      "citations": [
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 146,
+          "selector": "Link.{styles.menuLink}",
+          "snippet": "<Link className={styles.menuLink} href=\"/admin\" onClick={close} role=\"menuitem\" tabIndex={-1} >"
+        },
+        {
+          "file": "src/modules/layout/Header/UserAccountMenu.tsx",
+          "line": 156,
+          "selector": "Link.{styles.menuLink}",
+          "snippet": "<Link className={styles.menuLink} href=\"/mon-espace/mes-entreprises\" onClick={close} role=\"menuitem\" tabIndex={-1}"
+        },
+        {
+          "file": "src/modules/layout/shared/ConsultationNavLink.tsx",
+          "line": 20,
+          "selector": "NavLink.{className}",
+          "snippet": "<NavLink className={className} href={href} onClick={() =>"
+        }
+      ],
+      "evidenceFingerprint": "sha256:c9ce902958b0155b418fc04a02334926",
+      "evidenceCount": 4,
+      "date": "2026-08-24",
+      "decidedBy": "agent"
+    }
+  ]
+}

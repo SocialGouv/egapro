@@ -172,7 +172,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.33.1
+        uses: maxgfr/ultra11y@v5.34.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -424,7 +424,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.33.1
+        uses: maxgfr/ultra11y@v5.34.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -490,6 +490,26 @@ jobs:
           # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
           # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
           adjudicate-model: claude-sonnet-5
+          # L'EFFORT, ET C'EST LE LEVIER QUI N'EST PAS LE MODÈLE (5.34.0).
+          #
+          # Ce qui arrive à ce tier est, par construction, ce qu'aucun moteur n'a pu décider :
+          # pertinence d'une alternative, intitulé de lien en contexte, ordre de lecture. La
+          # difficulté n'est donc pas de choisir entre deux réponses, c'est de LIRE l'évidence
+          # sans se tromper — et c'est exactement là qu'un run mesuré ici a échoué.
+          #
+          # Mesuré sur le run 32782282651 (5.33.1, effort par défaut) : la porte a refusé 13
+          # verdicts à la première passe, 12 à la deuxième, 2 à la troisième. Aucun refus n'était
+          # un désaccord sur le fond — c'étaient des citations fabriquées, des snippets retapés
+          # au lieu d'être copiés, et des chemins préfixés `packages/app/` alors que le
+          # `working-directory` EST `packages/app`. Trois critères en sont morts, le job est
+          # sorti rouge à 103/106.
+          #
+          # `high` et pas plus : le tier est facturé au critère, et l'amont a montré que monter
+          # le MODÈLE ne rattrapait pas ces défauts-là. C'est du soin de lecture qu'il faut, pas
+          # de la puissance. Les niveaux sont low, medium, high, xhigh, max — et une valeur hors
+          # liste est refusée par l'Action plutôt que transmise (le CLI avalerait un niveau
+          # inconnu en silence, exactement comme il avale un flag inconnu).
+          adjudicate-effort: high
           # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
           # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
           # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
@@ -542,6 +562,22 @@ jobs:
           # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
           # visible ici, nommément.
           require-sample: "true"
+          # LES DEUX CRITÈRES QUE PERSONNE ICI NE PEUT TRANCHER, NOMMÉS PLUTÔT QUE TUS.
+          #
+          # 13.3 et 13.4 portent sur le classeur `referents-egapro-dreets.xlsx` en
+          # téléchargement, et leurs tests exigent de l'OUVRIR : structure interne et en-têtes
+          # pour 13.3, parité d'information avec /referents pour 13.4. Aucun tier du dispositif
+          # ne le peut — le moteur ne voit que l'URL, le balayage ne capture que la page qui la
+          # porte, l'adjudicateur n'a ni shell ni lecteur xlsx. Ce n'est pas un critère sans
+          # sujet, c'est un critère sans instrument, et c'est l'adjudicateur lui-même qui l'a
+          # dit, en les rendant `manual / undecidable` avec sa justification.
+          #
+          # Ce n'est PAS une tolérance, et c'est ce qui distingue cette liste d'un pourcentage :
+          # chaque entrée porte sa raison, la porte refuse une entrée sans raison, et elle
+          # refuse aussi une entrée dont le critère a depuis été tranché — une dispense ne
+          # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
+          # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
+          undecidable-file: .ultra11y/undecidable.json
           # PAS DE COMMENTAIRE : ni `schedule` ni `workflow_dispatch` n'ont de PR où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC

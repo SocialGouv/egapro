@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {
+      "criteriaId": "13.3",
+      "reason": "Le seul document bureautique en téléchargement du périmètre est referents-egapro-dreets.xlsx. La méthodologie du test 13.3.1 exige d'analyser le CLASSEUR lui-même — structure interne, balisage, en-têtes de colonnes — avec un vérificateur d'accessibilité bureautique. Aucun tier de ce dispositif ne peut le faire : le moteur statique ne voit que l'URL du fichier, le balayage Playwright ne capture que la page qui le référence, et l'adjudicateur n'a ni shell ni lecteur xlsx. L'évidence existe et elle est hors d'atteinte de l'instrument — ce n'est pas un critère sans sujet, c'est un critère sans outil. À trancher par un auditeur humain ouvrant le fichier."
+    },
+    {
+      "criteriaId": "13.4",
+      "reason": "Le test 13.4.1 exige d'ouvrir le document d'origine (referents-egapro-dreets.xlsx) ET sa version alternative supposée (la page /referents), puis de comparer leur contenu information par information. La moisson ne donne accès qu'au lien de téléchargement et au code de la page : ni au contenu du classeur (binaire, hors périmètre de l'audit statique), ni à une preuve que ses données correspondent champ par champ à celles rendues par /referents. La parité d'information ne peut pas être établie sans lecture manuelle des deux documents. Même nature que 13.3 : l'instrument manque, pas le sujet."
+    }
+  ]
+}

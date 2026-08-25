@@ -73,9 +73,29 @@ total au run suivant.**
 passe. Lire quels critères sont périmés : leur verdict porte sur du code qui n'existe plus.
 Ré-adjuger ceux-là, et commiter le résultat.
 
-`undecidable.json` ne revient pas : le workflow n'a plus d'`undecidable-file`. Une exemption est
-le constat qu'un critère n'a pas reçu d'évidence — le correctif appartient au moteur, pas à une
-liste de dispenses versionnée à côté de lui.
+### `undecidable.json` est revenu, et pourquoi son retrait ne tenait plus
+
+Il avait été supprimé sur ce raisonnement : « une exemption est le constat qu'un critère n'a pas
+reçu d'évidence — le correctif appartient au moteur, pas à une liste de dispenses versionnée à
+côté de lui. » C'était juste **pour le cas visé**, et ce cas a bien été corrigé en amont.
+
+**13.3 et 13.4 sont l'autre cas.** Le sujet existe — le classeur `referents-egapro-dreets.xlsx`
+en téléchargement — et leurs tests exigent de l'**ouvrir** : structure interne et en-têtes de
+colonnes pour 13.3, parité d'information avec `/referents` pour 13.4. Aucun tier du dispositif ne
+le peut : le moteur ne voit que l'URL, le balayage ne capture que la page qui la porte, et
+l'adjudicateur n'a ni shell ni lecteur xlsx. **Ce n'est pas un critère sans évidence, c'est un
+critère sans instrument** — et aucun correctif moteur ne l'atteindra tant que personne n'ouvrira
+le fichier. C'est l'adjudicateur lui-même qui l'a établi, en les rendant `manual / undecidable`
+avec sa justification, sur le run 32782282651.
+
+Ce que la liste n'est pas : une tolérance. Un pourcentage passe ce qu'il faut pour rester vert et
+cache exactement les critères que personne n'a pu décider. Ici chaque entrée porte sa **raison**,
+la porte refuse une entrée sans raison **et** une entrée dont le critère a depuis été tranché — une
+dispense ne survit pas à ce qu'elle excusait — et chacune est imprimée dans le log du job. C'est un
+renvoi nommé vers l'auditeur humain.
+
+Fichier : `packages/app/.ultra11y/undecidable.json`, versionné (exception dans `.gitignore`),
+câblé par `undecidable-file` dans `a11y.yaml`.
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
@@ -132,8 +152,18 @@ jq '.standard' audits/audit-latest.json    # doit dire "rgaa", jamais "wcag"
 ### Ce que coûte l'adjudication
 
 Sans registre à rejouer : **9,59 $**, mesuré sur le run du 24/08/2026 (3 passes — 5,91 + 2,43 +
-1,25). Avec le registre commité, le premier run paie le total et les suivants ne paient que le
-reliquat.
+1,25). Le registre **est** commité depuis (`packages/app/.ultra11y/verdicts/rgaa.json`, 47
+verdicts) : les runs suivants rejouent ce qui tient et ne paient que le reliquat.
+
+**L'effort est le second levier, et il n'est pas le modèle.** `adjudicate-effort: high` (5.34.0).
+Ce qui arrive à ce tier est ce qu'aucun moteur n'a pu décider, donc la difficulté n'est pas de
+choisir entre deux réponses — c'est de LIRE l'évidence sans se tromper. Mesuré sur le run
+32782282651 (5.33.1, effort par défaut) : la porte a refusé **13 verdicts à la première passe, 12
+à la deuxième, 2 à la troisième**, et aucun refus n'était un désaccord de fond. C'étaient des
+citations fabriquées, des snippets retapés au lieu d'être copiés, et des chemins préfixés
+`packages/app/` alors que le `working-directory` **est** `packages/app`. Trois critères en sont
+morts et le job est sorti rouge à 103/106. Monter le modèle ne répare pas ça ; monter le soin de
+lecture, si.
 
 ### Le runner CLI, évalué et écarté
 
@@ -216,7 +246,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.33.1**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+Les deux sont sur **5.34.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
 se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
 son cache si le skill `review-a11y` se comporte autrement que la CI.
 
