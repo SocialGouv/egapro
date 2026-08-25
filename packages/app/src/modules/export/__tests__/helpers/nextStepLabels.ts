@@ -1,4 +1,4 @@
-// The v2027.1 stage names and the two gap conditions #4328 pins verbatim.
+// The v2027.1 stage names and the two gap conditions, verbatim.
 // Shared so the payload unit test and the assembled-declaration test cannot
 // drift on the wording the SUIT contract promises.
 export const STAGE_LABELS = {

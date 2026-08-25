@@ -114,7 +114,7 @@ const nullIndicators = {
 	}>,
 };
 
-// The #4328 cases differ from the fixtures above by a handful of columns only,
+// These cases differ from the fixtures above by a handful of columns only,
 // so they go through a factory and spell out just what they exercise.
 function declarationRow(overrides: Record<string, unknown> = {}) {
 	return {
