@@ -1353,7 +1353,7 @@ describe("assembleDeclaration — compliance flags", () => {
 	});
 });
 
-describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles (#4328)", () => {
+describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 	// baseRow narrows status to its own literal; these cases walk the whole FSM.
 	type RowOverrides = Omit<Partial<typeof baseRow>, "status"> & {
 		status?: DeclarationFsmStatus;

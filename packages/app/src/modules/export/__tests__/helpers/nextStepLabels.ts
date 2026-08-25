@@ -1,6 +1,4 @@
-// The v2027.1 stage names and the two gap conditions, verbatim.
-// Shared so the payload unit test and the assembled-declaration test cannot
-// drift on the wording the SUIT contract promises.
+// Shared verbatim so both test suites cannot drift on the wording the SUIT contract promises.
 export const STAGE_LABELS = {
 	compliancePathChoice:
 		"(1ère déclaration) Choix du parcours de mise en conformité",

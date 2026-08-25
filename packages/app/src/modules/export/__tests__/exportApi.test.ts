@@ -1519,7 +1519,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(body.Declarations[0].Date_seconde_declaration).toBeNull();
 	});
 
-	describe("Parcours.Prochaines_etapes_possibles (#4328)", () => {
+	describe("Parcours.Prochaines_etapes_possibles", () => {
 		async function exportedDeclarations(rows: Record<string, unknown>[]) {
 			mockFetchSubmitted.mockResolvedValue(rows);
 			const { GET } = await import("~/app/api/v1/export/declarations/route");

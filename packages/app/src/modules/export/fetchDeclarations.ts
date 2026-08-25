@@ -349,6 +349,7 @@ export function assembleDeclaration(
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
+	const cancelled = isCancelled(row);
 
 	// Obligation regime uses the exact value; the segmentation bucket uses the floored one.
 	const gipWorkforce = parseGipWorkforce(row.workforceEma);
@@ -374,7 +375,7 @@ export function assembleDeclaration(
 				getObligationWorkforce(gipWorkforce),
 			),
 			Statut: row.status,
-			Annulee: isCancelled(row),
+			Annulee: cancelled,
 			Parcours_de_conformite_requis: flags.complianceProcessRequired,
 			Parcours_de_conformite_revision_requis:
 				flags.complianceProcessRevisionRequired,
@@ -385,7 +386,7 @@ export function assembleDeclaration(
 				status: row.status,
 				rulesVersion: row.rulesVersion,
 				cseRequired: row.cseRequired,
-				cancelled: isCancelled(row),
+				cancelled,
 			}),
 		},
 		Date_creation: row.createdAt?.toISOString() ?? null,

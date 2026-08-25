@@ -205,7 +205,7 @@ describe("openApiSpec", () => {
 		});
 	});
 
-	describe("Prochaines_etapes_possibles schema (#4328)", () => {
+	describe("Prochaines_etapes_possibles schema", () => {
 		const stepsSchema =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
 				.content["application/json"].schema.properties.Declarations.items

@@ -10,9 +10,7 @@ import { loadRulesWithFallback } from "~/server/rules/nextSteps";
 import type { Predicate } from "~/server/rules/schema";
 import { buildNextStepsPayload } from "../nextStepsPayload";
 
-// Substituting the ruleset (the real engine still derives the residual) is the
-// only way to reach the rendering branches the bundled 2027.1 never produces:
-// a stage-less target state and residual leaves other than `action.stillHasGap`.
+// Substituting the ruleset is the only way to reach rendering branches the bundled 2027.1 never produces.
 vi.mock("~/server/rules/nextSteps", async (importOriginal) => {
 	const actual =
 		await importOriginal<typeof import("~/server/rules/nextSteps")>();
@@ -280,8 +278,7 @@ describe("buildNextStepsPayload — rendering of a substituted ruleset", () => {
 		).toBeNull();
 	});
 
-	// 2027.1 pins gapAlertPercent at 5, so only a shifted threshold tells an
-	// interpolated seuil apart from a hardcoded literal.
+	// 2027.1 pins gapAlertPercent at 5, so only a shifted threshold proves the seuil is interpolated.
 	const shiftedThresholdRules: Rules = {
 		...renderingRules,
 		thresholds: { gapAlertPercent: 8, phase2SizeMin: 100 },
