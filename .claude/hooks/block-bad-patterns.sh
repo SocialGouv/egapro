@@ -16,6 +16,18 @@ else
   exit 0
 fi
 
+# Every rule below is an egapro rule: they name egapro modules (~/env.js), egapro conventions
+# (the ~/ alias, DSFR classes) and egapro directories. A session often edits files in OTHER
+# repositories — a vendored tool, an upstream clone under the scratchpad — where the same
+# pattern is correct and the advice is simply wrong (a plain Node CLI has no ~/env.js to
+# import). Matching on the extension alone made those edits fail with egapro's reasoning.
+if [ -n "$CLAUDE_PROJECT_DIR" ] && [ -n "$FILE_PATH" ]; then
+  case "$FILE_PATH" in
+    "$CLAUDE_PROJECT_DIR"/*) ;;
+    *) exit 0 ;;
+  esac
+fi
+
 # Block if CONTENT matches PATTERN and FILE_PATH matches FILE_FILTER.
 # Optional 4th arg: exclude filter (skip if FILE_PATH matches).
 check_pattern() {

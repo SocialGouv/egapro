@@ -1,57 +1,646 @@
 name: "♿ Accessibilité (ultra11y RGAA)"
 
-# Gate d'accessibilité RGAA 4.1.2 / WCAG 2.2 AA piloté par ultra11y (vendored, zéro-dép).
-# Remplace les anciens workflows rgaa-audit.yaml (axe daily → wiki) et claude-revue-rgaa.yml.
-# Toute l'accessibilité passe par le dispositif ultra11y. Ce workflow en est le tier STATIQUE
-# (moteur JSX/TSX AST embarqué, ni navigateur ni install). Le tier RENDU (contraste/zoom/reflow/
-# focus visible) est le workflow lighthouse.yaml (gate a11y 100 %) ; l'adjudication est l'agent rgaa-auditor.
+# Audit d'accessibilité RGAA 4.1.2 / WCAG 2.2 AA, entièrement porté par l'Action ultra11y.
+# Le moteur est EMBARQUÉ dans l'Action : rien à installer, et aucune version à maintenir
+# alignée côté repo. Trois tiers :
+#
+#   a11y-gate    CODE     — audit statique JSX/TSX du package. MUET : il ne produit ni rapport,
+#                           ni artefact, ni commentaire. Il fait rougir ou verdir le run, et
+#                           laisse les annotations en ligne et le SARIF.
+#   a11y-pages   RENDU    — la suite Playwright dédiée balaye les pages, en épinglant l'état
+#                           applicatif que chaque écran de tunnel exige ; l'Action réingère
+#                           les instantanés, tourne le MÊME audit du code, et produit LE
+#                           rapport page par page, les crops de preuve, l'adjudication IA des
+#                           critères de jugement, et LE livrable.
+#                           Les CONSTATS ne bloquent pas — on mesure. Une panne, si ; et
+#                           depuis `require-decided: pages`, une grille incomplète aussi.
+#   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
+#
+# Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de `schedule` du tout :
+# `a11y-pages` produit le même livrable AVEC le navigateur, sur le seul déclenchement manuel.
+# Ce qu'on perd en le supprimant, dit franchement : le plancher « sans docker, sans base, sans
+# navigateur » qui sortait un rapport daté même quand la stack tombait. C'est le prix du
+# livrable unique, et `require-sample` fait déjà rougir un balayage amputé.
+#
+# Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
+#
+# DEUX DÉCLENCHEMENTS, ET ILS NE PAIENT PAS LA MÊME CHOSE.
+#
+#   pull_request                  → `a11y-gate` SEUL. Statique, gratuit, quelques secondes,
+#                                   aucun modèle, et BLOQUANT (`fail-on: blocking`).
+#   schedule (hebdo) + dispatch   → la chaîne complète. Balayage des pages, critères de rendu,
+#                                   rejeu du registre puis adjudication IA du reliquat, livrable.
+#
+# La moitié chère ne peut pas tourner sur chaque PR : 16 à 21 $ pour un premier run, 40 à 90
+# minutes, et une grille qui n'est pas reproductible d'un run à l'autre. La moitié statique, elle,
+# ne coûte rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce
+# fichier qui arrête un merge.
+#
+# POURQUOI UN CRON ET NON `push: alpha`, puisque c'est bien sur alpha qu'on veut le run complet.
+# `adjudicate: agent` passe par `claude-code-action`, qui REFUSE l'événement `push` — l'Action y
+# dégrade en avertissement et la grille repart « à évaluer » sans que rien ne rougisse. Les
+# événements qu'il accepte sont `pull_request`, `workflow_dispatch`, `schedule`, `workflow_run` et
+# `repository_dispatch`. Or **la branche par défaut de ce dépôt est `alpha`** : un `schedule` lit
+# le fichier depuis alpha et s'exécute sur alpha. Le cron donne donc ce qu'un `push: alpha` aurait
+# donné, avec le modèle en plus, et une facture bornée à un run par semaine au lieu d'un par merge.
+#
+# CE QUE ÇA NE DONNE PAS, dit franchement : une régression RGAA de RENDU peut vivre jusqu'au
+# prochain tick. Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page
+# rendue. C'est l'arbitrage, et c'est celui du coût.
+#
+# LES CRITÈRES DE JUGEMENT SONT ADJUGÉS, TOUS, À CHAQUE RUN. Ceux que le moteur ne peut pas
+# trancher — pertinence des alt, intitulé de lien dans son contexte, ordre de lecture — passent
+# par `adjudicate: agent`, une passe Claude Code avec le secret CLAUDE_CODE_OAUTH_TOKEN déjà
+# utilisé par claude-question.yml : même harness et même token que dans une session locale.
+#
+# LE REGISTRE DE VERDICTS EST DE RETOUR, et il faut dire pourquoi il était parti. Il était parti
+# parce qu'il « ratait » des critères et rendait la grille irreproductible — un diagnostic exact
+# sur un symptôme dont la cause n'était pas lui : sur 5.16.0, `verify --apply … --ledger --lang
+# fr` écrivait le registre dans un fichier nommé `--lang`, un flag à valeur optionnelle avalant
+# le flag suivant. Le registre n'était donc jamais écrit là où le run suivant le cherchait.
+# Corrigé en amont (5.17.0).
+#
+# Ce qu'il fait, et ce qu'il ne fait pas : `.ultra11y/verdicts/rgaa.json` enregistre les verdicts
+# que la porte a ACCEPTÉS, et un run ultérieur les REJOUE avant d'appeler le moindre modèle. Ce
+# n'est pas un cache : chaque entrée repasse par la même porte, sur l'évidence re-dérivée de
+# l'audit du moment, et celle dont l'empreinte d'évidence a bougé est abandonnée comme périmée
+# en le disant. Ce qui n'est pas rejoué est ce qui est payé.
+#
+# CE QUE ÇA N'AUTOMATISE PAS : rien ici ne commite ce fichier. Le job tourne en `contents: read`
+# et le registre sort dans l'artefact. Le rendre effectif est un geste humain — relire le diff
+# des verdicts, le commiter — et c'est délibérément dans cet ordre : un registre qu'une CI
+# s'écrit à elle-même n'est plus une décision revue par quiconque.
+#
+# Ce que ça coûte, mesuré sur ce dépôt : 9,59 $ pour le run du 24/08 (3 passes, aucun registre
+# à rejouer — 5,91 + 2,43 + 1,25). Avec un registre commité, le premier run paie le total et
+# les suivants ne paient que le reliquat.
+#
+# CE QUI FERME RÉELLEMENT LA GRILLE n'est pas l'adjudication seule, c'est le MOTEUR : il décide
+# par page ce qu'il a mesuré par page, au lieu de ne savoir que répéter le verdict du run. Un
+# critère non conforme sur une route est tranché POUR LE RUN, et sur les trente-six autres — les
+# mêmes que les sondes venaient de zoomer, de reflower, de parcourir au clavier — il retombait
+# « à évaluer ». Mesuré sur l'audit réel de cette branche : 9 critères ouverts sur la page
+# d'accueil, dont 7 exactement de cette forme. Ils tombent.
+#
+# `require-decided` reste donc à `pages`, et ce tier peut rougir : le zéro « à évaluer » est une
+# invariante gardée, pas un affichage. Ce qui reste ouvert est NOMMÉ, dans le log et dans la
+# fiche par page. Il n'y a plus d'`undecidable.json` non plus : la seule issue est désormais de
+# faire trancher le critère par l'adjudication, ou de relancer le workflow.
+#
+# CE QUE LE PASSAGE DE 5.16.0 À 5.23.0 CORRIGE, et qui est la substance de ce changement :
+#   - `adjudicate-model` ne câblait que le tier API. Choisir le modèle de l'adjudicateur AGENT
+#     était impossible : l'input existait et n'atteignait pas `claude_args`. (5.17.0)
+#   - une conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés,
+#     et `--require-decided=pages` ne pouvait alors passer sur AUCUNE entrée. La barre par page
+#     n'avait pas été abandonnée par excès d'ambition : elle était cassée. (5.17.0)
+#   - `verify --apply … --ledger --lang fr` écrivait le registre dans un fichier nommé `--lang`
+#     — un flag à valeur optionnelle avalait le flag suivant. C'est la cause du « registre raté,
+#     grille restée à 105/106 ». (5.17.0)
+#   - un appel modèle mort sautait rapport, HTML, fiche par page, artefact ET résidu : le run
+#     perdait son livrable pour une panne de modèle. (5.17.0)
+#   - le balayage MESURAIT puis jetait la mesure — ni sondes ni axe ne survivaient à l'écriture
+#     de l'instantané — donc une page pouvait rapporter une violation de rendu et ne jamais
+#     pouvoir conclure à la conformité. (5.20.0)
+#   - la fiche par critère, seul fichier que le prompt CI autorise l'adjudicateur à lire, était
+#     rendue SANS son contrat de verdict : ni « un C exige des citations », ni « une NC nomme son
+#     fichier », ni « la page rendue est sur le disque ». Sept critères sont morts de ça sur un
+#     run vert, et aucun ne demandait un plus gros modèle. (5.22.0)
+#   - RGAA 8.1 (« la page est-elle définie par un type de document ? ») n'était tranchable par
+#     aucun moteur : il ne mappe que sur WCAG 4.1.1, supprimé en 2.2. Pire, le doctype que
+#     chaque producteur enregistre était mangé par la validation du meta d'instantané, donc
+#     l'adjudicateur n'avait pas même l'évidence pour le trancher. Il est désormais décidé par
+#     mesure, sur chaque page, sans modèle. (5.23.0)
+#   - CINQ critères arrivaient à l'adjudicateur avec un moissonnage VIDE — 7.4, 10.1, 13.2,
+#     13.3, 13.4 — et un critère sans évidence ne peut pas être tranché : un `C` exige une
+#     citation, donc les seules réponses possibles sont `NA` et `manual`, et le modèle est
+#     facturé pour deviner entre les deux. Trois d'entre eux pointaient sur le MAUVAIS SUJET,
+#     hérité d'un mapping WCAG qui répond à une autre question. 10.1 (balises et attributs de
+#     présentation) est désormais décidé par le moteur, 13.3/13.4 sont « non applicables » quand
+#     rien n'est téléchargeable, et 7.4/13.2 reçoivent enfin l'évidence de leur propre question.
+#     Mesuré : c'était le dernier critère que Sonnet 5 ne pouvait pas fermer. (5.24.0)
+#
+# CE QUE L'AMONT AVAIT CORRIGÉ EN 5.8.0, et qui se voit toujours ici :
+#   - une sonde `hover` sans timeout suspendait le test appelant jusqu'à sa mort à 120 s. Deux
+#     specs en sont mortes, et leur groupe série a emporté 15 tests avec elles : 20 pages
+#     enregistrées au lieu de 35, à chaque run. Les sondes sont désormais bornées (timeout par
+#     interaction, budget mural, plafond de déclencheurs) et ce qu'un budget coupe est déclaré.
+#   - `sweepSample` n'exécutait aucune sonde : les 15 pages qu'il détient n'étaient pas
+#     mesurées, et la conformité de ces critères étant un ET sur TOUTES les pages du périmètre,
+#     zoom / reflow / espacement / survol restaient « à évaluer » pour l'audit entier — y
+#     compris sur les 5 pages qui, elles, étaient sondées. Il sonde maintenant par défaut.
+#   - ce qu'une sonde a mesuré compte enfin comme couverture, donc le rapport cesse d'annoncer
+#     « Audit partiel — les critères à restituer n'ont pas été testés » sur un run qui les a
+#     testés.
+#   - un critère dont le SUJET est absent de tout le périmètre (aucun tableau, aucun champ de
+#     formulaire, aucune image) est « non applicable » et non « à évaluer » : un thème entier
+#     cesse d'être listé comme du travail à faire quand il n'y a rien à regarder.
 
 on:
-  push:
-    branches: [alpha, beta, master]
+  # LA GATE. Statique, gratuite, aucun modèle : elle peut se permettre de tourner sur chaque PR,
+  # et c'est le seul endroit du dispositif qui BLOQUE un merge.
   pull_request:
+  # LE RUN COMPLET, sur alpha. `schedule` s'exécute sur la branche par défaut du dépôt, qui EST
+  # `alpha` — c'est ce qui rend ce cron équivalent au `push: alpha` que `claude-code-action`
+  # aurait refusé (voir l'en-tête). Lundi 04:00 UTC.
   schedule:
-    - cron: "0 6 * * 1" # lundi 06:00 UTC — rapport RGAA hebdomadaire (artefact)
+    - cron: "0 4 * * 1"
+  # Le même run complet, à la demande, depuis n'importe quelle branche.
   workflow_dispatch:
 
 concurrency:
-  cancel-in-progress: true
   group: "${{ github.workflow }}-${{ github.ref }}"
+  # Une PR qui repousse annule son run précédent — il n'a plus rien à dire sur un code qui a
+  # changé. Un run complet (cron ou manuel) est un LIVRABLE : deux lancements coup sur coup ne
+  # doivent pas s'annuler l'un l'autre, le second n'ayant aucune raison d'être « plus à jour ».
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  security-events: write # SARIF → code scanning ; sans ça les annotations prennent le relais
+  pull-requests: write # le commentaire sticky de la gate, sur une PR uniquement
+  # Pas d'`actions: read` : aucun artefact de registre à retrouver dans les runs passés.
+  # Pas de `contents: write` non plus, et c'est délibéré — voir l'en-tête : le registre de
+  # verdicts sort dans l'artefact et c'est un humain qui le commite, après en avoir relu le diff.
 
 jobs:
   a11y-gate:
-    name: "RGAA · audit statique (bloquant)"
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    name: "RGAA · audit statique du code"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
-      - name: ultra11y — audit RGAA statique (échoue sur NC bloquante)
-        working-directory: packages/app
-        run: node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit "src/**/*.tsx" --jsx --graph --standard rgaa --lang fr --fail-on blocking
+          fetch-depth: 0
+      - name: ultra11y — audit RGAA statique
+        uses: maxgfr/ultra11y@v5.34.2
+        with:
+          working-directory: packages/app
+          # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
+          # qui expanserait le glob lui-même en 6 fichiers (src/app/*.tsx) au lieu des 300
+          # du package. Le répertoire laisse le moteur faire son propre globbing.
+          paths: src
+          # Le scope complet, explicitement, ET C'EST LOAD-BEARING SUR UNE PR : le défaut `auto`
+          # y résout la branche de base et n'auditerait que les fichiers touchés. Une gate qui ne
+          # regarde que le diff ne voit pas la régression qu'un changement provoque ailleurs, et
+          # laisse le backlog existant invisible. On audite les 300 fichiers à chaque fois —
+          # l'audit statique est gratuit, il n'y a rien à économiser.
+          since: ""
+          jsx: "true"
+          graph: "true"
+          standard: rgaa
+          lang: fr
+          fail-on: blocking
+          # CETTE GATE PARLE SUR UNE PR, ET SE TAIT SUR LE RUN COMPLET.
+          #
+          # Elle avait été rendue muette parce qu'elle commentait et uploadait EN MÊME TEMPS que
+          # `a11y-pages` : deux commentaires sticky sur la même PR, deux arborescences de rapport
+          # dans le même ZIP, dont un lecteur qui veut « le rapport d'accessibilité de ce run »
+          # devait deviner laquelle ouvrir. Pire, le sien était FAUX par construction : sans
+          # instantané de page il annonçait 92 % (15/106) avec 91 critères « à évaluer » là où le
+          # tier page en décidait 104 sur 106 — le même dépôt, le même commit, deux chiffres.
+          #
+          # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR
+          # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire, un seul rapport,
+          # et le taux annoncé est le seul du run. Sur le cron et le dispatch, le livrable reste
+          # celui d'`a11y-pages` et cette gate redevient muette — elle garde les annotations en
+          # ligne et le SARIF, qui ne sont pas des livrables.
+          #
+          # `digest` et non `pages` : sans instantané, cette gate n'a pas de grille par page à
+          # poster. Elle nomme les défauts distincts de l'audit du code, avec leurs emplacements.
+          # Le marqueur sticky de `digest` lui est propre : rien ici ne peut écraser le
+          # commentaire d'un autre tier.
+          comment: ${{ github.event_name == 'pull_request' }}
+          comment-kind: digest
+          report: ${{ github.event_name == 'pull_request' }}
+          html: ${{ github.event_name == 'pull_request' }}
+          # Hors du motif `ultra11y-part-*`, donc jamais happé par la fusion d'`a11y-bundle`.
+          artifact-name: ${{ github.event_name == 'pull_request' && 'ultra11y-pr-static' || '' }}
 
-  a11y-report:
-    name: "RGAA · rapport de conformité (artefact)"
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+  a11y-pages:
+    name: "RGAA · rapport page par page"
+    # JAMAIS SUR UNE PR. C'est la moitié chère — stack docker complète, balayage navigateur,
+    # adjudication IA, 40 à 90 minutes et 16 à 21 $ pour un premier run. La brancher sur chaque PR
+    # reviendrait à facturer une flotte de PR pour un signal qui bouge rarement, sans être
+    # reproductible d'un run à l'autre. Sur une PR, la gate statique fait le travail.
+    if: github.event_name != 'pull_request'
+    # Ce tier a besoin de la stack complète — base, S3, ProConnect — et donc des secrets du
+    # dépôt. Sur `schedule` et `workflow_dispatch` ils sont toujours exposés : la condition qui
+    # excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
+    #
+    # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
+    # grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) —
+    # deux faits sur la QUALITÉ DU RUN, pas sur le code audité.
+    runs-on: ubuntu-22.04
+    # Mesuré : 34 min pour 17 pages et une adjudication plafonnée à 60 tours ; 40 min pour le
+    # run complet. Trois nombres cohabitent et disent trois choses différentes : **24** pages
+    # sont DÉCLARÉES dans `.ultra11yrc.json` (`sample.pages`, ce que vérifie `require-sample`),
+    # **39** sont ENREGISTRÉES par la suite Playwright (sweep 18 + funnels 16 + dynamic 3 +
+    # anonymous 2), et **37** sont effectivement CAPTURÉES — les 2 manquantes étant gardées par
+    # un `test.skip` faute de données (`admin-declaration-detail` sans ligne,
+    # `referent-detail` sans référent publié). Un job annulé sur timeout emporte le rapport ET
+    # l'artefact, ce que `continue-on-error` n'absorbe pas — d'où la marge.
+    #
+    # Un run SANS registre commité paie l'adjudication complète, et c'est le cas du premier :
+    # ce budget est calé sur lui, pas sur les suivants, qui ne paient que le reliquat.
+    # TROIS PASSES D'ADJUDICATION NE TIENNENT PAS EN 75 MINUTES. Mesuré : le job a été coupé
+    # à 75:00 pile en pleine adjudication, et un job annulé emporte le rapport ET l'artefact —
+    # ce que `continue-on-error` n'absorbe pas. Le budget est donc calé sur le pire cas :
+    # ~20 min d'infrastructure (build, base, navigateur), ~10 min de balayage, puis jusqu'à
+    # trois passes de modèle. Large exprès : un job qui finit trop tôt ne coûte rien, un job
+    # coupé coûte le livrable entier.
+    timeout-minutes: 300
+    # Ce tier MESURE : `fail-on: ""` sur l'Action, donc aucun constat d'accessibilité ne fait
+    # rougir le run. Ce n'est pas la même chose que masquer le job. `continue-on-error` au
+    # niveau du JOB avalait aussi les pannes d'infra — build, base, ProConnect, crash de
+    # l'Action — et un run sans secrets mourait au build en restant vert, sans le moindre
+    # rapport. Le masque est donc porté par la seule step de balayage,
+    # là où il sert : un écran qui coince ne doit pas coûter le rapport des autres.
+    # L'audit page par page a besoin de l'app RENDUE et AUTHENTIFIÉE (le tunnel de déclaration
+    # est derrière ProConnect), donc de la même stack que la suite E2E. Les étapes
+    # d'infrastructure ci-dessous sont volontairement alignées sur .github/workflows/e2e.yaml —
+    # c'est ce fichier qui fait foi pour le pin Chromium (CFT_BUILD).
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      NEXTAUTH_URL: http://localhost:3000/api/auth
+      EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+      EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+      EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+      EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+      EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
+      EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
+      EGAPRO_E2E_CLOCK: "true"
+      S3_ENDPOINT: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_BUCKET_NAME: egapro-dev-app
+      CLAMAV_HOST: localhost
+      CLAMAV_PORT: 3310
+      ADMIN_EMAILS: test@fia1.fr
+      NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
+      MAIL_ENABLED: "true"
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      MAIL_FROM: no-reply@egapro.local
+      MAILDEV_URL: http://localhost:1080
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-      - name: ultra11y — rapport RGAA
-        working-directory: packages/app
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium manually (bypass Playwright extractor)
+        shell: bash
+        timeout-minutes: 5
         run: |
-          node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs audit "src/**/*.tsx" --jsx --graph --standard rgaa --lang fr --out audits
-          node ../../.claude/skills/ultra11y/scripts/ultra11y.mjs report --in audits/audit-latest.json --standard rgaa --lang fr --out audits
-      - name: Upload rapport RGAA
-        uses: actions/upload-artifact@v4
+          set -euo pipefail
+          CHROMIUM_VERSION=1217
+          CFT_BUILD=147.0.7727.15
+
+          install_browser() {
+            local zip_name="$1" dest_subdir="$2" extracted_dir="$3" final_dir="$4"
+            local dest="$HOME/.cache/ms-playwright/${dest_subdir}"
+            mkdir -p "$dest"
+            echo "::group::Download ${zip_name}"
+            time curl --fail --location --silent --show-error \
+              --max-time 120 \
+              -o "/tmp/${zip_name}" \
+              "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/${zip_name}"
+            ls -lh "/tmp/${zip_name}"
+            echo "::endgroup::"
+            echo "::group::Extract ${zip_name} with system unzip"
+            time unzip -q "/tmp/${zip_name}" -d "$dest"
+            if [ "$extracted_dir" != "$final_dir" ]; then
+              mv "$dest/$extracted_dir" "$dest/$final_dir"
+            fi
+            touch "$dest/INSTALLATION_COMPLETE"
+            rm "/tmp/${zip_name}"
+            ls -la "$dest" | head -5
+            echo "::endgroup::"
+          }
+
+          install_browser \
+            "chrome-linux64.zip" \
+            "chromium-${CHROMIUM_VERSION}" \
+            "chrome-linux64" \
+            "chrome-linux"
+
+          install_browser \
+            "chrome-headless-shell-linux64.zip" \
+            "chromium_headless_shell-${CHROMIUM_VERSION}" \
+            "chrome-headless-shell-linux64" \
+            "chrome-headless-shell-linux64"
+      # `install-deps` is an `apt-get install`, and apt on a runner is occasionally slow enough
+      # to blow a 5-minute budget. Mesuré sur le run 32069120308 : cette étape a expiré à
+      # exactement 5:00 — pendant que le job E2E, qui exécute la MÊME commande sur le MÊME
+      # commit, passait. Ce n'est donc pas une dépendance cassée, c'est un miroir lent, et une
+      # tentative unique en fait un tirage au sort. Or les étapes 8 à 12 sont sautées quand
+      # celle-ci échoue : plus d'instantané, plus de grille par page, plus d'adjudication —
+      # tout le tier disparaît à cause d'apt.
+      #
+      # Trois tentatives sous un budget plus large : un flake coûte un retry, une vraie panne
+      # échoue toujours. Le `timeout` par tentative est ce qui rend le retry possible — sans
+      # lui, la première tentative consommerait tout le budget du step.
+      - name: Install Playwright system dependencies
+        timeout-minutes: 14
+        env:
+          DEBIAN_FRONTEND: noninteractive
+          NEEDRESTART_MODE: a
+        run: |
+          set -euo pipefail
+          # APT SUR LE MIROIR AZURE EST CE QUI PEND — trois mesures pour en arriver là.
+          #
+          #  1. run 32290208703 : trois tentatives en CINQ SECONDES sur `dpkg/lock-frontend`.
+          #     La boucle de retry ne dormait pas : elle relançait le même tirage.
+          #  2. run 32296197686 : avec une attente, l'étape patiente quatre minutes puis meurt
+          #     sur un TROISIÈME verrou, `/var/lib/apt/lists/lock`, non surveillé.
+          #  3. run 32296977647 : avec `DPkg::Lock::Timeout`, la tentative 1 tourne SEPT MINUTES
+          #     sans rendre la main (le timeout fonctionne, apt attend) avant d'être coupée, et
+          #     la tentative 2 échoue en cinq secondes sur ce même verrou de `lists` — que
+          #     `DPkg::Lock::Timeout` ne couvre pas. Le processus 2077 le tenait depuis plus de
+          #     dix minutes : un `apt-get update` de fond bloqué sur le miroir Azure.
+          #
+          # C'est le même diagnostic que maxgfr/ultra11y@7090f62 (« apt on the Azure mirror is
+          # what hangs »), et la même conclusion : on ne fait pas dépendre un livrable d'apt.
+          #
+          # Deux lignes de défense. D'abord on libère le verrou pour de bon — c'est une VM
+          # jetable, le processus qu'on tue est un updater de fond dont ce job n'a aucun besoin.
+          # Ensuite, si `install-deps` échoue quand même, on CONTINUE : l'image ubuntu-22.04
+          # embarque Chrome et donc les bibliothèques partagées que Playwright réclame, et la
+          # vraie preuve n'est pas ce qu'apt a répondu — c'est que le navigateur démarre, ce que
+          # les étapes suivantes vérifient immédiatement. Un miroir injoignable ne doit pas se
+          # présenter comme un échec de tests.
+          echo 'DPkg::Lock::Timeout "600";' | sudo tee /etc/apt/apt.conf.d/99-ultra11y-lock-timeout > /dev/null
+          sudo systemctl stop apt-daily.service apt-daily-upgrade.service unattended-upgrades.service 2>/dev/null || true
+          sudo systemctl kill --kill-who=all apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+          sudo pkill -9 -f 'apt-get|apt\.systemd\.daily|unattended-upgrade' 2>/dev/null || true
+          sudo rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend
+          sudo dpkg --configure -a > /dev/null 2>&1 || true
+          for attempt in 1 2; do
+            if timeout 300 pnpm --filter app exec playwright install-deps chromium; then
+              echo "playwright install-deps: ok (tentative $attempt)"
+              exit 0
+            fi
+            echo "::warning::playwright install-deps a échoué ou expiré (tentative $attempt/2)"
+            sudo apt-get clean || true
+            sleep 20
+          done
+          echo "::warning::playwright install-deps n'a pas abouti (apt injoignable ou verrouillé). On continue : l'image du runner embarque déjà Chrome et ses bibliothèques partagées, et le lancement du navigateur, juste après, est la vraie vérification."
+          exit 0
+      - name: Start services
+        run: docker compose up -d
+      - name: Build
+        run: pnpm build
+      - name: Apply database schema
+        run: pnpm db:push
+      # Le balayage est piloté par PLAYWRIGHT, pas par `scan --sample`. Ce n'est pas un
+      # détail d'implémentation : les écrans du tunnel sont gardés par la machine à états, et
+      # chacun n'est ouvert que depuis un état de déclaration précis — l'étape 2 veut un
+      # brouillon, le parcours de conformité veut une déclaration transmise. Un balayage qui
+      # visite des URL en une passe, sous un état unique, ne peut structurellement pas les
+      # produire : il obtient une redirection (ou un 404 rendu sur place) et, correctement,
+      # refuse de l'enregistrer. La suite Playwright, elle, épingle l'état avant chaque écran
+      # et passe par une vraie soumission là où la FSM l'exige.
+      #
+      # `playwright.a11y.config.ts` porte son propre projet `setup` (connexion ProConnect) et
+      # démarre l'app par le bloc `webServer` de la config de base — d'où l'absence de step
+      # « démarrer l'app » ici.
+      #
+      # `continue-on-error` sur CETTE step seulement : un écran qui coince ne doit pas coûter
+      # le rapport et l'artefact des 36 autres. Une panne d'infra, elle, reste rouge.
+      - name: ultra11y — balayage RGAA des pages (Playwright)
+        continue-on-error: true
+        timeout-minutes: 25
+        run: pnpm --filter app test:e2e:a11y
+      # L'Action n'a plus besoin de `sample`/`storage-state`/`runtime` : `audit` réingère
+      # `.ultra11y/pages/` tout seul dès que le répertoire existe. Elle fait le reste — audit
+      # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
+      # page, crops de preuve, HTML.
+      - name: ultra11y — audit, rapport page par page et adjudication
+        uses: maxgfr/ultra11y@v5.34.2
+        env:
+          # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
+          # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
+          # désactive tout seul avec un warning.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         with:
-          name: rgaa-report
-          path: packages/app/audits/rgaa-*.md
+          working-directory: packages/app
+          paths: src
+          since: ""
+          jsx: "true"
+          graph: "true"
+          standard: rgaa
+          lang: fr
+          # TOUTE la grille de jugement passe par le modèle — moins ce que le registre rejoue.
+          # Chaque entrée du registre repasse par la même porte, sur l'évidence re-dérivée de
+          # l'audit du moment ; ce qui n'est pas rejoué est ce qui est payé. Ce que personne ne
+          # tranche reste « à évaluer », et `require-decided: pages` plus bas fait rougir le job
+          # en le nommant.
+          adjudicate: agent
+          # ON RESTE SUR LE RUNNER `action`, ET C'EST UN CHOIX, PAS UN OUBLI.
+          #
+          # 5.30.0 a ouvert un second chemin pour ce tier : `adjudicate-runner: cli` fait
+          # spawner au moteur un `claude -p` lui-même, et `adjudicate-grain: criterion` lui fait
+          # juger un critère par appel. Évalué ici, écarté — trois raisons.
+          #
+          #   1. CE QU'IL VEND, ON L'A DÉJÀ. Son argument est de lever la liste d'événements
+          #      autorisés de `claude-code-action`, donc de rendre le tier disponible sur
+          #      `push`. Ce dépôt a contourné cette restriction par le cron sur `alpha` (voir
+          #      l'en-tête). Il n'y a rien à acheter.
+          #   2. LE DÉFAUT DE L'ACTION EST CASSÉ. `adjudicate-grain` vaut `worklist` par défaut
+          #      et l'Action le passe tel quel à `judge --grain`, qui n'accepte que `batch` ou
+          #      `criterion` (`src/cli.ts:3560`). `runner: cli` au grain par défaut sort en 2
+          #      sans appeler un modèle : 40 min de CI, 0 $, et un rouge sur `require-decided`
+          #      avec toute la grille « à évaluer ». Seul le couple `cli` + `criterion` marche.
+          #   3. IL ÉCHANGE UN PLAFOND QUI MARCHE CONTRE AUCUN. `adjudicate-max-turns` ci-dessous
+          #      est VIVANT sur ce runner-ci. Sous `cli` il est muet — `--max-turns` n'est pas un
+          #      flag du CLI, qui avale un flag inconnu sans un mot. Et `adjudicate-budget-usd`
+          #      ne le remplace pas : il est poussé sur l'argv de CHAQUE `claude -p`
+          #      (`src/agent-cli.ts:170`) avec jusqu'à 4 tentatives, donc le pire cas est
+          #      `critères × passes × tentatives × plafond`. Le seul plafond de run qui
+          #      resterait serait `timeout-minutes`, soit cinq heures de modèle.
+          #
+          # S'ajoute le coût en temps : un appel par critère sur 37 pages allonge le job sans
+          # borne connue, là où les trois étapes dépliées ont une durée mesurée (39 min 25 s).
+          #
+          # TROIS PASSES, et un budget de tours large. Mesuré : l'adjudicateur s'est arrêté à
+          # 22 tours sur 228, sans erreur, en laissant 42 critères `verdict: null` — une passe
+          # unique n'a aucun moyen d'y revenir, et le job finit vert sur une grille que
+          # personne n'a remplie. Chaque passe supplémentaire ne reprend que ce qui est ENCORE
+          # indécis (jamais atteint, ou jugé puis refusé par la porte en portant son motif),
+          # donc elle coûte le reliquat et rien d'autre — et un run qui a tout décidé saute les
+          # suivantes avant d'invoquer le moindre modèle.
+          adjudicate-passes: "3"
+          adjudicate-max-turns: "600"
+          # LE MODÈLE, EXPLICITEMENT. Sans cet input l'adjudication prend le défaut de
+          # `claude-code-action`, qui n'est pas une constante de ce dépôt : le tier est facturé
+          # AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et un défaut qui bouge
+          # fait bouger la facture sans que rien ici ne change. On le nomme donc.
+          #
+          # Sonnet 5, et pas plus gros. L'amont a mesuré que ce qu'un adjudicateur bon marché
+          # ratait n'était jamais un manque de modèle : sept critères perdus sur un run vert,
+          # sept défauts d'outil — une fiche par critère rendue sans son contrat de verdict, un
+          # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
+          # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
+          adjudicate-model: claude-sonnet-5
+          # L'EFFORT, ET C'EST LE LEVIER QUI N'EST PAS LE MODÈLE (5.34.0).
+          #
+          # Ce qui arrive à ce tier est, par construction, ce qu'aucun moteur n'a pu décider :
+          # pertinence d'une alternative, intitulé de lien en contexte, ordre de lecture. La
+          # difficulté n'est donc pas de choisir entre deux réponses, c'est de LIRE l'évidence
+          # sans se tromper — et c'est exactement là qu'un run mesuré ici a échoué.
+          #
+          # Mesuré sur le run 32782282651 (5.33.1, effort par défaut) : la porte a refusé 13
+          # verdicts à la première passe, 12 à la deuxième, 2 à la troisième. Aucun refus n'était
+          # un désaccord sur le fond — c'étaient des citations fabriquées, des snippets retapés
+          # au lieu d'être copiés, et des chemins préfixés `packages/app/` alors que le
+          # `working-directory` EST `packages/app`. Trois critères en sont morts, le job est
+          # sorti rouge à 103/106.
+          #
+          # `high` et pas plus : le tier est facturé au critère, et l'amont a montré que monter
+          # le MODÈLE ne rattrapait pas ces défauts-là. C'est du soin de lecture qu'il faut, pas
+          # de la puissance. Les niveaux sont low, medium, high, xhigh, max — et une valeur hors
+          # liste est refusée par l'Action plutôt que transmise (le CLI avalerait un niveau
+          # inconnu en silence, exactement comme il avale un flag inconnu).
+          adjudicate-effort: high
+          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
+          # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
+          # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
+          ledger: .ultra11y/verdicts/rgaa.json
+          # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
+          gate-adjudicated: "false"
+          fail-on: "" # le verdict d'accessibilité ne bloque pas — on mesure
+          # LA COMPLÉTUDE EST IMPOSÉE, ET PAR PAGE.
+          #
+          # `true` ne porte que sur la grille DU RUN, et les deux questions se séparent
+          # exactement là où ça compte : un critère non conforme quelque part est TRANCHÉ pour le
+          # run, et sur les pages où le défaut n'apparaît pas il peut n'être le verdict de
+          # personne. Mesuré sur ce dépôt : 104/106 décidés pour le run, et 8 à 11 ouverts sur
+          # CHACUNE des 37 pages — une porte verte au-dessus d'un livrable rempli à 90 %. C'est
+          # la grille par page qu'un bilan page par page se fait lire, donc c'est elle qu'on
+          # tient.
+          #
+          # POURQUOI ELLE EST REDEVENUE ATTEIGNABLE, alors qu'elle avait dû être abandonnée.
+          #
+          # Elle ne l'avait pas été par excès d'ambition : elle était CASSÉE. Sur 5.16.0 une
+          # conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés,
+          # et `--require-decided=pages` ne pouvait passer sur aucune entrée — la porte ne
+          # mesurait pas une exigence trop haute, elle mesurait un défaut. Corrigé en 5.17.0.
+          #
+          # Ce qui restait ouvert PAR PAGE là où le run était décidé tombe avec 5.20.0 : le
+          # balayage mesurait puis jetait la mesure, donc une page pouvait rapporter une
+          # violation de rendu sans jamais pouvoir conclure à la conformité. Et un verdict
+          # d'agent est enregistré à la granularité du référentiel, donc il traverse la
+          # projection par page : ce que l'adjudication ferme pour le run, elle le ferme sur les
+          # 37 pages capturées.
+          #
+          # Mesuré en amont sur la fixture RGAA, balayée et capturée : 37 critères « à évaluer »
+          # pour le run, et exactement les mêmes 37 sur chacune des pages. `pages` n'est donc
+          # plus une barre plus haute que `true` — c'est la même, vérifiée là où on la lit.
+          #
+          # Ce qui reste ouvert est NOMMÉ dans le log et dans la fiche par page ; jamais un
+          # seuil, jamais un pourcentage.
+          require-decided: "pages"
+          # LA COUVERTURE, elle, bloque — et c'est la seule chose qui bloque ici.
+          #
+          # `require-decided` porte sur les CRITÈRES ; celle-ci porte sur les PAGES, et c'est
+          # une question différente, un cran en amont : le balayage a-t-il seulement regardé
+          # les 24 pages que `.ultra11yrc.json` déclare ? Mesuré sur le run 32135566667 : une
+          # sonde suspendue a tué deux specs, le groupe série en a emporté quinze autres, et le
+          # rapport RGAA est sorti amputé — 20 pages seulement, vert, sans nommer une seule
+          # des manquantes. Un rapport plus court se lit exactement comme un rapport complet.
+          #
+          # Elle se combine avec le `continue-on-error` du balayage plus haut, elle ne le
+          # contredit pas : un écran qui coince ne doit pas coûter le rapport des autres,
+          # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
+          # visible ici, nommément.
+          require-sample: "true"
+          # LES DEUX CRITÈRES QUE PERSONNE ICI NE PEUT TRANCHER, NOMMÉS PLUTÔT QUE TUS.
+          #
+          # 13.3 et 13.4 portent sur le classeur `referents-egapro-dreets.xlsx` en
+          # téléchargement, et leurs tests exigent de l'OUVRIR : structure interne et en-têtes
+          # pour 13.3, parité d'information avec /referents pour 13.4. Aucun tier du dispositif
+          # ne le peut — le moteur ne voit que l'URL, le balayage ne capture que la page qui la
+          # porte, l'adjudicateur n'a ni shell ni lecteur xlsx. Ce n'est pas un critère sans
+          # sujet, c'est un critère sans instrument, et c'est l'adjudicateur lui-même qui l'a
+          # dit, en les rendant `manual / undecidable` avec sa justification.
+          #
+          # Ce n'est PAS une tolérance, et c'est ce qui distingue cette liste d'un pourcentage :
+          # chaque entrée porte sa raison, la porte refuse une entrée sans raison, et elle
+          # refuse aussi une entrée dont le critère a depuis été tranché — une dispense ne
+          # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
+          # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
+          undecidable-file: .ultra11y/undecidable.json
+          # PAS DE COMMENTAIRE : ni `schedule` ni `workflow_dispatch` n'ont de PR où le poster.
+          #
+          # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
+          # et ses sévérités, puis un bloc par page en échec — n'est pas perdu : c'est le rapport
+          # du livrable `ultra11y-rgaa`, que ce job produit de toute façon. Ce qui disparaît est
+          # le raccourci pour le lire, pas le document. Le laisser à `true` demanderait à l'Action
+          # de chercher une PR qui n'existe pas.
+          comment: "false"
+          artifact-name: ultra11y-part-rgaa
+      # Le rapport Playwright est du DIAGNOSTIC, pas un livrable d'accessibilité : sans lui, un
+      # échec de balayage est aussi un échec non diagnosticable — `e2e.yaml` remonte les mêmes.
+      - name: Upload du rapport Playwright a11y
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ultra11y-part-playwright
+          path: |
+            packages/app/playwright-report/a11y/
+            packages/app/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Stop services
+        if: always()
+        run: docker compose down
+
+  # UN SEUL LIVRABLE PAR RUN — et, depuis ce changement, un seul RAPPORT dedans.
+  #
+  # Trois jobs produisaient cinq artefacts — l'audit du code, le rapport page par page, le
+  # registre de verdicts, le rapport Playwright, le rapport hebdomadaire ; les deux premiers de
+  # cette liste sont les seuls qui restent, le registre et le run hebdomadaire ayant disparu.
+  # À l'époque, un lecteur qui
+  # veut « le rapport d'accessibilité de ce run » devait deviner lequel télécharger, puis en
+  # ouvrir plusieurs pour recoller les morceaux. La fusion réglait le nombre d'artefacts et
+  # pas le problème : le ZIP contenait toujours DEUX arborescences de rapport complètes, qui
+  # ne s'accordaient pas sur le taux.
+  #
+  # Il n'en reste qu'un producteur de rapport (`a11y-pages`) ; ce job fusionne sa partie avec
+  # le rapport Playwright, gardé à part parce que c'est du DIAGNOSTIC de suite de tests et non
+  # un livrable d'accessibilité — quand un écran coince, c'est là qu'on va voir pourquoi.
+  #
+  # `delete-merged: true` : les parties disparaissent, il ne reste que `ultra11y-rgaa`.
+  # `separate-directories: true` : chaque partie garde son répertoire, sans quoi une fusion à
+  # plat en détruit une (mesuré : le livrable est tombé de 4,4 Mo à 384 Ko).
+  #
+  # `if: always()` : un tier qui échoue ne doit pas emporter le livrable de l'autre.
+  # `actions/upload-artifact/merge` ne trouvant AUCUNE partie échoue par défaut — d'où
+  # `continue-on-error`, parce qu'un run sans artefact est un fait, pas une panne : c'est le
+  # cas d'un `push` sur alpha, où seule la gate tourne, et où elle ne produit plus rien.
+  a11y-bundle:
+    name: "RGAA · livrable unique"
+    needs: [a11y-gate, a11y-pages]
+    # PAS SUR UNE PR : `a11y-pages` n'y tourne pas, donc il n'y a aucune partie `ultra11y-part-*`
+    # à fusionner. Le rapport de la gate y vit sous son propre nom (`ultra11y-pr-static`), qui ne
+    # matche pas le motif — laisser tourner ce job ne produirait qu'un job vide de plus à lire.
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fusionner les parties en un seul artefact
+        continue-on-error: true
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: ultra11y-rgaa
+          pattern: ultra11y-part-*
+          separate-directories: true
+          delete-merged: true
+          retention-days: 30

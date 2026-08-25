@@ -116,7 +116,7 @@ pnpm db:studio            # opens Drizzle Studio
 ```
 
 > **Note:** `pnpm test:e2e` and `pnpm test:lighthouse` require the dev server running on port 3000 (`pnpm dev:app`).
-> Lighthouse accessibility must score **100%** — it is configured as an error threshold in `.lighthouserc.json`.
+> Lighthouse reports an accessibility score as a **warning**, not a gate: accessibility is decided by ultra11y (the `rgaa-auditor` agent and the `a11y.yaml` workflow), and two concurrent thresholds on one subject give two verdicts to reconcile by hand.
 
 ---
 
@@ -129,7 +129,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 | **Tests unitaires** | Inside `/implement`, avant les gates (step 5.5) | `tu-dev` agent (Opus) écrit/corrige les TU + intégration, renvoie à `code-dev` sur régression |
 | **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
 | **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
-| **RGAA** | After every task | `rgaa-auditor` agent (pilote **ultra11y**) sur les `.tsx` modifiés — voir `.claude/rules/rgaa.md` |
+| **RGAA** | After every task | `rgaa-auditor` agent — lance le skill ultra11y `review-a11y` sur les `.tsx` modifiés. Voir `.claude/rules/rgaa.md` |
 | **Security** | After every task | `security-auditor` agent on modified server files |
 | **Functional** | Inside `/implement` | `functional-validator` rejoue les scénarios PO |
 | **Tests E2E** (bloquant) | Fin de pipeline (epic-end pour Feature, après `code-dev validated` pour Task/Bug) | `e2e-dev` agent (Opus) lance la suite E2E (triage régression), imbrique/crée le scénario Playwright. **Bloquant** : sur vraie régression → `architect-rework` crée des tickets de fix (la PR finale n'est pas ouverte tant que la gate n'est pas verte) |
@@ -189,7 +189,7 @@ Quality checks run **automatically** après chaque itération de code — pas de
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
 | `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) |
-| `rgaa-auditor` | Audit accessibilité RGAA 4.1.2 / WCAG 2.2 AA piloté par **ultra11y** (`.claude/skills/ultra11y/`) |
+| `rgaa-auditor` | Lance le skill ultra11y `review-a11y` sur le code modifié et rend son verdict (plugin déclaré dans `.claude/settings.json`) |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 
 ### Skills (`.claude/skills/`)
@@ -251,7 +251,7 @@ GitHub Actions workflows are in `.github/workflows/` :
 | File | Trigger | Role |
 |---|---|---|
 | `ci.yaml` | each push | build · lint · format · typecheck · tests |
-| `a11y.yaml` | push `alpha`/`beta`/`master`, PR, cron hebdo, manual | gate RGAA 4.1.2 / WCAG 2.2 AA statique (ultra11y) |
+| `a11y.yaml` | PR, cron hebdo (lundi), manual | 3 jobs ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**, SARIF + annotations + commentaire sticky. Sur **cron/manuel** (donc sur `alpha`, branche par défaut) : la chaîne complète — `a11y-pages` (balayage Playwright — 39 pages enregistrées, 37 capturées, 24 déclarées dans `.ultra11yrc.json` —, critères de rendu, rejeu du registre de verdicts puis adjudication IA du reliquat, non bloquant) et `a11y-bundle` (livrable `ultra11y-rgaa`) |
 | `e2e.yaml` | PR → `alpha`, manual | suite Playwright complète |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
 | `review-auto.yaml` | push sur toute branche sauf `dependabot/**` et `master` | **déploiement des review apps** |
@@ -262,7 +262,6 @@ GitHub Actions workflows are in `.github/workflows/` :
 | `promote-test-env.yaml` | manual (inputs `release`, `target`) | déploie une release publiée sur un env de test persistant (`rgaa` / `perf`) |
 | `release.yml` | manual (branch `beta`) | semantic-release |
 | `release-alpha.yaml` | manual (branch `alpha`) | semantic-release — prerelease `-alpha.N` (remplace l'ancien auto `push: alpha`) |
-| `release-alpha-reminder.yaml` | cron lun–ven, manual | alerte sur les commits livrables non releasés |
 | `release-changelog.yaml` | `release: published`, manual | changelog IA FR injecté dans le corps de la release |
 | `db-schema.yaml` | push `alpha`/`master` sur le schéma, manual | publie la doc de schéma DB sur le wiki |
 | `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manual | miroir `docs/` → wiki |

@@ -9,9 +9,11 @@ export default defineConfig({
 	globalSetup: "./src/e2e/global-setup.ts",
 	testDir: "./src/e2e",
 	testMatch: "**/*.e2e.{ts,tsx}",
-	// The 185-coordinate grid (#4022) has its own config and reporter; keep it out
-	// of the PR gate even if a grid file were ever renamed to *.e2e.ts by mistake.
-	testIgnore: "**/grille/**",
+	// The 185-coordinate grid (#4022) and the RGAA page sweep both have their own config and
+	// reporter; keep them out of the PR gate even if one of their files were ever renamed to
+	// *.e2e.ts by mistake. `testMatch` above already misses them by extension — this is the
+	// belt, and it is the one the sweep's config says exists.
+	testIgnore: ["**/grille/**", "**/a11y/**"],
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,

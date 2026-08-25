@@ -1,6 +1,7 @@
-import path from "node:path";
-
-export const AUTH_FILE = path.join(import.meta.dirname, ".auth/user.json");
+// The session file lives in `helpers/login.ts` and nowhere else. A second `AUTH_FILE` used to
+// sit here, pointing at `src/e2e/.auth/user.json` — a different path, imported by nothing, and
+// exactly the kind of decoy someone reaches for by autocomplete. Removed rather than aligned:
+// two constants for one file is how the sweep ends up authenticating against nothing.
 export const TEST_SIREN = "130025265";
 
 // GIP-MDS annual average workforce of the test company. Every size-based rule reads this value,
