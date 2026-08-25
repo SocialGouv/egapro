@@ -93,7 +93,13 @@ export function formatShortDate(date: Date | null | undefined): string {
 
 /** Format a persisted ISO date string (`YYYY-MM-DD`) in short French format: `"2026-03-10"` → `"10/03/2026"`. */
 export function formatIsoDate(value: string): string {
-	return formatShortDate(new Date(value));
+	const [year, month, day] = value.split("-");
+	return `${day}/${month}/${year}`;
+}
+
+/** Format an optional persisted ISO date string (`YYYY-MM-DD`) in short French format. Returns `"—"` for `undefined`. */
+export function formatOptionalIsoDate(value: string | undefined): string {
+	return value === undefined ? "—" : formatIsoDate(value);
 }
 
 /** Format a date with time in short French format: `new Date(…)` → `"10/03/2026 14:30"`. Returns `"—"` for nullish values. */

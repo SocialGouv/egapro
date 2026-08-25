@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import {
-	formatIsoDate,
+	formatOptionalIsoDate,
 	formatPercentage,
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
@@ -26,10 +26,6 @@ import { Step5NextSteps } from "./Step5NextSteps";
 import styles from "./Step5Review.module.scss";
 
 const CONFIRMATION_HREF = "/declaration-representation/confirmation";
-
-function formatOptionalIsoDate(value: string | undefined): string {
-	return value === undefined ? "—" : formatIsoDate(value);
-}
 
 function PublicationUrl({ url }: { url: string | undefined }) {
 	if (url === undefined || url.trim() === "") return "—";

@@ -95,6 +95,12 @@ describe("getDeclarationReferencePeriod", () => {
 		);
 	});
 
+	it("falls back to the civil period on undefined persisted bounds", () => {
+		expect(
+			getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, undefined, undefined),
+		).toBe(CIVIL_PERIOD);
+	});
+
 	it("tracks the campaign year of the declaration when falling back", () => {
 		expect(getDeclarationReferencePeriod(2027, true, null, null)).toBe(
 			getReferencePeriod(2027),

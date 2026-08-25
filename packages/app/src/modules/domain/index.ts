@@ -163,6 +163,7 @@ export {
 	formatIsoDate,
 	formatLongDate,
 	formatMonthDay,
+	formatOptionalIsoDate,
 	formatPercentage,
 	formatShortDate,
 	formatShortDateTime,

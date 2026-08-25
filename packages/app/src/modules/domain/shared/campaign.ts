@@ -42,8 +42,8 @@ export function getReferencePeriod(campaignYear: number): string {
 export function getDeclarationReferencePeriod(
 	campaignYear: number,
 	isSecondDeclaration: boolean,
-	secondDeclReferencePeriodStart: string | null,
-	secondDeclReferencePeriodEnd: string | null,
+	secondDeclReferencePeriodStart: string | null | undefined,
+	secondDeclReferencePeriodEnd: string | null | undefined,
 ): string {
 	if (
 		isSecondDeclaration &&
