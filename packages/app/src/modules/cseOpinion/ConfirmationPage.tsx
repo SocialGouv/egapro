@@ -48,7 +48,7 @@ export function ConfirmationPage({
 			</div>
 
 			<h2 className="fr-h5 fr-mb-3w">
-				Documents récapitulatifs de votre déclaration
+				Documents récapitulatifs de votre démarche
 			</h2>
 
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>

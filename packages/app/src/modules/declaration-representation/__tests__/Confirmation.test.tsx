@@ -88,7 +88,7 @@ describe("Confirmation — fin de démarche", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
-				name: "Documents récapitulatifs de la déclaration",
+				name: "Documents récapitulatifs de votre démarche",
 			}),
 		).toBeInTheDocument();
 		expect(

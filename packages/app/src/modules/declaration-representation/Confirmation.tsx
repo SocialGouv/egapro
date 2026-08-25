@@ -46,7 +46,7 @@ export function Confirmation({
 			</div>
 
 			{/* Visually hidden: bridges h1 → h3 (DownloadCard's own title) without adding a visible heading the Figma frame doesn't show. */}
-			<h2 className="fr-sr-only">Documents récapitulatifs de la déclaration</h2>
+			<h2 className="fr-sr-only">Documents récapitulatifs de votre démarche</h2>
 			<DownloadCard
 				dataYear={referenceYear}
 				href={`/api/representation-pdf?year=${referenceYear}`}

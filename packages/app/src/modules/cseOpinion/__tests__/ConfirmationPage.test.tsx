@@ -92,7 +92,7 @@ describe("ConfirmationPage", () => {
 		);
 
 		expect(
-			screen.getByText("Documents récapitulatifs de votre déclaration"),
+			screen.getByText("Documents récapitulatifs de votre démarche"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
