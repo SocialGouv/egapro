@@ -262,7 +262,6 @@ GitHub Actions workflows are in `.github/workflows/` :
 | `promote-test-env.yaml` | manual (inputs `release`, `target`) | déploie une release publiée sur un env de test persistant (`rgaa` / `perf`) |
 | `release.yml` | manual (branch `beta`) | semantic-release |
 | `release-alpha.yaml` | manual (branch `alpha`) | semantic-release — prerelease `-alpha.N` (remplace l'ancien auto `push: alpha`) |
-| `release-alpha-reminder.yaml` | cron lun–ven, manual | alerte sur les commits livrables non releasés |
 | `release-changelog.yaml` | `release: published`, manual | changelog IA FR injecté dans le corps de la release |
 | `db-schema.yaml` | push `alpha`/`master` sur le schéma, manual | publie la doc de schéma DB sur le wiki |
 | `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manual | miroir `docs/` → wiki |
