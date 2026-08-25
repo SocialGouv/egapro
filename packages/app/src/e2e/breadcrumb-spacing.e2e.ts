@@ -19,13 +19,13 @@ const VIEWPORTS = [
 	{ name: "mobile", width: 375, height: 800 },
 ];
 
-// `/mon-espace` is not redundant with the public pages: its CompanyInfoBanner is one of the
-// two components whose local `:global(.fr-breadcrumb)` override this fix deleted, so it is
-// the surface that regresses first if the shared rule stops applying.
+// `/mon-espace` used to be listed here as the surface that regresses first, its
+// CompanyInfoBanner carrying one of the two local `:global(.fr-breadcrumb)` overrides this
+// fix deleted. #4256 removed the breadcrumb from `/mon-espace/**` altogether, leaving the
+// public pages as the only surfaces the shared rule still has to apply to.
 const SCREENS = [
 	{ name: "legal notice", path: "/mentions-legales" },
 	{ name: "FAQ", path: "/faq" },
-	{ name: "my space", path: "/mon-espace" },
 ];
 
 test.describe("breadcrumb spacing", () => {
