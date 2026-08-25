@@ -111,15 +111,13 @@ describe("loadRulesWithFallback", () => {
 		expect(loadRulesWithFallback(null)).toBe(loadRulesWithFallback("2027.1"));
 	});
 
-	// Critère d'acceptation : « ne throw jamais sur une version absente, vide ou
-	// inconnue » — S7 exige qu'une déclaration historique ne produise pas de 500.
 	it.each([
 		"constructor",
 		"toString",
 		"valueOf",
 		"__proto__",
 		"hasOwnProperty",
-	])("ne throw pas pour la version inconnue %o héritée d'Object.prototype", (version) => {
+	])("ne throw pas pour %o, version inconnue héritée d'Object.prototype — S7 interdit un 500 sur une déclaration historique", (version) => {
 		expect(() => loadRulesWithFallback(version)).not.toThrow();
 		expect(loadRulesWithFallback(version).version).toBe("2027.1");
 	});
@@ -459,12 +457,10 @@ describe("Kleene — un fait `null` est connu, seul un fait absent est indécis"
 		).toBeNull();
 	});
 
-	// Divergence assumée avec `evaluatePredicate` d'engine.ts, où `isNull` répond
-	// `true` sur un fait absent : à l'export, l'absence signifie « pas encore su ».
 	it.each([
 		"isNull",
 		"isNotNull",
-	] as const)("`%s` reste indécis quand la clé du fait est absente", (op) => {
+	] as const)("`%s` reste indécis sur une clé absente, là où engine.ts décide `true` — à l'export, l'absence signifie « pas encore su »", (op) => {
 		const guard: Predicate = { fact: "cancelledAt", op };
 
 		expect(guardOutcome(guard, KNOWN_FACTS)).toEqual(guard);
