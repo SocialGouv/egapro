@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
+
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
@@ -415,8 +417,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(response.status).toBe(200);
 		const decl = (await response.json()).Declarations[0];
-		expect(decl.Effectif).toBe(70);
-		expect(decl.Indicateur_G_requis).toBe(false);
+		expect(decl.Parcours.Effectif).toBe(70);
+		expect(decl.Parcours.Indicateur_G_requis).toBe(false);
 	});
 
 	it("should send a null Effectif when the company is absent from the GIP file", async () => {
@@ -468,10 +470,10 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(response.status).toBe(200);
 		const body = await response.json();
 		expect(body.Nombre).toBe(1);
-		expect(body.Declarations[0].Effectif).toBeNull();
+		expect(body.Declarations[0].Parcours.Effectif).toBeNull();
 		// Workforce-0 (absent from GIP) is in the voluntary (< 50) tier → 7-indicator
 		// volunteering, so indicator G is required (#4043).
-		expect(body.Declarations[0].Indicateur_G_requis).toBe(true);
+		expect(body.Declarations[0].Parcours.Indicateur_G_requis).toBe(true);
 	});
 
 	it("should expose CSE opinion declarationNumber alongside type", async () => {
@@ -1171,13 +1173,13 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Parcours_conformite");
 		expect(decl.Parcours_apres_declaration_1).toBe("corrective_action");
 		expect(decl.Parcours_apres_declaration_2).toBe("joint_evaluation");
-		expect(decl.Parcours_de_conformite_requis).toBe(true);
-		expect(decl.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(decl.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(decl.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
 		expect(decl).not.toHaveProperty("Phase_2_requise");
 		expect(decl).not.toHaveProperty("Phase_2_revision_requise");
-		expect(decl.Avis_CSE_requis).toBe(true);
-		expect(decl.Indicateur_G_requis).toBe(true);
-		expect(decl.Version_regles).toBe("2027.1");
+		expect(decl.Parcours.Avis_CSE_requis).toBe(true);
+		expect(decl.Parcours.Indicateur_G_requis).toBe(true);
+		expect(decl.Parcours.Version_regles).toBe("2027.1");
 		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
 		expect(decl.Date_parcours_apres_declaration_1).toBe(
 			"2027-04-01T10:00:00.000Z",
@@ -1190,6 +1192,9 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Date_avis_CSE).toBe("2027-10-01T13:00:00.000Z");
 		expect(decl.Date_fin_demarche).toBe("2027-10-15T14:00:00.000Z");
 		expect(decl.Seconde_declaration.Statut).toBe(true);
+		for (const key of RELOCATED_ROOT_KEYS) {
+			expect(decl).not.toHaveProperty(key);
+		}
 	});
 
 	it("should thread the job-category source into Source_categories_emplois (#3944)", async () => {

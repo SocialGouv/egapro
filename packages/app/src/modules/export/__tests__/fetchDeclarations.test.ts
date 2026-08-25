@@ -7,6 +7,7 @@ import {
 	buildIndicators,
 } from "../fetchDeclarations";
 import type { RawHistoryEntry } from "../queries";
+import { PARCOURS_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
 
 // Minimal DeclarationRow used by buildIndicators / assembleDeclaration
 const baseRow = {
@@ -326,13 +327,17 @@ describe("buildIndicatorG", () => {
 		expect(category).not.toHaveProperty("Taux_horaire_total_ecart");
 	});
 
-	it("nulls a component gap when one of its salary values is missing", () => {
-		const [category] = buildIndicatorG([
+	it("nulls a component gap when either of its salary values is missing", () => {
+		const [womenMissing] = buildIndicatorG([
 			gEntry({ annualBaseWomen: null }),
 		]).initial;
+		const [menMissing] = buildIndicatorG([
+			gEntry({ annualBaseMen: null }),
+		]).initial;
 
-		expect(category?.Rem_annuelle_base_ecart).toBeNull();
-		expect(category?.Rem_annuelle_variable_ecart).toBe(0.0099);
+		expect(womenMissing?.Rem_annuelle_base_ecart).toBeNull();
+		expect(menMissing?.Rem_annuelle_base_ecart).toBeNull();
+		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe(0.0099);
 	});
 
 	it("nulls a component gap when the men value is zero", () => {
@@ -352,9 +357,9 @@ describe("assembleDeclaration", () => {
 		expect(Object.keys(result)[0]).toBe("id");
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Raison_sociale).toBe("ACME Corp");
-		expect(result.Effectif).toBe(250);
+		expect(result.Parcours.Effectif).toBe(250);
 		expect(result.CSE_existant).toBe(true);
-		expect(result.Annee).toBe(2027);
+		expect(result.Parcours.Annee).toBe(2027);
 		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
 		expect(result.Effectif_H_rem_annuelle_globale).toBe(150);
 		expect(result.Declarant.Email).toBe("jean@acme.fr");
@@ -366,21 +371,131 @@ describe("assembleDeclaration", () => {
 		expect(result.Date_creation).toBe("2027-03-15T10:00:00.000Z");
 	});
 
-	it("exposes the GIP annual average workforce as Effectif, floored to the lower integer", () => {
+	it("exposes the GIP annual average workforce as Parcours.Effectif, floored to the lower integer", () => {
 		expect(
 			assembleDeclaration({ ...baseRow, workforceEma: "99.97" }, [], [])
-				.Effectif,
+				.Parcours.Effectif,
 		).toBe(99);
 		expect(
 			assembleDeclaration({ ...baseRow, workforceEma: "70.00" }, [], [])
-				.Effectif,
+				.Parcours.Effectif,
 		).toBe(70);
 	});
 
-	it("exposes a null Effectif when the company is absent from the GIP file", () => {
+	it("exposes a null Parcours.Effectif when the company is absent from the GIP file", () => {
 		expect(
-			assembleDeclaration({ ...baseRow, workforceEma: null }, [], []).Effectif,
+			assembleDeclaration({ ...baseRow, workforceEma: null }, [], []).Parcours
+				.Effectif,
 		).toBeNull();
+	});
+
+	it("groups the path-derived data under Parcours, in schema order (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(Object.keys(result.Parcours)).toEqual([...PARCOURS_KEYS]);
+		expect(result.Parcours).toEqual({
+			Annee: 2027,
+			Effectif: 250,
+			Tranche_effectif: "250+",
+			Regime_obligations: "mandatory_with_compliance",
+			Statut: "awaiting_compliance_path_choice",
+			Annulee: false,
+			Parcours_de_conformite_requis: false,
+			Parcours_de_conformite_revision_requis: false,
+			Avis_CSE_requis: false,
+			Indicateur_G_requis: true,
+			Version_regles: "2027.1",
+		});
+	});
+
+	it("no longer exposes the relocated keys at the payload root (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		for (const key of RELOCATED_ROOT_KEYS) {
+			expect(result).not.toHaveProperty(key);
+			expect(result.Parcours).toHaveProperty(key);
+		}
+	});
+
+	it("keeps the declared per-sex headcounts at the root, outside Parcours (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
+		expect(result.Effectif_H_rem_annuelle_globale).toBe(150);
+		expect(result.Parcours).not.toHaveProperty(
+			"Effectif_F_rem_annuelle_globale",
+		);
+		expect(result.Parcours).not.toHaveProperty(
+			"Effectif_H_rem_annuelle_globale",
+		);
+	});
+
+	it("buckets Tranche_effectif on the floored headcount, never on the raw GIP value", () => {
+		// 149.7 falls in no bucket once compared raw — getCompanySizeRange would
+		// fall back to "<50" and misreport a 149-employee company as voluntary.
+		const result = assembleDeclaration(
+			{ ...baseRow, workforceEma: "149.7" },
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Effectif).toBe(149);
+		expect(result.Parcours.Tranche_effectif).toBe("100-149");
+	});
+
+	it("classifies Regime_obligations on the exact GIP value, not the floored one", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "149.7" }, [], [])
+				.Parcours.Regime_obligations,
+		).toBe("mandatory_with_compliance");
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "49.99" }, [], [])
+				.Parcours.Regime_obligations,
+		).toBe("voluntary");
+	});
+
+	it.each([
+		["49.99", 49, "<50", "voluntary"],
+		["70.00", 70, "50-99", "mandatory"],
+		["100.00", 100, "100-149", "mandatory_with_compliance"],
+		["150.00", 150, "150-249", "mandatory_with_compliance"],
+		["250.00", 250, "250+", "mandatory_with_compliance"],
+	])("maps a GIP workforce of %s to Effectif %i, bucket %s and regime %s", (workforceEma, effectif, tranche, regime) => {
+		const { Parcours } = assembleDeclaration(
+			{ ...baseRow, workforceEma },
+			[],
+			[],
+		);
+
+		expect(Parcours.Effectif).toBe(effectif);
+		expect(Parcours.Tranche_effectif).toBe(tranche);
+		expect(Parcours.Regime_obligations).toBe(regime);
+	});
+
+	it("leaves Tranche_effectif null and the regime voluntary when the company is absent from the GIP file", () => {
+		const { Parcours } = assembleDeclaration(
+			{ ...baseRow, workforceEma: null },
+			[],
+			[],
+		);
+
+		expect(Parcours.Effectif).toBeNull();
+		expect(Parcours.Tranche_effectif).toBeNull();
+		expect(Parcours.Regime_obligations).toBe("voluntary");
+	});
+
+	it("flags Parcours.Annulee alongside the root Date_annulation", () => {
+		const active = assembleDeclaration(baseRow, [], []);
+		const cancelled = assembleDeclaration(
+			{ ...baseRow, cancelledAt: new Date("2027-04-15T08:00:00Z") },
+			[],
+			[],
+		);
+
+		expect(active.Parcours.Annulee).toBe(false);
+		expect(active.Date_annulation).toBeNull();
+		expect(cancelled.Parcours.Annulee).toBe(true);
+		expect(cancelled.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
 	});
 
 	it("nulls CSE_existant below the CSE threshold even when a legacy hasCse value exists", () => {
@@ -766,7 +881,7 @@ describe("assembleDeclaration", () => {
 		expect(result.Indicateurs.G).toHaveLength(1);
 		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
 		expect(result.SIREN).toBe("123456789");
-		expect(result.Effectif).toBe(250);
+		expect(result.Parcours.Effectif).toBe(250);
 	});
 
 	it("should expose Historique_statuts as empty array when no history (S7)", () => {
@@ -1030,7 +1145,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("does not require the compliance process when the indicator G gap is below 5%", () => {
@@ -1038,8 +1153,8 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, smallInitial, []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(false);
-		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
 	it("does not require the compliance process below 100 employees even with a gap", () => {
@@ -1047,7 +1162,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
 	});
 
 	it("does not require the compliance process without indicator G", () => {
@@ -1055,7 +1170,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, [], []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
 	});
 
 	it("does not require the compliance process when the indicator G categories carry no gap data", () => {
@@ -1063,7 +1178,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, [entry("initial", "0", "0")], []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
 	});
 
 	it("requires the compliance process when the indicator G gap is negative and significant", () => {
@@ -1073,7 +1188,7 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, negativeSignificantInitial, []);
 
-		expect(result.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("treats a company absent from the GIP file as 0 for the derived flags", () => {
@@ -1081,11 +1196,11 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Effectif).toBeNull();
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Effectif).toBeNull();
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
 		// Workforce-0 derives from the missing GIP effectif; it lands in the
 		// voluntary (< 50) tier, which files all 7 indicators (#4043).
-		expect(result.Indicateur_G_requis).toBe(true);
+		expect(result.Parcours.Indicateur_G_requis).toBe(true);
 	});
 
 	it("derives the flags from the GIP workforce, never from the Weez value (#3929)", () => {
@@ -1093,9 +1208,9 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Effectif).toBe(70);
-		expect(result.Indicateur_G_requis).toBe(false);
-		expect(result.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Effectif).toBe(70);
+		expect(result.Parcours.Indicateur_G_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
 	});
 
 	it("compares the indicator G threshold on the exact GIP value", () => {
@@ -1110,8 +1225,8 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(below.Indicateur_G_requis).toBe(false);
-		expect(atThreshold.Indicateur_G_requis).toBe(true);
+		expect(below.Parcours.Indicateur_G_requis).toBe(false);
+		expect(atThreshold.Parcours.Indicateur_G_requis).toBe(true);
 	});
 
 	it("compares the compliance threshold on the exact GIP value", () => {
@@ -1126,8 +1241,8 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(below.Parcours_de_conformite_requis).toBe(false);
-		expect(atThreshold.Parcours_de_conformite_requis).toBe(true);
+		expect(below.Parcours.Parcours_de_conformite_requis).toBe(false);
+		expect(atThreshold.Parcours.Parcours_de_conformite_requis).toBe(true);
 	});
 
 	it("requires the revision when a second declaration was submitted with a correction gap >= 5%", () => {
@@ -1143,8 +1258,8 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(result.Parcours_de_conformite_requis).toBe(true);
-		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
 	});
 
 	it("does not require the revision without a submitted second declaration", () => {
@@ -1160,8 +1275,8 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(result.Parcours_de_conformite_requis).toBe(true);
-		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
 	it("does not require the revision when the correction gap is below 5%", () => {
@@ -1177,7 +1292,7 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 
 	it("requires the revision when the correction gap is negative and significant", () => {
@@ -1195,7 +1310,7 @@ describe("assembleDeclaration — compliance flags", () => {
 			[],
 		);
 
-		expect(result.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
 	});
 
 	it("does not require the revision when there are no correction categories", () => {
@@ -1208,6 +1323,6 @@ describe("assembleDeclaration — compliance flags", () => {
 
 		const result = assembleDeclaration(row, significantInitial, []);
 
-		expect(result.Parcours_de_conformite_revision_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
 	});
 });
