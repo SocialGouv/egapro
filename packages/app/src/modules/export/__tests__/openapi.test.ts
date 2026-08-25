@@ -362,4 +362,25 @@ describe("openApiSpec", () => {
 			);
 		});
 	});
+
+	describe("breaking-change notice on the declarations endpoint (#4329)", () => {
+		const { description } =
+			openApiSpec.paths["/api/v1/export/declarations"].get;
+		const [major] = openApiSpec.info.version.split(".");
+
+		it("announces the breaking change of the declared major version", () => {
+			expect(description).toContain("rupture de compatibilité");
+			expect(description).toContain(`majeure ${major}`);
+		});
+
+		it("names the Parcours object that carries the relocated keys", () => {
+			expect(description).toContain("Parcours");
+		});
+
+		it("keeps every documented path on the v1 prefix the notice promises", () => {
+			for (const path of Object.keys(openApiSpec.paths)) {
+				expect(path).toMatch(/^\/api\/v1\//);
+			}
+		});
+	});
 });
