@@ -9,6 +9,7 @@ import {
 	setCompanyWorkforce,
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
+import { fetchSuitDeclarations } from "./helpers/suit-export";
 
 test.describe("Declaration cancellation — full cycle", () => {
 	test.describe.configure({ mode: "serial" });
@@ -112,5 +113,35 @@ test.describe("Declaration cancellation — full cycle", () => {
 		await expect(page.getByText(/Annulée le/)).toBeVisible({
 			timeout: 10_000,
 		});
+	});
+
+	// Epic #4122, point d'attention : « si une déclaration est annulée, il faut
+	// qu'elle remonte dans l'api SUIT ». The cycle above leaves exactly the state
+	// that proves it — two cancelled rows and one active — so the machine contract
+	// is asserted here rather than replaying three funnels for it.
+	test("the SUIT export surfaces the cancelled declarations alongside the active one", async ({
+		browser,
+	}) => {
+		const declarations = (await fetchSuitDeclarations(browser)).filter(
+			(entry) => entry.Parcours.Annee === currentYear,
+		);
+		expect(declarations).toHaveLength(3);
+
+		const cancelled = declarations.filter((entry) => entry.Parcours.Annulee);
+		const active = declarations.filter((entry) => !entry.Parcours.Annulee);
+		expect(cancelled).toHaveLength(2);
+		expect(active).toHaveLength(1);
+
+		for (const entry of cancelled) {
+			expect(entry.Date_annulation).not.toBeNull();
+			// A cancelled declaration has no next step to offer: the démarche restarts
+			// from a new row, it does not resume from this one.
+			expect(entry.Parcours.Prochaines_etapes_possibles).toEqual([]);
+		}
+
+		expect(active[0]?.Date_annulation).toBeNull();
+		expect(
+			active[0]?.Parcours.Prochaines_etapes_possibles.length,
+		).toBeGreaterThan(0);
 	});
 });
