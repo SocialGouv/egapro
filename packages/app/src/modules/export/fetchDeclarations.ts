@@ -349,10 +349,7 @@ export function assembleDeclaration(
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
 
-	// Two distinct readings of the workforce, on purpose: the obligation regime is
-	// classified on the exact GIP value (same input as the compliance flags above),
-	// while the segmentation bucket is computed on the floored value and never folds
-	// an unknown workforce into "<50" (see getOptionalCompanySizeRange contract).
+	// Obligation regime uses the exact value; the segmentation bucket uses the floored one.
 	const gipWorkforce = parseGipWorkforce(row.workforceEma);
 	const flooredWorkforce = floorWorkforce(gipWorkforce);
 
