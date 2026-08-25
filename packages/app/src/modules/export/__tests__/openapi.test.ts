@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	COMPANY_SIZE_RANGES,
+	DECLARATION_FSM_STATUSES,
+} from "~/modules/domain";
 import {
 	representationNotComputableExecutivesEnum,
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
 import { openApiSpec } from "../openapi";
+import { PARCOURS_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
 
 describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("2.1.0");
+		expect(openApiSpec.info.version).toBe("3.0.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -150,11 +154,63 @@ describe("openApiSpec", () => {
 		});
 	});
 
+	describe("Parcours object (#4326)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const parcoursSchema = declarationSchema.properties.Parcours;
+
+		it("declares Parcours as an object carrying the path-derived properties", () => {
+			expect(parcoursSchema.type).toBe("object");
+			expect(Object.keys(parcoursSchema.properties)).toEqual([
+				...PARCOURS_KEYS,
+			]);
+		});
+
+		it("documents every Parcours property with a French description", () => {
+			for (const key of PARCOURS_KEYS) {
+				expect(parcoursSchema.properties[key].description).toBeTruthy();
+			}
+		});
+
+		it("no longer documents the relocated keys at the schema root", () => {
+			for (const key of RELOCATED_ROOT_KEYS) {
+				expect(declarationSchema.properties).not.toHaveProperty(key);
+			}
+		});
+
+		it("declares Tranche_effectif as a nullable enum of the size buckets", () => {
+			const tranche = parcoursSchema.properties.Tranche_effectif;
+			const stringVariant = tranche.oneOf.find((v) => v.type === "string");
+
+			expect(tranche.oneOf.find((v) => v.type === "null")).toBeDefined();
+			expect(
+				stringVariant && "enum" in stringVariant && stringVariant.enum,
+			).toEqual(Object.keys(COMPANY_SIZE_RANGES));
+		});
+
+		it("declares Regime_obligations as the company size classification enum", () => {
+			const regime = parcoursSchema.properties.Regime_obligations;
+
+			expect(regime.type).toBe("string");
+			expect(regime.enum).toEqual([
+				"voluntary",
+				"mandatory",
+				"mandatory_with_compliance",
+			]);
+		});
+
+		it("declares Annulee as a boolean", () => {
+			expect(parcoursSchema.properties.Annulee.type).toBe("boolean");
+		});
+	});
+
 	describe("Statut field (declaration FSM status)", () => {
 		const declarationSchema =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
 				.content["application/json"].schema.properties.Declarations.items;
-		const statutSchema = declarationSchema.properties.Statut;
+		const statutSchema =
+			declarationSchema.properties.Parcours.properties.Statut;
 
 		it("declares Statut as a string enum", () => {
 			expect(statutSchema.type).toBe("string");
