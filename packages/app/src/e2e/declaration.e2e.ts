@@ -282,14 +282,14 @@ test.describe("Declaration workflow", () => {
 
 		await expect(
 			page.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeVisible();
+		).toHaveCount(2);
 
 		// DSFR 1.14 sets white-space: nowrap on table cells; inherited by
 		// .fr-error-text it painted the message onto the neighbouring column. A
 		// visible message is not enough — the bug kept it visible, just overflowing.
 		// Assert the rendered text extent stays within its owning <td>.
 		const measure = await page.evaluate(() => {
-			const paragraph = document.getElementById("women-error");
+			const paragraph = document.getElementById("step1-annual-women-error");
 			const cell = paragraph?.closest("td");
 			if (!paragraph || !cell) return null;
 			const range = document.createRange();
