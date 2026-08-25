@@ -126,6 +126,17 @@ export async function fillStep4Quartiles(
 }
 
 /**
+ * Changing a workforce that step 1 already holds opens a confirmation dialog
+ * before saving, because it resets the GIP-prefilled indicators. A real user
+ * confirms it; without this the funnel just never leaves step 1.
+ */
+async function confirmPrefillResetIfAsked(page: Page) {
+	const confirm = page.getByRole("button", { name: "Continuer" });
+	const asked = await confirm.isVisible({ timeout: 2_000 }).catch(() => false);
+	if (asked) await confirm.click();
+}
+
+/**
  * Fill and submit steps 1 → 4, then click "Suivant" on the quartile step without
  * asserting the destination: it is step 5 when indicator G applies, step 6 otherwise.
  */
@@ -153,6 +164,7 @@ export async function submitStepsThroughQuartiles(
 			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
 			.fill("15");
 		await page.getByRole("button", { name: "Suivant" }).click();
+		await confirmPrefillResetIfAsked(page);
 		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
 
