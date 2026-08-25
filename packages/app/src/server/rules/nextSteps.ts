@@ -174,7 +174,8 @@ export function listNextTransitions(
 			id: transition.id,
 			action: transition.action,
 			to: transition.to,
-			residualGuard: evaluation.value === "unknown" ? evaluation.residual : null,
+			residualGuard:
+				evaluation.value === "unknown" ? evaluation.residual : null,
 		});
 	}
 	return candidates;
