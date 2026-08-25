@@ -1,7 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step1Workforce } from "../Step1Workforce";
 
 const mockMutate = vi.fn();
@@ -303,22 +307,7 @@ describe("Step1Workforce", () => {
 					step1: { totalWomen: 50, totalMen: 100 },
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
@@ -346,22 +335,7 @@ describe("Step1Workforce", () => {
 					step1: { totalWomen: 50, totalMen: 100 },
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}

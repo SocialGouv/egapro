@@ -1,15 +1,15 @@
 import type { QuartileTuple } from "~/modules/declaration-remuneration";
 import { QUARTILE_COUNT } from "~/modules/domain";
-import { type CountField, TABLE_LABEL, type TableType } from "./quartileErrors";
+import {
+	type CountField,
+	type RecapEntry,
+	TABLE_LABEL,
+	type TableType,
+} from "./quartileErrors";
 
 export type QuartileReference = { women?: number; men?: number };
 
-export type QuartileReferences = {
-	annual: QuartileReference;
-	hourly: QuartileReference;
-};
-
-export type CoherenceWarning = {
+export type CoherenceError = {
 	table: TableType;
 	field: CountField;
 	expected: number;
@@ -26,18 +26,19 @@ function sumCounts(table: QuartileTuple, field: CountField): number | null {
 	return sum;
 }
 
-// Warnings only: the GIP file itself can ship quartile counts that disagree with
-// the headcount it declares, so blocking here would trap a declarant in an
-// inconsistency they cannot fix. Each table is compared to its own reference
-// (annual vs hourly), never to the other one.
-export function deriveCoherenceWarnings(
+// Blocking control (decision #4260): both the annual and hourly tables are
+// compared to the same reference — the step 1 headcount (declaration.totalWomen
+// / totalMen), never the GIP file. The comparison only runs once a column's
+// four counts are all filled in; an undefined reference (step 1 not yet
+// completed) disables the control entirely.
+export function deriveCoherenceErrors(
 	values: { annual: QuartileTuple; hourly: QuartileTuple },
-	references: QuartileReferences,
-): CoherenceWarning[] {
-	const out: CoherenceWarning[] = [];
+	reference: QuartileReference,
+): CoherenceError[] {
+	const out: CoherenceError[] = [];
 	for (const table of ["annual", "hourly"] as const) {
 		for (const field of ["women", "men"] as const) {
-			const expected = references[table][field];
+			const expected = reference[field];
 			if (expected === undefined) continue;
 			const total = sumCounts(values[table], field);
 			if (total === null) continue;
@@ -47,7 +48,30 @@ export function deriveCoherenceWarnings(
 	return out;
 }
 
-export function coherenceWarningLabel(warning: CoherenceWarning): string {
-	const sexLabel = warning.field === "women" ? "de femmes" : "d'hommes";
-	return `Le total des effectifs ${sexLabel} saisis pour la ${TABLE_LABEL[warning.table]} (${warning.total}) ne correspond pas à l'effectif de référence (${warning.expected}).`;
+export function coherenceErrorLabel(error: CoherenceError): string {
+	const sexLabel = error.field === "women" ? "de femmes" : "d'hommes";
+	const tableAdjective = error.table === "annual" ? "annuel" : "horaire";
+	return `Le nombre total ${sexLabel} renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total ${tableAdjective} : ${error.expected}).`;
+}
+
+/**
+ * Builds anchor entries for the submission recap alert (RGAA 11.10/11.13).
+ * One entry per table, never per sex: both sexes of a table share the same
+ * alert, so a second entry would duplicate the anchor and the React key.
+ */
+export function buildCoherenceRecap(errors: CoherenceError[]): RecapEntry[] {
+	return (["annual", "hourly"] as const).flatMap((table) => {
+		const tableErrors = errors.filter((error) => error.table === table);
+		if (tableErrors.length === 0) return [];
+		const clauses = tableErrors.map((error) => {
+			const sexLabel = error.field === "women" ? "de femmes" : "d'hommes";
+			return `le total ${sexLabel} ne correspond pas à la référence (${error.expected})`;
+		});
+		return [
+			{
+				id: `step4-coherence-${table}`,
+				label: `Nombre de salariés (${TABLE_LABEL[table]}) — ${clauses.join(" ; ")}.`,
+			},
+		];
+	});
 }

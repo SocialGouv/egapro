@@ -4,6 +4,7 @@ import {
 	makeGipRow,
 	nullGipStep2,
 	nullGipStep3,
+	nullGipStep4,
 } from "~/test/gipGapFixtures";
 import type { GipMdsRow } from "../gipMdsMapping";
 import { mapGipToFormData } from "../gipMdsMapping";
@@ -38,10 +39,6 @@ function makeBugRepoRow(): GipMdsRow {
 		hourlyQuartile3MenCount: "8",
 		hourlyQuartile4MenCount: "8",
 	});
-}
-
-function sum(values: Array<number | null>): number {
-	return values.reduce<number>((acc, v) => acc + (v ?? 0), 0);
 }
 
 describe("mapGipToFormData", () => {
@@ -162,22 +159,20 @@ describe("mapGipToFormData", () => {
 		expect(result?.step4.hourly.menCounts).toEqual([8, 8, 8, 8]);
 	});
 
-	it("sums each table's counts back to its own reference headcount", () => {
+	it("exposes only thresholds and counts per table, no reference headcount", () => {
+		// Since #4260 both tables are checked against the step 1 headcount, so the
+		// per-block GIP reference is no longer mapped at all.
 		const result = mapGipToFormData(makeBugRepoRow());
-		const annual = result?.step4.annual;
-		const hourly = result?.step4.hourly;
-		expect(sum(annual?.womenCounts ?? [])).toBe(annual?.referenceWomen);
-		expect(sum(annual?.menCounts ?? [])).toBe(annual?.referenceMen);
-		expect(sum(hourly?.womenCounts ?? [])).toBe(hourly?.referenceWomen);
-		expect(sum(hourly?.menCounts ?? [])).toBe(hourly?.referenceMen);
-	});
-
-	it("exposes a distinct reference headcount per table (annual vs hourly)", () => {
-		const result = mapGipToFormData(makeBugRepoRow());
-		expect(result?.step4.annual.referenceWomen).toBe(37);
-		expect(result?.step4.annual.referenceMen).toBe(33);
-		expect(result?.step4.hourly.referenceWomen).toBe(34);
-		expect(result?.step4.hourly.referenceMen).toBe(32);
+		expect(result?.step4.annual).toEqual({
+			thresholds: ["25000", "30000", "35000"],
+			womenCounts: [11, 10, 8, 8],
+			menCounts: [7, 8, 9, 9],
+		});
+		expect(result?.step4.hourly).toEqual({
+			thresholds: ["13.74", "17.58", "21.98"],
+			womenCounts: [10, 9, 8, 7],
+			menCounts: [8, 8, 8, 8],
+		});
 	});
 
 	it("leaves quartile cells empty when the GIP row has no nb columns (no proportion fallback)", () => {
@@ -219,13 +214,10 @@ describe("mapGipToFormData", () => {
 		expect(result?.step4.annual.womenCounts[0]).toBeNull();
 	});
 
-	it("returns null reference headcount when the block's global counts are null", () => {
+	it("returns an all-null step4 block when the GIP row carries no quartile data", () => {
 		const row = makeGipRow();
 		const result = mapGipToFormData(row);
-		expect(result?.step4.annual.referenceWomen).toBeNull();
-		expect(result?.step4.annual.referenceMen).toBeNull();
-		expect(result?.step4.hourly.referenceWomen).toBeNull();
-		expect(result?.step4.hourly.referenceMen).toBeNull();
+		expect(result?.step4).toEqual(nullGipStep4());
 	});
 
 	it("returns 3-element thresholds tuple (Q1-Q3 only, no Q4)", () => {

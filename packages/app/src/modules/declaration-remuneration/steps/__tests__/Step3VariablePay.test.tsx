@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step3VariablePay } from "../Step3VariablePay";
 
 const mockMutate = vi.fn();
@@ -375,22 +379,7 @@ describe("Step3VariablePay", () => {
 						beneficiaryCountWomen: 45,
 						beneficiaryCountMen: 60,
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
@@ -419,22 +408,7 @@ describe("Step3VariablePay", () => {
 						annualMeanWomen: "900",
 						annualMeanMen: "1000",
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
@@ -463,22 +437,7 @@ describe("Step3VariablePay", () => {
 						beneficiaryCountWomen: 0,
 						beneficiaryCountMen: 0,
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
