@@ -25,6 +25,7 @@
 .inputWithUnit :global(.fr-input) {
 	flex: 1 1 auto;
 	min-width: 0;
+	text-align: right;
 }
 
 .unit {
@@ -36,4 +37,11 @@
 
 .hint:global(.fr-message) {
 	margin-top: 1rem;
+	margin-left: 0.5rem;
+}
+
+.trailingContent {
+	display: flex;
+	height: 2.5rem;
+	align-items: center;
 }
