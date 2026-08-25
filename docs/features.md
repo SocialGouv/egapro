@@ -543,6 +543,8 @@ Le GIP-MDS publie chaque année (mars) un CSV des indicateurs A–F pré-calcul�
 
 L'API privée `/api/v1/*` consommée par **SUIT** (système d'information de l'inspection du travail) est protégée par une **passerelle APISIX** déployée dans le cluster Kubernetes. Voir le [README racine](../README.md#sécurisation-de-lapi-suit-via-passerelle-apisix) pour le détail. Cette feature n'a pas d'écran utilisateur — c'est de l'infra.
 
+L'export `GET /api/v1/export/declarations` est en version majeure `3.0.0` (rupture de compatibilité, URL inchangée) : les données déduites du parcours de la déclaration (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous un objet unique `Parcours`, qui inclut `Parcours.Prochaines_etapes_possibles` — les transitions possibles depuis le statut courant, calculées à l'export. Détail du contrat (cycle de vie, sémantique des champs) : [`docs/SUIT-API.md`](SUIT-API.md#interprétation-des-champs-et-cycle-de-vie) ; mécanique technique de calcul : voir [`architecture.md` §7.1](architecture.md#71-schéma).
+
 ### 13.6 Upload de fichiers (mécanisme partagé)
 
 L'upload de PDF (avis CSE et évaluation conjointe) est centralisé dans un **pipeline unifié** :
