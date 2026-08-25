@@ -312,6 +312,46 @@ const declarationSchema = {
 					description:
 						"Version du moteur de règles métier utilisée à la soumission.",
 				},
+				Prochaines_etapes_possibles: {
+					type: "array",
+					description:
+						"Liste des transitions offertes depuis le statut courant, dérivée du ruleset versionné. `Identifiant_transition` est stable et destiné au diff côté SUIT ; `Libelle` est l'intitulé de l'étape d'arrivée ; `Condition`, quand elle est présente, décrit le fait encore inconnu qui départagera les variantes. Tableau vide si la déclaration est annulée.",
+					items: {
+						type: "object",
+						properties: {
+							Identifiant_transition: {
+								type: "string",
+								description:
+									"Identifiant stable de la transition dans le ruleset — sert au diff côté SUIT.",
+							},
+							Action: {
+								type: "string",
+								description: "Action déclenchant la transition.",
+							},
+							Etat_cible: {
+								type: "string",
+								enum: [...DECLARATION_FSM_STATUSES],
+								description: "Statut atteint si la transition est exécutée.",
+							},
+							Libelle: {
+								type: ["string", "null"],
+								description:
+									"Intitulé du stage de l'étape d'arrivée. `null` si l'état cible n'appartient à aucun stage.",
+							},
+							Condition: {
+								type: "string",
+								description:
+									"Fait encore inconnu qui départagera les variantes, présent uniquement quand la garde est indécise.",
+							},
+						},
+						required: [
+							"Identifiant_transition",
+							"Action",
+							"Etat_cible",
+							"Libelle",
+						],
+					},
+				},
 			},
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },

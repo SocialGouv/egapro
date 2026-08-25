@@ -46,6 +46,7 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+import { buildNextStepsPayload } from "./shared/nextStepsPayload";
 import { getStatusHistoryLabel } from "./shared/statusHistoryLabels";
 
 function deriveExportFlags(
@@ -380,6 +381,12 @@ export function assembleDeclaration(
 			Avis_CSE_requis: row.cseRequired,
 			Indicateur_G_requis: flags.indicatorGRequired,
 			Version_regles: row.rulesVersion,
+			Prochaines_etapes_possibles: buildNextStepsPayload({
+				status: row.status,
+				rulesVersion: row.rulesVersion,
+				cseRequired: row.cseRequired,
+				cancelled: isCancelled(row),
+			}),
 		},
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
