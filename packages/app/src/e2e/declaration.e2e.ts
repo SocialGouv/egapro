@@ -317,8 +317,9 @@ test.describe("Declaration workflow", () => {
 // both tables, and the hourly table was checked against the GIP hourly reference (so it
 // was unchecked without a GIP prefill). Both tables are now held to the step 1
 // "Effectifs physiques" counts, divergence blocks the step, and the message sits under
-// the offending table. The unit tests cover the derivation; what only the browser proves
-// is that "Suivant" no longer navigates and that the recap anchor reaches the message.
+// the offending table, below its "Source : DSN" note, once per table. The unit tests
+// cover the derivation; what only the browser proves is that "Suivant" no longer
+// navigates and that the focus lands on the message of the table at fault.
 test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260)", () => {
 	test.describe.configure({ mode: "serial" });
 
@@ -336,9 +337,6 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 	}) => {
 		test.slow();
 
-		const recapAlert = page
-			.getByRole("alert")
-			.filter({ hasText: "Le formulaire contient des erreurs" });
 		const annualNote = page.locator("#step4-coherence-annual");
 		const hourlyNote = page.locator("#step4-coherence-hourly");
 		const next = page.getByRole("button", { name: "Suivant" });
@@ -358,8 +356,9 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			);
 			await expect(hourlyNote).toHaveCount(0);
 
-			// The message belongs to the table it indicts: after the annual table,
-			// before the hourly one — not above both, as the old warning was.
+			// The message belongs to the table it indicts: after the annual table and
+			// below its source note, before the hourly one — not above both, as the
+			// old warning was.
 			const placement = await page.evaluate(() => {
 				const note = document.getElementById("step4-coherence-annual");
 				const captioned = (needle: string) =>
@@ -378,24 +377,29 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 						hourly.compareDocumentPosition(note) &
 							Node.DOCUMENT_POSITION_PRECEDING,
 					),
+					afterSourceNote: Boolean(
+						note.parentElement?.previousElementSibling?.textContent?.startsWith(
+							"Source",
+						),
+					),
 				};
 			});
 			expect(placement).toEqual({
 				afterAnnualTable: true,
 				beforeHourlyTable: true,
+				afterSourceNote: true,
 			});
 		});
 
-		await test.step("« Suivant » ne quitte pas l'étape et le récap pointe vers le message", async () => {
+		await test.step("« Suivant » ne quitte pas l'étape et le focus va sur le message du tableau", async () => {
 			await next.click();
 
 			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/4$/);
-			await expect(recapAlert).toBeFocused();
+			await expect(annualNote).toBeFocused();
+			// One message, under the table at fault — no second copy in a summary.
 			await expect(
-				recapAlert.getByRole("link", {
-					name: /Nombre de salariés \(rémunération annuelle\)/,
-				}),
-			).toHaveAttribute("href", "#step4-coherence-annual");
+				page.getByText("Nombre de salariés", { exact: true }),
+			).toHaveCount(1);
 		});
 
 		await test.step("le contrôle horaire vit désormais sur l'effectif de l'étape 1", async () => {
@@ -416,11 +420,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			await expect(hourlyNote).toContainText(
 				`(nombre total horaire : ${STEP1_WORKFORCE.men})`,
 			);
-			await expect(
-				recapAlert.getByRole("link", {
-					name: /Nombre de salariés \(rémunération horaire\)/,
-				}),
-			).toHaveAttribute("href", "#step4-coherence-hourly");
+			await expect(hourlyNote).toBeFocused();
 		});
 
 		await test.step("les deux totaux corrigés, l'étape se valide", async () => {

@@ -28,7 +28,6 @@ import { CoherenceNote } from "./step4/CoherenceNote";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileTable } from "./step4/QuartileTable";
 import {
-	buildCoherenceRecap,
 	deriveCoherenceErrors,
 	type QuartileReference,
 } from "./step4/quartileCoherence";
@@ -261,18 +260,33 @@ export function Step4QuartileDistribution({
 		clearFieldError(tableType, index, field);
 	}
 
-	function focusAlert() {
-		requestAnimationFrame(() => alertRef.current?.focus());
+	// The coherence errors are reported once per table, under the table they
+	// belong to, so the summary alert has nothing to anchor for them: focus the
+	// offending table's alert directly.
+	function focusFirstError(
+		hasFieldError: boolean,
+		coherenceTable: TableType | undefined,
+	) {
+		requestAnimationFrame(() => {
+			if (hasFieldError) {
+				alertRef.current?.focus();
+				return;
+			}
+			if (coherenceTable) {
+				document.getElementById(`step4-coherence-${coherenceTable}`)?.focus();
+			}
+		});
 	}
 
 	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const values = form.getValues();
 		const errors = deriveErrors(values);
-		if (hasAnyError(errors) || coherenceErrors.length > 0) {
+		const hasFieldError = hasAnyError(errors);
+		if (hasFieldError || coherenceErrors.length > 0) {
 			setFieldErrors(errors);
 			setShowRecap(true);
-			focusAlert();
+			focusFirstError(hasFieldError, coherenceErrors[0]?.table);
 			return;
 		}
 		setFieldErrors(emptyErrorMap());
@@ -285,10 +299,7 @@ export function Step4QuartileDistribution({
 
 	const coherenceErrors = deriveCoherenceErrors({ annual, hourly }, reference);
 
-	const recap = [
-		...buildRecap(fieldErrors),
-		...buildCoherenceRecap(coherenceErrors),
-	];
+	const recap = buildRecap(fieldErrors);
 	const showAlert = showRecap && recap.length > 0;
 
 	return (

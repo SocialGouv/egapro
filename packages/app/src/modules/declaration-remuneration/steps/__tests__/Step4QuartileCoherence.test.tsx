@@ -2,6 +2,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { QuartileData } from "~/modules/declaration-remuneration";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -42,14 +47,27 @@ function quartiles(women: Counts, men: Counts): QuartileData[] {
 	];
 }
 
+// A GIP payload is what makes the "Source : DSN" note render; the saved
+// initialData wins over it, so the counts under test stay the ones passed in.
+const SOURCE_NOTE_PREFILL = {
+	step1: { totalWomen: TOTAL_WOMEN, totalMen: TOTAL_MEN },
+	step2: nullGipStep2(),
+	step3: nullGipStep3(),
+	step4: nullGipStep4(),
+	confidenceIndex: "0.85",
+	periodEnd: "2026-12-31",
+};
+
 // Spread, not destructured: `undefined` must mean "step 1 not filled in yet".
 function renderStep4({
 	annual = quartiles(MATCHING_WOMEN, MATCHING_MEN),
 	hourly = quartiles(MATCHING_WOMEN, MATCHING_MEN),
+	withSourceNote = false,
 	...reference
 }: {
 	annual?: QuartileData[];
 	hourly?: QuartileData[];
+	withSourceNote?: boolean;
 	maxWomen?: number;
 	maxMen?: number;
 } = {}) {
@@ -57,6 +75,7 @@ function renderStep4({
 		<Step4QuartileDistribution
 			declarationSiren="123456789"
 			declarationYear={2025}
+			gipPrefillData={withSourceNote ? SOURCE_NOTE_PREFILL : undefined}
 			indicatorGRequired
 			initialData={{ annual, hourly }}
 			maxMen={TOTAL_MEN}
@@ -118,6 +137,33 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		expect(document.getElementById("step4-coherence-hourly")).toBeNull();
 	});
 
+	it("places the message below the DSN source note", () => {
+		renderStep4({
+			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
+			withSourceNote: true,
+		});
+		const alert = document.getElementById("step4-coherence-annual");
+		const sourceNote = screen
+			.getAllByText(/^Source\s*:\s*DSN/)[0]
+			?.closest("p");
+		expect(sourceNote).not.toBeNull();
+		expect(
+			(sourceNote as HTMLElement).compareDocumentPosition(
+				alert as HTMLElement,
+			) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("reports each diverging table once, and only under that table", () => {
+		renderStep4({
+			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
+			hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]),
+		});
+		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
+		expect(screen.getAllByText(ANNUAL_WOMEN_ERROR)).toHaveLength(1);
+		expect(screen.getAllByText(HOURLY_MEN_ERROR)).toHaveLength(1);
+	});
+
 	it("appears live as soon as an edit makes a complete column diverge", async () => {
 		const user = userEvent.setup();
 		renderStep4();
@@ -167,7 +213,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		});
 	});
 
-	it("anchors the recap alert on each diverging table", async () => {
+	it("keeps the coherence message out of the summary alert on submit", async () => {
 		const user = userEvent.setup();
 		renderStep4({
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
@@ -176,37 +222,24 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		const recap = screen.getByRole("alert");
-		expect(recap).toHaveTextContent("Le formulaire contient des erreurs");
-		expect(
-			recap.querySelector('a[href="#step4-coherence-annual"]'),
-		).toHaveTextContent(
-			"Nombre de salariés (rémunération annuelle) — le total de femmes ne correspond pas à la référence (40).",
-		);
-		expect(
-			recap.querySelector('a[href="#step4-coherence-hourly"]'),
-		).toHaveTextContent(
-			"Nombre de salariés (rémunération horaire) — le total d'hommes ne correspond pas à la référence (32).",
-		);
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
 	});
 
-	it("targets a focusable alert with every recap anchor", async () => {
+	it("focuses the first diverging table's message on submit", async () => {
 		const user = userEvent.setup();
-		renderStep4({ annual: quartiles([10, 10, 10, 11], MATCHING_MEN) });
+		renderStep4({ hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]) });
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		expect(
-			screen
-				.getByRole("alert")
-				.querySelector('a[href="#step4-coherence-annual"]'),
-		).not.toBeNull();
-		const target = document.getElementById("step4-coherence-annual");
+		const target = document.getElementById("step4-coherence-hourly");
 		expect(target).toHaveAttribute("tabindex", "-1");
-		expect(target).toHaveTextContent(ANNUAL_WOMEN_ERROR);
+		await waitFor(() => {
+			expect(document.activeElement).toBe(target);
+		});
 	});
 
-	it("still lists the field errors in the recap alongside the coherence ones", async () => {
+	it("lists only the field errors in the summary alert", async () => {
 		const user = userEvent.setup();
 		renderStep4({
 			annual: [
@@ -223,9 +256,10 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		expect(
 			recap.querySelector('a[href="#step4-annual-q1-max"]'),
 		).toHaveTextContent("Le seuil est obligatoire");
-		expect(
-			recap.querySelector('a[href="#step4-coherence-annual"]'),
-		).not.toBeNull();
+		expect(recap.querySelector('a[href="#step4-coherence-annual"]')).toBeNull();
+		expect(document.getElementById("step4-coherence-annual")).toHaveTextContent(
+			ANNUAL_WOMEN_ERROR,
+		);
 	});
 
 	it("runs no control and blocks nothing when the step 1 headcount is unknown", async () => {

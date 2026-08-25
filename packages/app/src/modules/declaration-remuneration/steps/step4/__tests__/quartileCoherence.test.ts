@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { QuartileTuple } from "~/modules/declaration-remuneration";
 import {
-	buildCoherenceRecap,
 	type CoherenceError,
 	coherenceErrorLabel,
 	deriveCoherenceErrors,
@@ -172,66 +171,6 @@ describe("coherenceErrorLabel", () => {
 	])("names the sex and the %s table reference for %s", (t, field, expected, label) => {
 		const error: CoherenceError = { table: t, field, expected, total: 99 };
 		expect(coherenceErrorLabel(error)).toBe(label);
-	});
-});
-
-describe("buildCoherenceRecap", () => {
-	it("anchors an annual women error on the annual alert", () => {
-		expect(
-			buildCoherenceRecap([
-				{ table: "annual", field: "women", expected: 37, total: 40 },
-			]),
-		).toEqual([
-			{
-				id: "step4-coherence-annual",
-				label:
-					"Nombre de salariés (rémunération annuelle) — le total de femmes ne correspond pas à la référence (37).",
-			},
-		]);
-	});
-
-	it("anchors an hourly men error on the hourly alert", () => {
-		expect(
-			buildCoherenceRecap([
-				{ table: "hourly", field: "men", expected: 33, total: 30 },
-			]),
-		).toEqual([
-			{
-				id: "step4-coherence-hourly",
-				label:
-					"Nombre de salariés (rémunération horaire) — le total d'hommes ne correspond pas à la référence (33).",
-			},
-		]);
-	});
-
-	it("merges both sexes of a table into the single anchor they share", () => {
-		expect(
-			buildCoherenceRecap([
-				{ table: "annual", field: "women", expected: 37, total: 40 },
-				{ table: "annual", field: "men", expected: 33, total: 20 },
-			]),
-		).toEqual([
-			{
-				id: "step4-coherence-annual",
-				label:
-					"Nombre de salariés (rémunération annuelle) — le total de femmes ne correspond pas à la référence (37) ; le total d'hommes ne correspond pas à la référence (33).",
-			},
-		]);
-	});
-
-	it("keeps one entry per table when both tables diverge", () => {
-		const entries = buildCoherenceRecap([
-			{ table: "annual", field: "women", expected: 37, total: 40 },
-			{ table: "hourly", field: "men", expected: 33, total: 20 },
-		]);
-		expect(entries.map((entry) => entry.id)).toEqual([
-			"step4-coherence-annual",
-			"step4-coherence-hourly",
-		]);
-	});
-
-	it("returns an empty recap when there is no error", () => {
-		expect(buildCoherenceRecap([])).toEqual([]);
 	});
 });
 

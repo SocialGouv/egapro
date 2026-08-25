@@ -1,11 +1,6 @@
 import type { QuartileTuple } from "~/modules/declaration-remuneration";
 import { QUARTILE_COUNT } from "~/modules/domain";
-import {
-	type CountField,
-	type RecapEntry,
-	TABLE_LABEL,
-	type TableType,
-} from "./quartileErrors";
+import type { CountField, TableType } from "./quartileErrors";
 
 export type QuartileReference = { women?: number; men?: number };
 
@@ -48,22 +43,4 @@ export function coherenceErrorLabel(error: CoherenceError): string {
 	const sexLabel = error.field === "women" ? "de femmes" : "d'hommes";
 	const tableAdjective = error.table === "annual" ? "annuel" : "horaire";
 	return `Le nombre total ${sexLabel} renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total ${tableAdjective} : ${error.expected}).`;
-}
-
-// One entry per table: both sexes of a table share the same anchor.
-export function buildCoherenceRecap(errors: CoherenceError[]): RecapEntry[] {
-	return (["annual", "hourly"] as const).flatMap((table) => {
-		const tableErrors = errors.filter((error) => error.table === table);
-		if (tableErrors.length === 0) return [];
-		const clauses = tableErrors.map((error) => {
-			const sexLabel = error.field === "women" ? "de femmes" : "d'hommes";
-			return `le total ${sexLabel} ne correspond pas à la référence (${error.expected})`;
-		});
-		return [
-			{
-				id: `step4-coherence-${table}`,
-				label: `Nombre de salariés (${TABLE_LABEL[table]}) — ${clauses.join(" ; ")}.`,
-			},
-		];
-	});
 }
