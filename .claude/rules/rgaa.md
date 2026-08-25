@@ -131,8 +131,9 @@ là-dessus** — `Critère 12.5 déclaré indécidable, mais il porte désormais
 la liste`. C'est le comportement recherché : une dispense ne survit pas à ce qu'elle excusait, et
 la porte l'exige elle-même plutôt que d'attendre qu'on y pense.
 
-En amont, `maxgfr/ultra11y#36` traite la cause : le refus nomme désormais la moisson du critère au
-lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de citer la région inspectée.
+En amont, `maxgfr/ultra11y#36` traite la cause, et c'est livré en **5.34.1** : le refus nomme
+désormais la moisson du critère au lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de
+citer la région inspectée.
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
@@ -283,7 +284,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.34.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+Les deux sont sur **5.34.2**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
 se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
 son cache si le skill `review-a11y` se comporte autrement que la CI.
 
