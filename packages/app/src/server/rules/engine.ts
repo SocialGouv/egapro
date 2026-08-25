@@ -190,7 +190,7 @@ const BUNDLED_VERSIONS: Record<string, unknown> = {
 };
 
 export function isKnownRulesVersion(version: string): boolean {
-	return version in BUNDLED_VERSIONS;
+	return Object.hasOwn(BUNDLED_VERSIONS, version);
 }
 
 export function loadRules(version: string): Rules {
