@@ -724,7 +724,7 @@ export const openApiSpec = {
 				summary:
 					"Lister les déclarations par date de soumission ou d'annulation",
 				description:
-					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS.",
+					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS. Version majeure 3.0.0 : rupture de compatibilité — les données déduites du parcours (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous l'objet `Parcours`, sans doublon déprécié à la racine. L'URL reste inchangée (`/api/v1/export/declarations`, aucun `/api/v2`) ; la mise en service doit être coordonnée avec l'équipe SUIT avant déploiement.",
 				parameters: [
 					{
 						name: "date_begin",
