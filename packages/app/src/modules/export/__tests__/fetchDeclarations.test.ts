@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import type { CseRow, IndicatorGEntry } from "../fetchDeclarations";
 import {
 	assembleDeclaration,
@@ -7,6 +8,11 @@ import {
 	buildIndicators,
 } from "../fetchDeclarations";
 import type { RawHistoryEntry } from "../queries";
+import {
+	GAP_PERSISTS_CONDITION,
+	GAP_RESOLVED_CONDITION,
+	STAGE_LABELS,
+} from "./helpers/nextStepLabels";
 import { PARCOURS_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
 
 // Minimal DeclarationRow used by buildIndicators / assembleDeclaration
@@ -405,6 +411,26 @@ describe("assembleDeclaration", () => {
 			Avis_CSE_requis: false,
 			Indicateur_G_requis: true,
 			Version_regles: "2027.1",
+			Prochaines_etapes_possibles: [
+				{
+					Identifiant_transition: "choose_path_initial_justify_without_cse",
+					Action: "choose_compliance_path",
+					Etat_cible: "demarche_completed",
+					Libelle: STAGE_LABELS.completion,
+				},
+				{
+					Identifiant_transition: "choose_path_initial_corrective_action",
+					Action: "choose_compliance_path",
+					Etat_cible: "corrective_actions_chosen",
+					Libelle: STAGE_LABELS.correctiveActions,
+				},
+				{
+					Identifiant_transition: "choose_path_initial_joint_evaluation",
+					Action: "choose_compliance_path",
+					Etat_cible: "joint_evaluation_chosen",
+					Libelle: STAGE_LABELS.jointEvaluation,
+				},
+			],
 		});
 	});
 
@@ -1324,5 +1350,171 @@ describe("assembleDeclaration — compliance flags", () => {
 		const result = assembleDeclaration(row, significantInitial, []);
 
 		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+});
+
+describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
+	// baseRow narrows status to its own literal; these cases walk the whole FSM.
+	type RowOverrides = Omit<Partial<typeof baseRow>, "status"> & {
+		status?: DeclarationFsmStatus;
+	};
+
+	function rowWith(overrides: RowOverrides) {
+		return { ...baseRow, ...overrides };
+	}
+
+	function stepsOf(overrides: RowOverrides) {
+		return assembleDeclaration(rowWith(overrides), [], []).Parcours
+			.Prochaines_etapes_possibles;
+	}
+
+	function transitionIds(overrides: RowOverrides) {
+		return stepsOf(overrides).map((step) => step.Identifiant_transition);
+	}
+
+	it("offers the three compliance paths of a CSE-bound company, none conditional (S3)", () => {
+		const steps = stepsOf({
+			status: "awaiting_compliance_path_choice",
+			cseRequired: true,
+		});
+
+		expect(steps).toEqual([
+			{
+				Identifiant_transition: "choose_path_initial_justify_with_cse",
+				Action: "choose_compliance_path",
+				Etat_cible: "awaiting_cse_opinion",
+				Libelle: STAGE_LABELS.cseOpinion,
+			},
+			{
+				Identifiant_transition: "choose_path_initial_corrective_action",
+				Action: "choose_compliance_path",
+				Etat_cible: "corrective_actions_chosen",
+				Libelle: STAGE_LABELS.correctiveActions,
+			},
+			{
+				Identifiant_transition: "choose_path_initial_joint_evaluation",
+				Action: "choose_compliance_path",
+				Etat_cible: "joint_evaluation_chosen",
+				Libelle: STAGE_LABELS.jointEvaluation,
+			},
+		]);
+		for (const step of steps) {
+			expect(step).not.toHaveProperty("Condition");
+		}
+	});
+
+	it("drops the without-CSE first choice when the CSE opinion is required (S3)", () => {
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+			}),
+		).not.toContain("choose_path_initial_justify_without_cse");
+	});
+
+	it("splits the second declaration on the gap that is not known yet (S4)", () => {
+		const steps = stepsOf({
+			status: "corrective_actions_chosen",
+			cseRequired: true,
+		});
+
+		expect(steps).toEqual([
+			{
+				Identifiant_transition: "submit_second_declaration_persistent_gap",
+				Action: "submit_second_declaration",
+				Etat_cible: "awaiting_revision_choice",
+				Libelle: STAGE_LABELS.revisionChoice,
+				Condition: GAP_PERSISTS_CONDITION,
+			},
+			{
+				Identifiant_transition: "submit_second_declaration_resolved_with_cse",
+				Action: "submit_second_declaration",
+				Etat_cible: "awaiting_cse_opinion",
+				Libelle: STAGE_LABELS.cseOpinion,
+				Condition: GAP_RESOLVED_CONDITION,
+			},
+		]);
+	});
+
+	it("drops the resolved-without-CSE variant the stored CSE fact decides false (S4)", () => {
+		expect(
+			transitionIds({
+				status: "corrective_actions_chosen",
+				cseRequired: true,
+			}),
+		).not.toContain("submit_second_declaration_resolved_without_cse");
+	});
+
+	it("empties the steps of a cancelled declaration while keeping its last status (S5)", () => {
+		const result = assembleDeclaration(
+			rowWith({
+				status: "corrective_actions_chosen",
+				cseRequired: true,
+				cancelledAt: new Date("2027-04-15T08:00:00Z"),
+			}),
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+		expect(result.Parcours.Annulee).toBe(true);
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+		expect(result.Parcours.Statut).toBe("corrective_actions_chosen");
+	});
+
+	it("still offers the CSE opinion on a completed démarche that was not cancelled (S6)", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "demarche_completed", cseRequired: true }),
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([
+			{
+				Identifiant_transition: "submit_cse_opinion",
+				Action: "submit_cse_opinion",
+				Etat_cible: "demarche_completed",
+				Libelle: STAGE_LABELS.completion,
+			},
+		]);
+		expect(result.Parcours.Annulee).toBe(false);
+	});
+
+	// The column is NOT NULL in the schema, so only an unknown version reaches
+	// this boundary; the null case is pinned on buildNextStepsPayload itself.
+	it("derives the steps from the fallback ruleset for an unknown stored version, without rewriting Version_regles (S7)", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "corrective_actions_chosen", rulesVersion: "1999.0" }),
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Version_regles).toBe("1999.0");
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual(
+			stepsOf({ status: "corrective_actions_chosen" }),
+		);
+		expect(result.Parcours.Prochaines_etapes_possibles).not.toHaveLength(0);
+	});
+
+	it("filters on the stored cseRequired column, never on one recomputed from hasCse and the headcount", () => {
+		// A 250-employee company with a CSE would recompute to cseRequired=true;
+		// a 70-employee one without a CSE to false. The stored column wins both ways.
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: false,
+				hasCse: true,
+				workforceEma: "250.00",
+			}),
+		).toContain("choose_path_initial_justify_without_cse");
+
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+				hasCse: false,
+				workforceEma: "70.00",
+			}),
+		).toContain("choose_path_initial_justify_with_cse");
 	});
 });

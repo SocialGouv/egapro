@@ -46,6 +46,7 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+import { buildNextStepsPayload } from "./shared/nextStepsPayload";
 import { getStatusHistoryLabel } from "./shared/statusHistoryLabels";
 
 function deriveExportFlags(
@@ -348,6 +349,7 @@ export function assembleDeclaration(
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
+	const cancelled = isCancelled(row);
 
 	// Obligation regime uses the exact value; the segmentation bucket uses the floored one.
 	const gipWorkforce = parseGipWorkforce(row.workforceEma);
@@ -373,13 +375,19 @@ export function assembleDeclaration(
 				getObligationWorkforce(gipWorkforce),
 			),
 			Statut: row.status,
-			Annulee: isCancelled(row),
+			Annulee: cancelled,
 			Parcours_de_conformite_requis: flags.complianceProcessRequired,
 			Parcours_de_conformite_revision_requis:
 				flags.complianceProcessRevisionRequired,
 			Avis_CSE_requis: row.cseRequired,
 			Indicateur_G_requis: flags.indicatorGRequired,
 			Version_regles: row.rulesVersion,
+			Prochaines_etapes_possibles: buildNextStepsPayload({
+				status: row.status,
+				rulesVersion: row.rulesVersion,
+				cseRequired: row.cseRequired,
+				cancelled,
+			}),
 		},
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,

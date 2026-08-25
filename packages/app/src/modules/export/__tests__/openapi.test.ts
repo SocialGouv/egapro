@@ -205,6 +205,59 @@ describe("openApiSpec", () => {
 		});
 	});
 
+	describe("Prochaines_etapes_possibles schema", () => {
+		const stepsSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items
+				.properties.Parcours.properties.Prochaines_etapes_possibles;
+
+		it("declares an array of objects", () => {
+			expect(stepsSchema.type).toBe("array");
+			expect(stepsSchema.items.type).toBe("object");
+		});
+
+		it("lists exactly the five keys a step carries", () => {
+			expect(Object.keys(stepsSchema.items.properties)).toEqual([
+				"Identifiant_transition",
+				"Action",
+				"Etat_cible",
+				"Libelle",
+				"Condition",
+			]);
+		});
+
+		it("requires everything but Condition, which stays optional", () => {
+			expect(stepsSchema.items.required).toEqual([
+				"Identifiant_transition",
+				"Action",
+				"Etat_cible",
+				"Libelle",
+			]);
+			expect(stepsSchema.items.required).not.toContain("Condition");
+		});
+
+		it("mirrors Etat_cible on DECLARATION_FSM_STATUSES", () => {
+			const etatCible = stepsSchema.items.properties.Etat_cible;
+
+			expect(etatCible.type).toBe("string");
+			expect(etatCible.enum).toEqual([...DECLARATION_FSM_STATUSES]);
+		});
+
+		it("declares Libelle as a nullable string", () => {
+			expect(stepsSchema.items.properties.Libelle.type).toEqual([
+				"string",
+				"null",
+			]);
+		});
+
+		it("documents the array and every step key with a French description", () => {
+			expect(stepsSchema.description).toBeTruthy();
+			for (const property of Object.values(stepsSchema.items.properties)) {
+				expect(property.description).toBeTruthy();
+			}
+		});
+	});
+
 	describe("Statut field (declaration FSM status)", () => {
 		const declarationSchema =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
