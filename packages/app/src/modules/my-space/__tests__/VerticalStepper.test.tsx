@@ -9,7 +9,6 @@ import type {
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
-import type { JointEvaluationFileInfo } from "../VerticalStepper";
 
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
@@ -55,7 +54,6 @@ const JOINT_EVALUATION_MODIFY =
 const CSE_MODIFY = 'a[href^="/avis-cse/etape/2"]';
 const DECL1_VIEW =
 	'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]';
-const JOINT_EVALUATION_VIEW = 'a[href^="/api/v1/files/"]';
 const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
 
 const BASE_PROPS = {
@@ -66,7 +64,6 @@ const BASE_PROPS = {
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
-	jointEvaluationFile: null as JointEvaluationFileInfo | null,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,
@@ -353,10 +350,6 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		const CLOSED_OVERRIDES: PanelOverrides = {
 			displayContext: makeDisplayContext("joint_evaluation"),
 			hasSubmittedSecondDeclaration: true,
-			jointEvaluationFile: {
-				id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
-				fileName: "rapport-evaluation-conjointe.pdf",
-			},
 		};
 
 		it("keeps the first declaration transmission notice and its view link, without Modifier", () => {
@@ -392,7 +385,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(new Set(titles).size).toBe(titles.length);
 		});
 
-		it("keeps the joint evaluation report view link but drops its Modifier", () => {
+		it("keeps the joint evaluation transmission notice, with neither view link nor Modifier", () => {
 			const { panel, dialog } = renderPanel("closed", CLOSED_OVERRIDES);
 
 			expect(
@@ -400,50 +393,13 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 					"Votre rapport de l'évaluation conjointe a été transmis",
 				),
 			).toBeInTheDocument();
-			expect(dialog.querySelector(JOINT_EVALUATION_VIEW)).toBeInTheDocument();
+			expect(
+				dialog.querySelector(
+					'a[href^="/api/v1/files/"], a[title^="Visualiser"]',
+				),
+			).not.toBeInTheDocument();
 			expect(
 				dialog.querySelector(JOINT_EVALUATION_MODIFY),
-			).not.toBeInTheDocument();
-		});
-
-		it("opens the joint evaluation report in a new tab, named after the deposited file", () => {
-			const { dialog } = renderPanel("closed", CLOSED_OVERRIDES);
-
-			const link = dialog.querySelector<HTMLAnchorElement>(
-				JOINT_EVALUATION_VIEW,
-			);
-			if (!link) throw new Error("joint evaluation view link not rendered");
-			expect(link).toHaveAttribute(
-				"href",
-				"/api/v1/files/8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
-			);
-			expect(link).toHaveAttribute("target", "_blank");
-			expect(link).toHaveAttribute("rel", "noopener noreferrer");
-			expect(link).toHaveAttribute(
-				"title",
-				"Visualiser rapport-evaluation-conjointe.pdf",
-			);
-			expect(
-				within(link).getByText("Visualiser rapport-evaluation-conjointe.pdf"),
-			).toBeInTheDocument();
-			expect(
-				within(link).getByText("(ouvre une nouvelle fenêtre)"),
-			).toBeInTheDocument();
-		});
-
-		it("renders no view link on the joint evaluation row when no report file is available", () => {
-			const { panel, dialog } = renderPanel("closed", {
-				...CLOSED_OVERRIDES,
-				jointEvaluationFile: null,
-			});
-
-			expect(
-				panel.getByText(
-					"Votre rapport de l'évaluation conjointe a été transmis",
-				),
-			).toBeInTheDocument();
-			expect(
-				dialog.querySelector(JOINT_EVALUATION_VIEW),
 			).not.toBeInTheDocument();
 		});
 

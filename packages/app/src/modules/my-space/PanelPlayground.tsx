@@ -66,8 +66,6 @@ export function PanelPlayground() {
 		useState<(typeof COMPLIANCE_PATHS)[number]>("corrective_action");
 	const [secondDeclarationSubmitted, setSecondDeclarationSubmitted] =
 		useState(true);
-	const [jointEvaluationFileUploaded, setJointEvaluationFileUploaded] =
-		useState(true);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
 	const [indicatorGRequired, setIndicatorGRequired] = useState(true);
 	const [preset, setPreset] = useState<DatePreset>("future");
@@ -160,23 +158,6 @@ export function PanelPlayground() {
 						/>
 						<label className="fr-label" htmlFor="second-decl-submitted">
 							Seconde déclaration soumise
-						</label>
-					</div>
-
-					<div className="fr-checkbox-group">
-						<input
-							checked={jointEvaluationFileUploaded}
-							id="joint-evaluation-file-uploaded"
-							onChange={(e) =>
-								setJointEvaluationFileUploaded(e.currentTarget.checked)
-							}
-							type="checkbox"
-						/>
-						<label
-							className="fr-label"
-							htmlFor="joint-evaluation-file-uploaded"
-						>
-							Rapport d&apos;évaluation conjointe déposé
 						</label>
 					</div>
 
@@ -292,14 +273,6 @@ export function PanelPlayground() {
 				})}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				indicatorGRequired={indicatorGRequired}
-				jointEvaluationFile={
-					jointEvaluationFileUploaded
-						? {
-								id: "00000000-0000-0000-0000-000000000000",
-								fileName: "rapport-evaluation-conjointe.pdf",
-							}
-						: null
-				}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}

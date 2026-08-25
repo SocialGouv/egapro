@@ -12,7 +12,7 @@ import {
 } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
-import type { JointEvaluationFileInfo, StepStatus } from "./StepRows";
+import type { StepStatus } from "./StepRows";
 import { DeadlineRow, TransmittedRow } from "./StepRows";
 
 function StepTitle({
@@ -103,7 +103,6 @@ export function Step2Content({
 	campaignDeadlines,
 	declarationFsmStatus,
 	displayContext,
-	jointEvaluationFile,
 	secondDeclarationSubmitted,
 	siren,
 	status,
@@ -112,7 +111,6 @@ export function Step2Content({
 	campaignDeadlines: CampaignDeadlines;
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
-	jointEvaluationFile: JointEvaluationFileInfo | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	status: StepStatus;
@@ -232,17 +230,6 @@ export function Step2Content({
 							? `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`
 							: undefined
 					}
-					viewHref={
-						jointEvaluationFile
-							? `/api/v1/files/${jointEvaluationFile.id}`
-							: undefined
-					}
-					viewLabel={
-						jointEvaluationFile
-							? `Visualiser ${jointEvaluationFile.fileName}`
-							: undefined
-					}
-					viewOpensNewTab
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (

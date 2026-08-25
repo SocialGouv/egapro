@@ -6,9 +6,7 @@ import type {
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { Step1Content, Step2Content, Step3Content } from "./StepContent";
-import type { JointEvaluationFileInfo, StepStatus } from "./StepRows";
-
-export type { JointEvaluationFileInfo } from "./StepRows";
+import type { StepStatus } from "./StepRows";
 
 export function getStepStatuses(
 	variant: PanelVariant,
@@ -33,7 +31,6 @@ export function VerticalStepper({
 	declarationFsmStatus,
 	displayContext,
 	indicatorGRequired,
-	jointEvaluationFile,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -47,7 +44,6 @@ export function VerticalStepper({
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	indicatorGRequired: boolean;
-	jointEvaluationFile: JointEvaluationFileInfo | null;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -77,7 +73,6 @@ export function VerticalStepper({
 						campaignDeadlines={campaignDeadlines}
 						declarationFsmStatus={declarationFsmStatus}
 						displayContext={displayContext}
-						jointEvaluationFile={jointEvaluationFile}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}
 						siren={siren}
 						status={step2}

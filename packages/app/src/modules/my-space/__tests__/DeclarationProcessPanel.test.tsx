@@ -54,7 +54,6 @@ const BASE_PROPS = {
 	declarationFsmStatus: null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
-	jointEvaluationFile: null,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,

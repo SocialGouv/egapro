@@ -10,7 +10,6 @@ import type {
 } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
-import type { JointEvaluationFileInfo } from "./VerticalStepper";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
@@ -30,7 +29,6 @@ type Props = {
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	year: number;
 	indicatorGRequired: boolean;
-	jointEvaluationFile: JointEvaluationFileInfo | null;
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
@@ -47,7 +45,6 @@ export function DeclarationProcessPanel({
 	declarationFsmStatus,
 	year,
 	indicatorGRequired,
-	jointEvaluationFile,
 	lastActionDate,
 	variant,
 	displayContext,
@@ -99,7 +96,6 @@ export function DeclarationProcessPanel({
 							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
 							indicatorGRequired={indicatorGRequired}
-							jointEvaluationFile={jointEvaluationFile}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}
 							step1={step1}

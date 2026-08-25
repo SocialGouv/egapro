@@ -1,15 +1,9 @@
 import Link from "next/link";
 import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import { isDeadlinePassed } from "~/modules/domain";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import styles from "./DeclarationProcessPanel.module.scss";
 
 export type StepStatus = "pending" | "current" | "complete";
-
-export type JointEvaluationFileInfo = {
-	id: string;
-	fileName: string;
-};
 
 export function TransmittedRow({
 	label,
@@ -17,14 +11,12 @@ export function TransmittedRow({
 	modifyHref,
 	viewHref,
 	viewLabel = "Voir le récapitulatif de la déclaration",
-	viewOpensNewTab = false,
 }: {
 	label: string;
 	modifiableUntil: Date;
 	modifyHref?: string;
 	viewHref?: string;
 	viewLabel?: string;
-	viewOpensNewTab?: boolean;
 }) {
 	const deadlinePassed = isDeadlinePassed(modifiableUntil);
 	const canModify = modifyHref !== undefined && !deadlinePassed;
@@ -44,19 +36,7 @@ export function TransmittedRow({
 				)}
 			</div>
 			<div className={styles.transmittedActions}>
-				{viewHref && viewOpensNewTab && (
-					<a
-						className="fr-btn fr-btn--secondary fr-icon-eye-line"
-						href={viewHref}
-						rel="noopener noreferrer"
-						target="_blank"
-						title={viewLabel}
-					>
-						<span className="fr-sr-only">{viewLabel}</span>
-						<NewTabNotice />
-					</a>
-				)}
-				{viewHref && !viewOpensNewTab && (
+				{viewHref && (
 					<Link
 						className="fr-btn fr-btn--secondary fr-icon-eye-line"
 						href={viewHref}

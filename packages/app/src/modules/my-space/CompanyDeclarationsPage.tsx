@@ -24,14 +24,12 @@ import type {
 	DeclarationItem,
 	LockHolderDisplay,
 } from "./types";
-import type { JointEvaluationFileInfo } from "./VerticalStepper";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
-	jointEvaluationFile: JointEvaluationFileInfo | null;
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
 	representationCampaign: RepresentationCampaign;
@@ -58,7 +56,6 @@ export function CompanyDeclarationsPage({
 	campaignDeadlines,
 	company,
 	declarations,
-	jointEvaluationFile,
 	lockedByOther,
 	lockHolder,
 	representationCampaign,
@@ -119,7 +116,6 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
 				indicatorGRequired={indicatorGRequired}
-				jointEvaluationFile={jointEvaluationFile}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}
