@@ -6,7 +6,7 @@ paths:
 
 # Visual Quality Validation
 
-> **Used by**: `design-validator` (the independent visual-fidelity gate, spawned by `code-dev` at step 9). Complements `rules/figma-workflow.md` (which is the *building* discipline for `code-dev`); this rule is the *verification* discipline.
+> La discipline de **vérification** : le gate `design-validator` (étape 9a-bis de `code-dev`), le contrat de fidélité E2E, et les conditions de rendu que toute comparaison visuelle exige — y compris un check ad-hoc hors pipeline. La discipline de **construction** est dans `rules/figma-workflow.md`.
 
 The gate compares the **rendered** UI to its **Figma reference** — numbers first (measured in the DOM), pixels second (onion-skin overlay + Claude vision). It does **not** compare to designer HTML mockups (that legacy `designer` flow is gone). The reference is always the Figma node(s) in the ticket's `## Référence Figma` section.
 

@@ -8,7 +8,7 @@ paths:
 
 # Moteur d'étapes de la démarche (FSM)
 
-> **Used by**: `code-dev` (dès qu'il touche au parcours de déclaration, au panneau Mon espace ou aux règles serveur), `tu-dev` (tests de progression), `e2e-dev` (scénarios de parcours), `structural-auditor`, `review-fixer`. Auto-chargé via `paths:`. Complète `rules/code-quality.md` (§ Domain layer) et `rules/testing.md`.
+> Chargée dès qu'on touche au parcours de déclaration, au panneau Mon espace, aux règles serveur ou aux E2E. Complète `rules/code-quality.md` (§ Source unique d'une règle métier) et `rules/testing.md`.
 
 La progression de la démarche (passage d'un écran/étape à l'autre, conditions, transitions) est régie par **une seule autorité**. Tout ce qui décide « où va l'utilisateur ensuite » ou « quel est l'état courant de la démarche » **dérive** de cette autorité — jamais d'une copie recodée à la main.
 

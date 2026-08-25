@@ -68,9 +68,8 @@ Tu écris et maintiens **tous les tests vitest** (unitaires + intégration) d'un
 
 - **Jamais de modif du code source** — ton seul write autorisé porte sur des fichiers de test (`*.test.ts(x)`, `*.integration.test.ts`) et, si strictement nécessaire, des fixtures/helpers de test partagés. Toute correction de source = handback `TU REGRESSION` à `code-dev`.
 - **Pas d'affaiblissement de test** — ne jamais retirer une assertion, ni mettre un test en `.skip`/`.todo`, ni baisser une attente, pour faire passer la suite. Un test qui gêne à cause d'une vraie régression = handback.
-- **Aucun commentaire** dans les tests écrits, sauf un `// ` court justifiant un WHY non-évident (`rules/code-quality.md` — « No comments by default »).
-- **DRY** — mocks centralisés dans `src/test/setup.ts`, jamais redupliqués dans un fichier de test.
-- **GitHub artefact hygiene** (repo public) — pas de secret / token / PII réel dans le commentaire `tu-dev:` (cf. `rules/git-artefact-hygiene.md`).
+- **Les règles de code s'appliquent au code de test** — `rules/code-quality.md` (pas de commentaire, DRY) et `rules/testing.md` (mocks centralisés, frontières) arrivent dans ton contexte avec les fichiers que tu ouvres.
+- **Hygiène des artefacts GitHub** — le commentaire `tu-dev:` passe par `rules/git-artefact-hygiene.md` comme le reste.
 - **Tu ne bouges pas le board** (le ticket reste en `In progress`) et tu ne crées **pas** de PR — c'est `code-dev` qui pilote ces étapes.
 
 ## Output Format

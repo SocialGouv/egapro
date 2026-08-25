@@ -113,10 +113,7 @@ You address review feedback on one or more PRs : read the unresolved comments, a
 - **Aucune transition de statut board** — si le ticket est en `In review`, il y reste. Pas de `set_ticket_status` depuis cet agent.
 - **Aucun auto-merge** — le merge final reste manuel humain. Pour une sub-task d'epic dont la PR est encore ouverte, c'est `process_tick_result.sh` qui re-tentera le squash-merge dans `epic/<N>` après ton push (la pipeline détectera la nouvelle CI verte).
 - **Pas de force-push** sans validation utilisateur explicite. Une exception : un `git rebase` clean sur `epic/<N>` en mode epic peut être nécessaire si la branche d'intégration a bougé pendant que tu travaillais — demander avant.
-- **Aucun commentaire dans le code produit** (cf. `rules/code-quality.md`).
-- **Git artefact hygiene** — repo public.
-  - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans une reply, même tronqué. Si un reviewer a leaké un secret en commentaire, **avertir l'utilisateur** : la rotation est obligatoire (cf. `.claude/rules/git-artefact-hygiene.md`).
-  - Pas de PII réel dans les replies (redacter si tu cites un log ou un stack trace).
+- **Hygiène des artefacts GitHub** — `rules/git-artefact-hygiene.md` (toujours chargée) s'applique à chaque reply : redacter avant de citer un log ou une stack trace. Cas propre à cet agent : **si c'est un reviewer qui a leaké un secret** dans son commentaire, avertir l'utilisateur — la rotation est obligatoire, l'édit du commentaire ne suffit pas.
 
 ## Format de retour OBLIGATOIRE (dernier message)
 

@@ -45,6 +45,7 @@ packages/notifications/dist/
 .claude/*
 !.claude/agents/
 !.claude/hooks/
+!.claude/pipeline/
 !.claude/rules/
 !.claude/skills/
 !.claude/settings.json

@@ -3,43 +3,28 @@ paths:
   - "src/e2e/**"
 ---
 
-# E2E tests (Playwright)
+# Tests E2E (Playwright)
 
-> **Used by**: `e2e-dev` (écrit/maintient **tous** les E2E dans `src/e2e/`, en fin de pipeline). **Pas** `code-dev` (il ne touche plus aux E2E) ni `tu-dev` (son périmètre = TU + intégration uniquement). Pour les TU / tests d'intégration → `rules/testing.md`. Auto-chargé via `paths: src/e2e/**`.
+> Propriétaire **exclusif** : l'agent `e2e-dev`. Ni `code-dev` ni `tu-dev` ne touchent à `src/e2e/**`. Quand la gate tourne et ce qui se passe sur régression → `.claude/pipeline/orchestration.md`. Pour les TU et tests d'intégration → `rules/testing.md`.
 
-## Ownership : exclusivement `e2e-dev`
+## Peu de scénarios, mais riches
 
-`code-dev` n'écrit plus aucun test E2E. La couverture E2E est ajoutée **après l'intégration du code**, par l'agent `e2e-dev` :
+Contrairement aux tests unitaires — nombreux, ciblés, 100 % de couverture — on privilégie **peu de scénarios E2E globaux** qui rejouent un parcours utilisateur complet (`test.describe` + `test.step`, souvent `mode: "serial"`). Une nouvelle fonctionnalité se **greffe** dans le scénario existant qui couvre déjà ce parcours. Un **nouveau fichier** `*.e2e.ts` est réservé à un parcours ou une page réellement nouveaux.
 
-- **Feature (epic)** → **gate E2E bloquante** en fin d'`epic_loop.sh`, une fois tous les sous-tickets squash-mergés dans `epic/<N>` (avant doc-writer + PR finale).
-- **Task / Bug** → après le verdict `validated` de `code-dev`, invoqué par `/implement`.
+## Couverture des pages
 
-La gate est **bloquante** : sur une vraie régression, `e2e-dev` rend la main (commentaire `e2e-dev:`) et l'orchestrateur route vers l'agent `architect-rework` (création de tickets de fix reprocessés, ou escalade utilisateur sur doute fonctionnel). La PR finale n'est ouverte qu'une fois la suite E2E verte.
+Chaque route de `src/app/**/page.tsx` doit avoir une couverture E2E : la page rend sans erreur, le contenu et les titres clés sont visibles, les pages d'erreur (404, 500, 503) affichent le bon statut et le bon message.
 
-Voir `.claude/agents/e2e-dev/AGENT.md` (workflow : triage de régression, décision d'imbrication, criticité bugs) et `.claude/agents/architect-rework/AGENT.md`.
-
-## Préférer l'imbrication aux fichiers isolés
-
-Contrairement aux TU (nombreux, ciblés, 100% de couverture), on privilégie **peu de scénarios E2E globaux et riches**, qui rejouent un parcours utilisateur complet (`test.describe` + `test.step`, souvent `mode: "serial"`). On **greffe** une nouvelle fonctionnalité dans le scénario existant qui couvre déjà ce parcours plutôt que de créer un fichier par micro-comportement. Un **nouveau fichier** `*.e2e.ts` est réservé à un **parcours / une page réellement nouveaux**.
-
-## Every page must be tested
-
-Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When a page is **created**, or when its **parcours** changes (URL, steps, redirections, access conditions), `e2e-dev` verifies that an E2E test exists for it and updates/nests it if needed.
-
-Ce mandat porte sur la **couverture d'un parcours**, pas sur chaque édition d'un fichier de page. Une modification purement **visuelle** (CSS/SCSS, `className`, libellé, espacement) sur une route déjà couverte ne le déclenche **pas**, et il ne prime **jamais** sur le critère de criticité d'`e2e-dev` (voir `.claude/agents/e2e-dev/AGENT.md`, « Philosophie E2E »). Entre « la page est modifiée » et « le parcours change », c'est la criticité qui tranche — un « must » absolu appliqué à toute édition écrase le jugement qu'on demande par ailleurs à l'agent.
-
-E2E tests must cover at minimum:
-- The page renders without errors
-- Key content/headings are visible
-- Error pages (404, 500, 503) display correct status and messaging
-
-Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on **port 3000** — the ProConnect test gateway only registers the `:3000` callback, so `auth.setup.ts` fails on any other port; worktree E2E runs must bind the dev server to `PORT=3000` while the docker stack keeps its index-derived ports). Port 3000 being a single global resource, all E2E runs are effectively serialized repo-wide: do not run an epic-end E2E gate (background) and a ticket-mode `e2e-dev` (foreground) at the same time — both fail closed on a busy port, but one of them will have to be re-run. `e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »), mais le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.
+Le mandat porte sur la **couverture d'un parcours**, pas sur chaque édition d'un fichier de page. Une modification purement visuelle (SCSS, `className`, libellé, espacement) sur une route déjà couverte ne le déclenche pas, et il ne prime **jamais** sur le critère de criticité d'`e2e-dev` : entre « la page est modifiée » et « le parcours change », c'est la criticité qui tranche.
 
 ## Contrats de fidélité Figma
 
-La suite E2E porte aussi les **contrats de fidélité visuelle** : `helpers/figmaFidelity.ts` (moteur générique de mesure DOM) + `fixtures/figma/<écran>.ts` (les valeurs du node Figma). L'assertion s'**imbrique** dans le scénario qui atteint déjà l'écran dans le bon état — jamais un tunnel rejoué pour une mesure. C'est la couche de régression permanente que le gate `design-validator` (ponctuel, et dégradable si la session ProConnect manque) ne fournit pas. Discipline d'écriture d'un contrat → `rules/visual-quality-validation.md`.
+La suite porte aussi les contrats de fidélité visuelle : `helpers/figmaFidelity.ts` (moteur générique de mesure DOM) + `fixtures/figma/<écran>.ts` (les valeurs du node Figma). C'est la couche de régression **permanente** que le gate `design-validator` — ponctuel, et dégradable si la session ProConnect manque — ne fournit pas. L'assertion s'imbrique dans le scénario qui atteint déjà l'écran dans le bon état, jamais un tunnel rejoué pour une mesure. Discipline d'écriture → `rules/visual-quality-validation.md`.
 
-**Checklist for `e2e-dev` before completing any page-related coverage:**
-1. List all routes in `src/app/**/page.tsx`
-2. Verify each has a matching E2E test in `src/e2e/*.e2e.ts`
-3. Add missing E2E tests for any uncovered page (nesting into an existing scenario where it fits)
+## Lancer la suite
+
+`pnpm test:e2e`, avec le dev server sur le **port 3000** : la passerelle de test ProConnect n'enregistre que ce callback, donc `auth.setup.ts` échoue sur tout autre port. Un run E2E en worktree doit binder le dev server sur `PORT=3000` pendant que la stack docker garde ses ports dérivés de l'index.
+
+Le port 3000 étant une ressource globale unique, **tous les runs E2E du dépôt sont de fait sérialisés** : ne jamais lancer une gate E2E de fin d'epic (background) et un `e2e-dev` en mode ticket (foreground) en même temps. Les deux échouent proprement sur un port occupé, mais l'un des deux sera à relancer.
+
+`e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »). Le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.

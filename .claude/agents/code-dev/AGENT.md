@@ -16,7 +16,7 @@ You execute one pre-specified ticket end-to-end : edit code, delegate all unit/i
 ## Inputs
 
 - Ticket issue number
-- Worktree path (assigned by `/epic`, e.g. `../egapro-epic42-t1`)
+- Worktree path (assigné par l'orchestrateur, ex. `../egapro-epic42-t1`)
 - **Worktree index** (0, 1, 2…) — utilisé par `scripts/setup-worktree.sh` pour allouer les ports docker
 - Dev server port (dérivé de l'index : `3001 + index`, lu depuis `packages/app/.env.local` écrit par le setup script)
 - **Base branch** (assigned by `/implement`) — toujours au format **remote-tracking ref** (`origin/<branch>`), déjà fetchée par l'orchestrateur :
@@ -53,7 +53,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 0. **Logger START** — `bash scripts/orchestration/log_event.sh code-dev-<N> START "worktree=<path> base=<base-branch>"`. Voir la section « Logging events » plus bas pour la liste complète.
 
 1. **Vérifier le format du ticket** — `bash scripts/orchestration/log_event.sh code-dev-<N> ANALYSIS_START`. Lire le body **et** les commentaires. La source du spec dépend du type d'issue :
-   - **Type Feature (sub-issue d'epic)** → spec dans le **body** au format `rules/ticket-spec-format.md`
+   - **Type Feature (sub-issue d'epic)** → spec dans le **body** au format `.claude/pipeline/ticket-spec-format.md`
    - **Type Task** → body = description originale de l'utilisateur (intacte) ; spec dans le **commentaire `## Analyse architecte`** (le plus récent si plusieurs)
    - **Type Bug** → body = rapport de bug de l'utilisateur ; spec dans le **commentaire `## Analyse du bug`** (posté par `bug-analyst`)
 
@@ -81,12 +81,12 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - `git checkout <working-branch>` (PAS `checkout -b`)
    - La PR sera ouverte avec `--base <base-branch-sans-prefix-origin>` — `--base epic/<EPIC_N>` (sub-issue d'epic) ou `--base alpha` (Task / Bug standalone)
 
-4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si `/epic` ou `/code` a déjà lancé le setup, l'étape est un no-op.
+4.5. **Sanity check stack docker** — vérifier que `packages/app/.env.local` existe et contient `COMPOSE_PROJECT_NAME=egapro-wt-*`. Si absent → `scripts/setup-worktree.sh <index> [<extras>]` (où `<extras>` vient du parsing de la section `## Requires services` du ticket). Si l'orchestrateur a déjà lancé le setup, l'étape est un no-op.
 
 5. **Implémenter** — `bash scripts/orchestration/log_event.sh code-dev-<N> DEV_START "attempt=1"` au début. Sur reprise après un RETRY de 9a/9b/9c/9d, incrémenter `attempt`.
    - Modifier les fichiers listés dans le ticket
    - Respecter `packages/app/CLAUDE.md` et les rules projet
-   - **Aucun commentaire dans le code écrit ou modifié** — voir `rules/code-quality.md` section "No comments by default". Pas de JSDoc, pas de `// fetch user`, pas de `// for ticket #N`, pas de TODO/FIXME, pas de header de section. Seule exception : un `// ` court qui explique un WHY non-évident (workaround documenté, invariant subtil). Si le commentaire paraphrase le code juste en dessous, supprimer.
+   - Les règles de code (`rules/code-quality.md`, `react-components.md`, `styling-dsfr.md`…) arrivent dans ton contexte avec les fichiers que tu ouvres — elles ne sont pas recopiées ici.
    - `pnpm typecheck` après chaque modif de types/schemas
    - `nextjs_call(get_errors)` si dev server tourne
    - **Ne pas écrire, lancer, ni lire de tests** — ni TU/intégration (rôle de `tu-dev`, étape 5.5), **ni E2E Playwright** (rôle de `e2e-dev`, en fin de pipeline). Tu ne touches jamais `src/e2e/**`.
@@ -132,7 +132,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    Si le script échoue (`exit 1`) avec « Closes keyword missing » → ton body n'a pas `Closes #N` sur la première ligne, le corriger via `gh pr edit --body` puis re-run le script.
 
-   Note : ce force-link est **complémentaire** de la `linked branch` créée par `create_linked_branch.sh` (op. 6 de `rules/github-board.md`). Les deux artefacts apparaissent dans la sidebar Development de l'issue : la branche linkée (en haut) et la PR linkée (en bas, avec son statut). Sans le flip, seule la branche apparaît.
+   Note : ce force-link est **complémentaire** de la `linked branch` créée par `create_linked_branch.sh` (op. 6 de `.claude/pipeline/board.md`). Les deux artefacts apparaissent dans la sidebar Development de l'issue : la branche linkée (en haut) et la PR linkée (en bas, avec son statut). Sans le flip, seule la branche apparaît.
 
 9. **Validations en parallèle** — 3 axes simultanés, tous doivent être verts avant de passer à l'étape 10.
 
@@ -170,70 +170,18 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    **9d. Cycle review unique** — `bash scripts/orchestration/log_event.sh code-dev-<N> BOT_WAIT "pr=<PR>"`. Déclenché **une seule fois**, **uniquement** après que 9a + 9a-bis + 9b + 9c sont **tous verts** (vérifie explicitement le critère jq de 9b : toutes conclusions SUCCESS / SKIPPED / NEUTRAL, sans exception ; 9a-bis vert = PASS, SKIP, ou DEGRADED assumé).
 
-   ### 9d.1 — Wait borné pour les reviews bot (avec debounce)
+   ### 9d.1 — Attendre que la rafale des bots soit terminée
 
-   Les bots de review (notamment `revu-bot`) postent leurs commentaires avec un délai de **plusieurs minutes après que la CI soit verte** — typiquement 5 à 10 min, parfois plus selon la charge GitHub Actions et la taille du diff. **Et** ils postent leurs commentaires **un par un** sur quelques secondes/dizaines de secondes (un par fichier ou section). Si tu sors dès le premier comment détecté, tu lis un résumé incomplet et tu rates les retours détaillés.
-
-   La phase 9d.1 fait donc deux choses :
-
-   **9d.1a — Wait initial pour le premier comment** (timeout 15 min) :
+   Les bots de review postent **plusieurs minutes après** que la CI soit verte, puis leurs commentaires **un par un**. Sortir au premier commentaire détecté donne une lecture incomplète.
 
    ```bash
-   PR=<PR_NUMBER>
-   LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
-
-   count_after_last_push() {
-       local pr="$1" since="$2"
-       local n_reviews n_comments n_issue
-       n_reviews=$(gh api "repos/SocialGouv/egapro/pulls/$pr/reviews" \
-           --jq "[.[] | select(.submitted_at > \"$since\")] | length")
-       n_comments=$(gh api "repos/SocialGouv/egapro/pulls/$pr/comments" \
-           --jq "[.[] | select(.created_at > \"$since\")] | length")
-       n_issue=$(gh api "repos/SocialGouv/egapro/issues/$pr/comments" \
-           --jq "[.[] | select(.created_at > \"$since\")] | length")
-       echo $((n_reviews + n_comments + n_issue))
-   }
-
-   WAIT_MAX=900  # 15 min
-   ELAPSED=0
-   FIRST_COUNT=0
-   while [ "$ELAPSED" -lt "$WAIT_MAX" ]; do
-       FIRST_COUNT=$(count_after_last_push "$PR" "$LAST_PUSH")
-       [ "$FIRST_COUNT" -gt 0 ] && break
-       sleep 30
-       ELAPSED=$((ELAPSED + 30))
-   done
-
-   if [ "$FIRST_COUNT" -eq 0 ]; then
-       # 15 min sans rien → on suppose qu'aucun bot ne va commenter
-       # → passer directement à l'étape 10 (retour validated)
-       :
-   fi
+   COMMENTS=$(bash scripts/orchestration/wait_for_bot_reviews.sh <PR>)
    ```
 
-   **9d.1b — Debounce : attendre que la rafale du bot soit terminée** (uniquement si 9d.1a n'a PAS timeout) :
+   Le script attend le premier commentaire (plafond 15 min), puis attend que le compte reste stable 2 min avant de rendre la main. Il compte reviews + commentaires inline + commentaires d'issue postés **après ton dernier push**.
 
-   Le bot poste ses comments en séquence. On attend que le compte total soit **stable pendant 2 min consécutives** (probe toutes les 30s) avant de passer à 9d.2.
-
-   ```bash
-   STABLE_FOR=0
-   PREV_COUNT=$FIRST_COUNT
-   while [ "$STABLE_FOR" -lt 120 ]; do
-       sleep 30
-       NEW_COUNT=$(count_after_last_push "$PR" "$LAST_PUSH")
-       if [ "$NEW_COUNT" -eq "$PREV_COUNT" ]; then
-           STABLE_FOR=$((STABLE_FOR + 30))
-       else
-           # Le bot poste encore, reset le timer
-           PREV_COUNT=$NEW_COUNT
-           STABLE_FOR=0
-       fi
-   done
-   # À ce point le bot a fini sa rafale, on a tous les comments → 9d.2
-   ```
-
-   - **Si 9d.1a timeout (15 min sans le moindre comment)** → passer directement à l'étape 10 (retour `validated`).
-   - **Sinon** (debounce 9d.1b satisfait) → continuer en 9d.2 avec **TOUS** les comments captés.
+   - `COMMENTS = 0` → aucun bot ne va commenter, passer directement à l'étape 10 (retour `validated`).
+   - Sinon → 9d.2, avec **tous** les commentaires captés.
 
    ### 9d.2 — Traitement des reviews/comments (1 itération max)
 
@@ -250,27 +198,19 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    - **Question** (humain demande clarification) → répondre avec la justification technique
    - **Désaccord** (humain) → répondre avec argumentation, laisser le reviewer trancher (ne pas imposer)
 
-   ### 9d.2bis — Post-condition obligatoire avant sortie
-
-   Avant de passer à 9d.3, vérifier que **chaque review thread / inline comment** posté **après ton dernier push** a reçu **au moins une réponse de toi** (l'auteur de la PR). Si tu ne réponds pas, le pipeline considère ça comme un drift et fera échouer le ticket.
+   ### 9d.2bis — Post-condition : aucun thread laissé sans réponse
 
    ```bash
-   PR=<PR_NUMBER>
-   # Author login = the GitHub user whose token is gh-authenticated (i.e. you)
-   AUTHOR=$(gh api user --jq '.login')
-   LAST_PUSH=$(gh pr view "$PR" --json commits --jq '.commits[-1].committedDate')
-
-   # Reviews + inline comments posted by anyone after the last push
-   UNREPLIED_INLINE=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
-       --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and .user.login != \"$AUTHOR\")] | length")
-   AUTHOR_INLINE=$(gh api "repos/SocialGouv/egapro/pulls/$PR/comments" \
-       --jq "[.[] | select(.created_at > \"$LAST_PUSH\" and .user.login == \"$AUTHOR\")] | length")
+   bash scripts/orchestration/check_review_replies.sh <PR>   # exit 2 + liste si des threads restent
    ```
 
-   - Si `UNREPLIED_INLINE > AUTHOR_INLINE` → il reste des threads non couverts. Pour chacun, poster un commentaire texte (acknowledgement minimum, ou justification de non-pertinence). Utiliser `gh api -X POST repos/.../pulls/$PR/comments` avec `in_reply_to` pour répondre dans le thread.
-   - Recommencer le check jusqu'à ce que `UNREPLIED_INLINE <= AUTHOR_INLINE`. Une fois OK, passer à 9d.3.
+   Le script liste les threads postés après ton dernier push qui n'ont pas reçu de réponse de toi, avec leur `comment_id`. Répondre dans le thread :
 
-   **Pourquoi cette post-condition** : Sonnet a tendance à conclure "non pertinent" silencieusement et à sortir sans poster de réponse. Le bot reviewer revient sur le sujet à chaque nouvelle PR, et l'humain qui review la PR ne sait pas ce que l'agent a pensé des suggestions. Une réponse explicite (même brève) est obligatoire pour la traçabilité.
+   ```bash
+   gh api -X POST repos/SocialGouv/egapro/pulls/<PR>/comments -f in_reply_to=<comment_id> -f body='…'
+   ```
+
+   Boucler jusqu'à exit 0. **Conclure « non pertinent » sans le dire est invisible** : le bot reposera le même point à la PR suivante, et l'humain qui review ne saura pas ce que tu as pensé de la suggestion. Une réponse explicite, même d'une ligne, est ce qui rend la décision traçable.
 
    ### 9d.3 — Sortie de la phase 9d
 
@@ -305,13 +245,9 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 ## Contraintes
 
 - **Jamais `In review` ni `Done` automatique** — les deux transitions sont user-only (le script `set_ticket_status.sh` refuse explicitement). AI's terminus board-side = laisser le ticket à `In progress` ; l'humain bouge ensuite à `In review` puis `Done` à son rythme.
-- **Aucun commentaire dans le code produit** — voir `rules/code-quality.md` section "No comments by default". Seul un `// ` court justifiant un WHY non-évident est toléré.
 - **Jamais de merge depuis `code-dev`** — pas de `gh pr merge`, pas de `git push origin epic/<N>`, jamais. Le squash-merge dans la branche d'intégration est centralisé dans `process_tick_result.sh` après le retour `validated`.
 - **Jamais bypass** — pas de `@ts-ignore`, `--no-verify`, `--no-gpg-sign`, pas de skip CI
-- **GitHub artefact hygiene** — repo public.
-  - **Hard rule — jamais de secret / token / connection string / valeur `.env`** dans un body de PR, commentaire de réponse, ou commit message, même tronqué. Si tu rencontres une de ces valeurs en diagnostic (dump K8s, logs, fichier `.env`), **avertir l'utilisateur** — un secret leaké doit être rotaté à la source, l'edit GitHub ne suffit pas (cf. `.claude/rules/git-artefact-hygiene.md`).
-  - Pas de PII réel, pas de namespace K8s avec hash, pas d'output `kubectl logs` brut.
-  - Les screenshots dev server doivent afficher uniquement de la donnée seedée fictive — vérifier la stack docker locale avant capture.
+- **Hygiène des artefacts GitHub** — dépôt public : `rules/git-artefact-hygiene.md` (toujours chargée) s'applique à chaque body de PR, réponse de thread et message de commit. Les screenshots du dev server ne doivent montrer que de la donnée seedée fictive — vérifier la stack docker locale avant capture.
 - **Screenshots PR obligatoires** pour toute modif UI
 - **Un ticket = une branche = une PR** — pas de bundle
 - **Tests = jamais `code-dev`** — `code-dev` n'écrit, ne lance, ni ne lit aucun test. Les TU / intégration sont la responsabilité exclusive de `tu-dev` (étape 5.5 ; suite verte + couverture 100% sur les fichiers de logique). **Les E2E Playwright (`src/e2e/**`) sont la responsabilité exclusive de `e2e-dev`**, lancé en fin de pipeline (epic-end pour une Feature, ou après ton verdict `validated` pour une Task/Bug). `code-dev` ne touche jamais `src/e2e/**`.

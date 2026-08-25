@@ -54,4 +54,4 @@ La sélection est **déterministe** → le plan appliqué est identique à celui
 
 - **Le champ `Status` n'est pas touché** — `/plan-sprint` ne déplace pas les tickets sur le board (Backlog/To Do/In progress restent gérés par `/implement` et toi). Il ne pose que l'assignation **Sprint**.
 - Prérequis pour une capacité fiable : les tickets passent par `/analyse` qui les size (`Size` + `Estimate`). Sans sizing, la vélocité est sous-estimée.
-- Voir aussi `/velocity` (mesure rétrospective) et `rules/complexity-estimation.md` (rubrique t-shirt).
+- Voir aussi `/velocity` (mesure rétrospective) et `.claude/pipeline/complexity-estimation.md` (rubrique t-shirt).

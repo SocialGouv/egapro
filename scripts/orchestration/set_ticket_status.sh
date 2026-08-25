@@ -9,7 +9,7 @@ fi
 # set_ticket_status.sh <ticket_number> <status_label>
 #
 # Moves an issue to the given status on the EGAPRO V2 GitHub project board.
-# Encapsulates the 3 GraphQL calls described in .claude/rules/github-board.md
+# Encapsulates the 3 GraphQL calls described in .claude/pipeline/board.md
 # (snippets 1, 2, 3, 4) into a single command:
 #
 #   1. Resolve issue node ID (or get it from cache)
@@ -54,7 +54,7 @@ PROJECT_ID="${EGAPRO_PROJECT_ID:-PVT_kwDOAh0HH84BFsK7}"
 STATUS_FIELD_ID="${EGAPRO_STATUS_FIELD_ID:-PVTSSF_lADOAh0HH84BFsK7zg29EI8}"
 
 # Map human-readable label to single-select option ID
-# (cf. .claude/rules/github-board.md)
+# (cf. .claude/pipeline/board.md)
 case "$STATUS_RAW" in
     Backlog|backlog)               OPTION_ID="f75ad846" ;;
     "To Do"|"To do"|"to do"|Todo|todo) OPTION_ID="61e4505c" ;;
