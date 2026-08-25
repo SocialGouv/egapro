@@ -114,13 +114,23 @@ l'index des déclarantes) et la recherche de référent de `/referents`. C'est l
 exclut. **Le verdict est donc `NA`**, et l'adjudicateur l'a rendu, avec cette justification, sur le
 run 32828633331.
 
-Ce qui l'a fait tomber est un défaut d'outil : ses trois citations se terminent par un **backtick
-parasite**. Le modèle enveloppe le snippet dans des backticks et le caractère fermant écrase le
-dernier caractère utile ; or le fold grounde par **recherche de sous-chaîne**, donc la citation ne
-résout plus. Monter l'effort n'y change rien — l'artefact était identique sur les trois citations,
-c'est une habitude de formatage, pas un manque de soin. L'entrée est à retirer dès que le fold
-tolère cette transcription (ce que son propre contrat annonce déjà : « same tag, and at least one
-distinctive word in common »).
+Ce qui l'a fait tomber n'est **pas** un défaut de la porte, et il faut le dire précisément parce
+que l'inverse serait une invitation à l'affaiblir.
+
+L'adjudicateur a cité le **formulaire de recherche d'entreprise** — l'élément même qu'il argumente
+être hors sujet. Or les ancres moissonnées pour 12.5 sont `header.fr-header`,
+`footer#footer.fr-footer`, `nav.fr-breadcrumb` et `nav.fr-container` : **aucun `form`**. Une
+citation qui tombe sur une ancre moissonnée est acceptée sans re-vérifier la transcription (le
+moteur a lu l'élément dans le fichier, il y est par construction). Une citation **hors moisson**
+garde la vérification stricte du snippet, délibérément — c'est là qu'une localisation inventée se
+cacherait. Le snippet retapé, terminé par un backtick parasite, a donc échoué à une vérification
+qui avait raison de s'appliquer.
+
+La leçon n'est pas « la porte est trop stricte », c'est : **un critère dont le sujet est une
+absence pousse le modèle à citer ce qui n'est PAS le sujet**, et cet élément-là n'est par
+définition pas dans la moisson. Pour 12.5, la bonne citation était le `header` ou le `nav` — « voici
+la zone de navigation, identique sur les 37 pages, et elle ne porte aucune recherche ». L'entrée
+sera retirée dès qu'une passe produira cette citation-là.
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
