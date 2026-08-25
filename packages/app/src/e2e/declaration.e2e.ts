@@ -206,7 +206,7 @@ test.describe("Declaration workflow", () => {
 		// Recap alert with anchor links
 		const alert = page.getByRole("alert").first();
 		await expect(alert).toBeVisible();
-		await expect(alert).toContainText(/Le formulaire contient des erreurs/);
+		await expect(alert).toContainText(/Champ vide/);
 		await expect(
 			alert
 				.getByRole("link")
@@ -245,7 +245,7 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
-	test("step 1 - empty submission errors wrap inside their cell, not onto the next column (#3971)", async ({
+	test("step 1 - empty submission names every missing field in the error alert (#4235)", async ({
 		page,
 	}) => {
 		await goToStep(page, 1);
@@ -256,35 +256,25 @@ test.describe("Declaration workflow", () => {
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 
-		await expect(
-			page.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeVisible();
+		const alert = page.locator(".fr-alert--error").first();
+		await expect(alert).toBeVisible();
+		await expect(alert).toContainText("Champ vide");
+		await expect(alert).toContainText("Renseignez le nombre de femmes.");
+		await expect(alert).toContainText("Renseignez le nombre d'hommes.");
 
-		// DSFR 1.14 sets white-space: nowrap on table cells; inherited by
-		// .fr-error-text it painted the message onto the neighbouring column. A
-		// visible message is not enough — the bug kept it visible, just overflowing.
-		// Assert the rendered text extent stays within its owning <td>.
-		const measure = await page.evaluate(() => {
-			const paragraph = document.getElementById("women-error");
-			const cell = paragraph?.closest("td");
-			if (!paragraph || !cell) return null;
-			const range = document.createRange();
-			range.selectNodeContents(paragraph);
-			const textRight = Math.max(
-				...Array.from(range.getClientRects()).map((rect) => rect.right),
-			);
-			return {
-				textRight,
-				cellRight: cell.getBoundingClientRect().right,
-				scrollWidth: paragraph.scrollWidth,
-				clientWidth: paragraph.clientWidth,
-			};
-		});
-
-		if (!measure) throw new Error("step 1 women error paragraph not found");
-		// nowrap would force one line wider than the cell → scrollWidth > clientWidth.
-		expect(measure.scrollWidth).toBeLessThanOrEqual(measure.clientWidth + 1);
-		expect(measure.textRight).toBeLessThanOrEqual(measure.cellRight + 1);
+		// #3971 guarded the inline message against overflowing its <td> (DSFR 1.14
+		// sets white-space: nowrap on table cells). Since #4235 the message lives in
+		// the alert under the table, so that overflow cannot occur by construction —
+		// what has to hold now is that the cell carries the state and nothing else,
+		// with the input pointing at the alert that names it.
+		await expect(page.locator("td .fr-error-text")).toHaveCount(0);
+		const womenInput = page.getByRole("textbox", { name: "Nombre de femmes" });
+		await expect(womenInput).toHaveAttribute("aria-invalid", "true");
+		const describedBy = await womenInput.getAttribute("aria-describedby");
+		expect(describedBy).toBeTruthy();
+		await expect(page.locator(`#${describedBy}`)).toContainText(
+			"Renseignez le nombre de femmes.",
+		);
 	});
 
 	test("previous button navigates back", async ({ page }) => {
