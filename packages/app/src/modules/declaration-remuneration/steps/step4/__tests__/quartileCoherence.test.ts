@@ -87,9 +87,7 @@ describe("deriveCoherenceErrors", () => {
 	});
 
 	it("compares the hourly table to the step 1 reference, never to its own GIP totals", () => {
-		// 34 F / 32 H is what the GIP publishes for the hourly block; since #4260
-		// the hourly table is held to the step 1 headcount like the annual one, so
-		// those totals are now two errors instead of a match.
+		// 34 F / 32 H is what the GIP publishes for the hourly block.
 		const values = {
 			annual: table(MATCHING_WOMEN, MATCHING_MEN),
 			hourly: table([9, 9, 8, 8], [8, 8, 8, 8]),

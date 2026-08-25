@@ -56,12 +56,7 @@ export function nullGipStep4(): GipPrefillData["step4"] {
 	return { annual: nullGipQuartile(), hourly: nullGipQuartile() };
 }
 
-/**
- * The prefilled `GipPrefillData["step4"]` block shared by every suite that
- * renders a GIP-populated quartile table: annual thresholds 25 000 / 32 000 /
- * 40 000 spreading 90 women and 110 men, hourly thresholds 13,74 / 17,58 /
- * 21,98 spreading 80 women and 120 men.
- */
+/** A GIP-populated `GipPrefillData["step4"]` block: 90/110 annual, 80/120 hourly. */
 export function prefilledGipStep4(): GipPrefillData["step4"] {
 	return {
 		annual: {

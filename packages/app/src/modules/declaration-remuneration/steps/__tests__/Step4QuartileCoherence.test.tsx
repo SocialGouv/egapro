@@ -42,8 +42,7 @@ function quartiles(women: Counts, men: Counts): QuartileData[] {
 	];
 }
 
-// `maxWomen`/`maxMen` go through the JSX spread rather than a destructuring
-// default, so a test can pass `undefined` to mean "step 1 not filled in yet".
+// Spread, not destructured: `undefined` must mean "step 1 not filled in yet".
 function renderStep4({
 	annual = quartiles(MATCHING_WOMEN, MATCHING_MEN),
 	hourly = quartiles(MATCHING_WOMEN, MATCHING_MEN),

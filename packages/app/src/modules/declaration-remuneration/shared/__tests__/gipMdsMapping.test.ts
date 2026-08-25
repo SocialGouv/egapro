@@ -160,8 +160,6 @@ describe("mapGipToFormData", () => {
 	});
 
 	it("exposes only thresholds and counts per table, no reference headcount", () => {
-		// Since #4260 both tables are checked against the step 1 headcount, so the
-		// per-block GIP reference is no longer mapped at all.
 		const result = mapGipToFormData(makeBugRepoRow());
 		expect(result?.step4.annual).toEqual({
 			thresholds: ["25000", "30000", "35000"],

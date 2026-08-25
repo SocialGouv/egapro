@@ -24,11 +24,11 @@ import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import type { QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
+import { CoherenceNote } from "./step4/CoherenceNote";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileTable } from "./step4/QuartileTable";
 import {
 	buildCoherenceRecap,
-	coherenceErrorLabel,
 	deriveCoherenceErrors,
 	type QuartileReference,
 } from "./step4/quartileCoherence";
@@ -291,30 +291,6 @@ export function Step4QuartileDistribution({
 	];
 	const showAlert = showRecap && recap.length > 0;
 
-	function renderCoherenceNote(tableType: TableType) {
-		const tableErrors = coherenceErrors.filter(
-			(error) => error.table === tableType,
-		);
-		return (
-			<div aria-atomic="true" aria-live="polite">
-				{tableErrors.length > 0 && (
-					<div
-						className="fr-alert fr-alert--error"
-						id={`step4-coherence-${tableType}`}
-						tabIndex={-1}
-					>
-						<h3 className="fr-alert__title">Nombre de salariés</h3>
-						<ul>
-							{tableErrors.map((error) => (
-								<li key={error.field}>{coherenceErrorLabel(error)}</li>
-							))}
-						</ul>
-					</div>
-				)}
-			</div>
-		);
-	}
-
 	return (
 		<form
 			autoComplete="off"
@@ -408,7 +384,9 @@ export function Step4QuartileDistribution({
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
 						disabled={isImpersonating}
-						errorNote={renderCoherenceNote("annual")}
+						errorNote={
+							<CoherenceNote errors={coherenceErrors} tableType="annual" />
+						}
 						errors={fieldErrors.annual}
 						mins={annualMins}
 						onQuartileChange={(index, field, value) =>
@@ -432,7 +410,9 @@ export function Step4QuartileDistribution({
 
 					<QuartileTable
 						disabled={isImpersonating}
-						errorNote={renderCoherenceNote("hourly")}
+						errorNote={
+							<CoherenceNote errors={coherenceErrors} tableType="hourly" />
+						}
 						errors={fieldErrors.hourly}
 						mins={hourlyMins}
 						onQuartileChange={(index, field, value) =>

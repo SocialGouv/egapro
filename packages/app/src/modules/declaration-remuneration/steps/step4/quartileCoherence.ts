@@ -26,11 +26,7 @@ function sumCounts(table: QuartileTuple, field: CountField): number | null {
 	return sum;
 }
 
-// Blocking control (decision #4260): both the annual and hourly tables are
-// compared to the same reference — the step 1 headcount (declaration.totalWomen
-// / totalMen), never the GIP file. The comparison only runs once a column's
-// four counts are all filled in; an undefined reference (step 1 not yet
-// completed) disables the control entirely.
+// Both tables are held to the step 1 headcount, never to the GIP file.
 export function deriveCoherenceErrors(
 	values: { annual: QuartileTuple; hourly: QuartileTuple },
 	reference: QuartileReference,
@@ -54,11 +50,7 @@ export function coherenceErrorLabel(error: CoherenceError): string {
 	return `Le nombre total ${sexLabel} renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total ${tableAdjective} : ${error.expected}).`;
 }
 
-/**
- * Builds anchor entries for the submission recap alert (RGAA 11.10/11.13).
- * One entry per table, never per sex: both sexes of a table share the same
- * alert, so a second entry would duplicate the anchor and the React key.
- */
+// One entry per table: both sexes of a table share the same anchor.
 export function buildCoherenceRecap(errors: CoherenceError[]): RecapEntry[] {
 	return (["annual", "hourly"] as const).flatMap((table) => {
 		const tableErrors = errors.filter((error) => error.table === table);
