@@ -12,6 +12,7 @@ export const PARCOURS_KEYS = [
 	"Avis_CSE_requis",
 	"Indicateur_G_requis",
 	"Version_regles",
+	"Prochaines_etapes_possibles",
 ] as const;
 
 // The keys #4326 moved out of the root and into Parcours. Tranche_effectif,

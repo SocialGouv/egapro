@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+	GAP_PERSISTS_CONDITION,
+	GAP_RESOLVED_CONDITION,
+	STAGE_LABELS,
+} from "./helpers/nextStepLabels";
 import { RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
 
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
@@ -109,6 +114,49 @@ const nullIndicators = {
 	}>,
 };
 
+// The #4328 cases differ from the fixtures above by a handful of columns only,
+// so they go through a factory and spell out just what they exercise.
+function declarationRow(overrides: Record<string, unknown> = {}) {
+	return {
+		declarationId: "decl-1",
+		siren: "123456789",
+		year: 2027,
+		status: "awaiting_compliance_path_choice",
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		totalWomen: 100,
+		totalMen: 150,
+		submittedAt: null,
+		firstDeclarationPathChoiceAt: null,
+		secondDeclarationPathChoiceAt: null,
+		secondDeclarationSubmittedAt: null,
+		jointEvaluationSubmittedAt: null,
+		cseOpinionCompletedAt: null,
+		demarcheCompletedAt: null,
+		complianceProcessRequired: false,
+		complianceProcessRevisionRequired: false,
+		cseRequired: true,
+		indicatorGRequired: false,
+		rulesVersion: "2027.1",
+		secondDeclReferencePeriodStart: null,
+		secondDeclReferencePeriodEnd: null,
+		createdAt: new Date("2027-03-15T10:00:00Z"),
+		updatedAt: new Date("2027-03-15T12:00:00Z"),
+		cancelledAt: null,
+		companyName: "ACME Corp",
+		workforceEma: "250.00",
+		nafCode: "62.02",
+		address: "1 rue test",
+		hasCse: true,
+		declarantFirstName: "Jean",
+		declarantLastName: "Dupont",
+		declarantEmail: "jean@acme.fr",
+		declarantPhone: "0612345678",
+		...nullIndicators,
+		...overrides,
+	};
+}
+
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -213,7 +261,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "111111111",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 50,
@@ -234,6 +282,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-01T00:00:00Z"),
 				updatedAt: new Date("2027-01-01T00:00:00Z"),
+				cancelledAt: null,
 				companyName: "Test",
 				workforceEma: "100.00",
 				nafCode: "62.01",
@@ -249,7 +298,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-2",
 				siren: "222222222",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 60,
@@ -270,6 +319,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-02T00:00:00Z"),
 				updatedAt: new Date("2027-01-02T00:00:00Z"),
+				cancelledAt: null,
 				companyName: "Test2",
 				workforceEma: "200.00",
 				nafCode: "62.02",
@@ -303,7 +353,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -324,6 +374,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -375,7 +426,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "432491777",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 30,
@@ -396,6 +447,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "70.00",
 				nafCode: "62.02",
@@ -427,7 +479,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "999999999",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 10,
@@ -448,6 +500,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "Hors GIP",
 				workforceEma: null,
 				nafCode: "62.02",
@@ -482,7 +535,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -503,6 +556,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -584,7 +638,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -605,6 +659,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -663,7 +718,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -684,6 +739,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -730,7 +786,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -751,6 +807,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -807,7 +864,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -828,6 +885,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -868,7 +926,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -889,6 +947,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -936,7 +995,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -957,6 +1016,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -993,7 +1053,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -1014,6 +1074,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1104,6 +1165,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-10-15T14:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1203,7 +1265,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -1224,6 +1286,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1278,7 +1341,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -1299,6 +1362,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1329,7 +1393,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -1350,6 +1414,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-04-01T10:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1428,6 +1493,7 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
 				workforceEma: "250.00",
 				nafCode: "62.02",
@@ -1451,5 +1517,149 @@ describe("GET /api/v1/export/declarations", () => {
 		const body = await response.json();
 		expect(body.Declarations[0].Seconde_declaration.Statut).toBe(false);
 		expect(body.Declarations[0].Date_seconde_declaration).toBeNull();
+	});
+
+	describe("Parcours.Prochaines_etapes_possibles (#4328)", () => {
+		async function exportedDeclarations(rows: Record<string, unknown>[]) {
+			mockFetchSubmitted.mockResolvedValue(rows);
+			const { GET } = await import("~/app/api/v1/export/declarations/route");
+			const response = await GET(
+				gatewayForwardedRequest(
+					"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+				),
+			);
+
+			expect(response.status).toBe(200);
+			return response.json();
+		}
+
+		it("serialises the three compliance paths of a CSE-bound company as the last Parcours key (S3)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "awaiting_compliance_path_choice",
+					cseRequired: true,
+				}),
+			]);
+			const { Parcours } = body.Declarations[0];
+
+			expect(Object.keys(Parcours).at(-1)).toBe("Prochaines_etapes_possibles");
+			expect(
+				Parcours.Prochaines_etapes_possibles.map(
+					(step: { Identifiant_transition: string }) =>
+						step.Identifiant_transition,
+				),
+			).toEqual([
+				"choose_path_initial_justify_with_cse",
+				"choose_path_initial_corrective_action",
+				"choose_path_initial_joint_evaluation",
+			]);
+			for (const step of Parcours.Prochaines_etapes_possibles) {
+				expect(step).not.toHaveProperty("Condition");
+			}
+		});
+
+		it("keeps the Condition of an undecided guard through JSON serialisation (S4)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "corrective_actions_chosen",
+					cseRequired: true,
+				}),
+			]);
+
+			expect(body.Declarations[0].Parcours.Prochaines_etapes_possibles).toEqual(
+				[
+					{
+						Identifiant_transition: "submit_second_declaration_persistent_gap",
+						Action: "submit_second_declaration",
+						Etat_cible: "awaiting_revision_choice",
+						Libelle: STAGE_LABELS.revisionChoice,
+						Condition: GAP_PERSISTS_CONDITION,
+					},
+					{
+						Identifiant_transition:
+							"submit_second_declaration_resolved_with_cse",
+						Action: "submit_second_declaration",
+						Etat_cible: "awaiting_cse_opinion",
+						Libelle: STAGE_LABELS.cseOpinion,
+						Condition: GAP_RESOLVED_CONDITION,
+					},
+				],
+			);
+		});
+
+		it("exports an empty array for a cancelled declaration, with no redeclare step invented (S5)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "corrective_actions_chosen",
+					cancelledAt: new Date("2027-04-15T08:00:00Z"),
+				}),
+			]);
+			const decl = body.Declarations[0];
+
+			expect(decl.Parcours.Prochaines_etapes_possibles).toEqual([]);
+			expect(decl.Parcours.Annulee).toBe(true);
+			expect(decl.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+			expect(decl.Parcours.Statut).toBe("corrective_actions_chosen");
+		});
+
+		it("keeps offering the CSE opinion on a completed démarche (S6)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({ status: "demarche_completed", cseRequired: true }),
+			]);
+			const { Parcours } = body.Declarations[0];
+
+			expect(Parcours.Annulee).toBe(false);
+			expect(Parcours.Prochaines_etapes_possibles).toEqual([
+				{
+					Identifiant_transition: "submit_cse_opinion",
+					Action: "submit_cse_opinion",
+					Etat_cible: "demarche_completed",
+					Libelle: STAGE_LABELS.completion,
+				},
+			]);
+		});
+
+		it("answers 200 with both declarations when the stored rules version is missing or unknown, without rewriting it (S7)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					declarationId: "decl-null-version",
+					status: "corrective_actions_chosen",
+					rulesVersion: null,
+				}),
+				declarationRow({
+					declarationId: "decl-unknown-version",
+					siren: "987654321",
+					status: "corrective_actions_chosen",
+					rulesVersion: "1999.0",
+				}),
+			]);
+			const [nullVersion, unknownVersion] = body.Declarations;
+
+			expect(body.Nombre).toBe(2);
+			expect(nullVersion.Parcours.Version_regles).toBeNull();
+			expect(unknownVersion.Parcours.Version_regles).toBe("1999.0");
+			expect(nullVersion.Parcours.Prochaines_etapes_possibles).not.toHaveLength(
+				0,
+			);
+			expect(unknownVersion.Parcours.Prochaines_etapes_possibles).toEqual(
+				nullVersion.Parcours.Prochaines_etapes_possibles,
+			);
+		});
+
+		it("leaves the envelope and the payload root untouched (S10)", async () => {
+			const body = await exportedDeclarations([declarationRow()]);
+
+			expect(Object.keys(body)).toEqual([
+				"Date_debut",
+				"Date_fin",
+				"Nombre",
+				"Declarations",
+			]);
+			expect(body.Date_debut).toBe("2027-03-15");
+			expect(body.Date_fin).toBe("2027-03-16");
+			expect(body.Declarations[0]).not.toHaveProperty(
+				"Prochaines_etapes_possibles",
+			);
+		});
 	});
 });
