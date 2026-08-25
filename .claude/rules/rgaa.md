@@ -95,7 +95,32 @@ dispense ne survit pas à ce qu'elle excusait — et chacune est imprimée dans 
 renvoi nommé vers l'auditeur humain.
 
 Fichier : `packages/app/.ultra11y/undecidable.json`, versionné (exception dans `.gitignore`),
-câblé par `undecidable-file` dans `a11y.yaml`.
+câblé par `undecidable-file` dans `a11y.yaml`. Trois entrées, et elles ne sont pas de même nature.
+
+**13.3 et 13.4 — le critère sans instrument.** Décrit ci-dessus : il faut ouvrir le `.xlsx`, et
+personne ici ne le peut.
+
+**12.5 — le verdict est connu, c'est la CI qui ne sait pas l'enregistrer.** Le critère demande si
+le moteur de recherche est atteignable de manière identique sur un ensemble de pages. Le glossaire
+RGAA définit le *moteur de recherche interne* comme donnant accès à une recherche sur **l'ensemble
+des contenus du site**, et exclut explicitement « tout autre moteur de recherche permettant par
+exemple de faire des recherches sur une partie restreinte du site ».
+
+egapro n'en a aucun. Header, nav et pied de page ne portent aucune fonctionnalité de recherche sur
+les 37 pages capturées — zéro `fr-search`, `role="search"` ou `type="search"` dans
+`src/modules/layout/`. Les deux seuls champs du périmètre sont des outils métier confinés à leur
+page : la recherche d'entreprise de l'accueil (`action="/index-egapro/recherche"`, qui interroge
+l'index des déclarantes) et la recherche de référent de `/referents`. C'est le cas que le glossaire
+exclut. **Le verdict est donc `NA`**, et l'adjudicateur l'a rendu, avec cette justification, sur le
+run 32828633331.
+
+Ce qui l'a fait tomber est un défaut d'outil : ses trois citations se terminent par un **backtick
+parasite**. Le modèle enveloppe le snippet dans des backticks et le caractère fermant écrase le
+dernier caractère utile ; or le fold grounde par **recherche de sous-chaîne**, donc la citation ne
+résout plus. Monter l'effort n'y change rien — l'artefact était identique sur les trois citations,
+c'est une habitude de formatage, pas un manque de soin. L'entrée est à retirer dès que le fold
+tolère cette transcription (ce que son propre contrat annonce déjà : « same tag, and at least one
+distinctive word in common »).
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
