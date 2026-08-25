@@ -69,6 +69,7 @@ export function JointEvaluationForm({
 		handleConfirm,
 		handleFilesChange,
 		handleSubmit,
+		hasMissingFile,
 		isPending,
 		modalRef,
 		selectedFiles,
@@ -154,6 +155,19 @@ export function JointEvaluationForm({
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}
 					/>
+
+					{/* `role="alert"` over a permanent `aria-live` wrapper: an always-rendered container is a flex item, and would add a phantom 2rem gap. */}
+					{hasMissingFile && (
+						<div className="fr-alert fr-alert--error" role="alert">
+							<h3 className="fr-alert__title">
+								Le rapport de l&apos;évaluation conjointe est manquant
+							</h3>
+							<p>
+								Importez le rapport de l&apos;évaluation conjointe des
+								rémunérations avant de le transmettre.
+							</p>
+						</div>
+					)}
 
 					<div>
 						<div className={styles.panelBlue}>

@@ -105,14 +105,19 @@ describe("JointEvaluationForm", () => {
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
 	});
 
-	it("shows an error when submitting without a file", () => {
+	it("shows a titled error alert when submitting without a file", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
 		fireEvent.click(submitButton);
 
+		const title = screen.getByText(
+			/le rapport de l'évaluation conjointe est manquant/i,
+		);
+		expect(title).toHaveClass("fr-alert__title");
+		expect(title.closest(".fr-alert--error")).toBeInTheDocument();
 		expect(
-			screen.getByText(/veuillez sélectionner au moins un fichier/i),
+			screen.getByText(/importez le rapport de l'évaluation conjointe/i),
 		).toBeInTheDocument();
 	});
 

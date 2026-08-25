@@ -33,6 +33,7 @@ export function useFileUploadForm({
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 	const [uploadError, setUploadError] = useState<string | null>(null);
+	const [hasMissingFile, setHasMissingFile] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 
 	const uploadFiles = useCallback(
@@ -71,6 +72,7 @@ export function useFileUploadForm({
 	);
 
 	function handleFilesChange(files: File[], error: string | null) {
+		setHasMissingFile(false);
 		if (error) {
 			setSelectedFiles(files);
 			setUploadError(error);
@@ -109,11 +111,11 @@ export function useFileUploadForm({
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (selectedFiles.length === 0) {
-			setUploadError(
-				"Veuillez sélectionner au moins un fichier avant de soumettre.",
-			);
+			// Kept out of `uploadError`, which stays the dropzone's per-file line.
+			setHasMissingFile(true);
 			return;
 		}
+		setHasMissingFile(false);
 		setUploadError(null);
 		openModal();
 	}
@@ -128,6 +130,7 @@ export function useFileUploadForm({
 		handleConfirm,
 		handleFilesChange,
 		handleSubmit,
+		hasMissingFile,
 		isPending: isUploading,
 		modalRef,
 		selectedFiles,

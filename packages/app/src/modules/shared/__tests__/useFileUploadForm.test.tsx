@@ -149,9 +149,25 @@ describe("useFileUploadForm", () => {
 		});
 
 		expect(event.preventDefault).toHaveBeenCalled();
-		expect(result.current.uploadError).toBe(
-			"Veuillez sélectionner au moins un fichier avant de soumettre.",
+		expect(result.current.hasMissingFile).toBe(true);
+		expect(result.current.uploadError).toBeNull();
+	});
+
+	it("clears the missing-file flag as soon as a file is selected", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
+
+		act(() => {
+			result.current.handleSubmit(preventSubmit());
+		});
+		expect(result.current.hasMissingFile).toBe(true);
+
+		act(() => {
+			result.current.handleFilesChange([makeFile()], null);
+		});
+
+		expect(result.current.hasMissingFile).toBe(false);
 	});
 
 	it("handleSubmit opens the native dialog when DSFR API is unavailable", () => {
