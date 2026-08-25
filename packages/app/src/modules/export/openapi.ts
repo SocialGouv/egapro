@@ -219,11 +219,6 @@ const declarationSchema = {
 			type: ["string", "null"],
 			example: "THALES LAS FRANCE SAS",
 		},
-		Effectif: {
-			type: ["integer", "null"],
-			description: "Effectif total",
-			example: 7403,
-		},
 		Code_NAF: {
 			type: ["string", "null"],
 			description: "Code NAF/APE",
@@ -237,18 +232,6 @@ const declarationSchema = {
 			type: ["boolean", "null"],
 			description: "Présence d'un CSE (>= 100 salariés)",
 		},
-		Annee: {
-			type: "integer",
-			description: "Année de la déclaration",
-			example: 2026,
-		},
-		Statut: {
-			type: "string",
-			description:
-				"Statut courant de la déclaration dans le moteur FSM. Dérivé de l'autorité DECLARATION_FSM_STATUSES — toute évolution du vocabulaire FSM se répercute ici automatiquement. Sémantique : « demarche_completed » signifie qu'aucune action supplémentaire n'est attendue sur Egapro ; il peut être atteint dès le choix du parcours « justify » lorsque l'entreprise n'a pas de CSE (la justification des écarts ne donne lieu à aucun dépôt sur la plateforme).",
-			enum: [...DECLARATION_FSM_STATUSES],
-			example: "demarche_completed",
-		},
 		Parcours_apres_declaration_1: {
 			type: ["string", "null"],
 			description:
@@ -259,29 +242,77 @@ const declarationSchema = {
 			description:
 				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
 		},
-		Parcours_de_conformite_requis: {
-			type: "boolean",
+		Parcours: {
+			type: "object",
 			description:
-				"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la soumission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
-		},
-		Parcours_de_conformite_revision_requis: {
-			type: "boolean",
-			description:
-				"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
-		},
-		Avis_CSE_requis: {
-			type: "boolean",
-			description: "Indique si un avis CSE est requis pour cette déclaration.",
-		},
-		Indicateur_G_requis: {
-			type: "boolean",
-			description:
-				"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
-		},
-		Version_regles: {
-			type: ["string", "null"],
-			description:
-				"Version du moteur de règles métier utilisée à la soumission.",
+				"Données déduites du parcours de la déclaration — calculées par Egapro, jamais saisies par l'entreprise.",
+			properties: {
+				Annee: {
+					type: "integer",
+					description: "Année de la déclaration",
+					example: 2026,
+				},
+				Effectif: {
+					type: ["integer", "null"],
+					description:
+						"Effectif total, arrondi à l'entier inférieur (floored). `null` si l'effectif GIP est inconnu.",
+					example: 7403,
+				},
+				Tranche_effectif: {
+					description:
+						"Bucket de segmentation calculé sur l'effectif floored. `null` si l'effectif GIP est inconnu — jamais replié sur « <50 ».",
+					oneOf: [
+						{
+							type: "string",
+							enum: ["<50", "50-99", "100-149", "150-249", "250+"],
+						},
+						{ type: "null" },
+					],
+				},
+				Regime_obligations: {
+					type: "string",
+					enum: ["voluntary", "mandatory", "mandatory_with_compliance"],
+					description:
+						"Paquet d'obligations attaché à la taille de l'entreprise, classifié sur l'effectif GIP exact (jamais floored). Une entreprise absente du fichier GIP relève du volontariat.",
+				},
+				Statut: {
+					type: "string",
+					description:
+						"Statut courant de la déclaration dans le moteur FSM. Dérivé de l'autorité DECLARATION_FSM_STATUSES — toute évolution du vocabulaire FSM se répercute ici automatiquement. Sémantique : « demarche_completed » signifie qu'aucune action supplémentaire n'est attendue sur Egapro ; il peut être atteint dès le choix du parcours « justify » lorsque l'entreprise n'a pas de CSE (la justification des écarts ne donne lieu à aucun dépôt sur la plateforme).",
+					enum: [...DECLARATION_FSM_STATUSES],
+					example: "demarche_completed",
+				},
+				Annulee: {
+					type: "boolean",
+					description:
+						"Indique si la déclaration a été annulée. `Date_annulation` (à la racine) porte la date d'annulation et prime sur `Statut`, lequel reste figé à sa valeur d'avant annulation.",
+				},
+				Parcours_de_conformite_requis: {
+					type: "boolean",
+					description:
+						"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la soumission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
+				},
+				Parcours_de_conformite_revision_requis: {
+					type: "boolean",
+					description:
+						"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
+				},
+				Avis_CSE_requis: {
+					type: "boolean",
+					description:
+						"Indique si un avis CSE est requis pour cette déclaration.",
+				},
+				Indicateur_G_requis: {
+					type: "boolean",
+					description:
+						"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
+				},
+				Version_regles: {
+					type: ["string", "null"],
+					description:
+						"Version du moteur de règles métier utilisée à la soumission.",
+				},
+			},
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
@@ -629,7 +660,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "2.1.0",
+		version: "3.0.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
