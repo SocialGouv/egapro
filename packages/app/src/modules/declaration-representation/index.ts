@@ -57,6 +57,7 @@ export type {
 	RepresentationDeclarationRow,
 	RepresentationDraft,
 	RepresentationStepSlug,
+	SubjectionAnswer,
 	SubmitRepresentationInput,
 } from "./types";
 export {

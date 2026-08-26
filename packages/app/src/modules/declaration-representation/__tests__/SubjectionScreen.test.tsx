@@ -1,11 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { push, apiAccess } = vi.hoisted(() => ({
-	push: vi.fn(),
-	apiAccess: vi.fn(),
-}));
+const { push, declareNotSubjectMutate, declareNotSubjectState } = vi.hoisted(
+	() => ({
+		push: vi.fn(),
+		declareNotSubjectMutate: vi.fn(),
+		declareNotSubjectState: {
+			error: null as { message: string } | null,
+			isPending: false,
+			onSuccess: undefined as (() => void) | undefined,
+		},
+	}),
+);
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
@@ -17,32 +24,45 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-// The subjection answer is deliberately not persisted: any access to the tRPC
-// client from this screen is a product regression, not an implementation detail.
 vi.mock("~/trpc/react", () => ({
-	api: new Proxy(
-		{},
-		{
-			get: (_target, property) => {
-				apiAccess(property);
-				return undefined;
+	api: {
+		representationDeclaration: {
+			declareNotSubject: {
+				useMutation: ({ onSuccess }: { onSuccess: () => void }) => {
+					declareNotSubjectState.onSuccess = onSuccess;
+					return {
+						error: declareNotSubjectState.error,
+						isPending: declareNotSubjectState.isPending,
+						mutate: declareNotSubjectMutate,
+					};
+				},
 			},
 		},
-	),
+	},
 }));
 
+import {
+	REPRESENTATION_CAMPAIGN_YEAR,
+	REPRESENTATION_YEAR,
+} from "~/modules/declaration-representation/__tests__/fixtures";
 import { SubjectionScreen } from "../SubjectionScreen";
 
-const CAMPAIGN_YEAR = 2026;
 const STEP_1_HREF = "/declaration-representation/etape/1";
+const MY_SPACE_HREF = "/mon-espace";
 const SELECTION_ERROR = "Veuillez sélectionner une option pour continuer.";
 const NOT_CONCERNED_INFO = /Vous n'êtes pas assujetti à la publication/;
 const SUBJECTION_QUESTION =
 	/Indiquez si votre entreprise emploie au moins 1 000 salariés/;
 const SUBJECTION_FIELDSET_NAME = /Nombre de salariés de l'entreprise/;
 
-function renderScreen() {
-	return render(<SubjectionScreen campaignYear={CAMPAIGN_YEAR} />);
+function renderScreen(initialAnswer?: "concerned" | "not_concerned") {
+	return render(
+		<SubjectionScreen
+			campaignYear={REPRESENTATION_CAMPAIGN_YEAR}
+			initialAnswer={initialAnswer}
+			year={REPRESENTATION_YEAR}
+		/>,
+	);
 }
 
 function concernedRadio() {
@@ -61,9 +81,16 @@ function nextButton() {
 	return screen.getByRole("button", { name: "Suivant" });
 }
 
+function validateButton() {
+	return screen.getByRole("button", { name: "Valider" });
+}
+
 beforeEach(() => {
 	push.mockReset();
-	apiAccess.mockReset();
+	declareNotSubjectMutate.mockReset();
+	declareNotSubjectState.error = null;
+	declareNotSubjectState.isPending = false;
+	declareNotSubjectState.onSuccess = undefined;
 });
 
 describe("SubjectionScreen — rendering", () => {
@@ -73,7 +100,7 @@ describe("SubjectionScreen — rendering", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 1,
-				name: `Démarche des indicateurs de représentation ${CAMPAIGN_YEAR}`,
+				name: `Démarche des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR}`,
 			}),
 		).toBeInTheDocument();
 		expect(
@@ -136,6 +163,7 @@ describe("SubjectionScreen — no answer selected", () => {
 
 		expect(screen.getByText(SELECTION_ERROR)).toBeInTheDocument();
 		expect(push).not.toHaveBeenCalled();
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
 	});
 
 	it("keeps the way forward after rejecting the question", async () => {
@@ -182,33 +210,63 @@ describe("SubjectionScreen — no answer selected", () => {
 });
 
 describe("SubjectionScreen — company concerned", () => {
-	it("enters the funnel at the first step", async () => {
+	it("enters the funnel at the first step without recording anything", async () => {
 		renderScreen();
 
 		await userEvent.click(concernedRadio());
 		await userEvent.click(nextButton());
 
 		expect(push).toHaveBeenCalledWith(STEP_1_HREF);
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
 		expect(screen.queryByText(SELECTION_ERROR)).not.toBeInTheDocument();
 		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
 	});
 });
 
-describe("SubjectionScreen — company not concerned", () => {
-	it("explains the exemption and closes the démarche without entering the funnel", async () => {
+describe("SubjectionScreen — company not concerned (T3-S1)", () => {
+	it("explains the exemption and swaps the funnel entry for a validation", async () => {
 		renderScreen();
 
 		await userEvent.click(notConcernedRadio());
 
 		expect(screen.getByText(NOT_CONCERNED_INFO)).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: "Valider" })).toHaveAttribute(
-			"href",
-			"/mon-espace",
-		);
+		expect(validateButton()).toBeInTheDocument();
 		expect(
 			screen.queryByRole("button", { name: "Suivant" }),
 		).not.toBeInTheDocument();
 		expect(push).not.toHaveBeenCalled();
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
+	});
+
+	it("records the exemption for the reference year on validation", async () => {
+		renderScreen();
+
+		await userEvent.click(notConcernedRadio());
+		await userEvent.click(validateButton());
+
+		expect(declareNotSubjectMutate).toHaveBeenCalledWith({
+			year: REPRESENTATION_YEAR,
+		});
+		expect(push).not.toHaveBeenCalled();
+	});
+
+	it("closes the démarche back to Mon espace once the exemption is recorded", () => {
+		renderScreen("not_concerned");
+
+		act(() => declareNotSubjectState.onSuccess?.());
+
+		expect(push).toHaveBeenCalledWith(MY_SPACE_HREF);
+	});
+
+	it("holds the validation while the recording is in flight", async () => {
+		declareNotSubjectState.isPending = true;
+		renderScreen("not_concerned");
+
+		expect(validateButton()).toBeDisabled();
+
+		await userEvent.click(validateButton());
+
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
 	});
 
 	it("restores the funnel entry when the answer is changed back", async () => {
@@ -219,28 +277,60 @@ describe("SubjectionScreen — company not concerned", () => {
 
 		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole("link", { name: "Valider" }),
+			screen.queryByRole("button", { name: "Valider" }),
 		).not.toBeInTheDocument();
 		expect(nextButton()).toBeInTheDocument();
 	});
 });
 
-describe("SubjectionScreen — no persistence", () => {
-	it("never stores the answer, whichever option is submitted", async () => {
-		const { unmount } = renderScreen();
+describe("SubjectionScreen — recording failure (T3-S4)", () => {
+	it("surfaces the failure without leaving the screen", () => {
+		declareNotSubjectState.error = {
+			message: "La campagne de déclaration est fermée.",
+		};
+		renderScreen("not_concerned");
 
-		await userEvent.click(nextButton());
-		await userEvent.click(concernedRadio());
-		await userEvent.click(nextButton());
-		unmount();
-
-		renderScreen();
-		await userEvent.click(notConcernedRadio());
-
-		expect(apiAccess).not.toHaveBeenCalled();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("La campagne de déclaration est fermée.");
+		expect(alert).toHaveClass("fr-alert--error");
+		expect(push).not.toHaveBeenCalled();
 	});
 
-	it("asks the question again on every visit", async () => {
+	it("keeps the validation available for a retry", async () => {
+		declareNotSubjectState.error = { message: "Une erreur est survenue." };
+		renderScreen("not_concerned");
+
+		await userEvent.click(validateButton());
+
+		expect(declareNotSubjectMutate).toHaveBeenCalledWith({
+			year: REPRESENTATION_YEAR,
+		});
+	});
+});
+
+describe("SubjectionScreen — returning declarant (T3-S2)", () => {
+	it("pre-fills the recorded exemption without recording it again", () => {
+		renderScreen("not_concerned");
+
+		expect(notConcernedRadio()).toBeChecked();
+		expect(concernedRadio()).not.toBeChecked();
+		expect(screen.getByText(NOT_CONCERNED_INFO)).toBeInTheDocument();
+		expect(validateButton()).toBeEnabled();
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
+	});
+
+	it("lets the declarant switch to the funnel without recording anything (T3-S3)", async () => {
+		renderScreen("not_concerned");
+
+		await userEvent.click(concernedRadio());
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_1_HREF);
+		expect(declareNotSubjectMutate).not.toHaveBeenCalled();
+		expect(screen.queryByText(NOT_CONCERNED_INFO)).not.toBeInTheDocument();
+	});
+
+	it("asks the question again when nothing was recorded", async () => {
 		const { unmount } = renderScreen();
 		await userEvent.click(concernedRadio());
 		unmount();
