@@ -46,6 +46,7 @@ function getDeadlineCell(
 	representationCampaign: RepresentationCampaign,
 ): string {
 	if (declaration.type === "representation") {
+		if (declaration.notSubject) return "-";
 		return formatShortDate(representationCampaign.declarationDeadline);
 	}
 	const deadline = getDeclarationProcessStepDeadline(

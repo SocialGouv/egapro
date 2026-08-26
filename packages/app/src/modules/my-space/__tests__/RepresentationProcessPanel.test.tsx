@@ -46,6 +46,7 @@ function makeDeclaration(
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
+		notSubject: false,
 		...overrides,
 	};
 }
@@ -55,6 +56,15 @@ const SUBMITTED = makeDeclaration({
 	status: "done",
 	currentStep: TOTAL_REPRESENTATION_STEPS,
 });
+// A not-subject row is reset to step 0 yet mapped "done": the flag settles it.
+const NOT_SUBJECT = makeDeclaration({
+	status: "done",
+	currentStep: 0,
+	notSubject: true,
+});
+
+const NOT_SUBJECT_MESSAGE =
+	"Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.";
 
 function renderPanel({
 	campaign = OPEN_CAMPAIGN,
@@ -233,12 +243,50 @@ describe("RepresentationProcessPanel", () => {
 		});
 	});
 
+	describe("variant: not_subject", () => {
+		it('renders a "Commencer" CTA pointing back to the funnel entry point', () => {
+			const { dialog } = renderPanel({ declaration: NOT_SUBJECT });
+			const cta = getCta(dialog);
+			expect(cta).toHaveTextContent(/^Commencer$/);
+			expect(cta).toHaveAttribute("href", REPRESENTATION_FUNNEL_ROOT);
+		});
+
+		it("keeps the subjection check as the only step, done, with no deadline", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.getAllByText("Étape terminée")).toHaveLength(1);
+			expect(panel.queryByText("Étape en cours")).not.toBeInTheDocument();
+			expect(panel.queryByText("Étape à venir")).not.toBeInTheDocument();
+			expect(
+				panel.getByText("Vérification de l'assujettissement"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText("Déclaration des écarts de représentation"),
+			).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Écarts de représentation"),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it("states the company is not subject, without the Rixain reminder", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.getByText(NOT_SUBJECT_MESSAGE)).toBeInTheDocument();
+			expect(panel.queryByText(/loi Rixain/)).not.toBeInTheDocument();
+		});
+
+		it("does not announce the démarche as closed while the campaign is open", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+		});
+	});
+
 	describe("campaign closed", () => {
 		const declarations: Array<[string, DeclarationItem | undefined]> = [
 			["no démarche", undefined],
 			["an untouched démarche", makeDeclaration()],
 			["a draft", DRAFT],
 			["a submitted démarche", SUBMITTED],
+			["a not-subject démarche", NOT_SUBJECT],
 		];
 
 		for (const [label, declaration] of declarations) {
@@ -251,6 +299,7 @@ describe("RepresentationProcessPanel", () => {
 				expect(
 					panel.getByText("Cette démarche est terminée."),
 				).toBeInTheDocument();
+				expect(panel.queryByText(NOT_SUBJECT_MESSAGE)).not.toBeInTheDocument();
 				const cta = getCta(dialog);
 				expect(cta).toHaveTextContent(/^Voir la déclaration$/);
 				expect(cta).toHaveAttribute("href", RECAP_HREF);
