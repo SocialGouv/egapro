@@ -74,7 +74,7 @@ function expectLoadingState() {
 	expect(status).toHaveTextContent(/Chargement du brouillon/i);
 }
 
-const emptyStep1 = { totalWomen: 0, totalMen: 0 };
+const emptyStep1 = { totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 };
 const emptyStep2 = {
 	indicatorAAnnualWomen: "",
 	indicatorAAnnualMen: "",
@@ -236,6 +236,7 @@ describe("DraftLoadingGate", () => {
 				declarationDate="01/01/2026"
 				declarationSiren="123456789"
 				declarationYear={2026}
+				existingFile={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
 			/>,
 		);

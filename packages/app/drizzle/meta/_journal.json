@@ -334,8 +334,15 @@
 		{
 			"idx": 47,
 			"version": "7",
-			"when": 1787661808658,
-			"tag": "0047_easy_pestilence",
+			"when": 1787598108411,
+			"tag": "0047_concerned_champions",
+			"breakpoints": true
+		},
+		{
+			"idx": 48,
+			"version": "7",
+			"when": 1787754146913,
+			"tag": "0048_smooth_clint_barton",
 			"breakpoints": true
 		}
 	]

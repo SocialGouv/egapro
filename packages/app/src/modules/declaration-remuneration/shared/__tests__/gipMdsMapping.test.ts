@@ -49,15 +49,19 @@ describe("mapGipToFormData", () => {
 		expect(mapGipToFormData(null)).toBeNull();
 	});
 
-	it("maps step1 workforce from annual global counts", () => {
+	it("maps step1 workforce from the annual and hourly global counts", () => {
 		const row = makeGipRow({
 			womenCountAnnualGlobal: "120.5",
 			menCountAnnualGlobal: "80.3",
+			womenCountHourlyGlobal: "118.4",
+			menCountHourlyGlobal: "79.6",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step1).toEqual({
 			totalWomen: 121,
 			totalMen: 80,
+			hourlyWomen: 118,
+			hourlyMen: 80,
 		});
 	});
 
@@ -67,6 +71,8 @@ describe("mapGipToFormData", () => {
 		expect(result?.step1).toEqual({
 			totalWomen: null,
 			totalMen: null,
+			hourlyWomen: null,
+			hourlyMen: null,
 		});
 	});
 
@@ -278,11 +284,15 @@ describe("mapGipToFormData", () => {
 		const row = makeGipRow({
 			womenCountAnnualGlobal: "0",
 			menCountAnnualGlobal: "180",
+			womenCountHourlyGlobal: "0",
+			menCountHourlyGlobal: "178",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step1).toEqual({
 			totalWomen: 0,
 			totalMen: 180,
+			hourlyWomen: 0,
+			hourlyMen: 178,
 		});
 	});
 

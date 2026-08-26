@@ -21,6 +21,8 @@ export function declarationFixture(
 		workforceEma: 2256,
 		totalWomen: 752,
 		totalMen: 1504,
+		hourlyWomen: 700,
+		hourlyMen: 1400,
 		globalAnnualMeanGap: 0.005,
 		globalAnnualMedianGap: 0.0271,
 		globalHourlyMeanGap: 0.0717,

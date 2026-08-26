@@ -57,6 +57,14 @@ function getRemunerationResources(
 		});
 	}
 
+	if (declaration.hasSubmittedSecondDeclaration) {
+		resources.push({
+			title: "Télécharger le récapitulatif de la seconde déclaration",
+			subtitle,
+			href: `/api/declaration-pdf?type=correction&year=${declaration.year}`,
+		});
+	}
+
 	if (
 		declaration.hasSubmittedCseOpinion ||
 		declaration.hasJointEvaluationFile
@@ -65,14 +73,6 @@ function getRemunerationResources(
 			title: "Télécharger le récapitulatif des éléments transmis",
 			subtitle,
 			href: `/api/transmitted-pdf?year=${declaration.year}`,
-		});
-	}
-
-	if (declaration.hasSubmittedSecondDeclaration) {
-		resources.push({
-			title: "Télécharger le récapitulatif de la seconde déclaration",
-			subtitle,
-			href: `/api/declaration-pdf?type=correction&year=${declaration.year}`,
 		});
 	}
 

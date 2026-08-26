@@ -1,6 +1,6 @@
 {
-	"id": "d052d7fa-757e-4133-9236-13dc4b568bde",
-	"prevId": "196f338f-f2fb-4e5d-8927-10fb71de8ab0",
+	"id": "03b698f8-45ee-4a93-839d-9b33ad5f3a60",
+	"prevId": "d052d7fa-757e-4133-9236-13dc4b568bde",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -183,6 +183,12 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"city": {
+					"name": "city",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"naf_code": {
 					"name": "naf_code",
 					"type": "varchar(10)",
@@ -192,6 +198,12 @@
 				"naf_label": {
 					"name": "naf_label",
 					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"region_code": {
+					"name": "region_code",
+					"type": "varchar(3)",
 					"primaryKey": false,
 					"notNull": false
 				},
@@ -209,6 +221,18 @@
 				},
 				"department_label": {
 					"name": "department_label",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"country_code": {
+					"name": "country_code",
+					"type": "varchar(5)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"country_label": {
+					"name": "country_label",
 					"type": "varchar(255)",
 					"primaryKey": false,
 					"notNull": false

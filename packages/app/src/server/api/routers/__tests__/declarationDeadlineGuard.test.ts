@@ -29,7 +29,12 @@ vi.mock("~/server/db/getCampaignDeadlines", () => ({
 }));
 
 const GUARD_YEAR = 2027;
-const STEP1_INPUT = { totalWomen: 10, totalMen: 20 };
+const STEP1_INPUT = {
+	totalWomen: 10,
+	totalMen: 20,
+	hourlyWomen: 10,
+	hourlyMen: 20,
+};
 
 // decl1 a year in the past, decl2 a year in the future — relative to the real
 // clock the guard reads via `isDeadlinePassed(new Date())`. So a phase-1
@@ -77,6 +82,8 @@ function handlerDb() {
 		currentStep: 1,
 		totalWomen: STEP1_INPUT.totalWomen,
 		totalMen: STEP1_INPUT.totalMen,
+		hourlyWomen: STEP1_INPUT.totalWomen,
+		hourlyMen: STEP1_INPUT.totalMen,
 	};
 	const updateWhere = vi.fn().mockResolvedValue(undefined);
 	const set = vi.fn().mockReturnValue({ where: updateWhere });

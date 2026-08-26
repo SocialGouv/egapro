@@ -11,6 +11,8 @@ const declarationFixture: PublicDeclarationSource = {
 	year: 2024,
 	totalWomen: 120,
 	totalMen: 80,
+	hourlyWomen: 120,
+	hourlyMen: 80,
 	globalAnnualMeanGap: "0.1234",
 	globalAnnualMedianGap: "0.1000",
 	globalHourlyMeanGap: "0.0850",

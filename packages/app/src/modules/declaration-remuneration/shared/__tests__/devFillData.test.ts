@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	createDevStep5Categories,
-	DEV_STEP1_CATEGORIES,
+	DEV_STEP1_ROWS,
 	DEV_STEP2_ROWS,
 	DEV_STEP3_BENEFICIARY_MEN,
 	DEV_STEP3_BENEFICIARY_WOMEN,
@@ -12,10 +12,12 @@ import {
 } from "../devFillData";
 
 describe("devFillData", () => {
-	it("Step1 has 1 category with 120 women and 130 men", () => {
-		expect(DEV_STEP1_CATEGORIES).toHaveLength(1);
-		expect(DEV_STEP1_CATEGORIES[0]?.women).toBe(120);
-		expect(DEV_STEP1_CATEGORIES[0]?.men).toBe(130);
+	it("Step1 has one workforce row per pay basis, each with 120 women and 130 men", () => {
+		expect(DEV_STEP1_ROWS).toHaveLength(2);
+		for (const row of DEV_STEP1_ROWS) {
+			expect(row.women).toBe(120);
+			expect(row.men).toBe(130);
+		}
 	});
 
 	it("Step2 has 4 pay gap rows", () => {

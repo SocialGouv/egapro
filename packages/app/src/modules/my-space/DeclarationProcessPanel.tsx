@@ -6,6 +6,7 @@ import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
+	DeclarationFsmStatus,
 } from "~/modules/domain";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
@@ -25,6 +26,7 @@ export type PanelVariant =
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	cseOpinionRequired: boolean;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	year: number;
 	indicatorGRequired: boolean;
 	lastActionDate: string | null;
@@ -40,6 +42,7 @@ type Props = {
 export function DeclarationProcessPanel({
 	campaignDeadlines,
 	cseOpinionRequired,
+	declarationFsmStatus,
 	year,
 	indicatorGRequired,
 	lastActionDate,
@@ -90,6 +93,7 @@ export function DeclarationProcessPanel({
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
 							cseOpinionRequired={cseOpinionRequired}
+							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
 							indicatorGRequired={indicatorGRequired}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}

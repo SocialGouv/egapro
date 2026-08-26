@@ -4,6 +4,7 @@
 export {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -105,6 +106,7 @@ export {
 	isDeclarationWritingClosed,
 	isDraft,
 	isInComplianceProcess,
+	isJointEvaluationWritable,
 	isSecondDeclarationDeadlineApplicable,
 	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";
@@ -163,8 +165,10 @@ export {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatIsoDate,
 	formatLongDate,
 	formatMonthDay,
+	formatOptionalIsoDate,
 	formatPercentage,
 	formatShortDate,
 	formatShortDateTime,

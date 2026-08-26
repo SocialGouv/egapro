@@ -68,12 +68,24 @@ test.describe("Declaration workflow", () => {
 			page.getByRole("heading", { name: /Effectifs/i }),
 		).toBeVisible();
 
-		// Fill workforce data directly in the table
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		// Fill workforce data directly in the table, one row per pay basis
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("15");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("15");
 
-		// Verify total is computed
-		await expect(page.getByText("25", { exact: true })).toBeVisible();
+		// Verify each row total is computed
+		await expect(page.getByText("25", { exact: true }).first()).toBeVisible();
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
@@ -251,21 +263,33 @@ test.describe("Declaration workflow", () => {
 		await goToStep(page, 1);
 
 		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("");
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("");
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		await expect(
 			page.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeVisible();
+		).toHaveCount(2);
 
 		// DSFR 1.14 sets white-space: nowrap on table cells; inherited by
 		// .fr-error-text it painted the message onto the neighbouring column. A
 		// visible message is not enough — the bug kept it visible, just overflowing.
 		// Assert the rendered text extent stays within its owning <td>.
 		const measure = await page.evaluate(() => {
-			const paragraph = document.getElementById("women-error");
+			const paragraph = document.getElementById("step1-annual-women-error");
 			const cell = paragraph?.closest("td");
 			if (!paragraph || !cell) return null;
 			const range = document.createRange();

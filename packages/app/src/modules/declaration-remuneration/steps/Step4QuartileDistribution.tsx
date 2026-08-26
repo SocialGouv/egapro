@@ -63,6 +63,8 @@ type Step4QuartileDistributionProps = {
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
 };
 
 export function Step4QuartileDistribution({
@@ -73,6 +75,8 @@ export function Step4QuartileDistribution({
 	gipPrefillData,
 	maxWomen,
 	maxMen,
+	hourlyMaxWomen,
+	hourlyMaxMen,
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -156,8 +160,12 @@ export function Step4QuartileDistribution({
 	const references: QuartileReferences = {
 		annual: { women: maxWomen, men: maxMen },
 		hourly: {
-			women: gipPrefillData?.step4.hourly.referenceWomen ?? undefined,
-			men: gipPrefillData?.step4.hourly.referenceMen ?? undefined,
+			women:
+				hourlyMaxWomen ??
+				gipPrefillData?.step4.hourly.referenceWomen ??
+				undefined,
+			men:
+				hourlyMaxMen ?? gipPrefillData?.step4.hourly.referenceMen ?? undefined,
 		},
 	};
 

@@ -4,7 +4,6 @@ import {
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
-import { Breadcrumb } from "~/modules/layout";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
@@ -27,13 +26,6 @@ export function CompanyInfoBanner({ company }: Props) {
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
 			<div className="fr-container">
-				<Breadcrumb
-					items={[
-						{ label: "Mon espace", href: "/mon-espace/mes-entreprises" },
-						{ label: company.name },
-					]}
-				/>
-
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 					<div className="fr-col">
 						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>

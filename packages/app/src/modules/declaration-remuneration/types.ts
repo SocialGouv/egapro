@@ -6,9 +6,15 @@ export type WorkforceRow = {
 	men: number;
 };
 
+/**
+ * Physical workforce declared at step 1, one headcount per pay basis (#4247):
+ * `total*` for annual remuneration, `hourly*` for hourly remuneration.
+ */
 export type Step1Data = {
 	totalWomen: number;
 	totalMen: number;
+	hourlyWomen: number;
+	hourlyMen: number;
 };
 
 export type Step2Data = {

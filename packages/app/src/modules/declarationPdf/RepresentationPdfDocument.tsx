@@ -1,8 +1,8 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import {
+	formatIsoDate,
 	formatLongDate,
 	formatPercentage,
-	formatShortDate,
 } from "~/modules/domain";
 import type {
 	RepresentationPdfData,
@@ -22,7 +22,7 @@ const VERDICT_LABELS = {
 } as const;
 
 function formatOptionalDate(value: string | null): string {
-	return value === null ? "Non renseignée" : formatShortDate(new Date(value));
+	return value === null ? "Non renseignée" : formatIsoDate(value);
 }
 
 function IndicatorCard({

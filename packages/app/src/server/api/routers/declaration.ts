@@ -309,7 +309,9 @@ export const declarationRouter = createTRPCRouter({
 
 				const hasChanged =
 					existing[0]?.totalWomen !== input.totalWomen ||
-					existing[0]?.totalMen !== input.totalMen;
+					existing[0]?.totalMen !== input.totalMen ||
+					existing[0]?.hourlyWomen !== input.hourlyWomen ||
+					existing[0]?.hourlyMen !== input.hourlyMen;
 
 				if (hasChanged) {
 					const declarationId = existing[0]?.id;
@@ -326,6 +328,8 @@ export const declarationRouter = createTRPCRouter({
 					.set({
 						totalWomen: input.totalWomen,
 						totalMen: input.totalMen,
+						hourlyWomen: input.hourlyWomen,
+						hourlyMen: input.hourlyMen,
 						currentStep: 1,
 						updatedAt: new Date(),
 						...(hasChanged

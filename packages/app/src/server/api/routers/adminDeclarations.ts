@@ -26,7 +26,7 @@ import { releaseLockSchema } from "~/modules/admin/schemas";
 import {
 	floorWorkforce,
 	getCurrentYear,
-	getReferencePeriod,
+	getDeclarationReferencePeriod,
 	isCancelled,
 	parseGipWorkforce,
 } from "~/modules/domain";
@@ -161,6 +161,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					currentStep: declarations.currentStep,
 					totalWomen: declarations.totalWomen,
 					totalMen: declarations.totalMen,
+					hourlyWomen: declarations.hourlyWomen,
+					hourlyMen: declarations.hourlyMen,
 					remunerationScore: declarations.remunerationScore,
 					firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 					createdAt: declarations.createdAt,
@@ -426,7 +428,12 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				isCorrection ? "correction" : "initial",
 			);
 			const step5Source = jobs[0]?.source ?? null;
-			const referencePeriod = getReferencePeriod(d.year);
+			const referencePeriod = getDeclarationReferencePeriod(
+				d.year,
+				isCorrection,
+				d.secondDeclReferencePeriodStart,
+				d.secondDeclReferencePeriodEnd,
+			);
 			const declarantName = [row.declarantFirstName, row.declarantLastName]
 				.filter(Boolean)
 				.join(" ");
@@ -446,6 +453,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				isCorrection,
 				totalWomen: d.totalWomen,
 				totalMen: d.totalMen,
+				hourlyWomen: d.hourlyWomen,
+				hourlyMen: d.hourlyMen,
 				step2Data,
 				step3Data,
 				step4Data,
