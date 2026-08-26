@@ -41,8 +41,16 @@ LAST_PUSH=$(gh pr view "$PR" --repo "$REPO" --json commits --jq '.commits[-1].co
 
 # A thread is "replied" when the author posted a comment whose in_reply_to_id
 # points into it. Root comments carry no in_reply_to_id; replies do.
-UNREPLIED=$(gh api "repos/$REPO/pulls/$PR/comments" --paginate --jq "
-  [ .[] | select(.created_at > \"$LAST_PUSH\") ] as \$recent
+#
+# --slurp + an EXTERNAL jq is load-bearing, and the two go together: gh refuses
+# --slurp with --jq, and with --jq alone --paginate runs the filter once PER
+# PAGE. This filter reduces across records ($answered is derived from the whole
+# set), so a reply on page 2 to a root comment on page 1 would read as
+# unreplied. Measured on PR #4203 at per_page=10: 15 false positives vs 0 over
+# the full set. gh defaults to per_page=100, so it only bites past 100 comments
+# — which is exactly the noisy PR where this gate matters.
+UNREPLIED=$(gh api "repos/$REPO/pulls/$PR/comments" --paginate --slurp | jq -r "
+  [ (add // [])[] | select(.created_at > \"$LAST_PUSH\") ] as \$recent
   | ( [ \$recent[] | select(.user.login == \"$AUTHOR\") | .in_reply_to_id | select(. != null) ] ) as \$answered
   | \$recent
   | map(. as \$c

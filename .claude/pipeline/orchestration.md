@@ -53,7 +53,7 @@
 | Agent | Rôle |
 |---|---|
 | `validator` | Typecheck + test + lint + format (parallel) |
-| `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) |
+| `structural-auditor` | greps mécaniques, fuites de la couche domaine, checks qui demandent de lire le code (forms, schemas, transactions, ownership, commentaires) |
 | `rgaa-auditor` | Lance le skill ultra11y `review-a11y` sur le code modifié et rend son verdict (plugin déclaré dans `.claude/settings.json`) |
 | `security-auditor` | OWASP Top 10 + RGS security review |
 

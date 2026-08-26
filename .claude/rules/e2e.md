@@ -19,7 +19,7 @@ Le mandat porte sur la **couverture d'un parcours**, pas sur chaque édition d'u
 
 ## Contrats de fidélité Figma
 
-La suite porte aussi les contrats de fidélité visuelle : `helpers/figmaFidelity.ts` (moteur générique de mesure DOM) + `fixtures/figma/<écran>.ts` (les valeurs du node Figma). C'est la couche de régression **permanente** que le gate `design-validator` — ponctuel, et dégradable si la session ProConnect manque — ne fournit pas. L'assertion s'imbrique dans le scénario qui atteint déjà l'écran dans le bon état, jamais un tunnel rejoué pour une mesure. Discipline d'écriture → `rules/visual-quality-validation.md`.
+La suite porte aussi les contrats de fidélité visuelle — la couche de régression **permanente** que le gate `design-validator`, ponctuel et dégradable si la session ProConnect manque, ne fournit pas. Il n'y a **ni moteur générique ni dossier de fixtures** : un contrat est un `*.e2e.ts` dédié qui porte ses valeurs attendues en constantes de module et les asserte via `getComputedStyle` / `getBoundingClientRect`. Quatre existent (`breadcrumb-spacing`, `stepper-spacing`, `declaration-header-alignment`, `second-declaration-info-styling`) — les copier plutôt qu'en inventer la forme. L'assertion s'imbrique dans le scénario qui atteint déjà l'écran dans le bon état, jamais un tunnel rejoué pour une mesure. Discipline d'écriture → `rules/visual-quality-validation.md`.
 
 ## Lancer la suite
 

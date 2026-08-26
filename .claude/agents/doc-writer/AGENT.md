@@ -43,6 +43,7 @@ Tu **ne touches pas** :
 - `CLAUDE.md` racine et `packages/app/CLAUDE.md` (instructions agents)
 - `.claude/rules/*.md` (règles internes)
 - `docs/SUIT-API.md` (spec d'intégration externe rédigée à la main)
+- `docs/accessibilite-ultra11y.md` (câblage et décisions ultra11y, rédigé à la main — voir `.claude/rules/rgaa.md`)
 - Toute autre `.md` sous `.kontinuous/`, `.github/`, `scripts/`
 
 ## Workflow

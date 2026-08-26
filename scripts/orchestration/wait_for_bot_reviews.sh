@@ -32,10 +32,14 @@ fi
 #   1  usage error / gh failure
 #
 # Env (overridable)
-#   BOT_WAIT_MAX       seconds to wait for the FIRST comment   (default 900)
-#   BOT_DEBOUNCE       seconds of a stable count = burst over  (default 120)
-#   BOT_POLL_INTERVAL  seconds between probes                  (default 30)
-#   BOT_REPO           owner/repo                              (default SocialGouv/egapro)
+#   BOT_WAIT_MAX       seconds to wait for the FIRST comment    (default 900)
+#   BOT_DEBOUNCE       seconds of a stable count = burst over    (default 120)
+#   BOT_DEBOUNCE_MAX   hard cap on the debounce phase            (default 360)
+#   BOT_POLL_INTERVAL  seconds between probes                    (default 30)
+#   BOT_REPO           owner/repo                                (default SocialGouv/egapro)
+#
+# Worst case is BOT_WAIT_MAX + BOT_DEBOUNCE_MAX = 21 min by default, so callers
+# must wrap this in `timeout` rather than assume it returns quickly.
 
 set -euo pipefail
 
@@ -44,6 +48,7 @@ PR="${1:-}"
 
 WAIT_MAX="${BOT_WAIT_MAX:-900}"
 DEBOUNCE="${BOT_DEBOUNCE:-120}"
+DEBOUNCE_MAX="${BOT_DEBOUNCE_MAX:-360}"
 INTERVAL="${BOT_POLL_INTERVAL:-30}"
 REPO="${BOT_REPO:-SocialGouv/egapro}"
 
@@ -76,9 +81,16 @@ if [ "$count" -eq 0 ]; then
 fi
 
 # Phase 2 — debounce until the count stops moving.
+#
+# Capped: a chatty bot, or a human commenting while we watch, resets `stable`
+# on every probe and the loop would never converge. BOT_DEBOUNCE_MAX is the
+# backstop — past it we take the count we have, which is strictly better than
+# being killed mid-loop by the caller's own timeout and returning nothing.
 stable=0
-while [ "$stable" -lt "$DEBOUNCE" ]; do
+waited=0
+while [ "$stable" -lt "$DEBOUNCE" ] && [ "$waited" -lt "$DEBOUNCE_MAX" ]; do
   sleep "$INTERVAL"
+  waited=$(( waited + INTERVAL ))
   new=$(count_after_last_push)
   if [ "$new" -eq "$count" ]; then
     stable=$(( stable + INTERVAL ))

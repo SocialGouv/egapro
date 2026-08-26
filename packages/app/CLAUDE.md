@@ -10,7 +10,7 @@
 |---|---|---|
 | Framework | Next.js (App Router) | ^16 |
 | UI | React | ^19 |
-| Typage | TypeScript | ^5 — strict |
+| Typage | TypeScript | ^6 — strict |
 | Design system | @gouvfr/dsfr | ^1.14 (natif, sans react-dsfr) |
 | Styles | classes DSFR + SCSS Modules | sass (mixins DSFR auto-injectés) |
 | API | tRPC | ^11 |
@@ -19,7 +19,7 @@
 | Validation | Zod | ^4 |
 | Lint / Format | Biome | ^2 |
 | Tests unitaires | Vitest | ^4 |
-| E2E | Playwright | ^1.58 |
+| E2E | Playwright | ^1.59 |
 
 ---
 
@@ -169,6 +169,6 @@ pnpm db:studio        # Drizzle Studio
 
 Déclarées et validées dans `src/env.js` (`@t3-oss/env-nextjs` + Zod). **Jamais de `process.env` direct** — `import { env } from "~/env.js"` (bloqué par le hook).
 
-Ajouter une variable = 4 gestes : la déclarer dans `src/env.js` (section `server` ou `client`), l'ajouter à `runtimeEnv`, l'ajouter au `.env` local, **et l'ajouter à la config de déploiement `.kontinuous/`** (configmap pour une valeur publique, sealed-secret pour un secret). Base : `.kontinuous/templates/egapro.configmap.yaml` ; surcharges par environnement : `.kontinuous/env/{dev,preprod,prod}/`.
+Ajouter une variable = 4 gestes : la déclarer dans `src/env.js` (section `server` ou `client`), l'ajouter à `runtimeEnv`, l'ajouter au `.env` local, **et l'ajouter à la config de déploiement `.kontinuous/`**. Il n'y a pas de configmap unique « egapro » : le conteneur app monte ses variables via `app.envFrom` / `app.env` de `.kontinuous/values.yaml`, chaque bloc pointant vers une configmap ou une sealed-secret **par sujet** (`proconnect`, `mail`, `s3`, `api`, `matomo`…) définie sous `.kontinuous/env/{dev,preprod,prod}/templates/<sujet>.{configmap,sealed-secret}.yaml`. Une valeur publique va dans la configmap du sujet, un secret dans sa sealed-secret.
 
 > `SKIP_ENV_VALIDATION=1` contourne la validation (build Docker, CI sans secrets).

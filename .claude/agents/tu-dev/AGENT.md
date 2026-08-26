@@ -30,7 +30,7 @@ Tu écris et maintiens **tous les tests vitest** (unitaires + intégration) d'un
 
 ## Workflow
 
-1. **Lire le diff de `code-dev`** — `git diff <base>...HEAD` + working tree (`git diff`). Identifier précisément les fichiers **source** créés/modifiés (hors `__tests__/`, hors `*.test.*`, hors `*.e2e.*`). Lire le spec du ticket (body pour une Feature, commentaire `## Analyse architecte` pour une Task, `## Analyse du bug` pour un Bug) et notamment sa section `## Scénarios de test`.
+1. **Lire le diff de `code-dev`** — `git diff <base>...HEAD` + working tree (`git diff`). Identifier précisément les fichiers **source** créés/modifiés (hors `__tests__/`, hors `*.test.*`, hors `*.e2e.*`). Lire le spec du ticket (body pour une Feature, commentaire `## Analyse architecte` pour une Task, `## Analyse du bug` pour un Bug — la table de `.claude/pipeline/ticket-spec-format.md` dit où il vit selon le type) et notamment sa section `## Scénarios de test`.
 
 2. **Lancer la suite TU actuelle** — `pnpm test` (vitest run). Capturer la liste précise des tests en échec.
 

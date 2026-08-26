@@ -175,10 +175,11 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    Les bots de review postent **plusieurs minutes après** que la CI soit verte, puis leurs commentaires **un par un**. Sortir au premier commentaire détecté donne une lecture incomplète.
 
    ```bash
-   COMMENTS=$(bash scripts/orchestration/wait_for_bot_reviews.sh <PR>)
+   PR=<numéro de la PR>   # à substituer, pas à taper tel quel : `<PR>` nu serait lu comme une redirection
+   COMMENTS=$(timeout 1500 bash scripts/orchestration/wait_for_bot_reviews.sh "$PR" < /dev/null)
    ```
 
-   Le script attend le premier commentaire (plafond 15 min), puis attend que le compte reste stable 2 min avant de rendre la main. Il compte reviews + commentaires inline + commentaires d'issue postés **après ton dernier push**.
+   Le script attend le premier commentaire (plafond 15 min), puis attend que le compte reste stable 2 min avant de rendre la main. Il compte reviews + commentaires inline + commentaires d'issue postés **après ton dernier push**. Le `timeout` est la règle 3 ci-dessus appliquée à lui-même : c'est le plus long appel bash de tout le workflow, et il doit échouer proprement plutôt que d'être tué par le plafond de l'outil.
 
    - `COMMENTS = 0` → aucun bot ne va commenter, passer directement à l'étape 10 (retour `validated`).
    - Sinon → 9d.2, avec **tous** les commentaires captés.
@@ -187,9 +188,9 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    Lire **tous** les comments + reviews bot/humain de la PR :
    ```bash
-   gh pr view <PR> --comments
-   gh api "repos/SocialGouv/egapro/pulls/<PR>/reviews"
-   gh api "repos/SocialGouv/egapro/pulls/<PR>/comments"
+   gh pr view "$PR" --comments
+   gh api "repos/SocialGouv/egapro/pulls/$PR/reviews"
+   gh api "repos/SocialGouv/egapro/pulls/$PR/comments"
    ```
 
    Pour **chaque** comment / review thread :
@@ -201,13 +202,13 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
    ### 9d.2bis — Post-condition : aucun thread laissé sans réponse
 
    ```bash
-   bash scripts/orchestration/check_review_replies.sh <PR>   # exit 2 + liste si des threads restent
+   bash scripts/orchestration/check_review_replies.sh "$PR" < /dev/null   # exit 2 + liste si des threads restent
    ```
 
    Le script liste les threads postés après ton dernier push qui n'ont pas reçu de réponse de toi, avec leur `comment_id`. Répondre dans le thread :
 
    ```bash
-   gh api -X POST repos/SocialGouv/egapro/pulls/<PR>/comments -f in_reply_to=<comment_id> -f body='…'
+   gh api -X POST "repos/SocialGouv/egapro/pulls/$PR/comments" -f in_reply_to=<comment_id> -f body='…'
    ```
 
    Boucler jusqu'à exit 0. **Conclure « non pertinent » sans le dire est invisible** : le bot reposera le même point à la PR suivante, et l'humain qui review ne saura pas ce que tu as pensé de la suggestion. Une réponse explicite, même d'une ligne, est ce qui rend la décision traçable.

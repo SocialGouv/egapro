@@ -1,6 +1,6 @@
 # Format de spec d'un ticket
 
-> **Pipeline only.** Écrit par `architect` (body en mode epic-*, commentaire `## Analyse architecte` en mode task) et `bug-analyst` (`## Analyse du bug`). Lu par `code-dev` (précondition d'exécution), `tu-dev` (section `## Scénarios de test`) et le skill `/implement`.
+> **Pipeline only.** Écrit par `architect` (body en mode epic-*, commentaire `## Analyse architecte` en mode task). Lu par `code-dev` (précondition d'exécution), `tu-dev` (section `## Scénarios de test`) et le skill `/analyse`. Le gabarit du `## Analyse du bug` de `bug-analyst` n'est pas ici — il vit dans son propre AGENT.md ; seule la table ci-dessous, qui dit où trouver le spec selon le type d'issue, le concerne.
 
 Selon le type d'issue, le spec ne vit pas au même endroit :
 

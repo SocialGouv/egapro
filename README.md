@@ -218,7 +218,7 @@ packages/app/CLAUDE.md    <- architecture du package app (charge quand on y trav
 .mcp.json                 <- serveurs MCP (DSFR, Figma, GitHub, Next.js)
 ```
 
-**Le principe qui structure tout** : une regle vit a **un seul endroit**, et ce qu'une machine decide n'est pas re-enonce en prose. Les hooks bloquent mecaniquement, les `rules/` portent ce qui demande du jugement, les `agents/` rapportent, et `pipeline/` decrit l'orchestration — que seules les skills `/analyse` et `/implement` lisent.
+**Le principe qui structure tout** : une regle vit a **un seul endroit**, et ce qu'une machine decide n'est pas re-enonce en prose. Les hooks bloquent mecaniquement, les `rules/` portent ce qui demande du jugement, les `agents/` rapportent, et `pipeline/` decrit l'orchestration — jamais chargee automatiquement, ouverte a la demande.
 
 ### Rules (`.claude/rules/`)
 

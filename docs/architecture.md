@@ -211,7 +211,7 @@ domain/
   types.ts        # GapLevel, DeclarationStatus, …
   shared/
     constants.ts            # GAP_ALERT_THRESHOLD, MAX_CSE_FILES, COMPANY_SIZE_*
-    campaign.ts             # getCurrentYear, getCseYear (règles temporelles)
+    campaign.ts             # getCurrentYear, getWorkforceYear, getReferenceYearFor (règles temporelles)
     companySize.ts          # isCseRequired, COMPANY_SIZE_RANGES
     declarationFlags.ts     # isComplianceProcessRequired, isComplianceProcessRevisionRequired
     declarationLock.ts      # DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS
@@ -235,7 +235,7 @@ Hooks de garde — le hook `block-bad-patterns` bloque les patterns suivants en 
 
 | Pattern bloqué | Alternative obligatoire |
 |---|---|
-| `new Date().getFullYear()` | `getCurrentYear()` / `getCseYear()` depuis `~/modules/domain` |
+| `new Date().getFullYear()` | `getCurrentYear()` / `getWorkforceYear()` depuis `~/modules/domain` |
 | `siret.slice(0, 9)`, `.substring(0, 9)`, `.substr(0, 9)` | `extractSiren(siret)` depuis `~/modules/domain` |
 | `.getMonth()` / `.getDate()` | helpers de campagne depuis `~/modules/domain` |
 | `cancelledAt !== null` (réimplémentation de `isCancelled`) | `isCancelled({ cancelledAt })` depuis `~/modules/domain` |
