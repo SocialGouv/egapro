@@ -17,10 +17,6 @@ Sur EGAPRO, **la branche `alpha` est la branche par défaut et le canal de livra
 
 > ⚠️ Invariant : `release-alpha.yaml` crée la release avec le **token GitHub App** (token-bureau), pas `GITHUB_TOKEN`. Une release créée par `GITHUB_TOKEN` ne déclenche aucun workflow downstream → le déploiement prod **et** le changelog s'arrêteraient silencieusement.
 
-## Ne pas oublier de release
-
-Le workflow **⏰ Alpha release reminder** (`release-alpha-reminder.yaml`) tourne chaque jour ouvré : s'il reste des commits release-worthy non livrés sur `alpha`, il le signale (résumé de run + annotation `warning` + ping canal si configuré).
-
 ## Changelog IA
 
 `release-changelog.yaml` résume, en français et côté métier, ce qui a été livré :
