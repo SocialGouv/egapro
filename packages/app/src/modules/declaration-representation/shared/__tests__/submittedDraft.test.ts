@@ -71,8 +71,7 @@ describe("representationDraftFromDeclaration", () => {
 		).toEqual({ currentStep: 3 });
 	});
 
-	// Reopening the funnel after a not-subject choice must start from a blank
-	// slate, never from columns a previous submission left behind.
+	// Reopening after a not-subject choice must start blank, not from leftover columns.
 	it("returns an empty draft for a declaration closed as not subject", () => {
 		expect(
 			representationDraftFromDeclaration(

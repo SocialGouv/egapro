@@ -85,8 +85,7 @@ describe("representationDeclarationRouter.declareNotSubject", () => {
 		]);
 	});
 
-	// A non-subject company transmitted nothing: dating a transmission would make
-	// it appear on the public surfaces, which key off `submitted_at`.
+	// A non-subject company transmitted nothing, and public surfaces key off `submittedAt`.
 	it("never stamps a submission date, on either the insert or the update path", async () => {
 		const mock = createMockDb([{ status: "draft" }]);
 
@@ -106,6 +105,17 @@ describe("representationDeclarationRouter.declareNotSubject", () => {
 			draft: null,
 			draftUpdatedAt: null,
 		});
+	});
+
+	// A concurrent submit() must not slip between the guard and the upsert.
+	it("guards and upserts inside a single transaction, on the locked row", async () => {
+		const mock = createMockDb([{ status: "draft" }]);
+
+		await declareNotSubject(mock);
+
+		expect(mock.transaction).toHaveBeenCalledTimes(1);
+		expect(mock.forLock).toHaveBeenCalledWith("update");
+		expect(mock.insert).toHaveBeenCalled();
 	});
 
 	it("refuses to bury a declaration that was already transmitted (S2)", async () => {

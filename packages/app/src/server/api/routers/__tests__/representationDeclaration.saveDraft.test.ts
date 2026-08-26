@@ -89,8 +89,7 @@ describe("representationDeclarationRouter.saveDraft", () => {
 		]);
 	});
 
-	// The status is rewritten by SQL, not by the caller: only `not_subject` is
-	// converted back to `draft`, so a `submitted` row can never be degraded.
+	// SQL rewrites the status, not the caller, so a `submitted` row can never be degraded.
 	it("reopens a not-subject declaration as a draft and leaves any other status alone", async () => {
 		const mock = createMockDb();
 
