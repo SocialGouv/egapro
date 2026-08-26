@@ -103,13 +103,6 @@ describe("DeclarationProcessPanel", () => {
 			);
 		});
 
-		it("renders the info alert", () => {
-			const { panel } = renderPanel("start");
-			expect(
-				panel.getByText(/Vous devez au préalable disposer/),
-			).toBeInTheDocument();
-		});
-
 		it("renders step 1 details with bullet points", () => {
 			const { panel } = renderPanel("start");
 			expect(
@@ -150,6 +143,46 @@ describe("DeclarationProcessPanel", () => {
 			const texts = [...buttons].map((b) => b.textContent);
 			expect(texts).toContain("Détail des étapes");
 			expect(texts).toContain("Centre d'aide");
+		});
+	});
+
+	describe("encart accord de branche selon indicatorGRequired (#4267)", () => {
+		const BRANCH_AGREEMENT_TEXT = /Vous devez au préalable disposer/;
+
+		function infoAlert(dialog: HTMLElement) {
+			return dialog.querySelector(".fr-alert--info");
+		}
+
+		it("renders the info alert on the start variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the start variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
+		});
+
+		it("renders the info alert on the compliance_choice variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the compliance_choice variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
 		});
 	});
 

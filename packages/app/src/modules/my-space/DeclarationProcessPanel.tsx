@@ -87,9 +87,10 @@ export function DeclarationProcessPanel({
 						{lockedByOther && lockHolder && (
 							<DeclarationLockAlert holder={lockHolder} />
 						)}
-						{(variant === "start" || variant === "compliance_choice") && (
-							<StartAlert />
-						)}
+						{indicatorGRequired &&
+							(variant === "start" || variant === "compliance_choice") && (
+								<StartAlert />
+							)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
 							cseOpinionRequired={cseOpinionRequired}

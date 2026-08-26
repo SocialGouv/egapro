@@ -267,6 +267,43 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
+		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
+		const CATEGORY_BULLET =
+			/Indicateurs de rémunération par catégories de salariés à remplir/;
+
+		it("renders both bullets on the start variant when indicator G applies", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: true });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.getByText(CATEGORY_BULLET)).toBeInTheDocument();
+		});
+
+		it("drops the category bullet but keeps the prefilled one when indicator G does not apply", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: false });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
+		});
+
+		it("keeps the step 1 deadline row when the category bullet is dropped", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("start", {
+				campaignDeadlines: deadlines,
+				indicatorGRequired: false,
+			});
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl1ModificationDeadline)}`,
+			);
+		});
+
+		it("renders no step 1 bullet outside the start variant", () => {
+			const { panel } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(panel.queryByText(PREFILLED_BULLET)).not.toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
+		});
+	});
+
 	describe("numérotation des étapes visibles (#4000)", () => {
 		function stepNumbers(dialog: HTMLElement): string[] {
 			return Array.from(

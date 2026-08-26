@@ -33,12 +33,14 @@ function StepTitle({
 
 export function Step1Content({
 	campaignDeadlines,
+	indicatorGRequired,
 	siren,
 	status,
 	variant,
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	indicatorGRequired: boolean;
 	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
@@ -67,12 +69,14 @@ export function Step1Content({
 						(issus des données DSN)
 					</p>
 				</div>
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">
-						Indicateurs de rémunération par catégories de salariés à remplir
-					</p>
-				</div>
+				{indicatorGRequired && (
+					<div className={styles.bulletItem}>
+						<span aria-hidden="true" className={styles.bullet} />
+						<p className="fr-mb-0">
+							Indicateurs de rémunération par catégories de salariés à remplir
+						</p>
+					</div>
+				)}
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
