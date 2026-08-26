@@ -25,7 +25,10 @@ import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
-import { derivePayGapErrors } from "../shared/formError/payGapErrors";
+import {
+	derivePayGapErrors,
+	payGapFieldId,
+} from "../shared/formError/payGapErrors";
 import type { FieldError } from "../shared/formError/types";
 import { describedByForField, findFieldError } from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
@@ -37,6 +40,7 @@ import {
 	step3ToRows,
 } from "../shared/indicatorRowMapping";
 import { useLockContext } from "../shared/lock/LockContext";
+import { numericInputClassName } from "../shared/numericInputClassName";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
@@ -140,6 +144,7 @@ export function Step3VariablePay({
 	const [benefErrors, setBenefErrors] = useState<FieldError[]>([]);
 	const hasData = hasSavedData || hasDraft;
 	const [payGapErrors, setPayGapErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => {
@@ -156,6 +161,12 @@ export function Step3VariablePay({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep3FieldName(index, field);
 		form.setValue(fieldName, normalized);
+		setPayGapErrors((errors) =>
+			errors.filter(
+				(error) =>
+					error.fieldId !== payGapFieldId(PAY_GAP_ID_PREFIX, index, field),
+			),
+		);
 	}
 
 	function handleBenefChange(
@@ -165,14 +176,21 @@ export function Step3VariablePay({
 	) {
 		if (value === "") {
 			form.setValue(field, "");
-			setBenefErrors([]);
+			setBenefErrors((errors) =>
+				errors.filter(
+					(error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field],
+				),
+			);
 			return;
 		}
 		if (/\D/.test(value)) return;
 		const n = Number.parseInt(value, 10);
 		if (Number.isNaN(n) || n < 0) return;
 		if (max !== undefined && n > max) {
-			setBenefErrors([
+			setBenefErrors((errors) => [
+				...errors.filter(
+					(error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field],
+				),
 				{
 					fieldId: BENEFICIARY_FIELD_IDS[field],
 					category: "invalid",
@@ -181,7 +199,9 @@ export function Step3VariablePay({
 			]);
 			return;
 		}
-		setBenefErrors([]);
+		setBenefErrors((errors) =>
+			errors.filter((error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field]),
+		);
 		form.setValue(field, value);
 	}
 
@@ -195,6 +215,7 @@ export function Step3VariablePay({
 	);
 
 	const onSubmit = form.handleSubmit(() => {
+		setValidationAttempt((attempt) => attempt + 1);
 		const tableErrors = derivePayGapErrors(PAY_GAP_ID_PREFIX, rows);
 		setPayGapErrors(tableErrors);
 
@@ -209,9 +230,18 @@ export function Step3VariablePay({
 				category: "empty" as const,
 				message: `Renseignez le nombre ${BENEFICIARY_LABELS[field]}.`,
 			}));
-		if (missingBeneficiaries.length > 0) setBenefErrors(missingBeneficiaries);
+		const beneficiaryErrors = [
+			...benefErrors.filter(
+				(error) =>
+					!missingBeneficiaries.some(
+						(missing) => missing.fieldId === error.fieldId,
+					),
+			),
+			...missingBeneficiaries,
+		];
+		setBenefErrors(beneficiaryErrors);
 
-		if (tableErrors.length > 0 || missingBeneficiaries.length > 0) return;
+		if (tableErrors.length > 0 || beneficiaryErrors.length > 0) return;
 		mutation.mutate(form.getValues() as Step3Data);
 	});
 
@@ -242,6 +272,8 @@ export function Step3VariablePay({
 						});
 						form.setValue("indicatorEWomen", DEV_STEP3_BENEFICIARY_WOMEN);
 						form.setValue("indicatorEMen", DEV_STEP3_BENEFICIARY_MEN);
+						setPayGapErrors([]);
+						setBenefErrors([]);
 					}}
 					title={
 						<h1 className="fr-h4 fr-mb-0">
@@ -307,7 +339,11 @@ export function Step3VariablePay({
 							/>
 						)}
 
-						<FieldErrorAlert errors={payGapErrors} id={PAY_GAP_ALERT_ID} />
+						<FieldErrorAlert
+							errors={payGapErrors}
+							id={PAY_GAP_ALERT_ID}
+							validationAttempt={validationAttempt}
+						/>
 					</div>
 
 					<div className={common.flexColumnGap1}>
@@ -366,7 +402,9 @@ export function Step3VariablePay({
 																womenBeneficiaryError ? true : undefined
 															}
 															aria-label="Bénéficiaires femmes"
-															className={`fr-input ${womenBeneficiaryError ? "fr-input--error" : ""}${common.numericInput}`}
+															className={numericInputClassName(
+																Boolean(womenBeneficiaryError),
+															)}
 															disabled={isImpersonating}
 															id={BENEFICIARY_FIELD_IDS.indicatorEWomen}
 															inputMode="numeric"
@@ -407,7 +445,9 @@ export function Step3VariablePay({
 																menBeneficiaryError ? true : undefined
 															}
 															aria-label="Bénéficiaires hommes"
-															className={`fr-input ${menBeneficiaryError ? "fr-input--error" : ""}${common.numericInput}`}
+															className={numericInputClassName(
+																Boolean(menBeneficiaryError),
+															)}
 															disabled={isImpersonating}
 															id={BENEFICIARY_FIELD_IDS.indicatorEMen}
 															inputMode="numeric"
@@ -440,14 +480,19 @@ export function Step3VariablePay({
 							</div>
 						</div>
 
-						<FieldErrorAlert errors={benefErrors} id={BENEFICIARIES_ALERT_ID} />
-
 						{gipPrefillData && (
 							<PrefillSource
 								tooltipId="tooltip-source-step3"
 								year={declarationYear}
 							/>
 						)}
+
+						<FieldErrorAlert
+							errors={benefErrors}
+							focusOnValidation={payGapErrors.length === 0}
+							id={BENEFICIARIES_ALERT_ID}
+							validationAttempt={validationAttempt}
+						/>
 					</div>
 
 					<DefinitionAccordion

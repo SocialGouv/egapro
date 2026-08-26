@@ -127,6 +127,7 @@ export function Step1Workforce({
 
 	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
 	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
 		for (const field of WORKFORCE_FIELDS) {
@@ -210,6 +211,7 @@ export function Step1Workforce({
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
+		setValidationAttempt((attempt) => attempt + 1);
 		const missing: FieldError[] = [];
 		for (const row of WORKFORCE_ROWS) {
 			if (raw[row.womenField] === "") {
@@ -343,9 +345,13 @@ export function Step1Workforce({
 
 							{isPrefilled && <PrefillSource year={declarationYear} />}
 
-							<FieldErrorAlert errors={fieldErrors} id={WORKFORCE_ALERT_ID} />
-
 							{showResetWarning && <PrefillResetWarning />}
+
+							<FieldErrorAlert
+								errors={fieldErrors}
+								id={WORKFORCE_ALERT_ID}
+								validationAttempt={validationAttempt}
+							/>
 						</div>
 
 						<DefinitionAccordion

@@ -18,7 +18,10 @@ import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
-import { derivePayGapErrors } from "../shared/formError/payGapErrors";
+import {
+	derivePayGapErrors,
+	payGapFieldId,
+} from "../shared/formError/payGapErrors";
 import type { FieldError } from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
@@ -115,6 +118,7 @@ export function Step2PayGap({
 
 	const hasData = hasInitialData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => {
@@ -131,9 +135,16 @@ export function Step2PayGap({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep2FieldName(index, field);
 		form.setValue(fieldName, normalized);
+		setFieldErrors((errors) =>
+			errors.filter(
+				(error) =>
+					error.fieldId !== payGapFieldId(PAY_GAP_ID_PREFIX, index, field),
+			),
+		);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
+		setValidationAttempt((attempt) => attempt + 1);
 		const errors = derivePayGapErrors(PAY_GAP_ID_PREFIX, rows);
 		setFieldErrors(errors);
 		if (errors.length > 0) return;
@@ -163,6 +174,7 @@ export function Step2PayGap({
 							form.setValue(womenField, padDecimalToTwo(row.womenValue));
 							form.setValue(menField, padDecimalToTwo(row.menValue));
 						});
+						setFieldErrors([]);
 					}}
 					title={
 						<h1 className="fr-h4 fr-mb-0">
@@ -224,7 +236,11 @@ export function Step2PayGap({
 							/>
 						)}
 
-						<FieldErrorAlert errors={fieldErrors} id={PAY_GAP_ALERT_ID} />
+						<FieldErrorAlert
+							errors={fieldErrors}
+							id={PAY_GAP_ALERT_ID}
+							validationAttempt={validationAttempt}
+						/>
 					</div>
 
 					<DefinitionAccordion

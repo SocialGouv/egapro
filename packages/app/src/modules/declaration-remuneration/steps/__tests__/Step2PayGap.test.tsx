@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -286,6 +286,75 @@ describe("Step2PayGap", () => {
 		expect(alert).toHaveTextContent(
 			"Renseignez le montant Horaire brute médiane pour les hommes.",
 		);
+		const table = screen.getByRole("table");
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
+		expect(
+			table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
+		expect(
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("clears only the corrected amount from the shared error state", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
+		await user.type(womenInput, "100");
+
+		await waitFor(() => expect(womenInput).not.toHaveAttribute("aria-invalid"));
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+		expect(screen.getByRole("alert")).not.toHaveTextContent(
+			"Renseignez le montant Annuelle brute moyenne pour les femmes.",
+		);
+	});
+
+	it("places prefill source before the error alert", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: nullGipStep4(),
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const source = document.querySelector("p.fr-text-mention--grey");
+		const alert = screen.getByRole("alert");
+		expect(source).not.toBeNull();
+		expect(
+			(source as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 });

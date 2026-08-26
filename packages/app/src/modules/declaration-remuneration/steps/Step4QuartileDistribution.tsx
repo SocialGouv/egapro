@@ -169,6 +169,7 @@ export function Step4QuartileDistribution({
 
 	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 	const [showRecap, setShowRecap] = useState(false);
 
 	const nextHref = getNextStepHref(4, indicatorGRequired);
@@ -273,25 +274,15 @@ export function Step4QuartileDistribution({
 		clearFieldError(tableType, index, field);
 	}
 
-	// The coherence errors are reported once per table, under the table they
-	// belong to. FieldErrorAlert manages its own focus for field errors; when a
-	// coherence error is the only blocker, focus its table-level message here.
-	function focusCoherenceError(coherenceTable: TableType | undefined) {
-		requestAnimationFrame(() => {
-			if (coherenceTable) {
-				document.getElementById(`step4-coherence-${coherenceTable}`)?.focus();
-			}
-		});
-	}
 	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		setValidationAttempt((attempt) => attempt + 1);
 		const values = form.getValues();
 		const errors = deriveErrors(values);
 		const hasFieldError = hasAnyError(errors);
 		if (hasFieldError || coherenceErrors.length > 0) {
 			setFieldErrors(errors);
 			setShowRecap(true);
-			if (!hasFieldError) focusCoherenceError(coherenceErrors[0]?.table);
 			return;
 		}
 		setFieldErrors(emptyErrorMap());
@@ -309,7 +300,7 @@ export function Step4QuartileDistribution({
 	const recapErrors: FieldError[] = showRecap
 		? buildRecap(fieldErrors).map((entry) => ({
 				fieldId: entry.id,
-				category: "empty",
+				category: entry.category,
 				message: entry.label,
 				anchor: true,
 			}))
@@ -388,7 +379,15 @@ export function Step4QuartileDistribution({
 					<QuartileTable
 						disabled={isImpersonating}
 						errorNote={
-							<CoherenceNote errors={coherenceErrors} tableType="annual" />
+							<CoherenceNote
+								errors={coherenceErrors}
+								focusOnValidation={
+									!hasAnyError(fieldErrors) &&
+									coherenceErrors[0]?.table === "annual"
+								}
+								tableType="annual"
+								validationAttempt={validationAttempt}
+							/>
 						}
 						errors={fieldErrors.annual}
 						mins={annualMins}
@@ -414,7 +413,15 @@ export function Step4QuartileDistribution({
 					<QuartileTable
 						disabled={isImpersonating}
 						errorNote={
-							<CoherenceNote errors={coherenceErrors} tableType="hourly" />
+							<CoherenceNote
+								errors={coherenceErrors}
+								focusOnValidation={
+									!hasAnyError(fieldErrors) &&
+									coherenceErrors[0]?.table === "hourly"
+								}
+								tableType="hourly"
+								validationAttempt={validationAttempt}
+							/>
 						}
 						errors={fieldErrors.hourly}
 						mins={hourlyMins}
@@ -437,7 +444,11 @@ export function Step4QuartileDistribution({
 						title="Rémunération horaire brute moyenne"
 					/>
 
-					<FieldErrorAlert errors={recapErrors} id={QUARTILE_ALERT_ID} />
+					<FieldErrorAlert
+						errors={recapErrors}
+						id={QUARTILE_ALERT_ID}
+						validationAttempt={validationAttempt}
+					/>
 
 					<DefinitionAccordion
 						id="accordion-step4"

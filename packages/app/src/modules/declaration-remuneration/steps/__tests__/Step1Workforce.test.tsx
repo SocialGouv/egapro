@@ -262,6 +262,65 @@ describe("Step1Workforce", () => {
 				"true",
 			);
 		}
+		const table = screen.getByRole("table");
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
+		expect(
+			table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
+		expect(
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("places prefill source before the alert and definitions", async () => {
+		const user = userEvent.setup();
+		renderStep1(
+			step1Data(),
+			gipPrefill({
+				totalWomen: null,
+				totalMen: null,
+				hourlyWomen: null,
+				hourlyMen: null,
+			}),
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const source = document.querySelector("p.fr-text-mention--grey");
+		const alert = screen.getByRole("alert");
+		expect(source).not.toBeNull();
+		expect(
+			(source as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("keeps the reset warning before the validation alert", async () => {
+		const user = userEvent.setup();
+		renderStep1(
+			SAVED,
+			gipPrefill({
+				totalWomen: 50,
+				totalMen: 100,
+				hourlyWomen: 50,
+				hourlyMen: 100,
+			}),
+		);
+		await user.clear(screen.getByLabelText(ANNUAL_WOMEN));
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const warning = screen
+			.getByText(/réinitialise les indicateurs préremplis/)
+			.closest("div");
+		const alert = screen.getByRole("alert");
+		expect(warning).not.toBeNull();
+		expect(
+			(warning as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("blocks submit when the hourly row is left empty", async () => {

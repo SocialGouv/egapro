@@ -109,24 +109,18 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 	it("shows no coherence message when both tables match the step 1 headcount", () => {
 		renderStep4();
 		expect(screen.queryByText(ANNUAL_WOMEN_ERROR)).not.toBeInTheDocument();
-		expect(screen.queryByText("Nombre de salariés")).not.toBeInTheDocument();
+		expect(screen.queryByText("Données incohérentes")).not.toBeInTheDocument();
 	});
 
-	it("keeps a polite live region mounted under each table even with no error", () => {
-		const { container } = renderStep4();
-		const wrappers = container.querySelectorAll(".tableWrapper");
-		expect(wrappers).toHaveLength(2);
-		for (const wrapper of wrappers) {
-			expect(
-				wrapper.querySelector('[aria-live="polite"][aria-atomic="true"]'),
-			).not.toBeNull();
-		}
+	it("renders no coherence alert while both tables match", () => {
+		renderStep4();
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 
 	it("reports a diverging total on load, before any submission", () => {
 		renderStep4({ annual: quartiles([10, 10, 10, 11], MATCHING_MEN) });
 		expect(screen.getByText(ANNUAL_WOMEN_ERROR)).toBeInTheDocument();
-		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(screen.getByText("Données incohérentes")).toBeInTheDocument();
 	});
 
 	it("controls the hourly table too, with no GIP prefill in play", () => {
@@ -147,7 +141,9 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		const annualTable = screen.getByRole("table", {
 			name: "Rémunération annuelle brute moyenne",
 		});
-		const alert = document.getElementById("step4-coherence-annual");
+		const alert = screen
+			.getByText(ANNUAL_WOMEN_ERROR)
+			.closest('[role="alert"]');
 		expect(alert).not.toBeNull();
 		expect(alert?.closest(".tableWrapper")).toBe(
 			annualTable.closest(".tableWrapper"),
@@ -156,7 +152,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			annualTable.compareDocumentPosition(alert as HTMLElement) &
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
-		expect(document.getElementById("step4-coherence-hourly")).toBeNull();
+		expect(screen.queryByText(HOURLY_MEN_ERROR)).not.toBeInTheDocument();
 	});
 
 	it("places the message below the DSN source note", () => {
@@ -164,7 +160,9 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
 			withSourceNote: true,
 		});
-		const alert = document.getElementById("step4-coherence-annual");
+		const alert = screen
+			.getByText(ANNUAL_WOMEN_ERROR)
+			.closest('[role="alert"]');
 		const sourceNote = screen
 			.getAllByText(/^Source\s*:\s*DSN/)[0]
 			?.closest("p");
@@ -181,7 +179,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
 			hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]),
 		});
-		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
+		expect(screen.getAllByText("Données incohérentes")).toHaveLength(2);
 		expect(screen.getAllByText(ANNUAL_WOMEN_ERROR)).toHaveLength(1);
 		expect(screen.getAllByText(HOURLY_MEN_ERROR)).toHaveLength(1);
 	});
@@ -235,7 +233,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		});
 	});
 
-	it("keeps the coherence message out of the summary alert on submit", async () => {
+	it("uses one standardized alert per diverging table on submit", async () => {
 		const user = userEvent.setup();
 		renderStep4({
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
@@ -244,8 +242,8 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
+		expect(screen.getAllByRole("alert")).toHaveLength(2);
+		expect(screen.getAllByText("Données incohérentes")).toHaveLength(2);
 	});
 
 	it("focuses the first diverging table's message on submit", async () => {
@@ -254,7 +252,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		const target = document.getElementById("step4-coherence-hourly");
+		const target = screen.getByText(HOURLY_MEN_ERROR).closest('[role="alert"]');
 		expect(target).toHaveAttribute("tabindex", "-1");
 		await waitFor(() => {
 			expect(document.activeElement).toBe(target);
@@ -274,14 +272,14 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		const recap = screen.getByRole("alert");
+		const recap = screen
+			.getAllByRole("alert")
+			.find((alert) => alert.textContent?.includes("Champ vide"));
+		expect(recap).toBeDefined();
 		expect(
-			recap.querySelector('a[href="#step4-annual-q1-max"]'),
+			recap?.querySelector('a[href="#step4-annual-q1-max"]'),
 		).toHaveTextContent("Le seuil est obligatoire");
-		expect(recap.querySelector('a[href="#step4-coherence-annual"]')).toBeNull();
-		expect(document.getElementById("step4-coherence-annual")).toHaveTextContent(
-			ANNUAL_WOMEN_ERROR,
-		);
+		expect(screen.getByText(ANNUAL_WOMEN_ERROR)).toBeInTheDocument();
 	});
 
 	it("runs no control and blocks nothing when the step 1 headcount is unknown", async () => {
@@ -292,8 +290,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			maxMen: undefined,
 		});
 
-		expect(screen.queryByText("Nombre de salariés")).not.toBeInTheDocument();
-		expect(document.getElementById("step4-coherence-annual")).toBeNull();
+		expect(screen.queryByText("Données incohérentes")).not.toBeInTheDocument();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 

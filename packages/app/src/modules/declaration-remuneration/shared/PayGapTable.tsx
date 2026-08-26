@@ -13,6 +13,7 @@ import { payGapFieldId } from "./formError/payGapErrors";
 import type { FieldError } from "./formError/types";
 import { describedByForField, findFieldError } from "./formError/types";
 import { GAP_LEVEL_LABELS, gapBadgeClass } from "./gapBadge";
+import { numericInputClassName } from "./numericInputClassName";
 import styles from "./PayGapTable.module.scss";
 
 export const DEFAULT_PAY_GAP_ROWS: PayGapRow[] = [
@@ -119,7 +120,9 @@ export function PayGapTable({
 														}
 														aria-invalid={womenError ? true : undefined}
 														aria-label={`${row.label} — Femmes`}
-														className={`fr-input ${womenError ? "fr-input--error" : ""}${common.numericInput}`}
+														className={numericInputClassName(
+															Boolean(womenError),
+														)}
 														disabled={disabled}
 														id={womenId}
 														inputMode="decimal"
@@ -148,7 +151,7 @@ export function PayGapTable({
 														}
 														aria-invalid={menError ? true : undefined}
 														aria-label={`${row.label} — Hommes`}
-														className={`fr-input ${menError ? "fr-input--error" : ""}${common.numericInput}`}
+														className={numericInputClassName(Boolean(menError))}
 														disabled={disabled}
 														id={menId}
 														inputMode="decimal"

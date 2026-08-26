@@ -116,7 +116,7 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 		// Recap alert is rendered with role=alert
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent(/Champ vide/);
+		expect(alert).toHaveTextContent(/Valeur invalide/);
 		// Anchor link points to the offending threshold input
 		const anchor = alert.querySelector('a[href="#step4-annual-q2-max"]');
 		expect(anchor).not.toBeNull();

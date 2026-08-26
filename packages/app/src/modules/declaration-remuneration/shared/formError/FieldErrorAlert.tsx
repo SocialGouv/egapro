@@ -21,17 +21,35 @@ function groupByCategory(
 	return groups;
 }
 
-function ErrorMessage({ error }: { error: FieldError }) {
+function ErrorMessage({
+	error,
+	onAnchorClick,
+}: {
+	error: FieldError;
+	onAnchorClick?: (error: FieldError) => void;
+}) {
 	if (!error.anchor) return <>{error.message}</>;
-	return <a href={`#${error.fieldId}`}>{error.message}</a>;
+	return (
+		<a href={`#${error.fieldId}`} onClick={() => onAnchorClick?.(error)}>
+			{error.message}
+		</a>
+	);
 }
 
-function ErrorBody({ errors, id }: { errors: FieldError[]; id: string }) {
+function ErrorBody({
+	errors,
+	id,
+	onAnchorClick,
+}: {
+	errors: FieldError[];
+	id: string;
+	onAnchorClick?: (error: FieldError) => void;
+}) {
 	const [only] = errors;
 	if (errors.length === 1 && only) {
 		return (
 			<p id={id}>
-				<ErrorMessage error={only} />
+				<ErrorMessage error={only} onAnchorClick={onAnchorClick} />
 			</p>
 		);
 	}
@@ -39,7 +57,7 @@ function ErrorBody({ errors, id }: { errors: FieldError[]; id: string }) {
 		<ul id={id}>
 			{errors.map((error) => (
 				<li key={`${error.fieldId}-${error.message}`}>
-					<ErrorMessage error={error} />
+					<ErrorMessage error={error} onAnchorClick={onAnchorClick} />
 				</li>
 			))}
 		</ul>
@@ -47,34 +65,56 @@ function ErrorBody({ errors, id }: { errors: FieldError[]; id: string }) {
 }
 
 type Props = {
-	/** Base id — each category gets `${id}-${category}` so inputs can point at it. */
 	id: string;
 	errors: readonly FieldError[];
+	focusOnValidation?: boolean;
+	onErrorAnchorClick?: (error: FieldError) => void;
+	validationAttempt?: number;
 };
 
-/**
- * The single error surface of the declaration forms: a dismissible DSFR alert
- * rendered right under the table it belongs to, titled by error category and
- * naming each offending field. Offending inputs carry the error state and an
- * `aria-describedby` pointing here, never their own inline message (#4235).
- */
-export function FieldErrorAlert({ id, errors }: Props) {
-	const [dismissed, setDismissed] = useState(false);
+export function FieldErrorAlert({
+	id,
+	errors,
+	focusOnValidation = true,
+	onErrorAnchorClick,
+	validationAttempt = 0,
+}: Props) {
+	const [dismissedToken, setDismissedToken] = useState<string | null>(null);
 	const firstAlertRef = useRef<HTMLDivElement | null>(null);
+	const previousValidationAttemptRef = useRef(validationAttempt);
 
-	// A fresh set of errors re-opens the alert and takes the focus: dismissing
-	// one submission's feedback must never swallow the next one, and the alert
-	// is the only place the message is written (RGAA 11.10).
 	const signature = errors
 		.map((error) => `${error.category}:${error.fieldId}:${error.message}`)
 		.join("|");
-	useEffect(() => {
-		setDismissed(false);
-		if (signature === "") return;
-		requestAnimationFrame(() => firstAlertRef.current?.focus());
-	}, [signature]);
+	const alertToken = `${validationAttempt}:${signature}`;
+	const dismissed = dismissedToken === alertToken;
 
-	if (dismissed || errors.length === 0) return null;
+	useEffect(() => {
+		const isNewValidationAttempt =
+			previousValidationAttemptRef.current !== validationAttempt;
+		previousValidationAttemptRef.current = validationAttempt;
+		if (!isNewValidationAttempt || !focusOnValidation || signature === "")
+			return;
+		firstAlertRef.current?.focus();
+	}, [focusOnValidation, signature, validationAttempt]);
+
+	if (errors.length === 0) return null;
+
+	if (dismissed) {
+		return (
+			<>
+				{groupByCategory(errors).map(([category, group]) => (
+					<div
+						className="fr-sr-only"
+						id={fieldErrorAlertId(id, category)}
+						key={category}
+					>
+						{group.map((error) => error.message).join(" ")}
+					</div>
+				))}
+			</>
+		);
+	}
 
 	return (
 		<>
@@ -87,10 +127,14 @@ export function FieldErrorAlert({ id, errors }: Props) {
 					tabIndex={-1}
 				>
 					<h3 className="fr-alert__title">{FIELD_ERROR_TITLES[category]}</h3>
-					<ErrorBody errors={group} id={fieldErrorAlertId(id, category)} />
+					<ErrorBody
+						errors={group}
+						id={fieldErrorAlertId(id, category)}
+						onAnchorClick={onErrorAnchorClick}
+					/>
 					<button
 						className="fr-btn--close fr-btn"
-						onClick={() => setDismissed(true)}
+						onClick={() => setDismissedToken(alertToken)}
 						title="Masquer le message"
 						type="button"
 					>

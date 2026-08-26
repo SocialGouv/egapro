@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -86,6 +86,35 @@ describe("FieldErrorAlert", () => {
 		);
 
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+		expect(document.getElementById(`${ALERT_ID}-empty`)).toHaveTextContent(
+			EMPTY_WOMEN.message,
+		);
+	});
+
+	it("comes back and receives focus after an identical failed submission", async () => {
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<FieldErrorAlert
+				errors={[EMPTY_WOMEN]}
+				id={ALERT_ID}
+				validationAttempt={1}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: "Masquer le message" }),
+		);
+		rerender(
+			<FieldErrorAlert
+				errors={[EMPTY_WOMEN]}
+				id={ALERT_ID}
+				validationAttempt={2}
+			/>,
+		);
+
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(EMPTY_WOMEN.message);
+		await waitFor(() => expect(alert).toHaveFocus());
 	});
 
 	it("comes back when a new error set arrives after a dismissal", async () => {
