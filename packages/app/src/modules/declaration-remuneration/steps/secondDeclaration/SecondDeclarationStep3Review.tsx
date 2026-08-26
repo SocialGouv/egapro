@@ -100,7 +100,7 @@ export function SecondDeclarationStep3Review({
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
 					Parcours de mise en conformité pour l&apos;indicateur
-					par&nbsp;catégorie de salariés
+					par&nbsp;catégories de salariés
 				</h1>
 				<SavedIndicator hasData={true} />
 			</div>
@@ -110,10 +110,10 @@ export function SecondDeclarationStep3Review({
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				soumettre votre seconde déclaration des écarts de rémunération par
-				catégorie de salariés aux services du ministère chargé du travail.
+				catégories de salariés aux services du ministère chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateurs par catégorie de salariés</h2>
+			<h2 className="fr-h5 fr-mb-0">Indicateurs par catégories de salariés</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">

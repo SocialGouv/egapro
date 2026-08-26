@@ -103,7 +103,7 @@ export function JointEvaluationForm({
 					<div className={common.flexBetween}>
 						<h1 className="fr-h4 fr-mb-0">
 							Parcours de mise en conformité pour l&apos;indicateur par
-							catégorie de salariés
+							catégories de salariés
 						</h1>
 					</div>
 

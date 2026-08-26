@@ -41,8 +41,8 @@ export function SecondDeclarationStep1Info({
 		<div className={common.flexColumnGap2}>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-					salariés
+					Parcours de mise en conformité pour l&apos;indicateur par catégories
+					de salariés
 				</h1>
 				<SavedIndicator hasData={true} />
 			</div>
@@ -53,7 +53,7 @@ export function SecondDeclarationStep1Info({
 				Vous devez mettre en œuvre des <strong>actions correctives</strong> et
 				effectuer une{" "}
 				<strong>
-					seconde déclaration de l&apos;indicateur par catégorie de salariés
+					seconde déclaration de l&apos;indicateur par catégories de salariés
 				</strong>
 				.
 			</p>

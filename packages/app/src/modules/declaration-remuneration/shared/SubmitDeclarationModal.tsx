@@ -25,7 +25,7 @@ export function SubmitDeclarationModal({
 	const [certified, setCertified] = useState(false);
 
 	const description = isSecondDeclaration
-		? `Vous allez soumettre la seconde déclaration des écarts de rémunération par catégorie de salariés ${year} aux services du ministère chargé du travail.`
+		? `Vous allez soumettre la seconde déclaration des écarts de rémunération par catégories de salariés ${year} aux services du ministère chargé du travail.`
 		: `Vous allez soumettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
 
 	return (

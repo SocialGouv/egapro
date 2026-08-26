@@ -214,7 +214,7 @@ export function IndicatorSections({
 			{indicatorGRequired && (
 				<div className={stepStyles.group}>
 					<h2 className="fr-h6 fr-mb-0">
-						Indicateurs par catégorie de salariés
+						Indicateurs par catégories de salariés
 					</h2>
 
 					{/* Card: Employee categories (Step 5) */}
