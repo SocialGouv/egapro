@@ -38,6 +38,9 @@ test.describe("Declaration history page", () => {
 			page.getByText(`Démarche des indicateurs de rémunération ${year}`),
 		).toBeVisible();
 
+		// #4256: same removal as the company banner, on the other `/mon-espace/**` surface.
+		await expect(page.locator(".fr-breadcrumb")).toHaveCount(0);
+
 		const items = page.locator("main ul > li");
 		await expect(items).toHaveCount(3);
 	});

@@ -5,17 +5,13 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import {
-	computeWorkforceTotal,
-	getReferencePeriod,
-	getReferenceYearFor,
-} from "~/modules/domain";
+import { getReferencePeriod, getReferenceYearFor } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
+import { DEV_STEP1_ROWS } from "../shared/devFillData";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
@@ -23,7 +19,6 @@ import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
 import type { FieldError } from "../shared/formError/types";
-import { describedByForField, findFieldError } from "../shared/formError/types";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillResetConfirmDialog } from "../shared/PrefillResetConfirmDialog";
@@ -35,6 +30,17 @@ import { TooltipButton } from "../shared/TooltipButton";
 import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 import { Step1WorkforceDefinition } from "./Step1WorkforceDefinition";
+import { WorkforceTableRow } from "./step1/WorkforceTableRow";
+import type { WorkforceField } from "./step1/workforceRows";
+import {
+	WORKFORCE_FIELDS,
+	WORKFORCE_ROWS,
+	workforceFieldErrorMessage,
+	workforceFieldId,
+	workforceFieldIdFromField,
+} from "./step1/workforceRows";
+
+type RawValues = Record<WorkforceField, string>;
 
 type Step1WorkforceProps = {
 	declarationSiren: string;
@@ -45,8 +51,21 @@ type Step1WorkforceProps = {
 };
 
 const WORKFORCE_ALERT_ID = "step1-workforce-error";
-const WOMEN_FIELD_ID = "step1-women";
-const MEN_FIELD_ID = "step1-men";
+
+function toRaw(values: Step1Data): RawValues {
+	return {
+		totalWomen: values.totalWomen > 0 ? String(values.totalWomen) : "",
+		totalMen: values.totalMen > 0 ? String(values.totalMen) : "",
+		hourlyWomen: values.hourlyWomen > 0 ? String(values.hourlyWomen) : "",
+		hourlyMen: values.hourlyMen > 0 ? String(values.hourlyMen) : "",
+	};
+}
+
+function parseIntegerInput(raw: string): number | null {
+	if (raw === "") return null;
+	if (/\D/.test(raw)) return null;
+	return Number.parseInt(raw, 10);
+}
 
 export function Step1Workforce({
 	declarationSiren,
@@ -60,14 +79,23 @@ export function Step1Workforce({
 	const { isReadOnly } = useLockContext();
 	const isPrefilled = !!gipPrefillData;
 
-	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
+	const hasInitialData = WORKFORCE_FIELDS.some(
+		(field) => initialData[field] > 0,
+	);
 
 	const dbValues = useMemo(
-		() => ({
+		(): Step1Data => ({
 			totalWomen: initialData.totalWomen,
 			totalMen: initialData.totalMen,
+			hourlyWomen: initialData.hourlyWomen,
+			hourlyMen: initialData.hourlyMen,
 		}),
-		[initialData.totalWomen, initialData.totalMen],
+		[
+			initialData.totalWomen,
+			initialData.totalMen,
+			initialData.hourlyWomen,
+			initialData.hourlyMen,
+		],
 	);
 
 	const {
@@ -90,38 +118,32 @@ export function Step1Workforce({
 		defaultValues: dbValues,
 	});
 
-	const totalWomen = form.watch("totalWomen");
-	const totalMen = form.watch("totalMen");
-	const total = computeWorkforceTotal(totalWomen, totalMen);
+	const values: Record<WorkforceField, number> = {
+		totalWomen: form.watch("totalWomen"),
+		totalMen: form.watch("totalMen"),
+		hourlyWomen: form.watch("hourlyWomen"),
+		hourlyMen: form.watch("hourlyMen"),
+	};
 
-	const [womenRaw, setWomenRaw] = useState(() =>
-		initialData.totalWomen > 0 ? String(initialData.totalWomen) : "",
-	);
-	const [menRaw, setMenRaw] = useState(() =>
-		initialData.totalMen > 0 ? String(initialData.totalMen) : "",
-	);
+	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
 	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
-	const womenError = findFieldError(fieldErrors, WOMEN_FIELD_ID);
-	const menError = findFieldError(fieldErrors, MEN_FIELD_ID);
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
-		if (typeof d.totalWomen === "number") {
-			form.setValue("totalWomen", d.totalWomen);
-			setWomenRaw(d.totalWomen > 0 ? String(d.totalWomen) : "");
-		}
-		if (typeof d.totalMen === "number") {
-			form.setValue("totalMen", d.totalMen);
-			setMenRaw(d.totalMen > 0 ? String(d.totalMen) : "");
+		for (const field of WORKFORCE_FIELDS) {
+			const value = d[field];
+			if (typeof value !== "number") continue;
+			form.setValue(field, value);
+			setRaw((prev) => ({
+				...prev,
+				[field]: value > 0 ? String(value) : "",
+			}));
 		}
 	});
 
 	const hasData = hasInitialData || hasDraft;
 
 	const dialogRef = useRef<HTMLDialogElement | null>(null);
-	const pendingSubmitData = useRef<{
-		totalWomen: number;
-		totalMen: number;
-	} | null>(null);
+	const pendingSubmitData = useRef<Step1Data | null>(null);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep1.useMutation({
@@ -131,16 +153,11 @@ export function Step1Workforce({
 		},
 	});
 
-	function parseIntegerInput(raw: string): number | null {
-		if (raw === "") return null;
-		if (/\D/.test(raw)) return null;
-		return Number.parseInt(raw, 10);
-	}
-
 	const shouldConfirmReset =
 		hasInitialData &&
-		(parseIntegerInput(womenRaw) !== dbValues.totalWomen ||
-			parseIntegerInput(menRaw) !== dbValues.totalMen);
+		WORKFORCE_FIELDS.some(
+			(field) => parseIntegerInput(raw[field]) !== dbValues[field],
+		);
 
 	function handleConfirm() {
 		dialogRef.current?.close();
@@ -156,48 +173,59 @@ export function Step1Workforce({
 
 	const showResetWarning =
 		gipPrefillData !== undefined &&
-		((gipPrefillData.step1.totalWomen !== null &&
-			parseIntegerInput(womenRaw) !== gipPrefillData.step1.totalWomen) ||
-			(gipPrefillData.step1.totalMen !== null &&
-				parseIntegerInput(menRaw) !== gipPrefillData.step1.totalMen));
+		WORKFORCE_FIELDS.some((field) => {
+			const prefilled = gipPrefillData.step1[field];
+			return prefilled !== null && parseIntegerInput(raw[field]) !== prefilled;
+		});
 
-	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const raw = e.target.value;
-		setWomenRaw(raw);
-		setFieldErrors((prev) => prev.filter((e) => e.fieldId !== WOMEN_FIELD_ID));
-		const value = parseIntegerInput(raw);
-		if (value === null) return;
-		form.setValue("totalWomen", value);
-		setField({ totalWomen: value, totalMen });
+	function handleFieldChange(field: WorkforceField, value: string) {
+		setRaw((prev) => ({ ...prev, [field]: value }));
+		setFieldErrors((prev) =>
+			prev.filter(
+				(error) => error.fieldId !== workforceFieldIdFromField(field),
+			),
+		);
+		const parsed = parseIntegerInput(value);
+		if (parsed === null) return;
+		form.setValue(field, parsed);
+		setField({ ...values, [field]: parsed });
 	}
 
-	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const raw = e.target.value;
-		setMenRaw(raw);
-		setFieldErrors((prev) => prev.filter((e) => e.fieldId !== MEN_FIELD_ID));
-		const value = parseIntegerInput(raw);
-		if (value === null) return;
-		form.setValue("totalMen", value);
-		setField({ totalWomen, totalMen: value });
+	function fillForDev() {
+		const [annual, hourly] = DEV_STEP1_ROWS;
+		const filled: Step1Data = {
+			totalWomen: annual?.women ?? 50,
+			totalMen: annual?.men ?? 50,
+			hourlyWomen: hourly?.women ?? 50,
+			hourlyMen: hourly?.men ?? 50,
+		};
+		for (const field of WORKFORCE_FIELDS) {
+			form.setValue(field, filled[field]);
+		}
+		setRaw(toRaw(filled));
+		setFieldErrors([]);
+		setField(filled);
 	}
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
 		const missing: FieldError[] = [];
-		if (womenRaw === "") {
-			missing.push({
-				fieldId: WOMEN_FIELD_ID,
-				category: "empty",
-				message: "Renseignez le nombre de femmes.",
-			});
-		}
-		if (menRaw === "") {
-			missing.push({
-				fieldId: MEN_FIELD_ID,
-				category: "empty",
-				message: "Renseignez le nombre d'hommes.",
-			});
+		for (const row of WORKFORCE_ROWS) {
+			if (raw[row.womenField] === "") {
+				missing.push({
+					fieldId: workforceFieldId(row, "women"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "women"),
+				});
+			}
+			if (raw[row.menField] === "") {
+				missing.push({
+					fieldId: workforceFieldId(row, "men"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "men"),
+				});
+			}
 		}
 		setFieldErrors(missing);
 		if (missing.length > 0) return;
@@ -228,15 +256,7 @@ export function Step1Workforce({
 						hasData={hasData}
 						isPendingSave={isPendingSave}
 						isSaving={isSaving}
-						onDevFill={() => {
-							const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
-							const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
-							form.setValue("totalWomen", womenValue);
-							form.setValue("totalMen", menValue);
-							setWomenRaw(String(womenValue));
-							setMenRaw(String(menValue));
-							setField({ totalWomen: womenValue, totalMen: menValue });
-						}}
+						onDevFill={fillForDev}
 						title={
 							<h1 className="fr-h4 fr-mb-0">
 								Déclaration des indicateurs de rémunération {declarationYear}
@@ -294,83 +314,26 @@ export function Step1Workforce({
 												</colgroup>
 												<thead>
 													<tr>
-														<th scope="col">
-															<span className="fr-sr-only">Donnée</span>
-														</th>
+														<th scope="col">Nombre de salariés</th>
 														<th scope="col">Femmes</th>
 														<th scope="col">Hommes</th>
 														<th scope="col">Total</th>
 													</tr>
 												</thead>
 												<tbody>
-													<tr>
-														<th scope="row">Nombre de salariés</th>
-														<td>
-															<div
-																className={
-																	womenError
-																		? "fr-input-group fr-input-group--error"
-																		: "fr-input-group"
-																}
-															>
-																<input
-																	aria-describedby={describedByForField(
-																		WORKFORCE_ALERT_ID,
-																		womenError,
-																	)}
-																	aria-invalid={womenError ? true : undefined}
-																	aria-label="Nombre de femmes"
-																	className={
-																		womenError
-																			? `fr-input fr-input--error ${common.numericInput}`
-																			: `fr-input ${common.numericInput}`
-																	}
-																	disabled={isImpersonating}
-																	id={WOMEN_FIELD_ID}
-																	inputMode="numeric"
-																	onChange={handleWomenChange}
-																	pattern="[0-9]*"
-																	readOnly={isReadOnly}
-																	type="text"
-																	value={womenRaw}
-																/>
-															</div>
-														</td>
-														<td>
-															<div
-																className={
-																	menError
-																		? "fr-input-group fr-input-group--error"
-																		: "fr-input-group"
-																}
-															>
-																<input
-																	aria-describedby={describedByForField(
-																		WORKFORCE_ALERT_ID,
-																		menError,
-																	)}
-																	aria-invalid={menError ? true : undefined}
-																	aria-label="Nombre d'hommes"
-																	className={
-																		menError
-																			? `fr-input fr-input--error ${common.numericInput}`
-																			: `fr-input ${common.numericInput}`
-																	}
-																	disabled={isImpersonating}
-																	id={MEN_FIELD_ID}
-																	inputMode="numeric"
-																	onChange={handleMenChange}
-																	pattern="[0-9]*"
-																	readOnly={isReadOnly}
-																	type="text"
-																	value={menRaw}
-																/>
-															</div>
-														</td>
-														<td className="fr-cell--right">
-															<strong>{total}</strong>
-														</td>
-													</tr>
+													{WORKFORCE_ROWS.map((row) => (
+														<WorkforceTableRow
+															disabled={isImpersonating}
+															errorAlertId={WORKFORCE_ALERT_ID}
+															errors={fieldErrors}
+															key={row.basis}
+															onFieldChange={handleFieldChange}
+															raw={raw}
+															readOnly={isReadOnly}
+															row={row}
+															values={values}
+														/>
+													))}
 												</tbody>
 											</table>
 										</div>

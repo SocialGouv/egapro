@@ -25,7 +25,7 @@ test.describe("Declaration draft round-trip", () => {
 			await page1.waitForURL("**/declaration-remuneration/etape/1");
 
 			const womenInput1 = page1.getByRole("textbox", {
-				name: "Nombre de femmes",
+				name: "Rémunération annuelle — Nombre de femmes",
 			});
 			await expect(womenInput1).toBeVisible({ timeout: 30_000 });
 			await womenInput1.fill("75");
@@ -48,7 +48,7 @@ test.describe("Declaration draft round-trip", () => {
 			await page2.waitForURL("**/declaration-remuneration/etape/1");
 
 			const womenInput2 = page2.getByRole("textbox", {
-				name: "Nombre de femmes",
+				name: "Rémunération annuelle — Nombre de femmes",
 			});
 			await expect(womenInput2).toHaveValue("75", { timeout: 30_000 });
 		} finally {

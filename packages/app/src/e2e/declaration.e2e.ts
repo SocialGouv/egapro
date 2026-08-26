@@ -68,12 +68,24 @@ test.describe("Declaration workflow", () => {
 			page.getByRole("heading", { name: /Effectifs/i }),
 		).toBeVisible();
 
-		// Fill workforce data directly in the table
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		// Fill workforce data directly in the table, one row per pay basis
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("15");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("15");
 
-		// Verify total is computed
-		await expect(page.getByText("25", { exact: true })).toBeVisible();
+		// Verify each row total is computed
+		await expect(page.getByText("25", { exact: true }).first()).toBeVisible();
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
@@ -251,16 +263,38 @@ test.describe("Declaration workflow", () => {
 		await goToStep(page, 1);
 
 		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("");
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("");
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 
 		const alert = page.locator(".fr-alert--error").first();
 		await expect(alert).toBeVisible();
 		await expect(alert).toContainText("Champ vide");
-		await expect(alert).toContainText("Renseignez le nombre de femmes.");
-		await expect(alert).toContainText("Renseignez le nombre d'hommes.");
+		await expect(alert).toContainText(
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre d'hommes pour la rémunération annuelle.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre de femmes pour la rémunération horaire.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre d'hommes pour la rémunération horaire.",
+		);
 
 		// #3971 guarded the inline message against overflowing its <td> (DSFR 1.14
 		// sets white-space: nowrap on table cells). Since #4235 the message lives in
@@ -268,12 +302,14 @@ test.describe("Declaration workflow", () => {
 		// what has to hold now is that the cell carries the state and nothing else,
 		// with the input pointing at the alert that names it.
 		await expect(page.locator("td .fr-error-text")).toHaveCount(0);
-		const womenInput = page.getByRole("textbox", { name: "Nombre de femmes" });
+		const womenInput = page.getByRole("textbox", {
+			name: "Rémunération annuelle — Nombre de femmes",
+		});
 		await expect(womenInput).toHaveAttribute("aria-invalid", "true");
 		const describedBy = await womenInput.getAttribute("aria-describedby");
 		expect(describedBy).toBeTruthy();
 		await expect(page.locator(`#${describedBy}`)).toContainText(
-			"Renseignez le nombre de femmes.",
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
 		);
 	});
 

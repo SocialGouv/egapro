@@ -32,6 +32,8 @@ export type ExportRow = {
 	// Employees
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 
 	// Scores (indicators A, B, F, G)
 	remunerationScore: number | null;

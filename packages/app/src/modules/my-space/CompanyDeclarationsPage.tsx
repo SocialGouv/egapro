@@ -110,6 +110,7 @@ export function CompanyDeclarationsPage({
 				campaignDeadlines={campaignDeadlines}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={ctaHref}
+				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false

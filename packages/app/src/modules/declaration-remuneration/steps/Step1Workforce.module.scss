@@ -24,8 +24,8 @@ $workforce-input-min-width: 6rem;
 
 .labelCol {
 	@include respond-from(md) {
-		// Figma: 172 / 790 of the data container.
-		width: 22%;
+		// Figma: 197.5 / 790 — the four columns share equal width.
+		width: 25%;
 	}
 }
 
@@ -33,8 +33,8 @@ $workforce-input-min-width: 6rem;
 	min-width: $workforce-input-min-width;
 
 	@include respond-from(md) {
-		// Figma: 206 / 790 — the three data columns share equal width.
-		width: 26%;
+		// Figma: 197.5 / 790 — same width as the label column.
+		width: 25%;
 	}
 }
 
@@ -42,7 +42,7 @@ $workforce-input-min-width: 6rem;
 	min-width: 4rem;
 
 	@include respond-from(md) {
-		// Figma: 206 / 790 — same width as the input columns.
-		width: 26%;
+		// Figma: 197.5 / 790 — same width as the input columns.
+		width: 25%;
 	}
 }
