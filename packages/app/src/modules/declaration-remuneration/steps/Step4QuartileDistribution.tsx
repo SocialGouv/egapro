@@ -384,8 +384,6 @@ export function Step4QuartileDistribution({
 					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				<FieldErrorAlert errors={recapErrors} id={QUARTILE_ALERT_ID} />
-
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
 						disabled={isImpersonating}
@@ -438,6 +436,8 @@ export function Step4QuartileDistribution({
 						tableType="hourly"
 						title="Rémunération horaire brute moyenne"
 					/>
+
+					<FieldErrorAlert errors={recapErrors} id={QUARTILE_ALERT_ID} />
 
 					<DefinitionAccordion
 						id="accordion-step4"

@@ -121,6 +121,22 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		const anchor = alert.querySelector('a[href="#step4-annual-q2-max"]');
 		expect(anchor).not.toBeNull();
 		expect(alert.querySelectorAll("a").length).toBeGreaterThan(0);
+
+		const hourlyTable = screen.getByRole("table", {
+			name: "Rémunération horaire brute moyenne",
+		});
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
+		expect(
+			hourlyTable.compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
+		expect(
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("shows 'Effectif obligatoire' on missing women count cells", async () => {
