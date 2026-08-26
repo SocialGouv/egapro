@@ -3,7 +3,10 @@
 import type { ChangeEvent } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { formatPhoneInput } from "~/modules/profile/phone";
+import {
+	formatPhoneInput,
+	PHONE_FORMAT_MESSAGE,
+} from "~/modules/profile/phone";
 
 type PhoneFieldProps = {
 	className?: string;
@@ -19,6 +22,7 @@ export function PhoneField({
 	registration,
 }: PhoneFieldProps) {
 	const messagesId = `${inputId}-messages`;
+	const showFormatHint = error !== PHONE_FORMAT_MESSAGE;
 
 	function handleChange(event: ChangeEvent<HTMLInputElement>) {
 		event.target.value = formatPhoneInput(event.target.value);
@@ -31,9 +35,9 @@ export function PhoneField({
 		>
 			<label className="fr-label" htmlFor={inputId}>
 				Numéro de téléphone
-				<span className="fr-hint-text">
-					Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55
-				</span>
+				{showFormatHint && (
+					<span className="fr-hint-text">{PHONE_FORMAT_MESSAGE}</span>
+				)}
 			</label>
 			<input
 				aria-describedby={messagesId}
