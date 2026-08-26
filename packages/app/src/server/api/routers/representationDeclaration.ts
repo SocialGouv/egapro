@@ -154,10 +154,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 			};
 
 			await ctx.db.transaction(async (tx) => {
-				// Lock the row for the duration of the transaction so a concurrent
-				// submit() targeting the same (siren, year) can't slip in between
-				// this read and the upsert below — closing the TOCTOU race where
-				// both would observe a non-submitted status and both write.
+				// FOR UPDATE closes the TOCTOU race with a concurrent submit() on the same row.
 				const existing = await tx
 					.select({ status: representationDeclarations.status })
 					.from(representationDeclarations)
