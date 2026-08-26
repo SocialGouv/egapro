@@ -17,7 +17,7 @@ Cette API expose uniquement les **données brutes** calculées par le GIP-MDS à
 - Écarts de rémunération (moyens et médians, annuels et horaires)
 - Proportions de bénéficiaires de rémunération variable — part de l'effectif de chaque sexe qui en bénéficie (`bénéficiaires femmes / totalWomen`, `bénéficiaires hommes / totalMen`). Les deux valeurs sont indépendantes et **ne somment pas à 1**.
 - Répartitions par quartile de rémunération (proportions F/H) — celles-ci, à l'inverse, somment bien à 1 sur chaque quartile
-- Effectifs (femmes / hommes pris en compte)
+- Effectifs (femmes / hommes pris en compte, sur base annuelle `totalWomen` / `totalMen` et sur base horaire `hourlyWomen` / `hourlyMen`)
 
 **Aucun score ni indice global /100 n'est exposé.** Le calcul de l'index implique des règles de pondération et de seuils qui ne font pas partie de la diffusion publique.
 

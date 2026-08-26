@@ -304,7 +304,7 @@ describe("buildPdfData", () => {
 		expect(result.source).toBeNull();
 	});
 
-	it("uses the second_declaration_submit date for a correction declaration", async () => {
+	it("uses the second_declaration_submit date and the captured reference period for a correction declaration", async () => {
 		queue({
 			declarations: [
 				{
@@ -316,6 +316,8 @@ describe("buildPdfData", () => {
 					totalWomen: 10,
 					totalMen: 10,
 					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: "2025-07-01",
+					secondDeclReferencePeriodEnd: "2026-06-30",
 				},
 			],
 			companies: [{ siren: "123456789", name: "Société Démo" }],
@@ -345,6 +347,63 @@ describe("buildPdfData", () => {
 
 		expect(result.isSecondDeclaration).toBe(true);
 		expect(result.transmittedAt).toBe("05/06/2026");
+		expect(result.referencePeriod).toBe("01/07/2025 - 30/06/2026");
+	});
+
+	it("falls back to the civil reference period for a correction predating mandatory capture", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d4bis",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: null,
+					secondDeclReferencePeriodEnd: null,
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			declarationStatusHistory: [[{ createdAt: SECOND_SUBMIT }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
+
+		expect(result.isSecondDeclaration).toBe(true);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+	});
+
+	it("ignores a captured reference period on an initial declaration", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d4ter",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: "2025-07-01",
+					secondDeclReferencePeriodEnd: "2026-06-30",
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
+		expect(result.isSecondDeclaration).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 	});
 
 	it("falls back through submit then updatedAt when no matching status event exists", async () => {

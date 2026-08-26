@@ -10,7 +10,7 @@ import {
 } from "vitest";
 
 import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
-import type { UploadFileResult } from "../uploadFile";
+import type { UploadFailureReason, UploadFileResult } from "../uploadFile";
 import { useFileUploadForm } from "../useFileUploadForm";
 
 vi.mock("../uploadFile", () => ({
@@ -138,7 +138,7 @@ describe("useFileUploadForm", () => {
 		);
 	});
 
-	it("handleSubmit prevents default and shows an error when no file is selected", () => {
+	it("handleSubmit prevents default and shows the generic error when no emptySelectionError is provided", () => {
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
@@ -152,6 +152,45 @@ describe("useFileUploadForm", () => {
 		expect(result.current.uploadError).toBe(
 			"Veuillez sélectionner au moins un fichier avant de soumettre.",
 		);
+	});
+
+	it("handleSubmit shows the consumer's emptySelectionError when no file is selected", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({
+				emptySelectionError: "Veuillez sélectionner le rapport.",
+				flowType: "joint_evaluation",
+			}),
+		);
+
+		act(() => {
+			result.current.handleSubmit(preventSubmit());
+		});
+
+		expect(result.current.uploadError).toBe(
+			"Veuillez sélectionner le rapport.",
+		);
+	});
+
+	it("clears a previous emptySelectionError once a file is selected and submitted", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({
+				emptySelectionError: "Veuillez sélectionner le rapport.",
+				flowType: "joint_evaluation",
+			}),
+		);
+		attachDialog(result);
+
+		act(() => {
+			result.current.handleSubmit(preventSubmit());
+		});
+		act(() => {
+			result.current.handleFilesChange([makeFile()], null);
+		});
+		act(() => {
+			result.current.handleSubmit(preventSubmit());
+		});
+
+		expect(result.current.uploadError).toBeNull();
 	});
 
 	it("handleSubmit opens the native dialog when DSFR API is unavailable", () => {
@@ -358,17 +397,7 @@ describe("useFileUploadForm", () => {
 	});
 
 	const reasonCases: Array<{
-		reason:
-			| "scan_unavailable"
-			| "max_files"
-			| "unauthorized"
-			| "not_found"
-			| "too_large"
-			| "wrong_type"
-			| "empty"
-			| "missing_flow"
-			| "missing_filename"
-			| "server_error";
+		reason: Exclude<UploadFailureReason, "virus">;
 		serverError: string;
 		expected: string;
 	}> = [
@@ -419,9 +448,19 @@ describe("useFileUploadForm", () => {
 			expected: "Nom manquant",
 		},
 		{
+			reason: "invalid_filename",
+			serverError: "Nom de fichier invalide",
+			expected: "Nom de fichier invalide",
+		},
+		{
 			reason: "server_error",
 			serverError: "ignored",
 			expected: "Erreur lors de l'upload du fichier. Merci de réessayer.",
+		},
+		{
+			reason: "aborted",
+			serverError: "ignored",
+			expected: "L'upload a été interrompu. Merci de réessayer.",
 		},
 	];
 

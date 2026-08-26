@@ -1,33 +1,12 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
-import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
-} from "~/modules/domain";
-import {
-	getReferenceYearFor,
-	isDeadlinePassed,
-	selectPathChoiceDeadline,
+	DeclarationFsmStatus,
 } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
-
-type StepStatus = "pending" | "current" | "complete";
-
-type CompliancePath = NonNullable<
-	DeclarationDisplayContext["firstDeclarationPathChoice"]
->;
-
-/** Panel wording for each compliance path. Shorter than the funnel option
- *  titles, and free of the round suffix the table's step labels carry. */
-const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
-	corrective_action: "Actions correctives et seconde déclaration",
-	joint_evaluation: "Évaluation conjointe des rémunérations",
-	justify: "Justification des écarts de rémunération",
-};
-
-const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
+import { Step1Content, Step2Content, Step3Content } from "./StepContent";
+import type { StepStatus } from "./StepRows";
 
 export function getStepStatuses(
 	variant: PanelVariant,
@@ -49,6 +28,7 @@ export function getStepStatuses(
 export function VerticalStepper({
 	campaignDeadlines,
 	cseOpinionRequired,
+	declarationFsmStatus,
 	displayContext,
 	indicatorGRequired,
 	secondDeclarationSubmitted,
@@ -61,6 +41,7 @@ export function VerticalStepper({
 }: {
 	campaignDeadlines: CampaignDeadlines;
 	cseOpinionRequired: boolean;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	indicatorGRequired: boolean;
 	secondDeclarationSubmitted: boolean;
@@ -90,6 +71,7 @@ export function VerticalStepper({
 					<StepCircle number={2} status={step2} />
 					<Step2Content
 						campaignDeadlines={campaignDeadlines}
+						declarationFsmStatus={declarationFsmStatus}
 						displayContext={displayContext}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}
 						siren={siren}
@@ -116,22 +98,6 @@ export function VerticalStepper({
 function stepRowClass(status: StepStatus): string {
 	if (status === "complete") return styles.stepRowComplete ?? "";
 	return "";
-}
-
-function StepTitle({
-	children,
-	status,
-}: {
-	children: ReactNode;
-	status: StepStatus;
-}) {
-	return (
-		<p
-			className={`fr-text--bold fr-mb-0 ${status === "pending" ? "fr-text-mention--grey" : ""}`.trim()}
-		>
-			{children}
-		</p>
-	);
 }
 
 function StepCircle({
@@ -163,294 +129,6 @@ function StepCircle({
 			) : (
 				<span aria-hidden="true">{number}</span>
 			)}
-		</div>
-	);
-}
-
-function Step1Content({
-	campaignDeadlines,
-	siren,
-	status,
-	variant,
-	year,
-}: {
-	campaignDeadlines: CampaignDeadlines;
-	siren: string;
-	status: StepStatus;
-	variant: PanelVariant;
-	year: number;
-}) {
-	const refYear = getReferenceYearFor(year);
-	const title = (
-		<StepTitle status={status}>
-			Déclaration des indicateurs de rémunération
-		</StepTitle>
-	);
-
-	if (variant === "start") {
-		return (
-			<div className={styles.stepContent}>
-				<div>
-					{title}
-					<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
-					</p>
-				</div>
-				<BulletRow>
-					Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus
-					des données DSN)
-				</BulletRow>
-				<BulletRow>
-					Indicateurs de rémunération par catégorie de salariés à remplir
-				</BulletRow>
-				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
-			</div>
-		);
-	}
-
-	if (status === "complete") {
-		return (
-			<div className={styles.stepContent}>
-				{title}
-				<TransmittedRow
-					label="Votre déclaration a été transmise"
-					modifiableUntil={campaignDeadlines.decl1ModificationDeadline}
-					modifyHref={`/declaration-remuneration/etape/1?siren=${siren}`}
-					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
-				/>
-			</div>
-		);
-	}
-
-	return title;
-}
-
-function Step2Content({
-	campaignDeadlines,
-	displayContext,
-	secondDeclarationSubmitted,
-	siren,
-	status,
-	variant,
-}: {
-	campaignDeadlines: CampaignDeadlines;
-	displayContext: DeclarationDisplayContext;
-	secondDeclarationSubmitted: boolean;
-	siren: string;
-	status: StepStatus;
-	variant: PanelVariant;
-}) {
-	const title = (
-		<StepTitle status={status}>
-			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
-			si écarts &ge; 5&nbsp;%
-		</StepTitle>
-	);
-
-	if (variant === "start") {
-		return title;
-	}
-
-	if (variant === "compliance_choice") {
-		const pathChoiceDeadline = selectPathChoiceDeadline(
-			campaignDeadlines,
-			secondDeclarationSubmitted,
-		);
-		return (
-			<div className={styles.stepContent}>
-				{title}
-				{secondDeclarationSubmitted && (
-					<TransmittedRow
-						label="Votre seconde déclaration a été transmise"
-						modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-						modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
-					/>
-				)}
-				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
-				<DeadlineRow date={pathChoiceDeadline} />
-			</div>
-		);
-	}
-
-	if (variant === "compliance") {
-		return (
-			<div className={styles.stepContent}>
-				{title}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
-				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
-			</div>
-		);
-	}
-
-	const activeCompliancePath =
-		displayContext.secondDeclarationPathChoice ??
-		displayContext.firstDeclarationPathChoice;
-
-	if (variant === "evaluation") {
-		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
-			<TransmittedRow
-				label="Votre seconde déclaration a été transmise"
-				modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-				modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-				viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
-			/>
-		) : null;
-
-		if (activeCompliancePath === "corrective_action") {
-			return (
-				<div className={styles.stepContent}>
-					{title}
-					{secondDeclTransmittedRow}
-					<DeadlineRow date={campaignDeadlines.decl2JustificationDeadline} />
-				</div>
-			);
-		}
-
-		return (
-			<div className={styles.stepContent}>
-				{title}
-				{secondDeclTransmittedRow}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
-				<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
-			</div>
-		);
-	}
-
-	return (
-		<div className={styles.stepContent}>
-			{title}
-			{secondDeclarationSubmitted && (
-				<TransmittedRow
-					label="Votre seconde déclaration a été transmise"
-					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-					modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
-				/>
-			)}
-			{displayContext.shouldShowJointEvaluation && (
-				<TransmittedRow
-					label="Votre rapport de l'évaluation conjointe a été transmis"
-					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
-					modifyHref={`/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`}
-				/>
-			)}
-			{displayContext.shouldShowGapJustification && (
-				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
-			)}
-		</div>
-	);
-}
-
-function Step3Content({
-	campaignDeadlines,
-	siren,
-	status,
-	variant,
-}: {
-	campaignDeadlines: CampaignDeadlines;
-	siren: string;
-	status: StepStatus;
-	variant: PanelVariant;
-}) {
-	const title = (
-		<StepTitle status={status}>Déposer le ou les avis du CSE</StepTitle>
-	);
-
-	if (
-		variant === "start" ||
-		variant === "compliance_choice" ||
-		variant === "compliance" ||
-		variant === "evaluation"
-	) {
-		return title;
-	}
-
-	if (variant === "closed") {
-		return (
-			<div className={styles.stepContent}>
-				{title}
-				<TransmittedRow
-					label="Vos avis du CSE ont été transmis"
-					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
-					modifyHref={`/avis-cse/etape/2?siren=${siren}`}
-				/>
-			</div>
-		);
-	}
-
-	// cse variant
-	return (
-		<div className={styles.stepContent}>
-			{title}
-			<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
-		</div>
-	);
-}
-
-function TransmittedRow({
-	label,
-	modifiableUntil,
-	modifyHref,
-	viewHref,
-}: {
-	label: string;
-	modifiableUntil: Date;
-	modifyHref: string;
-	viewHref?: string;
-}) {
-	const deadlinePassed = isDeadlinePassed(modifiableUntil);
-
-	return (
-		<div className={styles.transmittedRow}>
-			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
-			<div className={styles.transmittedInfo}>
-				<p className="fr-mb-0">{label}</p>
-				<p className="fr-text-mention--grey fr-mb-0">
-					{deadlinePassed
-						? "Modification close depuis le "
-						: "Modifiable jusqu'au "}
-					<OrdinalLongDate date={modifiableUntil} />
-				</p>
-			</div>
-			<div className={styles.transmittedActions}>
-				{viewHref && (
-					<Link
-						className="fr-btn fr-btn--secondary fr-icon-eye-line"
-						href={viewHref}
-						title="Voir le récapitulatif de la déclaration"
-					>
-						<span className="fr-sr-only">
-							Voir le récapitulatif de la déclaration
-						</span>
-					</Link>
-				)}
-				{!deadlinePassed && (
-					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
-						Modifier
-					</a>
-				)}
-			</div>
-		</div>
-	);
-}
-
-function BulletRow({ children }: { children: ReactNode }) {
-	return (
-		<div className={styles.bulletItem}>
-			<span aria-hidden="true" className={styles.bullet} />
-			<p className="fr-mb-0">{children}</p>
-		</div>
-	);
-}
-
-function DeadlineRow({ date }: { date: Date }) {
-	return (
-		<div className={styles.deadlineRow}>
-			<span aria-hidden="true" className="fr-icon-calendar-line fr-icon--sm" />
-			<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-				Échéance : <OrdinalLongDate date={date} />
-			</p>
 		</div>
 	);
 }

@@ -31,6 +31,8 @@ export type DeclarationPdfData = {
 	company: DeclarationPdfCompany;
 	totalWomen: number;
 	totalMen: number;
+	hourlyWomen: number;
+	hourlyMen: number;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;

@@ -395,6 +395,8 @@ export function assembleDeclaration(
 		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
+		Effectif_F_rem_horaire_globale: row.hourlyWomen,
+		Effectif_H_rem_horaire_globale: row.hourlyMen,
 		Source_categories_emplois:
 			indicatorGEntries.find((e) => e.declarationType === "initial")?.source ??
 			null,

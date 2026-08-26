@@ -79,8 +79,12 @@ export const declarations = createTable(
 			.varchar({ length: 255 })
 			.notNull()
 			.references(() => users.id),
+		// Physical workforce, split by the pay basis each indicator is computed on
+		// (#4247): `total*` is the annual basis, `hourly*` the hourly one.
 		totalWomen: d.integer(),
 		totalMen: d.integer(),
+		hourlyWomen: d.integer(),
+		hourlyMen: d.integer(),
 		remunerationScore: d.integer(),
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),

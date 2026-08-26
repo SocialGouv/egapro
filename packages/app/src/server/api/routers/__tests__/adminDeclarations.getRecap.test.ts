@@ -37,6 +37,8 @@ const baseDeclarationRow = {
 	secondDeclarationPathChoice: null,
 	demarcheCompletedAt: null,
 	secondDeclarationSubmittedAt: null,
+	secondDeclReferencePeriodStart: null as string | null,
+	secondDeclReferencePeriodEnd: null as string | null,
 	createdAt: new Date("2026-03-01"),
 	updatedAt: new Date("2026-03-15"),
 	cancelledAt: null,
@@ -72,6 +74,17 @@ const baseJoinedRow: JoinedRow = {
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
 };
+
+// Deliberately off the civil year: the assertion only discriminates if the
+// persisted window cannot be produced by getReferencePeriod.
+const rowWithCapturedPeriod = (): JoinedRow => ({
+	...baseJoinedRow,
+	declaration: {
+		...baseDeclarationRow,
+		secondDeclReferencePeriodStart: "2025-07-01",
+		secondDeclReferencePeriodEnd: "2026-06-30",
+	},
+});
 
 function buildDb(options: {
 	row: JoinedRow | null;
@@ -204,6 +217,50 @@ describe("adminDeclarationsRouter — getRecap", () => {
 		const result = await caller.getRecap({ id: DECL_ID });
 
 		expect(result.isCorrection).toBe(true);
+	});
+
+	it("returns the reference period captured at step 2 of the second declaration", async () => {
+		const db = buildDb({ row: rowWithCapturedPeriod(), hasSecondSubmit: true });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.referencePeriod).toBe("01/07/2025 - 30/06/2026");
+	});
+
+	it("falls back to the civil period for a correction predating mandatory capture", async () => {
+		const db = buildDb({ row: baseJoinedRow, hasSecondSubmit: true });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.isCorrection).toBe(true);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+	});
+
+	it("ignores a captured reference period when the declaration is not a correction", async () => {
+		const db = buildDb({ row: rowWithCapturedPeriod() });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.isCorrection).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 	});
 
 	it("exposes step5Source from the first job category when jobs exist", async () => {

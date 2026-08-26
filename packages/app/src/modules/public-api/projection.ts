@@ -6,6 +6,8 @@ export type PublicDeclarationSource = Pick<
 	| "year"
 	| "totalWomen"
 	| "totalMen"
+	| "hourlyWomen"
+	| "hourlyMen"
 	| "globalAnnualMeanGap"
 	| "globalAnnualMedianGap"
 	| "globalHourlyMeanGap"
@@ -61,6 +63,8 @@ export const publicDeclarationColumns = {
 	year: declarations.year,
 	totalWomen: declarations.totalWomen,
 	totalMen: declarations.totalMen,
+	hourlyWomen: declarations.hourlyWomen,
+	hourlyMen: declarations.hourlyMen,
 	globalAnnualMeanGap: declarations.globalAnnualMeanGap,
 	globalAnnualMedianGap: declarations.globalAnnualMedianGap,
 	globalHourlyMeanGap: declarations.globalHourlyMeanGap,
@@ -121,6 +125,8 @@ export function toPublicDeclaration(
 		workforceEma: toNumber(company.workforceEma),
 		totalWomen: declaration.totalWomen,
 		totalMen: declaration.totalMen,
+		hourlyWomen: declaration.hourlyWomen,
+		hourlyMen: declaration.hourlyMen,
 		globalAnnualMeanGap: toNumber(declaration.globalAnnualMeanGap),
 		globalAnnualMedianGap: toNumber(declaration.globalAnnualMedianGap),
 		globalHourlyMeanGap: toNumber(declaration.globalHourlyMeanGap),
