@@ -214,6 +214,155 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("étape 1 transmise sur tous les parcours (#4243)", () => {
+		it.each<PanelVariant>([
+			"compliance_choice",
+			"compliance",
+			"evaluation",
+			"cse",
+			"closed",
+		])("announces the transmitted declaration for variant %s", (variant) => {
+			const { panel, dialog } = renderPanel(variant);
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+		});
+
+		it("keeps the view link on a closed démarche once the deadline has passed", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				year: PAST_YEAR,
+			});
+			expect(
+				dialog.querySelector(
+					'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]',
+				),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByRole("link", { name: "Modifier" }),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("étape 2 — choix du parcours nommé (#4243)", () => {
+		it("names the pending path choice on the first declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceRound1Deadline)}`,
+			);
+		});
+
+		it("names the pending path choice again after the second declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			});
+
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
+		});
+
+		it("names the chosen path and its deadline for corrective actions", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+			});
+
+			expect(
+				panel.getByText("Actions correctives et seconde déclaration"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl2ModificationDeadline)}`,
+			);
+		});
+
+		it.each([
+			{
+				label: "first round",
+				displayContext: makeDisplayContext("justify"),
+			},
+			{
+				label: "revised choice",
+				displayContext: makeDisplayContext("corrective_action", "justify"),
+			},
+		])("names the $label justification with no deadline", ({
+			displayContext,
+		}) => {
+			const { panel } = renderPanel("cse", {
+				displayContext,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			const step2 = panel.getByText(
+				/^Parcours de mise en conformité/,
+			).parentElement;
+			if (!step2) throw new Error("Step 2 content did not render");
+			expect(step2).toHaveTextContent(
+				"Justification des écarts de rémunération",
+			);
+			expect(within(step2).queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it.each([
+			{
+				label: "first round",
+				declarationFsmStatus: "joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedSecondDeclaration: false,
+				deadlineKey: "decl1JointEvaluationDeadline" as const,
+			},
+			{
+				label: "revised choice",
+				declarationFsmStatus: "revised_joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+				deadlineKey: "decl2JointEvaluationDeadline" as const,
+			},
+		])("names the $label joint evaluation with the applicable deadline", ({
+			declarationFsmStatus,
+			displayContext,
+			hasSubmittedSecondDeclaration,
+			deadlineKey,
+		}) => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("evaluation", {
+				campaignDeadlines: deadlines,
+				declarationFsmStatus,
+				displayContext,
+				hasSubmittedSecondDeclaration,
+			});
+
+			expect(
+				panel.getByText("Évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines[deadlineKey])}`,
+			);
+		});
+	});
+
 	describe("2nde déclaration — variant cse avec secondDeclarationSubmitted", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("cse", {

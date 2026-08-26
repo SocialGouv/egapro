@@ -67,6 +67,15 @@ test.describe("Declaration process panel", () => {
 					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
 				),
 			).toBeVisible();
+
+			// #4243: step 1 announces the transmitted declaration on every path,
+			// a closed démarche included, and keeps its view button.
+			await expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeVisible();
+			await expect(
+				panel.getByTitle("Voir le récapitulatif de la déclaration"),
+			).toBeVisible();
 		});
 	});
 
