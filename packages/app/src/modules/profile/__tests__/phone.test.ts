@@ -114,4 +114,24 @@ describe("phoneSchema", () => {
 			);
 		}
 	});
+
+	it("reports a dedicated message when the value is empty", () => {
+		const result = phoneSchema.safeParse("");
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0]?.message).toBe(
+				"Veuillez renseigner votre numéro de téléphone",
+			);
+		}
+	});
+
+	it("treats a separators-only value as empty", () => {
+		const result = phoneSchema.safeParse("  ");
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues[0]?.message).toBe(
+				"Veuillez renseigner votre numéro de téléphone",
+			);
+		}
+	});
 });
