@@ -25,7 +25,7 @@ Coupe-circuits du hook : `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant), + cron/manuel (muet) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun modèle. **C'est la seule gate de tout le dispositif qui arrête un merge** (`fail-on: blocking`). Sur une PR il parle : SARIF, annotations en ligne, commentaire sticky `digest` nommant les défauts distincts, et son propre rapport (`ultra11y-pr-static`). Sur le run complet il se tait — le livrable est celui d'`a11y-pages`. |
-| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **35 pages** en épinglant l'état applicatif que chaque écran de tunnel exige ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par une passe Claude Code (`adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
+| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par une passe Claude Code (`adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
 | `a11y-bundle` | cron + manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
 **Deux déclenchements, et ils ne paient pas la même chose.** `pull_request` ne lance que la gate
@@ -73,9 +73,67 @@ total au run suivant.**
 passe. Lire quels critères sont périmés : leur verdict porte sur du code qui n'existe plus.
 Ré-adjuger ceux-là, et commiter le résultat.
 
-`undecidable.json` ne revient pas : le workflow n'a plus d'`undecidable-file`. Une exemption est
-le constat qu'un critère n'a pas reçu d'évidence — le correctif appartient au moteur, pas à une
-liste de dispenses versionnée à côté de lui.
+### `undecidable.json` est revenu, et pourquoi son retrait ne tenait plus
+
+Il avait été supprimé sur ce raisonnement : « une exemption est le constat qu'un critère n'a pas
+reçu d'évidence — le correctif appartient au moteur, pas à une liste de dispenses versionnée à
+côté de lui. » C'était juste **pour le cas visé**, et ce cas a bien été corrigé en amont.
+
+**13.3 et 13.4 sont l'autre cas.** Le sujet existe — le classeur `referents-egapro-dreets.xlsx`
+en téléchargement — et leurs tests exigent de l'**ouvrir** : structure interne et en-têtes de
+colonnes pour 13.3, parité d'information avec `/referents` pour 13.4. Aucun tier du dispositif ne
+le peut : le moteur ne voit que l'URL, le balayage ne capture que la page qui la porte, et
+l'adjudicateur n'a ni shell ni lecteur xlsx. **Ce n'est pas un critère sans évidence, c'est un
+critère sans instrument** — et aucun correctif moteur ne l'atteindra tant que personne n'ouvrira
+le fichier. C'est l'adjudicateur lui-même qui l'a établi, en les rendant `manual / undecidable`
+avec sa justification, sur le run 32782282651.
+
+Ce que la liste n'est pas : une tolérance. Un pourcentage passe ce qu'il faut pour rester vert et
+cache exactement les critères que personne n'a pu décider. Ici chaque entrée porte sa **raison**,
+la porte refuse une entrée sans raison **et** une entrée dont le critère a depuis été tranché — une
+dispense ne survit pas à ce qu'elle excusait — et chacune est imprimée dans le log du job. C'est un
+renvoi nommé vers l'auditeur humain.
+
+Fichier : `packages/app/.ultra11y/undecidable.json`, versionné (exception dans `.gitignore`),
+câblé par `undecidable-file` dans `a11y.yaml`. **Deux entrées : 13.3 et 13.4**, le critère sans
+instrument décrit ci-dessus — il faut ouvrir le `.xlsx`, et personne ici ne le peut.
+
+### 12.5, et la démonstration que la liste se nettoie toute seule
+
+12.5 y a figuré, une journée. Ça vaut d'être raconté, parce que c'est la preuve que cette liste
+n'est pas une tolérance.
+
+Le critère demande si le moteur de recherche est atteignable de manière identique sur un ensemble
+de pages. Le glossaire RGAA définit le *moteur de recherche interne* comme donnant accès à une
+recherche sur **l'ensemble des contenus du site**, et exclut « tout autre moteur de recherche
+permettant par exemple de faire des recherches sur une partie restreinte du site ». egapro n'en a
+aucun : header, nav et pied de page ne portent aucune fonctionnalité de recherche sur les 37 pages
+capturées. Les deux seuls champs du périmètre sont des outils métier confinés à leur page — la
+recherche d'entreprise de l'accueil (`action="/index-egapro/recherche"`, qui interroge l'index des
+déclarantes) et la recherche de référent de `/referents`. **Le verdict est `NA`.**
+
+Il a d'abord été refusé trois passes de suite, et la porte avait raison. L'adjudicateur citait le
+**formulaire de recherche** — l'élément même qu'il argumentait être hors sujet — alors que les
+ancres moissonnées pour 12.5 sont `header.fr-header`, `footer#footer.fr-footer`, `nav.fr-breadcrumb`
+et `nav.fr-container`. Une citation qui tombe sur une ancre moissonnée est acceptée sans
+re-vérifier la transcription ; une citation **hors moisson** garde la vérification stricte du
+snippet, délibérément — c'est là qu'une localisation inventée se cacherait. Le snippet retapé y a
+échoué.
+
+**La leçon générale, et elle dépasse 12.5 :** un critère dont le sujet est une *absence* pousse le
+modèle à citer ce qui n'est PAS le sujet, et cet élément-là n'est par définition pas dans la
+moisson. La bonne citation était le `header` ou le `nav` — « voici la zone de navigation, identique
+sur les 37 pages, elle ne porte aucune recherche ».
+
+Une fois le registre commité, l'adjudicateur n'a plus eu que le reliquat à traiter, et il a rendu
+ce `NA` en citant cette fois `Header/index.tsx` et `Footer/index.tsx`. **Et le job a rougi
+là-dessus** — `Critère 12.5 déclaré indécidable, mais il porte désormais un verdict — retirez-le de
+la liste`. C'est le comportement recherché : une dispense ne survit pas à ce qu'elle excusait, et
+la porte l'exige elle-même plutôt que d'attendre qu'on y pense.
+
+En amont, `maxgfr/ultra11y#36` traite la cause, et c'est livré en **5.34.1** : le refus nomme
+désormais la moisson du critère au lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de
+citer la région inspectée.
 
 ### `require-decided: pages`, et pourquoi la barre a pu remonter
 
@@ -91,29 +149,81 @@ balayage mesurait puis jetait la mesure). Mesuré en amont sur la fixture RGAA b
 « à évaluer » pour le run, et exactement les mêmes 37 sur chacune des pages — `pages` n'est donc
 plus une barre plus haute que `true`, c'est la même, vérifiée là où on la lit.
 
+### La ligne de provenance, et pourquoi c'est elle qu'on lit
+
+Depuis 5.33.0, `check --require-decided` ne dit plus seulement *combien* de critères portent un
+verdict : il dit **qui l'a rendu**.
+
+```
+106 criteria — N engine, M measured (scan), P agent, Q declared undecidable, R with no verdict
+```
+
+C'est l'instrument qui répond à « est-ce que tous les critères sont traités ? », et il répond
+autrement qu'un comptage à la main. Compter les entrées du registre contre la worklist répond à la
+mauvaise question : un critère que le MOTEUR a tranché n'apparaît dans ni l'un ni l'autre, si bien
+qu'un run où le moteur en décide 55 se lisait « 51 audités » alors que 106 l'étaient.
+
+`R with no verdict` est le seul nombre qui doit valoir zéro. Les autres sont à surveiller entre deux
+runs pour une raison d'argent : **chaque critère qui passe de `agent` à `engine` ou `scan` est un
+critère que plus personne ne paie à un modèle.**
+
+Ce qui rendait ce compte non démontrable avant 5.33.0 : `derivePackResults` et le prédicat
+`outOfCore` de `coverage.ts` divergeaient — un critère dont tout le mapping WCAG sort du cœur 2.2 AA
+reste décidable quand une règle DÉCLARATIVE du pack s'y applique, et seul le premier le savait. RGAA
+8.1 est le cas d'école : le plan le classait hors périmètre pendant que la projection le tranchait
+depuis `pack:rgaa:doctype-missing`.
+
+### Le référentiel porté jusqu'au bout, et pas seulement à la fin
+
+Jusqu'à 5.32.0, `audit` et `scan --merge` réécrivaient tous deux `audits/audit-latest.json` **sans
+`--standard`**. Le document publié dans l'artefact était donc estampillé `wcag` pendant que tout ce
+qui se rendait à côté — SARIF, annotations, rapport, fiches par page — parlait RGAA, et la porte de
+sévérité comptait les constats du cœur au lieu de ceux du référentiel, qui sous un pack porte aussi
+ses propres règles déclaratives. Deux nombres pour un seul run.
+
+Vérifiable en une commande sur l'artefact d'un run :
+
+```bash
+jq '.standard' audits/audit-latest.json    # doit dire "rgaa", jamais "wcag"
+```
+
 ### Ce que coûte l'adjudication
 
-Sans registre commité : **16 à 21 $ par run**. Avec, le premier run paie le total et les suivants
-ne paient que le reliquat.
+Sans registre à rejouer : **9,59 $**, mesuré sur le run du 24/08/2026 (3 passes — 5,91 + 2,43 +
+1,25). Le registre **est** commité depuis (`packages/app/.ultra11y/verdicts/rgaa.json`, 47
+verdicts) : les runs suivants rejouent ce qui tient et ne paient que le reliquat.
 
-Le modèle est **nommé explicitement** (`adjudicate-model: claude-sonnet-5`) : le tier est facturé
-AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et le défaut de `claude-code-action`
-n'est pas une constante de ce dépôt — le laisser implicite ferait bouger la facture sans que rien
-ne change ici. Sonnet 5, et pas plus gros : l'amont a mesuré que ce qu'un adjudicateur bon marché
-ratait n'était jamais un manque de modèle mais un défaut d'outil (fiche par critère rendue sans son
-contrat de verdict, critères sans instrument, critères sans sujet moissonné) — tous corrigés.
+**L'effort est le second levier, et il n'est pas le modèle.** `adjudicate-effort: high` (5.34.0).
+Ce qui arrive à ce tier est ce qu'aucun moteur n'a pu décider, donc la difficulté n'est pas de
+choisir entre deux réponses — c'est de LIRE l'évidence sans se tromper. Mesuré sur le run
+32782282651 (5.33.1, effort par défaut) : la porte a refusé **13 verdicts à la première passe, 12
+à la deuxième, 2 à la troisième**, et aucun refus n'était un désaccord de fond. C'étaient des
+citations fabriquées, des snippets retapés au lieu d'être copiés, et des chemins préfixés
+`packages/app/` alors que le `working-directory` **est** `packages/app`. Trois critères en sont
+morts et le job est sorti rouge à 103/106. Monter le modèle ne répare pas ça ; monter le soin de
+lecture, si.
 
-Deux garde-fous à connaître avant de lire un log :
+### Le runner CLI, évalué et écarté
 
-- **Le fold est fail-closed PAR VERDICT.** Un verdict refusé coûte **son seul critère** — qui reste
-  « à évaluer » en portant le motif du refus — et laisse les autres passer. Le défaut d'origine :
-  95 verdicts sur 96 corrects, un seul `null`, et un fold au niveau du FICHIER jetait les 96 —
-  16,16 $ pour publier « à évaluer » sur toute la grille, dans un job qui se déclarait vert.
-- **Un job vert ne veut pas dire « tout a été évalué ».** Lire `applied:` / `rejected:` dans le
-  log, les avertissements « périmé » et « absent du registre », ou la colonne « À évaluer ».
+5.30.0 a ouvert un second chemin pour le tier agent : `adjudicate-runner: cli` fait spawner au
+moteur un `claude -p` lui-même, et `adjudicate-grain: criterion` lui fait juger un critère par
+appel. Ce dépôt **reste sur le runner `action`**, et c'est un choix documenté plutôt qu'un oubli.
 
-`gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une
-fonction pure du commit, quoi qu'un modèle ait dit.
+- **Ce qu'il vend, on l'a déjà.** Son argument est de lever la liste d'événements autorisés de
+  `claude-code-action`, donc de rendre le tier disponible sur `push`. Le cron sur `alpha` a déjà
+  contourné cette restriction — voir plus haut.
+- **Le défaut de l'Action est cassé.** `adjudicate-grain` vaut `worklist` par défaut, l'Action le
+  passe tel quel à `judge --grain`, et le moteur n'accepte que `batch` ou `criterion`
+  (`src/cli.ts:3560`). Le couple `cli` + défaut sort en 2 **sans appeler un modèle** : 40 min de
+  CI, 0 $, et un rouge sur `require-decided` avec toute la grille « à évaluer ».
+- **Il échange un plafond qui marche contre aucun.** `adjudicate-max-turns: "600"` est vivant sur
+  le runner `action`. Sous `cli` il est muet : `--max-turns` n'est pas un flag du CLI, qui avale un
+  flag inconnu sans un mot. Et `adjudicate-budget-usd` ne le remplace pas — il est poussé sur
+  l'argv de **chaque** `claude -p` (`src/agent-cli.ts:170`), avec jusqu'à `MAX_ATTEMPTS = 4`
+  tentatives : le pire cas est `critères × passes × tentatives × plafond`, et le seul plafond de
+  run restant serait `timeout-minutes`.
+- **Et le temps.** Un appel par critère sur 37 pages allonge le job sans borne connue, là où les
+  trois étapes dépliées ont une durée mesurée : 39 min 25 s.
 
 ### En local, la même chose sans CI
 
@@ -174,7 +284,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-Les deux sont sur **5.29.0**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
+Les deux sont sur **5.34.2**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
 se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
 son cache si le skill `review-a11y` se comporte autrement que la CI.
 
