@@ -11,7 +11,6 @@ export const PARCOURS_KEYS = [
 	"Parcours_de_conformite_revision_requis",
 	"Avis_CSE_requis",
 	"Indicateur_G_requis",
-	"Version_regles",
 	"Prochaines_etapes_possibles",
 ] as const;
 
@@ -25,5 +24,10 @@ export const RELOCATED_ROOT_KEYS = [
 	"Parcours_de_conformite_revision_requis",
 	"Avis_CSE_requis",
 	"Indicateur_G_requis",
-	"Version_regles",
 ] as const;
+
+// Left the root and was NOT relocated: dropped from the payload altogether.
+// Prochaines_etapes_possibles is already resolved server-side against the
+// pinned ruleset, so no consumer has a version to look up. Asserted absent
+// from both the root and Parcours, so neither can quietly reintroduce it.
+export const DROPPED_ROOT_KEYS = ["Version_regles"] as const;

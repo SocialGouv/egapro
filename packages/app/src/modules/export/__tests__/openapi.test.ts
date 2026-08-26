@@ -9,7 +9,11 @@ import {
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
 import { openApiSpec } from "../openapi";
-import { PARCOURS_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
+import {
+	DROPPED_ROOT_KEYS,
+	PARCOURS_KEYS,
+	RELOCATED_ROOT_KEYS,
+} from "./helpers/parcoursKeys";
 
 describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
@@ -176,6 +180,13 @@ describe("openApiSpec", () => {
 		it("no longer documents the relocated keys at the schema root", () => {
 			for (const key of RELOCATED_ROOT_KEYS) {
 				expect(declarationSchema.properties).not.toHaveProperty(key);
+			}
+		});
+
+		it("documents the dropped keys nowhere, root nor Parcours", () => {
+			for (const key of DROPPED_ROOT_KEYS) {
+				expect(declarationSchema.properties).not.toHaveProperty(key);
+				expect(parcoursSchema.properties).not.toHaveProperty(key);
 			}
 		});
 

@@ -90,6 +90,25 @@ function toNextStepPayload(
 	};
 }
 
+/**
+ * `submit_cse_opinion` is the one CSE transition the ruleset leaves unguarded,
+ * and deliberately so: `cse_required` is a snapshot taken at submission, and a
+ * company that gains a CSE afterwards must still be able to file its opinion
+ * without reopening a completed démarche (see `cseRequirementSync.ts`). The
+ * engine therefore keeps accepting the action whatever the snapshot says.
+ *
+ * That permissiveness is an accept-set, not an expectation. Advertising the
+ * step to a control authority for a company that has no CSE reads as an
+ * outstanding obligation, so the export prunes it here — at the export layer
+ * only, leaving `applyAction` free to accept the late deposit.
+ */
+function isAdvertisable(
+	transition: { action: string },
+	cseRequired: boolean,
+): boolean {
+	return cseRequired || transition.action !== "submit_cse_opinion";
+}
+
 export function buildNextStepsPayload(input: {
 	status: DeclarationFsmStatus;
 	rulesVersion: string | null;
@@ -103,5 +122,7 @@ export function buildNextStepsPayload(input: {
 		cseRequired: input.cseRequired,
 	});
 
-	return transitions.map((transition) => toNextStepPayload(transition, rules));
+	return transitions
+		.filter((transition) => isAdvertisable(transition, input.cseRequired))
+		.map((transition) => toNextStepPayload(transition, rules));
 }

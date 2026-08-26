@@ -5,7 +5,7 @@ import {
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
 } from "./helpers/nextStepLabels";
-import { RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
+import { DROPPED_ROOT_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
 
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
@@ -1241,7 +1241,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Phase_2_revision_requise");
 		expect(decl.Parcours.Avis_CSE_requis).toBe(true);
 		expect(decl.Parcours.Indicateur_G_requis).toBe(true);
-		expect(decl.Parcours.Version_regles).toBe("2027.1");
+		expect(decl.Parcours).not.toHaveProperty("Version_regles");
 		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
 		expect(decl.Date_parcours_apres_declaration_1).toBe(
 			"2027-04-01T10:00:00.000Z",
@@ -1256,6 +1256,10 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Seconde_declaration.Statut).toBe(true);
 		for (const key of RELOCATED_ROOT_KEYS) {
 			expect(decl).not.toHaveProperty(key);
+		}
+		for (const key of DROPPED_ROOT_KEYS) {
+			expect(decl).not.toHaveProperty(key);
+			expect(decl.Parcours).not.toHaveProperty(key);
 		}
 	});
 
@@ -1636,8 +1640,8 @@ describe("GET /api/v1/export/declarations", () => {
 			const [nullVersion, unknownVersion] = body.Declarations;
 
 			expect(body.Nombre).toBe(2);
-			expect(nullVersion.Parcours.Version_regles).toBeNull();
-			expect(unknownVersion.Parcours.Version_regles).toBe("1999.0");
+			expect(nullVersion.Parcours).not.toHaveProperty("Version_regles");
+			expect(unknownVersion.Parcours).not.toHaveProperty("Version_regles");
 			expect(nullVersion.Parcours.Prochaines_etapes_possibles).not.toHaveLength(
 				0,
 			);

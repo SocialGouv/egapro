@@ -116,7 +116,7 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		// The company answered "no CSE", so the snapshot taken at submission is false —
 		// which is what prunes the `with_cse` variant from the transitions below.
 		expect(parcours.Avis_CSE_requis).toBe(false);
-		expect(typeof parcours.Version_regles).toBe("string");
+		expect(parcours).not.toHaveProperty("Version_regles");
 
 		const nextSteps = parcours.Prochaines_etapes_possibles;
 		expect(
@@ -201,15 +201,11 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 
 		expect(parcours.Statut).toBe(DEMARCHE_COMPLETED);
 		expect(parcours.Annulee).toBe(false);
-		// The terminal state is not a dead end: the CSE opinion stays depositable, and
-		// that is the only transition the ruleset still offers from here.
-		expect(
-			parcours.Prochaines_etapes_possibles.map(
-				(step) => step.Identifiant_transition,
-			),
-		).toEqual(["submit_cse_opinion"]);
-		expect(parcours.Prochaines_etapes_possibles[0]?.Etat_cible).toBe(
-			DEMARCHE_COMPLETED,
-		);
+		// This company answered "no CSE", so nothing is owed from the terminal
+		// state. The ruleset still accepts submit_cse_opinion here — unguarded, to
+		// cover a company that gains a CSE later — but the export does not advertise
+		// an opinion to a control authority when none is required.
+		expect(parcours.Avis_CSE_requis).toBe(false);
+		expect(parcours.Prochaines_etapes_possibles).toEqual([]);
 	});
 });

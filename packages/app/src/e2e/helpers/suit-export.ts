@@ -29,7 +29,6 @@ export type SuitParcours = {
 	Parcours_de_conformite_revision_requis: boolean;
 	Avis_CSE_requis: boolean;
 	Indicateur_G_requis: boolean;
-	Version_regles: string | null;
 	Prochaines_etapes_possibles: SuitNextStep[];
 };
 

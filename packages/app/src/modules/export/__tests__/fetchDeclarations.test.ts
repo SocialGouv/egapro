@@ -13,7 +13,11 @@ import {
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
 } from "./helpers/nextStepLabels";
-import { PARCOURS_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
+import {
+	DROPPED_ROOT_KEYS,
+	PARCOURS_KEYS,
+	RELOCATED_ROOT_KEYS,
+} from "./helpers/parcoursKeys";
 
 // Minimal DeclarationRow used by buildIndicators / assembleDeclaration
 const baseRow = {
@@ -410,7 +414,6 @@ describe("assembleDeclaration", () => {
 			Parcours_de_conformite_revision_requis: false,
 			Avis_CSE_requis: false,
 			Indicateur_G_requis: true,
-			Version_regles: "2027.1",
 			Prochaines_etapes_possibles: [
 				{
 					Identifiant_transition: "choose_path_initial_justify_without_cse",
@@ -440,6 +443,15 @@ describe("assembleDeclaration", () => {
 		for (const key of RELOCATED_ROOT_KEYS) {
 			expect(result).not.toHaveProperty(key);
 			expect(result.Parcours).toHaveProperty(key);
+		}
+	});
+
+	it("drops the ruleset version from the payload, root and Parcours alike", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		for (const key of DROPPED_ROOT_KEYS) {
+			expect(result).not.toHaveProperty(key);
+			expect(result.Parcours).not.toHaveProperty(key);
 		}
 	});
 
@@ -1480,16 +1492,29 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 		expect(result.Parcours.Annulee).toBe(false);
 	});
 
+	it("does not advertise the CSE opinion on a completed démarche when no CSE is required", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "demarche_completed", cseRequired: false }),
+			[],
+			[],
+		);
+
+		// The engine still accepts the action (a company may gain a CSE after
+		// completing), but an unrequired opinion is not an expected next step.
+		expect(result.Parcours.Avis_CSE_requis).toBe(false);
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+	});
+
 	// The column is NOT NULL in the schema, so only an unknown version reaches
 	// this boundary; the null case is pinned on buildNextStepsPayload itself.
-	it("derives the steps from the fallback ruleset for an unknown stored version, without rewriting Version_regles (S7)", () => {
+	it("derives the steps from the fallback ruleset for an unknown stored version (S7)", () => {
 		const result = assembleDeclaration(
 			rowWith({ status: "corrective_actions_chosen", rulesVersion: "1999.0" }),
 			[],
 			[],
 		);
 
-		expect(result.Parcours.Version_regles).toBe("1999.0");
+		expect(result.Parcours).not.toHaveProperty("Version_regles");
 		expect(result.Parcours.Prochaines_etapes_possibles).toEqual(
 			stepsOf({ status: "corrective_actions_chosen" }),
 		);

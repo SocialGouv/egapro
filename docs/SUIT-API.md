@@ -60,7 +60,7 @@ Cette section décrit comment lire les champs déduits du parcours de la déclar
 
 ### Cycle de vie : les 8 états et leurs transitions
 
-Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée (`Parcours.Version_regles`). Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
+Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa soumission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
 
 | État source | Action | État cible | Condition |
 | --- | --- | --- | --- |

@@ -307,11 +307,6 @@ const declarationSchema = {
 					description:
 						"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
 				},
-				Version_regles: {
-					type: ["string", "null"],
-					description:
-						"Version du moteur de règles métier utilisée à la soumission.",
-				},
 				Prochaines_etapes_possibles: {
 					type: "array",
 					description:

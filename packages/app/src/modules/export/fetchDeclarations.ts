@@ -381,7 +381,6 @@ export function assembleDeclaration(
 				flags.complianceProcessRevisionRequired,
 			Avis_CSE_requis: row.cseRequired,
 			Indicateur_G_requis: flags.indicatorGRequired,
-			Version_regles: row.rulesVersion,
 			Prochaines_etapes_possibles: buildNextStepsPayload({
 				status: row.status,
 				rulesVersion: row.rulesVersion,
