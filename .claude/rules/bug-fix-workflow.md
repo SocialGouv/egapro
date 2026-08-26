@@ -6,7 +6,7 @@ paths:
 
 # Corriger un bug
 
-> Le protocole vaut pour tout le monde : la pipeline (`bug-analyst` analyse, `code-dev` fixe, `tu-dev` / `e2e-dev` verrouillent) comme une session directe. La répartition des rôles dans la pipeline est dans `.claude/pipeline/orchestration.md`.
+> Le protocole vaut pour tout le monde : la pipeline (`bug-analyst` analyse, `code-dev` fixe et verrouille en TU, `e2e-dev` verrouille le parcours) comme une session directe. La répartition des rôles dans la pipeline est dans `.claude/pipeline/orchestration.md`.
 
 Deux pièges justifient à eux seuls la discipline : « je crois que j'ai fixé » sans preuve, qui revient en régression un mois plus tard ; et le fix accidentel qui ne vise pas la cause racine, donc le bug qui reparaît sous une autre forme.
 

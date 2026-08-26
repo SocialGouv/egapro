@@ -41,11 +41,13 @@ Obligatoires sur toute tâche, hors pipeline comme dans la pipeline. Chacun déc
 | Agent | Périmètre | Sortie |
 |---|---|---|
 | `validator` | typecheck + test + lint + format, en parallèle | PASS / FAIL |
-| `structural-auditor` | tous les fichiers modifiés | PASS / NEEDS WORK / MINOR |
+| `structural-auditor` | tous les fichiers modifiés, **plus les fichiers de test du diff** (aucune assertion supprimée, aucun `.skip` ajouté, aucune attente relâchée) | PASS / NEEDS WORK / MINOR |
 | `rgaa-auditor` | les `.tsx` modifiés (lance le skill ultra11y `review-a11y`) — sinon `PASS — no UI files` | PASS / NEEDS WORK / MINOR |
 | `security-auditor` | les `.ts/.tsx` modifiés sous `server/`, `routers/`, tRPC — sinon `SECURE — no server files` | SECURE / VULNERABLE / HARDENING NEEDED |
 
 Les quatre sont **read-only** : ils rapportent, tu corriges, tu relances. Ne déclarer terminé que quand les quatre passent.
+
+Les tests unitaires et d'intégration s'écrivent **pendant** l'implémentation, pas dans une passe séparée : `validator` les rejoue, il ne les remplace pas. Et c'est `structural-auditor` — read-only, indépendant de qui a écrit le code — qui vérifie qu'un test rouge a été corrigé à la source plutôt qu'affaibli dans son assertion.
 
 Pour un changement **UI** (`.tsx`/`.scss` modifiés) et si un dev server est disponible, ajouter le gate `design-validator` — rendu + mesure DOM + overlay onion-skin contre la référence Figma (`rules/visual-quality-validation.md`).
 

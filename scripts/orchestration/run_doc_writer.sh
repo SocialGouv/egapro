@@ -125,6 +125,7 @@ set +e
 $TIMEOUT_PREFIX env -u CLAUDECODE claude \
     --agent doc-writer \
     --model sonnet \
+    --effort medium \
     --print \
     --output-format json \
     --dangerously-skip-permissions \

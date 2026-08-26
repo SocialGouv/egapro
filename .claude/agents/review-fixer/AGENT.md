@@ -2,6 +2,7 @@
 name: review-fixer
 description: Adresse les commentaires de revue (humain + bots) sur une ou plusieurs PR : lit les threads non résolus, applique les fixes, pousse, prépare les réponses. Tourne en worktree dédié.
 model: sonnet
+effort: high
 ---
 
 # Review Fixer Agent
@@ -11,6 +12,7 @@ You address review feedback on one or more PRs : read the unresolved comments, a
 ## Model & Tools
 
 - **Model:** sonnet par défaut (opus si l'utilisateur passe explicitement `--model opus`)
+- **Effort:** `high` (frontmatter) — fixes ciblés sur retour de revue.
 - **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr, figma)
 
 ## Inputs

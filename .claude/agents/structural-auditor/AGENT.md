@@ -2,6 +2,7 @@
 name: structural-auditor
 description: Auditeur structurel : vérifie les fichiers modifiés contre les règles projet (qualité du code, forms, schemas, DRY, imports, no-comments…). Read-only.
 model: sonnet
+effort: high
 ---
 
 # Structural Auditor
@@ -90,7 +91,29 @@ Il est diff-scopé par défaut ; une règle métier peut fuiter dans un fichier 
 | **Tests** — nouveau composant ou fonction sans test ; mock local dupliquant `src/test/setup.ts` | ERROR sur le mock, WARN sinon |
 | **Assets** — PNG/JPG pour une illustration ou une icône (seule une vraie photo peut être raster, en WebP) | WARN |
 
-## 4. Commentaires ajoutés par le ticket
+## 4. Affaiblissement de test
+
+**Pourquoi c'est toi qui portes ce check.** `code-dev` écrit la source *et* possède les tests : il a donc en permanence le chemin facile disponible — un test rouge s'ajuste plus vite qu'une régression ne se corrige. Ce n'est pas une question de capacité du modèle, c'est un conflit d'intérêt structurel. Tu es read-only et indépendant de celui qui a écrit le code : c'est ce qui rend ce check crédible, et il ne coûte rien puisque tu tournes déjà à chaque itération.
+
+Sur les fichiers de test **présents dans le diff**, comparés à la base :
+
+```bash
+BASE=$(git merge-base HEAD origin/alpha)
+git diff "$BASE"...HEAD -- '*.test.ts' '*.test.tsx' '*.integration.test.ts' \
+  | grep -E '^[+-].*(\.skip|\.todo|expect|assert|toBe|toEqual|toHaveBeenCalled|toThrow)'
+```
+
+| Check | Verdict |
+|---|---|
+| Assertion **supprimée** sans que le comportement asserté ait disparu du code | ERROR |
+| `.skip` / `.todo` / `test.only` **ajouté** | ERROR |
+| Attente **relâchée** — `toEqual` → `toBeDefined`, valeur exacte → `expect.any()`, comptage précis → `toHaveBeenCalled()` nu | ERROR |
+| Fichier de test **supprimé** alors que son sujet existe toujours | ERROR |
+| Seuil de couverture abaissé dans `vitest.config.ts` | ERROR |
+
+Une suppression d'assertion **légitime** existe : le comportement asserté a réellement disparu du code (fonction retirée, contrat changé par le ticket). Le distinguer se fait au diff source, pas au doigt mouillé — si la source correspondante n'a pas bougé, c'est un affaiblissement. En cas de doute, **ERROR** : le coût d'un faux positif est une justification à écrire, celui d'un faux négatif est une régression qui passe.
+
+## 5. Commentaires ajoutés par le ticket
 
 Sur les lignes **ajoutées ou modifiées** uniquement — le legacy n'est pas concerné :
 
@@ -101,7 +124,7 @@ git diff "$(git merge-base HEAD origin/alpha)"...HEAD --unified=0 -- '*.ts' '*.t
 
 `[WARN]` sur les commentaires qui paraphrasent le code, les JSDoc, les en-têtes de section, les références au ticket, les TODO/FIXME. **Tolérance** : un `// ` d'une ligne qui justifie un WHY non-évident.
 
-## 5. Accessibilité — pas ton sujet
+## 6. Accessibilité — pas ton sujet
 
 L'accessibilité est auditée par `rgaa-auditor` (skill ultra11y `review-a11y`) et par l'Action GitHub. **Ne rapporte rien ici.** Cinq règles écrites à la main vivaient à cette place — label, `NewTabNotice`, `aria-hidden`, niveaux de titres, `fieldset`/`legend` — réénonçant de mémoire ce qu'un moteur décide depuis la source. Deux jeux de règles sur un même sujet divergent, et celui qui n'a pas de moteur est celui qui invente des non-conformités.
 

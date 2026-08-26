@@ -153,6 +153,7 @@ set +e
 $TIMEOUT_PREFIX env -u CLAUDECODE claude \
     --agent architect-rework \
     --model opus \
+    --effort xhigh \
     --print \
     --output-format json \
     --dangerously-skip-permissions \
