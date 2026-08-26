@@ -79,7 +79,7 @@ export async function ComplianceConfirmation() {
 			</div>
 
 			<h2 className="fr-h5 fr-mb-0">
-				Documents récapitulatifs de votre déclaration
+				Documents récapitulatifs de votre démarche
 			</h2>
 
 			<div className={styles.downloadCards}>
