@@ -4,6 +4,7 @@
 export {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -160,8 +161,10 @@ export {
 	formatCurrency,
 	formatGap,
 	formatGapCompact,
+	formatIsoDate,
 	formatLongDate,
 	formatMonthDay,
+	formatOptionalIsoDate,
 	formatPercentage,
 	formatShortDate,
 	formatShortDateTime,
