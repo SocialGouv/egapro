@@ -457,7 +457,36 @@ describe("companyRouter.getWithDeclarations", () => {
 			status: "done",
 			fsmStatus: null,
 			currentStep: 0,
+			notSubject: true,
 		});
+	});
+
+	// "done" alone cannot tell a submitted démarche from a not-subject one, so
+	// the dashboard reads this discriminant rather than the status.
+	it("flags only the not-subject row, never a submitted one nor the rémunération lines", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			declRows: [makeDeclRow(getCurrentYear())],
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					status: "submitted",
+					currentStep: 5,
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ status: "done", notSubject: false });
+		expect(
+			result.declarations
+				.filter((d) => d.type === "remuneration")
+				.map((d) => d.notSubject),
+		).toEqual([false]);
 	});
 
 	it("keeps the démarche listed under the campaign year, not the stored reference year", async () => {

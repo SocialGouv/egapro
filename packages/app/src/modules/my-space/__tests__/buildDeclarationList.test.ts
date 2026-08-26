@@ -11,6 +11,7 @@ const EMPTY_DECLARATION = {
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
+	notSubject: false,
 };
 const PLACEHOLDER_ROW = { ...EMPTY_DECLARATION, fsmStatus: null };
 
@@ -360,6 +361,62 @@ describe("buildDeclarationList", () => {
 			year: 2026,
 			fsmStatus: "awaiting_cse_opinion",
 			cseRequired: true,
+		});
+	});
+
+	it("propagates notSubject from a current year representation record", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "representation",
+					year: 2026,
+					status: "done",
+					fsmStatus: null,
+					currentStep: 0,
+					updatedAt: null,
+					...EMPTY_DECLARATION,
+					notSubject: true,
+				},
+			],
+			2026,
+		);
+
+		expect(result[1]).toMatchObject({
+			type: "representation",
+			year: 2026,
+			status: "done",
+			notSubject: true,
+		});
+		expect(result[0]).toMatchObject({
+			type: "remuneration",
+			year: 2026,
+			notSubject: false,
+		});
+	});
+
+	it("propagates notSubject from a previous year representation record", () => {
+		const result = buildDeclarationList(
+			SIREN,
+			[
+				{
+					type: "representation",
+					year: 2025,
+					status: "done",
+					fsmStatus: null,
+					currentStep: 0,
+					updatedAt: null,
+					...EMPTY_DECLARATION,
+					notSubject: true,
+				},
+			],
+			2026,
+		);
+
+		expect(result[2]).toMatchObject({
+			type: "representation",
+			year: 2025,
+			notSubject: true,
 		});
 	});
 });
