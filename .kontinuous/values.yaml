@@ -7,6 +7,19 @@ global:
   # `packages/notifications/src/index.ts` exits cleanly when the queue DB URL
   # is absent — so a namespace without pg-notifications just runs an idle pod.
   notificationsEnabled: true
+  # One-off, idempotent post-deploy repair for location columns added by
+  # migration 0047. It only processes incomplete rows and can safely rerun.
+  companyLocationBackfillEnabled: true
+  # Deterministic Observatoire fixtures. Kept off by default and enabled only
+  # by the dev overlay used for ephemeral branch review apps.
+  observatoryDemoSeedEnabled: false
+  # Daily refresh of the remote data.gouv.fr resource. Enable once the dataset,
+  # resource and sealed API key have been provisioned by the publisher account.
+  dataGouv:
+    enabled: false
+    apiUrl: "https://www.data.gouv.fr/api/1"
+    datasetId: ""
+    resourceId: ""
   # APISIX standalone gateway in front of the SUIT API.
   # Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
   # Scoped under `global:` because only `global.*` values are propagated to the

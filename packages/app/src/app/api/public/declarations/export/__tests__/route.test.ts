@@ -11,7 +11,11 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/db/schema", () => ({
 	declarations: { year: "year", siren: "siren", status: "status" },
-	companies: { siren: "companies.siren" },
+	companies: {
+		siren: "companies.siren",
+		regionCode: "companies.regionCode",
+		region: "companies.region",
+	},
 	campaignDeadlines: { year: "cd.year", publicDataReleaseDate: "cd.release" },
 	gipMdsData: { siren: "gip.siren", year: "gip.year" },
 	// Pulled in at module scope by the ~/modules/public-api barrel.
@@ -38,6 +42,7 @@ vi.mock("drizzle-orm", () => ({
 	eq: (a: unknown, b: unknown) => ({ eq: [a, b] }),
 	isNotNull: (a: unknown) => ({ isNotNull: a }),
 	isNull: (a: unknown) => ({ isNull: a }),
+	or: (...args: unknown[]) => ({ or: args }),
 	sql: (strings: TemplateStringsArray) => ({ sql: strings.join("") }),
 }));
 
@@ -46,12 +51,15 @@ vi.mock("~/server/audit/log", () => ({
 }));
 
 function setRows(rows: unknown[]) {
+	const ordered = Object.assign(Promise.resolve(rows), {
+		limit: () => Promise.resolve(rows),
+	});
 	const chain = {
 		from: () => chain,
 		innerJoin: () => chain,
 		leftJoin: () => chain,
 		where: () => chain,
-		orderBy: () => Promise.resolve(rows),
+		orderBy: () => ordered,
 	};
 	mocks.dbSelect.mockReturnValue(chain);
 }
@@ -165,13 +173,11 @@ describe("GET /api/public/declarations/export", () => {
 		const row = body.data[0];
 
 		expect(row.siren).toBe("987654321");
-		expect(row.name).toBeNull();
-		expect(row.address).toBeNull();
-		expect(row.region).toBeNull();
-		expect(row.departmentCode).toBeNull();
-		expect(row.departmentLabel).toBeNull();
-		expect(row.nafCode).toBeNull();
-		expect(row.nafLabel).toBeNull();
+		expect(row.name).toBe("Non-diffusible");
+		expect(row.address).toBe("Non-diffusible");
+		expect(row.departmentCode).toBe("75");
+		expect(row.departmentLabel).toBe("Paris");
+		expect(row.nafCode).toBe("6202A");
 		// Indicators are always public, even for a non-diffusible company
 		expect(row.globalAnnualMeanGap).toBe(10.5);
 	});
@@ -201,8 +207,9 @@ describe("GET /api/public/declarations/export", () => {
 		const csv = await response.text();
 		const line = csv.split("\n")[1] ?? "";
 
-		// workforceEma is the 10th column (index 9), rendered as empty quotes
-		expect(line.split(";")[9]).toBe('""');
+		const header = csv.split("\n")[0]?.split(";") ?? [];
+		const workforceIndex = header.indexOf('"workforceEma"');
+		expect(line.split(";")[workforceIndex]).toBe('""');
 	});
 
 	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {
@@ -237,12 +244,26 @@ describe("GET /api/public/declarations/export", () => {
 
 		const csv = await response.text();
 		const lines = csv.split("\n");
-		expect(lines[0]).toBe(
-			'"year";"siren";"name";"address";"region";"departmentCode";"departmentLabel";"nafCode";"nafLabel";"workforceEma";"totalWomen";"totalMen";"globalAnnualMeanGap";"globalAnnualMedianGap";"globalHourlyMeanGap";"globalHourlyMedianGap";"variableAnnualMeanGap";"variableAnnualMedianGap";"variableHourlyMeanGap";"variableHourlyMedianGap";"variableProportionWomen";"variableProportionMen";"annualQuartile1ProportionWomen";"annualQuartile2ProportionWomen";"annualQuartile3ProportionWomen";"annualQuartile4ProportionWomen";"annualQuartile1ProportionMen";"annualQuartile2ProportionMen";"annualQuartile3ProportionMen";"annualQuartile4ProportionMen";"hourlyQuartile1ProportionWomen";"hourlyQuartile2ProportionWomen";"hourlyQuartile3ProportionWomen";"hourlyQuartile4ProportionWomen";"hourlyQuartile1ProportionMen";"hourlyQuartile2ProportionMen";"hourlyQuartile3ProportionMen";"hourlyQuartile4ProportionMen"',
-		);
+		expect(lines[0]).toContain('"city";"regionCode";"region"');
+		expect(lines[0]).toContain('"countryCode";"countryLabel"');
+		expect(lines[0]).toContain('"globalAnnualMeanGap"');
 		expect(lines).toHaveLength(2);
 		expect(lines[1]).toContain('"111222333"');
 		expect(lines[1]).toContain('"Alpha & Co"');
+	});
+
+	it("returns an Excel workbook when format=xlsx", async () => {
+		setRows([buildRow()]);
+
+		const response = await callGet("?format=xlsx");
+
+		expect(response.headers.get("Content-Type")).toContain(
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		);
+		expect(response.headers.get("Content-Disposition")).toContain(
+			"declarations_export.xlsx",
+		);
+		expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(100);
 	});
 
 	it("escapes double quotes in CSV fields and emits empty quotes for null values", async () => {
@@ -259,8 +280,8 @@ describe("GET /api/public/declarations/export", () => {
 		const line = csv.split("\n")[1] ?? "";
 
 		expect(line).toContain('"444555666"');
-		// Non-diffusible → name masked to null → empty quoted field
-		expect(line).toContain('""');
+		// Non-diffusible → name and address are replaced with the public label.
+		expect(line).toContain('"Non-diffusible"');
 		expect(line).not.toContain('Beta "Groupe" SA');
 	});
 
@@ -307,11 +328,31 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet();
 
 		expect(response.status).toBe(500);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		const body = await response.json();
 		expect(body).toEqual({ error: "Erreur lors de l'export des déclarations" });
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({ status: "failure" }),
 		);
 		consoleSpy.mockRestore();
+	});
+
+	it("returns a CORS-readable 400 for an unsupported format", async () => {
+		const response = await callGet("?format=xml");
+
+		expect(response.status).toBe(400);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+	});
+
+	it("requires filters when an Excel export would exceed 10,000 rows", async () => {
+		setRows(Array.from({ length: 10_001 }, () => buildRow()));
+
+		const response = await callGet("?format=xlsx");
+
+		expect(response.status).toBe(413);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(await response.json()).toEqual(
+			expect.objectContaining({ error: expect.stringContaining("10 000") }),
+		);
 	});
 });

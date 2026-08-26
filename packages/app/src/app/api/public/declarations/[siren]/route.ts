@@ -3,16 +3,25 @@ import { parseSiren } from "~/modules/domain";
 import { getPublicDeclarationsBySiren } from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
 const PUBLIC_HEADERS = {
 	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, OPTIONS",
+	"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	"Cache-Control": "public, max-age=300, s-maxage=300",
 };
+
+export function OPTIONS(): Response {
+	return new Response(null, { status: 204, headers: PUBLIC_HEADERS });
+}
 
 export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ siren: string }> },
 ) {
+	const limited = await enforcePublicApiRateLimit(request);
+	if (limited) return limited;
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(request.headers);
 	const { siren: rawSiren } = await params;

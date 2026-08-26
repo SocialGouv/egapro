@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-25T13:37:49Z",
+  "title": "Design System: EgaPro",
+  "extensions": {
+    "colorMeta": {
+      "primary-blue-france": {
+        "role": "primary",
+        "displayName": "Bleu France souverain",
+        "canonical": "#000091",
+        "tonalRamp": ["#00003d", "#00006f", "#000091", "#0000b8", "#1212ff", "#6a6af4", "#cacafb", "#f5f5fe"]
+      },
+      "primary-blue-france-hover": {
+        "role": "primary",
+        "displayName": "Bleu France survol",
+        "canonical": "#1212ff",
+        "tonalRamp": ["#00003d", "#00006f", "#000091", "#0000b8", "#1212ff", "#6a6af4", "#cacafb", "#f5f5fe"]
+      },
+      "primary-blue-france-active": {
+        "role": "primary",
+        "displayName": "Bleu France actif",
+        "canonical": "#2323ff",
+        "tonalRamp": ["#00003d", "#00006f", "#000091", "#0000b8", "#2323ff", "#6a6af4", "#cacafb", "#f5f5fe"]
+      },
+      "accent-blue-france": {
+        "role": "secondary",
+        "displayName": "Bleu France médian",
+        "canonical": "#6a6af4",
+        "tonalRamp": ["#00003d", "#00006f", "#000091", "#0000b8", "#1212ff", "#6a6af4", "#cacafb", "#f5f5fe"]
+      },
+      "focus-blue": {
+        "role": "secondary",
+        "displayName": "Bleu de focus",
+        "canonical": "#0a76f6",
+        "tonalRamp": ["#00183d", "#00336f", "#0050a8", "#0a76f6", "#4b9bff", "#84baff", "#bfdcff", "#f1f7ff"]
+      },
+      "surface-default": {
+        "role": "neutral",
+        "displayName": "Blanc de service",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "surface-contrast": {
+        "role": "neutral",
+        "displayName": "Gris de contraste",
+        "canonical": "#eeeeee",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "surface-blue-tint": {
+        "role": "neutral",
+        "displayName": "Blanc bleuté d’action",
+        "canonical": "#f5f5fe",
+        "tonalRamp": ["#00003d", "#00006f", "#000091", "#0000b8", "#1212ff", "#6a6af4", "#cacafb", "#f5f5fe"]
+      },
+      "text-title": {
+        "role": "neutral",
+        "displayName": "Noir de titre",
+        "canonical": "#161616",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "text-default": {
+        "role": "neutral",
+        "displayName": "Gris de lecture",
+        "canonical": "#3a3a3a",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "text-mention": {
+        "role": "neutral",
+        "displayName": "Gris de mention",
+        "canonical": "#666666",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "border-default": {
+        "role": "neutral",
+        "displayName": "Gris de séparation",
+        "canonical": "#dddddd",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      },
+      "border-plain": {
+        "role": "neutral",
+        "displayName": "Gris de contrôle",
+        "canonical": "#929292",
+        "tonalRamp": ["#161616", "#3a3a3a", "#666666", "#929292", "#c1c1c1", "#dddddd", "#eeeeee", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Titre de page", "purpose": "Point d’entrée unique de la tâche; passe à 2.5rem dès 48em." },
+      "title": { "displayName": "Titre de section", "purpose": "Structure résultats, historique, téléchargements et information." },
+      "lead": { "displayName": "Introduction", "purpose": "Explique la tâche ou expose l’identifiant principal." },
+      "body": { "displayName": "Texte courant", "purpose": "Faits, explications et métadonnées." },
+      "label": { "displayName": "Libellé", "purpose": "Nomme explicitement champs et contrôles." },
+      "mention": { "displayName": "Mention", "purpose": "Sources, confidentialité et contenu compact." }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      { "name": "sm", "value": "36em" },
+      { "name": "md", "value": "48em" },
+      { "name": "lg", "value": "62em" },
+      { "name": "xl", "value": "78em" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale de recherche ou d’application des critères.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Appliquer les critères</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; min-height:2.5rem; padding:.5rem 1rem; border:0; border-radius:0; background:var(--background-action-high-blue-france, #000091); color:var(--text-inverted-blue-france, #f5f5fe); font:500 1rem/1.5rem Marianne, Arial, sans-serif; cursor:pointer; } .ds-btn-primary:hover { background:var(--background-action-high-blue-france-hover, #1212ff); } .ds-btn-primary:active { background:var(--background-action-high-blue-france-active, #2323ff); } .ds-btn-primary:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Action voisine ou réversible qui reste subordonnée à l’action principale.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Réinitialiser</button>",
+      "css": ".ds-btn-secondary { display:inline-flex; align-items:center; justify-content:center; min-height:2.5rem; padding:.5rem 1rem; border:0; border-radius:0; background:transparent; color:var(--text-action-high-blue-france, #000091); box-shadow:inset 0 0 0 1px var(--border-action-high-blue-france, #000091); font:500 1rem/1.5rem Marianne, Arial, sans-serif; cursor:pointer; } .ds-btn-secondary:hover { background:#f6f6f6; } .ds-btn-secondary:active { background:#ededed; } .ds-btn-secondary:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Company Search",
+      "kind": "input",
+      "refersTo": "field-default",
+      "description": "Entrée dominante de la consultation publique par SIREN ou raison sociale.",
+      "html": "<div class=\"ds-search\"><label class=\"ds-sr-only\" for=\"ds-company\">SIREN ou raison sociale</label><input class=\"ds-search-input\" id=\"ds-company\" placeholder=\"Ex. 319159877 ou Entreprise Exemple\" type=\"search\"><button class=\"ds-search-button\" type=\"button\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" d=\"m18.031 16.617 4.283 4.282-1.415 1.415-4.282-4.283A8.96 8.96 0 0 1 11 20c-4.968 0-9-4.032-9-9s4.032-9 9-9 9 4.032 9 9a8.96 8.96 0 0 1-1.969 5.617ZM11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z\"/></svg><span>Rechercher</span></button></div>",
+      "css": ".ds-search { display:flex; width:100%; font-family:Marianne, Arial, sans-serif; } .ds-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; } .ds-search-input { width:100%; min-width:0; height:3rem; padding:.75rem 1rem; border:0; border-radius:.25rem 0 0 0; background:var(--background-contrast-grey, #eee); color:var(--text-default-grey, #3a3a3a); box-shadow:inset 0 -2px 0 var(--border-action-high-blue-france, #000091); font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-search-input::placeholder { color:var(--text-mention-grey, #666); font-style:italic; } .ds-search-button { display:inline-flex; align-items:center; gap:.5rem; height:3rem; padding:.75rem 1rem; border:0; border-radius:0 .25rem 0 0; background:var(--background-action-high-blue-france, #000091); color:var(--text-inverted-blue-france, #f5f5fe); font:500 1rem/1.5rem Marianne, Arial, sans-serif; cursor:pointer; } .ds-search-button svg { width:1.5rem; height:1.5rem; flex:none; } .ds-search-button:hover { background:var(--background-action-high-blue-france-hover, #1212ff); } .ds-search-input:focus-visible, .ds-search-button:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; } @media (max-width:35.99em) { .ds-search-button { width:3rem; padding:.75rem; } .ds-search-button span { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); } }"
+    },
+    {
+      "name": "Standard Field",
+      "kind": "input",
+      "refersTo": "field-default",
+      "description": "Champ factuel compact utilisé pour ville, année ou autre critère libre.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-city\">Ville</label><input class=\"ds-field\" id=\"ds-city\" type=\"text\">",
+      "css": ".ds-field-label { display:block; margin:0 0 .5rem; color:var(--text-label-grey, #161616); font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-field { display:block; width:100%; height:2.5rem; padding:.5rem 1rem; border:0; border-radius:.25rem .25rem 0 0; background:var(--background-contrast-grey, #eee); color:var(--text-default-grey, #3a3a3a); box-shadow:inset 0 -2px 0 var(--border-plain-grey, #929292); font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-field:hover { background:#d2d2d2; } .ds-field:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Filter Select",
+      "kind": "input",
+      "refersTo": "field-default",
+      "description": "Sélecteur progressif pour région, département, secteur, taille ou tri.",
+      "html": "<label class=\"ds-select-label\" for=\"ds-region\">Région</label><span class=\"ds-select-wrap\"><select class=\"ds-select\" id=\"ds-region\"><option>Toutes les régions</option></select><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" d=\"m12 13.1 5-4.9 1.4 1.4-6.4 6.3-6.4-6.3L7 8.2l5 4.9Z\"/></svg></span>",
+      "css": ".ds-select-label { display:block; margin:0 0 .5rem; color:var(--text-label-grey, #161616); font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-select-wrap { position:relative; display:block; } .ds-select { appearance:none; display:block; width:100%; height:2.5rem; padding:.5rem 2.5rem .5rem 1rem; border:0; border-radius:.25rem .25rem 0 0; background:var(--background-contrast-grey, #eee); color:var(--text-default-grey, #3a3a3a); box-shadow:inset 0 -2px 0 var(--border-plain-grey, #929292); font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-select-wrap svg { position:absolute; right:1rem; top:.75rem; width:1rem; height:1rem; pointer-events:none; color:var(--text-title-grey, #161616); } .ds-select:hover { background:#d2d2d2; } .ds-select:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Information Callout",
+      "kind": "card",
+      "refersTo": "callout-information",
+      "description": "Contexte ou explication réglementaire secondaire, jamais promotionnelle.",
+      "html": "<aside class=\"ds-callout\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path fill=\"currentColor\" d=\"M11 7h2v2h-2V7Zm0 4h2v6h-2v-6Zm1 11C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10Zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z\"/></svg><div><h3>Commencez votre recherche</h3><p>Saisissez un SIREN ou un nom, ou utilisez un des filtres proposés.</p></div></aside>",
+      "css": ".ds-callout { display:flex; gap:1rem; padding:1.5rem; border:0; border-radius:0; background:linear-gradient(90deg, var(--border-default-blue-france, #6a6af4) 0 4px, var(--background-contrast-grey, #eee) 4px); color:var(--text-default-grey, #3a3a3a); font-family:Marianne, Arial, sans-serif; } .ds-callout svg { width:1.5rem; height:1.5rem; flex:none; color:var(--text-title-grey, #161616); } .ds-callout h3 { margin:0 0 .5rem; color:var(--text-title-grey, #161616); font:700 1.375rem/1.75rem Marianne, Arial, sans-serif; } .ds-callout p { margin:0; font:400 1.125rem/1.75rem Marianne, Arial, sans-serif; }"
+    },
+    {
+      "name": "Year Tag",
+      "kind": "chip",
+      "refersTo": "tag-year",
+      "description": "Choix compact d’une année de résultats avec état courant explicite.",
+      "html": "<a class=\"ds-tag\" aria-current=\"page\" href=\"#\">2025</a>",
+      "css": ".ds-tag { display:inline-flex; align-items:center; justify-content:center; min-width:2.25rem; min-height:2rem; padding:.25rem .75rem; border-radius:1rem; background:var(--background-contrast-grey, #eee); color:var(--text-label-grey, #161616); text-decoration:none; font:400 .875rem/1.5rem Marianne, Arial, sans-serif; } .ds-tag[aria-current=\"page\"] { background:var(--background-active-blue-france, #000091); color:var(--text-inverted-blue-france, #f5f5fe); } .ds-tag:hover { background:#d2d2d2; } .ds-tag[aria-current=\"page\"]:hover { background:var(--background-action-high-blue-france-hover, #1212ff); } .ds-tag:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Section Navigation",
+      "kind": "nav",
+      "description": "Navigation publique plate avec Observatoire identifié comme section active.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Menu principal\"><a href=\"#\">Accueil</a><a aria-current=\"page\" href=\"#\">Observatoire</a></nav>",
+      "css": ".ds-nav { display:flex; align-items:stretch; border-top:1px solid var(--border-default-grey, #ddd); border-bottom:1px solid var(--border-default-grey, #ddd); font-family:Marianne, Arial, sans-serif; } .ds-nav a { position:relative; display:flex; align-items:center; min-height:3rem; padding:.75rem 1rem; color:var(--text-action-high-grey, #161616); text-decoration:none; font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-nav a:hover { background:#f6f6f6; } .ds-nav a[aria-current=\"page\"] { color:var(--text-active-blue-france, #000091); } .ds-nav a[aria-current=\"page\"]::after { content:\"\"; position:absolute; right:1rem; bottom:0; left:1rem; height:2px; background:var(--background-active-blue-france, #000091); } .ds-nav a:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; }"
+    },
+    {
+      "name": "Search Result",
+      "kind": "custom",
+      "description": "Résultat public sans carte, structuré par titre, faits et séparateurs.",
+      "html": "<article class=\"ds-result\"><h3><a href=\"#\">Entreprise Exemple</a></h3><p><span>SIREN 319159877</span><span>Dernier résultat publié : 2025</span><span>Paris — 75</span><span>NAF 62.01Z</span></p></article>",
+      "css": ".ds-result { padding:1.5rem 0; border-top:1px solid var(--border-default-grey, #ddd); color:var(--text-default-grey, #3a3a3a); font-family:Marianne, Arial, sans-serif; } .ds-result:last-child { border-bottom:1px solid var(--border-default-grey, #ddd); } .ds-result h3 { margin:0 0 .5rem; font:700 1.5rem/2rem Marianne, Arial, sans-serif; } .ds-result a { color:var(--text-action-high-blue-france, #000091); text-decoration:underline; text-underline-offset:.15em; } .ds-result a:hover { text-decoration-thickness:.125em; } .ds-result a:focus-visible { outline:2px solid #0a76f6; outline-offset:2px; } .ds-result p { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin:0; font:400 1rem/1.5rem Marianne, Arial, sans-serif; } .ds-result span { font-variant-numeric:tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le guichet public vérifiable",
+    "overview": "EgaPro transpose l’autorité calme d’un service public dans une interface de consultation immédiatement compréhensible. La recherche d’entreprise est l’action dominante; les filtres l’affinent sans concurrencer ce premier geste, puis les résultats et indicateurs sont présentés comme des faits à lire, comparer et réutiliser.\n\nLe système conserve strictement l’identité de l’État et le vocabulaire DSFR. Sa personnalité vient de la précision : hiérarchie typographique franche, Bleu France réservé aux actions et états actifs, surfaces tonales plutôt que décoratives, séparateurs nets et densité d’information contenue. L’interface reste stable du grand écran au mobile, où la grille se replie en une colonne et les actions prennent la largeur disponible.",
+    "keyCharacteristics": [
+      "Institutionnel, direct et explicatif, sans tonalité commerciale.",
+      "Recherche d’entreprise dominante, filtres factuels secondaires.",
+      "Mise en page blanche, plate et structurée par l’espacement et les séparateurs.",
+      "Composants DSFR reconnaissables et états clavier toujours visibles.",
+      "Données lisibles en texte ou en tableau, avec chiffres tabulaires lorsque nécessaire."
+    ],
+    "rules": [
+      { "name": "The Bleu utile Rule", "body": "Le Bleu France signifie action, lien, sélection ou focus; il ne sert pas à décorer des surfaces de contenu.", "section": "colors" },
+      { "name": "The Donnée neutre Rule", "body": "Un résultat factuel reste en gris de lecture sauf si une sémantique réglementaire explicite exige une couleur d’état.", "section": "colors" },
+      { "name": "The Une voix publique Rule", "body": "Marianne est la voix unique de l’interface; la graisse et l’échelle suffisent à distinguer action, structure et détail.", "section": "typography" },
+      { "name": "The Chiffres stables Rule", "body": "Les identifiants, années et mesures alignées utilisent des chiffres tabulaires dès qu’un balayage vertical ou une comparaison est attendue.", "section": "typography" },
+      { "name": "The Progression factuelle Rule", "body": "Organiser chaque page dans l’ordre : contexte bref, action ou identité dominante, critères ou période, résultats, puis provenance et réutilisation.", "section": "layout" },
+      { "name": "The Plat par défaut Rule", "body": "Une surface de consultation ne gagne pas une ombre pour attirer l’attention; utiliser d’abord la hiérarchie, le ton de fond ou un filet DSFR.", "section": "elevation" },
+      { "name": "The Rayon sémantique Rule", "body": "Le rayon indique un type de contrôle : sommet adouci pour la saisie, pilule pour le tag, angle droit pour l’action et le contenu.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do faire de la recherche ou de l’identité d’entreprise le point d’entrée visuel dominant.",
+      "Do révéler les filtres comme une progression factuelle et les empiler dans l’ordre de lecture en mobile.",
+      "Do utiliser les composants, variables, états et ruptures DSFR avant d’introduire une règle locale.",
+      "Do préserver les libellés, légendes, captions, alternatives tabulaires et contours de focus visibles.",
+      "Do placer source, confidentialité, API et exports après les résultats sans concurrencer la tâche principale."
+    ],
+    "donts": [
+      "Don't transformer les résultats en mosaïque de cartes, badges colorés ou tuiles de score sans nécessité sémantique.",
+      "Don't employer le Bleu France comme remplissage décoratif ou pour colorer arbitrairement une donnée.",
+      "Don't ajouter d’ombre, de dégradé, de grand rayon ou de mouvement décoratif aux surfaces de consultation.",
+      "Don't masquer un libellé essentiel derrière un placeholder ou dépendre d’un graphique seul pour transmettre un résultat.",
+      "Don't comprimer les filtres ou les tableaux au point de rompre l’ordre de lecture, les cibles tactiles ou la lisibilité mobile."
+    ]
+  }
+}

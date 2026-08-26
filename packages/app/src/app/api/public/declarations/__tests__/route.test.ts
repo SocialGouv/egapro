@@ -50,10 +50,9 @@ describe("GET /api/public/declarations", () => {
 
 		await GET(request());
 
-		expect(mocks.searchPublicDeclarations).toHaveBeenCalledWith({
-			limit: 10,
-			offset: 0,
-		});
+		expect(mocks.searchPublicDeclarations).toHaveBeenCalledWith(
+			expect.objectContaining({ limit: 50, offset: 0 }),
+		);
 	});
 
 	it("parses and coerces every supported query parameter", async () => {
@@ -61,16 +60,20 @@ describe("GET /api/public/declarations", () => {
 
 		await GET(
 			request(
-				"?q=acme&region=11&departement=75&naf=62.01Z&year=2023&limit=25&offset=50",
+				"?q=acme&city=Paris&region=11&departement=75&naf=J&workforceMin=50&workforceMax=249&year=2023&sort=name&limit=25&offset=50",
 			),
 		);
 
 		expect(mocks.searchPublicDeclarations).toHaveBeenCalledWith({
 			q: "acme",
+			city: "Paris",
 			region: "11",
 			departement: "75",
-			naf: "62.01Z",
+			naf: "J",
+			workforceMin: 50,
+			workforceMax: 249,
 			year: 2023,
+			sort: "name",
 			limit: 25,
 			offset: 50,
 		});
@@ -93,6 +96,15 @@ describe("GET /api/public/declarations", () => {
 		const { GET } = await import("../route");
 
 		const response = await GET(request("?year=abc"));
+
+		expect(response.status).toBe(400);
+		expect(mocks.searchPublicDeclarations).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 when a numeric parameter only starts with a number", async () => {
+		const { GET } = await import("../route");
+
+		const response = await GET(request("?year=2025invalid&limit=1.5"));
 
 		expect(response.status).toBe(400);
 		expect(mocks.searchPublicDeclarations).not.toHaveBeenCalled();
@@ -132,9 +144,11 @@ describe("GET /api/public/declarations", () => {
 				status: "success",
 				metadata: {
 					q: "acme",
+					city: null,
 					region: "11",
 					departement: null,
 					naf: null,
+					sort: null,
 					year: null,
 				},
 			}),
@@ -150,9 +164,11 @@ describe("GET /api/public/declarations", () => {
 			expect.objectContaining({
 				metadata: {
 					q: "acme",
+					city: null,
 					region: "11",
 					departement: "75",
 					naf: "62.01Z",
+					sort: null,
 					year: "2023",
 				},
 			}),
@@ -168,9 +184,11 @@ describe("GET /api/public/declarations", () => {
 			expect.objectContaining({
 				metadata: {
 					q: null,
+					city: null,
 					region: null,
 					departement: null,
 					naf: null,
+					sort: null,
 					year: null,
 				},
 			}),

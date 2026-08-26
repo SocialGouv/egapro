@@ -9,6 +9,7 @@ export type {
 } from "./projection";
 export {
 	isCompanyDiffusible,
+	NON_DIFFUSIBLE_LABEL,
 	publicDeclarationColumns,
 	toNumber,
 	toPublicDeclaration,

@@ -41,7 +41,7 @@ function campaignRow({ year, publicDataReleaseDate }: CampaignYear) {
 type DeclarationRow = {
 	siren: string;
 	year: number;
-	status?: "draft" | "demarche_completed";
+	status?: "draft" | "awaiting_cse_opinion" | "demarche_completed";
 	cancelledAt?: Date | null;
 	globalAnnualMeanGap?: string | null;
 };
@@ -142,6 +142,22 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		expect(result.count).toBe(1);
 		expect(result.data).toHaveLength(1);
 		expect(result.data[0]?.siren).toBe(SIREN_A);
+	});
+
+	it("keeps a released declaration in a submitted intermediate status", async () => {
+		await db.insert(declarations).values(
+			declarationRow({
+				siren: SIREN_A,
+				year: 2100,
+				status: "awaiting_cse_opinion",
+			}),
+		);
+
+		const result = await searchPublicDeclarations({ limit: 10, offset: 0 });
+
+		expect(result.data.map((declaration) => declaration.siren)).toEqual([
+			SIREN_A,
+		]);
 	});
 
 	it("excludes years whose public release date has not been reached", async () => {

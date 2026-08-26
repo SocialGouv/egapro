@@ -1,0 +1,44 @@
+# Consultation publique EgaPro
+
+La consultation publique expose exclusivement les six indicateurs de rémunération A à F dont la date de rendu public est atteinte. L'indicateur G, les avis CSE et les données des déclarants ne sont jamais exposés.
+
+## Points d'accès
+
+- interface : `/index-egapro/recherche` ;
+- API et autocomplétion : `/api/public/declarations` ;
+- historique d'un SIREN : `/api/public/declarations/{siren}` ;
+- exports filtrables : `/api/public/declarations/export?format=json|csv|xlsx` ;
+- documentation OpenAPI : `/api/public/docs` et `/api/public/openapi.json` ;
+- flux RSS : `/index-egapro/actualites.xml`.
+
+L'accès anonyme est limité à 120 appels par minute et par adresse IP. Un jeton présent dans `EGAPRO_PUBLIC_API_TOKENS` peut être envoyé avec `Authorization: Bearer …` et porte le quota à 1 200 appels par minute. Valkey partage le compteur entre réplicas ; en son absence, un compteur mémoire conserve une protection locale.
+
+## Données de démonstration
+
+Après avoir démarré PostgreSQL et appliqué les migrations, charger le jeu de données de l'Observatoire depuis la racine du dépôt :
+
+```bash
+pnpm db:seed-observatory
+```
+
+La commande crée cinq entreprises réservées aux tests (`998900001` à `998900005`) et douze déclarations sur quatre années. Le jeu couvre les filtres géographiques, NAF et effectif, les historiques avec valeurs positives, négatives, nulles ou égales à zéro, une entreprise non-diffusible, une entreprise étrangère et une entreprise sans historique.
+
+- recherche et filtres : `http://localhost:3000/index-egapro/recherche` ;
+- graphique multi-années : `http://localhost:3000/index-egapro/entreprise/998900001` ;
+- confidentialité : `http://localhost:3000/index-egapro/entreprise/998900003`.
+
+Une année de référence peut être choisie avec `pnpm db:seed-observatory -- --year=2025`. Pour supprimer uniquement les entreprises et déclarations de démonstration :
+
+```bash
+pnpm db:seed-observatory -- --clean
+```
+
+Les review apps éphémères de branche utilisent l'environnement `dev` : un Job Helm post-déploiement y exécute automatiquement le même seed, de façon idempotente. Le seed reste désactivé par défaut dans les valeurs communes et n'est donc pas exécuté en préproduction ou en production.
+
+## Confidentialité
+
+Pour une entreprise au statut INSEE non diffusible, la raison sociale et l'adresse sont remplacées par `Non-diffusible`. Le SIREN, le département, l'effectif EMA et les indicateurs A à F restent affichés. Une entreprise étrangère affiche son pays à la place de la région et du département.
+
+## Publication data.gouv.fr
+
+Le CronJob `data-gouv-refresh-daily` met à jour chaque jour la ressource distante vers l'export CSV. Il est désactivé par défaut. Pour l'activer, renseigner `global.dataGouv.enabled`, `datasetId` et `resourceId`, puis créer le secret Kubernetes `data-gouv` contenant `DATA_GOUV_API_KEY`.

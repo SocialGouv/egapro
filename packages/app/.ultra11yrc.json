@@ -20,6 +20,16 @@
 				"sources": ["src/app/page.tsx", "src/modules/home/HomePage.tsx"]
 			},
 			{
+				"id": "consultation-publique",
+				"name": "Consultation publique des résultats",
+				"url": "http://localhost:3000/index-egapro/recherche",
+				"sources": [
+					"src/app/index-egapro/recherche/page.tsx",
+					"src/modules/consultation/ConsultationSearchPage.tsx",
+					"src/modules/consultation/PublicSearchForm.tsx"
+				]
+			},
+			{
 				"id": "nous-contacter",
 				"name": "Nous contacter",
 				"url": "http://localhost:3000/aide/nous-contacter",

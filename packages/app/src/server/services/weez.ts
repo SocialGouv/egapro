@@ -49,6 +49,8 @@ type WeezLegalEntity = {
 	libellevoie: string | null;
 	codepostal: string | null;
 	libellecommune: string | null;
+	codepaysetrangeretablissement?: string | null;
+	libellepaysetrangeretablissement?: string | null;
 	statutdiffusionunitelegale: string | null;
 };
 
@@ -63,11 +65,15 @@ type WeezPaginatedResponse<T> = {
 export type CompanyInfo = {
 	name: string;
 	address: string | null;
+	city?: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
+	regionCode?: string | null;
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
+	countryCode?: string | null;
+	countryLabel?: string | null;
 	workforce: number | null;
 	statutDiffusion: string | null;
 };
@@ -118,11 +124,19 @@ export async function fetchCompanyBySiren(
 
 	if (!entity) return null;
 
-	// Region/department are derived from the establishment postal code, which
-	// INSEE exposes as public data even for non-diffusible legal units — so it
-	// is resolved before the address is masked below, keeping the columns filled
-	// when `address` becomes null.
-	const location = getLocationFromPostalCode(entity.codepostal);
+	const countryCode = entity.codepaysetrangeretablissement ?? null;
+	const countryLabel = entity.libellepaysetrangeretablissement ?? null;
+	const isForeign = Boolean(countryCode || countryLabel);
+	// A foreign postal code can look like a French one. Never derive French
+	// geography when Weez identifies the establishment as foreign.
+	const location = isForeign
+		? {
+				regionCode: null,
+				region: null,
+				departmentCode: null,
+				departmentLabel: null,
+			}
+		: getLocationFromPostalCode(entity.codepostal);
 
 	const statutDiffusion = entity.statutdiffusionunitelegale ?? null;
 
@@ -133,11 +147,15 @@ export async function fetchCompanyBySiren(
 				entity.raisonsociale ||
 				NON_DIFFUSIBLE_NAME,
 			address: null,
+			city: entity.libellecommune ?? null,
 			nafCode: null,
 			nafLabel: null,
+			regionCode: location.regionCode,
 			region: location.region,
 			departmentCode: location.departmentCode,
 			departmentLabel: location.departmentLabel,
+			countryCode,
+			countryLabel,
 			workforce:
 				entity.effectiftotal ??
 				trancheToWorkforce(entity.trancheeffectifsunitelegale),
@@ -151,14 +169,18 @@ export async function fetchCompanyBySiren(
 			entity.raisonsociale ||
 			`Entreprise ${siren}`,
 		address: buildAddress(entity),
+		city: entity.libellecommune ?? null,
 		nafCode: entity.activiteprincipalenaf25unitelegale ?? null,
 		// Clamp to the companies.nafLabel column width (varchar 255) to avoid insert overflow.
 		nafLabel:
 			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
 			null,
 		region: location.region,
+		regionCode: location.regionCode,
 		departmentCode: location.departmentCode,
 		departmentLabel: location.departmentLabel,
+		countryCode,
+		countryLabel,
 		workforce:
 			entity.effectiftotal ??
 			trancheToWorkforce(entity.trancheeffectifsunitelegale),

@@ -3,11 +3,18 @@ import { parseSiren } from "~/modules/domain";
 import { getPublicRepresentationBySirenYear } from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
 const PUBLIC_HEADERS = {
 	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, OPTIONS",
+	"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	"Cache-Control": "public, max-age=300, s-maxage=300",
 };
+
+export function OPTIONS(): Response {
+	return new Response(null, { status: 204, headers: PUBLIC_HEADERS });
+}
 
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2100;
@@ -16,6 +23,8 @@ export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ siren: string; year: string }> },
 ) {
+	const limited = await enforcePublicApiRateLimit(request);
+	if (limited) return limited;
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(request.headers);
 	const { siren: rawSiren, year: rawYear } = await params;
@@ -38,7 +47,7 @@ export async function GET(
 		);
 	}
 
-	const year = Number.parseInt(rawYear, 10);
+	const year = Number(rawYear);
 	if (!Number.isInteger(year) || year < MIN_YEAR || year > MAX_YEAR) {
 		void logAction({
 			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR,

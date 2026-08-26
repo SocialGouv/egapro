@@ -1,5 +1,5 @@
 /**
- * Backfill `region`, `department_code` and `department_label` on existing
+ * Backfill city, region, department and foreign-country fields on existing
  * `app_company` rows (issue #3710).
  *
  * Source of truth: the establishment postal code returned by the Weez public
@@ -17,17 +17,30 @@
  */
 import postgres from "postgres";
 
-import { getLocationFromPostalCode } from "../src/modules/domain/index.ts";
+import { getLocationFromPostalCode } from "../src/modules/domain/shared/regions.ts";
 
 const WEEZ_CONCURRENCY = 5;
 const DELAY_BETWEEN_BATCHES_MS = 150;
 
 const dryRun = process.argv.includes("--dry-run");
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-	throw new Error("DATABASE_URL must be set");
+function getDatabaseUrl() {
+	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
+	const database = process.env.POSTGRES_DB ?? process.env.PGDATABASE;
+	const user = process.env.POSTGRES_USER ?? process.env.PGUSER ?? "postgres";
+	const password = process.env.POSTGRES_PASSWORD ?? process.env.PGPASSWORD;
+	const port = process.env.POSTGRES_PORT ?? process.env.PGPORT ?? "5432";
+	const sslmode = process.env.POSTGRES_SSLMODE ?? process.env.PGSSLMODE;
+	if (!host || !database) {
+		throw new Error(
+			"DATABASE_URL or PostgreSQL connection variables must be set",
+		);
+	}
+	return `postgresql://${encodeURIComponent(user)}${password ? `:${encodeURIComponent(password)}` : ""}@${host}:${port}/${database}${sslmode ? `?sslmode=${sslmode}` : ""}`;
 }
+
+const databaseUrl = getDatabaseUrl();
 
 const weezApiUrl = process.env.EGAPRO_WEEZ_API_URL?.replace(/\/$/, "");
 if (!weezApiUrl) {
@@ -36,7 +49,7 @@ if (!weezApiUrl) {
 
 const sql = postgres(databaseUrl, { max: 1 });
 
-async function fetchPostalCode(siren) {
+async function fetchLocation(siren) {
 	const url = new URL(`${weezApiUrl}/public/v3/unitelegale/findbysiren`);
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
@@ -50,12 +63,26 @@ async function fetchPostalCode(siren) {
 		throw new Error(`Weez API error: ${response.status} ${siren}`);
 	}
 	const data = await response.json();
-	return data.content[0]?.codepostal ?? null;
+	const entity = data.content[0];
+	return entity
+		? {
+				postalCode: entity.codepostal ?? null,
+				city: entity.libellecommune ?? null,
+				countryCode: entity.codepaysetrangeretablissement ?? null,
+				countryLabel: entity.libellepaysetrangeretablissement ?? null,
+			}
+		: null;
 }
 
 async function main() {
-	const rows = await sql`SELECT siren FROM app_company WHERE region IS NULL`;
-	console.log(`${rows.length} companies without region to backfill`);
+	const rows = await sql`
+		SELECT siren, updated_at
+		FROM app_company
+		WHERE city IS NULL
+			OR (region IS NOT NULL AND region_code IS NULL)
+			OR (region IS NULL AND department_code IS NULL AND country_label IS NULL)
+	`;
+	console.log(`${rows.length} companies with location fields to backfill`);
 
 	let updated = 0;
 	let skipped = 0;
@@ -63,20 +90,40 @@ async function main() {
 	for (let i = 0; i < rows.length; i += WEEZ_CONCURRENCY) {
 		const batch = rows.slice(i, i + WEEZ_CONCURRENCY);
 		const settled = await Promise.allSettled(
-			batch.map(async ({ siren }) => {
-				const postalCode = await fetchPostalCode(siren);
-				const location = getLocationFromPostalCode(postalCode);
-				if (!location.departmentCode) return { siren, filled: false };
+			batch.map(async ({ siren, updated_at: selectedUpdatedAt }) => {
+				const registryLocation = await fetchLocation(siren);
+				if (!registryLocation) return { siren, filled: false };
+				const isForeign = Boolean(
+					registryLocation.countryCode || registryLocation.countryLabel,
+				);
+				const location = isForeign
+					? {
+							regionCode: null,
+							region: null,
+							departmentCode: null,
+							departmentLabel: null,
+						}
+					: getLocationFromPostalCode(registryLocation.postalCode);
+				if (!location.departmentCode && !registryLocation.countryLabel) {
+					return { siren, filled: false };
+				}
 
 				if (!dryRun) {
-					await sql`
+					const changed = await sql`
 						UPDATE app_company
-						SET region = ${location.region},
+						SET city = COALESCE(${registryLocation.city}, city),
+							region_code = ${location.regionCode},
+							region = ${location.region},
 							department_code = ${location.departmentCode},
 							department_label = ${location.departmentLabel},
+							country_code = COALESCE(${registryLocation.countryCode}, country_code),
+							country_label = COALESCE(${registryLocation.countryLabel}, country_label),
 							updated_at = NOW()
-						WHERE siren = ${siren} AND region IS NULL
+						WHERE siren = ${siren}
+							AND updated_at IS NOT DISTINCT FROM ${selectedUpdatedAt}
+						RETURNING siren
 					`;
+					if (changed.length === 0) return { siren, filled: false };
 				}
 				return { siren, filled: true };
 			}),

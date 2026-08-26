@@ -6,8 +6,10 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
+import { NAF_SECTIONS } from "~/modules/consultation/constants";
+import { COUNTIES, REGIONS } from "~/modules/domain";
 
-const FACET_FIELDS = ["query", "region", "departement", "secteur"] as const;
+const FACET_FIELDS = ["q", "region", "departement", "naf"] as const;
 
 // Records which search facets were used — by field name only, never their
 // values (the free-text query may contain a SIREN or a company name).
@@ -52,7 +54,7 @@ export function HomeSearchForm() {
 				<input
 					className="fr-input"
 					id="search-query"
-					name="query"
+					name="q"
 					placeholder="[siren] [raison sociale]"
 					type="search"
 				/>
@@ -70,27 +72,12 @@ export function HomeSearchForm() {
 							id="search-region"
 							name="region"
 						>
-							<option disabled hidden value="">
-								Sélectionner une option
-							</option>
-							<option value="11">Île-de-France</option>
-							<option value="24">Centre-Val de Loire</option>
-							<option value="27">Bourgogne-Franche-Comté</option>
-							<option value="28">Normandie</option>
-							<option value="32">Hauts-de-France</option>
-							<option value="44">Grand Est</option>
-							<option value="52">Pays de la Loire</option>
-							<option value="53">Bretagne</option>
-							<option value="75">Nouvelle-Aquitaine</option>
-							<option value="76">Occitanie</option>
-							<option value="84">Auvergne-Rhône-Alpes</option>
-							<option value="93">Provence-Alpes-Côte d'Azur</option>
-							<option value="94">Corse</option>
-							<option value="01">Guadeloupe</option>
-							<option value="02">Martinique</option>
-							<option value="03">Guyane</option>
-							<option value="04">La Réunion</option>
-							<option value="06">Mayotte</option>
+							<option value="">Toutes les régions</option>
+							{Object.values(REGIONS).map((region) => (
+								<option key={region} value={region}>
+									{region}
+								</option>
+							))}
 						</select>
 					</div>
 				</div>
@@ -106,9 +93,16 @@ export function HomeSearchForm() {
 							id="search-departement"
 							name="departement"
 						>
-							<option disabled hidden value="">
-								Sélectionner une option
-							</option>
+							<option value="">Tous les départements</option>
+							{Object.entries(COUNTIES)
+								.sort(([left], [right]) =>
+									left.localeCompare(right, "fr", { numeric: true }),
+								)
+								.map(([code, department]) => (
+									<option key={code} value={code}>
+										{code} — {department}
+									</option>
+								))}
 						</select>
 					</div>
 				</div>
@@ -122,11 +116,14 @@ export function HomeSearchForm() {
 							className="fr-select"
 							defaultValue=""
 							id="search-secteur"
-							name="secteur"
+							name="naf"
 						>
-							<option disabled hidden value="">
-								Sélectionner une option
-							</option>
+							<option value="">Tous les secteurs</option>
+							{Object.entries(NAF_SECTIONS).map(([code, sector]) => (
+								<option key={code} value={code}>
+									{code} — {sector}
+								</option>
+							))}
 						</select>
 					</div>
 				</div>

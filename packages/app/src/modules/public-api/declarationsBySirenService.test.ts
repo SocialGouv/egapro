@@ -170,10 +170,10 @@ describe("getPublicDeclarationsBySiren", () => {
 
 		expect(result[0]).toMatchObject({
 			siren: "123456789",
-			name: null,
-			address: null,
-			region: null,
-			nafCode: null,
+			name: "Non-diffusible",
+			address: "Non-diffusible",
+			region: "Île-de-France",
+			nafCode: "62.01Z",
 		});
 	});
 

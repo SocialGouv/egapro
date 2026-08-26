@@ -23,7 +23,7 @@ describe("HomeSearchForm tracking", () => {
 			target: { value: "Some Company" },
 		});
 		fireEvent.change(screen.getByLabelText("Région"), {
-			target: { value: "11" },
+			target: { value: "Île-de-France" },
 		});
 		fireEvent.submit(screen.getByRole("form"));
 
@@ -31,7 +31,7 @@ describe("HomeSearchForm tracking", () => {
 		expect(trackEventMock).toHaveBeenCalledWith({
 			category: MATOMO_EVENT_CATEGORY.SEARCH,
 			action: MATOMO_ACTION.SEARCH_SUBMIT,
-			name: "query+region",
+			name: "q+region",
 		});
 	});
 

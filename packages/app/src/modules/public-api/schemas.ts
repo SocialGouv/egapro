@@ -1,13 +1,22 @@
 import { z } from "zod";
 
-const publicSearchQueryParamsSchema = z.object({
+const sharedSearchFields = {
 	q: z.string().trim().min(1).optional(),
 	region: z.string().trim().min(1).optional(),
 	departement: z.string().trim().min(1).optional(),
 	naf: z.string().trim().min(1).optional(),
 	year: z.number().int().optional(),
-	limit: z.number().int().min(1).max(100).default(10),
+	limit: z.number().int().min(1).max(100),
 	offset: z.number().int().min(0).default(0),
+};
+
+const publicSearchQueryParamsSchema = z.object({
+	...sharedSearchFields,
+	city: z.string().trim().min(1).optional(),
+	workforceMin: z.number().int().min(0).optional(),
+	workforceMax: z.number().int().min(0).optional(),
+	sort: z.enum(["relevance", "name", "year"]).optional(),
+	limit: z.number().int().min(1).max(100).default(50),
 });
 
 export const publicSearchInputSchema = publicSearchQueryParamsSchema;
@@ -19,9 +28,13 @@ export const publicDeclarationDTOSchema = z.object({
 	siren: z.string(),
 	name: z.string().nullable(),
 	address: z.string().nullable(),
+	city: z.string().nullable(),
+	regionCode: z.string().nullable(),
 	region: z.string().nullable(),
 	departmentCode: z.string().nullable(),
 	departmentLabel: z.string().nullable(),
+	countryCode: z.string().nullable(),
+	countryLabel: z.string().nullable(),
 	nafCode: z.string().nullable(),
 	nafLabel: z.string().nullable(),
 	workforceEma: z.number().nullable(),
@@ -64,8 +77,10 @@ export const publicSearchResultDTOSchema = z.object({
 
 export type PublicSearchResultDTO = z.infer<typeof publicSearchResultDTOSchema>;
 
-export const publicRepresentationSearchInputSchema =
-	publicSearchQueryParamsSchema;
+export const publicRepresentationSearchInputSchema = z.object({
+	...sharedSearchFields,
+	limit: z.number().int().min(1).max(100).default(10),
+});
 
 export type PublicRepresentationSearchInput = z.infer<
 	typeof publicRepresentationSearchInputSchema

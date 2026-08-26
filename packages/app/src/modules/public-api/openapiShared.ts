@@ -57,29 +57,30 @@ export const serverErrorResponse = {
 export const publicNonDiffusibleIdentityProperties = {
 	name: {
 		type: ["string", "null"],
-		description: "Raison sociale. `null` pour les entreprises non diffusibles.",
+		description:
+			"Raison sociale. Masquée lorsque l'entreprise n'est pas diffusible.",
 		example: "THALES LAS FRANCE SAS",
 	},
 	address: {
 		type: ["string", "null"],
-		description: "Adresse. `null` pour les entreprises non diffusibles.",
+		description: "Adresse. Masquée lorsque l'entreprise n'est pas diffusible.",
 		example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
 	},
 	region: {
 		type: ["string", "null"],
-		description: "Région. `null` pour les entreprises non diffusibles.",
+		description: "Région française, si applicable.",
 		example: "Île-de-France",
 	},
 	departmentCode: {
 		type: ["string", "null"],
 		description:
-			"Code département. `null` pour les entreprises non diffusibles.",
+			"Code département, conservé pour les entreprises non diffusibles.",
 		example: "78",
 	},
 	departmentLabel: {
 		type: ["string", "null"],
 		description:
-			"Libellé département. `null` pour les entreprises non diffusibles.",
+			"Libellé département, conservé pour les entreprises non diffusibles.",
 		example: "Yvelines",
 	},
 	nafCode: {

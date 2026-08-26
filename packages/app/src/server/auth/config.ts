@@ -424,11 +424,15 @@ export const authConfig = {
 						siren: string;
 						name: string;
 						address?: string | null;
+						city?: string | null;
 						nafCode?: string | null;
 						nafLabel?: string | null;
+						regionCode?: string | null;
 						region?: string | null;
 						departmentCode?: string | null;
 						departmentLabel?: string | null;
+						countryCode?: string | null;
+						countryLabel?: string | null;
 						workforce?: number | null;
 						statutDiffusion?: string | null;
 					};
@@ -439,11 +443,15 @@ export const authConfig = {
 									siren,
 									name: companyInfo.name,
 									address: companyInfo.address,
+									city: companyInfo.city,
 									nafCode: companyInfo.nafCode,
 									nafLabel: companyInfo.nafLabel,
+									regionCode: companyInfo.regionCode,
 									region: companyInfo.region,
 									departmentCode: companyInfo.departmentCode,
 									departmentLabel: companyInfo.departmentLabel,
+									countryCode: companyInfo.countryCode,
+									countryLabel: companyInfo.countryLabel,
 									workforce: companyInfo.workforce,
 									statutDiffusion: companyInfo.statutDiffusion,
 								}

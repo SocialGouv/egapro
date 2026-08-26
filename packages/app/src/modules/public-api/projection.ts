@@ -1,6 +1,8 @@
 import { type companies, declarations } from "~/server/db/schema";
 import type { PublicDeclarationDTO } from "./schemas";
 
+export const NON_DIFFUSIBLE_LABEL = "Non-diffusible";
+
 export type PublicDeclarationSource = Pick<
 	typeof declarations.$inferSelect,
 	| "year"
@@ -44,10 +46,16 @@ export type PublicCompanySource = Pick<
 	| "departmentLabel"
 	| "nafCode"
 	| "nafLabel"
-> & {
-	statutDiffusion: string | null;
-	workforceEma: string | null;
-};
+> &
+	Partial<
+		Pick<
+			typeof companies.$inferSelect,
+			"city" | "regionCode" | "countryCode" | "countryLabel"
+		>
+	> & {
+		statutDiffusion: string | null;
+		workforceEma: string | null;
+	};
 
 /**
  * Drizzle column selection for the public declaration indicators.
@@ -111,13 +119,20 @@ export function toPublicDeclaration(
 	return {
 		year: declaration.year,
 		siren: company.siren,
-		name: diffusible ? company.name : null,
-		address: diffusible ? company.address : null,
-		region: diffusible ? company.region : null,
-		departmentCode: diffusible ? company.departmentCode : null,
-		departmentLabel: diffusible ? company.departmentLabel : null,
-		nafCode: diffusible ? company.nafCode : null,
-		nafLabel: diffusible ? company.nafLabel : null,
+		name: diffusible ? company.name : NON_DIFFUSIBLE_LABEL,
+		address: diffusible ? company.address : NON_DIFFUSIBLE_LABEL,
+		city: diffusible ? (company.city ?? null) : null,
+		// The public-consultation rule explicitly allows the département to stay
+		// visible for non-diffusible companies. Region and NAF are not identity
+		// fields and remain useful for aggregate filtering.
+		regionCode: company.regionCode ?? null,
+		region: company.countryLabel ? null : company.region,
+		departmentCode: company.departmentCode,
+		departmentLabel: company.departmentLabel,
+		countryCode: company.countryCode ?? null,
+		countryLabel: company.countryLabel ?? null,
+		nafCode: company.nafCode,
+		nafLabel: company.nafLabel,
 		workforceEma: toNumber(company.workforceEma),
 		totalWomen: declaration.totalWomen,
 		totalMen: declaration.totalMen,

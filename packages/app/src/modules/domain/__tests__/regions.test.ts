@@ -152,6 +152,7 @@ describe("getCountyCodeFromPostalCode", () => {
 describe("getLocationFromPostalCode", () => {
 	it("resolves region, department code and label for a metropolitan postal code", () => {
 		expect(getLocationFromPostalCode("75011")).toEqual({
+			regionCode: "11",
 			region: "Île-de-France",
 			departmentCode: "75",
 			departmentLabel: "Paris",
@@ -160,6 +161,7 @@ describe("getLocationFromPostalCode", () => {
 
 	it("resolves a Corsican postal code to its department and Corse region", () => {
 		expect(getLocationFromPostalCode("20000")).toEqual({
+			regionCode: "94",
 			region: "Corse",
 			departmentCode: "2A",
 			departmentLabel: "Corse-du-Sud",
@@ -168,6 +170,7 @@ describe("getLocationFromPostalCode", () => {
 
 	it("resolves an overseas postal code", () => {
 		expect(getLocationFromPostalCode("97400")).toEqual({
+			regionCode: "04",
 			region: "La Réunion",
 			departmentCode: "974",
 			departmentLabel: "La Réunion",
@@ -176,6 +179,7 @@ describe("getLocationFromPostalCode", () => {
 
 	it("returns all-null when the postal code is invalid or unknown", () => {
 		const empty = {
+			regionCode: null,
 			region: null,
 			departmentCode: null,
 			departmentLabel: null,

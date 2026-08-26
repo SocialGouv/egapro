@@ -1,0 +1,146 @@
+.section {
+	margin-top: 3rem;
+}
+
+.sectionTitle {
+	max-width: none;
+}
+
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1.5rem;
+}
+
+.metricGrid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.5rem;
+	margin-top: 1rem;
+}
+
+.metricCard,
+.proportionCard {
+	border: 1px solid var(--border-default-grey, #ddd);
+	padding: 1rem;
+}
+
+.metricCard {
+	display: flex;
+	min-height: 11rem;
+	flex-direction: column;
+}
+
+.metricTitle {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.infoButton {
+	width: 2rem;
+	min-width: 2rem;
+	height: 2rem;
+	min-height: 2rem;
+	padding: 0;
+}
+
+.metricValue {
+	margin: 1rem 0 auto;
+	color: var(--text-title-grey, #161616);
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 2.25rem;
+}
+
+.proportionCard {
+	margin-top: 1rem;
+}
+
+.bars {
+	margin-top: 1rem;
+}
+
+.barTrack {
+	height: 1.125rem;
+	border: 1px solid var(--border-default-grey, #ddd);
+	background: var(--background-default-grey, #fff);
+}
+
+.barFill {
+	display: block;
+	height: 100%;
+}
+
+.womenBar {
+	background: #273962;
+}
+
+.menBar {
+	background: #74a5ec;
+}
+
+.legendSwatch {
+	display: inline-block;
+	width: 0.75rem;
+	height: 0.75rem;
+	margin-right: 0.5rem;
+}
+
+.details {
+	margin-top: 1rem;
+}
+
+.detailsButton {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	border: 0;
+	background: var(--background-open-blue-france, #e3e3fd);
+	color: var(--text-action-high-blue-france, #000091);
+	cursor: pointer;
+	font: inherit;
+	font-size: 1rem;
+	font-weight: 500;
+	line-height: 1.5rem;
+	padding: 0.75rem 1rem;
+
+	&:hover {
+		background: var(--background-open-blue-france-hover, #cacafb);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--border-active-blue-france, #000091);
+		outline-offset: 2px;
+	}
+}
+
+.detailsTable {
+	table-layout: fixed;
+
+	col {
+		width: 33.333%;
+	}
+
+	> thead > tr > th:not(:first-child),
+	> tbody > tr > td {
+		text-align: center;
+	}
+
+	> tbody > tr > td {
+		font-weight: 700;
+	}
+}
+
+@media (max-width: 47.99em) {
+	.header {
+		flex-direction: column;
+	}
+
+	.metricGrid {
+		grid-template-columns: 1fr;
+	}
+}

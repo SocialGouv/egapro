@@ -234,6 +234,7 @@ export function getCountyCodeFromPostalCode(
 }
 
 export type CompanyLocation = {
+	regionCode: string | null;
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
@@ -244,10 +245,16 @@ export function getLocationFromPostalCode(
 ): CompanyLocation {
 	const departmentCode = getCountyCodeFromPostalCode(postalCode);
 	if (!departmentCode) {
-		return { region: null, departmentCode: null, departmentLabel: null };
+		return {
+			regionCode: null,
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+		};
 	}
 	const regionCode = getRegionCodeFromCountyCode(departmentCode);
 	return {
+		regionCode,
 		region: regionCode ? REGIONS[regionCode] : null,
 		departmentCode,
 		departmentLabel: COUNTIES[departmentCode],

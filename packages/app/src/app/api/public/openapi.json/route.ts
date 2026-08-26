@@ -5,7 +5,7 @@ import { publicOpenApiSpec } from "~/modules/public-api";
 const HEADERS = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type",
+	"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	"Cache-Control": "public, max-age=3600, must-revalidate",
 };
 

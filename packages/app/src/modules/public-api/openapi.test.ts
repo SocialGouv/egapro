@@ -57,12 +57,16 @@ describe("publicOpenApiSpec", () => {
 
 		it("declares every filter, pagination and their bounds", () => {
 			expect(operation.parameters.map((p) => p.name).sort()).toEqual([
+				"city",
 				"departement",
 				"limit",
 				"naf",
 				"offset",
 				"q",
 				"region",
+				"sort",
+				"workforceMax",
+				"workforceMin",
 				"year",
 			]);
 			for (const param of operation.parameters) {
@@ -73,7 +77,7 @@ describe("publicOpenApiSpec", () => {
 			expect(limit?.schema).toMatchObject({
 				minimum: 1,
 				maximum: 100,
-				default: 10,
+				default: 50,
 			});
 			expect(offset?.schema).toMatchObject({ minimum: 0, default: 0 });
 		});
@@ -139,7 +143,7 @@ describe("publicOpenApiSpec", () => {
 			expect(operation.operationId).toBe("exportPublicDeclarations");
 			const format = operation.parameters.find((p) => p.name === "format");
 			expect(format?.schema).toMatchObject({
-				enum: ["json", "csv"],
+				enum: ["json", "csv", "xlsx"],
 				default: "json",
 			});
 		});

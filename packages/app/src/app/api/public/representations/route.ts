@@ -6,11 +6,12 @@ import {
 	searchPublicRepresentations,
 } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
 const CORS_HEADERS = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type",
+	"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	"Cache-Control": "public, max-age=300, stale-while-revalidate=60",
 };
 
@@ -42,6 +43,8 @@ async function publicRepresentationsHandler(
 	request: Request,
 ): Promise<Response> {
 	try {
+		const limited = await enforcePublicApiRateLimit(request);
+		if (limited) return limited;
 		const url = new URL(request.url);
 		const sp = url.searchParams;
 
@@ -53,9 +56,9 @@ async function publicRepresentationsHandler(
 			region: sp.get("region") ?? undefined,
 			departement: sp.get("departement") ?? undefined,
 			naf: sp.get("naf") ?? undefined,
-			year: rawYear ? Number.parseInt(rawYear, 10) : undefined,
-			limit: rawLimit ? Number.parseInt(rawLimit, 10) : undefined,
-			offset: rawOffset ? Number.parseInt(rawOffset, 10) : undefined,
+			year: rawYear ? Number(rawYear) : undefined,
+			limit: rawLimit ? Number(rawLimit) : undefined,
+			offset: rawOffset ? Number(rawOffset) : undefined,
 		};
 
 		const parsed = publicRepresentationSearchInputSchema.safeParse(rawInput);

@@ -56,15 +56,7 @@ const companyFixture: PublicCompanySource = {
 
 const EXPECTED_DTO_KEYS = Object.keys(publicDeclarationDTOSchema.shape).sort();
 
-const MASKED_COMPANY_FIELDS = [
-	"name",
-	"address",
-	"region",
-	"departmentCode",
-	"departmentLabel",
-	"nafCode",
-	"nafLabel",
-] as const;
+const MASKED_COMPANY_FIELDS = ["name", "address"] as const;
 
 const FORBIDDEN_KEYS = [
 	"categoryScore",
@@ -139,9 +131,11 @@ describe("toPublicDeclaration", () => {
 			statutDiffusion: "N",
 		});
 
-		for (const field of MASKED_COMPANY_FIELDS) {
-			expect(dto[field]).toBeNull();
-		}
+		expect(dto.name).toBe("Non-diffusible");
+		expect(dto.address).toBe("Non-diffusible");
+		expect(dto.departmentCode).toBe("75");
+		expect(dto.departmentLabel).toBe("Paris");
+		expect(dto.nafCode).toBe("62.01Z");
 	});
 
 	it("derives diffusibility from a non-null address when statutDiffusion is null", () => {
@@ -163,9 +157,9 @@ describe("toPublicDeclaration", () => {
 			address: null,
 		});
 
-		for (const field of MASKED_COMPANY_FIELDS) {
-			expect(dto[field]).toBeNull();
-		}
+		expect(dto.name).toBe("Non-diffusible");
+		expect(dto.address).toBe("Non-diffusible");
+		expect(dto.departmentCode).toBe("75");
 		expect(dto.siren).toBe("123456789");
 		expect(dto.workforceEma).toBe(250);
 	});
@@ -195,6 +189,17 @@ describe("toPublicDeclaration", () => {
 				diffusible[key as keyof typeof diffusible],
 			);
 		}
+	});
+
+	it("uses the country instead of a French region for a foreign company", () => {
+		const dto = toPublicDeclaration(declarationFixture, {
+			...companyFixture,
+			countryCode: "99131",
+			countryLabel: "Belgique",
+		});
+
+		expect(dto.countryLabel).toBe("Belgique");
+		expect(dto.region).toBeNull();
 	});
 
 	it("converts numeric string gaps to numbers and preserves year and counts", () => {
@@ -261,7 +266,7 @@ describe("publicSearchInputSchema", () => {
 	it("applies default limit and offset", () => {
 		const parsed = publicSearchInputSchema.parse({});
 
-		expect(parsed.limit).toBe(10);
+		expect(parsed.limit).toBe(50);
 		expect(parsed.offset).toBe(0);
 	});
 

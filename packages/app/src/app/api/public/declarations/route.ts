@@ -3,12 +3,13 @@ import { NextResponse } from "next/server";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { publicSearchInputSchema } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 
 const CORS_HEADERS = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type",
+	"Access-Control-Allow-Headers": "Content-Type, Authorization",
 	"Cache-Control": "public, max-age=300, stale-while-revalidate=60",
 };
 
@@ -28,6 +29,8 @@ export const GET = withAuditedRoute(
 					region: url.searchParams.get("region") ?? null,
 					departement: url.searchParams.get("departement") ?? null,
 					naf: url.searchParams.get("naf") ?? null,
+					city: url.searchParams.get("city") ?? null,
+					sort: url.searchParams.get("sort") ?? null,
 					year: url.searchParams.get("year") ?? null,
 				},
 			};
@@ -38,20 +41,28 @@ export const GET = withAuditedRoute(
 
 async function publicDeclarationsHandler(request: Request): Promise<Response> {
 	try {
+		const limited = await enforcePublicApiRateLimit(request);
+		if (limited) return limited;
 		const url = new URL(request.url);
 		const sp = url.searchParams;
 
 		const rawYear = sp.get("year");
 		const rawLimit = sp.get("limit");
 		const rawOffset = sp.get("offset");
+		const rawWorkforceMin = sp.get("workforceMin");
+		const rawWorkforceMax = sp.get("workforceMax");
 		const rawInput = {
 			q: sp.get("q") ?? undefined,
+			city: sp.get("city") ?? undefined,
 			region: sp.get("region") ?? undefined,
 			departement: sp.get("departement") ?? undefined,
 			naf: sp.get("naf") ?? undefined,
-			year: rawYear ? Number.parseInt(rawYear, 10) : undefined,
-			limit: rawLimit ? Number.parseInt(rawLimit, 10) : undefined,
-			offset: rawOffset ? Number.parseInt(rawOffset, 10) : undefined,
+			workforceMin: rawWorkforceMin ? Number(rawWorkforceMin) : undefined,
+			workforceMax: rawWorkforceMax ? Number(rawWorkforceMax) : undefined,
+			year: rawYear ? Number(rawYear) : undefined,
+			sort: sp.get("sort") ?? undefined,
+			limit: rawLimit ? Number(rawLimit) : undefined,
+			offset: rawOffset ? Number(rawOffset) : undefined,
 		};
 
 		const parsed = publicSearchInputSchema.safeParse(rawInput);
