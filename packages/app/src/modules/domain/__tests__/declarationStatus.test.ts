@@ -9,9 +9,12 @@ import {
 	isDeclarationWritingClosed,
 	isDraft,
 	isInComplianceProcess,
+	isJointEvaluationWritable,
 	isSecondDeclarationDeadlineApplicable,
+	isSecondDeclarationWritable,
 } from "../shared/declarationStatus";
 import type { DeclarationFsmStatus } from "../types";
+import { DECLARATION_FSM_STATUSES } from "../types";
 
 describe("isDraft", () => {
 	it("returns true only for draft", () => {
@@ -331,5 +334,62 @@ describe("isSecondDeclarationDeadlineApplicable", () => {
 				secondDeclarationPathChoice: "justify",
 			}),
 		).toBe(true);
+	});
+});
+
+const ALL_STATUSES: (DeclarationFsmStatus | null)[] = [
+	...DECLARATION_FSM_STATUSES,
+	null,
+];
+
+function allStatusesExcept(
+	writable: DeclarationFsmStatus[],
+): (DeclarationFsmStatus | null)[] {
+	return ALL_STATUSES.filter(
+		(status) => !writable.some((allowed) => allowed === status),
+	);
+}
+
+describe("isSecondDeclarationWritable", () => {
+	// Mirrors the `from` set of the `submit_second_declaration` transition in v2027.1.json.
+	const WRITABLE: DeclarationFsmStatus[] = [
+		"corrective_actions_chosen",
+		"awaiting_revision_choice",
+	];
+
+	it.each(
+		WRITABLE,
+	)("returns true for %s, where the engine still exposes submit_second_declaration", (status) => {
+		expect(isSecondDeclarationWritable(status)).toBe(true);
+	});
+
+	it.each(
+		allStatusesExcept(WRITABLE),
+	)("returns false for %s, where no submit_second_declaration transition exists", (status) => {
+		expect(isSecondDeclarationWritable(status)).toBe(false);
+	});
+});
+
+describe("isJointEvaluationWritable", () => {
+	// Mirrors the `from` set of the `submit_joint_evaluation` transition in v2027.1.json.
+	const WRITABLE: DeclarationFsmStatus[] = [
+		"joint_evaluation_chosen",
+		"revised_joint_evaluation_chosen",
+	];
+
+	it.each(
+		WRITABLE,
+	)("returns true for %s, where the engine still exposes submit_joint_evaluation", (status) => {
+		expect(isJointEvaluationWritable(status)).toBe(true);
+	});
+
+	it.each(
+		allStatusesExcept(WRITABLE),
+	)("returns false for %s, where no submit_joint_evaluation transition exists", (status) => {
+		expect(isJointEvaluationWritable(status)).toBe(false);
+	});
+
+	it("returns false once the démarche is completed, which only reopens submit_cse_opinion", () => {
+		expect(isJointEvaluationWritable("demarche_completed")).toBe(false);
 	});
 });

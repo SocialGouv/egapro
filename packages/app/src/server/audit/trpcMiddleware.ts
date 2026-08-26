@@ -44,6 +44,9 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"cseOpinion.finalize": AUDIT_ACTIONS.CSE_OPINION_FINALIZE,
 	"cseOpinion.setFileContentTypes": AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES,
 
+	// ── joint evaluation sensitive read (exposes filed report) ─
+	"jointEvaluation.getFile": AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE,
+
 	// ── company mutations ──────────────────────────────────
 	"company.get": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"company.getWithDeclarations": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,

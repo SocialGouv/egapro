@@ -20,11 +20,18 @@ import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
 const EMPTY_DB_VALUES = {} as Record<string, never>;
 
+type ExistingFile = {
+	id: string;
+	fileName: string;
+	uploadedAt: Date;
+};
+
 type Props = {
 	cseOpinionRequired: boolean;
 	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
+	existingFile: ExistingFile | null;
 	jointEvaluationDeadline: Date;
 };
 
@@ -33,6 +40,7 @@ export function JointEvaluationForm({
 	declarationDate,
 	declarationSiren,
 	declarationYear,
+	existingFile,
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
@@ -135,6 +143,27 @@ export function JointEvaluationForm({
 							Déclaration effectuée le {declarationDate}
 						</p>
 					</div>
+
+					{existingFile && (
+						<div className={styles.panelWhite}>
+							<p className="fr-mb-1v fr-text--bold">Rapport déjà déposé</p>
+							<p className="fr-mb-1v">
+								<a
+									className="fr-link"
+									href={`/api/v1/files/${existingFile.id}`}
+									rel="noopener noreferrer"
+									target="_blank"
+									title={`Visualiser ${existingFile.fileName}`}
+								>
+									{existingFile.fileName}
+									<NewTabNotice />
+								</a>
+							</p>
+							<p className="fr-mb-0 fr-text--xs fr-text--mention-grey">
+								Déposé le {formatLongDate(existingFile.uploadedAt)}
+							</p>
+						</div>
+					)}
 
 					<div>
 						<label className="fr-label" htmlFor="joint-evaluation-file-upload">

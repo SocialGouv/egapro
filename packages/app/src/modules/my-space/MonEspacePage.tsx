@@ -19,11 +19,12 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 	if (siren === null) {
 		redirect("/mon-espace/mes-entreprises");
 	}
+	const currentYear = getCurrentYear();
 	const [data, campaignDeadlines, representationCampaign, lockState] =
 		await Promise.all([
 			api.company.getWithDeclarations({ siren }),
-			getCampaignDeadlines(getCurrentYear()),
-			getRepresentationCampaign(getCurrentYear()),
+			getCampaignDeadlines(currentYear),
+			getRepresentationCampaign(currentYear),
 			api.declarationLock.getActiveLockForCurrentDeclaration(),
 		]);
 
