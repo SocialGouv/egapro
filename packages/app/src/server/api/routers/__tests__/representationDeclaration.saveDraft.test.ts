@@ -4,6 +4,7 @@ import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representatio
 import {
 	CLOSED_CAMPAIGN,
 	CLOSED_MESSAGE,
+	compileSql,
 	conflictSet,
 	createCaller,
 	createMockDb,
@@ -74,7 +75,7 @@ describe("representationDeclarationRouter.saveDraft", () => {
 		]);
 	});
 
-	it("never overwrites the status of an existing declaration", async () => {
+	it("touches no column beyond the draft, its step and the status guard", async () => {
 		const mock = createMockDb();
 
 		await saveDraft(mock);
@@ -83,8 +84,23 @@ describe("representationDeclarationRouter.saveDraft", () => {
 			"currentStep",
 			"draft",
 			"draftUpdatedAt",
+			"status",
 			"updatedAt",
 		]);
+	});
+
+	// The status is rewritten by SQL, not by the caller: only `not_subject` is
+	// converted back to `draft`, so a `submitted` row can never be degraded.
+	it("reopens a not-subject declaration as a draft and leaves any other status alone", async () => {
+		const mock = createMockDb();
+
+		await saveDraft(mock);
+		const statusSql = compileSql(conflictSet(mock).set.status);
+
+		expect(statusSql).toBe(
+			`CASE WHEN "app_representation_declaration"."status" = 'not_subject'` +
+				` THEN 'draft' ELSE "app_representation_declaration"."status" END`,
+		);
 	});
 
 	it("refuses to save once the campaign is closed (S23)", async () => {

@@ -320,6 +320,9 @@ export const getRepresentationDeclarationSchema = z.object({
 	year: yearSchema,
 });
 
+export const declareRepresentationNotSubjectSchema =
+	getRepresentationDeclarationSchema;
+
 export const saveRepresentationDraftSchema = z.object({
 	year: yearSchema,
 	draft: representationDraftSchema,

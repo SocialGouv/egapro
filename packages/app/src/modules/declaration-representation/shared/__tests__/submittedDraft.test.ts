@@ -71,6 +71,17 @@ describe("representationDraftFromDeclaration", () => {
 		).toEqual({ currentStep: 3 });
 	});
 
+	// Reopening the funnel after a not-subject choice must start from a blank
+	// slate, never from columns a previous submission left behind.
+	it("returns an empty draft for a declaration closed as not subject", () => {
+		expect(
+			representationDraftFromDeclaration(
+				submitted({ status: "not_subject", draft: null, currentStep: 0 }),
+				0,
+			),
+		).toEqual({ currentStep: 0 });
+	});
+
 	it("rebuilds the recap from submitted columns even when the JSON draft was cleared", () => {
 		expect(representationDraftFromDeclaration(submitted(), STEP)).toEqual({
 			currentStep: STEP,

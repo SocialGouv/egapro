@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import {
+	declareRepresentationNotSubjectSchema,
 	getRepresentationDeclarationSchema,
 	saveRepresentationDraftSchema,
 	submitRepresentationDeclarationSchema,
@@ -24,6 +25,8 @@ import { representationDeclarations } from "~/server/db/schema";
 
 const CAMPAIGN_CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
+const ALREADY_SUBMITTED_MESSAGE =
+	"La déclaration des écarts de représentation a déjà été transmise pour cette année.";
 
 async function assertRepresentationCampaignOpen(year: number): Promise<void> {
 	const campaign = await getRepresentationCampaign(
@@ -105,6 +108,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 				draftUpdatedAt: now,
 				currentStep,
 				updatedAt: now,
+				status: sql`CASE WHEN ${representationDeclarations.status} = 'not_subject' THEN 'draft' ELSE ${representationDeclarations.status} END`,
 			};
 
 			await ctx.db
@@ -114,8 +118,61 @@ export const representationDeclarationRouter = createTRPCRouter({
 					year,
 					declarantId: ctx.session.user.id,
 					status: "draft",
-					...columns,
+					draft,
+					draftUpdatedAt: now,
+					currentStep,
+					updatedAt: now,
 				})
+				.onConflictDoUpdate({
+					target: [
+						representationDeclarations.siren,
+						representationDeclarations.year,
+					],
+					set: columns,
+				});
+
+			return { success: true as const };
+		}),
+
+	declareNotSubject: companyWriteProcedure
+		.input(declareRepresentationNotSubjectSchema)
+		.mutation(async ({ ctx, input }) => {
+			const { siren } = ctx;
+			const { year } = input;
+
+			await assertRepresentationCampaignOpen(year);
+
+			const existing = await ctx.db
+				.select({ status: representationDeclarations.status })
+				.from(representationDeclarations)
+				.where(
+					and(
+						eq(representationDeclarations.siren, siren),
+						eq(representationDeclarations.year, year),
+					),
+				)
+				.limit(1);
+
+			if (existing[0]?.status === "submitted") {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: ALREADY_SUBMITTED_MESSAGE,
+				});
+			}
+
+			const now = new Date();
+			const columns = {
+				status: "not_subject" as const,
+				currentStep: 0,
+				draft: null,
+				draftUpdatedAt: null,
+				declarantId: ctx.session.user.id,
+				updatedAt: now,
+			};
+
+			await ctx.db
+				.insert(representationDeclarations)
+				.values({ siren, year, ...columns })
 				.onConflictDoUpdate({
 					target: [
 						representationDeclarations.siren,
