@@ -14,7 +14,7 @@ jobs:
   e2e:
     name: "Test e2e"
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -73,6 +73,7 @@ jobs:
             echo "::group::Download ${zip_name}"
             time curl --fail --location --silent --show-error \
               --max-time 120 \
+              --retry 5 --retry-delay 3 --retry-all-errors \
               -o "/tmp/${zip_name}" \
               "https://cdn.playwright.dev/builds/cft/${CFT_BUILD}/linux64/${zip_name}"
             ls -lh "/tmp/${zip_name}"
