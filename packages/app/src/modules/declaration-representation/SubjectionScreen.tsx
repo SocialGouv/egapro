@@ -7,10 +7,11 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
 import { stepHref } from "./steps";
+import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
 	campaignYear: number;
-	initialAnswer?: "concerned" | "not_concerned";
+	initialAnswer?: SubjectionAnswer;
 	year: number;
 };
 
