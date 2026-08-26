@@ -218,17 +218,19 @@ test.describe("Declaration workflow", () => {
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 
-		// Recap alert with anchor links
-		const alert = page.getByRole("alert").first();
+		// Target the recap by its accessible description rather than by DOM order:
+		// coherence alerts can legitimately be rendered before it.
+		const alert = page.getByRole("alert").filter({
+			has: page.locator("#step4-error-summary-invalid"),
+		});
 		await expect(alert).toBeVisible();
-		await expect(alert).toContainText(/Champ vide/);
 		await expect(
-			alert
-				.getByRole("link")
-				.filter({
-					has: page.locator("text=/quartile/"),
-				})
-				.first(),
+			alert.getByRole("heading", { name: "Valeur invalide" }),
+		).toBeVisible();
+		await expect(
+			alert.getByRole("link", {
+				name: "Seuil 2e quartile (rémunération annuelle) — Les seuils doivent être strictement croissants",
+			}),
 		).toBeVisible();
 	});
 
@@ -364,8 +366,13 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 	}) => {
 		test.slow();
 
-		const annualNote = page.locator("#step4-coherence-annual");
-		const hourlyNote = page.locator("#step4-coherence-hourly");
+		const annualNote = page.getByRole("alert").filter({
+			has: page.locator("#step4-coherence-annual-inconsistent"),
+		});
+		const hourlyNote = page.getByRole("alert").filter({
+			has: page.locator("#step4-coherence-hourly-inconsistent"),
+		});
+		const annualWomenMismatchMessage = `Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.women}).`;
 		const next = page.getByRole("button", { name: "Suivant" });
 
 		await submitStepsThroughPayGaps(page);
@@ -378,9 +385,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 				.getByRole("textbox", { name: "Nombre de femmes 4e quartile annuel" })
 				.fill("4");
 
-			await expect(annualNote).toContainText(
-				`Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.women}).`,
-			);
+			await expect(annualNote).toContainText(annualWomenMismatchMessage);
 			await expect(hourlyNote).toHaveCount(0);
 
 			// This journey has a GIP workforce row but no DSN prefill payload, so it has
@@ -388,15 +393,14 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			// the table it indicts: after the annual table and before the hourly one —
 			// not above both, as the old warning was. The source-note variant is covered
 			// by Step4QuartileCoherence.test.tsx.
-			const placement = await page.evaluate(() => {
-				const note = document.getElementById("step4-coherence-annual");
+			const placement = await annualNote.evaluate((note) => {
 				const captioned = (needle: string) =>
 					Array.from(document.querySelectorAll("table")).find((table) =>
 						table.querySelector("caption")?.textContent?.includes(needle),
 					);
 				const annual = captioned("Rémunération annuelle");
 				const hourly = captioned("Rémunération horaire");
-				if (!note || !annual || !hourly) return null;
+				if (!annual || !hourly) return null;
 				return {
 					afterAnnualTable: Boolean(
 						annual.compareDocumentPosition(note) &
@@ -421,7 +425,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			await expect(annualNote).toBeFocused();
 			// One message, under the table at fault — no second copy in a summary.
 			await expect(
-				page.getByText("Nombre de salariés", { exact: true }),
+				page.getByText(annualWomenMismatchMessage, { exact: true }),
 			).toHaveCount(1);
 		});
 
