@@ -337,6 +337,13 @@
 			"when": 1787598108411,
 			"tag": "0047_concerned_champions",
 			"breakpoints": true
+		},
+		{
+			"idx": 48,
+			"version": "7",
+			"when": 1787764641727,
+			"tag": "0048_reflective_human_torch",
+			"breakpoints": true
 		}
 	]
 }
