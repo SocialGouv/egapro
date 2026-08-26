@@ -334,8 +334,15 @@
 		{
 			"idx": 47,
 			"version": "7",
-			"when": 1787562645481,
-			"tag": "0047_volatile_harpoon",
+			"when": 1787598108411,
+			"tag": "0047_concerned_champions",
+			"breakpoints": true
+		},
+		{
+			"idx": 48,
+			"version": "7",
+			"when": 1787753670693,
+			"tag": "0048_volatile_harpoon",
 			"breakpoints": true
 		}
 	]

@@ -6,7 +6,7 @@ import { env } from "~/env.js";
 
 // `integration-setup.ts` migrates an EMPTY container, so the backfill only ever runs here.
 
-const MIGRATION_FILE = "0047_volatile_harpoon.sql";
+const MIGRATION_FILE = "0048_volatile_harpoon.sql";
 const SCRATCH_SCHEMA = "migration_4217";
 const NEW_COLUMN = "decl2_cse_opinion_deadline";
 

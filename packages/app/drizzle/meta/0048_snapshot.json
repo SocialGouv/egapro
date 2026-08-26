@@ -1,6 +1,6 @@
 {
-	"id": "d052d7fa-757e-4133-9236-13dc4b568bde",
-	"prevId": "196f338f-f2fb-4e5d-8927-10fb71de8ab0",
+	"id": "0fcf8cbc-b668-4ec1-b646-2001e822303a",
+	"prevId": "d052d7fa-757e-4133-9236-13dc4b568bde",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -148,6 +148,12 @@
 				},
 				"decl2_joint_evaluation_deadline": {
 					"name": "decl2_joint_evaluation_deadline",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"decl2_cse_opinion_deadline": {
+					"name": "decl2_cse_opinion_deadline",
 					"type": "date",
 					"primaryKey": false,
 					"notNull": true

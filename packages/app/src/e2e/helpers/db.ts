@@ -72,6 +72,8 @@ export async function resetDeclarationToDraft() {
 			    second_declaration_path_choice = NULL,
 			    total_women = NULL,
 			    total_men = NULL,
+			    hourly_women = NULL,
+			    hourly_men = NULL,
 			    draft = NULL,
 			    draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
@@ -237,7 +239,8 @@ export async function setWorkforceCounts(women: number, men: number) {
 	try {
 		await sql`
 			UPDATE app_declaration
-			SET total_women = ${women}, total_men = ${men}
+			SET total_women = ${women}, total_men = ${men},
+			    hourly_women = ${women}, hourly_men = ${men}
 			WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {

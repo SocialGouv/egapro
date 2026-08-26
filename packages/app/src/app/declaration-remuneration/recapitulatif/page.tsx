@@ -109,6 +109,8 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							declarantEmail={session.user.email ?? ""}
 							declarantName={session.user.name ?? ""}
 							declarationYear={d.year}
+							hourlyMen={d.hourlyMen}
+							hourlyWomen={d.hourlyWomen}
 							isCorrection={isCorrection}
 							referencePeriod={referencePeriod}
 							step2Data={step2Data}

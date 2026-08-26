@@ -9,6 +9,8 @@ export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} car
 export const updateStep1Schema = z.object({
 	totalWomen: z.number().int().min(0),
 	totalMen: z.number().int().min(0),
+	hourlyWomen: z.number().int().min(0),
+	hourlyMen: z.number().int().min(0),
 });
 
 export const updateStep2Schema = z.object({

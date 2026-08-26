@@ -335,7 +335,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: {
@@ -376,7 +381,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: {
@@ -479,7 +489,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 177, totalMen: 180 },
+					step1: {
+						totalWomen: 177,
+						totalMen: 180,
+						hourlyWomen: 177,
+						hourlyMen: 180,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: {

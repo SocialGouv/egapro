@@ -125,7 +125,7 @@ describe("ComplianceConfirmation", () => {
 		// end-of-journey screen and from the maquette (#3460, #4029).
 		expect(
 			screen.getByRole("heading", {
-				name: "Documents récapitulatifs de votre déclaration",
+				name: "Documents récapitulatifs de votre démarche",
 			}),
 		).toBeInTheDocument();
 
