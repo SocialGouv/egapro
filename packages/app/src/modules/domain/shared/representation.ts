@@ -89,7 +89,10 @@ export function computeRepresentationDeclarationStatus(declaration: {
 	status: RepresentationDeclarationStatus;
 	currentStep: number | null;
 }): DeclarationStatus {
-	if (isRepresentationNotSubject(declaration.status)) return "done";
-	if (isRepresentationDeclarationSubmitted(declaration.status)) return "done";
+	if (
+		isRepresentationNotSubject(declaration.status) ||
+		isRepresentationDeclarationSubmitted(declaration.status)
+	)
+		return "done";
 	return (declaration.currentStep ?? 0) === 0 ? "to_complete" : "in_progress";
 }
