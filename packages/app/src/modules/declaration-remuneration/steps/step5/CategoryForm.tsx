@@ -9,6 +9,7 @@ import {
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -32,7 +33,6 @@ import {
 	padDecimalToTwo,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
