@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared";
@@ -16,6 +16,8 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../shared/formError/types";
 import { getNextStepHref } from "../shared/funnelSteps";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
@@ -67,6 +69,8 @@ type Step4QuartileDistributionProps = {
 	hourlyMaxMen?: number;
 };
 
+const QUARTILE_ALERT_ID = "step4-error-summary";
+
 export function Step4QuartileDistribution({
 	declarationSiren,
 	declarationYear,
@@ -81,7 +85,6 @@ export function Step4QuartileDistribution({
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly } = useLockContext();
-	const alertRef = useRef<HTMLDivElement | null>(null);
 
 	const hasSavedData =
 		initialData.annual.some(
@@ -166,6 +169,7 @@ export function Step4QuartileDistribution({
 
 	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 	const [showRecap, setShowRecap] = useState(false);
 
 	const nextHref = getNextStepHref(4, indicatorGRequired);
@@ -270,33 +274,15 @@ export function Step4QuartileDistribution({
 		clearFieldError(tableType, index, field);
 	}
 
-	// The coherence errors are reported once per table, under the table they
-	// belong to, so the summary alert has nothing to anchor for them: focus the
-	// offending table's alert directly.
-	function focusFirstError(
-		hasFieldError: boolean,
-		coherenceTable: TableType | undefined,
-	) {
-		requestAnimationFrame(() => {
-			if (hasFieldError) {
-				alertRef.current?.focus();
-				return;
-			}
-			if (coherenceTable) {
-				document.getElementById(`step4-coherence-${coherenceTable}`)?.focus();
-			}
-		});
-	}
-
 	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		setValidationAttempt((attempt) => attempt + 1);
 		const values = form.getValues();
 		const errors = deriveErrors(values);
 		const hasFieldError = hasAnyError(errors);
 		if (hasFieldError || coherenceErrors.length > 0) {
 			setFieldErrors(errors);
 			setShowRecap(true);
-			focusFirstError(hasFieldError, coherenceErrors[0]?.table);
 			return;
 		}
 		setFieldErrors(emptyErrorMap());
@@ -309,8 +295,16 @@ export function Step4QuartileDistribution({
 
 	const coherenceErrors = deriveCoherenceErrors({ annual, hourly }, references);
 
-	const recap = buildRecap(fieldErrors);
-	const showAlert = showRecap && recap.length > 0;
+	// The recap is capped at 4 anchors, so the per-cell messages stay inline:
+	// a quartile form can hold up to 24 offending cells (#4235).
+	const recapErrors: FieldError[] = showRecap
+		? buildRecap(fieldErrors).map((entry) => ({
+				fieldId: entry.id,
+				category: entry.category,
+				message: entry.label,
+				anchor: true,
+			}))
+		: [];
 
 	return (
 		<form
@@ -381,32 +375,19 @@ export function Step4QuartileDistribution({
 					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				{showAlert && (
-					<div
-						aria-labelledby="step4-error-summary-title"
-						className="fr-alert fr-alert--error"
-						ref={alertRef}
-						role="alert"
-						tabIndex={-1}
-					>
-						<h3 className="fr-alert__title" id="step4-error-summary-title">
-							Le formulaire contient des erreurs
-						</h3>
-						<ul>
-							{recap.map((entry) => (
-								<li key={entry.id}>
-									<a href={`#${entry.id}`}>{entry.label}</a>
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
 						disabled={isImpersonating}
 						errorNote={
-							<CoherenceNote errors={coherenceErrors} tableType="annual" />
+							<CoherenceNote
+								errors={coherenceErrors}
+								focusOnValidation={
+									!hasAnyError(fieldErrors) &&
+									coherenceErrors[0]?.table === "annual"
+								}
+								tableType="annual"
+								validationAttempt={validationAttempt}
+							/>
 						}
 						errors={fieldErrors.annual}
 						mins={annualMins}
@@ -432,7 +413,15 @@ export function Step4QuartileDistribution({
 					<QuartileTable
 						disabled={isImpersonating}
 						errorNote={
-							<CoherenceNote errors={coherenceErrors} tableType="hourly" />
+							<CoherenceNote
+								errors={coherenceErrors}
+								focusOnValidation={
+									!hasAnyError(fieldErrors) &&
+									coherenceErrors[0]?.table === "hourly"
+								}
+								tableType="hourly"
+								validationAttempt={validationAttempt}
+							/>
 						}
 						errors={fieldErrors.hourly}
 						mins={hourlyMins}
@@ -453,6 +442,12 @@ export function Step4QuartileDistribution({
 						}
 						tableType="hourly"
 						title="Rémunération horaire brute moyenne"
+					/>
+
+					<FieldErrorAlert
+						errors={recapErrors}
+						id={QUARTILE_ALERT_ID}
+						validationAttempt={validationAttempt}
 					/>
 
 					<DefinitionAccordion

@@ -1,30 +1,34 @@
+import { FieldErrorAlert } from "../../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../../shared/formError/types";
 import { type CoherenceError, coherenceErrorLabel } from "./quartileCoherence";
 import type { TableType } from "./quartileErrors";
 
 type Props = {
 	tableType: TableType;
 	errors: CoherenceError[];
+	focusOnValidation: boolean;
+	validationAttempt: number;
 };
 
-// Stays mounted at load, otherwise assistive tech misses the announcement.
-export function CoherenceNote({ tableType, errors }: Props) {
-	const tableErrors = errors.filter((error) => error.table === tableType);
+export function CoherenceNote({
+	tableType,
+	errors,
+	focusOnValidation,
+	validationAttempt,
+}: Props) {
+	const tableErrors: FieldError[] = errors
+		.filter((error) => error.table === tableType)
+		.map((error) => ({
+			fieldId: `step4-${tableType}-${error.field}-coherence`,
+			category: "inconsistent",
+			message: coherenceErrorLabel(error),
+		}));
 	return (
-		<div aria-atomic="true" aria-live="polite">
-			{tableErrors.length > 0 && (
-				<div
-					className="fr-alert fr-alert--error"
-					id={`step4-coherence-${tableType}`}
-					tabIndex={-1}
-				>
-					<h3 className="fr-alert__title">Nombre de salariés</h3>
-					<ul>
-						{tableErrors.map((error) => (
-							<li key={error.field}>{coherenceErrorLabel(error)}</li>
-						))}
-					</ul>
-				</div>
-			)}
-		</div>
+		<FieldErrorAlert
+			errors={tableErrors}
+			focusOnValidation={focusOnValidation}
+			id={`step4-coherence-${tableType}`}
+			validationAttempt={validationAttempt}
+		/>
 	);
 }

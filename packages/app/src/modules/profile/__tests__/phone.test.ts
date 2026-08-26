@@ -109,8 +109,8 @@ describe("phoneSchema", () => {
 		const result = phoneSchema.safeParse("123");
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues[0]?.message).toContain(
-				"01 22 33 44 55 ou +33 1 22 33 44 55",
+			expect(result.error.issues[0]?.message).toBe(
+				"Veuillez renseigner votre numéro de téléphone",
 			);
 		}
 	});

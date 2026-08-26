@@ -128,6 +128,11 @@ test.describe("Missing info modal", () => {
 					hasText: "Veuillez renseigner votre numéro de téléphone",
 				}),
 			).toBeVisible();
+			await expect(
+				modal.locator(".fr-hint-text", {
+					hasText: "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+				}),
+			).toBeVisible();
 			expect(page.url()).toContain("/mon-espace");
 		});
 	});
