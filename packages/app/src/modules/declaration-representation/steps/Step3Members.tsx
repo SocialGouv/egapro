@@ -198,13 +198,17 @@ export function Step3Members() {
 						legend="Indiquez le pourcentage de représentation des femmes et des hommes parmi les membres des instances dirigeantes."
 						onChange={handlePercentageChange}
 						readOnly={isReadOnly}
+						trailingContent={
+							<div aria-atomic="true" aria-live="polite">
+								{decidedVerdict ? (
+									<ComplianceBadge verdict={decidedVerdict} />
+								) : null}
+							</div>
+						}
 						values={percentageValues}
 					/>
 				</div>
 			) : null}
-			<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
-				{decidedVerdict ? <ComplianceBadge verdict={decidedVerdict} /> : null}
-			</div>
 
 			<section className="fr-accordion fr-mt-4w">
 				<h3 className="fr-accordion__title">

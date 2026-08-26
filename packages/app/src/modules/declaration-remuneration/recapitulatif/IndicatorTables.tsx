@@ -21,6 +21,8 @@ type Props = {
 	declarationYear: number;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -116,15 +118,22 @@ function GapTable({
 	);
 }
 
-/** Workforce row (Femmes / Hommes / Total). */
+/** Workforce rows, one per pay basis (Femmes / Hommes / Total). */
 function WorkforceTable({
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 }: {
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 }) {
-	const total = computeWorkforceTotal(totalWomen ?? 0, totalMen ?? 0);
+	const rows = [
+		{ label: "Rémunération annuelle", women: totalWomen, men: totalMen },
+		{ label: "Rémunération horaire", women: hourlyWomen, men: hourlyMen },
+	];
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -134,21 +143,25 @@ function WorkforceTable({
 							<caption>Effectifs physiques pris en compte</caption>
 							<thead>
 								<tr>
-									<th scope="col" />
+									<th scope="col">Nombre de salariés</th>
 									<th scope="col">Femmes</th>
 									<th scope="col">Hommes</th>
 									<th scope="col">Total</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<th scope="row">Nombre de salariés</th>
-									<td className={styles.numeric}>{totalWomen ?? 0}</td>
-									<td className={styles.numeric}>{totalMen ?? 0}</td>
-									<td className={styles.numeric}>
-										<strong>{total}</strong>
-									</td>
-								</tr>
+								{rows.map((row) => (
+									<tr key={row.label}>
+										<th scope="row">{row.label}</th>
+										<td className={styles.numeric}>{row.women ?? 0}</td>
+										<td className={styles.numeric}>{row.men ?? 0}</td>
+										<td className={styles.numeric}>
+											<strong>
+												{computeWorkforceTotal(row.women ?? 0, row.men ?? 0)}
+											</strong>
+										</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
 					</div>
@@ -381,6 +394,8 @@ export function IndicatorTables({
 	declarationYear,
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 	step2Data,
 	step3Data,
 	step4Data,
@@ -447,7 +462,12 @@ export function IndicatorTables({
 				<h3 className="fr-h6 fr-mb-0">
 					Effectifs physiques pris en compte pour le calcul des indicateurs
 				</h3>
-				<WorkforceTable totalMen={totalMen} totalWomen={totalWomen} />
+				<WorkforceTable
+					hourlyMen={hourlyMen}
+					hourlyWomen={hourlyWomen}
+					totalMen={totalMen}
+					totalWomen={totalWomen}
+				/>
 			</section>
 
 			<section className={styles.section}>

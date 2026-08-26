@@ -6,7 +6,7 @@ import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
 	formatShortDate,
 	formatWorkforceForUser,
-	getReferencePeriod,
+	getDeclarationReferencePeriod,
 	getReferenceYearFor,
 	isDraft,
 	parseGipWorkforce,
@@ -144,7 +144,12 @@ export async function buildPdfData(
 		workforceYear: getReferenceYearFor(year),
 		isSecondDeclaration: declarationType === "correction",
 		transmittedAt: formatShortDate(transmittedDate),
-		referencePeriod: getReferencePeriod(year),
+		referencePeriod: getDeclarationReferencePeriod(
+			year,
+			declarationType === "correction",
+			declaration.secondDeclReferencePeriodStart,
+			declaration.secondDeclReferencePeriodEnd,
+		),
 		declarant: {
 			name: [declarant?.firstName, declarant?.lastName]
 				.filter(Boolean)
@@ -162,6 +167,8 @@ export async function buildPdfData(
 		},
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
+		hourlyWomen: declaration.hourlyWomen ?? 0,
+		hourlyMen: declaration.hourlyMen ?? 0,
 		step2Data,
 		step3Data,
 		step4Data,

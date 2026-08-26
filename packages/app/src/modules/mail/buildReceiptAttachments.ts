@@ -1,9 +1,7 @@
 import "server-only";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { buildPdfData } from "~/modules/declarationPdf/buildPdfData";
-import { buildTransmittedPdfData } from "~/modules/declarationPdf/buildTransmittedPdfData";
 import { DeclarationPdfDocument } from "~/modules/declarationPdf/DeclarationPdfDocument";
-import { TransmittedPdfDocument } from "~/modules/declarationPdf/TransmittedPdfDocument";
 import type { MailAttachment } from "./types";
 
 async function renderDeclarationPdf(
@@ -24,19 +22,6 @@ async function renderDeclarationPdf(
 	};
 }
 
-async function renderTransmittedPdf(
-	siren: string,
-	year: number,
-): Promise<MailAttachment> {
-	const data = await buildTransmittedPdfData(siren, year, new Date());
-	const buffer = await renderToBuffer(TransmittedPdfDocument({ data }));
-	return {
-		filename: `recapitulatif-elements-transmis-${siren}-${data.year + 1}.pdf`,
-		content: Buffer.from(buffer),
-		contentType: "application/pdf",
-	};
-}
-
 export async function buildDeclarationAttachments(
 	siren: string,
 	year: number,
@@ -49,8 +34,5 @@ export async function buildSecondDeclarationAttachments(
 	siren: string,
 	year: number,
 ): Promise<MailAttachment[]> {
-	return Promise.all([
-		renderDeclarationPdf(siren, year, "correction"),
-		renderTransmittedPdf(siren, year),
-	]);
+	return [await renderDeclarationPdf(siren, year, "correction")];
 }

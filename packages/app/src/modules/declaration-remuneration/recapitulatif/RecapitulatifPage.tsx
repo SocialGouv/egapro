@@ -30,6 +30,8 @@ type Props = {
 	isCorrection: boolean;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -77,6 +79,8 @@ export function RecapitulatifPage({
 	isCorrection,
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 	step2Data,
 	step3Data,
 	step4Data,
@@ -153,6 +157,8 @@ export function RecapitulatifPage({
 					<div className={styles.indicatorsSection}>
 						<IndicatorTables
 							declarationYear={declarationYear}
+							hourlyMen={hourlyMen}
+							hourlyWomen={hourlyWomen}
 							step2Data={step2Data}
 							step2Gaps={step2Gaps}
 							step3Data={step3Data}

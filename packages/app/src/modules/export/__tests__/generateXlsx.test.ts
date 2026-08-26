@@ -33,6 +33,8 @@ function makeRow(overrides: Partial<ExportRow> = {}): ExportRow {
 		rulesVersion: "2027.1",
 		totalWomen: 120,
 		totalMen: 130,
+		hourlyWomen: 120,
+		hourlyMen: 130,
 		remunerationScore: 5,
 		variableRemunerationScore: 3,
 		quartileScore: 2,

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { CampaignDeadlines } from "~/modules/domain";
+import type { CampaignDeadlines, DeclarationFsmStatus } from "~/modules/domain";
 import {
 	getDeclarationDisplayContext,
 	getDefaultCampaignDeadlines,
@@ -21,6 +21,16 @@ const VARIANTS: PanelVariant[] = [
 	"cse",
 	"closed",
 ];
+
+// The playground picks a `variant` directly, so each one needs a representative FSM status to preview the "Modifier" gating.
+const VARIANT_FSM_STATUS: Record<PanelVariant, DeclarationFsmStatus | null> = {
+	start: "draft",
+	compliance_choice: "awaiting_compliance_path_choice",
+	compliance: "corrective_actions_chosen",
+	evaluation: "joint_evaluation_chosen",
+	cse: "awaiting_cse_opinion",
+	closed: "demarche_completed",
+};
 
 const COMPLIANCE_PATHS = [
 	"corrective_action",
@@ -255,6 +265,7 @@ export function PanelPlayground() {
 				campaignDeadlines={deadlines}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref="/declaration-remuneration?siren=000000000"
+				declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,
 					secondDeclarationPathChoice: null,

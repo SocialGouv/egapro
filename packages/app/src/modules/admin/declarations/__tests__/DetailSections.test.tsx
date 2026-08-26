@@ -22,6 +22,8 @@ const declaration: DeclarationDetail = {
 	currentStep: 6,
 	totalWomen: 120,
 	totalMen: 80,
+	hourlyWomen: 120,
+	hourlyMen: 80,
 	remunerationScore: 85,
 	firstDeclarationPathChoice: null,
 	demarcheCompletedAt: null,

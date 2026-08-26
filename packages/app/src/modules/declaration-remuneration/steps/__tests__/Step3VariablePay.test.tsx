@@ -360,7 +360,12 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: {
 						...nullGipStep3(),
@@ -412,7 +417,12 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: {
 						...nullGipStep3(),
@@ -455,7 +465,12 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: {
 						...nullGipStep3(),

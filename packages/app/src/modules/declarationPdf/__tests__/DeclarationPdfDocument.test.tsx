@@ -128,6 +128,8 @@ function makeData(
 		},
 		totalWomen: 50,
 		totalMen: 60,
+		hourlyWomen: 50,
+		hourlyMen: 60,
 		step2Data: emptyStep2Data(),
 		step3Data: emptyStep3Data(),
 		step4Data: emptyStep4Data(),

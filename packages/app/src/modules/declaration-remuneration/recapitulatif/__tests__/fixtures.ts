@@ -76,6 +76,8 @@ export const defaultProps = () => ({
 	isCorrection: false,
 	totalWomen: 120,
 	totalMen: 130,
+	hourlyWomen: 118,
+	hourlyMen: 128,
 	step2Data: emptyStep2Data(),
 	step3Data: emptyStep3Data(),
 	step4Data: emptyStep4Data(),

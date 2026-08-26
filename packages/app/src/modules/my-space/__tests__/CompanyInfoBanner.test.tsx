@@ -47,11 +47,14 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.getByText("532 847 196")).toBeInTheDocument();
 	});
 
-	it("renders a breadcrumb with a link to /mon-espace/mes-entreprises", () => {
+	it("does not render a breadcrumb", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
-		const link = screen.getByRole("link", { name: "Mon espace" });
-		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute("href", "/mon-espace/mes-entreprises");
+		expect(
+			screen.queryByRole("navigation", { name: "vous êtes ici :" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: "Mon espace" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the address when provided", () => {
