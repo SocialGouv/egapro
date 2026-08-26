@@ -61,6 +61,8 @@ export const DECLARATION_COLUMNS: Array<{
 	// Employees
 	{ key: "totalWomen", header: "Total_femmes" },
 	{ key: "totalMen", header: "Total_hommes" },
+	{ key: "hourlyWomen", header: "Total_femmes_horaire" },
+	{ key: "hourlyMen", header: "Total_hommes_horaire" },
 
 	// Scores
 	{ key: "remunerationScore", header: "Score_remuneration" },

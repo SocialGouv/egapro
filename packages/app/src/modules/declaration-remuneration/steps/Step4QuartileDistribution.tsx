@@ -29,7 +29,7 @@ import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCal
 import { QuartileTable } from "./step4/QuartileTable";
 import {
 	deriveCoherenceErrors,
-	type QuartileReference,
+	type QuartileReferences,
 } from "./step4/quartileCoherence";
 import {
 	buildRecap,
@@ -63,6 +63,8 @@ type Step4QuartileDistributionProps = {
 	gipPrefillData?: GipPrefillData;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
 };
 
 export function Step4QuartileDistribution({
@@ -73,6 +75,8 @@ export function Step4QuartileDistribution({
 	gipPrefillData,
 	maxWomen,
 	maxMen,
+	hourlyMaxWomen,
+	hourlyMaxMen,
 }: Step4QuartileDistributionProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -153,7 +157,12 @@ export function Step4QuartileDistribution({
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
-	const reference: QuartileReference = { women: maxWomen, men: maxMen };
+	// One reference per pay basis: each table is held to the headcount declared
+	// for its own basis at step 1 (#4247), never to the other one.
+	const references: QuartileReferences = {
+		annual: { women: maxWomen, men: maxMen },
+		hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
+	};
 
 	const hasData = hasSavedData || hasDraft;
 	const [fieldErrors, setFieldErrors] = useState<FieldErrorMap>(emptyErrorMap);
@@ -245,6 +254,7 @@ export function Step4QuartileDistribution({
 			if (/\D/.test(value)) return;
 			const n = Number.parseInt(value, 10);
 			if (Number.isNaN(n) || n < 0) return;
+			const reference = references[tableType];
 			const max = field === "women" ? reference.women : reference.men;
 			if (max !== undefined && n > max) {
 				setFieldError(
@@ -297,7 +307,7 @@ export function Step4QuartileDistribution({
 	const annualMins = computeMinsForTable(annual);
 	const hourlyMins = computeMinsForTable(hourly);
 
-	const coherenceErrors = deriveCoherenceErrors({ annual, hourly }, reference);
+	const coherenceErrors = deriveCoherenceErrors({ annual, hourly }, references);
 
 	const recap = buildRecap(fieldErrors);
 	const showAlert = showRecap && recap.length > 0;
@@ -405,8 +415,8 @@ export function Step4QuartileDistribution({
 						}
 						quartiles={annual}
 						readOnly={isReadOnly}
-						referenceMen={reference.men}
-						referenceWomen={reference.women}
+						referenceMen={references.annual.men}
+						referenceWomen={references.annual.women}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource
@@ -431,8 +441,8 @@ export function Step4QuartileDistribution({
 						}
 						quartiles={hourly}
 						readOnly={isReadOnly}
-						referenceMen={reference.men}
-						referenceWomen={reference.women}
+						referenceMen={references.hourly.men}
+						referenceWomen={references.hourly.women}
 						sourceNote={
 							gipPrefillData ? (
 								<PrefillSource

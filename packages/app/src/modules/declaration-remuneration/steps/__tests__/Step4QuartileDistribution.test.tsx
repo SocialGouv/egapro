@@ -340,7 +340,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: prefilledGipStep4(),
@@ -366,7 +371,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: nullGipStep4(),
@@ -455,7 +465,12 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 177, totalMen: 180 },
+					step1: {
+						totalWomen: 177,
+						totalMen: 180,
+						hourlyWomen: 177,
+						hourlyMen: 180,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: {
@@ -500,12 +515,14 @@ describe("Step4QuartileDistribution", () => {
 		expect(annualWomen).not.toHaveAttribute("aria-invalid");
 	});
 
-	it("rejects a count above the step 1 headcount in both tables with the same message", async () => {
+	it("caps each table at the step 1 headcount of its own pay basis", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				hourlyMaxMen={175}
+				hourlyMaxWomen={170}
 				indicatorGRequired
 				initialData={emptyStep4Data()}
 				maxMen={180}
@@ -513,10 +530,10 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 
-		for (const label of [
-			/Nombre de femmes 1er quartile annuel/i,
-			/Nombre de femmes 1er quartile horaire/i,
-		]) {
+		for (const [label, max] of [
+			[/Nombre de femmes 1er quartile annuel/i, 177],
+			[/Nombre de femmes 1er quartile horaire/i, 170],
+		] as const) {
 			const input = screen.getByLabelText(label) as HTMLInputElement;
 			await user.clear(input);
 			await user.type(input, "200");
@@ -525,7 +542,7 @@ describe("Step4QuartileDistribution", () => {
 			const describedBy = input.getAttribute("aria-describedby");
 			expect(describedBy).toBeTruthy();
 			expect(document.getElementById(describedBy as string)).toHaveTextContent(
-				"Le nombre ne peut pas dépasser l'effectif de l'étape 1 (177).",
+				`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
 			);
 		}
 	});

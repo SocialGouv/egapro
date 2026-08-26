@@ -233,7 +233,12 @@ describe("Step2PayGap", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: {
 						...nullGipStep2(),
 						annualMeanWomen: "35000",

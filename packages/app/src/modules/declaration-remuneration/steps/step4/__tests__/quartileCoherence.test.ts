@@ -4,7 +4,7 @@ import {
 	type CoherenceError,
 	coherenceErrorLabel,
 	deriveCoherenceErrors,
-	type QuartileReference,
+	type QuartileReferences,
 } from "../quartileCoherence";
 import { deriveErrors, hasAnyError } from "../quartileErrors";
 
@@ -25,20 +25,31 @@ function table(women: Counts, men: Counts): QuartileTuple {
 	];
 }
 
-/** Step 1 headcount: 37 women / 33 men, the single reference for both tables. */
-const STEP1_REFERENCE: QuartileReference = { women: 37, men: 33 };
+/**
+ * Step 1 headcount, one pair per pay basis (#4247): 37/33 on the annual base,
+ * 34/32 on the hourly one. Distinct on purpose — a table held to the other
+ * basis' reference would show up here.
+ */
+const STEP1_REFERENCES: QuartileReferences = {
+	annual: { women: 37, men: 33 },
+	hourly: { women: 34, men: 32 },
+};
 
-/** Columns summing exactly to STEP1_REFERENCE. */
+/** Columns summing exactly to the annual reference. */
 const MATCHING_WOMEN: Counts = [10, 9, 9, 9];
 const MATCHING_MEN: Counts = [9, 8, 8, 8];
+
+/** Columns summing exactly to the hourly reference. */
+const HOURLY_MATCHING_WOMEN: Counts = [9, 9, 8, 8];
+const HOURLY_MATCHING_MEN: Counts = [8, 8, 8, 8];
 
 describe("deriveCoherenceErrors", () => {
 	it("flags only the annual table when the hourly one matches the reference", () => {
 		const values = {
 			annual: table([10, 10, 10, 10], MATCHING_MEN),
-			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
+			hourly: table(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
 			{ table: "annual", field: "women", expected: 37, total: 40 },
 		]);
 	});
@@ -46,19 +57,19 @@ describe("deriveCoherenceErrors", () => {
 	it("flags only the hourly table when the annual one matches the reference", () => {
 		const values = {
 			annual: table(MATCHING_WOMEN, MATCHING_MEN),
-			hourly: table(MATCHING_WOMEN, [8, 8, 7, 7]),
+			hourly: table(HOURLY_MATCHING_WOMEN, [8, 8, 7, 7]),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
-			{ table: "hourly", field: "men", expected: 33, total: 30 },
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
+			{ table: "hourly", field: "men", expected: 32, total: 30 },
 		]);
 	});
 
 	it("flags both columns of a table when both diverge", () => {
 		const values = {
 			annual: table([10, 10, 10, 10], [5, 5, 5, 5]),
-			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
+			hourly: table(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
 			{ table: "annual", field: "women", expected: 37, total: 40 },
 			{ table: "annual", field: "men", expected: 33, total: 20 },
 		]);
@@ -69,31 +80,31 @@ describe("deriveCoherenceErrors", () => {
 			annual: table([10, 10, 10, 10], [5, 5, 5, 5]),
 			hourly: table([1, 1, 1, 1], [2, 2, 2, 2]),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
 			{ table: "annual", field: "women", expected: 37, total: 40 },
 			{ table: "annual", field: "men", expected: 33, total: 20 },
-			{ table: "hourly", field: "women", expected: 37, total: 4 },
-			{ table: "hourly", field: "men", expected: 33, total: 8 },
+			{ table: "hourly", field: "women", expected: 34, total: 4 },
+			{ table: "hourly", field: "men", expected: 32, total: 8 },
 		]);
 	});
 
 	it("returns no error when both tables match the reference", () => {
 		const values = {
 			annual: table(MATCHING_WOMEN, MATCHING_MEN),
-			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
+			hourly: table(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([]);
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([]);
 	});
 
-	it("compares the hourly table to the step 1 reference, never to its own GIP totals", () => {
-		// 34 F / 32 H is what the GIP publishes for the hourly block.
+	it("holds each table to its own pay basis, never to the other one", () => {
+		// The hourly table carries the annual headcount (37/33) instead of its own.
 		const values = {
 			annual: table(MATCHING_WOMEN, MATCHING_MEN),
-			hourly: table([9, 9, 8, 8], [8, 8, 8, 8]),
+			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
-			{ table: "hourly", field: "women", expected: 37, total: 34 },
-			{ table: "hourly", field: "men", expected: 33, total: 32 },
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
+			{ table: "hourly", field: "women", expected: 34, total: 37 },
+			{ table: "hourly", field: "men", expected: 32, total: 33 },
 		]);
 	});
 
@@ -102,33 +113,38 @@ describe("deriveCoherenceErrors", () => {
 			annual: table([10, 10, 10, 10], [5, 5, 5, 5]),
 			hourly: table([10, 10, 10, 10], [5, 5, 5, 5]),
 		};
-		expect(deriveCoherenceErrors(values, {})).toEqual([]);
+		expect(deriveCoherenceErrors(values, { annual: {}, hourly: {} })).toEqual(
+			[],
+		);
 	});
 
 	it("controls only the sex whose reference is known", () => {
 		const values = {
 			annual: table([10, 10, 10, 10], [5, 5, 5, 5]),
-			hourly: table(MATCHING_WOMEN, [5, 5, 5, 5]),
+			hourly: table(HOURLY_MATCHING_WOMEN, [5, 5, 5, 5]),
 		};
-		expect(deriveCoherenceErrors(values, { women: 37 })).toEqual([
-			{ table: "annual", field: "women", expected: 37, total: 40 },
-		]);
+		expect(
+			deriveCoherenceErrors(values, {
+				annual: { women: 37 },
+				hourly: {},
+			}),
+		).toEqual([{ table: "annual", field: "women", expected: 37, total: 40 }]);
 	});
 
 	it("returns no error while a column is still incomplete", () => {
 		const values = {
 			annual: table([10, undefined, 10, 10], MATCHING_MEN),
-			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
+			hourly: table(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([]);
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([]);
 	});
 
 	it("still flags the complete column of a partially filled table", () => {
 		const values = {
 			annual: table([10, undefined, 10, 10], [5, 5, 5, 5]),
-			hourly: table(MATCHING_WOMEN, MATCHING_MEN),
+			hourly: table(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE)).toEqual([
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES)).toEqual([
 			{ table: "annual", field: "men", expected: 33, total: 20 },
 		]);
 	});
@@ -138,7 +154,12 @@ describe("deriveCoherenceErrors", () => {
 			annual: table([0, 0, 0, 0], [0, 0, 0, 0]),
 			hourly: table([0, 0, 0, 0], [0, 0, 0, 0]),
 		};
-		expect(deriveCoherenceErrors(values, { women: 0, men: 0 })).toEqual([]);
+		expect(
+			deriveCoherenceErrors(values, {
+				annual: { women: 0, men: 0 },
+				hourly: { women: 0, men: 0 },
+			}),
+		).toEqual([]);
 	});
 });
 
@@ -180,7 +201,7 @@ describe("coherence versus per-field validation", () => {
 			annual: table([10, 10, 10, 10], [5, 5, 5, 5]),
 			hourly: table([10, 10, 10, 10], [5, 5, 5, 5]),
 		};
-		expect(deriveCoherenceErrors(values, STEP1_REFERENCE).length).toBe(4);
+		expect(deriveCoherenceErrors(values, STEP1_REFERENCES).length).toBe(4);
 		// The two axes stay independent: blocking the submit is the form's job,
 		// which is why `deriveErrors` reports nothing here.
 		expect(hasAnyError(deriveErrors(values))).toBe(false);

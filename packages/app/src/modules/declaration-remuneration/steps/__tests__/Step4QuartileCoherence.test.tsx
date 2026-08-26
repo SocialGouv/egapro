@@ -29,14 +29,18 @@ beforeEach(() => {
 	mockMutate.mockClear();
 });
 
-/** Step 1 headcount both tables are now checked against. */
+/** Step 1 headcount each table is checked against, one pair per pay basis. */
 const TOTAL_WOMEN = 40;
 const TOTAL_MEN = 32;
+const HOURLY_WOMEN = 36;
+const HOURLY_MEN = 28;
 
 type Counts = [number, number, number, number];
 
 const MATCHING_WOMEN: Counts = [10, 10, 10, 10];
 const MATCHING_MEN: Counts = [8, 8, 8, 8];
+const HOURLY_MATCHING_WOMEN: Counts = [9, 9, 9, 9];
+const HOURLY_MATCHING_MEN: Counts = [7, 7, 7, 7];
 
 function quartiles(women: Counts, men: Counts): QuartileData[] {
 	return [
@@ -50,7 +54,12 @@ function quartiles(women: Counts, men: Counts): QuartileData[] {
 // A GIP payload is what makes the "Source : DSN" note render; the saved
 // initialData wins over it, so the counts under test stay the ones passed in.
 const SOURCE_NOTE_PREFILL = {
-	step1: { totalWomen: TOTAL_WOMEN, totalMen: TOTAL_MEN },
+	step1: {
+		totalWomen: TOTAL_WOMEN,
+		totalMen: TOTAL_MEN,
+		hourlyWomen: HOURLY_WOMEN,
+		hourlyMen: HOURLY_MEN,
+	},
 	step2: nullGipStep2(),
 	step3: nullGipStep3(),
 	step4: nullGipStep4(),
@@ -61,7 +70,7 @@ const SOURCE_NOTE_PREFILL = {
 // Spread, not destructured: `undefined` must mean "step 1 not filled in yet".
 function renderStep4({
 	annual = quartiles(MATCHING_WOMEN, MATCHING_MEN),
-	hourly = quartiles(MATCHING_WOMEN, MATCHING_MEN),
+	hourly = quartiles(HOURLY_MATCHING_WOMEN, HOURLY_MATCHING_MEN),
 	withSourceNote = false,
 	...reference
 }: {
@@ -70,12 +79,16 @@ function renderStep4({
 	withSourceNote?: boolean;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
 } = {}) {
 	return render(
 		<Step4QuartileDistribution
 			declarationSiren="123456789"
 			declarationYear={2025}
 			gipPrefillData={withSourceNote ? SOURCE_NOTE_PREFILL : undefined}
+			hourlyMaxMen={HOURLY_MEN}
+			hourlyMaxWomen={HOURLY_WOMEN}
 			indicatorGRequired
 			initialData={{ annual, hourly }}
 			maxMen={TOTAL_MEN}
@@ -87,8 +100,10 @@ function renderStep4({
 
 const ANNUAL_WOMEN_ERROR =
 	"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 40).";
+const HOURLY_WOMEN_ERROR =
+	"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 36).";
 const HOURLY_MEN_ERROR =
-	"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 32).";
+	"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 28).";
 
 describe("Step4QuartileDistribution — headcount coherence control", () => {
 	it("shows no coherence message when both tables match the step 1 headcount", () => {
@@ -115,8 +130,15 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 	});
 
 	it("controls the hourly table too, with no GIP prefill in play", () => {
-		renderStep4({ hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]) });
+		renderStep4({ hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]) });
 		expect(screen.getByText(HOURLY_MEN_ERROR)).toBeInTheDocument();
+		expect(screen.queryByText(ANNUAL_WOMEN_ERROR)).not.toBeInTheDocument();
+	});
+
+	it("holds the hourly table to the hourly headcount, not the annual one", () => {
+		renderStep4({ hourly: quartiles(MATCHING_WOMEN, MATCHING_MEN) });
+		expect(screen.getByText(HOURLY_MEN_ERROR)).toBeInTheDocument();
+		expect(screen.getByText(HOURLY_WOMEN_ERROR)).toBeInTheDocument();
 		expect(screen.queryByText(ANNUAL_WOMEN_ERROR)).not.toBeInTheDocument();
 	});
 
@@ -157,7 +179,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 	it("reports each diverging table once, and only under that table", () => {
 		renderStep4({
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
-			hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]),
+			hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]),
 		});
 		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
 		expect(screen.getAllByText(ANNUAL_WOMEN_ERROR)).toHaveLength(1);
@@ -217,7 +239,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		const user = userEvent.setup();
 		renderStep4({
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
-			hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]),
+			hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]),
 		});
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
@@ -228,7 +250,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 
 	it("focuses the first diverging table's message on submit", async () => {
 		const user = userEvent.setup();
-		renderStep4({ hourly: quartiles(MATCHING_WOMEN, [8, 8, 8, 6]) });
+		renderStep4({ hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]) });
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 

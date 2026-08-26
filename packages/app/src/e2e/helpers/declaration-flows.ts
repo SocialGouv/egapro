@@ -126,9 +126,20 @@ export async function fillStep4Quartiles(
 }
 
 /**
- * Step 1 headcount every funnel helper below declares. Since #4260 it is also the
- * reference both step 4 quartile tables are held to, so the default quartile rows
- * (DEFAULT_*_QUARTILES) sum to exactly these counts.
+ * Changing a workforce that step 1 already holds opens a confirmation dialog
+ * before saving, because it resets the GIP-prefilled indicators. A real user
+ * confirms it; without this the funnel just never leaves step 1.
+ */
+async function confirmPrefillResetIfAsked(page: Page) {
+	const confirm = page.getByRole("button", { name: "Continuer" });
+	const asked = await confirm.isVisible({ timeout: 2_000 }).catch(() => false);
+	if (asked) await confirm.click();
+}
+
+/**
+ * Step 1 headcount every funnel helper below declares, on both pay bases (#4247).
+ * Since #4260 it is also the reference each step 4 quartile table is held to, so
+ * the default quartile rows (DEFAULT_*_QUARTILES) sum to exactly these counts.
  */
 export const STEP1_WORKFORCE = { women: 10, men: 15 } as const;
 
@@ -145,13 +156,20 @@ export async function submitStepsThroughPayGaps(
 		// Navigate to create/resume declaration → redirects to step 1
 		await page.goto("/declaration-remuneration");
 		await page.waitForURL("**/declaration-remuneration/etape/1");
-		await page
-			.getByRole("textbox", { name: "Nombre de femmes" })
-			.fill(String(STEP1_WORKFORCE.women));
-		await page
-			.getByRole("textbox", { name: "Nombre d'hommes" })
-			.fill(String(STEP1_WORKFORCE.men));
+		for (const basis of ["annuelle", "horaire"] as const) {
+			await page
+				.getByRole("textbox", {
+					name: `Rémunération ${basis} — Nombre de femmes`,
+				})
+				.fill(String(STEP1_WORKFORCE.women));
+			await page
+				.getByRole("textbox", {
+					name: `Rémunération ${basis} — Nombre d'hommes`,
+				})
+				.fill(String(STEP1_WORKFORCE.men));
+		}
 		await page.getByRole("button", { name: "Suivant" }).click();
+		await confirmPrefillResetIfAsked(page);
 		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
 

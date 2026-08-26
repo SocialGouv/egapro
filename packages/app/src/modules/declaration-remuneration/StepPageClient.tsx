@@ -39,6 +39,8 @@ type StepPageClientProps = {
 		year: number;
 		totalWomen: number | null;
 		totalMen: number | null;
+		hourlyWomen: number | null;
+		hourlyMen: number | null;
 		status: DeclarationFsmStatus | null;
 	};
 	// GIP-MDS annual average workforce; `null` = absent from the GIP file, i.e. not subject to the declaration.
@@ -140,6 +142,8 @@ export function StepPageClient({
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
 						gipPrefillData={gipPrefillData}
+						hourlyMaxMen={declaration.hourlyMen ?? undefined}
+						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
 						indicatorGRequired={indicatorGRequired}
 						initialData={step4Data}
 						maxMen={declaration.totalMen ?? undefined}

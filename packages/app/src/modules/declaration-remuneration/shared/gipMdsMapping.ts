@@ -22,10 +22,12 @@ export type GipQuartileData = {
  * `null` values mean the GIP file had no data for that field.
  */
 export type GipPrefillData = {
-	/** Step 1 — Workforce (physical headcount for annual global remuneration) */
+	/** Step 1 — Workforce (physical headcount, per pay basis) */
 	step1: {
 		totalWomen: number | null;
 		totalMen: number | null;
+		hourlyWomen: number | null;
+		hourlyMen: number | null;
 	};
 	/** Step 2 — Pay gap (Indicator A mean + Indicator C median) */
 	step2: {
@@ -88,6 +90,8 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 		step1: {
 			totalWomen,
 			totalMen,
+			hourlyWomen: toInt(row.womenCountHourlyGlobal),
+			hourlyMen: toInt(row.menCountHourlyGlobal),
 		},
 		step2: {
 			annualMeanWomen: row.globalAnnualMeanWomen,

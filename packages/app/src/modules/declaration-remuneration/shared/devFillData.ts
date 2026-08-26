@@ -2,8 +2,9 @@ import type { EmployeeCategory } from "../steps/step5/categorySerializer";
 import type { PayGapRow, WorkforceRow } from "../types";
 
 // Step 1 - Workforce (120 women + 130 men = 250 total)
-export const DEV_STEP1_CATEGORIES: WorkforceRow[] = [
-	{ name: "Nombre de salariés", women: 120, men: 130 },
+export const DEV_STEP1_ROWS: WorkforceRow[] = [
+	{ name: "Rémunération annuelle", women: 120, men: 130 },
+	{ name: "Rémunération horaire", women: 120, men: 130 },
 ];
 
 // Step 2 - Pay gap (4 rows, some gaps > 5%, some < 5%)

@@ -1,9 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
@@ -45,11 +52,15 @@ const { uploadFile: uploadFileMock } = (await import(
 	"~/modules/shared/uploadFile"
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
+const EMPTY_SELECTION_ERROR =
+	"Veuillez sélectionner le rapport de l'évaluation conjointe avant de soumettre.";
+
 const defaultProps = {
 	cseOpinionRequired: false,
 	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
+	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
 };
 
@@ -105,15 +116,16 @@ describe("JointEvaluationForm", () => {
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
 	});
 
-	it("shows an error when submitting without a file", () => {
+	it("names the expected document in the error when submitting without a file", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
 		fireEvent.click(submitButton);
 
+		expect(screen.getByText(EMPTY_SELECTION_ERROR)).toBeInTheDocument();
 		expect(
-			screen.getByText(/veuillez sélectionner au moins un fichier/i),
-		).toBeInTheDocument();
+			screen.queryByText(/veuillez sélectionner au moins un fichier/i),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the info boxes", () => {
@@ -148,9 +160,7 @@ describe("JointEvaluationForm", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
 
-		expect(
-			screen.queryByText(/veuillez sélectionner un fichier/i),
-		).not.toBeInTheDocument();
+		expect(screen.queryByText(EMPTY_SELECTION_ERROR)).not.toBeInTheDocument();
 
 		expect(
 			container.querySelector("dialog#joint-evaluation-submit-modal"),
@@ -208,6 +218,69 @@ describe("JointEvaluationForm", () => {
 		});
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
+		});
+	});
+
+	describe("rapport déjà déposé (#4222)", () => {
+		const existingFile = {
+			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			fileName: "rapport-evaluation-conjointe.pdf",
+			uploadedAt: new Date("2026-06-20T09:30:00"),
+		};
+
+		it("lists the deposited report with a new-tab link to the stored file", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(screen.getByText("Rapport déjà déposé")).toBeInTheDocument();
+
+			const link = screen.getByRole("link", {
+				name: /rapport-evaluation-conjointe\.pdf/,
+			});
+			expect(link).toHaveAttribute(
+				"href",
+				"/api/v1/files/8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			);
+			expect(link).toHaveAttribute("target", "_blank");
+			expect(link).toHaveAttribute("rel", "noopener noreferrer");
+			expect(
+				within(link).getByText("(ouvre une nouvelle fenêtre)"),
+			).toBeInTheDocument();
+		});
+
+		it("states the deposit date of the existing report", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(
+				screen.getByText(
+					`Déposé le ${formatLongDate(existingFile.uploadedAt)}`,
+				),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the upload zone available so the report can still be replaced", () => {
+			const { container } = render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(container.querySelector('input[type="file"]')).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeInTheDocument();
+		});
+
+		it("renders no deposited-report block when no file exists yet", () => {
+			render(<JointEvaluationForm {...defaultProps} />);
+
+			expect(screen.queryByText("Rapport déjà déposé")).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("link", {
+					name: /rapport-evaluation-conjointe\.pdf/,
+				}),
+			).not.toBeInTheDocument();
 		});
 	});
 

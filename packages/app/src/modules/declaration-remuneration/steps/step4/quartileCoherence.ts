@@ -4,6 +4,11 @@ import type { CountField, TableType } from "./quartileErrors";
 
 export type QuartileReference = { women?: number; men?: number };
 
+export type QuartileReferences = {
+	annual: QuartileReference;
+	hourly: QuartileReference;
+};
+
 export type CoherenceError = {
 	table: TableType;
 	field: CountField;
@@ -21,15 +26,16 @@ function sumCounts(table: QuartileTuple, field: CountField): number | null {
 	return sum;
 }
 
-// Both tables are held to the step 1 headcount, never to the GIP file.
+// Each table is held to the step 1 headcount declared for its own pay basis,
+// never to the GIP file nor to the other basis.
 export function deriveCoherenceErrors(
 	values: { annual: QuartileTuple; hourly: QuartileTuple },
-	reference: QuartileReference,
+	references: QuartileReferences,
 ): CoherenceError[] {
 	const out: CoherenceError[] = [];
 	for (const table of ["annual", "hourly"] as const) {
 		for (const field of ["women", "men"] as const) {
-			const expected = reference[field];
+			const expected = references[table][field];
 			if (expected === undefined) continue;
 			const total = sumCounts(values[table], field);
 			if (total === null) continue;

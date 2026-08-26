@@ -43,6 +43,18 @@ export const publicDeclarationSchema = {
 				"Nombre d'hommes pris en compte dans le calcul de la rémunération globale annuelle.",
 			example: 5003,
 		},
+		hourlyWomen: {
+			type: ["integer", "null"],
+			description:
+				"Nombre de femmes prises en compte dans le calcul de la rémunération globale horaire.",
+			example: 2380,
+		},
+		hourlyMen: {
+			type: ["integer", "null"],
+			description:
+				"Nombre d'hommes pris en compte dans le calcul de la rémunération globale horaire.",
+			example: 4960,
+		},
 		globalAnnualMeanGap: {
 			type: ["number", "null"],
 			description:

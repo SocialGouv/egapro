@@ -5,11 +5,15 @@ export function getEffectiveGipPrefillData(
 	gip: GipPrefillData | null,
 	totalWomen: number | null,
 	totalMen: number | null,
+	hourlyWomen: number | null = null,
+	hourlyMen: number | null = null,
 ): GipPrefillData | null {
 	if (gip === null || totalWomen === null) return gip;
 	const gipMatchesSaved =
 		totalWomen === (gip.step1.totalWomen ?? 0) &&
-		totalMen === (gip.step1.totalMen ?? 0);
+		totalMen === (gip.step1.totalMen ?? 0) &&
+		(hourlyWomen === null || hourlyWomen === (gip.step1.hourlyWomen ?? 0)) &&
+		(hourlyMen === null || hourlyMen === (gip.step1.hourlyMen ?? 0));
 	return gipMatchesSaved ? gip : null;
 }
 

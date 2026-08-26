@@ -71,8 +71,9 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # des verdicts, le commiter — et c'est délibérément dans cet ordre : un registre qu'une CI
 # s'écrit à elle-même n'est plus une décision revue par quiconque.
 #
-# Ce que ça coûte, mesuré sur ce dépôt : 16 à 21 $ par run sans registre. Avec, le premier run
-# paie le total et les suivants ne paient que le reliquat.
+# Ce que ça coûte, mesuré sur ce dépôt : 9,59 $ pour le run du 24/08 (3 passes, aucun registre
+# à rejouer — 5,91 + 2,43 + 1,25). Avec un registre commité, le premier run paie le total et
+# les suivants ne paient que le reliquat.
 #
 # CE QUI FERME RÉELLEMENT LA GRILLE n'est pas l'adjudication seule, c'est le MOTEUR : il décide
 # par page ce qu'il a mesuré par page, au lieu de ne savoir que répéter le verdict du run. Un
@@ -171,7 +172,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.29.0
+        uses: maxgfr/ultra11y@v5.34.2
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -231,10 +232,13 @@ jobs:
     # deux faits sur la QUALITÉ DU RUN, pas sur le code audité.
     runs-on: ubuntu-22.04
     # Mesuré : 34 min pour 17 pages et une adjudication plafonnée à 60 tours ; 40 min pour le
-    # run complet. Le balayage enregistre aujourd'hui **35 pages** (les 24 de l'échantillon
-    # normatif, moins les 5 portées par un spec dédié, plus les écrans intermédiaires des
-    # tunnels), et un job annulé sur timeout emporte le rapport ET l'artefact, ce que
-    # `continue-on-error` n'absorbe pas — d'où la marge.
+    # run complet. Trois nombres cohabitent et disent trois choses différentes : **24** pages
+    # sont DÉCLARÉES dans `.ultra11yrc.json` (`sample.pages`, ce que vérifie `require-sample`),
+    # **39** sont ENREGISTRÉES par la suite Playwright (sweep 18 + funnels 16 + dynamic 3 +
+    # anonymous 2), et **37** sont effectivement CAPTURÉES — les 2 manquantes étant gardées par
+    # un `test.skip` faute de données (`admin-declaration-detail` sans ligne,
+    # `referent-detail` sans référent publié). Un job annulé sur timeout emporte le rapport ET
+    # l'artefact, ce que `continue-on-error` n'absorbe pas — d'où la marge.
     #
     # Un run SANS registre commité paie l'adjudication complète, et c'est le cas du premier :
     # ce budget est calé sur lui, pas sur les suivants, qui ne paient que le reliquat.
@@ -410,7 +414,7 @@ jobs:
       # « démarrer l'app » ici.
       #
       # `continue-on-error` sur CETTE step seulement : un écran qui coince ne doit pas coûter
-      # le rapport et l'artefact des 34 autres. Une panne d'infra, elle, reste rouge.
+      # le rapport et l'artefact des 36 autres. Une panne d'infra, elle, reste rouge.
       - name: ultra11y — balayage RGAA des pages (Playwright)
         continue-on-error: true
         timeout-minutes: 25
@@ -420,7 +424,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.29.0
+        uses: maxgfr/ultra11y@v5.34.2
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -434,10 +438,38 @@ jobs:
           graph: "true"
           standard: rgaa
           lang: fr
-          # TOUTE la grille de jugement passe par le modèle, à chaque run. Il n'y a plus de
-          # registre à rejouer avant lui, donc plus de reliquat : ce qu'il ne tranche pas reste
-          # « à évaluer », et `require-decided: pages` plus bas fait rougir le job en le nommant.
+          # TOUTE la grille de jugement passe par le modèle — moins ce que le registre rejoue.
+          # Chaque entrée du registre repasse par la même porte, sur l'évidence re-dérivée de
+          # l'audit du moment ; ce qui n'est pas rejoué est ce qui est payé. Ce que personne ne
+          # tranche reste « à évaluer », et `require-decided: pages` plus bas fait rougir le job
+          # en le nommant.
           adjudicate: agent
+          # ON RESTE SUR LE RUNNER `action`, ET C'EST UN CHOIX, PAS UN OUBLI.
+          #
+          # 5.30.0 a ouvert un second chemin pour ce tier : `adjudicate-runner: cli` fait
+          # spawner au moteur un `claude -p` lui-même, et `adjudicate-grain: criterion` lui fait
+          # juger un critère par appel. Évalué ici, écarté — trois raisons.
+          #
+          #   1. CE QU'IL VEND, ON L'A DÉJÀ. Son argument est de lever la liste d'événements
+          #      autorisés de `claude-code-action`, donc de rendre le tier disponible sur
+          #      `push`. Ce dépôt a contourné cette restriction par le cron sur `alpha` (voir
+          #      l'en-tête). Il n'y a rien à acheter.
+          #   2. LE DÉFAUT DE L'ACTION EST CASSÉ. `adjudicate-grain` vaut `worklist` par défaut
+          #      et l'Action le passe tel quel à `judge --grain`, qui n'accepte que `batch` ou
+          #      `criterion` (`src/cli.ts:3560`). `runner: cli` au grain par défaut sort en 2
+          #      sans appeler un modèle : 40 min de CI, 0 $, et un rouge sur `require-decided`
+          #      avec toute la grille « à évaluer ». Seul le couple `cli` + `criterion` marche.
+          #   3. IL ÉCHANGE UN PLAFOND QUI MARCHE CONTRE AUCUN. `adjudicate-max-turns` ci-dessous
+          #      est VIVANT sur ce runner-ci. Sous `cli` il est muet — `--max-turns` n'est pas un
+          #      flag du CLI, qui avale un flag inconnu sans un mot. Et `adjudicate-budget-usd`
+          #      ne le remplace pas : il est poussé sur l'argv de CHAQUE `claude -p`
+          #      (`src/agent-cli.ts:170`) avec jusqu'à 4 tentatives, donc le pire cas est
+          #      `critères × passes × tentatives × plafond`. Le seul plafond de run qui
+          #      resterait serait `timeout-minutes`, soit cinq heures de modèle.
+          #
+          # S'ajoute le coût en temps : un appel par critère sur 37 pages allonge le job sans
+          # borne connue, là où les trois étapes dépliées ont une durée mesurée (39 min 25 s).
+          #
           # TROIS PASSES, et un budget de tours large. Mesuré : l'adjudicateur s'est arrêté à
           # 22 tours sur 228, sans erreur, en laissant 42 critères `verdict: null` — une passe
           # unique n'a aucun moyen d'y revenir, et le job finit vert sur une grille que
@@ -458,8 +490,29 @@ jobs:
           # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
           # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
           adjudicate-model: claude-sonnet-5
-          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué
-          # au run suivant s'il est commité. Voir l'en-tête — rien ici ne le commite.
+          # L'EFFORT, ET C'EST LE LEVIER QUI N'EST PAS LE MODÈLE (5.34.0).
+          #
+          # Ce qui arrive à ce tier est, par construction, ce qu'aucun moteur n'a pu décider :
+          # pertinence d'une alternative, intitulé de lien en contexte, ordre de lecture. La
+          # difficulté n'est donc pas de choisir entre deux réponses, c'est de LIRE l'évidence
+          # sans se tromper — et c'est exactement là qu'un run mesuré ici a échoué.
+          #
+          # Mesuré sur le run 32782282651 (5.33.1, effort par défaut) : la porte a refusé 13
+          # verdicts à la première passe, 12 à la deuxième, 2 à la troisième. Aucun refus n'était
+          # un désaccord sur le fond — c'étaient des citations fabriquées, des snippets retapés
+          # au lieu d'être copiés, et des chemins préfixés `packages/app/` alors que le
+          # `working-directory` EST `packages/app`. Trois critères en sont morts, le job est
+          # sorti rouge à 103/106.
+          #
+          # `high` et pas plus : le tier est facturé au critère, et l'amont a montré que monter
+          # le MODÈLE ne rattrapait pas ces défauts-là. C'est du soin de lecture qu'il faut, pas
+          # de la puissance. Les niveaux sont low, medium, high, xhigh, max — et une valeur hors
+          # liste est refusée par l'Action plutôt que transmise (le CLI avalerait un niveau
+          # inconnu en silence, exactement comme il avale un flag inconnu).
+          adjudicate-effort: high
+          # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
+          # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
+          # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
           ledger: .ultra11y/verdicts/rgaa.json
           # La gate ré-audite la source : un verdict de modèle ne peut pas faire rougir la CI.
           gate-adjudicated: "false"
@@ -486,7 +539,7 @@ jobs:
           # violation de rendu sans jamais pouvoir conclure à la conformité. Et un verdict
           # d'agent est enregistré à la granularité du référentiel, donc il traverse la
           # projection par page : ce que l'adjudication ferme pour le run, elle le ferme sur les
-          # 39 pages.
+          # 37 pages capturées.
           #
           # Mesuré en amont sur la fixture RGAA, balayée et capturée : 37 critères « à évaluer »
           # pour le run, et exactement les mêmes 37 sur chacune des pages. `pages` n'est donc
@@ -501,14 +554,30 @@ jobs:
           # une question différente, un cran en amont : le balayage a-t-il seulement regardé
           # les 24 pages que `.ultra11yrc.json` déclare ? Mesuré sur le run 32135566667 : une
           # sonde suspendue a tué deux specs, le groupe série en a emporté quinze autres, et le
-          # rapport RGAA est sorti avec 20 pages sur 35 — vert, sans nommer une seule des
-          # manquantes. Un rapport plus court se lit exactement comme un rapport complet.
+          # rapport RGAA est sorti amputé — 20 pages seulement, vert, sans nommer une seule
+          # des manquantes. Un rapport plus court se lit exactement comme un rapport complet.
           #
           # Elle se combine avec le `continue-on-error` du balayage plus haut, elle ne le
-          # contredit pas : un écran qui coince ne doit pas coûter le rapport des 23 autres,
+          # contredit pas : un écran qui coince ne doit pas coûter le rapport des autres,
           # mais il doit coûter le vert. La step garde donc son masque, et la perte devient
           # visible ici, nommément.
           require-sample: "true"
+          # LES DEUX CRITÈRES QUE PERSONNE ICI NE PEUT TRANCHER, NOMMÉS PLUTÔT QUE TUS.
+          #
+          # 13.3 et 13.4 portent sur le classeur `referents-egapro-dreets.xlsx` en
+          # téléchargement, et leurs tests exigent de l'OUVRIR : structure interne et en-têtes
+          # pour 13.3, parité d'information avec /referents pour 13.4. Aucun tier du dispositif
+          # ne le peut — le moteur ne voit que l'URL, le balayage ne capture que la page qui la
+          # porte, l'adjudicateur n'a ni shell ni lecteur xlsx. Ce n'est pas un critère sans
+          # sujet, c'est un critère sans instrument, et c'est l'adjudicateur lui-même qui l'a
+          # dit, en les rendant `manual / undecidable` avec sa justification.
+          #
+          # Ce n'est PAS une tolérance, et c'est ce qui distingue cette liste d'un pourcentage :
+          # chaque entrée porte sa raison, la porte refuse une entrée sans raison, et elle
+          # refuse aussi une entrée dont le critère a depuis été tranché — une dispense ne
+          # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
+          # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
+          undecidable-file: .ultra11y/undecidable.json
           # PAS DE COMMENTAIRE : ni `schedule` ni `workflow_dispatch` n'ont de PR où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
