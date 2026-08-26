@@ -1,0 +1,17 @@
+.table {
+	table-layout: fixed;
+
+	th,
+	td {
+		text-align: center;
+	}
+
+	> thead > tr > th:first-child,
+	> tbody > tr > th {
+		text-align: left;
+	}
+
+	> tbody > tr > td {
+		font-weight: 700;
+	}
+}

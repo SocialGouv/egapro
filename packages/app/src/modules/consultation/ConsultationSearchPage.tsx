@@ -1,13 +1,16 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
-import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
-import { PUBLIC_PAGE_SIZE } from "./constants";
+import styles from "./ConsultationSearchPage.module.scss";
+import { DownloadDataModal } from "./DownloadDataModal";
+import { PageSizeSelect } from "./PageSizeSelect";
 import { PublicSearchForm } from "./PublicSearchForm";
 import { SearchPagination } from "./SearchPagination";
 import { SearchResultItem } from "./SearchResultItem";
 import {
-	hasSearchCriteria,
+	type ConsultationSearchParams,
 	parseConsultationSearchParams,
+	searchHref,
 	toPublicSearchInput,
 } from "./searchParams";
 
@@ -15,120 +18,109 @@ type Props = {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function exportHref(
-	params: ReturnType<typeof parseConsultationSearchParams>,
-	format: "csv" | "json" | "xlsx",
-) {
-	const input = toPublicSearchInput(params);
-	const query = new URLSearchParams({ format });
-	for (const [key, value] of Object.entries(input)) {
-		if (key !== "limit" && key !== "offset" && value !== undefined) {
-			query.set(key, String(value));
-		}
-	}
-	return `/api/public/declarations/export?${query.toString()}`;
+function resultsLabel(count: number): string {
+	const formatted = count.toLocaleString("fr-FR");
+	return count > 1
+		? `${formatted} entreprises déclarantes`
+		: `${formatted} entreprise déclarante`;
+}
+
+function redirectToLastPage(
+	params: ConsultationSearchParams,
+	totalPages: number,
+): never {
+	redirect(searchHref(params, { page: totalPages }));
 }
 
 export async function ConsultationSearchPage({ searchParams }: Props) {
 	const params = parseConsultationSearchParams(await searchParams);
-	const hasCriteria = hasSearchCriteria(params);
-	const result = hasCriteria
-		? await searchPublicDeclarations(toPublicSearchInput(params))
-		: null;
-	const totalPages = result ? Math.ceil(result.count / PUBLIC_PAGE_SIZE) : 0;
-	if (result && totalPages > 0 && params.page > totalPages) {
-		const query = new URLSearchParams();
-		for (const [key, value] of Object.entries(params)) {
-			if (key !== "page" && value !== "" && value !== undefined) {
-				query.set(key, String(value));
-			}
-		}
-		query.set("page", String(totalPages));
-		redirect(`/index-egapro/recherche?${query.toString()}`);
+	const result = await searchPublicDeclarations(toPublicSearchInput(params));
+	const totalPages = Math.ceil(result.count / params.limit);
+	if (totalPages > 0 && params.page > totalPages) {
+		redirectToLastPage(params, totalPages);
 	}
+
 	return (
 		<main className="fr-container fr-py-6w" id="content" tabIndex={-1}>
-			<Breadcrumb
-				items={[
-					{ label: "Accueil", href: "/" },
-					{ label: "Consulter les résultats" },
-				]}
-			/>
-			<h1 className="fr-h1 fr-mt-4w">
-				Consulter les résultats d’égalité professionnelle
-			</h1>
-			<p className="fr-text--lead fr-mb-5w">
-				Recherchez une entreprise par son SIREN, sa raison sociale ou sa
-				localisation et consultez ses indicateurs de rémunération publiés.
-			</p>
-			<PublicSearchForm values={params} />
-
-			{!hasCriteria && (
-				<div className="fr-callout fr-icon-information-line fr-mt-5w">
-					<h2 className="fr-callout__title">Commencez votre recherche</h2>
-					<p className="fr-callout__text">
-						Saisissez un SIREN ou un nom, ou utilisez un des filtres proposés.
+			<div className="fr-grid-row fr-grid-row--gutters">
+				<div className="fr-col-12 fr-col-md-8">
+					<h1 className="fr-mb-3w">
+						Rechercher une entreprise et consulter ses résultats
+					</h1>
+					<p className="fr-mb-2w">
+						Recherchez une entreprise par son nom ou son numéro SIREN (9
+						chiffres).
 					</p>
+					<PublicSearchForm values={params} />
 				</div>
-			)}
-			{result && result.count === 0 && (
-				<div className="fr-alert fr-alert--info fr-mt-5w">
-					<h2 className="fr-alert__title">
-						Aucune entreprise trouvée pour ces critères
-					</h2>
-					<p>
-						Vérifiez le SIREN ou élargissez votre recherche en retirant un
-						filtre.
-					</p>
-				</div>
-			)}
-			{result && result.count > 0 && (
-				<section aria-labelledby="results-heading" className="fr-mt-6w">
-					<div className="fr-grid-row fr-grid-row--middle fr-mb-2w">
-						<h2 className="fr-h3 fr-col" id="results-heading">
-							{result.count.toLocaleString("fr-FR")} entreprise
-							{result.count > 1 ? "s" : ""} trouvée{result.count > 1 ? "s" : ""}
-						</h2>
-						<div className="fr-col-auto">
-							<a
-								className="fr-link fr-icon-download-line fr-link--icon-left"
-								href={exportHref(params, "xlsx")}
-							>
-								Télécharger les résultats (.xlsx)
-							</a>
-						</div>
-					</div>
-					<div>
-						{result.data.map((declaration) => (
-							<SearchResultItem
-								declaration={declaration}
-								key={declaration.siren}
-							/>
-						))}
-					</div>
-					<SearchPagination
-						currentPage={params.page}
-						params={params}
-						totalPages={totalPages}
-					/>
-				</section>
-			)}
-			<p className="fr-text--sm fr-text-mention--grey fr-mt-6w">
-				Source : données issues des déclarations EgaPro et des calculs GIP-MDS.
-				L’indicateur G et les avis CSE ne sont jamais publiés.
-			</p>
-			<p className="fr-text--sm">
-				<a className="fr-link" href="/api/public/docs">
-					Documentation de l’API publique
-				</a>
-				{" · "}
-				<a
-					className="fr-link fr-icon-rss-line fr-link--icon-left"
-					href="/index-egapro/actualites.xml"
+				<div
+					aria-hidden="true"
+					className="fr-hidden fr-unhidden-md fr-col-md-4 fr-px-6w"
 				>
-					Flux RSS
+					<Image
+						alt=""
+						height={228}
+						src="/assets/images/home/search-illustration.svg"
+						unoptimized
+						width={212}
+					/>
+				</div>
+			</div>
+
+			<section aria-labelledby="results-heading" className="fr-mt-6w">
+				<div className={styles.resultsHeader}>
+					<h2 className={styles.resultsTitle} id="results-heading">
+						{resultsLabel(result.count)}
+					</h2>
+					<DownloadDataModal
+						declarationsHref="/api/public/declarations/export?format=csv"
+						representationsHref="/api/public/representations/export?format=csv"
+					/>
+				</div>
+
+				{result.count === 0 ? (
+					<div className="fr-alert fr-alert--info">
+						<h3 className="fr-alert__title">
+							Aucune entreprise trouvée pour ces critères
+						</h3>
+						<p>
+							Vérifiez le numéro SIREN ou élargissez votre recherche en retirant
+							un filtre.
+						</p>
+					</div>
+				) : (
+					<>
+						<div>
+							{result.data.map((declaration) => (
+								<SearchResultItem
+									declaration={declaration}
+									key={declaration.siren}
+								/>
+							))}
+						</div>
+						<div className={styles.listFooter}>
+							<PageSizeSelect params={params} />
+							<SearchPagination
+								currentPage={params.page}
+								params={params}
+								totalPages={totalPages}
+							/>
+						</div>
+					</>
+				)}
+			</section>
+
+			<div className="fr-callout fr-mt-6w">
+				<h2 className="fr-callout__title">
+					Vous préférez une vue d’ensemble ?
+				</h2>
+				<p className="fr-callout__text">
+					Explorez les tendances nationales par taille d’entreprise.
+				</p>
+				<a className="fr-btn" href="/stats">
+					Statistiques générales
 				</a>
-			</p>
+			</div>
 		</main>
 	);
 }

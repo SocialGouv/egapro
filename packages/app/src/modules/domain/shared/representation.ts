@@ -3,6 +3,8 @@ import type { DeclarationStatus } from "../types";
 export const REPRESENTATION_TARGET_INITIAL = 30;
 export const REPRESENTATION_TARGET_RAISED = 40;
 export const REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029;
+/** First campaign year the Rixain quota is enforceable (declaration due 1 March). */
+export const REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR = 2026;
 export const REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000;
 export const REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3;
 
@@ -19,6 +21,20 @@ export function getRepresentationTarget(campaignYear: number): number {
 	return campaignYear >= REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR
 		? REPRESENTATION_TARGET_RAISED
 		: REPRESENTATION_TARGET_INITIAL;
+}
+
+/**
+ * Regulatory notice shown under the representation gaps. The raised target is
+ * announced only while it is still ahead — once the campaign has reached it,
+ * repeating "attendus en 2029" would describe the present as the future.
+ */
+export function getRepresentationThresholdNotice(campaignYear: number): string {
+	const target = getRepresentationTarget(campaignYear);
+	const since = `1ᵉʳ mars ${REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR}`;
+	const base = `Seuil réglementaire : ${target} % (Loi Rixain – obligation depuis le ${since}`;
+	return target >= REPRESENTATION_TARGET_RAISED
+		? `${base})`
+		: `${base}, ${REPRESENTATION_TARGET_RAISED} % attendus en ${REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR})`;
 }
 
 export function computeRepresentationVerdict(

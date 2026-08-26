@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { ConsultationSearchPage } from "~/modules/consultation";
 
 export const metadata: Metadata = {
-	title: "Consulter les résultats d’égalité professionnelle",
+	title: "Rechercher une entreprise et consulter ses résultats",
 	description:
-		"Recherchez une entreprise et consultez ses indicateurs publics d’égalité professionnelle femmes-hommes.",
+		"Recherchez une entreprise par son nom ou son numéro SIREN et consultez ses indicateurs publics d’égalité professionnelle femmes-hommes.",
 	alternates: { canonical: "/index-egapro/recherche" },
 };
 

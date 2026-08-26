@@ -266,11 +266,11 @@ describe("publicSearchInputSchema", () => {
 	it("applies default limit and offset", () => {
 		const parsed = publicSearchInputSchema.parse({});
 
-		expect(parsed.limit).toBe(50);
+		expect(parsed.limit).toBe(10);
 		expect(parsed.offset).toBe(0);
 	});
 
-	it("accepts the optional filters", () => {
+	it("reads a facet given once as a single-entry list", () => {
 		const parsed = publicSearchInputSchema.parse({
 			q: "acme",
 			region: "Île-de-France",
@@ -283,13 +283,49 @@ describe("publicSearchInputSchema", () => {
 
 		expect(parsed).toEqual({
 			q: "acme",
-			region: "Île-de-France",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["Île-de-France"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2024,
 			limit: 50,
 			offset: 20,
 		});
+	});
+
+	it("keeps every value of a repeated facet", () => {
+		const parsed = publicSearchInputSchema.parse({
+			region: ["11", "84"],
+			workforceRanges: ["<50", "1000+"],
+			limit: 10,
+		});
+
+		expect(parsed.region).toEqual(["11", "84"]);
+		expect(parsed.workforceRanges).toEqual(["<50", "1000+"]);
+	});
+
+	it("drops blank facet entries instead of filtering on them", () => {
+		const parsed = publicSearchInputSchema.parse({
+			region: ["", "  ", "11"],
+			naf: [""],
+			limit: 10,
+		});
+
+		expect(parsed.region).toEqual(["11"]);
+		expect(parsed.naf).toBeUndefined();
+	});
+
+	it("refuses a facet longer than any real vocabulary", () => {
+		const flood = Array.from({ length: 201 }, (_, index) => `r${index}`);
+
+		expect(publicSearchInputSchema.safeParse({ region: flood }).success).toBe(
+			false,
+		);
+	});
+
+	it("rejects a workforce bracket that is not one of the observatory keys", () => {
+		expect(
+			publicSearchInputSchema.safeParse({ workforceRanges: ["12-34"] }).success,
+		).toBe(false);
 	});
 
 	it("rejects a limit above 100", () => {

@@ -262,7 +262,7 @@ describe("public representation services (real Postgres)", () => {
 			]);
 
 		const byRegion = await searchPublicRepresentations({
-			region: "11",
+			region: ["11"],
 			limit: 10,
 			offset: 0,
 		});
@@ -272,14 +272,14 @@ describe("public representation services (real Postgres)", () => {
 		]);
 
 		const byDepartement = await searchPublicRepresentations({
-			departement: "69",
+			departement: ["69"],
 			limit: 10,
 			offset: 0,
 		});
 		expect(byDepartement.data.map((d) => d.siren)).toEqual([SIREN_HIDDEN]);
 
 		const byNaf = await searchPublicRepresentations({
-			naf: "70.10Z",
+			naf: ["70.10Z"],
 			limit: 10,
 			offset: 0,
 		});

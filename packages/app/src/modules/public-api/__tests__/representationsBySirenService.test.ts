@@ -50,6 +50,7 @@ vi.mock("drizzle-orm", () => ({
 	desc: (col: unknown) => ({ desc: col }),
 	eq: (a: unknown, b: unknown) => ({ eq: [a, b] }),
 	ilike: (a: unknown, b: unknown) => ({ ilike: [a, b] }),
+	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) =>
 		mocks.orReturnsUndefined ? undefined : { or: args },
 }));
@@ -181,9 +182,9 @@ describe("searchPublicRepresentations", () => {
 
 		await searchPublicRepresentations({
 			q: "acme",
-			region: "Île-de-France",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["Île-de-France", "Bretagne"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2026,
 			limit: 10,
 			offset: 0,
@@ -198,9 +199,9 @@ describe("searchPublicRepresentations", () => {
 						{ ilike: ["rd.siren", "%acme%"] },
 					],
 				},
-				{ eq: ["c.region", "Île-de-France"] },
-				{ eq: ["c.departmentCode", "75"] },
-				{ eq: ["c.nafCode", "62.01Z"] },
+				{ inArray: ["c.region", ["Île-de-France", "Bretagne"]] },
+				{ inArray: ["c.departmentCode", ["75"]] },
+				{ inArray: ["c.nafCode", ["62.01Z"]] },
 				{ eq: ["rd.year", 2026] },
 			],
 		});

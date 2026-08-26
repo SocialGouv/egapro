@@ -26,7 +26,29 @@
 				"sources": [
 					"src/app/index-egapro/recherche/page.tsx",
 					"src/modules/consultation/ConsultationSearchPage.tsx",
-					"src/modules/consultation/PublicSearchForm.tsx"
+					"src/modules/consultation/PublicSearchForm.tsx",
+					"src/modules/consultation/SearchResultItem.tsx",
+					"src/modules/consultation/SearchPagination.tsx",
+					"src/modules/consultation/DownloadDataModal.tsx",
+					"src/modules/shared/MultiSelectField.tsx"
+				]
+			},
+			{
+				"id": "consultation-entreprise",
+				"name": "Consultation publique — fiche entreprise",
+				"url": "http://localhost:3000/index-egapro/entreprise/998900001",
+				"sources": [
+					"src/app/index-egapro/entreprise/[siren]/page.tsx",
+					"src/modules/consultation/CompanyConsultationPage.tsx",
+					"src/modules/consultation/CompanyHeader.tsx",
+					"src/modules/consultation/RemunerationTab.tsx",
+					"src/modules/consultation/RepresentationTab.tsx",
+					"src/modules/consultation/PayGapSection.tsx",
+					"src/modules/consultation/QuartileSection.tsx",
+					"src/modules/consultation/YearSelector.tsx",
+					"src/modules/shared/IndicatorCard.tsx",
+					"src/modules/shared/DataDetailsAccordion.tsx",
+					"src/modules/shared/GenderBar.tsx"
 				]
 			},
 			{

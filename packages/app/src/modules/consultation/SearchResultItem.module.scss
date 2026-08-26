@@ -1,19 +1,55 @@
 .item {
+	position: relative;
+	padding: 1.5rem 1rem;
 	border-top: 1px solid var(--border-default-grey);
-	padding: 1.5rem 0;
+
+	&:last-child {
+		border-bottom: 1px solid var(--border-default-grey);
+	}
+
+	&:hover {
+		background: var(--background-default-grey-hover);
+	}
+
+	&:active {
+		background: var(--background-default-grey-active);
+	}
 }
 
-.item:last-child {
-	border-bottom: 1px solid var(--border-default-grey);
+.title {
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.5rem;
 }
 
-.details {
+.link {
+	background-image: none;
+
+	// Stretch the title link over the whole card so the row is clickable, as in
+	// the Figma hover state, without nesting the rest of the content in a link.
+	&::after {
+		position: absolute;
+		content: "";
+		inset: 0;
+	}
+}
+
+.facts {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.5rem 1.5rem;
+	gap: 0.25rem 1.5rem;
 	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.5rem;
 }
 
-.details span {
+.fact {
+	color: var(--text-mention-grey);
 	font-variant-numeric: tabular-nums;
+}
+
+.value {
+	color: var(--text-title-grey);
+	font-weight: 500;
 }

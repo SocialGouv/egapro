@@ -1,43 +1,78 @@
 import { describe, expect, it } from "vitest";
 import {
-	hasSearchCriteria,
 	parseConsultationSearchParams,
+	searchHref,
 	toPublicSearchInput,
 } from "./searchParams";
 
-describe("consultation search params", () => {
-	it("normalizes filters and pagination for the public service", () => {
+describe("parseConsultationSearchParams", () => {
+	it("reads a facet whether it appears once, several times, or not at all", () => {
 		const params = parseConsultationSearchParams({
-			q: "  Acme  ",
-			city: "Paris",
-			region: "Île-de-France",
-			departement: "75",
-			naf: "J",
-			workforce: "100-249",
-			year: "2024",
-			sort: "name",
-			page: "3",
+			region: "11",
+			departement: ["75", "92"],
 		});
 
-		expect(toPublicSearchInput(params)).toEqual({
-			q: "Acme",
-			city: "Paris",
-			region: "Île-de-France",
-			departement: "75",
-			naf: "J",
-			workforceMin: 100,
-			workforceMax: 249,
-			year: 2024,
-			sort: "name",
-			limit: 50,
-			offset: 100,
-		});
+		expect(params.region).toEqual(["11"]);
+		expect(params.departement).toEqual(["75", "92"]);
+		expect(params.naf).toEqual([]);
 	});
 
-	it("does not query until at least one criterion is present", () => {
-		expect(hasSearchCriteria(parseConsultationSearchParams({}))).toBe(false);
-		expect(hasSearchCriteria(parseConsultationSearchParams({ naf: "C" }))).toBe(
-			true,
+	it("drops blanks so an empty facet never becomes a filter", () => {
+		const params = parseConsultationSearchParams({ region: ["", "  ", "11"] });
+
+		expect(params.region).toEqual(["11"]);
+	});
+
+	it("drops an unknown workforce bracket rather than widening the search", () => {
+		const params = parseConsultationSearchParams({
+			workforceRanges: ["50-99", "gigantesque"],
+		});
+
+		expect(params.workforceRanges).toEqual(["50-99"]);
+	});
+
+	it("falls back to the defaults on unusable page and limit values", () => {
+		const params = parseConsultationSearchParams({
+			page: "-3",
+			limit: "7",
+		});
+
+		expect(params.page).toBe(1);
+		expect(params.limit).toBe(10);
+	});
+
+	it("keeps a page size the selector actually offers", () => {
+		expect(parseConsultationSearchParams({ limit: "50" }).limit).toBe(50);
+	});
+});
+
+describe("toPublicSearchInput", () => {
+	it("omits empty facets and derives the offset from the page size", () => {
+		const input = toPublicSearchInput(
+			parseConsultationSearchParams({ page: "3", limit: "25", region: "11" }),
 		);
+
+		expect(input.region).toEqual(["11"]);
+		expect(input.departement).toBeUndefined();
+		expect(input.limit).toBe(25);
+		expect(input.offset).toBe(50);
+	});
+});
+
+describe("searchHref", () => {
+	it("repeats a facet key per value and hides the defaults", () => {
+		const href = searchHref(
+			parseConsultationSearchParams({ region: ["11", "84"], q: "acme" }),
+		);
+
+		expect(href).toBe("/index-egapro/recherche?q=acme&region=11&region=84");
+	});
+
+	it("carries the criteria over to another page", () => {
+		const href = searchHref(parseConsultationSearchParams({ naf: "C" }), {
+			page: 4,
+		});
+
+		expect(href).toBe("/index-egapro/recherche?naf=C&page=4");
 	});
 });

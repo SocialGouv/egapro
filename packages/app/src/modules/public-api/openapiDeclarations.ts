@@ -263,6 +263,22 @@ const declarationSearchExtras = [
 		schema: { type: "integer", minimum: 0 },
 	},
 	{
+		name: "workforceRanges",
+		in: "query",
+		required: false,
+		description:
+			"Filtre par tranche d'effectif de l'observatoire. Répétable : plusieurs tranches sont combinées en « ou ».",
+		explode: true,
+		style: "form",
+		schema: {
+			type: "array",
+			items: {
+				type: "string",
+				enum: ["<50", "50-99", "100-249", "250-999", "1000+"],
+			},
+		},
+	},
+	{
 		name: "sort",
 		in: "query",
 		required: false,
@@ -281,16 +297,7 @@ function declarationSearchParameters() {
 			description:
 				"Filtre par année de déclaration. Doit être une année dont la date de rendu public est atteinte.",
 			example: 2026,
-		}).map((parameter) =>
-			parameter.name === "limit"
-				? {
-						...parameter,
-						description:
-							"Nombre de résultats par page. Entre 1 et 100. Défaut : 50.",
-						schema: { ...parameter.schema, default: 50 },
-					}
-				: parameter,
-		),
+		}),
 		...declarationSearchExtras,
 	];
 }

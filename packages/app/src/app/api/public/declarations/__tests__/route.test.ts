@@ -51,7 +51,7 @@ describe("GET /api/public/declarations", () => {
 		await GET(request());
 
 		expect(mocks.searchPublicDeclarations).toHaveBeenCalledWith(
-			expect.objectContaining({ limit: 50, offset: 0 }),
+			expect.objectContaining({ limit: 10, offset: 0 }),
 		);
 	});
 
@@ -67,9 +67,9 @@ describe("GET /api/public/declarations", () => {
 		expect(mocks.searchPublicDeclarations).toHaveBeenCalledWith({
 			q: "acme",
 			city: "Paris",
-			region: "11",
-			departement: "75",
-			naf: "J",
+			region: ["11"],
+			departement: ["75"],
+			naf: ["J"],
 			workforceMin: 50,
 			workforceMax: 249,
 			year: 2023,
@@ -145,9 +145,9 @@ describe("GET /api/public/declarations", () => {
 				metadata: {
 					q: "acme",
 					city: null,
-					region: "11",
-					departement: null,
-					naf: null,
+					region: ["11"],
+					departement: [],
+					naf: [],
 					sort: null,
 					year: null,
 				},
@@ -165,9 +165,9 @@ describe("GET /api/public/declarations", () => {
 				metadata: {
 					q: "acme",
 					city: null,
-					region: "11",
-					departement: "75",
-					naf: "62.01Z",
+					region: ["11"],
+					departement: ["75"],
+					naf: ["62.01Z"],
 					sort: null,
 					year: "2023",
 				},
@@ -185,9 +185,9 @@ describe("GET /api/public/declarations", () => {
 				metadata: {
 					q: null,
 					city: null,
-					region: null,
-					departement: null,
-					naf: null,
+					region: [],
+					departement: [],
+					naf: [],
 					sort: null,
 					year: null,
 				},

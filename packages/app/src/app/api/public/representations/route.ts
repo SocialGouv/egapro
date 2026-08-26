@@ -28,9 +28,9 @@ export const GET = withAuditedRoute(
 			return {
 				metadata: {
 					q: q ? q.slice(0, 200) : null,
-					region: url.searchParams.get("region") ?? null,
-					departement: url.searchParams.get("departement") ?? null,
-					naf: url.searchParams.get("naf") ?? null,
+					region: url.searchParams.getAll("region"),
+					departement: url.searchParams.getAll("departement"),
+					naf: url.searchParams.getAll("naf"),
 					year: url.searchParams.get("year") ?? null,
 				},
 			};
@@ -51,11 +51,13 @@ async function publicRepresentationsHandler(
 		const rawYear = sp.get("year");
 		const rawLimit = sp.get("limit");
 		const rawOffset = sp.get("offset");
+		// Facets are repeatable (`?region=A&region=B`); getAll also returns the
+		// single-value form the documented API has always accepted.
 		const rawInput = {
 			q: sp.get("q") ?? undefined,
-			region: sp.get("region") ?? undefined,
-			departement: sp.get("departement") ?? undefined,
-			naf: sp.get("naf") ?? undefined,
+			region: sp.getAll("region"),
+			departement: sp.getAll("departement"),
+			naf: sp.getAll("naf"),
 			year: rawYear ? Number(rawYear) : undefined,
 			limit: rawLimit ? Number(rawLimit) : undefined,
 			offset: rawOffset ? Number(rawOffset) : undefined,

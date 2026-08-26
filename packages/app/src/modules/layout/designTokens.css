@@ -1,0 +1,27 @@
+/*
+ * EgaPro design tokens.
+ *
+ * DSFR ships every colour this product needs except the two that plot women and
+ * men in the observatory charts. The Figma "Observatoire" picks them from the
+ * DSFR option palette ($blue-ecume-200 / $blue-cumulus-main-526-hover); neither
+ * exists as a DSFR decision custom property, so they are declared once here and
+ * consumed as var(--egapro-chart-*) everywhere else. This file is the single
+ * place in the app where a raw colour value is allowed — SCSS modules must use
+ * DSFR custom properties or these tokens.
+ *
+ * The pair is chosen for contrast, not decoration: adjacent segments of a
+ * stacked bar carry meaning, so WCAG 2.2 SC 1.4.11 asks for 3:1 between them
+ * and against the page. The dark-theme values swap the roles rather than
+ * reusing the light ones, which would sink the dark navy into the background.
+ *
+ * Mirrors the chart-women / chart-men entries of DESIGN.md.
+ */
+:root {
+	--egapro-chart-women: #273962;
+	--egapro-chart-men: #74a5ec;
+}
+
+:root[data-fr-theme="dark"] {
+	--egapro-chart-women: #bfccfb;
+	--egapro-chart-men: #417dc4;
+}

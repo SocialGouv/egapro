@@ -1,6 +1,6 @@
 import { getReferencePeriod } from "~/modules/domain";
 
-import { TooltipButton } from "./TooltipButton";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 
 type Props = {
 	year: number;

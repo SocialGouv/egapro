@@ -1,3 +1,4 @@
+import { FACET_MAX_VALUES } from "./schemas";
 export const errorSchema = {
 	type: "object",
 	properties: {
@@ -114,25 +115,46 @@ export function buildSearchParameters(year: {
 			name: "region",
 			in: "query",
 			required: false,
-			description: "Filtre par code de région (ex. `11` pour Île-de-France).",
+			description:
+				"Filtre par code de région (ex. `11` pour Île-de-France). Répétable : `?region=A&region=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "11",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "departement",
 			in: "query",
 			required: false,
-			description: "Filtre par code département (ex. `75` pour Paris).",
+			description:
+				"Filtre par code département (ex. `75` pour Paris). Répétable : `?departement=A&departement=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "75",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "naf",
 			in: "query",
 			required: false,
-			description: "Filtre par code NAF (ex. `26.51A`).",
+			description:
+				"Filtre par code NAF (ex. `26.51A`). Répétable : `?naf=A&naf=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "26.51A",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "year",

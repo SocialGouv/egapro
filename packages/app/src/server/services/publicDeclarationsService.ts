@@ -7,11 +7,18 @@ import {
 	desc,
 	eq,
 	ilike,
+	inArray,
 	isNotNull,
 	or,
+	type SQL,
 	sql,
 } from "drizzle-orm";
 
+import {
+	NAF_SECTION_DIVISIONS,
+	type NafSection,
+	OBSERVATORY_WORKFORCE_RANGES,
+} from "~/modules/domain";
 import {
 	type PublicSearchInput,
 	type PublicSearchResultDTO,
@@ -31,32 +38,95 @@ import {
 } from "~/server/db/schema";
 
 export function nafSectionCondition(section: string) {
-	const ranges: Record<string, [number, number]> = {
-		A: [1, 3],
-		B: [5, 9],
-		C: [10, 33],
-		D: [35, 35],
-		E: [36, 39],
-		F: [41, 43],
-		G: [45, 47],
-		H: [49, 53],
-		I: [55, 56],
-		J: [58, 63],
-		K: [64, 66],
-		L: [68, 68],
-		M: [69, 75],
-		N: [77, 82],
-		O: [84, 84],
-		P: [85, 85],
-		Q: [86, 88],
-		R: [90, 93],
-		S: [94, 96],
-		T: [97, 98],
-		U: [99, 99],
-	};
-	const range = ranges[section.toUpperCase()];
+	const range = NAF_SECTION_DIVISIONS[section.toUpperCase() as NafSection];
 	if (!range) return ilike(companies.nafCode, `${section}%`);
 	return sql<number>`substring(${companies.nafCode} from 1 for 2)::integer between ${range[0]} and ${range[1]}`;
+}
+
+/**
+ * Companies flagged `statutDiffusion = 'N'` keep their identity hidden, so any
+ * filter that reads an identity field must exclude them rather than leak a
+ * match through the filter itself.
+ */
+const diffusibleIdentityCondition = sql`${companies.statutDiffusion} IS DISTINCT FROM 'N'`;
+
+export type PublicDeclarationFacets = Pick<
+	PublicSearchInput,
+	| "city"
+	| "region"
+	| "departement"
+	| "naf"
+	| "workforceMin"
+	| "workforceMax"
+	| "workforceRanges"
+>;
+
+/**
+ * Facet conditions shared by the search endpoint and the export endpoint, so a
+ * download always covers exactly the result set the user was looking at.
+ *
+ * Repeated values inside one facet are OR-ed (a company in either region
+ * matches); different facets are AND-ed by the caller. `year` is deliberately
+ * absent: search falls back to each company's latest publishable year when no
+ * year is given, while the export spans every year.
+ */
+export function publicDeclarationFacetConditions(
+	facets: PublicDeclarationFacets,
+): SQL[] {
+	const conditions: SQL[] = [];
+
+	if (facets.city) {
+		const cityFilter = and(
+			diffusibleIdentityCondition,
+			ilike(companies.city, `%${facets.city}%`),
+		);
+		if (cityFilter) conditions.push(cityFilter);
+	}
+
+	if (facets.region?.length) {
+		// The facet accepts both the INSEE code and the label, as the column pair
+		// is populated inconsistently across import sources.
+		const regionFilter = or(
+			inArray(companies.regionCode, facets.region),
+			inArray(companies.region, facets.region),
+		);
+		if (regionFilter) conditions.push(regionFilter);
+	}
+
+	if (facets.departement?.length) {
+		conditions.push(inArray(companies.departmentCode, facets.departement));
+	}
+
+	if (facets.naf?.length) {
+		const nafFilter = or(...facets.naf.map(nafSectionCondition));
+		if (nafFilter) conditions.push(nafFilter);
+	}
+
+	if (facets.workforceRanges?.length) {
+		const rangeFilter = or(
+			...facets.workforceRanges.map((key) => {
+				const { min, max } = OBSERVATORY_WORKFORCE_RANGES[key];
+				return max === null
+					? sql`${gipMdsData.workforceEma}::numeric >= ${min}`
+					: sql`${gipMdsData.workforceEma}::numeric between ${min} and ${max}`;
+			}),
+		);
+		if (rangeFilter) conditions.push(rangeFilter);
+	}
+
+	if (facets.workforceMin !== undefined) {
+		conditions.push(
+			sql`${gipMdsData.workforceEma}::numeric >= ${facets.workforceMin}`,
+		);
+	}
+
+	if (facets.workforceMax !== undefined) {
+		conditions.push(
+			sql`${gipMdsData.workforceEma}::numeric <= ${facets.workforceMax}`,
+		);
+	}
+
+	return conditions;
 }
 
 export async function searchPublicDeclarations(
@@ -68,8 +138,6 @@ export async function searchPublicDeclarations(
 		isNotNull(campaignDeadlines.publicDataReleaseDate),
 		sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
 	];
-	const diffusibleIdentityCondition = sql`${companies.statutDiffusion} IS DISTINCT FROM 'N'`;
-
 	if (input.q) {
 		const normalizedQuery = input.q.replace(/\s/g, "");
 		const term = `%${input.q}%`;
@@ -79,41 +147,7 @@ export async function searchPublicDeclarations(
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 
-	if (input.city) {
-		const cityFilter = and(
-			diffusibleIdentityCondition,
-			ilike(companies.city, `%${input.city}%`),
-		);
-		if (cityFilter) baseConditions.push(cityFilter);
-	}
-
-	if (input.region) {
-		const regionFilter = or(
-			eq(companies.regionCode, input.region),
-			eq(companies.region, input.region),
-		);
-		if (regionFilter) baseConditions.push(regionFilter);
-	}
-
-	if (input.departement) {
-		baseConditions.push(eq(companies.departmentCode, input.departement));
-	}
-
-	if (input.naf) {
-		baseConditions.push(nafSectionCondition(input.naf));
-	}
-
-	if (input.workforceMin !== undefined) {
-		baseConditions.push(
-			sql`${gipMdsData.workforceEma}::numeric >= ${input.workforceMin}`,
-		);
-	}
-
-	if (input.workforceMax !== undefined) {
-		baseConditions.push(
-			sql`${gipMdsData.workforceEma}::numeric <= ${input.workforceMax}`,
-		);
-	}
+	baseConditions.push(...publicDeclarationFacetConditions(input));
 
 	if (input.year) {
 		baseConditions.push(eq(declarations.year, input.year));

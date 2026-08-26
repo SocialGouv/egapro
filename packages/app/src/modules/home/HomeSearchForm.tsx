@@ -6,8 +6,12 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
-import { NAF_SECTIONS } from "~/modules/consultation/constants";
-import { COUNTIES, REGIONS } from "~/modules/domain";
+import {
+	COUNTIES,
+	NAF_SECTION_CODES,
+	NAF_SECTIONS,
+	REGIONS,
+} from "~/modules/domain";
 
 const FACET_FIELDS = ["q", "region", "departement", "naf"] as const;
 
@@ -119,9 +123,9 @@ export function HomeSearchForm() {
 							name="naf"
 						>
 							<option value="">Tous les secteurs</option>
-							{Object.entries(NAF_SECTIONS).map(([code, sector]) => (
+							{NAF_SECTION_CODES.map((code) => (
 								<option key={code} value={code}>
-									{code} — {sector}
+									{code} — {NAF_SECTIONS[code]}
 								</option>
 							))}
 						</select>

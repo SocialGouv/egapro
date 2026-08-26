@@ -283,9 +283,9 @@ describe("publicRepresentationSearchInputSchema", () => {
 			}),
 		).toEqual({
 			q: "acme",
-			region: "11",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["11"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2026,
 			limit: 50,
 			offset: 20,

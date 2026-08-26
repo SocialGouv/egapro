@@ -50,6 +50,7 @@ vi.mock("drizzle-orm", () => ({
 	desc: (col: unknown) => ({ op: "desc", col }),
 	eq: (col: unknown, value: unknown) => ({ op: "eq", col, value }),
 	ilike: (col: unknown, value: unknown) => ({ op: "ilike", col, value }),
+	inArray: (col: unknown, values: unknown) => ({ op: "inArray", col, values }),
 	isNotNull: (col: unknown) => ({ op: "isNotNull", col }),
 	isNull: (col: unknown) => ({ op: "isNull", col }),
 	ne: (col: unknown, value: unknown) => ({ op: "ne", col, value }),
@@ -260,57 +261,67 @@ describe("searchPublicDeclarations", () => {
 		mocks.or.mockReturnValueOnce(undefined);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, region: "11" });
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, region: ["11"] });
 
 		const conditions = (captured.where as { args: Array<{ op: string }> }).args;
 		expect(conditions).toHaveLength(5);
 		expect(conditions.some((c) => c.op === "or")).toBe(false);
 	});
 
-	it("adds an equality filter on region", async () => {
+	it("ORs the region facet over both the code and the label columns", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
 		await searchPublicDeclarations({
 			...DEFAULT_INPUT,
-			region: "Île-de-France",
+			region: ["Île-de-France", "11"],
 		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
 			op: "or",
 			args: [
-				{ op: "eq", col: "companies.regionCode", value: "Île-de-France" },
-				{ op: "eq", col: "companies.region", value: "Île-de-France" },
+				{
+					op: "inArray",
+					col: "companies.regionCode",
+					values: ["Île-de-France", "11"],
+				},
+				{
+					op: "inArray",
+					col: "companies.region",
+					values: ["Île-de-France", "11"],
+				},
 			],
 		});
 	});
 
-	it("maps departement to the company department code filter", async () => {
+	it("maps every departement of the facet to the department code column", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, departement: "75" });
+		await searchPublicDeclarations({
+			...DEFAULT_INPUT,
+			departement: ["75", "69"],
+		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "eq",
+			op: "inArray",
 			col: "companies.departmentCode",
-			value: "75",
+			values: ["75", "69"],
 		});
 	});
 
-	it("adds an equality filter on naf", async () => {
+	it("ORs the naf facet over the section conditions", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, naf: "62.01Z" });
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, naf: ["62.01Z"] });
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "ilike",
-			col: "companies.nafCode",
-			value: "62.01Z%",
+			op: "or",
+			args: [{ op: "ilike", col: "companies.nafCode", value: "62.01Z%" }],
 		});
 	});
 

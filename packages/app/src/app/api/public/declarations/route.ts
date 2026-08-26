@@ -26,9 +26,9 @@ export const GET = withAuditedRoute(
 			return {
 				metadata: {
 					q: q ? q.slice(0, 200) : null,
-					region: url.searchParams.get("region") ?? null,
-					departement: url.searchParams.get("departement") ?? null,
-					naf: url.searchParams.get("naf") ?? null,
+					region: url.searchParams.getAll("region"),
+					departement: url.searchParams.getAll("departement"),
+					naf: url.searchParams.getAll("naf"),
 					city: url.searchParams.get("city") ?? null,
 					sort: url.searchParams.get("sort") ?? null,
 					year: url.searchParams.get("year") ?? null,
@@ -51,12 +51,15 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 		const rawOffset = sp.get("offset");
 		const rawWorkforceMin = sp.get("workforceMin");
 		const rawWorkforceMax = sp.get("workforceMax");
+		// Facets are repeatable (`?region=A&region=B`); getAll also returns the
+		// single-value form the documented API has always accepted.
 		const rawInput = {
 			q: sp.get("q") ?? undefined,
 			city: sp.get("city") ?? undefined,
-			region: sp.get("region") ?? undefined,
-			departement: sp.get("departement") ?? undefined,
-			naf: sp.get("naf") ?? undefined,
+			region: sp.getAll("region"),
+			departement: sp.getAll("departement"),
+			naf: sp.getAll("naf"),
+			workforceRanges: sp.getAll("workforceRanges"),
 			workforceMin: rawWorkforceMin ? Number(rawWorkforceMin) : undefined,
 			workforceMax: rawWorkforceMax ? Number(rawWorkforceMax) : undefined,
 			year: rawYear ? Number(rawYear) : undefined,

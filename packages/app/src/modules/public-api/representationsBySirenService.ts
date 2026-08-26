@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import { companies, representationDeclarations } from "~/server/db/schema";
 import type { PublicRepresentationCompanySource } from "./representationProjection";
@@ -68,16 +68,16 @@ export async function searchPublicRepresentations(
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 
-	if (input.region) {
-		baseConditions.push(eq(companies.region, input.region));
+	if (input.region?.length) {
+		baseConditions.push(inArray(companies.region, input.region));
 	}
 
-	if (input.departement) {
-		baseConditions.push(eq(companies.departmentCode, input.departement));
+	if (input.departement?.length) {
+		baseConditions.push(inArray(companies.departmentCode, input.departement));
 	}
 
-	if (input.naf) {
-		baseConditions.push(eq(companies.nafCode, input.naf));
+	if (input.naf?.length) {
+		baseConditions.push(inArray(companies.nafCode, input.naf));
 	}
 
 	if (input.year) {

@@ -224,7 +224,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			]);
 
 		const byRegion = await searchPublicDeclarations({
-			region: "11",
+			region: ["11"],
 			limit: 10,
 			offset: 0,
 		});
@@ -234,14 +234,14 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		]);
 
 		const byDepartement = await searchPublicDeclarations({
-			departement: "69",
+			departement: ["69"],
 			limit: 10,
 			offset: 0,
 		});
 		expect(byDepartement.data.map((d) => d.siren)).toEqual([SIREN_B]);
 
 		const byNaf = await searchPublicDeclarations({
-			naf: "70.10Z",
+			naf: ["70.10Z"],
 			limit: 10,
 			offset: 0,
 		});

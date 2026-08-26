@@ -1,178 +1,124 @@
-import { COUNTIES, REGIONS } from "~/modules/domain";
-import { CompanyAutocomplete } from "./CompanyAutocomplete";
-import { NAF_SECTIONS, WORKFORCE_RANGES } from "./constants";
+import {
+	COUNTIES,
+	NAF_SECTION_CODES,
+	NAF_SECTIONS,
+	OBSERVATORY_WORKFORCE_RANGE_KEYS,
+	OBSERVATORY_WORKFORCE_RANGES,
+	REGION_CODES,
+	REGIONS,
+} from "~/modules/domain";
+import {
+	MultiSelectField,
+	type MultiSelectOption,
+} from "~/modules/shared/MultiSelectField";
+import { DEFAULT_PAGE_SIZE, SEARCH_PATH } from "./constants";
 import type { ConsultationSearchParams } from "./searchParams";
+
+const REGION_OPTIONS: MultiSelectOption[] = REGION_CODES.map((code) => ({
+	value: code,
+	label: REGIONS[code],
+})).sort((left, right) => left.label.localeCompare(right.label, "fr"));
+
+const DEPARTMENT_OPTIONS: MultiSelectOption[] = Object.entries(COUNTIES)
+	.map(([code, label]) => ({ value: code, label: `${code} — ${label}` }))
+	.sort((left, right) =>
+		left.value.localeCompare(right.value, "fr", { numeric: true }),
+	);
+
+const NAF_OPTIONS: MultiSelectOption[] = NAF_SECTION_CODES.map((code) => ({
+	value: code,
+	label: NAF_SECTIONS[code],
+}));
+
+const WORKFORCE_OPTIONS: MultiSelectOption[] =
+	OBSERVATORY_WORKFORCE_RANGE_KEYS.map((key) => ({
+		value: key,
+		label: OBSERVATORY_WORKFORCE_RANGES[key].label,
+	}));
 
 type Props = { values: ConsultationSearchParams };
 
 export function PublicSearchForm({ values }: Props) {
 	return (
-		<form action="/index-egapro/recherche" method="get">
-			<search className="fr-search-bar fr-search-bar--lg fr-mb-4w">
-				<CompanyAutocomplete
+		<form action={SEARCH_PATH} method="get">
+			<search className="fr-search-bar fr-search-bar--lg">
+				<label className="fr-label" htmlFor="consultation-query">
+					Rechercher une entreprise par son nom ou son numéro SIREN
+				</label>
+				<input
 					autoComplete="organization"
+					className="fr-input"
 					defaultValue={values.q}
+					id="consultation-query"
+					name="q"
+					placeholder="Rechercher une entreprise"
+					type="search"
 				/>
 				<button className="fr-btn" title="Rechercher" type="submit">
 					Rechercher
 				</button>
 			</search>
 
-			<fieldset className="fr-fieldset fr-mb-2w">
-				<legend className="fr-fieldset__legend fr-text--lg">
-					Affiner la recherche
-				</legend>
-				<div className="fr-fieldset__content">
+			<section className="fr-accordion fr-mt-3w">
+				<h2 className="fr-accordion__title">
+					<button
+						aria-controls="consultation-advanced-search"
+						aria-expanded="false"
+						className="fr-accordion__btn"
+						type="button"
+					>
+						Recherche avancée
+					</button>
+				</h2>
+				<div className="fr-collapse" id="consultation-advanced-search">
 					<div className="fr-grid-row fr-grid-row--gutters">
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-input-group">
-								<label className="fr-label" htmlFor="consultation-city">
-									Ville
-								</label>
-								<input
-									autoComplete="address-level2"
-									className="fr-input"
-									defaultValue={values.city}
-									id="consultation-city"
-									name="city"
-								/>
-							</div>
+						<div className="fr-col-12 fr-col-md-6">
+							<MultiSelectField
+								id="facet-region"
+								label="Région"
+								name="region"
+								options={REGION_OPTIONS}
+								searchable
+								selected={values.region}
+							/>
 						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="consultation-region">
-									Région
-								</label>
-								<select
-									className="fr-select"
-									defaultValue={values.region}
-									id="consultation-region"
-									name="region"
-								>
-									<option value="">Toutes les régions</option>
-									{Object.values(REGIONS).map((label) => (
-										<option key={label} value={label}>
-											{label}
-										</option>
-									))}
-								</select>
-							</div>
+						<div className="fr-col-12 fr-col-md-6">
+							<MultiSelectField
+								id="facet-departement"
+								label="Département"
+								name="departement"
+								options={DEPARTMENT_OPTIONS}
+								searchable
+								selected={values.departement}
+							/>
 						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="consultation-departement">
-									Département
-								</label>
-								<select
-									className="fr-select"
-									defaultValue={values.departement}
-									id="consultation-departement"
-									name="departement"
-								>
-									<option value="">Tous les départements</option>
-									{Object.entries(COUNTIES)
-										.sort(([left], [right]) =>
-											left.localeCompare(right, "fr", { numeric: true }),
-										)
-										.map(([code, label]) => (
-											<option key={code} value={code}>
-												{code} — {label}
-											</option>
-										))}
-								</select>
-							</div>
+						<div className="fr-col-12 fr-col-md-6">
+							<MultiSelectField
+								id="facet-naf"
+								label="Secteur d’activité"
+								name="naf"
+								options={NAF_OPTIONS}
+								searchable
+								selected={values.naf}
+							/>
 						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="consultation-naf">
-									Secteur d’activité
-								</label>
-								<select
-									className="fr-select"
-									defaultValue={values.naf}
-									id="consultation-naf"
-									name="naf"
-								>
-									<option value="">Tous les secteurs</option>
-									{Object.entries(NAF_SECTIONS).map(([code, label]) => (
-										<option key={code} value={code}>
-											{code} — {label}
-										</option>
-									))}
-								</select>
-							</div>
-						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="consultation-workforce">
-									Taille de l’entreprise
-								</label>
-								<select
-									className="fr-select"
-									defaultValue={values.workforce}
-									id="consultation-workforce"
-									name="workforce"
-								>
-									{WORKFORCE_RANGES.map((range) => (
-										<option key={range.value || "all"} value={range.value}>
-											{range.label}
-										</option>
-									))}
-								</select>
-							</div>
-						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-input-group">
-								<label className="fr-label" htmlFor="consultation-year">
-									Année des données
-								</label>
-								<input
-									className="fr-input"
-									defaultValue={values.year}
-									id="consultation-year"
-									max={2100}
-									min={2000}
-									name="year"
-									placeholder="Ex. 2025"
-									type="number"
-								/>
-							</div>
-						</div>
-						<div className="fr-col-12 fr-col-md-4">
-							<div className="fr-select-group">
-								<label className="fr-label" htmlFor="consultation-sort">
-									Trier les résultats
-								</label>
-								<select
-									className="fr-select"
-									defaultValue={values.sort}
-									id="consultation-sort"
-									name="sort"
-								>
-									<option value="relevance">Pertinence</option>
-									<option value="name">Ordre alphabétique</option>
-								</select>
-							</div>
+						<div className="fr-col-12 fr-col-md-6">
+							<MultiSelectField
+								id="facet-workforce"
+								label="Effectif"
+								name="workforceRanges"
+								options={WORKFORCE_OPTIONS}
+								selected={values.workforceRanges}
+							/>
 						</div>
 					</div>
 				</div>
-			</fieldset>
+			</section>
 
-			<ul className="fr-btns-group fr-btns-group--inline-sm">
-				<li>
-					<button className="fr-btn" type="submit">
-						Appliquer les critères
-					</button>
-				</li>
-				<li>
-					<a
-						className="fr-btn fr-btn--secondary"
-						href="/index-egapro/recherche"
-					>
-						Réinitialiser
-					</a>
-				</li>
-			</ul>
+			{/* A new search restarts at page 1, but keeps the chosen page size. */}
+			{values.limit !== DEFAULT_PAGE_SIZE && (
+				<input name="limit" type="hidden" value={values.limit} />
+			)}
 		</form>
 	);
 }

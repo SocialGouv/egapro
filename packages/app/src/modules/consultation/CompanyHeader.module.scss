@@ -1,0 +1,34 @@
+.band {
+	padding: 1.5rem 0 2rem;
+}
+
+.back {
+	display: inline-flex;
+	margin: 1rem 0 1.5rem;
+}
+
+.name {
+	margin: 0 0 1rem;
+	color: var(--text-title-grey);
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 2.5rem;
+}
+
+.facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+.fact {
+	color: var(--text-mention-grey);
+}
+
+.value {
+	color: var(--text-title-grey);
+	font-weight: 700;
+}

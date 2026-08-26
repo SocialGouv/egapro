@@ -13,6 +13,7 @@ import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
 // Overrides must win on specificity — this bundle loads before dsfr.min.css.
+import "~/modules/layout/designTokens.css";
 import "~/modules/layout/dsfrFixes.scss";
 
 export const metadata: Metadata = {

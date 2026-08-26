@@ -67,6 +67,7 @@ describe("publicOpenApiSpec", () => {
 				"sort",
 				"workforceMax",
 				"workforceMin",
+				"workforceRanges",
 				"year",
 			]);
 			for (const param of operation.parameters) {
@@ -77,9 +78,19 @@ describe("publicOpenApiSpec", () => {
 			expect(limit?.schema).toMatchObject({
 				minimum: 1,
 				maximum: 100,
-				default: 50,
+				default: 10,
 			});
 			expect(offset?.schema).toMatchObject({ minimum: 0, default: 0 });
+		});
+
+		it("declares the repeatable facets as exploded arrays", () => {
+			for (const name of ["region", "departement", "naf", "workforceRanges"]) {
+				const param = operation.parameters.find((p) => p.name === name) as
+					| { explode?: boolean; schema?: { type?: string } }
+					| undefined;
+				expect(param?.schema?.type).toBe("array");
+				expect(param?.explode).toBe(true);
+			}
 		});
 
 		it("returns a PublicSearchResult on 200 and documents 400/500", () => {
