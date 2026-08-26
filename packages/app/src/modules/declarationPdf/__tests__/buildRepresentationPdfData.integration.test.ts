@@ -128,8 +128,11 @@ describe("buildRepresentationPdfData against a real Postgres", () => {
 		expect(data.publicationApplicable).toBe(false);
 	});
 
-	it("refuses a declaration still in draft", async () => {
-		await insertDeclaration({ status: "draft", current_step: 3 });
+	it.each([
+		"draft",
+		"not_subject",
+	])("refuses a %s declaration, which transmitted no gap", async (status) => {
+		await insertDeclaration({ status, current_step: 3 });
 
 		await expect(
 			buildRepresentationPdfData(SIREN, YEAR, NOW),

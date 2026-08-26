@@ -5,6 +5,7 @@ export { StepPageClient } from "./StepPageClient";
 export { Stepper } from "./Stepper";
 export { SubjectionScreen } from "./SubjectionScreen";
 export {
+	declareRepresentationNotSubjectSchema,
 	executivesCountSchema,
 	executivesSchema,
 	getRepresentationDeclarationSchema,

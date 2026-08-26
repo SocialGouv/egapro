@@ -331,6 +331,7 @@ describe("auditMiddleware", () => {
 		"representationDeclaration.get",
 		"representationDeclaration.saveDraft",
 		"representationDeclaration.submit",
+		"representationDeclaration.declareNotSubject",
 	])("keeps only the allowlisted keys in metadata for %s", async (path) => {
 		const next = vi.fn(async () => undefined);
 		await auditMiddleware({
@@ -345,6 +346,23 @@ describe("auditMiddleware", () => {
 		});
 
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({ year: 2025 });
+	});
+
+	it("logs the not-subject choice under its own action key", async () => {
+		const next = vi.fn(async () => ({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			path: "representationDeclaration.declareNotSubject",
+			getRawInput: buildGetRawInput({ year: 2026 }),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "representation_declaration.declare_not_subject",
+			status: "success",
+			siren: "123456789",
+			metadata: { year: 2026 },
+		});
 	});
 
 	it("returns null metadata when an allowlisted path carries none of its allowed keys", async () => {
