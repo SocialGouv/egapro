@@ -39,9 +39,15 @@ export function DeclarationSummary({
 					<td>{declaration.remunerationScore ?? "—"}</td>
 				</tr>
 				<tr>
-					<th scope="row">Effectif femmes / hommes</th>
+					<th scope="row">Effectif annuel femmes / hommes</th>
 					<td>
 						{declaration.totalWomen ?? "—"} / {declaration.totalMen ?? "—"}
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Effectif horaire femmes / hommes</th>
+					<td>
+						{declaration.hourlyWomen ?? "—"} / {declaration.hourlyMen ?? "—"}
 					</td>
 				</tr>
 				<tr>

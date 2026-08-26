@@ -18,6 +18,8 @@ const baseRow = {
 	secondDeclarationPathChoice: null,
 	totalWomen: 100,
 	totalMen: 150,
+	hourlyWomen: 100,
+	hourlyMen: 150,
 	submittedAt: null as Date | null,
 	firstDeclarationPathChoiceAt: null as Date | null,
 	secondDeclarationPathChoiceAt: null as Date | null,
