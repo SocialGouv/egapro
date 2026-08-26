@@ -32,6 +32,10 @@ export default async function CseOpinionConfirmationPage() {
 				declarationYear={declarationData.declaration.year}
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
+				hasTransmittedElements={
+					declarationData.hasSubmittedCseOpinion ||
+					declarationData.hasSubmittedJointEvaluation
+				}
 			/>
 		</>
 	);

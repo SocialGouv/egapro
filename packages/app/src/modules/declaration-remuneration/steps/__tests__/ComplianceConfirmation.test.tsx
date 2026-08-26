@@ -2,19 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Shared across renders so the resend payload can be asserted; a spy created
-// inside the factory would be a fresh one on every hook call.
-const { resendMutate } = vi.hoisted(() => ({ resendMutate: vi.fn() }));
-
-vi.mock("~/trpc/react", () => ({
-	api: {
-		mail: {
-			resendReceipt: {
-				useMutation: () => ({ mutate: resendMutate, isPending: false }),
-			},
-		},
-	},
-}));
+vi.mock(
+	"~/trpc/react",
+	async () => await import("~/test/resendReceiptApiMock"),
+);
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(async () => ({ user: { email: "declarant@example.fr" } })),
@@ -32,6 +23,8 @@ vi.mock("~/trpc/server", () => ({
 }));
 
 import { COMPANY_SIZE_ANNUAL_MIN } from "~/modules/domain";
+import { auth } from "~/server/auth";
+import { resendReceiptMutate } from "~/test/resendReceiptApiMock";
 import { api } from "~/trpc/server";
 import { ComplianceConfirmation } from "../ComplianceConfirmation";
 
@@ -60,13 +53,19 @@ const ANY_COMPANY: CompanyShape = {
 
 async function renderConfirmation(
 	company: CompanyShape,
-	{ hasSubmittedSecondDeclaration = false } = {},
+	{
+		hasSubmittedCseOpinion = false,
+		hasSubmittedJointEvaluation = false,
+		hasSubmittedSecondDeclaration = false,
+	} = {},
 ) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { year: DECLARATION_YEAR, siren: SIREN },
 		jobCategories: [],
 		employeeCategories: [],
 		gipPrefillData: null,
+		hasSubmittedCseOpinion,
+		hasSubmittedJointEvaluation,
 		hasSubmittedSecondDeclaration,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue(company as never);
@@ -76,7 +75,7 @@ async function renderConfirmation(
 
 describe("ComplianceConfirmation", () => {
 	beforeEach(() => {
-		resendMutate.mockClear();
+		resendReceiptMutate.mockClear();
 	});
 
 	it("marks the completion pictogram as a success rather than an error", async () => {
@@ -89,12 +88,14 @@ describe("ComplianceConfirmation", () => {
 		).toBeInTheDocument();
 	});
 
+	// Both ends of the démarche share one maquette, hence one title, one sentence.
 	it("renders the confirmation title", async () => {
 		await renderConfirmation(ANY_COMPANY);
 
 		expect(
 			screen.getByRole("heading", {
-				name: /Parcours de mise en conformité/,
+				level: 1,
+				name: `Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`,
 			}),
 		).toBeInTheDocument();
 	});
@@ -104,9 +105,7 @@ describe("ComplianceConfirmation", () => {
 
 		expect(
 			screen.getByText(
-				new RegExp(
-					`Votre parcours de mise en conformité ${DECLARATION_YEAR} est terminé`,
-				),
+				`Votre parcours ${DECLARATION_YEAR} est désormais terminé`,
 			),
 		).toBeInTheDocument();
 	});
@@ -154,6 +153,38 @@ describe("ComplianceConfirmation", () => {
 		).not.toBeInTheDocument();
 	});
 
+	// Offered when the PDF has content — the rule DocumentsPanel already applies.
+	describe("transmitted elements card", () => {
+		function transmittedCard() {
+			return screen.queryByRole("link", {
+				name: /Télécharger le récapitulatif des éléments transmis/,
+			});
+		}
+
+		it.each([
+			{ hasSubmittedCseOpinion: true, hasSubmittedJointEvaluation: false },
+			{ hasSubmittedCseOpinion: false, hasSubmittedJointEvaluation: true },
+			{ hasSubmittedCseOpinion: true, hasSubmittedJointEvaluation: true },
+		])("offers it once something was transmitted (cseOpinion: $hasSubmittedCseOpinion, jointEvaluation: $hasSubmittedJointEvaluation)", async (submissions) => {
+			await renderConfirmation(ANY_COMPANY, submissions);
+
+			expect(transmittedCard()).toHaveAttribute(
+				"href",
+				`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+			);
+			expect(transmittedCard()).toHaveAttribute("download");
+		});
+
+		it("omits it when nothing was transmitted", async () => {
+			await renderConfirmation(ANY_COMPANY, {
+				hasSubmittedCseOpinion: false,
+				hasSubmittedJointEvaluation: false,
+			});
+
+			expect(transmittedCard()).not.toBeInTheDocument();
+		});
+	});
+
 	describe("acknowledgement receipt", () => {
 		it("tells the user where the acknowledgement was sent", async () => {
 			// The screen used to give no trace at all that a receipt had been sent,
@@ -173,7 +204,7 @@ describe("ComplianceConfirmation", () => {
 				screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
 			);
 
-			expect(resendMutate).toHaveBeenCalledWith({
+			expect(resendReceiptMutate).toHaveBeenCalledWith({
 				kind: "declaration",
 				year: DECLARATION_YEAR,
 			});
@@ -190,10 +221,22 @@ describe("ComplianceConfirmation", () => {
 				screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
 			);
 
-			expect(resendMutate).toHaveBeenCalledWith({
+			expect(resendReceiptMutate).toHaveBeenCalledWith({
 				kind: "secondDeclaration",
 				year: DECLARATION_YEAR,
 			});
+		});
+
+		// A ProConnect account can carry no e-mail, but an address must still be named.
+		it.each([
+			null,
+			{ user: {} },
+			{ user: { email: null } },
+		])("falls back to a placeholder address when the session carries none (session: %s)", async (session) => {
+			vi.mocked(auth).mockResolvedValueOnce(session as never);
+			await renderConfirmation(ANY_COMPANY);
+
+			expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 		});
 	});
 
@@ -246,6 +289,17 @@ describe("ComplianceConfirmation", () => {
 			expect(
 				screen.queryByText(UNDER_THRESHOLD_REASON),
 			).not.toBeInTheDocument();
+		});
+
+		// The voluntary tier is named by its threshold, never by its exact headcount.
+		it.each([
+			{ gipWorkforce: 87, hasCse: false },
+			{ gipWorkforce: 3412, hasCse: false },
+		])("never prints the company's own headcount (gipWorkforce: $gipWorkforce)", async (company) => {
+			await renderConfirmation(company);
+
+			expect(document.body).not.toHaveTextContent(String(company.gipWorkforce));
+			expect(screen.getByText(NO_OPINION_REQUIRED)).toBeInTheDocument();
 		});
 
 		// Unreachable through routing: at this size with a CSE an opinion is due, so

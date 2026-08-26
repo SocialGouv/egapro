@@ -251,6 +251,10 @@ describe("Step1Opinions", () => {
 				/Votre rapport de l'évaluation conjointe a été transmise/,
 			),
 		).toBeInTheDocument();
+		// The banner keeps the small variant; the confirmation screens take 40px.
+		expect(
+			screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
+		).toHaveClass("fr-btn--sm");
 	});
 
 	it("does not render the submission banner for other paths", () => {
