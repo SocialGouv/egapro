@@ -125,7 +125,6 @@ export function SecondDeclarationStep2Form({
 				});
 			}}
 			previousHref={`${BASE_PATH}/etape/1`}
-			readOnly={isLocked}
 			readOnlyLabel
 			referencePeriodPicker={
 				<ReferencePeriodPicker
@@ -147,6 +146,7 @@ export function SecondDeclarationStep2Form({
 				</h1>
 			}
 			tooltipPrefix="tooltip-second-decl"
+			readOnly={isLocked}
 		/>
 	);
 }
