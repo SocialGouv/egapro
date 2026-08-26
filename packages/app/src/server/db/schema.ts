@@ -740,7 +740,7 @@ export const representationNotComputableMembersEnum = pgEnum(
 
 export const representationDeclarationStatusEnum = pgEnum(
 	"representation_declaration_status",
-	["draft", "submitted"],
+	["draft", "submitted", "not_subject"],
 );
 
 export const representationDeclarations = createTable(

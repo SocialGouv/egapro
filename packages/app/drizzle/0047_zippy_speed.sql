@@ -1,0 +1,1 @@
+ALTER TYPE "public"."representation_declaration_status" ADD VALUE 'not_subject';

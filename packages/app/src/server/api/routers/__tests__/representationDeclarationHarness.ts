@@ -36,16 +36,28 @@ export function createMockDb(rows: unknown[] = []) {
 	const values = vi.fn().mockReturnValue({ onConflictDoUpdate });
 	const insert = vi.fn().mockReturnValue({ values });
 	const limit = vi.fn().mockResolvedValue(rows);
-	const where = vi.fn().mockReturnValue({ limit });
+	const forLock = vi.fn();
+	const rowsChain = { limit, for: forLock };
+	forLock.mockReturnValue(rowsChain);
+	const where = vi.fn().mockReturnValue(rowsChain);
 	const from = vi.fn().mockReturnValue({ where });
 	const select = vi.fn().mockReturnValue({ from });
+	// `tx` reuses the very mocks exposed below, so the assertions read the same
+	// calls whether the router went through `db` directly or through a transaction.
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+			fn({ select, insert }),
+		);
 
 	return {
-		db: { select, insert } as unknown,
+		db: { select, insert, transaction } as unknown,
 		insert,
 		values,
 		onConflictDoUpdate,
 		where,
+		forLock,
+		transaction,
 	};
 }
 
@@ -91,6 +103,11 @@ export function conflictSet(mock: MockDb) {
 export function whereParams(mock: MockDb) {
 	const clause = mock.where.mock.calls[0]?.[0];
 	return new PgDialect().sqlToQuery(clause as never).params;
+}
+
+export function compileSql(expression: unknown) {
+	return new PgDialect({ casing: "snake_case" }).sqlToQuery(expression as never)
+		.sql;
 }
 
 export function installRouterTestEnv(campaignMock: Mock) {
