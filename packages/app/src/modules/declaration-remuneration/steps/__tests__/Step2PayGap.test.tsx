@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step2PayGap } from "../Step2PayGap";
 
 const mockMutate = vi.fn();
@@ -247,22 +251,7 @@ describe("Step2PayGap", () => {
 						hourlyMedianMen: "19",
 					},
 					step3: nullGipStep3(),
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}

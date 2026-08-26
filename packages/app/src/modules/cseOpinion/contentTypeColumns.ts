@@ -11,11 +11,11 @@ import type {
 
 const ACCURACY_DESCRIPTIONS: Record<DeclarationNumber, string> = {
 	1: "Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs",
-	2: "Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés",
+	2: "Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
 };
 
 const GAP_DESCRIPTION =
-	"Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégorie de salariés";
+	"Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégories de salariés";
 
 const TYPE_LABELS: Record<ContentType, string> = {
 	accuracy: "Exactitude",

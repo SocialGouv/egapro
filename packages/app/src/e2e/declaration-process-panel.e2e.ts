@@ -127,7 +127,7 @@ test.describe("Declaration process panel", () => {
 	// or the has_cse flag, so it is hidden except on the tier's own indicator G years.
 	test.describe("GIP < 100 without CSE: the CSE step is hidden, the indicator-G step follows the obligation", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
 		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 		const indicatorGRequired = indicatorGRequiredForGip(79);
 
@@ -218,7 +218,7 @@ test.describe("Declaration process panel", () => {
 	// workforce alone, so this differs from the < 100 case where step 2 is hidden too.
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
 		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 
 		test.afterAll(async () => {

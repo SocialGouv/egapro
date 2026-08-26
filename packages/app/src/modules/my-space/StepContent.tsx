@@ -88,7 +88,7 @@ export function Step1Content({
 					des données DSN)
 				</BulletRow>
 				<BulletRow>
-					Indicateurs de rémunération par catégorie de salariés à remplir
+					Indicateurs de rémunération par catégories de salariés à remplir
 				</BulletRow>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
@@ -135,8 +135,8 @@ export function Step2Content({
 }) {
 	const title = (
 		<StepTitle status={status}>
-			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
-			si écarts &ge; 5&nbsp;%
+			Parcours de mise en conformité pour l'indicateur par catégories de
+			salariés si écarts &ge; 5&nbsp;%
 		</StepTitle>
 	);
 

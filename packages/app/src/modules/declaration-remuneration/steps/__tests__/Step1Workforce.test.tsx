@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GipPrefillData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { Step1Data } from "~/modules/declaration-remuneration/types";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step1Workforce } from "../Step1Workforce";
 
 const mockMutate = vi.fn();
@@ -51,22 +55,12 @@ const SAVED = step1Data({
 	hourlyMen: 100,
 });
 
-function emptyGipQuartileTable() {
-	return {
-		thresholds: [null, null, null],
-		referenceWomen: null,
-		referenceMen: null,
-		womenCounts: [null, null, null, null],
-		menCounts: [null, null, null, null],
-	} as GipPrefillData["step4"]["annual"];
-}
-
 function gipPrefill(step1: GipPrefillData["step1"]): GipPrefillData {
 	return {
 		step1,
 		step2: nullGipStep2(),
 		step3: nullGipStep3(),
-		step4: { annual: emptyGipQuartileTable(), hourly: emptyGipQuartileTable() },
+		step4: nullGipStep4(),
 		confidenceIndex: null,
 		periodEnd: null,
 	};
