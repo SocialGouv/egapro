@@ -157,7 +157,9 @@ export function PercentagePairFields({
 							</div>
 						</div>
 					</div>
-					{trailingContent ? <div>{trailingContent}</div> : null}
+					{trailingContent ? (
+						<div className={styles.trailingContent}>{trailingContent}</div>
+					) : null}
 				</div>
 			</div>
 			{hint ? (

@@ -1,6 +1,6 @@
 import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
-import { formatLongDate } from "./format";
+import { formatIsoDate, formatLongDate } from "./format";
 
 /** Returns the current campaign year: the E2E recette override when a grid run
  * pinned one (see campaignClock.ts — test-only, inert in production), the
@@ -28,6 +28,31 @@ export function getRepresentationDeadline(year: number): string {
 export function getReferencePeriod(campaignYear: number): string {
 	const referenceYear = getReferenceYearFor(campaignYear);
 	return `01/01/${referenceYear} - 31/12/${referenceYear}`;
+}
+
+/**
+ * Declaration recap reference period, format "DD/MM/YYYY - DD/MM/YYYY".
+ *
+ * A second declaration lets the user enter a custom reference period at step 2
+ * (`secondDeclReferencePeriodStart`/`End`, persisted as `YYYY-MM-DD`) instead of
+ * the campaign's civil year. Recap surfaces must display that persisted period —
+ * falling back to the civil-year period for initial declarations and for second
+ * declarations predating mandatory capture (both columns null).
+ */
+export function getDeclarationReferencePeriod(
+	campaignYear: number,
+	isSecondDeclaration: boolean,
+	secondDeclReferencePeriodStart: string | null | undefined,
+	secondDeclReferencePeriodEnd: string | null | undefined,
+): string {
+	if (
+		isSecondDeclaration &&
+		secondDeclReferencePeriodStart &&
+		secondDeclReferencePeriodEnd
+	) {
+		return `${formatIsoDate(secondDeclReferencePeriodStart)} - ${formatIsoDate(secondDeclReferencePeriodEnd)}`;
+	}
+	return getReferencePeriod(campaignYear);
 }
 
 /** Returns the declaration modification deadline for a given year: `"1ᵉʳ juin 2027"`. */

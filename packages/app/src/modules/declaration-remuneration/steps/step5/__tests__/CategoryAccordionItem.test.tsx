@@ -44,6 +44,7 @@ function renderItem(
 			onAskRemove={vi.fn()}
 			onDecimalBlur={() => vi.fn()}
 			onPositiveNumberChange={() => vi.fn()}
+			readOnly={false}
 			readOnlyLabel={false}
 			showDelete={false}
 			{...rest}

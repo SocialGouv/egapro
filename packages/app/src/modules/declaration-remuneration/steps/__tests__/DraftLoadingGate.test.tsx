@@ -237,6 +237,7 @@ describe("DraftLoadingGate", () => {
 				declarationDate="01/01/2026"
 				declarationSiren="123456789"
 				declarationYear={2026}
+				existingFile={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
 			/>,
 		);

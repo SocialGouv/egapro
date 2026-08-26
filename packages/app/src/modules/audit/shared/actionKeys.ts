@@ -39,8 +39,9 @@ export const AUDIT_ACTIONS = {
 	CSE_OPINION_FINALIZE: "cse_opinion.finalize",
 	CSE_OPINION_SET_FILE_TYPES: "cse_opinion.set_file_types",
 
-	// ── Joint evaluation mutations ─────────────────────────
+	// ── Joint evaluation ───────────────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
+	JOINT_EVALUATION_GET_FILE: "joint_evaluation.get_file",
 
 	// ── Company mutations ──────────────────────────────────
 	COMPANY_READ_GIP_DATA: "company.read_gip_data",
@@ -182,6 +183,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES]: "mutation",
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
+	[AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE]: "read_sensitive",
 
 	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",

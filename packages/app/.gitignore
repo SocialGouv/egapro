@@ -65,5 +65,32 @@ src/e2e/.auth/
 
 # ultra11y a11y audit artifacts (runtime output + scan session state)
 /audits
-/.ultra11y
 /.auth
+# `/.ultra11y/*` et non `/.ultra11y` : git ne descend pas dans un répertoire ignoré, donc une
+# exception à l'intérieur ne peut pas s'appliquer. On ignore le CONTENU, ce qui laisse la porte
+# ouverte au seul fichier qui doit être versionné.
+/.ultra11y/*
+# Le registre de verdicts n'est pas un artefact de run : c'est une affirmation datée sur ce
+# dépôt (« ce critère est conforme, voici la preuve citée »), que la CI rejoue pour ne pas
+# racheter au modèle ce qu'elle a déjà fait trancher. Versionné exprès, donc relu en revue comme
+# le reste du code. Sous `/.ultra11y` ignoré en bloc, le registre serait resté vide et la CI
+# aurait silencieusement repayé chaque run — sans que rien ne le dise.
+!/.ultra11y/verdicts/
+/.ultra11y/verdicts/*
+!/.ultra11y/verdicts/*.json
+# `undecidable.json` REVIENT, et il faut dire pourquoi la raison de son retrait ne tenait plus.
+#
+# Elle disait : « une exemption est le constat qu'un critère n'a pas reçu d'évidence — le
+# correctif appartient au moteur, pas à une liste de dispenses versionnée à côté de lui ». Vrai
+# pour le cas qu'elle visait, et ce cas a bien été corrigé en amont.
+#
+# Mais 13.3 et 13.4 sont l'autre cas. Le sujet EXISTE — un classeur `.xlsx` en téléchargement —
+# et leurs tests exigent de l'OUVRIR pour le juger. Aucun tier ne le peut : le moteur ne voit
+# que l'URL, le balayage ne capture que la page qui la porte, et l'adjudicateur n'a ni shell ni
+# lecteur xlsx. Ce n'est pas un critère sans évidence, c'est un critère sans instrument, et
+# aucun correctif moteur ne l'atteindra tant que personne n'ouvrira le fichier.
+#
+# La liste n'est donc pas une tolérance : chaque entrée porte sa raison, la porte refuse une
+# entrée sans raison ET une entrée dont le critère a depuis été tranché — une dispense ne peut
+# pas survivre à ce qu'elle excusait. C'est un renvoi nommé vers l'auditeur humain.
+!/.ultra11y/undecidable.json

@@ -9,6 +9,7 @@ import {
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -85,6 +86,7 @@ type Props = {
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	disabled?: boolean;
+	readOnly?: boolean;
 	nextHref?: string;
 	mimoquageNextHref?: string;
 	hasDataOverride?: boolean;
@@ -143,6 +145,7 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
+	readOnly = false,
 	nextHref,
 	mimoquageNextHref,
 	hasDataOverride,
@@ -385,6 +388,7 @@ export function CategoryForm({
 			onSubmit={handleFormSubmit}
 		>
 			<StepTitleRow
+				devFillDisabled={disabled || readOnly}
 				hasData={hasData}
 				isPendingSave={isPendingSaveOverride}
 				isSaving={isSavingOverride}
@@ -441,7 +445,7 @@ export function CategoryForm({
 							aria-describedby={sourceError ? "source-error" : undefined}
 							aria-invalid={Boolean(sourceError)}
 							className="fr-select"
-							disabled={disabled}
+							disabled={disabled || readOnly}
 							id="source-select"
 							{...form.register("source")}
 							onChange={(e) => {
@@ -481,68 +485,72 @@ export function CategoryForm({
 				</div>
 				{!readOnlyLabel && (
 					<CategoryImportExport
-						disabled={disabled}
+						disabled={disabled || readOnly}
 						onImport={handleImportCategories}
 					/>
 				)}
 			</div>
 
-			<div className="fr-accordions-group" data-fr-group="false">
-				{fields.map((field, index) => {
-					const cat = categories[index];
-					return (
-						<CategoryAccordionItem
-							baseId={baseId}
-							category={
-								cat ? { id: index, ...cat } : createEmptyCategory(index)
-							}
-							collapseRef={(node) => {
-								accordionCollapseRefs.current[index] = node;
-							}}
-							disabled={disabled}
-							fieldId={field.id}
-							headerRef={(node) => {
-								accordionHeaderRefs.current[index] = node;
-							}}
-							index={index}
-							isExpanded={expandedByFieldId[field.id] ?? true}
-							key={field.id}
-							nameError={
-								form.formState.errors.categories?.[index]?.name?.message
-							}
-							nameProps={{
-								...form.register(`categories.${index}.name`),
-								onChange: (e) => {
-									form.setValue(`categories.${index}.name`, e.target.value);
-									setHasData(false);
-								},
-							}}
-							onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
-							onAskRemove={askRemoveCategory}
-							onDecimalBlur={handleDecimalBlur}
-							onPositiveNumberChange={handlePositiveNumberChange}
-							readOnlyLabel={readOnlyLabel}
-							showDelete={!readOnlyLabel && fields.length > 1}
-						/>
-					);
-				})}
-			</div>
+			<fieldset className={readOnly ? common.readOnlyFieldset : undefined}>
+				<legend className="fr-sr-only">Catégories d&apos;emplois</legend>
+				<div className="fr-accordions-group" data-fr-group="false">
+					{fields.map((field, index) => {
+						const cat = categories[index];
+						return (
+							<CategoryAccordionItem
+								baseId={baseId}
+								category={
+									cat ? { id: index, ...cat } : createEmptyCategory(index)
+								}
+								collapseRef={(node) => {
+									accordionCollapseRefs.current[index] = node;
+								}}
+								disabled={disabled}
+								fieldId={field.id}
+								headerRef={(node) => {
+									accordionHeaderRefs.current[index] = node;
+								}}
+								index={index}
+								isExpanded={expandedByFieldId[field.id] ?? true}
+								key={field.id}
+								nameError={
+									form.formState.errors.categories?.[index]?.name?.message
+								}
+								nameProps={{
+									...form.register(`categories.${index}.name`),
+									onChange: (e) => {
+										form.setValue(`categories.${index}.name`, e.target.value);
+										setHasData(false);
+									},
+								}}
+								onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
+								onAskRemove={askRemoveCategory}
+								onDecimalBlur={handleDecimalBlur}
+								onPositiveNumberChange={handlePositiveNumberChange}
+								readOnly={readOnly}
+								readOnlyLabel={readOnlyLabel}
+								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}
+							/>
+						);
+					})}
+				</div>
 
-			<div className={stepStyles.categoryFooter}>
-				<p className="fr-text--bold fr-mb-0">
-					Nombre de catégories : {fields.length}
-				</p>
-				{!readOnlyLabel && (
-					<button
-						className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
-						disabled={disabled}
-						onClick={addCategory}
-						type="button"
-					>
-						Ajouter une catégorie d&apos;emplois
-					</button>
-				)}
-			</div>
+				<div className={stepStyles.categoryFooter}>
+					<p className="fr-text--bold fr-mb-0">
+						Nombre de catégories : {fields.length}
+					</p>
+					{!readOnlyLabel && (
+						<button
+							className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
+							disabled={disabled || readOnly}
+							onClick={addCategory}
+							type="button"
+						>
+							Ajouter une catégorie d&apos;emplois
+						</button>
+					)}
+				</div>
+			</fieldset>
 
 			<DefinitionAccordion
 				id={accordionId}

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -40,6 +41,70 @@ describe("getReferencePeriod", () => {
 	it("uses the workforce year of the campaign as the reference window", () => {
 		expect(getReferencePeriod(2027)).toBe(
 			`01/01/${getReferenceYearFor(2027)} - 31/12/${getReferenceYearFor(2027)}`,
+		);
+	});
+});
+
+describe("getDeclarationReferencePeriod", () => {
+	const CAMPAIGN_YEAR = 2026;
+	const CIVIL_PERIOD = "01/01/2025 - 31/12/2025";
+	// Deliberately off the civil year: the assertion only discriminates if the
+	// persisted window cannot be produced by getReferencePeriod.
+	const CAPTURED_START = "2025-07-01";
+	const CAPTURED_END = "2026-06-30";
+
+	it("returns the period captured at step 2 of a second declaration", () => {
+		expect(
+			getDeclarationReferencePeriod(
+				CAMPAIGN_YEAR,
+				true,
+				CAPTURED_START,
+				CAPTURED_END,
+			),
+		).toBe("01/07/2025 - 30/06/2026");
+	});
+
+	it("never reads the persisted period for an initial declaration", () => {
+		expect(
+			getDeclarationReferencePeriod(
+				CAMPAIGN_YEAR,
+				false,
+				CAPTURED_START,
+				CAPTURED_END,
+			),
+		).toBe(CIVIL_PERIOD);
+	});
+
+	it("falls back to the civil period for a second declaration predating mandatory capture", () => {
+		expect(getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, null, null)).toBe(
+			CIVIL_PERIOD,
+		);
+	});
+
+	it("falls back to the civil period when a single bound is persisted", () => {
+		expect(
+			getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, CAPTURED_START, null),
+		).toBe(CIVIL_PERIOD);
+		expect(
+			getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, null, CAPTURED_END),
+		).toBe(CIVIL_PERIOD);
+	});
+
+	it("falls back to the civil period on blank persisted bounds", () => {
+		expect(getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, "", "")).toBe(
+			CIVIL_PERIOD,
+		);
+	});
+
+	it("falls back to the civil period on undefined persisted bounds", () => {
+		expect(
+			getDeclarationReferencePeriod(CAMPAIGN_YEAR, true, undefined, undefined),
+		).toBe(CIVIL_PERIOD);
+	});
+
+	it("tracks the campaign year of the declaration when falling back", () => {
+		expect(getDeclarationReferencePeriod(2027, true, null, null)).toBe(
+			getReferencePeriod(2027),
 		);
 	});
 });
