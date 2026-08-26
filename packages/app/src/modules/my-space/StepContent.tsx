@@ -70,7 +70,7 @@ export function Step1Content({
 				<div className={styles.bulletItem}>
 					<span aria-hidden="true" className={styles.bullet} />
 					<p className="fr-mb-0">
-						Indicateurs de rémunération par catégorie de salariés à remplir
+						Indicateurs de rémunération par catégories de salariés à remplir
 					</p>
 				</div>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
@@ -118,8 +118,8 @@ export function Step2Content({
 }) {
 	const title = (
 		<StepTitle status={status}>
-			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
-			si écarts &ge; 5&nbsp;%
+			Parcours de mise en conformité pour l'indicateur par catégories de
+			salariés si écarts &ge; 5&nbsp;%
 		</StepTitle>
 	);
 

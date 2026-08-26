@@ -100,7 +100,7 @@ export function NextStepsBox({
 
 						<p className="fr-mb-0">
 							À la suite de l&apos;analyse de vos données de l&apos;indicateur
-							par catégorie de salariés, des écarts &ge; 5 % ont{" "}
+							par catégories de salariés, des écarts &ge; 5 % ont{" "}
 							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
 							. Vous devez engager un des parcours de mise en conformité
 							suivant&nbsp;:

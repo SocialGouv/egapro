@@ -26,11 +26,11 @@ import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
 import type { QuartileTuple, Step4Data } from "../types";
 import stepStyles from "./Step4QuartileDistribution.module.scss";
+import { CoherenceNote } from "./step4/CoherenceNote";
 import { QuartileInterpretationCallout } from "./step4/QuartileInterpretationCallout";
 import { QuartileTable } from "./step4/QuartileTable";
 import {
-	coherenceWarningLabel,
-	deriveCoherenceWarnings,
+	deriveCoherenceErrors,
 	type QuartileReferences,
 } from "./step4/quartileCoherence";
 import {
@@ -160,16 +160,11 @@ export function Step4QuartileDistribution({
 	const annual = form.watch("annual");
 	const hourly = form.watch("hourly");
 
+	// One reference per pay basis: each table is held to the headcount declared
+	// for its own basis at step 1 (#4247), never to the other one.
 	const references: QuartileReferences = {
 		annual: { women: maxWomen, men: maxMen },
-		hourly: {
-			women:
-				hourlyMaxWomen ??
-				gipPrefillData?.step4.hourly.referenceWomen ??
-				undefined,
-			men:
-				hourlyMaxMen ?? gipPrefillData?.step4.hourly.referenceMen ?? undefined,
-		},
+		hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 	};
 
 	const hasData = hasSavedData || hasDraft;
@@ -269,9 +264,7 @@ export function Step4QuartileDistribution({
 					tableType,
 					index,
 					field,
-					tableType === "annual"
-						? `Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`
-						: `Le nombre ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire (${max}).`,
+					`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
 				);
 				return;
 			}
@@ -280,13 +273,25 @@ export function Step4QuartileDistribution({
 		clearFieldError(tableType, index, field);
 	}
 
+	// The coherence errors are reported once per table, under the table they
+	// belong to. FieldErrorAlert manages its own focus for field errors; when a
+	// coherence error is the only blocker, focus its table-level message here.
+	function focusCoherenceError(coherenceTable: TableType | undefined) {
+		requestAnimationFrame(() => {
+			if (coherenceTable) {
+				document.getElementById(`step4-coherence-${coherenceTable}`)?.focus();
+			}
+		});
+	}
 	function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const values = form.getValues();
 		const errors = deriveErrors(values);
-		if (hasAnyError(errors)) {
+		const hasFieldError = hasAnyError(errors);
+		if (hasFieldError || coherenceErrors.length > 0) {
 			setFieldErrors(errors);
 			setShowRecap(true);
+			if (!hasFieldError) focusCoherenceError(coherenceErrors[0]?.table);
 			return;
 		}
 		setFieldErrors(emptyErrorMap());
@@ -296,6 +301,8 @@ export function Step4QuartileDistribution({
 
 	const annualMins = computeMinsForTable(annual);
 	const hourlyMins = computeMinsForTable(hourly);
+
+	const coherenceErrors = deriveCoherenceErrors({ annual, hourly }, references);
 
 	// The recap is capped at 4 anchors, so the per-cell messages stay inline:
 	// a quartile form can hold up to 24 offending cells (#4235).
@@ -307,11 +314,6 @@ export function Step4QuartileDistribution({
 				anchor: true,
 			}))
 		: [];
-
-	const coherenceWarnings = deriveCoherenceWarnings(
-		{ annual, hourly },
-		references,
-	);
 
 	return (
 		<form
@@ -384,28 +386,12 @@ export function Step4QuartileDistribution({
 
 				<FieldErrorAlert errors={recapErrors} id={QUARTILE_ALERT_ID} />
 
-				{/* The live region stays mounted at load; only its content toggles,
-				    otherwise assistive tech misses the announcement. */}
-				<div aria-atomic="true" aria-live="polite">
-					{coherenceWarnings.length > 0 && (
-						<div className="fr-alert fr-alert--warning">
-							<h3 className="fr-alert__title">
-								Vérifiez la répartition des effectifs
-							</h3>
-							<ul>
-								{coherenceWarnings.map((warning) => (
-									<li key={`${warning.table}-${warning.field}`}>
-										{coherenceWarningLabel(warning)}
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
-				</div>
-
 				<div className={stepStyles.dataContainer}>
 					<QuartileTable
 						disabled={isImpersonating}
+						errorNote={
+							<CoherenceNote errors={coherenceErrors} tableType="annual" />
+						}
 						errors={fieldErrors.annual}
 						mins={annualMins}
 						onQuartileChange={(index, field, value) =>
@@ -429,6 +415,9 @@ export function Step4QuartileDistribution({
 
 					<QuartileTable
 						disabled={isImpersonating}
+						errorNote={
+							<CoherenceNote errors={coherenceErrors} tableType="hourly" />
+						}
 						errors={fieldErrors.hourly}
 						mins={hourlyMins}
 						onQuartileChange={(index, field, value) =>

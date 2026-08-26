@@ -8,7 +8,10 @@ import {
 	setGipWorkforce,
 } from "./helpers/db";
 import {
+	fillStep4Quartiles,
+	STEP1_WORKFORCE,
 	submitFromStep6Recap,
+	submitStepsThroughPayGaps,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
 
@@ -333,6 +336,126 @@ test.describe("Declaration workflow", () => {
 			(url) => !url.pathname.includes("/declaration-remuneration/etape/"),
 			{ timeout: 15_000 },
 		);
+	});
+});
+
+// #4260 — the quartile headcount check used to be an ignorable warning rendered above
+// both tables, and the hourly table was checked against the GIP hourly reference (so it
+// was unchecked without a GIP prefill). Both tables are now held to the step 1
+// "Effectifs physiques" counts, divergence blocks the step, and the message sits under
+// the offending table, below its "Source : DSN" note when prefill data exists, once
+// per table. The unit tests cover the derivation and source-note ordering; what only
+// the browser proves here is that "Suivant" no longer navigates and that the focus
+// lands on the message of the table at fault.
+test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("a diverging total blocks the step until it is corrected, on either table", async ({
+		page,
+	}) => {
+		test.slow();
+
+		const annualNote = page.locator("#step4-coherence-annual");
+		const hourlyNote = page.locator("#step4-coherence-hourly");
+		const next = page.getByRole("button", { name: "Suivant" });
+
+		await submitStepsThroughPayGaps(page);
+
+		await test.step("étape 4 — le total annuel de femmes diverge de l'étape 1", async () => {
+			await fillStep4Quartiles(page);
+			// Q4 women 2 → 4 makes the annual women total 12 against the 10 of step 1.
+			// Each cell stays under the per-cell cap, so only the total is at fault.
+			await page
+				.getByRole("textbox", { name: "Nombre de femmes 4e quartile annuel" })
+				.fill("4");
+
+			await expect(annualNote).toContainText(
+				`Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.women}).`,
+			);
+			await expect(hourlyNote).toHaveCount(0);
+
+			// This journey has a GIP workforce row but no DSN prefill payload, so it has
+			// no source note. Its browser-level invariant is that the message belongs to
+			// the table it indicts: after the annual table and before the hourly one —
+			// not above both, as the old warning was. The source-note variant is covered
+			// by Step4QuartileCoherence.test.tsx.
+			const placement = await page.evaluate(() => {
+				const note = document.getElementById("step4-coherence-annual");
+				const captioned = (needle: string) =>
+					Array.from(document.querySelectorAll("table")).find((table) =>
+						table.querySelector("caption")?.textContent?.includes(needle),
+					);
+				const annual = captioned("Rémunération annuelle");
+				const hourly = captioned("Rémunération horaire");
+				if (!note || !annual || !hourly) return null;
+				return {
+					afterAnnualTable: Boolean(
+						annual.compareDocumentPosition(note) &
+							Node.DOCUMENT_POSITION_FOLLOWING,
+					),
+					beforeHourlyTable: Boolean(
+						hourly.compareDocumentPosition(note) &
+							Node.DOCUMENT_POSITION_PRECEDING,
+					),
+				};
+			});
+			expect(placement).toEqual({
+				afterAnnualTable: true,
+				beforeHourlyTable: true,
+			});
+		});
+
+		await test.step("« Suivant » ne quitte pas l'étape et le focus va sur le message du tableau", async () => {
+			await next.click();
+
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/4$/);
+			await expect(annualNote).toBeFocused();
+			// One message, under the table at fault — no second copy in a summary.
+			await expect(
+				page.getByText("Nombre de salariés", { exact: true }),
+			).toHaveCount(1);
+		});
+
+		await test.step("le contrôle horaire vit sur l'effectif horaire de l'étape 1", async () => {
+			await page
+				.getByRole("textbox", { name: "Nombre de femmes 4e quartile annuel" })
+				.fill("2");
+			await expect(annualNote).toHaveCount(0);
+
+			// The hourly table used to be checked against the GIP hourly reference; it
+			// answers to the hourly headcount of step 1 now (#4247), which this journey
+			// declares equal to the annual one, so breaking its men total blocks too.
+			await page
+				.getByRole("textbox", { name: "Nombre d'hommes 4e quartile horaire" })
+				.fill("5");
+
+			await next.click();
+
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/4$/);
+			await expect(hourlyNote).toContainText(
+				`(nombre total horaire : ${STEP1_WORKFORCE.men})`,
+			);
+			await expect(hourlyNote).toBeFocused();
+		});
+
+		await test.step("les deux totaux corrigés, l'étape se valide", async () => {
+			await page
+				.getByRole("textbox", { name: "Nombre d'hommes 4e quartile horaire" })
+				.fill("3");
+			await expect(hourlyNote).toHaveCount(0);
+
+			await next.click();
+			await page.waitForURL("**/declaration-remuneration/etape/5");
+		});
 	});
 });
 

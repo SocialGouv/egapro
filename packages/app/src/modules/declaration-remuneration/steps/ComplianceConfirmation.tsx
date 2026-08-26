@@ -35,7 +35,7 @@ export async function ComplianceConfirmation() {
 	return (
 		<div className={common.flexColumnGap2}>
 			<h1 className="fr-h4 fr-mb-0">
-				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
+				Parcours de mise en conformité pour l&apos;indicateur par catégories de
 				salariés
 			</h1>
 
@@ -93,7 +93,7 @@ export async function ComplianceConfirmation() {
 					<DownloadCard
 						dataYear={getReferenceYearFor(currentYear)}
 						href={`/api/declaration-pdf?type=correction&year=${currentYear}`}
-						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
+						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégories de salariés"
 						year={currentYear}
 					/>
 				)}
