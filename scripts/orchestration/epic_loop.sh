@@ -266,7 +266,6 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
-        --effort xhigh \
         --print \
         --output-format stream-json \
         --verbose \

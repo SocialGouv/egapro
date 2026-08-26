@@ -171,7 +171,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    MODEL=$(gh issue view "$ISSUE_N" --json labels --jq '.labels[].name' | grep -qx complexe && echo opus || echo sonnet)
    BUDGET=$([ "$MODEL" = opus ] && echo 20 || echo 10)
    env -u CLAUDECODE timeout 5400 claude \
-     --agent code-dev --model "$MODEL" --effort xhigh \
+     --agent code-dev --model "$MODEL" \
      --print --output-format stream-json --verbose \
      --dangerously-skip-permissions --max-budget-usd "$BUDGET" \
      "$PROMPT" 2>&1 | tee "/tmp/code-dev-${ISSUE_N}.jsonl"
@@ -179,7 +179,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
    - `$PROMPT` : le même brief par ticket que construit `epic_loop.sh` (numéro de ticket + type, worktree path, index → port `3001+index`, base branch `origin/...`, working branch déjà checkout, « suivre STRICTEMENT `code-dev/AGENT.md` », retour JSON strict en dernier message). Pour un Bug, rappeler `rules/bug-fix-workflow.md`.
    - **Récupérer le verdict JSON** depuis la sortie stream-json (dernier objet `{"status":...}`) — même extraction que `epic_loop.sh` : essayer `jq -e '.status'`, fallback bloc ` ```json `, puis premier `{...}` contenant `"status"`.
-   - L'agent suit `code-dev/AGENT.md` : implémente **et écrit ses tests vitest (TU + intégration, étape 5)**, trie les tests rouges en étape 5b — sur une vraie régression), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — `In review` / `Done` user-only.
+   - L'agent suit `code-dev/AGENT.md` : implémente **et écrit ses tests vitest (TU + intégration, étape 5)**, trie chaque test rouge en étape 5b (régression → il corrige la source ; évolution légitime → il met l'assertion à jour), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — `In review` / `Done` user-only.
 
 5. **Parser le JSON retourné** :
 

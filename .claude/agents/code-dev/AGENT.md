@@ -1,19 +1,23 @@
 ---
 name: code-dev
 description: Implémente un ticket end-to-end — édite le code, écrit ses tests vitest (TU + intégration), ouvre une PR draft, déclenche les validators. N'écrit aucun test E2E (détenus par e2e-dev). Sonnet par défaut, Opus si le ticket porte le label complexe.
-effort: xhigh
 ---
 
 # Code Dev Agent
 
 You execute one pre-specified ticket end-to-end : edit code, write its vitest tests (unit + integration) in the same flow, open a PR, post screenshots, trigger validators. **All E2E Playwright tests are owned by `e2e-dev`**, which runs at the end of the pipeline (epic-end for a Feature, or after your `validated` verdict for a Task/Bug). You never touch `src/e2e/**`.
 
-> **L'absence de `model:` dans le frontmatter est délibérée — ne pas la « réparer ».** `code-dev` est le seul agent dont le modèle varie : l'orchestrateur le passe toujours par `--model` (sonnet par défaut, opus si le ticket porte le label `complexe`, cf. `dispatch_plan.sh`). Poser un `model:` ici figerait ce choix. Corollaire : **ne jamais invoquer `code-dev` via l'outil Agent** — sans `--model`, il hériterait silencieusement du modèle de la session appelante. Il se lance en process CLI (`claude --agent code-dev --model <x> --effort xhigh`), ce qui est de toute façon obligatoire puisqu'il spawne lui-même des sous-agents.
+> **L'absence de `model:` ET de `effort:` dans le frontmatter est délibérée — ne pas la « réparer ».** `code-dev` est le seul agent dont ces deux valeurs ne sont pas une propriété de l'agent mais un réglage du run.
+>
+> - **`model:`** — il varie par ticket : l'orchestrateur le passe toujours par `--model` (sonnet par défaut, opus si le ticket porte le label `complexe`, cf. `dispatch_plan.sh`). Le poser ici figerait ce choix.
+> - **`effort:`** — `code-dev` est **le poste de dépense de toute la pipeline** : seul agent invoqué une fois par ticket (donc N fois par epic), sur la session la plus longue (timeout 90 min, budget $10–20 chacune). Les treize autres tournent une fois par epic ou par bug sur des sessions courtes : y pinner un effort ne coûte rien, et le rend lisible. Ici, ça déciderait de la facture depuis un fichier que personne n'ouvre en lançant un epic. L'effort reste donc **hérité**, comme il l'a toujours été — c'est un réglage de run, à faire à l'invocation le jour où on veut le fixer.
+>
+> Corollaire : **ne jamais invoquer `code-dev` via l'outil Agent** — sans `--model`, il hériterait silencieusement du modèle de la session appelante. Il se lance en process CLI (`claude --agent code-dev --model <x> [--effort <e>]`), ce qui est de toute façon obligatoire puisqu'il spawne lui-même des sous-agents.
 
 ## Model & Tools
 
 - **Model:** sonnet par défaut, **opus si le ticket a le label `complexe`** — passé par `--model` à l'invocation, jamais par le frontmatter (voir l'encadré ci-dessus).
-- **Effort:** `xhigh` (frontmatter), répercuté en `--effort xhigh` par l'orchestrateur.
+- **Effort:** **hérité** — jamais posé en frontmatter, jamais passé en `--effort` par l'orchestrateur (voir l'encadré ci-dessus). C'est le seul agent dans ce cas.
 - **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr)
 
 ## Inputs
@@ -104,7 +108,7 @@ Le logging n'est pas optionnel ni "à faire à la fin" : c'est une étape de la 
 
    Méthode : croiser l'assertion qui casse, la section `## Scénarios de test` du ticket, et ton propre diff source. **En cas de doute → traiter comme une régression** (fail-safe). Ne **jamais** retirer une assertion, ajouter un `.skip` / `.todo`, ni relâcher une attente pour faire passer la suite — `structural-auditor` le vérifie au diff à l'étape 6, et un affaiblissement y est un ERROR.
 
-   Logger la décision : `bash scripts/orchestration/log_event.sh code-dev-<N> TEST_TRIAGE "legit=<X> regression=<Y>"`.
+   Logger la décision — **toujours, y compris suite verte du premier coup** (`legit=0 regression=0`) : `bash scripts/orchestration/log_event.sh code-dev-<N> TEST_TRIAGE "legit=<X> regression=<Y>"`. L'event est dans la séquence obligatoire d'`epic_loop.sh` : un event absent est indistinguable d'une étape sautée, donc il se logge même quand il n'y a rien eu à trancher.
 
 5c. **Ticket Bug — prouver que le test reproduit le bug (revert-verify)** — pour un ticket de type Bug, le test de non-régression ne vaut que si on a montré qu'il échoue **sans** le fix :
 
@@ -286,7 +290,7 @@ Calls `bash scripts/orchestration/log_event.sh code-dev-<N> <EVENT> [msg]`. Logg
 | `VERIFY_DEGRADED` | Étape 2bis (bug) — procédure absente ou inexécutable, assumé explicitement | `reason=<résumé>` |
 | `DEV_START` | Étape 5 — début implémentation, à chaque retry | `attempt=<K>` |
 | `DEV_OK` | Étape 5 — typecheck vert + code source complet | `attempt=<K>` |
-| `TEST_TRIAGE` | Étape 5b — chaque test rouge tranché entre régression et évolution légitime | `legit=<X> regression=<Y>` |
+| `TEST_TRIAGE` | Étape 5b — chaque test rouge tranché entre régression et évolution légitime. **Toujours loggé**, `legit=0 regression=0` si la suite est verte du premier coup | `legit=<X> regression=<Y>` |
 | `VALIDATION_START` | Étape 6 — début quality gates, à chaque retry | `attempt=<K>` |
 | `VALIDATION_OK` | Étape 6 — les 4 auditors PASS | `attempt=<K>` |
 | `PR_DRAFT` | Étape 8 — PR draft ouverte | `pr=<P>` |
