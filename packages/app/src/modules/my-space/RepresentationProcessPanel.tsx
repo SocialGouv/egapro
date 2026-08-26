@@ -31,7 +31,7 @@ type StepStatus = "pending" | "current" | "complete";
 
 function getStepStatuses(
 	variant: RepresentationPanelVariant,
-): [StepStatus, StepStatus] {
+): [StepStatus, StepStatus | null] {
 	switch (variant) {
 		case "start":
 			return ["current", "pending"];
@@ -40,11 +40,13 @@ function getStepStatuses(
 		case "submitted":
 		case "closed":
 			return ["complete", "complete"];
+		case "not_subject":
+			return ["complete", null];
 	}
 }
 
 function getCtaLabel(variant: RepresentationPanelVariant): string {
-	if (variant === "start") return "Commencer";
+	if (variant === "start" || variant === "not_subject") return "Commencer";
 	if (variant === "draft") return "Reprendre";
 	return "Voir la déclaration";
 }
@@ -88,14 +90,17 @@ export function RepresentationProcessPanel({
 							campaignYear={campaignYear}
 							lastActionDate={lastActionDate}
 						/>
-						<RixainAlert />
+						{variant !== "not_subject" && <RixainAlert />}
 						<div className={`${styles.stepper} fr-mb-4w`}>
 							<Step1Row status={step1} />
-							<Step2Row
-								deadline={campaign.declarationDeadline}
-								status={step2}
-							/>
+							{step2 !== null && (
+								<Step2Row
+									deadline={campaign.declarationDeadline}
+									status={step2}
+								/>
+							)}
 						</div>
+						{variant === "not_subject" && <NotSubjectMessage />}
 						{variant === "closed" && <ClosedMessage />}
 					</div>
 					<div>
@@ -274,6 +279,17 @@ function ClosedMessage() {
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">Cette démarche est terminée.</p>
+		</div>
+	);
+}
+
+function NotSubjectMessage() {
+	return (
+		<div className="fr-background-alt--blue-france fr-p-4w">
+			<p className="fr-mb-0">
+				Vous n'êtes pas assujetti à la publication et à la déclaration des
+				écarts éventuels de représentation entre les femmes et les hommes.
+			</p>
 		</div>
 	);
 }
