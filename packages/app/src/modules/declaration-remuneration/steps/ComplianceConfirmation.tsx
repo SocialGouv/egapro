@@ -5,7 +5,10 @@ import {
 	isCseRequired,
 } from "~/modules/domain";
 import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
-import { buildRemunerationDocuments } from "~/modules/shared/demarcheDocuments";
+import {
+	buildRemunerationDocuments,
+	offersTransmittedElements,
+} from "~/modules/shared/demarcheDocuments";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -31,8 +34,7 @@ export async function ComplianceConfirmation() {
 			documents={buildRemunerationDocuments({
 				dataYear: getReferenceYearFor(currentYear),
 				hasSecondDeclaration: data.hasSubmittedSecondDeclaration,
-				hasTransmittedElements:
-					data.hasSubmittedCseOpinion || data.hasSubmittedJointEvaluation,
+				hasTransmittedElements: offersTransmittedElements(data),
 				year: currentYear,
 			})}
 			email={session?.user?.email ?? "adresse@exemple.fr"}

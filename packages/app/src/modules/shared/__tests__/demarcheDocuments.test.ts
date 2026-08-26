@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildRemunerationDocuments } from "../demarcheDocuments";
+import {
+	buildRemunerationDocuments,
+	offersTransmittedElements,
+} from "../demarcheDocuments";
 
 const YEAR = 2025;
 const DATA_YEAR = YEAR - 1;
@@ -95,6 +98,47 @@ describe("buildRemunerationDocuments", () => {
 			documents.every(
 				(document) => document.year === YEAR && document.dataYear === DATA_YEAR,
 			),
+		).toBe(true);
+	});
+});
+
+describe("offersTransmittedElements", () => {
+	it.each([
+		{
+			expected: false,
+			hasSubmittedCseOpinion: false,
+			hasSubmittedJointEvaluation: false,
+		},
+		{
+			expected: true,
+			hasSubmittedCseOpinion: true,
+			hasSubmittedJointEvaluation: false,
+		},
+		{
+			expected: true,
+			hasSubmittedCseOpinion: false,
+			hasSubmittedJointEvaluation: true,
+		},
+		{
+			expected: true,
+			hasSubmittedCseOpinion: true,
+			hasSubmittedJointEvaluation: true,
+		},
+	])("is $expected (cseOpinion: $hasSubmittedCseOpinion, jointEvaluation: $hasSubmittedJointEvaluation)", ({
+		expected,
+		...submissions
+	}) => {
+		expect(offersTransmittedElements(submissions)).toBe(expected);
+	});
+
+	// The joint evaluation report is a compliance-path choice, not a CSE artefact:
+	// a company without a CSE that filed one has a non-empty recap (issue 4268).
+	it("offers the recap to a company without a CSE that filed a joint evaluation", () => {
+		expect(
+			offersTransmittedElements({
+				hasSubmittedCseOpinion: false,
+				hasSubmittedJointEvaluation: true,
+			}),
 		).toBe(true);
 	});
 });
