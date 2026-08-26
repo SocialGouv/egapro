@@ -222,10 +222,11 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			"cse",
 			"closed",
 		])("announces the transmitted declaration for variant %s", (variant) => {
-			const { panel } = renderPanel(variant);
+			const { panel, dialog } = renderPanel(variant);
 			expect(
 				panel.getByText("Votre déclaration a été transmise"),
 			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
 		});
 
 		it("keeps the view link on a closed démarche once the deadline has passed", () => {
@@ -294,18 +295,70 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			);
 		});
 
-		it("names the chosen path with no deadline for the justification", () => {
-			const { panel } = renderPanel("cse", {
+		it.each([
+			{
+				label: "first round",
 				displayContext: makeDisplayContext("justify"),
+			},
+			{
+				label: "revised choice",
+				displayContext: makeDisplayContext("corrective_action", "justify"),
+			},
+		])("names the $label justification with no deadline", ({
+			displayContext,
+		}) => {
+			const { panel } = renderPanel("cse", {
+				displayContext,
 				hasSubmittedSecondDeclaration: false,
 			});
 
-			const step2 = panel
-				.getByText(/^Parcours de mise en conformité/)
-				.closest("div");
-			expect(step2).not.toBeNull();
-			expect(step2?.parentElement).toHaveTextContent(
+			const step2 = panel.getByText(
+				/^Parcours de mise en conformité/,
+			).parentElement;
+			if (!step2) throw new Error("Step 2 content did not render");
+			expect(step2).toHaveTextContent(
 				"Justification des écarts de rémunération",
+			);
+			expect(within(step2).queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it.each([
+			{
+				label: "first round",
+				declarationFsmStatus: "joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedSecondDeclaration: false,
+				deadlineKey: "decl1JointEvaluationDeadline" as const,
+			},
+			{
+				label: "revised choice",
+				declarationFsmStatus: "revised_joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+				deadlineKey: "decl2JointEvaluationDeadline" as const,
+			},
+		])("names the $label joint evaluation with the applicable deadline", ({
+			declarationFsmStatus,
+			displayContext,
+			hasSubmittedSecondDeclaration,
+			deadlineKey,
+		}) => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("evaluation", {
+				campaignDeadlines: deadlines,
+				declarationFsmStatus,
+				displayContext,
+				hasSubmittedSecondDeclaration,
+			});
+
+			expect(
+				panel.getByText("Évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines[deadlineKey])}`,
 			);
 		});
 	});

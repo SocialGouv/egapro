@@ -182,6 +182,10 @@ export function Step2Content({
 		displayContext.firstDeclarationPathChoice;
 
 	if (variant === "evaluation") {
+		const jointEvaluationDeadline =
+			declarationFsmStatus === "joint_evaluation_chosen"
+				? campaignDeadlines.decl1JointEvaluationDeadline
+				: campaignDeadlines.decl2JointEvaluationDeadline;
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
@@ -207,7 +211,7 @@ export function Step2Content({
 				{title}
 				{secondDeclTransmittedRow}
 				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
-				<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
+				<DeadlineRow date={jointEvaluationDeadline} />
 			</div>
 		);
 	}
