@@ -150,7 +150,7 @@ describe("DeclarationProcessPanel", () => {
 		const BRANCH_AGREEMENT_TEXT = /Vous devez au préalable disposer/;
 
 		function infoAlert(dialog: HTMLElement) {
-			return dialog.querySelector(".fr-alert--info");
+			return dialog.querySelector(".fr-alert.fr-alert--info");
 		}
 
 		it("renders the info alert on the start variant when indicator G applies", () => {
