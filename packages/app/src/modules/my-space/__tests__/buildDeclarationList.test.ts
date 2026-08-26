@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDeclarationList } from "../buildDeclarationList";
+import {
+	buildDeclarationList,
+	type DbDeclaration,
+} from "../buildDeclarationList";
+import type { DeclarationType } from "../types";
 
 const SIREN = "532847196";
 const EMPTY_DECLARATION = {
@@ -13,63 +17,64 @@ const EMPTY_DECLARATION = {
 	hasPrefillData: false,
 	notSubject: false,
 };
-const PLACEHOLDER_ROW = { ...EMPTY_DECLARATION, fsmStatus: null };
+
+function makeDbDeclaration(
+	overrides: Partial<DbDeclaration> = {},
+): DbDeclaration {
+	return {
+		type: "remuneration",
+		year: 2026,
+		status: "done",
+		fsmStatus: "demarche_completed",
+		currentStep: 6,
+		updatedAt: null,
+		...EMPTY_DECLARATION,
+		...overrides,
+	};
+}
+
+function placeholderRow(type: DeclarationType, year = 2026) {
+	return {
+		type,
+		siren: SIREN,
+		year,
+		status: "to_complete",
+		fsmStatus: null,
+		currentStep: 0,
+		updatedAt: null,
+		...EMPTY_DECLARATION,
+	};
+}
+
+const NOT_SUBJECT: Partial<DbDeclaration> = {
+	type: "representation",
+	status: "done",
+	fsmStatus: null,
+	currentStep: 0,
+	notSubject: true,
+};
 
 describe("buildDeclarationList", () => {
 	it("returns two rows (remuneration + representation) for the current year when no DB records exist", () => {
 		const result = buildDeclarationList(SIREN, [], 2026);
 
 		expect(result).toEqual([
-			{
-				type: "remuneration",
-				siren: SIREN,
-				year: 2026,
-				status: "to_complete",
-				currentStep: 0,
-				updatedAt: null,
-				...PLACEHOLDER_ROW,
-			},
-			{
-				type: "representation",
-				siren: SIREN,
-				year: 2026,
-				status: "to_complete",
-				currentStep: 0,
-				updatedAt: null,
-				...PLACEHOLDER_ROW,
-			},
+			placeholderRow("remuneration"),
+			placeholderRow("representation"),
 		]);
 	});
 
 	it("uses DB data for remuneration when a record exists for the current year", () => {
-		const updatedAt = new Date("2026-02-15");
-		const result = buildDeclarationList(
-			SIREN,
-			[
-				{
-					type: "remuneration",
-					year: 2026,
-					status: "in_progress",
-					fsmStatus: "draft",
-					currentStep: 3,
-					updatedAt,
-					...EMPTY_DECLARATION,
-				},
-			],
-			2026,
-		);
-
-		expect(result).toHaveLength(2);
-		expect(result[0]).toEqual({
-			type: "remuneration",
-			siren: SIREN,
-			year: 2026,
+		const record = makeDbDeclaration({
 			status: "in_progress",
 			fsmStatus: "draft",
 			currentStep: 3,
-			updatedAt,
-			...EMPTY_DECLARATION,
+			updatedAt: new Date("2026-02-15"),
 		});
+		const result = buildDeclarationList(SIREN, [record], 2026);
+
+		expect(result).toHaveLength(2);
+		expect(result[0]).toEqual({ ...record, siren: SIREN });
 		expect(result[1]).toMatchObject({
 			type: "representation",
 			year: 2026,
@@ -82,17 +87,7 @@ describe("buildDeclarationList", () => {
 		const updatedAt2025 = new Date("2025-06-01");
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "remuneration",
-					year: 2025,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: updatedAt2025,
-					...EMPTY_DECLARATION,
-				},
-			],
+			[makeDbDeclaration({ year: 2025, updatedAt: updatedAt2025 })],
 			2026,
 		);
 
@@ -121,33 +116,9 @@ describe("buildDeclarationList", () => {
 		const result = buildDeclarationList(
 			SIREN,
 			[
-				{
-					type: "remuneration",
-					year: 2023,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
-				{
-					type: "remuneration",
-					year: 2025,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
-				{
-					type: "remuneration",
-					year: 2024,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
+				makeDbDeclaration({ year: 2023 }),
+				makeDbDeclaration({ year: 2025 }),
+				makeDbDeclaration({ year: 2024 }),
 			],
 			2026,
 		);
@@ -161,28 +132,14 @@ describe("buildDeclarationList", () => {
 	});
 
 	it("merges current year DB record with expected types", () => {
-		const updatedAt = new Date("2026-01-10");
 		const result = buildDeclarationList(
 			SIREN,
 			[
-				{
-					type: "remuneration",
-					year: 2026,
-					status: "done",
+				makeDbDeclaration({
 					fsmStatus: "awaiting_compliance_path_choice",
-					currentStep: 6,
-					updatedAt,
-					...EMPTY_DECLARATION,
-				},
-				{
-					type: "remuneration",
-					year: 2025,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
+					updatedAt: new Date("2026-01-10"),
+				}),
+				makeDbDeclaration({ year: 2025 }),
 			],
 			2026,
 		);
@@ -220,17 +177,7 @@ describe("buildDeclarationList", () => {
 	it("omits the current year representation row when visibility is denied", () => {
 		const result = buildDeclarationList(SIREN, [], 2026, new Set(), false);
 
-		expect(result).toEqual([
-			{
-				type: "remuneration",
-				siren: SIREN,
-				year: 2026,
-				status: "to_complete",
-				currentStep: 0,
-				updatedAt: null,
-				...PLACEHOLDER_ROW,
-			},
-		]);
+		expect(result).toEqual([placeholderRow("remuneration")]);
 	});
 
 	it("keeps the remuneration prefill flag when representation is hidden", () => {
@@ -250,52 +197,29 @@ describe("buildDeclarationList", () => {
 	});
 
 	it("keeps an existing representation draft visible when visibility is denied", () => {
-		const updatedAt = new Date("2026-03-02");
+		const record = makeDbDeclaration({
+			type: "representation",
+			status: "in_progress",
+			fsmStatus: "draft",
+			currentStep: 2,
+			updatedAt: new Date("2026-03-02"),
+		});
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "representation",
-					year: 2026,
-					status: "in_progress",
-					fsmStatus: "draft",
-					currentStep: 2,
-					updatedAt,
-					...EMPTY_DECLARATION,
-				},
-			],
+			[record],
 			2026,
 			new Set(),
 			false,
 		);
 
 		expect(result).toHaveLength(2);
-		expect(result[1]).toEqual({
-			type: "representation",
-			siren: SIREN,
-			year: 2026,
-			status: "in_progress",
-			fsmStatus: "draft",
-			currentStep: 2,
-			updatedAt,
-			...EMPTY_DECLARATION,
-		});
+		expect(result[1]).toEqual({ ...record, siren: SIREN });
 	});
 
 	it("keeps a submitted representation declaration visible when visibility is denied", () => {
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "representation",
-					year: 2026,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
-			],
+			[makeDbDeclaration({ type: "representation" })],
 			2026,
 			new Set(),
 			false,
@@ -313,17 +237,7 @@ describe("buildDeclarationList", () => {
 	it("keeps previous year representation declarations visible when visibility is denied", () => {
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "representation",
-					year: 2025,
-					status: "done",
-					fsmStatus: "demarche_completed",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-				},
-			],
+			[makeDbDeclaration({ type: "representation", year: 2025 })],
 			2026,
 			new Set(),
 			false,
@@ -342,16 +256,10 @@ describe("buildDeclarationList", () => {
 		const result = buildDeclarationList(
 			SIREN,
 			[
-				{
-					type: "remuneration",
-					year: 2026,
-					status: "done",
+				makeDbDeclaration({
 					fsmStatus: "awaiting_cse_opinion",
-					currentStep: 6,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
 					cseRequired: true,
-				},
+				}),
 			],
 			2026,
 		);
@@ -367,18 +275,7 @@ describe("buildDeclarationList", () => {
 	it("propagates notSubject from a current year representation record", () => {
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "representation",
-					year: 2026,
-					status: "done",
-					fsmStatus: null,
-					currentStep: 0,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-					notSubject: true,
-				},
-			],
+			[makeDbDeclaration(NOT_SUBJECT)],
 			2026,
 		);
 
@@ -398,18 +295,7 @@ describe("buildDeclarationList", () => {
 	it("propagates notSubject from a previous year representation record", () => {
 		const result = buildDeclarationList(
 			SIREN,
-			[
-				{
-					type: "representation",
-					year: 2025,
-					status: "done",
-					fsmStatus: null,
-					currentStep: 0,
-					updatedAt: null,
-					...EMPTY_DECLARATION,
-					notSubject: true,
-				},
-			],
+			[makeDbDeclaration({ ...NOT_SUBJECT, year: 2025 })],
 			2026,
 		);
 

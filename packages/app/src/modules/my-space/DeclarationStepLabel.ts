@@ -21,7 +21,6 @@ const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 };
 
 const REPRESENTATION_START_LABEL = "Vérification de l'assujettissement";
-const REPRESENTATION_NOT_SUBJECT_LABEL = "Non-assujetti";
 
 function getRepresentationStepLabel(
 	status: DeclarationStatus,
@@ -29,7 +28,7 @@ function getRepresentationStepLabel(
 	notSubject: boolean,
 ): string {
 	if (notSubject) {
-		return REPRESENTATION_NOT_SUBJECT_LABEL;
+		return "Non-assujetti";
 	}
 	if (status === "done") {
 		return "Finalisation - Démarche des indicateurs de représentation";

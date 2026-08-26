@@ -461,8 +461,7 @@ describe("companyRouter.getWithDeclarations", () => {
 		});
 	});
 
-	// "done" alone cannot tell a submitted démarche from a not-subject one, so
-	// the dashboard reads this discriminant rather than the status.
+	// "done" alone cannot tell a submitted démarche from a not-subject one.
 	it("flags only the not-subject row, never a submitted one nor the rémunération lines", async () => {
 		getRepresentationWorkforceHistoryMock.mockResolvedValue(
 			workforceBelowThreshold,

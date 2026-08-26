@@ -127,8 +127,7 @@ describe("getDocumentResourceCount", () => {
 		).toBe(1);
 	});
 
-	// A not-subject démarche is settled ("done") but produces no récépissé — the
-	// PDF route would 404 on a declaration that was never filled.
+	// Settled ("done") but never filled: the récépissé PDF route would 404.
 	it("counts no resource for a settled representation declaration that is not subject", () => {
 		expect(
 			getDocumentResourceCount(

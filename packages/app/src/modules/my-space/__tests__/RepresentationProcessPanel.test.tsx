@@ -56,8 +56,7 @@ const SUBMITTED = makeDeclaration({
 	status: "done",
 	currentStep: TOTAL_REPRESENTATION_STEPS,
 });
-// The funnel resets a not-subject row to step 0 while the router still maps it
-// to "done": the discriminant, not the progression, settles the démarche.
+// A not-subject row is reset to step 0 yet mapped "done": the flag settles it.
 const NOT_SUBJECT = makeDeclaration({
 	status: "done",
 	currentStep: 0,
