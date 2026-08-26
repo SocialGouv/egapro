@@ -286,6 +286,40 @@ describe("MissingInfoModal", () => {
 		});
 	});
 
+	it("does not repeat the format hint when typing after an empty submission", async () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={false}
+				hasCse={true}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await screen.findByText("Veuillez renseigner votre numéro de téléphone");
+
+		fireEvent.change(screen.getByLabelText(/Numéro de téléphone/), {
+			target: { value: "0" },
+		});
+
+		await waitFor(() => {
+			expect(
+				document.querySelector(
+					"#missing-info-phone-messages .fr-message--error",
+				),
+			).toHaveTextContent(
+				"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+			);
+			expect(
+				screen.getAllByText(
+					"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+				),
+			).toHaveLength(1);
+		});
+	});
+
 	it("keeps the format error when the phone number is filled but malformed", async () => {
 		render(
 			<MissingInfoModal

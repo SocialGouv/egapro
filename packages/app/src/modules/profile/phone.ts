@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const FRENCH_LOCAL_REGEX = /^0\d{9}$/;
 const INTERNATIONAL_REGEX = /^\+\d{8,15}$/;
-const PHONE_FORMAT_ERROR =
+export const PHONE_FORMAT_MESSAGE =
 	"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55";
 const PHONE_REQUIRED_ERROR = "Veuillez renseigner votre numéro de téléphone";
 
@@ -76,8 +76,8 @@ export function formatPhoneInput(raw: string): string {
 /**
  * Zod schema validating French local or international phone numbers and
  * normalizing them to the canonical "+CC…" form for storage. An empty value
- * reports a dedicated "missing" message: the format hint is already displayed
- * permanently under the label, so repeating it tells the user nothing.
+ * reports a dedicated "missing" message: format guidance alone would not tell
+ * the user that the field is required.
  */
 export const phoneSchema = z.string().transform((value, ctx) => {
 	if (normalizePhone(value).length === 0) {
@@ -86,7 +86,7 @@ export const phoneSchema = z.string().transform((value, ctx) => {
 	}
 	const canonical = toCanonicalPhone(value);
 	if (canonical === null) {
-		ctx.addIssue({ code: "custom", message: PHONE_FORMAT_ERROR });
+		ctx.addIssue({ code: "custom", message: PHONE_FORMAT_MESSAGE });
 		return z.NEVER;
 	}
 	return canonical;
