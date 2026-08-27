@@ -8,6 +8,8 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { CURRENT_RULES_VERSION } from "~/server/rules/version";
+
 /**
  * Multi-project schema: all tables are prefixed with `app_`.
  *
@@ -178,7 +180,10 @@ export const declarations = createTable(
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
 		cseRequired: d.boolean().notNull().default(false),
-		rulesVersion: d.varchar("rules_version").notNull().default("2027.1"),
+		rulesVersion: d
+			.varchar("rules_version")
+			.notNull()
+			.default(CURRENT_RULES_VERSION),
 		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),

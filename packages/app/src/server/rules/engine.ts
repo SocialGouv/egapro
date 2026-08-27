@@ -189,6 +189,10 @@ const BUNDLED_VERSIONS: Record<string, unknown> = {
 	"2027.1": rawV20271,
 };
 
+export function isKnownRulesVersion(version: string): boolean {
+	return Object.hasOwn(BUNDLED_VERSIONS, version);
+}
+
 export function loadRules(version: string): Rules {
 	const cached = cache.get(version);
 	if (cached) return cached;
