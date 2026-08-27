@@ -59,6 +59,36 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       initContainers:
+        # Sealed-secret `suit` is applied in the same wave as this Deployment;
+        # kubelet then races the controller (rollout watcher gives up in ~7s).
+        # An optional volume lets this init start, then we block until the key
+        # is projected so the main container's required envFrom does not 404.
+        - name: wait-suit-secret
+          image: apache/apisix:3.11.0-debian
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              echo "waiting for secret/suit to be projected..."
+              for i in $(seq 1 90); do
+                if [ -s /var/run/suit/EGAPRO_SUIT_API_KEY ]; then
+                  echo "secret/suit is available"
+                  exit 0
+                fi
+                sleep 2
+              done
+              echo "timeout waiting for secret/suit" >&2
+              exit 1
+          volumeMounts:
+            - name: suit-secret
+              mountPath: /var/run/suit
+              readOnly: true
         - name: seed-conf
           image: apache/apisix:3.11.0-debian
           imagePullPolicy: IfNotPresent
@@ -173,6 +203,10 @@ spec:
         - name: config
           configMap:
             name: apisix-suit-config
+        - name: suit-secret
+          secret:
+            secretName: suit
+            optional: true
 ---
 apiVersion: v1
 kind: Service
