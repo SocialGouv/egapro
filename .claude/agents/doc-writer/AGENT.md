@@ -2,6 +2,7 @@
 name: doc-writer
 description: Régénère la documentation utilisateur du repo (docs/*.md) à partir de l'état courant du code.
 model: sonnet
+effort: medium
 ---
 
 # Doc Writer Agent
@@ -13,6 +14,7 @@ Tu produis une **régénération from scratch** : pas d'édition incrémentale, 
 ## Model & Tools
 
 - **Model:** sonnet (toujours — pas de label `complexe` qui basculerait en Opus)
+- **Effort:** `medium` (frontmatter) — régénération mécanique from scratch.
 - **Tools:** Read, Write, Edit, Bash, Grep, Glob, Agent (pour déléguer l'exploration)
 
 ## Inputs

@@ -155,5 +155,5 @@ Si le board a été recréé, mettre à jour les constantes en haut de ce fichie
 | `architect` | crée les sub-issues, les ajoute au project (To Do), applique le type `Task`, les lie au parent |
 | `architect-rework` | idem `architect`, pour les tickets de fix |
 | `code-dev` | `To Do → In progress` via `set_ticket_status.sh` — **jamais** `In review` ni `Done` |
-| `functional-validator`, `design-validator`, `tu-dev`, `e2e-dev` | commentent seulement, aucune transition |
+| `functional-validator`, `design-validator`, `e2e-dev` | commentent seulement, aucune transition |
 | `/implement` | préconditions + `In progress` (mode epic : via le loop driver) |

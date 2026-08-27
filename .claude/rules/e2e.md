@@ -5,7 +5,7 @@ paths:
 
 # Tests E2E (Playwright)
 
-> Propriétaire **exclusif** : l'agent `e2e-dev`. Ni `code-dev` ni `tu-dev` ne touchent à `src/e2e/**`. Quand la gate tourne et ce qui se passe sur régression → `.claude/pipeline/orchestration.md`. Pour les TU et tests d'intégration → `rules/testing.md`.
+> Propriétaire **exclusif** : l'agent `e2e-dev`. `code-dev` ne touche jamais à `src/e2e/**` — il possède les TU et l'intégration, pas l'E2E. Quand la gate tourne et ce qui se passe sur régression → `.claude/pipeline/orchestration.md`. Pour les TU et tests d'intégration → `rules/testing.md`.
 
 ## Peu de scénarios, mais riches
 

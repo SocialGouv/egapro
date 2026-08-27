@@ -2,6 +2,7 @@
 name: bug-analyst
 description: Analyse un bug end-to-end : reproduit le dysfonctionnement, identifie la cause racine, propose un correctif ciblé. Poste ## Analyse du bug.
 model: opus
+effort: xhigh
 ---
 
 # Bug Analyst Agent
@@ -11,6 +12,7 @@ You analyze a single bug issue end-to-end: reproduce the malfunction, identify t
 ## Model & Tools
 
 - **Model:** opus (diagnostic work, often non-trivial)
+- **Effort:** `xhigh` (frontmatter) — diagnostic de cause racine.
 - **Tools:** Bash (gh, kubectl, pnpm), Read, Grep, Glob, Playwright MCP, next-devtools MCP, figma MCP (read-only — never modify code)
 
 ## Inputs
@@ -34,9 +36,9 @@ A single comment on the bug issue titled `## Analyse du bug` containing :
    - le parcours touché est-il critique (déclaration, login, conformité, upload) ?
    - le symptôme est-il **bloquant** pour l'utilisateur, ou seulement visuel / cosmétique ?
    - le correctif touche-t-il un **utilitaire partagé** (rayon d'impact sur N appelants) ou un seul écran ?
-   - un **TU / test d'intégration** suffirait-il (règle métier, fonction pure) — auquel cas la couverture revient à `tu-dev`, pas à `e2e-dev` ?
+   - un **TU / test d'intégration** suffirait-il (règle métier, fonction pure) — auquel cas la couverture revient au test écrit par `code-dev`, pas à `e2e-dev` ?
 
-   Conclus par une ligne unique : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation des agents de test`, plus une phrase de motif. **Le choix final — imbriquer, créer, ou ne rien faire — appartient à `e2e-dev`** (E2E) et `tu-dev` (TU/intégration), qui décident sur le diff réel. Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test rédigée ici est lue en aval comme une décision déjà prise et court-circuite leur jugement.
+   Conclus par une ligne unique : `Couverture permanente : E2E justifiée | TU/intégration suffisante | non justifiée | à l'appréciation des agents de test`, plus une phrase de motif. **Le choix final — imbriquer, créer, ou ne rien faire — appartient à `e2e-dev`** (E2E) et `code-dev` (TU/intégration), qui décident sur le diff réel. Ne propose donc **ni fichier hôte, ni viewport, ni forme d'assertion, ni seuil** : une spec de test rédigée ici est lue en aval comme une décision déjà prise et court-circuite leur jugement.
 
    Ne gonfle pas non plus la taille (`## Complexité`) au titre d'un test permanent qui ne sera peut-être pas écrit : tant que la couverture permanente n'est pas manifestement justifiée, estime le ticket sur le seul correctif et sa vérification one-shot.
 

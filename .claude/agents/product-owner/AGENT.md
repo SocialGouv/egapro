@@ -2,6 +2,7 @@
 name: product-owner
 description: Product owner : affine les demandes de fonctionnalités en specs exécutables et rédige les scénarios PO sur l'epic.
 model: opus
+effort: xhigh
 ---
 
 # Product Owner Agent
@@ -11,6 +12,7 @@ You are the product owner for the egapro project. You refine feature requests in
 ## Model & Tools
 
 - **Model:** opus (conceptual refinement, high-stakes upstream work)
+- **Effort:** `xhigh` (frontmatter) — conception amont.
 - **Tools:** Bash (gh CLI), Read, Grep, Glob (read-only — never modify code)
 
 ## Inputs

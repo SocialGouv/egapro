@@ -36,8 +36,7 @@
 **Pipeline exécution** (invoqués par `/implement`) :
 | Agent | Rôle |
 |---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, **construit** fidèle au Figma (lecture structurelle) ; la **vérification** est faite indépendamment par le gate `design-validator` (step 9a-bis). Délègue **tous** les tests TU + intégration à `tu-dev` ; **n'écrit aucun test E2E** (c'est `e2e-dev`). |
-| `tu-dev` | Écrit/corrige **tous** les tests vitest (TU + intégration) du ticket, juste après `code-dev` et avant les validators (step 5.5). Toujours Opus. Trie les échecs : sur **vraie régression** il rend la main à `code-dev` (commentaire `tu-dev:` + verdict) ; sinon corrige les tests en échec légitime et ajoute la couverture du nouveau code (DRY). |
+| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, **construit** fidèle au Figma (lecture structurelle) ; la **vérification** est faite indépendamment par le gate `design-validator` (step 9a-bis). Écrit **ses** tests vitest (TU + intégration) dans la foulée de l'implémentation, et trie chaque test rouge entre régression et évolution légitime (étape 5b, event `TEST_TRIAGE`) ; **n'écrit aucun test E2E** (c'est `e2e-dev`). |
 | `e2e-dev` | Écrit/maintient **tous** les tests E2E Playwright (`src/e2e/**`) en **fin de pipeline** : pour une Feature après que les sous-tickets sont squash-mergés dans `epic/<N>` (via `run_e2e_dev.sh`, **gate bloquante avant** doc-writer + PR finale) ; pour une Task/Bug après le `validated` de `code-dev` (via `/implement`). Toujours Opus. Lance la suite E2E (triage régression vs évolution légitime), puis décide d'**imbriquer** la nouvelle fonctionnalité dans un scénario global existant ou d'en créer un nouveau (et juge la **criticité** pour les bugs). Sur **vraie régression** : handback **bloquant** → routé vers `architect-rework`. Ne touche jamais au code source. |
 | `architect-rework` | Transforme un besoin de rework de fin d'epic en **tickets Task de fix** (sous-issues To Do, modèle `architect` epic-enrich) que l'orchestrateur reprocesse — ou, sur **doute fonctionnel**, pose la question. Toujours Opus. Deux sources : (1) **régression E2E** détectée par `e2e-dev` (lit le commentaire `e2e-dev:`, escalade via `dispatch=escalate`) ; (2) **demande de changement utilisateur** à la gate d'acceptation de fin de pipeline (lit le feedback ; sur doute, la question est relayée par `/implement`). N'écrit ni code ni test. |
 | `functional-validator` | Rejoue les scénarios PO dans le dev server |
@@ -113,12 +112,11 @@ Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`val
 
 ## Qui écrit quoi, et quand
 
-`code-dev` **n'écrit aucun test**. Cette contrainte n'est pas une précaution : elle sépare celui qui produit le code de celui qui juge s'il marche, pour qu'aucun agent ne puisse valider son propre travail.
+`code-dev` écrit ses **tests vitest** (TU + intégration) dans la foulée du code, mais **aucun E2E**. Le cloisonnement qui compte n'est plus « un autre agent écrit les tests » — il est ailleurs, et il tient en deux points : `structural-auditor`, read-only et indépendant, vérifie au diff qu'aucun test n'a été **affaibli** pour passer ; et la décision de triage sur chaque test rouge est **écrite** (`TEST_TRIAGE`) plutôt que dissoute dans un tour de boucle. Un agent qui écrit la source et possède les tests a toujours le chemin facile disponible ; ce qui le ferme, c'est un tiers qui regarde le diff et une trace qu'on peut relire.
 
 | Agent | Écrit | Quand | Sur régression |
 |---|---|---|---|
-| `code-dev` | le code source, la PR | étapes 1–10 du ticket | — |
-| `tu-dev` (Opus) | les tests vitest, TU + intégration | étape 5.5, juste après le code | commentaire `tu-dev:` → rend la main à `code-dev` |
+| `code-dev` | le code source, ses tests vitest, la PR | étapes 1–10 du ticket | triage écrit en `TEST_TRIAGE` ; il corrige la source, jamais le test |
 | les 4 auditors | rien (read-only) | étape 6, en parallèle | findings → `code-dev` corrige |
 | `functional-validator`, `design-validator` | rien (read-only) | étape 9a / 9a-bis, sur le dev server | `RETRY` ×2 → `REFACTO` → ticket en To Do |
 | `e2e-dev` (Opus) | les tests Playwright `src/e2e/**` | **fin de pipeline** | commentaire `e2e-dev:` → `architect-rework` |
@@ -128,4 +126,4 @@ Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`val
 
 **La gate d'acceptation utilisateur** ferme la boucle : PR finale ouverte → `/implement` invite l'utilisateur à tester → s'il demande des changements, ils passent par `architect-rework` en mode `user-feedback`, exactement comme un renvoi d'`e2e-dev`. La boucle se ferme quand l'utilisateur valide.
 
-**`code-dev` tourne comme agent principal**, jamais via l'outil Agent : il spawn lui-même `tu-dev`, les 4 gates et les deux validators navigateur, et un sous-agent ne peut pas spawner de sous-agents. D'où le lancement en process CLI — `epic_loop.sh` en mode epic, `claude --agent code-dev` synchrone en mode task/bug.
+**`code-dev` tourne comme agent principal**, jamais via l'outil Agent : il spawn lui-même les 4 gates et les deux validators navigateur, et un sous-agent ne peut pas spawner de sous-agents. D'où le lancement en process CLI — `epic_loop.sh` en mode epic, `claude --agent code-dev` synchrone en mode task/bug.

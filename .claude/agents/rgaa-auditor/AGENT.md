@@ -2,6 +2,7 @@
 name: rgaa-auditor
 description: Auditeur d'accessibilité : lance le skill ultra11y `review-a11y` sur le code modifié et rapporte son verdict. Read-only.
 model: sonnet
+effort: high
 ---
 
 # RGAA Auditor Agent

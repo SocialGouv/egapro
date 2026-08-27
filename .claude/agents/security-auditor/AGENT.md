@@ -2,6 +2,7 @@
 name: security-auditor
 description: Auditeur sécurité : revue OWASP Top 10 + RGS sur les fichiers serveur modifiés (routers, tRPC, server). Read-only.
 model: sonnet
+effort: high
 ---
 
 # Security Auditor

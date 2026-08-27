@@ -5,7 +5,7 @@ paths:
 
 # Tests unitaires et d'intégration
 
-> Chargée sur `src/**/__tests__/**`. Propriétaire dans la pipeline : `tu-dev`. Pour les E2E Playwright → `rules/e2e.md` (propriétaire : `e2e-dev`).
+> Chargée sur `src/**/__tests__/**`. Propriétaire dans la pipeline : `code-dev`, qui écrit ses tests dans la foulée de l'implémentation ; `structural-auditor` vérifie ensuite qu'aucun test n'a été affaibli. Pour les E2E Playwright → `rules/e2e.md` (propriétaire : `e2e-dev`).
 
 ## Couverture
 

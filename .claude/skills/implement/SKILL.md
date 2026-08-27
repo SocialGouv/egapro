@@ -14,7 +14,7 @@ description: "Phase exécution. Détecte le mode (epic/task/bug) selon le type d
 | `Bug` | bug | Lance `code-dev` en **CLI foreground** (`claude --agent code-dev`, bloquant) avec `rules/bug-fix-workflow.md`, puis **e2e-dev** une fois `validated` |
 | sub-issue d'un epic (non-feature) | task-debug | Comme `task` — utile pour re-rouler un sous-ticket d'un epic plus large (ex: après `refacto` ou debug) |
 
-`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise (et exécute la **gate E2E bloquante** `run_e2e_dev.sh` → `run_architect_rework.sh` en fin de loop), pour task/bug c'est un process CLI `claude --agent code-dev` foreground suivi d'un `claude --agent e2e-dev`. **`code-dev` tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (`tu-dev`, les 4 validateurs, `functional-validator`) : un sous-agent ne peut pas en spawner d'autres. **`e2e-dev` tourne en fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug) et possède toute la couverture E2E — `code-dev` n'écrit plus aucun test E2E.
+`/implement` n'orchestre rien lui-même : pour epic c'est `epic_loop.sh` qui parallèlise (et exécute la **gate E2E bloquante** `run_e2e_dev.sh` → `run_architect_rework.sh` en fin de loop), pour task/bug c'est un process CLI `claude --agent code-dev` foreground suivi d'un `claude --agent e2e-dev`. **`code-dev` tourne comme _main agent_ (process CLI)** — obligatoire pour qu'il puisse lancer ses propres sous-agents (les 4 validateurs, `functional-validator`, `design-validator`) : un sous-agent ne peut pas en spawner d'autres. **`e2e-dev` tourne en fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug) et possède toute la couverture E2E — `code-dev` n'écrit plus aucun test E2E.
 
 ---
 
@@ -165,11 +165,11 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
 3. **Status board** : `set_ticket_status.sh "$ISSUE_N" "In progress"`. Cette transition **stampe automatiquement la `Start date`** du board (première fois seulement, idempotent) via `set_ticket_date.sh` — c'est le point de passage unique de « implémentation démarrée » pour tous les modes. La `End date` est posée plus tard par le workflow `ticket-end-date.yaml` au merge de la PR.
 
-4. **Lancer `code-dev` en CLI foreground** (PAS via le Task tool) — code-dev DOIT être *main agent* de son propre process pour pouvoir lancer ses sous-agents (`tu-dev` étape 5.5, les 4 quality gates étape 6, `functional-validator` étape 9a) ; un sous-agent ne peut pas en spawner d'autres. Même invocation que `epic_loop.sh` (`spawn_agent`), mais **synchrone/bloquante** pour un seul ticket :
+4. **Lancer `code-dev` en CLI foreground** (PAS via le Task tool) — code-dev DOIT être *main agent* de son propre process pour pouvoir lancer ses sous-agents (les 4 quality gates étape 6, `functional-validator` étape 9a, `design-validator` étape 9a-bis) ; un sous-agent ne peut pas en spawner d'autres. Même invocation que `epic_loop.sh` (`spawn_agent`), mais **synchrone/bloquante** pour un seul ticket :
 
    ```bash
    MODEL=$(gh issue view "$ISSUE_N" --json labels --jq '.labels[].name' | grep -qx complexe && echo opus || echo sonnet)
-   BUDGET=$([ "$MODEL" = opus ] && echo 40 || echo 10)
+   BUDGET=$([ "$MODEL" = opus ] && echo 20 || echo 10)
    env -u CLAUDECODE timeout 5400 claude \
      --agent code-dev --model "$MODEL" \
      --print --output-format stream-json --verbose \
@@ -179,7 +179,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
    - `$PROMPT` : le même brief par ticket que construit `epic_loop.sh` (numéro de ticket + type, worktree path, index → port `3001+index`, base branch `origin/...`, working branch déjà checkout, « suivre STRICTEMENT `code-dev/AGENT.md` », retour JSON strict en dernier message). Pour un Bug, rappeler `rules/bug-fix-workflow.md`.
    - **Récupérer le verdict JSON** depuis la sortie stream-json (dernier objet `{"status":...}`) — même extraction que `epic_loop.sh` : essayer `jq -e '.status'`, fallback bloc ` ```json `, puis premier `{...}` contenant `"status"`.
-   - L'agent suit `code-dev/AGENT.md` : implémente, **délègue tous les tests (TU + intégration) à `tu-dev`** (Opus, étape 5.5 — `tu-dev` rend la main sur une vraie régression), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — `In review` / `Done` user-only.
+   - L'agent suit `code-dev/AGENT.md` : implémente **et écrit ses tests vitest (TU + intégration, étape 5)**, trie chaque test rouge en étape 5b (régression → il corrige la source ; évolution légitime → il met l'assertion à jour), push, ouvre PR draft, force PR↔issue link, fait passer les 4 quality gates + `functional-validator`, `gh pr ready`, retourne JSON. **Le ticket reste en `In progress`** — `In review` / `Done` user-only.
 
 5. **Parser le JSON retourné** :
 
@@ -195,7 +195,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
    ```bash
    env -u CLAUDECODE timeout 3600 claude \
-     --agent e2e-dev --model opus \
+     --agent e2e-dev --model opus --effort xhigh \
      --print --output-format json \
      --dangerously-skip-permissions --max-budget-usd 15 \
      "$E2E_PROMPT" 2>&1 | tee "/tmp/e2e-dev-${ISSUE_N}.json"
@@ -211,7 +211,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
      | `rate_limited` | proposer de retenter ou de lancer `e2e-dev` plus tard | `## E2E: RATE_LIMITED` + délai |
      | `failed` | noter l'échec technique (dev server / infra), proposer de relancer | `## E2E: FAILED` + raison |
 
-   - **Sur `regression`** : lancer `architect-rework` exactement comme `e2e-dev` (CLI foreground, `claude --agent architect-rework --model opus`), en lui passant le ticket et la base de comparaison. Il lit le commentaire `e2e-dev:`, crée des tickets Task de fix (To Do) ou pose une question à l'utilisateur (`needs_user`). Comme on est en foreground (utilisateur présent), afficher le verdict et la **next-step** (`/implement <ticket-de-fix>`), plutôt que de relancer l'orchestrateur automatiquement.
+   - **Sur `regression`** : lancer `architect-rework` exactement comme `e2e-dev` (CLI foreground, `claude --agent architect-rework --model opus --effort xhigh`), en lui passant le ticket et la base de comparaison. Il lit le commentaire `e2e-dev:`, crée des tickets Task de fix (To Do) ou pose une question à l'utilisateur (`needs_user`). Comme on est en foreground (utilisateur présent), afficher le verdict et la **next-step** (`/implement <ticket-de-fix>`), plutôt que de relancer l'orchestrateur automatiquement.
    - **e2e-dev ne bouge pas le board** : le ticket reste en `In progress` ; une régression est traitée par les tickets de fix d'`architect-rework` (l'utilisateur les implémente, puis `e2e-dev` re-valide).
 
 6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement (de préférence **après** que `e2e-dev` a poussé sa couverture, pour que les E2E partent avec) :
@@ -257,7 +257,7 @@ Pour reprendre : relancer `/implement <N>` — le script est idempotent (worktre
 | `EPIC_LOOP_SLEEP_TICK` | 5 | Sleep entre 2 ticks (sec). |
 | `EPIC_LOOP_SLEEP_WAIT` | 30 | Sleep quand le plan est vide mais des tickets sont en flight. |
 | `EPIC_LOOP_BUDGET_SONNET` | 10 | Budget USD max par sub-agent Sonnet (`claude --max-budget-usd`). |
-| `EPIC_LOOP_BUDGET_OPUS` | 40 | Budget USD max par sub-agent Opus. |
+| `EPIC_LOOP_BUDGET_OPUS` | 20 | Budget USD max par sub-agent Opus. Calé sur le pricing Opus 5 ($5/$25 par Mtok) — l'ancien défaut de 40 datait du pricing précédent, 3× plus cher. |
 | `EPIC_LOOP_AGENT_TIMEOUT` | 5400 | Timeout dur par sub-agent en sec (90 min). |
 
 ```bash
@@ -283,7 +283,7 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - **NE JAMAIS** dupliquer la logique d'orchestration ici — tout est dans `scripts/orchestration/`
 - **NE PAS** attendre le retour du loop driver en mode epic (`nohup ... &; disown`)
 - **NE PAS** poll l'état — utiliser `/report`
-- **En mode task/bug**, c'est synchrone : tu lances le **CLI `claude --agent code-dev`** (bloquant) et tu attends le JSON final, comme l'ancien `/code`. **PAS** le Task tool — code-dev doit être main agent pour lancer ses sous-agents (`tu-dev`, validateurs, `functional-validator`). Puis, si `validated`, tu lances le **CLI `claude --agent e2e-dev`** (bloquant) sur le même worktree pour la couverture E2E (étape 5bis).
+- **En mode task/bug**, c'est synchrone : tu lances le **CLI `claude --agent code-dev`** (bloquant) et tu attends le JSON final, comme l'ancien `/code`. **PAS** le Task tool — code-dev doit être main agent pour lancer ses sous-agents (les 4 validateurs, `functional-validator`, `design-validator`). Puis, si `validated`, tu lances le **CLI `claude --agent e2e-dev`** (bloquant) sur le même worktree pour la couverture E2E (étape 5bis).
 - **E2E = exclusivement `e2e-dev`** — ni `/implement` ni `code-dev` n'écrivent de test E2E ; `e2e-dev` est le seul propriétaire de `src/e2e/**`, lancé en fin de pipeline.
 - Avant tout dispatch : check **analyse présente** (cf. Step 1) ; sinon proposer `/analyse <N>` et exit
 

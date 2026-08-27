@@ -265,18 +265,22 @@ Executes **automatiquement**, sans intervention.
 
 ### Agents (`.claude/agents/`)
 
-| Agent | Role | Modele |
-|---|---|---|
-| `validator` | typecheck + tests + lint + format en parallele | sonnet |
-| `structural-auditor` | greps mecaniques, fuites de la couche domaine, checks de jugement | sonnet |
-| `rgaa-auditor` | lance le skill ultra11y `review-a11y` sur le code modifie | sonnet |
-| `security-auditor` | OWASP Top 10 + RGS, cible sur les mecanismes du projet | sonnet |
-| `code-dev` | implemente un ticket end-to-end, n'ecrit aucun test | sonnet (opus si `complexe`) |
-| `tu-dev` | ecrit tous les tests vitest, trie regression vs evolution | opus |
-| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus |
-| `functional-validator`, `design-validator` | rejouent le comportement / mesurent la fidelite visuelle | sonnet |
-| `product-owner`, `architect`, `bug-analyst`, `architect-rework` | conception : specs, decoupage, diagnostic | opus |
-| `review-fixer`, `doc-writer` | adressent les reviews / regenerent `docs/` | opus / sonnet |
+Chaque agent porte son couple `model:` / `effort:` en frontmatter, et les invocations CLI headless repassent les memes valeurs en `--model` / `--effort` : la redondance est volontaire, aucune precedence ne peut produire de divergence. **Seule exception : `code-dev`**, dont ni le modele ni l'effort ne sont pinnes — le modele varie par ticket (passe en `--model`), et l'effort reste herite : c'est le poste de depense de la pipeline (1 run par ticket, session la plus longue), donc un reglage de run et non une propriete de l'agent.
+
+| Agent | Role | Modele | Effort |
+|---|---|---|---|
+| `validator` | typecheck + tests + lint + format en parallele | sonnet | low |
+| `structural-auditor` | greps mecaniques, fuites du domaine, affaiblissement de test | sonnet | high |
+| `rgaa-auditor` | lance le skill ultra11y `review-a11y` sur le code modifie | sonnet | high |
+| `security-auditor` | OWASP Top 10 + RGS, cible sur les mecanismes du projet | sonnet | high |
+| `code-dev` | implemente un ticket end-to-end **et ecrit ses tests vitest** | passe en `--model` : sonnet, opus si `complexe` | herite (non pinne) |
+| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus | xhigh |
+| `functional-validator` | rejoue les scenarios PO sur le dev server | sonnet | medium |
+| `design-validator` | mesure la fidelite visuelle contre le Figma | sonnet | xhigh |
+| `product-owner`, `bug-analyst`, `architect-rework` | conception : besoin, diagnostic, rework | opus | xhigh |
+| `architect` | decoupage et redaction des specs | fable | xhigh |
+| `review-fixer` | adresse les commentaires de revue | sonnet | high |
+| `doc-writer` | regenere `docs/` depuis le code | sonnet | medium |
 
 Les quatre premiers sont **read-only** : ils rapportent, l'agent principal corrige.
 
