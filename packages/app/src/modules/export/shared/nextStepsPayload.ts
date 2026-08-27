@@ -91,22 +91,45 @@ function toNextStepPayload(
 }
 
 /**
- * `submit_cse_opinion` is the one CSE transition the ruleset leaves unguarded,
- * and deliberately so: `cse_required` is a snapshot taken at submission, and a
- * company that gains a CSE afterwards must still be able to file its opinion
- * without reopening a completed démarche (see `cseRequirementSync.ts`). The
- * engine therefore keeps accepting the action whatever the snapshot says.
+ * The ruleset is an ACCEPT-set: it stays permissive on purpose, so a late or
+ * repeated action is tolerated rather than rejected. `Prochaines_etapes_possibles`
+ * is an EXPECT-set: what a control authority should look for next. The two
+ * differ in exactly two places, both pruned here.
  *
- * That permissiveness is an accept-set, not an expectation. Advertising the
- * step to a control authority for a company that has no CSE reads as an
- * outstanding obligation, so the export prunes it here — at the export layer
- * only, leaving `applyAction` free to accept the late deposit.
+ * 1. `submit_cse_opinion` is left unguarded because `cse_required` is a
+ *    snapshot taken at submission: a company that gains a CSE afterwards must
+ *    still be able to file its opinion without reopening a completed démarche
+ *    (see `cseRequirementSync.ts`). Advertising it to a company that owes no
+ *    opinion reads as an outstanding obligation.
+ *
+ * 2. `submit_second_declaration` also fires from `awaiting_revision_choice`, so
+ *    a company may resubmit its correction while parked there. But the app
+ *    routes that state to the compliance-path screen
+ *    (`complianceNavigation.ts`), never back into the second-declaration
+ *    funnel: the expected next step is the path choice, not a resubmission.
+ *
+ * Both prunings are export-only — `applyAction` still accepts either action.
+ * Keep this list at two: a third entry would make it a de facto mirror of the
+ * state graph, which `CLAUDE.md` forbids. A third case belongs in the ruleset.
+ *
+ * Note on `action.stillHasGap`, which stays deliberately undecided. The router
+ * derives it from the stored `correction` categories, so it looks like a known
+ * fact — but `hasGapsAboveThreshold` is a `.some()`, and the only state left
+ * advertising `submit_second_declaration` is `corrective_actions_chosen`, where
+ * no correction row exists yet. Feeding it in would read "no rows" as "gap
+ * resolved" and promise an outcome the company has not produced. It is a real
+ * unknown there, and `Condition` is the right way to say so.
  */
 function isAdvertisable(
 	transition: { action: string },
+	status: DeclarationFsmStatus,
 	cseRequired: boolean,
 ): boolean {
-	return cseRequired || transition.action !== "submit_cse_opinion";
+	if (transition.action === "submit_cse_opinion") return cseRequired;
+	if (transition.action === "submit_second_declaration") {
+		return status !== "awaiting_revision_choice";
+	}
+	return true;
 }
 
 export function buildNextStepsPayload(input: {
@@ -123,6 +146,8 @@ export function buildNextStepsPayload(input: {
 	});
 
 	return transitions
-		.filter((transition) => isAdvertisable(transition, input.cseRequired))
+		.filter((transition) =>
+			isAdvertisable(transition, input.status, input.cseRequired),
+		)
 		.map((transition) => toNextStepPayload(transition, rules));
 }

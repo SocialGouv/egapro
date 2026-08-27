@@ -1448,6 +1448,29 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 		]);
 	});
 
+	it("does not advertise a second-declaration resubmission from awaiting_revision_choice", () => {
+		// The ruleset accepts submit_second_declaration from there — a company may
+		// resubmit its correction while parked — but the app routes that state to
+		// the compliance-path screen, so the expected next step is the choice.
+		const steps = stepsOf({
+			status: "awaiting_revision_choice",
+			cseRequired: true,
+		});
+
+		expect(steps.map((step) => step.Action)).toEqual([
+			"choose_compliance_path",
+			"choose_compliance_path",
+		]);
+		expect(steps.map((step) => step.Identifiant_transition)).toEqual([
+			"choose_path_revised_justify_with_cse",
+			"choose_path_revised_joint_evaluation",
+		]);
+		// Nothing conditional survives: the two gap variants are gone with it.
+		for (const step of steps) {
+			expect(step).not.toHaveProperty("Condition");
+		}
+	});
+
 	it("drops the resolved-without-CSE variant the stored CSE fact decides false (S4)", () => {
 		expect(
 			transitionIds({
