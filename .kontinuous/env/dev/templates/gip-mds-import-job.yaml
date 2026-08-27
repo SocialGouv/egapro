@@ -18,10 +18,12 @@ metadata:
 ---
 # Bind the built-in namespaced `view` ClusterRole instead of a Role created in
 # the same apply: SSA of RoleBinding otherwise 404s on the Role (API cache).
+# New name: roleRef is immutable, leftover RoleBindings from failed review
+# deploys cannot be patched from Role/gip-mds-import to ClusterRole/view.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gip-mds-import
+  name: gip-mds-import-view
   namespace: {{ .Values.global.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
