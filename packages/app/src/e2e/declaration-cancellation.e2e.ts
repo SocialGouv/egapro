@@ -139,9 +139,17 @@ test.describe("Declaration cancellation — full cycle", () => {
 			expect(entry.Parcours.Prochaines_etapes_possibles).toEqual([]);
 		}
 
+		// The active one is discriminated by Annulee / Date_annulation, not by the
+		// step list: this suite forces workforce 80 + no CSE, so the submit lands
+		// straight in the terminal demarche_completed. The ruleset still accepts
+		// submit_cse_opinion from there — unguarded, to cover a company that gains
+		// a CSE later — but the export does not advertise an opinion that is not
+		// required, so this list is legitimately empty too. Both are empty, for
+		// two different reasons.
 		expect(active[0]?.Date_annulation).toBeNull();
-		expect(
-			active[0]?.Parcours.Prochaines_etapes_possibles.length,
-		).toBeGreaterThan(0);
+		expect(active[0]?.Parcours.Annulee).toBe(false);
+		expect(active[0]?.Parcours.Statut).toBe("demarche_completed");
+		expect(active[0]?.Parcours.Avis_CSE_requis).toBe(false);
+		expect(active[0]?.Parcours.Prochaines_etapes_possibles).toEqual([]);
 	});
 });
