@@ -22,7 +22,10 @@ export async function JointEvaluationPage() {
 		redirect("/declaration-remuneration/parcours-conformite");
 	}
 
-	const company = await api.company.get({ siren: data.declaration.siren });
+	const [company, existingFile] = await Promise.all([
+		api.company.get({ siren: data.declaration.siren }),
+		api.jointEvaluation.getFile(),
+	]);
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
 	const declarationDate = formatLongDate(
@@ -40,6 +43,7 @@ export async function JointEvaluationPage() {
 			declarationDate={declarationDate}
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
+			existingFile={existingFile}
 			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
 		/>
 	);

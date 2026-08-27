@@ -36,6 +36,10 @@ test.describe("ProConnect authentication flow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+
+		// #4256: the company banner opens on the company name. Only a real render catches a
+		// breadcrumb re-injected by the layout rather than by CompanyInfoBanner itself.
+		await expect(page.locator(".fr-breadcrumb")).toHaveCount(0);
 	});
 
 	test("redirects to mon espace when already logged in", async ({ page }) => {

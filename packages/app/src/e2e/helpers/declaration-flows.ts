@@ -126,10 +126,29 @@ export async function fillStep4Quartiles(
 }
 
 /**
- * Fill and submit steps 1 → 4, then click "Suivant" on the quartile step without
- * asserting the destination: it is step 5 when indicator G applies, step 6 otherwise.
+ * Changing a workforce that step 1 already holds opens a confirmation dialog
+ * before saving, because it resets the GIP-prefilled indicators. A real user
+ * confirms it; without this the funnel just never leaves step 1.
  */
-export async function submitStepsThroughQuartiles(
+async function confirmPrefillResetIfAsked(page: Page) {
+	const confirm = page.getByRole("button", { name: "Continuer" });
+	const asked = await confirm.isVisible({ timeout: 2_000 }).catch(() => false);
+	if (asked) await confirm.click();
+}
+
+/**
+ * Step 1 headcount every funnel helper below declares, on both pay bases (#4247).
+ * Since #4260 it is also the reference each step 4 quartile table is held to, so
+ * the default quartile rows (DEFAULT_*_QUARTILES) sum to exactly these counts.
+ */
+export const STEP1_WORKFORCE = { women: 10, men: 15 } as const;
+
+/**
+ * Fill and submit steps 1 → 3, landing on the quartile step with the step 1
+ * headcount saved. Callers that want the quartiles filled and submitted too use
+ * submitStepsThroughQuartiles; this one stops on step 4 so a test can drive it.
+ */
+export async function submitStepsThroughPayGaps(
 	page: Page,
 	options: { annualMeanGap?: boolean } = {},
 ) {
@@ -137,10 +156,20 @@ export async function submitStepsThroughQuartiles(
 		// Navigate to create/resume declaration → redirects to step 1
 		await page.goto("/declaration-remuneration");
 		await page.waitForURL("**/declaration-remuneration/etape/1");
-		// 10 women + 15 men = 25 total
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		for (const basis of ["annuelle", "horaire"] as const) {
+			await page
+				.getByRole("textbox", {
+					name: `Rémunération ${basis} — Nombre de femmes`,
+				})
+				.fill(String(STEP1_WORKFORCE.women));
+			await page
+				.getByRole("textbox", {
+					name: `Rémunération ${basis} — Nombre d'hommes`,
+				})
+				.fill(String(STEP1_WORKFORCE.men));
+		}
 		await page.getByRole("button", { name: "Suivant" }).click();
+		await confirmPrefillResetIfAsked(page);
 		await page.waitForURL("**/declaration-remuneration/etape/2");
 	});
 
@@ -160,6 +189,17 @@ export async function submitStepsThroughQuartiles(
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL("**/declaration-remuneration/etape/4");
 	});
+}
+
+/**
+ * Fill and submit steps 1 → 4, then click "Suivant" on the quartile step without
+ * asserting the destination: it is step 5 when indicator G applies, step 6 otherwise.
+ */
+export async function submitStepsThroughQuartiles(
+	page: Page,
+	options: { annualMeanGap?: boolean } = {},
+) {
+	await submitStepsThroughPayGaps(page, options);
 
 	await test.step("étape 4 — répartition par quartile", async () => {
 		await fillStep4Quartiles(page);

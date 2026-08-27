@@ -30,6 +30,8 @@ type Props = {
 	isCorrection: boolean;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
@@ -77,6 +79,8 @@ export function RecapitulatifPage({
 	isCorrection,
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 	step2Data,
 	step3Data,
 	step4Data,
@@ -120,7 +124,7 @@ export function RecapitulatifPage({
 				<div className="fr-col">
 					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
-							? `Seconde déclaration des écarts de rémunération par catégorie de salariés ${declarationYear}`
+							? `Seconde déclaration des écarts de rémunération par catégories de salariés ${declarationYear}`
 							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
 					</TitleTag>
 				</div>
@@ -153,6 +157,8 @@ export function RecapitulatifPage({
 					<div className={styles.indicatorsSection}>
 						<IndicatorTables
 							declarationYear={declarationYear}
+							hourlyMen={hourlyMen}
+							hourlyWomen={hourlyWomen}
 							step2Data={step2Data}
 							step2Gaps={step2Gaps}
 							step3Data={step3Data}
@@ -167,7 +173,7 @@ export function RecapitulatifPage({
 
 			<section>
 				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs par catégorie de salariés
+					Indicateurs par catégories de salariés
 				</h2>
 				{sourceLabel && (
 					<p className={`fr-mb-3w ${styles.sourceLine}`}>

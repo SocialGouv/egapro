@@ -1338,6 +1338,8 @@ describe("declarationRouter", () => {
 			const result = await caller.updateStep1({
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 			});
 
 			expect(result).toEqual({ success: true });
@@ -1349,6 +1351,8 @@ describe("declarationRouter", () => {
 				...mockDeclaration,
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 			};
 			const tx = createMockTx([unchangedDecl]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
@@ -1360,6 +1364,8 @@ describe("declarationRouter", () => {
 			const result = await caller.updateStep1({
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 			});
 
 			expect(result).toEqual({ success: true });
@@ -1379,6 +1385,8 @@ describe("declarationRouter", () => {
 			const result = await caller.updateStep1({
 				totalWomen: 50,
 				totalMen: 60,
+				hourlyWomen: 50,
+				hourlyMen: 60,
 			});
 
 			expect(result).toEqual({ success: true });
@@ -1395,7 +1403,12 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(mockDb, null as never);
 
 			await expect(
-				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
+				caller.updateStep1({
+					totalWomen: 10,
+					totalMen: 20,
+					hourlyWomen: 10,
+					hourlyMen: 20,
+				}),
 			).rejects.toThrow("SIRET manquant ou invalide dans la session");
 		});
 
@@ -1443,7 +1456,12 @@ describe("declarationRouter", () => {
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createLockedCaller(mockDb);
 
-			await caller.updateStep1({ totalWomen: 50, totalMen: 60 });
+			await caller.updateStep1({
+				totalWomen: 50,
+				totalMen: 60,
+				hourlyWomen: 50,
+				hourlyMen: 60,
+			});
 
 			const setCalls = mockSet.mock.calls.map(
 				(c) => c[0] as Record<string, unknown>,
@@ -1745,7 +1763,12 @@ describe("declarationRouter", () => {
 			const mockDb = { transaction: mockTransaction } as unknown;
 			const caller = await createLockedCaller(mockDb);
 
-			await caller.updateStep1({ totalWomen: 30, totalMen: 40 });
+			await caller.updateStep1({
+				totalWomen: 30,
+				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
+			});
 
 			const insertedRows = mockValues.mock.calls
 				.map((c) => c[0])

@@ -10,9 +10,6 @@ export type GipMdsRow = typeof gipMdsData.$inferSelect;
 export type GipQuartileData = {
 	/** 3 thresholds for Q1-Q3 (lower bound); Q4 has no threshold in the GIP model. */
 	thresholds: [string | null, string | null, string | null];
-	/** Block reference headcount (annual or hourly) the table is checked against. */
-	referenceWomen: number | null;
-	referenceMen: number | null;
 	/** Integer women count per quartile, read verbatim from the GIP `nb_F` columns. */
 	womenCounts: [number | null, number | null, number | null, number | null];
 	/** Integer men count per quartile, read verbatim from the GIP `nb_H` columns. */
@@ -25,10 +22,12 @@ export type GipQuartileData = {
  * `null` values mean the GIP file had no data for that field.
  */
 export type GipPrefillData = {
-	/** Step 1 — Workforce (physical headcount for annual global remuneration) */
+	/** Step 1 — Workforce (physical headcount, per pay basis) */
 	step1: {
 		totalWomen: number | null;
 		totalMen: number | null;
+		hourlyWomen: number | null;
+		hourlyMen: number | null;
 	};
 	/** Step 2 — Pay gap (Indicator A mean + Indicator C median) */
 	step2: {
@@ -91,6 +90,8 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 		step1: {
 			totalWomen,
 			totalMen,
+			hourlyWomen: toInt(row.womenCountHourlyGlobal),
+			hourlyMen: toInt(row.menCountHourlyGlobal),
 		},
 		step2: {
 			annualMeanWomen: row.globalAnnualMeanWomen,
@@ -124,8 +125,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 		},
 		step4: {
 			annual: buildQuartileData(
-				totalWomen,
-				totalMen,
 				[
 					row.annualQuartileThreshold1,
 					row.annualQuartileThreshold2,
@@ -145,8 +144,6 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 				],
 			),
 			hourly: buildQuartileData(
-				toInt(row.womenCountHourlyGlobal),
-				toInt(row.menCountHourlyGlobal),
 				[
 					row.hourlyQuartileThreshold1,
 					row.hourlyQuartileThreshold2,
@@ -280,16 +277,12 @@ function toInt(value: string | null): number | null {
  * declarant fills them by hand); there is no proportion fallback.
  */
 function buildQuartileData(
-	referenceWomen: number | null,
-	referenceMen: number | null,
 	thresholds: [string | null, string | null, string | null],
 	womenCounts: [string | null, string | null, string | null, string | null],
 	menCounts: [string | null, string | null, string | null, string | null],
 ): GipQuartileData {
 	return {
 		thresholds,
-		referenceWomen,
-		referenceMen,
 		womenCounts: [
 			toInt(womenCounts[0]),
 			toInt(womenCounts[1]),

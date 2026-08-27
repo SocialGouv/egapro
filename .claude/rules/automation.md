@@ -58,5 +58,4 @@ Les tests **E2E** ne s'écrivent jamais ici : ils appartiennent à `e2e-dev` (`r
 `pnpm check:write` depuis `packages/app`. Le hook auto-lint traite chaque édition isolément mais ne garantit pas l'état final du diff ; cette passe évite l'échec CI de format. Si le dev server tourne, `nextjs_call(get_errors)` attrape en plus les erreurs runtime que `pnpm typecheck` ne voit pas.
 
 ## Pendant que tu écris
-
 Les règles de code vivent dans `.claude/rules/` et arrivent toutes seules selon le fichier ouvert : `code-quality.md`, `react-components.md`, `styling-dsfr.md`, `testing.md`, `trpc-api.md`, `database-drizzle.md`, `audit-logging.md`, `demarche-state-machine.md`. Elles ne sont pas recopiées ici — une quatrième copie d'une règle est la première à vieillir.

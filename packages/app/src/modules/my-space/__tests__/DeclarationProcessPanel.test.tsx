@@ -51,6 +51,7 @@ const BASE_PROPS = {
 	year: FUTURE_YEAR,
 	indicatorGRequired: true,
 	lastActionDate: "12 mars 2026" as string | null,
+	declarationFsmStatus: null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
@@ -116,7 +117,7 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					/Indicateurs de rémunération par catégorie de salariés à remplir/,
+					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
 		});

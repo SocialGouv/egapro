@@ -128,6 +128,8 @@ function makeData(
 		},
 		totalWomen: 50,
 		totalMen: 60,
+		hourlyWomen: 50,
+		hourlyMen: 60,
 		step2Data: emptyStep2Data(),
 		step3Data: emptyStep3Data(),
 		step4Data: emptyStep4Data(),
@@ -192,7 +194,7 @@ describe("DeclarationPdfDocument", () => {
 		);
 		expect(
 			screen.getByText(
-				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés 2026",
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés 2026",
 			),
 		).toBeInTheDocument();
 

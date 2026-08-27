@@ -133,7 +133,6 @@ C'est le principe général de cet agent : **là où une machine décide, tu ne 
 ---
 
 ## Sortie
-
 Une ligne par violation :
 
 ```

@@ -535,10 +535,54 @@ describe("Step5EmployeeCategories", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Champ vide");
+		expect(alert).toHaveTextContent(/veuillez sélectionner la source/i);
+		const sourceSelect = screen.getByLabelText(/Quelle est la source utilisée/);
+		expect(sourceSelect).toHaveAttribute("aria-invalid", "true");
+		expect(sourceSelect).toHaveAttribute(
+			"aria-describedby",
+			"step5-categories-error-empty",
+		);
+		expect(document.querySelector(".fr-error-text")).toBeNull();
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
+		expect(definitions).not.toBeNull();
 		expect(
-			screen.getByText(/veuillez sélectionner la source/i),
-		).toBeInTheDocument();
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("shows the same source error again after dismissal and an identical submit", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+		await user.type(
+			document.getElementById("cat-0-name") as HTMLElement,
+			"Techniciens",
+		);
+
+		const submit = screen.getByRole("button", { name: /suivant/i });
+		await user.click(submit);
+		await user.click(
+			screen.getByRole("button", { name: "Masquer le message" }),
+		);
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+		await user.click(submit);
+		await waitFor(() =>
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				/veuillez sélectionner la source/i,
+			),
+		);
 	});
 
 	it("shows error when workforce totals do not match step 1", async () => {
@@ -574,6 +618,7 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getByText(/ne correspond pas à l'effectif déclaré/),
 		).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -598,11 +643,19 @@ describe("Step5EmployeeCategories", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		expect(
-			screen.getByText(
-				/renseigner toutes les données de rémunération avant de passer/i,
-			),
-		).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Champ vide");
+		expect(alert).toHaveTextContent(
+			/renseignez le salaire de base annuel des femmes/i,
+		);
+		const missingPayInput = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(missingPayInput).toHaveAttribute("aria-invalid", "true");
+		expect(missingPayInput).toHaveAttribute(
+			"aria-describedby",
+			"step5-categories-error-empty",
+		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -696,12 +749,33 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByLabelText(/Quelle est la source utilisée/),
 			"accord-entreprise",
 		);
+		const categoryToggle = screen.getByRole("button", {
+			name: "Catégorie d'emplois n°1",
+		});
+		categoryToggle.setAttribute("aria-expanded", "false");
+		await user.click(categoryToggle);
+		await waitFor(() =>
+			expect(categoryToggle).toHaveAttribute("aria-expanded", "false"),
+		);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
-		expect(
-			screen.getByText(/nom de chaque catégorie.*obligatoire/i),
-		).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(/nom de chaque catégorie.*obligatoire/i);
+		const errorLink = alert.querySelector('a[href="#cat-0-name"]');
+		expect(errorLink).not.toBeNull();
+		const nameInput = document.getElementById("cat-0-name");
+		expect(nameInput).toHaveAttribute("aria-invalid", "true");
+		expect(nameInput).toHaveAttribute(
+			"aria-describedby",
+			expect.stringContaining("step5-categories-error-empty"),
+		);
+		expect(categoryToggle).toHaveAttribute("aria-expanded", "false");
+		await user.click(errorLink as HTMLElement);
+		await waitFor(() =>
+			expect(categoryToggle).toHaveAttribute("aria-expanded", "true"),
+		);
+		await waitFor(() => expect(nameInput).toHaveFocus());
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -736,6 +810,11 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getByText(/noms des catégories.*uniques/i),
 		).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent("Valeur invalide");
+		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "1");
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/noms des catégories.*uniques/i,
+		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 

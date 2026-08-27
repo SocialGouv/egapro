@@ -22,7 +22,7 @@ type Props = {
 
 function buildTitle(data: DeclarationPdfData): string {
 	return data.isSecondDeclaration
-		? `Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés ${data.year}`
+		? `Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés ${data.year}`
 		: `Récapitulatif de la déclaration des indicateurs de rémunération ${data.year}`;
 }
 

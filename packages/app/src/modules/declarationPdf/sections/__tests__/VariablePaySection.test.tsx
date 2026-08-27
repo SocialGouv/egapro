@@ -33,7 +33,12 @@ import { VariablePaySection } from "../VariablePaySection";
 
 function makeData(
 	step3: Partial<Step3Data>,
-	totals: { totalWomen: number; totalMen: number },
+	totals: {
+		totalWomen: number;
+		totalMen: number;
+		hourlyWomen: number;
+		hourlyMen: number;
+	},
 ): DeclarationPdfData {
 	return {
 		year: 2026,
@@ -52,6 +57,8 @@ function makeData(
 		},
 		totalWomen: totals.totalWomen,
 		totalMen: totals.totalMen,
+		hourlyWomen: totals.totalWomen,
+		hourlyMen: totals.totalMen,
 		step2Data: emptyStep2Data(),
 		step3Data: { ...emptyStep3Data(), ...step3 },
 		step4Data: emptyStep4Data(),
@@ -68,7 +75,7 @@ describe("VariablePaySection", () => {
 			<VariablePaySection
 				data={makeData(
 					{ indicatorEWomen: "95", indicatorEMen: "80" },
-					{ totalWomen: 200, totalMen: 100 },
+					{ totalWomen: 200, totalMen: 100, hourlyWomen: 200, hourlyMen: 100 },
 				)}
 			/>,
 		);
@@ -81,7 +88,7 @@ describe("VariablePaySection", () => {
 			<VariablePaySection
 				data={makeData(
 					{ indicatorEWomen: "", indicatorEMen: "" },
-					{ totalWomen: 200, totalMen: 100 },
+					{ totalWomen: 200, totalMen: 100, hourlyWomen: 200, hourlyMen: 100 },
 				)}
 			/>,
 		);
@@ -93,7 +100,7 @@ describe("VariablePaySection", () => {
 			<VariablePaySection
 				data={makeData(
 					{ indicatorEWomen: "95", indicatorEMen: "80" },
-					{ totalWomen: 0, totalMen: 0 },
+					{ totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 },
 				)}
 			/>,
 		);

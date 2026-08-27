@@ -1,6 +1,12 @@
 "use client";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
+import { numericInputClassName } from "~/modules/declaration-remuneration/shared/numericInputClassName";
 import {
 	computeGap,
 	computeTotal,
@@ -23,6 +29,8 @@ type Props = {
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
 	readOnly?: boolean;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 type StringField = {
@@ -50,6 +58,28 @@ const HOURLY_FIELDS: EuroFields = {
 	variableMen: "hourlyVariableMen",
 };
 
+const FIELD_ID_SUFFIX: Partial<Record<keyof EmployeeCategory, string>> = {
+	annualBaseWomen: "annual-base-women",
+	annualBaseMen: "annual-base-men",
+	annualVariableWomen: "annual-variable-women",
+	annualVariableMen: "annual-variable-men",
+	hourlyBaseWomen: "hourly-base-women",
+	hourlyBaseMen: "hourly-base-men",
+	hourlyVariableWomen: "hourly-variable-women",
+	hourlyVariableMen: "hourly-variable-men",
+	womenCount: "women-count",
+	menCount: "men-count",
+};
+
+export function categoryDataFieldId(
+	categoryIndex: number,
+	field: keyof EmployeeCategory,
+): string {
+	const suffix = FIELD_ID_SUFFIX[field];
+	if (!suffix) return `cat-${categoryIndex}`;
+	return `cat-${categoryIndex}-${suffix}`;
+}
+
 type EuroCellProps = {
 	ariaLabel: string;
 	id: string;
@@ -58,6 +88,8 @@ type EuroCellProps = {
 	value: string;
 	onBlur: () => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 function EuroInputCell({
@@ -68,13 +100,18 @@ function EuroInputCell({
 	value,
 	onBlur,
 	onChange,
+	errorAlertId,
+	errors,
 }: EuroCellProps) {
+	const error = findFieldError(errors, id);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
 				<input
+					aria-describedby={describedByForField(errorAlertId, error)}
+					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
-					className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
+					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
 					disabled={disabled}
 					id={id}
 					inputMode="decimal"
@@ -145,6 +182,8 @@ type RemunerationTableProps = {
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 function RemunerationTable({
@@ -158,6 +197,8 @@ function RemunerationTable({
 	pos,
 	blur,
 	idPrefix,
+	errorAlertId,
+	errors,
 }: RemunerationTableProps) {
 	const totalWomen = computeTotal(
 		cat[fields.baseWomen],
@@ -188,6 +229,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("base-women")}
 							onBlur={blur(catIndex, fields.baseWomen)}
 							onChange={pos(catIndex, fields.baseWomen, false)}
@@ -197,6 +240,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("base-men")}
 							onBlur={blur(catIndex, fields.baseMen)}
 							onChange={pos(catIndex, fields.baseMen, false)}
@@ -219,6 +264,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("variable-women")}
 							onBlur={blur(catIndex, fields.variableWomen)}
 							onChange={pos(catIndex, fields.variableWomen, false)}
@@ -228,6 +275,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("variable-men")}
 							onBlur={blur(catIndex, fields.variableMen)}
 							onChange={pos(catIndex, fields.variableMen, false)}
@@ -269,6 +318,8 @@ export function CategoryDataTable({
 	onDecimalBlur: blur,
 	disabled = false,
 	readOnly = false,
+	errorAlertId,
+	errors,
 }: Props) {
 	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
 	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
@@ -344,6 +395,8 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled}
+				errorAlertId={errorAlertId}
+				errors={errors}
 				fields={ANNUAL_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}
@@ -357,6 +410,8 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled}
+				errorAlertId={errorAlertId}
+				errors={errors}
 				fields={HOURLY_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}

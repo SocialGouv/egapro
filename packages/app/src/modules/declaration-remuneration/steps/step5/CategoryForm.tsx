@@ -9,6 +9,7 @@ import {
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -16,6 +17,12 @@ import {
 } from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { FieldErrorAlert } from "~/modules/declaration-remuneration/shared/formError/FieldErrorAlert";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
 import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
@@ -27,16 +34,15 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
-	isSexRemunerationComplete,
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { CategoryAccordionItem } from "./CategoryAccordionItem";
+import { categoryDataFieldId } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
 import {
 	createEmptyCategory,
@@ -126,6 +132,25 @@ type Props = {
 	};
 };
 
+const CATEGORY_ALERT_ID = "step5-categories-error";
+// The step-5 checks are form-level (a source not picked, totals that do not
+// reconcile), so they anchor on the form itself rather than on one cell.
+const CATEGORY_FORM_FIELD_ID = "step5-categories";
+
+const PAY_FIELD_LABELS: Record<
+	(typeof PAY_FIELDS_WOMEN)[number] | (typeof PAY_FIELDS_MEN)[number],
+	string
+> = {
+	annualBaseWomen: "salaire de base annuel des femmes",
+	annualVariableWomen: "composantes variables annuelles des femmes",
+	hourlyBaseWomen: "salaire de base horaire des femmes",
+	hourlyVariableWomen: "composantes variables horaires des femmes",
+	annualBaseMen: "salaire de base annuel des hommes",
+	annualVariableMen: "composantes variables annuelles des hommes",
+	hourlyBaseMen: "salaire de base horaire des hommes",
+	hourlyVariableMen: "composantes variables horaires des hommes",
+};
+
 export function CategoryForm({
 	referenceYear,
 	title,
@@ -187,7 +212,8 @@ export function CategoryForm({
 	const [hasDataInternal, setHasData] = useState(hasInitialData);
 	const hasData =
 		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
-	const [workforceError, setWorkforceError] = useState("");
+	const [categoryErrors, setCategoryErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 	const [expandedByFieldId, setExpandedByFieldId] = useState<
 		Record<string, boolean>
 	>({});
@@ -235,6 +261,24 @@ export function CategoryForm({
 			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
+			const changedFieldId = categoryDataFieldId(index, field);
+			const clearedSex =
+				field === "womenCount" && n === 0
+					? "women"
+					: field === "menCount" && n === 0
+						? "men"
+						: null;
+			setCategoryErrors((errors) =>
+				errors.filter(
+					(error) =>
+						error.fieldId !== changedFieldId &&
+						(!clearedSex ||
+							!error.fieldId.startsWith(`cat-${index}-`) ||
+							!error.fieldId.endsWith(`-${clearedSex}`)) &&
+						(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
+							error.category === "invalid"),
+				),
+			);
 			setHasData(false);
 		};
 	}
@@ -259,11 +303,13 @@ export function CategoryForm({
 			pendingFocusIndex.current = fields.length;
 			append(formEntry);
 		}
+		setCategoryErrors([]);
 		setHasData(false);
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
 		replace(toFormValues(imported));
+		setCategoryErrors([]);
 		setHasData(false);
 	}
 
@@ -299,87 +345,157 @@ export function CategoryForm({
 	function confirmRemoveCategory() {
 		if (deleteIndex !== null) {
 			remove(deleteIndex);
+			setCategoryErrors([]);
 			setHasData(false);
 		}
 		closeDeleteDialog();
 	}
 
 	const categories = form.watch("categories");
-	const sourceError = form.formState.errors.source?.message;
+	const sourceSummaryError = findFieldError(categoryErrors, "source-select");
 
-	const handleFormSubmit = form.handleSubmit((data) => {
-		setWorkforceError("");
-
-		const emptyNames = data.categories.some((cat) => !cat.name.trim());
-		if (emptyNames) {
-			setWorkforceError(
-				"Le nom de chaque catégorie d'emplois est obligatoire.",
-			);
-			return;
-		}
-
-		const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
-		const hasDuplicates = names.length !== new Set(names).size;
-		if (hasDuplicates) {
-			setWorkforceError(
-				"Les noms des catégories d'emplois doivent être uniques.",
-			);
-			return;
-		}
-
-		const hasIncompleteRemuneration = data.categories.some((cat) => {
-			const womenCount = Number.parseInt(cat.womenCount, 10);
-			const menCount = Number.parseInt(cat.menCount, 10);
-			return (
-				!isSexRemunerationComplete(
-					womenCount,
-					PAY_FIELDS_WOMEN.map((f) => cat[f]),
-				) ||
-				!isSexRemunerationComplete(
-					menCount,
-					PAY_FIELDS_MEN.map((f) => cat[f]),
-				)
+	function handleErrorAnchorClick(error: FieldError) {
+		const match = /^cat-(\d+)-/.exec(error.fieldId);
+		if (!match) return;
+		const index = Number.parseInt(match[1] ?? "", 10);
+		const field = fields[index];
+		if (!field) return;
+		setExpandedByFieldId((expanded) => ({ ...expanded, [field.id]: true }));
+		requestAnimationFrame(() => {
+			const collapse = accordionCollapseRefs.current[index];
+			if (collapse) getDsfrCollapse(collapse)?.disclose();
+			requestAnimationFrame(() =>
+				document.getElementById(error.fieldId)?.focus(),
 			);
 		});
-		if (hasIncompleteRemuneration) {
-			setWorkforceError(
-				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
-			);
-			return;
-		}
+	}
 
-		if (maxWomen !== undefined || maxMen !== undefined) {
-			const { women: totalWomen, men: totalMen } = sumCategoryWorkforce(
-				data.categories,
-			);
+	const handleFormSubmit = form.handleSubmit(
+		(data) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			setCategoryErrors([]);
 
-			const errors: string[] = [];
-			if (maxWomen !== undefined && totalWomen !== maxWomen) {
-				errors.push(
-					`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
-				);
-			}
-			if (maxMen !== undefined && totalMen !== maxMen) {
-				errors.push(
-					`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
-				);
-			}
-			if (errors.length > 0) {
-				setWorkforceError(errors.join(" "));
+			const emptyNameIndex = data.categories.findIndex(
+				(cat) => !cat.name.trim(),
+			);
+			if (emptyNameIndex >= 0) {
+				form.setError(`categories.${emptyNameIndex}.name`, {
+					message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+				});
+				setCategoryErrors([
+					{
+						fieldId: `cat-${emptyNameIndex}-name`,
+						category: "empty",
+						message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+						anchor: true,
+					},
+				]);
 				return;
 			}
-		}
 
-		onSubmit(
-			toSubmitData(
-				data.categories.map((cat, i) => ({
-					id: i,
-					...cat,
-				})),
-				data.source,
-			),
-		);
-	});
+			const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
+			const hasDuplicates = names.length !== new Set(names).size;
+			if (hasDuplicates) {
+				setCategoryErrors([
+					{
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "invalid",
+						message: "Les noms des catégories d'emplois doivent être uniques.",
+					},
+				]);
+				return;
+			}
+
+			const remunerationErrors: FieldError[] = [];
+			data.categories.forEach((category, index) => {
+				for (const [count, payFields] of [
+					[Number.parseInt(category.womenCount, 10), PAY_FIELDS_WOMEN],
+					[Number.parseInt(category.menCount, 10), PAY_FIELDS_MEN],
+				] as const) {
+					if (Number.isNaN(count) || count < 1) continue;
+					for (const payField of payFields) {
+						if (category[payField].trim() !== "") continue;
+						remunerationErrors.push({
+							fieldId: categoryDataFieldId(index, payField),
+							category: "empty",
+							message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
+							anchor: true,
+						});
+					}
+				}
+			});
+			if (remunerationErrors.length > 0) {
+				setCategoryErrors(remunerationErrors);
+				return;
+			}
+
+			if (maxWomen !== undefined || maxMen !== undefined) {
+				const { women: totalWomen, men: totalMen } = sumCategoryWorkforce(
+					data.categories,
+				);
+
+				const errors: string[] = [];
+				if (maxWomen !== undefined && totalWomen !== maxWomen) {
+					errors.push(
+						`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
+					);
+				}
+				if (maxMen !== undefined && totalMen !== maxMen) {
+					errors.push(
+						`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
+					);
+				}
+				if (errors.length > 0) {
+					setCategoryErrors([
+						{
+							fieldId: CATEGORY_FORM_FIELD_ID,
+							category: "inconsistent",
+							message: errors.join(" "),
+						},
+					]);
+					return;
+				}
+			}
+
+			onSubmit(
+				toSubmitData(
+					data.categories.map((cat, i) => ({
+						id: i,
+						...cat,
+					})),
+					data.source,
+				),
+			);
+		},
+		(errors) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			const invalidErrors: FieldError[] = [];
+			if (errors.source) {
+				invalidErrors.push({
+					fieldId: "source-select",
+					category: "empty",
+					message:
+						errors.source.message?.toString() ??
+						"Veuillez sélectionner la source utilisée pour déterminer les catégories d'emplois.",
+					anchor: true,
+				});
+			}
+			if (Array.isArray(errors.categories)) {
+				errors.categories.forEach((categoryError, index) => {
+					if (!categoryError?.name) return;
+					invalidErrors.push({
+						fieldId: `cat-${index}-name`,
+						category: "invalid",
+						message:
+							categoryError.name.message?.toString() ??
+							"Le libellé de la catégorie d'emploi est invalide.",
+						anchor: true,
+					});
+				});
+			}
+			setCategoryErrors(invalidErrors);
+		},
+	);
 
 	return (
 		<form
@@ -397,6 +513,7 @@ export function CategoryForm({
 					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
 					replace(toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
+					setCategoryErrors([]);
 					setHasData(false);
 				}}
 				title={title}
@@ -434,7 +551,7 @@ export function CategoryForm({
 				{!readOnlyLabel && (
 					<div
 						className={`fr-select-group ${
-							sourceError ? "fr-select-group--error" : ""
+							sourceSummaryError ? "fr-select-group--error" : ""
 						} ${stepStyles.sourceSelectGroup}`}
 					>
 						<label className="fr-label" htmlFor="source-select">
@@ -442,8 +559,11 @@ export function CategoryForm({
 							d&apos;emplois ?
 						</label>
 						<select
-							aria-describedby={sourceError ? "source-error" : undefined}
-							aria-invalid={Boolean(sourceError)}
+							aria-describedby={describedByForField(
+								CATEGORY_ALERT_ID,
+								sourceSummaryError,
+							)}
+							aria-invalid={sourceSummaryError ? true : undefined}
 							className="fr-select"
 							disabled={disabled || readOnly}
 							id="source-select"
@@ -452,6 +572,10 @@ export function CategoryForm({
 								form.setValue("source", e.target.value, {
 									shouldValidate: true,
 								});
+								form.clearErrors("source");
+								setCategoryErrors((errors) =>
+									errors.filter((error) => error.fieldId !== "source-select"),
+								);
 								setHasData(false);
 							}}
 						>
@@ -464,11 +588,6 @@ export function CategoryForm({
 								</option>
 							))}
 						</select>
-						{sourceError && (
-							<p className="fr-error-text" id="source-error">
-								{sourceError}
-							</p>
-						)}
 					</div>
 				)}
 			</div>
@@ -491,7 +610,10 @@ export function CategoryForm({
 				)}
 			</div>
 
-			<fieldset className={readOnly ? common.readOnlyFieldset : undefined}>
+			<fieldset
+				className={readOnly ? common.readOnlyFieldset : undefined}
+				id={CATEGORY_FORM_FIELD_ID}
+			>
 				<legend className="fr-sr-only">Catégories d&apos;emplois</legend>
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
@@ -506,6 +628,8 @@ export function CategoryForm({
 									accordionCollapseRefs.current[index] = node;
 								}}
 								disabled={disabled}
+								errorAlertId={CATEGORY_ALERT_ID}
+								errors={categoryErrors}
 								fieldId={field.id}
 								headerRef={(node) => {
 									accordionHeaderRefs.current[index] = node;
@@ -520,6 +644,15 @@ export function CategoryForm({
 									...form.register(`categories.${index}.name`),
 									onChange: (e) => {
 										form.setValue(`categories.${index}.name`, e.target.value);
+										form.clearErrors(`categories.${index}.name`);
+										setCategoryErrors((errors) =>
+											errors.filter(
+												(error) =>
+													error.fieldId !== `cat-${index}-name` &&
+													(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
+														error.category !== "invalid"),
+											),
+										);
 										setHasData(false);
 									},
 								}}
@@ -552,6 +685,13 @@ export function CategoryForm({
 				</div>
 			</fieldset>
 
+			<FieldErrorAlert
+				errors={categoryErrors}
+				id={CATEGORY_ALERT_ID}
+				onErrorAnchorClick={handleErrorAnchorClick}
+				validationAttempt={validationAttempt}
+			/>
+
 			<DefinitionAccordion
 				id={accordionId}
 				title="Définitions et méthode de calcul"
@@ -583,10 +723,7 @@ export function CategoryForm({
 				</div>
 			</DefinitionAccordion>
 
-			<FormErrors
-				mutationError={submitError}
-				validationError={workforceError}
-			/>
+			<FormErrors mutationError={submitError} />
 
 			<FormActions
 				className="fr-mt-0"

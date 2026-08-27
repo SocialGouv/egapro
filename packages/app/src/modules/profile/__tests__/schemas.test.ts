@@ -88,7 +88,7 @@ describe("updateProfileSchema", () => {
 		expect(result.success).toBe(false);
 		expect(result.error?.issues[0]).toMatchObject({
 			path: ["phone"],
-			message: "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+			message: "Veuillez renseigner votre numéro de téléphone",
 		});
 	});
 });

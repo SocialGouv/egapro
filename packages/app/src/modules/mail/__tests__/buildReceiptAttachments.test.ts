@@ -74,17 +74,16 @@ describe("buildReceiptAttachments", () => {
 	});
 
 	describe("buildSecondDeclarationAttachments", () => {
-		it("attaches the correction recap and the transmitted recap", async () => {
+		it("attaches only the second declaration recap and never renders the transmitted recap", async () => {
 			const attachments = await buildSecondDeclarationAttachments(SIREN, YEAR);
 
-			expect(attachments).toHaveLength(2);
-			expect(attachments.map((a) => a.filename)).toEqual([
-				`seconde-declaration-${SIREN}-${YEAR}.pdf`,
-				`recapitulatif-elements-transmis-${SIREN}-${YEAR + 1}.pdf`,
-			]);
-			expect(
-				attachments.every((a) => a.contentType === "application/pdf"),
-			).toBe(true);
+			expect(attachments).toHaveLength(1);
+			expect(attachments[0]).toMatchObject({
+				filename: `seconde-declaration-${SIREN}-${YEAR}.pdf`,
+				contentType: "application/pdf",
+			});
+			expect(mocks.buildTransmittedPdfData).not.toHaveBeenCalled();
+			expect(mocks.TransmittedPdfDocument).not.toHaveBeenCalled();
 		});
 
 		it("renders the declaration recap as a correction", async () => {
@@ -95,11 +94,6 @@ describe("buildReceiptAttachments", () => {
 				YEAR,
 				expect.any(Date),
 				"correction",
-			);
-			expect(mocks.buildTransmittedPdfData).toHaveBeenCalledWith(
-				SIREN,
-				YEAR,
-				expect.any(Date),
 			);
 		});
 	});

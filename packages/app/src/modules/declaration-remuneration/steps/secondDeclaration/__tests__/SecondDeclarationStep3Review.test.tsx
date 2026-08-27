@@ -136,7 +136,7 @@ describe("SecondDeclarationStep3Review", () => {
 		renderStep3();
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégories de salariés/,
 			),
 		).toBeInTheDocument();
 		// Non-breaking space keeps "par catégorie" on the same line (Figma spec)

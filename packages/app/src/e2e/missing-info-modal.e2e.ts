@@ -124,7 +124,14 @@ test.describe("Missing info modal", () => {
 			await modal.getByRole("button", { name: "Enregistrer" }).click();
 
 			await expect(
-				modal.locator(".fr-message--error", { hasText: "Format attendu" }),
+				modal.locator(".fr-message--error", {
+					hasText: "Veuillez renseigner votre numéro de téléphone",
+				}),
+			).toBeVisible();
+			await expect(
+				modal.locator(".fr-hint-text", {
+					hasText: "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+				}),
 			).toBeVisible();
 			expect(page.url()).toContain("/mon-espace");
 		});

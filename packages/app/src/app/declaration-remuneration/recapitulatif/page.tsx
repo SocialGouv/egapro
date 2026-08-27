@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
-import { getReferencePeriod, isDraft } from "~/modules/domain";
+import { getDeclarationReferencePeriod, isDraft } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
@@ -52,7 +52,12 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
 		mapToStepData(d);
 
-	const referencePeriod = getReferencePeriod(d.year);
+	const referencePeriod = getDeclarationReferencePeriod(
+		d.year,
+		isCorrection,
+		d.secondDeclReferencePeriodStart,
+		d.secondDeclReferencePeriodEnd,
+	);
 
 	const step5Categories =
 		data.jobCategories.length > 0
@@ -104,6 +109,8 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							declarantEmail={session.user.email ?? ""}
 							declarantName={session.user.name ?? ""}
 							declarationYear={d.year}
+							hourlyMen={d.hourlyMen}
+							hourlyWomen={d.hourlyWomen}
 							isCorrection={isCorrection}
 							referencePeriod={referencePeriod}
 							step2Data={step2Data}

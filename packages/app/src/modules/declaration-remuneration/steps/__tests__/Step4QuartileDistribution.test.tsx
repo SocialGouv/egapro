@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+	prefilledGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -335,25 +340,15 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
-					step4: {
-						annual: {
-							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: 90,
-							referenceMen: 110,
-							womenCounts: [30, 25, 20, 15],
-							menCounts: [20, 25, 30, 35],
-						},
-						hourly: {
-							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: 80,
-							referenceMen: 120,
-							womenCounts: [28, 22, 18, 12],
-							menCounts: [22, 28, 32, 38],
-						},
-					},
+					step4: prefilledGipStep4(),
 					confidenceIndex: "0.85",
 					periodStart: "2026-01-01",
 					periodEnd: "2026-12-31",
@@ -376,25 +371,15 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodStart: null,
 					periodEnd: null,
@@ -472,30 +457,30 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
 	});
 
-	it("caps each table against its own reference: 160 is rejected in hourly (153) but accepted in annual (177)", async () => {
+	it("caps the hourly table against the step 1 headcount, not against the GIP hourly block", async () => {
 		const user = userEvent.setup();
+		const gipThresholdsOnly = nullGipStep4();
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 177, totalMen: 180 },
+					step1: {
+						totalWomen: 177,
+						totalMen: 180,
+						hourlyWomen: 177,
+						hourlyMen: 180,
+					},
 					step2: nullGipStep2(),
 					step3: nullGipStep3(),
 					step4: {
 						annual: {
+							...gipThresholdsOnly.annual,
 							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: 177,
-							referenceMen: 180,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
 						},
 						hourly: {
+							...gipThresholdsOnly.hourly,
 							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: 153,
-							referenceMen: 196,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
 						},
 					},
 					confidenceIndex: null,
@@ -508,24 +493,18 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 
+		// 160 used to be rejected in the hourly table against the GIP reference of
+		// 153; the only cap left is the step 1 headcount, shared by both tables.
 		const hourlyWomen = screen.getByLabelText(
 			/Nombre de femmes 1er quartile horaire/i,
 		) as HTMLInputElement;
 		await user.clear(hourlyWomen);
 		await user.type(hourlyWomen, "160");
+		expect(hourlyWomen).toHaveValue("160");
+		expect(hourlyWomen).not.toHaveAttribute("aria-invalid");
 		expect(
-			screen.getByText(
-				/ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire \(153\)/i,
-			),
-		).toBeInTheDocument();
-		expect(hourlyWomen).not.toHaveValue("160");
-
-		expect(hourlyWomen).toHaveAttribute("aria-invalid", "true");
-		const describedBy = hourlyWomen.getAttribute("aria-describedby");
-		expect(describedBy).toBeTruthy();
-		expect(document.getElementById(describedBy as string)).toHaveTextContent(
-			/ne peut pas dépasser l'effectif du fichier GIP pour le taux horaire \(153\)/i,
-		);
+			screen.queryByText(/fichier GIP pour le taux horaire/i),
+		).not.toBeInTheDocument();
 
 		const annualWomen = screen.getByLabelText(
 			/Nombre de femmes 1er quartile annuel/i,
@@ -534,10 +513,37 @@ describe("Step4QuartileDistribution", () => {
 		await user.type(annualWomen, "160");
 		expect(annualWomen).toHaveValue("160");
 		expect(annualWomen).not.toHaveAttribute("aria-invalid");
-		expect(
-			screen.queryByText(
-				/ne peut pas dépasser l'effectif de l'étape 1 \(177\)/i,
-			),
-		).not.toBeInTheDocument();
+	});
+
+	it("caps each table at the step 1 headcount of its own pay basis", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={175}
+				hourlyMaxWomen={170}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+				maxMen={180}
+				maxWomen={177}
+			/>,
+		);
+
+		for (const [label, max] of [
+			[/Nombre de femmes 1er quartile annuel/i, 177],
+			[/Nombre de femmes 1er quartile horaire/i, 170],
+		] as const) {
+			const input = screen.getByLabelText(label) as HTMLInputElement;
+			await user.clear(input);
+			await user.type(input, "200");
+			expect(input).not.toHaveValue("200");
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			const describedBy = input.getAttribute("aria-describedby");
+			expect(describedBy).toBeTruthy();
+			expect(document.getElementById(describedBy as string)).toHaveTextContent(
+				`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			);
+		}
 	});
 });

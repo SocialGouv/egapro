@@ -125,6 +125,7 @@ export function SecondDeclarationStep2Form({
 				});
 			}}
 			previousHref={`${BASE_PATH}/etape/1`}
+			readOnly={isLocked}
 			readOnlyLabel
 			referencePeriodPicker={
 				<ReferencePeriodPicker
@@ -141,12 +142,11 @@ export function SecondDeclarationStep2Form({
 			submitError={periodError || mutation.error?.message}
 			title={
 				<h1 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-					salariés
+					Parcours de mise en conformité pour l&apos;indicateur par catégories
+					de salariés
 				</h1>
 			}
 			tooltipPrefix="tooltip-second-decl"
-			readOnly={isLocked}
 		/>
 	);
 }

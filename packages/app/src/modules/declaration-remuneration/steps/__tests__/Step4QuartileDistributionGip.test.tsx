@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+	prefilledGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -44,25 +49,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
-					step4: {
-						annual: {
-							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: 90,
-							referenceMen: 110,
-							womenCounts: [30, 25, 20, 15],
-							menCounts: [20, 25, 30, 35],
-						},
-						hourly: {
-							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: 80,
-							referenceMen: 120,
-							womenCounts: [28, 22, 18, 12],
-							menCounts: [22, 28, 32, 38],
-						},
-					},
+					step4: prefilledGipStep4(),
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}
@@ -84,21 +79,22 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: null,
-							referenceMen: null,
 							womenCounts: [30, 25, 20, null],
 							menCounts: [20, 25, 30, null],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: null,
-							referenceMen: null,
 							womenCounts: [28, 22, 18, null],
 							menCounts: [22, 28, 32, null],
 						},
@@ -121,25 +117,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							referenceWomen: null,
-							referenceMen: null,
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
@@ -159,21 +145,22 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 200, totalMen: 0 },
+					step1: {
+						totalWomen: 200,
+						totalMen: 0,
+						hourlyWomen: 200,
+						hourlyMen: 0,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
 					step4: {
 						annual: {
 							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: 200,
-							referenceMen: 0,
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
 						hourly: {
 							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: 200,
-							referenceMen: 0,
 							womenCounts: [50, 50, 50, 50],
 							menCounts: [0, 0, 0, 0],
 						},
@@ -202,25 +189,15 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
-					step4: {
-						annual: {
-							thresholds: ["25000", "32000", "40000"],
-							referenceWomen: 90,
-							referenceMen: 110,
-							womenCounts: [30, 25, 20, 15],
-							menCounts: [20, 25, 30, 35],
-						},
-						hourly: {
-							thresholds: ["13.74", "17.58", "21.98"],
-							referenceWomen: 80,
-							referenceMen: 120,
-							womenCounts: [28, 22, 18, 12],
-							menCounts: [22, 28, 32, 38],
-						},
-					},
+					step4: prefilledGipStep4(),
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}

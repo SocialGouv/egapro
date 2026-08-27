@@ -48,7 +48,7 @@ export function ConfirmationPage({
 			</div>
 
 			<h2 className="fr-h5 fr-mb-3w">
-				Documents récapitulatifs de votre déclaration
+				Documents récapitulatifs de votre démarche
 			</h2>
 
 			<div className={`fr-mb-4w ${styles.downloadCards}`}>
@@ -62,7 +62,7 @@ export function ConfirmationPage({
 					<DownloadCard
 						dataYear={dataYear}
 						href={`/api/declaration-pdf?type=correction&year=${declarationYear}`}
-						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés"
+						title="Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégories de salariés"
 						year={declarationYear}
 					/>
 				)}

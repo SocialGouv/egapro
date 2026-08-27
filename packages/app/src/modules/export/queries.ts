@@ -203,6 +203,8 @@ export async function fetchSubmittedDeclarations(
 			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
+			hourlyWomen: declarations.hourlyWomen,
+			hourlyMen: declarations.hourlyMen,
 			cseRequired: declarations.cseRequired,
 			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
