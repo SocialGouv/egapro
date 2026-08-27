@@ -43,6 +43,7 @@ function makeDeclaration(
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
+		notSubject: false,
 		...overrides,
 	};
 }
@@ -99,6 +100,13 @@ function makeRepresentation(
 	});
 }
 
+// A not-subject row is reset to step 0 yet mapped "done": the flag settles it.
+const NOT_SUBJECT = {
+	status: "done" as const,
+	currentStep: 0,
+	notSubject: true,
+};
+
 describe("computeRepresentationPanelVariant", () => {
 	it('returns "start" when no démarche exists yet', () => {
 		expect(computeRepresentationPanelVariant(undefined, CAMPAIGN_OPEN)).toBe(
@@ -128,6 +136,24 @@ describe("computeRepresentationPanelVariant", () => {
 				CAMPAIGN_OPEN,
 			),
 		).toBe("submitted");
+	});
+
+	it('returns "not_subject" — not "submitted" — for a settled non-subject démarche', () => {
+		expect(
+			computeRepresentationPanelVariant(
+				makeRepresentation(NOT_SUBJECT),
+				CAMPAIGN_OPEN,
+			),
+		).toBe("not_subject");
+	});
+
+	it('returns "closed" for a non-subject démarche once the campaign is closed', () => {
+		expect(
+			computeRepresentationPanelVariant(
+				makeRepresentation(NOT_SUBJECT),
+				CAMPAIGN_CLOSED,
+			),
+		).toBe("closed");
 	});
 
 	it('returns "closed" for every démarche state once the campaign is closed', () => {
@@ -181,6 +207,24 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "done", currentStep: 5 }),
 				CAMPAIGN_OPEN,
+			),
+		).toBe(RECAP_HREF);
+	});
+
+	it("sends a non-subject démarche back to the funnel entry point, so it stays reversible", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation(NOT_SUBJECT),
+				CAMPAIGN_OPEN,
+			),
+		).toBe(REPRESENTATION_FUNNEL_ROOT);
+	});
+
+	it("sends a non-subject démarche to the recap once the campaign is closed", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation(NOT_SUBJECT),
+				CAMPAIGN_CLOSED,
 			),
 		).toBe(RECAP_HREF);
 	});

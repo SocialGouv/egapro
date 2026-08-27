@@ -1,9 +1,10 @@
+import type { RepresentationDeclarationStatus } from "~/modules/domain";
 import { toNullableNumber } from "~/modules/domain";
 import { representationDraftSchema } from "../schemas";
 import type { RepresentationDraft } from "../types";
 
 export type RepresentationDeclarationSnapshot = {
-	status: "draft" | "submitted";
+	status: RepresentationDeclarationStatus;
 	currentStep: number | null;
 	draft: unknown;
 	referencePeriodStart: string | Date | null;

@@ -30,5 +30,13 @@ export default async function RepresentationHomePage() {
 		redirect(stepHref(currentStep));
 	}
 
-	return <SubjectionScreen campaignYear={campaignYear} />;
+	return (
+		<SubjectionScreen
+			campaignYear={campaignYear}
+			initialAnswer={
+				declaration?.status === "not_subject" ? "not_concerned" : undefined
+			}
+			year={year}
+		/>
+	);
 }

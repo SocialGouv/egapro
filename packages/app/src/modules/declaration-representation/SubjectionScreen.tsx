@@ -1,32 +1,48 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { Controller } from "react-hook-form";
 import { useZodForm } from "~/modules/shared/useZodForm";
+import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
 import { stepHref } from "./steps";
+import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
 	campaignYear: number;
+	initialAnswer?: SubjectionAnswer;
+	year: number;
 };
 
-export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
+export function SubjectionScreen({
+	campaignYear,
+	initialAnswer,
+	year,
+}: SubjectionScreenProps) {
 	const router = useRouter();
 	const legendId = useId();
 	const messagesId = useId();
 
 	const form = useZodForm(subjectionSchema, {
-		defaultValues: { answer: null },
+		defaultValues: { answer: initialAnswer ?? null },
 	});
 
 	const answer = form.watch("answer");
 
+	const declareNotSubjectMutation =
+		api.representationDeclaration.declareNotSubject.useMutation({
+			onSuccess: () => {
+				router.push("/mon-espace");
+			},
+		});
+
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
 			router.push(stepHref(1));
+			return;
 		}
+		declareNotSubjectMutation.mutate({ year });
 	});
 
 	return (
@@ -139,15 +155,25 @@ export function SubjectionScreen({ campaignYear }: SubjectionScreenProps) {
 					</div>
 				) : null}
 
+				{declareNotSubjectMutation.error ? (
+					<div className="fr-alert fr-alert--error fr-alert--sm" role="alert">
+						<p>{declareNotSubjectMutation.error.message}</p>
+					</div>
+				) : null}
+
 				{/* fr-btns-group--icon-right: without it, DSFR 1.14 treats any
 				    icon-carrying .fr-btn in a group as icon-only and clamps it to
 				    2.5rem, truncating the "Suivant" label. */}
 				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-right fr-btns-group--right fr-mt-4w">
 					{answer === "not_concerned" ? (
 						<li>
-							<Link className="fr-btn" href="/mon-espace">
+							<button
+								className="fr-btn"
+								disabled={declareNotSubjectMutation.isPending}
+								type="submit"
+							>
 								Valider
-							</Link>
+							</button>
 						</li>
 					) : (
 						<li>

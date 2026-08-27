@@ -27,6 +27,11 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
  * step guards, the debounced draft persisted across five real navigations, the
  * submit mutation, and the three read surfaces (PDF, public API, SUIT export)
  * that read back what the funnel wrote.
+ *
+ * The last describe walks the second outcome of that same démarche (epic #4324):
+ * a company below the 1 000-employee threshold answers once and is done — the
+ * non-subjection is a declaration result, persisted and restituted, not a dead
+ * end in the UI.
  */
 
 const PANEL_ID = "representation-process-panel";
@@ -500,5 +505,123 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 		await page.goto(`${FUNNEL_ROOT}/etape/3`);
 		await page.waitForURL(`**${FUNNEL_ROOT}/etape/1`);
 		await expectOnStep(page, 1, "Période de référence");
+	});
+});
+
+test.describe("Représentation équilibrée — parcours non-assujetti", () => {
+	test.describe.configure({ mode: "serial" });
+
+	let campaignYear: number;
+	let referenceYear: number;
+	let seededYears: number[] = [];
+
+	test.beforeAll(async () => {
+		campaignYear = await getCurrentDbYear();
+		referenceYear = getReferenceYearFor(campaignYear);
+		await resetRepresentationDeclaration();
+		seededYears = await setRepresentationWorkforceWindow(
+			campaignYear,
+			REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+		);
+	});
+
+	test.afterAll(async () => {
+		await resetRepresentationDeclaration();
+		for (const year of seededYears) {
+			await setGipWorkforce(null, year);
+		}
+		await resetGipWorkforce();
+	});
+
+	test("answering « moins de 1 000 salariés » closes the démarche without a funnel", async ({
+		page,
+	}) => {
+		await page.goto(FUNNEL_ROOT);
+		await chooseRadio(page, /Moins de 1 000 salariés/);
+		await expect(
+			page.getByText(/Vous n'êtes pas assujetti à la publication/),
+		).toBeVisible();
+
+		await page.getByRole("button", { name: "Valider" }).click();
+		await page.waitForURL("**/mon-espace");
+	});
+
+	test("Mon espace records the non-subjection as a result, with no deadline and no récapitulatif", async ({
+		page,
+	}) => {
+		await page.goto("/mon-espace");
+
+		const row = page.getByRole("row", { name: /Représentation/ });
+		await expect(row).toContainText("Non-assujetti");
+		await expect(row).toContainText("Effectué");
+		// A démarche that does not apply carries neither a deadline nor a receipt.
+		await expect(
+			row.getByRole("cell", { name: "-", exact: true }),
+		).toBeVisible();
+		await expect(
+			row.getByRole("cell", { name: "Aucune", exact: true }),
+		).toBeVisible();
+
+		const pdf = await page.request.get(
+			`/api/representation-pdf?year=${referenceYear}`,
+		);
+		expect(pdf.status()).toBe(404);
+	});
+
+	test("the panel keeps the subjection step alone and offers to reopen the démarche", async ({
+		page,
+	}) => {
+		await page.goto("/mon-espace");
+		await waitForDsfrModal(page, PANEL_ID);
+		await clickAndExpectDialogOpen(
+			page,
+			page.getByRole("button", { name: "Représentation", exact: true }),
+			PANEL_ID,
+		);
+
+		const panel = page.locator(`#${PANEL_ID}`);
+		await expect(
+			panel.getByText(/Vous n'êtes pas assujetti à la publication/),
+		).toBeVisible();
+		await expect(
+			panel.getByText("Vérification de l'assujettissement"),
+		).toBeVisible();
+
+		// Neither the declaration step nor the Rixain reminder applies below the threshold.
+		await expect(panel.getByText(/Écarts de représentation/)).toHaveCount(0);
+		await expect(panel.getByText(/loi Rixain/)).toHaveCount(0);
+
+		await expect(panel.getByRole("link", { name: "Modifier" })).toHaveAttribute(
+			"href",
+			FUNNEL_ROOT,
+		);
+	});
+
+	test("the answer is reversible: pre-filled on return, and starting the funnel drops the status", async ({
+		page,
+	}) => {
+		await page.goto(FUNNEL_ROOT);
+		await expect(
+			page.getByRole("radio", { name: /Moins de 1 000 salariés/ }),
+		).toBeChecked();
+
+		await chooseRadio(page, /1 000 salariés ou plus/);
+		await goNext(page);
+
+		await expectOnStep(page, 1, "Période de référence");
+		await page
+			.locator("#reference-period-start")
+			.fill(`${referenceYear}-01-01`);
+		await page.locator("#reference-period-end").fill(`${referenceYear}-12-31`);
+		await goNext(page);
+		await expectOnStep(page, 2, "Écarts de représentation - Cadres dirigeants");
+
+		await page.goto("/mon-espace");
+		const row = page.getByRole("row", { name: /Représentation/ });
+		await expect(row).toContainText(
+			"Écarts de représentation - Cadres dirigeants",
+		);
+		await expect(row).toContainText("En cours");
+		await expect(row).not.toContainText("Non-assujetti");
 	});
 });
