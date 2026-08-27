@@ -244,10 +244,10 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("variant: not_subject", () => {
-		it('renders a "Commencer" CTA pointing back to the funnel entry point', () => {
+		it('renders a "Modifier" CTA pointing back to the funnel entry point', () => {
 			const { dialog } = renderPanel({ declaration: NOT_SUBJECT });
 			const cta = getCta(dialog);
-			expect(cta).toHaveTextContent(/^Commencer$/);
+			expect(cta).toHaveTextContent(/^Modifier$/);
 			expect(cta).toHaveAttribute("href", REPRESENTATION_FUNNEL_ROOT);
 		});
 

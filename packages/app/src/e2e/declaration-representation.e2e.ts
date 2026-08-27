@@ -591,9 +591,10 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		await expect(panel.getByText(/Écarts de représentation/)).toHaveCount(0);
 		await expect(panel.getByText(/loi Rixain/)).toHaveCount(0);
 
-		await expect(
-			panel.getByRole("link", { name: "Commencer" }),
-		).toHaveAttribute("href", FUNNEL_ROOT);
+		await expect(panel.getByRole("link", { name: "Modifier" })).toHaveAttribute(
+			"href",
+			FUNNEL_ROOT,
+		);
 	});
 
 	test("the answer is reversible: pre-filled on return, and starting the funnel drops the status", async ({

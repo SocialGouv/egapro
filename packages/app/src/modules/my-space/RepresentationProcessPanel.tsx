@@ -46,7 +46,8 @@ function getStepStatuses(
 }
 
 function getCtaLabel(variant: RepresentationPanelVariant): string {
-	if (variant === "start" || variant === "not_subject") return "Commencer";
+	if (variant === "not_subject") return "Modifier";
+	if (variant === "start") return "Commencer";
 	if (variant === "draft") return "Reprendre";
 	return "Voir la déclaration";
 }
