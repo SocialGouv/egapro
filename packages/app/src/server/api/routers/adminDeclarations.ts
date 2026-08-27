@@ -406,6 +406,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 								declarationType: employeeCategories.declarationType,
 								womenCount: employeeCategories.womenCount,
 								menCount: employeeCategories.menCount,
+								hourlyWomenCount: employeeCategories.hourlyWomenCount,
+								hourlyMenCount: employeeCategories.hourlyMenCount,
 								annualBaseWomen: employeeCategories.annualBaseWomen,
 								annualBaseMen: employeeCategories.annualBaseMen,
 								annualVariableWomen: employeeCategories.annualVariableWomen,

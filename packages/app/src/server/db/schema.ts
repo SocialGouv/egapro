@@ -365,6 +365,8 @@ export const employeeCategories = createTable(
 		declarationType: declarationTypeEnum().notNull(),
 		womenCount: d.integer(),
 		menCount: d.integer(),
+		hourlyWomenCount: d.integer(),
+		hourlyMenCount: d.integer(),
 		annualBaseWomen: d.numeric(),
 		annualBaseMen: d.numeric(),
 		annualVariableWomen: d.numeric(),

@@ -344,6 +344,13 @@
 			"when": 1787764641727,
 			"tag": "0048_reflective_human_torch",
 			"breakpoints": true
+		},
+		{
+			"idx": 49,
+			"version": "7",
+			"when": 1787833039307,
+			"tag": "0049_fluffy_hercules",
+			"breakpoints": true
 		}
 	]
 }
