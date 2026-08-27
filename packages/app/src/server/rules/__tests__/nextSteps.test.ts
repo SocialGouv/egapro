@@ -1,5 +1,7 @@
+import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 import type { DeclarationFsmStatus } from "~/modules/domain";
+import { declarations } from "~/server/db/schema";
 import {
 	type Facts,
 	isKnownRulesVersion,
@@ -7,13 +9,13 @@ import {
 	type Rules,
 } from "../engine";
 import {
-	DEFAULT_RULES_VERSION,
+	CURRENT_RULES_VERSION,
 	listNextTransitions,
 	loadRulesWithFallback,
 } from "../nextSteps";
 import type { Predicate } from "../schema";
 
-const bundled = loadRules(DEFAULT_RULES_VERSION);
+const bundled = loadRules(CURRENT_RULES_VERSION);
 
 type SyntheticTransition = {
 	id: string;
@@ -84,10 +86,22 @@ describe("isKnownRulesVersion", () => {
 	});
 });
 
-describe("DEFAULT_RULES_VERSION", () => {
+describe("CURRENT_RULES_VERSION", () => {
 	it("vaut 2027.1 et désigne une version embarquée", () => {
-		expect(DEFAULT_RULES_VERSION).toBe("2027.1");
-		expect(isKnownRulesVersion(DEFAULT_RULES_VERSION)).toBe(true);
+		expect(CURRENT_RULES_VERSION).toBe("2027.1");
+		expect(isKnownRulesVersion(CURRENT_RULES_VERSION)).toBe(true);
+	});
+
+	// Le défaut de colonne est le seul point qui lie une déclaration à un
+	// ruleset : aucun code applicatif n'écrit rules_version. Il doit donc
+	// désigner la même version que le repli, sinon une déclaration neuve
+	// suivrait un graphe que le repli ne résoudrait pas.
+	it("est la version que le défaut de colonne estampille sur une déclaration neuve", () => {
+		const defaultSql = getTableConfig(declarations).columns.find(
+			(column) => column.name === "rules_version",
+		)?.default;
+
+		expect(defaultSql).toBe(CURRENT_RULES_VERSION);
 	});
 });
 

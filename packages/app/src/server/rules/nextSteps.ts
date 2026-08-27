@@ -6,8 +6,9 @@ import {
 	type Rules,
 } from "./engine";
 import type { Predicate } from "./schema";
+import { CURRENT_RULES_VERSION } from "./version";
 
-export const DEFAULT_RULES_VERSION = "2027.1";
+export { CURRENT_RULES_VERSION } from "./version";
 
 export type NextTransition = {
 	id: string;
@@ -147,7 +148,7 @@ export function loadRulesWithFallback(
 	version: string | null | undefined,
 ): Rules {
 	if (!version || !isKnownRulesVersion(version)) {
-		return loadRules(DEFAULT_RULES_VERSION);
+		return loadRules(CURRENT_RULES_VERSION);
 	}
 	return loadRules(version);
 }
