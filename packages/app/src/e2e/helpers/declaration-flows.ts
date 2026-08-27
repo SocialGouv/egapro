@@ -25,35 +25,50 @@ async function fillPayGapTable(
 	}
 }
 
+const CATEGORY_PAY_MEASURES = [
+	"Salaire de base annuel",
+	"Composantes variables annuelles",
+	"Salaire de base horaire",
+	"Composantes variables horaires",
+] as const;
+
+export function categoryPayInput(
+	page: Page,
+	options: {
+		measure: (typeof CATEGORY_PAY_MEASURES)[number];
+		sex: "femmes" | "hommes";
+		categoryIndex?: number;
+	},
+) {
+	const { measure, sex, categoryIndex = 1 } = options;
+	return page.getByRole("textbox", {
+		name: `${measure} ${sex}, catégorie ${categoryIndex}`,
+	});
+}
+
 /**
  * Fill every pay measure of one indicator G category with the same women/men
- * pair. Since #3948 a category whose headcount is >= 1 for a sex requires all
- * four of that sex's pay amounts, so filling the annual base alone now blocks
- * the submit. Reusing one pair across the four measures keeps every computed
- * gap equal to the caller's intended gap.
+ * pair. Since #3948 a category whose headcount is >= 1 for a sex requires that
+ * sex's pay amounts, so filling the annual base alone now blocks the submit.
+ * Reusing one pair across the four measures keeps every computed gap equal to
+ * the caller's intended gap.
  */
 export async function fillCategoryPayAmounts(
 	page: Page,
 	options: { categoryIndex?: number; women: string; men: string },
 ) {
-	const { categoryIndex = 1, women, men } = options;
-	const measures = [
-		"Salaire de base annuel",
-		"Composantes variables annuelles",
-		"Salaire de base horaire",
-		"Composantes variables horaires",
-	];
-	for (const measure of measures) {
-		await page
-			.getByRole("textbox", {
-				name: `${measure} femmes, catégorie ${categoryIndex}`,
-			})
-			.fill(women);
-		await page
-			.getByRole("textbox", {
-				name: `${measure} hommes, catégorie ${categoryIndex}`,
-			})
-			.fill(men);
+	const { categoryIndex, women, men } = options;
+	for (const measure of CATEGORY_PAY_MEASURES) {
+		await categoryPayInput(page, {
+			categoryIndex,
+			measure,
+			sex: "femmes",
+		}).fill(women);
+		await categoryPayInput(page, {
+			categoryIndex,
+			measure,
+			sex: "hommes",
+		}).fill(men);
 	}
 }
 
@@ -207,6 +222,57 @@ export async function submitStepsThroughQuartiles(
 	});
 }
 
+/** Shown under the step 5 title of the first declaration only (#4254). */
+export const STEP5_WORKFORCE_REMINDER =
+	"Pour rappel, le nombre total de salariés doit correspondre à celui renseigné dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs ».";
+
+const CATEGORY_WORKFORCE_ROW_LABEL = {
+	annual: "Rémunération annuelle",
+	hourly: "Rémunération horaire",
+} as const;
+
+type WorkforceCounts = { women: string; men: string };
+
+export function categoryWorkforceInput(
+	page: Page,
+	options: {
+		basis: keyof typeof CATEGORY_WORKFORCE_ROW_LABEL;
+		sex: keyof WorkforceCounts;
+		categoryIndex?: number;
+	},
+) {
+	const { basis, sex, categoryIndex = 1 } = options;
+	const sexLabel = sex === "women" ? "Nombre de femmes" : "Nombre d'hommes";
+	return page.getByRole("textbox", {
+		name: `${CATEGORY_WORKFORCE_ROW_LABEL[basis]} — ${sexLabel}, catégorie ${categoryIndex}`,
+	});
+}
+
+/**
+ * Fill both headcount rows of one indicator G category. Since #4254 a category
+ * declares a physical headcount per pay basis, each held to its own step 1
+ * total, so filling the annual row alone leaves the hourly sum at 0 and blocks
+ * the step.
+ */
+async function fillCategoryWorkforce(
+	page: Page,
+	options: {
+		categoryIndex?: number;
+		annual: WorkforceCounts;
+		hourly: WorkforceCounts;
+	},
+) {
+	const { categoryIndex, annual, hourly } = options;
+	for (const basis of ["annual", "hourly"] as const) {
+		const counts = basis === "annual" ? annual : hourly;
+		for (const sex of ["women", "men"] as const) {
+			await categoryWorkforceInput(page, { basis, categoryIndex, sex }).fill(
+				counts[sex],
+			);
+		}
+	}
+}
+
 /**
  * Fill step 5 employee categories so the computed indicator G gap lands above or
  * below the 5% alert threshold. women=1000, men=1100 → 9% gap (triggers
@@ -223,12 +289,12 @@ async function fillStep5Categories(page: Page, options: { hasGap: boolean }) {
 	if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
 		await sourceSelect.selectOption("accord-entreprise");
 		await page.getByRole("textbox", { name: "Libellé" }).fill("Catégorie test");
-		await page
-			.getByRole("textbox", { name: "Effectif femmes, catégorie 1" })
-			.fill("10");
-		await page
-			.getByRole("textbox", { name: "Effectif hommes, catégorie 1" })
-			.fill("15");
+		// The single category carries the whole step 1 headcount, on both bases.
+		const counts = {
+			women: String(STEP1_WORKFORCE.women),
+			men: String(STEP1_WORKFORCE.men),
+		};
+		await fillCategoryWorkforce(page, { annual: counts, hourly: counts });
 	}
 
 	// Fill salary data on category 1 (works for both fresh and pre-populated)
