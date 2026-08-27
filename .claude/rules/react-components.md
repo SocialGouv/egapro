@@ -3,17 +3,20 @@ paths:
   - "src/**/*.tsx"
 ---
 
-> **Used by**: `code-dev` (écriture composants), `rgaa-auditor`, `structural-auditor` (règle 2.11). Auto-chargé via `paths:`.
+# Composants React
 
-# React Components
+> Chargée sur tout `.tsx` sous `src/`. Vérifiée par `structural-auditor`. Les interdits mécaniques (`<svg>` inline, `<img>` brut, `style={}`) sont bloqués par le hook — voir `rules/automation.md`.
 
-## No logic in JSX
+## Server par défaut, client au plus bas
 
-Extract conditions, computations, and transformations **before** the return statement.
-Ternaries in JSX are acceptable only for simple show/hide (`{condition && <X />}`).
+Un composant est **Server Component** par défaut. `"use client"` ne s'ajoute que pour des hooks, des événements navigateur ou des Web APIs, et il s'isole au niveau le plus bas possible — jamais remonté sur un parent.
+
+## Pas de logique dans le JSX
+
+Conditions, calculs et transformations sont extraits **avant** le `return`. Un ternaire dans le JSX n'est acceptable que pour un show/hide simple (`{condition && <X />}`).
 
 ```tsx
-// FORBIDDEN
+// INTERDIT
 return <div>{items.filter(i => i.active).map(i => <span key={i.id}>{i.name.toUpperCase()}</span>)}</div>
 
 // CORRECT
@@ -21,82 +24,33 @@ const activeItems = items.filter(i => i.active);
 return <div>{activeItems.map(i => <ActiveItem key={i.id} item={i} />)}</div>
 ```
 
-## No inline SVG (blocked by hook)
+## Granularité
 
-Never paste raw `<svg>` markup in `.tsx` components — the edit will be rejected.
-Place all SVG files in `public/assets/` and reference them via `<Image>` from `next/image`, or use DSFR icon classes (`fr-icon-*`).
+Un composant = une responsabilité. Extraire un sous-composant vers ~50 lignes de JSX, et dès qu'un callback de `.map()` dépasse 5 lignes de JSX.
 
-## Images: always use `next/image` (blocked by hook)
+## `next/image`
 
-Raw `<img>` tags are forbidden in `.tsx` files — use `import Image from "next/image"` instead.
-Next.js `Image` provides automatic optimization (lazy loading, responsive sizing, format conversion).
+`<img>` brut est bloqué par le hook. Avec `Image` de `next/image` : `width` + `height` obligatoires pour un SVG de `public/assets/`, et tout domaine distant se déclare dans `images.remotePatterns` de `next.config.js`. Les `alt` sont du ressort d'ultra11y (`rules/rgaa.md`), pas d'une liste ici.
 
-```tsx
-// FORBIDDEN
-<img src="/assets/illustration.svg" alt="Illustration" />
+## Pas de `useEffect` pour de la donnée dérivée
 
-// CORRECT
-import Image from "next/image";
-<Image src="/assets/illustration.svg" alt="Illustration" width={200} height={150} />
-```
-
-- Decorative images: `alt=""`
-- Informative images: descriptive `alt` (not "image", "photo", "icon")
-- SVG from `public/assets/`: use `width` + `height` props
-- Remote images: declare the domain in `next.config.js` `images.remotePatterns`
-
-## Figma assets: always SVG, never PNG/JPG
-
-When extracting illustrations, icons, or graphics from Figma (`get_design_context`), **always export as SVG**.
-PNG and JPG raster formats are forbidden for illustrations and icons — they are not scalable and produce larger files.
-
-| Asset type | Format | Where to store |
-|---|---|---|
-| Illustration / graphic | **SVG** | `public/assets/{module}/` |
-| Icon | **DSFR icon class** preferred, SVG fallback | `fr-icon-*` or `public/assets/icons/` |
-| Photo (real photograph) | **WebP** (exception: only format where SVG is impossible) | `public/assets/{module}/` |
+Tout ce qui se calcule depuis les props ou le state se calcule **pendant le rendu**, jamais par un effet qui recopie dans du state.
 
 ```tsx
-// FORBIDDEN — raster export from Figma
-<Image src="/assets/illustration.png" alt="..." width={400} height={300} />
-
-// CORRECT — vector export from Figma
-<Image src="/assets/illustration.svg" alt="..." width={400} height={300} />
-```
-
-When calling `get_design_context` from the Figma MCP, if the returned asset download URLs point to PNG/JPG:
-1. Re-export manually as SVG from Figma, or
-2. Ask the user to export the asset as SVG from the Figma file
-3. Only accept PNG/JPG for actual photographs that cannot be vectorized
-
-## .map() over 5 lines
-
-If a `.map()` callback exceeds 5 lines of JSX, extract it to a named sub-component.
-
-## No common.module.scss
-
-Never import from a shared `common.module.scss`. Each component must have its own scoped SCSS module if custom styles are needed.
-
-## Component naming
-
-Name components after **what they display**, not where they sit in the tree.
-`DeclarationSummaryCard` not `LeftPanelCard`.
-
-## No useEffect for derived data
-
-Anything computable from props/state is computed **during render**, not mirrored into state through an effect. Reserve `useEffect` for syncing with the outside world: subscriptions, DOM, timers, analytics, non-React APIs.
-
-```tsx
-// FORBIDDEN — derived state via effect
+// INTERDIT
 const [fullName, setFullName] = useState("");
 useEffect(() => { setFullName(`${first} ${last}`); }, [first, last]);
 
-// CORRECT — derive at render
+// CORRECT
 const fullName = `${first} ${last}`;
 ```
 
-**Allowed (external sync, not derivation):** hydrating a form from an async source — `form.reset(query.data)` / `setValue(...)` inside an effect once a tRPC query or draft resolves. Never "fix" these into render-time computations.
+`useEffect` est réservé à la synchronisation avec l'extérieur : abonnements, DOM, timers, analytics, APIs non-React. **Autorisé et à ne pas « corriger »** : hydrater un formulaire depuis une source asynchrone (`form.reset(query.data)` une fois qu'une query tRPC ou un brouillon résout) — c'est de la synchro externe, pas de la dérivation.
 
-## Stable IDs with useId
+## Ids stables avec `useId`
 
-Generate any id that wires a `<label>`/`<input>` (or aria attribute) with `useId()` — never `Math.random()` or a render-time counter (unstable across re-renders, breaks a11y). A component may accept an `id` prop for composition; only non-deterministic ids generated at render are forbidden.
+Tout id qui relie un `<label>` à un `<input>` (ou un attribut aria) se génère avec `useId()` — jamais `Math.random()` ni un compteur de rendu, qui sont instables entre deux rendus et cassent l'accessibilité. Un composant peut accepter un `id` en prop pour la composition ; seuls les ids non déterministes générés au rendu sont interdits.
+
+## Pas de `common.module.scss`
+
+Chaque composant a son propre SCSS module scopé si des styles sur mesure sont nécessaires. Jamais de module SCSS partagé entre composants sans lien.

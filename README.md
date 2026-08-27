@@ -200,103 +200,120 @@ Quand l'infra fournira une API Gateway native :
 
 ## Configuration AI (Claude Code)
 
-Le projet est entierement configure pour [Claude Code](https://claude.com/claude-code). Toute la configuration est versionnee dans `.claude/` et `.mcp.json`, ce qui signifie que chaque developpeur qui clone le repo beneficie automatiquement de toute l'intelligence du projet.
+Le projet est entierement configure pour [Claude Code](https://claude.com/claude-code). Toute la configuration est versionnee dans `.claude/` et `.mcp.json` : chaque developpeur qui clone le repo beneficie automatiquement de toute l'intelligence du projet.
 
 ### Comment ca fonctionne
 
-Claude Code utilise un systeme de couches qui s'activent automatiquement :
-
 ```
 .claude/
-  settings.json           ← Configuration des hooks (pre/post edit)
-  hooks/                  ← Scripts shell executes automatiquement
-  rules/                  ← Regles chargees selon le contexte du fichier edite
-  agents/                 ← Sous-agents specialises (read-only, delegues automatiquement)
-  skills/                 ← Workflows invocables manuellement via /commande
+  settings.json           <- hooks + plugins
+  hooks/                  <- scripts shell executes automatiquement
+  rules/                  <- socle produit et code, charge selon le fichier edite
+  pipeline/               <- mecanique d'orchestration, JAMAIS charge automatiquement
+  agents/                 <- sous-agents specialises
+  skills/                 <- workflows invocables via /commande
 
-CLAUDE.md (racine)        ← Instructions globales du projet (toujours chargees)
-packages/app/CLAUDE.md    ← Conventions specifiques au package app (chargees quand on travaille dans packages/app/)
-.mcp.json                 ← Serveurs MCP (DSFR, Figma, GitHub, Next.js)
+CLAUDE.md (racine)        <- contexte projet (toujours charge)
+packages/app/CLAUDE.md    <- architecture du package app (charge quand on y travaille)
+.mcp.json                 <- serveurs MCP (DSFR, Figma, GitHub, Next.js)
 ```
 
-**Principe** : les `CLAUDE.md` donnent le contexte general, les `rules/` ajoutent des regles specifiques au type de fichier edite, les `hooks/` bloquent ou corrigent automatiquement, et les `agents/` fournissent des checklists specialisees pour les audits.
-
-### Serveurs MCP (`.mcp.json`)
-
-Les serveurs MCP ajoutent des outils que Claude peut appeler pendant le dev :
-
-| Serveur | Role | Exemple d'utilisation |
-|---|---|---|
-| `dsfr` | Documentation DSFR | Verifier la structure HTML d'un composant DSFR avant de l'ecrire |
-| `next-devtools` | Dev tools Next.js | Diagnostics, erreurs de compilation, routes disponibles |
-| `figma` | Integration Figma | Extraire le design d'un ecran Figma pour le coder |
-| `github` | Operations GitHub | Lire les commentaires d'une PR, creer des issues |
+**Le principe qui structure tout** : une regle vit a **un seul endroit**, et ce qu'une machine decide n'est pas re-enonce en prose. Les hooks bloquent mecaniquement, les `rules/` portent ce qui demande du jugement, les `agents/` rapportent, et `pipeline/` decrit l'orchestration — jamais chargee automatiquement, ouverte a la demande.
 
 ### Rules (`.claude/rules/`)
 
-Les rules sont des fichiers markdown charges **automatiquement** par Claude selon le fichier en cours d'edition. Chaque rule a un `paths:` dans son frontmatter qui definit quand elle s'active.
+Chargees **automatiquement** selon le `paths:` de leur frontmatter. Trois n'en ont pas et sont donc toujours en contexte, parce qu'elles s'appliquent a toute action.
 
-| Fichier | S'active quand on edite... | Contenu |
+| Fichier | S'active sur | Contenu |
 |---|---|---|
-| `code-quality.md` | *(toujours)* | TypeScript strict, naming, imports `~/`, DRY, env vars, taille fichiers |
-| `automation.md` | *(toujours)* | Gates auto, hooks, agents, skills — orchestration globale |
-| `database-drizzle.md` | `src/server/**/*.ts` | Transactions obligatoires, Drizzle Kit, casing snake_case |
-| `react-components.md` | `src/**/*.tsx` | Pas de logique dans le JSX, pas d'inline SVG, granularite |
-| `styling-dsfr.md` | `src/**/*.tsx`, `src/**/*.scss` | DSFR first, tokens couleur, breakpoints SASS, runtime DSFR |
-| `testing.md` | `src/**/__tests__/**` | Couverture 100%, mocks centralises dans setup.ts |
-| `trpc-api.md` | `src/server/api/**/*.ts` | Zod schemas dans schemas.ts, TRPCError avec codes HTTP |
+| `automation.md` | *(toujours)* | les 22 patterns bloques par le hook, les 4 gates, la verif avant push |
+| `rgaa.md` | *(toujours)* | accessibilite RGAA 4.1.2 / WCAG 2.2 AA — le dispositif ultra11y |
+| `git-artefact-hygiene.md` | *(toujours)* | depot public : zero secret, scrubbing du PII et de l'infra |
+| `code-quality.md` | `src/**/*.{ts,tsx,js,jsx}` | source unique d'une regle metier, DRY, nommage, pas de commentaire |
+| `react-components.md` | `src/**/*.tsx` | pas de logique dans le JSX, granularite, `useEffect`, `useId` |
+| `styling-dsfr.md` | `src/**/*.{tsx,scss}` | cascade DSFR, tokens de couleur, breakpoints, runtime DSFR |
+| `figma-workflow.md` | `src/**/*.{tsx,scss}` | construire depuis un node Figma : traduction des tokens, les pieges |
+| `visual-quality-validation.md` | `src/**/*.{tsx,scss}` | verifier le rendu : mesure DOM, overlay, contrats de fidelite |
+| `bug-fix-workflow.md` | `src/**/*.{ts,tsx}` | reproduire, cause racine, revert-verify, consigner |
+| `database-drizzle.md` | `src/server/**/*.ts` | transactions obligatoires, casing, migrations generees |
+| `trpc-api.md` | `src/server/api/**/*.ts` | schemas Zod hors routeurs, ownership, codes `TRPCError` |
+| `audit-logging.md` | routeurs, route handlers, auth, audit | les 3 points de cablage d'une action auditee |
+| `demarche-state-machine.md` | parcours de declaration, Mon espace, regles serveur, E2E | l'autorite unique du graphe d'etats |
+| `testing.md` | `src/**/__tests__/**` | couverture, frontieres de mock, pieges rencontres |
+| `e2e.md` | `src/e2e/**` | peu de scenarios riches, couverture des pages, port 3000 |
+
+### Pipeline (`.claude/pipeline/`)
+
+**Jamais charge automatiquement** — lu a la demande par les skills, les agents pipeline et `scripts/orchestration/`. Une session de travail directe n'a aucun usage du board GitHub ni du format de spec des tickets.
+
+| Fichier | Contenu |
+|---|---|
+| `orchestration.md` | la pipeline de bout en bout : agents, skills, scripts, modele de branches |
+| `board.md` | les IDs du board **EGAPRO V2** (non devinables) et les pieges GraphQL |
+| `ticket-spec-format.md` | ce qu'un spec de ticket porte, et ou il vit selon le type d'issue |
+| `complexity-estimation.md` | la rubrique de sizing t-shirt et ses anchors |
 
 ### Hooks (`.claude/hooks/`)
 
-Les hooks sont des scripts shell executes **automatiquement** a chaque action de Claude. Ils ne necessitent aucune intervention.
+Executes **automatiquement**, sans intervention.
 
 | Hook | Quand | Ce qu'il fait |
 |---|---|---|
-| `block-bad-patterns.sh` | **Avant** chaque edit de fichier | Bloque 6 patterns interdits : `biome-ignore`, `@ts-ignore`, `style={}`, `<svg>` inline (utiliser `DsfrPictogram` pour les pictogrammes DSFR), `process.env` (→ `~/env.js`), `../../` ou plus profond (→ `~/`), `@media` width/screen en SCSS (→ mixins DSFR). L'edit est rejete, Claude doit trouver une autre approche. |
-| `auto-lint.sh` | **Apres** chaque edit ou commande bash | Lance `biome check --write` pour auto-corriger le formatage et le lint. Apres un edit : corrige le fichier edite. Apres `pnpm test/build/typecheck` : corrige tous les fichiers modifies. |
+| `block-bad-patterns.sh` | **avant** chaque edit | bloque **22 patterns** : suppressions de lint, `: any`, `process.env`, `../../`, `dangerouslySetInnerHTML`, `style={}`, `<svg>`, `<img>`, couleurs en dur et `@media` en SCSS, `zod` dans un routeur ou un composant, helpers `domain` re-inlines, composant sur mesure dans `src/app/`. L'edit est rejete |
+| `auto-lint.sh` | **apres** chaque edit ou commande bash | `biome check --write` sur le fichier edite, ou sur tous les fichiers modifies apres un `pnpm test/build/typecheck` |
+| `check-pr-reviews.sh` | au premier message d'une session | signale les commentaires de review non resolus sur la PR de la branche courante |
 
 ### Agents (`.claude/agents/`)
 
-Les agents sont des sous-processus specialises avec leur propre checklist. Ils tournent sur un modele rapide (Sonnet), sont **read-only** (ils rapportent les problemes mais ne modifient rien), et sont delegues automatiquement par les skills et les quality gates.
-
-| Agent | Checklist | Utilise par |
+| Agent | Role | Modele |
 |---|---|---|
-| `validator` | Typecheck + tests + lint + format en parallele | Toutes les gates, `/ship` |
-| `structural-auditor` | 16 regles : forms, schemas, DRY, imports, file size, naming, domain layer... | Gate automatique, `/ship` |
-| `rgaa-auditor` | Lance le skill ultra11y `review-a11y` sur le code modifie | Gate automatique, `/ship` |
-| `security-auditor` | OWASP Top 10 + RGS : injection, auth, acces, secrets, headers, SSRF... | Gate automatique, `/ship` |
+| `validator` | typecheck + tests + lint + format en parallele | sonnet |
+| `structural-auditor` | greps mecaniques, fuites de la couche domaine, checks de jugement | sonnet |
+| `rgaa-auditor` | lance le skill ultra11y `review-a11y` sur le code modifie | sonnet |
+| `security-auditor` | OWASP Top 10 + RGS, cible sur les mecanismes du projet | sonnet |
+| `code-dev` | implemente un ticket end-to-end, n'ecrit aucun test | sonnet (opus si `complexe`) |
+| `tu-dev` | ecrit tous les tests vitest, trie regression vs evolution | opus |
+| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus |
+| `functional-validator`, `design-validator` | rejouent le comportement / mesurent la fidelite visuelle | sonnet |
+| `product-owner`, `architect`, `bug-analyst`, `architect-rework` | conception : specs, decoupage, diagnostic | opus |
+| `review-fixer`, `doc-writer` | adressent les reviews / regenerent `docs/` | opus / sonnet |
+
+Les quatre premiers sont **read-only** : ils rapportent, l'agent principal corrige.
 
 ### Skills (`.claude/skills/`)
 
-Un seul skill smart `/ship` qui orchestre tout le cycle de vie d'une issue. Il detecte automatiquement ou on en est (branche, PR, reviews) et reprend la ou on s'est arrete.
-
 | Commande | Ce que ca fait |
 |---|---|
-| `/ship [#N]` | **Implement** -> **Validate** (4 agents) -> **PR** (single ou split) -> **Review** (watch, fix, re-validate) -> **Done**. Sans argument, detecte l'etat depuis la branche/PR. |
+| `/analyse [#N] [description]` | phase conception — detecte epic / task / bug et invoque les agents adaptes |
+| `/implement #N` | phase execution — loop background pour un epic, `code-dev` synchrone pour une task ou un bug |
+| `/review [#N \| #PR]` | adresse les commentaires de review (humains + bots) |
+| `/report [#N]` | dashboard des agents actifs et de l'etat des sous-tickets |
+| `/doc [#N]` | regenere `docs/features.md`, `architecture.md`, `parcours-utilisateurs.md` |
+| `/open #PR` | recree un worktree local pour tester une PR |
+| `/velocity [sprint]` | velocite des sprints termines + capacite conseillee |
+| `/plan-sprint [sprint]` | planifie le prochain sprint (capacite, report, backlog) |
 
-### Gates automatiques (`.claude/rules/automation.md`)
+### Gates automatiques
 
-Les gates sont le coeur de l'automatisation. Elles se declenchent **toutes seules** sans aucune commande :
+Elles se declenchent **toutes seules**, sans commande.
 
 | Gate | Se declenche quand... | Ce qui se passe |
 |---|---|---|
-| **Validation** | Claude finit une tache | 4 agents paralleles verifient typecheck + tests + lint + structure + RGAA + securite avant de reporter "termine" |
-| **RGAA** | Claude modifie un `.tsx` | Verification inline de l'accessibilite (labels, alt, aria, landmarks, headings) |
-| **Securite** | Claude modifie `server/` ou tRPC | Verification inline OWASP (Drizzle, Zod, ownership, process.env, transactions) |
-| **Domain layer** | Claude ecrit du code | Hooks bloquent getFullYear(), slice(0,9), import zod dans les mauvais fichiers |
-| **PR review** | La branche a une PR ouverte | Auto-fetch des commentaires non resolus, signalement avant de commencer |
+| **Validation** | une tache se termine | 4 agents paralleles (typecheck/tests/lint, structure, RGAA, securite) avant de reporter « termine » |
+| **RGAA** | un `.tsx` est modifie | `rgaa-auditor` lance le moteur ultra11y sur le diff. Pas de checklist ecrite a la main : deux jeux de regles sur un meme sujet divergent |
+| **Securite** | `server/` ou tRPC est modifie | `security-auditor` sur les mecanismes du projet (ownership, `~/env.js`, Drizzle, audit) |
+| **Patterns interdits** | a chaque edit | le hook bloque avant l'ecriture — rien a lancer |
+| **PR review** | la branche a une PR ouverte | les commentaires non resolus sont signales en debut de session |
 
 ### Workflow type
 
-Quand un developpeur demande "ajoute une page de profil" :
+« Ajoute une page de profil » :
 
-1. Claude charge `CLAUDE.md` + `packages/app/CLAUDE.md` (contexte global)
-2. Les rules `react-components.md` et `styling-dsfr.md` s'activent pour les fichiers `.tsx`
-3. Le hook `block-bad-patterns` empeche d'ecrire du code interdit
-4. Le hook `auto-lint` formate automatiquement chaque fichier edite
-5. La gate RGAA verifie l'accessibilite inline
-6. La gate Validation lance 3 agents paralleles a la fin
-7. Si la branche a une PR, la gate PR review signale les commentaires non resolus
+1. `CLAUDE.md` + `packages/app/CLAUDE.md` donnent le contexte
+2. `code-quality.md`, `react-components.md`, `styling-dsfr.md`, `figma-workflow.md` s'activent sur les `.tsx`
+3. `block-bad-patterns` empeche d'ecrire du code interdit, `auto-lint` formate
+4. les 4 gates tournent en parallele avant que la tache soit declaree finie
+5. si la branche a une PR, les commentaires non resolus sont signales
 
 ## Specifications completes
 

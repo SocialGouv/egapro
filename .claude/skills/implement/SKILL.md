@@ -60,7 +60,7 @@ if [ -n "$HEADER" ]; then
 fi
 ```
 
-Pour les epics, vérifier `subIssues.totalCount > 0` via GraphQL (snippet 5 de `rules/github-board.md`).
+Pour les epics, vérifier `subIssues.totalCount > 0` via GraphQL (snippet 5 de `.claude/pipeline/board.md`).
 
 ## Step 2 — Dispatcher selon le mode
 
@@ -298,5 +298,5 @@ L'utilisateur retire `dispatch=escalate` (et `attempt=3`) après orientation pou
 - Computation du plan : `scripts/orchestration/dispatch_plan.sh`
 - Mutations board : `scripts/orchestration/process_tick_result.sh`
 - Helpers : `scripts/orchestration/{cache_gh,log_event,set_ticket_status,set_ticket_date,epic_state,render_dashboard,create_linked_branch,force_pr_issue_link}.sh`
-- Colonnes `Start date` / `End date` du board : `scripts/orchestration/{set_ticket_date,backfill_ticket_dates}.sh` + workflow `.github/workflows/ticket-end-date.yaml` (voir `rules/github-board.md` § Date fields)
+- Colonnes `Start date` / `End date` du board : `scripts/orchestration/{set_ticket_date,backfill_ticket_dates}.sh` + workflow `.github/workflows/ticket-end-date.yaml` (voir `.claude/pipeline/board.md` § Date fields)
 - Dashboard : skill `/report`

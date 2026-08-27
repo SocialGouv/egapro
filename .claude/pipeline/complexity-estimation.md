@@ -1,13 +1,6 @@
----
-paths:
-  - ".claude/agents/architect/**"
-  - ".claude/agents/bug-analyst/**"
-  - "scripts/orchestration/set_ticket_size.sh"
----
-
 # Estimation de complexité (t-shirt sizing)
 
-> **Used by**: `architect` (modes `epic-create` / `epic-enrich` / `task`) et `bug-analyst`. Chaque ticket **feuille** qui passera dans la pipeline IA (`/implement`) reçoit une taille t-shirt **à la fin de l'analyse**, quand tout le contexte technique est connu (fichiers touchés, migration, schéma, surface UI). La taille alimente la **vélocité de sprint** (skill `/velocity`).
+> **Pipeline only.** Posé par `architect` et `bug-analyst` **à la fin de l'analyse**, quand le contexte technique est connu (fichiers touchés, migration, surface UI). Alimente `/velocity` et `/plan-sprint`.
 
 Le sizing est posé sur le board GitHub **EGAPRO V2** via le champ `Size` (single-select XS→XL) **et** le champ `Estimate` (number, points). Les deux sont écrits d'un coup par `scripts/orchestration/set_ticket_size.sh` — l'agent n'écrit jamais ces champs en GraphQL brut.
 

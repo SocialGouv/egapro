@@ -2,99 +2,50 @@
 paths:
   - "src/**/*.ts"
   - "src/**/*.tsx"
-  - "src/e2e/**"
 ---
 
-# Bug Fix Workflow
+# Corriger un bug
 
-> **Used by**: `code-dev` (issue type Bug, ou label `bug` — écrit **uniquement le fix source**, plus aucun test), `tu-dev` (écrit le test de reproduction **unitaire / intégration** par revert-verify), `e2e-dev` (écrit le test de reproduction **E2E** en fin de pipeline, s'il juge le bug assez critique), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix. Auto-chargé via `paths:` (`.ts/.tsx`, `src/e2e/**`).
+> Le protocole vaut pour tout le monde : la pipeline (`bug-analyst` analyse, `code-dev` fixe, `tu-dev` / `e2e-dev` verrouillent) comme une session directe. La répartition des rôles dans la pipeline est dans `.claude/pipeline/orchestration.md`.
 
-Quand un ticket est un **bug** (issue type Bug, label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**, en s'appuyant sur l'analyse postée par `bug-analyst` dans le commentaire `## Analyse du bug` (root cause, fichiers à modifier, fix proposé).
+Deux pièges justifient à eux seuls la discipline : « je crois que j'ai fixé » sans preuve, qui revient en régression un mois plus tard ; et le fix accidentel qui ne vise pas la cause racine, donc le bug qui reparaît sous une autre forme.
 
-> **Répartition tests** (dans la pipeline `/implement`) : `code-dev` écrit **uniquement le fix source** — il n'écrit plus aucun test, ni unitaire/intégration, ni E2E. Les tests de reproduction **unitaire / intégration** sont écrits par `tu-dev` (étape 5.5 de `code-dev`), **après** le fix, et prouvés par **revert-verify** (revert du fix → RED → restore → GREEN). Le test de reproduction **E2E** (pour un bug UI/parcours **assez critique**) est écrit par `e2e-dev` en fin de pipeline, également prouvé par revert-verify. `code-dev` ne touche jamais aux tests.
+## Deux choses distinctes vivent sous le mot « reproduire »
 
-Cette discipline évite deux pièges fréquents :
-1. "Je crois que j'ai fixé" sans preuve → régression un mois plus tard
-2. Fix accidentel qui ne cible pas la root cause → bug réapparaît sous une autre forme
-
----
-
-## Protocole obligatoire
-
-### 1. Reproduire
-
-Deux choses distinctes vivent sous ce mot, et les confondre a déjà coûté cher :
-
-| | **Vérification one-shot** | **Test de non-régression permanent** |
+| | **Vérification one-shot** | **Test de non-régression** |
 |---|---|---|
-| But | prouver que le fix fait ce qu'il prétend, maintenant | empêcher le bug de revenir, indéfiniment |
-| Qui | **`code-dev`** (étape 2bis), rejouée par `functional-validator` / `design-validator` | `tu-dev` (TU/intégration) ou `e2e-dev` (E2E) |
+| But | prouver que le fix agit, maintenant | empêcher le bug de revenir |
 | Quand | pendant l'implémentation | après le fix, prouvé par revert-verify |
-| Durée de vie | éphémère — consignée dans le body de la PR | permanente — committée dans la suite |
-| Obligatoire ? | **toujours** | **non** — soumis au critère de criticité |
+| Durée de vie | éphémère — consignée dans le body de la PR | permanente — commitée dans la suite |
+| Obligatoire ? | **toujours** | **non** — soumis à la criticité |
 
-La **vérification one-shot est toujours due**, quel que soit le bug : elle est décrite par `bug-analyst` dans son analyse et **exécutée par `code-dev`**, qui consigne l'avant/après observé. Même un bug infra ou un écart purement visuel en a une, fût-elle manuelle. Un bug qui ne reçoit aucun test permanent n'est donc **pas** un bug non vérifié.
+La **vérification one-shot est toujours due**, quel que soit le bug — même un bug d'infra ou un écart purement visuel, fût-elle manuelle. Elle relève de celui qui a le worktree, le dev server et le fix sous la main. Un bug sans test permanent n'est donc pas un bug non vérifié.
 
-Le **test permanent**, lui, n'est jamais écrit par `code-dev`. Qui l'écrit — et s'il est seulement justifié — dépend du type de bug :
+Le **test permanent** dépend du type de bug : logique métier ou API → test unitaire (ou d'intégration si le défaut est au DB-layer) ; UI / parcours → E2E Playwright, **seulement si le bug est assez critique** (parcours critique, fort risque de régression) et de préférence imbriqué dans le scénario existant. Un bug mineur ou cosmétique n'en reçoit en général pas.
 
-- **Bug UI / comportement utilisateur** → test E2E Playwright dans `src/e2e/<feature>.e2e.ts`, écrit par **`e2e-dev`** en fin de pipeline, **uniquement s'il juge le bug assez critique** (parcours critique, fort risque de régression). De préférence imbriqué dans le scénario E2E existant qui couvre le parcours. Un bug mineur / cosmétique / visual-mismatch ne reçoit en général pas d'E2E.
-- **Bug logique métier / domain** → test unitaire Vitest dans `__tests__/` à côté du module, écrit par **`tu-dev`** (étape 5.5).
-- **Bug API / tRPC** → test unitaire du router (ou test d'intégration si le bug est au DB-layer), écrit par **`tu-dev`** (étape 5.5).
+## Le protocole
 
-La preuve de reproduction se fait **après** le fix par **revert-verify**, par l'agent qui écrit le test (`tu-dev` pour TU/intégration, `e2e-dev` pour l'E2E) : reverse-appliquer le diff source de `code-dev` → le test doit être **RED** → ré-appliquer le fix → **GREEN**. Si le test passe sans le fix, il ne reproduit pas le bug → le retravailler.
+**1. Identifier la cause racine.** Ne pas s'arrêter au symptôme : remonter les appelants, la stack trace, les schémas Zod, les migrations. `nextjs_call(get_errors)` pour les erreurs compile/runtime, `git log -p <fichier>` pour les changements récents, les logs d'un env de review si le bug y est spécifique (scrubber avant de citer — `rules/git-artefact-hygiene.md`).
 
-### 2. Identifier la root cause
+**2. Fixer la cause, pas le symptôme.**
 
-Ne pas se contenter du symptôme. Lire le code en amont (stack trace, appelants, schémas Zod, migrations DB). Si la root cause n'est pas claire :
-- `nextjs_call(get_errors)` pour les erreurs compile/runtime
-- `kubectl logs` si le bug vient d'un env de review (voir mémoire utilisateur)
-- Lire les PRs récentes qui touchent le fichier incriminé (`git log -p <file>`)
+```ts
+// INTERDIT — masque un undefined qui ne devrait jamais arriver
+if (value == null) return "default";
 
-### 3. Fixer
+// CORRECT — corriger la fonction en amont qui propage le undefined
+```
 
-Modifier le code pour faire passer le test. Le fix doit cibler la **root cause**, pas masquer le symptôme :
-- ❌ `if (value == null) return "default";` pour masquer un `undefined` qui ne devrait jamais arriver
-- ✅ Fixer la fonction en amont qui propage le `undefined`
+**3. Prouver le test par revert-verify.** Reverse-appliquer le diff **source** (`git apply -R`) → le test doit être **RED** ; ré-appliquer → **GREEN**. Un test qui passe sans le fix ne reproduit pas le bug : le retravailler.
 
-### 4. Valider
+**4. Consigner.** La vérification one-shot va dans le body de la PR, sous forme observable : ce qui a été fait → valeur **avant** / valeur **après**. Sans cette trace, personne ne peut distinguer un fix vérifié d'un fix plausible. Pour un bug visuel ou CSS, la preuve est une **mesure DOM** (`getBoundingClientRect`, `getComputedStyle`, `Range.getClientRects`), jamais un jugement à l'œil.
 
-- `pnpm typecheck` + `pnpm lint:check` verts (côté `code-dev`)
-- La suite **TU + intégration** verte (pas de régression) est garantie par `tu-dev` à l'étape 5.5 — `code-dev` ne lance pas `pnpm test` lui-même. Si `tu-dev` détecte une vraie régression, il rend la main à `code-dev` pour corriger la source.
-- La suite **E2E** verte (pas de régression de parcours) et l'éventuel test de reproduction E2E sont garantis par `e2e-dev` en fin de pipeline.
-- **La vérification one-shot (étape 1) a été exécutée et consignée** dans le body de la PR, avec la valeur **avant** et **après** — c'est la seule preuve que le fix agit, et elle est due même quand ni `tu-dev` ni `e2e-dev` ne produisent de test permanent. Pour un bug UI, elle se fait dans le dev server, mesure DOM à l'appui plutôt qu'à l'œil.
+**5. Commit** : `fix(<scope>): <description courte> (#NNN)`. Le test de reproduction est commité séparément (`test(<scope>): …`).
 
-### 5. Commit
+## Bug de pipeline ou de déploiement
 
-Commit du fix (par `code-dev`) : `fix(<scope>): <description courte> (#NNN)`.
+CI/CD, Docker, Kubernetes n'ont pas forcément de test automatisable. Alors : documenter la reproduction manuelle (commandes exactes) sur le ticket, tester le fix dans un environnement de review, joindre les logs avant/après (scrubbés), et si possible ajouter une assertion de monitoring qui rattrapera la régression.
 
-Le test de reproduction (E2E écrit par `e2e-dev`, ou TU / intégration écrit par `tu-dev`) fait partie de la suite de non-régression permanente, committé séparément par son agent (`test(<scope>): …`).
+## Écart visuel Figma ↔ app
 
----
-
-## Cas particulier : bug de pipeline / déploiement
-
-Les bugs touchant CI/CD, Docker, Kubernetes n'ont pas forcément de test automatisable. Dans ce cas :
-
-1. Documenter la reproduction manuelle dans le commentaire du ticket (commandes exactes, logs)
-2. Tester le fix dans un environnement de review (voir mémoire utilisateur : namespace K8s, URL, mail test)
-3. Joindre les logs **avant** et **après** fix en commentaire du ticket
-4. Si possible, ajouter un monitoring/assertion pour détecter la régression (health check, alerte)
-
----
-
-## Cas particulier : visual mismatch (Figma ↔ app)
-
-Quand le bug est un **écart visuel** entre le rendu de l'app et le design Figma de référence (couleur fausse, espacement décalé, typo wrong weight, élément manquant), le protocole « test qui échoue avant fix » ne s'applique pas tel quel : il n'y a pas de test unitaire / E2E qui asserte du pixel-perfect.
-
-`bug-analyst` aura déjà identifié le delta dans son commentaire `## Analyse du bug` (sous-stratégie `visual mismatch`) — pour chaque divergence, il liste la propriété Figma concernée (`fontWeight`, `fill`, `itemSpacing`, …) et le fichier/composant à corriger.
-
-Protocole côté `code-dev` :
-
-1. **Lire l'analyse** posté par `bug-analyst` → savoir exactement quelles propriétés sont en écart
-2. **Implémenter le fix** en suivant `rules/figma-workflow.md` Phase 3 (mapping Figma → DSFR : couleur → token, fontSize → `fr-text--*`, fontWeight ≥ 600 → `<strong>`, itemSpacing → `fr-m{b,t,r,l}-Xw`)
-3. **Vérifier le rendu** :
-   - Démarrer le dev server, naviguer via Playwright sur la page concernée
-   - Re-lire le node Figma via `mcp__figma__get_design_context` et confirmer que chaque propriété est maintenant alignée
-   - `mcp__figma__get_screenshot` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
-4. **Inclure des screenshots dev server** (desktop + mobile) dans le body de la PR — c'est le signal visuel pour la review humaine
-5. **Pas de test E2E de record** sur le pixel-perfect : ultra11y couvre l'a11y (agent `rgaa-auditor` + workflow `a11y.yaml`), la fidélité visuelle reste en revue humaine + check structurel agent
+Il n'y a pas de test unitaire du pixel-perfect, mais il y a mieux qu'une revue à l'œil. Corriger en suivant `rules/figma-workflow.md` (mapping token → DSFR), puis **re-mesurer le rendu** contre le node — c'est la vérification one-shot, et elle est due comme les autres. La plupart des écrans n'ont que ça : quatre écrans seulement portent un **contrat de fidélité** E2E permanent (`src/e2e/{breadcrumb-spacing,stepper-spacing,declaration-header-alignment,second-declaration-info-styling}.e2e.ts`). Si le bug tombe sur l'un d'eux, c'est le contrat qui verrouille : soit le code s'y conforme, soit le contrat est mis à jour avec le nouveau node en référence. Sinon, joindre les screenshots dev server (desktop + mobile) au body de la PR — c'est le signal pour la revue humaine. Voir `rules/visual-quality-validation.md`.
