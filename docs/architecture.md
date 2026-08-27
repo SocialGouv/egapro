@@ -775,7 +775,7 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 | `e2e.yaml` | push | Tests E2E Playwright |
 | `lighthouse.yaml` | `deployment_status` | Audit Lighthouse sur l'env de review |
 | `db-schema.yaml` | push (master, alpha) | Génération doc schéma BDD |
-| `review-auto.yaml` / `review.yaml` | push branches | Déploiement environnement de review (par PR) |
+| `review-auto.yaml` | push branches | Déploiement environnement de review (par PR) |
 | `deactivate.yaml` | PR closed / branch deleted | Cleanup environnement de review |
 | `preproduction.yaml` | push branche `beta` | Déploiement preprod |
 | `production.yaml` | push tag | Déploiement prod |
