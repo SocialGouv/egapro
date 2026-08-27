@@ -247,6 +247,7 @@ export {
 export type {
 	ExecutivesCount,
 	RepresentationComplianceVerdict,
+	RepresentationDeclarationStatus,
 	WorkforceHistoryEntry,
 } from "./shared/representation";
 export {
@@ -257,6 +258,7 @@ export {
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
 	isRepresentationDeclarationSubmitted,
+	isRepresentationNotSubject,
 	isRepresentationPublicationRequired,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,

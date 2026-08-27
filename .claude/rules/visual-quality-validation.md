@@ -6,7 +6,7 @@ paths:
 
 # Visual Quality Validation
 
-> **Used by**: `design-validator` (the independent visual-fidelity gate, spawned by `code-dev` at step 9). Complements `rules/figma-workflow.md` (which is the *building* discipline for `code-dev`); this rule is the *verification* discipline.
+> La discipline de **vérification** : le gate `design-validator` (étape 9a-bis de `code-dev`), le contrat de fidélité E2E, et les conditions de rendu que toute comparaison visuelle exige — y compris un check ad-hoc hors pipeline. La discipline de **construction** est dans `rules/figma-workflow.md`.
 
 The gate compares the **rendered** UI to its **Figma reference** — numbers first (measured in the DOM), pixels second (onion-skin overlay + Claude vision). It does **not** compare to designer HTML mockups (that legacy `designer` flow is gone). The reference is always the Figma node(s) in the ticket's `## Référence Figma` section.
 
@@ -29,10 +29,14 @@ Les deux couches ci-dessus sont un **contrôle ponctuel** : elles jugent l'écra
 
 Le **contrat de fidélité** est la couche qui survit : les valeurs numériques du node Figma sont écrites une fois dans un fichier versionné, puis rejouées contre le DOM à chaque exécution de la suite E2E — donc dans `e2e.yaml` (PR → `alpha`) et dans la gate `e2e-dev` de fin de pipeline.
 
-| Fichier | Rôle |
+**Il n'y a pas de moteur générique ni de dossier de fixtures.** Un contrat est un `*.e2e.ts` dédié qui porte ses valeurs attendues en constantes de module et les asserte via `getComputedStyle` / `getBoundingClientRect`. Les quatre qui existent sont les modèles à copier :
+
+| Fichier | Ce qu'il verrouille |
 |---|---|
-| `packages/app/src/e2e/helpers/figmaFidelity.ts` | Moteur générique : mesure le DOM, compare au contrat, agrège **tous** les écarts et échoue avec un rapport lisible (`élément.propriété : attendu X, obtenu Y`) |
-| `packages/app/src/e2e/fixtures/figma/<écran>.ts` | Le contrat : géométrie, rythme vertical, rampe typographique, couleurs, alignements, copy obligatoire |
+| `src/e2e/breadcrumb-spacing.e2e.ts` | marges du fil d'Ariane, sur 2 viewports × 3 écrans |
+| `src/e2e/stepper-spacing.e2e.ts` | rythme vertical autour du stepper |
+| `src/e2e/declaration-header-alignment.e2e.ts` | alignement de l'en-tête et de son bloc compagnon |
+| `src/e2e/second-declaration-info-styling.e2e.ts` | fond, rampe typographique et padding du callout |
 
 Règles d'écriture d'un contrat :
 
@@ -42,7 +46,7 @@ Règles d'écriture d'un contrat :
 4. **Pas de diff de pixels** : la rastérisation des polices varie d'une machine à l'autre. Le contrat porte sur des nombres.
 5. **Imbriquer l'assertion dans le parcours E2E existant** qui atteint déjà l'écran dans le bon état, plutôt que de rejouer un tunnel complet pour une mesure.
 
-Quand un ticket UI touche un écran couvert par un contrat, le contrat fait foi : soit le code s'y conforme, soit le contrat est mis à jour **avec le nouveau node Figma en référence** (`capturedAt` remis à jour).
+Quand un ticket UI touche un écran couvert par un contrat, le contrat fait foi : soit le code s'y conforme, soit le contrat est mis à jour **avec le nouveau node Figma en référence**, et le commentaire d'en-tête du fichier dit lequel.
 
 ## Méthode — espaces verticaux (systématique, jamais à l'œil)
 

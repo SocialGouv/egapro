@@ -229,8 +229,11 @@ describe("buildRepresentationPdfData", () => {
 		});
 	});
 
-	it("refuses to build a recap for a declaration that was never transmitted", async () => {
-		stubDb({ ...SUBMITTED_DECLARATION, status: "draft", submittedAt: null });
+	it.each([
+		"draft",
+		"not_subject",
+	])("refuses to build a recap for a %s declaration, which transmitted no gap", async (status) => {
+		stubDb({ ...SUBMITTED_DECLARATION, status, submittedAt: null });
 
 		await expect(build()).rejects.toBeInstanceOf(
 			RepresentationDeclarationNotFoundError,

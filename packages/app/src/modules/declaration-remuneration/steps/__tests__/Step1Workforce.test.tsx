@@ -3,7 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GipPrefillData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { Step1Data } from "~/modules/declaration-remuneration/types";
-import { nullGipStep2, nullGipStep3 } from "~/test/gipGapFixtures";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step1Workforce } from "../Step1Workforce";
 
 const mockMutate = vi.fn();
@@ -51,22 +55,12 @@ const SAVED = step1Data({
 	hourlyMen: 100,
 });
 
-function emptyGipQuartileTable() {
-	return {
-		thresholds: [null, null, null],
-		referenceWomen: null,
-		referenceMen: null,
-		womenCounts: [null, null, null, null],
-		menCounts: [null, null, null, null],
-	} as GipPrefillData["step4"]["annual"];
-}
-
 function gipPrefill(step1: GipPrefillData["step1"]): GipPrefillData {
 	return {
 		step1,
 		step2: nullGipStep2(),
 		step3: nullGipStep3(),
-		step4: { annual: emptyGipQuartileTable(), hourly: emptyGipQuartileTable() },
+		step4: nullGipStep4(),
 		confidenceIndex: null,
 		periodEnd: null,
 	};
@@ -240,18 +234,93 @@ describe("Step1Workforce", () => {
 		});
 	});
 
-	it("shows a field-level error on every empty input when submitting", async () => {
+	it("names every empty field in a single error alert on submit", async () => {
 		const user = userEvent.setup();
 		renderStep1();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
+		const alert = screen.getByRole("alert");
+		expect(within(alert).getByText("Champ vide")).toBeInTheDocument();
+		expect(alert).toHaveTextContent(
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		);
+		expect(alert).toHaveTextContent(
+			"Renseignez le nombre d'hommes pour la rémunération annuelle.",
+		);
+		expect(alert).toHaveTextContent(
+			"Renseignez le nombre de femmes pour la rémunération horaire.",
+		);
+		expect(alert).toHaveTextContent(
+			"Renseignez le nombre d'hommes pour la rémunération horaire.",
+		);
+		// The maquette keeps the cell free of text: only the error state shows.
+		expect(document.querySelector(".fr-error-text")).toBeNull();
+		for (const label of [ANNUAL_WOMEN, ANNUAL_MEN, HOURLY_WOMEN, HOURLY_MEN]) {
+			expect(screen.getByLabelText(label)).toHaveAttribute(
+				"aria-invalid",
+				"true",
+			);
+		}
+		const table = screen.getByRole("table");
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
 		expect(
-			screen.getAllByText("Veuillez renseigner le nombre de femmes."),
-		).toHaveLength(2);
+			table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
 		expect(
-			screen.getAllByText("Veuillez renseigner le nombre d'hommes."),
-		).toHaveLength(2);
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("places prefill source before the alert and definitions", async () => {
+		const user = userEvent.setup();
+		renderStep1(
+			step1Data(),
+			gipPrefill({
+				totalWomen: null,
+				totalMen: null,
+				hourlyWomen: null,
+				hourlyMen: null,
+			}),
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const source = document.querySelector("p.fr-text-mention--grey");
+		const alert = screen.getByRole("alert");
+		expect(source).not.toBeNull();
+		expect(
+			(source as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("keeps the reset warning before the validation alert", async () => {
+		const user = userEvent.setup();
+		renderStep1(
+			SAVED,
+			gipPrefill({
+				totalWomen: 50,
+				totalMen: 100,
+				hourlyWomen: 50,
+				hourlyMen: 100,
+			}),
+		);
+		await user.clear(screen.getByLabelText(ANNUAL_WOMEN));
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const warning = screen
+			.getByText(/réinitialise les indicateurs préremplis/)
+			.closest("div");
+		const alert = screen.getByRole("alert");
+		expect(warning).not.toBeNull();
+		expect(
+			(warning as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("blocks submit when the hourly row is left empty", async () => {
@@ -274,9 +343,9 @@ describe("Step1Workforce", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(mockMutate).not.toHaveBeenCalled();
-		expect(
-			screen.getByText("Veuillez renseigner le nombre de femmes."),
-		).toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		);
 	});
 
 	it("does not render a previous link (exit is handled by the breadcrumb)", () => {

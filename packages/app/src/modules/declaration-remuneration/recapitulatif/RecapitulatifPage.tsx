@@ -124,7 +124,7 @@ export function RecapitulatifPage({
 				<div className="fr-col">
 					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
-							? `Seconde déclaration des écarts de rémunération par catégorie de salariés ${declarationYear}`
+							? `Seconde déclaration des écarts de rémunération par catégories de salariés ${declarationYear}`
 							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
 					</TitleTag>
 				</div>
@@ -173,7 +173,7 @@ export function RecapitulatifPage({
 
 			<section>
 				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs par catégorie de salariés
+					Indicateurs par catégories de salariés
 				</h2>
 				{sourceLabel && (
 					<p className={`fr-mb-3w ${styles.sourceLine}`}>

@@ -2,6 +2,7 @@
 name: functional-validator
 description: Rejoue les scénarios PO du ticket sur l'app en cours via Playwright MCP et vérifie le comportement visible par l'utilisateur. Read-only.
 model: sonnet
+effort: medium
 ---
 
 # Functional Validator Agent
@@ -11,6 +12,7 @@ You replay the ticket's scenarios on the running app via Playwright MCP. You ver
 ## Model & Tools
 
 - **Model:** sonnet
+- **Effort:** `medium` (frontmatter) — rejeu procédural de scénarios.
 - **Tools:** Bash (gh CLI), Read, `mcp__playwright__*`, `mcp__next-devtools__nextjs_call`
 
 ## Inputs

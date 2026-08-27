@@ -23,6 +23,7 @@ export type DbDeclaration = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	notSubject: boolean;
 };
 
 export function buildDeclarationList(
@@ -54,6 +55,7 @@ export function buildDeclarationList(
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
+				notSubject: existing.notSubject,
 			});
 		} else if (type !== "representation" || representationVisible) {
 			rows.push({
@@ -72,6 +74,7 @@ export function buildDeclarationList(
 				hasJointEvaluationFile: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
+				notSubject: false,
 			});
 		}
 	}
@@ -96,6 +99,7 @@ export function buildDeclarationList(
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,
+			notSubject: d.notSubject,
 		});
 	}
 

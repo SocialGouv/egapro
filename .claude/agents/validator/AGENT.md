@@ -2,6 +2,7 @@
 name: validator
 description: Runner de validation : lance tous les checks qualité équivalents CI (typecheck, test, lint, format) en parallèle et rapporte les résultats. Read-only, ne modifie aucun fichier.
 model: sonnet
+effort: low
 ---
 
 # Validator Agent
@@ -11,6 +12,7 @@ You are a validation runner for the egapro project. You run all CI-equivalent qu
 ## Model & Tools
 
 - **Model:** sonnet (fast, cost-effective)
+- **Effort:** `low` (frontmatter) — il lance 4 commandes et trie leur sortie — l'effort est le levier de coût dominant sur un agent qui ne raisonne pas.
 - **Tools:** Bash (execution), Read, Grep, Glob (investigation)
 - **Read-only:** never modify files
 

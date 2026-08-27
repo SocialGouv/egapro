@@ -34,6 +34,15 @@ vi.mock("~/trpc/react", () => ({
 				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
 			},
 		},
+		representationDeclaration: {
+			declareNotSubject: {
+				useMutation: () => ({
+					mutate: vi.fn(),
+					isPending: false,
+					error: null,
+				}),
+			},
+		},
 	},
 }));
 
@@ -69,15 +78,19 @@ function mockFunnelState({
 	campaignOpen = true,
 	currentStep,
 	draft,
+	status,
 }: {
 	campaignOpen?: boolean;
 	currentStep?: number;
 	draft?: unknown;
+	status?: string;
 } = {}) {
 	getDeclaration.mockResolvedValue({
 		campaignOpen,
 		declaration:
-			currentStep === undefined ? null : { currentStep, draft: draft ?? null },
+			currentStep === undefined
+				? null
+				: { currentStep, draft: draft ?? null, status },
 	} as never);
 }
 
@@ -137,6 +150,34 @@ describe("RepresentationHomePage", () => {
 		render(await RepresentationHomePage());
 
 		expect(mockRedirect).not.toHaveBeenCalled();
+	});
+
+	it("pre-fills the subjection screen for a company already declared out of scope (T3-S2)", async () => {
+		mockFunnelState({ currentStep: 0, status: "not_subject" });
+
+		render(await RepresentationHomePage());
+
+		expect(mockRedirect).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole("radio", {
+				name: /Moins de 1 000 salariés sur au moins un exercice/,
+			}),
+		).toBeChecked();
+		expect(
+			screen.getByText(/Vous n'êtes pas assujetti à la publication/),
+		).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Valider" })).toBeInTheDocument();
+	});
+
+	it("leaves the subjection screen blank for a draft that has not reached a step", async () => {
+		mockFunnelState({ currentStep: 0, status: "draft" });
+
+		render(await RepresentationHomePage());
+
+		for (const radio of screen.getAllByRole("radio")) {
+			expect(radio).not.toBeChecked();
+		}
+		expect(screen.getByRole("button", { name: "Suivant" })).toBeInTheDocument();
 	});
 
 	it("resumes an existing draft at its current step (S21)", async () => {

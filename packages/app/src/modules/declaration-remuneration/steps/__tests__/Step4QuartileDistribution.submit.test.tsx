@@ -116,11 +116,27 @@ describe("Step4QuartileDistribution submit behaviour", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 		// Recap alert is rendered with role=alert
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent(/Le formulaire contient des erreurs/);
+		expect(alert).toHaveTextContent(/Valeur invalide/);
 		// Anchor link points to the offending threshold input
 		const anchor = alert.querySelector('a[href="#step4-annual-q2-max"]');
 		expect(anchor).not.toBeNull();
 		expect(alert.querySelectorAll("a").length).toBeGreaterThan(0);
+
+		const hourlyTable = screen.getByRole("table", {
+			name: "Rémunération horaire brute moyenne",
+		});
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
+		expect(
+			hourlyTable.compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
+		expect(
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("shows 'Effectif obligatoire' on missing women count cells", async () => {

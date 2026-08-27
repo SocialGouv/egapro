@@ -80,7 +80,7 @@ describe("DeclarationSuccessBanner", () => {
 		[false, "Télécharger le récapitulatif de la déclaration des indicateurs"],
 		[
 			true,
-			"Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés",
+			"Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
 		],
 	])("links to the recapitulative PDF when available (isSecondDeclaration: %s)", (isSecondDeclaration, label) => {
 		renderBanner({ isSecondDeclaration, pdfDownloadHref: "/pdf/2026" });

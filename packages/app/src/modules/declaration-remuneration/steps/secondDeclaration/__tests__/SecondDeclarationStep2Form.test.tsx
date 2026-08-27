@@ -120,7 +120,7 @@ describe("SecondDeclarationStep2Form", () => {
 		renderStep2();
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégories de salariés/,
 			),
 		).toBeInTheDocument();
 		expect(screen.getByText("Étape 2 sur 3")).toBeInTheDocument();

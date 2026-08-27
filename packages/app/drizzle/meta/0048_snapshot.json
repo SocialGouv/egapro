@@ -1,5 +1,5 @@
 {
-	"id": "0fcf8cbc-b668-4ec1-b646-2001e822303a",
+	"id": "f9d36275-6b76-4fe6-b3d7-e4f63f7daf94",
 	"prevId": "d052d7fa-757e-4133-9236-13dc4b568bde",
 	"version": "7",
 	"dialect": "postgresql",
@@ -148,12 +148,6 @@
 				},
 				"decl2_joint_evaluation_deadline": {
 					"name": "decl2_joint_evaluation_deadline",
-					"type": "date",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"decl2_cse_opinion_deadline": {
-					"name": "decl2_cse_opinion_deadline",
 					"type": "date",
 					"primaryKey": false,
 					"notNull": true
@@ -2997,7 +2991,7 @@
 		"public.representation_declaration_status": {
 			"name": "representation_declaration_status",
 			"schema": "public",
-			"values": ["draft", "submitted"]
+			"values": ["draft", "submitted", "not_subject"]
 		},
 		"public.representation_not_computable_executives": {
 			"name": "representation_not_computable_executives",

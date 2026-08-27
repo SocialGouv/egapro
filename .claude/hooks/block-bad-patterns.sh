@@ -117,7 +117,7 @@ check_pattern '\.(tsx|jsx)$' \
 # Domain layer — getFullYear() must come from ~/modules/domain (allow domain/ itself and tests)
 check_pattern '\.(ts|tsx)$' \
   'getFullYear\(\)' \
-  'Inline getFullYear() is forbidden. Use getCurrentYear() or getCseYear() from ~/modules/domain.' \
+  'Inline getFullYear() is forbidden. Use getCurrentYear(), getWorkforceYear() or getReferenceYearFor() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
 # Domain layer — slice/substring/substr(0, 9) for SIREN extraction must come from ~/modules/domain

@@ -22,7 +22,7 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
 		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
 		cse_required: "SUIT: Avis_CSE_requis",
-		rules_version: "SUIT: Version_regles",
+		rules_version: "FSM ruleset pinned at submission; not exposed to SUIT",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",
 		total_men: "SUIT: Effectif_H_rem_annuelle_globale",
 		created_at: "SUIT: Date_creation",

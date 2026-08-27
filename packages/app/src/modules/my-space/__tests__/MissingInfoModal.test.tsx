@@ -286,7 +286,7 @@ describe("MissingInfoModal", () => {
 		});
 	});
 
-	it("does not repeat the format hint when typing after an empty submission", async () => {
+	it("keeps the format hint and generic error while correcting the phone", async () => {
 		render(
 			<MissingInfoModal
 				cseApplicable={false}
@@ -309,9 +309,7 @@ describe("MissingInfoModal", () => {
 				document.querySelector(
 					"#missing-info-phone-messages .fr-message--error",
 				),
-			).toHaveTextContent(
-				"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
-			);
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
 			expect(
 				screen.getAllByText(
 					"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
@@ -320,7 +318,7 @@ describe("MissingInfoModal", () => {
 		});
 	});
 
-	it("keeps the format error when the phone number is filled but malformed", async () => {
+	it("keeps the generic error when the phone number is malformed", async () => {
 		render(
 			<MissingInfoModal
 				cseApplicable={false}
@@ -340,10 +338,11 @@ describe("MissingInfoModal", () => {
 				document.querySelector(
 					"#missing-info-phone-messages .fr-message--error",
 				),
-			).toHaveTextContent(
-				"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
-			);
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
 		});
+		expect(
+			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),
+		).toBeInTheDocument();
 	});
 
 	it("shows the explicit CSE error when submitting without selecting a radio", async () => {

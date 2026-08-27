@@ -51,7 +51,7 @@ Les quatre mêmes actions (`MATOMO_FUNNEL_ACTION`) sont émises pour chaque funn
 
 `storageKey` : `egapro:declaration-funnel` · Dimensions : **année + tranche d'effectif** · Émis par `StepPageClient.tsx` (start/step/abandon) et `Step6Review.tsx` (complete).
 
-Clés d'étape : `step_1` Effectifs · `step_2` Écart de rémunération · `step_3` Écart de rémunération variable · `step_4` Quartiles de rémunération · `step_5` Écart par catégorie de salariés · `step_6` Récapitulatif.
+Clés d'étape : `step_1` Effectifs · `step_2` Écart de rémunération · `step_3` Écart de rémunération variable · `step_4` Quartiles de rémunération · `step_5` Écart par catégories de salariés · `step_6` Récapitulatif.
 
 | `action` | Déclencheur | `name` | `value` |
 |---|---|---|---|

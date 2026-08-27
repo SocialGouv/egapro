@@ -5,6 +5,7 @@ import {
 	saveRepresentationDraftSchema,
 	submitRepresentationDeclarationSchema,
 } from "~/modules/declaration-representation";
+import { declareRepresentationNotSubjectSchema } from "~/modules/declaration-representation/schemas";
 import { REPRESENTATION_YEAR as YEAR } from "./fixtures";
 
 describe("router input schemas", () => {
@@ -43,6 +44,24 @@ describe("router input schemas", () => {
 			year: YEAR,
 			payload: { executivesCount: "none" },
 		});
+	});
+
+	it("drops a client-supplied siren and status from the declareNotSubject input", () => {
+		const result = declareRepresentationNotSubjectSchema.safeParse({
+			year: YEAR,
+			siren: "999999999",
+			status: "submitted",
+		});
+
+		expect(result.data).toEqual({ year: YEAR });
+	});
+
+	it.each([
+		1999, 2101,
+	])("rejects the out-of-range year %s on the declareNotSubject input", (year) => {
+		expect(
+			declareRepresentationNotSubjectSchema.safeParse({ year }).success,
+		).toBe(false);
 	});
 
 	it.each([2025.5, Number.NaN])("rejects the year %s", (year) => {

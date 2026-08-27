@@ -246,6 +246,6 @@ describe("FirstRoundOptions", () => {
 		expect(
 			screen.getByText(/Vous souhaitez mettre en place des actions correctives/)
 				.textContent,
-		).toContain("par catégorie de\u00A0salariés");
+		).toContain("par catégories de\u00A0salariés");
 	});
 });

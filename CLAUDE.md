@@ -1,269 +1,144 @@
 # CLAUDE.md — Monorepo egapro
 
-> Reference for all AI agents or developers working on this repository.
+> Référence pour tout agent ou développeur travaillant sur ce dépôt.
 
 ---
 
-## Business context
+## Contexte métier
 
-EGAPRO is the French government platform for declaring gender pay equity indicators (7 indicators, detailed in [README.md](./README.md)).
+EGAPRO est la plateforme de l'État pour la déclaration de l'index d'égalité professionnelle (7 indicateurs, détaillés dans [README.md](./README.md)).
 
-Key concepts for development:
-- **Indicators A–F**: pre-calculated by GIP-MDS from DSN data, available each March
-- **Indicator G**: company-calculated pay gap by job categories (base + variable compensation)
-- **Alert threshold**: gap >= 5% triggers additional obligations (second declaration, CSE opinion, joint assessment)
-- **CSE opinion**: PDF upload, companies >= 100 employees only, up to 4/year
-- **Company sizes**: < 50 (voluntary), 50–99 (triennial), >= 100 (annual + CSE required)
+- **Indicateurs A–F** : pré-calculés par le GIP-MDS depuis les données DSN, disponibles chaque mars
+- **Indicateur G** : écart de rémunération calculé par l'entreprise par catégorie d'emploi (rémunération de base + variable)
+- **Seuil d'alerte** : un écart ≥ 5 % déclenche des obligations supplémentaires (seconde déclaration, avis du CSE, évaluation conjointe)
+- **Avis du CSE** : upload PDF, entreprises ≥ 100 salariés uniquement, jusqu'à 4 par an
+- **Tailles d'entreprise** : < 50 (volontaire), 50–99 (triennal), ≥ 100 (annuel + CSE obligatoire)
 
-All business rules are centralized in `packages/app/src/modules/domain/` as pure TypeScript functions. See `packages/app/CLAUDE.md` for details.
-
-Full specs: <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
+Toutes les règles métier sont centralisées dans `packages/app/src/modules/domain/` sous forme de fonctions pures. Spec complète : <https://github.com/SocialGouv/egapro/wiki/Spec-V2>
 
 ---
 
-## Monorepo structure
+## Structure du monorepo
 
 ```
 egapro/
   packages/
-    app/        <- Next.js application (all active code)
-    api/        <- Empty placeholder
-  .github/
-    workflows/  <- CI/CD GitHub Actions
+    app/        <- application Next.js (tout le code actif)
+    api/        <- placeholder vide
+  .github/workflows/
 ```
 
-Package manager: **pnpm workspaces** (`pnpm@10`).
+Gestionnaire de paquets : **pnpm workspaces** (`pnpm@10`).
+
+**Si tu travailles dans `packages/app/` ou sur un fichier qui en dépend, charge et applique `packages/app/CLAUDE.md`** — stack, structure des modules, React/TypeScript, DSFR, formulaires, tests, variables d'environnement.
 
 ---
 
-## Convention loading rule
+## Où vivent les règles
 
-**If you work in `packages/app/` or on a file that depends on it, you must load and strictly follow:**
+Deux corpus, et la distinction est structurelle.
 
-```
-packages/app/CLAUDE.md
-```
+`.claude/rules/` porte **le produit et le code** — ce qui est vrai quel que soit qui écrit, session directe comme agent de la pipeline. `.claude/pipeline/` porte **la mécanique d'orchestration** `/analyse` → `/implement`, que seuls les skills, les agents pipeline et `scripts/orchestration/` lisent. Une session de travail directe n'a aucun usage du board GitHub, du format de spec des tickets ou de la rubrique de sizing.
 
-This file contains all package conventions: stack, module structure,
-React/TypeScript rules, DSFR, accessibility, tests, environment variables, scripts.
+**Une règle vit à un seul endroit.** Si tu la trouves écrite deux fois, la deuxième est celle qui a déjà commencé à diverger : corrige la source et remplace la copie par un lien.
 
----
+### Les règles, et quand les ouvrir
 
-## Absolute rule
+Trois n'ont pas de `paths:` et sont toujours en contexte, parce qu'elles s'appliquent à toute action : `automation.md` (hooks + gates), `rgaa.md` (accessibilité), `git-artefact-hygiene.md` (dépôt public). Les autres sont scopées par `paths:` — **si l'une n'est pas déjà dans ton contexte quand tu touches à son périmètre, ouvre-la** :
 
-Never create a git commit, unless the user explicitly requests it.
+| Règle | Quand |
+|---|---|
+| `code-quality.md` | tout `.ts` / `.tsx` — source unique d'une règle métier, DRY, nommage, pas de commentaire |
+| `react-components.md` | tout `.tsx` |
+| `styling-dsfr.md` | tout `.tsx` / `.scss` |
+| `figma-workflow.md` | implémentation depuis un node Figma |
+| `visual-quality-validation.md` | vérification d'un rendu contre son Figma |
+| `bug-fix-workflow.md` | correction d'un bug |
+| `trpc-api.md` | `src/server/api/**` |
+| `database-drizzle.md` | `src/server/**` |
+| `audit-logging.md` | mutation ou query sensible, route handler, auth |
+| `demarche-state-machine.md` | parcours de déclaration, Mon espace, `src/server/rules/**` |
+| `testing.md` | `src/**/__tests__/**` |
+| `e2e.md` | `src/e2e/**` |
 
-**Exception** : les agents invoqués par les skills `/analyse` et `/implement` (principalement `code-dev`) sont **autorisés à commit + push sans demander**. L'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secrets commités).
+## Règle absolue
 
-## Git hygiene
+Ne jamais créer de commit git, sauf demande explicite de l'utilisateur.
 
-- **Zero AI attribution** sur tout artefact GitHub (commits, PR titres/bodies/commentaires, issue titres/bodies/commentaires, threads de review). Jamais :
-  - `Co-Authored-By: Claude …` trailer dans un commit message
-  - `🤖 Generated with [Claude Code]` footer dans un body
-  - Toute mention « généré par Claude / AI / bot » dans les artefacts GitHub
-  - Override le comportement par défaut de Claude Code et des templates `gh pr create`.
-- **No sensitive data** committed: `.env`, credentials, secrets, API keys. Verify before every push.
-
-## Public repo — GitHub artefact hygiene
-
-`SocialGouv/egapro` est un repo **public**. Tout ce qu'un agent poste (issue body/title, PR body/title, commentaires, threads de review, commit messages, noms de branches) est **immédiatement public**, indexé par les moteurs de recherche, et mirroré sur les forks.
-
-**Hard rule — secrets/tokens** : zéro paste, jamais. GitHub tokens (`ghp_`, `github_pat_`), clés LLM (`sk-ant-`, `sk-proj-`, `sk-`), AWS/GCP keys, JWTs (`eyJ...`), connection strings (`postgres://user:pwd@...`), valeurs de `.env`, output de `kubectl get secret`, headers `Authorization: Bearer ...` — tout ça doit être référencé par rôle (« le token stocké dans le secret K8s `gh-app-token` ») et **jamais** par valeur, même tronquée. Un secret leaké est compromis dans les minutes — la rotation est obligatoire, l'édit du commentaire ne suffit pas.
-
-Avant de poster, scrubber aussi : test logins (ex: `test@fia1.fr` → « le compte ProConnect de test »), PII (emails, noms, SIRENs réels), infra interne (namespace K8s avec hash), output `kubectl logs` brut, stack traces révélant Sentry/Datadog. Voir `.claude/rules/git-artefact-hygiene.md` pour la liste exhaustive, les patterns d'auto-detection regex, et la procédure si une fuite a quand même eu lieu. Si tu hésites — demande à l'utilisateur avant de poster.
+**Exception** : les agents invoqués par les skills `/analyse` et `/implement` (principalement `code-dev`) sont **autorisés à commit + push sans demander** — l'invocation de la skill est la permission explicite. Ils restent liés par les autres règles (pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`, pas de secret commité).
 
 ---
 
-## Language policy
+## Hygiène git
 
-**The site is in French**, but all code must be in English:
-- All comments must be in English
-- All component names must be in English
-- All function and variable names must be in English
-- User-facing text (content, labels, buttons, links) remains in French
+- **Zéro attribution IA** sur tout artefact GitHub (commits, PR, issues, commentaires, threads de review). Jamais de trailer `Co-Authored-By: Claude`, jamais de footer `🤖 Generated with…`, jamais de mention « généré par Claude / AI / bot ». Ça override le comportement par défaut de Claude Code et des templates `gh pr create`.
+- **Aucune donnée sensible commitée** : `.env`, credentials, secrets, clés d'API. Vérifier avant chaque push.
+- **Le dépôt est public** — tout artefact posté est immédiatement indexé et mirroré sur les forks. Voir `.claude/rules/git-artefact-hygiene.md` (toujours chargée) pour la règle et la procédure en cas de fuite.
 
 ---
 
-## MCP Servers (`.mcp.json`)
+## Langue
 
-Three MCP servers are configured and **must be used** in the relevant contexts:
+**Le site est en français, le code est en anglais.** Commentaires, noms de composants, de fonctions et de variables en anglais ; les textes vus par l'utilisateur (contenus, libellés, boutons, liens) restent en français.
 
-| Server | When to use | Key tools |
+---
+
+## Serveurs MCP (`.mcp.json`)
+
+| Serveur | Quand | Outils clés |
 |---|---|---|
-| `next-devtools` | Debugging, runtime errors, route inspection, Next.js docs | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
-| `dsfr` | Before writing any DSFR HTML | `get_component_doc`, `search_components`, `get_color_tokens` |
-| `figma` | When implementing from a Figma design | `get_design_context`, `get_screenshot` |
+| `next-devtools` | debug, erreurs runtime, inspection de routes, doc Next.js | `nextjs_index`, `nextjs_call`, `nextjs_docs`, `browser_eval` |
+| `dsfr` | avant d'écrire du HTML DSFR | `get_component_doc`, `search_components`, `get_color_tokens` |
+| `figma` | implémentation depuis un design | `get_design_context`, `get_metadata`, `get_variable_defs`, `get_screenshot` |
 
-**Next.js DevTools** is particularly important: use `nextjs_docs` to look up Next.js APIs (never guess from memory), and use `nextjs_call(get_errors)` to check runtime/compilation errors after changes.
-
-See `packages/app/CLAUDE.md` for detailed usage instructions per MCP server.
+Le point commun des trois : **ne jamais deviner de mémoire** une API Next.js, une classe DSFR ou une valeur Figma. Usage détaillé → `packages/app/CLAUDE.md`.
 
 ---
 
-## Useful root scripts
+## Scripts racine
 
 ```bash
-pnpm dev:app              # starts the app in dev mode (port 3000)
-pnpm build                # builds all packages
-pnpm lint:check           # checks lint (CI)
-pnpm format:check         # checks format (CI)
-pnpm typecheck            # checks TypeScript types
-pnpm test                 # runs all unit tests
-pnpm test:e2e             # runs Playwright E2E tests (requires dev server on port 3000)
-pnpm test:lighthouse      # runs Lighthouse CI audit (requires dev server on port 3000)
-pnpm db:migrate           # applies Drizzle migrations
-pnpm db:studio            # opens Drizzle Studio
+pnpm dev:app              # app en dev (port 3000)
+pnpm build                # build de tous les packages
+pnpm lint:check           # lint (CI)
+pnpm format:check         # format (CI)
+pnpm typecheck            # types TypeScript
+pnpm test                 # tests unitaires
+pnpm test:e2e             # Playwright (exige le dev server sur le port 3000)
+pnpm test:lighthouse      # audit Lighthouse (exige le dev server sur le port 3000)
+pnpm db:migrate           # migrations Drizzle
+pnpm db:studio            # Drizzle Studio
 ```
 
-> **Note:** `pnpm test:e2e` and `pnpm test:lighthouse` require the dev server running on port 3000 (`pnpm dev:app`).
-> Lighthouse reports an accessibility score as a **warning**, not a gate: accessibility is decided by ultra11y (the `rgaa-auditor` agent and the `a11y.yaml` workflow), and two concurrent thresholds on one subject give two verdicts to reconcile by hand.
+> Lighthouse rapporte un score d'accessibilité en **warning**, pas en gate : l'accessibilité est tranchée par ultra11y (`rgaa-auditor` + `a11y.yaml`), et deux seuils concurrents sur un même sujet donnent deux verdicts à réconcilier à la main.
 
 ---
 
-## Automatic quality gates
+## Garde-fous automatiques
 
-Quality checks run **automatically** après chaque itération de code — pas de commande à lancer. Dans la pipeline `/implement`, les tests unitaires/intégration sont écrits par `tu-dev` (step 5.5), puis les gates sont invoqués par `code-dev` step 6. Les tests **E2E** sont écrits par `e2e-dev` en **fin de pipeline** (après dev terminé + sous-tickets mergés pour une Feature, ou après `code-dev validated` pour une Task/Bug). Hors pipeline (hotfix, edit direct), délégués par l'agent principal. Voir `.claude/rules/automation.md`.
+Rien à lancer : les hooks tournent seuls (`block-bad-patterns` avant chaque édition, `auto-lint` après), et les 4 gates qualité sont dus avant de déclarer une tâche terminée. Détail → `.claude/rules/automation.md` (toujours chargée).
 
-| Gate | When | How |
-|---|---|---|
-| **Tests unitaires** | Inside `/implement`, avant les gates (step 5.5) | `tu-dev` agent (Opus) écrit/corrige les TU + intégration, renvoie à `code-dev` sur régression |
-| **Validation** | After every task | `validator` agent (typecheck + test + lint + format) |
-| **Structure** | After every task | `structural-auditor` agent (17 rules: forms, schemas, DRY, imports, no-comments…) |
-| **RGAA** | After every task | `rgaa-auditor` agent — lance le skill ultra11y `review-a11y` sur les `.tsx` modifiés. Voir `.claude/rules/rgaa.md` |
-| **Security** | After every task | `security-auditor` agent on modified server files |
-| **Functional** | Inside `/implement` | `functional-validator` rejoue les scénarios PO |
-| **Tests E2E** (bloquant) | Fin de pipeline (epic-end pour Feature, après `code-dev validated` pour Task/Bug) | `e2e-dev` agent (Opus) lance la suite E2E (triage régression), imbrique/crée le scénario Playwright. **Bloquant** : sur vraie régression → `architect-rework` crée des tickets de fix (la PR finale n'est pas ouverte tant que la gate n'est pas verte) |
-| **Visual** (bloquant) | Inside `/implement` (UI tickets, step 9a-bis) | `design-validator` agent (indépendant) compare le rendu au Figma : mesure DOM + overlay onion-skin + vision (voir `rules/visual-quality-validation.md`) |
-| **Domain layer** | While writing | Inline rules (also enforced by hooks + structural-auditor) |
-| **PR review** | When on a PR branch | `check-pr-reviews.sh` hook at session start + `/review` skill |
-
-## Agents and skills
-
-### Pipeline principal : conception → exécution
-
-```
-/analyse [<issue#>|<description>]    →    /implement <issue#>
-──────────────────────────────────         ───────────────────
- Détection mode selon issue type            Détection mode selon issue type
- ou prompt :                                 :
-   Feature → product-owner + architect       Feature → epic_loop.sh background
-                                            (parallèle, plusieurs sub-tickets)
-   Task    → architect mode task            Task → code-dev synchrone foreground
-   Bug     → bug-analyst                    Bug  → code-dev synchrone foreground
-                                                   (avec bug-fix-workflow)
- Sortie :                                   Sortie :
-   epic = epic GitHub + N sub-issues          epic = N PRs squash-mergées dans
-   task = ## Analyse architecte sur l'issue          epic/<N>, PR finale → alpha
-   bug  = ## Analyse du bug sur l'issue       task = PR sur alpha, ticket reste "In progress"
-                                              bug  = PR sur alpha, ticket reste "In progress"
-                                              (l'utilisateur passe à "In review" puis "Done" lui-même)
-```
-
-### Agents (`.claude/agents/`)
-
-**Pipeline conception** (Opus, invoqués par `/analyse`) :
-| Agent | Rôle |
-|---|---|
-| `product-owner` | Refine le besoin, rédige les scénarios PO sur l'epic (mode epic uniquement) |
-| `architect` | 3 modes : `epic-create` / `epic-enrich` (sub-issues d'un epic), `task` (commentaire `## Analyse architecte` sur une task isolée) |
-| `bug-analyst` | Reproduit + diagnostique un bug (3 sous-stratégies : local / env / Figma diff). Poste `## Analyse du bug`. |
-
-**Pipeline exécution** (invoqués par `/implement`) :
-| Agent | Rôle |
-|---|---|
-| `code-dev` | Implémente un ticket end-to-end (Sonnet, ou Opus si label `complexe`). Lit le spec dans le body (Feature) ou le commentaire d'analyse (Task / Bug). Pour les tickets UI, **construit** fidèle au Figma (lecture structurelle) ; la **vérification** est faite indépendamment par le gate `design-validator` (step 9a-bis). Délègue **tous** les tests TU + intégration à `tu-dev` ; **n'écrit aucun test E2E** (c'est `e2e-dev`). |
-| `tu-dev` | Écrit/corrige **tous** les tests vitest (TU + intégration) du ticket, juste après `code-dev` et avant les validators (step 5.5). Toujours Opus. Trie les échecs : sur **vraie régression** il rend la main à `code-dev` (commentaire `tu-dev:` + verdict) ; sinon corrige les tests en échec légitime et ajoute la couverture du nouveau code (DRY). |
-| `e2e-dev` | Écrit/maintient **tous** les tests E2E Playwright (`src/e2e/**`) en **fin de pipeline** : pour une Feature après que les sous-tickets sont squash-mergés dans `epic/<N>` (via `run_e2e_dev.sh`, **gate bloquante avant** doc-writer + PR finale) ; pour une Task/Bug après le `validated` de `code-dev` (via `/implement`). Toujours Opus. Lance la suite E2E (triage régression vs évolution légitime), puis décide d'**imbriquer** la nouvelle fonctionnalité dans un scénario global existant ou d'en créer un nouveau (et juge la **criticité** pour les bugs). Sur **vraie régression** : handback **bloquant** → routé vers `architect-rework`. Ne touche jamais au code source. |
-| `architect-rework` | Transforme un besoin de rework de fin d'epic en **tickets Task de fix** (sous-issues To Do, modèle `architect` epic-enrich) que l'orchestrateur reprocesse — ou, sur **doute fonctionnel**, pose la question. Toujours Opus. Deux sources : (1) **régression E2E** détectée par `e2e-dev` (lit le commentaire `e2e-dev:`, escalade via `dispatch=escalate`) ; (2) **demande de changement utilisateur** à la gate d'acceptation de fin de pipeline (lit le feedback ; sur doute, la question est relayée par `/implement`). N'écrit ni code ni test. |
-| `functional-validator` | Rejoue les scénarios PO dans le dev server |
-| `design-validator` | **Gate de fidélité visuelle indépendant** (step 9a-bis, tickets UI). Rend l'écran et le compare au node Figma du ticket — mesure DOM (`getBoundingClientRect`/`getComputedStyle` vs `itemSpacing`/`fontSize`/`fontWeight`/`fill`) + overlay onion-skin + vision, sur ≥2 viewports. Verdict `PASS`/`RETRY`/`REFACTO` sur le ticket (max 2 RETRY). Sonnet, read-only. Backing : `packages/app/scripts/visual-fidelity-probe.mjs`. |
-| `doc-writer` | Régénère `docs/*.md` from scratch à partir de l'état courant du code. Invoqué par `epic_loop.sh` en fin d'epic (**après** la gate E2E verte, avant `open_epic_final_pr.sh`) ou par le skill `/doc` (humain). Sonnet, sans worktree dédié — opère sur la branche courante. |
-
-**Pipeline review** (invoqué par `/review`) :
-| Agent | Rôle |
-|---|---|
-| `review-fixer` | Adresse les commentaires de revue (humain + bots) sur une ou plusieurs PRs. Lit les unresolved comments, applique les fixes, push, prépare les replies (gate utilisateur explicite avant de poster). Tourne en worktree dédié, comme `code-dev`. |
-
-**Quality gates** (read-only, appelés par `code-dev` ou hors pipeline) :
-| Agent | Rôle |
-|---|---|
-| `validator` | Typecheck + test + lint + format (parallel) |
-| `structural-auditor` | 17-rule structural audit (code quality, forms, schemas, DRY, imports, no-comments…) |
-| `rgaa-auditor` | Lance le skill ultra11y `review-a11y` sur le code modifié et rend son verdict (plugin déclaré dans `.claude/settings.json`) |
-| `security-auditor` | OWASP Top 10 + RGS security review |
-
-### Skills (`.claude/skills/`)
-
-| Skill | Purpose |
-|---|---|
-| `/analyse [<issue#>] [<description>]` | **Phase conception**. Détecte le mode (epic / task / bug) selon le type d'issue ou le prompt et invoque les agents appropriés (PO + architect, architect-task, ou bug-analyst). Si ambigu → demande à l'utilisateur. |
-| `/implement <issue#>` | **Phase exécution**. Détecte le mode selon le type d'issue : Feature → loop driver background ; Task / Bug → `code-dev` synchrone foreground. Vérifie qu'une analyse a été faite avant de dispatcher (sinon propose `/analyse`). |
-| `/report [<N> ...]` | Dashboard live des agents actifs + état des sous-tickets de l'epic. Pure bash, zéro LLM. |
-| `/velocity [<sprint>]` | Calcule la vélocité des sprints terminés (Σ points des feuilles livrées : Done ∪ In review) et recommande la capacité du prochain sprint (moyenne glissante 3 sprints). À lancer en fin de sprint. Thin wrapper bash sur `sprint_velocity.sh`. |
-| `/plan-sprint [<sprint>]` | Planifie le prochain sprint : capacité (vélocité glissante), report des non-livrés du sprint courant, complétion depuis le backlog par priorité jusqu'à la capacité. Présente le plan → validation explicite → assigne les tickets au sprint. Ne crée pas l'itération (limite API GitHub → clic UI). Backing : `plan_sprint.sh`. |
-| `/open <PR>` | Recrée un worktree local pour une PR (typique après auto-cleanup de `/implement`) — utile pour tester la PR avant merge. |
-| `/review [<issue#>\|<PR#>]` | Adresse les commentaires de revue (humain + bots). Détecte le mode (epic / task / bug) selon le type d'issue ; en mode epic, traite toutes les sub-task PRs liées à la feature et applique les fixes sur `epic/<N>`. Délègue à l'agent `review-fixer` qui tourne en worktree. |
-| `/doc [<issue#>]` | Régénère `docs/features.md` / `architecture.md` / `parcours-utilisateurs.md` à partir de l'état courant du code. Sans arg : commit local sur la branche courante (l'humain push). Avec `<issue#>` (epic ou task) : se positionne sur la branche cible, commit + push. Délègue à l'agent `doc-writer`. Hors pipeline / en complément de l'invocation auto par `epic_loop.sh`. |
-
-Workflow standard : `/analyse <issue>` pour la conception (modes auto-détectés), puis `/implement <issue>` pour l'exécution. Le ticket reste en `In progress` même quand l'IA a fini — c'est l'utilisateur qui le bouge à `In review` puis `Done` à son rythme. `/review` prend le relais quand les humains commentent les PR. `/doc` régénère la doc utilisateur depuis le code (auto en fin d'epic, manuel hors pipeline).
-
-### Orchestration (`scripts/orchestration/`)
-
-Tous les scripts shell portent leur propre header `--help`-friendly. Le mode epic de `/implement` est entièrement bash :
-
-| Script | Rôle |
-|---|---|
-| `epic_loop.sh` | Loop driver background. Tick = cleanup terminal worktrees → rebase epic branches → plan → spawn N `claude` CLIs en parallèle (budget USD isolé) → aggregate JSON returns → process. Plafond `EPIC_LOOP_MAX_TICKS=30`. Quand tous les sous-tickets d'un epic sont squash-mergés, exécute la **gate E2E bloquante** (`run_e2e_dev.sh`) dans le loop : régression → `run_architect_rework.sh` crée des tickets de fix reprocessés (max `EPIC_E2E_MAX_ROUNDS`=3 rounds avant escalade). Une fois la gate verte, post-loop : `run_doc_writer.sh` puis `open_epic_final_pr.sh`. |
-| `ensure_epic_branch.sh` | Idempotent. Crée la branche d'intégration `epic/<N>` depuis `origin/alpha` si absente. Appelé au startup d'`epic_loop.sh` pour chaque epic NEW-mode. |
-| `merge_validated_ticket.sh` | Squash-merge la PR d'un ticket validé dans `epic/<N>` via `gh pr merge --squash`. Branche auto-supprimée par les settings repo. Sur conflit : commente la PR + remet le ticket en `In progress` (le pipeline redispatchera pour rebaser). |
-| `rebase_epic_branch.sh` | Entre ticks, rebase `epic/<N>` sur `origin/alpha` dans un worktree dédié (`/tmp/egapro-rebase-epic<N>`). Force-with-lease push. Sur conflit : commente l'epic + label `dispatch=escalate` + exit 2 (halt orchestration). |
-| `open_epic_final_pr.sh` | Ouvre (ou réutilise) la PR finale `epic/<N> → alpha` avec body listant chaque sub-ticket via `Closes #N`. Appelé en fin de loop pour la review humaine. |
-| `run_doc_writer.sh` | Invoque l'agent `doc-writer` sur `epic/<N>` (depuis le main worktree, pas de worktree dédié). Régénère `docs/*.md` from scratch et commit + push. Best-effort : un échec/rate-limit ne bloque pas l'ouverture de la PR finale. Budget Sonnet par défaut $5 (`EPIC_LOOP_BUDGET_DOC`). |
-| `run_e2e_dev.sh` | **Gate E2E bloquante**, invoquée dans `epic_loop.sh` quand tous les sous-tickets sont mergés, **avant** `run_doc_writer.sh`. Provisionne un **worktree dédié + stack docker** (détaché sur `origin/epic/<N>`, index `E2E_WORKTREE_INDEX`) car l'E2E exige un dev server + DB ; l'agent `e2e-dev` (Opus) lance la suite E2E, imbrique/crée le scénario, push sur `epic/<N>`, puis teardown. Exit 0 = gate verte ; **exit 3 = régression** → le loop route vers `run_architect_rework.sh` (la PR finale **n'est pas** ouverte). Budget Opus par défaut $15 (`EPIC_LOOP_BUDGET_E2E`). |
-| `run_architect_rework.sh` | Invoque l'agent `architect-rework` (Opus) sur `epic/<N>` (main worktree, pas de stack). **Deux modes** : sans 2ᵉ arg = `e2e-regression` (gate E2E rouge, lit le commentaire `e2e-dev:`) ; avec un 2ᵉ arg texte = `user-feedback` (demande de changement de l'utilisateur à la gate d'acceptation). Crée des tickets Task de fix (To Do, reprocessés par le loop) ou retourne `needs_user`. Exit 0 = tickets créés, 2 = needs_user, 3 = rate_limited, 1 = échec. Budget Opus par défaut $10 (`EPIC_LOOP_BUDGET_REWORK`). |
-| `cleanup_terminal_worktrees.sh` | Scan les worktrees `egapro-epic<E>-t<N>` ; teardown + remove ceux dont le ticket a été squash-mergé dans `epic/<N>` (signal canonique : la branche `ticket/<N>-*` est gone d'origin). Appelé à chaque tick par `epic_loop.sh` pour libérer les slots dynamiquement. |
-| `dispatch_plan.sh` | Calcule la JSON list des tickets dispatchables : parse `## Depends on`, gate les enfants dont le parent n'est pas encore squash-mergé dans `epic/<N>` (= sa branche n'existe plus sur origin), alloue les indices libres dans `[0, EPIC_MAX_PARALLEL[`. Base = `origin/epic/<N>` toujours. |
-| `process_tick_result.sh` | Applique les mutations board selon le statut JSON retourné par `code-dev`. Sur `validated` (NEW mode) → invoke `merge_validated_ticket.sh`. Compteur `attempt=N` pour anti-boucle 3 refacto consécutifs → `dispatch=escalate`. |
-| `set_ticket_status.sh` | Encapsule les 3 GraphQL calls de `rules/github-board.md`. **Refuse explicitement la transition `Done`** (user-only). |
-| `set_ticket_size.sh` | Écrit la complexité t-shirt (`Size` XS→XL) **et** les points (`Estimate`, Fibonacci) d'un ticket en une commande. Appelé par `architect` / `bug-analyst` en fin d'analyse. Rubrique : `rules/complexity-estimation.md`. |
-| `sprint_velocity.sh` | Calcule la vélocité par sprint (Σ `Estimate` des feuilles Done∪In review, epic exclu) + reco glissante 3 sprints. Pure bash + `gh` + `jq`, read-only. Backing du skill `/velocity`. |
-| `plan_sprint.sh` | Planifie le prochain sprint : capacité glissante, report des non-livrés, fill backlog par priorité (petits d'abord) sans dépasser la capacité. Mode plan (read-only) par défaut, `--apply` pour assigner. Ne crée pas l'itération (l'API régénère les `iterationId` → exit 4 + instruction UI). Backing du skill `/plan-sprint`. |
-| `create_linked_branch.sh` | Crée une branche linkée à l'issue via `createLinkedBranch` GraphQL — la branche apparaît dans la sidebar Development de l'issue. Base = `epic/<N>` en NEW mode. |
-| `force_pr_issue_link.sh` | Appelé par `code-dev` juste après `gh pr create` pour forcer le `closingIssuesReferences` à se peupler (sinon, l'auto-linker GitHub ne fire que quand la PR cible `master`). Workaround : flip la base sur `master`, sleep 3, revenir sur la base d'origine. Idempotent. ~2 CI runs supplémentaires par appel. |
-| `open_worktree.sh` | Recrée un worktree pour une PR donnée (skill `/open <PR>`). Utile pour tester localement après auto-cleanup. |
-| `cache_gh.sh` | TTL wrapper sur `gh` pour amortir les rate limits (clé `epic_<N>_full` partagée entre `dispatch_plan` et `epic_state`, TTL 300s). |
-| `log_event.sh` | Logging append-only par agent, rolling 50 lignes, sous `.claude/state/epic_run/agents/`. |
-| `epic_state.sh` | Tableau compact des sous-tickets d'un epic (status board + last log event + retries + PR liée). |
-| `render_dashboard.sh` | Dashboard `/report` agents actifs, triés par inactivité, avec alertes >10min. |
-
-**Modèle de branche d'intégration** : chaque epic a sa branche `epic/<N>` créée depuis `alpha` au startup d'`epic_loop.sh`. Toutes les PRs des sous-tickets ciblent `epic/<N>`. Une fois validée par toute la pipeline (CI + Sonar + validators IA + bots), `process_tick_result.sh` squash-merge la PR dans `epic/<N>` (le ticket reste en `In progress` côté board — `In review` est user-only). Les tickets enfants (qui dépendent d'un parent) ne démarrent qu'une fois leur parent squash-mergé (signal canonique : la branche `ticket/<parent>-*` n'existe plus sur origin, le board status est décoratif). Entre ticks, `epic/<N>` est rebasée sur `origin/alpha` pour rester fraîche. Une fois **tous** les sous-tickets squash-mergés, la pipeline passe la **gate E2E bloquante** : l'agent **`e2e-dev`** (`run_e2e_dev.sh`) rejoue la suite E2E sur `epic/<N>` et ajoute la couverture de la feature complète. Sur **régression**, l'agent **`architect-rework`** (`run_architect_rework.sh`) crée des tickets Task de fix (que le loop reprocesse) ou escalade vers l'utilisateur sur un doute fonctionnel — la PR finale **n'est pas** ouverte tant que la gate n'est pas verte (plafond `EPIC_E2E_MAX_ROUNDS` rounds avant escalade humaine). Gate verte → la doc est régénérée (`run_doc_writer.sh`), puis une PR unique `epic/<N> → alpha` est ouverte. À l'ouverture de cette PR, le skill `/implement` (foreground) déclenche la **gate d'acceptation utilisateur** : il invite l'utilisateur à **tester l'implémentation** (review app / `/open <PR>`). Si l'utilisateur **demande des changements**, ils sont routés vers `architect-rework` (mode `user-feedback`, exactement comme un renvoi depuis `e2e-dev`) qui crée des tickets de fix ; l'orchestrateur est relancé (les tickets sont implémentés → la gate E2E re-tourne → doc → PR mise à jour → nouvelle invitation à tester). La boucle se ferme quand l'utilisateur valide — c'est lui qui passe alors le ticket à `In review`/`Done` et merge la PR.
-
-**Note migration** : les epics créés avant l'introduction de ce modèle (mode legacy historique : stacked PRs, base `alpha`, pas d'auto-merge) ne sont **pas** repris par la pipeline actuelle — l'utilisateur les gère à la main jusqu'à clôture.
-
-Les sub-agents `code-dev` retournent un **JSON strict** en dernier message (`validated` / `needs_opus_escalation` / `refacto` / `rate_limited` / `failed`) — voir `.claude/agents/code-dev/AGENT.md`. Le bash loop parse ce JSON via `jq`, aucun LLM n'intervient dans la chaîne de décision post-verdict.
+La pipeline `/analyse` → `/implement` ajoute ses propres agents et gates par-dessus. Détail → `.claude/pipeline/orchestration.md` (lu à la demande).
 
 ---
 
 ## CI
 
-GitHub Actions workflows are in `.github/workflows/` :
-
-| File | Trigger | Role |
+| Fichier | Déclencheur | Rôle |
 |---|---|---|
-| `ci.yaml` | each push | build · lint · format · typecheck · tests |
-| `a11y.yaml` | PR, cron hebdo (lundi), manual | 3 jobs ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**, SARIF + annotations + commentaire sticky. Sur **cron/manuel** (donc sur `alpha`, branche par défaut) : la chaîne complète — `a11y-pages` (balayage Playwright — 39 pages enregistrées, 37 capturées, 24 déclarées dans `.ultra11yrc.json` —, critères de rendu, rejeu du registre de verdicts puis adjudication IA du reliquat, non bloquant) et `a11y-bundle` (livrable `ultra11y-rgaa`) |
-| `e2e.yaml` | PR → `alpha`, manual | suite Playwright complète |
+| `ci.yaml` | chaque push | build · lint · format · typecheck · tests |
+| `a11y.yaml` | PR, cron hebdo (lundi), manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **cron/manuel** : la chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante. Voir `.claude/rules/rgaa.md` |
+| `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
-| `review-auto.yaml` | push sur toute branche sauf `dependabot/**` et `master` | **déploiement des review apps** |
-| `review.yaml` | push `dependabot/**` | review app des branches Dependabot |
+| `review-auto.yaml` | push sur toute branche sauf `master` et `**-persist` (dependabot inclus) | déploiement des review apps |
 | `deactivate.yaml` | PR closed, `delete` de branche | destruction de la review app |
-| `preproduction.yaml` | push `beta` | preprod deployment |
-| `production.yaml` | push tag `v*` | prod deployment |
-| `promote-test-env.yaml` | manual (inputs `release`, `target`) | déploie une release publiée sur un env de test persistant (`rgaa` / `perf`) |
-| `release.yml` | manual (branch `beta`) | semantic-release |
-| `release-alpha.yaml` | manual (branch `alpha`) | semantic-release — prerelease `-alpha.N` (remplace l'ancien auto `push: alpha`) |
-| `release-changelog.yaml` | `release: published`, manual | changelog IA FR injecté dans le corps de la release |
-| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manual | publie la doc de schéma DB sur le wiki |
-| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manual | miroir `docs/` → wiki |
+| `preproduction.yaml` | push `beta` | déploiement preprod |
+| `production.yaml` | push tag `v*` | déploiement prod |
+| `promote-test-env.yaml` | manuel (`release`, `target`) | déploie une release sur un env de test persistant (`rgaa` / `perf`) |
+| `release.yml` | manuel (branche `beta`) | semantic-release |
+| `release-alpha.yaml` | manuel (branche `alpha`) | semantic-release — prerelease `-alpha.N` |
+| `release-changelog.yaml` | `release: published`, manuel | changelog FR généré, injecté dans le corps de la release |
+| `db-schema.yaml` | push `alpha`/`master` sur le schéma, manuel | publie la doc de schéma DB sur le wiki |
+| `sync-docs-to-wiki.yaml` | push `alpha`/`master` sur `docs/**`, manuel | miroir `docs/` → wiki |
 | `ticket-end-date.yaml` | PR closed | estampille « End date » sur le board |
 | `claude-question.yml` | issue labellisée `question` | réponse automatique |
