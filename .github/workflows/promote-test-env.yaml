@@ -39,7 +39,7 @@ jobs:
       contents: read
     steps:
       - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -81,7 +81,7 @@ jobs:
       id-token: write # OIDC identity for buildkit-operator /route auth
     steps:
       - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: refs/tags/${{ inputs.release }}
 
@@ -142,7 +142,7 @@ jobs:
       # The manifests deployed must be the ones of the promoted version, so
       # the checkout is done on the release tag, not on the workflow ref.
       - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: refs/tags/${{ inputs.release }}
           fetch-depth: 0

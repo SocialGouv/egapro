@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⏬ Checkout code repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # The footer exposes a direct link to the PR on review apps. Review builds
       # trigger on `push` (not `pull_request`), so the PR number is not in the

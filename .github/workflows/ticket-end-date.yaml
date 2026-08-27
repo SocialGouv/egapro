@@ -80,7 +80,7 @@ jobs:
           permissions: '{"issues":"read","organization_projects":"write"}'
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Stamp End date
         env:
