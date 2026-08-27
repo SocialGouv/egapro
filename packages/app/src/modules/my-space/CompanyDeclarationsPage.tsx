@@ -72,6 +72,7 @@ export function CompanyDeclarationsPage({
 		obligationWorkforce,
 		currentYear,
 	);
+	const compliancePathApplicable = cseApplicable && indicatorGRequired;
 	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
@@ -108,14 +109,15 @@ export function CompanyDeclarationsPage({
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
+				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={ctaHref}
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
+				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
-				indicatorGRequired={indicatorGRequired}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}
