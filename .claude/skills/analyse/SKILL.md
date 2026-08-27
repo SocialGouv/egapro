@@ -9,8 +9,8 @@ description: "Conception pipeline. Détecte le mode (epic/task/bug) selon le typ
 
 | Mode | Trigger | Agents invoqués | Sortie |
 |---|---|---|---|
-| **epic** | Issue type `Feature`, ou prompt « nouvelle feature », « parcours », « ajouter une page X » | `product-owner` (Opus) → `architect` (Fable) | Epic GitHub avec N sous-issues |
-| **task** | Issue type `Task`, ou prompt « refactor », « migrer », « ajouter un champ X » sans contexte feature | `architect` mode task (Fable) | Commentaire `## Analyse architecte` posté sur la task |
+| **epic** | Issue type `Feature`, ou prompt « nouvelle feature », « parcours », « ajouter une page X » | `product-owner` (Opus) → `architect` (Opus) | Epic GitHub avec N sous-issues |
+| **task** | Issue type `Task`, ou prompt « refactor », « migrer », « ajouter un champ X » sans contexte feature | `architect` mode task (Opus) | Commentaire `## Analyse architecte` posté sur la task |
 | **bug** | Issue type `Bug`, ou prompt « bug », « cassé », « ne marche pas », « écart figma », « régression » | `bug-analyst` (Opus) | Commentaire `## Analyse du bug` posté sur le bug |
 
 Chaque agent gère lui-même un gate de validation utilisateur explicite avant de poster sur GitHub. L'orchestrateur (toi qui exécutes ce skill) chaîne et ne ré-interroge pas l'utilisateur entre étapes.

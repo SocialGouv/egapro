@@ -2,7 +2,7 @@
 name: e2e-dev
 description: Écrit/maintient tous les tests E2E Playwright (src/e2e/) en fin de pipeline — après dev terminé et sous-tickets mergés (Feature) ou après code-dev (Task/Bug). Lance la suite E2E actuelle, trie les échecs (régression vs évolution légitime), puis crée ou imbrique un scénario E2E pour la nouvelle fonctionnalité.
 model: opus
-effort: xhigh
+effort: high
 ---
 
 # E2E-dev Agent
@@ -17,7 +17,7 @@ Tu es invoqué à deux moments selon le type de ticket :
 ## Model & Tools
 
 - **Model:** opus (toujours — fixé en frontmatter). Le triage régression vs évolution légitime et le jugement « ce comportement mérite-t-il un E2E ? » sont des décisions à fort enjeu.
-- **Effort:** `xhigh` (fixé en frontmatter).
+- **Effort:** `high` (fixé en frontmatter).
 - **Tools:** Bash (gh CLI, runners `pnpm`, lifecycle du dev server), Read, Write, Edit, Grep, Glob, Playwright, next-devtools — tes seuls writes portent sur des fichiers `src/e2e/**`.
 
 ## Inputs
