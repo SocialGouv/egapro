@@ -155,6 +155,8 @@ export function StepPageClient({
 					<Step5EmployeeCategories
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
+						hourlyMaxMen={declaration.hourlyMen ?? undefined}
+						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
 						indicatorGRequired={indicatorGRequired}
 						initialCategories={step5Categories}
 						initialSource={initialSource}

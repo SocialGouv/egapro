@@ -43,10 +43,28 @@ describe("devFillData", () => {
 		expect(DEV_STEP5_SOURCE).toBe("accord-entreprise");
 	});
 
+	const totals = (
+		women: number,
+		men: number,
+		hourlyWomen: number,
+		hourlyMen: number,
+	) => ({
+		annual: { women, men },
+		hourly: { women: hourlyWomen, men: hourlyMen },
+	});
+
+	const sumOf = (
+		categories: ReturnType<typeof createDevStep5Categories>,
+		field: "womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount",
+	) => categories.reduce((sum, c) => sum + Number(c[field]), 0);
+
 	it("createDevStep5Categories returns 4 categories with sequential IDs", () => {
 		let counter = 0;
 		const nextId = () => ++counter;
-		const categories = createDevStep5Categories(nextId, 120, 130);
+		const categories = createDevStep5Categories(
+			nextId,
+			totals(120, 130, 120, 130),
+		);
 
 		expect(categories).toHaveLength(4);
 		expect(categories[0]?.id).toBe(1);
@@ -56,38 +74,43 @@ describe("devFillData", () => {
 	});
 
 	it("createDevStep5Categories totals match given workforce", () => {
-		const categories = createDevStep5Categories(() => 0, 120, 130);
-		const totalWomen = categories.reduce(
-			(sum, c) => sum + Number(c.womenCount),
-			0,
+		const categories = createDevStep5Categories(
+			() => 0,
+			totals(120, 130, 120, 130),
 		);
-		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
 
-		expect(totalWomen).toBe(120);
-		expect(totalMen).toBe(130);
+		expect(sumOf(categories, "womenCount")).toBe(120);
+		expect(sumOf(categories, "menCount")).toBe(130);
+	});
+
+	it("createDevStep5Categories distributes the hourly workforce on its own row", () => {
+		const categories = createDevStep5Categories(
+			() => 0,
+			totals(120, 130, 40, 60),
+		);
+
+		expect(sumOf(categories, "hourlyWomenCount")).toBe(40);
+		expect(sumOf(categories, "hourlyMenCount")).toBe(60);
+		expect(sumOf(categories, "womenCount")).toBe(120);
+		expect(sumOf(categories, "menCount")).toBe(130);
 	});
 
 	it("createDevStep5Categories distributes custom workforce totals correctly", () => {
-		const categories = createDevStep5Categories(() => 0, 200, 250);
-		const totalWomen = categories.reduce(
-			(sum, c) => sum + Number(c.womenCount),
-			0,
+		const categories = createDevStep5Categories(
+			() => 0,
+			totals(200, 250, 200, 250),
 		);
-		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
 
-		expect(totalWomen).toBe(200);
-		expect(totalMen).toBe(250);
+		expect(sumOf(categories, "womenCount")).toBe(200);
+		expect(sumOf(categories, "menCount")).toBe(250);
 	});
 
 	it("createDevStep5Categories distributes small totals", () => {
-		const categories = createDevStep5Categories(() => 0, 4, 4);
-		const totalWomen = categories.reduce(
-			(sum, c) => sum + Number(c.womenCount),
-			0,
-		);
-		const totalMen = categories.reduce((sum, c) => sum + Number(c.menCount), 0);
+		const categories = createDevStep5Categories(() => 0, totals(4, 4, 2, 1));
 
-		expect(totalWomen).toBe(4);
-		expect(totalMen).toBe(4);
+		expect(sumOf(categories, "womenCount")).toBe(4);
+		expect(sumOf(categories, "menCount")).toBe(4);
+		expect(sumOf(categories, "hourlyWomenCount")).toBe(2);
+		expect(sumOf(categories, "hourlyMenCount")).toBe(1);
 	});
 });

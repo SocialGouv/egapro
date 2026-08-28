@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
+import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
+	CATEGORY_PAY_BASES,
 	categoryFormSchema,
-	PAY_FIELDS_MEN,
-	PAY_FIELDS_WOMEN,
+	type PAY_FIELDS_MEN,
+	type PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
@@ -41,6 +43,7 @@ import {
 import { getDsfrCollapse } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import { WORKFORCE_ROWS } from "../step1/workforceRows";
 import { CategoryAccordionItem } from "./CategoryAccordionItem";
 import { categoryDataFieldId } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
@@ -62,6 +65,8 @@ function toFormValues(cats: EmployeeCategory[]) {
 		name: c.name,
 		womenCount: c.womenCount,
 		menCount: c.menCount,
+		hourlyWomenCount: c.hourlyWomenCount,
+		hourlyMenCount: c.hourlyMenCount,
 		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
 		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
 		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
@@ -85,6 +90,10 @@ type Props = {
 	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
+	/** Reminder shown under the description on the first declaration only. */
+	reminderText?: string;
 	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
@@ -98,44 +107,25 @@ type Props = {
 	hasDataOverride?: boolean;
 	isSavingOverride?: boolean;
 	isPendingSaveOverride?: boolean;
-	onValuesChange?: (values: {
-		source: string;
-		categories: {
-			name: string;
-			womenCount: string;
-			menCount: string;
-			annualBaseWomen: string;
-			annualBaseMen: string;
-			annualVariableWomen: string;
-			annualVariableMen: string;
-			hourlyBaseWomen: string;
-			hourlyBaseMen: string;
-			hourlyVariableWomen: string;
-			hourlyVariableMen: string;
-		}[];
-	}) => void;
-	defaultValuesOverride?: {
-		source: string;
-		categories: {
-			name: string;
-			womenCount: string;
-			menCount: string;
-			annualBaseWomen: string;
-			annualBaseMen: string;
-			annualVariableWomen: string;
-			annualVariableMen: string;
-			hourlyBaseWomen: string;
-			hourlyBaseMen: string;
-			hourlyVariableWomen: string;
-			hourlyVariableMen: string;
-		}[];
-	};
+	onValuesChange?: (values: CategoryFormValues) => void;
+	defaultValuesOverride?: CategoryFormValues;
 };
 
 const CATEGORY_ALERT_ID = "step5-categories-error";
 // The step-5 checks are form-level (a source not picked, totals that do not
 // reconcile), so they anchor on the form itself rather than on one cell.
 const CATEGORY_FORM_FIELD_ID = "step5-categories";
+
+/** The pay fields a headcount makes mandatory — its own basis and sex only. */
+function payFieldsForCountField(
+	field: keyof EmployeeCategory,
+): readonly (keyof EmployeeCategory)[] {
+	for (const base of CATEGORY_PAY_BASES) {
+		if (field === base.womenCountField) return base.womenPayFields;
+		if (field === base.menCountField) return base.menPayFields;
+	}
+	return [];
+}
 
 const PAY_FIELD_LABELS: Record<
 	(typeof PAY_FIELDS_WOMEN)[number] | (typeof PAY_FIELDS_MEN)[number],
@@ -163,6 +153,9 @@ export function CategoryForm({
 	initialSource = "",
 	maxWomen,
 	maxMen,
+	hourlyMaxWomen,
+	hourlyMaxMen,
+	reminderText,
 	onSubmit,
 	isSubmitting,
 	submitError,
@@ -262,19 +255,21 @@ export function CategoryForm({
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
 			const changedFieldId = categoryDataFieldId(index, field);
-			const clearedSex =
-				field === "womenCount" && n === 0
-					? "women"
-					: field === "menCount" && n === 0
-						? "men"
-						: null;
+			// A headcount back to 0 releases the pay fields it was requiring —
+			// those of its own basis and sex, never the other basis' (#4254).
+			const clearedPayFieldIds =
+				n === 0
+					? new Set(
+							payFieldsForCountField(field).map((payField) =>
+								categoryDataFieldId(index, payField),
+							),
+						)
+					: null;
 			setCategoryErrors((errors) =>
 				errors.filter(
 					(error) =>
 						error.fieldId !== changedFieldId &&
-						(!clearedSex ||
-							!error.fieldId.startsWith(`cat-${index}-`) ||
-							!error.fieldId.endsWith(`-${clearedSex}`)) &&
+						!clearedPayFieldIds?.has(error.fieldId) &&
 						(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
 							error.category === "invalid"),
 				),
@@ -408,19 +403,22 @@ export function CategoryForm({
 
 			const remunerationErrors: FieldError[] = [];
 			data.categories.forEach((category, index) => {
-				for (const [count, payFields] of [
-					[Number.parseInt(category.womenCount, 10), PAY_FIELDS_WOMEN],
-					[Number.parseInt(category.menCount, 10), PAY_FIELDS_MEN],
-				] as const) {
-					if (Number.isNaN(count) || count < 1) continue;
-					for (const payField of payFields) {
-						if (category[payField].trim() !== "") continue;
-						remunerationErrors.push({
-							fieldId: categoryDataFieldId(index, payField),
-							category: "empty",
-							message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
-							anchor: true,
-						});
+				for (const base of CATEGORY_PAY_BASES) {
+					for (const [countField, payFields] of [
+						[base.womenCountField, base.womenPayFields],
+						[base.menCountField, base.menPayFields],
+					] as const) {
+						const count = Number.parseInt(category[countField], 10);
+						if (Number.isNaN(count) || count < 1) continue;
+						for (const payField of payFields) {
+							if (category[payField].trim() !== "") continue;
+							remunerationErrors.push({
+								fieldId: categoryDataFieldId(index, payField),
+								category: "empty",
+								message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
+								anchor: true,
+							});
+						}
 					}
 				}
 			});
@@ -429,32 +427,34 @@ export function CategoryForm({
 				return;
 			}
 
-			if (maxWomen !== undefined || maxMen !== undefined) {
-				const { women: totalWomen, men: totalMen } = sumCategoryWorkforce(
-					data.categories,
-				);
-
-				const errors: string[] = [];
-				if (maxWomen !== undefined && totalWomen !== maxWomen) {
-					errors.push(
-						`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
+			const maxByBasis = {
+				annual: { women: maxWomen, men: maxMen },
+				hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
+			} as const;
+			const sums = sumCategoryWorkforce(data.categories);
+			const workforceErrors: string[] = [];
+			for (const row of WORKFORCE_ROWS) {
+				for (const [sex, sexLabel] of [
+					["women", "femmes"],
+					["men", "hommes"],
+				] as const) {
+					const max = maxByBasis[row.basis][sex];
+					const total = sums[row.basis][sex];
+					if (max === undefined || total === max) continue;
+					workforceErrors.push(
+						`Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
 					);
 				}
-				if (maxMen !== undefined && totalMen !== maxMen) {
-					errors.push(
-						`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
-					);
-				}
-				if (errors.length > 0) {
-					setCategoryErrors([
-						{
-							fieldId: CATEGORY_FORM_FIELD_ID,
-							category: "inconsistent",
-							message: errors.join(" "),
-						},
-					]);
-					return;
-				}
+			}
+			if (workforceErrors.length > 0) {
+				setCategoryErrors([
+					{
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "inconsistent",
+						message: workforceErrors.join(" "),
+					},
+				]);
+				return;
 			}
 
 			onSubmit(
@@ -509,8 +509,18 @@ export function CategoryForm({
 				isPendingSave={isPendingSaveOverride}
 				isSaving={isSavingOverride}
 				onDevFill={() => {
-					if (maxWomen == null || maxMen == null) return;
-					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
+					if (
+						maxWomen == null ||
+						maxMen == null ||
+						hourlyMaxWomen == null ||
+						hourlyMaxMen == null
+					) {
+						return;
+					}
+					const devCats = createDevStep5Categories(nextId, {
+						annual: { women: maxWomen, men: maxMen },
+						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
+					});
 					replace(toFormValues(devCats));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setCategoryErrors([]);
@@ -522,7 +532,15 @@ export function CategoryForm({
 			{stepper}
 
 			<div className={stepStyles.categoryBlock}>
-				<p className="fr-mb-0">{descriptionText}</p>
+				<p className="fr-mb-0">
+					{descriptionText}
+					{reminderText ? (
+						<>
+							<br />
+							{reminderText}
+						</>
+					) : null}
+				</p>
 				{readOnlyLabel && (
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}

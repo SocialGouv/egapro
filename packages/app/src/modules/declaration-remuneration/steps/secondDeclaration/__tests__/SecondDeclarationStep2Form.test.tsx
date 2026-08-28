@@ -50,6 +50,8 @@ function makeCategory(
 		name: "",
 		womenCount: null,
 		menCount: null,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: null,
 		annualBaseMen: null,
 		annualVariableWomen: null,
@@ -265,7 +267,9 @@ describe("SecondDeclarationStep2Form", () => {
 		renderStep2ReadOnly();
 
 		const startDate = screen.getByLabelText(/Date de début/);
-		const womenCount = screen.getByLabelText(/Effectif femmes, catégorie 1/);
+		const womenCount = screen.getByLabelText(
+			/Rémunération annuelle — Nombre de femmes, catégorie 1/,
+		);
 
 		expect(startDate).toHaveAttribute("readonly");
 		expect(startDate).not.toBeDisabled();
@@ -276,5 +280,52 @@ describe("SecondDeclarationStep2Form", () => {
 	it("does not autosave the draft when the declaration is lock-read-only", () => {
 		renderStep2ReadOnly();
 		expect(setFieldMock).not.toHaveBeenCalled();
+	});
+});
+
+describe("SecondDeclarationStep2Form — headcount per pay basis (#4254)", () => {
+	it("shows both headcount rows without the first-declaration reminder", () => {
+		renderStep2();
+
+		expect(
+			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Pour rappel, le nombre total de salariés/),
+		).not.toBeInTheDocument();
+	});
+
+	it("prefills each basis from the first declaration's categories", () => {
+		renderStep2({
+			initialFirstDeclarationCategories: [
+				{
+					...(mockCategories[0] as EmployeeCategoryRow),
+					name: "Cadres",
+					womenCount: 3,
+					menCount: 4,
+					hourlyWomenCount: 1,
+					hourlyMenCount: 2,
+				},
+			],
+		});
+
+		expect(
+			screen.getByLabelText(
+				"Rémunération annuelle — Nombre de femmes, catégorie 1",
+			),
+		).toHaveValue("3");
+		expect(
+			screen.getByLabelText(
+				"Rémunération horaire — Nombre de femmes, catégorie 1",
+			),
+		).toHaveValue("1");
+		expect(
+			screen.getByLabelText(
+				"Rémunération horaire — Nombre d'hommes, catégorie 1",
+			),
+		).toHaveValue("2");
 	});
 });

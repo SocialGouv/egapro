@@ -296,6 +296,10 @@ function buildCategoryFromRow(
 		name: get("name").trim(),
 		womenCount: normalizeDecimal(get("womenCount")),
 		menCount: normalizeDecimal(get("menCount")),
+		// Hourly headcounts have no column in the template yet — #4276 owns the
+		// import file, this ticket only owns the model (#4254).
+		hourlyWomenCount: "",
+		hourlyMenCount: "",
 		annualBaseWomen: normalizeDecimal(get("annualBaseWomen")),
 		annualBaseMen: normalizeDecimal(get("annualBaseMen")),
 		annualVariableWomen: normalizeDecimal(get("annualVariableWomen")),
