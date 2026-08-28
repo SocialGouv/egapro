@@ -645,7 +645,7 @@ describe("Step5EmployeeCategories", () => {
 		const alert = screen.getByRole("alert");
 		expect(alert).toHaveTextContent("Données incohérentes");
 		// Two simultaneous mismatches (women + men) render as two list items,
-		// each naming its own sex and totals, rather than one merged paragraph (#4390).
+		// each naming its own sex and totals, rather than one merged paragraph.
 		const items = within(alert).getAllByRole("listitem");
 		expect(items).toHaveLength(2);
 		expect(items.map((item) => item.textContent)).toEqual([
@@ -1102,7 +1102,7 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (5).",
 		);
 		expect(alert).not.toHaveTextContent("« Rémunération annuelle »");
-		// A single inconsistency stays a plain paragraph, not a list (#4390).
+		// A single inconsistency stays a plain paragraph, not a list.
 		expect(within(alert).queryAllByRole("listitem")).toHaveLength(0);
 		expect(alert.querySelector("p")).not.toBeNull();
 		expect(mockMutate).not.toHaveBeenCalled();
