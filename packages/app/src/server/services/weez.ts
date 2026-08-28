@@ -97,6 +97,7 @@ export async function fetchCompanyBySiren(
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
 	url.searchParams.set("inclure_non_diffusibles", "true");
+	url.searchParams.set("inclure_cesse", "true");
 
 	const TWENTY_FOUR_HOURS = 86_400;
 
