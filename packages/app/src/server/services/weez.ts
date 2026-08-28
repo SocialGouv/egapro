@@ -6,6 +6,9 @@ import { isCompanyDiffusible } from "~/modules/public-api";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
+const WEEZ_TIMEOUT_MS = 10_000;
+const TWENTY_FOUR_HOURS = 86_400;
+
 // INSEE "tranche d'effectif salarié" code → lower bound of the size band, used
 // as a workforce proxy when the registry exposes the band but not an exact
 // `effectiftotal` (the usual case for public administrations and many ETI/GE).
@@ -52,6 +55,15 @@ type WeezLegalEntity = {
 	statutdiffusionunitelegale: string | null;
 };
 
+// Head office of the legal unit, from `/public/v3/unitelegale/etablissementsiege`
+// (schema `EtabDocDtoV3`). INSEE carries the foreign-country fields on the
+// establishment only — `findbysiren` has no country key at all — and fills them
+// solely when the registered address is abroad.
+type WeezEstablishment = {
+	codepaysetrangeretablissement: string | null;
+	libellepaysetrangeretablissement: string | null;
+};
+
 type WeezPaginatedResponse<T> = {
 	content: T[];
 	pageNumber: number;
@@ -68,9 +80,19 @@ export type CompanyInfo = {
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
 	workforce: number | null;
 	statutDiffusion: string | null;
 };
+
+/** France carries no COG code: the label alone marks the state. */
+const FRANCE_COUNTRY = { countryCode: null, countryLabel: "FRANCE" } as const;
+
+/** Neither France nor a known foreign country — repaired at the next refresh. */
+const UNKNOWN_COUNTRY = { countryCode: null, countryLabel: null } as const;
+
+type CompanyCountry = Pick<CompanyInfo, "countryCode" | "countryLabel">;
 
 function buildAddress(entity: WeezLegalEntity): string | null {
 	const streetParts = [
@@ -89,20 +111,89 @@ function buildAddress(entity: WeezLegalEntity): string | null {
 	return null;
 }
 
+function weezUrl(path: string, siren: string): URL {
+	const url = new URL(`${env.EGAPRO_WEEZ_API_URL.replace(/\/$/, "")}${path}`);
+	url.searchParams.set("siren", siren);
+	return url;
+}
+
+// The endpoint answers with the single head-office row. Both the bare object and
+// the paginated envelope used by the other v3 routes are accepted: reading only
+// one of the two shapes would leave the country column silently empty rather
+// than fail loudly.
+function readEstablishment(payload: unknown): WeezEstablishment | null {
+	if (!payload || typeof payload !== "object") return null;
+	const content = (payload as WeezPaginatedResponse<WeezEstablishment>).content;
+	if (Array.isArray(content)) return content[0] ?? null;
+	return payload as WeezEstablishment;
+}
+
+async function fetchHeadOffice(
+	siren: string,
+): Promise<WeezEstablishment | null> {
+	const response = await fetch(
+		weezUrl("/public/v3/unitelegale/etablissementsiege", siren),
+		{
+			headers: { Accept: "application/json" },
+			signal: AbortSignal.timeout(WEEZ_TIMEOUT_MS),
+			next: { revalidate: TWENTY_FOUR_HOURS },
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error(
+			`Weez API error: ${response.status} ${response.statusText}`,
+		);
+	}
+
+	return readEstablishment(await response.json());
+}
+
+/**
+ * Resolves the tri-state country of a legal unit.
+ *
+ * The postal code decides whether the second call is worth making — it never
+ * derives the value. A legal unit registered abroad carries neither postal code
+ * nor commune, and its country lives on the head office. `fetchCompanyBySiren`
+ * runs on every ProConnect login and in a loop over several thousand SIREN on
+ * the GIP-MDS import, so the extra request is spent only on that population.
+ *
+ * A failing or silent head office leaves the country unknown: it is never
+ * guessed as France, and it never breaks the main lookup.
+ */
+async function resolveCountry(
+	siren: string,
+	postalCode: string | null,
+): Promise<CompanyCountry> {
+	if (postalCode) return FRANCE_COUNTRY;
+
+	try {
+		const establishment = await fetchHeadOffice(siren);
+		const countryCode = establishment?.codepaysetrangeretablissement ?? null;
+		const countryLabel =
+			establishment?.libellepaysetrangeretablissement ?? null;
+
+		// Both halves or neither: a code without a label reads as an unnamed
+		// foreign country, and a label without a code is France-shaped. Either
+		// would break the tri-state for every consumer downstream.
+		if (!countryCode || !countryLabel) return UNKNOWN_COUNTRY;
+
+		return { countryCode, countryLabel };
+	} catch {
+		return UNKNOWN_COUNTRY;
+	}
+}
+
 export async function fetchCompanyBySiren(
 	siren: string,
 ): Promise<CompanyInfo | null> {
-	const baseUrl = env.EGAPRO_WEEZ_API_URL.replace(/\/$/, "");
-	const url = new URL(`${baseUrl}/public/v3/unitelegale/findbysiren`);
-	url.searchParams.set("siren", siren);
+	const url = weezUrl("/public/v3/unitelegale/findbysiren", siren);
 	url.searchParams.set("page", "0");
 	url.searchParams.set("inclure_non_diffusibles", "true");
 
-	const TWENTY_FOUR_HOURS = 86_400;
-
 	const response = await fetch(url, {
 		headers: { Accept: "application/json" },
-		signal: AbortSignal.timeout(10_000),
+		signal: AbortSignal.timeout(WEEZ_TIMEOUT_MS),
 		next: { revalidate: TWENTY_FOUR_HOURS },
 	});
 
@@ -124,6 +215,11 @@ export async function fetchCompanyBySiren(
 	// when `address` becomes null.
 	const location = getLocationFromPostalCode(entity.codepostal);
 
+	// Coarse geography, kept on non-diffusible units like region and department
+	// already are — and for a company registered abroad, those two are empty by
+	// construction, so masking the country would leave nothing at all.
+	const country = await resolveCountry(siren, entity.codepostal);
+
 	const statutDiffusion = entity.statutdiffusionunitelegale ?? null;
 
 	if (!isCompanyDiffusible(statutDiffusion)) {
@@ -138,6 +234,8 @@ export async function fetchCompanyBySiren(
 			region: location.region,
 			departmentCode: location.departmentCode,
 			departmentLabel: location.departmentLabel,
+			countryCode: country.countryCode,
+			countryLabel: country.countryLabel,
 			workforce:
 				entity.effectiftotal ??
 				trancheToWorkforce(entity.trancheeffectifsunitelegale),
@@ -159,6 +257,8 @@ export async function fetchCompanyBySiren(
 		region: location.region,
 		departmentCode: location.departmentCode,
 		departmentLabel: location.departmentLabel,
+		countryCode: country.countryCode,
+		countryLabel: country.countryLabel,
 		workforce:
 			entity.effectiftotal ??
 			trancheToWorkforce(entity.trancheeffectifsunitelegale),
