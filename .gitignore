@@ -38,8 +38,11 @@ packages/notifications/dist/
 # vscode
 .vscode/
 
-# codex — local agent workspace, never shared
-.codex/
+# Codex local workspace, except shared repository skills.
+.codex/*
+!.codex/skills/
+!.codex/skills/**/
+!.codex/skills/**/SKILL.md
 
 # claude code — ignore everything, then whitelist shared config
 .claude/*
