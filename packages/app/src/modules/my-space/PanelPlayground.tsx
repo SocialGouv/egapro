@@ -70,6 +70,7 @@ export function PanelPlayground() {
 	const [compliancePathApplicable, setCompliancePathApplicable] =
 		useState(true);
 	const [hasPrefillData, setHasPrefillData] = useState(true);
+	const [indicatorGRequired, setIndicatorGRequired] = useState(true);
 	const [preset, setPreset] = useState<DatePreset>("future");
 	const [deadlines, setDeadlines] = useState<CampaignDeadlines>(
 		buildPresetDeadlines("future"),
@@ -191,6 +192,18 @@ export function PanelPlayground() {
 
 					<div className="fr-checkbox-group">
 						<input
+							checked={indicatorGRequired}
+							id="indicator-g-required"
+							onChange={(e) => setIndicatorGRequired(e.currentTarget.checked)}
+							type="checkbox"
+						/>
+						<label className="fr-label" htmlFor="indicator-g-required">
+							Indicateur G requis
+						</label>
+					</div>
+
+					<div className="fr-checkbox-group">
+						<input
 							checked={cseOpinionRequired}
 							id="cse-opinion-required"
 							onChange={(e) => setCseOpinionRequired(e.currentTarget.checked)}
@@ -290,6 +303,7 @@ export function PanelPlayground() {
 				})}
 				hasPrefillData={hasPrefillData}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
+				indicatorGRequired={indicatorGRequired}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}

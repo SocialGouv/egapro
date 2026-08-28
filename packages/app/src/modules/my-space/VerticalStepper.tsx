@@ -32,6 +32,7 @@ export function VerticalStepper({
 	declarationFsmStatus,
 	displayContext,
 	hasPrefillData,
+	indicatorGRequired,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -46,6 +47,7 @@ export function VerticalStepper({
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	hasPrefillData: boolean;
+	indicatorGRequired: boolean;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -62,6 +64,7 @@ export function VerticalStepper({
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
+					indicatorGRequired={indicatorGRequired}
 					hasPrefillData={hasPrefillData}
 					siren={siren}
 					status={step1}
