@@ -56,12 +56,16 @@ function BulletRow({ children }: { children: ReactNode }) {
 
 export function Step1Content({
 	campaignDeadlines,
+	indicatorGRequired,
+	hasPrefillData,
 	siren,
 	status,
 	variant,
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	indicatorGRequired: boolean;
+	hasPrefillData: boolean;
 	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
@@ -84,12 +88,15 @@ export function Step1Content({
 					</p>
 				</div>
 				<BulletRow>
-					Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus
-					des données DSN)
+					{hasPrefillData
+						? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+						: "Indicateurs pour l'ensemble des salariés à remplir"}
 				</BulletRow>
-				<BulletRow>
-					Indicateurs de rémunération par catégories de salariés à remplir
-				</BulletRow>
+				{indicatorGRequired && (
+					<BulletRow>
+						Indicateurs de rémunération par catégories de salariés à remplir
+					</BulletRow>
+				)}
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);

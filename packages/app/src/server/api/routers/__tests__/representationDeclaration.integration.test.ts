@@ -207,6 +207,77 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		});
 	});
 
+	it("closes the démarche as not subject and wipes the draft it replaces (S1)", async () => {
+		const caller = createCaller();
+
+		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
+		await caller.declareNotSubject({ year: YEAR });
+		const { declaration } = await caller.get({ year: YEAR });
+
+		expect(await countDeclarations()).toBe(1);
+		expect(declaration).toMatchObject({
+			siren: SIREN,
+			year: YEAR,
+			status: "not_subject",
+			currentStep: 0,
+			draft: null,
+			draftUpdatedAt: null,
+			submittedAt: null,
+			declarantId: USER_ID,
+		});
+	});
+
+	it("records the choice of a company that never opened the funnel (S1)", async () => {
+		const caller = createCaller();
+
+		await caller.declareNotSubject({ year: YEAR });
+		const { declaration } = await caller.get({ year: YEAR });
+
+		expect(await countDeclarations()).toBe(1);
+		expect(declaration).toMatchObject({
+			status: "not_subject",
+			currentStep: 0,
+			draft: null,
+			submittedAt: null,
+		});
+	});
+
+	it("refuses to bury a declaration that was already transmitted (S2)", async () => {
+		const caller = createCaller();
+
+		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
+		const submittedAt = (await caller.get({ year: YEAR })).declaration
+			?.submittedAt;
+
+		await expect(
+			caller.declareNotSubject({ year: YEAR }),
+		).rejects.toMatchObject({ code: "CONFLICT" });
+
+		const { declaration } = await caller.get({ year: YEAR });
+		expect(declaration).toMatchObject({
+			status: "submitted",
+			submittedAt,
+			publishUrl: FULL_REPRESENTATION_PAYLOAD.publishUrl,
+		});
+	});
+
+	// The status guard is a SQL CASE evaluated by Postgres, so only a real driver
+	// round-trip proves the enum value it yields is the one the column accepts.
+	it("reopens a not-subject declaration as a draft when the funnel is walked again (S4)", async () => {
+		const caller = createCaller();
+
+		await caller.declareNotSubject({ year: YEAR });
+		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
+		const { declaration } = await caller.get({ year: YEAR });
+
+		expect(await countDeclarations()).toBe(1);
+		expect(declaration).toMatchObject({
+			status: "draft",
+			currentStep: 2,
+			draft: DRAFT,
+		});
+	});
+
 	it("never exposes the declaration of another company", async () => {
 		await sql`
 			INSERT INTO app_representation_declaration (id, siren, year, status, publish_url)
@@ -234,6 +305,9 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 				payload: FULL_REPRESENTATION_PAYLOAD,
 			}),
 		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		await expect(
+			caller.declareNotSubject({ year: CLOSED_YEAR }),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
 
 		const { declaration, campaignOpen } = await caller.get({
 			year: CLOSED_YEAR,
@@ -247,6 +321,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	it("records every procedure in the audit log with its retention category", async () => {
 		const caller = createCaller();
 
+		await caller.declareNotSubject({ year: YEAR });
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		await caller.get({ year: YEAR });
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
@@ -268,6 +343,11 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 					siren: SIREN,
 				},
 				{
+					action: "representation_declaration.declare_not_subject",
+					category: "mutation",
+					siren: SIREN,
+				},
+				{
 					action: "representation_declaration.get",
 					category: "read_sensitive",
 					siren: SIREN,
@@ -282,6 +362,23 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 					category: "mutation",
 					siren: SIREN,
 				},
+			]);
+		}, 5_000);
+	});
+
+	it("logs the not-subject choice with the year alone as metadata (S7)", async () => {
+		const caller = createCaller();
+
+		await caller.declareNotSubject({ year: YEAR });
+
+		await vi.waitFor(async () => {
+			const rows = await sql<{ metadata: unknown; status: string }[]>`
+				SELECT metadata, status FROM audit.action_log
+				WHERE user_id = ${USER_ID}
+					AND action = 'representation_declaration.declare_not_subject'
+			`;
+			expect([...rows]).toEqual([
+				{ metadata: { year: YEAR }, status: "success" },
 			]);
 		}, 5_000);
 	});

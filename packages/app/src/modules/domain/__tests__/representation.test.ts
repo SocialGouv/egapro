@@ -8,6 +8,7 @@ import {
 	getRepresentationTarget,
 	isPresumedSubjectToRepresentation,
 	isRepresentationDeclarationSubmitted,
+	isRepresentationNotSubject,
 	isRepresentationPublicationRequired,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
@@ -320,6 +321,23 @@ describe("isRepresentationDeclarationSubmitted", () => {
 	it.each([null, undefined])("rejects a missing declaration (%s)", (status) => {
 		expect(isRepresentationDeclarationSubmitted(status)).toBe(false);
 	});
+
+	// A non-subject company transmitted no gaps: it must never count as submitted.
+	it("rejects a declaration closed as not subject", () => {
+		expect(isRepresentationDeclarationSubmitted("not_subject")).toBe(false);
+	});
+});
+
+describe("isRepresentationNotSubject", () => {
+	it.each([
+		["not_subject", true],
+		["draft", false],
+		["submitted", false],
+		[null, false],
+		[undefined, false],
+	] as const)("returns %s → %s", (status, expected) => {
+		expect(isRepresentationNotSubject(status)).toBe(expected);
+	});
 });
 
 describe("computeRepresentationDeclarationStatus", () => {
@@ -340,6 +358,21 @@ describe("computeRepresentationDeclarationStatus", () => {
 			computeRepresentationDeclarationStatus({
 				status: "submitted",
 				currentStep: null,
+			}),
+		).toBe("done");
+	});
+
+	// `currentStep` is reset to 0 on the row, but the démarche is over all the same.
+	it.each([
+		0,
+		1,
+		5,
+		null,
+	])("returns done for a not-subject declaration on step %s", (currentStep) => {
+		expect(
+			computeRepresentationDeclarationStatus({
+				status: "not_subject",
+				currentStep,
 			}),
 		).toBe("done");
 	});
@@ -395,6 +428,7 @@ describe("verdict independence (S16)", () => {
 			"getRepresentationTarget",
 			"isPresumedSubjectToRepresentation",
 			"isRepresentationDeclarationSubmitted",
+			"isRepresentationNotSubject",
 			"isRepresentationPublicationRequired",
 		]);
 	});

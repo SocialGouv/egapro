@@ -2,41 +2,45 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ConfirmationPage } from "../ConfirmationPage";
 
-vi.mock("~/trpc/react", () => ({
-	api: {
-		mail: {
-			resendReceipt: {
-				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
-			},
-		},
-	},
-}));
+vi.mock(
+	"~/trpc/react",
+	async () => await import("~/test/resendReceiptApiMock"),
+);
 
 const DECLARATION_YEAR = 2025;
 
+const TRANSMITTED_CARD = /récapitulatif des éléments transmis/;
+
+type Overrides = {
+	email?: string;
+	hasSecondDeclaration?: boolean;
+	hasTransmittedElements?: boolean;
+};
+
+function renderConfirmation(overrides: Overrides = {}) {
+	return render(
+		<ConfirmationPage
+			dataYear={DECLARATION_YEAR - 1}
+			declarationYear={DECLARATION_YEAR}
+			{...overrides}
+		/>,
+	);
+}
+
 describe("ConfirmationPage", () => {
 	it("renders the page title", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(
-			screen.getByText(
-				`Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`,
-			),
+			screen.getByRole("heading", {
+				level: 1,
+				name: `Démarche des indicateurs de rémunération ${DECLARATION_YEAR}`,
+			}),
 		).toBeInTheDocument();
 	});
 
 	it("renders the success message", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(
 			screen.getByText(
@@ -46,35 +50,19 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the default email in receipt card", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});
 
 	it("renders the provided email in receipt card", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-				email="test@example.com"
-			/>,
-		);
+		renderConfirmation({ email: "test@example.com" });
 
 		expect(screen.getByText("test@example.com")).toBeInTheDocument();
 	});
 
 	it("renders the resend button", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(
 			screen.getByRole("button", {
@@ -84,12 +72,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders document download section without second declaration card", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(
 			screen.getByText("Documents récapitulatifs de votre démarche"),
@@ -100,19 +83,10 @@ describe("ConfirmationPage", () => {
 		expect(
 			screen.queryByText(/récapitulatif de la seconde déclaration/),
 		).not.toBeInTheDocument();
-		expect(
-			screen.getByText(/récapitulatif des éléments transmis/),
-		).toBeInTheDocument();
 	});
 
 	it("renders second declaration card when hasSecondDeclaration is true", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-				hasSecondDeclaration
-			/>,
-		);
+		renderConfirmation({ hasSecondDeclaration: true });
 
 		expect(
 			screen.getByText(/récapitulatif de la déclaration des indicateurs/),
@@ -120,18 +94,23 @@ describe("ConfirmationPage", () => {
 		expect(
 			screen.getByText(/récapitulatif de la seconde déclaration/),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText(/récapitulatif des éléments transmis/),
-		).toBeInTheDocument();
+	});
+
+	// The PDF is empty unless something was transmitted, hence the condition.
+	it("offers the transmitted elements card when elements were transmitted", () => {
+		renderConfirmation({ hasTransmittedElements: true });
+
+		expect(screen.getByText(TRANSMITTED_CARD)).toBeInTheDocument();
+	});
+
+	it("omits the transmitted elements card when nothing was transmitted", () => {
+		renderConfirmation();
+
+		expect(screen.queryByText(TRANSMITTED_CARD)).not.toBeInTheDocument();
 	});
 
 	it("renders download cards as links with correct hrefs", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation({ hasTransmittedElements: true });
 
 		const declarationLink = screen
 			.getByText(/récapitulatif de la déclaration des indicateurs/)
@@ -142,9 +121,7 @@ describe("ConfirmationPage", () => {
 		);
 		expect(declarationLink).toHaveAttribute("download");
 
-		const transmittedLink = screen
-			.getByText(/récapitulatif des éléments transmis/)
-			.closest("a");
+		const transmittedLink = screen.getByText(TRANSMITTED_CARD).closest("a");
 		expect(transmittedLink).toHaveAttribute(
 			"href",
 			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
@@ -153,13 +130,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders second declaration download card with correction href", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-				hasSecondDeclaration
-			/>,
-		);
+		renderConfirmation({ hasSecondDeclaration: true });
 
 		const secondDeclLink = screen
 			.getByText(/récapitulatif de la seconde déclaration/)
@@ -172,12 +143,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("renders the feedback banner with the jedonnemonavis link", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		expect(
 			screen.getByText("Comment s'est passée votre démarche ?"),
@@ -188,12 +154,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("closes the funnel on Mon espace alone", () => {
-		render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		renderConfirmation();
 
 		const spaceLink = screen.getByRole("link", { name: "Mon espace" });
 		expect(spaceLink).toHaveAttribute("href", "/mon-espace");
@@ -206,12 +167,7 @@ describe("ConfirmationPage", () => {
 	});
 
 	it("marks the completion pictogram as a success rather than an error", () => {
-		const { container } = render(
-			<ConfirmationPage
-				dataYear={DECLARATION_YEAR - 1}
-				declarationYear={DECLARATION_YEAR}
-			/>,
-		);
+		const { container } = renderConfirmation();
 
 		// Without the modifier, the DSFR artwork paints its check in Marianne red.
 		expect(

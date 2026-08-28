@@ -4,9 +4,11 @@ import type { EmployeeCategory } from "./categorySerializer";
 
 /** Column definitions for the import/export template. */
 const TEMPLATE_COLUMNS = [
-	{ key: "name", header: "Nom de la catégorie" },
-	{ key: "womenCount", header: "Effectif femmes" },
-	{ key: "menCount", header: "Effectif hommes" },
+	{ key: "name", header: "Libellé de la catégorie" },
+	{ key: "womenCount", header: "Annuel effectif femmes" },
+	{ key: "menCount", header: "Annuel effectif hommes" },
+	{ key: "hourlyWomenCount", header: "Horaire effectif femmes" },
+	{ key: "hourlyMenCount", header: "Horaire effectif hommes" },
 	{ key: "annualBaseWomen", header: "Annuel base femmes (€)" },
 	{ key: "annualBaseMen", header: "Annuel base hommes (€)" },
 	{ key: "annualVariableWomen", header: "Annuel variable femmes (€)" },
@@ -296,6 +298,8 @@ function buildCategoryFromRow(
 		name: get("name").trim(),
 		womenCount: normalizeDecimal(get("womenCount")),
 		menCount: normalizeDecimal(get("menCount")),
+		hourlyWomenCount: normalizeDecimal(get("hourlyWomenCount")),
+		hourlyMenCount: normalizeDecimal(get("hourlyMenCount")),
 		annualBaseWomen: normalizeDecimal(get("annualBaseWomen")),
 		annualBaseMen: normalizeDecimal(get("annualBaseMen")),
 		annualVariableWomen: normalizeDecimal(get("annualVariableWomen")),

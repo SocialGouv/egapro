@@ -8,6 +8,8 @@ export type EmployeeCategory = {
 	name: string;
 	womenCount: string;
 	menCount: string;
+	hourlyWomenCount: string;
+	hourlyMenCount: string;
 	annualBaseWomen: string;
 	annualBaseMen: string;
 	annualVariableWomen: string;
@@ -22,6 +24,8 @@ const EMPTY_FIELDS = {
 	name: "",
 	womenCount: "",
 	menCount: "",
+	hourlyWomenCount: "",
+	hourlyMenCount: "",
 	annualBaseWomen: "",
 	annualBaseMen: "",
 	annualVariableWomen: "",
@@ -45,6 +49,8 @@ export function fromDatabaseRows(
 		name: row.name,
 		womenCount: row.womenCount?.toString() ?? "",
 		menCount: row.menCount?.toString() ?? "",
+		hourlyWomenCount: row.hourlyWomenCount?.toString() ?? "",
+		hourlyMenCount: row.hourlyMenCount?.toString() ?? "",
 		annualBaseWomen: row.annualBaseWomen ?? "",
 		annualBaseMen: row.annualBaseMen ?? "",
 		annualVariableWomen: row.annualVariableWomen ?? "",
@@ -77,6 +83,8 @@ export function toSubmitData(
 			data: {
 				womenCount: toInt(cat.womenCount),
 				menCount: toInt(cat.menCount),
+				hourlyWomenCount: toInt(cat.hourlyWomenCount),
+				hourlyMenCount: toInt(cat.hourlyMenCount),
 				annualBaseWomen: toStr(cat.annualBaseWomen),
 				annualBaseMen: toStr(cat.annualBaseMen),
 				annualVariableWomen: toStr(cat.annualVariableWomen),

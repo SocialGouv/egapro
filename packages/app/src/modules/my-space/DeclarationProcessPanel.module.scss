@@ -163,6 +163,11 @@
 	gap: 0.5rem;
 }
 
+// Not-subject message
+.notSubjectMessage {
+	color: var(--text-title-grey);
+}
+
 // Help section
 .helpSection {
 	display: flex;

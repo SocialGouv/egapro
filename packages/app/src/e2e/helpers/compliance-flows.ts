@@ -1,7 +1,11 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 
-import { fillCategoryPayAmounts } from "./declaration-flows";
+import {
+	categoryWorkforceInput,
+	fillCategoryPayAmounts,
+	STEP5_WORKFORCE_REMINDER,
+} from "./declaration-flows";
 
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
 export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
@@ -209,6 +213,23 @@ export async function completeSecondDeclaration(
 		expect(sourceBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(
 			mandatoryBox?.y ?? Number.NEGATIVE_INFINITY,
 		);
+
+		// #4254 — the shared category table carries a headcount row per pay basis here
+		// too, but this parcours answers to no step 1: it gets neither the reminder
+		// sentence nor the coherence caps that go with it.
+		await expect(
+			categoryBlock.getByRole("heading", {
+				name: "Nombre de salariés en effectif physique",
+			}),
+		).toBeVisible();
+		for (const basis of ["annual", "hourly"] as const) {
+			for (const sex of ["women", "men"] as const) {
+				await expect(
+					categoryWorkforceInput(page, { basis, sex }),
+				).toBeVisible();
+			}
+		}
+		await expect(page.getByText(STEP5_WORKFORCE_REMINDER)).toHaveCount(0);
 
 		// Step 2: Edit correction employee category data
 		// women=1000, men=1100 → 9% gap | women=1000, men=1020 → 2% gap

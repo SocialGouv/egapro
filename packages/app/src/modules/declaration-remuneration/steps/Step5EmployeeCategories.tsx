@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { getReferenceYearFor, padDecimalToTwo } from "~/modules/domain";
 import { api } from "~/trpc/react";
+import type { CategoryFormValues } from "../schemas";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { useLockContext } from "../shared/lock/LockContext";
@@ -13,22 +14,9 @@ import { StepIndicator } from "../shared/StepIndicator";
 import type { EmployeeCategoryRow } from "../types";
 import { CategoryForm } from "./step5/CategoryForm";
 
-type Step5FormValues = {
-	source: string;
-	categories: {
-		name: string;
-		womenCount: string;
-		menCount: string;
-		annualBaseWomen: string;
-		annualBaseMen: string;
-		annualVariableWomen: string;
-		annualVariableMen: string;
-		hourlyBaseWomen: string;
-		hourlyBaseMen: string;
-		hourlyVariableWomen: string;
-		hourlyVariableMen: string;
-	}[];
-};
+/** Figma node 10904-38051 — verbatim. */
+const STEP5_WORKFORCE_REMINDER =
+	"Pour rappel, le nombre total de salariés doit correspondre à celui renseigné dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs ».";
 
 type Props = {
 	declarationSiren: string;
@@ -38,6 +26,8 @@ type Props = {
 	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
 };
 
 export function Step5EmployeeCategories({
@@ -48,19 +38,23 @@ export function Step5EmployeeCategories({
 	initialSource,
 	maxWomen,
 	maxMen,
+	hourlyMaxWomen,
+	hourlyMaxMen,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly: isLocked } = useLockContext();
 	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
-	const dbValues = useMemo<Step5FormValues>(
+	const dbValues = useMemo<CategoryFormValues>(
 		() => ({
 			source: initialSource ?? "",
 			categories: (initialCategories ?? []).map((row) => ({
 				name: row.name,
 				womenCount: row.womenCount?.toString() ?? "",
 				menCount: row.menCount?.toString() ?? "",
+				hourlyWomenCount: row.hourlyWomenCount?.toString() ?? "",
+				hourlyMenCount: row.hourlyMenCount?.toString() ?? "",
 				annualBaseWomen: padDecimalToTwo(row.annualBaseWomen ?? ""),
 				annualBaseMen: padDecimalToTwo(row.annualBaseMen ?? ""),
 				annualVariableWomen: padDecimalToTwo(row.annualVariableWomen ?? ""),
@@ -82,7 +76,7 @@ export function Step5EmployeeCategories({
 		isLoadingDraft,
 		isSaving,
 		isPendingSave,
-	} = useDeclarationDraft<Step5FormValues>({
+	} = useDeclarationDraft<CategoryFormValues>({
 		siren: declarationSiren,
 		year: declarationYear,
 		step: 5,
@@ -114,6 +108,8 @@ export function Step5EmployeeCategories({
 			defaultValuesOverride={categoryFormDefaultOverride}
 			disabled={isImpersonating}
 			hasDataOverride={hasInitialData || hasDraft}
+			hourlyMaxMen={hourlyMaxMen}
+			hourlyMaxWomen={hourlyMaxWomen}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
@@ -136,6 +132,7 @@ export function Step5EmployeeCategories({
 			previousHref="/declaration-remuneration/etape/4"
 			readOnly={isLocked}
 			referenceYear={getReferenceYearFor(declarationYear)}
+			reminderText={STEP5_WORKFORCE_REMINDER}
 			stepper={
 				<StepIndicator
 					currentStep={5}

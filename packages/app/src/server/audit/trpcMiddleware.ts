@@ -119,6 +119,8 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"representationDeclaration.saveDraft":
 		AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
 	"representationDeclaration.submit": AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+	"representationDeclaration.declareNotSubject":
+		AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT,
 
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
@@ -134,6 +136,7 @@ const METADATA_ALLOWED_KEYS: Partial<Record<string, readonly string[]>> = {
 	"representationDeclaration.get": ["year"],
 	"representationDeclaration.saveDraft": ["year"],
 	"representationDeclaration.submit": ["year"],
+	"representationDeclaration.declareNotSubject": ["year"],
 };
 
 type SessionLike = {

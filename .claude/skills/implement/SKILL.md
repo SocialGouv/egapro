@@ -171,7 +171,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    MODEL=$(gh issue view "$ISSUE_N" --json labels --jq '.labels[].name' | grep -qx complexe && echo opus || echo sonnet)
    BUDGET=$([ "$MODEL" = opus ] && echo 20 || echo 10)
    env -u CLAUDECODE timeout 5400 claude \
-     --agent code-dev --model "$MODEL" \
+     --agent code-dev --model "$MODEL" --effort high \
      --print --output-format stream-json --verbose \
      --dangerously-skip-permissions --max-budget-usd "$BUDGET" \
      "$PROMPT" 2>&1 | tee "/tmp/code-dev-${ISSUE_N}.jsonl"
@@ -186,7 +186,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    | `.status` | Action skill | Markdown affiché |
    |---|---|---|
    | `validated` | enchaîner sur **e2e-dev** (étape 5bis) ; le ticket reste In progress, l'utilisateur le bouge à In review à son rythme | `## Code: PASS` + ticket/branche/PR, puis le verdict E2E |
-   | `needs_opus_escalation` | relancer immédiatement le **CLI `code-dev`** avec `--model opus` et le même `$PROMPT` ; si le retour Opus est `validated`, enchaîner sur e2e-dev (étape 5bis) | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
+   | `needs_opus_escalation` | relancer immédiatement le **CLI `code-dev`** avec `--model opus --effort high` et le même `$PROMPT` ; si le retour Opus est `validated`, enchaîner sur e2e-dev (étape 5bis) | `## Code: PASS` ou `## Code: REFACTO` selon le retour Opus |
    | `refacto` | aucune (le ticket est en To Do) ; pas d'e2e-dev | `## Code: REFACTO` + diagnostic + next-step `/analyse <N>` (re-spec) |
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
    | `failed` | propager l'erreur sans modifier le ticket ; pas d'e2e-dev | `## Code: FAILED` + raison technique |
@@ -195,7 +195,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
    ```bash
    env -u CLAUDECODE timeout 3600 claude \
-     --agent e2e-dev --model opus --effort xhigh \
+     --agent e2e-dev --model opus --effort high \
      --print --output-format json \
      --dangerously-skip-permissions --max-budget-usd 15 \
      "$E2E_PROMPT" 2>&1 | tee "/tmp/e2e-dev-${ISSUE_N}.json"
@@ -211,7 +211,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
      | `rate_limited` | proposer de retenter ou de lancer `e2e-dev` plus tard | `## E2E: RATE_LIMITED` + délai |
      | `failed` | noter l'échec technique (dev server / infra), proposer de relancer | `## E2E: FAILED` + raison |
 
-   - **Sur `regression`** : lancer `architect-rework` exactement comme `e2e-dev` (CLI foreground, `claude --agent architect-rework --model opus --effort xhigh`), en lui passant le ticket et la base de comparaison. Il lit le commentaire `e2e-dev:`, crée des tickets Task de fix (To Do) ou pose une question à l'utilisateur (`needs_user`). Comme on est en foreground (utilisateur présent), afficher le verdict et la **next-step** (`/implement <ticket-de-fix>`), plutôt que de relancer l'orchestrateur automatiquement.
+   - **Sur `regression`** : lancer `architect-rework` de la même façon que `e2e-dev` (CLI foreground, `claude --agent architect-rework --model opus --effort xhigh`), en lui passant le ticket et la base de comparaison. Il lit le commentaire `e2e-dev:`, crée des tickets Task de fix (To Do) ou pose une question à l'utilisateur (`needs_user`). Comme on est en foreground (utilisateur présent), afficher le verdict et la **next-step** (`/implement <ticket-de-fix>`), plutôt que de relancer l'orchestrateur automatiquement.
    - **e2e-dev ne bouge pas le board** : le ticket reste en `In progress` ; une régression est traitée par les tickets de fix d'`architect-rework` (l'utilisateur les implémente, puis `e2e-dev` re-valide).
 
 6. **Pour les sub-issues d'epic validées en mode synchrone** : `process_tick_result.sh` n'est pas appelé (c'est un mécanisme du loop driver). Le squash-merge de la PR validée dans `epic/<N>` peut être déclenché manuellement (de préférence **après** que `e2e-dev` a poussé sa couverture, pour que les E2E partent avec) :

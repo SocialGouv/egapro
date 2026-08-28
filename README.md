@@ -265,7 +265,7 @@ Executes **automatiquement**, sans intervention.
 
 ### Agents (`.claude/agents/`)
 
-Chaque agent porte son couple `model:` / `effort:` en frontmatter, et les invocations CLI headless repassent les memes valeurs en `--model` / `--effort` : la redondance est volontaire, aucune precedence ne peut produire de divergence. **Seule exception : `code-dev`**, dont ni le modele ni l'effort ne sont pinnes — le modele varie par ticket (passe en `--model`), et l'effort reste herite : c'est le poste de depense de la pipeline (1 run par ticket, session la plus longue), donc un reglage de run et non une propriete de l'agent.
+Chaque agent porte son couple `model:` / `effort:` en frontmatter, et les invocations CLI headless repassent les memes valeurs en `--model` / `--effort` : la redondance est volontaire, aucune precedence ne peut produire de divergence. **Seule exception : `code-dev`**, dont ni le modele ni l'effort ne sont pinnes en frontmatter — les deux sont passes a l'invocation : le modele varie par ticket (`--model`), et l'effort est fixe pour le run (`--effort high`, surchargeable par `EPIC_LOOP_EFFORT_CODE_DEV`). C'est le poste de depense de la pipeline (1 run par ticket, session la plus longue), donc un reglage de run et non une propriete de l'agent.
 
 | Agent | Role | Modele | Effort |
 |---|---|---|---|
@@ -273,12 +273,12 @@ Chaque agent porte son couple `model:` / `effort:` en frontmatter, et les invoca
 | `structural-auditor` | greps mecaniques, fuites du domaine, affaiblissement de test | sonnet | high |
 | `rgaa-auditor` | lance le skill ultra11y `review-a11y` sur le code modifie | sonnet | high |
 | `security-auditor` | OWASP Top 10 + RGS, cible sur les mecanismes du projet | sonnet | high |
-| `code-dev` | implemente un ticket end-to-end **et ecrit ses tests vitest** | passe en `--model` : sonnet, opus si `complexe` | herite (non pinne) |
-| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus | xhigh |
+| `code-dev` | implemente un ticket end-to-end **et ecrit ses tests vitest** | passe en `--model` : sonnet, opus si `complexe` | passe en `--effort` : high |
+| `e2e-dev` | ecrit tous les tests Playwright, en fin de pipeline | opus | high |
 | `functional-validator` | rejoue les scenarios PO sur le dev server | sonnet | medium |
 | `design-validator` | mesure la fidelite visuelle contre le Figma | sonnet | xhigh |
 | `product-owner`, `bug-analyst`, `architect-rework` | conception : besoin, diagnostic, rework | opus | xhigh |
-| `architect` | decoupage et redaction des specs | fable | xhigh |
+| `architect` | decoupage et redaction des specs | opus | xhigh |
 | `review-fixer` | adresse les commentaires de revue | sonnet | high |
 | `doc-writer` | regenere `docs/` depuis le code | sonnet | medium |
 

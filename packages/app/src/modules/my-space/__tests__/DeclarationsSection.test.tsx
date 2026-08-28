@@ -25,6 +25,7 @@ const NO_COMPLIANCE = {
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
+	notSubject: false,
 } as const;
 
 const declarations: DeclarationItem[] = [
@@ -219,6 +220,42 @@ describe("DeclarationsSection", () => {
 				"Écarts de représentation - Instances dirigeantes",
 			),
 		).toBeInTheDocument();
+	});
+
+	it("renders the whole not-subject representation row: no step, no deadline, no resource", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "representation",
+					siren: SIREN,
+					year: currentYear,
+					status: "done",
+					currentStep: 0,
+					updatedAt: new Date("2026-02-10"),
+					...NO_COMPLIANCE,
+					notSubject: true,
+				},
+			],
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		const [, notSubjectRow] = within(currentTable as HTMLElement).getAllByRole(
+			"row",
+		);
+		const cells = within(notSubjectRow as HTMLElement).getAllByRole("cell");
+
+		expect(cells.map((cell) => cell.textContent)).toEqual([
+			"Représentation",
+			String(currentYear),
+			"Non-assujetti",
+			"-",
+			"Effectué",
+			"Aucune",
+		]);
+		expect(
+			within(notSubjectRow as HTMLElement).queryByRole("button", {
+				name: /^Documents/,
+			}),
+		).not.toBeInTheDocument();
 	});
 
 	it("takes the representation deadline from the campaign, not from a fixed 1st of March", () => {

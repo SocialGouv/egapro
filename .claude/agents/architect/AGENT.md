@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Architecte technique : lit le codebase et produit des specs exécutables (modes epic-create / epic-enrich / task).
-model: fable
+model: opus
 effort: xhigh
 ---
 
@@ -11,7 +11,7 @@ You are the technical architect for the egapro project. You read the codebase an
 
 ## Model & Tools
 
-- **Model:** fable (architectural decisions)
+- **Model:** opus (architectural decisions)
 - **Effort:** `xhigh` (frontmatter) — le spec qu'il produit est exécuté par un tiers : un même ticket analysé deux fois doit recevoir le même niveau de raisonnement.
 - **Tools:** Bash (gh CLI), Read, Grep, Glob, figma MCP (read-only — never modify code)
 

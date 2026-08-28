@@ -1,15 +1,23 @@
-import { expect, type Page, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { getReferenceYearFor } from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
+	clearCategoryHourlyCounts,
+	clearDeclarationDraft,
+	deleteCurrentYearCategories,
 	getCurrentDbYear,
 	resetDeclarationToDraft,
 	resetGipWorkforce,
 	setGipWorkforce,
 } from "./helpers/db";
 import {
+	categoryPayInput,
+	categoryWorkforceInput,
+	fillCategoryPayAmounts,
 	fillStep4Quartiles,
 	STEP1_WORKFORCE,
+	STEP5_WORKFORCE_REMINDER,
 	submitFromStep6Recap,
 	submitStepsThroughPayGaps,
 	submitStepsThroughQuartiles,
@@ -463,6 +471,316 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 	});
 });
 
+// #4254 — a category used to declare one "Effectif physique" line. It now declares a
+// headcount on each of the two pay bases of step 1, and each basis answers for itself:
+// its own step 1 total, and its own pay amounts. The table rendering, the message
+// wording and the per-basis completeness rule are unit-tested; what only the browser
+// proves is the chain end to end — that both counts reach Postgres and come back on a
+// reload, and that a row written before the columns existed still reopens with its
+// annual figures intact, since the migration backfills nothing.
+test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	const rowTotal = (page: Page, rowLabel: string) =>
+		page
+			.getByRole("row")
+			.filter({
+				has: page.getByRole("rowheader", { exact: true, name: rowLabel }),
+			})
+			.getByRole("cell")
+			.last();
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+		// Categories outlive resetDeclarationToDraft, and a pre-populated step 5
+		// replaces the source select this journey drives with read-only text.
+		await deleteCurrentYearCategories();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+		await deleteCurrentYearCategories();
+	});
+
+	test("each basis carries its own count, its own checks and its own persistence", async ({
+		page,
+	}) => {
+		test.slow();
+
+		const next = page.getByRole("button", { name: "Suivant" });
+		const inconsistent = page.locator("#step5-categories-error-inconsistent");
+		const emptyFields = page.locator("#step5-categories-error-empty");
+		const count = (basis: "annual" | "hourly", sex: "women" | "men") =>
+			categoryWorkforceInput(page, { basis, sex });
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL("**/declaration-remuneration/etape/5");
+
+		await test.step("le tableau des effectifs porte les deux bases, sous le rappel", async () => {
+			await page
+				.getByRole("combobox", {
+					name: /source utilisée pour déterminer les catégories/i,
+				})
+				.selectOption("accord-entreprise");
+			await page
+				.getByRole("textbox", { name: "Libellé" })
+				.fill("Catégorie test");
+
+			await expect(page.getByText(STEP5_WORKFORCE_REMINDER)).toBeVisible();
+			await expect(
+				page.getByRole("heading", {
+					name: "Nombre de salariés en effectif physique",
+				}),
+			).toBeVisible();
+
+			await count("annual", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men));
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+
+			// The Total is computed per row: the hourly one has nothing to add up
+			// until both of its cells are entered.
+			await expect(rowTotal(page, "Rémunération annuelle")).toHaveText(
+				String(STEP1_WORKFORCE.women + STEP1_WORKFORCE.men),
+			);
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
+
+			await count("hourly", "men").fill(String(STEP1_WORKFORCE.men));
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText(
+				String(STEP1_WORKFORCE.women + STEP1_WORKFORCE.men),
+			);
+		});
+
+		await test.step("la cohérence avec l'étape 1 nomme la ligne fautive", async () => {
+			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
+
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women - 1));
+			await next.click();
+
+			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(inconsistent).toHaveText(
+				`Le total des effectifs femmes de la ligne « Rémunération horaire » (${STEP1_WORKFORCE.women - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.women}).`,
+			);
+
+			// Same divergence on the other row: only the row at fault is named, so
+			// the two bases cannot be satisfied by one another.
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men - 1));
+			await next.click();
+
+			await expect(inconsistent).toHaveText(
+				`Le total des effectifs hommes de la ligne « Rémunération annuelle » (${STEP1_WORKFORCE.men - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.men}).`,
+			);
+		});
+
+		await test.step("un effectif n'exige que les rémunérations de sa base", async () => {
+			await count("annual", "women").fill("0");
+			await count("annual", "men").fill("0");
+			for (const measure of [
+				"Salaire de base annuel",
+				"Composantes variables annuelles",
+			] as const) {
+				await categoryPayInput(page, { measure, sex: "femmes" }).fill("");
+				await categoryPayInput(page, { measure, sex: "hommes" }).fill("");
+			}
+			await categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "femmes",
+			}).fill("");
+
+			await next.click();
+
+			// Exactly one message: the hourly headcount claims its own missing field
+			// and the four emptied annual amounts are claimed by nobody.
+			await expect(emptyFields).toHaveText(
+				"Renseignez le salaire de base horaire des femmes pour la catégorie d'emplois n°1.",
+			);
+		});
+
+		await test.step("les huit compteurs et rémunérations franchissent l'étape et reviennent", async () => {
+			await count("annual", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men));
+			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
+
+			await next.click();
+			await page.waitForURL("**/declaration-remuneration/etape/6");
+
+			await page.goto("/declaration-remuneration/etape/5");
+			for (const basis of ["annual", "hourly"] as const) {
+				await expect(count(basis, "women")).toHaveValue(
+					String(STEP1_WORKFORCE.women),
+				);
+				await expect(count(basis, "men")).toHaveValue(
+					String(STEP1_WORKFORCE.men),
+				);
+			}
+		});
+
+		await test.step("une catégorie antérieure aux colonnes rouvre sans rien perdre", async () => {
+			await clearDeclarationDraft();
+			await clearCategoryHourlyCounts();
+			await page.reload();
+
+			await expect(count("annual", "women")).toHaveValue(
+				String(STEP1_WORKFORCE.women),
+			);
+			await expect(count("annual", "men")).toHaveValue(
+				String(STEP1_WORKFORCE.men),
+			);
+			await expect(count("hourly", "women")).toHaveValue("");
+			await expect(count("hourly", "men")).toHaveValue("");
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
+		});
+	});
+
+	test("le modèle d'import porte les treize colonnes et alimente les deux bases (#4276)", async ({
+		page,
+	}) => {
+		test.slow();
+
+		// Keys = the thirteen template columns in their spec order, values = a
+		// distinct number per column, so a mapping shifted by the two headcount
+		// columns inserted mid-list lands a value in the wrong input instead of
+		// staying green.
+		const importedValues = {
+			"Libellé de la catégorie": "Ouvriers",
+			"Annuel effectif femmes": "11",
+			"Annuel effectif hommes": "12",
+			"Horaire effectif femmes": "13",
+			"Horaire effectif hommes": "14",
+			"Annuel base femmes (€)": "101",
+			"Annuel base hommes (€)": "102",
+			"Annuel variable femmes (€)": "103",
+			"Annuel variable hommes (€)": "104",
+			"Horaire base femmes (€)": "105",
+			"Horaire base hommes (€)": "106",
+			"Horaire variable femmes (€)": "107",
+			"Horaire variable hommes (€)": "108",
+		};
+
+		const inputByHeader: Record<
+			Exclude<keyof typeof importedValues, "Libellé de la catégorie">,
+			Locator
+		> = {
+			"Annuel effectif femmes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "women",
+			}),
+			"Annuel effectif hommes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "men",
+			}),
+			"Horaire effectif femmes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "women",
+			}),
+			"Horaire effectif hommes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "men",
+			}),
+			"Annuel base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "femmes",
+			}),
+			"Annuel base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "hommes",
+			}),
+			"Annuel variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "femmes",
+			}),
+			"Annuel variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "hommes",
+			}),
+			"Horaire base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "femmes",
+			}),
+			"Horaire base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "hommes",
+			}),
+			"Horaire variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "femmes",
+			}),
+			"Horaire variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "hommes",
+			}),
+		};
+
+		await page.goto("/declaration-remuneration/etape/5");
+		await page.getByRole("button", { name: "Importer les données" }).click();
+
+		const panel = page.getByRole("dialog", {
+			name: "Importer vos données depuis un fichier",
+		});
+		await expect(panel).toBeVisible();
+
+		const templateHeaders =
+			await test.step("le modèle téléchargé porte les treize colonnes attendues", async () => {
+				const [download] = await Promise.all([
+					page.waitForEvent("download"),
+					panel
+						.getByRole("button", { name: "Fichier d'import à remplir" })
+						.click(),
+				]);
+
+				expect(download.suggestedFilename()).toBe("modele-indicateur-g.csv");
+
+				const template = readFileSync(await download.path(), "utf8").replace(
+					/^\uFEFF/,
+					"",
+				);
+				expect(template.split(";")).toEqual(Object.keys(importedValues));
+
+				return template;
+			});
+
+		await test.step("un fichier au format du modèle renseigne les treize champs", async () => {
+			// Built on the very header line the app just served, so the template and
+			// the parser are asserted against each other, not against a copy.
+			const csv = `\uFEFF${templateHeaders}\n${Object.values(importedValues).join(";")}`;
+
+			await panel.getByLabel("Sélectionner des fichiers").setInputFiles({
+				buffer: Buffer.from(csv, "utf8"),
+				mimeType: "text/csv",
+				name: "categories.csv",
+			});
+			await panel
+				.getByRole("button", { exact: true, name: "Importer" })
+				.click();
+
+			await expect(panel).toBeHidden();
+
+			const { "Libellé de la catégorie": name, ...amounts } = importedValues;
+
+			const category = page.getByRole("button", {
+				name: `Catégorie d'emplois n°1 : ${name}`,
+			});
+			await expect(category).toBeVisible();
+
+			// An imported category remounts its accordion, which DSFR brings back
+			// folded — its fields reach the DOM only once it is disclosed.
+			if ((await category.getAttribute("aria-expanded")) !== "true") {
+				await category.click();
+			}
+
+			for (const [header, value] of Object.entries(amounts)) {
+				// Pay amounts come back through the form's decimal formatting;
+				// headcounts are plain integers.
+				const shown = header.endsWith("(€)") ? `${value},00` : value;
+				await expect(
+					inputByHeader[header as keyof typeof inputByHeader],
+				).toHaveValue(shown);
+			}
+		});
+	});
+});
+
 // The suite baseline above is a >= 250 GIP company: 6 steps, CSE field, indicator G required.
 // Below, the same journeys are replayed for the two smaller GIP profiles of #3929/#3934.
 test.describe("Workforce comes from the GIP file, not the company registry", () => {
@@ -682,9 +1000,11 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 		const nameInput = page.locator("#cat-0-name");
 		await expect(nameInput).toBeVisible();
 
-		// Hint added by the fix, wired to the field for assistive tech.
+		// The hint is wired to the field for assistive tech. #4254 gave it the Figma
+		// text; the 255 limit it used to spell out is now carried by the maxLength
+		// attribute asserted below and by the Zod message, not by the hint.
 		await expect(page.locator("#cat-0-name-hint")).toHaveText(
-			"255 caractères maximum",
+			"En référence à l'accord ou à la décision unilatérale",
 		);
 		await expect(nameInput).toHaveAttribute(
 			"aria-describedby",

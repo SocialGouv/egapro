@@ -25,7 +25,11 @@ const REPRESENTATION_START_LABEL = "Vérification de l'assujettissement";
 function getRepresentationStepLabel(
 	status: DeclarationStatus,
 	currentStep: number,
+	notSubject: boolean,
 ): string {
+	if (notSubject) {
+		return "Non-assujetti";
+	}
 	if (status === "done") {
 		return "Finalisation - Démarche des indicateurs de représentation";
 	}
@@ -42,9 +46,10 @@ export function getDeclarationProcessStepLabel(d: {
 	fsmStatus: DeclarationFsmStatus | null;
 	status: DeclarationStatus;
 	currentStep: number;
+	notSubject: boolean;
 }): string {
 	if (d.type === "representation") {
-		return getRepresentationStepLabel(d.status, d.currentStep);
+		return getRepresentationStepLabel(d.status, d.currentStep, d.notSubject);
 	}
 	return PROCESS_STEP_LABELS[d.fsmStatus ?? "draft"];
 }

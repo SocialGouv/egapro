@@ -54,6 +54,8 @@ function category(id: number, name: string): EmployeeCategory {
 		name,
 		womenCount: "",
 		menCount: "",
+		hourlyWomenCount: "",
+		hourlyMenCount: "",
 		annualBaseWomen: "",
 		annualBaseMen: "",
 		annualVariableWomen: "",

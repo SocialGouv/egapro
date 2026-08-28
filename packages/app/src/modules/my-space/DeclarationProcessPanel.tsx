@@ -25,9 +25,11 @@ export type PanelVariant =
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
+	compliancePathApplicable: boolean;
 	cseOpinionRequired: boolean;
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	year: number;
+	hasPrefillData: boolean;
 	indicatorGRequired: boolean;
 	lastActionDate: string | null;
 	variant: PanelVariant;
@@ -41,9 +43,11 @@ type Props = {
 
 export function DeclarationProcessPanel({
 	campaignDeadlines,
+	compliancePathApplicable,
 	cseOpinionRequired,
 	declarationFsmStatus,
 	year,
+	hasPrefillData,
 	indicatorGRequired,
 	lastActionDate,
 	variant,
@@ -87,14 +91,17 @@ export function DeclarationProcessPanel({
 						{lockedByOther && lockHolder && (
 							<DeclarationLockAlert holder={lockHolder} />
 						)}
-						{(variant === "start" || variant === "compliance_choice") && (
-							<StartAlert />
-						)}
+						{indicatorGRequired &&
+							(variant === "start" || variant === "compliance_choice") && (
+								<StartAlert />
+							)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
+							compliancePathApplicable={compliancePathApplicable}
 							cseOpinionRequired={cseOpinionRequired}
 							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
+							hasPrefillData={hasPrefillData}
 							indicatorGRequired={indicatorGRequired}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							siren={siren}

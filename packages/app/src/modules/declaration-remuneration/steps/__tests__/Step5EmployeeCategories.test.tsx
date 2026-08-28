@@ -45,6 +45,13 @@ async function fillAllPayCells(
 	}
 }
 
+const countLabel = (
+	basis: "annuelle" | "horaire",
+	sex: "femmes" | "hommes",
+	catNumber = 1,
+) =>
+	`Rémunération ${basis} — ${sex === "femmes" ? "Nombre de femmes" : "Nombre d'hommes"}, catégorie ${catNumber}`;
+
 function makeCategory(
 	overrides: Partial<EmployeeCategoryRow> = {},
 ): EmployeeCategoryRow {
@@ -52,6 +59,8 @@ function makeCategory(
 		name: "",
 		womenCount: null,
 		menCount: null,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: null,
 		annualBaseMen: null,
 		annualVariableWomen: null,
@@ -182,9 +191,15 @@ describe("Step5EmployeeCategories", () => {
 		}
 		expect(
 			screen.getAllByRole("columnheader", { name: "Donnée" }),
-		).toHaveLength(3);
+		).toHaveLength(2);
 		expect(
-			screen.getByRole("rowheader", { name: "Effectif physique" }),
+			screen.getByRole("columnheader", { name: "Nombre de salariés" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
 		).toBeInTheDocument();
 		expect(
 			screen.getAllByRole("rowheader", { name: "Salaire de base" }),
@@ -200,8 +215,15 @@ describe("Step5EmployeeCategories", () => {
 				indicatorGRequired
 			/>,
 		);
-		expect(screen.getByText("Nombre de femmes")).toBeInTheDocument();
-		expect(screen.getByText("Nombre d'hommes")).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Femmes" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Hommes" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Total" }),
+		).toBeInTheDocument();
 		expect(
 			screen.getAllByText("Rémunération des femmes").length,
 		).toBeGreaterThanOrEqual(1);
@@ -218,7 +240,9 @@ describe("Step5EmployeeCategories", () => {
 				indicatorGRequired
 			/>,
 		);
-		expect(screen.getAllByText(/Total salariés/).length).toBe(1);
+		expect(
+			screen.getAllByText("Nombre de salariés en effectif physique").length,
+		).toBe(1);
 		expect(
 			screen.getAllByText("Rémunération annuelle brute moyenne").length,
 		).toBe(1);
@@ -606,8 +630,8 @@ describe("Step5EmployeeCategories", () => {
 			"accord-entreprise",
 		);
 
-		const womenInput = screen.getByLabelText("Effectif femmes, catégorie 1");
-		const menInput = screen.getByLabelText("Effectif hommes, catégorie 1");
+		const womenInput = screen.getByLabelText(countLabel("annuelle", "femmes"));
+		const menInput = screen.getByLabelText(countLabel("annuelle", "hommes"));
 
 		await user.type(womenInput, "5");
 		await user.type(menInput, "15");
@@ -638,8 +662,14 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByLabelText(/Quelle est la source utilisée/),
 			"accord-entreprise",
 		);
-		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "2");
-		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "2");
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"2",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"2",
+		);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
@@ -675,8 +705,14 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByLabelText(/Quelle est la source utilisée/),
 			"accord-entreprise",
 		);
-		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "3");
-		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "0");
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"3",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"0",
+		);
 
 		await user.type(
 			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
@@ -723,8 +759,14 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByLabelText(/Quelle est la source utilisée/),
 			"accord-entreprise",
 		);
-		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "2");
-		await user.type(screen.getByLabelText("Effectif hommes, catégorie 1"), "2");
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"2",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"2",
+		);
 		await fillAllPayCells(user);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
@@ -811,7 +853,10 @@ describe("Step5EmployeeCategories", () => {
 			screen.getByText(/noms des catégories.*uniques/i),
 		).toBeInTheDocument();
 		expect(screen.getByRole("alert")).toHaveTextContent("Valeur invalide");
-		await user.type(screen.getByLabelText("Effectif femmes, catégorie 1"), "1");
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"1",
+		);
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			/noms des catégories.*uniques/i,
 		);
@@ -873,5 +918,253 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getByText("Définitions et méthode de calcul"),
 		).toBeInTheDocument();
+	});
+});
+
+describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
+	function workforceRow(label: string) {
+		const rowHeader = screen.getByRole("rowheader", { name: label });
+		const row = rowHeader.closest("tr");
+		if (!row) throw new Error(`No row for ${label}`);
+		return within(row as HTMLElement);
+	}
+
+	async function fillNameAndSource(user: ReturnType<typeof userEvent.setup>) {
+		await user.type(
+			document.getElementById("cat-0-name") as HTMLElement,
+			"Cadres",
+		);
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+	}
+
+	it("reminds that the headcounts must match the step-1 table", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		expect(
+			screen.getByText(/Pour rappel, le nombre total de salariés/),
+		).toHaveTextContent(
+			"Pour rappel, le nombre total de salariés doit correspondre à celui renseigné dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs ».",
+		);
+	});
+
+	it("totals each row on its own and shows a dash until both cells are filled", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		expect(workforceRow("Rémunération annuelle").getByText("-")).toBeVisible();
+		expect(workforceRow("Rémunération horaire").getByText("-")).toBeVisible();
+
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"3",
+		);
+		expect(workforceRow("Rémunération annuelle").getByText("-")).toBeVisible();
+
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"4",
+		);
+		expect(workforceRow("Rémunération annuelle").getByText("7")).toBeVisible();
+		expect(workforceRow("Rémunération horaire").getByText("-")).toBeVisible();
+	});
+
+	it("prefills a category saved before the split on the annual row, leaving the hourly row empty", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialCategories={[
+					makeCategory({ name: "Cadres", womenCount: 12, menCount: 8 }),
+				]}
+			/>,
+		);
+
+		expect(screen.getByLabelText(countLabel("annuelle", "femmes"))).toHaveValue(
+			"12",
+		);
+		expect(screen.getByLabelText(countLabel("annuelle", "hommes"))).toHaveValue(
+			"8",
+		);
+		expect(screen.getByLabelText(countLabel("horaire", "femmes"))).toHaveValue(
+			"",
+		);
+		expect(screen.getByLabelText(countLabel("horaire", "hommes"))).toHaveValue(
+			"",
+		);
+	});
+
+	it("submits both bases of headcounts", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={5}
+				hourlyMaxWomen={5}
+				indicatorGRequired
+				maxMen={20}
+				maxWomen={10}
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"10",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"20",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "femmes")),
+			"5",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "hommes")),
+			"5",
+		);
+		await fillAllPayCells(user);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockMutate.mock.calls[0]?.[0]?.categories[0]?.data).toMatchObject({
+			womenCount: 10,
+			menCount: 20,
+			hourlyWomenCount: 5,
+			hourlyMenCount: 5,
+		});
+	});
+
+	it("names the hourly row when its total does not match step 1", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={5}
+				hourlyMaxWomen={5}
+				indicatorGRequired
+				maxMen={20}
+				maxWomen={10}
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"10",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"20",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "femmes")),
+			"4",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "hommes")),
+			"5",
+		);
+		await fillAllPayCells(user);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(
+			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (5).",
+		);
+		expect(alert).not.toHaveTextContent("« Rémunération annuelle »");
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("requires only the pay fields of the basis that carries a headcount", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "femmes")),
+			"2",
+		);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(
+			/renseignez le salaire de base horaire des femmes/i,
+		);
+		expect(alert).not.toHaveTextContent(/salaire de base annuel/i);
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toHaveAttribute("aria-invalid");
+		expect(mockMutate).not.toHaveBeenCalled();
+
+		await user.type(
+			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
+			"18",
+		);
+		await user.type(
+			screen.getByLabelText(
+				"Composantes variables horaires femmes, catégorie 1",
+			),
+			"3",
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+	});
+
+	it("releases the pay fields of a basis when its headcount goes back to 0", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		const hourlyWomen = screen.getByLabelText(countLabel("horaire", "femmes"));
+		await user.type(hourlyWomen, "2");
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/salaire de base horaire des femmes/i,
+		);
+
+		await user.clear(hourlyWomen);
+		await user.type(hourlyWomen, "0");
+
+		expect(
+			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
+		).not.toHaveAttribute("aria-invalid");
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(mockMutate).toHaveBeenCalledTimes(1);
 	});
 });

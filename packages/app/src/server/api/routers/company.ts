@@ -9,6 +9,7 @@ import {
 	getReferenceYearFor,
 	isCseRequired,
 	isPresumedSubjectToRepresentation,
+	isRepresentationNotSubject,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import {
@@ -308,6 +309,7 @@ export const companyRouter = createTRPCRouter({
 				cseRequired: d.cseRequired,
 				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 				hasPrefillData: yearsWithPrefill.has(d.year),
+				notSubject: false,
 			}));
 
 			if (representationRow) {
@@ -329,6 +331,7 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: false,
 					hasJointEvaluationFile: false,
 					hasPrefillData: false,
+					notSubject: isRepresentationNotSubject(representationRow.status),
 				});
 			}
 

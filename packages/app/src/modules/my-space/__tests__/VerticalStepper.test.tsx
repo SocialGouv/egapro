@@ -58,8 +58,10 @@ const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	compliancePathApplicable: true,
 	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
+	hasPrefillData: true,
 	indicatorGRequired: true,
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
@@ -384,15 +386,17 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
 
-		it("renders steps 2 and 3 when both indicatorGRequired and cseOpinionRequired are true", () => {
+		it("renders steps 2 and 3 when both compliancePathApplicable and cseOpinionRequired are true", () => {
 			const { panel } = renderPanel("start");
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
 			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
 		});
 
-		it("hides step 2 when indicatorGRequired is false", () => {
-			const { panel } = renderPanel("start", { indicatorGRequired: false });
+		it("hides step 2 when compliancePathApplicable is false", () => {
+			const { panel } = renderPanel("start", {
+				compliancePathApplicable: false,
+			});
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
 			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
@@ -405,14 +409,51 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
 		});
 
-		it("hides both steps 2 and 3 for a company without CSE and without indicator G", () => {
+		it("hides both steps 2 and 3 when neither compliance nor a CSE opinion applies", () => {
 			const { panel } = renderPanel("start", {
 				cseOpinionRequired: false,
-				indicatorGRequired: false,
+				compliancePathApplicable: false,
 			});
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
 			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
+		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
+		const CATEGORY_BULLET =
+			/Indicateurs de rémunération par catégories de salariés à remplir/;
+
+		it("renders both bullets on the start variant when indicator G applies", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: true });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.getByText(CATEGORY_BULLET)).toBeInTheDocument();
+		});
+
+		it("drops the category bullet but keeps the prefilled one when indicator G does not apply", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: false });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
+		});
+
+		it("keeps the step 1 deadline row when the category bullet is dropped", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("start", {
+				campaignDeadlines: deadlines,
+				indicatorGRequired: false,
+			});
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl1ModificationDeadline)}`,
+			);
+		});
+
+		it("renders no step 1 bullet outside the start variant", () => {
+			const { panel } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(panel.queryByText(PREFILLED_BULLET)).not.toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
 		});
 	});
 
@@ -430,8 +471,10 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(stepNumbers(dialog)).toEqual(["1", "2", "3"]);
 		});
 
-		it("renumbers the CSE step to 2 when step 2 (indicator G) is hidden", () => {
-			const { dialog } = renderPanel("start", { indicatorGRequired: false });
+		it("renumbers the CSE step to 2 when the compliance step is hidden", () => {
+			const { dialog } = renderPanel("start", {
+				compliancePathApplicable: false,
+			});
 			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
 		});
 
@@ -443,7 +486,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("only shows step 1 when both steps 2 and 3 are hidden", () => {
 			const { dialog } = renderPanel("start", {
 				cseOpinionRequired: false,
-				indicatorGRequired: false,
+				compliancePathApplicable: false,
 			});
 			expect(stepNumbers(dialog)).toEqual(["1"]);
 		});
