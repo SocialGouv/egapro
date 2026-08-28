@@ -76,13 +76,19 @@ function distribute(total: number, ratios: readonly number[]): number[] {
 	return floored;
 }
 
+export type DevStep5Totals = {
+	annual: { women: number; men: number };
+	hourly: { women: number; men: number };
+};
+
 export function createDevStep5Categories(
 	nextId: () => number,
-	totalWomen: number,
-	totalMen: number,
+	totals: DevStep5Totals,
 ): EmployeeCategory[] {
-	const womenCounts = distribute(totalWomen, WOMEN_RATIOS);
-	const menCounts = distribute(totalMen, MEN_RATIOS);
+	const womenCounts = distribute(totals.annual.women, WOMEN_RATIOS);
+	const menCounts = distribute(totals.annual.men, MEN_RATIOS);
+	const hourlyWomenCounts = distribute(totals.hourly.women, WOMEN_RATIOS);
+	const hourlyMenCounts = distribute(totals.hourly.men, MEN_RATIOS);
 
 	return [
 		{
@@ -90,6 +96,8 @@ export function createDevStep5Categories(
 			name: "Ouvriers",
 			womenCount: String(womenCounts[0]),
 			menCount: String(menCounts[0]),
+			hourlyWomenCount: String(hourlyWomenCounts[0]),
+			hourlyMenCount: String(hourlyMenCounts[0]),
 			annualBaseWomen: "24000",
 			annualBaseMen: "25500",
 			annualVariableWomen: "1200",
@@ -104,6 +112,8 @@ export function createDevStep5Categories(
 			name: "Employés",
 			womenCount: String(womenCounts[1]),
 			menCount: String(menCounts[1]),
+			hourlyWomenCount: String(hourlyWomenCounts[1]),
+			hourlyMenCount: String(hourlyMenCounts[1]),
 			annualBaseWomen: "27000",
 			annualBaseMen: "28000",
 			annualVariableWomen: "1800",
@@ -118,6 +128,8 @@ export function createDevStep5Categories(
 			name: "Techniciens et agents de maîtrise",
 			womenCount: String(womenCounts[2]),
 			menCount: String(menCounts[2]),
+			hourlyWomenCount: String(hourlyWomenCounts[2]),
+			hourlyMenCount: String(hourlyMenCounts[2]),
 			annualBaseWomen: "35000",
 			annualBaseMen: "37500",
 			annualVariableWomen: "3500",
@@ -132,6 +144,8 @@ export function createDevStep5Categories(
 			name: "Ingénieurs et cadres",
 			womenCount: String(womenCounts[3]),
 			menCount: String(menCounts[3]),
+			hourlyWomenCount: String(hourlyWomenCounts[3]),
+			hourlyMenCount: String(hourlyMenCounts[3]),
 			annualBaseWomen: "48000",
 			annualBaseMen: "52000",
 			annualVariableWomen: "6000",

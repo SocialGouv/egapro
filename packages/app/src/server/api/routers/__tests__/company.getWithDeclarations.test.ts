@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { RepresentationDeclarationStatus } from "~/modules/domain";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import {
 	companies,
@@ -119,7 +120,7 @@ function makeDeclRow(year: number) {
  * reference year the row is stored under is asserted on the query instead. */
 function makeRepresentationDeclarationRow(
 	overrides: Partial<{
-		status: "draft" | "submitted";
+		status: RepresentationDeclarationStatus;
 		currentStep: number | null;
 		updatedAt: Date | null;
 	}> = {},
@@ -430,6 +431,61 @@ describe("companyRouter.getWithDeclarations", () => {
 			fsmStatus: null,
 			currentStep: 5,
 		});
+	});
+
+	// The row is reset to step 0 so the funnel can be reopened, but the démarche
+	// is settled: the dashboard must not send the company back to complete it.
+	it("maps a not-subject row to 'done' even though it sits on step 0", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					status: "not_subject",
+					currentStep: 0,
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({
+			year: getCurrentYear(),
+			status: "done",
+			fsmStatus: null,
+			currentStep: 0,
+			notSubject: true,
+		});
+	});
+
+	// "done" alone cannot tell a submitted démarche from a not-subject one.
+	it("flags only the not-subject row, never a submitted one nor the rémunération lines", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		const { caller } = await makeCaller({
+			declRows: [makeDeclRow(getCurrentYear())],
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({
+					status: "submitted",
+					currentStep: 5,
+				}),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ status: "done", notSubject: false });
+		expect(
+			result.declarations
+				.filter((d) => d.type === "remuneration")
+				.map((d) => d.notSubject),
+		).toEqual([false]);
 	});
 
 	it("keeps the démarche listed under the campaign year, not the stored reference year", async () => {

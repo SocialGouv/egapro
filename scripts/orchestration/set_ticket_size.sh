@@ -13,7 +13,7 @@ fi
 #   - Size     (single-select XS/S/M/L/XL) — human-readable
 #   - Estimate (number, Fibonacci points)  — summed by /velocity
 #
-# Mapping (cf. .claude/rules/complexity-estimation.md):
+# Mapping (cf. .claude/pipeline/complexity-estimation.md):
 #   XS=1  S=2  M=3  L=5  XL=8
 #
 # Idempotent: re-running with a different size overwrites both fields.
@@ -28,7 +28,7 @@ fi
 #   set_ticket_size.sh 123 M
 #   set_ticket_size.sh 123 XL
 #
-# Env (overridable, defaults from .claude/rules/github-board.md):
+# Env (overridable, defaults from .claude/pipeline/board.md):
 #   EGAPRO_PROJECT_ID         — project ID
 #   EGAPRO_SIZE_FIELD_ID      — Size single-select field ID
 #   EGAPRO_ESTIMATE_FIELD_ID  — Estimate number field ID

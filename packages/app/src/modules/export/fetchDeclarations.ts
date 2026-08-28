@@ -14,10 +14,13 @@ export {
 } from "./queries";
 
 import {
+	classifyCompanySize,
 	computeGapRatio,
 	floorWorkforce,
 	getObligationWorkforce,
+	getOptionalCompanySizeRange,
 	hasGapsAboveThreshold,
+	isCancelled,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseRequired,
@@ -43,6 +46,7 @@ import {
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
+import { buildNextStepsPayload } from "./shared/nextStepsPayload";
 import { getStatusHistoryLabel } from "./shared/statusHistoryLabels";
 
 function deriveExportFlags(
@@ -345,30 +349,45 @@ export function assembleDeclaration(
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
+	const cancelled = isCancelled(row);
+
+	// Obligation regime uses the exact value; the segmentation bucket uses the floored one.
+	const gipWorkforce = parseGipWorkforce(row.workforceEma);
+	const flooredWorkforce = floorWorkforce(gipWorkforce);
 
 	return {
 		id: row.declarationId,
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
-		Effectif: floorWorkforce(parseGipWorkforce(row.workforceEma)),
 		Code_NAF: row.nafCode,
 		Adresse: row.address,
 		// The CSE field only exists for companies at or above the CSE threshold; legacy sub-100 values are not exported.
-		CSE_existant: isCseRequired(
-			getObligationWorkforce(parseGipWorkforce(row.workforceEma)),
-		)
+		CSE_existant: isCseRequired(getObligationWorkforce(gipWorkforce))
 			? row.hasCse
 			: null,
-		Annee: row.year,
-		Statut: row.status,
 		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
 		Parcours_apres_declaration_2: row.secondDeclarationPathChoice,
-		Parcours_de_conformite_requis: flags.complianceProcessRequired,
-		Parcours_de_conformite_revision_requis:
-			flags.complianceProcessRevisionRequired,
-		Avis_CSE_requis: row.cseRequired,
-		Indicateur_G_requis: flags.indicatorGRequired,
-		Version_regles: row.rulesVersion,
+		Parcours: {
+			Annee: row.year,
+			Effectif: flooredWorkforce,
+			Tranche_effectif: getOptionalCompanySizeRange(flooredWorkforce) ?? null,
+			Regime_obligations: classifyCompanySize(
+				getObligationWorkforce(gipWorkforce),
+			),
+			Statut: row.status,
+			Annulee: cancelled,
+			Parcours_de_conformite_requis: flags.complianceProcessRequired,
+			Parcours_de_conformite_revision_requis:
+				flags.complianceProcessRevisionRequired,
+			Avis_CSE_requis: row.cseRequired,
+			Indicateur_G_requis: flags.indicatorGRequired,
+			Prochaines_etapes_possibles: buildNextStepsPayload({
+				status: row.status,
+				rulesVersion: row.rulesVersion,
+				cseRequired: row.cseRequired,
+				cancelled,
+			}),
+		},
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
 		Date_soumission: row.submittedAt?.toISOString() ?? null,

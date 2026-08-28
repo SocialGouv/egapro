@@ -55,6 +55,7 @@ function makeDeclaration({
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
+		notSubject: false,
 		...overrides,
 	};
 
@@ -124,6 +125,15 @@ describe("getDocumentResourceCount", () => {
 		expect(
 			getDocumentResourceCount(makeDeclaration({ type: "representation" })),
 		).toBe(1);
+	});
+
+	// Settled ("done") but never filled: the récépissé PDF route would 404.
+	it("counts no resource for a settled representation declaration that is not subject", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({ type: "representation", notSubject: true }),
+			),
+		).toBe(0);
 	});
 
 	it.each(
@@ -236,6 +246,15 @@ describe("DocumentsPanel", () => {
 			type: "representation",
 			fsmStatus: "draft",
 			currentStep: 1,
+		});
+
+		expect(links()).toHaveLength(0);
+	});
+
+	it("offers no representation document when the company is not subject", () => {
+		const { links } = renderPanel({
+			type: "representation",
+			notSubject: true,
 		});
 
 		expect(links()).toHaveLength(0);

@@ -109,7 +109,7 @@ Suivre STRICTEMENT le workflow de .claude/agents/architect-rework/AGENT.md (sour
 1. Comprendre la demande de changement ci-dessus ; lire le code intégré concerné (git diff origin/alpha...HEAD + fichiers pertinents) pour la traduire en travail exécutable.
 2. DÉCIDER :
    - Doute fonctionnel (la demande est ambiguë ou incomplète) → retourner {\"status\":\"needs_user\",\"epic\":${EPIC_N},\"question\":\"...\"}. NE PAS poser de label dispatch=escalate (le skill /implement, en foreground, relaiera ta question à l'utilisateur présent). NE CRÉE AUCUN ticket tant que ce n'est pas clarifié.
-   - Demande claire → créer un/plusieurs tickets Task (sous-issues de #${EPIC_N}, To Do) implémentant le changement, en suivant EXACTEMENT les conventions de l'agent architect (mode epic-enrich) : spec rules/ticket-spec-format.md dans le body, type + ajout project + parent link + To Do via rules/github-board.md, sizing via set_ticket_size.sh. Retourner {\"status\":\"tickets_created\",...}."
+   - Demande claire → créer un/plusieurs tickets Task (sous-issues de #${EPIC_N}, To Do) implémentant le changement, en suivant EXACTEMENT les conventions de l'agent architect (mode epic-enrich) : spec .claude/pipeline/ticket-spec-format.md dans le body, type + ajout project + parent link + To Do via .claude/pipeline/board.md, sizing via set_ticket_size.sh. Retourner {\"status\":\"tickets_created\",...}."
 else
     SOURCE_BLOCK="SOURCE DU REWORK : régression E2E. La gate E2E bloquante de l'epic #${EPIC_N} a échoué ; l'agent e2e-dev a posté un commentaire \`e2e-dev:\` sur l'epic décrivant la régression (test E2E en échec, parcours cassé, fichier source suspecté).
 
@@ -118,7 +118,7 @@ Suivre STRICTEMENT le workflow de .claude/agents/architect-rework/AGENT.md (sour
 2. Diagnostiquer la root cause (git diff origin/alpha...HEAD + fichiers suspectés + scénario E2E qui casse).
 3. DÉCIDER :
    - Doute fonctionnel / arbitrage produit → poster un commentaire \`architect-rework:\` avec la question précise, \`gh issue edit ${EPIC_N} --add-label dispatch=escalate\`, retourner {\"status\":\"needs_user\",...}. NE CRÉE AUCUN ticket.
-   - Cause claire → créer un/plusieurs tickets Task de fix (sous-issues de #${EPIC_N}, To Do) en suivant EXACTEMENT les conventions de l'agent architect (mode epic-enrich) : spec rules/ticket-spec-format.md dans le body, type + ajout project + parent link + To Do via rules/github-board.md, sizing via set_ticket_size.sh. Retourner {\"status\":\"tickets_created\",...}."
+   - Cause claire → créer un/plusieurs tickets Task de fix (sous-issues de #${EPIC_N}, To Do) en suivant EXACTEMENT les conventions de l'agent architect (mode epic-enrich) : spec .claude/pipeline/ticket-spec-format.md dans le body, type + ajout project + parent link + To Do via .claude/pipeline/board.md, sizing via set_ticket_size.sh. Retourner {\"status\":\"tickets_created\",...}."
 fi
 
 # ---- Build prompt for the agent ----
@@ -153,6 +153,7 @@ set +e
 $TIMEOUT_PREFIX env -u CLAUDECODE claude \
     --agent architect-rework \
     --model opus \
+    --effort xhigh \
     --print \
     --output-format json \
     --dangerously-skip-permissions \

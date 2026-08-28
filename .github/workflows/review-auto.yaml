@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - "**"
-      - "!dependabot/**"
       - "!master"
       # Persistent test envs (rgaa-persist, perf-persist) are deployed only by
       # promote-test-env.yaml, which builds from a release tag — that is what

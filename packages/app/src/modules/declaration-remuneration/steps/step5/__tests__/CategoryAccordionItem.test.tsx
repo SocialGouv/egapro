@@ -4,6 +4,7 @@ import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 } from "~/modules/declaration-remuneration/schemas";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import { CategoryAccordionItem } from "../CategoryAccordionItem";
 import type { EmployeeCategory } from "../categorySerializer";
 
@@ -12,6 +13,8 @@ const category: EmployeeCategory & { id: number } = {
 	name: "",
 	womenCount: "",
 	menCount: "",
+	hourlyWomenCount: "",
+	hourlyMenCount: "",
 	annualBaseWomen: "",
 	annualBaseMen: "",
 	annualVariableWomen: "",
@@ -26,6 +29,7 @@ function renderItem(
 	overrides: {
 		nameError?: string;
 		category?: EmployeeCategory & { id: number };
+		errors?: FieldError[];
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
@@ -35,6 +39,8 @@ function renderItem(
 			category={categoryOverride ?? category}
 			collapseRef={vi.fn()}
 			disabled={false}
+			errorAlertId="category-alert"
+			errors={[]}
 			fieldId="field-1"
 			headerRef={vi.fn()}
 			index={0}
@@ -53,10 +59,10 @@ function renderItem(
 }
 
 describe("CategoryAccordionItem — name length cap (#3943)", () => {
-	it("shows the max-length hint and caps the input with maxLength", () => {
+	it("caps the input with maxLength and hints at the label's source (#4254)", () => {
 		renderItem();
 		expect(
-			screen.getByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE),
+			screen.getByText("En référence à l'accord ou à la décision unilatérale"),
 		).toBeInTheDocument();
 		const input = document.getElementById("cat-0-name") as HTMLInputElement;
 		expect(input).toHaveAttribute(
@@ -84,17 +90,24 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the error text and wires aria-invalid/aria-describedby when nameError is set", () => {
+	it("uses the shared alert for the name error state", () => {
 		const message = CATEGORY_NAME_MAX_LENGTH_MESSAGE;
-		renderItem({ nameError: message });
-		const error = document.getElementById("cat-0-name-error");
-		expect(error).toHaveClass("fr-error-text");
-		expect(error).toHaveTextContent(message);
+		renderItem({
+			nameError: message,
+			errors: [
+				{
+					fieldId: "cat-0-name",
+					category: "invalid",
+					message,
+				},
+			],
+		});
+		expect(document.querySelector(".fr-error-text")).toBeNull();
 		const input = document.getElementById("cat-0-name") as HTMLInputElement;
 		expect(input).toHaveAttribute("aria-invalid", "true");
 		expect(input).toHaveAttribute(
 			"aria-describedby",
-			"cat-0-name-hint cat-0-name-error",
+			"cat-0-name-hint category-alert-invalid",
 		);
 	});
 });

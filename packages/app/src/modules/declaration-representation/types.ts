@@ -7,6 +7,7 @@ import type {
 	publicationSchema,
 	referencePeriodSchema,
 	representationDraftSchema,
+	subjectionSchema,
 	submitRepresentationSchema,
 } from "./schemas";
 
@@ -17,6 +18,9 @@ export type RepresentationDeclarationRow = Omit<
 
 export type ReferencePeriodInput = z.infer<
 	ReturnType<typeof referencePeriodSchema>
+>;
+export type SubjectionAnswer = NonNullable<
+	z.infer<typeof subjectionSchema>["answer"]
 >;
 export type ExecutivesInput = z.infer<typeof executivesSchema>;
 export type MembersInput = z.infer<typeof membersSchema>;

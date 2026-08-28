@@ -17,6 +17,8 @@ import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../shared/formError/types";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillResetConfirmDialog } from "../shared/PrefillResetConfirmDialog";
@@ -34,10 +36,11 @@ import {
 	WORKFORCE_FIELDS,
 	WORKFORCE_ROWS,
 	workforceFieldErrorMessage,
+	workforceFieldId,
+	workforceFieldIdFromField,
 } from "./step1/workforceRows";
 
 type RawValues = Record<WorkforceField, string>;
-type FieldErrors = Partial<Record<WorkforceField, string>>;
 
 type Step1WorkforceProps = {
 	declarationSiren: string;
@@ -46,6 +49,8 @@ type Step1WorkforceProps = {
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
+
+const WORKFORCE_ALERT_ID = "step1-workforce-error";
 
 function toRaw(values: Step1Data): RawValues {
 	return {
@@ -121,7 +126,8 @@ export function Step1Workforce({
 	};
 
 	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
-	const [errors, setErrors] = useState<FieldErrors>({});
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
 		for (const field of WORKFORCE_FIELDS) {
@@ -175,7 +181,11 @@ export function Step1Workforce({
 
 	function handleFieldChange(field: WorkforceField, value: string) {
 		setRaw((prev) => ({ ...prev, [field]: value }));
-		setErrors((prev) => ({ ...prev, [field]: undefined }));
+		setFieldErrors((prev) =>
+			prev.filter(
+				(error) => error.fieldId !== workforceFieldIdFromField(field),
+			),
+		);
 		const parsed = parseIntegerInput(value);
 		if (parsed === null) return;
 		form.setValue(field, parsed);
@@ -194,26 +204,33 @@ export function Step1Workforce({
 			form.setValue(field, filled[field]);
 		}
 		setRaw(toRaw(filled));
+		setFieldErrors([]);
 		setField(filled);
 	}
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
-		const missing: FieldErrors = {};
+		setValidationAttempt((attempt) => attempt + 1);
+		const missing: FieldError[] = [];
 		for (const row of WORKFORCE_ROWS) {
 			if (raw[row.womenField] === "") {
-				missing[row.womenField] = workforceFieldErrorMessage("women");
+				missing.push({
+					fieldId: workforceFieldId(row, "women"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "women"),
+				});
 			}
 			if (raw[row.menField] === "") {
-				missing[row.menField] = workforceFieldErrorMessage("men");
+				missing.push({
+					fieldId: workforceFieldId(row, "men"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "men"),
+				});
 			}
 		}
-		if (Object.keys(missing).length > 0) {
-			setErrors(missing);
-			return;
-		}
-		setErrors({});
+		setFieldErrors(missing);
+		if (missing.length > 0) return;
 
 		setValidationError(null);
 		if (shouldConfirmReset) {
@@ -309,7 +326,8 @@ export function Step1Workforce({
 													{WORKFORCE_ROWS.map((row) => (
 														<WorkforceTableRow
 															disabled={isImpersonating}
-															errors={errors}
+															errorAlertId={WORKFORCE_ALERT_ID}
+															errors={fieldErrors}
 															key={row.basis}
 															onFieldChange={handleFieldChange}
 															raw={raw}
@@ -328,6 +346,12 @@ export function Step1Workforce({
 							{isPrefilled && <PrefillSource year={declarationYear} />}
 
 							{showResetWarning && <PrefillResetWarning />}
+
+							<FieldErrorAlert
+								errors={fieldErrors}
+								id={WORKFORCE_ALERT_ID}
+								validationAttempt={validationAttempt}
+							/>
 						</div>
 
 						<DefinitionAccordion

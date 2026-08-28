@@ -64,6 +64,7 @@ function makeDeclaration(
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
+		notSubject: false,
 		...overrides,
 	};
 }
@@ -113,6 +114,41 @@ describe("CompanyDeclarationsPage", () => {
 		expect(
 			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
 		).toBeInTheDocument();
+	});
+
+	it("shows manual indicators and hides compliance for a voluntary company", () => {
+		renderPage();
+		expect(
+			screen.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Parcours de mise en conformité/),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps the transmitted recap visible without compliance after voluntary completion", () => {
+		renderPage({
+			declarations: [
+				makeDeclaration("remuneration", {
+					status: "done",
+					fsmStatus: "demarche_completed",
+				}),
+				makeDeclaration("representation"),
+			],
+		});
+
+		expect(
+			screen.getByText("Votre déclaration a été transmise"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByTitle("Voir le récapitulatif de la déclaration"),
+		).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/recapitulatif?siren=532847196",
+		);
+		expect(
+			screen.queryByText(/Parcours de mise en conformité/),
+		).not.toBeInTheDocument();
 	});
 
 	it("hides the 'Archives' section while archives are unavailable", () => {

@@ -22,7 +22,6 @@ export function PhoneField({
 	registration,
 }: PhoneFieldProps) {
 	const messagesId = `${inputId}-messages`;
-	const showFormatHint = error !== PHONE_FORMAT_MESSAGE;
 
 	function handleChange(event: ChangeEvent<HTMLInputElement>) {
 		event.target.value = formatPhoneInput(event.target.value);
@@ -35,9 +34,7 @@ export function PhoneField({
 		>
 			<label className="fr-label" htmlFor={inputId}>
 				Numéro de téléphone
-				{showFormatHint && (
-					<span className="fr-hint-text">{PHONE_FORMAT_MESSAGE}</span>
-				)}
+				<span className="fr-hint-text">{PHONE_FORMAT_MESSAGE}</span>
 			</label>
 			<input
 				aria-describedby={messagesId}

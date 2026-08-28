@@ -24,7 +24,7 @@ function resourceSubtitle(declaration: DeclarationItem): string {
 function getRepresentationResources(
 	declaration: DeclarationItem,
 ): DocumentResource[] {
-	if (declaration.status !== "done") return [];
+	if (declaration.status !== "done" || declaration.notSubject) return [];
 	const referenceYear = getReferenceYearFor(declaration.year);
 	return [
 		{

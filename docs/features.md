@@ -243,7 +243,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 | Étape | URL | Contenu |
 |---|---|---|
-| assujettissement | `/declaration-representation` | Réponse déclarative « entreprise concernée / non concernée » |
+| assujettissement | `/declaration-representation` | Réponse déclarative « entreprise concernée / non concernée » (persistée) |
 | 1 | `/declaration-representation/etape/1` | Période de référence (12 mois consécutifs) |
 | 2 | `/declaration-representation/etape/2` | Écarts cadres dirigeants |
 | 3 | `/declaration-representation/etape/3` | Écarts instances dirigeantes |
@@ -251,26 +251,30 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 | 5 | `/declaration-representation/etape/5` | Récapitulatif et soumission |
 | — | `/declaration-representation/confirmation` | Confirmation après soumission |
 
-**Modules** : `~/modules/declaration-representation` (funnel, steps, PDF via `~/modules/declarationPdf`), `~/modules/domain/shared/representation.ts` (règles pures).
+**Modules** : `~/modules/declaration-representation` (funnel, steps, PDF via `~/modules/declarationPdf`), `~/modules/domain/shared/representation.ts` (règles pures), `~/modules/my-space` (affichage du statut dans le panneau latéral et le tableau des démarches).
 
-**Router tRPC** : `~/server/api/routers/representationDeclaration.ts`. 3 procédures, scopées SIREN (`companyProcedure` / `companyWriteProcedure`, même mécanisme que la déclaration index) :
+**Router tRPC** : `~/server/api/routers/representationDeclaration.ts`. 4 procédures, scopées SIREN (`companyProcedure` / `companyWriteProcedure`, même mécanisme que la déclaration index) :
 
 - `representationDeclaration.get` — lecture de la déclaration de l'année + statut d'ouverture de campagne
-- `representationDeclaration.saveDraft` — sauvegarde du brouillon par étape (upsert `ON CONFLICT (siren, year)`)
+- `representationDeclaration.saveDraft` — sauvegarde du brouillon par étape (upsert `ON CONFLICT (siren, year)`) ; si la déclaration était `not_subject`, le statut retombe automatiquement à `draft` (CASE SQL en base) — l'entreprise vient de revenir sur son choix en avançant dans le funnel
+- `representationDeclaration.declareNotSubject` — enregistre la réponse « non concernée » de l'écran d'assujettissement : bascule `status = not_subject`, remet `currentStep` à 0 et efface le brouillon. Une transaction avec un verrou `FOR UPDATE` sur la ligne empêche une course avec un `submit` concurrent sur la même déclaration ; si la déclaration est déjà `submitted`, la mutation échoue en `CONFLICT`
 - `representationDeclaration.submit` — validation finale (re-parse serveur du payload complet), bascule `status = submitted`, envoie le reçu par mail
 
 **Règles métier-clés** :
 
-- **Seuil d'assujettissement** (présomption) : `REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000` salariés sur `REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3` exercices consécutifs (constantes `~/modules/domain/shared/representation.ts`). En l'absence de donnée GIP-MDS sur la fenêtre, l'entreprise est **présumée assujettie par défaut** (`isPresumedSubjectToRepresentation`) — ce pré-filtre conditionne uniquement la **visibilité** de la ligne dans Mon espace ; la réponse à l'écran d'assujettissement reste déclarative.
+- **Seuil d'assujettissement** (présomption) : `REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000` salariés sur `REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3` exercices consécutifs (constantes `~/modules/domain/shared/representation.ts`). En l'absence de donnée GIP-MDS sur la fenêtre, l'entreprise est **présumée assujettie par défaut** (`isPresumedSubjectToRepresentation`) — ce pré-filtre conditionne uniquement la **visibilité** de la ligne dans Mon espace ; la réponse à l'écran d'assujettissement reste déclarative et persistée (`representationDeclaration.declareNotSubject`).
+- **Réponse « non concernée » (`not_subject`)** : si l'utilisateur choisit « Moins de 1 000 salariés » sur l'écran d'assujettissement, la déclaration est immédiatement close sans passer par les étapes 1 à 5 (`isRepresentationNotSubject`). L'écran pré-remplit la réponse précédente à la réouverture (`initialAnswer`). Revenir sur ce choix (répondre « concernée » puis avancer dans le funnel) réinitialise le statut à `draft` via `saveDraft`.
 - **Objectif de représentation** : `REPRESENTATION_TARGET_INITIAL = 30` % (chaque sexe), porté à `REPRESENTATION_TARGET_RAISED = 40` % à compter de la campagne `REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029` (`getRepresentationTarget(campaignYear)`). L'année de campagne = année de référence + 1 (`getRepresentationCampaignYear`).
-- **Verdict** (`computeRepresentationVerdict`) : `compliant` si `min(%femmes, %hommes) >= objectif`, `non_compliant` sinon, `not_applicable` si l'indicateur n'est pas calculable (aucun ou un seul cadre dirigeant ; aucune instance dirigeante). Les deux indicateurs (cadres dirigeants / instances dirigeantes) gardent des verdicts **indépendants** — aucun verdict agrégé n'existe.
+- **Verdict** (`computeRepresentationVerdict`) : `compliant` si `min(%femmes, %hommes) >= objectif`, `non_compliant` sinon, `not_applicable` si l'indicateur n'est pas calculable (aucun ou un seul cadre dirigeant ; aucune instance dirigeante). Les deux indicateurs (cadres dirigeants / instances dirigeantes) gardent des verdicts **indépendants** — aucun verdict agrégé n'existe. Sans objet pour une déclaration `not_subject` (aucun pourcentage saisi).
 - **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
-- **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`). Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
-- **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la soumission. Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace.
+- **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
+- **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la soumission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations soumises (une déclaration `not_subject` n'a pas de PDF).
 - **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
 - **Reprise V1** : un script ponctuel (`pnpm --filter app import:v1-representation`) importe les déclarations historiques depuis la base legacy ; il ne **jamais** écraser une déclaration saisie nativement en V2.
 
-**Données persistées** : `representationCampaigns` (surcharges de campagne par année), `representationDeclarations` (une ligne par SIREN × année, contrainte unique `(siren, year)`).
+**Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (soumise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
+
+**Données persistées** : `representationCampaigns` (surcharges de campagne par année), `representationDeclarations` (une ligne par SIREN × année, contrainte unique `(siren, year)`, `status` ∈ `draft` / `submitted` / `not_subject`).
 
 ---
 
@@ -542,6 +546,8 @@ Le GIP-MDS publie chaque année (mars) un CSV des indicateurs A–F pré-calcul�
 ### 13.5 Sécurité de l'API SUIT (passerelle APISIX)
 
 L'API privée `/api/v1/*` consommée par **SUIT** (système d'information de l'inspection du travail) est protégée par une **passerelle APISIX** déployée dans le cluster Kubernetes. Voir le [README racine](../README.md#sécurisation-de-lapi-suit-via-passerelle-apisix) pour le détail. Cette feature n'a pas d'écran utilisateur — c'est de l'infra.
+
+L'export `GET /api/v1/export/declarations` est en version majeure `3.0.0` (rupture de compatibilité, URL inchangée) : les données déduites du parcours de la déclaration (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous un objet unique `Parcours`, qui inclut `Parcours.Prochaines_etapes_possibles` — les transitions possibles depuis le statut courant, calculées à l'export. Détail du contrat (cycle de vie, sémantique des champs) : [`docs/SUIT-API.md`](SUIT-API.md#interprétation-des-champs-et-cycle-de-vie) ; mécanique technique de calcul : voir [`architecture.md` §7.1](architecture.md#71-schéma).
 
 ### 13.6 Upload de fichiers (mécanisme partagé)
 

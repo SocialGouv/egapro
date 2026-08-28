@@ -33,8 +33,9 @@ fi
 #   EPIC_LOOP_SLEEP_TICK      5      sleep between consecutive ticks
 #   EPIC_LOOP_SLEEP_WAIT      30     sleep when plan empty but tickets in flight
 #   EPIC_LOOP_BUDGET_SONNET   10     USD max per Sonnet sub-agent
-#   EPIC_LOOP_BUDGET_OPUS     40     USD max per Opus sub-agent
+#   EPIC_LOOP_BUDGET_OPUS     20     USD max per Opus sub-agent (Opus 5 pricing)
 #   EPIC_LOOP_AGENT_TIMEOUT   5400   seconds max per agent (90 min)
+#   EPIC_LOOP_EFFORT_CODE_DEV high   reasoning effort passed to each code-dev
 #   EPIC_MAX_PARALLEL         5      max concurrent worktrees
 #
 # Usage:
@@ -77,8 +78,12 @@ MAX_TICKS="${EPIC_LOOP_MAX_TICKS:-30}"
 SLEEP_TICK="${EPIC_LOOP_SLEEP_TICK:-5}"
 SLEEP_WAIT="${EPIC_LOOP_SLEEP_WAIT:-30}"
 BUDGET_SONNET="${EPIC_LOOP_BUDGET_SONNET:-10}"
-BUDGET_OPUS="${EPIC_LOOP_BUDGET_OPUS:-40}"
+BUDGET_OPUS="${EPIC_LOOP_BUDGET_OPUS:-20}"
 AGENT_TIMEOUT="${EPIC_LOOP_AGENT_TIMEOUT:-5400}"
+# code-dev carries neither model: nor effort: in its frontmatter (cf. its
+# AGENT.md): both are run settings, passed here. The model varies per ticket
+# (dispatch_plan.sh), the effort is fixed for the whole run.
+AGENT_EFFORT="${EPIC_LOOP_EFFORT_CODE_DEV:-high}"
 # Max consecutive e2e-dev regression rounds before escalating to the user.
 # Each round = e2e-dev finds a regression → architect-rework creates fix
 # ticket(s) → the loop reprocesses them → e2e-dev re-runs. Beyond this cap the
@@ -205,7 +210,7 @@ cd ${WT_PATH}
 git fetch origin ${BRANCH}
 git checkout ${BRANCH}
 \`\`\`
-Puis implémenter le code source, **déléguer tous les tests (TU + intégration) à l'agent tu-dev** (Opus, étape 5.5 — il rend la main sur une vraie régression), push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr create --base ${BASE#origin/} --head ${BRANCH}\`), faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
+Puis implémenter le code source **et ses tests vitest (TU + intégration, cf. rules/testing.md)**, en triant chaque test rouge entre régression et évolution légitime (étape 5b), push tes commits sur ${BRANCH}, créer la PR draft (\`gh pr create --base ${BASE#origin/} --head ${BRANCH}\`), faire les 4 + 2 validators internes, itérer sur les RETRY, retourner le verdict final JSON.
 
 **Ne crée PAS une autre branche** (pas de \`checkout -b\`). La branche ${BRANCH} est déjà créée et linkée — utilise-la telle quelle.
 
@@ -215,7 +220,7 @@ REGLES STRICTES (appliquer sans exception) :
   AVANT de commencer la phase suivante. Sans ces events, le dashboard /report
   ne peut pas suivre ta progression et l'utilisateur croit que tu es stuck.
   Events obligatoires dans l'ordre : START → ANALYSIS_START → ANALYSIS_OK
-  → DEV_START → DEV_OK → TU_START → TU_OK → VALIDATION_START → VALIDATION_OK → PR_DRAFT
+  → DEV_START → DEV_OK → TEST_TRIAGE → VALIDATION_START → VALIDATION_OK → PR_DRAFT
   → FUNCTIONAL_START → FUNCTIONAL_OK → CI_WAIT → CI_OK → SONAR_WAIT → SONAR_OK
   → BOT_WAIT → BOT_REPLIED → PR_READY → COMPLETE. (RETRY/CI_FAIL/SONAR_FAIL
   à intercaler en cas d'itération, voir AGENT.md « Logging events ».)
@@ -266,6 +271,7 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
+        --effort "$AGENT_EFFORT" \
         --print \
         --output-format stream-json \
         --verbose \

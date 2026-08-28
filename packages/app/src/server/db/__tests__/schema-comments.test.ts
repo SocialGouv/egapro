@@ -66,7 +66,9 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 			"SUIT: Parcours_apres_declaration_2",
 		);
 		expect(decl?.cse_required).toBe("SUIT: Avis_CSE_requis");
-		expect(decl?.rules_version).toBe("SUIT: Version_regles");
+		expect(decl?.rules_version).toBe(
+			"FSM ruleset pinned at submission; not exposed to SUIT",
+		);
 		expect(decl?.total_women).toBe("SUIT: Effectif_F_rem_annuelle_globale");
 		expect(decl?.total_men).toBe("SUIT: Effectif_H_rem_annuelle_globale");
 		expect(decl?.created_at).toBe("SUIT: Date_creation");

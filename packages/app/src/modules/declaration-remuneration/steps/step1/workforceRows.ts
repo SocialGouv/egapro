@@ -40,8 +40,26 @@ export function workforceFieldLabel(
 	return `${row.label} — ${sexLabel}`;
 }
 
-export function workforceFieldErrorMessage(sex: "women" | "men"): string {
-	return sex === "women"
-		? "Veuillez renseigner le nombre de femmes."
-		: "Veuillez renseigner le nombre d'hommes.";
+export function workforceFieldId(
+	row: WorkforceRowDefinition,
+	sex: "women" | "men",
+): string {
+	return `step1-${row.basis}-${sex}`;
+}
+
+export function workforceFieldIdFromField(field: WorkforceField): string {
+	const row = WORKFORCE_ROWS.find(
+		(candidate) =>
+			candidate.womenField === field || candidate.menField === field,
+	);
+	if (!row) throw new Error(`Unknown workforce field: ${field}`);
+	return workforceFieldId(row, row.womenField === field ? "women" : "men");
+}
+
+export function workforceFieldErrorMessage(
+	row: WorkforceRowDefinition,
+	sex: "women" | "men",
+): string {
+	const field = sex === "women" ? "nombre de femmes" : "nombre d'hommes";
+	return `Renseignez le ${field} pour la ${row.label.toLowerCase()}.`;
 }

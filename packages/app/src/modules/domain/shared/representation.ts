@@ -68,16 +68,31 @@ export function isRepresentationPublicationRequired(
 	return executivesCount === "two_or_more" || hasManagementBody === true;
 }
 
+export type RepresentationDeclarationStatus =
+	| "draft"
+	| "not_subject"
+	| "submitted";
+
 export function isRepresentationDeclarationSubmitted(
-	status: "draft" | "submitted" | null | undefined,
+	status: RepresentationDeclarationStatus | null | undefined,
 ): boolean {
 	return status === "submitted";
 }
 
+export function isRepresentationNotSubject(
+	status: RepresentationDeclarationStatus | null | undefined,
+): boolean {
+	return status === "not_subject";
+}
+
 export function computeRepresentationDeclarationStatus(declaration: {
-	status: "draft" | "submitted";
+	status: RepresentationDeclarationStatus;
 	currentStep: number | null;
 }): DeclarationStatus {
-	if (isRepresentationDeclarationSubmitted(declaration.status)) return "done";
+	if (
+		isRepresentationNotSubject(declaration.status) ||
+		isRepresentationDeclarationSubmitted(declaration.status)
+	)
+		return "done";
 	return (declaration.currentStep ?? 0) === 0 ? "to_complete" : "in_progress";
 }

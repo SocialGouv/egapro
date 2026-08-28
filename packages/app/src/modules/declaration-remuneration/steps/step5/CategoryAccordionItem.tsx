@@ -1,9 +1,11 @@
 import type React from "react";
 
+import { CATEGORY_NAME_MAX_LENGTH } from "~/modules/declaration-remuneration/schemas";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
-	CATEGORY_NAME_MAX_LENGTH,
-	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
-} from "~/modules/declaration-remuneration/schemas";
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
 
 import { CategoryDataTable } from "./CategoryDataTable";
@@ -21,6 +23,8 @@ type Props = {
 	showDelete: boolean;
 	nameProps: React.ComponentPropsWithRef<"input">;
 	nameError?: string;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 	onAccordionToggle: (e: React.MouseEvent<HTMLButtonElement>) => void;
 	headerRef: (node: HTMLButtonElement | null) => void;
 	collapseRef: (node: HTMLDivElement | null) => void;
@@ -32,6 +36,16 @@ type Props = {
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	onAskRemove: (index: number) => void;
 };
+
+const CATEGORY_NAME_HINT =
+	"En référence à l'accord ou à la décision unilatérale";
+
+export function categoryAccordionHeadingId(
+	baseId: string,
+	fieldId: string,
+): string {
+	return `${baseId}-accordion-${fieldId}-heading`;
+}
 
 export function CategoryAccordionItem({
 	baseId,
@@ -45,6 +59,8 @@ export function CategoryAccordionItem({
 	showDelete,
 	nameProps,
 	nameError,
+	errorAlertId,
+	errors,
 	onAccordionToggle,
 	headerRef,
 	collapseRef,
@@ -59,12 +75,16 @@ export function CategoryAccordionItem({
 	// own selector and DSFR disposes it, which leaves the accordion unopenable
 	// — cf. #4008.
 	const collapseId = `${baseId}-accordion-${fieldId}`;
-	const headingId = `${collapseId}-heading`;
+	const headingId = categoryAccordionHeadingId(baseId, fieldId);
 	const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 	const catName = category.name?.trim() ?? "";
 	const categoryLabel = catName
 		? `${categoryNumber} : ${catName}`
 		: categoryNumber;
+	const nameId = `cat-${index}-name`;
+	const summaryNameError = findFieldError(errors, nameId);
+	const hasNameError = Boolean(nameError || summaryNameError);
+	const nameDescriptionId = describedByForField(errorAlertId, summaryNameError);
 
 	return (
 		<section aria-labelledby={headingId} className="fr-accordion">
@@ -90,43 +110,40 @@ export function CategoryAccordionItem({
 					{!readOnlyLabel && (
 						<div
 							className={
-								nameError
+								hasNameError
 									? "fr-input-group fr-mb-0 fr-input-group--error"
 									: "fr-input-group fr-mb-0"
 							}
 						>
-							<label className="fr-label" htmlFor={`cat-${index}-name`}>
+							<label className="fr-label" htmlFor={nameId}>
 								Libellé de la catégorie d&apos;emploi
 								<span className="fr-hint-text" id={`cat-${index}-name-hint`}>
-									{CATEGORY_NAME_MAX_LENGTH_MESSAGE}
+									{CATEGORY_NAME_HINT}
 								</span>
 							</label>
 							<input
-								aria-describedby={
-									nameError
-										? `cat-${index}-name-hint cat-${index}-name-error`
-										: `cat-${index}-name-hint`
+								aria-describedby={[`cat-${index}-name-hint`, nameDescriptionId]
+									.filter(Boolean)
+									.join(" ")}
+								aria-invalid={hasNameError ? true : undefined}
+								className={
+									hasNameError ? "fr-input fr-input--error" : "fr-input"
 								}
-								aria-invalid={nameError ? true : undefined}
-								className={nameError ? "fr-input fr-input--error" : "fr-input"}
 								disabled={disabled}
-								id={`cat-${index}-name`}
+								id={nameId}
 								maxLength={CATEGORY_NAME_MAX_LENGTH}
 								readOnly={readOnly}
 								{...nameProps}
 								type="text"
 							/>
-							{nameError && (
-								<p className="fr-error-text" id={`cat-${index}-name-error`}>
-									{nameError}
-								</p>
-							)}
 						</div>
 					)}
 					<CategoryDataTable
 						category={category}
 						categoryIndex={index}
 						disabled={disabled}
+						errorAlertId={errorAlertId}
+						errors={errors}
 						onDecimalBlur={onDecimalBlur}
 						onPositiveNumberChange={onPositiveNumberChange}
 						readOnly={readOnly}

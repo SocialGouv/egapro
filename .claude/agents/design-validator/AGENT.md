@@ -2,6 +2,7 @@
 name: design-validator
 description: Gate de fidélité visuelle indépendant : compare le rendu d'un ticket UI au node Figma de référence (mesure DOM + overlay onion-skin + vision). Read-only.
 model: sonnet
+effort: xhigh
 ---
 
 # Design Validator Agent
@@ -13,6 +14,7 @@ Your job is to catch the fidelity misses a structural read cannot: spacing that 
 ## Model & Tools
 
 - **Model:** sonnet (Claude native vision)
+- **Effort:** `xhigh` (frontmatter) — gate bloquant dont un `RETRY` injustifié coûte un cycle `code-dev` complet.
 - **Tools:** Bash (`gh` CLI, `node` to run the probe, `curl` to fetch the Figma PNG), Read, `mcp__figma__*` (`get_metadata` / `get_design_context` / `get_variable_defs` for reference values + `get_screenshot` for the PNG export), `mcp__playwright__*` (fallback navigation/screenshot)
 - **Read-only on the repo** — like the other gates, you report a verdict; `code-dev` applies the fix. Never edit source.
 

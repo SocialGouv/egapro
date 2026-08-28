@@ -13,6 +13,7 @@ function remuneration(fsmStatus: DeclarationFsmStatus | null) {
 		fsmStatus,
 		status: "in_progress" as DeclarationStatus,
 		currentStep: 1,
+		notSubject: false,
 	};
 }
 
@@ -22,6 +23,7 @@ function representation(status: DeclarationStatus, currentStep: number) {
 		fsmStatus: null,
 		status,
 		currentStep,
+		notSubject: false,
 	};
 }
 
@@ -105,6 +107,26 @@ describe("getDeclarationProcessStepLabel", () => {
 			expect(
 				getDeclarationProcessStepLabel(representation("in_progress", 0)),
 			).toBe(REPRESENTATION_START_LABEL);
+		});
+
+		describe("not subject", () => {
+			const settledStates: Array<[DeclarationStatus, number]> = [
+				["done", 0],
+				["to_complete", 0],
+				["in_progress", 3],
+				["done", 5],
+			];
+
+			for (const [status, currentStep] of settledStates) {
+				it(`returns "Non-assujetti" whatever the progression (${status}, step ${currentStep})`, () => {
+					expect(
+						getDeclarationProcessStepLabel({
+							...representation(status, currentStep),
+							notSubject: true,
+						}),
+					).toBe("Non-assujetti");
+				});
+			}
 		});
 
 		it("returns the completion label for a submitted démarche", () => {

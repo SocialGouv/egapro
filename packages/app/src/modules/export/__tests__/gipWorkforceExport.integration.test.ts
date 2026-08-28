@@ -76,13 +76,16 @@ describe("GET /api/v1/export/declarations — GIP workforce integration (#3929)"
 		`;
 	});
 
-	async function fetchExport(): Promise<
-		Array<{
-			SIREN: string;
+	type ExportedDeclaration = {
+		SIREN: string;
+		Parcours: {
 			Effectif: number | null;
+			Tranche_effectif: string | null;
 			Indicateur_G_requis: boolean;
-		}>
-	> {
+		};
+	};
+
+	async function fetchExport(): Promise<ExportedDeclaration[]> {
 		const { GET } = await import("~/app/api/v1/export/declarations/route");
 		const response = await GET(
 			new Request(
@@ -94,41 +97,47 @@ describe("GET /api/v1/export/declarations — GIP workforce integration (#3929)"
 		return (await response.json()).Declarations;
 	}
 
-	function findBySiren(
-		declarations: Array<{ SIREN: string }>,
+	function parcoursOf(
+		declarations: ExportedDeclaration[],
 		siren: string,
-	): { SIREN: string; Effectif: number | null; Indicateur_G_requis: boolean } {
+	): ExportedDeclaration["Parcours"] {
 		const found = declarations.find((d) => d.SIREN === siren);
 		if (!found) throw new Error(`declaration for ${siren} missing from export`);
-		return found as never;
+		return found.Parcours;
 	}
 
-	it("sends the GIP annual average workforce as Effectif, not the Weez company workforce", async () => {
+	it("sends the GIP annual average workforce as Parcours.Effectif, not the Weez company workforce", async () => {
 		const declarations = await fetchExport();
 
-		expect(findBySiren(declarations, SIREN_IN_GIP).Effectif).toBe(70);
+		expect(parcoursOf(declarations, SIREN_IN_GIP).Effectif).toBe(70);
 	});
 
-	it("keeps the declaration of a company absent from the GIP file, with a null Effectif", async () => {
+	it("keeps the declaration of a company absent from the GIP file, with a null Parcours.Effectif", async () => {
 		const declarations = await fetchExport();
 
 		expect(declarations).toHaveLength(4);
-		const notInGip = findBySiren(declarations, SIREN_NOT_IN_GIP);
+		const notInGip = parcoursOf(declarations, SIREN_NOT_IN_GIP);
 		expect(notInGip.Effectif).toBeNull();
-		expect(notInGip.Indicateur_G_requis).toBe(false);
+		expect(notInGip.Tranche_effectif).toBeNull();
+		// Absent from GIP → obligation workforce 0 → voluntary tier, which files
+		// all 7 indicators (#4043).
+		expect(notInGip.Indicateur_G_requis).toBe(true);
 	});
 
-	it("floors the numeric(9,2) workforce so 99,97 is exported as 99", async () => {
+	it("floors the numeric(9,2) workforce so 99,97 is exported as 99 and bucketed on the floored value", async () => {
 		const declarations = await fetchExport();
 
-		expect(findBySiren(declarations, SIREN_FRACTIONAL).Effectif).toBe(99);
+		const fractional = parcoursOf(declarations, SIREN_FRACTIONAL);
+		expect(fractional.Effectif).toBe(99);
+		expect(fractional.Tranche_effectif).toBe("50-99");
 	});
 
 	it("does not pick up a GIP row from another campaign year", async () => {
 		const declarations = await fetchExport();
 
-		const otherYear = findBySiren(declarations, SIREN_OTHER_YEAR);
+		const otherYear = parcoursOf(declarations, SIREN_OTHER_YEAR);
 		expect(otherYear.Effectif).toBeNull();
-		expect(otherYear.Indicateur_G_requis).toBe(false);
+		expect(otherYear.Tranche_effectif).toBeNull();
+		expect(otherYear.Indicateur_G_requis).toBe(true);
 	});
 });

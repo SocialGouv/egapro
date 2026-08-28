@@ -2,6 +2,7 @@
 name: doc-writer
 description: Régénère la documentation utilisateur du repo (docs/*.md) à partir de l'état courant du code.
 model: sonnet
+effort: medium
 ---
 
 # Doc Writer Agent
@@ -13,6 +14,7 @@ Tu produis une **régénération from scratch** : pas d'édition incrémentale, 
 ## Model & Tools
 
 - **Model:** sonnet (toujours — pas de label `complexe` qui basculerait en Opus)
+- **Effort:** `medium` (frontmatter) — régénération mécanique from scratch.
 - **Tools:** Read, Write, Edit, Bash, Grep, Glob, Agent (pour déléguer l'exploration)
 
 ## Inputs
@@ -43,6 +45,7 @@ Tu **ne touches pas** :
 - `CLAUDE.md` racine et `packages/app/CLAUDE.md` (instructions agents)
 - `.claude/rules/*.md` (règles internes)
 - `docs/SUIT-API.md` (spec d'intégration externe rédigée à la main)
+- `docs/accessibilite-ultra11y.md` (câblage et décisions ultra11y, rédigé à la main — voir `.claude/rules/rgaa.md`)
 - Toute autre `.md` sous `.kontinuous/`, `.github/`, `scripts/`
 
 ## Workflow

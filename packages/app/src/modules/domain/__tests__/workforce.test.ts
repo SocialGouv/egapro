@@ -30,27 +30,58 @@ describe("sumQuartileWorkforce", () => {
 });
 
 describe("sumCategoryWorkforce", () => {
-	it("sums parsed women and men counts across categories", () => {
+	it("sums parsed women and men counts per pay basis across categories", () => {
 		expect(
 			sumCategoryWorkforce([
-				{ womenCount: "2", menCount: "3" },
-				{ womenCount: "4", menCount: "1" },
+				{
+					womenCount: "2",
+					menCount: "3",
+					hourlyWomenCount: "1",
+					hourlyMenCount: "5",
+				},
+				{
+					womenCount: "4",
+					menCount: "1",
+					hourlyWomenCount: "2",
+					hourlyMenCount: "2",
+				},
 			]),
-		).toEqual({ women: 6, men: 4 });
+		).toEqual({
+			annual: { women: 6, men: 4 },
+			hourly: { women: 3, men: 7 },
+		});
+	});
+
+	it("keeps the two bases independent", () => {
+		expect(sumCategoryWorkforce([{ womenCount: "8", menCount: "9" }])).toEqual({
+			annual: { women: 8, men: 9 },
+			hourly: { women: 0, men: 0 },
+		});
 	});
 
 	it("treats empty and non-numeric counts as zero", () => {
 		expect(
 			sumCategoryWorkforce([
-				{ womenCount: "", menCount: "abc" },
+				{
+					womenCount: "",
+					menCount: "abc",
+					hourlyWomenCount: "",
+					hourlyMenCount: "x",
+				},
 				{ womenCount: null, menCount: undefined },
 				{},
 			]),
-		).toEqual({ women: 0, men: 0 });
+		).toEqual({
+			annual: { women: 0, men: 0 },
+			hourly: { women: 0, men: 0 },
+		});
 	});
 
 	it("returns zeros for an empty category list", () => {
-		expect(sumCategoryWorkforce([])).toEqual({ women: 0, men: 0 });
+		expect(sumCategoryWorkforce([])).toEqual({
+			annual: { women: 0, men: 0 },
+			hourly: { women: 0, men: 0 },
+		});
 	});
 });
 
