@@ -24,8 +24,10 @@ function makeCategory(
 	};
 }
 
-function effectifCells() {
-	const row = screen.getByRole("rowheader", { name: "Effectif physique" })
+function effectifRowCells(
+	label: "Rémunération annuelle" | "Rémunération horaire",
+) {
+	const row = screen.getByRole("rowheader", { name: label })
 		.parentElement as HTMLElement;
 	return within(row).getAllByRole("cell");
 }
@@ -38,7 +40,31 @@ function totalRowGapCell() {
 }
 
 describe("CategoryRecapTable", () => {
-	it("suffixes the 'Effectif physique' counts with 'nb'", () => {
+	it("shows Femmes/Hommes/Total on the annual and hourly headcount rows (#4368)", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					womenCount: 53,
+					menCount: 25,
+					hourlyWomenCount: 4,
+					hourlyMenCount: 2,
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+		const annualCells = effectifRowCells("Rémunération annuelle");
+		expect(annualCells[0]).toHaveTextContent("53");
+		expect(annualCells[1]).toHaveTextContent("25");
+		expect(annualCells[2]).toHaveTextContent("78");
+
+		const hourlyCells = effectifRowCells("Rémunération horaire");
+		expect(hourlyCells[0]).toHaveTextContent("4");
+		expect(hourlyCells[1]).toHaveTextContent("2");
+		expect(hourlyCells[2]).toHaveTextContent("6");
+	});
+
+	it("shows '—' for a missing hourly headcount, never an invented 0 (#4368)", () => {
 		render(
 			<CategoryRecapTable
 				category={makeCategory({ womenCount: 53, menCount: 25 })}
@@ -46,12 +72,13 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		const cells = effectifCells();
-		expect(cells[0]).toHaveTextContent("53 nb");
-		expect(cells[1]).toHaveTextContent("25 nb");
+		const hourlyCells = effectifRowCells("Rémunération horaire");
+		expect(hourlyCells[0]).toHaveTextContent("—");
+		expect(hourlyCells[1]).toHaveTextContent("—");
+		expect(hourlyCells[2]).toHaveTextContent("—");
 	});
 
-	it("renders '0 nb' when counts are null", () => {
+	it("shows '—' for a missing annual headcount too, never an invented 0 (#4368)", () => {
 		render(
 			<CategoryRecapTable
 				category={makeCategory()}
@@ -59,9 +86,10 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		const cells = effectifCells();
-		expect(cells[0]).toHaveTextContent("0 nb");
-		expect(cells[1]).toHaveTextContent("0 nb");
+		const annualCells = effectifRowCells("Rémunération annuelle");
+		expect(annualCells[0]).toHaveTextContent("—");
+		expect(annualCells[1]).toHaveTextContent("—");
+		expect(annualCells[2]).toHaveTextContent("—");
 	});
 
 	it("renders the heading with the category name and 1-based index", () => {
@@ -86,17 +114,6 @@ describe("CategoryRecapTable", () => {
 			/>,
 		);
 		expect(screen.getByText("Catégorie d'emplois n°1")).toBeInTheDocument();
-	});
-
-	it("renders the total salariés count from women + men", () => {
-		render(
-			<CategoryRecapTable
-				category={makeCategory({ womenCount: 53, menCount: 25 })}
-				declarationYear={2025}
-				index={0}
-			/>,
-		);
-		expect(screen.getByText("Total salariés : 78")).toBeInTheDocument();
 	});
 
 	it("flags an 'élevé' badge when a salary gap reaches the 5% threshold", () => {

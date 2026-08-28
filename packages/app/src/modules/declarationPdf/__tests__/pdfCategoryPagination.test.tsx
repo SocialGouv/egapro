@@ -171,7 +171,7 @@ describe("PDF category pagination", () => {
 				.filter((text) => /^Catégorie d'emplois n°\d+/.test(text));
 			for (const heading of headings) bannerPage.set(heading, pageIndex);
 			// The effectif table's row label marks the page holding the table body.
-			if (texts.some((entry) => entry.text === "Nombre de salariés")) {
+			if (texts.some((entry) => entry.text === "Rémunération annuelle")) {
 				for (const heading of headings) tablePage.set(heading, pageIndex);
 			}
 			pageIndex += 1;

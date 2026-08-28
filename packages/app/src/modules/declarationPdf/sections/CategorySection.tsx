@@ -1,5 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration";
+import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import {
 	computeGap,
 	computeTotal,
@@ -14,10 +15,13 @@ import { CategoryBanner, SectionBanner, SubTitle } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
 
+/** An hourly headcount can be absent on categories entered before #4254 —
+ *  never invent a 0 for it. */
+function formatWorkforceCount(value: number | null): string {
+	return value === null ? "—" : String(value);
+}
+
 function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
-	const womenCount = category.womenCount ?? 0;
-	const menCount = category.menCount ?? 0;
-	const total = computeWorkforceTotal(womenCount, menCount);
 	return (
 		<Table>
 			<Row>
@@ -26,12 +30,35 @@ function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
 				<Cell header text="Hommes" width={PAY_TABLE.value} />
 				<Cell header text="Total" width={PAY_TABLE.total} />
 			</Row>
-			<Row>
-				<Cell bold text="Nombre de salariés" width={PAY_TABLE.label} />
-				<Cell align="right" text={String(womenCount)} width={PAY_TABLE.value} />
-				<Cell align="right" text={String(menCount)} width={PAY_TABLE.value} />
-				<Cell align="right" bold text={String(total)} width={PAY_TABLE.total} />
-			</Row>
+			{CATEGORY_WORKFORCE_ROWS.map((row) => {
+				const women = category[row.womenField];
+				const men = category[row.menField];
+				const total =
+					women !== null && men !== null
+						? computeWorkforceTotal(women, men)
+						: null;
+				return (
+					<Row key={row.workforceRow.basis}>
+						<Cell bold text={row.workforceRow.label} width={PAY_TABLE.label} />
+						<Cell
+							align="right"
+							text={formatWorkforceCount(women)}
+							width={PAY_TABLE.value}
+						/>
+						<Cell
+							align="right"
+							text={formatWorkforceCount(men)}
+							width={PAY_TABLE.value}
+						/>
+						<Cell
+							align="right"
+							bold
+							text={total === null ? "—" : String(total)}
+							width={PAY_TABLE.total}
+						/>
+					</Row>
+				);
+			})}
 		</Table>
 	);
 }

@@ -114,6 +114,8 @@ export type IndicatorGEntry = {
 	declarationType: string;
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;
@@ -260,6 +262,8 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Nom_categorie: entry.categoryName,
 		Effectif_F: entry.womenCount,
 		Effectif_H: entry.menCount,
+		Effectif_horaire_F: entry.hourlyWomenCount,
+		Effectif_horaire_H: entry.hourlyMenCount,
 		Rem_annuelle_base_F: abW,
 		Rem_annuelle_base_H: abM,
 		Rem_annuelle_variable_F: avW,

@@ -170,6 +170,8 @@ export const INDICATOR_G_COLUMNS: Array<{
 	{ key: "categorySource", header: "Source" },
 	{ key: "womenCount", header: "Effectif_F" },
 	{ key: "menCount", header: "Effectif_H" },
+	{ key: "hourlyWomenCount", header: "Effectif_horaire_F" },
+	{ key: "hourlyMenCount", header: "Effectif_horaire_H" },
 	{ key: "annualBaseWomen", header: "Annuel_base_F" },
 	{ key: "annualBaseMen", header: "Annuel_base_H" },
 	{ key: "annualVariableWomen", header: "Annuel_variable_F" },

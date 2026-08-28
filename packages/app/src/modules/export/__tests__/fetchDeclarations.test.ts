@@ -262,6 +262,8 @@ describe("buildIndicatorG", () => {
 				declarationType: "initial",
 				womenCount: 40,
 				menCount: 45,
+				hourlyWomenCount: 8,
+				hourlyMenCount: 6,
 				annualBaseWomen: "24000",
 				annualBaseMen: "25500",
 				annualVariableWomen: "1200",
@@ -277,6 +279,8 @@ describe("buildIndicatorG", () => {
 				declarationType: "correction",
 				womenCount: 42,
 				menCount: 44,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "24800",
 				annualBaseMen: "25200",
 				annualVariableWomen: "1350",
@@ -296,6 +300,12 @@ describe("buildIndicatorG", () => {
 		expect(result.initial[0]?.Effectif_F).toBe(40);
 		expect(result.correction[0]?.Effectif_F).toBe(42);
 		expect(result.initial[0]?.Rem_annuelle_base_F).toBe("24000");
+		// #4368 — hourly headcount rides alongside the annual one, unchanged
+		// columns, null passed through as-is (never an invented 0).
+		expect(result.initial[0]?.Effectif_horaire_F).toBe(8);
+		expect(result.initial[0]?.Effectif_horaire_H).toBe(6);
+		expect(result.correction[0]?.Effectif_horaire_F).toBeNull();
+		expect(result.correction[0]?.Effectif_horaire_H).toBeNull();
 	});
 
 	it("should return empty arrays when no entries", () => {
@@ -311,6 +321,8 @@ describe("buildIndicatorG", () => {
 		declarationType: "initial",
 		womenCount: 50,
 		menCount: 60,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: "10000",
 		annualBaseMen: "11000",
 		annualVariableWomen: "1000",
@@ -582,6 +594,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -597,6 +611,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "correction",
 				womenCount: 52,
 				menCount: 58,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "53000",
 				annualBaseMen: "55000",
 				annualVariableWomen: null,
@@ -624,6 +640,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -648,6 +666,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -663,6 +683,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 30,
 				menCount: 20,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "30000",
 				annualBaseMen: "31000",
 				annualVariableWomen: null,
@@ -693,6 +715,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "correction",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -708,6 +732,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -732,6 +758,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -903,6 +931,8 @@ describe("assembleDeclaration", () => {
 				declarationType: "initial",
 				womenCount: 12,
 				menCount: 18,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -1163,6 +1193,8 @@ describe("assembleDeclaration — compliance flags", () => {
 		declarationType,
 		womenCount: 50,
 		menCount: 60,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen,
 		annualBaseMen,
 		annualVariableWomen: null,
