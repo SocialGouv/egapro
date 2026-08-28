@@ -640,9 +640,18 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(
-			screen.getByText(/ne correspond pas à l'effectif déclaré/),
-		).toBeInTheDocument();
-		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+			screen.getAllByText(/ne correspond pas à l'effectif déclaré/),
+		).not.toHaveLength(0);
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Données incohérentes");
+		// Two simultaneous mismatches (women + men) render as two list items,
+		// each naming its own sex and totals, rather than one merged paragraph (#4390).
+		const items = within(alert).getAllByRole("listitem");
+		expect(items).toHaveLength(2);
+		expect(items.map((item) => item.textContent)).toEqual([
+			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
+			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+		]);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -1093,6 +1102,9 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (5).",
 		);
 		expect(alert).not.toHaveTextContent("« Rémunération annuelle »");
+		// A single inconsistency stays a plain paragraph, not a list (#4390).
+		expect(within(alert).queryAllByRole("listitem")).toHaveLength(0);
+		expect(alert.querySelector("p")).not.toBeNull();
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
@@ -1166,5 +1178,145 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 		expect(mockMutate).toHaveBeenCalledTimes(1);
+	});
+
+	it("renders one list item per inconsistency when both bases and both sexes mismatch (#4390)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={9}
+				hourlyMaxWomen={7}
+				indicatorGRequired
+				maxMen={20}
+				maxWomen={10}
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"5",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"15",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "femmes")),
+			"4",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "hommes")),
+			"6",
+		);
+		await fillAllPayCells(user);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Données incohérentes");
+		const items = within(alert).getAllByRole("listitem");
+		expect(items).toHaveLength(4);
+
+		const texts = items.map((item) => item.textContent ?? "");
+		expect(
+			texts.some(
+				(text) =>
+					text.includes("Rémunération annuelle") &&
+					text.includes("femmes") &&
+					text.includes("(5)") &&
+					text.includes("(10)"),
+			),
+		).toBe(true);
+		expect(
+			texts.some(
+				(text) =>
+					text.includes("Rémunération annuelle") &&
+					text.includes("hommes") &&
+					text.includes("(15)") &&
+					text.includes("(20)"),
+			),
+		).toBe(true);
+		expect(
+			texts.some(
+				(text) =>
+					text.includes("Rémunération horaire") &&
+					text.includes("femmes") &&
+					text.includes("(4)") &&
+					text.includes("(7)"),
+			),
+		).toBe(true);
+		expect(
+			texts.some(
+				(text) =>
+					text.includes("Rémunération horaire") &&
+					text.includes("hommes") &&
+					text.includes("(6)") &&
+					text.includes("(9)"),
+			),
+		).toBe(true);
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("keeps every hidden message after dismissal of a four-way inconsistency (#4390)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={9}
+				hourlyMaxWomen={7}
+				indicatorGRequired
+				maxMen={20}
+				maxWomen={10}
+			/>,
+		);
+
+		await fillNameAndSource(user);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"5",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "hommes")),
+			"15",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "femmes")),
+			"4",
+		);
+		await user.type(
+			screen.getByLabelText(countLabel("horaire", "hommes")),
+			"6",
+		);
+		await fillAllPayCells(user);
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+
+		await user.click(
+			screen.getByRole("button", { name: "Masquer le message" }),
+		);
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+		const hidden = document.getElementById(
+			"step5-categories-error-inconsistent",
+		);
+		expect(hidden).not.toBeNull();
+		expect(hidden).toHaveTextContent(
+			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
+		);
+		expect(hidden).toHaveTextContent(
+			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+		);
+		expect(hidden).toHaveTextContent(
+			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (7).",
+		);
+		expect(hidden).toHaveTextContent(
+			"Le total des effectifs hommes de la ligne « Rémunération horaire » (6) ne correspond pas à l'effectif déclaré à l'étape 1 (9).",
+		);
+		expect(mockMutate).not.toHaveBeenCalled();
 	});
 });

@@ -432,7 +432,7 @@ export function CategoryForm({
 				hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 			} as const;
 			const sums = sumCategoryWorkforce(data.categories);
-			const workforceErrors: string[] = [];
+			const workforceErrors: FieldError[] = [];
 			for (const row of WORKFORCE_ROWS) {
 				for (const [sex, sexLabel] of [
 					["women", "femmes"],
@@ -441,19 +441,15 @@ export function CategoryForm({
 					const max = maxByBasis[row.basis][sex];
 					const total = sums[row.basis][sex];
 					if (max === undefined || total === max) continue;
-					workforceErrors.push(
-						`Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
-					);
+					workforceErrors.push({
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "inconsistent",
+						message: `Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
+					});
 				}
 			}
 			if (workforceErrors.length > 0) {
-				setCategoryErrors([
-					{
-						fieldId: CATEGORY_FORM_FIELD_ID,
-						category: "inconsistent",
-						message: workforceErrors.join(" "),
-					},
-				]);
+				setCategoryErrors(workforceErrors);
 				return;
 			}
 
