@@ -1,4 +1,5 @@
-import { expect, type Page, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { getReferenceYearFor } from "~/modules/domain";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
@@ -629,6 +630,153 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await expect(count("hourly", "women")).toHaveValue("");
 			await expect(count("hourly", "men")).toHaveValue("");
 			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
+		});
+	});
+
+	test("le modèle d'import porte les treize colonnes et alimente les deux bases (#4276)", async ({
+		page,
+	}) => {
+		test.slow();
+
+		// Keys = the thirteen template columns in their spec order, values = a
+		// distinct number per column, so a mapping shifted by the two headcount
+		// columns inserted mid-list lands a value in the wrong input instead of
+		// staying green.
+		const importedValues = {
+			"Libellé de la catégorie": "Ouvriers",
+			"Annuel effectif femmes": "11",
+			"Annuel effectif hommes": "12",
+			"Horaire effectif femmes": "13",
+			"Horaire effectif hommes": "14",
+			"Annuel base femmes (€)": "101",
+			"Annuel base hommes (€)": "102",
+			"Annuel variable femmes (€)": "103",
+			"Annuel variable hommes (€)": "104",
+			"Horaire base femmes (€)": "105",
+			"Horaire base hommes (€)": "106",
+			"Horaire variable femmes (€)": "107",
+			"Horaire variable hommes (€)": "108",
+		};
+
+		const inputByHeader: Record<
+			Exclude<keyof typeof importedValues, "Libellé de la catégorie">,
+			Locator
+		> = {
+			"Annuel effectif femmes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "women",
+			}),
+			"Annuel effectif hommes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "men",
+			}),
+			"Horaire effectif femmes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "women",
+			}),
+			"Horaire effectif hommes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "men",
+			}),
+			"Annuel base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "femmes",
+			}),
+			"Annuel base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "hommes",
+			}),
+			"Annuel variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "femmes",
+			}),
+			"Annuel variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "hommes",
+			}),
+			"Horaire base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "femmes",
+			}),
+			"Horaire base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "hommes",
+			}),
+			"Horaire variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "femmes",
+			}),
+			"Horaire variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "hommes",
+			}),
+		};
+
+		await page.goto("/declaration-remuneration/etape/5");
+		await page.getByRole("button", { name: "Importer les données" }).click();
+
+		const panel = page.getByRole("dialog", {
+			name: "Importer vos données depuis un fichier",
+		});
+		await expect(panel).toBeVisible();
+
+		const templateHeaders =
+			await test.step("le modèle téléchargé porte les treize colonnes attendues", async () => {
+				const [download] = await Promise.all([
+					page.waitForEvent("download"),
+					panel
+						.getByRole("button", { name: "Fichier d'import à remplir" })
+						.click(),
+				]);
+
+				expect(download.suggestedFilename()).toBe("modele-indicateur-g.csv");
+
+				const template = readFileSync(await download.path(), "utf8").replace(
+					/^\uFEFF/,
+					"",
+				);
+				expect(template.split(";")).toEqual(Object.keys(importedValues));
+
+				return template;
+			});
+
+		await test.step("un fichier au format du modèle renseigne les treize champs", async () => {
+			// Built on the very header line the app just served, so the template and
+			// the parser are asserted against each other, not against a copy.
+			const csv = `\uFEFF${templateHeaders}\n${Object.values(importedValues).join(";")}`;
+
+			await panel.getByLabel("Sélectionner des fichiers").setInputFiles({
+				buffer: Buffer.from(csv, "utf8"),
+				mimeType: "text/csv",
+				name: "categories.csv",
+			});
+			await panel
+				.getByRole("button", { exact: true, name: "Importer" })
+				.click();
+
+			await expect(panel).toBeHidden();
+
+			const { "Libellé de la catégorie": name, ...amounts } = importedValues;
+
+			const category = page.getByRole("button", {
+				name: `Catégorie d'emplois n°1 : ${name}`,
+			});
+			await expect(category).toBeVisible();
+
+			// An imported category remounts its accordion, which DSFR brings back
+			// folded — its fields reach the DOM only once it is disclosed.
+			if ((await category.getAttribute("aria-expanded")) !== "true") {
+				await category.click();
+			}
+
+			for (const [header, value] of Object.entries(amounts)) {
+				// Pay amounts come back through the form's decimal formatting;
+				// headcounts are plain integers.
+				const shown = header.endsWith("(€)") ? `${value},00` : value;
+				await expect(
+					inputByHeader[header as keyof typeof inputByHeader],
+				).toHaveValue(shown);
+			}
 		});
 	});
 });
