@@ -629,7 +629,7 @@ export function CategoryForm({
 			</div>
 
 			<fieldset
-				className={readOnly ? common.readOnlyFieldset : undefined}
+				className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
 				id={CATEGORY_FORM_FIELD_ID}
 			>
 				<legend className="fr-sr-only">Catégories d&apos;emplois</legend>
