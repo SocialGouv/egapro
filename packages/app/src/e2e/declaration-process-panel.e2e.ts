@@ -16,7 +16,6 @@ import {
 	setUserPhone,
 } from "./helpers/db";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
-import { indicatorGRequiredForGip } from "./helpers/indicator-g";
 import { loginWithProConnect } from "./helpers/login";
 
 // Per-variant panel rendering is covered by my-space/__tests__/DeclarationProcessPanel.test.tsx.
@@ -120,16 +119,15 @@ test.describe("Declaration process panel", () => {
 		});
 	});
 
-	// Regression #3939: a GIP-derived < 100 company without CSE must never see the
+	// Regressions #3939 and #4275: a voluntary company without CSE must never see the
 	// "déposer l'avis CSE" step — neither during the démarche nor after completion (where
-	// the panel used to stay stuck on "avis CSE en cours" with a /avis-cse CTA). The
-	// indicator-G path step follows the same GIP workforce (79 here), not the WEEZ headcount
-	// or the has_cse flag, so it is hidden except on the tier's own indicator G years.
-	test.describe("GIP < 100 without CSE: the CSE step is hidden, the indicator-G step follows the obligation", () => {
+	// the panel used to stay stuck on "avis CSE en cours" with a /avis-cse CTA). Although
+	// voluntary declarations carry indicator G, their workforce keeps the compliance path
+	// inapplicable. Absence from the GIP file also means the indicators are not prefilled.
+	test.describe("voluntary company without CSE: compliance and CSE steps are hidden", () => {
 		const STEP2_TITLE =
 			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
 		const STEP3_TITLE = "Déposer le ou les avis du CSE";
-		const indicatorGRequired = indicatorGRequiredForGip(79);
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -149,13 +147,13 @@ test.describe("Declaration process panel", () => {
 		test.describe("during the démarche (draft)", () => {
 			test.beforeAll(async () => {
 				await ensureCurrentYearDeclaration();
-				await setGipWorkforce(79);
+				await setGipWorkforce(null);
 				await setCompanyHasCse(false);
 				await setUserPhone(TEST_USER_PHONE);
 				await resetDeclarationToDraft();
 			});
 
-			test("announces the declaration step, and the indicator-G step only when owed", async ({
+			test("announces manual indicators without compliance or CSE steps", async ({
 				page,
 			}) => {
 				await openPanel(page);
@@ -164,11 +162,10 @@ test.describe("Declaration process panel", () => {
 				await expect(
 					panel.getByText("Déclaration des indicateurs de rémunération"),
 				).toBeVisible();
-				if (indicatorGRequired) {
-					await expect(panel.getByText(STEP2_TITLE)).toBeVisible();
-				} else {
-					await expect(panel.getByText(STEP2_TITLE)).toHaveCount(0);
-				}
+				await expect(
+					panel.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
+				).toBeVisible();
+				await expect(panel.getByText(STEP2_TITLE)).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
 			});
 		});
@@ -176,7 +173,7 @@ test.describe("Declaration process panel", () => {
 		test.describe("after completion (démarche_completed, not subject)", () => {
 			test.beforeAll(async () => {
 				await ensureCurrentYearDeclaration();
-				await setGipWorkforce(79);
+				await setGipWorkforce(null);
 				await setCompanyHasCse(false);
 				await setUserPhone(TEST_USER_PHONE);
 				await setDeclarationComplianceState({
@@ -202,6 +199,13 @@ test.describe("Declaration process panel", () => {
 					),
 				).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
+				await expect(panel.getByText(STEP2_TITLE)).toHaveCount(0);
+				await expect(
+					panel.getByText("Votre déclaration a été transmise"),
+				).toBeVisible();
+				await expect(
+					panel.getByTitle("Voir le récapitulatif de la déclaration"),
+				).toBeVisible();
 
 				const cta = panel.getByRole("link", { name: "Voir la déclaration" });
 				await expect(cta).toBeVisible();

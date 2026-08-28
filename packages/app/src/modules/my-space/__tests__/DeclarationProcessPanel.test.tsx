@@ -47,9 +47,10 @@ type LockHolder = {
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	compliancePathApplicable: true,
 	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
-	indicatorGRequired: true,
+	hasPrefillData: true,
 	lastActionDate: "12 mars 2026" as string | null,
 	declarationFsmStatus: null,
 	displayContext: makeDisplayContext(),
@@ -120,6 +121,16 @@ describe("DeclarationProcessPanel", () => {
 					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
+		});
+
+		it("describes indicators as manual when no prefill data is available", () => {
+			const { panel } = renderPanel("start", { hasPrefillData: false });
+			expect(
+				panel.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(/Indicateurs pré-remplis à vérifier/),
+			).not.toBeInTheDocument();
 		});
 
 		it("renders the CTA link with correct href", () => {

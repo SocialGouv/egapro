@@ -27,10 +27,11 @@ export function getStepStatuses(
 
 export function VerticalStepper({
 	campaignDeadlines,
+	compliancePathApplicable,
 	cseOpinionRequired,
 	declarationFsmStatus,
 	displayContext,
-	indicatorGRequired,
+	hasPrefillData,
 	secondDeclarationSubmitted,
 	siren,
 	step1,
@@ -40,10 +41,11 @@ export function VerticalStepper({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	compliancePathApplicable: boolean;
 	cseOpinionRequired: boolean;
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
-	indicatorGRequired: boolean;
+	hasPrefillData: boolean;
 	secondDeclarationSubmitted: boolean;
 	siren: string;
 	step1: StepStatus;
@@ -52,7 +54,7 @@ export function VerticalStepper({
 	variant: PanelVariant;
 	year: number;
 }) {
-	const step3Number = indicatorGRequired ? 3 : 2;
+	const step3Number = compliancePathApplicable ? 3 : 2;
 
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
@@ -60,13 +62,14 @@ export function VerticalStepper({
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
+					hasPrefillData={hasPrefillData}
 					siren={siren}
 					status={step1}
 					variant={variant}
 					year={year}
 				/>
 			</div>
-			{indicatorGRequired && (
+			{compliancePathApplicable && (
 				<div className={`${styles.stepRow} ${stepRowClass(step2)}`}>
 					<StepCircle number={2} status={step2} />
 					<Step2Content

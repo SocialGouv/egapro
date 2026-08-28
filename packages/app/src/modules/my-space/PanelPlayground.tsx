@@ -67,7 +67,9 @@ export function PanelPlayground() {
 	const [secondDeclarationSubmitted, setSecondDeclarationSubmitted] =
 		useState(true);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
-	const [indicatorGRequired, setIndicatorGRequired] = useState(true);
+	const [compliancePathApplicable, setCompliancePathApplicable] =
+		useState(true);
+	const [hasPrefillData, setHasPrefillData] = useState(true);
 	const [preset, setPreset] = useState<DatePreset>("future");
 	const [deadlines, setDeadlines] = useState<CampaignDeadlines>(
 		buildPresetDeadlines("future"),
@@ -163,13 +165,27 @@ export function PanelPlayground() {
 
 					<div className="fr-checkbox-group">
 						<input
-							checked={indicatorGRequired}
-							id="indicator-g-required"
-							onChange={(e) => setIndicatorGRequired(e.currentTarget.checked)}
+							checked={compliancePathApplicable}
+							id="compliance-path-applicable"
+							onChange={(e) =>
+								setCompliancePathApplicable(e.currentTarget.checked)
+							}
 							type="checkbox"
 						/>
-						<label className="fr-label" htmlFor="indicator-g-required">
-							Indicateur G requis (étape 2 visible)
+						<label className="fr-label" htmlFor="compliance-path-applicable">
+							Parcours de conformité applicable (étape 2 visible)
+						</label>
+					</div>
+
+					<div className="fr-checkbox-group">
+						<input
+							checked={hasPrefillData}
+							id="has-prefill-data"
+							onChange={(e) => setHasPrefillData(e.currentTarget.checked)}
+							type="checkbox"
+						/>
+						<label className="fr-label" htmlFor="has-prefill-data">
+							Données préremplies disponibles
 						</label>
 					</div>
 
@@ -263,6 +279,7 @@ export function PanelPlayground() {
 
 			<DeclarationProcessPanel
 				campaignDeadlines={deadlines}
+				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref="/declaration-remuneration?siren=000000000"
 				declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
@@ -271,8 +288,8 @@ export function PanelPlayground() {
 					secondDeclarationPathChoice: null,
 					cseRequired: cseOpinionRequired,
 				})}
+				hasPrefillData={hasPrefillData}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
-				indicatorGRequired={indicatorGRequired}
 				lastActionDate="12 mars 2026"
 				lockedByOther={false}
 				lockHolder={null}
