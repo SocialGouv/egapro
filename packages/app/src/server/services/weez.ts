@@ -7,6 +7,12 @@ import { isCompanyDiffusible } from "~/modules/public-api";
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
 const WEEZ_TIMEOUT_MS = 10_000;
+
+// Column widths of `companies.country_code` / `country_label`. The registry is
+// not bound by them, and neither insert path catches a Postgres overflow: one
+// over-long value would break a ProConnect login, or the whole GIP-MDS import.
+const COUNTRY_CODE_MAX_LENGTH = 5;
+const COUNTRY_LABEL_MAX_LENGTH = 255;
 const TWENTY_FOUR_HOURS = 86_400;
 
 // INSEE "tranche d'effectif salarié" code → lower bound of the size band, used
@@ -178,7 +184,16 @@ async function resolveCountry(
 		// would break the tri-state for every consumer downstream.
 		if (!countryCode || !countryLabel) return UNKNOWN_COUNTRY;
 
-		return { countryCode, countryLabel };
+		// An over-long code is dropped rather than truncated: the code is an
+		// identifier, and cutting it would persist a *different* country as
+		// authoritative data. The label is a display string, so it degrades the
+		// way `nafLabel` already does below.
+		if (countryCode.length > COUNTRY_CODE_MAX_LENGTH) return UNKNOWN_COUNTRY;
+
+		return {
+			countryCode,
+			countryLabel: countryLabel.slice(0, COUNTRY_LABEL_MAX_LENGTH),
+		};
 	} catch {
 		return UNKNOWN_COUNTRY;
 	}

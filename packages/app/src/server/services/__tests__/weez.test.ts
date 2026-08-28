@@ -556,6 +556,31 @@ describe("fetchCompanyBySiren", () => {
 		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
 	});
 
+	it("drops an over-long country code rather than truncating it into another country", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: "992480",
+			libellepaysetrangeretablissement: "QATAR",
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it("clamps an over-long country label to the column width", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: "99248",
+			libellepaysetrangeretablissement: "Q".repeat(300),
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result?.countryCode).toBe("99248");
+		expect(result?.countryLabel).toBe("Q".repeat(255));
+	});
+
 	it("keeps FRANCE on a non-diffusible company while address and NAF stay masked (S4)", async () => {
 		mockLegalUnit({
 			siren: "111222333",
