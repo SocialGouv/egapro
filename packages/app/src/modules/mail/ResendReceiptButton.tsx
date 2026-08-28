@@ -6,10 +6,11 @@ import type { ResendReceiptInput } from "./schemas";
 
 type Props = {
 	kind: ResendReceiptInput["kind"];
+	size?: "default" | "sm";
 	year: number;
 };
 
-export function ResendReceiptButton({ kind, year }: Props) {
+export function ResendReceiptButton({ kind, size = "default", year }: Props) {
 	const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
 	const mutation = api.mail.resendReceipt.useMutation({
@@ -20,7 +21,11 @@ export function ResendReceiptButton({ kind, year }: Props) {
 	return (
 		<>
 			<button
-				className="fr-btn fr-btn--tertiary fr-btn--sm"
+				className={
+					size === "sm"
+						? "fr-btn fr-btn--tertiary fr-btn--sm"
+						: "fr-btn fr-btn--tertiary"
+				}
 				disabled={mutation.isPending}
 				onClick={() => {
 					setStatus("idle");
@@ -32,9 +37,14 @@ export function ResendReceiptButton({ kind, year }: Props) {
 					? "Envoi en cours…"
 					: "Renvoyer l'accusé de réception"}
 			</button>
+			{/* Stays mounted for aria-live, but takes no vertical space while empty. */}
 			<p
 				aria-live="polite"
-				className="fr-text--xs fr-mt-1w fr-mb-0"
+				className={
+					status === "idle"
+						? "fr-text--xs fr-mb-0"
+						: "fr-text--xs fr-mt-1w fr-mb-0"
+				}
 				role="status"
 			>
 				{status === "success"

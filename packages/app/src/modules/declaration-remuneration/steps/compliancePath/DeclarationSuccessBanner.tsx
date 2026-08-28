@@ -70,6 +70,7 @@ export function DeclarationSuccessBanner({
 					</p>
 					<ResendReceiptButton
 						kind={isSecondDeclaration ? "secondDeclaration" : "declaration"}
+						size="sm"
 						year={year}
 					/>
 				</div>

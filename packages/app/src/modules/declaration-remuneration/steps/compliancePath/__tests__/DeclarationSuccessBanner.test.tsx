@@ -58,6 +58,10 @@ describe("DeclarationSuccessBanner", () => {
 		expect(
 			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
 		).toBeInTheDocument();
+		// The banner keeps the small variant; the confirmation screens take 40px.
+		expect(
+			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
+		).toHaveClass("fr-btn--sm");
 	});
 
 	it("greys out the spam notice with the real DSFR utility class", () => {
