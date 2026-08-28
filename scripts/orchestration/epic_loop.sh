@@ -35,6 +35,7 @@ fi
 #   EPIC_LOOP_BUDGET_SONNET   10     USD max per Sonnet sub-agent
 #   EPIC_LOOP_BUDGET_OPUS     20     USD max per Opus sub-agent (Opus 5 pricing)
 #   EPIC_LOOP_AGENT_TIMEOUT   5400   seconds max per agent (90 min)
+#   EPIC_LOOP_EFFORT_CODE_DEV high   reasoning effort passed to each code-dev
 #   EPIC_MAX_PARALLEL         5      max concurrent worktrees
 #
 # Usage:
@@ -79,6 +80,10 @@ SLEEP_WAIT="${EPIC_LOOP_SLEEP_WAIT:-30}"
 BUDGET_SONNET="${EPIC_LOOP_BUDGET_SONNET:-10}"
 BUDGET_OPUS="${EPIC_LOOP_BUDGET_OPUS:-20}"
 AGENT_TIMEOUT="${EPIC_LOOP_AGENT_TIMEOUT:-5400}"
+# code-dev carries neither model: nor effort: in its frontmatter (cf. its
+# AGENT.md): both are run settings, passed here. The model varies per ticket
+# (dispatch_plan.sh), the effort is fixed for the whole run.
+AGENT_EFFORT="${EPIC_LOOP_EFFORT_CODE_DEV:-high}"
 # Max consecutive e2e-dev regression rounds before escalating to the user.
 # Each round = e2e-dev finds a regression → architect-rework creates fix
 # ticket(s) → the loop reprocesses them → e2e-dev re-runs. Beyond this cap the
@@ -266,6 +271,7 @@ Ton dernier message DOIT être uniquement ce JSON (rien d'autre, pas de prose)."
     $TIMEOUT_PREFIX env -u CLAUDECODE claude \
         --agent "$AGENT" \
         --model "$MODEL" \
+        --effort "$AGENT_EFFORT" \
         --print \
         --output-format stream-json \
         --verbose \
