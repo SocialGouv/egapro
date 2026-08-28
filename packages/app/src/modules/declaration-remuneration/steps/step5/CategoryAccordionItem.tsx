@@ -1,15 +1,12 @@
 import type React from "react";
 
-import {
-	CATEGORY_NAME_MAX_LENGTH,
-	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
-} from "~/modules/declaration-remuneration/schemas";
-import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
+import { CATEGORY_NAME_MAX_LENGTH } from "~/modules/declaration-remuneration/schemas";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
 	describedByForField,
 	findFieldError,
 } from "~/modules/declaration-remuneration/shared/formError/types";
+import stepStyles from "~/modules/declaration-remuneration/steps/Step5EmployeeCategories.module.scss";
 
 import { CategoryDataTable } from "./CategoryDataTable";
 import type { EmployeeCategory } from "./categorySerializer";
@@ -39,6 +36,9 @@ type Props = {
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	onAskRemove: (index: number) => void;
 };
+
+const CATEGORY_NAME_HINT =
+	"En référence à l'accord ou à la décision unilatérale";
 
 export function categoryAccordionHeadingId(
 	baseId: string,
@@ -118,7 +118,7 @@ export function CategoryAccordionItem({
 							<label className="fr-label" htmlFor={nameId}>
 								Libellé de la catégorie d&apos;emploi
 								<span className="fr-hint-text" id={`cat-${index}-name-hint`}>
-									{CATEGORY_NAME_MAX_LENGTH_MESSAGE}
+									{CATEGORY_NAME_HINT}
 								</span>
 							</label>
 							<input

@@ -122,6 +122,8 @@ type DbOrTx = Tx | import("~/server/db").DB;
 type EmployeeCategoryData = {
 	womenCount?: number;
 	menCount?: number;
+	hourlyWomenCount?: number;
+	hourlyMenCount?: number;
 	annualBaseWomen?: string;
 	annualBaseMen?: string;
 	annualVariableWomen?: string;
@@ -142,6 +144,8 @@ export function buildEmployeeCategoryValues(
 		declarationType: declarationType as typeof declarationType,
 		womenCount: data.womenCount ?? null,
 		menCount: data.menCount ?? null,
+		hourlyWomenCount: data.hourlyWomenCount ?? null,
+		hourlyMenCount: data.hourlyMenCount ?? null,
 		annualBaseWomen: data.annualBaseWomen ?? null,
 		annualBaseMen: data.annualBaseMen ?? null,
 		annualVariableWomen: data.annualVariableWomen ?? null,
@@ -255,6 +259,8 @@ type EmployeeCategoryDbRow = Pick<
 	| "declarationType"
 	| "womenCount"
 	| "menCount"
+	| "hourlyWomenCount"
+	| "hourlyMenCount"
 	| "annualBaseWomen"
 	| "annualBaseMen"
 	| "annualVariableWomen"
@@ -281,6 +287,8 @@ export function mapToEmployeeCategoryRows(
 				name: job.name,
 				womenCount: emp?.womenCount ?? null,
 				menCount: emp?.menCount ?? null,
+				hourlyWomenCount: emp?.hourlyWomenCount ?? null,
+				hourlyMenCount: emp?.hourlyMenCount ?? null,
 				annualBaseWomen: emp?.annualBaseWomen ?? null,
 				annualBaseMen: emp?.annualBaseMen ?? null,
 				annualVariableWomen: emp?.annualVariableWomen ?? null,

@@ -99,6 +99,8 @@ export default async function StepPage({ params }: StepPageProps) {
 				name: cat.name,
 				womenCount: null,
 				menCount: null,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: null,
 				annualBaseMen: null,
 				annualVariableWomen: null,

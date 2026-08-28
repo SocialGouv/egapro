@@ -198,7 +198,7 @@ set +e
 $TIMEOUT_PREFIX env -u CLAUDECODE claude \
     --agent e2e-dev \
     --model opus \
-    --effort xhigh \
+    --effort high \
     --print \
     --output-format json \
     --dangerously-skip-permissions \

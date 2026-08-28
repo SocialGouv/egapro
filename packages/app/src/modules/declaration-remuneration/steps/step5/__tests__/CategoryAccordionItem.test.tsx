@@ -13,6 +13,8 @@ const category: EmployeeCategory & { id: number } = {
 	name: "",
 	womenCount: "",
 	menCount: "",
+	hourlyWomenCount: "",
+	hourlyMenCount: "",
 	annualBaseWomen: "",
 	annualBaseMen: "",
 	annualVariableWomen: "",
@@ -57,10 +59,10 @@ function renderItem(
 }
 
 describe("CategoryAccordionItem — name length cap (#3943)", () => {
-	it("shows the max-length hint and caps the input with maxLength", () => {
+	it("caps the input with maxLength and hints at the label's source (#4254)", () => {
 		renderItem();
 		expect(
-			screen.getByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE),
+			screen.getByText("En référence à l'accord ou à la décision unilatérale"),
 		).toBeInTheDocument();
 		const input = document.getElementById("cat-0-name") as HTMLInputElement;
 		expect(input).toHaveAttribute(

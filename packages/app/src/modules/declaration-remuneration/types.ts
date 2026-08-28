@@ -69,10 +69,16 @@ export type PayGapRow = {
 	gipReference?: GipGapReference;
 };
 
+/**
+ * One employee category, with a physical headcount per pay basis (#4254):
+ * `womenCount`/`menCount` for annual remuneration, `hourly*Count` for hourly.
+ */
 export type EmployeeCategoryRow = {
 	name: string;
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;
@@ -90,6 +96,8 @@ export type EmployeeCategorySubmitData = {
 		data: {
 			womenCount?: number;
 			menCount?: number;
+			hourlyWomenCount?: number;
+			hourlyMenCount?: number;
 			annualBaseWomen?: string;
 			annualBaseMen?: string;
 			annualVariableWomen?: string;

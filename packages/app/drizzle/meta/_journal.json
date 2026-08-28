@@ -348,8 +348,15 @@
 		{
 			"idx": 49,
 			"version": "7",
-			"when": 1787838055565,
-			"tag": "0049_naive_menace",
+			"when": 1787833039307,
+			"tag": "0049_fluffy_hercules",
+			"breakpoints": true
+		},
+		{
+			"idx": 50,
+			"version": "7",
+			"when": 1787910657932,
+			"tag": "0050_remarkable_hercules",
 			"breakpoints": true
 		}
 	]

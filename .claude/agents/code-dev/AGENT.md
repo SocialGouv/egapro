@@ -10,14 +10,14 @@ You execute one pre-specified ticket end-to-end : edit code, write its vitest te
 > **L'absence de `model:` ET de `effort:` dans le frontmatter est délibérée — ne pas la « réparer ».** `code-dev` est le seul agent dont ces deux valeurs ne sont pas une propriété de l'agent mais un réglage du run.
 >
 > - **`model:`** — il varie par ticket : l'orchestrateur le passe toujours par `--model` (sonnet par défaut, opus si le ticket porte le label `complexe`, cf. `dispatch_plan.sh`). Le poser ici figerait ce choix.
-> - **`effort:`** — `code-dev` est **le poste de dépense de toute la pipeline** : seul agent invoqué une fois par ticket (donc N fois par epic), sur la session la plus longue (timeout 90 min, budget $10–20 chacune). Les treize autres tournent une fois par epic ou par bug sur des sessions courtes : y pinner un effort ne coûte rien, et le rend lisible. Ici, ça déciderait de la facture depuis un fichier que personne n'ouvre en lançant un epic. L'effort reste donc **hérité**, comme il l'a toujours été — c'est un réglage de run, à faire à l'invocation le jour où on veut le fixer.
+> - **`effort:`** — `code-dev` est **le poste de dépense de toute la pipeline** : seul agent invoqué une fois par ticket (donc N fois par epic), sur la session la plus longue (timeout 90 min, budget $10–20 chacune). Les treize autres tournent une fois par epic ou par bug sur des sessions courtes : y pinner un effort ne coûte rien, et le rend lisible. Ici, ça déciderait de la facture depuis un fichier que personne n'ouvre en lançant un epic. L'effort est donc **passé à l'invocation** — `--effort high` par défaut, dans `epic_loop.sh` (surchargeable par `EPIC_LOOP_EFFORT_CODE_DEV`) comme dans le CLI foreground de `/implement`, là où on voit ce qu'on dépense.
 >
-> Corollaire : **ne jamais invoquer `code-dev` via l'outil Agent** — sans `--model`, il hériterait silencieusement du modèle de la session appelante. Il se lance en process CLI (`claude --agent code-dev --model <x> [--effort <e>]`), ce qui est de toute façon obligatoire puisqu'il spawne lui-même des sous-agents.
+> Corollaire : **ne jamais invoquer `code-dev` via l'outil Agent** — sans `--model`, il hériterait silencieusement du modèle de la session appelante. Il se lance en process CLI (`claude --agent code-dev --model <x> --effort <e>`), ce qui est de toute façon obligatoire puisqu'il spawne lui-même des sous-agents.
 
 ## Model & Tools
 
 - **Model:** sonnet par défaut, **opus si le ticket a le label `complexe`** — passé par `--model` à l'invocation, jamais par le frontmatter (voir l'encadré ci-dessus).
-- **Effort:** **hérité** — jamais posé en frontmatter, jamais passé en `--effort` par l'orchestrateur (voir l'encadré ci-dessus). C'est le seul agent dans ce cas.
+- **Effort:** `high` — passé par `--effort` à l'invocation, jamais posé en frontmatter (voir l'encadré ci-dessus). C'est le seul agent dans ce cas.
 - **Tools:** all (Bash, Read, Write, Edit, Grep, Glob, Playwright, next-devtools, dsfr)
 
 ## Inputs

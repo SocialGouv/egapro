@@ -399,6 +399,47 @@ export async function deleteCseOpinions() {
 	}
 }
 
+/**
+ * Drop the autosaved draft without touching the declaration's status or step, so
+ * a test can assert what the persisted rows alone render.
+ */
+export async function clearDeclarationDraft() {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET draft = NULL, draft_updated_at = NULL
+			WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
+ * Blank the per-category hourly headcounts, reproducing a category saved before
+ * #4254 added the two columns: they are nullable and were never backfilled, so
+ * this is the exact shape every pre-existing row still has in production.
+ */
+export async function clearCategoryHourlyCounts(year?: number) {
+	const sql = createConnection();
+	try {
+		const targetYear = await effectiveYear(sql, year);
+		await sql`
+			UPDATE app_employee_category
+			SET hourly_women_count = NULL, hourly_men_count = NULL
+			WHERE job_category_id IN (
+				SELECT jc.id FROM app_job_category jc
+				INNER JOIN app_declaration d ON d.id = jc.declaration_id
+				WHERE d.siren = ${TEST_SIREN}
+				  AND d.year = ${targetYear}
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function deleteCurrentYearCategories(year?: number) {
 	const sql = createConnection();
 	try {

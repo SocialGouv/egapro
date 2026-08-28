@@ -308,6 +308,53 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		}
 	});
 
+	it("requires only the annual pay fields when the hourly headcounts are 0 (#4254)", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 0,
+			annualBaseWomen: "30000",
+			annualVariableWomen: "5000",
+			annualBaseMen: "32000",
+			annualVariableMen: "6000",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("requires only the hourly pay fields when the annual headcounts are 0 (#4254)", () => {
+		const result = parseCategory({
+			womenCount: 0,
+			menCount: 0,
+			hourlyWomenCount: 2,
+			hourlyMenCount: 2,
+			hourlyBaseWomen: "18.5",
+			hourlyVariableWomen: "3.0",
+			hourlyBaseMen: "19.0",
+			hourlyVariableMen: "3.5",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it("rejects an hourly headcount whose hourly pay fields are missing, even with the annual ones filled (#4254)", () => {
+		const result = parseCategory({
+			womenCount: 2,
+			menCount: 2,
+			hourlyWomenCount: 2,
+			hourlyMenCount: 0,
+			annualBaseWomen: "30000",
+			annualVariableWomen: "5000",
+			annualBaseMen: "32000",
+			annualVariableMen: "6000",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
 	it("rejects a single-headcount sex with no pay fields (womenCount=1, menCount=0)", () => {
 		const result = parseCategory({ womenCount: 1, menCount: 0 });
 		expect(result.success).toBe(false);
@@ -348,6 +395,8 @@ function parseCategoryForm(name: string) {
 				name,
 				womenCount: "",
 				menCount: "",
+				hourlyWomenCount: "",
+				hourlyMenCount: "",
 				annualBaseWomen: "",
 				annualBaseMen: "",
 				annualVariableWomen: "",

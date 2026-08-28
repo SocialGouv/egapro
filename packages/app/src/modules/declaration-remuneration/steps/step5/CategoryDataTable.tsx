@@ -15,8 +15,11 @@ import {
 	formatTotal,
 } from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import { workforceFieldLabel } from "../step1/workforceRows";
 import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";
+import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
+import { CATEGORY_WORKFORCE_ROWS } from "./categoryWorkforceRows";
 
 type Props = {
 	category: EmployeeCategory;
@@ -69,6 +72,8 @@ const FIELD_ID_SUFFIX: Partial<Record<keyof EmployeeCategory, string>> = {
 	hourlyVariableMen: "hourly-variable-men",
 	womenCount: "women-count",
 	menCount: "men-count",
+	hourlyWomenCount: "hourly-women-count",
+	hourlyMenCount: "hourly-men-count",
 };
 
 export function categoryDataFieldId(
@@ -218,9 +223,9 @@ function RemunerationTable({
 			>
 				<colgroup>
 					<col className={stepStyles.colLabel} />
-					<col className={stepStyles.colRemunData} />
-					<col className={stepStyles.colRemunData} />
-					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colData} />
+					<col className={stepStyles.colData} />
+					<col className={stepStyles.colData} />
 				</colgroup>
 				<RemunerationHead />
 				<tbody>
@@ -311,6 +316,59 @@ function RemunerationTable({
 	);
 }
 
+type WorkforceRowProps = {
+	row: CategoryWorkforceRowDefinition;
+	cat: EmployeeCategory;
+	catIndex: number;
+	disabled: boolean;
+	readOnly: boolean;
+	pos: Props["onPositiveNumberChange"];
+};
+
+function CategoryWorkforceRow({
+	row,
+	cat,
+	catIndex,
+	disabled,
+	readOnly,
+	pos,
+}: WorkforceRowProps) {
+	const women = Number.parseInt(cat[row.womenField], 10);
+	const men = Number.parseInt(cat[row.menField], 10);
+	const total =
+		!Number.isNaN(women) && !Number.isNaN(men)
+			? computeWorkforceTotal(women, men)
+			: null;
+
+	const countCell = (field: typeof row.womenField, sex: "women" | "men") => (
+		<td>
+			<input
+				aria-label={`${workforceFieldLabel(row.workforceRow, sex)}, catégorie ${catIndex + 1}`}
+				className={`fr-input ${common.numericInput}`}
+				disabled={disabled}
+				id={categoryDataFieldId(catIndex, field)}
+				inputMode="numeric"
+				onChange={pos(catIndex, field, true)}
+				pattern="[0-9]*"
+				readOnly={readOnly}
+				type="text"
+				value={cat[field]}
+			/>
+		</td>
+	);
+
+	return (
+		<tr className={stepStyles.dataRow}>
+			<th scope="row">{row.workforceRow.label}</th>
+			{countCell(row.womenField, "women")}
+			{countCell(row.menField, "men")}
+			<td className={stepStyles.totalCell}>
+				<strong>{total ?? "-"}</strong>
+			</td>
+		</tr>
+	);
+}
+
 export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
@@ -321,71 +379,43 @@ export function CategoryDataTable({
 	errorAlertId,
 	errors,
 }: Props) {
-	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
-	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
-	const totalEmployees =
-		!Number.isNaN(womenInt) && !Number.isNaN(menInt)
-			? computeWorkforceTotal(womenInt, menInt)
-			: null;
-
 	const idPrefix = `cat-${catIndex}`;
 
 	return (
 		<div className={common.dataSection}>
 			<div className={common.flexColumnGap1}>
-				<h3 aria-atomic="true" aria-live="polite" className="fr-h6 fr-mb-0">
-					Total salariés
-					{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
+				<h3 className="fr-h6 fr-mb-0">
+					Nombre de salariés en effectif physique
 				</h3>
 				<TableFrame
-					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Effectifs physiques`}
+					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Nombre de salariés en effectif physique`}
 				>
 					<colgroup>
 						<col className={stepStyles.colLabel} />
-						<col className={stepStyles.colWorkforceData} />
-						<col className={stepStyles.colWorkforceData} />
+						<col className={stepStyles.colData} />
+						<col className={stepStyles.colData} />
+						<col className={stepStyles.colData} />
 					</colgroup>
 					<thead>
 						<tr>
-							<th scope="col">
-								<span className="fr-sr-only">Donnée</span>
-							</th>
-							<th scope="col">Nombre de femmes</th>
-							<th scope="col">Nombre d&apos;hommes</th>
+							<th scope="col">Nombre de salariés</th>
+							<th scope="col">Femmes</th>
+							<th scope="col">Hommes</th>
+							<th scope="col">Total</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr className={stepStyles.dataRow}>
-							<th scope="row">Effectif physique</th>
-							<td>
-								<input
-									aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-									className={`fr-input ${common.numericInput}`}
-									disabled={disabled}
-									id={`${idPrefix}-women-count`}
-									inputMode="numeric"
-									onChange={pos(catIndex, "womenCount", true)}
-									pattern="[0-9]*"
-									readOnly={readOnly}
-									type="text"
-									value={cat.womenCount}
-								/>
-							</td>
-							<td>
-								<input
-									aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-									className={`fr-input ${common.numericInput}`}
-									disabled={disabled}
-									id={`${idPrefix}-men-count`}
-									inputMode="numeric"
-									onChange={pos(catIndex, "menCount", true)}
-									pattern="[0-9]*"
-									readOnly={readOnly}
-									type="text"
-									value={cat.menCount}
-								/>
-							</td>
-						</tr>
+						{CATEGORY_WORKFORCE_ROWS.map((row) => (
+							<CategoryWorkforceRow
+								cat={cat}
+								catIndex={catIndex}
+								disabled={disabled}
+								key={row.workforceRow.basis}
+								pos={pos}
+								readOnly={readOnly}
+								row={row}
+							/>
+						))}
 					</tbody>
 				</TableFrame>
 			</div>
