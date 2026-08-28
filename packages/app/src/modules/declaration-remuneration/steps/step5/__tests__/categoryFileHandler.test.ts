@@ -63,7 +63,6 @@ describe("generateTemplate", () => {
 		// Blob.text() UTF-8-decodes the bytes, stripping the leading BOM.
 		const lines = (await blob.text()).split("\n");
 		expect(lines).toHaveLength(1);
-		expect(lines[0]).toBe(HEADER_LINE);
 		expect(lines[0]?.split(";")).toEqual(TEMPLATE_HEADERS);
 	});
 
@@ -229,7 +228,27 @@ describe("parseImportFile — XLSX", () => {
 
 describe("parseImportFile — CSV", () => {
 	it("parses a valid CSV file, restituting annual and hourly headcounts alongside the 8 remuneration columns", async () => {
-		const csv = `${HEADER_LINE}\nOuvriers;50;60;45;55;30000;31000;;;;;;\nCadres;20;25;18;22;;;;;;;;`;
+		const csv = [
+			HEADER_LINE,
+			[
+				"Ouvriers",
+				"50",
+				"60",
+				"45",
+				"55",
+				"30000",
+				"31000",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+			].join(";"),
+			["Cadres", "20", "25", "18", "22", "", "", "", "", "", "", "", ""].join(
+				";",
+			),
+		].join("\n");
 		const result = await parseImportFile(csvFile(csv));
 
 		expect(result.ok).toBe(true);
@@ -287,7 +306,13 @@ describe("parseImportFile — CSV", () => {
 	});
 
 	it("rejects a file built on the old 11-column format, listing the renamed and new headers as missing", async () => {
-		const csv = `${OLD_TEMPLATE_HEADERS.join(";")}\nOuvriers;50;60;30000;31000;;;;;;`;
+		expect(OLD_TEMPLATE_HEADERS).toHaveLength(11);
+		const csv = [
+			OLD_TEMPLATE_HEADERS.join(";"),
+			["Ouvriers", "50", "60", "30000", "31000", "", "", "", "", "", ""].join(
+				";",
+			),
+		].join("\n");
 		const result = await parseImportFile(csvFile(csv));
 
 		expect(result.ok).toBe(false);
