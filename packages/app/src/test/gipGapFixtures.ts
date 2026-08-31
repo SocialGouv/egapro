@@ -43,6 +43,35 @@ export function nullGipStep3(): GipPrefillData["step3"] {
 	};
 }
 
+function nullGipQuartile(): GipPrefillData["step4"]["annual"] {
+	return {
+		thresholds: [null, null, null],
+		womenCounts: [null, null, null, null],
+		menCounts: [null, null, null, null],
+	};
+}
+
+/** A `GipPrefillData["step4"]` block with no GIP quartile data at all. */
+export function nullGipStep4(): GipPrefillData["step4"] {
+	return { annual: nullGipQuartile(), hourly: nullGipQuartile() };
+}
+
+/** A GIP-populated `GipPrefillData["step4"]` block: 90/110 annual, 80/120 hourly. */
+export function prefilledGipStep4(): GipPrefillData["step4"] {
+	return {
+		annual: {
+			thresholds: ["25000", "32000", "40000"],
+			womenCounts: [30, 25, 20, 15],
+			menCounts: [20, 25, 30, 35],
+		},
+		hourly: {
+			thresholds: ["13.74", "17.58", "21.98"],
+			womenCounts: [28, 22, 18, 12],
+			menCounts: [22, 28, 32, 38],
+		},
+	};
+}
+
 /**
  * Representative fixture for the case where both operands round to the same
  * value (0,10 €/h) yet the GIP — which computed the gap on full-precision

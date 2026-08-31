@@ -27,6 +27,8 @@ type Props = {
 	];
 	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
+	/** Rendered below sourceNote — the per-table coherence error alert. */
+	errorNote?: React.ReactNode;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
 	readOnly?: boolean;
@@ -43,6 +45,7 @@ export function QuartileTable({
 	errors,
 	readingNote,
 	sourceNote,
+	errorNote,
 	onQuartileChange,
 	disabled = false,
 	readOnly = false,
@@ -182,6 +185,7 @@ export function QuartileTable({
 				</div>
 
 				{sourceNote}
+				{errorNote}
 			</div>
 		</div>
 	);

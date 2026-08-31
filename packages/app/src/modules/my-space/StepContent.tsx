@@ -15,6 +15,20 @@ import styles from "./DeclarationProcessPanel.module.scss";
 import type { StepStatus } from "./StepRows";
 import { DeadlineRow, TransmittedRow } from "./StepRows";
 
+type CompliancePath = NonNullable<
+	DeclarationDisplayContext["firstDeclarationPathChoice"]
+>;
+
+/** Panel wording for each compliance path. Shorter than the funnel option
+ * titles, and free of the round suffix the table's step labels carry. */
+const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
+	corrective_action: "Actions correctives et seconde déclaration",
+	joint_evaluation: "Évaluation conjointe des rémunérations",
+	justify: "Justification des écarts de rémunération",
+};
+
+const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
+
 function StepTitle({
 	children,
 	status,
@@ -31,14 +45,27 @@ function StepTitle({
 	);
 }
 
+function BulletRow({ children }: { children: ReactNode }) {
+	return (
+		<div className={styles.bulletItem}>
+			<span aria-hidden="true" className={styles.bullet} />
+			<p className="fr-mb-0">{children}</p>
+		</div>
+	);
+}
+
 export function Step1Content({
 	campaignDeadlines,
+	indicatorGRequired,
+	hasPrefillData,
 	siren,
 	status,
 	variant,
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	indicatorGRequired: boolean;
+	hasPrefillData: boolean;
 	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
@@ -60,19 +87,16 @@ export function Step1Content({
 						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
 					</p>
 				</div>
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">
-						Indicateurs pré-remplis à vérifier et à modifier si nécessaire
-						(issus des données DSN)
-					</p>
-				</div>
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">
-						Indicateurs de rémunération par catégorie de salariés à remplir
-					</p>
-				</div>
+				<BulletRow>
+					{hasPrefillData
+						? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+						: "Indicateurs pour l'ensemble des salariés à remplir"}
+				</BulletRow>
+				{indicatorGRequired && (
+					<BulletRow>
+						Indicateurs de rémunération par catégories de salariés à remplir
+					</BulletRow>
+				)}
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
@@ -118,8 +142,8 @@ export function Step2Content({
 }) {
 	const title = (
 		<StepTitle status={status}>
-			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
-			si écarts &ge; 5&nbsp;%
+			Parcours de mise en conformité pour l'indicateur par catégories de
+			salariés si écarts &ge; 5&nbsp;%
 		</StepTitle>
 	);
 
@@ -144,6 +168,7 @@ export function Step2Content({
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
 					/>
 				)}
+				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
 				<DeadlineRow date={pathChoiceDeadline} />
 			</div>
 		);
@@ -153,10 +178,7 @@ export function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Actions correctives et seconde déclaration</p>
-				</div>
+				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
 				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
@@ -167,6 +189,10 @@ export function Step2Content({
 		displayContext.firstDeclarationPathChoice;
 
 	if (variant === "evaluation") {
+		const jointEvaluationDeadline =
+			declarationFsmStatus === "joint_evaluation_chosen"
+				? campaignDeadlines.decl1JointEvaluationDeadline
+				: campaignDeadlines.decl2JointEvaluationDeadline;
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
@@ -191,11 +217,8 @@ export function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				{secondDeclTransmittedRow}
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Évaluation conjointe des rémunérations</p>
-				</div>
-				<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
+				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				<DeadlineRow date={jointEvaluationDeadline} />
 			</div>
 		);
 	}
@@ -233,10 +256,7 @@ export function Step2Content({
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
-				<div className={styles.bulletItem}>
-					<span aria-hidden="true" className={styles.bullet} />
-					<p className="fr-mb-0">Justification des écarts de rémunération</p>
-				</div>
+				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
 			)}
 		</div>
 	);

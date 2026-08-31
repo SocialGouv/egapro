@@ -47,8 +47,10 @@ type LockHolder = {
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	compliancePathApplicable: true,
 	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
+	hasPrefillData: true,
 	indicatorGRequired: true,
 	lastActionDate: "12 mars 2026" as string | null,
 	declarationFsmStatus: null,
@@ -103,13 +105,6 @@ describe("DeclarationProcessPanel", () => {
 			);
 		});
 
-		it("renders the info alert", () => {
-			const { panel } = renderPanel("start");
-			expect(
-				panel.getByText(/Vous devez au préalable disposer/),
-			).toBeInTheDocument();
-		});
-
 		it("renders step 1 details with bullet points", () => {
 			const { panel } = renderPanel("start");
 			expect(
@@ -117,9 +112,19 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					/Indicateurs de rémunération par catégorie de salariés à remplir/,
+					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
+		});
+
+		it("describes indicators as manual when no prefill data is available", () => {
+			const { panel } = renderPanel("start", { hasPrefillData: false });
+			expect(
+				panel.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(/Indicateurs pré-remplis à vérifier/),
+			).not.toBeInTheDocument();
 		});
 
 		it("renders the CTA link with correct href", () => {
@@ -150,6 +155,46 @@ describe("DeclarationProcessPanel", () => {
 			const texts = [...buttons].map((b) => b.textContent);
 			expect(texts).toContain("Détail des étapes");
 			expect(texts).toContain("Centre d'aide");
+		});
+	});
+
+	describe("encart accord de branche selon indicatorGRequired (#4267)", () => {
+		const BRANCH_AGREEMENT_TEXT = /Vous devez au préalable disposer/;
+
+		function infoAlert(dialog: HTMLElement) {
+			return dialog.querySelector(".fr-alert.fr-alert--info");
+		}
+
+		it("renders the info alert on the start variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the start variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
+		});
+
+		it("renders the info alert on the compliance_choice variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the compliance_choice variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
 		});
 	});
 

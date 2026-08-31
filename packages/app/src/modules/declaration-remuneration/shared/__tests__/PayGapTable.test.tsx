@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { PayGapRow } from "~/modules/declaration-remuneration/types";
+import type { FieldError } from "../formError/types";
 import { DIVERGENT_HOURLY_MEDIAN } from "~/test/gipGapFixtures";
 import {
 	DEFAULT_PAY_GAP_ROWS,
@@ -17,6 +18,7 @@ function renderTable(rows: PayGapRow[]) {
 		<PayGapTable
 			caption="Écarts de rémunération"
 			columnHeader="Rémunération"
+			idPrefix="test-paygap"
 			onRowChange={vi.fn()}
 			rows={rows}
 		/>,
@@ -92,6 +94,7 @@ describe("PayGapTable", () => {
 			<PayGapTable
 				caption="Écarts de rémunération"
 				columnHeader="Rémunération"
+				idPrefix="test-paygap"
 				onRowChange={onRowChange}
 				rows={[gipRow({ womenValue: "", menValue: "" })]}
 			/>,
@@ -105,6 +108,31 @@ describe("PayGapTable", () => {
 		expect(onRowChange).toHaveBeenCalledWith(0, "menValue", "5");
 	});
 
+	it("keeps the DSFR and numeric classes separated on fields in error", () => {
+		const errors: FieldError[] = [
+			{
+				fieldId: "test-paygap-row1-f",
+				category: "empty",
+				message: "Le montant est obligatoire.",
+			},
+		];
+		render(
+			<PayGapTable
+				caption="Écarts de rémunération"
+				columnHeader="Rémunération"
+				errorAlertId="test-alert"
+				errors={errors}
+				idPrefix="test-paygap"
+				onRowChange={vi.fn()}
+				rows={[gipRow()]}
+			/>,
+		);
+
+		const input = screen.getByLabelText("Horaire brute médiane — Femmes");
+		expect(input).toHaveClass("fr-input", "fr-input--error");
+		expect(input.classList).toHaveLength(3);
+	});
+
 	it.each([
 		["Femmes", "womenValue"],
 		["Hommes", "menValue"],
@@ -115,6 +143,7 @@ describe("PayGapTable", () => {
 			<PayGapTable
 				caption="Écarts de rémunération"
 				columnHeader="Rémunération"
+				idPrefix="test-paygap"
 				onRowChange={onRowChange}
 				rows={[gipRow({ womenValue: "12", menValue: "12" })]}
 			/>,

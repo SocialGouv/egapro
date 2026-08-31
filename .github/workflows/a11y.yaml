@@ -16,11 +16,10 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #                           depuis `require-decided: pages`, une grille incomplète aussi.
 #   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
 #
-# Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de `schedule` du tout :
-# `a11y-pages` produit le même livrable AVEC le navigateur, sur le seul déclenchement manuel.
-# Ce qu'on perd en le supprimant, dit franchement : le plancher « sans docker, sans base, sans
-# navigateur » qui sortait un rapport daté même quand la stack tombait. C'est le prix du
-# livrable unique, et `require-sample` fait déjà rougir un balayage amputé.
+# Il n'y a plus de `a11y-report` hebdomadaire séparé : le `schedule` et le déclenchement manuel
+# lancent tous deux `a11y-pages`, qui produit le même livrable AVEC le navigateur. Le job statique
+# ne tourne plus une seconde fois sur ces événements : l'Action du tier rendu réaudite déjà tout
+# `src`, et le doublon ne renforçait aucune porte.
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
@@ -165,14 +164,18 @@ permissions:
 jobs:
   a11y-gate:
     name: "RGAA · audit statique du code"
+    # Le run complet réaudite déjà tout `src` dans `a11y-pages`. Garder cette gate sur les PR
+    # seulement évite deux invocations identiques sur le cron et le dispatch.
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        uses: maxgfr/ultra11y@v5.34.2
+        # Tag de release explicite : garder les deux usages de l'Action sur la même version.
+        uses: maxgfr/ultra11y@v5.40.1
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -190,7 +193,14 @@ jobs:
           standard: rgaa
           lang: fr
           fail-on: blocking
-          # CETTE GATE PARLE SUR UNE PR, ET SE TAIT SUR LE RUN COMPLET.
+          # Une PR reste strictement statique : aucun navigateur, aucun modèle et aucune
+          # prétention de complétude sur les critères qui exigent le rendu ou le jugement.
+          adjudicate: none
+          ledger: "false"
+          pages-report: "false"
+          require-decided: "false"
+          require-rendered: "false"
+          # CETTE GATE N'EXISTE QUE SUR UNE PR.
           #
           # Elle avait été rendue muette parce qu'elle commentait et uploadait EN MÊME TEMPS que
           # `a11y-pages` : deux commentaires sticky sur la même PR, deux arborescences de rapport
@@ -199,22 +209,21 @@ jobs:
           # instantané de page il annonçait 92 % (15/106) avec 91 critères « à évaluer » là où le
           # tier page en décidait 104 sur 106 — le même dépôt, le même commit, deux chiffres.
           #
-          # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR
-          # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire, un seul rapport,
-          # et le taux annoncé est le seul du run. Sur le cron et le dispatch, le livrable reste
-          # celui d'`a11y-pages` et cette gate redevient muette — elle garde les annotations en
-          # ligne et le SARIF, qui ne sont pas des livrables.
+          # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR,
+          # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire et un seul
+          # rapport. Sur cron/dispatch, ce job est sauté et le livrable appartient exclusivement
+          # à `a11y-pages`.
           #
           # `digest` et non `pages` : sans instantané, cette gate n'a pas de grille par page à
           # poster. Elle nomme les défauts distincts de l'audit du code, avec leurs emplacements.
           # Le marqueur sticky de `digest` lui est propre : rien ici ne peut écraser le
           # commentaire d'un autre tier.
-          comment: ${{ github.event_name == 'pull_request' }}
+          comment: "true"
           comment-kind: digest
-          report: ${{ github.event_name == 'pull_request' }}
-          html: ${{ github.event_name == 'pull_request' }}
+          report: "true"
+          html: "true"
           # Hors du motif `ultra11y-part-*`, donc jamais happé par la fusion d'`a11y-bundle`.
-          artifact-name: ${{ github.event_name == 'pull_request' && 'ultra11y-pr-static' || '' }}
+          artifact-name: ultra11y-pr-static
 
   a11y-pages:
     name: "RGAA · rapport page par page"
@@ -287,10 +296,10 @@ jobs:
       MAILDEV_URL: http://localhost:1080
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+        uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -424,7 +433,8 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        uses: maxgfr/ultra11y@v5.34.2
+        # Même tag de release que la gate PR ; ne jamais laisser les deux tiers diverger.
+        uses: maxgfr/ultra11y@v5.40.1
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -438,78 +448,32 @@ jobs:
           graph: "true"
           standard: rgaa
           lang: fr
+          report: "true"
+          html: "true"
+          pages-report: "true"
+          evidence: "true"
           # TOUTE la grille de jugement passe par le modèle — moins ce que le registre rejoue.
           # Chaque entrée du registre repasse par la même porte, sur l'évidence re-dérivée de
           # l'audit du moment ; ce qui n'est pas rejoué est ce qui est payé. Ce que personne ne
           # tranche reste « à évaluer », et `require-decided: pages` plus bas fait rougir le job
           # en le nommant.
           adjudicate: agent
-          # ON RESTE SUR LE RUNNER `action`, ET C'EST UN CHOIX, PAS UN OUBLI.
-          #
-          # 5.30.0 a ouvert un second chemin pour ce tier : `adjudicate-runner: cli` fait
-          # spawner au moteur un `claude -p` lui-même, et `adjudicate-grain: criterion` lui fait
-          # juger un critère par appel. Évalué ici, écarté — trois raisons.
-          #
-          #   1. CE QU'IL VEND, ON L'A DÉJÀ. Son argument est de lever la liste d'événements
-          #      autorisés de `claude-code-action`, donc de rendre le tier disponible sur
-          #      `push`. Ce dépôt a contourné cette restriction par le cron sur `alpha` (voir
-          #      l'en-tête). Il n'y a rien à acheter.
-          #   2. LE DÉFAUT DE L'ACTION EST CASSÉ. `adjudicate-grain` vaut `worklist` par défaut
-          #      et l'Action le passe tel quel à `judge --grain`, qui n'accepte que `batch` ou
-          #      `criterion` (`src/cli.ts:3560`). `runner: cli` au grain par défaut sort en 2
-          #      sans appeler un modèle : 40 min de CI, 0 $, et un rouge sur `require-decided`
-          #      avec toute la grille « à évaluer ». Seul le couple `cli` + `criterion` marche.
-          #   3. IL ÉCHANGE UN PLAFOND QUI MARCHE CONTRE AUCUN. `adjudicate-max-turns` ci-dessous
-          #      est VIVANT sur ce runner-ci. Sous `cli` il est muet — `--max-turns` n'est pas un
-          #      flag du CLI, qui avale un flag inconnu sans un mot. Et `adjudicate-budget-usd`
-          #      ne le remplace pas : il est poussé sur l'argv de CHAQUE `claude -p`
-          #      (`src/agent-cli.ts:170`) avec jusqu'à 4 tentatives, donc le pire cas est
-          #      `critères × passes × tentatives × plafond`. Le seul plafond de run qui
-          #      resterait serait `timeout-minutes`, soit cinq heures de modèle.
-          #
-          # S'ajoute le coût en temps : un appel par critère sur 37 pages allonge le job sans
-          # borne connue, là où les trois étapes dépliées ont une durée mesurée (39 min 25 s).
-          #
-          # TROIS PASSES, et un budget de tours large. Mesuré : l'adjudicateur s'est arrêté à
-          # 22 tours sur 228, sans erreur, en laissant 42 critères `verdict: null` — une passe
-          # unique n'a aucun moyen d'y revenir, et le job finit vert sur une grille que
-          # personne n'a remplie. Chaque passe supplémentaire ne reprend que ce qui est ENCORE
-          # indécis (jamais atteint, ou jugé puis refusé par la porte en portant son motif),
-          # donc elle coûte le reliquat et rien d'autre — et un run qui a tout décidé saute les
-          # suivantes avant d'invoquer le moindre modèle.
+          # LE RUNNER OPTIMISÉ, EXPLICITEMENT. Le moteur lance Claude en lecture seule, groupe
+          # huit critères par appel et checkpoint chaque lot. Une passe suivante ne reçoit que
+          # le reliquat refusé ou resté sans réponse ; le registre rejoué avant cela évite de
+          # repayer les verdicts dont l'évidence est encore valide.
+          adjudicate-runner: cli
+          adjudicate-grain: worklist
           adjudicate-passes: "3"
-          adjudicate-max-turns: "600"
-          # LE MODÈLE, EXPLICITEMENT. Sans cet input l'adjudication prend le défaut de
-          # `claude-code-action`, qui n'est pas une constante de ce dépôt : le tier est facturé
-          # AU CRITÈRE, une worklist RGAA en compte plusieurs dizaines, et un défaut qui bouge
-          # fait bouger la facture sans que rien ici ne change. On le nomme donc.
-          #
-          # Sonnet 5, et pas plus gros. L'amont a mesuré que ce qu'un adjudicateur bon marché
-          # ratait n'était jamais un manque de modèle : sept critères perdus sur un run vert,
-          # sept défauts d'outil — une fiche par critère rendue sans son contrat de verdict, un
-          # contrat de dispatch écrit pour un autre harnais, deux critères sans instrument et
-          # deux sans sujet moissonné. Tous corrigés en amont. Ce qui reste tient à Sonnet.
-          adjudicate-model: claude-sonnet-5
-          # L'EFFORT, ET C'EST LE LEVIER QUI N'EST PAS LE MODÈLE (5.34.0).
-          #
-          # Ce qui arrive à ce tier est, par construction, ce qu'aucun moteur n'a pu décider :
-          # pertinence d'une alternative, intitulé de lien en contexte, ordre de lecture. La
-          # difficulté n'est donc pas de choisir entre deux réponses, c'est de LIRE l'évidence
-          # sans se tromper — et c'est exactement là qu'un run mesuré ici a échoué.
-          #
-          # Mesuré sur le run 32782282651 (5.33.1, effort par défaut) : la porte a refusé 13
-          # verdicts à la première passe, 12 à la deuxième, 2 à la troisième. Aucun refus n'était
-          # un désaccord sur le fond — c'étaient des citations fabriquées, des snippets retapés
-          # au lieu d'être copiés, et des chemins préfixés `packages/app/` alors que le
-          # `working-directory` EST `packages/app`. Trois critères en sont morts, le job est
-          # sorti rouge à 103/106.
-          #
-          # `high` et pas plus : le tier est facturé au critère, et l'amont a montré que monter
-          # le MODÈLE ne rattrapait pas ces défauts-là. C'est du soin de lecture qu'il faut, pas
-          # de la puissance. Les niveaux sont low, medium, high, xhigh, max — et une valeur hors
-          # liste est refusée par l'Action plutôt que transmise (le CLI avalerait un niveau
-          # inconnu en silence, exactement comme il avale un flag inconnu).
+          # Opus high est réservé au cron/dispatch, jamais aux PR. Le CLI applique le budget à
+          # CHAQUE lot de huit, pas à la passe entière : 106 critères font au plus 14 lots, donc
+          # 0,70 $ borne une passe complète à 9,80 $ hors rares retries de transport. Les passes
+          # suivantes ne reçoivent que le reliquat et s'arrêtent dès que la grille est complète.
+          # `opus` est volontairement l'alias Claude CLI : le tier reste Opus, sa version peut
+          # évoluer avec le CLI.
+          adjudicate-model: opus
           adjudicate-effort: high
+          adjudicate-budget-usd: "0.70"
           # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
           # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
           # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
@@ -548,6 +512,10 @@ jobs:
           # Ce qui reste ouvert est NOMMÉ dans le log et dans la fiche par page ; jamais un
           # seuil, jamais un pourcentage.
           require-decided: "pages"
+          # Si un critère de rendu reste ouvert, cette porte refuse un run sans aucune capture
+          # navigateur. `require-sample` ci-dessous impose indépendamment la présence des 24
+          # pages attendues par la configuration du dépôt.
+          require-rendered: "true"
           # LA COUVERTURE, elle, bloque — et c'est la seule chose qui bloque ici.
           #
           # `require-decided` porte sur les CRITÈRES ; celle-ci porte sur les PAGES, et c'est
@@ -624,8 +592,8 @@ jobs:
   #
   # `if: always()` : un tier qui échoue ne doit pas emporter le livrable de l'autre.
   # `actions/upload-artifact/merge` ne trouvant AUCUNE partie échoue par défaut — d'où
-  # `continue-on-error`, parce qu'un run sans artefact est un fait, pas une panne : c'est le
-  # cas d'un `push` sur alpha, où seule la gate tourne, et où elle ne produit plus rien.
+  # `continue-on-error`, parce qu'un run sans artefact est un fait à rendre visible dans les
+  # logs de fusion, pas une raison de masquer les statuts des producteurs.
   a11y-bundle:
     name: "RGAA · livrable unique"
     needs: [a11y-gate, a11y-pages]

@@ -58,8 +58,10 @@ const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
 
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	compliancePathApplicable: true,
 	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
+	hasPrefillData: true,
 	indicatorGRequired: true,
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
@@ -214,6 +216,155 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("étape 1 transmise sur tous les parcours (#4243)", () => {
+		it.each<PanelVariant>([
+			"compliance_choice",
+			"compliance",
+			"evaluation",
+			"cse",
+			"closed",
+		])("announces the transmitted declaration for variant %s", (variant) => {
+			const { panel, dialog } = renderPanel(variant);
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+		});
+
+		it("keeps the view link on a closed démarche once the deadline has passed", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				year: PAST_YEAR,
+			});
+			expect(
+				dialog.querySelector(
+					'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]',
+				),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByRole("link", { name: "Modifier" }),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("étape 2 — choix du parcours nommé (#4243)", () => {
+		it("names the pending path choice on the first declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceRound1Deadline)}`,
+			);
+		});
+
+		it("names the pending path choice again after the second declaration", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance_choice", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+			});
+
+			expect(
+				panel.getByText("Votre seconde déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				panel.getByText("Choix du parcours de mise en conformité"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
+		});
+
+		it("names the chosen path and its deadline for corrective actions", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("compliance", {
+				campaignDeadlines: deadlines,
+				displayContext: makeDisplayContext("corrective_action"),
+			});
+
+			expect(
+				panel.getByText("Actions correctives et seconde déclaration"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl2ModificationDeadline)}`,
+			);
+		});
+
+		it.each([
+			{
+				label: "first round",
+				displayContext: makeDisplayContext("justify"),
+			},
+			{
+				label: "revised choice",
+				displayContext: makeDisplayContext("corrective_action", "justify"),
+			},
+		])("names the $label justification with no deadline", ({
+			displayContext,
+		}) => {
+			const { panel } = renderPanel("cse", {
+				displayContext,
+				hasSubmittedSecondDeclaration: false,
+			});
+
+			const step2 = panel.getByText(
+				/^Parcours de mise en conformité/,
+			).parentElement;
+			if (!step2) throw new Error("Step 2 content did not render");
+			expect(step2).toHaveTextContent(
+				"Justification des écarts de rémunération",
+			);
+			expect(within(step2).queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it.each([
+			{
+				label: "first round",
+				declarationFsmStatus: "joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext("joint_evaluation"),
+				hasSubmittedSecondDeclaration: false,
+				deadlineKey: "decl1JointEvaluationDeadline" as const,
+			},
+			{
+				label: "revised choice",
+				declarationFsmStatus: "revised_joint_evaluation_chosen" as const,
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+				deadlineKey: "decl2JointEvaluationDeadline" as const,
+			},
+		])("names the $label joint evaluation with the applicable deadline", ({
+			declarationFsmStatus,
+			displayContext,
+			hasSubmittedSecondDeclaration,
+			deadlineKey,
+		}) => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("evaluation", {
+				campaignDeadlines: deadlines,
+				declarationFsmStatus,
+				displayContext,
+				hasSubmittedSecondDeclaration,
+			});
+
+			expect(
+				panel.getByText("Évaluation conjointe des rémunérations"),
+			).toBeInTheDocument();
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines[deadlineKey])}`,
+			);
+		});
+	});
+
 	describe("2nde déclaration — variant cse avec secondDeclarationSubmitted", () => {
 		it("renders view link on the second declaration row (with type=correction)", () => {
 			const { dialog } = renderPanel("cse", {
@@ -235,15 +386,17 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
 
-		it("renders steps 2 and 3 when both indicatorGRequired and cseOpinionRequired are true", () => {
+		it("renders steps 2 and 3 when both compliancePathApplicable and cseOpinionRequired are true", () => {
 			const { panel } = renderPanel("start");
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.getByText(STEP2_TITLE)).toBeInTheDocument();
 			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
 		});
 
-		it("hides step 2 when indicatorGRequired is false", () => {
-			const { panel } = renderPanel("start", { indicatorGRequired: false });
+		it("hides step 2 when compliancePathApplicable is false", () => {
+			const { panel } = renderPanel("start", {
+				compliancePathApplicable: false,
+			});
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
 			expect(panel.getByText(STEP3_TITLE)).toBeInTheDocument();
@@ -256,14 +409,51 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
 		});
 
-		it("hides both steps 2 and 3 for a company without CSE and without indicator G", () => {
+		it("hides both steps 2 and 3 when neither compliance nor a CSE opinion applies", () => {
 			const { panel } = renderPanel("start", {
 				cseOpinionRequired: false,
-				indicatorGRequired: false,
+				compliancePathApplicable: false,
 			});
 			expect(panel.getByText(STEP1_TITLE)).toBeInTheDocument();
 			expect(panel.queryByText(STEP2_TITLE)).not.toBeInTheDocument();
 			expect(panel.queryByText(STEP3_TITLE)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
+		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
+		const CATEGORY_BULLET =
+			/Indicateurs de rémunération par catégories de salariés à remplir/;
+
+		it("renders both bullets on the start variant when indicator G applies", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: true });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.getByText(CATEGORY_BULLET)).toBeInTheDocument();
+		});
+
+		it("drops the category bullet but keeps the prefilled one when indicator G does not apply", () => {
+			const { panel } = renderPanel("start", { indicatorGRequired: false });
+			expect(panel.getByText(PREFILLED_BULLET)).toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
+		});
+
+		it("keeps the step 1 deadline row when the category bullet is dropped", () => {
+			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const { panel } = renderPanel("start", {
+				campaignDeadlines: deadlines,
+				indicatorGRequired: false,
+			});
+			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+				`Échéance : ${longDateText(deadlines.decl1ModificationDeadline)}`,
+			);
+		});
+
+		it("renders no step 1 bullet outside the start variant", () => {
+			const { panel } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(panel.queryByText(PREFILLED_BULLET)).not.toBeInTheDocument();
+			expect(panel.queryByText(CATEGORY_BULLET)).not.toBeInTheDocument();
 		});
 	});
 
@@ -281,8 +471,10 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(stepNumbers(dialog)).toEqual(["1", "2", "3"]);
 		});
 
-		it("renumbers the CSE step to 2 when step 2 (indicator G) is hidden", () => {
-			const { dialog } = renderPanel("start", { indicatorGRequired: false });
+		it("renumbers the CSE step to 2 when the compliance step is hidden", () => {
+			const { dialog } = renderPanel("start", {
+				compliancePathApplicable: false,
+			});
 			expect(stepNumbers(dialog)).toEqual(["1", "2"]);
 		});
 
@@ -294,7 +486,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("only shows step 1 when both steps 2 and 3 are hidden", () => {
 			const { dialog } = renderPanel("start", {
 				cseOpinionRequired: false,
-				indicatorGRequired: false,
+				compliancePathApplicable: false,
 			});
 			expect(stepNumbers(dialog)).toEqual(["1"]);
 		});

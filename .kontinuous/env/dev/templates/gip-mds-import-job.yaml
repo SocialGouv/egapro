@@ -8,41 +8,27 @@
 # check is not enough — the old pods answer it too. The init container below
 # gates the import on `kubectl rollout status`, which only returns once the
 # new ReplicaSet is fully ready and the old one is scaled down. The
-# ServiceAccount/Role/RoleBinding grant the read-only access this watch
-# requires, scoped to the single `app` Deployment.
+# ServiceAccount + RoleBinding (`view` ClusterRole, namespace-scoped) grant
+# the read-only access this watch requires.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: gip-mds-import
   namespace: {{ .Values.global.namespace }}
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: gip-mds-import
-  namespace: {{ .Values.global.namespace }}
-rules:
-  # `get` can be scoped to the deployment name, but `list`/`watch` cannot:
-  # RBAC resourceNames never match collection requests, and `kubectl rollout
-  # status` sets up its watch through list+watch on the deployments
-  # collection (with a fieldSelector). The rule stays namespace-scoped.
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    resourceNames: ["app"]
-    verbs: ["get"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["list", "watch"]
----
+# Bind the built-in namespaced `view` ClusterRole instead of a Role created in
+# the same apply: SSA of RoleBinding otherwise 404s on the Role (API cache).
+# New name: roleRef is immutable, leftover RoleBindings from failed review
+# deploys cannot be patched from Role/gip-mds-import to ClusterRole/view.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gip-mds-import
+  name: gip-mds-import-view
   namespace: {{ .Values.global.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: gip-mds-import
+  kind: ClusterRole
+  name: view
 subjects:
   - kind: ServiceAccount
     name: gip-mds-import

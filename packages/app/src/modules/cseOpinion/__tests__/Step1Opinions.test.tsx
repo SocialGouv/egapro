@@ -150,7 +150,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégories de salariés/,
 			),
 		).toBeInTheDocument();
 	});
@@ -167,7 +167,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.queryByText(
-				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégories de salariés/,
 			),
 		).not.toBeInTheDocument();
 	});
@@ -251,6 +251,10 @@ describe("Step1Opinions", () => {
 				/Votre rapport de l'évaluation conjointe a été transmise/,
 			),
 		).toBeInTheDocument();
+		// The banner keeps the small variant; the confirmation screens take 40px.
+		expect(
+			screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
+		).toHaveClass("fr-btn--sm");
 	});
 
 	it("does not render the submission banner for other paths", () => {

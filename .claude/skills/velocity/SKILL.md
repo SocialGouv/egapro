@@ -22,7 +22,7 @@ description: "Calcule la vélocité des sprints terminés (Σ points des tickets
 | **Complétion** | réalisé / engagé. Le reste = carry-over. |
 | **Recommandation** | moyenne glissante de la vélocité des **3 derniers sprints terminés**. |
 
-Les points viennent du champ `Estimate`, alimenté par le sizing t-shirt en fin d'analyse (`/analyse` → `set_ticket_size.sh`). Convention Fibonacci : **XS=1 S=2 M=3 L=5 XL=8** (cf. `rules/complexity-estimation.md`).
+Les points viennent du champ `Estimate`, alimenté par le sizing t-shirt en fin d'analyse (`/analyse` → `set_ticket_size.sh`). Convention Fibonacci : **XS=1 S=2 M=3 L=5 XL=8** (cf. `.claude/pipeline/complexity-estimation.md`).
 
 ## Exécution
 

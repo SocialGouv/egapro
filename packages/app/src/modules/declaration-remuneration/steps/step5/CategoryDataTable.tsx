@@ -1,6 +1,12 @@
 "use client";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
+import { numericInputClassName } from "~/modules/declaration-remuneration/shared/numericInputClassName";
 import {
 	computeGap,
 	computeTotal,
@@ -9,8 +15,11 @@ import {
 	formatTotal,
 } from "~/modules/domain";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import { workforceFieldLabel } from "../step1/workforceRows";
 import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";
+import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
+import { CATEGORY_WORKFORCE_ROWS } from "./categoryWorkforceRows";
 
 type Props = {
 	category: EmployeeCategory;
@@ -23,6 +32,8 @@ type Props = {
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
 	readOnly?: boolean;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 type StringField = {
@@ -50,6 +61,30 @@ const HOURLY_FIELDS: EuroFields = {
 	variableMen: "hourlyVariableMen",
 };
 
+const FIELD_ID_SUFFIX: Partial<Record<keyof EmployeeCategory, string>> = {
+	annualBaseWomen: "annual-base-women",
+	annualBaseMen: "annual-base-men",
+	annualVariableWomen: "annual-variable-women",
+	annualVariableMen: "annual-variable-men",
+	hourlyBaseWomen: "hourly-base-women",
+	hourlyBaseMen: "hourly-base-men",
+	hourlyVariableWomen: "hourly-variable-women",
+	hourlyVariableMen: "hourly-variable-men",
+	womenCount: "women-count",
+	menCount: "men-count",
+	hourlyWomenCount: "hourly-women-count",
+	hourlyMenCount: "hourly-men-count",
+};
+
+export function categoryDataFieldId(
+	categoryIndex: number,
+	field: keyof EmployeeCategory,
+): string {
+	const suffix = FIELD_ID_SUFFIX[field];
+	if (!suffix) return `cat-${categoryIndex}`;
+	return `cat-${categoryIndex}-${suffix}`;
+}
+
 type EuroCellProps = {
 	ariaLabel: string;
 	id: string;
@@ -58,6 +93,8 @@ type EuroCellProps = {
 	value: string;
 	onBlur: () => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 function EuroInputCell({
@@ -68,13 +105,18 @@ function EuroInputCell({
 	value,
 	onBlur,
 	onChange,
+	errorAlertId,
+	errors,
 }: EuroCellProps) {
+	const error = findFieldError(errors, id);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
 				<input
+					aria-describedby={describedByForField(errorAlertId, error)}
+					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
-					className={`fr-input ${stepStyles.compactInput} ${common.numericInput}`}
+					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
 					disabled={disabled}
 					id={id}
 					inputMode="decimal"
@@ -145,6 +187,8 @@ type RemunerationTableProps = {
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 };
 
 function RemunerationTable({
@@ -158,6 +202,8 @@ function RemunerationTable({
 	pos,
 	blur,
 	idPrefix,
+	errorAlertId,
+	errors,
 }: RemunerationTableProps) {
 	const totalWomen = computeTotal(
 		cat[fields.baseWomen],
@@ -177,9 +223,9 @@ function RemunerationTable({
 			>
 				<colgroup>
 					<col className={stepStyles.colLabel} />
-					<col className={stepStyles.colRemunData} />
-					<col className={stepStyles.colRemunData} />
-					<col className={stepStyles.colRemunData} />
+					<col className={stepStyles.colData} />
+					<col className={stepStyles.colData} />
+					<col className={stepStyles.colData} />
 				</colgroup>
 				<RemunerationHead />
 				<tbody>
@@ -188,6 +234,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("base-women")}
 							onBlur={blur(catIndex, fields.baseWomen)}
 							onChange={pos(catIndex, fields.baseWomen, false)}
@@ -197,6 +245,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("base-men")}
 							onBlur={blur(catIndex, fields.baseMen)}
 							onChange={pos(catIndex, fields.baseMen, false)}
@@ -219,6 +269,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("variable-women")}
 							onBlur={blur(catIndex, fields.variableWomen)}
 							onChange={pos(catIndex, fields.variableWomen, false)}
@@ -228,6 +280,8 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							errorAlertId={errorAlertId}
+							errors={errors}
 							id={idFor("variable-men")}
 							onBlur={blur(catIndex, fields.variableMen)}
 							onChange={pos(catIndex, fields.variableMen, false)}
@@ -262,6 +316,59 @@ function RemunerationTable({
 	);
 }
 
+type WorkforceRowProps = {
+	row: CategoryWorkforceRowDefinition;
+	cat: EmployeeCategory;
+	catIndex: number;
+	disabled: boolean;
+	readOnly: boolean;
+	pos: Props["onPositiveNumberChange"];
+};
+
+function CategoryWorkforceRow({
+	row,
+	cat,
+	catIndex,
+	disabled,
+	readOnly,
+	pos,
+}: WorkforceRowProps) {
+	const women = Number.parseInt(cat[row.womenField], 10);
+	const men = Number.parseInt(cat[row.menField], 10);
+	const total =
+		!Number.isNaN(women) && !Number.isNaN(men)
+			? computeWorkforceTotal(women, men)
+			: null;
+
+	const countCell = (field: typeof row.womenField, sex: "women" | "men") => (
+		<td>
+			<input
+				aria-label={`${workforceFieldLabel(row.workforceRow, sex)}, catégorie ${catIndex + 1}`}
+				className={`fr-input ${common.numericInput}`}
+				disabled={disabled}
+				id={categoryDataFieldId(catIndex, field)}
+				inputMode="numeric"
+				onChange={pos(catIndex, field, true)}
+				pattern="[0-9]*"
+				readOnly={readOnly}
+				type="text"
+				value={cat[field]}
+			/>
+		</td>
+	);
+
+	return (
+		<tr className={stepStyles.dataRow}>
+			<th scope="row">{row.workforceRow.label}</th>
+			{countCell(row.womenField, "women")}
+			{countCell(row.menField, "men")}
+			<td className={stepStyles.totalCell}>
+				<strong>{total ?? "-"}</strong>
+			</td>
+		</tr>
+	);
+}
+
 export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
@@ -269,72 +376,46 @@ export function CategoryDataTable({
 	onDecimalBlur: blur,
 	disabled = false,
 	readOnly = false,
+	errorAlertId,
+	errors,
 }: Props) {
-	const womenInt = cat.womenCount ? Number.parseInt(cat.womenCount, 10) : NaN;
-	const menInt = cat.menCount ? Number.parseInt(cat.menCount, 10) : NaN;
-	const totalEmployees =
-		!Number.isNaN(womenInt) && !Number.isNaN(menInt)
-			? computeWorkforceTotal(womenInt, menInt)
-			: null;
-
 	const idPrefix = `cat-${catIndex}`;
 
 	return (
 		<div className={common.dataSection}>
 			<div className={common.flexColumnGap1}>
-				<h3 aria-atomic="true" aria-live="polite" className="fr-h6 fr-mb-0">
-					Total salariés
-					{totalEmployees !== null ? ` : ${totalEmployees}` : ""}
+				<h3 className="fr-h6 fr-mb-0">
+					Nombre de salariés en effectif physique
 				</h3>
 				<TableFrame
-					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Effectifs physiques`}
+					caption={`Catégorie d'emplois n°${catIndex + 1}${cat.name.trim() ? ` : ${cat.name}` : ""} — Nombre de salariés en effectif physique`}
 				>
 					<colgroup>
 						<col className={stepStyles.colLabel} />
-						<col className={stepStyles.colWorkforceData} />
-						<col className={stepStyles.colWorkforceData} />
+						<col className={stepStyles.colData} />
+						<col className={stepStyles.colData} />
+						<col className={stepStyles.colData} />
 					</colgroup>
 					<thead>
 						<tr>
-							<th scope="col">
-								<span className="fr-sr-only">Donnée</span>
-							</th>
-							<th scope="col">Nombre de femmes</th>
-							<th scope="col">Nombre d&apos;hommes</th>
+							<th scope="col">Nombre de salariés</th>
+							<th scope="col">Femmes</th>
+							<th scope="col">Hommes</th>
+							<th scope="col">Total</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr className={stepStyles.dataRow}>
-							<th scope="row">Effectif physique</th>
-							<td>
-								<input
-									aria-label={`Effectif femmes, catégorie ${catIndex + 1}`}
-									className={`fr-input ${common.numericInput}`}
-									disabled={disabled}
-									id={`${idPrefix}-women-count`}
-									inputMode="numeric"
-									onChange={pos(catIndex, "womenCount", true)}
-									pattern="[0-9]*"
-									readOnly={readOnly}
-									type="text"
-									value={cat.womenCount}
-								/>
-							</td>
-							<td>
-								<input
-									aria-label={`Effectif hommes, catégorie ${catIndex + 1}`}
-									className={`fr-input ${common.numericInput}`}
-									disabled={disabled}
-									id={`${idPrefix}-men-count`}
-									inputMode="numeric"
-									onChange={pos(catIndex, "menCount", true)}
-									pattern="[0-9]*"
-									readOnly={readOnly}
-									type="text"
-									value={cat.menCount}
-								/>
-							</td>
-						</tr>
+						{CATEGORY_WORKFORCE_ROWS.map((row) => (
+							<CategoryWorkforceRow
+								cat={cat}
+								catIndex={catIndex}
+								disabled={disabled}
+								key={row.workforceRow.basis}
+								pos={pos}
+								readOnly={readOnly}
+								row={row}
+							/>
+						))}
 					</tbody>
 				</TableFrame>
 			</div>
@@ -344,6 +425,8 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled}
+				errorAlertId={errorAlertId}
+				errors={errors}
 				fields={ANNUAL_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}
@@ -357,6 +440,8 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled}
+				errorAlertId={errorAlertId}
+				errors={errors}
 				fields={HOURLY_FIELDS}
 				idPrefix={idPrefix}
 				pos={pos}

@@ -322,7 +322,7 @@ describe("ProfileModal — validation", () => {
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
-	it("blocks the submit and flags the phone when its format is invalid", async () => {
+	it("keeps the phone format hint and shows the generic error when invalid", async () => {
 		await renderOpenModal();
 		fireEvent.change(getElement("profile-phone"), {
 			target: { value: "012233" },
@@ -332,10 +332,11 @@ describe("ProfileModal — validation", () => {
 		await waitFor(() => {
 			expect(
 				document.querySelector("#profile-phone-messages .fr-message--error"),
-			).toHaveTextContent(
-				"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
-			);
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
 		});
+		expect(
+			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),
+		).toBeVisible();
 		expect(getElement("profile-phone")).toHaveAttribute("aria-invalid", "true");
 		expect(mockMutate).not.toHaveBeenCalled();
 	});

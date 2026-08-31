@@ -131,6 +131,14 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 		expect(findRowBySiren(sheet, SIREN_DRAFT)).toBeUndefined();
 	});
 
+	it("excludes a declaration closed as not subject from the export", async () => {
+		await sql`UPDATE app_representation_declaration SET status = 'not_subject' WHERE id = 'repr-export-draft'`;
+
+		const sheet = await fetchExportSheet();
+
+		expect(findRowBySiren(sheet, SIREN_DRAFT)).toBeUndefined();
+	});
+
 	it("exports a declaration that becomes submitted after having been a draft", async () => {
 		await sql`UPDATE app_representation_declaration SET status = 'submitted' WHERE id = 'repr-export-draft'`;
 

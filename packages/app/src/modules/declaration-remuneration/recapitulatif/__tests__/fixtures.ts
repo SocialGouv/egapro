@@ -8,6 +8,8 @@ export function makeCategory(
 		name: "",
 		womenCount: null,
 		menCount: null,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: null,
 		annualBaseMen: null,
 		annualVariableWomen: null,

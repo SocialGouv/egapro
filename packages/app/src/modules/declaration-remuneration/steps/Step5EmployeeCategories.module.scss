@@ -56,13 +56,10 @@
 	width: 28%;
 }
 
-// Workforce (effectifs) table: two equal data columns (women / men).
-.colWorkforceData {
-	width: 36%;
-}
-
-// Rémunération tables: three equal data columns (women / men / gap).
-.colRemunData {
+// Three equal data columns in every category table, so the effectifs table
+// (femmes / hommes / total) and the rémunération tables (femmes / hommes /
+// écart) share the same vertical rules (Figma node 10905-44316).
+.colData {
 	width: 24%;
 }
 

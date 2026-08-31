@@ -1,15 +1,15 @@
 ---
 paths:
-  - "packages/app/src/server/api/routers/**/*.ts"
-  - "packages/app/src/app/api/**/route.ts"
-  - "packages/app/src/server/auth/**/*.ts"
-  - "packages/app/src/server/audit/**/*.ts"
-  - "packages/app/src/modules/audit/**/*.ts"
+  - "src/server/api/routers/**/*.ts"
+  - "src/app/api/**/route.ts"
+  - "src/server/auth/**/*.ts"
+  - "src/server/audit/**/*.ts"
+  - "src/modules/audit/**/*.ts"
 ---
 
 # Audit logging
 
-> **Used by**: `code-dev` (quand il touche à tRPC, route handlers, auth), `security-auditor` (A09), `structural-auditor`. Auto-chargé via `paths:` frontmatter.
+> Chargée sur les routeurs tRPC, les route handlers, l'auth et la couche audit. Vérifiée par `security-auditor` (A09) et `structural-auditor`.
 
 Every user-facing action that falls into one of the audit categories **must**
 produce a row in `audit.action_log`. Adding a new action without wiring the

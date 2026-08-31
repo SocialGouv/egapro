@@ -58,6 +58,10 @@ describe("DeclarationSuccessBanner", () => {
 		expect(
 			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
 		).toBeInTheDocument();
+		// The banner keeps the small variant; the confirmation screens take 40px.
+		expect(
+			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
+		).toHaveClass("fr-btn--sm");
 	});
 
 	it("greys out the spam notice with the real DSFR utility class", () => {
@@ -80,7 +84,7 @@ describe("DeclarationSuccessBanner", () => {
 		[false, "Télécharger le récapitulatif de la déclaration des indicateurs"],
 		[
 			true,
-			"Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés",
+			"Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
 		],
 	])("links to the recapitulative PDF when available (isSecondDeclaration: %s)", (isSecondDeclaration, label) => {
 		renderBanner({ isSecondDeclaration, pdfDownloadHref: "/pdf/2026" });

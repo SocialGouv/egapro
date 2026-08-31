@@ -161,6 +161,19 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 		);
 	});
 
+	it("excludes a declaration closed as not subject from the window", async () => {
+		await sql`UPDATE app_representation_declaration SET status = 'not_subject' WHERE id = 'suit-repr-draft'`;
+
+		const body = await fetchWindow({
+			date_begin: DATE_BEGIN,
+			date_end: DATE_END,
+		});
+
+		expect(seededOnly(body.Representations).map((r) => r.SIREN)).not.toContain(
+			SIREN_DRAFT,
+		);
+	});
+
 	it("includes a declaration that becomes submitted after having been a draft", async () => {
 		await sql`UPDATE app_representation_declaration SET status = 'submitted' WHERE id = 'suit-repr-draft'`;
 

@@ -42,7 +42,7 @@ export function SubmissionBanner({ email, deadline, year }: Props) {
 						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
 						Sinon, cliquez sur le bouton ci-dessous.
 					</p>
-					<ResendReceiptButton kind="cseOpinion" year={year} />
+					<ResendReceiptButton kind="cseOpinion" size="sm" year={year} />
 				</div>
 			</div>
 		</div>

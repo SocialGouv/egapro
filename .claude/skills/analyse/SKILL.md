@@ -90,7 +90,7 @@ Déléguer à `architect` mode `task` (`.claude/agents/architect/AGENT.md`). Pas
 L'agent :
 1. Lit le body (intact) + tous les commentaires
 2. **Pose des questions à l'utilisateur si la task est trop floue** — fichiers concernés, comportement attendu, scénario observable, réf Figma. Pas d'invention.
-3. Propose un spec inline au format `rules/ticket-spec-format.md`
+3. Propose un spec inline au format `.claude/pipeline/ticket-spec-format.md`
 4. Obtient validation explicite
 5. Poste un commentaire `## Analyse architecte` sur la task — **le body reste intact**
 6. Applique le label `complexe` si > 5 fichiers / refacto multi-modules
@@ -132,7 +132,7 @@ Next: /implement NNN
 
 ## Notes
 
-- **Complexité t-shirt en fin d'analyse** — chaque ticket **feuille** (Task / Bug, jamais l'epic) reçoit une taille XS→XL écrite sur le board (`Size` + `Estimate`) par l'agent d'analyse via `set_ticket_size.sh`, avec justification dans le commentaire/body sous `## Complexité`. Rubrique : `rules/complexity-estimation.md`. Ces points alimentent la vélocité de sprint (skill `/velocity`).
+- **Complexité t-shirt en fin d'analyse** — chaque ticket **feuille** (Task / Bug, jamais l'epic) reçoit une taille XS→XL écrite sur le board (`Size` + `Estimate`) par l'agent d'analyse via `set_ticket_size.sh`, avec justification dans le commentaire/body sous `## Complexité`. Rubrique : `.claude/pipeline/complexity-estimation.md`. Ces points alimentent la vélocité de sprint (skill `/velocity`).
 - **Pas de transition de statut board** — l'issue reste dans son statut courant (`Backlog` ou `To Do`). C'est `/implement` qui bouge à `In progress` puis `In review`.
 - Si un agent revient sans validation utilisateur (utilisateur a refusé après Q&A) → arrêter la pipeline, laisser l'utilisateur reformuler.
 - En mode `epic-enrich`, ne **jamais effacer** les commentaires précédents (`## Besoin métier`, `## Analyse PO`). Préférer un commentaire `(révisé YYYY-MM-DD)` pointant vers le précédent — la traçabilité historique est précieuse.

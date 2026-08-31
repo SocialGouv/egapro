@@ -52,4 +52,5 @@ export type DeclarationItem = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	notSubject: boolean;
 };

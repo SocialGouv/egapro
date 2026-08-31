@@ -82,24 +82,41 @@ export const updateStep4Schema = z.object({
 	hourly: tableSchema,
 });
 
-export const PAY_FIELDS_WOMEN = [
-	"annualBaseWomen",
-	"annualVariableWomen",
-	"hourlyBaseWomen",
-	"hourlyVariableWomen",
+/**
+ * Each pay basis carries its own headcount and its own pay fields (#4254):
+ * a headcount on one basis only ever requires that basis' pay data.
+ */
+export const CATEGORY_PAY_BASES = [
+	{
+		basis: "annual",
+		womenCountField: "womenCount",
+		menCountField: "menCount",
+		womenPayFields: ["annualBaseWomen", "annualVariableWomen"],
+		menPayFields: ["annualBaseMen", "annualVariableMen"],
+	},
+	{
+		basis: "hourly",
+		womenCountField: "hourlyWomenCount",
+		menCountField: "hourlyMenCount",
+		womenPayFields: ["hourlyBaseWomen", "hourlyVariableWomen"],
+		menPayFields: ["hourlyBaseMen", "hourlyVariableMen"],
+	},
 ] as const;
 
-export const PAY_FIELDS_MEN = [
-	"annualBaseMen",
-	"annualVariableMen",
-	"hourlyBaseMen",
-	"hourlyVariableMen",
-] as const;
+export const PAY_FIELDS_WOMEN = CATEGORY_PAY_BASES.flatMap(
+	(base) => base.womenPayFields,
+);
+
+export const PAY_FIELDS_MEN = CATEGORY_PAY_BASES.flatMap(
+	(base) => base.menPayFields,
+);
 
 const employeeCategoryDataSchema = z
 	.object({
 		womenCount: z.number().int().min(0).optional(),
 		menCount: z.number().int().min(0).optional(),
+		hourlyWomenCount: z.number().int().min(0).optional(),
+		hourlyMenCount: z.number().int().min(0).optional(),
 		annualBaseWomen: z.string().optional(),
 		annualBaseMen: z.string().optional(),
 		annualVariableWomen: z.string().optional(),
@@ -111,13 +128,16 @@ const employeeCategoryDataSchema = z
 	})
 	.refine(
 		(data) =>
-			isSexRemunerationComplete(
-				data.womenCount,
-				PAY_FIELDS_WOMEN.map((f) => data[f]),
-			) &&
-			isSexRemunerationComplete(
-				data.menCount,
-				PAY_FIELDS_MEN.map((f) => data[f]),
+			CATEGORY_PAY_BASES.every(
+				(base) =>
+					isSexRemunerationComplete(
+						data[base.womenCountField],
+						base.womenPayFields.map((field) => data[field]),
+					) &&
+					isSexRemunerationComplete(
+						data[base.menCountField],
+						base.menPayFields.map((field) => data[field]),
+					),
 			),
 		{
 			message:
@@ -149,6 +169,8 @@ export const categoryFormEntrySchema = z.object({
 		.max(CATEGORY_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH_MESSAGE),
 	womenCount: z.string(),
 	menCount: z.string(),
+	hourlyWomenCount: z.string(),
+	hourlyMenCount: z.string(),
 	annualBaseWomen: z.string(),
 	annualBaseMen: z.string(),
 	annualVariableWomen: z.string(),
@@ -168,6 +190,8 @@ export const categoryFormSchema = z.object({
 		),
 	categories: z.array(categoryFormEntrySchema),
 });
+
+export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),

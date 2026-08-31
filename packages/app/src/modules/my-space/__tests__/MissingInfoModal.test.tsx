@@ -265,6 +265,86 @@ describe("MissingInfoModal", () => {
 		).not.toBeDisabled();
 	});
 
+	it("shows a dedicated error when submitting without a phone number", async () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={false}
+				hasCse={true}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await waitFor(() => {
+			expect(
+				document.querySelector(
+					"#missing-info-phone-messages .fr-message--error",
+				),
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+		});
+	});
+
+	it("keeps the format hint and generic error while correcting the phone", async () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={false}
+				hasCse={true}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await screen.findByText("Veuillez renseigner votre numéro de téléphone");
+
+		fireEvent.change(screen.getByLabelText(/Numéro de téléphone/), {
+			target: { value: "0" },
+		});
+
+		await waitFor(() => {
+			expect(
+				document.querySelector(
+					"#missing-info-phone-messages .fr-message--error",
+				),
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+			expect(
+				screen.getAllByText(
+					"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
+				),
+			).toHaveLength(1);
+		});
+	});
+
+	it("keeps the generic error when the phone number is malformed", async () => {
+		render(
+			<MissingInfoModal
+				cseApplicable={false}
+				hasCse={true}
+				siren="532847196"
+				userPhone={null}
+			/>,
+		);
+		fireEvent.change(screen.getByLabelText(/Numéro de téléphone/), {
+			target: { value: "012233" },
+		});
+		fireEvent.click(
+			screen.getByRole("button", { name: "Enregistrer", hidden: true }),
+		);
+		await waitFor(() => {
+			expect(
+				document.querySelector(
+					"#missing-info-phone-messages .fr-message--error",
+				),
+			).toHaveTextContent("Veuillez renseigner votre numéro de téléphone");
+		});
+		expect(
+			screen.getByText("Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55"),
+		).toBeInTheDocument();
+	});
+
 	it("shows the explicit CSE error when submitting without selecting a radio", async () => {
 		render(
 			<MissingInfoModal

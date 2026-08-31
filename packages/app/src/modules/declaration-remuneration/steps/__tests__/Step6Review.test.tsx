@@ -35,6 +35,8 @@ function makeCategory(
 		name: "",
 		womenCount: null,
 		menCount: null,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: null,
 		annualBaseMen: null,
 		annualVariableWomen: null,
@@ -174,7 +176,7 @@ describe("Step6Review", () => {
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateurs par catégorie de salariés"),
+			screen.getByText("Indicateurs par catégories de salariés"),
 		).toBeInTheDocument();
 	});
 

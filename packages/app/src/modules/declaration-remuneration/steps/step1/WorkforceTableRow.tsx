@@ -1,13 +1,19 @@
 "use client";
 
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
 import { computeWorkforceTotal } from "~/modules/domain";
 import type { WorkforceField, WorkforceRowDefinition } from "./workforceRows";
-import { workforceFieldLabel } from "./workforceRows";
+import { workforceFieldId, workforceFieldLabel } from "./workforceRows";
 
 type CellProps = {
 	disabled: boolean;
-	error: string | undefined;
+	error: FieldError | undefined;
+	errorAlertId: string;
 	id: string;
 	label: string;
 	onChange: (raw: string) => void;
@@ -18,6 +24,7 @@ type CellProps = {
 function WorkforceCell({
 	disabled,
 	error,
+	errorAlertId,
 	id,
 	label,
 	onChange,
@@ -32,7 +39,7 @@ function WorkforceCell({
 				}
 			>
 				<input
-					aria-describedby={error ? `${id}-error` : undefined}
+					aria-describedby={describedByForField(errorAlertId, error)}
 					aria-invalid={error ? true : undefined}
 					aria-label={label}
 					className={
@@ -41,6 +48,7 @@ function WorkforceCell({
 							: `fr-input ${common.numericInput}`
 					}
 					disabled={disabled}
+					id={id}
 					inputMode="numeric"
 					onChange={(e) => onChange(e.target.value)}
 					pattern="[0-9]*"
@@ -48,11 +56,6 @@ function WorkforceCell({
 					type="text"
 					value={value}
 				/>
-				{error && (
-					<p className="fr-error-text" id={`${id}-error`}>
-						{error}
-					</p>
-				)}
 			</div>
 		</td>
 	);
@@ -60,7 +63,8 @@ function WorkforceCell({
 
 type Props = {
 	disabled: boolean;
-	errors: Partial<Record<WorkforceField, string>>;
+	errorAlertId: string;
+	errors: readonly FieldError[];
 	onFieldChange: (field: WorkforceField, raw: string) => void;
 	raw: Record<WorkforceField, string>;
 	readOnly: boolean;
@@ -70,6 +74,7 @@ type Props = {
 
 export function WorkforceTableRow({
 	disabled,
+	errorAlertId,
 	errors,
 	onFieldChange,
 	raw,
@@ -81,14 +86,17 @@ export function WorkforceTableRow({
 		values[row.womenField],
 		values[row.menField],
 	);
+	const womenId = workforceFieldId(row, "women");
+	const menId = workforceFieldId(row, "men");
 
 	return (
 		<tr>
 			<th scope="row">{row.label}</th>
 			<WorkforceCell
 				disabled={disabled}
-				error={errors[row.womenField]}
-				id={`step1-${row.basis}-women`}
+				error={findFieldError(errors, womenId)}
+				errorAlertId={errorAlertId}
+				id={womenId}
 				label={workforceFieldLabel(row, "women")}
 				onChange={(value) => onFieldChange(row.womenField, value)}
 				readOnly={readOnly}
@@ -96,8 +104,9 @@ export function WorkforceTableRow({
 			/>
 			<WorkforceCell
 				disabled={disabled}
-				error={errors[row.menField]}
-				id={`step1-${row.basis}-men`}
+				error={findFieldError(errors, menId)}
+				errorAlertId={errorAlertId}
+				id={menId}
 				label={workforceFieldLabel(row, "men")}
 				onChange={(value) => onFieldChange(row.menField, value)}
 				readOnly={readOnly}

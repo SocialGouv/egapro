@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
+import type { RepresentationDeclarationStatus } from "~/modules/domain";
 import {
 	getPublicRepresentationBySirenYear,
 	getPublicRepresentationsBySiren,
@@ -18,7 +19,7 @@ const SIRENS = [SIREN_DIFFUSIBLE, SIREN_HIDDEN, SIREN_OTHER];
 type DeclarationRow = {
 	siren: string;
 	year: number;
-	status?: "draft" | "submitted";
+	status?: RepresentationDeclarationStatus;
 	executiveWomenPercent?: string | null;
 	notComputableReasonMembers?: "aucune_instance_dirigeante" | null;
 };
@@ -131,12 +132,15 @@ describe("public representation services (real Postgres)", () => {
 		expect(typeof dto?.executiveWomenPercent).toBe("number");
 	});
 
-	it("excludes drafts from all three read surfaces", async () => {
+	it.each([
+		"draft",
+		"not_subject",
+	] as const)("excludes a %s declaration from all three read surfaces", async (status) => {
 		await db.insert(representationDeclarations).values([
 			declarationRow({
 				siren: SIREN_DIFFUSIBLE,
 				year: 2026,
-				status: "draft",
+				status,
 			}),
 			declarationRow({ siren: SIREN_OTHER, year: 2026 }),
 		]);

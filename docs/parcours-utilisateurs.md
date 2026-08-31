@@ -15,6 +15,7 @@ Audience : équipe métier / PO (référence pour les tests d'acceptance, les re
 5. [Employeur — modification d'une déclaration soumise](#5-employeur--modification-dune-déclaration-soumise)
 6. [Employeur — parcours de conformité (seconde déclaration)](#6-employeur--parcours-de-conformité-seconde-déclaration)
 7. [Employeur — avis du CSE](#7-employeur--avis-du-cse)
+8. [Employeur — parcours de représentation équilibrée](#8-employeur--parcours-de-représentation-équilibrée)
 9. [Citoyen — recherche et consultation publique](#9-citoyen--recherche-et-consultation-publique)
 10. [Agent administration DGT](#10-agent-administration-dgt)
 11. [Tableau récapitulatif des branchements clés](#11-tableau-récapitulatif-des-branchements-clés)
@@ -394,6 +395,70 @@ Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) 
 
 ---
 
+## 8. Employeur — parcours de représentation équilibrée
+
+Concerne les entreprises **présumées ≥ 1 000 salariés sur les 3 derniers exercices** (loi Rixain). Démarche annuelle, distincte de la déclaration index — sa propre entrée dans le panneau latéral et le tableau des démarches de `/mon-espace`.
+
+```mermaid
+flowchart TD
+    Start([/mon-espace<br/>CTA « Commencer »]) --> Subj[/declaration-representation<br/>Écran d'assujettissement]
+    Subj --> Q{Entreprise concernée ?<br/>≥ 1000 salariés / 3 exercices}
+    Q -->|Non| NS[declareNotSubject<br/>status = not_subject]
+    NS --> Back([Retour /mon-espace<br/>« Non-assujetti »])
+    Q -->|Oui| S1[/etape/1<br/>Période de référence]
+    S1 --> S2[/etape/2<br/>Écarts cadres dirigeants]
+    S2 --> S3[/etape/3<br/>Écarts instances dirigeantes]
+    S3 --> Pub{Publication requise ?<br/>2+ cadres dirigeants<br/>ou instance dirigeante}
+    Pub -->|Oui| S4[/etape/4<br/>Informations de publication]
+    Pub -->|Non| S5[/etape/5<br/>Récapitulatif]
+    S4 --> S5
+    S5 --> Submit[submit<br/>status = submitted]
+    Submit --> Conf([/confirmation<br/>+ mail representation_receipt])
+```
+
+### 8.1 Écran d'assujettissement
+
+Premier écran du parcours (`/declaration-representation`), toujours affiché en entrant dans la démarche — avant même l'étape 1. Question déclarative à deux réponses :
+
+- **« 1 000 salariés ou plus sur les trois exercices »** → passage à l'étape 1 du funnel, aucune écriture immédiate (le brouillon n'est créé qu'au premier `saveDraft`).
+- **« Moins de 1 000 salariés sur au moins un exercice »** → un bouton « Valider » apparaît ; son clic appelle `representationDeclaration.declareNotSubject` et redirige vers `/mon-espace`.
+
+Si l'entreprise a déjà répondu (dans un sens ou dans l'autre) lors d'une visite précédente, la réponse est **pré-remplie** à la réouverture de l'écran (`initialAnswer`, dérivé du `status` stocké).
+
+> **Pourquoi un écran déclaratif plutôt qu'un calcul automatique ?** Le seuil « 1 000 salariés sur 3 exercices consécutifs » n'est pas toujours calculable depuis les seules données GIP-MDS disponibles (historique incomplet, entreprise nouvellement créée…). La présomption d'assujettissement (`isPresumedSubjectToRepresentation`) ne sert qu'à décider si la ligne apparaît dans Mon espace ; la réponse effective reste à la charge déclarative de l'entreprise, qui engage sa responsabilité.
+
+### 8.2 Parcours « non-assujetti »
+
+Répondre « non concernée » **clôture immédiatement la démarche** de l'année en cours, sans passer par les étapes 1 à 5 :
+
+1. `declareNotSubject` bascule `status = not_subject`, réinitialise `currentStep` à 0 et efface tout brouillon existant.
+2. Aucun mail n'est envoyé (contrairement à la soumission complète).
+3. Dans Mon espace, la ligne affiche le libellé **« Non-assujetti »**, la colonne échéance affiche `-`, et le CTA du panneau latéral redevient « Commencer » (il rouvre l'écran d'assujettissement plutôt que le funnel).
+4. Aucune ressource PDF n'apparaît dans le panneau des documents (`DocumentsPanel`) pour cette année.
+
+**Revenir sur ce choix** : rouvrir `/declaration-representation`, répondre « concernée », puis avancer dans le funnel — le premier `saveDraft` fait automatiquement retomber le statut à `draft`. Le blocage `submitted` (déjà soumis) empêche toute redéclaration ultérieure en `not_subject` — `declareNotSubject` échoue alors en conflit.
+
+### 8.3 Parcours « concerné » (étapes 1 à 5)
+
+| Étape | URL | Contenu |
+|---|---|---|
+| 1 | `/etape/1` | Période de référence (12 mois consécutifs) |
+| 2 | `/etape/2` | Écarts de représentation femmes-hommes parmi les cadres dirigeants |
+| 3 | `/etape/3` | Écarts de représentation au sein des instances dirigeantes |
+| 4 (conditionnelle) | `/etape/4` | Informations de publication (date, URL ou modalités) |
+| 5 | `/etape/5` | Récapitulatif et soumission |
+
+L'étape 4 n'apparaît que si l'entreprise compte **2 cadres dirigeants ou plus**, ou déclare disposer d'une **instance dirigeante** — sautée sinon dans les deux sens de navigation.
+
+Chaque changement d'étape déclenche un `saveDraft` (upsert du brouillon). La démarche est bloquée en écriture si la **campagne est fermée** (`isRepresentationCampaignOpen` → sinon `FORBIDDEN`), y compris pour `declareNotSubject`. À l'étape 5, la soumission (`submit`) re-valide l'intégralité du payload côté serveur, fige la déclaration (`status = submitted`) et déclenche l'envoi du mail `representation_receipt`.
+
+### 8.4 Sortie
+
+- **Non-assujetti** : retour direct à `/mon-espace`, aucune confirmation dédiée.
+- **Soumis** : redirection vers `/declaration-representation/confirmation`, mail de reçu envoyé, PDF récapitulatif téléchargeable à la demande depuis Mon espace (`GET /api/representation-pdf?year=...`).
+
+---
+
 ## 9. Citoyen — recherche et consultation publique
 
 Public, sans authentification. Très peu de friction.
@@ -574,6 +639,7 @@ Pour les arbitrages de spec et la priorisation, ces décisions sont les plus str
 | Indicateur G obligatoire ? | Effectif | < 50 : non / 50–249 : triennal / 250+ : annuel |
 | Avis CSE applicable ? | Effectif | < 100 : interdit / ≥ 100 : obligatoire |
 | Seconde déclaration applicable ? | Écart calculé + effectif | ≥ 5% **et** ≥ 100 salariés → parcours conformité |
+| Représentation équilibrée : assujettie ? | Réponse déclarative à l'écran d'assujettissement | Non → `status = not_subject`, démarche close sans étapes 1–5 / Oui → funnel complet |
 | Modification possible ? | Date du jour vs deadline | < deadline : oui / ≥ deadline : lecture seule |
 | Pré-remplissage disponible ? | Présence dans `gipMdsData` | Oui = champs A–F pré-remplis (écrasables) |
 | Accès à l'historique d'une démarche ? | Rattachement entreprise | Oui si rattaché (ou admin en impersonation) — sinon refusé |

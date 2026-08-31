@@ -11,7 +11,7 @@ fi
 # Computes sprint velocity on the EGAPRO V2 project board, to help decide how
 # much to commit to the next sprint.
 #
-# Definitions (cf. .claude/rules/complexity-estimation.md):
+# Definitions (cf. .claude/pipeline/complexity-estimation.md):
 #   - LEAF tickets only      : items whose issue type is Task or Bug (the epic
 #                              Feature is excluded — its load is its children's).
 #   - Velocity of sprint N    : Σ Estimate of leaf items with Sprint==N whose

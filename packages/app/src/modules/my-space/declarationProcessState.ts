@@ -77,6 +77,7 @@ export type RepresentationPanelVariant =
 	| "start"
 	| "draft"
 	| "submitted"
+	| "not_subject"
 	| "closed";
 
 // Representation has no FSM yet — progression is this 3-bucket DeclarationItem.status.
@@ -95,6 +96,7 @@ export function computeRepresentationPanelVariant(
 	campaignOpen: boolean,
 ): RepresentationPanelVariant {
 	if (!campaignOpen) return "closed";
+	if (declaration?.notSubject) return "not_subject";
 	const progress = getRepresentationProgress(declaration);
 	return progress === "not_started" ? "start" : progress;
 }
@@ -104,6 +106,7 @@ export function computeRepresentationCtaHref(
 	campaignOpen: boolean,
 ): string {
 	if (!campaignOpen) return stepHref(TOTAL_REPRESENTATION_STEPS);
+	if (declaration?.notSubject) return REPRESENTATION_FUNNEL_ROOT;
 	const progress = getRepresentationProgress(declaration);
 	if (progress === "submitted") return stepHref(TOTAL_REPRESENTATION_STEPS);
 	if (progress === "draft") {
