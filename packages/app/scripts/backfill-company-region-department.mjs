@@ -24,6 +24,15 @@ const DELAY_BETWEEN_BATCHES_MS = 150;
 
 const dryRun = process.argv.includes("--dry-run");
 
+const SCHEMA_WAIT_SECONDS = Number(
+	process.env.COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS ?? "0",
+);
+if (!Number.isFinite(SCHEMA_WAIT_SECONDS) || SCHEMA_WAIT_SECONDS < 0) {
+	throw new Error(
+		"COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS must be a positive number",
+	);
+}
+
 function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
@@ -74,7 +83,38 @@ async function fetchLocation(siren) {
 		: null;
 }
 
+async function assertSchema() {
+	const rows = await sql`
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'app_company'
+			AND column_name IN ('city', 'region_code', 'country_code', 'country_label')
+	`;
+	if (rows.length !== 4) {
+		throw new Error(
+			"Location columns are missing. Run `pnpm db:migrate` first.",
+		);
+	}
+}
+
+async function waitForSchema() {
+	const deadline = Date.now() + SCHEMA_WAIT_SECONDS * 1000;
+	for (;;) {
+		try {
+			await assertSchema();
+			return;
+		} catch (error) {
+			if (Date.now() >= deadline) throw error;
+			console.log("[backfill-company-location] waiting for the database...");
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+		}
+	}
+}
+
 async function main() {
+	await waitForSchema();
+
 	const rows = await sql`
 		SELECT siren, updated_at
 		FROM app_company

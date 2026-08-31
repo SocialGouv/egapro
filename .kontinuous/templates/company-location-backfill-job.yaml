@@ -29,6 +29,9 @@ spec:
                 name: "{{ .Values.global.pgSecretName }}"
             - secretRef:
                 name: api
+          env:
+            - name: COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS
+              value: "180"
           command:
             - node
             - packages/app/scripts/backfill-company-location.bundle.mjs
