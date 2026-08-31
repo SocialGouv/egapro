@@ -351,6 +351,13 @@
 			"when": 1787833039307,
 			"tag": "0049_fluffy_hercules",
 			"breakpoints": true
+		},
+		{
+			"idx": 50,
+			"version": "7",
+			"when": 1787918177718,
+			"tag": "0050_shiny_the_hood",
+			"breakpoints": true
 		}
 	]
 }

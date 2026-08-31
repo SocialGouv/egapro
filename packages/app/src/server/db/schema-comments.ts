@@ -130,6 +130,10 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		region: "Weez: libellé région (dérivé du code postal établissement)",
 		department_code: "Weez: code département (dérivé du code postal)",
 		department_label: "Weez: libellé département (dérivé du code postal)",
+		country_code:
+			"Weez: code pays COG INSEE du siège (codepaysetrangeretablissement). null pour la France comme pour un pays inconnu — c'est country_label qui distingue les deux",
+		country_label:
+			"Weez: libellé du pays du siège, en capitales (libellepaysetrangeretablissement). 'FRANCE' si l'unité légale porte un code postal, null si le pays n'a pas pu être résolu",
 		has_cse: "SUIT: CSE_existant",
 	},
 	user: {
