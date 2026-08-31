@@ -16,12 +16,42 @@ Deux surfaces, et deux seulement.
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun navigateur et aucun modèle. **La seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
-| `a11y-pages` | cron hebdo (lundi 04:00 UTC) + manuel | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Opus high du reliquat par Claude CLI en lots. Non bloquant sur les constats ; bloquant sur une panne, un rendu absent ou une grille incomplète |
-| `a11y-bundle` | cron + manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
+| `a11y-pages` | **manuel uniquement** (`gh workflow run a11y.yaml`) | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Sonnet 5 / effort `high` du reliquat par Claude CLI en lots de huit, sans plafond par lot. Non bloquant sur les constats ; bloquant sur une panne, un rendu absent ou une grille incomplète |
+| `a11y-bundle` | manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
 
-Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au prochain tick hebdo.** Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
+Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu ne sera rattrapée par personne tant que personne ne lance le workflow.** Le cron hebdomadaire a été retiré parce que, depuis ultra11y 5.36, 103 des 106 critères RGAA exigent une adjudication par le modèle — un run n'est plus une dépense de fond. Ce qui rattrape une régression sur une PR est l'audit statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
 
 > Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, runner CLI par lots, choix du cron plutôt que `push: alpha`, commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
+
+## La version, et pourquoi elle vit à quatre endroits
+
+Le moteur ultra11y est **embarqué** dans chaque surface, donc « la version » n'est pas un
+numéro unique mais quatre copies qui doivent s'accorder :
+
+| Où | Quoi | Tenu par |
+|---|---|---|
+| `a11y.yaml`, `uses:` ×2 | le moteur de la CI (gate PR + `a11y-pages`) | `a11y-version-coherence` (ci.yaml) |
+| `packages/app/package.json` | le binaire et le plugin Playwright qui **écrivent** les instantanés | idem |
+| le plugin Claude Code | le skill `review-a11y`, donc l'agent `rgaa-auditor` | hook `check-ultra11y-plugin.sh` |
+
+Les deux premières doivent être identiques pour une raison mécanique : la suite Playwright écrit
+les instantanés avec la **devDependency**, et l'Action les réingère avec **son** moteur. Deux
+versions, deux formats — et la divergence ne lève aucune erreur, elle se lit comme des critères
+« à évaluer » dans un rapport qui a l'air complet. `scripts/a11y/check-ultra11y-version.sh`
+refuse une demi-montée de version, et tourne dans la CI sur chaque push.
+
+Dependabot propose les montées : `github-actions` et `npm` sont sur la **même cadence** (lundi
+01:00) précisément pour que les deux PR arrivent ensemble — il ne sait pas grouper à travers
+deux écosystèmes, donc c'est la CI qui tranche.
+
+**Le plugin est le seul que rien dans le dépôt ne pin.** `.claude/settings.json` déclare
+`"ultra11y@ultra11y": true` sans version : l'install prend ce que la marketplace avait ce
+jour-là et n'en bouge plus. Mesuré le 31/08/2026 : plugin en **4.5.1**, dépôt en **5.40.1** —
+l'agent `rgaa-auditor` auditait avec un moteur d'une trentaine de versions mineures en arrière.
+Le hook `UserPromptSubmit` compare hors ligne la version installée au pin d'`a11y.yaml`, et ne
+touche au réseau qu'en cas d'écart. Il **relit** la version après coup plutôt que d'annoncer un
+succès sur un code de retour : `claude plugin update` monte vers le dernier tag de la
+marketplace, pas forcément vers celui que le dépôt épingle.
 
 ## Ce qui n'est PAS le dispositif
 

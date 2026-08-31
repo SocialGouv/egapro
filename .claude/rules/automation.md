@@ -8,9 +8,11 @@ description: Hooks, quality gates et vérifications avant push — toujours char
 
 ## Hooks (`.claude/settings.json`)
 
-Trois hooks, exécutés par le harnais, pas par toi.
+Quatre hooks, exécutés par le harnais, pas par toi.
 
 **`UserPromptSubmit` → `check-pr-reviews.sh`** — au premier message d'une session. Si la branche courante a une PR ouverte avec des commentaires non résolus, il le signale et suggère `/review`. Silencieux sur `alpha`.
+
+**`UserPromptSubmit` → `check-ultra11y-plugin.sh`** — au premier message d'une session. Compare **hors ligne** la version du plugin ultra11y installé au tag épinglé dans `a11y.yaml`, et ne touche au réseau qu'en cas d'écart. C'est le seul des quatre endroits où vit la version d'ultra11y que le dépôt ne peut pas pinner — et c'est celui qui avait dérivé de 4.5.1 à 5.40.1 sans que rien ne le dise. Détail → `.claude/rules/rgaa.md`.
 
 **`PreToolUse` → `block-bad-patterns.sh`** (matcher `Edit|Write`) — **22 patterns bloqués avant l'écriture**. C'est la couche machine : ce qu'elle attrape n'a pas besoin d'être re-vérifié à la main, et ce qu'elle bloque ne se contourne pas.
 
