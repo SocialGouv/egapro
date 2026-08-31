@@ -1,6 +1,6 @@
 {
-	"id": "1aa318fe-3aa1-49b0-bf71-cb5a5be768c3",
-	"prevId": "9c689794-f88e-45e4-bdd3-b4edfd6085ce",
+	"id": "7f0f2848-fafc-4e0c-84b3-d1e7fd8d765c",
+	"prevId": "1aa318fe-3aa1-49b0-bf71-cb5a5be768c3",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -183,6 +183,12 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"city": {
+					"name": "city",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"naf_code": {
 					"name": "naf_code",
 					"type": "varchar(10)",
@@ -192,6 +198,12 @@
 				"naf_label": {
 					"name": "naf_label",
 					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"region_code": {
+					"name": "region_code",
+					"type": "varchar(3)",
 					"primaryKey": false,
 					"notNull": false
 				},

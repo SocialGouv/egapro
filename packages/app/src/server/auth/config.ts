@@ -11,6 +11,7 @@ import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
+import { toCompanyInsertValues } from "~/server/db/companyInsert";
 import {
 	adminImpersonationEvents,
 	companies,
@@ -420,44 +421,14 @@ export const authConfig = {
 				if (profileData.siret) {
 					const siren = extractSiren(profileData.siret);
 
-					let companyValues: {
-						siren: string;
-						name: string;
-						address?: string | null;
-						city?: string | null;
-						nafCode?: string | null;
-						nafLabel?: string | null;
-						regionCode?: string | null;
-						region?: string | null;
-						departmentCode?: string | null;
-						departmentLabel?: string | null;
-						countryCode?: string | null;
-						countryLabel?: string | null;
-						workforce?: number | null;
-						statutDiffusion?: string | null;
-					};
+					let companyValues: ReturnType<typeof toCompanyInsertValues>;
 					try {
-						const companyInfo = await fetchCompanyBySiren(siren);
-						companyValues = companyInfo
-							? {
-									siren,
-									name: companyInfo.name,
-									address: companyInfo.address,
-									city: companyInfo.city,
-									nafCode: companyInfo.nafCode,
-									nafLabel: companyInfo.nafLabel,
-									regionCode: companyInfo.regionCode,
-									region: companyInfo.region,
-									departmentCode: companyInfo.departmentCode,
-									departmentLabel: companyInfo.departmentLabel,
-									countryCode: companyInfo.countryCode,
-									countryLabel: companyInfo.countryLabel,
-									workforce: companyInfo.workforce,
-									statutDiffusion: companyInfo.statutDiffusion,
-								}
-							: { siren, name: `Entreprise ${siren}` };
+						companyValues = toCompanyInsertValues(
+							siren,
+							await fetchCompanyBySiren(siren),
+						);
 					} catch {
-						companyValues = { siren, name: `Entreprise ${siren}` };
+						companyValues = toCompanyInsertValues(siren, null);
 					}
 
 					await db.transaction(async (tx) => {

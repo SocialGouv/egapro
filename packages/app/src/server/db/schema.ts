@@ -534,6 +534,8 @@ export const companies = createTable("company", (d) => ({
 	region: d.varchar({ length: 255 }),
 	departmentCode: d.varchar({ length: 3 }),
 	departmentLabel: d.varchar({ length: 255 }),
+	// Tri-state country, never collapsed: France = (null, "FRANCE"),
+	// abroad = (COG code, Weez label), unknown = (null, null).
 	countryCode: d.varchar({ length: 5 }),
 	countryLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),

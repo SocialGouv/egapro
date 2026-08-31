@@ -113,7 +113,7 @@ export function SecondDeclarationStep3Review({
 				catégories de salariés aux services du ministère chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateurs par catégories de salariés</h2>
+			<h2 className="fr-h5 fr-mb-0">Indicateur par catégories de salariés</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">

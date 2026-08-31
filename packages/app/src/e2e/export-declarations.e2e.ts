@@ -1,7 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { type Browser, expect, test } from "@playwright/test";
 import { TEST_SIREN } from "./constants";
 import { resetDeclarationToDraft } from "./helpers/db";
-import { completeDeclaration } from "./helpers/declaration-flows";
+import {
+	completeDeclaration,
+	STEP1_WORKFORCE,
+} from "./helpers/declaration-flows";
 
 /**
  * End-to-end test for the SUIT declarations export contract
@@ -53,6 +56,27 @@ function isoDate(offsetDays: number): string {
 	return d.toISOString().slice(0, 10);
 }
 
+/** Read the SUIT export through the gateway branch and return the test company's declaration. */
+async function readExportedDeclaration(browser: Browser) {
+	const anonCtx = await browser.newContext({ storageState: undefined });
+	try {
+		const response = await anonCtx.request.get(
+			`/api/v1/export/declarations?date_begin=${isoDate(-1)}&date_end=${isoDate(1)}`,
+			{ headers: { "X-Gateway-Forwarded": DEV_GATEWAY_SHARED_SECRET } },
+		);
+		expect(response.status()).toBe(200);
+
+		const body = await response.json();
+		const declaration = body.Declarations.find(
+			(d: { SIREN: string }) => d.SIREN === TEST_SIREN,
+		);
+		expect(declaration).toBeDefined();
+		return declaration;
+	} finally {
+		await anonCtx.close();
+	}
+}
+
 test.describe("SUIT declarations export — indicator G computed gaps", () => {
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();
@@ -69,54 +93,60 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 		test.slow(); // Full 6-step declaration funnel + submission.
 		await completeDeclaration(page, { hasGap: true });
 
-		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const response = await anonCtx.request.get(
-				`/api/v1/export/declarations?date_begin=${isoDate(-1)}&date_end=${isoDate(1)}`,
-				{ headers: { "X-Gateway-Forwarded": DEV_GATEWAY_SHARED_SECRET } },
-			);
-			expect(response.status()).toBe(200);
+		const declaration = await readExportedDeclaration(browser);
+		const categories = declaration.Indicateurs.G;
+		expect(Array.isArray(categories)).toBe(true);
+		expect(categories.length).toBeGreaterThan(0);
 
-			const body = await response.json();
-			const declaration = body.Declarations.find(
-				(d: { SIREN: string }) => d.SIREN === TEST_SIREN,
-			);
-			expect(declaration).toBeDefined();
-
-			const categories = declaration.Indicateurs.G;
-			expect(Array.isArray(categories)).toBe(true);
-			expect(categories.length).toBeGreaterThan(0);
-
-			// Every category must carry the four computed-gap fields (the #3942
-			// bug: absent) and must NOT carry the two total-gap fields dropped
-			// in #4205 (regression guard for the deliberate contract change).
-			for (const category of categories) {
-				for (const key of ECART_KEYS) {
-					expect(category).toHaveProperty(key);
-				}
-				for (const key of REMOVED_ECART_KEYS) {
-					expect(category).not.toHaveProperty(key);
-				}
-			}
-
-			// The funnel fills category 1's four pay measures with the same
-			// women 1000 / men 1100 pair (since #3948 a headcount >= 1 requires
-			// all four amounts). Numeric strings keep their DB scale ("1100.00"),
-			// so compare on the parsed value.
-			const filled = categories.find(
-				(c: { Rem_annuelle_base_H: string | null }) =>
-					c.Rem_annuelle_base_H !== null &&
-					Number(c.Rem_annuelle_base_H) === 1100,
-			);
-			expect(filled).toBeDefined();
-
-			// Every measure carries the same pair, so every remaining gap is the
-			// same: (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
+		// Every category must carry the four computed-gap fields (the #3942
+		// bug: absent) and must NOT carry the two total-gap fields dropped
+		// in #4205 (regression guard for the deliberate contract change).
+		for (const category of categories) {
 			for (const key of ECART_KEYS) {
-				expect(filled[key]).toBe(0.0909);
+				expect(category).toHaveProperty(key);
 			}
-		} finally {
-			await anonCtx.close();
+			for (const key of REMOVED_ECART_KEYS) {
+				expect(category).not.toHaveProperty(key);
+			}
 		}
+
+		// The funnel fills category 1's four pay measures with the same
+		// women 1000 / men 1100 pair (since #3948 a headcount >= 1 requires
+		// all four amounts). Numeric strings keep their DB scale ("1100.00"),
+		// so compare on the parsed value.
+		const filled = categories.find(
+			(c: { Rem_annuelle_base_H: string | null }) =>
+				c.Rem_annuelle_base_H !== null &&
+				Number(c.Rem_annuelle_base_H) === 1100,
+		);
+		expect(filled).toBeDefined();
+
+		// Every measure carries the same pair, so every remaining gap is the
+		// same: (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
+		for (const key of ECART_KEYS) {
+			expect(filled[key]).toBe(0.0909);
+		}
+	});
+
+	// #4368 — the contract gained a headcount pair per pay basis. `queries.ts` names
+	// the exported columns one by one, so a column dropped there reaches the client as
+	// a missing field while every DB-mocking unit test stays green; only the real
+	// select → serialize chain rules that out. The funnel holds both bases to the same
+	// step 1 totals, so which source column feeds which field stays the unit test's
+	// question — this one answers whether they survive the chain at all.
+	test("carries the physical headcount of both pay bases per indicator G category", async ({
+		browser,
+	}) => {
+		const declaration = await readExportedDeclaration(browser);
+
+		const filled = declaration.Indicateurs.G.find(
+			(c: { Effectif_F: number | null }) => c.Effectif_F !== null,
+		);
+		expect(filled).toBeDefined();
+
+		expect(filled.Effectif_F).toBe(STEP1_WORKFORCE.women);
+		expect(filled.Effectif_H).toBe(STEP1_WORKFORCE.men);
+		expect(filled.Effectif_horaire_F).toBe(STEP1_WORKFORCE.women);
+		expect(filled.Effectif_horaire_H).toBe(STEP1_WORKFORCE.men);
 	});
 });

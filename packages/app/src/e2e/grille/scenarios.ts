@@ -340,7 +340,7 @@ export const FICHE_SCENARIOS = {
 		).toBeVisible();
 		await expect(
 			page.getByRole("heading", {
-				name: "Indicateurs par catégories de salariés",
+				name: "Indicateur par catégories de salariés",
 			}),
 		).toBeVisible();
 		await submitFromStep6Recap(page);
