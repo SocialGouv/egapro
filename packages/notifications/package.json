@@ -37,7 +37,7 @@
 		"@react-email/components": "^1.0.12",
 		"@react-email/render": "^2.0.8",
 		"html-to-text": "^9.0.5",
-		"nodemailer": "^7.0.13",
+		"nodemailer": "^9.0.1",
 		"pg-boss": "^12.18.2",
 		"postgres": "^3.4.9",
 		"react": "^19.2.5",
@@ -46,7 +46,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.11",
 		"@types/html-to-text": "^9.0.4",
-		"@types/node": "^25.6.0",
+		"@types/node": "^26.1.1",
 		"@types/nodemailer": "^8.0.0",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
