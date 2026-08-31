@@ -10,17 +10,18 @@ Deux surfaces, et deux seulement.
 
 **La revue** — l'agent `rgaa-auditor` lance le skill **`review-a11y`** sur le code sous changement et rend son verdict. C'est tout ce qu'il fait : le skill cadre l'audit sur le diff, lance le moteur, réfute les faux positifs, tranche les critères de jugement depuis la source et nomme les critères de rendu comme risques résiduels. Le skill vient du plugin déclaré dans `.claude/settings.json` ; il s'installe une fois avec `claude plugin install ultra11y@ultra11y`. Le plugin apporte aussi un hook `PreToolUse` qui arrête un `git commit` / `git push` / `gh pr create` porteur de non-conformités — coupe-circuits `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une session), `"hook": { "failOn": "off" }` dans `.ultra11yrc.json` (le dépôt).
 
-**L'analyse** — `.github/workflows/a11y.yaml`, trois jobs portés par `maxgfr/ultra11y@v5.x` :
+**L'analyse** — `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y,
+épinglée à un tag de version explicite :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | **chaque PR** (bloquant) + cron/manuel (muet) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun modèle. **La seule gate du dispositif qui arrête un merge** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
-| `a11y-pages` | cron hebdo (lundi 04:00 UTC) + manuel | balayage Playwright, critères décidés **au rendu**, rejeu du registre de verdicts, adjudication IA du reliquat. Non bloquant sur les constats ; bloquant sur une panne ou une grille incomplète |
+| `a11y-gate` | **chaque PR** (bloquant) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun navigateur et aucun modèle. **La seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
+| `a11y-pages` | cron hebdo (lundi 04:00 UTC) + manuel | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Opus high du reliquat par Claude CLI en lots. Non bloquant sur les constats ; bloquant sur une panne, un rendu absent ou une grille incomplète |
 | `a11y-bundle` | cron + manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
 
 Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au prochain tick hebdo.** Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
 
-> Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, décisions déjà tranchées (le runner CLI écarté, le cron plutôt que `push: alpha`), commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
+> Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, runner CLI par lots, choix du cron plutôt que `push: alpha`, commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
 
 ## Ce qui n'est PAS le dispositif
 
