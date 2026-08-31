@@ -9,26 +9,43 @@
 
 ### 2. L'analyse, par la GitHub Action
 
-`.github/workflows/a11y.yaml`, trois jobs, tous portés par `maxgfr/ultra11y@v5.x` :
+`.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée à un
+tag de version explicite :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
-| `a11y-gate` | **chaque PR** (bloquant), + cron/manuel (muet) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun modèle. **C'est la seule gate de tout le dispositif qui arrête un merge** (`fail-on: blocking`). Sur une PR il parle : SARIF, annotations en ligne, commentaire sticky `digest` nommant les défauts distincts, et son propre rapport (`ultra11y-pr-static`). Sur le run complet il se tait — le livrable est celui d'`a11y-pages`. |
-| `a11y-pages` | **cron hebdo (lundi 04:00 UTC) + manuel** | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient ; l'Action réingère les instantanés et décide les critères **au rendu** depuis eux (contraste calculé, information par la couleur, contraste des composants, visibilité du focus, verrou d'orientation), **rejoue le registre de verdicts** puis fait adjuger le reliquat par une passe Claude Code (`adjudicate-model: claude-sonnet-5`, secret `CLAUDE_CODE_OAUTH_TOKEN`). Produit LE rapport page par page du livrable. Les constats ne bloquent pas — on mesure. Une panne, si ; une grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) aussi. |
-| `a11y-bundle` | cron + manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
+| `a11y-gate` | **chaque PR** (bloquant) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun navigateur et aucun modèle. **C'est la seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky `digest` et rapport `ultra11y-pr-static`. |
+| `a11y-pages` | **manuel uniquement** (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis soumet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure. Une panne, une grille incomplète (`require-decided: pages`), un rendu requis mais absent (`require-rendered`) ou un balayage amputé (`require-sample`) bloquent. |
+| `a11y-bundle` | manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
 **Deux déclenchements, et ils ne paient pas la même chose.** `pull_request` ne lance que la gate
-statique — gratuite, sans modèle, bloquante. `schedule` (hebdo) et `workflow_dispatch` lancent la
-chaîne complète : balayage navigateur, critères de rendu, rejeu du registre puis adjudication IA
-du reliquat, livrable.
+statique — gratuite, sans modèle, bloquante. `workflow_dispatch` lance la chaîne complète :
+balayage navigateur, critères de rendu, rejeu du registre puis adjudication IA du reliquat,
+livrable.
 
-**Pourquoi un cron et non `push: alpha`**, alors que c'est bien sur alpha qu'on veut le run
-complet. `adjudicate: agent` passe par `claude-code-action`, **qui refuse l'événement `push`** —
-l'Action y dégrade en avertissement et la grille repart « à évaluer » sans que rien ne rougisse.
-Les événements qu'il accepte sont `pull_request`, `workflow_dispatch`, `schedule`, `workflow_run`
-et `repository_dispatch`. Or **la branche par défaut de ce dépôt est `alpha`** : un `schedule` lit
-le fichier depuis alpha et s'exécute sur alpha. Le cron donne donc ce qu'un `push: alpha` aurait
-donné, avec le modèle en plus, et une facture bornée à un run par semaine au lieu d'un par merge.
+### Pourquoi il n'y a plus de cron
+
+Il y en a eu un — lundi 04:00 UTC — et on avait pris soin de le choisir plutôt qu'un
+`push: alpha` que `claude-code-action` aurait refusé. Il est retiré, et la raison est le prix.
+
+**ultra11y 5.36 a rendu le contrat d'automatisation exhaustif.** Un critère n'obtient un `C` par
+mesure que si son contrat de test démontre que *chaque* test numéroté a un instrument décisif.
+Sur les 106 critères RGAA, **trois** remplissent cette condition : 8.3, 8.5 et 10.1. Les 103
+autres exigent une adjudication. Mesuré sur ce dépôt, même commit et mêmes 37 captures :
+
+| | run 33383329004 (action `v5.34.2`) | run 33389189227 (action `v5.40.1`) |
+|---|---|---|
+| Grille | `26 moteur, 32 mesure (scan), 48 agent, 0 sans verdict` | `3 moteur, 0 mesure (scan), 32 agent, 69 sans verdict` |
+| Worklist modèle | 27 critères | 84 critères |
+
+Ce n'est pas une régression, c'est un durcissement, et il se défend : avant, un dépôt sans image
+marquait 100 % sur « chaque image a-t-elle une alternative pertinente ? ». Mais un run qui adjuge
+84 critères n'est plus une dépense de fond qu'on laisse tourner toutes les semaines — il est
+lancé quand on en veut le résultat : `gh workflow run a11y.yaml --ref alpha`.
+
+**Ce que ça coûte, dit franchement :** une régression RGAA de rendu ne sera rattrapée par
+personne tant que personne ne lance ce workflow. La gate statique reste bloquante sur chaque PR,
+mais elle ne voit pas la page rendue.
 
 Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au
 prochain tick.** Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page
@@ -178,9 +195,36 @@ jq '.standard' audits/audit-latest.json    # doit dire "rgaa", jamais "wcag"
 
 ### Ce que coûte l'adjudication
 
-Sans registre à rejouer : **9,59 $**, mesuré sur le run du 24/08/2026 (3 passes — 5,91 + 2,43 +
-1,25). Le registre **est** commité depuis (`packages/app/.ultra11y/verdicts/rgaa.json`, 47
-verdicts) : les runs suivants rejouent ce qui tient et ne paient que le reliquat.
+Le chiffre historique — **9,59 $** sur le run du 24/08/2026, 3 passes — a été mesuré quand la
+worklist faisait ~27 critères. Depuis 5.36 elle en fait ~84 (voir « Pourquoi il n'y a plus de
+cron »), donc ce chiffre n'est plus la référence : **un run à froid coûte plusieurs fois cela.**
+
+**`adjudicate-budget-usd` borne CHAQUE INVOCATION du CLI** — pas une passe, pas le run. Ce
+document a longtemps affirmé le contraire (« 0,70 $ borne une passe complète à 9,80 $ ») et
+c'était faux dans les deux sens :
+
+- le plafond était **sous le coût d'un lot** : mesuré, un lot de huit coûte 0,88 à 2,00 $ en
+  Opus / effort `high` ;
+- le pire cas n'était pas 9,80 $ mais `lots × passes × plafond`, un retry de transport repartant
+  avec un plafond neuf.
+
+Et un plafond trop bas ne produit pas une économie, il produit une **perte sèche** : le CLI
+abandonne le lot ENTIER sur `error_max_budget_usd`, après l'avoir payé. Mesuré sur le run
+33389189227 : **30 invocations, 38,90 $ dépensés, 12 verdicts gardés**, 69 critères sur 106
+laissés « à évaluer », job rouge sur `require-decided`.
+
+D'où la configuration actuelle : **`adjudicate-budget-usd: ""`** (aucun plafond par lot) et
+**`adjudicate-model: claude-sonnet-5`**. Ce qui borne la dépense est le mur horaire du CLI (10
+min par invocation), le `timeout-minutes` du job, les trois passes qui ne reçoivent que le
+reliquat, et le registre rejoué avant tout appel. Sonnet 5 est le seul modèle qui ait fermé la
+grille de ce dépôt (run 33383329004, `0 sans verdict`) ; Opus n'y est jamais parvenu.
+
+**Le registre est devenu la pièce maîtresse**, et il n'amortit qu'à moitié.
+`packages/app/.ultra11y/verdicts/rgaa.json` (48 verdicts) est rejoué avant le moindre appel, mais
+au dernier run **27 entrées sur 48 étaient périmées** (« l'évidence a changé ») : l'empreinte
+bouge d'un balayage à l'autre. Rien dans la CI ne commite ce fichier — c'est un geste humain,
+délibéré. Après un run vert : récupérer `verdicts-rgaa.json` dans l'artefact `ultra11y-rgaa`,
+relire le diff, commiter.
 
 **L'effort est le second levier, et il n'est pas le modèle.** `adjudicate-effort: high` (5.34.0).
 Ce qui arrive à ce tier est ce qu'aucun moteur n'a pu décider, donc la difficulté n'est pas de
@@ -192,27 +236,39 @@ citations fabriquées, des snippets retapés au lieu d'être copiés, et des che
 morts et le job est sorti rouge à 103/106. Monter le modèle ne répare pas ça ; monter le soin de
 lecture, si.
 
-### Le runner CLI, évalué et écarté
+### Le runner CLI, retenu depuis 5.40.0
 
-5.30.0 a ouvert un second chemin pour le tier agent : `adjudicate-runner: cli` fait spawner au
-moteur un `claude -p` lui-même, et `adjudicate-grain: criterion` lui fait juger un critère par
-appel. Ce dépôt **reste sur le runner `action`**, et c'est un choix documenté plutôt qu'un oubli.
+Le runner `cli` est désormais le chemin de production. L'Action traduit son grain public
+`worklist` en lots moteur de huit critères, lance Claude en lecture seule, checkpoint chaque lot
+et reprend seulement le reliquat aux passes suivantes. Les problèmes qui avaient motivé son rejet
+dans ce dépôt sont corrigés : le grain par défaut est valide, l'indisponibilité fournisseur coupe
+les retries extérieurs et une passe entièrement inopérante fait échouer la porte finale au lieu de
+laisser une grille vide paraître exploitable.
 
-- **Ce qu'il vend, on l'a déjà.** Son argument est de lever la liste d'événements autorisés de
-  `claude-code-action`, donc de rendre le tier disponible sur `push`. Le cron sur `alpha` a déjà
-  contourné cette restriction — voir plus haut.
-- **Le défaut de l'Action est cassé.** `adjudicate-grain` vaut `worklist` par défaut, l'Action le
-  passe tel quel à `judge --grain`, et le moteur n'accepte que `batch` ou `criterion`
-  (`src/cli.ts:3560`). Le couple `cli` + défaut sort en 2 **sans appeler un modèle** : 40 min de
-  CI, 0 $, et un rouge sur `require-decided` avec toute la grille « à évaluer ».
-- **Il échange un plafond qui marche contre aucun.** `adjudicate-max-turns: "600"` est vivant sur
-  le runner `action`. Sous `cli` il est muet : `--max-turns` n'est pas un flag du CLI, qui avale un
-  flag inconnu sans un mot. Et `adjudicate-budget-usd` ne le remplace pas — il est poussé sur
-  l'argv de **chaque** `claude -p` (`src/agent-cli.ts:170`), avec jusqu'à `MAX_ATTEMPTS = 4`
-  tentatives : le pire cas est `critères × passes × tentatives × plafond`, et le seul plafond de
-  run restant serait `timeout-minutes`.
-- **Et le temps.** Un appel par critère sur 37 pages allonge le job sans borne connue, là où les
-  trois étapes dépliées ont une durée mesurée : 39 min 25 s.
+Depuis **5.40.2**, un lot que le plafond fait abandonner est **coupé en deux et remis en file**,
+chaque moitié repartant avec son propre plafond — une perte de huit critères devient au pire une
+perte d'un. Ce dépôt ne pose plus de plafond du tout (voir « Ce que coûte l'adjudication ») ;
+ce découpage est le filet, pas la ceinture.
+
+### RGAA 10.7 et les contrôles DSFR — ce que 5.41.0 corrige
+
+La sonde `dyn-focus-visible` proxifiait bien un radio/checkbox visuellement masqué vers son
+label — c'est la forme DSFR, et c'était le bon réflexe. Mais elle lisait ensuite le style
+**propre** du label, c'est-à-dire la seule boîte qu'un design system ne peint pas : DSFR dessine
+la case, la coche et l'anneau de focus dans `label::before`.
+
+Mesuré sur le run 33389189227 : **12 constats 10.7**, tous des `<label class="fr-label">`, tous
+faux — 9 sur les cases « années » de `admin-stats`, 2 sur les radios de l'avis du CSE, 1 sur le
+choix de parcours de conformité.
+
+Et le dégât dépassait le bruit. **10.7 n'est pas sur l'allowlist `completeBySilence`**, donc un
+NC fabriqué sur 3 pages laissait le critère « à évaluer » sur les **34 autres** — hors d'atteinte
+de toute adjudication, puisqu'un critère déjà tranché pour le run n'entre jamais dans la
+worklist. C'était, à lui seul, ce qui rendait `require-decided: pages` inatteignable.
+
+La règle générale, qui vaut au-delà de ce cas : **un critère jugé NC quelque part et absent de
+l'allowlist reste « à évaluer » sur chaque page où le défaut ne tire pas.** Un `C` d'agent, lui,
+ferme les 37 pages — mesuré, 31 verdicts sur 31.
 
 ### En local, la même chose sans CI
 
@@ -258,12 +314,20 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 # puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
-claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
+./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
 ```
 
-Les deux sont sur **5.34.2**. Le **plugin Claude Code** est une troisième surface, hors dépôt : il
-se met à jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier
-son cache si le skill `review-a11y` se comporte autrement que la CI.
+La devDependency et les deux usages de l'Action sont alignés sur **5.41.0**, et ce n'est plus une
+consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
+refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
+avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
+formats, et rien ne lève d'erreur.
+
+Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
+pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au tag
+d'`a11y.yaml` au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
+été écrit pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
+dépôt tournait en 5.40.1.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
@@ -271,4 +335,3 @@ que l'échange OIDC avait réussi, et semantic-release ne republie pas un tag ex
 `v5.3.0` existe donc sans version npm correspondante. C'était transitoire : le commit suivant
 a publié normalement. Si ça se reproduit, le contournement est un nouveau commit releasable,
 pas une republication.
-

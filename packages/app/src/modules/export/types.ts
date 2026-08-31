@@ -133,6 +133,8 @@ export type IndicatorGRow = {
 	categorySource: string;
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;

@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
+import { toCompanyInsertValues } from "~/server/db/companyInsert";
 import { campaignDeadlines, companies, gipMdsData } from "~/server/db/schema";
 import { reconcileCseRequirementForYear } from "./cseRequirementSync";
 import { suitAwareFetch } from "./suitClient";
@@ -180,18 +181,7 @@ async function ensureCompaniesExist(db: DB, sirens: string[]): Promise<void> {
 	await db.insert(companies).values(companyValues).onConflictDoNothing();
 }
 
-type CompanyInsert = {
-	siren: string;
-	name: string;
-	address?: string | null;
-	nafCode?: string | null;
-	nafLabel?: string | null;
-	region?: string | null;
-	departmentCode?: string | null;
-	departmentLabel?: string | null;
-	workforce?: number | null;
-	statutDiffusion?: string | null;
-};
+type CompanyInsert = ReturnType<typeof toCompanyInsertValues>;
 
 async function fetchCompanyInfoBatch(
 	sirens: string[],
@@ -203,23 +193,9 @@ async function fetchCompanyInfoBatch(
 		const settled = await Promise.allSettled(
 			batch.map(async (siren) => {
 				try {
-					const info = await fetchCompanyBySiren(siren);
-					return info
-						? {
-								siren,
-								name: info.name,
-								address: info.address,
-								nafCode: info.nafCode,
-								nafLabel: info.nafLabel,
-								region: info.region,
-								departmentCode: info.departmentCode,
-								departmentLabel: info.departmentLabel,
-								workforce: info.workforce,
-								statutDiffusion: info.statutDiffusion,
-							}
-						: { siren, name: `Entreprise ${siren}` };
+					return toCompanyInsertValues(siren, await fetchCompanyBySiren(siren));
 				} catch {
-					return { siren, name: `Entreprise ${siren}` };
+					return toCompanyInsertValues(siren, null);
 				}
 			}),
 		);
