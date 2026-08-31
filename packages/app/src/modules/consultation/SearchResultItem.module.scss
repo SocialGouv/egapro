@@ -23,7 +23,9 @@
 	line-height: 1.5rem;
 }
 
-.link {
+// DSFR draws the link underline with a background-image; `.title` raises the
+// specificity above `.fr-link`, which a bare `.link` only ties with.
+.title .link {
 	background-image: none;
 
 	// Stretch the title link over the whole card so the row is clickable, as in

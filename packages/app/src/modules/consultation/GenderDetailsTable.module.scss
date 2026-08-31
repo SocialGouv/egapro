@@ -11,6 +11,14 @@
 		text-align: left;
 	}
 
+	// DSFR keeps cells on a single line and scrolls the wrapper instead; inside
+	// these fixed-layout cards a long row label would overflow onto its value.
+	> thead > tr > th,
+	> tbody > tr > th,
+	> tbody > tr > td {
+		white-space: normal;
+	}
+
 	> tbody > tr > td {
 		font-weight: 700;
 	}

@@ -69,6 +69,11 @@
 	@include respond-to(sm) {
 		flex-direction: column;
 		gap: 0.25rem;
+
+		// Stacked, the label's flex-basis would become a height.
+		.rowLabel {
+			flex: 0 0 auto;
+		}
 	}
 }
 
@@ -85,8 +90,11 @@
 	min-width: 0;
 }
 
+// DSFR gives `hr` a 1.5rem bottom padding and draws its line with a
+// background-image; the shorthand below would otherwise paint that padding too.
 .separator {
 	height: 1px;
+	padding: 0;
 	border: 0;
 	margin: 0;
 	background: var(--border-default-grey);

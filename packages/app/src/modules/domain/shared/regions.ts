@@ -9,7 +9,7 @@ export const REGIONS = {
 	"27": "Bourgogne-Franche-Comté",
 	"28": "Normandie",
 	"32": "Hauts-de-France",
-	"44": "Grand-Est",
+	"44": "Grand Est",
 	"52": "Pays de la Loire",
 	"53": "Bretagne",
 	"75": "Nouvelle-Aquitaine",

@@ -18,8 +18,12 @@
 	line-height: 1.5rem;
 }
 
-.select {
+// `.fr-select` is width:100%, which in this flex bar stretches the year field
+// across the whole row.
+.bar .select {
+	width: auto;
 	min-width: 6rem;
+	flex: 0 0 auto;
 }
 
 .period {
