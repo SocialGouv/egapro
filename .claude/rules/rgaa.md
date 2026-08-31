@@ -16,10 +16,10 @@ Deux surfaces, et deux seulement.
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant) | audit statique JSX/TSX de tout `src` — gratuit, quelques secondes, aucun navigateur et aucun modèle. **La seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky |
-| `a11y-pages` | cron hebdo (lundi 04:00 UTC) + manuel | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Opus high du reliquat par Claude CLI en lots. Non bloquant sur les constats ; bloquant sur une panne, un rendu absent ou une grille incomplète |
-| `a11y-bundle` | cron + manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
+| `a11y-pages` | **manuel uniquement** (`gh workflow run a11y.yaml`) | balayage Playwright, critères décidés **au rendu**, rejeu du registre, puis adjudication Sonnet 5 / effort `high` du reliquat par Claude CLI en lots de huit, sans plafond par lot. Non bloquant sur les constats ; bloquant sur une panne, un rendu absent ou une grille incomplète |
+| `a11y-bundle` | manuel | fusionne le tout dans l'artefact `ultra11y-rgaa` |
 
-Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu peut vivre jusqu'au prochain tick hebdo.** Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
+Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu ne sera rattrapée par personne tant que personne ne lance le workflow.** Le cron hebdomadaire a été retiré parce que, depuis ultra11y 5.36, 103 des 106 critères RGAA exigent une adjudication par le modèle — un run n'est plus une dépense de fond. Ce qui rattrape une régression sur une PR est l'audit statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
 
 > Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, runner CLI par lots, choix du cron plutôt que `push: alpha`, commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
 

@@ -16,36 +16,43 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #                           depuis `require-decided: pages`, une grille incomplète aussi.
 #   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
 #
-# Il n'y a plus de `a11y-report` hebdomadaire séparé : le `schedule` et le déclenchement manuel
-# lancent tous deux `a11y-pages`, qui produit le même livrable AVEC le navigateur. Le job statique
-# ne tourne plus une seconde fois sur ces événements : l'Action du tier rendu réaudite déjà tout
-# `src`, et le doublon ne renforçait aucune porte.
+# Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de cron non plus : le déclenchement
+# manuel lance `a11y-pages`, qui produit le livrable AVEC le navigateur. Le job statique ne tourne
+# pas une seconde fois sur cet événement : l'Action du tier rendu réaudite déjà tout `src`, et le
+# doublon ne renforçait aucune porte.
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
 # DEUX DÉCLENCHEMENTS, ET ILS NE PAIENT PAS LA MÊME CHOSE.
 #
-#   pull_request                  → `a11y-gate` SEUL. Statique, gratuit, quelques secondes,
-#                                   aucun modèle, et BLOQUANT (`fail-on: blocking`).
-#   schedule (hebdo) + dispatch   → la chaîne complète. Balayage des pages, critères de rendu,
-#                                   rejeu du registre puis adjudication IA du reliquat, livrable.
+#   pull_request       → `a11y-gate` SEUL. Statique, gratuit, quelques secondes, aucun modèle,
+#                        et BLOQUANT (`fail-on: blocking`).
+#   workflow_dispatch  → la chaîne complète. Balayage des pages, critères de rendu, rejeu du
+#                        registre puis adjudication IA du reliquat, livrable.
 #
-# La moitié chère ne peut pas tourner sur chaque PR : 16 à 21 $ pour un premier run, 40 à 90
-# minutes, et une grille qui n'est pas reproductible d'un run à l'autre. La moitié statique, elle,
-# ne coûte rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce
-# fichier qui arrête un merge.
+# La moitié chère ne peut pas tourner sur chaque PR : 40 à 90 minutes, une grille qui n'est pas
+# reproductible d'un run à l'autre, et une facture qui a MONTÉ. La moitié statique, elle, ne coûte
+# rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce fichier qui
+# arrête un merge.
 #
-# POURQUOI UN CRON ET NON `push: alpha`, puisque c'est bien sur alpha qu'on veut le run complet.
-# `adjudicate: agent` passe par `claude-code-action`, qui REFUSE l'événement `push` — l'Action y
-# dégrade en avertissement et la grille repart « à évaluer » sans que rien ne rougisse. Les
-# événements qu'il accepte sont `pull_request`, `workflow_dispatch`, `schedule`, `workflow_run` et
-# `repository_dispatch`. Or **la branche par défaut de ce dépôt est `alpha`** : un `schedule` lit
-# le fichier depuis alpha et s'exécute sur alpha. Le cron donne donc ce qu'un `push: alpha` aurait
-# donné, avec le modèle en plus, et une facture bornée à un run par semaine au lieu d'un par merge.
+# POURQUOI PLUS DE CRON, alors qu'il y en a eu un (lundi 04:00 UTC), et qu'on avait pris soin de
+# le choisir plutôt qu'un `push: alpha` que `claude-code-action` aurait refusé.
 #
-# CE QUE ÇA NE DONNE PAS, dit franchement : une régression RGAA de RENDU peut vivre jusqu'au
-# prochain tick. Ce qui la rattrape sur une PR est l'audit statique, qui ne voit pas la page
-# rendue. C'est l'arbitrage, et c'est celui du coût.
+# Parce que le prix d'un run a changé sous nos pieds. ultra11y 5.36 a rendu le contrat
+# d'automatisation EXHAUSTIF : un critère n'obtient un `C` par mesure que si son contrat démontre
+# que CHAQUE test numéroté a un instrument décisif — et sur les 106 critères RGAA, TROIS
+# remplissent cette condition (8.3, 8.5, 10.1). Les autres passent par le modèle. Mesuré sur ce
+# dépôt, même commit et mêmes 37 captures : la worklist est passée de 27 critères (run
+# 33383329004, action v5.34.2) à 84 (run 33389189227, action v5.40.1).
+#
+# Ce n'est pas une régression, c'est un durcissement, et il se défend : avant, un dépôt sans image
+# marquait 100 % sur « chaque image a-t-elle une alternative pertinente ? ». Mais un run qui adjuge
+# 84 critères n'est plus une dépense de fond qu'on laisse tourner toutes les semaines. Il est
+# lancé quand on en veut le résultat.
+#
+# CE QUE ÇA NE DONNE PAS, dit franchement : une régression RGAA de RENDU ne sera rattrapée par
+# personne tant que personne ne lance ce workflow. Ce qui la rattrape sur une PR est l'audit
+# statique, qui ne voit pas la page rendue. C'est l'arbitrage, et c'est celui du coût.
 #
 # LES CRITÈRES DE JUGEMENT SONT ADJUGÉS, TOUS, À CHAQUE RUN. Ceux que le moteur ne peut pas
 # trancher — pertinence des alt, intitulé de lien dans son contexte, ordre de lecture — passent
@@ -138,19 +145,29 @@ on:
   # LA GATE. Statique, gratuite, aucun modèle : elle peut se permettre de tourner sur chaque PR,
   # et c'est le seul endroit du dispositif qui BLOQUE un merge.
   pull_request:
-  # LE RUN COMPLET, sur alpha. `schedule` s'exécute sur la branche par défaut du dépôt, qui EST
-  # `alpha` — c'est ce qui rend ce cron équivalent au `push: alpha` que `claude-code-action`
-  # aurait refusé (voir l'en-tête). Lundi 04:00 UTC.
-  schedule:
-    - cron: "0 4 * * 1"
-  # Le même run complet, à la demande, depuis n'importe quelle branche.
+  # LE RUN COMPLET, À LA DEMANDE ET UNIQUEMENT À LA DEMANDE.
+  #
+  # Il y avait ici un cron hebdomadaire (lundi 04:00 UTC). Il est retiré, et la raison est le
+  # prix : depuis ultra11y 5.36, 103 des 106 critères RGAA exigent une adjudication par le
+  # modèle pour obtenir un `C` — le silence d'une règle ne prouve plus la conformité si le
+  # contrat de test du critère ne démontre pas que CHAQUE test numéroté a un instrument
+  # décisif. Mesuré sur ce dépôt, la worklist est passée de 27 critères à 84 pour le même
+  # commit et les mêmes captures. Un run n'est plus une dépense de fond, c'est une décision.
+  #
+  # CE QUE ÇA COÛTE, ET IL FAUT LE DIRE : une régression RGAA de rendu ne sera plus rattrapée
+  # par personne tant que quelqu'un ne lance pas ce workflow. La gate statique reste bloquante
+  # sur chaque PR, mais elle ne voit pas la page rendue. C'est l'arbitrage, et il est assumé.
+  #
+  # À lancer avant une mise en production, après un changement d'UI significatif, ou quand on
+  # veut un livrable RGAA daté : `gh workflow run a11y.yaml --ref alpha`.
   workflow_dispatch:
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   # Une PR qui repousse annule son run précédent — il n'a plus rien à dire sur un code qui a
-  # changé. Un run complet (cron ou manuel) est un LIVRABLE : deux lancements coup sur coup ne
-  # doivent pas s'annuler l'un l'autre, le second n'ayant aucune raison d'être « plus à jour ».
+  # changé. Un run complet (manuel) est un LIVRABLE, et il est PAYÉ : deux lancements coup sur
+  # coup ne doivent pas s'annuler l'un l'autre, le second n'ayant aucune raison d'être « plus à
+  # jour » — et un run annulé a dépensé sans rien produire.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -165,7 +182,7 @@ jobs:
   a11y-gate:
     name: "RGAA · audit statique du code"
     # Le run complet réaudite déjà tout `src` dans `a11y-pages`. Garder cette gate sur les PR
-    # seulement évite deux invocations identiques sur le cron et le dispatch.
+    # seulement évite deux invocations identiques sur le dispatch.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -175,7 +192,7 @@ jobs:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
         # Tag de release explicite : garder les deux usages de l'Action sur la même version.
-        uses: maxgfr/ultra11y@v5.40.1
+        uses: maxgfr/ultra11y@v5.40.2
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -211,7 +228,7 @@ jobs:
           #
           # Le grief tombe exactement là où les deux jobs ne coexistent plus. Sur une PR,
           # `a11y-pages` ne tourne pas : un seul producteur, un seul commentaire et un seul
-          # rapport. Sur cron/dispatch, ce job est sauté et le livrable appartient exclusivement
+          # rapport. Sur un dispatch, ce job est sauté et le livrable appartient exclusivement
           # à `a11y-pages`.
           #
           # `digest` et non `pages` : sans instantané, cette gate n'a pas de grille par page à
@@ -233,7 +250,7 @@ jobs:
     # reproductible d'un run à l'autre. Sur une PR, la gate statique fait le travail.
     if: github.event_name != 'pull_request'
     # Ce tier a besoin de la stack complète — base, S3, ProConnect — et donc des secrets du
-    # dépôt. Sur `schedule` et `workflow_dispatch` ils sont toujours exposés : la condition qui
+    # dépôt. Sur `workflow_dispatch` ils sont toujours exposés : la condition qui
     # excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
     #
     # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
@@ -434,7 +451,7 @@ jobs:
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
         # Même tag de release que la gate PR ; ne jamais laisser les deux tiers diverger.
-        uses: maxgfr/ultra11y@v5.40.1
+        uses: maxgfr/ultra11y@v5.40.2
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -465,15 +482,42 @@ jobs:
           adjudicate-runner: cli
           adjudicate-grain: worklist
           adjudicate-passes: "3"
-          # Opus high est réservé au cron/dispatch, jamais aux PR. Le CLI applique le budget à
-          # CHAQUE lot de huit, pas à la passe entière : 106 critères font au plus 14 lots, donc
-          # 0,70 $ borne une passe complète à 9,80 $ hors rares retries de transport. Les passes
-          # suivantes ne reçoivent que le reliquat et s'arrêtent dès que la grille est complète.
-          # `opus` est volontairement l'alias Claude CLI : le tier reste Opus, sa version peut
-          # évoluer avec le CLI.
-          adjudicate-model: opus
+          # LE MODÈLE, ET C'EST LE SEUL GARDE-FOU DE COÛT QUI RESTE.
+          #
+          # Sonnet 5, et le choix est MESURÉ, pas préféré. C'est le seul modèle qui ait fermé la
+          # grille de ce dépôt : run 33383329004, trois passes, `0 sans verdict` sur les 106.
+          # Opus n'a jamais rien fermé ici — sa seule tentative (run 33389189227) a rendu 12
+          # verdicts sur 84 pour 38,90 $, et le modèle n'y était pour rien : voir le budget
+          # ci-dessous. Ce qui coûte cher sur ce tier n'est pas la difficulté de la décision,
+          # c'est le VOLUME — depuis ultra11y 5.36, 103 des 106 critères RGAA exigent une
+          # adjudication pour obtenir un `C`, contre une cinquantaine avant.
+          adjudicate-model: claude-sonnet-5
+          # L'EFFORT, ET IL N'EST PAS LE MODÈLE. Ce qui arrive ici est ce qu'aucun moteur n'a pu
+          # décider : la difficulté n'est pas de choisir entre deux réponses, c'est de LIRE
+          # l'évidence sans se tromper. Mesuré sur le run 32782282651 (effort par défaut) : 13
+          # verdicts refusés à la première passe, 12 à la deuxième, 2 à la troisième — que des
+          # citations fabriquées et des snippets retapés, aucun désaccord de fond. `high` a
+          # réparé ça sans changer de tier de facturation.
           adjudicate-effort: high
-          adjudicate-budget-usd: "0.70"
+          # PAS DE PLAFOND PAR LOT, ET C'EST UN CHOIX APRÈS MESURE.
+          #
+          # `adjudicate-budget-usd` borne CHAQUE INVOCATION du CLI — pas une passe, pas le run.
+          # Ce fichier a longtemps affirmé le contraire (« 0,70 $ borne une passe complète à
+          # 9,80 $ »), et c'était faux dans les deux sens : un lot de huit coûte 0,88 à 2,00 $
+          # en Opus/`high`, donc le plafond était SOUS le coût d'un lot, et le pire cas n'était
+          # pas 9,80 $ mais `lots × passes × plafond`.
+          #
+          # Ce qu'un plafond trop bas produit n'est pas une économie, c'est une perte sèche : le
+          # CLI abandonne le lot ENTIER sur `error_max_budget_usd`, après l'avoir payé. Mesuré
+          # sur le run 33389189227 : 30 invocations, 38,90 $ dépensés, 12 verdicts gardés, 69
+          # critères sur 106 laissés « à évaluer », et le job rouge sur `require-decided`.
+          #
+          # Vide, donc. Ce qui borne réellement la dépense : le mur horaire du CLI (10 min par
+          # invocation, tué par le moteur), le `timeout-minutes` du job, les trois passes qui ne
+          # reçoivent que le reliquat, et le registre rejoué avant tout appel. ultra11y 5.40.2
+          # découpe en plus un lot abandonné en deux moitiés plutôt que de le perdre — le filet,
+          # pas la ceinture.
+          adjudicate-budget-usd: ""
           # Le registre : écrit à chaque run avec les verdicts que la porte a acceptés, rejoué au
           # run suivant. Il EST versionné (`packages/app/.ultra11y/verdicts/rgaa.json`) — rien
           # ici ne le commite pour autant, c'est un geste humain. Voir l'en-tête.
@@ -546,7 +590,7 @@ jobs:
           # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
           # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
           undecidable-file: .ultra11y/undecidable.json
-          # PAS DE COMMENTAIRE : ni `schedule` ni `workflow_dispatch` n'ont de PR où le poster.
+          # PAS DE COMMENTAIRE : un `workflow_dispatch` n'a pas de PR où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
           # et ses sévérités, puis un bloc par page en échec — n'est pas perdu : c'est le rapport
