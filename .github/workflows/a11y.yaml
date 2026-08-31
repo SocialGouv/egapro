@@ -174,9 +174,8 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        # v5.40.0 + correctifs de complétude/performance, épinglés au commit immuable en
-        # attendant la prochaine release Ultra11y.
-        uses: maxgfr/ultra11y@76a48723330461b2ee358858d759ae182f0a1381
+        # Tag de release explicite : garder les deux usages de l'Action sur la même version.
+        uses: maxgfr/ultra11y@v5.40.1
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -434,8 +433,8 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        # Même commit immuable que la gate PR ; ne jamais laisser les deux tiers diverger.
-        uses: maxgfr/ultra11y@76a48723330461b2ee358858d759ae182f0a1381
+        # Même tag de release que la gate PR ; ne jamais laisser les deux tiers diverger.
+        uses: maxgfr/ultra11y@v5.40.1
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se

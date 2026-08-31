@@ -10,7 +10,7 @@
 ### 2. L'analyse, par la GitHub Action
 
 `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée à un
-commit immuable :
+tag de version explicite :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
@@ -253,16 +253,15 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-# puis aligner les DEUX `maxgfr/ultra11y@<tag-ou-sha>` de .github/workflows/a11y.yaml
+# puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
 claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
 ```
 
-La devDependency est sur **5.40.0**. L'Action est temporairement épinglée au commit
-`76a48723330461b2ee358858d759ae182f0a1381`, qui ajoute les correctifs de complétude des worklists
-et de performance trouvés pendant la validation réelle ; remplacer ce SHA par le prochain tag de
-release avant merge. Le **plugin Claude Code** est une troisième surface, hors dépôt : il se met à
-jour à la main et peut donc rester très en retard sans que rien ne le signale — vérifier son cache
-si le skill `review-a11y` se comporte autrement que la CI.
+La devDependency et les deux usages de l'Action sont alignés sur **5.40.1**. Cette release contient
+les correctifs de complétude des worklists et de performance validés sur le dépôt réel. Le
+**plugin Claude Code** est une troisième surface, hors dépôt : il se met à jour à la main et peut
+donc rester très en retard sans que rien ne le signale — vérifier son cache si le skill
+`review-a11y` se comporte autrement que la CI.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
