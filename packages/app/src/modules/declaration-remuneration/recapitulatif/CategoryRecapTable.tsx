@@ -1,3 +1,4 @@
+import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	computeGap,
@@ -27,16 +28,80 @@ function GapCell({ gap }: { gap: number | null }) {
 	);
 }
 
-/** One employee-category recap table — 11 rows: header → effectif → annuel section → horaire section. */
+/** An hourly headcount can be absent on categories entered before #4254 —
+ *  never invent a 0 for it. */
+function formatWorkforceCount(value: number | null): string {
+	return value === null ? "—" : String(value);
+}
+
+/** Physical-headcount table, one row per pay basis (#4368) — same shape and
+ *  labels as the company-level `WorkforceTable` in IndicatorTables.tsx and
+ *  the step-5 `CategoryDataTable`, with the row total computed the same way
+ *  (`null` — shown as "—" — when either side is missing, never a summed 0). */
+function CategoryEffectifTable({
+	category,
+	heading,
+}: {
+	category: EmployeeCategoryRow;
+	heading: string;
+}) {
+	return (
+		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
+			<div className="fr-table__wrapper">
+				<div className="fr-table__container">
+					<div className="fr-table__content">
+						<table>
+							<caption>{`${heading} – Effectifs physiques`}</caption>
+							<thead>
+								<tr>
+									<th scope="col">Nombre de salariés</th>
+									<th scope="col">Femmes</th>
+									<th scope="col">Hommes</th>
+									<th scope="col">Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								{CATEGORY_WORKFORCE_ROWS.map((row) => {
+									const women = category[row.womenField];
+									const men = category[row.menField];
+									const total =
+										women !== null && men !== null
+											? computeWorkforceTotal(women, men)
+											: null;
+									return (
+										<tr
+											className={styles.regularRow}
+											key={row.workforceRow.basis}
+										>
+											<th scope="row">{row.workforceRow.label}</th>
+											<td className={indicatorStyles.numeric}>
+												{formatWorkforceCount(women)}
+											</td>
+											<td className={indicatorStyles.numeric}>
+												{formatWorkforceCount(men)}
+											</td>
+											<td className={indicatorStyles.numeric}>
+												<strong>{total === null ? "—" : total}</strong>
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+/** One employee-category recap: a headcount table (one row per pay basis) followed
+ *  by a 10-row pay table (header → annuel section → horaire section). */
 export function CategoryRecapTable({
 	index,
 	category,
 	declarationYear,
 }: Props) {
-	const womenCount = category.womenCount ?? 0;
-	const menCount = category.menCount ?? 0;
-	const totalSalaries = computeWorkforceTotal(womenCount, menCount);
-
 	const annualWomenSum = computeTotal(
 		category.annualBaseWomen ?? "",
 		category.annualVariableWomen ?? "",
@@ -78,6 +143,7 @@ export function CategoryRecapTable({
 	return (
 		<section className={styles.section}>
 			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
+			<CategoryEffectifTable category={category} heading={heading} />
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">
@@ -100,20 +166,6 @@ export function CategoryRecapTable({
 									</tr>
 								</thead>
 								<tbody>
-									<tr className={styles.subheaderRow}>
-										<th colSpan={4} scope="colgroup">
-											Total salariés : {totalSalaries}
-										</th>
-									</tr>
-									<tr className={styles.regularRow}>
-										<th scope="row">Effectif physique</th>
-										<td className={indicatorStyles.numeric}>{womenCount} nb</td>
-										<td className={indicatorStyles.numeric}>{menCount} nb</td>
-										<td>
-											<span className="fr-sr-only">Non applicable</span>
-										</td>
-									</tr>
-
 									<tr className={styles.sectionRow}>
 										<th colSpan={4} scope="colgroup">
 											Rémunération annuelle brute

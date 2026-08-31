@@ -358,9 +358,13 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByText("Catégorie d'emplois n°2 : Techniciens"),
 		).toBeInTheDocument();
-		expect(screen.getAllByText("Effectif physique").length).toBe(2);
-		// "Total salariés : 78" total label must appear for the first category row.
-		expect(screen.getByText("Total salariés : 78")).toBeInTheDocument();
+		// One headcount table per category, each with an annual and hourly row
+		// (#4368) — plus the company-wide "Indicateurs pour l'ensemble de vos
+		// salariés" table above, which already carries the same two labels.
+		expect(screen.getAllByText("Rémunération annuelle").length).toBe(3);
+		expect(screen.getAllByText("Rémunération horaire").length).toBe(3);
+		// The first category's annual headcount total: 53 + 25 = 78.
+		expect(screen.getByText("78")).toBeInTheDocument();
 	});
 
 	it("renders source line when step5Source is provided", () => {

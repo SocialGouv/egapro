@@ -116,6 +116,8 @@ function makeIndicatorGRow(
 		categorySource: "predefined",
 		womenCount: 40,
 		menCount: 45,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: "24000",
 		annualBaseMen: "25500",
 		annualVariableWomen: "1200",
@@ -187,6 +189,29 @@ describe("generateXlsx", () => {
 		for (const col of INDICATOR_G_COLUMNS) {
 			expect(headers).toContain(col.header);
 		}
+	});
+
+	it("keeps a null hourly headcount blank while filling a populated one (#4368)", async () => {
+		const buffer = await generateXlsx(
+			[],
+			[
+				makeIndicatorGRow({ hourlyWomenCount: 8, hourlyMenCount: 6 }),
+				makeIndicatorGRow({ categoryName: "Cadres" }),
+			],
+		);
+
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.load(buffer as never);
+
+		const sheet = workbook.getWorksheet("Indicateur G");
+		const headers = sheet?.getRow(1).values as string[];
+		const womenColIndex = headers.indexOf("Effectif_horaire_F");
+		const menColIndex = headers.indexOf("Effectif_horaire_H");
+
+		expect(sheet?.getRow(2).getCell(womenColIndex).value).toBe(8);
+		expect(sheet?.getRow(2).getCell(menColIndex).value).toBe(6);
+		expect(sheet?.getRow(3).getCell(womenColIndex).value).toBeNull();
+		expect(sheet?.getRow(3).getCell(menColIndex).value).toBeNull();
 	});
 
 	it("should include data rows", async () => {
