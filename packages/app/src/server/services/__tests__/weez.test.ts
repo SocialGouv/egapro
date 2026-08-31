@@ -22,12 +22,65 @@ describe("fetchCompanyBySiren", () => {
 	const fetchSpy = vi.fn();
 
 	beforeEach(() => {
+		// The spy is shared across the describe: without a reset it keeps the
+		// previous test's call history and queued responses, and any assertion
+		// on a call index silently reads the wrong request.
+		fetchSpy.mockReset();
 		vi.stubGlobal("fetch", fetchSpy);
 	});
 
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
+
+	/**
+	 * Queues the head-office response of the conditional second call. Only a
+	 * legal unit without a postal code triggers it.
+	 */
+	function mockHeadOffice(establishment: unknown) {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => establishment,
+		});
+	}
+
+	const NO_COUNTRY = {
+		codepaysetrangeretablissement: null,
+		libellepaysetrangeretablissement: null,
+	};
+
+	/** Queues the legal-unit response of the first call. */
+	function mockLegalUnit(entity: {
+		siren: string;
+		codepostal: string | null;
+		name?: string;
+		statutdiffusionunitelegale?: string;
+	}) {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: entity.siren,
+						denominationunitelegale: entity.name ?? "Alpha Solutions",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale:
+							"Conseil en systèmes et logiciels informatiques",
+						effectiftotal: 256,
+						numerovoie: "12",
+						typevoie: "RUE",
+						libellevoie: "DES INNOVATEURS",
+						codepostal: entity.codepostal,
+						libellecommune: entity.codepostal ? "PARIS" : null,
+						statutdiffusionunitelegale:
+							entity.statutdiffusionunitelegale ?? "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+	}
 
 	it("returns company info for a diffusible company", async () => {
 		fetchSpy.mockResolvedValueOnce({
@@ -64,6 +117,8 @@ describe("fetchCompanyBySiren", () => {
 			region: "Île-de-France",
 			departmentCode: "75",
 			departmentLabel: "Paris",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			workforce: 256,
 			statutDiffusion: "O",
 		});
@@ -72,6 +127,7 @@ describe("fetchCompanyBySiren", () => {
 		expect(calledUrl.href).toContain("/public/v3/unitelegale/findbysiren");
 		expect(calledUrl.searchParams.get("siren")).toBe("532847196");
 		expect(calledUrl.searchParams.get("inclure_non_diffusibles")).toBe("true");
+		expect(calledUrl.searchParams.get("inclure_cesse")).toBe("true");
 	});
 
 	it("returns limited info for non-diffusible company", async () => {
@@ -97,6 +153,7 @@ describe("fetchCompanyBySiren", () => {
 				totalElements: 1,
 			}),
 		});
+		mockHeadOffice(NO_COUNTRY);
 
 		const result = await fetchCompanyBySiren("111222333");
 
@@ -108,6 +165,8 @@ describe("fetchCompanyBySiren", () => {
 			region: null,
 			departmentCode: null,
 			departmentLabel: null,
+			countryCode: null,
+			countryLabel: null,
 			workforce: 50,
 			statutDiffusion: "N",
 		});
@@ -147,6 +206,8 @@ describe("fetchCompanyBySiren", () => {
 			region: "Nouvelle-Aquitaine",
 			departmentCode: "33",
 			departmentLabel: "Gironde",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			workforce: 50,
 			statutDiffusion: "N",
 		});
@@ -176,6 +237,8 @@ describe("fetchCompanyBySiren", () => {
 				totalElements: 1,
 			}),
 		});
+
+		mockHeadOffice(NO_COUNTRY);
 
 		const result = await fetchCompanyBySiren("222333444");
 
@@ -239,6 +302,8 @@ describe("fetchCompanyBySiren", () => {
 				totalElements: 1,
 			}),
 		});
+
+		mockHeadOffice(NO_COUNTRY);
 
 		const result = await fetchCompanyBySiren("451678973");
 
@@ -306,6 +371,8 @@ describe("fetchCompanyBySiren", () => {
 			region: "Auvergne-Rhône-Alpes",
 			departmentCode: "69",
 			departmentLabel: "Rhône",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			workforce: null,
 			statutDiffusion: "O",
 		});
@@ -375,8 +442,162 @@ describe("fetchCompanyBySiren", () => {
 			region: "Nouvelle-Aquitaine",
 			departmentCode: "33",
 			departmentLabel: "Gironde",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			workforce: 12,
 			statutDiffusion: "O",
+		});
+	});
+
+	it("resolves FRANCE without calling the head office when a postal code is present (S1)", async () => {
+		mockLegalUnit({ siren: "532847196", codepostal: "75011" });
+
+		const result = await fetchCompanyBySiren("532847196");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: "FRANCE" });
+		expect(fetchSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it("reads the country off the head office when the legal unit has no postal code (S2)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: "99248",
+			libellepaysetrangeretablissement: "QATAR",
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({
+			countryCode: "99248",
+			countryLabel: "QATAR",
+		});
+
+		const headOfficeUrl = fetchSpy.mock.calls[1]?.[0] as URL;
+		expect(headOfficeUrl.href).toContain(
+			"/public/v3/unitelegale/etablissementsiege",
+		);
+		expect(headOfficeUrl.searchParams.get("siren")).toBe("987654321");
+	});
+
+	it("reads the country off a paginated head-office envelope (S2)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			content: [
+				{
+					codepaysetrangeretablissement: "99248",
+					libellepaysetrangeretablissement: "QATAR",
+				},
+			],
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({
+			countryCode: "99248",
+			countryLabel: "QATAR",
+		});
+	});
+
+	it("leaves the country unknown when the head-office call fails, without breaking the lookup (S3)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null, name: "Gamma SARL" });
+		fetchSpy.mockRejectedValueOnce(new Error("network down"));
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({
+			name: "Gamma SARL",
+			countryCode: null,
+			countryLabel: null,
+		});
+	});
+
+	it("leaves the country unknown when the head office answers with an error status (S3)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		fetchSpy.mockResolvedValueOnce({
+			ok: false,
+			status: 503,
+			statusText: "Service Unavailable",
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it("leaves the country unknown when the head office carries no country (S3)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice(NO_COUNTRY);
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it("leaves the country unknown when the head office answers with no row at all (S3)", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice(null);
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it.each([
+		["a code without a label", "99248", null],
+		["a label without a code", null, "QATAR"],
+	])("leaves the country unknown rather than half-filled when the head office returns %s (S3)", async (_case, code, label) => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: code,
+			libellepaysetrangeretablissement: label,
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it("drops an over-long country code rather than truncating it into another country", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: "992480",
+			libellepaysetrangeretablissement: "QATAR",
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result).toMatchObject({ countryCode: null, countryLabel: null });
+	});
+
+	it("clamps an over-long country label to the column width", async () => {
+		mockLegalUnit({ siren: "987654321", codepostal: null });
+		mockHeadOffice({
+			codepaysetrangeretablissement: "99248",
+			libellepaysetrangeretablissement: "Q".repeat(300),
+		});
+
+		const result = await fetchCompanyBySiren("987654321");
+
+		expect(result?.countryCode).toBe("99248");
+		expect(result?.countryLabel).toBe("Q".repeat(255));
+	});
+
+	it("keeps FRANCE on a non-diffusible company while address and NAF stay masked (S4)", async () => {
+		mockLegalUnit({
+			siren: "111222333",
+			codepostal: "33000",
+			statutdiffusionunitelegale: "N",
+		});
+
+		const result = await fetchCompanyBySiren("111222333");
+
+		expect(result).toMatchObject({
+			address: null,
+			nafCode: null,
+			nafLabel: null,
+			departmentCode: "33",
+			countryCode: null,
+			countryLabel: "FRANCE",
 		});
 	});
 });

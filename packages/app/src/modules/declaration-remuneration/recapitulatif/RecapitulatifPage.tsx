@@ -173,7 +173,7 @@ export function RecapitulatifPage({
 
 			<section>
 				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs par catégories de salariés
+					Indicateur par catégories de salariés
 				</h2>
 				{sourceLabel && (
 					<p className={`fr-mb-3w ${styles.sourceLine}`}>

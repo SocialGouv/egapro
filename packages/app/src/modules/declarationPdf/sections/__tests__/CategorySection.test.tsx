@@ -138,4 +138,40 @@ describe("CategorySection", () => {
 		// Men pay total: 42000 + 2000 = 44 000 €
 		expect(screen.getByText("44 000 €")).toBeInTheDocument();
 	});
+
+	it("shows a dash for a missing hourly headcount, never an invented 0 (#4368)", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({ name: "Ouvriers", womenCount: 10, menCount: 15 }),
+					],
+				})}
+			/>,
+		);
+		expect(screen.getByText("Rémunération annuelle")).toBeInTheDocument();
+		expect(screen.getByText("Rémunération horaire")).toBeInTheDocument();
+		// The hourly row's Femmes/Hommes/Total cells are all missing → 3 dashes.
+		expect(screen.getAllByText("—")).toHaveLength(3);
+	});
+
+	it("shows the hourly headcount total once both women and men counts are present (#4368)", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							name: "Ouvriers",
+							womenCount: 10,
+							menCount: 15,
+							hourlyWomenCount: 4,
+							hourlyMenCount: 2,
+						}),
+					],
+				})}
+			/>,
+		);
+		// Hourly total: 4 + 2 = 6
+		expect(screen.getByText("6")).toBeInTheDocument();
+	});
 });
