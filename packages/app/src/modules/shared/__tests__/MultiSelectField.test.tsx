@@ -77,6 +77,20 @@ describe("MultiSelectField", () => {
 		expect(submittedValues(container, "region")).toEqual(["53"]);
 	});
 
+	it("keeps the panel open when an option is picked by its label", async () => {
+		const user = userEvent.setup();
+		const { container } = renderField();
+		const trigger = screen.getByRole("button", {
+			name: /Sélectionner des options/,
+		});
+
+		await user.click(trigger);
+		await user.click(screen.getByText("Bretagne"));
+
+		expect(trigger).toHaveAttribute("aria-expanded", "true");
+		expect(submittedValues(container, "region")).toEqual(["53"]);
+	});
+
 	it("selects then clears every option from the same control", async () => {
 		const user = userEvent.setup();
 		const { container } = renderField();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./MultiSelectField.module.scss";
 
@@ -47,6 +47,23 @@ export function MultiSelectField({
 	const [query, setQuery] = useState("");
 	const [values, setValues] = useState<string[]>([...selected]);
 	const triggerRef = useRef<HTMLButtonElement>(null);
+	const fieldRef = useRef<HTMLFieldSetElement>(null);
+
+	// Closing on blur alone is not enough: a label is not focusable, so pressing
+	// one blurs the trigger with a null `relatedTarget` before the click lands,
+	// and the panel would disappear from under the pointer.
+	useEffect(() => {
+		if (!open) return;
+		function closeOnOutsidePointer(event: PointerEvent) {
+			const target = event.target;
+			if (target instanceof Node && !fieldRef.current?.contains(target)) {
+				setOpen(false);
+			}
+		}
+		document.addEventListener("pointerdown", closeOnOutsidePointer);
+		return () =>
+			document.removeEventListener("pointerdown", closeOnOutsidePointer);
+	}, [open]);
 
 	const panelId = `${id}-panel`;
 	const allSelected = values.length === options.length && options.length > 0;
@@ -89,7 +106,12 @@ export function MultiSelectField({
 		<fieldset
 			className={styles.field}
 			onBlur={(event) => {
-				if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+				if (
+					event.relatedTarget &&
+					!event.currentTarget.contains(event.relatedTarget)
+				) {
+					setOpen(false);
+				}
 			}}
 			onKeyDown={(event) => {
 				// Escape closes the panel and hands focus back to the trigger, so a
@@ -100,6 +122,7 @@ export function MultiSelectField({
 					triggerRef.current?.focus();
 				}
 			}}
+			ref={fieldRef}
 		>
 			<legend className={styles.legend}>{label}</legend>
 			<button
@@ -111,6 +134,10 @@ export function MultiSelectField({
 				ref={triggerRef}
 				type="button"
 			>
+				{/* Four of these sit on the search form; without the field name in
+				    the accessible name they are indistinguishable in a screen
+				    reader's button list. */}
+				<span className="fr-sr-only">{label} : </span>
 				<span>{triggerLabel}</span>
 				<span
 					aria-hidden="true"
@@ -146,6 +173,10 @@ export function MultiSelectField({
 							type="search"
 							value={query}
 						/>
+						<span
+							aria-hidden="true"
+							className={`fr-icon-search-line fr-icon--sm ${styles.searchIcon}`}
+						/>
 					</div>
 				)}
 				<div className={styles.options}>
@@ -155,7 +186,10 @@ export function MultiSelectField({
 						visibleOptions.map((option) => {
 							const optionId = `${id}-${option.value}`;
 							return (
-								<div className="fr-checkbox-group" key={option.value}>
+								<div
+									className="fr-checkbox-group fr-checkbox-group--sm"
+									key={option.value}
+								>
 									<input
 										checked={values.includes(option.value)}
 										id={optionId}

@@ -12,6 +12,7 @@ import {
 	type MultiSelectOption,
 } from "~/modules/shared/MultiSelectField";
 import { DEFAULT_PAGE_SIZE, SEARCH_PATH } from "./constants";
+import styles from "./PublicSearchForm.module.scss";
 import type { ConsultationSearchParams } from "./searchParams";
 
 const REGION_OPTIONS: MultiSelectOption[] = REGION_CODES.map((code) => ({
@@ -59,18 +60,26 @@ export function PublicSearchForm({ values }: Props) {
 				</button>
 			</search>
 
-			<section className="fr-accordion fr-mt-3w">
+			{/* The DSFR runtime stamps its own `data-fr-js-*` attributes on these
+			    three nodes before React hydrates, which React reports as a mismatch;
+			    the markup itself is identical on both sides. */}
+			<section className="fr-accordion fr-mt-3w" suppressHydrationWarning>
 				<h2 className="fr-accordion__title">
 					<button
 						aria-controls="consultation-advanced-search"
 						aria-expanded="false"
 						className="fr-accordion__btn"
+						suppressHydrationWarning
 						type="button"
 					>
 						Recherche avancée
 					</button>
 				</h2>
-				<div className="fr-collapse" id="consultation-advanced-search">
+				<div
+					className={`fr-collapse ${styles.advancedFilters}`}
+					id="consultation-advanced-search"
+					suppressHydrationWarning
+				>
 					<div className="fr-grid-row fr-grid-row--gutters">
 						<div className="fr-col-12 fr-col-md-6">
 							<MultiSelectField
