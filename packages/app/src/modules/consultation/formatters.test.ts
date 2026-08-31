@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	companyLocation,
 	formatCount,
 	formatGap,
 	formatPercent,
@@ -56,5 +57,47 @@ describe("gapDirection", () => {
 	it("states a nil gap and a missing one differently", () => {
 		expect(gapDirection(0).prefix).toBe("Aucun écart constaté");
 		expect(gapDirection(null).prefix).toBe("Donnée non disponible");
+	});
+});
+
+describe("companyLocation", () => {
+	it("names the département and the region of a French company", () => {
+		expect(
+			companyLocation({
+				countryLabel: null,
+				departmentLabel: "Nord",
+				region: "Hauts-de-France",
+			}),
+		).toEqual({ label: "Adresse", value: "Nord, Hauts-de-France" });
+	});
+
+	it("names the country of a company registered abroad", () => {
+		expect(
+			companyLocation({
+				countryLabel: "Belgique",
+				departmentLabel: null,
+				region: null,
+			}),
+		).toEqual({ label: "Pays", value: "Belgique" });
+	});
+
+	it("keeps the département a non-diffusible company still publishes", () => {
+		expect(
+			companyLocation({
+				countryLabel: null,
+				departmentLabel: "Nord",
+				region: null,
+			}),
+		).toEqual({ label: "Adresse", value: "Nord" });
+	});
+
+	it("returns nothing when the registry located the company nowhere", () => {
+		expect(
+			companyLocation({
+				countryLabel: null,
+				departmentLabel: null,
+				region: null,
+			}),
+		).toBeNull();
 	});
 });

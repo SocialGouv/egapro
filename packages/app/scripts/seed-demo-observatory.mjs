@@ -194,16 +194,20 @@ const YEARS = [
 	),
 ].sort((left, right) => left - right);
 
-function indicatorValues(companyIndex, point) {
+function indicatorValues(company, companyIndex, point) {
 	const annual = point.annual;
 	const hourly = point.hourly;
 	const variable = point.variable;
 	const womenShare = 46 + companyIndex * 2;
 	const quartileShift = companyIndex - 2;
 
+	// The headcount split must add up to the company's workforce: the company
+	// page shows both, and a demo that contradicts itself reads as a bug.
+	const totalWomen = Math.round((company.workforce * womenShare) / 100);
+
 	return {
-		totalWomen: 40 + companyIndex * 35,
-		totalMen: 35 + companyIndex * 31,
+		totalWomen,
+		totalMen: company.workforce - totalWomen,
 		globalAnnualMeanGap: annual,
 		globalHourlyMeanGap: hourly,
 		variableAnnualMeanGap: variable,
@@ -325,7 +329,7 @@ async function main() {
 
 				for (const point of company.history) {
 					const year = YEAR + point.offset;
-					const values = indicatorValues(companyIndex, point);
+					const values = indicatorValues(company, companyIndex, point);
 					await tx`
 						INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
 						VALUES (${company.siren}, ${year}, ${company.workforce}, NOW())

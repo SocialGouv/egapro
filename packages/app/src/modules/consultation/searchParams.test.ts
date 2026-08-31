@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	backToSearchHref,
 	parseConsultationSearchParams,
 	searchHref,
 	toPublicSearchInput,
@@ -74,5 +75,24 @@ describe("searchHref", () => {
 		});
 
 		expect(href).toBe("/index-egapro/recherche?naf=C&page=4");
+	});
+});
+
+describe("backToSearchHref", () => {
+	it("rebuilds the search a company page was reached from", () => {
+		expect(backToSearchHref("q=Atelier&region=11&region=84&page=3")).toBe(
+			"/index-egapro/recherche?q=Atelier&region=11&region=84&page=3",
+		);
+	});
+
+	it("falls back to the bare search when nothing was carried", () => {
+		expect(backToSearchHref(undefined)).toBe("/index-egapro/recherche");
+		expect(backToSearchHref("")).toBe("/index-egapro/recherche");
+	});
+
+	it("drops keys the search does not own instead of reflecting them", () => {
+		expect(
+			backToSearchHref("q=Atelier&evil=%3Cscript%3E&next=//example.com"),
+		).toBe("/index-egapro/recherche?q=Atelier");
 	});
 });

@@ -4,11 +4,14 @@ import { getPublicDeclarationsBySiren } from "~/modules/public-api";
 
 type Props = {
 	params: Promise<{ siren: string }>;
-	searchParams: Promise<{ year?: string }>;
+	searchParams: Promise<{ year?: string; from?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-	const { siren } = await params;
+export async function generateMetadata({
+	params,
+	searchParams,
+}: Props): Promise<Metadata> {
+	const [{ siren }, query] = await Promise.all([params, searchParams]);
 	const rows = await getPublicDeclarationsBySiren(siren, 1);
 	const company = rows[0];
 	return {
@@ -19,11 +22,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 			? `Consultez les indicateurs publics d’égalité professionnelle de l’entreprise ${company.name ?? siren}.`
 			: undefined,
 		alternates: { canonical: `/index-egapro/entreprise/${siren}` },
+		// Only the canonical view — the latest published campaign — is indexed;
+		// past and future years stay reachable through the client-side selector.
+		...(query.year ? { robots: { index: false, follow: true } } : {}),
 	};
 }
 
 export default async function Page({ params, searchParams }: Props) {
 	const [{ siren }, query] = await Promise.all([params, searchParams]);
 	const selectedYear = query.year ? Number.parseInt(query.year, 10) : undefined;
-	return <CompanyConsultationPage selectedYear={selectedYear} siren={siren} />;
+	return (
+		<CompanyConsultationPage
+			from={query.from}
+			selectedYear={selectedYear}
+			siren={siren}
+		/>
+	);
 }

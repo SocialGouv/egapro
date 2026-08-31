@@ -96,6 +96,24 @@ export function buildSearchQuery(
 	return query.toString();
 }
 
+/**
+ * The search a company page was reached from, so "Retour" lands back on the
+ * caller's criteria. The string is re-parsed through the facet whitelist rather
+ * than reflected: an unknown or hostile key never reaches the rebuilt URL.
+ */
+export function backToSearchHref(from: string | undefined): string {
+	if (!from) return SEARCH_PATH;
+	const query = new URLSearchParams(from);
+	const raw: Record<string, string | string[]> = {};
+	for (const key of new Set(query.keys())) {
+		const values = query.getAll(key);
+		const first = values[0];
+		if (first === undefined) continue;
+		raw[key] = values.length > 1 ? values : first;
+	}
+	return searchHref(parseConsultationSearchParams(raw));
+}
+
 export function searchHref(
 	params: ConsultationSearchParams,
 	overrides: Partial<Record<"page" | "limit", number>> = {},

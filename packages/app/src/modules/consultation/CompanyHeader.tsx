@@ -1,18 +1,22 @@
 import Link from "next/link";
 import { getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
+import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import styles from "./CompanyHeader.module.scss";
-import { SEARCH_PATH } from "./constants";
-import { formatCount } from "./formatters";
+import { companyLocation, formatCount } from "./formatters";
 
 type Props = {
 	name: string | null;
 	siren: string;
 	address: string | null;
+	region: string | null;
+	departmentLabel: string | null;
+	countryLabel: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
 	workforceEma: number | null;
 	year: number;
+	backHref: string;
 };
 
 type Fact = { label: string; value: string };
@@ -21,14 +25,24 @@ export function CompanyHeader({
 	name,
 	siren,
 	address,
+	region,
+	departmentLabel,
+	countryLabel,
 	nafCode,
 	nafLabel,
 	workforceEma,
 	year,
+	backHref,
 }: Props) {
 	const displayName = name ?? `Entreprise ${siren}`;
 	const identity: Fact[] = [{ label: "SIREN", value: siren }];
-	if (address) identity.push({ label: "Adresse", value: address });
+	// A withheld address must not cost the reader the location the API still
+	// publishes: fall back to the département and region the listing shows.
+	const location =
+		address && address !== NON_DIFFUSIBLE_LABEL
+			? { label: "Adresse", value: address }
+			: companyLocation({ countryLabel, departmentLabel, region });
+	if (location) identity.push(location);
 
 	const activity: Fact[] = [];
 	if (nafCode || nafLabel) {
@@ -50,13 +64,13 @@ export function CompanyHeader({
 			<div className="fr-container">
 				<Breadcrumb
 					items={[
-						{ label: "Observatoire", href: SEARCH_PATH },
+						{ label: "Observatoire", href: backHref },
 						{ label: displayName },
 					]}
 				/>
 				<Link
 					className={`fr-link fr-icon-arrow-left-line fr-link--icon-left ${styles.back}`}
-					href={SEARCH_PATH}
+					href={backHref}
 				>
 					Retour
 				</Link>

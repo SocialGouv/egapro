@@ -7,7 +7,10 @@ import { SearchResultItem } from "./SearchResultItem";
 describe("SearchResultItem", () => {
 	it("names the company and links to its page", () => {
 		render(
-			<SearchResultItem declaration={declarationFixture({ name: "Alpha" })} />,
+			<SearchResultItem
+				declaration={declarationFixture({ name: "Alpha" })}
+				searchQuery=""
+			/>,
 		);
 
 		expect(screen.getByRole("link", { name: "Alpha" })).toHaveAttribute(
@@ -16,8 +19,24 @@ describe("SearchResultItem", () => {
 		);
 	});
 
+	it("carries the current search so the company page can return to it", () => {
+		render(
+			<SearchResultItem
+				declaration={declarationFixture({ name: "Alpha" })}
+				searchQuery="q=Alpha&region=11"
+			/>,
+		);
+
+		expect(screen.getByRole("link", { name: "Alpha" })).toHaveAttribute(
+			"href",
+			"/index-egapro/entreprise/998900001?from=q%3DAlpha%26region%3D11",
+		);
+	});
+
 	it("lists the four facts of the maquette card", () => {
-		render(<SearchResultItem declaration={declarationFixture()} />);
+		render(
+			<SearchResultItem declaration={declarationFixture()} searchQuery="" />,
+		);
 
 		expect(screen.getByText(/SIREN/)).toBeInTheDocument();
 		expect(screen.getByText("998900001")).toBeInTheDocument();
@@ -35,6 +54,7 @@ describe("SearchResultItem", () => {
 		render(
 			<SearchResultItem
 				declaration={declarationFixture({ workforceEma: 62 })}
+				searchQuery=""
 			/>,
 		);
 
@@ -50,6 +70,7 @@ describe("SearchResultItem", () => {
 					departmentLabel: null,
 					region: null,
 				})}
+				searchQuery=""
 			/>,
 		);
 
@@ -61,6 +82,7 @@ describe("SearchResultItem", () => {
 		render(
 			<SearchResultItem
 				declaration={declarationFixture({ workforceEma: null })}
+				searchQuery=""
 			/>,
 		);
 

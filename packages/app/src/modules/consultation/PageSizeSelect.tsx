@@ -17,7 +17,13 @@ export function PageSizeSelect({ params }: Props) {
 			<label className="fr-label fr-sr-only" htmlFor="consultation-page-size">
 				Nombre de résultats par page
 			</label>
+			{/* WCAG 3.2.2: the reload is what a sighted user asked for by picking a
+			    size, but a screen-reader user has to be told it will happen. */}
+			<p className="fr-sr-only" id="consultation-page-size-hint">
+				Le choix d’un nombre de résultats recharge la liste.
+			</p>
 			<select
+				aria-describedby="consultation-page-size-hint"
 				className="fr-select"
 				id="consultation-page-size"
 				onChange={(event) =>

@@ -10,6 +10,8 @@ type Props = {
 	years: number[];
 	selectedYear: number;
 	referencePeriod: string;
+	/** The search the page was reached from, kept across a year change. */
+	from?: string;
 };
 
 export function YearSelector({
@@ -18,6 +20,7 @@ export function YearSelector({
 	years,
 	selectedYear,
 	referencePeriod,
+	from,
 }: Props) {
 	const router = useRouter();
 	const fieldId = `${id}-year`;
@@ -27,14 +30,22 @@ export function YearSelector({
 			<label className={`fr-label ${styles.label}`} htmlFor={fieldId}>
 				Année
 			</label>
+			{/* WCAG 3.2.2: the reload is what a sighted user asked for by picking a
+			    year, but a screen-reader user has to be told it will happen. */}
+			<p className="fr-sr-only" id={`${fieldId}-hint`}>
+				Le choix d’une année recharge les indicateurs affichés.
+			</p>
 			<select
+				aria-describedby={`${fieldId}-hint`}
 				className={`fr-select ${styles.select}`}
 				id={fieldId}
-				onChange={(event) =>
-					router.push(
-						`/index-egapro/entreprise/${siren}?year=${event.currentTarget.value}`,
-					)
-				}
+				onChange={(event) => {
+					const query = new URLSearchParams({
+						year: event.currentTarget.value,
+					});
+					if (from) query.set("from", from);
+					router.push(`/index-egapro/entreprise/${siren}?${query.toString()}`);
+				}}
 				value={selectedYear}
 			>
 				{years.map((year) => (

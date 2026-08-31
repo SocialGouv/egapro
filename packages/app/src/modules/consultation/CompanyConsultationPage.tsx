@@ -1,23 +1,32 @@
 import { notFound } from "next/navigation";
+import { env } from "~/env.js";
 import { GAP_ALERT_THRESHOLD, getReferencePeriod } from "~/modules/domain";
 import {
 	getPublicDeclarationsBySiren,
 	getPublicRepresentationsBySiren,
+	NON_DIFFUSIBLE_LABEL,
 } from "~/modules/public-api";
+import { JsonLd } from "~/modules/shared/JsonLd";
 import { CompanyHeader } from "./CompanyHeader";
 import { MAX_HISTORY_YEARS } from "./constants";
 import { RemunerationTab } from "./RemunerationTab";
 import { RepresentationTab } from "./RepresentationTab";
+import { backToSearchHref } from "./searchParams";
+import { companyPageStructuredData } from "./structuredData";
 import { YearSelector } from "./YearSelector";
 
-type Props = { siren: string; selectedYear?: number };
+type Props = { siren: string; selectedYear?: number; from?: string };
 
 const TABS = [
 	{ id: "remuneration", label: "Rémunération" },
 	{ id: "representation", label: "Représentation" },
 ] as const;
 
-export async function CompanyConsultationPage({ siren, selectedYear }: Props) {
+export async function CompanyConsultationPage({
+	siren,
+	selectedYear,
+	from,
+}: Props) {
 	const [declarations, representations] = await Promise.all([
 		getPublicDeclarationsBySiren(siren, MAX_HISTORY_YEARS),
 		getPublicRepresentationsBySiren(siren, MAX_HISTORY_YEARS),
@@ -44,6 +53,17 @@ export async function CompanyConsultationPage({ siren, selectedYear }: Props) {
 	const identity = declaration ?? representation;
 	if (!identity) notFound();
 
+	// City and country live on the declaration only; a company does not move, so
+	// the latest one answers for a year that published a representation alone.
+	const located = declarations[0] ?? null;
+	const location = {
+		city: located?.city ?? null,
+		countryCode: located?.countryCode ?? null,
+		countryLabel: located?.countryLabel ?? null,
+		departmentLabel: identity.departmentLabel,
+		region: identity.region,
+	};
+
 	const referencePeriod =
 		representation?.referencePeriodStart && representation.referencePeriodEnd
 			? `${formatIsoDate(representation.referencePeriodStart)} - ${formatIsoDate(representation.referencePeriodEnd)}`
@@ -51,11 +71,29 @@ export async function CompanyConsultationPage({ siren, selectedYear }: Props) {
 
 	return (
 		<main id="content" tabIndex={-1}>
+			<JsonLd
+				data={companyPageStructuredData(
+					{
+						...location,
+						name: identity.name,
+						nafLabel: identity.nafLabel,
+						siren,
+						workforceEma: declaration?.workforceEma ?? null,
+						year,
+					},
+					new URL(env.NEXTAUTH_URL).origin,
+					identity.name === NON_DIFFUSIBLE_LABEL,
+				)}
+			/>
 			<CompanyHeader
 				address={identity.address}
+				backHref={backToSearchHref(from)}
+				countryLabel={location.countryLabel}
+				departmentLabel={location.departmentLabel}
 				nafCode={identity.nafCode}
 				nafLabel={identity.nafLabel}
 				name={identity.name}
+				region={location.region}
 				siren={siren}
 				workforceEma={declaration?.workforceEma ?? null}
 				year={year}
@@ -92,6 +130,7 @@ export async function CompanyConsultationPage({ siren, selectedYear }: Props) {
 						role="tabpanel"
 					>
 						<YearSelector
+							from={from}
 							id="remuneration"
 							referencePeriod={referencePeriod}
 							selectedYear={year}
@@ -122,6 +161,7 @@ export async function CompanyConsultationPage({ siren, selectedYear }: Props) {
 						role="tabpanel"
 					>
 						<YearSelector
+							from={from}
 							id="representation"
 							referencePeriod={referencePeriod}
 							selectedYear={year}

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { env } from "~/env.js";
+import { JsonLd } from "~/modules/shared/JsonLd";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 import styles from "./ConsultationSearchPage.module.scss";
 import { DownloadDataModal } from "./DownloadDataModal";
@@ -8,11 +10,13 @@ import { PublicSearchForm } from "./PublicSearchForm";
 import { SearchPagination } from "./SearchPagination";
 import { SearchResultItem } from "./SearchResultItem";
 import {
+	buildSearchQuery,
 	type ConsultationSearchParams,
 	parseConsultationSearchParams,
 	searchHref,
 	toPublicSearchInput,
 } from "./searchParams";
+import { searchPageStructuredData } from "./structuredData";
 
 type Props = {
 	searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -36,12 +40,16 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 	const params = parseConsultationSearchParams(await searchParams);
 	const result = await searchPublicDeclarations(toPublicSearchInput(params));
 	const totalPages = Math.ceil(result.count / params.limit);
+	const searchQuery = buildSearchQuery(params);
 	if (totalPages > 0 && params.page > totalPages) {
 		redirectToLastPage(params, totalPages);
 	}
 
 	return (
 		<main className="fr-container fr-py-6w" id="content" tabIndex={-1}>
+			<JsonLd
+				data={searchPageStructuredData(new URL(env.NEXTAUTH_URL).origin)}
+			/>
 			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-12 fr-col-md-8">
 					<h1 className="fr-mb-3w">
@@ -95,6 +103,7 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 								<SearchResultItem
 									declaration={declaration}
 									key={declaration.siren}
+									searchQuery={searchQuery}
 								/>
 							))}
 						</div>

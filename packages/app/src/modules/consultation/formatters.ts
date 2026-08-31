@@ -28,6 +28,27 @@ export function shareOf(
 	return (part / total) * 100;
 }
 
+export type CompanyLocation = { label: string; value: string };
+
+/**
+ * Where a company sits, as both screens of the observatory name it. A company
+ * registered abroad has no French département, and a non-diffusible one keeps
+ * its département and region even though its street address is withheld.
+ */
+export function companyLocation(company: {
+	countryLabel: string | null;
+	departmentLabel: string | null;
+	region: string | null;
+}): CompanyLocation | null {
+	if (company.countryLabel) {
+		return { label: "Pays", value: company.countryLabel };
+	}
+	const value = [company.departmentLabel, company.region]
+		.filter(Boolean)
+		.join(", ");
+	return value ? { label: "Adresse", value } : null;
+}
+
 export type GapDirection = {
 	/** Sentence up to the emphasised word, e.g. "Écart en faveur des ". */
 	prefix: string;
