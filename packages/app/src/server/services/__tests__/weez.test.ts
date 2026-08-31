@@ -72,6 +72,7 @@ describe("fetchCompanyBySiren", () => {
 		expect(calledUrl.href).toContain("/public/v3/unitelegale/findbysiren");
 		expect(calledUrl.searchParams.get("siren")).toBe("532847196");
 		expect(calledUrl.searchParams.get("inclure_non_diffusibles")).toBe("true");
+		expect(calledUrl.searchParams.get("inclure_cesse")).toBe("true");
 	});
 
 	it("returns limited info for non-diffusible company", async () => {
