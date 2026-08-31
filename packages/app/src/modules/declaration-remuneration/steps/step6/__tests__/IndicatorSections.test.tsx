@@ -174,7 +174,7 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.getByText("Indicateurs par catégories de salariés"),
+			screen.getByText("Indicateur par catégories de salariés"),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Écart de rémunération par catégories de salariés"),
@@ -195,7 +195,7 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.queryByText("Indicateurs par catégories de salariés"),
+			screen.queryByText("Indicateur par catégories de salariés"),
 		).not.toBeInTheDocument();
 		expect(
 			screen.queryByText("Écart de rémunération par catégories de salariés"),

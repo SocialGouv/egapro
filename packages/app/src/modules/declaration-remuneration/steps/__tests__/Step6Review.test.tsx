@@ -176,7 +176,7 @@ describe("Step6Review", () => {
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateurs par catégories de salariés"),
+			screen.getByText("Indicateur par catégories de salariés"),
 		).toBeInTheDocument();
 	});
 
