@@ -250,6 +250,26 @@ chaque moitié repartant avec son propre plafond — une perte de huit critères
 perte d'un. Ce dépôt ne pose plus de plafond du tout (voir « Ce que coûte l'adjudication ») ;
 ce découpage est le filet, pas la ceinture.
 
+### RGAA 10.7 et les contrôles DSFR — ce que 5.41.0 corrige
+
+La sonde `dyn-focus-visible` proxifiait bien un radio/checkbox visuellement masqué vers son
+label — c'est la forme DSFR, et c'était le bon réflexe. Mais elle lisait ensuite le style
+**propre** du label, c'est-à-dire la seule boîte qu'un design system ne peint pas : DSFR dessine
+la case, la coche et l'anneau de focus dans `label::before`.
+
+Mesuré sur le run 33389189227 : **12 constats 10.7**, tous des `<label class="fr-label">`, tous
+faux — 9 sur les cases « années » de `admin-stats`, 2 sur les radios de l'avis du CSE, 1 sur le
+choix de parcours de conformité.
+
+Et le dégât dépassait le bruit. **10.7 n'est pas sur l'allowlist `completeBySilence`**, donc un
+NC fabriqué sur 3 pages laissait le critère « à évaluer » sur les **34 autres** — hors d'atteinte
+de toute adjudication, puisqu'un critère déjà tranché pour le run n'entre jamais dans la
+worklist. C'était, à lui seul, ce qui rendait `require-decided: pages` inatteignable.
+
+La règle générale, qui vaut au-delà de ce cas : **un critère jugé NC quelque part et absent de
+l'allowlist reste « à évaluer » sur chaque page où le défaut ne tire pas.** Un `C` d'agent, lui,
+ferme les 37 pages — mesuré, 31 verdicts sur 31.
+
 ### En local, la même chose sans CI
 
 Depuis `packages/app` :
@@ -294,14 +314,20 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 # puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
-claude plugin update ultra11y@ultra11y        # hors dépôt, à lancer à la main
+./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
 ```
 
-La devDependency et les deux usages de l'Action sont alignés sur **5.40.1**. Cette release contient
-les correctifs de complétude des worklists et de performance validés sur le dépôt réel. Le
-**plugin Claude Code** est une troisième surface, hors dépôt : il se met à jour à la main et peut
-donc rester très en retard sans que rien ne le signale — vérifier son cache si le skill
-`review-a11y` se comporte autrement que la CI.
+La devDependency et les deux usages de l'Action sont alignés sur **5.41.0**, et ce n'est plus une
+consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
+refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
+avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
+formats, et rien ne lève d'erreur.
+
+Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
+pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au tag
+d'`a11y.yaml` au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
+été écrit pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
+dépôt tournait en 5.40.1.
 
 À noter si un bump échoue : la publication npm de la 5.3.0 est
 tombée sur la signature de provenance (`CA_CREATE_SIGNING_CERTIFICATE_ERROR`, 403 du CA) alors
