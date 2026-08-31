@@ -121,6 +121,24 @@ jobs:
       - name: Check cahier de tests correlation
         run: pnpm --filter app check:cahier
 
+  a11y-version-coherence:
+    # LA SEULE CHOSE QUI EMPÊCHE UNE DEMI-MONTÉE DE VERSION D'ULTRA11Y.
+    #
+    # Le tag de l'Action (deux fois dans a11y.yaml) et la devDependency `ultra11y` doivent
+    # porter la même version : le balayage Playwright ÉCRIT les instantanés avec la
+    # devDependency, l'Action les RÉINGÈRE avec son moteur embarqué. Dependabot les met à jour
+    # dans deux PR distinctes, sur deux écosystèmes qui s'ignorent — rien de son côté ne sait
+    # qu'elles vont ensemble. C'est ce job qui le sait.
+    #
+    # Ni pnpm ni node : trois greps, quelques secondes.
+    name: "App · Cohérence des versions ultra11y"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Check ultra11y version coherence
+        run: ./scripts/a11y/check-ultra11y-version.sh
+
   app-check-journal:
     name: App · Journal monotone check
     runs-on: ubuntu-latest

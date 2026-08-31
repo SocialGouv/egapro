@@ -23,6 +23,36 @@ Ce que ça ne donne pas, et il faut le savoir : **une régression RGAA de rendu 
 
 > Câblage complet, coûts mesurés, registre de verdicts, `undecidable.json`, runner CLI par lots, choix du cron plutôt que `push: alpha`, commandes locales et procédure de bump → **[`docs/accessibilite-ultra11y.md`](../../docs/accessibilite-ultra11y.md)**. À lire avant de toucher à `a11y.yaml` ou à la version d'ultra11y — plusieurs de ces choix ont déjà été faits, défaits, puis refaits.
 
+## La version, et pourquoi elle vit à quatre endroits
+
+Le moteur ultra11y est **embarqué** dans chaque surface, donc « la version » n'est pas un
+numéro unique mais quatre copies qui doivent s'accorder :
+
+| Où | Quoi | Tenu par |
+|---|---|---|
+| `a11y.yaml`, `uses:` ×2 | le moteur de la CI (gate PR + `a11y-pages`) | `a11y-version-coherence` (ci.yaml) |
+| `packages/app/package.json` | le binaire et le plugin Playwright qui **écrivent** les instantanés | idem |
+| le plugin Claude Code | le skill `review-a11y`, donc l'agent `rgaa-auditor` | hook `check-ultra11y-plugin.sh` |
+
+Les deux premières doivent être identiques pour une raison mécanique : la suite Playwright écrit
+les instantanés avec la **devDependency**, et l'Action les réingère avec **son** moteur. Deux
+versions, deux formats — et la divergence ne lève aucune erreur, elle se lit comme des critères
+« à évaluer » dans un rapport qui a l'air complet. `scripts/a11y/check-ultra11y-version.sh`
+refuse une demi-montée de version, et tourne dans la CI sur chaque push.
+
+Dependabot propose les montées : `github-actions` et `npm` sont sur la **même cadence** (lundi
+01:00) précisément pour que les deux PR arrivent ensemble — il ne sait pas grouper à travers
+deux écosystèmes, donc c'est la CI qui tranche.
+
+**Le plugin est le seul que rien dans le dépôt ne pin.** `.claude/settings.json` déclare
+`"ultra11y@ultra11y": true` sans version : l'install prend ce que la marketplace avait ce
+jour-là et n'en bouge plus. Mesuré le 31/08/2026 : plugin en **4.5.1**, dépôt en **5.40.1** —
+l'agent `rgaa-auditor` auditait avec un moteur d'une trentaine de versions mineures en arrière.
+Le hook `UserPromptSubmit` compare hors ligne la version installée au pin d'`a11y.yaml`, et ne
+touche au réseau qu'en cas d'écart. Il **relit** la version après coup plutôt que d'annoncer un
+succès sur un code de retour : `claude plugin update` monte vers le dernier tag de la
+marketplace, pas forcément vers celui que le dépôt épingle.
+
 ## Ce qui n'est PAS le dispositif
 
 - **Lighthouse** rapporte un score d'accessibilité en `warn`. Sa notion d'accessibilité n'est pas celle des 106 critères ; deux seuils concurrents donnent deux verdicts à réconcilier à la main.
