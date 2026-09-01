@@ -1,4 +1,4 @@
-import type { MetadataRoute } from "next";
+import type { Metadata, MetadataRoute } from "next";
 
 const DISALLOWED_PATHS = [
 	"/api/",
@@ -27,4 +27,17 @@ export function buildRobots(
 		rules: [{ userAgent: "*", allow: "/", disallow: DISALLOWED_PATHS }],
 		sitemap: `${origin}/sitemap.xml`,
 	};
+}
+
+/**
+ * Page-level indexing directive, paired with `buildRobots`.
+ *
+ * `Disallow: /` stops crawling but not indexing: a URL discovered through an
+ * external link can still be listed without a snippet. Review app URLs are
+ * posted on the pull requests of this public repository, so they are exactly
+ * that case — hence an explicit `noindex` on every non-prod page. Prod returns
+ * `undefined`, which emits no directive and leaves the page indexable.
+ */
+export function buildMetadataRobots(isProd: boolean): Metadata["robots"] {
+	return isProd ? undefined : { follow: false, index: false };
 }

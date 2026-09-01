@@ -3,6 +3,6 @@ export { CookiesPage } from "./CookiesPage";
 export { LegalNoticePage } from "./LegalNoticePage";
 export { MatomoOptOut } from "./MatomoOptOut";
 export { PrivacyPolicyPage } from "./PrivacyPolicyPage";
-export { buildRobots } from "./robots";
+export { buildMetadataRobots, buildRobots } from "./robots";
 export { SitemapPage } from "./SitemapPage";
 export { buildSitemap } from "./sitemap";

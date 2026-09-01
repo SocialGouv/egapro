@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 
+import { env } from "~/env.js";
 import { MatomoAnalytics } from "~/modules/analytics";
 import { SessionProviderWrapper } from "~/modules/auth";
 import {
@@ -9,6 +10,7 @@ import {
 	PublicChrome,
 	SkipLinks,
 } from "~/modules/layout";
+import { buildMetadataRobots } from "~/modules/legal";
 import { ProfileModal } from "~/modules/profile";
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -19,6 +21,7 @@ import "~/modules/layout/dsfrFixes.scss";
 export const metadata: Metadata = {
 	title: { template: "%s — Egapro", default: "Egapro" },
 	description: "Indicateurs d'égalité professionnelle femmes‑hommes",
+	robots: buildMetadataRobots(env.NEXT_PUBLIC_EGAPRO_ENV === "prod"),
 };
 
 export default function RootLayout({

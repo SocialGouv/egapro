@@ -5,7 +5,6 @@ export const metadata: Metadata = {
 	title: "Documentation de l’API publique",
 	description:
 		"Documentation interactive de l’API publique des indicateurs EgaPro.",
-	robots: { index: true, follow: true },
 };
 
 export default function PublicApiDocsPage() {
