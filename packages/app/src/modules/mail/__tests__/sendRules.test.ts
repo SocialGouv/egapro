@@ -6,6 +6,10 @@ import {
 	selectJointEvaluationSubmittedVariant,
 } from "../sendRules";
 
+// `awaitingPathChoice` reflects the FSM state at the time of the e-mail,
+// not whether a path was ever chosen (issue #4293). The four cases below
+// are the function's whole input space; the row-to-variant mapping that
+// actually regressed is covered in `enqueueReceipt.test.ts`.
 describe("selectDeclarationConfirmationVariant", () => {
 	it("returns path_to_select when a path choice is still outstanding", () => {
 		expect(
@@ -41,48 +45,6 @@ describe("selectDeclarationConfirmationVariant", () => {
 				cseRequired: false,
 			}),
 		).toBe("completed");
-	});
-
-	// Regression — issue #4293: a compliance path chosen *earlier* (e.g. round
-	// 1) must not make a later confirmation e-mail read as "you still need to
-	// choose a path". `awaitingPathChoice` reflects the FSM state at the time
-	// of this e-mail, not whether a path was ever chosen at any point.
-	describe("regression #4293 — a path was chosen earlier but is now settled", () => {
-		it("CAS-03/CAS-09 — justify without CSE ends the démarche: completed", () => {
-			// Round 1 (CAS-03) or round 2 (CAS-09) just chose "justify", no CSE
-			// required: the FSM transitions straight to demarche_completed, so
-			// no path choice is outstanding anymore.
-			expect(
-				selectDeclarationConfirmationVariant({
-					awaitingPathChoice: false,
-					cseRequired: false,
-				}),
-			).toBe("completed");
-		});
-
-		it("CAS-07 — corrective action resolved without CSE: completed", () => {
-			// Round 1 chose "corrective_action" (a path *was* chosen), the
-			// second declaration then resolves the gap with no CSE required:
-			// terminal state, nothing left to choose.
-			expect(
-				selectDeclarationConfirmationVariant({
-					awaitingPathChoice: false,
-					cseRequired: false,
-				}),
-			).toBe("completed");
-		});
-
-		it("CAS-08 — corrective action resolved, CSE opinion expected: cse_to_deposit", () => {
-			// Same round-1 choice as CAS-07, but a CSE opinion is still due —
-			// the démarche isn't over yet, it's waiting on a deposit, not on a
-			// path choice.
-			expect(
-				selectDeclarationConfirmationVariant({
-					awaitingPathChoice: false,
-					cseRequired: true,
-				}),
-			).toBe("cse_to_deposit");
-		});
 	});
 });
 

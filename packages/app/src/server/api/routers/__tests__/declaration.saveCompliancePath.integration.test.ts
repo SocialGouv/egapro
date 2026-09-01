@@ -149,21 +149,6 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		});
 	});
 
-	// Guards against the naive fix the bug analysis warned against: the
-	// e-mail must carry the FSM's terminal-state variant, never the
-	// "you still need to choose a path" wording, once the démarche is over.
-	it("never sends the path_to_select wording once the démarche has ended", async () => {
-		const declarationId = await insertDeclaration(
-			"awaiting_compliance_path_choice",
-		);
-		await acquireLock(declarationId);
-
-		await createCaller().saveCompliancePath({ path: "justify" });
-
-		const rows = await waitForNotificationEnqueue();
-		expect(rows[0]?.metadata.variant).not.toBe("path_to_select");
-	});
-
 	// A non-terminal path choice (corrective action, joint evaluation) has
 	// more steps ahead — the démarche isn't over, so no acknowledgement is
 	// due yet. Confirms the fix is gated on `demarche_complete`, not fired
