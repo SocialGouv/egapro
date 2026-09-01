@@ -474,8 +474,20 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(payloadOf().variant).toBe("path_to_select");
 	});
 
-	it("selects cse_first_and_second for a joint evaluation when a second declaration exists", async () => {
+	it("selects completed for a joint evaluation when a second declaration exists but no CSE is required (CAS-11)", async () => {
 		stubContext({ ...declarationRow, secondDeclarationStep: 3 });
+
+		await enqueueReceipt({ ...baseInput, kind: "jointEvaluation" });
+
+		expect(payloadOf().variant).toBe("completed");
+	});
+
+	it("selects cse_first_and_second for a joint evaluation when a second declaration exists and the CSE is required", async () => {
+		stubContext({
+			...declarationRow,
+			secondDeclarationStep: 3,
+			cseRequired: true,
+		});
 
 		await enqueueReceipt({ ...baseInput, kind: "jointEvaluation" });
 
