@@ -38,7 +38,7 @@ Le script :
 - Choisit le premier slot libre dans `[0, EPIC_MAX_PARALLEL[`
 - Recrée le worktree (idempotent : réutilise s'il existe)
 - Lance `setup-worktree.sh` si `.env.local` est manquant (pnpm install + docker stack + migrations)
-- Affiche le path + les URLs (dev server, maildev, minio, postgres)
+- Affiche le path + les URLs (dev server, mailpit, minio, postgres)
 
 ---
 
