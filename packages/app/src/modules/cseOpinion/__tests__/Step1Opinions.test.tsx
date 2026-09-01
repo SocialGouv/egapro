@@ -213,6 +213,32 @@ describe("Step1Opinions", () => {
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
+	it("hides only the second consultation question for the second-round justification path", () => {
+		const { container } = render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration={true}
+				secondDeclarationPathChoice="justify"
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(
+			screen.getAllByText(
+				/Avez-vous informé et consulté le CSE sur la justification des écarts/,
+			),
+		).toHaveLength(1);
+		expect(container.querySelector("#first-decl-gap-yes")).toBeInTheDocument();
+		expect(container.querySelector("#second-decl-gap-yes")).toBeNull();
+		expect(
+			container.querySelector("#second-decl-gap-favorable"),
+		).toBeInTheDocument();
+		expect(
+			container.querySelector("#second-decl-gap-date"),
+		).toBeInTheDocument();
+	});
+
 	it("drops both declaration headings when there is only one declaration", () => {
 		render(
 			<Step1Opinions
@@ -352,6 +378,40 @@ describe("Step1Opinions", () => {
 				gapDate: null,
 			},
 		});
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+	});
+
+	it("normalizes the second gap consultation to true for the second-round justification path", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration={true}
+				initialData={{
+					firstDeclAccuracyOpinion: "favorable",
+					firstDeclAccuracyDate: "2026-01-15",
+					firstDeclGapConsulted: false,
+					firstDeclGapOpinion: null,
+					firstDeclGapDate: null,
+					secondDeclAccuracyOpinion: "favorable",
+					secondDeclAccuracyDate: "2026-02-01",
+					secondDeclGapConsulted: false,
+					secondDeclGapOpinion: "favorable",
+					secondDeclGapDate: "2026-02-02",
+				}}
+				secondDeclarationPathChoice="justify"
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+		expect(mockMutate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				secondDeclaration: expect.objectContaining({ gapConsulted: true }),
+			}),
+		);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
 	});
 
@@ -500,6 +560,38 @@ describe("Step1Opinions", () => {
 						secondDeclGapOpinion: null,
 						secondDeclGapDate: null,
 					}}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(
+				screen.getByText("Veuillez remplir tous les champs obligatoires."),
+			).toBeInTheDocument();
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+
+		it("blocks an incomplete implicit second-declaration consultation even when stored as false", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					hasSecondDeclaration={true}
+					initialData={{
+						firstDeclAccuracyOpinion: "favorable",
+						firstDeclAccuracyDate: "2026-01-15",
+						firstDeclGapConsulted: false,
+						firstDeclGapOpinion: null,
+						firstDeclGapDate: null,
+						secondDeclAccuracyOpinion: "favorable",
+						secondDeclAccuracyDate: "2026-02-01",
+						secondDeclGapConsulted: false,
+						secondDeclGapOpinion: null,
+						secondDeclGapDate: null,
+					}}
+					secondDeclarationPathChoice="justify"
 					siren="123456789"
 					year={2026}
 				/>,
