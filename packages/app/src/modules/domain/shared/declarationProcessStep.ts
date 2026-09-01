@@ -30,7 +30,7 @@ export function getDeclarationProcessStepDeadline(
 		case "revised_joint_evaluation_chosen":
 			return deadlines.decl2JointEvaluationDeadline;
 		case "awaiting_cse_opinion":
-			return deadlines.decl2JointEvaluationDeadline;
+			return deadlines.decl2CseOpinionDeadline;
 		case "demarche_completed":
 			return null;
 	}

@@ -138,7 +138,7 @@ describe("useFileUploadForm", () => {
 		);
 	});
 
-	it("handleSubmit prevents default and shows the generic error when no emptySelectionError is provided", () => {
+	it("handleSubmit prevents default and flags the missing file", () => {
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
@@ -149,48 +149,25 @@ describe("useFileUploadForm", () => {
 		});
 
 		expect(event.preventDefault).toHaveBeenCalled();
-		expect(result.current.uploadError).toBe(
-			"Veuillez sélectionner au moins un fichier avant de soumettre.",
-		);
+		expect(result.current.hasMissingFile).toBe(true);
+		expect(result.current.uploadError).toBeNull();
 	});
 
-	it("handleSubmit shows the consumer's emptySelectionError when no file is selected", () => {
+	it("clears the missing-file flag as soon as a file is selected", () => {
 		const { result } = renderHook(() =>
-			useFileUploadForm({
-				emptySelectionError: "Veuillez sélectionner le rapport.",
-				flowType: "joint_evaluation",
-			}),
+			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
 
 		act(() => {
 			result.current.handleSubmit(preventSubmit());
 		});
+		expect(result.current.hasMissingFile).toBe(true);
 
-		expect(result.current.uploadError).toBe(
-			"Veuillez sélectionner le rapport.",
-		);
-	});
-
-	it("clears a previous emptySelectionError once a file is selected and submitted", () => {
-		const { result } = renderHook(() =>
-			useFileUploadForm({
-				emptySelectionError: "Veuillez sélectionner le rapport.",
-				flowType: "joint_evaluation",
-			}),
-		);
-		attachDialog(result);
-
-		act(() => {
-			result.current.handleSubmit(preventSubmit());
-		});
 		act(() => {
 			result.current.handleFilesChange([makeFile()], null);
 		});
-		act(() => {
-			result.current.handleSubmit(preventSubmit());
-		});
 
-		expect(result.current.uploadError).toBeNull();
+		expect(result.current.hasMissingFile).toBe(false);
 	});
 
 	it("handleSubmit opens the native dialog when DSFR API is unavailable", () => {

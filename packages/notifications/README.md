@@ -5,7 +5,7 @@ pg-boss worker **+** publisher library for Egapro email notifications.
 The Next.js app (`packages/app`) imports `notifications/publisher` to enqueue
 jobs; this workspace also ships a long-running consumer that pulls jobs, renders
 the DSFR-styled email (with optional PDF attachments decoded from base64), sends
-via SMTP (Tipimail in prod / MailDev in dev / preprod), and writes a row to the
+via SMTP (Tipimail in prod / Mailpit in dev / preprod), and writes a row to the
 main DB's `audit.action_log` when reachable.
 
 The app no longer carries `pg-boss` / `nodemailer` / `html-to-text` as direct

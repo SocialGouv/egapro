@@ -70,6 +70,7 @@ export const adminSettingsRouter = createTRPCRouter({
 					decl2ModificationDeadline: row.decl2ModificationDeadline,
 					decl2JustificationDeadline: row.decl2JustificationDeadline,
 					decl2JointEvaluationDeadline: row.decl2JointEvaluationDeadline,
+					decl2CseOpinionDeadline: row.decl2CseOpinionDeadline,
 				};
 			}
 
@@ -98,6 +99,7 @@ export const adminSettingsRouter = createTRPCRouter({
 				decl2JointEvaluationDeadline: toIsoDate(
 					defaults.decl2JointEvaluationDeadline,
 				),
+				decl2CseOpinionDeadline: toIsoDate(defaults.decl2CseOpinionDeadline),
 			};
 		}),
 
@@ -151,6 +153,7 @@ export const adminSettingsRouter = createTRPCRouter({
 				decl2ModificationDeadline: input.decl2ModificationDeadline,
 				decl2JustificationDeadline: input.decl2JustificationDeadline,
 				decl2JointEvaluationDeadline: input.decl2JointEvaluationDeadline,
+				decl2CseOpinionDeadline: input.decl2CseOpinionDeadline,
 			};
 
 			// `gipPublicationDate` is written exclusively by the SUIT CSV import,

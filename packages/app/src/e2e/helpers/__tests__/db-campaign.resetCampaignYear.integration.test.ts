@@ -92,12 +92,14 @@ describe("resetCampaignYear (real Postgres) — #4067 coordinate isolation", () 
 			INSERT INTO app_campaign_deadline (
 				year,
 				decl1_modification_deadline, decl1_justification_deadline, decl1_joint_evaluation_deadline,
-				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline
+				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
 			)
 			VALUES (
 				${year},
 				${FAR_FUTURE}, ${FAR_FUTURE}, ${FAR_FUTURE},
-				${FAR_FUTURE}, ${FAR_FUTURE}, ${FAR_FUTURE}
+				${FAR_FUTURE}, ${FAR_FUTURE}, ${FAR_FUTURE},
+				${FAR_FUTURE}
 			)
 		`;
 	}

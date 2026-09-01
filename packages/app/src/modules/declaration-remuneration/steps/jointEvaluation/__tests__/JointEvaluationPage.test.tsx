@@ -53,11 +53,12 @@ vi.mock("../JointEvaluationForm", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { formatLongDate } from "~/modules/domain";
+import { formatLongDate, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
 const DECLARATION_YEAR = 2025;
+const DEFAULT_DEADLINES = getDefaultCampaignDeadlines(DECLARATION_YEAR);
 
 function mockDeclaration(
 	pathChoices: {
@@ -102,11 +103,13 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
+			DEFAULT_DEADLINES.decl1JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
 		);
 	});
 
-	it("renders the form when secondDeclarationPathChoice is joint_evaluation (revised round)", async () => {
+	it("serves the round-2 deadline, never the round-1 one, on the revised round", async () => {
 		mockDeclaration(
 			{
 				firstDeclarationPathChoice: "corrective_action",
@@ -118,8 +121,35 @@ describe("JointEvaluationPage", () => {
 		const page = await JointEvaluationPage();
 		render(page);
 
-		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
+		const deadline = screen.getByTestId("joint-evaluation-deadline");
+		expect(deadline).toHaveTextContent(
+			DEFAULT_DEADLINES.decl2JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
+		);
+		expect(deadline).not.toHaveTextContent(
+			DEFAULT_DEADLINES.decl1JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
+		);
+	});
+
+	it("never serves the CSE opinion deadline, which closes a later step", async () => {
+		mockDeclaration(
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			},
+			new Date("2025-06-15"),
+		);
+
+		const page = await JointEvaluationPage();
+		render(page);
+
+		expect(
+			screen.getByTestId("joint-evaluation-deadline"),
+		).not.toHaveTextContent(
+			DEFAULT_DEADLINES.decl2CseOpinionDeadline.toLocaleDateString("fr-FR"),
 		);
 	});
 

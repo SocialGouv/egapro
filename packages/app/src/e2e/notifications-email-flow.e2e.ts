@@ -11,10 +11,10 @@ import {
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 import {
-	clearMaildev,
-	maildevReachable,
+	clearMailpit,
+	mailpitReachable,
 	waitForEmail,
-} from "./helpers/maildev";
+} from "./helpers/mailpit";
 import {
 	isMailFlowEnabled,
 	killWorker,
@@ -24,12 +24,12 @@ import {
 
 const TEST_USER_EMAIL = "test@fia1.fr";
 
-test.describe("notifications email flow (publisher → pg-boss → worker → SMTP → maildev)", () => {
+test.describe("notifications email flow (publisher → pg-boss → worker → SMTP → mailpit)", () => {
 	let worker: ChildProcess | null = null;
 
 	test.beforeAll(async () => {
-		if (!(await maildevReachable())) {
-			test.skip(true, "MailDev unreachable — start docker-compose or skipping");
+		if (!(await mailpitReachable())) {
+			test.skip(true, "Mailpit unreachable — start docker-compose or skipping");
 		}
 		if (!isMailFlowEnabled()) {
 			test.skip(
@@ -46,13 +46,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 	});
 
 	test.beforeEach(async () => {
-		await clearMaildev();
+		await clearMailpit();
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
 		await setCompanyWorkforce(60);
 	});
 
-	test("declaration submission delivers a confirmation email to MailDev", async ({
+	test("declaration submission delivers a confirmation email to Mailpit", async ({
 		page,
 	}) => {
 		test.slow();
@@ -80,7 +80,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		// (workforce=60, no CSE) intact for the other test.
 		await setCompanyWorkforce(200);
 		await setCompanyHasCse(true);
-		await clearMaildev();
+		await clearMailpit();
 
 		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });
