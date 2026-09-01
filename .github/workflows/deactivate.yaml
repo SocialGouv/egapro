@@ -2,19 +2,57 @@ name: ♻️ Deactivate
 on:
   pull_request:
     types: [closed]
+  # No `branches:` filter here, on purpose: GitHub applies branch and tag
+  # filters to `push` and `pull_request` only. On `delete` they are silently
+  # ignored, so an exclusion written here reads as a protection while doing
+  # nothing at all. Deleting the leftover `rgaa-persist` branch on 2026-08-26
+  # destroyed the persistent RGAA test environment exactly that way, past an
+  # `!**-persist` line that looked like it covered the case. The exclusions
+  # now live in the `guard` job below, which does run.
   delete:
-    branches:
-      - "**"
-      - "!v*"
-      - "!master"
-      - "!alpha"
-      - "!**-persist"
 
 concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event.ref || github.event.pull_request.head.ref }}
 
 jobs:
+  guard:
+    name: "🛡️ Protected refs"
+    runs-on: ubuntu-latest
+    outputs:
+      protected: ${{ steps.check.outputs.protected }}
+    steps:
+      - name: 🛡️ Decide whether this ref may be deactivated
+        id: check
+        env:
+          REF_TYPE: ${{ github.event.ref_type }}
+          REF: ${{ github.event.ref || github.event.pull_request.head.ref }}
+        run: |
+          # `github.event.ref` is already the short name on `delete`
+          # (`rgaa-persist`), as is `head.ref` on `pull_request` — the strip is
+          # a belt, not a need.
+          BRANCH=${REF#refs/heads/}
+          protected=false
+
+          # A deleted tag has no environment behind it.
+          if [ "$REF_TYPE" = "tag" ]; then
+            protected=true
+          fi
+
+          # `*-persist` are the persistent test environments (rgaa, perf).
+          # They are deployed only by promote-test-env.yaml, from a release
+          # tag, and never track a branch — nothing about a branch of that
+          # name should tear them down. `master` and `alpha` are the long
+          # lived environments.
+          case "$BRANCH" in
+            *-persist | master | alpha) protected=true ;;
+          esac
+
+          echo "protected=$protected" >> "$GITHUB_OUTPUT"
+          echo "ref_type=${REF_TYPE:-branch} ref=${BRANCH} protected=${protected}"
+
   kontinuous:
+    needs: guard
+    if: needs.guard.outputs.protected == 'false'
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate-atlas.yaml@v1
     secrets: inherit
