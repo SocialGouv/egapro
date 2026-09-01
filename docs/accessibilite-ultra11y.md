@@ -15,7 +15,7 @@ tag de version explicite :
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun navigateur et aucun modèle. **C'est la seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky `digest` et rapport `ultra11y-pr-static`. |
-| `a11y-pages` | **manuel uniquement** (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis soumet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure. Une panne, une grille incomplète (`require-decided: pages`), un rendu requis mais absent (`require-rendered`) ou un balayage amputé (`require-sample`) bloquent. |
+| `a11y-pages` | **manuel uniquement** (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis soumet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure —, et un critère « à évaluer » non plus (`require-decided: false`). Bloquent : une panne, un rendu requis mais absent (`require-rendered`), un balayage amputé (`require-sample`). |
 | `a11y-bundle` | manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
 **Deux déclenchements, et ils ne paient pas la même chose.** `pull_request` ne lance que la gate
@@ -141,19 +141,41 @@ En amont, `maxgfr/ultra11y#36` traite la cause, et c'est livré en **5.34.1** : 
 désormais la moisson du critère au lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de
 citer la région inspectée.
 
-### `require-decided: pages`, et pourquoi la barre a pu remonter
+### `require-decided`, et pourquoi la barre est redescendue à `false`
 
-`pages` tient CHAQUE grille de page à la barre, pas seulement celle du run. La distinction compte :
-un critère non conforme quelque part est tranché POUR LE RUN, et sur les pages où le défaut
-n'apparaît pas il peut n'être le verdict de personne — mesuré ici, 104/106 décidés pour le run et
-8 à 11 ouverts sur chacune des 37 pages, soit une porte verte au-dessus d'un livrable rempli à 90 %.
+La barre a longtemps été : zéro critère « à évaluer », sur le run **et** sur chaque page
+(`require-decided: pages`). Elle a été atteinte une fois, sous ultra11y 5.34.2, quand le moteur
+et la mesure tranchaient 58 critères gratuitement.
 
-Elle avait dû être abandonnée, non par excès d'ambition mais parce qu'elle était **cassée** : sur
-5.16.0 une conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés, et
-`--require-decided=pages` ne pouvait passer sur aucune entrée. Corrigé en 5.17.0, puis 5.20.0 (le
-balayage mesurait puis jetait la mesure). Mesuré en amont sur la fixture RGAA balayée : 37 critères
-« à évaluer » pour le run, et exactement les mêmes 37 sur chacune des pages — `pages` n'est donc
-plus une barre plus haute que `true`, c'est la même, vérifiée là où on la lit.
+Elle ne l'est plus, et pas par régression. Depuis 5.36, **trois** critères sur 106 peuvent
+obtenir un `C` par mesure (8.3, 8.5, 10.1) ; tout le reste passe par le modèle. Et le modèle
+refuse certains critères — correctement. Mesuré sur le run 33416093626, une fois tout le reste
+réparé : **102 critères sur 106 tranchés**, et quatre rendus `manual / undecidable` sur trois
+passes.
+
+| | ce qu'il faut juger | volume soumis |
+|---|---|---|
+| 3.1 | l'information donnée par la couleur seule | 137 classes / 947 occurrences |
+| 8.2 | la validité du code source | 67 / 1718 |
+| 10.3 | le contenu compréhensible sans CSS (ordre de lecture) | 560 / 2700 |
+| 11.9 | la pertinence de chaque intitulé de bouton en contexte | 141 / 454 |
+
+Ce ne sont pas des critères que le volume écrase — 8.9 a été tranché avec 516 classes et 1180
+occurrences. Ce sont des critères où il faut **regarder**. Un modèle qui les déclarerait
+conformes mentirait ; il dit qu'il ne sait pas.
+
+**Un job rouge sur ce motif n'apprend rien.** Il ne dit pas « le code a régressé », il dit
+« quatre critères RGAA demandent un œil humain » — vrai avant le run, vrai après. Un rouge
+permanent qu'on apprend à ignorer use la seule couleur dont on dispose pour signaler une vraie
+panne, et ce fichier en a de vraies à signaler.
+
+Ce qui ne change pas : **le résidu reste nommé**. Le log imprime toujours
+`✗ N/106 critère(s) encore « à évaluer » : …`, la fiche par page le porte, le livrable aussi. On
+mesure et on publie ; on n'arrête plus la chaîne dessus. C'est `fail-on: ""` appliqué au même
+sujet.
+
+Ce qui rougit encore : une panne, un balayage amputé (`require-sample`), un rendu réclamé mais
+absent (`require-rendered`) — des faits sur la qualité du run, jamais sur le verdict.
 
 ### La ligne de provenance, et pourquoi c'est elle qu'on lit
 
@@ -250,6 +272,45 @@ chaque moitié repartant avec son propre plafond — une perte de huit critères
 perte d'un. Ce dépôt ne pose plus de plafond du tout (voir « Ce que coûte l'adjudication ») ;
 ce découpage est le filet, pas la ceinture.
 
+### Ce que 5.42 corrige, et ce que ça coûte
+
+**5.42.0 / 5.42.1 ferment une classe de défaut, pas un bug.** Un faux positif est bruyant et se
+discute en revue ; un **faux conforme est invisible**, et c'est lui qu'une déclaration
+d'accessibilité recopie. Trois chemins en produisaient :
+
+- `focusObscured` (2.4.11) et `keyboardTrap` (2.1.2) étaient mesurés par les sondes, écrits dans
+  `probes.json` — et ni le format d'instantané ni le repli des constats ne connaissaient ces
+  clés, pendant que `probed` créditait les critères. Une obstruction de focus ou un piège
+  clavier RÉELS ressortaient `C` de la réingestion hors ligne. **C'est exactement le chemin
+  d'egapro**, qui capture ses 37 pages hors de l'Action ;
+- les parcours de l'anneau de tabulation, de survol et d'interaction rendaient un résultat
+  PARTIEL dans la forme d'un résultat fini — plafond de marquage, budget d'horloge, plafonds
+  d'enregistrement — et `probed` était écrit quand même ;
+- `probes.json` porte maintenant un numéro de contrat (`v: 2`). Un fichier écrit avant n'est
+  plus cru pour les cinq critères dont la prétention dépend d'une marche achevée. **Nos captures
+  actuelles sont donc pré-v2** : le premier run en 5.42.1 les réécrit, et c'est voulu.
+
+Ce que ça coûte : RGAA 10.1 quitte l'allowlist `completeBySilence` (sa règle tolère `<u>`,
+tolère `width`/`height` sur neuf balises là où le glossaire en nomme cinq, et couvre la
+présentation par espaces avec deux heuristiques — chacune une sous-détection assumée, bonne
+direction pour un constat, mauvaise pour une conformité). On passe de 103 à **104 critères sur
+106 exigeant une adjudication**. Et les critères dont la marche est tronquée restent ouverts au
+lieu de se fermer à tort, ce qui peut faire monter la facture d'adjudication.
+
+En face, le **registre de verdicts amortit enfin** : un `C` survit à une évidence qui a RÉTRÉCI
+(blanchir un ensemble couvre ses parties) et ne périme que sur une évidence NOUVELLE, à deux
+gardes près — une moisson incomplète et un rétrécissement qu'aucune suppression n'explique.
+Mesuré en rejouant notre registre de 48 entrées contre le run du 31/08 : 27 périmées, dont 13
+pour un simple rétrécissement.
+
+**Le rapport, enfin, ne se contredit plus.** Il mène avec le taux officiel du RGAA — critères
+validés ÷ critères **applicables**, les NA exclus des deux moitiés — annoncé provisoire tant
+qu'un critère est ouvert, formule nommée et opérandes publiés. Sur le run 33416093626 :
+**80 % (59 ÷ 74)** au lieu de « 17 % » en tête d'une grille lisant 91 C / 10 NC. Et les trois
+bandeaux d'en-tête regardent enfin ce que le run a fait : plus d'« audit préliminaire » sur un
+run qui a audité 37 pages rendues, plus d'« auditez la sortie de build » quand elle l'a été,
+plus d'« audit partiel » au-dessus d'une grille qui tranche le critère qu'il nomme.
+
 ### RGAA 10.7 et les contrôles DSFR — ce que 5.41.0 corrige
 
 La sonde `dyn-focus-visible` proxifiait bien un radio/checkbox visuellement masqué vers son
@@ -264,7 +325,7 @@ choix de parcours de conformité.
 Et le dégât dépassait le bruit. **10.7 n'est pas sur l'allowlist `completeBySilence`**, donc un
 NC fabriqué sur 3 pages laissait le critère « à évaluer » sur les **34 autres** — hors d'atteinte
 de toute adjudication, puisqu'un critère déjà tranché pour le run n'entre jamais dans la
-worklist. C'était, à lui seul, ce qui rendait `require-decided: pages` inatteignable.
+worklist. C'était, à lui seul, ce qui rendait la barre par page inatteignable — même après ce correctif, quatre critères de jugement restent hors de portée d'un modèle, d'où `require-decided: false`.
 
 La règle générale, qui vaut au-delà de ce cas : **un critère jugé NC quelque part et absent de
 l'allowlist reste « à évaluer » sur chaque page où le défaut ne tire pas.** Un `C` d'agent, lui,
@@ -317,7 +378,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 ./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
 ```
 
-La devDependency et les deux usages de l'Action sont alignés sur **5.41.0**, et ce n'est plus une
+La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
 refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
