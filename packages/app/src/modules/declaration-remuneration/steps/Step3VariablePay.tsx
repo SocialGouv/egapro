@@ -96,9 +96,7 @@ function deriveBenefError(
 	};
 }
 
-// Re-derives from the field's current value rather than trusting stale
-// error state, so a value written outside a keystroke (dev fill, GIP
-// prefill, draft rehydration) is never missed.
+// Re-derives from the current value — a stale error state would miss a value written outside a keystroke.
 function deriveBenefErrors(
 	values: Pick<Step3Data, "indicatorEWomen" | "indicatorEMen">,
 	maxWomen: number | undefined,

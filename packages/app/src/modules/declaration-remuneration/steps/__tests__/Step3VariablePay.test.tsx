@@ -253,8 +253,7 @@ describe("Step3VariablePay", () => {
 		await user.clear(womenInput);
 		await user.type(womenInput, "20");
 
-		// The field keeps the value the user typed — the error message names
-		// that same number, not one the user never entered.
+		// The error message must name the value the field actually shows.
 		expect(womenInput).toHaveValue("20");
 		expect(
 			screen.getByText(
