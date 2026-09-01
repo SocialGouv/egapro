@@ -4,6 +4,7 @@ import {
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
 	isCancelled,
+	isCompliancePathStepApplicable,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
 	isDeclarationWritingClosed,
@@ -332,6 +333,68 @@ describe("isSecondDeclarationDeadlineApplicable", () => {
 				status,
 				secondDeclarationStep: null,
 				secondDeclarationPathChoice: "justify",
+			}),
+		).toBe(true);
+	});
+});
+
+describe("isCompliancePathStepApplicable", () => {
+	const NO_PATH_CHOICE = {
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+	};
+
+	const NON_TERMINAL_STATUSES: (DeclarationFsmStatus | null)[] = [
+		null,
+		"draft",
+		"awaiting_compliance_path_choice",
+		"corrective_actions_chosen",
+		"joint_evaluation_chosen",
+		"awaiting_revision_choice",
+		"revised_joint_evaluation_chosen",
+	];
+
+	it.each(
+		NON_TERMINAL_STATUSES,
+	)("returns true for the non-terminal status %s, even with no path choice recorded", (status) => {
+		expect(isCompliancePathStepApplicable({ status, ...NO_PATH_CHOICE })).toBe(
+			true,
+		);
+	});
+
+	const TERMINAL_STATUSES: DeclarationFsmStatus[] = [
+		"awaiting_cse_opinion",
+		"demarche_completed",
+	];
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns false for the terminal status %s reached with no path choice (skipped via a direct transition)", (status) => {
+		expect(isCompliancePathStepApplicable({ status, ...NO_PATH_CHOICE })).toBe(
+			false,
+		);
+	});
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns true for the terminal status %s once a first-declaration path was chosen", (status) => {
+		expect(
+			isCompliancePathStepApplicable({
+				status,
+				firstDeclarationPathChoice: "justify",
+				secondDeclarationPathChoice: null,
+			}),
+		).toBe(true);
+	});
+
+	it.each(
+		TERMINAL_STATUSES,
+	)("returns true for the terminal status %s once a second-declaration path was chosen", (status) => {
+		expect(
+			isCompliancePathStepApplicable({
+				status,
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: "corrective_action",
 			}),
 		).toBe(true);
 	});

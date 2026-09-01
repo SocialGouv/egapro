@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { withCampaignYear } from "../helpers/campaign-year";
 import {
 	COMPLIANCE_PATH,
@@ -82,16 +82,49 @@ function transmittedRow(page: Page, label: string) {
 		.locator("xpath=../..");
 }
 
+async function openPanneauDemarche(page: Page): Promise<Locator> {
+	await page.goto("/mon-espace");
+	await waitForDsfrModal(page, PROCESS_PANEL_ID);
+	const trigger = page.getByRole("button", { name: "Rémunération" }).first();
+	await expect(trigger).toBeVisible();
+	await clickAndExpectDialogOpen(page, trigger, PROCESS_PANEL_ID);
+	return page.locator(`#${PROCESS_PANEL_ID}`);
+}
+
+const ETAPE_PARCOURS_CONFORMITE =
+	"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
+
+// #4291 — CAS-01 closes its démarche without ever opening the compliance path,
+// and the panel used to derive that step from the company characteristics alone
+// (>= 100 salariés owing indicator G), dropping the ">= 5 % gap" conjunct. The
+// closed variant therefore showed the step ticked « Étape terminée », claiming a
+// parcours this company never had to take.
+async function expectPanneauFinDeDemarcheSansParcours(
+	page: Page,
+): Promise<void> {
+	await test.step("panneau « Mon espace » d'une fin de démarche sans parcours", async () => {
+		const panel = await openPanneauDemarche(page);
+		await expect(panel.getByText("Démarche close")).toBeVisible();
+		await expect(panel.getByText(ETAPE_PARCOURS_CONFORMITE)).toHaveCount(0);
+
+		const row = transmittedRow(page, "Votre déclaration a été transmise");
+		// Pin the row before reading the negative assertion above as a result: an
+		// empty panel would satisfy toHaveCount(0) without proving anything.
+		await expect(row).toBeVisible();
+		await expect(
+			row.getByRole("link", {
+				name: "Voir le récapitulatif de la déclaration",
+			}),
+		).toBeVisible();
+	});
+}
+
 // #4222 — on a closed démarche the panel used to derive "Modifier" from the
 // campaign deadline alone, so it offered edits the FSM then refused. The
 // affordance now follows the FSM, which only still accepts a CSE opinion.
 async function expectPanneauDemarcheClose(page: Page): Promise<void> {
 	await test.step("panneau « Mon espace » d'une démarche close", async () => {
-		await page.goto("/mon-espace");
-		await waitForDsfrModal(page, PROCESS_PANEL_ID);
-		const trigger = page.getByRole("button", { name: "Rémunération" }).first();
-		await expect(trigger).toBeVisible();
-		await clickAndExpectDialogOpen(page, trigger, PROCESS_PANEL_ID);
+		await openPanneauDemarche(page);
 
 		const readOnlyRows: Array<{ label: string; view?: string }> = [
 			{
@@ -142,6 +175,7 @@ export const FICHE_SCENARIOS = {
 			await page.goto("/avis-cse/etape/1");
 			await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
 		});
+		await expectPanneauFinDeDemarcheSansParcours(page);
 	},
 
 	"CAS-02": async ({ page }) => {

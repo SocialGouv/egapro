@@ -6,6 +6,7 @@ import {
 	getCurrentYear,
 	getDeclarationDisplayContext,
 	getObligationWorkforce,
+	isCompliancePathStepApplicable,
 	isCseOpinionRequired,
 	isCseRequired,
 	isIndicatorGRequired,
@@ -72,11 +73,20 @@ export function CompanyDeclarationsPage({
 		obligationWorkforce,
 		currentYear,
 	);
-	const compliancePathApplicable = cseApplicable && indicatorGRequired;
 	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
 	);
+	const compliancePathApplicable =
+		cseApplicable &&
+		indicatorGRequired &&
+		isCompliancePathStepApplicable({
+			status: currentDeclaration?.fsmStatus ?? null,
+			firstDeclarationPathChoice:
+				currentDeclaration?.firstDeclarationPathChoice ?? null,
+			secondDeclarationPathChoice:
+				currentDeclaration?.secondDeclarationPathChoice ?? null,
+		});
 	const panelVariant = computePanelVariant(currentDeclaration);
 	const ctaHref = computeCtaHref(currentDeclaration, company.siren);
 	const displayContext = getDeclarationDisplayContext({
