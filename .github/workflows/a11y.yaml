@@ -12,8 +12,9 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #                           les instantanés, tourne le MÊME audit du code, et produit LE
 #                           rapport page par page, les crops de preuve, l'adjudication IA des
 #                           critères de jugement, et LE livrable.
-#                           Les CONSTATS ne bloquent pas — on mesure. Une panne, si ; et
-#                           depuis `require-decided: pages`, une grille incomplète aussi.
+#                           Les CONSTATS ne bloquent pas — on mesure, et depuis que la grille
+#                           dépend d'un modèle, un critère « à évaluer » ne bloque pas non
+#                           plus. Une panne, si ; un balayage amputé aussi.
 #   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
 #
 # Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de cron non plus : le déclenchement
@@ -88,10 +89,17 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # « à évaluer ». Mesuré sur l'audit réel de cette branche : 9 critères ouverts sur la page
 # d'accueil, dont 7 exactement de cette forme. Ils tombent.
 #
-# `require-decided` reste donc à `pages`, et ce tier peut rougir : le zéro « à évaluer » est une
-# invariante gardée, pas un affichage. Ce qui reste ouvert est NOMMÉ, dans le log et dans la
-# fiche par page. Il n'y a plus d'`undecidable.json` non plus : la seule issue est désormais de
-# faire trancher le critère par l'adjudication, ou de relancer le workflow.
+# `require-decided` est néanmoins repassé à `false`, et il faut dire pourquoi ce paragraphe ne
+# suffit plus. Le moteur ferme bien ce qu'il a mesuré ; seulement, depuis 5.36, il n'a le droit
+# de conclure à la conformité par mesure que sur TROIS critères. Le reste dépend d'un modèle, et
+# un modèle refuse — correctement — de déclarer conformes 2700 occurrences qu'il n'a pas toutes
+# regardées. Un job rouge sur ce motif ne dit pas « le code a régressé », il dit « ces critères
+# demandent un œil humain ». Ce qui reste ouvert est toujours NOMMÉ dans le log, la fiche par
+# page et le livrable ; on mesure et on publie, on n'arrête plus la chaîne dessus.
+#
+# `undecidable.json` est de retour et sert à autre chose : nommer les critères sans INSTRUMENT
+# (13.3, 13.4 — un classeur xlsx que personne ici ne peut ouvrir), pas ceux que l'adjudicateur
+# n'a pas su trancher.
 #
 # CE QUE LE PASSAGE DE 5.16.0 À 5.23.0 CORRIGE, et qui est la substance de ce changement :
 #   - `adjudicate-model` ne câblait que le tier API. Choisir le modèle de l'adjudicateur AGENT
@@ -192,7 +200,7 @@ jobs:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
         # Tag de release explicite : garder les deux usages de l'Action sur la même version.
-        uses: maxgfr/ultra11y@v5.41.0
+        uses: maxgfr/ultra11y@v5.42.1
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -254,8 +262,9 @@ jobs:
     # excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
     #
     # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
-    # grille incomplète (`require-decided: pages`) ou un balayage amputé (`require-sample`) —
-    # deux faits sur la QUALITÉ DU RUN, pas sur le code audité.
+    # balayage amputé (`require-sample`) ou un rendu réclamé mais absent (`require-rendered`) —
+    # des faits sur la QUALITÉ DU RUN, pas sur le code audité. Une grille incomplète, elle, ne
+    # rougit plus : voir `require-decided` plus bas.
     runs-on: ubuntu-22.04
     # Mesuré : 34 min pour 17 pages et une adjudication plafonnée à 60 tours ; 40 min pour le
     # run complet. Trois nombres cohabitent et disent trois choses différentes : **24** pages
@@ -327,8 +336,19 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          CHROMIUM_VERSION=1217
-          CFT_BUILD=147.0.7727.15
+          # Ces deux constantes sont DICTÉES par la version de @playwright/test, elles ne se
+          # choisissent pas : Playwright cherche le navigateur dans
+          # ~/.cache/ms-playwright/chromium-<revision>, et refuse de démarrer si le dossier porte
+          # une autre révision. Un bump de @playwright/test sans bump ici donne
+          # « browserType.launch: Executable doesn't exist at .../chromium_headless_shell-<rev> »
+          # (mesuré sur la PR #4408, 1.59.1 -> 1.62.1 : le cache restait sur 1217).
+          # Les valeurs se lisent dans playwright-core/browsers.json de la version installée :
+          #   jq '.browsers[] | select(.name=="chromium")' node_modules/playwright-core/browsers.json
+          # -> revision = CHROMIUM_VERSION, browserVersion = CFT_BUILD.
+          # Les TROIS workflows (e2e, a11y, e2e-grille) partagent ce bloc et ce cache : les
+          # désaligner, c'est laisser rouge celui qu'on n'a pas corrigé.
+          CHROMIUM_VERSION=1234
+          CFT_BUILD=151.0.7922.34
 
           install_browser() {
             local zip_name="$1" dest_subdir="$2" extracted_dir="$3" final_dir="$4"
@@ -451,7 +471,7 @@ jobs:
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
         # Même tag de release que la gate PR ; ne jamais laisser les deux tiers diverger.
-        uses: maxgfr/ultra11y@v5.41.0
+        uses: maxgfr/ultra11y@v5.42.1
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
@@ -472,8 +492,8 @@ jobs:
           # TOUTE la grille de jugement passe par le modèle — moins ce que le registre rejoue.
           # Chaque entrée du registre repasse par la même porte, sur l'évidence re-dérivée de
           # l'audit du moment ; ce qui n'est pas rejoué est ce qui est payé. Ce que personne ne
-          # tranche reste « à évaluer », et `require-decided: pages` plus bas fait rougir le job
-          # en le nommant.
+          # tranche reste « à évaluer », NOMMÉ dans le log et dans la fiche par page — sans faire
+          # rougir le job pour autant (voir `require-decided` plus bas).
           adjudicate: agent
           # LE RUNNER OPTIMISÉ, EXPLICITEMENT. Le moteur lance Claude en lecture seule, groupe
           # huit critères par appel et checkpoint chaque lot. Une passe suivante ne reçoit que
@@ -535,27 +555,36 @@ jobs:
           # la grille par page qu'un bilan page par page se fait lire, donc c'est elle qu'on
           # tient.
           #
-          # POURQUOI ELLE EST REDEVENUE ATTEIGNABLE, alors qu'elle avait dû être abandonnée.
+          # POURQUOI ELLE NE ROUGIT PLUS, APRÈS AVOIR ÉTÉ DÉFENDUE ICI PENDANT DES MOIS.
           #
-          # Elle ne l'avait pas été par excès d'ambition : elle était CASSÉE. Sur 5.16.0 une
-          # conformité obtenue faute de sujet perdait son drapeau en fusionnant les instantanés,
-          # et `--require-decided=pages` ne pouvait passer sur aucune entrée — la porte ne
-          # mesurait pas une exigence trop haute, elle mesurait un défaut. Corrigé en 5.17.0.
+          # La barre était : zéro critère « à évaluer », sur le run ET sur chaque page. Elle a
+          # été atteinte — une fois, sous ultra11y 5.34.2, quand le moteur et la mesure
+          # tranchaient 58 critères gratuitement. Depuis 5.36, TROIS critères sur 106 peuvent
+          # obtenir un `C` par mesure (8.3, 8.5, 10.1) : tout le reste passe par le modèle.
           #
-          # Ce qui restait ouvert PAR PAGE là où le run était décidé tombe avec 5.20.0 : le
-          # balayage mesurait puis jetait la mesure, donc une page pouvait rapporter une
-          # violation de rendu sans jamais pouvoir conclure à la conformité. Et un verdict
-          # d'agent est enregistré à la granularité du référentiel, donc il traverse la
-          # projection par page : ce que l'adjudication ferme pour le run, elle le ferme sur les
-          # 37 pages capturées.
+          # Et le modèle, correctement, refuse certains. Mesuré sur le run 33416093626, après
+          # que tout le reste eut été réparé : 102 critères sur 106 tranchés, et QUATRE que
+          # l'adjudicateur rend `manual / undecidable` sur trois passes — 3.1 (l'information
+          # donnée par la couleur seule), 8.2 (la validité du code source), 10.3 (le contenu
+          # compréhensible sans CSS), 11.9 (la pertinence de chaque intitulé de bouton). Ce
+          # sont des critères où il faut REGARDER, sur 454 à 2700 occurrences. Un modèle qui
+          # les déclarerait conformes mentirait ; il dit qu'il ne sait pas, et il a raison.
           #
-          # Mesuré en amont sur la fixture RGAA, balayée et capturée : 37 critères « à évaluer »
-          # pour le run, et exactement les mêmes 37 sur chacune des pages. `pages` n'est donc
-          # plus une barre plus haute que `true` — c'est la même, vérifiée là où on la lit.
+          # UN JOB ROUGE SUR CE MOTIF N'APPREND RIEN À PERSONNE. Il ne dit pas « le code a
+          # régressé », il dit « quatre critères RGAA demandent un œil humain » — ce qui était
+          # déjà vrai avant le run, et le restera après. Un rouge permanent qu'on apprend à
+          # ignorer est pire qu'un vert : il use la seule couleur dont on dispose pour signaler
+          # une vraie panne, et ce fichier en a de vraies à signaler (voir `require-sample`).
           #
-          # Ce qui reste ouvert est NOMMÉ dans le log et dans la fiche par page ; jamais un
-          # seuil, jamais un pourcentage.
-          require-decided: "pages"
+          # CE QUI NE CHANGE PAS : le résidu reste NOMMÉ. Le log imprime toujours
+          # « ✗ N/106 critère(s) encore « à évaluer » : … », le rapport page par page le porte,
+          # et le livrable aussi. On mesure et on publie ; on n'arrête plus la chaîne dessus.
+          # C'est la même politique que `fail-on: ""` juste au-dessus, appliquée au même sujet.
+          #
+          # CE QUI ROUGIT ENCORE, et c'est délibéré : une panne, un balayage amputé
+          # (`require-sample`), un rendu réclamé mais absent (`require-rendered`). Des faits sur
+          # la QUALITÉ DU RUN, jamais sur le verdict d'accessibilité.
+          require-decided: "false"
           # Si un critère de rendu reste ouvert, cette porte refuse un run sans aucune capture
           # navigateur. `require-sample` ci-dessous impose indépendamment la présence des 24
           # pages attendues par la configuration du dépôt.
