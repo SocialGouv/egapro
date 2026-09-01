@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: mailpit
+      annotations:
+        prometheus.io/scrape: "false"
     spec:
       securityContext:
         runAsNonRoot: true
@@ -63,16 +65,20 @@ kind: Service
 metadata:
   name: mailpit
   namespace: {{ .Values.global.namespace }}
+  annotations:
+    prometheus.io/scrape: "false"
 spec:
   selector:
     app: mailpit
   ports:
-    - name: smtp
-      port: 1025
-      targetPort: smtp
     - name: web
       port: 8025
       targetPort: web
+      appProtocol: http
+    - name: smtp
+      port: 1025
+      targetPort: smtp
+      appProtocol: tcp
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
