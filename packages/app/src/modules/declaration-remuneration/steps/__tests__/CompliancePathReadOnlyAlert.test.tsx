@@ -12,10 +12,6 @@ const CASES: Array<[CompliancePathReadOnlyReason, RegExp]> = [
 		"joint_evaluation_submitted",
 		/Le rapport d'évaluation conjointe a déjà été transmis/,
 	],
-	[
-		"path_choice_deadline_passed",
-		/La date limite pour choisir un parcours de mise en conformité est dépassée/,
-	],
 ];
 
 describe("CompliancePathReadOnlyAlert", () => {

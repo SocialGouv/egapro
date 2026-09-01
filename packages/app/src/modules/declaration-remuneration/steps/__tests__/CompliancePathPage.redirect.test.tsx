@@ -166,11 +166,13 @@ describe("CompliancePathPage — skipping the choice page", () => {
 	});
 });
 
-// The page must keep feeding the read-only gate the round-2 deadline for BOTH
-// rounds. Rebranching it on `selectPathChoiceDeadline` (the display helper) would
-// close the choice on 1 July N instead of 1 January N+1 — 5 months too early —
-// and typecheck would stay green. These two tests are that safety net.
-describe("CompliancePathPage — the path-choice deadline is indicative", () => {
+// #4282 removed the calendar gate outright, which turns the older invariant
+// («close on 1 January N+1, never on 1 July N») into the strictly stronger one
+// pinned below: NO date closes the choice, however late. Reintroducing any clock
+// read — `selectPathChoiceDeadline`, `campaignDeadlines.pathChoiceDeadline` or a
+// bare `new Date()` — would leave typecheck green. These tests are that safety
+// net, kept at page level because the page is what reads the clock.
+describe("CompliancePathPage — the path-choice deadline never closes the choice", () => {
 	beforeEach(() => {
 		mockRedirect.mockClear();
 		mockAuth.mockReset();
@@ -200,13 +202,22 @@ describe("CompliancePathPage — the path-choice deadline is indicative", () => 
 
 		expect(
 			props?.readOnlyReason,
-			"the round-1 path choice must stay open past 1 July — the gate has to keep reading campaignDeadlines.pathChoiceDeadline (1 January N+1), never selectPathChoiceDeadline",
+			"the round-1 path choice must stay open past 1 July — the displayed deadline is a milestone, not a lock",
 		).toBeUndefined();
 	});
 
-	it("closes the choice only once 1 January N+1 has passed", async () => {
+	it("leaves the choice open past 1 January N+1 too: no date closes it", async () => {
 		const props = await renderRound1ChoiceAt(new Date(2027, 0, 15));
 
-		expect(props?.readOnlyReason).toBe("path_choice_deadline_passed");
+		expect(
+			props?.readOnlyReason,
+			"no calendar date may make the path choice read-only (#4282) — only a business reason can: démarche finalised, or a downstream step already submitted",
+		).toBeUndefined();
+	});
+
+	it("leaves the choice open years after every campaign deadline", async () => {
+		const props = await renderRound1ChoiceAt(new Date(2031, 5, 30));
+
+		expect(props?.readOnlyReason).toBeUndefined();
 	});
 });
