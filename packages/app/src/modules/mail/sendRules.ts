@@ -5,14 +5,17 @@ import type {
 } from "notifications/queue";
 
 export type DeclarationConfirmationContext = {
-	hasGapAboveThreshold: boolean;
+	// Whether the FSM is currently sitting on a compliance-path choice the
+	// company still has to make — not whether a path was *ever* chosen (see
+	// `isAwaitingCompliancePathChoice` vs `isInComplianceProcess`).
+	awaitingPathChoice: boolean;
 	cseRequired: boolean;
 };
 
 export function selectDeclarationConfirmationVariant(
 	context: DeclarationConfirmationContext,
 ): DeclarationConfirmationVariant {
-	if (context.hasGapAboveThreshold) return "path_to_select";
+	if (context.awaitingPathChoice) return "path_to_select";
 	if (context.cseRequired) return "cse_to_deposit";
 	return "completed";
 }

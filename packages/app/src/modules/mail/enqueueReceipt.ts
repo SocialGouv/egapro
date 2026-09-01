@@ -9,6 +9,7 @@ import type {
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	hasStartedSecondDeclaration,
+	isAwaitingCompliancePathChoice,
 	isInComplianceProcess,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
@@ -56,7 +57,13 @@ type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
 type ReceiptContext = {
 	raisonSociale: string;
 	cseRequired: boolean;
+	// Feeds `selectCseOpinionReceiptVariant` only — "a compliance path is (or
+	// was) in progress", used to pick the CSE-opinion-receipt gap wording.
 	hasGapAboveThreshold: boolean;
+	// Feeds `selectDeclarationConfirmationVariant` — "a path choice is
+	// currently outstanding", distinct from the above (see
+	// `isAwaitingCompliancePathChoice`).
+	awaitingPathChoice: boolean;
 	hasSecondDeclaration: boolean;
 };
 
@@ -95,6 +102,7 @@ async function readReceiptContext(
 			raisonSociale,
 			cseRequired: false,
 			hasGapAboveThreshold: false,
+			awaitingPathChoice: false,
 			hasSecondDeclaration: false,
 		};
 	}
@@ -103,6 +111,7 @@ async function readReceiptContext(
 		raisonSociale,
 		cseRequired: row.cseRequired,
 		hasGapAboveThreshold: isInComplianceProcess(row),
+		awaitingPathChoice: isAwaitingCompliancePathChoice(row.status),
 		hasSecondDeclaration: hasStartedSecondDeclaration(row),
 	};
 }
@@ -119,7 +128,7 @@ async function buildConfirmationPayload(
 		case "declaration_confirmation":
 		case "second_declaration_confirmation": {
 			const variant = selectDeclarationConfirmationVariant({
-				hasGapAboveThreshold: context.hasGapAboveThreshold,
+				awaitingPathChoice: context.awaitingPathChoice,
 				cseRequired: context.cseRequired,
 			});
 			if (variant === "path_to_select") {

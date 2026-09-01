@@ -3,6 +3,7 @@ import {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
+	isAwaitingCompliancePathChoice,
 	isCancelled,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
@@ -213,6 +214,39 @@ describe("isInComplianceProcess", () => {
 
 	it("returns false when status is null and no path chosen", () => {
 		expect(isInComplianceProcess({ status: null, ...noPath })).toBe(false);
+	});
+});
+
+describe("isAwaitingCompliancePathChoice", () => {
+	it("returns true when awaiting the round-1 compliance path choice", () => {
+		expect(
+			isAwaitingCompliancePathChoice("awaiting_compliance_path_choice"),
+		).toBe(true);
+	});
+
+	it("returns true when awaiting the round-2 revision choice", () => {
+		expect(isAwaitingCompliancePathChoice("awaiting_revision_choice")).toBe(
+			true,
+		);
+	});
+
+	// Regression — issue #4293: a path chosen earlier must not read as "still
+	// awaiting a choice", unlike `isInComplianceProcess` which stays true
+	// forever once any path has been chosen.
+	it("returns false once the démarche has ended, even though a path was chosen", () => {
+		expect(isAwaitingCompliancePathChoice("demarche_completed")).toBe(false);
+	});
+
+	it("returns false for an in-progress non-choice status", () => {
+		expect(isAwaitingCompliancePathChoice("corrective_actions_chosen")).toBe(
+			false,
+		);
+		expect(isAwaitingCompliancePathChoice("awaiting_cse_opinion")).toBe(false);
+	});
+
+	it("returns false for draft and null", () => {
+		expect(isAwaitingCompliancePathChoice("draft")).toBe(false);
+		expect(isAwaitingCompliancePathChoice(null)).toBe(false);
 	});
 });
 

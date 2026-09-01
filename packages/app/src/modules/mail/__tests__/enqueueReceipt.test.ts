@@ -425,7 +425,7 @@ describe("enqueueReceipt — variant derivation", () => {
 	it("attaches the round-1 deadline to a first declaration", async () => {
 		stubContext({
 			...declarationRow,
-			firstDeclarationPathChoice: "justify",
+			status: "awaiting_compliance_path_choice",
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
@@ -440,7 +440,7 @@ describe("enqueueReceipt — variant derivation", () => {
 	it("attaches the administrable round-2 deadline to a second declaration", async () => {
 		stubContext({
 			...declarationRow,
-			secondDeclarationPathChoice: "justify",
+			status: "awaiting_revision_choice",
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
@@ -472,6 +472,41 @@ describe("enqueueReceipt — variant derivation", () => {
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
 		expect(payloadOf().variant).toBe("path_to_select");
+	});
+
+	// Regression — issue #4293: CAS-03/CAS-07/CAS-09 all reach this shape —
+	// a compliance path was chosen earlier (round 1 or round 2) and the FSM
+	// has since reached its terminal status. The old proxy
+	// (`isInComplianceProcess`) stayed true forever once any path was chosen,
+	// so the acknowledgement wrongly read "you still need to choose a path"
+	// even though the démarche was already over.
+	it("selects completed once the démarche is over, even though a path was chosen earlier", async () => {
+		stubContext({
+			...declarationRow,
+			status: "demarche_completed",
+			firstDeclarationPathChoice: "justify",
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(payloadOf().variant).toBe("completed");
+		expect(payloadOf().complianceDeadline).toBeUndefined();
+	});
+
+	// CAS-08 shape: round-1 corrective action chosen, second declaration
+	// resolves with a CSE opinion still expected — settled path choice, not
+	// yet a terminal state.
+	it("selects cse_to_deposit for a second declaration once its path choice is settled but a CSE is expected", async () => {
+		stubContext({
+			...declarationRow,
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			cseRequired: true,
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
+
+		expect(payloadOf().variant).toBe("cse_to_deposit");
 	});
 
 	it("selects cse_first_and_second for a joint evaluation when a second declaration exists", async () => {

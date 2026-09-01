@@ -96,6 +96,7 @@ export {
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
+	isAwaitingCompliancePathChoice,
 	isCancelled,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,

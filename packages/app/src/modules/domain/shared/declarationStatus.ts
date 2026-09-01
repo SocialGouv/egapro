@@ -51,6 +51,20 @@ export function isInComplianceProcess(declaration: {
 	);
 }
 
+// Unlike `isInComplianceProcess` — true forever once any path has been
+// chosen, including long after the démarche has ended — this is true only
+// while a choice is actually outstanding. A round-1 or round-2 confirmation
+// e-mail needs exactly this distinction: a path chosen in round 1 must not
+// make a round-2 (or terminal) e-mail read as "you still need to choose".
+export function isAwaitingCompliancePathChoice(
+	status: DeclarationFsmStatus | null,
+): boolean {
+	return (
+		status === "awaiting_compliance_path_choice" ||
+		status === "awaiting_revision_choice"
+	);
+}
+
 // Second declaration *started* (a step was reached or a path chosen). Distinct
 // from `hasSubmittedSecondDeclaration`, which requires the submit event.
 export function hasStartedSecondDeclaration(declaration: {
