@@ -2,8 +2,31 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: "/"
+    # MÊME CADENCE ET MÊME BRANCHE QUE L'ÉCOSYSTÈME NPM CI-DESSOUS, ET C'EST LOAD-BEARING.
+    #
+    # `maxgfr/ultra11y` existe des deux côtés : comme Action épinglée dans a11y.yaml et comme
+    # devDependency dans packages/app. Les deux doivent porter la même version — le balayage
+    # Playwright écrit les instantanés avec la devDependency, l'Action les réingère avec son
+    # moteur embarqué. Dependabot ne peut pas grouper à travers deux écosystèmes, donc le mieux
+    # qu'on puisse faire ici est de faire ARRIVER les deux PR le même matin ; ce qui REFUSE une
+    # moitié de montée est le job `a11y-version-coherence` de ci.yaml.
+    #
+    # Avant, ce bloc était mensuel et sans `target-branch` : les mises à jour d'Action
+    # atterrissaient sur la branche par défaut à un rythme différent de leurs jumelles npm.
+    target-branch: alpha
+    labels:
+      - bot
+      - dependencies
     schedule:
-      interval: monthly
+      interval: weekly
+      day: monday
+      time: "01:00"
+      timezone: Europe/Paris
+    groups:
+      # Une seule PR pour les deux `uses:` d'ultra11y, jamais deux qui se marchent dessus.
+      ultra11y:
+        patterns:
+          - "maxgfr/ultra11y"
   - package-ecosystem: "npm"
     labels:
       - bot

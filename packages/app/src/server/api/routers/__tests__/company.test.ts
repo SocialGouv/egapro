@@ -351,6 +351,8 @@ describe("findUserCompany NAF label enrichment", () => {
 			region: null,
 			departmentCode: null,
 			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
 			workforce: 100,
 			statutDiffusion: null,
 		});

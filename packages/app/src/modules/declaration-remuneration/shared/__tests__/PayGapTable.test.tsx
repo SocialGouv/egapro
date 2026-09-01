@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { PayGapRow } from "~/modules/declaration-remuneration/types";
-import type { FieldError } from "../formError/types";
 import { DIVERGENT_HOURLY_MEDIAN } from "~/test/gipGapFixtures";
+import type { FieldError } from "../formError/types";
 import {
 	DEFAULT_PAY_GAP_ROWS,
 	handlePayGapRowChange,

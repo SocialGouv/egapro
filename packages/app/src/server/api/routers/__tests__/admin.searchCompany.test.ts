@@ -15,6 +15,8 @@ const WEEZ_COMPANY = {
 	region: null,
 	departmentCode: null,
 	departmentLabel: null,
+	countryCode: null,
+	countryLabel: "FRANCE",
 	// Weez/INSEE headcount, deliberately far from the GIP one.
 	workforce: 500,
 	statutDiffusion: null,

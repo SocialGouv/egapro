@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -6,7 +6,6 @@ import { env } from "~/env.js";
 
 // `integration-setup.ts` migrates an EMPTY container, so the backfill only ever runs here.
 
-const MIGRATION_FILE = "0048_volatile_harpoon.sql";
 const SCRATCH_SCHEMA = "migration_4217";
 const NEW_COLUMN = "decl2_cse_opinion_deadline";
 
@@ -27,15 +26,29 @@ function toIsoDate(value: Date | string): string {
 	return typeof value === "string" ? value : value.toISOString().slice(0, 10);
 }
 
-describe("#4217 campaign deadline split — migration 0047 replayed on pre-existing rows (real Postgres)", () => {
+describe("#4217 campaign deadline split — migration replayed on pre-existing rows (real Postgres)", () => {
 	let sql!: ReturnType<typeof postgres>;
 	let statements: string[] = [];
 
 	async function readMigrationStatements(): Promise<string[]> {
 		// `drizzle/` is outside `src/` so has no `~/` alias; vitest runs from the package root.
-		const file = path.join(process.cwd(), "drizzle", MIGRATION_FILE);
-		const content = await readFile(file, "utf8");
-		return content
+		const dir = path.join(process.cwd(), "drizzle");
+		// Every rebase past a concurrent migration renumbers the file, so it is
+		// found by the column it adds rather than by a number that goes stale.
+		const files = (await readdir(dir)).filter((name) => name.endsWith(".sql"));
+		const contents = await Promise.all(
+			files.map(async (name) => await readFile(path.join(dir, name), "utf8")),
+		);
+		const matches = contents.filter((content) =>
+			content.includes(`ADD COLUMN "${NEW_COLUMN}"`),
+		);
+		const migration = matches[0];
+		if (!migration || matches.length > 1) {
+			throw new Error(
+				`Expected exactly one migration adding "${NEW_COLUMN}", found ${matches.length}.`,
+			);
+		}
+		return migration
 			.split("--> statement-breakpoint")
 			.map((statement) => statement.trim())
 			.filter((statement) => statement.length > 0);
