@@ -272,6 +272,45 @@ chaque moitié repartant avec son propre plafond — une perte de huit critères
 perte d'un. Ce dépôt ne pose plus de plafond du tout (voir « Ce que coûte l'adjudication ») ;
 ce découpage est le filet, pas la ceinture.
 
+### Ce que 5.42 corrige, et ce que ça coûte
+
+**5.42.0 / 5.42.1 ferment une classe de défaut, pas un bug.** Un faux positif est bruyant et se
+discute en revue ; un **faux conforme est invisible**, et c'est lui qu'une déclaration
+d'accessibilité recopie. Trois chemins en produisaient :
+
+- `focusObscured` (2.4.11) et `keyboardTrap` (2.1.2) étaient mesurés par les sondes, écrits dans
+  `probes.json` — et ni le format d'instantané ni le repli des constats ne connaissaient ces
+  clés, pendant que `probed` créditait les critères. Une obstruction de focus ou un piège
+  clavier RÉELS ressortaient `C` de la réingestion hors ligne. **C'est exactement le chemin
+  d'egapro**, qui capture ses 37 pages hors de l'Action ;
+- les parcours de l'anneau de tabulation, de survol et d'interaction rendaient un résultat
+  PARTIEL dans la forme d'un résultat fini — plafond de marquage, budget d'horloge, plafonds
+  d'enregistrement — et `probed` était écrit quand même ;
+- `probes.json` porte maintenant un numéro de contrat (`v: 2`). Un fichier écrit avant n'est
+  plus cru pour les cinq critères dont la prétention dépend d'une marche achevée. **Nos captures
+  actuelles sont donc pré-v2** : le premier run en 5.42.1 les réécrit, et c'est voulu.
+
+Ce que ça coûte : RGAA 10.1 quitte l'allowlist `completeBySilence` (sa règle tolère `<u>`,
+tolère `width`/`height` sur neuf balises là où le glossaire en nomme cinq, et couvre la
+présentation par espaces avec deux heuristiques — chacune une sous-détection assumée, bonne
+direction pour un constat, mauvaise pour une conformité). On passe de 103 à **104 critères sur
+106 exigeant une adjudication**. Et les critères dont la marche est tronquée restent ouverts au
+lieu de se fermer à tort, ce qui peut faire monter la facture d'adjudication.
+
+En face, le **registre de verdicts amortit enfin** : un `C` survit à une évidence qui a RÉTRÉCI
+(blanchir un ensemble couvre ses parties) et ne périme que sur une évidence NOUVELLE, à deux
+gardes près — une moisson incomplète et un rétrécissement qu'aucune suppression n'explique.
+Mesuré en rejouant notre registre de 48 entrées contre le run du 31/08 : 27 périmées, dont 13
+pour un simple rétrécissement.
+
+**Le rapport, enfin, ne se contredit plus.** Il mène avec le taux officiel du RGAA — critères
+validés ÷ critères **applicables**, les NA exclus des deux moitiés — annoncé provisoire tant
+qu'un critère est ouvert, formule nommée et opérandes publiés. Sur le run 33416093626 :
+**80 % (59 ÷ 74)** au lieu de « 17 % » en tête d'une grille lisant 91 C / 10 NC. Et les trois
+bandeaux d'en-tête regardent enfin ce que le run a fait : plus d'« audit préliminaire » sur un
+run qui a audité 37 pages rendues, plus d'« auditez la sortie de build » quand elle l'a été,
+plus d'« audit partiel » au-dessus d'une grille qui tranche le critère qu'il nomme.
+
 ### RGAA 10.7 et les contrôles DSFR — ce que 5.41.0 corrige
 
 La sonde `dyn-focus-visible` proxifiait bien un radio/checkbox visuellement masqué vers son
@@ -339,7 +378,7 @@ pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
 ./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
 ```
 
-La devDependency et les deux usages de l'Action sont alignés sur **5.41.0**, et ce n'est plus une
+La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
 refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
 avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deux versions, deux
