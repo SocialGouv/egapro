@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	nullGipStep2,
 	nullGipStep3,
@@ -38,6 +38,10 @@ const emptyStep3Data = () => ({
 });
 
 describe("Step3VariablePay", () => {
+	beforeEach(() => {
+		mockMutate.mockClear();
+	});
+
 	it("renders the pay gap table with 4 rows", () => {
 		render(
 			<Step3VariablePay
@@ -231,7 +235,7 @@ describe("Step3VariablePay", () => {
 		expect(menInput).toHaveValue("20");
 	});
 
-	it("blocks beneficiary count exceeding max workforce", async () => {
+	it("blocks beneficiary count exceeding max workforce, keeping the typed value visible", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
@@ -249,8 +253,76 @@ describe("Step3VariablePay", () => {
 		await user.clear(womenInput);
 		await user.type(womenInput, "20");
 
-		// Should show validation error since 20 > 15
-		expect(screen.getByText(/ne peut pas dépasser/i)).toBeInTheDocument();
+		// The error message must name the value the field actually shows.
+		expect(womenInput).toHaveValue("20");
+		expect(
+			screen.getByText(
+				"Le nombre de femmes bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (15).",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("lets an over-max beneficiary value be corrected downward via backspace", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+		expect(womenInput).toHaveValue("20");
+
+		await user.type(womenInput, "{backspace}");
+		expect(womenInput).toHaveValue("2");
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
+	});
+
+	it("blocks submit when a beneficiary value exceeding max workforce was set outside a keystroke", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={{
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "100",
+					indicatorBHourlyWomen: "100",
+					indicatorBHourlyMen: "100",
+					indicatorDAnnualWomen: "100",
+					indicatorDAnnualMen: "100",
+					indicatorDHourlyWomen: "100",
+					indicatorDHourlyMen: "100",
+					indicatorEWomen: "20",
+					indicatorEMen: "10",
+				}}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		expect(womenInput).toHaveValue("20");
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(
+			screen.getByText(
+				"Le nombre de femmes bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (15).",
+			),
+		).toBeInTheDocument();
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
 	});
 
 	it("associates the beneficiaries error with the women input (RGAA 11.10)", async () => {
