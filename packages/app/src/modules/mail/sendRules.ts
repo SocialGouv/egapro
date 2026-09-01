@@ -25,9 +25,9 @@ export type JointEvaluationSubmittedContext = {
 export function selectJointEvaluationSubmittedVariant(
 	context: JointEvaluationSubmittedContext,
 ): JointEvaluationSubmittedVariant {
+	if (!context.cseOpinionExpected) return "completed";
 	if (context.hasSecondDeclaration) return "cse_first_and_second";
-	if (context.cseOpinionExpected) return "cse_to_deposit";
-	return "completed";
+	return "cse_to_deposit";
 }
 
 export type CseOpinionReceiptContext = {
