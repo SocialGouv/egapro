@@ -18,7 +18,7 @@ export function buildTransporter(): Transporter {
 	// `requireTLS` enforces STARTTLS on plain-text ports; combined with a
 	// `minVersion` floor at TLS 1.2 it prevents silent downgrade attacks.
 	// We only apply it when SMTP auth is configured (i.e. real SMTP relay) —
-	// the MailDev local container has no TLS support and would refuse the
+	// the Mailpit local container has no TLS support and would refuse the
 	// connection if STARTTLS were required.
 	const hardenTls = auth !== undefined;
 	return nodemailer.createTransport({

@@ -94,7 +94,7 @@ spec:
           # no longer mounts these vars (removed from `global.env` once the
           # publisher pattern landed). The `mail` configmap exposes
           # MAIL_ENABLED / SMTP_HOST / SMTP_PORT / SMTP_SECURE / MAIL_FROM
-          # pointing at the in-cluster MailDev for dev / preprod review
+          # pointing at the in-cluster Mailpit for dev / preprod review
           # apps. The `notifications` configmap is optional and lets ops
           # tune retry / batch knobs without rebuilding.
           envFrom:

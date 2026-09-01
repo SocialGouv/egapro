@@ -1,39 +1,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: maildev
+  name: mailpit
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: maildev
+    app: mailpit
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: maildev
+      app: mailpit
   template:
     metadata:
       labels:
-        app: maildev
+        app: mailpit
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
       containers:
-        - name: maildev
-          image: maildev/maildev:2.2.1
+        - name: mailpit
+          image: axllent/mailpit:v1.31.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
+          env:
+            - name: MP_DATABASE
+              value: /data/mailpit.db
+            - name: MP_DISABLE_VERSION_CHECK
+              value: "true"
           ports:
             - name: smtp
               containerPort: 1025
             - name: web
-              containerPort: 1080
+              containerPort: 8025
           readinessProbe:
             httpGet:
-              path: /
+              path: /readyz
               port: web
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -45,32 +52,32 @@ spec:
               cpu: 200m
               memory: 256Mi
           volumeMounts:
-            - name: tmp
-              mountPath: /tmp
+            - name: data
+              mountPath: /data
       volumes:
-        - name: tmp
+        - name: data
           emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: maildev
+  name: mailpit
   namespace: {{ .Values.global.namespace }}
 spec:
   selector:
-    app: maildev
+    app: mailpit
   ports:
     - name: smtp
       port: 1025
       targetPort: smtp
     - name: web
-      port: 1080
+      port: 8025
       targetPort: web
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: maildev
+  name: mailpit
   namespace: {{ .Values.global.namespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -79,16 +86,16 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - maildev-{{ .Values.global.host }}
-      secretName: maildev-tls
+        - mailpit-{{ .Values.global.host }}
+      secretName: mailpit-tls
   rules:
-    - host: maildev-{{ .Values.global.host }}
+    - host: mailpit-{{ .Values.global.host }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: maildev
+                name: mailpit
                 port:
                   name: web

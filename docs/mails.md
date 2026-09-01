@@ -172,7 +172,7 @@ Les erreurs **transitoires** (SMTP timeout, réseau) sont retentées. Les erreur
 
 ### Sécurité SMTP
 
-`worker/transporter.ts` impose `requireTLS: true` et `tls.minVersion: "TLSv1.2"` dès qu'un couple `SMTP_USER` / `SMTP_PASS` est configuré (prod / preprod). En dev local (MailDev sans auth), ces options sont skip pour rester compatibles avec le conteneur.
+`worker/transporter.ts` impose `requireTLS: true` et `tls.minVersion: "TLSv1.2"` dès qu'un couple `SMTP_USER` / `SMTP_PASS` est configuré (prod / preprod). En dev local (Mailpit sans auth), ces options sont skip pour rester compatibles avec le conteneur.
 
 ### Dégradation gracieuse
 
@@ -184,9 +184,9 @@ Si `DATABASE_URL` est absent côté worker, `registerSchedules` warn et **les ra
 
 | Environnement | SMTP cible | Worker déployé | Schedules actifs |
 |---|---|---|---|
-| Local (`pnpm dev:app`) | MailDev (`docker compose`) | Non — à lancer manuellement (`pnpm --filter notifications dev`) ou via les E2E | Oui dès que le worker tourne |
-| Review app / dev | MailDev in-cluster | Oui | Oui |
-| Preprod | MailDev in-cluster | Oui | Oui |
+| Local (`pnpm dev:app`) | Mailpit (`docker compose`) | Non — à lancer manuellement (`pnpm --filter notifications dev`) ou via les E2E | Oui dès que le worker tourne |
+| Review app / dev | Mailpit in-cluster | Oui | Oui |
+| Preprod | Mailpit in-cluster | Oui | Oui |
 | Prod | Tipimail (secret `smtp-app`) | Oui | Oui (Europe/Paris) |
 
 ---
