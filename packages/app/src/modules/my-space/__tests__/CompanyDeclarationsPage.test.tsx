@@ -151,6 +151,65 @@ describe("CompanyDeclarationsPage", () => {
 		).not.toBeInTheDocument();
 	});
 
+	describe("CAS-01 (#4291) — compliance-path step keyed off the declared trajectory, not company size alone", () => {
+		const cas01Company = { ...company, gipWorkforce: 250, hasCse: false };
+
+		it("hides the compliance-path step once démarche_completed is reached with no path choice recorded", () => {
+			renderPage({
+				company: cas01Company,
+				declarations: [
+					makeDeclaration("remuneration", {
+						status: "done",
+						fsmStatus: "demarche_completed",
+					}),
+					makeDeclaration("representation"),
+				],
+			});
+
+			expect(
+				screen.queryAllByText(/Parcours de mise en conformité/),
+			).toHaveLength(0);
+			expect(
+				screen.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(
+				screen.getByTitle("Voir le récapitulatif de la déclaration"),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the compliance-path step visible on a draft, since whether a ≥5% gap applies is not known yet", () => {
+			renderPage({
+				company: cas01Company,
+				declarations: [
+					makeDeclaration("remuneration"),
+					makeDeclaration("representation"),
+				],
+			});
+
+			expect(
+				screen.queryAllByText(/Parcours de mise en conformité/),
+			).toHaveLength(1);
+		});
+
+		it("keeps the compliance-path step visible after completion when a compliance path was actually chosen", () => {
+			renderPage({
+				company: cas01Company,
+				declarations: [
+					makeDeclaration("remuneration", {
+						status: "done",
+						fsmStatus: "demarche_completed",
+						firstDeclarationPathChoice: "justify",
+					}),
+					makeDeclaration("representation"),
+				],
+			});
+
+			expect(
+				screen.queryAllByText(/Parcours de mise en conformité/),
+			).toHaveLength(1);
+		});
+	});
+
 	it("hides the 'Archives' section while archives are unavailable", () => {
 		renderPage();
 		expect(
