@@ -86,6 +86,36 @@ export function isSecondDeclarationDeadlineApplicable(declaration: {
 	}
 }
 
+// Whether the compliance-path step (indicator G, ≥5% gap) should still be shown
+// as part of the démarche. Company-characteristics alone (workforce, CSE,
+// indicator G applicability) are not sufficient: the gap itself decides
+// `phase2Required` in the rule engine, and that fact is not available on this
+// page. Two direct transitions skip the compliance path entirely when it does
+// not apply (`submit_to_cse_opinion_directly`, `submit_to_demarche_completed_directly`,
+// both guarded by `not phase2Required`) and neither records a path choice — so
+// a terminal state reached with no path choice at all proves the path never
+// applied. `awaiting_compliance_path_choice` also has a null path choice, but
+// that state means the path is still open, not skipped.
+export function isCompliancePathStepApplicable(declaration: {
+	status: DeclarationFsmStatus | null;
+	firstDeclarationPathChoice: CompliancePath | null;
+	secondDeclarationPathChoice: CompliancePath | null;
+}): boolean {
+	switch (declaration.status) {
+		case null:
+		case "draft":
+		case "awaiting_compliance_path_choice":
+		case "corrective_actions_chosen":
+		case "joint_evaluation_chosen":
+		case "awaiting_revision_choice":
+		case "revised_joint_evaluation_chosen":
+			return true;
+		case "awaiting_cse_opinion":
+		case "demarche_completed":
+			return getCurrentCompliancePath(declaration) !== null;
+	}
+}
+
 // The corrective-action second declaration may only be written while its funnel
 // is actually open: right after the corrective-action path choice, or once the
 // declaration has been re-opened for revision. Any other status means round 2

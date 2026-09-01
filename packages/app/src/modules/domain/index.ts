@@ -97,6 +97,7 @@ export {
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
 	isCancelled,
+	isCompliancePathStepApplicable,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
 	isDeclarationWritingClosed,
