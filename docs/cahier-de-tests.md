@@ -100,7 +100,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 7 indicateurs
 - Parcours de conformité : justification des écarts
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5.b` : choix justification sans CSE → fin de démarche directe → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-03] Path 5.b` : choix justification sans CSE → fin de démarche directe → `/confirmation`. La coordonnée de grille correspondante vérifie en plus l'accusé de réception de fin de démarche reçu en boîte mail (#4293), quand la chaîne mail est disponible sur l'environnement de run.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-03\]"`
 
 ---
@@ -199,7 +199,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Nouvelle déclaration du 7ème indicateur
 - Parcours de conformité : justification des écarts
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-09] Path 9` : 2ᵉ tour → justification sans CSE → fin de démarche directe → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-09] Path 9` : 2ᵉ tour → justification sans CSE → fin de démarche directe → `/confirmation`. La coordonnée de grille correspondante vérifie en plus l'accusé de réception de la **seconde** déclaration (#4293), quand la chaîne mail est disponible sur l'environnement de run.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-09\]"`
 
 ---

@@ -1,5 +1,6 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { TEST_USER_EMAIL } from "./constants";
 import {
 	COMPLIANCE_PATH,
 	completeSecondDeclaration,
@@ -22,19 +23,11 @@ import {
 	spawnNotificationsWorker,
 	waitForWorkerReady,
 } from "./helpers/notifications-worker";
-
-const TEST_USER_EMAIL = "test@fia1.fr";
-
-// #4293 — the three confirmation variants are only distinguishable this way:
-// `completed` owns a subject of its own, while `cse_to_deposit` and
-// `path_to_select` share one, so only the body tells those two apart.
-const COMPLETED_DECLARATION_SUBJECT =
-	"Egapro - Transmission de déclaration et fin de démarche";
-const COMPLETED_SECOND_DECLARATION_SUBJECT =
-	"Egapro - Transmission de la seconde déclaration et fin de démarche";
-const DEMARCHE_COMPLETED_WORDING = /Votre démarche est désormais terminée/;
-const CSE_TO_DEPOSIT_WORDING = /déposer le ou les avis du CSE/;
-const PATH_TO_SELECT_WORDING = /sélectionner un parcours de mise en conformité/;
+import {
+	CSE_TO_DEPOSIT_WORDING,
+	expectCompletionReceipt,
+	PATH_TO_SELECT_WORDING,
+} from "./helpers/receipts";
 
 test.describe("notifications email flow (publisher → pg-boss → worker → SMTP → maildev)", () => {
 	let worker: ChildProcess | null = null;
@@ -141,15 +134,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 
-		const email = await waitForEmail(
-			TEST_USER_EMAIL,
-			(m) => m.subject === COMPLETED_DECLARATION_SUBJECT,
-			{ since: startedAt },
-		);
-
-		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
-		expect(email.html).toMatch(DEMARCHE_COMPLETED_WORDING);
-		expect(email.html).not.toMatch(PATH_TO_SELECT_WORDING);
+		await expectCompletionReceipt({ round: "first", since: startedAt });
 	});
 
 	test("CAS-09 — round-2 justify without CSE ends the démarche and delivers its receipt (#4293)", async ({
@@ -165,14 +150,6 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
 		await selectCompliancePath(page, "path-justify");
 
-		const email = await waitForEmail(
-			TEST_USER_EMAIL,
-			(m) => m.subject === COMPLETED_SECOND_DECLARATION_SUBJECT,
-			{ since: startedAt },
-		);
-
-		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
-		expect(email.html).toMatch(DEMARCHE_COMPLETED_WORDING);
-		expect(email.html).not.toMatch(PATH_TO_SELECT_WORDING);
+		await expectCompletionReceipt({ round: "second", since: startedAt });
 	});
 });
