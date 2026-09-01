@@ -62,7 +62,7 @@ export function Step1Opinions({
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
 
-	const dbValues = useMemo(
+	const initialFormValues = useMemo(
 		() => ({
 			firstDeclaration: {
 				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
@@ -92,31 +92,11 @@ export function Step1Opinions({
 		year,
 		step: "opinions",
 		kind: "cse",
-		dbValues,
+		dbValues: initialFormValues,
 	});
 
 	const form = useZodForm(saveOpinionsSchema, {
-		defaultValues: {
-			firstDeclaration: {
-				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
-				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-				gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
-				gapOpinion: initialData?.firstDeclGapOpinion ?? null,
-				gapDate: initialData?.firstDeclGapDate ?? null,
-			},
-			secondDeclaration: hasSecondDeclaration
-				? {
-						accuracyOpinion:
-							initialData?.secondDeclAccuracyOpinion ?? undefined,
-						accuracyDate: initialData?.secondDeclAccuracyDate ?? "",
-						gapConsulted: isSecondDeclarationJustification
-							? true
-							: (initialData?.secondDeclGapConsulted ?? undefined),
-						gapOpinion: initialData?.secondDeclGapOpinion ?? null,
-						gapDate: initialData?.secondDeclGapDate ?? null,
-					}
-				: undefined,
-		},
+		defaultValues: initialFormValues,
 	});
 
 	useEffect(() => {
