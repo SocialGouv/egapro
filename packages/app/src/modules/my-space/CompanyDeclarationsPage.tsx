@@ -115,10 +115,10 @@ export function CompanyDeclarationsPage({
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
 				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
-				indicatorGRequired={indicatorGRequired}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
+				indicatorGRequired={indicatorGRequired}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}

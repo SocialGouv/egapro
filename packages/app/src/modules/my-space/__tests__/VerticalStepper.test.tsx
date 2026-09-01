@@ -492,6 +492,39 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 	});
 
+	describe("étape 3 — échéance de l'avis du CSE (#4217)", () => {
+		const DEADLINES = getDefaultCampaignDeadlines(FUTURE_YEAR);
+
+		it("closes the CSE opinion a month after the round-2 joint evaluation", () => {
+			expect(DEADLINES.decl2CseOpinionDeadline).not.toEqual(
+				DEADLINES.decl2JointEvaluationDeadline,
+			);
+		});
+
+		it("shows the CSE opinion deadline on the cse variant", () => {
+			const { panel } = renderPanel("cse");
+			const row = panel.getByText(/Échéance :/);
+			expect(row).toHaveTextContent(
+				longDateText(DEADLINES.decl2CseOpinionDeadline),
+			);
+			expect(row).not.toHaveTextContent(
+				longDateText(DEADLINES.decl2JointEvaluationDeadline),
+			);
+		});
+
+		it("shows the CSE opinion deadline on the transmitted row of the closed variant", () => {
+			const { panel } = renderPanel("closed");
+			const row = panel.getByText("Vos avis du CSE ont été transmis")
+				.parentElement as HTMLElement;
+			expect(row).toHaveTextContent(
+				longDateText(DEADLINES.decl2CseOpinionDeadline),
+			);
+			expect(row).not.toHaveTextContent(
+				longDateText(DEADLINES.decl2JointEvaluationDeadline),
+			);
+		});
+	});
+
 	describe("ClosedMessage — texte selon cseOpinionRequired (#3939)", () => {
 		it("mentions the CSE opinions still being modifiable when cseOpinionRequired is true", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: true });

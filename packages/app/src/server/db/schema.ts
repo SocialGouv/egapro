@@ -727,6 +727,7 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2ModificationDeadline: d.date().notNull(),
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),
+	decl2CseOpinionDeadline: d.date().notNull(),
 }));
 
 // ── Representation campaign deadlines (configurable per year) ─────

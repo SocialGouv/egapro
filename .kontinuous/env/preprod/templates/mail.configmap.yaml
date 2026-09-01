@@ -3,10 +3,10 @@ apiVersion: v1
 metadata:
   name: mail
 data:
-  # Using MailDev as an in-cluster SMTP catcher until a Tipimail preprod
+  # Using Mailpit as an in-cluster SMTP catcher until a Tipimail preprod
   # sealed-secret is available. The UI is exposed at
-  # https://maildev-<global.host> via the maildev Ingress.
+  # https://mailpit-<global.host> via the mailpit Ingress.
   MAIL_ENABLED: "true"
-  SMTP_HOST: "maildev"
+  SMTP_HOST: "mailpit"
   SMTP_PORT: "1025"
   MAIL_FROM: "no-reply@egapro.preprod.fabrique.social.gouv.fr"

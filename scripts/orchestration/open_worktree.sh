@@ -154,7 +154,7 @@ cat <<EOF
   Slot index  : $INDEX
   Dev server  : http://localhost:$APP_PORT  (run via: cd $WT_PATH && pnpm dev:app)
 
-  Maildev    : http://localhost:$((1200 + 10 * INDEX))
+  Mailpit    : http://localhost:$((1200 + 10 * INDEX))
   Minio      : http://localhost:$((9100 + 10 * INDEX))  (console: $((9101 + 10 * INDEX)))
   Postgres   : localhost:$((5500 + 10 * INDEX))
 EOF

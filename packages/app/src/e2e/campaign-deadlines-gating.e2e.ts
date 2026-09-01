@@ -25,7 +25,8 @@ const FUTURE_DEADLINES = {
 	decl1JointEvaluationDeadline: "2099-08-01",
 	decl2ModificationDeadline: "2099-12-01",
 	decl2JustificationDeadline: "2099-12-01",
-	decl2JointEvaluationDeadline: "2100-02-01",
+	decl2JointEvaluationDeadline: "2100-01-01",
+	decl2CseOpinionDeadline: "2100-02-01",
 } as const;
 
 const PAST_DEADLINES = {
@@ -34,7 +35,8 @@ const PAST_DEADLINES = {
 	decl1JointEvaluationDeadline: "2020-08-01",
 	decl2ModificationDeadline: "2020-12-01",
 	decl2JustificationDeadline: "2020-12-01",
-	decl2JointEvaluationDeadline: "2021-02-01",
+	decl2JointEvaluationDeadline: "2021-01-01",
+	decl2CseOpinionDeadline: "2021-02-01",
 } as const;
 
 test.describe("Campaign deadlines gating", () => {

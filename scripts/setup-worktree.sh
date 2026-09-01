@@ -13,7 +13,7 @@
 #   <extra-service>  optional service names to start on top of the default stack
 #                    (currently only `clamavd`). See `docker-compose.yml`.
 #
-# Defaults started: db, minio, minio-init, maildev, valkey.
+# Defaults started: db, minio, minio-init, mailpit, valkey.
 # ClamAV is heavy (~1GB RAM) — opt-in per ticket.
 #
 # Must be run from the root of a worktree (containing docker-compose.yml).
@@ -55,8 +55,8 @@ APP_DEV_PORT=$((3001 + N))
 POSTGRES_HOST_PORT=$((5500 + 10 * N))
 MINIO_API_PORT=$((9100 + 10 * N))
 MINIO_CONSOLE_PORT=$((9101 + 10 * N))
-MAILDEV_SMTP_PORT=$((1100 + 10 * N))
-MAILDEV_WEB_PORT=$((1200 + 10 * N))
+MAILPIT_SMTP_PORT=$((1100 + 10 * N))
+MAILPIT_WEB_PORT=$((1200 + 10 * N))
 CLAMAV_HOST_PORT=$((3400 + 10 * N))
 VALKEY_HOST_PORT=$((6400 + 10 * N))
 
@@ -92,8 +92,8 @@ COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME
 POSTGRES_HOST_PORT=$POSTGRES_HOST_PORT
 MINIO_API_PORT=$MINIO_API_PORT
 MINIO_CONSOLE_PORT=$MINIO_CONSOLE_PORT
-MAILDEV_SMTP_PORT=$MAILDEV_SMTP_PORT
-MAILDEV_WEB_PORT=$MAILDEV_WEB_PORT
+MAILPIT_SMTP_PORT=$MAILPIT_SMTP_PORT
+MAILPIT_WEB_PORT=$MAILPIT_WEB_PORT
 CLAMAV_HOST_PORT=$CLAMAV_HOST_PORT
 VALKEY_HOST_PORT=$VALKEY_HOST_PORT
 
@@ -108,7 +108,8 @@ CLAMAV_PORT=$CLAMAV_HOST_PORT
 # against S3 on startup).
 S3_ENDPOINT=http://localhost:$MINIO_API_PORT
 SMTP_HOST=localhost
-SMTP_PORT=$MAILDEV_SMTP_PORT
+SMTP_PORT=$MAILPIT_SMTP_PORT
+MAILPIT_URL=http://localhost:$MAILPIT_WEB_PORT
 VALKEY_URL=redis://localhost:$VALKEY_HOST_PORT
 
 # Remaining server vars required by src/env.js, so a fresh worktree boots
@@ -143,12 +144,12 @@ echo "                 project=$COMPOSE_PROJECT_NAME"
 echo "                 app=http://localhost:$APP_DEV_PORT"
 echo "                 postgres=localhost:$POSTGRES_HOST_PORT"
 echo "                 minio=http://localhost:$MINIO_API_PORT (console: $MINIO_CONSOLE_PORT)"
-echo "                 maildev=http://localhost:$MAILDEV_WEB_PORT"
+echo "                 mailpit=http://localhost:$MAILPIT_WEB_PORT"
 echo "                 valkey=localhost:$VALKEY_HOST_PORT"
 echo "                 dev login=http://localhost:$APP_DEV_PORT/dev-login"
 
 # Core services always needed.
-SERVICES="db minio minio-init maildev valkey"
+SERVICES="db minio minio-init mailpit valkey"
 
 # Optional extras.
 for svc in "${EXTRA_SERVICES[@]:-}"; do

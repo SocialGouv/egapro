@@ -52,6 +52,7 @@ export const getCampaignDeadlines = cache(
 			decl2JointEvaluationDeadline: parseCivilDate(
 				row.decl2JointEvaluationDeadline,
 			),
+			decl2CseOpinionDeadline: parseCivilDate(row.decl2CseOpinionDeadline),
 			pathChoiceDeadline: getPathChoiceDeadline(year),
 			pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 		};

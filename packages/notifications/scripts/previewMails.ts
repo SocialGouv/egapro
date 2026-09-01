@@ -1,11 +1,11 @@
 /**
- * Mail preview — render every mail variant and ship each one to MailDev.
+ * Mail preview — render every mail variant and ship each one to Mailpit.
  *
- * Use case: after a copy/template change, open MailDev's web UI side-by-side
+ * Use case: after a copy/template change, open Mailpit's web UI side-by-side
  * with the Figma source of truth (node `9564-114784`) to spot any regression.
  *
  * Prereqs:
- *   docker compose up -d maildev
+ *   docker compose up -d mailpit
  *   pnpm --filter notifications preview
  *
  * Defaults (override via env vars):
@@ -19,7 +19,7 @@
  * Open the rendered mails: http://localhost:1080
  *
  * Cleanup after previewing:
- *   - MailDev clears itself on container restart (volatile by design)
+ *   - Mailpit clears itself on container restart (volatile by design)
  *   - This script is git-tracked (devTooling, not test fixture)
  */
 
@@ -157,7 +157,7 @@ async function main(): Promise<void> {
 			})()
 		: JOBS;
 
-	console.log(`Connecting to MailDev on smtp://${HOST}:${PORT} …`);
+	console.log(`Connecting to Mailpit on smtp://${HOST}:${PORT} …`);
 	const transporter = nodemailer.createTransport({
 		host: HOST,
 		port: PORT,
@@ -170,7 +170,7 @@ async function main(): Promise<void> {
 	}
 	transporter.close();
 
-	console.log("\nDone. Inspect the rendered HTML in MailDev:");
+	console.log("\nDone. Inspect the rendered HTML in Mailpit:");
 	console.log("  http://localhost:1080");
 }
 

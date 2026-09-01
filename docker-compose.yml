@@ -77,13 +77,15 @@ services:
              mc mb --ignore-existing local/egapro-dev-app &&
              mc anonymous set none local/egapro-dev-app"
 
-  maildev:
-    image: maildev/maildev:2.2.1
+  mailpit:
+    image: axllent/mailpit:v1.31.0
     ports:
-      - "${MAILDEV_SMTP_PORT:-1025}:1025"
-      - "${MAILDEV_WEB_PORT:-1080}:1080"
+      - "${MAILPIT_SMTP_PORT:-${MAILDEV_SMTP_PORT:-1025}}:1025"
+      - "${MAILPIT_WEB_PORT:-${MAILDEV_WEB_PORT:-1080}}:8025"
+    environment:
+      MP_DISABLE_VERSION_CHECK: "true"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1080"]
+      test: ["CMD", "/mailpit", "readyz"]
       interval: 10s
       timeout: 5s
       retries: 5
