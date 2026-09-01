@@ -55,6 +55,7 @@ function deadlines(
 		decl2ModificationDeadline: future,
 		decl2JustificationDeadline: future,
 		decl2JointEvaluationDeadline: future,
+		decl2CseOpinionDeadline: future,
 		pathChoiceDeadline: past,
 		pathChoiceRound1Deadline: past,
 		...overrides,

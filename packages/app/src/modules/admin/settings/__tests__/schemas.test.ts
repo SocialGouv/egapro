@@ -12,7 +12,8 @@ const validDates = {
 	decl1JointEvaluationDeadline: "2026-08-01",
 	decl2ModificationDeadline: "2026-12-01",
 	decl2JustificationDeadline: "2026-12-01",
-	decl2JointEvaluationDeadline: "2027-02-01",
+	decl2JointEvaluationDeadline: "2027-01-01",
+	decl2CseOpinionDeadline: "2027-02-01",
 };
 
 describe("campaignDeadlinesFormSchema", () => {
@@ -85,6 +86,42 @@ describe("campaignDeadlinesFormSchema", () => {
 			...validDates,
 		});
 		expect(result.success).toBe(false);
+	});
+
+	it("requires decl2CseOpinionDeadline", () => {
+		const { decl2CseOpinionDeadline, ...withoutCseOpinion } = validDates;
+		const result = campaignDeadlinesFormSchema.safeParse({
+			year: 2026,
+			campaignStartDate: null,
+			publicDataReleaseDate: null,
+			...withoutCseOpinion,
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("rejects an invalid decl2CseOpinionDeadline format", () => {
+		const result = campaignDeadlinesFormSchema.safeParse({
+			year: 2026,
+			campaignStartDate: null,
+			publicDataReleaseDate: null,
+			...validDates,
+			decl2CseOpinionDeadline: "2027/02/01",
+		});
+		expect(result.success).toBe(false);
+	});
+
+	it("keeps decl2CseOpinionDeadline distinct from decl2JointEvaluationDeadline", () => {
+		const result = campaignDeadlinesFormSchema.safeParse({
+			year: 2026,
+			campaignStartDate: null,
+			publicDataReleaseDate: null,
+			...validDates,
+		});
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data.decl2JointEvaluationDeadline).toBe("2027-01-01");
+			expect(result.data.decl2CseOpinionDeadline).toBe("2027-02-01");
+		}
 	});
 
 	it("rejects when decl2 is not after decl1", () => {

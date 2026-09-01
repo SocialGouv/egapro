@@ -28,6 +28,7 @@ const DECL2_FIELDS: readonly DateFieldKey[] = [
 	"decl2ModificationDeadline",
 	"decl2JustificationDeadline",
 	"decl2JointEvaluationDeadline",
+	"decl2CseOpinionDeadline",
 ];
 
 const FIELD_LABELS: Record<DateFieldKey, string> = {
@@ -35,10 +36,13 @@ const FIELD_LABELS: Record<DateFieldKey, string> = {
 	publicDataReleaseDate: "Date de rendu public des données",
 	decl1ModificationDeadline: "Date limite de modification",
 	decl1JustificationDeadline: "Date limite de justification",
-	decl1JointEvaluationDeadline: "Date limite de l'avis du CSE",
+	decl1JointEvaluationDeadline:
+		"Date limite de dépôt du rapport d'évaluation conjointe",
 	decl2ModificationDeadline: "Date limite de modification",
 	decl2JustificationDeadline: "Date limite de justification",
-	decl2JointEvaluationDeadline: "Date limite de l'avis du CSE",
+	decl2JointEvaluationDeadline:
+		"Date limite de dépôt du rapport d'évaluation conjointe",
+	decl2CseOpinionDeadline: "Date limite de dépôt de l'avis du CSE",
 };
 
 /**
@@ -80,6 +84,7 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 				deadlinesQuery.data.decl2JustificationDeadline,
 			decl2JointEvaluationDeadline:
 				deadlinesQuery.data.decl2JointEvaluationDeadline,
+			decl2CseOpinionDeadline: deadlinesQuery.data.decl2CseOpinionDeadline,
 		});
 	}, [deadlinesQuery.data, form, selectedYear]);
 
@@ -306,6 +311,7 @@ function buildDefaults(year: number): CampaignDeadlinesFormInput {
 		decl2ModificationDeadline: "",
 		decl2JustificationDeadline: "",
 		decl2JointEvaluationDeadline: "",
+		decl2CseOpinionDeadline: "",
 	};
 }
 

@@ -64,8 +64,8 @@ export function VerticalStepper({
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
-					indicatorGRequired={indicatorGRequired}
 					hasPrefillData={hasPrefillData}
+					indicatorGRequired={indicatorGRequired}
 					siren={siren}
 					status={step1}
 					variant={variant}

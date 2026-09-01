@@ -100,6 +100,7 @@ type CampaignDeadlineDates = {
 	decl2ModificationDeadline: string;
 	decl2JustificationDeadline: string;
 	decl2JointEvaluationDeadline: string;
+	decl2CseOpinionDeadline: string;
 };
 
 export async function setCampaignDeadlines(
@@ -116,7 +117,8 @@ export async function setCampaignDeadlines(
 				decl1_joint_evaluation_deadline,
 				decl2_modification_deadline,
 				decl2_justification_deadline,
-				decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
 			) VALUES (
 				${year},
 				${dates.decl1ModificationDeadline},
@@ -124,7 +126,8 @@ export async function setCampaignDeadlines(
 				${dates.decl1JointEvaluationDeadline},
 				${dates.decl2ModificationDeadline},
 				${dates.decl2JustificationDeadline},
-				${dates.decl2JointEvaluationDeadline}
+				${dates.decl2JointEvaluationDeadline},
+				${dates.decl2CseOpinionDeadline}
 			)
 			ON CONFLICT (year) DO UPDATE SET
 				decl1_modification_deadline = EXCLUDED.decl1_modification_deadline,
@@ -132,7 +135,8 @@ export async function setCampaignDeadlines(
 				decl1_joint_evaluation_deadline = EXCLUDED.decl1_joint_evaluation_deadline,
 				decl2_modification_deadline = EXCLUDED.decl2_modification_deadline,
 				decl2_justification_deadline = EXCLUDED.decl2_justification_deadline,
-				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline = EXCLUDED.decl2_cse_opinion_deadline
 		`;
 	} finally {
 		await sql.end();

@@ -47,9 +47,15 @@ describe("getDeclarationProcessStepDeadline", () => {
 		},
 		{
 			fsm: "awaiting_cse_opinion",
-			deadlineKey: "decl2JointEvaluationDeadline",
+			deadlineKey: "decl2CseOpinionDeadline",
 		},
 	];
+
+	it("keeps the round-2 joint evaluation and CSE opinion fixtures distinct, so neither case below can pass by accident", () => {
+		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
+			deadlines.decl2CseOpinionDeadline,
+		);
+	});
 
 	for (const { fsm, deadlineKey } of cases) {
 		it(`returns ${deadlineKey} for fsmStatus="${fsm}"`, () => {
