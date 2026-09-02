@@ -43,6 +43,7 @@ packages/notifications/dist/
 !.codex/skills/
 !.codex/skills/**/
 !.codex/skills/**/SKILL.md
+!.codex/config.toml
 
 # claude code — ignore everything, then whitelist shared config
 .claude/*
