@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	applyDeclarationClosure,
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
@@ -14,7 +15,7 @@ import {
 	isSecondDeclarationDeadlineApplicable,
 	isSecondDeclarationWritable,
 } from "../shared/declarationStatus";
-import type { DeclarationFsmStatus } from "../types";
+import type { CampaignDeadlines, DeclarationFsmStatus } from "../types";
 import { DECLARATION_FSM_STATUSES } from "../types";
 
 describe("isDraft", () => {
@@ -454,5 +455,145 @@ describe("isJointEvaluationWritable", () => {
 
 	it("returns false once the démarche is completed, which only reopens submit_cse_opinion", () => {
 		expect(isJointEvaluationWritable("demarche_completed")).toBe(false);
+	});
+});
+
+describe("applyDeclarationClosure", () => {
+	const ROW_YEAR = 2026;
+	const CURRENT_YEAR = 2028;
+	// Step deadline for `corrective_actions_chosen` (decl2ModificationDeadline)
+	// and for `draft`/null (decl1ModificationDeadline) both fall well inside
+	// this window, so a single deadlines fixture can drive every scenario.
+	const DEADLINES: CampaignDeadlines = {
+		gipPublicationDate: null,
+		campaignStartDate: null,
+		decl1ModificationDeadline: new Date(2026, 5, 1),
+		decl1JustificationDeadline: new Date(2027, 2, 1),
+		decl1JointEvaluationDeadline: new Date(2026, 7, 1),
+		decl2ModificationDeadline: new Date(2026, 11, 1),
+		decl2JustificationDeadline: new Date(2026, 11, 1),
+		decl2JointEvaluationDeadline: new Date(2027, 0, 1),
+		decl2CseOpinionDeadline: new Date(2027, 1, 1),
+		pathChoiceDeadline: new Date(2027, 0, 1),
+		pathChoiceRound1Deadline: new Date(2026, 6, 1),
+	};
+	const PAST_DEADLINE_NOW = new Date(CURRENT_YEAR, 0, 1);
+	const BEFORE_DEADLINE_NOW = new Date(ROW_YEAR, 0, 15);
+
+	it("S1 — closes an in_progress past-year row past its step deadline as closed_incomplete", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "in_progress",
+				fsmStatus: "corrective_actions_chosen",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("closed_incomplete");
+	});
+
+	it("S2 — closes a to_complete past-year row past its step deadline as closed_not_done", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "to_complete",
+				fsmStatus: "draft",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("closed_not_done");
+	});
+
+	it("S3 — a past year whose step deadline has not yet elapsed stays in_progress", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "in_progress",
+				fsmStatus: "awaiting_cse_opinion",
+				year: ROW_YEAR,
+				currentYear: ROW_YEAR + 1,
+				deadlines: DEADLINES,
+				now: BEFORE_DEADLINE_NOW,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("S4 — done never closes, however far past the deadline", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "done",
+				fsmStatus: "demarche_completed",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("done");
+	});
+
+	it("S5 — the current year never closes, even past its own deadline", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "to_complete",
+				fsmStatus: "draft",
+				year: CURRENT_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("to_complete");
+	});
+
+	it("never closes a future year relative to currentYear", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "in_progress",
+				fsmStatus: "corrective_actions_chosen",
+				year: CURRENT_YEAR + 1,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("treats the deadline instant itself as not yet passed (strict inequality)", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "to_complete",
+				fsmStatus: "draft",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: DEADLINES.decl1ModificationDeadline,
+			}),
+		).toBe("to_complete");
+	});
+
+	it("never closes when the FSM status carries no step deadline (demarche_completed's null)", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "in_progress",
+				fsmStatus: "demarche_completed",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("in_progress");
+	});
+
+	it("is a no-op on an already-closed status", () => {
+		expect(
+			applyDeclarationClosure({
+				status: "closed_incomplete",
+				fsmStatus: "corrective_actions_chosen",
+				year: ROW_YEAR,
+				currentYear: CURRENT_YEAR,
+				deadlines: DEADLINES,
+				now: PAST_DEADLINE_NOW,
+			}),
+		).toBe("closed_incomplete");
 	});
 });

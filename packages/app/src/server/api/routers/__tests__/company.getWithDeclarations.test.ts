@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { RepresentationDeclarationStatus } from "~/modules/domain";
-import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	RepresentationDeclarationStatus,
+} from "~/modules/domain";
+import {
+	getCurrentYear,
+	getDefaultCampaignDeadlines,
+	getReferenceYearFor,
+} from "~/modules/domain";
 import {
 	companies,
 	declarationStatusHistory,
@@ -10,15 +17,20 @@ import {
 	representationDeclarations,
 } from "~/server/db/schema";
 
-const { getRepresentationWorkforceHistoryMock } = vi.hoisted(() => ({
-	getRepresentationWorkforceHistoryMock: vi.fn(),
-}));
+const { getRepresentationWorkforceHistoryMock, getCampaignDeadlinesMock } =
+	vi.hoisted(() => ({
+		getRepresentationWorkforceHistoryMock: vi.fn(),
+		getCampaignDeadlinesMock: vi.fn(),
+	}));
 
 vi.mock("~/server/services/suit");
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/db/getRepresentationWorkforceHistory", () => ({
 	getRepresentationWorkforceHistory: getRepresentationWorkforceHistoryMock,
+}));
+vi.mock("~/server/db/getCampaignDeadlines", () => ({
+	getCampaignDeadlines: getCampaignDeadlinesMock,
 }));
 
 const SIREN = "339787277";
@@ -181,6 +193,9 @@ describe("companyRouter.getWithDeclarations", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(getDefaultCampaignDeadlines(y)),
+		);
 	});
 
 	afterEach(() => {
@@ -196,6 +211,18 @@ describe("companyRouter.getWithDeclarations", () => {
 
 		expect(result.company.siren).toBe(SIREN);
 		expect(result.declarations).toBeDefined();
+	});
+
+	it("falls back to step 0 for a remuneration row with no current step", async () => {
+		const { caller } = await makeCaller({
+			declRows: [{ ...makeDeclRow(getCurrentYear()), currentStep: null }],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "remuneration"),
+		).toMatchObject({ currentStep: 0 });
 	});
 
 	it("excludes cancelled declarations from the timeline", async () => {
@@ -522,5 +549,208 @@ describe("companyRouter.getWithDeclarations", () => {
 		expect(
 			result.declarations.find((d) => d.type === "representation"),
 		).toMatchObject({ status: "to_complete", currentStep: 0 });
+	});
+});
+
+describe("companyRouter.getWithDeclarations — past-campaign closure", () => {
+	const PAST_YEAR = getCurrentYear() - 2;
+	const OTHER_PAST_YEAR = getCurrentYear() - 3;
+	// A fixed year 2000 deadline is unambiguously elapsed no matter when the
+	// suite runs, unlike relying on `getDefaultCampaignDeadlines(PAST_YEAR)`
+	// racing the real system clock near a year boundary.
+	const ELAPSED = new Date(2000, 0, 1);
+	const NOT_YET_ELAPSED = new Date(2999, 0, 1);
+
+	function pastDeadlines(
+		year: number,
+		overrides: Partial<CampaignDeadlines>,
+	): CampaignDeadlines {
+		return { ...getDefaultCampaignDeadlines(year), ...overrides };
+	}
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(getDefaultCampaignDeadlines(y)),
+		);
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("S1 — closes a past-year in_progress declaration as closed_incomplete once its step deadline elapsed", async () => {
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl2ModificationDeadline: ELAPSED })
+					: getDefaultCampaignDeadlines(y),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [
+				{ ...makeDeclRow(PAST_YEAR), status: "corrective_actions_chosen" },
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ status: "closed_incomplete" });
+	});
+
+	it("S2 — closes a past-year to_complete declaration as closed_not_done once its step deadline elapsed", async () => {
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl1ModificationDeadline: ELAPSED })
+					: getDefaultCampaignDeadlines(y),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [
+				{
+					...makeDeclRow(PAST_YEAR),
+					status: "draft",
+					currentStep: 0,
+				},
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ status: "closed_not_done" });
+	});
+
+	it("S3 — keeps a past-year row open while its step deadline has not yet elapsed", async () => {
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl2CseOpinionDeadline: NOT_YET_ELAPSED })
+					: getDefaultCampaignDeadlines(y),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [{ ...makeDeclRow(PAST_YEAR), status: "awaiting_cse_opinion" }],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ status: "in_progress" });
+	});
+
+	it("S4 — a demarche_completed past-year row stays done, never closed", async () => {
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl2CseOpinionDeadline: ELAPSED })
+					: getDefaultCampaignDeadlines(y),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [{ ...makeDeclRow(PAST_YEAR), status: "demarche_completed" }],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ status: "done" });
+	});
+
+	it("S5 — the current-year row is never closed, whatever its deadline", async () => {
+		const currentYear = getCurrentYear();
+		const { caller } = await makeCaller({
+			declRows: [
+				{ ...makeDeclRow(currentYear), status: "draft", currentStep: 0 },
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === currentYear,
+			),
+		).toMatchObject({ status: "to_complete" });
+		expect(getCampaignDeadlinesMock).not.toHaveBeenCalledWith(currentYear);
+	});
+
+	it("S7 — resolves each past year's deadlines independently, one call per distinct year", async () => {
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl1ModificationDeadline: ELAPSED })
+					: pastDeadlines(y, { decl2ModificationDeadline: ELAPSED }),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [
+				{
+					...makeDeclRow(PAST_YEAR),
+					id: "declaration-past",
+					status: "draft",
+					currentStep: 0,
+				},
+				{
+					...makeDeclRow(OTHER_PAST_YEAR),
+					id: "declaration-other-past",
+					status: "corrective_actions_chosen",
+				},
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ status: "closed_not_done" });
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === OTHER_PAST_YEAR,
+			),
+		).toMatchObject({ status: "closed_incomplete" });
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledTimes(2);
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(PAST_YEAR);
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(OTHER_PAST_YEAR);
+	});
+
+	it("S6 — a past-year representation-line badge is unaffected by remuneration closure", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue(
+			workforceBelowThreshold,
+		);
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(pastDeadlines(y, { decl1ModificationDeadline: ELAPSED })),
+		);
+		const { caller } = await makeCaller({
+			declRows: [
+				{ ...makeDeclRow(PAST_YEAR), status: "draft", currentStep: 0 },
+			],
+			representationDeclarationRows: [
+				makeRepresentationDeclarationRow({ status: "submitted" }),
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({ status: "done" });
 	});
 });

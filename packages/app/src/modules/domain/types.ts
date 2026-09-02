@@ -4,8 +4,13 @@ export type GapLevel = "low" | "high";
 /** Which side a set of pay gaps disfavours, or "balanced" when neither dominates. */
 export type GapDirection = "women" | "men" | "balanced";
 
-/** Lifecycle state of a declaration from the user's perspective. */
-export type DeclarationStatus = "to_complete" | "in_progress" | "done";
+/** Lifecycle state of a declaration from the user's perspective. `closed_incomplete`/`closed_not_done` are reached only via `applyDeclarationClosure` (a past-year row past its step deadline) — `computeDeclarationStatus` itself never returns them. */
+export type DeclarationStatus =
+	| "to_complete"
+	| "in_progress"
+	| "done"
+	| "closed_incomplete"
+	| "closed_not_done";
 
 /** FSM status persisted in `declarations.status`; mirrors `declarationStatusEnum` (kept in sync by `declarationFsmStatus.test.ts` — domain layer stays isomorphic, no Drizzle import). Single source for the FSM state vocabulary: the rule-engine schema (`server/rules/schema.ts`) and every UI mirror derive from this const, so adding/renaming a state surfaces as a `tsc` or Zod error, never a silent production bug. */
 export const DECLARATION_FSM_STATUSES = [
