@@ -21,7 +21,7 @@ export function GenderDetailsTable({
 	caption,
 	columns,
 	rows,
-	className = "fr-mb-0",
+	className = "fr-mt-0 fr-mb-0",
 }: Props) {
 	return (
 		<DsfrTable

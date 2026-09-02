@@ -21,6 +21,7 @@ function renderField(selected: string[] = [], searchable = false) {
 				searchable={searchable}
 				selected={selected}
 			/>
+			<button type="button">Après le filtre</button>
 		</form>,
 	);
 }
@@ -91,7 +92,7 @@ describe("MultiSelectField", () => {
 		expect(submittedValues(container, "region")).toEqual(["53"]);
 	});
 
-	it("waits for the label to transfer focus before deciding whether to close", async () => {
+	it("does not treat a blur without a new focus target as an outside interaction", async () => {
 		const user = userEvent.setup();
 		renderField();
 		const trigger = screen.getByRole("button", {
@@ -100,11 +101,29 @@ describe("MultiSelectField", () => {
 
 		await user.click(trigger);
 		trigger.blur();
-		const checkbox = screen.getByRole("checkbox", { name: "Bretagne" });
-		checkbox.focus();
 		await vi.waitFor(() => {
 			expect(trigger).toHaveAttribute("aria-expanded", "true");
 		});
+	});
+
+	it("closes when focus explicitly moves outside the field", async () => {
+		const user = userEvent.setup();
+		renderField();
+		const trigger = screen.getByRole("button", {
+			name: /Sélectionner des options/,
+		});
+
+		await user.click(trigger);
+		await user.tab();
+		await user.tab();
+		await user.tab();
+		await user.tab();
+		await user.tab();
+
+		expect(trigger).toHaveAttribute("aria-expanded", "false");
+		expect(
+			screen.getByRole("button", { name: "Après le filtre" }),
+		).toHaveFocus();
 	});
 
 	it("selects then clears every option from the same control", async () => {

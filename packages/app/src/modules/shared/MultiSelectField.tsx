@@ -48,6 +48,7 @@ export function MultiSelectField({
 	const [values, setValues] = useState<string[]>([...selected]);
 	const triggerRef = useRef<HTMLButtonElement>(null);
 	const fieldRef = useRef<HTMLFieldSetElement>(null);
+	const pointerInsideRef = useRef(false);
 
 	// Closing on blur alone is not enough: a label is not focusable, so pressing
 	// one blurs the trigger with a null `relatedTarget` before the click lands,
@@ -64,6 +65,23 @@ export function MultiSelectField({
 		return () =>
 			document.removeEventListener("pointerdown", closeOnOutsidePointer);
 	}, [open]);
+
+	useEffect(() => {
+		let resetTimer: ReturnType<typeof setTimeout> | undefined;
+		function resetPointerState() {
+			if (resetTimer !== undefined) clearTimeout(resetTimer);
+			resetTimer = setTimeout(() => {
+				pointerInsideRef.current = false;
+			}, 0);
+		}
+		document.addEventListener("pointerup", resetPointerState);
+		document.addEventListener("pointercancel", resetPointerState);
+		return () => {
+			if (resetTimer !== undefined) clearTimeout(resetTimer);
+			document.removeEventListener("pointerup", resetPointerState);
+			document.removeEventListener("pointercancel", resetPointerState);
+		};
+	}, []);
 
 	const panelId = `${id}-panel`;
 	const allSelected = values.length === options.length && options.length > 0;
@@ -105,12 +123,15 @@ export function MultiSelectField({
 	return (
 		<fieldset
 			className={styles.field}
-			onBlur={() => {
-				requestAnimationFrame(() => {
-					if (!fieldRef.current?.contains(document.activeElement)) {
-						setOpen(false);
-					}
-				});
+			onBlur={(event) => {
+				const nextTarget = event.relatedTarget;
+				if (
+					!pointerInsideRef.current &&
+					nextTarget instanceof Node &&
+					!fieldRef.current?.contains(nextTarget)
+				) {
+					setOpen(false);
+				}
 			}}
 			onKeyDown={(event) => {
 				// Escape closes the panel and hands focus back to the trigger, so a
@@ -120,6 +141,9 @@ export function MultiSelectField({
 					setOpen(false);
 					triggerRef.current?.focus();
 				}
+			}}
+			onPointerDownCapture={() => {
+				pointerInsideRef.current = true;
 			}}
 			ref={fieldRef}
 		>

@@ -34,7 +34,7 @@ export function DataDetailsAccordion({
 					{label}
 				</button>
 			</Heading>
-			<div className="fr-collapse" id={id}>
+			<div className="fr-collapse fr-pt-0" id={id}>
 				{children}
 			</div>
 		</div>

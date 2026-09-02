@@ -19,6 +19,11 @@
 		white-space: normal;
 	}
 
+	> thead > tr > th:not(:last-child),
+	> tbody > tr > td:not(:last-child) {
+		border-inline-end: 1px solid var(--border-default-grey);
+	}
+
 	> tbody > tr > td {
 		font-weight: 700;
 	}
