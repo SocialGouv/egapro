@@ -25,8 +25,6 @@ export type CompanyDetail = {
 	address: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
-	countryCode: string | null;
-	countryLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };

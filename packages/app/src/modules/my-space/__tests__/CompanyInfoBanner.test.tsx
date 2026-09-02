@@ -16,8 +16,6 @@ const baseCompany: CompanyDetail = {
 	address: null,
 	nafCode: null,
 	nafLabel: null,
-	countryCode: null,
-	countryLabel: "FRANCE",
 	gipWorkforce: 250,
 	hasCse: null,
 };
@@ -210,88 +208,5 @@ describe("CompanyInfoBanner", () => {
 		expect(
 			screen.queryByRole("button", { name: "Modifier" }),
 		).not.toBeInTheDocument();
-	});
-
-	describe("country row (#4279)", () => {
-		it("shows 'Pays : <libellé>' and no 'Adresse :' for a known foreign country, even with an address stored", () => {
-			render(
-				<CompanyInfoBanner
-					company={{
-						...baseCompany,
-						countryCode: "99248",
-						countryLabel: "QATAR",
-						address: "58 AV SOME STREET",
-					}}
-				/>,
-			);
-			expect(screen.getByText("Pays :")).toBeInTheDocument();
-			expect(screen.getByText("Qatar")).toBeInTheDocument();
-			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
-		});
-
-		it("shows 'Adresse :' and no 'Pays :' for a French company with an address", () => {
-			render(
-				<CompanyInfoBanner
-					company={{
-						...baseCompany,
-						countryCode: null,
-						countryLabel: "FRANCE",
-						address: "12 RUE DE PARIS, 75001 PARIS",
-					}}
-				/>,
-			);
-			expect(screen.getByText("Adresse :")).toBeInTheDocument();
-			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
-		});
-
-		it("shows 'Pays : non renseigné' and no 'Adresse :' when the country is unknown, even with an address stored", () => {
-			render(
-				<CompanyInfoBanner
-					company={{
-						...baseCompany,
-						countryCode: null,
-						countryLabel: null,
-						address: "58 AV SOME STREET",
-					}}
-				/>,
-			);
-			expect(screen.getByText("Pays :")).toBeInTheDocument();
-			expect(screen.getByText("non renseigné")).toBeInTheDocument();
-			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
-			expect(screen.getByText("SIREN :")).toBeInTheDocument();
-		});
-
-		it("shows 'Pays : non renseigné' when the country code is set but the label is missing (defensive)", () => {
-			render(
-				<CompanyInfoBanner
-					company={{
-						...baseCompany,
-						countryCode: "99248",
-						countryLabel: null,
-					}}
-				/>,
-			);
-			expect(screen.getByText("Pays :")).toBeInTheDocument();
-			expect(screen.getByText("non renseigné")).toBeInTheDocument();
-		});
-
-		it("renders a composed country label in title case", () => {
-			render(
-				<CompanyInfoBanner
-					company={{
-						...baseCompany,
-						countryCode: "99123",
-						countryLabel: "AFRIQUE DU SUD",
-					}}
-				/>,
-			);
-			expect(screen.getByText("Afrique du Sud")).toBeInTheDocument();
-		});
-
-		it("does not render the country row for a French company without an address", () => {
-			render(<CompanyInfoBanner company={baseCompany} />);
-			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
-			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
-		});
 	});
 });

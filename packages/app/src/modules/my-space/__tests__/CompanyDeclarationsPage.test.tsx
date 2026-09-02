@@ -38,8 +38,6 @@ const company: CompanyDetail = {
 	address: null,
 	nafCode: null,
 	nafLabel: null,
-	countryCode: null,
-	countryLabel: "FRANCE",
 	gipWorkforce: null,
 	hasCse: null,
 };
