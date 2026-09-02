@@ -1,7 +1,6 @@
 import { env } from "~/env.js";
+import { COMPANY_URLS_PER_SITEMAP } from "~/modules/legal";
 import { countPublicCompanySirens } from "~/server/services/publicDeclarationsService";
-
-const COMPANY_URLS_PER_SITEMAP = 50_000;
 
 export const dynamic = "force-dynamic";
 

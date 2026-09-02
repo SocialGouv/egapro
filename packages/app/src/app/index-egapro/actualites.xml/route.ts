@@ -1,14 +1,6 @@
+import { escapeXml } from "~/modules/legal";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
-
-function escapeXml(value: string): string {
-	return value
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&apos;");
-}
 
 export async function GET(request: Request): Promise<Response> {
 	const limited = await enforcePublicApiRateLimit(request);

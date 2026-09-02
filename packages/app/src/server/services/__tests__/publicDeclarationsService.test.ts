@@ -25,6 +25,7 @@ vi.mock("~/server/db/schema", () => ({
 	companies: {
 		siren: "companies.siren",
 		name: "companies.name",
+		address: "companies.address",
 		city: "companies.city",
 		regionCode: "companies.regionCode",
 		region: "companies.region",
@@ -187,7 +188,14 @@ describe("searchPublicDeclarations", () => {
 		expect(conditions).toContainEqual({
 			op: "and",
 			args: [
-				expect.objectContaining({ op: "sql" }),
+				expect.objectContaining({
+					op: "sql",
+					values: [
+						"companies.statutDiffusion",
+						"companies.statutDiffusion",
+						"companies.address",
+					],
+				}),
 				{ op: "ilike", col: "companies.name", value: "%acme%" },
 			],
 		});
@@ -279,17 +287,23 @@ describe("searchPublicDeclarations", () => {
 		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "or",
+			op: "and",
 			args: [
+				expect.objectContaining({ op: "sql" }),
 				{
-					op: "inArray",
-					col: "companies.regionCode",
-					values: ["Île-de-France", "11"],
-				},
-				{
-					op: "inArray",
-					col: "companies.region",
-					values: ["Île-de-France", "11"],
+					op: "or",
+					args: [
+						{
+							op: "inArray",
+							col: "companies.regionCode",
+							values: ["Île-de-France", "11"],
+						},
+						{
+							op: "inArray",
+							col: "companies.region",
+							values: ["Île-de-France", "11"],
+						},
+					],
 				},
 			],
 		});
@@ -306,9 +320,15 @@ describe("searchPublicDeclarations", () => {
 		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "inArray",
-			col: "companies.departmentCode",
-			values: ["75", "69"],
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{
+					op: "inArray",
+					col: "companies.departmentCode",
+					values: ["75", "69"],
+				},
+			],
 		});
 	});
 
@@ -320,8 +340,14 @@ describe("searchPublicDeclarations", () => {
 		await searchPublicDeclarations({ ...DEFAULT_INPUT, naf: ["62.01Z"] });
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "or",
-			args: [{ op: "ilike", col: "companies.nafCode", value: "62.01Z%" }],
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{
+					op: "or",
+					args: [{ op: "ilike", col: "companies.nafCode", value: "62.01Z%" }],
+				},
+			],
 		});
 	});
 

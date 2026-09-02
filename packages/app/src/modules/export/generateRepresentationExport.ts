@@ -3,8 +3,9 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
-import { isCompanyDiffusible, toNumber } from "~/modules/public-api";
+import { NON_DIFFUSIBLE_LABEL, toNumber } from "~/modules/public-api";
 import type { DB } from "~/server/db";
+import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
 import { companies, representationDeclarations } from "~/server/db/schema";
 
 export type RepresentationExportRow = {
@@ -67,7 +68,7 @@ async function fetchSubmittedRepresentationDeclarations(db: DB) {
 			departmentLabel: companies.departmentLabel,
 			nafCode: companies.nafCode,
 			nafLabel: companies.nafLabel,
-			statutDiffusion: companies.statutDiffusion,
+			identityDiffusible: diffusibleCompanyCondition(),
 			executiveWomenPercent: representationDeclarations.executiveWomenPercent,
 			executiveMenPercent: representationDeclarations.executiveMenPercent,
 			notComputableReasonExecutives:
@@ -93,17 +94,17 @@ type RepresentationDeclarationRow = Awaited<
 function toExportRow(
 	row: RepresentationDeclarationRow,
 ): RepresentationExportRow {
-	const diffusible = isCompanyDiffusible(row.statutDiffusion);
+	const diffusible = row.identityDiffusible;
 
 	return {
 		referenceYear: row.year,
 		siren: row.siren,
-		name: diffusible ? row.name : null,
-		region: diffusible ? row.region : null,
-		departmentCode: diffusible ? row.departmentCode : null,
-		departmentLabel: diffusible ? row.departmentLabel : null,
-		nafCode: diffusible ? row.nafCode : null,
-		nafLabel: diffusible ? row.nafLabel : null,
+		name: diffusible ? row.name : NON_DIFFUSIBLE_LABEL,
+		region: diffusible ? row.region : NON_DIFFUSIBLE_LABEL,
+		departmentCode: diffusible ? row.departmentCode : NON_DIFFUSIBLE_LABEL,
+		departmentLabel: diffusible ? row.departmentLabel : NON_DIFFUSIBLE_LABEL,
+		nafCode: diffusible ? row.nafCode : NON_DIFFUSIBLE_LABEL,
+		nafLabel: diffusible ? row.nafLabel : NON_DIFFUSIBLE_LABEL,
 		executiveWomenPercent: toNumber(row.executiveWomenPercent),
 		executiveMenPercent: toNumber(row.executiveMenPercent),
 		notComputableReasonExecutives: row.notComputableReasonExecutives,

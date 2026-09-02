@@ -175,9 +175,11 @@ describe("GET /api/public/declarations/export", () => {
 		expect(row.siren).toBe("987654321");
 		expect(row.name).toBe("Non-diffusible");
 		expect(row.address).toBe("Non-diffusible");
-		expect(row.departmentCode).toBe("75");
-		expect(row.departmentLabel).toBe("Paris");
-		expect(row.nafCode).toBe("6202A");
+		expect(row.city).toBe("Non-diffusible");
+		expect(row.region).toBe("Non-diffusible");
+		expect(row.departmentCode).toBe("Non-diffusible");
+		expect(row.departmentLabel).toBe("Non-diffusible");
+		expect(row.nafCode).toBe("Non-diffusible");
 		// Indicators are always public, even for a non-diffusible company
 		expect(row.globalAnnualMeanGap).toBe(10.5);
 	});
@@ -238,7 +240,7 @@ describe("GET /api/public/declarations/export", () => {
 
 		expect(response.headers.get("Content-Type")).toContain("text/csv");
 		expect(response.headers.get("Content-Disposition")).toContain(
-			"declarations_export.csv",
+			"index-egapro-remunerations.csv",
 		);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 
@@ -261,7 +263,7 @@ describe("GET /api/public/declarations/export", () => {
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		);
 		expect(response.headers.get("Content-Disposition")).toContain(
-			"declarations_export.xlsx",
+			"index-egapro-remunerations.xlsx",
 		);
 		expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(100);
 	});

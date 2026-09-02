@@ -23,7 +23,7 @@ describe("HomeSearchForm tracking", () => {
 			target: { value: "Some Company" },
 		});
 		fireEvent.change(screen.getByLabelText("Région"), {
-			target: { value: "Île-de-France" },
+			target: { value: "11" },
 		});
 		fireEvent.submit(screen.getByRole("form"));
 

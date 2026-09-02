@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 
-import { publicOpenApiSpec } from "~/modules/public-api";
-
-const HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-	"Cache-Control": "public, max-age=3600, must-revalidate",
-};
+import {
+	PUBLIC_API_OPENAPI_HEADERS,
+	publicOpenApiSpec,
+} from "~/modules/public-api";
 
 export function OPTIONS(): Response {
-	return new Response(null, { status: 204, headers: HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_OPENAPI_HEADERS,
+	});
 }
 
 export function GET(): NextResponse {
-	return NextResponse.json(publicOpenApiSpec, { headers: HEADERS });
+	return NextResponse.json(publicOpenApiSpec, {
+		headers: PUBLIC_API_OPENAPI_HEADERS,
+	});
 }

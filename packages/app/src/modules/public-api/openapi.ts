@@ -20,7 +20,7 @@ export const publicOpenApiSpec = {
 
 **Indicateur G exclu** : l'indicateur G (écart de rémunération déclaré par l'entreprise par catégorie socio-professionnelle) n'est pas exposé par cette API.
 
-**Identité des entreprises non diffusibles masquée** : pour les entreprises dont le statut de diffusion est non diffusible (\`statutDiffusion === 'N'\`), la raison sociale et l'adresse valent \`Non-diffusible\`. Le département, le SIREN, l'effectif EMA et les indicateurs A–F restent disponibles.
+**Identité des entreprises non diffusibles masquée** : pour les entreprises dont le statut de diffusion est non diffusible (\`statutDiffusion === 'N'\`), tous les champs d'identité, de localisation et d'activité valent \`Non-diffusible\`. Le SIREN, l'effectif EMA et les indicateurs restent disponibles.
 
 **Accès et quotas** : l'API est accessible anonymement (120 appels/minute). Un jeton Bearer optionnel configuré par EgaPro porte le quota à 1 200 appels/minute.
 

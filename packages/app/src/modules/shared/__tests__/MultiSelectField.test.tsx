@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { MultiSelectField } from "~/modules/shared/MultiSelectField";
 
@@ -89,6 +89,22 @@ describe("MultiSelectField", () => {
 
 		expect(trigger).toHaveAttribute("aria-expanded", "true");
 		expect(submittedValues(container, "region")).toEqual(["53"]);
+	});
+
+	it("waits for the label to transfer focus before deciding whether to close", async () => {
+		const user = userEvent.setup();
+		renderField();
+		const trigger = screen.getByRole("button", {
+			name: /Sélectionner des options/,
+		});
+
+		await user.click(trigger);
+		trigger.blur();
+		const checkbox = screen.getByRole("checkbox", { name: "Bretagne" });
+		checkbox.focus();
+		await vi.waitFor(() => {
+			expect(trigger).toHaveAttribute("aria-expanded", "true");
+		});
 	});
 
 	it("selects then clears every option from the same control", async () => {

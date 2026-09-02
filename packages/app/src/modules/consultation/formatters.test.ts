@@ -3,6 +3,7 @@ import {
 	companyLocation,
 	formatCount,
 	formatGap,
+	formatNaf,
 	formatPercent,
 	gapDirection,
 	MISSING_VALUE,
@@ -81,14 +82,14 @@ describe("companyLocation", () => {
 		).toEqual({ label: "Pays", value: "Belgique" });
 	});
 
-	it("keeps the département a non-diffusible company still publishes", () => {
+	it("collapses masked location fields to one public label", () => {
 		expect(
 			companyLocation({
-				countryLabel: null,
-				departmentLabel: "Nord",
-				region: null,
+				countryLabel: "Non-diffusible",
+				departmentLabel: "Non-diffusible",
+				region: "Non-diffusible",
 			}),
-		).toEqual({ label: "Adresse", value: "Nord" });
+		).toEqual({ label: "Adresse", value: "Non-diffusible" });
 	});
 
 	it("returns nothing when the registry located the company nowhere", () => {
@@ -99,5 +100,20 @@ describe("companyLocation", () => {
 				region: null,
 			}),
 		).toBeNull();
+	});
+});
+
+describe("formatNaf", () => {
+	it("formats a diffusible activity without duplicating missing values", () => {
+		expect(formatNaf("62.01Z", "Programmation informatique")).toBe(
+			"Programmation informatique (62.01Z)",
+		);
+		expect(formatNaf("62.01Z", null)).toBe("62.01Z");
+	});
+
+	it("collapses masked code and label to one public label", () => {
+		expect(formatNaf("Non-diffusible", "Non-diffusible")).toBe(
+			"Non-diffusible",
+		);
 	});
 });

@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { publicSearchInputSchema } from "~/modules/public-api";
+import {
+	PUBLIC_API_SEARCH_HEADERS,
+	publicSearchInputSchema,
+} from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 
-const CORS_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-	"Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-};
-
 export async function OPTIONS(): Promise<Response> {
-	return new Response(null, { status: 204, headers: CORS_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_SEARCH_HEADERS,
+	});
 }
 
 export const GET = withAuditedRoute(
@@ -73,13 +72,13 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 		if (!parsed.success) {
 			return NextResponse.json(
 				{ error: "Paramètres invalides.", details: parsed.error.issues },
-				{ status: 400, headers: CORS_HEADERS },
+				{ status: 400, headers: PUBLIC_API_SEARCH_HEADERS },
 			);
 		}
 
 		const result = await searchPublicDeclarations(parsed.data);
 
-		return NextResponse.json(result, { headers: CORS_HEADERS });
+		return NextResponse.json(result, { headers: PUBLIC_API_SEARCH_HEADERS });
 	} catch (error) {
 		console.error(
 			"[api/public/declarations]",
@@ -87,7 +86,7 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 		);
 		return NextResponse.json(
 			{ error: "Erreur lors de la récupération des déclarations." },
-			{ status: 500, headers: CORS_HEADERS },
+			{ status: 500, headers: PUBLIC_API_SEARCH_HEADERS },
 		);
 	}
 }

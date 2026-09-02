@@ -5,4 +5,5 @@ export { MatomoOptOut } from "./MatomoOptOut";
 export { PrivacyPolicyPage } from "./PrivacyPolicyPage";
 export { buildMetadataRobots, buildRobots } from "./robots";
 export { SitemapPage } from "./SitemapPage";
-export { buildSitemap } from "./sitemap";
+export { buildSitemap, COMPANY_URLS_PER_SITEMAP } from "./sitemap";
+export { escapeXml } from "./xml";

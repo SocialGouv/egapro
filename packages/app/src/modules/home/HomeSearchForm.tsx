@@ -10,6 +10,7 @@ import {
 	COUNTIES,
 	NAF_SECTION_CODES,
 	NAF_SECTIONS,
+	REGION_CODES,
 	REGIONS,
 } from "~/modules/domain";
 
@@ -77,9 +78,9 @@ export function HomeSearchForm() {
 							name="region"
 						>
 							<option value="">Toutes les régions</option>
-							{Object.values(REGIONS).map((region) => (
-								<option key={region} value={region}>
-									{region}
+							{REGION_CODES.map((code) => (
+								<option key={code} value={code}>
+									{REGIONS[code]}
 								</option>
 							))}
 						</select>

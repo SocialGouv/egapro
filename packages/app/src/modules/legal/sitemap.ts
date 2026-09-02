@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+export const COMPANY_URLS_PER_SITEMAP = 50_000;
+
 type PublicRoute = {
 	path: string;
 	changeFrequency: NonNullable<

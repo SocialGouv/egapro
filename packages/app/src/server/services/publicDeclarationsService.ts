@@ -27,6 +27,10 @@ import {
 } from "~/modules/public-api";
 import { db } from "~/server/db";
 import {
+	diffusibleCompanyCondition,
+	publicCompanyNameSortKey,
+} from "~/server/db/companyConditions";
+import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -42,13 +46,6 @@ export function nafSectionCondition(section: string) {
 	if (!range) return ilike(companies.nafCode, `${section}%`);
 	return sql<number>`substring(${companies.nafCode} from 1 for 2)::integer between ${range[0]} and ${range[1]}`;
 }
-
-/**
- * Companies flagged `statutDiffusion = 'N'` keep their identity hidden, so any
- * filter that reads an identity field must exclude them rather than leak a
- * match through the filter itself.
- */
-const diffusibleIdentityCondition = sql`${companies.statutDiffusion} IS DISTINCT FROM 'N'`;
 
 export type PublicDeclarationFacets = Pick<
 	PublicSearchInput,
@@ -77,7 +74,7 @@ export function publicDeclarationFacetConditions(
 
 	if (facets.city) {
 		const cityFilter = and(
-			diffusibleIdentityCondition,
+			diffusibleCompanyCondition(),
 			ilike(companies.city, `%${facets.city}%`),
 		);
 		if (cityFilter) conditions.push(cityFilter);
@@ -90,16 +87,29 @@ export function publicDeclarationFacetConditions(
 			inArray(companies.regionCode, facets.region),
 			inArray(companies.region, facets.region),
 		);
-		if (regionFilter) conditions.push(regionFilter);
+		if (regionFilter) {
+			const publicRegionFilter = and(
+				diffusibleCompanyCondition(),
+				regionFilter,
+			);
+			if (publicRegionFilter) conditions.push(publicRegionFilter);
+		}
 	}
 
 	if (facets.departement?.length) {
-		conditions.push(inArray(companies.departmentCode, facets.departement));
+		const departmentFilter = and(
+			diffusibleCompanyCondition(),
+			inArray(companies.departmentCode, facets.departement),
+		);
+		if (departmentFilter) conditions.push(departmentFilter);
 	}
 
 	if (facets.naf?.length) {
 		const nafFilter = or(...facets.naf.map(nafSectionCondition));
-		if (nafFilter) conditions.push(nafFilter);
+		if (nafFilter) {
+			const publicNafFilter = and(diffusibleCompanyCondition(), nafFilter);
+			if (publicNafFilter) conditions.push(publicNafFilter);
+		}
 	}
 
 	if (facets.workforceRanges?.length) {
@@ -143,7 +153,7 @@ export async function searchPublicDeclarations(
 		const term = `%${input.q}%`;
 		const queryFilter = /^\d{9}$/.test(normalizedQuery)
 			? eq(declarations.siren, normalizedQuery)
-			: and(diffusibleIdentityCondition, ilike(companies.name, term));
+			: and(diffusibleCompanyCondition(), ilike(companies.name, term));
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 
@@ -170,13 +180,17 @@ export async function searchPublicDeclarations(
 	const where = and(...baseConditions);
 
 	const alphabeticalOrder = [
-		asc(companies.name),
+		asc(publicCompanyNameSortKey()),
 		asc(companies.siren),
 		desc(declarations.year),
 	];
 	const order =
 		input.sort === "year"
-			? [desc(declarations.year), asc(companies.name), asc(companies.siren)]
+			? [
+					desc(declarations.year),
+					asc(publicCompanyNameSortKey()),
+					asc(companies.siren),
+				]
 			: input.sort === "name" || !input.q
 				? alphabeticalOrder
 				: [

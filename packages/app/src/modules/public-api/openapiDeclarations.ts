@@ -11,7 +11,7 @@ import {
 export const publicDeclarationSchema = {
 	type: "object",
 	description:
-		"Déclaration d'index égalité professionnelle. Ce schéma expose uniquement des **données brutes** (écarts, proportions, quartiles, effectifs) calculées par le GIP-MDS à partir des DSN. Aucun score ni indice /100 n'est exposé. L'indicateur G (écart déclaré par l'entreprise par catégorie socio-professionnelle) est exclu. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), la raison sociale et l'adresse valent `Non-diffusible`; le département reste public.",
+		"Déclaration d'index égalité professionnelle. Ce schéma expose uniquement des **données brutes** (écarts, proportions, quartiles, effectifs) calculées par le GIP-MDS à partir des DSN. Aucun score ni indice /100 n'est exposé. L'indicateur G (écart déclaré par l'entreprise par catégorie socio-professionnelle) est exclu. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), tous les champs d'identité, de localisation et d'activité valent `Non-diffusible`; le SIREN, l'effectif EMA et les indicateurs restent disponibles.",
 	required: ["year", "siren"],
 	properties: {
 		year: {
@@ -28,22 +28,25 @@ export const publicDeclarationSchema = {
 		city: {
 			type: ["string", "null"],
 			description:
-				"Ville du siège, masquée si l'entreprise n'est pas diffusible.",
+				"Ville du siège. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 			example: "Élancourt",
 		},
 		regionCode: {
 			type: ["string", "null"],
-			description: "Code de région française, si applicable.",
+			description:
+				"Code de région française, si applicable. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 			example: "11",
 		},
 		countryCode: {
 			type: ["string", "null"],
-			description: "Code du pays pour une entreprise établie à l'étranger.",
+			description:
+				"Code du pays pour une entreprise établie à l'étranger. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 			example: "99100",
 		},
 		countryLabel: {
 			type: ["string", "null"],
-			description: "Pays affiché à la place de la région et du département.",
+			description:
+				"Pays affiché à la place de la région et du département. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 			example: "Belgique",
 		},
 		workforceEma: {

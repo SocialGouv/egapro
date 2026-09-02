@@ -40,7 +40,7 @@ function makeDbRow(overrides: DbRow = {}): DbRow {
 		departmentLabel: "Paris",
 		nafCode: "62.02A",
 		nafLabel: "Conseil en systèmes informatiques",
-		statutDiffusion: "O",
+		identityDiffusible: true,
 		executiveWomenPercent: "40.00",
 		executiveMenPercent: "60.00",
 		notComputableReasonExecutives: null,
@@ -147,13 +147,13 @@ describe("buildRepresentationExportRows", () => {
 		]);
 	});
 
-	it("blanks identity and location of a non-diffusible company but keeps its SIREN and indicators", async () => {
+	it("masks identity and location of a non-diffusible company but keeps its SIREN and indicators", async () => {
 		mockOrderBy.mockResolvedValue([
 			makeDbRow(),
 			makeDbRow({
 				siren: "987654321",
 				name: "Entreprise Non Diffusible",
-				statutDiffusion: "N",
+				identityDiffusible: false,
 				executiveWomenPercent: "30.00",
 				executiveMenPercent: "70.00",
 			}),
@@ -168,12 +168,12 @@ describe("buildRepresentationExportRows", () => {
 		});
 		expect(rows[1]).toMatchObject({
 			siren: "987654321",
-			name: null,
-			region: null,
-			departmentCode: null,
-			departmentLabel: null,
-			nafCode: null,
-			nafLabel: null,
+			name: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
 			executiveWomenPercent: 30,
 			executiveMenPercent: 70,
 			publishUrl: "https://example.fr/representation",
@@ -183,7 +183,7 @@ describe("buildRepresentationExportRows", () => {
 	it("never exposes an address, neither for a diffusible nor for a non-diffusible company", async () => {
 		mockOrderBy.mockResolvedValue([
 			makeDbRow(),
-			makeDbRow({ siren: "987654321", statutDiffusion: "N" }),
+			makeDbRow({ siren: "987654321", identityDiffusible: false }),
 		]);
 
 		const rows = await buildRepresentationExportRows(mockDb as never);
@@ -194,8 +194,8 @@ describe("buildRepresentationExportRows", () => {
 		expect(rows[1]).not.toHaveProperty("address");
 	});
 
-	it("treats an unknown diffusion status as diffusible", async () => {
-		mockOrderBy.mockResolvedValue([makeDbRow({ statutDiffusion: null })]);
+	it("keeps identity when the database condition marks it diffusible", async () => {
+		mockOrderBy.mockResolvedValue([makeDbRow({ identityDiffusible: true })]);
 
 		const rows = await buildRepresentationExportRows(mockDb as never);
 

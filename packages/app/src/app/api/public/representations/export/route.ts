@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { PUBLIC_API_EXPORT_HEADERS } from "~/modules/public-api";
 import {
 	buildRepresentationExportRows,
 	generateRepresentationCsv,
@@ -10,18 +11,15 @@ import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
-const CORS_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
 // Defaults to xlsx: this endpoint shipped as an Excel-only download and
 // existing callers pass no format at all.
 const FORMAT_SCHEMA = z.enum(["csv", "xlsx"]).default("xlsx");
 
 export function OPTIONS(): Response {
-	return new Response(null, { status: 204, headers: CORS_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_EXPORT_HEADERS,
+	});
 }
 
 export const GET = withAuditedRoute(
@@ -43,7 +41,7 @@ export const GET = withAuditedRoute(
 			if (!format.success) {
 				return NextResponse.json(
 					{ error: "Le paramètre format doit être 'csv' ou 'xlsx'" },
-					{ status: 400, headers: CORS_HEADERS },
+					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
 				);
 			}
 			const rows = await buildRepresentationExportRows(db);
@@ -51,11 +49,10 @@ export const GET = withAuditedRoute(
 			if (format.data === "csv") {
 				return new NextResponse(generateRepresentationCsv(rows), {
 					headers: {
+						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type": "text/csv; charset=utf-8",
 						"Content-Disposition":
-							'attachment; filename="representation_equilibree_export.csv"',
-						...CORS_HEADERS,
-						"Cache-Control": "public, max-age=3600, s-maxage=3600",
+							'attachment; filename="index-egapro-representations-equilibrees.csv"',
 					},
 				});
 			}
@@ -64,12 +61,11 @@ export const GET = withAuditedRoute(
 
 			return new NextResponse(new Uint8Array(xlsxBuffer), {
 				headers: {
+					...PUBLIC_API_EXPORT_HEADERS,
 					"Content-Type":
 						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 					"Content-Disposition":
-						'attachment; filename="representation_equilibree_export.xlsx"',
-					...CORS_HEADERS,
-					"Cache-Control": "public, max-age=3600, s-maxage=3600",
+						'attachment; filename="index-egapro-representations-equilibrees.xlsx"',
 				},
 			});
 		} catch (error) {
@@ -79,7 +75,7 @@ export const GET = withAuditedRoute(
 			);
 			return NextResponse.json(
 				{ error: "Erreur lors de l'export des représentations équilibrées" },
-				{ status: 500, headers: CORS_HEADERS },
+				{ status: 500, headers: PUBLIC_API_EXPORT_HEADERS },
 			);
 		}
 	},

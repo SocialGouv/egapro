@@ -1,19 +1,18 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
-import { getPublicDeclarationsBySiren } from "~/modules/public-api";
+import {
+	getPublicDeclarationsBySiren,
+	PUBLIC_API_RESOURCE_HEADERS,
+} from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
-const PUBLIC_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-	"Cache-Control": "public, max-age=300, s-maxage=300",
-};
-
 export function OPTIONS(): Response {
-	return new Response(null, { status: 204, headers: PUBLIC_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_RESOURCE_HEADERS,
+	});
 }
 
 export async function GET(
@@ -40,7 +39,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "SIREN invalide. Attendu : 9 chiffres." },
-			{ status: 400, headers: PUBLIC_HEADERS },
+			{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 
@@ -52,7 +51,7 @@ export async function GET(
 		if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
 			return Response.json(
 				{ error: "Le paramètre 'limit' doit être un entier entre 1 et 100." },
-				{ status: 400, headers: PUBLIC_HEADERS },
+				{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 			);
 		}
 		limit = parsed;
@@ -71,7 +70,7 @@ export async function GET(
 			durationMs: Date.now() - startedAt,
 		});
 
-		return Response.json(data, { headers: PUBLIC_HEADERS });
+		return Response.json(data, { headers: PUBLIC_API_RESOURCE_HEADERS });
 	} catch (error) {
 		console.error(
 			"[api/public/declarations/:siren]",
@@ -89,7 +88,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "Erreur lors de la récupération des déclarations." },
-			{ status: 500, headers: PUBLIC_HEADERS },
+			{ status: 500, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 }

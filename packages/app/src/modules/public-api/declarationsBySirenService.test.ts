@@ -172,8 +172,15 @@ describe("getPublicDeclarationsBySiren", () => {
 			siren: "123456789",
 			name: "Non-diffusible",
 			address: "Non-diffusible",
-			region: "Île-de-France",
-			nafCode: "62.01Z",
+			city: "Non-diffusible",
+			regionCode: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			countryCode: "Non-diffusible",
+			countryLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
 		});
 	});
 

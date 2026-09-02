@@ -105,13 +105,12 @@ export function MultiSelectField({
 	return (
 		<fieldset
 			className={styles.field}
-			onBlur={(event) => {
-				if (
-					event.relatedTarget &&
-					!event.currentTarget.contains(event.relatedTarget)
-				) {
-					setOpen(false);
-				}
+			onBlur={() => {
+				requestAnimationFrame(() => {
+					if (!fieldRef.current?.contains(document.activeElement)) {
+						setOpen(false);
+					}
+				});
 			}}
 			onKeyDown={(event) => {
 				// Escape closes the panel and hands focus back to the trigger, so a

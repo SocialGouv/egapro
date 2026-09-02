@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatObservatoryWorkforce } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
-import { companyLocation } from "./formatters";
+import { companyLocation, formatNaf } from "./formatters";
 import styles from "./SearchResultItem.module.scss";
 
 type Props = { declaration: PublicDeclarationDTO; searchQuery: string };
@@ -14,12 +14,11 @@ function buildFacts(declaration: PublicDeclarationDTO): Fact[] {
 	const location = companyLocation(declaration);
 	if (location) facts.push(location);
 
-	if (declaration.nafCode || declaration.nafLabel) {
+	const naf = formatNaf(declaration.nafCode, declaration.nafLabel);
+	if (naf) {
 		facts.push({
 			label: "Code NAF",
-			value: declaration.nafLabel
-				? `${declaration.nafLabel}${declaration.nafCode ? ` (${declaration.nafCode})` : ""}`
-				: (declaration.nafCode ?? ""),
+			value: naf,
 		});
 	}
 

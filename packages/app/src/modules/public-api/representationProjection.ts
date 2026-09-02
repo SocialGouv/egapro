@@ -1,5 +1,6 @@
 import { type companies, representationDeclarations } from "~/server/db/schema";
-import { isCompanyDiffusible, toNumber } from "./projection";
+import { NON_DIFFUSIBLE_LABEL } from "./constants";
+import { isPublicCompanyDiffusible, toNumber } from "./projection";
 import type { PublicRepresentationDTO } from "./schemas";
 
 export type PublicRepresentationSource = Pick<
@@ -52,18 +53,23 @@ export function toPublicRepresentation(
 	declaration: PublicRepresentationSource,
 	company: PublicRepresentationCompanySource,
 ): PublicRepresentationDTO {
-	const diffusible = isCompanyDiffusible(company.statutDiffusion);
+	const diffusible = isPublicCompanyDiffusible(
+		company.statutDiffusion,
+		company.address,
+	);
 
 	return {
 		siren: company.siren,
 		year: declaration.year,
-		name: diffusible ? company.name : null,
-		address: diffusible ? company.address : null,
-		region: diffusible ? company.region : null,
-		departmentCode: diffusible ? company.departmentCode : null,
-		departmentLabel: diffusible ? company.departmentLabel : null,
-		nafCode: diffusible ? company.nafCode : null,
-		nafLabel: diffusible ? company.nafLabel : null,
+		name: diffusible ? company.name : NON_DIFFUSIBLE_LABEL,
+		address: diffusible ? company.address : NON_DIFFUSIBLE_LABEL,
+		region: diffusible ? company.region : NON_DIFFUSIBLE_LABEL,
+		departmentCode: diffusible ? company.departmentCode : NON_DIFFUSIBLE_LABEL,
+		departmentLabel: diffusible
+			? company.departmentLabel
+			: NON_DIFFUSIBLE_LABEL,
+		nafCode: diffusible ? company.nafCode : NON_DIFFUSIBLE_LABEL,
+		nafLabel: diffusible ? company.nafLabel : NON_DIFFUSIBLE_LABEL,
 		referencePeriodStart: declaration.referencePeriodStart,
 		referencePeriodEnd: declaration.referencePeriodEnd,
 		executiveWomenPercent: toNumber(declaration.executiveWomenPercent),

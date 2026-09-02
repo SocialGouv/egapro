@@ -82,6 +82,93 @@ const DATABASE_URL = resolveDatabaseUrl();
 const SEED_USER_ID = "00000000-9989-4989-8989-000000009989";
 const SEED_USER_EMAIL = "seed-observatory@example.fr";
 
+const PAGINATION_COMPANY_NAMES = [
+	"Aquitaine Mobilier Durable",
+	"Bureau d’Études Tourangeau",
+	"Céramiques de Flandre",
+	"Design Industriel Rémois",
+	"Éditions de Normandie",
+	"Fluides et Énergies Alpines",
+	"Génie Civil Atlantique",
+	"Horizon Logistique Centre",
+	"Industries Textiles du Nord",
+	"Jardins et Paysages Champenois",
+	"Kiosque Numérique Caennais",
+	"Laboratoire des Alpes",
+	"Mécanique de Précision Girondine",
+	"Nouvelles Technologies de Tours",
+	"Optique des Hauts-de-France",
+	"Papeteries du Grand Est",
+	"Qualité Services Normandie",
+	"Réseaux Électriques Isérois",
+];
+
+const PAGINATION_LOCATIONS = [
+	{
+		city: "Bordeaux",
+		postalCode: "33000",
+		region: "Nouvelle-Aquitaine",
+		regionCode: "75",
+		departmentCode: "33",
+		departmentLabel: "Gironde",
+	},
+	{
+		city: "Tours",
+		postalCode: "37000",
+		region: "Centre-Val de Loire",
+		regionCode: "24",
+		departmentCode: "37",
+		departmentLabel: "Indre-et-Loire",
+	},
+	{
+		city: "Lille",
+		postalCode: "59000",
+		region: "Hauts-de-France",
+		regionCode: "32",
+		departmentCode: "59",
+		departmentLabel: "Nord",
+	},
+	{
+		city: "Reims",
+		postalCode: "51100",
+		region: "Grand Est",
+		regionCode: "44",
+		departmentCode: "51",
+		departmentLabel: "Marne",
+	},
+	{
+		city: "Caen",
+		postalCode: "14000",
+		region: "Normandie",
+		regionCode: "28",
+		departmentCode: "14",
+		departmentLabel: "Calvados",
+	},
+	{
+		city: "Grenoble",
+		postalCode: "38000",
+		region: "Auvergne-Rhône-Alpes",
+		regionCode: "84",
+		departmentCode: "38",
+		departmentLabel: "Isère",
+	},
+];
+
+const PAGINATION_NAFS = [
+	{
+		code: "16.23Z",
+		label: "Fabrication de charpentes et d’autres menuiseries",
+	},
+	{ code: "41.20B", label: "Construction d’autres bâtiments" },
+	{ code: "52.29B", label: "Affrètement et organisation des transports" },
+	{ code: "58.11Z", label: "Édition de livres" },
+	{ code: "71.12B", label: "Ingénierie et études techniques" },
+	{
+		code: "72.19Z",
+		label: "Recherche-développement en autres sciences physiques",
+	},
+];
+
 const COMPANIES = [
 	{
 		siren: "998900001",
@@ -183,6 +270,162 @@ const COMPANIES = [
 		statutDiffusion: "O",
 		history: [{ offset: 0, annual: 0, hourly: 0, variable: null }],
 	},
+	{
+		siren: "998900006",
+		name: "Chantiers de l’Iroise",
+		address: "6 rue de Siam, 29200 Brest",
+		city: "Brest",
+		region: "Bretagne",
+		regionCode: "53",
+		departmentCode: "29",
+		departmentLabel: "Finistère",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "30.11Z",
+		nafLabel: "Construction de navires et de structures flottantes",
+		workforce: 55,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: 0.04, hourly: 0.03, variable: 0.02 }],
+	},
+	{
+		siren: "998900007",
+		name: "Énergies de Loire",
+		address: "18 quai de la Fosse, 44000 Nantes",
+		city: "Nantes",
+		region: "Pays de la Loire",
+		regionCode: "52",
+		departmentCode: "44",
+		departmentLabel: "Loire-Atlantique",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "35.11Z",
+		nafLabel: "Production d’électricité",
+		workforce: 110,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: -0.03, hourly: -0.01, variable: 0.01 }],
+	},
+	{
+		siren: "998900008",
+		name: "Aéro Occitanie Services",
+		address: "2 avenue Didier Daurat, 31700 Blagnac",
+		city: "Blagnac",
+		region: "Occitanie",
+		regionCode: "76",
+		departmentCode: "31",
+		departmentLabel: "Haute-Garonne",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "33.16Z",
+		nafLabel: "Réparation et maintenance d’aéronefs",
+		workforce: 410,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: 0.07, hourly: 0.05, variable: 0.06 }],
+	},
+	{
+		siren: "998900009",
+		name: "Laboratoires du Rhin",
+		address: "5 place de l’Hôpital, 67000 Strasbourg",
+		city: "Strasbourg",
+		region: "Grand Est",
+		regionCode: "44",
+		departmentCode: "67",
+		departmentLabel: "Bas-Rhin",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "21.20Z",
+		nafLabel: "Fabrication de préparations pharmaceutiques",
+		workforce: 1600,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: 0.02, hourly: 0.01, variable: 0.03 }],
+	},
+	{
+		siren: "998900010",
+		name: "Mobilités Normandes",
+		address: "14 rue Jeanne-d’Arc, 76000 Rouen",
+		city: "Rouen",
+		region: "Normandie",
+		regionCode: "28",
+		departmentCode: "76",
+		departmentLabel: "Seine-Maritime",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "49.31Z",
+		nafLabel: "Transports urbains et suburbains de voyageurs",
+		workforce: 88,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: 0.01, hourly: -0.01, variable: null }],
+	},
+	{
+		siren: "998900011",
+		name: "Agro Bourgogne Conseil",
+		address: "3 place Darcy, 21000 Dijon",
+		city: "Dijon",
+		region: "Bourgogne-Franche-Comté",
+		regionCode: "27",
+		departmentCode: "21",
+		departmentLabel: "Côte-d’Or",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "01.61Z",
+		nafLabel: "Activités de soutien aux cultures",
+		workforce: 275,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: 0.09, hourly: 0.06, variable: 0.08 }],
+	},
+	{
+		siren: "998900012",
+		name: "Atelier Insulaire",
+		address: "9 cours Napoléon, 20000 Ajaccio",
+		city: "Ajaccio",
+		region: "Corse",
+		regionCode: "94",
+		departmentCode: "2A",
+		departmentLabel: "Corse-du-Sud",
+		countryCode: null,
+		countryLabel: null,
+		nafCode: "31.09B",
+		nafLabel: "Fabrication d’autres meubles",
+		workforce: 47,
+		statutDiffusion: "O",
+		history: [{ offset: 0, annual: -0.02, hourly: -0.03, variable: -0.01 }],
+	},
+	...PAGINATION_COMPANY_NAMES.map((name, index) => {
+		const companyNumber = index + 13;
+		const location = PAGINATION_LOCATIONS[index % PAGINATION_LOCATIONS.length];
+		const naf = PAGINATION_NAFS[index % PAGINATION_NAFS.length];
+		const currentGap = ((index % 9) - 4) / 100;
+
+		return {
+			siren: `998900${String(companyNumber).padStart(3, "0")}`,
+			name,
+			address: `${companyNumber} rue de la Démonstration, ${location.postalCode} ${location.city}`,
+			city: location.city,
+			region: location.region,
+			regionCode: location.regionCode,
+			departmentCode: location.departmentCode,
+			departmentLabel: location.departmentLabel,
+			countryCode: null,
+			countryLabel: null,
+			nafCode: naf.code,
+			nafLabel: naf.label,
+			workforce: 60 + index * 87,
+			statutDiffusion: "O",
+			history: [
+				{
+					offset: -1,
+					annual: currentGap + 0.02,
+					hourly: currentGap + 0.01,
+					variable: currentGap + 0.03,
+				},
+				{
+					offset: 0,
+					annual: currentGap,
+					hourly: currentGap - 0.01,
+					variable: index % 4 === 0 ? null : currentGap + 0.01,
+				},
+			],
+		};
+	}),
 ];
 
 const SIRENS = COMPANIES.map((company) => company.siren);
@@ -194,20 +437,20 @@ const YEARS = [
 	),
 ].sort((left, right) => left - right);
 
-function indicatorValues(company, companyIndex, point) {
+function indicatorValues(companyIndex, point, workforce) {
 	const annual = point.annual;
 	const hourly = point.hourly;
 	const variable = point.variable;
-	const womenShare = 46 + companyIndex * 2;
-	const quartileShift = companyIndex - 2;
+	const womenShare = 46 + (companyIndex % 10) * 2;
+	const quartileShift = (companyIndex % 7) - 2;
 
 	// The headcount split must add up to the company's workforce: the company
 	// page shows both, and a demo that contradicts itself reads as a bug.
-	const totalWomen = Math.round((company.workforce * womenShare) / 100);
+	const totalWomen = Math.round((workforce * womenShare) / 100);
 
 	return {
 		totalWomen,
-		totalMen: company.workforce - totalWomen,
+		totalMen: workforce - totalWomen,
 		globalAnnualMeanGap: annual,
 		globalHourlyMeanGap: hourly,
 		variableAnnualMeanGap: variable,
@@ -218,15 +461,19 @@ function indicatorValues(company, companyIndex, point) {
 		variableHourlyMedianGap: variable === null ? null : variable - 0.01,
 		variableProportionWomen: womenShare / 100,
 		variableProportionMen: (womenShare + 5) / 100,
-		annualQuartile1Women: 58 + quartileShift,
-		annualQuartile2Women: 54 + quartileShift,
-		annualQuartile3Women: 49 + quartileShift,
-		annualQuartile4Women: 43 + quartileShift,
-		hourlyQuartile1Women: 57 + quartileShift,
-		hourlyQuartile2Women: 53 + quartileShift,
-		hourlyQuartile3Women: 48 + quartileShift,
-		hourlyQuartile4Women: 42 + quartileShift,
+		annualQuartile1Women: (58 + quartileShift) / 100,
+		annualQuartile2Women: (54 + quartileShift) / 100,
+		annualQuartile3Women: (49 + quartileShift) / 100,
+		annualQuartile4Women: (43 + quartileShift) / 100,
+		hourlyQuartile1Women: (57 + quartileShift) / 100,
+		hourlyQuartile2Women: (53 + quartileShift) / 100,
+		hourlyQuartile3Women: (48 + quartileShift) / 100,
+		hourlyQuartile4Women: (42 + quartileShift) / 100,
 	};
+}
+
+function workforceForPoint(company, companyIndex, point) {
+	return Math.max(1, company.workforce + point.offset * (companyIndex + 4));
 }
 
 async function assertSchema(sql) {
@@ -259,6 +506,7 @@ async function waitForSchema(sql) {
 }
 
 async function cleanRows(sql) {
+	await sql`DELETE FROM app_representation_declaration WHERE siren = ANY(${SIRENS})`;
 	await sql`
 		DELETE FROM app_declaration_status_history
 		WHERE declaration_id IN (
@@ -301,10 +549,11 @@ async function main() {
 						year, public_data_release_date,
 						decl1_modification_deadline, decl1_justification_deadline,
 						decl1_joint_evaluation_deadline, decl2_modification_deadline,
-						decl2_justification_deadline, decl2_joint_evaluation_deadline
+						decl2_justification_deadline, decl2_joint_evaluation_deadline,
+						decl2_cse_opinion_deadline
 					) VALUES (
 						${year}, ${publicReleaseDate}, ${deadline}, ${deadline},
-						${deadline}, ${deadline}, ${deadline}, ${deadline}
+						${deadline}, ${deadline}, ${deadline}, ${deadline}, ${deadline}
 					)
 					ON CONFLICT (year) DO UPDATE SET
 						public_data_release_date = EXCLUDED.public_data_release_date
@@ -329,10 +578,11 @@ async function main() {
 
 				for (const point of company.history) {
 					const year = YEAR + point.offset;
-					const values = indicatorValues(company, companyIndex, point);
+					const workforce = workforceForPoint(company, companyIndex, point);
+					const values = indicatorValues(companyIndex, point, workforce);
 					await tx`
 						INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
-						VALUES (${company.siren}, ${year}, ${company.workforce}, NOW())
+						VALUES (${company.siren}, ${year}, ${workforce}, NOW())
 					`;
 					await tx`
 						INSERT INTO app_declaration (
@@ -359,18 +609,50 @@ async function main() {
 							${values.globalAnnualMedianGap}, ${values.globalHourlyMedianGap},
 							${values.variableAnnualMedianGap}, ${values.variableHourlyMedianGap},
 							${values.variableProportionWomen}, ${values.variableProportionMen},
-							${values.annualQuartile1Women}, ${100 - values.annualQuartile1Women},
-							${values.annualQuartile2Women}, ${100 - values.annualQuartile2Women},
-							${values.annualQuartile3Women}, ${100 - values.annualQuartile3Women},
-							${values.annualQuartile4Women}, ${100 - values.annualQuartile4Women},
-							${values.hourlyQuartile1Women}, ${100 - values.hourlyQuartile1Women},
-							${values.hourlyQuartile2Women}, ${100 - values.hourlyQuartile2Women},
-							${values.hourlyQuartile3Women}, ${100 - values.hourlyQuartile3Women},
-							${values.hourlyQuartile4Women}, ${100 - values.hourlyQuartile4Women},
+							${values.annualQuartile1Women}, ${1 - values.annualQuartile1Women},
+							${values.annualQuartile2Women}, ${1 - values.annualQuartile2Women},
+							${values.annualQuartile3Women}, ${1 - values.annualQuartile3Women},
+							${values.annualQuartile4Women}, ${1 - values.annualQuartile4Women},
+							${values.hourlyQuartile1Women}, ${1 - values.hourlyQuartile1Women},
+							${values.hourlyQuartile2Women}, ${1 - values.hourlyQuartile2Women},
+							${values.hourlyQuartile3Women}, ${1 - values.hourlyQuartile3Women},
+							${values.hourlyQuartile4Women}, ${1 - values.hourlyQuartile4Women},
 							NOW(), NOW()
 						)
 					`;
 				}
+
+				const representationIsComputable = companyIndex !== 4;
+				const executiveWomenPercent = representationIsComputable
+					? 30 + companyIndex
+					: null;
+				const memberWomenPercent = representationIsComputable
+					? 40 + companyIndex
+					: null;
+				await tx`
+					INSERT INTO app_representation_declaration (
+						id, siren, year, declarant_id,
+						reference_period_start, reference_period_end,
+						executive_women_percent, executive_men_percent,
+						not_computable_reason_executives,
+						member_women_percent, member_men_percent,
+						not_computable_reason_members,
+						publish_date, publish_modalities, status, submitted_at,
+						created_at, updated_at
+					) VALUES (
+						${`seed-observatory-representation-${company.siren}-${YEAR}`},
+						${company.siren}, ${YEAR}, ${SEED_USER_ID},
+						${`${YEAR - 1}-01-01`}, ${`${YEAR - 1}-12-31`},
+						${executiveWomenPercent},
+						${executiveWomenPercent === null ? null : 100 - executiveWomenPercent},
+						${representationIsComputable ? null : "aucun_cadre_dirigeant"},
+						${memberWomenPercent},
+						${memberWomenPercent === null ? null : 100 - memberWomenPercent},
+						${representationIsComputable ? null : "aucune_instance_dirigeante"},
+						${`${YEAR}-03-01`}, 'Publication de démonstration', 'submitted', NOW(),
+						NOW(), NOW()
+					)
+				`;
 			}
 		});
 

@@ -88,4 +88,24 @@ describe("SearchResultItem", () => {
 
 		expect(screen.queryByText(/Effectif/)).not.toBeInTheDocument();
 	});
+
+	it("shows each masked company fact only once", () => {
+		render(
+			<SearchResultItem
+				declaration={declarationFixture({
+					name: "Non-diffusible",
+					address: "Non-diffusible",
+					countryLabel: "Non-diffusible",
+					departmentLabel: "Non-diffusible",
+					region: "Non-diffusible",
+					nafCode: "Non-diffusible",
+					nafLabel: "Non-diffusible",
+				})}
+				searchQuery=""
+			/>,
+		);
+
+		expect(screen.queryByText(/Non-diffusible.*Non-diffusible/)).toBeNull();
+		expect(screen.getAllByText("Non-diffusible")).toHaveLength(3);
+	});
 });

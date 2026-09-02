@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
+import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import { db } from "~/server/db";
 import {
 	campaignDeadlines,
@@ -103,7 +104,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			},
 			{
 				siren: SIREN_C,
-				name: "Gamma SA",
+				name: "Aaron Secret",
 				region: "11",
 				departmentCode: "92",
 				nafCode: "62.01Z",
@@ -213,6 +214,14 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(bySiren.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(bySiren.data[0]?.name).toBe(NON_DIFFUSIBLE_LABEL);
+
+		const hiddenByName = await searchPublicDeclarations({
+			q: "beta",
+			limit: 10,
+			offset: 0,
+		});
+		expect(hiddenByName.data).toEqual([]);
 	});
 
 	it("filters by region, department, naf and year", async () => {
@@ -229,24 +238,21 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			limit: 10,
 			offset: 0,
 		});
-		expect(byRegion.data.map((d) => d.siren).sort()).toEqual([
-			SIREN_A,
-			SIREN_C,
-		]);
+		expect(byRegion.data.map((d) => d.siren)).toEqual([SIREN_A]);
 
 		const byDepartement = await searchPublicDeclarations({
 			departement: ["69"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byDepartement.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(byDepartement.data).toEqual([]);
 
 		const byNaf = await searchPublicDeclarations({
 			naf: ["70.10Z"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byNaf.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(byNaf.data).toEqual([]);
 
 		const byYear = await searchPublicDeclarations({
 			year: 2100,
@@ -272,6 +278,31 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		const secondPage = await searchPublicDeclarations({ limit: 2, offset: 2 });
 		expect(secondPage.count).toBe(3);
 		expect(secondPage.data).toHaveLength(1);
+	});
+
+	it("sorts masked companies by their public label and siren", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_B, year: 2100 }),
+				declarationRow({ siren: SIREN_C, year: 2100 }),
+			]);
+
+		const result = await searchPublicDeclarations({
+			sort: "name",
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(result.data.map((declaration) => declaration.siren)).toEqual([
+			SIREN_A,
+			SIREN_B,
+			SIREN_C,
+		]);
+		expect(result.data.slice(1).map((declaration) => declaration.name)).toEqual(
+			[NON_DIFFUSIBLE_LABEL, NON_DIFFUSIBLE_LABEL],
+		);
 	});
 
 	it("left-joins gip workforce and coerces numeric gap columns to numbers", async () => {

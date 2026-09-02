@@ -25,22 +25,22 @@ const declarationFixture: PublicDeclarationSource = {
 	// and they do NOT sum to 1 (unlike the quartile proportions below).
 	variableProportionWomen: "0.5625",
 	variableProportionMen: "0.6000",
-	annualQuartile1ProportionWomen: "60.0000",
-	annualQuartile2ProportionWomen: "55.0000",
-	annualQuartile3ProportionWomen: "50.0000",
-	annualQuartile4ProportionWomen: "40.0000",
-	annualQuartile1ProportionMen: "40.0000",
-	annualQuartile2ProportionMen: "45.0000",
-	annualQuartile3ProportionMen: "50.0000",
-	annualQuartile4ProportionMen: "60.0000",
-	hourlyQuartile1ProportionWomen: "61.0000",
-	hourlyQuartile2ProportionWomen: "56.0000",
-	hourlyQuartile3ProportionWomen: "51.0000",
-	hourlyQuartile4ProportionWomen: "41.0000",
-	hourlyQuartile1ProportionMen: "39.0000",
-	hourlyQuartile2ProportionMen: "44.0000",
-	hourlyQuartile3ProportionMen: "49.0000",
-	hourlyQuartile4ProportionMen: "59.0000",
+	annualQuartile1ProportionWomen: "0.6000",
+	annualQuartile2ProportionWomen: "0.5500",
+	annualQuartile3ProportionWomen: "0.5000",
+	annualQuartile4ProportionWomen: "0.4000",
+	annualQuartile1ProportionMen: "0.4000",
+	annualQuartile2ProportionMen: "0.4500",
+	annualQuartile3ProportionMen: "0.5000",
+	annualQuartile4ProportionMen: "0.6000",
+	hourlyQuartile1ProportionWomen: "0.6100",
+	hourlyQuartile2ProportionWomen: "0.5600",
+	hourlyQuartile3ProportionWomen: "0.5100",
+	hourlyQuartile4ProportionWomen: "0.4100",
+	hourlyQuartile1ProportionMen: "0.3900",
+	hourlyQuartile2ProportionMen: "0.4400",
+	hourlyQuartile3ProportionMen: "0.4900",
+	hourlyQuartile4ProportionMen: "0.5900",
 };
 
 const companyFixture: PublicCompanySource = {
@@ -58,7 +58,19 @@ const companyFixture: PublicCompanySource = {
 
 const EXPECTED_DTO_KEYS = Object.keys(publicDeclarationDTOSchema.shape).sort();
 
-const MASKED_COMPANY_FIELDS = ["name", "address"] as const;
+const MASKED_COMPANY_FIELDS = [
+	"name",
+	"address",
+	"city",
+	"regionCode",
+	"region",
+	"departmentCode",
+	"departmentLabel",
+	"countryCode",
+	"countryLabel",
+	"nafCode",
+	"nafLabel",
+] as const;
 
 const FORBIDDEN_KEYS = [
 	"categoryScore",
@@ -133,11 +145,9 @@ describe("toPublicDeclaration", () => {
 			statutDiffusion: "N",
 		});
 
-		expect(dto.name).toBe("Non-diffusible");
-		expect(dto.address).toBe("Non-diffusible");
-		expect(dto.departmentCode).toBe("75");
-		expect(dto.departmentLabel).toBe("Paris");
-		expect(dto.nafCode).toBe("62.01Z");
+		for (const field of MASKED_COMPANY_FIELDS) {
+			expect(dto[field]).toBe("Non-diffusible");
+		}
 	});
 
 	it("derives diffusibility from a non-null address when statutDiffusion is null", () => {
@@ -161,7 +171,7 @@ describe("toPublicDeclaration", () => {
 
 		expect(dto.name).toBe("Non-diffusible");
 		expect(dto.address).toBe("Non-diffusible");
-		expect(dto.departmentCode).toBe("75");
+		expect(dto.departmentCode).toBe("Non-diffusible");
 		expect(dto.siren).toBe("123456789");
 		expect(dto.workforceEma).toBe(250);
 	});
@@ -212,8 +222,8 @@ describe("toPublicDeclaration", () => {
 		expect(dto.totalMen).toBe(80);
 		expect(dto.globalAnnualMeanGap).toBe(0.1234);
 		expect(dto.variableProportionWomen).toBe(0.5625);
-		expect(dto.annualQuartile4ProportionMen).toBe(60);
-		expect(dto.hourlyQuartile1ProportionWomen).toBe(61);
+		expect(dto.annualQuartile4ProportionMen).toBe(0.6);
+		expect(dto.hourlyQuartile1ProportionWomen).toBe(0.61);
 		expect(dto.workforceEma).toBe(250);
 	});
 

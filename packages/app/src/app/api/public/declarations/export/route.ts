@@ -8,11 +8,13 @@ import type {
 	PublicDeclarationDTO,
 } from "~/modules/public-api";
 import {
+	PUBLIC_API_EXPORT_HEADERS,
 	publicDeclarationColumns,
 	toPublicDeclaration,
 } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
+import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -22,15 +24,13 @@ import {
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { nafSectionCondition } from "~/server/services/publicDeclarationsService";
 
-const CORS_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
 const MAX_XLSX_EXPORT_ROWS = 10_000;
 
 export function OPTIONS(): Response {
-	return new Response(null, { status: 204, headers: CORS_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_EXPORT_HEADERS,
+	});
 }
 
 function exportFilters(searchParams: URLSearchParams) {
@@ -41,24 +41,39 @@ function exportFilters(searchParams: URLSearchParams) {
 		conditions.push(
 			/^\d{9}$/.test(siren)
 				? eq(declarations.siren, siren)
-				: or(
-						ilike(companies.name, `%${q}%`),
-						ilike(declarations.siren, `%${siren}%`),
-					),
+				: and(diffusibleCompanyCondition(), ilike(companies.name, `%${q}%`)),
 		);
 	}
 	const city = searchParams.get("city");
-	if (city) conditions.push(ilike(companies.city, `%${city}%`));
+	if (city) {
+		conditions.push(
+			and(diffusibleCompanyCondition(), ilike(companies.city, `%${city}%`)),
+		);
+	}
 	const region = searchParams.get("region");
 	if (region) {
 		conditions.push(
-			or(eq(companies.regionCode, region), eq(companies.region, region)),
+			and(
+				diffusibleCompanyCondition(),
+				or(eq(companies.regionCode, region), eq(companies.region, region)),
+			),
 		);
 	}
 	const department = searchParams.get("departement");
-	if (department) conditions.push(eq(companies.departmentCode, department));
+	if (department) {
+		conditions.push(
+			and(
+				diffusibleCompanyCondition(),
+				eq(companies.departmentCode, department),
+			),
+		);
+	}
 	const naf = searchParams.get("naf");
-	if (naf) conditions.push(nafSectionCondition(naf));
+	if (naf) {
+		conditions.push(
+			and(diffusibleCompanyCondition(), nafSectionCondition(naf)),
+		);
+	}
 	const year = Number(searchParams.get("year"));
 	if (Number.isInteger(year) && year > 0)
 		conditions.push(eq(declarations.year, year));
@@ -263,7 +278,7 @@ export const GET = withAuditedRoute(
 			if (!formatResult.success) {
 				return NextResponse.json(
 					{ error: "Le paramètre format doit être 'json', 'csv' ou 'xlsx'" },
-					{ status: 400, headers: CORS_HEADERS },
+					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
 				);
 			}
 			const format = formatResult.data;
@@ -278,7 +293,7 @@ export const GET = withAuditedRoute(
 						error:
 							"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
 					},
-					{ status: 413, headers: CORS_HEADERS },
+					{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
 				);
 			}
 			const data = rows.map(toPublicDTO);
@@ -287,23 +302,21 @@ export const GET = withAuditedRoute(
 				const csv = formatCsv(data);
 				return new NextResponse(csv, {
 					headers: {
+						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type": "text/csv; charset=utf-8",
 						"Content-Disposition":
-							'attachment; filename="declarations_export.csv"',
-						"Access-Control-Allow-Origin": "*",
-						"Cache-Control": "public, max-age=3600, s-maxage=3600",
+							'attachment; filename="index-egapro-remunerations.csv"',
 					},
 				});
 			}
 			if (format === "xlsx") {
 				return new NextResponse(await formatWorkbook(data), {
 					headers: {
+						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type":
 							"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 						"Content-Disposition":
-							'attachment; filename="declarations_export.xlsx"',
-						"Access-Control-Allow-Origin": "*",
-						"Cache-Control": "public, max-age=3600, s-maxage=3600",
+							'attachment; filename="index-egapro-remunerations.xlsx"',
 					},
 				});
 			}
@@ -311,10 +324,7 @@ export const GET = withAuditedRoute(
 			return NextResponse.json(
 				{ data, count: data.length },
 				{
-					headers: {
-						"Access-Control-Allow-Origin": "*",
-						"Cache-Control": "public, max-age=3600, s-maxage=3600",
-					},
+					headers: PUBLIC_API_EXPORT_HEADERS,
 				},
 			);
 		} catch (error) {
@@ -324,7 +334,7 @@ export const GET = withAuditedRoute(
 			);
 			return NextResponse.json(
 				{ error: "Erreur lors de l'export des déclarations" },
-				{ status: 500, headers: CORS_HEADERS },
+				{ status: 500, headers: PUBLIC_API_EXPORT_HEADERS },
 			);
 		}
 	},

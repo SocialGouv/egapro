@@ -27,7 +27,7 @@ Après avoir démarré PostgreSQL et appliqué les migrations, charger le jeu de
 pnpm db:seed-observatory
 ```
 
-La commande crée cinq entreprises réservées aux tests (`998900001` à `998900005`) et douze déclarations sur quatre années. Le jeu couvre les filtres géographiques, NAF et effectif, les historiques avec valeurs positives, négatives, nulles ou égales à zéro, une entreprise non-diffusible, une entreprise étrangère et une entreprise sans historique.
+La commande crée trente entreprises réservées aux tests (`998900001` à `998900030`), cinquante-cinq déclarations de rémunération sur quatre années et trente déclarations de représentation. Le jeu couvre trois pages de dix résultats et deux pages de vingt-cinq résultats, les filtres géographiques, NAF et effectif, des effectifs qui évoluent selon l'année, les historiques avec valeurs positives, négatives, nulles ou égales à zéro, une représentation non calculable, une entreprise non-diffusible, une entreprise étrangère et une entreprise sans historique.
 
 - recherche et filtres : `http://localhost:3000/index-egapro/recherche` ;
 - fiche entreprise et ses deux onglets : `http://localhost:3000/index-egapro/entreprise/998900001` ;
@@ -43,7 +43,7 @@ Les review apps éphémères de branche utilisent l'environnement `dev` : un Job
 
 ## Confidentialité
 
-Pour une entreprise au statut INSEE non diffusible, la raison sociale et l'adresse sont remplacées par `Non-diffusible`. Le SIREN, le département, l'effectif EMA et les indicateurs A à F restent affichés. Une entreprise étrangère affiche son pays à la place de la région et du département.
+Pour une entreprise au statut INSEE non diffusible, les champs d'identité, de localisation et d'activité sont remplacés par `Non-diffusible`. Le SIREN, l'effectif EMA et les indicateurs restent affichés. Une entreprise étrangère diffusible affiche son pays à la place de la région et du département.
 
 ## Publication data.gouv.fr
 

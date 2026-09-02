@@ -17,6 +17,7 @@ vi.mock("~/server/db/schema", () => ({
 		siren: "c.siren",
 		name: "c.name",
 		address: "c.address",
+		regionCode: "c.regionCode",
 		region: "c.region",
 		departmentCode: "c.departmentCode",
 		departmentLabel: "c.departmentLabel",
@@ -46,6 +47,7 @@ vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => ({
 		and: args.filter((arg) => arg !== undefined),
 	}),
+	asc: (col: unknown) => ({ asc: col }),
 	count: () => "count(*)",
 	desc: (col: unknown) => ({ desc: col }),
 	eq: (a: unknown, b: unknown) => ({ eq: [a, b] }),
@@ -53,6 +55,10 @@ vi.mock("drizzle-orm", () => ({
 	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) =>
 		mocks.orReturnsUndefined ? undefined : { or: args },
+	sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({
+		sql: strings.join(""),
+		values,
+	}),
 }));
 
 const SUBMITTED_ONLY = { eq: ["rd.status", "submitted"] };
@@ -90,7 +96,7 @@ function makeRawRow(overrides: RawRow = {}): RawRow {
 type Captured = {
 	rowsWhere?: unknown;
 	countWhere?: unknown;
-	orderBy?: unknown;
+	orderBy?: unknown[];
 	limit?: number;
 	offset?: number;
 };
@@ -126,8 +132,8 @@ function setDb(rows: RawRow[], countRows: RawRow[] = [{ total: rows.length }]) {
 				captured.rowsWhere = condition;
 				return chain;
 			},
-			orderBy: (condition: unknown) => {
-				captured.orderBy = condition;
+			orderBy: (...conditions: unknown[]) => {
+				captured.orderBy = conditions;
 				return orderByResult;
 			},
 		};
@@ -194,14 +200,41 @@ describe("searchPublicRepresentations", () => {
 			and: [
 				SUBMITTED_ONLY,
 				{
-					or: [
+					and: [
+						expect.objectContaining({
+							sql: expect.any(String),
+							values: ["c.statutDiffusion", "c.statutDiffusion", "c.address"],
+						}),
 						{ ilike: ["c.name", "%acme%"] },
-						{ ilike: ["rd.siren", "%acme%"] },
 					],
 				},
-				{ inArray: ["c.region", ["Île-de-France", "Bretagne"]] },
-				{ inArray: ["c.departmentCode", ["75"]] },
-				{ inArray: ["c.nafCode", ["62.01Z"]] },
+				{
+					and: [
+						expect.objectContaining({ sql: expect.any(String) }),
+						{
+							or: [
+								{
+									inArray: ["c.regionCode", ["Île-de-France", "Bretagne"]],
+								},
+								{
+									inArray: ["c.region", ["Île-de-France", "Bretagne"]],
+								},
+							],
+						},
+					],
+				},
+				{
+					and: [
+						expect.objectContaining({ sql: expect.any(String) }),
+						{ inArray: ["c.departmentCode", ["75"]] },
+					],
+				},
+				{
+					and: [
+						expect.objectContaining({ sql: expect.any(String) }),
+						{ inArray: ["c.nafCode", ["62.01Z"]] },
+					],
+				},
 				{ eq: ["rd.year", 2026] },
 			],
 		});
@@ -215,7 +248,11 @@ describe("searchPublicRepresentations", () => {
 
 		expect(captured.limit).toBe(25);
 		expect(captured.offset).toBe(50);
-		expect(captured.orderBy).toEqual({ desc: "rd.year" });
+		expect(captured.orderBy).toEqual([
+			{ desc: "rd.year" },
+			{ asc: expect.objectContaining({ sql: expect.any(String) }) },
+			{ asc: "c.siren" },
+		]);
 	});
 
 	it("falls back to a zero count when the count query yields no usable total", async () => {
@@ -232,16 +269,38 @@ describe("searchPublicRepresentations", () => {
 		);
 	});
 
-	it("never pushes an undefined text condition into the where clause", async () => {
-		// drizzle's or() is typed `SQL | undefined`; a nullish condition slipped
-		// into and() would widen the query to every declaration.
-		mocks.orReturnsUndefined = true;
+	it("guards a partial name search with the diffusibility condition", async () => {
 		setDb([]);
 		const { searchPublicRepresentations } = await importService();
 
 		await searchPublicRepresentations({ q: "acme", limit: 10, offset: 0 });
 
-		expect(captured.rowsWhere).toEqual({ and: [SUBMITTED_ONLY] });
+		expect(captured.rowsWhere).toEqual({
+			and: [
+				SUBMITTED_ONLY,
+				{
+					and: [
+						expect.objectContaining({ sql: expect.any(String) }),
+						{ ilike: ["c.name", "%acme%"] },
+					],
+				},
+			],
+		});
+	});
+
+	it("allows an exact SIREN search without reading masked identity fields", async () => {
+		setDb([]);
+		const { searchPublicRepresentations } = await importService();
+
+		await searchPublicRepresentations({
+			q: "123 456 789",
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(captured.rowsWhere).toEqual({
+			and: [SUBMITTED_ONLY, { eq: ["rd.siren", "123456789"] }],
+		});
 	});
 
 	it("masks the identity of a non-diffusible company in the search results", async () => {
@@ -252,13 +311,13 @@ describe("searchPublicRepresentations", () => {
 
 		expect(result.data[0]).toMatchObject({
 			siren: SIREN,
-			name: null,
-			address: null,
-			region: null,
-			departmentCode: null,
-			departmentLabel: null,
-			nafCode: null,
-			nafLabel: null,
+			name: "Non-diffusible",
+			address: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
 			executiveWomenPercent: 35.5,
 		});
 	});
@@ -272,7 +331,7 @@ describe("getPublicRepresentationsBySiren", () => {
 		const result = await getPublicRepresentationsBySiren(SIREN);
 
 		expect(result.map((d) => d.year)).toEqual([2026, 2025]);
-		expect(captured.orderBy).toEqual({ desc: "rd.year" });
+		expect(captured.orderBy).toEqual([{ desc: "rd.year" }]);
 		expect(captured.rowsWhere).toEqual({
 			and: [{ eq: ["rd.siren", SIREN] }, SUBMITTED_ONLY],
 		});

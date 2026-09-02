@@ -1,16 +1,14 @@
 import { env } from "~/env.js";
-import { buildSitemap } from "~/modules/legal";
+import {
+	buildSitemap,
+	COMPANY_URLS_PER_SITEMAP,
+	escapeXml,
+} from "~/modules/legal";
 import { listPublicCompanySirens } from "~/server/services/publicDeclarationsService";
-
-const COMPANY_URLS_PER_SITEMAP = 50_000;
 
 // Same reason as sitemap.xml: NEXTAUTH_URL is a runtime variable, undefined in
 // the Docker/CI build where SKIP_ENV_VALIDATION applies.
 export const dynamic = "force-dynamic";
-
-function escapeXml(value: string): string {
-	return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;");
-}
 
 function urlSet(entries: Array<{ url: string; lastModified?: string | Date }>) {
 	const urls = entries

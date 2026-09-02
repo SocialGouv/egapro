@@ -22,4 +22,8 @@
 	> tbody > tr > td {
 		font-weight: 700;
 	}
+
+	> tbody > tr > th[scope="row"] {
+		background-color: var(--background-default-grey);
+	}
 }

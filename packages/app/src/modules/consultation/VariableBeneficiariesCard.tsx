@@ -1,3 +1,4 @@
+import { gapRatioToPercent } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { SingleGenderBar } from "~/modules/shared/GenderBar";
@@ -24,8 +25,6 @@ type Props = {
  */
 export function VariableBeneficiariesCard({ declaration }: Props) {
 	const { variableProportionWomen, variableProportionMen } = declaration;
-	const toPercent = (ratio: number | null) =>
-		ratio === null ? null : ratio * 100;
 
 	return (
 		<IndicatorCard
@@ -46,7 +45,7 @@ export function VariableBeneficiariesCard({ declaration }: Props) {
 							<strong>{formatGap(variableProportionWomen)}</strong>
 						</>
 					}
-					percent={toPercent(variableProportionWomen)}
+					percent={gapRatioToPercent(variableProportionWomen)}
 				/>
 				<SingleGenderBar
 					gender="men"
@@ -56,7 +55,7 @@ export function VariableBeneficiariesCard({ declaration }: Props) {
 							<strong>{formatGap(variableProportionMen)}</strong>
 						</>
 					}
-					percent={toPercent(variableProportionMen)}
+					percent={gapRatioToPercent(variableProportionMen)}
 				/>
 			</div>
 			<div className={styles.accordionSlot}>

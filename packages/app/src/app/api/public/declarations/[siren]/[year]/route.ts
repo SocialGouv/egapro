@@ -1,19 +1,18 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { FIRST_DECLARATION_YEAR, parseSiren } from "~/modules/domain";
-import { getPublicDeclarationBySirenYear } from "~/modules/public-api";
+import {
+	getPublicDeclarationBySirenYear,
+	PUBLIC_API_RESOURCE_HEADERS,
+} from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
-const PUBLIC_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type, Authorization",
-	"Cache-Control": "public, max-age=300, s-maxage=300",
-};
-
 export function OPTIONS(): Response {
-	return new Response(null, { status: 204, headers: PUBLIC_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_RESOURCE_HEADERS,
+	});
 }
 
 export async function GET(
@@ -40,7 +39,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "SIREN invalide. Attendu : 9 chiffres." },
-			{ status: 400, headers: PUBLIC_HEADERS },
+			{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 
@@ -58,7 +57,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "Année invalide." },
-			{ status: 400, headers: PUBLIC_HEADERS },
+			{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 
@@ -78,7 +77,7 @@ export async function GET(
 			});
 			return Response.json(
 				{ error: "Déclaration non trouvée ou non encore publiée." },
-				{ status: 404, headers: PUBLIC_HEADERS },
+				{ status: 404, headers: PUBLIC_API_RESOURCE_HEADERS },
 			);
 		}
 
@@ -92,7 +91,7 @@ export async function GET(
 			durationMs: Date.now() - startedAt,
 		});
 
-		return Response.json(data, { headers: PUBLIC_HEADERS });
+		return Response.json(data, { headers: PUBLIC_API_RESOURCE_HEADERS });
 	} catch (error) {
 		console.error(
 			"[api/public/declarations/:siren/:year]",
@@ -110,7 +109,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "Erreur lors de la récupération de la déclaration." },
-			{ status: 500, headers: PUBLIC_HEADERS },
+			{ status: 500, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 }

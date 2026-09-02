@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { gapRatioToPercent } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { GenderBarRow, GenderBarSeparator } from "~/modules/shared/GenderBar";
@@ -27,8 +28,12 @@ function buildRows(
 ): Row[] {
 	const rows: Row[] = QUARTILES.map((quartile, index) => ({
 		label: QUARTILE_LABELS[index] ?? `${quartile}ᵉ quartile`,
-		women: declaration[`${basis}Quartile${quartile}ProportionWomen`],
-		men: declaration[`${basis}Quartile${quartile}ProportionMen`],
+		women: gapRatioToPercent(
+			declaration[`${basis}Quartile${quartile}ProportionWomen`],
+		),
+		men: gapRatioToPercent(
+			declaration[`${basis}Quartile${quartile}ProportionMen`],
+		),
 	}));
 
 	// "Tous les salariés" is not stored per basis: it is the company-wide split,

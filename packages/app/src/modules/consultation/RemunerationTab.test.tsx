@@ -135,6 +135,13 @@ describe("RemunerationTab", () => {
 		expect(screen.getAllByText("33,33 %").length).toBeGreaterThan(0);
 	});
 
+	it("renders stored quartile ratios as percentages", () => {
+		renderTab();
+
+		expect(screen.getAllByText("66,7 %").length).toBeGreaterThan(0);
+		expect(screen.queryByText("0,67 %")).not.toBeInTheDocument();
+	});
+
 	it("prints a dash instead of a figure when an indicator is missing", () => {
 		renderTab({ globalHourlyMeanGap: null });
 

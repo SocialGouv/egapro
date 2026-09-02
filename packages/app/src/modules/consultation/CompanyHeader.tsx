@@ -3,7 +3,7 @@ import { getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import styles from "./CompanyHeader.module.scss";
-import { companyLocation, formatCount } from "./formatters";
+import { companyLocation, formatCount, formatNaf } from "./formatters";
 
 type Props = {
 	name: string | null;
@@ -36,19 +36,24 @@ export function CompanyHeader({
 }: Props) {
 	const displayName = name ?? `Entreprise ${siren}`;
 	const identity: Fact[] = [{ label: "SIREN", value: siren }];
-	// A withheld address must not cost the reader the location the API still
-	// publishes: fall back to the département and region the listing shows.
 	const location =
 		address && address !== NON_DIFFUSIBLE_LABEL
 			? { label: "Adresse", value: address }
-			: companyLocation({ countryLabel, departmentLabel, region });
+			: address === NON_DIFFUSIBLE_LABEL
+				? { label: "Adresse", value: NON_DIFFUSIBLE_LABEL }
+				: companyLocation({ countryLabel, departmentLabel, region });
 	if (location) identity.push(location);
 
 	const activity: Fact[] = [];
-	if (nafCode || nafLabel) {
+	const publicNaf = formatNaf(nafCode, nafLabel);
+	const naf =
+		publicNaf === NON_DIFFUSIBLE_LABEL
+			? NON_DIFFUSIBLE_LABEL
+			: [nafCode, nafLabel].filter(Boolean).join(" - ");
+	if (naf) {
 		activity.push({
 			label: "Code NAF",
-			value: [nafCode, nafLabel].filter(Boolean).join(" - "),
+			value: naf,
 		});
 	}
 	if (workforceEma !== null) {

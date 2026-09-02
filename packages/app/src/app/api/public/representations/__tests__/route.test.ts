@@ -11,7 +11,11 @@ vi.mock("~/modules/public-api", async () => {
 	const { publicRepresentationSearchInputSchema } = await import(
 		"~/modules/public-api/schemas"
 	);
+	const { PUBLIC_API_SEARCH_HEADERS } = await import(
+		"~/modules/public-api/httpHeaders"
+	);
 	return {
+		PUBLIC_API_SEARCH_HEADERS,
 		publicRepresentationSearchInputSchema,
 		searchPublicRepresentations: mocks.searchPublicRepresentations,
 	};
