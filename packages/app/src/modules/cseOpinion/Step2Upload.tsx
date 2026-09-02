@@ -210,7 +210,7 @@ export function Step2Upload({
 						accept=".pdf"
 						acceptLabel="pdf"
 						allowedMimeTypes={["application/pdf"]}
-						disabled={isReadOnly || isUploadingFiles}
+						disabled={isReadOnly || isUploadingFiles || isComplete}
 						error={uploadError}
 						inputId="cse-file-upload"
 						maxFileCount={remainingSlots}
