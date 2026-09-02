@@ -42,6 +42,22 @@ describe("GET /api/public/representations/export", () => {
 		expect(response.headers.get("Cache-Control")).toContain("max-age=3600");
 	});
 
+	it("passes repeated observatory facets to the export query", async () => {
+		const response = await callGet(
+			"?format=csv&region=11&region=84&naf=C&workforceRanges=1000%2B",
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.buildRows).toHaveBeenCalledWith(
+			expect.any(Object),
+			expect.objectContaining({
+				region: ["11", "84"],
+				naf: ["C"],
+				workforceRanges: ["1000+"],
+			}),
+		);
+	});
+
 	it("uses the stable public filename for XLSX downloads", async () => {
 		const response = await callGet();
 

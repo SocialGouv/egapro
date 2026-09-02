@@ -11,7 +11,10 @@ import {
 	gipMdsData,
 	users,
 } from "~/server/db/schema";
-import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
+import {
+	listRecentPublicDeclarations,
+	searchPublicDeclarations,
+} from "~/server/services/publicDeclarationsService";
 
 const DECLARANT_ID = "pub-decl-declarant";
 const SIREN_A = "800000001";
@@ -47,6 +50,7 @@ type DeclarationRow = {
 	status?: "draft" | "awaiting_cse_opinion" | "demarche_completed";
 	cancelledAt?: Date | null;
 	globalAnnualMeanGap?: string | null;
+	updatedAt?: Date;
 };
 
 function declarationRow({
@@ -55,6 +59,7 @@ function declarationRow({
 	status = "demarche_completed",
 	cancelledAt = null,
 	globalAnnualMeanGap = null,
+	updatedAt,
 }: DeclarationRow) {
 	return {
 		id: `${siren}-${year}-${status}-${cancelledAt ? "cancelled" : "active"}`,
@@ -64,6 +69,7 @@ function declarationRow({
 		status,
 		cancelledAt,
 		globalAnnualMeanGap,
+		updatedAt,
 	};
 }
 
@@ -367,5 +373,29 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 
 		expect(result.count).toBe(1);
 		expect(result.data[0]?.workforceEma).toBeNull();
+	});
+
+	it("lists the most recently published declaration-years for the RSS feed", async () => {
+		await db.insert(declarations).values([
+			declarationRow({
+				siren: SIREN_A,
+				year: 2100,
+				updatedAt: new Date("2026-08-30T10:00:00Z"),
+			}),
+			declarationRow({
+				siren: SIREN_B,
+				year: 2100,
+				updatedAt: new Date("2026-08-31T10:00:00Z"),
+			}),
+		]);
+
+		const publications = await listRecentPublicDeclarations(2);
+
+		expect(publications.map((item) => item.siren)).toEqual([SIREN_B, SIREN_A]);
+		expect(publications[0]).toMatchObject({
+			name: NON_DIFFUSIBLE_LABEL,
+			year: 2100,
+			publishedAt: new Date("2026-08-31T10:00:00Z"),
+		});
 	});
 });

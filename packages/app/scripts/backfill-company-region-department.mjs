@@ -19,8 +19,8 @@ import postgres from "postgres";
 
 import { getLocationFromPostalCode } from "../src/modules/domain/shared/regions.ts";
 
-const WEEZ_CONCURRENCY = 5;
-const DELAY_BETWEEN_BATCHES_MS = 150;
+const WEEZ_CONCURRENCY = 10;
+const DELAY_BETWEEN_BATCHES_MS = 100;
 
 const dryRun = process.argv.includes("--dry-run");
 
@@ -133,9 +133,7 @@ async function main() {
 			batch.map(async ({ siren, updated_at: selectedUpdatedAt }) => {
 				const registryLocation = await fetchLocation(siren);
 				if (!registryLocation) return { siren, filled: false };
-				const isForeign = Boolean(
-					registryLocation.countryCode || registryLocation.countryLabel,
-				);
+				const isForeign = Boolean(registryLocation.countryCode);
 				const location = isForeign
 					? {
 							regionCode: null,
@@ -144,7 +142,7 @@ async function main() {
 							departmentLabel: null,
 						}
 					: getLocationFromPostalCode(registryLocation.postalCode);
-				if (!location.departmentCode && !registryLocation.countryLabel) {
+				if (!isForeign && !location.departmentCode) {
 					return { siren, filled: false };
 				}
 

@@ -555,8 +555,7 @@ async function main() {
 						${year}, ${publicReleaseDate}, ${deadline}, ${deadline},
 						${deadline}, ${deadline}, ${deadline}, ${deadline}, ${deadline}
 					)
-					ON CONFLICT (year) DO UPDATE SET
-						public_data_release_date = EXCLUDED.public_data_release_date
+					ON CONFLICT (year) DO NOTHING
 				`;
 			}
 

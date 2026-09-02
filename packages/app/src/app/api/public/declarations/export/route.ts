@@ -1,4 +1,4 @@
-import { and, eq, ilike, isNotNull, isNull, or, sql } from "drizzle-orm";
+import { and, eq, ilike, isNotNull, isNull, sql } from "drizzle-orm";
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -6,9 +6,11 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import type {
 	PublicCompanySource,
 	PublicDeclarationDTO,
+	PublicSearchInput,
 } from "~/modules/public-api";
 import {
 	PUBLIC_API_EXPORT_HEADERS,
+	parsePublicSearchInput,
 	publicDeclarationColumns,
 	toPublicDeclaration,
 } from "~/modules/public-api";
@@ -22,9 +24,9 @@ import {
 	gipMdsData,
 } from "~/server/db/schema";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
-import { nafSectionCondition } from "~/server/services/publicDeclarationsService";
+import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
 
-const MAX_EXPORT_ROWS = 10_000;
+const MAX_XLSX_EXPORT_ROWS = 10_000;
 
 export function OPTIONS(): Response {
 	return new Response(null, {
@@ -33,67 +35,24 @@ export function OPTIONS(): Response {
 	});
 }
 
-function exportFilters(searchParams: URLSearchParams) {
-	const conditions = [];
-	const q = searchParams.get("q")?.trim();
-	if (q) {
-		const siren = q.replace(/\s/g, "");
-		conditions.push(
-			/^\d{9}$/.test(siren)
-				? eq(declarations.siren, siren)
-				: and(diffusibleCompanyCondition(), ilike(companies.name, `%${q}%`)),
-		);
+function exportFilters(input: PublicSearchInput) {
+	const conditions = publicDeclarationFacetConditions(input);
+	if (input.q) {
+		const siren = input.q.replace(/\s/g, "");
+		const queryFilter = /^\d{9}$/.test(siren)
+			? eq(declarations.siren, siren)
+			: and(
+					diffusibleCompanyCondition(),
+					ilike(companies.name, `%${input.q}%`),
+				);
+		if (queryFilter) conditions.push(queryFilter);
 	}
-	const city = searchParams.get("city");
-	if (city) {
-		conditions.push(
-			and(diffusibleCompanyCondition(), ilike(companies.city, `%${city}%`)),
-		);
-	}
-	const region = searchParams.get("region");
-	if (region) {
-		conditions.push(
-			and(
-				diffusibleCompanyCondition(),
-				or(eq(companies.regionCode, region), eq(companies.region, region)),
-			),
-		);
-	}
-	const department = searchParams.get("departement");
-	if (department) {
-		conditions.push(
-			and(
-				diffusibleCompanyCondition(),
-				eq(companies.departmentCode, department),
-			),
-		);
-	}
-	const naf = searchParams.get("naf");
-	if (naf) {
-		conditions.push(
-			and(diffusibleCompanyCondition(), nafSectionCondition(naf)),
-		);
-	}
-	const year = Number(searchParams.get("year"));
-	if (Number.isInteger(year) && year > 0)
-		conditions.push(eq(declarations.year, year));
-	const workforceMin = Number(searchParams.get("workforceMin"));
-	if (Number.isFinite(workforceMin) && searchParams.has("workforceMin")) {
-		conditions.push(
-			sql`${gipMdsData.workforceEma}::numeric >= ${workforceMin}`,
-		);
-	}
-	const workforceMax = Number(searchParams.get("workforceMax"));
-	if (Number.isFinite(workforceMax) && searchParams.has("workforceMax")) {
-		conditions.push(
-			sql`${gipMdsData.workforceEma}::numeric <= ${workforceMax}`,
-		);
-	}
+	if (input.year) conditions.push(eq(declarations.year, input.year));
 	return conditions;
 }
 
 async function fetchPublishableDeclarations(
-	searchParams: URLSearchParams,
+	input: PublicSearchInput,
 	limit?: number,
 ) {
 	const query = db
@@ -135,7 +94,7 @@ async function fetchPublishableDeclarations(
 			and(
 				eq(declarations.status, "demarche_completed"),
 				isNull(declarations.cancelledAt),
-				...exportFilters(searchParams),
+				...exportFilters(input),
 			),
 		)
 		.orderBy(declarations.year, companies.siren);
@@ -282,16 +241,23 @@ export const GET = withAuditedRoute(
 				);
 			}
 			const format = formatResult.data;
+			const inputResult = parsePublicSearchInput(searchParams);
+			if (!inputResult.success) {
+				return NextResponse.json(
+					{ error: "Paramètres de filtre invalides." },
+					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
+				);
+			}
 
 			const rows = await fetchPublishableDeclarations(
-				searchParams,
-				MAX_EXPORT_ROWS + 1,
+				inputResult.data,
+				format === "xlsx" ? MAX_XLSX_EXPORT_ROWS + 1 : undefined,
 			);
-			if (rows.length > MAX_EXPORT_ROWS) {
+			if (format === "xlsx" && rows.length > MAX_XLSX_EXPORT_ROWS) {
 				return NextResponse.json(
 					{
 						error:
-							"L’export est limité à 10 000 lignes. Ajoutez des filtres pour réduire le nombre de résultats.",
+							"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
 					},
 					{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
 				);

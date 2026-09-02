@@ -93,7 +93,8 @@ function readRow(sheet: ExcelJS.Worksheet, rowNumber: number): unknown[] {
 describe("buildRepresentationExportRows", () => {
 	const mockOrderBy = vi.fn();
 	const mockWhere = vi.fn(() => ({ orderBy: mockOrderBy }));
-	const mockInnerJoin = vi.fn(() => ({ where: mockWhere }));
+	const mockLeftJoin = vi.fn(() => ({ where: mockWhere }));
+	const mockInnerJoin = vi.fn(() => ({ leftJoin: mockLeftJoin }));
 	const mockFrom = vi.fn(() => ({ innerJoin: mockInnerJoin }));
 	const mockSelect = vi.fn((_projection: Record<string, unknown>) => ({
 		from: mockFrom,
@@ -117,6 +118,18 @@ describe("buildRepresentationExportRows", () => {
 		expect(mockWhere).toHaveBeenCalledWith(
 			eq(representationDeclarations.status, "submitted"),
 		);
+	});
+
+	it("applies the observatory facets to filtered downloads", async () => {
+		await buildRepresentationExportRows(mockDb as never, {
+			region: ["11", "84"],
+			workforceRanges: ["1000+"],
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(mockLeftJoin).toHaveBeenCalledTimes(1);
+		expect(mockWhere).toHaveBeenCalledTimes(1);
 	});
 
 	it("keeps identity and location for a diffusible company", async () => {

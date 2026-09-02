@@ -62,6 +62,24 @@ const publicSearchQueryParamsSchema = z.object({
 
 export const publicSearchInputSchema = publicSearchQueryParamsSchema;
 
+export function parsePublicSearchInput(searchParams: URLSearchParams) {
+	const workforceMin = searchParams.get("workforceMin");
+	const workforceMax = searchParams.get("workforceMax");
+	const year = searchParams.get("year");
+	return publicSearchInputSchema.safeParse({
+		q: searchParams.get("q") ?? undefined,
+		city: searchParams.get("city") ?? undefined,
+		region: searchParams.getAll("region"),
+		departement: searchParams.getAll("departement"),
+		naf: searchParams.getAll("naf"),
+		workforceRanges: searchParams.getAll("workforceRanges"),
+		workforceMin: workforceMin ? Number(workforceMin) : undefined,
+		workforceMax: workforceMax ? Number(workforceMax) : undefined,
+		year: year ? Number(year) : undefined,
+		sort: searchParams.get("sort") ?? undefined,
+	});
+}
+
 export type PublicSearchInput = z.infer<typeof publicSearchInputSchema>;
 
 export const publicDeclarationDTOSchema = z.object({

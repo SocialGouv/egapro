@@ -158,6 +158,19 @@ describe("MultiSelectField", () => {
 		expect(submittedValues(container, "region")).toEqual(["53"]);
 	});
 
+	it("selects only visible options while preserving hidden selections", async () => {
+		const user = userEvent.setup();
+		const { container } = renderField(["53"], true);
+
+		await user.click(
+			screen.getByRole("button", { name: /1 option sélectionnée/ }),
+		);
+		await user.type(screen.getByRole("searchbox"), "Auvergne");
+		await user.click(screen.getByRole("button", { name: /Tout sélectionner/ }));
+
+		expect(submittedValues(container, "region").sort()).toEqual(["53", "84"]);
+	});
+
 	it("closes on Escape and returns focus to the trigger", async () => {
 		const user = userEvent.setup();
 		renderField();

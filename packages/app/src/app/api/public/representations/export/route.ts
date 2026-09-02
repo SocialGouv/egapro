@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { PUBLIC_API_EXPORT_HEADERS } from "~/modules/public-api";
 import {
 	buildRepresentationExportRows,
 	generateRepresentationCsv,
 	generateRepresentationXlsx,
 } from "~/modules/export";
+import {
+	PUBLIC_API_EXPORT_HEADERS,
+	parsePublicSearchInput,
+} from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
@@ -35,8 +38,9 @@ export const GET = withAuditedRoute(
 		try {
 			const limited = await enforcePublicApiRateLimit(request);
 			if (limited) return limited;
+			const searchParams = new URL(request.url).searchParams;
 			const format = FORMAT_SCHEMA.safeParse(
-				new URL(request.url).searchParams.get("format") ?? "xlsx",
+				searchParams.get("format") ?? "xlsx",
 			);
 			if (!format.success) {
 				return NextResponse.json(
@@ -44,7 +48,14 @@ export const GET = withAuditedRoute(
 					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
 				);
 			}
-			const rows = await buildRepresentationExportRows(db);
+			const input = parsePublicSearchInput(searchParams);
+			if (!input.success) {
+				return NextResponse.json(
+					{ error: "Paramètres de filtre invalides." },
+					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
+				);
+			}
+			const rows = await buildRepresentationExportRows(db, input.data);
 
 			if (format.data === "csv") {
 				return new NextResponse(generateRepresentationCsv(rows), {

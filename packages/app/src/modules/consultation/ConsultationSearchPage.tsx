@@ -12,6 +12,7 @@ import { SearchResultItem } from "./SearchResultItem";
 import {
 	buildSearchQuery,
 	type ConsultationSearchParams,
+	exportHref,
 	parseConsultationSearchParams,
 	searchHref,
 	toPublicSearchInput,
@@ -81,8 +82,14 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 						{resultsLabel(result.count)}
 					</h2>
 					<DownloadDataModal
-						declarationsHref="/api/public/declarations/export?format=csv"
-						representationsHref="/api/public/representations/export?format=csv"
+						declarationsHref={exportHref(
+							"/api/public/declarations/export",
+							params,
+						)}
+						representationsHref={exportHref(
+							"/api/public/representations/export",
+							params,
+						)}
 					/>
 				</div>
 

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { CompanyConsultationPage } from "~/modules/consultation";
-import { getPublicDeclarationsBySiren } from "~/modules/public-api";
+import {
+	getPublicDeclarationsBySiren,
+	getPublicRepresentationsBySiren,
+} from "~/modules/public-api";
 
 type Props = {
 	params: Promise<{ siren: string }>;
@@ -12,8 +15,11 @@ export async function generateMetadata({
 	searchParams,
 }: Props): Promise<Metadata> {
 	const [{ siren }, query] = await Promise.all([params, searchParams]);
-	const rows = await getPublicDeclarationsBySiren(siren, 1);
-	const company = rows[0];
+	const [declarations, representations] = await Promise.all([
+		getPublicDeclarationsBySiren(siren, 1),
+		getPublicRepresentationsBySiren(siren, 1),
+	]);
+	const company = declarations[0] ?? representations[0];
 	return {
 		title: company
 			? `${company.name ?? "Entreprise"} — résultats d’égalité professionnelle`

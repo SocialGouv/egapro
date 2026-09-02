@@ -84,13 +84,14 @@ export function MultiSelectField({
 	}, []);
 
 	const panelId = `${id}-panel`;
-	const allSelected = values.length === options.length && options.length > 0;
-
 	const visibleOptions = useMemo(() => {
 		if (!searchable || query.trim() === "") return options;
 		const needle = normalize(query.trim());
 		return options.filter((option) => normalize(option.label).includes(needle));
 	}, [options, query, searchable]);
+	const allSelected =
+		visibleOptions.length > 0 &&
+		visibleOptions.every((option) => values.includes(option.value));
 
 	// A checked option that the filter hides is unmounted, and an unmounted
 	// checkbox is not serialised — mirror it as a hidden input so filtering never
@@ -112,7 +113,17 @@ export function MultiSelectField({
 	}
 
 	function toggleAll() {
-		setValues(allSelected ? [] : options.map((option) => option.value));
+		const visibleValues = new Set(visibleOptions.map((option) => option.value));
+		setValues((current) =>
+			allSelected
+				? current.filter((value) => !visibleValues.has(value))
+				: [
+						...current,
+						...visibleOptions
+							.map((option) => option.value)
+							.filter((value) => !current.includes(value)),
+					],
+		);
 	}
 
 	const triggerLabel =

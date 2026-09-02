@@ -1,12 +1,21 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ilike } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
-import { NON_DIFFUSIBLE_LABEL, toNumber } from "~/modules/public-api";
+import {
+	NON_DIFFUSIBLE_LABEL,
+	type PublicSearchInput,
+	toNumber,
+} from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
-import { companies, representationDeclarations } from "~/server/db/schema";
+import {
+	companies,
+	gipMdsData,
+	representationDeclarations,
+} from "~/server/db/schema";
+import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
 
 export type RepresentationExportRow = {
 	referenceYear: number;
@@ -57,7 +66,30 @@ const REPRESENTATION_EXPORT_COLUMNS: Array<{
 	{ key: "publishModalities", header: "Modalites_publication" },
 ];
 
-async function fetchSubmittedRepresentationDeclarations(db: DB) {
+function representationExportFilters(input: PublicSearchInput) {
+	const conditions = publicDeclarationFacetConditions(input);
+	if (input.q) {
+		const siren = input.q.replace(/\s/g, "");
+		const queryFilter = /^\d{9}$/.test(siren)
+			? eq(representationDeclarations.siren, siren)
+			: and(
+					diffusibleCompanyCondition(),
+					ilike(companies.name, `%${input.q}%`),
+				);
+		if (queryFilter) conditions.push(queryFilter);
+	}
+	if (input.year) {
+		conditions.push(eq(representationDeclarations.year, input.year));
+	}
+	return conditions;
+}
+
+async function fetchSubmittedRepresentationDeclarations(
+	db: DB,
+	input?: PublicSearchInput,
+) {
+	const submitted = eq(representationDeclarations.status, "submitted");
+	const filters = input ? representationExportFilters(input) : [];
 	return db
 		.select({
 			year: representationDeclarations.year,
@@ -83,7 +115,14 @@ async function fetchSubmittedRepresentationDeclarations(db: DB) {
 		})
 		.from(representationDeclarations)
 		.innerJoin(companies, eq(representationDeclarations.siren, companies.siren))
-		.where(eq(representationDeclarations.status, "submitted"))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, representationDeclarations.siren),
+				eq(gipMdsData.year, representationDeclarations.year),
+			),
+		)
+		.where(filters.length > 0 ? and(submitted, ...filters) : submitted)
 		.orderBy(representationDeclarations.year, companies.siren);
 }
 
@@ -119,8 +158,9 @@ function toExportRow(
 
 export async function buildRepresentationExportRows(
 	db: DB,
+	input?: PublicSearchInput,
 ): Promise<RepresentationExportRow[]> {
-	const rows = await fetchSubmittedRepresentationDeclarations(db);
+	const rows = await fetchSubmittedRepresentationDeclarations(db, input);
 	return rows.map(toExportRow);
 }
 

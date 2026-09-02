@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	backToSearchHref,
+	exportHref,
 	parseConsultationSearchParams,
 	searchHref,
 	toPublicSearchInput,
@@ -94,5 +95,23 @@ describe("backToSearchHref", () => {
 		expect(
 			backToSearchHref("q=Atelier&evil=%3Cscript%3E&next=//example.com"),
 		).toBe("/index-egapro/recherche?q=Atelier");
+	});
+});
+
+describe("exportHref", () => {
+	it("carries every active facet but not pagination", () => {
+		const params = parseConsultationSearchParams({
+			q: "Atelier",
+			region: ["11", "84"],
+			departement: "75",
+			naf: ["C", "J"],
+			workforceRanges: "1000+",
+			page: "3",
+			limit: "25",
+		});
+
+		expect(exportHref("/api/public/declarations/export", params)).toBe(
+			"/api/public/declarations/export?format=csv&q=Atelier&region=11&region=84&departement=75&naf=C&naf=J&workforceRanges=1000%2B",
+		);
 	});
 });

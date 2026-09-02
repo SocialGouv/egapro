@@ -43,6 +43,7 @@ export type {
 	PublicSearchResultDTO,
 } from "./schemas";
 export {
+	parsePublicSearchInput,
 	publicDeclarationDTOSchema,
 	publicRepresentationDTOSchema,
 	publicRepresentationSearchInputSchema,

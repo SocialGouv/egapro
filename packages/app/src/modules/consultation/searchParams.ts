@@ -4,7 +4,12 @@ import {
 	type ObservatoryWorkforceRange,
 } from "~/modules/domain";
 import type { PublicSearchInput } from "~/modules/public-api";
-import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS, SEARCH_PATH } from "./constants";
+import {
+	DEFAULT_PAGE_SIZE,
+	FACET_KEYS,
+	PAGE_SIZE_OPTIONS,
+	SEARCH_PATH,
+} from "./constants";
 
 /** A URL facet: absent, single, or repeated — always read as a list. */
 function facet(raw: string | string[] | undefined): string[] {
@@ -120,4 +125,18 @@ export function searchHref(
 ): string {
 	const query = buildSearchQuery(params, overrides);
 	return query ? `${SEARCH_PATH}?${query}` : SEARCH_PATH;
+}
+
+export function exportHref(
+	path: string,
+	params: ConsultationSearchParams,
+): string {
+	const exportQuery = new URLSearchParams({ format: "csv" });
+	const searchQuery = new URLSearchParams(buildSearchQuery(params));
+	for (const key of FACET_KEYS) {
+		for (const value of searchQuery.getAll(key)) {
+			exportQuery.append(key, value);
+		}
+	}
+	return `${path}?${exportQuery}`;
 }

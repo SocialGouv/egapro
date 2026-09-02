@@ -42,6 +42,7 @@ vi.mock("drizzle-orm", () => ({
 	eq: (a: unknown, b: unknown) => ({ eq: [a, b] }),
 	isNotNull: (a: unknown) => ({ isNotNull: a }),
 	isNull: (a: unknown) => ({ isNull: a }),
+	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) => ({ or: args }),
 	sql: (strings: TemplateStringsArray) => ({ sql: strings.join("") }),
 }));
@@ -254,6 +255,16 @@ describe("GET /api/public/declarations/export", () => {
 		expect(lines[1]).toContain('"Alpha & Co"');
 	});
 
+	it("accepts repeated facets and workforce brackets on filtered exports", async () => {
+		setRows([buildRow()]);
+
+		const response = await callGet(
+			"?format=csv&region=11&region=84&naf=C&naf=J&workforceRanges=1000%2B",
+		);
+
+		expect(response.status).toBe(200);
+	});
+
 	it("returns an Excel workbook when format=xlsx", async () => {
 		setRows([buildRow()]);
 
@@ -346,19 +357,26 @@ describe("GET /api/public/declarations/export", () => {
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 	});
 
-	it.each([
-		"",
-		"?format=csv",
-		"?format=xlsx",
-	])("requires filters when an export would exceed 10,000 rows (%s)", async (search) => {
+	it("requires filters when an Excel export would exceed 10,000 rows", async () => {
 		setRows(Array.from({ length: 10_001 }, () => buildRow()));
 
-		const response = await callGet(search);
+		const response = await callGet("?format=xlsx");
 
 		expect(response.status).toBe(413);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(await response.json()).toEqual(
 			expect.objectContaining({ error: expect.stringContaining("10 000") }),
 		);
+	});
+
+	it.each([
+		"",
+		"?format=csv",
+	])("keeps complete open-data exports unbounded (%s)", async (search) => {
+		setRows(Array.from({ length: 10_001 }, () => buildRow()));
+
+		const response = await callGet(search);
+
+		expect(response.status).toBe(200);
 	});
 });

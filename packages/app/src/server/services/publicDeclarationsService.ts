@@ -20,6 +20,8 @@ import {
 	OBSERVATORY_WORKFORCE_RANGES,
 } from "~/modules/domain";
 import {
+	isPublicCompanyDiffusible,
+	NON_DIFFUSIBLE_LABEL,
 	type PublicSearchInput,
 	type PublicSearchResultDTO,
 	publicDeclarationColumns,
@@ -57,6 +59,44 @@ export type PublicDeclarationFacets = Pick<
 	| "workforceMax"
 	| "workforceRanges"
 >;
+
+export async function listRecentPublicDeclarations(limit: number) {
+	const publishedAt = sql<Date>`greatest(
+		${declarations.updatedAt},
+		${campaignDeadlines.publicDataReleaseDate}::timestamp
+	)`;
+	const rows = await db
+		.select({
+			siren: companies.siren,
+			name: companies.name,
+			address: companies.address,
+			statutDiffusion: companies.statutDiffusion,
+			year: declarations.year,
+			publishedAt,
+		})
+		.from(declarations)
+		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.innerJoin(campaignDeadlines, eq(declarations.year, campaignDeadlines.year))
+		.where(
+			and(
+				notCancelledCondition(),
+				submittedDeclarationCondition(),
+				isNotNull(campaignDeadlines.publicDataReleaseDate),
+				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+			),
+		)
+		.orderBy(desc(publishedAt), asc(companies.siren))
+		.limit(limit);
+
+	return rows.map((row) => ({
+		siren: row.siren,
+		year: row.year,
+		name: isPublicCompanyDiffusible(row.statutDiffusion, row.address)
+			? row.name
+			: NON_DIFFUSIBLE_LABEL,
+		publishedAt: new Date(String(row.publishedAt)),
+	}));
+}
 
 /**
  * Facet conditions shared by the search endpoint and the export endpoint, so a
