@@ -98,6 +98,7 @@ export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
 export {
+	applyDeclarationClosure,
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
