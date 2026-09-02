@@ -370,6 +370,47 @@ describe("Step2Upload", () => {
 		).toBeDisabled();
 	});
 
+	it("disables the dropzone once every required content type is covered, even with slots remaining (#4299)", () => {
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// Only 1 of the 4 MAX_CSE_FILES slots is used, but the single
+		// required column is already covered by that file.
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeDisabled();
+		expect(getFileInput()).toBeDisabled();
+	});
+
+	it("re-enables the dropzone once an association is cleared, freeing a required content type (#4299)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeDisabled();
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeEnabled();
+		expect(getFileInput()).toBeEnabled();
+	});
+
 	it("reveals the missing-content error only after a submit attempt, blocking finalize (S8)", async () => {
 		const user = userEvent.setup();
 		renderStep({
