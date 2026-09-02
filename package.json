@@ -30,6 +30,7 @@
 		"db:generate": "pnpm --filter app run db:generate",
 		"db:migrate": "pnpm --filter app run db:migrate",
 		"db:push": "pnpm --filter app run db:push",
+		"db:seed-observatory": "pnpm --filter app run db:seed-observatory",
 		"db:studio": "pnpm --filter app run db:studio",
 		"test:e2e": "PLAYWRIGHT_BASE_URL=${SITE_URL:-http://localhost:3000} pnpm --filter app run test:e2e",
 		"test:a11y": "pnpm --filter app run test:a11y",

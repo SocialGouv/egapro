@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCompanyDiffusible } from "../projection";
+import { isPublicCompanyDiffusible } from "../projection";
 import {
 	type PublicRepresentationCompanySource,
 	type PublicRepresentationSource,
@@ -140,7 +140,7 @@ describe("toPublicRepresentation", () => {
 		});
 
 		for (const field of MASKED_COMPANY_FIELDS) {
-			expect(dto[field]).toBeNull();
+			expect(dto[field]).toBe("Non-diffusible");
 		}
 	});
 
@@ -172,7 +172,7 @@ describe("toPublicRepresentation", () => {
 		}
 	});
 
-	it("delegates the masking decision to isCompanyDiffusible for every statut", () => {
+	it("uses the status and the legacy address fallback for masking", () => {
 		for (const statutDiffusion of ["O", "N", "P", "", null]) {
 			const dto = toPublicRepresentation(declarationFixture, {
 				...companyFixture,
@@ -180,9 +180,18 @@ describe("toPublicRepresentation", () => {
 			});
 
 			expect(dto.name).toBe(
-				isCompanyDiffusible(statutDiffusion) ? "Société Démo" : null,
+				isPublicCompanyDiffusible(statutDiffusion, companyFixture.address)
+					? "Société Démo"
+					: "Non-diffusible",
 			);
 		}
+
+		const legacyNonDiffusible = toPublicRepresentation(declarationFixture, {
+			...companyFixture,
+			statutDiffusion: null,
+			address: null,
+		});
+		expect(legacyNonDiffusible.name).toBe("Non-diffusible");
 	});
 
 	it("converts the numeric percentage strings to numbers", () => {
@@ -283,9 +292,9 @@ describe("publicRepresentationSearchInputSchema", () => {
 			}),
 		).toEqual({
 			q: "acme",
-			region: "11",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["11"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2026,
 			limit: 50,
 			offset: 20,

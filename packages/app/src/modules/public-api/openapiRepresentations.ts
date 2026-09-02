@@ -11,7 +11,7 @@ import {
 export const publicRepresentationSchema = {
 	type: "object",
 	description:
-		"Écarts de représentation équilibrée femmes-hommes parmi les cadres dirigeants et les instances dirigeantes (art. D. 1142-19). Ce schéma expose uniquement des **données brutes** déclarées par l'entreprise. Aucun verdict de conformité ni score n'est exposé. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), les champs d'identité (`name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`) sont `null`.",
+		"Écarts de représentation équilibrée femmes-hommes parmi les cadres dirigeants et les instances dirigeantes (art. D. 1142-19). Ce schéma expose uniquement des **données brutes** déclarées par l'entreprise. Aucun verdict de conformité ni score n'est exposé. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible`.",
 	required: ["siren", "year"],
 	properties: {
 		siren: {

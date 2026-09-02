@@ -1,0 +1,43 @@
+{{- if .Values.global.observatoryDemoSeedEnabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: observatory-demo-seed
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  activeDeadlineSeconds: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: observatory-demo-seed
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: seed
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          envFrom:
+            - secretRef:
+                name: "{{ .Values.global.pgSecretName }}"
+          env:
+            - name: OBSERVATORY_SEED_WAIT_FOR_SCHEMA_SECONDS
+              value: "120"
+          command:
+            - node
+            - packages/app/scripts/seed-demo-observatory.mjs
+          resources:
+            requests:
+              cpu: 25m
+              memory: 48Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+{{- end }}

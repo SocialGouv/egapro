@@ -11,7 +11,10 @@
 		// et le moteur écrit du JSON à 2 espaces là où ce dépôt formate en tabulations. Biome suit
 		// .gitignore, qui ignore désormais tout le répertoire, mais l'exclusion reste explicite :
 		// un run local laisse ces fichiers sur le disque, et `format` ne doit pas les réécrire.
-		"includes": ["**", "!**/.ultra11y"]
+		// `.impeccable/` relève du même cas : le hook de la skill le réécrit à chaque
+		// édition de .tsx, en JSON à 2 espaces. Il est gitignoré, mais un run local
+		// laisse le cache sur le disque et faisait échouer `format:check`.
+		"includes": ["**", "!**/.ultra11y", "!**/.impeccable"]
 	},
 	"assist": {
 		"enabled": true,

@@ -27,9 +27,10 @@ L'indicateur G (écart de rémunération déclaré par l'entreprise par catégor
 
 ### Identité des entreprises non diffusibles masquée
 
-Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiffusion === 'N'`), les champs d'identité sont retournés à `null` :
+Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible` :
 
-- `name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`
+- rémunération : `name`, `address`, `city`, `regionCode`, `region`, `departmentCode`, `departmentLabel`, `countryCode`, `countryLabel`, `nafCode`, `nafLabel`
+- représentation : `name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`
 
 Le SIREN, l'effectif EMA (`workforceEma`) et l'intégralité des indicateurs A–F restent disponibles.
 
@@ -95,7 +96,7 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export"
 
 # CSV (séparateur ;)
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv" \
-  -o declarations_export.csv
+  -o index-egapro-remunerations.csv
 ```
 
 ## Licence

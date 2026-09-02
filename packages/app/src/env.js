@@ -144,6 +144,9 @@ export const env = createEnv({
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
 		// the app module graph), but we declare it here for validation and docs.
 		VALKEY_URL: z.url().optional(),
+		// Optional comma-separated API tokens. Recognised tokens receive the
+		// documented higher public-API quota; anonymous access remains available.
+		EGAPRO_PUBLIC_API_TOKENS: z.string().optional().default(""),
 	},
 
 	/**
@@ -211,6 +214,7 @@ export const env = createEnv({
 		EGAPRO_DECLARATION_RETENTION_YEARS:
 			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
+		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,

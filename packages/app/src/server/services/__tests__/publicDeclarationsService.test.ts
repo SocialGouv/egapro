@@ -25,9 +25,13 @@ vi.mock("~/server/db/schema", () => ({
 	companies: {
 		siren: "companies.siren",
 		name: "companies.name",
+		address: "companies.address",
+		city: "companies.city",
+		regionCode: "companies.regionCode",
 		region: "companies.region",
 		departmentCode: "companies.departmentCode",
 		nafCode: "companies.nafCode",
+		statutDiffusion: "companies.statutDiffusion",
 	},
 	campaignDeadlines: {
 		year: "campaignDeadlines.year",
@@ -42,9 +46,12 @@ vi.mock("~/server/db/schema", () => ({
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => ({ op: "and", args: args.filter(Boolean) }),
-	count: () => ({ op: "count" }),
+	asc: (col: unknown) => ({ op: "asc", col }),
+	countDistinct: () => ({ op: "countDistinct" }),
+	desc: (col: unknown) => ({ op: "desc", col }),
 	eq: (col: unknown, value: unknown) => ({ op: "eq", col, value }),
 	ilike: (col: unknown, value: unknown) => ({ op: "ilike", col, value }),
+	inArray: (col: unknown, values: unknown) => ({ op: "inArray", col, values }),
 	isNotNull: (col: unknown) => ({ op: "isNotNull", col }),
 	isNull: (col: unknown) => ({ op: "isNull", col }),
 	ne: (col: unknown, value: unknown) => ({ op: "ne", col, value }),
@@ -63,38 +70,43 @@ vi.mock("~/modules/public-api", () => ({
 
 const service = () => import("~/server/services/publicDeclarationsService");
 
-type Captured = { where?: unknown; limit?: number; offset?: number };
+type Captured = {
+	where?: unknown;
+	order?: unknown[];
+	limit?: number;
+	offset?: number;
+};
 
 // Distinguishes the two Promise.all queries by shape: the data query chains
 // `.leftJoin().where().limit().offset()`, the count query stops at `.where()`.
 function primeDb(rows: unknown[], total: number, captured: Captured) {
-	mocks.dbSelect.mockImplementation(() => ({
-		from: () => ({
-			innerJoin: () => ({
-				innerJoin: () => ({
-					// data query: leftJoin → where → limit → offset
-					leftJoin: () => ({
-						where: (where: unknown) => {
-							captured.where = where;
-							return {
-								limit: (limit: number) => {
-									captured.limit = limit;
-									return {
-										offset: (offset: number) => {
-											captured.offset = offset;
-											return Promise.resolve(rows);
-										},
-									};
-								},
-							};
-						},
-					}),
-					// count query: where resolves directly
-					where: () => Promise.resolve([{ total }]),
-				}),
-			}),
-		}),
-	}));
+	let call = 0;
+	mocks.dbSelect.mockImplementation(() => {
+		call += 1;
+		const chain = {
+			from: () => chain,
+			innerJoin: () => chain,
+			leftJoin: () => chain,
+			where: (where: unknown) => {
+				if (call === 2) return Promise.resolve([{ total }]);
+				captured.where = where;
+				return chain;
+			},
+			orderBy: (...order: unknown[]) => {
+				captured.order = order;
+				return chain;
+			},
+			limit: (limit: number) => {
+				captured.limit = limit;
+				return chain;
+			},
+			offset: (offset: number) => {
+				captured.offset = offset;
+				return Promise.resolve(rows);
+			},
+		};
+		return chain;
+	});
 }
 
 const DEFAULT_INPUT = { limit: 10, offset: 0 } as const;
@@ -121,26 +133,13 @@ describe("searchPublicDeclarations", () => {
 
 	it("defaults the count to 0 when the count query returns no row", async () => {
 		const captured: Captured = {};
-		mocks.dbSelect.mockImplementation(() => ({
-			from: () => ({
-				innerJoin: () => ({
-					innerJoin: () => ({
-						leftJoin: () => ({
-							where: () => ({
-								limit: () => ({ offset: () => Promise.resolve([]) }),
-							}),
-						}),
-						where: () => Promise.resolve([]),
-					}),
-				}),
-			}),
-		}));
+		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
 		const result = await searchPublicDeclarations(DEFAULT_INPUT);
 
 		expect(result).toEqual({ data: [], count: 0 });
-		expect(captured.where).toBeUndefined();
+		expect(captured.where).toBeDefined();
 	});
 
 	it("forwards pagination limit and offset to the data query", async () => {
@@ -178,7 +177,7 @@ describe("searchPublicDeclarations", () => {
 		expect(conditions).toContainEqual(expect.objectContaining({ op: "sql" }));
 	});
 
-	it("adds an ILIKE OR filter on name and siren when q is provided", async () => {
+	it("matches a partial name only for a diffusible company", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
@@ -187,66 +186,168 @@ describe("searchPublicDeclarations", () => {
 
 		const conditions = (captured.where as { args: unknown[] }).args;
 		expect(conditions).toContainEqual({
-			op: "or",
+			op: "and",
 			args: [
+				expect.objectContaining({
+					op: "sql",
+					values: [
+						"companies.statutDiffusion",
+						"companies.statutDiffusion",
+						"companies.address",
+					],
+				}),
 				{ op: "ilike", col: "companies.name", value: "%acme%" },
-				{ op: "ilike", col: "declarations.siren", value: "%acme%" },
 			],
 		});
 	});
 
-	it("skips the q filter when the OR builder yields no condition", async () => {
+	it("matches a SIREN only when the full nine digits are supplied", async () => {
+		const captured: Captured = {};
+		primeDb([], 0, captured);
+		const { searchPublicDeclarations } = await service();
+
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, q: "123 456 789" });
+
+		expect((captured.where as { args: unknown[] }).args).toContainEqual({
+			op: "eq",
+			col: "declarations.siren",
+			value: "123456789",
+		});
+	});
+
+	it("protects city filtering behind the diffusible identity condition", async () => {
+		const captured: Captured = {};
+		primeDb([], 0, captured);
+		const { searchPublicDeclarations } = await service();
+
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, city: "Paris" });
+
+		expect((captured.where as { args: unknown[] }).args).toContainEqual({
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{ op: "ilike", col: "companies.city", value: "%Paris%" },
+			],
+		});
+	});
+
+	it("adds both workforce bounds and a stable SIREN tie-breaker", async () => {
+		const captured: Captured = {};
+		primeDb([], 0, captured);
+		const { searchPublicDeclarations } = await service();
+
+		await searchPublicDeclarations({
+			...DEFAULT_INPUT,
+			workforceMin: 50,
+			workforceMax: 249,
+		});
+
+		const conditions = (
+			captured.where as { args: Array<{ op: string; values?: unknown[] }> }
+		).args;
+		expect(conditions).toContainEqual(
+			expect.objectContaining({
+				op: "sql",
+				values: ["gipMdsData.workforceEma", 50],
+			}),
+		);
+		expect(conditions).toContainEqual(
+			expect.objectContaining({
+				op: "sql",
+				values: ["gipMdsData.workforceEma", 249],
+			}),
+		);
+		expect(captured.order).toContainEqual({
+			op: "asc",
+			col: "companies.siren",
+		});
+	});
+
+	it("skips the region filter when the OR builder yields no condition", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		mocks.or.mockReturnValueOnce(undefined);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, q: "acme" });
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, region: ["11"] });
 
 		const conditions = (captured.where as { args: Array<{ op: string }> }).args;
-		expect(conditions).toHaveLength(4);
+		expect(conditions).toHaveLength(5);
 		expect(conditions.some((c) => c.op === "or")).toBe(false);
 	});
 
-	it("adds an equality filter on region", async () => {
+	it("ORs the region facet over both the code and the label columns", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, region: "11" });
+		await searchPublicDeclarations({
+			...DEFAULT_INPUT,
+			region: ["Île-de-France", "11"],
+		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "eq",
-			col: "companies.region",
-			value: "11",
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{
+					op: "or",
+					args: [
+						{
+							op: "inArray",
+							col: "companies.regionCode",
+							values: ["Île-de-France", "11"],
+						},
+						{
+							op: "inArray",
+							col: "companies.region",
+							values: ["Île-de-France", "11"],
+						},
+					],
+				},
+			],
 		});
 	});
 
-	it("maps departement to the company department code filter", async () => {
+	it("maps every departement of the facet to the department code column", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, departement: "75" });
+		await searchPublicDeclarations({
+			...DEFAULT_INPUT,
+			departement: ["75", "69"],
+		});
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "eq",
-			col: "companies.departmentCode",
-			value: "75",
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{
+					op: "inArray",
+					col: "companies.departmentCode",
+					values: ["75", "69"],
+				},
+			],
 		});
 	});
 
-	it("adds an equality filter on naf", async () => {
+	it("ORs the naf facet over the section conditions", async () => {
 		const captured: Captured = {};
 		primeDb([], 0, captured);
 		const { searchPublicDeclarations } = await service();
 
-		await searchPublicDeclarations({ ...DEFAULT_INPUT, naf: "62.01Z" });
+		await searchPublicDeclarations({ ...DEFAULT_INPUT, naf: ["62.01Z"] });
 
 		expect((captured.where as { args: unknown[] }).args).toContainEqual({
-			op: "eq",
-			col: "companies.nafCode",
-			value: "62.01Z",
+			op: "and",
+			args: [
+				expect.objectContaining({ op: "sql" }),
+				{
+					op: "or",
+					args: [{ op: "ilike", col: "companies.nafCode", value: "62.01Z%" }],
+				},
+			],
 		});
 	});
 
@@ -272,7 +373,7 @@ describe("searchPublicDeclarations", () => {
 		await searchPublicDeclarations(DEFAULT_INPUT);
 
 		const conditions = (captured.where as { args: Array<{ op: string }> }).args;
-		expect(conditions).toHaveLength(4);
+		expect(conditions).toHaveLength(5);
 		expect(conditions.some((c) => c.op === "or")).toBe(false);
 		expect(conditions.some((c) => c.op === "ilike")).toBe(false);
 	});

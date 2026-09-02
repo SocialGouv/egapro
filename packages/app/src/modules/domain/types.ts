@@ -38,6 +38,18 @@ export type CompanySize =
 /** Workforce range buckets used by admin/public statistics filters. */
 export type CompanySizeRange = "<50" | "50-99" | "100-149" | "150-249" | "250+";
 
+/**
+ * Workforce brackets of the public observatory search facet. Deliberately not
+ * `CompanySizeRange`: that one splits 100-249 in two for the statistics
+ * dashboards, while the observatory groups it and caps at 1000.
+ */
+export type ObservatoryWorkforceRange =
+	| "<50"
+	| "50-99"
+	| "100-249"
+	| "250-999"
+	| "1000+";
+
 /** Configurable campaign deadlines. */
 export type CampaignDeadlines = {
 	gipPublicationDate: Date | null;

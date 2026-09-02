@@ -66,6 +66,6 @@ describe("HomeSearch", () => {
 	it("has the correct name attribute on the search input", () => {
 		render(<HomeSearch />);
 		const input = screen.getByLabelText(/numéro siren/i);
-		expect(input).toHaveAttribute("name", "query");
+		expect(input).toHaveAttribute("name", "q");
 	});
 });

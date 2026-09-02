@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep2Schema } from "../schemas";
@@ -36,7 +37,6 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {

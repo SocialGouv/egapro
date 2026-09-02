@@ -43,6 +43,7 @@ packages/notifications/dist/
 !.codex/skills/
 !.codex/skills/**/
 !.codex/skills/**/SKILL.md
+!.codex/config.toml
 
 # claude code — ignore everything, then whitelist shared config
 .claude/*
@@ -65,3 +66,6 @@ scripts/matomo-local/.secrets/*
 # Python bytecode (matomo-local provisioning/seed scripts)
 __pycache__/
 *.pyc
+
+# Artefacts de la skill impeccable — jamais commités
+.impeccable/

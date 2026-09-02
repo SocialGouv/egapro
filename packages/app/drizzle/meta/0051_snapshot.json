@@ -1,5 +1,5 @@
 {
-	"id": "f4d17f35-b513-4c67-807e-2a4c88aad6dd",
+	"id": "7f0f2848-fafc-4e0c-84b3-d1e7fd8d765c",
 	"prevId": "1aa318fe-3aa1-49b0-bf71-cb5a5be768c3",
 	"version": "7",
 	"dialect": "postgresql",
@@ -151,12 +151,6 @@
 					"type": "date",
 					"primaryKey": false,
 					"notNull": true
-				},
-				"decl2_cse_opinion_deadline": {
-					"name": "decl2_cse_opinion_deadline",
-					"type": "date",
-					"primaryKey": false,
-					"notNull": true
 				}
 			},
 			"indexes": {},
@@ -189,6 +183,12 @@
 					"primaryKey": false,
 					"notNull": false
 				},
+				"city": {
+					"name": "city",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"naf_code": {
 					"name": "naf_code",
 					"type": "varchar(10)",
@@ -198,6 +198,12 @@
 				"naf_label": {
 					"name": "naf_label",
 					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"region_code": {
+					"name": "region_code",
+					"type": "varchar(3)",
 					"primaryKey": false,
 					"notNull": false
 				},

@@ -109,12 +109,14 @@ describe("fetchCompanyBySiren", () => {
 
 		const result = await fetchCompanyBySiren("532847196");
 
-		expect(result).toEqual({
+		expect(result).toMatchObject({
 			name: "Alpha Solutions",
 			address: "12 RUE DES INNOVATEURS, 75011 PARIS",
 			nafCode: "6202A",
 			nafLabel: "Conseil en systèmes et logiciels informatiques",
 			region: "Île-de-France",
+			regionCode: "11",
+			city: "PARIS",
 			departmentCode: "75",
 			departmentLabel: "Paris",
 			countryCode: null,
@@ -128,6 +130,74 @@ describe("fetchCompanyBySiren", () => {
 		expect(calledUrl.searchParams.get("siren")).toBe("532847196");
 		expect(calledUrl.searchParams.get("inclure_non_diffusibles")).toBe("true");
 		expect(calledUrl.searchParams.get("inclure_cesse")).toBe("true");
+	});
+
+	it("does not derive French geography for a foreign establishment", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "532847196",
+						denominationunitelegale: "Foreign Company",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 100,
+						codepostal: "10001",
+						libellecommune: "NEW YORK",
+						codepaysetrangeretablissement: "US",
+						libellepaysetrangeretablissement: "États-Unis",
+						statutdiffusionunitelegale: "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("532847196");
+
+		expect(result).toMatchObject({
+			countryCode: "US",
+			countryLabel: "États-Unis",
+			region: null,
+			regionCode: null,
+			departmentCode: null,
+			departmentLabel: null,
+		});
+	});
+
+	it("does not call a half-declared foreign establishment French", async () => {
+		fetchSpy.mockResolvedValueOnce({
+			ok: true,
+			json: async () => ({
+				content: [
+					{
+						siren: "532847196",
+						denominationunitelegale: "Half Declared",
+						raisonsociale: null,
+						activiteprincipalenaf25unitelegale: "6202A",
+						nomenclatureactiviteprincipalelibelleunitelegale: "Conseil",
+						effectiftotal: 100,
+						codepostal: "10001",
+						libellecommune: "NEW YORK",
+						codepaysetrangeretablissement: null,
+						libellepaysetrangeretablissement: "États-Unis",
+						statutdiffusionunitelegale: "O",
+					},
+				],
+				totalElements: 1,
+			}),
+		});
+
+		const result = await fetchCompanyBySiren("532847196");
+
+		expect(result).toMatchObject({
+			countryCode: null,
+			countryLabel: null,
+			region: null,
+			departmentCode: null,
+		});
 	});
 
 	it("returns limited info for non-diffusible company", async () => {
@@ -157,7 +227,7 @@ describe("fetchCompanyBySiren", () => {
 
 		const result = await fetchCompanyBySiren("111222333");
 
-		expect(result).toEqual({
+		expect(result).toMatchObject({
 			name: "Entreprise non diffusible",
 			address: null,
 			nafCode: null,
@@ -198,12 +268,13 @@ describe("fetchCompanyBySiren", () => {
 
 		const result = await fetchCompanyBySiren("111222333");
 
-		expect(result).toEqual({
+		expect(result).toMatchObject({
 			name: "Entreprise non diffusible",
 			address: null,
 			nafCode: null,
 			nafLabel: null,
 			region: "Nouvelle-Aquitaine",
+			regionCode: "75",
 			departmentCode: "33",
 			departmentLabel: "Gironde",
 			countryCode: null,
@@ -363,7 +434,7 @@ describe("fetchCompanyBySiren", () => {
 
 		const result = await fetchCompanyBySiren("444555666");
 
-		expect(result).toEqual({
+		expect(result).toMatchObject({
 			name: "Société Beta",
 			address: "69001 LYON",
 			nafCode: "7022Z",
@@ -434,7 +505,7 @@ describe("fetchCompanyBySiren", () => {
 
 		const result = await fetchCompanyBySiren("777888999");
 
-		expect(result).toEqual({
+		expect(result).toMatchObject({
 			name: "Gamma SARL",
 			address: "33000 BORDEAUX",
 			nafCode: "4321A",

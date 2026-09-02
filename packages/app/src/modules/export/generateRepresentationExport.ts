@@ -1,11 +1,21 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ilike } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
-import { isCompanyDiffusible, toNumber } from "~/modules/public-api";
+import {
+	NON_DIFFUSIBLE_LABEL,
+	type PublicSearchInput,
+	toNumber,
+} from "~/modules/public-api";
 import type { DB } from "~/server/db";
-import { companies, representationDeclarations } from "~/server/db/schema";
+import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import {
+	companies,
+	gipMdsData,
+	representationDeclarations,
+} from "~/server/db/schema";
+import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
 
 export type RepresentationExportRow = {
 	referenceYear: number;
@@ -56,7 +66,30 @@ const REPRESENTATION_EXPORT_COLUMNS: Array<{
 	{ key: "publishModalities", header: "Modalites_publication" },
 ];
 
-async function fetchSubmittedRepresentationDeclarations(db: DB) {
+function representationExportFilters(input: PublicSearchInput) {
+	const conditions = publicDeclarationFacetConditions(input);
+	if (input.q) {
+		const siren = input.q.replace(/\s/g, "");
+		const queryFilter = /^\d{9}$/.test(siren)
+			? eq(representationDeclarations.siren, siren)
+			: and(
+					diffusibleCompanyCondition(),
+					ilike(companies.name, `%${input.q}%`),
+				);
+		if (queryFilter) conditions.push(queryFilter);
+	}
+	if (input.year) {
+		conditions.push(eq(representationDeclarations.year, input.year));
+	}
+	return conditions;
+}
+
+async function fetchSubmittedRepresentationDeclarations(
+	db: DB,
+	input?: PublicSearchInput,
+) {
+	const submitted = eq(representationDeclarations.status, "submitted");
+	const filters = input ? representationExportFilters(input) : [];
 	return db
 		.select({
 			year: representationDeclarations.year,
@@ -67,7 +100,7 @@ async function fetchSubmittedRepresentationDeclarations(db: DB) {
 			departmentLabel: companies.departmentLabel,
 			nafCode: companies.nafCode,
 			nafLabel: companies.nafLabel,
-			statutDiffusion: companies.statutDiffusion,
+			identityDiffusible: diffusibleCompanyCondition(),
 			executiveWomenPercent: representationDeclarations.executiveWomenPercent,
 			executiveMenPercent: representationDeclarations.executiveMenPercent,
 			notComputableReasonExecutives:
@@ -82,7 +115,14 @@ async function fetchSubmittedRepresentationDeclarations(db: DB) {
 		})
 		.from(representationDeclarations)
 		.innerJoin(companies, eq(representationDeclarations.siren, companies.siren))
-		.where(eq(representationDeclarations.status, "submitted"))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, representationDeclarations.siren),
+				eq(gipMdsData.year, representationDeclarations.year),
+			),
+		)
+		.where(filters.length > 0 ? and(submitted, ...filters) : submitted)
 		.orderBy(representationDeclarations.year, companies.siren);
 }
 
@@ -93,17 +133,17 @@ type RepresentationDeclarationRow = Awaited<
 function toExportRow(
 	row: RepresentationDeclarationRow,
 ): RepresentationExportRow {
-	const diffusible = isCompanyDiffusible(row.statutDiffusion);
+	const diffusible = row.identityDiffusible;
 
 	return {
 		referenceYear: row.year,
 		siren: row.siren,
-		name: diffusible ? row.name : null,
-		region: diffusible ? row.region : null,
-		departmentCode: diffusible ? row.departmentCode : null,
-		departmentLabel: diffusible ? row.departmentLabel : null,
-		nafCode: diffusible ? row.nafCode : null,
-		nafLabel: diffusible ? row.nafLabel : null,
+		name: diffusible ? row.name : NON_DIFFUSIBLE_LABEL,
+		region: diffusible ? row.region : NON_DIFFUSIBLE_LABEL,
+		departmentCode: diffusible ? row.departmentCode : NON_DIFFUSIBLE_LABEL,
+		departmentLabel: diffusible ? row.departmentLabel : NON_DIFFUSIBLE_LABEL,
+		nafCode: diffusible ? row.nafCode : NON_DIFFUSIBLE_LABEL,
+		nafLabel: diffusible ? row.nafLabel : NON_DIFFUSIBLE_LABEL,
 		executiveWomenPercent: toNumber(row.executiveWomenPercent),
 		executiveMenPercent: toNumber(row.executiveMenPercent),
 		notComputableReasonExecutives: row.notComputableReasonExecutives,
@@ -118,8 +158,9 @@ function toExportRow(
 
 export async function buildRepresentationExportRows(
 	db: DB,
+	input?: PublicSearchInput,
 ): Promise<RepresentationExportRow[]> {
-	const rows = await fetchSubmittedRepresentationDeclarations(db);
+	const rows = await fetchSubmittedRepresentationDeclarations(db, input);
 	return rows.map(toExportRow);
 }
 
@@ -150,4 +191,31 @@ export async function generateRepresentationXlsx(
 
 	const arrayBuffer = await workbook.xlsx.writeBuffer();
 	return Buffer.from(arrayBuffer);
+}
+
+/**
+ * CSV field, semicolon-separated as the declarations export already is — the
+ * separator French spreadsheets open without an import dialog. A leading `=`,
+ * `+`, `-`, `@` or `|` is prefixed with a quote so a spreadsheet reads the cell
+ * as text instead of evaluating it as a formula.
+ */
+function toCsvField(value: unknown): string {
+	if (value === null || value === undefined) return '""';
+	let field = String(value).replace(/"/g, '""');
+	if (/^[=+\-@|]/.test(field)) field = `'${field}`;
+	return `"${field}"`;
+}
+
+export function generateRepresentationCsv(
+	rows: RepresentationExportRow[],
+): string {
+	const header = REPRESENTATION_EXPORT_COLUMNS.map((col) =>
+		toCsvField(col.header),
+	).join(";");
+	const body = rows.map((row) =>
+		REPRESENTATION_EXPORT_COLUMNS.map((col) => toCsvField(row[col.key])).join(
+			";",
+		),
+	);
+	return [header, ...body].join("\n");
 }
