@@ -5,10 +5,15 @@ const mocks = vi.hoisted(() => ({
 	deleteFile: vi.fn(),
 	dbSelect: vi.fn(),
 	dbTransaction: vi.fn(),
+	getRequiredContentTypes: vi.fn(),
 }));
 
 vi.mock("../fileUpload", () => ({
 	handleStreamingUpload: mocks.handleStreamingUpload,
+}));
+
+vi.mock("../cseRequiredContentTypes", () => ({
+	getRequiredContentTypes: mocks.getRequiredContentTypes,
 }));
 
 vi.mock("../s3", () => ({
@@ -89,6 +94,14 @@ function primeDbSelect(steps: Step[]) {
 
 describe("runUploadPipeline", () => {
 	beforeEach(() => {
+		// Four required content types: the quota then matches MAX_CSE_FILES,
+		// which is what most cases here exercise.
+		mocks.getRequiredContentTypes.mockReturnValue([
+			{ declarationNumber: 1, type: "accuracy" },
+			{ declarationNumber: 1, type: "gap" },
+			{ declarationNumber: 2, type: "accuracy" },
+			{ declarationNumber: 2, type: "gap" },
+		]);
 		vi.clearAllMocks();
 	});
 
@@ -134,6 +147,31 @@ describe("runUploadPipeline", () => {
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.reason).toBe("max_files");
+		}
+		expect(mocks.handleStreamingUpload).not.toHaveBeenCalled();
+	});
+
+	it("caps the CSE quota at the number of required content types (#4299)", async () => {
+		mocks.getRequiredContentTypes.mockReturnValue([
+			{ declarationNumber: 1, type: "accuracy" },
+			{ declarationNumber: 2, type: "accuracy" },
+		]);
+		primeDbSelect([
+			{ kind: "declaration", id: "decl-1" },
+			{ kind: "count", value: 2 },
+		]);
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "cse_opinion",
+		});
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("max_files");
+			expect(result.error).toContain("limite de 2 fichiers");
 		}
 		expect(mocks.handleStreamingUpload).not.toHaveBeenCalled();
 	});
@@ -413,6 +451,75 @@ describe("runUploadPipeline", () => {
 		// No row inserted because the in-tx recount threw before the insert.
 		expect(insertValues).not.toHaveBeenCalled();
 		// Compensating delete of the just-committed S3 object.
+		expect(mocks.deleteFile).toHaveBeenCalledWith(
+			"123456789/2027/new-file.pdf",
+		);
+	});
+
+	it("re-reads the quota inside the transaction when the required types shrink (#4299)", async () => {
+		// Pre-check sees four required content types (quota 4) and two files, so
+		// the upload streams. Meanwhile the declaration loses two required types
+		// — the in-tx quota is now 2 and the same two files fill it.
+		mocks.getRequiredContentTypes
+			.mockReturnValueOnce([
+				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
+				{ declarationNumber: 2, type: "accuracy" },
+				{ declarationNumber: 2, type: "gap" },
+			])
+			.mockReturnValue([
+				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 2, type: "accuracy" },
+			]);
+		primeDbSelect([
+			{ kind: "declaration", id: "decl-1" },
+			{ kind: "count", value: 2 },
+		]);
+		mocks.handleStreamingUpload.mockResolvedValue({
+			ok: true,
+			key: "123456789/2027/new-file.pdf",
+			fileId: "new-file",
+		});
+
+		const insertValues = vi.fn().mockResolvedValue(undefined);
+		const insert = vi.fn().mockReturnValue({ values: insertValues });
+		let txSelectCallCount = 0;
+		const txSelect = vi.fn().mockImplementation(() => {
+			txSelectCallCount++;
+			if (txSelectCallCount === 1) {
+				return {
+					from: () => ({
+						where: () => ({
+							for: () => ({
+								limit: () => Promise.resolve([{ id: "decl-1" }]),
+							}),
+						}),
+					}),
+				};
+			}
+			return {
+				from: () => ({
+					where: () => Promise.resolve([{ value: 2 }]),
+				}),
+			};
+		});
+		mocks.dbTransaction.mockImplementation(
+			async (fn: (tx: unknown) => unknown) =>
+				fn({ select: txSelect, insert, delete: vi.fn() }),
+		);
+		mocks.deleteFile.mockResolvedValue(undefined);
+
+		vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { runUploadPipeline } = await import("../uploadPipeline");
+		const result = await runUploadPipeline({
+			...baseInput,
+			stream: createStream(),
+			flowType: "cse_opinion",
+		});
+
+		expect(result.ok).toBe(false);
+		expect(insertValues).not.toHaveBeenCalled();
 		expect(mocks.deleteFile).toHaveBeenCalledWith(
 			"123456789/2027/new-file.pdf",
 		);

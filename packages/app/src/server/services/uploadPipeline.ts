@@ -11,6 +11,7 @@ import {
 import { db } from "~/server/db";
 import { declarations, files } from "~/server/db/schema";
 
+import { getRequiredContentTypes } from "./cseRequiredContentTypes";
 import { handleStreamingUpload, type UploadFailureReason } from "./fileUpload";
 import { deleteFile as deleteS3File } from "./s3";
 
@@ -98,12 +99,15 @@ export async function runUploadPipeline(
 	// Pre-validate flow-specific constraints BEFORE streaming. Cheap DB read
 	// that saves bandwidth when the constraint is already violated.
 	if (input.flowType === "cse_opinion") {
-		const existingCount = await countFilesByType(declaration.id, "cse_opinion");
-		if (existingCount >= MAX_CSE_FILES) {
+		const [existingCount, quota] = await Promise.all([
+			countFilesByType(declaration.id, "cse_opinion"),
+			getCseFileQuota(db, declaration.id),
+		]);
+		if (existingCount >= quota) {
 			return {
 				ok: false,
 				reason: "max_files",
-				error: `Vous avez atteint la limite de ${MAX_CSE_FILES} fichiers. Supprimez-en un avant d'en ajouter un nouveau.`,
+				error: `Vous avez atteint la limite de ${quota} fichier${quota > 1 ? "s" : ""}. Supprimez-en un avant d'en ajouter un nouveau.`,
 			};
 		}
 	}
@@ -203,6 +207,20 @@ async function countFilesByType(
 	return rows[0]?.value ?? 0;
 }
 
+/**
+ * How many CSE-opinion files a declaration may hold: one per required content
+ * type, capped by {@link MAX_CSE_FILES}. Depositing more files than there are
+ * avis to justify is what the parcours forbids — the Step 2 dropzone closes on
+ * the same number (#4299).
+ */
+async function getCseFileQuota(
+	client: Pick<typeof db, "select">,
+	declarationId: string,
+): Promise<number> {
+	const requiredTypes = await getRequiredContentTypes(client, declarationId);
+	return Math.min(MAX_CSE_FILES, requiredTypes.length);
+}
+
 type CommitFileInput = {
 	declarationId: string;
 	flowType: FlowType;
@@ -224,7 +242,7 @@ async function commitFileRow(
 		// Lock the declaration row for the duration of the transaction. Any
 		// concurrent upload targeting the same declaration blocks here until
 		// this tx commits — closing the TOCTOU race where two parallel CSE
-		// uploads could both observe `count < MAX_CSE_FILES` and both insert.
+		// uploads could both observe `count < cseFileQuota` and both insert.
 		// Joint evaluation already has a partial unique index at the DB level
 		// (`file_joint_eval_unique`), but the CSE quota has no such guard.
 		await tx
@@ -266,7 +284,12 @@ async function commitFileRow(
 					),
 				);
 			const currentCount = rows[0]?.value ?? 0;
-			if (currentCount >= MAX_CSE_FILES) {
+			// Quota re-read under the same lock: the required content types can
+			// change between the pre-check and the commit (the user edits the
+			// avis in another tab), and the count alone would then be measured
+			// against a stale ceiling.
+			const quota = await getCseFileQuota(tx, input.declarationId);
+			if (currentCount >= quota) {
 				throw new MaxFilesReachedError();
 			}
 		}

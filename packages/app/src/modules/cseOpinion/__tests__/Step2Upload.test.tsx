@@ -92,6 +92,14 @@ const SINGLE_COLUMN = computeContentTypeColumns({
 	secondDeclGapHigh: false,
 });
 
+const TWO_ACCURACY_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: true,
+	firstDeclGapConsulted: false,
+	secondDeclGapConsulted: false,
+	firstDeclGapHigh: false,
+	secondDeclGapHigh: false,
+});
+
 const DUAL_COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
 	firstDeclGapConsulted: true,
@@ -184,8 +192,17 @@ describe("Step2Upload", () => {
 		expect(screen.getByText(/Taille maximale.*pdf/)).toBeInTheDocument();
 	});
 
-	it("renders the dropzone with select button", () => {
+	it("renders the dropzone with a single-file select button when one avis is required", () => {
 		renderStep();
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
+	});
+
+	it("renders a multi-file select button when several avis are required", () => {
+		renderStep({ columns: TWO_ACCURACY_COLUMNS });
 
 		expect(
 			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
@@ -357,6 +374,7 @@ describe("Step2Upload", () => {
 
 	it("disables the dropzone when the max number of files is reached", () => {
 		renderStep({
+			columns: DUAL_COLUMNS,
 			existingFiles: [
 				makeFile("avis-1.pdf", "f1"),
 				makeFile("avis-2.pdf", "f2"),
@@ -368,6 +386,23 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
 		).toBeDisabled();
+	});
+
+	it("caps the deposit at one file per required avis, below MAX_CSE_FILES (#4299)", () => {
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "f1"),
+				makeFile("avis-2.pdf", "f2"),
+			],
+		});
+
+		// Two required avis, two files deposited: the 4 MAX_CSE_FILES slots are
+		// irrelevant, no third file may be added even with nothing associated.
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeDisabled();
+		expect(getFileInput()).toBeDisabled();
 	});
 
 	it("disables the dropzone once every required content type is covered, even with slots remaining (#4299)", () => {
@@ -390,23 +425,26 @@ describe("Step2Upload", () => {
 	it("re-enables the dropzone once an association is cleared, freeing a required content type (#4299)", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: TWO_ACCURACY_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-1" },
 			],
 		});
 
 		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeDisabled();
 
 		await user.click(
-			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 2e déclaration — avis-1.pdf",
+			}),
 		);
 
 		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeEnabled();
 		expect(getFileInput()).toBeEnabled();
 	});
@@ -756,7 +794,7 @@ describe("Step2Upload", () => {
 			renderStep({ isReadOnly: true });
 
 			expect(
-				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 			).toBeDisabled();
 		});
 
@@ -783,7 +821,7 @@ describe("Step2Upload", () => {
 			renderStep({ isReadOnly: false });
 
 			expect(
-				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 			).toBeEnabled();
 			expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
 		});
@@ -809,13 +847,13 @@ describe("Step2Upload", () => {
 			// The layout feeds `isReadOnly={false}` but impersonation must still
 			// disable writes through the unified context.
 			renderStep({
-				columns: SINGLE_COLUMN,
+				columns: TWO_ACCURACY_COLUMNS,
 				existingFiles: [makeFile("avis-1.pdf", "file-1")],
 				isReadOnly: false,
 			});
 
 			expect(
-				screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 			).toBeDisabled();
 			expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
 			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
