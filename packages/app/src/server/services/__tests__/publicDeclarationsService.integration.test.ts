@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
@@ -260,6 +261,34 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(byYear.count).toBe(3);
+	});
+
+	it("ignores a malformed NAF code instead of failing the filtered search", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_B, year: 2100 }),
+			]);
+		await db
+			.update(companies)
+			.set({ nafCode: "" })
+			.where(eq(companies.siren, SIREN_A));
+
+		try {
+			const result = await searchPublicDeclarations({
+				naf: ["J"],
+				limit: 10,
+				offset: 0,
+			});
+
+			expect(result.data).toEqual([]);
+		} finally {
+			await db
+				.update(companies)
+				.set({ nafCode: "62.01Z" })
+				.where(eq(companies.siren, SIREN_A));
+		}
 	});
 
 	it("paginates with limit and offset while keeping the full count", async () => {

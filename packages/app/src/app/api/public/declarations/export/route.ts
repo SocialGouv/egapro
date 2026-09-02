@@ -24,7 +24,7 @@ import {
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { nafSectionCondition } from "~/server/services/publicDeclarationsService";
 
-const MAX_XLSX_EXPORT_ROWS = 10_000;
+const MAX_EXPORT_ROWS = 10_000;
 
 export function OPTIONS(): Response {
 	return new Response(null, {
@@ -285,13 +285,13 @@ export const GET = withAuditedRoute(
 
 			const rows = await fetchPublishableDeclarations(
 				searchParams,
-				format === "xlsx" ? MAX_XLSX_EXPORT_ROWS + 1 : undefined,
+				MAX_EXPORT_ROWS + 1,
 			);
-			if (format === "xlsx" && rows.length > MAX_XLSX_EXPORT_ROWS) {
+			if (rows.length > MAX_EXPORT_ROWS) {
 				return NextResponse.json(
 					{
 						error:
-							"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
+							"L’export est limité à 10 000 lignes. Ajoutez des filtres pour réduire le nombre de résultats.",
 					},
 					{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
 				);

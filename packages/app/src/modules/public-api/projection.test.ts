@@ -50,6 +50,8 @@ const companyFixture: PublicCompanySource = {
 	region: "Île-de-France",
 	departmentCode: "75",
 	departmentLabel: "Paris",
+	countryCode: null,
+	countryLabel: "FRANCE",
 	nafCode: "62.01Z",
 	nafLabel: "Programmation informatique",
 	statutDiffusion: "O",
@@ -135,6 +137,7 @@ describe("toPublicDeclaration", () => {
 		expect(dto.region).toBe("Île-de-France");
 		expect(dto.departmentCode).toBe("75");
 		expect(dto.departmentLabel).toBe("Paris");
+		expect(dto.countryLabel).toBe("FRANCE");
 		expect(dto.nafCode).toBe("62.01Z");
 		expect(dto.nafLabel).toBe("Programmation informatique");
 	});

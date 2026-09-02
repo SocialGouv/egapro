@@ -143,7 +143,7 @@ export function toPublicDeclaration(
 		city: publicCompanyValue(company.city, diffusible),
 		regionCode: publicCompanyValue(company.regionCode, diffusible),
 		region: publicCompanyValue(
-			company.countryLabel ? null : company.region,
+			company.countryCode ? null : company.region,
 			diffusible,
 		),
 		departmentCode: publicCompanyValue(company.departmentCode, diffusible),

@@ -65,7 +65,8 @@ describe("companyLocation", () => {
 	it("names the département and the region of a French company", () => {
 		expect(
 			companyLocation({
-				countryLabel: null,
+				countryCode: null,
+				countryLabel: "FRANCE",
 				departmentLabel: "Nord",
 				region: "Hauts-de-France",
 			}),
@@ -75,6 +76,7 @@ describe("companyLocation", () => {
 	it("names the country of a company registered abroad", () => {
 		expect(
 			companyLocation({
+				countryCode: "BE",
 				countryLabel: "Belgique",
 				departmentLabel: null,
 				region: null,
@@ -85,6 +87,7 @@ describe("companyLocation", () => {
 	it("collapses masked location fields to one public label", () => {
 		expect(
 			companyLocation({
+				countryCode: "Non-diffusible",
 				countryLabel: "Non-diffusible",
 				departmentLabel: "Non-diffusible",
 				region: "Non-diffusible",
@@ -95,6 +98,7 @@ describe("companyLocation", () => {
 	it("returns nothing when the registry located the company nowhere", () => {
 		expect(
 			companyLocation({
+				countryCode: null,
 				countryLabel: null,
 				departmentLabel: null,
 				region: null,

@@ -74,9 +74,10 @@ function fingerprint(value: string): string {
 }
 
 function clientAddress(request: Request): string {
+	const forwardedFor = request.headers.get("x-forwarded-for");
 	return (
-		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-		request.headers.get("x-real-ip") ||
+		request.headers.get("x-real-ip")?.trim() ||
+		forwardedFor?.split(",").at(-1)?.trim() ||
 		"unknown"
 	);
 }

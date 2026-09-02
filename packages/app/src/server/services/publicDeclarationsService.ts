@@ -44,7 +44,7 @@ import {
 export function nafSectionCondition(section: string) {
 	const range = NAF_SECTION_DIVISIONS[section.toUpperCase() as NafSection];
 	if (!range) return ilike(companies.nafCode, `${section}%`);
-	return sql<number>`substring(${companies.nafCode} from 1 for 2)::integer between ${range[0]} and ${range[1]}`;
+	return sql<boolean>`substring(${companies.nafCode} from '^[0-9]{2}')::integer between ${range[0]} and ${range[1]}`;
 }
 
 export type PublicDeclarationFacets = Pick<

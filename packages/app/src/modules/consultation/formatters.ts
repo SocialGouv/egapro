@@ -37,6 +37,7 @@ export type CompanyLocation = { label: string; value: string };
  * registered abroad has no French département.
  */
 export function companyLocation(company: {
+	countryCode: string | null;
 	countryLabel: string | null;
 	departmentLabel: string | null;
 	region: string | null;
@@ -48,7 +49,7 @@ export function companyLocation(company: {
 	) {
 		return { label: "Adresse", value: NON_DIFFUSIBLE_LABEL };
 	}
-	if (company.countryLabel) {
+	if (company.countryCode && company.countryLabel) {
 		return { label: "Pays", value: company.countryLabel };
 	}
 	const value = [company.departmentLabel, company.region]

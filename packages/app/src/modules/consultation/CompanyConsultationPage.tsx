@@ -88,6 +88,7 @@ export async function CompanyConsultationPage({
 			<CompanyHeader
 				address={identity.address}
 				backHref={backToSearchHref(from)}
+				countryCode={location.countryCode}
 				countryLabel={location.countryLabel}
 				departmentLabel={location.departmentLabel}
 				nafCode={identity.nafCode}

@@ -346,10 +346,14 @@ describe("GET /api/public/declarations/export", () => {
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 	});
 
-	it("requires filters when an Excel export would exceed 10,000 rows", async () => {
+	it.each([
+		"",
+		"?format=csv",
+		"?format=xlsx",
+	])("requires filters when an export would exceed 10,000 rows (%s)", async (search) => {
 		setRows(Array.from({ length: 10_001 }, () => buildRow()));
 
-		const response = await callGet("?format=xlsx");
+		const response = await callGet(search);
 
 		expect(response.status).toBe(413);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");

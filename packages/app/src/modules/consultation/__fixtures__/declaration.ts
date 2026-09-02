@@ -15,7 +15,7 @@ export function declarationFixture(
 		departmentCode: "75",
 		departmentLabel: "Paris",
 		countryCode: null,
-		countryLabel: null,
+		countryLabel: "FRANCE",
 		nafCode: "62.02A",
 		nafLabel: "Conseil en systèmes et logiciels informatiques",
 		workforceEma: 2256,

@@ -11,6 +11,7 @@ type Props = {
 	address: string | null;
 	region: string | null;
 	departmentLabel: string | null;
+	countryCode: string | null;
 	countryLabel: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
@@ -27,6 +28,7 @@ export function CompanyHeader({
 	address,
 	region,
 	departmentLabel,
+	countryCode,
 	countryLabel,
 	nafCode,
 	nafLabel,
@@ -41,7 +43,12 @@ export function CompanyHeader({
 			? { label: "Adresse", value: address }
 			: address === NON_DIFFUSIBLE_LABEL
 				? { label: "Adresse", value: NON_DIFFUSIBLE_LABEL }
-				: companyLocation({ countryLabel, departmentLabel, region });
+				: companyLocation({
+						countryCode,
+						countryLabel,
+						departmentLabel,
+						region,
+					});
 	if (location) identity.push(location);
 
 	const activity: Fact[] = [];

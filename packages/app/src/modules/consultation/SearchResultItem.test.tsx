@@ -66,6 +66,7 @@ describe("SearchResultItem", () => {
 		render(
 			<SearchResultItem
 				declaration={declarationFixture({
+					countryCode: "BE",
 					countryLabel: "Belgique",
 					departmentLabel: null,
 					region: null,
@@ -95,6 +96,7 @@ describe("SearchResultItem", () => {
 				declaration={declarationFixture({
 					name: "Non-diffusible",
 					address: "Non-diffusible",
+					countryCode: "Non-diffusible",
 					countryLabel: "Non-diffusible",
 					departmentLabel: "Non-diffusible",
 					region: "Non-diffusible",

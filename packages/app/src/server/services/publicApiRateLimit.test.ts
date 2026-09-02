@@ -13,7 +13,7 @@ vi.mock("redis", () => ({ createClient: vi.fn() }));
 
 function request(headers: HeadersInit = {}) {
 	return new Request("http://localhost/api/public/declarations", {
-		headers: { "x-forwarded-for": "203.0.113.8", ...headers },
+		headers: { "x-real-ip": "203.0.113.8", ...headers },
 	});
 }
 
@@ -46,5 +46,23 @@ describe("enforcePublicApiRateLimit", () => {
 
 		expect(response?.status).toBe(429);
 		expect(response?.headers.get("Retry-After")).toBe("60");
+	});
+
+	it("ignores a spoofed forwarded-for value when the ingress IP is present", async () => {
+		const { enforcePublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		for (let index = 0; index < 120; index += 1) {
+			expect(
+				await enforcePublicApiRateLimit(
+					request({ "x-forwarded-for": `198.51.100.${index}` }),
+				),
+			).toBeNull();
+		}
+
+		expect(
+			await enforcePublicApiRateLimit(
+				request({ "x-forwarded-for": "198.51.100.250" }),
+			),
+		).toMatchObject({ status: 429 });
 	});
 });

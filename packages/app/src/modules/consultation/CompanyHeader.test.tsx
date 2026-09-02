@@ -9,11 +9,12 @@ describe("CompanyHeader", () => {
 			<CompanyHeader
 				address="Non-diffusible"
 				backHref="/index-egapro/recherche"
+				countryCode="Non-diffusible"
 				countryLabel="Non-diffusible"
 				departmentLabel="Non-diffusible"
-				name="Non-diffusible"
 				nafCode="Non-diffusible"
 				nafLabel="Non-diffusible"
+				name="Non-diffusible"
 				region="Non-diffusible"
 				siren="998900003"
 				workforceEma={62}
