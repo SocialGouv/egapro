@@ -20,6 +20,7 @@
 	}
 
 	> thead > tr > th:not(:last-child),
+	> tbody > tr > th:not(:last-child),
 	> tbody > tr > td:not(:last-child) {
 		border-inline-end: 1px solid var(--border-default-grey);
 	}
@@ -30,5 +31,8 @@
 
 	> tbody > tr > th[scope="row"] {
 		background-color: var(--background-default-grey);
+		// DSFR draws a darker vertical line on row headers. Keep its horizontal
+		// separator and let the shared border above draw every column uniformly.
+		background-size: 100% 1px, 0 0;
 	}
 }
