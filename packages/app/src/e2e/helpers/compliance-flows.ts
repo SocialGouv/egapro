@@ -68,14 +68,26 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
 				.click();
 			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-			await fillGapConsultation(
-				page,
-				"second-decl-gap",
-				secondDeclGapConsulted || secondDeclGapConsultationImplicit,
-				"2025-06-15",
-				opinion,
-				secondDeclGapConsultationImplicit,
-			);
+			if (secondDeclGapConsultationImplicit) {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					true,
+					"2025-06-15",
+					opinion,
+					true,
+				);
+			} else if (
+				(await page.locator('label[for="second-decl-gap-no"]').count()) > 0
+			) {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					secondDeclGapConsulted,
+					"2025-06-15",
+					opinion,
+				);
+			}
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL("**/avis-cse/etape/2");
