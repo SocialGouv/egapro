@@ -1,8 +1,8 @@
 .table {
 	table-layout: fixed;
 
-	th,
-	td {
+	> thead > tr > th:not(:first-child),
+	> tbody > tr > td {
 		text-align: center;
 	}
 
