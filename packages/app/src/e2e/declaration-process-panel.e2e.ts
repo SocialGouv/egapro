@@ -3,6 +3,10 @@ import { expect, type Page, test } from "@playwright/test";
 import { getCurrentYear } from "~/modules/domain";
 import { TEST_USER_PHONE } from "./constants";
 import {
+	pinCampaignYear,
+	setServerCampaignYear,
+} from "./helpers/campaign-year";
+import {
 	deleteCseOpinions,
 	deleteJointEvaluationFiles,
 	ensureCurrentYearDeclaration,
@@ -10,11 +14,16 @@ import {
 	insertJointEvaluationFile,
 	resetDeclarationToDraft,
 	resetGipWorkforce,
+	seedDeclarationForYear,
 	setCompanyHasCse,
 	setDeclarationComplianceState,
 	setGipWorkforce,
 	setUserPhone,
 } from "./helpers/db";
+import {
+	resetCampaignYear as resetCampaignYearData,
+	setCampaignDeadlines,
+} from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -453,6 +462,138 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			await expect(
 				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
 			).toHaveCount(0);
+		});
+	});
+});
+
+// Closure badges of the "Années précédentes" table (#3759). The projection is a second pass laid
+// over computeDeclarationStatus, and only a real past-year row exercises it end to end: the
+// campaign year comes from the pinned clock, while the step deadline is resolved on the row's OWN
+// year — from app_campaign_deadline when a row exists, from the domain defaults when it does not.
+// Those two resolutions have to agree across getWithDeclarations, buildDeclarationList and the
+// badge, which is precisely what no unit test can observe. Per-status projection is covered by
+// domain/__tests__/declarationStatus.test.ts, per-variant markup by StatusBadge.test.tsx.
+const CLOSURE_PINNED_YEAR = 2031;
+const YEAR_CLOSED_NOT_DONE = 2021;
+const YEAR_CLOSED_INCOMPLETE = 2022;
+const YEAR_STILL_OPEN = 2023;
+const YEAR_DONE = 2024;
+
+const REAL_PAST_DEADLINES = {
+	decl1ModificationDeadline: "2020-06-01",
+	decl1JustificationDeadline: "2020-06-01",
+	decl1JointEvaluationDeadline: "2020-08-01",
+	decl2ModificationDeadline: "2020-12-01",
+	decl2JustificationDeadline: "2020-12-01",
+	decl2JointEvaluationDeadline: "2021-01-01",
+	decl2CseOpinionDeadline: "2021-02-01",
+} as const;
+
+const OPEN_CSE_OPINION_DEADLINES = {
+	...REAL_PAST_DEADLINES,
+	decl2CseOpinionDeadline: "2099-02-01",
+} as const;
+
+test.describe("Mon espace — closure badges of the previous-years table", () => {
+	test.describe.configure({ mode: "serial" });
+	test.setTimeout(90_000);
+
+	const SEEDED_YEARS = [
+		YEAR_CLOSED_NOT_DONE,
+		YEAR_CLOSED_INCOMPLETE,
+		YEAR_STILL_OPEN,
+		YEAR_DONE,
+		CLOSURE_PINNED_YEAR,
+	];
+
+	test.beforeAll(async () => {
+		for (const year of SEEDED_YEARS) {
+			await resetCampaignYearData(year);
+		}
+		// YEAR_CLOSED_NOT_DONE deliberately gets no app_campaign_deadline row: its closure has to
+		// fall back on getDefaultCampaignDeadlines(), whose modification deadline for that year is
+		// already behind the wall clock. The other two closed-side years carry an explicit row, so
+		// the DB branch of the resolution is exercised too.
+		await setCampaignDeadlines(YEAR_CLOSED_INCOMPLETE, REAL_PAST_DEADLINES);
+		await setCampaignDeadlines(YEAR_STILL_OPEN, OPEN_CSE_OPINION_DEADLINES);
+		// The pinned year gets the same expired deadlines as the closed rows, so the "current year
+		// is never closed" assertion below bites on the year guard rather than on the deadline one.
+		await setCampaignDeadlines(CLOSURE_PINNED_YEAR, REAL_PAST_DEADLINES);
+		await seedDeclarationForYear(CLOSURE_PINNED_YEAR, "draft", 0);
+		await seedDeclarationForYear(YEAR_CLOSED_NOT_DONE, "draft", 0);
+		await seedDeclarationForYear(
+			YEAR_CLOSED_INCOMPLETE,
+			"corrective_actions_chosen",
+			6,
+		);
+		await seedDeclarationForYear(YEAR_STILL_OPEN, "awaiting_cse_opinion", 6);
+		await seedDeclarationForYear(YEAR_DONE, "demarche_completed", 6);
+		await setCompanyHasCse(true);
+		await setUserPhone(TEST_USER_PHONE);
+	});
+
+	test.afterAll(async () => {
+		// The server clock override lives on the Node process and outlives the page, so it goes
+		// first: any later unpinned spec would otherwise keep reading CLOSURE_PINNED_YEAR (#4067).
+		await setServerCampaignYear(null);
+		for (const year of SEEDED_YEARS) {
+			await resetCampaignYearData(year);
+		}
+		// resetCampaignYearData flattens the two app_company columns, which are not year-scoped.
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
+		await setUserPhone(TEST_USER_PHONE);
+	});
+
+	function previousYearBadge(page: Page, year: number) {
+		return page
+			.locator('table[aria-labelledby="annees-precedentes-title"] tbody tr')
+			.filter({ has: page.locator(`td:nth-child(2):text-is("${year}")`) })
+			.locator(".fr-badge");
+	}
+
+	test("a past year past its own step deadline is closed, one still inside it is not", async ({
+		page,
+	}) => {
+		await pinCampaignYear(page, CLOSURE_PINNED_YEAR);
+		await page.goto("/mon-espace");
+		await expect(
+			page.getByRole("heading", { name: "Années précédentes" }),
+		).toBeVisible();
+
+		await test.step("started, never finalised, deadline passed → Clôturée - incomplète", async () => {
+			const badge = previousYearBadge(page, YEAR_CLOSED_INCOMPLETE);
+			await expect(badge).toHaveText("Clôturée - incomplète");
+			await expect(badge).toHaveClass(/fr-badge--warning/);
+		});
+
+		await test.step("draft never filled in, closed on the domain default deadlines → Clôturée - non effectuée", async () => {
+			const badge = previousYearBadge(page, YEAR_CLOSED_NOT_DONE);
+			await expect(badge).toHaveText("Clôturée - non effectuée");
+			await expect(badge).toHaveClass(/fr-badge--error/);
+		});
+
+		await test.step("past year whose CSE-opinion deadline is still open keeps its badge", async () => {
+			await expect(previousYearBadge(page, YEAR_STILL_OPEN)).toHaveText(
+				"En cours",
+			);
+		});
+
+		await test.step("a finalised démarche stays Effectué whatever the deadline", async () => {
+			await expect(previousYearBadge(page, YEAR_DONE)).toHaveText("Effectué");
+		});
+
+		await test.step("the current year is never closed, expired deadlines included", async () => {
+			const currentYearBadge = page
+				.locator('table[aria-labelledby="demarches-en-cours-title"] tbody tr')
+				.filter({ has: page.getByText("Rémunération", { exact: true }) })
+				.filter({
+					has: page.locator(
+						`td:nth-child(2):text-is("${CLOSURE_PINNED_YEAR}")`,
+					),
+				})
+				.locator(".fr-badge");
+			await expect(currentYearBadge).toHaveText("À compléter");
 		});
 	});
 });
