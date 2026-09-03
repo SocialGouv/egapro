@@ -387,12 +387,14 @@ describe("runUploadPipeline", () => {
 		);
 	});
 
-	it("handles the concurrent CSE quota race by compensating the S3 commit", async () => {
+	it("classifies the concurrent CSE quota race as max_files and compensates the S3 commit", async () => {
 		// Pre-check passes (currentCount = 3 < MAX_CSE_FILES = 4) so we enter the
 		// streaming path and the pipeline commits the S3 multipart. Inside the
 		// tx, a concurrent upload has meanwhile pushed the count to 4, so the
 		// in-tx recount throws MaxFilesReachedError. Since the S3 object has
-		// already been committed, the compensating delete must run.
+		// already been committed, the compensating delete must run, and the
+		// caller must still see the actionable quota message (not a generic
+		// server_error) so the client maps it to HTTP 400, not 500.
 		primeDbSelect([
 			{ kind: "declaration", id: "decl-1" },
 			{ kind: "count", value: 3 },
@@ -444,8 +446,9 @@ describe("runUploadPipeline", () => {
 
 		expect(result).toEqual({
 			ok: false,
-			reason: "server_error",
-			error: "Erreur lors de l'enregistrement du fichier.",
+			reason: "max_files",
+			error:
+				"Vous avez atteint la limite de 4 fichiers. Supprimez-en un avant d'en ajouter un nouveau.",
 			s3Cleanup: "ok",
 		});
 		// No row inserted because the in-tx recount threw before the insert.

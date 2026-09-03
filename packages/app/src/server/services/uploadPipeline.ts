@@ -107,7 +107,7 @@ export async function runUploadPipeline(
 			return {
 				ok: false,
 				reason: "max_files",
-				error: `Vous avez atteint la limite de ${quota} fichier${quota > 1 ? "s" : ""}. Supprimez-en un avant d'en ajouter un nouveau.`,
+				error: formatMaxFilesError(quota),
 			};
 		}
 	}
@@ -162,18 +162,18 @@ export async function runUploadPipeline(
 			filePath: streamResult.key,
 		};
 	} catch (dbError) {
-		console.error("[uploadPipeline] DB write failed after S3 commit", dbError);
-
-		let s3Cleanup: "ok" | "failed" = "ok";
-		try {
-			await deleteS3File(streamResult.key);
-		} catch (deleteError) {
-			s3Cleanup = "failed";
-			console.error(
-				"[uploadPipeline] compensating delete failed — S3 object orphaned",
-				{ key: streamResult.key, err: deleteError },
-			);
+		if (dbError instanceof MaxFilesReachedError) {
+			const s3Cleanup = await compensateS3Commit(streamResult.key);
+			return {
+				ok: false,
+				reason: "max_files",
+				error: formatMaxFilesError(dbError.quota),
+				s3Cleanup,
+			};
 		}
+
+		console.error("[uploadPipeline] DB write failed after S3 commit", dbError);
+		const s3Cleanup = await compensateS3Commit(streamResult.key);
 
 		return {
 			ok: false,
@@ -181,6 +181,25 @@ export async function runUploadPipeline(
 			error: "Erreur lors de l'enregistrement du fichier.",
 			s3Cleanup,
 		};
+	}
+}
+
+function formatMaxFilesError(quota: number): string {
+	return `Vous avez atteint la limite de ${quota} fichier${quota > 1 ? "s" : ""}. Supprimez-en un avant d'en ajouter un nouveau.`;
+}
+
+// The S3 object was already committed before the failure, so every failure
+// path from here on must best-effort delete it to avoid an orphan blob.
+async function compensateS3Commit(key: string): Promise<"ok" | "failed"> {
+	try {
+		await deleteS3File(key);
+		return "ok";
+	} catch (deleteError) {
+		console.error(
+			"[uploadPipeline] compensating delete failed — S3 object orphaned",
+			{ key, err: deleteError },
+		);
+		return "failed";
 	}
 }
 
@@ -290,7 +309,7 @@ async function commitFileRow(
 			// against a stale ceiling.
 			const quota = await getCseFileQuota(tx, input.declarationId);
 			if (currentCount >= quota) {
-				throw new MaxFilesReachedError();
+				throw new MaxFilesReachedError(quota);
 			}
 		}
 
@@ -308,13 +327,16 @@ async function commitFileRow(
 
 /**
  * Thrown inside the DB transaction when a concurrent upload has already filled
- * the CSE-opinion quota between the pre-check and the tx. Surfaced as a
- * `server_error` by the caller because the S3 object has already been
- * committed and must be compensated.
+ * the CSE-opinion quota between the pre-check and the tx. Carries the quota so
+ * the caller can surface it as `max_files` with the same actionable message as
+ * the pre-check, after compensating the already-committed S3 object.
  */
 export class MaxFilesReachedError extends Error {
-	constructor() {
+	readonly quota: number;
+
+	constructor(quota: number) {
 		super("Max files reached (race condition)");
+		this.quota = quota;
 	}
 }
 
