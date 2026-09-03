@@ -10,6 +10,7 @@
  * - `gapLevel`: classify a gap against the regulatory 5% threshold, by absolute
  *   magnitude — a gap is significant in either direction
  * - `hasGapsAboveThreshold`: detect significant gaps across employee categories
+ * - `computeGapHighFlags`: split categories by declaration round then apply the threshold
  * - `computeTotal`: sum base + variable compensation components
  *
  * For number parsing/normalization, see `number.ts`.
@@ -200,4 +201,23 @@ export function hasGapsAboveThreshold(
 			return gap !== null && Math.abs(gap) >= threshold;
 		});
 	});
+}
+
+type CategoryWithDeclarationType = EmployeeCategoryLike & {
+	declarationType: string;
+};
+
+export function computeGapHighFlags(
+	categories: CategoryWithDeclarationType[],
+): { firstDeclGapHigh: boolean; secondDeclGapHigh: boolean } {
+	const initialCategories = categories.filter(
+		(category) => category.declarationType === "initial",
+	);
+	const correctionCategories = categories.filter(
+		(category) => category.declarationType === "correction",
+	);
+	return {
+		firstDeclGapHigh: hasGapsAboveThreshold(initialCategories),
+		secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
+	};
 }

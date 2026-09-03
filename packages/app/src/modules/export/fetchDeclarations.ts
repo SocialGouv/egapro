@@ -15,11 +15,11 @@ export {
 
 import {
 	classifyCompanySize,
+	computeGapHighFlags,
 	computeGapRatio,
 	floorWorkforce,
 	getObligationWorkforce,
 	getOptionalCompanySizeRange,
-	hasGapsAboveThreshold,
 	isCancelled,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
@@ -63,24 +63,19 @@ function deriveExportFlags(
 	// same source as the UI (Step6Review) and the declaration router — NOT by
 	// the aggregate indicators A/B stored on the row. The initial declaration's
 	// categories gate the compliance process; the correction's gate the revision.
-	const initialEntries = indicatorGEntries.filter(
-		(e) => e.declarationType === "initial",
-	);
-	const correctionEntries = indicatorGEntries.filter(
-		(e) => e.declarationType === "correction",
-	);
+	const { firstDeclGapHigh, secondDeclGapHigh } =
+		computeGapHighFlags(indicatorGEntries);
 	const complianceInput = {
 		workforce,
 		hasIndicatorG,
-		hasSignificantIndicatorGGap: hasGapsAboveThreshold(initialEntries),
+		hasSignificantIndicatorGGap: firstDeclGapHigh,
 	};
 	const complianceProcessRequired =
 		isComplianceProcessRequired(complianceInput);
 	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
 		{
 			...complianceInput,
-			hasSignificantCorrectionIndicatorGGap:
-				hasGapsAboveThreshold(correctionEntries),
+			hasSignificantCorrectionIndicatorGGap: secondDeclGapHigh,
 			events:
 				row.secondDeclarationSubmittedAt === null
 					? []

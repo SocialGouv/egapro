@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
-import { computeGapHighFlags } from "../gapHighFlags";
+import { GAP_ALERT_THRESHOLD } from "../shared/constants";
+import { computeGapHighFlags } from "../shared/gap";
 
 function category(
 	declarationType: "initial" | "correction",

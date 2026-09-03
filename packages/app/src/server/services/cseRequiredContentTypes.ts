@@ -3,8 +3,8 @@ import "server-only";
 import { eq } from "drizzle-orm";
 
 import { computeRequiredContentTypes } from "~/modules/cseOpinion/contentTypeColumns";
-import { computeGapHighFlags } from "~/modules/cseOpinion/gapHighFlags";
 import type { ContentTypeKey } from "~/modules/cseOpinion/types";
+import { computeGapHighFlags } from "~/modules/domain";
 import { getCurrentRound } from "~/server/api/routers/statusHistoryHelpers";
 import type { db as database } from "~/server/db";
 import {
