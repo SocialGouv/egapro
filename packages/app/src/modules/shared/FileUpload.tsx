@@ -32,7 +32,8 @@ type Props = {
 	maxFileCount?: number;
 	/**
 	 * When true, the dropzone, file input and selection button are all
-	 * disabled. Consumers can still render the component to preserve layout,
+	 * disabled. The same controls also lock on their own once `maxFileCount`
+	 * is reached. Consumers can still render the component to preserve layout,
 	 * but the user cannot add files (e.g. during admin impersonation).
 	 */
 	disabled?: boolean;
@@ -214,7 +215,7 @@ export function FileUpload({
 				aria-invalid={error !== null}
 				aria-label="Sélectionner des fichiers"
 				className="fr-sr-only"
-				disabled={disabled}
+				disabled={!canAddMore}
 				id={inputId}
 				multiple={maxFileCount > 1}
 				name={inputId}

@@ -1,12 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { computeRequiredContentTypes } from "~/modules/cseOpinion/contentTypeColumns";
 import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
-import { getCurrentYear, hasGapsAboveThreshold } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
 import {
 	createTRPCRouter,
 	declarationProcedure,
@@ -17,11 +16,10 @@ import {
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
-	employeeCategories,
 	files,
-	jobCategories,
 } from "~/server/db/schema";
 import { applyAction, loadRules } from "~/server/rules/engine";
+import { getRequiredContentTypes } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
 	buildHistoryInserts,
@@ -246,67 +244,10 @@ export const cseOpinionRouter = createTRPCRouter({
 			});
 		}
 
-		const opinions = await ctx.db
-			.select({
-				declarationNumber: cseOpinions.declarationNumber,
-				type: cseOpinions.type,
-				gapConsulted: cseOpinions.gapConsulted,
-			})
-			.from(cseOpinions)
-			.where(eq(cseOpinions.declarationId, ctx.declarationId));
-
-		// Same gap >= 5% signal as the Step 2 matrix (page.tsx): the Justification
-		// type is only required when the declaration actually has a gap, so finalize
-		// never demands an association the matrix does not offer.
-		const categories = await ctx.db
-			.select({
-				declarationType: employeeCategories.declarationType,
-				annualBaseWomen: employeeCategories.annualBaseWomen,
-				annualBaseMen: employeeCategories.annualBaseMen,
-				annualVariableWomen: employeeCategories.annualVariableWomen,
-				annualVariableMen: employeeCategories.annualVariableMen,
-				hourlyBaseWomen: employeeCategories.hourlyBaseWomen,
-				hourlyBaseMen: employeeCategories.hourlyBaseMen,
-				hourlyVariableWomen: employeeCategories.hourlyVariableWomen,
-				hourlyVariableMen: employeeCategories.hourlyVariableMen,
-			})
-			.from(employeeCategories)
-			.innerJoin(
-				jobCategories,
-				eq(employeeCategories.jobCategoryId, jobCategories.id),
-			)
-			.where(eq(jobCategories.declarationId, ctx.declarationId));
-
-		// Keyed like the Step 2 matrix (page.tsx uses hasSubmittedSecondDeclaration):
-		// a second declaration only needs an association once it was actually
-		// submitted (its opinions exist). declaration.secondDeclarationStep is set as
-		// soon as correction data is saved, even when no second declaration is ever
-		// submitted, so relying on it would demand an association the matrix never
-		// offers and block finalize permanently.
-		const hasSecondDeclaration = opinions.some(
-			(opinion) => opinion.declarationNumber === 2,
+		const requiredTypes = await getRequiredContentTypes(
+			ctx.db,
+			ctx.declarationId,
 		);
-
-		const gapConsultedFirst = opinions.find(
-			(o) => o.declarationNumber === 1 && o.type === "gap",
-		)?.gapConsulted;
-		const gapConsultedSecond = opinions.find(
-			(o) => o.declarationNumber === 2 && o.type === "gap",
-		)?.gapConsulted;
-
-		const requiredTypes = computeRequiredContentTypes({
-			hasSecondDeclaration,
-			firstDeclGapConsulted: gapConsultedFirst ?? null,
-			secondDeclGapConsulted: gapConsultedSecond ?? null,
-			firstDeclGapHigh: hasGapsAboveThreshold(
-				categories.filter((category) => category.declarationType === "initial"),
-			),
-			secondDeclGapHigh: hasGapsAboveThreshold(
-				categories.filter(
-					(category) => category.declarationType === "correction",
-				),
-			),
-		});
 
 		const coveredKeys = new Set(
 			existingAssociations.map((a) => `${a.declarationNumber}:${a.type}`),

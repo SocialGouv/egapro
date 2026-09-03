@@ -101,6 +101,9 @@ type FinalizeOptions = {
 	// When true, the opinion count query resolves to [] so its row is undefined,
 	// exercising the `?? 0` fallback in finalize().
 	emptyOpinionCountRow?: boolean;
+	// Mirrors a `second_declaration_submit` row in declarationStatusHistory —
+	// the same signal the Step 2 matrix reads (declarationData.hasSubmittedSecondDeclaration).
+	secondDeclarationSubmitted?: boolean;
 };
 
 // Select sequence of finalize():
@@ -111,7 +114,8 @@ type FinalizeOptions = {
 //   5 existingAssociations (.where)
 //   6 opinions with gapConsulted (.where)
 //   7 employee categories for the gap >= 5% gate (.innerJoin().where)
-//   8 (inside tx) declRow for draft purge (.where().limit)
+//   8 second_declaration_submit event lookup (.where().limit)
+//   9 (inside tx) declRow for draft purge (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
@@ -122,6 +126,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		associations = ASSOCIATIONS_FIRST_GAP,
 		categories = DEFAULT_CATEGORIES,
 		emptyOpinionCountRow = false,
+		secondDeclarationSubmitted = false,
 	} = options;
 
 	// Each association points to a real file (default: the single DEFAULT_FILE)
@@ -146,7 +151,14 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		if (call === 4) {
 			return Promise.resolve(declaration ? [declaration] : []);
 		}
-		if (call === 8 && txDraft !== null) {
+		if (call === 8) {
+			return Promise.resolve(
+				secondDeclarationSubmitted
+					? [{ eventType: "second_declaration_submit" }]
+					: [],
+			);
+		}
+		if (call === 9 && txDraft !== null) {
 			return Promise.resolve([{ draft: txDraft }]);
 		}
 		return Promise.resolve([]);
@@ -473,8 +485,9 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("requires (2, accuracy) when a second declaration was submitted (its opinions exist)", async () => {
+		it("requires (2, accuracy) when a second declaration was submitted (second_declaration_submit event exists)", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: false },
@@ -489,11 +502,33 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second-declaration opinion)", async () => {
-			// Regression guard (epic #3476): finalize keys off submitted second-
-			// declaration opinions, like the Step 2 matrix — not secondDeclarationStep,
-			// which is set as soon as correction data is saved. Relying on the column
-			// would demand a (2, accuracy) association the matrix never offers.
+		it("requires (2, accuracy) even when no round-two opinion row exists yet (regression #4299)", async () => {
+			// The second_declaration_submit event can fire before Step 1 CSE
+			// opinions are (re)saved with round-2 data — cseOpinions then has no
+			// declarationNumber:2 row yet, but the Step 2 matrix already opens a
+			// second column because it reads the same event. Deriving
+			// hasSecondDeclaration from the opinions rows instead of the event
+			// would under-require here and let finalize (and the upload quota)
+			// drift below what the matrix demands.
+			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
+				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				associations: [{ declarationNumber: 1, type: "accuracy" }],
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).rejects.toThrow(
+				"Le type de contenu « Exactitude » de la deuxième déclaration doit être associé à un fichier avant validation.",
+			);
+			expect(ctx.update).not.toHaveBeenCalled();
+		});
+
+		it("does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second_declaration_submit event)", async () => {
+			// Regression guard (epic #3476): finalize keys off the
+			// second_declaration_submit event, like the Step 2 matrix — not
+			// secondDeclarationStep, which is set as soon as correction data is
+			// saved. Relying on the column would demand a (2, accuracy)
+			// association the matrix never offers.
 			const ctx = createMockDbForFinalize({
 				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: 2 },
 				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
@@ -506,6 +541,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("requires (2, gap) when second declaration gapConsulted is true", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -525,6 +561,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("passes with a full two-declaration set when every required type is covered", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: true },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -543,6 +580,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("does not require (2, gap) when second declaration gapConsulted is false", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: false },
@@ -570,6 +608,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("does not require (2, gap) when gapConsulted is true but there is no gap >= 5% on the second declaration", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
