@@ -100,8 +100,11 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 		}
 	}
 
-	// Backfill the NAF label from Weez when missing — owner reads only
-	// (impersonation stays read-only); best-effort, never breaks the read.
+	// Backfill the NAF pair from Weez when the label is missing — owner reads
+	// only (impersonation stays read-only); best-effort, never breaks the read.
+	// Code and label are written together: a stored code may predate the rév. 2
+	// switch (#4087), and writing the label alone would pin a rév. 2 wording
+	// next to a NAF 2025 code.
 	if (
 		!bypassOwnership &&
 		company.nafCode !== null &&
@@ -109,11 +112,12 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 	) {
 		try {
 			const info = await fetchCompanyBySiren(company.siren);
-			if (info?.nafLabel) {
+			if (info?.nafLabel && info.nafCode) {
 				await db
 					.update(companies)
-					.set({ nafLabel: info.nafLabel })
+					.set({ nafCode: info.nafCode, nafLabel: info.nafLabel })
 					.where(eq(companies.siren, company.siren));
+				company.nafCode = info.nafCode;
 				company.nafLabel = info.nafLabel;
 			}
 		} catch {
