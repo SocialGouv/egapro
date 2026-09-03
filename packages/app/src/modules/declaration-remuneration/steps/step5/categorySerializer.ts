@@ -2,6 +2,7 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import type { CategoryHeadcounts } from "~/modules/domain";
 
 export type EmployeeCategory = {
 	id: number;
@@ -70,6 +71,23 @@ function toInt(val: string): number | undefined {
 
 function toStr(val: string): string | undefined {
 	return val || undefined;
+}
+
+/** The four headcount cells of a category, whatever else the row carries. */
+type CategoryCountFields = Pick<
+	EmployeeCategory,
+	"womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount"
+>;
+
+export function toCategoryHeadcounts(
+	cat: CategoryCountFields,
+): CategoryHeadcounts {
+	return {
+		womenCount: toInt(cat.womenCount),
+		menCount: toInt(cat.menCount),
+		hourlyWomenCount: toInt(cat.hourlyWomenCount),
+		hourlyMenCount: toInt(cat.hourlyMenCount),
+	};
 }
 
 export function toSubmitData(

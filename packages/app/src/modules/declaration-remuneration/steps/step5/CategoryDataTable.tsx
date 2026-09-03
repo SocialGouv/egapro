@@ -31,6 +31,9 @@ type Props = {
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
+	/** Greys out the two remuneration tables only — the headcount cells stay
+	 *  operable so a category at 0 can be corrected (#3678). */
+	payDisabled?: boolean;
 	readOnly?: boolean;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -375,6 +378,7 @@ export function CategoryDataTable({
 	onPositiveNumberChange: pos,
 	onDecimalBlur: blur,
 	disabled = false,
+	payDisabled = false,
 	readOnly = false,
 	errorAlertId,
 	errors,
@@ -424,7 +428,7 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled}
+				disabled={disabled || payDisabled}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -439,7 +443,7 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled}
+				disabled={disabled || payDisabled}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}

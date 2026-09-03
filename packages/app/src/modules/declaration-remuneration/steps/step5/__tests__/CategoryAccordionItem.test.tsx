@@ -30,6 +30,7 @@ function renderItem(
 		nameError?: string;
 		category?: EmployeeCategory & { id: number };
 		errors?: FieldError[];
+		payDisabled?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
@@ -50,6 +51,7 @@ function renderItem(
 			onAskRemove={vi.fn()}
 			onDecimalBlur={() => vi.fn()}
 			onPositiveNumberChange={() => vi.fn()}
+			payDisabled={false}
 			readOnly={false}
 			readOnlyLabel={false}
 			showDelete={false}
@@ -57,6 +59,43 @@ function renderItem(
 		/>,
 	);
 }
+
+const PAY_CELL_LABELS = [
+	"Salaire de base annuel femmes, catégorie 1",
+	"Salaire de base annuel hommes, catégorie 1",
+	"Composantes variables annuelles femmes, catégorie 1",
+	"Composantes variables annuelles hommes, catégorie 1",
+	"Salaire de base horaire femmes, catégorie 1",
+	"Salaire de base horaire hommes, catégorie 1",
+	"Composantes variables horaires femmes, catégorie 1",
+	"Composantes variables horaires hommes, catégorie 1",
+];
+
+const COUNT_CELL_LABELS = [
+	"Rémunération annuelle — Nombre de femmes, catégorie 1",
+	"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+	"Rémunération horaire — Nombre de femmes, catégorie 1",
+	"Rémunération horaire — Nombre d'hommes, catégorie 1",
+];
+
+describe("CategoryAccordionItem — payDisabled (#3678)", () => {
+	it("leaves every cell operable when payDisabled is false", () => {
+		renderItem();
+		for (const label of [...PAY_CELL_LABELS, ...COUNT_CELL_LABELS]) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
+	});
+
+	it("greys out the 8 pay cells and keeps the 4 headcount cells operable", () => {
+		renderItem({ payDisabled: true });
+		for (const label of PAY_CELL_LABELS) {
+			expect(screen.getByLabelText(label)).toBeDisabled();
+		}
+		for (const label of COUNT_CELL_LABELS) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
+	});
+});
 
 describe("CategoryAccordionItem — name length cap (#3943)", () => {
 	it("caps the input with maxLength and hints at the label's source (#4254)", () => {

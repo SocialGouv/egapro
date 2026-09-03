@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { isSexRemunerationComplete } from "~/modules/domain";
+import {
+	isCategoryPayApplicable,
+	isSexRemunerationComplete,
+} from "~/modules/domain";
 import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
 export const CATEGORY_NAME_MAX_LENGTH = 255;
@@ -111,6 +114,9 @@ export const PAY_FIELDS_MEN = CATEGORY_PAY_BASES.flatMap(
 	(base) => base.menPayFields,
 );
 
+/** Every pay cell of a category, both bases and both sexes. */
+export const CATEGORY_PAY_FIELDS = [...PAY_FIELDS_WOMEN, ...PAY_FIELDS_MEN];
+
 const employeeCategoryDataSchema = z
 	.object({
 		womenCount: z.number().int().min(0).optional(),
@@ -128,6 +134,16 @@ const employeeCategoryDataSchema = z
 	})
 	.refine(
 		(data) =>
+			isCategoryPayApplicable(data) ||
+			CATEGORY_PAY_FIELDS.every((field) => !data[field]),
+		{
+			message:
+				"Une catégorie d'emplois dont un effectif est à 0 ne peut pas déclarer de rémunération.",
+		},
+	)
+	.refine(
+		(data) =>
+			!isCategoryPayApplicable(data) ||
 			CATEGORY_PAY_BASES.every(
 				(base) =>
 					isSexRemunerationComplete(

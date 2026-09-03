@@ -11,6 +11,17 @@ import {
 	DEV_STEP5_SOURCE,
 } from "../devFillData";
 
+const PAY_FIELDS = [
+	"annualBaseWomen",
+	"annualBaseMen",
+	"annualVariableWomen",
+	"annualVariableMen",
+	"hourlyBaseWomen",
+	"hourlyBaseMen",
+	"hourlyVariableWomen",
+	"hourlyVariableMen",
+] as const;
+
 describe("devFillData", () => {
 	it("Step1 has one workforce row per pay basis, each with 120 women and 130 men", () => {
 		expect(DEV_STEP1_ROWS).toHaveLength(2);
@@ -112,5 +123,34 @@ describe("devFillData", () => {
 		expect(sumOf(categories, "menCount")).toBe(4);
 		expect(sumOf(categories, "hourlyWomenCount")).toBe(2);
 		expect(sumOf(categories, "hourlyMenCount")).toBe(1);
+	});
+
+	it("createDevStep5Categories leaves no pay amount on a category at 0 (#3678)", () => {
+		const categories = createDevStep5Categories(() => 0, totals(1, 1, 1, 1));
+
+		const atZero = categories.filter((c) =>
+			[c.womenCount, c.menCount, c.hourlyWomenCount, c.hourlyMenCount].includes(
+				"0",
+			),
+		);
+		expect(atZero.length).toBeGreaterThan(0);
+		for (const category of atZero) {
+			for (const field of PAY_FIELDS) {
+				expect(category[field]).toBe("");
+			}
+		}
+	});
+
+	it("createDevStep5Categories keeps the pay amounts of categories without a 0 (#3678)", () => {
+		const categories = createDevStep5Categories(
+			() => 0,
+			totals(120, 130, 120, 130),
+		);
+
+		for (const category of categories) {
+			for (const field of PAY_FIELDS) {
+				expect(category[field]).not.toBe("");
+			}
+		}
 	});
 });

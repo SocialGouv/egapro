@@ -7,6 +7,7 @@ import { useFieldArray } from "react-hook-form";
 import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
 	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
 	categoryFormSchema,
 	type PAY_FIELDS_MEN,
 	type PAY_FIELDS_WOMEN,
@@ -35,6 +36,7 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	isCategoryPayApplicable,
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	sumCategoryWorkforce,
@@ -51,6 +53,7 @@ import {
 	createEmptyCategory,
 	type EmployeeCategory,
 	fromDatabaseRows,
+	toCategoryHeadcounts,
 	toSubmitData,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
@@ -245,8 +248,31 @@ export function CategoryForm({
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
 			const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
+			const changedFieldId = categoryDataFieldId(index, field);
+			// A headcount drives every pay cell of its category, a pay cell only
+			// drives its own error.
+			const isCountField = payFieldsForCountField(field).length > 0;
+			const categoryPayFieldIds = new Set(
+				isCountField
+					? CATEGORY_PAY_FIELDS.map((payField) =>
+							categoryDataFieldId(index, payField),
+						)
+					: [],
+			);
 			if (raw === "") {
 				form.setValue(`categories.${index}.${formField}`, raw);
+				// An emptied headcount is no longer an explicit 0, so the category
+				// declares pay again: its inconsistencies are gone (#3678).
+				setCategoryErrors((errors) =>
+					errors.filter(
+						(error) =>
+							error.fieldId !== changedFieldId &&
+							!(
+								error.category === "inconsistent" &&
+								categoryPayFieldIds.has(error.fieldId)
+							),
+					),
+				);
 				setHasData(false);
 				return;
 			}
@@ -254,25 +280,17 @@ export function CategoryForm({
 			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
-			const changedFieldId = categoryDataFieldId(index, field);
-			// A headcount back to 0 releases the pay fields it was requiring —
-			// those of its own basis and sex, never the other basis' (#4254).
-			const clearedPayFieldIds =
-				n === 0
-					? new Set(
-							payFieldsForCountField(field).map((payField) =>
-								categoryDataFieldId(index, payField),
-							),
-						)
-					: null;
 			setCategoryErrors((errors) =>
-				errors.filter(
-					(error) =>
-						error.fieldId !== changedFieldId &&
-						!clearedPayFieldIds?.has(error.fieldId) &&
-						(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
-							error.category === "invalid"),
-				),
+				errors.filter((error) => {
+					if (error.fieldId === changedFieldId) return false;
+					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
+						return error.category === "invalid";
+					if (!categoryPayFieldIds.has(error.fieldId)) return true;
+					// A headcount at 0 releases every pay cell of its category, which
+					// then declares no remuneration at all (#3678). Any other headcount
+					// only clears the inconsistency that 0 had raised.
+					return n !== 0 && error.category !== "inconsistent";
+				}),
 			);
 			setHasData(false);
 		};
@@ -401,8 +419,22 @@ export function CategoryForm({
 				return;
 			}
 
-			const remunerationErrors: FieldError[] = [];
+			const payErrors: FieldError[] = [];
 			data.categories.forEach((category, index) => {
+				// A category missing a sex on either basis declares no remuneration:
+				// amounts left facing a 0 are never erased, they are refused (#3678).
+				if (!isCategoryPayApplicable(toCategoryHeadcounts(category))) {
+					for (const payField of CATEGORY_PAY_FIELDS) {
+						if (category[payField].trim() === "") continue;
+						payErrors.push({
+							fieldId: categoryDataFieldId(index, payField),
+							category: "inconsistent",
+							anchor: true,
+							message: `La rémunération « ${PAY_FIELD_LABELS[payField]} » de la catégorie d'emplois n°${index + 1} est renseignée alors qu'un effectif de cette catégorie est à 0 : effacez-la ou corrigez l'effectif.`,
+						});
+					}
+					return;
+				}
 				for (const base of CATEGORY_PAY_BASES) {
 					for (const [countField, payFields] of [
 						[base.womenCountField, base.womenPayFields],
@@ -412,7 +444,7 @@ export function CategoryForm({
 						if (Number.isNaN(count) || count < 1) continue;
 						for (const payField of payFields) {
 							if (category[payField].trim() !== "") continue;
-							remunerationErrors.push({
+							payErrors.push({
 								fieldId: categoryDataFieldId(index, payField),
 								category: "empty",
 								message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
@@ -422,8 +454,8 @@ export function CategoryForm({
 					}
 				}
 			});
-			if (remunerationErrors.length > 0) {
-				setCategoryErrors(remunerationErrors);
+			if (payErrors.length > 0) {
+				setCategoryErrors(payErrors);
 				return;
 			}
 
@@ -632,6 +664,14 @@ export function CategoryForm({
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
 						const cat = categories[index];
+						// A category at 0 that carries no amount is greyed out; one that
+						// still carries amounts stays operable so it can be fixed (#3678).
+						const payDisabled = cat
+							? !isCategoryPayApplicable(toCategoryHeadcounts(cat)) &&
+								!CATEGORY_PAY_FIELDS.some(
+									(payField) => cat[payField].trim() !== "",
+								)
+							: false;
 						return (
 							<CategoryAccordionItem
 								baseId={baseId}
@@ -674,6 +714,7 @@ export function CategoryForm({
 								onAskRemove={askRemoveCategory}
 								onDecimalBlur={handleDecimalBlur}
 								onPositiveNumberChange={handlePositiveNumberChange}
+								payDisabled={payDisabled}
 								readOnly={readOnly}
 								readOnlyLabel={readOnlyLabel}
 								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}
