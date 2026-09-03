@@ -850,6 +850,28 @@ export const declarationRouter = createTRPCRouter({
 				await purgeDraftSlice(tx, siren, year, "compliance");
 			});
 
+			// The "justify" path with no CSE (round 1 or round 2) ends the
+			// démarche right here — no upload step follows to carry the
+			// acknowledgement, unlike the corrective-action / joint-evaluation
+			// paths. Every other event.type is either a transient path choice
+			// with more steps ahead, or absent — so this only fires on those
+			// two terminal transitions.
+			const isDemarcheComplete = events.some(
+				(event) => event.type === "demarche_complete",
+			);
+			const email = ctx.session.user.email;
+			if (isDemarcheComplete && email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: isRound2 ? "secondDeclaration" : "declaration",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
+
 			return { success: true };
 		}),
 

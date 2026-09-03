@@ -1,3 +1,4 @@
+import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
@@ -20,8 +21,32 @@ import {
 	completeDeclaration,
 	reachStep6ComplianceRecap,
 } from "./helpers/declaration-flows";
+import {
+	killWorker,
+	spawnNotificationsWorker,
+	waitForWorkerReady,
+} from "./helpers/notifications-worker";
+import { mailChainAvailable } from "./helpers/receipts";
 
 test.describe.configure({ mode: "serial" });
+
+// CAS-03 and CAS-09 assert the acknowledgement that closes their démarche (#4293),
+// and nothing drains pg-boss in this workflow: without a worker the receipt is
+// enqueued and never sent, so the assertion would wait out its timeout on an
+// environment gap rather than on the rule under test. Same spawn as
+// `grille.grille.ts` and `notifications-email-flow.e2e.ts`; `workers: 1` keeps
+// these three from ever holding a worker at the same time.
+let notificationsWorker: ChildProcess | null = null;
+
+test.beforeAll(async () => {
+	if (!(await mailChainAvailable())) return;
+	notificationsWorker = spawnNotificationsWorker();
+	await waitForWorkerReady(notificationsWorker);
+});
+
+test.afterAll(async () => {
+	if (notificationsWorker) await killWorker(notificationsWorker);
+});
 
 // The 185 coordinates are derived from the domain (grille/coordinates.ts); every
 // fiche's parcours-type lives in FICHE_SCENARIOS (grille/scenarios.ts). Each

@@ -7,6 +7,7 @@ import type {
 	NotificationType,
 } from "notifications/queue";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
 	hasStartedSecondDeclaration,
 	isInComplianceProcess,
@@ -56,7 +57,12 @@ type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
 type ReceiptContext = {
 	raisonSociale: string;
 	cseRequired: boolean;
+	// Feeds `selectCseOpinionReceiptVariant` only — "a compliance path is (or
+	// was) in progress", used to pick the CSE-opinion-receipt gap wording.
 	hasGapAboveThreshold: boolean;
+	// Feeds `selectDeclarationConfirmationVariant` directly — that selector
+	// switches on the FSM status itself rather than a derived boolean.
+	status: DeclarationFsmStatus | null;
 	hasSecondDeclaration: boolean;
 };
 
@@ -95,6 +101,7 @@ async function readReceiptContext(
 			raisonSociale,
 			cseRequired: false,
 			hasGapAboveThreshold: false,
+			status: null,
 			hasSecondDeclaration: false,
 		};
 	}
@@ -103,6 +110,7 @@ async function readReceiptContext(
 		raisonSociale,
 		cseRequired: row.cseRequired,
 		hasGapAboveThreshold: isInComplianceProcess(row),
+		status: row.status,
 		hasSecondDeclaration: hasStartedSecondDeclaration(row),
 	};
 }
@@ -119,8 +127,7 @@ async function buildConfirmationPayload(
 		case "declaration_confirmation":
 		case "second_declaration_confirmation": {
 			const variant = selectDeclarationConfirmationVariant({
-				hasGapAboveThreshold: context.hasGapAboveThreshold,
-				cseRequired: context.cseRequired,
+				status: context.status,
 			});
 			if (variant === "path_to_select") {
 				// The first declaration acknowledges round 1, the second round 2.
