@@ -56,6 +56,8 @@ export function Step1Opinions({
 	secondDeclarationPathChoice,
 }: Props) {
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
+	const isFirstDeclarationJustification =
+		firstDeclarationPathChoice === "justify";
 	const isSecondDeclarationJustification =
 		hasSecondDeclaration && secondDeclarationPathChoice === "justify";
 	const router = useRouter();
@@ -67,7 +69,9 @@ export function Step1Opinions({
 			firstDeclaration: {
 				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
 				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-				gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
+				gapConsulted: isFirstDeclarationJustification
+					? true
+					: (initialData?.firstDeclGapConsulted ?? undefined),
 				gapOpinion: initialData?.firstDeclGapOpinion ?? null,
 				gapDate: initialData?.firstDeclGapDate ?? null,
 			},
@@ -84,7 +88,12 @@ export function Step1Opinions({
 					}
 				: undefined,
 		}),
-		[initialData, hasSecondDeclaration, isSecondDeclarationJustification],
+		[
+			initialData,
+			hasSecondDeclaration,
+			isFirstDeclarationJustification,
+			isSecondDeclarationJustification,
+		],
 	);
 
 	const { draft, setField, isLoadingDraft } = useDeclarationDraft({
@@ -102,12 +111,15 @@ export function Step1Opinions({
 	useEffect(() => {
 		if (isLoadingDraft) return;
 		const fd = draft.firstDeclaration;
+		if (isFirstDeclarationJustification) {
+			form.setValue("firstDeclaration.gapConsulted", true);
+		}
 		if (fd) {
 			if (fd.accuracyOpinion !== undefined)
 				form.setValue("firstDeclaration.accuracyOpinion", fd.accuracyOpinion);
 			if (fd.accuracyDate !== undefined)
 				form.setValue("firstDeclaration.accuracyDate", fd.accuracyDate);
-			if (fd.gapConsulted !== undefined)
+			if (!isFirstDeclarationJustification && fd.gapConsulted !== undefined)
 				form.setValue("firstDeclaration.gapConsulted", fd.gapConsulted);
 			if (fd.gapOpinion !== undefined)
 				form.setValue("firstDeclaration.gapOpinion", fd.gapOpinion);
@@ -140,6 +152,7 @@ export function Step1Opinions({
 		draft,
 		form,
 		hasSecondDeclaration,
+		isFirstDeclarationJustification,
 		isSecondDeclarationJustification,
 	]);
 
@@ -157,16 +170,25 @@ export function Step1Opinions({
 	});
 
 	const onSubmit = form.handleSubmit((data) => {
+		const withFirstDeclaration = isFirstDeclarationJustification
+			? {
+					...data,
+					firstDeclaration: {
+						...data.firstDeclaration,
+						gapConsulted: true,
+					},
+				}
+			: data;
 		const submittedData =
-			isSecondDeclarationJustification && data.secondDeclaration
+			isSecondDeclarationJustification && withFirstDeclaration.secondDeclaration
 				? {
-						...data,
+						...withFirstDeclaration,
 						secondDeclaration: {
-							...data.secondDeclaration,
+							...withFirstDeclaration.secondDeclaration,
 							gapConsulted: true,
 						},
 					}
-				: data;
+				: withFirstDeclaration;
 		const firstGapIncomplete =
 			submittedData.firstDeclaration.gapConsulted === true &&
 			(!submittedData.firstDeclaration.gapOpinion ||
@@ -288,7 +310,9 @@ export function Step1Opinions({
 						name="firstDeclaration.gapConsulted"
 						render={({ field }) => (
 							<GapConsultationCard
-								consulted={field.value ?? null}
+								consulted={
+									isFirstDeclarationJustification ? true : (field.value ?? null)
+								}
 								date={firstDeclGapDate ?? ""}
 								id="first-decl-gap"
 								onConsultedChange={(v) => {
@@ -305,6 +329,7 @@ export function Step1Opinions({
 								}}
 								opinion={firstDeclGapOpinion ?? null}
 								readOnly={isReadOnly}
+								showConsultationQuestion={!isFirstDeclarationJustification}
 							/>
 						)}
 					/>

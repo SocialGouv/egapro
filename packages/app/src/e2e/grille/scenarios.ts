@@ -205,7 +205,13 @@ export const FICHE_SCENARIOS = {
 		});
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapConsulted: true, opinion });
+		await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
+			0,
+		);
+		await fillCseStep1(page, {
+			firstDeclGapConsultationImplicit: true,
+			opinion,
+		});
 		await submitCseStep2(page, {
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
