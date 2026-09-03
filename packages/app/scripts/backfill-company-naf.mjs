@@ -67,6 +67,13 @@ const sql = postgres(databaseUrl, { max: 1 });
  * Reads the rév. 2 activity pair. Returns null when the registry has nothing to
  * say about the SIREN, and null for a non-diffusible unit too: the app masks
  * that company's activity, and the backfill must not put it back in the clear.
+ *
+ * The `"N"` test below restates `isCompanyDiffusible`
+ * (src/modules/public-api/projection.ts) rather than importing it: that module
+ * reaches the Drizzle schema through the `~/` alias, which this plain-node
+ * script cannot resolve. **If the diffusibility rule ever gains a status, change
+ * it here too** — the two must not drift, or this job re-exposes the activity of
+ * companies the app deliberately masks.
  */
 async function fetchNaf(siren) {
 	const url = new URL(`${weezApiUrl}/public/v3/unitelegale/findbysiren`);
