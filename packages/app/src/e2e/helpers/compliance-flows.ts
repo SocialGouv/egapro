@@ -72,7 +72,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 				.click();
 			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
 			if (secondDeclGapCardHidden) {
-				await expect(page.locator("#second-decl-gap-favorable")).toHaveCount(0);
+				await expect(page.locator("#second-decl-gap-legend")).toHaveCount(0);
 			} else if (secondDeclGapConsultationImplicit) {
 				await fillGapConsultation(
 					page,
