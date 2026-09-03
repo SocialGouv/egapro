@@ -105,7 +105,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapConsulted: true });
+		await fillCseStep1(page, { firstDeclGapConsultationImplicit: true });
 
 		const accuracyFile = "avis-cse-exactitude.pdf";
 		const gapFile = "avis-cse-justification.pdf";

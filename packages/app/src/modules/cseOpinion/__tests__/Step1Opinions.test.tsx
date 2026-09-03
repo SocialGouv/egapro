@@ -239,6 +239,30 @@ describe("Step1Opinions", () => {
 		).toBeInTheDocument();
 	});
 
+	it("hides only the first consultation question for the first-round justification path", () => {
+		const { container } = render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="justify"
+				hasSecondDeclaration={true}
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(
+			screen.getAllByText(
+				/Avez-vous informé et consulté le CSE sur la justification des écarts/,
+			),
+		).toHaveLength(1);
+		expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
+		expect(
+			container.querySelector("#first-decl-gap-favorable"),
+		).toBeInTheDocument();
+		expect(container.querySelector("#first-decl-gap-date")).toBeInTheDocument();
+		expect(container.querySelector("#second-decl-gap-yes")).toBeInTheDocument();
+	});
+
 	it("drops both declaration headings when there is only one declaration", () => {
 		render(
 			<Step1Opinions
@@ -410,6 +434,40 @@ describe("Step1Opinions", () => {
 		expect(mockMutate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				secondDeclaration: expect.objectContaining({ gapConsulted: true }),
+			}),
+		);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+	});
+
+	it("normalizes the first gap consultation to true for the first-round justification path", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="justify"
+				hasSecondDeclaration={false}
+				initialData={{
+					firstDeclAccuracyOpinion: "favorable",
+					firstDeclAccuracyDate: "2026-01-15",
+					firstDeclGapConsulted: false,
+					firstDeclGapOpinion: "favorable",
+					firstDeclGapDate: "2026-01-20",
+					secondDeclAccuracyOpinion: null,
+					secondDeclAccuracyDate: "",
+					secondDeclGapConsulted: null,
+					secondDeclGapOpinion: null,
+					secondDeclGapDate: null,
+				}}
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+		expect(mockMutate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				firstDeclaration: expect.objectContaining({ gapConsulted: true }),
 			}),
 		);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
@@ -604,9 +662,78 @@ describe("Step1Opinions", () => {
 			).toBeInTheDocument();
 			expect(mockMutate).not.toHaveBeenCalled();
 		});
+
+		it("blocks an incomplete implicit first-declaration consultation even when stored as false", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclarationPathChoice="justify"
+					hasSecondDeclaration={false}
+					initialData={{
+						firstDeclAccuracyOpinion: "favorable",
+						firstDeclAccuracyDate: "2026-01-15",
+						firstDeclGapConsulted: false,
+						firstDeclGapOpinion: null,
+						firstDeclGapDate: null,
+						secondDeclAccuracyOpinion: null,
+						secondDeclAccuracyDate: "",
+						secondDeclGapConsulted: null,
+						secondDeclGapOpinion: null,
+						secondDeclGapDate: null,
+					}}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(
+				screen.getByText("Veuillez remplir tous les champs obligatoires."),
+			).toBeInTheDocument();
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("draft integration", () => {
+		it("forces the first-declaration gap consultation from a draft when the first-round path is justify", async () => {
+			const user = userEvent.setup();
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-01-10",
+						gapConsulted: false,
+						gapOpinion: "favorable",
+						gapDate: "2026-01-12",
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+			});
+
+			const { container } = render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclarationPathChoice="justify"
+					hasSecondDeclaration={false}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
+			expect(screen.getAllByLabelText("Favorable")[1]).toBeChecked();
+
+			await user.click(
+				container.querySelector("#first-decl-gap-unfavorable") as HTMLElement,
+			);
+			expect(lastFirstDeclaration()?.gapConsulted).toBe(true);
+		});
+
 		it("hydrates form from draft when available", () => {
 			mockUseDeclarationDraft.mockReturnValue({
 				draft: {
