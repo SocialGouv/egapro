@@ -41,7 +41,13 @@ touch "$MARKER"
 
 # LA RÉFÉRENCE EST LE TAG DE L'ACTION, pas la devDependency : c'est le moteur, et la CI garantit
 # déjà que les trois versions du dépôt s'accordent. Une seule source à lire, donc.
-WANT=$(grep -oE '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@v[0-9]+\.[0-9]+\.[0-9]+' "$WORKFLOW" | sed -E 's/.*@v//' | head -1)
+WANT=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$WORKFLOW" | sed -E '
+	s/.*@v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+	t
+	s/.*#[[:space:]]*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+	t
+	s/.*//
+' | grep -m1 . || true)
 [ -n "$WANT" ] || exit 0
 
 # La plus haute version installée, tous scopes confondus : le plugin peut être posé au scope

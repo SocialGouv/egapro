@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { computeRequiredContentTypes } from "~/modules/cseOpinion/contentTypeColumns";
 import type { ContentTypeKey } from "~/modules/cseOpinion/types";
-import { hasGapsAboveThreshold } from "~/modules/domain";
+import { computeGapHighFlags } from "~/modules/domain";
 import { getCurrentRound } from "~/server/api/routers/statusHistoryHelpers";
 import type { db as database } from "~/server/db";
 import {
@@ -74,17 +74,13 @@ export async function getRequiredContentTypes(
 		(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
 	)?.gapConsulted;
 
+	const { firstDeclGapHigh, secondDeclGapHigh } =
+		computeGapHighFlags(categories);
 	return computeRequiredContentTypes({
 		hasSecondDeclaration,
 		firstDeclGapConsulted: gapConsultedFirst ?? null,
 		secondDeclGapConsulted: gapConsultedSecond ?? null,
-		firstDeclGapHigh: hasGapsAboveThreshold(
-			categories.filter((category) => category.declarationType === "initial"),
-		),
-		secondDeclGapHigh: hasGapsAboveThreshold(
-			categories.filter(
-				(category) => category.declarationType === "correction",
-			),
-		),
+		firstDeclGapHigh,
+		secondDeclGapHigh,
 	});
 }

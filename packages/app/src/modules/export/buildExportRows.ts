@@ -1,9 +1,9 @@
 import { and, eq, isNotNull, or } from "drizzle-orm";
 
 import {
+	computeGapHighFlags,
 	floorWorkforce,
 	getObligationWorkforce,
-	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isIndicatorGRequired,
@@ -97,24 +97,19 @@ export async function buildExportRows(
 		// the same source as the UI and the declaration router — not by the
 		// aggregate indicators A/B on the row.
 		const indicatorGEntries = indicatorGMap.get(row.declarationId) ?? [];
-		const initialEntries = indicatorGEntries.filter(
-			(e) => e.declarationType === "initial",
-		);
-		const correctionEntries = indicatorGEntries.filter(
-			(e) => e.declarationType === "correction",
-		);
+		const { firstDeclGapHigh, secondDeclGapHigh } =
+			computeGapHighFlags(indicatorGEntries);
 		const complianceInput = {
 			workforce,
 			hasIndicatorG: hasIndicatorGForThisDecl,
-			hasSignificantIndicatorGGap: hasGapsAboveThreshold(initialEntries),
+			hasSignificantIndicatorGGap: firstDeclGapHigh,
 		};
 		const complianceProcessRequired =
 			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
 			isComplianceProcessRevisionRequired({
 				...complianceInput,
-				hasSignificantCorrectionIndicatorGGap:
-					hasGapsAboveThreshold(correctionEntries),
+				hasSignificantCorrectionIndicatorGGap: secondDeclGapHigh,
 				events:
 					row.secondDeclarationSubmittedAt === null
 						? []
