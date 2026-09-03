@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # LA VERSION D'ULTRA11Y VIT À TROIS ENDROITS DANS CE DÉPÔT, ET ILS DOIVENT S'ACCORDER.
 #
-#   1 & 2. `.github/workflows/a11y.yaml` — `uses: maxgfr/ultra11y@vX`, DEUX FOIS : la gate PR
-#          et `a11y-pages`. Le moteur est embarqué dans l'Action, donc ce tag EST le moteur.
+#   1 & 2. `.github/workflows/a11y.yaml` — `uses: maxgfr/ultra11y@…`, DEUX FOIS : la gate PR
+#          et `a11y-pages`. Le moteur est embarqué dans l'Action. La version se lit soit
+#          sur `@vX.Y.Z`, soit sur un `# vX.Y.Z` quand le ref est un SHA de release
+#          (les tags peuvent disparaître en amont alors que le commit reste).
 #   3.     `packages/app/package.json` — la devDependency `ultra11y`. Ce n'est pas un doublon
 #          décoratif : c'est le binaire (`pnpm exec ultra11y`) et le plugin Playwright
 #          (`ultra11y/playwright`) dont `src/e2e/a11y/` se sert pour ÉCRIRE les instantanés que
@@ -30,19 +32,31 @@ fail() {
 [ -f "$workflow" ] || fail "fichier introuvable : $workflow"
 [ -f "$manifest" ] || fail "fichier introuvable : $manifest"
 
-# Les lignes `uses:` seulement — jamais un `maxgfr/ultra11y@<sha>` cité dans un commentaire,
-# et il y en a un dans ce fichier.
-pins=$(grep -oE '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@v[0-9]+\.[0-9]+\.[0-9]+' "$workflow" | sed -E 's/.*@v//')
-count=$(printf '%s\n' "$pins" | grep -c . || true)
-first=$(printf '%s\n' "$pins" | sed -n 1p)
-second=$(printf '%s\n' "$pins" | sed -n 2p)
+# Lignes `uses:` seulement — un SHA cité dans un commentaire du workflow ne compte pas.
+uses_lines=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$workflow" || true)
+count=$(printf '%s\n' "$uses_lines" | grep -c . || true)
+
+pin_version() {
+	printf '%s\n' "$1" | sed -E '
+		s/.*@v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+		t
+		s/.*#[[:space:]]*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+		t
+		s/.*//
+	'
+}
+
+first=$(pin_version "$(printf '%s\n' "$uses_lines" | sed -n 1p)")
+second=$(pin_version "$(printf '%s\n' "$uses_lines" | sed -n 2p)")
 dep=$(grep -oE '"ultra11y"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$manifest" | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"$/\1/')
 
-[ "$count" -eq 2 ] || fail "attendu 2 \`uses: maxgfr/ultra11y@vX\` dans a11y.yaml, trouvé $count. Si un tier a été ajouté ou retiré, mets ce script à jour avec lui."
+[ "$count" -eq 2 ] || fail "attendu 2 \`uses: maxgfr/ultra11y@…\` dans a11y.yaml, trouvé $count. Si un tier a été ajouté ou retiré, mets ce script à jour avec lui."
+[ -n "$first" ] && [ -n "$second" ] ||
+	fail "chaque \`uses:\` doit porter \`@vX.Y.Z\` ou un \`# vX.Y.Z\` (pin SHA de release)."
 [ -n "$dep" ] || fail "devDependency \`ultra11y\` introuvable dans packages/app/package.json"
 
 [ "$first" = "$second" ] ||
-  fail "les deux tiers de l'Action divergent — un job en v$first, l'autre en v$second. Ils doivent porter le même tag."
+	fail "les deux tiers de l'Action divergent — un job en v$first, l'autre en v$second. Ils doivent porter la même version."
 
 [ "$first" = "$dep" ] ||
   fail "l'Action est en v$first et la devDependency en $dep. Le balayage Playwright écrit les instantanés avec la devDependency et l'Action les réingère avec le sien — alignez-les."
