@@ -112,9 +112,17 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	it("annotates company identity columns exposed by SUIT", () => {
 		const company = SCHEMA_COLUMN_COMMENTS.company;
 		expect(company?.name).toBe("SUIT: Raison_sociale");
-		expect(company?.naf_code).toBe("SUIT: Code_NAF");
 		expect(company?.address).toBe("SUIT: Adresse");
 		expect(company?.has_cse).toBe("SUIT: CSE_existant");
+	});
+
+	it("names the registry field and nomenclature behind naf_code", () => {
+		// Not a SUIT column: the code comes from the Weez registry, and the
+		// nomenclature has to be named — a NAF 2025 code next to the rév. 2
+		// label is exactly the mismatch #4087 fixed.
+		expect(SCHEMA_COLUMN_COMMENTS.company?.naf_code).toBe(
+			"Weez: activiteprincipaleunitelegale (NAF rév. 2), la nomenclature du libellé naf_label. Le code NAF 2025 est suivi séparément (#4089)",
+		);
 	});
 
 	it("annotates declarant columns exposed by SUIT", () => {

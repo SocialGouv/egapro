@@ -34,6 +34,14 @@ Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiff
 
 Le SIREN, l'effectif EMA (`workforceEma`) et l'intégralité des indicateurs A–F restent disponibles.
 
+### Nomenclature des champs NAF
+
+`nafCode` et `nafLabel` sont servis en **NAF rév. 2**, la nomenclature en vigueur, et forment un couple cohérent (le code et son libellé décrivent la même activité).
+
+Entre mars 2026 et la correction de l'issue #4087, `nafCode` a été servi en NAF 2025 (rév. 3) alors que `nafLabel` restait en rév. 2 : les consommateurs qui ont mis un code en cache sur cette période peuvent voir sa valeur changer pour les entreprises dont le code a été remappé par l'INSEE (par exemple `65.12Y` → `65.12Z`). Le filtre `naf` de l'endpoint représentation fait une égalité stricte sur ce code : une requête construite avec un code NAF 2025 ne renverra plus de résultat.
+
+Le passage au couple NAF 2025 complet (code **et** libellé) interviendra quand cette nomenclature deviendra la référence d'attribution des codes APE, au 1ᵉʳ janvier 2027.
+
 ### Gate par date de rendu public
 
 Seules les déclarations dont l'année correspond à une campagne dont la **date de rendu public** est atteinte sont servies. Les données d'une campagne en cours ou dont la date de publication n'est pas encore passée ne sont pas exposées.
@@ -59,7 +67,7 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 | `q` | string | non | Texte libre (raison sociale, SIREN) |
 | `region` | string | non | Code région (ex. `11`) |
 | `departement` | string | non | Code département (ex. `75`) |
-| `naf` | string | non | Code NAF (ex. `26.51A`) |
+| `naf` | string | non | Code NAF, nomenclature **NAF rév. 2**, en égalité stricte (ex. `26.51A`) |
 | `year` | integer | non | Année de déclaration |
 | `limit` | integer | non | Résultats par page (1–100, défaut 10) |
 | `offset` | integer | non | Décalage de pagination (défaut 0) |

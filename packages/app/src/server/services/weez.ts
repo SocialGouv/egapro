@@ -47,8 +47,15 @@ type WeezLegalEntity = {
 	siren: string;
 	denominationunitelegale: string | null;
 	raisonsociale: string | null;
+	// NAF rév. 2 activity code — the nomenclature the label below is written in,
+	// and the one we expose. Kept as the source until the NAF 2025 switch (#4089).
+	activiteprincipaleunitelegale: string | null;
+	// NAF 2025 (rév. 3) activity code. Typed but unmapped: the registry carries
+	// no NAF 2025 label, so pairing it with the rév. 2 label below mismatches.
 	activiteprincipalenaf25unitelegale: string | null;
-	// NAF rév. 2 activity label; describes the same activity as the mapped NAF 2025 nafCode above.
+	// Nomenclature the rév. 2 code and label belong to (e.g. "NAFRev2").
+	nomenclatureactiviteprincipaleunitelegale: string | null;
+	// NAF rév. 2 activity label; describes the activity of the rév. 2 code above.
 	nomenclatureactiviteprincipalelibelleunitelegale: string | null;
 	effectiftotal: number | null;
 	// INSEE size-band code; fallback for workforce when `effectiftotal` is null.
@@ -305,7 +312,7 @@ export async function fetchCompanyBySiren(
 			`Entreprise ${siren}`,
 		address: buildAddress(entity),
 		city: entity.libellecommune ?? null,
-		nafCode: entity.activiteprincipalenaf25unitelegale ?? null,
+		nafCode: entity.activiteprincipaleunitelegale ?? null,
 		// Clamp to the companies.nafLabel column width (varchar 255) to avoid insert overflow.
 		nafLabel:
 			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
