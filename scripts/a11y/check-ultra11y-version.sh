@@ -17,7 +17,8 @@
 # (`github-actions` et `npm`) : il n'a aucun moyen de savoir qu'elles vont ensemble. Ce script
 # est ce qui refuse une demi-montée de version.
 #
-# Sortie 0 si tout s'accorde, 1 sinon. Aucune dépendance : grep et sed.
+# Sortie 0 si tout s'accorde, 1 sinon. grep/sed en local ; curl pour résoudre un SHA vers
+# la version publiée dans package.json amont (repli sur le commentaire si hors ligne).
 set -euo pipefail
 
 root="${1:-$(git rev-parse --show-toplevel)}"
@@ -50,6 +51,14 @@ pin_ref() {
 	printf '%s\n' "$1" | sed -E 's|^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@([^[:space:]#]+).*|\1|'
 }
 
+resolve_engine_version() {
+	local ref="$1"
+	command -v curl >/dev/null 2>&1 || return 1
+	local json
+	json=$(curl -sfL --max-time 10 "https://raw.githubusercontent.com/maxgfr/ultra11y/${ref}/package.json") || return 1
+	printf '%s\n' "$json" | sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' | sed -n 1p
+}
+
 first_line=$(printf '%s\n' "$uses_lines" | sed -n 1p)
 second_line=$(printf '%s\n' "$uses_lines" | sed -n 2p)
 first=$(pin_version "$first_line")
@@ -69,7 +78,16 @@ dep=$(grep -oE '"ultra11y"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$m
 [ "$first" = "$second" ] ||
 	fail "les deux tiers de l'Action divergent — un job en v$first, l'autre en v$second. Ils doivent porter la même version."
 
-[ "$first" = "$dep" ] ||
-  fail "l'Action est en v$first et la devDependency en $dep. Le balayage Playwright écrit les instantanés avec la devDependency et l'Action les réingère avec le sien — alignez-les."
+engine=""
+if engine=$(resolve_engine_version "$first_ref") && [ -n "$engine" ]; then
+	[ "$engine" = "$first" ] ||
+		fail "le ref $first_ref est ultra11y $engine, le commentaire dit v$first. Aligne le \`# vX.Y.Z\` (ou passe en @vX.Y.Z) : le commentaire ne prouve rien, c'est le ref qui EST le moteur."
+	[ "$engine" = "$dep" ] ||
+		fail "le ref $first_ref est ultra11y $engine et la devDependency est $dep. Le balayage Playwright écrit les instantanés avec la devDependency et l'Action les réingère avec le sien — alignez-les."
+else
+	echo "⚠ ultra11y : impossible de résoudre $first_ref vers une version (réseau). Comparaison limitée au commentaire \`# v$first\`." >&2
+	[ "$first" = "$dep" ] ||
+		fail "l'Action est en v$first et la devDependency en $dep. Le balayage Playwright écrit les instantanés avec la devDependency et l'Action les réingère avec le sien — alignez-les."
+fi
 
 echo "✓ ultra11y v$first : les deux tiers de l'Action et la devDependency sont alignés."

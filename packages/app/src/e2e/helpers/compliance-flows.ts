@@ -40,10 +40,7 @@ async function fillGapConsultation(
 		return;
 	}
 	if (!consultationIsImplicit) {
-		const yes = page.locator(`label[for="${idPrefix}-yes"]`);
-		if ((await yes.count()) > 0) {
-			await yes.click();
-		}
+		await page.locator(`label[for="${idPrefix}-yes"]`).click();
 	}
 	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
