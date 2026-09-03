@@ -46,14 +46,25 @@ pin_version() {
 	'
 }
 
-first=$(pin_version "$(printf '%s\n' "$uses_lines" | sed -n 1p)")
-second=$(pin_version "$(printf '%s\n' "$uses_lines" | sed -n 2p)")
+pin_ref() {
+	printf '%s\n' "$1" | sed -E 's|^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@([^[:space:]#]+).*|\1|'
+}
+
+first_line=$(printf '%s\n' "$uses_lines" | sed -n 1p)
+second_line=$(printf '%s\n' "$uses_lines" | sed -n 2p)
+first=$(pin_version "$first_line")
+second=$(pin_version "$second_line")
+first_ref=$(pin_ref "$first_line")
+second_ref=$(pin_ref "$second_line")
 dep=$(grep -oE '"ultra11y"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$manifest" | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"$/\1/')
 
 [ "$count" -eq 2 ] || fail "attendu 2 \`uses: maxgfr/ultra11y@…\` dans a11y.yaml, trouvé $count. Si un tier a été ajouté ou retiré, mets ce script à jour avec lui."
 [ -n "$first" ] && [ -n "$second" ] ||
 	fail "chaque \`uses:\` doit porter \`@vX.Y.Z\` ou un \`# vX.Y.Z\` (pin SHA de release)."
 [ -n "$dep" ] || fail "devDependency \`ultra11y\` introuvable dans packages/app/package.json"
+
+[ "$first_ref" = "$second_ref" ] ||
+	fail "les deux tiers de l'Action pointent des refs différentes — $first_ref vs $second_ref. Le commentaire \`# vX.Y.Z\` ne prouve rien : c'est le ref qui EST le moteur."
 
 [ "$first" = "$second" ] ||
 	fail "les deux tiers de l'Action divergent — un job en v$first, l'autre en v$second. Ils doivent porter la même version."
