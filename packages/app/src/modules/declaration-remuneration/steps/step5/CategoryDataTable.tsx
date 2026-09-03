@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
@@ -94,8 +96,9 @@ type EuroCellProps = {
 	disabled: boolean;
 	readOnly: boolean;
 	value: string;
-	onBlur: () => void;
+	onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onFocus: () => void;
 	errorAlertId: string;
 	errors: readonly FieldError[];
 };
@@ -108,6 +111,7 @@ function EuroInputCell({
 	value,
 	onBlur,
 	onChange,
+	onFocus,
 	errorAlertId,
 	errors,
 }: EuroCellProps) {
@@ -120,11 +124,13 @@ function EuroInputCell({
 					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
 					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
+					data-pay-cell="true"
 					disabled={disabled}
 					id={id}
 					inputMode="decimal"
 					onBlur={onBlur}
 					onChange={onChange}
+					onFocus={onFocus}
 					readOnly={readOnly}
 					type="text"
 					value={displayDecimal(value)}
@@ -192,6 +198,8 @@ type RemunerationTableProps = {
 	idPrefix: string;
 	errorAlertId: string;
 	errors: readonly FieldError[];
+	onPayFocus: () => void;
+	onPayBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 function RemunerationTable({
@@ -207,7 +215,17 @@ function RemunerationTable({
 	idPrefix,
 	errorAlertId,
 	errors,
+	onPayFocus,
+	onPayBlur,
 }: RemunerationTableProps) {
+	const cellHandlers = (field: StringField) => ({
+		onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+			blur(catIndex, field)();
+			onPayBlur(e);
+		},
+		onChange: pos(catIndex, field, false),
+		onFocus: onPayFocus,
+	});
 	const totalWomen = computeTotal(
 		cat[fields.baseWomen],
 		cat[fields.variableWomen],
@@ -240,8 +258,7 @@ function RemunerationTable({
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-women")}
-							onBlur={blur(catIndex, fields.baseWomen)}
-							onChange={pos(catIndex, fields.baseWomen, false)}
+							{...cellHandlers(fields.baseWomen)}
 							readOnly={readOnly}
 							value={cat[fields.baseWomen]}
 						/>
@@ -251,8 +268,7 @@ function RemunerationTable({
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-men")}
-							onBlur={blur(catIndex, fields.baseMen)}
-							onChange={pos(catIndex, fields.baseMen, false)}
+							{...cellHandlers(fields.baseMen)}
 							readOnly={readOnly}
 							value={cat[fields.baseMen]}
 						/>
@@ -275,8 +291,7 @@ function RemunerationTable({
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-women")}
-							onBlur={blur(catIndex, fields.variableWomen)}
-							onChange={pos(catIndex, fields.variableWomen, false)}
+							{...cellHandlers(fields.variableWomen)}
 							readOnly={readOnly}
 							value={cat[fields.variableWomen]}
 						/>
@@ -286,8 +301,7 @@ function RemunerationTable({
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-men")}
-							onBlur={blur(catIndex, fields.variableMen)}
-							onChange={pos(catIndex, fields.variableMen, false)}
+							{...cellHandlers(fields.variableMen)}
 							readOnly={readOnly}
 							value={cat[fields.variableMen]}
 						/>
@@ -372,6 +386,10 @@ function CategoryWorkforceRow({
 	);
 }
 
+function isPayCell(node: EventTarget | null): boolean {
+	return node instanceof HTMLElement && node.dataset.payCell === "true";
+}
+
 export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
@@ -384,6 +402,17 @@ export function CategoryDataTable({
 	errors,
 }: Props) {
 	const idPrefix = `cat-${catIndex}`;
+	const [isEditingPay, setIsEditingPay] = useState(false);
+	// Greying an input that currently holds the focus makes the browser drop
+	// that focus to <body>. Erasing the last amount of a category at 0 is the
+	// very fix the error message suggests, so the greying waits until the user
+	// has left the two tables (WCAG 3.2.2 On Input, 2.4.3 Focus Order).
+	const payTablesDisabled = disabled || (payDisabled && !isEditingPay);
+
+	const handlePayBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+		// Focus moving to the sibling pay cell must not grey that cell away.
+		if (!isPayCell(e.relatedTarget)) setIsEditingPay(false);
+	};
 
 	return (
 		<div className={common.dataSection}>
@@ -428,11 +457,13 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || payDisabled}
+				disabled={payTablesDisabled}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
 				idPrefix={idPrefix}
+				onPayBlur={handlePayBlur}
+				onPayFocus={() => setIsEditingPay(true)}
 				pos={pos}
 				readOnly={readOnly}
 				scope="annuel"
@@ -443,11 +474,13 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || payDisabled}
+				disabled={payTablesDisabled}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}
 				idPrefix={idPrefix}
+				onPayBlur={handlePayBlur}
+				onPayFocus={() => setIsEditingPay(true)}
 				pos={pos}
 				readOnly={readOnly}
 				scope="horaire"

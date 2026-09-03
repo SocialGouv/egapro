@@ -1473,6 +1473,9 @@ describe("Step5EmployeeCategories — pay cells of a category at 0 (#3678)", () 
 		for (const label of ANNUAL_PAY_CELL_LABELS.slice(1)) {
 			await user.clear(screen.getByLabelText(label));
 		}
+		// The cells only grey out once the user has left them — greying a focused
+		// input would drop the focus to <body>.
+		await user.click(screen.getByLabelText(countLabel("annuelle", "femmes")));
 		for (const cell of payCells()) expect(cell).toBeDisabled();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
@@ -1507,6 +1510,34 @@ describe("Step5EmployeeCategories — pay cells of a category at 0 (#3678)", () 
 			annualBaseWomen: "100.00",
 			annualBaseMen: "100.00",
 		});
+	});
+
+	it("keeps the cell the user is editing operable, and greys it once focus leaves", async () => {
+		const user = userEvent.setup();
+		renderStep();
+
+		await fillAnnualAmountsThenZero(user);
+		const lastAmount = screen.getByLabelText(
+			ANNUAL_PAY_CELL_LABELS[3] as string,
+		);
+		for (const label of ANNUAL_PAY_CELL_LABELS.slice(0, 3)) {
+			await user.clear(screen.getByLabelText(label));
+		}
+
+		await user.clear(lastAmount);
+
+		// Erasing the last amount is the fix the error message suggests: the cell
+		// must not be greyed out from under the keyboard.
+		expect(lastAmount).not.toBeDisabled();
+		expect(lastAmount).toHaveFocus();
+
+		// Tabbing on lands in the next pay cell, which must not vanish either.
+		await user.tab();
+		for (const cell of payCells()) expect(cell).not.toBeDisabled();
+
+		// Leaving the two tables altogether is what greys them.
+		await user.click(screen.getByLabelText(countLabel("annuelle", "femmes")));
+		for (const cell of payCells()) expect(cell).toBeDisabled();
 	});
 
 	it("still applies the per-sex completeness rule to a category without any 0 (S7)", async () => {
