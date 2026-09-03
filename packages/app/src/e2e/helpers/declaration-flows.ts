@@ -1,4 +1,4 @@
-import { type Page, test } from "@playwright/test";
+import { type Locator, type Page, test } from "@playwright/test";
 
 /**
  * Fill all pay gap textboxes on steps 2 and 3. Every row is equal (no gap) by
@@ -44,6 +44,19 @@ export function categoryPayInput(
 	return page.getByRole("textbox", {
 		name: `${measure} ${sex}, catégorie ${categoryIndex}`,
 	});
+}
+
+/**
+ * The eight remuneration cells of one indicator G category — the four measures
+ * of both pay bases, for both sexes. Since #3678 they are greyed and released
+ * as one block, so a spec asserts on the whole set rather than on a basis.
+ */
+export function categoryPayCells(page: Page, categoryIndex = 1): Locator[] {
+	return CATEGORY_PAY_MEASURES.flatMap((measure) =>
+		(["femmes", "hommes"] as const).map((sex) =>
+			categoryPayInput(page, { categoryIndex, measure, sex }),
+		),
+	);
 }
 
 /**
