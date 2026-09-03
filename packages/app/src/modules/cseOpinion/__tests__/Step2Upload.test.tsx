@@ -407,17 +407,20 @@ describe("Step2Upload", () => {
 
 	it("disables the dropzone once every required content type is covered, even with slots remaining (#4299)", () => {
 		renderStep({
-			columns: SINGLE_COLUMN,
+			// Two required columns (1:accuracy, 2:accuracy), one file covering
+			// both: fileQuota is 2, so with a single existing file remainingSlots
+			// is 1 — a real free slot. Only the isComplete guard can close the
+			// dropzone here; without it this test would pass regardless.
+			columns: TWO_ACCURACY_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-1" },
 			],
 		});
 
-		// Only 1 of the 4 MAX_CSE_FILES slots is used, but the single
-		// required column is already covered by that file.
 		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 		).toBeDisabled();
 		expect(getFileInput()).toBeDisabled();
 	});
