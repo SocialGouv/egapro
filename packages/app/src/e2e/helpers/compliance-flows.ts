@@ -34,12 +34,16 @@ async function fillGapConsultation(
 	opinion: "favorable" | "unfavorable" = "favorable",
 	consultationIsImplicit = false,
 ) {
+	await expect(page.locator(`#${idPrefix}-legend`)).toBeVisible();
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
 	}
 	if (!consultationIsImplicit) {
-		await page.locator(`label[for="${idPrefix}-yes"]`).click();
+		const yes = page.locator(`label[for="${idPrefix}-yes"]`);
+		if ((await yes.count()) > 0) {
+			await yes.click();
+		}
 	}
 	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
