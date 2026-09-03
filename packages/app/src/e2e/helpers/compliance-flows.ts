@@ -16,6 +16,8 @@ type CseStep1Options = {
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
 	secondDeclGapConsulted?: boolean;
+	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
+	secondDeclGapConsultationImplicit?: boolean;
 	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
 	opinion?: "favorable" | "unfavorable";
 };
@@ -27,12 +29,15 @@ async function fillGapConsultation(
 	consulted: boolean,
 	date: string,
 	opinion: "favorable" | "unfavorable" = "favorable",
+	consultationIsImplicit = false,
 ) {
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
 	}
-	await page.locator(`label[for="${idPrefix}-yes"]`).click();
+	if (!consultationIsImplicit) {
+		await page.locator(`label[for="${idPrefix}-yes"]`).click();
+	}
 	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
 }
@@ -42,6 +47,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		hasSecondDeclaration = false,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
+		secondDeclGapConsultationImplicit = false,
 		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
@@ -64,9 +70,10 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 			await fillGapConsultation(
 				page,
 				"second-decl-gap",
-				secondDeclGapConsulted,
+				secondDeclGapConsulted || secondDeclGapConsultationImplicit,
 				"2025-06-15",
 				opinion,
+				secondDeclGapConsultationImplicit,
 			);
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
