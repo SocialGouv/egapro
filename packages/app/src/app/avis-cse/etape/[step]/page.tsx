@@ -18,6 +18,15 @@ type StepPageProps = {
 	params: Promise<{ step: string }>;
 };
 
+function categoriesOfType<T extends { declarationType: string }>(
+	categories: T[],
+	declarationType: "correction" | "initial",
+): T[] {
+	return categories.filter(
+		(category) => category.declarationType === declarationType,
+	);
+}
+
 export const metadata = { title: "Déclaration d'un avis du CSE" };
 
 export default async function CseOpinionStepPage({ params }: StepPageProps) {
@@ -36,8 +45,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
-		const initialCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "initial",
+		const initialCategories = categoriesOfType(
+			declarationData.employeeCategories,
+			"initial",
 		);
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
@@ -93,11 +103,13 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const secondGap = opinions.find(
 			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
 		);
-		const initialCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "initial",
+		const initialCategories = categoriesOfType(
+			declarationData.employeeCategories,
+			"initial",
 		);
-		const correctionCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "correction",
+		const correctionCategories = categoriesOfType(
+			declarationData.employeeCategories,
+			"correction",
 		);
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration,

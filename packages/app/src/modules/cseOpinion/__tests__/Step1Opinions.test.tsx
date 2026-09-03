@@ -249,7 +249,9 @@ describe("Step1Opinions", () => {
 			/>,
 		);
 
-		expect(container.querySelector("#first-decl-gap-question-legend")).toBeNull();
+		expect(
+			container.querySelector("#first-decl-gap-question-legend"),
+		).toBeNull();
 		expect(container.querySelector("#first-decl-gap-legend")).toBeNull();
 		expect(
 			screen.getByText(
@@ -541,13 +543,7 @@ describe("Step1Opinions", () => {
 
 	describe("gap threshold gating", () => {
 		it("submits without error on a brand-new declaration (no initialData) below threshold", async () => {
-			// The real-world case that matters most: a first-ever visit to this
-			// screen, with no draft and no persisted answer, so `gapConsulted`
-			// would otherwise default to `undefined` — not a boolean — and
-			// zodResolver would reject the submit before onSubmit's own
-			// normalization ever runs (#4289 regression: forcing the value only
-			// inside the submit closure isn't enough, the *default* must already
-			// be a boolean).
+			// Normalizing inside the submit closure isn't enough: the form default must already be a boolean.
 			const user = userEvent.setup();
 			render(
 				<Step1Opinions
@@ -608,9 +604,7 @@ describe("Step1Opinions", () => {
 
 			await user.click(screen.getByRole("button", { name: /Suivant/ }));
 
-			// initialData is only ever wired by the page for a declaration that
-			// still has a draft or a persisted answer from before the gap dropped
-			// below threshold; submission must still normalize it away.
+			// A persisted answer from before the gap dropped below threshold must be normalized away.
 			expect(mockMutate).toHaveBeenCalledWith({
 				firstDeclaration: {
 					accuracyOpinion: "favorable",
@@ -684,13 +678,14 @@ describe("Step1Opinions", () => {
 				/>,
 			);
 
-			// The card isn't rendered at all: no consulted-question legend, no
-			// stray "Oui" checked in from the stale draft slice.
-			expect(container.querySelector("#first-decl-gap-question-legend")).toBeNull();
+			// No legend and no stray "Oui" restored from the stale draft slice.
+			expect(
+				container.querySelector("#first-decl-gap-question-legend"),
+			).toBeNull();
 			expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
 		});
 
-		it("still requires a complete gap consultation above threshold (contre-épreuve)", async () => {
+		it("still requires a complete gap consultation above threshold", async () => {
 			const user = userEvent.setup();
 			render(
 				<Step1Opinions

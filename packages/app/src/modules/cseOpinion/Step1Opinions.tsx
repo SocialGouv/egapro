@@ -39,11 +39,7 @@ type Props = {
 	};
 	email?: string;
 	firstDeclarationPathChoice?: string | null;
-	/** True when the first declaration has a gap ≥ 5 % on its `initial`
-	 *  employee categories (`hasGapsAboveThreshold`). Gates the gap
-	 *  justification card the same way step 2 already gates its "Justification"
-	 *  column — defaults to `true` so callers that don't compute it yet keep
-	 *  today's behavior. */
+	// Defaults to true so the card keeps rendering for callers that don't compute it.
 	hasFirstDeclGapAboveThreshold?: boolean;
 	hasSecondDeclaration?: boolean;
 	previousHref?: string;
@@ -74,11 +70,7 @@ export function Step1Opinions({
 			firstDeclaration: {
 				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
 				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-				// Below the threshold the card never renders, so the field can
-				// never be answered by the user: default it to false rather than
-				// leave it undefined, or zodResolver rejects the form before
-				// onSubmit's own normalization ever runs (`gapConsulted` is a
-				// required boolean in saveOpinionsSchema).
+				// saveOpinionsSchema requires a boolean, and the card that would answer it is hidden.
 				gapConsulted: hasFirstDeclGapAboveThreshold
 					? (initialData?.firstDeclGapConsulted ?? undefined)
 					: false,
@@ -126,9 +118,7 @@ export function Step1Opinions({
 				form.setValue("firstDeclaration.accuracyOpinion", fd.accuracyOpinion);
 			if (fd.accuracyDate !== undefined)
 				form.setValue("firstDeclaration.accuracyDate", fd.accuracyDate);
-			// The gap card isn't rendered below the threshold, so its draft slice
-			// is stale: restoring it would leave `gapConsulted` briefly true while
-			// onSubmit forces it back to false.
+			// The hidden card's draft slice is stale, restoring it would flash a true gapConsulted.
 			if (hasFirstDeclGapAboveThreshold) {
 				if (fd.gapConsulted !== undefined)
 					form.setValue("firstDeclaration.gapConsulted", fd.gapConsulted);
@@ -182,9 +172,6 @@ export function Step1Opinions({
 	});
 
 	const onSubmit = form.handleSubmit((data) => {
-		// Below the threshold, the gap card isn't rendered: force gapConsulted
-		// to false rather than let it reach the wire as undefined, which
-		// zodResolver would otherwise reject with no visible faulty field.
 		const submittedData = {
 			...data,
 			firstDeclaration: hasFirstDeclGapAboveThreshold
