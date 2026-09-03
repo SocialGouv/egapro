@@ -3,7 +3,11 @@
 import Script from "next/script";
 import { useRef } from "react";
 
-export function SwaggerUI() {
+export function SwaggerUI({
+	specUrl = "/api/v1/openapi.json",
+}: {
+	specUrl?: string;
+}) {
 	const initializedRef = useRef(false);
 
 	const tryInit = () => {
@@ -12,7 +16,7 @@ export function SwaggerUI() {
 		initializedRef.current = true;
 
 		window.SwaggerUIBundle({
-			url: "/api/v1/openapi.json",
+			url: specUrl,
 			dom_id: "#swagger-ui",
 			deepLinking: true,
 			presets: [

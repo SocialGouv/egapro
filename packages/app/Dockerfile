@@ -52,6 +52,13 @@ ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
 
+# Bundle the idempotent company-location backfill for the minimal production
+# image. The source imports the shared TypeScript postal-code mapping; bundling
+# keeps that single source of truth without shipping tsx or the app source tree.
+RUN pnpm --filter app exec esbuild scripts/backfill-company-region-department.mjs \
+    --bundle --platform=node --format=esm --packages=external \
+    --outfile=scripts/backfill-company-location.bundle.mjs
+
 # Produce a self-contained runtime tree for the notifications worker. The
 # output bundles its own `node_modules/.pnpm` store, so the symlinks
 # resolve at runtime without depending on the workspace `.pnpm` store we
@@ -103,6 +110,9 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-location.bundle.mjs ./packages/app/scripts/backfill-company-location.bundle.mjs
+# Development/review-app fixture loaded by the optional post-deploy hook.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.mjs ./packages/app/scripts/seed-demo-observatory.mjs
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs

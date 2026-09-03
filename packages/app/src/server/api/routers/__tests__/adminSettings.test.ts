@@ -21,7 +21,8 @@ const validInput = {
 	decl1JointEvaluationDeadline: "2026-08-01",
 	decl2ModificationDeadline: "2026-12-01",
 	decl2JustificationDeadline: "2026-12-01",
-	decl2JointEvaluationDeadline: "2027-02-01",
+	decl2JointEvaluationDeadline: "2027-01-01",
+	decl2CseOpinionDeadline: "2027-02-01",
 };
 
 const validRepresentationInput = {
@@ -130,7 +131,8 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 							decl1JointEvaluationDeadline: "2026-08-01",
 							decl2ModificationDeadline: "2026-12-01",
 							decl2JustificationDeadline: "2026-12-01",
-							decl2JointEvaluationDeadline: "2027-02-01",
+							decl2JointEvaluationDeadline: "2027-01-01",
+							decl2CseOpinionDeadline: "2027-02-01",
 						},
 					]),
 				}),
@@ -142,6 +144,8 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.gipPublicationDate).toBe("2026-03-01");
 		expect(result.publicDataReleaseDate).toBe("2026-06-01");
 		expect(result.decl1ModificationDeadline).toBe("2026-06-01");
+		expect(result.decl2JointEvaluationDeadline).toBe("2027-01-01");
+		expect(result.decl2CseOpinionDeadline).toBe("2027-02-01");
 	});
 
 	it("returns formatted defaults when no row exists", async () => {
@@ -160,6 +164,8 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.campaignStartDate).toBeNull();
 		expect(result.publicDataReleaseDate).toBeNull();
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
+		expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
+		expect(result.decl2CseOpinionDeadline).toBe("2028-02-01");
 	});
 });
 
@@ -177,6 +183,8 @@ describe("adminSettingsRouter — upsertCampaignDeadlines", () => {
 				year: 2026,
 				publicDataReleaseDate: "2026-06-01",
 				decl1ModificationDeadline: "2026-06-01",
+				decl2JointEvaluationDeadline: "2027-01-01",
+				decl2CseOpinionDeadline: "2027-02-01",
 			}),
 		);
 		expect(db.__onConflict).toHaveBeenCalled();

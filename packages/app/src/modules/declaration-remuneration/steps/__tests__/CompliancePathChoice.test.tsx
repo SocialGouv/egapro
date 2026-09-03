@@ -476,6 +476,50 @@ describe("CompliancePathChoice", () => {
 	});
 });
 
+// A third-party lock (or admin impersonation) freezes the controls without any
+// read-only *reason*: #4282 removed the only calendar one, so the alert must stay
+// absent here while the radios stay disabled. "Suivant" is then a link forward when
+// a path was already saved, and a disabled button when none was (#3230).
+describe("CompliancePathChoice under a third-party lock", () => {
+	it("disables the radios without showing a read-only alert", () => {
+		const { container } = render(
+			<LockProvider isReadOnly>
+				{compliancePathChoice({ initialPath: "justify" })}
+			</LockProvider>,
+		);
+
+		expect(
+			screen.getByLabelText("Justifier les écarts de rémunération ≥ 5 %"),
+		).toBeDisabled();
+		expect(container.querySelector(".fr-alert--info")).not.toBeInTheDocument();
+	});
+
+	it("renders Suivant as a link to the rest of the path when a choice is saved", () => {
+		render(
+			<LockProvider isReadOnly>
+				{compliancePathChoice({ initialPath: "justify" })}
+			</LockProvider>,
+		);
+
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			"/avis-cse",
+		);
+		expect(
+			screen.queryByRole("button", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps Suivant a disabled button when no choice was saved", () => {
+		render(<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>);
+
+		expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		expect(
+			screen.queryByRole("link", { name: /suivant/i }),
+		).not.toBeInTheDocument();
+	});
+});
+
 describe("CompliancePathChoice read-only mode", () => {
 	it("renders the read-only alert and disables the radios", () => {
 		render(

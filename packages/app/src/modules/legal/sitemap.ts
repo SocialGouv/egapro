@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+export const COMPANY_URLS_PER_SITEMAP = 50_000;
+
 type PublicRoute = {
 	path: string;
 	changeFrequency: NonNullable<
@@ -19,6 +21,11 @@ const PUBLIC_ROUTES: readonly PublicRoute[] = [
 	{ path: "/aide/nous-contacter", changeFrequency: "yearly", priority: 0.5 },
 	{ path: "/faq", changeFrequency: "monthly", priority: 0.8 },
 	{ path: "/referents", changeFrequency: "monthly", priority: 0.7 },
+	{
+		path: "/index-egapro/recherche",
+		changeFrequency: "daily",
+		priority: 0.9,
+	},
 	{ path: "/mentions-legales", changeFrequency: "yearly", priority: 0.3 },
 	{ path: "/donnees-personnelles", changeFrequency: "yearly", priority: 0.3 },
 	{ path: "/gestion-des-cookies", changeFrequency: "yearly", priority: 0.3 },

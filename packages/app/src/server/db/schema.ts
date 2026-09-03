@@ -527,8 +527,10 @@ export const companies = createTable("company", (d) => ({
 	siren: d.varchar({ length: 9 }).notNull().primaryKey(),
 	name: d.varchar({ length: 255 }).notNull(),
 	address: d.varchar({ length: 500 }),
+	city: d.varchar({ length: 255 }),
 	nafCode: d.varchar({ length: 10 }),
 	nafLabel: d.varchar({ length: 255 }),
+	regionCode: d.varchar({ length: 3 }),
 	region: d.varchar({ length: 255 }),
 	departmentCode: d.varchar({ length: 3 }),
 	departmentLabel: d.varchar({ length: 255 }),
@@ -727,6 +729,7 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	decl2ModificationDeadline: d.date().notNull(),
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),
+	decl2CseOpinionDeadline: d.date().notNull(),
 }));
 
 // ── Representation campaign deadlines (configurable per year) ─────

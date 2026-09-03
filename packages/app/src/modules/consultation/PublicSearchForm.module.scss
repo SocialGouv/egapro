@@ -1,0 +1,5 @@
+// DSFR gives an expanded accordion `overflow-y: auto`, which clips the filter
+// panels — they are absolute overlays that must escape the accordion box.
+.advancedFilters:global(.fr-collapse--expanded) {
+	overflow: visible;
+}

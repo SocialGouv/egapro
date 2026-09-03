@@ -1,8 +1,8 @@
 "use client";
 
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { formatFileSize } from "~/modules/shared";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 
 import type { AssociationMap, ContentTypeColumn, UploadedFile } from "../types";
 import styles from "./ContentTypeMatrix.module.scss";

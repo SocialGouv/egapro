@@ -1,5 +1,5 @@
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import styles from "./ReferencePeriodPicker.module.scss";
 
 type Props = {

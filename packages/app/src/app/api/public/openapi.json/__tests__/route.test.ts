@@ -36,7 +36,7 @@ describe("OPTIONS /api/public/openapi.json", () => {
 			"GET, OPTIONS",
 		);
 		expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
-			"Content-Type",
+			"Content-Type, Authorization",
 		);
 	});
 });

@@ -159,6 +159,7 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 
 		await sql`
 			INSERT INTO app_declaration_lock (
+				id,
 				declaration_id,
 				locked_by_user_id,
 				locked_at,
@@ -166,6 +167,7 @@ describe("declarationDraftRouter save/get roundtrip (real Postgres)", () => {
 				expires_at
 			)
 			VALUES (
+				'declaration-draft-integration-external-lock',
 				${declarationId as string},
 				${LOCK_USER_ID},
 				NOW(),

@@ -978,6 +978,19 @@ export const declarationRouter = createTRPCRouter({
 				await purgeDraftSlice(tx, siren, year, "joint");
 			});
 
+			const email = ctx.session.user.email;
+			if (email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: "jointEvaluation",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
+
 			return { success: true };
 		}),
 

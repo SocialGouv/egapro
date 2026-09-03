@@ -15,7 +15,7 @@ test.describe.configure({ mode: "serial" });
 
 // #4293 — CAS-03 and CAS-09 close the démarche on the path choice itself, with no
 // upload screen after it: their acknowledgement is only observable in the mail
-// chain. The grid workflow already runs MailDev and sets MAIL_ENABLED, but no
+// chain. The grid workflow already runs Mailpit and sets MAIL_ENABLED, but no
 // service starts the notifications worker, so the grid spawns it exactly like
 // `notifications-email-flow.e2e.ts` does. Off that environment the coordinates
 // still run — see `expectCompletionReceiptWhenMailChainUp`.

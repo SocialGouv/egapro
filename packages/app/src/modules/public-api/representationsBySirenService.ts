@@ -1,7 +1,11 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "~/server/db";
+import {
+	diffusibleCompanyCondition,
+	publicCompanyNameSortKey,
+} from "~/server/db/companyConditions";
 import { companies, representationDeclarations } from "~/server/db/schema";
 import type { PublicRepresentationCompanySource } from "./representationProjection";
 import {
@@ -18,6 +22,7 @@ const representationCompanyColumns = {
 	siren: companies.siren,
 	name: companies.name,
 	address: companies.address,
+	regionCode: companies.regionCode,
 	region: companies.region,
 	departmentCode: companies.departmentCode,
 	departmentLabel: companies.departmentLabel,
@@ -60,24 +65,39 @@ export async function searchPublicRepresentations(
 	const baseConditions = [submittedRepresentationCondition()];
 
 	if (input.q) {
+		const normalizedQuery = input.q.replace(/\s/g, "");
 		const term = `%${input.q}%`;
-		const queryFilter = or(
-			ilike(companies.name, term),
-			ilike(representationDeclarations.siren, term),
-		);
+		const queryFilter = /^\d{9}$/.test(normalizedQuery)
+			? eq(representationDeclarations.siren, normalizedQuery)
+			: and(diffusibleCompanyCondition(), ilike(companies.name, term));
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 
-	if (input.region) {
-		baseConditions.push(eq(companies.region, input.region));
+	if (input.region?.length) {
+		const regionFilter = and(
+			diffusibleCompanyCondition(),
+			or(
+				inArray(companies.regionCode, input.region),
+				inArray(companies.region, input.region),
+			),
+		);
+		if (regionFilter) baseConditions.push(regionFilter);
 	}
 
-	if (input.departement) {
-		baseConditions.push(eq(companies.departmentCode, input.departement));
+	if (input.departement?.length) {
+		const departmentFilter = and(
+			diffusibleCompanyCondition(),
+			inArray(companies.departmentCode, input.departement),
+		);
+		if (departmentFilter) baseConditions.push(departmentFilter);
 	}
 
-	if (input.naf) {
-		baseConditions.push(eq(companies.nafCode, input.naf));
+	if (input.naf?.length) {
+		const nafFilter = and(
+			diffusibleCompanyCondition(),
+			inArray(companies.nafCode, input.naf),
+		);
+		if (nafFilter) baseConditions.push(nafFilter);
 	}
 
 	if (input.year) {
@@ -98,7 +118,11 @@ export async function searchPublicRepresentations(
 				eq(representationDeclarations.siren, companies.siren),
 			)
 			.where(where)
-			.orderBy(desc(representationDeclarations.year))
+			.orderBy(
+				desc(representationDeclarations.year),
+				asc(publicCompanyNameSortKey()),
+				asc(companies.siren),
+			)
 			.limit(input.limit)
 			.offset(input.offset),
 		db

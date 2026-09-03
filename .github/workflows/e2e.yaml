@@ -63,8 +63,19 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          CHROMIUM_VERSION=1217
-          CFT_BUILD=147.0.7727.15
+          # Ces deux constantes sont DICTÉES par la version de @playwright/test, elles ne se
+          # choisissent pas : Playwright cherche le navigateur dans
+          # ~/.cache/ms-playwright/chromium-<revision>, et refuse de démarrer si le dossier porte
+          # une autre révision. Un bump de @playwright/test sans bump ici donne
+          # « browserType.launch: Executable doesn't exist at .../chromium_headless_shell-<rev> »
+          # (mesuré sur la PR #4408, 1.59.1 -> 1.62.1 : le cache restait sur 1217).
+          # Les valeurs se lisent dans playwright-core/browsers.json de la version installée :
+          #   jq '.browsers[] | select(.name=="chromium")' node_modules/playwright-core/browsers.json
+          # -> revision = CHROMIUM_VERSION, browserVersion = CFT_BUILD.
+          # Les TROIS workflows (e2e, a11y, e2e-grille) partagent ce bloc et ce cache : les
+          # désaligner, c'est laisser rouge celui qu'on n'a pas corrigé.
+          CHROMIUM_VERSION=1234
+          CFT_BUILD=151.0.7922.34
 
           install_browser() {
             local zip_name="$1" dest_subdir="$2" extracted_dir="$3" final_dir="$4"

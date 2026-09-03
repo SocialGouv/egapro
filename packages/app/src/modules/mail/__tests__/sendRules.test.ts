@@ -77,16 +77,16 @@ describe("selectDeclarationConfirmationVariant", () => {
 });
 
 describe("selectJointEvaluationSubmittedVariant", () => {
-	it("returns cse_first_and_second when a second declaration exists", () => {
+	it("returns completed when a second declaration exists but no CSE opinion is expected (CAS-11, no CSE)", () => {
 		expect(
 			selectJointEvaluationSubmittedVariant({
 				hasSecondDeclaration: true,
 				cseOpinionExpected: false,
 			}),
-		).toBe("cse_first_and_second");
+		).toBe("completed");
 	});
 
-	it("returns cse_first_and_second even when a CSE opinion is expected (second declaration takes priority)", () => {
+	it("returns cse_first_and_second when a second declaration exists and a CSE opinion is expected", () => {
 		expect(
 			selectJointEvaluationSubmittedVariant({
 				hasSecondDeclaration: true,

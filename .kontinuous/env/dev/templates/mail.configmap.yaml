@@ -4,6 +4,6 @@ metadata:
   name: mail
 data:
   MAIL_ENABLED: "true"
-  SMTP_HOST: "maildev"
+  SMTP_HOST: "mailpit"
   SMTP_PORT: "1025"
   MAIL_FROM: "no-reply@egapro.dev.fabrique.social.gouv.fr"

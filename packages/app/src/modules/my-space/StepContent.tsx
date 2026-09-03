@@ -292,7 +292,7 @@ export function Step3Content({
 				{title}
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
-					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
+					modifiableUntil={campaignDeadlines.decl2CseOpinionDeadline}
 					modifyHref={`/avis-cse/etape/2?siren=${siren}`}
 				/>
 			</div>
@@ -303,7 +303,7 @@ export function Step3Content({
 	return (
 		<div className={styles.stepContent}>
 			{title}
-			<DeadlineRow date={campaignDeadlines.decl2JointEvaluationDeadline} />
+			<DeadlineRow date={campaignDeadlines.decl2CseOpinionDeadline} />
 		</div>
 	);
 }

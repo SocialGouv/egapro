@@ -299,33 +299,6 @@ export async function POST(request: Request): Promise<Response> {
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
 		});
-		if (userEmail) {
-			void (async () => {
-				if (flowType === "cse_opinion") {
-					const { enqueueReceipt } = await import("~/modules/mail/server");
-					await enqueueReceipt({
-						kind: "cseOpinion",
-						to: userEmail,
-						siren,
-						year,
-						userId,
-						isResend: false,
-					});
-					return;
-				}
-				if (flowType === "joint_evaluation") {
-					const { enqueueReceipt } = await import("~/modules/mail/server");
-					await enqueueReceipt({
-						kind: "jointEvaluation",
-						to: userEmail,
-						siren,
-						year,
-						userId,
-						isResend: false,
-					});
-				}
-			})();
-		}
 		return Response.json({
 			fileId: result.fileId,
 			fileName: result.fileName,

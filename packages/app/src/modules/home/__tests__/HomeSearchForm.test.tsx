@@ -31,7 +31,7 @@ describe("HomeSearchForm tracking", () => {
 		expect(trackEventMock).toHaveBeenCalledWith({
 			category: MATOMO_EVENT_CATEGORY.SEARCH,
 			action: MATOMO_ACTION.SEARCH_SUBMIT,
-			name: "query+region",
+			name: "q+region",
 		});
 	});
 

@@ -215,11 +215,17 @@ test.describe("Declaration process panel", () => {
 	});
 
 	// #3939 follow-up: a GIP-derived >= 100 company that declared "sans CSE" is still
-	// subject to indicator G, so the panel keeps the indicator-G path step (step 2),
-	// but must never ask it to deposit a CSE opinion — step 3 and the "avis CSE
-	// modifiables" closing note are hidden, during the démarche and after completion.
-	// Step visibility is driven by isCseOpinionRequired({ workforce, hasCse }), not the
-	// workforce alone, so this differs from the < 100 case where step 2 is hidden too.
+	// subject to indicator G, so the panel shows the indicator-G path step (step 2)
+	// during the démarche — but must never ask it to deposit a CSE opinion — step 3
+	// and the "avis CSE modifiables" closing note are hidden, both during the démarche
+	// and after completion. Step 3 visibility is driven by
+	// isCseOpinionRequired({ workforce, hasCse }), not the workforce alone, so this
+	// differs from the < 100 case where step 2 is hidden too.
+	// #4291 follow-up: step 2 itself is not simply gated by company size any more —
+	// once `demarche_completed` is reached with no compliance path ever chosen, the
+	// démarche skipped it (the ≥5% gap never applied) and it disappears from the
+	// closed panel too. It only survives past completion when a path was actually
+	// chosen (see `isCompliancePathStepApplicable`).
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
 			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";

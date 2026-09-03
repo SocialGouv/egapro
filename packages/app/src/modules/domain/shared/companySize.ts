@@ -1,4 +1,8 @@
-import type { CompanySize, CompanySizeRange } from "../types";
+import type {
+	CompanySize,
+	CompanySizeRange,
+	ObservatoryWorkforceRange,
+} from "../types";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
@@ -60,4 +64,51 @@ export function getCompanySizeRange(workforce: number): CompanySizeRange {
 	);
 
 	return entry ? entry[0] : "<50";
+}
+
+/**
+ * Workforce brackets of the public observatory search facet, in UI order.
+ *
+ * Separate from {@link COMPANY_SIZE_RANGES} on purpose: the statistics
+ * dashboards need 100-149 and 150-249 apart to track the CSE threshold, while
+ * the observatory groups them and caps the last bucket at 1000. Merging the two
+ * would force one audience to read the other's boundaries.
+ */
+export const OBSERVATORY_WORKFORCE_RANGES: Record<
+	ObservatoryWorkforceRange,
+	{ min: number; max: number | null; label: string }
+> = {
+	"<50": { min: 0, max: 49, label: "Moins de 50" },
+	"50-99": { min: 50, max: 99, label: "De 50 à 99" },
+	"100-249": { min: 100, max: 249, label: "De 100 à 249" },
+	"250-999": { min: 250, max: 999, label: "De 250 à 999" },
+	"1000+": { min: 1000, max: null, label: "Plus de 1000" },
+};
+
+export const OBSERVATORY_WORKFORCE_RANGE_KEYS = Object.keys(
+	OBSERVATORY_WORKFORCE_RANGES,
+) as ObservatoryWorkforceRange[];
+
+/** True when `value` is one of the observatory workforce bracket keys. */
+export function isObservatoryWorkforceRange(
+	value: string,
+): value is ObservatoryWorkforceRange {
+	return value in OBSERVATORY_WORKFORCE_RANGES;
+}
+
+/**
+ * Bracket label for a headcount, as shown on an observatory result card
+ * ("De 50 à 99"). An unknown headcount has no bracket — it is never folded into
+ * the smallest one, which would assert a size the source does not give.
+ */
+export function formatObservatoryWorkforce(
+	workforce: number | null,
+): string | null {
+	if (workforce === null) return null;
+	const entry = OBSERVATORY_WORKFORCE_RANGE_KEYS.map(
+		(key) => OBSERVATORY_WORKFORCE_RANGES[key],
+	).find(
+		({ min, max }) => workforce >= min && (max === null || workforce <= max),
+	);
+	return entry?.label ?? null;
 }

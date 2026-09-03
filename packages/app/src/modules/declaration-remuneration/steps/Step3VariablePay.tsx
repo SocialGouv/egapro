@@ -8,6 +8,7 @@ import {
 	normalizeDecimalInput,
 	padDecimalToTwo,
 } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep3Schema } from "../schemas";
@@ -45,7 +46,6 @@ import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step3Data } from "../types";
 import stepStyles from "./Step3VariablePay.module.scss";
 
@@ -80,6 +80,38 @@ const BENEFICIARY_LABELS = {
 	indicatorEWomen: "de femmes bénéficiaires",
 	indicatorEMen: "d'hommes bénéficiaires",
 } as const;
+
+function deriveBenefError(
+	field: "indicatorEWomen" | "indicatorEMen",
+	value: string,
+	max: number | undefined,
+): FieldError | null {
+	if (value === "") return null;
+	const n = Number.parseInt(value, 10);
+	if (Number.isNaN(n) || max === undefined || n <= max) return null;
+	return {
+		fieldId: BENEFICIARY_FIELD_IDS[field],
+		category: "invalid",
+		message: `Le nombre ${BENEFICIARY_LABELS[field]} ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+	};
+}
+
+// Re-derives from the current value — a stale error state would miss a value written outside a keystroke.
+function deriveBenefErrors(
+	values: Pick<Step3Data, "indicatorEWomen" | "indicatorEMen">,
+	maxWomen: number | undefined,
+	maxMen: number | undefined,
+): FieldError[] {
+	return (["indicatorEWomen", "indicatorEMen"] as const)
+		.map((field) =>
+			deriveBenefError(
+				field,
+				values[field],
+				field === "indicatorEWomen" ? maxWomen : maxMen,
+			),
+		)
+		.filter((error): error is FieldError => error !== null);
+}
 
 export function Step3VariablePay({
 	declarationSiren,
@@ -174,35 +206,13 @@ export function Step3VariablePay({
 		max: number | undefined,
 		value: string,
 	) {
-		if (value === "") {
-			form.setValue(field, "");
-			setBenefErrors((errors) =>
-				errors.filter(
-					(error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field],
-				),
-			);
-			return;
-		}
-		if (/\D/.test(value)) return;
-		const n = Number.parseInt(value, 10);
-		if (Number.isNaN(n) || n < 0) return;
-		if (max !== undefined && n > max) {
-			setBenefErrors((errors) => [
-				...errors.filter(
-					(error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field],
-				),
-				{
-					fieldId: BENEFICIARY_FIELD_IDS[field],
-					category: "invalid",
-					message: `Le nombre ${BENEFICIARY_LABELS[field]} ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
-				},
-			]);
-			return;
-		}
-		setBenefErrors((errors) =>
-			errors.filter((error) => error.fieldId !== BENEFICIARY_FIELD_IDS[field]),
-		);
+		if (value !== "" && /\D/.test(value)) return;
 		form.setValue(field, value);
+		const error = deriveBenefError(field, value, max);
+		setBenefErrors((errors) => [
+			...errors.filter((e) => e.fieldId !== BENEFICIARY_FIELD_IDS[field]),
+			...(error ? [error] : []),
+		]);
 	}
 
 	const womenBeneficiaryError = findFieldError(
@@ -230,14 +240,19 @@ export function Step3VariablePay({
 				category: "empty" as const,
 				message: `Renseignez le nombre ${BENEFICIARY_LABELS[field]}.`,
 			}));
+		const exceedsMaxBeneficiaries = deriveBenefErrors(
+			{ indicatorEWomen: beneficiaryWomen, indicatorEMen: beneficiaryMen },
+			maxWomen,
+			maxMen,
+		).filter(
+			(error) =>
+				!missingBeneficiaries.some(
+					(missing) => missing.fieldId === error.fieldId,
+				),
+		);
 		const beneficiaryErrors = [
-			...benefErrors.filter(
-				(error) =>
-					!missingBeneficiaries.some(
-						(missing) => missing.fieldId === error.fieldId,
-					),
-			),
 			...missingBeneficiaries,
+			...exceedsMaxBeneficiaries,
 		];
 		setBenefErrors(beneficiaryErrors);
 

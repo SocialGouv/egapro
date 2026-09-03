@@ -1,3 +1,4 @@
+import { FACET_MAX_VALUES } from "./schemas";
 export const errorSchema = {
 	type: "object",
 	properties: {
@@ -57,40 +58,44 @@ export const serverErrorResponse = {
 export const publicNonDiffusibleIdentityProperties = {
 	name: {
 		type: ["string", "null"],
-		description: "Raison sociale. `null` pour les entreprises non diffusibles.",
+		description:
+			"Raison sociale. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "THALES LAS FRANCE SAS",
 	},
 	address: {
 		type: ["string", "null"],
-		description: "Adresse. `null` pour les entreprises non diffusibles.",
+		description:
+			"Adresse. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
 	},
 	region: {
 		type: ["string", "null"],
-		description: "Région. `null` pour les entreprises non diffusibles.",
+		description:
+			"Région française, si applicable. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "Île-de-France",
 	},
 	departmentCode: {
 		type: ["string", "null"],
 		description:
-			"Code département. `null` pour les entreprises non diffusibles.",
+			"Code département. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "78",
 	},
 	departmentLabel: {
 		type: ["string", "null"],
 		description:
-			"Libellé département. `null` pour les entreprises non diffusibles.",
+			"Libellé département. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "Yvelines",
 	},
 	nafCode: {
 		type: ["string", "null"],
-		description: "Code NAF/APE. `null` pour les entreprises non diffusibles.",
+		description:
+			"Code NAF/APE. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "26.51A",
 	},
 	nafLabel: {
 		type: ["string", "null"],
 		description:
-			"Libellé NAF/APE. `null` pour les entreprises non diffusibles.",
+			"Libellé NAF/APE. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "Fabrication d'instruments de navigation",
 	},
 } as const;
@@ -113,25 +118,46 @@ export function buildSearchParameters(year: {
 			name: "region",
 			in: "query",
 			required: false,
-			description: "Filtre par code de région (ex. `11` pour Île-de-France).",
+			description:
+				"Filtre par code de région (ex. `11` pour Île-de-France). Répétable : `?region=A&region=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "11",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "departement",
 			in: "query",
 			required: false,
-			description: "Filtre par code département (ex. `75` pour Paris).",
+			description:
+				"Filtre par code département (ex. `75` pour Paris). Répétable : `?departement=A&departement=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "75",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "naf",
 			in: "query",
 			required: false,
-			description: "Filtre par code NAF (ex. `26.51A`).",
+			description:
+				"Filtre par code NAF (ex. `26.51A`). Répétable : `?naf=A&naf=B` filtre sur l'une ou l'autre valeur ; la forme scalaire reste acceptée.",
 			example: "26.51A",
-			schema: { type: "string" },
+			explode: true,
+			style: "form",
+			schema: {
+				type: "array",
+				items: { type: "string" },
+				maxItems: FACET_MAX_VALUES,
+			},
 		},
 		{
 			name: "year",

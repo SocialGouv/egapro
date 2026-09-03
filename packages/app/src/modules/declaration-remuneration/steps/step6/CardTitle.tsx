@@ -1,4 +1,4 @@
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 
 type Props = {
 	children: React.ReactNode;

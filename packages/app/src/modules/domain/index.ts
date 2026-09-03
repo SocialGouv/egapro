@@ -16,6 +16,7 @@ export {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
@@ -36,9 +37,13 @@ export { isObligatedForYear } from "./shared/companyObligation";
 export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
+	formatObservatoryWorkforce,
 	getCompanySizeRange,
 	getOptionalCompanySizeRange,
 	isCseRequired,
+	isObservatoryWorkforceRange,
+	OBSERVATORY_WORKFORCE_RANGE_KEYS,
+	OBSERVATORY_WORKFORCE_RANGES,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)
 export type { GlobalScoreInputs } from "./shared/computeGlobalScore";
@@ -97,6 +102,7 @@ export {
 	getCurrentCompliancePath,
 	hasStartedSecondDeclaration,
 	isCancelled,
+	isCompliancePathStepApplicable,
 	isComplianceProcessCompleted,
 	isDeclarationSubmitted,
 	isDeclarationWritingClosed,
@@ -204,6 +210,13 @@ export {
 	isIndicatorGRequired,
 	isTriennialYear,
 } from "./shared/indicatorG";
+// NAF activity nomenclature
+export type { NafSection } from "./shared/naf";
+export {
+	NAF_SECTION_CODES,
+	NAF_SECTION_DIVISIONS,
+	NAF_SECTIONS,
+} from "./shared/naf";
 // Number parsing & normalization (French locale)
 export {
 	displayDecimal,
@@ -255,10 +268,12 @@ export {
 	deriveExecutivesNotComputableReason,
 	getRepresentationCampaignYear,
 	getRepresentationTarget,
+	getRepresentationThresholdNotice,
 	isPresumedSubjectToRepresentation,
 	isRepresentationDeclarationSubmitted,
 	isRepresentationNotSubject,
 	isRepresentationPublicationRequired,
+	REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 	REPRESENTATION_TARGET_INITIAL,
@@ -301,6 +316,7 @@ export type {
 	DeclarationType,
 	GapDirection,
 	GapLevel,
+	ObservatoryWorkforceRange,
 	RepresentationCampaign,
 } from "./types";
 export { DECLARATION_FSM_STATUSES } from "./types";

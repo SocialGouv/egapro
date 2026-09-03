@@ -58,6 +58,8 @@ type WeezLegalEntity = {
 	libellevoie: string | null;
 	codepostal: string | null;
 	libellecommune: string | null;
+	codepaysetrangeretablissement?: string | null;
+	libellepaysetrangeretablissement?: string | null;
 	statutdiffusionunitelegale: string | null;
 };
 
@@ -81,8 +83,10 @@ type WeezPaginatedResponse<T> = {
 export type CompanyInfo = {
 	name: string;
 	address: string | null;
+	city?: string | null;
 	nafCode: string | null;
 	nafLabel: string | null;
+	regionCode?: string | null;
 	region: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
@@ -167,33 +171,53 @@ async function fetchHeadOffice(
  * A failing or silent head office leaves the country unknown: it is never
  * guessed as France, and it never breaks the main lookup.
  */
+/**
+ * Both halves or neither: a code without a label reads as an unnamed foreign
+ * country, and a label without a code is France-shaped. Either would break the
+ * tri-state for every consumer downstream.
+ *
+ * An over-long code is dropped rather than truncated — the code is an
+ * identifier, and cutting it would persist a *different* country as
+ * authoritative data. The label is a display string, so it degrades the way
+ * `nafLabel` does.
+ */
+function toCountry(
+	code: string | null,
+	label: string | null,
+): CompanyCountry | null {
+	if (!code || !label) return null;
+	if (code.length > COUNTRY_CODE_MAX_LENGTH) return null;
+	return {
+		countryCode: code,
+		countryLabel: label.slice(0, COUNTRY_LABEL_MAX_LENGTH),
+	};
+}
+
 async function resolveCountry(
 	siren: string,
 	postalCode: string | null,
+	declaredCode: string | null,
+	declaredLabel: string | null,
 ): Promise<CompanyCountry> {
+	// A legal unit that names its own foreign country settles the question: the
+	// postal code it comes with can look French — a US ZIP is five digits too.
+	const declared = toCountry(declaredCode, declaredLabel);
+	if (declared) return declared;
+
+	// Half a foreign declaration is not France, it is unknown: labelling it
+	// FRANCE would contradict the geography this same record refuses to derive.
+	if (declaredCode || declaredLabel) return UNKNOWN_COUNTRY;
+
 	if (postalCode) return FRANCE_COUNTRY;
 
 	try {
 		const establishment = await fetchHeadOffice(siren);
-		const countryCode = establishment?.codepaysetrangeretablissement ?? null;
-		const countryLabel =
-			establishment?.libellepaysetrangeretablissement ?? null;
-
-		// Both halves or neither: a code without a label reads as an unnamed
-		// foreign country, and a label without a code is France-shaped. Either
-		// would break the tri-state for every consumer downstream.
-		if (!countryCode || !countryLabel) return UNKNOWN_COUNTRY;
-
-		// An over-long code is dropped rather than truncated: the code is an
-		// identifier, and cutting it would persist a *different* country as
-		// authoritative data. The label is a display string, so it degrades the
-		// way `nafLabel` already does below.
-		if (countryCode.length > COUNTRY_CODE_MAX_LENGTH) return UNKNOWN_COUNTRY;
-
-		return {
-			countryCode,
-			countryLabel: countryLabel.slice(0, COUNTRY_LABEL_MAX_LENGTH),
-		};
+		return (
+			toCountry(
+				establishment?.codepaysetrangeretablissement ?? null,
+				establishment?.libellepaysetrangeretablissement ?? null,
+			) ?? UNKNOWN_COUNTRY
+		);
 	} catch {
 		return UNKNOWN_COUNTRY;
 	}
@@ -225,16 +249,29 @@ export async function fetchCompanyBySiren(
 
 	if (!entity) return null;
 
-	// Region/department are derived from the establishment postal code, which
-	// INSEE exposes as public data even for non-diffusible legal units — so it
-	// is resolved before the address is masked below, keeping the columns filled
-	// when `address` becomes null.
-	const location = getLocationFromPostalCode(entity.codepostal);
+	const countryCode = entity.codepaysetrangeretablissement ?? null;
+	const countryLabel = entity.libellepaysetrangeretablissement ?? null;
+	const isForeign = Boolean(countryCode || countryLabel);
+	// A foreign postal code can look like a French one. Never derive French
+	// geography when Weez identifies the establishment as foreign.
+	const location = isForeign
+		? {
+				regionCode: null,
+				region: null,
+				departmentCode: null,
+				departmentLabel: null,
+			}
+		: getLocationFromPostalCode(entity.codepostal);
 
 	// Coarse geography, kept on non-diffusible units like region and department
 	// already are — and for a company registered abroad, those two are empty by
 	// construction, so masking the country would leave nothing at all.
-	const country = await resolveCountry(siren, entity.codepostal);
+	const country = await resolveCountry(
+		siren,
+		entity.codepostal,
+		countryCode,
+		countryLabel,
+	);
 
 	const statutDiffusion = entity.statutdiffusionunitelegale ?? null;
 
@@ -245,8 +282,10 @@ export async function fetchCompanyBySiren(
 				entity.raisonsociale ||
 				NON_DIFFUSIBLE_NAME,
 			address: null,
+			city: entity.libellecommune ?? null,
 			nafCode: null,
 			nafLabel: null,
+			regionCode: location.regionCode,
 			region: location.region,
 			departmentCode: location.departmentCode,
 			departmentLabel: location.departmentLabel,
@@ -265,12 +304,14 @@ export async function fetchCompanyBySiren(
 			entity.raisonsociale ||
 			`Entreprise ${siren}`,
 		address: buildAddress(entity),
+		city: entity.libellecommune ?? null,
 		nafCode: entity.activiteprincipalenaf25unitelegale ?? null,
 		// Clamp to the companies.nafLabel column width (varchar 255) to avoid insert overflow.
 		nafLabel:
 			entity.nomenclatureactiviteprincipalelibelleunitelegale?.slice(0, 255) ??
 			null,
 		region: location.region,
+		regionCode: location.regionCode,
 		departmentCode: location.departmentCode,
 		departmentLabel: location.departmentLabel,
 		countryCode: country.countryCode,

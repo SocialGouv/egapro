@@ -1,6 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import {
 	getCompliancePathReadOnlyReason,
 	getComplianceState,
@@ -85,9 +84,11 @@ describe("getCompliancePathReadOnlyReason", () => {
 		hasSubmittedSecondDeclaration: false,
 		hasSubmittedCseOpinion: false,
 		hasSubmittedJointEvaluation: false,
-		pathChoiceDeadline: new Date("2026-12-01T00:00:00"),
-		now: new Date("2026-06-15T00:00:00"),
 	} satisfies Parameters<typeof getCompliancePathReadOnlyReason>[0];
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
 
 	it("returns null when no condition is met", () => {
 		expect(getCompliancePathReadOnlyReason(baseParams)).toBeNull();
@@ -168,63 +169,28 @@ describe("getCompliancePathReadOnlyReason", () => {
 		).toBeNull();
 	});
 
-	it("returns path_choice_deadline_passed once the deadline is in the past", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: "justify",
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("path_choice_deadline_passed");
+	// #4282 removed the calendar branch: read-only is now a pure function of the
+	// business state. The date-driven cases moved to CompliancePathPage.redirect.test.tsx,
+	// which renders the page and is therefore the only place that can prove no clock
+	// is read at all.
+	it("stays a pure function of the business state, whatever the current date is", () => {
+		const beforeAnyDeadline = new Date(2026, 0, 2);
+		const longAfterEveryDeadline = new Date(2030, 0, 15);
+		vi.useFakeTimers({ toFake: ["Date"] });
+
+		for (const now of [beforeAnyDeadline, longAfterEveryDeadline]) {
+			vi.setSystemTime(now);
+			expect(getCompliancePathReadOnlyReason(baseParams)).toBeNull();
+			expect(
+				getCompliancePathReadOnlyReason({
+					...baseParams,
+					pathChoice: "justify",
+					hasSubmittedCseOpinion: true,
+				}),
+			).toBe("cse_opinion_submitted");
+		}
 	});
 
-	it("prioritises a submitted next step over a passed deadline", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: "justify",
-				hasSubmittedCseOpinion: true,
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("cse_opinion_submitted");
-	});
-
-	it("returns path_choice_deadline_passed even without a chosen path", () => {
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoice: null,
-				pathChoiceDeadline: new Date("2026-06-01T00:00:00"),
-				now: new Date("2026-06-02T00:00:00"),
-			}),
-		).toBe("path_choice_deadline_passed");
-	});
-
-	// The gate is fed the round-2 deadline for both rounds on purpose: the round-1
-	// date (1 July) is a nudge shown to the user, not a lock. The wiring that keeps
-	// it that way is pinned in CompliancePathPage.redirect.test.tsx.
-	it("keeps the round-1 choice open past 1 July: the path-choice deadline is indicative, never blocking", () => {
-		const deadlines = getDefaultCampaignDeadlines(2026);
-		const afterRound1Nudge = new Date(2026, 8, 15);
-
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoiceDeadline: deadlines.pathChoiceDeadline,
-				now: afterRound1Nudge,
-			}),
-		).toBeNull();
-
-		expect(
-			getCompliancePathReadOnlyReason({
-				...baseParams,
-				pathChoiceDeadline: deadlines.pathChoiceRound1Deadline,
-				now: afterRound1Nudge,
-			}),
-		).toBe("path_choice_deadline_passed");
-	});
 	it("does not lock the second-round revision choice when only the first-round second declaration was submitted", () => {
 		expect(
 			getCompliancePathReadOnlyReason({

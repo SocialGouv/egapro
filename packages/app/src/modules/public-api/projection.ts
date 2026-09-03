@@ -1,4 +1,5 @@
 import { type companies, declarations } from "~/server/db/schema";
+import { NON_DIFFUSIBLE_LABEL } from "./constants";
 import type { PublicDeclarationDTO } from "./schemas";
 
 export type PublicDeclarationSource = Pick<
@@ -46,10 +47,16 @@ export type PublicCompanySource = Pick<
 	| "departmentLabel"
 	| "nafCode"
 	| "nafLabel"
-> & {
-	statutDiffusion: string | null;
-	workforceEma: string | null;
-};
+> &
+	Partial<
+		Pick<
+			typeof companies.$inferSelect,
+			"city" | "regionCode" | "countryCode" | "countryLabel"
+		>
+	> & {
+		statutDiffusion: string | null;
+		workforceEma: string | null;
+	};
 
 /**
  * Drizzle column selection for the public declaration indicators.
@@ -97,6 +104,22 @@ export function isCompanyDiffusible(statutDiffusion: string | null): boolean {
 	return statutDiffusion !== "N";
 }
 
+export function isPublicCompanyDiffusible(
+	statutDiffusion: string | null,
+	address: string | null,
+): boolean {
+	return statutDiffusion === null
+		? address !== null
+		: isCompanyDiffusible(statutDiffusion);
+}
+
+function publicCompanyValue(
+	value: string | null | undefined,
+	diffusible: boolean,
+): string | null {
+	return diffusible ? (value ?? null) : NON_DIFFUSIBLE_LABEL;
+}
+
 export function toNumber(value: string | null): number | null {
 	if (value === null) return null;
 	const parsed = Number(value);
@@ -107,21 +130,28 @@ export function toPublicDeclaration(
 	declaration: PublicDeclarationSource,
 	company: PublicCompanySource,
 ): PublicDeclarationDTO {
-	const diffusible =
-		company.statutDiffusion !== null
-			? isCompanyDiffusible(company.statutDiffusion)
-			: company.address !== null;
+	const diffusible = isPublicCompanyDiffusible(
+		company.statutDiffusion,
+		company.address,
+	);
 
 	return {
 		year: declaration.year,
 		siren: company.siren,
-		name: diffusible ? company.name : null,
-		address: diffusible ? company.address : null,
-		region: diffusible ? company.region : null,
-		departmentCode: diffusible ? company.departmentCode : null,
-		departmentLabel: diffusible ? company.departmentLabel : null,
-		nafCode: diffusible ? company.nafCode : null,
-		nafLabel: diffusible ? company.nafLabel : null,
+		name: publicCompanyValue(company.name, diffusible),
+		address: publicCompanyValue(company.address, diffusible),
+		city: publicCompanyValue(company.city, diffusible),
+		regionCode: publicCompanyValue(company.regionCode, diffusible),
+		region: publicCompanyValue(
+			company.countryCode ? null : company.region,
+			diffusible,
+		),
+		departmentCode: publicCompanyValue(company.departmentCode, diffusible),
+		departmentLabel: publicCompanyValue(company.departmentLabel, diffusible),
+		countryCode: publicCompanyValue(company.countryCode, diffusible),
+		countryLabel: publicCompanyValue(company.countryLabel, diffusible),
+		nafCode: publicCompanyValue(company.nafCode, diffusible),
+		nafLabel: publicCompanyValue(company.nafLabel, diffusible),
 		workforceEma: toNumber(company.workforceEma),
 		totalWomen: declaration.totalWomen,
 		totalMen: declaration.totalMen,

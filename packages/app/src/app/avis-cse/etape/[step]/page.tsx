@@ -54,7 +54,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					step={step}
 				/>
 				<Step1Opinions
-					cseDeadline={campaignDeadlines.decl2JointEvaluationDeadline}
+					cseDeadline={campaignDeadlines.decl2CseOpinionDeadline}
 					email={session?.user?.email ?? undefined}
 					firstDeclarationPathChoice={
 						declarationData.declaration.firstDeclarationPathChoice
@@ -62,6 +62,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					hasSecondDeclaration={hasSecondDeclaration}
 					initialData={initialData}
 					previousHref={previousHref}
+					secondDeclarationPathChoice={
+						declarationData.declaration.secondDeclarationPathChoice
+					}
 					siren={declarationData.declaration.siren}
 					year={declarationData.declaration.year}
 				/>

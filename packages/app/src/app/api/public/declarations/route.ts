@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { publicSearchInputSchema } from "~/modules/public-api";
+import {
+	PUBLIC_API_SEARCH_HEADERS,
+	publicSearchInputSchema,
+} from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 
-const CORS_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Access-Control-Allow-Methods": "GET, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type",
-	"Cache-Control": "public, max-age=300, stale-while-revalidate=60",
-};
-
 export async function OPTIONS(): Promise<Response> {
-	return new Response(null, { status: 204, headers: CORS_HEADERS });
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_SEARCH_HEADERS,
+	});
 }
 
 export const GET = withAuditedRoute(
@@ -25,9 +25,11 @@ export const GET = withAuditedRoute(
 			return {
 				metadata: {
 					q: q ? q.slice(0, 200) : null,
-					region: url.searchParams.get("region") ?? null,
-					departement: url.searchParams.get("departement") ?? null,
-					naf: url.searchParams.get("naf") ?? null,
+					region: url.searchParams.getAll("region"),
+					departement: url.searchParams.getAll("departement"),
+					naf: url.searchParams.getAll("naf"),
+					city: url.searchParams.get("city") ?? null,
+					sort: url.searchParams.get("sort") ?? null,
 					year: url.searchParams.get("year") ?? null,
 				},
 			};
@@ -38,20 +40,31 @@ export const GET = withAuditedRoute(
 
 async function publicDeclarationsHandler(request: Request): Promise<Response> {
 	try {
+		const limited = await enforcePublicApiRateLimit(request);
+		if (limited) return limited;
 		const url = new URL(request.url);
 		const sp = url.searchParams;
 
 		const rawYear = sp.get("year");
 		const rawLimit = sp.get("limit");
 		const rawOffset = sp.get("offset");
+		const rawWorkforceMin = sp.get("workforceMin");
+		const rawWorkforceMax = sp.get("workforceMax");
+		// Facets are repeatable (`?region=A&region=B`); getAll also returns the
+		// single-value form the documented API has always accepted.
 		const rawInput = {
 			q: sp.get("q") ?? undefined,
-			region: sp.get("region") ?? undefined,
-			departement: sp.get("departement") ?? undefined,
-			naf: sp.get("naf") ?? undefined,
-			year: rawYear ? Number.parseInt(rawYear, 10) : undefined,
-			limit: rawLimit ? Number.parseInt(rawLimit, 10) : undefined,
-			offset: rawOffset ? Number.parseInt(rawOffset, 10) : undefined,
+			city: sp.get("city") ?? undefined,
+			region: sp.getAll("region"),
+			departement: sp.getAll("departement"),
+			naf: sp.getAll("naf"),
+			workforceRanges: sp.getAll("workforceRanges"),
+			workforceMin: rawWorkforceMin ? Number(rawWorkforceMin) : undefined,
+			workforceMax: rawWorkforceMax ? Number(rawWorkforceMax) : undefined,
+			year: rawYear ? Number(rawYear) : undefined,
+			sort: sp.get("sort") ?? undefined,
+			limit: rawLimit ? Number(rawLimit) : undefined,
+			offset: rawOffset ? Number(rawOffset) : undefined,
 		};
 
 		const parsed = publicSearchInputSchema.safeParse(rawInput);
@@ -59,13 +72,13 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 		if (!parsed.success) {
 			return NextResponse.json(
 				{ error: "Paramètres invalides.", details: parsed.error.issues },
-				{ status: 400, headers: CORS_HEADERS },
+				{ status: 400, headers: PUBLIC_API_SEARCH_HEADERS },
 			);
 		}
 
 		const result = await searchPublicDeclarations(parsed.data);
 
-		return NextResponse.json(result, { headers: CORS_HEADERS });
+		return NextResponse.json(result, { headers: PUBLIC_API_SEARCH_HEADERS });
 	} catch (error) {
 		console.error(
 			"[api/public/declarations]",
@@ -73,7 +86,7 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 		);
 		return NextResponse.json(
 			{ error: "Erreur lors de la récupération des déclarations." },
-			{ status: 500, headers: CORS_HEADERS },
+			{ status: 500, headers: PUBLIC_API_SEARCH_HEADERS },
 		);
 	}
 }

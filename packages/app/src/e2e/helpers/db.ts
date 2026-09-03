@@ -139,10 +139,12 @@ export async function pushCampaignDeadlinesFarFuture(year?: number) {
 				decl1_joint_evaluation_deadline,
 				decl2_modification_deadline,
 				decl2_justification_deadline,
-				decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
 			)
 			SELECT
 				${targetYear},
+				'2099-12-31'::date,
 				'2099-12-31'::date,
 				'2099-12-31'::date,
 				'2099-12-31'::date,
@@ -155,7 +157,8 @@ export async function pushCampaignDeadlinesFarFuture(year?: number) {
 				decl1_joint_evaluation_deadline = '2099-12-31'::date,
 				decl2_modification_deadline = '2099-12-31'::date,
 				decl2_justification_deadline = '2099-12-31'::date,
-				decl2_joint_evaluation_deadline = '2099-12-31'::date
+				decl2_joint_evaluation_deadline = '2099-12-31'::date,
+				decl2_cse_opinion_deadline = '2099-12-31'::date
 		`;
 	} finally {
 		await sql.end();
@@ -594,4 +597,51 @@ export async function setRepresentationWorkforceWindow(
 		await setGipWorkforce(workforceEma, year);
 	}
 	return years;
+}
+
+export type CompanyLocation = {
+	address: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+};
+
+/**
+ * Read the three columns that drive the location row of the Mon espace banner.
+ *
+ * They are populated from the company registry at sign-in, so their value differs
+ * between a local worktree (registry unreachable — everything null) and CI. A spec
+ * that asserts on that row must capture the baseline and restore it, rather than
+ * assume one.
+ */
+export async function getCompanyLocation(): Promise<CompanyLocation> {
+	const sql = createConnection();
+	try {
+		const rows = await sql`
+			SELECT address, country_code, country_label
+			FROM app_company
+			WHERE siren = ${TEST_SIREN}
+		`;
+		return {
+			address: (rows[0]?.address as string | null) ?? null,
+			countryCode: (rows[0]?.country_code as string | null) ?? null,
+			countryLabel: (rows[0]?.country_label as string | null) ?? null,
+		};
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function setCompanyLocation(location: CompanyLocation) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_company
+			SET address = ${location.address},
+			    country_code = ${location.countryCode},
+			    country_label = ${location.countryLabel}
+			WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
 }

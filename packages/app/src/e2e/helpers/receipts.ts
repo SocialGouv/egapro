@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { TEST_USER_EMAIL } from "../constants";
-import { type MailDevEmail, maildevReachable, waitForEmail } from "./maildev";
+import { type MailpitEmail, mailpitReachable, waitForEmail } from "./mailpit";
 import { isMailFlowEnabled } from "./notifications-worker";
 
 // #4293 — the three confirmation variants are only distinguishable this way:
@@ -20,13 +20,13 @@ export const PATH_TO_SELECT_WORDING =
 export type ReceiptRound = "first" | "second";
 
 /**
- * Whether the publisher → pg-boss → worker → SMTP → MailDev chain can deliver at
+ * Whether the publisher → pg-boss → worker → SMTP → Mailpit chain can deliver at
  * all. `MAIL_ENABLED` is the app server's own switch (the publisher is a no-op
- * without it), MailDev is the sink — either one down and no receipt can arrive,
+ * without it), Mailpit is the sink — either one down and no receipt can arrive,
  * for reasons that have nothing to do with the business rule under test.
  */
 export async function mailChainAvailable(): Promise<boolean> {
-	return isMailFlowEnabled() && (await maildevReachable());
+	return isMailFlowEnabled() && (await mailpitReachable());
 }
 
 /**
@@ -38,7 +38,7 @@ export async function mailChainAvailable(): Promise<boolean> {
 export async function expectCompletionReceipt(options: {
 	round: ReceiptRound;
 	since: Date;
-}): Promise<MailDevEmail> {
+}): Promise<MailpitEmail> {
 	const subject =
 		options.round === "second"
 			? COMPLETED_SECOND_DECLARATION_SUBJECT
@@ -69,7 +69,7 @@ export async function expectCompletionReceiptWhenMailChainUp(options: {
 		test.info().annotations.push({
 			type: "accusé de réception non vérifié",
 			description:
-				"chaîne mail indisponible (MAIL_ENABLED / MailDev) — le parcours est vérifié, pas l'accusé de réception",
+				"chaîne mail indisponible (MAIL_ENABLED / Mailpit) — le parcours est vérifié, pas l'accusé de réception",
 		});
 		return;
 	}

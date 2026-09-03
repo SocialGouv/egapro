@@ -92,7 +92,7 @@ Trois grandes catégories de surface technique :
 | Tests unit | Vitest | ^4 | + coverage ≥ 75% global, 100% sur `domain/` |
 | Tests E2E | Playwright | ^1.58 | Une E2E par `page.tsx` minimum |
 | Observabilité | Sentry | — | Erreurs serveur + client |
-| Mails | Nodemailer + maildev | — | Transactionnel ; maildev en local ; rendu HTML par React Email (`packages/notifications`) |
+| Mails | Nodemailer + mailpit | — | Transactionnel ; mailpit en local ; rendu HTML par React Email (`packages/notifications`) |
 | File d'attente mails | pg-boss | — | Jobs persistés en PostgreSQL ; worker dans `packages/notifications` |
 | Stockage fichiers | MinIO local / S3 prod | — | Accessible via `@aws-sdk/client-s3` |
 | Antivirus | ClamAV (`clamavd`) | — | Scan des PDF avant stockage |
@@ -131,7 +131,7 @@ egapro/
 ├── .kontinuous/             # Manifests Kubernetes (Helm-like) pour dev/preprod/prod
 ├── .github/workflows/       # CI/CD GitHub Actions
 ├── docs/                    # Cette documentation
-├── docker-compose.yml       # Stack locale (db, minio, clamavd, maildev, valkey)
+├── docker-compose.yml       # Stack locale (db, minio, clamavd, mailpit, valkey)
 └── CLAUDE.md                # Instructions globales (agents IA + devs)
 ```
 
@@ -815,7 +815,7 @@ Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta
 | `db` | `postgres:14.17` | Base de données principale |
 | `migrate` | `node:22-slim` | Applique les migrations Drizzle au démarrage |
 | `minio` | `minio/minio` | Stockage S3-compatible |
-| `maildev` | — | Capteur de mails dev (web UI sur :1080) |
+| `mailpit` | `axllent/mailpit` | Capteur de mails dev (web UI sur :1080, SMTP :1025) |
 | `clamavd` | — | Antivirus pour l'upload de PDF |
 | `valkey` | — | Cache Redis-compatible (optionnel) |
 

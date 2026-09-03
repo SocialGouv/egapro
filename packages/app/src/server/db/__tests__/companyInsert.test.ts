@@ -6,8 +6,10 @@ describe("toCompanyInsertValues", () => {
 	const COMPANY_INFO = {
 		name: "Alpha Solutions",
 		address: "12 RUE DES INNOVATEURS, 75011 PARIS",
+		city: "PARIS",
 		nafCode: "6202A",
 		nafLabel: "Conseil en systèmes et logiciels informatiques",
+		regionCode: "11",
 		region: "Île-de-France",
 		departmentCode: "75",
 		departmentLabel: "Paris",

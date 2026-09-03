@@ -416,6 +416,7 @@ describe("verdict independence (S16)", () => {
 	it("exposes no aggregated verdict helper", async () => {
 		const representation = await import("../shared/representation");
 		expect(Object.keys(representation).sort()).toEqual([
+			"REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR",
 			"REPRESENTATION_SUBJECTION_WINDOW_YEARS",
 			"REPRESENTATION_SUBJECTION_WORKFORCE_MIN",
 			"REPRESENTATION_TARGET_INITIAL",
@@ -426,6 +427,7 @@ describe("verdict independence (S16)", () => {
 			"deriveExecutivesNotComputableReason",
 			"getRepresentationCampaignYear",
 			"getRepresentationTarget",
+			"getRepresentationThresholdNotice",
 			"isPresumedSubjectToRepresentation",
 			"isRepresentationDeclarationSubmitted",
 			"isRepresentationNotSubject",

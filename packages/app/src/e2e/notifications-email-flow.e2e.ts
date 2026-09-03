@@ -2,9 +2,13 @@ import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { TEST_USER_EMAIL } from "./constants";
 import {
+	associateCseContentTypes,
 	COMPLIANCE_PATH,
 	completeSecondDeclaration,
+	fillCseStep1,
 	selectCompliancePath,
+	submitCseOpinion,
+	uploadCseFiles,
 } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
@@ -13,11 +17,13 @@ import {
 } from "./helpers/db";
 import { completeDeclaration } from "./helpers/declaration-flows";
 import {
-	clearMaildev,
-	maildevReachable,
+	clearMailpit,
+	listEmailsTo,
+	mailpitReachable,
 	waitForEmail,
-} from "./helpers/maildev";
+} from "./helpers/mailpit";
 import {
+	clearNotificationQueue,
 	isMailFlowEnabled,
 	killWorker,
 	spawnNotificationsWorker,
@@ -29,12 +35,19 @@ import {
 	PATH_TO_SELECT_WORDING,
 } from "./helpers/receipts";
 
-test.describe("notifications email flow (publisher → pg-boss → worker → SMTP → maildev)", () => {
+const CSE_OPINION_RECEIPT = /Dépôt d'avis CSE et fin de démarche/i;
+
+async function countCseOpinionReceipts(): Promise<number> {
+	const emails = await listEmailsTo(TEST_USER_EMAIL);
+	return emails.filter((m) => CSE_OPINION_RECEIPT.test(m.subject)).length;
+}
+
+test.describe("notifications email flow (publisher → pg-boss → worker → SMTP → mailpit)", () => {
 	let worker: ChildProcess | null = null;
 
 	test.beforeAll(async () => {
-		if (!(await maildevReachable())) {
-			test.skip(true, "MailDev unreachable — start docker-compose or skipping");
+		if (!(await mailpitReachable())) {
+			test.skip(true, "Mailpit unreachable — start docker-compose or skipping");
 		}
 		if (!isMailFlowEnabled()) {
 			test.skip(
@@ -42,6 +55,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 				"MAIL_ENABLED!=true on the app server — publisher is no-op, skipping",
 			);
 		}
+		await clearNotificationQueue();
 		worker = spawnNotificationsWorker();
 		await waitForWorkerReady(worker);
 	});
@@ -51,13 +65,14 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 	});
 
 	test.beforeEach(async () => {
-		await clearMaildev();
+		await clearNotificationQueue();
+		await clearMailpit();
 		await resetDeclarationToDraft();
 		await setCompanyHasCse(false);
 		await setCompanyWorkforce(60);
 	});
 
-	test("declaration submission delivers a confirmation email to MailDev", async ({
+	test("declaration submission delivers a confirmation email to Mailpit", async ({
 		page,
 	}) => {
 		test.slow();
@@ -75,6 +90,59 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		expect(email.html).toMatch(/accuse réception de cette transmission/i);
 	});
 
+	test("CSE opinion receipt is sent once at submission, never on a file deposit (#4300)", async ({
+		page,
+	}) => {
+		test.slow();
+		// A gap declaration settled on the "justify" path opens two matrix columns,
+		// which is what lets two deposited files both be associated: a column holds
+		// exactly one file.
+		await setCompanyWorkforce(200);
+		await setCompanyHasCse(true);
+		await clearMailpit();
+
+		const startedAt = new Date();
+		await completeDeclaration(page, { hasGap: true });
+		await selectCompliancePath(page, "path-justify");
+		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await fillCseStep1(page, { firstDeclGapConsulted: true });
+
+		const accuracyFile = "avis-cse-exactitude.pdf";
+		const gapFile = "avis-cse-justification.pdf";
+
+		await test.step("depositing two files sends no receipt", async () => {
+			await uploadCseFiles(page, [accuracyFile, gapFile]);
+			// The receipt announces "votre démarche est désormais terminée"; a deposit
+			// must never claim it. Settle past the worker poll so a mail wrongly
+			// enqueued on upload would have been delivered before we assert none.
+			await page.waitForTimeout(10_000);
+			expect(await countCseOpinionReceipts()).toBe(0);
+		});
+
+		await test.step("submitting sends exactly one receipt", async () => {
+			await associateCseContentTypes(page, [
+				{
+					column: { declarationNumber: 1, type: "accuracy" },
+					fileName: accuracyFile,
+				},
+				{ column: { declarationNumber: 1, type: "gap" }, fileName: gapFile },
+			]);
+			await submitCseOpinion(page);
+
+			const receipt = await waitForEmail(
+				TEST_USER_EMAIL,
+				(m) => CSE_OPINION_RECEIPT.test(m.subject),
+				{ since: startedAt },
+			);
+			expect(receipt.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+			expect(receipt.html).toMatch(/démarche est désormais terminée/i);
+
+			// Any deposit-time receipt would have been queued before this one, so it
+			// would already have been delivered — the total is the real assertion.
+			expect(await countCseOpinionReceipts()).toBe(1);
+		});
+	});
+
 	test("second declaration submission (corrective action) delivers a second-declaration receipt", async ({
 		page,
 	}) => {
@@ -85,7 +153,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		// (workforce=60, no CSE) intact for the other test.
 		await setCompanyWorkforce(200);
 		await setCompanyHasCse(true);
-		await clearMaildev();
+		await clearMailpit();
 
 		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });

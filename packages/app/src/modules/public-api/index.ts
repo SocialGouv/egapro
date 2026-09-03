@@ -1,7 +1,14 @@
+export { NON_DIFFUSIBLE_LABEL } from "./constants";
 export {
 	getPublicDeclarationBySirenYear,
 	getPublicDeclarationsBySiren,
 } from "./declarationsBySirenService";
+export {
+	PUBLIC_API_EXPORT_HEADERS,
+	PUBLIC_API_OPENAPI_HEADERS,
+	PUBLIC_API_RESOURCE_HEADERS,
+	PUBLIC_API_SEARCH_HEADERS,
+} from "./httpHeaders";
 export { publicOpenApiSpec } from "./openapi";
 export type {
 	PublicCompanySource,
@@ -9,6 +16,7 @@ export type {
 } from "./projection";
 export {
 	isCompanyDiffusible,
+	isPublicCompanyDiffusible,
 	publicDeclarationColumns,
 	toNumber,
 	toPublicDeclaration,
@@ -35,6 +43,7 @@ export type {
 	PublicSearchResultDTO,
 } from "./schemas";
 export {
+	parsePublicSearchInput,
 	publicDeclarationDTOSchema,
 	publicRepresentationDTOSchema,
 	publicRepresentationSearchInputSchema,

@@ -28,6 +28,7 @@ const {
 					decl2ModificationDeadline: string;
 					decl2JustificationDeadline: string;
 					decl2JointEvaluationDeadline: string;
+					decl2CseOpinionDeadline: string;
 			  }
 			| undefined;
 		isLoading: boolean;
@@ -76,7 +77,8 @@ const sampleData = {
 	decl1JointEvaluationDeadline: "2026-08-01",
 	decl2ModificationDeadline: "2026-12-01",
 	decl2JustificationDeadline: "2026-12-01",
-	decl2JointEvaluationDeadline: "2027-02-01",
+	decl2JointEvaluationDeadline: "2027-01-01",
+	decl2CseOpinionDeadline: "2027-02-01",
 };
 
 describe("CampaignDeadlinesForm", () => {
@@ -159,6 +161,66 @@ describe("CampaignDeadlinesForm", () => {
 			year: 2026,
 			decl1ModificationDeadline: "2026-06-01",
 		});
+	});
+
+	it("populates the round-2 joint evaluation and CSE opinion fields separately", async () => {
+		render(
+			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
+		);
+		await waitFor(() => {
+			expect(
+				document.getElementById("settings-decl2JointEvaluationDeadline"),
+			).toHaveValue("2027-01-01");
+		});
+		expect(
+			document.getElementById("settings-decl2CseOpinionDeadline"),
+		).toHaveValue("2027-02-01");
+	});
+
+	it("labels the joint evaluation and CSE opinion deadlines distinctly", () => {
+		render(
+			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
+		);
+		expect(
+			screen.getAllByLabelText(
+				/date limite de dépôt du rapport d'évaluation conjointe/i,
+			),
+		).toHaveLength(2);
+		expect(
+			screen.getByLabelText(/date limite de dépôt de l'avis du cse/i),
+		).toBeInTheDocument();
+	});
+
+	it("submits the round-2 joint evaluation and CSE opinion deadlines as separate values", async () => {
+		render(
+			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
+		);
+		await waitFor(() => {
+			expect(
+				document.getElementById("settings-decl2CseOpinionDeadline"),
+			).toHaveValue("2027-02-01");
+		});
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
+		expect(upsertMutate.mock.calls[0]?.[0]).toMatchObject({
+			decl2JointEvaluationDeadline: "2027-01-01",
+			decl2CseOpinionDeadline: "2027-02-01",
+		});
+	});
+
+	it("leaves every deadline blank for a year with no stored configuration", async () => {
+		queryState.data = undefined;
+		render(
+			<CampaignDeadlinesForm configuredYears={[2025]} initialYear={2026} />,
+		);
+		await waitFor(() => {
+			expect(
+				document.getElementById("settings-decl2CseOpinionDeadline"),
+			).toHaveValue("");
+		});
+		expect(
+			document.getElementById("settings-decl2JointEvaluationDeadline"),
+		).toHaveValue("");
 	});
 
 	it("shows a success alert and invalidates queries on success", async () => {
