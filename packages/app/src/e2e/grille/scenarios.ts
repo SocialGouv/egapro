@@ -205,6 +205,10 @@ export const FICHE_SCENARIOS = {
 		});
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		// Pin the opinion fieldset — it only renders once consultation is truthy —
+		// before reading the negative assertion below: the loading placeholder
+		// would otherwise satisfy toHaveCount(0) without proving anything.
+		await expect(page.locator("#first-decl-gap-opinion-legend")).toBeVisible();
 		await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
 			0,
 		);
