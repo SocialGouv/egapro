@@ -366,7 +366,7 @@ export async function reachStep6ComplianceRecap(page: Page) {
  */
 export async function submitFromStep6Recap(page: Page) {
 	await test.step("étape 6 — récapitulatif et transmission", async () => {
-		await page.getByRole("button", { name: "Suivant" }).click();
+		await page.getByRole("button", { name: "Soumettre" }).click();
 		// Click the label, as the DSFR checkbox label intercepts pointer events.
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();

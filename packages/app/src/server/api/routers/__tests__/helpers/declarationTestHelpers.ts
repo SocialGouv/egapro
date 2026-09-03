@@ -47,6 +47,7 @@ export function createCaller(
 	mockDb: unknown,
 	siret: string | null = "33978727700015",
 	impersonation: { siren: string; name: string } | null = null,
+	email?: string,
 ) {
 	return import("~/server/api/routers/declaration").then(
 		({ declarationRouter }) =>
@@ -55,6 +56,7 @@ export function createCaller(
 				session: {
 					user: {
 						id: "user-1",
+						email,
 						siret,
 						isAdmin: impersonation !== null,
 						impersonation,
