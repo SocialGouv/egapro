@@ -697,7 +697,8 @@ describe("Step1Opinions", () => {
 	});
 
 	describe("draft integration", () => {
-		it("forces the first-declaration gap consultation from a draft when the first-round path is justify", () => {
+		it("forces the first-declaration gap consultation from a draft when the first-round path is justify", async () => {
+			const user = userEvent.setup();
 			mockUseDeclarationDraft.mockReturnValue({
 				draft: {
 					firstDeclaration: {
@@ -724,9 +725,13 @@ describe("Step1Opinions", () => {
 				/>,
 			);
 
-			// Implicit consultation: radios gone, hydrated opinion/date remain.
 			expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
 			expect(screen.getAllByLabelText("Favorable")[1]).toBeChecked();
+
+			await user.click(
+				container.querySelector("#first-decl-gap-unfavorable") as HTMLElement,
+			);
+			expect(lastFirstDeclaration()?.gapConsulted).toBe(true);
 		});
 
 		it("hydrates form from draft when available", () => {
