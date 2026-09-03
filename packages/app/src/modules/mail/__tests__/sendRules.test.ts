@@ -6,44 +6,72 @@ import {
 	selectJointEvaluationSubmittedVariant,
 } from "../sendRules";
 
-// `awaitingPathChoice` reflects the FSM state at the time of the e-mail,
-// not whether a path was ever chosen (issue #4293). The four cases below
-// are the function's whole input space; the row-to-variant mapping that
-// actually regressed is covered in `enqueueReceipt.test.ts`.
+// The selector switches on the FSM status alone — the nine cases below are
+// its whole input space (the eight `DECLARATION_FSM_STATUSES` plus `null`).
+// `corrective_actions_chosen` and `joint_evaluation_chosen` each get their
+// own assertion rather than sharing one with `revised_joint_evaluation_chosen`.
 describe("selectDeclarationConfirmationVariant", () => {
-	it("returns path_to_select when a path choice is still outstanding", () => {
+	it("returns path_to_select when awaiting the round-1 compliance path choice", () => {
 		expect(
 			selectDeclarationConfirmationVariant({
-				awaitingPathChoice: true,
-				cseRequired: false,
+				status: "awaiting_compliance_path_choice",
 			}),
 		).toBe("path_to_select");
 	});
 
-	it("returns path_to_select even when a CSE is required (outstanding choice takes priority)", () => {
+	it("returns path_to_select when awaiting the round-2 revision choice", () => {
 		expect(
 			selectDeclarationConfirmationVariant({
-				awaitingPathChoice: true,
-				cseRequired: true,
+				status: "awaiting_revision_choice",
 			}),
 		).toBe("path_to_select");
 	});
 
-	it("returns cse_to_deposit when the path choice is settled but a CSE is required", () => {
+	it("returns path_to_select once corrective actions were chosen and the funnel is still open", () => {
 		expect(
 			selectDeclarationConfirmationVariant({
-				awaitingPathChoice: false,
-				cseRequired: true,
+				status: "corrective_actions_chosen",
 			}),
+		).toBe("path_to_select");
+	});
+
+	it("returns path_to_select once a joint evaluation was chosen and the funnel is still open", () => {
+		expect(
+			selectDeclarationConfirmationVariant({
+				status: "joint_evaluation_chosen",
+			}),
+		).toBe("path_to_select");
+	});
+
+	it("returns path_to_select once a revised joint evaluation was chosen and the funnel is still open", () => {
+		expect(
+			selectDeclarationConfirmationVariant({
+				status: "revised_joint_evaluation_chosen",
+			}),
+		).toBe("path_to_select");
+	});
+
+	it("returns path_to_select for a draft status", () => {
+		expect(selectDeclarationConfirmationVariant({ status: "draft" })).toBe(
+			"path_to_select",
+		);
+	});
+
+	it("returns path_to_select when there is no declaration row at all", () => {
+		expect(selectDeclarationConfirmationVariant({ status: null })).toBe(
+			"path_to_select",
+		);
+	});
+
+	it("returns cse_to_deposit when a CSE opinion is awaited", () => {
+		expect(
+			selectDeclarationConfirmationVariant({ status: "awaiting_cse_opinion" }),
 		).toBe("cse_to_deposit");
 	});
 
-	it("returns completed when the path choice is settled and no CSE is required", () => {
+	it("returns completed once the démarche has ended", () => {
 		expect(
-			selectDeclarationConfirmationVariant({
-				awaitingPathChoice: false,
-				cseRequired: false,
-			}),
+			selectDeclarationConfirmationVariant({ status: "demarche_completed" }),
 		).toBe("completed");
 	});
 });

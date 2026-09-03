@@ -69,7 +69,7 @@ const CAMPAIGN_DEADLINES = {
 };
 
 const declarationRow = {
-	status: "declared",
+	status: "demarche_completed",
 	cseRequired: false,
 	secondDeclarationStep: null,
 	firstDeclarationPathChoice: null,
@@ -412,8 +412,12 @@ describe("enqueueReceipt — variant derivation", () => {
 			unknown
 		>;
 
-	it("selects cse_to_deposit for a declaration when the CSE is required and there is no gap", async () => {
-		stubContext({ ...declarationRow, cseRequired: true });
+	it("selects cse_to_deposit for a declaration when a CSE opinion is awaited", async () => {
+		stubContext({
+			...declarationRow,
+			status: "awaiting_cse_opinion",
+			cseRequired: true,
+		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
@@ -509,6 +513,23 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(payloadOf().variant).toBe("cse_to_deposit");
 	});
 
+	// Regression: a manual resend while a path was chosen but the funnel is
+	// still open (round 1 corrective action, round 2 not yet resolved) must
+	// not read as "déposez l'avis du CSE" — that step isn't next.
+	// `cseRequired: true` alone used to be enough to pick `cse_to_deposit`;
+	// it no longer participates in this selection at all.
+	it("selects path_to_select, not cse_to_deposit, once corrective actions are chosen and a CSE is required", async () => {
+		stubContext({
+			...declarationRow,
+			status: "corrective_actions_chosen",
+			cseRequired: true,
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(payloadOf().variant).toBe("path_to_select");
+	});
+
 	it("selects cse_first_and_second for a joint evaluation when a second declaration exists", async () => {
 		stubContext({ ...declarationRow, secondDeclarationStep: 3 });
 
@@ -563,12 +584,15 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(payloadOf().variant).toBe("single");
 	});
 
-	it("falls back to a neutral context and the siren as raisonSociale when no declaration and no company are found", async () => {
+	it("falls back to path_to_select and the siren as raisonSociale when no declaration and no company are found", async () => {
 		stubContext(null, null);
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
-		expect(payloadOf().variant).toBe("completed");
+		expect(payloadOf().variant).toBe("path_to_select");
+		expect(payloadOf().complianceDeadline).toBe(
+			CAMPAIGN_DEADLINES.pathChoiceRound1Deadline.toISOString(),
+		);
 		expect(payloadOf().raisonSociale).toBe("552100554");
 	});
 

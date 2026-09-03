@@ -3,21 +3,40 @@ import type {
 	DeclarationConfirmationVariant,
 	JointEvaluationSubmittedVariant,
 } from "notifications/queue";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 
 export type DeclarationConfirmationContext = {
-	// Whether the FSM is currently sitting on a compliance-path choice the
-	// company still has to make — not whether a path was *ever* chosen (see
-	// `isAwaitingCompliancePathChoice` vs `isInComplianceProcess`).
-	awaitingPathChoice: boolean;
-	cseRequired: boolean;
+	status: DeclarationFsmStatus | null;
 };
 
+// `path_to_select` is the only existing variant that never claims a step the
+// company hasn't reached: once a compliance path is chosen but the funnel is
+// still open (`corrective_actions_chosen`, `joint_evaluation_chosen`,
+// `revised_joint_evaluation_chosen`), the démarche is neither `completed` nor
+// `cse_to_deposit` yet, and there is no dedicated variant for "path already
+// chosen, still in progress". Falling back to `path_to_select` reads
+// stale-backward (the choice looks outstanding when it already happened)
+// rather than stale-forward (claiming a step the company hasn't reached).
+// A switch with no `default` keeps this exhaustive over
+// `DECLARATION_FSM_STATUSES`: an added status fails the build here instead
+// of silently picking a variant.
 export function selectDeclarationConfirmationVariant(
 	context: DeclarationConfirmationContext,
 ): DeclarationConfirmationVariant {
-	if (context.awaitingPathChoice) return "path_to_select";
-	if (context.cseRequired) return "cse_to_deposit";
-	return "completed";
+	switch (context.status) {
+		case "awaiting_cse_opinion":
+			return "cse_to_deposit";
+		case "demarche_completed":
+			return "completed";
+		case "awaiting_compliance_path_choice":
+		case "awaiting_revision_choice":
+		case "corrective_actions_chosen":
+		case "joint_evaluation_chosen":
+		case "revised_joint_evaluation_chosen":
+		case "draft":
+		case null:
+			return "path_to_select";
+	}
 }
 
 export type JointEvaluationSubmittedContext = {
