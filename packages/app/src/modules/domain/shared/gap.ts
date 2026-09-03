@@ -204,7 +204,7 @@ export function hasGapsAboveThreshold(
 }
 
 type CategoryWithDeclarationType = EmployeeCategoryLike & {
-	declarationType: string;
+	declarationType: "initial" | "correction";
 };
 
 export function computeGapHighFlags(

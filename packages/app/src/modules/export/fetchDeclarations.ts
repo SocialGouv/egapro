@@ -106,7 +106,7 @@ function deriveExportFlags(
 export type IndicatorGEntry = {
 	categoryName: string;
 	source: string | null;
-	declarationType: string;
+	declarationType: "initial" | "correction";
 	womenCount: number | null;
 	menCount: number | null;
 	hourlyWomenCount: number | null;
