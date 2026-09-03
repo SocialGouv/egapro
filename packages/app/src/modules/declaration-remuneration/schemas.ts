@@ -114,7 +114,6 @@ export const PAY_FIELDS_MEN = CATEGORY_PAY_BASES.flatMap(
 	(base) => base.menPayFields,
 );
 
-/** Every pay cell of a category, both bases and both sexes. */
 export const CATEGORY_PAY_FIELDS = [...PAY_FIELDS_WOMEN, ...PAY_FIELDS_MEN];
 
 const employeeCategoryDataSchema = z

@@ -6,11 +6,8 @@ import { useFieldArray } from "react-hook-form";
 
 import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
-	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
 	categoryFormSchema,
-	type PAY_FIELDS_MEN,
-	type PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
@@ -49,6 +46,10 @@ import { WORKFORCE_ROWS } from "../step1/workforceRows";
 import { CategoryAccordionItem } from "./CategoryAccordionItem";
 import { categoryDataFieldId } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
+import {
+	collectCategoryPayErrors,
+	payFieldsForCountField,
+} from "./categoryPayErrors";
 import {
 	createEmptyCategory,
 	type EmployeeCategory,
@@ -118,31 +119,6 @@ const CATEGORY_ALERT_ID = "step5-categories-error";
 // The step-5 checks are form-level (a source not picked, totals that do not
 // reconcile), so they anchor on the form itself rather than on one cell.
 const CATEGORY_FORM_FIELD_ID = "step5-categories";
-
-/** The pay fields a headcount makes mandatory — its own basis and sex only. */
-function payFieldsForCountField(
-	field: keyof EmployeeCategory,
-): readonly (keyof EmployeeCategory)[] {
-	for (const base of CATEGORY_PAY_BASES) {
-		if (field === base.womenCountField) return base.womenPayFields;
-		if (field === base.menCountField) return base.menPayFields;
-	}
-	return [];
-}
-
-const PAY_FIELD_LABELS: Record<
-	(typeof PAY_FIELDS_WOMEN)[number] | (typeof PAY_FIELDS_MEN)[number],
-	string
-> = {
-	annualBaseWomen: "salaire de base annuel des femmes",
-	annualVariableWomen: "composantes variables annuelles des femmes",
-	hourlyBaseWomen: "salaire de base horaire des femmes",
-	hourlyVariableWomen: "composantes variables horaires des femmes",
-	annualBaseMen: "salaire de base annuel des hommes",
-	annualVariableMen: "composantes variables annuelles des hommes",
-	hourlyBaseMen: "salaire de base horaire des hommes",
-	hourlyVariableMen: "composantes variables horaires des hommes",
-};
 
 export function CategoryForm({
 	referenceYear,
@@ -419,41 +395,7 @@ export function CategoryForm({
 				return;
 			}
 
-			const payErrors: FieldError[] = [];
-			data.categories.forEach((category, index) => {
-				// A category missing a sex on either basis declares no remuneration:
-				// amounts left facing a 0 are never erased, they are refused (#3678).
-				if (!isCategoryPayApplicable(toCategoryHeadcounts(category))) {
-					for (const payField of CATEGORY_PAY_FIELDS) {
-						if (category[payField].trim() === "") continue;
-						payErrors.push({
-							fieldId: categoryDataFieldId(index, payField),
-							category: "inconsistent",
-							anchor: true,
-							message: `La rémunération « ${PAY_FIELD_LABELS[payField]} » de la catégorie d'emplois n°${index + 1} est renseignée alors qu'un effectif de cette catégorie est à 0 : effacez-la ou corrigez l'effectif.`,
-						});
-					}
-					return;
-				}
-				for (const base of CATEGORY_PAY_BASES) {
-					for (const [countField, payFields] of [
-						[base.womenCountField, base.womenPayFields],
-						[base.menCountField, base.menPayFields],
-					] as const) {
-						const count = Number.parseInt(category[countField], 10);
-						if (Number.isNaN(count) || count < 1) continue;
-						for (const payField of payFields) {
-							if (category[payField].trim() !== "") continue;
-							payErrors.push({
-								fieldId: categoryDataFieldId(index, payField),
-								category: "empty",
-								message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
-								anchor: true,
-							});
-						}
-					}
-				}
-			});
+			const payErrors = collectCategoryPayErrors(data.categories);
 			if (payErrors.length > 0) {
 				setCategoryErrors(payErrors);
 				return;

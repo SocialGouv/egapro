@@ -73,7 +73,6 @@ function toStr(val: string): string | undefined {
 	return val || undefined;
 }
 
-/** The four headcount cells of a category, whatever else the row carries. */
 type CategoryCountFields = Pick<
 	EmployeeCategory,
 	"womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount"
