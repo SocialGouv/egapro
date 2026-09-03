@@ -68,6 +68,10 @@ const sql = postgres(databaseUrl, { max: 1 });
  * say about the SIREN, and null for a non-diffusible unit too: the app masks
  * that company's activity, and the backfill must not put it back in the clear.
  *
+ * Ceased legal units are requested explicitly (`inclure_cesse`), as weez.ts does:
+ * the registry omits them by default, nobody logs in for them any more, and their
+ * published declarations still expose the NAF pair through the public API.
+ *
  * The `"N"` test below restates `isCompanyDiffusible`
  * (src/modules/public-api/projection.ts) rather than importing it: that module
  * reaches the Drizzle schema through the `~/` alias, which this plain-node
@@ -80,6 +84,7 @@ async function fetchNaf(siren) {
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
 	url.searchParams.set("inclure_non_diffusibles", "true");
+	url.searchParams.set("inclure_cesse", "true");
 
 	const response = await fetch(url, {
 		headers: { Accept: "application/json" },
