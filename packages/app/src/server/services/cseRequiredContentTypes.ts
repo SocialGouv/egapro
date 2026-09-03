@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { computeRequiredContentTypes } from "~/modules/cseOpinion/contentTypeColumns";
 import type { ContentTypeKey } from "~/modules/cseOpinion/types";
 import { hasGapsAboveThreshold } from "~/modules/domain";
+import { getCurrentRound } from "~/server/api/routers/statusHistoryHelpers";
 import type { db as database } from "~/server/db";
 import {
 	cseOpinions,
@@ -58,15 +59,13 @@ export async function getRequiredContentTypes(
 		)
 		.where(eq(jobCategories.declarationId, declarationId));
 
-	// Keyed like the Step 2 matrix (page.tsx uses hasSubmittedSecondDeclaration):
-	// a second declaration only counts once it was actually submitted (its
-	// opinions exist). declaration.secondDeclarationStep is set as soon as
-	// correction data is saved, even when no second declaration is ever
-	// submitted, so relying on it would demand an association the matrix never
-	// offers and block finalize permanently.
-	const hasSecondDeclaration = opinions.some(
-		(opinion) => opinion.declarationNumber === 2,
-	);
+	// Same event as the Step 2 matrix (page.tsx reads
+	// declarationData.hasSubmittedSecondDeclaration, sourced from this same
+	// event): deriving it from cseOpinions rows instead drifted from the matrix
+	// whenever the second declaration was submitted before Step 1 CSE opinions
+	// were (re)saved with round-2 data, letting the page open a second-column
+	// dropzone the quota still capped at round 1 (#4299).
+	const hasSecondDeclaration = (await getCurrentRound(db, declarationId)) === 2;
 
 	const gapConsultedFirst = opinions.find(
 		(opinion) => opinion.declarationNumber === 1 && opinion.type === "gap",
