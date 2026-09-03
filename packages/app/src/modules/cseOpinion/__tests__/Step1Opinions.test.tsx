@@ -724,8 +724,7 @@ describe("Step1Opinions", () => {
 				/>,
 			);
 
-			// The radios are gone (implicit consultation), but the opinion/date
-			// sub-fields hydrated from the draft remain visible.
+			// Implicit consultation: radios gone, hydrated opinion/date remain.
 			expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
 			expect(screen.getAllByLabelText("Favorable")[1]).toBeChecked();
 		});
