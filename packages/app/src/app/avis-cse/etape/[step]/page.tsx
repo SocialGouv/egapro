@@ -36,6 +36,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
+		const initialCategories = declarationData.employeeCategories.filter(
+			(category) => category.declarationType === "initial",
+		);
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
@@ -59,6 +62,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					firstDeclarationPathChoice={
 						declarationData.declaration.firstDeclarationPathChoice
 					}
+					hasFirstDeclGapAboveThreshold={hasGapsAboveThreshold(
+						initialCategories,
+					)}
 					hasSecondDeclaration={hasSecondDeclaration}
 					initialData={initialData}
 					previousHref={previousHref}

@@ -39,6 +39,12 @@ type Props = {
 	};
 	email?: string;
 	firstDeclarationPathChoice?: string | null;
+	/** True when the first declaration has a gap ≥ 5 % on its `initial`
+	 *  employee categories (`hasGapsAboveThreshold`). Gates the gap
+	 *  justification card the same way step 2 already gates its "Justification"
+	 *  column — defaults to `true` so callers that don't compute it yet keep
+	 *  today's behavior. */
+	hasFirstDeclGapAboveThreshold?: boolean;
 	hasSecondDeclaration?: boolean;
 	previousHref?: string;
 	secondDeclarationPathChoice?: string | null;
@@ -51,6 +57,7 @@ export function Step1Opinions({
 	initialData,
 	email,
 	firstDeclarationPathChoice,
+	hasFirstDeclGapAboveThreshold = true,
 	hasSecondDeclaration = true,
 	previousHref = "/declaration-remuneration/etape/6",
 	secondDeclarationPathChoice,
@@ -67,7 +74,14 @@ export function Step1Opinions({
 			firstDeclaration: {
 				accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
 				accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-				gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
+				// Below the threshold the card never renders, so the field can
+				// never be answered by the user: default it to false rather than
+				// leave it undefined, or zodResolver rejects the form before
+				// onSubmit's own normalization ever runs (`gapConsulted` is a
+				// required boolean in saveOpinionsSchema).
+				gapConsulted: hasFirstDeclGapAboveThreshold
+					? (initialData?.firstDeclGapConsulted ?? undefined)
+					: false,
 				gapOpinion: initialData?.firstDeclGapOpinion ?? null,
 				gapDate: initialData?.firstDeclGapDate ?? null,
 			},
@@ -84,7 +98,12 @@ export function Step1Opinions({
 					}
 				: undefined,
 		}),
-		[initialData, hasSecondDeclaration, isSecondDeclarationJustification],
+		[
+			initialData,
+			hasFirstDeclGapAboveThreshold,
+			hasSecondDeclaration,
+			isSecondDeclarationJustification,
+		],
 	);
 
 	const { draft, setField, isLoadingDraft } = useDeclarationDraft({
@@ -107,12 +126,17 @@ export function Step1Opinions({
 				form.setValue("firstDeclaration.accuracyOpinion", fd.accuracyOpinion);
 			if (fd.accuracyDate !== undefined)
 				form.setValue("firstDeclaration.accuracyDate", fd.accuracyDate);
-			if (fd.gapConsulted !== undefined)
-				form.setValue("firstDeclaration.gapConsulted", fd.gapConsulted);
-			if (fd.gapOpinion !== undefined)
-				form.setValue("firstDeclaration.gapOpinion", fd.gapOpinion);
-			if (fd.gapDate !== undefined)
-				form.setValue("firstDeclaration.gapDate", fd.gapDate);
+			// The gap card isn't rendered below the threshold, so its draft slice
+			// is stale: restoring it would leave `gapConsulted` briefly true while
+			// onSubmit forces it back to false.
+			if (hasFirstDeclGapAboveThreshold) {
+				if (fd.gapConsulted !== undefined)
+					form.setValue("firstDeclaration.gapConsulted", fd.gapConsulted);
+				if (fd.gapOpinion !== undefined)
+					form.setValue("firstDeclaration.gapOpinion", fd.gapOpinion);
+				if (fd.gapDate !== undefined)
+					form.setValue("firstDeclaration.gapDate", fd.gapDate);
+			}
 		}
 		if (hasSecondDeclaration) {
 			const sd = draft.secondDeclaration;
@@ -139,6 +163,7 @@ export function Step1Opinions({
 		isLoadingDraft,
 		draft,
 		form,
+		hasFirstDeclGapAboveThreshold,
 		hasSecondDeclaration,
 		isSecondDeclarationJustification,
 	]);
@@ -157,16 +182,19 @@ export function Step1Opinions({
 	});
 
 	const onSubmit = form.handleSubmit((data) => {
-		const submittedData =
-			isSecondDeclarationJustification && data.secondDeclaration
-				? {
-						...data,
-						secondDeclaration: {
-							...data.secondDeclaration,
-							gapConsulted: true,
-						},
-					}
-				: data;
+		// Below the threshold, the gap card isn't rendered: force gapConsulted
+		// to false rather than let it reach the wire as undefined, which
+		// zodResolver would otherwise reject with no visible faulty field.
+		const submittedData = {
+			...data,
+			firstDeclaration: hasFirstDeclGapAboveThreshold
+				? data.firstDeclaration
+				: { ...data.firstDeclaration, gapConsulted: false },
+			secondDeclaration:
+				isSecondDeclarationJustification && data.secondDeclaration
+					? { ...data.secondDeclaration, gapConsulted: true }
+					: data.secondDeclaration,
+		};
 		const firstGapIncomplete =
 			submittedData.firstDeclaration.gapConsulted === true &&
 			(!submittedData.firstDeclaration.gapOpinion ||
@@ -283,31 +311,33 @@ export function Step1Opinions({
 						title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 					/>
 
-					<Controller
-						control={form.control}
-						name="firstDeclaration.gapConsulted"
-						render={({ field }) => (
-							<GapConsultationCard
-								consulted={field.value ?? null}
-								date={firstDeclGapDate ?? ""}
-								id="first-decl-gap"
-								onConsultedChange={(v) => {
-									field.onChange(v);
-									triggerDraftSave();
-								}}
-								onDateChange={(v) => {
-									form.setValue("firstDeclaration.gapDate", v);
-									triggerDraftSave();
-								}}
-								onOpinionChange={(v) => {
-									form.setValue("firstDeclaration.gapOpinion", v);
-									triggerDraftSave();
-								}}
-								opinion={firstDeclGapOpinion ?? null}
-								readOnly={isReadOnly}
-							/>
-						)}
-					/>
+					{hasFirstDeclGapAboveThreshold && (
+						<Controller
+							control={form.control}
+							name="firstDeclaration.gapConsulted"
+							render={({ field }) => (
+								<GapConsultationCard
+									consulted={field.value ?? null}
+									date={firstDeclGapDate ?? ""}
+									id="first-decl-gap"
+									onConsultedChange={(v) => {
+										field.onChange(v);
+										triggerDraftSave();
+									}}
+									onDateChange={(v) => {
+										form.setValue("firstDeclaration.gapDate", v);
+										triggerDraftSave();
+									}}
+									onOpinionChange={(v) => {
+										form.setValue("firstDeclaration.gapOpinion", v);
+										triggerDraftSave();
+									}}
+									opinion={firstDeclGapOpinion ?? null}
+									readOnly={isReadOnly}
+								/>
+							)}
+						/>
+					)}
 				</div>
 
 				{hasSecondDeclaration && (
