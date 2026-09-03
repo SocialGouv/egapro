@@ -62,6 +62,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					hasSecondDeclaration={hasSecondDeclaration}
 					initialData={initialData}
 					previousHref={previousHref}
+					secondDeclarationPathChoice={
+						declarationData.declaration.secondDeclarationPathChoice
+					}
 					siren={declarationData.declaration.siren}
 					year={declarationData.declaration.year}
 				/>

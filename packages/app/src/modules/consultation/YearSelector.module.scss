@@ -1,0 +1,37 @@
+.bar {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	margin-bottom: 1rem;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+}
+
+.label {
+	margin: 0;
+	color: var(--text-title-grey);
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+// `.fr-select` is width:100%, which in this flex bar stretches the year field
+// across the whole row.
+.bar .select {
+	width: auto;
+	min-width: 6rem;
+	flex: 0 0 auto;
+}
+
+.period {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin: 0;
+	color: var(--text-mention-grey);
+	font-size: 1rem;
+	line-height: 1.5rem;
+}

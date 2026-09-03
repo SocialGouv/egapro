@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({
+	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
 }));
@@ -10,6 +14,13 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/services/s3", () => ({
 	deleteFile: vi.fn(),
+}));
+
+// finalize() enqueues the "démarche terminée" receipt itself, after the
+// transaction commits — mock the dynamic import so the call can be asserted
+// without touching the real queue (issue #4300).
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: mocks.enqueueReceipt,
 }));
 
 const DEFAULT_DECLARATION = {
@@ -214,6 +225,7 @@ function createCaller(
 	mockDb: unknown,
 	siret: string | null = "33978727700015",
 	impersonation: { siren: string; name: string } | null = null,
+	email: string | null = "user@example.com",
 ) {
 	return import("../cseOpinion").then(({ cseOpinionRouter }) =>
 		cseOpinionRouter.createCaller({
@@ -221,6 +233,7 @@ function createCaller(
 			session: {
 				user: {
 					id: "user-1",
+					email,
 					siret,
 					isAdmin: impersonation !== null,
 					impersonation,
@@ -235,6 +248,7 @@ function createCaller(
 describe("cseOpinionRouter.finalize", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		mocks.enqueueReceipt.mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
@@ -262,6 +276,51 @@ describe("cseOpinionRouter.finalize", () => {
 			"cse_opinion_submit",
 			"demarche_complete",
 		]);
+	});
+
+	// Regression guard (#4300): the "démarche terminée" receipt used to fire on
+	// every file upload (route.ts), producing up to MAX_CSE_FILES duplicates and
+	// none on the actual Submit click. It now fires exactly once here, after the
+	// transaction that materialises the Submit action commits — moved from
+	// src/app/api/upload/__tests__/route.test.ts.
+	describe("confirmation mail on finalize", () => {
+		it("enqueues a cseOpinion receipt after the transaction commits", async () => {
+			const ctx = createMockDbForFinalize();
+			const caller = await createCaller(ctx.db);
+
+			const result = await caller.finalize();
+
+			expect(result).toEqual({ success: true });
+			expect(mocks.enqueueReceipt).toHaveBeenCalledTimes(1);
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
+				kind: "cseOpinion",
+				to: "user@example.com",
+				siren: "339787277",
+				year: expect.any(Number),
+				userId: "user-1",
+				isResend: false,
+			});
+		});
+
+		it("does not enqueue any receipt when the session has no email", async () => {
+			const ctx = createMockDbForFinalize();
+			const caller = await createCaller(ctx.db, "33978727700015", null, null);
+
+			const result = await caller.finalize();
+
+			expect(result).toEqual({ success: true });
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("does not enqueue a receipt when a precondition guard rejects finalize", async () => {
+			const ctx = createMockDbForFinalize({ opinionCount: 0 });
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).rejects.toThrow(
+				"Les avis du CSE doivent être renseignés avant validation.",
+			);
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
 	});
 
 	it("re-accepts finalize when the declaration is already completed (editable after submission)", async () => {

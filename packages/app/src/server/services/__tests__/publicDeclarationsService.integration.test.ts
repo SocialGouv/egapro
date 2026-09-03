@@ -1,6 +1,8 @@
+import { eq } from "drizzle-orm";
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
+import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import { db } from "~/server/db";
 import {
 	campaignDeadlines,
@@ -9,7 +11,10 @@ import {
 	gipMdsData,
 	users,
 } from "~/server/db/schema";
-import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
+import {
+	listRecentPublicDeclarations,
+	searchPublicDeclarations,
+} from "~/server/services/publicDeclarationsService";
 
 const DECLARANT_ID = "pub-decl-declarant";
 const SIREN_A = "800000001";
@@ -42,9 +47,10 @@ function campaignRow({ year, publicDataReleaseDate }: CampaignYear) {
 type DeclarationRow = {
 	siren: string;
 	year: number;
-	status?: "draft" | "demarche_completed";
+	status?: "draft" | "awaiting_cse_opinion" | "demarche_completed";
 	cancelledAt?: Date | null;
 	globalAnnualMeanGap?: string | null;
+	updatedAt?: Date;
 };
 
 function declarationRow({
@@ -53,6 +59,7 @@ function declarationRow({
 	status = "demarche_completed",
 	cancelledAt = null,
 	globalAnnualMeanGap = null,
+	updatedAt,
 }: DeclarationRow) {
 	return {
 		id: `${siren}-${year}-${status}-${cancelledAt ? "cancelled" : "active"}`,
@@ -62,6 +69,7 @@ function declarationRow({
 		status,
 		cancelledAt,
 		globalAnnualMeanGap,
+		updatedAt,
 	};
 }
 
@@ -103,7 +111,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			},
 			{
 				siren: SIREN_C,
-				name: "Gamma SA",
+				name: "Aaron Secret",
 				region: "11",
 				departmentCode: "92",
 				nafCode: "62.01Z",
@@ -143,6 +151,22 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		expect(result.count).toBe(1);
 		expect(result.data).toHaveLength(1);
 		expect(result.data[0]?.siren).toBe(SIREN_A);
+	});
+
+	it("keeps a released declaration in a submitted intermediate status", async () => {
+		await db.insert(declarations).values(
+			declarationRow({
+				siren: SIREN_A,
+				year: 2100,
+				status: "awaiting_cse_opinion",
+			}),
+		);
+
+		const result = await searchPublicDeclarations({ limit: 10, offset: 0 });
+
+		expect(result.data.map((declaration) => declaration.siren)).toEqual([
+			SIREN_A,
+		]);
 	});
 
 	it("excludes years whose public release date has not been reached", async () => {
@@ -197,6 +221,14 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(bySiren.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(bySiren.data[0]?.name).toBe(NON_DIFFUSIBLE_LABEL);
+
+		const hiddenByName = await searchPublicDeclarations({
+			q: "beta",
+			limit: 10,
+			offset: 0,
+		});
+		expect(hiddenByName.data).toEqual([]);
 	});
 
 	it("filters by region, department, naf and year", async () => {
@@ -209,28 +241,25 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			]);
 
 		const byRegion = await searchPublicDeclarations({
-			region: "11",
+			region: ["11"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byRegion.data.map((d) => d.siren).sort()).toEqual([
-			SIREN_A,
-			SIREN_C,
-		]);
+		expect(byRegion.data.map((d) => d.siren)).toEqual([SIREN_A]);
 
 		const byDepartement = await searchPublicDeclarations({
-			departement: "69",
+			departement: ["69"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byDepartement.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(byDepartement.data).toEqual([]);
 
 		const byNaf = await searchPublicDeclarations({
-			naf: "70.10Z",
+			naf: ["70.10Z"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byNaf.data.map((d) => d.siren)).toEqual([SIREN_B]);
+		expect(byNaf.data).toEqual([]);
 
 		const byYear = await searchPublicDeclarations({
 			year: 2100,
@@ -238,6 +267,34 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(byYear.count).toBe(3);
+	});
+
+	it("ignores a malformed NAF code instead of failing the filtered search", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_B, year: 2100 }),
+			]);
+		await db
+			.update(companies)
+			.set({ nafCode: "" })
+			.where(eq(companies.siren, SIREN_A));
+
+		try {
+			const result = await searchPublicDeclarations({
+				naf: ["J"],
+				limit: 10,
+				offset: 0,
+			});
+
+			expect(result.data).toEqual([]);
+		} finally {
+			await db
+				.update(companies)
+				.set({ nafCode: "62.01Z" })
+				.where(eq(companies.siren, SIREN_A));
+		}
 	});
 
 	it("paginates with limit and offset while keeping the full count", async () => {
@@ -256,6 +313,31 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		const secondPage = await searchPublicDeclarations({ limit: 2, offset: 2 });
 		expect(secondPage.count).toBe(3);
 		expect(secondPage.data).toHaveLength(1);
+	});
+
+	it("sorts masked companies by their public label and siren", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_B, year: 2100 }),
+				declarationRow({ siren: SIREN_C, year: 2100 }),
+			]);
+
+		const result = await searchPublicDeclarations({
+			sort: "name",
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(result.data.map((declaration) => declaration.siren)).toEqual([
+			SIREN_A,
+			SIREN_B,
+			SIREN_C,
+		]);
+		expect(result.data.slice(1).map((declaration) => declaration.name)).toEqual(
+			[NON_DIFFUSIBLE_LABEL, NON_DIFFUSIBLE_LABEL],
+		);
 	});
 
 	it("left-joins gip workforce and coerces numeric gap columns to numbers", async () => {
@@ -291,5 +373,29 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 
 		expect(result.count).toBe(1);
 		expect(result.data[0]?.workforceEma).toBeNull();
+	});
+
+	it("lists the most recently published declaration-years for the RSS feed", async () => {
+		await db.insert(declarations).values([
+			declarationRow({
+				siren: SIREN_A,
+				year: 2100,
+				updatedAt: new Date("2026-08-30T10:00:00Z"),
+			}),
+			declarationRow({
+				siren: SIREN_B,
+				year: 2100,
+				updatedAt: new Date("2026-08-31T10:00:00Z"),
+			}),
+		]);
+
+		const publications = await listRecentPublicDeclarations(2);
+
+		expect(publications.map((item) => item.siren)).toEqual([SIREN_B, SIREN_A]);
+		expect(publications[0]).toMatchObject({
+			name: NON_DIFFUSIBLE_LABEL,
+			year: 2100,
+			publishedAt: new Date("2026-08-31T10:00:00Z"),
+		});
 	});
 });

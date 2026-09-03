@@ -5,6 +5,7 @@ import {
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "~/modules/cseOpinion/schemas";
+import { getCurrentYear } from "~/modules/domain";
 import {
 	createTRPCRouter,
 	declarationProcedure,
@@ -324,6 +325,19 @@ export const cseOpinionRouter = createTRPCRouter({
 					.where(eq(declarations.id, ctx.declarationId));
 			}
 		});
+
+		const email = ctx.session.user.email;
+		if (email) {
+			const { enqueueReceipt } = await import("~/modules/mail/server");
+			await enqueueReceipt({
+				kind: "cseOpinion",
+				to: email,
+				siren: ctx.siren,
+				year: getCurrentYear(),
+				userId: ctx.session.user.id,
+				isResend: false,
+			});
+		}
 
 		return { success: true };
 	}),

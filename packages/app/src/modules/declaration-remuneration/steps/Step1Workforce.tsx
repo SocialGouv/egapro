@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { getReferencePeriod, getReferenceYearFor } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
@@ -26,7 +27,6 @@ import { PrefillResetWarning } from "../shared/PrefillResetWarning";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 import { Step1WorkforceDefinition } from "./Step1WorkforceDefinition";

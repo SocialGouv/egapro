@@ -25,22 +25,22 @@ const declarationFixture: PublicDeclarationSource = {
 	// and they do NOT sum to 1 (unlike the quartile proportions below).
 	variableProportionWomen: "0.5625",
 	variableProportionMen: "0.6000",
-	annualQuartile1ProportionWomen: "60.0000",
-	annualQuartile2ProportionWomen: "55.0000",
-	annualQuartile3ProportionWomen: "50.0000",
-	annualQuartile4ProportionWomen: "40.0000",
-	annualQuartile1ProportionMen: "40.0000",
-	annualQuartile2ProportionMen: "45.0000",
-	annualQuartile3ProportionMen: "50.0000",
-	annualQuartile4ProportionMen: "60.0000",
-	hourlyQuartile1ProportionWomen: "61.0000",
-	hourlyQuartile2ProportionWomen: "56.0000",
-	hourlyQuartile3ProportionWomen: "51.0000",
-	hourlyQuartile4ProportionWomen: "41.0000",
-	hourlyQuartile1ProportionMen: "39.0000",
-	hourlyQuartile2ProportionMen: "44.0000",
-	hourlyQuartile3ProportionMen: "49.0000",
-	hourlyQuartile4ProportionMen: "59.0000",
+	annualQuartile1ProportionWomen: "0.6000",
+	annualQuartile2ProportionWomen: "0.5500",
+	annualQuartile3ProportionWomen: "0.5000",
+	annualQuartile4ProportionWomen: "0.4000",
+	annualQuartile1ProportionMen: "0.4000",
+	annualQuartile2ProportionMen: "0.4500",
+	annualQuartile3ProportionMen: "0.5000",
+	annualQuartile4ProportionMen: "0.6000",
+	hourlyQuartile1ProportionWomen: "0.6100",
+	hourlyQuartile2ProportionWomen: "0.5600",
+	hourlyQuartile3ProportionWomen: "0.5100",
+	hourlyQuartile4ProportionWomen: "0.4100",
+	hourlyQuartile1ProportionMen: "0.3900",
+	hourlyQuartile2ProportionMen: "0.4400",
+	hourlyQuartile3ProportionMen: "0.4900",
+	hourlyQuartile4ProportionMen: "0.5900",
 };
 
 const companyFixture: PublicCompanySource = {
@@ -50,6 +50,8 @@ const companyFixture: PublicCompanySource = {
 	region: "Île-de-France",
 	departmentCode: "75",
 	departmentLabel: "Paris",
+	countryCode: null,
+	countryLabel: "FRANCE",
 	nafCode: "62.01Z",
 	nafLabel: "Programmation informatique",
 	statutDiffusion: "O",
@@ -61,9 +63,13 @@ const EXPECTED_DTO_KEYS = Object.keys(publicDeclarationDTOSchema.shape).sort();
 const MASKED_COMPANY_FIELDS = [
 	"name",
 	"address",
+	"city",
+	"regionCode",
 	"region",
 	"departmentCode",
 	"departmentLabel",
+	"countryCode",
+	"countryLabel",
 	"nafCode",
 	"nafLabel",
 ] as const;
@@ -131,6 +137,7 @@ describe("toPublicDeclaration", () => {
 		expect(dto.region).toBe("Île-de-France");
 		expect(dto.departmentCode).toBe("75");
 		expect(dto.departmentLabel).toBe("Paris");
+		expect(dto.countryLabel).toBe("FRANCE");
 		expect(dto.nafCode).toBe("62.01Z");
 		expect(dto.nafLabel).toBe("Programmation informatique");
 	});
@@ -142,7 +149,7 @@ describe("toPublicDeclaration", () => {
 		});
 
 		for (const field of MASKED_COMPANY_FIELDS) {
-			expect(dto[field]).toBeNull();
+			expect(dto[field]).toBe("Non-diffusible");
 		}
 	});
 
@@ -165,9 +172,9 @@ describe("toPublicDeclaration", () => {
 			address: null,
 		});
 
-		for (const field of MASKED_COMPANY_FIELDS) {
-			expect(dto[field]).toBeNull();
-		}
+		expect(dto.name).toBe("Non-diffusible");
+		expect(dto.address).toBe("Non-diffusible");
+		expect(dto.departmentCode).toBe("Non-diffusible");
 		expect(dto.siren).toBe("123456789");
 		expect(dto.workforceEma).toBe(250);
 	});
@@ -199,6 +206,17 @@ describe("toPublicDeclaration", () => {
 		}
 	});
 
+	it("uses the country instead of a French region for a foreign company", () => {
+		const dto = toPublicDeclaration(declarationFixture, {
+			...companyFixture,
+			countryCode: "99131",
+			countryLabel: "Belgique",
+		});
+
+		expect(dto.countryLabel).toBe("Belgique");
+		expect(dto.region).toBeNull();
+	});
+
 	it("converts numeric string gaps to numbers and preserves year and counts", () => {
 		const dto = toPublicDeclaration(declarationFixture, companyFixture);
 
@@ -207,8 +225,8 @@ describe("toPublicDeclaration", () => {
 		expect(dto.totalMen).toBe(80);
 		expect(dto.globalAnnualMeanGap).toBe(0.1234);
 		expect(dto.variableProportionWomen).toBe(0.5625);
-		expect(dto.annualQuartile4ProportionMen).toBe(60);
-		expect(dto.hourlyQuartile1ProportionWomen).toBe(61);
+		expect(dto.annualQuartile4ProportionMen).toBe(0.6);
+		expect(dto.hourlyQuartile1ProportionWomen).toBe(0.61);
 		expect(dto.workforceEma).toBe(250);
 	});
 
@@ -267,7 +285,7 @@ describe("publicSearchInputSchema", () => {
 		expect(parsed.offset).toBe(0);
 	});
 
-	it("accepts the optional filters", () => {
+	it("reads a facet given once as a single-entry list", () => {
 		const parsed = publicSearchInputSchema.parse({
 			q: "acme",
 			region: "Île-de-France",
@@ -280,13 +298,49 @@ describe("publicSearchInputSchema", () => {
 
 		expect(parsed).toEqual({
 			q: "acme",
-			region: "Île-de-France",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["Île-de-France"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2024,
 			limit: 50,
 			offset: 20,
 		});
+	});
+
+	it("keeps every value of a repeated facet", () => {
+		const parsed = publicSearchInputSchema.parse({
+			region: ["11", "84"],
+			workforceRanges: ["<50", "1000+"],
+			limit: 10,
+		});
+
+		expect(parsed.region).toEqual(["11", "84"]);
+		expect(parsed.workforceRanges).toEqual(["<50", "1000+"]);
+	});
+
+	it("drops blank facet entries instead of filtering on them", () => {
+		const parsed = publicSearchInputSchema.parse({
+			region: ["", "  ", "11"],
+			naf: [""],
+			limit: 10,
+		});
+
+		expect(parsed.region).toEqual(["11"]);
+		expect(parsed.naf).toBeUndefined();
+	});
+
+	it("refuses a facet longer than any real vocabulary", () => {
+		const flood = Array.from({ length: 201 }, (_, index) => `r${index}`);
+
+		expect(publicSearchInputSchema.safeParse({ region: flood }).success).toBe(
+			false,
+		);
+	});
+
+	it("rejects a workforce bracket that is not one of the observatory keys", () => {
+		expect(
+			publicSearchInputSchema.safeParse({ workforceRanges: ["12-34"] }).success,
+		).toBe(false);
 	});
 
 	it("rejects a limit above 100", () => {

@@ -40,7 +40,7 @@ importers:
         version: 4.4.1(react@19.2.8)
       '@sentry/nextjs':
         specifier: ^10.48.0
-        version: 10.72.0(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0))(react@19.2.8)(webpack@5.105.2)
+        version: 10.72.0(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0))(react@19.2.8)(webpack@5.105.2(esbuild@0.27.7))
       '@socialgouv/matomo-next':
         specifier: ^1.13.1
         version: 1.13.1(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0))(react@19.2.8)
@@ -153,6 +153,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+      esbuild:
+        specifier: ^0.27.7
+        version: 0.27.7
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1(@noble/hashes@1.8.0)
@@ -9112,7 +9115,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/bundler-plugins@10.73.0(rollup@4.63.1)(webpack@5.105.2)':
+  '@sentry/bundler-plugins@10.73.0(rollup@4.63.1)(webpack@5.105.2(esbuild@0.27.7))':
     dependencies:
       '@babel/core': 7.29.7
       '@sentry/cli': 2.58.6
@@ -9123,7 +9126,7 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       rollup: 4.63.1
-      webpack: 5.105.2
+      webpack: 5.105.2(esbuild@0.27.7)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -9198,7 +9201,7 @@ snapshots:
       '@sentry/utils': 7.120.4
       localforage: 1.10.0
 
-  '@sentry/nextjs@10.72.0(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0))(react@19.2.8)(webpack@5.105.2)':
+  '@sentry/nextjs@10.72.0(@opentelemetry/core@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(next@16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0))(react@19.2.8)(webpack@5.105.2(esbuild@0.27.7))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@rollup/plugin-commonjs': 28.0.1(rollup@4.63.1)
@@ -9211,7 +9214,7 @@ snapshots:
       '@sentry/react': 10.72.0(react@19.2.8)
       '@sentry/server-utils': 10.72.0
       '@sentry/vercel-edge': 10.72.0
-      '@sentry/webpack-plugin': 5.4.0(rollup@4.63.1)(webpack@5.105.2)
+      '@sentry/webpack-plugin': 5.4.0(rollup@4.63.1)(webpack@5.105.2(esbuild@0.27.7))
       next: 16.3.3(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.99.0)
       rollup: 4.63.1
       stacktrace-parser: 0.1.11
@@ -9301,10 +9304,10 @@ snapshots:
       '@opentelemetry/api': 1.9.1
       '@sentry/core': 10.72.0
 
-  '@sentry/webpack-plugin@5.4.0(rollup@4.63.1)(webpack@5.105.2)':
+  '@sentry/webpack-plugin@5.4.0(rollup@4.63.1)(webpack@5.105.2(esbuild@0.27.7))':
     dependencies:
-      '@sentry/bundler-plugins': 10.73.0(rollup@4.63.1)(webpack@5.105.2)
-      webpack: 5.105.2
+      '@sentry/bundler-plugins': 10.73.0(rollup@4.63.1)(webpack@5.105.2(esbuild@0.27.7))
+      webpack: 5.105.2(esbuild@0.27.7)
     transitivePeerDependencies:
       - encoding
       - rollup
@@ -13341,13 +13344,15 @@ snapshots:
       type-fest: 2.19.0
       unique-string: 3.0.0
 
-  terser-webpack-plugin@5.6.1(webpack@5.105.2):
+  terser-webpack-plugin@5.6.1(esbuild@0.27.7)(webpack@5.105.2(esbuild@0.27.7)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.51.2
-      webpack: 5.105.2
+      webpack: 5.105.2(esbuild@0.27.7)
+    optionalDependencies:
+      esbuild: 0.27.7
 
   terser@5.51.2:
     dependencies:
@@ -13717,7 +13722,7 @@ snapshots:
 
   webpack-sources@3.5.1: {}
 
-  webpack@5.105.2:
+  webpack@5.105.2(esbuild@0.27.7):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -13741,7 +13746,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.1(webpack@5.105.2)
+      terser-webpack-plugin: 5.6.1(esbuild@0.27.7)(webpack@5.105.2(esbuild@0.27.7))
       watchpack: 2.5.2
       webpack-sources: 3.5.1
     transitivePeerDependencies:

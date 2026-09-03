@@ -1,13 +1,13 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import {
 	computePercentage,
 	displayDecimal,
 	padDecimalOnBlur,
 } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import type { QuartileFieldErrors } from "./QuartileTable";
 

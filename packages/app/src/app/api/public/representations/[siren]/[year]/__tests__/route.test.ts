@@ -5,9 +5,16 @@ const mocks = vi.hoisted(() => ({
 	logAction: vi.fn(),
 }));
 
-vi.mock("~/modules/public-api", () => ({
-	getPublicRepresentationBySirenYear: mocks.getPublicRepresentationBySirenYear,
-}));
+vi.mock("~/modules/public-api", async () => {
+	const { PUBLIC_API_RESOURCE_HEADERS } = await import(
+		"~/modules/public-api/httpHeaders"
+	);
+	return {
+		getPublicRepresentationBySirenYear:
+			mocks.getPublicRepresentationBySirenYear,
+		PUBLIC_API_RESOURCE_HEADERS,
+	};
+});
 
 vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,

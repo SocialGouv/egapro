@@ -26,7 +26,6 @@ import {
 	findFieldError,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
 	CATEGORY_SOURCES,
 	formatCategorySource,
@@ -41,6 +40,7 @@ import {
 	sumCategoryWorkforce,
 } from "~/modules/domain";
 import { getDsfrCollapse } from "~/modules/shared";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { WORKFORCE_ROWS } from "../step1/workforceRows";

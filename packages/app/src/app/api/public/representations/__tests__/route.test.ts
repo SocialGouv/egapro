@@ -11,7 +11,11 @@ vi.mock("~/modules/public-api", async () => {
 	const { publicRepresentationSearchInputSchema } = await import(
 		"~/modules/public-api/schemas"
 	);
+	const { PUBLIC_API_SEARCH_HEADERS } = await import(
+		"~/modules/public-api/httpHeaders"
+	);
 	return {
+		PUBLIC_API_SEARCH_HEADERS,
 		publicRepresentationSearchInputSchema,
 		searchPublicRepresentations: mocks.searchPublicRepresentations,
 	};
@@ -75,9 +79,9 @@ describe("GET /api/public/representations", () => {
 
 		expect(mocks.searchPublicRepresentations).toHaveBeenCalledWith({
 			q: "acme",
-			region: "11",
-			departement: "75",
-			naf: "62.01Z",
+			region: ["11"],
+			departement: ["75"],
+			naf: ["62.01Z"],
 			year: 2026,
 			limit: 25,
 			offset: 50,
@@ -140,9 +144,9 @@ describe("GET /api/public/representations", () => {
 				status: "success",
 				metadata: {
 					q: "acme",
-					region: "11",
-					departement: "75",
-					naf: "62.01Z",
+					region: ["11"],
+					departement: ["75"],
+					naf: ["62.01Z"],
 					year: "2026",
 				},
 			}),
@@ -158,9 +162,9 @@ describe("GET /api/public/representations", () => {
 			expect.objectContaining({
 				metadata: {
 					q: null,
-					region: null,
-					departement: null,
-					naf: null,
+					region: [],
+					departement: [],
+					naf: [],
 					year: null,
 				},
 			}),

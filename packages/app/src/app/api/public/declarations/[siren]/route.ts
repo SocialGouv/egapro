@@ -1,18 +1,26 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
-import { getPublicDeclarationsBySiren } from "~/modules/public-api";
+import {
+	getPublicDeclarationsBySiren,
+	PUBLIC_API_RESOURCE_HEADERS,
+} from "~/modules/public-api";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
-const PUBLIC_HEADERS = {
-	"Access-Control-Allow-Origin": "*",
-	"Cache-Control": "public, max-age=300, s-maxage=300",
-};
+export function OPTIONS(): Response {
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_RESOURCE_HEADERS,
+	});
+}
 
 export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ siren: string }> },
 ) {
+	const limited = await enforcePublicApiRateLimit(request);
+	if (limited) return limited;
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(request.headers);
 	const { siren: rawSiren } = await params;
@@ -31,7 +39,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "SIREN invalide. Attendu : 9 chiffres." },
-			{ status: 400, headers: PUBLIC_HEADERS },
+			{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 
@@ -43,7 +51,7 @@ export async function GET(
 		if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
 			return Response.json(
 				{ error: "Le paramètre 'limit' doit être un entier entre 1 et 100." },
-				{ status: 400, headers: PUBLIC_HEADERS },
+				{ status: 400, headers: PUBLIC_API_RESOURCE_HEADERS },
 			);
 		}
 		limit = parsed;
@@ -62,7 +70,7 @@ export async function GET(
 			durationMs: Date.now() - startedAt,
 		});
 
-		return Response.json(data, { headers: PUBLIC_HEADERS });
+		return Response.json(data, { headers: PUBLIC_API_RESOURCE_HEADERS });
 	} catch (error) {
 		console.error(
 			"[api/public/declarations/:siren]",
@@ -80,7 +88,7 @@ export async function GET(
 		});
 		return Response.json(
 			{ error: "Erreur lors de la récupération des déclarations." },
-			{ status: 500, headers: PUBLIC_HEADERS },
+			{ status: 500, headers: PUBLIC_API_RESOURCE_HEADERS },
 		);
 	}
 }

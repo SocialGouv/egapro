@@ -2,6 +2,7 @@ import ExcelJS from "exceljs";
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
+import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 
 // Draft exclusion and company join are SQL-enforced: a mocked driver cannot prove them.
 describe("GET /api/public/representations/export — integration (#4155)", () => {
@@ -96,17 +97,14 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 		expect(row?.getCell(10).value).toBe(60);
 	});
 
-	it("exports a non-diffusible company with its SIREN and indicators but no identity nor location", async () => {
+	it("exports a non-diffusible company with its SIREN and indicators but a masked identity and location", async () => {
 		const sheet = await fetchExportSheet();
 		const row = findRowBySiren(sheet, SIREN_NON_DIFFUSIBLE);
 
 		expect(row).toBeDefined();
-		expect(row?.getCell(3).value).toBeNull();
-		expect(row?.getCell(4).value).toBeNull();
-		expect(row?.getCell(5).value).toBeNull();
-		expect(row?.getCell(6).value).toBeNull();
-		expect(row?.getCell(7).value).toBeNull();
-		expect(row?.getCell(8).value).toBeNull();
+		for (const cell of [3, 4, 5, 6, 7, 8]) {
+			expect(row?.getCell(cell).value).toBe(NON_DIFFUSIBLE_LABEL);
+		}
 		expect(row?.getCell(9).value).toBe(30);
 		expect(row?.getCell(10).value).toBe(70);
 	});

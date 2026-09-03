@@ -5,6 +5,7 @@ import type { RepresentationDeclarationStatus } from "~/modules/domain";
 import {
 	getPublicRepresentationBySirenYear,
 	getPublicRepresentationsBySiren,
+	NON_DIFFUSIBLE_LABEL,
 	publicRepresentationDTOSchema,
 	searchPublicRepresentations,
 } from "~/modules/public-api";
@@ -165,13 +166,13 @@ describe("public representation services (real Postgres)", () => {
 		expect(dto).toMatchObject({
 			siren: SIREN_HIDDEN,
 			year: 2026,
-			name: null,
-			address: null,
-			region: null,
-			departmentCode: null,
-			departmentLabel: null,
-			nafCode: null,
-			nafLabel: null,
+			name: NON_DIFFUSIBLE_LABEL,
+			address: NON_DIFFUSIBLE_LABEL,
+			region: NON_DIFFUSIBLE_LABEL,
+			departmentCode: NON_DIFFUSIBLE_LABEL,
+			departmentLabel: NON_DIFFUSIBLE_LABEL,
+			nafCode: NON_DIFFUSIBLE_LABEL,
+			nafLabel: NON_DIFFUSIBLE_LABEL,
 			executiveWomenPercent: 35.5,
 			memberWomenPercent: 42,
 		});
@@ -254,6 +255,14 @@ describe("public representation services (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(bySiren.data.map((d) => d.siren)).toEqual([SIREN_OTHER]);
+		expect(bySiren.data[0]?.name).toBe(NON_DIFFUSIBLE_LABEL);
+
+		const hiddenByName = await searchPublicRepresentations({
+			q: "beta",
+			limit: 10,
+			offset: 0,
+		});
+		expect(hiddenByName.data).toEqual([]);
 	});
 
 	it("filters the search by region, department, naf and year", async () => {
@@ -266,28 +275,25 @@ describe("public representation services (real Postgres)", () => {
 			]);
 
 		const byRegion = await searchPublicRepresentations({
-			region: "11",
+			region: ["11"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byRegion.data.map((d) => d.siren).sort()).toEqual([
-			SIREN_DIFFUSIBLE,
-			SIREN_OTHER,
-		]);
+		expect(byRegion.data.map((d) => d.siren)).toEqual([SIREN_DIFFUSIBLE]);
 
 		const byDepartement = await searchPublicRepresentations({
-			departement: "69",
+			departement: ["69"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byDepartement.data.map((d) => d.siren)).toEqual([SIREN_HIDDEN]);
+		expect(byDepartement.data).toEqual([]);
 
 		const byNaf = await searchPublicRepresentations({
-			naf: "70.10Z",
+			naf: ["70.10Z"],
 			limit: 10,
 			offset: 0,
 		});
-		expect(byNaf.data.map((d) => d.siren)).toEqual([SIREN_HIDDEN]);
+		expect(byNaf.data).toEqual([]);
 
 		const byYear = await searchPublicRepresentations({
 			year: 2025,

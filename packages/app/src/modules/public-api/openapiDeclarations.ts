@@ -11,7 +11,7 @@ import {
 export const publicDeclarationSchema = {
 	type: "object",
 	description:
-		"Déclaration d'index égalité professionnelle. Ce schéma expose uniquement des **données brutes** (écarts, proportions, quartiles, effectifs) calculées par le GIP-MDS à partir des DSN. Aucun score ni indice /100 n'est exposé. L'indicateur G (écart déclaré par l'entreprise par catégorie socio-professionnelle) est exclu. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), les champs d'identité (`name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`) sont `null`.",
+		"Déclaration d'index égalité professionnelle. Ce schéma expose uniquement des **données brutes** (écarts, proportions, quartiles, effectifs) calculées par le GIP-MDS à partir des DSN. Aucun score ni indice /100 n'est exposé. L'indicateur G (écart déclaré par l'entreprise par catégorie socio-professionnelle) est exclu. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), tous les champs d'identité, de localisation et d'activité valent `Non-diffusible`; le SIREN, l'effectif EMA et les indicateurs restent disponibles.",
 	required: ["year", "siren"],
 	properties: {
 		year: {
@@ -25,6 +25,30 @@ export const publicDeclarationSchema = {
 			example: "319159877",
 		},
 		...publicNonDiffusibleIdentityProperties,
+		city: {
+			type: ["string", "null"],
+			description:
+				"Ville du siège. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			example: "Élancourt",
+		},
+		regionCode: {
+			type: ["string", "null"],
+			description:
+				"Code de région française, si applicable. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			example: "11",
+		},
+		countryCode: {
+			type: ["string", "null"],
+			description:
+				"Code du pays pour une entreprise établie à l'étranger. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			example: "99100",
+		},
+		countryLabel: {
+			type: ["string", "null"],
+			description:
+				"Pays affiché à la place de la région et du département. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			example: "Belgique",
+		},
 		workforceEma: {
 			type: ["number", "null"],
 			description:
@@ -231,18 +255,85 @@ export const publicSearchResultSchema = {
 	},
 } as const;
 
+const declarationSearchExtras = [
+	{
+		name: "city",
+		in: "query",
+		required: false,
+		description: "Filtre par ville (recherche partielle).",
+		schema: { type: "string" },
+	},
+	{
+		name: "workforceMin",
+		in: "query",
+		required: false,
+		description: "Effectif EMA minimum.",
+		schema: { type: "integer", minimum: 0 },
+	},
+	{
+		name: "workforceMax",
+		in: "query",
+		required: false,
+		description: "Effectif EMA maximum.",
+		schema: { type: "integer", minimum: 0 },
+	},
+	{
+		name: "workforceRanges",
+		in: "query",
+		required: false,
+		description:
+			"Filtre par tranche d'effectif de l'observatoire. Répétable : plusieurs tranches sont combinées en « ou ».",
+		explode: true,
+		style: "form",
+		schema: {
+			type: "array",
+			items: {
+				type: "string",
+				enum: ["<50", "50-99", "100-249", "250-999", "1000+"],
+			},
+		},
+	},
+	{
+		name: "sort",
+		in: "query",
+		required: false,
+		description: "Tri par pertinence, raison sociale ou année décroissante.",
+		schema: {
+			type: "string",
+			enum: ["relevance", "name", "year"],
+			default: "relevance",
+		},
+	},
+] as const;
+
+function declarationSearchParameters() {
+	return [
+		...buildSearchParameters({
+			description:
+				"Filtre par année de déclaration. Doit être une année dont la date de rendu public est atteinte.",
+			example: 2026,
+		}),
+		...declarationSearchExtras,
+	];
+}
+
+function declarationExportFilterParameters() {
+	return declarationSearchParameters().filter(
+		(parameter) =>
+			parameter.name !== "limit" &&
+			parameter.name !== "offset" &&
+			parameter.name !== "sort",
+	);
+}
+
 export const declarationsPaths = {
 	"/api/public/declarations": {
 		get: {
 			operationId: "searchPublicDeclarations",
 			summary: "Rechercher des déclarations",
 			description:
-				"Recherche paginée sur les déclarations publiées. Les résultats sont filtrables par texte libre, région, département, code NAF et année. Seules les années dont la date de rendu public est atteinte sont incluses.",
-			parameters: buildSearchParameters({
-				description:
-					"Filtre par année de déclaration. Doit être une année dont la date de rendu public est atteinte.",
-				example: 2026,
-			}),
+				"Recherche paginée sur les entreprises ayant une déclaration publiée. Sans filtre d'année, une seule ligne — la plus récente — est retournée par SIREN. Les résultats sont filtrables par texte libre, ville, région, département, section NAF, effectif et année.",
+			parameters: declarationSearchParameters(),
 			responses: {
 				"200": {
 					description: "Liste paginée de déclarations.",
@@ -323,17 +414,22 @@ export const declarationsPaths = {
 			operationId: "exportPublicDeclarations",
 			summary: "Exporter toutes les déclarations publiées",
 			description:
-				"Retourne l'intégralité des déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON ou CSV. Le volume peut être important (plusieurs milliers de lignes). L'export est mis en cache 1 heure côté serveur.",
+				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. L'export est mis en cache 1 heure côté serveur.",
 			parameters: [
 				{
 					name: "format",
 					in: "query",
 					required: false,
 					description:
-						"Format de sortie : `json` (défaut) ou `csv`. Le CSV utilise `;` comme séparateur.",
+						"Format de sortie : `json` (défaut), `csv` ou `xlsx`. Le CSV utilise `;` comme séparateur.",
 					example: "json",
-					schema: { type: "string", enum: ["json", "csv"], default: "json" },
+					schema: {
+						type: "string",
+						enum: ["json", "csv", "xlsx"],
+						default: "json",
+					},
 				},
+				...declarationExportFilterParameters(),
 			],
 			responses: {
 				"200": {
@@ -360,9 +456,16 @@ export const declarationsPaths = {
 									"Fichier CSV avec en-tête, séparateur `;`. Colonnes dans l'ordre de `PublicDeclaration`.",
 							},
 						},
+						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+							{
+								schema: { type: "string", format: "binary" },
+							},
 					},
 				},
 				"400": errorResponse("Paramètre `format` invalide."),
+				"413": errorResponse(
+					"Export Excel trop volumineux : ajoutez des filtres ou utilisez le format CSV.",
+				),
 				"500": serverErrorResponse,
 			},
 		},
