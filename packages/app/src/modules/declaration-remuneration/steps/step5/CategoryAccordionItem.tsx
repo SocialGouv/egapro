@@ -17,6 +17,8 @@ type Props = {
 	fieldId: string;
 	category: EmployeeCategory & { id: number };
 	disabled: boolean;
+	/** Greys out this category's two remuneration tables (#3678). */
+	payDisabled: boolean;
 	readOnly: boolean;
 	isExpanded: boolean;
 	readOnlyLabel: boolean;
@@ -53,6 +55,7 @@ export function CategoryAccordionItem({
 	fieldId,
 	category,
 	disabled,
+	payDisabled,
 	readOnly,
 	isExpanded,
 	readOnlyLabel,
@@ -146,6 +149,7 @@ export function CategoryAccordionItem({
 						errors={errors}
 						onDecimalBlur={onDecimalBlur}
 						onPositiveNumberChange={onPositiveNumberChange}
+						payDisabled={payDisabled}
 						readOnly={readOnly}
 					/>
 					{showDelete && (

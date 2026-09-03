@@ -156,7 +156,9 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
+export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
 export {
+	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
 } from "./shared/employeeCategoryRemuneration";

@@ -1,4 +1,7 @@
+import { isCategoryPayApplicable } from "~/modules/domain";
+import { CATEGORY_PAY_FIELDS } from "../schemas";
 import type { EmployeeCategory } from "../steps/step5/categorySerializer";
+import { toCategoryHeadcounts } from "../steps/step5/categorySerializer";
 import type { PayGapRow, WorkforceRow } from "../types";
 
 // Step 1 - Workforce (120 women + 130 men = 250 total)
@@ -81,6 +84,22 @@ export type DevStep5Totals = {
 	hourly: { women: number; men: number };
 };
 
+/**
+ * Small step-1 totals distribute down to a 0 in some categories, and a category
+ * at 0 declares no remuneration (#3678): drop its amounts so the filled form is
+ * always submittable.
+ */
+function withoutPayValuesWhenNotApplicable(
+	category: EmployeeCategory,
+): EmployeeCategory {
+	if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return category;
+	const cleared = { ...category };
+	for (const field of CATEGORY_PAY_FIELDS) {
+		cleared[field] = "";
+	}
+	return cleared;
+}
+
 export function createDevStep5Categories(
 	nextId: () => number,
 	totals: DevStep5Totals,
@@ -155,5 +174,5 @@ export function createDevStep5Categories(
 			hourlyVariableWomen: "3.12",
 			hourlyVariableMen: "3.90",
 		},
-	];
+	].map(withoutPayValuesWhenNotApplicable);
 }
