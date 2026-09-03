@@ -12,6 +12,8 @@ export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 
 type CseStep1Options = {
 	hasSecondDeclaration?: boolean;
+	/** False when the first declaration has no gap ≥ 5% — the whole gap consultation card is then absent from step 1 (#4289). */
+	firstDeclHasGap?: boolean;
 	/** CSE consulted on justifying the first declaration's gaps ≥ 5% — adds the "Justification" column in step 2 when that declaration has a gap. */
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
@@ -45,6 +47,7 @@ async function fillGapConsultation(
 export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 	const {
 		hasSecondDeclaration = false,
+		firstDeclHasGap = true,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
 		secondDeclGapConsultationImplicit = false,
@@ -55,13 +58,19 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		// DSFR hides native radio inputs — click on the associated label instead
 		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
 		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-		await fillGapConsultation(
-			page,
-			"first-decl-gap",
-			firstDeclGapConsulted,
-			"2025-03-15",
-			opinion,
-		);
+		if (firstDeclHasGap) {
+			await fillGapConsultation(
+				page,
+				"first-decl-gap",
+				firstDeclGapConsulted,
+				"2025-03-15",
+				opinion,
+			);
+		} else {
+			await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
+				0,
+			);
+		}
 		if (hasSecondDeclaration) {
 			await page
 				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
