@@ -18,10 +18,9 @@ type StepPageProps = {
 	params: Promise<{ step: string }>;
 };
 
-function categoriesOfType<T extends { declarationType: string }>(
-	categories: T[],
-	declarationType: "correction" | "initial",
-): T[] {
+function categoriesOfType<
+	T extends { declarationType: "correction" | "initial" },
+>(categories: T[], declarationType: "correction" | "initial"): T[] {
 	return categories.filter(
 		(category) => category.declarationType === declarationType,
 	);

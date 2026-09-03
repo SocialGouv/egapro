@@ -309,7 +309,7 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 		// Complete declaration without gap → auto-redirect to CSE → complete CSE
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-		await fillCseStep1(page);
+		await fillCseStep1(page, { firstDeclHasGap: false });
 		await submitCseStep2(page);
 
 		// demarcheCompletedAt is now set — navigating back should redirect
