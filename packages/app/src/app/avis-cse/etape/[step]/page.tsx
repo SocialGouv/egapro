@@ -3,13 +3,13 @@ import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
 	CSE_FUNNEL,
 	computeContentTypeColumns,
+	computeGapHighFlags,
 	mapOpinionsFromDb,
 	Step1Opinions,
 	Step2Upload,
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
-import { hasGapsAboveThreshold } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -36,11 +36,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
-		const correctionCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "correction",
+		const { secondDeclGapHigh } = computeGapHighFlags(
+			declarationData.employeeCategories,
 		);
-		const secondDeclGapHigh =
-			hasSecondDeclaration && hasGapsAboveThreshold(correctionCategories);
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
@@ -93,18 +91,15 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const secondGap = opinions.find(
 			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
 		);
-		const initialCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "initial",
-		);
-		const correctionCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "correction",
+		const { firstDeclGapHigh, secondDeclGapHigh } = computeGapHighFlags(
+			declarationData.employeeCategories,
 		);
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration,
 			firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
 			secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
-			firstDeclGapHigh: hasGapsAboveThreshold(initialCategories),
-			secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
+			firstDeclGapHigh,
+			secondDeclGapHigh,
 		});
 		return (
 			<>

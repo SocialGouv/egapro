@@ -47,7 +47,7 @@ WANT=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$WORKFLOW" | se
 	s/.*#[[:space:]]*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
 	t
 	s/.*//
-' | head -1)
+' | grep -m1 . || true)
 [ -n "$WANT" ] || exit 0
 
 # La plus haute version installée, tous scopes confondus : le plugin peut être posé au scope
