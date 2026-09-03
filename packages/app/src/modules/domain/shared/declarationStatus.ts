@@ -1,5 +1,10 @@
-import type { DeclarationFsmStatus, DeclarationStatus } from "../types";
+import type {
+	CampaignDeadlines,
+	DeclarationFsmStatus,
+	DeclarationStatus,
+} from "../types";
 import { isDeadlinePassed } from "./campaign";
+import { getDeclarationProcessStepDeadline } from "./declarationProcessStep";
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
@@ -173,4 +178,33 @@ export function computeDeclarationStatus(
 		return "done";
 	}
 	return "in_progress";
+}
+
+// Second-pass projection composed on top of computeDeclarationStatus, rather than merged into
+// it, so that function's exhaustive FSM signature stays untouched. `year < currentYear` alone is
+// unsafe in Jan/Feb: the prior campaign's deadlines (e.g. decl2CseOpinionDeadline, Feb 1st) can
+// still be open, so closing also requires that row's own-year step deadline to have passed.
+export function applyDeclarationClosure(params: {
+	status: DeclarationStatus;
+	fsmStatus: DeclarationFsmStatus | null;
+	year: number;
+	currentYear: number;
+	deadlines: CampaignDeadlines;
+	now?: Date;
+}): DeclarationStatus {
+	const { status, fsmStatus, year, currentYear, deadlines, now } = params;
+	if (year >= currentYear || status === "done") {
+		return status;
+	}
+	const stepDeadline = getDeclarationProcessStepDeadline(fsmStatus, deadlines);
+	if (stepDeadline === null || !isDeadlinePassed(stepDeadline, now)) {
+		return status;
+	}
+	if (status === "in_progress") {
+		return "closed_incomplete";
+	}
+	if (status === "to_complete") {
+		return "closed_not_done";
+	}
+	return status;
 }
