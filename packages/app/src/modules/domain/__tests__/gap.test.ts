@@ -8,7 +8,6 @@ import {
 	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
-	gapDirection,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -16,6 +15,7 @@ import {
 	hasHighGap,
 	resolveGap,
 	resolveGapRatio,
+	significantGapDirection,
 } from "../shared/gap";
 
 describe("regulatory constants", () => {
@@ -349,46 +349,52 @@ describe("hasHighGap", () => {
 	});
 });
 
-describe("gapDirection", () => {
-	it("returns women when women are lower-paid in more rows", () => {
-		expect(
-			gapDirection([
-				{ women: "90", men: "100" },
-				{ women: "80", men: "100" },
-				{ women: "100", men: "95" },
-			]),
-		).toBe("women");
+describe("significantGapDirection", () => {
+	it("returns women when the only significant gap favors women, even split 2/2 by sub-threshold rows (#4034 defect A)", () => {
+		// One significant gap (20, men earn more => women disfavored) plus three sub-threshold
+		// gaps split evenly the other way — an unfiltered majority vote would tie to "balanced".
+		expect(significantGapDirection([20, 0.1, 0.1, -0.2])).toBe("women");
 	});
 
-	it("returns men when men are lower-paid in more rows", () => {
-		expect(
-			gapDirection([
-				{ women: "100", men: "90" },
-				{ women: "100", men: "80" },
-			]),
-		).toBe("men");
+	it("returns men when the only significant gap favors men, even outvoted 3-1 by sub-threshold rows (#4034 defect B)", () => {
+		// One significant gap (-20, women earn more => men disfavored) plus three sub-threshold
+		// gaps all pointing the other way — an unfiltered majority vote would flip this to "women".
+		expect(significantGapDirection([-20, 0.1, 0.2, 0.15])).toBe("men");
 	});
 
-	it("returns balanced on a tie", () => {
-		expect(
-			gapDirection([
-				{ women: "90", men: "100" },
-				{ women: "100", men: "90" },
-			]),
-		).toBe("balanced");
+	it("weighs cumulated magnitude rather than counting rows", () => {
+		// A single large women-disfavoring gap (30) outweighs two smaller men-disfavoring
+		// gaps (-6, -6) even though they are more numerous: 30 - 6 - 6 = 18 > 0.
+		expect(significantGapDirection([30, -6, -6])).toBe("women");
 	});
 
-	it("returns balanced for no data", () => {
-		expect(gapDirection([])).toBe("balanced");
+	it("returns balanced when no gap reaches the threshold", () => {
+		expect(significantGapDirection([1, -2, 3, -0.5])).toBe("balanced");
 	});
 
-	it("ignores rows with non-numeric values", () => {
-		expect(
-			gapDirection([
-				{ women: "abc", men: "100" },
-				{ women: "90", men: "100" },
-			]),
-		).toBe("women");
+	it("returns balanced for an empty list", () => {
+		expect(significantGapDirection([])).toBe("balanced");
+	});
+
+	it("ignores null gaps", () => {
+		expect(significantGapDirection([null, null, 20])).toBe("women");
+	});
+
+	it("never returns balanced when at least one gap is significant, even on an exact tie", () => {
+		expect(significantGapDirection([20, -20])).not.toBe("balanced");
+	});
+
+	it("breaks an exact tie on the largest-magnitude side, favoring men when it is negative", () => {
+		// Four significant gaps summing to exactly 0 (5 - 5 - 10 + 10), with the largest-magnitude
+		// value (-10) landing mid-array — exercises both the "new element wins" and "keeps the
+		// current largest" paths of the tie-break, and the "men" branch of its final sign check
+		// (the sibling test above only ever resolves to "women").
+		expect(significantGapDirection([5, -5, -10, 10])).toBe("men");
+	});
+
+	it("respects a custom threshold", () => {
+		expect(significantGapDirection([8], 10)).toBe("balanced");
+		expect(significantGapDirection([8], 5)).toBe("women");
 	});
 });
 

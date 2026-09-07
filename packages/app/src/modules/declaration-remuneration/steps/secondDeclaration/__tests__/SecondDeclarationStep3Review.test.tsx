@@ -279,6 +279,24 @@ describe("SecondDeclarationStep3Review", () => {
 		);
 	});
 
+	it("navigates to compliance path when gaps persist after submit, on a negative gap (#4034)", async () => {
+		// Same routing as the +50% case above, but with women earning more than men (-6%):
+		// the threshold is symmetric, so a negative gap must persist the compliance path too.
+		renderStep3({
+			cseOpinionRequired: true,
+			secondDeclarationCategories: [
+				makeCategory({ annualBaseWomen: "1060", annualBaseMen: "1000" }),
+			],
+		});
+
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
 	it("navigates to avis-cse when no gaps remain and a CSE opinion is due", async () => {
 		renderStep3({
 			cseOpinionRequired: true,
