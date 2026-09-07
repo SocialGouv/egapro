@@ -180,7 +180,10 @@ export function Step2Upload({
 		void finalizeAndRedirect();
 	}, [closeModal, finalizeAndRedirect]);
 
-	const remainingSlots = MAX_CSE_FILES - existingFiles.length;
+	// One file per required content type at most: a parcours with two avis to
+	// justify accepts two files, not the four of the absolute cap (#4299).
+	const fileQuota = Math.min(MAX_CSE_FILES, columns.length);
+	const remainingSlots = Math.max(0, fileQuota - existingFiles.length);
 
 	return (
 		<>
@@ -210,7 +213,7 @@ export function Step2Upload({
 						accept=".pdf"
 						acceptLabel="pdf"
 						allowedMimeTypes={["application/pdf"]}
-						disabled={isReadOnly || isUploadingFiles}
+						disabled={isReadOnly || isUploadingFiles || isComplete}
 						error={uploadError}
 						inputId="cse-file-upload"
 						maxFileCount={remainingSlots}

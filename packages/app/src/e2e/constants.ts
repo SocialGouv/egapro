@@ -11,3 +11,8 @@ export const TEST_GIP_WORKFORCE = 250;
 // Phone number of the test user. A ProConnect sign-up never carries one, and since #3952 the
 // funnel layout bounces to /mon-espace until it is known, so the suite seeds it as a baseline.
 export const TEST_USER_PHONE = "0122334455";
+
+// Email of the ProConnect test identity (FIA1V2). The login helper types it in and the
+// mail assertions filter Mailpit on it: two copies of the literal, and the day the
+// fixture account changes one of them keeps matching nothing while still passing.
+export const TEST_USER_EMAIL = "test@fia1.fr";

@@ -9,7 +9,7 @@ import {
 	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
-import { hasGapsAboveThreshold } from "~/modules/domain";
+import { computeGapHighFlags } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -36,6 +36,9 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
+		const { secondDeclGapHigh } = computeGapHighFlags(
+			declarationData.employeeCategories,
+		);
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
@@ -65,6 +68,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					secondDeclarationPathChoice={
 						declarationData.declaration.secondDeclarationPathChoice
 					}
+					secondDeclGapHigh={secondDeclGapHigh}
 					siren={declarationData.declaration.siren}
 					year={declarationData.declaration.year}
 				/>
@@ -87,18 +91,15 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const secondGap = opinions.find(
 			(opinion) => opinion.declarationNumber === 2 && opinion.type === "gap",
 		);
-		const initialCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "initial",
-		);
-		const correctionCategories = declarationData.employeeCategories.filter(
-			(category) => category.declarationType === "correction",
+		const { firstDeclGapHigh, secondDeclGapHigh } = computeGapHighFlags(
+			declarationData.employeeCategories,
 		);
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration,
 			firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
 			secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
-			firstDeclGapHigh: hasGapsAboveThreshold(initialCategories),
-			secondDeclGapHigh: hasGapsAboveThreshold(correctionCategories),
+			firstDeclGapHigh,
+			secondDeclGapHigh,
 		});
 		return (
 			<>
