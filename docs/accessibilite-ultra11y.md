@@ -396,6 +396,28 @@ seule chose qui reste comparable à la devDependency, et c'est lui que lit
 `5.42.1`). C'est la symétrie exacte du incident npm décrit plus bas — là un tag sans version
 npm, ici une version npm sans tag.
 
+**Recouper le SHA avant de le pinner, et ne pas se contenter du `package.json` amont.** Une
+suppression de tous les tags d'un dépôt tiers du jour au lendemain a la même signature qu'une
+compromission de compte suivie d'un nettoyage, ou qu'une réécriture d'historique. Dans ces deux
+cas, le commit qui porte *aujourd'hui* le message `chore(release): X.Y.Z` n'est pas
+nécessairement le code que `@vX.Y.Z` résolvait hier — et lire `"version"` dans son `package.json`
+ne discrimine rien, puisque ce champ est écrit par le commit lui-même. L'enjeu n'est pas
+théorique : cette Action reçoit `CLAUDE_CODE_OAUTH_TOKEN` dans `a11y-pages` et tourne dans
+`a11y-gate` avec `security-events: write` et `pull-requests: write`.
+
+La preuve indépendante est dans nos propres logs de CI : chaque run enregistre le SHA vers lequel
+le tag a résolu, et ces logs sont antérieurs à la suppression.
+
+```bash
+# Le SHA que le tag résolvait, lu dans un run ANTÉRIEUR à la disparition des tags
+gh run view --job <job-id-a11y> --log | grep "Download action repository 'maxgfr/ultra11y"
+```
+
+Fait pour la 5.42.1, sur deux runs indépendants du 02/09 portés par deux branches différentes :
+les deux enregistrent `(SHA:38d2a9ed15a94b2bd185c8bff7d56676af4ad77d)`, identique au SHA pinné.
+La provenance est donc recoupée, pas supposée. **Refaire ce recoupement à chaque bump**, tant que
+l'amont n'a pas republié de tags.
+
 La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
 refuse un désalignement. Ce n'est pas de l'hygiène — la suite Playwright ÉCRIT les instantanés
