@@ -10,7 +10,7 @@
 ### 2. L'analyse, par la GitHub Action
 
 `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée au
-**SHA** de son commit de release — `38d2a9ed # v5.42.1` — et non à un tag :
+SHA du commit de release avec un commentaire `# vX.Y.Z` (upstream n'a actuellement aucun tag) :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
@@ -374,27 +374,12 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-
-# Puis aligner les DEUX `uses: maxgfr/ultra11y@<sha> # v<version>` de a11y.yaml. Le SHA est
-# celui du commit `chore(release): <version>` de l'upstream, pas celui de `main` :
-gh api repos/maxgfr/ultra11y/commits --jq \
-  '.[] | select(.commit.message | startswith("chore(release): <version>")) | .sha'
-
-./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
+# puis aligner les DEUX `uses:` de .github/workflows/a11y.yaml sur le SHA de release :
+#   uses: maxgfr/ultra11y@<sha> # v<version>
+# Upstream n'a actuellement aucun tag (`git ls-remote --tags https://github.com/maxgfr/ultra11y.git`
+# est vide) : `@vX.Y.Z` ne résout pas. Le SHA est le commit `chore(release): X.Y.Z`.
+./scripts/a11y/check-ultra11y-version.sh      # refuse une demi-montée, y compris SHA ≠ version npm
 ```
-
-**Pourquoi un SHA et pas un tag.** Le 03/09/2026, l'upstream a supprimé la totalité de ses tags
-git — `git ls-remote --tags` en rend zéro, plus aucune release publiée, seule `main` subsiste
-— et `maxgfr/ultra11y@v5.42.1` a cessé de résoudre du jour au lendemain. La gate `a11y-gate`
-étant bloquante, toutes les PR ouvertes sont tombées ensemble sur `Unable to resolve action`,
-sans que rien n'ait bougé dans le dépôt. Le SHA est immuable : il survit à une suppression de
-tags comme à un retag. Le commentaire `# v<version>` qui le suit n'est pas décoratif — c'est la
-seule chose qui reste comparable à la devDependency, et c'est lui que lit
-`check-ultra11y-version.sh`, qui refuse désormais un pin par tag.
-
-À noter : la version npm, elle, n'a pas bougé (`npm view ultra11y dist-tags` rend toujours
-`5.42.1`). C'est la symétrie exacte du incident npm décrit plus bas — là un tag sans version
-npm, ici une version npm sans tag.
 
 La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
@@ -403,8 +388,8 @@ avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deu
 formats, et rien ne lève d'erreur.
 
 Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
-pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au tag
-d'`a11y.yaml` au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
+pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au pin
+d'`a11y.yaml` (`@vX.Y.Z` ou `# vX.Y.Z`) au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
 été écrit pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
 dépôt tournait en 5.40.1.
 

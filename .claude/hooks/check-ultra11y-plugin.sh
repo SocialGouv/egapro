@@ -39,15 +39,15 @@ MARKER="/tmp/.claude-ultra11y-plugin-$PPID"
 [ -f "$MARKER" ] && exit 0
 touch "$MARKER"
 
-# LA RÉFÉRENCE EST LE PIN DE L'ACTION, pas la devDependency : c'est le moteur, et la CI garantit
+# LA RÉFÉRENCE EST LE TAG DE L'ACTION, pas la devDependency : c'est le moteur, et la CI garantit
 # déjà que les trois versions du dépôt s'accordent. Une seule source à lire, donc.
-#
-# L'Action est pinnée par SHA depuis que l'upstream a supprimé tous ses tags (03/09/2026), donc
-# la version se lit dans le commentaire `# vX.Y.Z` qui suit le SHA — c'est ce qui le rend
-# load-bearing. Le `|| true` est indispensable : sous `pipefail`, un grep sans correspondance
-# tuerait le script AVANT le garde-fou de la ligne suivante, et le hook cesserait de comparer
-# quoi que ce soit, en silence.
-WANT=$(grep -oE '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@[0-9a-f]{40}[[:space:]]*#[[:space:]]*v[0-9]+\.[0-9]+\.[0-9]+' "$WORKFLOW" | sed -E 's/.*#[[:space:]]*v//' | head -1 || true)
+WANT=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$WORKFLOW" | sed -E '
+	s/.*@v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+	t
+	s/.*#[[:space:]]*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
+	t
+	s/.*//
+' | grep -m1 . || true)
 [ -n "$WANT" ] || exit 0
 
 # La plus haute version installée, tous scopes confondus : le plugin peut être posé au scope

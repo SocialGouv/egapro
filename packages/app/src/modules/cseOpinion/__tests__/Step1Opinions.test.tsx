@@ -239,6 +239,60 @@ describe("Step1Opinions", () => {
 		).toBeInTheDocument();
 	});
 
+	it("hides the second-declaration gap card when no remaining gap is ≥ 5%", () => {
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration
+				secondDeclGapHigh={false}
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
+			),
+		).toBeInTheDocument();
+		expect(screen.getAllByText(/Justification des écarts/).length).toBe(1);
+		expect(document.getElementById("first-decl-gap-yes")).not.toBeNull();
+		expect(document.getElementById("second-decl-gap-yes")).toBeNull();
+	});
+
+	it("hides the second-declaration gap card even on the justification path when no remaining gap is ≥ 5%", () => {
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration
+				secondDeclarationPathChoice="justify"
+				secondDeclGapHigh={false}
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(screen.getAllByText(/Justification des écarts/).length).toBe(1);
+		expect(document.getElementById("second-decl-gap-yes")).toBeNull();
+		expect(document.getElementById("second-decl-gap-favorable")).toBeNull();
+	});
+
+	it("keeps the second-declaration gap card when the remaining gap is ≥ 5%", () => {
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration
+				secondDeclGapHigh
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(screen.getAllByText(/Justification des écarts/).length).toBe(2);
+		expect(document.getElementById("second-decl-gap-yes")).not.toBeNull();
+	});
+
 	it("drops both declaration headings when there is only one declaration", () => {
 		render(
 			<Step1Opinions
@@ -413,6 +467,50 @@ describe("Step1Opinions", () => {
 			}),
 		);
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+	});
+
+	it("submits the second declaration without gap consultation when no remaining gap is ≥ 5%", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				hasSecondDeclaration
+				initialData={{
+					firstDeclAccuracyOpinion: "favorable",
+					firstDeclAccuracyDate: "2026-01-15",
+					firstDeclGapConsulted: false,
+					firstDeclGapOpinion: null,
+					firstDeclGapDate: null,
+					secondDeclAccuracyOpinion: "unfavorable",
+					secondDeclAccuracyDate: "2026-02-01",
+					secondDeclGapConsulted: true,
+					secondDeclGapOpinion: "favorable",
+					secondDeclGapDate: "2026-02-02",
+				}}
+				secondDeclGapHigh={false}
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+		expect(mockMutate).toHaveBeenCalledWith({
+			firstDeclaration: {
+				accuracyOpinion: "favorable",
+				accuracyDate: "2026-01-15",
+				gapConsulted: false,
+				gapOpinion: null,
+				gapDate: null,
+			},
+			secondDeclaration: {
+				accuracyOpinion: "unfavorable",
+				accuracyDate: "2026-02-01",
+				gapConsulted: false,
+				gapOpinion: null,
+				gapDate: null,
+			},
+		});
 	});
 
 	it("calls mutation without secondDeclaration when hasSecondDeclaration is false", async () => {
@@ -671,6 +769,64 @@ describe("Step1Opinions", () => {
 
 			expect(screen.getAllByLabelText("Favorable")[0]).toBeChecked();
 			expect(screen.getAllByLabelText("Défavorable")[1]).toBeChecked();
+		});
+
+		it("clears a stale draft justification for the second declaration when no remaining gap is ≥ 5%", async () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-01-15",
+						gapConsulted: false,
+						gapOpinion: null,
+						gapDate: null,
+					},
+					secondDeclaration: {
+						accuracyOpinion: "unfavorable",
+						accuracyDate: "2026-02-01",
+						gapConsulted: true,
+						gapOpinion: "favorable",
+						gapDate: "2026-02-02",
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+			});
+			const user = userEvent.setup();
+			const { container } = render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					hasSecondDeclaration
+					secondDeclGapHigh={false}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			const secondAccuracy = container.querySelector(
+				"#second-decl-accuracy-favorable",
+			) as HTMLElement;
+			await user.click(secondAccuracy);
+
+			expect(lastSecondDeclaration()?.gapConsulted).toBe(false);
+			expect(lastSecondDeclaration()?.gapOpinion).toBeNull();
+			expect(lastSecondDeclaration()?.gapDate).toBeNull();
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(mockMutate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					secondDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-02-01",
+						gapConsulted: false,
+						gapOpinion: null,
+						gapDate: null,
+					},
+				}),
+			);
 		});
 
 		it("shows loading state while draft is loading", () => {

@@ -199,14 +199,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
-        # SHA de release explicite, et NON un tag : le 03/09/2026 l'upstream a supprimé la
-        # totalité de ses tags git (`git ls-remote --tags` en rend zéro, plus aucune release ;
-        # seule `main` subsiste), et `maxgfr/ultra11y@v5.42.1` a cessé de résoudre du jour au
-        # lendemain — cette gate est bloquante, donc toutes les PR ouvertes sont tombées d'un
-        # coup sur `Unable to resolve action`. Un SHA ne peut pas être repris : il survit à la
-        # prochaine suppression de tags comme au prochain retag. Celui-ci EST la 5.42.1, c'est
-        # le commit `chore(release): 5.42.1` et son package.json porte cette version.
-        # Garder les deux usages de l'Action sur le même SHA.
+        # Pin the 5.42.1 release commit: the v5.42.1 tag is missing upstream.
         uses: maxgfr/ultra11y@38d2a9ed15a94b2bd185c8bff7d56676af4ad77d # v5.42.1
         with:
           working-directory: packages/app
@@ -477,7 +470,7 @@ jobs:
       # du code, ré-audit hors navigateur des instantanés, adjudication IA, rapport page par
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
-        # Même SHA de release que la gate PR ; ne jamais laisser les deux tiers diverger.
+        # Same 5.42.1 release commit as the PR gate; never let the two tiers drift.
         uses: maxgfr/ultra11y@38d2a9ed15a94b2bd185c8bff7d56676af4ad77d # v5.42.1
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier

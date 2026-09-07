@@ -19,6 +19,8 @@ type CseStep1Options = {
 	secondDeclGapConsulted?: boolean;
 	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
 	secondDeclGapConsultationImplicit?: boolean;
+	/** No remaining gap ≥ 5% on the second declaration: the whole justification card is absent. */
+	secondDeclGapCardHidden?: boolean;
 	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
 	opinion?: "favorable" | "unfavorable";
 };
@@ -49,6 +51,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
 		secondDeclGapConsultationImplicit = false,
+		secondDeclGapCardHidden = false,
 		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
@@ -68,14 +71,26 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
 				.click();
 			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-			await fillGapConsultation(
-				page,
-				"second-decl-gap",
-				secondDeclGapConsulted || secondDeclGapConsultationImplicit,
-				"2025-06-15",
-				opinion,
-				secondDeclGapConsultationImplicit,
-			);
+			if (secondDeclGapCardHidden) {
+				await expect(page.locator("#second-decl-gap-legend")).toHaveCount(0);
+			} else if (secondDeclGapConsultationImplicit) {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					true,
+					"2025-06-15",
+					opinion,
+					true,
+				);
+			} else {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					secondDeclGapConsulted,
+					"2025-06-15",
+					opinion,
+				);
+			}
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL("**/avis-cse/etape/2");

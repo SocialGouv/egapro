@@ -11,8 +11,8 @@ Deux surfaces, et deux seulement.
 **La revue** — l'agent `rgaa-auditor` lance le skill **`review-a11y`** sur le code sous changement et rend son verdict. C'est tout ce qu'il fait : le skill cadre l'audit sur le diff, lance le moteur, réfute les faux positifs, tranche les critères de jugement depuis la source et nomme les critères de rendu comme risques résiduels. Le skill vient du plugin déclaré dans `.claude/settings.json` ; il s'installe une fois avec `claude plugin install ultra11y@ultra11y`. Le plugin apporte aussi un hook `PreToolUse` qui arrête un `git commit` / `git push` / `gh pr create` porteur de non-conformités — coupe-circuits `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une session), `"hook": { "failOn": "off" }` dans `.ultra11yrc.json` (le dépôt).
 
 **L'analyse** — `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y,
-épinglée au **SHA** de son commit de release (`38d2a9ed # v5.42.1`) et non à un tag — l'upstream
-a supprimé tous les siens le 03/09/2026, voir la doc :
+épinglée au SHA du commit de release (`uses: maxgfr/ultra11y@<sha> # vX.Y.Z` ; upstream n'a
+actuellement aucun tag) :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
@@ -31,7 +31,7 @@ numéro unique mais quatre copies qui doivent s'accorder :
 
 | Où | Quoi | Tenu par |
 |---|---|---|
-| `a11y.yaml`, `uses:` ×2 | le moteur de la CI (gate PR + `a11y-pages`), pinné par SHA + commentaire `# vX` | `a11y-version-coherence` (ci.yaml) |
+| `a11y.yaml`, `uses:` ×2 | le moteur de la CI (gate PR + `a11y-pages`) | `a11y-version-coherence` (ci.yaml) |
 | `packages/app/package.json` | le binaire et le plugin Playwright qui **écrivent** les instantanés | idem |
 | le plugin Claude Code | le skill `review-a11y`, donc l'agent `rgaa-auditor` | hook `check-ultra11y-plugin.sh` |
 
