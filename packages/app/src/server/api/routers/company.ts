@@ -5,6 +5,7 @@ import {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
 	computeRepresentationDeclarationStatus,
+	getCurrentDate,
 	getCurrentYear,
 	getObligationWorkforce,
 	getReferenceYearFor,
@@ -328,6 +329,8 @@ export const companyRouter = createTRPCRouter({
 							year: d.year,
 							currentYear: year,
 							deadlines,
+							// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
+							now: getCurrentDate(),
 						})
 					: projectedStatus;
 				return {

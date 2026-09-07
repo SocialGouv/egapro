@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getCurrentDate, getCurrentYear } from "../shared/campaign";
 import {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
@@ -595,5 +596,61 @@ describe("applyDeclarationClosure", () => {
 				now: PAST_DEADLINE_NOW,
 			}),
 		).toBe("closed_incomplete");
+	});
+
+	// The two time inputs come from the clock helpers here rather than from
+	// fixtures: the call site feeds them together, and the bug was that they
+	// disagreed under a pinned campaign year.
+	describe("under a pinned campaign year", () => {
+		const PINNED_YEAR = 2029;
+		const PINNED_ROW_YEAR = 2028;
+		const PINNED_DEADLINES: CampaignDeadlines = {
+			...DEADLINES,
+			decl1ModificationDeadline: new Date(PINNED_ROW_YEAR, 5, 1),
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+			// A wall clock BEFORE the row's deadline, so the two clocks can only
+			// agree if the deadline check honours the override too.
+			vi.setSystemTime(new Date(2026, 0, 15));
+			(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+				PINNED_YEAR;
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+			delete (globalThis as { __egaproCampaignYear?: number })
+				.__egaproCampaignYear;
+		});
+
+		it("closes a past-year row when both inputs come from the campaign clock", () => {
+			expect(
+				applyDeclarationClosure({
+					status: "to_complete",
+					fsmStatus: "draft",
+					year: PINNED_ROW_YEAR,
+					currentYear: getCurrentYear(),
+					deadlines: PINNED_DEADLINES,
+					now: getCurrentDate(),
+				}),
+			).toBe("closed_not_done");
+		});
+
+		it("contradicts itself when the deadline check falls back on the wall clock", () => {
+			// Regression guard, not an endorsement: this is the state the call site
+			// was in. The year guard calls the row past while the wall clock leaves
+			// its deadline in the future, so the row renders 'En cours' where
+			// production renders 'Clôturée - non effectuée'.
+			expect(
+				applyDeclarationClosure({
+					status: "to_complete",
+					fsmStatus: "draft",
+					year: PINNED_ROW_YEAR,
+					currentYear: getCurrentYear(),
+					deadlines: PINNED_DEADLINES,
+				}),
+			).toBe("to_complete");
+		});
 	});
 });

@@ -2,6 +2,7 @@
 
 // Campaign
 export {
+	getCurrentDate,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDeclarationReferencePeriod,

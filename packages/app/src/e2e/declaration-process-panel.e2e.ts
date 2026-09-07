@@ -512,8 +512,8 @@ test.describe("Mon espace — closure badges of the previous-years table", () =>
 		}
 		// YEAR_CLOSED_NOT_DONE deliberately gets no app_campaign_deadline row: its closure has to
 		// fall back on getDefaultCampaignDeadlines(), whose modification deadline for that year is
-		// already behind the wall clock. The other two closed-side years carry an explicit row, so
-		// the DB branch of the resolution is exercised too.
+		// already behind the pinned campaign clock. The other two closed-side years carry an
+		// explicit row, so the DB branch of the resolution is exercised too.
 		await setCampaignDeadlines(YEAR_CLOSED_INCOMPLETE, REAL_PAST_DEADLINES);
 		await setCampaignDeadlines(YEAR_STILL_OPEN, OPEN_CSE_OPINION_DEADLINES);
 		// The pinned year gets the same expired deadlines as the closed rows, so the "current year
