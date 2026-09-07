@@ -16,7 +16,14 @@ describe("importGipCsvToDb — CSE reconciliation (real Postgres, #4184)", () =>
 	const SIREN_REMOVED = "822222222";
 	const SIREN_STAYS = "833333333";
 	const SIREN_COMPLETED = "844444444";
-	const ALL_SIRENS = [SIREN_DROPS, SIREN_REMOVED, SIREN_STAYS, SIREN_COMPLETED];
+	const DEMO_SIREN = "998900099";
+	const ALL_SIRENS = [
+		SIREN_DROPS,
+		SIREN_REMOVED,
+		SIREN_STAYS,
+		SIREN_COMPLETED,
+		DEMO_SIREN,
+	];
 	const USER_ID = "cse-reconciliation-user";
 	const DECL_IDS = [
 		"cse-recon-drops",
@@ -87,7 +94,8 @@ describe("importGipCsvToDb — CSE reconciliation (real Postgres, #4184)", () =>
 				(${SIREN_DROPS},     'Entreprise Effectif En Baisse', 110, true),
 				(${SIREN_REMOVED},   'Entreprise Retiree Du Fichier', 130, true),
 				(${SIREN_STAYS},     'Entreprise Temoin',             150, true),
-				(${SIREN_COMPLETED}, 'Entreprise Deja Terminee',      120, true)
+				(${SIREN_COMPLETED}, 'Entreprise Deja Terminee',      120, true),
+				(${DEMO_SIREN},      'Entreprise Observatoire Demo',   60, false)
 		`;
 		await sql`
 			INSERT INTO app_gip_mds_data (siren, year, workforce_ema)
@@ -95,7 +103,8 @@ describe("importGipCsvToDb — CSE reconciliation (real Postgres, #4184)", () =>
 				(${SIREN_DROPS},     ${YEAR}, 110.00),
 				(${SIREN_REMOVED},   ${YEAR}, 130.00),
 				(${SIREN_STAYS},     ${YEAR}, 150.00),
-				(${SIREN_COMPLETED}, ${YEAR}, 120.00)
+				(${SIREN_COMPLETED}, ${YEAR}, 120.00),
+				(${DEMO_SIREN},      ${YEAR},  60.00)
 		`;
 		await sql`
 			INSERT INTO app_declaration (id, siren, year, declarant_id, status, cse_required, created_at, updated_at)
@@ -126,6 +135,29 @@ describe("importGipCsvToDb — CSE reconciliation (real Postgres, #4184)", () =>
 		expect(row.status).toBe("demarche_completed");
 		expect(row.cse_required).toBe(false);
 		expect(row.history_count).toBe(1);
+	});
+
+	it("preserves the Observatory demo workforce when refreshing a year", async () => {
+		await importGipCsvToDb(db, csvAfterDrop);
+
+		const [row] = await sql`
+			SELECT workforce_ema FROM app_gip_mds_data
+			WHERE siren = ${DEMO_SIREN} AND year = ${YEAR}
+		`;
+		expect(Number(row?.workforce_ema)).toBe(60);
+	});
+
+	it("uses the upstream workforce when it contains a reserved demo SIREN", async () => {
+		await importGipCsvToDb(
+			db,
+			buildCsv([{ siren: DEMO_SIREN, workforce: "75,00" }]),
+		);
+
+		const [row] = await sql`
+			SELECT workforce_ema FROM app_gip_mds_data
+			WHERE siren = ${DEMO_SIREN} AND year = ${YEAR}
+		`;
+		expect(Number(row?.workforce_ema)).toBe(75);
 	});
 
 	it("leaves a démarche that still owes its opinion untouched", async () => {
