@@ -9,8 +9,8 @@
 
 ### 2. L'analyse, par la GitHub Action
 
-`.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée à un
-tag de version explicite :
+`.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée au
+**SHA** de son commit de release — `38d2a9ed # v5.42.1` — et non à un tag :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
@@ -374,9 +374,27 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-# puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
+
+# Puis aligner les DEUX `uses: maxgfr/ultra11y@<sha> # v<version>` de a11y.yaml. Le SHA est
+# celui du commit `chore(release): <version>` de l'upstream, pas celui de `main` :
+gh api repos/maxgfr/ultra11y/commits --jq \
+  '.[] | select(.commit.message | startswith("chore(release): <version>")) | .sha'
+
 ./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
 ```
+
+**Pourquoi un SHA et pas un tag.** Le 03/09/2026, l'upstream a supprimé la totalité de ses tags
+git — `git ls-remote --tags` en rend zéro, plus aucune release publiée, seule `main` subsiste
+— et `maxgfr/ultra11y@v5.42.1` a cessé de résoudre du jour au lendemain. La gate `a11y-gate`
+étant bloquante, toutes les PR ouvertes sont tombées ensemble sur `Unable to resolve action`,
+sans que rien n'ait bougé dans le dépôt. Le SHA est immuable : il survit à une suppression de
+tags comme à un retag. Le commentaire `# v<version>` qui le suit n'est pas décoratif — c'est la
+seule chose qui reste comparable à la devDependency, et c'est lui que lit
+`check-ultra11y-version.sh`, qui refuse désormais un pin par tag.
+
+À noter : la version npm, elle, n'a pas bougé (`npm view ultra11y dist-tags` rend toujours
+`5.42.1`). C'est la symétrie exacte du incident npm décrit plus bas — là un tag sans version
+npm, ici une version npm sans tag.
 
 La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
 consigne : `scripts/a11y/check-ultra11y-version.sh` tourne dans `ci.yaml` sur chaque push et
