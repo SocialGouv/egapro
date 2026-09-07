@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import styles from "./CompanyHeader.module.scss";
@@ -64,9 +65,8 @@ export function CompanyHeader({
 	}
 	if (workforceEma !== null) {
 		activity.push({
-			// The public DTO joins this value to the declaration on its stored year.
-			// Keep that year visible so seeded data is not presented as another vintage.
-			label: `Effectif annuel moyen en ${year}`,
+			// The headcount reported for a campaign is the previous civil year's.
+			label: `Effectif annuel moyen en ${getReferenceYearFor(year)}`,
 			value: formatCount(workforceEma),
 		});
 	}
