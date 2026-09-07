@@ -53,6 +53,8 @@ export function Step1Opinions({
 	secondDeclarationPathChoice,
 }: Props) {
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
+	const isFirstDeclarationJustification =
+		firstDeclarationPathChoice === "justify";
 	const showSecondDeclarationGap = hasSecondDeclaration && secondDeclGapHigh;
 	const isSecondDeclarationJustification =
 		showSecondDeclarationGap && secondDeclarationPathChoice === "justify";
@@ -67,10 +69,12 @@ export function Step1Opinions({
 				hasSecondDeclaration,
 				showSecondDeclarationGap,
 				isSecondDeclarationJustification,
+				isFirstDeclarationJustification,
 			),
 		[
 			hasSecondDeclaration,
 			initialData,
+			isFirstDeclarationJustification,
 			isSecondDeclarationJustification,
 			showSecondDeclarationGap,
 		],
@@ -96,6 +100,7 @@ export function Step1Opinions({
 			hasSecondDeclaration,
 			showSecondDeclarationGap,
 			isSecondDeclarationJustification,
+			isFirstDeclarationJustification,
 		);
 	}, [
 		isLoadingDraft,
@@ -103,6 +108,7 @@ export function Step1Opinions({
 		form,
 		hasSecondDeclaration,
 		showSecondDeclarationGap,
+		isFirstDeclarationJustification,
 		isSecondDeclarationJustification,
 	]);
 
@@ -124,6 +130,7 @@ export function Step1Opinions({
 			data,
 			showSecondDeclarationGap,
 			isSecondDeclarationJustification,
+			isFirstDeclarationJustification,
 		);
 		if (isGapConsultationIncomplete(submittedData.firstDeclaration)) {
 			form.setError("firstDeclaration.gapOpinion", {
@@ -238,7 +245,9 @@ export function Step1Opinions({
 						name="firstDeclaration.gapConsulted"
 						render={({ field }) => (
 							<GapConsultationCard
-								consulted={field.value ?? null}
+								consulted={
+									isFirstDeclarationJustification ? true : (field.value ?? null)
+								}
 								date={firstDeclGapDate ?? ""}
 								id="first-decl-gap"
 								onConsultedChange={(v) => {
@@ -255,6 +264,7 @@ export function Step1Opinions({
 								}}
 								opinion={firstDeclGapOpinion ?? null}
 								readOnly={isReadOnly}
+								showConsultationQuestion={!isFirstDeclarationJustification}
 							/>
 						)}
 					/>

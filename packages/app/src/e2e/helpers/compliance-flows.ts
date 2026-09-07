@@ -17,6 +17,8 @@ type CseStep1Options = {
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
 	secondDeclGapConsulted?: boolean;
+	/** The first-round justification choice already establishes consultation, so the yes/no radios are absent. */
+	firstDeclGapConsultationImplicit?: boolean;
 	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
 	secondDeclGapConsultationImplicit?: boolean;
 	/** No remaining gap ≥ 5% on the second declaration: the whole justification card is absent. */
@@ -34,6 +36,7 @@ async function fillGapConsultation(
 	opinion: "favorable" | "unfavorable" = "favorable",
 	consultationIsImplicit = false,
 ) {
+	await expect(page.locator(`#${idPrefix}-legend`)).toBeVisible();
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
@@ -50,6 +53,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		hasSecondDeclaration = false,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
+		firstDeclGapConsultationImplicit = false,
 		secondDeclGapConsultationImplicit = false,
 		secondDeclGapCardHidden = false,
 		opinion = "favorable",
@@ -62,9 +66,10 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		await fillGapConsultation(
 			page,
 			"first-decl-gap",
-			firstDeclGapConsulted,
+			firstDeclGapConsulted || firstDeclGapConsultationImplicit,
 			"2025-03-15",
 			opinion,
+			firstDeclGapConsultationImplicit,
 		);
 		if (hasSecondDeclaration) {
 			await page

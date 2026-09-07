@@ -62,6 +62,19 @@ describe("buildOpinionsFormValues", () => {
 		});
 	});
 
+	it("forces gapConsulted true for the first-round justification path", () => {
+		const values = buildOpinionsFormValues(
+			{ ...initialData, firstDeclGapConsulted: false },
+			false,
+			false,
+			false,
+			true,
+		);
+
+		expect(values.firstDeclaration.gapConsulted).toBe(true);
+		expect(values.firstDeclaration.gapOpinion).toBe("favorable");
+	});
+
 	it("omits secondDeclaration when there is no second declaration", () => {
 		const values = buildOpinionsFormValues(initialData, false, false);
 
@@ -110,6 +123,13 @@ describe("normalizeSubmittedOpinions", () => {
 		).toBe(true);
 	});
 
+	it("forces gapConsulted true on the first-round justification path", () => {
+		expect(
+			normalizeSubmittedOpinions(submitted, true, false, true).firstDeclaration
+				.gapConsulted,
+		).toBe(true);
+	});
+
 	it("leaves gap fields unchanged when a remaining gap is ≥ 5% outside the justification path", () => {
 		expect(
 			normalizeSubmittedOpinions(submitted, true, false).secondDeclaration,
@@ -140,6 +160,41 @@ describe("isGapConsultationIncomplete", () => {
 });
 
 describe("hydrateOpinionsForm", () => {
+	it("ignores a stale first-declaration draft consultation on the justification path", () => {
+		const setValue = vi.fn() as unknown as Parameters<
+			typeof hydrateOpinionsForm
+		>[0];
+		hydrateOpinionsForm(
+			setValue,
+			{
+				firstDeclaration: {
+					accuracyOpinion: "favorable",
+					accuracyDate: "2026-01-15",
+					gapConsulted: false,
+					gapOpinion: "favorable",
+					gapDate: "2026-01-20",
+				},
+			},
+			false,
+			false,
+			false,
+			true,
+		);
+
+		expect(setValue).toHaveBeenCalledWith(
+			"firstDeclaration.gapConsulted",
+			true,
+		);
+		expect(setValue).not.toHaveBeenCalledWith(
+			"firstDeclaration.gapConsulted",
+			false,
+		);
+		expect(setValue).toHaveBeenCalledWith(
+			"firstDeclaration.gapOpinion",
+			"favorable",
+		);
+	});
+
 	it("clears a stale second-declaration draft when no remaining gap is ≥ 5%", () => {
 		const setValue = vi.fn() as unknown as Parameters<
 			typeof hydrateOpinionsForm

@@ -17,12 +17,15 @@ export function buildOpinionsFormValues(
 	hasSecondDeclaration: boolean,
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification = false,
+	isFirstDeclarationJustification = false,
 ) {
 	return {
 		firstDeclaration: {
 			accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
 			accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-			gapConsulted: initialData?.firstDeclGapConsulted ?? undefined,
+			gapConsulted: isFirstDeclarationJustification
+				? true
+				: (initialData?.firstDeclGapConsulted ?? undefined),
 			gapOpinion: initialData?.firstDeclGapOpinion ?? null,
 			gapDate: initialData?.firstDeclGapDate ?? null,
 		},
@@ -48,27 +51,34 @@ export function normalizeSubmittedOpinions(
 	data: OpinionsInput,
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification: boolean,
+	isFirstDeclarationJustification = false,
 ): OpinionsInput {
-	if (!data.secondDeclaration) return data;
+	const normalized = isFirstDeclarationJustification
+		? {
+				...data,
+				firstDeclaration: { ...data.firstDeclaration, gapConsulted: true },
+			}
+		: data;
+	if (!normalized.secondDeclaration) return normalized;
 	if (!showSecondDeclarationGap) {
 		return {
-			...data,
+			...normalized,
 			secondDeclaration: {
-				...data.secondDeclaration,
+				...normalized.secondDeclaration,
 				...CLEARED_GAP_FIELDS,
 			},
 		};
 	}
 	if (isSecondDeclarationJustification) {
 		return {
-			...data,
+			...normalized,
 			secondDeclaration: {
-				...data.secondDeclaration,
+				...normalized.secondDeclaration,
 				gapConsulted: true,
 			},
 		};
 	}
-	return data;
+	return normalized;
 }
 
 export function isGapConsultationIncomplete(
@@ -119,14 +129,18 @@ export function hydrateOpinionsForm(
 	hasSecondDeclaration: boolean,
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification: boolean,
+	isFirstDeclarationJustification = false,
 ) {
+	if (isFirstDeclarationJustification) {
+		setValue("firstDeclaration.gapConsulted", true);
+	}
 	if (draft.firstDeclaration) {
 		applyDeclarationDraft(
 			setValue,
 			"firstDeclaration",
 			draft.firstDeclaration,
 			{
-				applyGapConsulted: true,
+				applyGapConsulted: !isFirstDeclarationJustification,
 				applyGapDetails: true,
 			},
 		);
