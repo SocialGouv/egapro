@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, inArray, like } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import { CSV_TO_SCHEMA_MAP } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import type { DB } from "~/server/db";
@@ -11,7 +11,6 @@ import { suitAwareFetch } from "./suitClient";
 import { fetchCompanyBySiren } from "./weez";
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const OBSERVATORY_DEMO_SIREN_PATTERN = "9989%";
 
 // The CSV is externally supplied: a crafted header could carry ANSI escape
 // sequences that mislead whoever reads the logs. Same shape as the upload audit.
@@ -276,18 +275,7 @@ export async function importGipCsvToDb(
 				| "gipPublicationDateSkipReason"
 			>
 		> => {
-			// Observatory demo companies do not exist in the upstream snapshot. Keep
-			// their seeded rows across the full-year replacement, unless the incoming
-			// file explicitly provides the same SIREN and year.
-			const demoRows = await tx
-				.select()
-				.from(gipMdsData)
-				.where(
-					and(
-						eq(gipMdsData.year, year),
-						like(gipMdsData.siren, OBSERVATORY_DEMO_SIREN_PATTERN),
-					),
-				);
+			// Delete existing data for this year before inserting
 			await tx.delete(gipMdsData).where(eq(gipMdsData.year, year));
 
 			// Insert all rows with metadata
@@ -300,14 +288,6 @@ export async function importGipCsvToDb(
 					siren: row.siren ?? "",
 				})),
 			);
-			if (demoRows.length > 0) {
-				await tx
-					.insert(gipMdsData)
-					.values(demoRows)
-					.onConflictDoNothing({
-						target: [gipMdsData.siren, gipMdsData.year],
-					});
-			}
 
 			// Record the SUIT `horodatage` as the GIP publication date — but only
 			// on an EXISTING `campaign_deadline` row. We never synthesise a row
