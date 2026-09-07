@@ -259,7 +259,10 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-		await fillCseStep1(page, { hasSecondDeclaration: true });
+		await fillCseStep1(page, {
+			hasSecondDeclaration: true,
+			secondDeclGapCardHidden: true,
+		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
