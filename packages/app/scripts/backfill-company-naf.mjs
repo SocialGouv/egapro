@@ -12,14 +12,36 @@
  *
  * Idempotent: a row whose stored pair already equals the registry pair is left
  * untouched (no write, no `updated_at` bump), so a second run reports 0 updated.
- * The optimistic lock on `updated_at` drops any row a login refreshed while the
- * job was running — that write already carries the corrected pair.
+ * The optimistic lock compares `naf_code`/`naf_label` themselves rather than
+ * `updated_at`: `timestamp with time zone` keeps microsecond precision, but
+ * postgres.js round-trips it through a JS `Date` (millisecond precision), so a
+ * row stamped by raw SQL `NOW()` — as `backfill-company-region-department.mjs`
+ * does on every deploy — could never satisfy an `updated_at` compare-and-swap.
+ * Comparing the two columns actually being rewritten keeps the same anti-clobber
+ * semantics (a row a login refreshed mid-run no longer matches its selected
+ * pair, so the write is dropped) without that precision trap.
+ *
+ * A registry read that fails (non-2xx, timeout, DB error) is counted and logged
+ * separately from a legitimate skip — a Weez outage must not look like a clean
+ * "0 skipped" pass. It fails the run's exit code only when failures are
+ * SYSTEMIC, see FAILURE_RATIO_EXIT_THRESHOLD.
  *
  * Run:
  *   EGAPRO_WEEZ_API_URL=... DATABASE_URL=... pnpm backfill:company-naf
  *   pnpm backfill:company-naf -- --dry-run
  */
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import postgres from "postgres";
+
+/** @typedef {import("postgres").Sql} Sql */
+/**
+ * @typedef {Object} CompanyNafRow
+ * @property {string} siren
+ * @property {string | null} naf_code
+ * @property {string | null} naf_label
+ */
 
 const WEEZ_CONCURRENCY = 10;
 const DELAY_BETWEEN_BATCHES_MS = 100;
@@ -27,18 +49,23 @@ const DELAY_BETWEEN_BATCHES_MS = 100;
 // Column width of `companies.naf_label`; the registry is not bound by it.
 const NAF_LABEL_MAX_LENGTH = 255;
 
-const dryRun = process.argv.includes("--dry-run");
+// Share of attempted rows that must fail before the run is called broken.
+//
+// The threshold exists because of where this script runs: a Helm
+// `post-install,post-upgrade` hook with `backoffLimit: 3` and `restartPolicy:
+// OnFailure`, over the WHOLE table, on EVERY deploy. Exiting non-zero on a
+// single failed row would restart the entire sweep — up to four full passes
+// over the registry precisely when the registry is the thing misbehaving — and
+// a hook that exhausts its backoff fails the release. That would couple the
+// availability of a deploy to the availability of a third-party API, for a
+// data-repair task nothing functionally depends on.
+//
+// A registry outage does not fail one row in a thousand, it fails nearly all of
+// them; one transient timeout is noise. Every failure is logged either way, so
+// nothing is hidden by tolerating a few.
+const FAILURE_RATIO_EXIT_THRESHOLD = 0.1;
 
-const SCHEMA_WAIT_SECONDS = Number(
-	process.env.COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS ?? "0",
-);
-if (!Number.isFinite(SCHEMA_WAIT_SECONDS) || SCHEMA_WAIT_SECONDS < 0) {
-	throw new Error(
-		"COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS must be a positive number",
-	);
-}
-
-function getDatabaseUrl() {
+export function getDatabaseUrl() {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
 	const database = process.env.POSTGRES_DB ?? process.env.PGDATABASE;
@@ -53,15 +80,6 @@ function getDatabaseUrl() {
 	}
 	return `postgresql://${encodeURIComponent(user)}${password ? `:${encodeURIComponent(password)}` : ""}@${host}:${port}/${database}${sslmode ? `?sslmode=${sslmode}` : ""}`;
 }
-
-const databaseUrl = getDatabaseUrl();
-
-const weezApiUrl = process.env.EGAPRO_WEEZ_API_URL?.replace(/\/$/, "");
-if (!weezApiUrl) {
-	throw new Error("EGAPRO_WEEZ_API_URL must be set");
-}
-
-const sql = postgres(databaseUrl, { max: 1 });
 
 /**
  * Reads the rév. 2 activity pair. Returns null when the registry has nothing to
@@ -78,8 +96,11 @@ const sql = postgres(databaseUrl, { max: 1 });
  * script cannot resolve. **If the diffusibility rule ever gains a status, change
  * it here too** — the two must not drift, or this job re-exposes the activity of
  * companies the app deliberately masks.
+ *
+ * @param {string} weezApiUrl
+ * @param {string} siren
  */
-async function fetchNaf(siren) {
+export async function fetchNaf(weezApiUrl, siren) {
 	const url = new URL(`${weezApiUrl}/public/v3/unitelegale/findbysiren`);
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
@@ -111,7 +132,8 @@ async function fetchNaf(siren) {
 	};
 }
 
-async function assertSchema() {
+/** @param {Sql} sql */
+export async function assertSchema(sql) {
 	const rows = await sql`
 		SELECT column_name
 		FROM information_schema.columns
@@ -124,11 +146,15 @@ async function assertSchema() {
 	}
 }
 
-async function waitForSchema() {
-	const deadline = Date.now() + SCHEMA_WAIT_SECONDS * 1000;
+/**
+ * @param {Sql} sql
+ * @param {number} waitSeconds
+ */
+export async function waitForSchema(sql, waitSeconds) {
+	const deadline = Date.now() + waitSeconds * 1000;
 	for (;;) {
 		try {
-			await assertSchema();
+			await assertSchema(sql);
 			return;
 		} catch (error) {
 			if (Date.now() >= deadline) throw error;
@@ -138,72 +164,226 @@ async function waitForSchema() {
 	}
 }
 
-async function main() {
-	await waitForSchema();
+/**
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {CompanyNafRow} args.row
+ * @param {{ nafCode: string, nafLabel: string | null }} args.registry
+ * @param {boolean} args.dryRun
+ * @returns {Promise<"updated" | "unchanged" | "skipped">}
+ */
+export async function applyRegistryPair({ sql, row, registry, dryRun }) {
+	if (
+		registry.nafCode === row.naf_code &&
+		registry.nafLabel === row.naf_label
+	) {
+		return "unchanged";
+	}
 
+	if (dryRun) return "updated";
+
+	const changed = await sql`
+		UPDATE app_company
+		SET naf_code = ${registry.nafCode},
+			naf_label = ${registry.nafLabel},
+			updated_at = NOW()
+		WHERE siren = ${row.siren}
+			AND naf_code IS NOT DISTINCT FROM ${row.naf_code}
+			AND naf_label IS NOT DISTINCT FROM ${row.naf_label}
+		RETURNING siren
+	`;
+	return changed.length === 0 ? "skipped" : "updated";
+}
+
+/**
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {string} args.weezApiUrl
+ * @param {CompanyNafRow} args.row
+ * @param {boolean} args.dryRun
+ * @returns {Promise<"updated" | "unchanged" | "skipped">}
+ */
+async function processRow({ sql, weezApiUrl, row, dryRun }) {
+	const registry = await fetchNaf(weezApiUrl, row.siren);
+	if (!registry) return "skipped";
+	return applyRegistryPair({ sql, row, registry, dryRun });
+}
+
+/**
+ * @typedef {Object} RowOutcome
+ * @property {string} siren
+ * @property {"updated" | "unchanged" | "skipped" | "failed"} outcome
+ * @property {string} [cause]
+ */
+
+/**
+ * Runs `processRow` and never rejects: a registry or DB failure is captured
+ * as a `"failed"` outcome carrying its cause, so the caller can tally it
+ * without indexing back into the batch to recover the siren.
+ *
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {string} args.weezApiUrl
+ * @param {CompanyNafRow} args.row
+ * @param {boolean} args.dryRun
+ * @returns {Promise<RowOutcome>}
+ */
+async function processRowSafely({ sql, weezApiUrl, row, dryRun }) {
+	try {
+		const outcome = await processRow({ sql, weezApiUrl, row, dryRun });
+		return { siren: row.siren, outcome };
+	} catch (error) {
+		return {
+			siren: row.siren,
+			outcome: "failed",
+			cause: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
+/**
+ * @typedef {Object} BackfillCounters
+ * @property {number} updated
+ * @property {number} unchanged
+ * @property {number} skipped
+ * @property {number} failed
+ * @property {{siren: string, cause: string}[]} errors
+ */
+
+/**
+ * @param {Object} args
+ * @param {Sql} args.sql
+ * @param {string} args.weezApiUrl
+ * @param {boolean} [args.dryRun]
+ * @returns {Promise<BackfillCounters>}
+ */
+export async function runBackfillCompanyNaf({
+	sql,
+	weezApiUrl,
+	dryRun = false,
+}) {
+	/** @type {CompanyNafRow[]} */
 	const rows = await sql`
-		SELECT siren, naf_code, naf_label, updated_at
+		SELECT siren, naf_code, naf_label
 		FROM app_company
 		WHERE naf_code IS NOT NULL
 	`;
 	console.log(`${rows.length} companies with a NAF code to re-read`);
 
-	let updated = 0;
-	let unchanged = 0;
-	let skipped = 0;
+	/** @type {BackfillCounters} */
+	const counters = {
+		updated: 0,
+		unchanged: 0,
+		skipped: 0,
+		failed: 0,
+		errors: [],
+	};
 
 	for (let i = 0; i < rows.length; i += WEEZ_CONCURRENCY) {
 		const batch = rows.slice(i, i + WEEZ_CONCURRENCY);
-		const settled = await Promise.allSettled(
-			batch.map(async (row) => {
-				const { siren, updated_at: selectedUpdatedAt } = row;
-				const registry = await fetchNaf(siren);
-				if (!registry) return "skipped";
-
-				if (
-					registry.nafCode === row.naf_code &&
-					registry.nafLabel === row.naf_label
-				) {
-					return "unchanged";
-				}
-
-				if (dryRun) return "updated";
-
-				const changed = await sql`
-					UPDATE app_company
-					SET naf_code = ${registry.nafCode},
-						naf_label = ${registry.nafLabel},
-						updated_at = NOW()
-					WHERE siren = ${siren}
-						AND updated_at IS NOT DISTINCT FROM ${selectedUpdatedAt}
-					RETURNING siren
-				`;
-				return changed.length === 0 ? "skipped" : "updated";
-			}),
+		const results = await Promise.all(
+			batch.map((row) => processRowSafely({ sql, weezApiUrl, row, dryRun })),
 		);
 
-		for (const result of settled) {
-			if (result.status !== "fulfilled") {
-				skipped++;
-			} else if (result.value === "updated") {
-				updated++;
-			} else if (result.value === "unchanged") {
-				unchanged++;
+		for (const result of results) {
+			if (result.outcome === "failed") {
+				counters.failed++;
+				counters.errors.push({
+					siren: result.siren,
+					cause: result.cause ?? "",
+				});
+			} else if (result.outcome === "updated") {
+				counters.updated++;
+			} else if (result.outcome === "unchanged") {
+				counters.unchanged++;
 			} else {
-				skipped++;
+				counters.skipped++;
 			}
 		}
 
 		await new Promise((r) => setTimeout(r, DELAY_BETWEEN_BATCHES_MS));
 	}
 
-	console.log(
-		`${dryRun ? "[dry-run] " : ""}Backfill done: ${updated} updated, ${unchanged} already aligned, ${skipped} skipped`,
-	);
+	return counters;
 }
 
-try {
-	await main();
-} finally {
-	await sql.end();
+/**
+ * @param {BackfillCounters} counters
+ * @param {boolean} dryRun
+ */
+export function formatReport(counters, dryRun) {
+	const lines = [
+		`${dryRun ? "[dry-run] " : ""}Backfill done: ${counters.updated} updated, ${counters.unchanged} already aligned, ${counters.skipped} skipped, ${counters.failed} failed`,
+	];
+	for (const error of counters.errors) {
+		lines.push(`  siren=${error.siren} cause=${error.cause}`);
+	}
+	return lines.join("\n");
+}
+
+/**
+ * True when failures look systemic rather than incidental — the registry being
+ * down, misconfigured or rejecting us, as opposed to a handful of timeouts.
+ *
+ * @param {BackfillCounters} counters
+ */
+export function hasSystemicFailure(counters) {
+	const attempted =
+		counters.updated + counters.unchanged + counters.skipped + counters.failed;
+	if (attempted === 0 || counters.failed === 0) return false;
+	return counters.failed / attempted >= FAILURE_RATIO_EXIT_THRESHOLD;
+}
+
+const isMain = (() => {
+	const entry = process.argv[1];
+	if (!entry) return false;
+	try {
+		return fileURLToPath(import.meta.url) === realpathSync(entry);
+	} catch {
+		return false;
+	}
+})();
+
+if (isMain) {
+	let exitCode = 0;
+	/** @type {Sql | undefined} */
+	let sql;
+	try {
+		const schemaWaitSeconds = Number(
+			process.env.COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS ?? "0",
+		);
+		if (!Number.isFinite(schemaWaitSeconds) || schemaWaitSeconds < 0) {
+			throw new Error(
+				"COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS must be a positive number",
+			);
+		}
+
+		const weezApiUrl = process.env.EGAPRO_WEEZ_API_URL?.replace(/\/$/, "");
+		if (!weezApiUrl) {
+			throw new Error("EGAPRO_WEEZ_API_URL must be set");
+		}
+
+		const dryRun = process.argv.includes("--dry-run");
+
+		sql = postgres(getDatabaseUrl(), { max: 1 });
+		await waitForSchema(sql, schemaWaitSeconds);
+
+		const counters = await runBackfillCompanyNaf({ sql, weezApiUrl, dryRun });
+		console.log(formatReport(counters, dryRun));
+		if (hasSystemicFailure(counters)) {
+			console.error(
+				`[backfill-company-naf] ${counters.failed} registry failures — treating the run as broken.`,
+			);
+			exitCode = 1;
+		}
+	} catch (error) {
+		console.error(
+			"[backfill-company-naf] Failed:",
+			error instanceof Error ? error.message : error,
+		);
+		exitCode = 1;
+	} finally {
+		await sql?.end();
+	}
+	process.exit(exitCode);
 }
