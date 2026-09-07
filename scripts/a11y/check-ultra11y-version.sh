@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # LA VERSION D'ULTRA11Y VIT À TROIS ENDROITS DANS CE DÉPÔT, ET ILS DOIVENT S'ACCORDER.
 #
-#   1 & 2. `.github/workflows/a11y.yaml` — `uses: maxgfr/ultra11y@…`, DEUX FOIS : la gate PR
+#   1 & 2. `.github/workflows/a11y.yaml` — `uses: SocialGouv/ultra11y@…`, DEUX FOIS : la gate PR
 #          et `a11y-pages`. Le moteur est embarqué dans l'Action. La version se lit soit
 #          sur `@vX.Y.Z`, soit sur un `# vX.Y.Z` quand le ref est un SHA de release
 #          (les tags peuvent disparaître en amont alors que le commit reste).
@@ -34,7 +34,7 @@ fail() {
 [ -f "$manifest" ] || fail "fichier introuvable : $manifest"
 
 # Lignes `uses:` seulement — un SHA cité dans un commentaire du workflow ne compte pas.
-uses_lines=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$workflow" || true)
+uses_lines=$(grep -E '^[[:space:]]*uses:[[:space:]]*SocialGouv/ultra11y@' "$workflow" || true)
 count=$(printf '%s\n' "$uses_lines" | grep -c . || true)
 
 pin_version() {
@@ -48,14 +48,14 @@ pin_version() {
 }
 
 pin_ref() {
-	printf '%s\n' "$1" | sed -E 's|^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@([^[:space:]#]+).*|\1|'
+	printf '%s\n' "$1" | sed -E 's|^[[:space:]]*uses:[[:space:]]*SocialGouv/ultra11y@([^[:space:]#]+).*|\1|'
 }
 
 resolve_engine_version() {
 	local ref="$1"
 	command -v curl >/dev/null 2>&1 || return 1
 	local json
-	json=$(curl -sfL --max-time 10 "https://raw.githubusercontent.com/maxgfr/ultra11y/${ref}/package.json") || return 1
+	json=$(curl -sfL --max-time 10 "https://raw.githubusercontent.com/SocialGouv/ultra11y/${ref}/package.json") || return 1
 	printf '%s\n' "$json" | sed -nE 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' | sed -n 1p
 }
 
@@ -67,7 +67,7 @@ first_ref=$(pin_ref "$first_line")
 second_ref=$(pin_ref "$second_line")
 dep=$(grep -oE '"ultra11y"[[:space:]]*:[[:space:]]*"[0-9]+\.[0-9]+\.[0-9]+"' "$manifest" | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)"$/\1/')
 
-[ "$count" -eq 2 ] || fail "attendu 2 \`uses: maxgfr/ultra11y@…\` dans a11y.yaml, trouvé $count. Si un tier a été ajouté ou retiré, mets ce script à jour avec lui."
+[ "$count" -eq 2 ] || fail "attendu 2 \`uses: SocialGouv/ultra11y@…\` dans a11y.yaml, trouvé $count. Si un tier a été ajouté ou retiré, mets ce script à jour avec lui."
 [ -n "$first" ] && [ -n "$second" ] ||
 	fail "chaque \`uses:\` doit porter \`@vX.Y.Z\` ou un \`# vX.Y.Z\` (pin SHA de release)."
 [ -n "$dep" ] || fail "devDependency \`ultra11y\` introuvable dans packages/app/package.json"

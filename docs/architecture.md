@@ -723,7 +723,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : l'agent `rgaa-auditor`, qui lance le skill `review-a11y` sur le code sous changement, et le workflow `.github/workflows/a11y.yaml` (Action `maxgfr/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : l'agent `rgaa-auditor`, qui lance le skill `review-a11y` sur le code sous changement, et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
 
 ---
 

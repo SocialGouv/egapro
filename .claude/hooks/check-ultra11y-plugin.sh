@@ -41,7 +41,7 @@ touch "$MARKER"
 
 # LA RÉFÉRENCE EST LE TAG DE L'ACTION, pas la devDependency : c'est le moteur, et la CI garantit
 # déjà que les trois versions du dépôt s'accordent. Une seule source à lire, donc.
-WANT=$(grep -E '^[[:space:]]*uses:[[:space:]]*maxgfr/ultra11y@' "$WORKFLOW" | sed -E '
+WANT=$(grep -E '^[[:space:]]*uses:[[:space:]]*SocialGouv/ultra11y@' "$WORKFLOW" | sed -E '
 	s/.*@v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
 	t
 	s/.*#[[:space:]]*v([0-9]+\.[0-9]+\.[0-9]+).*/\1/
