@@ -124,13 +124,13 @@ jobs:
   a11y-version-coherence:
     # LA SEULE CHOSE QUI EMPÊCHE UNE DEMI-MONTÉE DE VERSION D'ULTRA11Y.
     #
-    # Le tag de l'Action (deux fois dans a11y.yaml) et la devDependency `ultra11y` doivent
-    # porter la même version : le balayage Playwright ÉCRIT les instantanés avec la
-    # devDependency, l'Action les RÉINGÈRE avec son moteur embarqué. Dependabot les met à jour
-    # dans deux PR distinctes, sur deux écosystèmes qui s'ignorent — rien de son côté ne sait
-    # qu'elles vont ensemble. C'est ce job qui le sait.
+    # Le pin de l'Action (deux fois dans a11y.yaml, SHA + `# vX.Y.Z` ou `@vX.Y.Z`) et la
+    # devDependency `ultra11y` doivent porter la même version : le balayage Playwright ÉCRIT
+    # les instantanés avec la devDependency, l'Action les RÉINGÈRE avec son moteur embarqué.
+    # Dependabot les met à jour dans deux PR distinctes, sur deux écosystèmes qui s'ignorent —
+    # rien de son côté ne sait qu'elles vont ensemble. C'est ce job qui le sait.
     #
-    # Ni pnpm ni node : trois greps, quelques secondes.
+    # grep/sed, plus curl pour résoudre le SHA vers package.json amont.
     name: "App · Cohérence des versions ultra11y"
     runs-on: ubuntu-latest
     steps:
