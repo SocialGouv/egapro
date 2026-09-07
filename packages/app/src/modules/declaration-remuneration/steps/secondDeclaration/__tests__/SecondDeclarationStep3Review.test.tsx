@@ -434,6 +434,15 @@ describe("SecondDeclarationStep3Review", () => {
 		});
 	});
 
+	it("neutralises the top margin of the form actions (issue #4141)", () => {
+		renderStep3();
+
+		expect(
+			screen.getByRole("button", { name: /soumettre/i }).parentElement
+				?.parentElement,
+		).toHaveClass("fr-mt-0");
+	});
+
 	it("closes the modal without submitting when Annuler is clicked", async () => {
 		const user = userEvent.setup();
 		renderStep3();

@@ -270,6 +270,7 @@ export function CompliancePathChoice({
 				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
+					className="fr-mt-0"
 					isSubmitting={mutation.isPending}
 					mimoquageNextHref={
 						initialPath
