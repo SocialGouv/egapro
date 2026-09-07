@@ -135,7 +135,7 @@ jobs:
           #     `DPkg::Lock::Timeout` ne couvre pas. Le processus 2077 le tenait depuis plus de
           #     dix minutes : un `apt-get update` de fond bloqué sur le miroir Azure.
           #
-          # C'est le même diagnostic que maxgfr/ultra11y@7090f62 (« apt on the Azure mirror is
+          # C'est le même diagnostic que SocialGouv/ultra11y@7090f62 (« apt on the Azure mirror is
           # what hangs »), et la même conclusion : on ne fait pas dépendre un livrable d'apt.
           #
           # Deux lignes de défense. D'abord on libère le verrou pour de bon — c'est une VM
