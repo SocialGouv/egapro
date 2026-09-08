@@ -60,7 +60,8 @@ async function closeOpenImpersonationEvents(adminUserId: string) {
  * step-up but not against a window that simply lapses (issue #4466, S14).
  *
  * Emptying the token field is what keeps this from firing twice; a repeat costs
- * an index probe on the partial index of open rows and no write.
+ * an index probe on `admin_impersonation_event_admin_started_idx`, which narrows
+ * to this admin's own rows, and no write.
  */
 async function closeLapsedImpersonation(
 	token: {
@@ -650,9 +651,9 @@ export const authConfig = {
 				//
 				// Unconditional, and not gated on `shouldBeAdmin`: an account
 				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
-				// leave its last row open for good. The statement targets the
-				// partial index on open rows, so it costs nothing for the
-				// declarants who never have one.
+				// leave its last row open for good. The statement is keyed on
+				// `adminUserId`, so for the declarants — who never have a row — it
+				// costs one index probe and no write.
 				//
 				// No automatic resume: the agent restarts the mimoquage from the
 				// backoffice if they still need it.

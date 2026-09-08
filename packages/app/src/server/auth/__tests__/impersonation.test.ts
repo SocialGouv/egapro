@@ -310,9 +310,11 @@ describe("jwt callback — a step-up stops the impersonation (S14)", () => {
 			session: { impersonation: { siren: "987654321", name: "Autre Démo" } },
 		});
 
-		// Every start closes what was open before inserting, and the step-up
-		// closed the row it inherited — so nothing is ever left dangling.
-		expect(closedImpersonations.length).toBeGreaterThanOrEqual(1);
+		// One close before the only start allowed to open a row, one more at the
+		// step-up. The third call is refused for want of a fresh window, so it
+		// opens nothing: no row is left dangling and two are never open at once.
+		expect(startedImpersonations).toHaveLength(1);
+		expect(closedImpersonations).toHaveLength(2);
 		for (const row of closedImpersonations) {
 			expect(row.stoppedAt).toBeInstanceOf(Date);
 		}
