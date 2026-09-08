@@ -831,7 +831,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				.locator('[data-testid="category-pay-status"]')
 				.nth(categoryIndex - 1);
 			if (state === "hidden") {
-				await expect(status).toHaveText("Écart non calculable");
+				await expect(status).toHaveText("Aucun écart à calculer");
 			} else {
 				await expect(status).toBeEmpty();
 			}

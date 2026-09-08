@@ -1154,7 +1154,7 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		expect(
 			screen.queryByLabelText("Salaire de base horaire femmes, catégorie 1"),
 		).not.toBeInTheDocument();
-		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
@@ -1334,7 +1334,7 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 				name: "Rémunération horaire brute moyenne",
 			}),
 		).not.toBeInTheDocument();
-		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 	}
 
 	function countCells() {

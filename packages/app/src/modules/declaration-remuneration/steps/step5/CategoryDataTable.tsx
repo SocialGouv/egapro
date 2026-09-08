@@ -425,7 +425,7 @@ export function CategoryDataTable({
 			</div>
 
 			<div aria-live="polite" data-testid="category-pay-status">
-				{!payApplicable && <p className="fr-mb-0">Écart non calculable</p>}
+				{!payApplicable && <p className="fr-mb-0">Aucun écart à calculer</p>}
 			</div>
 
 			{payApplicable && (

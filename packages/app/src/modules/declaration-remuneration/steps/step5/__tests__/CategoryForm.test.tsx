@@ -260,7 +260,7 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 		]);
 
 		await waitFor(() =>
-			expect(screen.getByText("Écart non calculable")).toBeInTheDocument(),
+			expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument(),
 		);
 		expect(
 			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),

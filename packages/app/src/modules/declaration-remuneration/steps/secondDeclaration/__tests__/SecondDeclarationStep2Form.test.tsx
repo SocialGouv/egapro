@@ -365,7 +365,7 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 
 		await user.clear(menCount);
 		await user.type(menCount, "0");
-		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
 		).not.toBeInTheDocument();
@@ -400,7 +400,7 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 			initialEndDate: "2024-12-31",
 		});
 
-		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(mutateMock).toHaveBeenCalledTimes(1);
@@ -423,7 +423,7 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 			],
 		});
 
-		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
 		).not.toBeInTheDocument();

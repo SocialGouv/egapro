@@ -113,7 +113,7 @@ describe("CategoryAccordionItem — non-calculable pay gap (#3678)", () => {
 		renderItem({ payApplicable: false });
 		const status = screen.getByTestId("category-pay-status");
 		expect(status).toHaveAttribute("aria-live", "polite");
-		expect(status).toHaveTextContent("Écart non calculable");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
 		for (const label of PAY_CELL_LABELS) {
 			expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
 		}
@@ -139,7 +139,7 @@ describe("CategoryAccordionItem — non-calculable pay gap (#3678)", () => {
 		rerender(<TestItem payApplicable={false} />);
 
 		expect(screen.getByTestId("category-pay-status")).toBe(status);
-		expect(status).toHaveTextContent("Écart non calculable");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
 
 		rerender(<TestItem payApplicable />);
 		expect(screen.getByTestId("category-pay-status")).toBe(status);
