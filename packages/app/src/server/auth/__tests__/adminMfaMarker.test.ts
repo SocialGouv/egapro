@@ -25,6 +25,12 @@ vi.mock("~/server/db/schema", () => ({
 	users: { email: "email", id: "id" },
 	companies: { siren: "siren" },
 	userCompanies: {},
+	// The sign-in branch closes any open impersonation row (#4466), so the
+	// schema mock has to carry the table it targets.
+	adminImpersonationEvents: {
+		adminUserId: "adminUserId",
+		stoppedAt: "stoppedAt",
+	},
 }));
 vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),

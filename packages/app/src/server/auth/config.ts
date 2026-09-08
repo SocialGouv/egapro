@@ -6,7 +6,12 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { extractSiren, isAdminMfaAcr, parseSiren } from "~/modules/domain";
+import {
+	extractSiren,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	parseSiren,
+} from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
@@ -40,6 +45,37 @@ async function closeOpenImpersonationEvents(adminUserId: string) {
 				isNull(adminImpersonationEvents.stoppedAt),
 			),
 		);
+}
+
+/**
+ * Close the administration-journal row of a mimoquage whose second-factor
+ * window has lapsed, and drop it from the token.
+ *
+ * A mimoquage stops biting the instant the window closes: `exposedImpersonation`
+ * and `activeImpersonation` both stop honouring it, so the banner goes and the
+ * server resolves the agent's own SIREN again. The open row has no such clock.
+ * Closing it on sign-in alone would leave it open for the whole remaining life
+ * of the session — weeks past the window — so the invariant the sign-in branch
+ * states, no row open without a live mimoquage behind it, would hold against a
+ * step-up but not against a window that simply lapses (issue #4466, S14).
+ *
+ * Emptying the token field is what keeps this from firing twice; a repeat costs
+ * an index probe on `admin_impersonation_event_admin_started_idx`, which narrows
+ * to this admin's own rows, and no write.
+ */
+async function closeLapsedImpersonation(
+	token: {
+		adminMfaAt?: number;
+		id: string;
+		impersonation?: Impersonation | null;
+	},
+	now: Date,
+) {
+	if (!token.impersonation) return;
+	if (isAdminMfaFresh(token.adminMfaAt, now)) return;
+
+	await closeOpenImpersonationEvents(token.id);
+	token.impersonation = null;
 }
 
 /**
@@ -159,6 +195,36 @@ declare module "next-auth/jwt" {
 		adminMfaAt?: number;
 	}
 }
+
+/**
+ * Impersonation as the session exposes it: present only while the account is
+ * an admin *and* its second factor is still inside the window.
+ *
+ * The banner reads `session.user.impersonation` and nothing else, so it
+ * vanishes at the very instant the server stops honouring the mimoquage
+ * (issue #4466, S14). The two must never diverge: a banner outliving the
+ * privilege would invite an agent to act on a company whose SIREN the server
+ * has already stopped resolving, and an effective mimoquage with no banner
+ * would hide whose data is on screen.
+ *
+ * The token keeps its `impersonation` field untouched — this is a projection,
+ * not a mutation. Nothing resumes when a new second factor is presented: a
+ * step-up re-mints the token from scratch, without impersonation.
+ */
+function exposedImpersonation(
+	token: JWTWithImpersonation,
+	now: Date,
+): Impersonation | null {
+	if (!token.isAdmin) return null;
+	if (!isAdminMfaFresh(token.adminMfaAt, now)) return null;
+	return token.impersonation ?? null;
+}
+
+type JWTWithImpersonation = {
+	isAdmin?: boolean;
+	adminMfaAt?: number;
+	impersonation?: Impersonation | null;
+};
 
 // Decoded without re-verifying the signature: this token never transited
 // through the browser — NextAuth fetched it server-to-server and openid-client
@@ -437,6 +503,25 @@ export const authConfig = {
 					return token;
 				}
 
+				// Starting a mimoquage is itself an administrator privilege, so it
+				// needs a second factor inside the window — the same condition the
+				// shared predicates apply when *reading* through a mimoquage
+				// (#4466). Gating only on `token.isAdmin` would let an agent whose
+				// window has closed open a row in the administration journal that
+				// no live mimoquage backs, which is precisely the invariant this
+				// ticket exists to hold. It would also persist a client-supplied
+				// company name without a valid second factor.
+				//
+				// Stopping stays ungated on purpose, above: ending a mimoquage and
+				// closing its row must never be refused.
+				if (!isAdminMfaFresh(token.adminMfaAt, new Date())) {
+					// The refusal must not strand what the agent already had open:
+					// an agent switching companies as the window lapses gets the
+					// same treatment as one who simply stopped browsing.
+					await closeLapsedImpersonation(token, new Date());
+					return token;
+				}
+
 				if (raw && typeof raw === "object") {
 					const candidate = raw as { siren?: unknown; name?: unknown };
 					const sirenResult = sirenSchema.safeParse(candidate.siren);
@@ -557,6 +642,24 @@ export const authConfig = {
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
 
+				// A sign-in — a step-up included — mints the token from scratch,
+				// so the mimoquage disappears on its own. The open row in the
+				// administration journal does not: close it here so there is no
+				// instant at which a row is open without a live mimoquage behind
+				// it. That journal is a compliance trail, not a by-product of the
+				// banner (issue #4466, S14).
+				//
+				// Unconditional, and not gated on `shouldBeAdmin`: an account
+				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
+				// leave its last row open for good. The statement is keyed on
+				// `adminUserId`, so for the declarants — who never have a row — it
+				// costs one index probe and no write.
+				//
+				// No automatic resume: the agent restarts the mimoquage from the
+				// backoffice if they still need it.
+				await closeOpenImpersonationEvents(dbUser.id);
+				token.impersonation = null;
+
 				// The marker has exactly two sources, and a client reaches
 				// neither: the id_token of the exchange we just performed
 				// server-to-server, and — off outside a loopback test run, see
@@ -603,6 +706,12 @@ export const authConfig = {
 					});
 				}
 			}
+
+			// Last, so it never doubles a close the branches above already made:
+			// an explicit stop returns from the update branch, and a sign-in has
+			// just emptied the field.
+			await closeLapsedImpersonation(token, new Date());
+
 			return token;
 		},
 		session: ({ session, token }) => ({
@@ -613,7 +722,7 @@ export const authConfig = {
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
-				impersonation: token.impersonation ?? null,
+				impersonation: exposedImpersonation(token, new Date()),
 				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),

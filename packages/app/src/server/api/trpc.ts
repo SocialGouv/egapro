@@ -24,10 +24,12 @@ import {
 	isDeclarationSubmitted,
 	isSecondDeclarationDeadlineApplicable,
 } from "~/modules/domain";
-import { parseSiren } from "~/modules/shared/parseSiren";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
-import { assertNotImpersonating } from "~/server/auth/companyAccess";
+import {
+	assertNotImpersonating,
+	getEffectiveSiren,
+} from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { declarations } from "~/server/db/schema";
@@ -193,16 +195,12 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
  * Use this for any procedure that operates on company-scoped data.
  */
 export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	// Admin impersonation short-circuit: when an admin is currently mimoquing
-	// a company, every company-scoped procedure operates on the impersonated
-	// SIREN instead of the admin's own SIRET from ProConnect. The admin flag
-	// is checked to prevent a non-admin from ever resolving a foreign SIREN.
-	const impersonatedSiren =
-		ctx.session.user.isAdmin && ctx.session.user.impersonation
-			? ctx.session.user.impersonation.siren
-			: null;
-
-	const siren = impersonatedSiren ?? parseSiren(ctx.session.user.siret);
+	// The impersonation short-circuit is not re-implemented here: it lives in
+	// `getEffectiveSiren`, which also holds the MFA-window condition (#4466).
+	// One module decides which company a session acts on, so a procedure can
+	// never keep resolving a foreign SIREN that the pages have already stopped
+	// resolving.
+	const siren = getEffectiveSiren(ctx.session);
 	if (!siren) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",

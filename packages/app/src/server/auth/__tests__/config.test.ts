@@ -28,6 +28,12 @@ vi.mock("~/server/db/schema", () => ({
 	users: { email: "email", id: "id" },
 	companies: { siren: "siren" },
 	userCompanies: {},
+	// The sign-in branch closes any open impersonation row (#4466), so the
+	// schema mock has to carry the table it targets.
+	adminImpersonationEvents: {
+		adminUserId: "adminUserId",
+		stoppedAt: "stoppedAt",
+	},
 }));
 vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),
@@ -195,6 +201,16 @@ describe("auth config", () => {
 	}
 
 	describe("jwt callback — ProConnect identity seeding", () => {
+		// Every sign-in also closes any open impersonation row (#4466), which is
+		// an UPDATE against another table. These tests are about name seeding,
+		// so they count the updates aimed at `users` rather than all of them.
+		function userTableUpdates() {
+			return mockUpdate.mock.calls.filter(
+				([table]) =>
+					(table as { email?: string } | undefined)?.email === "email",
+			);
+		}
+
 		function armUpdate() {
 			const where = vi.fn().mockResolvedValue(undefined);
 			const set = vi.fn().mockReturnValue({ where });
@@ -226,7 +242,7 @@ describe("auth config", () => {
 
 			await signIn({ firstName: "Camille", lastName: "Durand" });
 
-			expect(mockUpdate).not.toHaveBeenCalled();
+			expect(userTableUpdates()).toHaveLength(0);
 		});
 
 		it("leaves the DB row untouched when ProConnect sends no name", async () => {
@@ -234,7 +250,7 @@ describe("auth config", () => {
 
 			await signIn({ firstName: null, lastName: null }, namelessProconnectUser);
 
-			expect(mockUpdate).not.toHaveBeenCalled();
+			expect(userTableUpdates()).toHaveLength(0);
 		});
 	});
 
