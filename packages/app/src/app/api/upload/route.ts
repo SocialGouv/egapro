@@ -5,14 +5,13 @@ import {
 	getCurrentYear,
 } from "~/modules/domain";
 import { validateFileName } from "~/modules/shared/fileNameValidation";
-import { parseSiren } from "~/modules/shared/parseSiren";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
 } from "~/modules/shared/uploadConfig";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
-import { auth } from "~/server/auth";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
@@ -82,8 +81,7 @@ export async function POST(request: Request): Promise<Response> {
 
 	const action = FLOW_TO_ACTION[flowType];
 
-	const session = await auth();
-	const siren = parseSiren(session?.user?.siret);
+	const { session, siren } = await getSessionSiren(request);
 	if (!session?.user || !siren) {
 		writeFailure({
 			action,
