@@ -1,3 +1,5 @@
+import "server-only";
+
 import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 
 import type { DB } from "./index";
@@ -43,8 +45,14 @@ function currentDeclarationFilter(siren: string, year: number) {
  * un `LIMIT 1` sans ordre rendrait une ligne arbitraire. Deux requêtes non
  * ordonnées portant le même filtre peuvent rendre deux lignes différentes : le
  * garde de verrou et l'écriture qu'il protège doivent partager ce résolveur,
- * pas seulement leur filtre. L'ordre fait gagner la déclaration active, puis la
- * plus récente.
+ * pas seulement leur filtre.
+ *
+ * L'ordre doit être **total**, sinon il ne décide rien dans les cas où il est
+ * justement sollicité : la déclaration active gagne, puis la plus récente, puis
+ * l'`id` — clé finale unique, sans laquelle deux lignes annulées de même
+ * `createdAt` laisseraient le choix à Postgres. `createdAt` est nullable, et un
+ * `DESC` place les NULL en tête : `nulls last` renvoie les lignes sans date au
+ * fond, là où « la plus récente » les attend.
  */
 export async function resolveCurrentDeclarationId(
 	db: DbOrTx,
@@ -57,7 +65,8 @@ export async function resolveCurrentDeclarationId(
 		.where(currentDeclarationFilter(siren, year))
 		.orderBy(
 			sql`${declarations.cancelledAt} is null desc`,
-			desc(declarations.createdAt),
+			sql`${declarations.createdAt} desc nulls last`,
+			desc(declarations.id),
 		)
 		.limit(1);
 	return rows[0]?.id ?? null;

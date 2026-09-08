@@ -54,8 +54,9 @@ describe("resolveCurrentDeclarationId", () => {
 	// This ordering is the correctness argument of the lock guard: the guard and
 	// `uploadPipeline` each run their own query, and the unique index on
 	// (siren, year) is partial, so several cancelled rows may share the pair.
-	// Without a deterministic order the two lookups can land on different rows.
-	it("orders the active declaration first, then the most recent", async () => {
+	// The order has to be total — a tie would hand the two lookups different
+	// rows, which is the divergence the guard exists to prevent.
+	it("orders by active, then most recent, then id to break every tie", async () => {
 		const { db, captured } = stubDb([{ id: "decl-1" }]);
 
 		await resolveCurrentDeclarationId(db as never, "123456789", 2026);
@@ -63,11 +64,16 @@ describe("resolveCurrentDeclarationId", () => {
 		const rendered = (captured.orderBy ?? []).map((clause) =>
 			dialect.sqlToQuery(clause).sql.toLowerCase(),
 		);
-		expect(rendered).toHaveLength(2);
+		expect(rendered).toHaveLength(3);
 		expect(rendered[0]).toContain("cancelled_at");
 		expect(rendered[0]).toContain("is null desc");
 		expect(rendered[1]).toContain("created_at");
 		expect(rendered[1]).toContain("desc");
+		// `createdAt` is nullable and DESC puts NULLs first: an undated row would
+		// otherwise outrank every dated one.
+		expect(rendered[1]).toContain("nulls last");
+		expect(rendered[2]).toContain("id");
+		expect(rendered[2]).toContain("desc");
 	});
 
 	it("scopes on siren and year without excluding cancelled declarations", async () => {
