@@ -46,6 +46,10 @@ vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => ({ op: "and", args }),
 	eq: (...args: unknown[]) => ({ op: "eq", args }),
 	count: () => ({ op: "count" }),
+	desc: (column: unknown) => ({ op: "desc", column }),
+	isNull: (column: unknown) => ({ op: "isNull", column }),
+	ne: (...args: unknown[]) => ({ op: "ne", args }),
+	sql: (...args: unknown[]) => ({ op: "sql", args }),
 }));
 
 function createStream(): ReadableStream<Uint8Array> {
@@ -77,15 +81,13 @@ function primeDbSelect(steps: Step[]) {
 					if (step?.kind === "count") {
 						return Promise.resolve([{ value: step.value }]);
 					}
-					// Declaration lookup path chains `.limit(1)` before await.
-					return {
-						limit: () =>
-							Promise.resolve(
-								step?.kind === "declaration" && step.id !== undefined
-									? [{ id: step.id }]
-									: [],
-							),
-					};
+					// Declaration lookup path chains `.orderBy().limit(1)` before await.
+					const rows =
+						step?.kind === "declaration" && step.id !== undefined
+							? [{ id: step.id }]
+							: [];
+					const limit = { limit: () => Promise.resolve(rows) };
+					return { ...limit, orderBy: () => limit };
 				},
 			}),
 		};

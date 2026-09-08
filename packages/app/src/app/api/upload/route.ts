@@ -221,7 +221,7 @@ export async function POST(request: Request): Promise<Response> {
 
 	// Before the body is streamed: no bandwidth wasted on a locked target.
 	try {
-		await assertDeclarationUnlockedForWrite(db, siren, session.user.id);
+		await assertDeclarationUnlockedForWrite(db, siren, year, session.user.id);
 	} catch (error) {
 		if (!(error instanceof DeclarationLockedByOtherUserError)) {
 			throw error;

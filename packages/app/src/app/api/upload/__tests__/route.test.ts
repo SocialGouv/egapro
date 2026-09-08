@@ -650,10 +650,13 @@ describe("POST /api/upload", () => {
 
 		expect(response.status).toBe(200);
 		expect(mocks.runUploadPipeline).toHaveBeenCalled();
-		expect(mocks.assertDeclarationUnlockedForWrite).toHaveBeenCalledWith(
-			{},
-			"123456789",
-			"user-1",
+		// The guard must vet the very (siren, year) the pipeline then writes to.
+		const [, guardSiren, guardYear, guardUserId] =
+			mocks.assertDeclarationUnlockedForWrite.mock.calls[0] ?? [];
+		expect(guardSiren).toBe("123456789");
+		expect(guardUserId).toBe("user-1");
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ siren: guardSiren, year: guardYear }),
 		);
 	});
 });

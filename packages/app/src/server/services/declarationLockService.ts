@@ -2,13 +2,10 @@ import "server-only";
 
 import { and, eq, gt, lte, or } from "drizzle-orm";
 
-import {
-	DECLARATION_LOCK_CONFLICT_MESSAGE,
-	getCurrentYear,
-} from "~/modules/domain";
-import { currentDeclarationFilter } from "~/server/api/routers/declarationHelpers";
+import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import type { DB } from "~/server/db";
-import { declarationLocks, declarations, users } from "~/server/db/schema";
+import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
+import { declarationLocks, users } from "~/server/db/schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
@@ -103,25 +100,23 @@ export class DeclarationLockedByOtherUserError extends Error {
  * — or a declaration that does not exist yet — lets the write through. Merging
  * the two intentions into one function would break `/api/upload`.
  *
- * Resolves through `currentDeclarationFilter`, the same filter `uploadPipeline`
- * uses, cancelled rows included. Scoping the guard to active declarations only
- * would let a write onto a cancelled-but-locked declaration slip past.
+ * Resolves through `resolveCurrentDeclarationId`, the same resolver
+ * `uploadPipeline` writes through — sharing only a filter would not do: the
+ * unique index on (siren, year) is partial, so an unordered `LIMIT 1` can hand
+ * the guard a different row than the one the write lands on. `year` is a
+ * parameter for the same reason: deriving it here would let a caller guard one
+ * year while writing to another.
  */
 export async function assertDeclarationUnlockedForWrite(
 	db: DbClient,
 	siren: string,
+	year: number,
 	userId: string,
 ): Promise<void> {
-	const rows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(currentDeclarationFilter(siren, getCurrentYear()))
-		.limit(1);
+	const declarationId = await resolveCurrentDeclarationId(db, siren, year);
+	if (!declarationId) return;
 
-	const declaration = rows[0];
-	if (!declaration) return;
-
-	const lock = await getActiveLock(db, declaration.id);
+	const lock = await getActiveLock(db, declarationId);
 	if (lock && lock.userId !== userId) {
 		throw new DeclarationLockedByOtherUserError();
 	}
