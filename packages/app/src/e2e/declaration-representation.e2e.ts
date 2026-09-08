@@ -537,11 +537,28 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		page,
 	}) => {
 		await page.goto(FUNNEL_ROOT);
-		await chooseRadio(page, /Moins de 1 000 salariés/);
 		await expect(
-			page.getByText(/Vous n'êtes pas assujetti à la publication/),
+			page.getByText(
+				"Indiquez si votre entreprise a employé au moins 1 000 salariés durant les trois derniers exercices consécutifs.",
+			),
 		).toBeVisible();
 
+		await chooseRadio(page, /Moins de 1 000 salariés/);
+
+		const notice = page
+			.locator("div.fr-background-alt--blue-france")
+			.filter({ hasText: "Votre entreprise n'est pas assujettie" });
+		await expect(notice.locator("p")).toHaveText([
+			"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			"Vous pouvez cliquer sur valider pour confirmer.",
+		]);
+		// Two independent sentences, two paragraphs: the <br /> this wording replaced
+		// fabricated a structure that read as a single block.
+		await expect(notice.locator("br")).toHaveCount(0);
+		// The consigne no longer dates itself with the campaign year.
+		await expect(notice).not.toContainText(String(campaignYear));
+
+		await expect(page.getByRole("button", { name: "Suivant" })).toHaveCount(0);
 		await page.getByRole("button", { name: "Valider" }).click();
 		await page.waitForURL("**/mon-espace");
 	});
@@ -581,8 +598,12 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 
 		const panel = page.locator(`#${PANEL_ID}`);
 		await expect(
-			panel.getByText(/Vous n'êtes pas assujetti à la publication/),
+			panel.getByText(
+				"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			),
 		).toBeVisible();
+		// A follow-up view carries no Valider button, so it drops the funnel's second sentence.
+		await expect(panel.getByText(/cliquer sur valider/)).toHaveCount(0);
 		await expect(
 			panel.getByText("Vérification de l'assujettissement"),
 		).toBeVisible();
