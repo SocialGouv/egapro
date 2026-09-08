@@ -50,9 +50,10 @@ import { SubjectionScreen } from "../SubjectionScreen";
 const STEP_1_HREF = "/declaration-representation/etape/1";
 const MY_SPACE_HREF = "/mon-espace";
 const SELECTION_ERROR = "Veuillez sélectionner une option pour continuer.";
-const NOT_CONCERNED_INFO = /Vous n'êtes pas assujetti à la publication/;
+const NOT_CONCERNED_INFO =
+	/Votre entreprise n'est pas assujettie à la publication/;
 const SUBJECTION_QUESTION =
-	/Indiquez si votre entreprise emploie au moins 1 000 salariés/;
+	/Indiquez si votre entreprise a employé au moins 1 000 salariés/;
 const SUBJECTION_FIELDSET_NAME = /Nombre de salariés de l'entreprise/;
 
 function renderScreen(initialAnswer?: "concerned" | "not_concerned") {
