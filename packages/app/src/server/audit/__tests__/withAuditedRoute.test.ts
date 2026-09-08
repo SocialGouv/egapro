@@ -109,4 +109,60 @@ describe("withAuditedRoute", () => {
 		expect(consoleSpy).toHaveBeenCalled();
 		consoleSpy.mockRestore();
 	});
+	it("forwards the Next route context to the handler", async () => {
+		const seen: unknown[] = [];
+		const handler = withAuditedRoute<{ params: Promise<{ siren: string }> }>(
+			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			async (_request, routeContext) => {
+				seen.push(await routeContext?.params);
+				return new Response(null, { status: 200 });
+			},
+		);
+
+		await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "123456789" }),
+		});
+
+		expect(seen).toEqual([{ siren: "123456789" }]);
+	});
+
+	it("forwards the Next route context to resolveContext", async () => {
+		const handler = withAuditedRoute<{ params: Promise<{ siren: string }> }>(
+			{
+				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
+				resolveContext: async (_request, routeContext) => {
+					const params = await routeContext?.params;
+					return { siren: params?.siren ?? null };
+				},
+			},
+			async () => new Response(null, { status: 200 }),
+		);
+
+		await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "987654321" }),
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			siren: "987654321",
+		});
+	});
+
+	it("still works when the route context is omitted", async () => {
+		const handler = withAuditedRoute(
+			{
+				action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD,
+				resolveContext: (_request, routeContext) => ({
+					metadata: { hasRouteContext: routeContext !== undefined },
+				}),
+			},
+			async () => new Response(null, { status: 200 }),
+		);
+
+		const response = await handler(buildRequest());
+
+		expect(response.status).toBe(200);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			metadata: { hasRouteContext: false },
+		});
+	});
 });
