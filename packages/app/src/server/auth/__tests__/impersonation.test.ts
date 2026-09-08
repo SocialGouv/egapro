@@ -298,6 +298,96 @@ describe("jwt callback — a step-up stops the impersonation (S14)", () => {
 	});
 });
 
+describe("jwt callback — a lapsed window closes the journal row on its own", () => {
+	/** Any ordinary request: no sign-in, no session update. */
+	function plainRequest(token: JWT) {
+		return callJwt({ token });
+	}
+
+	it("closes the open row once the window has lapsed, without waiting for a step-up", async () => {
+		// The session outlives the window by weeks. Were the row closed only on
+		// sign-in, the administration journal would show a mimoquage still open
+		// long after the server stopped honouring it.
+		const result = await plainRequest({
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: DEMO,
+		} as JWT);
+
+		expect(closedImpersonations).toHaveLength(1);
+		expect(closedImpersonations[0]?.stoppedAt).toBeInstanceOf(Date);
+		expect(result.impersonation).toBeNull();
+	});
+
+	it("closes the open row when no second factor was ever presented", async () => {
+		const result = await plainRequest({
+			id: "u1",
+			isAdmin: true,
+			impersonation: DEMO,
+		} as JWT);
+
+		expect(closedImpersonations).toHaveLength(1);
+		expect(result.impersonation).toBeNull();
+	});
+
+	it("leaves a mimoquage alone while the window is still open", async () => {
+		const result = await plainRequest({
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: FRESH_MFA,
+			impersonation: DEMO,
+		} as JWT);
+
+		expect(closedImpersonations).toHaveLength(0);
+		expect(result.impersonation).toEqual(DEMO);
+	});
+
+	it("writes nothing on a request carrying no mimoquage", async () => {
+		const result = await plainRequest({
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+		} as JWT);
+
+		expect(closedImpersonations).toHaveLength(0);
+		expect(result.impersonation).toBeUndefined();
+	});
+
+	it("does not close twice when the same token comes back on a later request", async () => {
+		const token = {
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: DEMO,
+		} as JWT;
+
+		await plainRequest(token);
+		await plainRequest(token);
+
+		expect(closedImpersonations).toHaveLength(1);
+	});
+
+	it("still issues a single closing statement when the agent stops a lapsed mimoquage explicitly", async () => {
+		// The explicit stop returns from the update branch, so the lapsed-window
+		// close below it never doubles it.
+		const token = {
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: DEMO,
+		} as JWT;
+
+		await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: null },
+		});
+
+		expect(closedImpersonations).toHaveLength(1);
+	});
+});
+
 describe("session callback — impersonation is exposed only inside the MFA window", () => {
 	function sessionFor(token: Partial<JWT>) {
 		return callSession({

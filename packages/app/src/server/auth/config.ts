@@ -671,6 +671,30 @@ export const authConfig = {
 					});
 				}
 			}
+
+			// A mimoquage stops biting the instant the second-factor window
+			// lapses: `exposedImpersonation` and `activeImpersonation` both stop
+			// honouring it, so the banner goes and the server resolves the
+			// agent's own SIREN again. The open row in the administration journal
+			// has no such clock. Closing it in the sign-in branch alone would
+			// leave it open for the whole remaining life of the session — weeks
+			// past the window — so the invariant that branch states, no row open
+			// without a live mimoquage behind it, would hold against a step-up
+			// but not against a window that simply lapses (#4466, S14).
+			//
+			// Last, so it never doubles a close the branches above already made:
+			// an explicit stop returns from the update branch, and a sign-in has
+			// just emptied the field. Clearing the field is what keeps it from
+			// firing twice; a repeat would cost an index probe on the partial
+			// index of open rows and no write.
+			if (
+				token.impersonation &&
+				!isAdminMfaFresh(token.adminMfaAt, new Date())
+			) {
+				await closeOpenImpersonationEvents(token.id);
+				token.impersonation = null;
+			}
+
 			return token;
 		},
 		session: ({ session, token }) => ({
