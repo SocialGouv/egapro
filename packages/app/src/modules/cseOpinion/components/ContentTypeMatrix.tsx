@@ -59,8 +59,8 @@ export function ContentTypeMatrix({
 							</caption>
 							<thead>
 								<tr>
-									<th className="fr-cell--fixed" scope="col">
-										Fichier
+									<th className="fr-cell--fixed fr-cell--multiline" scope="col">
+										Fichier(s) importé(s)/déposé(s)
 									</th>
 									{columns.map((column) => (
 										<th
