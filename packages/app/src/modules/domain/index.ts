@@ -1,11 +1,17 @@
 // Types
 
 // Admin two-factor authentication — accepted levels and freshness window
+export type {
+	AdminAccessDecision,
+	AdminMfaFailure,
+	AdminSessionState,
+} from "./shared/adminMfa";
 export {
 	ADMIN_MFA_ACR_VALUES,
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	resolveAdminAccess,
 } from "./shared/adminMfa";
 // Campaign
 export {

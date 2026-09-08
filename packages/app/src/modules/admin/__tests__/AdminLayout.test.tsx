@@ -21,7 +21,13 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
+
 import AdminLayout from "~/app/admin/layout";
+
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
 
 describe("AdminLayout", () => {
 	beforeEach(() => {
@@ -45,8 +51,32 @@ describe("AdminLayout", () => {
 		expect(mockRedirect).toHaveBeenCalledWith("/mon-espace");
 	});
 
-	it("renders children for an admin user", async () => {
+	it("sends an admin whose two-factor authentication is missing to the resume screen", async () => {
 		mockAuth.mockResolvedValue({ user: { id: "u1", isAdmin: true } });
+		await expect(
+			AdminLayout({ children: "child" as unknown as React.ReactNode }),
+		).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith("/acces-backoffice");
+	});
+
+	it("sends an admin whose two-factor authentication expired to the resume screen", async () => {
+		mockAuth.mockResolvedValue({
+			user: {
+				id: "u1",
+				isAdmin: true,
+				adminMfaAt: nowSeconds() - ADMIN_MFA_WINDOW_SECONDS - 1,
+			},
+		});
+		await expect(
+			AdminLayout({ children: "child" as unknown as React.ReactNode }),
+		).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith("/acces-backoffice");
+	});
+
+	it("renders children for an admin authenticated inside the window", async () => {
+		mockAuth.mockResolvedValue({
+			user: { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() },
+		});
 		const result = await AdminLayout({
 			children: "admin-child" as unknown as React.ReactNode,
 		});

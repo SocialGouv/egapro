@@ -26,3 +26,61 @@ export function isAdminMfaFresh(
 	// back to ProConnect after a successful second factor.
 	return elapsedSeconds < ADMIN_MFA_WINDOW_SECONDS;
 }
+
+/**
+ * Why an eligible agent is sent to the resume screen rather than into the
+ * backoffice. Derived from the session alone — never from a query parameter,
+ * which any visitor could set at will.
+ */
+export type AdminMfaFailure = "expired" | "missing";
+
+export type AdminAccessDecision =
+	| { type: "login" }
+	| { type: "monEspace" }
+	| { type: "resume"; reason: AdminMfaFailure }
+	| { type: "allow" };
+
+/**
+ * The subset of a session the decision reads. `isAdmin` is optional on purpose:
+ * a token minted before the field existed carries no value at all, and that
+ * absence is not the same thing as `false`.
+ */
+export type AdminSessionState = {
+	isAdmin?: boolean;
+	adminMfaAt?: number | null;
+};
+
+/**
+ * The single decision table for the `/admin` surface, applied identically by
+ * the Edge middleware, the backoffice layout and the resume screen.
+ *
+ * It compares values the token already carries: no database, no Node API,
+ * nothing the Edge runtime cannot do — which is why the authentication date
+ * lives in the token in the first place.
+ *
+ * A user without the admin grant is turned away silently towards `/mon-espace`:
+ * telling them the backoffice exists is itself the disclosure we refuse.
+ */
+export function resolveAdminAccess(
+	session: AdminSessionState | null | undefined,
+	now: Date,
+): AdminAccessDecision {
+	// No session, or a token predating the admin field: only a fresh sign-in
+	// produces a token we are able to judge.
+	if (!session || session.isAdmin === undefined) return { type: "login" };
+
+	if (!session.isAdmin) return { type: "monEspace" };
+
+	if (!isAdminMfaFresh(session.adminMfaAt, now)) {
+		return {
+			type: "resume",
+			reason:
+				typeof session.adminMfaAt === "number" &&
+				Number.isFinite(session.adminMfaAt)
+					? "expired"
+					: "missing",
+		};
+	}
+
+	return { type: "allow" };
+}

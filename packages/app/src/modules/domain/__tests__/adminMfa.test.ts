@@ -4,6 +4,7 @@ import {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	resolveAdminAccess,
 } from "~/modules/domain";
 
 const AUTH_AT = Math.floor(Date.parse("2026-03-10T08:00:00.000Z") / 1000);
@@ -106,3 +107,79 @@ describe("isAdminMfaFresh", () => {
 		expect(isAdminMfaFresh(adminMfaAt, at(0))).toBe(false);
 	});
 });
+
+describe("resolveAdminAccess", () => {
+	it.each([
+		["no session at all", null],
+		["an undefined session", undefined],
+	])("sends %s back to the sign-in page", (_label, session) => {
+		expect(resolveAdminAccess(session, at(0))).toEqual({ type: "login" });
+	});
+
+	it("sends a token predating the admin field back to the sign-in page", () => {
+		// Signed in before the grant was minted into the token: the absence of
+		// the field is not the same as `false`, and only a fresh sign-in can
+		// tell them apart.
+		expect(resolveAdminAccess({ adminMfaAt: AUTH_AT }, at(0))).toEqual({
+			type: "login",
+		});
+	});
+
+	it("turns a user without the admin grant away towards Mon espace", () => {
+		// Silent refusal, even with a fresh second factor: the backoffice is
+		// never mentioned to someone who has no business there.
+		expect(
+			resolveAdminAccess({ isAdmin: false, adminMfaAt: AUTH_AT }, at(0)),
+		).toEqual({ type: "monEspace" });
+	});
+
+	it("lets an eligible agent in inside the window", () => {
+		expect(
+			resolveAdminAccess({ isAdmin: true, adminMfaAt: AUTH_AT }, at(0)),
+		).toEqual({ type: "allow" });
+	});
+
+	it("still lets an eligible agent in one second before the window closes", () => {
+		expect(
+			resolveAdminAccess(
+				{ isAdmin: true, adminMfaAt: AUTH_AT },
+				at(ADMIN_MFA_WINDOW_SECONDS - 1),
+			),
+		).toEqual({ type: "allow" });
+	});
+
+	it("reports an expiry exactly on the window boundary", () => {
+		expect(
+			resolveAdminAccess(
+				{ isAdmin: true, adminMfaAt: AUTH_AT },
+				at(ADMIN_MFA_WINDOW_SECONDS),
+			),
+		).toEqual({ type: "resume", reason: "expired" });
+	});
+
+	it("reports an expiry when the authentication is older than the window", () => {
+		expect(
+			resolveAdminAccess(
+				{ isAdmin: true, adminMfaAt: AUTH_AT },
+				at(ADMIN_MFA_WINDOW_SECONDS + 1),
+			),
+		).toEqual({ type: "resume", reason: "expired" });
+	});
+
+	it.each([
+		["undefined", undefined],
+		["null", null],
+		["NaN", Number.NaN],
+		["Infinity", Number.POSITIVE_INFINITY],
+	])(
+		"reports an authentication that never happened when the date is %s",
+		(_label, adminMfaAt) => {
+			// A session opened before this feature shipped lands here too: the
+			// wording stays true, and the action offered is the same.
+			expect(resolveAdminAccess({ isAdmin: true, adminMfaAt }, at(0))).toEqual({
+				type: "resume",
+				reason: "missing",
+			});
+		},
+	);
+})
