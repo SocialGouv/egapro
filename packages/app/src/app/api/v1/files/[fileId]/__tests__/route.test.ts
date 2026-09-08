@@ -30,8 +30,7 @@ import { GET } from "../route";
 // A SIRET whose first 9 digits form the admin's own SIREN scope.
 const ADMIN_SIRET = "98765432100010";
 const ADMIN_SIREN = "987654321";
-// The fictitious SIREN used by the ticket's scenarios for a company the
-// admin is not a referent of.
+// A file belonging to a company the admin is not a referent of.
 const OTHER_SIREN_FILE = {
 	filePath: "123456789/2027/f.pdf",
 	fileName: "f.pdf",
@@ -204,7 +203,7 @@ describe("GET /api/v1/files/:fileId", () => {
 			});
 		}
 
-		it("bypasses SIREN scope and serves any file as an attachment (S13 scenario 1)", async () => {
+		it("bypasses SIREN scope and serves any file as an attachment", async () => {
 			freshAdminSession();
 			mocks.fetchFileById.mockResolvedValue(OTHER_SIREN_FILE);
 
@@ -241,7 +240,7 @@ describe("GET /api/v1/files/:fileId", () => {
 		});
 	});
 
-	describe("admin session with an expired double authentication (S13)", () => {
+	describe("admin session with an expired double authentication", () => {
 		function expiredAdminSession(overrides: Record<string, unknown> = {}) {
 			mocks.auth.mockResolvedValue({
 				user: {
@@ -255,7 +254,7 @@ describe("GET /api/v1/files/:fileId", () => {
 			});
 		}
 
-		it("serves a file within the admin's own SIREN scope, like a regular user (S8)", async () => {
+		it("serves a file within the admin's own SIREN scope, like a regular user", async () => {
 			expiredAdminSession();
 			mocks.fetchFileBySiren.mockResolvedValue(OWN_SIREN_FILE);
 
