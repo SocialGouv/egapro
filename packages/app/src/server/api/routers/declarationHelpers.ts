@@ -22,6 +22,16 @@ export function activeDeclarationFilter(siren: string, year: number) {
 	);
 }
 
+/**
+ * Contrairement à `activeDeclarationFilter`, n'exclut **pas** les déclarations
+ * annulées : c'est la ligne que le pipeline d'upload écrit réellement. Le garde
+ * de verrou doit résoudre exactement celle-là, sinon il verrouille une
+ * déclaration pendant que l'écriture en touche une autre.
+ */
+export function currentDeclarationFilter(siren: string, year: number) {
+	return and(eq(declarations.siren, siren), eq(declarations.year, year));
+}
+
 /** Minimal structural contract for `select().from(table)…limit(n)` on a single table. */
 type SelectTx<Table, Row> = {
 	select: () => {

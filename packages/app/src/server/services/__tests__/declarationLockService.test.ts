@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getCurrentYear } from "~/modules/domain";
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
@@ -17,9 +18,17 @@ vi.mock("~/server/db/schema", () => ({
 		firstName: "firstName",
 		lastName: "lastName",
 	},
+	declarations: { id: "id" },
+}));
+
+const CURRENT_DECLARATION_FILTER = Symbol("currentDeclarationFilter");
+
+vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	currentDeclarationFilter: vi.fn(() => CURRENT_DECLARATION_FILTER),
 }));
 
 const DECLARATION_ID = "decl-1";
+const SIREN = "123456789";
 const USER_ID = "user-1";
 const TIMEOUT_MINUTES = 30;
 const NOW = new Date("2025-06-23T10:00:00.000Z");
@@ -96,6 +105,95 @@ describe("getActiveLock", () => {
 		const { getActiveLock } = await service();
 
 		expect(await getActiveLock(select as never, DECLARATION_ID)).toBeNull();
+	});
+});
+
+describe("assertDeclarationUnlockedForWrite", () => {
+	function guardDb(declarationRows: unknown[], lockRows: unknown[]) {
+		const declarationWhere = vi
+			.fn()
+			.mockReturnValue({ limit: vi.fn().mockResolvedValue(declarationRows) });
+		const innerJoin = vi.fn().mockReturnValue({
+			where: vi
+				.fn()
+				.mockReturnValue({ limit: vi.fn().mockResolvedValue(lockRows) }),
+		});
+		const from = vi
+			.fn()
+			.mockReturnValueOnce({ where: declarationWhere })
+			.mockReturnValue({ innerJoin });
+		return {
+			db: { select: vi.fn().mockReturnValue({ from }) },
+			declarationWhere,
+		};
+	}
+
+	it("rejects when another co-declarant holds an active lock", async () => {
+		const { db } = guardDb(
+			[{ id: DECLARATION_ID }],
+			[{ ...HOLDER, userId: "user-2" }],
+		);
+		const {
+			assertDeclarationUnlockedForWrite,
+			DeclarationLockedByOtherUserError,
+		} = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, USER_ID),
+		).rejects.toBeInstanceOf(DeclarationLockedByOtherUserError);
+	});
+
+	it("resolves when no active lock is held", async () => {
+		const { db } = guardDb([{ id: DECLARATION_ID }], []);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, USER_ID),
+		).resolves.toBeUndefined();
+	});
+
+	it("resolves when the caller already holds the lock", async () => {
+		const { db } = guardDb([{ id: DECLARATION_ID }], [HOLDER]);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, USER_ID),
+		).resolves.toBeUndefined();
+	});
+
+	it("resolves through the same filter the upload pipeline writes through", async () => {
+		const { db, declarationWhere } = guardDb([], []);
+		const { currentDeclarationFilter } = await import(
+			"~/server/api/routers/declarationHelpers"
+		);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, USER_ID),
+		).resolves.toBeUndefined();
+		expect(currentDeclarationFilter).toHaveBeenCalledWith(
+			SIREN,
+			getCurrentYear(),
+		);
+		expect(declarationWhere).toHaveBeenCalledWith(CURRENT_DECLARATION_FILTER);
+		expect(db.select).toHaveBeenCalledTimes(1);
+	});
+
+	// Scoping this lookup to active declarations only would make the guard blind
+	// to a cancelled row that `uploadPipeline` still resolves and writes to.
+	it("still rejects when a cancelled declaration is locked by another user", async () => {
+		const { db } = guardDb(
+			[{ id: DECLARATION_ID }],
+			[{ ...HOLDER, userId: "user-2" }],
+		);
+		const {
+			assertDeclarationUnlockedForWrite,
+			DeclarationLockedByOtherUserError,
+		} = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, USER_ID),
+		).rejects.toBeInstanceOf(DeclarationLockedByOtherUserError);
 	});
 });
 

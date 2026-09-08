@@ -2,8 +2,13 @@ import "server-only";
 
 import { and, eq, gt, lte, or } from "drizzle-orm";
 
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	getCurrentYear,
+} from "~/modules/domain";
+import { currentDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import type { DB } from "~/server/db";
-import { declarationLocks, users } from "~/server/db/schema";
+import { declarationLocks, declarations, users } from "~/server/db/schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
@@ -83,6 +88,43 @@ export async function getLockReadState(
 			email: activeLock.email,
 		},
 	};
+}
+
+export class DeclarationLockedByOtherUserError extends Error {
+	constructor() {
+		super(DECLARATION_LOCK_CONFLICT_MESSAGE);
+		this.name = "DeclarationLockedByOtherUserError";
+	}
+}
+
+/**
+ * Deliberately looser than `declarationLockedWriteProcedure`, which demands a
+ * lock **owned by the caller**: REST clients never acquire one, so a free lock
+ * — or a declaration that does not exist yet — lets the write through. Merging
+ * the two intentions into one function would break `/api/upload`.
+ *
+ * Resolves through `currentDeclarationFilter`, the same filter `uploadPipeline`
+ * uses, cancelled rows included. Scoping the guard to active declarations only
+ * would let a write onto a cancelled-but-locked declaration slip past.
+ */
+export async function assertDeclarationUnlockedForWrite(
+	db: DbClient,
+	siren: string,
+	userId: string,
+): Promise<void> {
+	const rows = await db
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(currentDeclarationFilter(siren, getCurrentYear()))
+		.limit(1);
+
+	const declaration = rows[0];
+	if (!declaration) return;
+
+	const lock = await getActiveLock(db, declaration.id);
+	if (lock && lock.userId !== userId) {
+		throw new DeclarationLockedByOtherUserError();
+	}
 }
 
 /**

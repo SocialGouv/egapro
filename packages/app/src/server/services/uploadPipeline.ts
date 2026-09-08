@@ -8,6 +8,7 @@ import {
 	type FlowType,
 	UPLOAD_REQUEST_TIMEOUT_MS,
 } from "~/modules/shared/uploadConfig";
+import { currentDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import { db } from "~/server/db";
 import { declarations, files } from "~/server/db/schema";
 
@@ -210,7 +211,7 @@ async function findCurrentDeclaration(
 	const rows = await db
 		.select({ id: declarations.id })
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(currentDeclarationFilter(siren, year))
 		.limit(1);
 	return rows[0] ?? null;
 }
