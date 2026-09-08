@@ -1,4 +1,5 @@
 import type { GipGapReference } from "~/modules/domain";
+import { REMUNERATION_STEP_NUMBERS } from "~/modules/routes";
 
 export type WorkforceRow = {
 	name: string;
@@ -127,4 +128,4 @@ export const STEP_TITLES = [
 	"Récapitulatif de votre déclaration",
 ] as const;
 
-export const TOTAL_STEPS = 6;
+export const TOTAL_STEPS = REMUNERATION_STEP_NUMBERS.length;

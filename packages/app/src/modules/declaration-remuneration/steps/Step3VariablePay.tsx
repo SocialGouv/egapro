@@ -8,6 +8,7 @@ import {
 	normalizeDecimalInput,
 	padDecimalToTwo,
 } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -181,7 +182,7 @@ export function Step3VariablePay({
 	const mutation = api.declaration.updateStep3.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/4");
+			router.push(remunerationStepHref(4));
 		},
 	});
 
@@ -547,10 +548,8 @@ export function Step3VariablePay({
 
 				<FormActions
 					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						hasSavedData ? "/declaration-remuneration/etape/4" : undefined
-					}
-					previousHref="/declaration-remuneration/etape/2"
+					mimoquageNextHref={hasSavedData ? remunerationStepHref(4) : undefined}
+					previousHref={remunerationStepHref(2)}
 				/>
 			</fieldset>
 		</form>

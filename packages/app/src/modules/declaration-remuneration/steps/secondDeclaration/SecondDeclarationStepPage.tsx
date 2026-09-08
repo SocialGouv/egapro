@@ -8,10 +8,14 @@ import {
 	isCseRequired,
 	shouldRedirectSubmittedToRecap,
 } from "~/modules/domain";
+import {
+	COMPLIANCE_PATH,
+	complianceStepHref,
+	toComplianceStep,
+} from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
-import { SECOND_DECLARATION_TOTAL_STEPS } from "./constants";
 import { COMPLIANCE_FUNNEL } from "./funnelConfig";
 import { SecondDeclarationStep1Info } from "./SecondDeclarationStep1Info";
 import { SecondDeclarationStep2Form } from "./SecondDeclarationStep2Form";
@@ -21,8 +25,9 @@ type Props = {
 	step: number;
 };
 
-export async function SecondDeclarationStepPage({ step }: Props) {
-	if (Number.isNaN(step) || step < 1 || step > SECOND_DECLARATION_TOTAL_STEPS) {
+export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
+	const step = toComplianceStep(rawStep);
+	if (step === null) {
 		notFound();
 	}
 
@@ -33,7 +38,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 	// Without that choice the company has no second declaration to fill, so send
 	// it back to the compliance path page rather than exposing the steps.
 	if (data.declaration.firstDeclarationPathChoice !== "corrective_action") {
-		redirect("/declaration-remuneration/parcours-conformite");
+		redirect(COMPLIANCE_PATH);
 	}
 
 	const company = await api.company.get({ siren: data.declaration.siren });
@@ -50,7 +55,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 			modificationDeadline: campaignDeadlines.decl2ModificationDeadline,
 		})
 	) {
-		redirect("/declaration-remuneration/parcours-conformite/etape/3");
+		redirect(complianceStepHref(3));
 	}
 
 	const initialCategories = mapToEmployeeCategoryRows(

@@ -6,10 +6,10 @@ import {
 	mapOpinionsFromDb,
 	Step1Opinions,
 	Step2Upload,
-	TOTAL_STEPS,
 } from "~/modules/cseOpinion";
 import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { computeGapHighFlags } from "~/modules/domain";
+import { toCseOpinionStep } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
@@ -22,9 +22,9 @@ export const metadata = { title: "Déclaration d'un avis du CSE" };
 
 export default async function CseOpinionStepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;
-	const step = Number.parseInt(stepParam, 10);
+	const step = toCseOpinionStep(Number.parseInt(stepParam, 10));
 
-	if (Number.isNaN(step) || step < 1 || step > TOTAL_STEPS) {
+	if (step === null) {
 		notFound();
 	}
 

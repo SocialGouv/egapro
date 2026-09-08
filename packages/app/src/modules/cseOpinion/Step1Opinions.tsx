@@ -9,9 +9,14 @@ import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getCurrentYear } from "~/modules/domain";
+import type { AppHref } from "~/modules/routes";
+import {
+	cseOpinionStepHref,
+	LAST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-
 import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
 import { CseStepIndicator } from "./components/CseStepIndicator";
 import { GapConsultationCard } from "./components/GapConsultationCard";
@@ -35,7 +40,7 @@ type Props = {
 	email?: string;
 	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
-	previousHref?: string;
+	previousHref?: AppHref;
 	secondDeclGapHigh?: boolean;
 	secondDeclarationPathChoice?: string | null;
 };
@@ -48,7 +53,7 @@ export function Step1Opinions({
 	email,
 	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
-	previousHref = "/declaration-remuneration/etape/6",
+	previousHref = remunerationStepHref(LAST_REMUNERATION_STEP),
 	secondDeclGapHigh = true,
 	secondDeclarationPathChoice,
 }: Props) {
@@ -122,7 +127,7 @@ export function Step1Opinions({
 	}, [form, isReadOnly, setField]);
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
-		onSuccess: () => router.push("/avis-cse/etape/2"),
+		onSuccess: () => router.push(cseOpinionStepHref(2)),
 	});
 
 	const onSubmit = form.handleSubmit((data) => {

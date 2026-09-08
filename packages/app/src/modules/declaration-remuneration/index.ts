@@ -33,7 +33,6 @@ export {
 	getNextStepHref,
 	getPreviousStepHref,
 	INDICATOR_G_STEP,
-	stepHref,
 } from "./shared/funnelSteps";
 export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
 export type {

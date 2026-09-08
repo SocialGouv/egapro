@@ -1,9 +1,6 @@
 import { expect, test } from "@playwright/test";
-
-import {
-	COMPLIANCE_PATH,
-	selectCompliancePath,
-} from "./helpers/compliance-flows";
+import { complianceStepHref } from "~/modules/routes";
+import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
@@ -17,7 +14,7 @@ import { completeDeclaration } from "./helpers/declaration-flows";
 // resolves those cascades, never cancels DSFR's callout artwork, and never evaluates the
 // `respond-from(md)` padding. Only a real browser holds this contract.
 
-const STEP_1_PATH = `${COMPLIANCE_PATH}/etape/1`;
+const STEP_1_PATH = complianceStepHref(1);
 
 // --background-alt-blue-france → --blue-france-975-75 in DSFR 1.14's light theme.
 const EXPECTED_BACKGROUND = "rgb(245, 245, 254)";

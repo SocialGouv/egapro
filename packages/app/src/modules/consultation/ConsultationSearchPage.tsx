@@ -1,6 +1,10 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { env } from "~/env.js";
+import {
+	API_PUBLIC_DECLARATIONS_EXPORT,
+	API_PUBLIC_REPRESENTATIONS_EXPORT,
+} from "~/modules/routes";
 import { JsonLd } from "~/modules/shared/JsonLd";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 import styles from "./ConsultationSearchPage.module.scss";
@@ -83,11 +87,11 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					</h2>
 					<DownloadDataModal
 						declarationsHref={exportHref(
-							"/api/public/declarations/export",
+							API_PUBLIC_DECLARATIONS_EXPORT,
 							params,
 						)}
 						representationsHref={exportHref(
-							"/api/public/representations/export",
+							API_PUBLIC_REPRESENTATIONS_EXPORT,
 							params,
 						)}
 					/>
@@ -133,6 +137,8 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 				<p className="fr-callout__text">
 					Explorez les tendances nationales par taille d’entreprise.
 				</p>
+				{/* `/stats` stays a literal here: #4342 removes that page, so it is
+				    deliberately absent from `~/modules/routes`. */}
 				<a className="fr-btn" href="/stats">
 					Statistiques générales
 				</a>

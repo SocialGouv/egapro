@@ -1,33 +1,40 @@
-export const INDICATOR_G_STEP = 5;
+import type { RemunerationStep, RemunerationStepRoute } from "~/modules/routes";
+import {
+	REMUNERATION_STEP_NUMBERS,
+	remunerationStepHref,
+	toRemunerationStep,
+} from "~/modules/routes";
 
-const ALL_STEPS = [1, 2, 3, 4, 5, 6] as const;
+export const INDICATOR_G_STEP: RemunerationStep = 5;
 
-export function stepHref(step: number): string {
-	return `/declaration-remuneration/etape/${step}`;
-}
-
-export function getFunnelSteps(indicatorGRequired: boolean): number[] {
+export function getFunnelSteps(
+	indicatorGRequired: boolean,
+): RemunerationStep[] {
 	return indicatorGRequired
-		? [...ALL_STEPS]
-		: ALL_STEPS.filter((step) => step !== INDICATOR_G_STEP);
+		? [...REMUNERATION_STEP_NUMBERS]
+		: REMUNERATION_STEP_NUMBERS.filter((step) => step !== INDICATOR_G_STEP);
 }
 
 export function getNextStepHref(
 	currentStep: number,
 	indicatorGRequired: boolean,
-): string | undefined {
+): RemunerationStepRoute | undefined {
+	const step = toRemunerationStep(currentStep);
+	if (step === null) return undefined;
 	const steps = getFunnelSteps(indicatorGRequired);
-	const index = steps.indexOf(currentStep);
+	const index = steps.indexOf(step);
 	const next = index < 0 ? undefined : steps[index + 1];
-	return next === undefined ? undefined : stepHref(next);
+	return next === undefined ? undefined : remunerationStepHref(next);
 }
 
 export function getPreviousStepHref(
 	currentStep: number,
 	indicatorGRequired: boolean,
-): string | undefined {
+): RemunerationStepRoute | undefined {
+	const step = toRemunerationStep(currentStep);
+	if (step === null) return undefined;
 	const steps = getFunnelSteps(indicatorGRequired);
-	const index = steps.indexOf(currentStep);
+	const index = steps.indexOf(step);
 	const previous = index <= 0 ? undefined : steps[index - 1];
-	return previous === undefined ? undefined : stepHref(previous);
+	return previous === undefined ? undefined : remunerationStepHref(previous);
 }

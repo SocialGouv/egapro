@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
-
+import { API_AUTH_LOGOUT, MY_SPACE_COMPANIES } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./MobileUserBlock.module.scss";
 
@@ -94,7 +94,7 @@ export function MobileUserBlock({ userName, userEmail, userPhone }: Props) {
 				<li>
 					<Link
 						className="fr-btn fr-btn--tertiary-no-outline fr-icon-building-line fr-btn--icon-left"
-						href="/mon-espace/mes-entreprises"
+						href={MY_SPACE_COMPANIES}
 					>
 						Mes entreprises
 					</Link>
@@ -113,7 +113,7 @@ export function MobileUserBlock({ userName, userEmail, userPhone }: Props) {
 					    (ProConnect), so a full browser navigation is needed. */}
 					<a
 						className="fr-btn fr-btn--secondary fr-icon-logout-box-r-line fr-btn--icon-left"
-						href="/api/auth/logout"
+						href={API_AUTH_LOGOUT}
 					>
 						Se déconnecter
 					</a>

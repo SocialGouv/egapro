@@ -3,10 +3,10 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getCurrentYear, parseSiren } from "~/modules/domain";
+import { MY_SPACE_COMPANIES } from "~/modules/routes";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { api } from "~/trpc/server";
-
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
 export async function MonEspacePage({ siret, userPhone }: Props) {
 	const siren = parseSiren(siret);
 	if (siren === null) {
-		redirect("/mon-espace/mes-entreprises");
+		redirect(MY_SPACE_COMPANIES);
 	}
 	const currentYear = getCurrentYear();
 	const [data, campaignDeadlines, representationCampaign, lockState] =

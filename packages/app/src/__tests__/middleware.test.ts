@@ -16,7 +16,15 @@ vi.mock("~/env", () => ({
 	},
 }));
 
-import { middleware } from "~/middleware";
+import { config, middleware } from "~/middleware";
+import {
+	ADMIN,
+	API_SEARCH,
+	API_V1_PREFIX,
+	CSE_OPINION,
+	DECLARATION_REMUNERATION,
+	MY_SPACE,
+} from "~/modules/routes";
 
 function makeRequest(
 	pathnameAndSearch = "/admin",
@@ -263,5 +271,25 @@ describe("search redirect (/api/search → /api/public/declarations)", () => {
 		mockGetToken.mockReset();
 		await middleware(makeRequest("/api/search?q=test"));
 		expect(mockGetToken).not.toHaveBeenCalled();
+	});
+});
+
+describe("matcher coverage", () => {
+	// Next reads `config.matcher` at build time and cannot evaluate an imported
+	// constant there, so those six patterns are written out by hand. This pins
+	// them to `~/modules/routes`: renaming a section without updating the matcher
+	// would leave it silently unguarded.
+	it("covers every section the middleware guards", () => {
+		const patterns = new Set<string>(config.matcher);
+		for (const section of [
+			ADMIN,
+			MY_SPACE,
+			DECLARATION_REMUNERATION,
+			CSE_OPINION,
+		]) {
+			expect(patterns.has(`${section}/:path*`)).toBe(true);
+		}
+		expect(patterns.has(`${API_V1_PREFIX}:path*`)).toBe(true);
+		expect(patterns.has(API_SEARCH)).toBe(true);
 	});
 });

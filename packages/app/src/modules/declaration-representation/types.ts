@@ -1,5 +1,6 @@
 import type { z } from "zod";
 
+import { REPRESENTATION_STEP_NUMBERS } from "~/modules/routes";
 import type { representationDeclarations } from "~/server/db/schema";
 import type {
 	executivesSchema,
@@ -30,7 +31,7 @@ export type SubmitRepresentationInput = z.infer<
 	ReturnType<typeof submitRepresentationSchema>
 >;
 
-export const TOTAL_REPRESENTATION_STEPS = 5;
+export const TOTAL_REPRESENTATION_STEPS = REPRESENTATION_STEP_NUMBERS.length;
 
 export const REPRESENTATION_STEP_SLUGS = [
 	"periode-de-reference",

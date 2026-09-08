@@ -4,6 +4,7 @@ import {
 	getPublicDeclarationsBySiren,
 	getPublicRepresentationsBySiren,
 } from "~/modules/public-api";
+import { observatoryCompanyHref } from "~/modules/routes";
 
 type Props = {
 	params: Promise<{ siren: string }>;
@@ -27,7 +28,7 @@ export async function generateMetadata({
 		description: company
 			? `Consultez les indicateurs publics d’égalité professionnelle de l’entreprise ${company.name ?? siren}.`
 			: undefined,
-		alternates: { canonical: `/index-egapro/entreprise/${siren}` },
+		alternates: { canonical: observatoryCompanyHref(siren) },
 		// Only the canonical view — the latest published campaign — is indexed;
 		// past and future years stay reachable through the client-side selector.
 		...(query.year ? { robots: { index: false, follow: true } } : {}),

@@ -4,6 +4,7 @@ import {
 	type ObservatoryWorkforceRange,
 } from "~/modules/domain";
 import type { PublicSearchInput } from "~/modules/public-api";
+import { routeWithQuery } from "~/modules/routes";
 import {
 	DEFAULT_PAGE_SIZE,
 	FACET_KEYS,
@@ -106,7 +107,7 @@ export function buildSearchQuery(
  * caller's criteria. The string is re-parsed through the facet whitelist rather
  * than reflected: an unknown or hostile key never reaches the rebuilt URL.
  */
-export function backToSearchHref(from: string | undefined): string {
+export function backToSearchHref(from: string | undefined) {
 	if (!from) return SEARCH_PATH;
 	const query = new URLSearchParams(from);
 	const raw: Record<string, string | string[]> = {};
@@ -122,9 +123,8 @@ export function backToSearchHref(from: string | undefined): string {
 export function searchHref(
 	params: ConsultationSearchParams,
 	overrides: Partial<Record<"page" | "limit", number>> = {},
-): string {
-	const query = buildSearchQuery(params, overrides);
-	return query ? `${SEARCH_PATH}?${query}` : SEARCH_PATH;
+) {
+	return routeWithQuery(SEARCH_PATH, buildSearchQuery(params, overrides));
 }
 
 export function exportHref(

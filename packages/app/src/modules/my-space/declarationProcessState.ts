@@ -1,10 +1,18 @@
-// Submodule imports, not the barrel — the barrel drags declaration-remuneration's (server-touching) tree into this client bundle.
-import {
-	REPRESENTATION_FUNNEL_ROOT,
-	stepHref,
-} from "~/modules/declaration-representation/steps";
-import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import { isCseOpinionResolved } from "~/modules/domain";
+// `~/modules/routes` is strings only, so the barrel is safe here: unlike the
+// declaration-representation barrel it drags no server-touching tree into this
+// client bundle.
+import {
+	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+	clampRepresentationStep,
+	complianceStepHref,
+	DECLARATION_REMUNERATION,
+	DECLARATION_REPRESENTATION,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import type { DeclarationItem } from "./types";
 
@@ -44,32 +52,32 @@ export function computePanelVariant(
 	}
 }
 
-export function computeCtaHref(
-	declaration: DeclarationItem | undefined,
-	siren: string,
-): string {
+// No `?siren=` is appended: every one of these pages resolves the declaration
+// from the session (`companyProcedure` binds the SIREN), and none ever read the
+// query.
+export function computeCtaHref(declaration: DeclarationItem | undefined) {
 	const fsmStatus = declaration?.fsmStatus ?? null;
 	if (fsmStatus === null) {
-		return `/declaration-remuneration?siren=${siren}`;
+		return DECLARATION_REMUNERATION;
 	}
 
 	switch (fsmStatus) {
 		case "draft":
-			return `/declaration-remuneration?siren=${siren}`;
+			return DECLARATION_REMUNERATION;
 		case "awaiting_compliance_path_choice":
 		case "awaiting_revision_choice":
-			return `/declaration-remuneration/parcours-conformite?siren=${siren}`;
+			return COMPLIANCE_PATH;
 		case "corrective_actions_chosen":
-			return `/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`;
+			return complianceStepHref(1);
 		case "joint_evaluation_chosen":
 		case "revised_joint_evaluation_chosen":
-			return `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`;
+			return COMPLIANCE_JOINT_EVALUATION;
 		case "awaiting_cse_opinion":
-			return `/avis-cse?siren=${siren}`;
+			return CSE_OPINION;
 		case "demarche_completed":
 			return cseOpinionResolvedFor(declaration)
-				? `/declaration-remuneration?siren=${siren}`
-				: `/avis-cse?siren=${siren}`;
+				? DECLARATION_REMUNERATION
+				: CSE_OPINION;
 	}
 }
 
@@ -104,13 +112,16 @@ export function computeRepresentationPanelVariant(
 export function computeRepresentationCtaHref(
 	declaration: DeclarationItem | undefined,
 	campaignOpen: boolean,
-): string {
-	if (!campaignOpen) return stepHref(TOTAL_REPRESENTATION_STEPS);
-	if (declaration?.notSubject) return REPRESENTATION_FUNNEL_ROOT;
+) {
+	const recapHref = representationStepHref(LAST_REPRESENTATION_STEP);
+	if (!campaignOpen) return recapHref;
+	if (declaration?.notSubject) return DECLARATION_REPRESENTATION;
 	const progress = getRepresentationProgress(declaration);
-	if (progress === "submitted") return stepHref(TOTAL_REPRESENTATION_STEPS);
+	if (progress === "submitted") return recapHref;
 	if (progress === "draft") {
-		return stepHref(Math.max(declaration?.currentStep ?? 1, 1));
+		return representationStepHref(
+			clampRepresentationStep(declaration?.currentStep ?? 1),
+		);
 	}
-	return REPRESENTATION_FUNNEL_ROOT;
+	return DECLARATION_REPRESENTATION;
 }
