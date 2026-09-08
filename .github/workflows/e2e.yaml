@@ -32,6 +32,13 @@ jobs:
       # stays unreachable in production, which is gated by NODE_ENV on top of
       # this flag, and the flag is set in no .kontinuous env config.
       EGAPRO_E2E_CLOCK: "true"
+      # Test-only admin two-factor seam (#4467). Since #4461 /admin demands an
+      # `eidas1-mfa` sign-in, and the FIA1V2 test identity has no second factor
+      # a headless run can present, so without this flag every backoffice spec
+      # lands on the resume screen. The seam additionally demands a loopback
+      # host and is declared in no .kontinuous env config — asserted by
+      # src/server/auth/__tests__/e2eFlagsAbsentFromDeployConfig.test.ts.
+      EGAPRO_E2E_ADMIN_MFA: "true"
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin
