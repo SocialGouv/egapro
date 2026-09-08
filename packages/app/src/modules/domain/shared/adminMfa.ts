@@ -26,3 +26,42 @@ export function isAdminMfaFresh(
 	// back to ProConnect after a successful second factor.
 	return elapsedSeconds < ADMIN_MFA_WINDOW_SECONDS;
 }
+
+// Read from the session alone: a reason carried in the URL would be displayable at will.
+export type AdminMfaFailure = "expired" | "missing";
+
+export type AdminAccessDecision =
+	| { type: "login" }
+	| { type: "monEspace" }
+	| { type: "resume"; reason: AdminMfaFailure }
+	| { type: "allow" };
+
+// `isAdmin` is optional because a token minted before the field existed carries no value, which is not `false`.
+export type AdminSessionState = {
+	isAdmin?: boolean;
+	adminMfaAt?: number | null;
+};
+
+// The single decision table of the `/admin` surface: Edge middleware, backoffice layout and resume screen all run this one.
+export function resolveAdminAccess(
+	session: AdminSessionState | null | undefined,
+	now: Date,
+): AdminAccessDecision {
+	// A token predating the admin field cannot be judged; only a fresh sign-in produces one that can.
+	if (!session || session.isAdmin === undefined) return { type: "login" };
+
+	if (!session.isAdmin) return { type: "monEspace" };
+
+	if (!isAdminMfaFresh(session.adminMfaAt, now)) {
+		return {
+			type: "resume",
+			reason:
+				typeof session.adminMfaAt === "number" &&
+				Number.isFinite(session.adminMfaAt)
+					? "expired"
+					: "missing",
+		};
+	}
+
+	return { type: "allow" };
+}
