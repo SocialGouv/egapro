@@ -14,8 +14,9 @@ function createLockedCaller(
 	mockDb: unknown,
 	siret?: string | null,
 	impersonation?: { siren: string; name: string } | null,
+	email?: string,
 ) {
-	return createCaller(withLockMiddleware(mockDb), siret, impersonation);
+	return createCaller(withLockMiddleware(mockDb), siret, impersonation, email);
 }
 
 vi.mock("~/server/auth", () => ({
@@ -24,6 +25,19 @@ vi.mock("~/server/auth", () => ({
 
 vi.mock("~/server/db", () => ({
 	db: {},
+}));
+
+const { mockEnqueueReceipt } = vi.hoisted(() => ({
+	mockEnqueueReceipt: vi.fn().mockResolvedValue(undefined),
+}));
+
+// submitDeclaration and submitJointEvaluation enqueue their confirmation
+// receipt themselves, after their transaction commits — mock the dynamic
+// import so it can be asserted without touching the real queue. Most tests
+// below don't pass a session email, so the guarded call never fires and this
+// mock stays untouched (issue #4300).
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: mockEnqueueReceipt,
 }));
 
 const { mockGetCampaignDeadlines } = vi.hoisted(() => ({
@@ -385,6 +399,7 @@ function createSimpleSelectDb(
 describe("declarationRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		mockEnqueueReceipt.mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
@@ -1323,6 +1338,73 @@ describe("declarationRouter", () => {
 			expect(purgeCall).toBeDefined();
 			expect(purgeCall?.draft).toBeNull();
 			expect(purgeCall?.draftUpdatedAt).toBeNull();
+		});
+
+		// Regression guard (#4300): the "démarche terminée" receipt used to fire
+		// from the upload route on every file received, ahead of a successful
+		// submit and surviving its failure. It now fires exactly once here, after
+		// the transaction that materialises the Submit action commits — moved
+		// from src/app/api/upload/__tests__/route.test.ts.
+		describe("confirmation mail on submitJointEvaluation", () => {
+			it("enqueues a jointEvaluation receipt after the transaction commits", async () => {
+				const declaration = buildDeclaration({
+					status: "joint_evaluation_chosen",
+					cseRequired: true,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				const result = await caller.submitJointEvaluation();
+
+				expect(result).toEqual({ success: true });
+				expect(mockEnqueueReceipt).toHaveBeenCalledTimes(1);
+				expect(mockEnqueueReceipt).toHaveBeenCalledWith({
+					kind: "jointEvaluation",
+					to: "user@example.com",
+					siren: "339787277",
+					year: expect.any(Number),
+					userId: "user-1",
+					isResend: false,
+				});
+			});
+
+			it("does not enqueue any receipt when the session has no email", async () => {
+				const declaration = buildDeclaration({
+					status: "joint_evaluation_chosen",
+					cseRequired: true,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(ctx.db);
+
+				const result = await caller.submitJointEvaluation();
+
+				expect(result).toEqual({ success: true });
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+
+			it("does not enqueue a receipt when the declaration is missing", async () => {
+				const selectQueue = createSelectQueue([[]]);
+				const mockDb = {
+					select: selectQueue.select,
+					update: vi.fn(),
+				} as unknown;
+				const caller = await createLockedCaller(
+					mockDb,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.submitJointEvaluation()).rejects.toThrow();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
 		});
 	});
 

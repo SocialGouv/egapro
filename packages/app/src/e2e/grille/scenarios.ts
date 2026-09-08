@@ -18,6 +18,7 @@ import {
 } from "../helpers/declaration-flows";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "../helpers/dsfr";
 import { recapStepperLabel } from "../helpers/indicator-g";
+import { expectCompletionReceiptWhenMailChainUp } from "../helpers/receipts";
 import type { Coordinate } from "./coordinates";
 
 export type ScenarioContext = {
@@ -187,11 +188,20 @@ export const FICHE_SCENARIOS = {
 	},
 
 	"CAS-03": async ({ page }) => {
+		// Taken before the funnel: the receipt is matched on emails newer than this,
+		// so the grid's 185 coordinates can share one Mailpit without clearing it.
+		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 		await finDeDemarche(page, {
 			url: `**${CONFIRMATION_PATH}`,
 			completed: true,
+		});
+		// The justify-without-CSE path ends here, so the acknowledgement of #4293 is
+		// part of this nominal case — not a case of its own.
+		await expectCompletionReceiptWhenMailChainUp({
+			round: "first",
+			since: startedAt,
 		});
 	},
 
@@ -205,7 +215,17 @@ export const FICHE_SCENARIOS = {
 		});
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapConsulted: true, opinion });
+		// Pin the opinion fieldset — it only renders once consultation is truthy —
+		// before reading the negative assertion below: the loading placeholder
+		// would otherwise satisfy toHaveCount(0) without proving anything.
+		await expect(page.locator("#first-decl-gap-opinion-legend")).toBeVisible();
+		await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
+			0,
+		);
+		await fillCseStep1(page, {
+			firstDeclGapConsultationImplicit: true,
+			opinion,
+		});
 		await submitCseStep2(page, {
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
@@ -249,7 +269,10 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
-		await fillCseStep1(page, { hasSecondDeclaration: true });
+		await fillCseStep1(page, {
+			hasSecondDeclaration: true,
+			secondDeclGapCardHidden: true,
+		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
@@ -261,6 +284,7 @@ export const FICHE_SCENARIOS = {
 	},
 
 	"CAS-09": async ({ page }) => {
+		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: true });
@@ -269,6 +293,12 @@ export const FICHE_SCENARIOS = {
 		await finDeDemarche(page, {
 			url: `**${CONFIRMATION_PATH}`,
 			completed: true,
+		});
+		// Round 2 closes on the same justify-without-CSE transition, so the receipt
+		// is the second-declaration one — a round-1 subject here would be the bug.
+		await expectCompletionReceiptWhenMailChainUp({
+			round: "second",
+			since: startedAt,
 		});
 	},
 

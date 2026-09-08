@@ -69,7 +69,7 @@ const CAMPAIGN_DEADLINES = {
 };
 
 const declarationRow = {
-	status: "declared",
+	status: "demarche_completed",
 	cseRequired: false,
 	secondDeclarationStep: null,
 	firstDeclarationPathChoice: null,
@@ -412,8 +412,12 @@ describe("enqueueReceipt — variant derivation", () => {
 			unknown
 		>;
 
-	it("selects cse_to_deposit for a declaration when the CSE is required and there is no gap", async () => {
-		stubContext({ ...declarationRow, cseRequired: true });
+	it("selects cse_to_deposit for a declaration when a CSE opinion is awaited", async () => {
+		stubContext({
+			...declarationRow,
+			status: "awaiting_cse_opinion",
+			cseRequired: true,
+		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
@@ -425,7 +429,7 @@ describe("enqueueReceipt — variant derivation", () => {
 	it("attaches the round-1 deadline to a first declaration", async () => {
 		stubContext({
 			...declarationRow,
-			firstDeclarationPathChoice: "justify",
+			status: "awaiting_compliance_path_choice",
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
@@ -440,7 +444,7 @@ describe("enqueueReceipt — variant derivation", () => {
 	it("attaches the administrable round-2 deadline to a second declaration", async () => {
 		stubContext({
 			...declarationRow,
-			secondDeclarationPathChoice: "justify",
+			status: "awaiting_revision_choice",
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
@@ -467,6 +471,58 @@ describe("enqueueReceipt — variant derivation", () => {
 		stubContext({
 			...declarationRow,
 			status: "awaiting_revision_choice",
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(payloadOf().variant).toBe("path_to_select");
+	});
+
+	// Regression — issue #4293: CAS-03/CAS-07/CAS-09 all reach this shape —
+	// a compliance path was chosen earlier (round 1 or round 2) and the FSM
+	// has since reached its terminal status. The old proxy
+	// (`isInComplianceProcess`) stayed true forever once any path was chosen,
+	// so the acknowledgement wrongly read "you still need to choose a path"
+	// even though the démarche was already over.
+	it("selects completed once the démarche is over, even though a path was chosen earlier", async () => {
+		stubContext({
+			...declarationRow,
+			status: "demarche_completed",
+			firstDeclarationPathChoice: "justify",
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "declaration" });
+
+		expect(payloadOf().variant).toBe("completed");
+		expect(payloadOf().complianceDeadline).toBeUndefined();
+	});
+
+	// CAS-08 shape: round-1 corrective action chosen, second declaration
+	// resolves with a CSE opinion still expected — settled path choice, not
+	// yet a terminal state.
+	it("selects cse_to_deposit for a second declaration once its path choice is settled but a CSE is expected", async () => {
+		stubContext({
+			...declarationRow,
+			status: "awaiting_cse_opinion",
+			firstDeclarationPathChoice: "corrective_action",
+			cseRequired: true,
+		});
+
+		await enqueueReceipt({ ...baseInput, kind: "secondDeclaration" });
+
+		expect(payloadOf().variant).toBe("cse_to_deposit");
+	});
+
+	// Regression: a manual resend while a path was chosen but the funnel is
+	// still open (round 1 corrective action, round 2 not yet resolved) must
+	// not read as "déposez l'avis du CSE" — that step isn't next.
+	// `cseRequired: true` alone used to be enough to pick `cse_to_deposit`;
+	// it no longer participates in this selection at all.
+	it("selects path_to_select, not cse_to_deposit, once corrective actions are chosen and a CSE is required", async () => {
+		stubContext({
+			...declarationRow,
+			status: "corrective_actions_chosen",
+			cseRequired: true,
 		});
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
@@ -540,12 +596,15 @@ describe("enqueueReceipt — variant derivation", () => {
 		expect(payloadOf().variant).toBe("single");
 	});
 
-	it("falls back to a neutral context and the siren as raisonSociale when no declaration and no company are found", async () => {
+	it("falls back to path_to_select and the siren as raisonSociale when no declaration and no company are found", async () => {
 		stubContext(null, null);
 
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
-		expect(payloadOf().variant).toBe("completed");
+		expect(payloadOf().variant).toBe("path_to_select");
+		expect(payloadOf().complianceDeadline).toBe(
+			CAMPAIGN_DEADLINES.pathChoiceRound1Deadline.toISOString(),
+		);
 		expect(payloadOf().raisonSociale).toBe("552100554");
 	});
 

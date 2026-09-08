@@ -1512,6 +1512,29 @@ describe("Step5EmployeeCategories — pay cells of a category at 0 (#3678)", () 
 		});
 	});
 
+	it("keeps inconsistencies until every explicit 0 has been corrected", async () => {
+		const user = userEvent.setup();
+		renderStep();
+
+		await fillAnnualAmountsThenZero(user);
+		await setCount(user, "horaire", "femmes", "0");
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+
+		await setCount(user, "annuelle", "hommes", "2");
+
+		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+		for (const label of ANNUAL_PAY_CELL_LABELS) {
+			expect(screen.getByLabelText(label)).toHaveAttribute(
+				"aria-invalid",
+				"true",
+			);
+		}
+
+		await setCount(user, "horaire", "femmes", "");
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+	});
+
 	it("keeps the cell the user is editing operable, and greys it once focus leaves", async () => {
 		const user = userEvent.setup();
 		renderStep();

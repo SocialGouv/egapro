@@ -183,6 +183,7 @@ export type { GipGapReference } from "./shared/gap";
 export {
 	computeGap,
 	computeGapBetween,
+	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
 	gapDirection,

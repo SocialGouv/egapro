@@ -9,8 +9,8 @@
 
 ### 2. L'analyse, par la GitHub Action
 
-`.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée à un
-tag de version explicite :
+`.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y, épinglée au
+SHA du commit de release avec un commentaire `# vX.Y.Z` :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
@@ -137,7 +137,7 @@ là-dessus** — `Critère 12.5 déclaré indécidable, mais il porte désormais
 la liste`. C'est le comportement recherché : une dispense ne survit pas à ce qu'elle excusait, et
 la porte l'exige elle-même plutôt que d'attendre qu'on y pense.
 
-En amont, `maxgfr/ultra11y#36` traite la cause, et c'est livré en **5.34.1** : le refus nomme
+En amont, `SocialGouv/ultra11y#36` traite la cause, et c'est livré en **5.34.1** : le refus nomme
 désormais la moisson du critère au lieu de ne montrer que le symptôme, et `ABSENCE_RULE` dit de
 citer la région inspectée.
 
@@ -374,8 +374,10 @@ Trois surfaces à bouger ensemble — deux dans le dépôt, une hors dépôt :
 
 ```bash
 pnpm --filter app add -D ultra11y@<version>   # version EXACTE, pas de ^
-# puis aligner les DEUX `maxgfr/ultra11y@v<version>` de .github/workflows/a11y.yaml
-./scripts/a11y/check-ultra11y-version.sh      # le job CI qui refuse une demi-montée
+# puis aligner les DEUX `uses:` de .github/workflows/a11y.yaml sur le SHA de release :
+#   uses: SocialGouv/ultra11y@<sha> # v<version>
+# Le SHA doit correspondre au commit de la release `v<version>`.
+./scripts/a11y/check-ultra11y-version.sh      # refuse une demi-montée, y compris SHA ≠ version npm
 ```
 
 La devDependency et les deux usages de l'Action sont alignés sur **5.42.1**, et ce n'est plus une
@@ -385,8 +387,8 @@ avec la devDependency et l'Action les RÉINGÈRE avec son moteur embarqué ; deu
 formats, et rien ne lève d'erreur.
 
 Le **plugin Claude Code** est la quatrième surface, hors dépôt, et la seule que rien ici ne peut
-pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au tag
-d'`a11y.yaml` au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
+pinner. Le hook `check-ultra11y-plugin.sh` compare hors ligne la version installée au pin
+d'`a11y.yaml` (`@vX.Y.Z` ou `# vX.Y.Z`) au premier prompt de chaque session, et ne touche au réseau qu'en cas d'écart. Il a
 été écrit pour une raison mesurée : le 31/08/2026, le plugin était en **4.5.1** pendant que le
 dépôt tournait en 5.40.1.
 

@@ -235,37 +235,33 @@ export function CategoryForm({
 						)
 					: [],
 			);
-			if (raw === "") {
-				form.setValue(`categories.${index}.${formField}`, raw);
-				// An emptied headcount is no longer an explicit 0, so the category
-				// declares pay again: its inconsistencies are gone (#3678).
-				setCategoryErrors((errors) =>
-					errors.filter(
-						(error) =>
-							error.fieldId !== changedFieldId &&
-							!(
-								error.category === "inconsistent" &&
-								categoryPayFieldIds.has(error.fieldId)
-							),
-					),
-				);
-				setHasData(false);
-				return;
+			if (raw !== "") {
+				if (isInteger && /\D/.test(raw)) return;
+				const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
+				if (Number.isNaN(n) || n < 0) return;
 			}
-			if (isInteger && /\D/.test(raw)) return;
-			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
-			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
+			const categoryPayApplicable = isCategoryPayApplicable(
+				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
+			);
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
-					if (error.fieldId === changedFieldId) return false;
+					if (error.fieldId === changedFieldId) {
+						if (isCountField) return false;
+						if (error.category === "inconsistent") {
+							return !categoryPayApplicable && raw !== "";
+						}
+						return false;
+					}
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
-					// A headcount at 0 releases every pay cell of its category, which
-					// then declares no remuneration at all (#3678). Any other headcount
-					// only clears the inconsistency that 0 had raised.
-					return n !== 0 && error.category !== "inconsistent";
+					// Clear only the errors made obsolete by the resulting category
+					// state. Correcting one of several zeros must not hide the remaining
+					// inconsistency until every explicit zero is gone (#3678).
+					return categoryPayApplicable
+						? error.category !== "inconsistent"
+						: error.category !== "empty";
 				}),
 			);
 			setHasData(false);

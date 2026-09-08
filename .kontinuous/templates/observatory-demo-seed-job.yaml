@@ -6,6 +6,10 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
+    # On upgrades, wait for the GIP MDS import hook (default weight 0) to
+    # finish before recreating the demo data. Otherwise both jobs race and the
+    # full-year GIP replacement can delete the workforce rows just seeded.
+    helm.sh/hook-weight: "10"
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   activeDeadlineSeconds: 300

@@ -824,9 +824,21 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			categoryIndex: number,
 			state: "enabled" | "disabled",
 		) => {
+			const disabledHintId = `cat-${categoryIndex - 1}-pay-disabled-hint`;
 			for (const cell of categoryPayCells(page, categoryIndex)) {
 				if (state === "enabled") await expect(cell).toBeEnabled();
-				else await expect(cell).toBeDisabled();
+				else {
+					await expect(cell).toBeDisabled();
+					await expect(cell).toHaveAttribute(
+						"aria-describedby",
+						disabledHintId,
+					);
+				}
+			}
+			if (state === "disabled") {
+				await expect(page.locator(`#${disabledHintId}`)).toContainText(
+					"Cette catégorie a au moins un effectif à 0",
+				);
 			}
 		};
 

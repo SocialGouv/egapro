@@ -4,14 +4,14 @@
 
 ## Un seul dispositif : ultra11y
 
-L'outil est **ultra11y** (`github.com/maxgfr/ultra11y`, MIT). Il n'y a **pas** de second système d'accessibilité dans ce dépôt, et c'est délibéré : deux jeux de règles sur un même sujet divergent, et celui qui n'a pas de moteur derrière lui est celui qui invente des non-conformités.
+L'outil est **ultra11y** (`github.com/SocialGouv/ultra11y`, MIT). Il n'y a **pas** de second système d'accessibilité dans ce dépôt, et c'est délibéré : deux jeux de règles sur un même sujet divergent, et celui qui n'a pas de moteur derrière lui est celui qui invente des non-conformités.
 
 Deux surfaces, et deux seulement.
 
 **La revue** — l'agent `rgaa-auditor` lance le skill **`review-a11y`** sur le code sous changement et rend son verdict. C'est tout ce qu'il fait : le skill cadre l'audit sur le diff, lance le moteur, réfute les faux positifs, tranche les critères de jugement depuis la source et nomme les critères de rendu comme risques résiduels. Le skill vient du plugin déclaré dans `.claude/settings.json` ; il s'installe une fois avec `claude plugin install ultra11y@ultra11y`. Le plugin apporte aussi un hook `PreToolUse` qui arrête un `git commit` / `git push` / `gh pr create` porteur de non-conformités — coupe-circuits `SKIP_A11Y=1` (une commande), `ULTRA11Y_HOOK=off` (une session), `"hook": { "failOn": "off" }` dans `.ultra11yrc.json` (le dépôt).
 
 **L'analyse** — `.github/workflows/a11y.yaml`, trois jobs portés par la même Action Ultra11y,
-épinglée à un tag de version explicite :
+épinglée au SHA du commit de release (`uses: SocialGouv/ultra11y@<sha> # vX.Y.Z`) :
 
 | Job | Quand | Ce qu'il fait |
 |---|---|---|

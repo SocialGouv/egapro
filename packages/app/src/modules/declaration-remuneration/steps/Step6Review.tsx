@@ -185,7 +185,7 @@ export function Step6Review({
 							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
-					nextLabel="Suivant"
+					nextLabel={isSubmitted ? "Suivant" : "Soumettre"}
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 

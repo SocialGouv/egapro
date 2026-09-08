@@ -94,6 +94,7 @@ type EuroCellProps = {
 	ariaLabel: string;
 	id: string;
 	disabled: boolean;
+	disabledDescriptionId?: string;
 	readOnly: boolean;
 	value: string;
 	onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -107,6 +108,7 @@ function EuroInputCell({
 	ariaLabel,
 	id,
 	disabled,
+	disabledDescriptionId,
 	readOnly,
 	value,
 	onBlur,
@@ -116,11 +118,17 @@ function EuroInputCell({
 	errors,
 }: EuroCellProps) {
 	const error = findFieldError(errors, id);
+	const ariaDescribedBy = [
+		describedByForField(errorAlertId, error),
+		disabledDescriptionId,
+	]
+		.filter(Boolean)
+		.join(" ");
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
 				<input
-					aria-describedby={describedByForField(errorAlertId, error)}
+					aria-describedby={ariaDescribedBy || undefined}
 					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
 					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
@@ -192,6 +200,7 @@ type RemunerationTableProps = {
 	cat: EmployeeCategory;
 	catIndex: number;
 	disabled: boolean;
+	disabledDescriptionId?: string;
 	readOnly: boolean;
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
@@ -209,6 +218,7 @@ function RemunerationTable({
 	cat,
 	catIndex,
 	disabled,
+	disabledDescriptionId,
 	readOnly,
 	pos,
 	blur,
@@ -255,6 +265,7 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-women")}
@@ -265,6 +276,7 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-men")}
@@ -288,6 +300,7 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-women")}
@@ -298,6 +311,7 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
+							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-men")}
@@ -402,6 +416,7 @@ export function CategoryDataTable({
 	errors,
 }: Props) {
 	const idPrefix = `cat-${catIndex}`;
+	const payDisabledHintId = `${idPrefix}-pay-disabled-hint`;
 	const [isEditingPay, setIsEditingPay] = useState(false);
 	// Greying an input that currently holds the focus makes the browser drop
 	// that focus to <body>. Erasing the last amount of a category at 0 is the
@@ -458,6 +473,7 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={payTablesDisabled}
+				disabledDescriptionId={payDisabled ? payDisabledHintId : undefined}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -475,6 +491,7 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={payTablesDisabled}
+				disabledDescriptionId={payDisabled ? payDisabledHintId : undefined}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}
@@ -486,6 +503,14 @@ export function CategoryDataTable({
 				scope="horaire"
 				title="Rémunération horaire brute moyenne"
 			/>
+
+			{payDisabled && (
+				<p className="fr-hint-text fr-mb-0" id={payDisabledHintId}>
+					Cette catégorie a au moins un effectif à 0&nbsp;: elle ne déclare pas
+					de rémunération. Corrigez ou videz chaque effectif à 0 pour réactiver
+					les champs.
+				</p>
+			)}
 		</div>
 	);
 }

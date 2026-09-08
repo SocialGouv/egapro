@@ -88,8 +88,15 @@ describe("CategoryAccordionItem — payDisabled (#3678)", () => {
 
 	it("greys out the 8 pay cells and keeps the 4 headcount cells operable", () => {
 		renderItem({ payDisabled: true });
+		const hint = screen.getByText(/au moins un effectif à 0/i);
+		expect(hint).toHaveAttribute("id", "cat-0-pay-disabled-hint");
 		for (const label of PAY_CELL_LABELS) {
-			expect(screen.getByLabelText(label)).toBeDisabled();
+			const input = screen.getByLabelText(label);
+			expect(input).toBeDisabled();
+			expect(input).toHaveAttribute(
+				"aria-describedby",
+				"cat-0-pay-disabled-hint",
+			);
 		}
 		for (const label of COUNT_CELL_LABELS) {
 			expect(screen.getByLabelText(label)).not.toBeDisabled();

@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 
@@ -16,8 +17,12 @@ type CseStep1Options = {
 	firstDeclGapConsulted?: boolean;
 	/** Same, for the corrective (second) declaration. */
 	secondDeclGapConsulted?: boolean;
+	/** The first-round justification choice already establishes consultation, so the yes/no radios are absent. */
+	firstDeclGapConsultationImplicit?: boolean;
 	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
 	secondDeclGapConsultationImplicit?: boolean;
+	/** No remaining gap ≥ 5% on the second declaration: the whole justification card is absent. */
+	secondDeclGapCardHidden?: boolean;
 	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
 	opinion?: "favorable" | "unfavorable";
 };
@@ -31,6 +36,7 @@ async function fillGapConsultation(
 	opinion: "favorable" | "unfavorable" = "favorable",
 	consultationIsImplicit = false,
 ) {
+	await expect(page.locator(`#${idPrefix}-legend`)).toBeVisible();
 	if (!consulted) {
 		await page.locator(`label[for="${idPrefix}-no"]`).click();
 		return;
@@ -47,7 +53,9 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		hasSecondDeclaration = false,
 		firstDeclGapConsulted = false,
 		secondDeclGapConsulted = false,
+		firstDeclGapConsultationImplicit = false,
 		secondDeclGapConsultationImplicit = false,
+		secondDeclGapCardHidden = false,
 		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
@@ -58,23 +66,36 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		await fillGapConsultation(
 			page,
 			"first-decl-gap",
-			firstDeclGapConsulted,
+			firstDeclGapConsulted || firstDeclGapConsultationImplicit,
 			"2025-03-15",
 			opinion,
+			firstDeclGapConsultationImplicit,
 		);
 		if (hasSecondDeclaration) {
 			await page
 				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
 				.click();
 			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-			await fillGapConsultation(
-				page,
-				"second-decl-gap",
-				secondDeclGapConsulted || secondDeclGapConsultationImplicit,
-				"2025-06-15",
-				opinion,
-				secondDeclGapConsultationImplicit,
-			);
+			if (secondDeclGapCardHidden) {
+				await expect(page.locator("#second-decl-gap-legend")).toHaveCount(0);
+			} else if (secondDeclGapConsultationImplicit) {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					true,
+					"2025-06-15",
+					opinion,
+					true,
+				);
+			} else {
+				await fillGapConsultation(
+					page,
+					"second-decl-gap",
+					secondDeclGapConsulted,
+					"2025-06-15",
+					opinion,
+				);
+			}
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL("**/avis-cse/etape/2");
@@ -158,6 +179,75 @@ export async function submitCseStep2(
 		await page.getByRole("button", { name: "Valider" }).click();
 		await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
 	});
+}
+
+/**
+ * Deposit files on CSE step 2, one upload request per entry — the form
+ * auto-uploads on selection. Lets a caller observe what a deposit alone
+ * triggers, before anything is submitted (#4300).
+ */
+export async function uploadCseFiles(page: Page, fileNames: string[]) {
+	await page.waitForURL("**/avis-cse/etape/2");
+	const pdf = await readFile(DUMMY_PDF);
+	for (const name of fileNames) {
+		const uploaded = page.waitForResponse(
+			(response) =>
+				response.url().includes("/api/upload") &&
+				response.request().method() === "POST",
+		);
+		await page
+			.locator("#cse-file-upload")
+			.setInputFiles([{ name, mimeType: "application/pdf", buffer: pdf }]);
+		await uploaded;
+		await expect(page.getByText(name, { exact: false }).first()).toBeVisible({
+			timeout: 30_000,
+		});
+	}
+}
+
+/**
+ * Associate deposited files to matrix columns. A column holds exactly one file,
+ * so each pairing is explicit. Each wait matches its own mutation rather than
+ * the next response to arrive: the payload is cumulative, so the response
+ * carrying this column proves every association ticked so far reached the
+ * server, which the optimistic submit gate does not.
+ */
+export async function associateCseContentTypes(
+	page: Page,
+	assignments: { column: CseColumn; fileName: string }[],
+	options: { hasSecondDeclaration?: boolean } = {},
+) {
+	const { hasSecondDeclaration = false } = options;
+	for (const { column, fileName } of assignments) {
+		const persisted = page.waitForResponse((response) => {
+			if (!response.url().includes("setFileContentTypes") || !response.ok()) {
+				return false;
+			}
+			const body = response.request().postData() ?? "";
+			return (
+				body.includes(`"type":"${column.type}"`) &&
+				body.includes(`"declarationNumber":${column.declarationNumber}`)
+			);
+		});
+		await page
+			.getByRole("checkbox", {
+				name: cseCheckboxName(column, fileName, hasSecondDeclaration),
+			})
+			.check();
+		await persisted;
+	}
+}
+
+/** Submit CSE step 2: certify, validate, then land on the confirmation page. */
+export async function submitCseOpinion(page: Page) {
+	const submit = page.getByRole("button", { name: "Soumettre" });
+	await expect(submit).toBeEnabled();
+	await submit.click();
+	await page
+		.getByText(/Je certifie que les avis transmis sont conformes/)
+		.click();
+	await page.getByRole("button", { name: "Valider" }).click();
+	await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
 }
 
 export async function uploadJointEvalPdf(page: Page) {

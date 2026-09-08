@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({
+	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
 }));
@@ -10,6 +14,13 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/services/s3", () => ({
 	deleteFile: vi.fn(),
+}));
+
+// finalize() enqueues the "démarche terminée" receipt itself, after the
+// transaction commits — mock the dynamic import so the call can be asserted
+// without touching the real queue (issue #4300).
+vi.mock("~/modules/mail/server", () => ({
+	enqueueReceipt: mocks.enqueueReceipt,
 }));
 
 const DEFAULT_DECLARATION = {
@@ -90,6 +101,9 @@ type FinalizeOptions = {
 	// When true, the opinion count query resolves to [] so its row is undefined,
 	// exercising the `?? 0` fallback in finalize().
 	emptyOpinionCountRow?: boolean;
+	// Mirrors a `second_declaration_submit` row in declarationStatusHistory —
+	// the same signal the Step 2 matrix reads (declarationData.hasSubmittedSecondDeclaration).
+	secondDeclarationSubmitted?: boolean;
 };
 
 // Select sequence of finalize():
@@ -100,7 +114,8 @@ type FinalizeOptions = {
 //   5 existingAssociations (.where)
 //   6 opinions with gapConsulted (.where)
 //   7 employee categories for the gap >= 5% gate (.innerJoin().where)
-//   8 (inside tx) declRow for draft purge (.where().limit)
+//   8 second_declaration_submit event lookup (.where().limit)
+//   9 (inside tx) declRow for draft purge (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
@@ -111,6 +126,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		associations = ASSOCIATIONS_FIRST_GAP,
 		categories = DEFAULT_CATEGORIES,
 		emptyOpinionCountRow = false,
+		secondDeclarationSubmitted = false,
 	} = options;
 
 	// Each association points to a real file (default: the single DEFAULT_FILE)
@@ -135,7 +151,14 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		if (call === 4) {
 			return Promise.resolve(declaration ? [declaration] : []);
 		}
-		if (call === 8 && txDraft !== null) {
+		if (call === 8) {
+			return Promise.resolve(
+				secondDeclarationSubmitted
+					? [{ eventType: "second_declaration_submit" }]
+					: [],
+			);
+		}
+		if (call === 9 && txDraft !== null) {
 			return Promise.resolve([{ draft: txDraft }]);
 		}
 		return Promise.resolve([]);
@@ -202,6 +225,7 @@ function createCaller(
 	mockDb: unknown,
 	siret: string | null = "33978727700015",
 	impersonation: { siren: string; name: string } | null = null,
+	email: string | null = "user@example.com",
 ) {
 	return import("../cseOpinion").then(({ cseOpinionRouter }) =>
 		cseOpinionRouter.createCaller({
@@ -209,6 +233,7 @@ function createCaller(
 			session: {
 				user: {
 					id: "user-1",
+					email,
 					siret,
 					isAdmin: impersonation !== null,
 					impersonation,
@@ -223,6 +248,7 @@ function createCaller(
 describe("cseOpinionRouter.finalize", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		mocks.enqueueReceipt.mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
@@ -250,6 +276,51 @@ describe("cseOpinionRouter.finalize", () => {
 			"cse_opinion_submit",
 			"demarche_complete",
 		]);
+	});
+
+	// Regression guard (#4300): the "démarche terminée" receipt used to fire on
+	// every file upload (route.ts), producing up to MAX_CSE_FILES duplicates and
+	// none on the actual Submit click. It now fires exactly once here, after the
+	// transaction that materialises the Submit action commits — moved from
+	// src/app/api/upload/__tests__/route.test.ts.
+	describe("confirmation mail on finalize", () => {
+		it("enqueues a cseOpinion receipt after the transaction commits", async () => {
+			const ctx = createMockDbForFinalize();
+			const caller = await createCaller(ctx.db);
+
+			const result = await caller.finalize();
+
+			expect(result).toEqual({ success: true });
+			expect(mocks.enqueueReceipt).toHaveBeenCalledTimes(1);
+			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
+				kind: "cseOpinion",
+				to: "user@example.com",
+				siren: "339787277",
+				year: expect.any(Number),
+				userId: "user-1",
+				isResend: false,
+			});
+		});
+
+		it("does not enqueue any receipt when the session has no email", async () => {
+			const ctx = createMockDbForFinalize();
+			const caller = await createCaller(ctx.db, "33978727700015", null, null);
+
+			const result = await caller.finalize();
+
+			expect(result).toEqual({ success: true });
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("does not enqueue a receipt when a precondition guard rejects finalize", async () => {
+			const ctx = createMockDbForFinalize({ opinionCount: 0 });
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).rejects.toThrow(
+				"Les avis du CSE doivent être renseignés avant validation.",
+			);
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
 	});
 
 	it("re-accepts finalize when the declaration is already completed (editable after submission)", async () => {
@@ -414,8 +485,9 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("requires (2, accuracy) when a second declaration was submitted (its opinions exist)", async () => {
+		it("requires (2, accuracy) when a second declaration was submitted (second_declaration_submit event exists)", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: false },
@@ -430,11 +502,33 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second-declaration opinion)", async () => {
-			// Regression guard (epic #3476): finalize keys off submitted second-
-			// declaration opinions, like the Step 2 matrix — not secondDeclarationStep,
-			// which is set as soon as correction data is saved. Relying on the column
-			// would demand a (2, accuracy) association the matrix never offers.
+		it("requires (2, accuracy) even when no round-two opinion row exists yet (regression #4299)", async () => {
+			// The second_declaration_submit event can fire before Step 1 CSE
+			// opinions are (re)saved with round-2 data — cseOpinions then has no
+			// declarationNumber:2 row yet, but the Step 2 matrix already opens a
+			// second column because it reads the same event. Deriving
+			// hasSecondDeclaration from the opinions rows instead of the event
+			// would under-require here and let finalize (and the upload quota)
+			// drift below what the matrix demands.
+			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
+				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				associations: [{ declarationNumber: 1, type: "accuracy" }],
+			});
+			const caller = await createCaller(ctx.db);
+
+			await expect(caller.finalize()).rejects.toThrow(
+				"Le type de contenu « Exactitude » de la deuxième déclaration doit être associé à un fichier avant validation.",
+			);
+			expect(ctx.update).not.toHaveBeenCalled();
+		});
+
+		it("does not require a second-declaration association when correction was only started (secondDeclarationStep set, no second_declaration_submit event)", async () => {
+			// Regression guard (epic #3476): finalize keys off the
+			// second_declaration_submit event, like the Step 2 matrix — not
+			// secondDeclarationStep, which is set as soon as correction data is
+			// saved. Relying on the column would demand a (2, accuracy)
+			// association the matrix never offers.
 			const ctx = createMockDbForFinalize({
 				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: 2 },
 				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
@@ -447,6 +541,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("requires (2, gap) when second declaration gapConsulted is true", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -466,6 +561,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("passes with a full two-declaration set when every required type is covered", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: true },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
@@ -484,6 +580,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("does not require (2, gap) when second declaration gapConsulted is false", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: false },
@@ -511,6 +608,7 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("does not require (2, gap) when gapConsulted is true but there is no gap >= 5% on the second declaration", async () => {
 			const ctx = createMockDbForFinalize({
+				secondDeclarationSubmitted: true,
 				opinions: [
 					{ declarationNumber: 1, type: "gap", gapConsulted: false },
 					{ declarationNumber: 2, type: "gap", gapConsulted: true },
