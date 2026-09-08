@@ -1,7 +1,6 @@
 import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
 	CATEGORY_PAY_BASES,
-	CATEGORY_PAY_FIELDS,
 	type PAY_FIELDS_MEN,
 	type PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
@@ -38,20 +37,6 @@ const PAY_FIELD_LABELS: Record<
 	hourlyVariableMen: "composantes variables horaires des hommes",
 };
 
-function inconsistentPayErrors(
-	category: CategoryPayValues,
-	index: number,
-): FieldError[] {
-	return CATEGORY_PAY_FIELDS.filter(
-		(payField) => category[payField].trim() !== "",
-	).map((payField) => ({
-		fieldId: categoryDataFieldId(index, payField),
-		category: "inconsistent",
-		anchor: true,
-		message: `La rémunération « ${PAY_FIELD_LABELS[payField]} » de la catégorie d'emplois n°${index + 1} est renseignée alors qu'un effectif de cette catégorie est à 0 : effacez-la ou corrigez l'effectif.`,
-	}));
-}
-
 function missingPayErrors(
 	category: CategoryPayValues,
 	index: number,
@@ -82,10 +67,8 @@ export function collectCategoryPayErrors(
 	categories: readonly CategoryPayValues[],
 ): FieldError[] {
 	return categories.flatMap((category, index) =>
-		// A category missing a sex on either basis declares no remuneration:
-		// amounts left facing a 0 are never erased, they are refused (#3678).
 		isCategoryPayApplicable(toCategoryHeadcounts(category))
 			? missingPayErrors(category, index)
-			: inconsistentPayErrors(category, index),
+			: [],
 	);
 }

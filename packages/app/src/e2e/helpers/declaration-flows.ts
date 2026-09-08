@@ -48,7 +48,7 @@ export function categoryPayInput(
 
 /**
  * The eight remuneration cells of one indicator G category — the four measures
- * of both pay bases, for both sexes. Since #3678 they are greyed and released
+ * of both pay bases, for both sexes. Since #3678 both tables are shown or hidden
  * as one block, so a spec asserts on the whole set rather than on a basis.
  */
 export function categoryPayCells(page: Page, categoryIndex = 1): Locator[] {

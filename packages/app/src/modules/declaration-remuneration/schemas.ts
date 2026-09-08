@@ -86,8 +86,9 @@ export const updateStep4Schema = z.object({
 });
 
 /**
- * Each pay basis carries its own headcount and its own pay fields (#4254):
- * a headcount on one basis only ever requires that basis' pay data.
+ * Each pay basis carries its own headcount and its own pay fields (#4254).
+ * For an applicable category, a headcount only requires its basis' pay data;
+ * the category-wide zero rule (#3678) takes precedence over that distinction.
  */
 export const CATEGORY_PAY_BASES = [
 	{

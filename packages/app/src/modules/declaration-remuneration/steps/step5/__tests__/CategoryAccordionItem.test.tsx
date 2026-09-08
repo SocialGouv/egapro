@@ -30,11 +30,23 @@ function renderItem(
 		nameError?: string;
 		category?: EmployeeCategory & { id: number };
 		errors?: FieldError[];
-		payDisabled?: boolean;
+		payApplicable?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
-	return render(
+	return render(<TestItem category={categoryOverride} {...rest} />);
+}
+
+function TestItem({
+	category: categoryOverride,
+	...overrides
+}: {
+	nameError?: string;
+	category?: EmployeeCategory & { id: number };
+	errors?: FieldError[];
+	payApplicable?: boolean;
+}) {
+	return (
 		<CategoryAccordionItem
 			baseId="cat-form"
 			category={categoryOverride ?? category}
@@ -51,12 +63,12 @@ function renderItem(
 			onAskRemove={vi.fn()}
 			onDecimalBlur={() => vi.fn()}
 			onPositiveNumberChange={() => vi.fn()}
-			payDisabled={false}
+			payApplicable
 			readOnly={false}
 			readOnlyLabel={false}
 			showDelete={false}
-			{...rest}
-		/>,
+			{...overrides}
+		/>
 	);
 }
 
@@ -78,29 +90,60 @@ const COUNT_CELL_LABELS = [
 	"Rémunération horaire — Nombre d'hommes, catégorie 1",
 ];
 
-describe("CategoryAccordionItem — payDisabled (#3678)", () => {
-	it("leaves every cell operable when payDisabled is false", () => {
+describe("CategoryAccordionItem — non-calculable pay gap (#3678)", () => {
+	it("renders both pay tables while the category is applicable", () => {
 		renderItem();
 		for (const label of [...PAY_CELL_LABELS, ...COUNT_CELL_LABELS]) {
 			expect(screen.getByLabelText(label)).not.toBeDisabled();
 		}
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération annuelle brute moyenne",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération horaire brute moyenne",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByTestId("category-pay-status")).toBeEmptyDOMElement();
 	});
 
-	it("greys out the 8 pay cells and keeps the 4 headcount cells operable", () => {
-		renderItem({ payDisabled: true });
-		const hint = screen.getByText(/au moins un effectif à 0/i);
-		expect(hint).toHaveAttribute("id", "cat-0-pay-disabled-hint");
+	it("replaces both pay tables with a live non-calculable message", () => {
+		renderItem({ payApplicable: false });
+		const status = screen.getByTestId("category-pay-status");
+		expect(status).toHaveAttribute("aria-live", "polite");
+		expect(status).toHaveTextContent("Écart non calculable");
 		for (const label of PAY_CELL_LABELS) {
-			const input = screen.getByLabelText(label);
-			expect(input).toBeDisabled();
-			expect(input).toHaveAttribute(
-				"aria-describedby",
-				"cat-0-pay-disabled-hint",
-			);
+			expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
 		}
+		expect(
+			screen.queryByRole("heading", {
+				name: "Rémunération annuelle brute moyenne",
+			}),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("heading", {
+				name: "Rémunération horaire brute moyenne",
+			}),
+		).not.toBeInTheDocument();
 		for (const label of COUNT_CELL_LABELS) {
 			expect(screen.getByLabelText(label)).not.toBeDisabled();
 		}
+	});
+
+	it("keeps the live region mounted while its content changes", () => {
+		const { rerender } = renderItem();
+		const status = screen.getByTestId("category-pay-status");
+
+		rerender(<TestItem payApplicable={false} />);
+
+		expect(screen.getByTestId("category-pay-status")).toBe(status);
+		expect(status).toHaveTextContent("Écart non calculable");
+
+		rerender(<TestItem payApplicable />);
+		expect(screen.getByTestId("category-pay-status")).toBe(status);
+		expect(status).toBeEmptyDOMElement();
 	});
 });
 

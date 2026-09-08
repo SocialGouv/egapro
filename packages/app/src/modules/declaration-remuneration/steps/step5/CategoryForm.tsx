@@ -256,12 +256,11 @@ export function CategoryForm({
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
-					// Clear only the errors made obsolete by the resulting category
-					// state. Correcting one of several zeros must not hide the remaining
-					// inconsistency until every explicit zero is gone (#3678).
+					// A category with an explicit zero has no pay fields to correct.
+					// When it becomes applicable again, keep any completeness errors.
 					return categoryPayApplicable
 						? error.category !== "inconsistent"
-						: error.category !== "empty";
+						: false;
 				}),
 			);
 			setHasData(false);
@@ -602,14 +601,12 @@ export function CategoryForm({
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
 						const cat = categories[index];
-						// A category at 0 that carries no amount is greyed out; one that
-						// still carries amounts stays operable so it can be fixed (#3678).
-						const payDisabled = cat
-							? !isCategoryPayApplicable(toCategoryHeadcounts(cat)) &&
-								!CATEGORY_PAY_FIELDS.some(
-									(payField) => cat[payField].trim() !== "",
-								)
-							: false;
+						// React Hook Form keeps unmounted values by default. Hiding the pay
+						// tables therefore leaves their controlled values available if the
+						// user corrects the headcount before submitting (#3678).
+						const payApplicable = cat
+							? isCategoryPayApplicable(toCategoryHeadcounts(cat))
+							: true;
 						return (
 							<CategoryAccordionItem
 								baseId={baseId}
@@ -652,7 +649,7 @@ export function CategoryForm({
 								onAskRemove={askRemoveCategory}
 								onDecimalBlur={handleDecimalBlur}
 								onPositiveNumberChange={handlePositiveNumberChange}
-								payDisabled={payDisabled}
+								payApplicable={payApplicable}
 								readOnly={readOnly}
 								readOnlyLabel={readOnlyLabel}
 								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}

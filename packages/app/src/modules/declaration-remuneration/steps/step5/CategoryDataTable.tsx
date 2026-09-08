@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
@@ -33,9 +31,8 @@ type Props = {
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
-	/** Greys out the two remuneration tables only — the headcount cells stay
-	 *  operable so a category at 0 can be corrected (#3678). */
-	payDisabled?: boolean;
+	/** Whether this category can declare remuneration (#3678). */
+	payApplicable?: boolean;
 	readOnly?: boolean;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -94,12 +91,10 @@ type EuroCellProps = {
 	ariaLabel: string;
 	id: string;
 	disabled: boolean;
-	disabledDescriptionId?: string;
 	readOnly: boolean;
 	value: string;
 	onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	onFocus: () => void;
 	errorAlertId: string;
 	errors: readonly FieldError[];
 };
@@ -108,22 +103,15 @@ function EuroInputCell({
 	ariaLabel,
 	id,
 	disabled,
-	disabledDescriptionId,
 	readOnly,
 	value,
 	onBlur,
 	onChange,
-	onFocus,
 	errorAlertId,
 	errors,
 }: EuroCellProps) {
 	const error = findFieldError(errors, id);
-	const ariaDescribedBy = [
-		describedByForField(errorAlertId, error),
-		disabledDescriptionId,
-	]
-		.filter(Boolean)
-		.join(" ");
+	const ariaDescribedBy = describedByForField(errorAlertId, error);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
@@ -132,13 +120,11 @@ function EuroInputCell({
 					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
 					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
-					data-pay-cell="true"
 					disabled={disabled}
 					id={id}
 					inputMode="decimal"
 					onBlur={onBlur}
 					onChange={onChange}
-					onFocus={onFocus}
 					readOnly={readOnly}
 					type="text"
 					value={displayDecimal(value)}
@@ -200,15 +186,12 @@ type RemunerationTableProps = {
 	cat: EmployeeCategory;
 	catIndex: number;
 	disabled: boolean;
-	disabledDescriptionId?: string;
 	readOnly: boolean;
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
 	errorAlertId: string;
 	errors: readonly FieldError[];
-	onPayFocus: () => void;
-	onPayBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 function RemunerationTable({
@@ -218,23 +201,16 @@ function RemunerationTable({
 	cat,
 	catIndex,
 	disabled,
-	disabledDescriptionId,
 	readOnly,
 	pos,
 	blur,
 	idPrefix,
 	errorAlertId,
 	errors,
-	onPayFocus,
-	onPayBlur,
 }: RemunerationTableProps) {
 	const cellHandlers = (field: StringField) => ({
-		onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-			blur(catIndex, field)();
-			onPayBlur(e);
-		},
+		onBlur: blur(catIndex, field),
 		onChange: pos(catIndex, field, false),
-		onFocus: onPayFocus,
 	});
 	const totalWomen = computeTotal(
 		cat[fields.baseWomen],
@@ -265,7 +241,6 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
-							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-women")}
@@ -276,7 +251,6 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
-							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-men")}
@@ -300,7 +274,6 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
-							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-women")}
@@ -311,7 +284,6 @@ function RemunerationTable({
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
 							disabled={disabled}
-							disabledDescriptionId={disabledDescriptionId}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-men")}
@@ -400,34 +372,18 @@ function CategoryWorkforceRow({
 	);
 }
 
-function isPayCell(node: EventTarget | null): boolean {
-	return node instanceof HTMLElement && node.dataset.payCell === "true";
-}
-
 export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
 	onPositiveNumberChange: pos,
 	onDecimalBlur: blur,
 	disabled = false,
-	payDisabled = false,
+	payApplicable = true,
 	readOnly = false,
 	errorAlertId,
 	errors,
 }: Props) {
 	const idPrefix = `cat-${catIndex}`;
-	const payDisabledHintId = `${idPrefix}-pay-disabled-hint`;
-	const [isEditingPay, setIsEditingPay] = useState(false);
-	// Greying an input that currently holds the focus makes the browser drop
-	// that focus to <body>. Erasing the last amount of a category at 0 is the
-	// very fix the error message suggests, so the greying waits until the user
-	// has left the two tables (WCAG 3.2.2 On Input, 2.4.3 Focus Order).
-	const payTablesDisabled = disabled || (payDisabled && !isEditingPay);
-
-	const handlePayBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-		// Focus moving to the sibling pay cell must not grey that cell away.
-		if (!isPayCell(e.relatedTarget)) setIsEditingPay(false);
-	};
 
 	return (
 		<div className={common.dataSection}>
@@ -468,48 +424,42 @@ export function CategoryDataTable({
 				</TableFrame>
 			</div>
 
-			<RemunerationTable
-				blur={blur}
-				cat={cat}
-				catIndex={catIndex}
-				disabled={payTablesDisabled}
-				disabledDescriptionId={payDisabled ? payDisabledHintId : undefined}
-				errorAlertId={errorAlertId}
-				errors={errors}
-				fields={ANNUAL_FIELDS}
-				idPrefix={idPrefix}
-				onPayBlur={handlePayBlur}
-				onPayFocus={() => setIsEditingPay(true)}
-				pos={pos}
-				readOnly={readOnly}
-				scope="annuel"
-				title="Rémunération annuelle brute moyenne"
-			/>
+			<div aria-live="polite" data-testid="category-pay-status">
+				{!payApplicable && <p className="fr-mb-0">Écart non calculable</p>}
+			</div>
 
-			<RemunerationTable
-				blur={blur}
-				cat={cat}
-				catIndex={catIndex}
-				disabled={payTablesDisabled}
-				disabledDescriptionId={payDisabled ? payDisabledHintId : undefined}
-				errorAlertId={errorAlertId}
-				errors={errors}
-				fields={HOURLY_FIELDS}
-				idPrefix={idPrefix}
-				onPayBlur={handlePayBlur}
-				onPayFocus={() => setIsEditingPay(true)}
-				pos={pos}
-				readOnly={readOnly}
-				scope="horaire"
-				title="Rémunération horaire brute moyenne"
-			/>
+			{payApplicable && (
+				<>
+					<RemunerationTable
+						blur={blur}
+						cat={cat}
+						catIndex={catIndex}
+						disabled={disabled}
+						errorAlertId={errorAlertId}
+						errors={errors}
+						fields={ANNUAL_FIELDS}
+						idPrefix={idPrefix}
+						pos={pos}
+						readOnly={readOnly}
+						scope="annuel"
+						title="Rémunération annuelle brute moyenne"
+					/>
 
-			{payDisabled && (
-				<p className="fr-hint-text fr-mb-0" id={payDisabledHintId}>
-					Cette catégorie a au moins un effectif à 0&nbsp;: elle ne déclare pas
-					de rémunération. Corrigez ou videz chaque effectif à 0 pour réactiver
-					les champs.
-				</p>
+					<RemunerationTable
+						blur={blur}
+						cat={cat}
+						catIndex={catIndex}
+						disabled={disabled}
+						errorAlertId={errorAlertId}
+						errors={errors}
+						fields={HOURLY_FIELDS}
+						idPrefix={idPrefix}
+						pos={pos}
+						readOnly={readOnly}
+						scope="horaire"
+						title="Rémunération horaire brute moyenne"
+					/>
+				</>
 			)}
 		</div>
 	);

@@ -1,13 +1,15 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { SecondDeclarationStep2Form } from "../SecondDeclarationStep2Form";
 
-const { setFieldMock, clearDraftMock } = vi.hoisted(() => ({
+const { setFieldMock, clearDraftMock, mutateMock } = vi.hoisted(() => ({
 	setFieldMock: vi.fn(),
 	clearDraftMock: vi.fn(),
+	mutateMock: vi.fn(),
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -15,7 +17,7 @@ vi.mock("~/trpc/react", () => ({
 		declaration: {
 			updateEmployeeCategories: {
 				useMutation: () => ({
-					mutate: vi.fn(),
+					mutate: mutateMock,
 					isPending: false,
 					error: null,
 				}),
@@ -115,6 +117,7 @@ function renderStep2ReadOnly(
 beforeEach(() => {
 	setFieldMock.mockClear();
 	clearDraftMock.mockClear();
+	mutateMock.mockClear();
 });
 
 describe("SecondDeclarationStep2Form", () => {
@@ -327,5 +330,102 @@ describe("SecondDeclarationStep2Form — headcount per pay basis (#4254)", () =>
 				"Rémunération horaire — Nombre d'hommes, catégorie 1",
 			),
 		).toHaveValue("2");
+	});
+});
+
+describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () => {
+	const payValues = {
+		annualBaseWomen: "30000",
+		annualBaseMen: "32000",
+		annualVariableWomen: "5000",
+		annualVariableMen: "6000",
+		hourlyBaseWomen: "18",
+		hourlyBaseMen: "19",
+		hourlyVariableWomen: "3",
+		hourlyVariableMen: "4",
+	} as const;
+
+	it("restores hidden pay while the correction form remains mounted", async () => {
+		const user = userEvent.setup();
+		renderStep2({
+			initialFirstDeclarationCategories: [
+				makeCategory({
+					name: "Cadres",
+					womenCount: 3,
+					menCount: 2,
+					hourlyWomenCount: 3,
+					hourlyMenCount: 2,
+					...payValues,
+				}),
+			],
+		});
+		const menCount = screen.getByLabelText(
+			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+		);
+
+		await user.clear(menCount);
+		await user.type(menCount, "0");
+		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeInTheDocument();
+
+		await user.clear(menCount);
+		await user.type(menCount, "2");
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("30 000,00");
+		expect(
+			screen.getByLabelText(
+				"Composantes variables horaires hommes, catégorie 1",
+			),
+		).toHaveValue("4,00");
+	});
+
+	it("omits hidden pay when the correction is submitted", async () => {
+		const user = userEvent.setup();
+		renderStep2({
+			initialFirstDeclarationCategories: [
+				makeCategory({
+					name: "Cadres",
+					womenCount: 3,
+					menCount: 0,
+					hourlyWomenCount: 3,
+					hourlyMenCount: 2,
+					...payValues,
+				}),
+			],
+			initialSource: "accord-entreprise",
+			initialStartDate: "2024-01-01",
+			initialEndDate: "2024-12-31",
+		});
+
+		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mutateMock).toHaveBeenCalledTimes(1);
+		const data = mutateMock.mock.calls[0]?.[0]?.categories?.[0]?.data;
+		expect(data).toMatchObject({ womenCount: 3, menCount: 0 });
+		expect(data?.annualBaseWomen).toBeUndefined();
+		expect(data?.hourlyVariableMen).toBeUndefined();
+	});
+
+	it("keeps pay absent after reload from a sanitized correction", () => {
+		renderStep2({
+			initialSecondDeclarationCategories: [
+				makeCategory({
+					name: "Cadres",
+					womenCount: 3,
+					menCount: 0,
+					hourlyWomenCount: 3,
+					hourlyMenCount: 2,
+				}),
+			],
+		});
+
+		expect(screen.getByText("Écart non calculable")).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeInTheDocument();
 	});
 });

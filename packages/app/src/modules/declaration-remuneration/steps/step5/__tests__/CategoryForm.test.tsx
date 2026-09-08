@@ -6,6 +6,7 @@ import {
 	within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -54,7 +55,11 @@ function row(name: string): EmployeeCategoryRow {
 	};
 }
 
-function importedCategory(id: number, name: string): EmployeeCategory {
+function importedCategory(
+	id: number,
+	name: string,
+	overrides: Partial<EmployeeCategory> = {},
+): EmployeeCategory {
 	return {
 		id,
 		name,
@@ -70,6 +75,7 @@ function importedCategory(id: number, name: string): EmployeeCategory {
 		hourlyBaseMen: "",
 		hourlyVariableWomen: "",
 		hourlyVariableMen: "",
+		...overrides,
 	};
 }
 
@@ -88,7 +94,10 @@ function accordionIds(): string[] {
 	).map((button) => button.getAttribute("aria-controls") ?? "");
 }
 
-function renderForm(initialCategories: EmployeeCategoryRow[]) {
+function renderForm(
+	initialCategories: EmployeeCategoryRow[],
+	overrides: Partial<ComponentProps<typeof CategoryForm>> = {},
+) {
 	return render(
 		<CategoryForm
 			accordionId="accordion-test"
@@ -101,6 +110,7 @@ function renderForm(initialCategories: EmployeeCategoryRow[]) {
 			stepper={null}
 			title="Catégories de salariés"
 			tooltipPrefix="test"
+			{...overrides}
 		/>,
 	);
 }
@@ -222,5 +232,57 @@ describe("CategoryForm accordion identity", () => {
 		expect(afterSecondImport.filter((id) => afterDelete.includes(id))).toEqual(
 			[],
 		);
+	});
+});
+
+describe("CategoryForm import of a non-calculable category (#3678)", () => {
+	it("keeps imported pay in form memory but omits it from submission", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+		const onValuesChange = vi.fn();
+		renderForm([], { onSubmit, onValuesChange });
+
+		await importCategories([
+			importedCategory(1, "Cadres", {
+				womenCount: "3",
+				menCount: "0",
+				hourlyWomenCount: "3",
+				hourlyMenCount: "2",
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			}),
+		]);
+
+		await waitFor(() =>
+			expect(screen.getByText("Écart non calculable")).toBeInTheDocument(),
+		);
+		expect(
+			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeInTheDocument();
+		await waitFor(() =>
+			expect(
+				onValuesChange.mock.calls.some(
+					([values]) => values.categories[0]?.annualBaseWomen === "30000.00",
+				),
+			).toBe(true),
+		);
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(onSubmit).toHaveBeenCalledTimes(1);
+		const data = onSubmit.mock.calls[0]?.[0]?.categories?.[0]?.data;
+		expect(data).toMatchObject({ womenCount: 3, menCount: 0 });
+		expect(data?.annualBaseWomen).toBeUndefined();
+		expect(data?.hourlyVariableMen).toBeUndefined();
 	});
 });

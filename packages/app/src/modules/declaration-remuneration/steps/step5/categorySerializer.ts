@@ -2,7 +2,10 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
-import type { CategoryHeadcounts } from "~/modules/domain";
+import {
+	type CategoryHeadcounts,
+	isCategoryPayApplicable,
+} from "~/modules/domain";
 
 export type EmployeeCategory = {
 	id: number;
@@ -78,15 +81,22 @@ type CategoryCountFields = Pick<
 	"womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount"
 >;
 
+type ParsedCategoryHeadcounts = {
+	womenCount: number | undefined;
+	menCount: number | undefined;
+	hourlyWomenCount: number | undefined;
+	hourlyMenCount: number | undefined;
+};
+
 export function toCategoryHeadcounts(
 	cat: CategoryCountFields,
-): CategoryHeadcounts {
+): ParsedCategoryHeadcounts {
 	return {
 		womenCount: toInt(cat.womenCount),
 		menCount: toInt(cat.menCount),
 		hourlyWomenCount: toInt(cat.hourlyWomenCount),
 		hourlyMenCount: toInt(cat.hourlyMenCount),
-	};
+	} satisfies CategoryHeadcounts;
 }
 
 export function toSubmitData(
@@ -95,22 +105,35 @@ export function toSubmitData(
 ): EmployeeCategorySubmitData {
 	return {
 		source,
-		categories: categories.map((cat) => ({
-			name: cat.name,
-			data: {
-				womenCount: toInt(cat.womenCount),
-				menCount: toInt(cat.menCount),
-				hourlyWomenCount: toInt(cat.hourlyWomenCount),
-				hourlyMenCount: toInt(cat.hourlyMenCount),
-				annualBaseWomen: toStr(cat.annualBaseWomen),
-				annualBaseMen: toStr(cat.annualBaseMen),
-				annualVariableWomen: toStr(cat.annualVariableWomen),
-				annualVariableMen: toStr(cat.annualVariableMen),
-				hourlyBaseWomen: toStr(cat.hourlyBaseWomen),
-				hourlyBaseMen: toStr(cat.hourlyBaseMen),
-				hourlyVariableWomen: toStr(cat.hourlyVariableWomen),
-				hourlyVariableMen: toStr(cat.hourlyVariableMen),
-			},
-		})),
+		categories: categories.map((cat) => {
+			const headcounts = toCategoryHeadcounts(cat);
+			const payApplicable = isCategoryPayApplicable(headcounts);
+			return {
+				name: cat.name,
+				data: {
+					...headcounts,
+					annualBaseWomen: payApplicable
+						? toStr(cat.annualBaseWomen)
+						: undefined,
+					annualBaseMen: payApplicable ? toStr(cat.annualBaseMen) : undefined,
+					annualVariableWomen: payApplicable
+						? toStr(cat.annualVariableWomen)
+						: undefined,
+					annualVariableMen: payApplicable
+						? toStr(cat.annualVariableMen)
+						: undefined,
+					hourlyBaseWomen: payApplicable
+						? toStr(cat.hourlyBaseWomen)
+						: undefined,
+					hourlyBaseMen: payApplicable ? toStr(cat.hourlyBaseMen) : undefined,
+					hourlyVariableWomen: payApplicable
+						? toStr(cat.hourlyVariableWomen)
+						: undefined,
+					hourlyVariableMen: payApplicable
+						? toStr(cat.hourlyVariableMen)
+						: undefined,
+				},
+			};
+		}),
 	};
 }
