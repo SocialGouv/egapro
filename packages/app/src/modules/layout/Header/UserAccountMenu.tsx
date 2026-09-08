@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	type MouseEvent as ReactMouseEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
+import { ADMIN_HOME_PATH, triggerAdminStepUp } from "~/modules/admin/access";
+import { isAdminMfaFresh } from "~/modules/domain";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -11,6 +19,7 @@ interface UserAccountMenuProps {
 	userEmail: string;
 	userPhone?: string;
 	isAdmin?: boolean;
+	adminMfaAt?: number | null;
 }
 
 /** Dropdown menu in the header for authenticated users. */
@@ -19,6 +28,7 @@ export function UserAccountMenu({
 	userEmail,
 	userPhone,
 	isAdmin,
+	adminMfaAt,
 }: UserAccountMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
@@ -35,6 +45,20 @@ export function UserAccountMenu({
 		const modal = document.getElementById("profile-modal");
 		if (modal) getDsfrModal(modal)?.disclose();
 	}, [close]);
+
+	// No intermediate Egapro screen on this door: a stale or missing second
+	// factor triggers ProConnect directly from the click, through the same
+	// step-up entry point as the resume screen and the login button. A fresh
+	// one lets the link navigate to `/admin` as-is — no ProConnect passage.
+	const handleAdminClick = useCallback(
+		(event: ReactMouseEvent<HTMLAnchorElement>) => {
+			close();
+			if (isAdminMfaFresh(adminMfaAt, new Date())) return;
+			event.preventDefault();
+			triggerAdminStepUp(ADMIN_HOME_PATH);
+		},
+		[adminMfaAt, close],
+	);
 
 	const getMenuItems = useCallback(
 		() =>
@@ -145,8 +169,8 @@ export function UserAccountMenu({
 							{isAdmin && (
 								<Link
 									className={styles.menuLink}
-									href="/admin"
-									onClick={close}
+									href={ADMIN_HOME_PATH}
+									onClick={handleAdminClick}
 									role="menuitem"
 									tabIndex={-1}
 								>

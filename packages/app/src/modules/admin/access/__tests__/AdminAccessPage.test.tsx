@@ -74,8 +74,28 @@ describe("AdminAccessPage", () => {
 			}),
 		);
 
-		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/admin/declarations/abc",
-		});
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/admin/declarations/abc" },
+			expect.anything(),
+		);
+	});
+
+	it("resumes through the same step-up entry point as the menu and the login button", async () => {
+		// One path, not three: the resume action must carry the admin step-up
+		// authorization params, exactly like the menu entry and the login button.
+		render(<AdminAccessPage reason="missing" returnPath="/admin" />);
+
+		await userEvent.click(
+			screen.getByRole("button", {
+				name: "Refaire la double authentification",
+			}),
+		);
+
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			expect.anything(),
+			expect.objectContaining({ claims: expect.any(String) }),
+		);
 	});
 });
