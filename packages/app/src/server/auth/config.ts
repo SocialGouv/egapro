@@ -6,7 +6,12 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { extractSiren, isAdminMfaAcr, parseSiren } from "~/modules/domain";
+import {
+	extractSiren,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	parseSiren,
+} from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
@@ -159,6 +164,36 @@ declare module "next-auth/jwt" {
 		adminMfaAt?: number;
 	}
 }
+
+/**
+ * Impersonation as the session exposes it: present only while the account is
+ * an admin *and* its second factor is still inside the window.
+ *
+ * The banner reads `session.user.impersonation` and nothing else, so it
+ * vanishes at the very instant the server stops honouring the mimoquage
+ * (issue #4466, S14). The two must never diverge: a banner outliving the
+ * privilege would invite an agent to act on a company whose SIREN the server
+ * has already stopped resolving, and an effective mimoquage with no banner
+ * would hide whose data is on screen.
+ *
+ * The token keeps its `impersonation` field untouched — this is a projection,
+ * not a mutation. Nothing resumes when a new second factor is presented: a
+ * step-up re-mints the token from scratch, without impersonation.
+ */
+function exposedImpersonation(
+	token: JWTWithImpersonation,
+	now: Date,
+): Impersonation | null {
+	if (!token.isAdmin) return null;
+	if (!isAdminMfaFresh(token.adminMfaAt, now)) return null;
+	return token.impersonation ?? null;
+}
+
+type JWTWithImpersonation = {
+	isAdmin?: boolean;
+	adminMfaAt?: number;
+	impersonation?: Impersonation | null;
+};
 
 // Decoded without re-verifying the signature: this token never transited
 // through the browser — NextAuth fetched it server-to-server and openid-client
@@ -557,6 +592,24 @@ export const authConfig = {
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
 
+				// A sign-in — a step-up included — mints the token from scratch,
+				// so the mimoquage disappears on its own. The open row in the
+				// administration journal does not: close it here so there is no
+				// instant at which a row is open without a live mimoquage behind
+				// it. That journal is a compliance trail, not a by-product of the
+				// banner (issue #4466, S14).
+				//
+				// Unconditional, and not gated on `shouldBeAdmin`: an account
+				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
+				// leave its last row open for good. The statement targets the
+				// partial index on open rows, so it costs nothing for the
+				// declarants who never have one.
+				//
+				// No automatic resume: the agent restarts the mimoquage from the
+				// backoffice if they still need it.
+				await closeOpenImpersonationEvents(dbUser.id);
+				token.impersonation = null;
+
 				// The marker has exactly two sources, and a client reaches
 				// neither: the id_token of the exchange we just performed
 				// server-to-server, and — off outside a loopback test run, see
@@ -613,7 +666,7 @@ export const authConfig = {
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
-				impersonation: token.impersonation ?? null,
+				impersonation: exposedImpersonation(token, new Date()),
 				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),

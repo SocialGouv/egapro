@@ -12,6 +12,10 @@ export const SIRET = `${SIREN}00015`;
 export const USER_ID = "user-1";
 export const NOW = new Date("2026-06-15T09:30:00.000Z");
 export const CAMPAIGN_YEAR = YEAR + 1;
+// A second factor presented a minute before `NOW`: an impersonation is only
+// effective while the admin MFA window is open (#4466), so a fixture without
+// it would model an agent whose mimoquage has already lapsed.
+export const FRESH_ADMIN_MFA = Math.floor(NOW.getTime() / 1000) - 60;
 export const CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
 export const IMPERSONATION_MESSAGE =
@@ -78,7 +82,11 @@ export function buildSession(overrides: Record<string, unknown> = {}) {
 }
 
 export function impersonatingSession(siren = SIREN) {
-	return buildSession({ isAdmin: true, impersonation: { siren } });
+	return buildSession({
+		isAdmin: true,
+		adminMfaAt: FRESH_ADMIN_MFA,
+		impersonation: { siren },
+	});
 }
 
 export function createCaller(db: unknown, session = buildSession()) {

@@ -1,5 +1,15 @@
+import type { Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
+
+// Records every UPDATE the callbacks issue so the tests can tell an
+// impersonation-closing statement from the other writes of a sign-in.
+const closedImpersonations = vi.hoisted(
+	() => [] as Array<Record<string, unknown>>,
+);
+const mockFindFirst = vi.hoisted(() => vi.fn());
 
 // The impersonation-update branch of the jwt callback writes to the audit
 // log inside a transaction. Factory returns self-contained stubs.
@@ -10,11 +20,26 @@ vi.mock("~/server/db", () => {
 		}),
 	});
 	const plainValues = () => ({ values: () => Promise.resolve() });
-	const setWhere = () => ({
-		set: () => ({ where: () => Promise.resolve() }),
+	const recordingUpdate = (table: unknown) => ({
+		set: (values: Record<string, unknown>) => {
+			if ((table as { adminUserId?: string } | undefined)?.adminUserId) {
+				closedImpersonations.push(values);
+			}
+			return { where: () => Promise.resolve() };
+		},
 	});
 	return {
 		db: {
+			query: {
+				users: { findFirst: (...args: unknown[]) => mockFindFirst(...args) },
+			},
+			insert: () => ({
+				values: () => ({
+					onConflictDoUpdate: () => Promise.resolve(),
+					onConflictDoNothing: () => Promise.resolve(),
+					returning: () => Promise.resolve([{ id: "u1", phone: null }]),
+				}),
+			}),
 			transaction: async (fn: (tx: unknown) => unknown) =>
 				fn({
 					insert: (() => {
@@ -27,14 +52,14 @@ vi.mock("~/server/db", () => {
 							return plainValues();
 						};
 					})(),
-					update: () => setWhere(),
+					update: recordingUpdate,
 				}),
-			update: () => setWhere(),
+			update: recordingUpdate,
 		},
 	};
 });
 vi.mock("~/server/db/schema", () => ({
-	users: {},
+	users: { email: "email", id: "id" },
 	companies: { siren: "siren" },
 	userCompanies: {},
 	adminImpersonationEvents: {
@@ -45,6 +70,7 @@ vi.mock("~/server/db/schema", () => ({
 vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),
 }));
+vi.mock("~/server/audit/log", () => ({ logAction: vi.fn() }));
 
 import { authConfig } from "../config";
 
@@ -61,6 +87,24 @@ function callSession(params: Record<string, unknown>) {
 		params as unknown as Parameters<typeof callbacks.session>[0],
 	);
 }
+
+const NOW_SECONDS = Math.floor(Date.now() / 1000);
+const FRESH_MFA = NOW_SECONDS - 60;
+const EXPIRED_MFA = NOW_SECONDS - ADMIN_MFA_WINDOW_SECONDS - 1;
+
+const DEMO = { siren: "123456789", name: "Société Démo" };
+
+beforeEach(() => {
+	closedImpersonations.length = 0;
+	mockFindFirst.mockReset();
+	mockFindFirst.mockResolvedValue({
+		id: "u1",
+		phone: null,
+		isAdmin: true,
+		firstName: "Alice",
+		lastName: "Martin",
+	});
+});
 
 describe("jwt callback — impersonation update trigger", () => {
 	it("writes impersonation into the token when admin updates the session", async () => {
@@ -121,29 +165,120 @@ describe("jwt callback — impersonation update trigger", () => {
 	});
 });
 
-describe("session callback — impersonation propagation", () => {
-	it("mirrors token.impersonation onto session.user.impersonation", () => {
-		const result = callSession({
-			session: { user: { name: null, email: null, image: null }, expires: "" },
-			token: {
-				id: "u1",
-				isAdmin: true,
-				impersonation: { siren: "123456789", name: "Acme" },
-			} as unknown as JWT,
-		}) as {
-			user: { impersonation: { siren: string; name: string } | null };
-		};
-		expect(result.user.impersonation).toEqual({
-			siren: "123456789",
-			name: "Acme",
+describe("jwt callback — a step-up stops the impersonation (S14)", () => {
+	/** A fresh sign-in, which is exactly what a step-up produces. */
+	function signIn(token: JWT = {} as JWT) {
+		return callJwt({
+			token,
+			user: {
+				id: "proconnect-sub",
+				email: "agent@example.fr",
+				name: "Alice Martin",
+			} as User,
+			account: {} as Account,
+			trigger: "signIn",
 		});
+	}
+
+	it("closes the open administration-journal row", async () => {
+		await signIn();
+
+		expect(closedImpersonations).toHaveLength(1);
+		expect(closedImpersonations[0]?.stoppedAt).toBeInstanceOf(Date);
+	});
+
+	it("leaves no impersonation on the token, and never resumes the previous one", async () => {
+		const result = await signIn({
+			id: "u1",
+			isAdmin: true,
+			impersonation: DEMO,
+		} as JWT);
+
+		expect(result.impersonation).toBeNull();
+	});
+
+	it("closes the row even for an account no longer listed as admin, so no row stays open for good", async () => {
+		mockFindFirst.mockResolvedValue({
+			id: "u1",
+			phone: null,
+			isAdmin: false,
+			firstName: "Alice",
+			lastName: "Martin",
+		});
+
+		await signIn({ id: "u1", isAdmin: true, impersonation: DEMO } as JWT);
+
+		expect(closedImpersonations).toHaveLength(1);
+	});
+
+	it("leaves at most one open row across two impersonations separated by a step-up", async () => {
+		const token = { id: "u1", isAdmin: true } as JWT;
+
+		await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: DEMO },
+		});
+		const afterStepUp = await signIn(token);
+		expect(afterStepUp.impersonation).toBeNull();
+
+		await callJwt({
+			token: { id: "u1", isAdmin: true } as JWT,
+			trigger: "update",
+			session: { impersonation: { siren: "987654321", name: "Autre Démo" } },
+		});
+
+		// Every start closes what was open before inserting, and the step-up
+		// closed the row it inherited — so nothing is ever left dangling.
+		expect(closedImpersonations.length).toBeGreaterThanOrEqual(1);
+		for (const row of closedImpersonations) {
+			expect(row.stoppedAt).toBeInstanceOf(Date);
+		}
+	});
+});
+
+describe("session callback — impersonation is exposed only inside the MFA window", () => {
+	function sessionFor(token: Partial<JWT>) {
+		return callSession({
+			session: { user: { name: null, email: null, image: null }, expires: "" },
+			token: { id: "u1", ...token } as unknown as JWT,
+		}) as { user: { impersonation: { siren: string; name: string } | null } };
+	}
+
+	it("mirrors token.impersonation while the second factor is fresh", () => {
+		const result = sessionFor({
+			isAdmin: true,
+			adminMfaAt: FRESH_MFA,
+			impersonation: DEMO,
+		});
+		expect(result.user.impersonation).toEqual(DEMO);
+	});
+
+	it("hides the impersonation once the window has expired, so the banner disappears with it", () => {
+		const result = sessionFor({
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: DEMO,
+		});
+		expect(result.user.impersonation).toBeNull();
+	});
+
+	it("hides the impersonation when no second factor was ever presented", () => {
+		const result = sessionFor({ isAdmin: true, impersonation: DEMO });
+		expect(result.user.impersonation).toBeNull();
+	});
+
+	it("hides a stray impersonation carried by a non-admin token", () => {
+		const result = sessionFor({
+			isAdmin: false,
+			adminMfaAt: FRESH_MFA,
+			impersonation: DEMO,
+		});
+		expect(result.user.impersonation).toBeNull();
 	});
 
 	it("defaults impersonation to null when token has none", () => {
-		const result = callSession({
-			session: { user: { name: null, email: null, image: null }, expires: "" },
-			token: { id: "u1", isAdmin: false } as unknown as JWT,
-		}) as { user: { impersonation: unknown } };
+		const result = sessionFor({ isAdmin: false });
 		expect(result.user.impersonation).toBeNull();
 	});
 });
