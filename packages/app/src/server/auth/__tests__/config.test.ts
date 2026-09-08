@@ -305,6 +305,30 @@ describe("auth config", () => {
 			expect(result.user.email).toBe("test@example.com");
 		});
 
+		it("exposes the two-factor instant so the backoffice guards can read it", () => {
+			const result = callSession({
+				session: {
+					user: { name: "Test" },
+					expires: "2026-12-31T00:00:00.000Z",
+				},
+				token: { sub: "sub-123", id: "user-456", adminMfaAt: 1_772_000_000 },
+			});
+
+			expect(result.user.adminMfaAt).toBe(1_772_000_000);
+		});
+
+		it("exposes a null two-factor instant when the token carries none", () => {
+			const result = callSession({
+				session: {
+					user: { name: "Test" },
+					expires: "2026-12-31T00:00:00.000Z",
+				},
+				token: { sub: "sub-123", id: "user-456" },
+			});
+
+			expect(result.user.adminMfaAt).toBeNull();
+		});
+
 		it("defaults siret and phone to null when token has no values", () => {
 			const result = callSession({
 				session: {
