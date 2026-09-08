@@ -184,9 +184,11 @@ find packages/app/src/app/api -name route.ts | sort
 ```
 
 If that count changes, this table is stale: a new handler is either audited or
-listed as a named exemption. There is no third option.
+listed as a named exemption. The only third state this table accepts is a route
+whose wiring is in flight in a named open PR, and it is listed apart from the
+counts — never inside them.
 
-### Audited through `withAuditedRoute` (16)
+### Audited through `withAuditedRoute` (15)
 
 | Route | Action key |
 |---|---|
@@ -195,7 +197,6 @@ listed as a named exemption. There is no third option.
 | `export/download` | `EXPORT_DOWNLOAD` |
 | `export/generate` | `EXPORT_GENERATE` |
 | `gip-mds/import` | `GIP_MDS_IMPORT` |
-| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` |
 | `public/declarations` | `PUBLIC_DECLARATIONS_SEARCH` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
@@ -207,7 +208,19 @@ listed as a named exemption. There is no third option.
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
 | `v1/files` | `EXPORT_API_FILES` |
 
-`prefill-pdf` was wired by issue #3189; the remaining gap (`public/referents-egalite-professionnelle`, whose action key already existed but was only reachable through tRPC) was closed by #3764.
+### Wiring in flight (1)
+
+| Route | Action key | Status |
+|---|---|---|
+| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` | **pending #3189** — the handler writes no audit row at this commit |
+
+Deliberately outside the count above. Listing it as covered would hide a real
+compliance gap behind a complete-looking inventory: the next `find` would
+reconcile 33/33 and stop looking. If #3189 is abandoned, or lands with another
+action key, this row is what surfaces it.
+
+The other gap — `public/referents-egalite-professionnelle`, whose action key
+already existed but was only reachable through tRPC — is closed by #3764.
 
 ### Audited through a direct `logAction` call (7)
 
