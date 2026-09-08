@@ -12,7 +12,12 @@ vi.mock("~/server/db", () => ({
 const DECL_ID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 
 const adminSession = {
-	user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "admin@example.fr",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 
