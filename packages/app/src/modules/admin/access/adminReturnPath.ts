@@ -22,13 +22,8 @@ export function sanitizeAdminReturnPath(value?: string): string {
 	return normalized;
 }
 
-/**
- * True when `value` already targets the backoffice — used by the login form
- * to decide whether the ProConnect request it is about to send must carry
- * the admin step-up requirement. Segment-aware, same rule as
- * {@link sanitizeAdminReturnPath}: `/administration` merely shares a prefix
- * with `/admin` and must not match.
- */
+// Used by the login form to decide whether its ProConnect request must
+// carry the step-up requirement. Same segment-aware rule as sanitizeAdminReturnPath.
 export function isAdminReturnPath(value: string): boolean {
 	return BACKOFFICE_PATH.test(value);
 }
