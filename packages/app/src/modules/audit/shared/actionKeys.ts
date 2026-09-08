@@ -12,7 +12,6 @@ export const AUDIT_ACTIONS = {
 	AUTH_LOGIN: "auth.login",
 	AUTH_LOGIN_FAILED: "auth.login_failed",
 	AUTH_LOGOUT: "auth.logout",
-	/** Outcome of the two-factor authentication level required for the backoffice. */
 	AUTH_ADMIN_MFA: "auth.admin_mfa",
 
 	// ── Declaration mutations ──────────────────────────────
