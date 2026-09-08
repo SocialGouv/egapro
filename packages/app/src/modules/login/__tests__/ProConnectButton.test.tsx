@@ -17,6 +17,7 @@ vi.mock("~/modules/analytics", async (importOriginal) => {
 });
 
 import { MATOMO_ACTION, MATOMO_EVENT_CATEGORY } from "~/modules/analytics";
+import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { ProConnectButton } from "../ProConnectButton";
 
 beforeEach(() => {
@@ -82,6 +83,58 @@ describe("ProConnectButton", () => {
 		expect(trackEventMock).toHaveBeenCalledWith({
 			category: MATOMO_EVENT_CATEGORY.AUTH,
 			action: MATOMO_ACTION.LOGIN_START,
+		});
+	});
+
+	describe("when requiresAdminStepUp is set", () => {
+		it("attaches the admin step-up authorization params to the sign-in request", () => {
+			render(<ProConnectButton callbackUrl="/admin" requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				buildAdminStepUpAuthorizationParams(),
+			);
+		});
+
+		it("falls back to the backoffice home when no callbackUrl is provided", () => {
+			render(<ProConnectButton requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/mon-espace" },
+				buildAdminStepUpAuthorizationParams(),
+			);
+		});
+
+		it("still emits the LOGIN_START analytics event", () => {
+			render(<ProConnectButton callbackUrl="/admin" requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(trackEventMock).toHaveBeenCalledWith({
+				category: MATOMO_EVENT_CATEGORY.AUTH,
+				action: MATOMO_ACTION.LOGIN_START,
+			});
+		});
+	});
+
+	describe("when requiresAdminStepUp is not set", () => {
+		it("leaves an admin-shaped callbackUrl's sign-in request unchanged", () => {
+			// Regression guard for the rule the epic does not negotiate: only an
+			// explicit `requiresAdminStepUp` may add the step-up params — the
+			// button never infers it from the shape of the URL on its own.
+			render(<ProConnectButton callbackUrl="/admin" />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith("proconnect", {
+				callbackUrl: "/admin",
+			});
 		});
 	});
 });

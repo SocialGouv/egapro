@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { triggerAdminStepUp } from "./adminStepUp";
 
 type Props = {
 	returnPath: string;
@@ -11,9 +11,7 @@ export function AdminAccessResumeButton({ returnPath }: Props) {
 	return (
 		<button
 			className="fr-btn"
-			onClick={() => {
-				void signIn("proconnect", { callbackUrl: returnPath });
-			}}
+			onClick={() => triggerAdminStepUp(returnPath)}
 			type="button"
 		>
 			Refaire la double authentification

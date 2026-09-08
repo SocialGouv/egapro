@@ -1,8 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { signIn } from "next-auth/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { LoginForm } from "../LoginForm";
 
+const mockSignIn = vi.mocked(signIn);
+
 describe("LoginForm", () => {
+	beforeEach(() => {
+		mockSignIn.mockClear();
+	});
+
 	it("displays the login heading", () => {
 		render(<LoginForm />);
 		expect(
@@ -36,5 +45,51 @@ describe("LoginForm", () => {
 				name: /vous n'avez pas de compte/i,
 			}),
 		).toBeInTheDocument();
+	});
+
+	it("carries the admin step-up requirement when the destination targets the backoffice", () => {
+		render(<LoginForm callbackUrl="/admin/declarations" />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/admin/declarations" },
+			buildAdminStepUpAuthorizationParams(),
+		);
+	});
+
+	it("leaves the sign-in request unchanged for any other destination", () => {
+		render(<LoginForm callbackUrl="/mon-espace/mes-entreprises" />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+
+		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
+			callbackUrl: "/mon-espace/mes-entreprises",
+		});
+	});
+
+	it("leaves the sign-in request unchanged when no destination is given", () => {
+		render(<LoginForm />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+
+		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
+			callbackUrl: "/mon-espace",
+		});
+	});
+
+	it("does not mistake /administration for the backoffice", () => {
+		render(<LoginForm callbackUrl="/administration/secret" />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+
+		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
+			callbackUrl: "/administration/secret",
+		});
 	});
 });

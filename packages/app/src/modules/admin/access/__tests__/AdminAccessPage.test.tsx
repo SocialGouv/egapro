@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { signIn } from "next-auth/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { AdminAccessPage } from "../AdminAccessPage";
 
 const mockSignIn = vi.mocked(signIn);
@@ -74,8 +75,28 @@ describe("AdminAccessPage", () => {
 			}),
 		);
 
-		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
-			callbackUrl: "/admin/declarations/abc",
-		});
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/admin/declarations/abc" },
+			expect.anything(),
+		);
+	});
+
+	it("resumes through the same step-up entry point as the menu and the login button", async () => {
+		// One path, not three: the resume action must carry the admin step-up
+		// authorization params, exactly like the menu entry and the login button.
+		render(<AdminAccessPage reason="missing" returnPath="/admin" />);
+
+		await userEvent.click(
+			screen.getByRole("button", {
+				name: "Refaire la double authentification",
+			}),
+		);
+
+		expect(mockSignIn).toHaveBeenCalledWith(
+			"proconnect",
+			expect.anything(),
+			buildAdminStepUpAuthorizationParams(),
+		);
 	});
 });

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { ADMIN_HOME_PATH, sanitizeAdminReturnPath } from "../adminReturnPath";
+import {
+	ADMIN_HOME_PATH,
+	isAdminReturnPath,
+	sanitizeAdminReturnPath,
+} from "../adminReturnPath";
 
 describe("sanitizeAdminReturnPath", () => {
 	it("keeps a backoffice deep link", () => {
@@ -48,5 +52,34 @@ describe("sanitizeAdminReturnPath", () => {
 		["malformed percent-encoding", "/admin/%E0%A4%A"],
 	])("falls back to the backoffice home for %s", (_label, value) => {
 		expect(sanitizeAdminReturnPath(value)).toBe(ADMIN_HOME_PATH);
+	});
+});
+
+describe("isAdminReturnPath", () => {
+	it("recognizes the backoffice home", () => {
+		expect(isAdminReturnPath(ADMIN_HOME_PATH)).toBe(true);
+	});
+
+	it("recognizes a backoffice deep link", () => {
+		expect(isAdminReturnPath("/admin/declarations/abc")).toBe(true);
+	});
+
+	it("recognizes a backoffice path with a query string", () => {
+		expect(isAdminReturnPath("/admin?onglet=historique")).toBe(true);
+	});
+
+	it("recognizes a backoffice path with a fragment", () => {
+		expect(isAdminReturnPath("/admin#contenu")).toBe(true);
+	});
+
+	it.each([
+		["an empty string", ""],
+		["a path outside the backoffice", "/mon-espace"],
+		["the site root", "/"],
+		// `/administration` merely shares a prefix with `/admin`: the comparison
+		// is segment-aware, so this must not be mistaken for a backoffice path.
+		["a path that only shares the prefix", "/administration/secret"],
+	])("does not recognize %s", (_label, value) => {
+		expect(isAdminReturnPath(value)).toBe(false);
 	});
 });

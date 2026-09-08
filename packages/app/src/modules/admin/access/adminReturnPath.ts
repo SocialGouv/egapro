@@ -17,7 +17,18 @@ export function sanitizeAdminReturnPath(value?: string): string {
 	const normalized = `${resolved.pathname}${resolved.search}${resolved.hash}`;
 
 	// Without this confinement the resume screen becomes a redirector towards any page of the site.
-	if (!BACKOFFICE_PATH.test(normalized)) return ADMIN_HOME_PATH;
+	if (!isAdminReturnPath(normalized)) return ADMIN_HOME_PATH;
 
 	return normalized;
+}
+
+/**
+ * True when `value` already targets the backoffice — used by the login form
+ * to decide whether the ProConnect request it is about to send must carry
+ * the admin step-up requirement. Segment-aware, same rule as
+ * {@link sanitizeAdminReturnPath}: `/administration` merely shares a prefix
+ * with `/admin` and must not match.
+ */
+export function isAdminReturnPath(value: string): boolean {
+	return BACKOFFICE_PATH.test(value);
 }
