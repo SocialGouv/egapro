@@ -27,11 +27,8 @@ export function isAdminMfaFresh(
 	return elapsedSeconds < ADMIN_MFA_WINDOW_SECONDS;
 }
 
-/**
- * Why an eligible agent is sent to the resume screen rather than into the
- * backoffice. Derived from the session alone — never from a query parameter,
- * which any visitor could set at will.
- */
+// Derived from the session alone — a reason carried in the URL would be
+// displayable at will.
 export type AdminMfaFailure = "expired" | "missing";
 
 export type AdminAccessDecision =
@@ -40,27 +37,17 @@ export type AdminAccessDecision =
 	| { type: "resume"; reason: AdminMfaFailure }
 	| { type: "allow" };
 
-/**
- * The subset of a session the decision reads. `isAdmin` is optional on purpose:
- * a token minted before the field existed carries no value at all, and that
- * absence is not the same thing as `false`.
- */
+// `isAdmin` is optional on purpose: a token minted before the field existed
+// carries no value, and that absence is not the same thing as `false`.
 export type AdminSessionState = {
 	isAdmin?: boolean;
 	adminMfaAt?: number | null;
 };
 
-/**
- * The single decision table for the `/admin` surface, applied identically by
- * the Edge middleware, the backoffice layout and the resume screen.
- *
- * It compares values the token already carries: no database, no Node API,
- * nothing the Edge runtime cannot do — which is why the authentication date
- * lives in the token in the first place.
- *
- * A user without the admin grant is turned away silently towards `/mon-espace`:
- * telling them the backoffice exists is itself the disclosure we refuse.
- */
+// The single decision table of the `/admin` surface, applied identically by the
+// Edge middleware, the backoffice layout and the resume screen. It compares
+// values the token already carries — which is why the authentication date lives
+// in the token in the first place.
 export function resolveAdminAccess(
 	session: AdminSessionState | null | undefined,
 	now: Date,

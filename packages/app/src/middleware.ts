@@ -98,12 +98,9 @@ async function adminMiddleware(request: NextRequest) {
 	}
 }
 
-/**
- * Marks a backoffice response uncacheable, so that a browser back after an
- * expiry does not restore a page of the backoffice from its cache. The
- * back/forward cache remains a client behaviour we do not command; the header
- * is the part that is ours, and the part that is verifiable.
- */
+// A browser back after an expiry must not restore a backoffice page from the
+// cache. The back/forward cache stays a client behaviour we do not command;
+// the header is the part that is ours, and the verifiable one.
 function noStore(response: NextResponse) {
 	response.headers.set("Cache-Control", "no-store");
 	return response;

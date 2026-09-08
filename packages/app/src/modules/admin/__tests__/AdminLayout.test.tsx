@@ -21,9 +21,8 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
-import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
-
 import AdminLayout from "~/app/admin/layout";
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
 
 function nowSeconds(): number {
 	return Math.floor(Date.now() / 1000);

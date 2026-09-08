@@ -16,15 +16,13 @@ vi.mock("~/env", () => ({
 	},
 }));
 
-import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
-
 import { middleware } from "~/middleware";
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
 
 function nowSeconds(): number {
 	return Math.floor(Date.now() / 1000);
 }
 
-/** Admin token whose two-factor authentication is `elapsed` seconds old. */
 function adminToken(elapsed: number) {
 	return { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() - elapsed };
 }

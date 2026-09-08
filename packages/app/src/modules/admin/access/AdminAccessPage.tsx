@@ -20,15 +20,8 @@ const CONTENT: Record<AdminMfaFailure, { title: string; body: string }> = {
 	},
 };
 
-/**
- * Landing screen of an eligible agent whose two-factor authentication is
- * missing or out of the window. An Egapro screen rather than a silent redirect:
- * the agent is told what is being asked of them, and decides when to go through
- * ProConnect again.
- *
- * Both states are derived from the session on the server — a reason carried in
- * the URL would be displayable at will.
- */
+// An Egapro screen rather than a silent redirect: the agent is told what is
+// asked of them and decides when to go through ProConnect again.
 export function AdminAccessPage({ reason, returnPath }: Props) {
 	const { title, body } = CONTENT[reason];
 

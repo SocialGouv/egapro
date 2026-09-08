@@ -171,15 +171,12 @@ describe("resolveAdminAccess", () => {
 		["null", null],
 		["NaN", Number.NaN],
 		["Infinity", Number.POSITIVE_INFINITY],
-	])(
-		"reports an authentication that never happened when the date is %s",
-		(_label, adminMfaAt) => {
-			// A session opened before this feature shipped lands here too: the
-			// wording stays true, and the action offered is the same.
-			expect(resolveAdminAccess({ isAdmin: true, adminMfaAt }, at(0))).toEqual({
-				type: "resume",
-				reason: "missing",
-			});
-		},
-	);
-})
+	])("reports an authentication that never happened when the date is %s", (_label, adminMfaAt) => {
+		// A session opened before this feature shipped lands here too: the
+		// wording stays true, and the action offered is the same.
+		expect(resolveAdminAccess({ isAdmin: true, adminMfaAt }, at(0))).toEqual({
+			type: "resume",
+			reason: "missing",
+		});
+	});
+});

@@ -15,6 +15,12 @@ describe("sanitizeAdminReturnPath", () => {
 		).toBe("/admin/declarations?onglet=historique");
 	});
 
+	it("resolves dot segments inside the backoffice", () => {
+		expect(sanitizeAdminReturnPath("/admin/stats/../declarations")).toBe(
+			"/admin/declarations",
+		);
+	});
+
 	it("keeps a fragment on a backoffice path", () => {
 		expect(sanitizeAdminReturnPath("/admin#contenu")).toBe("/admin#contenu");
 	});
@@ -31,6 +37,11 @@ describe("sanitizeAdminReturnPath", () => {
 		// `/administration` merely shares a prefix with `/admin`: the comparison
 		// is segment-aware, so this must not be mistaken for a backoffice path.
 		["a path that only shares the prefix", "/administration/secret"],
+		// `/admin/../mon-espace` opens with `/admin` as a string, but every
+		// consumer collapses it to `/mon-espace` before requesting it.
+		["dot segments escaping the backoffice", "/admin/../mon-espace"],
+		["dot segments climbing above the root", "/admin/../../mon-espace"],
+		["encoded dot segments", "/admin/%2E%2E/mon-espace"],
 		["a relative path", "admin/declarations"],
 		["an absolute URL", "https://evil.example/admin"],
 		["a protocol-relative URL", "//evil.example/admin"],

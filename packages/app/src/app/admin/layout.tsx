@@ -5,14 +5,9 @@ import { AdminShell } from "~/modules/admin";
 import { resolveAdminAccess } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
-/**
- * Node-runtime guard of the backoffice, running the same decision table as the
- * Edge middleware — defense in depth, never the only barrier.
- *
- * It does not know which path was requested (a layout receives no pathname), so
- * the resume screen falls back to `/admin` here. The middleware, which does
- * know, is what preserves the deep link in the normal path.
- */
+// Defense in depth behind the Edge middleware, on the same decision table.
+// A layout receives no pathname, so the resume screen falls back to `/admin`
+// here; the middleware, which knows it, preserves the deep link.
 export default async function AdminLayout({
 	children,
 }: {

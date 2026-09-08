@@ -41,7 +41,9 @@ describe("AdminAccessPage", () => {
 				name: "La double authentification n'a pas abouti",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText(/Votre session n'en porte pas/)).toBeInTheDocument();
+		expect(
+			screen.getByText(/Votre session n'en porte pas/),
+		).toBeInTheDocument();
 	});
 
 	it("keeps Mon espace reachable while the backoffice is refused", () => {
@@ -67,7 +69,9 @@ describe("AdminAccessPage", () => {
 		);
 
 		await userEvent.click(
-			screen.getByRole("button", { name: "Refaire la double authentification" }),
+			screen.getByRole("button", {
+				name: "Refaire la double authentification",
+			}),
 		);
 
 		expect(mockSignIn).toHaveBeenCalledWith("proconnect", {
