@@ -1,5 +1,5 @@
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
-import { parseSiren } from "~/modules/domain";
+import { isAdminMfaFresh, parseSiren } from "~/modules/domain";
 import { fetchFileById, fetchFileBySiren } from "~/modules/export";
 import { logAction } from "~/server/audit/log";
 import {
@@ -15,13 +15,21 @@ import { isGatewayForwarded } from "~/server/services/gatewaySource";
  *
  * Unified file-streaming endpoint serving three caller types:
  *  - SUIT REST API consumers (via APISIX gateway, attachment, no SIREN scope)
- *  - Admin backoffice users (NextAuth session + isAdmin, attachment, no SIREN scope)
+ *  - Admin backoffice users (NextAuth session + isAdmin, attachment, no SIREN
+ *    scope — but only while the double authentication is fresh, see below)
  *  - In-app authenticated users (NextAuth session, inline, SIREN-scoped)
  *
  * Caller detection:
  *  - `X-Gateway-Forwarded` header present → SUIT (injected by APISIX's
  *    `proxy-rewrite` plugin; validated by the Edge middleware)
  *  - otherwise → session-based (admin vs. regular decided by `isAdmin` flag)
+ *
+ * The admin SIREN-scope bypass is the platform's most discreet privilege —
+ * it is gated on `isAdminMfaFresh` (epic #4405). Past the 8h window the
+ * admin is not refused outright: they are demoted to their own SIREN scope,
+ * same as a declarant (S8), and only a request that falls outside that
+ * scope is refused, explicitly naming the double authentication to redo
+ * (S13). The gateway and regular-user branches are untouched.
  *
  * Each branch logs to the audit trail with its own action key.
  */
@@ -93,8 +101,8 @@ async function handleSuitDownload(
 }
 
 /**
- * Session-based download: dispatches to admin (no SIREN scope) or regular user
- * (SIREN-scoped) based on `isAdmin` flag.
+ * Session-based download: dispatches to admin (no SIREN scope, MFA-gated) or
+ * regular user (SIREN-scoped) based on `isAdmin` flag.
  */
 async function handleSessionDownload(
 	request: Request,
@@ -115,7 +123,9 @@ async function handleSessionDownload(
 	}
 
 	if (session.user.isAdmin) {
-		return handleAdminDownload(fileId, session, requestContext);
+		return isAdminMfaFresh(session.user.adminMfaAt, new Date())
+			? handleAdminDownload(fileId, session, requestContext)
+			: handleAdminDownloadDemoted(fileId, session, requestContext);
 	}
 
 	const siren = parseSiren(session.user.siret);
@@ -192,6 +202,93 @@ async function handleAdminDownload(
 		});
 		return Response.json(
 			{ error: "Erreur lors du téléchargement du fichier" },
+			{ status: 500 },
+		);
+	}
+}
+
+/**
+ * Named after S13: a habilitated agent refused an out-of-scope attachment
+ * because the window lapsed must be told so — never the same silent
+ * "not found" a never-habilitated user gets.
+ */
+const ADMIN_MFA_EXPIRED_ERROR =
+	"Cette pièce jointe est hors de votre périmètre : la double authentification doit être refaite pour y accéder.";
+
+/**
+ * Admin session whose double authentication has fallen out of the 8h window
+ * (`isAdminMfaFresh`, epic #4405). The SIREN-scope bypass is the privilege
+ * being guarded, so it is withdrawn — but the admin is also a declarant
+ * (S8), so the demotion is to their own SIREN scope, not a blanket refusal:
+ * a file within it is served exactly as it would be for a regular user, and
+ * only a request that falls outside it is refused, explicitly naming the
+ * double authentication to redo (S13). Logged under the admin download
+ * action key — this is still the admin bypass surface, just gated — per the
+ * ticket's instruction not to invent a new audit category for the refusal.
+ */
+async function handleAdminDownloadDemoted(
+	fileId: string,
+	session: {
+		user: { id?: string | null; email?: string | null; siret?: string | null };
+	},
+	requestContext: RequestContext,
+): Promise<Response> {
+	const startedAt = Date.now();
+	const siren = parseSiren(session.user.siret);
+
+	try {
+		const file = siren ? await fetchFileBySiren(fileId, siren) : undefined;
+		if (!file) {
+			writeAuditFailure({
+				action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
+				fileId,
+				errorMessage: "HTTP 403 admin_mfa_expired",
+				requestContext,
+				startedAt,
+				userId: session.user.id ?? null,
+				userEmail: session.user.email ?? null,
+				siren,
+			});
+			return Response.json({ error: ADMIN_MFA_EXPIRED_ERROR }, { status: 403 });
+		}
+
+		const response = await streamStoredFile({
+			filePath: file.filePath,
+			fileName: file.fileName,
+			disposition: "inline",
+			cacheControl: "private, no-store",
+		});
+
+		void logAction({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			status: "success",
+			userId: session.user.id ?? null,
+			userEmail: session.user.email ?? null,
+			siren,
+			metadata: { fileId, fileName: file.fileName },
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+			durationMs: Date.now() - startedAt,
+		});
+
+		return response;
+	} catch (error) {
+		console.error(
+			"[api/v1/files/:fileId][admin-demoted]",
+			error instanceof Error ? error.message : "unknown error",
+		);
+		writeAuditFailure({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			fileId,
+			errorMessage: error instanceof Error ? error.message : "Unknown error",
+			requestContext,
+			startedAt,
+			userId: session.user.id ?? null,
+			userEmail: session.user.email ?? null,
+			siren,
+		});
+		return Response.json(
+			{ error: "Erreur lors de la récupération du fichier" },
 			{ status: 500 },
 		);
 	}
