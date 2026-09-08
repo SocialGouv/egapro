@@ -81,13 +81,17 @@ function primeDbSelect(steps: Step[]) {
 					if (step?.kind === "count") {
 						return Promise.resolve([{ value: step.value }]);
 					}
-					// Declaration lookup path chains `.orderBy().limit(1)` before await.
+					// Declaration lookup path chains `.orderBy().limit(1)` before
+					// await. `.limit()` is deliberately unreachable without
+					// `.orderBy()`: an unordered lookup here would resolve a
+					// different row than the lock guard, and must break loudly.
 					const rows =
 						step?.kind === "declaration" && step.id !== undefined
 							? [{ id: step.id }]
 							: [];
-					const limit = { limit: () => Promise.resolve(rows) };
-					return { ...limit, orderBy: () => limit };
+					return {
+						orderBy: () => ({ limit: () => Promise.resolve(rows) }),
+					};
 				},
 			}),
 		};
