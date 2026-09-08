@@ -54,7 +54,12 @@ function buildDb(overrides: Partial<Record<string, unknown>> = {}) {
 }
 
 const adminSession = {
-	user: { id: "admin-1", email: "a@b.c", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "a@b.c",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 

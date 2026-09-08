@@ -12,8 +12,14 @@ import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import {
+	ADMIN_MFA_REQUIRED_MARKER,
+	ADMIN_MFA_REQUIRED_MESSAGE,
+	AdminMfaRequiredError,
+} from "~/modules/admin/shared/adminMfaGuard";
+import {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	getCurrentYear,
+	isAdminMfaFresh,
 	isDeadlinePassed,
 	isDeclarationSubmitted,
 	isSecondDeclarationDeadlineApplicable,
@@ -56,6 +62,13 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
+// Extracted so the marker detection is unit-testable without a full tRPC HTTP round trip.
+export function isAdminMfaRequiredTRPCError(error: {
+	cause?: unknown;
+}): boolean {
+	return error.cause instanceof AdminMfaRequiredError;
+}
+
 const t = initTRPC.context<typeof createTRPCContext>().create({
 	transformer: superjson,
 	errorFormatter({ shape, error }) {
@@ -65,6 +78,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 				...shape.data,
 				zodError:
 					error.cause instanceof ZodError ? error.cause.flatten() : null,
+				[ADMIN_MFA_REQUIRED_MARKER]: isAdminMfaRequiredTRPCError(error),
 			},
 		};
 	},
@@ -160,6 +174,13 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: "Accès réservé aux administrateurs.",
+		});
+	}
+	if (!isAdminMfaFresh(ctx.session.user.adminMfaAt, new Date())) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: ADMIN_MFA_REQUIRED_MESSAGE,
+			cause: new AdminMfaRequiredError(),
 		});
 	}
 	return next({ ctx });
