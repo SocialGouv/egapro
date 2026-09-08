@@ -72,6 +72,12 @@ describe("isAdminReturnPath", () => {
 		expect(isAdminReturnPath("/admin#contenu")).toBe(true);
 	});
 
+	it("recognizes a backoffice destination reached through dot segments", () => {
+		// Same normalization as sanitizeAdminReturnPath: a caller testing the
+		// raw, not-yet-resolved string must see this as backoffice-bound too.
+		expect(isAdminReturnPath("/mon-espace/../admin")).toBe(true);
+	});
+
 	it.each([
 		["an empty string", ""],
 		["a path outside the backoffice", "/mon-espace"],
@@ -79,6 +85,11 @@ describe("isAdminReturnPath", () => {
 		// `/administration` merely shares a prefix with `/admin`: the comparison
 		// is segment-aware, so this must not be mistaken for a backoffice path.
 		["a path that only shares the prefix", "/administration/secret"],
+		["dot segments escaping the backoffice", "/admin/../mon-espace"],
+		["a relative path", "admin/declarations"],
+		["an absolute URL", "https://evil.example/admin"],
+		["a protocol-relative URL", "//evil.example/admin"],
+		["a backslash authority", "/\\evil.example/admin"],
 	])("does not recognize %s", (_label, value) => {
 		expect(isAdminReturnPath(value)).toBe(false);
 	});
