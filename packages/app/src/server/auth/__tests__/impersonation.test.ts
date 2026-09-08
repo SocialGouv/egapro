@@ -9,6 +9,11 @@ import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
 const closedImpersonations = vi.hoisted(
 	() => [] as Array<Record<string, unknown>>,
 );
+// Records every row inserted into the administration journal, so a test can
+// assert that a refused mimoquage opened none.
+const startedImpersonations = vi.hoisted(
+	() => [] as Array<Record<string, unknown>>,
+);
 const mockFindFirst = vi.hoisted(() => vi.fn());
 
 // The impersonation-update branch of the jwt callback writes to the audit
@@ -19,7 +24,12 @@ vi.mock("~/server/db", () => {
 			onConflictDoNothing: () => Promise.resolve(),
 		}),
 	});
-	const plainValues = () => ({ values: () => Promise.resolve() });
+	const recordingValues = () => ({
+		values: (values: Record<string, unknown>) => {
+			startedImpersonations.push(values);
+			return Promise.resolve();
+		},
+	});
 	const recordingUpdate = (table: unknown) => ({
 		set: (values: Record<string, unknown>) => {
 			if ((table as { adminUserId?: string } | undefined)?.adminUserId) {
@@ -49,7 +59,7 @@ vi.mock("~/server/db", () => {
 								first = false;
 								return chain();
 							}
-							return plainValues();
+							return recordingValues();
 						};
 					})(),
 					update: recordingUpdate,
@@ -96,6 +106,7 @@ const DEMO = { siren: "123456789", name: "Société Démo" };
 
 beforeEach(() => {
 	closedImpersonations.length = 0;
+	startedImpersonations.length = 0;
 	mockFindFirst.mockReset();
 	mockFindFirst.mockResolvedValue({
 		id: "u1",
@@ -108,7 +119,7 @@ beforeEach(() => {
 
 describe("jwt callback — impersonation update trigger", () => {
 	it("writes impersonation into the token when admin updates the session", async () => {
-		const token = { id: "u1", isAdmin: true } as JWT;
+		const token = { id: "u1", isAdmin: true, adminMfaAt: FRESH_MFA } as JWT;
 		const result = await callJwt({
 			token,
 			trigger: "update",
@@ -124,6 +135,7 @@ describe("jwt callback — impersonation update trigger", () => {
 		const token = {
 			id: "u1",
 			isAdmin: true,
+			adminMfaAt: FRESH_MFA,
 			impersonation: { siren: "123456789", name: "Acme" },
 		} as JWT;
 		const result = await callJwt({
@@ -145,7 +157,7 @@ describe("jwt callback — impersonation update trigger", () => {
 	});
 
 	it("rejects malformed impersonation payloads (invalid SIREN)", async () => {
-		const token = { id: "u1", isAdmin: true } as JWT;
+		const token = { id: "u1", isAdmin: true, adminMfaAt: FRESH_MFA } as JWT;
 		const result = await callJwt({
 			token,
 			trigger: "update",
@@ -155,13 +167,62 @@ describe("jwt callback — impersonation update trigger", () => {
 	});
 
 	it("rejects payload missing the `name` field", async () => {
-		const token = { id: "u1", isAdmin: true } as JWT;
+		const token = { id: "u1", isAdmin: true, adminMfaAt: FRESH_MFA } as JWT;
 		const result = await callJwt({
 			token,
 			trigger: "update",
 			session: { impersonation: { siren: "123456789" } },
 		});
 		expect(result.impersonation).toBeUndefined();
+	});
+
+	it("refuses to start a mimoquage once the MFA window has closed", async () => {
+		// Starting a mimoquage is an administrator privilege in its own right.
+		// Were it gated on `isAdmin` alone, an agent whose window had closed
+		// could open a row in the administration journal that no live mimoquage
+		// backs — the very invariant #4466 exists to hold — and persist a
+		// client-supplied company name without a valid second factor.
+		const token = { id: "u1", isAdmin: true, adminMfaAt: EXPIRED_MFA } as JWT;
+		const result = await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: { siren: "123456789", name: "Acme" } },
+		});
+
+		expect(result.impersonation).toBeUndefined();
+		expect(startedImpersonations).toHaveLength(0);
+	});
+
+	it("refuses to start a mimoquage when no second factor was ever presented", async () => {
+		const token = { id: "u1", isAdmin: true } as JWT;
+		const result = await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: { siren: "123456789", name: "Acme" } },
+		});
+
+		expect(result.impersonation).toBeUndefined();
+		expect(startedImpersonations).toHaveLength(0);
+	});
+
+	it("still lets an agent stop a mimoquage after the window has closed", async () => {
+		// Ending a mimoquage and closing its row must never be refused: the
+		// gate above is on starting, so an expired window can never strand an
+		// open row that the agent is powerless to close.
+		const token = {
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: { siren: "123456789", name: "Acme" },
+		} as JWT;
+		const result = await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: null },
+		});
+
+		expect(result.impersonation).toBeNull();
+		expect(closedImpersonations).toHaveLength(1);
 	});
 });
 
@@ -212,7 +273,7 @@ describe("jwt callback — a step-up stops the impersonation (S14)", () => {
 	});
 
 	it("leaves at most one open row across two impersonations separated by a step-up", async () => {
-		const token = { id: "u1", isAdmin: true } as JWT;
+		const token = { id: "u1", isAdmin: true, adminMfaAt: FRESH_MFA } as JWT;
 
 		await callJwt({
 			token,

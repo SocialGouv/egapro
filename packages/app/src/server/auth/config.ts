@@ -472,6 +472,21 @@ export const authConfig = {
 					return token;
 				}
 
+				// Starting a mimoquage is itself an administrator privilege, so it
+				// needs a second factor inside the window — the same condition the
+				// shared predicates apply when *reading* through a mimoquage
+				// (#4466). Gating only on `token.isAdmin` would let an agent whose
+				// window has closed open a row in the administration journal that
+				// no live mimoquage backs, which is precisely the invariant this
+				// ticket exists to hold. It would also persist a client-supplied
+				// company name without a valid second factor.
+				//
+				// Stopping stays ungated on purpose, above: ending a mimoquage and
+				// closing its row must never be refused.
+				if (!isAdminMfaFresh(token.adminMfaAt, new Date())) {
+					return token;
+				}
+
 				if (raw && typeof raw === "object") {
 					const candidate = raw as { siren?: unknown; name?: unknown };
 					const sirenResult = sirenSchema.safeParse(candidate.siren);
