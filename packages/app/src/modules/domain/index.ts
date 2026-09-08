@@ -1,5 +1,12 @@
 // Types
 
+// Admin two-factor authentication — accepted levels and freshness window
+export {
+	ADMIN_MFA_ACR_VALUES,
+	ADMIN_MFA_WINDOW_SECONDS,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+} from "./shared/adminMfa";
 // Campaign
 export {
 	getCurrentYear,

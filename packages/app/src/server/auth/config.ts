@@ -6,7 +6,7 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { extractSiren, parseSiren } from "~/modules/domain";
+import { extractSiren, isAdminMfaAcr, parseSiren } from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
@@ -141,6 +141,7 @@ declare module "next-auth" {
 			phone?: string | null;
 			isAdmin: boolean;
 			impersonation?: Impersonation | null;
+			adminMfaAt?: number | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -153,6 +154,51 @@ declare module "next-auth/jwt" {
 		id_token?: string | null;
 		isAdmin: boolean;
 		impersonation?: Impersonation | null;
+		/**
+		 * Instant (seconds since the epoch) at which ProConnect authenticated
+		 * this user with a second factor. Absent when the returned level did
+		 * not prove one. Read by the backoffice guards to decide whether the
+		 * 8-hour window is still open.
+		 */
+		adminMfaAt?: number;
+	}
+}
+
+/**
+ * Authentication level (`acr`) and instant (`auth_time`) reported by the
+ * identity provider for the sign-in that just happened, read from the
+ * `id_token` the token endpoint returned.
+ *
+ * The payload is decoded without re-verifying its signature, and that is
+ * deliberate rather than an oversight: this token never transited through the
+ * browser. NextAuth fetched it over a server-to-server channel and validated
+ * its signature, issuer, audience and nonce before handing it to us as
+ * `account.id_token` — checking it again would re-run the same verification
+ * against the same JWKS.
+ */
+function readAuthenticationClaims(idToken: string | null | undefined): {
+	acr: string | null;
+	authTime: number | null;
+} {
+	const payload = idToken?.split(".")[1];
+	if (!payload) return { acr: null, authTime: null };
+
+	try {
+		const claims = JSON.parse(
+			Buffer.from(payload, "base64url").toString("utf-8"),
+		) as Record<string, unknown>;
+		const authTime = claims.auth_time;
+		return {
+			acr: typeof claims.acr === "string" ? claims.acr : null,
+			authTime:
+				typeof authTime === "number" &&
+				Number.isFinite(authTime) &&
+				authTime > 0
+					? Math.floor(authTime)
+					: null,
+		};
+	} catch {
+		return { acr: null, authTime: null };
 	}
 }
 
@@ -467,6 +513,37 @@ export const authConfig = {
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
+
+				// Two-factor marker (#4461). Its only source is the id_token of
+				// the token exchange we just performed server-to-server: never a
+				// query parameter, a header, a request body, nor the
+				// `trigger === "update"` branch above, which any signed-in client
+				// can reach. A level below MFA is not an error — the declarant
+				// journey never asks for one — so the sign-in succeeds and the
+				// session simply carries no marker.
+				const { acr, authTime } = readAuthenticationClaims(account?.id_token);
+				if (isAdminMfaAcr(acr)) {
+					token.adminMfaAt = authTime ?? Math.floor(Date.now() / 1000);
+				} else {
+					token.adminMfaAt = undefined;
+				}
+
+				// Only admin-eligible accounts produce an audit row: a declarant
+				// signing in at a level we never demanded is not a refused MFA.
+				// Neither token nor raw claim is logged — the returned level and
+				// the instant are the whole payload.
+				if (shouldBeAdmin) {
+					await logAction({
+						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
+						status: token.adminMfaAt ? "success" : "failure",
+						userId: dbUser.id,
+						userEmail: email,
+						errorMessage: token.adminMfaAt
+							? null
+							: "Niveau d'authentification insuffisant pour le backoffice.",
+						metadata: { acr, authTime: token.adminMfaAt ?? null },
+					});
+				}
 			}
 			return token;
 		},
@@ -479,6 +556,7 @@ export const authConfig = {
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
 				impersonation: token.impersonation ?? null,
+				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),
 	},
