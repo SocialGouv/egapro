@@ -246,21 +246,13 @@ export function CategoryForm({
 			);
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
-					if (error.fieldId === changedFieldId) {
-						if (isCountField) return false;
-						if (error.category === "inconsistent") {
-							return !categoryPayApplicable && raw !== "";
-						}
-						return false;
-					}
+					if (error.fieldId === changedFieldId) return false;
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
 					// A category with an explicit zero has no pay fields to correct.
 					// When it becomes applicable again, keep any completeness errors.
-					return categoryPayApplicable
-						? error.category !== "inconsistent"
-						: false;
+					return categoryPayApplicable;
 				}),
 			);
 			setHasData(false);
