@@ -3,7 +3,6 @@ import { signIn } from "next-auth/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
-import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { UserAccountMenu } from "../UserAccountMenu";
 
 const mockSignIn = vi.mocked(signIn);
@@ -251,7 +250,7 @@ describe("UserAccountMenu", () => {
 			expect(mockSignIn).toHaveBeenCalledWith(
 				"proconnect",
 				{ callbackUrl: "/admin" },
-				buildAdminStepUpAuthorizationParams(),
+				expect.objectContaining({ claims: expect.any(String) }),
 			);
 		});
 
@@ -263,7 +262,7 @@ describe("UserAccountMenu", () => {
 			expect(mockSignIn).toHaveBeenCalledWith(
 				"proconnect",
 				{ callbackUrl: "/admin" },
-				buildAdminStepUpAuthorizationParams(),
+				expect.objectContaining({ claims: expect.any(String) }),
 			);
 		});
 

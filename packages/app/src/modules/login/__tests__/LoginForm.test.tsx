@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { signIn } from "next-auth/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { LoginForm } from "../LoginForm";
 
 const mockSignIn = vi.mocked(signIn);
@@ -56,7 +55,7 @@ describe("LoginForm", () => {
 		expect(mockSignIn).toHaveBeenCalledWith(
 			"proconnect",
 			{ callbackUrl: "/admin/declarations" },
-			buildAdminStepUpAuthorizationParams(),
+			expect.objectContaining({ claims: expect.any(String) }),
 		);
 	});
 

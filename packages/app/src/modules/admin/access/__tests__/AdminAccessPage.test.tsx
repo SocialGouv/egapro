@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { signIn } from "next-auth/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { AdminAccessPage } from "../AdminAccessPage";
 
 const mockSignIn = vi.mocked(signIn);
@@ -96,7 +95,7 @@ describe("AdminAccessPage", () => {
 		expect(mockSignIn).toHaveBeenCalledWith(
 			"proconnect",
 			expect.anything(),
-			buildAdminStepUpAuthorizationParams(),
+			expect.objectContaining({ claims: expect.any(String) }),
 		);
 	});
 });

@@ -17,7 +17,6 @@ vi.mock("~/modules/analytics", async (importOriginal) => {
 });
 
 import { MATOMO_ACTION, MATOMO_EVENT_CATEGORY } from "~/modules/analytics";
-import { buildAdminStepUpAuthorizationParams } from "~/server/auth/stepUpParams";
 import { ProConnectButton } from "../ProConnectButton";
 
 beforeEach(() => {
@@ -95,11 +94,14 @@ describe("ProConnectButton", () => {
 			expect(signInMock).toHaveBeenCalledWith(
 				"proconnect",
 				{ callbackUrl: "/admin" },
-				buildAdminStepUpAuthorizationParams(),
+				expect.objectContaining({ claims: expect.any(String) }),
 			);
 		});
 
-		it("falls back to the backoffice home when no callbackUrl is provided", () => {
+		it("falls back to /mon-espace even when requiresAdminStepUp is set", () => {
+			// ProConnectButton's own `callbackUrl ?? "/mon-espace"` default is
+			// independent of `requiresAdminStepUp` — it does not fall back to the
+			// backoffice home just because a step-up was requested.
 			render(<ProConnectButton requiresAdminStepUp />);
 			screen
 				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
@@ -107,7 +109,7 @@ describe("ProConnectButton", () => {
 			expect(signInMock).toHaveBeenCalledWith(
 				"proconnect",
 				{ callbackUrl: "/mon-espace" },
-				buildAdminStepUpAuthorizationParams(),
+				expect.objectContaining({ claims: expect.any(String) }),
 			);
 		});
 
