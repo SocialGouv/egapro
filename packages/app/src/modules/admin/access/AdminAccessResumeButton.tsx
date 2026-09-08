@@ -6,9 +6,7 @@ type Props = {
 	returnPath: string;
 };
 
-// Triggered by a click, never by the page itself: an automatic redirect would
-// bounce the agent between Egapro and ProConnect were the issuer to replay an
-// authentication too old for our window.
+// Click-triggered, never automatic: an issuer replaying an authentication too old for our window would loop the agent.
 export function AdminAccessResumeButton({ returnPath }: Props) {
 	return (
 		<button

@@ -37,8 +37,6 @@ describe("sanitizeAdminReturnPath", () => {
 		// `/administration` merely shares a prefix with `/admin`: the comparison
 		// is segment-aware, so this must not be mistaken for a backoffice path.
 		["a path that only shares the prefix", "/administration/secret"],
-		// `/admin/../mon-espace` opens with `/admin` as a string, but every
-		// consumer collapses it to `/mon-espace` before requesting it.
 		["dot segments escaping the backoffice", "/admin/../mon-espace"],
 		["dot segments climbing above the root", "/admin/../../mon-espace"],
 		["encoded dot segments", "/admin/%2E%2E/mon-espace"],

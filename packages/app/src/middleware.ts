@@ -68,23 +68,17 @@ function redirectToLogin(request: NextRequest) {
 async function adminMiddleware(request: NextRequest) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
-	// The Edge runtime is allowed to settle freshness: the token is already
-	// decoded here to read the admin grant, and the rule is a comparison of two
-	// numbers — no database, no Node API.
+	// The Edge runtime can settle freshness itself: the token is already decoded here, and the rule compares two numbers.
 	const decision = resolveAdminAccess(token, new Date());
 
 	switch (decision.type) {
-		// No token, or a token predating the `isAdmin` field (users signed in
-		// before that field existed). The DB sync runs in the `jwt` callback on
-		// sign-in, so a fresh token is the only way to get the correct flag.
+		// The DB sync runs in the `jwt` callback, so a fresh sign-in is the only way to obtain the grant flag.
 		case "login":
 			return redirectToLogin(request);
-		// Silent refusal: a user without the grant is not told the backoffice
-		// exists.
+		// Silent refusal: a user without the grant is never told the backoffice exists.
 		case "monEspace":
 			return NextResponse.redirect(new URL("/mon-espace", request.url));
-		// Explicit refusal, on an Egapro screen: the product rules out reopening
-		// ProConnect in the middle of a navigation the agent did not ask for.
+		// Explicit refusal on an Egapro screen: reopening ProConnect mid-navigation is ruled out by the product.
 		case "resume": {
 			const resumeUrl = new URL("/acces-backoffice", request.url);
 			resumeUrl.searchParams.set(
@@ -98,9 +92,7 @@ async function adminMiddleware(request: NextRequest) {
 	}
 }
 
-// A browser back after an expiry must not restore a backoffice page from the
-// cache. The back/forward cache stays a client behaviour we do not command;
-// the header is the part that is ours, and the verifiable one.
+// A browser back after an expiry must not restore a backoffice page from the cache.
 function noStore(response: NextResponse) {
 	response.headers.set("Cache-Control", "no-store");
 	return response;

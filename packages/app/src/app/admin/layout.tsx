@@ -5,9 +5,7 @@ import { AdminShell } from "~/modules/admin";
 import { resolveAdminAccess } from "~/modules/domain";
 import { auth } from "~/server/auth";
 
-// Defense in depth behind the Edge middleware, on the same decision table.
-// A layout receives no pathname, so the resume screen falls back to `/admin`
-// here; the middleware, which knows it, preserves the deep link.
+// Defense in depth behind the Edge middleware; a layout receives no pathname, hence the `/admin` fallback on resume.
 export default async function AdminLayout({
 	children,
 }: {

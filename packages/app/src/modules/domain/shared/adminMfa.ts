@@ -27,8 +27,7 @@ export function isAdminMfaFresh(
 	return elapsedSeconds < ADMIN_MFA_WINDOW_SECONDS;
 }
 
-// Derived from the session alone — a reason carried in the URL would be
-// displayable at will.
+// Read from the session alone: a reason carried in the URL would be displayable at will.
 export type AdminMfaFailure = "expired" | "missing";
 
 export type AdminAccessDecision =
@@ -37,23 +36,18 @@ export type AdminAccessDecision =
 	| { type: "resume"; reason: AdminMfaFailure }
 	| { type: "allow" };
 
-// `isAdmin` is optional on purpose: a token minted before the field existed
-// carries no value, and that absence is not the same thing as `false`.
+// `isAdmin` is optional because a token minted before the field existed carries no value, which is not `false`.
 export type AdminSessionState = {
 	isAdmin?: boolean;
 	adminMfaAt?: number | null;
 };
 
-// The single decision table of the `/admin` surface, applied identically by the
-// Edge middleware, the backoffice layout and the resume screen. It compares
-// values the token already carries — which is why the authentication date lives
-// in the token in the first place.
+// The single decision table of the `/admin` surface: Edge middleware, backoffice layout and resume screen all run this one.
 export function resolveAdminAccess(
 	session: AdminSessionState | null | undefined,
 	now: Date,
 ): AdminAccessDecision {
-	// No session, or a token predating the admin field: only a fresh sign-in
-	// produces a token we are able to judge.
+	// A token predating the admin field cannot be judged; only a fresh sign-in produces one that can.
 	if (!session || session.isAdmin === undefined) return { type: "login" };
 
 	if (!session.isAdmin) return { type: "monEspace" };

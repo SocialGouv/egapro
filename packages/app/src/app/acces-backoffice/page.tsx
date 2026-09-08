@@ -14,10 +14,7 @@ type PageProps = {
 	searchParams: Promise<{ retour?: string }>;
 };
 
-// Outside `/admin` on purpose: under the backoffice guard, this screen would
-// bounce against that very guard. It runs the same decision table, so a user
-// without the grant is turned away exactly as on `/admin` — an exception here
-// would make this screen the disclosure the guard refuses to make.
+// Outside `/admin` on purpose: under the backoffice guard this screen would bounce against that very guard.
 export default async function Page({ searchParams }: PageProps) {
 	const { retour } = await searchParams;
 	const returnPath = sanitizeAdminReturnPath(retour);
@@ -29,8 +26,7 @@ export default async function Page({ searchParams }: PageProps) {
 		redirect(`/login?callbackUrl=${encodeURIComponent(returnPath)}`);
 	}
 	if (decision.type === "monEspace") redirect("/mon-espace");
-	// Already authenticated at the required level: nothing to resume, the agent
-	// goes straight where they were headed.
+	// Nothing left to resume: the agent goes straight where they were headed.
 	if (decision.type === "allow") redirect(returnPath);
 
 	return <AdminAccessPage reason={decision.reason} returnPath={returnPath} />;

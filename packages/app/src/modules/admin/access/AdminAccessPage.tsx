@@ -20,8 +20,7 @@ const CONTENT: Record<AdminMfaFailure, { title: string; body: string }> = {
 	},
 };
 
-// An Egapro screen rather than a silent redirect: the agent is told what is
-// asked of them and decides when to go through ProConnect again.
+// An Egapro screen rather than a silent redirect: the agent decides when to go through ProConnect again.
 export function AdminAccessPage({ reason, returnPath }: Props) {
 	const { title, body } = CONTENT[reason];
 
