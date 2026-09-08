@@ -48,6 +48,36 @@ async function closeOpenImpersonationEvents(adminUserId: string) {
 }
 
 /**
+ * Close the administration-journal row of a mimoquage whose second-factor
+ * window has lapsed, and drop it from the token.
+ *
+ * A mimoquage stops biting the instant the window closes: `exposedImpersonation`
+ * and `activeImpersonation` both stop honouring it, so the banner goes and the
+ * server resolves the agent's own SIREN again. The open row has no such clock.
+ * Closing it on sign-in alone would leave it open for the whole remaining life
+ * of the session — weeks past the window — so the invariant the sign-in branch
+ * states, no row open without a live mimoquage behind it, would hold against a
+ * step-up but not against a window that simply lapses (issue #4466, S14).
+ *
+ * Emptying the token field is what keeps this from firing twice; a repeat costs
+ * an index probe on the partial index of open rows and no write.
+ */
+async function closeLapsedImpersonation(
+	token: {
+		adminMfaAt?: number;
+		id: string;
+		impersonation?: Impersonation | null;
+	},
+	now: Date,
+) {
+	if (!token.impersonation) return;
+	if (isAdminMfaFresh(token.adminMfaAt, now)) return;
+
+	await closeOpenImpersonationEvents(token.id);
+	token.impersonation = null;
+}
+
+/**
  * Persist the start of an impersonation session atomically:
  * close any previously open session, ensure the company row exists (so
  * the FK on the audit table holds), then insert the new event.
@@ -484,6 +514,10 @@ export const authConfig = {
 				// Stopping stays ungated on purpose, above: ending a mimoquage and
 				// closing its row must never be refused.
 				if (!isAdminMfaFresh(token.adminMfaAt, new Date())) {
+					// The refusal must not strand what the agent already had open:
+					// an agent switching companies as the window lapses gets the
+					// same treatment as one who simply stopped browsing.
+					await closeLapsedImpersonation(token, new Date());
 					return token;
 				}
 
@@ -672,28 +706,10 @@ export const authConfig = {
 				}
 			}
 
-			// A mimoquage stops biting the instant the second-factor window
-			// lapses: `exposedImpersonation` and `activeImpersonation` both stop
-			// honouring it, so the banner goes and the server resolves the
-			// agent's own SIREN again. The open row in the administration journal
-			// has no such clock. Closing it in the sign-in branch alone would
-			// leave it open for the whole remaining life of the session — weeks
-			// past the window — so the invariant that branch states, no row open
-			// without a live mimoquage behind it, would hold against a step-up
-			// but not against a window that simply lapses (#4466, S14).
-			//
 			// Last, so it never doubles a close the branches above already made:
 			// an explicit stop returns from the update branch, and a sign-in has
-			// just emptied the field. Clearing the field is what keeps it from
-			// firing twice; a repeat would cost an index probe on the partial
-			// index of open rows and no write.
-			if (
-				token.impersonation &&
-				!isAdminMfaFresh(token.adminMfaAt, new Date())
-			) {
-				await closeOpenImpersonationEvents(token.id);
-				token.impersonation = null;
-			}
+			// just emptied the field.
+			await closeLapsedImpersonation(token, new Date());
 
 			return token;
 		},

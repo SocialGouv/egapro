@@ -193,6 +193,27 @@ describe("jwt callback — impersonation update trigger", () => {
 		expect(startedImpersonations).toHaveLength(0);
 	});
 
+	it("closes the row it already had open when the switch is refused for a lapsed window", async () => {
+		// An agent switching companies just as the window lapses must not be
+		// left with a refused switch and its previous row still open.
+		const token = {
+			id: "u1",
+			isAdmin: true,
+			adminMfaAt: EXPIRED_MFA,
+			impersonation: DEMO,
+		} as JWT;
+
+		const result = await callJwt({
+			token,
+			trigger: "update",
+			session: { impersonation: { siren: "987654321", name: "Autre Démo" } },
+		});
+
+		expect(startedImpersonations).toHaveLength(0);
+		expect(closedImpersonations).toHaveLength(1);
+		expect(result.impersonation).toBeNull();
+	});
+
 	it("refuses to start a mimoquage when no second factor was ever presented", async () => {
 		const token = { id: "u1", isAdmin: true } as JWT;
 		const result = await callJwt({
