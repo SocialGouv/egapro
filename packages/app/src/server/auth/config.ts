@@ -154,28 +154,16 @@ declare module "next-auth/jwt" {
 		id_token?: string | null;
 		isAdmin: boolean;
 		impersonation?: Impersonation | null;
-		/**
-		 * Instant (seconds since the epoch) at which ProConnect authenticated
-		 * this user with a second factor. Absent when the returned level did
-		 * not prove one. Read by the backoffice guards to decide whether the
-		 * 8-hour window is still open.
-		 */
+		// Seconds since the epoch. Absent when the level ProConnect returned
+		// proved no second factor.
 		adminMfaAt?: number;
 	}
 }
 
-/**
- * Authentication level (`acr`) and instant (`auth_time`) reported by the
- * identity provider for the sign-in that just happened, read from the
- * `id_token` the token endpoint returned.
- *
- * The payload is decoded without re-verifying its signature, and that is
- * deliberate rather than an oversight: this token never transited through the
- * browser. NextAuth fetched it over a server-to-server channel and validated
- * its signature, issuer, audience and nonce before handing it to us as
- * `account.id_token` — checking it again would re-run the same verification
- * against the same JWKS.
- */
+// Decoded without re-verifying the signature: this token never transited
+// through the browser — NextAuth fetched it server-to-server and openid-client
+// already validated signature, issuer, audience and nonce before handing it
+// over, so a second check would re-run the same one against the same JWKS.
 function readAuthenticationClaims(idToken: string | null | undefined): {
 	acr: string | null;
 	authTime: number | null;
@@ -514,13 +502,12 @@ export const authConfig = {
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
 
-				// Two-factor marker (#4461). Its only source is the id_token of
-				// the token exchange we just performed server-to-server: never a
-				// query parameter, a header, a request body, nor the
-				// `trigger === "update"` branch above, which any signed-in client
-				// can reach. A level below MFA is not an error — the declarant
-				// journey never asks for one — so the sign-in succeeds and the
-				// session simply carries no marker.
+				// The marker's only source is the id_token of the exchange we
+				// just performed server-to-server: never a query parameter, a
+				// header, a request body, nor the `trigger === "update"` branch
+				// above, which any signed-in client can reach. A level below MFA
+				// is not an error — the declarant journey never asks for one — so
+				// the sign-in succeeds with the session simply left undated.
 				const { acr, authTime } = readAuthenticationClaims(account?.id_token);
 				if (isAdminMfaAcr(acr)) {
 					token.adminMfaAt = authTime ?? Math.floor(Date.now() / 1000);
@@ -528,11 +515,11 @@ export const authConfig = {
 					token.adminMfaAt = undefined;
 				}
 
-				// Only admin-eligible accounts produce an audit row: a declarant
-				// signing in at a level we never demanded is not a refused MFA.
-				// Neither token nor raw claim is logged — the returned level and
-				// the instant are the whole payload.
+				// Only admin-eligible accounts produce a row: a declarant signing
+				// in at a level we never demanded is not a refused MFA. Neither
+				// token nor raw claim is logged.
 				if (shouldBeAdmin) {
+					const requestContext = await safeRequestContext();
 					await logAction({
 						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
 						status: token.adminMfaAt ? "success" : "failure",
@@ -542,6 +529,8 @@ export const authConfig = {
 							? null
 							: "Niveau d'authentification insuffisant pour le backoffice.",
 						metadata: { acr, authTime: token.adminMfaAt ?? null },
+						ipAddress: requestContext.ipAddress,
+						userAgent: requestContext.userAgent,
 					});
 				}
 			}
