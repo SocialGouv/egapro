@@ -27,10 +27,11 @@ export function notCancelledCondition() {
 
 /**
  * Le couple (siren, année), **sans** exclure les déclarations annulées —
- * l'exact opposé délibéré d'`activeDeclarationFilter`. C'est ce que le pipeline
- * d'upload écrit, donc ce que son garde de verrou doit inspecter.
+ * l'exact opposé délibéré d'`activeDeclarationFilter`. Volontairement privé :
+ * la propriété de sûreté repose sur le résolveur ci-dessous, pas sur le filtre,
+ * et un second appelant du filtre seul rouvrirait la divergence.
  */
-export function currentDeclarationFilter(siren: string, year: number) {
+function currentDeclarationFilter(siren: string, year: number) {
 	return and(eq(declarations.siren, siren), eq(declarations.year, year));
 }
 
