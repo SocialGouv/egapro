@@ -2,7 +2,6 @@ import "server-only";
 
 import type { Session } from "next-auth";
 
-import { parseSiren } from "~/modules/domain";
 import { cachedAuth } from "~/server/audit/cachedAuth";
 import { getEffectiveSiren } from "./companyAccess";
 
@@ -11,8 +10,8 @@ export type SessionSiren = {
 	siren: string | null;
 };
 
-// Impersonation-aware and validating like `companyProcedure`: a malformed SIRET yields `null`, never a nine-character lookalike.
+// Impersonation-aware and validating like `companyProcedure`: `getEffectiveSiren` parses, so a malformed SIRET yields `null`, never a nine-character lookalike.
 export async function getSessionSiren(request: Request): Promise<SessionSiren> {
 	const session = await cachedAuth(request);
-	return { session, siren: parseSiren(getEffectiveSiren(session)) };
+	return { session, siren: getEffectiveSiren(session) };
 }
