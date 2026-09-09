@@ -106,11 +106,14 @@ function toFormValues(
 	);
 }
 
-function normalizeFormValues(values: CategoryFormValues): CategoryFormValues {
+function normalizeFormValues(
+	values: CategoryFormValues,
+	preserveLegacyPay = false,
+): CategoryFormValues {
 	return {
 		source: values.source,
 		categories: values.categories.map((category) =>
-			normalizeCategoryForForm(category, false),
+			normalizeCategoryForForm(category, preserveLegacyPay),
 		),
 	};
 }
@@ -194,7 +197,7 @@ export function CategoryForm({
 
 	const form = useZodForm(categoryFormSchema, {
 		defaultValues: defaultValuesOverride
-			? normalizeFormValues(defaultValuesOverride)
+			? normalizeFormValues(defaultValuesOverride, readOnly)
 			: {
 					source: initialSource,
 					categories: toFormValues(initialCats, readOnly),

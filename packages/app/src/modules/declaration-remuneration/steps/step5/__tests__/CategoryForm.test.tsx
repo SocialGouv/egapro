@@ -259,7 +259,6 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 				categories: [defaults],
 			},
 			onValuesChange,
-			readOnly: true,
 		});
 
 		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
@@ -336,6 +335,41 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 });
 
 describe("CategoryForm legacy read-only categories (#3678)", () => {
+	it("preserves legacy pay restored from a residual draft", () => {
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "0",
+			menCount: "3",
+			hourlyWomenCount: "0",
+			hourlyMenCount: "3",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+			readOnly: true,
+		});
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(annualBaseWomen).toHaveAttribute("readonly");
+		expect(annualBaseWomen).not.toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000");
+	});
+
 	it("preserves already-submitted pay so the locked form matches PDF and export", () => {
 		renderForm(
 			[
