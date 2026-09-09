@@ -17,8 +17,9 @@ transformé en un instantané CSV contrôlé avant toute connexion à la V2.
 - `psql` 14 ou plus récent pour la simulation et l'import ;
 - `sha256sum` ou `shasum` ;
 - un service libpq donnant accès à la V2 avec les droits de lecture et
-  d'écriture sur `app_company`, `app_representation_declaration` et
-  `app_referent`.
+  d'écriture sur les tables du jeu sélectionné : `app_company` et
+  `app_representation_declaration` pour `repeq`, `app_referent` pour les
+  référents.
 
 Le kit est testé avec PostgreSQL 14.17. Un dump créé par une version plus
 récente peut ne pas être lisible par `pg_restore` 14. Les deux tables reprises
@@ -38,7 +39,7 @@ Un dump custom complet est accepté : seules les données des tables
 schéma minimal maîtrisé par le kit.
 
 Le format plain n'est accepté que s'il s'agit d'un dump `--data-only` limité à
-ces deux tables et produit au format `COPY` standard :
+une ou aux deux tables de reprise et produit au format `COPY` standard :
 
 ```bash
 pg_dump --format=plain --data-only --no-owner --no-privileges \
@@ -49,6 +50,19 @@ pg_dump --format=plain --data-only --no-owner --no-privileges \
 Les dumps `pg_dumpall`, les dumps plain contenant du DDL et les archives
 directory/tar ne sont pas pris en charge. Le kit n'essaie jamais de réécrire
 des rôles, propriétaires ou commandes SQL arbitraires.
+
+## Jeux de données
+
+L'option `--dataset` accepte trois valeurs :
+
+- `all` : représentations équilibrées et référents ;
+- `repeq` : représentations équilibrées uniquement ;
+- `referents` : référents uniquement.
+
+Pour `export`, la valeur par défaut est `all`. Pour `dry-run` et `apply`, la
+valeur par défaut est celle enregistrée dans l'instantané. Un instantané `all`
+peut donc être appliqué en une fois ou en deux opérations séparées. Un
+instantané limité à une partie ne peut pas servir à importer l'autre partie.
 
 ## 1. Créer l'instantané
 
@@ -80,14 +94,40 @@ fixée avec des instants explicites :
 ```
 
 Cette plage ne concerne que `representation_equilibree`. L'annuaire des
-référents est toujours exporté en totalité ; un annuaire vide est refusé.
+référents sélectionné est toujours exporté en totalité ; un annuaire vide est
+refusé. Les bornes temporelles sont refusées avec `--dataset referents`.
+
+Pour créer deux instantanés indépendants à partir du même dump :
+
+```bash
+./migration-v1/migrate.sh export \
+  --dump "$PWD/v1.dump" \
+  --format custom \
+  --dataset repeq \
+  --out "$PWD/v1-snapshot-repeq"
+
+./migration-v1/migrate.sh export \
+  --dump "$PWD/v1.dump" \
+  --format custom \
+  --dataset referents \
+  --out "$PWD/v1-snapshot-referents"
+```
+
+Avec un dump custom, seule la table sélectionnée est restaurée. Avec un dump
+plain, le fichier peut contenir une ou les deux tables ; les données non
+sélectionnées sont ignorées.
 
 Le répertoire créé contient exactement :
 
-- `manifest.txt` : version du format, date, bornes, compteurs et empreinte du
-  dump ;
+- `manifest.txt` : version du format, jeu de données, date, bornes, compteurs et
+  empreinte du dump ;
 - `representations.csv` et `referents.csv` : données privées ;
 - `SHA256SUMS` : empreintes des trois fichiers précédents.
+
+Les quatre fichiers sont toujours présents. Dans un instantané limité à une
+partie, le CSV de la partie omise contient uniquement son en-tête et son
+compteur vaut zéro. Le kit accepte aussi les instantanés de format 1 comme des
+instantanés combinés ; les nouveaux exports utilisent le format 2.
 
 Les sommes de contrôle détectent une modification accidentelle ou ultérieure,
 mais ne prouvent pas l'origine des fichiers. Le conteneur PostgreSQL temporaire
@@ -151,6 +191,7 @@ Le rapport ne contient que des compteurs :
 
 ```text
 mode=dry-run
+dataset=all
 representations.read=...
 representations.insert=...
 representations.update=...
@@ -166,6 +207,25 @@ La simulation charge seulement des tables temporaires et ne modifie aucune
 donnée persistante. Elle valide aussi le schéma cible, les types, les codes et
 les longueurs. Son résultat reste indicatif : l'état V2 peut changer avant
 l'import réel, qui recalcule donc le plan sous verrou.
+
+Pour simuler séparément les deux parties depuis l'instantané combiné :
+
+```bash
+./migration-v1/migrate.sh dry-run \
+  --snapshot "$PWD/v1-snapshot" \
+  --dataset repeq \
+  --service egapro-v2-production \
+  --pgpass "$PWD/pgpass"
+
+./migration-v1/migrate.sh dry-run \
+  --snapshot "$PWD/v1-snapshot" \
+  --dataset referents \
+  --service egapro-v2-production \
+  --pgpass "$PWD/pgpass"
+```
+
+Le rapport indique `dataset=all|repeq|referents` et ne présente que les
+compteurs de la partie effectivement sélectionnée.
 
 ## 5. Importer en production
 
@@ -186,10 +246,28 @@ Puis exécuter exactement le même instantané :
   --pgpass "$PWD/pgpass"
 ```
 
-L'import utilise une seule transaction. Il verrouille en écriture les tables
-de déclarations de représentation et de référents, dans cet ordre, mais ne
-verrouille pas toute la table des entreprises. Une attente de verrou supérieure
-à dix secondes interrompt l'opération.
+L'import peut également être séparé :
+
+```bash
+./migration-v1/migrate.sh apply \
+  --snapshot "$PWD/v1-snapshot" \
+  --dataset repeq \
+  --service egapro-v2-production \
+  --pgpass "$PWD/pgpass"
+
+./migration-v1/migrate.sh apply \
+  --snapshot "$PWD/v1-snapshot" \
+  --dataset referents \
+  --service egapro-v2-production \
+  --pgpass "$PWD/pgpass"
+```
+
+Chaque invocation utilise une seule transaction et ne verrouille que la table
+du jeu sélectionné. Le mode `all` verrouille les déclarations de représentation
+puis les référents et garantit un rollback commun. Deux imports séparés ont
+deux transactions indépendantes : le succès du premier n'est pas annulé si le
+second échoue. La table des entreprises n'est jamais verrouillée en totalité.
+Une attente de verrou supérieure à dix secondes interrompt l'opération.
 
 Les entreprises absentes sont créées sans modifier les entreprises existantes.
 Une déclaration saisie nativement en V2 (`imported_from_v1_at IS NULL`) n'est
@@ -197,11 +275,13 @@ jamais écrasée. Une déclaration déjà reprise n'est mise à jour que si son
 `modified_at` V1 est plus récent que son `updated_at` V2. L'annuaire des
 référents est remplacé en totalité seulement si son contenu diffère.
 
-Une erreur, même pendant la dernière insertion, annule les changements des deux
-jeux de données. La commande n'annonce le succès qu'après réception du `COMMIT`.
-Si la connexion tombe pendant ce `COMMIT`, le résultat est indéterminé : vérifier
-les compteurs en relançant `dry-run`, puis relancer le même `apply` si nécessaire.
-La relance d'un instantané identique est idempotente.
+En mode `all`, une erreur, même pendant la dernière insertion, annule les
+changements des deux jeux de données. En mode séparé, elle annule uniquement
+l'invocation en cours. La commande n'annonce le succès qu'après réception du
+`COMMIT`. Si la connexion tombe pendant ce `COMMIT`, le résultat est
+indéterminé : vérifier les compteurs en relançant `dry-run`, puis relancer le
+même `apply` si nécessaire. La relance d'un instantané identique est
+idempotente.
 
 Il n'existe pas de commande d'annulation automatique après un import validé :
 la restauration relève de la procédure de sauvegarde V2 préparée avant la

@@ -6,8 +6,11 @@ umask 077
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly POSTGRES_IMAGE="${MIGRATION_V1_POSTGRES_IMAGE:-postgres:14.17}"
-readonly SNAPSHOT_VERSION="1"
+readonly SNAPSHOT_VERSION="2"
+readonly LEGACY_SNAPSHOT_VERSION="1"
 readonly SNAPSHOT_FILES=(manifest.txt representations.csv referents.csv SHA256SUMS)
+readonly REPRESENTATIONS_HEADER="siren,year,declared_at,modified_at,data"
+readonly REFERENTS_HEADER="id,county,name,principal,region,type,value,substitute_name,substitute_email"
 
 TEMP_DIR=""
 CONTAINER_NAME=""
@@ -16,10 +19,13 @@ usage() {
   cat <<'EOF'
 Usage:
   migrate.sh export --dump PATH --format custom|plain --out DIR
+                    [--dataset all|repeq|referents]
                     [--declared-at-gte TIMESTAMPTZ] [--declared-at-lt TIMESTAMPTZ]
   migrate.sh verify --snapshot DIR
-  migrate.sh dry-run --snapshot DIR --service NAME [--pgpass PATH]
-  migrate.sh apply --snapshot DIR --service NAME [--pgpass PATH]
+  migrate.sh dry-run --snapshot DIR --service NAME [--dataset all|repeq|referents]
+                     [--pgpass PATH]
+  migrate.sh apply --snapshot DIR --service NAME [--dataset all|repeq|referents]
+                   [--pgpass PATH]
 EOF
 }
 
@@ -55,6 +61,33 @@ sha256_file() {
   else
     die "sha256sum ou shasum est requis"
   fi
+}
+
+validate_dataset() {
+  case "$1" in
+    all|repeq|referents) ;;
+    *) die "jeu de données attendu : all, repeq ou referents" ;;
+  esac
+}
+
+dataset_includes() {
+  local available=$1
+  local requested=$2
+
+  [[ "$available" == "all" || "$available" == "$requested" ]]
+}
+
+write_header_only_csv() {
+  local path=$1
+  local header=$2
+  printf '%s\n' "$header" >"$path"
+}
+
+assert_header_only_csv() {
+  local path=$1
+  local header=$2
+  cmp -s "$path" <(printf '%s\n' "$header") ||
+    die "le fichier omis doit contenir uniquement son en-tête : $(basename "$path")"
 }
 
 absolute_existing_file() {
@@ -103,7 +136,8 @@ manifest_value() {
 
 verify_snapshot() {
   local snapshot=$1
-  local entry file expected actual manifest_count csv_count key value
+  local entry file expected actual csv_count key value format_version expected_key_count dataset
+  local representation_count referent_count
 
   [[ -d "$snapshot" && ! -L "$snapshot" ]] || die "instantané introuvable ou lien symbolique refusé : $snapshot"
   snapshot=$(cd "$snapshot" && pwd)
@@ -121,32 +155,58 @@ verify_snapshot() {
     [[ -f "$snapshot/$file" && ! -L "$snapshot/$file" ]] || die "fichier d'instantané absent : $file"
   done
 
+  format_version=$(manifest_value "$snapshot/manifest.txt" format_version)
+  case "$format_version" in
+    "$LEGACY_SNAPSHOT_VERSION")
+      expected_key_count=9
+      dataset="all"
+      ;;
+    "$SNAPSHOT_VERSION")
+      expected_key_count=10
+      dataset=$(manifest_value "$snapshot/manifest.txt" dataset)
+      validate_dataset "$dataset"
+      ;;
+    *) die "version d'instantané non prise en charge" ;;
+  esac
+
   while IFS='=' read -r key value; do
-    case "$key" in
-      format_version|kit_revision|exported_at|source_postgresql_version|declared_at_gte|declared_at_lt|representations_count|referents_count|dump_sha256) ;;
+    case "$format_version:$key" in
+      "$LEGACY_SNAPSHOT_VERSION":format_version|"$LEGACY_SNAPSHOT_VERSION":kit_revision|"$LEGACY_SNAPSHOT_VERSION":exported_at|"$LEGACY_SNAPSHOT_VERSION":source_postgresql_version|"$LEGACY_SNAPSHOT_VERSION":declared_at_gte|"$LEGACY_SNAPSHOT_VERSION":declared_at_lt|"$LEGACY_SNAPSHOT_VERSION":representations_count|"$LEGACY_SNAPSHOT_VERSION":referents_count|"$LEGACY_SNAPSHOT_VERSION":dump_sha256) ;;
+      "$SNAPSHOT_VERSION":format_version|"$SNAPSHOT_VERSION":kit_revision|"$SNAPSHOT_VERSION":dataset|"$SNAPSHOT_VERSION":exported_at|"$SNAPSHOT_VERSION":source_postgresql_version|"$SNAPSHOT_VERSION":declared_at_gte|"$SNAPSHOT_VERSION":declared_at_lt|"$SNAPSHOT_VERSION":representations_count|"$SNAPSHOT_VERSION":referents_count|"$SNAPSHOT_VERSION":dump_sha256) ;;
       *) die "clé inattendue dans le manifeste : $key" ;;
     esac
     [[ $(awk -F= -v wanted="$key" '$1 == wanted { count++ } END { print count + 0 }' "$snapshot/manifest.txt") -eq 1 ]] ||
       die "clé dupliquée dans le manifeste : $key"
   done <"$snapshot/manifest.txt"
 
-  [[ $(wc -l <"$snapshot/manifest.txt") -eq 9 ]] || die "nombre de clés incorrect dans le manifeste"
-
-  [[ "$(manifest_value "$snapshot/manifest.txt" format_version)" == "$SNAPSHOT_VERSION" ]] ||
-    die "version d'instantané non prise en charge"
-  [[ "$(manifest_value "$snapshot/manifest.txt" kit_revision)" == "$SNAPSHOT_VERSION" ]] ||
+  [[ $(wc -l <"$snapshot/manifest.txt") -eq "$expected_key_count" ]] ||
+    die "nombre de clés incorrect dans le manifeste"
+  [[ "$(manifest_value "$snapshot/manifest.txt" kit_revision)" == "$format_version" ]] ||
     die "révision de kit non prise en charge"
   [[ "$(manifest_value "$snapshot/manifest.txt" exported_at)" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] ||
     die "date d'export invalide dans le manifeste"
-  [[ "$(manifest_value "$snapshot/manifest.txt" representations_count)" =~ ^[0-9]+$ ]] ||
+  representation_count=$(manifest_value "$snapshot/manifest.txt" representations_count)
+  referent_count=$(manifest_value "$snapshot/manifest.txt" referents_count)
+  [[ "$representation_count" =~ ^[0-9]+$ ]] ||
     die "compteur de représentations invalide"
-  [[ "$(manifest_value "$snapshot/manifest.txt" referents_count)" =~ ^[1-9][0-9]*$ ]] ||
-    die "l'instantané des référents est vide ou invalide"
+  [[ "$referent_count" =~ ^[0-9]+$ ]] || die "compteur de référents invalide"
+  case "$dataset" in
+    all)
+      [[ "$referent_count" =~ ^[1-9][0-9]*$ ]] || die "l'instantané des référents est vide ou invalide"
+      ;;
+    repeq)
+      [[ "$referent_count" == "0" ]] || die "un instantané repeq ne doit pas contenir de référents"
+      ;;
+    referents)
+      [[ "$representation_count" == "0" ]] || die "un instantané referents ne doit pas contenir de représentations"
+      [[ "$referent_count" =~ ^[1-9][0-9]*$ ]] || die "l'instantané des référents est vide ou invalide"
+      ;;
+  esac
   [[ "$(manifest_value "$snapshot/manifest.txt" dump_sha256)" =~ ^[0-9a-f]{64}$ ]] ||
     die "somme SHA-256 du dump invalide dans le manifeste"
-  [[ "$(head -n 1 "$snapshot/representations.csv" | tr -d '\r')" == "siren,year,declared_at,modified_at,data" ]] ||
+  [[ "$(head -n 1 "$snapshot/representations.csv" | tr -d '\r')" == "$REPRESENTATIONS_HEADER" ]] ||
     die "en-tête de representations.csv invalide"
-  [[ "$(head -n 1 "$snapshot/referents.csv" | tr -d '\r')" == "id,county,name,principal,region,type,value,substitute_name,substitute_email" ]] ||
+  [[ "$(head -n 1 "$snapshot/referents.csv" | tr -d '\r')" == "$REFERENTS_HEADER" ]] ||
     die "en-tête de referents.csv invalide"
 
   [[ $(wc -l <"$snapshot/SHA256SUMS") -eq 3 ]] || die "fichier SHA256SUMS invalide"
@@ -161,18 +221,35 @@ verify_snapshot() {
     [[ "$actual" == "$expected" ]] || die "somme SHA-256 incorrecte pour $file"
   done
 
-  manifest_count=$(manifest_value "$snapshot/manifest.txt" representations_count)
-  csv_count=$(awk 'END { print (NR > 0 ? NR - 1 : 0) }' "$snapshot/representations.csv")
-  # CSV fields may contain line breaks; the authoritative row count is checked
-  # again after PostgreSQL loads the file. This quick check is valid only as a
-  # lower bound and catches truncated empty files.
-  (( csv_count >= manifest_count )) || die "fichier representations.csv tronqué"
+  if [[ "$dataset" == "referents" ]]; then
+    assert_header_only_csv "$snapshot/representations.csv" "$REPRESENTATIONS_HEADER"
+  else
+    csv_count=$(awk 'END { print (NR > 0 ? NR - 1 : 0) }' "$snapshot/representations.csv")
+    # CSV fields may contain line breaks; PostgreSQL checks the authoritative
+    # row count again after loading the file.
+    (( csv_count >= representation_count )) || die "fichier representations.csv tronqué"
+  fi
 
-  manifest_count=$(manifest_value "$snapshot/manifest.txt" referents_count)
-  csv_count=$(awk 'END { print (NR > 0 ? NR - 1 : 0) }' "$snapshot/referents.csv")
-  (( csv_count >= manifest_count )) || die "fichier referents.csv tronqué"
+  if [[ "$dataset" == "repeq" ]]; then
+    assert_header_only_csv "$snapshot/referents.csv" "$REFERENTS_HEADER"
+  else
+    csv_count=$(awk 'END { print (NR > 0 ? NR - 1 : 0) }' "$snapshot/referents.csv")
+    (( csv_count >= referent_count )) || die "fichier referents.csv tronqué"
+  fi
 
   printf '%s\n' "$snapshot"
+}
+
+snapshot_dataset() {
+  local manifest=$1
+  local format_version
+
+  format_version=$(manifest_value "$manifest" format_version)
+  if [[ "$format_version" == "$LEGACY_SNAPSHOT_VERSION" ]]; then
+    printf 'all\n'
+  else
+    manifest_value "$manifest" dataset
+  fi
 }
 
 wait_for_postgres() {
@@ -190,7 +267,7 @@ wait_for_postgres() {
 reject_unsafe_plain_dump() {
   local dump=$1
   if LC_ALL=C grep -Ein '^[[:space:]]*(CREATE|ALTER|DROP|GRANT|REVOKE|COMMENT|DO|INSERT|UPDATE|DELETE|TRUNCATE)[[:space:]]|^[[:space:]]*\\(connect|!|i|ir)[[:space:]]' "$dump" >/dev/null; then
-    die "le format plain doit être un export pg_dump --data-only limité aux deux tables"
+    die "le format plain doit être un export pg_dump --data-only limité aux tables de reprise"
   fi
 }
 
@@ -200,8 +277,15 @@ export_snapshot() {
   local output=$3
   local lower_bound=$4
   local upper_bound=$5
+  local dataset=$6
   local output_parent output_name work log source_version exported_at dump_hash representation_count referent_count
+  local migration_repeq migration_referents
+  local -a restore_tables
 
+  validate_dataset "$dataset"
+  if [[ "$dataset" == "referents" && ( -n "$lower_bound" || -n "$upper_bound" ) ]]; then
+    die "les bornes de déclaration ne s'appliquent pas au jeu de données referents"
+  fi
   require_command docker
   dump=$(absolute_existing_file "$dump")
   output=$(absolute_path "$output")
@@ -212,6 +296,25 @@ export_snapshot() {
     [[ -z "$bound" || "$bound" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(Z|[+-][0-9]{2}:[0-9]{2})$ ]] ||
       die "les bornes doivent être des instants ISO 8601 avec fuseau horaire"
   done
+
+  migration_repeq=0
+  migration_referents=0
+  restore_tables=()
+  case "$dataset" in
+    all)
+      migration_repeq=1
+      migration_referents=1
+      restore_tables=(--table representation_equilibree --table referent)
+      ;;
+    repeq)
+      migration_repeq=1
+      restore_tables=(--table representation_equilibree)
+      ;;
+    referents)
+      migration_referents=1
+      restore_tables=(--table referent)
+      ;;
+  esac
 
   output_parent=$(dirname "$output")
   output_name=$(basename "$output")
@@ -234,8 +337,8 @@ export_snapshot() {
 
   if [[ "$dump_format" == "custom" ]]; then
     docker exec "$CONTAINER_NAME" pg_restore --dbname legacy --username postgres \
-      --data-only --no-owner --no-privileges --exit-on-error \
-      --table representation_equilibree --table referent \
+      --data-only --no-owner --no-privileges --exit-on-error --strict-names \
+      "${restore_tables[@]}" \
       /input/source.dump >>"$log" 2>&1 ||
       die "restauration sélective du dump custom impossible ; voir $log"
   else
@@ -248,34 +351,55 @@ export_snapshot() {
 
   docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
     --no-psqlrc --set ON_ERROR_STOP=1 \
+    --set "migration_repeq=$migration_repeq" --set "migration_referents=$migration_referents" \
     --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
     <"$SCRIPT_DIR/sql/validate-source.sql" >>"$log" 2>&1 ||
     die "validation des données V1 impossible ; voir $log"
 
-  docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
-    --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
-    --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
-    <"$SCRIPT_DIR/sql/export-representations.sql" >"$work/representations.csv" 2>>"$log" ||
-    die "export des représentations impossible ; voir $log"
-  docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
-    --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
-    <"$SCRIPT_DIR/sql/export-referents.sql" >"$work/referents.csv" 2>>"$log" ||
-    die "export des référents impossible ; voir $log"
+  if (( migration_repeq )); then
+    docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
+      --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
+      --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
+      <"$SCRIPT_DIR/sql/export-representations.sql" >"$work/representations.csv" 2>>"$log" ||
+      die "export des représentations impossible ; voir $log"
+  else
+    write_header_only_csv "$work/representations.csv" "$REPRESENTATIONS_HEADER"
+  fi
+  if (( migration_referents )); then
+    docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
+      --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
+      <"$SCRIPT_DIR/sql/export-referents.sql" >"$work/referents.csv" 2>>"$log" ||
+      die "export des référents impossible ; voir $log"
+  else
+    write_header_only_csv "$work/referents.csv" "$REFERENTS_HEADER"
+  fi
 
   source_version=$(docker exec "$CONTAINER_NAME" psql --username postgres --dbname legacy --no-psqlrc --tuples-only --no-align --command 'SHOW server_version' 2>>"$log" | tr -d '\r\n')
-  representation_count=$(docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy --no-psqlrc --tuples-only --no-align \
-    --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
-    2>>"$log" <"$SCRIPT_DIR/sql/count-representations.sql" | tr -d '[:space:]')
-  referent_count=$(docker exec "$CONTAINER_NAME" psql --username postgres --dbname legacy --no-psqlrc --tuples-only --no-align \
-    --command 'SELECT count(*) FROM public.referent' 2>>"$log" | tr -d '[:space:]')
-  [[ "$representation_count" =~ ^[0-9]+$ && "$referent_count" =~ ^[1-9][0-9]*$ ]] ||
+  if (( migration_repeq )); then
+    representation_count=$(docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy --no-psqlrc --tuples-only --no-align \
+      --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
+      2>>"$log" <"$SCRIPT_DIR/sql/count-representations.sql" | tr -d '[:space:]')
+  else
+    representation_count=0
+  fi
+  if (( migration_referents )); then
+    referent_count=$(docker exec "$CONTAINER_NAME" psql --username postgres --dbname legacy --no-psqlrc --tuples-only --no-align \
+      --command 'SELECT count(*) FROM public.referent' 2>>"$log" | tr -d '[:space:]')
+  else
+    referent_count=0
+  fi
+  [[ "$representation_count" =~ ^[0-9]+$ && "$referent_count" =~ ^[0-9]+$ ]] ||
     die "compteurs V1 invalides ; voir $log"
+  if (( migration_referents )) && [[ ! "$referent_count" =~ ^[1-9][0-9]*$ ]]; then
+    die "l'instantané sélectionné des référents est vide ; voir $log"
+  fi
 
   exported_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   dump_hash=$(sha256_file "$dump")
   {
     printf 'format_version=%s\n' "$SNAPSHOT_VERSION"
     printf 'kit_revision=%s\n' "$SNAPSHOT_VERSION"
+    printf 'dataset=%s\n' "$dataset"
     printf 'exported_at=%s\n' "$exported_at"
     printf 'source_postgresql_version=%s\n' "$source_version"
     printf 'declared_at_gte=%s\n' "$lower_bound"
@@ -298,6 +422,7 @@ export_snapshot() {
   CONTAINER_NAME=""
   verify_snapshot "$output" >/dev/null
   printf 'Instantané créé : %s\n' "$output"
+  printf 'Jeu de données : %s\n' "$dataset"
   printf 'Représentations : %s\nRéférents : %s\n' "$representation_count" "$referent_count"
 }
 
@@ -306,11 +431,10 @@ run_target() {
   local snapshot=$2
   local service=$3
   local pgpass=$4
+  local requested_dataset=$5
   local verified work log output expected_representations expected_referents failure_log psql_version
+  local available_dataset effective_dataset migration_repeq migration_referents
 
-  require_command psql
-  psql_version=$(psql --version | sed -E 's/.* ([0-9]+)(\..*)?$/\1/')
-  [[ "$psql_version" =~ ^[0-9]+$ && "$psql_version" -ge 14 ]] || die "psql 14 ou plus récent est requis"
   [[ "$service" =~ ^[A-Za-z0-9_.-]+$ ]] || die "nom de service libpq invalide"
   if [[ -n "$pgpass" ]]; then
     pgpass=$(absolute_existing_file "$pgpass")
@@ -318,6 +442,23 @@ run_target() {
   fi
 
   verified=$(verify_snapshot "$snapshot")
+  available_dataset=$(snapshot_dataset "$verified/manifest.txt")
+  effective_dataset=${requested_dataset:-$available_dataset}
+  validate_dataset "$effective_dataset"
+  dataset_includes "$available_dataset" "$effective_dataset" ||
+    die "l'instantané '$available_dataset' ne contient pas le jeu de données '$effective_dataset'"
+
+  migration_repeq=0
+  migration_referents=0
+  case "$effective_dataset" in
+    all) migration_repeq=1; migration_referents=1 ;;
+    repeq) migration_repeq=1 ;;
+    referents) migration_referents=1 ;;
+  esac
+
+  require_command psql
+  psql_version=$(psql --version | sed -E 's/.* ([0-9]+)(\..*)?$/\1/')
+  [[ "$psql_version" =~ ^[0-9]+$ && "$psql_version" -ge 14 ]] || die "psql 14 ou plus récent est requis"
   expected_representations=$(manifest_value "$verified/manifest.txt" representations_count)
   expected_referents=$(manifest_value "$verified/manifest.txt" referents_count)
   TEMP_DIR=$(mktemp -d /tmp/egapro-v1-migration.XXXXXX)
@@ -345,6 +486,9 @@ run_target() {
     fi
     psql --no-psqlrc --set ON_ERROR_STOP=1 --quiet --tuples-only --no-align \
       --set "migration_mode=$mode" \
+      --set "migration_dataset=$effective_dataset" \
+      --set "migration_repeq=$migration_repeq" \
+      --set "migration_referents=$migration_referents" \
       --set "expected_representations=$expected_representations" \
       --set "expected_referents=$expected_referents" \
       --file "$SCRIPT_DIR/sql/migrate.sql"
@@ -367,6 +511,7 @@ case "$command" in
     dump=""
     dump_format=""
     output=""
+    dataset="all"
     lower_bound=""
     upper_bound=""
     while (($#)); do
@@ -374,13 +519,15 @@ case "$command" in
         --dump) [[ $# -ge 2 ]] || die "valeur absente après --dump"; dump=$2; shift 2 ;;
         --format) [[ $# -ge 2 ]] || die "valeur absente après --format"; dump_format=$2; shift 2 ;;
         --out) [[ $# -ge 2 ]] || die "valeur absente après --out"; output=$2; shift 2 ;;
+        --dataset) [[ $# -ge 2 ]] || die "valeur absente après --dataset"; dataset=$2; shift 2 ;;
         --declared-at-gte) [[ $# -ge 2 ]] || die "valeur absente après --declared-at-gte"; lower_bound=$2; shift 2 ;;
         --declared-at-lt) [[ $# -ge 2 ]] || die "valeur absente après --declared-at-lt"; upper_bound=$2; shift 2 ;;
         *) die "option inconnue pour export : $1" ;;
       esac
     done
     [[ -n "$dump" && -n "$dump_format" && -n "$output" ]] || die "--dump, --format et --out sont requis"
-    export_snapshot "$dump" "$dump_format" "$output" "$lower_bound" "$upper_bound"
+    validate_dataset "$dataset"
+    export_snapshot "$dump" "$dump_format" "$output" "$lower_bound" "$upper_bound" "$dataset"
     ;;
   verify)
     snapshot=""
@@ -398,16 +545,19 @@ case "$command" in
     snapshot=""
     service=""
     pgpass=""
+    dataset=""
     while (($#)); do
       case "$1" in
         --snapshot) [[ $# -ge 2 ]] || die "valeur absente après --snapshot"; snapshot=$2; shift 2 ;;
         --service) [[ $# -ge 2 ]] || die "valeur absente après --service"; service=$2; shift 2 ;;
         --pgpass) [[ $# -ge 2 ]] || die "valeur absente après --pgpass"; pgpass=$2; shift 2 ;;
+        --dataset) [[ $# -ge 2 ]] || die "valeur absente après --dataset"; dataset=$2; shift 2 ;;
         *) die "option inconnue pour $command : $1" ;;
       esac
     done
     [[ -n "$snapshot" && -n "$service" ]] || die "--snapshot et --service sont requis"
-    run_target "$command" "$snapshot" "$service" "$pgpass"
+    [[ -z "$dataset" ]] || validate_dataset "$dataset"
+    run_target "$command" "$snapshot" "$service" "$pgpass" "$dataset"
     ;;
   help|-h|--help)
     usage

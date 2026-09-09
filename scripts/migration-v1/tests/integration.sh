@@ -51,8 +51,35 @@ wait_for_target() {
 }
 
 target_sql() {
-  PGSERVICEFILE="$WORK/pg_service.conf" PGSERVICE=target \
+  target_sql_for target "$@"
+}
+
+target_sql_for() {
+  local service=$1
+  shift
+  PGSERVICEFILE="$WORK/pg_service.conf" PGSERVICE="$service" \
     psql --no-psqlrc --set ON_ERROR_STOP=1 --tuples-only --no-align "$@"
+}
+
+refresh_checksums() {
+  local snapshot=$1
+  chmod 600 "$snapshot/SHA256SUMS"
+  {
+    printf '%s  manifest.txt\n' "$(sha256sum "$snapshot/manifest.txt" | awk '{print $1}')"
+    printf '%s  representations.csv\n' "$(sha256sum "$snapshot/representations.csv" | awk '{print $1}')"
+    printf '%s  referents.csv\n' "$(sha256sum "$snapshot/referents.csv" | awk '{print $1}')"
+  } >"$snapshot/SHA256SUMS"
+}
+
+assert_header_only() {
+  local description=$1
+  local expected=$2
+  local file=$3
+  if cmp -s "$file" <(printf '%s\n' "$expected"); then
+    printf 'ok - %s\n' "$description"
+  else
+    fail "$description"
+  fi
 }
 
 WORK=$(mktemp -d /tmp/egapro-v1-migration-test.XXXXXX)
@@ -65,12 +92,25 @@ wait_for_target
 
 docker exec "$TARGET_CONTAINER" createdb --username postgres legacy
 docker exec "$TARGET_CONTAINER" createdb --username postgres target
+docker exec "$TARGET_CONTAINER" createdb --username postgres target_split
+docker exec "$TARGET_CONTAINER" createdb --username postgres target_repeq_only
+docker exec "$TARGET_CONTAINER" createdb --username postgres target_referents_only
 docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname legacy \
   --set ON_ERROR_STOP=1 <"$KIT_DIR/sql/source-schema.sql" >/dev/null
 docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname legacy \
   --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/source.sql" >/dev/null
 docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname target \
   --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/target.sql" >/dev/null
+docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname target_split \
+  --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/target.sql" >/dev/null
+docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname target_repeq_only \
+  --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/target.sql" >/dev/null
+docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname target_referents_only \
+  --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/target.sql" >/dev/null
+docker exec "$TARGET_CONTAINER" psql --username postgres --dbname target_repeq_only \
+  --set ON_ERROR_STOP=1 --command 'DROP TABLE app_referent' >/dev/null
+docker exec "$TARGET_CONTAINER" psql --username postgres --dbname target_referents_only \
+  --set ON_ERROR_STOP=1 --command 'DROP TABLE app_representation_declaration; DROP TABLE app_company' >/dev/null
 
 target_port=$(docker port "$TARGET_CONTAINER" 5432/tcp | sed 's/.*://')
 cat >"$WORK/pg_service.conf" <<EOF
@@ -80,13 +120,46 @@ port=$target_port
 dbname=target
 user=postgres
 sslmode=disable
+
+[target-split]
+host=127.0.0.1
+port=$target_port
+dbname=target_split
+user=postgres
+sslmode=disable
+
+[target-repeq-only]
+host=127.0.0.1
+port=$target_port
+dbname=target_repeq_only
+user=postgres
+sslmode=disable
+
+[target-referents-only]
+host=127.0.0.1
+port=$target_port
+dbname=target_referents_only
+user=postgres
+sslmode=disable
 EOF
 
 docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
   --format custom --no-owner --no-privileges >"$WORK/v1 full.dump"
 docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format custom --no-owner --no-privileges \
+  --table public.representation_equilibree >"$WORK/v1-repeq.dump"
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format custom --no-owner --no-privileges \
+  --table public.referent >"$WORK/v1-referents.dump"
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
   --format plain --data-only --no-owner --no-privileges \
   --table public.representation_equilibree --table public.referent >"$WORK/v1-data.sql"
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format plain --data-only --no-owner --no-privileges \
+  --table public.representation_equilibree >"$WORK/v1-repeq.sql"
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format plain --data-only --no-owner --no-privileges \
+  --table public.referent >"$WORK/v1-referents.sql"
 
 "$MIGRATE" export --dump "$WORK/v1 full.dump" --format custom \
   --out "$WORK/full snapshot" >/dev/null
@@ -95,6 +168,36 @@ assert_equal "custom export keeps every representation" "3" \
   "$(awk -F= '$1 == "representations_count" { print $2 }' "$WORK/full snapshot/manifest.txt")"
 assert_equal "custom export keeps the full referent snapshot" "2" \
   "$(awk -F= '$1 == "referents_count" { print $2 }' "$WORK/full snapshot/manifest.txt")"
+assert_equal "combined export is the default" "all" \
+  "$(awk -F= '$1 == "dataset" { print $2 }' "$WORK/full snapshot/manifest.txt")"
+
+"$MIGRATE" export --dump "$WORK/v1-repeq.dump" --format custom \
+  --dataset repeq --out "$WORK/repeq snapshot" >/dev/null
+"$MIGRATE" verify --snapshot "$WORK/repeq snapshot" >/dev/null
+assert_equal "repeq export records its dataset" "repeq" \
+  "$(awk -F= '$1 == "dataset" { print $2 }' "$WORK/repeq snapshot/manifest.txt")"
+assert_equal "repeq export omits referents" "0" \
+  "$(awk -F= '$1 == "referents_count" { print $2 }' "$WORK/repeq snapshot/manifest.txt")"
+assert_header_only "repeq export writes a canonical empty referent CSV" \
+  "id,county,name,principal,region,type,value,substitute_name,substitute_email" \
+  "$WORK/repeq snapshot/referents.csv"
+
+"$MIGRATE" export --dump "$WORK/v1-referents.dump" --format custom \
+  --dataset referents --out "$WORK/referents snapshot" >/dev/null
+"$MIGRATE" verify --snapshot "$WORK/referents snapshot" >/dev/null
+assert_equal "referent export records its dataset" "referents" \
+  "$(awk -F= '$1 == "dataset" { print $2 }' "$WORK/referents snapshot/manifest.txt")"
+assert_equal "referent export omits representations" "0" \
+  "$(awk -F= '$1 == "representations_count" { print $2 }' "$WORK/referents snapshot/manifest.txt")"
+assert_header_only "referent export writes a canonical empty representation CSV" \
+  "siren,year,declared_at,modified_at,data" \
+  "$WORK/referents snapshot/representations.csv"
+
+if "$MIGRATE" export --dump "$WORK/v1-referents.dump" --format custom \
+  --dataset repeq --out "$WORK/missing repeq snapshot" >/dev/null 2>&1; then
+  fail "custom export should reject a dump missing the selected table"
+fi
+printf 'ok - custom export requires the selected table\n'
 
 "$MIGRATE" export --dump "$WORK/v1 full.dump" --format custom \
   --out "$WORK/filtered snapshot" \
@@ -110,6 +213,50 @@ assert_equal "the range never filters referents" "2" \
 "$MIGRATE" verify --snapshot "$WORK/plain snapshot" >/dev/null
 printf 'ok - a portable plain data dump is supported\n'
 
+"$MIGRATE" export --dump "$WORK/v1-repeq.sql" --format plain \
+  --dataset repeq --out "$WORK/plain repeq snapshot" >/dev/null
+"$MIGRATE" export --dump "$WORK/v1-referents.sql" --format plain \
+  --dataset referents --out "$WORK/plain referents snapshot" >/dev/null
+printf 'ok - single-dataset portable plain dumps are supported\n'
+
+cp -R "$WORK/full snapshot" "$WORK/legacy snapshot"
+chmod 600 "$WORK/legacy snapshot/manifest.txt"
+sed -i \
+  -e 's/^format_version=2$/format_version=1/' \
+  -e 's/^kit_revision=2$/kit_revision=1/' \
+  -e '/^dataset=/d' \
+  "$WORK/legacy snapshot/manifest.txt"
+refresh_checksums "$WORK/legacy snapshot"
+"$MIGRATE" verify --snapshot "$WORK/legacy snapshot" >/dev/null
+printf 'ok - legacy version 1 snapshots remain valid as combined snapshots\n'
+
+cp -R "$WORK/full snapshot" "$WORK/invalid dataset snapshot"
+chmod 600 "$WORK/invalid dataset snapshot/manifest.txt"
+sed -i 's/^dataset=all$/dataset=invalid/' "$WORK/invalid dataset snapshot/manifest.txt"
+refresh_checksums "$WORK/invalid dataset snapshot"
+if "$MIGRATE" verify --snapshot "$WORK/invalid dataset snapshot" >/dev/null 2>&1; then
+  fail "snapshots should reject invalid dataset metadata"
+fi
+printf 'ok - snapshots reject invalid dataset metadata\n'
+
+cp -R "$WORK/repeq snapshot" "$WORK/repeq with hidden referents"
+chmod 600 "$WORK/repeq with hidden referents/referents.csv"
+printf 'unexpected,data\n' >>"$WORK/repeq with hidden referents/referents.csv"
+refresh_checksums "$WORK/repeq with hidden referents"
+if "$MIGRATE" verify --snapshot "$WORK/repeq with hidden referents" >/dev/null 2>&1; then
+  fail "repeq snapshots should reject hidden referent rows"
+fi
+printf 'ok - repeq snapshots reject hidden referent rows\n'
+
+cp -R "$WORK/referents snapshot" "$WORK/referents with hidden repeq"
+chmod 600 "$WORK/referents with hidden repeq/representations.csv"
+printf 'unexpected,data\n' >>"$WORK/referents with hidden repeq/representations.csv"
+refresh_checksums "$WORK/referents with hidden repeq"
+if "$MIGRATE" verify --snapshot "$WORK/referents with hidden repeq" >/dev/null 2>&1; then
+  fail "referent snapshots should reject hidden representation rows"
+fi
+printf 'ok - referent snapshots reject hidden representation rows\n'
+
 cp -R "$WORK/full snapshot" "$WORK/tampered snapshot"
 chmod 600 "$WORK/tampered snapshot/representations.csv"
 printf '\n' >>"$WORK/tampered snapshot/representations.csv"
@@ -117,6 +264,71 @@ if "$MIGRATE" verify --snapshot "$WORK/tampered snapshot" >/dev/null 2>&1; then
   fail "checksum tampering should be rejected"
 fi
 printf 'ok - checksum tampering is rejected\n'
+
+cp -R "$WORK/full snapshot" "$WORK/wrong count snapshot"
+chmod 600 "$WORK/wrong count snapshot/manifest.txt"
+sed -i 's/^representations_count=3$/representations_count=4/' \
+  "$WORK/wrong count snapshot/manifest.txt"
+refresh_checksums "$WORK/wrong count snapshot"
+if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
+  --snapshot "$WORK/wrong count snapshot" --service target --dataset repeq >/dev/null 2>&1; then
+  fail "target loading should reject a selected dataset count mismatch"
+fi
+printf 'ok - target loading rejects selected dataset count mismatches\n'
+
+if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
+  --snapshot "$WORK/repeq snapshot" --service target --dataset referents >/dev/null 2>&1; then
+  fail "a single-dataset snapshot should reject an incompatible selection"
+fi
+printf 'ok - single-dataset snapshots reject incompatible selections\n'
+
+split_referents_before=$(target_sql_for target-split --command \
+  "SELECT md5(string_agg(app_referent::text, '|' ORDER BY id)) FROM app_referent")
+split_repeq_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/full snapshot" --service target-split --dataset repeq)
+assert_equal "a combined snapshot can apply repeq only" "dataset=repeq" \
+  "$(grep '^dataset=' <<<"$split_repeq_output")"
+assert_equal "repeq-only apply leaves referents untouched" "$split_referents_before" \
+  "$(target_sql_for target-split --command "SELECT md5(string_agg(app_referent::text, '|' ORDER BY id)) FROM app_referent")"
+if grep -q '^referents\.' <<<"$split_repeq_output"; then
+  fail "repeq-only reports should omit referent metrics"
+fi
+printf 'ok - repeq-only reports omit referent metrics\n'
+
+split_representations_before=$(target_sql_for target-split --command \
+  "SELECT md5(string_agg(app_representation_declaration::text, '|' ORDER BY id)) FROM app_representation_declaration")
+split_referents_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/full snapshot" --service target-split --dataset referents)
+assert_equal "a combined snapshot can apply referents only" "dataset=referents" \
+  "$(grep '^dataset=' <<<"$split_referents_output")"
+assert_equal "referent-only apply leaves representations untouched" "$split_representations_before" \
+  "$(target_sql_for target-split --command "SELECT md5(string_agg(app_representation_declaration::text, '|' ORDER BY id)) FROM app_representation_declaration")"
+if grep -q '^representations\.' <<<"$split_referents_output"; then
+  fail "referent-only reports should omit representation metrics"
+fi
+printf 'ok - referent-only reports omit representation metrics\n'
+
+repeq_only_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/repeq snapshot" --service target-repeq-only)
+assert_equal "repeq snapshot defaults to repeq" "dataset=repeq" \
+  "$(grep '^dataset=' <<<"$repeq_only_output")"
+assert_equal "repeq migration works without the target referent table" "1" \
+  "$(target_sql_for target-repeq-only --command "SELECT count(*) FROM app_representation_declaration WHERE siren = '800000003'")"
+repeq_only_rerun=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/repeq snapshot" --service target-repeq-only --dataset repeq)
+assert_equal "repeq-only rerun is idempotent" "representations.skip_unchanged=2" \
+  "$(grep '^representations.skip_unchanged=' <<<"$repeq_only_rerun")"
+
+referents_only_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/referents snapshot" --service target-referents-only)
+assert_equal "referent snapshot defaults to referents" "dataset=referents" \
+  "$(grep '^dataset=' <<<"$referents_only_output")"
+assert_equal "referent migration works without target repeq tables" "2" \
+  "$(target_sql_for target-referents-only --command "SELECT count(*) FROM app_referent")"
+referents_only_rerun=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/referents snapshot" --service target-referents-only --dataset referents)
+assert_equal "referent-only rerun is idempotent" "referents.replace=false" \
+  "$(grep '^referents.replace=' <<<"$referents_only_rerun")"
 
 cp -R "$WORK/full snapshot" "$WORK/invalid snapshot"
 chmod 600 "$WORK/invalid snapshot/referents.csv" "$WORK/invalid snapshot/SHA256SUMS"
@@ -141,6 +353,7 @@ after_state=$(target_sql --command "SELECT count(*) || ':' || (SELECT count(*) F
 assert_equal "dry-run reports one insert" "representations.insert=1" "$(grep '^representations.insert=' <<<"$dry_run_output")"
 assert_equal "dry-run reports one update" "representations.update=1" "$(grep '^representations.update=' <<<"$dry_run_output")"
 assert_equal "dry-run reports the native skip" "representations.skip_native=1" "$(grep '^representations.skip_native=' <<<"$dry_run_output")"
+assert_equal "combined snapshot defaults to all" "dataset=all" "$(grep '^dataset=' <<<"$dry_run_output")"
 assert_equal "dry-run leaves target data unchanged" "$before_state" "$after_state"
 
 target_sql --command "ALTER TABLE app_referent ADD CONSTRAINT reject_source_referent CHECK (name <> 'Cellule égalité professionnelle') NOT VALID" >/dev/null
