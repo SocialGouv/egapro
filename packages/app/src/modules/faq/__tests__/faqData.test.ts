@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
+	DRAFT_EXPIRY_DAYS,
 	GAP_ALERT_THRESHOLD,
 	INDICATOR_G_ANNUAL_MIN,
 	INDICATOR_G_TRIENNIAL_BASE_YEAR,
@@ -128,6 +129,22 @@ describe("FAQ describes the scheme the application implements", () => {
 		expect(indicatorG).toContain(String(INDICATOR_G_TRIENNIAL_BASE_YEAR));
 	});
 
+	it("states the draft expiry the domain defines", () => {
+		expect(answersOf("declaration-habilitation")).toContain(
+			`${DRAFT_EXPIRY_DAYS} jours`,
+		);
+	});
+
+	// The retention window is an env-overridable default and the privacy policy
+	// is the text that governs it, so the FAQ must point there instead of
+	// quoting a number that can be wrong in production.
+	it("defers the retention window to the privacy policy", () => {
+		const donnees = answersOf("donnees-personnelles");
+
+		expect(donnees).toMatch(/politique de confidentialité/i);
+		expect(donnees).not.toMatch(/\b(six|6)\s+ans\b/i);
+	});
+
 	it("states the upload limits the shared config defines", () => {
 		const depot = answersOf("depot-documents");
 
@@ -177,17 +194,17 @@ describe("FAQ describes the scheme the application implements", () => {
 });
 
 describe("FAQ states no deadline the campaign settings can move", () => {
-	// Index deadlines live in `campaignDeadlines` and are set per campaign by the
-	// DGT, so any fixed day-and-month written here is wrong the year it changes.
-	// The representation declaration is the one exception: its deadline is fixed
-	// in the domain itself (`getRepresentationDeadline`).
+	// Every deadline the reader could act on is stored per campaign and editable
+	// by the DGT — the index ones in `campaignDeadlines`, the representation one
+	// in `representationCampaigns.declarationDeadline`, which Mon espace renders
+	// from the database. The domain helpers only supply defaults, so a fixed
+	// day-and-month written here is wrong the day a campaign moves. No section is
+	// exempt.
 	const DAY_AND_MONTH =
 		/\b(1(er|ᵉʳ)|\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\b/i;
 
 	it.each(
-		FAQ_SECTIONS.filter(
-			(section) => section.id !== "representation-equilibree",
-		).map((section) => section.id),
+		FAQ_SECTIONS.map((section) => section.id),
 	)("writes no fixed calendar date in the %s section", (sectionId) => {
 		expect(answersOf(sectionId)).not.toMatch(DAY_AND_MONTH);
 	});

@@ -319,7 +319,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Quelle est l'échéance ?",
 						answer:
-							"Cette déclaration est attendue au 1ᵉʳ mars de chaque année de campagne. L'échéance est rappelée dans Mon espace et sur l'écran de déclaration.",
+							"Elle est fixée campagne par campagne par l'administration et peut varier d'une année à l'autre. Celle qui s'applique à votre entreprise est affichée dans Mon espace et sur l'écran de déclaration.",
 					},
 				],
 			},
@@ -494,7 +494,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 						question:
 							"Combien de temps mes déclarations sont-elles conservées ?",
 						answer:
-							"Six ans. Au-delà, une purge automatique quotidienne supprime la déclaration et tout ce qui s'y rattache — catégories d'emploi, avis du CSE, historique — sans intervention humaine et sans démarche de votre part.",
+							"La durée applicable figure dans la politique de confidentialité, qui fait foi. Passé ce délai, une purge automatique quotidienne supprime la déclaration et tout ce qui s'y rattache — catégories d'emploi, avis du CSE, historique — sans intervention humaine et sans démarche de votre part.",
 					},
 					{
 						question:
