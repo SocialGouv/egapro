@@ -9,7 +9,6 @@ import {
 import { extractSiren, getCurrentYear } from "~/modules/domain";
 import { cachedAuth } from "~/server/audit/cachedAuth";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
-import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
@@ -20,6 +19,17 @@ import {
 
 const ROUTE = "prefill-pdf";
 
+const resolveAuditContext = async (request: Request) => {
+	const session = await cachedAuth(request);
+	const url = new URL(request.url);
+	return {
+		userId: session?.user?.id ?? null,
+		userEmail: session?.user?.email ?? null,
+		siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
+		metadata: { year: url.searchParams.get("year") ?? null },
+	};
+};
+
 type ResolvedPrefillPdf =
 	| { error: Response }
 	| { data: PrefillPdfData; filename: string; error?: undefined };
@@ -27,7 +37,7 @@ type ResolvedPrefillPdf =
 async function resolvePrefillPdf(
 	request: Request,
 ): Promise<ResolvedPrefillPdf> {
-	const session = await auth();
+	const session = await cachedAuth(request);
 	if (!session?.user?.siret) {
 		return { error: new Response("Non autorisé", { status: 401 }) };
 	}
@@ -74,43 +84,41 @@ async function resolvePrefillPdf(
 	return { data, filename: `donnees-preremplies-${siren}-${year}.pdf` };
 }
 
-export async function GET(request: Request) {
-	try {
-		const resolved = await resolvePrefillPdf(request);
-		if (resolved.error) return resolved.error;
-
-		const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
-			renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
-		);
-
-		return new Response(body, {
-			headers: pdfHeaders(resolved.filename, body.byteLength),
-		});
-	} catch (error) {
-		console.error("[prefill-pdf]", error);
-		return new Response("Impossible de générer le PDF", { status: 500 });
-	}
-}
-
-export const HEAD = withAuditedRoute(
+export const GET = withAuditedRoute(
 	{
-		action: AUDIT_ACTIONS.PDF_SIZE_PROBE,
-		resolveContext: async (request) => {
-			const session = await cachedAuth(request);
-			const url = new URL(request.url);
-			return {
-				userId: session?.user?.id ?? null,
-				userEmail: session?.user?.email ?? null,
-				siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
-				metadata: { year: url.searchParams.get("year") ?? null },
-			};
-		},
+		action: AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD,
+		resolveContext: resolveAuditContext,
 	},
 	async (request) => {
 		try {
 			const resolved = await resolvePrefillPdf(request);
-			if (resolved.error)
+			if (resolved.error) return resolved.error;
+
+			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
+				renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
+			);
+
+			return new Response(body, {
+				headers: pdfHeaders(resolved.filename, body.byteLength),
+			});
+		} catch (error) {
+			console.error("[prefill-pdf]", error);
+			return new Response("Impossible de générer le PDF", { status: 500 });
+		}
+	},
+);
+
+export const HEAD = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.PDF_SIZE_PROBE,
+		resolveContext: resolveAuditContext,
+	},
+	async (request) => {
+		try {
+			const resolved = await resolvePrefillPdf(request);
+			if (resolved.error) {
 				return new Response(null, { status: resolved.error.status });
+			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
 				renderToBuffer(PrefillPdfDocument({ data: resolved.data })),

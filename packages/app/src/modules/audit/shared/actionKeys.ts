@@ -107,6 +107,7 @@ export const AUDIT_ACTIONS = {
 	PDF_DECLARATION_DOWNLOAD: "pdf.declaration_download",
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
 	PDF_REPRESENTATION_DOWNLOAD: "pdf.representation_download",
+	PDF_PREFILL_DOWNLOAD: "pdf.prefill_download",
 	PDF_SIZE_PROBE: "pdf.size_probe",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
@@ -230,6 +231,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_SIZE_PROBE]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
