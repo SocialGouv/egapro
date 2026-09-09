@@ -157,3 +157,49 @@ test.describe("Mon espace — location row of the company banner", () => {
 		]);
 	});
 });
+
+// #3867 removed the "mes entreprises" screen. Both header breakpoints render their own
+// entry (UserAccountMenu on desktop, MobileUserBlock inside the DSFR modal), so a single
+// viewport would leave half the change unasserted. Each test starts from "/" so landing
+// on /mon-espace is a real navigation rather than a URL that already matched.
+test.describe("Mon espace — header entry point", () => {
+	const MOBILE = { width: 375, height: 812 };
+
+	test("the desktop user menu leads to mon espace", async ({ page }) => {
+		await page.goto("/");
+		await dismissCookieBanner(page);
+
+		await page.getByRole("button", { name: "Mon espace" }).click();
+
+		await expect(
+			page.getByRole("menuitem", { name: "Mes entreprises" }),
+		).toHaveCount(0);
+		await page.getByRole("menuitem", { name: "Mes déclarations" }).click();
+
+		await page.waitForURL("**/mon-espace");
+		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+	});
+
+	test("the mobile menu leads to mon espace", async ({ page }) => {
+		await page.setViewportSize(MOBILE);
+		await page.goto("/");
+		await dismissCookieBanner(page);
+
+		// By id: the desktop tools bar carries a button with the same accessible name.
+		await page.locator("#fr-btn-menu-mobile").click();
+
+		const menu = page.locator("#modal-menu");
+		await expect(
+			menu.getByRole("link", { name: "Mes entreprises" }),
+		).toHaveCount(0);
+		await menu.getByRole("link", { name: "Mes déclarations" }).click();
+
+		await page.waitForURL("**/mon-espace");
+	});
+
+	test("the removed mes-entreprises route is not found", async ({ page }) => {
+		const response = await page.goto("/mon-espace/mes-entreprises");
+
+		expect(response?.status()).toBe(404);
+	});
+});
