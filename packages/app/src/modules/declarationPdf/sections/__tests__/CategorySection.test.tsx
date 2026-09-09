@@ -174,4 +174,54 @@ describe("CategorySection", () => {
 		// Hourly total: 4 + 2 = 6
 		expect(screen.getByText("6")).toBeInTheDocument();
 	});
+
+	it("keeps both pay tables and explains a non-calculable category (#3678)", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							name: "Ouvriers",
+							womenCount: 0,
+							hourlyWomenCount: 0,
+							menCount: 15,
+							hourlyMenCount: 12,
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(
+			screen.getByText("Rémunération annuelle brute moyenne"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Rémunération horaire brute moyenne"),
+		).toBeInTheDocument();
+	});
+
+	it("preserves legacy pay in the PDF without marking it non-calculable (#3678)", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							womenCount: 0,
+							hourlyWomenCount: 0,
+							menCount: 15,
+							hourlyMenCount: 12,
+							annualBaseWomen: "40000",
+							annualBaseMen: "42000",
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		expect(screen.getAllByText("40 000 €")).toHaveLength(2);
+	});
 });
