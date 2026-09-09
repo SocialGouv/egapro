@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { getReferenceYearFor, padDecimalToTwo } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
 import { api } from "~/trpc/react";
 import type { CategoryFormValues } from "../schemas";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
@@ -87,7 +88,7 @@ export function Step5EmployeeCategories({
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/6");
+			router.push(remunerationStepHref(6));
 		},
 	});
 
@@ -118,9 +119,7 @@ export function Step5EmployeeCategories({
 			isSubmitting={mutation.isPending}
 			maxMen={maxMen}
 			maxWomen={maxWomen}
-			mimoquageNextHref={
-				hasInitialData ? "/declaration-remuneration/etape/6" : undefined
-			}
+			mimoquageNextHref={hasInitialData ? remunerationStepHref(6) : undefined}
 			onSubmit={(data) =>
 				mutation.mutate({
 					declarationType: "initial",
@@ -129,7 +128,7 @@ export function Step5EmployeeCategories({
 				})
 			}
 			onValuesChange={(values) => setField(values)}
-			previousHref="/declaration-remuneration/etape/4"
+			previousHref={remunerationStepHref(4)}
 			readOnly={isLocked}
 			referenceYear={getReferenceYearFor(declarationYear)}
 			reminderText={STEP5_WORKFORCE_REMINDER}

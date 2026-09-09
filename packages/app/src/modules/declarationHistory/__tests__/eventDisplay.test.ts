@@ -82,11 +82,14 @@ describe("getHistoryEventDisplay", () => {
 		expect(result.pageHref).toBe("/declaration-remuneration/etape/5");
 	});
 
-	it("step_change with round=0: maps to Introduction step", () => {
+	// Round 0 is the funnel introduction, which lives at the entry page: there is
+	// no `/etape/0` and the route `notFound()`s below step 1. The expectation used
+	// to pin that dead URL — the page is still named, but not linked.
+	it("step_change with round=0: names the introduction without linking it", () => {
 		const result = getHistoryEventDisplay(buildEvent("step_change", 0));
 		expect(result.label).toBe("Modification de la page");
 		expect(result.pageLabel).toBe("Introduction");
-		expect(result.pageHref).toBe("/declaration-remuneration/etape/0");
+		expect(result.pageHref).toBeNull();
 	});
 
 	it("step_change with null round: returns null page link", () => {

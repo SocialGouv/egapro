@@ -39,6 +39,7 @@ import {
 	shouldRetainCategoryPayValues,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
+import type { AppHref } from "~/modules/routes";
 import { getDsfrCollapse } from "~/modules/shared";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
@@ -126,7 +127,7 @@ type Props = {
 	instructionText: string;
 	tooltipPrefix: string;
 	accordionId: string;
-	previousHref: string;
+	previousHref: AppHref;
 	initialCategories: EmployeeCategoryRow[];
 	initialSource?: string;
 	maxWomen?: number;
@@ -143,8 +144,8 @@ type Props = {
 	descriptionText?: string;
 	disabled?: boolean;
 	readOnly?: boolean;
-	nextHref?: string;
-	mimoquageNextHref?: string;
+	nextHref?: AppHref;
+	mimoquageNextHref?: AppHref;
 	hasDataOverride?: boolean;
 	isSavingOverride?: boolean;
 	isPendingSaveOverride?: boolean;

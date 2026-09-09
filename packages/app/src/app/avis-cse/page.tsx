@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import { cseOpinionStepHref } from "~/modules/routes";
 
 export const metadata = { title: "Avis du CSE" };
 
 export default function CseOpinionPage() {
-	redirect("/avis-cse/etape/1");
+	redirect(cseOpinionStepHref(1));
 }

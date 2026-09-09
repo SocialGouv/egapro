@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { FAQ, LEGAL_NOTICE } from "~/modules/routes";
 
 // DSFR 1.14 ships `.fr-breadcrumb { margin: 1rem 0 2rem }` plus a `min-width: 48em`
 // override raising the bottom margin to 2.5rem. dsfrFixes.scss neutralises both with a
@@ -24,8 +25,8 @@ const VIEWPORTS = [
 // fix deleted. #4256 removed the breadcrumb from `/mon-espace/**` altogether, leaving the
 // public pages as the only surfaces the shared rule still has to apply to.
 const SCREENS = [
-	{ name: "legal notice", path: "/mentions-legales" },
-	{ name: "FAQ", path: "/faq" },
+	{ name: "legal notice", path: LEGAL_NOTICE },
+	{ name: "FAQ", path: FAQ },
 ];
 
 test.describe("breadcrumb spacing", () => {
@@ -71,7 +72,7 @@ test.describe("breadcrumb spacing", () => {
 		test("the bottom margin renders as 32px of real spacing", async ({
 			page,
 		}) => {
-			await page.goto("/faq");
+			await page.goto(FAQ);
 
 			const breadcrumb = page.locator(".fr-breadcrumb").first();
 			await expect(breadcrumb).toBeVisible();

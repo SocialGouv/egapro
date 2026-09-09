@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OBSERVATORY_SEARCH } from "~/modules/routes";
 
 export default function NotFound() {
 	return (
@@ -7,7 +8,7 @@ export default function NotFound() {
 			<p>Cette entreprise n’a pas encore de déclaration rendue publique.</p>
 			<Link
 				className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
-				href="/index-egapro/recherche"
+				href={OBSERVATORY_SEARCH}
 			>
 				Revenir à la recherche
 			</Link>

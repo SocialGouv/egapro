@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./HomeHero.module.scss";
 
 type InfoItemProps = {
@@ -39,7 +39,7 @@ export function HomeHero() {
 						</p>
 						<Link
 							className={`fr-btn fr-icon-file-text-line fr-btn--icon-left ${styles.cta}`}
-							href="/mon-espace"
+							href={MY_SPACE}
 						>
 							Déclarer mes indicateurs
 						</Link>

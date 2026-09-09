@@ -5,10 +5,11 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
+import type { AppHref } from "~/modules/routes";
 import { NavLink } from "./NavLink";
 
 type Props = {
-	href: string;
+	href: AppHref;
 	className?: string;
 	children: React.ReactNode;
 };

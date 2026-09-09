@@ -6,7 +6,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { formatLongDate } from "~/modules/domain";
-import { BASE_PATH } from "./constants";
+import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import styles from "./SecondDeclarationStep1Info.module.scss";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
@@ -67,9 +67,9 @@ export function SecondDeclarationStep1Info({
 
 			<FormActions
 				className="fr-mt-0"
-				nextHref={`${BASE_PATH}/etape/2`}
+				nextHref={complianceStepHref(2)}
 				nextLabel="Suivant"
-				previousHref={BASE_PATH}
+				previousHref={COMPLIANCE_PATH}
 			/>
 		</div>
 	);

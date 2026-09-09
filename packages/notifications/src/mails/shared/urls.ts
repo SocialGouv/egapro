@@ -3,8 +3,17 @@ function trimTrailingSlash(url: string): string {
 }
 
 // Environment-specific base URL, injected per deployment (prod / alpha / review
-// app) via EGAPRO_PUBLIC_URL. Falls back to production. The paths below mirror
-// the app's real routes; the flow resolves the declaration from the session
+// app) via EGAPRO_PUBLIC_URL. Falls back to production.
+//
+// The paths below MIRROR `packages/app/src/modules/routes`. This package has no
+// dependency on the app, no `paths` in its tsconfig, and `next.config.js` keeps
+// it outside the bundler (`serverExternalPackages`), so it cannot import that
+// module — sharing one would mean a third workspace package. The mirror is held
+// by a test on the app side, which *can* import this one:
+// `app/src/modules/routes/__tests__/notificationsParity.test.ts`. Same
+// arrangement as `../../dates.ts` and the campaign deadlines it mirrors.
+//
+// The flow resolves the declaration from the session
 // (`api.declaration.getOrCreate`), so no siren/year query is used — an
 // unauthenticated click is bounced to `/login?callbackUrl=…` by the app
 // middleware and lands on the target page after ProConnect sign-in.

@@ -125,18 +125,6 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					</>
 				)}
 			</section>
-
-			<div className="fr-callout fr-mt-6w">
-				<h2 className="fr-callout__title">
-					Vous préférez une vue d’ensemble ?
-				</h2>
-				<p className="fr-callout__text">
-					Explorez les tendances nationales par taille d’entreprise.
-				</p>
-				<a className="fr-btn" href="/stats">
-					Statistiques générales
-				</a>
-			</div>
 		</main>
 	);
 }

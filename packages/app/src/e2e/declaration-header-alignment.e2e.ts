@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 import {
+	complianceStepHref,
+	DECLARATION_REMUNERATION_RECAP,
+	remunerationStepHref,
+} from "~/modules/routes";
+import {
 	pushCampaignDeadlinesFarFuture,
 	resetDeclarationToDraft,
 	setDeclarationComplianceState,
@@ -37,7 +42,7 @@ type Screen = {
 const SCREENS: Screen[] = [
 	{
 		name: "funnel step 1",
-		path: "/declaration-remuneration/etape/1",
+		path: remunerationStepHref(1),
 		companion: "p[role='status']",
 		// The indicator only renders once the step holds data.
 		setup: async () => {
@@ -47,7 +52,7 @@ const SCREENS: Screen[] = [
 	},
 	{
 		name: "funnel step 6 review",
-		path: "/declaration-remuneration/etape/6",
+		path: remunerationStepHref(6),
 		companion: "p[role='status']",
 		setup: async () => {
 			await resetDeclarationToDraft();
@@ -56,7 +61,7 @@ const SCREENS: Screen[] = [
 	},
 	{
 		name: "récapitulatif",
-		path: "/declaration-remuneration/recapitulatif",
+		path: DECLARATION_REMUNERATION_RECAP,
 		companion: "a[download]",
 		setup: async () => {
 			await setDeclarationComplianceState({
@@ -70,7 +75,7 @@ const SCREENS: Screen[] = [
 		// SCSS rule. This header is also the one whose title is long enough to wrap
 		// at every desktop width, so it holds the contract whatever the breakpoint.
 		name: "second declaration step 1",
-		path: "/declaration-remuneration/parcours-conformite/etape/1",
+		path: complianceStepHref(1),
 		companion: "p[role='status']",
 		setup: async () => {
 			await setDeclarationComplianceState({

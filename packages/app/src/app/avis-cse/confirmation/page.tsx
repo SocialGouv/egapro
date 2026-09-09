@@ -6,6 +6,7 @@ import {
 import { ConfirmationPage, CSE_FUNNEL } from "~/modules/cseOpinion";
 import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
 import { getReferenceYearFor } from "~/modules/domain";
+import { MY_SPACE } from "~/modules/routes";
 import { offersTransmittedElements } from "~/modules/shared/demarcheDocuments";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -19,7 +20,7 @@ export default async function CseOpinionConfirmationPage() {
 	]);
 
 	if (!isDeclarationSubmitted(declarationData.declaration.status)) {
-		redirect("/mon-espace");
+		redirect(MY_SPACE);
 	}
 
 	return (

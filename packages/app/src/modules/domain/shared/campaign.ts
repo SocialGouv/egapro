@@ -9,6 +9,24 @@ export function getCurrentYear(): number {
 	return readCampaignYearOverride() ?? new Date().getFullYear();
 }
 
+/** Returns the current date under the same clock as `getCurrentYear()`, so that a year guard and a deadline check sitting side by side cannot disagree under a pinned campaign year. Pass it to any `now` whose sibling year comes from `getCurrentYear()`. */
+export function getCurrentDate(): Date {
+	const now = new Date();
+	const override = readCampaignYearOverride();
+	if (override === null) return now;
+	// Day 0 of the next month is its predecessor's last: clamping keeps 29 February off 1 March in a non-leap pinned year.
+	const lastDayOfMonth = new Date(override, now.getMonth() + 1, 0).getDate();
+	return new Date(
+		override,
+		now.getMonth(),
+		Math.min(now.getDate(), lastDayOfMonth),
+		now.getHours(),
+		now.getMinutes(),
+		now.getSeconds(),
+		now.getMilliseconds(),
+	);
+}
+
 /** Returns the reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
 export function getReferenceYearFor(campaignYear: number): number {
 	return campaignYear - 1;

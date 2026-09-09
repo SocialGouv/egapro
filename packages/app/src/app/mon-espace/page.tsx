@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { MonEspacePage } from "~/modules/my-space";
+import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api, HydrateClient } from "~/trpc/server";
@@ -11,7 +12,7 @@ export default async function Page() {
 	const session = await auth();
 
 	if (!session?.user) {
-		redirect("/login");
+		redirect(LOGIN);
 	}
 
 	// When an admin is impersonating a company, use the impersonated SIREN.

@@ -2,6 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
+import {
+	ADMIN,
+	API_PUBLIC_DECLARATIONS,
+	API_SEARCH,
+	API_V1_PREFIX,
+	LOGIN,
+	MY_SPACE,
+} from "~/modules/routes";
 
 /**
  * Next.js Edge middleware handling three concerns:
@@ -31,15 +39,15 @@ import { env } from "~/env";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (pathname === "/api/search") {
+	if (pathname === API_SEARCH) {
 		return searchRedirect(request);
 	}
 
-	if (pathname.startsWith("/api/v1/")) {
+	if (pathname.startsWith(API_V1_PREFIX)) {
 		return gatewayMiddleware(request);
 	}
 
-	if (pathname.startsWith("/admin")) {
+	if (pathname.startsWith(ADMIN)) {
 		return adminMiddleware(request);
 	}
 
@@ -47,7 +55,7 @@ export async function middleware(request: NextRequest) {
 }
 
 function searchRedirect(request: NextRequest) {
-	const target = new URL("/api/public/declarations", request.url);
+	const target = new URL(API_PUBLIC_DECLARATIONS, request.url);
 	for (const [key, value] of request.nextUrl.searchParams.entries()) {
 		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
 	}
@@ -55,7 +63,7 @@ function searchRedirect(request: NextRequest) {
 }
 
 function redirectToLogin(request: NextRequest) {
-	const loginUrl = new URL("/login", request.url);
+	const loginUrl = new URL(LOGIN, request.url);
 	loginUrl.searchParams.set(
 		"callbackUrl",
 		`${request.nextUrl.pathname}${request.nextUrl.search}`,
@@ -75,7 +83,7 @@ async function adminMiddleware(request: NextRequest) {
 	}
 
 	if (!token.isAdmin) {
-		return NextResponse.redirect(new URL("/mon-espace", request.url));
+		return NextResponse.redirect(new URL(MY_SPACE, request.url));
 	}
 
 	return NextResponse.next();
@@ -132,6 +140,10 @@ function constantTimeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
+// Next reads this at build time and cannot evaluate an imported constant, so
+// these patterns are the one place route paths stay written out; the "matcher
+// coverage" test in `__tests__/middleware.test.ts` pins them against
+// `~/modules/routes`.
 export const config = {
 	matcher: [
 		"/admin/:path*",

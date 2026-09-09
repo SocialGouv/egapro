@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { MY_SPACE } from "~/modules/routes";
 import { TEST_SIREN } from "./constants";
 import {
 	cleanCurrentYearDeclarations,
@@ -61,7 +62,7 @@ test.describe("Declaration cancellation — full cycle", () => {
 		await completeDeclaration(page, { hasGap: false });
 
 		// Verify mon-espace shows "Effectué" (status=submitted → done)
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(page.getByText("Effectué").first()).toBeVisible();
 
 		// Admin navigates to first submission and cancels it
@@ -71,12 +72,12 @@ test.describe("Declaration cancellation — full cycle", () => {
 		await cancelCurrentDeclaration();
 
 		// S5 — declarant espace shows "À compléter" after cancellation
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(page.getByText("À compléter").first()).toBeVisible();
 
 		// S2 — declarant re-submits (second declaration)
 		await completeDeclaration(page, { hasGap: false });
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(page.getByText("Effectué").first()).toBeVisible();
 
 		// S3 — admin cancels second declaration (cycle multi-annulations)
@@ -85,12 +86,12 @@ test.describe("Declaration cancellation — full cycle", () => {
 		await page.waitForLoadState("networkidle");
 		await cancelCurrentDeclaration();
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(page.getByText("À compléter").first()).toBeVisible();
 
 		// S3 — declarant re-submits a third time
 		await completeDeclaration(page, { hasGap: false });
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(page.getByText("Effectué").first()).toBeVisible();
 
 		// S8 — admin lists declarations for this SIREN/year: 3 rows (2 cancelled + 1 active)

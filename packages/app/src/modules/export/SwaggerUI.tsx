@@ -2,12 +2,9 @@
 
 import Script from "next/script";
 import { useRef } from "react";
+import { API_V1_OPENAPI } from "~/modules/routes";
 
-export function SwaggerUI({
-	specUrl = "/api/v1/openapi.json",
-}: {
-	specUrl?: string;
-}) {
+export function SwaggerUI({ specUrl = API_V1_OPENAPI }: { specUrl?: string }) {
 	const initializedRef = useRef(false);
 
 	const tryInit = () => {

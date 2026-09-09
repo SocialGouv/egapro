@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { observatoryCompanyHref, routeWithQuery } from "~/modules/routes";
 import styles from "./YearSelector.module.scss";
 
 type Props = {
@@ -44,7 +45,7 @@ export function YearSelector({
 						year: event.currentTarget.value,
 					});
 					if (from) query.set("from", from);
-					router.push(`/index-egapro/entreprise/${siren}?${query.toString()}`);
+					router.push(routeWithQuery(observatoryCompanyHref(siren), query));
 				}}
 				value={selectedYear}
 			>

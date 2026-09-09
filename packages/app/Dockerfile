@@ -111,6 +111,10 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-location.bundle.mjs ./packages/app/scripts/backfill-company-location.bundle.mjs
+# The NAF backfill imports nothing but `postgres` (already copied above), so it
+# ships as-is — no esbuild pass, unlike the location one which pulls in a shared
+# TypeScript module.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.mjs ./packages/app/scripts/backfill-company-naf.mjs
 # Development/review-app fixture loaded by the optional post-deploy hook.
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.mjs ./packages/app/scripts/seed-demo-observatory.mjs
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct

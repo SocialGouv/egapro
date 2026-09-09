@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-
+import { DECLARATION_REPRESENTATION } from "~/modules/routes";
 import {
 	getNextStep,
 	getNextStepHref,
@@ -8,9 +8,7 @@ import {
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,
 	parseStepParam,
-	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,
-	stepHref,
 } from "../steps";
 import { Step1ReferencePeriod } from "../steps/Step1ReferencePeriod";
 import { Step2Executives } from "../steps/Step2Executives";
@@ -112,23 +110,19 @@ describe("getStepDefinition", () => {
 });
 
 describe("navigation hrefs", () => {
-	it("builds the step href from the funnel root", () => {
-		expect(stepHref(3)).toBe(`${REPRESENTATION_FUNNEL_ROOT}/etape/3`);
-	});
-
 	it("goes back to the previous step", () => {
 		expect(getPreviousStepHref(3)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/2`,
+			`${DECLARATION_REPRESENTATION}/etape/2`,
 		);
 	});
 
 	it("goes back to the funnel root from the first step", () => {
-		expect(getPreviousStepHref(1)).toBe(REPRESENTATION_FUNNEL_ROOT);
+		expect(getPreviousStepHref(1)).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("goes forward to the next step", () => {
-		expect(getNextStepHref(1)).toBe(`${REPRESENTATION_FUNNEL_ROOT}/etape/2`);
-		expect(getNextStepHref(4)).toBe(`${REPRESENTATION_FUNNEL_ROOT}/etape/5`);
+		expect(getNextStepHref(1)).toBe(`${DECLARATION_REPRESENTATION}/etape/2`);
+		expect(getNextStepHref(4)).toBe(`${DECLARATION_REPRESENTATION}/etape/5`);
 	});
 
 	it("has no next step on the last step", () => {
@@ -150,29 +144,29 @@ describe("navigation hrefs — publication step skipped (S12)", () => {
 			PUBLICATION_STEP_NUMBER + 1,
 		);
 		expect(getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/${PUBLICATION_STEP_NUMBER + 1}`,
+			`${DECLARATION_REPRESENTATION}/etape/${PUBLICATION_STEP_NUMBER + 1}`,
 		);
 	});
 
 	it("jumps over the publication step when moving backward", () => {
 		expect(getPreviousStepHref(PUBLICATION_STEP_NUMBER + 1, true)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/${PUBLICATION_STEP_NUMBER - 1}`,
+			`${DECLARATION_REPRESENTATION}/etape/${PUBLICATION_STEP_NUMBER - 1}`,
 		);
 	});
 
 	it("leaves every other transition untouched", () => {
 		expect(getNextStep(1, true)).toBe(2);
 		expect(getNextStepHref(1, true)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/2`,
+			`${DECLARATION_REPRESENTATION}/etape/2`,
 		);
 		expect(getNextStep(2, true)).toBe(3);
 		expect(getPreviousStepHref(3, true)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/2`,
+			`${DECLARATION_REPRESENTATION}/etape/2`,
 		);
 		expect(getPreviousStepHref(2, true)).toBe(
-			`${REPRESENTATION_FUNNEL_ROOT}/etape/1`,
+			`${DECLARATION_REPRESENTATION}/etape/1`,
 		);
-		expect(getPreviousStepHref(1, true)).toBe(REPRESENTATION_FUNNEL_ROOT);
+		expect(getPreviousStepHref(1, true)).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("still stops at the end of the funnel", () => {
