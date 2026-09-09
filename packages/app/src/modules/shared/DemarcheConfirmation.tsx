@@ -4,8 +4,9 @@ import { DsfrPictogram } from "~/modules/layout";
 import type { ResendReceiptInput } from "~/modules/mail";
 import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./DemarcheConfirmation.module.scss";
-import { DownloadCard, formatDocumentSubtitle } from "./DownloadCard";
+import { DownloadCard } from "./DownloadCard";
 import type { DemarcheDocument } from "./demarcheDocuments";
+import { formatDocumentSubtitle } from "./documentSubtitle";
 import { FeedbackBanner } from "./FeedbackBanner";
 
 type Props = {

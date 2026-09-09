@@ -3,8 +3,9 @@ export {
 	CampaignRateTileLoading,
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
-export { DownloadCard, formatDocumentSubtitle } from "./DownloadCard";
+export { DownloadCard } from "./DownloadCard";
 export { DownloadStatusRegion } from "./DownloadStatusRegion";
+export { formatDocumentSubtitle } from "./documentSubtitle";
 export { FileDownloadLink } from "./FileDownloadLink";
 export { FileFormatDetail } from "./FileFormatDetail";
 export { FileUpload } from "./FileUpload";

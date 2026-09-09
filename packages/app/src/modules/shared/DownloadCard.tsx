@@ -6,10 +6,6 @@ import { useDownloadClickGuard } from "./useDownloadClickGuard";
 
 const PENDING_LABEL = "Téléchargement en cours…";
 
-export function formatDocumentSubtitle(year: number, dataYear: number): string {
-	return `Année ${year} au titre des données ${dataYear}`;
-}
-
 type Props = {
 	description: string;
 	href: string;

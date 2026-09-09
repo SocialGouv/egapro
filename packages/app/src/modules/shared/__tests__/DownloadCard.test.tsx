@@ -9,7 +9,8 @@ import {
 	pendingFetch,
 	sizeProbeFetch,
 } from "~/test/downloadHelpers";
-import { DownloadCard, formatDocumentSubtitle } from "../DownloadCard";
+import { DownloadCard } from "../DownloadCard";
+import { formatDocumentSubtitle } from "../documentSubtitle";
 
 const DATA_YEAR = 2024;
 const DECLARATION_YEAR = 2025;
