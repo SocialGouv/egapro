@@ -65,30 +65,53 @@ function createIdGenerator() {
 	return () => id++;
 }
 
-function toFormValues(cats: EmployeeCategory[]) {
+type FormCategory = CategoryFormValues["categories"][number];
+
+function categoryHasPayValues(category: FormCategory): boolean {
+	return CATEGORY_PAY_FIELDS.some((field) => category[field].trim() !== "");
+}
+
+function normalizeCategoryForForm(
+	category: FormCategory,
+	preserveLegacyPay: boolean,
+): FormCategory {
+	return preserveLegacyPay && categoryHasPayValues(category)
+		? category
+		: withoutPayValuesWhenNotApplicable(category);
+}
+
+function toFormValues(
+	cats: EmployeeCategory[],
+	preserveLegacyPay: boolean,
+): FormCategory[] {
 	return cats.map((c) =>
-		withoutPayValuesWhenNotApplicable({
-			name: c.name,
-			womenCount: c.womenCount,
-			menCount: c.menCount,
-			hourlyWomenCount: c.hourlyWomenCount,
-			hourlyMenCount: c.hourlyMenCount,
-			annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
-			annualBaseMen: padDecimalToTwo(c.annualBaseMen),
-			annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
-			annualVariableMen: padDecimalToTwo(c.annualVariableMen),
-			hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
-			hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
-			hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
-			hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
-		}),
+		normalizeCategoryForForm(
+			{
+				name: c.name,
+				womenCount: c.womenCount,
+				menCount: c.menCount,
+				hourlyWomenCount: c.hourlyWomenCount,
+				hourlyMenCount: c.hourlyMenCount,
+				annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+				annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+				annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+				annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+				hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+				hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+				hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+				hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
+			},
+			preserveLegacyPay,
+		),
 	);
 }
 
 function normalizeFormValues(values: CategoryFormValues): CategoryFormValues {
 	return {
 		source: values.source,
-		categories: values.categories.map(withoutPayValuesWhenNotApplicable),
+		categories: values.categories.map((category) =>
+			normalizeCategoryForForm(category, false),
+		),
 	};
 }
 
@@ -174,7 +197,7 @@ export function CategoryForm({
 			? normalizeFormValues(defaultValuesOverride)
 			: {
 					source: initialSource,
-					categories: toFormValues(initialCats),
+					categories: toFormValues(initialCats, readOnly),
 				},
 	});
 
@@ -308,7 +331,7 @@ export function CategoryForm({
 
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
-		const formEntry = toFormValues([empty])[0];
+		const formEntry = toFormValues([empty], false)[0];
 		if (formEntry) {
 			pendingFocusIndex.current = fields.length;
 			append(formEntry);
@@ -318,7 +341,7 @@ export function CategoryForm({
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		replace(toFormValues(imported));
+		replace(toFormValues(imported, false));
 		setCategoryErrors([]);
 		setHasData(false);
 	}
@@ -512,7 +535,7 @@ export function CategoryForm({
 						annual: { women: maxWomen, men: maxMen },
 						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 					});
-					replace(toFormValues(devCats));
+					replace(toFormValues(devCats, false));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setCategoryErrors([]);
 					setHasData(false);
@@ -627,10 +650,15 @@ export function CategoryForm({
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
 						const cat = categories[index];
-						// One sex absent from both workforce rows disables every pay field.
-						const payApplicable = cat
+						// Preserve the official values of legacy locked declarations that
+						// predate #3678; editable and newly saved categories are normalized.
+						const payApplicableByHeadcount = cat
 							? isCategoryPayApplicable(toCategoryHeadcounts(cat))
 							: true;
+						const showLegacyPay = Boolean(
+							cat && readOnly && categoryHasPayValues(cat),
+						);
+						const payApplicable = payApplicableByHeadcount || showLegacyPay;
 						return (
 							<CategoryAccordionItem
 								baseId={baseId}
