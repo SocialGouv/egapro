@@ -7,7 +7,7 @@ import { ComplianceBadge } from "../ComplianceBadge";
 const CASES: Array<[RepresentationComplianceVerdict, string, string]> = [
 	["compliant", "Conforme", "fr-badge--info"],
 	["non_compliant", "Non conforme", "fr-badge--warning"],
-	["not_applicable", "Non applicable", ""],
+	["not_applicable", "Non calculable", ""],
 ];
 
 describe("ComplianceBadge", () => {
@@ -24,7 +24,7 @@ describe("ComplianceBadge", () => {
 	it("keeps the not_applicable badge neutral", () => {
 		render(<ComplianceBadge verdict="not_applicable" />);
 
-		const badge = screen.getByText("Non applicable");
+		const badge = screen.getByText("Non calculable");
 		expect(badge).not.toHaveClass("fr-badge--info");
 		expect(badge).not.toHaveClass("fr-badge--warning");
 	});

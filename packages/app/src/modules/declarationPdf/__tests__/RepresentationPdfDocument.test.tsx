@@ -142,7 +142,7 @@ describe("RepresentationPdfDocument", () => {
 
 		expect(screen.getByText("Aucun cadre dirigeant")).toBeInTheDocument();
 		expect(screen.queryByText("Femmes")).not.toBeInTheDocument();
-		expect(screen.getByText("Verdict : Non applicable")).toBeInTheDocument();
+		expect(screen.getByText("Verdict : Non calculable")).toBeInTheDocument();
 	});
 
 	it("renders the publication page address when the company has a website", () => {

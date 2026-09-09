@@ -14,7 +14,7 @@ const BADGE_BY_VERDICT: Record<
 	},
 	not_applicable: {
 		className: "fr-badge fr-badge--sm fr-badge--no-icon",
-		label: "Non applicable",
+		label: "Non calculable",
 	},
 };
 

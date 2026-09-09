@@ -109,7 +109,7 @@ function percentageFields() {
 }
 
 function queryBadge() {
-	return screen.queryByText(/^(Conforme|Non conforme|Non applicable)$/);
+	return screen.queryByText(/^(Conforme|Non conforme|Non calculable)$/);
 }
 
 function spy() {
