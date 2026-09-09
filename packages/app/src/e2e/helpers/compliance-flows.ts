@@ -21,6 +21,8 @@ type CseStep1Options = {
 	firstDeclGapConsultationImplicit?: boolean;
 	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
 	secondDeclGapConsultationImplicit?: boolean;
+	/** No gap ≥ 5% on the first declaration: the whole justification card is absent. */
+	firstDeclGapCardHidden?: boolean;
 	/** No remaining gap ≥ 5% on the second declaration: the whole justification card is absent. */
 	secondDeclGapCardHidden?: boolean;
 	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
@@ -55,6 +57,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		secondDeclGapConsulted = false,
 		firstDeclGapConsultationImplicit = false,
 		secondDeclGapConsultationImplicit = false,
+		firstDeclGapCardHidden = false,
 		secondDeclGapCardHidden = false,
 		opinion = "favorable",
 	} = options;
@@ -63,14 +66,18 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		// DSFR hides native radio inputs — click on the associated label instead
 		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
 		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-		await fillGapConsultation(
-			page,
-			"first-decl-gap",
-			firstDeclGapConsulted || firstDeclGapConsultationImplicit,
-			"2025-03-15",
-			opinion,
-			firstDeclGapConsultationImplicit,
-		);
+		if (firstDeclGapCardHidden) {
+			await expect(page.locator("#first-decl-gap-legend")).toHaveCount(0);
+		} else {
+			await fillGapConsultation(
+				page,
+				"first-decl-gap",
+				firstDeclGapConsulted || firstDeclGapConsultationImplicit,
+				"2025-03-15",
+				opinion,
+				firstDeclGapConsultationImplicit,
+			);
+		}
 		if (hasSecondDeclaration) {
 			await page
 				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
