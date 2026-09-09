@@ -100,3 +100,9 @@ export function useReadOnlyContext(): LockState {
 }
 
 export const useLockContext = useReadOnlyContext;
+
+// `holder` is set on acquires this tab wins too, so only read-only proves it is somebody else.
+export function useLockHolderIfLockedOut(): LockHolder | null {
+	const { isReadOnly, holder } = useReadOnlyContext();
+	return isReadOnly ? holder : null;
+}

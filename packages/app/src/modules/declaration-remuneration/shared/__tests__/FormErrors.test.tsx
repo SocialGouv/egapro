@@ -51,6 +51,7 @@ describe("FormErrors", () => {
 					lastName: "Martin",
 					email: "camille.martin@example.fr",
 				}}
+				isReadOnly
 			>
 				<FormErrors mutationError={DECLARATION_LOCK_CONFLICT_MESSAGE} />
 			</LockProvider>,
@@ -58,6 +59,24 @@ describe("FormErrors", () => {
 
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			"Déclaration verrouillée par Camille Martin (camille.martin@example.fr).",
+		);
+	});
+
+	it("keeps the generic message when a holder is set but this tab is not locked out", () => {
+		render(
+			<LockProvider
+				holder={{
+					firstName: "Camille",
+					lastName: "Martin",
+					email: "camille.martin@example.fr",
+				}}
+			>
+				<FormErrors mutationError={DECLARATION_LOCK_CONFLICT_MESSAGE} />
+			</LockProvider>,
+		);
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			DECLARATION_LOCK_CONFLICT_MESSAGE,
 		);
 	});
 
@@ -71,7 +90,10 @@ describe("FormErrors", () => {
 
 	it("keeps the generic message when the lock holder has no exploitable identity", () => {
 		render(
-			<LockProvider holder={{ firstName: null, lastName: null, email: null }}>
+			<LockProvider
+				holder={{ firstName: null, lastName: null, email: null }}
+				isReadOnly
+			>
 				<FormErrors mutationError={DECLARATION_LOCK_CONFLICT_MESSAGE} />
 			</LockProvider>,
 		);

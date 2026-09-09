@@ -1,7 +1,7 @@
 "use client";
 
 import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
-import { useReadOnlyContext } from "./lock/LockContext";
+import { useLockHolderIfLockedOut } from "./lock/LockContext";
 import { formatLockConflictMessage } from "./lock/lockHolderIdentity";
 
 type FormErrorsProps = {
@@ -13,7 +13,7 @@ export function FormErrors({
 	validationError,
 	mutationError,
 }: FormErrorsProps) {
-	const { holder } = useReadOnlyContext();
+	const holder = useLockHolderIfLockedOut();
 	const resolvedMutationError =
 		mutationError === DECLARATION_LOCK_CONFLICT_MESSAGE
 			? formatLockConflictMessage(holder)
