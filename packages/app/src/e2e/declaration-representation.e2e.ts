@@ -416,11 +416,37 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			page.getByRole("button", { name: "Représentation", exact: true }),
 			PANEL_ID,
 		);
+		const panel = page.locator(`#${PANEL_ID}`);
 		await expect(
-			page
-				.locator(`#${PANEL_ID}`)
-				.getByRole("link", { name: "Voir la déclaration" }),
+			panel.getByRole("link", { name: "Voir la déclaration" }),
 		).toHaveAttribute("href", `${FUNNEL_ROOT}/etape/5`);
+
+		await test.step("the declaration step announces the transmission instead of the work left to do", async () => {
+			await expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeVisible();
+
+			for (const item of [
+				"Cadres dirigeants",
+				"Instances dirigeantes",
+				"Informations de publication",
+			]) {
+				await expect(panel.getByText(item, { exact: true })).toHaveCount(0);
+			}
+			await expect(panel.getByText(/Échéance :/)).toHaveCount(0);
+		});
+
+		await test.step("a transmitted declaration is immutable: a view button, never a modify affordance", async () => {
+			await expect(
+				panel.getByRole("link", {
+					name: "Voir le récapitulatif de la déclaration",
+				}),
+			).toHaveAttribute("href", `${FUNNEL_ROOT}/etape/5`);
+			await expect(panel.getByRole("link", { name: "Modifier" })).toHaveCount(
+				0,
+			);
+			await expect(panel.getByText(/Modifiable jusqu'au/)).toHaveCount(0);
+		});
 	});
 });
 
@@ -590,6 +616,12 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		// Neither the declaration step nor the Rixain reminder applies below the threshold.
 		await expect(panel.getByText(/Écarts de représentation/)).toHaveCount(0);
 		await expect(panel.getByText(/loi Rixain/)).toHaveCount(0);
+
+		// A non-subjection is stored as a `done` declaration: nothing was ever
+		// transmitted, so the transmission line must not follow the status alone.
+		await expect(
+			panel.getByText("Votre déclaration a été transmise"),
+		).toHaveCount(0);
 
 		await expect(panel.getByRole("link", { name: "Modifier" })).toHaveAttribute(
 			"href",
