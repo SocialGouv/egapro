@@ -1,12 +1,11 @@
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
-import { parseSiren } from "~/modules/domain";
 import { fetchFileById, fetchFileBySiren } from "~/modules/export";
 import { logAction } from "~/server/audit/log";
 import {
 	buildRequestContext,
 	type RequestContext,
 } from "~/server/audit/requestContext";
-import { auth } from "~/server/auth";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { streamStoredFile } from "~/server/services/fileStreaming";
 import { isGatewayForwarded } from "~/server/services/gatewaySource";
 
@@ -102,7 +101,7 @@ async function handleSessionDownload(
 ): Promise<Response> {
 	const requestContext = buildRequestContext(request.headers);
 
-	const session = await auth();
+	const { session, siren } = await getSessionSiren(request);
 	if (!session?.user) {
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
@@ -118,7 +117,6 @@ async function handleSessionDownload(
 		return handleAdminDownload(fileId, session, requestContext);
 	}
 
-	const siren = parseSiren(session.user.siret);
 	if (!siren) {
 		writeAuditFailure({
 			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,

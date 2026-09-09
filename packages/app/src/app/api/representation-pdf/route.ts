@@ -5,24 +5,20 @@ import {
 	RepresentationDeclarationNotFoundError,
 } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
-import {
-	extractSiren,
-	getCurrentYear,
-	getReferenceYearFor,
-} from "~/modules/domain";
-import { cachedAuth } from "~/server/audit/cachedAuth";
+import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD,
 		resolveContext: async (request) => {
-			const session = await cachedAuth(request);
+			const { session, siren } = await getSessionSiren(request);
 			const url = new URL(request.url);
 			return {
 				userId: session?.user?.id ?? null,
 				userEmail: session?.user?.email ?? null,
-				siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
+				siren,
 				metadata: {
 					year: url.searchParams.get("year") ?? null,
 				},
@@ -30,12 +26,11 @@ export const GET = withAuditedRoute(
 		},
 	},
 	async (request) => {
-		const session = await cachedAuth(request);
-		if (!session?.user?.siret) {
+		const { siren } = await getSessionSiren(request);
+		if (!siren) {
 			return new Response("Non autorisé", { status: 401 });
 		}
 
-		const siren = extractSiren(session.user.siret);
 		const url = new URL(request.url);
 		const yearParam = url.searchParams.get("year");
 		const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : Number.NaN;

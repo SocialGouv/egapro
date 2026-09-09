@@ -141,6 +141,35 @@ describe("POST /api/upload", () => {
 		);
 	});
 
+	it.each([
+		["a siret whose first nine characters are not digits", "1234A678900015"],
+		["a siret shorter than a siren", "1234"],
+		["no siret", null],
+	])("returns 401 and writes an audit failure row for %s", async (_label, siret) => {
+		mocks.auth.mockResolvedValue({
+			user: { id: "user-1", email: "user@example.com", siret },
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "f.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(401);
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "HTTP 401",
+				siren: null,
+			}),
+		);
+	});
+
 	it("returns 403 and audits a failure row when the admin is impersonating", async () => {
 		mocks.auth.mockResolvedValue({
 			user: {
