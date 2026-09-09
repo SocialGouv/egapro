@@ -1,3 +1,4 @@
+import { CATEGORY_PAY_FIELDS } from "~/modules/declaration-remuneration/schemas";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
@@ -8,6 +9,7 @@ import {
 	formatGap,
 	formatTotal,
 	gapLevel,
+	isCategoryPayApplicable,
 } from "~/modules/domain";
 import styles from "./CategoryRecapTable.module.scss";
 import indicatorStyles from "./IndicatorTables.module.scss";
@@ -32,6 +34,10 @@ function GapCell({ gap }: { gap: number | null }) {
  *  never invent a 0 for it. */
 function formatWorkforceCount(value: number | null): string {
 	return value === null ? "—" : String(value);
+}
+
+function categoryHasPayValues(category: EmployeeCategoryRow): boolean {
+	return CATEGORY_PAY_FIELDS.some((field) => Boolean(category[field]));
 }
 
 /** Physical-headcount table, one row per pay basis (#4368) — same shape and
@@ -139,11 +145,16 @@ export function CategoryRecapTable({
 	);
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
+	const payApplicable =
+		isCategoryPayApplicable(category) || categoryHasPayValues(category);
 
 	return (
 		<section className={styles.section}>
 			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
 			<CategoryEffectifTable category={category} heading={heading} />
+			{!payApplicable && (
+				<p className="fr-mt-2w fr-mb-1w">Aucun écart à calculer</p>
+			)}
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">

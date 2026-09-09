@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { Step5EmployeeCategories } from "../Step5EmployeeCategories";
 
@@ -80,6 +81,37 @@ function makeCategory(
 }
 
 describe("Step5EmployeeCategories", () => {
+	it("waits for lock resolution before initializing legacy pay", () => {
+		const step = (
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialCategories={[
+					makeCategory({
+						name: "Cadres",
+						womenCount: 0,
+						menCount: 3,
+						hourlyWomenCount: 0,
+						hourlyMenCount: 3,
+						annualBaseWomen: "30000",
+						annualBaseMen: "32000",
+					}),
+				]}
+			/>
+		);
+		const { rerender } = render(<LockProvider isLoading>{step}</LockProvider>);
+		expect(screen.getByRole("status")).toHaveTextContent("Chargement");
+		expect(
+			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeInTheDocument();
+
+		rerender(<LockProvider isReadOnly>{step}</LockProvider>);
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("30 000,00");
+	});
+
 	it("renders with 1 empty category by default", () => {
 		render(
 			<Step5EmployeeCategories

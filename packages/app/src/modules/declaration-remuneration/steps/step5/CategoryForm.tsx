@@ -203,6 +203,32 @@ export function CategoryForm({
 					categories: toFormValues(initialCats, readOnly),
 				},
 	});
+	const clearNonApplicableCategoryPay = useCallback(
+		(index: number) => {
+			const category = form.getValues(`categories.${index}`);
+			if (
+				!category ||
+				isCategoryPayApplicable(toCategoryHeadcounts(category))
+			) {
+				return;
+			}
+			for (const payField of CATEGORY_PAY_FIELDS) {
+				const path = `categories.${index}.${payField}` as const;
+				if (form.getValues(path) !== "") form.setValue(path, "");
+			}
+		},
+		[form],
+	);
+
+	// Lock ownership can change without remounting the form. Official legacy pay
+	// is preserved while read-only, then normalized once editing becomes possible.
+	// This effect depends only on the scalar lock state, never on the watched array.
+	useEffect(() => {
+		if (readOnly) return;
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+	}, [clearNonApplicableCategoryPay, form, readOnly]);
 
 	useEffect(() => {
 		if (!onValuesChange) return;
@@ -309,14 +335,9 @@ export function CategoryForm({
 	function handleHeadcountBlur(index: number) {
 		return () => {
 			if (readOnly) return;
-			const category = form.getValues(`categories.${index}`);
-			if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return;
 			// Wait until the edit is committed so a transient 0 while replacing a
 			// multi-digit count cannot irreversibly erase the remuneration values.
-			for (const payField of CATEGORY_PAY_FIELDS) {
-				const path = `categories.${index}.${payField}` as const;
-				if (form.getValues(path) !== "") form.setValue(path, "");
-			}
+			clearNonApplicableCategoryPay(index);
 		};
 	}
 
@@ -409,10 +430,11 @@ export function CategoryForm({
 
 	const handleFormSubmit = form.handleSubmit(
 		(data) => {
+			const normalizedData = normalizeFormValues(data, false);
 			setValidationAttempt((attempt) => attempt + 1);
 			setCategoryErrors([]);
 
-			const emptyNameIndex = data.categories.findIndex(
+			const emptyNameIndex = normalizedData.categories.findIndex(
 				(cat) => !cat.name.trim(),
 			);
 			if (emptyNameIndex >= 0) {
@@ -430,7 +452,9 @@ export function CategoryForm({
 				return;
 			}
 
-			const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
+			const names = normalizedData.categories.map((cat) =>
+				cat.name.trim().toLowerCase(),
+			);
 			const hasDuplicates = names.length !== new Set(names).size;
 			if (hasDuplicates) {
 				setCategoryErrors([
@@ -443,7 +467,7 @@ export function CategoryForm({
 				return;
 			}
 
-			const payErrors = collectCategoryPayErrors(data.categories);
+			const payErrors = collectCategoryPayErrors(normalizedData.categories);
 			if (payErrors.length > 0) {
 				setCategoryErrors(payErrors);
 				return;
@@ -453,7 +477,7 @@ export function CategoryForm({
 				annual: { women: maxWomen, men: maxMen },
 				hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 			} as const;
-			const sums = sumCategoryWorkforce(data.categories);
+			const sums = sumCategoryWorkforce(normalizedData.categories);
 			const workforceErrors: FieldError[] = [];
 			for (const row of WORKFORCE_ROWS) {
 				for (const [sex, sexLabel] of [
@@ -477,11 +501,11 @@ export function CategoryForm({
 
 			onSubmit(
 				toSubmitData(
-					data.categories.map((cat, i) => ({
+					normalizedData.categories.map((cat, i) => ({
 						id: i,
 						...cat,
 					})),
-					data.source,
+					normalizedData.source,
 				),
 			);
 		},
@@ -515,11 +539,25 @@ export function CategoryForm({
 		},
 	);
 
+	function handleSubmitEvent(event: React.FormEvent<HTMLFormElement>) {
+		if (disabled || readOnly) {
+			event.preventDefault();
+			return;
+		}
+		// A keyboard submit does not necessarily blur the active headcount cell.
+		// Normalize the live form first so a failed request cannot leave stale pay
+		// in the persisted draft.
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+		void handleFormSubmit(event);
+	}
+
 	return (
 		<form
 			autoComplete="off"
 			className={stepStyles.form}
-			onSubmit={handleFormSubmit}
+			onSubmit={handleSubmitEvent}
 		>
 			<StepTitleRow
 				devFillDisabled={disabled || readOnly}

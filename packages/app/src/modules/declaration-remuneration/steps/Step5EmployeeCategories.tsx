@@ -43,7 +43,7 @@ export function Step5EmployeeCategories({
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
-	const { isReadOnly: isLocked } = useLockContext();
+	const { isLoading: isLockLoading, isReadOnly: isLocked } = useLockContext();
 	const hasInitialData = (initialCategories?.length ?? 0) > 0;
 
 	const dbValues = useMemo<CategoryFormValues>(
@@ -91,7 +91,7 @@ export function Step5EmployeeCategories({
 		},
 	});
 
-	if (isLoadingDraft) {
+	if (isLoadingDraft || isLockLoading) {
 		return <DraftLoadingState />;
 	}
 

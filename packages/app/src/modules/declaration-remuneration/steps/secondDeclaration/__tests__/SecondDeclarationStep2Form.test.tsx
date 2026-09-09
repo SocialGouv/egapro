@@ -121,6 +121,31 @@ beforeEach(() => {
 });
 
 describe("SecondDeclarationStep2Form", () => {
+	it("waits for lock resolution before initializing the category form", () => {
+		const step = (
+			<SecondDeclarationStep2Form
+				declarationSiren="123456789"
+				declarationYear={2025}
+				initialFirstDeclarationCategories={mockCategories}
+				status="corrective_actions_chosen"
+			/>
+		);
+		const { rerender } = render(<LockProvider isLoading>{step}</LockProvider>);
+		expect(screen.getByRole("status")).toHaveTextContent("Chargement");
+		expect(
+			screen.queryByRole("button", {
+				name: "Catégorie d'emplois n°1 : Ouvriers",
+			}),
+		).not.toBeInTheDocument();
+
+		rerender(<LockProvider isReadOnly>{step}</LockProvider>);
+		expect(
+			screen.getByRole("button", {
+				name: "Catégorie d'emplois n°1 : Ouvriers",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders the title and step indicator", () => {
 		renderStep2();
 		expect(
