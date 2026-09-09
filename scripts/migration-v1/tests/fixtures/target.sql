@@ -14,6 +14,7 @@ CREATE TABLE app_company (
   region_code varchar(3),
   department_code varchar(3),
   department_label varchar(255),
+  statut_diffusion varchar(1),
   created_at timestamptz,
   updated_at timestamptz
 );

@@ -120,6 +120,7 @@ describe("mapCompanyFromV1", () => {
 			regionCode: "11",
 			departmentCode: "75",
 			departmentLabel: "Paris",
+			statutDiffusion: null,
 		});
 	});
 
@@ -156,6 +157,7 @@ describe("mapCompanyFromV1", () => {
 			regionCode: null,
 			departmentCode: null,
 			departmentLabel: null,
+			statutDiffusion: null,
 		});
 	});
 
@@ -167,6 +169,24 @@ describe("mapCompanyFromV1", () => {
 			regionCode: null,
 			departmentCode: "999",
 			departmentLabel: null,
+			statutDiffusion: null,
+		});
+	});
+
+	it("marks a V1 non-diffusible company and clears its placeholder address", () => {
+		expect(
+			mapCompanyFromV1(
+				v1Company({
+					raison_sociale: "[NON-DIFFUSIBLE]",
+					adresse: "[NON-DIFFUSIBLE]",
+					code_naf: "[NON-DIFFUSIBLE]",
+				}),
+			),
+		).toMatchObject({
+			name: "[NON-DIFFUSIBLE]",
+			address: null,
+			nafCode: null,
+			statutDiffusion: "N",
 		});
 	});
 });

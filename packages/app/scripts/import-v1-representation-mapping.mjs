@@ -54,6 +54,7 @@ import { COUNTIES, REGIONS } from "~/modules/domain";
  * @property {string | null} regionCode
  * @property {string | null} departmentCode
  * @property {string | null} departmentLabel
+ * @property {string | null} statutDiffusion
  */
 
 /**
@@ -94,7 +95,7 @@ import { COUNTIES, REGIONS } from "~/modules/domain";
  * @property {ImportError[]} errors
  */
 
-const NON_DIFFUSIBLE_NAF = "[NON-DIFFUSIBLE]";
+const NON_DIFFUSIBLE_MARKER = "[NON-DIFFUSIBLE]";
 
 /** @type {Record<string, string>} */
 const REGION_LABELS = REGIONS;
@@ -125,9 +126,12 @@ export function mapCompanyFromV1(entreprise) {
 	return {
 		siren: entreprise.siren,
 		name: entreprise.raison_sociale,
-		address: entreprise.adresse ?? null,
+		address:
+			entreprise.adresse === NON_DIFFUSIBLE_MARKER
+				? null
+				: (entreprise.adresse ?? null),
 		nafCode:
-			entreprise.code_naf && entreprise.code_naf !== NON_DIFFUSIBLE_NAF
+			entreprise.code_naf && entreprise.code_naf !== NON_DIFFUSIBLE_MARKER
 				? entreprise.code_naf
 				: null,
 		region: regionCode ? (REGION_LABELS[regionCode] ?? null) : null,
@@ -136,6 +140,8 @@ export function mapCompanyFromV1(entreprise) {
 		departmentLabel: departmentCode
 			? (DEPARTMENT_LABELS[departmentCode] ?? null)
 			: null,
+		statutDiffusion:
+			entreprise.raison_sociale === NON_DIFFUSIBLE_MARKER ? "N" : null,
 	};
 }
 

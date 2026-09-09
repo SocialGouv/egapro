@@ -285,6 +285,17 @@ if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
 fi
 printf 'ok - representation row and payload years must agree\n'
 
+cp -R "$WORK/full snapshot" "$WORK/empty substitute snapshot"
+chmod 600 "$WORK/empty substitute snapshot/referents.csv"
+sed -i '$s/,,$/,"",""/' "$WORK/empty substitute snapshot/referents.csv"
+grep -q ',"",""$' "$WORK/empty substitute snapshot/referents.csv" ||
+  fail "the empty substitute snapshot fixture should contain quoted empty strings"
+refresh_checksums "$WORK/empty substitute snapshot"
+PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
+  --snapshot "$WORK/empty substitute snapshot" --service target \
+  --dataset referents >/dev/null
+printf 'ok - target loading normalizes empty substitute fields from existing snapshots\n'
+
 cp -R "$WORK/full snapshot" "$WORK/legacy snapshot"
 chmod 600 "$WORK/legacy snapshot/manifest.txt"
 sed -i \
@@ -421,6 +432,8 @@ after_state=$(target_sql --command "SELECT count(*) || ':' || (SELECT count(*) F
 assert_equal "dry-run reports one insert" "representations.insert=1" "$(grep '^representations.insert=' <<<"$dry_run_output")"
 assert_equal "dry-run reports one update" "representations.update=1" "$(grep '^representations.update=' <<<"$dry_run_output")"
 assert_equal "dry-run reports the native skip" "representations.skip_native=1" "$(grep '^representations.skip_native=' <<<"$dry_run_output")"
+assert_equal "dry-run identifies native V2 drafts" "representations.skip_native_draft=1" "$(grep '^representations.skip_native_draft=' <<<"$dry_run_output")"
+assert_equal "dry-run identifies non-draft native V2 rows" "representations.skip_native_non_draft=0" "$(grep '^representations.skip_native_non_draft=' <<<"$dry_run_output")"
 assert_equal "dry-run reports unresolved regions" "representations.unresolved_region=1" "$(grep '^representations.unresolved_region=' <<<"$dry_run_output")"
 assert_equal "dry-run reports unresolved departments" "representations.unresolved_department=1" "$(grep '^representations.unresolved_department=' <<<"$dry_run_output")"
 assert_equal "dry-run reports V2 referents absent from V1" "referents.delete_without_source=1" "$(grep '^referents.delete_without_source=' <<<"$dry_run_output")"
@@ -472,12 +485,16 @@ assert_equal "unknown geography stays lenient like the Node mapper" ":999:" \
   "$(target_sql --command "SELECT coalesce(region, '') || ':' || department_code || ':' || coalesce(department_label, '') FROM app_company WHERE siren = '800000003'")"
 assert_equal "the non-diffusible NAF sentinel becomes null" "t" \
   "$(target_sql --command "SELECT naf_code IS NULL FROM app_company WHERE siren = '800000003'")"
+assert_equal "V1 non-diffusible companies are marked and their placeholder address is cleared" "N:true" \
+  "$(target_sql --command "SELECT statut_diffusion || ':' || (address IS NULL) FROM app_company WHERE siren = '800000003'")"
 assert_equal "CSV newlines and SQL-looking text remain data" "t" \
   "$(target_sql --command "SELECT position(E'\\nSELECT * FROM app_user;' IN publish_modalities) > 0 FROM app_representation_declaration WHERE siren = '800000003'")"
 assert_equal "referent UUIDs and all snapshot rows are preserved" "2" \
   "$(target_sql --command "SELECT count(*) FROM app_referent WHERE id IN ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222')")"
 assert_equal "empty V1 referent counties become null" "t" \
   "$(target_sql --command "SELECT county IS NULL FROM app_referent WHERE id = '22222222-2222-4222-8222-222222222222'")"
+assert_equal "empty V1 substitute fields become null" "true:true" \
+  "$(target_sql --command "SELECT (substitute_name IS NULL) || ':' || (substitute_email IS NULL) FROM app_referent WHERE id = '22222222-2222-4222-8222-222222222222'")"
 assert_equal "new companies persist their validated region code" "11" \
   "$(target_sql_for target-repeq-only --command "SELECT region_code FROM app_company WHERE siren = '800000001'")"
 

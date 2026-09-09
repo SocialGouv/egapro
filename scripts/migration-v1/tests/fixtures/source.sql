@@ -72,8 +72,9 @@ VALUES
         )
       ),
       'entreprise', jsonb_build_object(
-        'siren', '800000003', 'raison_sociale', 'Société inconnue',
-        'code_naf', '[NON-DIFFUSIBLE]', 'région', '99', 'département', '999'
+        'siren', '800000003', 'raison_sociale', '[NON-DIFFUSIBLE]',
+        'adresse', '[NON-DIFFUSIBLE]', 'code_naf', '[NON-DIFFUSIBLE]',
+        'région', '99', 'département', '999'
       ),
       'indicateurs', jsonb_build_object(
         'représentation_équilibrée', jsonb_build_object(
@@ -99,5 +100,5 @@ VALUES
   (
     '22222222-2222-4222-8222-222222222222', '',
     E'Coordination, régionale\nSELECT * FROM app_user;', false, '94', 'url',
-    'https://example.test/contact?x=1,y=2', NULL, NULL
+    'https://example.test/contact?x=1,y=2', '', ''
   );

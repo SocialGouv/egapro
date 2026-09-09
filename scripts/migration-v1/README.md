@@ -53,7 +53,9 @@ ne contenant que les blocs `COPY` attendus, avec les noms de tables et les
 colonnes exactes de la V1. Toute autre instruction, commande psql, table,
 colonne, duplication ou bloc tronqué est refusé. Les données situées à
 l'intérieur d'un bloc `COPY` restent des données, même si leur texte ressemble
-à du SQL.
+à du SQL. Cet ordre exact correspond au schéma V1 de `master`; une divergence
+du schéma réel est refusée sans adaptation implicite et doit être détectée lors
+de la répétition sur le dump représentatif.
 
 Les dumps `pg_dumpall`, les dumps plain contenant du DDL et les archives
 directory/tar ne sont pas pris en charge. Le format custom reste recommandé,
@@ -207,6 +209,8 @@ representations.read=...
 representations.insert=...
 representations.update=...
 representations.skip_native=...
+representations.skip_native_draft=...
+representations.skip_native_non_draft=...
 representations.skip_unchanged=...
 companies.insert=...
 representations.unresolved_region=...
@@ -249,6 +253,12 @@ inventer de correspondance.
 V2 dont l'identifiant n'existe pas dans l'instantané V1. Il faut faire valider
 explicitement ce compteur avant de remplacer l'annuaire.
 
+Les compteurs `skip_native_draft` et `skip_native_non_draft` détaillent les
+déclarations V1 ignorées parce qu'une ligne créée nativement en V2 existe déjà.
+La V2 reste prioritaire même lorsqu'il s'agit d'un brouillon : ce volume doit
+être examiné avant la bascule afin de décider hors script du traitement des cas
+concernés.
+
 ## 5. Importer en production
 
 Avant l'import :
@@ -281,7 +291,9 @@ V2 doivent bien être supprimées, relancer avec l'accord destructif explicite :
 ```
 
 L'option ne s'applique qu'à `apply`; le dry-run affiche toujours le compteur
-sans exiger d'option.
+sans exiger d'option. Elle ne modifie pas le plan calculé : le dry-run sans
+option est donc l'exacte simulation des suppressions qu'un apply autorisé
+effectuera.
 
 L'import peut également être séparé :
 
@@ -312,7 +324,10 @@ jamais écrasée. Une déclaration déjà reprise n'est mise à jour que si son
 `modified_at` V1 est plus récent que son `updated_at` V2. L'annuaire des
 référents est remplacé en totalité seulement si son contenu diffère et si les
 éventuelles suppressions de lignes propres à la V2 ont été acceptées. Un code
-département vide d'un référent V1 est normalisé en `NULL`.
+département vide d'un référent V1 est normalisé en `NULL`, comme les nom et
+e-mail de suppléance vides. Le remplacement reprend les UUID V1 et réinitialise
+les dates techniques de l'annuaire ; ces identifiants servent aux URLs de
+détail et doivent donc être considérés comme changés pendant la bascule.
 
 Une représentation soumise doit fournir les deux pourcentages de chaque
 catégorie ou un motif de non-calculabilité. Son année V1, l'année portée dans
@@ -320,6 +335,11 @@ le JSON et l'année de fin de période doivent coïncider. Les périodes se
 terminant un 29 février commencent le 1er mars de l'année précédente, ce qui
 forme douze mois consécutifs valides en V2. Les e-mails et URL invalides sont
 refusés plutôt que corrigés implicitement.
+
+Une entreprise V1 dont la raison sociale vaut `[NON-DIFFUSIBLE]` est créée avec
+`statut_diffusion = 'N'`. Son adresse placeholder est supprimée afin que les
+canaux publics V2 appliquent bien le masquage prévu. Une entreprise déjà
+présente en V2 conserve toutefois intégralement ses informations V2.
 
 En mode `all`, une erreur, même pendant la dernière insertion, annule les
 changements des deux jeux de données. En mode séparé, elle annule uniquement
@@ -349,3 +369,9 @@ les éventuels répertoires `.partial.*` résiduels par la procédure sécurisé
 l'organisation. Avant la production, répéter l'ensemble du scénario avec un
 dump représentatif, y compris le dry-run, l'import, les compteurs métier et une
 relance idempotente.
+
+La suite Docker dédiée est volontairement locale car ce kit est destiné à une
+exécution unique et ne justifie pas un coût CI à chaque push. L'opérateur qui
+prépare la reprise doit exécuter `tests/cli.test.sh` puis
+`tests/integration.sh` avant la répétition sur le dump représentatif et avant
+la bascule de production.

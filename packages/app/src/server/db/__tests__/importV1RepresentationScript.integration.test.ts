@@ -75,6 +75,7 @@ type CompanyRow = {
 	region: string | null;
 	region_code: string | null;
 	siren: string;
+	statut_diffusion: string | null;
 };
 
 describe("import-v1-representation.mjs (integration)", () => {
@@ -176,7 +177,7 @@ describe("import-v1-representation.mjs (integration)", () => {
 
 	async function readCompany(siren: string) {
 		const [row] = await sql<CompanyRow[]>`
-			SELECT siren, name, address, naf_code, region, region_code, department_code, department_label
+			SELECT siren, name, address, naf_code, region, region_code, department_code, department_label, statut_diffusion
 			FROM app_company WHERE siren = ${siren}
 		`;
 		return row;
@@ -286,6 +287,30 @@ describe("import-v1-representation.mjs (integration)", () => {
 			region_code: "11",
 			department_code: "75",
 			department_label: "Paris",
+			statut_diffusion: null,
+		});
+	});
+
+	it("marks V1 placeholder companies as non-diffusible", async () => {
+		await seedLegacy({
+			siren: SIREN_A,
+			data: v1Data({
+				entreprise: v1Company({
+					siren: SIREN_A,
+					raison_sociale: "[NON-DIFFUSIBLE]",
+					adresse: "[NON-DIFFUSIBLE]",
+					code_naf: "[NON-DIFFUSIBLE]",
+				}),
+			}),
+		});
+
+		await runImport();
+
+		expect(await readCompany(SIREN_A)).toMatchObject({
+			name: "[NON-DIFFUSIBLE]",
+			address: null,
+			naf_code: null,
+			statut_diffusion: "N",
 		});
 	});
 

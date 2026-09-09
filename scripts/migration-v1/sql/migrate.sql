@@ -92,6 +92,7 @@ CREATE TEMP TABLE migration_department (
         ('app_company', 'region_code'),
         ('app_company', 'department_code'),
         ('app_company', 'department_label'),
+        ('app_company', 'statut_diffusion'),
         ('app_company', 'created_at'),
         ('app_company', 'updated_at'),
         ('app_representation_declaration', 'id'),
@@ -291,13 +292,17 @@ CREATE TEMP TABLE migration_department (
     source.declared_at AS created_at,
     source.modified_at AS updated_at,
     source.data #>> '{entreprise,raison_sociale}' AS company_name,
-    source.data #>> '{entreprise,adresse}' AS company_address,
+    nullif(source.data #>> '{entreprise,adresse}', '[NON-DIFFUSIBLE]') AS company_address,
     nullif(nullif(source.data #>> '{entreprise,code_naf}', '[NON-DIFFUSIBLE]'), '') AS company_naf_code,
     region.label AS company_region,
     region.code AS company_region_code,
     source.data #>> '{entreprise,région}' AS source_region_code,
     source.data #>> '{entreprise,département}' AS company_department_code,
-    department.label AS company_department_label
+    department.label AS company_department_label,
+    CASE
+      WHEN source.data #>> '{entreprise,raison_sociale}' = '[NON-DIFFUSIBLE]' THEN 'N'
+      ELSE NULL
+    END AS company_statut_diffusion
   FROM migration_representation_raw AS source
   LEFT JOIN migration_region AS region
     ON region.code = source.data #>> '{entreprise,région}'
@@ -320,7 +325,10 @@ CREATE TEMP TABLE migration_department (
 
   \copy migration_referent_raw FROM 'referents.csv' WITH (FORMAT csv, HEADER true)
 
-  UPDATE migration_referent_raw SET county = NULL WHERE county = '';
+  UPDATE migration_referent_raw
+  SET county = nullif(county, ''),
+      substitute_name = nullif(substitute_name, ''),
+      substitute_email = nullif(substitute_email, '');
 
   DO $validation$
   DECLARE
@@ -432,6 +440,7 @@ CREATE TEMP TABLE migration_department (
   CREATE TEMP TABLE migration_representation_plan ON COMMIT DROP AS
   SELECT
     source.*,
+    target.status::text AS target_status,
     CASE
       WHEN target.id IS NULL THEN 'insert'
       WHEN target.imported_from_v1_at IS NULL THEN 'skip_native'
@@ -448,6 +457,10 @@ CREATE TEMP TABLE migration_department (
     (SELECT count(*) FROM migration_representation_plan WHERE action = 'insert') AS representations_insert,
     (SELECT count(*) FROM migration_representation_plan WHERE action = 'update') AS representations_update,
     (SELECT count(*) FROM migration_representation_plan WHERE action = 'skip_native') AS representations_skip_native,
+    (SELECT count(*) FROM migration_representation_plan
+     WHERE action = 'skip_native' AND target_status = 'draft') AS representations_skip_native_draft,
+    (SELECT count(*) FROM migration_representation_plan
+     WHERE action = 'skip_native' AND target_status <> 'draft') AS representations_skip_native_non_draft,
     (SELECT count(*) FROM migration_representation_plan WHERE action = 'skip_unchanged') AS representations_skip_unchanged,
     (SELECT count(DISTINCT plan.siren)
      FROM migration_representation_plan AS plan
@@ -510,12 +523,13 @@ CREATE TEMP TABLE migration_department (
   \if :migration_repeq
     INSERT INTO public.app_company (
       siren, name, address, naf_code, region, region_code, department_code, department_label,
-      created_at, updated_at
+      statut_diffusion, created_at, updated_at
     )
     SELECT DISTINCT ON (plan.siren)
       plan.siren, plan.company_name, plan.company_address, plan.company_naf_code,
       plan.company_region, plan.company_region_code,
       plan.company_department_code, plan.company_department_label,
+      plan.company_statut_diffusion,
       transaction_timestamp(), transaction_timestamp()
     FROM migration_representation_plan AS plan
     WHERE plan.action IN ('insert', 'update')
@@ -589,6 +603,8 @@ UNION ALL SELECT 'dataset=' || :'migration_dataset';
   UNION ALL SELECT 'representations.insert=' || representations_insert FROM migration_representation_report
   UNION ALL SELECT 'representations.update=' || representations_update FROM migration_representation_report
   UNION ALL SELECT 'representations.skip_native=' || representations_skip_native FROM migration_representation_report
+  UNION ALL SELECT 'representations.skip_native_draft=' || representations_skip_native_draft FROM migration_representation_report
+  UNION ALL SELECT 'representations.skip_native_non_draft=' || representations_skip_native_non_draft FROM migration_representation_report
   UNION ALL SELECT 'representations.skip_unchanged=' || representations_skip_unchanged FROM migration_representation_report
   UNION ALL SELECT 'companies.insert=' || companies_insert FROM migration_representation_report
   UNION ALL SELECT 'representations.unresolved_region=' || unresolved_region FROM migration_representation_report
