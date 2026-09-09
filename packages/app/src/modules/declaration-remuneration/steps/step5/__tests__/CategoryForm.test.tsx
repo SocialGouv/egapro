@@ -401,6 +401,17 @@ describe("CategoryForm legacy read-only categories (#3678)", () => {
 		expect(annualBaseWomen).toHaveAttribute("readonly");
 		expect(annualBaseWomen).not.toBeDisabled();
 		expect(annualBaseWomen).toHaveValue("30 000,00");
+
+		fireEvent.blur(
+			screen.getByLabelText(
+				"Rémunération annuelle — Nombre de femmes, catégorie 1",
+			),
+		);
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		expect(annualBaseWomen).not.toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
 		expect(
 			screen.getByLabelText(
 				"Composantes variables horaires hommes, catégorie 1",

@@ -108,7 +108,7 @@ function toFormValues(
 
 function normalizeFormValues(
 	values: CategoryFormValues,
-	preserveLegacyPay = false,
+	preserveLegacyPay: boolean,
 ): CategoryFormValues {
 	return {
 		source: values.source,
@@ -308,6 +308,7 @@ export function CategoryForm({
 
 	function handleHeadcountBlur(index: number) {
 		return () => {
+			if (readOnly) return;
 			const category = form.getValues(`categories.${index}`);
 			if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return;
 			// Wait until the edit is committed so a transient 0 while replacing a
