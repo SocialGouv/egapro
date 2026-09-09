@@ -303,7 +303,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await waitForDsfrModal(page, SUBMIT_MODAL_ID);
 			await clickAndExpectDialogOpen(
 				page,
-				page.getByRole("button", { name: "Soumettre" }),
+				page.getByRole("button", { name: "Transmettre" }),
 				SUBMIT_MODAL_ID,
 			);
 

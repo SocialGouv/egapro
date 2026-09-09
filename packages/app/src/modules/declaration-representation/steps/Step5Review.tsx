@@ -115,7 +115,7 @@ export function Step5Review() {
 	return (
 		<div className={styles.review}>
 			<p className="fr-text--md fr-mb-0">
-				Vérifiez les informations avant de soumettre votre déclaration aux
+				Vérifiez les informations avant de transmettre votre déclaration aux
 				services du ministère chargé du travail.
 			</p>
 
@@ -193,7 +193,7 @@ export function Step5Review() {
 						onClick={open}
 						type="button"
 					>
-						Soumettre
+						Transmettre
 					</button>
 				)}
 			</div>

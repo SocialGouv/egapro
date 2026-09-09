@@ -116,7 +116,7 @@ function renderStep3(
 
 async function submitDeclaration() {
 	const user = userEvent.setup();
-	await user.click(screen.getByRole("button", { name: /soumettre/i }));
+	await user.click(screen.getByRole("button", { name: /transmettre/i }));
 	const checkbox = screen.getByLabelText(/Je certifie/, {
 		selector: "input",
 	});
@@ -205,10 +205,10 @@ describe("SecondDeclarationStep3Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders Soumettre button", () => {
+	it("renders Transmettre button", () => {
 		renderStep3();
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 
@@ -310,10 +310,10 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
 	});
 
-	it("keeps Soumettre while the second declaration is still writable", () => {
+	it("keeps Transmettre while the second declaration is still writable", () => {
 		renderStep3();
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("link", { name: /suivant/i }),
@@ -327,14 +327,14 @@ describe("SecondDeclarationStep3Review", () => {
 			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 		);
 		expect(
-			screen.queryByRole("button", { name: /soumettre/i }),
+			screen.queryByRole("button", { name: /transmettre/i }),
 		).not.toBeInTheDocument();
 	});
 
-	it("keeps Soumettre while awaiting a revision choice", () => {
+	it("keeps Transmettre while awaiting a revision choice", () => {
 		renderStep3({ status: "awaiting_revision_choice" });
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 
@@ -438,7 +438,7 @@ describe("SecondDeclarationStep3Review", () => {
 		const user = userEvent.setup();
 		renderStep3();
 
-		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		await user.click(screen.getByRole("button", { name: /transmettre/i }));
 		const submitDialog = document.getElementById("submit-declaration-modal");
 		if (!submitDialog) throw new Error("submit dialog not found");
 		const cancelButton = within(submitDialog).getByRole("button", {

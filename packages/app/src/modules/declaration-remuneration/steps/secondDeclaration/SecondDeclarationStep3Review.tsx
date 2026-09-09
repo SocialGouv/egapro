@@ -89,7 +89,7 @@ export function SecondDeclarationStep3Review({
 	const nextHref = isWritable
 		? undefined
 		: getCurrentStageHref(status, cseOpinionRequired);
-	const nextLabel = isWritable ? "Soumettre" : "Suivant";
+	const nextLabel = isWritable ? "Transmettre" : "Suivant";
 
 	return (
 		<form
@@ -109,7 +109,7 @@ export function SecondDeclarationStep3Review({
 
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre seconde déclaration des écarts de rémunération par
+				transmettre votre seconde déclaration des écarts de rémunération par
 				catégories de salariés aux services du ministère chargé du travail.
 			</p>
 

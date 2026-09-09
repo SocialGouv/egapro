@@ -242,7 +242,7 @@ export function Step1Opinions({
 
 				<p className={`fr-text--md fr-mb-2w ${styles.introText}`}>
 					Indiquez si le CSE a été consulté et précisez les avis émis avant de
-					soumettre votre déclaration aux services du ministère chargé du
+					transmettre votre déclaration aux services du ministère chargé du
 					Travail.
 				</p>
 				<p className="fr-mb-4w fr-text-title--grey">

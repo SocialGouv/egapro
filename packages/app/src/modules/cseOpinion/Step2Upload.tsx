@@ -301,7 +301,7 @@ export function Step2Upload({
 							disabled={isReadOnly}
 							type="submit"
 						>
-							Soumettre
+							Transmettre
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>

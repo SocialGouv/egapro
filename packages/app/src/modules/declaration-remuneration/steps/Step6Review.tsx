@@ -152,7 +152,7 @@ export function Step6Review({
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
 						Vérifiez que toutes les informations ont été complétées avant de
-						soumettre votre déclaration aux services du ministère chargé du
+						transmettre votre déclaration aux services du ministère chargé du
 						travail.
 					</p>
 
@@ -185,7 +185,7 @@ export function Step6Review({
 							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
-					nextLabel={isSubmitted ? "Suivant" : "Soumettre"}
+					nextLabel={isSubmitted ? "Suivant" : "Transmettre"}
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 
