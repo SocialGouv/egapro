@@ -2,16 +2,15 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-
+import { MY_SPACE } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
-
 import { devLoginSchema } from "./schemas";
 
 type Props = {
 	callbackUrl?: string;
 };
 
-const DEFAULT_CALLBACK = "/mon-espace";
+const DEFAULT_CALLBACK = MY_SPACE;
 
 /**
  * `callbackUrl` reaches this form straight from the query string. Anything

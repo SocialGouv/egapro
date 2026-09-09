@@ -8,6 +8,7 @@ import {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "~/modules/domain";
+import { API_DECLARATION_LOCK_RELEASE } from "~/modules/routes";
 import { api } from "~/trpc/react";
 import type { DeclarationLockState, LockHolder, ReadOnlyReason } from "./types";
 
@@ -16,7 +17,7 @@ type UseDeclarationLockOptions = {
 	modificationClosed?: boolean;
 };
 
-const RELEASE_ENDPOINT = "/api/declaration-lock/release";
+const RELEASE_ENDPOINT = API_DECLARATION_LOCK_RELEASE;
 
 export function useDeclarationLock({
 	declarationId,

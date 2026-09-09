@@ -4,8 +4,8 @@ import Link from "next/link";
 
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { isCancelled } from "~/modules/domain";
+import { ADMIN_DECLARATIONS } from "~/modules/routes";
 import { api } from "~/trpc/react";
-
 import { CancelDeclarationButton } from "./CancelDeclarationButton";
 import {
 	CancelledBadge,
@@ -45,7 +45,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 				<div className="fr-alert fr-alert--error">
 					<p>Déclaration introuvable.</p>
 				</div>
-				<Link className="fr-link fr-mt-2w" href="/admin/declarations">
+				<Link className="fr-link fr-mt-2w" href={ADMIN_DECLARATIONS}>
 					Retour à la liste
 				</Link>
 			</div>
@@ -56,7 +56,7 @@ export function AdminDeclarationDetailPage({ declarationId }: Props) {
 		<div className="fr-container fr-py-4w">
 			<Link
 				className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mb-4w"
-				href="/admin/declarations"
+				href={ADMIN_DECLARATIONS}
 			>
 				Retour à la liste
 			</Link>

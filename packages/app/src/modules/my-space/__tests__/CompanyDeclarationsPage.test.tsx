@@ -29,6 +29,7 @@ import {
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 } from "~/modules/domain";
+import { DECLARATION_REMUNERATION_RECAP } from "~/modules/routes";
 import { CompanyDeclarationsPage } from "../CompanyDeclarationsPage";
 import type { CompanyDetail, DeclarationItem } from "../types";
 
@@ -144,10 +145,7 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByTitle("Voir le récapitulatif de la déclaration"),
-		).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/recapitulatif?siren=532847196",
-		);
+		).toHaveAttribute("href", DECLARATION_REMUNERATION_RECAP);
 		expect(
 			screen.queryByText(/Parcours de mise en conformité/),
 		).not.toBeInTheDocument();

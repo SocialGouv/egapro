@@ -8,7 +8,7 @@ import {
 	trackEvent,
 } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./ProConnectButton.module.scss";
 
 type Props = {
@@ -22,7 +22,7 @@ export function ProConnectButton({ callbackUrl }: Props) {
 			category: MATOMO_EVENT_CATEGORY.AUTH,
 			action: MATOMO_ACTION.LOGIN_START,
 		});
-		void signIn("proconnect", { callbackUrl: callbackUrl ?? "/mon-espace" });
+		void signIn("proconnect", { callbackUrl: callbackUrl ?? MY_SPACE });
 	}
 
 	return (

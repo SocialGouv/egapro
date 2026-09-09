@@ -9,7 +9,7 @@ import {
 } from "~/modules/domain";
 import { Breadcrumb, RouteScrollReset } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
-
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./CseOpinionLayout.module.scss";
 
 type CompanyData = {
@@ -48,7 +48,7 @@ export function CseOpinionLayout({
 							{ label: "Mon espace", href: "/" },
 							{
 								label: company.name,
-								href: "/mon-espace",
+								href: MY_SPACE,
 							},
 							{
 								label: `Démarche des indicateurs de rémunération ${declarationYear}`,

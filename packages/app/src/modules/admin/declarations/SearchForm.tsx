@@ -2,9 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-
+import { ADMIN_DECLARATIONS, routeWithQuery } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
-
 import type { SearchDeclarationsFormValues } from "./schemas";
 import { searchDeclarationsFormSchema } from "./schemas";
 
@@ -38,7 +37,7 @@ export function SearchForm() {
 				}
 			}
 			params.set("page", "1");
-			router.push(`/admin/declarations?${params.toString()}`);
+			router.push(routeWithQuery(ADMIN_DECLARATIONS, params));
 		},
 		[router],
 	);
@@ -52,7 +51,7 @@ export function SearchForm() {
 			dateTo: "",
 			status: "",
 		});
-		router.push("/admin/declarations");
+		router.push(ADMIN_DECLARATIONS);
 	}, [reset, router]);
 
 	return (

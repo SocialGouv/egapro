@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { Controller } from "react-hook-form";
+import {
+	FIRST_REPRESENTATION_STEP,
+	MY_SPACE,
+	representationStepHref,
+} from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
-import { stepHref } from "./steps";
 import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
@@ -33,13 +37,13 @@ export function SubjectionScreen({
 	const declareNotSubjectMutation =
 		api.representationDeclaration.declareNotSubject.useMutation({
 			onSuccess: () => {
-				router.push("/mon-espace");
+				router.push(MY_SPACE);
 			},
 		});
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
-			router.push(stepHref(1));
+			router.push(representationStepHref(FIRST_REPRESENTATION_STEP));
 			return;
 		}
 		declareNotSubjectMutation.mutate({ year });

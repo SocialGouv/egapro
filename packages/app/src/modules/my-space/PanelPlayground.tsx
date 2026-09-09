@@ -7,6 +7,7 @@ import {
 	getDeclarationDisplayContext,
 	getDefaultCampaignDeadlines,
 } from "~/modules/domain";
+import { DECLARATION_REMUNERATION } from "~/modules/routes";
 import {
 	DECLARATION_PROCESS_PANEL_ID,
 	DeclarationProcessPanel,
@@ -294,7 +295,7 @@ export function PanelPlayground() {
 				campaignDeadlines={deadlines}
 				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
-				ctaHref="/declaration-remuneration?siren=000000000"
+				ctaHref={DECLARATION_REMUNERATION}
 				declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,

@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { getReferencePeriod, getReferenceYearFor } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -150,7 +151,7 @@ export function Step1Workforce({
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/2");
+			router.push(remunerationStepHref(2));
 		},
 	});
 
@@ -370,7 +371,7 @@ export function Step1Workforce({
 					<FormActions
 						isSubmitting={mutation.isPending}
 						mimoquageNextHref={
-							hasInitialData ? "/declaration-remuneration/etape/2" : undefined
+							hasInitialData ? remunerationStepHref(2) : undefined
 						}
 					/>
 				</fieldset>

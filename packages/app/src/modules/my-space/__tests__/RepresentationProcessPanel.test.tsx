@@ -1,18 +1,18 @@
 import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import {
-	REPRESENTATION_FUNNEL_ROOT,
-	stepHref,
-	TOTAL_REPRESENTATION_STEPS,
-} from "~/modules/declaration-representation";
 import type { RepresentationCampaign } from "~/modules/domain";
+import {
+	DECLARATION_REPRESENTATION,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import { RepresentationProcessPanel } from "../RepresentationProcessPanel";
 import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
 const CAMPAIGN_YEAR = 2026;
-const RECAP_HREF = stepHref(TOTAL_REPRESENTATION_STEPS);
+const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
 
 // The panel resolves the campaign window against the real clock, so the open
 // window is stretched wide enough to stay open whenever the suite runs.
@@ -54,7 +54,7 @@ function makeDeclaration(
 const DRAFT = makeDeclaration({ status: "in_progress", currentStep: 3 });
 const SUBMITTED = makeDeclaration({
 	status: "done",
-	currentStep: TOTAL_REPRESENTATION_STEPS,
+	currentStep: LAST_REPRESENTATION_STEP,
 });
 // A not-subject row is reset to step 0 yet mapped "done": the flag settles it.
 const NOT_SUBJECT = makeDeclaration({
@@ -155,7 +155,7 @@ describe("RepresentationProcessPanel", () => {
 			const { dialog } = renderPanel();
 			const cta = getCta(dialog);
 			expect(cta).toHaveTextContent(/^Commencer$/);
-			expect(cta).toHaveAttribute("href", REPRESENTATION_FUNNEL_ROOT);
+			expect(cta).toHaveAttribute("href", DECLARATION_REPRESENTATION);
 		});
 
 		it("marks the subjection check as the current step", () => {
@@ -185,7 +185,7 @@ describe("RepresentationProcessPanel", () => {
 			const { dialog } = renderPanel({ declaration: DRAFT });
 			const cta = getCta(dialog);
 			expect(cta).toHaveTextContent(/^Reprendre$/);
-			expect(cta).toHaveAttribute("href", stepHref(3));
+			expect(cta).toHaveAttribute("href", representationStepHref(3));
 		});
 
 		it("expands the declaration step into its three bullets", () => {
@@ -248,7 +248,7 @@ describe("RepresentationProcessPanel", () => {
 			const { dialog } = renderPanel({ declaration: NOT_SUBJECT });
 			const cta = getCta(dialog);
 			expect(cta).toHaveTextContent(/^Modifier$/);
-			expect(cta).toHaveAttribute("href", REPRESENTATION_FUNNEL_ROOT);
+			expect(cta).toHaveAttribute("href", DECLARATION_REPRESENTATION);
 		});
 
 		it("keeps the subjection check as the only step, done, with no deadline", () => {

@@ -10,6 +10,7 @@ import {
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { DECLARATION_REPRESENTATION_CONFIRMATION } from "~/modules/routes";
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
@@ -25,7 +26,7 @@ import {
 import { Step5NextSteps } from "./Step5NextSteps";
 import styles from "./Step5Review.module.scss";
 
-const CONFIRMATION_HREF = "/declaration-representation/confirmation";
+const CONFIRMATION_HREF = DECLARATION_REPRESENTATION_CONFIRMATION;
 
 function PublicationUrl({ url }: { url: string | undefined }) {
 	if (url === undefined || url.trim() === "") return "—";

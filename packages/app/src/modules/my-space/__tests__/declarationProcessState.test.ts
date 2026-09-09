@@ -1,16 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import {
-	REPRESENTATION_FUNNEL_ROOT,
-	stepHref,
-	TOTAL_REPRESENTATION_STEPS,
-} from "~/modules/declaration-representation";
-import {
-	REPRESENTATION_FUNNEL_ROOT as FUNNEL_ROOT_FROM_SUBMODULE,
-	stepHref as stepHrefFromSubmodule,
-} from "~/modules/declaration-representation/steps";
-import { TOTAL_REPRESENTATION_STEPS as TOTAL_STEPS_FROM_SUBMODULE } from "~/modules/declaration-representation/types";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	DECLARATION_REMUNERATION,
+	DECLARATION_REPRESENTATION,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import {
 	computeCtaHref,
 	computePanelVariant,
@@ -20,7 +16,7 @@ import {
 import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
-const RECAP_HREF = stepHref(TOTAL_REPRESENTATION_STEPS);
+const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
 const CAMPAIGN_OPEN = true;
 const CAMPAIGN_CLOSED = false;
 
@@ -65,25 +61,22 @@ describe("computePanelVariant", () => {
 
 describe("computeCtaHref", () => {
 	it("returns declaration URL when no declaration", () => {
-		expect(computeCtaHref(undefined, SIREN)).toBe(
-			`/declaration-remuneration?siren=${SIREN}`,
-		);
+		expect(computeCtaHref(undefined)).toBe(DECLARATION_REMUNERATION);
 	});
 
 	it("returns declaration URL when fsmStatus is null", () => {
-		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }), SIREN)).toBe(
-			`/declaration-remuneration?siren=${SIREN}`,
+		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }))).toBe(
+			DECLARATION_REMUNERATION,
 		);
 	});
 
-	// Per-status destinations live in fsmMirrors.conformance.test.ts (#3975), which
-	// strips the query — the company-scoping contract is pinned here, across every
-	// branch since the implementation repeats the siren template per status.
-	it("keeps every destination scoped to the company via the siren query parameter", () => {
+	// Per-status destinations live in fsmMirrors.conformance.test.ts. What
+	// is pinned here is an absence: the mirror used to append `?siren=` on every
+	// branch and no page ever read it, so the query must not creep back in
+	// one status at a time.
+	it("emits a bare path for every status — the pages read the SIREN from the session", () => {
 		for (const fsmStatus of DECLARATION_FSM_STATUSES) {
-			expect(computeCtaHref(makeDeclaration({ fsmStatus }), SIREN)).toContain(
-				`?siren=${SIREN}`,
-			);
+			expect(computeCtaHref(makeDeclaration({ fsmStatus }))).not.toContain("?");
 		}
 	});
 });
@@ -174,14 +167,14 @@ describe("computeRepresentationPanelVariant", () => {
 describe("computeRepresentationCtaHref", () => {
 	it("sends a company with no démarche to the funnel entry point", () => {
 		expect(computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN)).toBe(
-			REPRESENTATION_FUNNEL_ROOT,
+			DECLARATION_REPRESENTATION,
 		);
 	});
 
 	it("sends a listed-but-unopened démarche to the funnel entry point", () => {
 		expect(
 			computeRepresentationCtaHref(makeRepresentation(), CAMPAIGN_OPEN),
-		).toBe(REPRESENTATION_FUNNEL_ROOT);
+		).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("resumes a draft on the step it stopped at", () => {
@@ -190,7 +183,7 @@ describe("computeRepresentationCtaHref", () => {
 				makeRepresentation({ status: "in_progress", currentStep: 3 }),
 				CAMPAIGN_OPEN,
 			),
-		).toBe(stepHref(3));
+		).toBe(representationStepHref(3));
 	});
 
 	it("resumes on the first step when an in-progress draft has no step yet", () => {
@@ -199,7 +192,7 @@ describe("computeRepresentationCtaHref", () => {
 				makeRepresentation({ status: "in_progress", currentStep: 0 }),
 				CAMPAIGN_OPEN,
 			),
-		).toBe(stepHref(1));
+		).toBe(representationStepHref(1));
 	});
 
 	it("sends a transmitted démarche to its recap", () => {
@@ -217,7 +210,7 @@ describe("computeRepresentationCtaHref", () => {
 				makeRepresentation(NOT_SUBJECT),
 				CAMPAIGN_OPEN,
 			),
-		).toBe(REPRESENTATION_FUNNEL_ROOT);
+		).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("sends a non-subject démarche to the recap once the campaign is closed", () => {
@@ -241,14 +234,5 @@ describe("computeRepresentationCtaHref", () => {
 				RECAP_HREF,
 			);
 		}
-	});
-
-	// The source imports the steps/types submodules, not the barrel, to keep the
-	// declaration-remuneration tree out of this client bundle; the hrefs asserted
-	// above come from the barrel, so both must stay the same values.
-	it("reads the same funnel constants through the barrel and the submodules", () => {
-		expect(REPRESENTATION_FUNNEL_ROOT).toBe(FUNNEL_ROOT_FROM_SUBMODULE);
-		expect(TOTAL_REPRESENTATION_STEPS).toBe(TOTAL_STEPS_FROM_SUBMODULE);
-		expect(stepHref).toBe(stepHrefFromSubmodule);
 	});
 });
