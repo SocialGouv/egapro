@@ -84,8 +84,11 @@ function renderPanel({
 	return { panel: within(dialog), dialog };
 }
 
+// Scoped to the footer: the transmitted-declaration row also renders an
+// `a.fr-btn` (its view button), so an unqualified selector would pick
+// whichever one comes first in the DOM instead of the panel's actual CTA.
 function getCta(dialog: HTMLElement) {
-	return dialog.querySelector("a.fr-btn");
+	return dialog.querySelector(".footer a.fr-btn");
 }
 
 describe("RepresentationProcessPanel", () => {
@@ -174,6 +177,17 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
 		});
 
+		// No démarche started yet: the deadline stays, no bullets, no
+		// transmission line.
+		it("renders the deadline without bullets or a transmission line", () => {
+			const { panel } = renderPanel();
+			expect(panel.getByText(/^Échéance :/)).toBeInTheDocument();
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Votre déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
+
 		it("does not render a last action date when the démarche was never touched", () => {
 			const { panel } = renderPanel({ declaration: makeDeclaration() });
 			expect(panel.queryByText(/Dernière action/)).not.toBeInTheDocument();
@@ -221,6 +235,14 @@ describe("RepresentationProcessPanel", () => {
 			const { panel } = renderPanel({ declaration: DRAFT });
 			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
 		});
+
+		// A draft never shows the transmission line.
+		it('does not render "Votre déclaration a été transmise"', () => {
+			const { panel } = renderPanel({ declaration: DRAFT });
+			expect(
+				panel.queryByText("Votre déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
 	});
 
 	describe("variant: submitted", () => {
@@ -240,6 +262,33 @@ describe("RepresentationProcessPanel", () => {
 		it("does not announce the démarche as closed while the campaign is open", () => {
 			const { panel } = renderPanel({ declaration: SUBMITTED });
 			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+		});
+
+		// The transmission line replaces the three bullets and the deadline.
+		it('replaces the three bullets and the deadline with "Votre déclaration a été transmise"', () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Instances dirigeantes"),
+			).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Informations de publication"),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		// A view button to the recap, no modify affordance of any kind.
+		it("renders a view button to the recap, without a Modifier button or a modifiable-until mention", () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			const viewButton = panel.getByTitle(
+				"Voir le récapitulatif de la déclaration",
+			);
+			expect(viewButton).toHaveAttribute("href", RECAP_HREF);
+			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
 		});
 	});
 
@@ -303,6 +352,44 @@ describe("RepresentationProcessPanel", () => {
 				const cta = getCta(dialog);
 				expect(cta).toHaveTextContent(/^Voir la déclaration$/);
 				expect(cta).toHaveAttribute("href", RECAP_HREF);
+			});
+		}
+	});
+
+	describe("campaign closed — transmission line", () => {
+		// A transmitted declaration stays transmitted after the campaign
+		// closes: both "Démarche close" and the transmission line show.
+		it('shows "Votre déclaration a été transmise" alongside "Démarche close" for a transmitted démarche', () => {
+			const { panel } = renderPanel({
+				campaign: CLOSED_CAMPAIGN,
+				declaration: SUBMITTED,
+			});
+			expect(panel.getByText("Démarche close")).toBeInTheDocument();
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+		});
+
+		// Closed campaign, nothing ever transmitted: no transmission line, even
+		// though the step is rendered "complete" for a closed campaign. Same for
+		// a non-subject company despite status "done" — the notSubject flag
+		// settles it.
+		const noTransmission: Array<[string, DeclarationItem | undefined]> = [
+			["no démarche", undefined],
+			["an untouched démarche", makeDeclaration()],
+			["a draft", DRAFT],
+			['a not-subject démarche despite status "done"', NOT_SUBJECT],
+		];
+
+		for (const [label, declaration] of noTransmission) {
+			it(`does not render the transmission line with ${label}`, () => {
+				const { panel } = renderPanel({
+					campaign: CLOSED_CAMPAIGN,
+					declaration,
+				});
+				expect(
+					panel.queryByText("Votre déclaration a été transmise"),
+				).not.toBeInTheDocument();
 			});
 		}
 	});
