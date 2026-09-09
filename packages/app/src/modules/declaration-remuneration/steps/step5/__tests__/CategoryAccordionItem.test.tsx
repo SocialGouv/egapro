@@ -62,6 +62,7 @@ function TestItem({
 			onAccordionToggle={vi.fn()}
 			onAskRemove={vi.fn()}
 			onDecimalBlur={() => vi.fn()}
+			onHeadcountBlur={() => vi.fn()}
 			onPositiveNumberChange={() => vi.fn()}
 			payApplicable
 			readOnly={false}

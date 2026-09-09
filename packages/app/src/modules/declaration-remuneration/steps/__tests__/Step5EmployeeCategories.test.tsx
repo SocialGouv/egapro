@@ -1,4 +1,10 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -1134,7 +1140,7 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		expect(mockMutate).toHaveBeenCalledTimes(1);
 	});
 
-	it("disables both pay tables and clears pay errors when one sex reaches 0 on both rows", async () => {
+	it("releases one row's pay errors when its headcount goes back to 0 (#4254)", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step5EmployeeCategories
@@ -1145,31 +1151,34 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		);
 
 		await fillNameAndSource(user);
-		const annualWomen = screen.getByLabelText(countLabel("annuelle", "femmes"));
 		const hourlyWomen = screen.getByLabelText(countLabel("horaire", "femmes"));
-		await user.type(annualWomen, "2");
+		await user.type(
+			screen.getByLabelText(countLabel("annuelle", "femmes")),
+			"2",
+		);
 		await user.type(hourlyWomen, "2");
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			/salaire de base horaire des femmes/i,
 		);
 
-		await user.clear(annualWomen);
-		await user.type(annualWomen, "0");
-		expect(
-			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
-		).not.toBeDisabled();
 		await user.clear(hourlyWomen);
 		await user.type(hourlyWomen, "0");
 
+		const hourlyBaseWomen = screen.getByLabelText(
+			"Salaire de base horaire femmes, catégorie 1",
+		);
+		expect(hourlyBaseWomen).not.toBeDisabled();
+		expect(hourlyBaseWomen).not.toHaveAttribute("aria-invalid");
 		expect(
-			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
-		).toBeDisabled();
-		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
-		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-
-		await user.click(screen.getByRole("button", { name: /suivant/i }));
-		expect(mockMutate).toHaveBeenCalledTimes(1);
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/salaire de base annuel des femmes/i,
+		);
+		expect(screen.getByRole("alert")).not.toHaveTextContent(
+			/salaire de base horaire des femmes/i,
+		);
 	});
 
 	it("renders one list item per inconsistency when both bases and both sexes mismatch (#4390)", async () => {
@@ -1448,6 +1457,7 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		for (const cell of payCells()) expect(cell).not.toHaveValue("");
 
 		await setCount(user, "horaire", "femmes", "0");
+		await user.tab();
 
 		expectPayTablesDisabledAndEmpty();
 		for (const cell of countCells()) expect(cell).not.toBeDisabled();
@@ -1460,6 +1470,7 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		await fillApplicableCategory(user);
 		await setCount(user, "annuelle", "femmes", "0");
 		await setCount(user, "horaire", "femmes", "0");
+		await user.tab();
 		expectPayTablesDisabledAndEmpty();
 
 		await setCount(user, "horaire", "femmes", "1");
@@ -1472,6 +1483,22 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 			/renseignez le salaire/i,
 		);
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("preserves pay when a transient 0 is corrected before the headcount loses focus", async () => {
+		const user = userEvent.setup();
+		renderStep();
+
+		await fillApplicableCategory(user);
+		await setCount(user, "horaire", "femmes", "0");
+		const annualWomen = screen.getByLabelText(countLabel("annuelle", "femmes"));
+
+		fireEvent.change(annualWomen, { target: { value: "0" } });
+		expectPayTablesDisabledAndEmpty();
+
+		fireEvent.change(annualWomen, { target: { value: "20" } });
+		expectPayTablesEnabled();
+		for (const cell of payCells()) expect(cell).toHaveValue("100,00");
 	});
 
 	it("submits same-column 0s without requiring or persisting pay", async () => {

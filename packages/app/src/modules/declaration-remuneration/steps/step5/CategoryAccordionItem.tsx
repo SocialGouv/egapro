@@ -35,6 +35,7 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onHeadcountBlur: (index: number) => () => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	onAskRemove: (index: number) => void;
 };
@@ -68,6 +69,7 @@ export function CategoryAccordionItem({
 	headerRef,
 	collapseRef,
 	onPositiveNumberChange,
+	onHeadcountBlur,
 	onDecimalBlur,
 	onAskRemove,
 }: Props) {
@@ -148,6 +150,7 @@ export function CategoryAccordionItem({
 						errorAlertId={errorAlertId}
 						errors={errors}
 						onDecimalBlur={onDecimalBlur}
+						onHeadcountBlur={onHeadcountBlur}
 						onPositiveNumberChange={onPositiveNumberChange}
 						payApplicable={payApplicable}
 						readOnly={readOnly}

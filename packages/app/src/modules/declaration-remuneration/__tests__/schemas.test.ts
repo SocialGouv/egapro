@@ -310,10 +310,12 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		}
 	});
 
-	it("requires only the annual pay fields when the hourly headcounts are absent (#4254)", () => {
+	it("requires only the annual pay fields when the hourly headcounts are 0 (#4254)", () => {
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 2,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 0,
 			annualBaseWomen: "30000",
 			annualVariableWomen: "5000",
 			annualBaseMen: "32000",
@@ -322,8 +324,10 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("requires only the hourly pay fields when the annual headcounts are absent (#4254)", () => {
+	it("requires only the hourly pay fields when the annual headcounts are 0 (#4254)", () => {
 		const result = parseCategory({
+			womenCount: 0,
+			menCount: 0,
 			hourlyWomenCount: 2,
 			hourlyMenCount: 2,
 			hourlyBaseWomen: "18.5",

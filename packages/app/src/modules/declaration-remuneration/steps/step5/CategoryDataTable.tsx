@@ -29,6 +29,7 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onHeadcountBlur: (index: number) => () => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
 	/** Whether this category can declare remuneration (#3678). */
@@ -187,6 +188,7 @@ type RemunerationTableProps = {
 	catIndex: number;
 	disabled: boolean;
 	readOnly: boolean;
+	emptyValues: boolean;
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
@@ -202,6 +204,7 @@ function RemunerationTable({
 	catIndex,
 	disabled,
 	readOnly,
+	emptyValues,
 	pos,
 	blur,
 	idPrefix,
@@ -212,11 +215,15 @@ function RemunerationTable({
 		onBlur: blur(catIndex, field),
 		onChange: pos(catIndex, field, false),
 	});
+	const valueFor = (field: StringField) => (emptyValues ? "" : cat[field]);
 	const totalWomen = computeTotal(
-		cat[fields.baseWomen],
-		cat[fields.variableWomen],
+		valueFor(fields.baseWomen),
+		valueFor(fields.variableWomen),
 	);
-	const totalMen = computeTotal(cat[fields.baseMen], cat[fields.variableMen]);
+	const totalMen = computeTotal(
+		valueFor(fields.baseMen),
+		valueFor(fields.variableMen),
+	);
 
 	const scopeId = scope === "annuel" ? "annual" : "hourly";
 	const variableScope = scope === "annuel" ? "annuelles" : "horaires";
@@ -246,7 +253,7 @@ function RemunerationTable({
 							id={idFor("base-women")}
 							{...cellHandlers(fields.baseWomen)}
 							readOnly={readOnly}
-							value={cat[fields.baseWomen]}
+							value={valueFor(fields.baseWomen)}
 						/>
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
@@ -256,11 +263,14 @@ function RemunerationTable({
 							id={idFor("base-men")}
 							{...cellHandlers(fields.baseMen)}
 							readOnly={readOnly}
-							value={cat[fields.baseMen]}
+							value={valueFor(fields.baseMen)}
 						/>
 						<td className={stepStyles.gapCell}>
 							<GapBadge
-								gap={computeGap(cat[fields.baseWomen], cat[fields.baseMen])}
+								gap={computeGap(
+									valueFor(fields.baseWomen),
+									valueFor(fields.baseMen),
+								)}
 								layout="cell"
 							/>
 						</td>
@@ -279,7 +289,7 @@ function RemunerationTable({
 							id={idFor("variable-women")}
 							{...cellHandlers(fields.variableWomen)}
 							readOnly={readOnly}
-							value={cat[fields.variableWomen]}
+							value={valueFor(fields.variableWomen)}
 						/>
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
@@ -289,13 +299,13 @@ function RemunerationTable({
 							id={idFor("variable-men")}
 							{...cellHandlers(fields.variableMen)}
 							readOnly={readOnly}
-							value={cat[fields.variableMen]}
+							value={valueFor(fields.variableMen)}
 						/>
 						<td className={stepStyles.gapCell}>
 							<GapBadge
 								gap={computeGap(
-									cat[fields.variableWomen],
-									cat[fields.variableMen],
+									valueFor(fields.variableWomen),
+									valueFor(fields.variableMen),
 								)}
 								layout="cell"
 							/>
@@ -326,6 +336,7 @@ type WorkforceRowProps = {
 	disabled: boolean;
 	readOnly: boolean;
 	pos: Props["onPositiveNumberChange"];
+	blur: Props["onHeadcountBlur"];
 };
 
 function CategoryWorkforceRow({
@@ -335,6 +346,7 @@ function CategoryWorkforceRow({
 	disabled,
 	readOnly,
 	pos,
+	blur,
 }: WorkforceRowProps) {
 	const women = Number.parseInt(cat[row.womenField], 10);
 	const men = Number.parseInt(cat[row.menField], 10);
@@ -351,6 +363,7 @@ function CategoryWorkforceRow({
 				disabled={disabled}
 				id={categoryDataFieldId(catIndex, field)}
 				inputMode="numeric"
+				onBlur={blur(catIndex)}
 				onChange={pos(catIndex, field, true)}
 				pattern="[0-9]*"
 				readOnly={readOnly}
@@ -376,6 +389,7 @@ export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
 	onPositiveNumberChange: pos,
+	onHeadcountBlur: headcountBlur,
 	onDecimalBlur: blur,
 	disabled = false,
 	payApplicable = true,
@@ -411,6 +425,7 @@ export function CategoryDataTable({
 					<tbody>
 						{CATEGORY_WORKFORCE_ROWS.map((row) => (
 							<CategoryWorkforceRow
+								blur={headcountBlur}
 								cat={cat}
 								catIndex={catIndex}
 								disabled={disabled}
@@ -433,6 +448,7 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled || !payApplicable}
+				emptyValues={!payApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -448,6 +464,7 @@ export function CategoryDataTable({
 				cat={cat}
 				catIndex={catIndex}
 				disabled={disabled || !payApplicable}
+				emptyValues={!payApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}

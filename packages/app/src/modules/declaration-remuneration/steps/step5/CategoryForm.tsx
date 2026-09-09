@@ -247,6 +247,13 @@ export function CategoryForm({
 						)
 					: [],
 			);
+			const releasedPayFieldIds = new Set(
+				isCountField && (raw === "" || Number.parseInt(raw, 10) === 0)
+					? payFieldsForCountField(field).map((payField) =>
+							categoryDataFieldId(index, payField),
+						)
+					: [],
+			);
 			if (raw !== "") {
 				if (isInteger && /\D/.test(raw)) return;
 				const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
@@ -256,24 +263,33 @@ export function CategoryForm({
 			const categoryPayApplicable = isCategoryPayApplicable(
 				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
 			);
-			if (isCountField && !categoryPayApplicable) {
-				for (const payField of CATEGORY_PAY_FIELDS) {
-					const path = `categories.${index}.${payField}` as const;
-					if (form.getValues(path) !== "") form.setValue(path, "");
-				}
-			}
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
 					if (error.fieldId === changedFieldId) return false;
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
-					// A category without one sex has no pay fields to correct.
-					// When it becomes applicable again, keep any completeness errors.
-					return categoryPayApplicable;
+					// A category without one sex has no pay fields to correct. A 0
+					// on just one row still releases that row's own fields (#4254).
+					return (
+						categoryPayApplicable && !releasedPayFieldIds.has(error.fieldId)
+					);
 				}),
 			);
 			setHasData(false);
+		};
+	}
+
+	function handleHeadcountBlur(index: number) {
+		return () => {
+			const category = form.getValues(`categories.${index}`);
+			if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return;
+			// Wait until the edit is committed so a transient 0 while replacing a
+			// multi-digit count cannot irreversibly erase the remuneration values.
+			for (const payField of CATEGORY_PAY_FIELDS) {
+				const path = `categories.${index}.${payField}` as const;
+				if (form.getValues(path) !== "") form.setValue(path, "");
+			}
 		};
 	}
 
@@ -656,6 +672,7 @@ export function CategoryForm({
 								onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
 								onAskRemove={askRemoveCategory}
 								onDecimalBlur={handleDecimalBlur}
+								onHeadcountBlur={handleHeadcountBlur}
 								onPositiveNumberChange={handlePositiveNumberChange}
 								payApplicable={payApplicable}
 								readOnly={readOnly}
