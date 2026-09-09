@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	getCurrentDate,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDeclarationReferencePeriod,
@@ -155,6 +156,52 @@ describe("getCurrentYear", () => {
 		delete (globalThis as { __egaproCampaignYear?: number })
 			.__egaproCampaignYear;
 		expect(getCurrentYear()).toBe(2025);
+	});
+});
+
+describe("getCurrentDate", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		// Never leak the override: every other domain test calls getCurrentYear().
+		delete (globalThis as { __egaproCampaignYear?: number })
+			.__egaproCampaignYear;
+	});
+
+	it("returns the system date when no override is pinned", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30, 45, 123));
+		expect(getCurrentDate()).toEqual(new Date(2025, 5, 15, 10, 30, 45, 123));
+	});
+
+	it("carries the calendar date over to the pinned campaign year", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate()).toEqual(new Date(2029, 5, 15, 10, 30));
+	});
+
+	it("agrees with getCurrentYear under a pinned year", () => {
+		vi.setSystemTime(new Date(2025, 5, 15));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate().getFullYear()).toBe(getCurrentYear());
+	});
+
+	it("clamps 29 February to 28 February in a non-leap pinned year", () => {
+		vi.setSystemTime(new Date(2024, 1, 29, 8, 0));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate()).toEqual(new Date(2029, 1, 28, 8, 0));
+	});
+
+	it("ignores a non-numeric override and falls back to the system date", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30));
+		(globalThis as { __egaproCampaignYear?: unknown }).__egaproCampaignYear =
+			"2029";
+		expect(getCurrentDate()).toEqual(new Date(2025, 5, 15, 10, 30));
 	});
 });
 

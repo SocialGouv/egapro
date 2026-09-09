@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-	auth: vi.fn(),
-	runUploadPipeline: vi.fn(),
-	logAction: vi.fn().mockResolvedValue(undefined),
-	getActiveLock: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+	class DeclarationLockedByOtherUserError extends Error {}
+	return {
+		auth: vi.fn(),
+		runUploadPipeline: vi.fn(),
+		logAction: vi.fn().mockResolvedValue(undefined),
+		assertDeclarationUnlockedForWrite: vi.fn(),
+		DeclarationLockedByOtherUserError,
+	};
+});
 
 vi.mock("~/server/auth", () => ({
 	auth: mocks.auth,
@@ -19,28 +23,13 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,
 }));
 
-// The route resolves the current-year declaration before streaming the body so
-// it can refuse a target locked by another co-declarant (epic #3556). Mock the
-// db lookup to return one declaration and the lock service to a configurable
-// holder.
-vi.mock("~/server/db", () => ({
-	db: {
-		select: () => ({
-			from: () => ({
-				where: () => ({
-					limit: async () => [{ id: "decl-1" }],
-				}),
-			}),
-		}),
-	},
-}));
-
-vi.mock("~/server/db/schema", () => ({
-	declarations: { id: "id", siren: "siren", year: "year" },
-}));
+// Only the guard verdict is mocked here: its three semantics live in
+// `declarationLockService.test.ts`, which owns the declaration lookup.
+vi.mock("~/server/db", () => ({ db: {} }));
 
 vi.mock("~/server/services/declarationLockService", () => ({
-	getActiveLock: mocks.getActiveLock,
+	assertDeclarationUnlockedForWrite: mocks.assertDeclarationUnlockedForWrite,
+	DeclarationLockedByOtherUserError: mocks.DeclarationLockedByOtherUserError,
 }));
 
 function validSession() {
@@ -99,7 +88,7 @@ describe("POST /api/upload", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		// Default: declaration free of any active lock, so the upload proceeds.
-		mocks.getActiveLock.mockResolvedValue(null);
+		mocks.assertDeclarationUnlockedForWrite.mockResolvedValue(undefined);
 	});
 
 	it("returns 400 when X-Flow-Type is missing", async () => {
@@ -624,13 +613,9 @@ describe("POST /api/upload", () => {
 
 	it("returns 409 and audits a failure row when another co-declarant holds the lock", async () => {
 		validSession();
-		mocks.getActiveLock.mockResolvedValue({
-			userId: "user-2",
-			email: "other@example.com",
-			firstName: "Bob",
-			lastName: "Durand",
-			expiresAt: new Date(Date.now() + 30 * 60_000),
-		});
+		mocks.assertDeclarationUnlockedForWrite.mockRejectedValue(
+			new mocks.DeclarationLockedByOtherUserError(),
+		);
 
 		const { POST } = await import("../route");
 		const response = await POST(
@@ -654,15 +639,28 @@ describe("POST /api/upload", () => {
 		);
 	});
 
-	it("proceeds when the session user holds the lock", async () => {
+	it("propagates an unexpected guard failure instead of reporting a conflict", async () => {
 		validSession();
-		mocks.getActiveLock.mockResolvedValue({
-			userId: "user-1",
-			email: "user@example.com",
-			firstName: "Alice",
-			lastName: "Martin",
-			expiresAt: new Date(Date.now() + 30 * 60_000),
-		});
+		mocks.assertDeclarationUnlockedForWrite.mockRejectedValue(
+			new Error("database unreachable"),
+		);
+
+		const { POST } = await import("../route");
+
+		await expect(
+			POST(
+				buildRequest({
+					"Content-Type": "application/pdf",
+					"X-Filename": "avis-cse.pdf",
+					"X-Flow-Type": "cse_opinion",
+				}),
+			),
+		).rejects.toThrow("database unreachable");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+	});
+
+	it("proceeds when the guard raises no conflict", async () => {
+		validSession();
 		mocks.runUploadPipeline.mockResolvedValue({
 			ok: true,
 			fileId: "file-uuid",
@@ -681,5 +679,13 @@ describe("POST /api/upload", () => {
 
 		expect(response.status).toBe(200);
 		expect(mocks.runUploadPipeline).toHaveBeenCalled();
+		// The guard must vet the very (siren, year) the pipeline then writes to.
+		const [, guardSiren, guardYear, guardUserId] =
+			mocks.assertDeclarationUnlockedForWrite.mock.calls[0] ?? [];
+		expect(guardSiren).toBe("123456789");
+		expect(guardUserId).toBe("user-1");
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ siren: guardSiren, year: guardYear }),
+		);
 	});
 });

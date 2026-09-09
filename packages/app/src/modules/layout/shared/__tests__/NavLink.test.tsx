@@ -36,7 +36,7 @@ describe("NavLink", () => {
 
 	describe("aria-current absent when no match", () => {
 		it("is absent when path does not match", () => {
-			vi.mocked(usePathname).mockReturnValue("/stats");
+			vi.mocked(usePathname).mockReturnValue("/faq");
 			render(<NavLink href="/index-egapro">Index</NavLink>);
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-current");
 		});
