@@ -18,7 +18,7 @@ import {
 	hasHighGap,
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -89,7 +89,7 @@ export function SecondDeclarationStep3Review({
 	const nextHref = isWritable
 		? undefined
 		: getCurrentStageHref(status, cseOpinionRequired);
-	const nextLabel = isWritable ? "Transmettre" : "Suivant";
+	const nextLabel = isWritable ? SUBMIT_LABEL : "Suivant";
 
 	return (
 		<form

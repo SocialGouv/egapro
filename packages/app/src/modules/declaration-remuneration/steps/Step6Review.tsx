@@ -12,7 +12,7 @@ import {
 	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
@@ -185,7 +185,7 @@ export function Step6Review({
 							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
-					nextLabel={isSubmitted ? "Suivant" : "Transmettre"}
+					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 

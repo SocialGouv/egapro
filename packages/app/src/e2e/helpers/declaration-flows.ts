@@ -1,5 +1,7 @@
 import { type Page, test } from "@playwright/test";
 
+import { SUBMIT_LABEL } from "~/modules/shared";
+
 /**
  * Fill all pay gap textboxes on steps 2 and 3. Every row is equal (no gap) by
  * default; passing annualMeanMen introduces a gap on the mean annual row, which
@@ -366,9 +368,7 @@ export async function reachStep6ComplianceRecap(page: Page) {
  */
 export async function submitFromStep6Recap(page: Page) {
 	await test.step("étape 6 — récapitulatif et transmission", async () => {
-		await page
-			.getByRole("button", { exact: true, name: "Transmettre" })
-			.click();
+		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		// Click the label, as the DSFR checkbox label intercepts pointer events.
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 
+import { SUBMIT_LABEL } from "~/modules/shared";
 import {
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,
@@ -179,7 +180,7 @@ export async function submitCseStep2(
 		// Phase C — submit, certify, validate, then wait for the confirmation page.
 		const submit = page.getByRole("button", {
 			exact: true,
-			name: "Transmettre",
+			name: SUBMIT_LABEL,
 		});
 		await expect(submit).toBeEnabled();
 		await submit.click();
@@ -250,7 +251,7 @@ export async function associateCseContentTypes(
 
 /** Submit CSE step 2: certify, validate, then land on the confirmation page. */
 export async function submitCseOpinion(page: Page) {
-	const submit = page.getByRole("button", { exact: true, name: "Transmettre" });
+	const submit = page.getByRole("button", { exact: true, name: SUBMIT_LABEL });
 	await expect(submit).toBeEnabled();
 	await submit.click();
 	await page
@@ -266,9 +267,7 @@ export async function uploadJointEvalPdf(page: Page) {
 		await page
 			.locator("#joint-evaluation-file-upload")
 			.setInputFiles(DUMMY_PDF);
-		await page
-			.getByRole("button", { exact: true, name: "Transmettre" })
-			.click();
+		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		await page
 			.getByText(/Je certifie que le rapport transmis est conforme/)
 			.click();
@@ -353,9 +352,7 @@ export async function completeSecondDeclaration(
 		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
 
 		// Step 3: Review and submit (opens confirmation modal)
-		await page
-			.getByRole("button", { exact: true, name: "Transmettre" })
-			.click();
+		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		await page
 			.getByText(/Je certifie que les données saisies sont exactes/)
 			.click();

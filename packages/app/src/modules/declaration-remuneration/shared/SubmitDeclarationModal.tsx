@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { SUBMIT_LABEL } from "~/modules/shared";
+
 const MODAL_ID = "submit-declaration-modal";
 
 type Props = {
@@ -55,7 +57,7 @@ export function SubmitDeclarationModal({
 									className="fr-modal__title"
 									id="submit-declaration-modal-title"
 								>
-									Transmettre
+									{SUBMIT_LABEL}
 								</h2>
 								<p>{description}</p>
 								<div className="fr-checkbox-group fr-mt-2w">

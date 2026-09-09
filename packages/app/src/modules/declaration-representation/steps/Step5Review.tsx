@@ -10,7 +10,7 @@ import {
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { useDsfrModal } from "~/modules/shared";
+import { SUBMIT_LABEL, useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
 import { toAbsoluteHttpUrl } from "../schemas";
@@ -193,7 +193,7 @@ export function Step5Review() {
 						onClick={open}
 						type="button"
 					>
-						Transmettre
+						{SUBMIT_LABEL}
 					</button>
 				)}
 			</div>

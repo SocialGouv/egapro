@@ -20,6 +20,7 @@ export type { KpiBadgeDelta } from "./KpiBadge";
 export { getKpiBadgeRendering, KpiBadge } from "./KpiBadge";
 export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
+export { SUBMIT_LABEL } from "./submitLabels";
 export {
 	FILE_TOO_LARGE_ERROR,
 	formatFileSize,

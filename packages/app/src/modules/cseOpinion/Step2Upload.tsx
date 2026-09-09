@@ -7,7 +7,12 @@ import { useCallback, useMemo, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
+import {
+	FileUpload,
+	getDsfrModal,
+	SUBMIT_LABEL,
+	useFileUploadForm,
+} from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -301,7 +306,7 @@ export function Step2Upload({
 							disabled={isReadOnly}
 							type="submit"
 						>
-							Transmettre
+							{SUBMIT_LABEL}
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>

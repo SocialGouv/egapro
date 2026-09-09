@@ -5,6 +5,7 @@ import {
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
+import { SUBMIT_LABEL } from "~/modules/shared";
 
 import { TEST_SIREN } from "./constants";
 import {
@@ -303,7 +304,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await waitForDsfrModal(page, SUBMIT_MODAL_ID);
 			await clickAndExpectDialogOpen(
 				page,
-				page.getByRole("button", { exact: true, name: "Transmettre" }),
+				page.getByRole("button", { exact: true, name: SUBMIT_LABEL }),
 				SUBMIT_MODAL_ID,
 			);
 
