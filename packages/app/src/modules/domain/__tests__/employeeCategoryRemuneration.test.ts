@@ -3,6 +3,7 @@ import {
 	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+	shouldRetainCategoryPayValues,
 } from "../shared/employeeCategoryRemuneration";
 
 describe("MIN_HEADCOUNT_REQUIRING_PAY_DATA", () => {
@@ -106,5 +107,48 @@ describe("isCategoryPayApplicable (#3678)", () => {
 
 	it("applies when a headcount cell is NaN — unparsable is not zero", () => {
 		expect(isCategoryPayApplicable({ womenCount: Number.NaN })).toBe(true);
+	});
+});
+
+describe("shouldRetainCategoryPayValues (#3678)", () => {
+	const nonApplicable = {
+		womenCount: 0,
+		hourlyWomenCount: 0,
+		menCount: 2,
+		hourlyMenCount: 2,
+	};
+
+	it("retains values for an applicable category", () => {
+		expect(shouldRetainCategoryPayValues({}, {}, false)).toBe(true);
+	});
+
+	it("drops legacy values on an editable surface", () => {
+		expect(
+			shouldRetainCategoryPayValues(
+				nonApplicable,
+				{ annualBaseWomen: "40000" },
+				false,
+			),
+		).toBe(false);
+	});
+
+	it("retains legacy values on a historical surface", () => {
+		expect(
+			shouldRetainCategoryPayValues(
+				nonApplicable,
+				{ annualBaseWomen: "40000" },
+				true,
+			),
+		).toBe(true);
+	});
+
+	it("does not treat whitespace-only values as historical pay", () => {
+		expect(
+			shouldRetainCategoryPayValues(
+				nonApplicable,
+				{ annualBaseWomen: "   " },
+				true,
+			),
+		).toBe(false);
 	});
 });

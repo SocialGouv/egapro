@@ -4,9 +4,8 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
-import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
-	CATEGORY_PAY_FIELDS,
+	type CategoryFormValues,
 	categoryFormSchema,
 } from "~/modules/declaration-remuneration/schemas";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
@@ -33,9 +32,11 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	CATEGORY_PAY_FIELDS,
 	isCategoryPayApplicable,
 	padDecimalOnBlur,
 	padDecimalToTwo,
+	shouldRetainCategoryPayValues,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
 import { getDsfrCollapse } from "~/modules/shared";
@@ -67,15 +68,15 @@ function createIdGenerator() {
 
 type FormCategory = CategoryFormValues["categories"][number];
 
-function categoryHasPayValues(category: FormCategory): boolean {
-	return CATEGORY_PAY_FIELDS.some((field) => category[field].trim() !== "");
-}
-
 function normalizeCategoryForForm(
 	category: FormCategory,
 	preserveLegacyPay: boolean,
 ): FormCategory {
-	return preserveLegacyPay && categoryHasPayValues(category)
+	return shouldRetainCategoryPayValues(
+		toCategoryHeadcounts(category),
+		category,
+		preserveLegacyPay,
+	)
 		? category
 		: withoutPayValuesWhenNotApplicable(category);
 }
@@ -694,13 +695,13 @@ export function CategoryForm({
 						const cat = categories[index];
 						// Preserve the official values of legacy locked declarations that
 						// predate #3678; editable and newly saved categories are normalized.
-						const payApplicableByHeadcount = cat
-							? isCategoryPayApplicable(toCategoryHeadcounts(cat))
+						const payApplicable = cat
+							? shouldRetainCategoryPayValues(
+									toCategoryHeadcounts(cat),
+									cat,
+									readOnly,
+								)
 							: true;
-						const showLegacyPay = Boolean(
-							cat && readOnly && categoryHasPayValues(cat),
-						);
-						const payApplicable = payApplicableByHeadcount || showLegacyPay;
 						return (
 							<CategoryAccordionItem
 								baseId={baseId}

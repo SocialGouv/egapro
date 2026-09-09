@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { PAY_FIELDS_MEN, PAY_FIELDS_WOMEN } from "~/modules/domain";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormSchema,
-	PAY_FIELDS_MEN,
-	PAY_FIELDS_WOMEN,
 	updateEmployeeCategoriesSchema,
 	updateStep4Schema,
 } from "../schemas";

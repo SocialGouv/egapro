@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import {
+	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
 	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 } from "~/modules/domain";
@@ -90,33 +92,6 @@ export const updateStep4Schema = z.object({
  * For an applicable category, a headcount only requires its basis' pay data;
  * the absence of one sex from both workforce rows (#3678) takes precedence.
  */
-export const CATEGORY_PAY_BASES = [
-	{
-		basis: "annual",
-		womenCountField: "womenCount",
-		menCountField: "menCount",
-		womenPayFields: ["annualBaseWomen", "annualVariableWomen"],
-		menPayFields: ["annualBaseMen", "annualVariableMen"],
-	},
-	{
-		basis: "hourly",
-		womenCountField: "hourlyWomenCount",
-		menCountField: "hourlyMenCount",
-		womenPayFields: ["hourlyBaseWomen", "hourlyVariableWomen"],
-		menPayFields: ["hourlyBaseMen", "hourlyVariableMen"],
-	},
-] as const;
-
-export const PAY_FIELDS_WOMEN = CATEGORY_PAY_BASES.flatMap(
-	(base) => base.womenPayFields,
-);
-
-export const PAY_FIELDS_MEN = CATEGORY_PAY_BASES.flatMap(
-	(base) => base.menPayFields,
-);
-
-export const CATEGORY_PAY_FIELDS = [...PAY_FIELDS_WOMEN, ...PAY_FIELDS_MEN];
-
 const employeeCategoryDataSchema = z
 	.object({
 		womenCount: z.number().int().min(0).optional(),

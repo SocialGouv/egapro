@@ -1,11 +1,11 @@
 import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
 	CATEGORY_PAY_BASES,
+	isCategoryPayApplicable,
 	type PAY_FIELDS_MEN,
 	type PAY_FIELDS_WOMEN,
-} from "~/modules/declaration-remuneration/schemas";
-import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
-import { isCategoryPayApplicable } from "~/modules/domain";
+} from "~/modules/domain";
 import { categoryDataFieldId } from "./CategoryDataTable";
 import type { EmployeeCategory } from "./categorySerializer";
 import { toCategoryHeadcounts } from "./categorySerializer";

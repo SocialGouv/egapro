@@ -1,4 +1,3 @@
-import { CATEGORY_PAY_FIELDS } from "~/modules/declaration-remuneration/schemas";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
@@ -9,7 +8,7 @@ import {
 	formatGap,
 	formatTotal,
 	gapLevel,
-	isCategoryPayApplicable,
+	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import styles from "./CategoryRecapTable.module.scss";
 import indicatorStyles from "./IndicatorTables.module.scss";
@@ -34,10 +33,6 @@ function GapCell({ gap }: { gap: number | null }) {
  *  never invent a 0 for it. */
 function formatWorkforceCount(value: number | null): string {
 	return value === null ? "—" : String(value);
-}
-
-function categoryHasPayValues(category: EmployeeCategoryRow): boolean {
-	return CATEGORY_PAY_FIELDS.some((field) => Boolean(category[field]));
 }
 
 /** Physical-headcount table, one row per pay basis (#4368) — same shape and
@@ -145,8 +140,7 @@ export function CategoryRecapTable({
 	);
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
-	const payApplicable =
-		isCategoryPayApplicable(category) || categoryHasPayValues(category);
+	const payApplicable = shouldRetainCategoryPayValues(category, category, true);
 
 	return (
 		<section className={styles.section}>

@@ -1,9 +1,9 @@
-import { CATEGORY_PAY_FIELDS } from "~/modules/declaration-remuneration/schemas";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	CATEGORY_PAY_FIELDS,
 	type CategoryHeadcounts,
 	isCategoryPayApplicable,
 } from "~/modules/domain";

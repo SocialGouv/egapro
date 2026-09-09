@@ -1,6 +1,5 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration";
-import { CATEGORY_PAY_FIELDS } from "~/modules/declaration-remuneration/schemas";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import {
 	computeGap,
@@ -8,7 +7,7 @@ import {
 	computeWorkforceTotal,
 	formatCurrency,
 	formatTotal,
-	isCategoryPayApplicable,
+	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import { styles } from "../recapPdfStyles";
 import type { DeclarationPdfData } from "../types";
@@ -21,10 +20,6 @@ import { PAY_TABLE } from "./tableWidths";
  *  never invent a 0 for it. */
 function formatWorkforceCount(value: number | null): string {
 	return value === null ? "—" : String(value);
-}
-
-function categoryHasPayValues(category: EmployeeCategoryRow): boolean {
-	return CATEGORY_PAY_FIELDS.some((field) => Boolean(category[field]));
 }
 
 function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
@@ -167,8 +162,7 @@ function CategoryBlock({
 	index: number;
 }) {
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
-	const payApplicable =
-		isCategoryPayApplicable(category) || categoryHasPayValues(category);
+	const payApplicable = shouldRetainCategoryPayValues(category, category, true);
 	return (
 		<>
 			<View wrap={false}>

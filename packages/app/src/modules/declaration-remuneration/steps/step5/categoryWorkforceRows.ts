@@ -1,4 +1,4 @@
-import { CATEGORY_PAY_BASES } from "~/modules/declaration-remuneration/schemas";
+import { CATEGORY_PAY_BASES } from "~/modules/domain";
 import type { WorkforceRowDefinition } from "../step1/workforceRows";
 import { WORKFORCE_ROWS } from "../step1/workforceRows";
 
