@@ -1,19 +1,35 @@
 import { renderToBuffer } from "@react-pdf/renderer";
 import { and, eq } from "drizzle-orm";
 
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	type PrefillPdfData,
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
 import { extractSiren, getCurrentYear } from "~/modules/domain";
+import { cachedAuth } from "~/server/audit/cachedAuth";
+import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
+import {
+	pdfHeaders,
+	renderPdfAndCacheSize,
+	resolvePdfSize,
+} from "~/server/pdf/pdfRoute";
 
-export async function GET(request: Request) {
+const ROUTE = "prefill-pdf";
+
+type ResolvedPrefillPdf =
+	| { error: Response }
+	| { data: PrefillPdfData; filename: string; error?: undefined };
+
+async function resolvePrefillPdf(
+	request: Request,
+): Promise<ResolvedPrefillPdf> {
 	const session = await auth();
 	if (!session?.user?.siret) {
-		return new Response("Non autorisé", { status: 401 });
+		return { error: new Response("Non autorisé", { status: 401 }) };
 	}
 
 	const siren = extractSiren(session.user.siret);
@@ -24,47 +40,88 @@ export async function GET(request: Request) {
 		parsedYear !== null &&
 		(Number.isNaN(parsedYear) || parsedYear < 2000 || parsedYear > 2100)
 	) {
-		return new Response("Paramètre 'year' invalide", { status: 400 });
+		return {
+			error: new Response("Paramètre 'year' invalide", { status: 400 }),
+		};
 	}
 	const year = parsedYear ?? getCurrentYear();
 
+	const [row] = await db
+		.select()
+		.from(gipMdsData)
+		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+		.limit(1);
+
+	if (!row) {
+		return { error: new Response("Aucune donnée préremplie", { status: 404 }) };
+	}
+
+	const [company] = await db
+		.select({ name: companies.name })
+		.from(companies)
+		.where(eq(companies.siren, siren))
+		.limit(1);
+
+	const data: PrefillPdfData = {
+		siren,
+		companyName: company?.name ?? `Entreprise ${siren}`,
+		year,
+		periodStart: row.periodStart,
+		periodEnd: row.periodEnd,
+		row: row as unknown as Record<string, string | number | null>,
+	};
+
+	return { data, filename: `donnees-preremplies-${siren}-${year}.pdf` };
+}
+
+export async function GET(request: Request) {
 	try {
-		const [row] = await db
-			.select()
-			.from(gipMdsData)
-			.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
-			.limit(1);
+		const resolved = await resolvePrefillPdf(request);
+		if (resolved.error) return resolved.error;
 
-		if (!row) {
-			return new Response("Aucune donnée préremplie", { status: 404 });
-		}
+		const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
+			renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
+		);
 
-		const [company] = await db
-			.select({ name: companies.name })
-			.from(companies)
-			.where(eq(companies.siren, siren))
-			.limit(1);
-
-		const data: PrefillPdfData = {
-			siren,
-			companyName: company?.name ?? `Entreprise ${siren}`,
-			year,
-			periodStart: row.periodStart,
-			periodEnd: row.periodEnd,
-			row: row as unknown as Record<string, string | number | null>,
-		};
-
-		const buffer = await renderToBuffer(PrefillPdfDocument({ data }));
-		const filename = `donnees-preremplies-${siren}-${year}.pdf`;
-
-		return new Response(new Uint8Array(buffer), {
-			headers: {
-				"Content-Type": "application/pdf",
-				"Content-Disposition": `attachment; filename="${filename}"`,
-			},
+		return new Response(body, {
+			headers: pdfHeaders(resolved.filename, body.byteLength),
 		});
 	} catch (error) {
 		console.error("[prefill-pdf]", error);
 		return new Response("Impossible de générer le PDF", { status: 500 });
 	}
 }
+
+export const HEAD = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.PDF_SIZE_PROBE,
+		resolveContext: async (request) => {
+			const session = await cachedAuth(request);
+			const url = new URL(request.url);
+			return {
+				userId: session?.user?.id ?? null,
+				userEmail: session?.user?.email ?? null,
+				siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
+				metadata: { year: url.searchParams.get("year") ?? null },
+			};
+		},
+	},
+	async (request) => {
+		try {
+			const resolved = await resolvePrefillPdf(request);
+			if (resolved.error)
+				return new Response(null, { status: resolved.error.status });
+
+			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
+				renderToBuffer(PrefillPdfDocument({ data: resolved.data })),
+			);
+
+			return new Response(null, {
+				headers: pdfHeaders(resolved.filename, size),
+			});
+		} catch (error) {
+			console.error("[prefill-pdf:head]", error);
+			return new Response(null, { status: 500 });
+		}
+	},
+);

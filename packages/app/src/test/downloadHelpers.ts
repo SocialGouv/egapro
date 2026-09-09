@@ -7,21 +7,45 @@ import { vi } from "vitest";
  * response shape have a single definition across the five files.
  */
 
-/** A PDF response, optionally carrying a `Content-Disposition` header. */
+type PdfResponseOptions = {
+	ok?: boolean;
+	contentLength?: number | null;
+};
+
+/** A PDF response, optionally carrying `Content-Disposition` and a size. */
 export function pdfResponse(
 	disposition?: string,
-	{ ok = true }: { ok?: boolean } = {},
+	{ ok = true, contentLength = null }: PdfResponseOptions = {},
 ): Response {
 	return {
 		ok,
 		blob: () => Promise.resolve(new Blob(["pdf"], { type: "application/pdf" })),
+		text: () => Promise.resolve(""),
 		headers: {
-			get: (name: string) =>
-				name.toLowerCase() === "content-disposition"
-					? (disposition ?? null)
-					: null,
+			get: (name: string) => {
+				const header = name.toLowerCase();
+				if (header === "content-disposition") return disposition ?? null;
+				if (header === "content-length") {
+					return contentLength === null ? null : String(contentLength);
+				}
+				return null;
+			},
 		},
 	} as unknown as Response;
+}
+
+/**
+ * A fetch answering the `HEAD` size probe with `contentLength` and any other
+ * verb with a downloadable PDF. Downloads stay pending so a suite that only
+ * cares about the size never has to unwind a click.
+ */
+export function sizeProbeFetch(contentLength: number | null) {
+	return vi.fn((_href: string, init?: RequestInit) => {
+		if (init?.method === "HEAD") {
+			return Promise.resolve(pdfResponse(undefined, { contentLength }));
+		}
+		return new Promise<Response>(() => undefined);
+	});
 }
 
 /** A fetch that never settles — pins the download to its pending state. */
@@ -41,4 +65,13 @@ export function failingFetch() {
  */
 export function getLiveRegion(scope: ParentNode): HTMLElement | null {
 	return scope.querySelector('[aria-live="polite"]');
+}
+
+/** The calls a fetch stub received for an actual download, excluding size probes. */
+export function downloadCalls(fetchMock: {
+	mock: { calls: unknown[][] };
+}): unknown[][] {
+	return fetchMock.mock.calls.filter(
+		(call) => (call[1] as RequestInit | undefined)?.method !== "HEAD",
+	);
 }

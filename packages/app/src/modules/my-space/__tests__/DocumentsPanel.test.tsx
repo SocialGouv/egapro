@@ -7,8 +7,10 @@ import {
 	getReferenceYearFor,
 } from "~/modules/domain";
 import {
+	downloadCalls,
 	failingFetch,
 	getLiveRegion,
+	pdfResponse,
 	pendingFetch,
 } from "~/test/downloadHelpers";
 import {
@@ -376,7 +378,7 @@ describe("DocumentsPanel", () => {
 			);
 		});
 
-		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(downloadCalls(fetchMock)).toHaveLength(1);
 		expect(fetchMock).toHaveBeenCalledWith(
 			`/api/declaration-pdf?year=${DECLARATION_YEAR}`,
 		);
@@ -393,7 +395,7 @@ describe("DocumentsPanel", () => {
 		});
 
 		expect(notPrevented).toBe(true);
-		expect(fetchMock).not.toHaveBeenCalled();
+		expect(downloadCalls(fetchMock)).toHaveLength(0);
 		expect(links()[0]).not.toHaveAttribute("aria-busy");
 	});
 
@@ -412,7 +414,7 @@ describe("DocumentsPanel", () => {
 		expect(announcement).toHaveAttribute("aria-atomic", "true");
 		expect(announcement).toHaveTextContent("Téléchargement en cours…");
 		expect(panel.getAllByText("Téléchargement en cours…")).toHaveLength(2);
-		expect(panel.getAllByText("PDF")).toHaveLength(1);
+		expect(panel.getAllByText("PDF")).toHaveLength(2);
 	});
 
 	it("keeps each card's download state independent", () => {
@@ -436,18 +438,15 @@ describe("DocumentsPanel", () => {
 	});
 
 	it("accepts a new download after a failed attempt", async () => {
-		const fetchMock = vi
+		const download = vi
 			.fn()
-			.mockResolvedValueOnce({
-				ok: false,
-				blob: () => Promise.resolve(new Blob(["pdf"])),
-				headers: { get: () => null },
-			} as unknown as Response)
-			.mockResolvedValueOnce({
-				ok: true,
-				blob: () => Promise.resolve(new Blob(["pdf"])),
-				headers: { get: () => null },
-			} as unknown as Response);
+			.mockResolvedValueOnce(pdfResponse(undefined, { ok: false }))
+			.mockResolvedValueOnce(pdfResponse());
+		const fetchMock = vi.fn((_href: string, init?: RequestInit) =>
+			init?.method === "HEAD"
+				? Promise.resolve(pdfResponse(undefined, { contentLength: null }))
+				: download(),
+		);
 		vi.stubGlobal("fetch", fetchMock);
 		const { panel, links } = renderPanel();
 
@@ -462,7 +461,7 @@ describe("DocumentsPanel", () => {
 			);
 		});
 
-		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(downloadCalls(fetchMock)).toHaveLength(2);
 		expect(
 			panel.queryByRole("alert", { hidden: true }),
 		).not.toBeInTheDocument();

@@ -4,7 +4,7 @@ import { DsfrPictogram } from "~/modules/layout";
 import type { ResendReceiptInput } from "~/modules/mail";
 import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./DemarcheConfirmation.module.scss";
-import { DownloadCard } from "./DownloadCard";
+import { DownloadCard, formatDocumentSubtitle } from "./DownloadCard";
 import type { DemarcheDocument } from "./demarcheDocuments";
 import { FeedbackBanner } from "./FeedbackBanner";
 
@@ -71,11 +71,13 @@ export function DemarcheConfirmation({
 				</h2>
 				{documents.map((document) => (
 					<DownloadCard
-						dataYear={document.dataYear}
+						description={formatDocumentSubtitle(
+							document.year,
+							document.dataYear,
+						)}
 						href={document.href}
 						key={document.href}
 						title={document.title}
-						year={document.year}
 					/>
 				))}
 			</div>

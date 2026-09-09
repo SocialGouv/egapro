@@ -3,23 +3,25 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	downloadCalls,
 	failingFetch,
 	getLiveRegion,
 	pendingFetch,
+	sizeProbeFetch,
 } from "~/test/downloadHelpers";
-import { DownloadCard } from "../DownloadCard";
+import { DownloadCard, formatDocumentSubtitle } from "../DownloadCard";
 
 const DATA_YEAR = 2024;
 const DECLARATION_YEAR = 2025;
 const HREF = "/api/cse-opinion-pdf?year=2025";
+const DESCRIPTION = formatDocumentSubtitle(DECLARATION_YEAR, DATA_YEAR);
 
 function renderCard() {
 	return render(
 		<DownloadCard
-			dataYear={DATA_YEAR}
+			description={DESCRIPTION}
 			href={HREF}
 			title="Télécharger l'avis du CSE"
-			year={DECLARATION_YEAR}
 		/>,
 	);
 }
@@ -37,6 +39,7 @@ afterEach(() => {
 
 describe("DownloadCard", () => {
 	it("names the file in a heading link and its years alongside", () => {
+		vi.stubGlobal("fetch", sizeProbeFetch(null));
 		renderCard();
 
 		// DSFR download card: the link carries the title only, and the enlarged
@@ -57,6 +60,32 @@ describe("DownloadCard", () => {
 				`Année ${DECLARATION_YEAR} au titre des données ${DATA_YEAR}`,
 			),
 		).toBeInTheDocument();
+	});
+
+	it("shows the file size next to the format once the probe answers", async () => {
+		vi.stubGlobal("fetch", sizeProbeFetch(63365));
+		renderCard();
+
+		expect(await screen.findByText("PDF – 61,88 Ko")).toBeInTheDocument();
+	});
+
+	it("probes the size of the very file the link points at", async () => {
+		const fetchMock = sizeProbeFetch(63365);
+		vi.stubGlobal("fetch", fetchMock);
+		renderCard();
+
+		await screen.findByText("PDF – 61,88 Ko");
+		expect(fetchMock).toHaveBeenCalledWith(
+			HREF,
+			expect.objectContaining({ method: "HEAD" }),
+		);
+	});
+
+	it("shows the format alone when the size cannot be known", async () => {
+		vi.stubGlobal("fetch", sizeProbeFetch(null));
+		renderCard();
+
+		await act(async () => undefined);
 		expect(screen.getByText("PDF")).toBeInTheDocument();
 	});
 
@@ -91,7 +120,7 @@ describe("DownloadCard", () => {
 			);
 		});
 
-		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(downloadCalls(fetchMock)).toHaveLength(1);
 	});
 
 	it("leaves a modifier click to the browser's native behaviour", () => {
@@ -104,7 +133,7 @@ describe("DownloadCard", () => {
 		});
 
 		expect(notPrevented).toBe(true);
-		expect(fetchMock).not.toHaveBeenCalled();
+		expect(downloadCalls(fetchMock)).toHaveLength(0);
 		expect(screen.getByRole("link")).not.toHaveAttribute("aria-busy");
 	});
 

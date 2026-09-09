@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
-import { DownloadCard } from "~/modules/shared/DownloadCard";
+import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
 import styles from "./Confirmation.module.scss";
 
 type ConfirmationProps = {
@@ -48,10 +48,9 @@ export function Confirmation({
 			{/* Visually hidden: bridges h1 → h3 (DownloadCard's own title) without adding a visible heading the Figma frame doesn't show. */}
 			<h2 className="fr-sr-only">Documents récapitulatifs de votre démarche</h2>
 			<DownloadCard
-				dataYear={referenceYear}
+				description={formatDocumentSubtitle(campaignYear, referenceYear)}
 				href={`/api/representation-pdf?year=${referenceYear}`}
 				title="Télécharger le récapitulatif de la déclaration"
-				year={campaignYear}
 			/>
 
 			<div>

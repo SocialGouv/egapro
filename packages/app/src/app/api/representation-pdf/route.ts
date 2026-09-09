@@ -12,47 +12,75 @@ import {
 } from "~/modules/domain";
 import { cachedAuth } from "~/server/audit/cachedAuth";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import {
+	pdfHeaders,
+	renderPdfAndCacheSize,
+	resolvePdfSize,
+} from "~/server/pdf/pdfRoute";
+
+const ROUTE = "representation-pdf";
+
+const resolveAuditContext = async (request: Request) => {
+	const session = await cachedAuth(request);
+	const url = new URL(request.url);
+	return {
+		userId: session?.user?.id ?? null,
+		userEmail: session?.user?.email ?? null,
+		siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
+		metadata: {
+			year: url.searchParams.get("year") ?? null,
+		},
+	};
+};
+
+type ResolvedRepresentationPdf =
+	| { unauthorized: Response }
+	| {
+			data: Awaited<ReturnType<typeof buildRepresentationPdfData>>;
+			filename: string;
+			unauthorized?: undefined;
+	  };
+
+async function resolveRepresentationPdf(
+	request: Request,
+): Promise<ResolvedRepresentationPdf> {
+	const session = await cachedAuth(request);
+	if (!session?.user?.siret) {
+		return { unauthorized: new Response("Non autorisé", { status: 401 }) };
+	}
+
+	const siren = extractSiren(session.user.siret);
+	const url = new URL(request.url);
+	const yearParam = url.searchParams.get("year");
+	const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : Number.NaN;
+	const year = Number.isInteger(parsedYear)
+		? parsedYear
+		: getReferenceYearFor(getCurrentYear());
+
+	const data = await buildRepresentationPdfData(siren, year, new Date());
+
+	return {
+		data,
+		filename: `representation-equilibree-${siren}-${data.campaignYear}.pdf`,
+	};
+}
 
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD,
-		resolveContext: async (request) => {
-			const session = await cachedAuth(request);
-			const url = new URL(request.url);
-			return {
-				userId: session?.user?.id ?? null,
-				userEmail: session?.user?.email ?? null,
-				siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
-				metadata: {
-					year: url.searchParams.get("year") ?? null,
-				},
-			};
-		},
+		resolveContext: resolveAuditContext,
 	},
 	async (request) => {
-		const session = await cachedAuth(request);
-		if (!session?.user?.siret) {
-			return new Response("Non autorisé", { status: 401 });
-		}
-
-		const siren = extractSiren(session.user.siret);
-		const url = new URL(request.url);
-		const yearParam = url.searchParams.get("year");
-		const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : Number.NaN;
-		const year = Number.isInteger(parsedYear)
-			? parsedYear
-			: getReferenceYearFor(getCurrentYear());
-
 		try {
-			const data = await buildRepresentationPdfData(siren, year, new Date());
-			const buffer = await renderToBuffer(RepresentationPdfDocument({ data }));
-			const filename = `representation-equilibree-${siren}-${data.campaignYear}.pdf`;
+			const resolved = await resolveRepresentationPdf(request);
+			if (resolved.unauthorized) return resolved.unauthorized;
 
-			return new Response(new Uint8Array(buffer), {
-				headers: {
-					"Content-Type": "application/pdf",
-					"Content-Disposition": `attachment; filename="${filename}"`,
-				},
+			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
+				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
+			);
+
+			return new Response(body, {
+				headers: pdfHeaders(resolved.filename, body.byteLength),
 			});
 		} catch (error) {
 			if (error instanceof RepresentationDeclarationNotFoundError) {
@@ -60,6 +88,33 @@ export const GET = withAuditedRoute(
 			}
 			console.error("[representation-pdf]", error);
 			return new Response("Impossible de générer le PDF", { status: 400 });
+		}
+	},
+);
+
+export const HEAD = withAuditedRoute(
+	{
+		action: AUDIT_ACTIONS.PDF_SIZE_PROBE,
+		resolveContext: resolveAuditContext,
+	},
+	async (request) => {
+		try {
+			const resolved = await resolveRepresentationPdf(request);
+			if (resolved.unauthorized) return resolved.unauthorized;
+
+			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
+				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
+			);
+
+			return new Response(null, {
+				headers: pdfHeaders(resolved.filename, size),
+			});
+		} catch (error) {
+			if (error instanceof RepresentationDeclarationNotFoundError) {
+				return new Response(null, { status: 404 });
+			}
+			console.error("[representation-pdf:head]", error);
+			return new Response(null, { status: 400 });
 		}
 	},
 );

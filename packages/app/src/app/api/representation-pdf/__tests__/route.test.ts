@@ -37,7 +37,8 @@ vi.mock(
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { RepresentationDeclarationNotFoundError } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
-import { GET } from "../route";
+import { clearPdfSizeCache } from "~/server/pdf/pdfSizeCache";
+import { GET, HEAD } from "../route";
 
 const SIREN = "123456789";
 const SIRET = `${SIREN}00015`;
@@ -62,6 +63,7 @@ function auditRow(): Record<string, unknown> {
 describe("GET /api/representation-pdf", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		clearPdfSizeCache();
 		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
 		mocks.RepresentationPdfDocument.mockReturnValue(DOCUMENT);
 		mocks.buildRepresentationPdfData.mockResolvedValue({
@@ -77,6 +79,9 @@ describe("GET /api/representation-pdf", () => {
 		expect(response.headers.get("Content-Type")).toBe("application/pdf");
 		expect(response.headers.get("Content-Disposition")).toBe(
 			`attachment; filename="representation-equilibree-${SIREN}-${YEAR + 1}.pdf"`,
+		);
+		expect(response.headers.get("Content-Length")).toBe(
+			String(PDF_BYTES.byteLength),
 		);
 		expect(Buffer.from(await response.arrayBuffer())).toEqual(PDF_BYTES);
 	});
@@ -171,5 +176,99 @@ describe("GET /api/representation-pdf", () => {
 			siren: null,
 			errorMessage: "HTTP 401",
 		});
+	});
+});
+
+describe("HEAD /api/representation-pdf", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		clearPdfSizeCache();
+		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
+		mocks.RepresentationPdfDocument.mockReturnValue(DOCUMENT);
+		mocks.buildRepresentationPdfData.mockResolvedValue({
+			campaignYear: YEAR + 1,
+		});
+		signedIn();
+	});
+
+	it("answers the size with an empty body", async () => {
+		const response = await HEAD(request());
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Length")).toBe(
+			String(PDF_BYTES.byteLength),
+		);
+		expect(response.headers.get("Content-Type")).toBe("application/pdf");
+		expect(await response.text()).toBe("");
+	});
+
+	it("serves the size a preceding download already paid for", async () => {
+		await GET(request());
+		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+
+		const response = await HEAD(request());
+
+		expect(response.headers.get("Content-Length")).toBe(
+			String(PDF_BYTES.byteLength),
+		);
+		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+	});
+
+	it("renders once for repeated probes on the same data", async () => {
+		await HEAD(request());
+		await HEAD(request());
+
+		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(1);
+	});
+
+	it("renders again once the underlying data changed", async () => {
+		await HEAD(request());
+
+		mocks.buildRepresentationPdfData.mockResolvedValue({
+			campaignYear: YEAR + 1,
+			gaps: [{ category: "cadres", gap: 4 }],
+		});
+		await HEAD(request());
+
+		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(2);
+	});
+
+	it.each([
+		["no session at all", null],
+		["a session without a siret", { user: { id: "user-1" } }],
+	])("refuses the probe with %s", async (_label, session) => {
+		mocks.auth.mockResolvedValue(session);
+
+		const response = await HEAD(request());
+
+		expect(response.status).toBe(401);
+		expect(mocks.buildRepresentationPdfData).not.toHaveBeenCalled();
+	});
+
+	it("answers 404 when no declaration was transmitted for the year", async () => {
+		mocks.buildRepresentationPdfData.mockRejectedValue(
+			new RepresentationDeclarationNotFoundError(),
+		);
+
+		const response = await HEAD(request());
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get("Content-Length")).toBeNull();
+	});
+
+	it("audits the probe under its own action, never as a download", async () => {
+		await HEAD(request());
+
+		expect(auditRow()).toMatchObject({
+			action: AUDIT_ACTIONS.PDF_SIZE_PROBE,
+			status: "success",
+			userId: "user-1",
+			userEmail: "declarant@exemple.fr",
+			siren: SIREN,
+			metadata: { year: String(YEAR) },
+		});
+		expect(auditRow().action).not.toBe(
+			AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD,
+		);
 	});
 });
