@@ -36,7 +36,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		]);
 		const initialData = mapOpinionsFromDb(opinions);
 		const hasSecondDeclaration = declarationData.hasSubmittedSecondDeclaration;
-		const { secondDeclGapHigh } = computeGapHighFlags(
+		const { firstDeclGapHigh, secondDeclGapHigh } = computeGapHighFlags(
 			declarationData.employeeCategories,
 		);
 		const campaignDeadlines = await getCampaignDeadlines(
@@ -62,6 +62,7 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					firstDeclarationPathChoice={
 						declarationData.declaration.firstDeclarationPathChoice
 					}
+					firstDeclGapHigh={firstDeclGapHigh}
 					hasSecondDeclaration={hasSecondDeclaration}
 					initialData={initialData}
 					previousHref={previousHref}
