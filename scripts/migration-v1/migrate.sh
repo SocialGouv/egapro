@@ -14,6 +14,7 @@ readonly REFERENTS_HEADER="id,county,name,principal,region,type,value,substitute
 
 TEMP_DIR=""
 CONTAINER_NAME=""
+EXPORT_WORK_DIR=""
 
 usage() {
   cat <<'EOF'
@@ -25,7 +26,7 @@ Usage:
   migrate.sh dry-run --snapshot DIR --service NAME [--dataset all|repeq|referents]
                      [--pgpass PATH]
   migrate.sh apply --snapshot DIR --service NAME [--dataset all|repeq|referents]
-                   [--pgpass PATH]
+                   [--pgpass PATH] [--allow-referent-deletions]
 EOF
 }
 
@@ -39,6 +40,10 @@ cleanup() {
 
   if [[ -n "$CONTAINER_NAME" ]]; then
     docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true
+  fi
+  if [[ -n "$EXPORT_WORK_DIR" && -d "$EXPORT_WORK_DIR" &&
+        "$(basename "$EXPORT_WORK_DIR")" == .*".partial."?????? ]]; then
+    rm -rf -- "$EXPORT_WORK_DIR"
   fi
   if [[ -n "$TEMP_DIR" && "$TEMP_DIR" == /tmp/egapro-v1-migration.* ]]; then
     rm -rf -- "$TEMP_DIR"
@@ -255,7 +260,8 @@ snapshot_dataset() {
 wait_for_postgres() {
   local attempt
   for attempt in {1..60}; do
-    if docker exec "$CONTAINER_NAME" psql --username postgres --dbname legacy \
+    if docker exec "$CONTAINER_NAME" psql --host 127.0.0.1 \
+      --username postgres --dbname legacy \
       --no-psqlrc --tuples-only --command 'SELECT 1' >/dev/null 2>&1; then
       return
     fi
@@ -264,11 +270,86 @@ wait_for_postgres() {
   die "PostgreSQL temporaire n'est pas prêt après 60 secondes"
 }
 
-reject_unsafe_plain_dump() {
+sanitize_plain_dump() {
   local dump=$1
-  if LC_ALL=C grep -Ein '^[[:space:]]*(CREATE|ALTER|DROP|GRANT|REVOKE|COMMENT|DO|INSERT|UPDATE|DELETE|TRUNCATE)[[:space:]]|^[[:space:]]*\\(connect|!|i|ir)[[:space:]]' "$dump" >/dev/null; then
-    die "le format plain doit être un export pg_dump --data-only limité aux tables de reprise"
-  fi
+  local sanitized=$2
+  local dataset=$3
+
+  LC_ALL=C awk -v dataset="$dataset" '
+    BEGIN {
+      representation_header = "COPY public.representation_equilibree (siren, year, modified_at, declared_at, data, ft) FROM stdin;"
+      referent_header = "COPY public.referent (id, county, name, principal, region, type, value, substitute_name, substitute_email) FROM stdin;"
+      in_copy = 0
+      emit = 0
+      invalid = 0
+    }
+
+    function reject(message) {
+      print "dump plain refusé à la ligne " NR " : " message > "/dev/stderr"
+      invalid = 1
+      exit 1
+    }
+
+    {
+      line = $0
+      sub(/\r$/, "", line)
+
+      if (in_copy) {
+        if (emit) print line
+        if (line == "\\.") {
+          in_copy = 0
+          emit = 0
+        }
+        next
+      }
+
+      if (line == representation_header) {
+        if (seen_representation) reject("bloc representation_equilibree dupliqué")
+        seen_representation = 1
+        in_copy = 1
+        emit = dataset == "all" || dataset == "repeq"
+        if (emit) print line
+        next
+      }
+      if (line == referent_header) {
+        if (seen_referent) reject("bloc referent dupliqué")
+        seen_referent = 1
+        in_copy = 1
+        emit = dataset == "all" || dataset == "referents"
+        if (emit) print line
+        next
+      }
+
+      if (line == "" || line ~ /^--/) next
+      if (line ~ /^SET (statement_timeout|lock_timeout|idle_in_transaction_session_timeout) = 0;$/) next
+      if (line == "SET client_encoding = '\''UTF8'\'';") next
+      if (line == "SET standard_conforming_strings = on;") next
+      if (line == "SELECT pg_catalog.set_config('\''search_path'\'', '\'''\'', false);") next
+      if (line == "SET check_function_bodies = false;") next
+      if (line == "SET xmloption = content;") next
+      if (line == "SET client_min_messages = warning;") next
+      if (line == "SET row_security = off;") next
+
+      reject("instruction hors liste blanche")
+    }
+
+    END {
+      if (invalid) exit 1
+      if (in_copy) {
+        print "dump plain refusé : bloc COPY tronqué" > "/dev/stderr"
+        exit 1
+      }
+      if ((dataset == "all" || dataset == "repeq") && !seen_representation) {
+        print "dump plain refusé : table representation_equilibree absente" > "/dev/stderr"
+        exit 1
+      }
+      if ((dataset == "all" || dataset == "referents") && !seen_referent) {
+        print "dump plain refusé : table referent absente" > "/dev/stderr"
+        exit 1
+      }
+    }
+  ' "$dump" >"$sanitized" ||
+    die "le format plain doit être un pg_dump --data-only COPY strictement limité aux tables de reprise"
 }
 
 export_snapshot() {
@@ -278,7 +359,7 @@ export_snapshot() {
   local lower_bound=$4
   local upper_bound=$5
   local dataset=$6
-  local output_parent output_name work log source_version exported_at dump_hash representation_count referent_count
+  local output_parent output_name work log plain_restore source_version exported_at dump_hash representation_count referent_count
   local migration_repeq migration_referents
   local -a restore_tables
 
@@ -319,34 +400,47 @@ export_snapshot() {
   output_parent=$(dirname "$output")
   output_name=$(basename "$output")
   work=$(mktemp -d "$output_parent/.${output_name}.partial.XXXXXX")
+  EXPORT_WORK_DIR=$work
   chmod 700 "$work"
   log="$work/export.log"
   : >"$log"
   chmod 600 "$log"
 
+  plain_restore=""
+  if [[ "$dump_format" == "plain" ]]; then
+    plain_restore="$work/plain-data.sql"
+    sanitize_plain_dump "$dump" "$plain_restore" "$dataset"
+    chmod 600 "$plain_restore"
+  fi
+
   CONTAINER_NAME="egapro-v1-migration-${RANDOM}-$$"
-  docker run --detach --name "$CONTAINER_NAME" --network none \
-    --env POSTGRES_HOST_AUTH_METHOD=trust --env POSTGRES_DB=legacy \
-    --mount "type=bind,src=$dump,dst=/input/source.dump,readonly" \
-    "$POSTGRES_IMAGE" >>"$log" 2>&1 || die "impossible de démarrer PostgreSQL temporaire ; voir $log"
+  local -a docker_args
+  docker_args=(--detach --name "$CONTAINER_NAME" --network none
+    --env POSTGRES_HOST_AUTH_METHOD=trust --env POSTGRES_DB=legacy)
+  if [[ "$dump_format" == "custom" ]]; then
+    docker_args+=(--mount "type=bind,src=$dump,dst=/input/source.dump,readonly")
+  fi
+  docker run "${docker_args[@]}" "$POSTGRES_IMAGE" >>"$log" 2>&1 ||
+    die "impossible de démarrer PostgreSQL temporaire"
   wait_for_postgres
 
   docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
     --no-psqlrc --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/sql/source-schema.sql" >>"$log" 2>&1 ||
-    die "impossible de préparer le schéma V1 temporaire ; voir $log"
+    die "impossible de préparer le schéma V1 temporaire"
 
   if [[ "$dump_format" == "custom" ]]; then
     docker exec "$CONTAINER_NAME" pg_restore --dbname legacy --username postgres \
       --data-only --no-owner --no-privileges --exit-on-error --strict-names \
       "${restore_tables[@]}" \
       /input/source.dump >>"$log" 2>&1 ||
-      die "restauration sélective du dump custom impossible ; voir $log"
+      die "restauration sélective du dump custom impossible"
   else
-    reject_unsafe_plain_dump "$dump"
-    docker exec "$CONTAINER_NAME" psql --username postgres --dbname legacy \
+    docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
       --no-psqlrc --set ON_ERROR_STOP=1 --single-transaction \
-      --file /input/source.dump >>"$log" 2>&1 ||
-      die "restauration du dump plain impossible ; voir $log"
+      >>"$log" 2>&1 <"$plain_restore" ||
+      die "restauration du dump plain filtré impossible"
+    rm -f -- "$plain_restore"
+    plain_restore=""
   fi
 
   docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
@@ -354,14 +448,14 @@ export_snapshot() {
     --set "migration_repeq=$migration_repeq" --set "migration_referents=$migration_referents" \
     --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
     <"$SCRIPT_DIR/sql/validate-source.sql" >>"$log" 2>&1 ||
-    die "validation des données V1 impossible ; voir $log"
+    die "validation des données V1 impossible"
 
   if (( migration_repeq )); then
     docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
       --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
       --set "declared_at_gte=$lower_bound" --set "declared_at_lt=$upper_bound" \
       <"$SCRIPT_DIR/sql/export-representations.sql" >"$work/representations.csv" 2>>"$log" ||
-      die "export des représentations impossible ; voir $log"
+      die "export des représentations impossible"
   else
     write_header_only_csv "$work/representations.csv" "$REPRESENTATIONS_HEADER"
   fi
@@ -369,7 +463,7 @@ export_snapshot() {
     docker exec --interactive "$CONTAINER_NAME" psql --username postgres --dbname legacy \
       --no-psqlrc --set ON_ERROR_STOP=1 --quiet \
       <"$SCRIPT_DIR/sql/export-referents.sql" >"$work/referents.csv" 2>>"$log" ||
-      die "export des référents impossible ; voir $log"
+      die "export des référents impossible"
   else
     write_header_only_csv "$work/referents.csv" "$REFERENTS_HEADER"
   fi
@@ -389,9 +483,9 @@ export_snapshot() {
     referent_count=0
   fi
   [[ "$representation_count" =~ ^[0-9]+$ && "$referent_count" =~ ^[0-9]+$ ]] ||
-    die "compteurs V1 invalides ; voir $log"
+    die "compteurs V1 invalides"
   if (( migration_referents )) && [[ ! "$referent_count" =~ ^[1-9][0-9]*$ ]]; then
-    die "l'instantané sélectionné des référents est vide ; voir $log"
+    die "l'instantané sélectionné des référents est vide"
   fi
 
   exported_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -416,11 +510,12 @@ export_snapshot() {
   done
   rm -f -- "$log"
   chmod 400 "$work"/*
+  verify_snapshot "$work" >/dev/null
   mv -- "$work" "$output"
+  EXPORT_WORK_DIR=""
 
   docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true
   CONTAINER_NAME=""
-  verify_snapshot "$output" >/dev/null
   printf 'Instantané créé : %s\n' "$output"
   printf 'Jeu de données : %s\n' "$dataset"
   printf 'Représentations : %s\nRéférents : %s\n' "$representation_count" "$referent_count"
@@ -432,6 +527,7 @@ run_target() {
   local service=$3
   local pgpass=$4
   local requested_dataset=$5
+  local allow_referent_deletions=$6
   local verified work log output expected_representations expected_referents failure_log psql_version
   local available_dataset effective_dataset migration_repeq migration_referents
 
@@ -489,6 +585,7 @@ run_target() {
       --set "migration_dataset=$effective_dataset" \
       --set "migration_repeq=$migration_repeq" \
       --set "migration_referents=$migration_referents" \
+      --set "allow_referent_deletions=$allow_referent_deletions" \
       --set "expected_representations=$expected_representations" \
       --set "expected_referents=$expected_referents" \
       --file "$SCRIPT_DIR/sql/migrate.sql"
@@ -546,18 +643,23 @@ case "$command" in
     service=""
     pgpass=""
     dataset=""
+    allow_referent_deletions=0
     while (($#)); do
       case "$1" in
         --snapshot) [[ $# -ge 2 ]] || die "valeur absente après --snapshot"; snapshot=$2; shift 2 ;;
         --service) [[ $# -ge 2 ]] || die "valeur absente après --service"; service=$2; shift 2 ;;
         --pgpass) [[ $# -ge 2 ]] || die "valeur absente après --pgpass"; pgpass=$2; shift 2 ;;
         --dataset) [[ $# -ge 2 ]] || die "valeur absente après --dataset"; dataset=$2; shift 2 ;;
+        --allow-referent-deletions) allow_referent_deletions=1; shift ;;
         *) die "option inconnue pour $command : $1" ;;
       esac
     done
     [[ -n "$snapshot" && -n "$service" ]] || die "--snapshot et --service sont requis"
     [[ -z "$dataset" ]] || validate_dataset "$dataset"
-    run_target "$command" "$snapshot" "$service" "$pgpass" "$dataset"
+    if [[ "$command" == "dry-run" && "$allow_referent_deletions" == "1" ]]; then
+      die "--allow-referent-deletions ne s'applique qu'à apply"
+    fi
+    run_target "$command" "$snapshot" "$service" "$pgpass" "$dataset" "$allow_referent_deletions"
     ;;
   help|-h|--help)
     usage

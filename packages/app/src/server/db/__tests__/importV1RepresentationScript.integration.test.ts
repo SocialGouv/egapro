@@ -73,6 +73,7 @@ type CompanyRow = {
 	naf_code: string | null;
 	name: string;
 	region: string | null;
+	region_code: string | null;
 	siren: string;
 };
 
@@ -175,7 +176,7 @@ describe("import-v1-representation.mjs (integration)", () => {
 
 	async function readCompany(siren: string) {
 		const [row] = await sql<CompanyRow[]>`
-			SELECT siren, name, address, naf_code, region, department_code, department_label
+			SELECT siren, name, address, naf_code, region, region_code, department_code, department_label
 			FROM app_company WHERE siren = ${siren}
 		`;
 		return row;
@@ -282,6 +283,7 @@ describe("import-v1-representation.mjs (integration)", () => {
 			address: "1 rue de la Paix",
 			naf_code: "62.01Z",
 			region: "Île-de-France",
+			region_code: "11",
 			department_code: "75",
 			department_label: "Paris",
 		});

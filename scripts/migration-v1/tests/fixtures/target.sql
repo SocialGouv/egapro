@@ -11,6 +11,7 @@ CREATE TABLE app_company (
   address varchar(500),
   naf_code varchar(10),
   region varchar(255),
+  region_code varchar(3),
   department_code varchar(3),
   department_label varchar(255),
   created_at timestamptz,

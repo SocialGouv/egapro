@@ -49,20 +49,22 @@ VALUES
       'indicateurs', jsonb_build_object(
         'représentation_équilibrée', jsonb_build_object(
           'pourcentage_femmes_cadres', 80,
-          'pourcentage_hommes_cadres', 20
+          'pourcentage_hommes_cadres', 20,
+          'pourcentage_femmes_membres', 50,
+          'pourcentage_hommes_membres', 50
         )
       )
     )
   ),
   (
-    '800000003', 2023, '2024-04-10T09:30:00Z', '2024-04-11T14:45:00Z',
+    '800000003', 2024, '2024-04-10T09:30:00Z', '2024-04-11T14:45:00Z',
     jsonb_build_object(
       'déclarant', jsonb_build_object(
         'email', 'third@example.test', 'nom', 'O''Neil',
         'prénom', 'Lou', 'téléphone', '0102030407'
       ),
       'déclaration', jsonb_build_object(
-        'année_indicateurs', 2023,
+        'année_indicateurs', 2024,
         'fin_période_référence', '2024-02-29',
         'publication', jsonb_build_object(
           'date', '2024-04-01',
@@ -95,7 +97,7 @@ VALUES
     'referent@example.test', 'Suppléance régionale', 'substitute@example.test'
   ),
   (
-    '22222222-2222-4222-8222-222222222222', NULL,
+    '22222222-2222-4222-8222-222222222222', '',
     E'Coordination, régionale\nSELECT * FROM app_user;', false, '94', 'url',
     'https://example.test/contact?x=1,y=2', NULL, NULL
   );

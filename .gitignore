@@ -65,6 +65,8 @@ scripts/migration-v1/*.dump
 scripts/migration-v1/*.backup
 scripts/migration-v1/*-failure-*.log
 scripts/migration-v1/*-snapshot/
+**/migration-v1-*-failure-*.log
+**/.*.partial.*/
 
 # Local Matomo — generated API token + credentials (never commit)
 scripts/matomo-local/.secrets/*

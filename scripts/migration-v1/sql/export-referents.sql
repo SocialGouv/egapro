@@ -1,7 +1,7 @@
 COPY (
   SELECT
     id,
-    county,
+    nullif(county, '') AS county,
     name,
     principal,
     region,

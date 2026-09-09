@@ -109,6 +109,9 @@ docker exec --interactive "$TARGET_CONTAINER" psql --username postgres --dbname 
   --set ON_ERROR_STOP=1 <"$SCRIPT_DIR/fixtures/target.sql" >/dev/null
 docker exec "$TARGET_CONTAINER" psql --username postgres --dbname target_repeq_only \
   --set ON_ERROR_STOP=1 --command 'DROP TABLE app_referent' >/dev/null
+docker exec "$TARGET_CONTAINER" psql --username postgres --dbname target_repeq_only \
+  --set ON_ERROR_STOP=1 --command \
+  "DELETE FROM app_representation_declaration WHERE siren = '800000001'; DELETE FROM app_company WHERE siren = '800000001'" >/dev/null
 docker exec "$TARGET_CONTAINER" psql --username postgres --dbname target_referents_only \
   --set ON_ERROR_STOP=1 --command 'DROP TABLE app_representation_declaration; DROP TABLE app_company' >/dev/null
 
@@ -219,6 +222,69 @@ printf 'ok - a portable plain data dump is supported\n'
   --dataset referents --out "$WORK/plain referents snapshot" >/dev/null
 printf 'ok - single-dataset portable plain dumps are supported\n'
 
+cp "$WORK/v1-data.sql" "$WORK/v1-data-with-sql.sql"
+printf '\nSELECT current_user;\n' >>"$WORK/v1-data-with-sql.sql"
+if "$MIGRATE" export --dump "$WORK/v1-data-with-sql.sql" --format plain \
+  --out "$WORK/unsafe plain snapshot" >/dev/null 2>&1; then
+  fail "plain exports should reject SQL outside approved COPY blocks"
+fi
+if find "$WORK" -maxdepth 1 -type d -name '.unsafe plain snapshot.partial.*' | grep -q .; then
+  fail "failed exports should remove their private partial directory"
+fi
+printf 'ok - plain exports reject SQL and clean failed partial directories\n'
+
+cp "$WORK/v1-repeq.sql" "$WORK/v1-data-truncated.sql"
+sed -i '/^\\\.$/d' "$WORK/v1-data-truncated.sql"
+if "$MIGRATE" export --dump "$WORK/v1-data-truncated.sql" --format plain \
+  --dataset repeq --out "$WORK/truncated plain snapshot" >/dev/null 2>&1; then
+  fail "plain exports should reject truncated COPY blocks"
+fi
+printf 'ok - plain exports reject truncated COPY blocks\n'
+
+if awk -F, 'NR == 1 { next } NF != 2 || $1 == "" || $2 == "" { exit 1 }' \
+  "$KIT_DIR/reference/regions.csv" "$KIT_DIR/reference/departments.csv"; then
+  printf 'ok - reference CSV labels satisfy the two-column no-comma invariant\n'
+else
+  fail "reference CSV labels should remain unquoted and comma-free"
+fi
+
+cp "$WORK/v1-repeq.sql" "$WORK/v1-repeq-unauthorized-copy.sql"
+printf '\nCOPY public.unrelated_private_table (secret) FROM stdin;\nsecret\n\\.\n' \
+  >>"$WORK/v1-repeq-unauthorized-copy.sql"
+if "$MIGRATE" export --dump "$WORK/v1-repeq-unauthorized-copy.sql" --format plain \
+  --dataset repeq --out "$WORK/unauthorized copy snapshot" >/dev/null 2>&1; then
+  fail "plain exports should reject unauthorized COPY tables"
+fi
+printf 'ok - plain exports reject unauthorized COPY tables\n'
+
+docker exec "$TARGET_CONTAINER" psql --username postgres --dbname legacy \
+  --set ON_ERROR_STOP=1 --command \
+  "UPDATE representation_equilibree SET data = data #- '{indicateurs,représentation_équilibrée,pourcentage_hommes_membres}' WHERE siren = '800000001'" >/dev/null
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format custom --no-owner --no-privileges \
+  --table public.representation_equilibree >"$WORK/v1-missing-percentage.dump"
+"$MIGRATE" export --dump "$WORK/v1-missing-percentage.dump" --format custom \
+  --dataset repeq --out "$WORK/missing percentage snapshot" >/dev/null
+if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
+  --snapshot "$WORK/missing percentage snapshot" --service target >/dev/null 2>&1; then
+  fail "submitted representations should require both percentages or a reason"
+fi
+printf 'ok - submitted representations require complete percentage pairs\n'
+
+docker exec "$TARGET_CONTAINER" psql --username postgres --dbname legacy \
+  --set ON_ERROR_STOP=1 --command \
+  "UPDATE representation_equilibree SET data = jsonb_set(jsonb_set(data, '{indicateurs,représentation_équilibrée,pourcentage_hommes_membres}', '60'), '{déclaration,année_indicateurs}', '2022') WHERE siren = '800000001'" >/dev/null
+docker exec "$TARGET_CONTAINER" pg_dump --username postgres --dbname legacy \
+  --format custom --no-owner --no-privileges \
+  --table public.representation_equilibree >"$WORK/v1-wrong-year.dump"
+"$MIGRATE" export --dump "$WORK/v1-wrong-year.dump" --format custom \
+  --dataset repeq --out "$WORK/wrong year snapshot" >/dev/null
+if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" dry-run \
+  --snapshot "$WORK/wrong year snapshot" --service target >/dev/null 2>&1; then
+  fail "representation row and payload years should agree"
+fi
+printf 'ok - representation row and payload years must agree\n'
+
 cp -R "$WORK/full snapshot" "$WORK/legacy snapshot"
 chmod 600 "$WORK/legacy snapshot/manifest.txt"
 sed -i \
@@ -298,7 +364,8 @@ printf 'ok - repeq-only reports omit referent metrics\n'
 split_representations_before=$(target_sql_for target-split --command \
   "SELECT md5(string_agg(app_representation_declaration::text, '|' ORDER BY id)) FROM app_representation_declaration")
 split_referents_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
-  --snapshot "$WORK/full snapshot" --service target-split --dataset referents)
+  --snapshot "$WORK/full snapshot" --service target-split --dataset referents \
+  --allow-referent-deletions)
 assert_equal "a combined snapshot can apply referents only" "dataset=referents" \
   "$(grep '^dataset=' <<<"$split_referents_output")"
 assert_equal "referent-only apply leaves representations untouched" "$split_representations_before" \
@@ -320,7 +387,8 @@ assert_equal "repeq-only rerun is idempotent" "representations.skip_unchanged=2"
   "$(grep '^representations.skip_unchanged=' <<<"$repeq_only_rerun")"
 
 referents_only_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
-  --snapshot "$WORK/referents snapshot" --service target-referents-only)
+  --snapshot "$WORK/referents snapshot" --service target-referents-only \
+  --allow-referent-deletions)
 assert_equal "referent snapshot defaults to referents" "dataset=referents" \
   "$(grep '^dataset=' <<<"$referents_only_output")"
 assert_equal "referent migration works without target repeq tables" "2" \
@@ -353,12 +421,26 @@ after_state=$(target_sql --command "SELECT count(*) || ':' || (SELECT count(*) F
 assert_equal "dry-run reports one insert" "representations.insert=1" "$(grep '^representations.insert=' <<<"$dry_run_output")"
 assert_equal "dry-run reports one update" "representations.update=1" "$(grep '^representations.update=' <<<"$dry_run_output")"
 assert_equal "dry-run reports the native skip" "representations.skip_native=1" "$(grep '^representations.skip_native=' <<<"$dry_run_output")"
+assert_equal "dry-run reports unresolved regions" "representations.unresolved_region=1" "$(grep '^representations.unresolved_region=' <<<"$dry_run_output")"
+assert_equal "dry-run reports unresolved departments" "representations.unresolved_department=1" "$(grep '^representations.unresolved_department=' <<<"$dry_run_output")"
+assert_equal "dry-run reports V2 referents absent from V1" "referents.delete_without_source=1" "$(grep '^referents.delete_without_source=' <<<"$dry_run_output")"
 assert_equal "combined snapshot defaults to all" "dataset=all" "$(grep '^dataset=' <<<"$dry_run_output")"
 assert_equal "dry-run leaves target data unchanged" "$before_state" "$after_state"
 
-target_sql --command "ALTER TABLE app_referent ADD CONSTRAINT reject_source_referent CHECK (name <> 'Cellule égalité professionnelle') NOT VALID" >/dev/null
 if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
   --snapshot "$WORK/full snapshot" --service target >/dev/null 2>&1; then
+  fail "referent replacement should require explicit acknowledgement of deletions"
+fi
+assert_equal "the deletion guard rolls back the combined representation import" "0" \
+  "$(target_sql --command "SELECT count(*) FROM app_representation_declaration WHERE siren = '800000003'")"
+assert_equal "the deletion guard preserves V2-native referents" "1" \
+  "$(target_sql --command "SELECT count(*) FROM app_referent WHERE name = 'Stale referent'")"
+printf 'ok - referent replacement requires an explicit deletion acknowledgement\n'
+
+target_sql --command "ALTER TABLE app_referent ADD CONSTRAINT reject_source_referent CHECK (name <> 'Cellule égalité professionnelle') NOT VALID" >/dev/null
+if PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
+  --snapshot "$WORK/full snapshot" --service target \
+  --allow-referent-deletions >/dev/null 2>&1; then
   fail "late target failure should abort apply"
 fi
 assert_equal "late failure rolls back the new declaration" "0" \
@@ -371,7 +453,7 @@ printf 'ok - a late insertion failure rolls back both datasets\n'
 target_sql --command "ALTER TABLE app_referent DROP CONSTRAINT reject_source_referent" >/dev/null
 
 apply_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \
-  --snapshot "$WORK/full snapshot" --service target)
+  --snapshot "$WORK/full snapshot" --service target --allow-referent-deletions)
 assert_equal "apply inserts the missing representation" "representations.insert=1" "$(grep '^representations.insert=' <<<"$apply_output")"
 assert_equal "apply updates the older imported representation" "representations.update=1" "$(grep '^representations.update=' <<<"$apply_output")"
 assert_equal "apply replaces the referent directory" "referents.replace=true" "$(grep '^referents.replace=' <<<"$apply_output")"
@@ -382,7 +464,7 @@ assert_equal "an existing company is never overwritten" "Existing company" \
   "$(target_sql --command "SELECT name FROM app_company WHERE siren = '800000001'")"
 assert_equal "a native V2 declaration is never overwritten" "10.00:draft" \
   "$(target_sql --command "SELECT executive_women_percent || ':' || status FROM app_representation_declaration WHERE siren = '800000002'")"
-assert_equal "the JS leap-day period calculation is preserved" "2023-03-02:2024-02-29" \
+assert_equal "a leap-day period remains valid in V2" "2023-03-01:2024-02-29" \
   "$(target_sql --command "SELECT reference_period_start || ':' || reference_period_end FROM app_representation_declaration WHERE siren = '800000003'")"
 assert_equal "not-computable values clear their percentages" "un_seul_cadre_dirigeant:true:aucune_instance_dirigeante:true" \
   "$(target_sql --command "SELECT not_computable_reason_executives || ':' || (executive_women_percent IS NULL) || ':' || not_computable_reason_members || ':' || (member_women_percent IS NULL) FROM app_representation_declaration WHERE siren = '800000003'")"
@@ -394,6 +476,10 @@ assert_equal "CSV newlines and SQL-looking text remain data" "t" \
   "$(target_sql --command "SELECT position(E'\\nSELECT * FROM app_user;' IN publish_modalities) > 0 FROM app_representation_declaration WHERE siren = '800000003'")"
 assert_equal "referent UUIDs and all snapshot rows are preserved" "2" \
   "$(target_sql --command "SELECT count(*) FROM app_referent WHERE id IN ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222')")"
+assert_equal "empty V1 referent counties become null" "t" \
+  "$(target_sql --command "SELECT county IS NULL FROM app_referent WHERE id = '22222222-2222-4222-8222-222222222222'")"
+assert_equal "new companies persist their validated region code" "11" \
+  "$(target_sql_for target-repeq-only --command "SELECT region_code FROM app_company WHERE siren = '800000001'")"
 
 referent_timestamp=$(target_sql --command "SELECT min(created_at)::text FROM app_referent")
 rerun_output=$(PGSERVICEFILE="$WORK/pg_service.conf" "$MIGRATE" apply \

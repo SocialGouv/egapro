@@ -42,5 +42,7 @@ expect_failure "verify requires a snapshot" "$MIGRATE" verify
 expect_failure "target commands require a service" "$MIGRATE" dry-run --snapshot missing
 expect_failure "target commands reject an invalid dataset" "$MIGRATE" dry-run \
   --snapshot missing --service target --dataset invalid
+expect_failure "dry-run rejects the destructive referent acknowledgement" "$MIGRATE" dry-run \
+  --snapshot missing --service target --allow-referent-deletions
 
 exit "$failures"

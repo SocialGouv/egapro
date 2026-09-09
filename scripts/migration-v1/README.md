@@ -47,9 +47,19 @@ pg_dump --format=plain --data-only --no-owner --no-privileges \
   --file=v1-data.sql NOM_BASE_V1
 ```
 
+Le fichier plain est analysé intégralement selon une liste blanche stricte. Le
+kit n'exécute jamais le fichier fourni : il restaure un fichier intermédiaire
+ne contenant que les blocs `COPY` attendus, avec les noms de tables et les
+colonnes exactes de la V1. Toute autre instruction, commande psql, table,
+colonne, duplication ou bloc tronqué est refusé. Les données situées à
+l'intérieur d'un bloc `COPY` restent des données, même si leur texte ressemble
+à du SQL.
+
 Les dumps `pg_dumpall`, les dumps plain contenant du DDL et les archives
-directory/tar ne sont pas pris en charge. Le kit n'essaie jamais de réécrire
-des rôles, propriétaires ou commandes SQL arbitraires.
+directory/tar ne sont pas pris en charge. Le format custom reste recommandé,
+car il porte un catalogue que `pg_restore` peut filtrer explicitement. Le kit
+n'essaie jamais de réécrire des rôles, propriétaires ou commandes SQL
+arbitraires.
 
 ## Jeux de données
 
@@ -198,8 +208,11 @@ representations.update=...
 representations.skip_native=...
 representations.skip_unchanged=...
 companies.insert=...
+representations.unresolved_region=...
+representations.unresolved_department=...
 referents.read=...
 referents.before=...
+referents.delete_without_source=...
 referents.replace=true|false
 ```
 
@@ -225,7 +238,15 @@ Pour simuler séparément les deux parties depuis l'instantané combiné :
 ```
 
 Le rapport indique `dataset=all|repeq|referents` et ne présente que les
-compteurs de la partie effectivement sélectionnée.
+compteurs de la partie effectivement sélectionnée. Les compteurs
+`unresolved_region` et `unresolved_department` recensent les codes V1 non vides
+qui ne figurent pas dans les référentiels du kit. La migration reste possible :
+le libellé et, pour la région, le code V2 restent alors nuls afin de ne pas
+inventer de correspondance.
+
+`referents.delete_without_source` indique le nombre de référents présents en
+V2 dont l'identifiant n'existe pas dans l'instantané V1. Il faut faire valider
+explicitement ce compteur avant de remplacer l'annuaire.
 
 ## 5. Importer en production
 
@@ -245,6 +266,21 @@ Puis exécuter exactement le même instantané :
   --service egapro-v2-production \
   --pgpass "$PWD/pgpass"
 ```
+
+Si `referents.delete_without_source` est supérieur à zéro, l'import incluant
+les référents s'arrête sans aucune écriture. Après vérification que ces lignes
+V2 doivent bien être supprimées, relancer avec l'accord destructif explicite :
+
+```bash
+./migration-v1/migrate.sh apply \
+  --snapshot "$PWD/v1-snapshot" \
+  --service egapro-v2-production \
+  --pgpass "$PWD/pgpass" \
+  --allow-referent-deletions
+```
+
+L'option ne s'applique qu'à `apply`; le dry-run affiche toujours le compteur
+sans exiger d'option.
 
 L'import peut également être séparé :
 
@@ -273,7 +309,16 @@ Les entreprises absentes sont créées sans modifier les entreprises existantes.
 Une déclaration saisie nativement en V2 (`imported_from_v1_at IS NULL`) n'est
 jamais écrasée. Une déclaration déjà reprise n'est mise à jour que si son
 `modified_at` V1 est plus récent que son `updated_at` V2. L'annuaire des
-référents est remplacé en totalité seulement si son contenu diffère.
+référents est remplacé en totalité seulement si son contenu diffère et si les
+éventuelles suppressions de lignes propres à la V2 ont été acceptées. Un code
+département vide d'un référent V1 est normalisé en `NULL`.
+
+Une représentation soumise doit fournir les deux pourcentages de chaque
+catégorie ou un motif de non-calculabilité. Son année V1, l'année portée dans
+le JSON et l'année de fin de période doivent coïncider. Les périodes se
+terminant un 29 février commencent le 1er mars de l'année précédente, ce qui
+forme douze mois consécutifs valides en V2. Les e-mails et URL invalides sont
+refusés plutôt que corrigés implicitement.
 
 En mode `all`, une erreur, même pendant la dernière insertion, annule les
 changements des deux jeux de données. En mode séparé, elle annule uniquement
@@ -289,13 +334,17 @@ bascule.
 
 ## Diagnostics et nettoyage
 
-En cas d'échec de l'export, un répertoire `.partial.*` privé est conservé à côté
-de la sortie demandée. En cas d'échec V2, un fichier
+En cas d'échec ou d'interruption de l'export, le répertoire privé
+`.partial.*` est supprimé automatiquement. En cas d'échec V2, un fichier
 `migration-v1-*-failure-*.log`, en mode 600, est écrit à côté de l'instantané.
 Ces diagnostics restent privés et peuvent contenir des détails PostgreSQL ; ils
-ne doivent pas être joints à une issue ou une PR publique.
+ne doivent pas être joints à une issue ou une PR publique. Le dump,
+l'instantané et leurs diagnostics doivent rester dans le répertoire privé hors
+du dépôt Git indiqué au début de cette procédure.
 
 Après validation fonctionnelle et expiration de la durée de conservation
 convenue, supprimer le dump, les instantanés, les journaux, le fichier pgpass et
-les éventuels répertoires `.partial.*` par la procédure sécurisée de
-l'organisation.
+les éventuels répertoires `.partial.*` résiduels par la procédure sécurisée de
+l'organisation. Avant la production, répéter l'ensemble du scénario avec un
+dump représentatif, y compris le dry-run, l'import, les compteurs métier et une
+relance idempotente.

@@ -2,6 +2,7 @@
 
 SELECT :'migration_mode' = 'apply' AS migration_apply,
        :'migration_mode' = 'dry-run' AS migration_dry_run,
+       :'allow_referent_deletions' IN ('0', '1') AS migration_deletion_option_valid,
        (
          (:'migration_dataset' = 'all' AND :'migration_repeq' = '1' AND :'migration_referents' = '1')
          OR (:'migration_dataset' = 'repeq' AND :'migration_repeq' = '1' AND :'migration_referents' = '0')
@@ -22,6 +23,12 @@ SELECT :'migration_mode' = 'apply' AS migration_apply,
   \quit 2
 \endif
 
+\if :migration_deletion_option_valid
+\else
+  \echo 'invalid referent deletion option'
+  \quit 2
+\endif
+
 BEGIN;
 SET LOCAL statement_timeout = '30min';
 SET LOCAL idle_in_transaction_session_timeout = '5min';
@@ -32,6 +39,11 @@ CREATE TEMP TABLE migration_expected_counts (
 ) ON COMMIT DROP;
 INSERT INTO migration_expected_counts
 VALUES (:expected_representations::bigint, :expected_referents::bigint);
+
+CREATE TEMP TABLE migration_options (
+  allow_referent_deletions boolean NOT NULL
+) ON COMMIT DROP;
+INSERT INTO migration_options VALUES (:'allow_referent_deletions' = '1');
 
 DO $validation$
 BEGIN
@@ -77,6 +89,7 @@ CREATE TEMP TABLE migration_department (
         ('app_company', 'address'),
         ('app_company', 'naf_code'),
         ('app_company', 'region'),
+        ('app_company', 'region_code'),
         ('app_company', 'department_code'),
         ('app_company', 'department_label'),
         ('app_company', 'created_at'),
@@ -156,6 +169,8 @@ CREATE TEMP TABLE migration_department (
        OR jsonb_typeof(source.data #> '{entreprise}') <> 'object'
        OR jsonb_typeof(source.data #> '{indicateurs,représentation_équilibrée}') <> 'object'
        OR source.data #>> '{entreprise,siren}' IS DISTINCT FROM source.siren
+       OR source.data #> '{déclaration,année_indicateurs}' IS DISTINCT FROM to_jsonb(source.year)
+       OR left(source.data #>> '{déclaration,fin_période_référence}', 4) IS DISTINCT FROM source.year::text
        OR coalesce(source.data #>> '{entreprise,raison_sociale}', '') = ''
        OR char_length(source.data #>> '{entreprise,raison_sociale}') > 255
        OR char_length(source.data #>> '{entreprise,adresse}') > 500
@@ -196,7 +211,10 @@ CREATE TEMP TABLE migration_department (
        )
        OR (
          source.data #>> '{indicateurs,représentation_équilibrée,motif_non_calculabilité_cadres}' IS NULL
-         AND EXISTS (
+         AND (
+           source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_femmes_cadres}' IS NULL
+           OR source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_hommes_cadres}' IS NULL
+           OR EXISTS (
            SELECT 1
            FROM unnest(ARRAY[
              source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_femmes_cadres}',
@@ -205,11 +223,15 @@ CREATE TEMP TABLE migration_department (
            WHERE percentage.value IS NOT NULL
              AND (percentage.value !~ '^([0-9]+([.][0-9]+)?|[.][0-9]+)$'
                OR percentage.value::numeric < 0 OR percentage.value::numeric > 100)
+           )
          )
        )
        OR (
          source.data #>> '{indicateurs,représentation_équilibrée,motif_non_calculabilité_membres}' IS NULL
-         AND EXISTS (
+         AND (
+           source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_femmes_membres}' IS NULL
+           OR source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_hommes_membres}' IS NULL
+           OR EXISTS (
            SELECT 1
            FROM unnest(ARRAY[
              source.data #>> '{indicateurs,représentation_équilibrée,pourcentage_femmes_membres}',
@@ -218,6 +240,7 @@ CREATE TEMP TABLE migration_department (
            WHERE percentage.value IS NOT NULL
              AND (percentage.value !~ '^([0-9]+([.][0-9]+)?|[.][0-9]+)$'
                OR percentage.value::numeric < 0 OR percentage.value::numeric > 100)
+           )
          )
        );
     IF invalid_count > 0 THEN
@@ -234,7 +257,7 @@ CREATE TEMP TABLE migration_department (
   AS $function$
     SELECT CASE
       WHEN to_char(period_end, 'MM-DD') = '02-29'
-        THEN make_date(extract(year FROM period_end)::integer - 1, 3, 2)
+        THEN make_date(extract(year FROM period_end)::integer - 1, 3, 1)
       ELSE (period_end - interval '1 year' + interval '1 day')::date
     END
   $function$;
@@ -271,6 +294,8 @@ CREATE TEMP TABLE migration_department (
     source.data #>> '{entreprise,adresse}' AS company_address,
     nullif(nullif(source.data #>> '{entreprise,code_naf}', '[NON-DIFFUSIBLE]'), '') AS company_naf_code,
     region.label AS company_region,
+    region.code AS company_region_code,
+    source.data #>> '{entreprise,région}' AS source_region_code,
     source.data #>> '{entreprise,département}' AS company_department_code,
     department.label AS company_department_label
   FROM migration_representation_raw AS source
@@ -294,6 +319,8 @@ CREATE TEMP TABLE migration_department (
   ) ON COMMIT DROP;
 
   \copy migration_referent_raw FROM 'referents.csv' WITH (FORMAT csv, HEADER true)
+
+  UPDATE migration_referent_raw SET county = NULL WHERE county = '';
 
   DO $validation$
   DECLARE
@@ -425,7 +452,11 @@ CREATE TEMP TABLE migration_department (
     (SELECT count(DISTINCT plan.siren)
      FROM migration_representation_plan AS plan
      LEFT JOIN public.app_company AS company ON company.siren = plan.siren
-     WHERE plan.action IN ('insert', 'update') AND company.siren IS NULL) AS companies_insert;
+     WHERE plan.action IN ('insert', 'update') AND company.siren IS NULL) AS companies_insert,
+    (SELECT count(*) FROM migration_representation
+     WHERE coalesce(source_region_code, '') <> '' AND company_region_code IS NULL) AS unresolved_region,
+    (SELECT count(*) FROM migration_representation
+     WHERE coalesce(company_department_code, '') <> '' AND company_department_label IS NULL) AS unresolved_department;
 \endif
 
 \if :migration_referents
@@ -448,18 +479,43 @@ CREATE TEMP TABLE migration_department (
   SELECT
     (SELECT count(*) FROM migration_referent_raw) AS referents_read,
     (SELECT count(*) FROM public.app_referent) AS referents_before,
+    (SELECT count(*)
+     FROM public.app_referent AS target
+     WHERE NOT EXISTS (
+       SELECT 1 FROM migration_referent_raw AS source WHERE source.id = target.id
+     )) AS referents_delete_without_source,
     (SELECT changed FROM migration_referent_state) AS referents_replace;
+\endif
+
+\if :migration_apply
+  \if :migration_referents
+    DO $guard$
+    DECLARE
+      delete_without_source bigint;
+    BEGIN
+      SELECT referents_delete_without_source INTO delete_without_source
+      FROM migration_referent_report;
+      IF delete_without_source > 0
+         AND NOT (SELECT allow_referent_deletions FROM migration_options) THEN
+        RAISE EXCEPTION
+          'referent replacement would delete % target rows absent from the V1 snapshot; rerun after review with --allow-referent-deletions',
+          delete_without_source;
+      END IF;
+    END
+    $guard$;
+  \endif
 \endif
 
 \if :migration_apply
   \if :migration_repeq
     INSERT INTO public.app_company (
-      siren, name, address, naf_code, region, department_code, department_label,
+      siren, name, address, naf_code, region, region_code, department_code, department_label,
       created_at, updated_at
     )
     SELECT DISTINCT ON (plan.siren)
       plan.siren, plan.company_name, plan.company_address, plan.company_naf_code,
-      plan.company_region, plan.company_department_code, plan.company_department_label,
+      plan.company_region, plan.company_region_code,
+      plan.company_department_code, plan.company_department_label,
       transaction_timestamp(), transaction_timestamp()
     FROM migration_representation_plan AS plan
     WHERE plan.action IN ('insert', 'update')
@@ -534,12 +590,15 @@ UNION ALL SELECT 'dataset=' || :'migration_dataset';
   UNION ALL SELECT 'representations.update=' || representations_update FROM migration_representation_report
   UNION ALL SELECT 'representations.skip_native=' || representations_skip_native FROM migration_representation_report
   UNION ALL SELECT 'representations.skip_unchanged=' || representations_skip_unchanged FROM migration_representation_report
-  UNION ALL SELECT 'companies.insert=' || companies_insert FROM migration_representation_report;
+  UNION ALL SELECT 'companies.insert=' || companies_insert FROM migration_representation_report
+  UNION ALL SELECT 'representations.unresolved_region=' || unresolved_region FROM migration_representation_report
+  UNION ALL SELECT 'representations.unresolved_department=' || unresolved_department FROM migration_representation_report;
 \endif
 
 \if :migration_referents
   SELECT 'referents.read=' || referents_read FROM migration_referent_report
   UNION ALL SELECT 'referents.before=' || referents_before FROM migration_referent_report
+  UNION ALL SELECT 'referents.delete_without_source=' || referents_delete_without_source FROM migration_referent_report
   UNION ALL SELECT 'referents.replace=' || referents_replace FROM migration_referent_report;
 \endif
 

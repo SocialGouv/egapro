@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	computePeriodStart,
 	nextCalendarDay,
 	referencePeriodDateBounds,
 	referencePeriodSchema,
@@ -21,6 +22,16 @@ const MALFORMED_DATES = [
 ] as const;
 
 describe("referencePeriodSchema", () => {
+	it("derives a valid start for a period ending on leap day", () => {
+		expect(computePeriodStart("2024-02-29")).toBe("2023-03-01");
+		expect(
+			referencePeriodSchema(2024).safeParse({
+				referencePeriodStart: "2023-03-01",
+				referencePeriodEnd: "2024-02-29",
+			}).success,
+		).toBe(true);
+	});
+
 	it("accepts a calendar year ending in the declaration year", () => {
 		expect(referencePeriodSchema(YEAR).safeParse(VALID_PERIOD).success).toBe(
 			true,
