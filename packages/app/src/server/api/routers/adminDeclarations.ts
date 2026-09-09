@@ -54,8 +54,7 @@ import {
 	releaseLockAsAdmin,
 } from "~/server/services/declarationLockService";
 
-// Every sortable column but `workforce`, which is a nullable joined column and
-// needs its own NULLS LAST key — see `gipWorkforceSortKey`.
+// `workforce` is absent: nullable joined column, sorted via gipWorkforceSortKey.
 const sortColumnMap = {
 	siren: declarations.siren,
 	companyName: companies.name,
@@ -122,9 +121,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						);
 			const offset = (input.page - 1) * input.pageSize;
 
-			// The GIP join and the bracket filter are carried by BOTH queries: the
-			// count feeds the "N résultats" line and the pagination, which would
-			// otherwise describe a different population than the listed rows.
+			// Join and filter on BOTH queries, else count and pagination describe another population.
 			const [rawRows, totalResult] = await Promise.all([
 				ctx.db
 					.select({

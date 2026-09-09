@@ -35,9 +35,7 @@ export function SearchForm() {
 		},
 	);
 
-	// The size filter is a controlled component, so it is driven through
-	// watch/setValue rather than `register`; the value still travels to the URL
-	// with the rest of the form on submit.
+	// Controlled component: driven by watch/setValue rather than `register`.
 	const sizeRange = watch("sizeRange");
 
 	const handleSizeRangeChange = useCallback(

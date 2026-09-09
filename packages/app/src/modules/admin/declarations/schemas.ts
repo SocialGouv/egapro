@@ -26,9 +26,7 @@ export const ADMIN_DECLARATION_STATUS_FILTERS = [
 	"cancelled",
 ] as const;
 
-// Workforce brackets of the admin filter. Derived from the domain constant so a
-// bracket added there propagates here by construction (or breaks tsc), never a
-// hand-copied list of bounds.
+// Derived from the domain constant so a new bracket propagates here or breaks tsc.
 const COMPANY_SIZE_RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as Array<
 	keyof typeof COMPANY_SIZE_RANGES
 >;
