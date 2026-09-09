@@ -34,6 +34,11 @@ import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpe
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
+	gipSizeRangeFilter,
+	gipWorkforceJoinCondition,
+	gipWorkforceSortKey,
+} from "~/server/db/gipWorkforceConditions";
+import {
 	companies,
 	cseOpinions,
 	declarationStatusHistory,
@@ -49,6 +54,8 @@ import {
 	releaseLockAsAdmin,
 } from "~/server/services/declarationLockService";
 
+// Every sortable column but `workforce`, which is a nullable joined column and
+// needs its own NULLS LAST key — see `gipWorkforceSortKey`.
 const sortColumnMap = {
 	siren: declarations.siren,
 	companyName: companies.name,
@@ -102,12 +109,23 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				filters.push(isNull(declarations.cancelledAt));
 			}
 
+			if (input.sizeRange) {
+				filters.push(gipSizeRangeFilter(input.sizeRange));
+			}
+
 			const where = filters.length > 0 ? and(...filters) : undefined;
-			const orderDir = input.sortOrder === "asc" ? asc : desc;
-			const orderColumn = sortColumnMap[input.sortBy];
+			const orderBy =
+				input.sortBy === "workforce"
+					? gipWorkforceSortKey(input.sortOrder)
+					: (input.sortOrder === "asc" ? asc : desc)(
+							sortColumnMap[input.sortBy],
+						);
 			const offset = (input.page - 1) * input.pageSize;
 
-			const [rows, totalResult] = await Promise.all([
+			// The GIP join and the bracket filter are carried by BOTH queries: the
+			// count feeds the "N résultats" line and the pagination, which would
+			// otherwise describe a different population than the listed rows.
+			const [rawRows, totalResult] = await Promise.all([
 				ctx.db
 					.select({
 						id: declarations.id,
@@ -119,26 +137,33 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						createdAt: declarations.createdAt,
 						updatedAt: declarations.updatedAt,
 						companyName: companies.name,
+						workforceEma: gipMdsData.workforceEma,
 						declarantEmail: users.email,
 						declarantFirstName: users.firstName,
 						declarantLastName: users.lastName,
 					})
 					.from(declarations)
 					.innerJoin(companies, eq(declarations.siren, companies.siren))
+					.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 					.innerJoin(users, eq(declarations.declarantId, users.id))
 					.where(where)
-					.orderBy(orderDir(orderColumn))
+					.orderBy(orderBy)
 					.limit(input.pageSize)
 					.offset(offset),
 				ctx.db
 					.select({ total: count() })
 					.from(declarations)
 					.innerJoin(companies, eq(declarations.siren, companies.siren))
+					.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 					.innerJoin(users, eq(declarations.declarantId, users.id))
 					.where(where),
 			]);
 
 			const total = totalResult[0]?.total ?? 0;
+			const rows = rawRows.map(({ workforceEma, ...row }) => ({
+				...row,
+				workforce: floorWorkforce(parseGipWorkforce(workforceEma)),
+			}));
 
 			return {
 				rows,
@@ -180,13 +205,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
-				.leftJoin(
-					gipMdsData,
-					and(
-						eq(gipMdsData.siren, declarations.siren),
-						eq(gipMdsData.year, declarations.year),
-					),
-				)
+				.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 				.innerJoin(users, eq(declarations.declarantId, users.id))
 				.where(eq(declarations.id, input.id))
 				.limit(1);
@@ -354,13 +373,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
-				.leftJoin(
-					gipMdsData,
-					and(
-						eq(gipMdsData.siren, declarations.siren),
-						eq(gipMdsData.year, declarations.year),
-					),
-				)
+				.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 				.innerJoin(users, eq(declarations.declarantId, users.id))
 				.where(eq(declarations.id, input.id))
 				.limit(1);

@@ -26,7 +26,6 @@ import type {
 import {
 	alignCampaignYear,
 	COMPANY_SIZE_ANNUAL_MIN,
-	COMPANY_SIZE_RANGES,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	type CompanySizeRange,
 	computeRate,
@@ -44,6 +43,7 @@ import {
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { gipSizeRangeFilter } from "~/server/db/gipWorkforceConditions";
 import {
 	companies,
 	declarationStatusHistory,
@@ -109,12 +109,7 @@ function obligationWorkforceFilter(
 
 	if (!sizeRange) return baseObligation;
 
-	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
-	const bucket =
-		max === null
-			? sql`${ema} >= ${min}`
-			: sql`${ema} BETWEEN ${min} AND ${max}`;
-	return sql`(${bucket}) AND ${baseObligation}`;
+	return sql`(${gipSizeRangeFilter(sizeRange)}) AND ${baseObligation}`;
 }
 
 // The GIP file is the single source of the headcount across the admin layer, so
@@ -126,20 +121,6 @@ function obligationWorkforceFilter(
 const gipWorkforceJoin = sql`LEFT JOIN ${gipMdsData}
 				ON ${gipMdsData.siren} = ${declarations.siren}
 				AND ${gipMdsData.year} = ${declarations.year}`;
-
-// Mirrors `getOptionalCompanySizeRange` (domain) as a SQL predicate, on the GIP
-// headcount floored the way `floorWorkforce` (domain) floors it. An unknown
-// headcount belongs to no bucket: the NULL propagates through the comparison and
-// the row leaves the filter, rather than being folded into the smallest bucket.
-function gipSizeRangeFilter(sizeRange: CompanySizeRange | undefined): SQL {
-	if (!sizeRange) return sql`TRUE`;
-
-	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
-	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	return max === null
-		? sql`${ema} >= ${min}`
-		: sql`${ema} BETWEEN ${min} AND ${max}`;
-}
 
 // Mirrors `isCseRequired` (domain) as a SQL predicate: >= 100 employees, with no
 // dependency on the campaign year. Deliberately not `obligationWorkforceFilter`,

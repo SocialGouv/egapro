@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+	COMPANY_SIZE_RANGES,
 	DECLARATION_FSM_STATUSES,
 	FIRST_DECLARATION_YEAR,
 } from "~/modules/domain";
@@ -9,6 +10,7 @@ export const SORT_COLUMNS = [
 	"siren",
 	"companyName",
 	"year",
+	"workforce",
 	"status",
 	"declarantEmail",
 	"createdAt",
@@ -24,7 +26,19 @@ export const ADMIN_DECLARATION_STATUS_FILTERS = [
 	"cancelled",
 ] as const;
 
-// The form select also offers the empty "all statuses" option.
+// Workforce brackets of the admin filter. Derived from the domain constant so a
+// bracket added there propagates here by construction (or breaks tsc), never a
+// hand-copied list of bounds.
+const COMPANY_SIZE_RANGE_KEYS = Object.keys(COMPANY_SIZE_RANGES) as Array<
+	keyof typeof COMPANY_SIZE_RANGES
+>;
+
+// Both form selects also offer the empty "all sizes" / "all statuses" option.
+const COMPANY_SIZE_RANGE_FORM_OPTIONS = [
+	"",
+	...COMPANY_SIZE_RANGE_KEYS,
+] as const;
+
 const ADMIN_DECLARATION_STATUS_FORM_OPTIONS = [
 	"",
 	...ADMIN_DECLARATION_STATUS_FILTERS,
@@ -42,6 +56,7 @@ export const searchDeclarationsSchema = z.object({
 	dateFrom: z.string().date().optional().or(z.literal("")),
 	dateTo: z.string().date().optional().or(z.literal("")),
 	status: z.enum(ADMIN_DECLARATION_STATUS_FILTERS).optional(),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
 	page: z.coerce.number().int().min(1).default(1),
 	pageSize: z.coerce.number().int().min(10).max(100).default(DEFAULT_PAGE_SIZE),
 	sortBy: z.enum(SORT_COLUMNS).default("createdAt"),
@@ -60,6 +75,7 @@ export const searchDeclarationsFormSchema = z.object({
 	dateFrom: z.string().optional(),
 	dateTo: z.string().optional(),
 	status: z.enum(ADMIN_DECLARATION_STATUS_FORM_OPTIONS).optional(),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_FORM_OPTIONS).optional(),
 });
 
 export type SearchDeclarationsFormValues = z.infer<

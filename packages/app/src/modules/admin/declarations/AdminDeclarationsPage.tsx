@@ -23,6 +23,8 @@ function DeclarationsContent() {
 		dateTo: searchParams.get("dateTo") ?? undefined,
 		status: (searchParams.get("status") ||
 			undefined) as SearchDeclarationsOutput["status"],
+		sizeRange: (searchParams.get("sizeRange") ||
+			undefined) as SearchDeclarationsOutput["sizeRange"],
 		page: Number(searchParams.get("page") ?? "1"),
 		pageSize: Number(searchParams.get("pageSize") ?? String(DEFAULT_PAGE_SIZE)),
 		sortBy: (searchParams.get("sortBy") as SortColumn) ?? "createdAt",
