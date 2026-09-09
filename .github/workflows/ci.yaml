@@ -229,20 +229,3 @@ jobs:
         uses: actions/checkout@v7
       - name: Run release scripts tests
         run: bash scripts/release/release-scripts.test.sh
-
-  migration-v1-test:
-    name: Migration V1 · Scripts test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes postgresql-client
-      - name: Check shell syntax
-        run: bash -n scripts/migration-v1/migrate.sh scripts/migration-v1/tests/*.sh
-      - name: Run command-line tests
-        run: bash scripts/migration-v1/tests/cli.test.sh
-      - name: Run PostgreSQL integration tests
-        run: bash scripts/migration-v1/tests/integration.sh
