@@ -331,7 +331,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Puis-je remplir la déclaration en plusieurs fois ?",
 						answer:
-							"Oui. Chaque étape est enregistrée en brouillon au fur et à mesure et vous pouvez reprendre plus tard. Un brouillon laissé sans activité expire au bout de deux mois.",
+							"Oui. Chaque étape est enregistrée en brouillon au fur et à mesure et vous pouvez reprendre plus tard. Un brouillon laissé sans activité expire au bout de 30 jours.",
 					},
 					{
 						question: "Que se passe-t-il quand je transmets ?",

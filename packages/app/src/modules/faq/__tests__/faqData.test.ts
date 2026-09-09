@@ -141,6 +141,16 @@ describe("FAQ describes the scheme the application implements", () => {
 		expect(quartiles).toContain(`${QUARTILE_THRESHOLD_COUNT} seuils`);
 	});
 
+	// The band is parity ± the alert threshold, exactly as `quartile.ts` derives
+	// QUARTILE_BALANCE_LOWER/UPPER — so it moves with GAP_ALERT_THRESHOLD.
+	it("states the top-quartile parity band the domain derives", () => {
+		const quartiles = answersOf("quartiles");
+
+		expect(quartiles).toContain(`${GAP_ALERT_THRESHOLD} %`);
+		expect(quartiles).toContain(`${50 - GAP_ALERT_THRESHOLD} %`);
+		expect(quartiles).toContain(`${50 + GAP_ALERT_THRESHOLD} %`);
+	});
+
 	it("states the representation thresholds the domain defines", () => {
 		const representation = answersOf("representation-equilibree");
 
