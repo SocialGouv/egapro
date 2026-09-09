@@ -403,6 +403,41 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 });
 
 describe("CategoryForm legacy read-only categories (#3678)", () => {
+	it("preserves legacy pay while disabled, then normalizes it when editing becomes possible", async () => {
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			},
+		];
+		const { rerenderForm } = renderForm(initialCategories, { disabled: true });
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+
+		expect(annualBaseWomen).toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+
+		rerenderForm({ disabled: false });
+		await waitFor(() => expect(annualBaseWomen).toHaveValue(""));
+		expect(annualBaseWomen).toBeDisabled();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
 	it("normalizes legacy pay once a read-only form becomes editable", async () => {
 		const initialCategories = [
 			{

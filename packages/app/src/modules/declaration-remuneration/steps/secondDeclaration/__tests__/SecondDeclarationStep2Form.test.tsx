@@ -291,6 +291,32 @@ describe("SecondDeclarationStep2Form", () => {
 		expect(screen.getByLabelText(/Date de fin/)).toBeDisabled();
 	});
 
+	it("preserves historical pay when a submitted second declaration is disabled but not locked", () => {
+		renderStep2({
+			initialSecondDeclarationCategories: [
+				makeCategory({
+					name: "Cadres",
+					womenCount: 0,
+					hourlyWomenCount: 0,
+					menCount: 3,
+					hourlyMenCount: 3,
+					annualBaseWomen: "30000",
+					annualBaseMen: "32000",
+				}),
+			],
+			status: "demarche_completed",
+		});
+
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(annualBaseWomen).toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+	});
+
 	it("renders the lock-protected inputs as readOnly instead of disabled", () => {
 		renderStep2ReadOnly();
 

@@ -190,6 +190,7 @@ export function CategoryForm({
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
+	const preserveLegacyPay = readOnly || disabled;
 
 	const initialCats =
 		initialCategories.length > 0
@@ -198,10 +199,10 @@ export function CategoryForm({
 
 	const form = useZodForm(categoryFormSchema, {
 		defaultValues: defaultValuesOverride
-			? normalizeFormValues(defaultValuesOverride, readOnly)
+			? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
 			: {
 					source: initialSource,
-					categories: toFormValues(initialCats, readOnly),
+					categories: toFormValues(initialCats, preserveLegacyPay),
 				},
 	});
 	const clearNonApplicableCategoryPay = useCallback(
@@ -221,15 +222,15 @@ export function CategoryForm({
 		[form],
 	);
 
-	// Lock ownership can change without remounting the form. Official legacy pay
-	// is preserved while read-only, then normalized once editing becomes possible.
-	// This effect depends only on the scalar lock state, never on the watched array.
+	// Editability can change without remounting the form. Official legacy pay is
+	// preserved while non-editable, then normalized once editing becomes possible.
+	// This effect depends only on scalar state, never on the watched array.
 	useEffect(() => {
-		if (readOnly) return;
+		if (preserveLegacyPay) return;
 		form.getValues("categories").forEach((_, index) => {
 			clearNonApplicableCategoryPay(index);
 		});
-	}, [clearNonApplicableCategoryPay, form, readOnly]);
+	}, [clearNonApplicableCategoryPay, form, preserveLegacyPay]);
 
 	useEffect(() => {
 		if (!onValuesChange) return;
@@ -699,7 +700,7 @@ export function CategoryForm({
 							? shouldRetainCategoryPayValues(
 									toCategoryHeadcounts(cat),
 									cat,
-									readOnly,
+									preserveLegacyPay,
 								)
 							: true;
 						return (
