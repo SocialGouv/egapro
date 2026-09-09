@@ -27,8 +27,7 @@ import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
 import type { CseOpinionStep1Data, OpinionType } from "./types";
 
-// Looser than the form values on purpose: below the threshold the draft only ever
-// carries what the user actually entered, so the gap keys are simply absent.
+// Looser than the form values on purpose: the draft only ever carries what the user entered.
 type DeclarationOpinionDraftValue = {
 	accuracyOpinion?: OpinionType;
 	accuracyDate?: string;
@@ -139,8 +138,7 @@ export function Step1Opinions({
 	const triggerDraftSave = useCallback(() => {
 		if (isReadOnly) return;
 		const values = form.getValues();
-		// Guarding the read side alone would leave the synthesized answer in the draft,
-		// to be restored as the user's own once a gap brings the card back.
+		// Guarding the read side alone would leave the synthesized answer in the draft.
 		const firstDeclaration: DeclarationOpinionDraftValue =
 			showFirstDeclarationGap
 				? values.firstDeclaration
