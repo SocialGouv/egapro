@@ -270,7 +270,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
 - **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la soumission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations soumises (une déclaration `not_subject` n'a pas de PDF).
 - **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
-- **Reprise V1** : un script ponctuel (`pnpm --filter app import:v1-representation`) importe les déclarations historiques depuis la base legacy ; il n’écrase **jamais** une déclaration saisie nativement en V2. La procédure d’exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
+- **Reprise V1** : le kit ponctuel `scripts/migration-v1` reprend depuis un dump les déclarations historiques sans jamais écraser une déclaration saisie nativement en V2. La procédure d'exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
 
 **Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (soumise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
 
@@ -327,7 +327,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - L'API publique **ne renvoie jamais** les champs de contact (`type`, `value`, `substituteEmail`) dans les listes — seulement dans la fiche détaillée. Cette séparation est volontaire (anti-scraping, RGPD).
 - Pagination : 20 par défaut, max 100.
 - Import CSV admin : upsert basé sur (région, département, nom).
-- Reprise V1 : le script ponctuel `pnpm --filter app import:v1-referents` remplace l’annuaire V2 par un instantané complet et validé de l’annuaire legacy. Voir [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
+- Reprise V1 : le kit ponctuel `scripts/migration-v1` remplace l'annuaire V2 par un instantané complet et validé de l'annuaire legacy. Voir [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
 
 **Données persistées** : `referents`.
 

@@ -49,7 +49,6 @@
 		"generate:fetch-companies": "tsx scripts/fetch-companies.ts",
 		"backfill:company-location": "tsx scripts/backfill-company-region-department.mjs",
 		"import:v1-representation": "tsx scripts/import-v1-representation.mjs",
-		"import:v1-referents": "tsx scripts/import-v1-referents.mjs",
 		"generate:mock-gip": "tsx scripts/generate-mock-gip-data.ts",
 		"mock:refresh": "tsx scripts/fetch-companies.ts --per-bucket=40 && tsx scripts/generate-mock-gip-data.ts",
 		"suit:encode-cert": "node scripts/encode-suit-cert.mjs",

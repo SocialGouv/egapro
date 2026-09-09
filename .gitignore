@@ -59,6 +59,13 @@ suit-client-certs/
 suit-signing-keys/
 *.key
 
+# Private V1 migration inputs and generated snapshots
+scripts/migration-v1/private/
+scripts/migration-v1/*.dump
+scripts/migration-v1/*.backup
+scripts/migration-v1/*-failure-*.log
+scripts/migration-v1/*-snapshot/
+
 # Local Matomo — generated API token + credentials (never commit)
 scripts/matomo-local/.secrets/*
 !scripts/matomo-local/.secrets/.gitkeep
