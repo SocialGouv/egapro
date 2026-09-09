@@ -174,15 +174,44 @@ describe("GET /api/prefill-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: String(YEAR) },
+			metadata: { year: YEAR, invalidYear: false },
 		});
 	});
 
-	it("answers 400 when the requested year is out of range", async () => {
-		const response = await GET(request("?year=1900"));
+	it("audits no year at all when none is requested", async () => {
+		prefilledCompany();
+
+		await GET(request(""));
+
+		expect(auditRow()).toMatchObject({
+			metadata: { year: null, invalidYear: false },
+		});
+	});
+
+	it.each([
+		["out of range", "1900"],
+		["not a number", "abc"],
+		["a number with a trailing suffix", "2025abc"],
+	])("answers 400 when the requested year is %s", async (_label, year) => {
+		const response = await GET(request(`?year=${year}`));
 
 		expect(response.status).toBe(400);
 		expect(mocks.limit).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["without a session", null, 401],
+		["with a session", { user: { id: "user-1", siret: SIRET } }, 400],
+	])("audits an oversized year as null %s", async (_label, session, status) => {
+		mocks.auth.mockResolvedValue(session);
+
+		const response = await GET(request(`?year=${"x".repeat(5_000)}`));
+
+		expect(response.status).toBe(status);
+		expect(auditRow()).toMatchObject({
+			status: "failure",
+			metadata: { year: null, invalidYear: true },
+		});
 	});
 
 	it("answers 404 when no prefilled data exists for the year", async () => {

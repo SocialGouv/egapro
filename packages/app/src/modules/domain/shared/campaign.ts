@@ -9,6 +9,24 @@ export function getCurrentYear(): number {
 	return readCampaignYearOverride() ?? new Date().getFullYear();
 }
 
+/** Bounds a campaign year has to fall within to be accepted from user input. */
+export const MIN_CAMPAIGN_YEAR = 2000;
+export const MAX_CAMPAIGN_YEAR = 2100;
+
+/**
+ * Parses a campaign year coming from user input (a query string, a form field).
+ * Returns the number when it is a plain integer inside the accepted bounds,
+ * `null` otherwise — so callers never carry the raw string any further, into an
+ * audit row least of all.
+ */
+export function parseCampaignYear(raw: string): number | null {
+	if (!/^\d{4}$/.test(raw)) {
+		return null;
+	}
+	const year = Number.parseInt(raw, 10);
+	return year >= MIN_CAMPAIGN_YEAR && year <= MAX_CAMPAIGN_YEAR ? year : null;
+}
+
 /** Returns the reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
 export function getReferenceYearFor(campaignYear: number): number {
 	return campaignYear - 1;

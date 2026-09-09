@@ -6,23 +6,44 @@ import {
 	type PrefillPdfData,
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
-import { getCurrentYear } from "~/modules/domain";
+import { getCurrentYear, parseCampaignYear } from "~/modules/domain";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
+
+/**
+ * Reads the `year` query parameter as a number the audit row can carry. The raw
+ * string never leaves this function: an unbounded caller-supplied value written
+ * to `audit.action_log` would let anyone inflate the trace, and the row is
+ * written for refused requests too.
+ */
+function readRequestedYear(request: Request): {
+	year: number | null;
+	invalid: boolean;
+} {
+	const raw = new URL(request.url).searchParams.get("year");
+	if (!raw) {
+		return { year: null, invalid: false };
+	}
+	const year = parseCampaignYear(raw);
+	return { year, invalid: year === null };
+}
 
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD,
 		resolveContext: async (request) => {
 			const { session, siren } = await getSessionSiren(request);
-			const url = new URL(request.url);
+			const requestedYear = readRequestedYear(request);
 			return {
 				userId: session?.user?.id ?? null,
 				userEmail: session?.user?.email ?? null,
 				siren,
-				metadata: { year: url.searchParams.get("year") ?? null },
+				metadata: {
+					year: requestedYear.year,
+					invalidYear: requestedYear.invalid,
+				},
 			};
 		},
 	},
@@ -32,16 +53,11 @@ export const GET = withAuditedRoute(
 			return new Response("Non autorisé", { status: 401 });
 		}
 
-		const url = new URL(request.url);
-		const yearParam = url.searchParams.get("year");
-		const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : null;
-		if (
-			parsedYear !== null &&
-			(Number.isNaN(parsedYear) || parsedYear < 2000 || parsedYear > 2100)
-		) {
+		const requestedYear = readRequestedYear(request);
+		if (requestedYear.invalid) {
 			return new Response("Paramètre 'year' invalide", { status: 400 });
 		}
-		const year = parsedYear ?? getCurrentYear();
+		const year = requestedYear.year ?? getCurrentYear();
 
 		try {
 			const [row] = await db
