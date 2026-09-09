@@ -91,9 +91,7 @@ function getRepresentationProgress(
 	return "not_started";
 }
 
-// `status === "done"` alone is not enough: it also covers a not-subject
-// declaration (reset to step 0 but mapped "done", see DeclarationItem).
-// Only an actually-transmitted declaration should read as transmitted.
+// `status === "done"` also covers a not-subject declaration, which transmitted nothing.
 export function isRepresentationDeclarationTransmitted(
 	declaration: DeclarationItem | undefined,
 ): boolean {
