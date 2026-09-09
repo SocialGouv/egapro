@@ -236,7 +236,46 @@ describe("CategoryForm accordion identity", () => {
 });
 
 describe("CategoryForm import of a non-calculable category (#3678)", () => {
-	it("keeps imported pay in form memory but omits it from submission", async () => {
+	it("normalizes non-calculable defaults before the first emitted value change", () => {
+		const onValuesChange = vi.fn();
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "0",
+			menCount: "3",
+			hourlyWomenCount: "0",
+			hourlyMenCount: "3",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+			onValuesChange,
+		});
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
+		expect(onValuesChange).toHaveBeenCalled();
+		for (const [values] of onValuesChange.mock.calls) {
+			expect(values.categories[0]?.annualBaseWomen).toBe("");
+			expect(values.categories[0]?.hourlyVariableMen).toBe("");
+		}
+	});
+
+	it("clears imported pay, disables its visible fields, and omits it from submission", async () => {
 		const user = userEvent.setup();
 		const onSubmit = vi.fn();
 		const onValuesChange = vi.fn();
@@ -247,7 +286,7 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 				womenCount: "3",
 				menCount: "0",
 				hourlyWomenCount: "3",
-				hourlyMenCount: "2",
+				hourlyMenCount: "0",
 				annualBaseWomen: "30000",
 				annualBaseMen: "32000",
 				annualVariableWomen: "5000",
@@ -263,12 +302,15 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 			expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument(),
 		);
 		expect(
-			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
-		).not.toBeInTheDocument();
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
 		await waitFor(() =>
 			expect(
 				onValuesChange.mock.calls.some(
-					([values]) => values.categories[0]?.annualBaseWomen === "30000.00",
+					([values]) => values.categories[0]?.annualBaseWomen === "",
 				),
 			).toBe(true),
 		);
@@ -281,7 +323,12 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 
 		expect(onSubmit).toHaveBeenCalledTimes(1);
 		const data = onSubmit.mock.calls[0]?.[0]?.categories?.[0]?.data;
-		expect(data).toMatchObject({ womenCount: 3, menCount: 0 });
+		expect(data).toMatchObject({
+			womenCount: 3,
+			menCount: 0,
+			hourlyWomenCount: 3,
+			hourlyMenCount: 0,
+		});
 		expect(data?.annualBaseWomen).toBeUndefined();
 		expect(data?.hourlyVariableMen).toBeUndefined();
 	});

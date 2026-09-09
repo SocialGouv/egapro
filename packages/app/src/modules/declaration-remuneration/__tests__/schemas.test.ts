@@ -208,7 +208,7 @@ const INCOMPLETE_REMUNERATION_MESSAGE =
 	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
 
 const INCONSISTENT_REMUNERATION_MESSAGE =
-	"Une catégorie d'emplois dont un effectif est à 0 ne peut pas déclarer de rémunération.";
+	"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.";
 
 function parseCategory(data: Record<string, unknown>) {
 	return updateEmployeeCategoriesSchema.safeParse({
@@ -229,32 +229,22 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("rejects womenCount=0 even when only the 4 men pay fields are filled (#3678)", () => {
+	it("accepts an isolated womenCount=0 when the required men pay fields are filled (#3678)", () => {
 		const result = parseCategory({
 			womenCount: 0,
 			menCount: 2,
 			...MEN_PAY_VALUES,
 		});
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			expect(result.error.issues.map((i) => i.message)).toContain(
-				INCONSISTENT_REMUNERATION_MESSAGE,
-			);
-		}
+		expect(result.success).toBe(true);
 	});
 
-	it("rejects menCount=0 even when only the 4 women pay fields are filled (#3678)", () => {
+	it("accepts an isolated menCount=0 when the required women pay fields are filled (#3678)", () => {
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 0,
 			...WOMEN_PAY_VALUES,
 		});
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			expect(result.error.issues.map((i) => i.message)).toContain(
-				INCONSISTENT_REMUNERATION_MESSAGE,
-			);
-		}
+		expect(result.success).toBe(true);
 	});
 
 	it("accepts both sexes at headcount 0 with no pay fields", () => {
@@ -375,10 +365,28 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 });
 
 describe("updateEmployeeCategoriesSchema — pay of a category at 0 (#3678)", () => {
-	it("rejects a pay amount facing an annual headcount at 0", () => {
+	it("rejects pay when women are absent from both workforce rows", () => {
+		const result = parseCategory({
+			womenCount: 0,
+			menCount: 3,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 3,
+			annualBaseMen: "1000",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCONSISTENT_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects pay when men are absent from both workforce rows", () => {
 		const result = parseCategory({
 			womenCount: 3,
 			menCount: 0,
+			hourlyWomenCount: 3,
+			hourlyMenCount: 0,
 			annualBaseWomen: "1000",
 		});
 		expect(result.success).toBe(false);
@@ -389,28 +397,30 @@ describe("updateEmployeeCategoriesSchema — pay of a category at 0 (#3678)", ()
 		}
 	});
 
-	it("rejects a pay amount when the 0 sits on the other basis", () => {
-		const result = parseCategory({
-			womenCount: 3,
-			hourlyWomenCount: 0,
-			annualBaseWomen: "1000",
-		});
-		expect(result.success).toBe(false);
-		if (!result.success) {
-			expect(result.error.issues.map((i) => i.message)).toContain(
-				INCONSISTENT_REMUNERATION_MESSAGE,
-			);
-		}
+	it("accepts an isolated 0 with the required pay for positive headcounts", () => {
+		expect(
+			parseCategory({
+				womenCount: 3,
+				menCount: 0,
+				annualBaseWomen: "30000",
+				annualVariableWomen: "5000",
+			}).success,
+		).toBe(true);
 	});
 
-	it("accepts an annual headcount at 0 with no pay amount at all", () => {
-		expect(parseCategory({ womenCount: 3, menCount: 0 }).success).toBe(true);
-	});
-
-	it("accepts an hourly headcount at 0 with no pay amount at all", () => {
-		expect(parseCategory({ womenCount: 3, hourlyWomenCount: 0 }).success).toBe(
-			true,
-		);
+	it("accepts crossed 0s with the required pay for each positive headcount", () => {
+		expect(
+			parseCategory({
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 0,
+				annualBaseMen: "32000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyVariableWomen: "3",
+			}).success,
+		).toBe(true);
 	});
 
 	it("still rejects a category without any 0 that declares no pay at all", () => {

@@ -428,39 +428,35 @@ export function CategoryDataTable({
 				{!payApplicable && <p className="fr-mb-0">Aucun écart à calculer</p>}
 			</div>
 
-			{payApplicable && (
-				<>
-					<RemunerationTable
-						blur={blur}
-						cat={cat}
-						catIndex={catIndex}
-						disabled={disabled}
-						errorAlertId={errorAlertId}
-						errors={errors}
-						fields={ANNUAL_FIELDS}
-						idPrefix={idPrefix}
-						pos={pos}
-						readOnly={readOnly}
-						scope="annuel"
-						title="Rémunération annuelle brute moyenne"
-					/>
+			<RemunerationTable
+				blur={blur}
+				cat={cat}
+				catIndex={catIndex}
+				disabled={disabled || !payApplicable}
+				errorAlertId={errorAlertId}
+				errors={errors}
+				fields={ANNUAL_FIELDS}
+				idPrefix={idPrefix}
+				pos={pos}
+				readOnly={readOnly}
+				scope="annuel"
+				title="Rémunération annuelle brute moyenne"
+			/>
 
-					<RemunerationTable
-						blur={blur}
-						cat={cat}
-						catIndex={catIndex}
-						disabled={disabled}
-						errorAlertId={errorAlertId}
-						errors={errors}
-						fields={HOURLY_FIELDS}
-						idPrefix={idPrefix}
-						pos={pos}
-						readOnly={readOnly}
-						scope="horaire"
-						title="Rémunération horaire brute moyenne"
-					/>
-				</>
-			)}
+			<RemunerationTable
+				blur={blur}
+				cat={cat}
+				catIndex={catIndex}
+				disabled={disabled || !payApplicable}
+				errorAlertId={errorAlertId}
+				errors={errors}
+				fields={HOURLY_FIELDS}
+				idPrefix={idPrefix}
+				pos={pos}
+				readOnly={readOnly}
+				scope="horaire"
+				title="Rémunération horaire brute moyenne"
+			/>
 		</div>
 	);
 }

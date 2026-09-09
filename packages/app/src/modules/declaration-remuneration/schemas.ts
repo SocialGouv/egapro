@@ -88,7 +88,7 @@ export const updateStep4Schema = z.object({
 /**
  * Each pay basis carries its own headcount and its own pay fields (#4254).
  * For an applicable category, a headcount only requires its basis' pay data;
- * the category-wide zero rule (#3678) takes precedence over that distinction.
+ * the absence of one sex from both workforce rows (#3678) takes precedence.
  */
 export const CATEGORY_PAY_BASES = [
 	{
@@ -138,7 +138,7 @@ const employeeCategoryDataSchema = z
 			CATEGORY_PAY_FIELDS.every((field) => !data[field]),
 		{
 			message:
-				"Une catégorie d'emplois dont un effectif est à 0 ne peut pas déclarer de rémunération.",
+				"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.",
 		},
 	)
 	.refine(

@@ -72,22 +72,32 @@ describe("isCategoryPayApplicable (#3678)", () => {
 	});
 
 	it.each([
-		["womenCount", { womenCount: 0 }],
-		["menCount", { menCount: 0 }],
-		["hourlyWomenCount", { hourlyWomenCount: 0 }],
-		["hourlyMenCount", { hourlyMenCount: 0 }],
-	])("does not apply when %s is an explicit 0", (_field, headcounts) => {
+		[
+			"women",
+			{ womenCount: 0, menCount: 2, hourlyWomenCount: 0, hourlyMenCount: 2 },
+		],
+		[
+			"men",
+			{ womenCount: 2, menCount: 0, hourlyWomenCount: 2, hourlyMenCount: 0 },
+		],
+		[
+			"both sexes",
+			{ womenCount: 0, menCount: 0, hourlyWomenCount: 0, hourlyMenCount: 0 },
+		],
+	] as const)("does not apply when both workforce rows are 0 for %s", (_label, headcounts) => {
 		expect(isCategoryPayApplicable(headcounts)).toBe(false);
 	});
 
-	it("does not apply when a 0 faces a headcount on the same basis", () => {
-		expect(isCategoryPayApplicable({ womenCount: 3, menCount: 0 })).toBe(false);
-	});
-
-	it("does not apply when the 0 is on the other basis than the headcount", () => {
-		expect(isCategoryPayApplicable({ womenCount: 3, hourlyMenCount: 0 })).toBe(
-			false,
-		);
+	it.each([
+		["one isolated hourly 0", { hourlyWomenCount: 0 }],
+		["two crossed 0s", { womenCount: 0, hourlyMenCount: 0 }],
+		["annual 0 and missing hourly count", { womenCount: 0 }],
+		[
+			"annual 0 and null hourly count",
+			{ womenCount: 0, hourlyWomenCount: null },
+		],
+	])("applies with %s", (_label, headcounts) => {
+		expect(isCategoryPayApplicable(headcounts)).toBe(true);
 	});
 
 	it("applies when a headcount cell is null — unknown is not zero", () => {

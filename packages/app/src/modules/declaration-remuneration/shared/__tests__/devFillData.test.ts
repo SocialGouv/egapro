@@ -125,23 +125,23 @@ describe("devFillData", () => {
 		expect(sumOf(categories, "hourlyMenCount")).toBe(1);
 	});
 
-	it("createDevStep5Categories leaves no pay amount on a category at 0 (#3678)", () => {
+	it("createDevStep5Categories leaves no pay amount when one sex is absent from both rows (#3678)", () => {
 		const categories = createDevStep5Categories(() => 0, totals(1, 1, 1, 1));
 
-		const atZero = categories.filter((c) =>
-			[c.womenCount, c.menCount, c.hourlyWomenCount, c.hourlyMenCount].includes(
-				"0",
-			),
+		const nonApplicable = categories.filter(
+			(c) =>
+				(c.womenCount === "0" && c.hourlyWomenCount === "0") ||
+				(c.menCount === "0" && c.hourlyMenCount === "0"),
 		);
-		expect(atZero.length).toBeGreaterThan(0);
-		for (const category of atZero) {
+		expect(nonApplicable.length).toBeGreaterThan(0);
+		for (const category of nonApplicable) {
 			for (const field of PAY_FIELDS) {
 				expect(category[field]).toBe("");
 			}
 		}
 	});
 
-	it("createDevStep5Categories keeps the pay amounts of categories without a 0 (#3678)", () => {
+	it("createDevStep5Categories keeps pay amounts for applicable categories (#3678)", () => {
 		const categories = createDevStep5Categories(
 			() => 0,
 			totals(120, 130, 120, 130),

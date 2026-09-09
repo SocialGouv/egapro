@@ -28,7 +28,8 @@ describe("collectCategoryPayErrors", () => {
 		expect(
 			collectCategoryPayErrors([
 				category({
-					menCount: "0",
+					womenCount: "0",
+					hourlyWomenCount: "0",
 					annualBaseWomen: "30000",
 					annualBaseMen: "32000",
 					annualVariableWomen: "5000",

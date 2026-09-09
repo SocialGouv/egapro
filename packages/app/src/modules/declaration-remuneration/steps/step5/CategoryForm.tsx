@@ -56,6 +56,7 @@ import {
 	fromDatabaseRows,
 	toCategoryHeadcounts,
 	toSubmitData,
+	withoutPayValuesWhenNotApplicable,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
@@ -65,21 +66,30 @@ function createIdGenerator() {
 }
 
 function toFormValues(cats: EmployeeCategory[]) {
-	return cats.map((c) => ({
-		name: c.name,
-		womenCount: c.womenCount,
-		menCount: c.menCount,
-		hourlyWomenCount: c.hourlyWomenCount,
-		hourlyMenCount: c.hourlyMenCount,
-		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
-		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
-		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
-		annualVariableMen: padDecimalToTwo(c.annualVariableMen),
-		hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
-		hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
-		hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
-		hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
-	}));
+	return cats.map((c) =>
+		withoutPayValuesWhenNotApplicable({
+			name: c.name,
+			womenCount: c.womenCount,
+			menCount: c.menCount,
+			hourlyWomenCount: c.hourlyWomenCount,
+			hourlyMenCount: c.hourlyMenCount,
+			annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+			annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+			annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+			annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+			hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+			hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+			hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+			hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
+		}),
+	);
+}
+
+function normalizeFormValues(values: CategoryFormValues): CategoryFormValues {
+	return {
+		source: values.source,
+		categories: values.categories.map(withoutPayValuesWhenNotApplicable),
+	};
 }
 
 type Props = {
@@ -160,10 +170,12 @@ export function CategoryForm({
 			: [createEmptyCategory(nextId())];
 
 	const form = useZodForm(categoryFormSchema, {
-		defaultValues: defaultValuesOverride ?? {
-			source: initialSource,
-			categories: toFormValues(initialCats),
-		},
+		defaultValues: defaultValuesOverride
+			? normalizeFormValues(defaultValuesOverride)
+			: {
+					source: initialSource,
+					categories: toFormValues(initialCats),
+				},
 	});
 
 	useEffect(() => {
@@ -244,13 +256,19 @@ export function CategoryForm({
 			const categoryPayApplicable = isCategoryPayApplicable(
 				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
 			);
+			if (isCountField && !categoryPayApplicable) {
+				for (const payField of CATEGORY_PAY_FIELDS) {
+					const path = `categories.${index}.${payField}` as const;
+					if (form.getValues(path) !== "") form.setValue(path, "");
+				}
+			}
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
 					if (error.fieldId === changedFieldId) return false;
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
-					// A category with an explicit zero has no pay fields to correct.
+					// A category without one sex has no pay fields to correct.
 					// When it becomes applicable again, keep any completeness errors.
 					return categoryPayApplicable;
 				}),
@@ -593,9 +611,7 @@ export function CategoryForm({
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
 						const cat = categories[index];
-						// React Hook Form keeps unmounted values by default. Hiding the pay
-						// tables therefore leaves their controlled values available if the
-						// user corrects the headcount before submitting (#3678).
+						// One sex absent from both workforce rows disables every pay field.
 						const payApplicable = cat
 							? isCategoryPayApplicable(toCategoryHeadcounts(cat))
 							: true;

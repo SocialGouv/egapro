@@ -23,16 +23,14 @@ export type CategoryHeadcounts = {
 	hourlyMenCount?: number | null;
 };
 
-/** Whether a job category declares pay data at all. False as soon as one
- *  headcount cell, on either basis, is an explicit 0 — (0/0), (n/0) or (0/n):
- *  a category missing a sex on a basis has no gap to declare (#3678). */
+/** Whether a job category declares pay data at all. False only when one sex
+ *  has an explicit 0 on both the annual and hourly rows: the category then has
+ *  no gap to declare (#3678). */
 export function isCategoryPayApplicable(
 	headcounts: CategoryHeadcounts,
 ): boolean {
-	return ![
-		headcounts.womenCount,
-		headcounts.menCount,
-		headcounts.hourlyWomenCount,
-		headcounts.hourlyMenCount,
-	].some((count) => count === 0);
+	const hasNoWomen =
+		headcounts.womenCount === 0 && headcounts.hourlyWomenCount === 0;
+	const hasNoMen = headcounts.menCount === 0 && headcounts.hourlyMenCount === 0;
+	return !hasNoWomen && !hasNoMen;
 }

@@ -345,7 +345,7 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 		hourlyVariableMen: "4",
 	} as const;
 
-	it("restores hidden pay while the correction form remains mounted", async () => {
+	it("clears pay and does not restore it when the correction becomes applicable again", async () => {
 		const user = userEvent.setup();
 		renderStep2({
 			initialFirstDeclarationCategories: [
@@ -362,27 +362,41 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 		const menCount = screen.getByLabelText(
 			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
 		);
+		const hourlyMenCount = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
 
 		await user.clear(menCount);
 		await user.type(menCount, "0");
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		await user.clear(hourlyMenCount);
+		await user.type(hourlyMenCount, "0");
 		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		expect(
-			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
-		).not.toBeInTheDocument();
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
 
 		await user.clear(menCount);
 		await user.type(menCount, "2");
 		expect(
 			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
-		).toHaveValue("30 000,00");
+		).toHaveValue("");
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).not.toBeDisabled();
 		expect(
 			screen.getByLabelText(
 				"Composantes variables horaires hommes, catégorie 1",
 			),
-		).toHaveValue("4,00");
+		).toHaveValue("");
 	});
 
-	it("omits hidden pay when the correction is submitted", async () => {
+	it("omits disabled pay when the correction is submitted", async () => {
 		const user = userEvent.setup();
 		renderStep2({
 			initialFirstDeclarationCategories: [
@@ -391,7 +405,7 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 					womenCount: 3,
 					menCount: 0,
 					hourlyWomenCount: 3,
-					hourlyMenCount: 2,
+					hourlyMenCount: 0,
 					...payValues,
 				}),
 			],
@@ -405,7 +419,12 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 
 		expect(mutateMock).toHaveBeenCalledTimes(1);
 		const data = mutateMock.mock.calls[0]?.[0]?.categories?.[0]?.data;
-		expect(data).toMatchObject({ womenCount: 3, menCount: 0 });
+		expect(data).toMatchObject({
+			womenCount: 3,
+			menCount: 0,
+			hourlyWomenCount: 3,
+			hourlyMenCount: 0,
+		});
 		expect(data?.annualBaseWomen).toBeUndefined();
 		expect(data?.hourlyVariableMen).toBeUndefined();
 	});
@@ -418,14 +437,17 @@ describe("SecondDeclarationStep2Form — non-calculable category (#3678)", () =>
 					womenCount: 3,
 					menCount: 0,
 					hourlyWomenCount: 3,
-					hourlyMenCount: 2,
+					hourlyMenCount: 0,
 				}),
 			],
 		});
 
 		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
 		expect(
-			screen.queryByLabelText("Salaire de base annuel femmes, catégorie 1"),
-		).not.toBeInTheDocument();
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
 	});
 });

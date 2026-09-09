@@ -109,24 +109,24 @@ describe("CategoryAccordionItem — non-calculable pay gap (#3678)", () => {
 		expect(screen.getByTestId("category-pay-status")).toBeEmptyDOMElement();
 	});
 
-	it("replaces both pay tables with a live non-calculable message", () => {
+	it("keeps both pay tables visible and disables their fields with a live non-calculable message", () => {
 		renderItem({ payApplicable: false });
 		const status = screen.getByTestId("category-pay-status");
 		expect(status).toHaveAttribute("aria-live", "polite");
 		expect(status).toHaveTextContent("Aucun écart à calculer");
 		for (const label of PAY_CELL_LABELS) {
-			expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
+			expect(screen.getByLabelText(label)).toBeDisabled();
 		}
 		expect(
-			screen.queryByRole("heading", {
+			screen.getByRole("heading", {
 				name: "Rémunération annuelle brute moyenne",
 			}),
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("heading", {
+			screen.getByRole("heading", {
 				name: "Rémunération horaire brute moyenne",
 			}),
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 		for (const label of COUNT_CELL_LABELS) {
 			expect(screen.getByLabelText(label)).not.toBeDisabled();
 		}

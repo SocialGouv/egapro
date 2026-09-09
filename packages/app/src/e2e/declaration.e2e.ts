@@ -575,9 +575,9 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 		});
 
 		await test.step("un effectif n'exige que les rémunérations de sa base", async () => {
-			// The annual headcount is emptied, not zeroed: an unknown headcount
-			// claims nothing, where an explicit 0 suspends the whole category's
-			// remuneration (#3678) and would hand the answer to another rule.
+			// The annual headcount is emptied: an unknown headcount claims nothing.
+			// Only 0 on both rows of one sex suspends the category's remuneration
+			// (#3678), which is covered by the dedicated journey below.
 			await count("annual", "women").fill("");
 			await count("annual", "men").fill("");
 			for (const measure of [
@@ -808,7 +808,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 		await deleteCurrentYearCategories();
 	});
 
-	test("hides both pay tables, restores their values, and persists none", async ({
+	test("keeps pay tables visible, clears and disables them, and persists no pay", async ({
 		page,
 	}) => {
 		test.slow();
@@ -821,16 +821,20 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 		) => categoryWorkforceInput(page, { basis, categoryIndex, sex });
 		const expectPayCells = async (
 			categoryIndex: number,
-			state: "shown" | "hidden",
+			state: "enabled" | "disabled",
 		) => {
 			for (const cell of categoryPayCells(page, categoryIndex)) {
-				if (state === "shown") await expect(cell).toBeEnabled();
-				else await expect(cell).toHaveCount(0);
+				if (state === "enabled") {
+					await expect(cell).toBeEnabled();
+				} else {
+					await expect(cell).toBeDisabled();
+					await expect(cell).toHaveValue("");
+				}
 			}
 			const status = page
 				.locator('[data-testid="category-pay-status"]')
 				.nth(categoryIndex - 1);
-			if (state === "hidden") {
+			if (state === "disabled") {
 				await expect(status).toHaveText("Aucun écart à calculer");
 			} else {
 				await expect(status).toBeEmpty();
@@ -848,7 +852,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				.selectOption("accord-entreprise");
 			await page.locator("#cat-0-name").fill("Cadres");
 
-			await expectPayCells(1, "shown");
+			await expectPayCells(1, "enabled");
 
 			for (const basis of ["annual", "hourly"] as const) {
 				await count(1, basis, "women").fill(String(FIRST_CATEGORY.women));
@@ -857,57 +861,57 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 		});
 
-		await test.step("un 0 sur une seule ligne masque les deux tableaux de la catégorie", async () => {
+		await test.step("un 0 isolé ou deux 0 croisés laissent les rémunérations actives", async () => {
 			await page.getByRole("button", { name: /Ajouter une catégorie/ }).click();
 			await page.locator("#cat-1-name").fill("Employés");
 			for (const basis of ["annual", "hourly"] as const) {
 				await count(2, basis, "women").fill("3");
 				await count(2, basis, "men").fill(String(SECOND_CATEGORY_MEN));
 			}
-			await expectPayCells(2, "shown");
+			await expectPayCells(2, "enabled");
 
 			await count(2, "hourly", "women").fill("0");
+			await expectPayCells(2, "enabled");
 
-			// A 0 on the hourly row suspends the annual table too: the category
-			// declares no remuneration at all, not merely the basis at fault.
-			await expectPayCells(2, "hidden");
+			await count(2, "annual", "men").fill("0");
+			await expectPayCells(2, "enabled");
+
+			await count(2, "annual", "men").fill(String(SECOND_CATEGORY_MEN));
+			await count(2, "hourly", "women").fill("3");
 			for (const basis of ["annual", "hourly"] as const) {
 				for (const sex of ["women", "men"] as const) {
 					await expect(count(2, basis, sex)).toBeEnabled();
 				}
 			}
-			await expectPayCells(1, "shown");
+			await expectPayCells(1, "enabled");
 		});
 
-		await test.step("un effectif vidé, puis revenu à un entier, réactive les huit cellules", async () => {
-			await count(2, "hourly", "women").fill("");
-			await expectPayCells(2, "shown");
-
-			await count(2, "hourly", "women").fill("3");
-			await expectPayCells(2, "shown");
-		});
-
-		await test.step("un 0 masque les montants, puis sa correction les restaure", async () => {
+		await test.step("deux 0 dans la même colonne vident et désactivent les huit champs", async () => {
 			await fillCategoryPayAmounts(page, {
 				categoryIndex: 2,
 				men: "900",
 				women: "900",
 			});
 			await count(2, "annual", "women").fill("0");
-
-			await expectPayCells(2, "hidden");
-			await count(2, "annual", "women").fill("3");
-
-			await expectPayCells(2, "shown");
+			await expectPayCells(2, "enabled");
 			for (const cell of categoryPayCells(page, 2)) {
 				await expect(cell).toHaveValue("900,00");
 			}
+
+			await count(2, "hourly", "women").fill("0");
+			await expectPayCells(2, "disabled");
+
+			await count(2, "annual", "women").fill("3");
+			await expectPayCells(2, "enabled");
+			for (const cell of categoryPayCells(page, 2)) {
+				await expect(cell).toHaveValue("");
+			}
 		});
 
-		await test.step("la catégorie à 0 franchit l'étape sans persister de rémunération", async () => {
+		await test.step("la catégorie sans femmes franchit l'étape sans persister de rémunération", async () => {
 			await count(2, "annual", "women").fill("0");
 			await count(2, "hourly", "women").fill("0");
-			await expectPayCells(2, "hidden");
+			await expectPayCells(2, "disabled");
 
 			await next.click();
 			await page.waitForURL("**/declaration-remuneration/etape/6");
@@ -917,11 +921,11 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 
 			await page.goto("/declaration-remuneration/etape/5");
 			await expect(count(2, "annual", "women")).toHaveValue("0");
-			await expectPayCells(2, "hidden");
+			await expectPayCells(2, "disabled");
 
 			await count(2, "annual", "women").fill("3");
 			await count(2, "hourly", "women").fill("3");
-			await expectPayCells(2, "shown");
+			await expectPayCells(2, "enabled");
 			for (const cell of categoryPayCells(page, 2)) {
 				await expect(cell).toHaveValue("");
 			}

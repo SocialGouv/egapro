@@ -1,3 +1,4 @@
+import { CATEGORY_PAY_FIELDS } from "~/modules/declaration-remuneration/schemas";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
@@ -76,10 +77,12 @@ function toStr(val: string): string | undefined {
 	return val || undefined;
 }
 
-type CategoryCountFields = Pick<
+export type CategoryCountFields = Pick<
 	EmployeeCategory,
 	"womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount"
 >;
+
+type CategoryPayFields = Record<(typeof CATEGORY_PAY_FIELDS)[number], string>;
 
 type ParsedCategoryHeadcounts = {
 	womenCount: number | undefined;
@@ -97,6 +100,19 @@ export function toCategoryHeadcounts(
 		hourlyWomenCount: toInt(cat.hourlyWomenCount),
 		hourlyMenCount: toInt(cat.hourlyMenCount),
 	} satisfies CategoryHeadcounts;
+}
+
+/** Clear every pay value when one sex is absent from both workforce rows.
+ *  The input is left untouched so this can normalize form defaults and imports. */
+export function withoutPayValuesWhenNotApplicable<
+	T extends CategoryCountFields & CategoryPayFields,
+>(category: T): T {
+	if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return category;
+	const cleared = { ...category };
+	for (const field of CATEGORY_PAY_FIELDS) {
+		Object.assign(cleared, { [field]: "" });
+	}
+	return cleared;
 }
 
 export function toSubmitData(
