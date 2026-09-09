@@ -90,9 +90,10 @@ cd reprise-egapro
   --out "$PWD/v1-snapshot"
 ```
 
-Par défaut, toutes les déclarations du dump sont exportées. Une plage
-optionnelle, dont la borne basse est incluse et la borne haute exclue, peut être
-fixée avec des instants explicites :
+Par défaut, toutes les représentations effectivement déclarées du dump sont
+exportées. Une ligne V1 sans `declared_at` est un brouillon et reste exclue de
+la reprise. Une plage optionnelle, dont la borne basse est incluse et la borne
+haute exclue, peut être fixée avec des instants explicites :
 
 ```bash
 ./migration-v1/migrate.sh export \
