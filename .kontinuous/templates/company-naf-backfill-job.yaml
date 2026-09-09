@@ -1,0 +1,45 @@
+{{- if .Values.global.companyNafBackfillEnabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: company-naf-backfill
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  activeDeadlineSeconds: 10800
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: company-naf-backfill
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: backfill
+          image: "{{ .Values.global.registry }}/{{ .Values.global.imageProject }}/{{ .Values.global.imageRepository }}/app:{{ .Values.global.imageTag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+          envFrom:
+            - secretRef:
+                name: "{{ .Values.global.pgSecretName }}"
+            - secretRef:
+                name: api
+          env:
+            - name: COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS
+              value: "180"
+          command:
+            - node
+            - packages/app/scripts/backfill-company-naf.mjs
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+{{- end }}

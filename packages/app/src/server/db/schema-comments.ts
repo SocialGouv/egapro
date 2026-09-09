@@ -125,7 +125,8 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		name: "SUIT: Raison_sociale",
 		workforce:
 			"Weez/INSEE: effectif d'identité, non utilisé comme effectif de référence. L'effectif de référence (stats admin/publiques, export, back-office) provient de gip_mds_data.workforce_ema",
-		naf_code: "SUIT: Code_NAF",
+		naf_code:
+			"Weez: activiteprincipaleunitelegale (NAF rév. 2), la nomenclature du libellé naf_label. Le code NAF 2025 est suivi séparément (#4089)",
 		address: "SUIT: Adresse",
 		region: "Weez: libellé région (dérivé du code postal établissement)",
 		department_code: "Weez: code département (dérivé du code postal)",
