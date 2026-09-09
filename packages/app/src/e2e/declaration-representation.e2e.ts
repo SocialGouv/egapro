@@ -5,7 +5,9 @@ import {
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
-import { SUBMIT_LABEL } from "~/modules/shared";
+// Leaf module, not the barrel: the Playwright runner cannot load the CSS
+// modules the barrel pulls in through its React components.
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 
 import { TEST_SIREN } from "./constants";
 import {
