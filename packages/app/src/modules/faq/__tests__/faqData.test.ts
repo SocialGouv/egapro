@@ -18,6 +18,7 @@ import {
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
+import { MAX_FILE_SIZE_LABEL, MAX_FILENAME_LENGTH } from "~/modules/shared";
 import { FAQ_SECTIONS } from "../faqData";
 
 const ALL_ITEMS = FAQ_SECTIONS.flatMap((section) =>
@@ -125,6 +126,13 @@ describe("FAQ describes the scheme the application implements", () => {
 		expect(indicatorG).toContain(String(INDICATOR_G_TRIENNIAL_MIN));
 		expect(indicatorG).toContain(String(INDICATOR_G_UNIVERSAL_YEAR));
 		expect(indicatorG).toContain(String(INDICATOR_G_TRIENNIAL_BASE_YEAR));
+	});
+
+	it("states the upload limits the shared config defines", () => {
+		const depot = answersOf("depot-documents");
+
+		expect(depot).toContain(MAX_FILE_SIZE_LABEL);
+		expect(depot).toContain(`${MAX_FILENAME_LENGTH} caractères`);
 	});
 
 	it("states the CSE threshold and file cap the domain defines", () => {

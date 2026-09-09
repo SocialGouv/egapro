@@ -253,6 +253,52 @@ export const FAQ_SECTIONS: FaqSection[] = [
 		],
 	},
 	{
+		id: "depot-documents",
+		title: "Déposer un document",
+		subsections: [
+			{
+				title: "Ce que le dépôt accepte",
+				items: [
+					{
+						question: "Quels formats de fichier puis-je déposer ?",
+						answer:
+							"Le PDF, pour l'avis du CSE comme pour l'évaluation conjointe. Les autres formats sont écartés dès la sélection du fichier.",
+					},
+					{
+						question: "Y a-t-il une taille maximale ?",
+						answer:
+							"10 Mo par fichier. Au-delà, le dépôt est refusé avant même l'envoi, et le message vous l'indique.",
+					},
+					{
+						question: "Le nom de mon fichier peut-il poser problème ?",
+						answer:
+							"Il doit faire au plus 200 caractères et ne pas contenir de caractères réservés par les systèmes de fichiers. Un nom refusé se renomme : rien d'autre n'est à corriger, et le contenu du document n'est pas en cause.",
+					},
+				],
+			},
+			{
+				title: "Après le dépôt",
+				items: [
+					{
+						question: "Mon fichier est-il contrôlé ?",
+						answer:
+							"Oui. Chaque fichier est analysé par un antivirus pendant l'envoi. Un fichier détecté comme infecté est rejeté et n'est jamais conservé.",
+					},
+					{
+						question: "Puis-je supprimer ou remplacer un fichier déposé ?",
+						answer:
+							"Tant que la démarche n'est pas close, oui. Pour l'avis du CSE, chaque fichier se supprime individuellement. Pour l'évaluation conjointe, il n'y a qu'un seul document : en déposer un nouveau remplace le précédent.",
+					},
+					{
+						question: "Reçois-je une confirmation de dépôt ?",
+						answer:
+							"Oui, un accusé de réception vous est envoyé par e-mail dès qu'un dépôt aboutit.",
+					},
+				],
+			},
+		],
+	},
+	{
 		id: "representation-equilibree",
 		title: "La représentation équilibrée",
 		subsections: [
@@ -343,6 +389,22 @@ export const FAQ_SECTIONS: FaqSection[] = [
 						answer:
 							"Dans Mon espace, qui liste vos démarches par année, leur état d'avancement et les documents associés : données pré-remplies, récapitulatifs de déclaration et récapitulatif des éléments transmis.",
 					},
+					{
+						question: "Pourquoi me demande-t-on mon numéro de téléphone ?",
+						answer:
+							"Il est demandé une fois, au premier accès à Mon espace, pour que l'administration puisse vous joindre au sujet de vos déclarations. Il ne sert à rien d'autre.",
+					},
+					{
+						question:
+							"Je déclare pour plusieurs entreprises. Est-ce possible ?",
+						answer:
+							"Oui. Mon espace liste toutes les entreprises rattachées à votre habilitation, chacune avec ses propres démarches. Vous passez de l'une à l'autre sans vous reconnecter.",
+					},
+					{
+						question: "Je n'ai pas reçu l'accusé de réception, que faire ?",
+						answer:
+							"Vérifiez d'abord vos courriers indésirables. Le bandeau de confirmation et Mon espace proposent un bouton pour vous le renvoyer, sans avoir à toucher à votre déclaration.",
+					},
 				],
 			},
 		],
@@ -384,6 +446,102 @@ export const FAQ_SECTIONS: FaqSection[] = [
 						question: "Qui voit l'historique de mes modifications ?",
 						answer:
 							"Chaque étape franchie et chaque transmission sont horodatées et conservées. Cet historique est accessible à l'administration et vous est présenté dans le détail de votre démarche.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "publication-consultation",
+		title: "Ce qui est publié, et ce qui ne l'est pas",
+		subsections: [
+			{
+				title: "Vos résultats vus de l'extérieur",
+				items: [
+					{
+						question: "Mes résultats sont-ils publics ?",
+						answer:
+							"Les indicateurs A à F le sont : toute personne peut les consulter. L'indicateur G, lui, ne l'est jamais — vos catégories d'emploi et les rémunérations associées restent confidentielles et ne sont accessibles qu'à l'administration.",
+					},
+					{
+						question: "Où mes résultats sont-ils consultables ?",
+						answer:
+							"Depuis la page d'accueil d'Egapro, sans connexion. La recherche se fait par SIREN, par raison sociale, par région, par département ou par secteur d'activité.",
+					},
+					{
+						question:
+							"Les données publiées sont-elles téléchargeables en masse ?",
+						answer:
+							"Oui, un export est proposé depuis la recherche publique, pensé pour un usage d'analyse. Il ne contient que ce qui est déjà consultable en ligne, donc jamais l'indicateur G.",
+					},
+					{
+						question: "Dois-je publier moi-même mes résultats quelque part ?",
+						answer:
+							"Rien ne vous est demandé sur Egapro à ce titre : transmettre votre déclaration suffit à la porter à la connaissance de l'administration, et la publication des indicateurs A à F est assurée par la plateforme.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "donnees-personnelles",
+		title: "Vos données",
+		subsections: [
+			{
+				title: "Conservation et accès",
+				items: [
+					{
+						question:
+							"Combien de temps mes déclarations sont-elles conservées ?",
+						answer:
+							"Six ans. Au-delà, une purge automatique quotidienne supprime la déclaration et tout ce qui s'y rattache — catégories d'emploi, avis du CSE, historique — sans intervention humaine et sans démarche de votre part.",
+					},
+					{
+						question:
+							"Les documents que j'ai déposés disparaissent-ils aussi ?",
+						answer:
+							"Oui. Les PDF suivent le sort de la déclaration à laquelle ils appartiennent et sont effacés de l'espace de stockage en même temps qu'elle.",
+					},
+					{
+						question: "Qui accède à mes données pendant ce temps ?",
+						answer:
+							"Vous, les personnes habilitées pour votre entreprise, et les services du ministère chargé du travail. Les consultations de données sensibles sont journalisées.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "aide-contacts",
+		title: "Trouver de l'aide",
+		subsections: [
+			{
+				title: "Sur la plateforme",
+				items: [
+					{
+						question: "Où voir les échéances qui me concernent ?",
+						answer:
+							"Sur la page d'aide, qui affiche les dates de la campagne en cours, et dans Mon espace, où chaque démarche porte la sienne.",
+					},
+					{
+						question: "Comment poser une question à l'équipe ?",
+						answer:
+							"Par le formulaire de contact accessible depuis la page d'aide. Indiquez votre SIREN et l'écran concerné : cela évite un aller-retour.",
+					},
+				],
+			},
+			{
+				title: "Votre interlocuteur en région",
+				items: [
+					{
+						question: "Qui contacter localement ?",
+						answer:
+							"Un annuaire public des référents à l'égalité professionnelle est disponible sur la plateforme, organisé par région et par département.",
+					},
+					{
+						question: "Comment obtenir leurs coordonnées ?",
+						answer:
+							"En ouvrant la fiche du référent : le téléphone et l'adresse e-mail y figurent. Ils ne sont volontairement pas affichés dans la liste, afin d'éviter leur collecte automatisée.",
 					},
 				],
 			},
