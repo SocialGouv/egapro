@@ -1,10 +1,6 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { env } from "~/env.js";
-import {
-	API_PUBLIC_DECLARATIONS_EXPORT,
-	API_PUBLIC_REPRESENTATIONS_EXPORT,
-} from "~/modules/routes";
 import { JsonLd } from "~/modules/shared/JsonLd";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 import styles from "./ConsultationSearchPage.module.scss";
@@ -87,11 +83,11 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					</h2>
 					<DownloadDataModal
 						declarationsHref={exportHref(
-							API_PUBLIC_DECLARATIONS_EXPORT,
+							"/api/public/declarations/export",
 							params,
 						)}
 						representationsHref={exportHref(
-							API_PUBLIC_REPRESENTATIONS_EXPORT,
+							"/api/public/representations/export",
 							params,
 						)}
 					/>
@@ -129,20 +125,6 @@ export async function ConsultationSearchPage({ searchParams }: Props) {
 					</>
 				)}
 			</section>
-
-			<div className="fr-callout fr-mt-6w">
-				<h2 className="fr-callout__title">
-					Vous préférez une vue d’ensemble ?
-				</h2>
-				<p className="fr-callout__text">
-					Explorez les tendances nationales par taille d’entreprise.
-				</p>
-				{/* `/stats` stays a literal here: #4342 removes that page, so it is
-				    deliberately absent from `~/modules/routes`. */}
-				<a className="fr-btn" href="/stats">
-					Statistiques générales
-				</a>
-			</div>
 		</main>
 	);
 }

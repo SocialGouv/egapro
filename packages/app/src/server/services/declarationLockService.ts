@@ -2,7 +2,9 @@ import "server-only";
 
 import { and, eq, gt, lte, or } from "drizzle-orm";
 
+import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import type { DB } from "~/server/db";
+import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
 import { declarationLocks, users } from "~/server/db/schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
@@ -83,6 +85,41 @@ export async function getLockReadState(
 			email: activeLock.email,
 		},
 	};
+}
+
+export class DeclarationLockedByOtherUserError extends Error {
+	constructor() {
+		super(DECLARATION_LOCK_CONFLICT_MESSAGE);
+		this.name = "DeclarationLockedByOtherUserError";
+	}
+}
+
+/**
+ * Deliberately looser than `declarationLockedWriteProcedure`, which demands a
+ * lock **owned by the caller**: REST clients never acquire one, so a free lock
+ * — or a declaration that does not exist yet — lets the write through. Merging
+ * the two intentions into one function would break `/api/upload`.
+ *
+ * Resolves through `resolveCurrentDeclarationId`, the same resolver
+ * `uploadPipeline` writes through — sharing only a filter would not do: the
+ * unique index on (siren, year) is partial, so an unordered `LIMIT 1` can hand
+ * the guard a different row than the one the write lands on. `year` is a
+ * parameter for the same reason: deriving it here would let a caller guard one
+ * year while writing to another.
+ */
+export async function assertDeclarationUnlockedForWrite(
+	db: DbClient,
+	siren: string,
+	year: number,
+	userId: string,
+): Promise<void> {
+	const declarationId = await resolveCurrentDeclarationId(db, siren, year);
+	if (!declarationId) return;
+
+	const lock = await getActiveLock(db, declarationId);
+	if (lock && lock.userId !== userId) {
+		throw new DeclarationLockedByOtherUserError();
+	}
 }
 
 /**

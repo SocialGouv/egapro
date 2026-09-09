@@ -55,8 +55,8 @@ export type PublicPage = {
 
 // Every page a visitor can reach without signing in. Authenticated areas, the
 // declaration funnels and the internal harness are excluded on purpose.
-// `/stats` is absent because #4342 removes that page — listing it would publish
-// a URL scheduled for deletion into `sitemap.xml`.
+// `/stats` is absent because #4342 deleted that page — listing it would publish
+// a 404 into `sitemap.xml`.
 export const PUBLIC_PAGES: readonly PublicPage[] = [
 	{
 		path: HOME,

@@ -46,6 +46,10 @@ vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => ({ op: "and", args }),
 	eq: (...args: unknown[]) => ({ op: "eq", args }),
 	count: () => ({ op: "count" }),
+	desc: (column: unknown) => ({ op: "desc", column }),
+	isNull: (column: unknown) => ({ op: "isNull", column }),
+	ne: (...args: unknown[]) => ({ op: "ne", args }),
+	sql: (...args: unknown[]) => ({ op: "sql", args }),
 }));
 
 function createStream(): ReadableStream<Uint8Array> {
@@ -77,14 +81,16 @@ function primeDbSelect(steps: Step[]) {
 					if (step?.kind === "count") {
 						return Promise.resolve([{ value: step.value }]);
 					}
-					// Declaration lookup path chains `.limit(1)` before await.
+					// Declaration lookup path chains `.orderBy().limit(1)` before
+					// await. `.limit()` is deliberately unreachable without
+					// `.orderBy()`: an unordered lookup here would resolve a
+					// different row than the lock guard, and must break loudly.
+					const rows =
+						step?.kind === "declaration" && step.id !== undefined
+							? [{ id: step.id }]
+							: [];
 					return {
-						limit: () =>
-							Promise.resolve(
-								step?.kind === "declaration" && step.id !== undefined
-									? [{ id: step.id }]
-									: [],
-							),
+						orderBy: () => ({ limit: () => Promise.resolve(rows) }),
 					};
 				},
 			}),

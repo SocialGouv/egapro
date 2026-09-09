@@ -53,8 +53,9 @@ export {
 export type {
 	DeclarationLockState,
 	LockHolder,
+	LockHolderDisplay,
 	ReadOnlyReason,
-} from "./shared/lock/useDeclarationLock";
+} from "./shared/lock/types";
 export { useDeclarationLock } from "./shared/lock/useDeclarationLock";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";

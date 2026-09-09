@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { describe, expect, it, vi } from "vitest";
-import { HELP, HOME } from "~/modules/routes";
+import { FAQ, HELP, HOME } from "~/modules/routes";
 import { NavLink } from "../NavLink";
 
 describe("NavLink", () => {
@@ -35,7 +35,7 @@ describe("NavLink", () => {
 
 	describe("aria-current absent when no match", () => {
 		it("is absent when path does not match", () => {
-			vi.mocked(usePathname).mockReturnValue("/stats");
+			vi.mocked(usePathname).mockReturnValue(FAQ);
 			render(<NavLink href={HELP}>Aide</NavLink>);
 			expect(screen.getByRole("link")).not.toHaveAttribute("aria-current");
 		});

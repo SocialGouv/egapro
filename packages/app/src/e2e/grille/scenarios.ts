@@ -190,7 +190,7 @@ export const FICHE_SCENARIOS = {
 	"CAS-02": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page);
+		await fillCseStep1(page, { firstDeclGapCardHidden: true });
 		await submitCseStep2(page);
 		await finDeDemarche(page, { completed: true });
 	},
@@ -404,7 +404,7 @@ export const FICHE_SCENARIOS = {
 				await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
 					timeout: 10_000,
 				});
-				await fillCseStep1(page);
+				await fillCseStep1(page, { firstDeclGapCardHidden: true });
 				await submitCseStep2(page);
 				await finDeDemarche(page, { completed: true });
 			},

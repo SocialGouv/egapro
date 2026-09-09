@@ -30,7 +30,21 @@ import {
 import styles from "./Step1Opinions.module.scss";
 import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
-import type { CseOpinionStep1Data } from "./types";
+import type { CseOpinionStep1Data, OpinionType } from "./types";
+
+// Looser than the form values on purpose: the draft only ever carries what the user entered.
+type DeclarationOpinionDraftValue = {
+	accuracyOpinion?: OpinionType;
+	accuracyDate?: string;
+	gapConsulted?: boolean;
+	gapOpinion?: OpinionType | null;
+	gapDate?: string | null;
+};
+
+type OpinionsDraftValues = {
+	firstDeclaration: DeclarationOpinionDraftValue;
+	secondDeclaration?: DeclarationOpinionDraftValue;
+};
 
 type Props = {
 	cseDeadline: Date;
@@ -38,6 +52,8 @@ type Props = {
 	year: number;
 	initialData?: CseOpinionStep1Data;
 	email?: string;
+	// Defaults to true so the card keeps rendering for callers that don't compute it.
+	firstDeclGapHigh?: boolean;
 	firstDeclarationPathChoice?: string | null;
 	hasSecondDeclaration?: boolean;
 	previousHref?: AppHref;
@@ -51,6 +67,7 @@ export function Step1Opinions({
 	year,
 	initialData,
 	email,
+	firstDeclGapHigh = true,
 	firstDeclarationPathChoice,
 	hasSecondDeclaration = true,
 	previousHref = remunerationStepHref(LAST_REMUNERATION_STEP),
@@ -58,8 +75,9 @@ export function Step1Opinions({
 	secondDeclarationPathChoice,
 }: Props) {
 	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
+	const showFirstDeclarationGap = firstDeclGapHigh;
 	const isFirstDeclarationJustification =
-		firstDeclarationPathChoice === "justify";
+		showFirstDeclarationGap && firstDeclarationPathChoice === "justify";
 	const showSecondDeclarationGap = hasSecondDeclaration && secondDeclGapHigh;
 	const isSecondDeclarationJustification =
 		showSecondDeclarationGap && secondDeclarationPathChoice === "justify";
@@ -75,23 +93,26 @@ export function Step1Opinions({
 				showSecondDeclarationGap,
 				isSecondDeclarationJustification,
 				isFirstDeclarationJustification,
+				showFirstDeclarationGap,
 			),
 		[
 			hasSecondDeclaration,
 			initialData,
 			isFirstDeclarationJustification,
 			isSecondDeclarationJustification,
+			showFirstDeclarationGap,
 			showSecondDeclarationGap,
 		],
 	);
 
-	const { draft, setField, isLoadingDraft } = useDeclarationDraft({
-		siren,
-		year,
-		step: "opinions",
-		kind: "cse",
-		dbValues: initialFormValues,
-	});
+	const { draft, setField, isLoadingDraft } =
+		useDeclarationDraft<OpinionsDraftValues>({
+			siren,
+			year,
+			step: "opinions",
+			kind: "cse",
+			dbValues: initialFormValues,
+		});
 
 	const form = useZodForm(saveOpinionsSchema, {
 		defaultValues: initialFormValues,
@@ -106,12 +127,14 @@ export function Step1Opinions({
 			showSecondDeclarationGap,
 			isSecondDeclarationJustification,
 			isFirstDeclarationJustification,
+			showFirstDeclarationGap,
 		);
 	}, [
 		isLoadingDraft,
 		draft,
 		form,
 		hasSecondDeclaration,
+		showFirstDeclarationGap,
 		showSecondDeclarationGap,
 		isFirstDeclarationJustification,
 		isSecondDeclarationJustification,
@@ -120,11 +143,19 @@ export function Step1Opinions({
 	const triggerDraftSave = useCallback(() => {
 		if (isReadOnly) return;
 		const values = form.getValues();
+		// Guarding the read side alone would leave the synthesized answer in the draft.
+		const firstDeclaration: DeclarationOpinionDraftValue =
+			showFirstDeclarationGap
+				? values.firstDeclaration
+				: {
+						accuracyOpinion: values.firstDeclaration.accuracyOpinion,
+						accuracyDate: values.firstDeclaration.accuracyDate,
+					};
 		setField({
-			firstDeclaration: values.firstDeclaration,
+			firstDeclaration,
 			secondDeclaration: values.secondDeclaration,
 		});
-	}, [form, isReadOnly, setField]);
+	}, [form, isReadOnly, setField, showFirstDeclarationGap]);
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push(cseOpinionStepHref(2)),
@@ -136,8 +167,12 @@ export function Step1Opinions({
 			showSecondDeclarationGap,
 			isSecondDeclarationJustification,
 			isFirstDeclarationJustification,
+			showFirstDeclarationGap,
 		);
-		if (isGapConsultationIncomplete(submittedData.firstDeclaration)) {
+		if (
+			showFirstDeclarationGap &&
+			isGapConsultationIncomplete(submittedData.firstDeclaration)
+		) {
 			form.setError("firstDeclaration.gapOpinion", {
 				message: "Veuillez remplir tous les champs de consultation.",
 			});
@@ -245,34 +280,38 @@ export function Step1Opinions({
 						title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
 					/>
 
-					<Controller
-						control={form.control}
-						name="firstDeclaration.gapConsulted"
-						render={({ field }) => (
-							<GapConsultationCard
-								consulted={
-									isFirstDeclarationJustification ? true : (field.value ?? null)
-								}
-								date={firstDeclGapDate ?? ""}
-								id="first-decl-gap"
-								onConsultedChange={(v) => {
-									field.onChange(v);
-									triggerDraftSave();
-								}}
-								onDateChange={(v) => {
-									form.setValue("firstDeclaration.gapDate", v);
-									triggerDraftSave();
-								}}
-								onOpinionChange={(v) => {
-									form.setValue("firstDeclaration.gapOpinion", v);
-									triggerDraftSave();
-								}}
-								opinion={firstDeclGapOpinion ?? null}
-								readOnly={isReadOnly}
-								showConsultationQuestion={!isFirstDeclarationJustification}
-							/>
-						)}
-					/>
+					{showFirstDeclarationGap && (
+						<Controller
+							control={form.control}
+							name="firstDeclaration.gapConsulted"
+							render={({ field }) => (
+								<GapConsultationCard
+									consulted={
+										isFirstDeclarationJustification
+											? true
+											: (field.value ?? null)
+									}
+									date={firstDeclGapDate ?? ""}
+									id="first-decl-gap"
+									onConsultedChange={(v) => {
+										field.onChange(v);
+										triggerDraftSave();
+									}}
+									onDateChange={(v) => {
+										form.setValue("firstDeclaration.gapDate", v);
+										triggerDraftSave();
+									}}
+									onOpinionChange={(v) => {
+										form.setValue("firstDeclaration.gapOpinion", v);
+										triggerDraftSave();
+									}}
+									opinion={firstDeclGapOpinion ?? null}
+									readOnly={isReadOnly}
+									showConsultationQuestion={!isFirstDeclarationJustification}
+								/>
+							)}
+						/>
+					)}
 				</div>
 
 				{hasSecondDeclaration && (

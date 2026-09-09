@@ -61,8 +61,7 @@ describe("PUBLIC_PAGES", () => {
 		}
 	});
 
-	// #4342 removes the page; listing it would publish a URL scheduled for
-	// deletion into sitemap.xml.
+	// #4342 deleted the page; listing it would publish a 404 into sitemap.xml.
 	it("leaves /stats out", () => {
 		expect(PUBLIC_PAGES.map((page) => page.path)).not.toContain("/stats");
 	});
