@@ -2,8 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
+	applyDeclarationClosure,
 	computeDeclarationStatus,
 	computeRepresentationDeclarationStatus,
+	getCurrentDate,
 	getCurrentYear,
 	getObligationWorkforce,
 	getReferenceYearFor,
@@ -26,6 +28,7 @@ import {
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationWorkforceHistory } from "~/server/db/getRepresentationWorkforceHistory";
 import {
 	companies,
@@ -294,29 +297,59 @@ export const companyRouter = createTRPCRouter({
 					.map((r) => r.declarationId),
 			);
 
+			const pastYears = [
+				...new Set(
+					declarationRows.filter((d) => d.year < year).map((d) => d.year),
+				),
+			];
+			const pastYearDeadlines = await Promise.all(
+				pastYears.map((pastYear) => getCampaignDeadlines(pastYear)),
+			);
+			const deadlinesByYear = new Map(
+				pastYears.map((pastYear, index) => [
+					pastYear,
+					pastYearDeadlines[index],
+				]),
+			);
+
 			const representationRow = currentYearRepresentationDeclarationRows[0];
 			const representationVisible =
 				representationRow !== undefined ||
 				isPresumedSubjectToRepresentation(representationWorkforceHistory, year);
-			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => ({
-				type: "remuneration" as const,
-				year: d.year,
-				status: computeDeclarationStatus({
+			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => {
+				const projectedStatus = computeDeclarationStatus({
 					status: d.status,
 					currentStep: d.currentStep,
-				}),
-				fsmStatus: d.status,
-				currentStep: d.currentStep ?? 0,
-				updatedAt: d.updatedAt,
-				firstDeclarationPathChoice: d.firstDeclarationPathChoice,
-				secondDeclarationPathChoice: d.secondDeclarationPathChoice,
-				hasSubmittedSecondDeclaration: declarationIdsWithSecondDecl.has(d.id),
-				hasSubmittedCseOpinion: declarationIdsWithCseOpinion.has(d.id),
-				cseRequired: d.cseRequired,
-				hasJointEvaluationFile: yearsWithJointEval.has(d.year),
-				hasPrefillData: yearsWithPrefill.has(d.year),
-				notSubject: false,
-			}));
+				});
+				const deadlines = deadlinesByYear.get(d.year);
+				const status = deadlines
+					? applyDeclarationClosure({
+							status: projectedStatus,
+							fsmStatus: d.status,
+							year: d.year,
+							currentYear: year,
+							deadlines,
+							// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
+							now: getCurrentDate(),
+						})
+					: projectedStatus;
+				return {
+					type: "remuneration" as const,
+					year: d.year,
+					status,
+					fsmStatus: d.status,
+					currentStep: d.currentStep ?? 0,
+					updatedAt: d.updatedAt,
+					firstDeclarationPathChoice: d.firstDeclarationPathChoice,
+					secondDeclarationPathChoice: d.secondDeclarationPathChoice,
+					hasSubmittedSecondDeclaration: declarationIdsWithSecondDecl.has(d.id),
+					hasSubmittedCseOpinion: declarationIdsWithCseOpinion.has(d.id),
+					cseRequired: d.cseRequired,
+					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
+					hasPrefillData: yearsWithPrefill.has(d.year),
+					notSubject: false,
+				};
+			});
 
 			if (representationRow) {
 				const representationCurrentStep = representationRow.currentStep ?? 0;
