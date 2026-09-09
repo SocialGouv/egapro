@@ -96,7 +96,7 @@ export function MobileUserBlock({ userName, userEmail, userPhone }: Props) {
 						className="fr-btn fr-btn--tertiary-no-outline fr-icon-dashboard-3-line fr-btn--icon-left"
 						href="/mon-espace"
 					>
-						Mes déclarations
+						Mes démarches
 					</Link>
 				</li>
 				<li>

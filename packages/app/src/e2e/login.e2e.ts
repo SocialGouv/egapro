@@ -174,7 +174,7 @@ test.describe("Mon espace — header entry point", () => {
 		await expect(
 			page.getByRole("menuitem", { name: "Mes entreprises" }),
 		).toHaveCount(0);
-		await page.getByRole("menuitem", { name: "Mes déclarations" }).click();
+		await page.getByRole("menuitem", { name: "Mes démarches" }).click();
 
 		await page.waitForURL("**/mon-espace");
 		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
@@ -192,7 +192,7 @@ test.describe("Mon espace — header entry point", () => {
 		await expect(
 			menu.getByRole("link", { name: "Mes entreprises" }),
 		).toHaveCount(0);
-		await menu.getByRole("link", { name: "Mes déclarations" }).click();
+		await menu.getByRole("link", { name: "Mes démarches" }).click();
 
 		await page.waitForURL("**/mon-espace");
 	});

@@ -25,9 +25,9 @@ describe("MobileUserBlock", () => {
 		expect(screen.getByText("01 23 45 67 89")).toBeInTheDocument();
 	});
 
-	it("renders the 'Mes déclarations' link", () => {
+	it("renders the 'Mes démarches' link", () => {
 		render(<MobileUserBlock {...defaultProps} />);
-		const link = screen.getByRole("link", { name: "Mes déclarations" });
+		const link = screen.getByRole("link", { name: "Mes démarches" });
 		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 

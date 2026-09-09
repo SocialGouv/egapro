@@ -160,7 +160,7 @@ export function UserAccountMenu({
 								role="menuitem"
 								tabIndex={-1}
 							>
-								Mes déclarations
+								Mes démarches
 							</Link>
 							<button
 								className={styles.menuLink}
