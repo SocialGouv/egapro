@@ -244,20 +244,29 @@ wrapper would flatten one row per call and drop that metadata — a net loss of
 audit fidelity. The wrapper's route-context argument (see below) removes the
 *type-level* blocker; it does not make the conversion desirable.
 
-Since #3764, `withAuditedRoute` is generic over the Next route context, so a
-dynamic segment survives the wrapper:
+Since #3764, `withAuditedRoute` is generic over the handler's arguments *after*
+the request — a tuple, empty for a static route and `[{ params }]` for a dynamic
+one — so a dynamic segment survives the wrapper and its context stays required:
 
 ```ts
-export const GET = withAuditedRoute<{ params: Promise<{ siren: string }> }>(
+type RouteContext = { params: Promise<{ siren: string }> };
+
+export const GET = withAuditedRoute(
   {
     action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
-    resolveContext: async (_request, routeContext) => ({
-      siren: (await routeContext?.params)?.siren ?? null,
+    resolveContext: async (_request: Request, { params }: RouteContext) => ({
+      siren: (await params).siren,
     }),
   },
-  async (request, routeContext) => { /* … */ },
+  async (request: Request, { params }: RouteContext) => { /* … */ },
 );
 ```
+
+The tuple is not cosmetic. An optional `routeContext?: TRouteContext` widens the
+parameter to `TRouteContext | undefined`, which a handler *requiring* its
+context — the signature Next gives a dynamic segment — cannot accept (TS2345).
+Inference reads the tuple off the handler, so neither shape needs an explicit
+type argument.
 
 ### Deliberate exemptions (10)
 

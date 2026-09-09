@@ -8,6 +8,9 @@ vi.mock("../log", () => ({
 const { withAuditedRoute } = await import("../withAuditedRoute");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
+/** The shape Next hands a dynamic segment: the context is required, not optional. */
+type SirenRouteContext = { params: Promise<{ siren: string }> };
+
 function buildRequest() {
 	return new Request("http://localhost/api/test", {
 		headers: {
@@ -111,10 +114,10 @@ describe("withAuditedRoute", () => {
 	});
 	it("forwards the Next route context to the handler", async () => {
 		const seen: unknown[] = [];
-		const handler = withAuditedRoute<{ params: Promise<{ siren: string }> }>(
+		const handler = withAuditedRoute(
 			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
-			async (_request, routeContext) => {
-				seen.push(await routeContext?.params);
+			async (_request: Request, routeContext: SirenRouteContext) => {
+				seen.push(await routeContext.params);
 				return new Response(null, { status: 200 });
 			},
 		);
@@ -127,15 +130,16 @@ describe("withAuditedRoute", () => {
 	});
 
 	it("forwards the Next route context to resolveContext", async () => {
-		const handler = withAuditedRoute<{ params: Promise<{ siren: string }> }>(
+		const handler = withAuditedRoute(
 			{
 				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
-				resolveContext: async (_request, routeContext) => {
-					const params = await routeContext?.params;
-					return { siren: params?.siren ?? null };
-				},
+				resolveContext: async (
+					_request: Request,
+					routeContext: SirenRouteContext,
+				) => ({ siren: (await routeContext.params).siren }),
 			},
-			async () => new Response(null, { status: 200 }),
+			async (_request: Request, _routeContext: SirenRouteContext) =>
+				new Response(null, { status: 200 }),
 		);
 
 		await handler(buildRequest(), {
@@ -147,12 +151,37 @@ describe("withAuditedRoute", () => {
 		});
 	});
 
-	it("still works when the route context is omitted", async () => {
+	// Replaces "still works when the route context is omitted", which pinned the
+	// very defect this signature removes: the wrapper used to widen the context
+	// to `TRouteContext | undefined`, so a handler that *requires* it — the shape
+	// Next gives a dynamic segment — was rejected with TS2345. A static handler
+	// now takes exactly one argument, and the assertion below is a compile-time
+	// one: `wrapDynamicRoute` would not type-check under the old signature.
+	it("accepts a handler whose route context is required", async () => {
+		async function dynamicRoute(
+			_request: Request,
+			{ params }: SirenRouteContext,
+		) {
+			return Response.json(await params);
+		}
+
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			dynamicRoute,
+		);
+		const response = await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "123456789" }),
+		});
+
+		expect(await response.json()).toEqual({ siren: "123456789" });
+	});
+
+	it("wraps a static handler as a one-argument handler", async () => {
 		const handler = withAuditedRoute(
 			{
 				action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD,
-				resolveContext: (_request, routeContext) => ({
-					metadata: { hasRouteContext: routeContext !== undefined },
+				resolveContext: (request) => ({
+					metadata: { path: new URL(request.url).pathname },
 				}),
 			},
 			async () => new Response(null, { status: 200 }),
@@ -162,7 +191,7 @@ describe("withAuditedRoute", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
-			metadata: { hasRouteContext: false },
+			metadata: { path: "/api/test" },
 		});
 	});
 });
