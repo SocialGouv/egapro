@@ -4,19 +4,13 @@ import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import type { ReadOnlyReason } from "./useDeclarationLock";
+import type { LockHolderDisplay, ReadOnlyReason } from "./types";
 import { useDeclarationLock } from "./useDeclarationLock";
-
-export type LockHolder = {
-	firstName: string | null;
-	lastName: string | null;
-	email: string | null;
-};
 
 type LockState = {
 	isReadOnly: boolean;
 	reason: ReadOnlyReason | null;
-	holder: LockHolder | null;
+	holder: LockHolderDisplay | null;
 	isLoading?: boolean;
 };
 
@@ -30,7 +24,7 @@ type StaticLockProviderProps = {
 	children: ReactNode;
 	isReadOnly?: boolean;
 	reason?: ReadOnlyReason | null;
-	holder?: LockHolder | null;
+	holder?: LockHolderDisplay | null;
 	isLoading?: boolean;
 };
 

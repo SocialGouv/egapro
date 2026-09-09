@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { DeclarationLockState } from "../useDeclarationLock";
+import type { DeclarationLockState } from "../types";
 
 const contextState: DeclarationLockState = {
 	isReadOnly: false,

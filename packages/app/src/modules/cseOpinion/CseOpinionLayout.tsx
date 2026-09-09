@@ -1,6 +1,6 @@
 import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
-import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { LockHolderDisplay } from "~/modules/declaration-remuneration/shared/lock/types";
 import {
 	formatWorkforceForUser,
 	getObligationWorkforce,
@@ -24,7 +24,7 @@ type Props = {
 	declarationYear: number;
 	children: React.ReactNode;
 	isReadOnly?: boolean;
-	lockHolder?: LockHolder | null;
+	lockHolder?: LockHolderDisplay | null;
 };
 
 export function CseOpinionLayout({

@@ -1,6 +1,9 @@
 import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
-import type { GipMdsRow } from "~/modules/declaration-remuneration";
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
+// Submodule import, not the barrel: the barrel re-exports `shared/lock/types`,
+// which derives from this router's own module — going through it would close a
+// type cycle that today only stays open because this import asks for one symbol.
+import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
