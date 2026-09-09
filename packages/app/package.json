@@ -108,7 +108,7 @@
 		"typescript": "^6.0.2",
 		"ultra11y": "5.42.1",
 		"vite-tsconfig-paths": "^6.1.1",
-		"vitest": "^4.1.4"
+		"vitest": "^4.1.11"
 	},
 	"packageManager": "pnpm@10.8.1"
 }
