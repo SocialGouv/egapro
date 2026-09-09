@@ -6,12 +6,20 @@ const MAX_ENTRIES = 200;
 
 const renderedSizes = new Map<string, number>();
 
-// Keyed on the PDF's own data rather than on a timestamp, so a change to the
-// declaration, to the deadlines or to the document content invalidates the
-// entry on its own and a stale size can never be served.
+// The moment the document was produced is not part of what it says, and it is
+// the one field that differs on every single call — `buildRepresentationPdfData`
+// returns a raw `Date`, which serialises to the millisecond. Left in the
+// fingerprint it gives every request its own key: the cache would never be read
+// and every probe would render a full PDF. Neutralised here rather than at the
+// call sites so the GET and the HEAD cannot drift apart.
+const GENERATION_TIMESTAMP_KEY = "generatedAt";
+
 export function pdfSizeKey(route: string, data: unknown): string {
+	const stable = JSON.stringify(data, (key, value) =>
+		key === GENERATION_TIMESTAMP_KEY ? null : value,
+	);
 	const fingerprint = createHash("sha256")
-		.update(JSON.stringify(data) ?? "")
+		.update(stable ?? "")
 		.digest("hex");
 	return `${route}:${fingerprint}`;
 }

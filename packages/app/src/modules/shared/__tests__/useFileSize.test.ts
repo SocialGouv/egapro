@@ -55,6 +55,18 @@ describe("useFileSize", () => {
 		expect(result.current).toBeNull();
 	});
 
+	it("stays null on a zero length rather than showing an empty file", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(() => Promise.resolve(headResponse("0"))),
+		);
+
+		const { result } = renderHook(() => useFileSize("/api/declaration-pdf"));
+
+		await act(async () => undefined);
+		expect(result.current).toBeNull();
+	});
+
 	it("stays null when the response is not ok", async () => {
 		vi.stubGlobal(
 			"fetch",

@@ -20,7 +20,10 @@ export function useFileSize(href: string): number | null {
 				const header = response.headers.get("content-length");
 				if (header === null) return;
 				const parsed = Number.parseInt(header, 10);
-				if (!Number.isFinite(parsed) || parsed < 0) return;
+				// Zero means a layer rebuilt the entity headers on the bodyless
+				// response, not that the PDF is empty. Showing « PDF – 0 Ko » would
+				// be worse than showing nothing.
+				if (!Number.isFinite(parsed) || parsed <= 0) return;
 				setSize(parsed);
 			})
 			.catch(() => undefined);

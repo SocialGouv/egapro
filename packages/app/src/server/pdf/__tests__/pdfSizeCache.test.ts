@@ -34,6 +34,35 @@ describe("pdfSizeKey", () => {
 			pdfSizeKey("declaration-pdf", { year: 2027 }),
 		);
 	});
+
+	// Without this the key differs on every call and the cache is dead weight.
+	it("ignores the moment the document was generated", () => {
+		expect(
+			pdfSizeKey("representation-pdf", {
+				campaignYear: 2026,
+				generatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			}),
+		).toBe(
+			pdfSizeKey("representation-pdf", {
+				campaignYear: 2026,
+				generatedAt: new Date("2026-06-30T23:59:59.999Z"),
+			}),
+		);
+	});
+
+	it("still separates two documents that differ elsewhere", () => {
+		expect(
+			pdfSizeKey("representation-pdf", {
+				campaignYear: 2026,
+				generatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			}),
+		).not.toBe(
+			pdfSizeKey("representation-pdf", {
+				campaignYear: 2027,
+				generatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			}),
+		);
+	});
 });
 
 describe("pdf size cache", () => {

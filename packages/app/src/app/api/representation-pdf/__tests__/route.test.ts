@@ -56,6 +56,13 @@ function signedIn() {
 	});
 }
 
+let generationTick = 0;
+
+function nextGeneratedAt(): Date {
+	generationTick += 1;
+	return new Date(Date.UTC(2026, 0, 1, 0, 0, 0, generationTick));
+}
+
 function auditRow(): Record<string, unknown> {
 	return (mocks.logAction.mock.calls[0]?.[0] ?? {}) as Record<string, unknown>;
 }
@@ -185,9 +192,16 @@ describe("HEAD /api/representation-pdf", () => {
 		clearPdfSizeCache();
 		mocks.renderToBuffer.mockResolvedValue(PDF_BYTES);
 		mocks.RepresentationPdfDocument.mockReturnValue(DOCUMENT);
-		mocks.buildRepresentationPdfData.mockResolvedValue({
-			campaignYear: YEAR + 1,
-		});
+		generationTick = 0;
+		// The real builder stamps a fresh Date on every call, and two calls in the
+		// same millisecond would collide — so the fixture advances explicitly.
+		// Without this the cache assertions hold whatever the key does.
+		mocks.buildRepresentationPdfData.mockImplementation(() =>
+			Promise.resolve({
+				campaignYear: YEAR + 1,
+				generatedAt: nextGeneratedAt(),
+			}),
+		);
 		signedIn();
 	});
 
@@ -224,10 +238,13 @@ describe("HEAD /api/representation-pdf", () => {
 	it("renders again once the underlying data changed", async () => {
 		await HEAD(request());
 
-		mocks.buildRepresentationPdfData.mockResolvedValue({
-			campaignYear: YEAR + 1,
-			gaps: [{ category: "cadres", gap: 4 }],
-		});
+		mocks.buildRepresentationPdfData.mockImplementation(() =>
+			Promise.resolve({
+				campaignYear: YEAR + 1,
+				gaps: [{ category: "cadres", gap: 4 }],
+				generatedAt: nextGeneratedAt(),
+			}),
+		);
 		await HEAD(request());
 
 		expect(mocks.renderToBuffer).toHaveBeenCalledTimes(2);
