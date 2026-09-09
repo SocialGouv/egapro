@@ -41,8 +41,7 @@ Conventions de notation :
 **Routes** :
 
 - `/login` — page d'entrée, redirige vers ProConnect ou vers `/mon-espace` si déjà connecté
-- `/mon-espace` — espace personnel, liste les entreprises de l'utilisateur
-- `/mon-espace/mes-entreprises` — détail des entreprises, statut de leurs déclarations
+- `/mon-espace` — tableau de bord de l'entreprise rattachée à la session, statut de ses déclarations
 
 **Modules** : `~/modules/login`, `~/modules/auth`, `~/modules/profile`, `~/modules/my-space`.
 
@@ -50,7 +49,7 @@ Conventions de notation :
 
 - `profile.get` — lecture du profil (audit `read_sensitive`)
 - `profile.updatePhone` — mise à jour du téléphone (modal au premier accès)
-- `company.get` / `company.list` — détails et liste des entreprises rattachées (avec statut CSE et déclarations)
+- `company.get` — détails de l'entreprise rattachée à la session (avec statut CSE et déclarations)
 
 **Règles métier-clés** :
 

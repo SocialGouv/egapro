@@ -155,12 +155,12 @@ export function UserAccountMenu({
 							)}
 							<Link
 								className={styles.menuLink}
-								href="/mon-espace/mes-entreprises"
+								href="/mon-espace"
 								onClick={close}
 								role="menuitem"
 								tabIndex={-1}
 							>
-								Mes entreprises
+								Mes déclarations
 							</Link>
 							<button
 								className={styles.menuLink}

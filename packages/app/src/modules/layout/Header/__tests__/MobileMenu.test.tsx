@@ -58,7 +58,7 @@ describe("MobileMenu", () => {
 		expect(screen.getByText("Jean Dupont")).toBeInTheDocument();
 		expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		expect(
-			screen.getByRole("link", { name: "Mes entreprises" }),
+			screen.getByRole("link", { name: "Mes déclarations" }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Voir mon profil" }),

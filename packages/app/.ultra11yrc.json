@@ -162,13 +162,6 @@
 				"sources": ["src/app/gestion-des-cookies/page.tsx"]
 			},
 			{
-				"id": "mes-entreprises",
-				"name": "Mes entreprises",
-				"url": "http://localhost:3000/mon-espace/mes-entreprises",
-				"sources": ["src/app/mon-espace/mes-entreprises/page.tsx"],
-				"auth": true
-			},
-			{
 				"id": "admin-declarations",
 				"name": "Backoffice — déclarations",
 				"url": "http://localhost:3000/admin/declarations",

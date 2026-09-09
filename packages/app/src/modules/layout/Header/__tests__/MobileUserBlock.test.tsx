@@ -25,10 +25,17 @@ describe("MobileUserBlock", () => {
 		expect(screen.getByText("01 23 45 67 89")).toBeInTheDocument();
 	});
 
-	it("renders the 'Mes entreprises' link", () => {
+	it("renders the 'Mes déclarations' link", () => {
 		render(<MobileUserBlock {...defaultProps} />);
-		const link = screen.getByRole("link", { name: "Mes entreprises" });
-		expect(link).toHaveAttribute("href", "/mon-espace/mes-entreprises");
+		const link = screen.getByRole("link", { name: "Mes déclarations" });
+		expect(link).toHaveAttribute("href", "/mon-espace");
+	});
+
+	it("does not render a 'Mes entreprises' link", () => {
+		render(<MobileUserBlock {...defaultProps} />);
+		expect(
+			screen.queryByRole("link", { name: "Mes entreprises" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the 'Voir mon profil' button", () => {

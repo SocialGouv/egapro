@@ -1,7 +1,6 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
-
+import { MissingSiret } from "~/modules/declaration-remuneration";
 import { getCurrentYear, parseSiren } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
@@ -17,7 +16,7 @@ type Props = {
 export async function MonEspacePage({ siret, userPhone }: Props) {
 	const siren = parseSiren(siret);
 	if (siren === null) {
-		redirect("/mon-espace/mes-entreprises");
+		return <MissingSiret />;
 	}
 	const currentYear = getCurrentYear();
 	const [data, campaignDeadlines, representationCampaign, lockState] =

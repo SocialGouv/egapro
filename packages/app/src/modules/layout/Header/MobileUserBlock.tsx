@@ -93,10 +93,10 @@ export function MobileUserBlock({ userName, userEmail, userPhone }: Props) {
 			<ul className="fr-btns-group">
 				<li>
 					<Link
-						className="fr-btn fr-btn--tertiary-no-outline fr-icon-building-line fr-btn--icon-left"
-						href="/mon-espace/mes-entreprises"
+						className="fr-btn fr-btn--tertiary-no-outline fr-icon-dashboard-3-line fr-btn--icon-left"
+						href="/mon-espace"
 					>
-						Mes entreprises
+						Mes déclarations
 					</Link>
 				</li>
 				<li>
