@@ -52,12 +52,21 @@ ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
 
-# Bundle the idempotent company-location backfill for the minimal production
-# image. The source imports the shared TypeScript postal-code mapping; bundling
-# keeps that single source of truth without shipping tsx or the app source tree.
-RUN pnpm --filter app exec esbuild scripts/backfill-company-region-department.mjs \
+# Bundle the standalone maintenance scripts for the minimal production image.
+# Their sources are TypeScript and some of them import shared modules from src/;
+# bundling keeps that single source of truth without shipping tsx or the app
+# source tree. Output stays .mjs so Node reads it as ESM whatever package.json
+# the runner ends up with, and lands in scripts/ so that import.meta.url-relative
+# paths (migrate reads ../drizzle) resolve exactly as they did before.
+RUN pnpm --filter app exec esbuild \
+    scripts/migrate.ts \
+    scripts/audit-cleanup.ts \
+    scripts/declaration-cleanup.ts \
+    scripts/backfill-company-naf.ts \
+    scripts/backfill-company-region-department.ts \
+    scripts/seed-demo-observatory.ts \
     --bundle --platform=node --format=esm --packages=external \
-    --outfile=scripts/backfill-company-location.bundle.mjs
+    --outdir=scripts --out-extension:.js=.bundle.mjs
 
 # Produce a self-contained runtime tree for the notifications worker. The
 # output bundles its own `node_modules/.pnpm` store, so the symlinks
@@ -109,17 +118,17 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle ./packages/app/d
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm ./packages/app/node_modules/drizzle-orm
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-location.bundle.mjs ./packages/app/scripts/backfill-company-location.bundle.mjs
-# The NAF backfill imports nothing but `postgres` (already copied above), so it
-# ships as-is — no esbuild pass, unlike the location one which pulls in a shared
-# TypeScript module.
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.mjs ./packages/app/scripts/backfill-company-naf.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.bundle.mjs ./packages/app/scripts/migrate.bundle.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-region-department.bundle.mjs ./packages/app/scripts/backfill-company-region-department.bundle.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.bundle.mjs ./packages/app/scripts/backfill-company-naf.bundle.mjs
 # Development/review-app fixture loaded by the optional post-deploy hook.
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.mjs ./packages/app/scripts/seed-demo-observatory.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
+# declaration-cleanup is deliberately NOT copied: its CronJob has never found it
+# in this image. That packaging gap predates the TypeScript migration and is
+# tracked on its own — fixing it here would be a behaviour change out of scope.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bundle.mjs ./packages/app/scripts/audit-cleanup.bundle.mjs
 
 # Notifications worker — independent workspace, runs as its own K8s
 # Deployment (notifications-deployment.yaml). Source = `pnpm deploy` output
