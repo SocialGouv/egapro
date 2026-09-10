@@ -17,8 +17,14 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = join(__dirname, "..");
-const RESULTS_PATH = join(APP_ROOT, "playwright-report/grille-results.json");
-const OUTPUT_PATH = join(APP_ROOT, "playwright-report/grille-recette.md");
+export const DEFAULT_RESULTS_PATH = join(
+	APP_ROOT,
+	"playwright-report/grille-results.json",
+);
+export const DEFAULT_OUTPUT_PATH = join(
+	APP_ROOT,
+	"playwright-report/grille-recette.md",
+);
 
 export type StepResult = {
 	title: string;
@@ -297,6 +303,8 @@ export type CliArgs = {
 	scope: string;
 	commit: string;
 	reportUrl: string;
+	results: string;
+	out: string;
 };
 
 export function parseArgs(argv: string[]): CliArgs {
@@ -304,6 +312,8 @@ export function parseArgs(argv: string[]): CliArgs {
 		scope: "tous les cas",
 		commit: "N/A",
 		reportUrl: "playwright-report/html/index.html",
+		results: DEFAULT_RESULTS_PATH,
+		out: DEFAULT_OUTPUT_PATH,
 	};
 	for (let i = 0; i < argv.length; i++) {
 		const flag = argv[i];
@@ -317,15 +327,27 @@ export function parseArgs(argv: string[]): CliArgs {
 		} else if (flag === "--report-url") {
 			args.reportUrl = next;
 			i++;
+		} else if (flag === "--results") {
+			args.results = next;
+			i++;
+		} else if (flag === "--out") {
+			args.out = next;
+			i++;
 		}
 	}
 	return args;
 }
 
 function main(): void {
-	const { scope, commit, reportUrl } = parseArgs(process.argv.slice(2));
+	const {
+		scope,
+		commit,
+		reportUrl,
+		results: resultsPath,
+		out,
+	} = parseArgs(process.argv.slice(2));
 	const grid = buildGrid();
-	const report = loadResults(RESULTS_PATH);
+	const report = loadResults(resultsPath);
 
 	let results: Map<string, CoordResult>;
 	let startTime: string;
@@ -336,7 +358,7 @@ function main(): void {
 		results = new Map();
 		startTime = new Date().toISOString();
 		durationMs = 0;
-		noJsonReason = existsSync(RESULTS_PATH)
+		noJsonReason = existsSync(resultsPath)
 			? "Fichier de résultats illisible ou invalide"
 			: "Fichier de résultats introuvable (playwright-report/grille-results.json)";
 	} else {
@@ -356,9 +378,9 @@ function main(): void {
 		noJsonReason,
 	});
 
-	mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
-	writeFileSync(OUTPUT_PATH, content, "utf-8");
-	console.log(`Rapport écrit : ${OUTPUT_PATH}`);
+	mkdirSync(dirname(out), { recursive: true });
+	writeFileSync(out, content, "utf-8");
+	console.log(`Rapport écrit : ${out}`);
 
 	const summaryPath = env.GITHUB_STEP_SUMMARY;
 	if (summaryPath) {
