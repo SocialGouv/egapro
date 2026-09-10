@@ -213,12 +213,17 @@ export function CategoryForm({
 				!category ||
 				isCategoryPayApplicable(toCategoryHeadcounts(category))
 			) {
-				return;
+				return false;
 			}
+			let cleared = false;
 			for (const payField of CATEGORY_PAY_FIELDS) {
 				const path = `categories.${index}.${payField}` as const;
-				if (form.getValues(path) !== "") form.setValue(path, "");
+				if (form.getValues(path) !== "") {
+					form.setValue(path, "");
+					cleared = true;
+				}
 			}
+			return cleared;
 		},
 		[form],
 	);
@@ -337,10 +342,10 @@ export function CategoryForm({
 
 	function handleHeadcountBlur(index: number) {
 		return () => {
-			if (readOnly) return;
+			if (readOnly) return false;
 			// Wait until the edit is committed so a transient 0 while replacing a
 			// multi-digit count cannot irreversibly erase the remuneration values.
-			clearNonApplicableCategoryPay(index);
+			return clearNonApplicableCategoryPay(index);
 		};
 	}
 

@@ -442,6 +442,52 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 
 		await waitFor(() => expect(status).toHaveFocus());
 	});
+
+	it("does not move focus when tabbing out without clearing remuneration", async () => {
+		const user = userEvent.setup();
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+			},
+		];
+		renderForm(initialCategories, { readOnly: true });
+
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		const status = screen.getByTestId("category-pay-status");
+		hourlyMen.focus();
+		await user.tab();
+
+		expect(status).not.toHaveFocus();
+	});
+
+	it("does not move focus for an already normalized non-calculable category", async () => {
+		const user = userEvent.setup();
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+			},
+		];
+		renderForm(initialCategories);
+
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		const status = screen.getByTestId("category-pay-status");
+		hourlyMen.focus();
+		await user.tab();
+
+		expect(status).not.toHaveFocus();
+	});
 });
 
 describe("CategoryForm legacy read-only categories (#3678)", () => {

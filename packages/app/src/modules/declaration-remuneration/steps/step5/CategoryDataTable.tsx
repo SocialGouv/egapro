@@ -33,7 +33,7 @@ type Props = {
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onHeadcountBlur: (
 		index: number,
-	) => (e: React.FocusEvent<HTMLInputElement>) => void;
+	) => (e: React.FocusEvent<HTMLInputElement>) => boolean | undefined;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
 	/** Whether this category can declare remuneration (#3678). */
@@ -433,8 +433,8 @@ export function CategoryDataTable({
 				!nextIsSameCategoryHeadcount;
 
 			tabbedHeadcountRef.current = false;
-			onBlur(event);
-			if (!shouldRecoverFocus) return;
+			const payWasCleared = onBlur(event) === true;
+			if (!shouldRecoverFocus || !payWasCleared) return;
 
 			// Clearing a category on blur disables the pay inputs that the browser
 			// selected as the next tab stop. Recover focus on the explanatory status
