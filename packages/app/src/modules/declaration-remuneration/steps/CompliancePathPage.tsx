@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import {
+	type CompliancePathValue,
 	type DeclarationFsmStatus,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
@@ -7,6 +8,7 @@ import {
 	isCseOpinionRequired,
 	isDraft,
 } from "~/modules/domain";
+import { getPostComplianceDestination } from "~/modules/navigation";
 import {
 	API_DECLARATION_PDF,
 	LAST_REMUNERATION_STEP,
@@ -15,12 +17,8 @@ import {
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
-import { getPostComplianceDestination } from "../shared/complianceNavigation";
 import { CompliancePathChoice } from "./CompliancePathChoice";
-import type {
-	CompliancePathReadOnlyReason,
-	CompliancePathValue,
-} from "./compliancePath/constants";
+import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 
 type ComplianceState =
 	| { type: "no_gap" }

@@ -331,6 +331,7 @@ export type {
 	CampaignDeadlines,
 	CompanySize,
 	CompanySizeRange,
+	CompliancePathValue,
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
@@ -339,4 +340,4 @@ export type {
 	ObservatoryWorkforceRange,
 	RepresentationCampaign,
 } from "./types";
-export { DECLARATION_FSM_STATUSES } from "./types";
+export { COMPLIANCE_PATHS, DECLARATION_FSM_STATUSES } from "./types";

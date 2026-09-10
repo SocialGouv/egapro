@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
-import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { getObligationWorkforce, isCseOpinionRequired } from "~/modules/domain";
+import { getPostComplianceDestination } from "~/modules/navigation";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";

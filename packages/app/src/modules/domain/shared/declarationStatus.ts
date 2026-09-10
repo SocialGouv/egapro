@@ -1,12 +1,11 @@
 import type {
 	CampaignDeadlines,
+	CompliancePathValue as CompliancePath,
 	DeclarationFsmStatus,
 	DeclarationStatus,
 } from "../types";
 import { isDeadlinePassed } from "./campaign";
 import { getDeclarationProcessStepDeadline } from "./declarationProcessStep";
-
-type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
 export function isDeclarationSubmitted(status: string | null): boolean {
 	return status !== null && status !== "draft";

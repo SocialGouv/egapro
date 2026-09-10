@@ -26,6 +26,15 @@ export const DECLARATION_FSM_STATUSES = [
 
 export type DeclarationFsmStatus = (typeof DECLARATION_FSM_STATUSES)[number];
 
+/** The three ways a company may answer a gap alert. Single source for the vocabulary the rule engine matches on (`transitions[].matchPayload.path`), the tRPC schemas validate and the navigation table keys. */
+export const COMPLIANCE_PATHS = [
+	"justify",
+	"corrective_action",
+	"joint_evaluation",
+] as const;
+
+export type CompliancePathValue = (typeof COMPLIANCE_PATHS)[number];
+
 /** The two types of declarations a company must file each year. */
 export type DeclarationType = "remuneration" | "representation";
 
