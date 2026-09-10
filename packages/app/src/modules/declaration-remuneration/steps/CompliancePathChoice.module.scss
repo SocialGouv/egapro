@@ -12,12 +12,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
-
-	// FormActions carries its own `margin-top: 2rem` for block-flow parents; the
-	// flex gap already provides that spacing here and the margin would double it.
-	> :last-child {
-		margin-top: 0;
-	}
 }
 
 // DSFR's fieldset gutters (negative row margin + per-element side padding) exist
