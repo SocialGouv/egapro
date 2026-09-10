@@ -9,7 +9,7 @@ import {
 	isCompliancePathStepApplicable,
 	isCseOpinionRequired,
 	isCseRequired,
-	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
@@ -69,8 +69,8 @@ export function CompanyDeclarationsPage({
 		workforce: obligationWorkforce,
 		hasCse: company.hasCse,
 	});
-	const indicatorGRequired = isIndicatorGRequired(
-		obligationWorkforce,
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		company.gipWorkforce,
 		currentYear,
 	);
 	const lastActionDate = getLastActionDate(declarations, currentYear);

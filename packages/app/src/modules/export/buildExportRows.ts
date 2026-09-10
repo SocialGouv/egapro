@@ -3,10 +3,9 @@ import { and, eq, isNotNull, or } from "drizzle-orm";
 import {
 	computeGapHighFlags,
 	floorWorkforce,
-	getObligationWorkforce,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
-	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
@@ -123,10 +122,7 @@ export async function buildExportRows(
 								},
 							],
 			});
-		const indicatorGRequired = isIndicatorGRequired(
-			getObligationWorkforce(workforce),
-			row.year,
-		);
+		const indicatorGRequired = isIndicatorGRequiredForGip(workforce, row.year);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
