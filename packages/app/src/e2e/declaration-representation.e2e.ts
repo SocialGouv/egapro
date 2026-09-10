@@ -248,6 +248,11 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await expect(
 				page.getByText("Non conforme", { exact: true }),
 			).toBeVisible();
+			await expect(
+				page.getByText(
+					`Objectif de ${getRepresentationTarget(campaignYear)} % non atteint`,
+				),
+			).toBeVisible();
 
 			await goNext(page);
 		});
