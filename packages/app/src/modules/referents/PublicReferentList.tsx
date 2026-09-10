@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS } from "~/modules/domain";
-
+import { referentHref } from "~/modules/routes";
 import type { PublicReferentListRow } from "./types";
 
 type Props = {
@@ -46,7 +46,7 @@ export function PublicReferentList({ rows }: Props) {
 								<Link
 									aria-label={`Voir le contact de ${row.name}`}
 									className="fr-btn fr-btn--secondary fr-btn--sm"
-									href={`/referents/${row.id}`}
+									href={referentHref(row.id)}
 								>
 									Voir le contact
 								</Link>

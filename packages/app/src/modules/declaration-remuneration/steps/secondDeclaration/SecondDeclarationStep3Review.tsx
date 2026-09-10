@@ -18,13 +18,13 @@ import {
 	hasHighGap,
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
+import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
 import { GapBadge } from "../step6/GapBadge";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
-import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
@@ -61,7 +61,7 @@ export function SecondDeclarationStep3Review({
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
 		onSuccess: () => {
 			if (gapsExist) {
-				router.push(BASE_PATH);
+				router.push(COMPLIANCE_PATH);
 			} else {
 				router.push(getPostComplianceDestination(cseOpinionRequired));
 			}
@@ -174,9 +174,10 @@ export function SecondDeclarationStep3Review({
 			<FormErrors mutationError={mutation.error?.message} />
 
 			<FormActions
+				className="fr-mt-0"
 				nextHref={nextHref}
 				nextLabel={nextLabel}
-				previousHref={`${BASE_PATH}/etape/2`}
+				previousHref={complianceStepHref(2)}
 			/>
 
 			{isWritable ? (

@@ -9,6 +9,42 @@ export function getCurrentYear(): number {
 	return readCampaignYearOverride() ?? new Date().getFullYear();
 }
 
+/** Returns the current date under the same clock as `getCurrentYear()`, so that a year guard and a deadline check sitting side by side cannot disagree under a pinned campaign year. Pass it to any `now` whose sibling year comes from `getCurrentYear()`. */
+export function getCurrentDate(): Date {
+	const now = new Date();
+	const override = readCampaignYearOverride();
+	if (override === null) return now;
+	// Day 0 of the next month is its predecessor's last: clamping keeps 29 February off 1 March in a non-leap pinned year.
+	const lastDayOfMonth = new Date(override, now.getMonth() + 1, 0).getDate();
+	return new Date(
+		override,
+		now.getMonth(),
+		Math.min(now.getDate(), lastDayOfMonth),
+		now.getHours(),
+		now.getMinutes(),
+		now.getSeconds(),
+		now.getMilliseconds(),
+	);
+}
+
+/** Bounds a campaign year has to fall within to be accepted from user input. */
+export const MIN_CAMPAIGN_YEAR = 2000;
+export const MAX_CAMPAIGN_YEAR = 2100;
+
+/**
+ * Parses a campaign year coming from user input (a query string, a form field).
+ * Returns the number when it is a plain integer inside the accepted bounds,
+ * `null` otherwise — so callers never carry the raw string any further, into an
+ * audit row least of all.
+ */
+export function parseCampaignYear(raw: string): number | null {
+	if (!/^\d{4}$/.test(raw)) {
+		return null;
+	}
+	const year = Number.parseInt(raw, 10);
+	return year >= MIN_CAMPAIGN_YEAR && year <= MAX_CAMPAIGN_YEAR ? year : null;
+}
+
 /** Returns the reference year for a given campaign year (N-1: a declaration reports the prior year's data). */
 export function getReferenceYearFor(campaignYear: number): number {
 	return campaignYear - 1;

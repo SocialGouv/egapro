@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AppHref } from "~/modules/routes";
 
 type Props = {
-	href: string;
+	href: AppHref;
 	className?: string;
 	children: React.ReactNode;
 	onClick?: () => void;

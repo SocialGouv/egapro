@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
 import {
+	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
-	selectCompliancePath,
-} from "./helpers/compliance-flows";
+	complianceStepHref,
+} from "~/modules/routes";
+import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	countPathChoiceEventsRound1,
 	lastPathChoiceValueRound1,
@@ -25,16 +28,18 @@ test.describe("[ANX-01] Path change before downstream action — tâtonnement su
 		page,
 	}) => {
 		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await selectCompliancePath(page, "path-corrective");
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 10_000 });
 
 		expect(await countPathChoiceEventsRound1()).toBe(1);
 		expect(await lastPathChoiceValueRound1()).toBe("corrective_action");
 
 		await selectCompliancePath(page, "path-joint");
-		await page.waitForURL("**/evaluation-conjointe", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_JOINT_EVALUATION), {
+			timeout: 10_000,
+		});
 
 		expect(await countPathChoiceEventsRound1()).toBe(2);
 		expect(await lastPathChoiceValueRound1()).toBe("joint_evaluation");

@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
-
+import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
 import { getCurrentYear } from "~/modules/domain";
-import { TEST_USER_PHONE } from "./constants";
-import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	COMPLIANCE_PATH,
-	selectCompliancePath,
-} from "./helpers/compliance-flows";
+	complianceStepHref,
+	DECLARATION_REMUNERATION,
+	remunerationStepHref,
+} from "~/modules/routes";
+import { TEST_USER_PHONE } from "./constants";
+import { withCampaignYear } from "./helpers/campaign-year";
+import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
@@ -87,11 +90,11 @@ test.describe("Campaign deadlines gating", () => {
 			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await page.goto("/declaration-remuneration");
+			await page.goto(DECLARATION_REMUNERATION);
 			await seedSubmittedCompliance();
 
-			await page.goto("/declaration-remuneration/etape/2");
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/2$/);
+			await page.goto(remunerationStepHref(2));
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(2)));
 		});
 	});
 
@@ -106,12 +109,12 @@ test.describe("Campaign deadlines gating", () => {
 			await seedUserProfile();
 			await page.context().clearCookies();
 			await loginWithProConnect(page);
-			await page.goto("/declaration-remuneration");
+			await page.goto(DECLARATION_REMUNERATION);
 			await seedSubmittedCompliance();
 
 			// After the deadline the step stays navigable but renders the read-only modification-closed banner.
-			await page.goto("/declaration-remuneration/etape/2");
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/2$/);
+			await page.goto(remunerationStepHref(2));
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(2)));
 			await expect(
 				page.getByText(/modification close depuis le/i),
 			).toBeVisible();
@@ -139,7 +142,7 @@ test.describe("Path-choice deadline is informational, never a gate", () => {
 			async () => {
 				await setCompanyWorkforce(200);
 				await completeDeclaration(page, { hasGap: true });
-				await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 15_000 });
+				await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 
 				await expect(page.getByText(READ_ONLY_TAIL)).toHaveCount(0);
 				await expect(page.locator("#path-corrective")).toBeEnabled();
@@ -156,7 +159,7 @@ test.describe("Path-choice deadline is informational, never a gate", () => {
 				await expect(page.getByText(STALE_ROUND1_DEADLINE)).toBeVisible();
 
 				await selectCompliancePath(page, "path-corrective");
-				await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, {
+				await page.waitForURL(urlGlob(complianceStepHref(1)), {
 					timeout: 15_000,
 				});
 			},

@@ -1,5 +1,8 @@
 import postgres from "postgres";
-import { REPRESENTATION_SUBJECTION_WINDOW_YEARS } from "~/modules/domain";
+import {
+	type DeclarationFsmStatus,
+	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
+} from "~/modules/domain";
 import { TEST_GIP_WORKFORCE, TEST_SIREN } from "../constants";
 
 const DEFAULT_DB_URL = "postgresql://postgres:postgres@localhost:5438/egapro";
@@ -159,6 +162,32 @@ export async function pushCampaignDeadlinesFarFuture(year?: number) {
 				decl2_justification_deadline = '2099-12-31'::date,
 				decl2_joint_evaluation_deadline = '2099-12-31'::date,
 				decl2_cse_opinion_deadline = '2099-12-31'::date
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
+ * Seed the rémunération declaration of one arbitrary campaign year, FSM status included.
+ *
+ * `setDeclarationComplianceState` updates every declaration row of the test SIREN at once, so a
+ * past-year fixture cannot reuse it without overwriting the current-year row the rest of the
+ * suite depends on — hence a year-scoped writer. Pair it with `resetCampaignYear(year)` for
+ * teardown, which purges the row and everything hanging off it.
+ */
+export async function seedDeclarationForYear(
+	year: number,
+	status: DeclarationFsmStatus,
+	currentStep: number,
+) {
+	await ensureCurrentYearDeclaration(year);
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET status = ${status}, current_step = ${currentStep}, updated_at = NOW()
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
 		`;
 	} finally {
 		await sql.end();

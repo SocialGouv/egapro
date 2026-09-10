@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { MAINTENANCE, TEST_ERROR } from "~/modules/routes";
 
 // Page copy / artwork is covered by src/modules/error/__tests__/*.
 
@@ -17,7 +18,7 @@ test.describe("Error pages", () => {
 	test("500 — a thrown client error is caught by the error boundary", async ({
 		page,
 	}) => {
-		await page.goto("/test-error");
+		await page.goto(TEST_ERROR);
 		await page
 			.getByRole("button", { name: "Déclencher une erreur client" })
 			.click();
@@ -30,7 +31,7 @@ test.describe("Error pages", () => {
 	test("503 — the maintenance route renders the unavailable page", async ({
 		page,
 	}) => {
-		await page.goto("/maintenance");
+		await page.goto(MAINTENANCE);
 
 		await expect(
 			page.getByRole("heading", { name: "Service indisponible" }),

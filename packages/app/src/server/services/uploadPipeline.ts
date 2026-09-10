@@ -9,6 +9,7 @@ import {
 	UPLOAD_REQUEST_TIMEOUT_MS,
 } from "~/modules/shared/uploadConfig";
 import { db } from "~/server/db";
+import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
 import { declarations, files } from "~/server/db/schema";
 
 import { getRequiredContentTypes } from "./cseRequiredContentTypes";
@@ -207,12 +208,8 @@ async function findCurrentDeclaration(
 	siren: string,
 	year: number,
 ): Promise<{ id: string } | null> {
-	const rows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
-		.limit(1);
-	return rows[0] ?? null;
+	const id = await resolveCurrentDeclarationId(db, siren, year);
+	return id === null ? null : { id };
 }
 
 async function countFilesByType(

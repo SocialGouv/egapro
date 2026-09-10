@@ -41,8 +41,7 @@ Conventions de notation :
 **Routes** :
 
 - `/login` — page d'entrée, redirige vers ProConnect ou vers `/mon-espace` si déjà connecté
-- `/mon-espace` — espace personnel, liste les entreprises de l'utilisateur
-- `/mon-espace/mes-entreprises` — détail des entreprises, statut de leurs déclarations
+- `/mon-espace` — tableau de bord de l'entreprise rattachée à la session, statut de ses déclarations
 
 **Modules** : `~/modules/login`, `~/modules/auth`, `~/modules/profile`, `~/modules/my-space`.
 
@@ -50,7 +49,7 @@ Conventions de notation :
 
 - `profile.get` — lecture du profil (audit `read_sensitive`)
 - `profile.updatePhone` — mise à jour du téléphone (modal au premier accès)
-- `company.get` / `company.list` — détails et liste des entreprises rattachées (avec statut CSE et déclarations)
+- `company.get` — détails de l'entreprise rattachée à la session (avec statut CSE et déclarations)
 
 **Règles métier-clés** :
 
@@ -287,7 +286,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 **Routes** :
 
 - `/` — page d'accueil avec formulaire de recherche
-- Téléchargement Excel via `/api/export/declarations` (voir §11)
+- Export public via `/api/public/declarations/export` (voir §11)
 
 **Module** : `~/modules/home`.
 
@@ -392,18 +391,34 @@ Téléchargement déclenché depuis :
 - Page CSE (avis officiel)
 - Vue admin de la déclaration (`/admin/declarations/[id]`)
 
-### 11.2 Export Excel et API publique
+### 11.2 Export Excel et API
 
-Routes publiques (aucune authentification, OpenAPI documentée) :
+Export annuel XLSX, déclenché puis téléchargé :
+
+| URL | Méthode | Format | Filtres |
+|---|---|---|---|
+| `/api/export/generate?year=2026` | POST | — | génère l'export de l'année |
+| `/api/export/download?year=2026` | GET | XLSX | par année |
+
+API SUIT (`/api/v1/*`), derrière la passerelle APISIX — jamais publique :
 
 | URL | Format | Filtres |
 |---|---|---|
-| `/api/export/declarations?year=2024` | XLSX | par année |
-| `/api/export/declarations?date_begin=...&date_end=...` | XLSX | par plage de dates |
-| `/api/export/files?siren=...&year=...` | ZIP | tous les fichiers d'une déclaration |
-| `/export?swagger=1` | Swagger UI | documentation interactive |
+| `/api/v1/export/declarations?date_begin=...&date_end=...` | JSON | par plage de dates |
+| `/api/v1/export/representations?date_begin=...&date_end=...` | JSON | par plage de dates |
+| `/api/v1/files?siren=...&year=...` | JSON | fichiers d'une déclaration |
+| `/api/v1/files/[fileId]` | binaire | un fichier |
+| `/api/v1/docs` | Swagger UI | documentation interactive (hors prod) |
 
-**Module** : `~/modules/export`. **Audit** : `EXPORT_DOWNLOAD`, `EXPORT_API_DECLARATIONS`, `EXPORT_API_FILES` (catégorie `export`, rétention 365 jours).
+API publique (aucune authentification, OpenAPI documentée) :
+
+| URL | Format | Filtres |
+|---|---|---|
+| `/api/public/declarations/export` | CSV | mêmes facettes que la recherche |
+| `/api/public/representations/export` | CSV | mêmes facettes que la recherche |
+| `/api/public/docs` | Swagger UI | documentation interactive |
+
+**Module** : `~/modules/export`. **Audit** : `EXPORT_GENERATE`, `EXPORT_DOWNLOAD`, `EXPORT_API_DECLARATIONS`, `EXPORT_API_FILES` (catégorie `export`, rétention 365 jours).
 
 **À noter** : l'export public n'expose **jamais** l'indicateur G ni les fichiers CSE / évaluation conjointe (filtrage côté serveur dans `buildExportRows`).
 

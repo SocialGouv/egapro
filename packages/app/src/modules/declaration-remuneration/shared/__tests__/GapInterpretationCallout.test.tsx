@@ -132,6 +132,31 @@ describe("GapInterpretationCallout", () => {
 		expect(container.textContent).toMatch(/16,66\s*%/);
 	});
 
+	it("renders '-' for gaps whose rows are missing from the input (defensive fallback)", () => {
+		const rows = makeRows({
+			annualMeanW: "25000",
+			annualMeanM: "30000",
+			hourlyMedianW: "11",
+			hourlyMedianM: "14",
+		}).filter(
+			(r) =>
+				r.label !== "Annuelle brute médiane" &&
+				r.label !== "Horaire brute moyenne",
+		);
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(
+			screen.getByText(/Écart en défaveur des femmes/),
+		).toBeInTheDocument();
+		expect(container.textContent).toMatch(
+			/rémunération médiane inférieure de -\./,
+		);
+		expect(container.textContent).toMatch(/autour de -\./);
+	});
+
 	it("renders balanced title for payGap variant when gaps are below 5%", () => {
 		// 2 rows women-lower, 2 rows men-lower => balanced direction, all gaps < 5%
 		const rows = makeRows({
@@ -153,6 +178,67 @@ describe("GapInterpretationCallout", () => {
 		expect(
 			screen.getByText(/Les rémunérations annuelles et médianes/),
 		).toBeInTheDocument();
+	});
+
+	it("announces men-disfavored direction, not balanced, when a significant gap is outvoted 2-2 by sub-threshold rows (#4034 defect A)", () => {
+		// Annual mean crosses the threshold at -20% (men disfavored). The three other rows sit
+		// well under 0.5% and split 2 women-lower / 1 men-lower — a raw majority vote over all
+		// four rows ties 2-2 and used to fall back to "balanced" despite the orange accent.
+		const rows = makeRows({
+			annualMeanW: "30000",
+			annualMeanM: "25000",
+			annualMedianW: "29995",
+			annualMedianM: "30000",
+			hourlyMeanW: "14.995",
+			hourlyMeanM: "15",
+			hourlyMedianW: "15",
+			hourlyMedianM: "14.995",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Écart entre hommes et femmes/),
+		).not.toBeInTheDocument();
+	});
+
+	it("announces men-disfavored direction, not the opposite, when outvoted 3-1 by sub-threshold rows (#4034 defect B)", () => {
+		// Same significant -20% row (men disfavored), but all three sub-threshold rows point
+		// the other way. A raw majority vote (1 vs 3) used to flip the announced direction to
+		// "women" while still displaying the 20% magnitude of the men-disfavoring row as evidence.
+		const rows = makeRows({
+			annualMeanW: "30000",
+			annualMeanM: "25000",
+			annualMedianW: "29995",
+			annualMedianM: "30000",
+			hourlyMeanW: "14.995",
+			hourlyMeanM: "15",
+			hourlyMedianW: "14.996",
+			hourlyMedianM: "15",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Écart en défaveur des femmes/),
+		).not.toBeInTheDocument();
+		expect(container.textContent).toMatch(/20,00\s*%/);
 	});
 
 	it("renders women disfavored title for variablePay variant", () => {

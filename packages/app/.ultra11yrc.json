@@ -106,12 +106,6 @@
 				"sources": ["src/app/referents/page.tsx"]
 			},
 			{
-				"id": "stats",
-				"name": "Statistiques publiques",
-				"url": "http://localhost:3000/stats",
-				"sources": ["src/app/stats/page.tsx"]
-			},
-			{
 				"id": "mon-espace",
 				"name": "Mon espace",
 				"url": "http://localhost:3000/mon-espace",
@@ -160,13 +154,6 @@
 				"name": "Gestion des cookies",
 				"url": "http://localhost:3000/gestion-des-cookies",
 				"sources": ["src/app/gestion-des-cookies/page.tsx"]
-			},
-			{
-				"id": "mes-entreprises",
-				"name": "Mes entreprises",
-				"url": "http://localhost:3000/mon-espace/mes-entreprises",
-				"sources": ["src/app/mon-espace/mes-entreprises/page.tsx"],
-				"auth": true
 			},
 			{
 				"id": "admin-declarations",

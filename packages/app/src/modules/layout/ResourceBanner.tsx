@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-
+import type { AppHref } from "~/modules/routes";
+import { CONTACT, FAQ, HELP } from "~/modules/routes";
 import styles from "./ResourceBanner.module.scss";
 import { DsfrPictogram } from "./shared/DsfrPictogram";
 
 type ResourceTileProps = {
-	href: string;
+	href: AppHref;
 	pictogramPath: string;
 	title: string;
 	detail: string;
@@ -51,7 +52,7 @@ export function ResourceBanner() {
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
 									detail="Recherchez et accédez à toutes nos ressources"
-									href="/aide"
+									href={HELP}
 									pictogramPath="/dsfr/artwork/pictograms/document/document-search.svg"
 									title="Centre d'aide"
 								/>
@@ -59,7 +60,7 @@ export function ResourceBanner() {
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
 									detail="Réponses aux questions les plus courantes"
-									href="/faq"
+									href={FAQ}
 									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
 									title="Questions fréquentes (FAQ)"
 								/>
@@ -67,7 +68,7 @@ export function ResourceBanner() {
 							<div className="fr-col-12 fr-col-md-4">
 								<ResourceTile
 									detail="Besoin d'aide ? Contactez nos services d'assistance"
-									href="/aide/nous-contacter"
+									href={CONTACT}
 									pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
 									title="Nous contacter"
 								/>

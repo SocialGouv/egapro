@@ -7,14 +7,17 @@ import {
 	getDraftInput,
 	saveDraftInput,
 } from "~/modules/declaration-remuneration/shared/draft/schemas";
-import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	DRAFT_EXPIRY_DAYS,
+} from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { isImpersonatingSiren } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
 import { declarations, userCompanies } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
 
-const DRAFT_TTL_MS = 30 * 24 * 3600 * 1000;
+const DRAFT_TTL_MS = DRAFT_EXPIRY_DAYS * 24 * 3600 * 1000;
 
 async function assertOwnership(
 	db: DB,

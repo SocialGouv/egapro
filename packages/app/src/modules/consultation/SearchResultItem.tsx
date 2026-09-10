@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatObservatoryWorkforce } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
+import { observatoryCompanyHref, routeWithQuery } from "~/modules/routes";
 import { companyLocation, formatNaf } from "./formatters";
 import styles from "./SearchResultItem.module.scss";
 
@@ -35,7 +36,10 @@ export function SearchResultItem({ declaration, searchQuery }: Props) {
 			<h3 className={styles.title}>
 				<Link
 					className={`fr-link ${styles.link}`}
-					href={`/index-egapro/entreprise/${declaration.siren}${searchQuery ? `?from=${encodeURIComponent(searchQuery)}` : ""}`}
+					href={routeWithQuery(
+						observatoryCompanyHref(declaration.siren),
+						searchQuery ? `from=${encodeURIComponent(searchQuery)}` : "",
+					)}
 				>
 					{declaration.name ?? "Entreprise"}
 				</Link>

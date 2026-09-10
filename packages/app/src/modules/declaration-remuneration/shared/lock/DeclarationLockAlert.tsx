@@ -1,17 +1,12 @@
-import type { LockHolder } from "./useDeclarationLock";
+import { formatLockHolderIdentity } from "./lockHolderIdentity";
+import type { LockHolderDisplay } from "./types";
 
 type DeclarationLockAlertProps = {
-	holder: Pick<LockHolder, "firstName" | "lastName" | "email">;
+	holder: LockHolderDisplay;
 };
 
 export function DeclarationLockAlert({ holder }: DeclarationLockAlertProps) {
-	const fullName = [holder.firstName, holder.lastName]
-		.filter(Boolean)
-		.join(" ")
-		.trim();
-	const identity = fullName
-		? `${fullName}${holder.email ? ` (${holder.email})` : ""}`
-		: (holder.email ?? "Un autre utilisateur");
+	const identity = formatLockHolderIdentity(holder) ?? "Un autre utilisateur";
 
 	return (
 		<div className="fr-alert fr-alert--warning fr-mb-3w" role="alert">

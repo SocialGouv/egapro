@@ -11,6 +11,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	typedRoutes: true,
 	async redirects() {
 		// Hash fragments are stripped by the browser before the request reaches the server.
 		return [

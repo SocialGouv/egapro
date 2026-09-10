@@ -2,466 +2,546 @@ import type { FaqSection } from "./types";
 
 export const FAQ_SECTIONS: FaqSection[] = [
 	{
-		id: "indicateur-remuneration",
-		title: "Calculez votre indicateur de rémunération",
+		id: "dispositif",
+		title: "Le dispositif et ses 7 indicateurs",
 		subsections: [
 			{
-				title: "Les effectifs à prendre en compte",
+				title: "Ce que mesure le dispositif",
 				items: [
 					{
-						question:
-							"Quels salariés doivent être pris en compte dans le calcul ?",
+						question: "Sur quoi porte la déclaration ?",
 						answer:
-							"Sont pris en compte tous les salariés, à l'exception des apprentis, des titulaires d'un contrat de professionnalisation, des salariés mis à disposition, des expatriés, ainsi que des salariés absents plus de la moitié de la période de référence.",
+							"Sur les écarts de rémunération entre les femmes et les hommes dans votre entreprise. Le dispositif repose sur 7 indicateurs, désignés par les lettres A à G. Les six premiers sont calculés pour vous à partir de vos données de paie ; le septième, l'indicateur G, est le seul que votre entreprise calcule et saisit elle-même.",
 					},
 					{
-						question: "Comment déterminer la période de référence annuelle ?",
+						question: "Que mesure chacun des sept indicateurs ?",
 						answer:
-							"La période de référence correspond à l'année civile précédant la date de publication, soit du 1er janvier au 31 décembre. L'employeur peut toutefois choisir une période de 12 mois consécutifs différente.",
+							"A : l'écart de rémunération moyenne. B : l'écart sur la rémunération variable. C : l'écart médian de rémunération. D : l'écart médian de rémunération variable. E : la proportion de bénéficiaires d'une rémunération variable, par sexe. F : la répartition des effectifs par quartile de rémunération. G : l'écart de rémunération, base et variable confondues, par catégorie d'emploi.",
 					},
 					{
-						question: "Les salariés à temps partiel sont-ils inclus ?",
+						question: "Y a-t-il encore une note globale sur 100 ?",
 						answer:
-							"Oui, les salariés à temps partiel sont pris en compte. Leurs rémunérations sont reconstituées en équivalent temps plein sur la période de référence.",
-					},
-					{
-						question: "Quel est le seuil minimum d'effectifs par groupe ?",
-						answer:
-							"Chaque groupe (par catégorie socio-professionnelle et tranche d'âge) doit comporter au moins 3 femmes et 3 hommes pour être pris en compte dans le calcul.",
+							"Non. Le dispositif actuel ne produit ni note, ni barème, ni classement. Il publie des écarts, indicateur par indicateur. Ce qui déclenche des obligations n'est pas un score insuffisant mais un écart qui dépasse le seuil d'alerte de l'indicateur G.",
 					},
 				],
 			},
 			{
-				title: "Le calcul de l'indicateur",
+				title: "Qui doit déclarer",
 				items: [
 					{
-						question: "Comment calculer l'écart de rémunération ?",
+						question: "Mon entreprise est-elle tenue de déclarer ?",
 						answer:
-							"L'écart de rémunération est calculé en comparant la moyenne des rémunérations des femmes et des hommes par groupe de catégorie socio-professionnelle et tranche d'âge, puis en pondérant par les effectifs.",
+							"En dessous de 50 salariés, la déclaration est volontaire. À partir de 50 salariés, elle est obligatoire et annuelle depuis la campagne 2027. Le seuil de 100 salariés ne change pas cette périodicité : il ouvre les obligations supplémentaires, avis du CSE et parcours de mise en conformité.",
 					},
 					{
-						question: "Quels éléments de rémunération sont pris en compte ?",
+						question:
+							"Une entreprise de moins de 50 salariés qui déclare volontairement doit-elle tout remplir ?",
 						answer:
-							"La rémunération prise en compte comprend le salaire de base, les primes de performance, les bonus, les avantages en nature, et tout autre élément de rémunération lié au poste.",
+							"Oui. Une déclaration volontaire porte les 7 indicateurs, indicateur G compris. Le caractère volontaire porte sur le fait de déclarer, pas sur le contenu de la déclaration.",
 					},
 					{
-						question: "Comment est appliqué le seuil de pertinence ?",
+						question: "L'effectif retenu est-il celui d'aujourd'hui ?",
 						answer:
-							"Un seuil de pertinence de 2 % ou 5 % (selon la méthode choisie) est appliqué à l'écart de rémunération. Si l'écart est inférieur au seuil, il est ramené à zéro.",
-					},
-					{
-						question: "Comment convertir l'écart en nombre de points ?",
-						answer:
-							"L'écart pondéré est converti en points selon un barème : 0 % d'écart = 40 points, jusqu'à un écart supérieur ou égal à 20 % = 0 point.",
+							"Non, c'est l'effectif annuel moyen de l'année de référence, c'est-à-dire l'année civile précédant la campagne. Il vous est présenté dans la déclaration ; vous n'avez pas à le recalculer.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "indicateur-representation",
-		title: "Calculez votre indicateur de représentation",
+		id: "donnees-preremplies",
+		title: "Les données pré-remplies par le GIP-MDS",
 		subsections: [
 			{
-				title: "Les obligations de représentation",
+				title: "D'où viennent les indicateurs A à F",
 				items: [
 					{
-						question:
-							"Quelles entreprises sont concernées par cet indicateur ?",
+						question: "Qui calcule les indicateurs A à F ?",
 						answer:
-							"Les entreprises de plus de 1 000 salariés sont tenues de publier les écarts de représentation entre les femmes et les hommes parmi les cadres dirigeants et les membres des instances dirigeantes.",
+							"Le GIP-MDS les calcule à partir de vos déclarations sociales nominatives (DSN). Vous n'avez ni chiffre à saisir, ni fichier à déposer pour ces six indicateurs : ils sont déjà là quand vous ouvrez votre déclaration.",
 					},
 					{
-						question: "Quels postes sont pris en compte ?",
+						question: "Quand ces données deviennent-elles disponibles ?",
 						answer:
-							"Sont concernés les cadres dirigeants au sens de l'article L.3111-2 du Code du travail et les membres des instances dirigeantes telles que définies à l'article L.23-12-1 du Code de commerce.",
+							"Elles sont mises à disposition chaque année au mois de mars, pour l'année de référence précédente. Tant qu'elles ne sont pas publiées, la campagne n'est pas ouverte et votre déclaration ne peut pas être commencée.",
 					},
 					{
-						question: "À quelle date les effectifs sont-ils appréciés ?",
+						question: "Puis-je consulter ces données avant de déclarer ?",
 						answer:
-							"Les effectifs sont appréciés au dernier jour de la période de référence annuelle choisie par l'employeur.",
-					},
-					{
-						question: "Comment se calcule le pourcentage de représentation ?",
-						answer:
-							"Le pourcentage est calculé en divisant le nombre de personnes du sexe sous-représenté par le nombre total de personnes dans la catégorie concernée, multiplié par 100.",
+							"Oui. Depuis Mon espace, vous pouvez télécharger un récapitulatif PDF des données pré-remplies issues de la DSN, avant même d'avoir commencé votre déclaration.",
 					},
 				],
 			},
 			{
-				title: "La publication et la déclaration",
+				title: "Quand les données semblent fausses",
 				items: [
 					{
-						question: "Où publier les écarts de représentation ?",
+						question:
+							"Un indicateur pré-rempli me paraît erroné. Puis-je le corriger dans Egapro ?",
 						answer:
-							"Les écarts de représentation doivent être publiés sur le site internet de l'entreprise, de manière visible et lisible, au plus tard le 1er mars de chaque année.",
+							"Non, les indicateurs A à F ne sont pas modifiables dans Egapro : ils reflètent vos DSN. Une donnée qui vous paraît fausse se corrige à la source, dans vos déclarations sociales. Signalez-le par le formulaire de contact afin que la correction soit prise en compte pour la campagne concernée.",
 					},
 					{
-						question: "Faut-il aussi déclarer sur Egapro ?",
+						question: "Pourquoi certains indicateurs sont-ils incalculables ?",
 						answer:
-							"Oui, en complément de la publication, les écarts doivent être déclarés sur la plateforme Egapro via le formulaire de déclaration dédié.",
-					},
-					{
-						question: "Quelles sont les sanctions en cas de non-publication ?",
-						answer:
-							"Le non-respect de l'obligation de publication peut entraîner une pénalité financière pouvant aller jusqu'à 1 % de la masse salariale annuelle.",
-					},
-					{
-						question: "Existe-t-il un quota minimum à atteindre ?",
-						answer:
-							"Oui, la loi impose un quota minimum de 30 % de chaque sexe parmi les cadres dirigeants et les instances dirigeantes, applicable progressivement.",
+							"Un indicateur est incalculable quand les effectifs concernés sont insuffisants pour produire une comparaison, par exemple lorsqu'un sexe n'est pas représenté dans un groupe. La déclaration reste due : l'indicateur est alors présenté comme non calculable, et cela ne vous pénalise pas.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "ecart-augmentations",
-		title: "Calculez votre indicateur d'écart de taux d'augmentations",
+		id: "quartiles",
+		title: "Les quartiles de rémunération",
 		subsections: [
 			{
-				title: "Le périmètre des augmentations",
+				title: "Comprendre l'étape",
 				items: [
 					{
-						question: "Qu'entend-on par augmentation individuelle ?",
+						question: "Qu'est-ce qu'un quartile de rémunération ?",
 						answer:
-							"Une augmentation individuelle correspond à une augmentation du salaire de base du salarié, qu'elle soit liée à une promotion ou non.",
+							"Vos salariés sont classés par rémunération croissante puis répartis en 4 tranches d'effectif égal, appelées quartiles. Le premier quartile réunit les rémunérations les plus basses, le quatrième les plus hautes. L'indicateur F observe la part de femmes et d'hommes dans chacune de ces tranches.",
 					},
 					{
-						question:
-							"Les augmentations collectives sont-elles prises en compte ?",
+						question: "Que dois-je saisir à cette étape ?",
 						answer:
-							"Non, seules les augmentations individuelles sont prises en compte. Les augmentations résultant d'accords collectifs ou de revalorisations générales sont exclues.",
+							"Vous saisissez 3 seuils de rémunération : ceux qui séparent le premier quartile du deuxième, le deuxième du troisième, et le troisième du quatrième. Le quatrième quartile n'a pas de seuil haut, il n'y a donc rien à renseigner pour lui. La borne basse de chaque quartile est déduite automatiquement du seuil précédent.",
 					},
 					{
-						question:
-							"Comment traiter les augmentations liées à un retour de congé maternité ?",
+						question: "Pourquoi le quartile supérieur est-il regardé de près ?",
 						answer:
-							"Les augmentations liées au rattrapage salarial suite à un congé maternité ne sont pas comptabilisées dans cet indicateur, car elles font l'objet d'un indicateur dédié.",
-					},
-					{
-						question:
-							"Les changements de catégorie socio-professionnelle comptent-ils ?",
-						answer:
-							"Oui, si un changement de catégorie socio-professionnelle s'accompagne d'une augmentation de salaire, il est comptabilisé comme une augmentation individuelle.",
-					},
-				],
-			},
-			{
-				title: "Le calcul de l'indicateur",
-				items: [
-					{
-						question: "Comment est calculé l'écart de taux d'augmentations ?",
-						answer:
-							"L'écart est calculé en comparant le pourcentage de femmes augmentées au pourcentage d'hommes augmentés, par catégorie socio-professionnelle pour les entreprises de 250 salariés et plus.",
-					},
-					{
-						question:
-							"Le calcul diffère-t-il selon la taille de l'entreprise ?",
-						answer:
-							"Oui, pour les entreprises de 50 à 249 salariés, le calcul se fait sur l'ensemble des salariés sans distinction de catégorie. Pour les entreprises de 250 salariés et plus, le calcul est fait par catégorie socio-professionnelle.",
-					},
-					{
-						question: "Quel est le barème de points pour cet indicateur ?",
-						answer:
-							"L'indicateur est noté sur 20 points pour les entreprises de 250 salariés et plus, et sur 35 points pour les entreprises de 50 à 249 salariés (augmentations et promotions combinées).",
-					},
-					{
-						question:
-							"Que se passe-t-il si un groupe ne comporte pas assez de salariés ?",
-						answer:
-							"Si un groupe comporte moins de 10 femmes ou 10 hommes, il n'est pas pris en compte dans le calcul. Si aucun groupe n'est valide, l'indicateur est considéré comme incalculable.",
+							"Parce qu'il concentre les rémunérations les plus élevées et révèle le plafond de verre. La répartition y est considérée comme équilibrée tant que la part de chaque sexe y reste dans une marge de 5 % autour de la parité, soit entre 45 % et 55 %. Au-delà, le déséquilibre est signalé.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "ecart-promotions",
-		title: "Calculez votre indicateur d'écart de taux de promotions",
+		id: "indicateur-g",
+		title: "L'indicateur G et les catégories d'emploi",
 		subsections: [
 			{
-				title: "La définition des promotions",
+				title: "Qui doit le renseigner, et quand",
 				items: [
 					{
-						question: "Qu'est-ce qu'une promotion au sens de l'index ?",
+						question: "Suis-je concerné par l'indicateur G cette année ?",
 						answer:
-							"Une promotion correspond à un changement de catégorie socio-professionnelle (CSP) ou de niveau/coefficient hiérarchique, accompagné ou non d'une augmentation de salaire.",
+							"À partir de 250 salariés, il est dû chaque année. Entre 150 et 249 salariés, il est dû une année sur trois, en commençant par la campagne 2027 — donc 2027, 2030, 2033, et ainsi de suite. À partir de la campagne 2030, cette périodicité triennale s'étend à toutes les entreprises soumises à l'obligation, dès 50 salariés. En dessous de 50 salariés, une déclaration volontaire le comporte toujours.",
 					},
 					{
-						question: "Cet indicateur concerne-t-il toutes les entreprises ?",
+						question: "Comment savoir si l'année en cours est une année G ?",
 						answer:
-							"Non, cet indicateur ne concerne que les entreprises de 250 salariés et plus. Pour les entreprises de 50 à 249 salariés, les augmentations et promotions sont combinées dans un seul indicateur.",
-					},
-					{
-						question:
-							"Les promotions internes et externes sont-elles distinguées ?",
-						answer:
-							"Seules les promotions internes (au sein de l'entreprise) sont prises en compte. Les promotions liées à un recrutement externe ne sont pas comptabilisées.",
-					},
-					{
-						question:
-							"Les promotions en cours d'année sont-elles proratisées ?",
-						answer:
-							"Non, toute promotion intervenue au cours de la période de référence est comptabilisée, quelle que soit la date à laquelle elle a eu lieu.",
+							"Vous n'avez pas à le calculer : si l'indicateur G est dû pour votre entreprise cette année, l'étape correspondante apparaît dans votre déclaration. Si elle n'apparaît pas, il n'est pas attendu de vous cette année.",
 					},
 				],
 			},
 			{
-				title: "Le calcul et le barème",
+				title: "Définir ses catégories d'emploi",
 				items: [
 					{
-						question: "Comment est calculé l'écart de taux de promotions ?",
+						question: "Qui décide des catégories d'emploi ?",
 						answer:
-							"L'écart est calculé en comparant le pourcentage de femmes promues au pourcentage d'hommes promus, par catégorie socio-professionnelle.",
+							"Votre entreprise, par accord collectif ou, à défaut, par décision unilatérale de l'employeur. Il n'existe pas de nomenclature imposée : les catégories doivent refléter l'organisation réelle du travail chez vous, en regroupant des emplois de valeur comparable.",
 					},
 					{
-						question: "Quel est le barème de points ?",
+						question: "Que faut-il renseigner pour chaque catégorie ?",
 						answer:
-							"L'indicateur est noté sur 15 points. Un écart nul ou en faveur du sexe sous-représenté donne 15 points. Le nombre de points diminue avec l'augmentation de l'écart.",
+							"Les effectifs de femmes et d'hommes, puis la rémunération brute annuelle et horaire, base et rémunération variable comprises. L'écart est calculé pour vous à partir de ces valeurs.",
 					},
 					{
-						question: "Le seuil de pertinence s'applique-t-il aussi ?",
+						question:
+							"Puis-je préparer ces données en dehors de la plateforme ?",
 						answer:
-							"Oui, un seuil de pertinence de 2 points de pourcentage est appliqué. Si l'écart est inférieur à ce seuil, il est ramené à zéro.",
+							"Oui. L'étape propose un modèle de tableur à télécharger, à compléter hors ligne, puis à réimporter. Le contenu importé reste modifiable dans le formulaire avant transmission.",
 					},
 					{
-						question: "Que faire si l'indicateur est incalculable ?",
+						question: "Mes catégories d'emploi sont-elles rendues publiques ?",
 						answer:
-							"Si l'indicateur est incalculable (pas assez d'effectifs dans les groupes valides), il n'entre pas dans le calcul de l'index global. Le total des points est alors recalculé sur la base des indicateurs calculables.",
+							"Non. Seuls les indicateurs A à F sont consultables publiquement. L'indicateur G, vos catégories d'emploi et les rémunérations associées restent confidentiels et ne sont accessibles qu'à l'administration.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "retour-conge-maternite",
-		title: "Calculez votre indicateur de retour de congé maternité",
+		id: "seuil-alerte",
+		title: "Le seuil d'alerte et la seconde déclaration",
 		subsections: [
 			{
-				title: "Les salariées concernées",
+				title: "Le seuil",
 				items: [
 					{
-						question: "Quelles salariées sont prises en compte ?",
+						question: "À partir de quel écart suis-je en alerte ?",
 						answer:
-							"Sont prises en compte toutes les salariées revenues de congé maternité au cours de la période de référence, et pendant lequel des augmentations ont été accordées à d'autres salariés.",
-					},
-					{
-						question: "Le congé d'adoption est-il inclus ?",
-						answer:
-							"Oui, le congé d'adoption est traité de la même manière que le congé maternité pour le calcul de cet indicateur.",
+							"Le seuil d'alerte est fixé à 5 % d'écart sur l'indicateur G. En dessous, aucune obligation supplémentaire ne se déclenche. À partir de 5 %, et pour les entreprises d'au moins 100 salariés, le parcours de mise en conformité s'ouvre.",
 					},
 					{
 						question:
-							"Quelle augmentation est due au retour de congé maternité ?",
+							"Un écart au-dessus du seuil est-il une sanction ou une faute ?",
 						answer:
-							"La salariée doit bénéficier, à son retour, des augmentations générales et de la moyenne des augmentations individuelles perçues par les salariés relevant de la même catégorie professionnelle.",
-					},
-					{
-						question:
-							"Comment traiter un congé à cheval sur deux périodes de référence ?",
-						answer:
-							"C'est la date de retour effectif de la salariée qui détermine la période de référence à prendre en compte, indépendamment de la date de début du congé.",
+							"Ni l'un ni l'autre. C'est un constat qui ouvre une obligation d'agir : justifier l'écart, le corriger, ou l'examiner avec les représentants du personnel. La plateforme sert à tracer cette démarche.",
 					},
 				],
 			},
 			{
-				title: "Le calcul de l'indicateur",
+				title: "Le parcours de mise en conformité",
 				items: [
 					{
-						question: "Comment est calculé cet indicateur ?",
+						question: "Quels parcours puis-je choisir ?",
 						answer:
-							"L'indicateur vérifie si 100 % des salariées de retour de congé maternité ont bénéficié d'une augmentation à leur retour. Si oui, 15 points sont attribués.",
+							"Trois : justifier l'écart par des éléments objectifs, engager des mesures correctives et le mesurer à nouveau par une seconde déclaration, ou déposer une évaluation conjointe menée avec les représentants du personnel. Le choix est enregistré et se verrouille dès qu'une action en découle.",
 					},
 					{
-						question: "Quel est le barème de points ?",
+						question: "Qu'est-ce que la seconde déclaration ?",
 						answer:
-							"C'est un indicateur binaire : 15 points si toutes les salariées concernées ont été augmentées, 0 point sinon.",
+							"C'est une nouvelle mesure de l'indicateur G après vos mesures correctives, dans les six mois suivant la première. Elle porte sur une période de référence que vous choisissez, comprise entre la date de votre première déclaration et la fin de l'année civile.",
 					},
 					{
-						question:
-							"Que se passe-t-il s'il n'y a aucun retour de congé maternité ?",
+						question: "Combien de déclarations puis-je faire dans l'année ?",
 						answer:
-							"Si aucune salariée n'est revenue de congé maternité pendant la période de référence, l'indicateur est considéré comme incalculable et n'entre pas dans le total de l'index.",
+							"Deux au maximum par année civile : la déclaration initiale, et le cas échéant la seconde déclaration du parcours de conformité.",
 					},
 					{
-						question:
-							"L'augmentation doit-elle intervenir immédiatement au retour ?",
+						question: "Qu'est-ce qu'une évaluation conjointe ?",
 						answer:
-							"L'augmentation doit être effective au retour de la salariée. Un retard dans l'application de l'augmentation constitue un manquement à l'obligation légale.",
+							"C'est un examen de l'écart mené avec les représentants du personnel, dont vous déposez le document au format PDF. Un seul document par déclaration : en déposer un nouveau remplace le précédent.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "hautes-remunerations",
-		title: "Calculez votre indicateur de hautes rémunérations",
+		id: "avis-cse",
+		title: "L'avis du CSE",
 		subsections: [
 			{
-				title: "L'identification des hautes rémunérations",
+				title: "Qui est concerné",
 				items: [
 					{
-						question:
-							"Quels salariés sont considérés comme ayant les plus hautes rémunérations ?",
+						question: "Dois-je déposer un avis du CSE ?",
 						answer:
-							"Il s'agit des 10 salariés ayant perçu les rémunérations les plus élevées au cours de la période de référence, tous sexes confondus.",
+							"Oui à partir de 100 salariés, où il est obligatoire. En dessous de ce seuil, le dépôt n'est pas seulement facultatif : il n'est pas ouvert, et l'étape n'apparaît pas dans votre démarche.",
 					},
 					{
-						question: "Comment départager des salariés à rémunération égale ?",
+						question: "Sur quoi le CSE se prononce-t-il ?",
 						answer:
-							"En cas d'égalité de rémunération au 10e rang, tous les salariés concernés sont inclus dans le décompte. Le total peut donc dépasser 10 personnes.",
-					},
-					{
-						question: "Les dirigeants mandataires sociaux sont-ils inclus ?",
-						answer:
-							"Non, seuls les salariés au sens du droit du travail sont pris en compte. Les mandataires sociaux non titulaires d'un contrat de travail sont exclus.",
-					},
-					{
-						question: "La rémunération inclut-elle les avantages en nature ?",
-						answer:
-							"Oui, la rémunération prise en compte est la rémunération brute annuelle reconstituée en équivalent temps plein, incluant les primes et avantages en nature.",
+							"Sur deux points distincts : l'exactitude des données déclarées, et les écarts constatés. Chacun donne lieu à un avis favorable ou défavorable, daté. La consultation sur les écarts peut être sans objet si aucun écart ne la rend nécessaire.",
 					},
 				],
 			},
 			{
-				title: "Le calcul de l'indicateur",
+				title: "Le dépôt des documents",
 				items: [
 					{
-						question: "Comment est calculé cet indicateur ?",
+						question: "Combien de fichiers puis-je déposer ?",
 						answer:
-							"On compte le nombre de femmes et d'hommes parmi les 10 plus hautes rémunérations. Le sexe le moins représenté détermine le nombre de points.",
+							"Jusqu'à 4 fichiers PDF par année. Ce plafond couvre les avis portant sur la première comme sur la seconde déclaration.",
 					},
 					{
-						question: "Quel est le barème de points ?",
+						question:
+							"Pourquoi dois-je associer chaque fichier à un type de contenu ?",
 						answer:
-							"L'indicateur est noté sur 10 points : 4 ou 5 personnes de chaque sexe = 10 points, 3 personnes du sexe sous-représenté = 5 points, 2 = 5 points, 1 = 2.5 points, 0 = 0 point.",
+							"Parce qu'un même procès-verbal peut porter sur l'exactitude, sur les écarts, ou sur les deux, et pour l'une ou l'autre déclaration. L'association indique quel avis se trouve dans quel document. Chaque type ne peut être associé qu'à un seul fichier, et tous les types attendus doivent l'être avant de pouvoir transmettre.",
 					},
 					{
-						question: "Cet indicateur peut-il être incalculable ?",
+						question: "Un avis défavorable bloque-t-il ma déclaration ?",
 						answer:
-							"Non, cet indicateur est toujours calculable dès lors que l'entreprise a au moins 10 salariés rémunérés sur la période de référence.",
-					},
-					{
-						question: "Y a-t-il un seuil de pertinence ?",
-						answer:
-							"Non, aucun seuil de pertinence ne s'applique à cet indicateur. Le décompte est purement factuel.",
+							"Non. Le sens de l'avis est enregistré et transmis tel quel ; il ne conditionne pas la validité de votre déclaration.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "declaration",
-		title: "Déclarez vos résultats",
+		id: "depot-documents",
+		title: "Déposer un document",
 		subsections: [
 			{
-				title: "Les modalités de déclaration",
+				title: "Ce que le dépôt accepte",
 				items: [
 					{
-						question: "Quelle est la date limite de déclaration ?",
+						question: "Quels formats de fichier puis-je déposer ?",
 						answer:
-							"La déclaration doit être effectuée au plus tard le 1er mars de chaque année, au titre de la période de référence précédente.",
+							"Le PDF, pour l'avis du CSE comme pour l'évaluation conjointe. Les autres formats sont écartés dès la sélection du fichier.",
 					},
 					{
-						question: "Qui peut effectuer la déclaration sur Egapro ?",
+						question: "Y a-t-il une taille maximale ?",
 						answer:
-							"La déclaration peut être effectuée par le représentant légal de l'entreprise ou toute personne disposant d'une habilitation via ProConnect.",
+							"10 Mo par fichier. Au-delà, le dépôt est refusé avant même l'envoi, et le message vous l'indique.",
 					},
 					{
-						question: "Peut-on modifier une déclaration déjà transmise ?",
+						question: "Le nom de mon fichier peut-il poser problème ?",
 						answer:
-							"Oui, il est possible de modifier et retransmettre une déclaration tant que la période de déclaration est ouverte. La nouvelle déclaration remplace la précédente.",
-					},
-					{
-						question:
-							"La déclaration est-elle obligatoire même si l'index est incalculable ?",
-						answer:
-							"Oui, même si certains indicateurs sont incalculables, l'entreprise doit effectuer sa déclaration en indiquant les motifs d'incalculabilité.",
+							"Il doit faire au plus 200 caractères et ne pas contenir de caractères réservés par les systèmes de fichiers. Un nom refusé se renomme : rien d'autre n'est à corriger, et le contenu du document n'est pas en cause.",
 					},
 				],
 			},
 			{
-				title: "La publication des résultats",
+				title: "Après le dépôt",
 				items: [
 					{
-						question: "Où publier l'index d'égalité professionnelle ?",
+						question: "Mon fichier est-il contrôlé ?",
 						answer:
-							"L'index global et le résultat de chaque indicateur doivent être publiés sur le site internet de l'entreprise, de manière visible et lisible.",
+							"Oui. Chaque fichier est analysé par un antivirus pendant l'envoi. Un fichier détecté comme infecté est rejeté et n'est jamais conservé.",
 					},
 					{
-						question: "Faut-il informer le CSE ?",
+						question: "Puis-je supprimer ou remplacer un fichier déposé ?",
 						answer:
-							"Oui, l'index et les résultats de chaque indicateur doivent être communiqués au Comité social et économique (CSE) via la Base de Données Économiques, Sociales et Environnementales (BDESE).",
+							"Tant que la démarche n'est pas close, oui. Pour l'avis du CSE, chaque fichier se supprime individuellement. Pour l'évaluation conjointe, il n'y a qu'un seul document : en déposer un nouveau remplace le précédent.",
 					},
 					{
-						question:
-							"Quelles sont les conséquences d'un index inférieur à 75 ?",
+						question: "Reçois-je une confirmation de dépôt ?",
 						answer:
-							"Si l'index est inférieur à 75 points, l'entreprise doit définir et publier des mesures de correction et, le cas échéant, des objectifs de progression.",
-					},
-					{
-						question: "La DREETS est-elle automatiquement informée ?",
-						answer:
-							"Oui, la déclaration sur Egapro vaut transmission à la DREETS (Direction régionale de l'économie, de l'emploi, du travail et des solidarités) compétente.",
+							"Oui, un accusé de réception vous est envoyé par e-mail dès qu'un dépôt aboutit.",
 					},
 				],
 			},
 		],
 	},
 	{
-		id: "mesures-correction",
-		title: "Mesures de correction et objectifs de progression",
+		id: "representation-equilibree",
+		title: "La représentation équilibrée",
 		subsections: [
 			{
-				title: "Les obligations en cas d'index insuffisant",
+				title: "Une déclaration distincte",
 				items: [
 					{
-						question: "Quand faut-il définir des mesures de correction ?",
-						answer:
-							"Des mesures de correction doivent être définies dès que l'index est inférieur à 75 points. Elles doivent être publiées sur le site internet de l'entreprise et transmises à la DREETS.",
-					},
-					{
 						question:
-							"Quel est le délai pour atteindre le seuil de 75 points ?",
+							"En quoi cette déclaration diffère-t-elle de celle des indicateurs ?",
 						answer:
-							"L'entreprise dispose de 3 ans pour atteindre le seuil de 75 points. En cas de non-atteinte dans ce délai, une pénalité financière peut être appliquée.",
+							"Elle porte sur un tout autre sujet : la place des femmes et des hommes parmi les cadres dirigeants et au sein des instances dirigeantes, et non sur les rémunérations. Elle a son propre parcours, sa propre échéance et son propre récapitulatif.",
 					},
 					{
-						question: "Les objectifs de progression sont-ils obligatoires ?",
+						question: "Quelles entreprises sont concernées ?",
 						answer:
-							"Oui, pour les entreprises dont l'index est inférieur à 85 points, des objectifs de progression pour chaque indicateur doivent être définis et publiés.",
+							"Celles d'au moins 1 000 salariés sur chacun des 3 derniers exercices, au titre de la loi Rixain. Si vous êtes en dessous de ce seuil, le premier écran vous permet de le déclarer, et la démarche se clôt sans autre étape.",
 					},
 					{
-						question: "Quelle est la pénalité maximale ?",
+						question: "Quelle est l'échéance ?",
 						answer:
-							"La pénalité financière peut atteindre jusqu'à 1 % de la masse salariale annuelle brute. Son montant est fixé par la DREETS en tenant compte des efforts consentis par l'entreprise.",
+							"Elle est fixée campagne par campagne par l'administration et peut varier d'une année à l'autre. Celle qui s'applique à votre entreprise est affichée dans Mon espace et sur l'écran de déclaration.",
 					},
 				],
 			},
 			{
-				title: "La mise en œuvre des mesures",
+				title: "Le seuil de représentation",
 				items: [
 					{
-						question: "Comment définir des mesures de correction efficaces ?",
+						question: "Quel est le pourcentage à atteindre ?",
 						answer:
-							"Les mesures doivent cibler les indicateurs défaillants : révision des politiques de rémunération, plans de rattrapage salarial, objectifs chiffrés d'augmentation et de promotion pour le sexe sous-représenté.",
+							"Chaque sexe doit représenter au moins 30 % des cadres dirigeants et au moins 30 % des membres des instances dirigeantes. Ce seuil est porté à 40 % à compter de la campagne 2029.",
+					},
+					{
+						question: "Les deux indicateurs sont-ils appréciés ensemble ?",
+						answer:
+							"Non, ils restent indépendants : les cadres dirigeants et les instances dirigeantes reçoivent chacun leur propre verdict, et aucune note d'ensemble n'est produite. Un indicateur peut être sans objet, par exemple en l'absence d'instance dirigeante.",
 					},
 					{
 						question:
-							"Faut-il négocier les mesures avec les partenaires sociaux ?",
+							"Que dois-je faire si un écart dépasse le seuil réglementaire ?",
 						answer:
-							"Les mesures de correction doivent être négociées dans le cadre de la négociation obligatoire sur l'égalité professionnelle, ou à défaut, décidées unilatéralement par l'employeur après consultation du CSE.",
+							"Vous devez définir des mesures correctives par accord collectif ou par décision unilatérale de l'employeur, et les déposer sur TéléAccords. Une étape supplémentaire de la déclaration recueille alors vos informations de publication.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "declaration-habilitation",
+		title: "Se connecter et déclarer",
+		subsections: [
+			{
+				title: "L'accès à la plateforme",
+				items: [
+					{
+						question: "Comment se connecte-t-on à Egapro ?",
+						answer:
+							"Par ProConnect, l'identité numérique des professionnels. Il n'y a pas de compte Egapro à créer ni de mot de passe propre à la plateforme : votre habilitation ProConnect détermine l'entreprise pour laquelle vous déclarez.",
 					},
 					{
-						question: "Comment suivre la progression de l'index ?",
+						question: "Qui, dans l'entreprise, peut déclarer ?",
 						answer:
-							"L'entreprise doit recalculer son index chaque année. L'évolution des indicateurs permet de mesurer l'efficacité des mesures mises en place et d'ajuster la stratégie si nécessaire.",
+							"Le représentant légal, ou toute personne qu'il a habilitée via ProConnect pour le SIREN concerné. La déclaration est rattachée à l'entreprise, pas à la personne qui la saisit.",
 					},
 					{
-						question: "Les mesures de correction doivent-elles être publiées ?",
+						question:
+							"Deux personnes peuvent-elles remplir la déclaration en même temps ?",
 						answer:
-							"Oui, les mesures de correction et les objectifs de progression doivent être publiés sur le site internet de l'entreprise de manière visible et lisible.",
+							"Une seule à la fois peut la modifier. Lorsqu'une déclaration est déjà ouverte en écriture par un collègue, un bandeau vous indique qui la détient et les formulaires passent en lecture seule, afin qu'aucune saisie ne soit écrasée.",
+					},
+				],
+			},
+			{
+				title: "Le déroulement de la déclaration",
+				items: [
+					{
+						question: "Puis-je remplir la déclaration en plusieurs fois ?",
+						answer:
+							"Oui. Chaque étape est enregistrée en brouillon au fur et à mesure et vous pouvez reprendre plus tard. Un brouillon laissé sans activité expire au bout de 30 jours.",
+					},
+					{
+						question: "Que se passe-t-il quand je transmets ?",
+						answer:
+							"Votre déclaration est transmise aux services du ministère chargé du travail, un accusé de réception est envoyé à votre adresse e-mail, et un récapitulatif PDF devient téléchargeable depuis Mon espace. Aucune démarche complémentaire n'est à faire auprès de la DREETS.",
+					},
+					{
+						question: "Où retrouver mes déclarations passées ?",
+						answer:
+							"Dans Mon espace, qui liste vos démarches par année, leur état d'avancement et les documents associés : données pré-remplies, récapitulatifs de déclaration et récapitulatif des éléments transmis.",
+					},
+					{
+						question: "Pourquoi me demande-t-on mon numéro de téléphone ?",
+						answer:
+							"Il est demandé une fois, au premier accès à Mon espace, pour que l'administration puisse vous joindre au sujet de vos déclarations. Il ne sert à rien d'autre.",
+					},
+					{
+						question:
+							"Je déclare pour plusieurs entreprises. Est-ce possible ?",
+						answer:
+							"Oui. Mon espace liste toutes les entreprises rattachées à votre habilitation, chacune avec ses propres démarches. Vous passez de l'une à l'autre sans vous reconnecter.",
+					},
+					{
+						question: "Je n'ai pas reçu l'accusé de réception, que faire ?",
+						answer:
+							"Vérifiez d'abord vos courriers indésirables. Le bandeau de confirmation et Mon espace proposent un bouton pour vous le renvoyer, sans avoir à toucher à votre déclaration.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "calendrier-modification",
+		title: "Calendrier et modification",
+		subsections: [
+			{
+				title: "Les échéances",
+				items: [
+					{
+						question: "Quelles sont les dates limites ?",
+						answer:
+							"Elles sont fixées campagne par campagne par l'administration et peuvent varier d'une année à l'autre. Aucune date n'est à retenir de mémoire : celles qui s'appliquent à votre entreprise sont affichées dans Mon espace et sur les écrans concernés.",
+					},
+					{
+						question: "Que se passe-t-il si une échéance est dépassée ?",
+						answer:
+							"L'écran concerné passe en lecture seule et l'action n'est plus possible. Les étapes déjà accomplies et les documents déjà transmis restent consultables et téléchargeables.",
+					},
+				],
+			},
+			{
+				title: "Corriger après coup",
+				items: [
+					{
+						question: "Puis-je modifier une déclaration déjà transmise ?",
+						answer:
+							"Oui, tant que la date limite de modification de la campagne n'est pas dépassée. Vous rouvrez votre déclaration, corrigez, puis transmettez à nouveau : la nouvelle version remplace la précédente et un nouvel accusé de réception vous est envoyé.",
+					},
+					{
+						question:
+							"Une modification est-elle la même chose qu'une seconde déclaration ?",
+						answer:
+							"Non. Une modification corrige une déclaration existante sur la même période de référence. Une seconde déclaration est une nouvelle mesure, sur une nouvelle période, dans le cadre du parcours de conformité ouvert par un écart au-dessus du seuil d'alerte.",
+					},
+					{
+						question: "Qui voit l'historique de mes modifications ?",
+						answer:
+							"Chaque étape franchie et chaque transmission sont horodatées et conservées. Cet historique est accessible à l'administration et vous est présenté dans le détail de votre démarche.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "publication-consultation",
+		title: "Ce qui est publié, et ce qui ne l'est pas",
+		subsections: [
+			{
+				title: "Vos résultats vus de l'extérieur",
+				items: [
+					{
+						question: "Mes résultats sont-ils publics ?",
+						answer:
+							"Les indicateurs A à F le sont : toute personne peut les consulter. L'indicateur G, lui, ne l'est jamais — vos catégories d'emploi et les rémunérations associées restent confidentielles et ne sont accessibles qu'à l'administration.",
+					},
+					{
+						question: "Où mes résultats sont-ils consultables ?",
+						answer:
+							"Depuis la page d'accueil d'Egapro, sans connexion. La recherche se fait par SIREN, par raison sociale, par région, par département ou par secteur d'activité.",
+					},
+					{
+						question:
+							"Les données publiées sont-elles téléchargeables en masse ?",
+						answer:
+							"Oui, un export est proposé depuis la recherche publique, pensé pour un usage d'analyse. Il ne contient que ce qui est déjà consultable en ligne, donc jamais l'indicateur G.",
+					},
+					{
+						question: "Dois-je publier moi-même mes résultats quelque part ?",
+						answer:
+							"Rien ne vous est demandé sur Egapro à ce titre : transmettre votre déclaration suffit à la porter à la connaissance de l'administration, et la publication des indicateurs A à F est assurée par la plateforme.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "donnees-personnelles",
+		title: "Vos données",
+		subsections: [
+			{
+				title: "Conservation et accès",
+				items: [
+					{
+						question:
+							"Combien de temps mes déclarations sont-elles conservées ?",
+						answer:
+							"La durée applicable figure dans la politique de confidentialité, qui fait foi. Passé ce délai, une purge automatique quotidienne supprime la déclaration et tout ce qui s'y rattache — catégories d'emploi, avis du CSE, historique — sans intervention humaine et sans démarche de votre part.",
+					},
+					{
+						question:
+							"Les documents que j'ai déposés disparaissent-ils aussi ?",
+						answer:
+							"Oui. Les PDF suivent le sort de la déclaration à laquelle ils appartiennent et sont effacés de l'espace de stockage en même temps qu'elle.",
+					},
+					{
+						question: "Qui accède à mes données pendant ce temps ?",
+						answer:
+							"Vous, les personnes habilitées pour votre entreprise, et les services du ministère chargé du travail. Les consultations de données sensibles sont journalisées.",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "aide-contacts",
+		title: "Trouver de l'aide",
+		subsections: [
+			{
+				title: "Sur la plateforme",
+				items: [
+					{
+						question: "Où voir les échéances qui me concernent ?",
+						answer:
+							"Sur la page d'aide, qui affiche les dates de la campagne en cours, et dans Mon espace, où chaque démarche porte la sienne.",
+					},
+					{
+						question: "Comment poser une question à l'équipe ?",
+						answer:
+							"Par le formulaire de contact accessible depuis la page d'aide. Indiquez votre SIREN et l'écran concerné : cela évite un aller-retour.",
+					},
+				],
+			},
+			{
+				title: "Votre interlocuteur en région",
+				items: [
+					{
+						question: "Qui contacter localement ?",
+						answer:
+							"Un annuaire public des référents à l'égalité professionnelle est disponible sur la plateforme, organisé par région et par département.",
+					},
+					{
+						question: "Comment obtenir leurs coordonnées ?",
+						answer:
+							"En ouvrant la fiche du référent : le téléphone et l'adresse e-mail y figurent. Ils ne sont volontairement pas affichés dans la liste, afin d'éviter leur collecte automatisée.",
 					},
 				],
 			},

@@ -9,6 +9,7 @@ import {
 } from "~/modules/analytics";
 import type { RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS, REGIONS_TO_COUNTIES } from "~/modules/domain";
+import { routeWithQuery, runtimeRoute } from "~/modules/routes";
 import {
 	type ReferentsSearchFormSchema,
 	useReferentsSearchForm,
@@ -77,14 +78,14 @@ export function ReferentsSearchForm({
 						? [...usedFacets].sort((a, b) => a.localeCompare(b)).join("+")
 						: "empty",
 			});
-			router.push(`${basePath}?${params.toString()}`);
+			router.push(routeWithQuery(basePath, params));
 		},
 		[basePath, router],
 	);
 
 	const handleReset = useCallback(() => {
 		reset({ region: "", county: "" });
-		router.push(basePath);
+		router.push(runtimeRoute(basePath));
 	}, [basePath, reset, router]);
 
 	const regionField = (

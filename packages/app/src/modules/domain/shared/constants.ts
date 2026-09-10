@@ -25,6 +25,9 @@ export const EXPECTED_DECLARATION_TYPES = [
 /** Maximum number of CSE opinion files per company per year. */
 export const MAX_CSE_FILES = 4;
 
+/** Days of inactivity after which a declaration draft expires. */
+export const DRAFT_EXPIRY_DAYS = 30;
+
 /** First year the Egapro platform started collecting declarations. */
 export const FIRST_DECLARATION_YEAR = 2018;
 

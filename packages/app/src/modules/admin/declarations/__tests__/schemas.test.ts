@@ -4,6 +4,7 @@ import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
 	ADMIN_DECLARATION_STATUS_FILTERS,
 	getDeclarationByIdSchema,
+	releaseLockSchema,
 	searchDeclarationsFormSchema,
 	searchDeclarationsSchema,
 } from "../schemas";
@@ -110,5 +111,22 @@ describe("getDeclarationByIdSchema", () => {
 		expect(() =>
 			getDeclarationByIdSchema.parse({ id: "not-a-uuid" }),
 		).toThrow();
+	});
+});
+
+describe("releaseLockSchema", () => {
+	it("accepts a valid UUID declarationId", () => {
+		const result = releaseLockSchema.safeParse({
+			declarationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it.each([
+		"",
+		"not-a-uuid",
+		"123456789",
+	])("rejects a non-UUID declarationId %s", (declarationId) => {
+		expect(releaseLockSchema.safeParse({ declarationId }).success).toBe(false);
 	});
 });

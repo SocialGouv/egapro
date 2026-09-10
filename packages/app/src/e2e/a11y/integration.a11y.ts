@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 import { checkA11y } from "ultra11y/playwright";
+import { MY_SPACE } from "~/modules/routes";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(here, "..", "..", "..");
@@ -44,7 +45,7 @@ test.describe("intégration ultra11y ↔ Playwright", () => {
 	});
 
 	test("checkA11y collecte, persiste et audite la page", async ({ page }) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await page.waitForLoadState("networkidle");
 
 		const result = await checkA11y(page, {
@@ -81,7 +82,7 @@ test.describe("intégration ultra11y ↔ Playwright", () => {
 		);
 		expect(meta.id).toBe(PAGE_ID);
 		expect(meta.name).toBe("Sonde d'intégration");
-		expect(meta.url).toContain("/mon-espace");
+		expect(meta.url).toContain(MY_SPACE);
 
 		// 4. It is a FULL document, not a component fragment. This is what makes RGAA 8.3
 		//    (lang) and 8.5/8.6 (title) decidable at all.

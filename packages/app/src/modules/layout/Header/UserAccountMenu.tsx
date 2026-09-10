@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-
+import { ADMIN, API_AUTH_LOGOUT, MY_SPACE } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -145,7 +145,7 @@ export function UserAccountMenu({
 							{isAdmin && (
 								<Link
 									className={styles.menuLink}
-									href="/admin"
+									href={ADMIN}
 									onClick={close}
 									role="menuitem"
 									tabIndex={-1}
@@ -155,12 +155,12 @@ export function UserAccountMenu({
 							)}
 							<Link
 								className={styles.menuLink}
-								href="/mon-espace/mes-entreprises"
+								href={MY_SPACE}
 								onClick={close}
 								role="menuitem"
 								tabIndex={-1}
 							>
-								Mes entreprises
+								Mes démarches
 							</Link>
 							<button
 								className={styles.menuLink}
@@ -178,7 +178,7 @@ export function UserAccountMenu({
 							    so we need a full browser navigation, not a client-side RSC fetch. */}
 							<a
 								className={styles.logoutLink}
-								href="/api/auth/logout"
+								href={API_AUTH_LOGOUT}
 								role="menuitem"
 								tabIndex={-1}
 							>

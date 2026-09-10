@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
-
-import { COMPLIANCE_PATH } from "./helpers/compliance-flows";
+import {
+	complianceStepHref,
+	cseOpinionStepHref,
+	remunerationStepHref,
+} from "~/modules/routes";
 import {
 	ensureCurrentYearDeclaration,
 	resetDeclarationToDraft,
@@ -34,18 +37,22 @@ type Screen = {
 const CORRECTED: Screen[] = [
 	{
 		name: "seconde déclaration — étape 1",
-		path: `${COMPLIANCE_PATH}/etape/1`,
+		path: complianceStepHref(1),
 		checksAbove: true,
 	},
-	{ name: "seconde déclaration — étape 2", path: `${COMPLIANCE_PATH}/etape/2` },
+	{ name: "seconde déclaration — étape 2", path: complianceStepHref(2) },
 	{
 		name: "seconde déclaration — étape 3",
-		path: `${COMPLIANCE_PATH}/etape/3`,
+		path: complianceStepHref(3),
 		checksAbove: true,
 	},
 	// The only one of the four fixed on the gap *above* the stepper, so its
 	// `checksAbove` is the assertion that pins the actual correction.
-	{ name: "avis CSE — étape 1", path: "/avis-cse/etape/1", checksAbove: true },
+	{
+		name: "avis CSE — étape 1",
+		path: cseOpinionStepHref(1),
+		checksAbove: true,
+	},
 ];
 
 // Screens that were already at 32px and must stay there. The declaration funnel
@@ -56,9 +63,13 @@ const CORRECTED: Screen[] = [
 // `gap` is inert (single `<fieldset>` child), the rhythm would collapse to 0
 // rather than degrade. Step 5 covers the shared `.form` host from the other side.
 const WITNESSES: Screen[] = [
-	{ name: "déclaration — étape 1", path: "/declaration-remuneration/etape/1" },
-	{ name: "déclaration — étape 5", path: "/declaration-remuneration/etape/5" },
-	{ name: "avis CSE — étape 2", path: "/avis-cse/etape/2", checksAbove: true },
+	{ name: "déclaration — étape 1", path: remunerationStepHref(1) },
+	{ name: "déclaration — étape 5", path: remunerationStepHref(5) },
+	{
+		name: "avis CSE — étape 2",
+		path: cseOpinionStepHref(2),
+		checksAbove: true,
+	},
 ];
 
 // One viewport is enough, and measurably so: every gap asserted here reads the
