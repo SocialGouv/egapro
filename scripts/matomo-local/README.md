@@ -66,7 +66,7 @@ This brings up `matomo-db` → `matomo` → `matomo-init` → `matomo-seed` in o
 >
 > ```bash
 > DATABASE_URL="postgresql://postgres:postgres@localhost:5438/egapro" \
->   node packages/app/scripts/seed-demo-stats.mjs --year=2026   # --clean to wipe
+>   pnpm --filter app db:seed-stats --year=2026   # --clean to wipe
 > ```
 >
 > Run **both** to populate the whole page. After every Matomo volume reset the

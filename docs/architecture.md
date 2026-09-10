@@ -118,8 +118,8 @@ egapro/
 │   │   │   └── instrumentation-client.ts  # Sentry client
 │   │   ├── e2e/             # Tests Playwright
 │   │   ├── public/dsfr/     # Assets DSFR copiés (git-ignored)
-│   │   └── scripts/         # Scripts utilitaires (audit-cleanup.mjs,
-│   │                        #   declaration-cleanup.mjs, copy-dsfr.mjs)
+│   │   └── scripts/         # Scripts utilitaires (audit-cleanup.ts,
+│   │                        #   declaration-cleanup.ts, copy-dsfr.ts)
 │   ├── notifications/       # Worker de mails (pg-boss + React Email)
 │   │   └── src/
 │   │       ├── mails/
@@ -193,9 +193,9 @@ Des scripts Node autonomes, exécutés en dehors du serveur Next.js (typiquement
 
 | Script | Rôle |
 |---|---|
-| `audit-cleanup.mjs` | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention (§9.6) |
-| `declaration-cleanup.mjs` | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention (§9.6) |
-| `copy-dsfr.mjs` | Copie les assets DSFR dans `public/dsfr/` (au `dev` / `build`) |
+| `audit-cleanup.ts` | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention (§9.6) |
+| `declaration-cleanup.ts` | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention (§9.6) |
+| `copy-dsfr.ts` | Copie les assets DSFR dans `public/dsfr/` (au `dev` / `build`) |
 
 Ces scripts se connectent directement à PostgreSQL (`postgres`-js) et — pour la purge de déclarations — à S3 (`@aws-sdk/client-s3`) via des variables d'environnement, sans passer par la couche tRPC.
 
@@ -601,12 +601,12 @@ Deux CronJobs Kubernetes assurent la maintenance des données. Ils partagent le 
 
 | CronJob | Script | Horaire (UTC) | Action audit associée | Rôle |
 |---|---|---|---|---|
-| `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.mjs` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
-| `declaration-cleanup-daily` | `packages/app/scripts/declaration-cleanup.mjs` | `0 3 * * *` (03:00) | `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`) | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention |
+| `audit-cleanup-daily` | `packages/app/scripts/audit-cleanup.ts` | `0 4 * * *` (04:00) | `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`) | Purge les lignes d'`audit.action_log` au-delà de leur fenêtre de rétention |
+| `declaration-cleanup-daily` | `packages/app/scripts/declaration-cleanup.ts` | `0 3 * * *` (03:00) | `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`) | Purge RGPD des déclarations dont l'année est antérieure au seuil de rétention |
 
 Ces deux actions sont de catégorie `system` (rétention 365 j). Toute modification de ces scripts → **test d'intégration obligatoire** (`*.integration.test.ts`, cf. §13).
 
-#### Purge RGPD des déclarations (`declaration-cleanup.mjs`)
+#### Purge RGPD des déclarations (`declaration-cleanup.ts`)
 
 Objectif : supprimer les déclarations (et toutes leurs données rattachées) au-delà de la durée légale de conservation.
 
@@ -714,7 +714,7 @@ Le router `declarationLock` résout toujours l'ID de déclaration côté serveur
 
 Le **Système de Design de l'État** est utilisé en mode "natif" : on importe le CSS et le JS DSFR directement, sans wrapper React (`react-dsfr` n'est pas utilisé). Concrètement :
 
-- **Assets** : copiés dans `public/dsfr/` par `scripts/copy-dsfr.mjs` (git-ignored, regénéré sur `dev` / `build`).
+- **Assets** : copiés dans `public/dsfr/` par `scripts/copy-dsfr.ts` (git-ignored, regénéré sur `dev` / `build`).
 - **CSS** : chargé via `<link>` dans `src/app/layout.tsx`.
 - **JS** : chargé via `<Script type="module" strategy="beforeInteractive">`. Gère modales, dropdowns, theme toggle, navigation clavier. **Ne jamais dupliquer** ce comportement en React — utiliser les attributs `data-fr-*`.
 

@@ -1,5 +1,5 @@
 /**
- * Integration test for `scripts/import-v1-representation.mjs` — runs against
+ * Integration test for `scripts/import-v1-representation.ts` — runs against
  * the real Postgres container booted by `src/test/integration-setup.ts`.
  *
  * Why this exists as an integration test (issue #4156):

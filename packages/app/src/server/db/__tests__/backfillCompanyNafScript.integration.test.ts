@@ -1,5 +1,5 @@
 /**
- * Integration test for `scripts/backfill-company-naf.mjs` (issue #4087) — runs
+ * Integration test for `scripts/backfill-company-naf.ts` (issue #4087) — runs
  * against the real Postgres container booted by `src/test/integration-setup.ts`.
  *
  * Why this exists as an integration test: the optimistic lock compares
@@ -27,7 +27,7 @@ import {
 	applyRegistryPair,
 	formatReport,
 	runBackfillCompanyNaf,
-} from "#scripts/backfill-company-naf.mjs";
+} from "#scripts/backfill-company-naf";
 import { env } from "~/env.js";
 
 describe("backfill-company-naf.mjs (real Postgres)", () => {

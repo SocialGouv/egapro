@@ -533,7 +533,7 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 
 Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
 
-**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.mjs`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
+**Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
 
 ### 13.3 Impersonation admin
 
@@ -694,7 +694,7 @@ sequenceDiagram
 
 **À quoi ça sert** : appliquer la **conservation limitée** exigée par le RGPD — les déclarations trop anciennes (et toutes leurs données rattachées, y compris les PDF stockés sur S3) sont supprimées automatiquement, sans intervention humaine.
 
-**Déclenchement** : un **CronJob Kubernetes** (`declaration-cleanup-daily`, tous les jours à 03:00 UTC) exécute le script autonome `packages/app/scripts/declaration-cleanup.mjs`. Il n'y a **aucun écran utilisateur ni procédure tRPC** — c'est un traitement de fond. Détail technique et diagramme du flux : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données).
+**Déclenchement** : un **CronJob Kubernetes** (`declaration-cleanup-daily`, tous les jours à 03:00 UTC) exécute le script autonome `packages/app/scripts/declaration-cleanup.ts`. Il n'y a **aucun écran utilisateur ni procédure tRPC** — c'est un traitement de fond. Détail technique et diagramme du flux : [`architecture.md` §9.6](architecture.md#96-traitements-planifiés-crons-de-maintenance-des-données).
 
 **Fenêtre de rétention** : pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**). Une déclaration est éligible à la purge si son année est **strictement inférieure** à `annéeCourante − retention` :
 

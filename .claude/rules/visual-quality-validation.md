@@ -81,7 +81,7 @@ Judge only what the ticket covers. If a divergence is explicitly assigned to ano
 ## Tooling
 
 - **Figma**: `mcp__figma__get_design_context` / `mcp__figma__get_variable_defs` for the reference values (`fill`, `fontSize`, `fontWeight`, `itemSpacing`/`gap`, verbatim text) + `mcp__figma__get_screenshot` for the PNG. `get_screenshot` returns a short-lived URL + curl instructions → curl the PNG into the worktree's `tmp/visual-<ticket>/` (request `maxDimension` = 2 × the node's longer edge to match the browser `deviceScaleFactor: 2`). Always the official **`figma`** server (see `rules/figma-workflow.md`).
-- **Render / measure / overlay**: `packages/app/scripts/visual-fidelity-probe.mjs` (scenario JSON → screenshots + DOM measurements + onion-skin overlay). Header documents the config shape.
+- **Render / measure / overlay**: `packages/app/scripts/visual-fidelity-probe.ts` (scenario JSON → screenshots + DOM measurements + onion-skin overlay). Header documents the config shape.
 - **Fallback**: `mcp__playwright__*` for ad-hoc navigation/screenshot when a scenario can't be expressed declaratively.
 
 ## Verdict & thresholds

@@ -52,7 +52,7 @@ For each `## Référence Figma` node: `mcp__figma__get_design_context` / `mcp__f
 Drive the probe against the running dev server:
 
 ```bash
-node packages/app/scripts/visual-fidelity-probe.mjs \
+node packages/app/scripts/visual-fidelity-probe.ts \
   --config tmp/visual-<ticket>/scenario.json \
   --out tmp/visual-<ticket> \
   --base-url http://localhost:<port>
@@ -74,7 +74,7 @@ Tolerance: **±1px** on spacing/size, exact on colour token and font-weight buck
 Onion-skin the rendered screenshot over the Figma export so positional drift shows as ghosting regardless of cause:
 
 ```bash
-node packages/app/scripts/visual-fidelity-probe.mjs --overlay \
+node packages/app/scripts/visual-fidelity-probe.ts --overlay \
   --a tmp/visual-<ticket>/<name>-h<H>.png \
   --b tmp/visual-<ticket>/<figma-node>.png \
   --out tmp/visual-<ticket>/overlay-h<H>.png
