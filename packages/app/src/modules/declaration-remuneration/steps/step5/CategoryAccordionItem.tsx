@@ -35,7 +35,9 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
-	onHeadcountBlur: (index: number) => () => void;
+	onHeadcountBlur: (
+		index: number,
+	) => (e: React.FocusEvent<HTMLInputElement>) => void;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	onAskRemove: (index: number) => void;
 };

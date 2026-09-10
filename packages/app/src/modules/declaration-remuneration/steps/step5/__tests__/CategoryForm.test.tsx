@@ -401,6 +401,47 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
 		).toHaveValue("");
 	});
+
+	it("keeps focus on the non-calculable explanation when tabbing out of the last headcount", async () => {
+		const user = userEvent.setup();
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "2",
+			menCount: "2",
+			hourlyWomenCount: "2",
+			hourlyMenCount: "2",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+		});
+
+		const annualMen = screen.getByLabelText(
+			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+		);
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		await user.clear(annualMen);
+		await user.type(annualMen, "0");
+		await user.clear(hourlyMen);
+		await user.type(hourlyMen, "0");
+
+		const status = screen.getByTestId("category-pay-status");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
+		await user.tab();
+
+		await waitFor(() => expect(status).toHaveFocus());
+	});
 });
 
 describe("CategoryForm legacy read-only categories (#3678)", () => {
