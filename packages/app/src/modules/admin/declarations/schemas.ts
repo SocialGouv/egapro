@@ -77,3 +77,9 @@ export const cancelDeclarationSchema = z.object({
 export const getRecapSchema = z.object({
 	id: z.string().uuid(),
 });
+
+export const releaseLockSchema = z.object({
+	declarationId: z.string().uuid(),
+});
+
+export type ReleaseLockInput = z.infer<typeof releaseLockSchema>;

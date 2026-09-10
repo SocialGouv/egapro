@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { NewTabNotice } from "~/modules/layout";
+import { COOKIES } from "~/modules/routes";
 
 /** Cookie policy section. */
 export function PrivacyCookies() {
@@ -48,7 +49,7 @@ export function PrivacyCookies() {
 			</p>
 			<p>
 				Pour en savoir plus sur la gestion des cookies, consultez notre page{" "}
-				<Link href="/gestion-des-cookies">Gestion des cookies</Link>.
+				<Link href={COOKIES}>Gestion des cookies</Link>.
 			</p>
 			<p>
 				À tout moment, vous pouvez refuser l'utilisation des cookies et

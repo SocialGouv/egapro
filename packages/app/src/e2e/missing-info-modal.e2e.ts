@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-
+import { urlGlob } from "~/e2e/helpers/routes";
+import {
+	DECLARATION_REMUNERATION,
+	DECLARATION_REMUNERATION_RECAP,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { TEST_USER_PHONE } from "./constants";
 import {
 	resetDeclarationToDraft,
@@ -133,7 +139,7 @@ test.describe("Missing info modal", () => {
 					hasText: "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55",
 				}),
 			).toBeVisible();
-			expect(page.url()).toContain("/mon-espace");
+			expect(page.url()).toContain(MY_SPACE);
 		});
 	});
 
@@ -238,7 +244,7 @@ test.describe("Missing info modal", () => {
 					hasText: "Veuillez renseigner si un CSE a été mis en place.",
 				}),
 			).toBeVisible();
-			expect(page.url()).toContain("/mon-espace");
+			expect(page.url()).toContain(MY_SPACE);
 		});
 	});
 
@@ -273,22 +279,22 @@ test.describe("Missing info modal", () => {
 			await loginWithProConnect(page);
 
 			await test.step("neither answered — the funnel entry point bounces", async () => {
-				await page.goto("/declaration-remuneration");
-				await page.waitForURL("**/mon-espace");
+				await page.goto(DECLARATION_REMUNERATION);
+				await page.waitForURL(urlGlob(MY_SPACE));
 				// Bounced, but not into a dead end: the modal that collects both is right there.
 				await waitForDsfrModal(page, MISSING_INFO_MODAL_ID);
 			});
 
 			await test.step("a deep link into a later step bounces too", async () => {
-				await page.goto("/declaration-remuneration/etape/4");
-				await page.waitForURL("**/mon-espace");
+				await page.goto(remunerationStepHref(4));
+				await page.waitForURL(urlGlob(MY_SPACE));
 			});
 
 			// The guard sits on the (with-banner) group, not on the funnel root, so the
 			// read-only recap stays readable — a colleague who never filled the funnel in
 			// must still be able to consult what the company declared.
 			await test.step("the read-only recap stays outside the guard", async () => {
-				await page.goto("/declaration-remuneration/recapitulatif");
+				await page.goto(DECLARATION_REMUNERATION_RECAP);
 				await expect(
 					page.getByRole("heading", {
 						level: 1,
@@ -299,14 +305,14 @@ test.describe("Missing info modal", () => {
 
 			await test.step("the phone alone is not enough above the CSE threshold", async () => {
 				await setUserPhone(TEST_USER_PHONE);
-				await page.goto("/declaration-remuneration");
-				await page.waitForURL("**/mon-espace");
+				await page.goto(DECLARATION_REMUNERATION);
+				await page.waitForURL(urlGlob(MY_SPACE));
 			});
 
 			await test.step("both answered — the same deep link now opens the funnel", async () => {
 				await setCompanyHasCse(true);
-				await page.goto("/declaration-remuneration/etape/4");
-				await page.waitForURL("**/declaration-remuneration/etape/4");
+				await page.goto(remunerationStepHref(4));
+				await page.waitForURL(urlGlob(remunerationStepHref(4)));
 				await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
 			});
 		});

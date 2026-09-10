@@ -5,7 +5,6 @@ import { getCurrentYear, parseSiren } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { api } from "~/trpc/server";
-
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
 
 type Props = {

@@ -8,6 +8,14 @@ import {
 	computePanelVariant,
 } from "~/modules/my-space/declarationProcessState";
 import type { DeclarationItem } from "~/modules/my-space/types";
+import {
+	COMPLIANCE_CONFIRMATION,
+	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+	complianceStepHref,
+	DECLARATION_REMUNERATION,
+} from "~/modules/routes";
 import { loadRules } from "../engine";
 
 const rules = loadRules("2027.1");
@@ -19,15 +27,12 @@ const SIREN = "123456789";
 // what makes this a conformance test: the nav mirror (getCurrentStageHref) and the
 // panel mirror (computePanelVariant/computeCtaHref) must both send the user to the
 // screen the engine assigns to that stage.
-const ENTRY = "/declaration-remuneration";
-const COMPLIANCE = "/declaration-remuneration/parcours-conformite";
-const CORRECTIVE_STEP1 =
-	"/declaration-remuneration/parcours-conformite/etape/1";
-const JOINT_EVAL =
-	"/declaration-remuneration/parcours-conformite/evaluation-conjointe";
-const CSE = "/avis-cse";
-const CONFIRMATION =
-	"/declaration-remuneration/parcours-conformite/confirmation";
+const ENTRY = DECLARATION_REMUNERATION;
+const COMPLIANCE = COMPLIANCE_PATH;
+const CORRECTIVE_STEP1 = complianceStepHref(1);
+const JOINT_EVAL = COMPLIANCE_JOINT_EVALUATION;
+const CSE = CSE_OPINION;
+const CONFIRMATION = COMPLIANCE_CONFIRMATION;
 
 const STAGE_SCREEN: Record<string, { screen: string; variant: PanelVariant }> =
 	{
@@ -62,10 +67,6 @@ function makeDeclaration(
 	};
 }
 
-function stripSiren(url: string): string {
-	return url.split("?")[0] ?? url;
-}
-
 describe("engine conformance to the shared FSM vocabulary", () => {
 	it("the v2027.1.json states cover exactly DECLARATION_FSM_STATUSES", () => {
 		const engineStates = rules.states.map((s) => s.id).sort();
@@ -94,7 +95,7 @@ describe("mirror conformance — engine states (non-terminal)", () => {
 		expect(getCurrentStageHref(state.id, false)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: state.id });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(stripSiren(computeCtaHref(decl, SIREN))).toBe(expected.screen);
+		expect(computeCtaHref(decl)).toBe(expected.screen);
 	});
 });
 
@@ -123,7 +124,7 @@ describe("mirror conformance — engine transition destinations", () => {
 		expect(getCurrentStageHref(to, true)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: to });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(stripSiren(computeCtaHref(decl, SIREN))).toBe(expected.screen);
+		expect(computeCtaHref(decl)).toBe(expected.screen);
 	});
 });
 
@@ -136,7 +137,7 @@ describe("exhaustiveness — every FSM status is covered by both mirrors", () =>
 		expect(nav.length).toBeGreaterThan(0);
 		const decl = makeDeclaration({ fsmStatus: status });
 		expect(computePanelVariant(decl)).toBeDefined();
-		const cta = computeCtaHref(decl, SIREN);
+		const cta = computeCtaHref(decl);
 		expect(typeof cta).toBe("string");
 		expect(cta.length).toBeGreaterThan(0);
 	});
@@ -150,7 +151,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 			cseRequired: true,
 		});
 		expect(computePanelVariant(decl)).toBe("cse");
-		expect(stripSiren(computeCtaHref(decl, SIREN))).toBe(CSE);
+		expect(computeCtaHref(decl)).toBe(CSE);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
@@ -164,7 +165,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 		// re-submittable /avis-cse page (up to 4 opinions). Each mirror is correct
 		// for its own surface, so no coherence is asserted between them here.
 		expect(computePanelVariant(decl)).toBe("closed");
-		expect(stripSiren(computeCtaHref(decl, SIREN))).toBe(ENTRY);
+		expect(computeCtaHref(decl)).toBe(ENTRY);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 

@@ -1,6 +1,11 @@
 import { test } from "@playwright/test";
-
-import { COMPLIANCE_PATH } from "../helpers/compliance-flows";
+import {
+	COMPLIANCE_CONFIRMATION,
+	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION_CONFIRMATION,
+	DECLARATION_REMUNERATION_RECAP,
+} from "~/modules/routes";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
@@ -8,6 +13,7 @@ import {
 	setDeclarationComplianceState,
 } from "../helpers/db";
 import { completeDeclaration } from "../helpers/declaration-flows";
+import { urlGlob } from "../helpers/routes";
 import { snapshotCurrentPage, snapshotRoute } from "./snapshot";
 
 // The tunnel screens are gated by the démarche state machine, so they cannot simply be
@@ -77,7 +83,7 @@ test.describe("RGAA — parcours de conformité", () => {
 	// state the rest of this describe pins from.
 	test("snapshot le choix du parcours", async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await snapshotCurrentPage(page, {
 			path: COMPLIANCE_PATH,
@@ -96,7 +102,7 @@ test.describe("RGAA — parcours de conformité", () => {
 	// what opens it — the record has to have really been transmitted.
 	test("snapshot le récapitulatif", async ({ page }) => {
 		await snapshotRoute(page, {
-			path: "/declaration-remuneration/recapitulatif",
+			path: DECLARATION_REMUNERATION_RECAP,
 			id: "declaration-recapitulatif",
 			name: "Déclaration — récapitulatif",
 			sources: ["src/app/declaration-remuneration/recapitulatif/page.tsx"],
@@ -137,7 +143,7 @@ test.describe("RGAA — parcours de conformité", () => {
 		});
 
 		await snapshotRoute(page, {
-			path: "/declaration-remuneration/parcours-conformite/evaluation-conjointe",
+			path: COMPLIANCE_JOINT_EVALUATION,
 			id: "evaluation-conjointe",
 			name: "Parcours de conformité — évaluation conjointe",
 			sources: [
@@ -149,11 +155,9 @@ test.describe("RGAA — parcours de conformité", () => {
 	});
 
 	test("snapshot la confirmation du parcours", async ({ page }) => {
-		await page.goto(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
+		await page.goto(COMPLIANCE_CONFIRMATION);
 		await snapshotCurrentPage(page, {
-			path: "/declaration-remuneration/parcours-conformite/confirmation",
+			path: COMPLIANCE_CONFIRMATION,
 			id: "parcours-conformite-confirmation",
 			name: "Parcours de conformité — confirmation",
 			sources: [
@@ -190,9 +194,9 @@ test.describe("RGAA — avis du CSE", () => {
 	}
 
 	test("snapshot la confirmation de l'avis du CSE", async ({ page }) => {
-		await page.goto("/avis-cse/confirmation");
+		await page.goto(CSE_OPINION_CONFIRMATION);
 		await snapshotCurrentPage(page, {
-			path: "/avis-cse/confirmation",
+			path: CSE_OPINION_CONFIRMATION,
 			id: "avis-cse-confirmation",
 			name: "Avis du CSE — confirmation",
 			sources: ["src/app/avis-cse/confirmation/page.tsx"],

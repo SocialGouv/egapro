@@ -6,7 +6,7 @@ import {
 	getLockStateSchema,
 	heartbeatSchema,
 	releaseLockSchema,
-} from "~/modules/declaration-remuneration/schemas";
+} from "~/modules/declaration-remuneration/shared/lock/schemas";
 import { DEFAULT_LOCK_TIMEOUT_MINUTES, getCurrentYear } from "~/modules/domain";
 import {
 	companyProcedure,

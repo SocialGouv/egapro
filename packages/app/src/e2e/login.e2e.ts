@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
-
+import { urlGlob } from "~/e2e/helpers/routes";
+import { LOGIN, MY_SPACE } from "~/modules/routes";
 import type { CompanyLocation } from "./helpers/db";
 import { getCompanyLocation, setCompanyLocation } from "./helpers/db";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
@@ -9,7 +10,7 @@ test.describe("Login page", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
 	test("displays ProConnect button", async ({ page }) => {
-		await page.goto("/login");
+		await page.goto(LOGIN);
 		await dismissCookieBanner(page);
 
 		await expect(
@@ -18,7 +19,7 @@ test.describe("Login page", () => {
 	});
 
 	test("hides the public help banner", async ({ page }) => {
-		await page.goto("/login");
+		await page.goto(LOGIN);
 		await dismissCookieBanner(page);
 
 		await expect(
@@ -33,7 +34,7 @@ test.describe("ProConnect authentication flow", () => {
 	test("redirects to mon espace after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.waitForURL("**/mon-espace");
+		await page.waitForURL(urlGlob(MY_SPACE));
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
@@ -48,9 +49,9 @@ test.describe("ProConnect authentication flow", () => {
 	test("redirects to mon espace when already logged in", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.goto("/login");
+		await page.goto(LOGIN);
 
-		await page.waitForURL("**/mon-espace", {
+		await page.waitForURL(urlGlob(MY_SPACE), {
 			timeout: 15_000,
 		});
 
@@ -95,7 +96,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			countryLabel: "QATAR",
 		});
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		await expect(locationList(page).locator("dt")).toHaveText([
 			"SIREN :",
@@ -111,7 +112,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			countryLabel: "AFRIQUE DU SUD",
 		});
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		await expect(locationList(page).locator("dd").last()).toHaveText(
 			"Afrique du Sud",
@@ -125,7 +126,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			countryLabel: "FRANCE",
 		});
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		await expect(locationList(page).locator("dt")).toHaveText([
 			"SIREN :",
@@ -145,7 +146,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			countryLabel: null,
 		});
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		await expect(locationList(page).locator("dt")).toHaveText([
 			"SIREN :",

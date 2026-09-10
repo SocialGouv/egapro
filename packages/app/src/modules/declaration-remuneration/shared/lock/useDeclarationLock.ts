@@ -8,27 +8,16 @@ import {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "~/modules/domain";
-import { api, type RouterOutputs } from "~/trpc/react";
-
-export type LockHolder = NonNullable<
-	RouterOutputs["declarationLock"]["getLockState"]["holder"]
->;
-
-export type ReadOnlyReason = "impersonation" | "modification_closed" | "lock";
-
-export type DeclarationLockState = {
-	isReadOnly: boolean;
-	reason: ReadOnlyReason | null;
-	holder: LockHolder | null;
-	isLoading: boolean;
-};
+import { API_DECLARATION_LOCK_RELEASE } from "~/modules/routes";
+import { api } from "~/trpc/react";
+import type { DeclarationLockState, LockHolder, ReadOnlyReason } from "./types";
 
 type UseDeclarationLockOptions = {
 	declarationId: string;
 	modificationClosed?: boolean;
 };
 
-const RELEASE_ENDPOINT = "/api/declaration-lock/release";
+const RELEASE_ENDPOINT = API_DECLARATION_LOCK_RELEASE;
 
 export function useDeclarationLock({
 	declarationId,
