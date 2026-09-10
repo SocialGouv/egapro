@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { complianceStepHref } from "~/modules/routes";
+import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	ensureCurrentYearDeclaration,
