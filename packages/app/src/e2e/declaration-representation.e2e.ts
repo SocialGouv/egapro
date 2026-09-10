@@ -485,7 +485,7 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 		);
 		await expect(page.getByText("Aucun cadre dirigeant")).toBeVisible();
 		await expect(page.getByText("Aucune instance dirigeante")).toBeVisible();
-		await expect(page.getByText("Non applicable").first()).toBeVisible();
+		await expect(page.getByText("Non calculable").first()).toBeVisible();
 		await expect(
 			page.getByRole("heading", { name: "Publication" }),
 		).toHaveCount(0);
