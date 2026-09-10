@@ -13,7 +13,7 @@ import {
 	isCseRequired,
 } from "~/modules/domain";
 import { COMPLIANCE_PATH } from "~/modules/routes";
-import { getDsfrModal } from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
@@ -153,7 +153,7 @@ export function Step6Review({
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
 						Vérifiez que toutes les informations ont été complétées avant de
-						soumettre votre déclaration aux services du ministère chargé du
+						transmettre votre déclaration aux services du ministère chargé du
 						travail.
 					</p>
 
@@ -186,7 +186,7 @@ export function Step6Review({
 							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
-					nextLabel={isSubmitted ? "Suivant" : "Soumettre"}
+					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 

@@ -8,7 +8,12 @@ import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { CSE_OPINION_CONFIRMATION, cseOpinionStepHref } from "~/modules/routes";
-import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
+import {
+	FileUpload,
+	getDsfrModal,
+	SUBMIT_LABEL,
+	useFileUploadForm,
+} from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
 import { CseStepIndicator } from "./components/CseStepIndicator";
@@ -302,7 +307,7 @@ export function Step2Upload({
 							disabled={isReadOnly}
 							type="submit"
 						>
-							Soumettre
+							{SUBMIT_LABEL}
 						</button>
 						{readOnlyGuard.tooltip}
 					</span>

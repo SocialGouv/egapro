@@ -2,9 +2,10 @@
 
 import { useCallback, useState } from "react";
 
+import { SUBMIT_LABEL } from "./submitLabels";
+
 type Props = {
 	modalId: string;
-	title?: string;
 	description: React.ReactNode;
 	certifyLabel: string;
 	certifyInputId: string;
@@ -16,7 +17,6 @@ type Props = {
 
 export function SubmitModal({
 	modalId,
-	title = "Transmettre",
 	description,
 	certifyLabel,
 	certifyInputId,
@@ -63,7 +63,7 @@ export function SubmitModal({
 							</div>
 							<div className="fr-modal__content">
 								<h2 className="fr-modal__title" id={`${modalId}-title`}>
-									{title}
+									{SUBMIT_LABEL}
 								</h2>
 								<p>{description}</p>
 								<div className="fr-checkbox-group fr-mt-2w">

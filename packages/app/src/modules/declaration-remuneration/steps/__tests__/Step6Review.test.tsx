@@ -494,7 +494,7 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders next as a submit button labelled Soumettre when not submitted", () => {
+	it("renders next as a submit button labelled Transmettre when not submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
@@ -509,7 +509,7 @@ describe("Step6Review", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 

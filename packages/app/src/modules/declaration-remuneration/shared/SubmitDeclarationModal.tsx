@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { SUBMIT_LABEL } from "~/modules/shared";
+
 const MODAL_ID = "submit-declaration-modal";
 
 type Props = {
@@ -25,8 +27,8 @@ export function SubmitDeclarationModal({
 	const [certified, setCertified] = useState(false);
 
 	const description = isSecondDeclaration
-		? `Vous allez soumettre la seconde déclaration des écarts de rémunération par catégories de salariés ${year} aux services du ministère chargé du travail.`
-		: `Vous allez soumettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
+		? `Vous allez transmettre la seconde déclaration des écarts de rémunération par catégories de salariés ${year} aux services du ministère chargé du travail.`
+		: `Vous allez transmettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
 
 	return (
 		<dialog
@@ -55,7 +57,7 @@ export function SubmitDeclarationModal({
 									className="fr-modal__title"
 									id="submit-declaration-modal-title"
 								>
-									Soumettre
+									{SUBMIT_LABEL}
 								</h2>
 								<p>{description}</p>
 								<div className="fr-checkbox-group fr-mt-2w">

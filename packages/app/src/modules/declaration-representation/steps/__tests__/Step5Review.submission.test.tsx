@@ -74,7 +74,7 @@ import {
 const CONFIRMATION_HREF = "/declaration-representation/confirmation";
 
 function submitButton() {
-	return screen.queryByRole("button", { name: "Soumettre" });
+	return screen.queryByRole("button", { name: "Transmettre" });
 }
 
 async function openSubmitModal() {

@@ -6,6 +6,9 @@ import {
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import { DECLARATION_REPRESENTATION, MY_SPACE } from "~/modules/routes";
+// Leaf module, not the barrel: the Playwright runner cannot load the CSS
+// modules the barrel pulls in through its React components.
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { TEST_SIREN } from "./constants";
 import {
 	getCurrentDbYear,
@@ -308,7 +311,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await waitForDsfrModal(page, SUBMIT_MODAL_ID);
 			await clickAndExpectDialogOpen(
 				page,
-				page.getByRole("button", { name: "Soumettre" }),
+				page.getByRole("button", { exact: true, name: SUBMIT_LABEL }),
 				SUBMIT_MODAL_ID,
 			);
 

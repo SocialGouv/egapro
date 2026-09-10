@@ -38,8 +38,9 @@ export function SubmitModal({
 			certifyLabel="Je certifie que les données saisies sont exactes et conformes aux informations disponibles dans les systèmes de paie et de gestion des ressources humaines de l'entreprise."
 			description={
 				<>
-					Vous allez soumettre la déclaration des indicateurs de représentation{" "}
-					{campaignYear} aux services du ministère chargé du travail.
+					Vous allez transmettre la déclaration des indicateurs de
+					représentation {campaignYear} aux services du ministère chargé du
+					travail.
 					<br />
 					<strong>{VARIANT_MESSAGES[variant]}</strong>
 				</>
@@ -49,7 +50,6 @@ export function SubmitModal({
 			modalRef={modalRef}
 			onClose={onClose}
 			onSubmit={onSubmit}
-			title="Soumettre"
 		/>
 	);
 }

@@ -3,6 +3,9 @@ import {
 	DECLARATION_REMUNERATION,
 	remunerationStepHref,
 } from "~/modules/routes";
+// Leaf module, not the barrel: the Playwright runner cannot load the CSS
+// modules the barrel pulls in through its React components.
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { urlGlob } from "./routes";
 
 /**
@@ -371,7 +374,7 @@ export async function reachStep6ComplianceRecap(page: Page) {
  */
 export async function submitFromStep6Recap(page: Page) {
 	await test.step("étape 6 — récapitulatif et transmission", async () => {
-		await page.getByRole("button", { name: "Soumettre" }).click();
+		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		// Click the label, as the DSFR checkbox label intercepts pointer events.
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();

@@ -11,7 +11,7 @@ import {
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { DECLARATION_REPRESENTATION_CONFIRMATION } from "~/modules/routes";
-import { useDsfrModal } from "~/modules/shared";
+import { SUBMIT_LABEL, useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
 import { toAbsoluteHttpUrl } from "../schemas";
@@ -116,7 +116,7 @@ export function Step5Review() {
 	return (
 		<div className={styles.review}>
 			<p className="fr-text--md fr-mb-0">
-				Vérifiez les informations avant de soumettre votre déclaration aux
+				Vérifiez les informations avant de transmettre votre déclaration aux
 				services du ministère chargé du travail.
 			</p>
 
@@ -194,7 +194,7 @@ export function Step5Review() {
 						onClick={open}
 						type="button"
 					>
-						Soumettre
+						{SUBMIT_LABEL}
 					</button>
 				)}
 			</div>
