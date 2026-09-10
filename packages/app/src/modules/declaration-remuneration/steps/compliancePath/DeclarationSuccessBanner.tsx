@@ -1,7 +1,7 @@
 import { formatLongDate } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout/shared/DsfrPictogram";
 import { ResendReceiptButton } from "~/modules/mail";
-import { FileDownloadLink } from "~/modules/shared";
+import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./DeclarationSuccessBanner.module.scss";
 
 type Props = {
@@ -50,8 +50,9 @@ export function DeclarationSuccessBanner({
 									? "Télécharger le récapitulatif de la seconde déclaration de l'indicateur de rémunération par catégories de salariés"
 									: "Télécharger le récapitulatif de la déclaration des indicateurs"}
 							</FileDownloadLink>
-							{/* The PDF is generated on demand, so only the format is known. */}
-							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">PDF</p>
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
+								<FileFormatDetail href={pdfDownloadHref} />
+							</p>
 						</div>
 					)}
 				</div>

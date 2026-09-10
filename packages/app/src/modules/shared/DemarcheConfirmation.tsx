@@ -7,6 +7,7 @@ import { MY_SPACE } from "~/modules/routes";
 import styles from "./DemarcheConfirmation.module.scss";
 import { DownloadCard } from "./DownloadCard";
 import type { DemarcheDocument } from "./demarcheDocuments";
+import { formatDocumentSubtitle } from "./documentSubtitle";
 import { FeedbackBanner } from "./FeedbackBanner";
 
 type Props = {
@@ -72,11 +73,13 @@ export function DemarcheConfirmation({
 				</h2>
 				{documents.map((document) => (
 					<DownloadCard
-						dataYear={document.dataYear}
+						description={formatDocumentSubtitle(
+							document.year,
+							document.dataYear,
+						)}
 						href={document.href}
 						key={document.href}
 						title={document.title}
-						year={document.year}
 					/>
 				))}
 			</div>

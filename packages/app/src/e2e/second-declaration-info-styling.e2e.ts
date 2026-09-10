@@ -106,7 +106,7 @@ test.describe("second declaration step 1 — DSFR overrides", () => {
 // tests assert the class string rather than what it renders to.
 const FLEX_HOSTS = [
 	{ name: "choix du parcours", path: COMPLIANCE_PATH },
-	{ name: "seconde déclaration — étape 3", path: `${COMPLIANCE_PATH}/etape/3` },
+	{ name: "seconde déclaration — étape 3", path: complianceStepHref(3) },
 ];
 
 // The rendered gap, not the computed margin: 32px is what the maquette asks for and what

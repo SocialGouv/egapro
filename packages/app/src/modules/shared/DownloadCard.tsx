@@ -1,25 +1,25 @@
 "use client";
 
 import { DownloadStatusRegion } from "./DownloadStatusRegion";
+import { FileFormatDetail } from "./FileFormatDetail";
 import { useDownloadClickGuard } from "./useDownloadClickGuard";
 
 const PENDING_LABEL = "Téléchargement en cours…";
 
 type Props = {
-	dataYear: number;
+	description: string;
 	href: string;
 	title: string;
-	year: number;
 };
 
-export function DownloadCard({ dataYear, href, title, year }: Props) {
+export function DownloadCard({ description, href, title }: Props) {
 	const { anchorProps, state } = useDownloadClickGuard(href);
 
 	return (
 		<>
 			{/* SM, per the Figma node "Carte / Thème clair / Desktop / SM / Sans
-			    média": 24px padding, 20/28 title, 8px under it. The default size
-			    gives 32px, 22px and 12px. */}
+				média": 24px padding, 20/28 title, 8px under it. The default size
+				gives 32px, 22px and 12px. */}
 			<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
 				<div className="fr-card__body">
 					<div className="fr-card__content">
@@ -28,12 +28,11 @@ export function DownloadCard({ dataYear, href, title, year }: Props) {
 								{state === "pending" ? PENDING_LABEL : title}
 							</a>
 						</h3>
-						<p className="fr-card__desc">
-							Année {year} au titre des données {dataYear}
-						</p>
+						<p className="fr-card__desc">{description}</p>
 						<div className="fr-card__end">
-							{/* The PDF is generated on demand, so only the format is known. */}
-							<p className="fr-card__detail">PDF</p>
+							<p className="fr-card__detail">
+								<FileFormatDetail href={href} />
+							</p>
 						</div>
 					</div>
 				</div>
