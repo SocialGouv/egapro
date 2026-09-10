@@ -30,11 +30,21 @@ test.describe("Declaration draft round-trip", () => {
 			await expect(womenInput1).toBeVisible({ timeout: 30_000 });
 			await womenInput1.fill("75");
 
+			// The tRPC batch-stream link always answers HTTP 200 — headers go out
+			// before the procedure runs, and stay 200 even on failure — so
+			// `r.status() === 200` proves nothing about persistence. Only the
+			// completed streamed body (a "result" entry, no "error") does (#4102).
 			await page1.waitForResponse(
-				(r) =>
-					r.url().includes("declarationDraft.save") &&
-					r.request().method() === "POST" &&
-					r.status() === 200,
+				async (r) => {
+					if (
+						!r.url().includes("declarationDraft.save") ||
+						r.request().method() !== "POST"
+					) {
+						return false;
+					}
+					const body = await r.text();
+					return body.includes('"result"') && !body.includes('"error"');
+				},
 				{ timeout: 15_000 },
 			);
 		} finally {

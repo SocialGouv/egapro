@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type Response, test } from "@playwright/test";
 
 import {
 	categoryWorkforceInput,
@@ -135,6 +135,26 @@ function cseCheckboxName(
 	return `${CSE_TYPE_LABELS[column.type]}${declarationPart} — ${fileName}`;
 }
 
+// The tRPC client uses httpBatchStreamLink: the response headers (and the 200
+// status) go out before the procedure runs, and stay 200 even when the
+// procedure throws — a rejected setFileContentTypes still answers
+// `HTTP/1.1 200 OK` with the failure encoded in the streamed body
+// (`"error":{...,"data":{"httpStatus":401,...}}`). `response.ok()` is
+// therefore structurally unable to tell a persisted association from a lost
+// one (#4102) — only the completed body can. A successful mutation encodes
+// its tRPC batch entry under `"result"`; a failure never does.
+async function isPersistedResponse(response: Response): Promise<boolean> {
+	const body = await response.text();
+	return body.includes('"result"') && !body.includes('"error"');
+}
+
+function waitForContentTypesPersisted(response: Response): Promise<boolean> {
+	if (!response.url().includes("setFileContentTypes")) {
+		return Promise.resolve(false);
+	}
+	return isPersistedResponse(response);
+}
+
 /**
  * Complete CSE step 2 through the real UI: upload the PDF, associate the required
  * content types via the matrix, then submit and certify. Exercises the matrix
@@ -161,12 +181,13 @@ export async function submitCseStep2(
 		).toBeVisible({ timeout: 30_000 });
 
 		// Phase B — tick the required columns, waiting for each association to
-		// persist before submitting. The client submit gate is optimistic, so
-		// finalize could otherwise race the setFileContentTypes mutation.
+		// actually persist before submitting (see `isPersistedResponse` above
+		// for why `response.ok()` can't be used here, #4102). The client submit
+		// gate is optimistic, so finalize could otherwise race the
+		// setFileContentTypes mutation.
 		for (const column of columns) {
-			const persisted = page.waitForResponse(
-				(response) =>
-					response.url().includes("setFileContentTypes") && response.ok(),
+			const persisted = page.waitForResponse((response) =>
+				waitForContentTypesPersisted(response),
 			);
 			await page
 				.getByRole("checkbox", {
@@ -217,7 +238,8 @@ export async function uploadCseFiles(page: Page, fileNames: string[]) {
  * so each pairing is explicit. Each wait matches its own mutation rather than
  * the next response to arrive: the payload is cumulative, so the response
  * carrying this column proves every association ticked so far reached the
- * server, which the optimistic submit gate does not.
+ * server — which the optimistic submit gate does not (see
+ * `isPersistedResponse` above for how persistence is actually detected, #4102).
  */
 export async function associateCseContentTypes(
 	page: Page,
@@ -226,15 +248,18 @@ export async function associateCseContentTypes(
 ) {
 	const { hasSecondDeclaration = false } = options;
 	for (const { column, fileName } of assignments) {
-		const persisted = page.waitForResponse((response) => {
-			if (!response.url().includes("setFileContentTypes") || !response.ok()) {
+		const persisted = page.waitForResponse(async (response) => {
+			if (!response.url().includes("setFileContentTypes")) {
 				return false;
 			}
-			const body = response.request().postData() ?? "";
-			return (
-				body.includes(`"type":"${column.type}"`) &&
-				body.includes(`"declarationNumber":${column.declarationNumber}`)
-			);
+			const requestBody = response.request().postData() ?? "";
+			const carriesColumn =
+				requestBody.includes(`"type":"${column.type}"`) &&
+				requestBody.includes(`"declarationNumber":${column.declarationNumber}`);
+			if (!carriesColumn) {
+				return false;
+			}
+			return isPersistedResponse(response);
 		});
 		await page
 			.getByRole("checkbox", {
