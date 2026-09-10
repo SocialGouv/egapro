@@ -162,7 +162,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await test.step("first-declaration receipt states the round-1 path-choice deadline in French (#4207)", async () => {
 			const firstReceipt = await waitForEmail(
 				TEST_USER_EMAIL,
-				(m) => /Transmission de la déclaration/i.test(m.subject),
+				(m) => m.subject === "Egapro - Transmission de la déclaration",
 				{ since: startedAt },
 			);
 			// Round 1 is July 1st, not the round-2 January deadline.
