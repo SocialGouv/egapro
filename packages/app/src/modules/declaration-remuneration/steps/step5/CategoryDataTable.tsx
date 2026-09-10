@@ -422,7 +422,7 @@ export function CategoryDataTable({
 	};
 	const handleHeadcountBlur = (index: number) => {
 		const onBlur = headcountBlur(index);
-		return (event: React.FocusEvent<HTMLInputElement>) => {
+		return (event: React.FocusEvent<HTMLInputElement>): undefined => {
 			const nextTarget = event.relatedTarget;
 			const nextIsSameCategoryHeadcount =
 				nextTarget instanceof HTMLElement &&
@@ -434,7 +434,7 @@ export function CategoryDataTable({
 
 			tabbedHeadcountRef.current = false;
 			const payWasCleared = onBlur(event) === true;
-			if (!shouldRecoverFocus || !payWasCleared) return;
+			if (!shouldRecoverFocus || !payWasCleared) return undefined;
 
 			// Clearing a category on blur disables the pay inputs that the browser
 			// selected as the next tab stop. Recover focus on the explanatory status
@@ -447,6 +447,7 @@ export function CategoryDataTable({
 					payStatusRef.current?.focus();
 				}
 			});
+			return undefined;
 		};
 	};
 
