@@ -14,12 +14,13 @@ export function TransmittedRow({
 	viewLabel = "Voir le récapitulatif de la déclaration",
 }: {
 	label: string;
-	modifiableUntil: Date;
+	modifiableUntil?: Date;
 	modifyHref?: AppHref;
 	viewHref?: AppHref;
 	viewLabel?: string;
 }) {
-	const deadlinePassed = isDeadlinePassed(modifiableUntil);
+	const deadlinePassed =
+		modifiableUntil !== undefined && isDeadlinePassed(modifiableUntil);
 	const canModify = modifyHref !== undefined && !deadlinePassed;
 
 	return (
@@ -27,7 +28,7 @@ export function TransmittedRow({
 			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
-				{modifyHref && (
+				{modifyHref && modifiableUntil && (
 					<p className="fr-text-mention--grey fr-mb-0">
 						{deadlinePassed
 							? "Modification close depuis le "
