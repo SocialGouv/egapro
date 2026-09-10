@@ -13,9 +13,9 @@ import {
 	getReferenceYearFor,
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
+import { complianceStepHref } from "~/modules/routes";
 import { api } from "~/trpc/react";
 import { CategoryForm } from "../step5/CategoryForm";
-import { BASE_PATH } from "./constants";
 import { ReferencePeriodPicker } from "./ReferencePeriodPicker";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
@@ -86,13 +86,13 @@ export function SecondDeclarationStep2Form({
 	const mutation = api.declaration.updateEmployeeCategories.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push(`${BASE_PATH}/etape/3`);
+			router.push(complianceStepHref(3));
 		},
 	});
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const recapHref = `${BASE_PATH}/etape/3`;
+	const recapHref = complianceStepHref(3);
 	const nextHref = isWritable ? undefined : recapHref;
 	const mimoquageNextHref = hasSavedSecondDeclaration ? recapHref : undefined;
 
@@ -124,7 +124,7 @@ export function SecondDeclarationStep2Form({
 					referencePeriodEnd: endDate,
 				});
 			}}
-			previousHref={`${BASE_PATH}/etape/1`}
+			previousHref={complianceStepHref(1)}
 			readOnly={isLocked}
 			readOnlyLabel
 			referencePeriodPicker={

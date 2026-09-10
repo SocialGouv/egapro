@@ -1,3 +1,4 @@
+import { ADMIN } from "~/modules/routes";
 /**
  * Returns true for the `/admin` root and every nested `/admin/**` route.
  * Matches the `/admin` segment boundary so hypothetical sibling routes like
@@ -10,6 +11,6 @@
 export function isAdminRoute(pathname: string | null): boolean {
 	return (
 		pathname !== null &&
-		(pathname === "/admin" || pathname.startsWith("/admin/"))
+		(pathname === ADMIN || pathname.startsWith(`${ADMIN}/`))
 	);
 }

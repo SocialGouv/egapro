@@ -1,15 +1,18 @@
 import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 
-import { extractSiren } from "~/modules/domain";
+import { parseSiren } from "~/modules/domain";
 
 /**
  * Resolve the SIREN to display/load for the current session.
  *
  * - Admin currently impersonating a company → the impersonated SIREN.
- * - Regular user → the SIREN extracted from their ProConnect SIRET.
- * - Anyone without either → `null`, and the caller decides how to bail
- *   (redirect, `<MissingSiret/>`, etc.).
+ * - Regular user → the SIREN parsed from their ProConnect SIRET.
+ * - Anyone without either, or a malformed SIRET → `null`, and the caller
+ *   decides how to bail (redirect, `<MissingSiret/>`, etc.).
+ *
+ * Parsing, never slicing: a malformed SIRET must not yield a nine-character
+ * lookalike that then reaches the database as if it were a real SIREN.
  *
  * Shared across every page/layout that renders company-scoped UI so every
  * surface behaves identically during mimoquage (issue #3230).
@@ -17,9 +20,9 @@ import { extractSiren } from "~/modules/domain";
 export function getEffectiveSiren(session: Session | null): string | null {
 	if (!session?.user) return null;
 	if (session.user.isAdmin && session.user.impersonation) {
-		return session.user.impersonation.siren;
+		return parseSiren(session.user.impersonation.siren);
 	}
-	return session.user.siret ? extractSiren(session.user.siret) : null;
+	return parseSiren(session.user.siret);
 }
 
 /**

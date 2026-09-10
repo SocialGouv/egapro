@@ -17,6 +17,9 @@ export {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	MAX_CAMPAIGN_YEAR,
+	MIN_CAMPAIGN_YEAR,
+	parseCampaignYear,
 	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
@@ -283,12 +286,9 @@ export {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
-// Score brackets for public stats distribution chart
-export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
-export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
-// Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+// Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
 	buildCampaignRateTileProps,

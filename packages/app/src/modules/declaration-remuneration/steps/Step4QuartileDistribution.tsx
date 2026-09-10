@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
@@ -495,7 +496,7 @@ export function Step4QuartileDistribution({
 				<FormActions
 					isSubmitting={mutation.isPending}
 					mimoquageNextHref={hasSavedData ? nextHref : undefined}
-					previousHref="/declaration-remuneration/etape/3"
+					previousHref={remunerationStepHref(3)}
 				/>
 			</fieldset>
 		</form>

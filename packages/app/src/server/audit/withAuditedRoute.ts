@@ -4,15 +4,17 @@ import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { logAction } from "./log";
 import { buildRequestContext } from "./requestContext";
 
-type AuditedRouteOptions = {
+type AuditedRouteOptions<TArgs extends unknown[]> = {
 	action: AuditActionKey;
 	/**
 	 * Compute audit context from the incoming request before calling the
 	 * handler. Runs even if the handler throws — make it cheap and never
-	 * throwing (use try/catch internally if needed).
+	 * throwing (use try/catch internally if needed). Receives the same route
+	 * context as the handler, so `{ params }` can feed the audit row.
 	 */
 	resolveContext?: (
 		request: Request,
+		...args: TArgs
 	) => Promise<AuditedRouteContext> | AuditedRouteContext;
 };
 
@@ -25,7 +27,18 @@ export type AuditedRouteContext = {
 	metadata?: AuditMetadata | null;
 };
 
-type RouteHandler = (request: Request) => Promise<Response>;
+/**
+ * The wrapped handler's arguments after the request, as a tuple: `[]` for a
+ * static route, `[{ params }]` for a dynamic one. A tuple rather than an
+ * optional parameter because `routeContext?: TRouteContext` refuses a handler
+ * that *requires* its context — `TRouteContext | undefined` is not assignable
+ * to `TRouteContext` — which is exactly the signature Next gives a dynamic
+ * segment. The tuple keeps both shapes assignable and infers from the handler.
+ */
+type RouteHandler<TArgs extends unknown[]> = (
+	request: Request,
+	...args: TArgs
+) => Promise<Response>;
 
 /**
  * Wrap a Next.js Route Handler so every call writes an entry to
@@ -40,18 +53,21 @@ type RouteHandler = (request: Request) => Promise<Response>;
  * have very different shapes (auth via session, signed API auth, public
  * routes…).
  */
-export function withAuditedRoute(
-	options: AuditedRouteOptions,
-	handler: RouteHandler,
-): RouteHandler {
-	return async function auditedHandler(request: Request): Promise<Response> {
+export function withAuditedRoute<TArgs extends unknown[] = []>(
+	options: AuditedRouteOptions<TArgs>,
+	handler: RouteHandler<TArgs>,
+): RouteHandler<TArgs> {
+	return async function auditedHandler(
+		request: Request,
+		...routeArgs: TArgs
+	): Promise<Response> {
 		const startedAt = Date.now();
 		const requestContext = buildRequestContext(request.headers);
 
 		let auditContext: AuditedRouteContext = {};
 		if (options.resolveContext) {
 			try {
-				auditContext = await options.resolveContext(request);
+				auditContext = await options.resolveContext(request, ...routeArgs);
 			} catch (resolveError) {
 				console.error("[audit] resolveContext threw", {
 					action: options.action,
@@ -61,7 +77,7 @@ export function withAuditedRoute(
 		}
 
 		try {
-			const response = await handler(request);
+			const response = await handler(request, ...routeArgs);
 			const isSuccess = response.status >= 200 && response.status < 300;
 			void logAction({
 				action: options.action,

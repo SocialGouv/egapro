@@ -11,6 +11,7 @@ import {
 	isCseRequired,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { CONTACT } from "~/modules/routes";
 import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
@@ -121,7 +122,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									Si vous constatez une erreur, veuillez{" "}
 									<a
 										className={`fr-link fr-icon-external-link-line fr-link--icon-right ${styles.contactLink}`}
-										href="/aide/nous-contacter"
+										href={CONTACT}
 										rel="noopener noreferrer"
 										target="_blank"
 									>

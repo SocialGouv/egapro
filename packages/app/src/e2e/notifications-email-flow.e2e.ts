@@ -1,9 +1,10 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import { COMPLIANCE_PATH, CSE_OPINION } from "~/modules/routes";
 import { TEST_USER_EMAIL } from "./constants";
 import {
 	associateCseContentTypes,
-	COMPLIANCE_PATH,
 	completeSecondDeclaration,
 	fillCseStep1,
 	selectCompliancePath,
@@ -104,7 +105,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		const startedAt = new Date();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, { firstDeclGapConsultationImplicit: true });
 
 		const accuracyFile = "avis-cse-exactitude.pdf";
@@ -215,7 +216,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		await selectCompliancePath(page, "path-justify");
 
 		await expectCompletionReceipt({ round: "second", since: startedAt });

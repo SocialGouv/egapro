@@ -1,8 +1,12 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { inferRouterOutputs } from "@trpc/server";
+
+import type { publicReferentsRouter } from "~/server/api/routers/publicReferents";
+
+type PublicReferentsOutputs = inferRouterOutputs<typeof publicReferentsRouter>;
 
 export type PublicReferentListRow =
-	RouterOutputs["publicReferents"]["search"]["rows"][number];
+	PublicReferentsOutputs["search"]["rows"][number];
 
 export type PublicReferentDetail = NonNullable<
-	RouterOutputs["publicReferents"]["getById"]
+	PublicReferentsOutputs["getById"]
 >;

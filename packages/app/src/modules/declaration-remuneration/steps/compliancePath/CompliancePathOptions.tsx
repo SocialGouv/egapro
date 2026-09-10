@@ -1,16 +1,20 @@
 import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
+import {
+	COMPLIANCE_JOINT_EVALUATION,
+	complianceStepHref,
+} from "~/modules/routes";
 import { CompliancePathOption } from "./CompliancePathOption";
 import type { CompliancePathValue } from "./constants";
 
 export function getCompliancePathHref(
 	path: CompliancePathValue,
 	cseOpinionRequired: boolean,
-): string {
+) {
 	if (path === "corrective_action") {
-		return "/declaration-remuneration/parcours-conformite/etape/1";
+		return complianceStepHref(1);
 	}
 	if (path === "joint_evaluation") {
-		return "/declaration-remuneration/parcours-conformite/evaluation-conjointe";
+		return COMPLIANCE_JOINT_EVALUATION;
 	}
 	// "justify" has no dedicated page: when an opinion is due it remains to be
 	// deposited on /avis-cse; otherwise the FSM already completed the

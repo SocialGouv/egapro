@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-
+import { ADMIN_DECLARATIONS, REFERENTS } from "~/modules/routes";
 import { TEST_SIREN } from "../constants";
 import { getCurrentDbYear } from "../helpers/db";
 import { snapshotCurrentPage, snapshotRoute } from "./snapshot";
@@ -30,7 +30,7 @@ test.describe("RGAA — pages à segment dynamique", () => {
 	test("snapshot le détail d'une déclaration au backoffice", async ({
 		page,
 	}) => {
-		await page.goto("/admin/declarations");
+		await page.goto(ADMIN_DECLARATIONS);
 		await page.waitForLoadState("networkidle");
 
 		// `count()` resolves immediately on an empty match, where `getAttribute()` would
@@ -54,7 +54,7 @@ test.describe("RGAA — pages à segment dynamique", () => {
 	});
 
 	test("snapshot la fiche d'un référent", async ({ page }) => {
-		await page.goto("/referents");
+		await page.goto(REFERENTS);
 		await page.waitForLoadState("networkidle");
 
 		const links = page.locator('a[href^="/referents/"]');

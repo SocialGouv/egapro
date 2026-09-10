@@ -492,9 +492,10 @@ Pour les analystes / journalistes / chercheurs :
 
 | URL | Format | Usage |
 |---|---|---|
-| `/api/export/declarations?year=2024` | XLSX | Toutes les déclarations d'une année |
-| `/api/export/declarations?date_begin=2024-01-01&date_end=2024-12-31` | XLSX | Plage de dates |
-| `/export?swagger=1` | Swagger UI | Documentation interactive |
+| `/api/public/declarations` | JSON | Recherche de déclarations, mêmes facettes que l'observatoire |
+| `/api/public/declarations/export` | CSV | Résultats de la recherche, en fichier |
+| `/api/public/representations/export` | CSV | Idem pour les indicateurs de représentation |
+| `/api/public/docs` | Swagger UI | Documentation interactive |
 
 Aucune authentification requise. Les téléchargements sont audités (catégorie `export`, rétention 365 jours).
 

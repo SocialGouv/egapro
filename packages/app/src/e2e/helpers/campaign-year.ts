@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { API_E2E_CLOCK } from "~/modules/routes";
 import {
 	getCurrentDbYear,
 	pushCampaignDeadlinesFarFuture,
@@ -14,7 +15,7 @@ import { resetCampaignYear as resetCampaignYearData } from "./db-campaign";
 // guarded /api/e2e-clock route) and each browser bundle (written by an init
 // script). Pinning a year deterministically therefore means writing both.
 
-const CLOCK_ENDPOINT = "/api/e2e-clock";
+const CLOCK_ENDPOINT = API_E2E_CLOCK;
 
 function clockUrl(): string {
 	const baseUrl = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
