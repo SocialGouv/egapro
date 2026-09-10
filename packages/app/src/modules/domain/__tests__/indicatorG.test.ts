@@ -5,6 +5,7 @@ import {
 	CAMPAIGN_YEAR_ALIGNED_ON_V2,
 } from "../shared/campaignAlignment";
 import { V2_FIRST_CAMPAIGN_YEAR } from "../shared/constants";
+import { getObligationWorkforce } from "../shared/gipWorkforce";
 import {
 	getApplicableIndicators,
 	INDICATOR_G_ANNUAL_MIN,
@@ -12,6 +13,7 @@ import {
 	INDICATOR_G_TRIENNIAL_MIN,
 	INDICATOR_G_UNIVERSAL_YEAR,
 	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	isTriennialYear,
 } from "../shared/indicatorG";
 
@@ -74,6 +76,36 @@ describe("isIndicatorGRequired — universal year (2030+) regime", () => {
 
 	it("returns true for workforce >= 250 after universal year", () => {
 		expect(isIndicatorGRequired(300, 2035)).toBe(true);
+	});
+});
+
+describe("isIndicatorGRequiredForGip", () => {
+	it("requires indicator G for a null gipWorkforce (absent from the GIP file — voluntary tier)", () => {
+		expect(isIndicatorGRequiredForGip(null, 2027)).toBe(true);
+		expect(isIndicatorGRequiredForGip(null, 2029)).toBe(true);
+	});
+
+	it("matches the manual composition on the pinned anchors", () => {
+		expect(isIndicatorGRequiredForGip(120, 2029)).toBe(false);
+		expect(isIndicatorGRequiredForGip(120, 2030)).toBe(true);
+		expect(isIndicatorGRequiredForGip(250, 2027)).toBe(true);
+		expect(isIndicatorGRequiredForGip(250, 2030)).toBe(true);
+		expect(isIndicatorGRequiredForGip(250, 2035)).toBe(true);
+	});
+
+	it("is equivalent to the manual composition (getObligationWorkforce then isIndicatorGRequired) for every anchor", () => {
+		const anchors: Array<[number | null, number]> = [
+			[null, 2027],
+			[120, 2029],
+			[120, 2030],
+			[250, 2027],
+			[30, CAMPAIGN_YEAR_ALIGNED_ON_V2],
+		];
+		for (const [gipWorkforce, year] of anchors) {
+			const manualWorkforce = getObligationWorkforce(gipWorkforce);
+			const manual = isIndicatorGRequired(manualWorkforce, year);
+			expect(isIndicatorGRequiredForGip(gipWorkforce, year)).toBe(manual);
+		}
 	});
 });
 

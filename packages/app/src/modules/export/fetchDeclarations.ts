@@ -24,7 +24,7 @@ import {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseRequired,
-	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
@@ -91,8 +91,8 @@ function deriveExportFlags(
 						],
 		},
 	);
-	const indicatorGRequiredFlag = isIndicatorGRequired(
-		getObligationWorkforce(workforce),
+	const indicatorGRequiredFlag = isIndicatorGRequiredForGip(
+		workforce,
 		row.year,
 	);
 	return {

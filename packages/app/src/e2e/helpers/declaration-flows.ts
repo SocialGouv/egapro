@@ -355,7 +355,7 @@ export async function reachStep6Recap(
  * Fill a gap-free funnel up to the review step, whatever shape the campaign year gives
  * it: the categories step is only presented when the tier owes indicator G that year, so
  * the quartiles land either on it or straight on the review. Callers pass the expectation
- * derived from the domain (`indicatorGRequiredForGip`).
+ * derived from the domain (`isIndicatorGRequiredForGip`).
  */
 export async function reachRecapWithoutGap(
 	page: Page,

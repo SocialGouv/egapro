@@ -1,5 +1,6 @@
 import { alignCampaignYear } from "./campaignAlignment";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
+import { getObligationWorkforce } from "./gipWorkforce";
 
 export const INDICATOR_G_ANNUAL_MIN = 250;
 export const INDICATOR_G_TRIENNIAL_MIN = 150;
@@ -29,6 +30,16 @@ export function isIndicatorGRequired(workforce: number, year: number): boolean {
 		return isTriennialYear(year);
 	}
 	return workforce >= INDICATOR_G_TRIENNIAL_MIN && isTriennialYear(year);
+}
+
+// A `null` gipWorkforce means the company is absent from the GIP file, which every
+// threshold rule treats as the voluntary tier — hence 7 indicators regardless of year.
+export function isIndicatorGRequiredForGip(
+	gipWorkforce: number | null,
+	year: number,
+): boolean {
+	const workforce = getObligationWorkforce(gipWorkforce);
+	return isIndicatorGRequired(workforce, year);
 }
 
 type IndicatorCode = "A" | "B" | "C" | "D" | "E" | "F" | "G";
