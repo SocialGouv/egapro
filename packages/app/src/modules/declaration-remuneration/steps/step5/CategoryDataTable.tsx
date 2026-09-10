@@ -424,13 +424,13 @@ export function CategoryDataTable({
 		const onBlur = headcountBlur(index);
 		return (event: React.FocusEvent<HTMLInputElement>): undefined => {
 			const nextTarget = event.relatedTarget;
-			const nextIsSameCategoryHeadcount =
+			const nextIsCategoryPayInput =
 				nextTarget instanceof HTMLElement &&
-				nextTarget.dataset.categoryHeadcountInput === idPrefix;
+				nextTarget.dataset.categoryPayInput === idPrefix;
 			const shouldRecoverFocus =
 				!payApplicable &&
 				tabbedHeadcountRef.current &&
-				!nextIsSameCategoryHeadcount;
+				(nextIsCategoryPayInput || nextTarget === null);
 
 			tabbedHeadcountRef.current = false;
 			const payWasCleared = onBlur(event) === true;
@@ -442,7 +442,7 @@ export function CategoryDataTable({
 			requestAnimationFrame(() => {
 				if (
 					document.activeElement === document.body ||
-					document.activeElement === nextTarget
+					(nextIsCategoryPayInput && document.activeElement === nextTarget)
 				) {
 					payStatusRef.current?.focus();
 				}

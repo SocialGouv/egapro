@@ -402,7 +402,56 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 		).toHaveValue("");
 	});
 
-	it("keeps focus on the non-calculable explanation when tabbing out of the last headcount", async () => {
+	it("recovers focus when disabling the selected remuneration field loses it", async () => {
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "2",
+			menCount: "2",
+			hourlyWomenCount: "2",
+			hourlyMenCount: "2",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+		});
+
+		const annualMen = screen.getByLabelText(
+			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+		);
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		fireEvent.change(annualMen, { target: { value: "0" } });
+		fireEvent.change(hourlyMen, { target: { value: "0" } });
+
+		const status = screen.getByTestId("category-pay-status");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		const previousBodyTabIndex = document.body.getAttribute("tabindex");
+		document.body.setAttribute("tabindex", "-1");
+		hourlyMen.focus();
+		fireEvent.keyDown(hourlyMen, { key: "Tab" });
+		fireEvent.blur(hourlyMen, { relatedTarget: annualBaseWomen });
+		document.body.focus();
+
+		await waitFor(() => expect(status).toHaveFocus());
+		if (previousBodyTabIndex === null)
+			document.body.removeAttribute("tabindex");
+		else document.body.setAttribute("tabindex", previousBodyTabIndex);
+	});
+
+	it("keeps a valid later control focused after clearing remuneration", async () => {
 		const user = userEvent.setup();
 		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
 			womenCount: "2",
@@ -431,16 +480,14 @@ describe("CategoryForm import of a non-calculable category (#3678)", () => {
 		const hourlyMen = screen.getByLabelText(
 			"Rémunération horaire — Nombre d'hommes, catégorie 1",
 		);
-		await user.clear(annualMen);
-		await user.type(annualMen, "0");
-		await user.clear(hourlyMen);
-		await user.type(hourlyMen, "0");
+		fireEvent.change(annualMen, { target: { value: "0" } });
+		fireEvent.change(hourlyMen, { target: { value: "0" } });
 
 		const status = screen.getByTestId("category-pay-status");
-		expect(status).toHaveTextContent("Aucun écart à calculer");
+		hourlyMen.focus();
 		await user.tab();
 
-		await waitFor(() => expect(status).toHaveFocus());
+		expect(status).not.toHaveFocus();
 	});
 
 	it("does not move focus when tabbing out without clearing remuneration", async () => {
