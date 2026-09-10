@@ -6,9 +6,8 @@
 // succeeded, so the certificate is fine. A thrown error means it is not.
 //
 // Usage:
-//   pnpm --filter app suit:check              # reads the ambient env
-//   node --env-file=.env scripts/check-suit-connection.mjs   # local, from .env
-//   kubectl exec deploy/app -- node scripts/check-suit-connection.mjs
+//   pnpm --filter app suit:check   # loads .env if present, then the ambient env
+//   pnpm --filter app exec tsx scripts/check-suit-connection.ts   # ambient env only
 //
 // Prints statuses only — never the certificate, the passphrase, or response
 // bodies, which may carry SIREN-level data.
@@ -65,10 +64,13 @@ try {
 		);
 	}
 } catch (error) {
-	const cause = error.cause ?? error;
-	console.error(
-		`\nGET metadata   : ÉCHEC ${cause.code ?? ""} ${cause.message}`,
-	);
+	const cause = error instanceof Error ? (error.cause ?? error) : error;
+	const code =
+		typeof cause === "object" && cause !== null && "code" in cause
+			? String(cause.code)
+			: "";
+	const message = cause instanceof Error ? cause.message : String(cause);
+	console.error(`\nGET metadata   : ÉCHEC ${code} ${message}`);
 	console.error(
 		"→ Aucune réponse : certificat refusé, expiré, mot de passe erroné, ou SUIT injoignable.",
 	);

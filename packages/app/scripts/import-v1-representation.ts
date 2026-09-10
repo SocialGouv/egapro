@@ -1,35 +1,18 @@
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-
+import type { Sql, TransactionSql } from "postgres";
 import postgres from "postgres";
-
+import type {
+	ImportCounters,
+	MappedCompany,
+	MappedDeclaration,
+	V1Row,
+} from "./import-v1-representation-mapping";
 import {
 	computeReferencePeriodStart,
 	mapCompanyFromV1,
 	mapDeclarationFromV1,
-} from "./import-v1-representation-mapping.mjs";
-
-/** @typedef {import("postgres").Sql} Sql */
-/** @typedef {import("./import-v1-representation-mapping.mjs").V1Row} V1Row */
-/** @typedef {import("./import-v1-representation-mapping.mjs").MappedCompany} MappedCompany */
-/** @typedef {import("./import-v1-representation-mapping.mjs").MappedDeclaration} MappedDeclaration */
-
-/**
- * @typedef {Object} ImportError
- * @property {string} siren
- * @property {number} year
- * @property {string} cause
- */
-
-/**
- * @typedef {Object} ImportCounters
- * @property {number} total
- * @property {number} imported
- * @property {number} updated
- * @property {number} skippedUpToDate
- * @property {number} skippedNative
- * @property {ImportError[]} errors
- */
+} from "./import-v1-representation-mapping";
 
 export { computeReferencePeriodStart, mapCompanyFromV1, mapDeclarationFromV1 };
 
@@ -39,14 +22,28 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const IMPORTED_DECLARATION_STEP = 5;
 const IMPORTED_DECLARATION_STATUS = "submitted";
 
-/**
- * @param {string[]} argv
- * @param {{ now?: Date }} [options]
- * @returns {{ from: Date, to: Date, dryRun: boolean }}
- */
-export function parseCliArgs(argv, { now = new Date() } = {}) {
-	/** @type {{ dryRun: boolean, from?: string, to?: string }} */
-	const flags = { dryRun: false };
+type CliArgs = {
+	from: Date;
+	to: Date;
+	dryRun: boolean;
+};
+
+type CliFlags = {
+	dryRun: boolean;
+	from?: string;
+	to?: string;
+};
+
+type ExistingDeclarationRow = {
+	imported_from_v1_at: Date | null;
+	updated_at: Date;
+};
+
+export function parseCliArgs(
+	argv: string[],
+	{ now = new Date() }: { now?: Date } = {},
+): CliArgs {
+	const flags: CliFlags = { dryRun: false };
 	for (let i = 0; i < argv.length; i++) {
 		const token = argv[i];
 		if (token === "--dry-run") {
@@ -74,12 +71,7 @@ export function parseCliArgs(argv, { now = new Date() } = {}) {
 	return { from, to, dryRun: flags.dryRun };
 }
 
-/**
- * @param {string} value
- * @param {string} label
- * @returns {Date}
- */
-function parseDateBoundary(value, label) {
+function parseDateBoundary(value: string, label: string): Date {
 	if (!DATE_PATTERN.test(value)) {
 		throw new Error(`Invalid ${label} date "${value}": expected YYYY-MM-DD`);
 	}
@@ -90,11 +82,7 @@ function parseDateBoundary(value, label) {
 	return date;
 }
 
-/**
- * @param {Sql} tx
- * @param {MappedCompany} company
- */
-async function ensureCompany(tx, company) {
+async function ensureCompany(tx: TransactionSql, company: MappedCompany) {
 	await tx`
 		INSERT INTO app_company (
 			siren, name, address, naf_code, region, region_code,
@@ -108,11 +96,10 @@ async function ensureCompany(tx, company) {
 	`;
 }
 
-/**
- * @param {Sql} tx
- * @param {MappedDeclaration} declaration
- */
-async function insertDeclaration(tx, declaration) {
+async function insertDeclaration(
+	tx: TransactionSql,
+	declaration: MappedDeclaration,
+) {
 	await tx`
 		INSERT INTO app_representation_declaration (
 			id, siren, year, legacy_declarant, imported_from_v1_at,
@@ -136,11 +123,10 @@ async function insertDeclaration(tx, declaration) {
 	`;
 }
 
-/**
- * @param {Sql} tx
- * @param {MappedDeclaration} declaration
- */
-async function updateDeclaration(tx, declaration) {
+async function updateDeclaration(
+	tx: TransactionSql,
+	declaration: MappedDeclaration,
+) {
 	await tx`
 		UPDATE app_representation_declaration
 		SET legacy_declarant = ${tx.json(declaration.legacyDeclarant)},
@@ -161,18 +147,21 @@ async function updateDeclaration(tx, declaration) {
 	`;
 }
 
-/**
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {V1Row} args.row
- * @param {boolean} args.dryRun
- * @param {ImportCounters} args.counters
- */
-async function importRow({ sql, row, dryRun, counters }) {
+async function importRow({
+	sql,
+	row,
+	dryRun,
+	counters,
+}: {
+	sql: Sql;
+	row: V1Row;
+	dryRun: boolean;
+	counters: ImportCounters;
+}) {
 	const company = mapCompanyFromV1(row.data.entreprise);
 	const declaration = mapDeclarationFromV1(row);
 
-	const [existing] = await sql`
+	const [existing] = await sql<ExistingDeclarationRow[]>`
 		SELECT imported_from_v1_at, updated_at
 		FROM app_representation_declaration
 		WHERE siren = ${row.siren} AND year = ${row.year}
@@ -197,8 +186,7 @@ async function importRow({ sql, row, dryRun, counters }) {
 		return;
 	}
 
-	await sql.begin(async (txRaw) => {
-		const tx = /** @type {Sql} */ (/** @type {unknown} */ (txRaw));
+	await sql.begin(async (tx) => {
 		await ensureCompany(tx, company);
 		if (existing) {
 			await updateDeclaration(tx, declaration);
@@ -214,30 +202,26 @@ async function importRow({ sql, row, dryRun, counters }) {
 	}
 }
 
-/**
- * @param {Object} args
- * @param {Sql} args.legacySql
- * @param {Sql} args.sql
- * @param {Date} args.from
- * @param {Date} args.to
- * @param {boolean} [args.dryRun]
- * @returns {Promise<ImportCounters>}
- */
 export async function runImportV1Representation({
 	legacySql,
 	sql,
 	from,
 	to,
 	dryRun = false,
-}) {
-	const legacyRows = await legacySql`
+}: {
+	legacySql: Sql;
+	sql: Sql;
+	from: Date;
+	to: Date;
+	dryRun?: boolean;
+}): Promise<ImportCounters> {
+	const legacyRows = await legacySql<V1Row[]>`
 		SELECT siren, year, declared_at, modified_at, data
 		FROM representation_equilibree
 		WHERE declared_at >= ${from} AND declared_at < ${to}
 	`;
 
-	/** @type {ImportCounters} */
-	const counters = {
+	const counters: ImportCounters = {
 		total: legacyRows.length,
 		imported: 0,
 		updated: 0,
@@ -250,7 +234,7 @@ export async function runImportV1Representation({
 		try {
 			await importRow({
 				sql,
-				row: /** @type {V1Row} */ (/** @type {unknown} */ (row)),
+				row,
 				dryRun,
 				counters,
 			});
@@ -266,12 +250,10 @@ export async function runImportV1Representation({
 	return counters;
 }
 
-/**
- * @param {ImportCounters} counters
- * @param {boolean} dryRun
- * @returns {string}
- */
-export function formatReport(counters, dryRun) {
+export function formatReport(
+	counters: ImportCounters,
+	dryRun: boolean,
+): string {
 	const lines = [
 		`${dryRun ? "[dry-run] " : ""}import-v1-representation report`,
 		`  total read:            ${counters.total}`,
@@ -289,7 +271,7 @@ export function formatReport(counters, dryRun) {
 	return lines.join("\n");
 }
 
-function getDatabaseUrl() {
+function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 
 	const {
@@ -326,10 +308,8 @@ const isMain = (() => {
 
 if (isMain) {
 	let exitCode = 0;
-	/** @type {Sql | undefined} */
-	let sql;
-	/** @type {Sql | undefined} */
-	let legacySql;
+	let sql: Sql | undefined;
+	let legacySql: Sql | undefined;
 	try {
 		const { from, to, dryRun } = parseCliArgs(process.argv.slice(2));
 

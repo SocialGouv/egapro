@@ -35,16 +35,45 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type postgresDriver from "postgres";
+import type { DeclarationFsmStatus } from "~/modules/domain";
+import type {
+	compliancePathEnum,
+	declarationEventTypeEnum,
+} from "~/server/db/schema";
+
+type CompliancePath = (typeof compliancePathEnum.enumValues)[number];
+type DeclarationEventType =
+	(typeof declarationEventTypeEnum.enumValues)[number];
+
+interface JourneyEvent {
+	type: DeclarationEventType;
+	round: number | null;
+	value?: string;
+	at: string;
+}
+
+interface SeedDeclaration {
+	siren: string;
+	year?: number;
+	currentStep: number;
+	status: DeclarationFsmStatus;
+	path: CompliancePath | null;
+	secondPath?: CompliancePath;
+	cseRequired?: boolean;
+	events: JourneyEvent[];
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(path.join(__dirname, "..", "package.json"));
-const postgres = require("postgres");
+const postgres = require("postgres") as typeof postgresDriver;
 
-const args = Object.fromEntries(
-	process.argv.slice(2).map((a) => {
+const args: Record<string, string | true> = Object.fromEntries(
+	process.argv.slice(2).map((a): [string, string | true] => {
 		if (a === "--clean") return ["clean", true];
 		const m = a.match(/^--([^=]+)=(.+)$/);
-		return m ? [m[1], m[2]] : [a, true];
+		const [, key, value] = m ?? [];
+		return key !== undefined && value !== undefined ? [key, value] : [a, true];
 	}),
 );
 
@@ -56,33 +85,42 @@ for (const key of Object.keys(args)) {
 	}
 }
 
-const YEAR = Number.parseInt(args.year ?? "2026", 10);
+const YEAR = Number.parseInt(String(args.year ?? "2026"), 10);
 const CLEAN = !!args.clean;
-const DATABASE_URL = process.env.DATABASE_URL;
-
-if (!DATABASE_URL) {
-	console.error("ERROR: DATABASE_URL env var required");
-	process.exit(1);
+function requireDatabaseUrl(): string {
+	const url = process.env.DATABASE_URL;
+	if (!url) {
+		console.error("ERROR: DATABASE_URL env var required");
+		process.exit(1);
+	}
+	return url;
 }
+
+const DATABASE_URL = requireDatabaseUrl();
 
 const SEED_USER_EMAIL = "seed-demo@example.fr";
 const SEED_USER_ID = "00000000-9999-4999-8999-000000009999";
 
 // --- Date helpers --------------------------------------------------------
 
-function addDays(isoDate, days) {
+function addDays(isoDate: string, days: number): string {
 	const d = new Date(isoDate);
 	d.setUTCDate(d.getUTCDate() + days);
 	return d.toISOString();
 }
 
-function addHours(isoDate, hours) {
+function addHours(isoDate: string, hours: number): string {
 	const d = new Date(isoDate);
 	d.setUTCHours(d.getUTCHours() + hours);
 	return d.toISOString();
 }
 
-function dateUtc(year, monthIdx, day, hour = 10) {
+function dateUtc(
+	year: number,
+	monthIdx: number,
+	day: number,
+	hour = 10,
+): string {
 	return new Date(Date.UTC(year, monthIdx, day, hour, 0, 0)).toISOString();
 }
 
@@ -90,7 +128,7 @@ function dateUtc(year, monthIdx, day, hour = 10) {
 // heights on the campaign progression chart: current year = full set,
 // each previous year cohort drops by 30 % so 2025 ≈ 70 % of 2026 etc.
 // Bottoms at 30 % so even old cohorts produce a visible line.
-function yearVolumeRatio(year, refYear) {
+function yearVolumeRatio(year: number, refYear: number): number {
 	const stepsBack = Math.max(0, refYear - year);
 	return Math.max(0.3, 1 - stepsBack * 0.3);
 }
@@ -98,7 +136,7 @@ function yearVolumeRatio(year, refYear) {
 // Uniform downsample: keeps `Math.round(arr.length * ratio)` items evenly
 // spread across the array so the kept subset still covers the full date
 // range (rather than just the first N items / earliest dates).
-function sampleUniform(arr, ratio) {
+function sampleUniform<T>(arr: T[], ratio: number): T[] {
 	if (ratio >= 1) return arr;
 	const target = Math.round(arr.length * ratio);
 	if (target <= 0) return [];
@@ -112,9 +150,13 @@ function sampleUniform(arr, ratio) {
 // --- Wizard event generator ----------------------------------------------
 // Generates the 7 step_change events 0..6 spread over ~stepGapDays each.
 
-function wizardEvents(startIso, maxStep = 6, stepGapDays = 3) {
-	const events = [];
-	let prev = null;
+function wizardEvents(
+	startIso: string,
+	maxStep = 6,
+	stepGapDays = 3,
+): JourneyEvent[] {
+	const events: JourneyEvent[] = [];
+	let prev: number | null = null;
 	let cursor = startIso;
 	for (let s = 0; s <= maxStep; s++) {
 		const fromLabel = prev === null ? "null" : String(prev);
@@ -128,6 +170,12 @@ function wizardEvents(startIso, maxStep = 6, stepGapDays = 3) {
 		cursor = addDays(cursor, stepGapDays);
 	}
 	return events;
+}
+
+function lastEventAt(events: JourneyEvent[]): string {
+	const last = events[events.length - 1];
+	if (!last) throw new Error("declaration has no events");
+	return last.at;
 }
 
 // --- Companies (~30) -----------------------------------------------------
@@ -326,7 +374,11 @@ const PREV_YEAR = YEAR - 1;
 
 // --- Declarations --------------------------------------------------------
 
-function declarationStuckAtStep(siren, maxStep, startIso) {
+function declarationStuckAtStep(
+	siren: string,
+	maxStep: number,
+	startIso: string,
+): SeedDeclaration {
 	return {
 		siren,
 		currentStep: maxStep,
@@ -336,9 +388,12 @@ function declarationStuckAtStep(siren, maxStep, startIso) {
 	};
 }
 
-function declarationCompleteDirect(siren, startIso) {
+function declarationCompleteDirect(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	// Direct complete (no alert): same-day completion, +2h only to keep a
 	// strict created_at ordering between submit and demarche_complete.
 	const completedAt = addHours(submittedAt, 2);
@@ -355,9 +410,9 @@ function declarationCompleteDirect(siren, startIso) {
 	};
 }
 
-function declarationJustify(siren, startIso) {
+function declarationJustify(siren: string, startIso: string): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 6);
 	const completedAt = addDays(pathChoiceAt, 1);
 	return {
@@ -375,13 +430,13 @@ function declarationJustify(siren, startIso) {
 }
 
 function declarationCorrective(
-	siren,
-	startIso,
+	siren: string,
+	startIso: string,
 	daysBeforeChoice = 10,
 	daysBeforeAction = 60,
-) {
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, daysBeforeChoice);
 	const secondDeclAt = addDays(pathChoiceAt, daysBeforeAction);
 	const completedAt = addDays(secondDeclAt, 1);
@@ -406,13 +461,13 @@ function declarationCorrective(
 }
 
 function declarationJointEvaluation(
-	siren,
-	startIso,
+	siren: string,
+	startIso: string,
 	daysBeforeChoice = 8,
 	daysBeforeAction = 45,
-) {
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, daysBeforeChoice);
 	const jointEvalAt = addDays(pathChoiceAt, daysBeforeAction);
 	const completedAt = addDays(jointEvalAt, 1);
@@ -436,9 +491,9 @@ function declarationJointEvaluation(
 	};
 }
 
-function declarationRevision(siren, startIso) {
+function declarationRevision(siren: string, startIso: string): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 8);
 	const secondDeclAt = addDays(pathChoiceAt, 55);
 	const revisionChoiceAt = addDays(secondDeclAt, 5);
@@ -472,23 +527,27 @@ function declarationRevision(siren, startIso) {
 	};
 }
 
-function declarationSubmittedAwaitingPath(siren, startIso) {
+function declarationSubmittedAwaitingPath(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
 	return {
 		siren,
 		currentStep: 6,
 		status: "awaiting_compliance_path_choice",
 		path: null,
-		events: [
-			...wizard,
-			{ type: "submit", round: 1, at: wizard[wizard.length - 1].at },
-		],
+		events: [...wizard, { type: "submit", round: 1, at: lastEventAt(wizard) }],
 	};
 }
 
-function declarationPathChosenNoAction(siren, startIso, path) {
+function declarationPathChosenNoAction(
+	siren: string,
+	startIso: string,
+	path: "corrective_action" | "joint_evaluation",
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 9);
 	const status =
 		path === "corrective_action"
@@ -507,9 +566,12 @@ function declarationPathChosenNoAction(siren, startIso, path) {
 	};
 }
 
-function declarationAwaitingCseAfterCorrective(siren, startIso) {
+function declarationAwaitingCseAfterCorrective(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 7);
 	const secondDeclAt = addDays(pathChoiceAt, 55);
 	return {
@@ -531,9 +593,12 @@ function declarationAwaitingCseAfterCorrective(siren, startIso) {
 	};
 }
 
-function declarationAwaitingCseAfterJointEval(siren, startIso) {
+function declarationAwaitingCseAfterJointEval(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 6);
 	const jointEvalAt = addDays(pathChoiceAt, 40);
 	return {
@@ -555,23 +620,26 @@ function declarationAwaitingCseAfterJointEval(siren, startIso) {
 	};
 }
 
-function declarationAwaitingCseNoAlert(siren, startIso) {
+function declarationAwaitingCseNoAlert(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
 	return {
 		siren,
 		currentStep: 6,
 		status: "awaiting_cse_opinion",
 		path: null,
-		events: [
-			...wizard,
-			{ type: "submit", round: 1, at: wizard[wizard.length - 1].at },
-		],
+		events: [...wizard, { type: "submit", round: 1, at: lastEventAt(wizard) }],
 	};
 }
 
-function declarationAwaitingRevisionChoice(siren, startIso) {
+function declarationAwaitingRevisionChoice(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 8);
 	const secondDeclAt = addDays(pathChoiceAt, 55);
 	return {
@@ -593,9 +661,12 @@ function declarationAwaitingRevisionChoice(siren, startIso) {
 	};
 }
 
-function declarationRevisionChosenNoSubmit(siren, startIso) {
+function declarationRevisionChosenNoSubmit(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 8);
 	const secondDeclAt = addDays(pathChoiceAt, 55);
 	const revisionChoiceAt = addDays(secondDeclAt, 5);
@@ -625,9 +696,12 @@ function declarationRevisionChosenNoSubmit(siren, startIso) {
 	};
 }
 
-function declarationCseRequired(siren, startIso) {
+function declarationCseRequired(
+	siren: string,
+	startIso: string,
+): SeedDeclaration {
 	const wizard = wizardEvents(startIso);
-	const submittedAt = wizard[wizard.length - 1].at;
+	const submittedAt = lastEventAt(wizard);
 	const pathChoiceAt = addDays(submittedAt, 7);
 	const secondDeclAt = addDays(pathChoiceAt, 50);
 	const cseAt = addDays(secondDeclAt, 30);
@@ -656,7 +730,7 @@ function declarationCseRequired(siren, startIso) {
 
 // Minimal previous-year `demarche_completed` declaration. We only need the
 // final state for K1 (no wizard/journey events) — keep the dataset compact.
-function previousYearCompleted(siren) {
+function previousYearCompleted(siren: string): SeedDeclaration {
 	const submittedAt = dateUtc(PREV_YEAR, 1, 15);
 	const completedAt = dateUtc(PREV_YEAR, 2, 1);
 	return {
@@ -674,7 +748,7 @@ function previousYearCompleted(siren) {
 
 // Half of the 100+ companies submitted last year → ~50 % previous-year rate
 // so the YoY delta is non-trivial in the K1 tile (current year ≈ 100 %).
-const RAW_PREVIOUS_YEAR_DECLARATIONS = [
+const RAW_PREVIOUS_YEAR_DECLARATIONS: SeedDeclaration[] = [
 	previousYearCompleted("999150001"),
 	previousYearCompleted("999150002"),
 	previousYearCompleted("999150003"),
@@ -691,7 +765,7 @@ const HAS_CSE_BY_SIREN = new Map(COMPANIES.map((c) => [c.siren, !!c.hasCse]));
 // before reaching `demarche_completed`, regardless of the path (no-alert,
 // justify, corrective, joint eval, revision). The seed bypasses the FSM by
 // inserting events directly, so we apply the same invariant manually.
-function applyCseTransform(decl) {
+function applyCseTransform(decl: SeedDeclaration): SeedDeclaration {
 	if (!HAS_CSE_BY_SIREN.get(decl.siren)) return decl;
 	if (decl.status !== "demarche_completed") {
 		return { ...decl, cseRequired: true };
@@ -699,11 +773,11 @@ function applyCseTransform(decl) {
 	const completeIdx = decl.events.findIndex(
 		(e) => e.type === "demarche_complete",
 	);
-	if (completeIdx === -1) return { ...decl, cseRequired: true };
+	const completeEvent = decl.events[completeIdx];
+	if (!completeEvent) return { ...decl, cseRequired: true };
 	if (decl.events.some((e) => e.type === "cse_opinion_submit")) {
 		return { ...decl, cseRequired: true };
 	}
-	const completeEvent = decl.events[completeIdx];
 	const prevEvent = decl.events[completeIdx - 1];
 	const cseAt = prevEvent
 		? addDays(prevEvent.at, 14)
@@ -712,7 +786,7 @@ function applyCseTransform(decl) {
 		new Date(cseAt) < new Date(completeEvent.at)
 			? cseAt
 			: addDays(completeEvent.at, -1);
-	const cseEvent = {
+	const cseEvent: JourneyEvent = {
 		type: "cse_opinion_submit",
 		round: prevEvent?.round === 2 ? 2 : 1,
 		at: safeCseAt,
@@ -727,7 +801,7 @@ function applyCseTransform(decl) {
 	return { ...decl, cseRequired: true, events };
 }
 
-const RAW_DECLARATIONS = [
+const RAW_DECLARATIONS: SeedDeclaration[] = [
 	// 4 wizard stuck (different steps for K5)
 	{
 		siren: "999100001",
@@ -901,8 +975,12 @@ async function main() {
 
 		for (const d of ALL_DECLARATIONS) {
 			const year = d.year ?? YEAR;
-			const earliest = d.events[0].at;
-			const latest = d.events[d.events.length - 1].at;
+			const firstEvent = d.events[0];
+			if (!firstEvent) {
+				throw new Error(`declaration ${d.siren} has no events`);
+			}
+			const earliest = firstEvent.at;
+			const latest = lastEventAt(d.events);
 
 			await tx`
 				DELETE FROM app_declaration_status_history
@@ -912,7 +990,7 @@ async function main() {
 			`;
 			await tx`DELETE FROM app_declaration WHERE siren = ${d.siren} AND year = ${year}`;
 
-			const inserted = await tx`
+			const inserted = await tx<{ id: string }[]>`
 				INSERT INTO app_declaration (
 					id, siren, year, declarant_id, current_step, status,
 					first_declaration_path_choice, second_declaration_path_choice,
@@ -927,7 +1005,10 @@ async function main() {
 				)
 				RETURNING id
 			`;
-			const declId = inserted[0].id;
+			const declId = inserted[0]?.id;
+			if (!declId) {
+				throw new Error(`INSERT returned no id for ${d.siren}`);
+			}
 
 			for (const ev of d.events) {
 				await tx`

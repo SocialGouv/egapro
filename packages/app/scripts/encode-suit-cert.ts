@@ -10,8 +10,8 @@
 // EGAPRO_SUIT_CLIENT_CERT_PASSWORD by hand, so it never transits through here.
 //
 // Usage:
-//   node scripts/encode-suit-cert.mjs <path/to/cert.p12>
-//   node scripts/encode-suit-cert.mjs <path/to/cert.p12> --raw   # value only
+//   pnpm --filter app suit:encode-cert <path/to/cert.p12>
+//   pnpm --filter app suit:encode-cert <path/to/cert.p12> --raw   # value only
 //
 // The certificate never leaves your machine — this only reads and re-encodes it.
 import { readFileSync } from "node:fs";
@@ -21,15 +21,17 @@ const raw = args.includes("--raw");
 const certPath = args.find((arg) => !arg.startsWith("--"));
 
 if (!certPath) {
-	console.error("Usage: node scripts/encode-suit-cert.mjs <cert.p12> [--raw]");
+	console.error("Usage: pnpm --filter app suit:encode-cert <cert.p12> [--raw]");
 	process.exit(1);
 }
 
-let bundle;
+let bundle: Buffer;
 try {
 	bundle = readFileSync(certPath);
 } catch (error) {
-	console.error(`Cannot read ${certPath}: ${error.message}`);
+	console.error(
+		`Cannot read ${certPath}: ${error instanceof Error ? error.message : String(error)}`,
+	);
 	process.exit(1);
 }
 

@@ -19,7 +19,7 @@
 
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { runImportV1Representation } from "#scripts/import-v1-representation.mjs";
+import { runImportV1Representation } from "#scripts/import-v1-representation";
 import { env } from "~/env.js";
 import {
 	V1_DECLARANT,

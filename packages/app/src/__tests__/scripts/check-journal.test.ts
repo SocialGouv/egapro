@@ -1,12 +1,8 @@
-import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-
-const APP_ROOT = resolve(import.meta.dirname, "..", "..", "..");
-const SCRIPT_PATH = join(APP_ROOT, "scripts/check-journal.mjs");
-
-const { findMonotoneViolations, checkJournal } = await import(SCRIPT_PATH);
+import { checkJournal, findMonotoneViolations } from "#scripts/check-journal";
 
 function writeJournal(dir: string, entries: { idx: number; when: number }[]) {
 	const path = join(dir, "_journal.json");
@@ -141,8 +137,15 @@ describe("checkJournal", () => {
 	});
 });
 
-describe("check-journal.mjs script file", () => {
-	it("script file exists", () => {
-		expect(existsSync(SCRIPT_PATH)).toBe(true);
+describe("check:journal package script", () => {
+	it("points at a script file that exists", () => {
+		const appRoot = resolve(import.meta.dirname, "..", "..", "..");
+		const manifest = JSON.parse(
+			readFileSync(join(appRoot, "package.json"), "utf-8"),
+		) as { scripts: Record<string, string> };
+		const command = manifest.scripts["check:journal"];
+		const scriptPath = command?.split(/\s+/).at(-1);
+		expect(scriptPath).toBeDefined();
+		expect(existsSync(join(appRoot, scriptPath as string))).toBe(true);
 	});
 });
