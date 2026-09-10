@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { expect, type Page, type Response, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 import {
 	API_UPLOAD,
@@ -143,25 +143,14 @@ function cseCheckboxName(
 	return `${CSE_TYPE_LABELS[column.type]}${declarationPart} — ${fileName}`;
 }
 
-// The tRPC client uses httpBatchStreamLink: the response headers (and the 200
-// status) go out before the procedure runs, and stay 200 even when the
-// procedure throws — a rejected setFileContentTypes still answers
-// `HTTP/1.1 200 OK` with the failure encoded in the streamed body
-// (`"error":{...,"data":{"httpStatus":401,...}}`). `response.ok()` is
-// therefore structurally unable to tell a persisted association from a lost
-// one (#4102) — only the completed body can. A successful mutation encodes
-// its tRPC batch entry under `"result"`; a failure never does.
-async function isPersistedResponse(response: Response): Promise<boolean> {
-	const body = await response.text();
-	return body.includes('"result"') && !body.includes('"error"');
-}
-
-function waitForContentTypesPersisted(response: Response): Promise<boolean> {
-	if (!response.url().includes("setFileContentTypes")) {
-		return Promise.resolve(false);
-	}
-	return isPersistedResponse(response);
-}
+// Neither the HTTP status nor the body can gate on persistence here. The tRPC
+// client uses httpBatchStreamLink: headers go out before the procedure runs and
+// stay 200 even when it throws, and the streamed body is no longer retrievable
+// through CDP once the page has consumed it — `response.text()` inside a
+// waitForResponse predicate fails with `Network.getResponseBody: No data found
+// for resource`. What removes the race is the client itself: Step2Upload blocks
+// submission while setFileContentTypes is in flight and rolls the matrix back
+// when it fails (#4102), so matching the mutation's URL is enough here.
 
 /**
  * Complete CSE step 2 through the real UI: upload the PDF, associate the required
@@ -188,14 +177,11 @@ export async function submitCseStep2(
 			page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
 		).toBeVisible({ timeout: 30_000 });
 
-		// Phase B — tick the required columns, waiting for each association to
-		// actually persist before submitting (see `isPersistedResponse` above
-		// for why `response.ok()` can't be used here, #4102). The client submit
-		// gate is optimistic, so finalize could otherwise race the
-		// setFileContentTypes mutation.
+		// Phase B — tick the required columns, letting each association mutation
+		// come back before the next click.
 		for (const column of columns) {
 			const persisted = page.waitForResponse((response) =>
-				waitForContentTypesPersisted(response),
+				response.url().includes("setFileContentTypes"),
 			);
 			await page
 				.getByRole("checkbox", {
@@ -248,8 +234,7 @@ export async function uploadCseFiles(page: Page, fileNames: string[]) {
  * so each pairing is explicit. Each wait matches its own mutation rather than
  * the next response to arrive: the payload is cumulative, so the response
  * carrying this column proves every association ticked so far reached the
- * server — which the optimistic submit gate does not (see
- * `isPersistedResponse` above for how persistence is actually detected, #4102).
+ * server, which the optimistic submit gate does not.
  */
 export async function associateCseContentTypes(
 	page: Page,
@@ -258,18 +243,15 @@ export async function associateCseContentTypes(
 ) {
 	const { hasSecondDeclaration = false } = options;
 	for (const { column, fileName } of assignments) {
-		const persisted = page.waitForResponse(async (response) => {
+		const persisted = page.waitForResponse((response) => {
 			if (!response.url().includes("setFileContentTypes")) {
 				return false;
 			}
 			const requestBody = response.request().postData() ?? "";
-			const carriesColumn =
+			return (
 				requestBody.includes(`"type":"${column.type}"`) &&
-				requestBody.includes(`"declarationNumber":${column.declarationNumber}`);
-			if (!carriesColumn) {
-				return false;
-			}
-			return isPersistedResponse(response);
+				requestBody.includes(`"declarationNumber":${column.declarationNumber}`)
+			);
 		});
 		await page
 			.getByRole("checkbox", {
