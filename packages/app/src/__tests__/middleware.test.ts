@@ -15,9 +15,16 @@ vi.mock("~/env", () => ({
 			"test-gateway-shared-secret-at-least-32-chars",
 	},
 }));
+vi.mock("~/modules/domain", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/domain")>();
+	return {
+		...actual,
+		resolveAdminAccess: vi.fn(actual.resolveAdminAccess),
+	};
+});
 
 import { config, middleware } from "~/middleware";
-import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
+import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
 import {
 	ADMIN,
 	API_SEARCH,
@@ -161,6 +168,17 @@ describe("admin middleware", () => {
 		});
 		const res = await middleware(makeRequest("/admin"));
 		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
+	});
+
+	it("fails closed to /login on a decision the switch does not recognize", async () => {
+		mockGetToken.mockResolvedValue(adminToken(0));
+		vi.mocked(resolveAdminAccess).mockReturnValueOnce({
+			type: "unknown",
+		} as unknown as ReturnType<typeof resolveAdminAccess>);
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin",
+		);
 	});
 });
 

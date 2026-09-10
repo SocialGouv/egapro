@@ -210,13 +210,13 @@ describe("auth config — admin two-factor authentication", () => {
 			);
 		});
 
-		it("records a refusal when the level of an admin account proves no second factor", async () => {
+		it("still records success when the level of an admin account carries no second factor — the sign-in itself did not fail", async () => {
 			await signInWith({ acr: "eidas1", auth_time: AUTH_TIME }, ADMIN_EMAIL);
 
 			expect(mockLogAction).toHaveBeenCalledWith(
 				expect.objectContaining({
 					action: "auth.admin_mfa",
-					status: "failure",
+					status: "success",
 					metadata: { acr: "eidas1", authTime: null },
 				}),
 			);

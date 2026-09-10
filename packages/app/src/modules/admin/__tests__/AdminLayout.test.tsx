@@ -20,9 +20,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
+vi.mock("~/modules/domain", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/domain")>();
+	return {
+		...actual,
+		resolveAdminAccess: vi.fn(actual.resolveAdminAccess),
+	};
+});
 
 import AdminLayout from "~/app/admin/layout";
-import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
+import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
 
 function nowSeconds(): number {
 	return Math.floor(Date.now() / 1000);
@@ -81,5 +88,18 @@ describe("AdminLayout", () => {
 		});
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(result).toBeDefined();
+	});
+
+	it("fails closed to /login on a decision the switch does not recognize", async () => {
+		mockAuth.mockResolvedValue({
+			user: { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() },
+		});
+		vi.mocked(resolveAdminAccess).mockReturnValueOnce({
+			type: "unknown",
+		} as unknown as ReturnType<typeof resolveAdminAccess>);
+		await expect(
+			AdminLayout({ children: "child" as unknown as React.ReactNode }),
+		).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith("/login");
 	});
 });

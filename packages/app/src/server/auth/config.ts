@@ -689,12 +689,9 @@ export const authConfig = {
 					const requestContext = await safeRequestContext();
 					await logAction({
 						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
-						status: token.adminMfaAt ? "success" : "failure",
+						status: "success",
 						userId: dbUser.id,
 						userEmail: email,
-						errorMessage: token.adminMfaAt
-							? null
-							: "Niveau d'authentification insuffisant pour le backoffice.",
 						metadata: {
 							acr,
 							authTime: token.adminMfaAt ?? null,

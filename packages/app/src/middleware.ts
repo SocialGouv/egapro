@@ -96,8 +96,10 @@ async function adminMiddleware(request: NextRequest) {
 			);
 			return NextResponse.redirect(resumeUrl);
 		}
-		default:
+		case "allow":
 			return noStore(NextResponse.next());
+		default:
+			return redirectToLogin(request);
 	}
 }
 

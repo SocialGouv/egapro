@@ -15,9 +15,17 @@ export default async function AdminLayout({
 	const session = await auth();
 	const decision = resolveAdminAccess(session?.user, new Date());
 
-	if (decision.type === "login") redirect(LOGIN);
-	if (decision.type === "monEspace") redirect(MY_SPACE);
-	if (decision.type === "resume") redirect(ADMIN_MFA_RESUME);
-
-	return <AdminShell>{children}</AdminShell>;
+	switch (decision.type) {
+		case "login":
+			return redirect(LOGIN);
+		case "monEspace":
+			return redirect(MY_SPACE);
+		case "resume":
+			return redirect(ADMIN_MFA_RESUME);
+		case "allow":
+			return <AdminShell>{children}</AdminShell>;
+		default:
+			decision satisfies never;
+			return redirect(LOGIN);
+	}
 }
