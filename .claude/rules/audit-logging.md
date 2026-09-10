@@ -174,6 +174,117 @@ false negative is a compliance gap.
 
 ---
 
+## Route Handler coverage map (`src/app/api/**/route.ts`)
+
+Inventory refreshed by issue #3764 — **33 route files**, every one of them
+accounted for below. Re-run the inventory with:
+
+```bash
+find packages/app/src/app/api -name route.ts | sort
+```
+
+If that count changes, this table is stale: a new handler is either audited or
+listed as a named exemption. The only third state this table accepts is a route
+whose wiring is in flight in a named open PR, and it is listed apart from the
+counts — never inside them.
+
+### Audited through `withAuditedRoute` (15)
+
+| Route | Action key |
+|---|---|
+| `declaration-lock/release` | `DECLARATION_LOCK_RELEASED` |
+| `declaration-pdf` | `PDF_DECLARATION_DOWNLOAD` |
+| `export/download` | `EXPORT_DOWNLOAD` |
+| `export/generate` | `EXPORT_GENERATE` |
+| `gip-mds/import` | `GIP_MDS_IMPORT` |
+| `public/declarations` | `PUBLIC_DECLARATIONS_SEARCH` |
+| `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
+| `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
+| `public/representations` | `PUBLIC_REPRESENTATIONS_SEARCH` |
+| `public/representations/export` | `PUBLIC_REPRESENTATIONS_EXPORT` |
+| `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
+| `transmitted-pdf` | `PDF_TRANSMITTED_DOWNLOAD` |
+| `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
+| `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
+| `v1/files` | `EXPORT_API_FILES` |
+
+### Wiring in flight (1)
+
+| Route | Action key | Status |
+|---|---|---|
+| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` | **pending #3189** — the handler writes no audit row at this commit |
+
+Deliberately outside the count above. Listing it as covered would hide a real
+compliance gap behind a complete-looking inventory: the next `find` would
+reconcile 33/33 and stop looking. If #3189 is abandoned, or lands with another
+action key, this row is what surfaces it.
+
+The other gap — `public/referents-egalite-professionnelle`, whose action key
+already existed but was only reachable through tRPC — is closed by #3764.
+
+### Audited through a direct `logAction` call (7)
+
+These are audited, and audited correctly — the wrapper is a convenience, not
+the definition of compliance. Each one logs from inside the handler because it
+needs something `resolveContext` cannot produce.
+
+| Route | Action key(s) | Why not the wrapper |
+|---|---|---|
+| `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
+| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`rawSiren` on a 400, `count` on success) computed *during* the handler |
+| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
+| `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
+| `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
+| `upload` | `CSE_OPINION_UPLOAD_FILE`, `JOINT_EVALUATION_UPLOAD_FILE` | The action key depends on the parsed multipart body |
+| `v1/files/[fileId]` | `ADMIN_FILE_DOWNLOAD`, `USER_FILE_DOWNLOAD`, `EXPORT_API_FILES` | The action key depends on the caller's role, resolved mid-handler |
+
+`resolveContext` runs **before** the handler, so it cannot see a result count,
+a parsed body, or the branch the handler took. Converting these seven to the
+wrapper would flatten one row per call and drop that metadata — a net loss of
+audit fidelity. The wrapper's route-context argument (see below) removes the
+*type-level* blocker; it does not make the conversion desirable.
+
+Since #3764, `withAuditedRoute` is generic over the handler's arguments *after*
+the request — a tuple, empty for a static route and `[{ params }]` for a dynamic
+one — so a dynamic segment survives the wrapper and its context stays required:
+
+```ts
+type RouteContext = { params: Promise<{ siren: string }> };
+
+export const GET = withAuditedRoute(
+  {
+    action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
+    resolveContext: async (_request: Request, { params }: RouteContext) => ({
+      siren: (await params).siren,
+    }),
+  },
+  async (request: Request, { params }: RouteContext) => { /* … */ },
+);
+```
+
+The tuple is not cosmetic. An optional `routeContext?: TRouteContext` widens the
+parameter to `TRouteContext | undefined`, which a handler *requiring* its
+context — the signature Next gives a dynamic segment — cannot accept (TS2345).
+Inference reads the tuple off the handler, so neither shape needs an explicit
+type argument.
+
+### Deliberate exemptions (10)
+
+| Route | Why no audit row |
+|---|---|
+| `healthz` | Liveness probe hit by Kubernetes every few seconds. Returns `"OK"`, reads nothing. Explicitly excluded above. |
+| `e2e-clock` | Test-only clock override, unreachable in production. Auditing it would flood `action_log` from the E2E suite for zero compliance value. |
+| `test-sentry` | Throws on purpose to exercise Sentry capture; 404s in `prod`. No user data. |
+| `v1/docs` | Serves the static Swagger UI shell; 404s in `prod`. No data access. |
+| `public/openapi.json` | Static OpenAPI document, identical for every caller. |
+| `v1/openapi.json` | idem. |
+| `gip-mds/mock` | Reads a checked-in fixture CSV (`data/mock-gip-mds.csv`) that stands in for the GIP MDS API until it exists. Fictional data only. |
+| `auth/logout/callback` | Bare redirect to `/` after the ProConnect end-session round-trip. The logout itself is audited by `auth/logout`; auditing the callback would double-count. |
+| `auth/[...nextauth]` | NextAuth's own catch-all. Audited one level down, in the NextAuth `events`/`logger` hooks (pattern §4) — wrapping the handler would duplicate every row. |
+| `trpc/[trpc]` | tRPC's fetch adapter. Every procedure worth auditing is already covered by `auditMiddleware` + `PROCEDURE_TO_ACTION`; wrapping the adapter would log one opaque row per batched call. |
+
+---
+
 ## Metadata sanitisation
 
 `logAction` accepts a free-form `metadata` jsonb field. The tRPC middleware
@@ -201,13 +312,14 @@ the caller is responsible for sanitisation:
 | Category | Retention | When to use |
 |---|---|---|
 | `read_sensitive` | **180 days** | Lectures sensibles (GIP data, PDFs, personal data). High volume, contain IP. |
+| `public_search` | **180 days** | Lectures du référentiel public (recherche de déclarations, référents, stats). Highest volume, no authentication. |
 | `auth` | 365 days | Login, logout, failed login. |
 | `mutation` | 365 days | Any write to business data. |
 | `export` | 365 days | Data exports and third-party API consumers. |
 | `system` | 365 days | Cron-triggered / admin actions. |
 
 The cleanup cron (`packages/app/scripts/audit-cleanup.mjs`, wired up in
-`.kontinuous/templates/audit-cleanup-cron.yaml`) drops `read_sensitive` rows
+`.kontinuous/templates/audit-cleanup-cron.yaml`) drops `read_sensitive` and `public_search` rows
 after 180 days and everything else after 365 days. This is enforced at the DB
 level; the category you choose **defines** the retention window.
 

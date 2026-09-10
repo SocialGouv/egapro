@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import { isDeadlinePassed } from "~/modules/domain";
+import type { AppHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 
 export type StepStatus = "pending" | "current" | "complete";
@@ -14,8 +15,8 @@ export function TransmittedRow({
 }: {
 	label: string;
 	modifiableUntil?: Date;
-	modifyHref?: string;
-	viewHref?: string;
+	modifyHref?: AppHref;
+	viewHref?: AppHref;
 	viewLabel?: string;
 }) {
 	const deadlinePassed =

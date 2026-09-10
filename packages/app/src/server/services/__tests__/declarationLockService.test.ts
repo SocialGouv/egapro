@@ -19,7 +19,12 @@ vi.mock("~/server/db/schema", () => ({
 	},
 }));
 
+vi.mock("~/server/db/declarationConditions", () => ({
+	resolveCurrentDeclarationId: vi.fn(),
+}));
+
 const DECLARATION_ID = "decl-1";
+const SIREN = "123456789";
 const USER_ID = "user-1";
 const TIMEOUT_MINUTES = 30;
 const NOW = new Date("2025-06-23T10:00:00.000Z");
@@ -96,6 +101,99 @@ describe("getActiveLock", () => {
 		const { getActiveLock } = await service();
 
 		expect(await getActiveLock(select as never, DECLARATION_ID)).toBeNull();
+	});
+});
+
+describe("assertDeclarationUnlockedForWrite", () => {
+	const YEAR = 2026;
+
+	async function helpers() {
+		return await import("~/server/db/declarationConditions");
+	}
+
+	function lockDb(lockRows: unknown[]) {
+		return {
+			select: vi.fn().mockReturnValue({
+				from: vi.fn().mockReturnValue({
+					innerJoin: vi.fn().mockReturnValue({
+						where: vi
+							.fn()
+							.mockReturnValue({ limit: vi.fn().mockResolvedValue(lockRows) }),
+					}),
+				}),
+			}),
+		};
+	}
+
+	it("rejects when another co-declarant holds an active lock", async () => {
+		const { resolveCurrentDeclarationId } = await helpers();
+		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(DECLARATION_ID);
+		const db = lockDb([{ ...HOLDER, userId: "user-2" }]);
+		const {
+			assertDeclarationUnlockedForWrite,
+			DeclarationLockedByOtherUserError,
+		} = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, YEAR, USER_ID),
+		).rejects.toBeInstanceOf(DeclarationLockedByOtherUserError);
+	});
+
+	it("resolves when no active lock is held", async () => {
+		const { resolveCurrentDeclarationId } = await helpers();
+		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(DECLARATION_ID);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(
+				lockDb([]) as never,
+				SIREN,
+				YEAR,
+				USER_ID,
+			),
+		).resolves.toBeUndefined();
+	});
+
+	it("resolves when the caller already holds the lock", async () => {
+		const { resolveCurrentDeclarationId } = await helpers();
+		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(DECLARATION_ID);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(
+				lockDb([HOLDER]) as never,
+				SIREN,
+				YEAR,
+				USER_ID,
+			),
+		).resolves.toBeUndefined();
+	});
+
+	// The guard must land on the row `uploadPipeline` writes to. Sharing the
+	// filter is not enough — the unique index on (siren, year) is partial, so an
+	// unordered lookup can return a different row on each call.
+	it("delegates row resolution to the resolver the write path uses", async () => {
+		const { resolveCurrentDeclarationId } = await helpers();
+		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(null);
+		const db = lockDb([]);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await expect(
+			assertDeclarationUnlockedForWrite(db as never, SIREN, YEAR, USER_ID),
+		).resolves.toBeUndefined();
+		expect(resolveCurrentDeclarationId).toHaveBeenCalledWith(db, SIREN, YEAR);
+		expect(db.select).not.toHaveBeenCalled();
+	});
+
+	it("guards the year it is given rather than re-deriving one", async () => {
+		const { resolveCurrentDeclarationId } = await helpers();
+		vi.mocked(resolveCurrentDeclarationId).mockResolvedValue(DECLARATION_ID);
+		const db = lockDb([]);
+		const { assertDeclarationUnlockedForWrite } = await service();
+
+		await assertDeclarationUnlockedForWrite(db as never, SIREN, 2024, USER_ID);
+
+		expect(resolveCurrentDeclarationId).toHaveBeenCalledWith(db, SIREN, 2024);
 	});
 });
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
+import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
 import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
@@ -15,7 +16,6 @@ import {
 	getPreviousStepHref,
 	getStepDefinition,
 	PUBLICATION_STEP_NUMBER,
-	stepHref,
 } from "./steps";
 import type { RepresentationDraft } from "./types";
 
@@ -100,7 +100,7 @@ export function StepPageClient({
 		setIsAdvancing(true);
 		try {
 			await saveProgress(nextStep);
-			router.push(stepHref(nextStep));
+			router.push(representationStepHref(nextStep));
 		} catch {
 			setNavigationError(
 				"L'enregistrement de votre progression a échoué. Veuillez réessayer.",

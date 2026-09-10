@@ -7,6 +7,11 @@ import type {
 	DeclarationFsmStatus,
 } from "~/modules/domain";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	DECLARATION_REMUNERATION,
+	DECLARATION_REMUNERATION_RECAP,
+	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+} from "~/modules/routes";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 
@@ -52,8 +57,7 @@ const DECL2_MODIFY =
 const JOINT_EVALUATION_MODIFY =
 	'a[href^="/declaration-remuneration/parcours-conformite/evaluation-conjointe"]';
 const CSE_MODIFY = 'a[href^="/avis-cse/etape/2"]';
-const DECL1_VIEW =
-	'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]';
+const DECL1_VIEW = `a[href="${DECLARATION_REMUNERATION_RECAP}"]`;
 const RECAP_VIEW = 'a[title="Voir le récapitulatif de la déclaration"]';
 
 const BASE_PROPS = {
@@ -67,7 +71,7 @@ const BASE_PROPS = {
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
-	ctaHref: "/declaration-remuneration?siren=532847196",
+	ctaHref: DECLARATION_REMUNERATION,
 	lockedByOther: false,
 	lockHolder: null,
 };
@@ -101,10 +105,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				'a[title="Voir le récapitulatif de la déclaration"]',
 			);
 			expect(link).toBeInTheDocument();
-			expect(link).toHaveAttribute(
-				"href",
-				"/declaration-remuneration/recapitulatif?siren=532847196",
-			);
+			expect(link).toHaveAttribute("href", DECLARATION_REMUNERATION_RECAP);
 		});
 
 		it("renders the sr-only text for accessibility", () => {
@@ -124,10 +125,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				'a[title="Voir le récapitulatif de la déclaration"]',
 			);
 			expect(link).toBeInTheDocument();
-			expect(link).toHaveAttribute(
-				"href",
-				"/declaration-remuneration/recapitulatif?siren=532847196",
-			);
+			expect(link).toHaveAttribute("href", DECLARATION_REMUNERATION_RECAP);
 		});
 
 		it("Modifier link is hidden after deadline but view link remains", () => {
@@ -153,7 +151,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			);
 			expect(correctionLink).toBeInTheDocument();
 			expect(correctionLink?.getAttribute("href")).toContain(
-				"recapitulatif?siren=532847196",
+				DECLARATION_REMUNERATION_RECAP_CORRECTION,
 			);
 			expect(correctionLink?.getAttribute("href")).toContain("type=correction");
 		});
@@ -236,11 +234,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
 				year: PAST_YEAR,
 			});
-			expect(
-				dialog.querySelector(
-					'a[href="/declaration-remuneration/recapitulatif?siren=532847196"]',
-				),
-			).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
 			expect(
 				panel.queryByRole("link", { name: "Modifier" }),
 			).not.toBeInTheDocument();
@@ -375,7 +369,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			);
 			expect(correctionLink).toBeInTheDocument();
 			expect(correctionLink?.getAttribute("href")).toContain(
-				"recapitulatif?siren=532847196",
+				DECLARATION_REMUNERATION_RECAP_CORRECTION,
 			);
 			expect(correctionLink?.getAttribute("href")).toContain("type=correction");
 		});

@@ -13,6 +13,7 @@ import {
 	REGION_CODES,
 	REGIONS,
 } from "~/modules/domain";
+import { OBSERVATORY_SEARCH } from "~/modules/routes";
 
 const FACET_FIELDS = ["q", "region", "departement", "naf"] as const;
 
@@ -43,7 +44,7 @@ export function HomeSearchForm() {
 
 	return (
 		<form
-			action="/index-egapro/recherche"
+			action={OBSERVATORY_SEARCH}
 			aria-label="Rechercher une entreprise"
 			autoComplete="off"
 			method="GET"

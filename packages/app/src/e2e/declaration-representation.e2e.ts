@@ -1,11 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
-
+import { urlGlob } from "~/e2e/helpers/routes";
 import {
 	getReferenceYearFor,
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
-
+import { DECLARATION_REPRESENTATION, MY_SPACE } from "~/modules/routes";
 import { TEST_SIREN } from "./constants";
 import {
 	getCurrentDbYear,
@@ -36,7 +36,7 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 
 const PANEL_ID = "representation-process-panel";
 const SUBMIT_MODAL_ID = "representation-submit-modal";
-const FUNNEL_ROOT = "/declaration-representation";
+const FUNNEL_ROOT = DECLARATION_REPRESENTATION;
 
 // Dev gateway shared secret — the deterministic local value from `.env.example`,
 // injected in prod by the APISIX `proxy-rewrite` plugin. Not a secret.
@@ -114,7 +114,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			REPRESENTATION_SUBJECTION_WORKFORCE_MIN - 1,
 			campaignYear - 1,
 		);
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(
 			page.getByRole("button", { name: "Rémunération", exact: true }),
 		).toBeVisible();
@@ -126,7 +126,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 			campaignYear - 1,
 		);
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(
 			page.getByRole("button", { name: "Représentation", exact: true }),
 		).toBeVisible();
@@ -135,7 +135,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	test("the Mon espace row opens the démarche panel and offers to start", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 
 		const row = page.getByRole("row", { name: /Représentation/ });
@@ -402,7 +402,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	});
 
 	test("Mon espace reflects the transmitted declaration", async ({ page }) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 
 		await expect(
@@ -569,13 +569,13 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		).toBeVisible();
 
 		await page.getByRole("button", { name: "Valider" }).click();
-		await page.waitForURL("**/mon-espace");
+		await page.waitForURL(urlGlob(MY_SPACE));
 	});
 
 	test("Mon espace records the non-subjection as a result, with no deadline and no récapitulatif", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		const row = page.getByRole("row", { name: /Représentation/ });
 		await expect(row).toContainText("Non-assujetti");
@@ -597,7 +597,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 	test("the panel keeps the subjection step alone and offers to reopen the démarche", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 		await clickAndExpectDialogOpen(
 			page,
@@ -648,7 +648,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		await goNext(page);
 		await expectOnStep(page, 2, "Écarts de représentation - Cadres dirigeants");
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		const row = page.getByRole("row", { name: /Représentation/ });
 		await expect(row).toContainText(
 			"Écarts de représentation - Cadres dirigeants",

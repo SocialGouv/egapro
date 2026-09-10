@@ -13,8 +13,7 @@ type TooltipContentProps = {
 
 // Recharts never mounts under jsdom (no layout), so drive the internals directly:
 // render the Tooltip `content` with a controlled active payload, invoke the
-// axis `tickFormatter`s and record each Line's stroke, mirroring how
-// ScoreDistributionChart is tested.
+// axis `tickFormatter`s and record each Line's stroke.
 let capturedYAxisTickFormatter: ((value: number) => string) | undefined;
 let capturedXAxisTickFormatter: ((value: string) => string) | undefined;
 const capturedLineStrokes: Record<string, string> = {};

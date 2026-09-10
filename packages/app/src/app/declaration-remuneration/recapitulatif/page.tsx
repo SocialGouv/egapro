@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
 import { getDeclarationReferencePeriod, isDraft } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
+import { MY_SPACE } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { auth } from "~/server/auth";
@@ -79,13 +80,13 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
-						{ label: "Mon espace", href: "/mon-espace" },
+						{ label: "Mon espace", href: MY_SPACE },
 						{ label: `Récapitulatif de la déclaration ${d.year}` },
 					]}
 				/>
 				<Link
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mt-2w"
-					href="/mon-espace"
+					href={MY_SPACE}
 				>
 					Retour
 				</Link>

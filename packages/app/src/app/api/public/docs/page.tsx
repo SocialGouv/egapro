@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SwaggerUI } from "~/modules/export";
+import { API_PUBLIC_OPENAPI } from "~/modules/routes";
 
 export const metadata: Metadata = {
 	title: "Documentation de l’API publique",
@@ -17,7 +18,7 @@ export default function PublicApiDocsPage() {
 					personnelles, les avis CSE et l’indicateur G sont exclus.
 				</p>
 			</div>
-			<SwaggerUI specUrl="/api/public/openapi.json" />
+			<SwaggerUI specUrl={API_PUBLIC_OPENAPI} />
 		</main>
 	);
 }

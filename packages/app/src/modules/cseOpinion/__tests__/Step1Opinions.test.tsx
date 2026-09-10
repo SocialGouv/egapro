@@ -666,6 +666,206 @@ describe("Step1Opinions", () => {
 		expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 	});
 
+	describe("gap threshold gating", () => {
+		it("submits without error on a brand-new declaration (no initialData) below threshold", async () => {
+			// Normalizing inside the submit closure isn't enough: the form default must already be a boolean.
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={false}
+					hasSecondDeclaration={false}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getAllByLabelText("Favorable")[0] as HTMLElement);
+			await user.type(
+				screen.getByLabelText(/Date de l'avis rendu par le CSE/),
+				"2026-03-01",
+			);
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(
+				screen.queryByText("Veuillez remplir tous les champs obligatoires."),
+			).not.toBeInTheDocument();
+			expect(mockMutate).toHaveBeenCalledWith({
+				firstDeclaration: {
+					accuracyOpinion: "favorable",
+					accuracyDate: "2026-03-01",
+					gapConsulted: false,
+					gapOpinion: null,
+					gapDate: null,
+				},
+				secondDeclaration: undefined,
+			});
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+		});
+
+		it("clears the whole first gap answer on submit when below threshold", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={false}
+					hasSecondDeclaration={false}
+					initialData={{
+						firstDeclAccuracyOpinion: "favorable",
+						firstDeclAccuracyDate: "2026-01-15",
+						firstDeclGapConsulted: true,
+						firstDeclGapOpinion: "favorable",
+						firstDeclGapDate: "2026-01-20",
+						secondDeclAccuracyOpinion: null,
+						secondDeclAccuracyDate: "",
+						secondDeclGapConsulted: null,
+						secondDeclGapOpinion: null,
+						secondDeclGapDate: null,
+					}}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			// All three fields, not just the boolean: the persisted answer would otherwise survive as `gapConsulted = false` next to `opinion = 'favorable'`.
+			expect(mockMutate).toHaveBeenCalledWith({
+				firstDeclaration: {
+					accuracyOpinion: "favorable",
+					accuracyDate: "2026-01-15",
+					gapConsulted: false,
+					gapOpinion: null,
+					gapDate: null,
+				},
+				secondDeclaration: undefined,
+			});
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+		});
+
+		it("does not block submission on an incomplete first gap when below threshold", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={false}
+					hasSecondDeclaration={false}
+					initialData={{
+						firstDeclAccuracyOpinion: "favorable",
+						firstDeclAccuracyDate: "2026-01-15",
+						firstDeclGapConsulted: true,
+						firstDeclGapOpinion: null,
+						firstDeclGapDate: null,
+						secondDeclAccuracyOpinion: null,
+						secondDeclAccuracyDate: "",
+						secondDeclGapConsulted: null,
+						secondDeclGapOpinion: null,
+						secondDeclGapDate: null,
+					}}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(
+				screen.queryByText("Veuillez remplir tous les champs de consultation."),
+			).not.toBeInTheDocument();
+			expect(mockMutate).toHaveBeenCalled();
+			expect(mockPush).toHaveBeenCalledWith("/avis-cse/etape/2");
+		});
+
+		it("does not restore the first-declaration gap draft slice when below threshold", () => {
+			mockUseDeclarationDraft.mockReturnValue({
+				draft: {
+					firstDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-01-10",
+						gapConsulted: true,
+						gapOpinion: "favorable",
+						gapDate: "2026-01-20",
+					},
+				},
+				setField: mockSetField,
+				clearDraft: mockClearDraft,
+				hasDraft: true,
+				isLoadingDraft: false,
+			});
+
+			const { container } = render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={false}
+					hasSecondDeclaration={false}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			// No legend and no stray "Oui" restored from the stale draft slice.
+			expect(
+				container.querySelector("#first-decl-gap-question-legend"),
+			).toBeNull();
+			expect(container.querySelector("#first-decl-gap-yes")).toBeNull();
+		});
+
+		it("never writes the synthesized gapConsulted to the draft when below threshold, even after the gap re-appears on a later visit", async () => {
+			// The slice this save produces is what a later above-threshold visit restores as the user's own answer.
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={false}
+					hasSecondDeclaration={false}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getAllByLabelText("Favorable")[0] as HTMLElement);
+
+			expect(mockSetField).toHaveBeenCalled();
+			const saved = lastFirstDeclaration();
+			expect(saved?.accuracyOpinion).toBe("favorable");
+			expect(saved).not.toHaveProperty("gapConsulted");
+			expect(saved).not.toHaveProperty("gapOpinion");
+			expect(saved).not.toHaveProperty("gapDate");
+		});
+
+		it("still requires a complete gap consultation above threshold", async () => {
+			const user = userEvent.setup();
+			render(
+				<Step1Opinions
+					cseDeadline={cseDeadline}
+					firstDeclGapHigh={true}
+					hasSecondDeclaration={false}
+					initialData={{
+						firstDeclAccuracyOpinion: "favorable",
+						firstDeclAccuracyDate: "2026-01-15",
+						firstDeclGapConsulted: true,
+						firstDeclGapOpinion: null,
+						firstDeclGapDate: null,
+						secondDeclAccuracyOpinion: null,
+						secondDeclAccuracyDate: "",
+						secondDeclGapConsulted: null,
+						secondDeclGapOpinion: null,
+						secondDeclGapDate: null,
+					}}
+					siren="123456789"
+					year={2026}
+				/>,
+			);
+
+			await user.click(screen.getByRole("button", { name: /Suivant/ }));
+
+			expect(
+				screen.getByText("Veuillez remplir tous les champs obligatoires."),
+			).toBeInTheDocument();
+			expect(mockMutate).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("gap consultation validation", () => {
 		it("blocks submission when the first-declaration gap is consulted but incomplete", async () => {
 			const user = userEvent.setup();

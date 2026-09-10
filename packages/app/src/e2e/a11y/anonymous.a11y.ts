@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-
+import { LOGIN } from "~/modules/routes";
 import { snapshotRoute } from "./snapshot";
 
 /**
@@ -41,7 +41,7 @@ test.describe("RGAA — pages hors session", () => {
 
 	test("snapshot la page d'authentification", async ({ page }) => {
 		await snapshotRoute(page, {
-			path: "/login",
+			path: LOGIN,
 			id: "login",
 			name: "Authentification",
 			sources: ["src/app/login/page.tsx"],

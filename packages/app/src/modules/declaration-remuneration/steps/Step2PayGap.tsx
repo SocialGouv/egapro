@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -123,7 +124,7 @@ export function Step2PayGap({
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/3");
+			router.push(remunerationStepHref(3));
 		},
 	});
 
@@ -287,10 +288,8 @@ export function Step2PayGap({
 
 				<FormActions
 					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						hasSavedData ? "/declaration-remuneration/etape/3" : undefined
-					}
-					previousHref="/declaration-remuneration/etape/1"
+					mimoquageNextHref={hasSavedData ? remunerationStepHref(3) : undefined}
+					previousHref={remunerationStepHref(1)}
 				/>
 			</fieldset>
 		</form>

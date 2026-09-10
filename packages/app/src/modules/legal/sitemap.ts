@@ -1,42 +1,13 @@
 import type { MetadataRoute } from "next";
 
+import { getIndexablePublicPages } from "~/modules/routes";
+
 export const COMPANY_URLS_PER_SITEMAP = 50_000;
 
-type PublicRoute = {
-	path: string;
-	changeFrequency: NonNullable<
-		MetadataRoute.Sitemap[number]["changeFrequency"]
-	>;
-	priority: number;
-};
-
-/**
- * Publicly crawlable routes. Authenticated areas (/mon-espace, /admin),
- * internal tools (/test-*, /maintenance) and dynamic declaration flows are
- * intentionally excluded per issue #3233.
- */
-const PUBLIC_ROUTES: readonly PublicRoute[] = [
-	{ path: "/", changeFrequency: "monthly", priority: 1 },
-	{ path: "/aide", changeFrequency: "monthly", priority: 0.8 },
-	{ path: "/aide/nous-contacter", changeFrequency: "yearly", priority: 0.5 },
-	{ path: "/faq", changeFrequency: "monthly", priority: 0.8 },
-	{ path: "/referents", changeFrequency: "monthly", priority: 0.7 },
-	{
-		path: "/index-egapro/recherche",
-		changeFrequency: "daily",
-		priority: 0.9,
-	},
-	{ path: "/mentions-legales", changeFrequency: "yearly", priority: 0.3 },
-	{ path: "/donnees-personnelles", changeFrequency: "yearly", priority: 0.3 },
-	{ path: "/gestion-des-cookies", changeFrequency: "yearly", priority: 0.3 },
-	{
-		path: "/declaration-accessibilite",
-		changeFrequency: "yearly",
-		priority: 0.3,
-	},
-	{ path: "/plan-du-site", changeFrequency: "yearly", priority: 0.3 },
-];
-
+// The crawlable pages come from `~/modules/routes`, the same list
+// `/plan-du-site` renders — they used to be two hand-kept inventories that
+// disagreed. Authenticated areas, internal tools and the declaration funnels
+// are excluded by not being public pages at all.
 export function buildSitemap(
 	baseUrl: string,
 	isProd: boolean,
@@ -45,10 +16,12 @@ export function buildSitemap(
 	// Non-prod environments (dev, preprod, review apps) must not be indexed.
 	if (!isProd) return [];
 	const origin = new URL(baseUrl).origin;
-	return PUBLIC_ROUTES.map(({ path, changeFrequency, priority }) => ({
-		url: `${origin}${path === "/" ? "" : path}`,
-		lastModified: now,
-		changeFrequency,
-		priority,
-	}));
+	return getIndexablePublicPages().map(
+		({ path, changeFrequency, priority }) => ({
+			url: `${origin}${path === "/" ? "" : path}`,
+			lastModified: now,
+			changeFrequency,
+			priority,
+		}),
+	);
 }

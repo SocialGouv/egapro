@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import {
-	Confirmation,
-	stepHref,
-	TOTAL_REPRESENTATION_STEPS,
-} from "~/modules/declaration-representation";
+import { Confirmation } from "~/modules/declaration-representation";
 import {
 	getCurrentYear,
 	getReferenceYearFor,
 	isRepresentationDeclarationSubmitted,
 } from "~/modules/domain";
+import {
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -28,7 +28,7 @@ export default async function RepresentationConfirmationPage() {
 	]);
 
 	if (!isRepresentationDeclarationSubmitted(declaration?.status)) {
-		redirect(stepHref(TOTAL_REPRESENTATION_STEPS));
+		redirect(representationStepHref(LAST_REPRESENTATION_STEP));
 	}
 
 	return (

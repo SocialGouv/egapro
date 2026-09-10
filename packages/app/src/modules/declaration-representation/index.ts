@@ -45,9 +45,7 @@ export {
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,
 	parseStepParam,
-	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,
-	stepHref,
 } from "./steps";
 export type {
 	ExecutivesInput,

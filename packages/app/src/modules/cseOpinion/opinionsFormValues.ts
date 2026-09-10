@@ -18,16 +18,21 @@ export function buildOpinionsFormValues(
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification = false,
 	isFirstDeclarationJustification = false,
+	showFirstDeclarationGap = true,
 ) {
 	return {
 		firstDeclaration: {
 			accuracyOpinion: initialData?.firstDeclAccuracyOpinion ?? undefined,
 			accuracyDate: initialData?.firstDeclAccuracyDate ?? "",
-			gapConsulted: isFirstDeclarationJustification
-				? true
-				: (initialData?.firstDeclGapConsulted ?? undefined),
-			gapOpinion: initialData?.firstDeclGapOpinion ?? null,
-			gapDate: initialData?.firstDeclGapDate ?? null,
+			...(showFirstDeclarationGap
+				? {
+						gapConsulted: isFirstDeclarationJustification
+							? true
+							: (initialData?.firstDeclGapConsulted ?? undefined),
+						gapOpinion: initialData?.firstDeclGapOpinion ?? null,
+						gapDate: initialData?.firstDeclGapDate ?? null,
+					}
+				: CLEARED_GAP_FIELDS),
 		},
 		secondDeclaration: hasSecondDeclaration
 			? {
@@ -52,13 +57,20 @@ export function normalizeSubmittedOpinions(
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification: boolean,
 	isFirstDeclarationJustification = false,
+	showFirstDeclarationGap = true,
 ): OpinionsInput {
-	const normalized = isFirstDeclarationJustification
+	// Dropped together: a persisted opinion beside a false gapConsulted reaches the PDF and the open data as a self-contradictory row.
+	const normalized = !showFirstDeclarationGap
 		? {
 				...data,
-				firstDeclaration: { ...data.firstDeclaration, gapConsulted: true },
+				firstDeclaration: { ...data.firstDeclaration, ...CLEARED_GAP_FIELDS },
 			}
-		: data;
+		: isFirstDeclarationJustification
+			? {
+					...data,
+					firstDeclaration: { ...data.firstDeclaration, gapConsulted: true },
+				}
+			: data;
 	if (!normalized.secondDeclaration) return normalized;
 	if (!showSecondDeclarationGap) {
 		return {
@@ -130,8 +142,13 @@ export function hydrateOpinionsForm(
 	showSecondDeclarationGap: boolean,
 	isSecondDeclarationJustification: boolean,
 	isFirstDeclarationJustification = false,
+	showFirstDeclarationGap = true,
 ) {
-	if (isFirstDeclarationJustification) {
+	if (!showFirstDeclarationGap) {
+		setValue("firstDeclaration.gapConsulted", CLEARED_GAP_FIELDS.gapConsulted);
+		setValue("firstDeclaration.gapOpinion", CLEARED_GAP_FIELDS.gapOpinion);
+		setValue("firstDeclaration.gapDate", CLEARED_GAP_FIELDS.gapDate);
+	} else if (isFirstDeclarationJustification) {
 		setValue("firstDeclaration.gapConsulted", true);
 	}
 	if (draft.firstDeclaration) {
@@ -140,8 +157,9 @@ export function hydrateOpinionsForm(
 			"firstDeclaration",
 			draft.firstDeclaration,
 			{
-				applyGapConsulted: !isFirstDeclarationJustification,
-				applyGapDetails: true,
+				applyGapConsulted:
+					showFirstDeclarationGap && !isFirstDeclarationJustification,
+				applyGapDetails: showFirstDeclarationGap,
 			},
 		);
 	}
