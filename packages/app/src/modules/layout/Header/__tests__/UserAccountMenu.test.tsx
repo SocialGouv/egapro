@@ -92,17 +92,22 @@ describe("UserAccountMenu", () => {
 			expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		});
 
-		it("displays 'Mes entreprises' menu item linking to the companies page", () => {
+		it("displays 'Mes démarches' menu item linking to /mon-espace", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			const mesEntreprises = screen.getByRole("menuitem", {
-				name: "Mes entreprises",
+			const menuItem = screen.getByRole("menuitem", {
+				name: "Mes démarches",
 			});
-			expect(mesEntreprises).toBeInTheDocument();
-			expect(mesEntreprises).toHaveAttribute(
-				"href",
-				"/mon-espace/mes-entreprises",
-			);
+			expect(menuItem).toBeInTheDocument();
+			expect(menuItem).toHaveAttribute("href", "/mon-espace");
+		});
+
+		it("does not display a 'Mes entreprises' menu item", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(
+				screen.queryByRole("menuitem", { name: "Mes entreprises" }),
+			).not.toBeInTheDocument();
 		});
 
 		it("displays 'Voir mon profil' menu item", () => {
@@ -168,9 +173,7 @@ describe("UserAccountMenu", () => {
 		it("closes the menu when clicking a menu item button", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			fireEvent.click(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
-			);
+			fireEvent.click(screen.getByRole("menuitem", { name: "Mes démarches" }));
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 		});
 	});
@@ -296,7 +299,7 @@ describe("UserAccountMenu", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -326,7 +329,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -336,7 +339,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			fireEvent.keyDown(document, { key: "ArrowUp" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -355,7 +358,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "Home" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 

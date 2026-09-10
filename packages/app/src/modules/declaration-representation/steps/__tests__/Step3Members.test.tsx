@@ -305,7 +305,56 @@ describe("Step3Members — verdict de conformité (S13–S15)", () => {
 
 		expect(screen.getByText("Non conforme")).toBeInTheDocument();
 	});
+});
 
+describe("Step3Members — rappel réglementaire", () => {
+	it("affiche l'encart bleu de rappel quand l'écart est conforme", () => {
+		render(<Harness draft={COMPUTABLE_MEMBERS} />);
+
+		expect(screen.getByText("Objectif de 30 % atteint")).toBeInTheDocument();
+		expect(
+			screen.getByText(/au moins 30 % des membres des instances dirigeantes/),
+		).toBeInTheDocument();
+	});
+
+	it("affiche l'encart orange de rappel quand l'écart est non conforme", () => {
+		render(<Harness draft={NON_COMPLIANT_MEMBERS} />);
+
+		expect(
+			screen.getByText("Objectif de 30 % non atteint"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/au moins 30 % des membres des instances dirigeantes/),
+		).toBeInTheDocument();
+	});
+
+	it("n'utilise pas le libellé de population de l'étape cadres dirigeants", () => {
+		render(<Harness draft={NON_COMPLIANT_MEMBERS} />);
+
+		expect(screen.queryByText(/des cadres dirigeants/)).not.toBeInTheDocument();
+	});
+
+	it("n'affiche pas l'encart tant que le verdict n'est pas décidé", () => {
+		render(<Harness draft={{ hasManagementBody: true }} />);
+
+		expect(screen.queryByText(/Objectif de 30 %/)).not.toBeInTheDocument();
+	});
+
+	it("annonce le rappel dans une unique région live polie, sans doublon sur le badge", () => {
+		render(<Harness draft={NON_COMPLIANT_MEMBERS} />);
+
+		const liveRegions = document.querySelectorAll('[aria-live="polite"]');
+		const reminderLiveRegions = [...liveRegions].filter((region) =>
+			region.textContent?.includes("Objectif de 30 %"),
+		);
+		expect(reminderLiveRegions).toHaveLength(1);
+		expect(
+			screen.getByText("Non conforme").closest('[aria-live="polite"]'),
+		).toBeNull();
+	});
+});
+
+describe("Step3Members — verdict de conformité (campagne)", () => {
 	it("applique le seuil relevé à partir de la campagne concernée", () => {
 		const { rerender } = render(
 			<Harness draft={BETWEEN_TARGETS_MEMBERS} year={REPRESENTATION_YEAR} />,

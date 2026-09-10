@@ -1,3 +1,4 @@
+export { getRepresentationCampaignYear } from "./campaign.js";
 export {
 	escapeHtml,
 	formatFrenchDate,

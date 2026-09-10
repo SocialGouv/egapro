@@ -18,7 +18,6 @@
 export {
 	LOGIN,
 	MY_SPACE,
-	MY_SPACE_COMPANIES,
 	mySpaceHistoryHref,
 } from "./shared/accountRoutes";
 export {

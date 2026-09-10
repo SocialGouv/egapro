@@ -11,7 +11,7 @@ import {
 
 import { ADMIN_HOME_PATH, triggerAdminStepUp } from "~/modules/admin/access";
 import { isAdminMfaFresh } from "~/modules/domain";
-import { API_AUTH_LOGOUT, MY_SPACE_COMPANIES } from "~/modules/routes";
+import { API_AUTH_LOGOUT, MY_SPACE } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -180,12 +180,12 @@ export function UserAccountMenu({
 							)}
 							<Link
 								className={styles.menuLink}
-								href={MY_SPACE_COMPANIES}
+								href={MY_SPACE}
 								onClick={close}
 								role="menuitem"
 								tabIndex={-1}
 							>
-								Mes entreprises
+								Mes démarches
 							</Link>
 							<button
 								className={styles.menuLink}
