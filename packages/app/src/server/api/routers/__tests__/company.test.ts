@@ -511,6 +511,8 @@ describe("findUserCompany NAF label enrichment", () => {
 				user: {
 					id: "admin-1",
 					isAdmin: true,
+					// An impersonation only bites while the admin MFA window is open (#4466).
+					adminMfaAt: Math.floor(Date.now() / 1000),
 					impersonation: { siren: "339787277" },
 				},
 				expires: "",
@@ -685,6 +687,8 @@ describe("companyRouter.updateHasCse", () => {
 				user: {
 					id: "user-1",
 					isAdmin: true,
+					// An impersonation only bites while the admin MFA window is open (#4466).
+					adminMfaAt: Math.floor(Date.now() / 1000),
 					impersonation: { siren: "339787277", name: "Acme" },
 				},
 				expires: "",

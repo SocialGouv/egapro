@@ -12,3 +12,9 @@ export {
 	impersonateSearchSchema,
 	sirenSchema,
 } from "./schemas";
+export {
+	ADMIN_MFA_REQUIRED_MARKER,
+	ADMIN_MFA_REQUIRED_MESSAGE,
+	AdminMfaRequiredError,
+	isAdminMfaRequiredErrorData,
+} from "./shared/adminMfaGuard";

@@ -43,6 +43,8 @@ import { GET, HEAD } from "../route";
 const SIREN = "123456789";
 const SIRET = `${SIREN}00015`;
 const IMPERSONATED_SIREN = "987654321";
+/** A second factor presented a minute ago — inside the admin MFA window. */
+const FRESH_MFA = Math.floor(Date.now() / 1000) - 60;
 const YEAR = 2025;
 const PDF_BYTES = Buffer.from([0x25, 0x50, 0x44, 0x46]);
 const DOCUMENT = { marker: "representation-pdf" };
@@ -135,6 +137,7 @@ describe("GET /api/representation-pdf", () => {
 				email: "admin@exemple.fr",
 				siret: "99999999900011",
 				isAdmin: true,
+				adminMfaAt: FRESH_MFA,
 				impersonation: { siren: IMPERSONATED_SIREN },
 			},
 		});

@@ -1,14 +1,26 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { signIn } from "next-auth/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
 import { UserAccountMenu } from "../UserAccountMenu";
+
+const mockSignIn = vi.mocked(signIn);
 
 const defaultProps = {
 	userName: "Jean Dupont",
 	userEmail: "jean.dupont@example.fr",
 };
 
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
 describe("UserAccountMenu", () => {
+	beforeEach(() => {
+		mockSignIn.mockClear();
+	});
+
 	it("renders the toggle button with 'Mon espace' label", () => {
 		render(<UserAccountMenu {...defaultProps} />);
 		expect(
@@ -209,6 +221,62 @@ describe("UserAccountMenu", () => {
 			});
 			expect(adminLink).toBeInTheDocument();
 			expect(adminLink).toHaveAttribute("href", "/admin");
+		});
+
+		it("lets the click navigate to /admin without ProConnect when the admin MFA is fresh", () => {
+			render(
+				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			const event = fireEvent.click(
+				screen.getByRole("menuitem", { name: "Administration" }),
+			);
+
+			expect(event).toBe(true); // not prevented — the link is followed
+			expect(mockSignIn).not.toHaveBeenCalled();
+		});
+
+		it("triggers the admin step-up directly, with no intermediate screen, when the admin MFA is stale", () => {
+			render(
+				<UserAccountMenu
+					{...defaultProps}
+					adminMfaAt={nowSeconds() - ADMIN_MFA_WINDOW_SECONDS - 1}
+					isAdmin
+				/>,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			const event = fireEvent.click(
+				screen.getByRole("menuitem", { name: "Administration" }),
+			);
+
+			expect(event).toBe(false); // navigation prevented
+			expect(mockSignIn).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("triggers the admin step-up when the session carries no admin MFA date at all", () => {
+			render(<UserAccountMenu {...defaultProps} isAdmin />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
+
+			expect(mockSignIn).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("closes the dropdown when the admin entry is clicked, fresh or not", () => {
+			render(
+				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
+
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 		});
 	});
 

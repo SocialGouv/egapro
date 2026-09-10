@@ -6,7 +6,12 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { extractSiren, parseSiren } from "~/modules/domain";
+import {
+	extractSiren,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	parseSiren,
+} from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
@@ -41,6 +46,37 @@ async function closeOpenImpersonationEvents(adminUserId: string) {
 				isNull(adminImpersonationEvents.stoppedAt),
 			),
 		);
+}
+
+/**
+ * Close the administration-journal row of a mimoquage whose second-factor
+ * window has lapsed, and drop it from the token.
+ *
+ * A mimoquage stops biting the instant the window closes: `exposedImpersonation`
+ * and `activeImpersonation` both stop honouring it, so the banner goes and the
+ * server resolves the agent's own SIREN again. The open row has no such clock.
+ * Closing it on sign-in alone would leave it open for the whole remaining life
+ * of the session — weeks past the window — so the invariant the sign-in branch
+ * states, no row open without a live mimoquage behind it, would hold against a
+ * step-up but not against a window that simply lapses (issue #4466, S14).
+ *
+ * Emptying the token field is what keeps this from firing twice; a repeat costs
+ * an index probe on `admin_impersonation_event_admin_started_idx`, which narrows
+ * to this admin's own rows, and no write.
+ */
+async function closeLapsedImpersonation(
+	token: {
+		adminMfaAt?: number;
+		id: string;
+		impersonation?: Impersonation | null;
+	},
+	now: Date,
+) {
+	if (!token.impersonation) return;
+	if (isAdminMfaFresh(token.adminMfaAt, now)) return;
+
+	await closeOpenImpersonationEvents(token.id);
+	token.impersonation = null;
 }
 
 /**
@@ -142,6 +178,7 @@ declare module "next-auth" {
 			phone?: string | null;
 			isAdmin: boolean;
 			impersonation?: Impersonation | null;
+			adminMfaAt?: number | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -154,6 +191,69 @@ declare module "next-auth/jwt" {
 		id_token?: string | null;
 		isAdmin: boolean;
 		impersonation?: Impersonation | null;
+		// Seconds since the epoch. Absent when the level ProConnect returned
+		// proved no second factor.
+		adminMfaAt?: number;
+	}
+}
+
+/**
+ * Impersonation as the session exposes it: present only while the account is
+ * an admin *and* its second factor is still inside the window.
+ *
+ * The banner reads `session.user.impersonation` and nothing else, so it
+ * vanishes at the very instant the server stops honouring the mimoquage
+ * (issue #4466, S14). The two must never diverge: a banner outliving the
+ * privilege would invite an agent to act on a company whose SIREN the server
+ * has already stopped resolving, and an effective mimoquage with no banner
+ * would hide whose data is on screen.
+ *
+ * The token keeps its `impersonation` field untouched — this is a projection,
+ * not a mutation. Nothing resumes when a new second factor is presented: a
+ * step-up re-mints the token from scratch, without impersonation.
+ */
+function exposedImpersonation(
+	token: JWTWithImpersonation,
+	now: Date,
+): Impersonation | null {
+	if (!token.isAdmin) return null;
+	if (!isAdminMfaFresh(token.adminMfaAt, now)) return null;
+	return token.impersonation ?? null;
+}
+
+type JWTWithImpersonation = {
+	isAdmin?: boolean;
+	adminMfaAt?: number;
+	impersonation?: Impersonation | null;
+};
+
+// Decoded without re-verifying the signature: this token never transited
+// through the browser — NextAuth fetched it server-to-server and openid-client
+// already validated signature, issuer, audience and nonce before handing it
+// over, so a second check would re-run the same one against the same JWKS.
+function readAuthenticationClaims(idToken: string | null | undefined): {
+	acr: string | null;
+	authTime: number | null;
+} {
+	const payload = idToken?.split(".")[1];
+	if (!payload) return { acr: null, authTime: null };
+
+	try {
+		const claims = JSON.parse(
+			Buffer.from(payload, "base64url").toString("utf-8"),
+		) as Record<string, unknown>;
+		const authTime = claims.auth_time;
+		return {
+			acr: typeof claims.acr === "string" ? claims.acr : null,
+			authTime:
+				typeof authTime === "number" &&
+				Number.isFinite(authTime) &&
+				authTime > 0
+					? Math.floor(authTime)
+					: null,
+		};
+	} catch {
+		return { acr: null, authTime: null };
 	}
 }
 
@@ -167,20 +267,75 @@ const ADMIN_EMAILS: Set<string> = parseAdminEmails(env.ADMIN_EMAILS);
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 /**
- * True when the request was addressed to this machine. `EGAPRO_DEV_AUTH` and
- * `NODE_ENV` both come from the same configmap and carry the same level of
- * trust, so on their own they are one barrier, not two. This check does not
- * read configuration at all: a request reaching a deployed pod carries that
- * environment's hostname, never a loopback one.
+ * True when the request was addressed to this machine. `EGAPRO_DEV_AUTH`,
+ * `EGAPRO_E2E_ADMIN_MFA` and `NODE_ENV` all come from the same configmap and
+ * carry the same level of trust, so on their own they are one barrier, not
+ * two. This check does not read configuration at all: a request reaching a
+ * deployed pod carries that environment's hostname, never a loopback one.
  */
-function isLoopbackRequest(headers: Record<string, string> | undefined) {
-	const host = headers?.host ?? headers?.Host;
+function isLoopbackHost(host: string | null | undefined) {
 	if (!host) return false;
 	// Strip the port, keeping bracketed IPv6 literals intact.
 	const hostname = host.startsWith("[")
 		? host.slice(0, host.indexOf("]") + 1)
 		: (host.split(":")[0] ?? "");
 	return LOOPBACK_HOSTS.has(hostname);
+}
+
+function isLoopbackRequest(headers: Record<string, string> | undefined) {
+	return isLoopbackHost(headers?.host ?? headers?.Host);
+}
+
+/**
+ * Host of the Next.js request in flight, or null outside a request scope.
+ *
+ * Read from the server's own view of the request, exactly as
+ * `safeRequestContext` does. NextAuth callbacks do not receive the request,
+ * and this is the only place the host can be obtained without letting a caller
+ * hand us one.
+ */
+async function safeRequestHost(): Promise<string | null> {
+	try {
+		return (await nextHeaders()).get("host");
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Test-only stand-in for a ProConnect second factor (issue #4467).
+ *
+ * Why it exists. `/admin` demands an `eidas1-mfa` sign-in since #4461.
+ * ProConnect's integration platform advertises that level, but its FIA1V2 test
+ * identity — the only one the suite has — presents no second factor a headless
+ * run can complete, and its fallback one-time code goes to a mailbox the suite
+ * cannot read. Without a seam the whole backoffice half of the suite is
+ * unreachable, which is worse for the epic than a seam whose absence in
+ * production is mechanically checkable.
+ *
+ * Why it cannot leak. Two independent barriers, deliberately not two variables
+ * of one configmap. `EGAPRO_E2E_ADMIN_MFA` is off by default and declared in no
+ * `.kontinuous` env config — `e2eFlagsAbsentFromDeployConfig.test.ts` fails the
+ * build if it ever appears in one. On top of it, the sign-in must have reached
+ * the app on a loopback host, which no deployed pod ever sees whatever its
+ * configuration says. Nothing in the request decides: no parameter, no header,
+ * no body — `Host` is not an input the caller chooses freely here, it is what
+ * the sign-in had to be addressed to in order to arrive at all.
+ *
+ * What it does NOT do. It grants no habilitation: `ADMIN_EMAILS` still decides
+ * who is an admin, and the freshness window still applies. It replaces the
+ * level ProConnect answered with, never the rule that reads it — so the
+ * negative half of the epic (no valid second factor, no backoffice) stays live.
+ *
+ * Not locked on `NODE_ENV`: every CI run serves a production build
+ * (`next build` then `next start`), so such a lock would make the seam inert in
+ * the one environment that needs it. The campaign-clock seam already made and
+ * reverted that mistake — see `~/app/api/e2e-clock/route.ts`.
+ */
+function grantsTestAdminMfa(host: string | null): boolean {
+	// Strict `=== true`, never truthiness: with SKIP_ENV_VALIDATION set the env
+	// helper hands back the raw environment, where the string "false" is truthy.
+	return env.EGAPRO_E2E_ADMIN_MFA === true && isLoopbackHost(host);
 }
 
 /**
@@ -349,6 +504,25 @@ export const authConfig = {
 					return token;
 				}
 
+				// Starting a mimoquage is itself an administrator privilege, so it
+				// needs a second factor inside the window — the same condition the
+				// shared predicates apply when *reading* through a mimoquage
+				// (#4466). Gating only on `token.isAdmin` would let an agent whose
+				// window has closed open a row in the administration journal that
+				// no live mimoquage backs, which is precisely the invariant this
+				// ticket exists to hold. It would also persist a client-supplied
+				// company name without a valid second factor.
+				//
+				// Stopping stays ungated on purpose, above: ending a mimoquage and
+				// closing its row must never be refused.
+				if (!isAdminMfaFresh(token.adminMfaAt, new Date())) {
+					// The refusal must not strand what the agent already had open:
+					// an agent switching companies as the window lapses gets the
+					// same treatment as one who simply stopped browsing.
+					await closeLapsedImpersonation(token, new Date());
+					return token;
+				}
+
 				if (raw && typeof raw === "object") {
 					const candidate = raw as { siren?: unknown; name?: unknown };
 					const sirenResult = sirenSchema.safeParse(candidate.siren);
@@ -468,7 +642,74 @@ export const authConfig = {
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
+
+				// A sign-in — a step-up included — mints the token from scratch,
+				// so the mimoquage disappears on its own. The open row in the
+				// administration journal does not: close it here so there is no
+				// instant at which a row is open without a live mimoquage behind
+				// it. That journal is a compliance trail, not a by-product of the
+				// banner (issue #4466, S14).
+				//
+				// Unconditional, and not gated on `shouldBeAdmin`: an account
+				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
+				// leave its last row open for good. The statement is keyed on
+				// `adminUserId`, so for the declarants — who never have a row — it
+				// costs one index probe and no write.
+				//
+				// No automatic resume: the agent restarts the mimoquage from the
+				// backoffice if they still need it.
+				await closeOpenImpersonationEvents(dbUser.id);
+				token.impersonation = null;
+
+				// The marker has exactly two sources, and a client reaches
+				// neither: the id_token of the exchange we just performed
+				// server-to-server, and — off outside a loopback test run, see
+				// `grantsTestAdminMfa` — the E2E seam. Never a query parameter, a
+				// header, a request body, nor the `trigger === "update"` branch
+				// above, which any signed-in client can reach. A level below MFA
+				// is not an error — the declarant journey never asks for one — so
+				// the sign-in succeeds with the session simply left undated.
+				const { acr, authTime } = readAuthenticationClaims(account?.id_token);
+				let testSeamGranted = false;
+				if (isAdminMfaAcr(acr)) {
+					token.adminMfaAt = authTime ?? Math.floor(Date.now() / 1000);
+				} else if (grantsTestAdminMfa(await safeRequestHost())) {
+					// Dated from the server clock, never from a claim: the level we
+					// are standing in for was not returned, so no `auth_time` exists.
+					token.adminMfaAt = Math.floor(Date.now() / 1000);
+					testSeamGranted = true;
+				} else {
+					token.adminMfaAt = undefined;
+				}
+
+				// Only admin-eligible accounts produce a row: a declarant signing
+				// in at a level we never demanded is not a refused MFA. Neither
+				// token nor raw claim is logged.
+				if (shouldBeAdmin) {
+					const requestContext = await safeRequestContext();
+					await logAction({
+						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
+						status: "success",
+						userId: dbUser.id,
+						userEmail: email,
+						metadata: {
+							acr,
+							authTime: token.adminMfaAt ?? null,
+							// Present only when the seam granted the passage, so a row
+							// never reads as a real second factor that did not happen.
+							...(testSeamGranted ? { testSeam: true } : {}),
+						},
+						ipAddress: requestContext.ipAddress,
+						userAgent: requestContext.userAgent,
+					});
+				}
 			}
+
+			// Last, so it never doubles a close the branches above already made:
+			// an explicit stop returns from the update branch, and a sign-in has
+			// just emptied the field.
+			await closeLapsedImpersonation(token, new Date());
+
 			return token;
 		},
 		session: ({ session, token }) => ({
@@ -479,7 +720,8 @@ export const authConfig = {
 				siret: token.siret ?? null,
 				phone: token.phone ?? null,
 				isAdmin: token.isAdmin ?? false,
-				impersonation: token.impersonation ?? null,
+				impersonation: exposedImpersonation(token, new Date()),
+				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),
 	},

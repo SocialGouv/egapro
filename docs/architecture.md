@@ -304,7 +304,18 @@ Deux responsabilités, deux scopes URL :
 
 **Defense in depth** : `src/app/admin/layout.tsx` re-vérifie la session côté Node runtime pour les tokens dépourvus du flag `isAdmin` (fallback de migration).
 
-### 5.5 Impersonation admin
+### 5.5 Double authentification admin (step-up ProConnect)
+
+`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Le niveau attendu de ProConnect est `eidas1-mfa` (`ADMIN_MFA_ACR_VALUES`) : eIDAS 1 plus un second facteur, orthogonal à `eidas2`/`eidas3` qui qualifient le niveau de vérification d'identité à l'enrôlement, pas la présence d'un second facteur à cette connexion.
+
+Un seul point d'entrée déclenche cette connexion renforcée, `triggerAdminStepUp()` (`src/modules/admin/access/adminStepUp.ts`), appelé par le bouton ProConnect du `/login` quand la destination cible le backoffice, par l'écran de reprise `/acces-backoffice`, et par le menu admin. Il attache deux paramètres à la requête d'autorisation OIDC :
+
+- `claims` avec `id_token.acr` et `auth_time` marqués `essential: true` — un `claims` essentiel est contraignant côté fournisseur, contrairement à `acr_values` qui n'est qu'une préférence qu'un fournisseur peut ignorer silencieusement ;
+- `max_age` borné à la fenêtre de fraîcheur (8h), pour qu'un fournisseur qui rejoue une session déjà ouverte renvoie un `auth_time` que la règle de fraîcheur refuse plutôt que de rouvrir une fenêtre sur une authentification ancienne.
+
+Le niveau réellement obtenu n'est jamais présumé côté client : `resolveAdminAccess` (le tableau de décision partagé par le middleware Edge, `src/app/admin/layout.tsx` et l'écran de reprise) ne date `adminMfaAt` qu'à partir de l'`id_token` que `openid-client` a déjà vérifié côté serveur (signature, émetteur, audience, nonce) au retour du callback ProConnect — jamais d'un paramètre de requête, d'un header, ni d'une mise à jour de session côté client.
+
+### 5.6 Impersonation admin
 
 L'admin DGT peut **incarner** une entreprise pour la dépanner. Le flux :
 

@@ -52,6 +52,22 @@ describe("ImpersonateBanner", () => {
 		expect(screen.getByText(/123456789/)).toBeInTheDocument();
 	});
 
+	it("renders nothing once the MFA window has expired, because the session no longer exposes the impersonation", () => {
+		// S14: the banner holds no freshness rule of its own. The `session`
+		// callback stops projecting `impersonation` the instant the window
+		// closes (see `exposedImpersonation`), which is exactly the instant the
+		// server stops resolving the impersonated SIREN — so the two can never
+		// disagree. This is the shape the callback hands back in that case.
+		useSessionMock.mockReturnValue({
+			data: {
+				user: { impersonation: null, adminMfaAt: 1_700_000_000 },
+			},
+			update: vi.fn(),
+		});
+		const { container } = render(<ImpersonateBanner />);
+		expect(container).toBeEmptyDOMElement();
+	});
+
 	it("calls session.update(null) and router.refresh on stop click", async () => {
 		const updateMock = vi.fn().mockResolvedValue(undefined);
 		useSessionMock.mockReturnValue({

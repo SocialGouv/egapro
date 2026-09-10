@@ -2,16 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	auth: vi.fn(),
-	logAction: vi.fn().mockResolvedValue(undefined),
 	fetchFileById: vi.fn(),
 	fetchFileBySiren: vi.fn(),
 	streamStoredFile: vi.fn(),
-	isGatewayForwarded: vi.fn(),
+	logAction: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("~/server/auth", () => ({ auth: mocks.auth }));
-
-vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
+vi.mock("~/server/auth", () => ({
+	auth: mocks.auth,
+}));
 
 vi.mock("~/modules/export", () => ({
 	fetchFileById: mocks.fetchFileById,
@@ -22,119 +21,323 @@ vi.mock("~/server/services/fileStreaming", () => ({
 	streamStoredFile: mocks.streamStoredFile,
 }));
 
-vi.mock("~/server/services/gatewaySource", () => ({
-	isGatewayForwarded: mocks.isGatewayForwarded,
+vi.mock("~/server/audit/log", () => ({
+	logAction: mocks.logAction,
 }));
 
-import { AUDIT_ACTIONS } from "~/modules/audit";
 import { GET } from "../route";
 
-const FILE_ID = "file-1";
-const SIREN = "123456789";
-const SIRET = `${SIREN}00015`;
-const IMPERSONATED_SIREN = "987654321";
-const STORED_FILE = { filePath: "s3://bucket/f.pdf", fileName: "avis-cse.pdf" };
+// A SIRET whose first 9 digits form the admin's own SIREN scope.
+const ADMIN_SIRET = "98765432100010";
+const ADMIN_SIREN = "987654321";
+// A file belonging to a company the admin is not a referent of.
+const OTHER_SIREN_FILE = {
+	filePath: "123456789/2027/f.pdf",
+	fileName: "f.pdf",
+};
+const OWN_SIREN_FILE = { filePath: "987654321/2027/f.pdf", fileName: "f.pdf" };
 
-function request() {
-	return new Request(`https://egapro.test/api/v1/files/${FILE_ID}`);
+const HOUR = 60 * 60;
+
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
 }
 
-function params() {
-	return { params: Promise.resolve({ fileId: FILE_ID }) };
+function buildRequest(headers: Record<string, string> = {}): Request {
+	return new Request("http://localhost/api/v1/files/file-1", { headers });
 }
 
-function signedIn(user: Record<string, unknown>) {
-	mocks.auth.mockResolvedValue({ user });
+function callGet(request: Request) {
+	return GET(request, { params: Promise.resolve({ fileId: "file-1" }) });
 }
 
-function auditRow(): Record<string, unknown> {
-	return (mocks.logAction.mock.calls[0]?.[0] ?? {}) as Record<string, unknown>;
+function mockStream(body = "content") {
+	mocks.streamStoredFile.mockResolvedValue(
+		new Response(body, { headers: { "Content-Type": "application/pdf" } }),
+	);
 }
 
 describe("GET /api/v1/files/:fileId", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.isGatewayForwarded.mockReturnValue(false);
-		mocks.streamStoredFile.mockResolvedValue(new Response("pdf bytes"));
-		mocks.fetchFileById.mockResolvedValue(STORED_FILE);
-		mocks.fetchFileBySiren.mockResolvedValue(STORED_FILE);
-		signedIn({ id: "user-1", email: "declarant@exemple.fr", siret: SIRET });
+		mockStream();
 	});
 
-	it("streams the file scoped to the session siren for a regular user", async () => {
-		const response = await GET(request(), params());
+	describe("gateway-forwarded caller (SUIT)", () => {
+		function gatewayRequest() {
+			return buildRequest({ "X-Gateway-Forwarded": "secret" });
+		}
 
-		expect(response.status).toBe(200);
-		expect(mocks.fetchFileBySiren).toHaveBeenCalledWith(FILE_ID, SIREN);
-		expect(mocks.fetchFileById).not.toHaveBeenCalled();
-		expect(auditRow()).toMatchObject({
-			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
-			status: "success",
-			siren: SIREN,
+		it("serves the file by id without consulting the session, regardless of caller", async () => {
+			mocks.fetchFileById.mockResolvedValue(OTHER_SIREN_FILE);
+
+			const response = await callGet(gatewayRequest());
+
+			expect(response.status).toBe(200);
+			expect(mocks.auth).not.toHaveBeenCalled();
+			expect(mocks.fetchFileById).toHaveBeenCalledWith("file-1");
+			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
+				expect.objectContaining({ disposition: "attachment" }),
+			);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "export.api_files",
+					status: "success",
+				}),
+			);
+		});
+
+		it("returns 404 and audits a failure when the file does not exist", async () => {
+			mocks.fetchFileById.mockResolvedValue(undefined);
+
+			const response = await callGet(gatewayRequest());
+
+			expect(response.status).toBe(404);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "export.api_files",
+					status: "failure",
+				}),
+			);
+		});
+
+		it("empty X-Gateway-Forwarded header falls through to the session branch", async () => {
+			mocks.auth.mockResolvedValue(null);
+
+			const response = await callGet(
+				buildRequest({ "X-Gateway-Forwarded": "" }),
+			);
+
+			expect(response.status).toBe(401);
+			expect(mocks.auth).toHaveBeenCalled();
 		});
 	});
 
-	it("answers 404 when the file does not belong to the session siren", async () => {
-		mocks.fetchFileBySiren.mockResolvedValue(null);
+	describe("no session", () => {
+		it("returns 401 and audits a failure", async () => {
+			mocks.auth.mockResolvedValue(null);
 
-		const response = await GET(request(), params());
+			const response = await callGet(buildRequest());
 
-		expect(response.status).toBe(404);
-		expect(mocks.streamStoredFile).not.toHaveBeenCalled();
-	});
-
-	it.each([
-		["no session at all", null],
-		[
-			"a session whose siret is malformed",
-			{ user: { id: "user-1", siret: "1234A678900015" } },
-		],
-		[
-			"a session whose siret is too short",
-			{ user: { id: "user-1", siret: "1234" } },
-		],
-		["a session without a siret", { user: { id: "user-1" } }],
-	])("refuses the download with %s", async (_label, session) => {
-		mocks.auth.mockResolvedValue(session);
-
-		const response = await GET(request(), params());
-
-		expect(response.status).toBe(401);
-		expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
-		expect(mocks.fetchFileById).not.toHaveBeenCalled();
-	});
-
-	it("keeps the unscoped admin branch for an admin, even in mimoquage", async () => {
-		signedIn({
-			id: "admin-1",
-			email: "admin@exemple.fr",
-			siret: "99999999900011",
-			isAdmin: true,
-			impersonation: { siren: IMPERSONATED_SIREN },
-		});
-
-		const response = await GET(request(), params());
-
-		expect(response.status).toBe(200);
-		expect(mocks.fetchFileById).toHaveBeenCalledWith(FILE_ID);
-		expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
-		expect(auditRow()).toMatchObject({
-			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
-			status: "success",
+			expect(response.status).toBe(401);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "user.file_download",
+					status: "failure",
+					errorMessage: "HTTP 401",
+				}),
+			);
 		});
 	});
 
-	it("serves the gateway caller without touching the session", async () => {
-		mocks.isGatewayForwarded.mockReturnValue(true);
+	describe("regular user session (unchanged)", () => {
+		it("serves a file within the caller's own SIREN scope, inline", async () => {
+			mocks.auth.mockResolvedValue({
+				user: { id: "user-1", email: "user@example.com", siret: ADMIN_SIRET },
+			});
+			mocks.fetchFileBySiren.mockResolvedValue(OWN_SIREN_FILE);
 
-		const response = await GET(request(), params());
+			const response = await callGet(buildRequest());
 
-		expect(response.status).toBe(200);
-		expect(mocks.fetchFileById).toHaveBeenCalledWith(FILE_ID);
-		expect(mocks.auth).not.toHaveBeenCalled();
-		expect(auditRow()).toMatchObject({
-			action: AUDIT_ACTIONS.EXPORT_API_FILES,
-			status: "success",
+			expect(response.status).toBe(200);
+			expect(mocks.fetchFileBySiren).toHaveBeenCalledWith(
+				"file-1",
+				ADMIN_SIREN,
+			);
+			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
+				expect.objectContaining({ disposition: "inline" }),
+			);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "user.file_download",
+					status: "success",
+					siren: ADMIN_SIREN,
+				}),
+			);
+		});
+
+		it("returns the generic 404 for a file outside the caller's scope, without mentioning MFA", async () => {
+			mocks.auth.mockResolvedValue({
+				user: { id: "user-1", email: "user@example.com", siret: ADMIN_SIRET },
+			});
+			mocks.fetchFileBySiren.mockResolvedValue(undefined);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(404);
+			const body = await response.json();
+			expect(body.error).toBe("Fichier non trouvé");
+			expect(body.error).not.toMatch(/authentification/i);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "user.file_download",
+					status: "failure",
+					errorMessage: "HTTP 404",
+				}),
+			);
+		});
+
+		it.each([
+			["no siret at all", null],
+			["a siret carrying a letter", "1234A678900015"],
+			["a siret too short to hold a SIREN", "1234"],
+		])("returns 401 when the session carries %s", async (_label, siret) => {
+			mocks.auth.mockResolvedValue({
+				user: { id: "user-1", email: "user@example.com", siret },
+			});
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(401);
+			expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
+			expect(mocks.fetchFileById).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("admin session with a fresh double authentication", () => {
+		function freshAdminSession(overrides: Record<string, unknown> = {}) {
+			mocks.auth.mockResolvedValue({
+				user: {
+					id: "admin-1",
+					email: "admin@example.com",
+					siret: ADMIN_SIRET,
+					isAdmin: true,
+					adminMfaAt: nowSeconds() - 60,
+					...overrides,
+				},
+			});
+		}
+
+		it("bypasses SIREN scope and serves any file as an attachment", async () => {
+			freshAdminSession();
+			mocks.fetchFileById.mockResolvedValue(OTHER_SIREN_FILE);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(200);
+			expect(mocks.fetchFileById).toHaveBeenCalledWith("file-1");
+			expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
+			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
+				expect.objectContaining({ disposition: "attachment" }),
+			);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "admin.file_download",
+					status: "success",
+				}),
+			);
+		});
+
+		it("returns the unchanged 404 when the file does not exist", async () => {
+			freshAdminSession();
+			mocks.fetchFileById.mockResolvedValue(undefined);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(404);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "admin.file_download",
+					status: "failure",
+					errorMessage: "HTTP 404",
+				}),
+			);
+		});
+	});
+
+	describe("admin session with an expired double authentication", () => {
+		function expiredAdminSession(overrides: Record<string, unknown> = {}) {
+			mocks.auth.mockResolvedValue({
+				user: {
+					id: "admin-1",
+					email: "admin@example.com",
+					siret: ADMIN_SIRET,
+					isAdmin: true,
+					adminMfaAt: nowSeconds() - 9 * HOUR,
+					...overrides,
+				},
+			});
+		}
+
+		it("serves a file within the admin's own SIREN scope, like a regular user", async () => {
+			expiredAdminSession();
+			mocks.fetchFileBySiren.mockResolvedValue(OWN_SIREN_FILE);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(200);
+			expect(mocks.fetchFileBySiren).toHaveBeenCalledWith(
+				"file-1",
+				ADMIN_SIREN,
+			);
+			expect(mocks.fetchFileById).not.toHaveBeenCalled();
+			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
+				expect.objectContaining({ disposition: "inline" }),
+			);
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "user.file_download",
+					status: "success",
+					siren: ADMIN_SIREN,
+				}),
+			);
+		});
+
+		it("refuses a file outside the admin's own SIREN scope, naming the expired double authentication", async () => {
+			expiredAdminSession();
+			mocks.fetchFileBySiren.mockResolvedValue(undefined);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(403);
+			const body = await response.json();
+			expect(body.error).toMatch(/double authentification/i);
+			expect(mocks.streamStoredFile).not.toHaveBeenCalled();
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "admin.file_download",
+					status: "failure",
+					errorMessage: "HTTP 403 admin_mfa_expired",
+					siren: ADMIN_SIREN,
+				}),
+			);
+		});
+
+		it("refuses explicitly when the admin has no usable SIREN of their own", async () => {
+			expiredAdminSession({ siret: null });
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(403);
+			const body = await response.json();
+			expect(body.error).toMatch(/double authentification/i);
+			expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
+			expect(mocks.logAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "admin.file_download",
+					status: "failure",
+					errorMessage: "HTTP 403 admin_mfa_expired",
+					siren: null,
+				}),
+			);
+		});
+
+		it("treats a session that never completed the double authentication the same as expired", async () => {
+			mocks.auth.mockResolvedValue({
+				user: {
+					id: "admin-1",
+					email: "admin@example.com",
+					siret: ADMIN_SIRET,
+					isAdmin: true,
+					adminMfaAt: null,
+				},
+			});
+			mocks.fetchFileBySiren.mockResolvedValue(undefined);
+
+			const response = await callGet(buildRequest());
+
+			expect(response.status).toBe(403);
+			expect(mocks.fetchFileById).not.toHaveBeenCalled();
 		});
 	});
 });

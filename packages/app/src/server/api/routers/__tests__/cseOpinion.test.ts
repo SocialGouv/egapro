@@ -113,6 +113,9 @@ function createCaller(
 					id: "user-1",
 					siret,
 					isAdmin: impersonation !== null,
+					// An impersonation only bites while the admin MFA window is open (#4466).
+					adminMfaAt:
+						impersonation !== null ? Math.floor(Date.now() / 1000) : null,
 					impersonation,
 				},
 				expires: "",

@@ -2,8 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
+import { resolveAdminAccess } from "~/modules/domain";
 import {
 	ADMIN,
+	ADMIN_MFA_RESUME,
 	API_PUBLIC_DECLARATIONS,
 	API_SEARCH,
 	API_V1_PREFIX,
@@ -14,9 +16,10 @@ import {
 /**
  * Next.js Edge middleware handling three concerns:
  *
- * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and enforces
- *    `isAdmin`. Defense in depth: `src/app/admin/layout.tsx` re-checks the
- *    session on the Node runtime in case the token is missing the flag.
+ * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and applies the
+ *    shared decision table of `resolveAdminAccess` — admin grant *and* a
+ *    two-factor authentication inside the window. Defense in depth:
+ *    `src/app/admin/layout.tsx` runs the same table on the Node runtime.
  *
  * 2. `/mon-espace/*`, `/declaration-remuneration/*`, `/avis-cse/*` — session
  *    gating only (no `isAdmin` check). Captures the requested URL into
@@ -74,19 +77,36 @@ function redirectToLogin(request: NextRequest) {
 async function adminMiddleware(request: NextRequest) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
-	// Force re-login when there is no token OR when the token predates the
-	// `isAdmin` field (users signed in before this PR). The DB sync runs in
-	// the `jwt` callback on sign-in, so a fresh token is the only way to get
-	// the correct flag.
-	if (!token || token.isAdmin === undefined) {
-		return redirectToLogin(request);
-	}
+	// The Edge runtime can settle freshness itself: the token is already decoded here, and the rule compares two numbers.
+	const decision = resolveAdminAccess(token, new Date());
 
-	if (!token.isAdmin) {
-		return NextResponse.redirect(new URL(MY_SPACE, request.url));
+	switch (decision.type) {
+		// The DB sync runs in the `jwt` callback, so a fresh sign-in is the only way to obtain the grant flag.
+		case "login":
+			return redirectToLogin(request);
+		// Silent refusal: a user without the grant is never told the backoffice exists.
+		case "monEspace":
+			return NextResponse.redirect(new URL(MY_SPACE, request.url));
+		// Explicit refusal on an Egapro screen: reopening ProConnect mid-navigation is ruled out by the product.
+		case "resume": {
+			const resumeUrl = new URL(ADMIN_MFA_RESUME, request.url);
+			resumeUrl.searchParams.set(
+				"retour",
+				`${request.nextUrl.pathname}${request.nextUrl.search}`,
+			);
+			return NextResponse.redirect(resumeUrl);
+		}
+		case "allow":
+			return noStore(NextResponse.next());
+		default:
+			return redirectToLogin(request);
 	}
+}
 
-	return NextResponse.next();
+// A browser back after an expiry must not restore a backoffice page from the cache.
+function noStore(response: NextResponse) {
+	response.headers.set("Cache-Control", "no-store");
+	return response;
 }
 
 async function sessionMiddleware(request: NextRequest) {

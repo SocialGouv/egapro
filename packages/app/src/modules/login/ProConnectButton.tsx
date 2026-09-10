@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 
+import { triggerAdminStepUp } from "~/modules/admin/access";
 import {
 	MATOMO_ACTION,
 	MATOMO_EVENT_CATEGORY,
@@ -13,16 +14,26 @@ import styles from "./ProConnectButton.module.scss";
 
 type Props = {
 	callbackUrl?: string;
+	// Set by the login form when the validated destination targets the
+	// backoffice: the request must then carry the admin step-up requirement
+	// from this very first sign-in, so an eligible agent never has to pass
+	// through ProConnect a second time on the resume screen.
+	requiresAdminStepUp?: boolean;
 };
 
 /** ProConnect authentication button with official branding and info link. */
-export function ProConnectButton({ callbackUrl }: Props) {
+export function ProConnectButton({ callbackUrl, requiresAdminStepUp }: Props) {
 	function handleLogin(): void {
 		trackEvent({
 			category: MATOMO_EVENT_CATEGORY.AUTH,
 			action: MATOMO_ACTION.LOGIN_START,
 		});
-		void signIn("proconnect", { callbackUrl: callbackUrl ?? MY_SPACE });
+		const resolvedCallbackUrl = callbackUrl ?? MY_SPACE;
+		if (requiresAdminStepUp) {
+			triggerAdminStepUp(resolvedCallbackUrl);
+			return;
+		}
+		void signIn("proconnect", { callbackUrl: resolvedCallbackUrl });
 	}
 
 	return (
