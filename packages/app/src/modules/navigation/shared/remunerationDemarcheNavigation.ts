@@ -19,22 +19,13 @@ const SECOND_DECLARATION_RECAP = complianceStepHref(3);
 const CORRECTIVE_ACTIONS_FIRST_STEP = complianceStepHref(1);
 
 /**
- * The single table: in state X, the user belongs on screen Y.
+ * The single table: in state X, the user belongs on screen Y. No `default:`, so
+ * a new `DECLARATION_FSM_STATUSES` entry fails `tsc` instead of falling back.
  *
- * Total over the 8 engine states and written as a `switch` with no `default:`,
- * so adding a state to `DECLARATION_FSM_STATUSES` fails `tsc` here rather than
- * silently routing to a fallback.
- *
- * Two things it deliberately does not decide, because they are surface policy
- * and not engine state — each caller passes its own answer:
- *
- * - `null` (no FSM status yet) is not an engine state, it is "no démarche". It
- *   never reaches this function: the recap mirror reads it as "start the path
- *   choice", Mon espace as "enter the tunnel", and both are right for their own
- *   surface.
- * - `demarche_completed` is terminal but not inert — a CSE opinion stays
- *   re-submittable (up to 4). `terminalHref` is where that surface considers a
- *   completed démarche should lead.
+ * `terminalHref` is a parameter because `demarche_completed` is terminal but not
+ * inert — a CSE opinion stays re-submittable — and each surface answers that
+ * differently. `null` never reaches here for the same reason: it means "no
+ * démarche", not a state, and each caller reads it its own way.
  */
 export function getDemarcheStageHref(
 	status: DeclarationFsmStatus,
@@ -67,13 +58,9 @@ export function getPostComplianceDestination(
 }
 
 /**
- * The declaration funnel's reading of the table: where the recap "Suivant"
- * buttons send a user, so they land **directly** on their current stage instead
- * of routing through /parcours-conformite, which would re-render the path choice
- * page for a user who has already moved past it.
- *
- * `status` is the projected `declarations.status` (FSM final state); `null`
- * means the démarche has not started, and this surface opens on the path choice.
+ * The funnel's reading of the table: the recap "Suivant" lands the user directly
+ * on their stage, instead of routing through /parcours-conformite, which would
+ * re-render the path choice for someone who has already moved past it.
  */
 export function getCurrentStageHref(
 	status: DeclarationFsmStatus | null,
@@ -107,11 +94,10 @@ export function getCompliancePathHref(
 }
 
 /**
- * Provenance: the engine transitions that land on `awaiting_cse_opinion`, keyed
- * by their id in `server/rules/v2027.1.json`. Keeping the engine's own ids as
- * keys is what lets `fsmMirrors.conformance.test.ts` derive the expected set
- * from `rules.transitions` — adding an incoming transition without branching
- * here breaks that test instead of silently sending "Précédent" to the wrong page.
+ * Provenance, keyed by the engine's own transition ids: that is what lets
+ * `fsmMirrors.conformance.test.ts` derive the expected set from
+ * `rules.transitions`, so a new incoming transition breaks the test rather than
+ * sending "Précédent" to the wrong page.
  */
 export type CseOpinionOrigin =
 	| "choose_path_initial_justify_with_cse"

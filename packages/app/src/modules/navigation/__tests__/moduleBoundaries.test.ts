@@ -17,14 +17,10 @@ function sourceFiles(dir: string): string[] {
 
 const IMPORT_RE = /^import\s+(type\s+)?[^"']*from\s+"([^"]+)";$/gm;
 
-// Modelled on `routes/__tests__/moduleBoundaries.test.ts`, and for the same
-// reason: Mon espace and `app/avis-cse` must be able to import this table from a
-// client component without a server module coming in behind it. That is the
-// whole point of hosting it here rather than in `declaration-remuneration`.
-//
-// Two specifiers are allowed and no more: `~/modules/routes` (strings, itself
-// runtime-free) and `~/modules/domain` as **types only** — the domain is pure,
-// but a value import would make this module a runtime edge into it for nothing.
+// Modelled on `routes/__tests__/moduleBoundaries.test.ts`, for the same reason:
+// this table must stay importable from a client component without a server
+// module coming in behind it. Domain is types-only — it is pure, but a value
+// import would make this module a runtime edge into it for nothing.
 const ALLOWED_IMPORTS = new Set([
 	"~/modules/routes (value)",
 	"~/modules/routes (type)",

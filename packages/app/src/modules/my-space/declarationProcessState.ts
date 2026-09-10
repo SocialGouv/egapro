@@ -51,20 +51,14 @@ export function computePanelVariant(
 }
 
 /**
- * This panel's reading of `~/modules/navigation`'s state table, which owns every
- * non-terminal destination. Only the two cases the table refuses to decide are
- * answered here, and they are what makes this surface differ from the funnel's
- * "Suivant":
+ * This panel's reading of the shared table: it answers only the two cases the
+ * table refuses, and those are exactly where it differs from the funnel's
+ * "Suivant" — `null` opens the tunnel rather than the path choice, and a settled
+ * démarche reads as over here while the recap keeps offering the re-submittable
+ * /avis-cse.
  *
- * - `null` is "no démarche yet", not an engine state: the panel opens the
- *   tunnel, where the funnel opens the compliance path choice.
- * - a completed démarche whose opinion is settled is over as far as Mon espace
- *   is concerned and points back at the tunnel, while the recap keeps offering
- *   the still re-submittable /avis-cse (up to 4 opinions).
- *
- * No `?siren=` is appended: every one of these pages resolves the declaration
- * from the session (`companyProcedure` binds the SIREN), and none ever read the
- * query.
+ * No `?siren=` is appended: these pages resolve the declaration from the session
+ * (`companyProcedure` binds the SIREN), and none ever read the query.
  */
 export function computeCtaHref(declaration: DeclarationItem | undefined) {
 	const fsmStatus = declaration?.fsmStatus ?? null;
