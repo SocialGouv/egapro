@@ -1,17 +1,12 @@
-import {
-	existsSync,
-	mkdirSync,
-	mkdtempSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	buildReport,
 	type CoordResult,
+	DEFAULT_OUTPUT_PATH,
+	DEFAULT_RESULTS_PATH,
 	deepestFailingStep,
 	extractTestResults,
 	loadResults,
@@ -593,14 +588,30 @@ describe("parseArgs", () => {
 			scope: "2030 uniquement",
 			commit: "abc1234",
 			reportUrl: "https://example.com",
+			results: DEFAULT_RESULTS_PATH,
+			out: DEFAULT_OUTPUT_PATH,
 		});
 	});
 
-	it("falls back to defaults when no flags are provided", () => {
+	it("parses --results and --out, defaulting the other flags", () => {
+		expect(
+			parseArgs(["--results", "/tmp/r.json", "--out", "/tmp/o.md"]),
+		).toEqual({
+			scope: "tous les cas",
+			commit: "N/A",
+			reportUrl: "playwright-report/html/index.html",
+			results: "/tmp/r.json",
+			out: "/tmp/o.md",
+		});
+	});
+
+	it("falls back to the exported default paths when no path flags are provided", () => {
 		expect(parseArgs([])).toEqual({
 			scope: "tous les cas",
 			commit: "N/A",
 			reportUrl: "playwright-report/html/index.html",
+			results: DEFAULT_RESULTS_PATH,
+			out: DEFAULT_OUTPUT_PATH,
 		});
 	});
 
@@ -613,79 +624,52 @@ describe("parseArgs", () => {
 			scope: "tous les cas",
 			commit: "deadbee",
 			reportUrl: "playwright-report/html/index.html",
+			results: DEFAULT_RESULTS_PATH,
+			out: DEFAULT_OUTPUT_PATH,
 		});
 	});
 });
 
 describe("main — CLI entrypoint", () => {
-	const REPORT_DIR = join(process.cwd(), "playwright-report");
-	const RESULTS_PATH = join(REPORT_DIR, "grille-results.json");
-	const OUTPUT_PATH = join(REPORT_DIR, "grille-recette.md");
-
-	// The script resolves its paths from process.cwd(), so these tests write into
-	// the package's own playwright-report/. That directory exists on a developer
-	// machine (an E2E run created it) but not on a fresh CI checkout, so each test
-	// creates it rather than relying on whichever test happens to run first.
-	//
-	// Those are also the paths a real recette run writes to. Any pre-existing file
-	// is saved here and restored afterwards: without this, running the unit suite
-	// on a developer machine silently destroys the artefacts of the grid run they
-	// just spent ten minutes producing.
-	let savedResults: string | null = null;
-	let savedOutput: string | null = null;
-
-	beforeEach(() => {
-		mkdirSync(REPORT_DIR, { recursive: true });
-		savedResults = existsSync(RESULTS_PATH)
-			? readFileSync(RESULTS_PATH, "utf-8")
-			: null;
-		savedOutput = existsSync(OUTPUT_PATH)
-			? readFileSync(OUTPUT_PATH, "utf-8")
-			: null;
-	});
+	// Every path used below lives under a fresh mkdtempSync() directory: the
+	// suite must never read or write packages/app/playwright-report/, the
+	// artefacts a real ten-minute recette run produces.
+	function tempPaths() {
+		const dir = mkdtempSync(join(tmpdir(), "report-grille-main-"));
+		return {
+			dir,
+			results: join(dir, "grille-results.json"),
+			out: join(dir, "grille-recette.md"),
+		};
+	}
 
 	afterEach(() => {
 		vi.resetModules();
 		vi.unstubAllEnvs();
 		process.argv = process.argv.slice(0, 2);
-		rmSync(RESULTS_PATH, { force: true });
-		rmSync(OUTPUT_PATH, { force: true });
-		if (savedResults !== null) writeFileSync(RESULTS_PATH, savedResults);
-		if (savedOutput !== null) writeFileSync(OUTPUT_PATH, savedOutput);
 	});
 
-	async function runMain(): Promise<void> {
+	async function runMain(argv: string[]): Promise<void> {
+		process.argv = ["node", "report-grille.ts", ...argv];
 		vi.resetModules();
 		await import("#scripts/report-grille");
 	}
 
-	it("does not write the output file when the module is imported without direct invocation", async () => {
-		rmSync(OUTPUT_PATH, { force: true });
-		process.argv = ["node", "/fake/test-runner"];
-		vi.resetModules();
-		await import("#scripts/report-grille");
-		expect(existsSync(OUTPUT_PATH)).toBe(false);
-	});
+	it("writes to --results/--out and leaves the default playwright-report/ artefacts untouched", async () => {
+		const before = {
+			resultsExists: existsSync(DEFAULT_RESULTS_PATH),
+			resultsContent: existsSync(DEFAULT_RESULTS_PATH)
+				? readFileSync(DEFAULT_RESULTS_PATH, "utf-8")
+				: null,
+			outExists: existsSync(DEFAULT_OUTPUT_PATH),
+			outContent: existsSync(DEFAULT_OUTPUT_PATH)
+				? readFileSync(DEFAULT_OUTPUT_PATH, "utf-8")
+				: null,
+		};
 
-	it("writes the report and the GitHub step summary from a real results file", async () => {
-		const summaryPath = join(
-			mkdtempSync(join(tmpdir(), "gh-summary-")),
-			"summary.md",
-		);
-		writeFileSync(summaryPath, "", "utf-8");
-		vi.stubEnv("GITHUB_STEP_SUMMARY", summaryPath);
-		process.argv = [
-			"node",
-			"report-grille.ts",
-			"--scope",
-			"probe",
-			"--commit",
-			"abc1234",
-			"--report-url",
-			"http://x",
-		];
+		const { results, out } = tempPaths();
 		writeFileSync(
-			RESULTS_PATH,
+			results,
 			JSON.stringify(
 				reportWith([
 					{
@@ -703,9 +687,85 @@ describe("main — CLI entrypoint", () => {
 			"utf-8",
 		);
 
-		await runMain();
+		await runMain(["--results", results, "--out", out, "--scope", "probe"]);
 
-		expect(readFileSync(OUTPUT_PATH, "utf-8")).toContain(
+		expect(readFileSync(out, "utf-8")).toContain(
+			"# Recette métier — Grille 185 coordonnées",
+		);
+
+		expect(existsSync(DEFAULT_RESULTS_PATH)).toBe(before.resultsExists);
+		if (before.resultsExists) {
+			expect(readFileSync(DEFAULT_RESULTS_PATH, "utf-8")).toBe(
+				before.resultsContent,
+			);
+		}
+		expect(existsSync(DEFAULT_OUTPUT_PATH)).toBe(before.outExists);
+		if (before.outExists) {
+			expect(readFileSync(DEFAULT_OUTPUT_PATH, "utf-8")).toBe(
+				before.outContent,
+			);
+		}
+	});
+
+	it("does not write the output file when the module is imported without direct invocation", async () => {
+		const { out } = tempPaths();
+		process.argv = ["node", "/fake/test-runner", "--out", out];
+		vi.resetModules();
+		await import("#scripts/report-grille");
+		expect(existsSync(out)).toBe(false);
+	});
+
+	it("creates a nonexistent output subfolder and writes the report", async () => {
+		const { dir, results } = tempPaths();
+		const nestedOut = join(dir, "nested", "sub", "grille-recette.md");
+		writeFileSync(results, JSON.stringify(reportWith([])), "utf-8");
+
+		await runMain(["--results", results, "--out", nestedOut]);
+
+		expect(existsSync(nestedOut)).toBe(true);
+	});
+
+	it("writes the report and the GitHub step summary from a real results file", async () => {
+		const { results, out } = tempPaths();
+		const summaryPath = join(
+			mkdtempSync(join(tmpdir(), "gh-summary-")),
+			"summary.md",
+		);
+		writeFileSync(summaryPath, "", "utf-8");
+		vi.stubEnv("GITHUB_STEP_SUMMARY", summaryPath);
+		writeFileSync(
+			results,
+			JSON.stringify(
+				reportWith([
+					{
+						title: "grille [2030-249-CAS01]",
+						tests: [
+							{
+								title: "t",
+								ok: true,
+								results: [{ status: "passed", duration: 5 }],
+							},
+						],
+					},
+				]),
+			),
+			"utf-8",
+		);
+
+		await runMain([
+			"--results",
+			results,
+			"--out",
+			out,
+			"--scope",
+			"probe",
+			"--commit",
+			"abc1234",
+			"--report-url",
+			"http://x",
+		]);
+
+		expect(readFileSync(out, "utf-8")).toContain(
 			"# Recette métier — Grille 185 coordonnées",
 		);
 		const summary = readFileSync(summaryPath, "utf-8");
@@ -713,24 +773,26 @@ describe("main — CLI entrypoint", () => {
 		expect(summary).toContain("| probe |");
 	});
 
-	it("reports every coordinate non joué when the results file is invalid", async () => {
-		writeFileSync(RESULTS_PATH, "{ not json", "utf-8");
+	it("reports every coordinate non joué when --results points to invalid JSON", async () => {
+		const { results, out } = tempPaths();
+		writeFileSync(results, "{ not json", "utf-8");
 
-		await runMain();
+		await runMain(["--results", results, "--out", out]);
 
-		const output = readFileSync(OUTPUT_PATH, "utf-8");
+		const output = readFileSync(out, "utf-8");
 		expect(output).toContain(
 			"**0 passés / 0 échoués / 185 non joués** sur 185",
 		);
 		expect(output).toContain("Fichier de résultats illisible ou invalide");
 	});
 
-	it("reports every coordinate non joué when the results file is missing", async () => {
-		rmSync(RESULTS_PATH, { force: true });
+	it("reports every coordinate non joué when --results points to a missing file", async () => {
+		const { dir, out } = tempPaths();
+		const missingResults = join(dir, "grille-results.json");
 
-		await runMain();
+		await runMain(["--results", missingResults, "--out", out]);
 
-		const output = readFileSync(OUTPUT_PATH, "utf-8");
+		const output = readFileSync(out, "utf-8");
 		expect(output).toContain(
 			"**0 passés / 0 échoués / 185 non joués** sur 185",
 		);
