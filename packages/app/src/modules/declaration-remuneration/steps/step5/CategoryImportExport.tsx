@@ -8,6 +8,7 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
+import { HELP } from "~/modules/routes";
 import {
 	EXTENSION_MIME_MAP,
 	FileUpload,
@@ -226,7 +227,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 										<button className="fr-link" disabled type="button">
 											Ressources et modèles de fichiers
 										</button>
-										<Link className="fr-link" href="/aide">
+										<Link className="fr-link" href={HELP}>
 											Centre d&apos;aide
 										</Link>
 									</div>

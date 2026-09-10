@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { DsfrPictogram } from "~/modules/layout";
 import type { ResendReceiptInput } from "~/modules/mail";
 import { ResendReceiptButton } from "~/modules/mail";
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./DemarcheConfirmation.module.scss";
 import { DownloadCard } from "./DownloadCard";
 import type { DemarcheDocument } from "./demarcheDocuments";
@@ -86,7 +87,7 @@ export function DemarcheConfirmation({
 			<FeedbackBanner />
 
 			<div className={styles.actions}>
-				<Link className="fr-btn" href="/mon-espace">
+				<Link className="fr-btn" href={MY_SPACE}>
 					Mon espace
 				</Link>
 			</div>

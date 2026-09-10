@@ -1,9 +1,9 @@
 "use client";
 
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { apiV1FileHref } from "~/modules/routes";
 import { formatFileMeta } from "~/modules/shared";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
-
 import type { AssociationMap, ContentTypeColumn, UploadedFile } from "../types";
 import styles from "./ContentTypeMatrix.module.scss";
 
@@ -105,7 +105,7 @@ export function ContentTypeMatrix({
 												<span className={styles.fileCell}>
 													<a
 														className="fr-link"
-														href={`/api/v1/files/${file.id}`}
+														href={apiV1FileHref(file.id)}
 														rel="noopener noreferrer"
 														target="_blank"
 														title={`Visualiser ${file.fileName}`}

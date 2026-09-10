@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
+import { LOGIN, MY_SPACE } from "~/modules/routes";
 import { TEST_USER_EMAIL } from "../constants";
+import { urlGlob } from "./routes";
 
 export const AUTH_FILE = "test-results/.auth/user.json";
 
@@ -15,7 +17,7 @@ export async function dismissCookieBanner(page: Page) {
 export async function loginWithProConnect(page: Page, retries = 2) {
 	for (let attempt = 0; attempt <= retries; attempt++) {
 		try {
-			await page.goto("/login");
+			await page.goto(LOGIN);
 			await dismissCookieBanner(page);
 
 			await page
@@ -28,7 +30,7 @@ export async function loginWithProConnect(page: Page, retries = 2) {
 			await page.getByRole("button", { name: "Se connecter" }).click();
 
 			// Wait for redirect to mon espace (slow ProConnect in CI)
-			await page.waitForURL("**/mon-espace", { timeout: 30_000 });
+			await page.waitForURL(urlGlob(MY_SPACE), { timeout: 30_000 });
 			return;
 		} catch (error) {
 			if (attempt === retries) throw error;

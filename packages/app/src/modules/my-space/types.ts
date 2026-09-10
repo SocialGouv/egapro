@@ -11,14 +11,6 @@ import type {
 	DeclarationType,
 } from "~/modules/domain";
 
-export type CompanyItem = {
-	siren: string;
-	name: string;
-	declarationStatus: DeclarationStatus;
-};
-
-export type ViewMode = "list" | "table";
-
 export type CompanyDetail = {
 	siren: string;
 	name: string;

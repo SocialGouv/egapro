@@ -90,9 +90,10 @@ describe("RepresentationPdfDocument", () => {
 		expect(
 			screen.getByText("Démarche des indicateurs de représentation 2026"),
 		).toBeInTheDocument();
+		expect(screen.getByText("Au titre des données 2025")).toBeInTheDocument();
 		expect(
-			screen.getByText("Au titre de la période de référence 2025"),
-		).toBeInTheDocument();
+			screen.queryByText("Au titre de la période de référence 2025"),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Société Représentation — SIREN 123456789"),
 		).toBeInTheDocument();

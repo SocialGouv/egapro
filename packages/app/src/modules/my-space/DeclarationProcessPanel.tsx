@@ -8,6 +8,7 @@ import type {
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
 } from "~/modules/domain";
+import { mySpaceHistoryHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
@@ -104,7 +105,6 @@ export function DeclarationProcessPanel({
 							hasPrefillData={hasPrefillData}
 							indicatorGRequired={indicatorGRequired}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
-							siren={siren}
 							step1={step1}
 							step2={step2}
 							step3={step3}
@@ -167,7 +167,7 @@ function PanelHeader({
 				)}
 				<Link
 					className={`fr-link ${styles.historyLink}`}
-					href={`/mon-espace/historique/${siren}/${year}`}
+					href={mySpaceHistoryHref(siren, year)}
 				>
 					Voir l'historique
 				</Link>

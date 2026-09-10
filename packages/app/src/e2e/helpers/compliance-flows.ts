@@ -1,15 +1,22 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-
+import {
+	API_UPLOAD,
+	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION_CONFIRMATION,
+	complianceStepHref,
+	cseOpinionStepHref,
+} from "~/modules/routes";
 import {
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,
 	STEP5_WORKFORCE_REMINDER,
 } from "./declaration-flows";
+import { urlGlob } from "./routes";
 
 const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
-export const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
 
 type CseStep1Options = {
 	hasSecondDeclaration?: boolean;
@@ -62,7 +69,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
-		await page.waitForURL("**/avis-cse/etape/1");
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)));
 		// DSFR hides native radio inputs — click on the associated label instead
 		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
 		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
@@ -105,7 +112,7 @@ export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 			}
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/avis-cse/etape/2");
+		await page.waitForURL(urlGlob(cseOpinionStepHref(2)));
 	});
 }
 
@@ -151,7 +158,7 @@ export async function submitCseStep2(
 	const fileName = path.basename(DUMMY_PDF);
 
 	await test.step("avis CSE — étape 2 : dépôt des fichiers", async () => {
-		await page.waitForURL("**/avis-cse/etape/2");
+		await page.waitForURL(urlGlob(cseOpinionStepHref(2)));
 
 		// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
 		// step), after which the page re-renders with the matrix.
@@ -184,7 +191,9 @@ export async function submitCseStep2(
 			.getByText(/Je certifie que les avis transmis sont conformes/)
 			.click();
 		await page.getByRole("button", { name: "Valider" }).click();
-		await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
+		await page.waitForURL(urlGlob(CSE_OPINION_CONFIRMATION), {
+			timeout: 30_000,
+		});
 	});
 }
 
@@ -194,12 +203,12 @@ export async function submitCseStep2(
  * triggers, before anything is submitted (#4300).
  */
 export async function uploadCseFiles(page: Page, fileNames: string[]) {
-	await page.waitForURL("**/avis-cse/etape/2");
+	await page.waitForURL(urlGlob(cseOpinionStepHref(2)));
 	const pdf = await readFile(DUMMY_PDF);
 	for (const name of fileNames) {
 		const uploaded = page.waitForResponse(
 			(response) =>
-				response.url().includes("/api/upload") &&
+				response.url().includes(API_UPLOAD) &&
 				response.request().method() === "POST",
 		);
 		await page
@@ -254,12 +263,12 @@ export async function submitCseOpinion(page: Page) {
 		.getByText(/Je certifie que les avis transmis sont conformes/)
 		.click();
 	await page.getByRole("button", { name: "Valider" }).click();
-	await page.waitForURL("**/avis-cse/confirmation", { timeout: 30_000 });
+	await page.waitForURL(urlGlob(CSE_OPINION_CONFIRMATION), { timeout: 30_000 });
 }
 
 export async function uploadJointEvalPdf(page: Page) {
 	await test.step("dépôt du rapport d'évaluation conjointe", async () => {
-		await page.waitForURL("**/evaluation-conjointe");
+		await page.waitForURL(urlGlob(COMPLIANCE_JOINT_EVALUATION));
 		await page
 			.locator("#joint-evaluation-file-upload")
 			.setInputFiles(DUMMY_PDF);
@@ -277,7 +286,7 @@ export async function selectCompliancePath(
 ) {
 	await test.step("choix du parcours de conformité", async () => {
 		await page.goto(COMPLIANCE_PATH);
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		// DSFR hides native radio inputs — click on the associated label instead
 		await page.locator(`label[for="${pathId}"]`).click();
 		await page.getByRole("button", { name: "Suivant" }).click();
@@ -295,9 +304,9 @@ export async function completeSecondDeclaration(
 ) {
 	await test.step("seconde déclaration", async () => {
 		// Step 1: Info page — just click through
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/1`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 10_000 });
 		await page.getByRole("link", { name: "Suivant" }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/2`);
+		await page.waitForURL(urlGlob(complianceStepHref(2)));
 
 		// #4215 — on the read-only second declaration, the source line sits between the
 		// intro and "Tous les champs sont obligatoires.", not after the reference period.
@@ -345,7 +354,7 @@ export async function completeSecondDeclaration(
 		await page.locator("#period-end-date").fill("2026-12-31");
 
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`);
+		await page.waitForURL(urlGlob(complianceStepHref(3)));
 
 		// Step 3: Review and submit (opens confirmation modal)
 		await page.getByRole("button", { name: "Soumettre" }).click();

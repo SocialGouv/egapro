@@ -1,21 +1,21 @@
-import { and, eq } from "drizzle-orm";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
 import {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
 	getCurrentYear,
 } from "~/modules/domain";
 import { validateFileName } from "~/modules/shared/fileNameValidation";
-import { parseSiren } from "~/modules/shared/parseSiren";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
 } from "~/modules/shared/uploadConfig";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
-import { auth } from "~/server/auth";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
-import { declarations } from "~/server/db/schema";
-import { getActiveLock } from "~/server/services/declarationLockService";
+import {
+	assertDeclarationUnlockedForWrite,
+	DeclarationLockedByOtherUserError,
+} from "~/server/services/declarationLockService";
 import {
 	runUploadPipeline,
 	type UploadPipelineResult,
@@ -82,8 +82,7 @@ export async function POST(request: Request): Promise<Response> {
 
 	const action = FLOW_TO_ACTION[flowType];
 
-	const session = await auth();
-	const siren = parseSiren(session?.user?.siret);
+	const { session, siren } = await getSessionSiren(request);
 	if (!session?.user || !siren) {
 		writeFailure({
 			action,
@@ -218,38 +217,29 @@ export async function POST(request: Request): Promise<Response> {
 	const safeFileName = fileName.trim();
 	const year = getCurrentYear();
 
-	// Collaborative edit lock. This route is not tRPC, so the lock
-	// is enforced inline against the service rather than via the
-	// `declarationLockedWriteProcedure` middleware. The upload is refused when
-	// another co-declarant holds an active lock on the same declaration; a free
-	// lock (or one held by this user) lets the upload proceed. The check runs
-	// before the body is streamed so no bandwidth is wasted on a locked target.
-	const declarationRows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
-		.limit(1);
-	const lockedDeclarationId = declarationRows[0]?.id;
-	if (lockedDeclarationId) {
-		const lock = await getActiveLock(db, lockedDeclarationId);
-		if (lock && lock.userId !== userId) {
-			writeFailure({
-				action,
-				flowType,
-				fileName,
-				fileId: null,
-				errorMessage: "HTTP 409 locked_by_other",
-				userId,
-				userEmail,
-				siren,
-				requestContext,
-				startedAt,
-			});
-			return Response.json(
-				{ error: DECLARATION_LOCK_CONFLICT_MESSAGE },
-				{ status: 409 },
-			);
+	// Before the body is streamed: no bandwidth wasted on a locked target.
+	try {
+		await assertDeclarationUnlockedForWrite(db, siren, year, session.user.id);
+	} catch (error) {
+		if (!(error instanceof DeclarationLockedByOtherUserError)) {
+			throw error;
 		}
+		writeFailure({
+			action,
+			flowType,
+			fileName,
+			fileId: null,
+			errorMessage: "HTTP 409 locked_by_other",
+			userId,
+			userEmail,
+			siren,
+			requestContext,
+			startedAt,
+		});
+		return Response.json(
+			{ error: DECLARATION_LOCK_CONFLICT_MESSAGE },
+			{ status: 409 },
+		);
 	}
 
 	let result: UploadPipelineResult;

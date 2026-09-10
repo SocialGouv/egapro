@@ -2,10 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
+	logAction: vi.fn(),
 }));
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
+}));
+
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mocks.logAction(...args),
 }));
 
 vi.mock("~/server/db/schema", () => ({
@@ -112,5 +117,86 @@ describe("/api/public/referents-egalite-professionnelle", () => {
 		expect(lines[2]).toContain('"Sans département"');
 		expect(lines[2]).toContain('"Non"');
 		expect(lines[2]).toContain('""');
+	});
+	it("writes a public_referents.search audit entry on success", async () => {
+		setRows([]);
+
+		const { GET } = await import("../route");
+		await GET(
+			new Request(
+				"http://localhost/api/public/referents-egalite-professionnelle",
+				{
+					headers: {
+						"x-forwarded-for": "203.0.113.42",
+						"user-agent": "ReferentsAgent",
+					},
+				},
+			),
+		);
+
+		expect(mocks.logAction).toHaveBeenCalledOnce();
+		expect(mocks.logAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "public_referents.search",
+			status: "success",
+			metadata: { format: "json" },
+			ipAddress: "203.0.113.42",
+			userAgent: "ReferentsAgent",
+		});
+	});
+
+	it("records the requested format in the audit metadata", async () => {
+		setRows([]);
+
+		const { GET } = await import("../route");
+		await GET(
+			new Request(
+				"http://localhost/api/public/referents-egalite-professionnelle?format=csv",
+			),
+		);
+
+		expect(mocks.logAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "public_referents.search",
+			status: "success",
+			metadata: { format: "csv" },
+		});
+	});
+
+	it("normalises an arbitrary format so it never reaches the audit metadata", async () => {
+		setRows([]);
+
+		const { GET } = await import("../route");
+		const response = await GET(
+			new Request(
+				`http://localhost/api/public/referents-egalite-professionnelle?format=${"x".repeat(5000)}`,
+			),
+		);
+
+		expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
+		expect(mocks.logAction.mock.calls[0]?.[0]).toMatchObject({
+			metadata: { format: "json" },
+		});
+	});
+
+	it("logs a failure entry when the query throws", async () => {
+		mocks.dbSelect.mockReturnValue({
+			from: () => ({
+				orderBy: () => Promise.reject(new Error("db down")),
+			}),
+		});
+
+		const { GET } = await import("../route");
+		await expect(
+			GET(
+				new Request(
+					"http://localhost/api/public/referents-egalite-professionnelle",
+				),
+			),
+		).rejects.toThrow("db down");
+
+		expect(mocks.logAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "public_referents.search",
+			status: "failure",
+			errorMessage: "db down",
+		});
 	});
 });

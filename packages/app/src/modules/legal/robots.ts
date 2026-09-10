@@ -1,15 +1,5 @@
 import type { Metadata, MetadataRoute } from "next";
-
-const DISALLOWED_PATHS = [
-	"/api/",
-	"/admin/",
-	"/mon-espace/",
-	"/declaration-remuneration/",
-	"/avis-cse/",
-	"/login",
-	"/maintenance",
-	"/test-",
-];
+import { CRAWLER_DISALLOWED_PREFIXES } from "~/modules/routes";
 
 export function buildRobots(
 	baseUrl: string,
@@ -24,7 +14,13 @@ export function buildRobots(
 	}
 	const origin = new URL(baseUrl).origin;
 	return {
-		rules: [{ userAgent: "*", allow: "/", disallow: DISALLOWED_PATHS }],
+		rules: [
+			{
+				userAgent: "*",
+				allow: "/",
+				disallow: [...CRAWLER_DISALLOWED_PREFIXES],
+			},
+		],
 		sitemap: `${origin}/sitemap.xml`,
 	};
 }

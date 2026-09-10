@@ -1,6 +1,12 @@
 "use client";
 
 import { getReferenceYearFor, isDeclarationSubmitted } from "~/modules/domain";
+import {
+	API_DECLARATION_PDF,
+	API_PREFILL_PDF,
+	API_REPRESENTATION_PDF,
+	API_TRANSMITTED_PDF,
+} from "~/modules/routes";
 import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
@@ -31,7 +37,7 @@ function getRepresentationResources(
 		{
 			title: "Télécharger le récapitulatif de la déclaration",
 			subtitle: resourceSubtitle(declaration),
-			href: `/api/representation-pdf?year=${referenceYear}`,
+			href: `${API_REPRESENTATION_PDF}?year=${referenceYear}`,
 		},
 	];
 }
@@ -46,7 +52,7 @@ function getRemunerationResources(
 		resources.push({
 			title: "Télécharger les données préremplies (issues des données DSN)",
 			subtitle,
-			href: `/api/prefill-pdf?year=${declaration.year}`,
+			href: `${API_PREFILL_PDF}?year=${declaration.year}`,
 		});
 	}
 
@@ -54,7 +60,7 @@ function getRemunerationResources(
 		resources.push({
 			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
 			subtitle,
-			href: `/api/declaration-pdf?year=${declaration.year}`,
+			href: `${API_DECLARATION_PDF}?year=${declaration.year}`,
 		});
 	}
 
@@ -62,7 +68,7 @@ function getRemunerationResources(
 		resources.push({
 			title: "Télécharger le récapitulatif de la seconde déclaration",
 			subtitle,
-			href: `/api/declaration-pdf?type=correction&year=${declaration.year}`,
+			href: `${API_DECLARATION_PDF}?type=correction&year=${declaration.year}`,
 		});
 	}
 
@@ -73,7 +79,7 @@ function getRemunerationResources(
 		resources.push({
 			title: "Télécharger le récapitulatif des éléments transmis",
 			subtitle,
-			href: `/api/transmitted-pdf?year=${declaration.year}`,
+			href: `${API_TRANSMITTED_PDF}?year=${declaration.year}`,
 		});
 	}
 

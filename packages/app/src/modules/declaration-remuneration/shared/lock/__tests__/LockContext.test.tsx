@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { DeclarationLockState } from "../useDeclarationLock";
+import type { DeclarationLockState } from "../types";
 
 const dynamicState: DeclarationLockState = {
 	isReadOnly: true,
@@ -15,12 +15,13 @@ vi.mock("../useDeclarationLock", () => ({
 	useDeclarationLock: vi.fn(() => dynamicState),
 }));
 
-import type { LockHolder } from "../LockContext";
 import {
 	LockProvider,
 	useLockContext,
+	useLockHolderIfLockedOut,
 	useReadOnlyContext,
 } from "../LockContext";
+import type { LockHolderDisplay } from "../types";
 
 const mockedUseSession = vi.mocked(useSession);
 
@@ -35,7 +36,7 @@ function ContextProbe() {
 	);
 }
 
-const holder: LockHolder = {
+const holder: LockHolderDisplay = {
 	firstName: "Camille",
 	lastName: "Martin",
 	email: "camille.martin@example.fr",
@@ -152,5 +153,52 @@ describe("LockContext — hook aliases", () => {
 		);
 
 		expect(screen.getByTestId("same")).toHaveTextContent("true");
+	});
+});
+
+describe("useLockHolderIfLockedOut", () => {
+	afterEach(() => {
+		mockedUseSession.mockReset();
+	});
+
+	function LockedOutProbe() {
+		const lockedOutHolder = useLockHolderIfLockedOut();
+		return (
+			<span data-testid="locked-out-holder">
+				{lockedOutHolder ? lockedOutHolder.email : "none"}
+			</span>
+		);
+	}
+
+	it("returns the holder when the context is read-only", () => {
+		render(
+			<LockProvider holder={holder} isReadOnly>
+				<LockedOutProbe />
+			</LockProvider>,
+		);
+
+		expect(screen.getByTestId("locked-out-holder")).toHaveTextContent(
+			"camille.martin@example.fr",
+		);
+	});
+
+	it("returns null when a holder is set but the context is not read-only", () => {
+		render(
+			<LockProvider holder={holder}>
+				<LockedOutProbe />
+			</LockProvider>,
+		);
+
+		expect(screen.getByTestId("locked-out-holder")).toHaveTextContent("none");
+	});
+
+	it("returns null when there is no holder at all", () => {
+		render(
+			<LockProvider isReadOnly reason="modification_closed">
+				<LockedOutProbe />
+			</LockProvider>,
+		);
+
+		expect(screen.getByTestId("locked-out-holder")).toHaveTextContent("none");
 	});
 });

@@ -6,9 +6,9 @@ import {
 	type PrefillPdfData,
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
-import { extractSiren, getCurrentYear } from "~/modules/domain";
-import { cachedAuth } from "~/server/audit/cachedAuth";
+import { getCurrentYear, parseCampaignYear } from "~/modules/domain";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
@@ -19,14 +19,35 @@ import {
 
 const ROUTE = "prefill-pdf";
 
+/**
+ * Reads the `year` query parameter as a number the audit row can carry. The raw
+ * string never leaves this function: an unbounded caller-supplied value written
+ * to `audit.action_log` would let anyone inflate the trace, and the row is
+ * written for refused requests too.
+ */
+function readRequestedYear(request: Request): {
+	year: number | null;
+	invalid: boolean;
+} {
+	const raw = new URL(request.url).searchParams.get("year");
+	if (!raw) {
+		return { year: null, invalid: false };
+	}
+	const year = parseCampaignYear(raw);
+	return { year, invalid: year === null };
+}
+
 const resolveAuditContext = async (request: Request) => {
-	const session = await cachedAuth(request);
-	const url = new URL(request.url);
+	const { session, siren } = await getSessionSiren(request);
+	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
-		siren: session?.user?.siret ? extractSiren(session.user.siret) : null,
-		metadata: { year: url.searchParams.get("year") ?? null },
+		siren,
+		metadata: {
+			year: requestedYear.year,
+			invalidYear: requestedYear.invalid,
+		},
 	};
 };
 
@@ -37,24 +58,18 @@ type ResolvedPrefillPdf =
 async function resolvePrefillPdf(
 	request: Request,
 ): Promise<ResolvedPrefillPdf> {
-	const session = await cachedAuth(request);
-	if (!session?.user?.siret) {
+	const { siren } = await getSessionSiren(request);
+	if (!siren) {
 		return { error: new Response("Non autorisé", { status: 401 }) };
 	}
 
-	const siren = extractSiren(session.user.siret);
-	const url = new URL(request.url);
-	const yearParam = url.searchParams.get("year");
-	const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : null;
-	if (
-		parsedYear !== null &&
-		(Number.isNaN(parsedYear) || parsedYear < 2000 || parsedYear > 2100)
-	) {
+	const requestedYear = readRequestedYear(request);
+	if (requestedYear.invalid) {
 		return {
 			error: new Response("Paramètre 'year' invalide", { status: 400 }),
 		};
 	}
-	const year = parsedYear ?? getCurrentYear();
+	const year = requestedYear.year ?? getCurrentYear();
 
 	const [row] = await db
 		.select()

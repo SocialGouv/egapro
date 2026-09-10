@@ -5,7 +5,6 @@ import {
 	INDICATOR_G_STEP,
 	STEP_TITLES,
 	StepPageClient,
-	stepHref,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
 import {
@@ -14,6 +13,7 @@ import {
 	isDeclarationSubmitted,
 	isIndicatorGRequired,
 } from "~/modules/domain";
+import { LAST_REMUNERATION_STEP, remunerationStepHref } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
@@ -55,7 +55,7 @@ export default async function StepPage({ params }: StepPageProps) {
 	);
 
 	if (step === INDICATOR_G_STEP && !indicatorGRequired) {
-		redirect(stepHref(INDICATOR_G_STEP + 1));
+		redirect(remunerationStepHref(LAST_REMUNERATION_STEP));
 	}
 
 	const isSubmitted = isDeclarationSubmitted(d.status);

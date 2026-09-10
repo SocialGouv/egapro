@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-
+import { REFERENTS, referentHref } from "~/modules/routes";
 import { deleteReferents, seedReferents } from "./helpers/db-campaign";
 
 // Referent rendering is covered by src/modules/referents/__tests__/*.
@@ -56,14 +56,14 @@ test.describe("public referents search", () => {
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
 			const page = await anonCtx.newPage();
-			await page.goto("/referents");
+			await page.goto(REFERENTS);
 			await expect(
 				page.getByRole("heading", {
 					name: /référents égalité professionnelle/i,
 					level: 1,
 				}),
 			).toBeVisible();
-			expect(page.url()).toContain("/referents");
+			expect(page.url()).toContain(REFERENTS);
 		} finally {
 			await anonCtx.close();
 		}
@@ -76,7 +76,7 @@ test.describe("public referents search", () => {
 		try {
 			const page = await anonCtx.newPage();
 			// Drive the search via URL params (same code path) to avoid the client-submit race flakiness.
-			await page.goto("/referents?region=11&page=1");
+			await page.goto(`${REFERENTS}?region=11&page=1`);
 
 			const list = page.getByTestId("public-referents-list");
 			await expect(list).toBeVisible({ timeout: 30_000 });
@@ -105,7 +105,7 @@ test.describe("public referents search", () => {
 		try {
 			const page = await anonCtx.newPage();
 			// Drive the search via URL params (same code path) to avoid the client-submit race flakiness.
-			await page.goto("/referents?region=11&page=1");
+			await page.goto(`${REFERENTS}?region=11&page=1`);
 
 			const list = page.getByTestId("public-referents-list");
 			await expect(list).toBeVisible({ timeout: 30_000 });
@@ -133,7 +133,7 @@ test.describe("public referents search", () => {
 		try {
 			const page = await anonCtx.newPage();
 			const response = await page.goto(
-				"/referents/00000000-0000-4000-8000-000000000000",
+				referentHref("00000000-0000-4000-8000-000000000000"),
 			);
 			expect(response?.status()).toBe(404);
 		} finally {

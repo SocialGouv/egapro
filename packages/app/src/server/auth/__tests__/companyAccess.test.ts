@@ -1,7 +1,11 @@
 import type { Session } from "next-auth";
 import { describe, expect, it } from "vitest";
 
-import { assertNotImpersonating, isImpersonatingSiren } from "../companyAccess";
+import {
+	assertNotImpersonating,
+	getEffectiveSiren,
+	isImpersonatingSiren,
+} from "../companyAccess";
 
 function makeSession(overrides: Partial<Session["user"]> = {}): Session | null {
 	return {
@@ -93,5 +97,56 @@ describe("assertNotImpersonating", () => {
 				message: expect.stringContaining("mimoquage"),
 			}),
 		);
+	});
+});
+
+describe("getEffectiveSiren", () => {
+	it("returns null without a session", () => {
+		expect(getEffectiveSiren(null)).toBeNull();
+	});
+
+	it("extracts the SIREN from a well-formed SIRET", () => {
+		expect(getEffectiveSiren(makeSession({ siret: "53284719600015" }))).toBe(
+			"532847196",
+		);
+	});
+
+	it("returns null when the session carries no SIRET", () => {
+		expect(getEffectiveSiren(makeSession({ siret: null }))).toBeNull();
+	});
+
+	// Slicing a malformed SIRET used to hand back a nine-character lookalike,
+	// which then reached the database as if it were a real SIREN.
+	it.each([
+		["too short", "1234"],
+		["letters in the SIREN part", "ABCDEFGHI00015"],
+		["punctuation in the SIREN part", "532-847-19600015"],
+		["blank", "   "],
+	])("returns null for a malformed SIRET (%s)", (_label, siret) => {
+		expect(getEffectiveSiren(makeSession({ siret }))).toBeNull();
+	});
+
+	it("returns the impersonated SIREN for an admin", () => {
+		expect(
+			getEffectiveSiren(
+				makeSession({
+					isAdmin: true,
+					siret: "53284719600015",
+					impersonation: { siren: "987654321", name: "Société Démo" },
+				}),
+			),
+		).toBe("987654321");
+	});
+
+	it("returns null rather than a lookalike for a malformed impersonated SIREN", () => {
+		expect(
+			getEffectiveSiren(
+				makeSession({
+					isAdmin: true,
+					siret: "53284719600015",
+					impersonation: { siren: "not-a-siren", name: "Société Démo" },
+				}),
+			),
+		).toBeNull();
 	});
 });

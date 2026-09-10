@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { Controller } from "react-hook-form";
+import {
+	FIRST_REPRESENTATION_STEP,
+	MY_SPACE,
+	representationStepHref,
+} from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
-import { stepHref } from "./steps";
 import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
@@ -33,13 +37,13 @@ export function SubjectionScreen({
 	const declareNotSubjectMutation =
 		api.representationDeclaration.declareNotSubject.useMutation({
 			onSuccess: () => {
-				router.push("/mon-espace");
+				router.push(MY_SPACE);
 			},
 		});
 
 	const onSubmit = form.handleSubmit((data) => {
 		if (data.answer === "concerned") {
-			router.push(stepHref(1));
+			router.push(representationStepHref(FIRST_REPRESENTATION_STEP));
 			return;
 		}
 		declareNotSubjectMutation.mutate({ year });
@@ -53,8 +57,8 @@ export function SubjectionScreen({
 			<h2 className="fr-h6">L'entreprise est-elle concernée ?</h2>
 
 			<p className="fr-text-title--grey fr-mt-4w fr-mb-2w">
-				Indiquez si votre entreprise emploie au moins 1 000 salariés durant les
-				trois derniers exercices consécutifs.
+				Indiquez si votre entreprise a employé au moins 1 000 salariés durant
+				les trois derniers exercices consécutifs.
 			</p>
 			<p className="fr-text-title--grey fr-mb-2w">
 				Ce seuil détermine si votre entreprise est tenue de déclarer ses écarts
@@ -145,12 +149,13 @@ export function SubjectionScreen({
 
 				{answer === "not_concerned" ? (
 					<div className="fr-background-alt--blue-france fr-p-4w">
-						<p className="fr-mb-0">
-							Vous n'êtes pas assujetti à la publication et à la déclaration des
-							écarts éventuels de représentation entre les femmes et les hommes.
-							<br />
-							Vous pouvez valider pour achever votre déclaration de
-							représentation {campaignYear}.
+						<p className="fr-text-title--grey fr-mb-3w">
+							Votre entreprise n'est pas assujettie à la publication et à la
+							déclaration des écarts éventuels de représentation entre les
+							femmes et les hommes.
+						</p>
+						<p className="fr-text-title--grey fr-mb-0">
+							Vous pouvez cliquer sur valider pour confirmer.
 						</p>
 					</div>
 				) : null}

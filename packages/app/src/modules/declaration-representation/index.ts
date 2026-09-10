@@ -26,6 +26,7 @@ export {
 	useRepresentationDraftContext,
 } from "./shared/draft/DraftContext";
 export { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
+export { GapReminderCallout } from "./shared/GapReminderCallout";
 export type { PercentagePairValues } from "./shared/PercentagePairFields";
 export {
 	complementPercentage,
@@ -45,9 +46,7 @@ export {
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,
 	parseStepParam,
-	REPRESENTATION_FUNNEL_ROOT,
 	REPRESENTATION_STEPS,
-	stepHref,
 } from "./steps";
 export type {
 	ExecutivesInput,

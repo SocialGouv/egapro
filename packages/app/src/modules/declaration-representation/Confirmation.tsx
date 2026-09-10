@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { DsfrPictogram } from "~/modules/layout";
 import { ResendReceiptButton } from "~/modules/mail";
+import { MY_SPACE } from "~/modules/routes";
 import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
 import styles from "./Confirmation.module.scss";
 
@@ -54,7 +55,7 @@ export function Confirmation({
 			/>
 
 			<div>
-				<Link className="fr-btn" href="/mon-espace">
+				<Link className="fr-btn" href={MY_SPACE}>
 					Mon espace
 				</Link>
 			</div>
