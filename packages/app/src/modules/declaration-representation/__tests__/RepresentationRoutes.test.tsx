@@ -164,7 +164,9 @@ describe("RepresentationHomePage", () => {
 			}),
 		).toBeChecked();
 		expect(
-			screen.getByText(/Vous n'êtes pas assujetti à la publication/),
+			screen.getByText(
+				/Votre entreprise n'est pas assujettie à la publication/,
+			),
 		).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Valider" })).toBeInTheDocument();
 	});

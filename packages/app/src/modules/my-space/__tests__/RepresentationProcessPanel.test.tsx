@@ -64,7 +64,7 @@ const NOT_SUBJECT = makeDeclaration({
 });
 
 const NOT_SUBJECT_MESSAGE =
-	"Vous n'êtes pas assujetti à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.";
+	"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.";
 
 function renderPanel({
 	campaign = OPEN_CAMPAIGN,
