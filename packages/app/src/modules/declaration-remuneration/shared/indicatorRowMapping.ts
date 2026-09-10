@@ -2,7 +2,7 @@ import type { GipGapReference } from "~/modules/domain";
 import type { PayGapRow, Step2Data, Step3Data } from "../types";
 import type { GipPrefillData } from "./gipMdsMapping";
 
-const PAY_GAP_LABELS = [
+export const PAY_GAP_LABELS = [
 	"Annuelle brute moyenne",
 	"Horaire brute moyenne",
 	"Annuelle brute médiane",

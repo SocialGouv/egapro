@@ -189,7 +189,6 @@ export {
 	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
-	gapDirection,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -197,6 +196,7 @@ export {
 	hasHighGap,
 	resolveGap,
 	resolveGapRatio,
+	significantGapDirection,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
