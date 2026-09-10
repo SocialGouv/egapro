@@ -9,6 +9,7 @@ import {
 	isCseRequired,
 	isDeclarationWritingClosed,
 } from "~/modules/domain";
+import { LOGIN, MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import {
 	getEffectiveSiren,
@@ -33,7 +34,7 @@ export default async function WithBannerLayout({
 	children: React.ReactNode;
 }) {
 	const session = await auth();
-	if (!session?.user) redirect("/login");
+	if (!session?.user) redirect(LOGIN);
 
 	const siren = getEffectiveSiren(session);
 	if (!siren) return <MissingSiret />;
@@ -54,7 +55,7 @@ export default async function WithBannerLayout({
 			cseApplicable,
 		)
 	) {
-		redirect("/mon-espace");
+		redirect(MY_SPACE);
 	}
 
 	// Kept after the guard: `getOrCreate` inserts a draft declaration, and a

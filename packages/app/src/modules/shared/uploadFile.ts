@@ -1,3 +1,4 @@
+import { API_UPLOAD } from "~/modules/routes";
 import type { FlowType } from "./uploadConfig";
 
 export type UploadFailureReason =
@@ -42,7 +43,7 @@ export async function uploadFile(
 	file: File,
 	options: UploadFileOptions,
 ): Promise<UploadFileResult> {
-	const response = await fetch("/api/upload", {
+	const response = await fetch(API_UPLOAD, {
 		method: "POST",
 		headers: {
 			"Content-Type": file.type || "application/octet-stream",

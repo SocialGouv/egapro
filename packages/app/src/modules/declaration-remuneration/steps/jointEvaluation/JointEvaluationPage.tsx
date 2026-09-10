@@ -6,9 +6,9 @@ import {
 	isCseOpinionRequired,
 	selectJointEvaluationDeadline,
 } from "~/modules/domain";
+import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
-
 import { JointEvaluationForm } from "./JointEvaluationForm";
 
 export async function JointEvaluationPage() {
@@ -20,7 +20,7 @@ export async function JointEvaluationPage() {
 		data.declaration.secondDeclarationPathChoice === "joint_evaluation";
 
 	if (!isInitialJoint && !isRevisedJoint) {
-		redirect("/declaration-remuneration/parcours-conformite");
+		redirect(COMPLIANCE_PATH);
 	}
 
 	const [company, existingFile] = await Promise.all([

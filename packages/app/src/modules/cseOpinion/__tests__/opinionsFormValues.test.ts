@@ -75,6 +75,23 @@ describe("buildOpinionsFormValues", () => {
 		expect(values.firstDeclaration.gapOpinion).toBe("favorable");
 	});
 
+	it("clears first-declaration gap fields when no gap is ≥ 5%", () => {
+		const values = buildOpinionsFormValues(
+			initialData,
+			false,
+			false,
+			false,
+			false,
+			false,
+		);
+
+		expect(values.firstDeclaration).toMatchObject({
+			accuracyOpinion: "favorable",
+			accuracyDate: "2026-01-15",
+			...CLEARED_GAP_FIELDS,
+		});
+	});
+
 	it("omits secondDeclaration when there is no second declaration", () => {
 		const values = buildOpinionsFormValues(initialData, false, false);
 
@@ -97,6 +114,16 @@ const submitted = {
 		gapConsulted: true,
 		gapOpinion: "favorable" as const,
 		gapDate: "2026-02-02",
+	},
+};
+
+const consultedFirstDeclaration = {
+	...submitted,
+	firstDeclaration: {
+		...submitted.firstDeclaration,
+		gapConsulted: true,
+		gapOpinion: "favorable" as const,
+		gapDate: "2026-01-20",
 	},
 };
 
@@ -128,6 +155,30 @@ describe("normalizeSubmittedOpinions", () => {
 			normalizeSubmittedOpinions(submitted, true, false, true).firstDeclaration
 				.gapConsulted,
 		).toBe(true);
+	});
+
+	it("clears first-declaration gap fields when no gap is ≥ 5%", () => {
+		const result = normalizeSubmittedOpinions(
+			consultedFirstDeclaration,
+			true,
+			false,
+			false,
+			false,
+		);
+
+		expect(result.firstDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
+	});
+
+	it("clears first-declaration gap fields below threshold even on the justification path", () => {
+		const result = normalizeSubmittedOpinions(
+			consultedFirstDeclaration,
+			true,
+			false,
+			true,
+			false,
+		);
+
+		expect(result.firstDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
 	});
 
 	it("leaves gap fields unchanged when a remaining gap is ≥ 5% outside the justification path", () => {
@@ -192,6 +243,40 @@ describe("hydrateOpinionsForm", () => {
 		expect(setValue).toHaveBeenCalledWith(
 			"firstDeclaration.gapOpinion",
 			"favorable",
+		);
+	});
+
+	it("clears a stale first-declaration draft when no gap is ≥ 5%", () => {
+		const setValue = vi.fn() as unknown as Parameters<
+			typeof hydrateOpinionsForm
+		>[0];
+		hydrateOpinionsForm(
+			setValue,
+			{
+				firstDeclaration: {
+					accuracyOpinion: "favorable",
+					accuracyDate: "2026-01-15",
+					gapConsulted: true,
+					gapOpinion: "favorable",
+					gapDate: "2026-01-20",
+				},
+			},
+			false,
+			false,
+			false,
+			false,
+			false,
+		);
+
+		expect(setValue).toHaveBeenCalledWith(
+			"firstDeclaration.gapConsulted",
+			false,
+		);
+		expect(setValue).toHaveBeenCalledWith("firstDeclaration.gapOpinion", null);
+		expect(setValue).toHaveBeenCalledWith("firstDeclaration.gapDate", null);
+		expect(setValue).not.toHaveBeenCalledWith(
+			"firstDeclaration.gapConsulted",
+			true,
 		);
 	});
 

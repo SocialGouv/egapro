@@ -1,3 +1,4 @@
+import { toRemunerationStep } from "~/modules/routes";
 import { STEP_TITLES } from "../types";
 import { getFunnelSteps } from "./funnelSteps";
 import styles from "./StepIndicator.module.scss";
@@ -12,7 +13,8 @@ export function StepIndicator({
 	indicatorGRequired,
 }: StepIndicatorProps) {
 	const steps = getFunnelSteps(indicatorGRequired);
-	const position = steps.indexOf(currentStep) + 1;
+	const step = toRemunerationStep(currentStep);
+	const position = step === null ? 0 : steps.indexOf(step) + 1;
 	const nextStep = steps[position];
 
 	const title = STEP_TITLES[currentStep] ?? "";

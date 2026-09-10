@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { DeclarationHistoryPage } from "~/modules/declarationHistory";
 import { FIRST_DECLARATION_YEAR } from "~/modules/domain";
+import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 
 type Props = {
@@ -20,7 +21,7 @@ export default async function Page({ params }: Props) {
 	const session = await auth();
 
 	if (!session?.user) {
-		redirect("/login");
+		redirect(LOGIN);
 	}
 
 	const { siren, year: yearParam } = await params;

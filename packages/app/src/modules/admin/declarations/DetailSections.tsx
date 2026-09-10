@@ -1,6 +1,6 @@
 import { formatShortDate, formatShortDateTime } from "~/modules/domain";
+import { apiV1FileHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
-
 import { STATUS_LABELS } from "./shared/constants";
 import type { DeclarationDetail } from "./types";
 
@@ -202,7 +202,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 									aria-label={`Télécharger ${file.fileName} (PDF)`}
 									className="fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
 									download
-									href={`/api/v1/files/${file.id}`}
+									href={apiV1FileHref(file.id)}
 								>
 									Télécharger
 								</a>

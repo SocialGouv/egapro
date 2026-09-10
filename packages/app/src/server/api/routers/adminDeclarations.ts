@@ -20,9 +20,9 @@ import {
 	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
 	getRecapSchema,
+	releaseLockSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
-import { releaseLockSchema } from "~/modules/admin/schemas";
 import {
 	floorWorkforce,
 	getCurrentYear,

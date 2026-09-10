@@ -6,10 +6,14 @@ import {
 	parseStepParam,
 	representationDraftFromDeclaration,
 	StepPageClient,
-	stepHref,
 	TOTAL_REPRESENTATION_STEPS,
 } from "~/modules/declaration-representation";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	clampRepresentationStep,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import { api } from "~/trpc/server";
 
 type StepPageProps = {
@@ -48,13 +52,15 @@ export default async function RepresentationStepPage({
 	);
 
 	if (!campaignOpen) {
-		if (step !== TOTAL_REPRESENTATION_STEPS) {
-			redirect(stepHref(TOTAL_REPRESENTATION_STEPS));
+		if (step !== LAST_REPRESENTATION_STEP) {
+			redirect(representationStepHref(LAST_REPRESENTATION_STEP));
 		}
 	} else {
-		const reachableStep = Math.max(declaration?.currentStep ?? 0, 1);
+		const reachableStep = clampRepresentationStep(
+			declaration?.currentStep ?? 0,
+		);
 		if (step > reachableStep) {
-			redirect(stepHref(reachableStep));
+			redirect(representationStepHref(reachableStep));
 		}
 	}
 

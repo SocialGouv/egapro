@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { CSE_OPINION_CONFIRMATION, cseOpinionStepHref } from "~/modules/routes";
 import { FileUpload, getDsfrModal, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { ContentTypeMatrix } from "./components/ContentTypeMatrix";
@@ -107,7 +108,7 @@ export function Step2Upload({
 	const finalizeAndRedirect = useCallback(async () => {
 		try {
 			await finalizeMutation.mutateAsync();
-			router.push("/avis-cse/confirmation");
+			router.push(CSE_OPINION_CONFIRMATION);
 		} catch (error) {
 			setFinalizeError(
 				error instanceof Error
@@ -290,7 +291,7 @@ export function Step2Upload({
 				<div className={`fr-mt-4w ${formStyles.actions}`}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-						href="/avis-cse/etape/1"
+						href={cseOpinionStepHref(1)}
 					>
 						Précédent
 					</Link>

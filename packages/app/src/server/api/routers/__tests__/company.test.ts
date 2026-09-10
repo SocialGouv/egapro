@@ -369,9 +369,75 @@ describe("findUserCompany NAF label enrichment", () => {
 
 		expect(fetchCompanyBySiren).toHaveBeenCalledWith("339787277");
 		expect(mockSet).toHaveBeenCalledWith({
+			nafCode: "62.01Z",
 			nafLabel: "Programmation informatique",
 		});
 		expect(result.nafLabel).toBe("Programmation informatique");
+	});
+
+	it("rewrites a stale NAF 2025 code alongside the rév. 2 label", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Z",
+			nafLabel: "Autres assurances",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 100,
+			statutDiffusion: null,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Y",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(mockSet).toHaveBeenCalledWith({
+			nafCode: "65.12Z",
+			nafLabel: "Autres assurances",
+		});
+		expect(result.nafCode).toBe("65.12Z");
+		expect(result.nafLabel).toBe("Autres assurances");
+	});
+
+	it("writes nothing when Weez returns a label without a code", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: null,
+			nafLabel: "Autres assurances",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 100,
+			statutDiffusion: null,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Y",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(mockSet).not.toHaveBeenCalled();
+		expect(result.nafCode).toBe("65.12Y");
+		expect(result.nafLabel).toBeNull();
 	});
 
 	it("does not call Weez when nafLabel is already present", async () => {

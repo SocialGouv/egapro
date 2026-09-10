@@ -88,7 +88,7 @@ export function CompanyDeclarationsPage({
 				currentDeclaration?.secondDeclarationPathChoice ?? null,
 		});
 	const panelVariant = computePanelVariant(currentDeclaration);
-	const ctaHref = computeCtaHref(currentDeclaration, company.siren);
+	const ctaHref = computeCtaHref(currentDeclaration);
 	const displayContext = getDeclarationDisplayContext({
 		firstDeclarationPathChoice:
 			currentDeclaration?.firstDeclarationPathChoice ?? null,

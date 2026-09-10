@@ -4,19 +4,13 @@ import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
-import type { ReadOnlyReason } from "./useDeclarationLock";
+import type { LockHolderDisplay, ReadOnlyReason } from "./types";
 import { useDeclarationLock } from "./useDeclarationLock";
-
-export type LockHolder = {
-	firstName: string | null;
-	lastName: string | null;
-	email: string | null;
-};
 
 type LockState = {
 	isReadOnly: boolean;
 	reason: ReadOnlyReason | null;
-	holder: LockHolder | null;
+	holder: LockHolderDisplay | null;
 	isLoading?: boolean;
 };
 
@@ -30,7 +24,7 @@ type StaticLockProviderProps = {
 	children: ReactNode;
 	isReadOnly?: boolean;
 	reason?: ReadOnlyReason | null;
-	holder?: LockHolder | null;
+	holder?: LockHolderDisplay | null;
 	isLoading?: boolean;
 };
 
@@ -102,7 +96,7 @@ export function useReadOnlyContext(): LockState {
 export const useLockContext = useReadOnlyContext;
 
 // `holder` is set on acquires this tab wins too, so only read-only proves it is somebody else.
-export function useLockHolderIfLockedOut(): LockHolder | null {
+export function useLockHolderIfLockedOut(): LockHolderDisplay | null {
 	const { isReadOnly, holder } = useReadOnlyContext();
 	return isReadOnly ? holder : null;
 }

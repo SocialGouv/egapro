@@ -1,8 +1,8 @@
 import { formatLockHolderIdentity } from "./lockHolderIdentity";
-import type { LockHolder } from "./useDeclarationLock";
+import type { LockHolderDisplay } from "./types";
 
 type DeclarationLockAlertProps = {
-	holder: Pick<LockHolder, "firstName" | "lastName" | "email">;
+	holder: LockHolderDisplay;
 };
 
 export function DeclarationLockAlert({ holder }: DeclarationLockAlertProps) {

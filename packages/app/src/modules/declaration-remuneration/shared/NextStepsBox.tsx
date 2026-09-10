@@ -2,6 +2,7 @@
 
 import { TrackedLink } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { CSE_OPINION } from "~/modules/routes";
 import styles from "./NextStepsBox.module.scss";
 import { UpdateCseModal } from "./UpdateCseModal";
 
@@ -49,7 +50,7 @@ export function NextStepsBox({
 							</p>
 							<TrackedLink
 								className="fr-link"
-								href="/avis-cse"
+								href={CSE_OPINION}
 								trackingId="cse_models"
 							>
 								Voir les modèles d&apos;avis CSE

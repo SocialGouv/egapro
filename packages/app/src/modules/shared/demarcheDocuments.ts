@@ -1,3 +1,4 @@
+import { API_DECLARATION_PDF, API_TRANSMITTED_PDF } from "~/modules/routes";
 export type DemarcheDocument = {
 	dataYear: number;
 	href: string;
@@ -36,7 +37,7 @@ export function buildRemunerationDocuments({
 	const documents: DemarcheDocument[] = [
 		{
 			dataYear,
-			href: `/api/declaration-pdf?year=${year}`,
+			href: `${API_DECLARATION_PDF}?year=${year}`,
 			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
 			year,
 		},
@@ -45,7 +46,7 @@ export function buildRemunerationDocuments({
 	if (hasSecondDeclaration) {
 		documents.push({
 			dataYear,
-			href: `/api/declaration-pdf?type=correction&year=${year}`,
+			href: `${API_DECLARATION_PDF}?type=correction&year=${year}`,
 			title:
 				"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégories de salariés",
 			year,
@@ -55,7 +56,7 @@ export function buildRemunerationDocuments({
 	if (hasTransmittedElements) {
 		documents.push({
 			dataYear,
-			href: `/api/transmitted-pdf?year=${year}`,
+			href: `${API_TRANSMITTED_PDF}?year=${year}`,
 			title: "Télécharger le récapitulatif des éléments transmis",
 			year,
 		});

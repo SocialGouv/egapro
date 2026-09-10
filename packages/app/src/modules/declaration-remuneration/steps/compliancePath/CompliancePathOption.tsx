@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { TrackedLink } from "~/modules/analytics";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-
+import type { AppHref } from "~/modules/routes";
 import styles from "./CompliancePathOption.module.scss";
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 	title: string;
 	children: ReactNode;
 	deadline: Date;
-	learnMoreHref?: string;
+	learnMoreHref?: AppHref;
 	learnMoreLabel?: string;
 	learnMoreTrackingId?: string;
 	disabled?: boolean;

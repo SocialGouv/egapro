@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { formatShortDate, isCancelled } from "~/modules/domain";
+import { ADMIN_DECLARATIONS, adminDeclarationHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-
 import { STATUS_LABELS } from "./shared/constants";
 import type { DeclarationSearchRow } from "./types";
 
@@ -39,7 +39,7 @@ export function DeclarationTable({
 }: Props) {
 	const { handleSort, handlePageChange, ariaSort, sortIcon } = useSortableTable(
 		{
-			basePath: "/admin/declarations",
+			basePath: ADMIN_DECLARATIONS,
 			sortBy,
 			sortOrder,
 		},
@@ -80,7 +80,7 @@ export function DeclarationTable({
 						<tr key={row.id}>
 							<td>{row.siren}</td>
 							<td>
-								<Link href={`/admin/declarations/${row.id}`}>
+								<Link href={adminDeclarationHref(row.id)}>
 									{row.companyName}
 								</Link>
 							</td>

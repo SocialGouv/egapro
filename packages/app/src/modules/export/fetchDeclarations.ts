@@ -27,6 +27,7 @@ import {
 	isIndicatorGRequired,
 	parseGipWorkforce,
 } from "~/modules/domain";
+import { apiV1FileHref } from "~/modules/routes";
 import type { DeclarationRow } from "./queries";
 import {
 	INDICATOR_A_GAP_LABELS,
@@ -298,7 +299,7 @@ export function buildCseFilePayload(file: FileRow) {
 		type: "cse_opinion" as const,
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
-		downloadUrl: `/api/v1/files/${file.id}`,
+		downloadUrl: apiV1FileHref(file.id),
 	};
 }
 
@@ -308,7 +309,7 @@ export function buildJointEvaluationFilePayload(file: FileRow) {
 		type: "joint_evaluation" as const,
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
-		downloadUrl: `/api/v1/files/${file.id}`,
+		downloadUrl: apiV1FileHref(file.id),
 	};
 }
 
@@ -322,7 +323,7 @@ function buildFichierPayload(
 		Type: type,
 		Nom_fichier: file.fileName,
 		Date_upload: file.uploadedAt.toISOString(),
-		URL_telechargement: `/api/v1/files/${file.id}`,
+		URL_telechargement: apiV1FileHref(file.id),
 	};
 }
 

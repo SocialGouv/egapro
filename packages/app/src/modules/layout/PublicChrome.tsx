@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-
+import { LOGIN } from "~/modules/routes";
 import { Footer } from "./Footer";
 import { ResourceBanner } from "./ResourceBanner";
 import { isAdminRoute } from "./shared/routeUtils";
@@ -17,7 +17,7 @@ export function PublicChrome() {
 	if (isAdminRoute(pathname)) {
 		return null;
 	}
-	const showResourceBanner = pathname !== "/login";
+	const showResourceBanner = pathname !== LOGIN;
 	return (
 		<>
 			{showResourceBanner && <ResourceBanner />}
