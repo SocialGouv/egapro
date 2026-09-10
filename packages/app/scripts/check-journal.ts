@@ -4,12 +4,25 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export function findMonotoneViolations(entries) {
+type JournalEntry = { idx: number; when: number };
+
+function describeError(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
+
+function readEntries(journal: unknown): JournalEntry[] | null {
+	if (typeof journal !== "object" || journal === null) return null;
+	const { entries } = journal as { entries?: unknown };
+	return Array.isArray(entries) ? (entries as JournalEntry[]) : null;
+}
+
+export function findMonotoneViolations(entries: JournalEntry[]): string[] {
 	const sorted = [...entries].sort((a, b) => a.idx - b.idx);
-	const violations = [];
+	const violations: string[] = [];
 	for (let i = 0; i < sorted.length - 1; i++) {
 		const current = sorted[i];
 		const next = sorted[i + 1];
+		if (!current || !next) continue;
 		if (current.when >= next.when) {
 			violations.push(
 				`idx ${current.idx} (when=${current.when}) >= idx ${next.idx} (when=${next.when})`,
@@ -19,40 +32,42 @@ export function findMonotoneViolations(entries) {
 	return violations;
 }
 
-export function checkJournal(journalPath) {
-	let journal;
+export function checkJournal(journalPath: string): string[] {
+	let parsed: unknown;
 	try {
-		journal = JSON.parse(readFileSync(journalPath, "utf-8"));
+		parsed = JSON.parse(readFileSync(journalPath, "utf-8"));
 	} catch (err) {
 		throw new Error(
-			`Failed to read or parse journal at "${journalPath}": ${err.message}`,
+			`Failed to read or parse journal at "${journalPath}": ${describeError(err)}`,
 		);
 	}
-	if (!Array.isArray(journal?.entries)) {
+	const entries = readEntries(parsed);
+	if (!entries) {
 		throw new Error(
 			`Invalid journal format at "${journalPath}": missing "entries" array.`,
 		);
 	}
-	return findMonotoneViolations(journal.entries);
+	return findMonotoneViolations(entries);
 }
 
 const journalPath = join(__dirname, "../drizzle/meta/_journal.json");
-let journal;
+let parsed: unknown;
 try {
-	journal = JSON.parse(readFileSync(journalPath, "utf-8"));
+	parsed = JSON.parse(readFileSync(journalPath, "utf-8"));
 } catch (err) {
 	console.error(
-		`ERROR: Failed to read or parse journal at "${journalPath}": ${err.message}`,
+		`ERROR: Failed to read or parse journal at "${journalPath}": ${describeError(err)}`,
 	);
 	process.exit(1);
 }
-if (!Array.isArray(journal?.entries)) {
+const entries = readEntries(parsed);
+if (!entries) {
 	console.error(
 		`ERROR: Invalid journal format at "${journalPath}": missing "entries" array.`,
 	);
 	process.exit(1);
 }
-const violations = findMonotoneViolations(journal.entries);
+const violations = findMonotoneViolations(entries);
 
 if (violations.length > 0) {
 	console.error(
@@ -67,6 +82,4 @@ if (violations.length > 0) {
 	process.exit(1);
 }
 
-console.log(
-	`OK: journal monotone check passed (${journal.entries.length} entries).`,
-);
+console.log(`OK: journal monotone check passed (${entries.length} entries).`);

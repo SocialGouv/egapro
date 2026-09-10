@@ -82,7 +82,7 @@ Les six rappels liés à une échéance (déclaration, choix parcours R1/R2, 2�
 | Imports | `notifications/publisher` + `notifications/queue` (1 fichier) | — |
 | Env vars `SMTP_*` / `MAIL_*` | **non déclarées** dans `env.js` (retirées) | lues via `process.env` direct (`worker/transporter.ts`) |
 | Env var `DATABASE_URL` | lue (Drizzle + audit + NextAuth) | lue (audit + eligibility + dedup table) — dépendance assumée |
-| Asset Marianne (fonts woff2) | `public/dsfr/fonts/*` (copié par `scripts/copy-dsfr.mjs`) | référencés via `${EGAPRO_PUBLIC_URL}/dsfr/fonts/*` dans `EmailLayout.tsx` |
+| Asset Marianne (fonts woff2) | `public/dsfr/fonts/*` (copié par `scripts/copy-dsfr.ts`) | référencés via `${EGAPRO_PUBLIC_URL}/dsfr/fonts/*` dans `EmailLayout.tsx` |
 
 ### Structure du package `packages/notifications/src/`
 
@@ -125,7 +125,7 @@ src/
 - `Marianne-Medium.woff2` (500) — libellés de boutons CTA
 - `Marianne-Bold.woff2` (700) — titres, salutation « Bonjour », signature, valeurs de l'`InfoList`
 
-Source : `${EGAPRO_PUBLIC_URL}/dsfr/fonts/Marianne-*.woff2`. Les fichiers sont déployés par [`packages/app/scripts/copy-dsfr.mjs`](../packages/app/scripts/copy-dsfr.mjs) lors de chaque build/dev de l'app — pas de wiring K8s supplémentaire. Fallback : `Arial, Helvetica, sans-serif` quand le client mail bloque les webfonts (Outlook ≤ 2019).
+Source : `${EGAPRO_PUBLIC_URL}/dsfr/fonts/Marianne-*.woff2`. Les fichiers sont déployés par [`packages/app/scripts/copy-dsfr.ts`](../packages/app/scripts/copy-dsfr.ts) lors de chaque build/dev de l'app — pas de wiring K8s supplémentaire. Fallback : `Arial, Helvetica, sans-serif` quand le client mail bloque les webfonts (Outlook ≤ 2019).
 
 ### Schéma DB ajouté
 

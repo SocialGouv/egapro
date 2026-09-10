@@ -34,7 +34,7 @@ spec:
               value: "180"
           command:
             - node
-            - packages/app/scripts/backfill-company-location.bundle.mjs
+            - packages/app/scripts/backfill-company-region-department.bundle.mjs
           resources:
             requests:
               cpu: 50m

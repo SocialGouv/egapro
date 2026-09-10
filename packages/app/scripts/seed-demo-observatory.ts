@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 //
 // Seed a deterministic public-consultation dataset for the Observatoire.
 //
@@ -11,22 +12,21 @@
 //   pnpm db:seed-observatory -- --year=2025
 //   pnpm db:seed-observatory -- --clean
 
-import { createRequire } from "node:module";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import type { Sql, TransactionSql } from "postgres";
+import postgres from "postgres";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const require = createRequire(path.join(__dirname, "..", "package.json"));
-const postgres = require("postgres");
-
-const args = Object.fromEntries(
+const args: Record<string, string | true> = Object.fromEntries(
 	process.argv
 		.slice(2)
 		.filter((arg) => arg !== "--")
-		.map((arg) => {
+		.map((arg): [string, string | true] => {
 			if (arg === "--clean") return ["clean", true];
 			const match = arg.match(/^--([^=]+)=(.+)$/);
-			return match ? [match[1], match[2]] : [arg, true];
+			const key = match?.[1];
+			const value = match?.[2];
+			return key === undefined || value === undefined
+				? [arg, true]
+				: [key, value];
 		}),
 );
 
@@ -56,7 +56,7 @@ if (!Number.isFinite(SCHEMA_WAIT_SECONDS) || SCHEMA_WAIT_SECONDS < 0) {
 	process.exit(1);
 }
 
-function resolveDatabaseUrl() {
+function resolveDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
 	const database =
@@ -82,7 +82,54 @@ const DATABASE_URL = resolveDatabaseUrl();
 const SEED_USER_ID = "00000000-9989-4989-8989-000000009989";
 const SEED_USER_EMAIL = "seed-observatory@example.fr";
 
-const PAGINATION_COMPANY_NAMES = [
+type PaginationLocation = {
+	city: string;
+	postalCode: string;
+	region: string;
+	regionCode: string;
+	departmentCode: string;
+	departmentLabel: string;
+};
+
+type PaginationNaf = {
+	code: string;
+	label: string;
+};
+
+type HistoryPoint = {
+	offset: number;
+	annual: number | null;
+	hourly: number | null;
+	variable: number | null;
+};
+
+type SeedCompany = {
+	siren: string;
+	name: string;
+	address: string;
+	city: string;
+	region: string | null;
+	regionCode: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string;
+	nafCode: string;
+	nafLabel: string;
+	workforce: number;
+	statutDiffusion: string;
+	history: HistoryPoint[];
+};
+
+function cycle<T>(values: readonly T[], index: number): T {
+	const value = values[index % values.length];
+	if (value === undefined) {
+		throw new Error("empty seed table");
+	}
+	return value;
+}
+
+const PAGINATION_COMPANY_NAMES: string[] = [
 	"Aquitaine Mobilier Durable",
 	"Bureau d’Études Tourangeau",
 	"Céramiques de Flandre",
@@ -103,7 +150,7 @@ const PAGINATION_COMPANY_NAMES = [
 	"Réseaux Électriques Isérois",
 ];
 
-const PAGINATION_LOCATIONS = [
+const PAGINATION_LOCATIONS: PaginationLocation[] = [
 	{
 		city: "Bordeaux",
 		postalCode: "33000",
@@ -154,7 +201,7 @@ const PAGINATION_LOCATIONS = [
 	},
 ];
 
-const PAGINATION_NAFS = [
+const PAGINATION_NAFS: PaginationNaf[] = [
 	{
 		code: "16.23Z",
 		label: "Fabrication de charpentes et d’autres menuiseries",
@@ -169,7 +216,7 @@ const PAGINATION_NAFS = [
 	},
 ];
 
-const COMPANIES = [
+const COMPANIES: SeedCompany[] = [
 	{
 		siren: "998900001",
 		name: "Atelier Horizon Numérique",
@@ -391,8 +438,8 @@ const COMPANIES = [
 	},
 	...PAGINATION_COMPANY_NAMES.map((name, index) => {
 		const companyNumber = index + 13;
-		const location = PAGINATION_LOCATIONS[index % PAGINATION_LOCATIONS.length];
-		const naf = PAGINATION_NAFS[index % PAGINATION_NAFS.length];
+		const location = cycle(PAGINATION_LOCATIONS, index);
+		const naf = cycle(PAGINATION_NAFS, index);
 		const currentGap = ((index % 9) - 4) / 100;
 
 		return {
@@ -437,7 +484,11 @@ const YEARS = [
 	),
 ].sort((left, right) => left - right);
 
-function indicatorValues(companyIndex, point, workforce) {
+function indicatorValues(
+	companyIndex: number,
+	point: HistoryPoint,
+	workforce: number,
+) {
 	const annual = point.annual;
 	const hourly = point.hourly;
 	const variable = point.variable;
@@ -472,11 +523,15 @@ function indicatorValues(companyIndex, point, workforce) {
 	};
 }
 
-function workforceForPoint(company, companyIndex, point) {
+function workforceForPoint(
+	company: SeedCompany,
+	companyIndex: number,
+	point: HistoryPoint,
+) {
 	return Math.max(1, company.workforce + point.offset * (companyIndex + 4));
 }
 
-async function assertSchema(sql) {
+async function assertSchema(sql: Sql) {
 	const rows = await sql`
 		SELECT column_name
 		FROM information_schema.columns
@@ -491,7 +546,7 @@ async function assertSchema(sql) {
 	}
 }
 
-async function waitForSchema(sql) {
+async function waitForSchema(sql: Sql) {
 	const deadline = Date.now() + SCHEMA_WAIT_SECONDS * 1000;
 	for (;;) {
 		try {
@@ -505,7 +560,7 @@ async function waitForSchema(sql) {
 	}
 }
 
-async function cleanRows(sql) {
+async function cleanRows(sql: TransactionSql) {
 	await sql`DELETE FROM app_representation_declaration WHERE siren = ANY(${SIRENS})`;
 	await sql`
 		DELETE FROM app_declaration_status_history
@@ -520,7 +575,7 @@ async function cleanRows(sql) {
 	await sql`DELETE FROM app_user WHERE id = ${SEED_USER_ID}`;
 }
 
-async function clean(sql) {
+async function clean(sql: Sql) {
 	await sql.begin(cleanRows);
 }
 

@@ -1,5 +1,5 @@
 /**
- * Unit tests for the DB-free half of `scripts/backfill-company-naf.mjs` (#4087).
+ * Unit tests for the DB-free half of `scripts/backfill-company-naf.ts` (#4087).
  *
  * They live outside `*.integration.test.ts` on purpose: that suffix is excluded
  * from `vitest.config.ts` and `test:integration` is wired into no CI workflow,
@@ -9,10 +9,7 @@
  * actually runs.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-	fetchNaf,
-	hasSystemicFailure,
-} from "#scripts/backfill-company-naf.mjs";
+import { fetchNaf, hasSystemicFailure } from "#scripts/backfill-company-naf";
 
 const SIREN = "700000030";
 const fetchSpy = vi.fn();

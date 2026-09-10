@@ -1,5 +1,6 @@
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import type { Sql } from "postgres";
 import postgres from "postgres";
 
 /**
@@ -19,21 +20,25 @@ import postgres from "postgres";
  * survives the rollback.
  *
  * Env vars:
- *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.mjs)
+ *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
  *  - EGAPRO_AUDIT_RETENTION_SHORT_DAYS (optional, default 180)
  *  - EGAPRO_AUDIT_RETENTION_LONG_DAYS  (optional, default 365)
  *
  * Issue: #3268 (cleanup jobs use direct DB access instead of HTTP endpoints).
  */
 
-/** @typedef {import("postgres").Sql} Sql */
+type CleanupResult = {
+	deletedShort: number;
+	deletedLong: number;
+	deletedTotal: number;
+};
 
-/**
- * @typedef {Object} CleanupResult
- * @property {number} deletedShort
- * @property {number} deletedLong
- * @property {number} deletedTotal
- */
+type RunAuditCleanupArgs = {
+	sql: Sql;
+	shortRetentionDays: number;
+	longRetentionDays: number;
+	now?: Date;
+};
 
 const SHORT_RETENTION_CATEGORIES = ["read_sensitive", "public_search"];
 const AUDIT_CLEANUP_ACTION = "system.audit_cleanup";
@@ -42,8 +47,7 @@ const AUDIT_CLEANUP_CATEGORY = "system";
 const DEFAULT_SHORT_RETENTION_DAYS = 180;
 const DEFAULT_LONG_RETENTION_DAYS = 365;
 
-/** @returns {string} */
-function getDatabaseUrl() {
+function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 
 	const {
@@ -68,23 +72,13 @@ function getDatabaseUrl() {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
-/**
- * @param {Date} ref
- * @param {number} days
- * @returns {Date}
- */
-function subtractDays(ref, days) {
+function subtractDays(ref: Date, days: number): Date {
 	const result = new Date(ref);
 	result.setUTCDate(result.getUTCDate() - days);
 	return result;
 }
 
-/**
- * @param {string | undefined} raw
- * @param {number} fallback
- * @returns {number}
- */
-function toPositiveInt(raw, fallback) {
+function toPositiveInt(raw: string | undefined, fallback: number): number {
 	if (raw === undefined || raw === null || raw === "") return fallback;
 	const n = Number(raw);
 	if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
@@ -98,28 +92,17 @@ function toPositiveInt(raw, fallback) {
 /**
  * Core cleanup routine. Exported so the integration test can drive it against
  * an ephemeral `postgres` client without spawning a child process.
- *
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {number} args.shortRetentionDays
- * @param {number} args.longRetentionDays
- * @param {Date} [args.now]
- * @returns {Promise<CleanupResult>}
  */
 export async function runAuditCleanup({
 	sql,
 	shortRetentionDays,
 	longRetentionDays,
 	now = new Date(),
-}) {
+}: RunAuditCleanupArgs): Promise<CleanupResult> {
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
 
-	const summary = await sql.begin(async (txRaw) => {
-		// postgres-js `TransactionSql` is declared as `Omit<Sql, ...>`, which
-		// — quirk of TS's `Omit` — strips the call signatures on Sql. Cast
-		// back to Sql so we can use the template-tag + dynamic-array helper.
-		const tx = /** @type {Sql} */ (/** @type {unknown} */ (txRaw));
+	const summary = await sql.begin(async (tx) => {
 		const shortResult = await tx`
 			DELETE FROM audit.action_log
 			WHERE category = ANY(${SHORT_RETENTION_CATEGORIES})
@@ -175,11 +158,7 @@ export async function runAuditCleanup({
 	return summary;
 }
 
-/**
- * @param {Sql} sql
- * @param {unknown} error
- */
-async function logFailure(sql, error) {
+async function logFailure(sql: Sql, error: unknown): Promise<void> {
 	const message = error instanceof Error ? error.message : "Unknown error";
 	try {
 		await sql`
@@ -201,7 +180,7 @@ async function logFailure(sql, error) {
 	}
 }
 
-const isMain = (() => {
+const isMain = ((): boolean => {
 	const entry = process.argv[1];
 	if (!entry) return false;
 	// `realpathSync` resolves symlinks — needed because pnpm's content-

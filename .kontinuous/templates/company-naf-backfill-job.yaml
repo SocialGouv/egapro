@@ -34,7 +34,7 @@ spec:
               value: "180"
           command:
             - node
-            - packages/app/scripts/backfill-company-naf.mjs
+            - packages/app/scripts/backfill-company-naf.bundle.mjs
           resources:
             requests:
               cpu: 50m

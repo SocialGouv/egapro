@@ -2,7 +2,7 @@
 set -e
 
 echo "Running Drizzle migrations..."
-node packages/app/scripts/migrate.mjs
+node packages/app/scripts/migrate.bundle.mjs
 echo "Migrations completed."
 
 echo "Starting Next.js..."

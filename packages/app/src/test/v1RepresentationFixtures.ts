@@ -1,6 +1,6 @@
 /**
  * Fixtures for legacy V1 `representation_equilibree` rows, shared by the unit
- * and the integration suites of `scripts/import-v1-representation.mjs`.
+ * and the integration suites of `scripts/import-v1-representation.ts`.
  *
  * Key names and shapes mirror `RepresentationEquilibreeDataRaw` from the V1
  * codebase (`origin/master`), accents included — that jsonb is the contract

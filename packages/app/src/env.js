@@ -133,7 +133,7 @@ export const env = createEnv({
 		ADMIN_EMAILS: z.string().optional().default(""),
 		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
 		// access logs, 12 months for security logs). Consumed directly by the
-		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.mjs, issue
+		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.ts, issue
 		// #3268) — no HTTP trigger in play anymore.
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
 			.number()
@@ -146,7 +146,7 @@ export const env = createEnv({
 			.positive()
 			.default(365),
 		// Retention (years) for declaration data, consumed by the
-		// declaration-cleanup CronJob (packages/app/scripts/declaration-cleanup.mjs,
+		// declaration-cleanup CronJob (packages/app/scripts/declaration-cleanup.ts,
 		// issue #3134). Default 6 (durée légale retenue). The .max(50) guard catches
 		// a misconfigured value that would silently disable the RGPD purge.
 		EGAPRO_DECLARATION_RETENTION_YEARS: z.coerce
