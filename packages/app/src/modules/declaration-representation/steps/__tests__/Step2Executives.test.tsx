@@ -34,8 +34,8 @@ const OPTIONS = {
 };
 
 const REMINDER = {
-	compliant: "Objectif de 30 % atteint",
-	nonCompliant: "Objectif de 30 % non atteint",
+	compliant: "Objectif de 30 % atteint.",
+	nonCompliant: "Objectif de 30 % non atteint.",
 };
 
 const NOT_COMPUTABLE_HINT = /L'écart ne peut pas être calculé\./;

@@ -83,8 +83,8 @@ function gapReminderTitle(
 	target: number,
 ): string {
 	return verdict === "compliant"
-		? `Objectif de ${target} % atteint`
-		: `Objectif de ${target} % non atteint`;
+		? `Objectif de ${target} % atteint.`
+		: `Objectif de ${target} % non atteint.`;
 }
 
 type ExecutiveCountOptionProps = {
