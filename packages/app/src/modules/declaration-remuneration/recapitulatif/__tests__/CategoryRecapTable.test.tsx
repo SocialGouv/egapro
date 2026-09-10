@@ -116,6 +116,80 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getByText("Catégorie d'emplois n°1")).toBeInTheDocument();
 	});
 
+	it("explains a non-calculable category while keeping its tables", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 0,
+					hourlyMenCount: 3,
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(screen.getAllByRole("table")).toHaveLength(2);
+	});
+
+	it("does not mark isolated or crossed zeroes as non-calculable", () => {
+		const { rerender } = render(
+			<CategoryRecapTable
+				category={makeCategory({
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 3,
+					hourlyMenCount: 0,
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+
+		rerender(
+			<CategoryRecapTable
+				category={makeCategory({
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 2,
+					hourlyMenCount: 3,
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps legacy pay visible without the non-calculable explanation", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 0,
+					hourlyMenCount: 3,
+					annualBaseWomen: "30000",
+					annualBaseMen: "32000",
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		expect(screen.getAllByText("30 000 €")).toHaveLength(2);
+	});
+
 	it("flags an 'élevé' badge when a salary gap reaches the 5% threshold", () => {
 		render(
 			<CategoryRecapTable

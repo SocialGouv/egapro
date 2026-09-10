@@ -2,6 +2,11 @@ import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
+import {
+	CATEGORY_PAY_FIELDS,
+	type CategoryHeadcounts,
+	isCategoryPayApplicable,
+} from "~/modules/domain";
 
 export type EmployeeCategory = {
 	id: number;
@@ -72,28 +77,79 @@ function toStr(val: string): string | undefined {
 	return val || undefined;
 }
 
+export type CategoryCountFields = Pick<
+	EmployeeCategory,
+	"womenCount" | "menCount" | "hourlyWomenCount" | "hourlyMenCount"
+>;
+
+type CategoryPayFields = Record<(typeof CATEGORY_PAY_FIELDS)[number], string>;
+
+type ParsedCategoryHeadcounts = {
+	womenCount: number | undefined;
+	menCount: number | undefined;
+	hourlyWomenCount: number | undefined;
+	hourlyMenCount: number | undefined;
+};
+
+export function toCategoryHeadcounts(
+	cat: CategoryCountFields,
+): ParsedCategoryHeadcounts {
+	return {
+		womenCount: toInt(cat.womenCount),
+		menCount: toInt(cat.menCount),
+		hourlyWomenCount: toInt(cat.hourlyWomenCount),
+		hourlyMenCount: toInt(cat.hourlyMenCount),
+	} satisfies CategoryHeadcounts;
+}
+
+/** Clear every pay value when one sex is absent from both workforce rows.
+ *  The input is left untouched so this can normalize form defaults and imports. */
+export function withoutPayValuesWhenNotApplicable<
+	T extends CategoryCountFields & CategoryPayFields,
+>(category: T): T {
+	if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return category;
+	const cleared = { ...category };
+	for (const field of CATEGORY_PAY_FIELDS) {
+		Object.assign(cleared, { [field]: "" });
+	}
+	return cleared;
+}
+
 export function toSubmitData(
 	categories: EmployeeCategory[],
 	source: string,
 ): EmployeeCategorySubmitData {
 	return {
 		source,
-		categories: categories.map((cat) => ({
-			name: cat.name,
-			data: {
-				womenCount: toInt(cat.womenCount),
-				menCount: toInt(cat.menCount),
-				hourlyWomenCount: toInt(cat.hourlyWomenCount),
-				hourlyMenCount: toInt(cat.hourlyMenCount),
-				annualBaseWomen: toStr(cat.annualBaseWomen),
-				annualBaseMen: toStr(cat.annualBaseMen),
-				annualVariableWomen: toStr(cat.annualVariableWomen),
-				annualVariableMen: toStr(cat.annualVariableMen),
-				hourlyBaseWomen: toStr(cat.hourlyBaseWomen),
-				hourlyBaseMen: toStr(cat.hourlyBaseMen),
-				hourlyVariableWomen: toStr(cat.hourlyVariableWomen),
-				hourlyVariableMen: toStr(cat.hourlyVariableMen),
-			},
-		})),
+		categories: categories.map((cat) => {
+			const headcounts = toCategoryHeadcounts(cat);
+			const payApplicable = isCategoryPayApplicable(headcounts);
+			return {
+				name: cat.name,
+				data: {
+					...headcounts,
+					annualBaseWomen: payApplicable
+						? toStr(cat.annualBaseWomen)
+						: undefined,
+					annualBaseMen: payApplicable ? toStr(cat.annualBaseMen) : undefined,
+					annualVariableWomen: payApplicable
+						? toStr(cat.annualVariableWomen)
+						: undefined,
+					annualVariableMen: payApplicable
+						? toStr(cat.annualVariableMen)
+						: undefined,
+					hourlyBaseWomen: payApplicable
+						? toStr(cat.hourlyBaseWomen)
+						: undefined,
+					hourlyBaseMen: payApplicable ? toStr(cat.hourlyBaseMen) : undefined,
+					hourlyVariableWomen: payApplicable
+						? toStr(cat.hourlyVariableWomen)
+						: undefined,
+					hourlyVariableMen: payApplicable
+						? toStr(cat.hourlyVariableMen)
+						: undefined,
+				},
+			};
+		}),
 	};
 }

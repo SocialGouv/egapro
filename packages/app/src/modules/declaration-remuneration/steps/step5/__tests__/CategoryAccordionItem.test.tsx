@@ -30,10 +30,23 @@ function renderItem(
 		nameError?: string;
 		category?: EmployeeCategory & { id: number };
 		errors?: FieldError[];
+		payApplicable?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
-	return render(
+	return render(<TestItem category={categoryOverride} {...rest} />);
+}
+
+function TestItem({
+	category: categoryOverride,
+	...overrides
+}: {
+	nameError?: string;
+	category?: EmployeeCategory & { id: number };
+	errors?: FieldError[];
+	payApplicable?: boolean;
+}) {
+	return (
 		<CategoryAccordionItem
 			baseId="cat-form"
 			category={categoryOverride ?? category}
@@ -49,14 +62,91 @@ function renderItem(
 			onAccordionToggle={vi.fn()}
 			onAskRemove={vi.fn()}
 			onDecimalBlur={() => vi.fn()}
+			onHeadcountBlur={() => vi.fn()}
 			onPositiveNumberChange={() => vi.fn()}
+			payApplicable
 			readOnly={false}
 			readOnlyLabel={false}
 			showDelete={false}
-			{...rest}
-		/>,
+			{...overrides}
+		/>
 	);
 }
+
+const PAY_CELL_LABELS = [
+	"Salaire de base annuel femmes, catégorie 1",
+	"Salaire de base annuel hommes, catégorie 1",
+	"Composantes variables annuelles femmes, catégorie 1",
+	"Composantes variables annuelles hommes, catégorie 1",
+	"Salaire de base horaire femmes, catégorie 1",
+	"Salaire de base horaire hommes, catégorie 1",
+	"Composantes variables horaires femmes, catégorie 1",
+	"Composantes variables horaires hommes, catégorie 1",
+];
+
+const COUNT_CELL_LABELS = [
+	"Rémunération annuelle — Nombre de femmes, catégorie 1",
+	"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+	"Rémunération horaire — Nombre de femmes, catégorie 1",
+	"Rémunération horaire — Nombre d'hommes, catégorie 1",
+];
+
+describe("CategoryAccordionItem — non-calculable pay gap (#3678)", () => {
+	it("renders both pay tables while the category is applicable", () => {
+		renderItem();
+		for (const label of [...PAY_CELL_LABELS, ...COUNT_CELL_LABELS]) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération annuelle brute moyenne",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération horaire brute moyenne",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByTestId("category-pay-status")).toBeEmptyDOMElement();
+	});
+
+	it("keeps both pay tables visible and disables their fields with a live non-calculable message", () => {
+		renderItem({ payApplicable: false });
+		const status = screen.getByTestId("category-pay-status");
+		expect(status).toHaveAttribute("aria-live", "polite");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
+		for (const label of PAY_CELL_LABELS) {
+			expect(screen.getByLabelText(label)).toBeDisabled();
+		}
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération annuelle brute moyenne",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				name: "Rémunération horaire brute moyenne",
+			}),
+		).toBeInTheDocument();
+		for (const label of COUNT_CELL_LABELS) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
+	});
+
+	it("keeps the live region mounted while its content changes", () => {
+		const { rerender } = renderItem();
+		const status = screen.getByTestId("category-pay-status");
+
+		rerender(<TestItem payApplicable={false} />);
+
+		expect(screen.getByTestId("category-pay-status")).toBe(status);
+		expect(status).toHaveTextContent("Aucun écart à calculer");
+
+		rerender(<TestItem payApplicable />);
+		expect(screen.getByTestId("category-pay-status")).toBe(status);
+		expect(status).toBeEmptyDOMElement();
+	});
+});
 
 describe("CategoryAccordionItem — name length cap (#3943)", () => {
 	it("caps the input with maxLength and hints at the label's source (#4254)", () => {

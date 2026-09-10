@@ -11,6 +11,17 @@ import {
 	DEV_STEP5_SOURCE,
 } from "../devFillData";
 
+const PAY_FIELDS = [
+	"annualBaseWomen",
+	"annualBaseMen",
+	"annualVariableWomen",
+	"annualVariableMen",
+	"hourlyBaseWomen",
+	"hourlyBaseMen",
+	"hourlyVariableWomen",
+	"hourlyVariableMen",
+] as const;
+
 describe("devFillData", () => {
 	it("Step1 has one workforce row per pay basis, each with 120 women and 130 men", () => {
 		expect(DEV_STEP1_ROWS).toHaveLength(2);
@@ -112,5 +123,34 @@ describe("devFillData", () => {
 		expect(sumOf(categories, "menCount")).toBe(4);
 		expect(sumOf(categories, "hourlyWomenCount")).toBe(2);
 		expect(sumOf(categories, "hourlyMenCount")).toBe(1);
+	});
+
+	it("createDevStep5Categories leaves no pay amount when one sex is absent from both rows (#3678)", () => {
+		const categories = createDevStep5Categories(() => 0, totals(1, 1, 1, 1));
+
+		const nonApplicable = categories.filter(
+			(c) =>
+				(c.womenCount === "0" && c.hourlyWomenCount === "0") ||
+				(c.menCount === "0" && c.hourlyMenCount === "0"),
+		);
+		expect(nonApplicable.length).toBeGreaterThan(0);
+		for (const category of nonApplicable) {
+			for (const field of PAY_FIELDS) {
+				expect(category[field]).toBe("");
+			}
+		}
+	});
+
+	it("createDevStep5Categories keeps pay amounts for applicable categories (#3678)", () => {
+		const categories = createDevStep5Categories(
+			() => 0,
+			totals(120, 130, 120, 130),
+		);
+
+		for (const category of categories) {
+			for (const field of PAY_FIELDS) {
+				expect(category[field]).not.toBe("");
+			}
+		}
 	});
 });

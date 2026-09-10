@@ -17,6 +17,8 @@ type Props = {
 	fieldId: string;
 	category: EmployeeCategory & { id: number };
 	disabled: boolean;
+	/** Whether this category can declare remuneration (#3678). */
+	payApplicable: boolean;
 	readOnly: boolean;
 	isExpanded: boolean;
 	readOnlyLabel: boolean;
@@ -33,6 +35,9 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onHeadcountBlur: (
+		index: number,
+	) => (e: React.FocusEvent<HTMLInputElement>) => boolean | undefined;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	onAskRemove: (index: number) => void;
 };
@@ -53,6 +58,7 @@ export function CategoryAccordionItem({
 	fieldId,
 	category,
 	disabled,
+	payApplicable,
 	readOnly,
 	isExpanded,
 	readOnlyLabel,
@@ -65,6 +71,7 @@ export function CategoryAccordionItem({
 	headerRef,
 	collapseRef,
 	onPositiveNumberChange,
+	onHeadcountBlur,
 	onDecimalBlur,
 	onAskRemove,
 }: Props) {
@@ -145,7 +152,9 @@ export function CategoryAccordionItem({
 						errorAlertId={errorAlertId}
 						errors={errors}
 						onDecimalBlur={onDecimalBlur}
+						onHeadcountBlur={onHeadcountBlur}
 						onPositiveNumberChange={onPositiveNumberChange}
+						payApplicable={payApplicable}
 						readOnly={readOnly}
 					/>
 					{showDelete && (

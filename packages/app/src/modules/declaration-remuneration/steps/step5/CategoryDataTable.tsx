@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
@@ -29,8 +31,13 @@ type Props = {
 		field: keyof EmployeeCategory,
 		isInteger: boolean,
 	) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onHeadcountBlur: (
+		index: number,
+	) => (e: React.FocusEvent<HTMLInputElement>) => boolean | undefined;
 	onDecimalBlur: (index: number, field: keyof EmployeeCategory) => () => void;
 	disabled?: boolean;
+	/** Whether this category can declare remuneration (#3678). */
+	payApplicable?: boolean;
 	readOnly?: boolean;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -87,11 +94,12 @@ export function categoryDataFieldId(
 
 type EuroCellProps = {
 	ariaLabel: string;
+	categoryId: string;
 	id: string;
 	disabled: boolean;
 	readOnly: boolean;
 	value: string;
-	onBlur: () => void;
+	onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -99,6 +107,7 @@ type EuroCellProps = {
 
 function EuroInputCell({
 	ariaLabel,
+	categoryId,
 	id,
 	disabled,
 	readOnly,
@@ -109,14 +118,16 @@ function EuroInputCell({
 	errors,
 }: EuroCellProps) {
 	const error = findFieldError(errors, id);
+	const ariaDescribedBy = describedByForField(errorAlertId, error);
 	return (
 		<td>
 			<div className={stepStyles.inputCell}>
 				<input
-					aria-describedby={describedByForField(errorAlertId, error)}
+					aria-describedby={ariaDescribedBy || undefined}
 					aria-invalid={error ? true : undefined}
 					aria-label={ariaLabel}
 					className={`${numericInputClassName(Boolean(error))} ${stepStyles.compactInput}`}
+					data-category-pay-input={categoryId}
 					disabled={disabled}
 					id={id}
 					inputMode="decimal"
@@ -184,6 +195,7 @@ type RemunerationTableProps = {
 	catIndex: number;
 	disabled: boolean;
 	readOnly: boolean;
+	emptyValues: boolean;
 	pos: Props["onPositiveNumberChange"];
 	blur: Props["onDecimalBlur"];
 	idPrefix: string;
@@ -199,17 +211,26 @@ function RemunerationTable({
 	catIndex,
 	disabled,
 	readOnly,
+	emptyValues,
 	pos,
 	blur,
 	idPrefix,
 	errorAlertId,
 	errors,
 }: RemunerationTableProps) {
+	const cellHandlers = (field: StringField) => ({
+		onBlur: blur(catIndex, field),
+		onChange: pos(catIndex, field, false),
+	});
+	const valueFor = (field: StringField) => (emptyValues ? "" : cat[field]);
 	const totalWomen = computeTotal(
-		cat[fields.baseWomen],
-		cat[fields.variableWomen],
+		valueFor(fields.baseWomen),
+		valueFor(fields.variableWomen),
 	);
-	const totalMen = computeTotal(cat[fields.baseMen], cat[fields.variableMen]);
+	const totalMen = computeTotal(
+		valueFor(fields.baseMen),
+		valueFor(fields.variableMen),
+	);
 
 	const scopeId = scope === "annuel" ? "annual" : "hourly";
 	const variableScope = scope === "annuel" ? "annuelles" : "horaires";
@@ -233,29 +254,32 @@ function RemunerationTable({
 						<th scope="row">Salaire de base</th>
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} femmes, catégorie ${catIndex + 1}`}
+							categoryId={idPrefix}
 							disabled={disabled}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-women")}
-							onBlur={blur(catIndex, fields.baseWomen)}
-							onChange={pos(catIndex, fields.baseWomen, false)}
+							{...cellHandlers(fields.baseWomen)}
 							readOnly={readOnly}
-							value={cat[fields.baseWomen]}
+							value={valueFor(fields.baseWomen)}
 						/>
 						<EuroInputCell
 							ariaLabel={`Salaire de base ${scope} hommes, catégorie ${catIndex + 1}`}
+							categoryId={idPrefix}
 							disabled={disabled}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("base-men")}
-							onBlur={blur(catIndex, fields.baseMen)}
-							onChange={pos(catIndex, fields.baseMen, false)}
+							{...cellHandlers(fields.baseMen)}
 							readOnly={readOnly}
-							value={cat[fields.baseMen]}
+							value={valueFor(fields.baseMen)}
 						/>
 						<td className={stepStyles.gapCell}>
 							<GapBadge
-								gap={computeGap(cat[fields.baseWomen], cat[fields.baseMen])}
+								gap={computeGap(
+									valueFor(fields.baseWomen),
+									valueFor(fields.baseMen),
+								)}
 								layout="cell"
 							/>
 						</td>
@@ -268,31 +292,31 @@ function RemunerationTable({
 						</th>
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} femmes, catégorie ${catIndex + 1}`}
+							categoryId={idPrefix}
 							disabled={disabled}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-women")}
-							onBlur={blur(catIndex, fields.variableWomen)}
-							onChange={pos(catIndex, fields.variableWomen, false)}
+							{...cellHandlers(fields.variableWomen)}
 							readOnly={readOnly}
-							value={cat[fields.variableWomen]}
+							value={valueFor(fields.variableWomen)}
 						/>
 						<EuroInputCell
 							ariaLabel={`Composantes variables ${variableScope} hommes, catégorie ${catIndex + 1}`}
+							categoryId={idPrefix}
 							disabled={disabled}
 							errorAlertId={errorAlertId}
 							errors={errors}
 							id={idFor("variable-men")}
-							onBlur={blur(catIndex, fields.variableMen)}
-							onChange={pos(catIndex, fields.variableMen, false)}
+							{...cellHandlers(fields.variableMen)}
 							readOnly={readOnly}
-							value={cat[fields.variableMen]}
+							value={valueFor(fields.variableMen)}
 						/>
 						<td className={stepStyles.gapCell}>
 							<GapBadge
 								gap={computeGap(
-									cat[fields.variableWomen],
-									cat[fields.variableMen],
+									valueFor(fields.variableWomen),
+									valueFor(fields.variableMen),
 								)}
 								layout="cell"
 							/>
@@ -323,6 +347,8 @@ type WorkforceRowProps = {
 	disabled: boolean;
 	readOnly: boolean;
 	pos: Props["onPositiveNumberChange"];
+	blur: Props["onHeadcountBlur"];
+	onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 function CategoryWorkforceRow({
@@ -332,6 +358,8 @@ function CategoryWorkforceRow({
 	disabled,
 	readOnly,
 	pos,
+	blur,
+	onKeyDown,
 }: WorkforceRowProps) {
 	const women = Number.parseInt(cat[row.womenField], 10);
 	const men = Number.parseInt(cat[row.menField], 10);
@@ -345,10 +373,13 @@ function CategoryWorkforceRow({
 			<input
 				aria-label={`${workforceFieldLabel(row.workforceRow, sex)}, catégorie ${catIndex + 1}`}
 				className={`fr-input ${common.numericInput}`}
+				data-category-headcount-input={`cat-${catIndex}`}
 				disabled={disabled}
 				id={categoryDataFieldId(catIndex, field)}
 				inputMode="numeric"
+				onBlur={blur(catIndex)}
 				onChange={pos(catIndex, field, true)}
+				onKeyDown={onKeyDown}
 				pattern="[0-9]*"
 				readOnly={readOnly}
 				type="text"
@@ -373,13 +404,52 @@ export function CategoryDataTable({
 	category: cat,
 	categoryIndex: catIndex,
 	onPositiveNumberChange: pos,
+	onHeadcountBlur: headcountBlur,
 	onDecimalBlur: blur,
 	disabled = false,
+	payApplicable = true,
 	readOnly = false,
 	errorAlertId,
 	errors,
 }: Props) {
 	const idPrefix = `cat-${catIndex}`;
+	const payStatusRef = useRef<HTMLDivElement>(null);
+	const tabbedHeadcountRef = useRef(false);
+	const handleHeadcountKeyDown = (
+		event: React.KeyboardEvent<HTMLInputElement>,
+	) => {
+		tabbedHeadcountRef.current = event.key === "Tab" && !event.shiftKey;
+	};
+	const handleHeadcountBlur = (index: number) => {
+		const onBlur = headcountBlur(index);
+		return (event: React.FocusEvent<HTMLInputElement>): undefined => {
+			const nextTarget = event.relatedTarget;
+			const nextIsCategoryPayInput =
+				nextTarget instanceof HTMLElement &&
+				nextTarget.dataset.categoryPayInput === idPrefix;
+			const shouldRecoverFocus =
+				!payApplicable &&
+				tabbedHeadcountRef.current &&
+				(nextIsCategoryPayInput || nextTarget === null);
+
+			tabbedHeadcountRef.current = false;
+			const payWasCleared = onBlur(event) === true;
+			if (!shouldRecoverFocus || !payWasCleared) return undefined;
+
+			// Clearing a category on blur disables the pay inputs that the browser
+			// selected as the next tab stop. Recover focus on the explanatory status
+			// region after the browser has completed its focus transition.
+			requestAnimationFrame(() => {
+				if (
+					document.activeElement === document.body ||
+					(nextIsCategoryPayInput && document.activeElement === nextTarget)
+				) {
+					payStatusRef.current?.focus();
+				}
+			});
+			return undefined;
+		};
+	};
 
 	return (
 		<div className={common.dataSection}>
@@ -407,10 +477,12 @@ export function CategoryDataTable({
 					<tbody>
 						{CATEGORY_WORKFORCE_ROWS.map((row) => (
 							<CategoryWorkforceRow
+								blur={handleHeadcountBlur}
 								cat={cat}
 								catIndex={catIndex}
 								disabled={disabled}
 								key={row.workforceRow.basis}
+								onKeyDown={handleHeadcountKeyDown}
 								pos={pos}
 								readOnly={readOnly}
 								row={row}
@@ -420,11 +492,21 @@ export function CategoryDataTable({
 				</TableFrame>
 			</div>
 
+			<div
+				aria-live="polite"
+				data-testid="category-pay-status"
+				ref={payStatusRef}
+				tabIndex={-1}
+			>
+				{!payApplicable && <p className="fr-mb-0">Aucun écart à calculer</p>}
+			</div>
+
 			<RemunerationTable
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled}
+				disabled={disabled || !payApplicable}
+				emptyValues={!payApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -439,7 +521,8 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled}
+				disabled={disabled || !payApplicable}
+				emptyValues={!payApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}
