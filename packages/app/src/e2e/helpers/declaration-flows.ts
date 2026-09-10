@@ -1,8 +1,12 @@
 import { type Page, test } from "@playwright/test";
-
+import {
+	DECLARATION_REMUNERATION,
+	remunerationStepHref,
+} from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
 // modules the barrel pulls in through its React components.
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
+import { urlGlob } from "./routes";
 
 /**
  * Fill all pay gap textboxes on steps 2 and 3. Every row is equal (no gap) by
@@ -173,8 +177,8 @@ export async function submitStepsThroughPayGaps(
 ) {
 	await test.step("étape 1 — effectifs", async () => {
 		// Navigate to create/resume declaration → redirects to step 1
-		await page.goto("/declaration-remuneration");
-		await page.waitForURL("**/declaration-remuneration/etape/1");
+		await page.goto(DECLARATION_REMUNERATION);
+		await page.waitForURL(urlGlob(remunerationStepHref(1)));
 		for (const basis of ["annuelle", "horaire"] as const) {
 			await page
 				.getByRole("textbox", {
@@ -189,7 +193,7 @@ export async function submitStepsThroughPayGaps(
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await confirmPrefillResetIfAsked(page);
-		await page.waitForURL("**/declaration-remuneration/etape/2");
+		await page.waitForURL(urlGlob(remunerationStepHref(2)));
 	});
 
 	await test.step("étape 2 — écarts de rémunération", async () => {
@@ -198,7 +202,7 @@ export async function submitStepsThroughPayGaps(
 			annualMeanMen: options.annualMeanGap ? "1100" : "1000",
 		});
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/3");
+		await page.waitForURL(urlGlob(remunerationStepHref(3)));
 	});
 
 	await test.step("étape 3 — composantes variables", async () => {
@@ -206,7 +210,7 @@ export async function submitStepsThroughPayGaps(
 		await page.getByRole("textbox", { name: "Bénéficiaires femmes" }).fill("5");
 		await page.getByRole("textbox", { name: "Bénéficiaires hommes" }).fill("5");
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/4");
+		await page.waitForURL(urlGlob(remunerationStepHref(4)));
 	});
 }
 
@@ -316,7 +320,7 @@ export async function submitIndicatorGStep(
 	await test.step("étape 5 — écarts par catégorie", async () => {
 		await fillStep5Categories(page, options);
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/6");
+		await page.waitForURL(urlGlob(remunerationStepHref(6)));
 	});
 }
 
@@ -330,7 +334,7 @@ export async function reachStep6Recap(
 	options: { hasGap: boolean },
 ) {
 	await submitStepsThroughQuartiles(page);
-	await page.waitForURL("**/declaration-remuneration/etape/5");
+	await page.waitForURL(urlGlob(remunerationStepHref(5)));
 	await submitIndicatorGStep(page, options);
 }
 
@@ -349,7 +353,7 @@ export async function reachRecapWithoutGap(
 		return;
 	}
 	await submitStepsThroughQuartiles(page);
-	await page.waitForURL("**/declaration-remuneration/etape/6");
+	await page.waitForURL(urlGlob(remunerationStepHref(6)));
 }
 
 /**
@@ -360,7 +364,7 @@ export async function reachRecapWithoutGap(
  */
 export async function reachStep6ComplianceRecap(page: Page) {
 	await submitStepsThroughQuartiles(page, { annualMeanGap: true });
-	await page.waitForURL("**/declaration-remuneration/etape/5");
+	await page.waitForURL(urlGlob(remunerationStepHref(5)));
 	await submitIndicatorGStep(page, { hasGap: true });
 }
 

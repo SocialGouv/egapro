@@ -1,22 +1,26 @@
 import type { DeclarationFsmStatus } from "~/modules/domain";
+import {
+	COMPLIANCE_CONFIRMATION,
+	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+	complianceStepHref,
+	DECLARATION_REMUNERATION,
+	LAST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
 import type { CompliancePathValue } from "../steps/compliancePath/constants";
 
-const DECLARATION_ENTRY_PATH = "/declaration-remuneration";
-const COMPLIANCE_CONFIRMATION_PATH =
-	"/declaration-remuneration/parcours-conformite/confirmation";
-const COMPLIANCE_PATH = "/declaration-remuneration/parcours-conformite";
-const JOINT_EVALUATION_PATH = `${COMPLIANCE_PATH}/evaluation-conjointe`;
-const FIRST_DECLARATION_RECAP_PATH = "/declaration-remuneration/etape/6";
-const SECOND_DECLARATION_RECAP_PATH = `${COMPLIANCE_PATH}/etape/3`;
-const CSE_OPINION_PATH = "/avis-cse";
-const CORRECTIVE_ACTIONS_FIRST_STEP_PATH = `${COMPLIANCE_PATH}/etape/1`;
+const FIRST_DECLARATION_RECAP_PATH = remunerationStepHref(
+	LAST_REMUNERATION_STEP,
+);
+const SECOND_DECLARATION_RECAP_PATH = complianceStepHref(3);
+const CORRECTIVE_ACTIONS_FIRST_STEP_PATH = complianceStepHref(1);
 
 // Takes the decision, not its inputs: on `hasCse` alone this sent a company
 // under 100 salariés into /avis-cse, whose layout bounced it straight back here.
-export function getPostComplianceDestination(
-	cseOpinionRequired: boolean,
-): string {
-	return cseOpinionRequired ? CSE_OPINION_PATH : COMPLIANCE_CONFIRMATION_PATH;
+export function getPostComplianceDestination(cseOpinionRequired: boolean) {
+	return cseOpinionRequired ? CSE_OPINION : COMPLIANCE_CONFIRMATION;
 }
 
 type CseOpinionPreviousContext = {
@@ -53,14 +57,14 @@ type CseOpinionPreviousContext = {
 export function getCurrentStageHref(
 	status: DeclarationFsmStatus | null,
 	cseOpinionRequired: boolean,
-): string {
+) {
 	if (status === null) {
 		return COMPLIANCE_PATH;
 	}
 
 	switch (status) {
 		case "draft":
-			return DECLARATION_ENTRY_PATH;
+			return DECLARATION_REMUNERATION;
 		case "awaiting_compliance_path_choice":
 		case "awaiting_revision_choice":
 			return COMPLIANCE_PATH;
@@ -68,9 +72,9 @@ export function getCurrentStageHref(
 			return CORRECTIVE_ACTIONS_FIRST_STEP_PATH;
 		case "joint_evaluation_chosen":
 		case "revised_joint_evaluation_chosen":
-			return JOINT_EVALUATION_PATH;
+			return COMPLIANCE_JOINT_EVALUATION;
 		case "awaiting_cse_opinion":
-			return CSE_OPINION_PATH;
+			return CSE_OPINION;
 		case "demarche_completed":
 			return getPostComplianceDestination(cseOpinionRequired);
 	}
@@ -80,10 +84,10 @@ export function getCseOpinionPreviousHref({
 	firstDeclarationPathChoice,
 	secondDeclarationPathChoice,
 	hasSubmittedSecondDeclaration,
-}: CseOpinionPreviousContext): string {
+}: CseOpinionPreviousContext) {
 	if (hasSubmittedSecondDeclaration) {
 		if (secondDeclarationPathChoice === "joint_evaluation") {
-			return JOINT_EVALUATION_PATH;
+			return COMPLIANCE_JOINT_EVALUATION;
 		}
 		if (secondDeclarationPathChoice === "justify") {
 			return COMPLIANCE_PATH;
@@ -91,7 +95,7 @@ export function getCseOpinionPreviousHref({
 		return SECOND_DECLARATION_RECAP_PATH;
 	}
 	if (firstDeclarationPathChoice === "joint_evaluation") {
-		return JOINT_EVALUATION_PATH;
+		return COMPLIANCE_JOINT_EVALUATION;
 	}
 	if (firstDeclarationPathChoice === "justify") {
 		return COMPLIANCE_PATH;
@@ -99,7 +103,7 @@ export function getCseOpinionPreviousHref({
 	return FIRST_DECLARATION_RECAP_PATH;
 }
 
-export function getCompliancePathPreviousHref(isSecondRound: boolean): string {
+export function getCompliancePathPreviousHref(isSecondRound: boolean) {
 	return isSecondRound
 		? SECOND_DECLARATION_RECAP_PATH
 		: FIRST_DECLARATION_RECAP_PATH;

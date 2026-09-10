@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 //
-// Seed declarations and journey events for the admin/public stats charts
-// (K1 taux de déclaration, K4 délai par étape, K5 taux d'abandon, K7
-// distribution des écarts, K19 funnel de complétion).
+// Seed declarations and journey events for the admin stats charts
+// (K1 taux de déclaration, K4 délai par étape, K5 taux d'abandon,
+// K19 funnel de complétion).
 //
 // Seeds ~48 declarations covering every non-terminal FSM state so the charts
 // always show a realistic distribution: wizard stucks (steps 0..5), submit

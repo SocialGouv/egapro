@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
+import type { AppHref } from "~/modules/routes";
 import styles from "./CompanyHeader.module.scss";
 import { companyLocation, formatCount, formatNaf } from "./formatters";
 
@@ -17,7 +18,7 @@ type Props = {
 	nafLabel: string | null;
 	workforceEma: number | null;
 	year: number;
-	backHref: string;
+	backHref: AppHref;
 };
 
 type Fact = { label: string; value: string };

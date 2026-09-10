@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
-
+import {
+	API_UPLOAD,
+	cseOpinionStepHref,
+	remunerationStepHref,
+} from "~/modules/routes";
 import {
 	ensureCurrentYearDeclaration,
 	resetDeclarationToDraft,
@@ -35,7 +39,7 @@ test.describe("admin impersonation — read-only guards", () => {
 		await startImpersonation(page, TEST_SIREN);
 		await expect(page.getByText(/vous mimoquez l'entreprise/i)).toBeVisible();
 
-		await page.goto("/declaration-remuneration/etape/1");
+		await page.goto(remunerationStepHref(1));
 
 		const submitButton = page.getByRole("button", { name: /suivant/i });
 		await expect(submitButton).toBeVisible();
@@ -56,7 +60,7 @@ test.describe("admin impersonation — read-only guards", () => {
 	}) => {
 		await startImpersonation(page, TEST_SIREN);
 
-		await page.goto("/avis-cse/etape/1");
+		await page.goto(cseOpinionStepHref(1));
 
 		const submitButton = page.getByRole("button", { name: /suivant/i });
 		await expect(submitButton).toBeVisible();
@@ -71,7 +75,7 @@ test.describe("admin impersonation — read-only guards", () => {
 	}) => {
 		await startImpersonation(page, TEST_SIREN);
 
-		const response = await page.request.post("/api/upload", {
+		const response = await page.request.post(API_UPLOAD, {
 			headers: {
 				"content-type": "application/pdf",
 				"x-filename": "impersonated.pdf",

@@ -1,10 +1,13 @@
 import type { ComponentType } from "react";
 
-import type { RepresentationStepSlug } from "../types";
+import type { RepresentationStep } from "~/modules/routes";
 import {
-	REPRESENTATION_STEP_SLUGS,
-	TOTAL_REPRESENTATION_STEPS,
-} from "../types";
+	DECLARATION_REPRESENTATION,
+	representationStepHref,
+	toRepresentationStep,
+} from "~/modules/routes";
+import type { RepresentationStepSlug } from "../types";
+import { REPRESENTATION_STEP_SLUGS } from "../types";
 import { Step1ReferencePeriod } from "./Step1ReferencePeriod";
 import { Step2Executives } from "./Step2Executives";
 import { Step3Members } from "./Step3Members";
@@ -16,8 +19,6 @@ export type StepDefinition = {
 	title: string;
 	Component: ComponentType;
 };
-
-export const REPRESENTATION_FUNNEL_ROOT = "/declaration-representation";
 
 export const PUBLICATION_STEP_NUMBER =
 	REPRESENTATION_STEP_SLUGS.indexOf("informations-de-publication") + 1;
@@ -47,54 +48,44 @@ export const REPRESENTATION_STEPS: StepDefinition[] =
 	}));
 
 export function isValidStep(step: number): boolean {
-	return (
-		Number.isInteger(step) && step >= 1 && step <= TOTAL_REPRESENTATION_STEPS
-	);
+	return toRepresentationStep(step) !== null;
 }
 
-export function parseStepParam(raw: string): number | undefined {
+export function parseStepParam(raw: string): RepresentationStep | undefined {
 	if (!/^\d+$/.test(raw)) return undefined;
-	const step = Number.parseInt(raw, 10);
-	return isValidStep(step) ? step : undefined;
+	return toRepresentationStep(Number.parseInt(raw, 10)) ?? undefined;
 }
 
 export function getStepDefinition(step: number): StepDefinition | undefined {
 	return isValidStep(step) ? REPRESENTATION_STEPS[step - 1] : undefined;
 }
 
-export function stepHref(step: number): string {
-	return `${REPRESENTATION_FUNNEL_ROOT}/etape/${step}`;
-}
-
-export function getPreviousStepHref(
-	step: number,
-	skipPublicationStep = false,
-): string {
-	if (step <= 1) return REPRESENTATION_FUNNEL_ROOT;
+export function getPreviousStepHref(step: number, skipPublicationStep = false) {
+	if (step <= 1) return DECLARATION_REPRESENTATION;
 	const candidate = step - 1;
 	const previous =
 		skipPublicationStep && candidate === PUBLICATION_STEP_NUMBER
 			? candidate - 1
 			: candidate;
-	return previous < 1 ? REPRESENTATION_FUNNEL_ROOT : stepHref(previous);
+	const target = toRepresentationStep(previous);
+	return target === null
+		? DECLARATION_REPRESENTATION
+		: representationStepHref(target);
 }
 
 export function getNextStep(
 	step: number,
 	skipPublicationStep = false,
-): number | undefined {
+): RepresentationStep | undefined {
 	const candidate = step + 1;
 	const next =
 		skipPublicationStep && candidate === PUBLICATION_STEP_NUMBER
 			? candidate + 1
 			: candidate;
-	return next > TOTAL_REPRESENTATION_STEPS ? undefined : next;
+	return toRepresentationStep(next) ?? undefined;
 }
 
-export function getNextStepHref(
-	step: number,
-	skipPublicationStep = false,
-): string | undefined {
+export function getNextStepHref(step: number, skipPublicationStep = false) {
 	const next = getNextStep(step, skipPublicationStep);
-	return next === undefined ? undefined : stepHref(next);
+	return next === undefined ? undefined : representationStepHref(next);
 }

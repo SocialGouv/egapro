@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatShortDateTime, isCancelled } from "~/modules/domain";
+import { adminDeclarationHref } from "~/modules/routes";
 import { STATUS_LABELS } from "./shared/constants";
 
 type Sibling = {
@@ -26,7 +27,7 @@ export function SiblingDeclarationsSection({ siblings }: Props) {
 					<li className="fr-mb-1w" key={sibling.id}>
 						<Link
 							aria-label={`Voir la déclaration du ${formatShortDateTime(sibling.updatedAt)}`}
-							href={`/admin/declarations/${sibling.id}`}
+							href={adminDeclarationHref(sibling.id)}
 						>
 							{formatShortDateTime(sibling.updatedAt)}
 						</Link>

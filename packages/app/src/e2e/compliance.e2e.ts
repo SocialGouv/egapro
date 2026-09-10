@@ -1,10 +1,18 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import {
+	API_TRANSMITTED_PDF,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+	complianceStepHref,
+	cseOpinionStepHref,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
-	COMPLIANCE_PATH,
 	completeSecondDeclaration,
 	fillCseStep1,
 	selectCompliancePath,
@@ -271,9 +279,9 @@ test.describe("[ANX-03] Path 13.a: no gap → /avis-cse Précédent → /etape/6
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/6", {
+		await page.waitForURL(urlGlob(remunerationStepHref(6)), {
 			timeout: 10_000,
 		});
 	});
@@ -292,9 +300,9 @@ test.describe("[ANX-03] Path 13.b: justify round 1 → /avis-cse Précédent →
 		test.slow();
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 	});
 });
 
@@ -312,9 +320,9 @@ test.describe("[ANX-03] Path 13.c: corrective second decl resolved → /avis-cse
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await page.getByRole("link", { name: /Précédent/ }).click();
-		await page.waitForURL(`**${COMPLIANCE_PATH}/etape/3`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(complianceStepHref(3)), { timeout: 10_000 });
 	});
 });
 
@@ -333,7 +341,7 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 		test.slow();
 		// Complete declaration without gap → auto-redirect to CSE → complete CSE
 		await completeDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, { firstDeclGapCardHidden: true });
 		await submitCseStep2(page);
 
@@ -397,9 +405,9 @@ test.describe("[ANX-04] Path 14bis: 100-149 company regains indicator G in a tri
 		await withCampaignYear(
 			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 120 },
 			async () => {
-				await page.goto("/declaration-remuneration/etape/1");
+				await page.goto(remunerationStepHref(1));
 				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-				await page.goto("/declaration-remuneration/etape/5");
+				await page.goto(remunerationStepHref(5));
 				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			},
 		);
@@ -419,11 +427,11 @@ test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinn
 		await withCampaignYear(
 			{ page, year: SIX_INDICATOR_YEAR, workforce: 75 },
 			async () => {
-				await page.goto("/declaration-remuneration/etape/1");
+				await page.goto(remunerationStepHref(1));
 				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
 				// The categories step is out of reach even by URL: it redirects to the recap.
-				await page.goto("/declaration-remuneration/etape/5");
-				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await page.goto(remunerationStepHref(5));
+				await page.waitForURL(urlGlob(remunerationStepHref(6)));
 				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
 			},
 		);
@@ -436,9 +444,9 @@ test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinn
 			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 75 },
 			async () => {
 				// Initialise the declaration first so the step 5 URL is reachable.
-				await page.goto("/declaration-remuneration/etape/1");
+				await page.goto(remunerationStepHref(1));
 				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-				await page.goto("/declaration-remuneration/etape/5");
+				await page.goto(remunerationStepHref(5));
 				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			},
 		);
@@ -505,7 +513,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await expect(
 			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
@@ -554,7 +562,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 	}) => {
 		test.slow();
 		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await expect(
 			page.getByText("Transmettre l'avis du CSE", { exact: true }),
@@ -675,8 +683,8 @@ test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opi
 	test("step-1 recap shows Défavorable as the selected opinion", async ({
 		page,
 	}) => {
-		await page.goto("/avis-cse/etape/1");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.goto(cseOpinionStepHref(1));
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await expect(
 			page.locator("#first-decl-accuracy-unfavorable"),
 		).toBeChecked();
@@ -685,7 +693,7 @@ test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opi
 	test("transmitted PDF endpoint returns a valid PDF for défavorable opinion", async ({
 		page,
 	}) => {
-		const response = await page.request.get("/api/transmitted-pdf");
+		const response = await page.request.get(API_TRANSMITTED_PDF);
 		expect(response.ok()).toBe(true);
 		expect(response.headers()["content-type"]).toContain("application/pdf");
 	});

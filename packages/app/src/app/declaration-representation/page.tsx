@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import {
-	SubjectionScreen,
-	stepHref,
-	TOTAL_REPRESENTATION_STEPS,
-} from "~/modules/declaration-representation";
+import { SubjectionScreen } from "~/modules/declaration-representation";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import {
+	clampRepresentationStep,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import { api } from "~/trpc/server";
 
 export const metadata: Metadata = {
@@ -22,12 +23,12 @@ export default async function RepresentationHomePage() {
 	);
 
 	if (!campaignOpen) {
-		redirect(stepHref(TOTAL_REPRESENTATION_STEPS));
+		redirect(representationStepHref(LAST_REPRESENTATION_STEP));
 	}
 
 	const currentStep = declaration?.currentStep ?? 0;
 	if (currentStep >= 1) {
-		redirect(stepHref(currentStep));
+		redirect(representationStepHref(clampRepresentationStep(currentStep)));
 	}
 
 	return (

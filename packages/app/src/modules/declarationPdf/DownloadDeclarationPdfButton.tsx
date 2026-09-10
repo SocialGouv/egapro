@@ -6,6 +6,7 @@ import {
 	MATOMO_EVENT_CATEGORY,
 	trackEvent,
 } from "~/modules/analytics";
+import { API_DECLARATION_PDF, routeWithQuery } from "~/modules/routes";
 import { FileDownloadLink } from "~/modules/shared";
 
 type Props = {
@@ -25,7 +26,7 @@ export function DownloadDeclarationPdfButton({
 	if (year) params.set("year", String(year));
 	if (correction) params.set("type", "correction");
 	const query = params.toString();
-	const href = query ? `/api/declaration-pdf?${query}` : "/api/declaration-pdf";
+	const href = routeWithQuery(API_DECLARATION_PDF, query);
 
 	function handleBeforeDownload(): void {
 		trackEvent({

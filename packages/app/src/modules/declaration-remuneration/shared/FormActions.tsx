@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useReadOnlyGuard } from "~/modules/auth";
+import type { AppHref } from "~/modules/routes";
 import styles from "./FormActions.module.scss";
 import { useLockContext } from "./lock/LockContext";
 
 type FormActionsProps = {
-	previousHref?: string;
-	nextHref?: string;
+	previousHref?: AppHref;
+	nextHref?: AppHref;
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
@@ -20,7 +21,7 @@ type FormActionsProps = {
 	 *   forward without any saved data would skip a step (issue #3230).
 	 * Ignored when `nextHref` is set (the button is already a Link).
 	 */
-	mimoquageNextHref?: string;
+	mimoquageNextHref?: AppHref;
 };
 
 export function FormActions({

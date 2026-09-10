@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-
+import {
+	ADMIN_SETTINGS,
+	ADMIN_STATS,
+	API_E2E_CLOCK,
+	MY_SPACE,
+} from "~/modules/routes";
 import {
 	pinCampaignYear,
 	setServerCampaignYear,
@@ -31,7 +36,7 @@ test.describe("Campaign clock — pilotable campaign year", () => {
 		// /admin/stats builds its campaign-year list server-side from
 		// getCurrentYear(); a checkbox for a future year can only exist if the
 		// Server Component observed the override.
-		await page.goto("/admin/stats");
+		await page.goto(ADMIN_STATS);
 		await expect(
 			page.getByRole("checkbox", {
 				exact: true,
@@ -48,7 +53,7 @@ test.describe("Campaign clock — pilotable campaign year", () => {
 		// Server surface: CompanyInfoBanner is a Server Component whose workforce
 		// label is rendered from the server-side getWorkforceYear() = N-1, so a
 		// campaign pinned on PINNED_YEAR shows the prior calendar year.
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(
 			page.locator("dl").filter({ hasText: "Effectif annuel moyen" }).first(),
 		).toContainText(`Effectif annuel moyen en ${PINNED_YEAR - 1} :`);
@@ -57,7 +62,7 @@ test.describe("Campaign clock — pilotable campaign year", () => {
 		// getCurrentYear() + 10, computed inside a client component. The pinned
 		// year's +10 option can only exist if the browser bundle read the injected
 		// override (otherwise hydration would recompute it from the system clock).
-		await page.goto("/admin/parametres");
+		await page.goto(ADMIN_SETTINGS);
 		await expect(page.locator("#campaign-year-selector")).toContainText(
 			`${PINNED_YEAR + 10}`,
 		);
@@ -66,17 +71,17 @@ test.describe("Campaign clock — pilotable campaign year", () => {
 	test("DELETE /api/e2e-clock reverts the year to the system clock", async ({
 		request,
 	}) => {
-		const calendarYear = (await (await request.get("/api/e2e-clock")).json())
+		const calendarYear = (await (await request.get(API_E2E_CLOCK)).json())
 			.campaignYear;
 
 		await setServerCampaignYear(SERVER_PINNED_YEAR);
-		expect(
-			(await (await request.get("/api/e2e-clock")).json()).campaignYear,
-		).toBe(SERVER_PINNED_YEAR);
+		expect((await (await request.get(API_E2E_CLOCK)).json()).campaignYear).toBe(
+			SERVER_PINNED_YEAR,
+		);
 
 		await setServerCampaignYear(null);
-		expect(
-			(await (await request.get("/api/e2e-clock")).json()).campaignYear,
-		).toBe(calendarYear);
+		expect((await (await request.get(API_E2E_CLOCK)).json()).campaignYear).toBe(
+			calendarYear,
+		);
 	});
 });

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { LoginPage, sanitizeCallbackUrl } from "~/modules/login";
+import { MY_SPACE, runtimeRoute } from "~/modules/routes";
 import { auth } from "~/server/auth";
 
 export const metadata: Metadata = { title: "Connexion" };
@@ -17,7 +18,7 @@ export default async function Page({ searchParams }: PageProps) {
 	const session = await auth();
 
 	if (session?.user) {
-		redirect(safeCallbackUrl ?? "/mon-espace");
+		redirect(safeCallbackUrl ? runtimeRoute(safeCallbackUrl) : MY_SPACE);
 	}
 
 	return <LoginPage callbackUrl={safeCallbackUrl} />;

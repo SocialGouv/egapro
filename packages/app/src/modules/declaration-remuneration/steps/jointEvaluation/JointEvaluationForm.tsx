@@ -12,10 +12,10 @@ import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { apiV1FileHref, COMPLIANCE_PATH } from "~/modules/routes";
 import { FileUpload, SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import styles from "./JointEvaluationForm.module.scss";
-
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
 const EMPTY_DB_VALUES = {} as Record<string, never>;
@@ -149,7 +149,7 @@ export function JointEvaluationForm({
 							<p className="fr-mb-1v">
 								<a
 									className="fr-link"
-									href={`/api/v1/files/${existingFile.id}`}
+									href={apiV1FileHref(existingFile.id)}
 									rel="noopener noreferrer"
 									target="_blank"
 									title={`Visualiser ${existingFile.fileName}`}
@@ -244,7 +244,7 @@ export function JointEvaluationForm({
 					<div className={common.flexBetween}>
 						<Link
 							className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-							href="/declaration-remuneration/parcours-conformite"
+							href={COMPLIANCE_PATH}
 						>
 							Précédent
 						</Link>

@@ -12,6 +12,7 @@ import {
 	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
+import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
@@ -90,7 +91,7 @@ export function Step6Review({
 					getOptionalCompanySizeRange(companyWorkforce),
 				),
 			);
-			router.push("/declaration-remuneration/parcours-conformite");
+			router.push(COMPLIANCE_PATH);
 		},
 	});
 

@@ -34,6 +34,7 @@ vi.mock("../categoryModelTracking", () => ({
 	trackCategoryImportDuration: vi.fn(),
 }));
 
+import { remunerationStepHref } from "~/modules/routes";
 import { CategoryForm } from "../CategoryForm";
 
 function row(name: string): EmployeeCategoryRow {
@@ -96,7 +97,7 @@ function renderForm(initialCategories: EmployeeCategoryRow[]) {
 			instructionText="Renseignez vos catégories."
 			isSubmitting={false}
 			onSubmit={vi.fn()}
-			previousHref="/precedent"
+			previousHref={remunerationStepHref(4)}
 			referenceYear={2025}
 			stepper={null}
 			title="Catégories de salariés"

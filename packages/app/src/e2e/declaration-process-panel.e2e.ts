@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
+import { MY_SPACE } from "~/modules/routes";
 import { TEST_USER_PHONE } from "./constants";
 import {
 	pinCampaignYear,
@@ -359,7 +360,7 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 	}
 
 	async function openDocumentsPanel(page: Page) {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(documentsTrigger(page)).toBeVisible();
 		await waitForDsfrModal(page, DOCUMENTS_PANEL_ID);
 		await clickAndExpectDialogOpen(

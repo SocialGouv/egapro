@@ -60,3 +60,17 @@ export {
 	type NotificationType,
 	type RenderedMail,
 };
+
+// The link builders are re-exported so the app can assert that they still point
+// at its real routes: `packages/app/src/modules/routes/__tests__/notificationsParity.test.ts`.
+// The dependency only runs that way — this package cannot import `~/modules/routes`.
+export {
+	getAvisCseUrl,
+	getCompliancePathUrl,
+	getCorrectiveActionsUrl,
+	getDeclarationUrl,
+	getJointEvaluationUrl,
+	getLoginUrl,
+	getMySpaceUrl,
+	getPublicUrl,
+} from "./shared/urls.js";

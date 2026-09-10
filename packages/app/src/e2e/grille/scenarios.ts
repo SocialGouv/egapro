@@ -1,7 +1,14 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+	COMPLIANCE_CONFIRMATION,
+	COMPLIANCE_PATH,
+	CSE_OPINION,
+	cseOpinionStepHref,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { withCampaignYear } from "../helpers/campaign-year";
 import {
-	COMPLIANCE_PATH,
 	completeSecondDeclaration,
 	fillCseStep1,
 	selectCompliancePath,
@@ -19,6 +26,7 @@ import {
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "../helpers/dsfr";
 import { recapStepperLabel } from "../helpers/indicator-g";
 import { expectCompletionReceiptWhenMailChainUp } from "../helpers/receipts";
+import { urlGlob, urlPattern } from "../helpers/routes";
 import type { Coordinate } from "./coordinates";
 
 export type ScenarioContext = {
@@ -28,7 +36,7 @@ export type ScenarioContext = {
 	opinion?: "favorable" | "unfavorable";
 };
 
-const CONFIRMATION_PATH = `${COMPLIANCE_PATH}/confirmation`;
+const CONFIRMATION_PATH = COMPLIANCE_CONFIRMATION;
 const DEMARCHE_COMPLETED = /Votre parcours .* est (désormais )?terminé/;
 
 async function finDeDemarche(
@@ -84,7 +92,7 @@ function transmittedRow(page: Page, label: string) {
 }
 
 async function openPanneauDemarche(page: Page): Promise<Locator> {
-	await page.goto("/mon-espace");
+	await page.goto(MY_SPACE);
 	await waitForDsfrModal(page, PROCESS_PANEL_ID);
 	const trigger = page.getByRole("button", { name: "Rémunération" }).first();
 	await expect(trigger).toBeVisible();
@@ -167,21 +175,21 @@ export const FICHE_SCENARIOS = {
 	"CAS-01": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: false });
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 		// Every field of the /avis-cse funnel is required, so a company without a
 		// CSE cannot fill it in — the screen must stay out of reach even by URL.
 		await test.step("fin de démarche", async () => {
-			await page.goto("/avis-cse/etape/1");
-			await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+			await page.goto(cseOpinionStepHref(1));
+			await page.waitForURL(urlGlob(CONFIRMATION_PATH), { timeout: 10_000 });
 		});
 		await expectPanneauFinDeDemarcheSansParcours(page);
 	},
 
 	"CAS-02": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, { firstDeclGapCardHidden: true });
 		await submitCseStep2(page);
 		await finDeDemarche(page, { completed: true });
@@ -194,7 +202,7 @@ export const FICHE_SCENARIOS = {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-justify");
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 		// The justify-without-CSE path ends here, so the acknowledgement of #4293 is
@@ -207,14 +215,14 @@ export const FICHE_SCENARIOS = {
 
 	"CAS-04": async ({ page, opinion = "favorable" }) => {
 		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		await expectComplianceOptions(page, {
 			corrective: true,
 			joint: true,
 			justify: true,
 		});
 		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		// Pin the opinion fieldset — it only renders once consultation is truthy —
 		// before reading the negative assertion below: the loading placeholder
 		// would otherwise satisfy toHaveCount(0) without proving anything.
@@ -244,14 +252,14 @@ export const FICHE_SCENARIOS = {
 		});
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
-		await finDeDemarche(page, { url: `**${CONFIRMATION_PATH}` });
+		await finDeDemarche(page, { url: urlGlob(CONFIRMATION_PATH) });
 	},
 
 	"CAS-06": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page);
 		await submitCseStep2(page);
 		await finDeDemarche(page, { completed: true });
@@ -261,14 +269,14 @@ export const FICHE_SCENARIOS = {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
-		await finDeDemarche(page, { url: `**${CONFIRMATION_PATH}` });
+		await finDeDemarche(page, { url: urlGlob(CONFIRMATION_PATH) });
 	},
 
 	"CAS-08": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: false });
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, {
 			hasSecondDeclaration: true,
 			secondDeclGapCardHidden: true,
@@ -288,10 +296,10 @@ export const FICHE_SCENARIOS = {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		await selectCompliancePath(page, "path-justify");
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 		// Round 2 closes on the same justify-without-CSE transition, so the receipt
@@ -306,7 +314,7 @@ export const FICHE_SCENARIOS = {
 		await completeDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-corrective");
 		await completeSecondDeclaration(page, { hasGap: true });
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 		await page.goto(COMPLIANCE_PATH);
 		await expectComplianceOptions(page, {
 			corrective: false,
@@ -314,7 +322,7 @@ export const FICHE_SCENARIOS = {
 			justify: true,
 		});
 		await selectCompliancePath(page, "path-justify");
-		await page.waitForURL("**/avis-cse/etape/1", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
 		await expect(page.locator("#first-decl-gap-question-legend")).toBeVisible();
 		await expect(page.locator("#second-decl-gap-question-legend")).toHaveCount(
 			0,
@@ -340,7 +348,7 @@ export const FICHE_SCENARIOS = {
 		await completeSecondDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
-		await finDeDemarche(page, { url: `**${CONFIRMATION_PATH}` });
+		await finDeDemarche(page, { url: urlGlob(CONFIRMATION_PATH) });
 	},
 
 	"CAS-12": async ({ page }) => {
@@ -349,7 +357,7 @@ export const FICHE_SCENARIOS = {
 		await completeSecondDeclaration(page, { hasGap: true });
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
-		await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
 		await fillCseStep1(page, { hasSecondDeclaration: true });
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
@@ -377,7 +385,7 @@ export const FICHE_SCENARIOS = {
 				).toBeVisible();
 				await submitFromStep6Recap(page);
 				await finDeDemarche(page, {
-					url: `**${CONFIRMATION_PATH}`,
+					url: urlGlob(CONFIRMATION_PATH),
 					completed: true,
 				});
 			},
@@ -393,7 +401,9 @@ export const FICHE_SCENARIOS = {
 					indicatorGRequired: coordinate.indicatorGRequired,
 				});
 				await submitFromStep6Recap(page);
-				await page.waitForURL("**/avis-cse/**", { timeout: 10_000 });
+				await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
+					timeout: 10_000,
+				});
 				await fillCseStep1(page, { firstDeclGapCardHidden: true });
 				await submitCseStep2(page);
 				await finDeDemarche(page, { completed: true });
@@ -413,7 +423,7 @@ export const FICHE_SCENARIOS = {
 		).toBeVisible();
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 	},
@@ -432,22 +442,22 @@ export const FICHE_SCENARIOS = {
 			page.getByRole("heading", { name: "Actions à engager" }),
 		).toHaveCount(0);
 
-		await page.goto("/declaration-remuneration/etape/6");
+		await page.goto(remunerationStepHref(6));
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 
 		// The compliance path choice is unreachable even by URL: below 100 salariés
 		// a gap ≥ 5 % opens none of the compliance surfaces.
 		await page.goto(COMPLIANCE_PATH);
-		await page.waitForURL(`**${CONFIRMATION_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(CONFIRMATION_PATH), { timeout: 10_000 });
 
 		// Declaring a CSE leaves the effectif as the only unmet term of
 		// isCseOpinionRequired, so this probe fails if the 100-salarié gate goes away.
 		await setCompanyHasCse(true);
-		const cseFunnelResponse = await page.goto("/avis-cse/etape/1");
+		const cseFunnelResponse = await page.goto(cseOpinionStepHref(1));
 		expect(cseFunnelResponse?.ok()).toBe(true);
 		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
 		await expect(
@@ -461,9 +471,9 @@ export const FICHE_SCENARIOS = {
 
 	"CAS-13-6IND": async ({ page, coordinate }) => {
 		const indicatorGRequired = coordinate.indicatorGRequired;
-		await page.goto("/declaration-remuneration/etape/5");
+		await page.goto(remunerationStepHref(5));
 		if (indicatorGRequired) {
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
 			await expect(
 				page.getByRole("heading", {
 					name: /Écart de rémunération par catégories de salariés/,
@@ -472,7 +482,7 @@ export const FICHE_SCENARIOS = {
 		} else {
 			// Off those years step 5 is out of reach even by URL — unlike the < 50
 			// tier, which always carries it.
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/6$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(6)));
 		}
 
 		await reachRecapWithoutGap(page, { indicatorGRequired });
@@ -481,7 +491,7 @@ export const FICHE_SCENARIOS = {
 		).toBeVisible();
 		await submitFromStep6Recap(page);
 		await finDeDemarche(page, {
-			url: `**${CONFIRMATION_PATH}`,
+			url: urlGlob(CONFIRMATION_PATH),
 			completed: true,
 		});
 	},

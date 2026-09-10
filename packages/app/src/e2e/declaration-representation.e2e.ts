@@ -1,14 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
-
+import { urlGlob } from "~/e2e/helpers/routes";
 import {
 	getReferenceYearFor,
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
+import { DECLARATION_REPRESENTATION, MY_SPACE } from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
 // modules the barrel pulls in through its React components.
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
-
 import { TEST_SIREN } from "./constants";
 import {
 	getCurrentDbYear,
@@ -39,7 +39,7 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 
 const PANEL_ID = "representation-process-panel";
 const SUBMIT_MODAL_ID = "representation-submit-modal";
-const FUNNEL_ROOT = "/declaration-representation";
+const FUNNEL_ROOT = DECLARATION_REPRESENTATION;
 
 // Dev gateway shared secret — the deterministic local value from `.env.example`,
 // injected in prod by the APISIX `proxy-rewrite` plugin. Not a secret.
@@ -117,7 +117,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			REPRESENTATION_SUBJECTION_WORKFORCE_MIN - 1,
 			campaignYear - 1,
 		);
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(
 			page.getByRole("button", { name: "Rémunération", exact: true }),
 		).toBeVisible();
@@ -129,7 +129,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 			campaignYear - 1,
 		);
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await expect(
 			page.getByRole("button", { name: "Représentation", exact: true }),
 		).toBeVisible();
@@ -138,7 +138,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	test("the Mon espace row opens the démarche panel and offers to start", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 
 		const row = page.getByRole("row", { name: /Représentation/ });
@@ -250,6 +250,11 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			);
 			await expect(
 				page.getByText("Non conforme", { exact: true }),
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					`Objectif de ${getRepresentationTarget(campaignYear)} % non atteint`,
+				),
 			).toBeVisible();
 
 			await goNext(page);
@@ -405,7 +410,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 	});
 
 	test("Mon espace reflects the transmitted declaration", async ({ page }) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 
 		await expect(
@@ -540,19 +545,36 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		page,
 	}) => {
 		await page.goto(FUNNEL_ROOT);
-		await chooseRadio(page, /Moins de 1 000 salariés/);
 		await expect(
-			page.getByText(/Vous n'êtes pas assujetti à la publication/),
+			page.getByText(
+				"Indiquez si votre entreprise a employé au moins 1 000 salariés durant les trois derniers exercices consécutifs.",
+			),
 		).toBeVisible();
 
+		await chooseRadio(page, /Moins de 1 000 salariés/);
+
+		const notice = page
+			.locator("div.fr-background-alt--blue-france")
+			.filter({ hasText: "Votre entreprise n'est pas assujettie" });
+		await expect(notice.locator("p")).toHaveText([
+			"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			"Vous pouvez cliquer sur valider pour confirmer.",
+		]);
+		// Two independent sentences, two paragraphs: the <br /> this wording replaced
+		// fabricated a structure that read as a single block.
+		await expect(notice.locator("br")).toHaveCount(0);
+		// The consigne no longer dates itself with the campaign year.
+		await expect(notice).not.toContainText(String(campaignYear));
+
+		await expect(page.getByRole("button", { name: "Suivant" })).toHaveCount(0);
 		await page.getByRole("button", { name: "Valider" }).click();
-		await page.waitForURL("**/mon-espace");
+		await page.waitForURL(urlGlob(MY_SPACE));
 	});
 
 	test("Mon espace records the non-subjection as a result, with no deadline and no récapitulatif", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 
 		const row = page.getByRole("row", { name: /Représentation/ });
 		await expect(row).toContainText("Non-assujetti");
@@ -574,7 +596,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 	test("the panel keeps the subjection step alone and offers to reopen the démarche", async ({
 		page,
 	}) => {
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, PANEL_ID);
 		await clickAndExpectDialogOpen(
 			page,
@@ -584,8 +606,12 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 
 		const panel = page.locator(`#${PANEL_ID}`);
 		await expect(
-			panel.getByText(/Vous n'êtes pas assujetti à la publication/),
+			panel.getByText(
+				"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			),
 		).toBeVisible();
+		// A follow-up view carries no Valider button, so it drops the funnel's second sentence.
+		await expect(panel.getByText(/cliquer sur valider/)).toHaveCount(0);
 		await expect(
 			panel.getByText("Vérification de l'assujettissement"),
 		).toBeVisible();
@@ -619,7 +645,7 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		await goNext(page);
 		await expectOnStep(page, 2, "Écarts de représentation - Cadres dirigeants");
 
-		await page.goto("/mon-espace");
+		await page.goto(MY_SPACE);
 		const row = page.getByRole("row", { name: /Représentation/ });
 		await expect(row).toContainText(
 			"Écarts de représentation - Cadres dirigeants",

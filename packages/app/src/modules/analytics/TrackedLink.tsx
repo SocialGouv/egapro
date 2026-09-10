@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
-
+import type { AppHref } from "~/modules/routes";
 import { MATOMO_ACTION, MATOMO_EVENT_CATEGORY } from "./shared/events";
 import { trackEvent } from "./trackEvent";
 
-type Props = AnchorHTMLAttributes<HTMLAnchorElement> & {
-	href: string;
+type Props = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+	href: AppHref;
 	// Stable, non-PII slug identifying the help link (e.g. "objective_criteria").
 	// Never the URL — the destination may contain query params we must not log.
 	trackingId: string;

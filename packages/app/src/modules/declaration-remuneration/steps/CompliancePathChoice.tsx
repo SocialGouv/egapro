@@ -17,10 +17,13 @@ import {
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import {
+	COMPLIANCE_JOINT_EVALUATION,
+	complianceStepHref,
+} from "~/modules/routes";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-
 import common from "../shared/common.module.scss";
 import {
 	getCompliancePathPreviousHref,
@@ -119,11 +122,9 @@ export function CompliancePathChoice({
 		onSuccess: (_, { path }) => {
 			clearDraft();
 			if (path === "corrective_action") {
-				router.push("/declaration-remuneration/parcours-conformite/etape/1");
+				router.push(complianceStepHref(1));
 			} else if (path === "joint_evaluation") {
-				router.push(
-					"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
-				);
+				router.push(COMPLIANCE_JOINT_EVALUATION);
 			} else {
 				// "justify": when an opinion is due it remains to be deposited on
 				// /avis-cse; otherwise the FSM already completed the démarche.
@@ -270,6 +271,7 @@ export function CompliancePathChoice({
 				<FormErrors mutationError={mutation.error?.message} />
 
 				<FormActions
+					className="fr-mt-0"
 					isSubmitting={mutation.isPending}
 					mimoquageNextHref={
 						initialPath

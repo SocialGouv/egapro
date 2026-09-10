@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 
 import type { RepresentationDraft } from "~/modules/declaration-representation/types";
+import type { AppHref } from "~/modules/routes";
 
 export type StepValidator = () => boolean | Promise<boolean>;
 
@@ -14,7 +15,7 @@ export type RepresentationDraftContextValue = {
 	isSaving: boolean;
 	isPendingSave: boolean;
 	isReadOnly: boolean;
-	previousHref: string;
+	previousHref: AppHref;
 	registerStepValidator: (validator: StepValidator | null) => void;
 };
 
