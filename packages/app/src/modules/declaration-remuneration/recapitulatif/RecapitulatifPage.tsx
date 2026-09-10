@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatWorkforceForUser } from "~/modules/domain";
+import { MY_SPACE } from "~/modules/routes";
 import common from "../shared/common.module.scss";
 import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { formatCategorySource } from "../steps/step5/sources";
@@ -201,7 +202,7 @@ export function RecapitulatifPage({
 
 			<Link
 				className={`fr-btn fr-btn--secondary ${styles.bottomAction}`}
-				href="/mon-espace"
+				href={MY_SPACE}
 			>
 				Mon espace
 			</Link>

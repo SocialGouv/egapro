@@ -11,6 +11,7 @@ import {
 
 import { ADMIN_HOME_PATH, triggerAdminStepUp } from "~/modules/admin/access";
 import { isAdminMfaFresh } from "~/modules/domain";
+import { API_AUTH_LOGOUT, MY_SPACE_COMPANIES } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -179,7 +180,7 @@ export function UserAccountMenu({
 							)}
 							<Link
 								className={styles.menuLink}
-								href="/mon-espace/mes-entreprises"
+								href={MY_SPACE_COMPANIES}
 								onClick={close}
 								role="menuitem"
 								tabIndex={-1}
@@ -202,7 +203,7 @@ export function UserAccountMenu({
 							    so we need a full browser navigation, not a client-side RSC fetch. */}
 							<a
 								className={styles.logoutLink}
-								href="/api/auth/logout"
+								href={API_AUTH_LOGOUT}
 								role="menuitem"
 								tabIndex={-1}
 							>

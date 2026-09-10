@@ -10,6 +10,17 @@ global:
   # One-off, idempotent post-deploy repair for location columns added by
   # migration 0047. It only processes incomplete rows and can safely rerun.
   companyLocationBackfillEnabled: true
+  # Post-deploy repair of the NAF pair (#4087): rows written between #3077 and
+  # #4087 carry a NAF 2025 code next to a rév. 2 label. No column records which
+  # nomenclature wrote a row, so every row with a NAF code is re-read from the
+  # registry on every deploy — writes are a no-op on an already-aligned row,
+  # but the registry call itself is not, unlike companyLocationBackfillEnabled
+  # above (whose predicate shrinks to the residual after the first run). This
+  # is NOT self-limiting: flip this flag to false for an environment once a
+  # run there has been confirmed complete (job logs: "N updated, M already
+  # aligned, 0 failed"), or every later deploy re-sweeps the whole company
+  # table against a third-party API for no further correction.
+  companyNafBackfillEnabled: true
   # Deterministic Observatoire fixtures. Kept off by default and enabled only
   # by the dev overlay used for ephemeral branch review apps.
   observatoryDemoSeedEnabled: false

@@ -3,6 +3,15 @@ import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
 import { resolveAdminAccess } from "~/modules/domain";
+import {
+	ADMIN,
+	ADMIN_MFA_RESUME,
+	API_PUBLIC_DECLARATIONS,
+	API_SEARCH,
+	API_V1_PREFIX,
+	LOGIN,
+	MY_SPACE,
+} from "~/modules/routes";
 
 /**
  * Next.js Edge middleware handling three concerns:
@@ -33,15 +42,15 @@ import { resolveAdminAccess } from "~/modules/domain";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (pathname === "/api/search") {
+	if (pathname === API_SEARCH) {
 		return searchRedirect(request);
 	}
 
-	if (pathname.startsWith("/api/v1/")) {
+	if (pathname.startsWith(API_V1_PREFIX)) {
 		return gatewayMiddleware(request);
 	}
 
-	if (pathname.startsWith("/admin")) {
+	if (pathname.startsWith(ADMIN)) {
 		return adminMiddleware(request);
 	}
 
@@ -49,7 +58,7 @@ export async function middleware(request: NextRequest) {
 }
 
 function searchRedirect(request: NextRequest) {
-	const target = new URL("/api/public/declarations", request.url);
+	const target = new URL(API_PUBLIC_DECLARATIONS, request.url);
 	for (const [key, value] of request.nextUrl.searchParams.entries()) {
 		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
 	}
@@ -57,7 +66,7 @@ function searchRedirect(request: NextRequest) {
 }
 
 function redirectToLogin(request: NextRequest) {
-	const loginUrl = new URL("/login", request.url);
+	const loginUrl = new URL(LOGIN, request.url);
 	loginUrl.searchParams.set(
 		"callbackUrl",
 		`${request.nextUrl.pathname}${request.nextUrl.search}`,
@@ -77,10 +86,10 @@ async function adminMiddleware(request: NextRequest) {
 			return redirectToLogin(request);
 		// Silent refusal: a user without the grant is never told the backoffice exists.
 		case "monEspace":
-			return NextResponse.redirect(new URL("/mon-espace", request.url));
+			return NextResponse.redirect(new URL(MY_SPACE, request.url));
 		// Explicit refusal on an Egapro screen: reopening ProConnect mid-navigation is ruled out by the product.
 		case "resume": {
-			const resumeUrl = new URL("/acces-backoffice", request.url);
+			const resumeUrl = new URL(ADMIN_MFA_RESUME, request.url);
 			resumeUrl.searchParams.set(
 				"retour",
 				`${request.nextUrl.pathname}${request.nextUrl.search}`,
@@ -149,6 +158,10 @@ function constantTimeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
+// Next reads this at build time and cannot evaluate an imported constant, so
+// these patterns are the one place route paths stay written out; the "matcher
+// coverage" test in `__tests__/middleware.test.ts` pins them against
+// `~/modules/routes`.
 export const config = {
 	matcher: [
 		"/admin/:path*",

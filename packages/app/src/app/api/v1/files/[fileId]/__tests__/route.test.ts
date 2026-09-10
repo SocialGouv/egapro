@@ -177,15 +177,20 @@ describe("GET /api/v1/files/:fileId", () => {
 			);
 		});
 
-		it("returns 401 when the session carries no usable SIREN", async () => {
+		it.each([
+			["no siret at all", null],
+			["a siret carrying a letter", "1234A678900015"],
+			["a siret too short to hold a SIREN", "1234"],
+		])("returns 401 when the session carries %s", async (_label, siret) => {
 			mocks.auth.mockResolvedValue({
-				user: { id: "user-1", email: "user@example.com", siret: null },
+				user: { id: "user-1", email: "user@example.com", siret },
 			});
 
 			const response = await callGet(buildRequest());
 
 			expect(response.status).toBe(401);
 			expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
+			expect(mocks.fetchFileById).not.toHaveBeenCalled();
 		});
 	});
 

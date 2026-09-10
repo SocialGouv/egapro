@@ -1,6 +1,6 @@
 import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
-import type { LockHolder } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { LockHolderDisplay } from "~/modules/declaration-remuneration/shared/lock/types";
 import {
 	formatWorkforceForUser,
 	getObligationWorkforce,
@@ -9,7 +9,7 @@ import {
 } from "~/modules/domain";
 import { Breadcrumb, RouteScrollReset } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
-
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./CseOpinionLayout.module.scss";
 
 type CompanyData = {
@@ -24,7 +24,7 @@ type Props = {
 	declarationYear: number;
 	children: React.ReactNode;
 	isReadOnly?: boolean;
-	lockHolder?: LockHolder | null;
+	lockHolder?: LockHolderDisplay | null;
 };
 
 export function CseOpinionLayout({
@@ -48,7 +48,7 @@ export function CseOpinionLayout({
 							{ label: "Mon espace", href: "/" },
 							{
 								label: company.name,
-								href: "/mon-espace",
+								href: MY_SPACE,
 							},
 							{
 								label: `Démarche des indicateurs de rémunération ${declarationYear}`,

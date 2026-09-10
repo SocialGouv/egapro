@@ -138,7 +138,7 @@ FAQ_ACCORDION_IDS = [
     "accordion-mesures-correction-0-1",
 ]
 # /aide resource cards (AideResourceCards.tsx `trackingId`).
-AIDE_RESOURCES = ["nouveau-site", "indicateurs-remuneration", "indicateurs-representation"]
+AIDE_RESOURCES = ["indicateurs-remuneration", "indicateurs-representation"]
 # Help-link slugs — must match TrackedLink instrumentation; /admin/stats maps them.
 HELP_SLUGS = ["cse_models", "objective_criteria", "corrective_actions", "joint_evaluation"]
 # PDF kinds (DownloadDeclarationPdfButton.tsx).

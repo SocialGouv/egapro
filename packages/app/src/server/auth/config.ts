@@ -13,6 +13,7 @@ import {
 	parseSiren,
 } from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
+import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
@@ -465,7 +466,7 @@ function getProviders(): Provider[] {
 
 export const authConfig = {
 	pages: {
-		signIn: "/login",
+		signIn: LOGIN,
 	},
 	session: {
 		strategy: "jwt",

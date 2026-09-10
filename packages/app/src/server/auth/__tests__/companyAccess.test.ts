@@ -249,3 +249,58 @@ describe("assertNotImpersonating", () => {
 		expect(() => assertNotImpersonating(session)).toThrow();
 	});
 });
+
+describe("getEffectiveSiren", () => {
+	it("returns null without a session", () => {
+		expect(getEffectiveSiren(null)).toBeNull();
+	});
+
+	it("extracts the SIREN from a well-formed SIRET", () => {
+		expect(getEffectiveSiren(makeSession({ siret: "53284719600015" }))).toBe(
+			"532847196",
+		);
+	});
+
+	it("returns null when the session carries no SIRET", () => {
+		expect(getEffectiveSiren(makeSession({ siret: null }))).toBeNull();
+	});
+
+	// Slicing a malformed SIRET used to hand back a nine-character lookalike,
+	// which then reached the database as if it were a real SIREN.
+	it.each([
+		["too short", "1234"],
+		["letters in the SIREN part", "ABCDEFGHI00015"],
+		["punctuation in the SIREN part", "532-847-19600015"],
+		["blank", "   "],
+	])("returns null for a malformed SIRET (%s)", (_label, siret) => {
+		expect(getEffectiveSiren(makeSession({ siret }))).toBeNull();
+	});
+
+	it("returns the impersonated SIREN for an admin inside the MFA window", () => {
+		expect(
+			getEffectiveSiren(
+				makeSession({
+					isAdmin: true,
+					adminMfaAt: FRESH_MFA,
+					siret: "53284719600015",
+					impersonation: { siren: "987654321", name: "Société Démo" },
+				}),
+				NOW,
+			),
+		).toBe("987654321");
+	});
+
+	it("returns null rather than a lookalike for a malformed impersonated SIREN", () => {
+		expect(
+			getEffectiveSiren(
+				makeSession({
+					isAdmin: true,
+					adminMfaAt: FRESH_MFA,
+					siret: "53284719600015",
+					impersonation: { siren: "not-a-siren", name: "Société Démo" },
+				}),
+				NOW,
+			),
+		).toBeNull();
+	});
+});

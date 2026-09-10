@@ -1,4 +1,5 @@
 import { type Browser, expect } from "@playwright/test";
+import { API_V1_EXPORT_DECLARATIONS } from "~/modules/routes";
 import { TEST_SIREN } from "../constants";
 
 // Dev gateway shared secret — the deterministic local value from `.env.example`.
@@ -8,7 +9,7 @@ import { TEST_SIREN } from "../constants";
 export const DEV_GATEWAY_SHARED_SECRET =
 	"dev-gateway-shared-secret-minimum-32-chars";
 
-export const SUIT_EXPORT_PATH = "/api/v1/export/declarations";
+export const SUIT_EXPORT_PATH = API_V1_EXPORT_DECLARATIONS;
 
 export type SuitNextStep = {
 	Identifiant_transition: string;

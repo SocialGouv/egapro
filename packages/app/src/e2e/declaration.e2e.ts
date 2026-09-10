@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs";
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
 import { getReferenceYearFor } from "~/modules/domain";
+import {
+	DECLARATION_REMUNERATION,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	clearCategoryHourlyCounts,
@@ -27,8 +33,8 @@ import {
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
-	await page.goto("/declaration-remuneration");
-	await page.waitForURL("**/declaration-remuneration/etape/**");
+	await page.goto(DECLARATION_REMUNERATION);
+	await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 	await page.goto(`/declaration-remuneration/etape/${step}`);
 	await page.waitForURL(`**/declaration-remuneration/etape/${step}`);
 	await expect(page.getByText(`Étape ${step} sur 6`)).toBeVisible();
@@ -44,8 +50,8 @@ test.describe("Declaration workflow", () => {
 
 	test.beforeEach(async ({ page }) => {
 		// Auth is handled by storageState from auth.setup.ts
-		await page.goto("/declaration-remuneration");
-		await page.waitForURL("**/declaration-remuneration/etape/**");
+		await page.goto(DECLARATION_REMUNERATION);
+		await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 	});
 
 	test("displays step 1 with the N-1 reference period after login (#4075)", async ({
@@ -71,7 +77,7 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
-		await page.waitForURL("**/declaration-remuneration/etape/1");
+		await page.waitForURL(urlGlob(remunerationStepHref(1)));
 
 		// Verify stepper
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
@@ -100,7 +106,7 @@ test.describe("Declaration workflow", () => {
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/2");
+		await page.waitForURL(urlGlob(remunerationStepHref(2)));
 	});
 
 	test("step 2 - Écart de rémunération inline editing", async ({ page }) => {
@@ -327,10 +333,10 @@ test.describe("Declaration workflow", () => {
 	});
 
 	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration-remuneration/etape/2");
+		await page.goto(remunerationStepHref(2));
 
 		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/1");
+		await page.waitForURL(urlGlob(remunerationStepHref(1)));
 	});
 
 	// Must be last — mutates declaration status to 'submitted'
@@ -429,7 +435,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 		await test.step("« Suivant » ne quitte pas l'étape et le focus va sur le message du tableau", async () => {
 			await next.click();
 
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/4$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(4)));
 			await expect(annualNote).toBeFocused();
 			// One message, under the table at fault — no second copy in a summary.
 			await expect(
@@ -452,7 +458,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 
 			await next.click();
 
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/4$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(4)));
 			await expect(hourlyNote).toContainText(
 				`(nombre total horaire : ${STEP1_WORKFORCE.men})`,
 			);
@@ -466,7 +472,7 @@ test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260
 			await expect(hourlyNote).toHaveCount(0);
 
 			await next.click();
-			await page.waitForURL("**/declaration-remuneration/etape/5");
+			await page.waitForURL(urlGlob(remunerationStepHref(5)));
 		});
 	});
 });
@@ -515,7 +521,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			categoryWorkforceInput(page, { basis, sex });
 
 		await submitStepsThroughQuartiles(page);
-		await page.waitForURL("**/declaration-remuneration/etape/5");
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
 
 		await test.step("le tableau des effectifs porte les deux bases, sous le rappel", async () => {
 			await page
@@ -557,7 +563,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women - 1));
 			await next.click();
 
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
 			await expect(inconsistent).toHaveText(
 				`Le total des effectifs femmes de la ligne « Rémunération horaire » (${STEP1_WORKFORCE.women - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.women}).`,
 			);
@@ -603,9 +609,9 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 
 			await next.click();
-			await page.waitForURL("**/declaration-remuneration/etape/6");
+			await page.waitForURL(urlGlob(remunerationStepHref(6)));
 
-			await page.goto("/declaration-remuneration/etape/5");
+			await page.goto(remunerationStepHref(5));
 			for (const basis of ["annual", "hourly"] as const) {
 				await expect(count(basis, "women")).toHaveValue(
 					String(STEP1_WORKFORCE.women),
@@ -712,7 +718,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			}),
 		};
 
-		await page.goto("/declaration-remuneration/etape/5");
+		await page.goto(remunerationStepHref(5));
 		await page.getByRole("button", { name: "Importer les données" }).click();
 
 		const panel = page.getByRole("dialog", {
@@ -806,7 +812,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		test('mon espace shows "< 50" and drops the CSE field and the edit button', async ({
 			page,
 		}) => {
-			await page.goto("/mon-espace");
+			await page.goto(MY_SPACE);
 
 			const companyInfo = page
 				.locator("dl")
@@ -826,9 +832,9 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		// which declares all 7 indicators every year. Step 5 is therefore presented
 		// (it used to be skipped), and the funnel keeps its 6 steps.
 		test("the funnel keeps the indicator G step", async ({ page }) => {
-			await page.goto("/declaration-remuneration/etape/5");
+			await page.goto(remunerationStepHref(5));
 
-			await expect(page).toHaveURL(/\/declaration-remuneration\/etape\/5$/);
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
 			await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			await expect(
 				page.getByRole("heading", {
@@ -850,7 +856,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 		test("mon espace brackets the headcount instead of printing it", async ({
 			page,
 		}) => {
-			await page.goto("/mon-espace");
+			await page.goto(MY_SPACE);
 
 			const companyInfo = page
 				.locator("dl")
@@ -877,7 +883,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			page,
 		}) => {
 			await withCampaignYear({ page, year: 2029, workforce: 70 }, async () => {
-				await page.goto("/mon-espace");
+				await page.goto(MY_SPACE);
 
 				const companyInfo = page
 					.locator("dl")
@@ -890,7 +896,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 					page.getByRole("button", { exact: true, name: "Modifier" }),
 				).toHaveCount(0);
 
-				await page.goto("/declaration-remuneration/etape/1");
+				await page.goto(remunerationStepHref(1));
 				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
 				// 2029 campaign → workforce reference year N-1 = 2028 (getWorkforceYear).
 				await expect(
@@ -899,7 +905,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 				await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
 
 				await submitStepsThroughQuartiles(page);
-				await page.waitForURL("**/declaration-remuneration/etape/6");
+				await page.waitForURL(urlGlob(remunerationStepHref(6)));
 				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
 			});
 		});
@@ -908,9 +914,9 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			page,
 		}) => {
 			await withCampaignYear({ page, year: 2030, workforce: 70 }, async () => {
-				await page.goto("/declaration-remuneration/etape/1");
+				await page.goto(remunerationStepHref(1));
 				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-				await page.goto("/declaration-remuneration/etape/5");
+				await page.goto(remunerationStepHref(5));
 				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			});
 		});
@@ -939,16 +945,16 @@ test.describe("withCampaignYear leaves no residue between two year coordinates (
 		test.slow();
 		// Coordinate A: create a declaration under 2032, then let the fixture tear it down.
 		await withCampaignYear({ page, year: 2032, workforce: 250 }, async () => {
-			await page.goto("/declaration-remuneration");
-			await page.waitForURL("**/declaration-remuneration/etape/**");
+			await page.goto(DECLARATION_REMUNERATION);
+			await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 		});
 
 		// Coordinate B: 2033 is listed, 2032 is gone — A left no residue.
 		await withCampaignYear({ page, year: 2033, workforce: 250 }, async () => {
-			await page.goto("/declaration-remuneration");
-			await page.waitForURL("**/declaration-remuneration/etape/**");
+			await page.goto(DECLARATION_REMUNERATION);
+			await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 
-			await page.goto("/mon-espace");
+			await page.goto(MY_SPACE);
 			const currentDeclarations = page.locator(
 				'table[aria-labelledby="demarches-en-cours-title"] tbody tr',
 			);
@@ -986,7 +992,7 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 		page,
 	}) => {
 		await submitStepsThroughQuartiles(page);
-		await page.waitForURL("**/declaration-remuneration/etape/5");
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
 
 		// Pick a source when categories aren't pre-populated, so the editable
 		// category form (with its label input) is rendered.

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
+import { remunerationStepHref } from "~/modules/routes";
 import { FormActions } from "../FormActions";
 import { LockProvider, useLockContext } from "../lock/LockContext";
 
@@ -12,12 +12,15 @@ vi.mock("../lock/LockContext", async (importOriginal) => {
 
 const mockedUseSession = vi.mocked(useSession);
 
+const PREVIOUS_HREF = remunerationStepHref(1);
+const NEXT_HREF = remunerationStepHref(3);
+
 describe("FormActions", () => {
 	it("renders previous link when previousHref is provided", () => {
-		render(<FormActions previousHref="/step/1" />);
+		render(<FormActions previousHref={PREVIOUS_HREF} />);
 
 		const link = screen.getByRole("link", { name: /précédent/i });
-		expect(link).toHaveAttribute("href", "/step/1");
+		expect(link).toHaveAttribute("href", PREVIOUS_HREF);
 	});
 
 	it("renders submit button when no nextHref is provided", () => {
@@ -28,10 +31,10 @@ describe("FormActions", () => {
 	});
 
 	it("renders next link when nextHref is provided", () => {
-		render(<FormActions nextHref="/step/3" />);
+		render(<FormActions nextHref={NEXT_HREF} />);
 
 		const link = screen.getByRole("link", { name: /suivant/i });
-		expect(link).toHaveAttribute("href", "/step/3");
+		expect(link).toHaveAttribute("href", NEXT_HREF);
 	});
 
 	it("shows 'Enregistrement…' when isSubmitting is true", () => {

@@ -1,6 +1,7 @@
 import { sanitizeCallbackUrl } from "~/modules/login";
+import { ADMIN } from "~/modules/routes";
 
-export const ADMIN_HOME_PATH = "/admin";
+export const ADMIN_HOME_PATH = ADMIN;
 
 // Segment-aware: `/administration` merely shares a prefix with `/admin`.
 const BACKOFFICE_PATH = new RegExp(`^${ADMIN_HOME_PATH}([/?#]|$)`);

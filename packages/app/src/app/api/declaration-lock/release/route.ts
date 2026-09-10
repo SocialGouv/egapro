@@ -1,8 +1,8 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { getCurrentYear, parseSiren } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
 import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
-import { cachedAuth } from "~/server/audit/cachedAuth";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 import { releaseLock } from "~/server/services/declarationLockService";
@@ -27,17 +27,17 @@ export const POST = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED,
 		resolveContext: async (request) => {
-			const session = await cachedAuth(request);
+			const { session, siren } = await getSessionSiren(request);
 			return {
 				userId: session?.user?.id ?? null,
 				userEmail: session?.user?.email ?? null,
-				siren: session?.user?.siret ? parseSiren(session.user.siret) : null,
+				siren,
 				resourceType: "declaration",
 			};
 		},
 	},
 	async (request) => {
-		const session = await cachedAuth(request);
+		const { session, siren } = await getSessionSiren(request);
 		if (!session?.user) {
 			return new Response(null, { status: 401 });
 		}
@@ -47,7 +47,6 @@ export const POST = withAuditedRoute(
 			return new Response(null, { status: 204 });
 		}
 
-		const siren = session.user.siret ? parseSiren(session.user.siret) : null;
 		if (!siren) {
 			return new Response(null, { status: 400 });
 		}

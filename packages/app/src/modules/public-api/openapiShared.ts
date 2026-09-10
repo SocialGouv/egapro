@@ -89,13 +89,13 @@ export const publicNonDiffusibleIdentityProperties = {
 	nafCode: {
 		type: ["string", "null"],
 		description:
-			"Code NAF/APE. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			"Code NAF/APE, nomenclature NAF rév. 2. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "26.51A",
 	},
 	nafLabel: {
 		type: ["string", "null"],
 		description:
-			"Libellé NAF/APE. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
+			"Libellé NAF/APE, nomenclature NAF rév. 2. Vaut `Non-diffusible` lorsque l'entreprise n'est pas diffusible.",
 		example: "Fabrication d'instruments de navigation",
 	},
 } as const;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MY_SPACE } from "~/modules/routes";
 import { StatusBadge } from "./StatusBadge";
 import type { CompanyItem } from "./types";
 
@@ -12,7 +13,7 @@ export function CompanyCard({ company }: Props) {
 			<div className="fr-card__body">
 				<div className="fr-card__content">
 					<h2 className="fr-card__title">
-						<Link href="/mon-espace">{company.name}</Link>
+						<Link href={MY_SPACE}>{company.name}</Link>
 					</h2>
 					<div className="fr-card__start">
 						<ul className="fr-badges-group">

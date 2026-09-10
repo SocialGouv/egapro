@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { DeclarationLockState } from "../useDeclarationLock";
+import type { DeclarationLockState } from "../types";
 
 const dynamicState: DeclarationLockState = {
 	isReadOnly: true,
@@ -15,12 +15,12 @@ vi.mock("../useDeclarationLock", () => ({
 	useDeclarationLock: vi.fn(() => dynamicState),
 }));
 
-import type { LockHolder } from "../LockContext";
 import {
 	LockProvider,
 	useLockContext,
 	useReadOnlyContext,
 } from "../LockContext";
+import type { LockHolderDisplay } from "../types";
 
 const mockedUseSession = vi.mocked(useSession);
 
@@ -35,7 +35,7 @@ function ContextProbe() {
 	);
 }
 
-const holder: LockHolder = {
+const holder: LockHolderDisplay = {
 	firstName: "Camille",
 	lastName: "Martin",
 	email: "camille.martin@example.fr",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import { MY_SPACE } from "~/modules/routes";
 import { StatusBadge } from "./StatusBadge";
 import type { CompanyItem } from "./types";
 
@@ -26,7 +26,7 @@ export function CompanyTable({ companies }: Props) {
 								{companies.map((company) => (
 									<tr key={company.siren}>
 										<td>
-											<Link href="/mon-espace">{company.name}</Link>
+											<Link href={MY_SPACE}>{company.name}</Link>
 										</td>
 										<td>{company.siren}</td>
 										<td>

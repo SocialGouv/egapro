@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import { COMPLIANCE_CONFIRMATION, COMPLIANCE_PATH } from "~/modules/routes";
 import { TEST_GIP_WORKFORCE } from "./constants";
-import {
-	COMPLIANCE_PATH,
-	selectCompliancePath,
-} from "./helpers/compliance-flows";
+import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	resetGipWorkforce,
@@ -72,7 +71,7 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		// Gap → compliance choice page; the justify option records a path_choice
 		// event and, once the A–F stepper has run, the history carries internal
 		// step_change rows that the export must strip.
-		await page.waitForURL(`**${COMPLIANCE_PATH}`, { timeout: 10_000 });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 	});
 
 	test("Parcours advertises exactly the transitions the compliance page offers", async ({
@@ -153,7 +152,7 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		// Without a CSE the justify choice completes the démarche immediately
 		// (FSM transition choose_path_initial_justify_without_cse) — the user lands on
 		// the confirmation page, not on the /avis-cse deposit flow.
-		await page.waitForURL(`**${COMPLIANCE_PATH}/confirmation`, {
+		await page.waitForURL(urlGlob(COMPLIANCE_CONFIRMATION), {
 			timeout: 10_000,
 		});
 	});

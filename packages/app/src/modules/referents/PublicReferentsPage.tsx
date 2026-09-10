@@ -5,9 +5,9 @@ import { Suspense, useCallback } from "react";
 
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
+import { REFERENTS, routeWithQuery } from "~/modules/routes";
 import { Pagination } from "~/modules/shared/Pagination";
 import { api } from "~/trpc/react";
-
 import { PublicReferentList } from "./PublicReferentList";
 import { PublicReferentsSearchForm } from "./PublicReferentsSearchForm";
 import { PUBLIC_PAGE_SIZE } from "./shared/constants";
@@ -37,7 +37,7 @@ function ReferentsContent() {
 		(page: number) => {
 			const params = new URLSearchParams(searchParams.toString());
 			params.set("page", String(page));
-			router.push(`/referents?${params.toString()}`);
+			router.push(routeWithQuery(REFERENTS, params));
 		},
 		[router, searchParams],
 	);

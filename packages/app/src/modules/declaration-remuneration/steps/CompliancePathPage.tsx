@@ -7,6 +7,11 @@ import {
 	isCseOpinionRequired,
 	isDraft,
 } from "~/modules/domain";
+import {
+	API_DECLARATION_PDF,
+	LAST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
@@ -73,7 +78,7 @@ export async function CompliancePathPage() {
 	const data = await api.declaration.getOrCreate();
 
 	if (isDraft(data.declaration.status)) {
-		redirect("/declaration-remuneration/etape/6");
+		redirect(remunerationStepHref(LAST_REMUNERATION_STEP));
 	}
 
 	const company = await api.company.get({ siren: data.declaration.siren });
@@ -141,8 +146,8 @@ export async function CompliancePathPage() {
 				isSecondRound={isSecondRound}
 				pdfDownloadHref={
 					isSecondRound
-						? `/api/declaration-pdf?type=correction&year=${currentYear}`
-						: `/api/declaration-pdf?year=${currentYear}`
+						? `${API_DECLARATION_PDF}?type=correction&year=${currentYear}`
+						: `${API_DECLARATION_PDF}?year=${currentYear}`
 				}
 				readOnlyReason={readOnlyReason ?? undefined}
 			/>

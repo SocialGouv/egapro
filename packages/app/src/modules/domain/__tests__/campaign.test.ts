@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	getCurrentDate,
 	getCurrentYear,
 	getDeclarationDeadline,
 	getDeclarationReferencePeriod,
@@ -15,6 +16,9 @@ import {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	MAX_CAMPAIGN_YEAR,
+	MIN_CAMPAIGN_YEAR,
+	parseCampaignYear,
 	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
@@ -152,6 +156,52 @@ describe("getCurrentYear", () => {
 		delete (globalThis as { __egaproCampaignYear?: number })
 			.__egaproCampaignYear;
 		expect(getCurrentYear()).toBe(2025);
+	});
+});
+
+describe("getCurrentDate", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		// Never leak the override: every other domain test calls getCurrentYear().
+		delete (globalThis as { __egaproCampaignYear?: number })
+			.__egaproCampaignYear;
+	});
+
+	it("returns the system date when no override is pinned", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30, 45, 123));
+		expect(getCurrentDate()).toEqual(new Date(2025, 5, 15, 10, 30, 45, 123));
+	});
+
+	it("carries the calendar date over to the pinned campaign year", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate()).toEqual(new Date(2029, 5, 15, 10, 30));
+	});
+
+	it("agrees with getCurrentYear under a pinned year", () => {
+		vi.setSystemTime(new Date(2025, 5, 15));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate().getFullYear()).toBe(getCurrentYear());
+	});
+
+	it("clamps 29 February to 28 February in a non-leap pinned year", () => {
+		vi.setSystemTime(new Date(2024, 1, 29, 8, 0));
+		(globalThis as { __egaproCampaignYear?: number }).__egaproCampaignYear =
+			2029;
+		expect(getCurrentDate()).toEqual(new Date(2029, 1, 28, 8, 0));
+	});
+
+	it("ignores a non-numeric override and falls back to the system date", () => {
+		vi.setSystemTime(new Date(2025, 5, 15, 10, 30));
+		(globalThis as { __egaproCampaignYear?: unknown }).__egaproCampaignYear =
+			"2029";
+		expect(getCurrentDate()).toEqual(new Date(2025, 5, 15, 10, 30));
 	});
 });
 
@@ -450,5 +500,32 @@ describe("shouldRedirectSubmittedToRecap", () => {
 				now,
 			}),
 		).toBe(true);
+	});
+});
+
+describe("parseCampaignYear", () => {
+	it.each([
+		["a year inside the bounds", "2025", 2025],
+		["the lower bound", String(MIN_CAMPAIGN_YEAR), MIN_CAMPAIGN_YEAR],
+		["the upper bound", String(MAX_CAMPAIGN_YEAR), MAX_CAMPAIGN_YEAR],
+	])("accepts %s", (_label, raw, expected) => {
+		expect(parseCampaignYear(raw)).toBe(expected);
+	});
+
+	it.each([
+		["a year below the lower bound", "1900"],
+		["a year above the upper bound", "3000"],
+		["a non-numeric value", "abc"],
+		["a number with a trailing suffix", "2025abc"],
+		["a padded number", " 2025"],
+		["a decimal", "2025.5"],
+		["a negative number", "-2025"],
+		["an empty string", ""],
+	])("rejects %s", (_label, raw) => {
+		expect(parseCampaignYear(raw)).toBeNull();
+	});
+
+	it("never returns the raw string, however long", () => {
+		expect(parseCampaignYear("x".repeat(5_000))).toBeNull();
 	});
 });

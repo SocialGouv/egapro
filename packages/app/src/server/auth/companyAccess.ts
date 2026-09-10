@@ -34,12 +34,11 @@ function activeImpersonation(
  * - Admin with an effective impersonation → the impersonated SIREN.
  * - Regular user, or admin whose window has expired → the SIREN parsed from
  *   their own ProConnect SIRET.
- * - Anyone without either → `null`, and the caller decides how to bail
- *   (redirect, `<MissingSiret/>`, etc.).
+ * - Anyone without either, or a malformed SIRET → `null`, and the caller
+ *   decides how to bail (redirect, `<MissingSiret/>`, etc.).
  *
- * The SIRET is read through `parseSiren`, which validates shape and length:
- * a malformed SIRET yields `null` and the caller's "missing SIRET" branch,
- * never a truncated string used as a query key.
+ * Parsing, never slicing: a malformed SIRET must not yield a nine-character
+ * lookalike that then reaches the database as if it were a real SIREN.
  *
  * Shared across every page/layout and the tRPC company procedure so every
  * surface behaves identically during mimoquage (issue #3230).
@@ -50,7 +49,7 @@ export function getEffectiveSiren(
 ): string | null {
 	if (!session?.user) return null;
 	const impersonation = activeImpersonation(session, now);
-	if (impersonation) return impersonation.siren;
+	if (impersonation) return parseSiren(impersonation.siren);
 	return parseSiren(session.user.siret);
 }
 

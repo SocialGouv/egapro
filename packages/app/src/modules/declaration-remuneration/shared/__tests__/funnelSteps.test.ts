@@ -6,17 +6,7 @@ import {
 	getNextStepHref,
 	getPreviousStepHref,
 	INDICATOR_G_STEP,
-	stepHref,
 } from "../funnelSteps";
-
-describe("stepHref", () => {
-	it("builds the funnel step URL", () => {
-		expect(stepHref(1)).toBe("/declaration-remuneration/etape/1");
-		expect(stepHref(INDICATOR_G_STEP)).toBe(
-			"/declaration-remuneration/etape/5",
-		);
-	});
-});
 
 describe("getFunnelSteps", () => {
 	it("keeps every step when indicator G is required", () => {

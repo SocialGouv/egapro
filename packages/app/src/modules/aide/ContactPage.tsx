@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Breadcrumb } from "~/modules/layout";
-
+import { HELP, REFERENTS } from "~/modules/routes";
 import { AideIllustration } from "./AideIllustration";
 import styles from "./AideLayout.module.scss";
 import { CopyEmailButton } from "./CopyEmailButton";
@@ -16,7 +16,7 @@ export function ContactPage() {
 				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
-						{ label: "Aide et ressources", href: "/aide" },
+						{ label: "Aide et ressources", href: HELP },
 						{ label: "Nous contacter" },
 					]}
 				/>
@@ -24,7 +24,7 @@ export function ContactPage() {
 				<a
 					aria-label="Retour à Aide et ressources"
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left"
-					href="/aide"
+					href={HELP}
 				>
 					Retour
 				</a>
@@ -40,7 +40,7 @@ export function ContactPage() {
 						<div className="fr-mb-4w">
 							<h2 className="fr-h6">Contactez votre référent régional :</h2>
 							<p className="fr-mb-2w">
-								<Link className="fr-link" href="/referents">
+								<Link className="fr-link" href={REFERENTS}>
 									Rechercher un référent par région ou département
 								</Link>
 							</p>

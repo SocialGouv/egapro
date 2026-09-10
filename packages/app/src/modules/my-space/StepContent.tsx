@@ -10,6 +10,15 @@ import {
 	isSecondDeclarationWritable,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
+import {
+	COMPLIANCE_JOINT_EVALUATION,
+	complianceStepHref,
+	cseOpinionStepHref,
+	DECLARATION_REMUNERATION_RECAP,
+	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+	FIRST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { StepStatus } from "./StepRows";
@@ -58,7 +67,6 @@ export function Step1Content({
 	campaignDeadlines,
 	indicatorGRequired,
 	hasPrefillData,
-	siren,
 	status,
 	variant,
 	year,
@@ -66,7 +74,6 @@ export function Step1Content({
 	campaignDeadlines: CampaignDeadlines;
 	indicatorGRequired: boolean;
 	hasPrefillData: boolean;
-	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
 	year: number;
@@ -112,9 +119,9 @@ export function Step1Content({
 					modifyHref={
 						variant === "closed"
 							? undefined
-							: `/declaration-remuneration/etape/1?siren=${siren}`
+							: remunerationStepHref(FIRST_REMUNERATION_STEP)
 					}
-					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}`}
+					viewHref={DECLARATION_REMUNERATION_RECAP}
 				/>
 			</div>
 		);
@@ -128,7 +135,6 @@ export function Step2Content({
 	declarationFsmStatus,
 	displayContext,
 	secondDeclarationSubmitted,
-	siren,
 	status,
 	variant,
 }: {
@@ -136,7 +142,6 @@ export function Step2Content({
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	secondDeclarationSubmitted: boolean;
-	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
 }) {
@@ -163,8 +168,8 @@ export function Step2Content({
 					<TransmittedRow
 						label="Votre seconde déclaration a été transmise"
 						modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-						modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-						viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
+						modifyHref={complianceStepHref(1)}
+						viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
 					/>
 				)}
@@ -197,8 +202,8 @@ export function Step2Content({
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
 				modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
-				modifyHref={`/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`}
-				viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
+				modifyHref={complianceStepHref(1)}
+				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 				viewLabel="Voir le récapitulatif de la seconde déclaration"
 			/>
 		) : null;
@@ -236,11 +241,9 @@ export function Step2Content({
 					label="Votre seconde déclaration a été transmise"
 					modifiableUntil={campaignDeadlines.decl2ModificationDeadline}
 					modifyHref={
-						secondDeclarationWritable
-							? `/declaration-remuneration/parcours-conformite/etape/1?siren=${siren}`
-							: undefined
+						secondDeclarationWritable ? complianceStepHref(1) : undefined
 					}
-					viewHref={`/declaration-remuneration/recapitulatif?siren=${siren}&type=correction`}
+					viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 					viewLabel="Voir le récapitulatif de la seconde déclaration"
 				/>
 			)}
@@ -249,9 +252,7 @@ export function Step2Content({
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					modifiableUntil={campaignDeadlines.decl2JointEvaluationDeadline}
 					modifyHref={
-						jointEvaluationWritable
-							? `/declaration-remuneration/parcours-conformite/evaluation-conjointe?siren=${siren}`
-							: undefined
+						jointEvaluationWritable ? COMPLIANCE_JOINT_EVALUATION : undefined
 					}
 				/>
 			)}
@@ -264,12 +265,10 @@ export function Step2Content({
 
 export function Step3Content({
 	campaignDeadlines,
-	siren,
 	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
-	siren: string;
 	status: StepStatus;
 	variant: PanelVariant;
 }) {
@@ -293,7 +292,7 @@ export function Step3Content({
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
 					modifiableUntil={campaignDeadlines.decl2CseOpinionDeadline}
-					modifyHref={`/avis-cse/etape/2?siren=${siren}`}
+					modifyHref={cseOpinionStepHref(2)}
 				/>
 			</div>
 		);

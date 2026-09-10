@@ -1,6 +1,12 @@
 import Link from "next/link";
+import {
+	ACCESSIBILITY,
+	COOKIES,
+	LEGAL_NOTICE,
+	PRIVACY,
+	SITE_MAP,
+} from "~/modules/routes";
 import { NewTabNotice } from "../shared/NewTabNotice";
-
 import { AppVersion } from "./AppVersion";
 
 /** Footer bottom bar: legal links, display settings, license. */
@@ -9,30 +15,27 @@ export function FooterBottom() {
 		<div className="fr-footer__bottom">
 			<ul className="fr-footer__bottom-list">
 				<li className="fr-footer__bottom-item">
-					<Link
-						className="fr-footer__bottom-link"
-						href="/declaration-accessibilite"
-					>
+					<Link className="fr-footer__bottom-link" href={ACCESSIBILITY}>
 						Accessibilité : partiellement conforme
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link className="fr-footer__bottom-link" href="/mentions-legales">
+					<Link className="fr-footer__bottom-link" href={LEGAL_NOTICE}>
 						Mentions légales
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link className="fr-footer__bottom-link" href="/donnees-personnelles">
+					<Link className="fr-footer__bottom-link" href={PRIVACY}>
 						Données personnelles
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link className="fr-footer__bottom-link" href="/gestion-des-cookies">
+					<Link className="fr-footer__bottom-link" href={COOKIES}>
 						Gestion des cookies
 					</Link>
 				</li>
 				<li className="fr-footer__bottom-item">
-					<Link className="fr-footer__bottom-link" href="/plan-du-site">
+					<Link className="fr-footer__bottom-link" href={SITE_MAP}>
 						Plan du site
 					</Link>
 				</li>

@@ -7,6 +7,7 @@ import {
 } from "~/modules/admin/access";
 import { resolveAdminAccess } from "~/modules/domain";
 import { LoginPage, sanitizeCallbackUrl } from "~/modules/login";
+import { MY_SPACE, runtimeRoute } from "~/modules/routes";
 import { auth } from "~/server/auth";
 
 export const metadata: Metadata = { title: "Connexion" };
@@ -39,7 +40,7 @@ export default async function Page({ searchParams }: PageProps) {
 				);
 			}
 		}
-		redirect(safeCallbackUrl ?? "/mon-espace");
+		redirect(safeCallbackUrl ? runtimeRoute(safeCallbackUrl) : MY_SPACE);
 	}
 
 	return <LoginPage callbackUrl={safeCallbackUrl} />;

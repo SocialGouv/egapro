@@ -108,6 +108,7 @@ export const AUDIT_ACTIONS = {
 	PDF_DECLARATION_DOWNLOAD: "pdf.declaration_download",
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
 	PDF_REPRESENTATION_DOWNLOAD: "pdf.representation_download",
+	PDF_PREFILL_DOWNLOAD: "pdf.prefill_download",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
 	// ── Exports & external API consumers ──────────────────
@@ -132,10 +133,6 @@ export const AUDIT_ACTIONS = {
 
 	PUBLIC_DECLARATIONS_EXPORT: "public_declarations.export",
 	PUBLIC_REPRESENTATIONS_EXPORT: "public_representations.export",
-
-	// ── Public stats reads ─────────────────────────────────
-	PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE:
-		"public_stats.get_current_campaign_rate",
 
 	// ── Public declaration reads ───────────────────────────
 	PUBLIC_DECLARATIONS_BY_SIREN: "public_declarations.by_siren",
@@ -231,6 +228,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
 	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: "export",
@@ -251,8 +249,6 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: "export",
 	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: "export",
-
-	[AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE]: "public_search",
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: "read_sensitive",
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: "read_sensitive",
