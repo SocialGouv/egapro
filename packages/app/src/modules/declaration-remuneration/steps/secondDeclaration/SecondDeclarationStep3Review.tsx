@@ -174,6 +174,7 @@ export function SecondDeclarationStep3Review({
 			<FormErrors mutationError={mutation.error?.message} />
 
 			<FormActions
+				className="fr-mt-0"
 				nextHref={nextHref}
 				nextLabel={nextLabel}
 				previousHref={complianceStepHref(2)}
