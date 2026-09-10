@@ -12,11 +12,11 @@ import {
 	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
+import { getCurrentStageHref } from "~/modules/navigation";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
-import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import {
 	DECLARATION_FUNNEL,

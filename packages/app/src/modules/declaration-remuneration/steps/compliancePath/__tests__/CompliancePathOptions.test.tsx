@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	FirstRoundOptions,
-	getCompliancePathHref,
 	JustifyOption,
 	SecondRoundOptions,
 } from "../CompliancePathOptions";
@@ -30,36 +29,6 @@ function expectNoEmptyList(container: HTMLElement) {
 	);
 	expect(emptyLists).toHaveLength(0);
 }
-
-describe("getCompliancePathHref", () => {
-	it.each([
-		true,
-		false,
-	])("routes corrective_action to the second declaration funnel (cseOpinionRequired: %s)", (cseOpinionRequired) => {
-		expect(getCompliancePathHref("corrective_action", cseOpinionRequired)).toBe(
-			"/declaration-remuneration/parcours-conformite/etape/1",
-		);
-	});
-
-	it.each([
-		true,
-		false,
-	])("routes joint_evaluation to the joint evaluation form (cseOpinionRequired: %s)", (cseOpinionRequired) => {
-		expect(getCompliancePathHref("joint_evaluation", cseOpinionRequired)).toBe(
-			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
-		);
-	});
-
-	it("routes justify to the CSE opinion page when an opinion is due", () => {
-		expect(getCompliancePathHref("justify", true)).toBe("/avis-cse");
-	});
-
-	it("routes justify to the confirmation page when no opinion is due", () => {
-		expect(getCompliancePathHref("justify", false)).toBe(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
-	});
-});
 
 describe("JustifyOption", () => {
 	function renderJustifyOption(cseOpinionRequired: boolean) {
