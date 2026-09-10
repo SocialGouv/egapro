@@ -14,6 +14,7 @@ import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
 import type {
 	ContentTypeColumn,
+	FileContentTypeAssociation,
 	StoredFileContentType,
 	UploadedFile,
 } from "../types";
@@ -30,9 +31,15 @@ let deleteMutationOptions: {
 	onError?: () => void;
 } = {};
 let setTypesMutationOptions: {
-	onSuccess?: () => void;
+	onSuccess?: (
+		data: unknown,
+		variables: { associations: FileContentTypeAssociation[] },
+	) => void;
 	onError?: () => void;
 } = {};
+// Lets tests simulate an association save still in flight (#4102) — read
+// fresh on every render, like the real hook's `isPending` would be.
+let setTypesIsPending = false;
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
@@ -67,7 +74,11 @@ vi.mock("~/trpc/react", () => ({
 			setFileContentTypes: {
 				useMutation: (options: typeof setTypesMutationOptions = {}) => {
 					setTypesMutationOptions = options;
-					return { mutate: setTypesMutateMock, isPending: false, error: null };
+					return {
+						mutate: setTypesMutateMock,
+						isPending: setTypesIsPending,
+						error: null,
+					};
 				},
 			},
 		},
@@ -106,6 +117,16 @@ const DUAL_COLUMNS = computeContentTypeColumns({
 	secondDeclGapConsulted: true,
 	firstDeclGapHigh: true,
 	secondDeclGapHigh: true,
+});
+
+// Two distinct content types on a single declaration — used to race two
+// independent setFileContentTypes calls against each other (#4102).
+const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: false,
+	firstDeclGapConsulted: true,
+	secondDeclGapConsulted: null,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: false,
 });
 
 function getFileInput() {
@@ -155,6 +176,7 @@ describe("Step2Upload", () => {
 		uploadFileMock.mockReset();
 		deleteMutationOptions = {};
 		setTypesMutationOptions = {};
+		setTypesIsPending = false;
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
 		// actually toggles its `open` attribute and its contents become visible.
 		HTMLDialogElement.prototype.showModal = function showModal() {
@@ -610,7 +632,7 @@ describe("Step2Upload", () => {
 		).toBeInTheDocument();
 
 		act(() => {
-			setTypesMutationOptions.onSuccess?.();
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
 		});
 
 		expect(
@@ -618,6 +640,129 @@ describe("Step2Upload", () => {
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
 			),
 		).not.toBeInTheDocument();
+	});
+
+	it("rolls back an optimistic check and blocks submission when persisting the association fails (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Optimistic check: the box ticks locally before the server confirms.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// The server rejects the association: the confirmed truth is still
+		// "nothing associated", so the box must roll back to it, not stay
+		// checked on a value the server never actually committed.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		// Reproduces the issue exactly: canSubmit must be re-derived from the
+		// rolled-back state, not from the optimistic value the failed save
+		// never persisted — so submit blocks on the missing content type.
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks submission while an association save is still in flight, independently of click speed (#4102)", async () => {
+		const user = userEvent.setup();
+		setTypesIsPending = true;
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			// The matrix is otherwise complete: only the in-flight save should
+			// block submission here, not a missing association.
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		const submit = screen.getByRole("button", { name: "Soumettre" });
+		expect(submit).toBeEnabled();
+
+		await user.click(submit);
+
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Valider" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("reconciles a losing second toggle from its own confirmed data, not a ref the first toggle's success can clobber (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Toggle 1 (accuracy): optimistic check, request #1 fires.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		// Toggle 2 (gap), before request #1 has resolved: optimistic check,
+		// request #2 fires with both associations.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		);
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).toBeChecked();
+
+		// Request #1 resolves first and confirms only accuracy — its own
+		// variables, not whatever the (now stale) shared pending value holds.
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		// Request #2 (accuracy + gap) then fails: the confirmed truth the
+		// rollback reverts to must be what request #1 actually established
+		// (accuracy only), not a ref request #2's own mutate() call had
+		// already overwritten to include the still-unconfirmed gap.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		// canSubmit is re-derived from the reconciled map: gap is still
+		// missing, so submit must block instead of opening the finalize modal
+		// (the exact failure mode of the issue).
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
 
 	it("hydrates the matrix from the stored associations on return (S10)", () => {

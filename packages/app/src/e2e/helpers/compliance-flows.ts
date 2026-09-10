@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+
 import {
 	API_UPLOAD,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -142,6 +143,15 @@ function cseCheckboxName(
 	return `${CSE_TYPE_LABELS[column.type]}${declarationPart} — ${fileName}`;
 }
 
+// Neither the HTTP status nor the body can gate on persistence here. The tRPC
+// client uses httpBatchStreamLink: headers go out before the procedure runs and
+// stay 200 even when it throws, and the streamed body is no longer retrievable
+// through CDP once the page has consumed it — `response.text()` inside a
+// waitForResponse predicate fails with `Network.getResponseBody: No data found
+// for resource`. What removes the race is the client itself: Step2Upload blocks
+// submission while setFileContentTypes is in flight and rolls the matrix back
+// when it fails (#4102), so matching the mutation's URL is enough here.
+
 /**
  * Complete CSE step 2 through the real UI: upload the PDF, associate the required
  * content types via the matrix, then submit and certify. Exercises the matrix
@@ -167,13 +177,11 @@ export async function submitCseStep2(
 			page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
 		).toBeVisible({ timeout: 30_000 });
 
-		// Phase B — tick the required columns, waiting for each association to
-		// persist before submitting. The client submit gate is optimistic, so
-		// finalize could otherwise race the setFileContentTypes mutation.
+		// Phase B — tick the required columns, letting each association mutation
+		// come back before the next click.
 		for (const column of columns) {
-			const persisted = page.waitForResponse(
-				(response) =>
-					response.url().includes("setFileContentTypes") && response.ok(),
+			const persisted = page.waitForResponse((response) =>
+				response.url().includes("setFileContentTypes"),
 			);
 			await page
 				.getByRole("checkbox", {
@@ -236,13 +244,13 @@ export async function associateCseContentTypes(
 	const { hasSecondDeclaration = false } = options;
 	for (const { column, fileName } of assignments) {
 		const persisted = page.waitForResponse((response) => {
-			if (!response.url().includes("setFileContentTypes") || !response.ok()) {
+			if (!response.url().includes("setFileContentTypes")) {
 				return false;
 			}
-			const body = response.request().postData() ?? "";
+			const requestBody = response.request().postData() ?? "";
 			return (
-				body.includes(`"type":"${column.type}"`) &&
-				body.includes(`"declarationNumber":${column.declarationNumber}`)
+				requestBody.includes(`"type":"${column.type}"`) &&
+				requestBody.includes(`"declarationNumber":${column.declarationNumber}`)
 			);
 		});
 		await page

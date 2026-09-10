@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
@@ -72,12 +72,35 @@ export function Step2Upload({
 		router.refresh();
 	}, [utils, router]);
 
+	// The server is the source of truth for which associations actually
+	// persisted. `associations` is written optimistically on every toggle, so
+	// on a failed setFileContentTypes it must roll back to the last state the
+	// server actually confirmed — not to whatever was locally displayed, which
+	// may itself be the failed, never-committed value (#4102).
+	//
+	// The confirmed map is rebuilt from each call's own `variables` (tRPC's
+	// second onSuccess/onError argument), never from a ref shared across
+	// concurrent mutate() calls: two toggles in flight would otherwise let the
+	// later-started call's ref write clobber the earlier one's, regardless of
+	// which one actually resolved last (#4102).
+	const lastConfirmedAssociations = useRef<AssociationMap>(
+		buildAssociationMap(columns, initialAssociations),
+	);
+
 	const setTypesMutation = api.cseOpinion.setFileContentTypes.useMutation({
-		onError: () =>
+		onError: () => {
+			setAssociations(lastConfirmedAssociations.current);
 			setAssociationError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
-			),
-		onSuccess: () => setAssociationError(null),
+			);
+		},
+		onSuccess: (_data, variables) => {
+			lastConfirmedAssociations.current = buildAssociationMap(
+				columns,
+				variables.associations,
+			);
+			setAssociationError(null);
+		},
 	});
 
 	const handleToggle = useCallback(
@@ -97,7 +120,13 @@ export function Step2Upload({
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: (_data, variables) => {
 			setDeletingFileId(null);
-			setAssociations((prev) => clearFileAssociations(prev, variables.fileId));
+			setAssociations((prev) => {
+				const next = clearFileAssociations(prev, variables.fileId);
+				// Deletion cascades server-side too, so the cleared map is itself
+				// now the confirmed truth — keep it in sync for the next revert.
+				lastConfirmedAssociations.current = next;
+				return next;
+			});
 			refreshFileList();
 		},
 		onError: () => setDeletingFileId(null),
@@ -170,10 +199,19 @@ export function Step2Upload({
 				return;
 			}
 			setHasAttemptedSubmit(false);
-			if (finalizeMutation.isPending) return;
+			// Guard against finalize AND against an association save still in
+			// flight — canSubmit reflects the optimistic matrix state, so without
+			// this a save that hasn't reached the server yet can race finalize
+			// and lose (#4102).
+			if (finalizeMutation.isPending || setTypesMutation.isPending) return;
 			openFinalizeModal();
 		},
-		[canSubmit, finalizeMutation.isPending, openFinalizeModal],
+		[
+			canSubmit,
+			finalizeMutation.isPending,
+			setTypesMutation.isPending,
+			openFinalizeModal,
+		],
 	);
 
 	const confirmFinalize = useCallback(() => {

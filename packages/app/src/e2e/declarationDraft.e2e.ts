@@ -32,11 +32,16 @@ test.describe("Declaration draft round-trip", () => {
 			await expect(womenInput1).toBeVisible({ timeout: 30_000 });
 			await womenInput1.fill("75");
 
+			// The tRPC batch-stream link always answers HTTP 200 — headers go out
+			// before the procedure runs, and stay 200 even on failure — so a
+			// status check proves nothing. Reading the streamed body proves
+			// nothing either: it is gone from CDP once the page consumed it
+			// (#4102). Match the mutation and let the next assertion be the
+			// real check.
 			await page1.waitForResponse(
 				(r) =>
 					r.url().includes("declarationDraft.save") &&
-					r.request().method() === "POST" &&
-					r.status() === 200,
+					r.request().method() === "POST",
 				{ timeout: 15_000 },
 			);
 		} finally {
