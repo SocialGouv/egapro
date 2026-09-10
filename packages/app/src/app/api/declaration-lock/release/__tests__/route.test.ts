@@ -82,8 +82,12 @@ describe("POST /api/declaration-lock/release", () => {
 		expect(mocks.releaseLock).not.toHaveBeenCalled();
 	});
 
-	it("returns 400 when the session has no usable siren", async () => {
-		mockSession({ id: "user-1", siret: null });
+	it.each([
+		["no siret", null],
+		["a siret whose first nine characters are not digits", "1234A678900015"],
+		["a siret shorter than a siren", "1234"],
+	])("returns 400 when the session has %s", async (_label, siret) => {
+		mockSession({ id: "user-1", siret });
 
 		const response = await POST(buildRequest());
 

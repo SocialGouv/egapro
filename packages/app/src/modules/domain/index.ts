@@ -17,6 +17,9 @@ export {
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
+	MAX_CAMPAIGN_YEAR,
+	MIN_CAMPAIGN_YEAR,
+	parseCampaignYear,
 	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
@@ -53,6 +56,7 @@ export { computeGlobalScore } from "./shared/computeGlobalScore";
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
+	DRAFT_EXPIRY_DAYS,
 	EXPECTED_DECLARATION_TYPES,
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
@@ -193,7 +197,6 @@ export {
 	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
-	gapDirection,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -201,6 +204,7 @@ export {
 	hasHighGap,
 	resolveGap,
 	resolveGapRatio,
+	significantGapDirection,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {

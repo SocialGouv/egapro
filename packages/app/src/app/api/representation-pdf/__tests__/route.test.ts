@@ -41,6 +41,7 @@ import { GET } from "../route";
 
 const SIREN = "123456789";
 const SIRET = `${SIREN}00015`;
+const IMPERSONATED_SIREN = "987654321";
 const YEAR = 2025;
 const PDF_BYTES = Buffer.from([0x25, 0x50, 0x44, 0x46]);
 const DOCUMENT = { marker: "representation-pdf" };
@@ -115,9 +116,39 @@ describe("GET /api/representation-pdf", () => {
 		);
 	});
 
+	it("serves the impersonated company when an admin is in mimoquage", async () => {
+		mocks.auth.mockResolvedValue({
+			user: {
+				id: "admin-1",
+				email: "admin@exemple.fr",
+				siret: "99999999900011",
+				isAdmin: true,
+				impersonation: { siren: IMPERSONATED_SIREN },
+			},
+		});
+
+		const response = await GET(request());
+
+		expect(response.status).toBe(200);
+		expect(mocks.buildRepresentationPdfData).toHaveBeenCalledWith(
+			IMPERSONATED_SIREN,
+			YEAR,
+			expect.any(Date),
+		);
+		expect(auditRow()).toMatchObject({ siren: IMPERSONATED_SIREN });
+	});
+
 	it.each([
 		["no session at all", null],
 		["a session without a siret", { user: { id: "user-1" } }],
+		[
+			"a session whose siret is malformed",
+			{ user: { id: "user-1", siret: "1234A678900015" } },
+		],
+		[
+			"a session whose siret is too short",
+			{ user: { id: "user-1", siret: "1234" } },
+		],
 	])("refuses the download with %s", async (_label, session) => {
 		mocks.auth.mockResolvedValue(session);
 
@@ -125,6 +156,7 @@ describe("GET /api/representation-pdf", () => {
 
 		expect(response.status).toBe(401);
 		expect(mocks.buildRepresentationPdfData).not.toHaveBeenCalled();
+		expect(auditRow()).toMatchObject({ siren: null });
 	});
 
 	it("answers 404 when no declaration was transmitted for the year", async () => {

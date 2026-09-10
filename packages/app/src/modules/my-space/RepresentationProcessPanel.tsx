@@ -288,8 +288,9 @@ function NotSubjectMessage() {
 	return (
 		<div className="fr-background-alt--blue-france fr-p-4w">
 			<p className={`fr-mb-0 ${styles.notSubjectMessage}`}>
-				Vous n'êtes pas assujetti à la publication et à la déclaration des
-				écarts éventuels de représentation entre les femmes et les hommes.
+				Votre entreprise n'est pas assujettie à la publication et à la
+				déclaration des écarts éventuels de représentation entre les femmes et
+				les hommes.
 			</p>
 		</div>
 	);
