@@ -145,8 +145,8 @@ const INPUT_ALLOWED_KEYS = new Set([
 	"hasCse",
 ]);
 
-const INPUT_KEY_NAME_PATTERN = /^[A-Za-z0-9_]{1,64}$/;
-const INPUT_VALUE_STRING_PATTERN = /^[A-Za-z0-9_.:-]{1,64}$/;
+const INPUT_KEY_NAME_PATTERN = /^\w{1,64}$/;
+const INPUT_VALUE_STRING_PATTERN = /^[\w.:-]{1,64}$/;
 const MAX_INPUT_KEYS = 20;
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -175,7 +175,8 @@ function projectInputKeys(rawValue: unknown): string[] | null {
 	);
 	if (keys.length === 0) return null;
 
-	return keys.sort().slice(0, MAX_INPUT_KEYS);
+	keys.sort((left, right) => left.localeCompare(right, "en"));
+	return keys.slice(0, MAX_INPUT_KEYS);
 }
 
 function projectInputValues(rawValue: unknown): Record<string, unknown> | null {

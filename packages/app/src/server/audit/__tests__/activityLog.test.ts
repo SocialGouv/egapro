@@ -420,6 +420,12 @@ describe("emitActivityLog", () => {
 		expect(inputKeys).not.toContain("bad key!");
 	});
 
+	it("sorts inputKeys alphabetically regardless of case", () => {
+		emitActivityLog(buildParams({ rawInput: { Zeta: 1, alpha: 2, Beta: 3 } }));
+
+		expect(parseLastLine().inputKeys).toEqual(["alpha", "Beta", "Zeta"]);
+	});
+
 	it("returns null input/inputKeys when rawInput is not a plain object", () => {
 		emitActivityLog(
 			buildParams({
