@@ -222,7 +222,7 @@ describe("emitActivityLog", () => {
 			status: "success",
 			ip: "203.0.0.0",
 		});
-		// Only the *names* of totalMen / totalWomen may appear, never the 40 / 60 figures themselves (S1).
+		// Only the *names* of totalMen / totalWomen may appear, never the 40 / 60 figures themselves.
 		expect(entry.input).toBeNull();
 		expect(entry.inputKeys).toEqual(["totalMen", "totalWomen"]);
 		expect(JSON.stringify(entry)).not.toContain("40");
@@ -255,7 +255,7 @@ describe("emitActivityLog", () => {
 		});
 	});
 
-	// S11 — tRPC input is read before Zod validation: an allowlisted key's value is caller-controlled, so no tRPC line ever carries one.
+	// tRPC input is read before Zod validation: an allowlisted key's value is caller-controlled, so no tRPC line ever carries one.
 	it.each([
 		{ path: "mapped", action: "representation_declaration.get" },
 		{ path: "unmapped", action: null },

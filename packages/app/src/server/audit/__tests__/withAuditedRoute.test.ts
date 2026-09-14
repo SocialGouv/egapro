@@ -58,7 +58,7 @@ describe("withAuditedRoute", () => {
 		});
 	});
 
-	// #3705 S6 — the stdout `route` field must never carry the query string.
+	// The stdout `route` field must never carry the query string.
 	it("strips the query string from the origin route", async () => {
 		const handler = withAuditedRoute(
 			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },

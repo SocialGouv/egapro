@@ -15,8 +15,7 @@ vi.mock("~/server/db/auditSchema", () => ({
 	actionLogs: { __mock: "actionLogs" },
 }));
 
-// Keeps `deriveErrorCode` real (log.ts relies on it) while letting tests spy
-// on what `logAction` hands off to the stdout mirror (#3705).
+// Keeps deriveErrorCode real (logAction relies on it) while spying on what is handed to the stdout mirror.
 vi.mock("../activityLog", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("../activityLog")>();
 	return {
@@ -110,7 +109,6 @@ describe("logAction", () => {
 		});
 	});
 
-	// #3705 — logAction mirrors every event to stdout, before the DB insert.
 	describe("stdout activity log mirror (#3705)", () => {
 		it("emits before inserting, carrying the resolved category and the origin", async () => {
 			const callOrder: string[] = [];
@@ -176,8 +174,7 @@ describe("logAction", () => {
 			});
 		});
 
-		// S8 — a failure while building/emitting the stdout line must never
-		// block the DB insert, nor make logAction reject.
+		// A failure while building or emitting the stdout line must never block the DB insert, nor make logAction reject.
 		it("still inserts and resolves when the stdout mirror throws", async () => {
 			const consoleSpy = vi
 				.spyOn(console, "error")

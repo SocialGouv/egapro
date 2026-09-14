@@ -33,7 +33,7 @@ function buildGetRawInput(value: unknown) {
 	return async () => value;
 }
 
-/** Shape of a real tRPC `MiddlewareResult` — see #3705 §5. */
+// okResult / errorResult mirror the real tRPC MiddlewareResult shape.
 function okResult(data: unknown) {
 	return { ok: true as const, marker: "middlewareMarker", data };
 }
@@ -126,7 +126,7 @@ describe("auditMiddleware", () => {
 		});
 	});
 
-	// S3 — a protected procedure called without a session: the guard's ok:false must be recorded, and handed back untouched.
+	// A protected procedure called without a session: the guard's ok:false must be recorded, and handed back untouched.
 	it("records an anonymous guard rejection on an unmapped path as a failure, without user identity", async () => {
 		const error = new TRPCError({
 			code: "UNAUTHORIZED",
@@ -369,10 +369,7 @@ describe("auditMiddleware", () => {
 		});
 	});
 
-	// tRPC v11's `next()` does not throw for a downstream failure (guard,
-	// validation, resolver) — it resolves `{ ok: false, error }`. Before #3705
-	// this branch was read as a success: every rejected mutation landed in the
-	// DB as `status: success`. This is the regression test for that fix.
+	// Regression: tRPC v11's next() resolves { ok: false, error } instead of throwing, which used to be recorded as a success.
 	it("treats an ok:false resolution as a failure, without altering the returned result", async () => {
 		const error = new TRPCError({
 			code: "UNAUTHORIZED",
