@@ -25,6 +25,8 @@
 		"db:seed-observatory": "tsx scripts/seed-demo-observatory.ts",
 		"db:seed-stats": "tsx scripts/seed-demo-stats.ts",
 		"db:studio": "drizzle-kit studio",
+		"docs:suit-values": "vitest run src/modules/export/shared/__tests__/suitValueTables.test.ts --update",
+		"predocs:suit-values": "pnpm --filter notifications build",
 		"dev": "tsx scripts/copy-dsfr.ts && tsx scripts/copy-swagger-ui.ts && sh scripts/dev.sh",
 		"predev": "pnpm --filter notifications build",
 		"preview": "next build && next start",

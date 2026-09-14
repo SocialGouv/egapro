@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { CSE_OPINION_CONTENT_TYPES } from "./types";
+
 export const opinionTypeSchema = z.enum(["favorable", "unfavorable"]);
 
 const declarationOpinionSchema = z.object({
@@ -23,7 +25,7 @@ export const setFileContentTypesSchema = z.object({
 	associations: z.array(
 		z.object({
 			declarationNumber: z.number().int().min(1).max(2),
-			type: z.enum(["accuracy", "gap"]),
+			type: z.enum(CSE_OPINION_CONTENT_TYPES),
 			fileId: z.string().min(1),
 		}),
 	),
