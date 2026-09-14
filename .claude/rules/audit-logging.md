@@ -307,6 +307,80 @@ the caller is responsible for sanitisation:
 
 ---
 
+## Miroir stdout (#3705)
+
+En complément — jamais en remplacement — de `audit.action_log`, `logAction`
+et `auditMiddleware` (branche « chemin non mappé ») émettent chacun une ligne
+JSON sur stdout via `~/server/audit/activityLog::emitActivityLog`, collectée
+par la plateforme d'hébergement et affichée dans Grafana. Deux points d'appel
+seulement — jamais un troisième call site direct à `emitActivityLog`.
+
+**Contrat de ligne** — toujours les 16 clés, `null` si inconnue :
+`timestamp`, `level` (`info`/`warn`), `logType` (constante `"user_activity"`),
+`source` (`"trpc"` / `"route"` / `null`), `action`, `category`, `route`,
+`operation`, `status`, `errorCode`, `durationMs`, `userId`, `siren`, `ip`,
+`input`, `inputKeys`. Le contrat est figé côté consommateur (Grafana) —
+n'ajoute ni ne retire une clé sans vérifier l'impact des requêtes `| json`.
+
+**Granularité** : un appel tRPC (mappé ou non, lecture comprise) = une ligne ;
+un chemin mappé n'en produit jamais deux (la branche non mappée ne passe pas
+par `logAction`). Pas de ligne pour la navigation de pages.
+
+**IP** — `truncateIp()` : IPv4 → `/16` (2 derniers octets à zéro), IPv6 → `/48`
+(3 premiers groupes conservés, forme compressée `::`), une IPv4 mappée en IPv6
+(`::ffff:a.b.c.d`) est traitée comme IPv4. Toute valeur invalide (y compris un
+suffixe de port) → `null` : jamais l'en-tête brut recopié tel quel.
+
+**`errorCode`** — `deriveErrorCode()` dérive un code court, jamais un message :
+préfixe `^[A-Z][A-Z0-9_]{0,63}:` (formats tRPC `<CODE>: <message>` et
+NextAuth) → ce préfixe ; `^HTTP (\d{3})` → `HTTP_<nnn>` ; sinon `ERROR`.
+Pour un chemin tRPC non mappé ou une route, le code est résolu directement
+(`error.code`, statut HTTP) sans passer par cette dérivation.
+
+**`input` / `inputKeys` — fermé par défaut.** `inputKeys` liste les noms des
+clés de premier niveau de l'input (objet non vide uniquement), triés, au plus
+20, filtrés par `^[A-Za-z0-9_]{1,64}$` — *les noms seulement, jamais les
+valeurs*. `input` ne garde que les clés d'une liste blanche fixe
+(`~/server/audit/activityLog::INPUT_ALLOWED_KEYS` — clés techniques : `year`,
+`siren`, `id`, `declarationId`, `fileId`, `step`, `currentStep`, `kind`,
+`type`, `slice`, `declarationNumber`, `page`, `pageSize`, `limit`, `offset`,
+`sortBy`, `sortOrder`, `sizeRange`, `region`, `county`, `hasCse`) **et** dont
+la valeur est un nombre fini, un booléen, ou une chaîne courte
+`^[A-Za-z0-9_.:-]{1,64}$` — jamais un objet, un tableau ou une Date, même sous
+une clé autorisée. N'étends cette liste que pour une clé dont les valeurs ne
+peuvent **jamais** être une donnée personnelle ni du texte libre ; en cas de
+doute, laisse la clé hors liste — elle apparaîtra quand même dans `inputKeys`.
+
+**Origine (`source` / `route` / `operation`)** — jamais persistée en base,
+portée par `LogActionOrigin` sur `LogActionInput.origin` :
+`auditMiddleware` la renseigne avec le chemin de procédure + le type
+(`query`/`mutation`/`subscription`) ; `withAuditedRoute` avec la méthode HTTP
++ le pathname (sans query string, tronqué à 200 caractères). Un appel direct
+à `logAction` (auth, upload, cron) ne la renseigne pas — son `action` suffit
+à l'identifier, et la ligne sort avec ces trois champs à `null`.
+
+**Sémantique `ok: false` des middlewares tRPC** — en tRPC v11, `next()` ne
+lève **jamais** pour un échec en aval (garde d'authentification, validation,
+resolver) : `callRecursive` a déjà capturé le throw et résout
+`{ ok: false, error }`. `auditMiddleware` doit détecter cette forme
+(`extractMiddlewareFailure()`) dans les deux branches — chemin mappé (ligne en
+base **et** stdout) et non mappé (stdout seul) — sous peine d'enregistrer tout
+échec tRPC comme un succès. Le résultat de `next()` est toujours retourné tel
+quel, `ok: false` inclus : l'audit ne doit jamais changer ce que voit le
+client.
+
+**Désactivation en test** — `emitActivityLog` ne fait rien quand
+`env.NODE_ENV === "test"` (lu via `~/env`, jamais `process.env`). Le serveur
+de dev et toute image déployée (`NODE_ENV` absent ou `production`) émettent
+normalement. Aucune nouvelle variable d'environnement.
+
+**Fail-safe** — `emitActivityLog` ne lève jamais (try/catch interne) ;
+`logAction` l'appelle dans son propre try/catch, avant l'insert en base : un
+échec de construction ou d'écriture de la ligne stdout n'empêche jamais
+l'insert, et un échec d'insert n'empêche jamais la ligne stdout (déjà émise).
+
+---
+
 ## Category → retention mapping (CNIL compliance)
 
 | Category | Retention | When to use |
@@ -334,8 +408,11 @@ Every new action key must pass the round-trip test in
 fails CI immediately.
 
 For tRPC middleware behaviour (opt-in query, metadata sanitisation,
-sensitive-key stripping), extend the existing
-`~/server/audit/__tests__/trpcMiddleware.test.ts`.
+sensitive-key stripping, `ok: false` detection), extend the existing
+`~/server/audit/__tests__/trpcMiddleware.test.ts`. For the stdout mirror
+itself (IP truncation, error-code derivation, input/inputKeys projection,
+the 16-key contract, the test-env guard), extend
+`~/server/audit/__tests__/activityLog.test.ts`.
 
 For `cleanup.ts` changes that touch the DB layer (new SQL predicates, new
 retention categories), **add an integration test** in

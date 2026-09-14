@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
+import { emitActivityLog } from "./activityLog";
 import { logAction } from "./log";
 import { buildRequestContext } from "./requestContext";
 
@@ -143,47 +144,105 @@ type SessionLike = {
 	} | null;
 } | null;
 
+type ProcedureType = "query" | "mutation" | "subscription";
+
 type AuditMiddlewareInput<TResult> = {
 	ctx: {
 		session: SessionLike;
 		headers: Headers;
 	};
+	type: ProcedureType;
 	path: string;
 	getRawInput: () => Promise<unknown>;
 	next: () => Promise<TResult>;
 };
 
-/**
- * Generic helper that records every mutation and every explicitly-listed
- * sensitive query into `audit.action_log`.
- *
- * Designed to be wrapped in a `t.middleware(...)` call from `~/server/api/trpc`
- * (kept generic so it returns whatever the tRPC pipeline expects).
- *
- * - Lookup is path-based (e.g. `declaration.submit`) — paths not in the map
- *   are skipped.
- * - Captures status, duration, error message, user identity and request
- *   metadata (IP, user-agent).
- * - Always re-throws errors so the audit log never alters business behavior.
- */
+// tRPC v11's next() resolves { ok: false, error } for a downstream failure
+// instead of throwing (#3705 §5) — this is the one place that recognizes it.
+function extractMiddlewareFailure(
+	result: unknown,
+): { errorCode: string; errorMessage: string } | null {
+	if (
+		typeof result !== "object" ||
+		result === null ||
+		!("ok" in result) ||
+		(result as { ok: unknown }).ok !== false ||
+		!("error" in result)
+	) {
+		return null;
+	}
+
+	const error = (result as { error: unknown }).error;
+	if (!(error instanceof TRPCError)) return null;
+
+	return {
+		errorCode: error.code,
+		errorMessage: `${error.code}: ${error.message}`,
+	};
+}
+
+// Mirrors every tRPC call — mapped or not — to the stdout activity log (#3705), on top of the existing audit.action_log write for mapped paths.
 export async function auditMiddleware<TResult>({
 	ctx,
+	type,
 	path,
 	getRawInput,
 	next,
 }: AuditMiddlewareInput<TResult>): Promise<TResult> {
 	const action = PROCEDURE_TO_ACTION[path];
+	const requestContext = buildRequestContext(ctx.headers);
+	const userId = ctx.session?.user?.id ?? null;
+	const siren = parseSiren(ctx.session?.user?.siret);
 
-	// Path is not auditable — short-circuit, no overhead beyond the lookup.
+	// Unmapped path: no audit.action_log row, but still a stdout line (#3705 §2).
 	if (!action) {
-		return next();
+		const startedAt = Date.now();
+		let rawInput: unknown;
+		try {
+			rawInput = await getRawInput();
+		} catch {
+			rawInput = undefined;
+		}
+
+		try {
+			const result = await next();
+			const failure = extractMiddlewareFailure(result);
+			emitActivityLog({
+				source: "trpc",
+				action: null,
+				category: null,
+				route: path,
+				operation: type,
+				status: failure ? "failure" : "success",
+				errorCode: failure?.errorCode ?? null,
+				durationMs: Date.now() - startedAt,
+				userId,
+				siren,
+				ip: requestContext.ipAddress,
+				rawInput,
+			});
+			return result;
+		} catch (error) {
+			emitActivityLog({
+				source: "trpc",
+				action: null,
+				category: null,
+				route: path,
+				operation: type,
+				status: "failure",
+				errorCode: error instanceof TRPCError ? error.code : "ERROR",
+				durationMs: Date.now() - startedAt,
+				userId,
+				siren,
+				ip: requestContext.ipAddress,
+				rawInput,
+			});
+			throw error;
+		}
 	}
 
 	const startedAt = Date.now();
-	const requestContext = buildRequestContext(ctx.headers);
-	const userId = ctx.session?.user?.id ?? null;
 	const userEmail = ctx.session?.user?.email ?? null;
-	const siren = parseSiren(ctx.session?.user?.siret);
 	let rawInput: unknown;
 	try {
 		rawInput = await getRawInput();
@@ -191,19 +250,25 @@ export async function auditMiddleware<TResult>({
 		rawInput = undefined;
 	}
 	const metadata = sanitizeMetadata(rawInput, path);
+	const origin = { source: "trpc" as const, route: path, operation: type };
 
 	try {
 		const result = await next();
+		const durationMs = Date.now() - startedAt;
+		const failure = extractMiddlewareFailure(result);
+
 		void logAction({
 			action,
-			status: "success",
+			status: failure ? "failure" : "success",
 			userId,
 			userEmail,
 			siren,
 			metadata,
+			errorMessage: failure?.errorMessage,
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
-			durationMs: Date.now() - startedAt,
+			durationMs,
+			origin,
 		});
 		return result;
 	} catch (error) {
@@ -225,6 +290,7 @@ export async function auditMiddleware<TResult>({
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
+			origin,
 		});
 		throw error;
 	}

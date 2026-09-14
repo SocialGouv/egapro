@@ -9,6 +9,14 @@ import type {
 import { AUDIT_ACTION_CATEGORIES } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
+import { deriveErrorCode, emitActivityLog } from "./activityLog";
+
+// Stdout-mirror-only fields (#3705), never persisted to audit.action_log.
+export type LogActionOrigin = {
+	source?: "trpc" | "route" | null;
+	route?: string | null;
+	operation?: string | null;
+};
 
 export type LogActionInput = {
 	action: AuditActionKey;
@@ -23,24 +31,38 @@ export type LogActionInput = {
 	ipAddress?: string | null;
 	userAgent?: string | null;
 	durationMs?: number | null;
-	/**
-	 * Optional override — falls back to AUDIT_ACTION_CATEGORIES[action].
-	 * Mostly useful for tests; production code should rely on the static map.
-	 */
+	// Overrides AUDIT_ACTION_CATEGORIES[action] — mostly for tests.
 	category?: AuditCategory;
+	origin?: LogActionOrigin;
 };
 
-/**
- * Append a row to `audit.action_log`.
- *
- * Fail-safe by design — every failure during logging is swallowed and reported
- * to the console. Audit logging must NEVER block business logic, so the
- * caller's promise will resolve regardless of the insert outcome.
- */
+// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
 export async function logAction(input: LogActionInput): Promise<void> {
-	try {
-		const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
 
+	try {
+		emitActivityLog({
+			source: input.origin?.source ?? null,
+			action: input.action,
+			category,
+			route: input.origin?.route ?? null,
+			operation: input.origin?.operation ?? null,
+			status: input.status,
+			errorCode: deriveErrorCode(input.errorMessage),
+			durationMs: input.durationMs ?? null,
+			userId: input.userId ?? null,
+			siren: input.siren ?? null,
+			ip: input.ipAddress ?? null,
+			rawInput: input.metadata ?? null,
+		});
+	} catch (error) {
+		console.error("[audit] Failed to emit activity log line", {
+			action: input.action,
+			error,
+		});
+	}
+
+	try {
 		await db.insert(actionLogs).values({
 			action: input.action,
 			category,
