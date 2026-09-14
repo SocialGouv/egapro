@@ -174,6 +174,30 @@ describe("logAction", () => {
 			});
 		});
 
+		it("hands only the NextAuth error code to the mirror, never a token carried by its message (S9)", async () => {
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage:
+					"OAUTH_CALLBACK_ERROR: invalid_grant for code fake-session-token-value",
+				ipAddress: "203.0.113.45",
+			});
+
+			const mirrored = mockEmitActivityLog.mock.calls[0]?.[0];
+			expect(mirrored).toMatchObject({
+				action: "auth.login_failed",
+				status: "failure",
+				errorCode: "OAUTH_CALLBACK_ERROR",
+			});
+			expect(JSON.stringify(mirrored)).not.toContain(
+				"fake-session-token-value",
+			);
+			expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+				errorMessage:
+					"OAUTH_CALLBACK_ERROR: invalid_grant for code fake-session-token-value",
+			});
+		});
+
 		// A failure while building or emitting the stdout line must never block the DB insert, nor make logAction reject.
 		it("still inserts and resolves when the stdout mirror throws", async () => {
 			const consoleSpy = vi

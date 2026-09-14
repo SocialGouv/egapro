@@ -353,6 +353,38 @@ describe("emitActivityLog", () => {
 		});
 	});
 
+	it("keeps only the file id of an upload failure, never its file or virus name", () => {
+		emitActivityLog(
+			buildParams({
+				source: null,
+				action: "cse_opinion.upload_file",
+				category: "mutation",
+				route: null,
+				operation: null,
+				status: "failure",
+				errorCode: deriveErrorCode("HTTP 422 virus_detected"),
+				rawInput: {
+					flowType: "cse_opinion",
+					fileId: "7c1e2d3f-0000-4000-8000-000000000042",
+					fileName: "avis-cse-societe-demo.pdf",
+					virusName: "Eicar-Test-Signature",
+					s3Cleanup: "ok",
+				},
+			}),
+		);
+
+		const entry = parseLastLine();
+		expect(entry).toMatchObject({
+			status: "failure",
+			errorCode: "HTTP_422",
+			input: { fileId: "7c1e2d3f-0000-4000-8000-000000000042" },
+			inputKeys: ["fileId", "fileName", "flowType", "s3Cleanup", "virusName"],
+		});
+		expect(JSON.stringify(entry)).not.toContain("avis-cse-societe-demo.pdf");
+		expect(JSON.stringify(entry)).not.toContain("Eicar-Test-Signature");
+		expect(JSON.stringify(entry)).not.toContain("virus_detected");
+	});
+
 	it("writes null input and inputKeys when no key survives the projection", () => {
 		emitActivityLog(
 			buildParams({ source: "route", rawInput: { "bad key!": 1 } }),
