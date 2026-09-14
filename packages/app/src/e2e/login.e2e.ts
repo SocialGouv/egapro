@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
-import { LOGIN, MY_SPACE } from "~/modules/routes";
+import { HOME, LOGIN, MY_SPACE } from "~/modules/routes";
 import type { CompanyLocation } from "./helpers/db";
 import { getCompanyLocation, setCompanyLocation } from "./helpers/db";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
@@ -59,6 +59,21 @@ test.describe("ProConnect authentication flow", () => {
 		await expect(
 			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).not.toBeVisible();
+	});
+});
+
+// Merged from home.e2e.ts (#4114). A file-level describe on purpose: this needs the
+// shared session of the `chromium` project, so it must stay out of the two describes
+// above, which opt into an anonymous context via `storageState: { cookies: [], origins: [] }`.
+// It is the twin of "redirects to mon espace when already logged in" — same redirect,
+// entered from "/" instead of /login.
+test.describe("Authenticated home redirect", () => {
+	test("home page redirects authenticated user to mon-espace", async ({
+		page,
+	}) => {
+		await page.goto(HOME);
+		await page.waitForURL(urlGlob(MY_SPACE));
+		expect(page.url()).toContain(MY_SPACE);
 	});
 });
 
