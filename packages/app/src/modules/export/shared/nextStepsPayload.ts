@@ -62,7 +62,7 @@ function renderChild(
 	return isCompositePredicate(node) ? `(${fragment})` : fragment;
 }
 
-function resolveTargetStageLabel(
+export function resolveTargetStageLabel(
 	rules: Rules,
 	targetStatus: DeclarationFsmStatus,
 ): string | null {

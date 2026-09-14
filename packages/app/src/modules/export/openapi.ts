@@ -1,10 +1,36 @@
 // OpenAPI 3.1 specification for the declarations export API.
 
+// Submodule imports, not the barrels: `~/modules/cseOpinion` and
+// `~/modules/declaration-remuneration` both re-export React components, which a
+// plain specification object has no business dragging in.
+import { opinionTypeSchema } from "~/modules/cseOpinion/schemas";
+import { CSE_OPINION_CONTENT_TYPES } from "~/modules/cseOpinion/types";
+import {
+	CATEGORY_SOURCES,
+	LEGACY_SOURCE_LABELS,
+} from "~/modules/declaration-remuneration/steps/step5/sources";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
+	fileTypeEnum,
 	representationNotComputableExecutivesEnum,
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
+import { listCompliancePathsByRound } from "~/server/rules/compliancePaths";
+import { DECLARATION_EVENT_TYPE_LABELS } from "./shared/statusHistoryLabels";
+
+const VALUE_TABLES_DOC = "docs/SUIT-API-valeurs.md";
+
+const COMPLIANCE_PATHS_BY_ROUND = listCompliancePathsByRound();
+
+const CSE_OPINION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
+	"cse_opinion";
+const JOINT_EVALUATION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
+	"joint_evaluation";
+
+const JOB_CATEGORY_SOURCES = [
+	...CATEGORY_SOURCES.map((source) => source.value),
+	...Object.keys(LEGACY_SOURCE_LABELS),
+];
 
 const declarantSchema = {
 	type: "object",
@@ -70,11 +96,16 @@ const cseOpinionSchema = {
 		},
 		Type: {
 			type: "string",
-			enum: ["accuracy", "gap"],
-			description:
-				"Type d'avis CSE : 'accuracy' = avis sur l'exactitude des données, 'gap' = avis sur les mesures de correction de l'écart",
+			enum: [...CSE_OPINION_CONTENT_TYPES],
+			description: `Objet de la consultation du CSE. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
 		},
-		Avis: { type: ["string", "null"] },
+		Avis: {
+			description: `Sens de l'avis rendu par le CSE. \`null\` si l'avis n'a pas été renseigné. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...opinionTypeSchema.options] },
+				{ type: "null" },
+			],
+		},
 		Date: { type: ["string", "null"], format: "date" },
 	},
 } as const;
@@ -233,14 +264,18 @@ const declarationSchema = {
 			description: "Présence d'un CSE (>= 100 salariés)",
 		},
 		Parcours_apres_declaration_1: {
-			type: ["string", "null"],
-			description:
-				"Parcours après la première déclaration (justify, corrective_action, joint_evaluation)",
+			description: `Parcours de mise en conformité choisi après la première déclaration. \`null\` tant qu'aucun choix n'a été fait. Valeurs dérivées des événements \`path_choice\` de tour 1 du moteur de règles ; signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...COMPLIANCE_PATHS_BY_ROUND[1]] },
+				{ type: "null" },
+			],
 		},
 		Parcours_apres_declaration_2: {
-			type: ["string", "null"],
-			description:
-				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
+			description: `Parcours de mise en conformité choisi après la seconde déclaration. \`null\` tant qu'aucun choix n'a été fait. Valeurs dérivées des événements \`path_choice\` de tour 2 du moteur de règles — l'offre y est plus étroite qu'au tour 1 ; signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...COMPLIANCE_PATHS_BY_ROUND[2]] },
+				{ type: "null" },
+			],
 		},
 		Parcours: {
 			type: "object",
@@ -403,17 +438,8 @@ const declarationSchema = {
 				properties: {
 					Statut: {
 						type: "string",
-						enum: [
-							"submit",
-							"path_choice",
-							"second_declaration_submit",
-							"joint_evaluation_submit",
-							"cse_opinion_submit",
-							"cancel",
-							"demarche_complete",
-						],
-						description:
-							"Type d'événement brut issu de l'enum `declaration_event_type`.",
+						enum: Object.keys(DECLARATION_EVENT_TYPE_LABELS),
+						description: `Type d'événement brut issu de l'enum \`declaration_event_type\`. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
 					},
 					Libelle_statut: {
 						type: "string",
@@ -446,20 +472,8 @@ const declarationSchema = {
 				"Effectif hommes pris en compte pour la rémunération globale annuelle",
 		},
 		Source_categories_emplois: {
-			description:
-				"Source de détermination des catégories d'emplois pour l'indicateur G. `null` si aucun indicateur G déclaré.",
-			oneOf: [
-				{
-					type: "string",
-					enum: [
-						"accord-entreprise",
-						"accord-groupe",
-						"accord-branche",
-						"decision-unilaterale",
-					],
-				},
-				{ type: "null" },
-			],
+			description: `Source de détermination des catégories d'emplois pour l'indicateur G, servie brute depuis une colonne texte libre. \`null\` si aucun indicateur G déclaré. L'énumération inclut les valeurs historiques, retirées du formulaire mais jamais migrées : un consommateur qui valide strictement doit les accepter. Signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [{ type: "string", enum: JOB_CATEGORY_SOURCES }, { type: "null" }],
 		},
 		Indicateurs: indicatorsSchema,
 		Seconde_declaration: {
@@ -498,7 +512,7 @@ const declarationSchema = {
 					Id: { type: "string", description: "Identifiant unique du fichier" },
 					Type: {
 						type: "string",
-						enum: ["cse_opinion"],
+						enum: [CSE_OPINION_FILE_TYPE],
 						description: "Type : avis CSE",
 					},
 					Nom_fichier: {
@@ -529,7 +543,7 @@ const declarationSchema = {
 						},
 						Type: {
 							type: "string",
-							enum: ["joint_evaluation"],
+							enum: [JOINT_EVALUATION_FILE_TYPE],
 							description: "Type : évaluation conjointe",
 						},
 						Nom_fichier: {
@@ -654,8 +668,8 @@ const fileMetadataSchema = {
 		id: { type: "string", description: "File unique identifier" },
 		type: {
 			type: "string",
-			enum: ["cse_opinion", "joint_evaluation"],
-			description: "File type: CSE opinion or joint evaluation",
+			enum: [...fileTypeEnum.enumValues],
+			description: `File type: CSE opinion or joint evaluation. Value reference: \`${VALUE_TABLES_DOC}\`.`,
 		},
 		fileName: {
 			type: "string",

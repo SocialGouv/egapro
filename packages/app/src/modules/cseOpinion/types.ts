@@ -10,7 +10,9 @@ export type UploadedFile = {
 
 export type DeclarationNumber = 1 | 2;
 
-export type ContentType = "accuracy" | "gap";
+export const CSE_OPINION_CONTENT_TYPES = ["accuracy", "gap"] as const;
+
+export type ContentType = (typeof CSE_OPINION_CONTENT_TYPES)[number];
 
 export type ContentTypeColumn = {
 	id: string;
