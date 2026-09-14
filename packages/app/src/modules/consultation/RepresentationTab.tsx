@@ -1,9 +1,11 @@
-import { getRepresentationThresholdNotice } from "~/modules/domain";
+import {
+	formatPrecisePercentage,
+	getRepresentationThresholdNotice,
+} from "~/modules/domain";
 import type { PublicRepresentationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { StackedGenderBar } from "~/modules/shared/GenderBar";
 import { IndicatorCard } from "~/modules/shared/IndicatorCard";
-import { formatPercent } from "./formatters";
 import { GenderDetailsTable } from "./GenderDetailsTable";
 import styles from "./indicatorSection.module.scss";
 import { NotComputableState } from "./NotComputableState";
@@ -67,13 +69,14 @@ function GapCard({ gap }: { gap: Gap }) {
 			<StackedGenderBar
 				menLabel={
 					<>
-						Hommes : <strong>{formatPercent(gap.menPercent)}</strong>
+						Hommes : <strong>{formatPrecisePercentage(gap.menPercent)}</strong>
 					</>
 				}
 				menPercent={gap.menPercent}
 				womenLabel={
 					<>
-						Femmes : <strong>{formatPercent(gap.womenPercent)}</strong>
+						Femmes :{" "}
+						<strong>{formatPrecisePercentage(gap.womenPercent)}</strong>
 					</>
 				}
 				womenPercent={gap.womenPercent}
@@ -87,8 +90,8 @@ function GapCard({ gap }: { gap: Gap }) {
 							{
 								label: "Représentation",
 								values: [
-									formatPercent(gap.womenPercent),
-									formatPercent(gap.menPercent),
+									formatPrecisePercentage(gap.womenPercent),
+									formatPrecisePercentage(gap.menPercent),
 								],
 							},
 						]}

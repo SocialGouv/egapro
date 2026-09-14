@@ -186,7 +186,12 @@ export {
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
+	formatDays,
+	formatDecimal,
+	formatFileSize,
+	formatFixedPercentage,
 	formatGap,
 	formatGapCompact,
 	formatIsoDate,
@@ -194,9 +199,17 @@ export {
 	formatMonthDay,
 	formatOptionalIsoDate,
 	formatPercentage,
+	formatPointsAbs,
+	formatPrecisePercentage,
+	formatRatioAsPercentage,
+	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
+	formatTime,
 	formatTotal,
+	formatWholePercentage,
+	MISSING_VALUE,
+	NARROW_NBSP,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export type { GipGapReference } from "./shared/gap";
@@ -310,10 +323,6 @@ export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
 	buildCampaignRateTileProps,
 	computeRate,
-	formatCount,
-	formatPointsAbs,
-	formatRate,
-	NARROW_NBSP,
 	roundOneDecimal,
 } from "./shared/submissionRate";
 // Indicator E — variable pay proportion (beneficiaries over same-sex workforce)

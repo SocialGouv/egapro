@@ -3,16 +3,30 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
+	formatDays,
+	formatDecimal,
+	formatFileSize,
+	formatFixedPercentage,
 	formatGap,
 	formatGapCompact,
 	formatIsoDate,
+	formatLongDate,
 	formatMonthDay,
 	formatOptionalIsoDate,
 	formatPercentage,
+	formatPointsAbs,
+	formatPrecisePercentage,
+	formatRatioAsPercentage,
+	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
+	formatTime,
 	formatTotal,
+	formatWholePercentage,
+	MISSING_VALUE,
+	NARROW_NBSP,
 } from "../shared/format";
 
 describe("formatGap", () => {
@@ -93,8 +107,15 @@ describe("formatCurrency", () => {
 		expect(formatCurrency("1234.5")).toMatch(/1[\s\u202f]234,5 €/);
 	});
 
-	it("returns dash for undefined", () => {
+	it("takes an arbitrary unit, for the hourly tranches of the recap", () => {
+		expect(formatCurrency("1234.5", "€/h")).toMatch(/1[\s\u202f]234,5 €\/h/);
+	});
+
+	it("returns a bare dash for undefined, never an amount of zero euros", () => {
 		expect(formatCurrency(undefined)).toBe("-");
+		expect(formatCurrency(undefined, "€/h")).toBe("-");
+		expect(formatCurrency("", "€/h")).toBe("-");
+		expect(formatCurrency("not-a-number")).toBe("-");
 	});
 });
 
@@ -205,5 +226,184 @@ describe("formatMonthDay", () => {
 	it("swaps a MM-DD fragment to the French DD/MM form", () => {
 		expect(formatMonthDay("02-15")).toBe("15/02");
 		expect(formatMonthDay("12-01")).toBe("01/12");
+	});
+});
+
+describe("MISSING_VALUE", () => {
+	it("is the em dash every formatter writes for an absent value", () => {
+		expect(MISSING_VALUE).toBe("\u2014");
+	});
+});
+
+describe("NARROW_NBSP", () => {
+	it("is the narrow no-break space, so a unit never wraps away from its number", () => {
+		expect(NARROW_NBSP).toBe("\u202f");
+	});
+});
+
+describe("formatCount", () => {
+	it("groups thousands with the French narrow no-break space", () => {
+		expect(formatCount(2256)).toBe("2\u202f256");
+		expect(formatCount(1234)).toBe("1\u202f234");
+	});
+
+	it("leaves a value below a thousand ungrouped", () => {
+		expect(formatCount(0)).toBe("0");
+		expect(formatCount(999)).toBe("999");
+	});
+
+	it("keeps the decimals a chart axis tick may carry", () => {
+		expect(formatCount(2.5)).toBe("2,5");
+	});
+
+	it("marks a missing count rather than printing a zero", () => {
+		expect(formatCount(null)).toBe(MISSING_VALUE);
+	});
+});
+
+describe("formatRoundedCount", () => {
+	it("rounds an average headcount to the unit", () => {
+		expect(formatRoundedCount(249.6)).toBe("250");
+		expect(formatRoundedCount(249.4)).toBe("249");
+	});
+
+	it("groups the rounded value like any other count", () => {
+		expect(formatRoundedCount(2256.4)).toBe("2\u202f256");
+	});
+
+	it("marks a missing count rather than printing a zero", () => {
+		expect(formatRoundedCount(null)).toBe(MISSING_VALUE);
+	});
+});
+
+describe("formatPrecisePercentage", () => {
+	it("leaves a value already on the 0-100 scale alone", () => {
+		expect(formatPrecisePercentage(66.7)).toBe("66,7 %");
+	});
+
+	it("keeps at most two decimals", () => {
+		expect(formatPrecisePercentage(33.333)).toBe("33,33 %");
+	});
+
+	it("writes a whole percentage without a decimal part", () => {
+		expect(formatPrecisePercentage(50)).toBe("50 %");
+	});
+
+	it("marks a missing percentage rather than printing a zero", () => {
+		expect(formatPrecisePercentage(null)).toBe(MISSING_VALUE);
+	});
+});
+
+describe("formatRatioAsPercentage", () => {
+	it("turns the stored 0-1 ratio into a percentage", () => {
+		expect(formatRatioAsPercentage(0.0717)).toBe("7,17 %");
+	});
+
+	it("keeps the sign of a gap in favour of women", () => {
+		expect(formatRatioAsPercentage(-0.05)).toBe("-5 %");
+	});
+
+	it("marks a missing ratio rather than printing a zero", () => {
+		expect(formatRatioAsPercentage(null)).toBe(MISSING_VALUE);
+	});
+});
+
+describe("formatWholePercentage", () => {
+	it("drops the decimal part entirely", () => {
+		expect(formatWholePercentage(33.3)).toBe("33 %");
+		expect(formatWholePercentage(66.7)).toBe("67 %");
+	});
+
+	it("leaves an already whole percentage alone", () => {
+		expect(formatWholePercentage(100)).toBe("100 %");
+		expect(formatWholePercentage(0)).toBe("0 %");
+	});
+});
+
+describe("formatFixedPercentage", () => {
+	it("formats with one decimal in French locale", () => {
+		expect(formatFixedPercentage(5.3)).toBe("5,3");
+	});
+
+	it("pads integers with one decimal", () => {
+		expect(formatFixedPercentage(12)).toBe("12,0");
+	});
+
+	it("appends % suffix when withUnit is true", () => {
+		expect(formatFixedPercentage(5.3, { withUnit: true })).toBe("5,3 %");
+		expect(formatFixedPercentage(12, { withUnit: true })).toBe("12,0 %");
+	});
+
+	it("reads a rate of a hundred as the tile used to write it", () => {
+		expect(formatFixedPercentage(100)).toBe("100,0");
+	});
+});
+
+describe("formatPointsAbs", () => {
+	it("returns absolute value rounded to 1 decimal, French separator", () => {
+		expect(formatPointsAbs(2.07)).toBe("2,1");
+		expect(formatPointsAbs(-2.07)).toBe("2,1");
+		expect(formatPointsAbs(0)).toBe("0,0");
+		expect(formatPointsAbs(0.5)).toBe("0,5");
+		expect(formatPointsAbs(-0.04)).toBe("0,0");
+	});
+});
+
+describe("formatDecimal", () => {
+	it("keeps at most one decimal without padding a whole number", () => {
+		expect(formatDecimal(2.5)).toBe("2,5");
+		expect(formatDecimal(2)).toBe("2");
+		expect(formatDecimal(2.46)).toBe("2,5");
+	});
+});
+
+describe("formatDays", () => {
+	it("formats a value with one decimal", () => {
+		expect(formatDays(2.5)).toBe("2,5");
+	});
+
+	it("appends j suffix when withUnit is true", () => {
+		expect(formatDays(2.5, { withUnit: true })).toBe("2,5 j");
+	});
+
+	it("returns em-dash for null", () => {
+		expect(formatDays(null)).toBe("—");
+		expect(formatDays(null, { withUnit: true })).toBe("—");
+	});
+});
+
+describe("formatFileSize", () => {
+	it("formats bytes under 1 Mo as a French Ko label", () => {
+		expect(formatFileSize(63365)).toBe("61,88 Ko");
+	});
+
+	it("formats bytes of 1 Mo and above as a French Mo label", () => {
+		expect(formatFileSize(5 * 1024 * 1024)).toBe("5 Mo");
+		expect(formatFileSize(1024 * 1024 + 512 * 1024)).toBe("1,5 Mo");
+	});
+
+	it("returns null for unknown or negative sizes", () => {
+		expect(formatFileSize(null)).toBeNull();
+		expect(formatFileSize(-1)).toBeNull();
+	});
+});
+
+describe("formatTime", () => {
+	it("writes the time of day on a 24-hour clock", () => {
+		expect(formatTime(new Date(2026, 5, 1, 14, 5))).toBe("14:05");
+		expect(formatTime(new Date(2026, 5, 1, 9, 5))).toBe("09:05");
+		expect(formatTime(new Date(2026, 5, 1, 0, 0))).toBe("00:00");
+	});
+});
+
+describe("formatLongDate", () => {
+	it("writes the month in full", () => {
+		expect(formatLongDate(new Date(2026, 5, 12))).toBe("12 juin 2026");
+	});
+
+	it("gives the first of the month its French ordinal", () => {
+		expect(formatLongDate(new Date(2026, 5, 1))).toBe(
+			"1\u1d49\u02b3 juin 2026",
+		);
 	});
 });

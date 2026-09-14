@@ -12,7 +12,7 @@ import {
 	YAxis,
 } from "recharts";
 
-import { formatCount, formatDays } from "./formatters";
+import { formatCount, formatDays } from "~/modules/domain";
 import styles from "./StepDurationsChart.module.scss";
 import type { StepDurationRow } from "./types";
 

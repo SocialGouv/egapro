@@ -161,6 +161,16 @@ check_pattern '\.(ts|tsx)$' \
   'Inline SIREN extraction is forbidden (even via a SIREN_LENGTH const). Use extractSiren()/parseSiren() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
+# Display formatting — every number, date and duration becomes text in ~/modules/domain.
+# Scoped to src/modules/: server/db/getGlobalSettings.ts uses "sv-SE" to COMPUTE an ISO date
+# (not to display one), packages/app/scripts/ writes CLI output, and packages/notifications
+# has no access to the domain. OrdinalLongDate.tsx is excluded because it renders <sup> markup
+# a string cannot express, and pins timeZone: "UTC" for deadlines that carry no time.
+check_pattern 'src/modules/.*\.(ts|tsx)$' \
+  '\.toLocale(Date|Time)?String\(|Intl\.(NumberFormat|DateTimeFormat)|\.toFixed\(' \
+  'Inline display formatting is forbidden outside the domain. Use a formatter from ~/modules/domain (shared/format.ts), or add the missing one there.' \
+  '(domain/|__tests__|__fixtures__|\.test\.|\.spec\.|OrdinalLongDate\.tsx)'
+
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
 check_pattern 'routers/.*\.ts$' \
   "from ['\"]zod['\"]" \
