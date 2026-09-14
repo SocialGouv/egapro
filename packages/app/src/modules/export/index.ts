@@ -44,17 +44,10 @@ export {
 	EXPORT_VERSION,
 	INDICATOR_G_COLUMNS,
 } from "./shared/constants";
-export { renderSuitValueTablesPage } from "./shared/renderSuitValueTables";
 export {
 	DECLARATION_EVENT_TYPE_LABELS,
 	type DeclarationEventType,
 	getStatusHistoryLabel,
 	PATH_CHOICE_VALUE_LABELS,
 } from "./shared/statusHistoryLabels";
-export {
-	buildSuitValueTablesPage,
-	SUIT_VALUES_REGENERATE_COMMAND,
-	type SuitFieldTable,
-	type SuitValueTablesPage,
-} from "./shared/suitValueTables";
 export type { ExportRow, IndicatorGRow } from "./types";
