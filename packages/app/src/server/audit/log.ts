@@ -11,7 +11,7 @@ import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
 import { deriveErrorCode, emitActivityLog } from "./activityLog";
 
-// Stdout-mirror-only fields (#3705), never persisted to audit.action_log.
+// Stdout-mirror-only fields, never persisted to audit.action_log.
 export type LogActionOrigin = {
 	source?: "trpc" | "route" | null;
 	route?: string | null;

@@ -126,6 +126,118 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	// S3 — a protected procedure called without a session: the guard's ok:false must be recorded, and handed back untouched.
+	it("records an anonymous guard rejection on an unmapped path as a failure, without user identity", async () => {
+		const error = new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "no session",
+		});
+		const next = vi.fn(async () => errorResult(error));
+
+		const result = await auditMiddleware({
+			ctx: { session: null, headers: new Headers() },
+			type: "query",
+			path: "cseOpinion.getFiles",
+			getRawInput: buildGetRawInput(undefined),
+			next,
+		});
+
+		expect(result).toEqual(errorResult(error));
+		expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorCode: "UNAUTHORIZED",
+			userId: null,
+			siren: null,
+			ip: null,
+		});
+	});
+
+	it("records an anonymous guard rejection on a mapped path as a failure, without user identity", async () => {
+		const error = new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "no session",
+		});
+		const next = vi.fn(async () => errorResult(error));
+
+		const result = await auditMiddleware({
+			ctx: { session: null, headers: new Headers() },
+			type: "query",
+			path: "profile.get",
+			getRawInput: buildGetRawInput(undefined),
+			next,
+		});
+
+		expect(result).toEqual(errorResult(error));
+		expect(mockEmitActivityLog).not.toHaveBeenCalled();
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "profile.read",
+			status: "failure",
+			errorMessage: "UNAUTHORIZED: no session",
+			userId: null,
+			userEmail: null,
+			siren: null,
+		});
+	});
+
+	it("treats an ok:false resolution as a failure even when its error is not a TRPCError", async () => {
+		const next = vi.fn(async () => ({
+			ok: false as const,
+			error: new Error("unexpected shape"),
+		}));
+
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "cseOpinion.getFiles",
+			getRawInput: buildGetRawInput(undefined),
+			next,
+		});
+
+		expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorCode: "ERROR",
+		});
+	});
+
+	it("still emits the unmapped stdout line when getRawInput throws", async () => {
+		const next = vi.fn(async () => okResult("result"));
+
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "cseOpinion.getFiles",
+			getRawInput: async () => {
+				throw new Error("input parse failed");
+			},
+			next,
+		});
+
+		expect(mockEmitActivityLog).toHaveBeenCalledOnce();
+		expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+			status: "success",
+			rawInput: undefined,
+		});
+	});
+
+	it("logs 'Unknown error' when a mapped path's next() throws something that is not an Error", async () => {
+		const next = vi.fn(() => Promise.reject("not-an-error"));
+
+		await expect(
+			auditMiddleware({
+				ctx: buildCtx(),
+				type: "mutation",
+				path: "declaration.submit",
+				getRawInput: buildGetRawInput(undefined),
+				next,
+			}),
+		).rejects.toBe("not-an-error");
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorMessage: "Unknown error",
+		});
+	});
+
 	it("emits errorCode ERROR for an unmapped path when next() throws a non-TRPCError", async () => {
 		const next = vi.fn(async () => {
 			throw new Error("boom");
@@ -457,6 +569,28 @@ describe("auditMiddleware", () => {
 
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
 			phone: "+33122334455",
+		});
+	});
+
+	it("keeps null values, drops undefined fields and preserves array positions in metadata", async () => {
+		const next = vi.fn(async () => okResult(undefined));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "profile.updatePhone",
+			getRawInput: buildGetRawInput({
+				phone: "0612345678",
+				extension: null,
+				skipped: undefined,
+				items: [undefined, 1],
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toStrictEqual({
+			phone: "0612345678",
+			extension: null,
+			items: [undefined, 1],
 		});
 	});
 

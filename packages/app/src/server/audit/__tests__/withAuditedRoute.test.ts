@@ -96,6 +96,20 @@ describe("withAuditedRoute", () => {
 		});
 	});
 
+	it("logs 'Unknown error' and re-throws when the handler rejects with a non-Error", async () => {
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
+			() => Promise.reject("not-an-error"),
+		);
+
+		await expect(handler(buildRequest())).rejects.toBe("not-an-error");
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorMessage: "Unknown error",
+			origin: { source: "route", route: "/api/test", operation: "GET" },
+		});
+	});
+
 	it("merges audit context returned by resolveContext", async () => {
 		const handler = withAuditedRoute(
 			{

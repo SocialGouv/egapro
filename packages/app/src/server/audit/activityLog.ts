@@ -23,7 +23,6 @@ export type EmitActivityLogParams = {
 
 const ROUTE_MAX_LENGTH = 200;
 
-// Silenced under Vitest (NODE_ENV=test) — the dev server and every deployed image emit normally.
 export function emitActivityLog(params: EmitActivityLogParams): void {
 	if (env.NODE_ENV === "test") return;
 
@@ -43,12 +42,14 @@ export function emitActivityLog(params: EmitActivityLogParams): void {
 			userId: params.userId,
 			siren: params.siren,
 			ip: truncateIp(params.ip),
-			input: projectInputValues(params.rawInput),
+			// tRPC input is read before Zod validation, so its values are caller-forged — keep only its key names.
+			input:
+				params.source === "trpc" ? null : projectInputValues(params.rawInput),
 			inputKeys: projectInputKeys(params.rawInput),
 		};
 		console.log(JSON.stringify(entry));
 	} catch (error) {
-		// A malformed entry must never block logAction's DB insert (S8).
+		// Swallowed: a malformed line must never block the audit.action_log insert that follows it.
 		console.error("[audit] Failed to emit activity log line", { error });
 	}
 }
@@ -70,100 +71,53 @@ export function deriveErrorCode(
 	return "ERROR";
 }
 
+const IPV6_ZONE_SUFFIX = /%.*$/;
+const IPV4_MAPPED_PATTERN = /^::ffff:([0-9a-f]{1,4}):[0-9a-f]{1,4}$/;
+const TRAILING_ZERO_GROUPS = /(?:^|:)0(?::0)*$/;
+const IPV6_GROUP_COUNT = 8;
+const IPV6_KEPT_GROUPS = 3;
+
 export function truncateIp(raw: string | null | undefined): string | null {
-	if (!raw) return null;
-	const value = raw.trim();
+	const value = raw?.trim();
 	if (!value) return null;
-
 	if (isIPv4(value)) return truncateIpv4(value);
+	if (!isIPv6(value)) return null;
 
-	if (isIPv6(value)) {
-		const groups = expandIpv6(value);
-		if (!groups) return null;
+	// The WHATWG URL parser serializes IPv6 in RFC 5952 form (lowercase hex, no dotted quad, one compressed run) — the only shape the expansion below handles.
+	const canonical = new URL(
+		`http://[${value.replace(IPV6_ZONE_SUFFIX, "")}]`,
+	).hostname.slice(1, -1);
 
-		const mappedIpv4 = ipv4FromMappedGroups(groups);
-		if (mappedIpv4) return truncateIpv4(mappedIpv4);
-
-		return formatCompressedIpv6([
-			groups[0] ?? 0,
-			groups[1] ?? 0,
-			groups[2] ?? 0,
-		]);
+	const mapped = IPV4_MAPPED_PATTERN.exec(canonical);
+	if (mapped?.[1]) {
+		const highGroup = Number.parseInt(mapped[1], 16);
+		return `${highGroup >> 8}.${highGroup & 0xff}.0.0`;
 	}
 
-	return null;
+	const keptGroups = expandIpv6(canonical).slice(0, IPV6_KEPT_GROUPS).join(":");
+	return `${keptGroups.replace(TRAILING_ZERO_GROUPS, "")}::`;
 }
 
 function truncateIpv4(value: string): string {
-	const [a, b] = value.split(".");
-	return `${a}.${b}.0.0`;
+	const [first, second] = value.split(".");
+	return `${first}.${second}.0.0`;
 }
 
-function expandIpv6(address: string): number[] | null {
-	const withoutZone = address.split("%")[0];
-	if (!withoutZone) return null;
-
-	const parts = withoutZone.split("::");
-	if (parts.length > 2) return null;
-
-	if (parts.length === 1) {
-		const groups = parseIpv6Segment(parts[0] ?? "");
-		return groups && groups.length === 8 ? groups : null;
-	}
-
-	const left = parseIpv6Segment(parts[0] ?? "");
-	const right = parseIpv6Segment(parts[1] ?? "");
-	if (!left || !right) return null;
-
-	const missing = 8 - left.length - right.length;
-	if (missing < 0) return null;
-
-	return [...left, ...Array(missing).fill(0), ...right];
-}
-
-function parseIpv6Segment(segment: string): number[] | null {
-	if (segment === "") return [];
-
-	const pieces = segment.split(":");
-	const groups: number[] = [];
-
-	for (const [index, piece] of pieces.entries()) {
-		if (index === pieces.length - 1 && piece.includes(".")) {
-			if (!isIPv4(piece)) return null;
-			const octets = piece.split(".").map(Number);
-			groups.push(((octets[0] ?? 0) << 8) | (octets[1] ?? 0));
-			groups.push(((octets[2] ?? 0) << 8) | (octets[3] ?? 0));
-			continue;
-		}
-		if (!/^[0-9a-fA-F]{1,4}$/.test(piece)) return null;
-		groups.push(Number.parseInt(piece, 16));
-	}
-
-	return groups;
-}
-
-function ipv4FromMappedGroups(groups: number[]): string | null {
-	if (
-		!groups.slice(0, 5).every((group) => group === 0) ||
-		groups[5] !== 0xffff
-	) {
-		return null;
-	}
-	const g6 = groups[6] ?? 0;
-	const g7 = groups[7] ?? 0;
-	return [(g6 >> 8) & 0xff, g6 & 0xff, (g7 >> 8) & 0xff, g7 & 0xff].join(".");
-}
-
-// The 5 trailing groups of a truncated /48 are always zero, so there is always a run to compress — no uncompressed fallback needed here.
-function formatCompressedIpv6(keptGroups: [number, number, number]): string {
-	let compressFrom: number = keptGroups.length;
-	for (let i = keptGroups.length - 1; i >= 0 && keptGroups[i] === 0; i--) {
-		compressFrom = i;
-	}
-	const printed = keptGroups
-		.slice(0, compressFrom)
-		.map((group) => group.toString(16));
-	return `${printed.join(":")}::`;
+function expandIpv6(canonical: string): string[] {
+	const halves = canonical
+		.split("::")
+		.map((half) => (half === "" ? [] : half.split(":")));
+	const explicitGroupCount = halves.reduce(
+		(count, half) => count + half.length,
+		0,
+	);
+	const zeroGroups = Array.from(
+		{ length: IPV6_GROUP_COUNT - explicitGroupCount },
+		() => "0",
+	);
+	return halves.flatMap((half, index) =>
+		index === 0 ? [...half, ...zeroGroups] : half,
+	);
 }
 
 // Extend only per the "Miroir stdout" section of .claude/rules/audit-logging.md.

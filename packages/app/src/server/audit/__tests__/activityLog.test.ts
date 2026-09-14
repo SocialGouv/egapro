@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { EmitActivityLogParams } from "../activityLog";
 
-// Overrides the global `~/env` mock (which pins NODE_ENV to "test", see
-// `src/test/setup.ts`) so `emitActivityLog`'s test-env guard can be exercised
-// in both directions within this file.
+// The global `~/env` mock pins NODE_ENV to "test"; overriding it lets the test-env guard be exercised both ways.
 vi.mock("~/env", () => ({ env: { NODE_ENV: "production" } }));
 
 const { emitActivityLog, deriveErrorCode, truncateIp } = await import(
@@ -10,10 +9,48 @@ const { emitActivityLog, deriveErrorCode, truncateIp } = await import(
 );
 const { env } = await import("~/env");
 
-/** The mocked `~/env` module types `NODE_ENV` as readonly — cast locally to flip it per-test. */
 function setNodeEnv(value: "test" | "production"): void {
 	(env as { NODE_ENV: string }).NODE_ENV = value;
 }
+
+const FROZEN_NOW = "2026-03-02T09:14:27.512Z";
+
+function buildParams(
+	overrides: Partial<EmitActivityLogParams> = {},
+): EmitActivityLogParams {
+	return {
+		source: "trpc",
+		action: "declaration.update_step_1",
+		category: "mutation",
+		route: "declaration.updateStep1",
+		operation: "mutation",
+		status: "success",
+		errorCode: null,
+		durationMs: 1,
+		userId: null,
+		siren: null,
+		ip: null,
+		rawInput: null,
+		...overrides,
+	};
+}
+
+const PII_LADEN_INPUT = {
+	phone: "0600000000",
+	firstName: "Camille",
+	email: "email@example.fr",
+	query: "Société Démo",
+	year: 2026,
+	nested: { declarationId: "should-not-leak" },
+};
+
+const PII_VALUES = [
+	"0600000000",
+	"Camille",
+	"email@example.fr",
+	"Société Démo",
+	"should-not-leak",
+];
 
 describe("truncateIp", () => {
 	it("truncates an IPv4 address to its /16", () => {
@@ -52,6 +89,25 @@ describe("truncateIp", () => {
 		expect(truncateIp("")).toBeNull();
 		expect(truncateIp("   ")).toBeNull();
 	});
+
+	it("normalizes case and leading zeros before truncating an IPv6 address", () => {
+		expect(truncateIp("2001:0DB8:0000:0000:0000:0000:0000:0001")).toBe(
+			"2001:db8::",
+		);
+	});
+
+	it("expands a leading :: so explicit groups land in their real /48 position", () => {
+		expect(truncateIp("::1")).toBe("::");
+		expect(truncateIp("::a:b:c:d:e:f")).toBe("0:0:a::");
+	});
+
+	it("drops an IPv6 zone identifier", () => {
+		expect(truncateIp("fe80::1%eth0")).toBe("fe80::");
+	});
+
+	it("truncates a hex-written IPv4-mapped address like its dotted form", () => {
+		expect(truncateIp("::ffff:cb00:712d")).toBe("203.0.0.0");
+	});
 });
 
 describe("deriveErrorCode", () => {
@@ -85,6 +141,9 @@ describe("emitActivityLog", () => {
 	let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
 	beforeEach(() => {
+		// A frozen clock keeps the timestamp from accidentally containing a value the leak assertions look for.
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date(FROZEN_NOW));
 		consoleLogSpy = vi
 			.spyOn(console, "log")
 			.mockImplementation(() => undefined);
@@ -96,6 +155,7 @@ describe("emitActivityLog", () => {
 	afterEach(() => {
 		consoleLogSpy.mockRestore();
 		consoleErrorSpy.mockRestore();
+		vi.useRealTimers();
 		setNodeEnv("production");
 	});
 
@@ -106,38 +166,28 @@ describe("emitActivityLog", () => {
 
 	it("emits nothing when NODE_ENV is test (S10)", () => {
 		setNodeEnv("test");
-		emitActivityLog({
-			source: "trpc",
-			action: "declaration.update_step_1",
-			category: "mutation",
-			route: "declaration.updateStep1",
-			operation: "mutation",
-			status: "success",
-			errorCode: null,
-			durationMs: 12,
-			userId: "user-1",
-			siren: "123456789",
-			ip: "203.0.113.45",
-			rawInput: { year: 2026 },
-		});
+		emitActivityLog(
+			buildParams({
+				durationMs: 12,
+				userId: "user-1",
+				siren: "123456789",
+				ip: "203.0.113.45",
+				rawInput: { year: 2026 },
+			}),
+		);
 		expect(consoleLogSpy).not.toHaveBeenCalled();
 	});
 
 	it("writes a single JSON line with all 16 contract keys always present (S1)", () => {
-		emitActivityLog({
-			source: "trpc",
-			action: "declaration.update_step_1",
-			category: "mutation",
-			route: "declaration.updateStep1",
-			operation: "mutation",
-			status: "success",
-			errorCode: null,
-			durationMs: 84,
-			userId: "0b9f6c2e-4d1a-4c3b-9e2f-5a6b7c8d9e01",
-			siren: "123456789",
-			ip: "203.0.113.45",
-			rawInput: { totalMen: 60, totalWomen: 40 },
-		});
+		emitActivityLog(
+			buildParams({
+				durationMs: 84,
+				userId: "0b9f6c2e-4d1a-4c3b-9e2f-5a6b7c8d9e01",
+				siren: "123456789",
+				ip: "203.0.113.45",
+				rawInput: { totalMen: 60, totalWomen: 40 },
+			}),
+		);
 
 		expect(consoleLogSpy).toHaveBeenCalledOnce();
 		const entry = parseLastLine();
@@ -162,6 +212,7 @@ describe("emitActivityLog", () => {
 			].sort(),
 		);
 		expect(entry).toMatchObject({
+			timestamp: FROZEN_NOW,
 			level: "info",
 			logType: "user_activity",
 			source: "trpc",
@@ -171,82 +222,145 @@ describe("emitActivityLog", () => {
 			status: "success",
 			ip: "203.0.0.0",
 		});
-		// totalMen / totalWomen are not in the value allowlist — only their
-		// *names* may appear, never the 40 / 60 figures themselves (S1).
+		// Only the *names* of totalMen / totalWomen may appear, never the 40 / 60 figures themselves (S1).
 		expect(entry.input).toBeNull();
 		expect(entry.inputKeys).toEqual(["totalMen", "totalWomen"]);
 		expect(JSON.stringify(entry)).not.toContain("40");
 		expect(JSON.stringify(entry)).not.toContain("60");
 	});
 
-	it("uses level warn for a failure and info for a success", () => {
-		emitActivityLog({
-			source: "route",
-			action: "pdf.declaration_download",
-			category: "read_sensitive",
-			route: "/api/declaration-pdf",
-			operation: "GET",
-			status: "failure",
-			errorCode: "HTTP_403",
-			durationMs: 31,
-			userId: "user-1",
-			siren: "123456789",
-			ip: "203.0.113.45",
-			rawInput: { year: 2026 },
-		});
+	it("uses level warn for a failure and keeps the allowlisted route input (§1, 3rd example)", () => {
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				action: "pdf.declaration_download",
+				category: "read_sensitive",
+				route: "/api/declaration-pdf",
+				operation: "GET",
+				status: "failure",
+				errorCode: "HTTP_403",
+				durationMs: 31,
+				userId: "user-1",
+				siren: "123456789",
+				ip: "203.0.113.45",
+				rawInput: { year: 2026 },
+			}),
+		);
 
-		expect(parseLastLine()).toMatchObject({ level: "warn", status: "failure" });
+		expect(parseLastLine()).toMatchObject({
+			level: "warn",
+			status: "failure",
+			input: { year: 2026 },
+			inputKeys: ["year"],
+		});
 	});
 
-	it("keeps only allowlisted keys — and only primitive values — in `input` (S4, S5)", () => {
-		emitActivityLog({
-			source: "trpc",
-			action: "profile.update",
-			category: "mutation",
-			route: "profile.updateProfile",
-			operation: "mutation",
-			status: "success",
-			errorCode: null,
-			durationMs: 5,
-			userId: "user-1",
-			siren: null,
-			ip: null,
-			rawInput: {
-				phone: "0600000000",
-				firstName: "Camille",
-				email: "email@example.fr",
-				query: "Société Démo",
-				year: 2026,
-				nested: { declarationId: "should-not-leak" },
-			},
-		});
+	// S11 — tRPC input is read before Zod validation: an allowlisted key's value is caller-controlled, so no tRPC line ever carries one.
+	it.each([
+		{ path: "mapped", action: "representation_declaration.get" },
+		{ path: "unmapped", action: null },
+	])("writes a null input but keeps inputKeys on a $path tRPC line (S11)", ({
+		action,
+	}) => {
+		emitActivityLog(
+			buildParams({
+				source: "trpc",
+				action,
+				rawInput: { year: 2026, declarationId: "decl-forged-1" },
+			}),
+		);
+
+		const entry = parseLastLine();
+		expect(entry.input).toBeNull();
+		expect(entry.inputKeys).toEqual(["declarationId", "year"]);
+		expect(JSON.stringify(entry)).not.toContain("decl-forged-1");
+	});
+
+	it("writes none of the PII values of a tRPC call, only their key names (S4, S5)", () => {
+		emitActivityLog(
+			buildParams({
+				action: "profile.update",
+				route: "profile.updateProfile",
+				rawInput: PII_LADEN_INPUT,
+			}),
+		);
+
+		const entry = parseLastLine();
+		expect(entry.input).toBeNull();
+		expect(entry.inputKeys).toEqual([
+			"email",
+			"firstName",
+			"nested",
+			"phone",
+			"query",
+			"year",
+		]);
+		for (const value of PII_VALUES) {
+			expect(JSON.stringify(entry)).not.toContain(value);
+		}
+	});
+
+	it.each([
+		"route",
+		null,
+	] as const)("keeps only allowlisted keys with primitive values in `input` for a %s-source line", (source) => {
+		emitActivityLog(
+			buildParams({
+				source,
+				action: "cse_opinion.upload_file",
+				route: source === "route" ? "/api/upload" : null,
+				operation: source === "route" ? "POST" : null,
+				rawInput: PII_LADEN_INPUT,
+			}),
+		);
 
 		const entry = parseLastLine();
 		// `year` is the only allowlisted key present with a valid primitive value.
 		expect(entry.input).toEqual({ year: 2026 });
-		expect(JSON.stringify(entry)).not.toContain("0600000000");
-		expect(JSON.stringify(entry)).not.toContain("Camille");
-		expect(JSON.stringify(entry)).not.toContain("email@example.fr");
-		expect(JSON.stringify(entry)).not.toContain("Société Démo");
+		for (const value of PII_VALUES) {
+			expect(JSON.stringify(entry)).not.toContain(value);
+		}
 	});
 
 	it("drops a nested value even under an allowlisted key", () => {
-		emitActivityLog({
-			source: "trpc",
-			action: "declaration.update_step_1",
-			category: "mutation",
-			route: "declaration.updateStep1",
-			operation: "mutation",
-			status: "success",
-			errorCode: null,
-			durationMs: 5,
-			userId: null,
-			siren: null,
-			ip: null,
-			rawInput: { id: { nested: true }, year: 2026 },
-		});
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				rawInput: { id: { nested: true }, year: 2026 },
+			}),
+		);
 
 		expect(parseLastLine().input).toEqual({ year: 2026 });
+	});
+
+	it("keeps booleans and short identifiers but drops free text and non-finite numbers from a route input", () => {
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				rawInput: {
+					hasCse: true,
+					declarationId: "7c1e2d3f-0000-4000-8000-000000000042",
+					siren: "Société Démo",
+					year: Number.NaN,
+					page: Number.POSITIVE_INFINITY,
+				},
+			}),
+		);
+
+		expect(parseLastLine().input).toEqual({
+			hasCse: true,
+			declarationId: "7c1e2d3f-0000-4000-8000-000000000042",
+		});
+	});
+
+	it("writes null input and inputKeys when no key survives the projection", () => {
+		emitActivityLog(
+			buildParams({ source: "route", rawInput: { "bad key!": 1 } }),
+		);
+
+		const entry = parseLastLine();
+		expect(entry.input).toBeNull();
+		expect(entry.inputKeys).toBeNull();
 	});
 
 	it("caps inputKeys at 20 entries, sorted, dropping malformed key names", () => {
@@ -258,20 +372,15 @@ describe("emitActivityLog", () => {
 		);
 		(rawInput as Record<string, unknown>)["bad key!"] = "x";
 
-		emitActivityLog({
-			source: "trpc",
-			action: null,
-			category: null,
-			route: "some.path",
-			operation: "query",
-			status: "success",
-			errorCode: null,
-			durationMs: 1,
-			userId: null,
-			siren: null,
-			ip: null,
-			rawInput,
-		});
+		emitActivityLog(
+			buildParams({
+				action: null,
+				category: null,
+				route: "some.path",
+				operation: "query",
+				rawInput,
+			}),
+		);
 
 		const inputKeys = parseLastLine().inputKeys as string[];
 		expect(inputKeys).toHaveLength(20);
@@ -280,20 +389,14 @@ describe("emitActivityLog", () => {
 	});
 
 	it("returns null input/inputKeys when rawInput is not a plain object", () => {
-		emitActivityLog({
-			source: "trpc",
-			action: null,
-			category: null,
-			route: "some.path",
-			operation: "query",
-			status: "success",
-			errorCode: null,
-			durationMs: 1,
-			userId: null,
-			siren: null,
-			ip: null,
-			rawInput: "just-a-string",
-		});
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				route: "/api/some-path",
+				operation: "GET",
+				rawInput: "just-a-string",
+			}),
+		);
 
 		const entry = parseLastLine();
 		expect(entry.input).toBeNull();
@@ -302,20 +405,15 @@ describe("emitActivityLog", () => {
 
 	it("truncates route to 200 characters", () => {
 		const longRoute = `/api/${"a".repeat(250)}`;
-		emitActivityLog({
-			source: "route",
-			action: "export.download",
-			category: "export",
-			route: longRoute,
-			operation: "GET",
-			status: "success",
-			errorCode: null,
-			durationMs: 1,
-			userId: null,
-			siren: null,
-			ip: null,
-			rawInput: null,
-		});
+		emitActivityLog(
+			buildParams({
+				source: "route",
+				action: "export.download",
+				category: "export",
+				route: longRoute,
+				operation: "GET",
+			}),
+		);
 
 		expect((parseLastLine().route as string).length).toBe(200);
 	});
@@ -325,22 +423,7 @@ describe("emitActivityLog", () => {
 			throw new Error("stdout write failed");
 		});
 
-		expect(() =>
-			emitActivityLog({
-				source: "trpc",
-				action: "declaration.update_step_1",
-				category: "mutation",
-				route: "declaration.updateStep1",
-				operation: "mutation",
-				status: "success",
-				errorCode: null,
-				durationMs: 1,
-				userId: null,
-				siren: null,
-				ip: null,
-				rawInput: null,
-			}),
-		).not.toThrow();
+		expect(() => emitActivityLog(buildParams())).not.toThrow();
 		expect(consoleErrorSpy).toHaveBeenCalled();
 	});
 });

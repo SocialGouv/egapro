@@ -340,7 +340,22 @@ Pour un chemin tRPC non mappé ou une route, le code est résolu directement
 **`input` / `inputKeys` — fermé par défaut.** `inputKeys` liste les noms des
 clés de premier niveau de l'input (objet non vide uniquement), triés, au plus
 20, filtrés par `^[A-Za-z0-9_]{1,64}$` — *les noms seulement, jamais les
-valeurs*. `input` ne garde que les clés d'une liste blanche fixe
+valeurs*.
+
+**Ligne `source: "trpc"` → `input` toujours `null`**, chemin mappé comme non
+mappé. L'input brut d'une procédure est lu par `auditMiddleware` **avant** la
+validation Zod : ses valeurs sont celles que l'appelant a choisi d'envoyer, et
+une valeur forgée sous une clé de la liste blanche (`siren`, `declarationId`…)
+apparaîtrait dans sa propre ligne comme si elle était attestée (OWASP A09).
+Seuls les noms de clés (`inputKeys`) sont donc écrits. La règle est portée par
+`emitActivityLog` sur le champ `source`, pas par ses appelants : un nouveau
+chemin tRPC en hérite sans rien câbler. Pour attribuer une ligne, lire
+`userId`, `siren` et `ip` de premier niveau (session, en-têtes) — jamais
+`input.*`.
+
+Sur une ligne `source: "route"` ou un appel direct à `logAction`
+(`source: null`) — métadonnées construites côté serveur —, `input` ne garde que
+les clés d'une liste blanche fixe
 (`~/server/audit/activityLog::INPUT_ALLOWED_KEYS` — clés techniques : `year`,
 `siren`, `id`, `declarationId`, `fileId`, `step`, `currentStep`, `kind`,
 `type`, `slice`, `declarationNumber`, `page`, `pageSize`, `limit`, `offset`,
@@ -350,6 +365,7 @@ la valeur est un nombre fini, un booléen, ou une chaîne courte
 une clé autorisée. N'étends cette liste que pour une clé dont les valeurs ne
 peuvent **jamais** être une donnée personnelle ni du texte libre ; en cas de
 doute, laisse la clé hors liste — elle apparaîtra quand même dans `inputKeys`.
+Étendre la liste ne rouvre **pas** les valeurs d'input sur les lignes tRPC.
 
 **Origine (`source` / `route` / `operation`)** — jamais persistée en base,
 portée par `LogActionOrigin` sur `LogActionInput.origin` :
@@ -363,9 +379,11 @@ portée par `LogActionOrigin` sur `LogActionInput.origin` :
 lève **jamais** pour un échec en aval (garde d'authentification, validation,
 resolver) : `callRecursive` a déjà capturé le throw et résout
 `{ ok: false, error }`. `auditMiddleware` doit détecter cette forme
-(`extractMiddlewareFailure()`) dans les deux branches — chemin mappé (ligne en
-base **et** stdout) et non mappé (stdout seul) — sous peine d'enregistrer tout
-échec tRPC comme un succès. Le résultat de `next()` est toujours retourné tel
+(`isFailedMiddlewareResult()`, quel que soit le type de l'erreur portée) dans
+les deux branches — chemin mappé (ligne en base **et** stdout) et non mappé
+(stdout seul) — sous peine d'enregistrer tout échec tRPC comme un succès. Code
+et message sont dérivés par `describeFailure()`, le même helper que pour un
+`next()` qui lève. Le résultat de `next()` est toujours retourné tel
 quel, `ok: false` inclus : l'audit ne doit jamais changer ce que voit le
 client.
 
