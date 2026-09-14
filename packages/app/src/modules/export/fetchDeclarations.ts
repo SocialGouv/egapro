@@ -40,11 +40,15 @@ import {
 	INDICATOR_D_LABELS,
 	INDICATOR_E_LABELS,
 	INDICATOR_E_PROPORTION_LABELS,
+	INDICATOR_F_ANNUAL_MEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_MEN_LABELS,
 	INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
+	INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_WOMEN_LABELS,
+	INDICATOR_F_HOURLY_MEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_MEN_LABELS,
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
+	INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
 import { buildNextStepsPayload } from "./shared/nextStepsPayload";
@@ -148,22 +152,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.annualQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[0]]:
 			row.annualQuartile1ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFAnnualWomen1 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[0]]: row.indicatorFAnnualMen1 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[1]]:
 			row.indicatorFAnnualThreshold2 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[1]]:
 			row.annualQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[1]]:
 			row.annualQuartile2ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFAnnualWomen2 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[1]]: row.indicatorFAnnualMen2 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[2]]:
 			row.indicatorFAnnualThreshold3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[2]]:
 			row.annualQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[2]]:
 			row.annualQuartile3ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFAnnualWomen3 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[2]]: row.indicatorFAnnualMen3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[3]]:
 			row.annualQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[3]]:
 			row.annualQuartile4ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFAnnualWomen4 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[3]]: row.indicatorFAnnualMen4 ?? null,
 	};
 
 	const hourlyQuartile = {
@@ -173,22 +189,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.hourlyQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[0]]:
 			row.hourlyQuartile1ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFHourlyWomen1 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[0]]: row.indicatorFHourlyMen1 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[1]]:
 			row.indicatorFHourlyThreshold2 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFHourlyWomen2 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[1]]: row.indicatorFHourlyMen2 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[2]]:
 			row.indicatorFHourlyThreshold3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFHourlyWomen3 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[2]]: row.indicatorFHourlyMen3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFHourlyWomen4 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[3]]: row.indicatorFHourlyMen4 ?? null,
 	};
 
 	return {

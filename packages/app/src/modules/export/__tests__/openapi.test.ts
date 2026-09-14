@@ -19,7 +19,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("3.0.0");
+		expect(openApiSpec.info.version).toBe("3.1.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -371,6 +371,55 @@ describe("openApiSpec", () => {
 			expect(historiqueSchema.items.required).not.toContain(
 				"Numero_declaration",
 			);
+		});
+	});
+
+	describe("indicator F declared headcounts (#4528)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const fSchema = declarationSchema.properties.Indicateurs.properties.F;
+
+		const annualProperties = fSchema.properties.annuel.properties as Record<
+			string,
+			unknown
+		>;
+		const hourlyProperties = fSchema.properties.horaire.properties as Record<
+			string,
+			unknown
+		>;
+
+		it("documents the 8 annual nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Rem_globale_annuelle_nb_${sex}`;
+					expect(annualProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the 8 hourly nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Taux_horaire_global_nb_${sex}`;
+					expect(hourlyProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the two root-level hourly headcounts emitted by the handler", () => {
+			expect(
+				declarationSchema.properties.Effectif_F_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
+			expect(
+				declarationSchema.properties.Effectif_H_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
 		});
 	});
 

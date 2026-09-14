@@ -82,38 +82,54 @@ const cseOpinionSchema = {
 const indicatorFAnnualSchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — rémunération globale annuelle. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — rémunération globale annuelle. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1 ; effectifs déclarés (nb_F/nb_H) en entiers, null si non déclarés.",
 	properties: {
 		Seuil_Q1_Rem_globale: { type: ["string", "null"] },
 		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile1_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile1_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 		Seuil_Q2_Rem_globale: { type: ["string", "null"] },
 		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile2_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile2_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile3_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile3_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
 		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile4_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile4_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 	},
 } as const;
 
 const indicatorFHourlySchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — taux horaire global. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — taux horaire global. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1 ; effectifs déclarés (nb_F/nb_H) en entiers, null si non déclarés.",
 	properties: {
 		Seuil_Q1_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile1_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile1_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile1_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile1_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 		Seuil_Q2_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile2_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile2_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile2_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile2_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
 		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile3_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile3_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
 		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile4_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile4_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 	},
 } as const;
 
@@ -445,6 +461,14 @@ const declarationSchema = {
 			description:
 				"Effectif hommes pris en compte pour la rémunération globale annuelle",
 		},
+		Effectif_F_rem_horaire_globale: {
+			type: ["integer", "null"],
+			description: "Effectif femmes pris en compte pour le taux horaire global",
+		},
+		Effectif_H_rem_horaire_globale: {
+			type: ["integer", "null"],
+			description: "Effectif hommes pris en compte pour le taux horaire global",
+		},
 		Source_categories_emplois: {
 			description:
 				"Source de détermination des catégories d'emplois pour l'indicateur G. `null` si aucun indicateur G déclaré.",
@@ -695,7 +719,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "3.0.0",
+		version: "3.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},

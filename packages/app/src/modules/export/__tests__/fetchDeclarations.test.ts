@@ -197,6 +197,40 @@ describe("buildIndicators", () => {
 		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
+	it("should expose indicator F declared headcounts (#4528) next to their quartile proportions", () => {
+		const result = buildIndicators(baseRow);
+
+		// Annual — each quartile's nb_F/nb_H sits right after its proportions.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBe(35);
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_F).toBe(30);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_H).toBe(32);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_F).toBe(28);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_H).toBe(33);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_F).toBe(27);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_H).toBe(35);
+
+		// Hourly — same 8 keys, distinct values, so a copy/paste mistake between
+		// annual and hourly would fail this assertion.
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_F).toBe(40);
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_H).toBe(25);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_F).toBe(32);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_H).toBe(30);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_F).toBe(28);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_H).toBe(33);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBe(37);
+	});
+
+	it("should not expose the raw GIP headcounts or a 'Tous les salariés' total for indicator F (#4528)", () => {
+		const result = buildIndicators(baseRow);
+
+		expect(result.F.annuel).not.toHaveProperty("Effectif");
+		expect(result.F.annuel).not.toHaveProperty("Effectif_total");
+		expect(result.F.horaire).not.toHaveProperty("Effectif");
+		expect(result.F.horaire).not.toHaveProperty("Effectif_total");
+	});
+
 	it("should expose gap labels for indicators A/B/C/D", () => {
 		const result = buildIndicators(baseRow);
 
@@ -250,6 +284,24 @@ describe("buildIndicators", () => {
 		expect(
 			result.F.annuel.Quartile2_Rem_globale_annuelle_proportion_F,
 		).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBeNull();
+	});
+
+	it("should return null for a quartile's declared headcount when its DB column is null, independently of the others (#4528)", () => {
+		const partialRow = {
+			...baseRow,
+			indicatorFAnnualWomen1: null,
+			indicatorFHourlyMen4: null,
+		};
+
+		const result = buildIndicators(partialRow);
+
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		// Untouched sibling columns still expose their declared value.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBeNull();
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
 	});
 });
 
