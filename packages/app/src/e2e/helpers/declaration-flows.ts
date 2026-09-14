@@ -100,14 +100,14 @@ type QuartileInputRow = {
 	men: string;
 };
 
-const DEFAULT_ANNUAL_QUARTILES: QuartileInputRow[] = [
+export const DEFAULT_ANNUAL_QUARTILES: QuartileInputRow[] = [
 	{ ordinal: "1er", threshold: "10000", women: "3", men: "4" },
 	{ ordinal: "2e", threshold: "20000", women: "3", men: "4" },
 	{ ordinal: "3e", threshold: "30000", women: "2", men: "4" },
 	{ ordinal: "4e", women: "2", men: "3" },
 ];
 
-const DEFAULT_HOURLY_QUARTILES: QuartileInputRow[] = [
+export const DEFAULT_HOURLY_QUARTILES: QuartileInputRow[] = [
 	{ ordinal: "1er", threshold: "10", women: "3", men: "4" },
 	{ ordinal: "2e", threshold: "20", women: "3", men: "4" },
 	{ ordinal: "3e", threshold: "30", women: "2", men: "4" },
