@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SUBMISSION_UNCONFIRMED_MESSAGE } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { Step6Review } from "../Step6Review";
@@ -8,17 +9,19 @@ import { Step6Review } from "../Step6Review";
 const mockSubmitMutate = vi.fn();
 const mockSubmitReset = vi.fn();
 const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 const mockDisclose = vi.fn();
 const mockConceal = vi.fn();
 const mockSubmitState = {
-	error: null as { message: string } | null,
+	error: null as { message: string; data?: { code: string } } | null,
 	isPending: false,
 	onSuccess: undefined as (() => void) | undefined,
+	onError: undefined as (() => void) | undefined,
 };
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
-	useRouter: () => ({ push: mockPush }),
+	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 }));
 
 vi.mock("~/modules/shared", async (importOriginal) => ({
@@ -30,12 +33,20 @@ vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submit: {
-				useMutation: ({ onSuccess }: { onSuccess: () => void }) => {
+				useMutation: ({
+					onSuccess,
+					onError,
+				}: {
+					onSuccess: () => void;
+					onError: () => void;
+				}) => {
 					mockSubmitState.onSuccess = onSuccess;
+					mockSubmitState.onError = onError;
 					return {
 						mutate: mockSubmitMutate,
 						reset: mockSubmitReset,
 						isPending: mockSubmitState.isPending,
+						isError: mockSubmitState.error !== null,
 						error: mockSubmitState.error,
 					};
 				},
@@ -117,32 +128,81 @@ const emptyStep4Data = () => ({
 	],
 });
 
-function renderSubmissionReview() {
-	return render(
+function submissionReview(isSubmitted = false) {
+	return (
 		<Step6Review
 			companyWorkforce={null}
 			declaration={emptyDeclaration()}
 			declarationYear={2025}
 			indicatorGRequired
+			isSubmitted={isSubmitted}
 			step2Data={emptyStep2Data()}
 			step2Gaps={noPayGapReferences()}
 			step3Data={emptyStep3Data()}
 			step3Gaps={noPayGapReferences()}
 			step4Data={emptyStep4Data()}
-		/>,
+		/>
 	);
 }
+
+function renderSubmissionReview() {
+	return render(submissionReview());
+}
+
+const RULES_ENGINE_REFUSAL = {
+	message:
+		'No matching transition for state="awaiting_compliance_path_choice" action="submit". Facts: {}',
+	data: { code: "INTERNAL_SERVER_ERROR" },
+};
 
 describe("Step6Review", () => {
 	beforeEach(() => {
 		mockSubmitMutate.mockReset();
 		mockSubmitReset.mockReset();
 		mockPush.mockReset();
+		mockRefresh.mockReset();
 		mockDisclose.mockReset();
 		mockConceal.mockReset();
 		mockSubmitState.error = null;
 		mockSubmitState.isPending = false;
 		mockSubmitState.onSuccess = undefined;
+		mockSubmitState.onError = undefined;
+	});
+
+	it("re-reads the server state when the submission fails", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onError?.());
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("completes the submission once the refreshed page shows it went through", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		rerender(submissionReview(true));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("shows a generic message instead of a technical server error", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		const alert = within(modal).getByRole("alert", { hidden: true });
+		expect(alert).toHaveTextContent(SUBMISSION_UNCONFIRMED_MESSAGE);
+		expect(alert).not.toHaveTextContent("No matching transition");
 	});
 
 	it("closes the modal before navigating after a successful submission", () => {
@@ -176,7 +236,10 @@ describe("Step6Review", () => {
 	});
 
 	it("shows a submission error in the modal and clears it on close", async () => {
-		mockSubmitState.error = { message: "La soumission a échoué." };
+		mockSubmitState.error = {
+			message: "La soumission a échoué.",
+			data: { code: "FORBIDDEN" },
+		};
 		renderSubmissionReview();
 		const modal = document.getElementById("submit-declaration-modal");
 		if (!modal) throw new Error("Submit modal not found");
