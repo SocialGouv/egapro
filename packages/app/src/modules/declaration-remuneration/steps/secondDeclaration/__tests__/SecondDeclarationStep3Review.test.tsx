@@ -362,6 +362,31 @@ describe("SecondDeclarationStep3Review", () => {
 		);
 	});
 
+	it("keeps the modal mounted while a retry is pending when the refreshed status shows the submission", () => {
+		mockMutationState.isPending = true;
+		const overrides = {
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		};
+		const { rerender } = renderStep3(overrides);
+
+		rerender(step3Review({ ...overrides, status: "awaiting_cse_opinion" }));
+
+		expect(document.getElementById("submit-declaration-modal")).not.toBeNull();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		mockMutationState.isPending = false;
+		mockMutationState.error = {
+			message:
+				'No matching transition for state="awaiting_cse_opinion" action="submit_second_declaration". Facts: {}',
+			data: { code: "INTERNAL_SERVER_ERROR" },
+		};
+		rerender(step3Review({ ...overrides, status: "awaiting_cse_opinion" }));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
 	it("navigates to compliance path when gaps persist after submit, on a negative gap (#4034)", async () => {
 		// Same routing as the +50% case above, but with women earning more than men (-6%):
 		// the threshold is symmetric, so a negative gap must persist the compliance path too.

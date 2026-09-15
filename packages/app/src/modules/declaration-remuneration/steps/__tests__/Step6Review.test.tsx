@@ -194,6 +194,28 @@ describe("Step6Review", () => {
 		);
 	});
 
+	it("keeps the modal mounted while a retry is pending when the refresh reveals the submission", () => {
+		mockSubmitState.isPending = true;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(document.getElementById("submit-declaration-modal")).not.toBeNull();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		mockSubmitState.isPending = false;
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		rerender(submissionReview(true));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
 	it("shows a generic message instead of a technical server error", () => {
 		mockSubmitState.error = RULES_ENGINE_REFUSAL;
 		renderSubmissionReview();
