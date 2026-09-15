@@ -239,8 +239,11 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
-function roundRatio(r: number | null): number | null {
-	return r === null ? null : Math.round(r * 10000) / 10000;
+// Round before toFixed(4): formatting the raw ratio turns a negligible negative gap into "-0.0000".
+function formatRatio(r: number | null): string | null {
+	if (r === null) return null;
+	const rounded = Math.round(r * 10000) / 10000;
+	return rounded.toFixed(4);
 }
 
 function toIndicatorGCategory(entry: IndicatorGEntry) {
@@ -268,12 +271,12 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Taux_horaire_base_H: hbM,
 		Taux_horaire_variable_F: hvW,
 		Taux_horaire_variable_H: hvM,
-		Rem_annuelle_base_ecart: roundRatio(computeGapRatio(abW ?? "", abM ?? "")),
-		Rem_annuelle_variable_ecart: roundRatio(
+		Rem_annuelle_base_ecart: formatRatio(computeGapRatio(abW ?? "", abM ?? "")),
+		Rem_annuelle_variable_ecart: formatRatio(
 			computeGapRatio(avW ?? "", avM ?? ""),
 		),
-		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
-		Taux_horaire_variable_ecart: roundRatio(
+		Taux_horaire_base_ecart: formatRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
+		Taux_horaire_variable_ecart: formatRatio(
 			computeGapRatio(hvW ?? "", hvM ?? ""),
 		),
 	};

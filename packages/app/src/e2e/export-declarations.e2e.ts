@@ -104,6 +104,10 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 		for (const category of categories) {
 			for (const key of ECART_KEYS) {
 				expect(category).toHaveProperty(key);
+				// SUIT reads the gaps as fixed-scale strings like A–F: a number would drop trailing zeros.
+				if (category[key] !== null) {
+					expect(category[key]).toMatch(/^-?\d+\.\d{4}$/);
+				}
 			}
 			for (const key of REMOVED_ECART_KEYS) {
 				expect(category).not.toHaveProperty(key);
@@ -124,7 +128,7 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 		// Every measure carries the same pair, so every remaining gap is the
 		// same: (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
 		for (const key of ECART_KEYS) {
-			expect(filled[key]).toBe(0.0909);
+			expect(filled[key]).toBe("0.0909");
 		}
 	});
 

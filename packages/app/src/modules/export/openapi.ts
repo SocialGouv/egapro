@@ -28,6 +28,16 @@ const indicatorGCategorySchema = {
 		},
 		Effectif_F: { type: ["integer", "null"] },
 		Effectif_H: { type: ["integer", "null"] },
+		Effectif_horaire_F: {
+			type: ["integer", "null"],
+			description:
+				"Effectif féminin de la catégorie retenu pour le taux horaire (peut différer de Effectif_F si des salariés sont exclus du calcul horaire).",
+		},
+		Effectif_horaire_H: {
+			type: ["integer", "null"],
+			description:
+				"Effectif masculin de la catégorie retenu pour le taux horaire (peut différer de Effectif_H si des salariés sont exclus du calcul horaire).",
+		},
 		Rem_annuelle_base_F: { type: ["string", "null"] },
 		Rem_annuelle_base_H: { type: ["string", "null"] },
 		Rem_annuelle_variable_F: { type: ["string", "null"] },
@@ -37,24 +47,24 @@ const indicatorGCategorySchema = {
 		Taux_horaire_variable_F: { type: ["string", "null"] },
 		Taux_horaire_variable_H: { type: ["string", "null"] },
 		Rem_annuelle_base_ecart: {
-			type: ["number", "null"],
+			type: ["string", "null"],
 			description:
-				"Écart de rémunération annuelle de base : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
+				"Écart de rémunération annuelle de base : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
 		},
 		Rem_annuelle_variable_ecart: {
-			type: ["number", "null"],
+			type: ["string", "null"],
 			description:
-				"Écart de rémunération annuelle variable : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
+				"Écart de rémunération annuelle variable : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
 		},
 		Taux_horaire_base_ecart: {
-			type: ["number", "null"],
+			type: ["string", "null"],
 			description:
-				"Écart de taux horaire de base : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
+				"Écart de taux horaire de base : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
 		},
 		Taux_horaire_variable_ecart: {
-			type: ["number", "null"],
+			type: ["string", "null"],
 			description:
-				"Écart de taux horaire variable : ratio signé (H−F)/H, arrondi à 4 décimales. Null si données manquantes ou effectif H nul.",
+				"Écart de taux horaire variable : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
 		},
 	},
 } as const;
@@ -82,38 +92,38 @@ const cseOpinionSchema = {
 const indicatorFAnnualSchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — rémunération globale annuelle. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — rémunération globale annuelle. Seuils et proportions F/H en chaîne numérique (échelle numeric(9,4)) ; proportions entre 0 et 1.",
 	properties: {
 		Seuil_Q1_Rem_globale: { type: ["string", "null"] },
-		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
 		Seuil_Q2_Rem_globale: { type: ["string", "null"] },
-		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
 		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
-		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
-		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
 	},
 } as const;
 
 const indicatorFHourlySchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — taux horaire global. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — taux horaire global. Seuils et proportions F/H en chaîne numérique (échelle numeric(9,4)) ; proportions entre 0 et 1.",
 	properties: {
 		Seuil_Q1_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile1_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile1_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile1_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile1_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
 		Seuil_Q2_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile2_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile2_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile2_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile2_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
 		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
-		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile3_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile3_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
+		Quartile4_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile4_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
 	},
 } as const;
 
@@ -130,6 +140,16 @@ const indicatorsSchema = {
 				Rem_globale_annuelle_moyenne_H: { type: ["string", "null"] },
 				Taux_horaire_global_moyen_F: { type: ["string", "null"] },
 				Taux_horaire_global_moyen_H: { type: ["string", "null"] },
+				Rem_globale_annuelle_moyenne_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération globale annuelle moyenne : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_global_moyen_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire global moyen : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		B: {
@@ -140,6 +160,16 @@ const indicatorsSchema = {
 				Rem_variable_annuelle_moyenne_H: { type: ["string", "null"] },
 				Taux_horaire_variable_moyen_F: { type: ["string", "null"] },
 				Taux_horaire_variable_moyen_H: { type: ["string", "null"] },
+				Rem_variable_annuelle_moyenne_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération variable annuelle moyenne : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_variable_moyen_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire variable moyen : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		C: {
@@ -150,6 +180,16 @@ const indicatorsSchema = {
 				Rem_globale_annuelle_médiane_H: { type: ["string", "null"] },
 				Taux_globale_annuelle_médiane_F: { type: ["string", "null"] },
 				Taux_globale_annuelle_médiane_H: { type: ["string", "null"] },
+				Rem_globale_annuelle_médiane_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération globale annuelle médiane : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_global_médian_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire global médian : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		D: {
@@ -160,6 +200,16 @@ const indicatorsSchema = {
 				Rem_variable_annuelle_médiane_H: { type: ["string", "null"] },
 				Taux_horaire_variable_médian_F: { type: ["string", "null"] },
 				Taux_horaire_variable_médian_H: { type: ["string", "null"] },
+				Rem_variable_annuelle_médiane_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération variable annuelle médiane : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_variable_médian_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire variable médian : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		E: {
