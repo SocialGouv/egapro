@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
@@ -77,13 +77,48 @@ export function Step2Upload({
 		router.refresh();
 	}, [utils, router]);
 
+	const lastConfirmedAssociations = useRef<AssociationMap>(
+		buildAssociationMap(columns, initialAssociations),
+	);
+	const isAssociationWriteInFlightRef = useRef(false);
+	const queuedAssociationWriteRef = useRef<AssociationMap | null>(null);
+	const deletedFileIdsRef = useRef<Set<string>>(new Set());
+	const [hasPendingAssociationWrite, setHasPendingAssociationWrite] =
+		useState(false);
+
 	const setTypesMutation = api.cseOpinion.setFileContentTypes.useMutation({
-		onError: () =>
+		onError: () => {
+			if (queuedAssociationWriteRef.current === null) {
+				setAssociations(lastConfirmedAssociations.current);
+			}
 			setAssociationError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
-			),
-		onSuccess: () => setAssociationError(null),
+			);
+			dispatchNextAssociationWrite();
+		},
+		onSuccess: (_data, variables) => {
+			let confirmed = buildAssociationMap(columns, variables.associations);
+			for (const deletedFileId of deletedFileIdsRef.current) {
+				confirmed = clearFileAssociations(confirmed, deletedFileId);
+			}
+			lastConfirmedAssociations.current = confirmed;
+			setAssociationError(null);
+			dispatchNextAssociationWrite();
+		},
 	});
+
+	const dispatchNextAssociationWrite = useCallback(() => {
+		const next = queuedAssociationWriteRef.current;
+		if (next === null) {
+			isAssociationWriteInFlightRef.current = false;
+			setHasPendingAssociationWrite(false);
+			return;
+		}
+		queuedAssociationWriteRef.current = null;
+		setTypesMutation.mutate({
+			associations: toAssociationPayload(columns, next),
+		});
+	}, [columns, setTypesMutation]);
 
 	const handleToggle = useCallback(
 		(columnId: string, fileId: string, checked: boolean) => {
@@ -92,16 +127,30 @@ export function Step2Upload({
 				[columnId]: checked ? fileId : null,
 			};
 			setAssociations(next);
-			setTypesMutation.mutate({
-				associations: toAssociationPayload(columns, next),
-			});
+			queuedAssociationWriteRef.current = next;
+			setHasPendingAssociationWrite(true);
+			if (!isAssociationWriteInFlightRef.current) {
+				isAssociationWriteInFlightRef.current = true;
+				dispatchNextAssociationWrite();
+			}
 		},
-		[associations, columns, setTypesMutation],
+		[associations, dispatchNextAssociationWrite],
 	);
 
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: (_data, variables) => {
 			setDeletingFileId(null);
+			deletedFileIdsRef.current.add(variables.fileId);
+			lastConfirmedAssociations.current = clearFileAssociations(
+				lastConfirmedAssociations.current,
+				variables.fileId,
+			);
+			if (queuedAssociationWriteRef.current !== null) {
+				queuedAssociationWriteRef.current = clearFileAssociations(
+					queuedAssociationWriteRef.current,
+					variables.fileId,
+				);
+			}
 			setAssociations((prev) => clearFileAssociations(prev, variables.fileId));
 			refreshFileList();
 		},
@@ -175,10 +224,9 @@ export function Step2Upload({
 				return;
 			}
 			setHasAttemptedSubmit(false);
-			if (finalizeMutation.isPending) return;
 			openFinalizeModal();
 		},
-		[canSubmit, finalizeMutation.isPending, openFinalizeModal],
+		[canSubmit, openFinalizeModal],
 	);
 
 	const confirmFinalize = useCallback(() => {
@@ -293,6 +341,14 @@ export function Step2Upload({
 					</p>
 				)}
 
+				<div aria-live="polite" className="fr-messages-group">
+					{hasPendingAssociationWrite && (
+						<p className="fr-message fr-message--info fr-mb-0">
+							Enregistrement des associations en cours…
+						</p>
+					)}
+				</div>
+
 				<div className={`fr-mt-4w ${formStyles.actions}`}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
@@ -304,7 +360,11 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isReadOnly}
+							disabled={
+								isReadOnly ||
+								hasPendingAssociationWrite ||
+								finalizeMutation.isPending
+							}
 							type="submit"
 						>
 							{SUBMIT_LABEL}
