@@ -48,11 +48,18 @@ export function createMockDb(rows: unknown[] = []) {
 	const select = vi.fn().mockReturnValue({ from });
 	// `tx` reuses the very mocks exposed below, so the assertions read the same
 	// calls whether the router went through `db` directly or through a transaction.
+	// The open flag lets a test pin *when* a write happened, not just that it did.
+	let transactionOpen = false;
 	const transaction = vi
 		.fn()
-		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-			fn({ select, insert }),
-		);
+		.mockImplementation(async (fn: (tx: unknown) => unknown) => {
+			transactionOpen = true;
+			try {
+				return await fn({ select, insert });
+			} finally {
+				transactionOpen = false;
+			}
+		});
 
 	return {
 		db: { select, insert, transaction } as unknown,
@@ -62,6 +69,7 @@ export function createMockDb(rows: unknown[] = []) {
 		where,
 		forLock,
 		transaction,
+		isTransactionOpen: () => transactionOpen,
 	};
 }
 

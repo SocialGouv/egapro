@@ -176,3 +176,83 @@ describe("enqueueNotification — graceful degradation", () => {
 		expect(Object.hasOwn(jobData, "attachments")).toBe(false);
 	});
 });
+
+describe("enqueueNotification — job id deduplication", () => {
+	beforeEach(() => {
+		__resetPublisherForTests();
+		mockSend.mockReset();
+		mockStart.mockReset().mockResolvedValue(undefined);
+		mockCreateQueue.mockReset().mockResolvedValue(undefined);
+		mockOn.mockReset();
+		process.env.NOTIFICATIONS_DATABASE_URL =
+			"postgres://user:pwd@localhost:5432/db";
+	});
+
+	afterEach(() => {
+		delete process.env.NOTIFICATIONS_DATABASE_URL;
+		vi.clearAllMocks();
+	});
+
+	const JOB_ID = "0f3f4d2e-1c2b-4a5e-9f11-2f9a8c7d6e5b";
+
+	it("passes the caller's job id to pg-boss as the row id", async () => {
+		mockSend.mockResolvedValue(JOB_ID);
+
+		const result = await enqueueNotification({ ...BASE_INPUT, jobId: JOB_ID });
+
+		expect(result).toEqual({ status: "enqueued", id: JOB_ID });
+		expect(mockSend).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.any(Object),
+			expect.objectContaining({ id: JOB_ID }),
+		);
+	});
+
+	it("sends no id at all when the caller gives none", async () => {
+		mockSend.mockResolvedValue("generated-id");
+
+		await enqueueNotification(BASE_INPUT);
+
+		const options = mockSend.mock.calls[0]?.[2] as Record<string, unknown>;
+		expect(options).not.toHaveProperty("id");
+	});
+
+	// A replay of a receipt whose first attempt did reach the queue must not
+	// produce a second e-mail (issue #4542): the duplicate key is the proof the
+	// job is already there, not a failure to report.
+	it("reports a duplicate when the id is already taken", async () => {
+		mockSend.mockRejectedValue(
+			Object.assign(new Error("duplicate key value"), { code: "23505" }),
+		);
+
+		const result = await enqueueNotification({ ...BASE_INPUT, jobId: JOB_ID });
+
+		expect(result).toEqual({ status: "duplicate", id: JOB_ID });
+	});
+
+	it("reports a duplicate when the queue policy refuses the id", async () => {
+		mockSend.mockResolvedValue(null);
+
+		const result = await enqueueNotification({ ...BASE_INPUT, jobId: JOB_ID });
+
+		expect(result).toEqual({ status: "duplicate", id: JOB_ID });
+	});
+
+	it("still reports an error for a non-duplicate failure", async () => {
+		mockSend.mockRejectedValue(
+			Object.assign(new Error("deadlock detected"), { code: "40P01" }),
+		);
+
+		const result = await enqueueNotification({ ...BASE_INPUT, jobId: JOB_ID });
+
+		expect(result).toEqual({ status: "error", error: "deadlock detected" });
+	});
+
+	it("keeps an unidentified send that resolves to null an enqueue", async () => {
+		mockSend.mockResolvedValue(null);
+
+		const result = await enqueueNotification(BASE_INPUT);
+
+		expect(result).toEqual({ status: "enqueued", id: "" });
+	});
+});
