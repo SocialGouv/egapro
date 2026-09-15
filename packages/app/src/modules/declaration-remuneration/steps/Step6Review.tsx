@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
 import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
@@ -28,6 +28,7 @@ import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { SubmitDeclarationModal } from "../shared/SubmitDeclarationModal";
+import { getSubmissionErrorMessage } from "../shared/submissionErrorMessage";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
@@ -94,29 +95,39 @@ export function Step6Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const completeSubmission = useCallback(() => {
+		// A blocked sessionStorage must not prevent navigation after submission.
+		try {
+			trackFunnelComplete(
+				DECLARATION_FUNNEL,
+				declarationFunnelDimensions(
+					declarationYear,
+					getOptionalCompanySizeRange(companyWorkforce),
+				),
+			);
+		} catch {
+			// Tracking is best effort; the declaration is already submitted.
+		}
+		closeModal();
+		router.push(COMPLIANCE_PATH);
+	}, [closeModal, companyWorkforce, declarationYear, router]);
 	const submitMutation = api.declaration.submit.useMutation({
-		onSuccess: () => {
-			// A blocked sessionStorage must not prevent navigation after submission.
-			try {
-				trackFunnelComplete(
-					DECLARATION_FUNNEL,
-					declarationFunnelDimensions(
-						declarationYear,
-						getOptionalCompanySizeRange(companyWorkforce),
-					),
-				);
-			} catch {
-				// Tracking is best effort; the declaration is already submitted.
-			}
-			closeModal();
-			router.push(COMPLIANCE_PATH);
-		},
+		onSuccess: completeSubmission,
+		// The response can be lost after the commit (restarted process): only a fresh server render tells whether it went through.
+		onError: () => router.refresh(),
 	});
+	const submittedDespiteError = isSubmitted && submitMutation.isError;
+	useEffect(() => {
+		if (submittedDespiteError) completeSubmission();
+	}, [submittedDespiteError, completeSubmission]);
 	const handleCloseModal = () => {
 		if (submitMutation.isPending) return;
 		submitMutation.reset();
 		closeModal();
 	};
+	const submissionError = getSubmissionErrorMessage(submitMutation.error);
+	// Kept mounted once the refresh reveals the submission, so it is concealed before navigating away.
+	const showSubmitModal = !isSubmitted || submitMutation.isError;
 
 	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
 
@@ -201,9 +212,9 @@ export function Step6Review({
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 
-				{!isSubmitted && (
+				{showSubmitModal && (
 					<SubmitDeclarationModal
-						error={submitMutation.error?.message}
+						error={submissionError}
 						isPending={submitMutation.isPending}
 						modalRef={modalRef}
 						onClose={handleCloseModal}
