@@ -119,6 +119,10 @@ Quand l'effectif GIP est inconnu, `Tranche_effectif` vaut `null` (jamais replié
 
 `CSE_existant` vaut `null` — et non `false` — pour les entreprises sous le seuil CSE (100 salariés) : l'information n'est simplement **pas exportée** pour ces entreprises, elle n'est pas absente au sens d'un CSE inexistant. Ne pas interpréter `null` comme « pas de CSE ».
 
+### Relier un fichier d'avis CSE à `Avis_CSE`
+
+Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` : la liste des `{ Numero_declaration, Type }` que ce fichier couvre, dans le même vocabulaire que `Avis_CSE` (`Numero_declaration` ∈ {1, 2}, `Type` ∈ {`accuracy`, `gap`}). C'est la clé de jointure entre un PDF et l'avis qu'il porte — comparer `Fichiers_CSE[].Contenus[]` à `Avis_CSE[]` sur `(Numero_declaration, Type)`. Un fichier peut couvrir plusieurs contenus (ex. un même PDF pour l'exactitude et la justification d'une même déclaration). `Contenus` vaut `[]` pour un fichier déposé mais pas encore associé — possible tant que l'étape 2 de l'avis CSE n'est pas finalisée, celle-ci refusant tout fichier orphelin. Côté `/files`, l'équivalent anglais est `contents: [{ declarationNumber, type }]`, présent uniquement sur les items `cse_opinion` (absent sur `joint_evaluation`, qui n'a pas de notion de contenu).
+
 ### Flags d'obligation figés vs statut évolutif
 
 `Parcours.Parcours_de_conformite_requis`, `Parcours_de_conformite_revision_requis`, `Avis_CSE_requis` et `Indicateur_G_requis` sont des prédicats **calculés à la soumission et figés** : ils ne changent jamais au fil de l'avancement de la démarche.

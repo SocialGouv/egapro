@@ -129,6 +129,12 @@ export type CseRow = {
 	opinionDate: string | null;
 };
 
+/** One `app_cse_opinion_file` association: a content the file covers. */
+export type CseFileContent = {
+	declarationNumber: number;
+	type: string;
+};
+
 export type FileRow = {
 	id: string;
 	siren: string;
@@ -136,7 +142,29 @@ export type FileRow = {
 	fileName: string;
 	filePath: string;
 	uploadedAt: Date;
+	/** CSE opinion contents this file covers. Undefined for joint evaluation files. */
+	contents?: CseFileContent[];
 };
+
+function compareCseFileContent(a: CseFileContent, b: CseFileContent): number {
+	if (a.declarationNumber !== b.declarationNumber) {
+		return a.declarationNumber - b.declarationNumber;
+	}
+	// 'accuracy' sorts before 'gap' — mirrors the CSE opinion step 2 checkbox
+	// order and the Avis_CSE.Type vocabulary.
+	if (a.type === b.type) return 0;
+	return a.type === "accuracy" ? -1 : 1;
+}
+
+/**
+ * Ascending by declaration number, then 'accuracy' before 'gap'. Shared by
+ * both file endpoints so a file's contents always read in the same order.
+ */
+export function sortCseFileContents(
+	contents: CseFileContent[],
+): CseFileContent[] {
+	return [...contents].sort(compareCseFileContent);
+}
 
 // ── Build indicators from declaration columns ─────────────────────────
 
@@ -300,6 +328,10 @@ export function buildCseFilePayload(file: FileRow) {
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
 		downloadUrl: apiV1FileHref(file.id),
+		contents: sortCseFileContents(file.contents ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
 	};
 }
 
@@ -324,6 +356,14 @@ function buildFichierPayload(
 		Nom_fichier: file.fileName,
 		Date_upload: file.uploadedAt.toISOString(),
 		URL_telechargement: apiV1FileHref(file.id),
+		// Only CSE opinion files relate to Avis_CSE entries; joint evaluation
+		// files keep their existing shape unchanged.
+		...(type === "cse_opinion" && {
+			Contenus: sortCseFileContents(file.contents ?? []).map((c) => ({
+				Numero_declaration: c.declarationNumber,
+				Type: c.type,
+			})),
+		}),
 	};
 }
 

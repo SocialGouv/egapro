@@ -181,6 +181,7 @@ describe("GET /api/v1/files", () => {
 			fileName: "avis-cse.pdf",
 			uploadedAt: "2027-03-10T08:00:00.000Z",
 			downloadUrl: "/api/v1/files/cse-1",
+			contents: [],
 		});
 		expect(body.files[1]).toEqual({
 			id: "joint-1",
@@ -189,6 +190,46 @@ describe("GET /api/v1/files", () => {
 			uploadedAt: "2027-03-12T09:00:00.000Z",
 			downloadUrl: "/api/v1/files/joint-1",
 		});
+	});
+
+	it("should expose a CSE file's contents, sorted by declaration number then accuracy before gap (#4535)", async () => {
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"123456789-2027",
+					[
+						{
+							id: "cse-1",
+							siren: "123456789",
+							year: 2027,
+							fileName: "avis-cse.pdf",
+							filePath: "123456789/2027/abc.pdf",
+							uploadedAt: new Date("2027-03-10T08:00:00Z"),
+							// Deliberately out of order and mixing both declarations.
+							contents: [
+								{ declarationNumber: 2, type: "gap" },
+								{ declarationNumber: 1, type: "gap" },
+								{ declarationNumber: 1, type: "accuracy" },
+							],
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/files/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files?siren=123456789&year=2027",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.files[0].contents).toEqual([
+			{ declarationNumber: 1, type: "accuracy" },
+			{ declarationNumber: 1, type: "gap" },
+			{ declarationNumber: 2, type: "gap" },
+		]);
 	});
 
 	it("should call queries with correct siren and year", async () => {

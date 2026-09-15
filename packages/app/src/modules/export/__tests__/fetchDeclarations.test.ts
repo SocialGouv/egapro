@@ -845,8 +845,53 @@ describe("assembleDeclaration", () => {
 				Nom_fichier: "avis-cse-original.pdf",
 				Date_upload: "2027-02-10T08:30:00.000Z",
 				URL_telechargement: "/api/v1/files/file-xyz",
+				Contenus: [],
 			},
 		]);
+	});
+
+	it("should expose a CSE file's Contenus, sorted by declaration number then accuracy before gap (#4535)", () => {
+		const files = [
+			{
+				id: "file-xyz",
+				siren: "123456789",
+				year: 2027,
+				fileName: "avis-cse-original.pdf",
+				filePath: "/s3/path",
+				uploadedAt: new Date("2027-02-10T08:30:00Z"),
+				// Deliberately out of order and mixing both declarations.
+				contents: [
+					{ declarationNumber: 2, type: "gap" },
+					{ declarationNumber: 1, type: "gap" },
+					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 2, type: "accuracy" },
+				],
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, [], [], files);
+
+		expect(result.Fichiers_CSE?.[0]?.Contenus).toEqual([
+			{ Numero_declaration: 1, Type: "accuracy" },
+			{ Numero_declaration: 1, Type: "gap" },
+			{ Numero_declaration: 2, Type: "accuracy" },
+			{ Numero_declaration: 2, Type: "gap" },
+		]);
+	});
+
+	it("should not add Contenus to the joint evaluation file (#4535)", () => {
+		const file = {
+			id: "je-1",
+			siren: "123456789",
+			year: 2027,
+			fileName: "eval-originale.pdf",
+			filePath: "/s3/je",
+			uploadedAt: new Date("2027-04-01T09:00:00Z"),
+		};
+
+		const result = assembleDeclaration(baseRow, [], [], [], [file]);
+
+		expect(result.Fichier_evaluation_conjointe).not.toHaveProperty("Contenus");
 	});
 
 	it("should expose the joint evaluation file with stored fileName", () => {
