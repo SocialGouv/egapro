@@ -104,8 +104,7 @@ test.describe("SUIT declarations export — indicator G computed gaps", () => {
 		for (const category of categories) {
 			for (const key of ECART_KEYS) {
 				expect(category).toHaveProperty(key);
-				// #4530 — SUIT parses the gaps as fixed-scale decimal strings, like the
-				// numeric(9,4) columns of A–F; a number drops the trailing zeros.
+				// SUIT reads the gaps as fixed-scale strings like A–F: a number would drop trailing zeros.
 				if (category[key] !== null) {
 					expect(category[key]).toMatch(/^-?\d+\.\d{4}$/);
 				}
