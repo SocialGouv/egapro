@@ -63,6 +63,11 @@ export function withAuditedRoute<TArgs extends unknown[] = []>(
 	): Promise<Response> {
 		const startedAt = Date.now();
 		const requestContext = buildRequestContext(request.headers);
+		const origin = {
+			source: "route" as const,
+			route: new URL(request.url).pathname,
+			operation: request.method,
+		};
 
 		let auditContext: AuditedRouteContext = {};
 		if (options.resolveContext) {
@@ -92,6 +97,7 @@ export function withAuditedRoute<TArgs extends unknown[] = []>(
 				ipAddress: requestContext.ipAddress,
 				userAgent: requestContext.userAgent,
 				durationMs: Date.now() - startedAt,
+				origin,
 			});
 			return response;
 		} catch (error) {
@@ -108,6 +114,7 @@ export function withAuditedRoute<TArgs extends unknown[] = []>(
 				ipAddress: requestContext.ipAddress,
 				userAgent: requestContext.userAgent,
 				durationMs: Date.now() - startedAt,
+				origin,
 			});
 			throw error;
 		}
