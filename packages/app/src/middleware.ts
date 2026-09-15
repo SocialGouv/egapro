@@ -7,6 +7,7 @@ import {
 	ADMIN,
 	ADMIN_MFA_RESUME,
 	API_PUBLIC_DECLARATIONS,
+	API_RECEIPTS_RETRY,
 	API_SEARCH,
 	API_V1_PREFIX,
 	LOGIN,
@@ -14,7 +15,7 @@ import {
 } from "~/modules/routes";
 
 /**
- * Next.js Edge middleware handling three concerns:
+ * Next.js Edge middleware handling four concerns:
  *
  * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and applies the
  *    shared decision table of `resolveAdminAccess` — admin grant *and* a
@@ -38,12 +39,23 @@ import {
  *    as the SUIT-vs-session discriminator, so we only validate the header
  *    when it is **present** — absence is forwarded to the route handler
  *    which falls back to NextAuth session auth.
+ *
+ * 4. `/api/receipts/retry` — same shared secret as `/api/v1/*`, but unlike
+ *    the mixed SUIT endpoints there is no legitimate session-based caller:
+ *    only the `receipt-outbox-retry` CronJob calls this route, in-cluster.
+ *    Absence of the header is therefore rejected here too, before the
+ *    request reaches `withAuditedRoute` — an unauthenticated caller must not
+ *    be able to make the app write an `audit.action_log` row on every call.
  */
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (pathname === API_SEARCH) {
 		return searchRedirect(request);
+	}
+
+	if (pathname === API_RECEIPTS_RETRY) {
+		return receiptsGatewayMiddleware(request);
 	}
 
 	if (pathname.startsWith(API_V1_PREFIX)) {
@@ -145,6 +157,22 @@ function gatewayMiddleware(request: NextRequest) {
 	return NextResponse.next();
 }
 
+// Unlike `gatewayMiddleware`, there is no session-based branch to fall
+// through to: an absent header is rejected here too, not just a wrong one.
+function receiptsGatewayMiddleware(request: NextRequest) {
+	const forwarded = request.headers.get("x-gateway-forwarded");
+
+	if (
+		forwarded === null ||
+		forwarded.length === 0 ||
+		!constantTimeEqual(forwarded, env.EGAPRO_GATEWAY_SHARED_SECRET)
+	) {
+		return new NextResponse(null, { status: 403 });
+	}
+
+	return NextResponse.next();
+}
+
 /**
  * Edge-runtime-safe constant-time string comparison. `node:crypto` is not
  * available on the Edge runtime, so we cannot use `timingSafeEqual` here.
@@ -169,6 +197,7 @@ export const config = {
 		"/admin/:path*",
 		"/api/v1/:path*",
 		"/api/search",
+		"/api/receipts/retry",
 		"/mon-espace/:path*",
 		"/declaration-remuneration/:path*",
 		"/avis-cse/:path*",

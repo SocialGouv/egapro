@@ -1,12 +1,19 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { assertGatewaySource } from "~/server/services/gatewaySource";
 
 export const POST = withAuditedRoute(
 	{ action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY },
 	receiptRetryHandler,
 );
 
-async function receiptRetryHandler(): Promise<Response> {
+// The Edge middleware already rejects a missing/wrong secret before this
+// route is reached — this call is defense in depth for the case a future
+// matcher edit drops `/api/receipts/retry` from coverage without notice.
+async function receiptRetryHandler(request: Request): Promise<Response> {
+	const gatewayError = assertGatewaySource(request);
+	if (gatewayError) return gatewayError;
+
 	const { replayPendingReceipts } = await import("~/modules/mail/server");
 
 	try {

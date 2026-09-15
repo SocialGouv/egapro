@@ -1,20 +1,20 @@
 import "server-only";
 
 /**
- * Guard for SUIT-only `/api/v1/*` endpoints.
+ * Guard for endpoints with no legitimate caller besides the gateway or an
+ * in-cluster CronJob: SUIT-only `/api/v1/*` routes, and `/api/receipts/retry`.
  *
- * APISIX (the gateway fronting SUIT traffic — see
- * `.kontinuous/templates/apisix-suit.yaml`) injects the `X-Gateway-Forwarded`
- * header on every proxied request. The Edge middleware
- * (`src/middleware.ts`) already rejects empty or mismatched values with 403,
- * so by the time the request reaches here the header is either absent
- * (session / public call) or a valid secret. An absent (or empty) header
- * means the caller reached the app pod directly and bypassed APISIX's
- * Bearer auth + rate-limit — reject with 403.
+ * Both send `X-Gateway-Forwarded: <EGAPRO_GATEWAY_SHARED_SECRET>` — APISIX
+ * (see `.kontinuous/templates/apisix-suit.yaml`) for SUIT traffic, the
+ * `receipt-outbox-retry` CronJob directly for its own route. The Edge
+ * middleware (`src/middleware.ts`) already rejects an absent, empty or
+ * mismatched value with 403 for both, so by the time a request reaches here
+ * the header is a valid secret — this call is defense in depth against a
+ * future middleware/matcher regression, not the primary check.
  *
- * Mixed endpoints that must serve both APISIX (SUIT) and browser
- * (admin / user) — e.g. `/api/v1/files/:fileId` — do **not** call this
- * guard; they dispatch on `isGatewayForwarded(request)` instead.
+ * Mixed endpoints that must serve both the gateway and a browser session —
+ * e.g. `/api/v1/files/:fileId` — do **not** call this guard; they dispatch
+ * on `isGatewayForwarded(request)` instead.
  */
 export function assertGatewaySource(request: Request): Response | null {
 	if (!isGatewayForwarded(request)) {

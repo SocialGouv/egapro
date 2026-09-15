@@ -28,11 +28,22 @@ spec:
               image: curlimages/curl:8.12.1
               securityContext:
                 allowPrivilegeEscalation: false
+              # Same shared secret as the app pod (`suit` secret) and the
+              # APISIX gateway — the Edge middleware now rejects this route
+              # outright when the header is absent or wrong, so an
+              # unauthenticated caller can no longer trigger a replay pass.
+              env:
+                - name: EGAPRO_GATEWAY_SHARED_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: suit
+                      key: EGAPRO_GATEWAY_SHARED_SECRET
               command:
                 - /bin/sh
                 - -c
                 - |
                   curl -X POST "http://app:3000/api/receipts/retry" \
+                    -H "X-Gateway-Forwarded: ${EGAPRO_GATEWAY_SHARED_SECRET}" \
                     --connect-timeout 10 \
                     --max-time 300 \
                     --fail \
