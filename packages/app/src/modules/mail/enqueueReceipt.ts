@@ -41,17 +41,13 @@ export type EnqueueReceiptInput = {
 };
 
 export type SendReceiptInput = EnqueueReceiptInput & {
-	/**
-	 * Deduplication key handed to the queue, and the outbox row this send
-	 * settles. Set by the outbox path only: a resend is a deliberate second
-	 * copy and must never be deduplicated against the original.
-	 */
+	// Set by the outbox path only — a resend must never dedupe against the original.
 	outboxId?: string;
 };
 
 export type SendReceiptOutcome = {
 	sent: boolean;
-	/** Why the send failed, or why it went out degraded. Null on a clean send. */
+	// Set even on a degraded (but sent) receipt, not only on failure.
 	error: string | null;
 };
 
@@ -251,14 +247,7 @@ async function buildAttachmentsOrDrop(
 	}
 }
 
-/**
- * Render the receipt and hand it to the notification queue, then stamp the
- * outcome on `audit.action_log`.
- *
- * Never throws: every caller is a post-commit step whose démarche is already
- * recorded, so a mail failure must not surface as a failed submission. The
- * outcome is returned instead, for the outbox to settle its row on.
- */
+// Never throws — a mail failure must not surface as a failed submission; the outcome is returned instead.
 export async function sendReceipt(
 	input: SendReceiptInput,
 ): Promise<SendReceiptOutcome> {
@@ -283,9 +272,7 @@ export async function sendReceipt(
 			...(outboxId === undefined ? {} : { jobId: outboxId }),
 		});
 
-		// `duplicate` means the queue already holds this exact job — a replay of
-		// a send that did reach pg-boss before the process died. The receipt is
-		// on its way, so it counts as sent.
+		// `duplicate` means the job already reached pg-boss before the process died — it counts as sent.
 		const queued =
 			result.status === "enqueued" || result.status === "duplicate";
 
@@ -351,11 +338,7 @@ export async function sendReceipt(
 	}
 }
 
-/**
- * Send a receipt right now, outside any outbox bookkeeping — the "Renvoyer
- * l'accusé de réception" button. A resend is asked for by a user who is
- * watching for it, so it is neither deduplicated nor retried.
- */
+// A resend is neither deduplicated nor retried — the user asking for it is watching for it.
 export async function enqueueReceipt(
 	input: EnqueueReceiptInput,
 ): Promise<void> {

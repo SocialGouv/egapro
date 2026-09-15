@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { env } from "~/env.js";
 import { db } from "~/server/db";
 import { deliverRecordedReceipt, recordReceiptIntent } from "../receiptIntent";
 import {
@@ -35,7 +36,7 @@ describe("receipt outbox (#4542)", () => {
 	const STALE = RECEIPT_OUTBOX_RETRY_AFTER_MS + 60_000;
 
 	beforeAll(() => {
-		sql = postgres(process.env.DATABASE_URL as string, { max: 1 });
+		sql = postgres(env.DATABASE_URL, { max: 1 });
 	});
 
 	afterAll(async () => {

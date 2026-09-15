@@ -945,19 +945,7 @@ export const receiptOutboxStatusEnum = pgEnum("receipt_outbox_status", [
 	"failed",
 ]);
 
-/**
- * Acknowledgement e-mails owed by a committed submission (issue #4542).
- *
- * The row is written *inside* the submitting transaction, so a receipt is owed
- * the instant the démarche is committed and not one line of code later. The
- * request then renders the PDF and queues the mail itself — same latency as
- * before — but if the process dies in between (an OOM kill, a rollout), the
- * intent survives in `pending` and the retry endpoint picks it up instead of
- * the acknowledgement being lost without a trace.
- *
- * `id` doubles as the pg-boss job id: replaying a row whose `send` may already
- * have landed cannot produce a second e-mail.
- */
+// `id` doubles as the pg-boss job id, so replaying a row whose send may already have landed cannot produce a second e-mail.
 export const receiptOutbox = createTable(
 	"receipt_outbox",
 	(d) => ({

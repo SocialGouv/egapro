@@ -260,9 +260,6 @@ export const representationDeclarationRouter = createTRPCRouter({
 			const email = ctx.session.user.email;
 			let receiptIntentId: string | null = null;
 
-			// The upsert and the receipt intent share a transaction for the same
-			// reason as every other submission here: once the declaration is
-			// committed, the acknowledgement it owes must be committed with it.
 			await ctx.db.transaction(async (tx) => {
 				await tx
 					.insert(representationDeclarations)

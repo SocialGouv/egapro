@@ -6,29 +6,17 @@ import { db } from "~/server/db";
 import { receiptOutbox } from "~/server/db/schema";
 import { sendReceipt } from "./enqueueReceipt";
 
-/** Attempts past which a row stops being replayed and is parked as `failed`. */
 export const RECEIPT_OUTBOX_MAX_ATTEMPTS = 5;
 
-/**
- * How long a row must sit unsettled before the retry endpoint touches it. The
- * request that created it sends within a second or two; anything still waiting
- * after this window belongs to a process that is not coming back.
- */
+// A normal send happens within a second or two; past this, the row belongs to a dead process.
 export const RECEIPT_OUTBOX_RETRY_AFTER_MS = 5 * 60_000;
 
-/** Upper bound on one retry pass, so a backlog cannot exhaust the pod. */
+// Caps one retry pass so a backlog cannot exhaust the pod.
 export const RECEIPT_OUTBOX_REPLAY_LIMIT = 20;
 
 type OutboxRow = typeof receiptOutbox.$inferSelect;
 
-/**
- * Take ownership of a row with a conditional update, so that the request path
- * and a concurrent retry pass can never both render and queue the same
- * receipt: the `WHERE` clause is the lock, and only one `UPDATE` matches.
- *
- * A row left in `sending` by a process that died is reclaimed once it has gone
- * stale — the pg-boss job id derived from `id` is what makes that safe.
- */
+// The WHERE clause is the lock — only one concurrent UPDATE can match a given row.
 async function claim(id: string, staleBefore: Date): Promise<OutboxRow | null> {
 	const [row] = await db
 		.update(receiptOutbox)
@@ -67,13 +55,7 @@ async function settle(row: OutboxRow, error: string | null, sent: boolean) {
 		.where(eq(receiptOutbox.id, row.id));
 }
 
-/**
- * Render and queue one recorded intent, then settle its row.
- *
- * Called twice over a row's life: once by the request that committed the
- * submission — so the acknowledgement keeps leaving as fast as it did before —
- * and, only if that never happened, by the retry endpoint.
- */
+// Called both by the submitting request and, if that never happened, by the retry endpoint.
 export async function deliverReceiptIntent(
 	id: string,
 	now: Date = new Date(),
@@ -95,10 +77,7 @@ export async function deliverReceiptIntent(
 	return sent ? "sent" : "failed";
 }
 
-/**
- * A row is only reclaimed well after the retry window, so the request that
- * owns it has every chance to finish first.
- */
+// Reclaim only well past the retry window, so the owning request finishes first.
 function staleAfterMs(): number {
 	return RECEIPT_OUTBOX_RETRY_AFTER_MS * 2;
 }
@@ -109,10 +88,6 @@ export type ReplayResult = {
 	failed: number;
 };
 
-/**
- * Replay the receipts nobody sent — the rows whose request died between the
- * commit and the queue.
- */
 export async function replayPendingReceipts(
 	options: { now?: Date; limit?: number } = {},
 ): Promise<ReplayResult> {
