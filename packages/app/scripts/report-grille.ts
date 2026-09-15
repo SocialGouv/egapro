@@ -17,10 +17,8 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const APP_ROOT = join(__dirname, "..");
-export const DEFAULT_RESULTS_PATH = join(
-	APP_ROOT,
-	"playwright-report/grille-results.json",
-);
+const DEFAULT_RESULTS_FILE = "playwright-report/grille-results.json";
+export const DEFAULT_RESULTS_PATH = join(APP_ROOT, DEFAULT_RESULTS_FILE);
 export const DEFAULT_OUTPUT_PATH = join(
 	APP_ROOT,
 	"playwright-report/grille-recette.md",
@@ -338,6 +336,12 @@ export function parseArgs(argv: string[]): CliArgs {
 	return args;
 }
 
+export function resultsPathLabel(resultsPath: string): string {
+	return resultsPath === DEFAULT_RESULTS_PATH
+		? DEFAULT_RESULTS_FILE
+		: resultsPath;
+}
+
 function main(): void {
 	const {
 		scope,
@@ -360,7 +364,7 @@ function main(): void {
 		durationMs = 0;
 		noJsonReason = existsSync(resultsPath)
 			? "Fichier de résultats illisible ou invalide"
-			: "Fichier de résultats introuvable (playwright-report/grille-results.json)";
+			: `Fichier de résultats introuvable (${resultsPathLabel(resultsPath)})`;
 	} else {
 		results = extractTestResults(report);
 		startTime = report.stats.startTime;

@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	buildReport,
 	type CoordResult,
@@ -12,6 +12,7 @@ import {
 	loadResults,
 	type PlaywrightReport,
 	parseArgs,
+	resultsPathLabel,
 	type StepResult,
 } from "#scripts/report-grille";
 import { buildGrid, type Coordinate } from "~/e2e/grille/coordinates";
@@ -615,6 +616,12 @@ describe("parseArgs", () => {
 		});
 	});
 
+	it("anchors the default paths on the playwright-report/ files the grille config and workflow rely on", () => {
+		const reportDir = join(process.cwd(), "playwright-report");
+		expect(DEFAULT_RESULTS_PATH).toBe(join(reportDir, "grille-results.json"));
+		expect(DEFAULT_OUTPUT_PATH).toBe(join(reportDir, "grille-recette.md"));
+	});
+
 	it("defaults a flag value to an empty string when it is the last token", () => {
 		expect(parseArgs(["--scope"]).scope).toBe("");
 	});
@@ -627,6 +634,20 @@ describe("parseArgs", () => {
 			results: DEFAULT_RESULTS_PATH,
 			out: DEFAULT_OUTPUT_PATH,
 		});
+	});
+});
+
+describe("resultsPathLabel", () => {
+	it("names the recette convention, not the absolute path, for the default results file", () => {
+		expect(resultsPathLabel(DEFAULT_RESULTS_PATH)).toBe(
+			"playwright-report/grille-results.json",
+		);
+	});
+
+	it("names an injected results path as given", () => {
+		expect(resultsPathLabel("/tmp/autre-recette.json")).toBe(
+			"/tmp/autre-recette.json",
+		);
 	});
 });
 
@@ -643,6 +664,15 @@ describe("main — CLI entrypoint", () => {
 		};
 	}
 
+	function fileSnapshot(path: string): string | null {
+		return existsSync(path) ? readFileSync(path, "utf-8") : null;
+	}
+
+	beforeEach(() => {
+		// Set for real on a GitHub runner: unstubbed, main() appends the whole report to the CI job summary.
+		vi.stubEnv("GITHUB_STEP_SUMMARY", "");
+	});
+
 	afterEach(() => {
 		vi.resetModules();
 		vi.unstubAllEnvs();
@@ -657,14 +687,8 @@ describe("main — CLI entrypoint", () => {
 
 	it("writes to --results/--out and leaves the default playwright-report/ artefacts untouched", async () => {
 		const before = {
-			resultsExists: existsSync(DEFAULT_RESULTS_PATH),
-			resultsContent: existsSync(DEFAULT_RESULTS_PATH)
-				? readFileSync(DEFAULT_RESULTS_PATH, "utf-8")
-				: null,
-			outExists: existsSync(DEFAULT_OUTPUT_PATH),
-			outContent: existsSync(DEFAULT_OUTPUT_PATH)
-				? readFileSync(DEFAULT_OUTPUT_PATH, "utf-8")
-				: null,
+			results: fileSnapshot(DEFAULT_RESULTS_PATH),
+			out: fileSnapshot(DEFAULT_OUTPUT_PATH),
 		};
 
 		const { results, out } = tempPaths();
@@ -693,18 +717,8 @@ describe("main — CLI entrypoint", () => {
 			"# Recette métier — Grille 185 coordonnées",
 		);
 
-		expect(existsSync(DEFAULT_RESULTS_PATH)).toBe(before.resultsExists);
-		if (before.resultsExists) {
-			expect(readFileSync(DEFAULT_RESULTS_PATH, "utf-8")).toBe(
-				before.resultsContent,
-			);
-		}
-		expect(existsSync(DEFAULT_OUTPUT_PATH)).toBe(before.outExists);
-		if (before.outExists) {
-			expect(readFileSync(DEFAULT_OUTPUT_PATH, "utf-8")).toBe(
-				before.outContent,
-			);
-		}
+		expect(fileSnapshot(DEFAULT_RESULTS_PATH)).toBe(before.results);
+		expect(fileSnapshot(DEFAULT_OUTPUT_PATH)).toBe(before.out);
 	});
 
 	it("does not write the output file when the module is imported without direct invocation", async () => {
@@ -797,7 +811,7 @@ describe("main — CLI entrypoint", () => {
 			"**0 passés / 0 échoués / 185 non joués** sur 185",
 		);
 		expect(output).toContain(
-			"Fichier de résultats introuvable (playwright-report/grille-results.json)",
+			`Fichier de résultats introuvable (${missingResults})`,
 		);
 	});
 });
