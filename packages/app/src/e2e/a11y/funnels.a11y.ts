@@ -20,7 +20,7 @@ import { snapshotCurrentPage, snapshotRoute } from "./snapshot";
 // visited: each one is reachable only from a given declaration state. Rather than replay a
 // full UI flow per screen (minutes per page, and a failure anywhere loses every later page),
 // the declaration record is pinned directly to the state that opens the screen — the same
-// seam `compliance-path-change.e2e.ts` and `declaration-process-panel.e2e.ts` already use.
+// seam `compliance.e2e.ts` and `my-space.e2e.ts` already use.
 //
 // Serial: every test mutates the one shared declaration (SIREN of the test company), so they
 // must not interleave. The config already pins `workers: 1`; this makes the intent explicit
@@ -79,8 +79,8 @@ test.describe("RGAA — parcours de conformité", () => {
 	// The path-choice screen is the one screen a pinned DB state does NOT open: the state
 	// machine routes on more than the stored status, and a direct visit lands on the CSE
 	// step instead. So this one goes through the real submission, exactly as
-	// `compliance-path-change.e2e.ts` does — it is also what puts the declaration into the
-	// state the rest of this describe pins from.
+	// the `[ANX-01]` describe of `compliance.e2e.ts` does — it is also what puts the declaration
+	// into the state the rest of this describe pins from.
 	test("snapshot le choix du parcours", async ({ page }) => {
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });

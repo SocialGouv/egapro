@@ -6,6 +6,9 @@ import {
 	ADMIN_IMPERSONATE,
 	ADMIN_REFERENTS,
 	ADMIN_SETTINGS,
+	ADMIN_STATS,
+	ADMIN_STATS_CAMPAIGN,
+	ADMIN_STATS_PLATFORM,
 	LOGIN,
 	routeWithQuery,
 } from "~/modules/routes";
@@ -15,7 +18,8 @@ import {
 	setGipWorkforce,
 } from "./helpers/db";
 
-// Merged from the former admin / admin-declarations / admin-referents specs.
+// Merged from the former admin / admin-declarations / admin-referents specs,
+// and from admin-stats.e2e.ts (#4114).
 
 test.describe("admin access", () => {
 	// One test per route so a failure pinpoints the broken route; they all reuse
@@ -263,5 +267,32 @@ test.describe("admin declarations — GIP headcount column and size filter", () 
 		await expect(page).toHaveURL(urlPattern(ADMIN_DECLARATIONS));
 		await expect(filter).toHaveValue("");
 		await expect(rowForYear(page, UNKNOWN_YEAR)).toHaveCount(1);
+	});
+});
+
+// Dashboard rendering is covered by src/modules/admin/stats/__tests__/*.
+
+test.describe("admin stats — routing & access", () => {
+	test("redirect: /admin/stats/campagne → /admin/stats", async ({ page }) => {
+		await page.goto(ADMIN_STATS_CAMPAIGN);
+		await expect(page).toHaveURL(urlPattern(ADMIN_STATS));
+	});
+
+	test("redirect: /admin/stats/plateforme → /admin/stats", async ({ page }) => {
+		await page.goto(ADMIN_STATS_PLATFORM);
+		await expect(page).toHaveURL(urlPattern(ADMIN_STATS));
+	});
+
+	test("non-admin users are redirected away from the stats page", async ({
+		browser,
+	}) => {
+		const anonCtx = await browser.newContext({ storageState: undefined });
+		try {
+			const page = await anonCtx.newPage();
+			await page.goto(ADMIN_STATS);
+			await expect(page).toHaveURL(/\/login/);
+		} finally {
+			await anonCtx.close();
+		}
 	});
 });
