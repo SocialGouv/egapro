@@ -24,6 +24,7 @@ const COLUMN_LABELS: Record<SortColumn, string> = {
 	siren: "SIREN",
 	companyName: "Entreprise",
 	year: "Année",
+	workforce: "Effectif",
 	status: "Statut",
 	declarantEmail: "Email déclarant",
 	createdAt: "Date de dépôt",
@@ -56,7 +57,7 @@ export function DeclarationTable({
 				{total} résultat{total > 1 ? "s" : ""}
 			</p>
 			<DsfrTable
-				caption="Liste des déclarations avec SIREN, entreprise, année, statut, email déclarant et date de dépôt."
+				caption="Liste des déclarations avec SIREN, entreprise, année, effectif issu du fichier GIP-MDS, statut, email déclarant et date de dépôt."
 				className=""
 			>
 				<thead>
@@ -85,6 +86,7 @@ export function DeclarationTable({
 								</Link>
 							</td>
 							<td>{row.year}</td>
+							<td>{row.workforce ?? "—"}</td>
 							<td>
 								{isCancelled(row) ? (
 									<span className="fr-badge fr-badge--warning">Annulée</span>
@@ -98,7 +100,7 @@ export function DeclarationTable({
 					))}
 					{rows.length === 0 && (
 						<tr>
-							<td colSpan={6}>Aucune déclaration trouvée.</td>
+							<td colSpan={7}>Aucune déclaration trouvée.</td>
 						</tr>
 					)}
 				</tbody>
