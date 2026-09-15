@@ -1,4 +1,5 @@
 import "server-only";
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import type { db } from "~/server/db";
 import { receiptOutbox } from "~/server/db/schema";
 import type { ReceiptKind } from "./receiptKind";
@@ -37,9 +38,25 @@ export async function deliverRecordedReceipt(id: string | null): Promise<void> {
 		const { deliverReceiptIntent } = await import("./receiptOutbox");
 		await deliverReceiptIntent(id);
 	} catch (error) {
-		// Dynamic, not hoisted: a static import would drag `enqueueReceipt`'s Sentry/db/notifications
-		// chain into every caller of this file, including ones that never reach a failing delivery.
-		const { reportReceiptFailure } = await import("./enqueueReceipt");
-		reportReceiptFailure(error, { stage: "delivery", outboxId: id });
+		// Both imports stay dynamic, not hoisted: a static import would drag
+		// `enqueueReceipt`'s Sentry/notifications chain and `~/server/audit/log`'s
+		// db client into every caller of this file, including ones that never
+		// reach a failing delivery.
+		const [{ reportReceiptFailure }, { logAction }] = await Promise.all([
+			import("./enqueueReceipt"),
+			import("~/server/audit/log"),
+		]);
+		const errorMessage = reportReceiptFailure(error, {
+			stage: "delivery",
+			outboxId: id,
+		});
+		void logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+			status: "failure",
+			resourceType: "receipt_outbox",
+			resourceId: id,
+			errorMessage,
+			metadata: { stage: "delivery" },
+		});
 	}
 }

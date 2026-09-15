@@ -198,10 +198,9 @@ async function buildAttachments(
  */
 export function reportReceiptFailure(
 	error: unknown,
-	context: { stage: "attachments" | "enqueue" | "delivery" } & Record<
-		string,
-		unknown
-	>,
+	context: {
+		stage: "attachments" | "enqueue" | "delivery" | "replay";
+	} & Record<string, unknown>,
 ): string {
 	const message = error instanceof Error ? error.message : String(error);
 	const reported =

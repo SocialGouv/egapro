@@ -4,7 +4,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
 import { receiptOutbox } from "~/server/db/schema";
-import { sendReceipt } from "./enqueueReceipt";
+import { reportReceiptFailure, sendReceipt } from "./enqueueReceipt";
 
 export const RECEIPT_OUTBOX_MAX_ATTEMPTS = 5;
 
@@ -111,7 +111,29 @@ export async function replayPendingReceipts(
 
 	const result: ReplayResult = { claimed: 0, sent: 0, failed: 0 };
 	for (const { id } of candidates) {
-		const outcome = await deliverReceiptIntent(id, now);
+		let outcome: "sent" | "failed" | "skipped";
+		try {
+			outcome = await deliverReceiptIntent(id, now);
+		} catch (error) {
+			// claim()/settle() are the only unguarded steps below (sendReceipt never
+			// throws) — one row's DB error must not abort the rest of the batch, so
+			// it is counted like any other failed row and the pass moves on.
+			const errorMessage = reportReceiptFailure(error, {
+				stage: "replay",
+				outboxId: id,
+			});
+			void logAction({
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+				status: "failure",
+				resourceType: "receipt_outbox",
+				resourceId: id,
+				errorMessage,
+				metadata: { stage: "replay" },
+			});
+			result.claimed += 1;
+			result.failed += 1;
+			continue;
+		}
 		if (outcome === "skipped") continue;
 		result.claimed += 1;
 		if (outcome === "sent") result.sent += 1;

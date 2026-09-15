@@ -127,6 +127,7 @@ export const AUDIT_ACTIONS = {
 	NOTIFICATION_ENQUEUE: "notification.enqueue",
 	NOTIFICATION_SEND: "notification.send",
 	NOTIFICATION_OUTBOX_REPLAY: "notification.outbox_replay",
+	NOTIFICATION_OUTBOX_DELIVERY_FAILED: "notification.outbox_delivery_failed",
 
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
@@ -148,6 +149,7 @@ export const AUDIT_ACTIONS = {
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
 	SYSTEM_DECLARATION_CLEANUP: "system.declaration_cleanup",
+	SYSTEM_RECEIPT_OUTBOX_CLEANUP: "system.receipt_outbox_cleanup",
 } as const;
 
 export type AuditActionKey = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
@@ -246,6 +248,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
 	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
 	[AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY]: "system",
+	[AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED]: "system",
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
@@ -263,4 +266,5 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",
+	[AUDIT_ACTIONS.SYSTEM_RECEIPT_OUTBOX_CLEANUP]: "system",
 };

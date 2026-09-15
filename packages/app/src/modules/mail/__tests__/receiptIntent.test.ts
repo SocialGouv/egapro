@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	deliverReceiptIntent: vi.fn().mockResolvedValue("sent"),
-	reportReceiptFailure: vi.fn(),
+	reportReceiptFailure: vi.fn().mockReturnValue("connection terminated"),
+	logAction: vi.fn(),
 }));
 
 vi.mock("../receiptOutbox", () => ({
@@ -13,6 +14,11 @@ vi.mock("../enqueueReceipt", () => ({
 	reportReceiptFailure: mocks.reportReceiptFailure,
 }));
 
+vi.mock("~/server/audit/log", () => ({
+	logAction: mocks.logAction,
+}));
+
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import { receiptOutbox } from "~/server/db/schema";
 import { deliverRecordedReceipt, recordReceiptIntent } from "../receiptIntent";
 
@@ -93,6 +99,7 @@ describe("deliverRecordedReceipt", () => {
 	it("does not propagate an outbox failure to the caller", async () => {
 		mocks.deliverReceiptIntent.mockClear();
 		mocks.reportReceiptFailure.mockClear();
+		mocks.logAction.mockClear();
 		const dbError = new Error("connection terminated");
 		mocks.deliverReceiptIntent.mockRejectedValueOnce(dbError);
 
@@ -102,5 +109,27 @@ describe("deliverRecordedReceipt", () => {
 			stage: "delivery",
 			outboxId: "outbox-42",
 		});
+	});
+
+	it("writes a dedicated failure audit row instead of the swallowed exception", async () => {
+		mocks.deliverReceiptIntent.mockClear();
+		mocks.reportReceiptFailure.mockClear();
+		mocks.logAction.mockClear();
+		mocks.deliverReceiptIntent.mockRejectedValueOnce(
+			new Error("connection terminated"),
+		);
+
+		await deliverRecordedReceipt("outbox-42");
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+				status: "failure",
+				resourceType: "receipt_outbox",
+				resourceId: "outbox-42",
+				errorMessage: "connection terminated",
+				metadata: { stage: "delivery" },
+			}),
+		);
 	});
 });

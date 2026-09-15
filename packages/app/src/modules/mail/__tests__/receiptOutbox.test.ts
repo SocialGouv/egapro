@@ -2,14 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	sendReceipt: vi.fn(),
+	reportReceiptFailure: vi.fn().mockReturnValue("boom"),
 	logAction: vi.fn(),
 	claimed: [] as unknown[][],
 	candidates: [] as unknown[],
 	settleCalls: [] as Record<string, unknown>[],
+	settleError: null as Error | null,
 }));
 
 vi.mock("../enqueueReceipt", () => ({
 	sendReceipt: mocks.sendReceipt,
+	reportReceiptFailure: mocks.reportReceiptFailure,
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -26,7 +29,10 @@ vi.mock("~/server/db", () => ({
 			set: (patch: Record<string, unknown>) => ({
 				where: () => {
 					const isClaim = patch.status === "sending";
-					if (!isClaim) mocks.settleCalls.push(patch);
+					if (!isClaim) {
+						mocks.settleCalls.push(patch);
+						if (mocks.settleError) return Promise.reject(mocks.settleError);
+					}
 					const statement = Promise.resolve(undefined) as Promise<undefined> & {
 						returning: () => Promise<unknown[]>;
 					};
@@ -168,7 +174,9 @@ describe("replayPendingReceipts", () => {
 		mocks.claimed = [];
 		mocks.candidates = [];
 		mocks.settleCalls = [];
+		mocks.settleError = null;
 		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
+		mocks.reportReceiptFailure.mockReturnValue("boom");
 	});
 
 	it("reports an empty pass and writes no audit row when nothing is owed", async () => {
@@ -222,5 +230,44 @@ describe("replayPendingReceipts", () => {
 		expect(result).toEqual({ claimed: 0, sent: 0, failed: 0 });
 		expect(mocks.sendReceipt).not.toHaveBeenCalled();
 		expect(mocks.logAction).not.toHaveBeenCalled();
+	});
+
+	// A DB error on one row's claim/settle (connection drop, pool timeout) must
+	// not abort the rest of the batch — it is counted like any other failure,
+	// reported to Sentry/console, and given its own audit row, then the pass
+	// moves on to the next candidate.
+	it("keeps replaying the rest of the batch after one row's claim/settle throws", async () => {
+		mocks.candidates = [{ id: "row-1" }, { id: "row-2" }];
+		mocks.claimed = [
+			[outboxRow({ id: "row-1" })],
+			[outboxRow({ id: "row-2" })],
+		];
+		mocks.settleError = new Error("connection terminated");
+		mocks.reportReceiptFailure.mockReturnValue("connection terminated");
+
+		const result = await replayPendingReceipts();
+
+		expect(result).toEqual({ claimed: 2, sent: 0, failed: 2 });
+		expect(mocks.reportReceiptFailure).toHaveBeenCalledWith(expect.any(Error), {
+			stage: "replay",
+			outboxId: "row-1",
+		});
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+				status: "failure",
+				resourceType: "receipt_outbox",
+				resourceId: "row-1",
+				errorMessage: "connection terminated",
+				metadata: { stage: "replay" },
+			}),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY,
+				status: "failure",
+				metadata: { claimed: 2, sent: 0, failed: 2 },
+			}),
+		);
 	});
 });
