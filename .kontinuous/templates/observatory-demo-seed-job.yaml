@@ -36,7 +36,7 @@ spec:
               value: "120"
           command:
             - node
-            - packages/app/scripts/seed-demo-observatory.mjs
+            - packages/app/scripts/seed-demo-observatory.bundle.mjs
           resources:
             requests:
               cpu: 25m

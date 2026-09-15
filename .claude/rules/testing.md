@@ -13,6 +13,14 @@ paths:
 
 Les tests vivent dans un `__tests__/` à côté du module qu'ils testent, jamais dans `src/app/`.
 
+## Tests des scripts de `packages/app/scripts/`
+
+Les scripts sont écrits en TypeScript et importés par alias `#scripts/<nom>`, sans extension — jamais par chemin littéral, sinon un renommage casse le test en silence.
+
+Leur test vit dans le `__tests__/` du module de `src/` que le script exerce : `src/server/db/__tests__/` pour un backfill ou un import en base, `src/server/audit/__tests__/` pour une purge d'audit. `src/__tests__/scripts/` est réservé aux scripts sans domaine d'accueil — l'outillage de CI (`check-journal`, `check-cahier`, `report-grille`) et la validation des jeux de données générés.
+
+Les tests restent sous `src/` : les `include` de `vitest.config.ts` et de `vitest.integration.config.ts` ne couvrent que `src/**`, et les seuils de couverture à 75 % sont calculés sur ce périmètre.
+
 ## Ce qu'on teste
 
 Le **comportement observable** : ce que l'utilisateur voit, ce que l'API retourne. Pas le nombre de rendus, pas l'appel d'un setter.

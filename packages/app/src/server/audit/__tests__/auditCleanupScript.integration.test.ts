@@ -1,5 +1,5 @@
 /**
- * Integration test for `scripts/audit-cleanup.mjs` — runs against the real
+ * Integration test for `scripts/audit-cleanup.ts` — runs against the real
  * Postgres container booted by `src/test/integration-setup.ts`.
  *
  * Why this exists as an integration test:
@@ -15,7 +15,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 // The .mjs script is a standalone CLI entry — we import its exported core
 // routine and drive it with our own `sql` client so we never spawn `node`
 // from within Vitest.
-import { runAuditCleanup } from "#scripts/audit-cleanup.mjs";
+import { runAuditCleanup } from "#scripts/audit-cleanup";
 import { env } from "~/env.js";
 
 describe("audit-cleanup.mjs (integration)", () => {

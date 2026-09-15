@@ -1,5 +1,5 @@
 /**
- * Integration test for `scripts/declaration-cleanup.mjs` — runs against the
+ * Integration test for `scripts/declaration-cleanup.ts` — runs against the
  * real Postgres container booted by `src/test/integration-setup.ts`.
  *
  * Why this exists as an integration test (issue #3769):
@@ -27,7 +27,7 @@ import {
 	type Mock,
 	vi,
 } from "vitest";
-import { runDeclarationCleanup } from "#scripts/declaration-cleanup.mjs";
+import { runDeclarationCleanup } from "#scripts/declaration-cleanup";
 import { env } from "~/env.js";
 
 const ACTION = "system.declaration_cleanup";

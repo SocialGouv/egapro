@@ -42,7 +42,7 @@ Tokens : `xs` (0), `sm` (36em), `md` (48em), `lg` (62em), `xl` (78em).
 
 ## Runtime DSFR
 
-- **Assets** : copiés dans `public/dsfr/` par `scripts/copy-dsfr.mjs` (git-ignoré, régénéré au `dev`/`build`). Ne jamais importer le CSS DSFR via webpack.
+- **Assets** : copiés dans `public/dsfr/` par `scripts/copy-dsfr.ts` (git-ignoré, régénéré au `dev`/`build`). Ne jamais importer le CSS DSFR via webpack.
 - **JS** : chargé en `<Script type="module" strategy="beforeInteractive">`. Il gère modales, dropdowns, bascule de thème et navigation clavier — ne jamais redupliquer cette logique en React, utiliser les attributs `data-fr-*`.
 - **Thème sombre** : `data-fr-scheme="system"` sur `<html>`, cookie `fr-theme` lu par un script inline pour éviter le flash, `ThemeModal` pour la bascule utilisateur.
 - **Icônes** : classes `fr-icon-{nom}-{fill|line}`, toujours `aria-hidden="true"` sur les décoratives.

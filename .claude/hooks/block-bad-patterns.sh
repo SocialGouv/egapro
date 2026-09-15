@@ -68,11 +68,13 @@ check_pattern '\.(tsx|jsx)$' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
   '(DsfrPictogram\.tsx|ErrorArtwork\.tsx|packages/notifications/)'
 
-# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry configs)
+# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry
+# configs, and packages/app/scripts/: standalone node scripts run outside the Next.js runtime and
+# cannot import ~/env.js, which validates the whole app env and would abort a migration pod).
 check_pattern '\.(ts|tsx)$' \
   'process\.env' \
   'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|migrate.*\.mjs|e2e/helpers/|packages/notifications/)'
+  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|packages/app/scripts/|e2e/helpers/|packages/notifications/)'
 
 # Deep relative imports — use ~/ path alias (exclude packages/notifications which has no path alias)
 check_pattern '\.(ts|tsx)$' \
