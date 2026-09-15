@@ -2,7 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+import type { CompanySizeRange } from "~/modules/domain";
 import { ADMIN_DECLARATIONS, routeWithQuery } from "~/modules/routes";
+import { CompanySizeFilter } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import type { SearchDeclarationsFormValues } from "./schemas";
 import { searchDeclarationsFormSchema } from "./schemas";
@@ -11,7 +14,7 @@ export function SearchForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const { register, handleSubmit, reset } = useZodForm(
+	const { register, handleSubmit, reset, setValue, watch } = useZodForm(
 		searchDeclarationsFormSchema,
 		{
 			defaultValues: {
@@ -24,8 +27,22 @@ export function SearchForm() {
 					(searchParams.get(
 						"status",
 					) as SearchDeclarationsFormValues["status"]) ?? "",
+				sizeRange:
+					(searchParams.get(
+						"sizeRange",
+					) as SearchDeclarationsFormValues["sizeRange"]) ?? "",
 			},
 		},
+	);
+
+	// Controlled component: driven by watch/setValue rather than `register`.
+	const sizeRange = watch("sizeRange");
+
+	const handleSizeRangeChange = useCallback(
+		(next: CompanySizeRange | undefined) => {
+			setValue("sizeRange", next ?? "");
+		},
+		[setValue],
 	);
 
 	const onSubmit = useCallback(
@@ -50,6 +67,7 @@ export function SearchForm() {
 			dateFrom: "",
 			dateTo: "",
 			status: "",
+			sizeRange: "",
 		});
 		router.push(ADMIN_DECLARATIONS);
 	}, [reset, router]);
@@ -127,6 +145,14 @@ export function SearchForm() {
 							{...register("dateTo")}
 						/>
 					</div>
+				</div>
+				<div className="fr-col-12 fr-col-md-3">
+					<CompanySizeFilter
+						id="search-size-range"
+						label="Effectif"
+						onChange={handleSizeRangeChange}
+						value={sizeRange === "" ? undefined : sizeRange}
+					/>
 				</div>
 				<div className="fr-col-12 fr-col-md-3">
 					<div className="fr-select-group">

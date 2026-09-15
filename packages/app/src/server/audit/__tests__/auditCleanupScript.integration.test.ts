@@ -1,5 +1,5 @@
 /**
- * Integration test for `scripts/audit-cleanup.mjs` — runs against the real
+ * Integration test for `scripts/audit-cleanup.ts` — runs against the real
  * Postgres container booted by `src/test/integration-setup.ts`.
  *
  * Why this exists as an integration test:
@@ -12,16 +12,16 @@
 
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-// The .mjs script is a standalone CLI entry — we import its exported core
-// routine and drive it with our own `sql` client so we never spawn `node`
+// The script is a standalone CLI entry — we import its exported core
+// routines and drive them with our own `sql` client so we never spawn `node`
 // from within Vitest.
 import {
 	runAuditCleanup,
 	runReceiptOutboxCleanup,
-} from "#scripts/audit-cleanup.mjs";
+} from "#scripts/audit-cleanup";
 import { env } from "~/env.js";
 
-describe("audit-cleanup.mjs (integration)", () => {
+describe("audit-cleanup.ts (integration)", () => {
 	// Definite-assignment assertion — initialized synchronously in `beforeAll`.
 	// If `beforeAll` throws, vitest skips the tests and reports the original
 	// error; any afterAll failure from an undefined `sql` is suppressed below.

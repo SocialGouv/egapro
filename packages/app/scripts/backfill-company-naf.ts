@@ -32,16 +32,29 @@
  */
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-
+import type { Sql } from "postgres";
 import postgres from "postgres";
 
-/** @typedef {import("postgres").Sql} Sql */
-/**
- * @typedef {Object} CompanyNafRow
- * @property {string} siren
- * @property {string | null} naf_code
- * @property {string | null} naf_label
- */
+type CompanyNafRow = {
+	siren: string;
+	naf_code: string | null;
+	naf_label: string | null;
+};
+
+type RegistryNafPair = {
+	nafCode: string;
+	nafLabel: string | null;
+};
+
+type WeezLegalUnit = {
+	statutdiffusionunitelegale?: string | null;
+	activiteprincipaleunitelegale?: string | null;
+	nomenclatureactiviteprincipalelibelleunitelegale?: string | null;
+};
+
+type WeezFindBySirenResponse = {
+	content?: WeezLegalUnit[] | null;
+};
 
 const WEEZ_CONCURRENCY = 10;
 const DELAY_BETWEEN_BATCHES_MS = 100;
@@ -65,7 +78,7 @@ const NAF_LABEL_MAX_LENGTH = 255;
 // nothing is hidden by tolerating a few.
 const FAILURE_RATIO_EXIT_THRESHOLD = 0.1;
 
-export function getDatabaseUrl() {
+export function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 	const host = process.env.POSTGRES_HOST ?? process.env.PGHOST;
 	const database = process.env.POSTGRES_DB ?? process.env.PGDATABASE;
@@ -96,11 +109,11 @@ export function getDatabaseUrl() {
  * script cannot resolve. **If the diffusibility rule ever gains a status, change
  * it here too** — the two must not drift, or this job re-exposes the activity of
  * companies the app deliberately masks.
- *
- * @param {string} weezApiUrl
- * @param {string} siren
  */
-export async function fetchNaf(weezApiUrl, siren) {
+export async function fetchNaf(
+	weezApiUrl: string,
+	siren: string,
+): Promise<RegistryNafPair | null> {
 	const url = new URL(`${weezApiUrl}/public/v3/unitelegale/findbysiren`);
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
@@ -114,7 +127,7 @@ export async function fetchNaf(weezApiUrl, siren) {
 	if (!response.ok) {
 		throw new Error(`Weez API error: ${response.status} ${siren}`);
 	}
-	const data = await response.json();
+	const data: WeezFindBySirenResponse = await response.json();
 	const entity = data.content?.[0];
 	if (!entity) return null;
 	if (entity.statutdiffusionunitelegale === "N") return null;
@@ -132,8 +145,7 @@ export async function fetchNaf(weezApiUrl, siren) {
 	};
 }
 
-/** @param {Sql} sql */
-export async function assertSchema(sql) {
+export async function assertSchema(sql: Sql): Promise<void> {
 	const rows = await sql`
 		SELECT column_name
 		FROM information_schema.columns
@@ -146,11 +158,10 @@ export async function assertSchema(sql) {
 	}
 }
 
-/**
- * @param {Sql} sql
- * @param {number} waitSeconds
- */
-export async function waitForSchema(sql, waitSeconds) {
+export async function waitForSchema(
+	sql: Sql,
+	waitSeconds: number,
+): Promise<void> {
 	const deadline = Date.now() + waitSeconds * 1000;
 	for (;;) {
 		try {
@@ -164,15 +175,19 @@ export async function waitForSchema(sql, waitSeconds) {
 	}
 }
 
-/**
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {CompanyNafRow} args.row
- * @param {{ nafCode: string, nafLabel: string | null }} args.registry
- * @param {boolean} args.dryRun
- * @returns {Promise<"updated" | "unchanged" | "skipped">}
- */
-export async function applyRegistryPair({ sql, row, registry, dryRun }) {
+type Outcome = "updated" | "unchanged" | "skipped";
+
+export async function applyRegistryPair({
+	sql,
+	row,
+	registry,
+	dryRun,
+}: {
+	sql: Sql;
+	row: CompanyNafRow;
+	registry: RegistryNafPair;
+	dryRun: boolean;
+}): Promise<Outcome> {
 	if (
 		registry.nafCode === row.naf_code &&
 		registry.nafLabel === row.naf_label
@@ -195,40 +210,44 @@ export async function applyRegistryPair({ sql, row, registry, dryRun }) {
 	return changed.length === 0 ? "skipped" : "updated";
 }
 
-/**
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {string} args.weezApiUrl
- * @param {CompanyNafRow} args.row
- * @param {boolean} args.dryRun
- * @returns {Promise<"updated" | "unchanged" | "skipped">}
- */
-async function processRow({ sql, weezApiUrl, row, dryRun }) {
+async function processRow({
+	sql,
+	weezApiUrl,
+	row,
+	dryRun,
+}: {
+	sql: Sql;
+	weezApiUrl: string;
+	row: CompanyNafRow;
+	dryRun: boolean;
+}): Promise<Outcome> {
 	const registry = await fetchNaf(weezApiUrl, row.siren);
 	if (!registry) return "skipped";
 	return applyRegistryPair({ sql, row, registry, dryRun });
 }
 
-/**
- * @typedef {Object} RowOutcome
- * @property {string} siren
- * @property {"updated" | "unchanged" | "skipped" | "failed"} outcome
- * @property {string} [cause]
- */
+type RowOutcome = {
+	siren: string;
+	outcome: Outcome | "failed";
+	cause?: string;
+};
 
 /**
  * Runs `processRow` and never rejects: a registry or DB failure is captured
  * as a `"failed"` outcome carrying its cause, so the caller can tally it
  * without indexing back into the batch to recover the siren.
- *
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {string} args.weezApiUrl
- * @param {CompanyNafRow} args.row
- * @param {boolean} args.dryRun
- * @returns {Promise<RowOutcome>}
  */
-async function processRowSafely({ sql, weezApiUrl, row, dryRun }) {
+async function processRowSafely({
+	sql,
+	weezApiUrl,
+	row,
+	dryRun,
+}: {
+	sql: Sql;
+	weezApiUrl: string;
+	row: CompanyNafRow;
+	dryRun: boolean;
+}): Promise<RowOutcome> {
 	try {
 		const outcome = await processRow({ sql, weezApiUrl, row, dryRun });
 		return { siren: row.siren, outcome };
@@ -241,37 +260,31 @@ async function processRowSafely({ sql, weezApiUrl, row, dryRun }) {
 	}
 }
 
-/**
- * @typedef {Object} BackfillCounters
- * @property {number} updated
- * @property {number} unchanged
- * @property {number} skipped
- * @property {number} failed
- * @property {{siren: string, cause: string}[]} errors
- */
+type BackfillCounters = {
+	updated: number;
+	unchanged: number;
+	skipped: number;
+	failed: number;
+	errors: { siren: string; cause: string }[];
+};
 
-/**
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {string} args.weezApiUrl
- * @param {boolean} [args.dryRun]
- * @returns {Promise<BackfillCounters>}
- */
 export async function runBackfillCompanyNaf({
 	sql,
 	weezApiUrl,
 	dryRun = false,
-}) {
-	/** @type {CompanyNafRow[]} */
-	const rows = await sql`
+}: {
+	sql: Sql;
+	weezApiUrl: string;
+	dryRun?: boolean;
+}): Promise<BackfillCounters> {
+	const rows = await sql<CompanyNafRow[]>`
 		SELECT siren, naf_code, naf_label
 		FROM app_company
 		WHERE naf_code IS NOT NULL
 	`;
 	console.log(`${rows.length} companies with a NAF code to re-read`);
 
-	/** @type {BackfillCounters} */
-	const counters = {
+	const counters: BackfillCounters = {
 		updated: 0,
 		unchanged: 0,
 		skipped: 0,
@@ -307,11 +320,10 @@ export async function runBackfillCompanyNaf({
 	return counters;
 }
 
-/**
- * @param {BackfillCounters} counters
- * @param {boolean} dryRun
- */
-export function formatReport(counters, dryRun) {
+export function formatReport(
+	counters: BackfillCounters,
+	dryRun: boolean,
+): string {
 	const lines = [
 		`${dryRun ? "[dry-run] " : ""}Backfill done: ${counters.updated} updated, ${counters.unchanged} already aligned, ${counters.skipped} skipped, ${counters.failed} failed`,
 	];
@@ -324,10 +336,8 @@ export function formatReport(counters, dryRun) {
 /**
  * True when failures look systemic rather than incidental — the registry being
  * down, misconfigured or rejecting us, as opposed to a handful of timeouts.
- *
- * @param {BackfillCounters} counters
  */
-export function hasSystemicFailure(counters) {
+export function hasSystemicFailure(counters: BackfillCounters): boolean {
 	const attempted =
 		counters.updated + counters.unchanged + counters.skipped + counters.failed;
 	if (attempted === 0 || counters.failed === 0) return false;
@@ -346,8 +356,7 @@ const isMain = (() => {
 
 if (isMain) {
 	let exitCode = 0;
-	/** @type {Sql | undefined} */
-	let sql;
+	let sql: Sql | undefined;
 	try {
 		const schemaWaitSeconds = Number(
 			process.env.COMPANY_BACKFILL_WAIT_FOR_SCHEMA_SECONDS ?? "0",

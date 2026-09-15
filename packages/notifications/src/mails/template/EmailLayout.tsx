@@ -12,7 +12,7 @@ type EmailLayoutProps = {
 // Marianne is the typographic identity of the French Republic — required by the
 // DSFR. Mail clients can't load the DSFR CSS bundle so we declare the three
 // weights we use explicitly. Sources live under `${EGAPRO_PUBLIC_URL}/dsfr/fonts/`
-// (deployed by `scripts/copy-dsfr.mjs` on every app build, URL stable per env).
+// (deployed by `scripts/copy-dsfr.ts` on every app build, URL stable per env).
 const MARIANNE_FALLBACK: ("Arial" | "Helvetica" | "sans-serif")[] = [
 	"Arial",
 	"Helvetica",

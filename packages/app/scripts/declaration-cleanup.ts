@@ -1,14 +1,33 @@
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import type { Sql } from "postgres";
 import postgres from "postgres";
 
-/** @typedef {import("postgres").Sql} Sql */
+type PurgeSummary = {
+	s3Keys: string[];
+	purgedDeclarations: number;
+	purgedFiles: number;
+};
+
+type DeclarationCleanupResult = {
+	purgedDeclarations: number;
+	purgedFiles: number;
+	purgedS3Objects: number;
+	failedS3Objects: number;
+};
+
+type RunDeclarationCleanupArgs = {
+	sql: Sql;
+	retentionYears: number;
+	now?: Date;
+	deleteObject: (key: string) => Promise<unknown>;
+};
 
 const DECLARATION_CLEANUP_ACTION = "system.declaration_cleanup";
 const DECLARATION_CLEANUP_CATEGORY = "system";
 const DEFAULT_RETENTION_YEARS = 6;
 
-function getDatabaseUrl() {
+function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 
 	const {
@@ -33,12 +52,7 @@ function getDatabaseUrl() {
 	throw new Error("DATABASE_URL or POSTGRES_HOST+POSTGRES_DB must be set");
 }
 
-/**
- * @param {string | undefined} raw
- * @param {number} fallback
- * @returns {number}
- */
-function toPositiveInt(raw, fallback) {
+function toPositiveInt(raw: string | undefined, fallback: number): number {
 	if (raw === undefined || raw === null || raw === "") return fallback;
 	const n = Number(raw);
 	if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) {
@@ -49,29 +63,17 @@ function toPositiveInt(raw, fallback) {
 	return n;
 }
 
-/**
- * @param {Object} args
- * @param {Sql} args.sql
- * @param {number} args.retentionYears
- * @param {Date} [args.now]
- * @param {(key: string) => Promise<unknown>} args.deleteObject
- */
 export async function runDeclarationCleanup({
 	sql,
 	retentionYears,
 	now = new Date(),
 	deleteObject,
-}) {
+}: RunDeclarationCleanupArgs): Promise<DeclarationCleanupResult> {
 	const cutoffYear = now.getUTCFullYear() - retentionYears;
 
 	const { s3Keys, purgedDeclarations, purgedFiles } = await sql.begin(
-		async (txRaw) => {
-			// postgres-js TransactionSql strips call signatures via Omit — cast back to Sql
-			const tx = /** @type {import("postgres").Sql} */ (
-				/** @type {unknown} */ (txRaw)
-			);
-
-			const eligibleRows = await tx`
+		async (tx): Promise<PurgeSummary> => {
+			const eligibleRows = await tx<{ id: string }[]>`
 				SELECT id FROM app_declaration WHERE year < ${cutoffYear}
 			`;
 			const ids = eligibleRows.map((r) => r.id);
@@ -80,7 +82,7 @@ export async function runDeclarationCleanup({
 				return { s3Keys: [], purgedDeclarations: 0, purgedFiles: 0 };
 			}
 
-			const fileRows = await tx`
+			const fileRows = await tx<{ file_path: string }[]>`
 				SELECT file_path FROM app_file WHERE declaration_id = ANY(${ids})
 			`;
 			const collectedKeys = fileRows.map((r) => r.file_path);
@@ -160,11 +162,7 @@ export async function runDeclarationCleanup({
 	return { purgedDeclarations, purgedFiles, purgedS3Objects, failedS3Objects };
 }
 
-/**
- * @param {Sql} sql
- * @param {unknown} error
- */
-async function logFailure(sql, error) {
+async function logFailure(sql: Sql, error: unknown): Promise<void> {
 	const message = error instanceof Error ? error.message : "Unknown error";
 	try {
 		await sql`
@@ -186,7 +184,7 @@ async function logFailure(sql, error) {
 	}
 }
 
-const isMain = (() => {
+const isMain = ((): boolean => {
 	const entry = process.argv[1];
 	if (!entry) return false;
 	// realpathSync resolves symlinks from pnpm content-addressable store or Docker bind-mounts

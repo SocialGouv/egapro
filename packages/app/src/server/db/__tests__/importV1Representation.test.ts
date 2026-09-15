@@ -5,7 +5,7 @@ import {
 	mapCompanyFromV1,
 	mapDeclarationFromV1,
 	parseCliArgs,
-} from "#scripts/import-v1-representation.mjs";
+} from "#scripts/import-v1-representation";
 import {
 	v1Company,
 	v1Data,

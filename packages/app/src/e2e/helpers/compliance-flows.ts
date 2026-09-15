@@ -368,5 +368,6 @@ export async function completeSecondDeclaration(
 			.getByText(/Je certifie que les données saisies sont exactes/)
 			.click();
 		await page.getByRole("button", { name: "Valider" }).click();
+		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible();
 	});
 }

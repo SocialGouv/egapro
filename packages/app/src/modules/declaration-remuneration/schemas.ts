@@ -3,10 +3,10 @@ import { z } from "zod";
 import {
 	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
+	COMPLIANCE_PATHS,
 	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 } from "~/modules/domain";
-import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
 export const CATEGORY_NAME_MAX_LENGTH = 255;
 export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;

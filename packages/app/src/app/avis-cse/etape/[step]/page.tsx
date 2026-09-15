@@ -7,8 +7,8 @@ import {
 	Step1Opinions,
 	Step2Upload,
 } from "~/modules/cseOpinion";
-import { getCseOpinionPreviousHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { computeGapHighFlags } from "~/modules/domain";
+import { getCseOpinionPreviousHref } from "~/modules/navigation";
 import { toCseOpinionStep } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";

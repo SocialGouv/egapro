@@ -1,7 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
-import { MY_SPACE } from "~/modules/routes";
+import {
+	CSE_OPINION,
+	LAST_REMUNERATION_STEP,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { TEST_USER_PHONE } from "./constants";
 import {
 	pinCampaignYear,
@@ -48,6 +53,10 @@ test.describe("Declaration process panel", () => {
 
 	test.describe("DB state → variant: closed (compliance completed + CSE deposited)", () => {
 		test.beforeAll(async () => {
+			// Both assertions below hinge on an opinion being due, which the funnel
+			// reads from the company rather than from the frozen snapshot.
+			await setCompanyHasCse(true);
+			await resetGipWorkforce();
 			await setDeclarationComplianceState({
 				status: "demarche_completed",
 				firstDeclarationPathChoice: "joint_evaluation",
@@ -85,6 +94,21 @@ test.describe("Declaration process panel", () => {
 			await expect(
 				panel.getByTitle("Voir le récapitulatif de la déclaration"),
 			).toBeVisible();
+		});
+
+		// #4113 — the panel and the funnel read one shared state table, and this
+		// terminal state is the one it refuses to decide for them: each surface
+		// supplies its own destination, so the two must still answer differently.
+		// The panel reports the démarche over (above), while the recap keeps
+		// offering /avis-cse, where up to four opinions stay re-submittable.
+		test("the recap « Suivant » still reaches /avis-cse on the same closed démarche", async ({
+			page,
+		}) => {
+			await page.goto(remunerationStepHref(LAST_REMUNERATION_STEP));
+			const next = page.getByRole("link", { name: "Suivant" });
+			await expect(next).toBeVisible();
+			await next.click();
+			await page.waitForURL(`**${CSE_OPINION}/**`, { timeout: 10_000 });
 		});
 	});
 

@@ -18,7 +18,7 @@ type Props = {
 const VERDICT_LABELS = {
 	compliant: "Conforme",
 	non_compliant: "Non conforme",
-	not_applicable: "Non applicable",
+	not_applicable: "Non calculable",
 } as const;
 
 function formatOptionalDate(value: string | null): string {

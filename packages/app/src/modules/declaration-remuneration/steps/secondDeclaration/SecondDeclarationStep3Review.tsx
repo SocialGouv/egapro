@@ -3,12 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import {
-	getCurrentStageHref,
-	getPostComplianceDestination,
-} from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
@@ -18,6 +13,10 @@ import {
 	hasHighGap,
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
+import {
+	getCurrentStageHref,
+	getPostComplianceDestination,
+} from "~/modules/navigation";
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -58,16 +57,6 @@ export function SecondDeclarationStep3Review({
 		]),
 	);
 
-	const mutation = api.declaration.submitSecondDeclaration.useMutation({
-		onSuccess: () => {
-			if (gapsExist) {
-				router.push(COMPLIANCE_PATH);
-			} else {
-				router.push(getPostComplianceDestination(cseOpinionRequired));
-			}
-		},
-	});
-
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
 			getDsfrModal(modalRef.current)?.disclose();
@@ -79,6 +68,21 @@ export function SecondDeclarationStep3Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		onSuccess: () => {
+			closeModal();
+			if (gapsExist) {
+				router.push(COMPLIANCE_PATH);
+			} else {
+				router.push(getPostComplianceDestination(cseOpinionRequired));
+			}
+		},
+	});
+	const handleCloseModal = () => {
+		if (mutation.isPending) return;
+		mutation.reset();
+		closeModal();
+	};
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -171,8 +175,6 @@ export function SecondDeclarationStep3Review({
 				siren={siren}
 			/>
 
-			<FormErrors mutationError={mutation.error?.message} />
-
 			<FormActions
 				className="fr-mt-0"
 				nextHref={nextHref}
@@ -182,10 +184,11 @@ export function SecondDeclarationStep3Review({
 
 			{isWritable ? (
 				<SubmitDeclarationModal
+					error={mutation.error?.message}
 					isPending={mutation.isPending}
 					isSecondDeclaration
 					modalRef={modalRef}
-					onClose={closeModal}
+					onClose={handleCloseModal}
 					onSubmit={() => mutation.mutate()}
 					year={declarationYear}
 				/>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { SUBMIT_LABEL } from "~/modules/shared";
+import { FormErrors } from "./FormErrors";
 
 const MODAL_ID = "submit-declaration-modal";
 
@@ -11,6 +12,7 @@ type Props = {
 	onClose: () => void;
 	onSubmit: () => void;
 	isPending: boolean;
+	error?: string | null;
 	year: number;
 	isSecondDeclaration?: boolean;
 };
@@ -21,6 +23,7 @@ export function SubmitDeclarationModal({
 	onClose,
 	onSubmit,
 	isPending,
+	error,
 	year,
 	isSecondDeclaration,
 }: Props) {
@@ -45,6 +48,7 @@ export function SubmitDeclarationModal({
 								<button
 									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
+									disabled={isPending}
 									onClick={onClose}
 									title="Fermer"
 									type="button"
@@ -60,6 +64,7 @@ export function SubmitDeclarationModal({
 									{SUBMIT_LABEL}
 								</h2>
 								<p>{description}</p>
+								<FormErrors mutationError={error} />
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
 										checked={certified}
@@ -93,6 +98,7 @@ export function SubmitDeclarationModal({
 									<li>
 										<button
 											className="fr-btn fr-btn--secondary"
+											disabled={isPending}
 											onClick={onClose}
 											type="button"
 										>

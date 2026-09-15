@@ -12,11 +12,11 @@ import {
 	isCseOpinionRequired,
 	isCseRequired,
 } from "~/modules/domain";
+import { getCurrentStageHref } from "~/modules/navigation";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
-import { getCurrentStageHref } from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import {
 	DECLARATION_FUNNEL,
@@ -82,18 +82,6 @@ export function Step6Review({
 		workforce: getObligationWorkforce(companyWorkforce),
 		hasCse,
 	});
-	const submitMutation = api.declaration.submit.useMutation({
-		onSuccess: () => {
-			trackFunnelComplete(
-				DECLARATION_FUNNEL,
-				declarationFunnelDimensions(
-					declarationYear,
-					getOptionalCompanySizeRange(companyWorkforce),
-				),
-			);
-			router.push(COMPLIANCE_PATH);
-		},
-	});
 
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
@@ -106,6 +94,29 @@ export function Step6Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const submitMutation = api.declaration.submit.useMutation({
+		onSuccess: () => {
+			// A blocked sessionStorage must not prevent navigation after submission.
+			try {
+				trackFunnelComplete(
+					DECLARATION_FUNNEL,
+					declarationFunnelDimensions(
+						declarationYear,
+						getOptionalCompanySizeRange(companyWorkforce),
+					),
+				);
+			} catch {
+				// Tracking is best effort; the declaration is already submitted.
+			}
+			closeModal();
+			router.push(COMPLIANCE_PATH);
+		},
+	});
+	const handleCloseModal = () => {
+		if (submitMutation.isPending) return;
+		submitMutation.reset();
+		closeModal();
+	};
 
 	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
 
@@ -192,9 +203,10 @@ export function Step6Review({
 
 				{!isSubmitted && (
 					<SubmitDeclarationModal
+						error={submitMutation.error?.message}
 						isPending={submitMutation.isPending}
 						modalRef={modalRef}
-						onClose={closeModal}
+						onClose={handleCloseModal}
 						onSubmit={() => submitMutation.mutate()}
 						year={declarationYear}
 					/>

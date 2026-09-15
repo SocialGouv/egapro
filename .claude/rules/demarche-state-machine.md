@@ -20,12 +20,12 @@ La progression de la démarche (passage d'un écran/étape à l'autre, condition
 
 ## Les deux miroirs — gelés
 
-Le graphe d'états n'est ré-encodé qu'à **deux** endroits, chacun une **projection** de l'autorité (état → écran / variante d'affichage), pas une redéfinition des règles :
+Le graphe d'états n'est ré-encodé qu'à **deux** endroits, chacun une **projection** de l'autorité, pas une redéfinition des règles. Depuis #4113 ils portent deux préoccupations distinctes, et non plus deux fois la même :
 
-1. `packages/app/src/modules/declaration-remuneration/shared/complianceNavigation.ts` — `getCurrentStageHref` (état → URL de l'étape courante).
-2. `packages/app/src/modules/my-space/declarationProcessState.ts` — `computePanelVariant` / `computeCtaHref` (état → variante du panneau + CTA).
+1. `packages/app/src/modules/navigation/` — `getDemarcheStageHref` (état → écran), **la** table de destination, lue par le tunnel de déclaration, `app/avis-cse` et le CTA de Mon espace. Elle est totale sur les 8 états et rend au consommateur les deux seuls choix qui relèvent de la surface : le cas `null` (« pas de démarche », qui n'est pas un état du moteur) et la destination de l'état terminal (`demarche_completed` reste re-soumissible côté avis CSE). Elle porte aussi la provenance des transitions entrant dans `awaiting_cse_opinion`, clefée par leur `id` moteur.
+2. `packages/app/src/modules/my-space/declarationProcessState.ts` — `computePanelVariant` (état → variante d'affichage du panneau). Il partage la clé `DeclarationFsmStatus` sans partager la table : une variante n'est pas une destination.
 
-**Interdiction d'en créer un troisième.** Tout nouveau consommateur qui a besoin de raisonner sur l'état :
+**Interdiction d'en créer un troisième.** Un nouveau besoin de destination se branche sur `~/modules/navigation`, il ne se réécrit pas sur place. Tout nouveau consommateur qui a besoin de raisonner sur l'état :
 
 - se type sur `DeclarationFsmStatus` (jamais `string`),
 - couvre l'état via un `switch` **exhaustif sans `default:`** (le type de retour force l'exhaustivité — ajouter un état casse la compilation tant qu'il n'est pas géré),
@@ -40,7 +40,7 @@ Tout test qui touche à la progression s'écrit **contre les états/transitions 
 Modèles de référence :
 
 - `packages/app/src/server/rules/__tests__/matrix.v2027.1.test.ts` — matrice des transitions du moteur.
-- `packages/app/src/server/rules/__tests__/fsmMirrors.conformance.test.ts` — cohérence sémantique moteur ↔ les deux miroirs (itère sur les états du JSON).
+- `packages/app/src/server/rules/__tests__/fsmMirrors.conformance.test.ts` — cohérence sémantique moteur ↔ miroirs : itère sur `rules.states` pour les destinations et sur `rules.transitions` pour la provenance (ajouter une transition vers `awaiting_cse_opinion` sans brancher la table casse le test).
 - `packages/app/src/modules/domain/__tests__/demarcheDecisionTable.test.ts` — table de décision combinatoire des prédicats métier (effectif × écart × année), via les constantes nommées du domain.
 
 Un écart de comportement connu mais pas encore corrigé se documente en `it.fails` avec le numéro d'issue (le fix casse le `it.fails` et force la bascule en assertion normale) — jamais en assertion qui consacre le bug.

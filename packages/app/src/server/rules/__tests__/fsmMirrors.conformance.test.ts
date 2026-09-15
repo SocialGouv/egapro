@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getCurrentStageHref } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import type { PanelVariant } from "~/modules/my-space";
 // Cross-module conformance test: computePanelVariant/computeCtaHref/DeclarationItem are internal to my-space (not exposed by the barrel); exporting them would be a production change out of scope for this test-only ticket.
@@ -8,6 +7,11 @@ import {
 	computePanelVariant,
 } from "~/modules/my-space/declarationProcessState";
 import type { DeclarationItem } from "~/modules/my-space/types";
+import {
+	CSE_OPINION_PREVIOUS_HREF,
+	getCurrentStageHref,
+	resolveCseOpinionOrigin,
+} from "~/modules/navigation";
 import {
 	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -22,11 +26,11 @@ const rules = loadRules("2027.1");
 
 const SIREN = "123456789";
 
-// Screens the two mirrors resolve to, indexed by the engine stage a state carries
-// in v2027.1.json. Anchoring the expectation on the engine's own stage metadata is
-// what makes this a conformance test: the nav mirror (getCurrentStageHref) and the
-// panel mirror (computePanelVariant/computeCtaHref) must both send the user to the
-// screen the engine assigns to that stage.
+// Screens the mirrors resolve to, indexed by the engine stage a state carries in
+// v2027.1.json. Anchoring the expectation on the engine's own stage metadata is
+// what makes this a conformance test: the shared table read through the funnel
+// (getCurrentStageHref) and through the panel (computeCtaHref), plus the panel
+// variant, must all land on the screen the engine assigns to that stage.
 const ENTRY = DECLARATION_REMUNERATION;
 const COMPLIANCE = COMPLIANCE_PATH;
 const CORRECTIVE_STEP1 = complianceStepHref(1);
@@ -82,6 +86,78 @@ describe("engine conformance to the shared FSM vocabulary", () => {
 	});
 });
 
+// Provenance: every engine transition landing on `awaiting_cse_opinion` must have
+// a branch in the navigation table, so adding one without wiring "Précédent"
+// breaks here rather than sending the user to the wrong page.
+const CSE_OPINION_ORIGIN_CONTEXTS = [
+	{
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: false,
+	},
+	{
+		firstDeclarationPathChoice: "justify",
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: false,
+	},
+	{
+		firstDeclarationPathChoice: "joint_evaluation",
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: false,
+	},
+	{
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: true,
+	},
+	{
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: "justify",
+		hasSubmittedSecondDeclaration: true,
+	},
+	{
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: "joint_evaluation",
+		hasSubmittedSecondDeclaration: true,
+	},
+] as const;
+
+describe("provenance conformance — engine transitions into awaiting_cse_opinion", () => {
+	const incoming = rules.transitions.filter(
+		(transition) => transition.to === "awaiting_cse_opinion",
+	);
+
+	it("the engine has incoming transitions to check", () => {
+		expect(incoming.length).toBeGreaterThan(0);
+	});
+
+	it("the provenance table names exactly the engine transitions that land there", () => {
+		expect(Object.keys(CSE_OPINION_PREVIOUS_HREF).sort()).toEqual(
+			incoming.map((transition) => transition.id).sort(),
+		);
+	});
+
+	it.each(
+		incoming,
+	)("transition $id has a previous-page branch", (transition) => {
+		const href =
+			CSE_OPINION_PREVIOUS_HREF[
+				transition.id as keyof typeof CSE_OPINION_PREVIOUS_HREF
+			];
+		expect(href, `no provenance branch for ${transition.id}`).toBeDefined();
+		expect(href).not.toBe(CSE);
+	});
+
+	it("every engine transition is reachable from a stored démarche", () => {
+		const reached = CSE_OPINION_ORIGIN_CONTEXTS.map((context) =>
+			resolveCseOpinionOrigin(context),
+		);
+		expect([...new Set(reached)].sort()).toEqual(
+			incoming.map((transition) => transition.id).sort(),
+		);
+	});
+});
+
 describe("mirror conformance — engine states (non-terminal)", () => {
 	it.each(
 		rules.states.filter((s) => s.id !== "demarche_completed"),
@@ -128,7 +204,7 @@ describe("mirror conformance — engine transition destinations", () => {
 	});
 });
 
-describe("exhaustiveness — every FSM status is covered by both mirrors", () => {
+describe("exhaustiveness — every FSM status is covered by the table and the panel", () => {
 	it.each(
 		DECLARATION_FSM_STATUSES,
 	)("status %s: nav and panel return a defined destination", (status) => {
@@ -143,6 +219,9 @@ describe("exhaustiveness — every FSM status is covered by both mirrors", () =>
 	});
 });
 
+// The one state the shared table refuses to decide: it hands the terminal
+// destination back to each surface, and the two answers below are the product
+// behaviour that survived the merge of the two mirrors (#4113).
 describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasSubmittedCseOpinion)", () => {
 	it('opinion due, not yet deposited: panel "cse" and nav → /avis-cse (coherent)', () => {
 		const decl = makeDeclaration({

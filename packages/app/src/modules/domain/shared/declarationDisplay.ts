@@ -1,4 +1,4 @@
-type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+import type { CompliancePathValue as CompliancePath } from "../types";
 
 type DeclarationLike = {
 	firstDeclarationPathChoice: CompliancePath | null;

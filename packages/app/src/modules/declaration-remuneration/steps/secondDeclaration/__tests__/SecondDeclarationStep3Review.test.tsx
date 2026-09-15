@@ -7,10 +7,21 @@ import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
+const mockReset = vi.fn();
+const mockConceal = vi.fn();
+const mockMutationState = {
+	error: null as { message: string } | null,
+	isPending: false,
+};
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
 	usePathname: () => "/declaration-remuneration/parcours-conformite/etape/3",
+}));
+
+vi.mock("~/modules/shared", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/shared")>()),
+	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -22,8 +33,9 @@ vi.mock("~/trpc/react", () => ({
 						mockMutate();
 						opts.onSuccess?.();
 					},
-					isPending: false,
-					error: null,
+					reset: mockReset,
+					isPending: mockMutationState.isPending,
+					error: mockMutationState.error,
 				}),
 			},
 		},
@@ -132,6 +144,10 @@ describe("SecondDeclarationStep3Review", () => {
 	beforeEach(() => {
 		mockMutate.mockClear();
 		mockPush.mockClear();
+		mockReset.mockClear();
+		mockConceal.mockClear();
+		mockMutationState.error = null;
+		mockMutationState.isPending = false;
 	});
 
 	it("renders the title and step indicator", () => {
@@ -277,6 +293,22 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite",
 		);
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("shows a submission error inside the confirmation modal", () => {
+		mockMutationState.error = { message: "Impossible de transmettre." };
+		renderStep3();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		expect(
+			within(modal).getByRole("alert", { hidden: true }),
+		).toHaveTextContent("Impossible de transmettre.");
+		expect(mockPush).not.toHaveBeenCalled();
 	});
 
 	it("navigates to compliance path when gaps persist after submit, on a negative gap (#4034)", async () => {
@@ -474,6 +506,7 @@ describe("SecondDeclarationStep3Review", () => {
 		});
 		await user.click(cancelButton);
 
+		expect(mockReset).toHaveBeenCalledTimes(1);
 		expect(mockMutate).not.toHaveBeenCalled();
 		expect(mockPush).not.toHaveBeenCalled();
 	});
