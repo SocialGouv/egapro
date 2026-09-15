@@ -397,7 +397,6 @@ describe("openApiSpec", () => {
 		});
 	});
 
-	// #4530: schema ↔ payload parity for the G category, and the *_ecart type fix.
 	describe("Indicateurs.G category schema (#4530)", () => {
 		const declarationSchema =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
