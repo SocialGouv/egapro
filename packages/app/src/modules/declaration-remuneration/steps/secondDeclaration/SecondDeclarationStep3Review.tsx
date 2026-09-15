@@ -92,8 +92,8 @@ export function SecondDeclarationStep3Review({
 		closeModal();
 	};
 	const submissionError = getSubmissionErrorMessage(mutation.error);
-	// Kept mounted once the refresh reveals the submission, so it is concealed before navigating away.
-	const showSubmitModal = isWritable || mutation.isError;
+	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
+	const showSubmitModal = isWritable || mutation.isError || mutation.isPending;
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();

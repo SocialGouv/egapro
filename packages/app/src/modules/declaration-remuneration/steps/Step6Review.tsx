@@ -126,8 +126,9 @@ export function Step6Review({
 		closeModal();
 	};
 	const submissionError = getSubmissionErrorMessage(submitMutation.error);
-	// Kept mounted once the refresh reveals the submission, so it is concealed before navigating away.
-	const showSubmitModal = !isSubmitted || submitMutation.isError;
+	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
+	const showSubmitModal =
+		!isSubmitted || submitMutation.isError || submitMutation.isPending;
 
 	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
 
