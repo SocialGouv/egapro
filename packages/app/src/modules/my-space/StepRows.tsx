@@ -6,34 +6,33 @@ import styles from "./DeclarationProcessPanel.module.scss";
 
 export type StepStatus = "pending" | "current" | "complete";
 
+type Modification = { href: AppHref; until: Date };
+
 export function TransmittedRow({
 	label,
-	modifiableUntil,
-	modifyHref,
+	modification,
 	viewHref,
 	viewLabel = "Voir le récapitulatif de la déclaration",
 }: {
 	label: string;
-	modifiableUntil?: Date;
-	modifyHref?: AppHref;
+	modification?: Modification;
 	viewHref?: AppHref;
 	viewLabel?: string;
 }) {
-	const deadlinePassed =
-		modifiableUntil !== undefined && isDeadlinePassed(modifiableUntil);
-	const canModify = modifyHref !== undefined && !deadlinePassed;
+	const modificationOpen =
+		modification !== undefined && !isDeadlinePassed(modification.until);
 
 	return (
 		<div className={styles.transmittedRow}>
 			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
-				{modifyHref && modifiableUntil && (
+				{modification && (
 					<p className="fr-text-mention--grey fr-mb-0">
-						{deadlinePassed
-							? "Modification close depuis le "
-							: "Modifiable jusqu'au "}
-						<OrdinalLongDate date={modifiableUntil} />
+						{modificationOpen
+							? "Modifiable jusqu'au "
+							: "Modification close depuis le "}
+						<OrdinalLongDate date={modification.until} />
 					</p>
 				)}
 			</div>
@@ -47,8 +46,8 @@ export function TransmittedRow({
 						<span className="fr-sr-only">{viewLabel}</span>
 					</Link>
 				)}
-				{canModify && (
-					<a className="fr-btn fr-btn--secondary" href={modifyHref}>
+				{modificationOpen && (
+					<a className="fr-btn fr-btn--secondary" href={modification.href}>
 						Modifier
 					</a>
 				)}

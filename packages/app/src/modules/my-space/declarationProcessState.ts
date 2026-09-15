@@ -99,11 +99,14 @@ function getRepresentationProgress(
 	return "not_started";
 }
 
-// `status === "done"` also covers a not-subject declaration, which transmitted nothing.
+// The "submitted" progress also covers a not-subject declaration, which transmitted nothing.
 export function isRepresentationDeclarationTransmitted(
 	declaration: DeclarationItem | undefined,
 ): boolean {
-	return declaration?.status === "done" && !declaration.notSubject;
+	return (
+		getRepresentationProgress(declaration) === "submitted" &&
+		!declaration?.notSubject
+	);
 }
 
 export function computeRepresentationPanelVariant(

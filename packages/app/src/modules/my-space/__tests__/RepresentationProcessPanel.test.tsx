@@ -177,8 +177,6 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
 		});
 
-		// No démarche started yet: the deadline stays, no bullets, no
-		// transmission line.
 		it("renders the deadline without bullets or a transmission line", () => {
 			const { panel } = renderPanel();
 			expect(panel.getByText(/^Échéance :/)).toBeInTheDocument();
@@ -236,7 +234,6 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
 		});
 
-		// A draft never shows the transmission line.
 		it('does not render "Votre déclaration a été transmise"', () => {
 			const { panel } = renderPanel({ declaration: DRAFT });
 			expect(
@@ -264,7 +261,6 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
 		});
 
-		// The transmission line replaces the three bullets and the deadline.
 		it('replaces the three bullets and the deadline with "Votre déclaration a été transmise"', () => {
 			const { panel } = renderPanel({ declaration: SUBMITTED });
 			expect(
@@ -280,7 +276,6 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
 		});
 
-		// A view button to the recap, no modify affordance of any kind.
 		it("renders a view button to the recap, without a Modifier button or a modifiable-until mention", () => {
 			const { panel } = renderPanel({ declaration: SUBMITTED });
 			const viewButton = panel.getByTitle(
@@ -357,8 +352,6 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("campaign closed — transmission line", () => {
-		// A transmitted declaration stays transmitted after the campaign
-		// closes: both "Démarche close" and the transmission line show.
 		it('shows "Votre déclaration a été transmise" alongside "Démarche close" for a transmitted démarche', () => {
 			const { panel } = renderPanel({
 				campaign: CLOSED_CAMPAIGN,
@@ -370,10 +363,8 @@ describe("RepresentationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		// Closed campaign, nothing ever transmitted: no transmission line, even
-		// though the step is rendered "complete" for a closed campaign. Same for
-		// a non-subject company despite status "done" — the notSubject flag
-		// settles it.
+		// The closed variant renders step 2 "complete" whether or not anything was
+		// transmitted, so the line must follow the declaration, not the step status.
 		const noTransmission: Array<[string, DeclarationItem | undefined]> = [
 			["no démarche", undefined],
 			["an untouched démarche", makeDeclaration()],

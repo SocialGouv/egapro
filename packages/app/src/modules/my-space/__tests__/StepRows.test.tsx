@@ -1,10 +1,17 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import {
+	DECLARATION_REMUNERATION_RECAP,
+	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+	FIRST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
 import { DeadlineRow, TransmittedRow } from "../StepRows";
 
 const FUTURE_DEADLINE = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 const PAST_DEADLINE = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30);
+const MODIFY_HREF = remunerationStepHref(FIRST_REMUNERATION_STEP);
 
 describe("TransmittedRow", () => {
 	it("renders the label and the check icon", () => {
@@ -15,54 +22,39 @@ describe("TransmittedRow", () => {
 		expect(container.querySelector(".fr-icon-check-line")).toBeInTheDocument();
 	});
 
-	it("with a modifiable deadline in the future: shows the modify affordance and its date", () => {
+	it("with a modification window still open: shows the modify affordance and its date", () => {
 		const { getByText, queryByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				modifiableUntil={FUTURE_DEADLINE}
-				modifyHref="/modify"
+				modification={{ href: MODIFY_HREF, until: FUTURE_DEADLINE }}
 			/>,
 		);
 		expect(getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
 		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
-		const modifyButton = getByText("Modifier");
-		expect(modifyButton).toHaveAttribute("href", "/modify");
+		expect(getByText("Modifier")).toHaveAttribute("href", MODIFY_HREF);
 	});
 
-	it("with a modifiable deadline already passed: shows the closed wording and hides the modify button", () => {
+	it("with a modification window already closed: shows the closed wording and hides the modify button", () => {
 		const { getByText, queryByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				modifiableUntil={PAST_DEADLINE}
-				modifyHref="/modify"
+				modification={{ href: MODIFY_HREF, until: PAST_DEADLINE }}
 			/>,
 		);
 		expect(getByText(/Modification close depuis le/)).toBeInTheDocument();
 		expect(queryByText("Modifier")).not.toBeInTheDocument();
 	});
 
-	it("without modifiableUntil and without modifyHref: renders neither the deadline wording nor a modify button (Repeq — immutable once transmitted)", () => {
+	it("without a modification: renders neither the deadline wording nor a modify button (Repeq — immutable once transmitted)", () => {
 		const { queryByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				viewHref="/recap"
+				viewHref={DECLARATION_REMUNERATION_RECAP}
 			/>,
 		);
 		expect(queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
 		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
 		expect(queryByText("Modifier")).not.toBeInTheDocument();
-	});
-
-	it("without modifiableUntil but with a modifyHref: still hides the deadline wording (nothing to date), yet keeps the modify button since no deadline means it never closes", () => {
-		const { getByText, queryByText } = render(
-			<TransmittedRow
-				label="Votre déclaration a été transmise"
-				modifyHref="/modify"
-			/>,
-		);
-		expect(queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
-		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
-		expect(getByText("Modifier")).toHaveAttribute("href", "/modify");
 	});
 
 	it("without a viewHref: renders no view button", () => {
@@ -78,18 +70,18 @@ describe("TransmittedRow", () => {
 		const { getByTitle } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				viewHref="/recap"
+				viewHref={DECLARATION_REMUNERATION_RECAP}
 			/>,
 		);
 		const viewButton = getByTitle("Voir le récapitulatif de la déclaration");
-		expect(viewButton).toHaveAttribute("href", "/recap");
+		expect(viewButton).toHaveAttribute("href", DECLARATION_REMUNERATION_RECAP);
 	});
 
 	it("with a custom viewLabel: overrides the default view button label", () => {
 		const { getByTitle } = render(
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
-				viewHref="/recap"
+				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 				viewLabel="Voir le récapitulatif de la seconde déclaration"
 			/>,
 		);

@@ -10,6 +10,10 @@ import {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
+import {
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import {
 	computeRepresentationCtaHref,
@@ -102,7 +106,6 @@ export function RepresentationProcessPanel({
 									deadline={campaign.declarationDeadline}
 									status={step2}
 									transmitted={transmitted}
-									viewHref={ctaHref}
 								/>
 							)}
 						</div>
@@ -247,12 +250,10 @@ function Step2Row({
 	deadline,
 	status,
 	transmitted,
-	viewHref,
 }: {
 	deadline: Date;
 	status: StepStatus;
 	transmitted: boolean;
-	viewHref: string;
 }) {
 	return (
 		<div className={`${styles.stepRow} ${stepRowClass(status)}`}>
@@ -266,7 +267,7 @@ function Step2Row({
 				{transmitted ? (
 					<TransmittedRow
 						label="Votre déclaration a été transmise"
-						viewHref={viewHref}
+						viewHref={representationStepHref(LAST_REPRESENTATION_STEP)}
 					/>
 				) : (
 					<>
