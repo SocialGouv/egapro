@@ -977,5 +977,11 @@ export const receiptOutbox = createTable(
 		index("receipt_outbox_unsettled_idx")
 			.on(t.status, t.updatedAt)
 			.where(sql`"status" IN ('pending', 'sending')`),
+		// The purge cron's query: terminal rows past retention, oldest first.
+		// `updated_at` is the settlement timestamp for both outcomes — `sent_at`
+		// stays null on a `failed` row, so it cannot anchor this predicate.
+		index("receipt_outbox_settled_idx")
+			.on(t.status, t.updatedAt)
+			.where(sql`"status" IN ('sent', 'failed')`),
 	],
 );

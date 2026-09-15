@@ -15,7 +15,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 // The .mjs script is a standalone CLI entry — we import its exported core
 // routine and drive it with our own `sql` client so we never spawn `node`
 // from within Vitest.
-import { runAuditCleanup } from "#scripts/audit-cleanup.mjs";
+import {
+	runAuditCleanup,
+	runReceiptOutboxCleanup,
+} from "#scripts/audit-cleanup.mjs";
 import { env } from "~/env.js";
 
 describe("audit-cleanup.mjs (integration)", () => {
@@ -258,5 +261,151 @@ describe("audit-cleanup.mjs (integration)", () => {
 				longRetentionDays: 1,
 			}),
 		).resolves.toBeDefined();
+	});
+});
+
+describe("runReceiptOutboxCleanup (integration)", () => {
+	let sql!: ReturnType<typeof postgres>;
+
+	beforeAll(() => {
+		sql = postgres(env.DATABASE_URL, { max: 1 });
+	});
+
+	afterAll(async () => {
+		if (!sql) return;
+		await sql`DELETE FROM app_receipt_outbox`;
+		await sql`DELETE FROM audit.action_log`;
+		await sql.end();
+	});
+
+	beforeEach(async () => {
+		await sql`DELETE FROM app_receipt_outbox`;
+		await sql`DELETE FROM audit.action_log`;
+	});
+
+	async function insertOutboxRow(row: {
+		status: "pending" | "sending" | "sent" | "failed";
+		updatedAt: Date;
+	}) {
+		await sql`
+			INSERT INTO app_receipt_outbox
+				(id, kind, siren, year, recipient_email, status, created_at, updated_at)
+			VALUES (
+				${crypto.randomUUID()},
+				'declaration',
+				'123456789',
+				2026,
+				'declarant@example.fr',
+				${row.status},
+				${row.updatedAt},
+				${row.updatedAt}
+			)
+		`;
+	}
+
+	async function countOutboxRows(): Promise<number> {
+		const result = await sql<[{ count: string }]>`
+			SELECT COUNT(*)::text AS count FROM app_receipt_outbox
+		`;
+		return Number(result[0]?.count ?? 0);
+	}
+
+	it("purges a sent row past retention", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		// 400 d old → above the 365 d threshold → purged.
+		await insertOutboxRow({
+			status: "sent",
+			updatedAt: new Date("2024-11-27T00:00:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 1 });
+		expect(await countOutboxRows()).toBe(0);
+	});
+
+	it("purges a failed row past retention the same way as a sent one", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertOutboxRow({
+			status: "failed",
+			updatedAt: new Date("2024-11-27T00:00:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 1 });
+	});
+
+	it("keeps a settled row within retention", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		// 300 d old → below the 365 d threshold → kept.
+		await insertOutboxRow({
+			status: "sent",
+			updatedAt: new Date("2025-03-07T00:00:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 0 });
+		expect(await countOutboxRows()).toBe(1);
+	});
+
+	// The row is live work for the retry pass, however old it looks — purging
+	// it would silently drop a receipt still owed.
+	it("never purges a pending or sending row, no matter its age", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertOutboxRow({
+			status: "pending",
+			updatedAt: new Date("2020-01-01T00:00:00Z"),
+		});
+		await insertOutboxRow({
+			status: "sending",
+			updatedAt: new Date("2020-01-01T00:00:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 0 });
+		expect(await countOutboxRows()).toBe(2);
+	});
+
+	it("writes a success self-audit row with the deletion count", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertOutboxRow({
+			status: "sent",
+			updatedAt: new Date("2024-11-27T00:00:00Z"),
+		});
+
+		await runReceiptOutboxCleanup({ sql, retentionDays: 365, now });
+
+		const selfAudit = await sql<
+			[{ status: string; metadata: Record<string, unknown> }]
+		>`
+			SELECT status, metadata FROM audit.action_log
+			WHERE action = 'system.receipt_outbox_cleanup'
+			ORDER BY created_at DESC
+			LIMIT 1
+		`;
+		expect(selfAudit[0]?.status).toBe("success");
+		expect(selfAudit[0]?.metadata).toMatchObject({
+			deleted: 1,
+			retentionDays: 365,
+		});
 	});
 });

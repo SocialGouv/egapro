@@ -1,0 +1,1 @@
+CREATE INDEX "receipt_outbox_settled_idx" ON "app_receipt_outbox" USING btree ("status","updated_at") WHERE "status" IN ('sent', 'failed');
