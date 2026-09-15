@@ -90,9 +90,10 @@ describe("RepresentationPdfDocument", () => {
 		expect(
 			screen.getByText("Démarche des indicateurs de représentation 2026"),
 		).toBeInTheDocument();
+		expect(screen.getByText("Au titre des données 2025")).toBeInTheDocument();
 		expect(
-			screen.getByText("Au titre de la période de référence 2025"),
-		).toBeInTheDocument();
+			screen.queryByText("Au titre de la période de référence 2025"),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Société Représentation — SIREN 123456789"),
 		).toBeInTheDocument();
@@ -142,7 +143,7 @@ describe("RepresentationPdfDocument", () => {
 
 		expect(screen.getByText("Aucun cadre dirigeant")).toBeInTheDocument();
 		expect(screen.queryByText("Femmes")).not.toBeInTheDocument();
-		expect(screen.getByText("Verdict : Non applicable")).toBeInTheDocument();
+		expect(screen.getByText("Verdict : Non calculable")).toBeInTheDocument();
 	});
 
 	it("renders the publication page address when the company has a website", () => {

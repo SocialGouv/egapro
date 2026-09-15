@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
 	applyDeclarationClosure,
@@ -137,69 +137,6 @@ export const companyRouter = createTRPCRouter({
 		.query(({ ctx, input }) =>
 			findUserCompany(ctx.db, ctx.session, input.siren),
 		),
-
-	list: protectedProcedure.query(async ({ ctx }) => {
-		const year = getCurrentYear();
-
-		const impersonation = ctx.session.user.isAdmin
-			? ctx.session.user.impersonation
-			: null;
-
-		// When impersonating, the admin's "my space" shows only the
-		// impersonated company — not the admin's own referent companies.
-		const userCompanyRows = impersonation
-			? await ctx.db
-					.select({ siren: companies.siren, name: companies.name })
-					.from(companies)
-					.where(eq(companies.siren, impersonation.siren))
-			: await ctx.db
-					.select({
-						siren: companies.siren,
-						name: companies.name,
-					})
-					.from(userCompanies)
-					.innerJoin(companies, eq(userCompanies.siren, companies.siren))
-					.where(eq(userCompanies.userId, ctx.session.user.id));
-
-		const sirens = userCompanyRows.map((r) => r.siren);
-
-		const declarationMap = new Map<
-			string,
-			{ status: string | null; currentStep: number | null }
-		>();
-
-		if (sirens.length > 0) {
-			const decls = await ctx.db
-				.select({
-					siren: declarations.siren,
-					status: declarations.status,
-					currentStep: declarations.currentStep,
-				})
-				.from(declarations)
-				.where(
-					and(
-						eq(declarations.year, year),
-						inArray(declarations.siren, sirens),
-						isNull(declarations.cancelledAt),
-					),
-				);
-
-			for (const d of decls) {
-				declarationMap.set(d.siren, {
-					status: d.status,
-					currentStep: d.currentStep,
-				});
-			}
-		}
-
-		return userCompanyRows.map((company) => ({
-			siren: company.siren,
-			name: company.name,
-			declarationStatus: computeDeclarationStatus(
-				declarationMap.get(company.siren),
-			),
-		}));
-	}),
 
 	getWithDeclarations: protectedProcedure
 		.input(sirenInputSchema)

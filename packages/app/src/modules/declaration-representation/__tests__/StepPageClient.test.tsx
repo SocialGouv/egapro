@@ -140,10 +140,10 @@ describe("StepPageClient — rendering", () => {
 		renderStep({ step: SUMMARY_STEP, currentStep: SUMMARY_STEP });
 
 		expect(
-			screen.getByText(/Vérifiez les informations avant de soumettre/),
+			screen.getByText(/Vérifiez les informations avant de transmettre/),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Soumettre" }),
+			screen.getByRole("button", { name: "Transmettre" }),
 		).toBeInTheDocument();
 	});
 
@@ -161,10 +161,10 @@ describe("StepPageClient — rendering", () => {
 		});
 
 		expect(
-			screen.getByText(/Vérifiez les informations avant de soumettre/),
+			screen.getByText(/Vérifiez les informations avant de transmettre/),
 		).toBeInTheDocument();
 		expect(
-			screen.queryByRole("button", { name: "Soumettre" }),
+			screen.queryByRole("button", { name: "Transmettre" }),
 		).not.toBeInTheDocument();
 		expect(screen.getByText("01/01/2025 - 31/12/2025")).toBeInTheDocument();
 	});

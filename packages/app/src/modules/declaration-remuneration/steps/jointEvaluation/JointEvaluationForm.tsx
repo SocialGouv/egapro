@@ -13,7 +13,7 @@ import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/L
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref, COMPLIANCE_PATH } from "~/modules/routes";
-import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { FileUpload, SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import styles from "./JointEvaluationForm.module.scss";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -255,7 +255,7 @@ export function JointEvaluationForm({
 								disabled={isPending || isReadOnly}
 								type="submit"
 							>
-								Transmettre
+								{SUBMIT_LABEL}
 							</button>
 							{readOnlyGuard.tooltip}
 						</span>

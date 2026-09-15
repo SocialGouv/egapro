@@ -1,8 +1,11 @@
-import { type Page, test } from "@playwright/test";
+import { type Locator, type Page, test } from "@playwright/test";
 import {
 	DECLARATION_REMUNERATION,
 	remunerationStepHref,
 } from "~/modules/routes";
+// Leaf module, not the barrel: the Playwright runner cannot load the CSS
+// modules the barrel pulls in through its React components.
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { urlGlob } from "./routes";
 
 /**
@@ -49,6 +52,19 @@ export function categoryPayInput(
 	return page.getByRole("textbox", {
 		name: `${measure} ${sex}, catégorie ${categoryIndex}`,
 	});
+}
+
+/**
+ * The eight remuneration cells of one indicator G category — the four measures
+ * of both pay bases, for both sexes. Since #3678 both tables are enabled or
+ * disabled as one block, so a spec asserts on the whole set rather than a basis.
+ */
+export function categoryPayCells(page: Page, categoryIndex = 1): Locator[] {
+	return CATEGORY_PAY_MEASURES.flatMap((measure) =>
+		(["femmes", "hommes"] as const).map((sex) =>
+			categoryPayInput(page, { categoryIndex, measure, sex }),
+		),
+	);
 }
 
 /**
@@ -339,7 +355,7 @@ export async function reachStep6Recap(
  * Fill a gap-free funnel up to the review step, whatever shape the campaign year gives
  * it: the categories step is only presented when the tier owes indicator G that year, so
  * the quartiles land either on it or straight on the review. Callers pass the expectation
- * derived from the domain (`indicatorGRequiredForGip`).
+ * derived from the domain (`isIndicatorGRequiredForGip`).
  */
 export async function reachRecapWithoutGap(
 	page: Page,
@@ -371,7 +387,7 @@ export async function reachStep6ComplianceRecap(page: Page) {
  */
 export async function submitFromStep6Recap(page: Page) {
 	await test.step("étape 6 — récapitulatif et transmission", async () => {
-		await page.getByRole("button", { name: "Soumettre" }).click();
+		await page.getByRole("button", { exact: true, name: SUBMIT_LABEL }).click();
 		// Click the label, as the DSFR checkbox label intercepts pointer events.
 		await page.getByText(/Je certifie/).click();
 		await page.getByRole("button", { name: "Valider" }).click();

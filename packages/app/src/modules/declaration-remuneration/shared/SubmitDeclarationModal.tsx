@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+import { SUBMIT_LABEL } from "~/modules/shared";
+import { FormErrors } from "./FormErrors";
+
 const MODAL_ID = "submit-declaration-modal";
 
 type Props = {
@@ -9,6 +12,7 @@ type Props = {
 	onClose: () => void;
 	onSubmit: () => void;
 	isPending: boolean;
+	error?: string | null;
 	year: number;
 	isSecondDeclaration?: boolean;
 };
@@ -19,14 +23,15 @@ export function SubmitDeclarationModal({
 	onClose,
 	onSubmit,
 	isPending,
+	error,
 	year,
 	isSecondDeclaration,
 }: Props) {
 	const [certified, setCertified] = useState(false);
 
 	const description = isSecondDeclaration
-		? `Vous allez soumettre la seconde déclaration des écarts de rémunération par catégories de salariés ${year} aux services du ministère chargé du travail.`
-		: `Vous allez soumettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
+		? `Vous allez transmettre la seconde déclaration des écarts de rémunération par catégories de salariés ${year} aux services du ministère chargé du travail.`
+		: `Vous allez transmettre la déclaration des indicateurs de rémunération ${year} aux services du ministère chargé du travail.`;
 
 	return (
 		<dialog
@@ -43,6 +48,7 @@ export function SubmitDeclarationModal({
 								<button
 									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
+									disabled={isPending}
 									onClick={onClose}
 									title="Fermer"
 									type="button"
@@ -55,9 +61,10 @@ export function SubmitDeclarationModal({
 									className="fr-modal__title"
 									id="submit-declaration-modal-title"
 								>
-									Soumettre
+									{SUBMIT_LABEL}
 								</h2>
 								<p>{description}</p>
+								<FormErrors mutationError={error} />
 								<div className="fr-checkbox-group fr-mt-2w">
 									<input
 										checked={certified}
@@ -91,6 +98,7 @@ export function SubmitDeclarationModal({
 									<li>
 										<button
 											className="fr-btn fr-btn--secondary"
+											disabled={isPending}
 											onClick={onClose}
 											type="button"
 										>

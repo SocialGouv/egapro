@@ -4,13 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
 import { validateFileName } from "./fileNameValidation";
-import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
-
-function formatFileSize(bytes: number): string {
-	if (bytes < 1024) return `${bytes} o`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} Ko`;
-	return `${(bytes / (1024 * 1024)).toFixed(2)} Mo`;
-}
+import {
+	FILE_TOO_LARGE_ERROR,
+	formatFileMeta,
+	MAX_FILE_SIZE,
+} from "./uploadConfig";
 
 function getExtensionLabel(name: string): string {
 	const ext = name.split(".").pop()?.toUpperCase();
@@ -194,7 +192,7 @@ export function FileUpload({
 								{file.name}
 							</a>
 							<p className="fr-text--xs fr-text--mention-grey fr-mb-0">
-								{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
+								{formatFileMeta(getExtensionLabel(file.name), file.size)}
 							</p>
 						</div>
 						<button

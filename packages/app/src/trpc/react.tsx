@@ -1,13 +1,39 @@
 "use client";
 
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchStreamLink, loggerLink } from "@trpc/client";
+import { httpBatchStreamLink, loggerLink, type TRPCLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
+import { observable } from "@trpc/server/observable";
 import { useState } from "react";
 import SuperJSON from "superjson";
 
+import { isAdminMfaRequiredErrorData } from "~/modules/admin/shared/adminMfaGuard";
+import { ADMIN_MFA_RESUME } from "~/modules/routes";
 import type { AppRouter } from "~/server/api/root";
 import { createQueryClient } from "./query-client";
+
+function adminMfaGuardLink(): TRPCLink<AppRouter> {
+	return () =>
+		({ next, op }) =>
+			observable((observer) => {
+				const subscription = next(op).subscribe({
+					next(value) {
+						observer.next(value);
+					},
+					error(error) {
+						if (isAdminMfaRequiredErrorData(error.data)) {
+							window.location.assign(ADMIN_MFA_RESUME);
+							return;
+						}
+						observer.error(error);
+					},
+					complete() {
+						observer.complete();
+					},
+				});
+				return subscription;
+			});
+}
 
 let clientQueryClientSingleton: QueryClient | undefined;
 const getQueryClient = () => {
@@ -34,6 +60,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
 						process.env.NODE_ENV === "development" ||
 						(op.direction === "down" && op.result instanceof Error),
 				}),
+				adminMfaGuardLink(),
 				httpBatchStreamLink({
 					transformer: SuperJSON,
 					url: `${getBaseUrl()}/api/trpc`,

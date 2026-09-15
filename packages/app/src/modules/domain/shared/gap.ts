@@ -123,23 +123,31 @@ export function hasHighGap(gaps: ReadonlyArray<number | null>): boolean {
 	return gaps.some((gap) => gapLevel(gap) === "high");
 }
 
-/** Determines which side is more often the lower-paid one across a set of women/men value pairs.
- *  "women" when women are lower in more rows, "men" for the opposite, "balanced" on a tie or no data. */
-export function gapDirection(
-	pairs: ReadonlyArray<{ women: string; men: string }>,
+/** Direction of pay disparity, derived only from gaps that cross the regulatory threshold and weighted by
+ *  their signed magnitude (cumulated per side) — unlike a plain majority vote, which would let several
+ *  sub-threshold rows outvote a single significant one. Positive gaps favor "women" (men earn more),
+ *  negative gaps favor "men" (women earn more), matching `computeGap`'s sign convention.
+ *
+ *  Total: whenever at least one gap is significant, the result always carries a sign — it can never be
+ *  "balanced" while a threshold-crossing row exists. */
+export function significantGapDirection(
+	gaps: ReadonlyArray<number | null>,
+	threshold: number = GAP_ALERT_THRESHOLD,
 ): GapDirection {
-	let womenLowerCount = 0;
-	let menLowerCount = 0;
-	for (const { women, men } of pairs) {
-		const w = Number.parseFloat(women);
-		const m = Number.parseFloat(men);
-		if (Number.isNaN(w) || Number.isNaN(m)) continue;
-		if (w < m) womenLowerCount++;
-		if (m < w) menLowerCount++;
-	}
-	if (womenLowerCount > menLowerCount) return "women";
-	if (menLowerCount > womenLowerCount) return "men";
-	return "balanced";
+	const significant = gaps.filter(
+		(gap): gap is number => gap !== null && Math.abs(gap) >= threshold,
+	);
+	if (significant.length === 0) return "balanced";
+
+	const cumulated = significant.reduce((sum, gap) => sum + gap, 0);
+	if (cumulated > 0) return "women";
+	if (cumulated < 0) return "men";
+
+	// Exact tie between opposing significant gaps: break on the largest magnitude side.
+	const largestMagnitude = significant.reduce((largest, gap) =>
+		Math.abs(gap) > Math.abs(largest) ? gap : largest,
+	);
+	return largestMagnitude > 0 ? "women" : "men";
 }
 
 /** Converts a stored gap ratio (e.g. `"0.0523"`) to a signed percentage (`5.23`).

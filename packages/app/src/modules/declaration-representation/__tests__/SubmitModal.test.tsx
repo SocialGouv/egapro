@@ -61,7 +61,7 @@ describe("SubmitModal — variants", () => {
 		expect(
 			screen.getByText(
 				new RegExp(
-					`Vous allez soumettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR}`,
+					`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR}`,
 				),
 			),
 		).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe("SubmitModal — confirmation", () => {
 		const title = screen.getByRole("heading", {
 			hidden: true,
 			level: 2,
-			name: "Soumettre",
+			name: "Transmettre",
 		});
 
 		const dialog = screen.getByRole("dialog", { hidden: true });

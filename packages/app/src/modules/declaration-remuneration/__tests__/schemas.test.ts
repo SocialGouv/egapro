@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { PAY_FIELDS_MEN, PAY_FIELDS_WOMEN } from "~/modules/domain";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormSchema,
-	PAY_FIELDS_MEN,
-	PAY_FIELDS_WOMEN,
 	updateEmployeeCategoriesSchema,
 	updateStep4Schema,
 } from "../schemas";
@@ -207,6 +206,9 @@ const MEN_PAY_VALUES = buildPayFieldValues(PAY_FIELDS_MEN);
 const INCOMPLETE_REMUNERATION_MESSAGE =
 	"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.";
 
+const INCONSISTENT_REMUNERATION_MESSAGE =
+	"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.";
+
 function parseCategory(data: Record<string, unknown>) {
 	return updateEmployeeCategoriesSchema.safeParse({
 		declarationType: "initial",
@@ -226,7 +228,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("accepts womenCount=0 with only the 4 men pay fields", () => {
+	it("accepts an isolated womenCount=0 when the required men pay fields are filled (#3678)", () => {
 		const result = parseCategory({
 			womenCount: 0,
 			menCount: 2,
@@ -235,7 +237,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		expect(result.success).toBe(true);
 	});
 
-	it("accepts menCount=0 with only the 4 women pay fields", () => {
+	it("accepts an isolated menCount=0 when the required women pay fields are filled (#3678)", () => {
 		const result = parseCategory({
 			womenCount: 2,
 			menCount: 0,
@@ -296,7 +298,6 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 	it("rejects an empty pay field (empty string counts as missing)", () => {
 		const result = parseCategory({
 			womenCount: 2,
-			menCount: 0,
 			...WOMEN_PAY_VALUES,
 			annualBaseWomen: "",
 		});
@@ -341,7 +342,7 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 			womenCount: 2,
 			menCount: 2,
 			hourlyWomenCount: 2,
-			hourlyMenCount: 0,
+			hourlyMenCount: 2,
 			annualBaseWomen: "30000",
 			annualVariableWomen: "5000",
 			annualBaseMen: "32000",
@@ -355,14 +356,88 @@ describe("updateEmployeeCategoriesSchema — remuneration completeness (#3948)",
 		}
 	});
 
-	it("rejects a single-headcount sex with no pay fields (womenCount=1, menCount=0)", () => {
-		const result = parseCategory({ womenCount: 1, menCount: 0 });
+	it("rejects a headcount of exactly 1 with no pay fields (womenCount=1, menCount=1)", () => {
+		const result = parseCategory({ womenCount: 1, menCount: 1 });
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues.map((i) => i.message)).toContain(
 				INCOMPLETE_REMUNERATION_MESSAGE,
 			);
 		}
+	});
+});
+
+describe("updateEmployeeCategoriesSchema — pay of a category at 0 (#3678)", () => {
+	it("rejects pay when women are absent from both workforce rows", () => {
+		const result = parseCategory({
+			womenCount: 0,
+			menCount: 3,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 3,
+			annualBaseMen: "1000",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCONSISTENT_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("rejects pay when men are absent from both workforce rows", () => {
+		const result = parseCategory({
+			womenCount: 3,
+			menCount: 0,
+			hourlyWomenCount: 3,
+			hourlyMenCount: 0,
+			annualBaseWomen: "1000",
+		});
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCONSISTENT_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("accepts an isolated 0 with the required pay for positive headcounts", () => {
+		expect(
+			parseCategory({
+				womenCount: 3,
+				menCount: 0,
+				annualBaseWomen: "30000",
+				annualVariableWomen: "5000",
+			}).success,
+		).toBe(true);
+	});
+
+	it("accepts crossed 0s with the required pay for each positive headcount", () => {
+		expect(
+			parseCategory({
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 0,
+				annualBaseMen: "32000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyVariableWomen: "3",
+			}).success,
+		).toBe(true);
+	});
+
+	it("still rejects a category without any 0 that declares no pay at all", () => {
+		const result = parseCategory({ womenCount: 3 });
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			expect(result.error.issues.map((i) => i.message)).toContain(
+				INCOMPLETE_REMUNERATION_MESSAGE,
+			);
+		}
+	});
+
+	it("accepts an entirely empty category", () => {
+		expect(parseCategory({}).success).toBe(true);
 	});
 });
 

@@ -232,14 +232,14 @@ describe("Step2Upload", () => {
 		const previousLink = screen.getByRole("link", { name: /Précédent/ });
 		expect(previousLink).toHaveAttribute("href", "/avis-cse/etape/1");
 		expect(
-			screen.getByRole("button", { name: "Soumettre" }),
+			screen.getByRole("button", { name: "Transmettre" }),
 		).toBeInTheDocument();
 	});
 
 	it("keeps the submit button enabled even before any file is added", () => {
 		renderStep();
 
-		expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
 	});
 
 	it("does not render the matrix when there is no existing file", () => {
@@ -321,7 +321,7 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByRole("button", { name: "Importer le ou les fichiers" }),
 		).not.toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 		expect(pushMock).not.toHaveBeenCalled();
 	});
@@ -463,7 +463,7 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
 		).not.toBeInTheDocument();
-		const submit = screen.getByRole("button", { name: "Soumettre" });
+		const submit = screen.getByRole("button", { name: "Transmettre" });
 		expect(submit).toBeEnabled();
 
 		await user.click(submit);
@@ -484,7 +484,7 @@ describe("Step2Upload", () => {
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 		});
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
 
 		await user.click(
@@ -510,7 +510,7 @@ describe("Step2Upload", () => {
 			],
 		});
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 		// The required column is covered, so the missing-content error stays hidden.
 		expect(
@@ -635,7 +635,7 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
 		).not.toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
 	});
 
 	it("opens the finalize modal then finalizes and redirects when the matrix is complete", async () => {
@@ -648,7 +648,7 @@ describe("Step2Upload", () => {
 			],
 		});
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 		await user.click(
 			screen.getByRole("checkbox", {
@@ -683,7 +683,7 @@ describe("Step2Upload", () => {
 				],
 			});
 
-			await user.click(screen.getByRole("button", { name: "Soumettre" }));
+			await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 			expect(disclose).toHaveBeenCalled();
 		} finally {
@@ -705,7 +705,7 @@ describe("Step2Upload", () => {
 			],
 		});
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 		await user.click(
 			screen.getByRole("checkbox", {
 				name: "Je certifie que les avis transmis sont conformes.",
@@ -733,7 +733,7 @@ describe("Step2Upload", () => {
 			],
 		});
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 		await user.click(
 			screen.getByRole("checkbox", {
 				name: "Je certifie que les avis transmis sont conformes.",
@@ -804,7 +804,9 @@ describe("Step2Upload", () => {
 		it("disables the submit button when locked", () => {
 			renderStep({ isReadOnly: true });
 
-			expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: "Transmettre" }),
+			).toBeDisabled();
 		});
 
 		it("disables the matrix delete and checkbox controls when locked", () => {
@@ -826,7 +828,7 @@ describe("Step2Upload", () => {
 			expect(
 				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 			).toBeEnabled();
-			expect(screen.getByRole("button", { name: "Soumettre" })).toBeEnabled();
+			expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
 		});
 	});
 
@@ -858,7 +860,9 @@ describe("Step2Upload", () => {
 			expect(
 				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
 			).toBeDisabled();
-			expect(screen.getByRole("button", { name: "Soumettre" })).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: "Transmettre" }),
+			).toBeDisabled();
 			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
 		});
 	});

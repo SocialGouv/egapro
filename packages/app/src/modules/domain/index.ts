@@ -1,5 +1,14 @@
 // Types
 
+// Admin two-factor authentication — accepted levels and freshness window
+export type { AdminMfaFailure } from "./shared/adminMfa";
+export {
+	ADMIN_MFA_ACR_VALUES,
+	ADMIN_MFA_WINDOW_SECONDS,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	resolveAdminAccess,
+} from "./shared/adminMfa";
 // Campaign
 export {
 	getCurrentDate,
@@ -56,6 +65,7 @@ export { computeGlobalScore } from "./shared/computeGlobalScore";
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
+	DRAFT_EXPIRY_DAYS,
 	EXPECTED_DECLARATION_TYPES,
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
@@ -161,9 +171,16 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
+export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
 export {
+	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
+	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+	shouldRetainCategoryPayValues,
 } from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
@@ -189,7 +206,6 @@ export {
 	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
-	gapDirection,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -197,6 +213,7 @@ export {
 	hasHighGap,
 	resolveGap,
 	resolveGapRatio,
+	significantGapDirection,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
@@ -214,6 +231,7 @@ export {
 	INDICATOR_G_TRIENNIAL_MIN,
 	INDICATOR_G_UNIVERSAL_YEAR,
 	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	isTriennialYear,
 } from "./shared/indicatorG";
 // NAF activity nomenclature

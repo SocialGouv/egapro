@@ -341,6 +341,13 @@ describe("CompliancePathChoice", () => {
 		);
 	});
 
+	it("neutralises the top margin of the form actions (issue #4141)", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.getByRole("link", { name: /précédent/i }).parentElement,
+		).toHaveClass("fr-mt-0");
+	});
+
 	it("renders previous link pointing to the second-declaration recap in round 2", () => {
 		render(compliancePathChoice({ isSecondRound: true }));
 		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(

@@ -84,4 +84,59 @@ describe("ProConnectButton", () => {
 			action: MATOMO_ACTION.LOGIN_START,
 		});
 	});
+
+	describe("when requiresAdminStepUp is set", () => {
+		it("attaches the admin step-up authorization params to the sign-in request", () => {
+			render(<ProConnectButton callbackUrl="/admin" requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("falls back to /mon-espace even when requiresAdminStepUp is set", () => {
+			// ProConnectButton's own `callbackUrl ?? "/mon-espace"` default is
+			// independent of `requiresAdminStepUp` — it does not fall back to the
+			// backoffice home just because a step-up was requested.
+			render(<ProConnectButton requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/mon-espace" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("still emits the LOGIN_START analytics event", () => {
+			render(<ProConnectButton callbackUrl="/admin" requiresAdminStepUp />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(trackEventMock).toHaveBeenCalledWith({
+				category: MATOMO_EVENT_CATEGORY.AUTH,
+				action: MATOMO_ACTION.LOGIN_START,
+			});
+		});
+	});
+
+	describe("when requiresAdminStepUp is not set", () => {
+		it("leaves an admin-shaped callbackUrl's sign-in request unchanged", () => {
+			// Regression guard for the rule the epic does not negotiate: only an
+			// explicit `requiresAdminStepUp` may add the step-up params — the
+			// button never infers it from the shape of the URL on its own.
+			render(<ProConnectButton callbackUrl="/admin" />);
+			screen
+				.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+				.click();
+			expect(signInMock).toHaveBeenCalledWith("proconnect", {
+				callbackUrl: "/admin",
+			});
+		});
+	});
 });

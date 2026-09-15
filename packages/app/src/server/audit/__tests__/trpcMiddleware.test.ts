@@ -37,7 +37,7 @@ describe("auditMiddleware", () => {
 		const next = vi.fn(async () => "result");
 		const result = await auditMiddleware({
 			ctx: buildCtx(),
-			path: "company.list",
+			path: "cseOpinion.getFiles",
 			getRawInput: buildGetRawInput(undefined),
 			next,
 		});

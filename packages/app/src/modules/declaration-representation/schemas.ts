@@ -61,6 +61,9 @@ export function computePeriodEnd(start: string): string | undefined {
 export function computePeriodStart(end: string): string | undefined {
 	if (!isValidIsoDate(end)) return undefined;
 	const start = parseIsoDate(end);
+	if (end.endsWith("-02-29")) {
+		return `${start.getUTCFullYear() - 1}-03-01`;
+	}
 	start.setUTCFullYear(start.getUTCFullYear() - 1);
 	start.setUTCDate(start.getUTCDate() + 1);
 	return toIsoDateString(start);

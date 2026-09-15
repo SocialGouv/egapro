@@ -71,7 +71,7 @@ function nextStepsSection(): HTMLElement {
 }
 
 function complianceBadges() {
-	return screen.queryAllByText(/^(Conforme|Non conforme|Non applicable)$/, {
+	return screen.queryAllByText(/^(Conforme|Non conforme|Non calculable)$/, {
 		selector: "p.fr-badge",
 	});
 }
@@ -205,7 +205,7 @@ describe("Step5Review — verdicts par indicateur (S16)", () => {
 		expect(executives.getByText("Femmes").nextElementSibling).toHaveTextContent(
 			"—",
 		);
-		expect(indicatorCard(EXECUTIVES_TITLE)).toHaveTextContent("Non applicable");
+		expect(indicatorCard(EXECUTIVES_TITLE)).toHaveTextContent("Non calculable");
 	});
 });
 
@@ -220,8 +220,8 @@ describe("Step5Review — écarts non calculables (S12)", () => {
 			"Aucune instance dirigeante",
 		);
 		expect(complianceBadges()).toHaveLength(2);
-		expect(indicatorCard(EXECUTIVES_TITLE)).toHaveTextContent("Non applicable");
-		expect(indicatorCard(MEMBERS_TITLE)).toHaveTextContent("Non applicable");
+		expect(indicatorCard(EXECUTIVES_TITLE)).toHaveTextContent("Non calculable");
+		expect(indicatorCard(MEMBERS_TITLE)).toHaveTextContent("Non calculable");
 		expect(
 			screen.queryByRole("heading", { name: "Publication" }),
 		).not.toBeInTheDocument();

@@ -34,6 +34,7 @@ export function HeaderQuickAccessLinks({ session, userPhone }: Props) {
 			<li>
 				{session?.user ? (
 					<UserAccountMenu
+						adminMfaAt={session.user.adminMfaAt}
 						isAdmin={session.user.isAdmin}
 						userEmail={session.user.email ?? ""}
 						userName={session.user.name ?? "Utilisateur"}

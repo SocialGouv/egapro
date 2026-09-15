@@ -15,8 +15,16 @@ vi.mock("~/env", () => ({
 			"test-gateway-shared-secret-at-least-32-chars",
 	},
 }));
+vi.mock("~/modules/domain", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/domain")>();
+	return {
+		...actual,
+		resolveAdminAccess: vi.fn(actual.resolveAdminAccess),
+	};
+});
 
 import { config, middleware } from "~/middleware";
+import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
 import {
 	ADMIN,
 	API_SEARCH,
@@ -25,6 +33,14 @@ import {
 	DECLARATION_REMUNERATION,
 	MY_SPACE,
 } from "~/modules/routes";
+
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
+function adminToken(elapsed: number) {
+	return { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() - elapsed };
+}
 
 function makeRequest(
 	pathnameAndSearch = "/admin",
@@ -83,11 +99,86 @@ describe("admin middleware", () => {
 		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
 	});
 
-	it("lets admin users through", async () => {
-		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+	it("lets an admin with a two-factor authentication inside the window through", async () => {
+		mockGetToken.mockResolvedValue(adminToken(0));
 		const res = await middleware(makeRequest("/admin"));
 		// NextResponse.next() does not set a redirect location
 		expect(res.headers.get("location")).toBeNull();
+	});
+
+	it("marks the backoffice response no-store", async () => {
+		// A browser back after an expiry must not restore a backoffice page
+		// from the cache.
+		mockGetToken.mockResolvedValue(adminToken(0));
+		const res = await middleware(makeRequest("/admin/declarations"));
+		expect(res.headers.get("cache-control")).toBe("no-store");
+	});
+
+	it("sends an admin whose authentication expired to the resume screen", async () => {
+		mockGetToken.mockResolvedValue(adminToken(ADMIN_MFA_WINDOW_SECONDS + 1));
+		const res = await middleware(makeRequest("/admin/declarations"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin%2Fdeclarations",
+		);
+	});
+
+	it("sends an admin with no two-factor authentication to the resume screen", async () => {
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin",
+		);
+	});
+
+	it("carries the deep link, query string included, into the resume screen", async () => {
+		// The resume action aims back at the page the agent asked for.
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+		const res = await middleware(
+			makeRequest("/admin/declarations/abc?onglet=historique"),
+		);
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin%2Fdeclarations%2Fabc%3Fonglet%3Dhistorique",
+		);
+	});
+
+	it("never redirects an admin to an external site, whatever the state", async () => {
+		// The product rules out reopening ProConnect in the middle of a
+		// navigation: every refusal stays on an Egapro URL.
+		for (const token of [
+			null,
+			{ id: "u1" },
+			{ id: "u1", isAdmin: false },
+			{ id: "u1", isAdmin: true },
+			adminToken(ADMIN_MFA_WINDOW_SECONDS + 1),
+		]) {
+			mockGetToken.mockResolvedValue(token);
+			const res = await middleware(makeRequest("/admin"));
+			const location = res.headers.get("location");
+			if (location) expect(new URL(location).origin).toBe("http://localhost");
+		}
+	});
+
+	it("still turns a non-admin away silently when the second factor is fresh", async () => {
+		// Passing the second factor grants nothing on its own: without the
+		// grant, the backoffice is never even mentioned.
+		mockGetToken.mockResolvedValue({
+			id: "u1",
+			isAdmin: false,
+			adminMfaAt: nowSeconds(),
+		});
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
+	});
+
+	it("fails closed to /login on a decision the switch does not recognize", async () => {
+		mockGetToken.mockResolvedValue(adminToken(0));
+		vi.mocked(resolveAdminAccess).mockReturnValueOnce({
+			type: "unknown",
+		} as unknown as ReturnType<typeof resolveAdminAccess>);
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin",
+		);
 	});
 });
 

@@ -1,14 +1,26 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { signIn } from "next-auth/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
 import { UserAccountMenu } from "../UserAccountMenu";
+
+const mockSignIn = vi.mocked(signIn);
 
 const defaultProps = {
 	userName: "Jean Dupont",
 	userEmail: "jean.dupont@example.fr",
 };
 
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
 describe("UserAccountMenu", () => {
+	beforeEach(() => {
+		mockSignIn.mockClear();
+	});
+
 	it("renders the toggle button with 'Mon espace' label", () => {
 		render(<UserAccountMenu {...defaultProps} />);
 		expect(
@@ -80,17 +92,22 @@ describe("UserAccountMenu", () => {
 			expect(screen.getByText("jean.dupont@example.fr")).toBeInTheDocument();
 		});
 
-		it("displays 'Mes entreprises' menu item linking to the companies page", () => {
+		it("displays 'Mes démarches' menu item linking to /mon-espace", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			const mesEntreprises = screen.getByRole("menuitem", {
-				name: "Mes entreprises",
+			const menuItem = screen.getByRole("menuitem", {
+				name: "Mes démarches",
 			});
-			expect(mesEntreprises).toBeInTheDocument();
-			expect(mesEntreprises).toHaveAttribute(
-				"href",
-				"/mon-espace/mes-entreprises",
-			);
+			expect(menuItem).toBeInTheDocument();
+			expect(menuItem).toHaveAttribute("href", "/mon-espace");
+		});
+
+		it("does not display a 'Mes entreprises' menu item", () => {
+			render(<UserAccountMenu {...defaultProps} />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			expect(
+				screen.queryByRole("menuitem", { name: "Mes entreprises" }),
+			).not.toBeInTheDocument();
 		});
 
 		it("displays 'Voir mon profil' menu item", () => {
@@ -156,9 +173,7 @@ describe("UserAccountMenu", () => {
 		it("closes the menu when clicking a menu item button", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
-			fireEvent.click(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
-			);
+			fireEvent.click(screen.getByRole("menuitem", { name: "Mes démarches" }));
 			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 		});
 	});
@@ -207,6 +222,62 @@ describe("UserAccountMenu", () => {
 			expect(adminLink).toBeInTheDocument();
 			expect(adminLink).toHaveAttribute("href", "/admin");
 		});
+
+		it("lets the click navigate to /admin without ProConnect when the admin MFA is fresh", () => {
+			render(
+				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			const event = fireEvent.click(
+				screen.getByRole("menuitem", { name: "Administration" }),
+			);
+
+			expect(event).toBe(true); // not prevented — the link is followed
+			expect(mockSignIn).not.toHaveBeenCalled();
+		});
+
+		it("triggers the admin step-up directly, with no intermediate screen, when the admin MFA is stale", () => {
+			render(
+				<UserAccountMenu
+					{...defaultProps}
+					adminMfaAt={nowSeconds() - ADMIN_MFA_WINDOW_SECONDS - 1}
+					isAdmin
+				/>,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			const event = fireEvent.click(
+				screen.getByRole("menuitem", { name: "Administration" }),
+			);
+
+			expect(event).toBe(false); // navigation prevented
+			expect(mockSignIn).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("triggers the admin step-up when the session carries no admin MFA date at all", () => {
+			render(<UserAccountMenu {...defaultProps} isAdmin />);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
+
+			expect(mockSignIn).toHaveBeenCalledWith(
+				"proconnect",
+				{ callbackUrl: "/admin" },
+				expect.objectContaining({ claims: expect.any(String) }),
+			);
+		});
+
+		it("closes the dropdown when the admin entry is clicked, fresh or not", () => {
+			render(
+				<UserAccountMenu {...defaultProps} adminMfaAt={nowSeconds()} isAdmin />,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
+			fireEvent.click(screen.getByRole("menuitem", { name: "Administration" }));
+
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+		});
 	});
 
 	describe("optional userPhone", () => {
@@ -228,7 +299,7 @@ describe("UserAccountMenu", () => {
 			render(<UserAccountMenu {...defaultProps} />);
 			fireEvent.click(screen.getByRole("button", { name: "Mon espace" }));
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -258,7 +329,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -268,7 +339,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "ArrowDown" });
 			fireEvent.keyDown(document, { key: "ArrowUp" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 
@@ -287,7 +358,7 @@ describe("UserAccountMenu", () => {
 			fireEvent.keyDown(document, { key: "End" });
 			fireEvent.keyDown(document, { key: "Home" });
 			expect(
-				screen.getByRole("menuitem", { name: "Mes entreprises" }),
+				screen.getByRole("menuitem", { name: "Mes démarches" }),
 			).toHaveFocus();
 		});
 

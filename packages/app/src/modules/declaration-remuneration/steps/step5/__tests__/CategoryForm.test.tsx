@@ -6,6 +6,7 @@ import {
 	within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
@@ -55,7 +56,11 @@ function row(name: string): EmployeeCategoryRow {
 	};
 }
 
-function importedCategory(id: number, name: string): EmployeeCategory {
+function importedCategory(
+	id: number,
+	name: string,
+	overrides: Partial<EmployeeCategory> = {},
+): EmployeeCategory {
 	return {
 		id,
 		name,
@@ -71,6 +76,7 @@ function importedCategory(id: number, name: string): EmployeeCategory {
 		hourlyBaseMen: "",
 		hourlyVariableWomen: "",
 		hourlyVariableMen: "",
+		...overrides,
 	};
 }
 
@@ -89,21 +95,30 @@ function accordionIds(): string[] {
 	).map((button) => button.getAttribute("aria-controls") ?? "");
 }
 
-function renderForm(initialCategories: EmployeeCategoryRow[]) {
-	return render(
-		<CategoryForm
-			accordionId="accordion-test"
-			initialCategories={initialCategories}
-			instructionText="Renseignez vos catégories."
-			isSubmitting={false}
-			onSubmit={vi.fn()}
-			previousHref={remunerationStepHref(4)}
-			referenceYear={2025}
-			stepper={null}
-			title="Catégories de salariés"
-			tooltipPrefix="test"
-		/>,
-	);
+function renderForm(
+	initialCategories: EmployeeCategoryRow[],
+	overrides: Partial<ComponentProps<typeof CategoryForm>> = {},
+) {
+	const props = {
+		accordionId: "accordion-test",
+		initialCategories,
+		instructionText: "Renseignez vos catégories.",
+		isSubmitting: false,
+		onSubmit: vi.fn(),
+		previousHref: remunerationStepHref(4),
+		referenceYear: 2025,
+		stepper: null,
+		title: "Catégories de salariés",
+		tooltipPrefix: "test",
+		...overrides,
+	} satisfies ComponentProps<typeof CategoryForm>;
+	const rendered = render(<CategoryForm {...props} />);
+	return {
+		...rendered,
+		rerenderForm(nextOverrides: Partial<ComponentProps<typeof CategoryForm>>) {
+			rendered.rerender(<CategoryForm {...props} {...nextOverrides} />);
+		},
+	};
 }
 
 async function deleteCategoryAt(index: number) {
@@ -223,5 +238,476 @@ describe("CategoryForm accordion identity", () => {
 		expect(afterSecondImport.filter((id) => afterDelete.includes(id))).toEqual(
 			[],
 		);
+	});
+});
+
+describe("CategoryForm import of a non-calculable category (#3678)", () => {
+	it("normalizes non-calculable defaults before the first emitted value change", () => {
+		const onValuesChange = vi.fn();
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "0",
+			menCount: "3",
+			hourlyWomenCount: "0",
+			hourlyMenCount: "3",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+			onValuesChange,
+		});
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
+		expect(onValuesChange).toHaveBeenCalled();
+		for (const [values] of onValuesChange.mock.calls) {
+			expect(values.categories[0]?.annualBaseWomen).toBe("");
+			expect(values.categories[0]?.hourlyVariableMen).toBe("");
+		}
+	});
+
+	it("clears imported pay, disables its visible fields, and omits it from submission", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+		const onValuesChange = vi.fn();
+		renderForm([], { onSubmit, onValuesChange });
+
+		await importCategories([
+			importedCategory(1, "Cadres", {
+				womenCount: "3",
+				menCount: "0",
+				hourlyWomenCount: "3",
+				hourlyMenCount: "0",
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			}),
+		]);
+
+		await waitFor(() =>
+			expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument(),
+		);
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
+		await waitFor(() =>
+			expect(
+				onValuesChange.mock.calls.some(
+					([values]) => values.categories[0]?.annualBaseWomen === "",
+				),
+			).toBe(true),
+		);
+
+		await user.selectOptions(
+			screen.getByLabelText(/Quelle est la source utilisée/),
+			"accord-entreprise",
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(onSubmit).toHaveBeenCalledTimes(1);
+		const data = onSubmit.mock.calls[0]?.[0]?.categories?.[0]?.data;
+		expect(data).toMatchObject({
+			womenCount: 3,
+			menCount: 0,
+			hourlyWomenCount: 3,
+			hourlyMenCount: 0,
+		});
+		expect(data?.annualBaseWomen).toBeUndefined();
+		expect(data?.hourlyVariableMen).toBeUndefined();
+	});
+
+	it("normalizes live pay before an Enter-key submit can persist a stale draft", async () => {
+		const user = userEvent.setup();
+		const onSubmit = vi.fn();
+		const onValuesChange = vi.fn();
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "2",
+			menCount: "2",
+			hourlyWomenCount: "2",
+			hourlyMenCount: "2",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+			onSubmit,
+			onValuesChange,
+		});
+
+		const annualWomen = screen.getByLabelText(
+			"Rémunération annuelle — Nombre de femmes, catégorie 1",
+		);
+		const hourlyWomen = screen.getByLabelText(
+			"Rémunération horaire — Nombre de femmes, catégorie 1",
+		);
+		fireEvent.change(annualWomen, { target: { value: "0" } });
+		fireEvent.change(hourlyWomen, { target: { value: "0" } });
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(
+			onValuesChange.mock.calls.some(
+				([values]) => values.categories[0]?.annualBaseWomen === "30000",
+			),
+		).toBe(true);
+
+		hourlyWomen.focus();
+		await user.keyboard("{Enter}");
+
+		await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+		const submitted = onSubmit.mock.calls[0]?.[0]?.categories?.[0]?.data;
+		expect(submitted?.annualBaseWomen).toBeUndefined();
+		expect(submitted?.hourlyVariableMen).toBeUndefined();
+		await waitFor(() =>
+			expect(
+				onValuesChange.mock.calls.some(
+					([values]) => values.categories[0]?.annualBaseWomen === "",
+				),
+			).toBe(true),
+		);
+
+		fireEvent.change(hourlyWomen, { target: { value: "2" } });
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toHaveValue("");
+	});
+
+	it("recovers focus when disabling the selected remuneration field loses it", async () => {
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "2",
+			menCount: "2",
+			hourlyWomenCount: "2",
+			hourlyMenCount: "2",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+		});
+
+		const annualMen = screen.getByLabelText(
+			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+		);
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		fireEvent.change(annualMen, { target: { value: "0" } });
+		fireEvent.change(hourlyMen, { target: { value: "0" } });
+
+		const status = screen.getByTestId("category-pay-status");
+		expect(status).toHaveTextContent("Aucun écart à calculer");
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		const previousBodyTabIndex = document.body.getAttribute("tabindex");
+		document.body.setAttribute("tabindex", "-1");
+		hourlyMen.focus();
+		fireEvent.keyDown(hourlyMen, { key: "Tab" });
+		fireEvent.blur(hourlyMen, { relatedTarget: annualBaseWomen });
+		document.body.focus();
+
+		await waitFor(() => expect(status).toHaveFocus());
+		if (previousBodyTabIndex === null)
+			document.body.removeAttribute("tabindex");
+		else document.body.setAttribute("tabindex", previousBodyTabIndex);
+	});
+
+	it("keeps a valid later control focused after clearing remuneration", async () => {
+		const user = userEvent.setup();
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "2",
+			menCount: "2",
+			hourlyWomenCount: "2",
+			hourlyMenCount: "2",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+		});
+
+		const annualMen = screen.getByLabelText(
+			"Rémunération annuelle — Nombre d'hommes, catégorie 1",
+		);
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		fireEvent.change(annualMen, { target: { value: "0" } });
+		fireEvent.change(hourlyMen, { target: { value: "0" } });
+
+		const status = screen.getByTestId("category-pay-status");
+		hourlyMen.focus();
+		await user.tab();
+
+		expect(status).not.toHaveFocus();
+	});
+
+	it("does not move focus when tabbing out without clearing remuneration", async () => {
+		const user = userEvent.setup();
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+			},
+		];
+		renderForm(initialCategories, { readOnly: true });
+
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		const status = screen.getByTestId("category-pay-status");
+		hourlyMen.focus();
+		await user.tab();
+
+		expect(status).not.toHaveFocus();
+	});
+
+	it("does not move focus for an already normalized non-calculable category", async () => {
+		const user = userEvent.setup();
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+			},
+		];
+		renderForm(initialCategories);
+
+		const hourlyMen = screen.getByLabelText(
+			"Rémunération horaire — Nombre d'hommes, catégorie 1",
+		);
+		const status = screen.getByTestId("category-pay-status");
+		hourlyMen.focus();
+		await user.tab();
+
+		expect(status).not.toHaveFocus();
+	});
+});
+
+describe("CategoryForm legacy read-only categories (#3678)", () => {
+	it("preserves legacy pay while disabled, then normalizes it when editing becomes possible", async () => {
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			},
+		];
+		const { rerenderForm } = renderForm(initialCategories, { disabled: true });
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+
+		expect(annualBaseWomen).toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+
+		rerenderForm({ disabled: false });
+		await waitFor(() => expect(annualBaseWomen).toHaveValue(""));
+		expect(annualBaseWomen).toBeDisabled();
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
+	it("normalizes legacy pay once a read-only form becomes editable", async () => {
+		const initialCategories = [
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 0,
+				hourlyMenCount: 3,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			},
+		];
+		const { rerenderForm } = renderForm(initialCategories, { readOnly: true });
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+
+		rerenderForm({ readOnly: false });
+		await waitFor(() => expect(annualBaseWomen).toBeDisabled());
+		expect(annualBaseWomen).toHaveValue("");
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+
+		rerenderForm({ readOnly: true });
+		expect(annualBaseWomen).toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("");
+	});
+
+	it("preserves legacy pay restored from a residual draft", () => {
+		const { id: _id, ...defaults } = importedCategory(1, "Cadres", {
+			womenCount: "0",
+			menCount: "3",
+			hourlyWomenCount: "0",
+			hourlyMenCount: "3",
+			annualBaseWomen: "30000",
+			annualBaseMen: "32000",
+			annualVariableWomen: "5000",
+			annualVariableMen: "6000",
+			hourlyBaseWomen: "18",
+			hourlyBaseMen: "19",
+			hourlyVariableWomen: "3",
+			hourlyVariableMen: "4",
+		});
+
+		renderForm([], {
+			defaultValuesOverride: {
+				source: "accord-entreprise",
+				categories: [defaults],
+			},
+			readOnly: true,
+		});
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(annualBaseWomen).toHaveAttribute("readonly");
+		expect(annualBaseWomen).not.toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000");
+	});
+
+	it("preserves already-submitted pay so the locked form matches PDF and export", () => {
+		renderForm(
+			[
+				{
+					...row("Cadres"),
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 0,
+					hourlyMenCount: 3,
+					annualBaseWomen: "30000",
+					annualBaseMen: "32000",
+					annualVariableWomen: "5000",
+					annualVariableMen: "6000",
+					hourlyBaseWomen: "18",
+					hourlyBaseMen: "19",
+					hourlyVariableWomen: "3",
+					hourlyVariableMen: "4",
+				},
+			],
+			{ readOnly: true },
+		);
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		const annualBaseWomen = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		expect(annualBaseWomen).toHaveAttribute("readonly");
+		expect(annualBaseWomen).not.toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+
+		fireEvent.blur(
+			screen.getByLabelText(
+				"Rémunération annuelle — Nombre de femmes, catégorie 1",
+			),
+		);
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+		expect(annualBaseWomen).not.toBeDisabled();
+		expect(annualBaseWomen).toHaveValue("30 000,00");
+		expect(
+			screen.getByLabelText(
+				"Composantes variables horaires hommes, catégorie 1",
+			),
+		).toHaveValue("4,00");
+	});
+
+	it("keeps a newly submitted non-calculable category empty and explained", () => {
+		renderForm(
+			[
+				{
+					...row("Cadres"),
+					womenCount: 0,
+					menCount: 3,
+					hourlyWomenCount: 0,
+					hourlyMenCount: 3,
+				},
+			],
+			{ readOnly: true },
+		);
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
 	});
 });

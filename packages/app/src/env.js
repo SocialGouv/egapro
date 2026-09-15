@@ -107,6 +107,25 @@ export const env = createEnv({
 		// in NO .kontinuous env config, so the route stays 404 in preproduction
 		// and production regardless of NODE_ENV.
 		EGAPRO_E2E_CLOCK: z.coerce.boolean().optional().default(false),
+		// E2E-only admin two-factor seam (issue #4467). ProConnect's integration
+		// platform advertises `eidas1-mfa`, but the FIA1V2 test identity has no
+		// second factor a headless run can present, so the suite could never obtain
+		// a backoffice session once #4461 started demanding one. With this flag on,
+		// a sign-in that reached the app on a loopback host is dated as if
+		// ProConnect had returned the MFA level.
+		//
+		// Declared in NO .kontinuous env config — `e2eFlagsAbsentFromDeployConfig`
+		// fails the build if that ever changes — and the seam additionally demands
+		// a loopback host, a barrier no configuration can grant a deployed pod.
+		//
+		// Parsed as a literal string rather than `z.coerce.boolean()`, which turns
+		// the string "false" into true: EGAPRO_E2E_CLOCK only escapes that trap
+		// because nothing ever sets it to "false" explicitly.
+		EGAPRO_E2E_ADMIN_MFA: z
+			.enum(["true", "false"])
+			.optional()
+			.default("false")
+			.transform((value) => value === "true"),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
@@ -206,6 +225,7 @@ export const env = createEnv({
 		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
+		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,

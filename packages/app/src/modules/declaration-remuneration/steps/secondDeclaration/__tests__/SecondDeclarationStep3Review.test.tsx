@@ -7,10 +7,21 @@ import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
+const mockReset = vi.fn();
+const mockConceal = vi.fn();
+const mockMutationState = {
+	error: null as { message: string } | null,
+	isPending: false,
+};
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: mockPush }),
 	usePathname: () => "/declaration-remuneration/parcours-conformite/etape/3",
+}));
+
+vi.mock("~/modules/shared", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/shared")>()),
+	getDsfrModal: () => ({ disclose: vi.fn(), conceal: mockConceal }),
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -22,8 +33,9 @@ vi.mock("~/trpc/react", () => ({
 						mockMutate();
 						opts.onSuccess?.();
 					},
-					isPending: false,
-					error: null,
+					reset: mockReset,
+					isPending: mockMutationState.isPending,
+					error: mockMutationState.error,
 				}),
 			},
 		},
@@ -116,7 +128,7 @@ function renderStep3(
 
 async function submitDeclaration() {
 	const user = userEvent.setup();
-	await user.click(screen.getByRole("button", { name: /soumettre/i }));
+	await user.click(screen.getByRole("button", { name: /transmettre/i }));
 	const checkbox = screen.getByLabelText(/Je certifie/, {
 		selector: "input",
 	});
@@ -132,6 +144,10 @@ describe("SecondDeclarationStep3Review", () => {
 	beforeEach(() => {
 		mockMutate.mockClear();
 		mockPush.mockClear();
+		mockReset.mockClear();
+		mockConceal.mockClear();
+		mockMutationState.error = null;
+		mockMutationState.isPending = false;
 	});
 
 	it("renders the title and step indicator", () => {
@@ -205,10 +221,10 @@ describe("SecondDeclarationStep3Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders Soumettre button", () => {
+	it("renders Transmettre button", () => {
 		renderStep3();
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 
@@ -277,6 +293,40 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite",
 		);
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("shows a submission error inside the confirmation modal", () => {
+		mockMutationState.error = { message: "Impossible de transmettre." };
+		renderStep3();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		expect(
+			within(modal).getByRole("alert", { hidden: true }),
+		).toHaveTextContent("Impossible de transmettre.");
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("navigates to compliance path when gaps persist after submit, on a negative gap (#4034)", async () => {
+		// Same routing as the +50% case above, but with women earning more than men (-6%):
+		// the threshold is symmetric, so a negative gap must persist the compliance path too.
+		renderStep3({
+			cseOpinionRequired: true,
+			secondDeclarationCategories: [
+				makeCategory({ annualBaseWomen: "1060", annualBaseMen: "1000" }),
+			],
+		});
+
+		await submitDeclaration();
+
+		expect(mockMutate).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
 	});
 
 	it("navigates to avis-cse when no gaps remain and a CSE opinion is due", async () => {
@@ -310,10 +360,10 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(screen.getByText("Aucune donnée renseignée.")).toBeInTheDocument();
 	});
 
-	it("keeps Soumettre while the second declaration is still writable", () => {
+	it("keeps Transmettre while the second declaration is still writable", () => {
 		renderStep3();
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("link", { name: /suivant/i }),
@@ -327,14 +377,14 @@ describe("SecondDeclarationStep3Review", () => {
 			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 		);
 		expect(
-			screen.queryByRole("button", { name: /soumettre/i }),
+			screen.queryByRole("button", { name: /transmettre/i }),
 		).not.toBeInTheDocument();
 	});
 
-	it("keeps Soumettre while awaiting a revision choice", () => {
+	it("keeps Transmettre while awaiting a revision choice", () => {
 		renderStep3({ status: "awaiting_revision_choice" });
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 
@@ -434,11 +484,20 @@ describe("SecondDeclarationStep3Review", () => {
 		});
 	});
 
+	it("neutralises the top margin of the form actions (issue #4141)", () => {
+		renderStep3();
+
+		expect(
+			screen.getByRole("button", { name: /transmettre/i }).parentElement
+				?.parentElement,
+		).toHaveClass("fr-mt-0");
+	});
+
 	it("closes the modal without submitting when Annuler is clicked", async () => {
 		const user = userEvent.setup();
 		renderStep3();
 
-		await user.click(screen.getByRole("button", { name: /soumettre/i }));
+		await user.click(screen.getByRole("button", { name: /transmettre/i }));
 		const submitDialog = document.getElementById("submit-declaration-modal");
 		if (!submitDialog) throw new Error("submit dialog not found");
 		const cancelButton = within(submitDialog).getByRole("button", {
@@ -447,6 +506,7 @@ describe("SecondDeclarationStep3Review", () => {
 		});
 		await user.click(cancelButton);
 
+		expect(mockReset).toHaveBeenCalledTimes(1);
 		expect(mockMutate).not.toHaveBeenCalled();
 		expect(mockPush).not.toHaveBeenCalled();
 	});

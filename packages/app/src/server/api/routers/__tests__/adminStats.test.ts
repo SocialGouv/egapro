@@ -187,7 +187,12 @@ function flattenSql(value: unknown): string {
 }
 
 const adminSession = {
-	user: { id: "admin-1", email: "a@b.c", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "a@b.c",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 
@@ -1997,7 +2002,12 @@ describe("adminStatsRouter.getMatomoFunnel", () => {
 		const caller = adminStatsRouter.createCaller({
 			db: buildDb(),
 			session: {
-				user: { id: "admin", email: "a@x", isAdmin: true },
+				user: {
+					id: "admin",
+					email: "a@x",
+					isAdmin: true,
+					adminMfaAt: Math.floor(Date.now() / 1000),
+				},
 				expires: "",
 			},
 			headers: new Headers(),

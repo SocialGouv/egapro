@@ -121,7 +121,7 @@ flowchart LR
     F --> G[Étape 4<br/>Quartiles]
     G --> H[Étape 5<br/>Catégories indicateur G<br/>optionnel]
     H --> I[Étape 6<br/>Récapitulatif]
-    I --> J{Soumettre}
+    I --> J{Transmettre}
     J -->|Confirmer| K([Reçu par mail<br/>+ PDF de déclaration])
     J -->|Modifier| F
 ```
@@ -176,7 +176,7 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 ### 3.5 Soumission
 
-À l'étape 6, le clic sur **« Soumettre »** :
+À l'étape 6, le clic sur **« Transmettre »** :
 
 1. Bascule la déclaration en `status = submitted` et fige le snapshot `cseRequired`.
 2. Calcule le `remunerationScore` final.
@@ -373,7 +373,7 @@ Pour chaque ligne (fichier) × colonne (type de contenu), une **case à cocher**
 
 ### 7.3 Finalisation
 
-Le clic sur **« Soumettre »** (quand toutes les associations sont présentes) :
+Le clic sur **« Transmettre »** (quand toutes les associations sont présentes) :
 
 1. Ouvre une modale de confirmation (`SubmitConfirmationModal`).
 2. Déclenche la procédure `finalize` qui vérifie côté serveur que :

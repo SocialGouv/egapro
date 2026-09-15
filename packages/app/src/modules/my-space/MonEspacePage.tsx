@@ -1,9 +1,7 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
-
+import { MissingSiret } from "~/modules/declaration-remuneration";
 import { getCurrentYear, parseSiren } from "~/modules/domain";
-import { MY_SPACE_COMPANIES } from "~/modules/routes";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { api } from "~/trpc/server";
@@ -17,7 +15,7 @@ type Props = {
 export async function MonEspacePage({ siret, userPhone }: Props) {
 	const siren = parseSiren(siret);
 	if (siren === null) {
-		redirect(MY_SPACE_COMPANIES);
+		return <MissingSiret />;
 	}
 	const currentYear = getCurrentYear();
 	const [data, campaignDeadlines, representationCampaign, lockState] =

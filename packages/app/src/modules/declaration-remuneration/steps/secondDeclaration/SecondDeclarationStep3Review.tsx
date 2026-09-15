@@ -8,7 +8,6 @@ import {
 	getPostComplianceDestination,
 } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
-import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
@@ -19,7 +18,7 @@ import {
 	isSecondDeclarationWritable,
 } from "~/modules/domain";
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
-import { getDsfrModal } from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -58,16 +57,6 @@ export function SecondDeclarationStep3Review({
 		]),
 	);
 
-	const mutation = api.declaration.submitSecondDeclaration.useMutation({
-		onSuccess: () => {
-			if (gapsExist) {
-				router.push(COMPLIANCE_PATH);
-			} else {
-				router.push(getPostComplianceDestination(cseOpinionRequired));
-			}
-		},
-	});
-
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
 			getDsfrModal(modalRef.current)?.disclose();
@@ -79,6 +68,21 @@ export function SecondDeclarationStep3Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		onSuccess: () => {
+			closeModal();
+			if (gapsExist) {
+				router.push(COMPLIANCE_PATH);
+			} else {
+				router.push(getPostComplianceDestination(cseOpinionRequired));
+			}
+		},
+	});
+	const handleCloseModal = () => {
+		if (mutation.isPending) return;
+		mutation.reset();
+		closeModal();
+	};
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -89,7 +93,7 @@ export function SecondDeclarationStep3Review({
 	const nextHref = isWritable
 		? undefined
 		: getCurrentStageHref(status, cseOpinionRequired);
-	const nextLabel = isWritable ? "Soumettre" : "Suivant";
+	const nextLabel = isWritable ? SUBMIT_LABEL : "Suivant";
 
 	return (
 		<form
@@ -109,7 +113,7 @@ export function SecondDeclarationStep3Review({
 
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre seconde déclaration des écarts de rémunération par
+				transmettre votre seconde déclaration des écarts de rémunération par
 				catégories de salariés aux services du ministère chargé du travail.
 			</p>
 
@@ -171,9 +175,8 @@ export function SecondDeclarationStep3Review({
 				siren={siren}
 			/>
 
-			<FormErrors mutationError={mutation.error?.message} />
-
 			<FormActions
+				className="fr-mt-0"
 				nextHref={nextHref}
 				nextLabel={nextLabel}
 				previousHref={complianceStepHref(2)}
@@ -181,10 +184,11 @@ export function SecondDeclarationStep3Review({
 
 			{isWritable ? (
 				<SubmitDeclarationModal
+					error={mutation.error?.message}
 					isPending={mutation.isPending}
 					isSecondDeclaration
 					modalRef={modalRef}
-					onClose={closeModal}
+					onClose={handleCloseModal}
 					onSubmit={() => mutation.mutate()}
 					year={declarationYear}
 				/>

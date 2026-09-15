@@ -1,3 +1,4 @@
+import { getRepresentationCampaignYear } from "../shared/campaign.js";
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl } from "../shared/urls.js";
 import {
@@ -14,9 +15,11 @@ import type { MailBuilder } from "../types.js";
 export const buildRepresentationReceiptMail: MailBuilder<
 	"representation_receipt"
 > = async ({ siren, year, raisonSociale }) => {
-	const subject = "Egapro - Représentation équilibrée : accusé de réception";
+	const subject =
+		"Egapro - Transmission de la déclaration de la représentation équilibrée";
 	const previewText =
 		"L'administration du travail accuse réception de votre déclaration des indicateurs de représentation équilibrée.";
+	const campaignYear = getRepresentationCampaignYear(year);
 
 	const { html, text } = await renderEmail(
 		<EmailShell previewText={previewText}>
@@ -26,8 +29,8 @@ export const buildRepresentationReceiptMail: MailBuilder<
 				<strong>
 					la déclaration des indicateurs de représentation équilibrée
 				</strong>{" "}
-				au titre de la période de référence {year}, concernant l&apos;entreprise{" "}
-				<strong>{raisonSociale}</strong> (SIREN : {siren}).
+				pour l&apos;année {campaignYear} au titre des données {year}, concernant
+				l&apos;entreprise <strong>{raisonSociale}</strong> (SIREN : {siren}).
 			</EmailParagraph>
 			<EmailReceiptDisclaimer receiptNoun="déclaration" />
 			<EmailParagraph>

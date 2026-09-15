@@ -9,7 +9,6 @@ import type {
 import {
 	computeRepresentationVerdict,
 	getRepresentationCampaignYear,
-	getRepresentationTarget,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
@@ -17,6 +16,7 @@ import {
 import { executivesSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
+import { GapReminderCallout } from "../shared/GapReminderCallout";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
 import {
 	formatPercentInput,
@@ -76,15 +76,6 @@ function evaluateExecutivesGap(
 			campaignYear,
 		),
 	};
-}
-
-function gapReminderTitle(
-	verdict: "compliant" | "non_compliant",
-	target: number,
-): string {
-	return verdict === "compliant"
-		? `Objectif de ${target} % atteint`
-		: `Objectif de ${target} % non atteint`;
 }
 
 type ExecutiveCountOptionProps = {
@@ -162,11 +153,6 @@ export function Step2Executives() {
 	);
 	const knownVerdict: "compliant" | "non_compliant" | null =
 		verdict === "compliant" || verdict === "non_compliant" ? verdict : null;
-	const target = getRepresentationTarget(campaignYear);
-	const reminderClassName =
-		knownVerdict === "compliant"
-			? styles.reminderCompliant
-			: styles.reminderNonCompliant;
 	const isStepValid =
 		hasSelection &&
 		(draft.executivesCount !== "two_or_more" || knownVerdict !== null);
@@ -249,16 +235,11 @@ export function Step2Executives() {
 					/>
 					<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
 						{knownVerdict ? (
-							<div className={`fr-callout ${reminderClassName}`}>
-								<p className="fr-callout__text">
-									<strong>{gapReminderTitle(knownVerdict, target)}</strong>{" "}
-									Depuis le 1er mars 2026, le sexe sous-représenté doit
-									représenter au moins {REPRESENTATION_TARGET_INITIAL} % des
-									cadres dirigeants. À partir du 1er mars{" "}
-									{REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR}, ce seuil
-									passera à {REPRESENTATION_TARGET_RAISED} %.
-								</p>
-							</div>
+							<GapReminderCallout
+								campaignYear={campaignYear}
+								populationLabel="des cadres dirigeants"
+								verdict={knownVerdict}
+							/>
 						) : null}
 					</div>
 				</div>

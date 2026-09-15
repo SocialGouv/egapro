@@ -184,6 +184,8 @@ describe("WithBannerLayout", () => {
 			user: {
 				...DEFAULT_USER,
 				isAdmin: true,
+				// An impersonation only bites while the admin MFA window is open (#4466).
+				adminMfaAt: Math.floor(Date.now() / 1000),
 				impersonation: { siren: SIREN },
 			},
 		});

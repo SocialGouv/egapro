@@ -42,7 +42,7 @@ export function SecondDeclarationStep2Form({
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
-	const { isReadOnly: isLocked } = useLockContext();
+	const { isLoading: isLockLoading, isReadOnly: isLocked } = useLockContext();
 	const isWritable = isSecondDeclarationWritable(status);
 	const isFormDisabled = isImpersonating || !isWritable;
 	const [startDate, setStartDate] = useState(initialStartDate);
@@ -90,7 +90,7 @@ export function SecondDeclarationStep2Form({
 		},
 	});
 
-	if (!draftHydrated) return <DraftLoadingState />;
+	if (!draftHydrated || isLockLoading) return <DraftLoadingState />;
 
 	const recapHref = complianceStepHref(3);
 	const nextHref = isWritable ? undefined : recapHref;

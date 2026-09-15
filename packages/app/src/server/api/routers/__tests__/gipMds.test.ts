@@ -22,7 +22,12 @@ vi.mock("~/server/services/gipMds", () => ({
 }));
 
 const adminSession = {
-	user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "admin@example.fr",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 

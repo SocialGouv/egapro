@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { isSexRemunerationComplete } from "~/modules/domain";
+import {
+	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
+	isCategoryPayApplicable,
+	isSexRemunerationComplete,
+} from "~/modules/domain";
 import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
 
 export const CATEGORY_NAME_MAX_LENGTH = 255;
@@ -83,34 +88,10 @@ export const updateStep4Schema = z.object({
 });
 
 /**
- * Each pay basis carries its own headcount and its own pay fields (#4254):
- * a headcount on one basis only ever requires that basis' pay data.
+ * Each pay basis carries its own headcount and its own pay fields (#4254).
+ * For an applicable category, a headcount only requires its basis' pay data;
+ * the absence of one sex from both workforce rows (#3678) takes precedence.
  */
-export const CATEGORY_PAY_BASES = [
-	{
-		basis: "annual",
-		womenCountField: "womenCount",
-		menCountField: "menCount",
-		womenPayFields: ["annualBaseWomen", "annualVariableWomen"],
-		menPayFields: ["annualBaseMen", "annualVariableMen"],
-	},
-	{
-		basis: "hourly",
-		womenCountField: "hourlyWomenCount",
-		menCountField: "hourlyMenCount",
-		womenPayFields: ["hourlyBaseWomen", "hourlyVariableWomen"],
-		menPayFields: ["hourlyBaseMen", "hourlyVariableMen"],
-	},
-] as const;
-
-export const PAY_FIELDS_WOMEN = CATEGORY_PAY_BASES.flatMap(
-	(base) => base.womenPayFields,
-);
-
-export const PAY_FIELDS_MEN = CATEGORY_PAY_BASES.flatMap(
-	(base) => base.menPayFields,
-);
-
 const employeeCategoryDataSchema = z
 	.object({
 		womenCount: z.number().int().min(0).optional(),
@@ -128,6 +109,16 @@ const employeeCategoryDataSchema = z
 	})
 	.refine(
 		(data) =>
+			isCategoryPayApplicable(data) ||
+			CATEGORY_PAY_FIELDS.every((field) => !data[field]),
+		{
+			message:
+				"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.",
+		},
+	)
+	.refine(
+		(data) =>
+			!isCategoryPayApplicable(data) ||
 			CATEGORY_PAY_BASES.every(
 				(base) =>
 					isSexRemunerationComplete(

@@ -13,6 +13,7 @@ import {
 import { membersSchema } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
+import { GapReminderCallout } from "../shared/GapReminderCallout";
 import type { PercentagePairValues } from "../shared/PercentagePairFields";
 import {
 	formatPercentInput,
@@ -199,14 +200,21 @@ export function Step3Members() {
 						onChange={handlePercentageChange}
 						readOnly={isReadOnly}
 						trailingContent={
-							<div aria-atomic="true" aria-live="polite">
-								{decidedVerdict ? (
-									<ComplianceBadge verdict={decidedVerdict} />
-								) : null}
-							</div>
+							decidedVerdict ? (
+								<ComplianceBadge verdict={decidedVerdict} />
+							) : undefined
 						}
 						values={percentageValues}
 					/>
+					<div aria-atomic="true" aria-live="polite" className="fr-mt-2w">
+						{decidedVerdict ? (
+							<GapReminderCallout
+								campaignYear={campaignYear}
+								populationLabel="des membres des instances dirigeantes"
+								verdict={decidedVerdict}
+							/>
+						) : null}
+					</div>
 				</div>
 			) : null}
 

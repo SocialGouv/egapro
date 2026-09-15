@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatWorkforceForUser } from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
+import { FileFormatDetail } from "~/modules/shared";
 import common from "../shared/common.module.scss";
 import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { formatCategorySource } from "../steps/step5/sources";
@@ -119,6 +120,8 @@ export function RecapitulatifPage({
 		position: i,
 	}));
 
+	const pdfHref = buildPdfHref(declarationYear, isCorrection);
+
 	return (
 		<div className={common.flexColumnGap2}>
 			<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
@@ -134,10 +137,13 @@ export function RecapitulatifPage({
 						aria-label="Télécharger la déclaration des indicateurs de rémunération (PDF)"
 						className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
 						download
-						href={buildPdfHref(declarationYear, isCorrection)}
+						href={pdfHref}
 					>
 						Télécharger
 					</a>
+					<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
+						<FileFormatDetail href={pdfHref} />
+					</p>
 				</div>
 			</div>
 

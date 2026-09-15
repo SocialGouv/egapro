@@ -3,8 +3,11 @@ export {
 	CampaignRateTileLoading,
 } from "./CampaignRateTileStates";
 export { CompanySizeFilter } from "./CompanySizeFilter";
+export { DownloadCard } from "./DownloadCard";
 export { DownloadStatusRegion } from "./DownloadStatusRegion";
+export { formatDocumentSubtitle } from "./documentSubtitle";
 export { FileDownloadLink } from "./FileDownloadLink";
+export { FileFormatDetail } from "./FileFormatDetail";
 export { FileUpload } from "./FileUpload";
 export type { FileNameError } from "./fileNameValidation";
 export {
@@ -20,8 +23,10 @@ export type { KpiBadgeDelta } from "./KpiBadge";
 export { getKpiBadgeRendering, KpiBadge } from "./KpiBadge";
 export { parseSiren } from "./parseSiren";
 export { SubmitModal } from "./SubmitModal";
+export { SUBMIT_LABEL } from "./submitLabels";
 export {
 	FILE_TOO_LARGE_ERROR,
+	formatFileMeta,
 	formatFileSize,
 	MAX_FILE_SIZE,
 	MAX_FILE_SIZE_LABEL,
@@ -36,5 +41,6 @@ export {
 } from "./useDownloadClickGuard";
 export { useDsfrDialogOpen } from "./useDsfrDialogOpen";
 export { useDsfrModal } from "./useDsfrModal";
+export { useFileSize } from "./useFileSize";
 export { useFileUploadForm } from "./useFileUploadForm";
 export { useZodForm } from "./useZodForm";

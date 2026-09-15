@@ -18,7 +18,7 @@ type Props = {
 const VERDICT_LABELS = {
 	compliant: "Conforme",
 	non_compliant: "Non conforme",
-	not_applicable: "Non applicable",
+	not_applicable: "Non calculable",
 } as const;
 
 function formatOptionalDate(value: string | null): string {
@@ -68,9 +68,7 @@ export function RepresentationPdfDocument({ data }: Props) {
 					<Text style={styles.title}>
 						Démarche des indicateurs de représentation {data.campaignYear}
 					</Text>
-					<Text style={styles.subtitle}>
-						Au titre de la période de référence {data.year}
-					</Text>
+					<Text style={styles.subtitle}>Au titre des données {data.year}</Text>
 					<Text style={styles.companyInfo}>
 						{data.companyName} — SIREN {data.siren}
 					</Text>

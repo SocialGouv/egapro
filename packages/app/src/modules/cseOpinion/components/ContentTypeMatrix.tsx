@@ -2,7 +2,7 @@
 
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref } from "~/modules/routes";
-import { formatFileSize } from "~/modules/shared";
+import { formatFileMeta } from "~/modules/shared";
 import { TooltipButton } from "~/modules/shared/TooltipButton";
 import type { AssociationMap, ContentTypeColumn, UploadedFile } from "../types";
 import styles from "./ContentTypeMatrix.module.scss";
@@ -24,8 +24,7 @@ function columnHeaderId(column: ContentTypeColumn): string {
 }
 
 function fileMeta(fileSize: number | null): string {
-	const size = formatFileSize(fileSize);
-	return size ? `PDF – ${size}` : "PDF";
+	return formatFileMeta("PDF", fileSize);
 }
 
 function tooltipId(column: ContentTypeColumn): string {
@@ -59,8 +58,8 @@ export function ContentTypeMatrix({
 							</caption>
 							<thead>
 								<tr>
-									<th className="fr-cell--fixed" scope="col">
-										Fichier
+									<th className="fr-cell--fixed fr-cell--multiline" scope="col">
+										Fichier(s) importé(s)/déposé(s)
 									</th>
 									{columns.map((column) => (
 										<th

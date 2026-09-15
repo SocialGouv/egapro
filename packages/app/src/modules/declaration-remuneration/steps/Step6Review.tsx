@@ -13,7 +13,7 @@ import {
 	isCseRequired,
 } from "~/modules/domain";
 import { COMPLIANCE_PATH } from "~/modules/routes";
-import { getDsfrModal } from "~/modules/shared";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
 import { getCurrentStageHref } from "../shared/complianceNavigation";
@@ -82,18 +82,6 @@ export function Step6Review({
 		workforce: getObligationWorkforce(companyWorkforce),
 		hasCse,
 	});
-	const submitMutation = api.declaration.submit.useMutation({
-		onSuccess: () => {
-			trackFunnelComplete(
-				DECLARATION_FUNNEL,
-				declarationFunnelDimensions(
-					declarationYear,
-					getOptionalCompanySizeRange(companyWorkforce),
-				),
-			);
-			router.push(COMPLIANCE_PATH);
-		},
-	});
 
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
@@ -106,6 +94,29 @@ export function Step6Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const submitMutation = api.declaration.submit.useMutation({
+		onSuccess: () => {
+			// A blocked sessionStorage must not prevent navigation after submission.
+			try {
+				trackFunnelComplete(
+					DECLARATION_FUNNEL,
+					declarationFunnelDimensions(
+						declarationYear,
+						getOptionalCompanySizeRange(companyWorkforce),
+					),
+				);
+			} catch {
+				// Tracking is best effort; the declaration is already submitted.
+			}
+			closeModal();
+			router.push(COMPLIANCE_PATH);
+		},
+	});
+	const handleCloseModal = () => {
+		if (submitMutation.isPending) return;
+		submitMutation.reset();
+		closeModal();
+	};
 
 	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
 
@@ -153,7 +164,7 @@ export function Step6Review({
 				<div className={stepStyles.recapBody}>
 					<p className={`fr-mb-0 ${stepStyles.intro}`}>
 						Vérifiez que toutes les informations ont été complétées avant de
-						soumettre votre déclaration aux services du ministère chargé du
+						transmettre votre déclaration aux services du ministère chargé du
 						travail.
 					</p>
 
@@ -186,15 +197,16 @@ export function Step6Review({
 							? getCurrentStageHref(declaration.status, cseOpinionRequired)
 							: undefined
 					}
-					nextLabel={isSubmitted ? "Suivant" : "Soumettre"}
+					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
 					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
 
 				{!isSubmitted && (
 					<SubmitDeclarationModal
+						error={submitMutation.error?.message}
 						isPending={submitMutation.isPending}
 						modalRef={modalRef}
-						onClose={closeModal}
+						onClose={handleCloseModal}
 						onSubmit={() => submitMutation.mutate()}
 						year={declarationYear}
 					/>

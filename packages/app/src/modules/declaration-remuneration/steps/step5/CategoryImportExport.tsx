@@ -12,7 +12,7 @@ import { HELP } from "~/modules/routes";
 import {
 	EXTENSION_MIME_MAP,
 	FileUpload,
-	formatFileSize,
+	formatFileMeta,
 	getDsfrModal,
 } from "~/modules/shared";
 import styles from "./CategoryImportExport.module.scss";
@@ -265,8 +265,7 @@ function ImportDownloadCard({
 	sizeBytes?: number;
 	onDownload?: () => void;
 }) {
-	const size = sizeBytes != null ? formatFileSize(sizeBytes) : null;
-	const detail = size ? `${format} – ${size}` : format;
+	const detail = formatFileMeta(format, sizeBytes ?? null);
 	const disabled = !onDownload;
 	const cardClassName = [
 		"fr-card",

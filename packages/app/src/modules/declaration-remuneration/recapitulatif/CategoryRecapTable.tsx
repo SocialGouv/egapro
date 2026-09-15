@@ -8,6 +8,7 @@ import {
 	formatGap,
 	formatTotal,
 	gapLevel,
+	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import styles from "./CategoryRecapTable.module.scss";
 import indicatorStyles from "./IndicatorTables.module.scss";
@@ -139,11 +140,15 @@ export function CategoryRecapTable({
 	);
 
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
+	const payApplicable = shouldRetainCategoryPayValues(category, category, true);
 
 	return (
 		<section className={styles.section}>
 			<p className={`fr-text--bold ${styles.heading}`}>{heading}</p>
 			<CategoryEffectifTable category={category} heading={heading} />
+			{!payApplicable && (
+				<p className="fr-mt-2w fr-mb-1w">Aucun écart à calculer</p>
+			)}
 			<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 				<div className="fr-table__wrapper">
 					<div className="fr-table__container">

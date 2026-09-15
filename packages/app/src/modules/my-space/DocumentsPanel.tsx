@@ -7,11 +7,9 @@ import {
 	API_REPRESENTATION_PDF,
 	API_TRANSMITTED_PDF,
 } from "~/modules/routes";
-import { DownloadStatusRegion, useDownloadClickGuard } from "~/modules/shared";
+import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
-
-const PENDING_LABEL = "Téléchargement en cours…";
 
 export function getDocumentsPanelId(declaration: DeclarationItem): string {
 	return `documents-panel-${declaration.type}-${declaration.year}`;
@@ -24,7 +22,10 @@ type DocumentResource = {
 };
 
 function resourceSubtitle(declaration: DeclarationItem): string {
-	return `Année ${declaration.year} au titre des données ${getReferenceYearFor(declaration.year)}`;
+	return formatDocumentSubtitle(
+		declaration.year,
+		getReferenceYearFor(declaration.year),
+	);
 }
 
 function getRepresentationResources(
@@ -99,35 +100,6 @@ export function getDocumentResourceCount(declaration: DeclarationItem): number {
 	return getResources(declaration).length;
 }
 
-type DocumentCardItemProps = {
-	resource: DocumentResource;
-};
-
-function DocumentCardItem({ resource }: DocumentCardItemProps) {
-	const { anchorProps, state } = useDownloadClickGuard(resource.href);
-
-	return (
-		<li className={styles.documentItem}>
-			<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
-				<div className="fr-card__body">
-					<div className="fr-card__content">
-						<h3 className="fr-card__title">
-							<a {...anchorProps}>{resource.title}</a>
-						</h3>
-						<p className="fr-card__desc">{resource.subtitle}</p>
-						<div className="fr-card__end">
-							<p className="fr-card__detail">
-								{state === "pending" ? PENDING_LABEL : "PDF"}
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<DownloadStatusRegion pendingLabel={PENDING_LABEL} state={state} />
-		</li>
-	);
-}
-
 type Props = {
 	declaration: DeclarationItem;
 };
@@ -166,7 +138,13 @@ export function DocumentsPanel({ declaration }: Props) {
 						</h2>
 						<ul className={styles.documentList}>
 							{resources.map((resource) => (
-								<DocumentCardItem key={resource.href} resource={resource} />
+								<li className={styles.documentItem} key={resource.href}>
+									<DownloadCard
+										description={resource.subtitle}
+										href={resource.href}
+										title={resource.title}
+									/>
+								</li>
 							))}
 						</ul>
 					</div>

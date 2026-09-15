@@ -120,8 +120,8 @@ describe("FileUpload", () => {
 		// The file meta is rendered outside the link (only the file name is the
 		// underlined link target).
 		expect(link).toHaveTextContent("avis.pdf");
-		expect(link).not.toHaveTextContent("PDF – 2.00 Ko");
-		expect(screen.getByText("PDF – 2.00 Ko")).toBeInTheDocument();
+		expect(link).not.toHaveTextContent("PDF – 2 Ko");
+		expect(screen.getByText("PDF – 2 Ko")).toBeInTheDocument();
 	});
 
 	it("creates an object URL per file and revokes it on unmount", () => {
@@ -178,9 +178,9 @@ describe("FileUpload", () => {
 	});
 
 	it.each([
-		[512, "512 o"],
-		[2048, "2.00 Ko"],
-		[5 * 1024 * 1024, "5.00 Mo"],
+		[512, "0,5 Ko"],
+		[2048, "2 Ko"],
+		[5 * 1024 * 1024, "5 Mo"],
 	])("formats a %d-byte file size as %s", (size, label) => {
 		render(
 			<FileUpload
@@ -210,7 +210,7 @@ describe("FileUpload", () => {
 		expect(
 			screen.getByRole("link", { name: /Télécharger noextension/ }),
 		).toBeInTheDocument();
-		expect(screen.getByText("NOEXTENSION – 1.00 Ko")).toBeInTheDocument();
+		expect(screen.getByText("NOEXTENSION – 1 Ko")).toBeInTheDocument();
 	});
 
 	it("accepts a valid file through the input", () => {

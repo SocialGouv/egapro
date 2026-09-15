@@ -103,6 +103,7 @@ describe("computeReferencePeriodStart", () => {
 		["a first-of-month end", "2023-03-01", "2022-03-02"],
 		["a leap year", "2024-12-31", "2024-01-01"],
 		["a period spanning a 29th of February", "2024-02-28", "2023-03-01"],
+		["a period ending on a 29th of February", "2024-02-29", "2023-03-01"],
 	])("derives the start of %s", (_label, end, expected) => {
 		expect(computeReferencePeriodStart(end)).toBe(expected);
 	});
@@ -116,8 +117,10 @@ describe("mapCompanyFromV1", () => {
 			address: "1 rue de la Paix",
 			nafCode: "62.01Z",
 			region: "Île-de-France",
+			regionCode: "11",
 			departmentCode: "75",
 			departmentLabel: "Paris",
+			statutDiffusion: null,
 		});
 	});
 
@@ -151,8 +154,10 @@ describe("mapCompanyFromV1", () => {
 			address: null,
 			nafCode: null,
 			region: null,
+			regionCode: null,
 			departmentCode: null,
 			departmentLabel: null,
+			statutDiffusion: null,
 		});
 	});
 
@@ -161,8 +166,27 @@ describe("mapCompanyFromV1", () => {
 			mapCompanyFromV1(v1Company({ région: "99", département: "999" })),
 		).toMatchObject({
 			region: null,
+			regionCode: null,
 			departmentCode: "999",
 			departmentLabel: null,
+			statutDiffusion: null,
+		});
+	});
+
+	it("marks a V1 non-diffusible company and clears its placeholder address", () => {
+		expect(
+			mapCompanyFromV1(
+				v1Company({
+					raison_sociale: "[NON-DIFFUSIBLE]",
+					adresse: "[NON-DIFFUSIBLE]",
+					code_naf: "[NON-DIFFUSIBLE]",
+				}),
+			),
+		).toMatchObject({
+			name: "[NON-DIFFUSIBLE]",
+			address: null,
+			nafCode: null,
+			statutDiffusion: "N",
 		});
 	});
 });

@@ -1,10 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect, mockGetActiveLock } = vi.hoisted(() => ({
-	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
-		throw new Error("NEXT_REDIRECT");
-	}),
+const { mockGetActiveLock } = vi.hoisted(() => ({
 	mockGetActiveLock: vi
 		.fn()
 		.mockResolvedValue({ lockedByOther: false, holder: null }),
@@ -18,7 +15,6 @@ vi.mock("next/navigation", () => ({
 		back: vi.fn(),
 		refresh: vi.fn(),
 	}),
-	redirect: mockRedirect,
 }));
 
 vi.mock("~/trpc/react", () => ({
@@ -111,18 +107,22 @@ describe("MonEspacePage", () => {
 		mockGetActiveLock.mockResolvedValue({ lockedByOther: false, holder: null });
 	});
 
-	it("redirects to mes-entreprises when siret is null", async () => {
-		await expect(
-			MonEspacePage({ siret: null, userPhone: null }),
-		).rejects.toThrow("NEXT_REDIRECT");
-		expect(mockRedirect).toHaveBeenCalledWith("/mon-espace/mes-entreprises");
+	it("renders MissingSiret without redirecting when siret is null", async () => {
+		const page = await MonEspacePage({ siret: null, userPhone: null });
+		const { container } = render(page);
+		expect(
+			screen.getByRole("heading", { level: 1, name: "SIRET manquant" }),
+		).toBeInTheDocument();
+		expect(container.querySelectorAll('main[id="content"]')).toHaveLength(1);
 	});
 
-	it("redirects to mes-entreprises when siret is too short", async () => {
-		await expect(
-			MonEspacePage({ siret: "1234", userPhone: null }),
-		).rejects.toThrow("NEXT_REDIRECT");
-		expect(mockRedirect).toHaveBeenCalledWith("/mon-espace/mes-entreprises");
+	it("renders MissingSiret without redirecting when siret is too short", async () => {
+		const page = await MonEspacePage({ siret: "1234", userPhone: null });
+		const { container } = render(page);
+		expect(
+			screen.getByRole("heading", { level: 1, name: "SIRET manquant" }),
+		).toBeInTheDocument();
+		expect(container.querySelectorAll('main[id="content"]')).toHaveLength(1);
 	});
 
 	it("renders company declarations for valid siret", async () => {

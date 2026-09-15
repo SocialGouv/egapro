@@ -305,6 +305,9 @@ jobs:
       EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       EGAPRO_E2E_CLOCK: "true"
+      # Same test-only admin two-factor seam as e2e.yaml (#4467): dynamic.a11y.ts
+      # records /admin/declarations, which is behind the MFA guard since #4461.
+      EGAPRO_E2E_ADMIN_MFA: "true"
       S3_ENDPOINT: http://localhost:9000
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin

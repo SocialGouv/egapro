@@ -172,3 +172,13 @@ Déclarées et validées dans `src/env.js` (`@t3-oss/env-nextjs` + Zod). **Jamai
 Ajouter une variable = 4 gestes : la déclarer dans `src/env.js` (section `server` ou `client`), l'ajouter à `runtimeEnv`, l'ajouter au `.env` local, **et l'ajouter à la config de déploiement `.kontinuous/`**. Il n'y a pas de configmap unique « egapro » : le conteneur app monte ses variables via `app.envFrom` / `app.env` de `.kontinuous/values.yaml`, chaque bloc pointant vers une configmap ou une sealed-secret **par sujet** (`proconnect`, `mail`, `s3`, `api`, `matomo`…) définie sous `.kontinuous/env/{dev,preprod,prod}/templates/<sujet>.{configmap,sealed-secret}.yaml`. Une valeur publique va dans la configmap du sujet, un secret dans sa sealed-secret.
 
 > `SKIP_ENV_VALIDATION=1` contourne la validation (build Docker, CI sans secrets).
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -51,8 +51,10 @@ import { COUNTIES, REGIONS } from "~/modules/domain";
  * @property {string | null} address
  * @property {string | null} nafCode
  * @property {string | null} region
+ * @property {string | null} regionCode
  * @property {string | null} departmentCode
  * @property {string | null} departmentLabel
+ * @property {string | null} statutDiffusion
  */
 
 /**
@@ -93,7 +95,7 @@ import { COUNTIES, REGIONS } from "~/modules/domain";
  * @property {ImportError[]} errors
  */
 
-const NON_DIFFUSIBLE_NAF = "[NON-DIFFUSIBLE]";
+const NON_DIFFUSIBLE_MARKER = "[NON-DIFFUSIBLE]";
 
 /** @type {Record<string, string>} */
 const REGION_LABELS = REGIONS;
@@ -106,6 +108,9 @@ const DEPARTMENT_LABELS = COUNTIES;
  */
 export function computeReferencePeriodStart(referencePeriodEnd) {
 	const start = new Date(`${referencePeriodEnd}T00:00:00.000Z`);
+	if (referencePeriodEnd.endsWith("-02-29")) {
+		return `${start.getUTCFullYear() - 1}-03-01`;
+	}
 	start.setUTCFullYear(start.getUTCFullYear() - 1);
 	start.setUTCDate(start.getUTCDate() + 1);
 	return start.toISOString().slice(0, 10);
@@ -121,16 +126,22 @@ export function mapCompanyFromV1(entreprise) {
 	return {
 		siren: entreprise.siren,
 		name: entreprise.raison_sociale,
-		address: entreprise.adresse ?? null,
+		address:
+			entreprise.adresse === NON_DIFFUSIBLE_MARKER
+				? null
+				: (entreprise.adresse ?? null),
 		nafCode:
-			entreprise.code_naf && entreprise.code_naf !== NON_DIFFUSIBLE_NAF
+			entreprise.code_naf && entreprise.code_naf !== NON_DIFFUSIBLE_MARKER
 				? entreprise.code_naf
 				: null,
 		region: regionCode ? (REGION_LABELS[regionCode] ?? null) : null,
+		regionCode: regionCode && REGION_LABELS[regionCode] ? regionCode : null,
 		departmentCode,
 		departmentLabel: departmentCode
 			? (DEPARTMENT_LABELS[departmentCode] ?? null)
 			: null,
+		statutDiffusion:
+			entreprise.raison_sociale === NON_DIFFUSIBLE_MARKER ? "N" : null,
 	};
 }
 

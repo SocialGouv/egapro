@@ -36,7 +36,12 @@ async function callSearchCompany(
 	const caller = adminRouter.createCaller({
 		db: buildDb(gipRows),
 		session: {
-			user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+			user: {
+				id: "admin-1",
+				email: "admin@example.fr",
+				isAdmin: true,
+				adminMfaAt: Math.floor(Date.now() / 1000),
+			},
 			expires: "",
 		},
 		headers: new Headers(),
@@ -127,7 +132,12 @@ describe("adminRouter.searchCompany", () => {
 		const caller = adminRouter.createCaller({
 			db,
 			session: {
-				user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+				user: {
+					id: "admin-1",
+					email: "admin@example.fr",
+					isAdmin: true,
+					adminMfaAt: Math.floor(Date.now() / 1000),
+				},
 				expires: "",
 			},
 			headers: new Headers(),

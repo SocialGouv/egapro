@@ -11,6 +11,8 @@ import { getSessionSiren } from "../sessionSiren";
 const SIREN = "123456789";
 const SIRET = `${SIREN}00015`;
 const IMPERSONATED_SIREN = "987654321";
+/** A second factor presented a minute ago — inside the admin MFA window. */
+const FRESH_MFA = Math.floor(Date.now() / 1000) - 60;
 
 function request() {
 	return new Request("https://egapro.test/api/whatever");
@@ -64,12 +66,29 @@ describe("getSessionSiren", () => {
 			id: "admin-1",
 			siret: SIRET,
 			isAdmin: true,
+			adminMfaAt: FRESH_MFA,
 			impersonation: { siren: IMPERSONATED_SIREN },
 		});
 
 		const { siren } = await getSessionSiren(request());
 
 		expect(siren).toBe(IMPERSONATED_SIREN);
+	});
+
+	// Mimoquage is an administrator privilege: once the second-factor window
+	// lapses, the agent reads their own perimeter like any declarant.
+	it("falls back to the admin's own siren once the MFA window has lapsed", async () => {
+		signedIn({
+			id: "admin-1",
+			siret: SIRET,
+			isAdmin: true,
+			adminMfaAt: null,
+			impersonation: { siren: IMPERSONATED_SIREN },
+		});
+
+		const { siren } = await getSessionSiren(request());
+
+		expect(siren).toBe(SIREN);
 	});
 
 	it("ignores an impersonation field carried by a non-admin session", async () => {
@@ -90,6 +109,7 @@ describe("getSessionSiren", () => {
 			id: "admin-1",
 			siret: SIRET,
 			isAdmin: true,
+			adminMfaAt: FRESH_MFA,
 			impersonation: { siren: "12345" },
 		});
 

@@ -18,13 +18,13 @@
 export {
 	LOGIN,
 	MY_SPACE,
-	MY_SPACE_COMPANIES,
 	mySpaceHistoryHref,
 } from "./shared/accountRoutes";
 export {
 	ADMIN,
 	ADMIN_DECLARATIONS,
 	ADMIN_IMPERSONATE,
+	ADMIN_MFA_RESUME,
 	ADMIN_NAV_LINKS,
 	ADMIN_REFERENTS,
 	ADMIN_SETTINGS,

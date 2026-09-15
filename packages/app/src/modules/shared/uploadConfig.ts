@@ -49,3 +49,9 @@ export const S3_PART_MIN_SIZE = 5 * 1024 * 1024;
  * Mirrors the `files.type` enum on the server.
  */
 export type FlowType = "cse_opinion" | "joint_evaluation";
+
+/** Renders a file's format and size as "PDF – 61,88 Ko", or the format alone. */
+export function formatFileMeta(format: string, bytes: number | null): string {
+	const size = formatFileSize(bytes);
+	return size ? `${format} – ${size}` : format;
+}

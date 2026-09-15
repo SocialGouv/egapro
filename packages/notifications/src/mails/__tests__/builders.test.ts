@@ -300,15 +300,19 @@ describe("per-type rendering details", () => {
 		});
 
 		expect(mail.subject).toBe(
-			"Egapro - Représentation équilibrée : accusé de réception",
+			"Egapro - Transmission de la déclaration de la représentation équilibrée",
 		);
 		expect(mail.html).toContain(
 			"la déclaration des indicateurs de représentation équilibrée",
 		);
+		expect(mail.html).toContain("pour l&#x27;année");
+		expect(mail.html).toContain("2028");
+		expect(mail.html).toContain("au titre des données");
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).not.toContain("période de référence");
 		expect(mail.html).toContain(RAISON_SOCIALE);
 		expect(mail.html).toContain("SIREN :");
 		expect(mail.html).toContain(SIREN);
-		expect(mail.html).toContain(String(YEAR));
 		expect(mail.html).toContain("accuse réception de cette transmission");
 		expect(mail.html).toContain("démarche est désormais terminée");
 	});

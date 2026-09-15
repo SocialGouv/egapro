@@ -83,7 +83,12 @@ async function createCaller(mockDb: unknown, isAdmin = true) {
 	return adminReferentsRouter.createCaller({
 		db: mockDb,
 		session: {
-			user: { id: "admin-1", email: "admin@gov.fr", isAdmin },
+			user: {
+				id: "admin-1",
+				email: "admin@gov.fr",
+				isAdmin,
+				adminMfaAt: Math.floor(Date.now() / 1000),
+			},
 			expires: "",
 		},
 		headers: new Headers(),

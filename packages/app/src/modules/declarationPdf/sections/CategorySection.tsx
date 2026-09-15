@@ -7,6 +7,7 @@ import {
 	computeWorkforceTotal,
 	formatCurrency,
 	formatTotal,
+	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import { styles } from "../recapPdfStyles";
 import type { DeclarationPdfData } from "../types";
@@ -161,6 +162,7 @@ function CategoryBlock({
 	index: number;
 }) {
 	const heading = `Catégorie d'emplois n°${index + 1}${category.name ? ` : ${category.name}` : ""}`;
+	const payApplicable = shouldRetainCategoryPayValues(category, category, true);
 	return (
 		<>
 			<View wrap={false}>
@@ -168,6 +170,9 @@ function CategoryBlock({
 				<SubTitle title="Effectifs physiques" />
 				<EffectifTable category={category} />
 			</View>
+			{!payApplicable && (
+				<Text style={styles.noData}>Aucun écart à calculer</Text>
+			)}
 			<View wrap={false}>
 				<SubTitle title="Rémunération annuelle brute moyenne" />
 				<PayTable

@@ -2,6 +2,8 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	// relies on block margin-collapse (fieldset): stays 2rem with or without a callout above
+	// Spaces .actions from the previous block under a block-flow parent (e.g. a
+	// DSFR fieldset). Under a flex parent with `gap`, this adds to the gap
+	// instead of collapsing into it — the call site must pass `fr-mt-0`.
 	margin-top: 2rem;
 }

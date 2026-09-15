@@ -26,6 +26,7 @@ export {
 	useRepresentationDraftContext,
 } from "./shared/draft/DraftContext";
 export { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
+export { GapReminderCallout } from "./shared/GapReminderCallout";
 export type { PercentagePairValues } from "./shared/PercentagePairFields";
 export {
 	complementPercentage,

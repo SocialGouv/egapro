@@ -1,20 +1,44 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { Step6Review } from "../Step6Review";
 
 const mockSubmitMutate = vi.fn();
+const mockSubmitReset = vi.fn();
+const mockPush = vi.fn();
+const mockDisclose = vi.fn();
+const mockConceal = vi.fn();
+const mockSubmitState = {
+	error: null as { message: string } | null,
+	isPending: false,
+	onSuccess: undefined as (() => void) | undefined,
+};
+
+vi.mock("next/navigation", () => ({
+	usePathname: vi.fn(),
+	useRouter: () => ({ push: mockPush }),
+}));
+
+vi.mock("~/modules/shared", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/shared")>()),
+	getDsfrModal: () => ({ disclose: mockDisclose, conceal: mockConceal }),
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submit: {
-				useMutation: () => ({
-					mutate: mockSubmitMutate,
-					isPending: false,
-					error: null,
-				}),
+				useMutation: ({ onSuccess }: { onSuccess: () => void }) => {
+					mockSubmitState.onSuccess = onSuccess;
+					return {
+						mutate: mockSubmitMutate,
+						reset: mockSubmitReset,
+						isPending: mockSubmitState.isPending,
+						error: mockSubmitState.error,
+					};
+				},
 			},
 		},
 		company: {
@@ -93,7 +117,102 @@ const emptyStep4Data = () => ({
 	],
 });
 
+function renderSubmissionReview() {
+	return render(
+		<Step6Review
+			companyWorkforce={null}
+			declaration={emptyDeclaration()}
+			declarationYear={2025}
+			indicatorGRequired
+			step2Data={emptyStep2Data()}
+			step2Gaps={noPayGapReferences()}
+			step3Data={emptyStep3Data()}
+			step3Gaps={noPayGapReferences()}
+			step4Data={emptyStep4Data()}
+		/>,
+	);
+}
+
 describe("Step6Review", () => {
+	beforeEach(() => {
+		mockSubmitMutate.mockReset();
+		mockSubmitReset.mockReset();
+		mockPush.mockReset();
+		mockDisclose.mockReset();
+		mockConceal.mockReset();
+		mockSubmitState.error = null;
+		mockSubmitState.isPending = false;
+		mockSubmitState.onSuccess = undefined;
+	});
+
+	it("closes the modal before navigating after a successful submission", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onSuccess?.());
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("still navigates if funnel tracking storage is unavailable", () => {
+		renderSubmissionReview();
+		const storage = vi
+			.spyOn(Storage.prototype, "getItem")
+			.mockImplementation(() => {
+				throw new Error("Storage blocked");
+			});
+		try {
+			act(() => mockSubmitState.onSuccess?.());
+			expect(mockConceal).toHaveBeenCalledTimes(1);
+			expect(mockPush).toHaveBeenCalledTimes(1);
+		} finally {
+			storage.mockRestore();
+		}
+	});
+
+	it("shows a submission error in the modal and clears it on close", async () => {
+		mockSubmitState.error = { message: "La soumission a échoué." };
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		expect(
+			within(modal).getByRole("alert", { hidden: true }),
+		).toHaveTextContent("La soumission a échoué.");
+		expect(mockPush).not.toHaveBeenCalled();
+		await userEvent.click(
+			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
+		);
+		expect(mockSubmitReset).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not submit again while the request is pending", async () => {
+		mockSubmitState.isPending = true;
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+		const user = userEvent.setup();
+		await user.click(within(modal).getByRole("checkbox", { hidden: true }));
+		const validate = within(modal).getByRole("button", {
+			name: "Envoi en cours…",
+			hidden: true,
+		});
+		expect(validate).toBeDisabled();
+		expect(
+			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
+		).toBeDisabled();
+		expect(
+			within(modal).getByRole("button", { name: "Fermer", hidden: true }),
+		).toBeDisabled();
+		await user.click(validate);
+		expect(mockSubmitMutate).not.toHaveBeenCalled();
+		expect(mockSubmitReset).not.toHaveBeenCalled();
+	});
 	it("renders title and stepper at step 6", () => {
 		render(
 			<Step6Review
@@ -494,7 +613,7 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders next as a submit button labelled Soumettre when not submitted", () => {
+	it("renders next as a submit button labelled Transmettre when not submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
@@ -509,7 +628,7 @@ describe("Step6Review", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("button", { name: /soumettre/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 

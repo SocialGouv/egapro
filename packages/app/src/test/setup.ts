@@ -68,6 +68,7 @@ URL.revokeObjectURL = vi.fn() as unknown as typeof URL.revokeObjectURL;
 vi.mock("~/env", () => ({
 	env: {
 		NODE_ENV: "test",
+		ADMIN_EMAILS: "agent@example.fr",
 		DATABASE_URL: "postgres://localhost/test",
 		AUTH_SECRET: "test-secret",
 		EGAPRO_PROCONNECT_CLIENT_ID: "test-client-id",

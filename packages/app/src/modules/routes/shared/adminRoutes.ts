@@ -7,6 +7,10 @@ export const ADMIN_REFERENTS = route("/admin/liste-referents");
 export const ADMIN_STATS = route("/admin/stats");
 export const ADMIN_SETTINGS = route("/admin/parametres");
 
+// The step-up screen lives outside `/admin/**`: the guard that redirects to it
+// must stay reachable when the backoffice itself is refused.
+export const ADMIN_MFA_RESUME = route("/acces-backoffice");
+
 // Redirected to `/admin/stats` by `next.config.js`: reachable without having a
 // `page.tsx` of their own.
 export const ADMIN_STATS_CAMPAIGN = route("/admin/stats/campagne");

@@ -7,6 +7,7 @@ import {
 	CLOSED_CAMPAIGN,
 	createCaller,
 	createMockDb,
+	FRESH_ADMIN_MFA,
 	installRouterTestEnv,
 	SIREN,
 	whereParams,
@@ -86,6 +87,7 @@ describe("representationDeclarationRouter.get", () => {
 		const mock = createMockDb([]);
 		const session = buildSession({
 			isAdmin: true,
+			adminMfaAt: FRESH_ADMIN_MFA,
 			impersonation: { siren: "987654321" },
 		});
 

@@ -161,6 +161,20 @@ check_pattern '\.(ts|tsx)$' \
   'Inline SIREN extraction is forbidden (even via a SIREN_LENGTH const). Use extractSiren()/parseSiren() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
+# Domain layer — isIndicatorGRequired(getObligationWorkforce(...)) composition must use
+# isIndicatorGRequiredForGip(). Matched on a newline-flattened copy of CONTENT: the
+# formatter breaks this call across two lines at most call sites, and check_pattern's
+# plain `grep -E` matches line by line, so a pattern anchored on a single line would
+# almost never trigger.
+if [[ "$FILE_PATH" =~ \.(ts|tsx)$ ]] &&
+  [[ ! "$FILE_PATH" =~ (domain/|__tests__|\.test\.|\.spec\.) ]]; then
+  FLATTENED_CONTENT=$(echo "$CONTENT" | tr '\n' ' ')
+  if echo "$FLATTENED_CONTENT" | grep -qE 'isIndicatorGRequired\([[:space:]]*getObligationWorkforce'; then
+    echo "Blocked: Inline isIndicatorGRequired(getObligationWorkforce(...)) composition is forbidden. Use isIndicatorGRequiredForGip() from ~/modules/domain." >&2
+    exit 2
+  fi
+fi
+
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
 check_pattern 'routers/.*\.ts$' \
   "from ['\"]zod['\"]" \

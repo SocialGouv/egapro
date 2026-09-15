@@ -12,6 +12,7 @@ export const AUDIT_ACTIONS = {
 	AUTH_LOGIN: "auth.login",
 	AUTH_LOGIN_FAILED: "auth.login_failed",
 	AUTH_LOGOUT: "auth.logout",
+	AUTH_ADMIN_MFA: "auth.admin_mfa",
 
 	// ── Declaration mutations ──────────────────────────────
 	DECLARATION_CREATE: "declaration.create",
@@ -108,6 +109,7 @@ export const AUDIT_ACTIONS = {
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
 	PDF_REPRESENTATION_DOWNLOAD: "pdf.representation_download",
 	PDF_PREFILL_DOWNLOAD: "pdf.prefill_download",
+	PDF_SIZE_PROBE: "pdf.size_probe",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
 	// ── Exports & external API consumers ──────────────────
@@ -158,6 +160,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.AUTH_LOGIN]: "auth",
 	[AUDIT_ACTIONS.AUTH_LOGIN_FAILED]: "auth",
 	[AUDIT_ACTIONS.AUTH_LOGOUT]: "auth",
+	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: "auth",
 
 	[AUDIT_ACTIONS.DECLARATION_CREATE]: "mutation",
 	[AUDIT_ACTIONS.DECLARATION_UPDATE_STEP_1]: "mutation",
@@ -227,6 +230,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.PDF_SIZE_PROBE]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 
 	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: "export",

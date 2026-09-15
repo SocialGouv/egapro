@@ -1,10 +1,10 @@
 "use client";
 
 import { DeclarationLockAlert } from "./DeclarationLockAlert";
-import { useLockContext } from "./LockContext";
+import { useLockHolderIfLockedOut } from "./LockContext";
 
 export function DeclarationLockAlertGate() {
-	const { holder, isReadOnly } = useLockContext();
-	if (!isReadOnly || !holder) return null;
+	const holder = useLockHolderIfLockedOut();
+	if (!holder) return null;
 	return <DeclarationLockAlert holder={holder} />;
 }

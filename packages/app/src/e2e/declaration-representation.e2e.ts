@@ -6,6 +6,9 @@ import {
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
 import { DECLARATION_REPRESENTATION, MY_SPACE } from "~/modules/routes";
+// Leaf module, not the barrel: the Playwright runner cannot load the CSS
+// modules the barrel pulls in through its React components.
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { TEST_SIREN } from "./constants";
 import {
 	getCurrentDbYear,
@@ -248,6 +251,11 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await expect(
 				page.getByText("Non conforme", { exact: true }),
 			).toBeVisible();
+			await expect(
+				page.getByText(
+					`Objectif de ${getRepresentationTarget(campaignYear)} % non atteint`,
+				),
+			).toBeVisible();
 
 			await goNext(page);
 		});
@@ -303,7 +311,7 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await waitForDsfrModal(page, SUBMIT_MODAL_ID);
 			await clickAndExpectDialogOpen(
 				page,
-				page.getByRole("button", { name: "Soumettre" }),
+				page.getByRole("button", { exact: true, name: SUBMIT_LABEL }),
 				SUBMIT_MODAL_ID,
 			);
 
@@ -511,7 +519,7 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 		);
 		await expect(page.getByText("Aucun cadre dirigeant")).toBeVisible();
 		await expect(page.getByText("Aucune instance dirigeante")).toBeVisible();
-		await expect(page.getByText("Non applicable").first()).toBeVisible();
+		await expect(page.getByText("Non calculable").first()).toBeVisible();
 		await expect(
 			page.getByRole("heading", { name: "Publication" }),
 		).toHaveCount(0);
@@ -563,11 +571,28 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 		page,
 	}) => {
 		await page.goto(FUNNEL_ROOT);
-		await chooseRadio(page, /Moins de 1 000 salariés/);
 		await expect(
-			page.getByText(/Vous n'êtes pas assujetti à la publication/),
+			page.getByText(
+				"Indiquez si votre entreprise a employé au moins 1 000 salariés durant les trois derniers exercices consécutifs.",
+			),
 		).toBeVisible();
 
+		await chooseRadio(page, /Moins de 1 000 salariés/);
+
+		const notice = page
+			.locator("div.fr-background-alt--blue-france")
+			.filter({ hasText: "Votre entreprise n'est pas assujettie" });
+		await expect(notice.locator("p")).toHaveText([
+			"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			"Vous pouvez cliquer sur valider pour confirmer.",
+		]);
+		// Two independent sentences, two paragraphs: the <br /> this wording replaced
+		// fabricated a structure that read as a single block.
+		await expect(notice.locator("br")).toHaveCount(0);
+		// The consigne no longer dates itself with the campaign year.
+		await expect(notice).not.toContainText(String(campaignYear));
+
+		await expect(page.getByRole("button", { name: "Suivant" })).toHaveCount(0);
 		await page.getByRole("button", { name: "Valider" }).click();
 		await page.waitForURL(urlGlob(MY_SPACE));
 	});
@@ -607,8 +632,12 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 
 		const panel = page.locator(`#${PANEL_ID}`);
 		await expect(
-			panel.getByText(/Vous n'êtes pas assujetti à la publication/),
+			panel.getByText(
+				"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.",
+			),
 		).toBeVisible();
+		// A follow-up view carries no Valider button, so it drops the funnel's second sentence.
+		await expect(panel.getByText(/cliquer sur valider/)).toHaveCount(0);
 		await expect(
 			panel.getByText("Vérification de l'assujettissement"),
 		).toBeVisible();

@@ -4,12 +4,9 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
-import type { CategoryFormValues } from "~/modules/declaration-remuneration/schemas";
 import {
-	CATEGORY_PAY_BASES,
+	type CategoryFormValues,
 	categoryFormSchema,
-	type PAY_FIELDS_MEN,
-	type PAY_FIELDS_WOMEN,
 } from "~/modules/declaration-remuneration/schemas";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
@@ -35,8 +32,11 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	CATEGORY_PAY_FIELDS,
+	isCategoryPayApplicable,
 	padDecimalOnBlur,
 	padDecimalToTwo,
+	shouldRetainCategoryPayValues,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
 import type { AppHref } from "~/modules/routes";
@@ -49,10 +49,16 @@ import { CategoryAccordionItem } from "./CategoryAccordionItem";
 import { categoryDataFieldId } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
 import {
+	collectCategoryPayErrors,
+	payFieldsForCountField,
+} from "./categoryPayErrors";
+import {
 	createEmptyCategory,
 	type EmployeeCategory,
 	fromDatabaseRows,
+	toCategoryHeadcounts,
 	toSubmitData,
+	withoutPayValuesWhenNotApplicable,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
@@ -61,22 +67,57 @@ function createIdGenerator() {
 	return () => id++;
 }
 
-function toFormValues(cats: EmployeeCategory[]) {
-	return cats.map((c) => ({
-		name: c.name,
-		womenCount: c.womenCount,
-		menCount: c.menCount,
-		hourlyWomenCount: c.hourlyWomenCount,
-		hourlyMenCount: c.hourlyMenCount,
-		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
-		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
-		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
-		annualVariableMen: padDecimalToTwo(c.annualVariableMen),
-		hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
-		hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
-		hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
-		hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
-	}));
+type FormCategory = CategoryFormValues["categories"][number];
+
+function normalizeCategoryForForm(
+	category: FormCategory,
+	preserveLegacyPay: boolean,
+): FormCategory {
+	return shouldRetainCategoryPayValues(
+		toCategoryHeadcounts(category),
+		category,
+		preserveLegacyPay,
+	)
+		? category
+		: withoutPayValuesWhenNotApplicable(category);
+}
+
+function toFormValues(
+	cats: EmployeeCategory[],
+	preserveLegacyPay: boolean,
+): FormCategory[] {
+	return cats.map((c) =>
+		normalizeCategoryForForm(
+			{
+				name: c.name,
+				womenCount: c.womenCount,
+				menCount: c.menCount,
+				hourlyWomenCount: c.hourlyWomenCount,
+				hourlyMenCount: c.hourlyMenCount,
+				annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+				annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+				annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+				annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+				hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+				hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+				hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+				hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
+			},
+			preserveLegacyPay,
+		),
+	);
+}
+
+function normalizeFormValues(
+	values: CategoryFormValues,
+	preserveLegacyPay: boolean,
+): CategoryFormValues {
+	return {
+		source: values.source,
+		categories: values.categories.map((category) =>
+			normalizeCategoryForForm(category, preserveLegacyPay),
+		),
+	};
 }
 
 type Props = {
@@ -117,31 +158,6 @@ const CATEGORY_ALERT_ID = "step5-categories-error";
 // reconcile), so they anchor on the form itself rather than on one cell.
 const CATEGORY_FORM_FIELD_ID = "step5-categories";
 
-/** The pay fields a headcount makes mandatory — its own basis and sex only. */
-function payFieldsForCountField(
-	field: keyof EmployeeCategory,
-): readonly (keyof EmployeeCategory)[] {
-	for (const base of CATEGORY_PAY_BASES) {
-		if (field === base.womenCountField) return base.womenPayFields;
-		if (field === base.menCountField) return base.menPayFields;
-	}
-	return [];
-}
-
-const PAY_FIELD_LABELS: Record<
-	(typeof PAY_FIELDS_WOMEN)[number] | (typeof PAY_FIELDS_MEN)[number],
-	string
-> = {
-	annualBaseWomen: "salaire de base annuel des femmes",
-	annualVariableWomen: "composantes variables annuelles des femmes",
-	hourlyBaseWomen: "salaire de base horaire des femmes",
-	hourlyVariableWomen: "composantes variables horaires des femmes",
-	annualBaseMen: "salaire de base annuel des hommes",
-	annualVariableMen: "composantes variables annuelles des hommes",
-	hourlyBaseMen: "salaire de base horaire des hommes",
-	hourlyVariableMen: "composantes variables horaires des hommes",
-};
-
 export function CategoryForm({
 	referenceYear,
 	title,
@@ -175,6 +191,7 @@ export function CategoryForm({
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
+	const preserveLegacyPay = readOnly || disabled;
 
 	const initialCats =
 		initialCategories.length > 0
@@ -182,11 +199,44 @@ export function CategoryForm({
 			: [createEmptyCategory(nextId())];
 
 	const form = useZodForm(categoryFormSchema, {
-		defaultValues: defaultValuesOverride ?? {
-			source: initialSource,
-			categories: toFormValues(initialCats),
-		},
+		defaultValues: defaultValuesOverride
+			? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
+			: {
+					source: initialSource,
+					categories: toFormValues(initialCats, preserveLegacyPay),
+				},
 	});
+	const clearNonApplicableCategoryPay = useCallback(
+		(index: number) => {
+			const category = form.getValues(`categories.${index}`);
+			if (
+				!category ||
+				isCategoryPayApplicable(toCategoryHeadcounts(category))
+			) {
+				return false;
+			}
+			let cleared = false;
+			for (const payField of CATEGORY_PAY_FIELDS) {
+				const path = `categories.${index}.${payField}` as const;
+				if (form.getValues(path) !== "") {
+					form.setValue(path, "");
+					cleared = true;
+				}
+			}
+			return cleared;
+		},
+		[form],
+	);
+
+	// Editability can change without remounting the form. Official legacy pay is
+	// preserved while non-editable, then normalized once editing becomes possible.
+	// This effect depends only on scalar state, never on the watched array.
+	useEffect(() => {
+		if (preserveLegacyPay) return;
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+	}, [clearNonApplicableCategoryPay, form, preserveLegacyPay]);
 
 	useEffect(() => {
 		if (!onValuesChange) return;
@@ -246,36 +296,56 @@ export function CategoryForm({
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
 			const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
-			if (raw === "") {
-				form.setValue(`categories.${index}.${formField}`, raw);
-				setHasData(false);
-				return;
-			}
-			if (isInteger && /\D/.test(raw)) return;
-			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
-			if (Number.isNaN(n) || n < 0) return;
-			form.setValue(`categories.${index}.${formField}`, raw);
 			const changedFieldId = categoryDataFieldId(index, field);
-			// A headcount back to 0 releases the pay fields it was requiring —
-			// those of its own basis and sex, never the other basis' (#4254).
-			const clearedPayFieldIds =
-				n === 0
-					? new Set(
-							payFieldsForCountField(field).map((payField) =>
-								categoryDataFieldId(index, payField),
-							),
+			// A headcount drives every pay cell of its category, a pay cell only
+			// drives its own error.
+			const isCountField = payFieldsForCountField(field).length > 0;
+			const categoryPayFieldIds = new Set(
+				isCountField
+					? CATEGORY_PAY_FIELDS.map((payField) =>
+							categoryDataFieldId(index, payField),
 						)
-					: null;
+					: [],
+			);
+			const releasedPayFieldIds = new Set(
+				isCountField && (raw === "" || Number.parseInt(raw, 10) === 0)
+					? payFieldsForCountField(field).map((payField) =>
+							categoryDataFieldId(index, payField),
+						)
+					: [],
+			);
+			if (raw !== "") {
+				if (isInteger && /\D/.test(raw)) return;
+				const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
+				if (Number.isNaN(n) || n < 0) return;
+			}
+			form.setValue(`categories.${index}.${formField}`, raw);
+			const categoryPayApplicable = isCategoryPayApplicable(
+				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
+			);
 			setCategoryErrors((errors) =>
-				errors.filter(
-					(error) =>
-						error.fieldId !== changedFieldId &&
-						!clearedPayFieldIds?.has(error.fieldId) &&
-						(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
-							error.category === "invalid"),
-				),
+				errors.filter((error) => {
+					if (error.fieldId === changedFieldId) return false;
+					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
+						return error.category === "invalid";
+					if (!categoryPayFieldIds.has(error.fieldId)) return true;
+					// A category without one sex has no pay fields to correct. A 0
+					// on just one row still releases that row's own fields (#4254).
+					return (
+						categoryPayApplicable && !releasedPayFieldIds.has(error.fieldId)
+					);
+				}),
 			);
 			setHasData(false);
+		};
+	}
+
+	function handleHeadcountBlur(index: number) {
+		return () => {
+			if (readOnly) return false;
+			// Wait until the edit is committed so a transient 0 while replacing a
+			// multi-digit count cannot irreversibly erase the remuneration values.
+			return clearNonApplicableCategoryPay(index);
 		};
 	}
 
@@ -294,7 +364,7 @@ export function CategoryForm({
 
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
-		const formEntry = toFormValues([empty])[0];
+		const formEntry = toFormValues([empty], false)[0];
 		if (formEntry) {
 			pendingFocusIndex.current = fields.length;
 			append(formEntry);
@@ -304,7 +374,7 @@ export function CategoryForm({
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		replace(toFormValues(imported));
+		replace(toFormValues(imported, false));
 		setCategoryErrors([]);
 		setHasData(false);
 	}
@@ -368,10 +438,11 @@ export function CategoryForm({
 
 	const handleFormSubmit = form.handleSubmit(
 		(data) => {
+			const normalizedData = normalizeFormValues(data, false);
 			setValidationAttempt((attempt) => attempt + 1);
 			setCategoryErrors([]);
 
-			const emptyNameIndex = data.categories.findIndex(
+			const emptyNameIndex = normalizedData.categories.findIndex(
 				(cat) => !cat.name.trim(),
 			);
 			if (emptyNameIndex >= 0) {
@@ -389,7 +460,9 @@ export function CategoryForm({
 				return;
 			}
 
-			const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
+			const names = normalizedData.categories.map((cat) =>
+				cat.name.trim().toLowerCase(),
+			);
 			const hasDuplicates = names.length !== new Set(names).size;
 			if (hasDuplicates) {
 				setCategoryErrors([
@@ -402,29 +475,9 @@ export function CategoryForm({
 				return;
 			}
 
-			const remunerationErrors: FieldError[] = [];
-			data.categories.forEach((category, index) => {
-				for (const base of CATEGORY_PAY_BASES) {
-					for (const [countField, payFields] of [
-						[base.womenCountField, base.womenPayFields],
-						[base.menCountField, base.menPayFields],
-					] as const) {
-						const count = Number.parseInt(category[countField], 10);
-						if (Number.isNaN(count) || count < 1) continue;
-						for (const payField of payFields) {
-							if (category[payField].trim() !== "") continue;
-							remunerationErrors.push({
-								fieldId: categoryDataFieldId(index, payField),
-								category: "empty",
-								message: `Renseignez le ${PAY_FIELD_LABELS[payField]} pour la catégorie d'emplois n°${index + 1}.`,
-								anchor: true,
-							});
-						}
-					}
-				}
-			});
-			if (remunerationErrors.length > 0) {
-				setCategoryErrors(remunerationErrors);
+			const payErrors = collectCategoryPayErrors(normalizedData.categories);
+			if (payErrors.length > 0) {
+				setCategoryErrors(payErrors);
 				return;
 			}
 
@@ -432,7 +485,7 @@ export function CategoryForm({
 				annual: { women: maxWomen, men: maxMen },
 				hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 			} as const;
-			const sums = sumCategoryWorkforce(data.categories);
+			const sums = sumCategoryWorkforce(normalizedData.categories);
 			const workforceErrors: FieldError[] = [];
 			for (const row of WORKFORCE_ROWS) {
 				for (const [sex, sexLabel] of [
@@ -456,11 +509,11 @@ export function CategoryForm({
 
 			onSubmit(
 				toSubmitData(
-					data.categories.map((cat, i) => ({
+					normalizedData.categories.map((cat, i) => ({
 						id: i,
 						...cat,
 					})),
-					data.source,
+					normalizedData.source,
 				),
 			);
 		},
@@ -494,11 +547,25 @@ export function CategoryForm({
 		},
 	);
 
+	function handleSubmitEvent(event: React.FormEvent<HTMLFormElement>) {
+		if (disabled || readOnly) {
+			event.preventDefault();
+			return;
+		}
+		// A keyboard submit does not necessarily blur the active headcount cell.
+		// Normalize the live form first so a failed request cannot leave stale pay
+		// in the persisted draft.
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+		void handleFormSubmit(event);
+	}
+
 	return (
 		<form
 			autoComplete="off"
 			className={stepStyles.form}
-			onSubmit={handleFormSubmit}
+			onSubmit={handleSubmitEvent}
 		>
 			<StepTitleRow
 				devFillDisabled={disabled || readOnly}
@@ -518,7 +585,7 @@ export function CategoryForm({
 						annual: { women: maxWomen, men: maxMen },
 						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 					});
-					replace(toFormValues(devCats));
+					replace(toFormValues(devCats, false));
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setCategoryErrors([]);
 					setHasData(false);
@@ -633,6 +700,15 @@ export function CategoryForm({
 				<div className="fr-accordions-group" data-fr-group="false">
 					{fields.map((field, index) => {
 						const cat = categories[index];
+						// Preserve the official values of legacy locked declarations that
+						// predate #3678; editable and newly saved categories are normalized.
+						const payApplicable = cat
+							? shouldRetainCategoryPayValues(
+									toCategoryHeadcounts(cat),
+									cat,
+									preserveLegacyPay,
+								)
+							: true;
 						return (
 							<CategoryAccordionItem
 								baseId={baseId}
@@ -674,7 +750,9 @@ export function CategoryForm({
 								onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
 								onAskRemove={askRemoveCategory}
 								onDecimalBlur={handleDecimalBlur}
+								onHeadcountBlur={handleHeadcountBlur}
 								onPositiveNumberChange={handlePositiveNumberChange}
+								payApplicable={payApplicable}
 								readOnly={readOnly}
 								readOnlyLabel={readOnlyLabel}
 								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}
