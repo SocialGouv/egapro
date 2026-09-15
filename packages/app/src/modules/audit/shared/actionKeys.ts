@@ -126,6 +126,7 @@ export const AUDIT_ACTIONS = {
 	// ── Notifications (queue + worker) ───────────────────
 	NOTIFICATION_ENQUEUE: "notification.enqueue",
 	NOTIFICATION_SEND: "notification.send",
+	NOTIFICATION_OUTBOX_REPLAY: "notification.outbox_replay",
 
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
@@ -244,6 +245,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: "mutation",
 	[AUDIT_ACTIONS.NOTIFICATION_SEND]: "system",
+	[AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY]: "system",
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",

@@ -17,6 +17,10 @@ import {
 	isRepresentationPublicationRequired,
 } from "~/modules/domain";
 import {
+	deliverRecordedReceipt,
+	recordReceiptIntent,
+} from "~/modules/mail/receiptIntent";
+import {
 	companyProcedure,
 	companyWriteProcedure,
 	createTRPCRouter,
@@ -253,34 +257,41 @@ export const representationDeclarationRouter = createTRPCRouter({
 				draftUpdatedAt: null,
 			};
 
-			await ctx.db
-				.insert(representationDeclarations)
-				.values({
-					siren,
-					year,
-					declarantId: ctx.session.user.id,
-					...columns,
-				})
-				.onConflictDoUpdate({
-					target: [
-						representationDeclarations.siren,
-						representationDeclarations.year,
-					],
-					set: columns,
-				});
-
 			const email = ctx.session.user.email;
-			if (email) {
-				const { enqueueReceipt } = await import("~/modules/mail/server");
-				await enqueueReceipt({
-					kind: "representation",
-					to: email,
-					siren,
-					year,
-					userId: ctx.session.user.id,
-					isResend: false,
-				});
-			}
+			let receiptIntentId: string | null = null;
+
+			// The upsert and the receipt intent share a transaction for the same
+			// reason as every other submission here: once the declaration is
+			// committed, the acknowledgement it owes must be committed with it.
+			await ctx.db.transaction(async (tx) => {
+				await tx
+					.insert(representationDeclarations)
+					.values({
+						siren,
+						year,
+						declarantId: ctx.session.user.id,
+						...columns,
+					})
+					.onConflictDoUpdate({
+						target: [
+							representationDeclarations.siren,
+							representationDeclarations.year,
+						],
+						set: columns,
+					});
+
+				receiptIntentId = email
+					? await recordReceiptIntent(tx, {
+							kind: "representation",
+							to: email,
+							siren,
+							year,
+							userId: ctx.session.user.id,
+						})
+					: null;
+			});
+
+			await deliverRecordedReceipt(receiptIntentId);
 
 			return { success: true as const };
 		}),
