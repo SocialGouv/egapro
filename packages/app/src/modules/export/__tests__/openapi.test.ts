@@ -19,7 +19,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("3.0.0");
+		expect(openApiSpec.info.version).toBe("3.1.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -190,14 +190,11 @@ describe("openApiSpec", () => {
 			}
 		});
 
-		it("declares Tranche_effectif as a nullable enum of the size buckets", () => {
+		it("declares Tranche_effectif as a non-nullable enum of the size buckets", () => {
 			const tranche = parcoursSchema.properties.Tranche_effectif;
-			const stringVariant = tranche.oneOf.find((v) => v.type === "string");
 
-			expect(tranche.oneOf.find((v) => v.type === "null")).toBeDefined();
-			expect(
-				stringVariant && "enum" in stringVariant && stringVariant.enum,
-			).toEqual(Object.keys(COMPANY_SIZE_RANGES));
+			expect(tranche.type).toBe("string");
+			expect(tranche.enum).toEqual(Object.keys(COMPANY_SIZE_RANGES));
 		});
 
 		it("declares Regime_obligations as the company size classification enum", () => {

@@ -113,7 +113,7 @@ Deux lectures de la taille de l'entreprise coexistent :
 - `Parcours.Regime_obligations` — le **paquet d'obligations** applicable : `voluntary` (< 50, volontariat), `mandatory` (assujettissement standard) ou `mandatory_with_compliance` (assujettissement avec parcours de conformité).
 - `Parcours.Tranche_effectif` — le **bucket de segmentation** : `<50`, `50-99`, `100-149`, `150-249`, `250+`.
 
-Quand l'effectif GIP est inconnu, `Tranche_effectif` vaut `null` (jamais replié sur `<50`), tandis que `Regime_obligations` relève alors du volontariat.
+Quand l'effectif GIP est inconnu (entreprise absente du fichier GIP de l'année), `Tranche_effectif` vaut `<50`, aligné sur `Regime_obligations` qui relève alors du volontariat — `Tranche_effectif === "<50"` si et seulement si `Regime_obligations === "voluntary"`. `Parcours.Effectif`, lui, reste `null` : c'est le seul champ qui continue de signaler l'absence de ligne GIP pour l'année.
 
 ### Masquage de `CSE_existant`
 

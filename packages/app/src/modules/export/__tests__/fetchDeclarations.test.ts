@@ -524,7 +524,7 @@ describe("assembleDeclaration", () => {
 		expect(Parcours.Regime_obligations).toBe(regime);
 	});
 
-	it("leaves Tranche_effectif null and the regime voluntary when the company is absent from the GIP file", () => {
+	it("buckets Tranche_effectif to <50 and the regime voluntary when the company is absent from the GIP file", () => {
 		const { Parcours } = assembleDeclaration(
 			{ ...baseRow, workforceEma: null },
 			[],
@@ -532,7 +532,7 @@ describe("assembleDeclaration", () => {
 		);
 
 		expect(Parcours.Effectif).toBeNull();
-		expect(Parcours.Tranche_effectif).toBeNull();
+		expect(Parcours.Tranche_effectif).toBe("<50");
 		expect(Parcours.Regime_obligations).toBe("voluntary");
 	});
 
