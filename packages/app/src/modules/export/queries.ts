@@ -9,6 +9,7 @@ import {
 } from "~/server/db/declarationConditions";
 import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
@@ -396,7 +397,33 @@ export async function fetchCseFilesByDeclaration(
 ): Promise<Map<string, FileRow[]>> {
 	if (keys.length === 0) return new Map();
 	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (rows.length === 0) return new Map();
+
+	// Separate query: a join would duplicate the file row once per content.
+	const contentRows = await db
+		.select({
+			fileId: cseOpinionFiles.fileId,
+			declarationNumber: cseOpinionFiles.declarationNumber,
+			type: cseOpinionFiles.type,
+		})
+		.from(cseOpinionFiles)
+		.where(
+			inArray(
+				cseOpinionFiles.fileId,
+				rows.map((r) => r.id),
+			),
+		);
+	const contentsByFileId = groupByKey(contentRows, (r) => r.fileId);
+
+	const filesWithContents: FileRow[] = rows.map((file) => ({
+		...file,
+		contents: (contentsByFileId.get(file.id) ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
+	}));
+
+	return groupByKey(filesWithContents, (r) => `${r.siren}-${r.year}`);
 }
 
 export async function fetchJointEvaluationFilesByDeclaration(

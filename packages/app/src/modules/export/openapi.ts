@@ -79,6 +79,42 @@ const cseOpinionSchema = {
 	},
 } as const;
 
+const cseFileContentSchema = {
+	type: "object",
+	properties: {
+		Numero_declaration: {
+			type: "integer",
+			enum: [1, 2],
+			description:
+				"Numéro de déclaration concernée par ce contenu : 1 = déclaration initiale, 2 = seconde déclaration.",
+		},
+		Type: {
+			type: "string",
+			enum: ["accuracy", "gap"],
+			description:
+				"Type de contenu couvert par le fichier — même vocabulaire que Avis_CSE.Type, pour relier un fichier à son avis via (Numero_declaration, Type).",
+		},
+	},
+} as const;
+
+const fileContentSchema = {
+	type: "object",
+	properties: {
+		declarationNumber: {
+			type: "integer",
+			enum: [1, 2],
+			description:
+				"Declaration number covered by this content: 1 = initial declaration, 2 = second declaration.",
+		},
+		type: {
+			type: "string",
+			enum: ["accuracy", "gap"],
+			description:
+				"Content type covered by the file — same vocabulary as the declarations export's Avis_CSE.Type.",
+		},
+	},
+} as const;
+
 const indicatorFAnnualSchema = {
 	type: "object",
 	description:
@@ -513,6 +549,12 @@ const declarationSchema = {
 							"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
 						example: "/api/v1/files/abc-123",
 					},
+					Contenus: {
+						type: "array",
+						items: cseFileContentSchema,
+						description:
+							"Contenus de l'avis CSE couverts par ce fichier — relie le fichier à ses entrées Avis_CSE via (Numero_declaration, Type). Un fichier peut couvrir plusieurs contenus. Tableau vide si aucune association n'est encore enregistrée (étape 2 de l'avis CSE non finalisée).",
+					},
 				},
 			},
 			description:
@@ -668,6 +710,12 @@ const fileMetadataSchema = {
 			description:
 				"Relative URL to download the file via GET /api/v1/files/{fileId}",
 			example: "/api/v1/files/abc-123",
+		},
+		contents: {
+			type: "array",
+			items: fileContentSchema,
+			description:
+				"CSE opinion contents covered by this file (type='cse_opinion' only). A file can cover several contents; empty array if none is registered yet. Not meaningful for type='joint_evaluation'.",
 		},
 	},
 } as const;
