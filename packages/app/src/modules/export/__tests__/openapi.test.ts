@@ -371,6 +371,55 @@ describe("openApiSpec", () => {
 		});
 	});
 
+	describe("indicator F declared headcounts (#4528)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const fSchema = declarationSchema.properties.Indicateurs.properties.F;
+
+		const annualProperties = fSchema.properties.annuel.properties as Record<
+			string,
+			unknown
+		>;
+		const hourlyProperties = fSchema.properties.horaire.properties as Record<
+			string,
+			unknown
+		>;
+
+		it("documents the 8 annual nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Rem_globale_annuelle_nb_${sex}`;
+					expect(annualProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the 8 hourly nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Taux_horaire_global_nb_${sex}`;
+					expect(hourlyProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the two root-level hourly headcounts emitted by the handler", () => {
+			expect(
+				declarationSchema.properties.Effectif_F_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
+			expect(
+				declarationSchema.properties.Effectif_H_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
+		});
+	});
+
 	describe("breaking-change notice on the declarations endpoint (#4329)", () => {
 		const { description } =
 			openApiSpec.paths["/api/v1/export/declarations"].get;

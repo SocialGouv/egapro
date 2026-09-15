@@ -118,6 +118,35 @@ export const INDICATOR_F_HOURLY_MEN_LABELS = [
 	"Quartile4_Taux_horaire_global_proportion_H",
 ] as const;
 
+/** Indicator F — declared headcount labels, per period, sex and quartile index (1..4). */
+export const INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS = [
+	"Quartile1_Rem_globale_annuelle_nb_F",
+	"Quartile2_Rem_globale_annuelle_nb_F",
+	"Quartile3_Rem_globale_annuelle_nb_F",
+	"Quartile4_Rem_globale_annuelle_nb_F",
+] as const;
+
+export const INDICATOR_F_ANNUAL_MEN_COUNT_LABELS = [
+	"Quartile1_Rem_globale_annuelle_nb_H",
+	"Quartile2_Rem_globale_annuelle_nb_H",
+	"Quartile3_Rem_globale_annuelle_nb_H",
+	"Quartile4_Rem_globale_annuelle_nb_H",
+] as const;
+
+export const INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS = [
+	"Quartile1_Taux_horaire_global_nb_F",
+	"Quartile2_Taux_horaire_global_nb_F",
+	"Quartile3_Taux_horaire_global_nb_F",
+	"Quartile4_Taux_horaire_global_nb_F",
+] as const;
+
+export const INDICATOR_F_HOURLY_MEN_COUNT_LABELS = [
+	"Quartile1_Taux_horaire_global_nb_H",
+	"Quartile2_Taux_horaire_global_nb_H",
+	"Quartile3_Taux_horaire_global_nb_H",
+	"Quartile4_Taux_horaire_global_nb_H",
+] as const;
+
 /**
  * Compute the women/men proportion inside one indicator F quartile from the
  * declared headcounts. Returns `null` when data is missing or the quartile

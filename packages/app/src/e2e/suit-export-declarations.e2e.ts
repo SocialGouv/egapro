@@ -9,7 +9,11 @@ import {
 	setCompanyHasCse,
 	setCompanyWorkforce,
 } from "./helpers/db";
-import { completeDeclaration } from "./helpers/declaration-flows";
+import {
+	completeDeclaration,
+	DEFAULT_ANNUAL_QUARTILES,
+	DEFAULT_HOURLY_QUARTILES,
+} from "./helpers/declaration-flows";
 import {
 	fetchActiveSuitDeclaration,
 	suitExportStatusWithoutSecret,
@@ -32,6 +36,10 @@ import {
  *    Unit tests pin the rule engine on synthetic facts; only here is the
  *    advertised next step checked against the choice the UI really offers, and
  *    against the state the FSM really reaches once that choice is made.
+ *  - `Indicateurs.F` (bug #4528): the quartile headcounts the funnel collected.
+ *    Unit tests pin the mapping on a synthetic row, so they hold whichever
+ *    column it reads; only a round-trip proves the exported figure is the one
+ *    step 4 actually persisted — the very link whose absence was the bug.
  */
 
 test.describe.configure({ mode: "serial" });
@@ -191,6 +199,36 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		expect(pathChoice?.Libelle_statut).toBe(
 			"Choix du parcours — Justification de l'écart",
 		);
+	});
+
+	test("Indicateurs.F exports the quartile headcounts step 4 recorded", async ({
+		browser,
+	}) => {
+		const { F } = (await fetchActiveSuitDeclaration(browser)).Indicateurs;
+
+		DEFAULT_ANNUAL_QUARTILES.forEach((row, index) => {
+			const quartile = index + 1;
+			expect(
+				F.annuel[`Quartile${quartile}_Rem_globale_annuelle_nb_F`],
+				`annual quartile ${quartile} women headcount`,
+			).toBe(Number(row.women));
+			expect(
+				F.annuel[`Quartile${quartile}_Rem_globale_annuelle_nb_H`],
+				`annual quartile ${quartile} men headcount`,
+			).toBe(Number(row.men));
+		});
+
+		DEFAULT_HOURLY_QUARTILES.forEach((row, index) => {
+			const quartile = index + 1;
+			expect(
+				F.horaire[`Quartile${quartile}_Taux_horaire_global_nb_F`],
+				`hourly quartile ${quartile} women headcount`,
+			).toBe(Number(row.women));
+			expect(
+				F.horaire[`Quartile${quartile}_Taux_horaire_global_nb_H`],
+				`hourly quartile ${quartile} men headcount`,
+			).toBe(Number(row.men));
+		});
 	});
 
 	test("Parcours follows the FSM into demarche_completed", async ({

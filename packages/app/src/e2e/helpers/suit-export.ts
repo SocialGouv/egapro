@@ -33,9 +33,15 @@ export type SuitParcours = {
 	Prochaines_etapes_possibles: SuitNextStep[];
 };
 
+/** One quartile table of indicator F, keyed by its GIP-MDS export label. */
+export type SuitQuartileTable = Record<string, number | string | null>;
+
 export type SuitDeclaration = {
 	SIREN: string;
 	Parcours: SuitParcours;
+	Indicateurs: {
+		F: { annuel: SuitQuartileTable; horaire: SuitQuartileTable };
+	} & Record<string, unknown>;
 	Date_modification: string | null;
 	Date_annulation: string | null;
 	Historique_statuts: Array<{ Statut: string; Libelle_statut: unknown }>;
