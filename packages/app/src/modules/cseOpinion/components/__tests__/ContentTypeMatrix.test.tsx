@@ -57,6 +57,16 @@ function renderMatrix(
 }
 
 describe("ContentTypeMatrix", () => {
+	it("names the file column header 'Fichier(s) importé(s)/déposé(s)' (wording regression guard, #4261)", () => {
+		renderMatrix();
+
+		expect(
+			screen.getByRole("columnheader", {
+				name: "Fichier(s) importé(s)/déposé(s)",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders one row per file with a view link pointing to the file endpoint", () => {
 		renderMatrix();
 
