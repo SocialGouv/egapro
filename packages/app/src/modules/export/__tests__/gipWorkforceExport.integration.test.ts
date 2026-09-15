@@ -112,13 +112,13 @@ describe("GET /api/v1/export/declarations — GIP workforce integration (#3929)"
 		expect(parcoursOf(declarations, SIREN_IN_GIP).Effectif).toBe(70);
 	});
 
-	it("keeps the declaration of a company absent from the GIP file, with a null Parcours.Effectif", async () => {
+	it("keeps the declaration of a company absent from the GIP file, with a null Parcours.Effectif bucketed to <50", async () => {
 		const declarations = await fetchExport();
 
 		expect(declarations).toHaveLength(4);
 		const notInGip = parcoursOf(declarations, SIREN_NOT_IN_GIP);
 		expect(notInGip.Effectif).toBeNull();
-		expect(notInGip.Tranche_effectif).toBeNull();
+		expect(notInGip.Tranche_effectif).toBe("<50");
 		// Absent from GIP → obligation workforce 0 → voluntary tier, which files
 		// all 7 indicators (#4043).
 		expect(notInGip.Indicateur_G_requis).toBe(true);
@@ -137,7 +137,7 @@ describe("GET /api/v1/export/declarations — GIP workforce integration (#3929)"
 
 		const otherYear = parcoursOf(declarations, SIREN_OTHER_YEAR);
 		expect(otherYear.Effectif).toBeNull();
-		expect(otherYear.Tranche_effectif).toBeNull();
+		expect(otherYear.Tranche_effectif).toBe("<50");
 		expect(otherYear.Indicateur_G_requis).toBe(true);
 	});
 });

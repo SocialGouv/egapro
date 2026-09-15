@@ -259,15 +259,10 @@ const declarationSchema = {
 					example: 7403,
 				},
 				Tranche_effectif: {
+					type: "string",
 					description:
-						"Bucket de segmentation calculé sur l'effectif floored. `null` si l'effectif GIP est inconnu — jamais replié sur « <50 ».",
-					oneOf: [
-						{
-							type: "string",
-							enum: ["<50", "50-99", "100-149", "150-249", "250+"],
-						},
-						{ type: "null" },
-					],
+						"Bucket de segmentation calculé sur l'effectif floored. Une entreprise absente du fichier GIP de l'année relève de la tranche `<50`, alignée sur `Regime_obligations`.",
+					enum: ["<50", "50-99", "100-149", "150-249", "250+"],
 				},
 				Regime_obligations: {
 					type: "string",
@@ -695,7 +690,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "3.0.0",
+		version: "3.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
