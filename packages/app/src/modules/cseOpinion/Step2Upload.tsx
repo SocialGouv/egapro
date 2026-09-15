@@ -77,6 +77,7 @@ export function Step2Upload({
 	);
 	const isAssociationWriteInFlightRef = useRef(false);
 	const queuedAssociationWriteRef = useRef<AssociationMap | null>(null);
+	const deletedFileIdsRef = useRef<Set<string>>(new Set());
 	const [hasPendingAssociationWrite, setHasPendingAssociationWrite] =
 		useState(false);
 
@@ -91,10 +92,11 @@ export function Step2Upload({
 			dispatchNextAssociationWrite();
 		},
 		onSuccess: (_data, variables) => {
-			lastConfirmedAssociations.current = buildAssociationMap(
-				columns,
-				variables.associations,
-			);
+			let confirmed = buildAssociationMap(columns, variables.associations);
+			for (const deletedFileId of deletedFileIdsRef.current) {
+				confirmed = clearFileAssociations(confirmed, deletedFileId);
+			}
+			lastConfirmedAssociations.current = confirmed;
 			setAssociationError(null);
 			dispatchNextAssociationWrite();
 		},
@@ -133,10 +135,17 @@ export function Step2Upload({
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: (_data, variables) => {
 			setDeletingFileId(null);
+			deletedFileIdsRef.current.add(variables.fileId);
 			lastConfirmedAssociations.current = clearFileAssociations(
 				lastConfirmedAssociations.current,
 				variables.fileId,
 			);
+			if (queuedAssociationWriteRef.current !== null) {
+				queuedAssociationWriteRef.current = clearFileAssociations(
+					queuedAssociationWriteRef.current,
+					variables.fileId,
+				);
+			}
 			setAssociations((prev) => clearFileAssociations(prev, variables.fileId));
 			refreshFileList();
 		},

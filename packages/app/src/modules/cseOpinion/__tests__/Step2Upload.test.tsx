@@ -851,6 +851,97 @@ describe("Step2Upload", () => {
 		).not.toBeChecked();
 	});
 
+	it("does not let a save that resolves after its file was deleted resurrect that association as confirmed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		// The in-flight save for file-1 resolves after the deletion (#4102).
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("strips a deleted file from the queued write instead of letting it get the whole batch rejected server-side (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		// Queued while the first save (file-1) is still in flight.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 2e déclaration — avis-2.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(
+			screen.getAllByRole("button", { name: /Supprimer/ })[0] as HTMLElement,
+		);
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-2" },
+			],
+		});
+	});
+
 	it("hydrates the matrix from the stored associations on return (S10)", () => {
 		renderStep({
 			columns: SINGLE_COLUMN,
