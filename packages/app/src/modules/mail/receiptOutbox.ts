@@ -142,7 +142,7 @@ export async function replayPendingReceipts(
 
 	if (result.claimed > 0) {
 		void logAction({
-			action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY,
+			action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY_BATCH,
 			status: result.failed > 0 ? "failure" : "success",
 			metadata: result,
 		});

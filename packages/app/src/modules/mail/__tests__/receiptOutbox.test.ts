@@ -201,7 +201,7 @@ describe("replayPendingReceipts", () => {
 		expect(result).toEqual({ claimed: 2, sent: 1, failed: 1 });
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
-				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY,
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY_BATCH,
 				status: "failure",
 				metadata: { claimed: 2, sent: 1, failed: 1 },
 			}),
@@ -264,7 +264,7 @@ describe("replayPendingReceipts", () => {
 		);
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
-				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY,
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY_BATCH,
 				status: "failure",
 				metadata: { claimed: 2, sent: 0, failed: 2 },
 			}),
