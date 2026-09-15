@@ -79,7 +79,6 @@ const cseOpinionSchema = {
 	},
 } as const;
 
-/** French-keyed item of `Fichiers_CSE[].Contenus` (`/export/declarations`). */
 const cseFileContentSchema = {
 	type: "object",
 	properties: {
@@ -98,7 +97,6 @@ const cseFileContentSchema = {
 	},
 } as const;
 
-/** English-keyed item of a `cse_opinion` file's `contents` (`/files`). */
 const fileContentSchema = {
 	type: "object",
 	properties: {

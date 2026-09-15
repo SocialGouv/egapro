@@ -399,9 +399,7 @@ export async function fetchCseFilesByDeclaration(
 	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
 	if (rows.length === 0) return new Map();
 
-	// Separate query rather than a SQL join: a file can cover several
-	// contents, and joining would duplicate the file row per content. Keying
-	// by file_id here and merging in memory avoids that without a dedup pass.
+	// Separate query: a join would duplicate the file row once per content.
 	const contentRows = await db
 		.select({
 			fileId: cseOpinionFiles.fileId,
