@@ -7,15 +7,17 @@ import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
 const mockMutationState = {
-	error: null as { message: string } | null,
+	error: null as { message: string; data?: { code: string } } | null,
 	isPending: false,
+	onError: undefined as (() => void) | undefined,
 };
 
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
+	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 	usePathname: () => "/declaration-remuneration/parcours-conformite/etape/3",
 }));
 
@@ -28,15 +30,22 @@ vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submitSecondDeclaration: {
-				useMutation: (opts: { onSuccess?: () => void }) => ({
-					mutate: () => {
-						mockMutate();
-						opts.onSuccess?.();
-					},
-					reset: mockReset,
-					isPending: mockMutationState.isPending,
-					error: mockMutationState.error,
-				}),
+				useMutation: (opts: {
+					onSuccess?: () => void;
+					onError?: () => void;
+				}) => {
+					mockMutationState.onError = opts.onError;
+					return {
+						mutate: () => {
+							mockMutate();
+							opts.onSuccess?.();
+						},
+						reset: mockReset,
+						isPending: mockMutationState.isPending,
+						isError: mockMutationState.error !== null,
+						error: mockMutationState.error,
+					};
+				},
 			},
 		},
 		company: {
@@ -110,10 +119,10 @@ const noGapCategories: EmployeeCategoryRow[] = [
 	}),
 ];
 
-function renderStep3(
+function step3Review(
 	overrides: Partial<ComponentProps<typeof SecondDeclarationStep3Review>> = {},
 ) {
-	return render(
+	return (
 		<SecondDeclarationStep3Review
 			cseApplicable
 			cseOpinionRequired={false}
@@ -122,8 +131,14 @@ function renderStep3(
 			siren="532847196"
 			status="corrective_actions_chosen"
 			{...overrides}
-		/>,
+		/>
 	);
+}
+
+function renderStep3(
+	overrides: Partial<ComponentProps<typeof SecondDeclarationStep3Review>> = {},
+) {
+	return render(step3Review(overrides));
 }
 
 async function submitDeclaration() {
@@ -144,10 +159,12 @@ describe("SecondDeclarationStep3Review", () => {
 	beforeEach(() => {
 		mockMutate.mockClear();
 		mockPush.mockClear();
+		mockRefresh.mockClear();
 		mockReset.mockClear();
 		mockConceal.mockClear();
 		mockMutationState.error = null;
 		mockMutationState.isPending = false;
+		mockMutationState.onError = undefined;
 	});
 
 	it("renders the title and step indicator", () => {
@@ -300,7 +317,10 @@ describe("SecondDeclarationStep3Review", () => {
 	});
 
 	it("shows a submission error inside the confirmation modal", () => {
-		mockMutationState.error = { message: "Impossible de transmettre." };
+		mockMutationState.error = {
+			message: "Impossible de transmettre.",
+			data: { code: "FORBIDDEN" },
+		};
 		renderStep3();
 		const modal = document.getElementById("submit-declaration-modal");
 		if (!modal) throw new Error("Submit modal not found");
@@ -309,6 +329,62 @@ describe("SecondDeclarationStep3Review", () => {
 			within(modal).getByRole("alert", { hidden: true }),
 		).toHaveTextContent("Impossible de transmettre.");
 		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("re-reads the server state when the submission fails", () => {
+		renderStep3();
+
+		mockMutationState.onError?.();
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("completes the submission once the refreshed status shows it went through", () => {
+		mockMutationState.error = {
+			message:
+				'No matching transition for state="awaiting_cse_opinion" action="submit_second_declaration". Facts: {}',
+			data: { code: "INTERNAL_SERVER_ERROR" },
+		};
+		const overrides = {
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		};
+		const { rerender } = renderStep3(overrides);
+		expect(mockPush).not.toHaveBeenCalled();
+
+		rerender(step3Review({ ...overrides, status: "awaiting_cse_opinion" }));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("keeps the modal mounted while a retry is pending when the refreshed status shows the submission", () => {
+		mockMutationState.isPending = true;
+		const overrides = {
+			cseOpinionRequired: true,
+			secondDeclarationCategories: noGapCategories,
+		};
+		const { rerender } = renderStep3(overrides);
+
+		rerender(step3Review({ ...overrides, status: "awaiting_cse_opinion" }));
+
+		expect(document.getElementById("submit-declaration-modal")).not.toBeNull();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		mockMutationState.isPending = false;
+		mockMutationState.error = {
+			message:
+				'No matching transition for state="awaiting_cse_opinion" action="submit_second_declaration". Facts: {}',
+			data: { code: "INTERNAL_SERVER_ERROR" },
+		};
+		rerender(step3Review({ ...overrides, status: "awaiting_cse_opinion" }));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
 
 	it("navigates to compliance path when gaps persist after submit, on a negative gap (#4034)", async () => {
