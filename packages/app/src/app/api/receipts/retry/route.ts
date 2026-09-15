@@ -19,6 +19,12 @@ import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
  * concurrent call a no-op rather than a second e-mail. So the endpoint grants
  * no one the power to send anything, and calling it early only does work the
  * app owed anyway.
+ *
+ * Repeating the call buys nothing either: a claimed row is settled, so a
+ * second caller claims none, and with an empty outbox — the normal state — the
+ * whole request is one indexed lookup returning no rows. The batch is capped
+ * at `RECEIPT_OUTBOX_REPLAY_LIMIT`, so even a backlog cannot turn one call
+ * into unbounded rendering.
  */
 export const POST = withAuditedRoute(
 	{ action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_REPLAY },
