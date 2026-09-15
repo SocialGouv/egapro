@@ -5,6 +5,7 @@ import {
 	DECLARATION_FSM_STATUSES,
 } from "~/modules/domain";
 import {
+	declarationEventTypeEnum,
 	representationNotComputableExecutivesEnum,
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
@@ -311,7 +312,9 @@ describe("openApiSpec", () => {
 			expect(nullVariant).toBeDefined();
 		});
 
-		it("lists the 4 job-category source values in the string enum", () => {
+		// Spelled out rather than read from `sources.ts`: comparing the spec to the
+		// constant the spec imports would pass on any drift (#4115).
+		it("lists the 4 active and 3 historical job-category source values", () => {
 			const stringVariant = sourceSchema.oneOf.find((v) => v.type === "string");
 			expect(stringVariant && hasEnum(stringVariant)).toBe(true);
 			expect(
@@ -321,7 +324,14 @@ describe("openApiSpec", () => {
 				"accord-groupe",
 				"accord-branche",
 				"decision-unilaterale",
+				"convention-collective",
+				"classification-interne",
+				"autre",
 			]);
+		});
+
+		it("points at the generated value tables rather than listing values in prose", () => {
+			expect(sourceSchema.description).toContain("docs/SUIT-API-valeurs.md");
 		});
 	});
 
@@ -346,17 +356,15 @@ describe("openApiSpec", () => {
 			]);
 		});
 
-		it("lists the 7 declaration_event_type values in Statut.enum", () => {
+		// Compared to the DB enum, not to the label map the spec reads: a test that
+		// derives from the same constant as the spec detects nothing (#4115).
+		it("lists every declaration_event_type value but step_change in Statut.enum", () => {
 			expect(historiqueSchema.items.properties.Statut.type).toBe("string");
-			expect(historiqueSchema.items.properties.Statut.enum).toEqual([
-				"submit",
-				"path_choice",
-				"second_declaration_submit",
-				"joint_evaluation_submit",
-				"cse_opinion_submit",
-				"cancel",
-				"demarche_complete",
-			]);
+			expect(historiqueSchema.items.properties.Statut.enum).toEqual(
+				declarationEventTypeEnum.enumValues.filter(
+					(value) => value !== "step_change",
+				),
+			);
 		});
 
 		it("declares Date as date-time formatted string", () => {
@@ -371,6 +379,105 @@ describe("openApiSpec", () => {
 			expect(historiqueSchema.items.required).not.toContain(
 				"Numero_declaration",
 			);
+		});
+	});
+
+	describe("Parcours_apres_declaration enums (#4115)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const stringEnumOf = (schema: {
+			oneOf: readonly { type: string }[];
+		}): readonly string[] | undefined => {
+			const variant = schema.oneOf.find((v) => v.type === "string");
+			return variant && "enum" in variant
+				? (variant.enum as readonly string[])
+				: undefined;
+		};
+
+		it("declares both fields as nullable string enums", () => {
+			for (const field of [
+				"Parcours_apres_declaration_1",
+				"Parcours_apres_declaration_2",
+			] as const) {
+				const schema = declarationSchema.properties[field];
+				expect(schema.oneOf).toHaveLength(2);
+				expect(schema.oneOf.find((v) => v.type === "null")).toBeDefined();
+				expect(stringEnumOf(schema)).toBeDefined();
+			}
+		});
+
+		// The three round-1 paths and the two round-2 ones are spelled out here
+		// rather than derived: the ruleset is what the spec reads (#4115).
+		it("offers the three compliance paths after the first declaration", () => {
+			expect(
+				stringEnumOf(declarationSchema.properties.Parcours_apres_declaration_1),
+			).toEqual(["justify", "corrective_action", "joint_evaluation"]);
+		});
+
+		it("never mentions corrective_action after the second declaration", () => {
+			const schema = declarationSchema.properties.Parcours_apres_declaration_2;
+			expect(stringEnumOf(schema)).toEqual(["justify", "joint_evaluation"]);
+			expect(schema.description).not.toContain("corrective_action");
+		});
+
+		it("points at the generated value tables rather than listing values in prose", () => {
+			for (const field of [
+				"Parcours_apres_declaration_1",
+				"Parcours_apres_declaration_2",
+			] as const) {
+				expect(declarationSchema.properties[field].description).toContain(
+					"docs/SUIT-API-valeurs.md",
+				);
+			}
+		});
+	});
+
+	describe("file and CSE opinion enums (#4115)", () => {
+		const responseSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema;
+		const declarationSchema = responseSchema.properties.Declarations.items;
+
+		it("lists the two CSE consultation subjects on Avis_CSE[].Type", () => {
+			expect(
+				declarationSchema.properties.Avis_CSE.items.properties.Type.enum,
+			).toEqual(["accuracy", "gap"]);
+		});
+
+		it("declares Avis_CSE[].Avis as a nullable enum of the two opinion senses", () => {
+			const avis = declarationSchema.properties.Avis_CSE.items.properties.Avis;
+			const stringVariant = avis.oneOf.find((v) => v.type === "string");
+			expect(avis.oneOf.find((v) => v.type === "null")).toBeDefined();
+			expect(
+				stringVariant && "enum" in stringVariant && stringVariant.enum,
+			).toEqual(["favorable", "unfavorable"]);
+		});
+
+		it("narrows each declaration file block to the single type it carries", () => {
+			expect(
+				declarationSchema.properties.Fichiers_CSE.items.properties.Type.enum,
+			).toEqual(["cse_opinion"]);
+			const jointEvaluation =
+				declarationSchema.properties.Fichier_evaluation_conjointe.oneOf.find(
+					(v) => v.type === "object",
+				);
+			expect(
+				jointEvaluation &&
+					"properties" in jointEvaluation &&
+					jointEvaluation.properties.Type.enum,
+			).toEqual(["joint_evaluation"]);
+		});
+
+		it("lists both file types on the files endpoint", () => {
+			const filesSchema =
+				openApiSpec.paths["/api/v1/files"].get.responses["200"].content[
+					"application/json"
+				].schema;
+			expect(filesSchema.properties.files.items.properties.type.enum).toEqual([
+				"cse_opinion",
+				"joint_evaluation",
+			]);
 		});
 	});
 

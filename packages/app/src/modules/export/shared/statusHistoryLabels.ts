@@ -1,3 +1,5 @@
+import type { CompliancePath } from "~/server/rules/compliancePaths";
+
 export const DECLARATION_EVENT_TYPE_LABELS = {
 	submit: "Soumission de la déclaration",
 	path_choice: "Choix du parcours",
@@ -8,11 +10,11 @@ export const DECLARATION_EVENT_TYPE_LABELS = {
 	demarche_complete: "Démarche terminée",
 } as const;
 
-export const PATH_CHOICE_VALUE_LABELS = {
+export const PATH_CHOICE_VALUE_LABELS: Record<CompliancePath, string> = {
 	justify: "Justification de l'écart",
 	corrective_action: "Actions correctives",
 	joint_evaluation: "Évaluation conjointe",
-} as const;
+};
 
 export type DeclarationEventType = keyof typeof DECLARATION_EVENT_TYPE_LABELS;
 
@@ -22,7 +24,7 @@ export function getStatusHistoryLabel(
 ): string {
 	if (eventType === "path_choice") {
 		if (value !== null && value in PATH_CHOICE_VALUE_LABELS) {
-			return `Choix du parcours — ${PATH_CHOICE_VALUE_LABELS[value as keyof typeof PATH_CHOICE_VALUE_LABELS]}`;
+			return `Choix du parcours — ${PATH_CHOICE_VALUE_LABELS[value as CompliancePath]}`;
 		}
 		return DECLARATION_EVENT_TYPE_LABELS.path_choice;
 	}
