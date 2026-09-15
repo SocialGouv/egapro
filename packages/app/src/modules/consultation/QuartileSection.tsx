@@ -1,10 +1,10 @@
 import { Fragment } from "react";
-import { gapRatioToPercent } from "~/modules/domain";
+import { formatPrecisePercentage, gapRatioToPercent } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { GenderBarRow, GenderBarSeparator } from "~/modules/shared/GenderBar";
 import { IndicatorCard } from "~/modules/shared/IndicatorCard";
-import { formatPercent, shareOf } from "./formatters";
+import { shareOf } from "./formatters";
 import { GenderDetailsTable } from "./GenderDetailsTable";
 import styles from "./indicatorSection.module.scss";
 import { INDICATOR_TOOLTIPS } from "./tooltips";
@@ -82,13 +82,13 @@ function QuartileCard({ basis, declaration }: CardProps) {
 							label={row.label}
 							menLabel={
 								<>
-									Hommes : <strong>{formatPercent(row.men)}</strong>
+									Hommes : <strong>{formatPrecisePercentage(row.men)}</strong>
 								</>
 							}
 							menPercent={row.men}
 							womenLabel={
 								<>
-									Femmes : <strong>{formatPercent(row.women)}</strong>
+									Femmes : <strong>{formatPrecisePercentage(row.women)}</strong>
 								</>
 							}
 							womenPercent={row.women}
@@ -103,7 +103,10 @@ function QuartileCard({ basis, declaration }: CardProps) {
 						columns={["Femmes", "Hommes"]}
 						rows={rows.map((row) => ({
 							label: row.label,
-							values: [formatPercent(row.women), formatPercent(row.men)],
+							values: [
+								formatPrecisePercentage(row.women),
+								formatPrecisePercentage(row.men),
+							],
 						}))}
 					/>
 				</DataDetailsAccordion>

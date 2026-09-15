@@ -276,13 +276,6 @@ function QuartileDistributionTable({
 		total,
 	} = sumQuartileWorkforce(quartiles);
 
-	function fmt(value: string | undefined) {
-		if (!value) return "-";
-		const n = Number.parseFloat(value);
-		if (Number.isNaN(n)) return "-";
-		return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
-	}
-
 	const trancheKind = unit === "€" ? "annuelle brute" : "horaire brute";
 
 	return (
@@ -328,8 +321,10 @@ function QuartileDistributionTable({
 									{quartiles.map((q, i) => {
 										const prev =
 											i === 0 ? "0" : (quartiles[i - 1]?.threshold ?? "");
-										const min = i === 0 ? `0 ${unit}` : fmt(prev);
-										const max = i === 3 ? "-" : fmt(q.threshold);
+										const min =
+											i === 0 ? `0 ${unit}` : formatCurrency(prev, unit);
+										const max =
+											i === 3 ? "-" : formatCurrency(q.threshold, unit);
 										const lineTotal = computeWorkforceTotal(
 											q.women ?? 0,
 											q.men ?? 0,

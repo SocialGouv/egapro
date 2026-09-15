@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	buildCampaignRateTileProps,
 	computeRate,
-	formatPointsAbs,
 	roundOneDecimal,
 } from "../shared/submissionRate";
 
@@ -38,12 +38,56 @@ describe("computeRate", () => {
 	});
 });
 
-describe("formatPointsAbs", () => {
-	it("returns absolute value rounded to 1 decimal, French separator", () => {
-		expect(formatPointsAbs(2.07)).toBe("2,1");
-		expect(formatPointsAbs(-2.07)).toBe("2,1");
-		expect(formatPointsAbs(0)).toBe("0,0");
-		expect(formatPointsAbs(0.5)).toBe("0,5");
-		expect(formatPointsAbs(-0.04)).toBe("0,0");
+describe("buildCampaignRateTileProps", () => {
+	const data = {
+		totalSubmitted: 4213,
+		totalObligated: 5738,
+		submissionRate: 73.4,
+		previousYearRate: 71.3,
+	};
+
+	it("glues the percent sign to the rate with a narrow no-break space", () => {
+		expect(buildCampaignRateTileProps(data, 2026, 2025).value).toBe(
+			"73,4\u202f%",
+		);
+	});
+
+	it("names the campaign year and counts the companies behind the rate", () => {
+		const props = buildCampaignRateTileProps(data, 2026, 2025);
+
+		expect(props.title).toBe("Taux de déclaration 2026");
+		expect(props.subtitle).toBe("4\u202f213 / 5\u202f738 entreprises");
+	});
+
+	it("measures the delta against the comparison year", () => {
+		expect(buildCampaignRateTileProps(data, 2026, 2025).delta).toEqual({
+			points: 2.1,
+			comparisonLabel: "vs 2025",
+		});
+	});
+
+	it("shows no delta when there is no previous year to compare with", () => {
+		expect(
+			buildCampaignRateTileProps(
+				{ ...data, previousYearRate: null },
+				2026,
+				2025,
+			).delta,
+		).toBeNull();
+	});
+
+	it("writes a whole rate with its decimal, never bare", () => {
+		expect(
+			buildCampaignRateTileProps(
+				{
+					totalSubmitted: 0,
+					totalObligated: 0,
+					submissionRate: 0,
+					previousYearRate: null,
+				},
+				2026,
+				2025,
+			).value,
+		).toBe("0,0\u202f%");
 	});
 });

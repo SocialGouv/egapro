@@ -44,4 +44,29 @@ test.describe("Declaration history page", () => {
 		const items = page.locator("main ul > li");
 		await expect(items).toHaveCount(3);
 	});
+
+	test.describe("entry date and time (S4)", () => {
+		test.beforeAll(async () => {
+			// Noon UTC keeps the calendar day at the 1st in every timezone the
+			// server or the browser may run in, so the ordinal is what is asserted.
+			await insertHistoryEvents(1, year, {
+				firstEventAt: new Date(Date.UTC(year, 5, 1, 12, 0)),
+			});
+		});
+
+		test.afterAll(async () => {
+			await insertHistoryEvents(3, year);
+		});
+
+		test("writes the first of the month with its French ordinal, next to a 24-hour time", async ({
+			page,
+		}) => {
+			await page.goto(`/mon-espace/historique/${TEST_SIREN}/${year}`);
+
+			const entry = page.locator("main ul > li").first();
+
+			await expect(entry.getByRole("time")).toHaveText(`1ᵉʳ juin ${year}`);
+			await expect(entry.getByText(/^\d{2}:\d{2}$/)).toBeVisible();
+		});
+	});
 });
