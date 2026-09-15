@@ -386,13 +386,51 @@ describe("buildIndicatorG", () => {
 		...overrides,
 	});
 
-	it("should compute the four signed base/variable gap ratios rounded to 4 decimals", () => {
+	// #4530: the four gap ratios ship as strings at 4 decimals, aligned with the
+	// numeric(9,4) scale A–D already come out of Postgres as (SUIT contract change).
+	it("should compute the four signed base/variable gap ratios as 4-decimal strings", () => {
 		const [category] = buildIndicatorG([gEntry({})]).initial;
 
-		expect(category?.Rem_annuelle_base_ecart).toBe(0.0909);
-		expect(category?.Rem_annuelle_variable_ecart).toBe(0.0099);
-		expect(category?.Taux_horaire_base_ecart).toBe(0.0909);
-		expect(category?.Taux_horaire_variable_ecart).toBe(0.2);
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0909");
+		expect(category?.Rem_annuelle_variable_ecart).toBe("0.0099");
+		expect(category?.Taux_horaire_base_ecart).toBe("0.0909");
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	// #4530: F = H must format as "0.0000", not "0.0".
+	it('formats a zero gap (F = H) as "0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "1000.00", annualBaseMen: "1000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
+	});
+
+	// #4530: a small negative gap must format as "-0.0008", not drop trailing zeros.
+	it("formats a small negative gap without dropping trailing zeros", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyBaseWomen: "12.00", hourlyBaseMen: "11.99" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_base_ecart).toBe("-0.0008");
+	});
+
+	// #4530: "2" / "2.5" must format as "0.2000", not "0.2".
+	it("formats a gap with a whole-number operand keeping 4 decimals", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyVariableWomen: "2", hourlyVariableMen: "2.5" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	// #4530: rounding BEFORE formatting must never surface a negative zero.
+	it('never formats a negligible negative gap as "-0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "30000.01", annualBaseMen: "30000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
 	});
 
 	// #4205: the Total gap is not computed anywhere (UI or export).
@@ -413,7 +451,7 @@ describe("buildIndicatorG", () => {
 
 		expect(womenMissing?.Rem_annuelle_base_ecart).toBeNull();
 		expect(menMissing?.Rem_annuelle_base_ecart).toBeNull();
-		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe(0.0099);
+		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe("0.0099");
 	});
 
 	it("nulls a component gap when the men value is zero", () => {

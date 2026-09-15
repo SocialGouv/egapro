@@ -8,6 +8,8 @@ import {
 	representationNotComputableExecutivesEnum,
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
+import type { IndicatorGEntry } from "../fetchDeclarations";
+import { buildIndicatorG } from "../fetchDeclarations";
 import { openApiSpec } from "../openapi";
 import {
 	DROPPED_ROOT_KEYS,
@@ -437,6 +439,166 @@ describe("openApiSpec", () => {
 		it("keeps every documented path on the v1 prefix the notice promises", () => {
 			for (const path of Object.keys(openApiSpec.paths)) {
 				expect(path).toMatch(/^\/api\/v1\//);
+			}
+		});
+	});
+
+	// #4530: schema ↔ payload parity for the G category, and the *_ecart type fix.
+	describe("Indicateurs.G category schema (#4530)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const categorySchema =
+			declarationSchema.properties.Indicateurs.properties.G.oneOf[0].items;
+
+		const fullEntry: IndicatorGEntry = {
+			categoryName: "Ouvriers",
+			source: null,
+			declarationType: "initial",
+			womenCount: 40,
+			menCount: 44,
+			hourlyWomenCount: 8,
+			hourlyMenCount: 6,
+			annualBaseWomen: "10000",
+			annualBaseMen: "11000",
+			annualVariableWomen: "1000",
+			annualVariableMen: "1010",
+			hourlyBaseWomen: "20",
+			hourlyBaseMen: "22",
+			hourlyVariableWomen: "2",
+			hourlyVariableMen: "2.5",
+		};
+
+		it("documents exactly the fields buildIndicatorG emits per category, in order", () => {
+			const [category] = buildIndicatorG([fullEntry]).initial;
+			expect(Object.keys(categorySchema.properties)).toEqual(
+				Object.keys(category ?? {}),
+			);
+		});
+
+		it("also used by Seconde_declaration.Correction (shared schema object)", () => {
+			const correctionSchema =
+				declarationSchema.properties.Seconde_declaration.properties.Correction
+					.oneOf[0].items;
+			expect(correctionSchema).toBe(categorySchema);
+		});
+
+		const ECART_KEYS = [
+			"Rem_annuelle_base_ecart",
+			"Rem_annuelle_variable_ecart",
+			"Taux_horaire_base_ecart",
+			"Taux_horaire_variable_ecart",
+		] as const;
+
+		it("types the four *_ecart fields as nullable strings, not numbers (#4530 bug)", () => {
+			for (const key of ECART_KEYS) {
+				expect(categorySchema.properties[key].type).toEqual(["string", "null"]);
+				expect(categorySchema.properties[key].description).toBeTruthy();
+			}
+		});
+
+		const HOURLY_HEADCOUNT_KEYS = [
+			"Effectif_horaire_F",
+			"Effectif_horaire_H",
+		] as const;
+
+		it("adds Effectif_horaire_F / Effectif_horaire_H as nullable integers", () => {
+			for (const key of HOURLY_HEADCOUNT_KEYS) {
+				expect(categorySchema.properties[key].type).toEqual([
+					"integer",
+					"null",
+				]);
+				expect(categorySchema.properties[key].description).toBeTruthy();
+			}
+		});
+	});
+
+	describe("Indicateurs A–D gap fields schema (#4530)", () => {
+		const indicatorsSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items
+				.properties.Indicateurs;
+
+		it("documents A.Rem_globale_annuelle_moyenne_ecart and A.Taux_horaire_global_moyen_ecart as nullable strings", () => {
+			const {
+				Rem_globale_annuelle_moyenne_ecart,
+				Taux_horaire_global_moyen_ecart,
+			} = indicatorsSchema.properties.A.properties;
+			expect(Rem_globale_annuelle_moyenne_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_globale_annuelle_moyenne_ecart.description).toBeTruthy();
+			expect(Taux_horaire_global_moyen_ecart.type).toEqual(["string", "null"]);
+			expect(Taux_horaire_global_moyen_ecart.description).toBeTruthy();
+		});
+
+		it("documents B.Rem_variable_annuelle_moyenne_ecart and B.Taux_horaire_variable_moyen_ecart as nullable strings", () => {
+			const {
+				Rem_variable_annuelle_moyenne_ecart,
+				Taux_horaire_variable_moyen_ecart,
+			} = indicatorsSchema.properties.B.properties;
+			expect(Rem_variable_annuelle_moyenne_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_variable_annuelle_moyenne_ecart.description).toBeTruthy();
+			expect(Taux_horaire_variable_moyen_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Taux_horaire_variable_moyen_ecart.description).toBeTruthy();
+		});
+
+		it("documents C.Rem_globale_annuelle_médiane_ecart and C.Taux_horaire_global_médian_ecart as nullable strings", () => {
+			const {
+				Rem_globale_annuelle_médiane_ecart,
+				Taux_horaire_global_médian_ecart,
+			} = indicatorsSchema.properties.C.properties;
+			expect(Rem_globale_annuelle_médiane_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_globale_annuelle_médiane_ecart.description).toBeTruthy();
+			expect(Taux_horaire_global_médian_ecart.type).toEqual(["string", "null"]);
+			expect(Taux_horaire_global_médian_ecart.description).toBeTruthy();
+		});
+
+		it("documents D.Rem_variable_annuelle_médiane_ecart and D.Taux_horaire_variable_médian_ecart as nullable strings", () => {
+			const {
+				Rem_variable_annuelle_médiane_ecart,
+				Taux_horaire_variable_médian_ecart,
+			} = indicatorsSchema.properties.D.properties;
+			expect(Rem_variable_annuelle_médiane_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_variable_annuelle_médiane_ecart.description).toBeTruthy();
+			expect(Taux_horaire_variable_médian_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Taux_horaire_variable_médian_ecart.description).toBeTruthy();
+		});
+	});
+
+	describe("Indicateur F proportions schema (#4530)", () => {
+		const fSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items
+				.properties.Indicateurs.properties.F;
+
+		it("types every quartile proportion as a nullable string (was number)", () => {
+			for (const quartileSchema of [
+				fSchema.properties.annuel,
+				fSchema.properties.horaire,
+			]) {
+				for (const [key, property] of Object.entries(
+					quartileSchema.properties,
+				)) {
+					if (!key.includes("proportion")) continue;
+					expect(property.type).toEqual(["string", "null"]);
+				}
 			}
 		});
 	});

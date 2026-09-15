@@ -267,8 +267,15 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
-function roundRatio(r: number | null): number | null {
-	return r === null ? null : Math.round(r * 10000) / 10000;
+// Aligns the G gap ratios on the `numeric(9,4)` scale A–F already come out of Postgres in
+// (fixed-scale string, trailing zeros kept). Rounding BEFORE formatting matters: a `toFixed(4)`
+// applied straight to the raw ratio can yield "-0.0000" for a negative gap that rounds to zero
+// (e.g. -3.3e-7). `Math.round` on that same value produces -0, which `toFixed` formats as
+// "0.0000" (unsigned), matching what Postgres would emit.
+function formatRatio(r: number | null): string | null {
+	if (r === null) return null;
+	const rounded = Math.round(r * 10000) / 10000;
+	return rounded.toFixed(4);
 }
 
 function toIndicatorGCategory(entry: IndicatorGEntry) {
@@ -296,12 +303,12 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Taux_horaire_base_H: hbM,
 		Taux_horaire_variable_F: hvW,
 		Taux_horaire_variable_H: hvM,
-		Rem_annuelle_base_ecart: roundRatio(computeGapRatio(abW ?? "", abM ?? "")),
-		Rem_annuelle_variable_ecart: roundRatio(
+		Rem_annuelle_base_ecart: formatRatio(computeGapRatio(abW ?? "", abM ?? "")),
+		Rem_annuelle_variable_ecart: formatRatio(
 			computeGapRatio(avW ?? "", avM ?? ""),
 		),
-		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
-		Taux_horaire_variable_ecart: roundRatio(
+		Taux_horaire_base_ecart: formatRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
+		Taux_horaire_variable_ecart: formatRatio(
 			computeGapRatio(hvW ?? "", hvM ?? ""),
 		),
 	};
