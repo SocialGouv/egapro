@@ -397,6 +397,15 @@ normalement. Aucune nouvelle variable d'environnement.
 échec de construction ou d'écriture de la ligne stdout n'empêche jamais
 l'insert, et un échec d'insert n'empêche jamais la ligne stdout (déjà émise).
 
+**Borne `error_message`** — `audit.action_log.error_message` est un `text()`
+sans limite ; un appelant non authentifié peut forger un message arbitrairement
+long (ex. une erreur de validation Zod qui sérialise tout l'input rejeté).
+`logAction` tronque à `AUDIT_ERROR_MESSAGE_MAX_LENGTH` (500 caractères) juste
+avant l'insert — seul point d'écriture en base, donc couvre tRPC, les routes
+et les appels directs. Le miroir stdout lit le message **non tronqué** via
+`deriveErrorCode` (qui n'en garde qu'un préfixe de toute façon) : ce
+comportement est inchangé.
+
 ---
 
 ## Category → retention mapping (CNIL compliance)

@@ -24,7 +24,7 @@ vi.mock("../activityLog", async (importOriginal) => {
 	};
 });
 
-const { logAction } = await import("../log");
+const { logAction, AUDIT_ERROR_MESSAGE_MAX_LENGTH } = await import("../log");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
 describe("logAction", () => {
@@ -226,6 +226,67 @@ describe("logAction", () => {
 				errorMessage:
 					"OAUTH_CALLBACK_ERROR: invalid_grant for code fake-session-token-value",
 			});
+		});
+
+		it("truncates a long errorMessage to AUDIT_ERROR_MESSAGE_MAX_LENGTH before inserting (#4526)", async () => {
+			const longMessage = "a".repeat(2000);
+
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: longMessage,
+			});
+
+			const row = mockInsertValues.mock.calls[0]?.[0];
+			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
+			expect(row?.errorMessage).toBe(
+				longMessage.slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH),
+			);
+		});
+
+		it("never splits a surrogate pair straddling the truncation cut", async () => {
+			const surrogatePairEmoji = "😀";
+			const longMessage =
+				"a".repeat(AUDIT_ERROR_MESSAGE_MAX_LENGTH - 1) + surrogatePairEmoji;
+
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: longMessage,
+			});
+
+			const row = mockInsertValues.mock.calls[0]?.[0];
+			expect(row?.errorMessage).toBe(longMessage);
+			expect([...(row?.errorMessage ?? "")]).toHaveLength(
+				AUDIT_ERROR_MESSAGE_MAX_LENGTH,
+			);
+		});
+
+		it("persists a short errorMessage unchanged", async () => {
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: "BAD_REQUEST: invalid input",
+			});
+
+			const row = mockInsertValues.mock.calls[0]?.[0];
+			expect(row?.errorMessage).toBe("BAD_REQUEST: invalid input");
+		});
+
+		it("keeps deriving the stdout errorCode correctly and truncates the persisted row, for a long tRPC-shaped message", async () => {
+			const longMessage = `BAD_REQUEST: ${"x".repeat(2000)}`;
+
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: longMessage,
+			});
+
+			expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+				errorCode: "BAD_REQUEST",
+			});
+			const row = mockInsertValues.mock.calls[0]?.[0];
+			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
 		});
 
 		// A failure while building or emitting the stdout line must never block the DB insert, nor make logAction reject.

@@ -38,6 +38,14 @@ export type LogActionInput = {
 	origin?: LogActionOrigin;
 };
 
+// Bounds audit.action_log.error_message (unbounded text()) against a caller-controlled message, e.g. a Zod error echoing attacker-chosen input; the stdout mirror keeps reading the untruncated message.
+export const AUDIT_ERROR_MESSAGE_MAX_LENGTH = 500;
+
+// Code-point aware so a surrogate pair straddling the cut is never split into an unpaired surrogate.
+function truncateErrorMessage(message: string): string {
+	return [...message].slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH).join("");
+}
+
 // Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
 export async function logAction(input: LogActionInput): Promise<void> {
 	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
@@ -77,7 +85,10 @@ export async function logAction(input: LogActionInput): Promise<void> {
 			siren: input.siren ?? null,
 			resourceType: input.resourceType ?? null,
 			resourceId: input.resourceId ?? null,
-			errorMessage: input.errorMessage ?? null,
+			errorMessage:
+				input.errorMessage != null
+					? truncateErrorMessage(input.errorMessage)
+					: null,
 			metadata: input.metadata ?? null,
 			ipAddress: input.ipAddress ?? null,
 			userAgent: input.userAgent ?? null,
