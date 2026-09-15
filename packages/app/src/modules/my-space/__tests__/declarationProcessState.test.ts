@@ -12,6 +12,7 @@ import {
 	computePanelVariant,
 	computeRepresentationCtaHref,
 	computeRepresentationPanelVariant,
+	isRepresentationDeclarationTransmitted,
 } from "../declarationProcessState";
 import type { DeclarationItem } from "../types";
 
@@ -234,5 +235,41 @@ describe("computeRepresentationCtaHref", () => {
 				RECAP_HREF,
 			);
 		}
+	});
+});
+
+describe("isRepresentationDeclarationTransmitted", () => {
+	it("returns false when no démarche exists yet", () => {
+		expect(isRepresentationDeclarationTransmitted(undefined)).toBe(false);
+	});
+
+	it("returns false for a démarche that is only listed, never opened", () => {
+		expect(isRepresentationDeclarationTransmitted(makeRepresentation())).toBe(
+			false,
+		);
+	});
+
+	it("returns false for a démarche in progress", () => {
+		expect(
+			isRepresentationDeclarationTransmitted(
+				makeRepresentation({ status: "in_progress", currentStep: 3 }),
+			),
+		).toBe(false);
+	});
+
+	it("returns true once the démarche is transmitted", () => {
+		expect(
+			isRepresentationDeclarationTransmitted(
+				makeRepresentation({ status: "done", currentStep: 5 }),
+			),
+		).toBe(true);
+	});
+
+	// A not-subject row is reset to step 0 yet mapped "done" (see NOT_SUBJECT
+	// above) — `status === "done"` alone would wrongly read it as transmitted.
+	it('returns false — not true — for a settled non-subject démarche despite status "done"', () => {
+		expect(
+			isRepresentationDeclarationTransmitted(makeRepresentation(NOT_SUBJECT)),
+		).toBe(false);
 	});
 });
