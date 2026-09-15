@@ -24,6 +24,10 @@ import {
 	parseGipWorkforce,
 } from "~/modules/domain";
 import {
+	deliverRecordedReceipt,
+	recordReceiptIntent,
+} from "~/modules/mail/receiptIntent";
+import {
 	companyProcedure,
 	createTRPCRouter,
 	declarationLockedWriteProcedure,
@@ -730,6 +734,9 @@ export const declarationRouter = createTRPCRouter({
 			hasCse: company.hasCse,
 		});
 
+		const email = ctx.session.user.email;
+		let receiptIntentId: string | null = null;
+
 		await ctx.db.transaction(async (tx) => {
 			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
@@ -757,20 +764,19 @@ export const declarationRouter = createTRPCRouter({
 
 			await applyPercentagesAfterUpdate(tx, siren, year);
 			await purgeDraftSlice(tx, siren, year, "main");
+
+			receiptIntentId = email
+				? await recordReceiptIntent(tx, {
+						kind: "declaration",
+						to: email,
+						siren,
+						year,
+						userId: ctx.session.user.id,
+					})
+				: null;
 		});
 
-		const email = ctx.session.user.email;
-		if (email) {
-			const { enqueueReceipt } = await import("~/modules/mail/server");
-			await enqueueReceipt({
-				kind: "declaration",
-				to: email,
-				siren,
-				year,
-				userId: ctx.session.user.id,
-				isResend: false,
-			});
-		}
+		await deliverRecordedReceipt(receiptIntentId);
 
 		return { success: true };
 	}),
@@ -841,15 +847,6 @@ export const declarationRouter = createTRPCRouter({
 				ctx.session.user.id,
 			);
 
-			await ctx.db.transaction(async (tx) => {
-				await tx.insert(declarationStatusHistory).values(historyInserts);
-				await tx
-					.update(declarations)
-					.set({ ...projection, updatedAt: new Date() })
-					.where(activeDeclarationFilter(siren, year));
-				await purgeDraftSlice(tx, siren, year, "compliance");
-			});
-
 			// The "justify" path with no CSE (round 1 or round 2) ends the
 			// démarche right here — no upload step follows to carry the
 			// acknowledgement, unlike the corrective-action / joint-evaluation
@@ -860,17 +857,29 @@ export const declarationRouter = createTRPCRouter({
 				(event) => event.type === "demarche_complete",
 			);
 			const email = ctx.session.user.email;
-			if (isDemarcheComplete && email) {
-				const { enqueueReceipt } = await import("~/modules/mail/server");
-				await enqueueReceipt({
-					kind: isRound2 ? "secondDeclaration" : "declaration",
-					to: email,
-					siren,
-					year,
-					userId: ctx.session.user.id,
-					isResend: false,
-				});
-			}
+			let receiptIntentId: string | null = null;
+
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({ ...projection, updatedAt: new Date() })
+					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "compliance");
+
+				receiptIntentId =
+					isDemarcheComplete && email
+						? await recordReceiptIntent(tx, {
+								kind: isRound2 ? "secondDeclaration" : "declaration",
+								to: email,
+								siren,
+								year,
+								userId: ctx.session.user.id,
+							})
+						: null;
+			});
+
+			await deliverRecordedReceipt(receiptIntentId);
 
 			return { success: true };
 		}),
@@ -910,6 +919,9 @@ export const declarationRouter = createTRPCRouter({
 				ctx.session.user.id,
 			);
 
+			const email = ctx.session.user.email;
+			let receiptIntentId: string | null = null;
+
 			await ctx.db.transaction(async (tx) => {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 				await tx
@@ -921,20 +933,19 @@ export const declarationRouter = createTRPCRouter({
 					})
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "second");
+
+				receiptIntentId = email
+					? await recordReceiptIntent(tx, {
+							kind: "secondDeclaration",
+							to: email,
+							siren,
+							year,
+							userId: ctx.session.user.id,
+						})
+					: null;
 			});
 
-			const email = ctx.session.user.email;
-			if (email) {
-				const { enqueueReceipt } = await import("~/modules/mail/server");
-				await enqueueReceipt({
-					kind: "secondDeclaration",
-					to: email,
-					siren,
-					year,
-					userId: ctx.session.user.id,
-					isResend: false,
-				});
-			}
+			await deliverRecordedReceipt(receiptIntentId);
 
 			return { success: true };
 		},
@@ -969,6 +980,9 @@ export const declarationRouter = createTRPCRouter({
 				ctx.session.user.id,
 			);
 
+			const email = ctx.session.user.email;
+			let receiptIntentId: string | null = null;
+
 			await ctx.db.transaction(async (tx) => {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 				await tx
@@ -976,20 +990,19 @@ export const declarationRouter = createTRPCRouter({
 					.set({ ...projection, updatedAt: new Date() })
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "joint");
+
+				receiptIntentId = email
+					? await recordReceiptIntent(tx, {
+							kind: "jointEvaluation",
+							to: email,
+							siren,
+							year,
+							userId: ctx.session.user.id,
+						})
+					: null;
 			});
 
-			const email = ctx.session.user.email;
-			if (email) {
-				const { enqueueReceipt } = await import("~/modules/mail/server");
-				await enqueueReceipt({
-					kind: "jointEvaluation",
-					to: email,
-					siren,
-					year,
-					userId: ctx.session.user.id,
-					isResend: false,
-				});
-			}
+			await deliverRecordedReceipt(receiptIntentId);
 
 			return { success: true };
 		}),

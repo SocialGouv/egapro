@@ -46,7 +46,7 @@ vi.mock("~/server/db", () => ({
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
-import { enqueueReceipt } from "../enqueueReceipt";
+import { enqueueReceipt, sendReceipt } from "../enqueueReceipt";
 
 const PDF_ATTACHMENT = {
 	filename: "test.pdf",
@@ -614,5 +614,110 @@ describe("enqueueReceipt — variant derivation", () => {
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
 		expect(payloadOf().raisonSociale).toBe("552100554");
+	});
+});
+
+// Issue #4542 — the outbox path calls `sendReceipt` directly, because unlike
+// the "Renvoyer" button it needs the outcome back to settle its row, and it
+// needs the send deduplicated against a replay of the same row.
+describe("sendReceipt — outbox path", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
+		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "enqueued",
+			id: "job-1",
+		});
+		stubContext();
+	});
+
+	const OUTBOX_ID = "0f3f4d2e-1c2b-4a5e-9f11-2f9a8c7d6e5b";
+
+	it("hands the outbox id to the queue as the deduplication key", async () => {
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: true, error: null });
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({ jobId: OUTBOX_ID }),
+		);
+		expect(auditMetadataOf()).toMatchObject({ outboxId: OUTBOX_ID });
+	});
+
+	it("sends no deduplication key for a resend, which is a deliberate second copy", async () => {
+		await sendReceipt({ ...baseInput, kind: "declaration", isResend: true });
+
+		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
+			jobId?: string;
+		};
+		expect(call.jobId).toBeUndefined();
+		expect(auditMetadataOf()).not.toHaveProperty("outboxId");
+	});
+
+	// A replay whose first attempt did reach the queue must read as delivered,
+	// not as a failure to retry — otherwise the row would be sent forever.
+	it("treats an already-queued job as sent", async () => {
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "duplicate",
+			id: OUTBOX_ID,
+		});
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: true, error: null });
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				resourceId: OUTBOX_ID,
+				metadata: expect.objectContaining({ alreadyQueued: true }),
+			}),
+		);
+	});
+
+	it("reports the queue error so the row stays owed", async () => {
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "queue_unavailable",
+		});
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: false, error: "queue_unavailable" });
+	});
+
+	it("reports a dropped PDF without claiming the receipt failed", async () => {
+		mocks.buildDeclarationAttachments.mockRejectedValue(new Error("render KO"));
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: true, error: "render KO" });
+	});
+
+	it("reports a thrown failure and stamps the outbox id on the audit row", async () => {
+		mocks.enqueueNotification.mockRejectedValue(new Error("boom"));
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: false, error: "boom" });
+		expect(auditMetadataOf()).toMatchObject({ outboxId: OUTBOX_ID });
 	});
 });

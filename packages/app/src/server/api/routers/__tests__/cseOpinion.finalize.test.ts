@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+	recordReceiptIntent: vi.fn().mockResolvedValue("outbox-1"),
+	deliverRecordedReceipt: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("~/server/auth", () => ({
@@ -16,11 +17,13 @@ vi.mock("~/server/services/s3", () => ({
 	deleteFile: vi.fn(),
 }));
 
-// finalize() enqueues the "démarche terminée" receipt itself, after the
-// transaction commits — mock the dynamic import so the call can be asserted
-// without touching the real queue (issue #4300).
-vi.mock("~/modules/mail/server", () => ({
-	enqueueReceipt: mocks.enqueueReceipt,
+// finalize() records the "démarche terminée" receipt inside its own
+// transaction and delivers it once the commit is through (issues #4300, #4542)
+// — mock the intent module so the calls can be asserted without touching the
+// real queue.
+vi.mock("~/modules/mail/receiptIntent", () => ({
+	recordReceiptIntent: mocks.recordReceiptIntent,
+	deliverRecordedReceipt: mocks.deliverRecordedReceipt,
 }));
 
 const DEFAULT_DECLARATION = {
@@ -218,6 +221,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		updateSet,
 		update,
 		insertValues,
+		transaction,
 	};
 }
 
@@ -251,7 +255,8 @@ function createCaller(
 describe("cseOpinionRouter.finalize", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		mocks.enqueueReceipt.mockResolvedValue(undefined);
+		mocks.recordReceiptIntent.mockResolvedValue("outbox-1");
+		mocks.deliverRecordedReceipt.mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
@@ -283,46 +288,67 @@ describe("cseOpinionRouter.finalize", () => {
 
 	// Regression guard (#4300): the "démarche terminée" receipt used to fire on
 	// every file upload (route.ts), producing up to MAX_CSE_FILES duplicates and
-	// none on the actual Submit click. It now fires exactly once here, after the
-	// transaction that materialises the Submit action commits — moved from
+	// none on the actual Submit click. It now fires exactly once here, on the
+	// transaction that materialises the Submit action — moved from
 	// src/app/api/upload/__tests__/route.test.ts.
 	describe("confirmation mail on finalize", () => {
-		it("enqueues a cseOpinion receipt after the transaction commits", async () => {
+		it("records a cseOpinion receipt intent and delivers it after the commit", async () => {
 			const ctx = createMockDbForFinalize();
 			const caller = await createCaller(ctx.db);
 
 			const result = await caller.finalize();
 
 			expect(result).toEqual({ success: true });
-			expect(mocks.enqueueReceipt).toHaveBeenCalledTimes(1);
-			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
-				kind: "cseOpinion",
-				to: "user@example.com",
-				siren: "339787277",
-				year: expect.any(Number),
-				userId: "user-1",
-				isResend: false,
-			});
+			expect(mocks.recordReceiptIntent).toHaveBeenCalledTimes(1);
+			expect(mocks.recordReceiptIntent).toHaveBeenCalledWith(
+				expect.anything(),
+				{
+					kind: "cseOpinion",
+					to: "user@example.com",
+					siren: "339787277",
+					year: expect.any(Number),
+					userId: "user-1",
+				},
+			);
+			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith("outbox-1");
 		});
 
-		it("does not enqueue any receipt when the session has no email", async () => {
+		// Regression guard (#4542): recording the intent outside the transaction
+		// is the very window that lost acknowledgements when the process died.
+		it("records the intent on the transaction handle, not on the ambient db", async () => {
+			const ctx = createMockDbForFinalize();
+			const caller = await createCaller(ctx.db);
+
+			await caller.finalize();
+
+			const writer = mocks.recordReceiptIntent.mock.calls[0]?.[0];
+			expect(writer).toBeDefined();
+			expect(writer).not.toBe(ctx.db);
+			expect(ctx.transaction).toHaveBeenCalledBefore(
+				mocks.deliverRecordedReceipt,
+			);
+		});
+
+		it("records no intent when the session has no email", async () => {
 			const ctx = createMockDbForFinalize();
 			const caller = await createCaller(ctx.db, "33978727700015", null, null);
 
 			const result = await caller.finalize();
 
 			expect(result).toEqual({ success: true });
-			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+			expect(mocks.recordReceiptIntent).not.toHaveBeenCalled();
+			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith(null);
 		});
 
-		it("does not enqueue a receipt when a precondition guard rejects finalize", async () => {
+		it("records no intent when a precondition guard rejects finalize", async () => {
 			const ctx = createMockDbForFinalize({ opinionCount: 0 });
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
 				"Les avis du CSE doivent être renseignés avant validation.",
 			);
-			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+			expect(mocks.recordReceiptIntent).not.toHaveBeenCalled();
+			expect(mocks.deliverRecordedReceipt).not.toHaveBeenCalled();
 		});
 	});
 

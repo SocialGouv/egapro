@@ -21,13 +21,38 @@ export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	payload: NotificationPayloadMap[T];
 	scheduledFor?: Date;
 	attachments?: PublisherAttachment[];
+	/**
+	 * Caller-chosen job id, used as the deduplication key. pg-boss stores it as
+	 * the primary key of its `job` table, so a second send under the same id is
+	 * rejected by the unique constraint rather than creating a twin job — which
+	 * is what lets a retry path replay a send it is not sure ever reached the
+	 * queue. Must be a UUID: the column is typed `uuid`.
+	 */
+	jobId?: string;
 };
 
 export type PublishResult =
 	| { status: "enqueued"; id: string }
+	| { status: "duplicate"; id: string }
 	| { status: "error"; error: string };
 
 export type EnqueueResult = PublishResult | { status: "queue_unavailable" };
+
+const UNIQUE_VIOLATION = "23505";
+
+/**
+ * True when the driver rejected the insert because the job id is already taken
+ * — the job reached the queue on an earlier attempt. Read off the SQLSTATE
+ * rather than the message, which is localised by the server's `lc_messages`.
+ */
+function isDuplicateJobId(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		(error as { code?: unknown }).code === UNIQUE_VIOLATION
+	);
+}
 
 const RETRY_AFTER_FAILURE_MS = 30_000;
 const DEFAULT_RETRY_LIMIT = 5;
@@ -97,6 +122,7 @@ function readPositiveInt(name: string, fallback: number): number {
  *
  * Graceful degradation:
  * - URL missing or queue unreachable → `{ status: "queue_unavailable" }` (no throw)
+ * - `jobId` already queued → `{ status: "duplicate", id }` (no throw)
  * - `boss.send` throws → `{ status: "error", error }` (no throw)
  *
  * Audit logging is the caller's responsibility: branch on the returned
@@ -144,9 +170,18 @@ export async function enqueueNotification<T extends NotificationType>(
 				DEFAULT_RETRY_DELAY_SECONDS,
 			),
 			startAfter: startAfterSeconds,
+			...(input.jobId ? { id: input.jobId } : {}),
 		});
+		// `send` resolves to null when the queue policy refuses the job — with an
+		// explicit id that means the very same job is already there.
+		if (jobId === null && input.jobId) {
+			return { status: "duplicate", id: input.jobId };
+		}
 		return { status: "enqueued", id: jobId ?? "" };
 	} catch (error) {
+		if (input.jobId && isDuplicateJobId(error)) {
+			return { status: "duplicate", id: input.jobId };
+		}
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return { status: "error", error: message };
 	}

@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: receipt-outbox-retry
+  namespace: {{ .Values.global.namespace }}
+spec:
+  # Every 10 minutes: the outbox only holds rows whose request died, and the
+  # replay window (5 min) means a row is never picked up while its own request
+  # might still be finishing.
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: receipt-outbox-retry
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsUser: 100
+            runAsNonRoot: true
+          containers:
+            - name: trigger
+              image: curlimages/curl:8.12.1
+              securityContext:
+                allowPrivilegeEscalation: false
+              # Same shared secret as the app pod (`suit` secret) and the
+              # APISIX gateway — the Edge middleware now rejects this route
+              # outright when the header is absent or wrong, so an
+              # unauthenticated caller can no longer trigger a replay pass.
+              env:
+                - name: EGAPRO_GATEWAY_SHARED_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: suit
+                      key: EGAPRO_GATEWAY_SHARED_SECRET
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  curl -X POST "http://app:3000/api/receipts/retry" \
+                    -H "X-Gateway-Forwarded: ${EGAPRO_GATEWAY_SHARED_SECRET}" \
+                    --connect-timeout 10 \
+                    --max-time 300 \
+                    --fail \
+                    --silent \
+                    --show-error
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

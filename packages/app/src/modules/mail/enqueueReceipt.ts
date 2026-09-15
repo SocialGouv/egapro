@@ -21,6 +21,7 @@ import {
 	buildDeclarationAttachments,
 	buildSecondDeclarationAttachments,
 } from "./buildReceiptAttachments";
+import type { ReceiptKind } from "./receiptKind";
 import {
 	selectCseOpinionReceiptVariant,
 	selectDeclarationConfirmationVariant,
@@ -28,12 +29,7 @@ import {
 } from "./sendRules";
 import type { MailAttachment } from "./types";
 
-export type ReceiptKind =
-	| "declaration"
-	| "secondDeclaration"
-	| "cseOpinion"
-	| "jointEvaluation"
-	| "representation";
+export type { ReceiptKind };
 
 export type EnqueueReceiptInput = {
 	kind: ReceiptKind;
@@ -42,6 +38,17 @@ export type EnqueueReceiptInput = {
 	year: number;
 	userId: string | null;
 	isResend: boolean;
+};
+
+export type SendReceiptInput = EnqueueReceiptInput & {
+	// Set by the outbox path only — a resend must never dedupe against the original.
+	outboxId?: string;
+};
+
+export type SendReceiptOutcome = {
+	sent: boolean;
+	// Set even on a degraded (but sent) receipt, not only on failure.
+	error: string | null;
 };
 
 const KIND_TO_TYPE = {
@@ -189,9 +196,11 @@ async function buildAttachments(
  * "Non-Error exception captured" and groups unrelated failures together, so it
  * is wrapped in a real Error and the original value kept as its cause.
  */
-function reportReceiptFailure(
+export function reportReceiptFailure(
 	error: unknown,
-	context: { stage: "attachments" | "enqueue" } & Record<string, unknown>,
+	context: {
+		stage: "attachments" | "enqueue" | "delivery" | "replay";
+	} & Record<string, unknown>,
 ): string {
 	const message = error instanceof Error ? error.message : String(error);
 	const reported =
@@ -240,10 +249,11 @@ async function buildAttachmentsOrDrop(
 	}
 }
 
-export async function enqueueReceipt(
-	input: EnqueueReceiptInput,
-): Promise<void> {
-	const { kind, to, siren, year, userId, isResend } = input;
+// Never throws — a mail failure must not surface as a failed submission; the outcome is returned instead.
+export async function sendReceipt(
+	input: SendReceiptInput,
+): Promise<SendReceiptOutcome> {
+	const { kind, to, siren, year, userId, isResend, outboxId } = input;
 	const type = KIND_TO_TYPE[kind];
 
 	try {
@@ -261,24 +271,28 @@ export async function enqueueReceipt(
 			siren,
 			payload,
 			...(attachments.length > 0 ? { attachments } : {}),
+			...(outboxId === undefined ? {} : { jobId: outboxId }),
 		});
+
+		// `duplicate` means the job already reached pg-boss before the process died — it counts as sent.
+		const queued =
+			result.status === "enqueued" || result.status === "duplicate";
 
 		// A receipt that never left matters more than one that left without its
 		// PDF, so the queue error wins the single error column when both happen.
-		const errorMessage =
-			result.status === "enqueued"
-				? droppedReason
-				: result.status === "error"
-					? result.error
-					: "queue_unavailable";
+		const errorMessage = queued
+			? droppedReason
+			: result.status === "error"
+				? result.error
+				: "queue_unavailable";
 
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-			status: result.status === "enqueued" ? "success" : "failure",
+			status: queued ? "success" : "failure",
 			userId,
 			userEmail: to,
 			siren,
-			...(result.status === "enqueued"
+			...(result.status === "enqueued" || result.status === "duplicate"
 				? { resourceType: "notification", resourceId: result.id }
 				: {}),
 			// Free text belongs in the dedicated column, not in `metadata`: a direct
@@ -297,8 +311,12 @@ export async function enqueueReceipt(
 				isResend,
 				...("variant" in payload ? { variant: payload.variant } : {}),
 				...(droppedReason === null ? {} : { attachmentsDropped: true }),
+				...(outboxId === undefined ? {} : { outboxId }),
+				...(result.status === "duplicate" ? { alreadyQueued: true } : {}),
 			},
 		});
+
+		return { sent: queued, error: errorMessage };
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
@@ -309,7 +327,22 @@ export async function enqueueReceipt(
 			userEmail: to,
 			siren,
 			errorMessage: message,
-			metadata: { type, kind, year, isResend },
+			metadata: {
+				type,
+				kind,
+				year,
+				isResend,
+				...(outboxId === undefined ? {} : { outboxId }),
+			},
 		});
+
+		return { sent: false, error: message };
 	}
+}
+
+// A resend is neither deduplicated nor retried — the user asking for it is watching for it.
+export async function enqueueReceipt(
+	input: EnqueueReceiptInput,
+): Promise<void> {
+	await sendReceipt(input);
 }
