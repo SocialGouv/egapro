@@ -243,7 +243,7 @@ export async function auditMiddleware<TResult>({
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
 			durationMs,
-			origin: { source: "trpc", route: path, operation: type },
+			origin: { source: "trpc", route: path, operation: type, rawInput },
 		});
 	};
 

@@ -149,6 +149,36 @@ describe("logAction", () => {
 			});
 		});
 
+		it("mirrors origin.rawInput instead of the persisted metadata when the origin carries it", async () => {
+			await logAction({
+				action: AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
+				status: "success",
+				metadata: { year: 2026 },
+				origin: {
+					source: "trpc",
+					route: "representationDeclaration.saveDraft",
+					operation: "mutation",
+					rawInput: { year: 2026, executiveWomenPercent: 60 },
+				},
+			});
+
+			expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+				rawInput: { year: 2026, executiveWomenPercent: 60 },
+			});
+		});
+
+		it("falls back to metadata when origin does not carry a raw input (route / direct calls)", async () => {
+			await logAction({
+				action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
+				status: "success",
+				metadata: { year: 2026 },
+			});
+
+			expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+				rawInput: { year: 2026 },
+			});
+		});
+
 		it("defaults origin fields to null for a direct call (auth events, crons…)", async () => {
 			await logAction({
 				action: AUDIT_ACTIONS.AUTH_LOGIN,

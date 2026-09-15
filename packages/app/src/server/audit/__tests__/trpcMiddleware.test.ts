@@ -702,6 +702,45 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]?.siren).toBeNull();
 	});
 
+	it("carries the real, unscoped raw input for the stdout mirror on a mapped path with an allowlisted metadata", async () => {
+		const next = vi.fn(async () => okResult(undefined));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "representationDeclaration.saveDraft",
+			getRawInput: buildGetRawInput({
+				year: 2025,
+				executiveWomenPercent: 60,
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			year: 2025,
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.origin).toMatchObject({
+			rawInput: { year: 2025, executiveWomenPercent: 60 },
+		});
+	});
+
+	it("carries the real scalar raw input for the stdout mirror, not the { value } metadata wrapper", async () => {
+		const next = vi.fn(async () => okResult(undefined));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "representationDeclaration.get",
+			getRawInput: buildGetRawInput(2025),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			value: 2025,
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.origin).toMatchObject({
+			rawInput: 2025,
+		});
+	});
+
 	it("swallows getRawInput errors and still logs the action", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({

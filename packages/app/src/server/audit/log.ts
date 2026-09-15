@@ -16,6 +16,8 @@ export type LogActionOrigin = {
 	source?: "trpc" | "route" | null;
 	route?: string | null;
 	operation?: string | null;
+	// Only auditMiddleware sets this key (source "trpc"); its values only ever reach `inputKeys`, never `input`, since activityLog.ts nulls `input` for that source — a "route" caller setting this would not get that guard.
+	rawInput?: unknown;
 };
 
 export type LogActionInput = {
@@ -41,6 +43,9 @@ export async function logAction(input: LogActionInput): Promise<void> {
 	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
 
 	try {
+		// inputKeys must reflect the caller's real input, not the allowlisted/wrapped projection persisted as `metadata`.
+		const stdoutInput = input.origin?.rawInput ?? input.metadata;
+
 		emitActivityLog({
 			source: input.origin?.source ?? null,
 			action: input.action,
@@ -53,7 +58,7 @@ export async function logAction(input: LogActionInput): Promise<void> {
 			userId: input.userId ?? null,
 			siren: input.siren ?? null,
 			ip: input.ipAddress ?? null,
-			rawInput: input.metadata ?? null,
+			rawInput: stdoutInput ?? null,
 		});
 	} catch (error) {
 		console.error("[audit] Failed to emit activity log line", {
