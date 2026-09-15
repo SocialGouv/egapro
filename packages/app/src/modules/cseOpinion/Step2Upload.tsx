@@ -72,27 +72,23 @@ export function Step2Upload({
 		router.refresh();
 	}, [utils, router]);
 
-	// The server is the source of truth for which associations actually
-	// persisted. `associations` is written optimistically on every toggle, so
-	// on a failed setFileContentTypes it must roll back to the last state the
-	// server actually confirmed — not to whatever was locally displayed, which
-	// may itself be the failed, never-committed value (#4102).
-	//
-	// The confirmed map is rebuilt from each call's own `variables` (tRPC's
-	// second onSuccess/onError argument), never from a ref shared across
-	// concurrent mutate() calls: two toggles in flight would otherwise let the
-	// later-started call's ref write clobber the earlier one's, regardless of
-	// which one actually resolved last (#4102).
 	const lastConfirmedAssociations = useRef<AssociationMap>(
 		buildAssociationMap(columns, initialAssociations),
 	);
+	const isAssociationWriteInFlightRef = useRef(false);
+	const queuedAssociationWriteRef = useRef<AssociationMap | null>(null);
+	const [hasPendingAssociationWrite, setHasPendingAssociationWrite] =
+		useState(false);
 
 	const setTypesMutation = api.cseOpinion.setFileContentTypes.useMutation({
 		onError: () => {
-			setAssociations(lastConfirmedAssociations.current);
+			if (queuedAssociationWriteRef.current === null) {
+				setAssociations(lastConfirmedAssociations.current);
+			}
 			setAssociationError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
 			);
+			dispatchNextAssociationWrite();
 		},
 		onSuccess: (_data, variables) => {
 			lastConfirmedAssociations.current = buildAssociationMap(
@@ -100,8 +96,22 @@ export function Step2Upload({
 				variables.associations,
 			);
 			setAssociationError(null);
+			dispatchNextAssociationWrite();
 		},
 	});
+
+	const dispatchNextAssociationWrite = useCallback(() => {
+		const next = queuedAssociationWriteRef.current;
+		if (next === null) {
+			isAssociationWriteInFlightRef.current = false;
+			setHasPendingAssociationWrite(false);
+			return;
+		}
+		queuedAssociationWriteRef.current = null;
+		setTypesMutation.mutate({
+			associations: toAssociationPayload(columns, next),
+		});
+	}, [columns, setTypesMutation]);
 
 	const handleToggle = useCallback(
 		(columnId: string, fileId: string, checked: boolean) => {
@@ -110,23 +120,24 @@ export function Step2Upload({
 				[columnId]: checked ? fileId : null,
 			};
 			setAssociations(next);
-			setTypesMutation.mutate({
-				associations: toAssociationPayload(columns, next),
-			});
+			queuedAssociationWriteRef.current = next;
+			setHasPendingAssociationWrite(true);
+			if (!isAssociationWriteInFlightRef.current) {
+				isAssociationWriteInFlightRef.current = true;
+				dispatchNextAssociationWrite();
+			}
 		},
-		[associations, columns, setTypesMutation],
+		[associations, dispatchNextAssociationWrite],
 	);
 
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: (_data, variables) => {
 			setDeletingFileId(null);
-			setAssociations((prev) => {
-				const next = clearFileAssociations(prev, variables.fileId);
-				// Deletion cascades server-side too, so the cleared map is itself
-				// now the confirmed truth — keep it in sync for the next revert.
-				lastConfirmedAssociations.current = next;
-				return next;
-			});
+			lastConfirmedAssociations.current = clearFileAssociations(
+				lastConfirmedAssociations.current,
+				variables.fileId,
+			);
+			setAssociations((prev) => clearFileAssociations(prev, variables.fileId));
 			refreshFileList();
 		},
 		onError: () => setDeletingFileId(null),
@@ -199,19 +210,9 @@ export function Step2Upload({
 				return;
 			}
 			setHasAttemptedSubmit(false);
-			// Guard against finalize AND against an association save still in
-			// flight — canSubmit reflects the optimistic matrix state, so without
-			// this a save that hasn't reached the server yet can race finalize
-			// and lose (#4102).
-			if (finalizeMutation.isPending || setTypesMutation.isPending) return;
 			openFinalizeModal();
 		},
-		[
-			canSubmit,
-			finalizeMutation.isPending,
-			setTypesMutation.isPending,
-			openFinalizeModal,
-		],
+		[canSubmit, openFinalizeModal],
 	);
 
 	const confirmFinalize = useCallback(() => {
@@ -326,6 +327,14 @@ export function Step2Upload({
 					</p>
 				)}
 
+				<div aria-live="polite" className="fr-messages-group">
+					{hasPendingAssociationWrite && (
+						<p className="fr-message fr-message--info fr-mb-0">
+							Enregistrement des associations en cours…
+						</p>
+					)}
+				</div>
+
 				<div className={`fr-mt-4w ${formStyles.actions}`}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
@@ -337,7 +346,11 @@ export function Step2Upload({
 						<button
 							{...readOnlyGuard.buttonProps}
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isReadOnly}
+							disabled={
+								isReadOnly ||
+								hasPendingAssociationWrite ||
+								finalizeMutation.isPending
+							}
 							type="submit"
 						>
 							Soumettre
