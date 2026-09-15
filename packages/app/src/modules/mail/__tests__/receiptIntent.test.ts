@@ -2,10 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	deliverReceiptIntent: vi.fn().mockResolvedValue("sent"),
+	reportReceiptFailure: vi.fn(),
 }));
 
 vi.mock("../receiptOutbox", () => ({
 	deliverReceiptIntent: mocks.deliverReceiptIntent,
+}));
+
+vi.mock("../enqueueReceipt", () => ({
+	reportReceiptFailure: mocks.reportReceiptFailure,
 }));
 
 import { receiptOutbox } from "~/server/db/schema";
@@ -22,7 +27,10 @@ const INTENT = {
 function createWriter() {
 	const values = vi.fn().mockResolvedValue(undefined);
 	const insert = vi.fn().mockReturnValue({ values });
-	return { insert, values };
+	const rollback = vi.fn(() => {
+		throw new Error("rollback");
+	});
+	return { insert, values, rollback };
 }
 
 describe("recordReceiptIntent", () => {
@@ -80,5 +88,19 @@ describe("deliverRecordedReceipt", () => {
 		await deliverRecordedReceipt("outbox-42");
 
 		expect(mocks.deliverReceiptIntent).toHaveBeenCalledWith("outbox-42");
+	});
+
+	it("does not propagate an outbox failure to the caller", async () => {
+		mocks.deliverReceiptIntent.mockClear();
+		mocks.reportReceiptFailure.mockClear();
+		const dbError = new Error("connection terminated");
+		mocks.deliverReceiptIntent.mockRejectedValueOnce(dbError);
+
+		await expect(deliverRecordedReceipt("outbox-42")).resolves.toBeUndefined();
+
+		expect(mocks.reportReceiptFailure).toHaveBeenCalledWith(dbError, {
+			stage: "delivery",
+			outboxId: "outbox-42",
+		});
 	});
 });

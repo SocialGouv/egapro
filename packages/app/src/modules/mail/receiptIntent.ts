@@ -11,8 +11,8 @@ export type ReceiptIntent = {
 	userId: string | null;
 };
 
-// Typed as a subset of the Drizzle client so callers must pass their `tx`, never the ambient `db`.
-type Writer = Pick<typeof db, "insert">;
+// `rollback` only exists on a transaction handle, so this rejects the ambient `db` at compile time.
+type Writer = Pick<typeof db, "insert"> & { rollback: () => never };
 
 export async function recordReceiptIntent(
 	tx: Writer,
@@ -33,6 +33,13 @@ export async function recordReceiptIntent(
 // Never throws — a receipt that can't leave stays in the outbox for the retry pass instead.
 export async function deliverRecordedReceipt(id: string | null): Promise<void> {
 	if (id === null) return;
-	const { deliverReceiptIntent } = await import("./receiptOutbox");
-	await deliverReceiptIntent(id);
+	try {
+		const { deliverReceiptIntent } = await import("./receiptOutbox");
+		await deliverReceiptIntent(id);
+	} catch (error) {
+		// Dynamic, not hoisted: a static import would drag `enqueueReceipt`'s Sentry/db/notifications
+		// chain into every caller of this file, including ones that never reach a failing delivery.
+		const { reportReceiptFailure } = await import("./enqueueReceipt");
+		reportReceiptFailure(error, { stage: "delivery", outboxId: id });
+	}
 }

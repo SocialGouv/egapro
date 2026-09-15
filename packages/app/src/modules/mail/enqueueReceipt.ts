@@ -196,9 +196,12 @@ async function buildAttachments(
  * "Non-Error exception captured" and groups unrelated failures together, so it
  * is wrapped in a real Error and the original value kept as its cause.
  */
-function reportReceiptFailure(
+export function reportReceiptFailure(
 	error: unknown,
-	context: { stage: "attachments" | "enqueue" } & Record<string, unknown>,
+	context: { stage: "attachments" | "enqueue" | "delivery" } & Record<
+		string,
+		unknown
+	>,
 ): string {
 	const message = error instanceof Error ? error.message : String(error);
 	const reported =
