@@ -13,36 +13,29 @@ import { useDraftHydration } from "~/modules/declaration-remuneration/shared/dra
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import {
 	type CampaignDeadlines,
+	type CompliancePathValue,
 	formatLongDate,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import {
-	COMPLIANCE_JOINT_EVALUATION,
-	complianceStepHref,
-} from "~/modules/routes";
+	getCompliancePathHref,
+	getCompliancePathPreviousHref,
+} from "~/modules/navigation";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
-import {
-	getCompliancePathPreviousHref,
-	getPostComplianceDestination,
-} from "../shared/complianceNavigation";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import styles from "./CompliancePathChoice.module.scss";
 import {
 	FirstRoundOptions,
-	getCompliancePathHref,
 	SecondRoundOptions,
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
-import type {
-	CompliancePathReadOnlyReason,
-	CompliancePathValue,
-} from "./compliancePath/constants";
+import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
@@ -121,15 +114,7 @@ export function CompliancePathChoice({
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
-			if (path === "corrective_action") {
-				router.push(complianceStepHref(1));
-			} else if (path === "joint_evaluation") {
-				router.push(COMPLIANCE_JOINT_EVALUATION);
-			} else {
-				// "justify": when an opinion is due it remains to be deposited on
-				// /avis-cse; otherwise the FSM already completed the démarche.
-				router.push(getPostComplianceDestination(cseOpinionRequired));
-			}
+			router.push(getCompliancePathHref(path, cseOpinionRequired));
 		},
 	});
 

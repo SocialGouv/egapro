@@ -1,13 +1,11 @@
 import { isCseOpinionResolved } from "~/modules/domain";
-// `~/modules/routes` is strings only, so the barrel is safe here: unlike the
-// declaration-representation barrel it drags no server-touching tree into this
-// client bundle.
+import { getDemarcheStageHref } from "~/modules/navigation";
+// `~/modules/routes` and `~/modules/navigation` are strings only, so their
+// barrels are safe here: unlike the declaration-representation barrel they drag
+// no server-touching tree into this client bundle.
 import {
-	COMPLIANCE_JOINT_EVALUATION,
-	COMPLIANCE_PATH,
 	CSE_OPINION,
 	clampRepresentationStep,
-	complianceStepHref,
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
@@ -52,33 +50,26 @@ export function computePanelVariant(
 	}
 }
 
-// No `?siren=` is appended: every one of these pages resolves the declaration
-// from the session (`companyProcedure` binds the SIREN), and none ever read the
-// query.
+/**
+ * This panel's reading of the shared table: it answers only the two cases the
+ * table refuses, and those are exactly where it differs from the funnel's
+ * "Suivant" — `null` opens the tunnel rather than the path choice, and a settled
+ * démarche reads as over here while the recap keeps offering the re-submittable
+ * /avis-cse.
+ *
+ * No `?siren=` is appended: these pages resolve the declaration from the session
+ * (`companyProcedure` binds the SIREN), and none ever read the query.
+ */
 export function computeCtaHref(declaration: DeclarationItem | undefined) {
 	const fsmStatus = declaration?.fsmStatus ?? null;
 	if (fsmStatus === null) {
 		return DECLARATION_REMUNERATION;
 	}
 
-	switch (fsmStatus) {
-		case "draft":
-			return DECLARATION_REMUNERATION;
-		case "awaiting_compliance_path_choice":
-		case "awaiting_revision_choice":
-			return COMPLIANCE_PATH;
-		case "corrective_actions_chosen":
-			return complianceStepHref(1);
-		case "joint_evaluation_chosen":
-		case "revised_joint_evaluation_chosen":
-			return COMPLIANCE_JOINT_EVALUATION;
-		case "awaiting_cse_opinion":
-			return CSE_OPINION;
-		case "demarche_completed":
-			return cseOpinionResolvedFor(declaration)
-				? DECLARATION_REMUNERATION
-				: CSE_OPINION;
-	}
+	return getDemarcheStageHref(
+		fsmStatus,
+		cseOpinionResolvedFor(declaration) ? DECLARATION_REMUNERATION : CSE_OPINION,
+	);
 }
 
 export type RepresentationPanelVariant =

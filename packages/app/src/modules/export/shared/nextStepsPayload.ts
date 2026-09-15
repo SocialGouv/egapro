@@ -105,7 +105,7 @@ function toNextStepPayload(
  * 2. `submit_second_declaration` also fires from `awaiting_revision_choice`, so
  *    a company may resubmit its correction while parked there. But the app
  *    routes that state to the compliance-path screen
- *    (`complianceNavigation.ts`), never back into the second-declaration
+ *    (`~/modules/navigation`), never back into the second-declaration
  *    funnel: the expected next step is the path choice, not a resubmission.
  *
  * Both prunings are export-only — `applyAction` still accepts either action.
