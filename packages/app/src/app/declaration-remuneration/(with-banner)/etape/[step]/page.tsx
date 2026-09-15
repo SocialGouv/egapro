@@ -8,10 +8,9 @@ import {
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
 import {
-	getObligationWorkforce,
 	isDeadlinePassed,
 	isDeclarationSubmitted,
-	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
 import { LAST_REMUNERATION_STEP, remunerationStepHref } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
@@ -49,8 +48,8 @@ export default async function StepPage({ params }: StepPageProps) {
 	const d = data.declaration;
 	const company = await api.company.get({ siren: d.siren });
 
-	const indicatorGRequired = isIndicatorGRequired(
-		getObligationWorkforce(company.gipWorkforce),
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		company.gipWorkforce,
 		d.year,
 	);
 

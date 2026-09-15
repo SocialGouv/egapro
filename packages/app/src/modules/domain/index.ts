@@ -231,6 +231,7 @@ export {
 	INDICATOR_G_TRIENNIAL_MIN,
 	INDICATOR_G_UNIVERSAL_YEAR,
 	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	isTriennialYear,
 } from "./shared/indicatorG";
 // NAF activity nomenclature
