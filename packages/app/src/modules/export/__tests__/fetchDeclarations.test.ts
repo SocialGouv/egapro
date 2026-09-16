@@ -859,7 +859,6 @@ describe("assembleDeclaration", () => {
 				fileName: "avis-cse-original.pdf",
 				filePath: "/s3/path",
 				uploadedAt: new Date("2027-02-10T08:30:00Z"),
-				// Deliberately out of order and mixing both declarations.
 				contents: [
 					{ declarationNumber: 2, type: "gap" },
 					{ declarationNumber: 1, type: "gap" },

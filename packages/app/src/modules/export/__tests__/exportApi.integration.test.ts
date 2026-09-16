@@ -316,9 +316,6 @@ describe("GET /api/v1/export/declarations — Fichiers_CSE[].Contenus integratio
 			INSERT INTO app_declaration (id, siren, year, declarant_id, status, created_at, updated_at)
 			VALUES (${DECL_ID}, ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2027-05-01T00:00:00Z', '2027-05-01T00:00:00Z')
 		`;
-		// Three files: A covers both contents of declaration 1, B both contents
-		// of declaration 2, C is uploaded but not (yet) associated to any
-		// content — the checkboxes are only cocheable before finalisation.
 		await sql`
 			INSERT INTO app_file (id, declaration_id, file_name, file_path, type, uploaded_at)
 			VALUES
@@ -326,8 +323,6 @@ describe("GET /api/v1/export/declarations — Fichiers_CSE[].Contenus integratio
 				(${FILE_B}, ${DECL_ID}, 'avis-declaration-2.pdf', ${`${SIREN}/${YEAR}/b.pdf`}, 'cse_opinion', '2027-05-01T09:00:00Z'),
 				(${FILE_C}, ${DECL_ID}, 'avis-sans-association.pdf', ${`${SIREN}/${YEAR}/c.pdf`}, 'cse_opinion', '2027-05-01T10:00:00Z')
 		`;
-		// Cross associations 1/2 × accuracy/gap, inserted out of order to prove
-		// the response sorts them rather than echoing insertion order.
 		await sql`
 			INSERT INTO app_cse_opinion_file (id, declaration_id, declaration_number, type, file_id)
 			VALUES

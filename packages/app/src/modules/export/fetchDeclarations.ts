@@ -148,8 +148,7 @@ function compareCseFileContent(a: CseFileContent, b: CseFileContent): number {
 	if (a.declarationNumber !== b.declarationNumber) {
 		return a.declarationNumber - b.declarationNumber;
 	}
-	if (a.type === b.type) return 0;
-	return a.type === "accuracy" ? -1 : 1;
+	return a.type.localeCompare(b.type);
 }
 
 export function sortCseFileContents(

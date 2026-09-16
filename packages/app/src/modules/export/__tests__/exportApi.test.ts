@@ -765,7 +765,6 @@ describe("GET /api/v1/export/declarations", () => {
 							fileName: "avis-cse-2027.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
-							// Deliberately out of order and mixing both declarations.
 							contents: [
 								{ declarationNumber: 2, type: "gap" },
 								{ declarationNumber: 1, type: "gap" },
