@@ -476,7 +476,7 @@ const COMPANIES: SeedCompany[] = [
 ];
 
 const SIRENS = COMPANIES.map((company) => company.siren);
-// La représentation est gouvernée par la campagne de l'année suivante, seedée jusqu'à YEAR.
+// Representations store the reference year; the campaign releasing them is YEAR, the last one seeded.
 const REPRESENTATION_REFERENCE_YEAR = YEAR - 1;
 const YEARS = [
 	...new Set(

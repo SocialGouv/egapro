@@ -13,7 +13,7 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 	const SIREN_DRAFT = "111222333";
 	const ALL_SIRENS = [SIREN_DIFFUSIBLE, SIREN_NON_DIFFUSIBLE, SIREN_DRAFT];
 	const YEAR = 2027;
-	// La représentation de l'année de référence N est publiée par la campagne N+1.
+	// Reference year N is released by campaign N + 1.
 	const CAMPAIGN_YEAR = YEAR + 1;
 	const DECL_IDS = [
 		"repr-export-diffusible",

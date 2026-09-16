@@ -22,9 +22,7 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 		SIREN_NO_CAMPAIGN,
 	];
 	const YEAR = 2029;
-	// Campagne qui publierait l'année de référence sur les accès publics.
 	const CAMPAIGN_YEAR = YEAR + 1;
-	// Année de référence sans ligne de campagne du tout.
 	const YEAR_NO_CAMPAIGN = 2031;
 	const DECL_IDS = [
 		"suit-repr-window-start",
@@ -328,8 +326,7 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 		expect(logs).toHaveLength(1);
 		expect(logs[0]).toMatchObject({ status: "failure" });
 	});
-	it("ignores the public release date entirely, unlike the public accesses (#4197)", async () => {
-		// Campagne datée de demain d'un côté, aucune campagne de l'autre : l'autorité de contrôle reçoit les deux.
+	it("ignores the public release date entirely, unlike the public accesses", async () => {
 		await sql`
 			INSERT INTO app_campaign_deadline (
 				year, public_data_release_date,

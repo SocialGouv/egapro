@@ -22,7 +22,7 @@ const SIREN_HIDDEN = "810000002";
 const SIREN_OTHER = "810000003";
 const SIRENS = [SIREN_DIFFUSIBLE, SIREN_HIDDEN, SIREN_OTHER];
 
-// Années dédiées à cette suite, hors du bloc 2100-2102 des déclarations.
+// Dedicated years, outside the 2100-2102 block used by the declarations suite.
 const YEAR_OLDEST = 2110;
 const YEAR_MIDDLE = 2111;
 const YEAR_RELEASED = 2112;
@@ -41,7 +41,7 @@ const REFERENCE_YEARS = [
 ];
 const CAMPAIGN_YEARS = REFERENCE_YEARS.map((year) => year + 1);
 
-// Dates calculées par Postgres : « aujourd'hui » ne dépend pas du fuseau de la machine.
+// Dates computed by Postgres so that today does not depend on the machine time zone.
 const YESTERDAY = sqlExpr`CURRENT_DATE - 1`;
 const TODAY = sqlExpr`CURRENT_DATE`;
 const TOMORROW = sqlExpr`CURRENT_DATE + 1`;
@@ -50,7 +50,6 @@ function campaignRow(
 	year: number,
 	publicDataReleaseDate: SQL | null,
 ): typeof campaignDeadlines.$inferInsert {
-	// Les colonnes NOT NULL d'échéance sont hors sujet ici, mais obligatoires.
 	const filler = "2000-01-01";
 	return {
 		year,
@@ -469,7 +468,6 @@ describe("public representation services (real Postgres)", () => {
 	});
 
 	it("reads the campaign of the reference year + 1, not the campaign of the reference year", async () => {
-		// La campagne YEAR_FUTURE est publiée aujourd'hui ; seule YEAR_FUTURE + 1, qui la publie, est datée demain.
 		await db
 			.insert(representationDeclarations)
 			.values([declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_FUTURE })]);

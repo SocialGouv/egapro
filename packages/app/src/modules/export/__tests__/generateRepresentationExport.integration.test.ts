@@ -5,8 +5,8 @@ import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import { db } from "~/server/db";
 import { buildRepresentationExportRows } from "../generateRepresentationExport";
 
-// Le verrou de publication est posé en SQL : un driver mocké ne le prouve pas.
-describe("buildRepresentationExportRows — public release gate (#4197)", () => {
+// The release gate is SQL-enforced: a mocked driver cannot prove it.
+describe("buildRepresentationExportRows — public release gate", () => {
 	let sql!: ReturnType<typeof postgres>;
 
 	const SIREN_RELEASED = "820000001";
@@ -26,7 +26,7 @@ describe("buildRepresentationExportRows — public release gate (#4197)", () => 
 		SIREN_DRAFT,
 	];
 
-	// Années de référence ; la campagne qui les publie est `year + 1`.
+	// Reference years: the campaign releasing each one is year + 1.
 	const YEAR_RELEASED = 2120;
 	const YEAR_TODAY = 2121;
 	const YEAR_FUTURE = 2122;
@@ -65,7 +65,7 @@ describe("buildRepresentationExportRows — public release gate (#4197)", () => 
 			FROM unnest(${sql.array(ALL_SIRENS)}::text[]) AS siren
 		`;
 
-		// Dates calculées par Postgres : « aujourd'hui » ne dépend pas du fuseau de la machine.
+		// Dates computed by Postgres so that today does not depend on the machine time zone.
 		await sql`
 			INSERT INTO app_campaign_deadline (
 				year, public_data_release_date,

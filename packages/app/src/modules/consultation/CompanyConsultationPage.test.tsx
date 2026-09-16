@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 	}),
 }));
 
-// Complète le mock next/navigation de src/test/setup.ts, dont le sélecteur d'année garde useRouter.
+// The year selector needs useRouter, which the shared next/navigation mock in src/test/setup.ts lacks.
 vi.mock("next/navigation", async (importOriginal) => ({
 	...(await importOriginal<Record<string, unknown>>()),
 	notFound: mocks.notFound,
