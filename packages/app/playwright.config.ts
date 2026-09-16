@@ -10,9 +10,11 @@ export default defineConfig({
 	testDir: "./src/e2e",
 	testMatch: "**/*.e2e.{ts,tsx}",
 	// The 185-coordinate grid (#4022) and the RGAA page sweep both have their own config and
-	// reporter; keep them out of the PR gate even if one of their files were ever renamed to
-	// *.e2e.ts by mistake. `testMatch` above already misses them by extension — this is the
-	// belt, and it is the one the sweep's config says exists.
+	// reporter; keep them out of THIS collection even if one of their files were ever renamed
+	// to *.e2e.ts by mistake. `testMatch` above already misses them by extension — this is the
+	// belt, and it is the one the sweep's config says exists. The grid is a PR gate all the
+	// same, run from its own config as its own shards in .github/workflows/e2e.yaml; what this
+	// line prevents is the two collections overlapping and running the same coordinate twice.
 	testIgnore: ["**/grille/**", "**/a11y/**"],
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
@@ -41,11 +43,18 @@ export default defineConfig({
 			},
 			dependencies: ["setup"],
 		},
+		// Depends on `setup`, NOT on `chromium`: Playwright only shards top-level
+		// projects and replays a dependency project whole inside every shard that
+		// needs it, so making `chromium` a dependency would collapse the whole
+		// suite into one shard. Sharing `setup` as the sole dependency keeps both
+		// projects top-level — hence shardable — while the declaration order below
+		// still runs `chromium` before `logout` within a shard, which is what the
+		// lock release in api/auth/logout expects.
 		{
 			name: "logout",
 			testMatch: /logout\.e2e\.ts$/,
 			use: { ...devices["Desktop Chrome"] },
-			dependencies: ["chromium"],
+			dependencies: ["setup"],
 		},
 	],
 	...(isRemote

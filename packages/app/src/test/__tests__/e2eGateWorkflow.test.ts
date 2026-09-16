@@ -1,0 +1,156 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+/**
+ * Tooling assertions on the E2E gate.
+ *
+ * The gate spreads the main suite and the 185-coordinate grid over five runners,
+ * and three of the properties that make it a gate at all fail SILENTLY — nothing
+ * turns red, the check just stops covering what it claims to cover:
+ *
+ *  - Playwright disables its "no tests found" error under `--shard`, so an empty
+ *    shard exits 0;
+ *  - a job skipped because one of its `needs` failed counts as PASSING for branch
+ *    protection, so the aggregator must run on `always()`;
+ *  - Playwright shards top-level projects only and replays dependency projects
+ *    whole, so putting `logout` back downstream of `chromium` — or restoring a
+ *    file-level serial group on the grid — hands every test to shard 1 and leaves
+ *    the others empty.
+ *
+ * Each of those is one line away at any time, and none of them would show up in a
+ * green run. Hence this file.
+ */
+
+const REPO_ROOT = join(process.cwd(), "..", "..");
+const APP_ROOT = process.cwd();
+
+const REQUIRED_CHECK_NAME = "Test e2e";
+
+const workflow = readFileSync(
+	join(REPO_ROOT, ".github", "workflows", "e2e.yaml"),
+	"utf-8",
+);
+
+type Job = { id: string; body: string };
+
+function parseJobs(source: string): Job[] {
+	const lines = source.split("\n");
+	const start = lines.indexOf("jobs:");
+	const jobs: Job[] = [];
+	for (const line of lines.slice(start + 1)) {
+		const id = /^ {2}([A-Za-z0-9_-]+):\s*$/.exec(line)?.[1];
+		if (id !== undefined) {
+			jobs.push({ id, body: "" });
+			continue;
+		}
+		const current = jobs.at(-1);
+		if (current) current.body += `${line}\n`;
+	}
+	return jobs;
+}
+
+function scalar(body: string, key: string): string | undefined {
+	const match = new RegExp(`^ {4}${key}:[ \\t]*(.+)$`, "m").exec(body)?.[1];
+	return match?.trim().replace(/^["']|["']$/g, "");
+}
+
+describe("E2E gate workflow", () => {
+	const jobs = parseJobs(workflow);
+
+	it("declares more than one job, otherwise every assertion below is vacuous", () => {
+		expect(jobs.length).toBeGreaterThan(1);
+	});
+
+	const aggregators = jobs.filter(
+		(job) => scalar(job.body, "name") === REQUIRED_CHECK_NAME,
+	);
+	const aggregatorBody = aggregators.at(0)?.body ?? "";
+
+	it(`exposes exactly one job named "${REQUIRED_CHECK_NAME}"`, () => {
+		// The name is the status-check context required by the protection of
+		// `alpha`. A matrix job would publish "e2e suite 1/2" instead and the pull
+		// request would wait on a context nobody ever emits.
+		expect(aggregators.map((job) => job.id)).toHaveLength(1);
+	});
+
+	it("runs that job unconditionally", () => {
+		expect(scalar(aggregatorBody, "if")).toBe("always()");
+	});
+
+	it("makes that job wait on every other job of the workflow", () => {
+		const needs = scalar(aggregatorBody, "needs") ?? "";
+		const others = jobs
+			.map((job) => job.id)
+			.filter((id) => id !== aggregators.at(0)?.id);
+
+		expect(others.length).toBeGreaterThan(0);
+		for (const id of others) {
+			expect(needs).toContain(id);
+		}
+	});
+
+	it("carries no shard that is allowed to run nothing", () => {
+		// `--pass-with-no-tests` would re-open by hand the hole the guard step closes.
+		expect(workflow).not.toContain("--pass-with-no-tests");
+	});
+
+	it("fails a shard that collects no test", () => {
+		const shardBody = jobs.find((job) => job.body.includes("--shard="))?.body;
+
+		expect(shardBody).toContain("--list");
+		expect(shardBody).toMatch(/COUNT" -eq 0/);
+	});
+
+	it("shards every matrix entry against the count of its own suite", () => {
+		const entries = [
+			...workflow.matchAll(
+				/- suite: (\w+)\n[\s\S]*?shard: (\d+)\n\s+total: (\d+)/g,
+			),
+		].map((match) => ({
+			suite: match[1] ?? "",
+			shard: Number(match[2]),
+			total: Number(match[3]),
+		}));
+
+		expect(entries.length).toBeGreaterThan(1);
+		for (const entry of entries) {
+			const siblings = entries.filter((other) => other.suite === entry.suite);
+			expect(siblings).toHaveLength(entry.total);
+			expect(
+				siblings.map((sibling) => sibling.shard).sort((a, b) => a - b),
+			).toEqual(Array.from({ length: entry.total }, (_, index) => index + 1));
+		}
+	});
+});
+
+describe("Playwright collection stays shardable", () => {
+	it("keeps `logout` off the dependency chain of `chromium`", () => {
+		// Playwright shards top-level projects only, and replays a dependency project
+		// whole inside each shard that needs it. `dependencies: ["chromium"]` on
+		// `logout` therefore demotes `chromium` to a dependency and collapses all 174
+		// tests into shard 1 — measured, not feared.
+		const config = readFileSync(
+			join(APP_ROOT, "playwright.config.ts"),
+			"utf-8",
+		);
+		const logout = config.slice(config.indexOf('name: "logout"'));
+
+		expect(logout).toContain('dependencies: ["setup"]');
+		expect(logout).not.toContain('"chromium"');
+	});
+
+	it("keeps the grid free of a file-level serial group", () => {
+		// A serial group at file level makes the 185 coordinates one indivisible
+		// block, which shards exactly as badly as the dependency above. Isolation
+		// between coordinates comes from `withCampaignYear`, and sequential
+		// execution from `workers: 1` — neither needs a serial group.
+		const grid = readFileSync(
+			join(APP_ROOT, "src", "e2e", "grille", "grille.grille.ts"),
+			"utf-8",
+		);
+
+		expect(grid).toContain("buildGrid()");
+		expect(grid).not.toMatch(/describe\.configure\(\s*\{\s*mode:\s*"serial"/);
+	});
+});

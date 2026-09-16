@@ -23,8 +23,12 @@ La suite porte aussi les contrats de fidélité visuelle — la couche de régre
 
 ## Lancer la suite
 
-`pnpm test:e2e`, avec le dev server sur le **port 3000** : la passerelle de test ProConnect n'enregistre que ce callback, donc `auth.setup.ts` échoue sur tout autre port. Un run E2E en worktree doit binder le dev server sur `PORT=3000` pendant que la stack docker garde ses ports dérivés de l'index.
+`pnpm test:e2e`, avec le dev server sur le **port 3000** : la connexion ProConnect passe par **Charon**, le proxy OAuth de la Fabrique, et la liste d'adresses de retour qu'il tient pour egapro ne contient en local que `http://localhost:3000` — `auth.setup.ts` échoue donc sur tout autre port. Ce n'est pas un réglage du dépôt : l'élargir se fait côté infra. Un run E2E en worktree doit binder le dev server sur `PORT=3000` pendant que la stack docker garde ses ports dérivés de l'index. Contexte complet → README, § Connexion ProConnect.
 
 Le port 3000 étant une ressource globale unique, **tous les runs E2E du dépôt sont de fait sérialisés** : ne jamais lancer une gate E2E de fin d'epic (background) et un `e2e-dev` en mode ticket (foreground) en même temps. Les deux échouent proprement sur un port occupé, mais l'un des deux sera à relancer.
 
-`e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »). Le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.
+`e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »), **et avec elle les 185 coordonnées de la grille de recette** (`pnpm test:e2e:grille`) : depuis #4132 les deux tournent en shards parallèles — 2 pour la suite, 3 pour la grille — sous un job agrégateur qui porte le nom du check requis. Une coordonnée rouge bloque donc la PR, au même titre qu'un spec rouge. `e2e-grille.yaml` reste le run nocturne, qui produit le rapport de recette.
+
+Conséquence pour qui touche au graphe de projets ou aux modes d'exécution : Playwright ne shard que les projets de **premier niveau** et rejoue un projet de dépendance en entier dans chaque shard. Mettre un projet en aval d'un autre, ou poser un `test.describe.configure({ mode: "serial" })` au niveau d'un fichier, renvoie donc tous les tests dans le premier shard et laisse les autres vides. Le workflow refuse un shard qui ne collecte rien, précisément pour que cette annulation silencieuse de la parallélisation se voie.
+
+Le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.
