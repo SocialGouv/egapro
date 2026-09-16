@@ -684,7 +684,7 @@ describe("Step2Upload", () => {
 		// Reproduces the issue exactly: canSubmit must be re-derived from the
 		// rolled-back state, not from the optimistic value the failed save
 		// never persisted — so submit blocks on the missing content type.
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
@@ -706,7 +706,7 @@ describe("Step2Upload", () => {
 			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
 		);
 
-		const submit = screen.getByRole("button", { name: "Soumettre" });
+		const submit = screen.getByRole("button", { name: "Transmettre" });
 		expect(submit).toBeDisabled();
 		expect(
 			screen.getByText("Enregistrement des associations en cours…"),
@@ -797,7 +797,7 @@ describe("Step2Upload", () => {
 
 		// canSubmit is re-derived from the reconciled map: both types are now
 		// covered, so submit must open the finalize modal.
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
@@ -888,7 +888,7 @@ describe("Step2Upload", () => {
 			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
 		).not.toBeChecked();
 
-		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
 
 		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
