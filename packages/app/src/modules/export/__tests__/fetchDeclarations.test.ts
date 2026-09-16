@@ -197,6 +197,40 @@ describe("buildIndicators", () => {
 		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
+	it("should expose indicator F declared headcounts (#4528) next to their quartile proportions", () => {
+		const result = buildIndicators(baseRow);
+
+		// Annual — each quartile's nb_F/nb_H sits right after its proportions.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBe(35);
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_F).toBe(30);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_H).toBe(32);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_F).toBe(28);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_H).toBe(33);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_F).toBe(27);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_H).toBe(35);
+
+		// Hourly — same 8 keys, distinct values, so a copy/paste mistake between
+		// annual and hourly would fail this assertion.
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_F).toBe(40);
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_H).toBe(25);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_F).toBe(32);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_H).toBe(30);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_F).toBe(28);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_H).toBe(33);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBe(37);
+	});
+
+	it("should not expose the raw GIP headcounts or a 'Tous les salariés' total for indicator F (#4528)", () => {
+		const result = buildIndicators(baseRow);
+
+		expect(result.F.annuel).not.toHaveProperty("Effectif");
+		expect(result.F.annuel).not.toHaveProperty("Effectif_total");
+		expect(result.F.horaire).not.toHaveProperty("Effectif");
+		expect(result.F.horaire).not.toHaveProperty("Effectif_total");
+	});
+
 	it("should expose gap labels for indicators A/B/C/D", () => {
 		const result = buildIndicators(baseRow);
 
@@ -250,6 +284,24 @@ describe("buildIndicators", () => {
 		expect(
 			result.F.annuel.Quartile2_Rem_globale_annuelle_proportion_F,
 		).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBeNull();
+	});
+
+	it("should return null for a quartile's declared headcount when its DB column is null, independently of the others (#4528)", () => {
+		const partialRow = {
+			...baseRow,
+			indicatorFAnnualWomen1: null,
+			indicatorFHourlyMen4: null,
+		};
+
+		const result = buildIndicators(partialRow);
+
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		// Untouched sibling columns still expose their declared value.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBeNull();
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
 	});
 });
 
@@ -334,13 +386,45 @@ describe("buildIndicatorG", () => {
 		...overrides,
 	});
 
-	it("should compute the four signed base/variable gap ratios rounded to 4 decimals", () => {
+	it("should compute the four signed base/variable gap ratios as 4-decimal strings", () => {
 		const [category] = buildIndicatorG([gEntry({})]).initial;
 
-		expect(category?.Rem_annuelle_base_ecart).toBe(0.0909);
-		expect(category?.Rem_annuelle_variable_ecart).toBe(0.0099);
-		expect(category?.Taux_horaire_base_ecart).toBe(0.0909);
-		expect(category?.Taux_horaire_variable_ecart).toBe(0.2);
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0909");
+		expect(category?.Rem_annuelle_variable_ecart).toBe("0.0099");
+		expect(category?.Taux_horaire_base_ecart).toBe("0.0909");
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	it('formats a zero gap (F = H) as "0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "1000.00", annualBaseMen: "1000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
+	});
+
+	it("formats a small negative gap without dropping trailing zeros", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyBaseWomen: "12.00", hourlyBaseMen: "11.99" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_base_ecart).toBe("-0.0008");
+	});
+
+	it("formats a gap with a whole-number operand keeping 4 decimals", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyVariableWomen: "2", hourlyVariableMen: "2.5" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	it('never formats a negligible negative gap as "-0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "30000.01", annualBaseMen: "30000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
 	});
 
 	// #4205: the Total gap is not computed anywhere (UI or export).
@@ -361,7 +445,7 @@ describe("buildIndicatorG", () => {
 
 		expect(womenMissing?.Rem_annuelle_base_ecart).toBeNull();
 		expect(menMissing?.Rem_annuelle_base_ecart).toBeNull();
-		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe(0.0099);
+		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe("0.0099");
 	});
 
 	it("nulls a component gap when the men value is zero", () => {
@@ -524,7 +608,7 @@ describe("assembleDeclaration", () => {
 		expect(Parcours.Regime_obligations).toBe(regime);
 	});
 
-	it("leaves Tranche_effectif null and the regime voluntary when the company is absent from the GIP file", () => {
+	it("buckets Tranche_effectif to <50 and the regime voluntary when the company is absent from the GIP file", () => {
 		const { Parcours } = assembleDeclaration(
 			{ ...baseRow, workforceEma: null },
 			[],
@@ -532,7 +616,7 @@ describe("assembleDeclaration", () => {
 		);
 
 		expect(Parcours.Effectif).toBeNull();
-		expect(Parcours.Tranche_effectif).toBeNull();
+		expect(Parcours.Tranche_effectif).toBe("<50");
 		expect(Parcours.Regime_obligations).toBe("voluntary");
 	});
 

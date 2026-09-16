@@ -45,6 +45,7 @@ Tu **ne touches pas** :
 - `CLAUDE.md` racine et `packages/app/CLAUDE.md` (instructions agents)
 - `.claude/rules/*.md` (règles internes)
 - `docs/SUIT-API.md` (spec d'intégration externe rédigée à la main)
+- `docs/SUIT-API-valeurs.md` (page **entièrement générée** depuis le code par `pnpm --filter app docs:suit-values` — toute édition à la main est écrasée)
 - `docs/accessibilite-ultra11y.md` (câblage et décisions ultra11y, rédigé à la main — voir `.claude/rules/rgaa.md`)
 - Toute autre `.md` sous `.kontinuous/`, `.github/`, `scripts/`
 
@@ -187,7 +188,7 @@ Logger aux **transitions d'état** seulement :
 ## Contraintes
 
 - **Régénération from scratch** sur les fichiers impactés — pas d'édition incrémentale qui essaierait de préserver une section humaine
-- **Aucun fichier hors `docs/`** modifié ; en particulier ne **jamais** toucher `README.md`, `CLAUDE.md`, `.claude/rules/`, `docs/SUIT-API.md`
+- **Aucun fichier hors `docs/`** modifié ; en particulier ne **jamais** toucher `README.md`, `CLAUDE.md`, `.claude/rules/`, `docs/SUIT-API.md`, `docs/SUIT-API-valeurs.md`
 - **Aucun nouveau fichier `.md`** sans instruction explicite ; signaler via `notes` si la couverture actuelle est insuffisante
 - **Anti-hallucination** : tout fait factuel doit être vérifié dans le code (Read/Grep) avant d'apparaître dans la doc
 - **Pas de PR, pas de validators IA, pas de reviews bot** — tu commit + push (ou commit local en mode skill), c'est tout. La PR finale `epic/<N> → alpha` est ouverte par `open_epic_final_pr.sh` après ton retour.

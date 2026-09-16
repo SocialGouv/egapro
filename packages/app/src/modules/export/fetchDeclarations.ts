@@ -18,13 +18,13 @@ import {
 	computeGapHighFlags,
 	computeGapRatio,
 	floorWorkforce,
+	getCompanySizeRange,
 	getObligationWorkforce,
-	getOptionalCompanySizeRange,
 	isCancelled,
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
 	isCseRequired,
-	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
@@ -40,11 +40,15 @@ import {
 	INDICATOR_D_LABELS,
 	INDICATOR_E_LABELS,
 	INDICATOR_E_PROPORTION_LABELS,
+	INDICATOR_F_ANNUAL_MEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_MEN_LABELS,
 	INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
+	INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_WOMEN_LABELS,
+	INDICATOR_F_HOURLY_MEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_MEN_LABELS,
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
+	INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
 import { buildNextStepsPayload } from "./shared/nextStepsPayload";
@@ -91,8 +95,8 @@ function deriveExportFlags(
 						],
 		},
 	);
-	const indicatorGRequiredFlag = isIndicatorGRequired(
-		getObligationWorkforce(workforce),
+	const indicatorGRequiredFlag = isIndicatorGRequiredForGip(
+		workforce,
 		row.year,
 	);
 	return {
@@ -148,22 +152,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.annualQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[0]]:
 			row.annualQuartile1ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFAnnualWomen1 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[0]]: row.indicatorFAnnualMen1 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[1]]:
 			row.indicatorFAnnualThreshold2 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[1]]:
 			row.annualQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[1]]:
 			row.annualQuartile2ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFAnnualWomen2 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[1]]: row.indicatorFAnnualMen2 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[2]]:
 			row.indicatorFAnnualThreshold3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[2]]:
 			row.annualQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[2]]:
 			row.annualQuartile3ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFAnnualWomen3 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[2]]: row.indicatorFAnnualMen3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[3]]:
 			row.annualQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[3]]:
 			row.annualQuartile4ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFAnnualWomen4 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[3]]: row.indicatorFAnnualMen4 ?? null,
 	};
 
 	const hourlyQuartile = {
@@ -173,22 +189,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.hourlyQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[0]]:
 			row.hourlyQuartile1ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFHourlyWomen1 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[0]]: row.indicatorFHourlyMen1 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[1]]:
 			row.indicatorFHourlyThreshold2 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFHourlyWomen2 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[1]]: row.indicatorFHourlyMen2 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[2]]:
 			row.indicatorFHourlyThreshold3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFHourlyWomen3 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[2]]: row.indicatorFHourlyMen3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFHourlyWomen4 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[3]]: row.indicatorFHourlyMen4 ?? null,
 	};
 
 	return {
@@ -239,8 +267,11 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
-function roundRatio(r: number | null): number | null {
-	return r === null ? null : Math.round(r * 10000) / 10000;
+// Round before toFixed(4): formatting the raw ratio turns a negligible negative gap into "-0.0000".
+function formatRatio(r: number | null): string | null {
+	if (r === null) return null;
+	const rounded = Math.round(r * 10000) / 10000;
+	return rounded.toFixed(4);
 }
 
 function toIndicatorGCategory(entry: IndicatorGEntry) {
@@ -268,12 +299,12 @@ function toIndicatorGCategory(entry: IndicatorGEntry) {
 		Taux_horaire_base_H: hbM,
 		Taux_horaire_variable_F: hvW,
 		Taux_horaire_variable_H: hvM,
-		Rem_annuelle_base_ecart: roundRatio(computeGapRatio(abW ?? "", abM ?? "")),
-		Rem_annuelle_variable_ecart: roundRatio(
+		Rem_annuelle_base_ecart: formatRatio(computeGapRatio(abW ?? "", abM ?? "")),
+		Rem_annuelle_variable_ecart: formatRatio(
 			computeGapRatio(avW ?? "", avM ?? ""),
 		),
-		Taux_horaire_base_ecart: roundRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
-		Taux_horaire_variable_ecart: roundRatio(
+		Taux_horaire_base_ecart: formatRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
+		Taux_horaire_variable_ecart: formatRatio(
 			computeGapRatio(hvW ?? "", hvM ?? ""),
 		),
 	};
@@ -370,7 +401,9 @@ export function assembleDeclaration(
 		Parcours: {
 			Annee: row.year,
 			Effectif: flooredWorkforce,
-			Tranche_effectif: getOptionalCompanySizeRange(flooredWorkforce) ?? null,
+			Tranche_effectif: getCompanySizeRange(
+				getObligationWorkforce(flooredWorkforce),
+			),
 			Regime_obligations: classifyCompanySize(
 				getObligationWorkforce(gipWorkforce),
 			),

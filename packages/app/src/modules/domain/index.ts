@@ -244,6 +244,7 @@ export {
 	INDICATOR_G_TRIENNIAL_MIN,
 	INDICATOR_G_UNIVERSAL_YEAR,
 	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	isTriennialYear,
 } from "./shared/indicatorG";
 // NAF activity nomenclature
@@ -340,6 +341,7 @@ export type {
 	CampaignDeadlines,
 	CompanySize,
 	CompanySizeRange,
+	CompliancePathValue,
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
@@ -348,4 +350,4 @@ export type {
 	ObservatoryWorkforceRange,
 	RepresentationCampaign,
 } from "./types";
-export { DECLARATION_FSM_STATUSES } from "./types";
+export { COMPLIANCE_PATHS, DECLARATION_FSM_STATUSES } from "./types";

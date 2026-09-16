@@ -193,6 +193,10 @@ export function isKnownRulesVersion(version: string): boolean {
 	return Object.hasOwn(BUNDLED_VERSIONS, version);
 }
 
+export function listBundledRulesVersions(): string[] {
+	return Object.keys(BUNDLED_VERSIONS);
+}
+
 export function loadRules(version: string): Rules {
 	const cached = cache.get(version);
 	if (cached) return cached;

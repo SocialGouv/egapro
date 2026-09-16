@@ -105,7 +105,7 @@ Intégration DSFR : `register()` se spread directement sur un `<input>` natif po
 
 La progression de la déclaration — écran suivant, transitions, conditions — a **une seule autorité** : `src/server/rules/v2027.1.json` + `engine.ts`, dont le vocabulaire d'états est la const `DECLARATION_FSM_STATUSES` de `~/modules/domain` (l'union `DeclarationFsmStatus` en dérive). Depuis #3974 le lien est **imposé par le compilateur**.
 
-**Ne jamais réencoder le graphe d'états à la main.** Deux miroirs seulement le projettent (`declaration-remuneration/shared/complianceNavigation.ts`, `my-space/declarationProcessState.ts`) — ne pas en créer un troisième : tout code conscient de l'état se type sur `DeclarationFsmStatus` avec un `switch` exhaustif **sans `default:`**, ou dérive directement du moteur.
+**Ne jamais réencoder le graphe d'états à la main.** Une seule table dit où va l'utilisateur (`~/modules/navigation`, `getDemarcheStageHref`) ; `my-space/declarationProcessState.ts` n'en projette que la variante d'affichage du panneau. Ne pas en ouvrir un autre : tout code conscient de l'état se branche sur `~/modules/navigation`, ou se type sur `DeclarationFsmStatus` avec un `switch` exhaustif **sans `default:`**, ou dérive directement du moteur.
 
 > Détail et modèles de tests → `.claude/rules/demarche-state-machine.md`
 

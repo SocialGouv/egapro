@@ -109,7 +109,7 @@ function percentageFields() {
 }
 
 function queryBadge() {
-	return screen.queryByText(/^(Conforme|Non conforme|Non applicable)$/);
+	return screen.queryByText(/^(Conforme|Non conforme|Non calculable)$/);
 }
 
 function spy() {
@@ -311,7 +311,7 @@ describe("Step3Members — rappel réglementaire", () => {
 	it("affiche l'encart bleu de rappel quand l'écart est conforme", () => {
 		render(<Harness draft={COMPUTABLE_MEMBERS} />);
 
-		expect(screen.getByText("Objectif de 30 % atteint")).toBeInTheDocument();
+		expect(screen.getByText("Objectif de 30 % atteint.")).toBeInTheDocument();
 		expect(
 			screen.getByText(/au moins 30 % des membres des instances dirigeantes/),
 		).toBeInTheDocument();
@@ -321,7 +321,7 @@ describe("Step3Members — rappel réglementaire", () => {
 		render(<Harness draft={NON_COMPLIANT_MEMBERS} />);
 
 		expect(
-			screen.getByText("Objectif de 30 % non atteint"),
+			screen.getByText("Objectif de 30 % non atteint."),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/au moins 30 % des membres des instances dirigeantes/),

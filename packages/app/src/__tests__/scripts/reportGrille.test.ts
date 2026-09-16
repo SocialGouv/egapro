@@ -1,25 +1,17 @@
-import {
-	existsSync,
-	mkdirSync,
-	mkdtempSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
 	buildReport,
 	type CoordResult,
 	deepestFailingStep,
 	extractTestResults,
 	loadResults,
-	type PlaywrightReport,
-	parseArgs,
 	type StepResult,
 } from "#scripts/report-grille";
 import { buildGrid, type Coordinate } from "~/e2e/grille/coordinates";
+import { reportWith } from "./helpers/playwrightReportFixture";
 
 const GRID = buildGrid();
 
@@ -48,20 +40,6 @@ function baseOptions(results: Map<string, CoordResult>) {
 		reportUrl: "playwright-report/html/index.html",
 		startTime: "2033-03-15T09:00:00.000Z",
 		durationMs: 90_000,
-	};
-}
-
-function reportWith(suites: PlaywrightReport["suites"]): PlaywrightReport {
-	return {
-		suites,
-		stats: {
-			startTime: "2033-03-15T09:00:00.000Z",
-			duration: 1000,
-			expected: 1,
-			unexpected: 0,
-			skipped: 0,
-			flaky: 0,
-		},
 	};
 }
 
@@ -575,167 +553,5 @@ describe("loadResults", () => {
 		const report = loadResults(path);
 
 		expect(report?.stats.startTime).toBe("2033-03-15T09:00:00.000Z");
-	});
-});
-
-describe("parseArgs", () => {
-	it("parses scope, commit and report-url flags", () => {
-		expect(
-			parseArgs([
-				"--scope",
-				"2030 uniquement",
-				"--commit",
-				"abc1234",
-				"--report-url",
-				"https://example.com",
-			]),
-		).toEqual({
-			scope: "2030 uniquement",
-			commit: "abc1234",
-			reportUrl: "https://example.com",
-		});
-	});
-
-	it("falls back to defaults when no flags are provided", () => {
-		expect(parseArgs([])).toEqual({
-			scope: "tous les cas",
-			commit: "N/A",
-			reportUrl: "playwright-report/html/index.html",
-		});
-	});
-
-	it("defaults a flag value to an empty string when it is the last token", () => {
-		expect(parseArgs(["--scope"]).scope).toBe("");
-	});
-
-	it("ignores unknown flags", () => {
-		expect(parseArgs(["--unknown", "value", "--commit", "deadbee"])).toEqual({
-			scope: "tous les cas",
-			commit: "deadbee",
-			reportUrl: "playwright-report/html/index.html",
-		});
-	});
-});
-
-describe("main — CLI entrypoint", () => {
-	const REPORT_DIR = join(process.cwd(), "playwright-report");
-	const RESULTS_PATH = join(REPORT_DIR, "grille-results.json");
-	const OUTPUT_PATH = join(REPORT_DIR, "grille-recette.md");
-
-	// The script resolves its paths from process.cwd(), so these tests write into
-	// the package's own playwright-report/. That directory exists on a developer
-	// machine (an E2E run created it) but not on a fresh CI checkout, so each test
-	// creates it rather than relying on whichever test happens to run first.
-	//
-	// Those are also the paths a real recette run writes to. Any pre-existing file
-	// is saved here and restored afterwards: without this, running the unit suite
-	// on a developer machine silently destroys the artefacts of the grid run they
-	// just spent ten minutes producing.
-	let savedResults: string | null = null;
-	let savedOutput: string | null = null;
-
-	beforeEach(() => {
-		mkdirSync(REPORT_DIR, { recursive: true });
-		savedResults = existsSync(RESULTS_PATH)
-			? readFileSync(RESULTS_PATH, "utf-8")
-			: null;
-		savedOutput = existsSync(OUTPUT_PATH)
-			? readFileSync(OUTPUT_PATH, "utf-8")
-			: null;
-	});
-
-	afterEach(() => {
-		vi.resetModules();
-		vi.unstubAllEnvs();
-		process.argv = process.argv.slice(0, 2);
-		rmSync(RESULTS_PATH, { force: true });
-		rmSync(OUTPUT_PATH, { force: true });
-		if (savedResults !== null) writeFileSync(RESULTS_PATH, savedResults);
-		if (savedOutput !== null) writeFileSync(OUTPUT_PATH, savedOutput);
-	});
-
-	async function runMain(): Promise<void> {
-		vi.resetModules();
-		await import("#scripts/report-grille");
-	}
-
-	it("does not write the output file when the module is imported without direct invocation", async () => {
-		rmSync(OUTPUT_PATH, { force: true });
-		process.argv = ["node", "/fake/test-runner"];
-		vi.resetModules();
-		await import("#scripts/report-grille");
-		expect(existsSync(OUTPUT_PATH)).toBe(false);
-	});
-
-	it("writes the report and the GitHub step summary from a real results file", async () => {
-		const summaryPath = join(
-			mkdtempSync(join(tmpdir(), "gh-summary-")),
-			"summary.md",
-		);
-		writeFileSync(summaryPath, "", "utf-8");
-		vi.stubEnv("GITHUB_STEP_SUMMARY", summaryPath);
-		process.argv = [
-			"node",
-			"report-grille.ts",
-			"--scope",
-			"probe",
-			"--commit",
-			"abc1234",
-			"--report-url",
-			"http://x",
-		];
-		writeFileSync(
-			RESULTS_PATH,
-			JSON.stringify(
-				reportWith([
-					{
-						title: "grille [2030-249-CAS01]",
-						tests: [
-							{
-								title: "t",
-								ok: true,
-								results: [{ status: "passed", duration: 5 }],
-							},
-						],
-					},
-				]),
-			),
-			"utf-8",
-		);
-
-		await runMain();
-
-		expect(readFileSync(OUTPUT_PATH, "utf-8")).toContain(
-			"# Recette métier — Grille 185 coordonnées",
-		);
-		const summary = readFileSync(summaryPath, "utf-8");
-		expect(summary).toContain("# Recette métier — Grille 185 coordonnées");
-		expect(summary).toContain("| probe |");
-	});
-
-	it("reports every coordinate non joué when the results file is invalid", async () => {
-		writeFileSync(RESULTS_PATH, "{ not json", "utf-8");
-
-		await runMain();
-
-		const output = readFileSync(OUTPUT_PATH, "utf-8");
-		expect(output).toContain(
-			"**0 passés / 0 échoués / 185 non joués** sur 185",
-		);
-		expect(output).toContain("Fichier de résultats illisible ou invalide");
-	});
-
-	it("reports every coordinate non joué when the results file is missing", async () => {
-		rmSync(RESULTS_PATH, { force: true });
-
-		await runMain();
-
-		const output = readFileSync(OUTPUT_PATH, "utf-8");
-		expect(output).toContain(
-			"**0 passés / 0 échoués / 185 non joués** sur 185",
-		);
-		expect(output).toContain(
-			"Fichier de résultats introuvable (playwright-report/grille-results.json)",
-		);
 	});
 });

@@ -5,9 +5,12 @@ import {
 	DECLARATION_FSM_STATUSES,
 } from "~/modules/domain";
 import {
+	declarationEventTypeEnum,
 	representationNotComputableExecutivesEnum,
 	representationNotComputableMembersEnum,
 } from "~/server/db/schema";
+import type { IndicatorGEntry } from "../fetchDeclarations";
+import { buildIndicatorG } from "../fetchDeclarations";
 import { openApiSpec } from "../openapi";
 import {
 	DROPPED_ROOT_KEYS,
@@ -19,7 +22,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("3.0.0");
+		expect(openApiSpec.info.version).toBe("3.1.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -190,14 +193,11 @@ describe("openApiSpec", () => {
 			}
 		});
 
-		it("declares Tranche_effectif as a nullable enum of the size buckets", () => {
+		it("declares Tranche_effectif as a non-nullable enum of the size buckets", () => {
 			const tranche = parcoursSchema.properties.Tranche_effectif;
-			const stringVariant = tranche.oneOf.find((v) => v.type === "string");
 
-			expect(tranche.oneOf.find((v) => v.type === "null")).toBeDefined();
-			expect(
-				stringVariant && "enum" in stringVariant && stringVariant.enum,
-			).toEqual(Object.keys(COMPANY_SIZE_RANGES));
+			expect(tranche.type).toBe("string");
+			expect(tranche.enum).toEqual(Object.keys(COMPANY_SIZE_RANGES));
 		});
 
 		it("declares Regime_obligations as the company size classification enum", () => {
@@ -311,7 +311,9 @@ describe("openApiSpec", () => {
 			expect(nullVariant).toBeDefined();
 		});
 
-		it("lists the 4 job-category source values in the string enum", () => {
+		// Spelled out rather than read from `sources.ts`: comparing the spec to the
+		// constant the spec imports would pass on any drift (#4115).
+		it("lists the 4 active and 3 historical job-category source values", () => {
 			const stringVariant = sourceSchema.oneOf.find((v) => v.type === "string");
 			expect(stringVariant && hasEnum(stringVariant)).toBe(true);
 			expect(
@@ -321,7 +323,14 @@ describe("openApiSpec", () => {
 				"accord-groupe",
 				"accord-branche",
 				"decision-unilaterale",
+				"convention-collective",
+				"classification-interne",
+				"autre",
 			]);
+		});
+
+		it("points at the generated value tables rather than listing values in prose", () => {
+			expect(sourceSchema.description).toContain("docs/SUIT-API-valeurs.md");
 		});
 	});
 
@@ -346,17 +355,15 @@ describe("openApiSpec", () => {
 			]);
 		});
 
-		it("lists the 7 declaration_event_type values in Statut.enum", () => {
+		// Compared to the DB enum, not to the label map the spec reads: a test that
+		// derives from the same constant as the spec detects nothing (#4115).
+		it("lists every declaration_event_type value but step_change in Statut.enum", () => {
 			expect(historiqueSchema.items.properties.Statut.type).toBe("string");
-			expect(historiqueSchema.items.properties.Statut.enum).toEqual([
-				"submit",
-				"path_choice",
-				"second_declaration_submit",
-				"joint_evaluation_submit",
-				"cse_opinion_submit",
-				"cancel",
-				"demarche_complete",
-			]);
+			expect(historiqueSchema.items.properties.Statut.enum).toEqual(
+				declarationEventTypeEnum.enumValues.filter(
+					(value) => value !== "step_change",
+				),
+			);
 		});
 
 		it("declares Date as date-time formatted string", () => {
@@ -371,6 +378,154 @@ describe("openApiSpec", () => {
 			expect(historiqueSchema.items.required).not.toContain(
 				"Numero_declaration",
 			);
+		});
+	});
+
+	describe("indicator F declared headcounts (#4528)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const fSchema = declarationSchema.properties.Indicateurs.properties.F;
+
+		const annualProperties = fSchema.properties.annuel.properties as Record<
+			string,
+			unknown
+		>;
+		const hourlyProperties = fSchema.properties.horaire.properties as Record<
+			string,
+			unknown
+		>;
+
+		it("documents the 8 annual nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Rem_globale_annuelle_nb_${sex}`;
+					expect(annualProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the 8 hourly nb_F/nb_H properties as nullable integers", () => {
+			for (const quartile of [1, 2, 3, 4]) {
+				for (const sex of ["F", "H"]) {
+					const key = `Quartile${quartile}_Taux_horaire_global_nb_${sex}`;
+					expect(hourlyProperties[key]).toEqual({ type: ["integer", "null"] });
+				}
+			}
+		});
+
+		it("documents the two root-level hourly headcounts emitted by the handler", () => {
+			expect(
+				declarationSchema.properties.Effectif_F_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
+			expect(
+				declarationSchema.properties.Effectif_H_rem_horaire_globale,
+			).toEqual({
+				type: ["integer", "null"],
+				description: expect.any(String),
+			});
+		});
+	});
+
+	describe("Parcours_apres_declaration enums (#4115)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const stringEnumOf = (schema: {
+			oneOf: readonly { type: string }[];
+		}): readonly string[] | undefined => {
+			const variant = schema.oneOf.find((v) => v.type === "string");
+			return variant && "enum" in variant
+				? (variant.enum as readonly string[])
+				: undefined;
+		};
+
+		it("declares both fields as nullable string enums", () => {
+			for (const field of [
+				"Parcours_apres_declaration_1",
+				"Parcours_apres_declaration_2",
+			] as const) {
+				const schema = declarationSchema.properties[field];
+				expect(schema.oneOf).toHaveLength(2);
+				expect(schema.oneOf.find((v) => v.type === "null")).toBeDefined();
+				expect(stringEnumOf(schema)).toBeDefined();
+			}
+		});
+
+		// The three round-1 paths and the two round-2 ones are spelled out here
+		// rather than derived: the ruleset is what the spec reads (#4115).
+		it("offers the three compliance paths after the first declaration", () => {
+			expect(
+				stringEnumOf(declarationSchema.properties.Parcours_apres_declaration_1),
+			).toEqual(["justify", "corrective_action", "joint_evaluation"]);
+		});
+
+		it("never mentions corrective_action after the second declaration", () => {
+			const schema = declarationSchema.properties.Parcours_apres_declaration_2;
+			expect(stringEnumOf(schema)).toEqual(["justify", "joint_evaluation"]);
+			expect(schema.description).not.toContain("corrective_action");
+		});
+
+		it("points at the generated value tables rather than listing values in prose", () => {
+			for (const field of [
+				"Parcours_apres_declaration_1",
+				"Parcours_apres_declaration_2",
+			] as const) {
+				expect(declarationSchema.properties[field].description).toContain(
+					"docs/SUIT-API-valeurs.md",
+				);
+			}
+		});
+	});
+
+	describe("file and CSE opinion enums (#4115)", () => {
+		const responseSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema;
+		const declarationSchema = responseSchema.properties.Declarations.items;
+
+		it("lists the two CSE consultation subjects on Avis_CSE[].Type", () => {
+			expect(
+				declarationSchema.properties.Avis_CSE.items.properties.Type.enum,
+			).toEqual(["accuracy", "gap"]);
+		});
+
+		it("declares Avis_CSE[].Avis as a nullable enum of the two opinion senses", () => {
+			const avis = declarationSchema.properties.Avis_CSE.items.properties.Avis;
+			const stringVariant = avis.oneOf.find((v) => v.type === "string");
+			expect(avis.oneOf.find((v) => v.type === "null")).toBeDefined();
+			expect(
+				stringVariant && "enum" in stringVariant && stringVariant.enum,
+			).toEqual(["favorable", "unfavorable"]);
+		});
+
+		it("narrows each declaration file block to the single type it carries", () => {
+			expect(
+				declarationSchema.properties.Fichiers_CSE.items.properties.Type.enum,
+			).toEqual(["cse_opinion"]);
+			const jointEvaluation =
+				declarationSchema.properties.Fichier_evaluation_conjointe.oneOf.find(
+					(v) => v.type === "object",
+				);
+			expect(
+				jointEvaluation &&
+					"properties" in jointEvaluation &&
+					jointEvaluation.properties.Type.enum,
+			).toEqual(["joint_evaluation"]);
+		});
+
+		it("lists both file types on the files endpoint", () => {
+			const filesSchema =
+				openApiSpec.paths["/api/v1/files"].get.responses["200"].content[
+					"application/json"
+				].schema;
+			expect(filesSchema.properties.files.items.properties.type.enum).toEqual([
+				"cse_opinion",
+				"joint_evaluation",
+			]);
 		});
 	});
 
@@ -391,6 +546,165 @@ describe("openApiSpec", () => {
 		it("keeps every documented path on the v1 prefix the notice promises", () => {
 			for (const path of Object.keys(openApiSpec.paths)) {
 				expect(path).toMatch(/^\/api\/v1\//);
+			}
+		});
+	});
+
+	describe("Indicateurs.G category schema (#4530)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		const categorySchema =
+			declarationSchema.properties.Indicateurs.properties.G.oneOf[0].items;
+
+		const fullEntry: IndicatorGEntry = {
+			categoryName: "Ouvriers",
+			source: null,
+			declarationType: "initial",
+			womenCount: 40,
+			menCount: 44,
+			hourlyWomenCount: 8,
+			hourlyMenCount: 6,
+			annualBaseWomen: "10000",
+			annualBaseMen: "11000",
+			annualVariableWomen: "1000",
+			annualVariableMen: "1010",
+			hourlyBaseWomen: "20",
+			hourlyBaseMen: "22",
+			hourlyVariableWomen: "2",
+			hourlyVariableMen: "2.5",
+		};
+
+		it("documents exactly the fields buildIndicatorG emits per category, in order", () => {
+			const [category] = buildIndicatorG([fullEntry]).initial;
+			expect(Object.keys(categorySchema.properties)).toEqual(
+				Object.keys(category ?? {}),
+			);
+		});
+
+		it("also used by Seconde_declaration.Correction (shared schema object)", () => {
+			const correctionSchema =
+				declarationSchema.properties.Seconde_declaration.properties.Correction
+					.oneOf[0].items;
+			expect(correctionSchema).toBe(categorySchema);
+		});
+
+		const ECART_KEYS = [
+			"Rem_annuelle_base_ecart",
+			"Rem_annuelle_variable_ecart",
+			"Taux_horaire_base_ecart",
+			"Taux_horaire_variable_ecart",
+		] as const;
+
+		it("types the four *_ecart fields as nullable strings, not numbers (#4530 bug)", () => {
+			for (const key of ECART_KEYS) {
+				expect(categorySchema.properties[key].type).toEqual(["string", "null"]);
+				expect(categorySchema.properties[key].description).toBeTruthy();
+			}
+		});
+
+		const HOURLY_HEADCOUNT_KEYS = [
+			"Effectif_horaire_F",
+			"Effectif_horaire_H",
+		] as const;
+
+		it("adds Effectif_horaire_F / Effectif_horaire_H as nullable integers", () => {
+			for (const key of HOURLY_HEADCOUNT_KEYS) {
+				expect(categorySchema.properties[key].type).toEqual([
+					"integer",
+					"null",
+				]);
+				expect(categorySchema.properties[key].description).toBeTruthy();
+			}
+		});
+	});
+
+	describe("Indicateurs A–D gap fields schema (#4530)", () => {
+		const indicatorsSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items
+				.properties.Indicateurs;
+
+		it("documents A.Rem_globale_annuelle_moyenne_ecart and A.Taux_horaire_global_moyen_ecart as nullable strings", () => {
+			const {
+				Rem_globale_annuelle_moyenne_ecart,
+				Taux_horaire_global_moyen_ecart,
+			} = indicatorsSchema.properties.A.properties;
+			expect(Rem_globale_annuelle_moyenne_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_globale_annuelle_moyenne_ecart.description).toBeTruthy();
+			expect(Taux_horaire_global_moyen_ecart.type).toEqual(["string", "null"]);
+			expect(Taux_horaire_global_moyen_ecart.description).toBeTruthy();
+		});
+
+		it("documents B.Rem_variable_annuelle_moyenne_ecart and B.Taux_horaire_variable_moyen_ecart as nullable strings", () => {
+			const {
+				Rem_variable_annuelle_moyenne_ecart,
+				Taux_horaire_variable_moyen_ecart,
+			} = indicatorsSchema.properties.B.properties;
+			expect(Rem_variable_annuelle_moyenne_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_variable_annuelle_moyenne_ecart.description).toBeTruthy();
+			expect(Taux_horaire_variable_moyen_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Taux_horaire_variable_moyen_ecart.description).toBeTruthy();
+		});
+
+		it("documents C.Rem_globale_annuelle_médiane_ecart and C.Taux_horaire_global_médian_ecart as nullable strings", () => {
+			const {
+				Rem_globale_annuelle_médiane_ecart,
+				Taux_horaire_global_médian_ecart,
+			} = indicatorsSchema.properties.C.properties;
+			expect(Rem_globale_annuelle_médiane_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_globale_annuelle_médiane_ecart.description).toBeTruthy();
+			expect(Taux_horaire_global_médian_ecart.type).toEqual(["string", "null"]);
+			expect(Taux_horaire_global_médian_ecart.description).toBeTruthy();
+		});
+
+		it("documents D.Rem_variable_annuelle_médiane_ecart and D.Taux_horaire_variable_médian_ecart as nullable strings", () => {
+			const {
+				Rem_variable_annuelle_médiane_ecart,
+				Taux_horaire_variable_médian_ecart,
+			} = indicatorsSchema.properties.D.properties;
+			expect(Rem_variable_annuelle_médiane_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Rem_variable_annuelle_médiane_ecart.description).toBeTruthy();
+			expect(Taux_horaire_variable_médian_ecart.type).toEqual([
+				"string",
+				"null",
+			]);
+			expect(Taux_horaire_variable_médian_ecart.description).toBeTruthy();
+		});
+	});
+
+	describe("Indicateur F proportions schema (#4530)", () => {
+		const fSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items
+				.properties.Indicateurs.properties.F;
+
+		it("types every quartile proportion as a nullable string (was number)", () => {
+			for (const quartileSchema of [
+				fSchema.properties.annuel,
+				fSchema.properties.horaire,
+			]) {
+				for (const [key, property] of Object.entries(
+					quartileSchema.properties,
+				)) {
+					if (!key.includes("proportion")) continue;
+					expect(property.type).toEqual(["string", "null"]);
+				}
 			}
 		});
 	});

@@ -1,8 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
-import { MY_SPACE } from "~/modules/routes";
-import { TEST_USER_PHONE } from "./constants";
+import {
+	CSE_OPINION,
+	LAST_REMUNERATION_STEP,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
+import { TEST_SIREN, TEST_USER_PHONE } from "./constants";
 import {
 	pinCampaignYear,
 	setServerCampaignYear,
@@ -11,6 +16,7 @@ import {
 	deleteCseOpinions,
 	deleteJointEvaluationFiles,
 	ensureCurrentYearDeclaration,
+	getCurrentDbYear,
 	insertCseOpinion,
 	insertJointEvaluationFile,
 	resetDeclarationToDraft,
@@ -25,9 +31,12 @@ import {
 	resetCampaignYear as resetCampaignYearData,
 	setCampaignDeadlines,
 } from "./helpers/db-campaign";
+import { insertHistoryEvents } from "./helpers/declaration-history";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
+// The `/mon-espace` surfaces, gathered here by #4114: the démarche panel, the
+// Ressources cell, the closure badges of the previous-years table, and the history page.
 // Per-variant panel rendering is covered by my-space/__tests__/DeclarationProcessPanel.test.tsx.
 
 const PANEL_ID = "declaration-process-panel";
@@ -48,6 +57,10 @@ test.describe("Declaration process panel", () => {
 
 	test.describe("DB state → variant: closed (compliance completed + CSE deposited)", () => {
 		test.beforeAll(async () => {
+			// Both assertions below hinge on an opinion being due, which the funnel
+			// reads from the company rather than from the frozen snapshot.
+			await setCompanyHasCse(true);
+			await resetGipWorkforce();
 			await setDeclarationComplianceState({
 				status: "demarche_completed",
 				firstDeclarationPathChoice: "joint_evaluation",
@@ -85,6 +98,21 @@ test.describe("Declaration process panel", () => {
 			await expect(
 				panel.getByTitle("Voir le récapitulatif de la déclaration"),
 			).toBeVisible();
+		});
+
+		// #4113 — the panel and the funnel read one shared state table, and this
+		// terminal state is the one it refuses to decide for them: each surface
+		// supplies its own destination, so the two must still answer differently.
+		// The panel reports the démarche over (above), while the recap keeps
+		// offering /avis-cse, where up to four opinions stay re-submittable.
+		test("the recap « Suivant » still reaches /avis-cse on the same closed démarche", async ({
+			page,
+		}) => {
+			await page.goto(remunerationStepHref(LAST_REMUNERATION_STEP));
+			const next = page.getByRole("link", { name: "Suivant" });
+			await expect(next).toBeVisible();
+			await next.click();
+			await page.waitForURL(`**${CSE_OPINION}/**`, { timeout: 10_000 });
 		});
 	});
 
@@ -595,6 +623,69 @@ test.describe("Mon espace — closure badges of the previous-years table", () =>
 				})
 				.locator(".fr-badge");
 			await expect(currentYearBadge).toHaveText("À compléter");
+		});
+	});
+});
+
+// List rendering + "Voir plus" pagination are covered by declarationHistory/__tests__/HistoryListSection.test.tsx.
+
+test.describe("Declaration history page", () => {
+	test.setTimeout(60_000);
+
+	let year: number;
+
+	test.beforeAll(async () => {
+		year = await getCurrentDbYear();
+		await ensureCurrentYearDeclaration();
+		await insertHistoryEvents(3, year);
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("displays history entries (S2)", async ({ page }) => {
+		await page.goto(`/mon-espace/historique/${TEST_SIREN}/${year}`);
+
+		await expect(
+			page.getByRole("heading", {
+				level: 1,
+				name: "Historique des modifications",
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByText(`Démarche des indicateurs de rémunération ${year}`),
+		).toBeVisible();
+
+		// #4256: same removal as the company banner, on the other `/mon-espace/**` surface.
+		await expect(page.locator(".fr-breadcrumb")).toHaveCount(0);
+
+		const items = page.locator("main ul > li");
+		await expect(items).toHaveCount(3);
+	});
+
+	test.describe("entry date and time (S4)", () => {
+		test.beforeAll(async () => {
+			// Noon UTC keeps the calendar day at the 1st in every timezone the
+			// server or the browser may run in, so the ordinal is what is asserted.
+			await insertHistoryEvents(1, year, {
+				firstEventAt: new Date(Date.UTC(year, 5, 1, 12, 0)),
+			});
+		});
+
+		test.afterAll(async () => {
+			await insertHistoryEvents(3, year);
+		});
+
+		test("writes the first of the month with its French ordinal, next to a 24-hour time", async ({
+			page,
+		}) => {
+			await page.goto(`/mon-espace/historique/${TEST_SIREN}/${year}`);
+
+			const entry = page.locator("main ul > li").first();
+
+			await expect(entry.getByRole("time")).toHaveText(`1ᵉʳ juin ${year}`);
+			await expect(entry.getByText(/^\d{2}:\d{2}$/)).toBeVisible();
 		});
 	});
 });

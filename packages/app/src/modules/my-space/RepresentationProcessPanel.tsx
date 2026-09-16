@@ -10,12 +10,18 @@ import {
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
+import {
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import {
 	computeRepresentationCtaHref,
 	computeRepresentationPanelVariant,
+	isRepresentationDeclarationTransmitted,
 	type RepresentationPanelVariant,
 } from "./declarationProcessState";
+import { TransmittedRow } from "./StepRows";
 import type { DeclarationItem } from "./types";
 
 export const REPRESENTATION_PROCESS_PANEL_ID = "representation-process-panel";
@@ -61,6 +67,7 @@ export function RepresentationProcessPanel({
 	const campaignOpen = isRepresentationCampaignOpen(campaign, new Date());
 	const variant = computeRepresentationPanelVariant(declaration, campaignOpen);
 	const ctaHref = computeRepresentationCtaHref(declaration, campaignOpen);
+	const transmitted = isRepresentationDeclarationTransmitted(declaration);
 	const [step1, step2] = getStepStatuses(variant);
 	const lastActionDate = declaration?.updatedAt
 		? formatLongDate(declaration.updatedAt)
@@ -98,6 +105,7 @@ export function RepresentationProcessPanel({
 								<Step2Row
 									deadline={campaign.declarationDeadline}
 									status={step2}
+									transmitted={transmitted}
 								/>
 							)}
 						</div>
@@ -241,9 +249,11 @@ const STEP2_ITEMS = [
 function Step2Row({
 	deadline,
 	status,
+	transmitted,
 }: {
 	deadline: Date;
 	status: StepStatus;
+	transmitted: boolean;
 }) {
 	return (
 		<div className={`${styles.stepRow} ${stepRowClass(status)}`}>
@@ -254,22 +264,31 @@ function Step2Row({
 						? "Déclaration des écarts de représentation"
 						: "Écarts de représentation"}
 				</StepTitle>
-				{status !== "pending" &&
-					STEP2_ITEMS.map((item) => (
-						<div className={styles.bulletItem} key={item}>
-							<span aria-hidden="true" className={styles.bullet} />
-							<p className="fr-mb-0">{item}</p>
-						</div>
-					))}
-				<div className={styles.deadlineRow}>
-					<span
-						aria-hidden="true"
-						className="fr-icon-calendar-line fr-icon--sm"
+				{transmitted ? (
+					<TransmittedRow
+						label="Votre déclaration a été transmise"
+						viewHref={representationStepHref(LAST_REPRESENTATION_STEP)}
 					/>
-					<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-						Échéance : {formatLongDate(deadline)}
-					</p>
-				</div>
+				) : (
+					<>
+						{status !== "pending" &&
+							STEP2_ITEMS.map((item) => (
+								<div className={styles.bulletItem} key={item}>
+									<span aria-hidden="true" className={styles.bullet} />
+									<p className="fr-mb-0">{item}</p>
+								</div>
+							))}
+						<div className={styles.deadlineRow}>
+							<span
+								aria-hidden="true"
+								className="fr-icon-calendar-line fr-icon--sm"
+							/>
+							<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
+								Échéance : {formatLongDate(deadline)}
+							</p>
+						</div>
+					</>
+				)}
 			</div>
 		</div>
 	);

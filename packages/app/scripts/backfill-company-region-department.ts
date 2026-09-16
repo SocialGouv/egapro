@@ -12,12 +12,12 @@
  * are left untouched (they get filled at next login/refresh by weez.ts).
  *
  * Run with tsx (resolves the TS domain import):
- *   EGAPRO_WEEZ_API_URL=... DATABASE_URL=... pnpm tsx scripts/backfill-company-region-department.mjs
- *   pnpm tsx scripts/backfill-company-region-department.mjs --dry-run
+ *   EGAPRO_WEEZ_API_URL=... DATABASE_URL=... pnpm backfill:company-location
+ *   pnpm backfill:company-location --dry-run
  */
 import postgres from "postgres";
 
-import { getLocationFromPostalCode } from "../src/modules/domain/shared/regions.ts";
+import { getLocationFromPostalCode } from "~/modules/domain/shared/regions";
 
 const WEEZ_CONCURRENCY = 10;
 const DELAY_BETWEEN_BATCHES_MS = 100;
@@ -58,7 +58,23 @@ if (!weezApiUrl) {
 
 const sql = postgres(databaseUrl, { max: 1 });
 
-async function fetchLocation(siren) {
+type RegistryLocation = {
+	postalCode: string | null;
+	city: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+};
+
+type WeezUniteLegale = {
+	content?: {
+		codepostal?: string | null;
+		libellecommune?: string | null;
+		codepaysetrangeretablissement?: string | null;
+		libellepaysetrangeretablissement?: string | null;
+	}[];
+};
+
+async function fetchLocation(siren: string): Promise<RegistryLocation | null> {
 	const url = new URL(`${weezApiUrl}/public/v3/unitelegale/findbysiren`);
 	url.searchParams.set("siren", siren);
 	url.searchParams.set("page", "0");
@@ -71,8 +87,8 @@ async function fetchLocation(siren) {
 	if (!response.ok) {
 		throw new Error(`Weez API error: ${response.status} ${siren}`);
 	}
-	const data = await response.json();
-	const entity = data.content[0];
+	const data = (await response.json()) as WeezUniteLegale;
+	const entity = data.content?.[0];
 	return entity
 		? {
 				postalCode: entity.codepostal ?? null,
@@ -115,7 +131,7 @@ async function waitForSchema() {
 async function main() {
 	await waitForSchema();
 
-	const rows = await sql`
+	const rows = await sql<{ siren: string; updated_at: Date | null }[]>`
 		SELECT siren, updated_at
 		FROM app_company
 		WHERE city IS NULL

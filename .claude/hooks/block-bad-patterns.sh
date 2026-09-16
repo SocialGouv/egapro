@@ -68,11 +68,13 @@ check_pattern '\.(tsx|jsx)$' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
   '(DsfrPictogram\.tsx|ErrorArtwork\.tsx|packages/notifications/)'
 
-# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry configs)
+# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry
+# configs, and packages/app/scripts/: standalone node scripts run outside the Next.js runtime and
+# cannot import ~/env.js, which validates the whole app env and would abort a migration pod).
 check_pattern '\.(ts|tsx)$' \
   'process\.env' \
   'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|migrate.*\.mjs|e2e/helpers/|packages/notifications/)'
+  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|packages/app/scripts/|e2e/helpers/|packages/notifications/)'
 
 # Deep relative imports — use ~/ path alias (exclude packages/notifications which has no path alias)
 check_pattern '\.(ts|tsx)$' \
@@ -170,6 +172,20 @@ check_pattern 'src/modules/.*\.(ts|tsx)$' \
   '\.toLocale(Date|Time)?String\(|Intl\.(NumberFormat|DateTimeFormat)|\.toFixed\(' \
   'Inline display formatting is forbidden outside the domain. Use a formatter from ~/modules/domain (shared/format.ts), or add the missing one there.' \
   '(domain/|__tests__|__fixtures__|\.test\.|\.spec\.|OrdinalLongDate\.tsx)'
+
+# Domain layer — isIndicatorGRequired(getObligationWorkforce(...)) composition must use
+# isIndicatorGRequiredForGip(). Matched on a newline-flattened copy of CONTENT: the
+# formatter breaks this call across two lines at most call sites, and check_pattern's
+# plain `grep -E` matches line by line, so a pattern anchored on a single line would
+# almost never trigger.
+if [[ "$FILE_PATH" =~ \.(ts|tsx)$ ]] &&
+  [[ ! "$FILE_PATH" =~ (domain/|__tests__|\.test\.|\.spec\.) ]]; then
+  FLATTENED_CONTENT=$(echo "$CONTENT" | tr '\n' ' ')
+  if echo "$FLATTENED_CONTENT" | grep -qE 'isIndicatorGRequired\([[:space:]]*getObligationWorkforce'; then
+    echo "Blocked: Inline isIndicatorGRequired(getObligationWorkforce(...)) composition is forbidden. Use isIndicatorGRequiredForGip() from ~/modules/domain." >&2
+    exit 2
+  fi
+fi
 
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
 check_pattern 'routers/.*\.ts$' \

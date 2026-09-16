@@ -353,6 +353,7 @@ test.describe("Declaration workflow", () => {
 			(url) => !url.pathname.includes("/declaration-remuneration/etape/"),
 			{ timeout: 15_000 },
 		);
+		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible();
 	});
 });
 

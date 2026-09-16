@@ -58,6 +58,8 @@ Le `fileId` est renvoyé par l'endpoint `/files`.
 
 Cette section décrit comment lire les champs déduits du parcours de la déclaration (`Parcours`, exposé par `/export/declarations`). Elle ne concerne **pas** `/export/representations`, dont le payload est indépendant.
 
+Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Historique_statuts[]`, `Parcours_apres_declaration_1` / `_2`, les quatre `Type` / `type`, `Source_categories_emplois` — sont publiées dans [`SUIT-API-valeurs.md`](SUIT-API-valeurs.md), une page générée depuis le code et tenue à jour par la CI.
+
 ### Cycle de vie : les 8 états et leurs transitions
 
 Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa soumission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
@@ -113,7 +115,7 @@ Deux lectures de la taille de l'entreprise coexistent :
 - `Parcours.Regime_obligations` — le **paquet d'obligations** applicable : `voluntary` (< 50, volontariat), `mandatory` (assujettissement standard) ou `mandatory_with_compliance` (assujettissement avec parcours de conformité).
 - `Parcours.Tranche_effectif` — le **bucket de segmentation** : `<50`, `50-99`, `100-149`, `150-249`, `250+`.
 
-Quand l'effectif GIP est inconnu, `Tranche_effectif` vaut `null` (jamais replié sur `<50`), tandis que `Regime_obligations` relève alors du volontariat.
+Quand l'effectif GIP est inconnu (entreprise absente du fichier GIP de l'année), `Tranche_effectif` vaut `<50`, aligné sur `Regime_obligations` qui relève alors du volontariat — `Tranche_effectif === "<50"` si et seulement si `Regime_obligations === "voluntary"`. `Parcours.Effectif`, lui, reste `null` : c'est le seul champ qui continue de signaler l'absence de ligne GIP pour l'année.
 
 ### Masquage de `CSE_existant`
 

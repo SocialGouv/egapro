@@ -9,7 +9,12 @@ import {
 	setCompanyHasCse,
 	setCompanyWorkforce,
 } from "./helpers/db";
-import { completeDeclaration } from "./helpers/declaration-flows";
+import {
+	completeDeclaration,
+	DEFAULT_ANNUAL_QUARTILES,
+	DEFAULT_HOURLY_QUARTILES,
+	STEP1_WORKFORCE,
+} from "./helpers/declaration-flows";
 import {
 	fetchActiveSuitDeclaration,
 	suitExportStatusWithoutSecret,
@@ -32,9 +37,39 @@ import {
  *    Unit tests pin the rule engine on synthetic facts; only here is the
  *    advertised next step checked against the choice the UI really offers, and
  *    against the state the FSM really reaches once that choice is made.
+ *  - `Indicateurs.F` (bug #4528): the quartile headcounts the funnel collected.
+ *    Unit tests pin the mapping on a synthetic row, so they hold whichever
+ *    column it reads; only a round-trip proves the exported figure is the one
+ *    step 4 actually persisted — the very link whose absence was the bug.
+ *  - Indicator G computed gaps (merged from `export-declarations.e2e.ts`, #4114):
+ *    non-regression guard for #3942 and #4205. The indicator G (indicateur 7)
+ *    categories used to serialize only the raw declared amounts, never the computed
+ *    pay gaps. #3942 added the per-category `*_ecart` fields; #4205 then deliberately
+ *    dropped the two `*_total_ecart` fields (the total-row gap was removed from the
+ *    declaration UI as it is decorative and enters no business rule), leaving four
+ *    `*_ecart` fields per category. #4368 then added a headcount pair per pay basis.
+ *    Only the real select → serialize chain rules out a column dropped in `queries.ts`.
+ *
+ * The former `export-declarations.e2e.ts` replayed its own full 6-step funnel to reach
+ * the same endpoint; folding it in here drops one complete tunnel from the suite.
  */
 
 test.describe.configure({ mode: "serial" });
+
+// The four computed gap fields the export must expose per indicator G category.
+const ECART_KEYS = [
+	"Rem_annuelle_base_ecart",
+	"Rem_annuelle_variable_ecart",
+	"Taux_horaire_base_ecart",
+	"Taux_horaire_variable_ecart",
+] as const;
+
+// Dropped in #4205: the total-row gap is decorative and enters no business
+// rule, so the export contract no longer exposes these two fields.
+const REMOVED_ECART_KEYS = [
+	"Rem_annuelle_total_ecart",
+	"Taux_horaire_total_ecart",
+] as const;
 
 // The FSM states this spec walks the declaration through.
 const AWAITING_PATH_CHOICE = "awaiting_compliance_path_choice";
@@ -63,6 +98,10 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		await resetGipWorkforce();
 	});
 
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
 	test("completes a declaration with a gap and reaches the compliance path choice", async ({
 		page,
 	}) => {
@@ -72,6 +111,73 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		// event and, once the A–F stepper has run, the history carries internal
 		// step_change rows that the export must strip.
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+	});
+
+	// The declaration submitted just above is the one these two read back: the funnel
+	// fills category 1's four pay measures with the same women 1000 / men 1100 pair, so
+	// no second tunnel is needed to observe the serialized gaps.
+	test("emits the four *_ecart fields per indicator G category with the signed (H−F)/H convention and no total gap", async ({
+		browser,
+	}) => {
+		const declaration = await fetchActiveSuitDeclaration(browser);
+		const categories = declaration.Indicateurs.G;
+		expect(Array.isArray(categories)).toBe(true);
+		expect(categories.length).toBeGreaterThan(0);
+
+		// Every category must carry the four computed-gap fields (the #3942
+		// bug: absent) and must NOT carry the two total-gap fields dropped
+		// in #4205 (regression guard for the deliberate contract change).
+		for (const category of categories) {
+			for (const key of ECART_KEYS) {
+				expect(category).toHaveProperty(key);
+				// SUIT reads the gaps as fixed-scale strings like A–F: a number would drop trailing zeros.
+				if (category[key] !== null) {
+					expect(category[key]).toMatch(/^-?\d+\.\d{4}$/);
+				}
+			}
+			for (const key of REMOVED_ECART_KEYS) {
+				expect(category).not.toHaveProperty(key);
+			}
+		}
+
+		// The funnel fills category 1's four pay measures with the same
+		// women 1000 / men 1100 pair (since #3948 a headcount >= 1 requires
+		// all four amounts). Numeric strings keep their DB scale ("1100.00"),
+		// so compare on the parsed value.
+		const filled = categories.find(
+			(c: { Rem_annuelle_base_H: string | null }) =>
+				c.Rem_annuelle_base_H !== null &&
+				Number(c.Rem_annuelle_base_H) === 1100,
+		);
+		expect(filled).toBeDefined();
+
+		// Every measure carries the same pair, so every remaining gap is the
+		// same: (1100 − 1000) / 1100 = 0.0909, rounded to 4 decimals.
+		for (const key of ECART_KEYS) {
+			expect(filled?.[key]).toBe("0.0909");
+		}
+	});
+
+	// #4368 — the contract gained a headcount pair per pay basis. `queries.ts` names
+	// the exported columns one by one, so a column dropped there reaches the client as
+	// a missing field while every DB-mocking unit test stays green; only the real
+	// select → serialize chain rules that out. The funnel holds both bases to the same
+	// step 1 totals, so which source column feeds which field stays the unit test's
+	// question — this one answers whether they survive the chain at all.
+	test("carries the physical headcount of both pay bases per indicator G category", async ({
+		browser,
+	}) => {
+		const declaration = await fetchActiveSuitDeclaration(browser);
+
+		const filled = declaration.Indicateurs.G.find(
+			(c: { Effectif_F: number | null }) => c.Effectif_F !== null,
+		);
+		expect(filled).toBeDefined();
+
+		expect(filled?.Effectif_F).toBe(STEP1_WORKFORCE.women);
+		expect(filled?.Effectif_H).toBe(STEP1_WORKFORCE.men);
+		expect(filled?.Effectif_horaire_F).toBe(STEP1_WORKFORCE.women);
+		expect(filled?.Effectif_horaire_H).toBe(STEP1_WORKFORCE.men);
 	});
 
 	test("Parcours advertises exactly the transitions the compliance page offers", async ({
@@ -191,6 +297,36 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		expect(pathChoice?.Libelle_statut).toBe(
 			"Choix du parcours — Justification de l'écart",
 		);
+	});
+
+	test("Indicateurs.F exports the quartile headcounts step 4 recorded", async ({
+		browser,
+	}) => {
+		const { F } = (await fetchActiveSuitDeclaration(browser)).Indicateurs;
+
+		DEFAULT_ANNUAL_QUARTILES.forEach((row, index) => {
+			const quartile = index + 1;
+			expect(
+				F.annuel[`Quartile${quartile}_Rem_globale_annuelle_nb_F`],
+				`annual quartile ${quartile} women headcount`,
+			).toBe(Number(row.women));
+			expect(
+				F.annuel[`Quartile${quartile}_Rem_globale_annuelle_nb_H`],
+				`annual quartile ${quartile} men headcount`,
+			).toBe(Number(row.men));
+		});
+
+		DEFAULT_HOURLY_QUARTILES.forEach((row, index) => {
+			const quartile = index + 1;
+			expect(
+				F.horaire[`Quartile${quartile}_Taux_horaire_global_nb_F`],
+				`hourly quartile ${quartile} women headcount`,
+			).toBe(Number(row.women));
+			expect(
+				F.horaire[`Quartile${quartile}_Taux_horaire_global_nb_H`],
+				`hourly quartile ${quartile} men headcount`,
+			).toBe(Number(row.men));
+		});
 	});
 
 	test("Parcours follows the FSM into demarche_completed", async ({

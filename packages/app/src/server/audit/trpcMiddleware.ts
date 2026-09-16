@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
+import { emitActivityLog } from "./activityLog";
 import { logAction } from "./log";
 import { buildRequestContext } from "./requestContext";
 
@@ -143,89 +144,117 @@ type SessionLike = {
 	} | null;
 } | null;
 
+type ProcedureType = "query" | "mutation" | "subscription";
+
 type AuditMiddlewareInput<TResult> = {
 	ctx: {
 		session: SessionLike;
 		headers: Headers;
 	};
+	type: ProcedureType;
 	path: string;
 	getRawInput: () => Promise<unknown>;
 	next: () => Promise<TResult>;
 };
 
-/**
- * Generic helper that records every mutation and every explicitly-listed
- * sensitive query into `audit.action_log`.
- *
- * Designed to be wrapped in a `t.middleware(...)` call from `~/server/api/trpc`
- * (kept generic so it returns whatever the tRPC pipeline expects).
- *
- * - Lookup is path-based (e.g. `declaration.submit`) — paths not in the map
- *   are skipped.
- * - Captures status, duration, error message, user identity and request
- *   metadata (IP, user-agent).
- * - Always re-throws errors so the audit log never alters business behavior.
- */
+type MiddlewareFailure = { errorCode: string; errorMessage: string };
+
+// tRPC v11's next() resolves { ok: false, error } for a downstream failure (guard, validation, resolver) instead of throwing.
+function isFailedMiddlewareResult(
+	result: unknown,
+): result is { ok: false; error: unknown } {
+	return (
+		typeof result === "object" &&
+		result !== null &&
+		"ok" in result &&
+		result.ok === false
+	);
+}
+
+function describeFailure(error: unknown): MiddlewareFailure {
+	if (error instanceof TRPCError) {
+		return {
+			errorCode: error.code,
+			errorMessage: `${error.code}: ${error.message}`,
+		};
+	}
+	return {
+		errorCode: "ERROR",
+		errorMessage: error instanceof Error ? error.message : "Unknown error",
+	};
+}
+
+async function readRawInput(
+	getRawInput: () => Promise<unknown>,
+): Promise<unknown> {
+	try {
+		return await getRawInput();
+	} catch {
+		return undefined;
+	}
+}
+
 export async function auditMiddleware<TResult>({
 	ctx,
+	type,
 	path,
 	getRawInput,
 	next,
 }: AuditMiddlewareInput<TResult>): Promise<TResult> {
 	const action = PROCEDURE_TO_ACTION[path];
-
-	// Path is not auditable — short-circuit, no overhead beyond the lookup.
-	if (!action) {
-		return next();
-	}
-
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(ctx.headers);
 	const userId = ctx.session?.user?.id ?? null;
-	const userEmail = ctx.session?.user?.email ?? null;
 	const siren = parseSiren(ctx.session?.user?.siret);
-	let rawInput: unknown;
-	try {
-		rawInput = await getRawInput();
-	} catch {
-		rawInput = undefined;
-	}
-	const metadata = sanitizeMetadata(rawInput, path);
+	const rawInput = await readRawInput(getRawInput);
+	const metadata = action ? sanitizeMetadata(rawInput, path) : null;
+
+	const record = (failure: MiddlewareFailure | null): void => {
+		const status = failure ? "failure" : "success";
+		const durationMs = Date.now() - startedAt;
+
+		// An unmapped path gets a stdout line but no audit.action_log row; a mapped one gets its single line from logAction.
+		if (!action) {
+			emitActivityLog({
+				source: "trpc",
+				action: null,
+				category: null,
+				route: path,
+				operation: type,
+				status,
+				errorCode: failure?.errorCode ?? null,
+				durationMs,
+				userId,
+				siren,
+				ip: requestContext.ipAddress,
+				rawInput,
+			});
+			return;
+		}
+
+		void logAction({
+			action,
+			status,
+			userId,
+			userEmail: ctx.session?.user?.email ?? null,
+			siren,
+			metadata,
+			errorMessage: failure?.errorMessage,
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+			durationMs,
+			origin: { source: "trpc", route: path, operation: type, rawInput },
+		});
+	};
 
 	try {
 		const result = await next();
-		void logAction({
-			action,
-			status: "success",
-			userId,
-			userEmail,
-			siren,
-			metadata,
-			ipAddress: requestContext.ipAddress,
-			userAgent: requestContext.userAgent,
-			durationMs: Date.now() - startedAt,
-		});
+		record(
+			isFailedMiddlewareResult(result) ? describeFailure(result.error) : null,
+		);
 		return result;
 	} catch (error) {
-		const errorMessage =
-			error instanceof TRPCError
-				? `${error.code}: ${error.message}`
-				: error instanceof Error
-					? error.message
-					: "Unknown error";
-
-		void logAction({
-			action,
-			status: "failure",
-			userId,
-			userEmail,
-			siren,
-			metadata,
-			errorMessage,
-			ipAddress: requestContext.ipAddress,
-			userAgent: requestContext.userAgent,
-			durationMs: Date.now() - startedAt,
-		});
+		record(describeFailure(error));
 		throw error;
 	}
 }

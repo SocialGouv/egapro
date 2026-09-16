@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
 	API_TRANSMITTED_PDF,
+	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
 	CSE_OPINION,
 	complianceStepHref,
@@ -11,7 +12,6 @@ import {
 } from "~/modules/routes";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
-import { withCampaignYear } from "./helpers/campaign-year";
 import {
 	completeSecondDeclaration,
 	fillCseStep1,
@@ -19,24 +19,21 @@ import {
 	submitCseStep2,
 } from "./helpers/compliance-flows";
 import {
+	countPathChoiceEventsRound1,
+	lastPathChoiceValueRound1,
 	resetDeclarationToDraft,
 	resetGipWorkforce,
 	setCompanyHasCse,
 	setCompanyWorkforce,
 	setGipWorkforce,
 } from "./helpers/db";
-import {
-	completeDeclaration,
-	reachStep6ComplianceRecap,
-} from "./helpers/declaration-flows";
+import { completeDeclaration } from "./helpers/declaration-flows";
 import {
 	killWorker,
 	spawnNotificationsWorker,
 	waitForWorkerReady,
 } from "./helpers/notifications-worker";
 import { mailChainAvailable } from "./helpers/receipts";
-
-test.describe.configure({ mode: "serial" });
 
 // CAS-03 and CAS-09 assert the acknowledgement that closes their démarche (#4293),
 // and nothing drains pg-boss in this workflow: without a worker the receipt is
@@ -164,6 +161,35 @@ test.describe("[CAS-03] Path 5.b: gap + no hasCse → justify → /confirmation"
 	}) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-03"]({ page, coordinate });
+	});
+});
+
+test.describe("[ANX-01] Path change before downstream action — tâtonnement supported", () => {
+	test.beforeAll(async () => {
+		await resetDeclarationToDraft();
+		await setCompanyHasCse(true);
+		await setCompanyWorkforce(200);
+	});
+
+	test("user explores corrective_action then switches to joint_evaluation: both events persisted, latest wins", async ({
+		page,
+	}) => {
+		await completeDeclaration(page, { hasGap: true });
+		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+
+		await selectCompliancePath(page, "path-corrective");
+		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 10_000 });
+
+		expect(await countPathChoiceEventsRound1()).toBe(1);
+		expect(await lastPathChoiceValueRound1()).toBe("corrective_action");
+
+		await selectCompliancePath(page, "path-joint");
+		await page.waitForURL(urlGlob(COMPLIANCE_JOINT_EVALUATION), {
+			timeout: 10_000,
+		});
+
+		expect(await countPathChoiceEventsRound1()).toBe(2);
+		expect(await lastPathChoiceValueRound1()).toBe("joint_evaluation");
 	});
 });
 
@@ -355,221 +381,6 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 	});
 });
 
-// === GROUP G: indicator G gated by the campaign year (#4022 / #4067) ===
-// Whether the funnel carries the categories step (step 5 / indicator G) is decided
-// by isIndicatorGRequired(workforce, year): below 250 it only applies on the
-// triennial cadence (base 2027), and — from 2030 — down to every mandatory 50+
-// company. Each 6-indicator fiche pins its campaign year through the coordinate it
-// receives (year 2029, workforce 120), so both branches stay exercised.
-
-test.describe("[CAS-01-6IND] Path 14: 6 indicators (no G) + no hasCse → direct completion", () => {
-	const coordinate = pickCoordinate(GRID, {
-		fiche: "CAS-01-6IND",
-		effmax: "149",
-		year: 2029,
-	});
-
-	test("submits the tier's funnel and completes the démarche directly", async ({
-		page,
-	}) => {
-		test.slow();
-		await FICHE_SCENARIOS["CAS-01-6IND"]({ page, coordinate });
-	});
-});
-
-test.describe("[CAS-02-6IND] Path 15: 6 indicators (no G) + hasCse → /avis-cse", () => {
-	const coordinate = pickCoordinate(GRID, {
-		fiche: "CAS-02-6IND",
-		effmax: "149",
-		year: 2029,
-	});
-
-	test("submits the tier's funnel then deposits the CSE accuracy opinion", async ({
-		page,
-	}) => {
-		test.slow();
-		await FICHE_SCENARIOS["CAS-02-6IND"]({ page, coordinate });
-	});
-});
-
-// ANX-04 — the OTHER branch of CAS-01/02-6IND: the same 100-149 company gains step 5
-// in a triennial year from 2030 — the assertion that would have silently broken
-// without #4067. Kept lightweight (funnel shape only): the full compliance flows
-// for a 7-indicator company are already covered by the >= 250 baseline cases.
-const SEVEN_INDICATOR_YEAR = 2030;
-
-test.describe("[ANX-04] Path 14bis: 100-149 company regains indicator G in a triennial year >= 2030", () => {
-	test("the funnel carries the indicator-G step (6 steps)", async ({
-		page,
-	}) => {
-		await withCampaignYear(
-			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 120 },
-			async () => {
-				await page.goto(remunerationStepHref(1));
-				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-				await page.goto(remunerationStepHref(5));
-				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
-			},
-		);
-	});
-});
-
-// ANX-05 — the 50-99 tranche (scenarios S1/S2 of #4067): indicator G is absent
-// below 2030 and returns only in a triennial year from 2030.
-const SIX_INDICATOR_YEAR = 2029;
-
-test.describe("[ANX-05] Path 13: 50-99 tranche — indicator G gated by the pinned year", () => {
-	test.describe.configure({ mode: "serial" });
-
-	test("6-indicator year (2029): step 5 is absent and unreachable by direct URL", async ({
-		page,
-	}) => {
-		await withCampaignYear(
-			{ page, year: SIX_INDICATOR_YEAR, workforce: 75 },
-			async () => {
-				await page.goto(remunerationStepHref(1));
-				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
-				// The categories step is out of reach even by URL: it redirects to the recap.
-				await page.goto(remunerationStepHref(5));
-				await page.waitForURL(urlGlob(remunerationStepHref(6)));
-				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
-			},
-		);
-	});
-
-	test("7-indicator year (2030): step 5 is present and the stepper counts 6", async ({
-		page,
-	}) => {
-		await withCampaignYear(
-			{ page, year: SEVEN_INDICATOR_YEAR, workforce: 75 },
-			async () => {
-				// Initialise the declaration first so the step 5 URL is reachable.
-				await page.goto(remunerationStepHref(1));
-				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-				await page.goto(remunerationStepHref(5));
-				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
-			},
-		);
-	});
-});
-
-// === GROUP H: [#3945] CSE opinion mentions gated by the declared CSE existence ===
-// A company >= 100 that declared it has no CSE (hasCse false or null) must no longer
-// be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
-// compliance-choice options drop every CSE-opinion mention, while the gap actions
-// and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
-//
-// Only the `false` branch is reachable end to end. Since #3952 the funnel layout
-// intercepts a >= 100 company whose CSE answer is still null and sends it back to
-// /mon-espace to answer, so no journey reaches the recap in that state — that bounce
-// is asserted in missing-info-modal.e2e.ts, and the recap's own null-like-false
-// rendering by Step6Review.test.tsx ("CSE consultation section gating (issue #3945)").
-
-const CSE_OPINION_RECAP_TEXT = /avis du CSE devra être transmis/;
-const CSE_JUSTIFY_PARENTHESIS =
-	/avis à transmettre lors de la dernière étape de la démarche/;
-const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
-
-test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setCompanyHasCse(false);
-		await setCompanyWorkforce(200);
-	});
-
-	test("step 6 recap hides the CSE opinion but keeps the gap actions and the update-CSE button", async ({
-		page,
-	}) => {
-		test.slow();
-		await reachStep6ComplianceRecap(page);
-
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toHaveCount(0);
-		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
-		await expect(
-			page.getByRole("link", { name: /Voir les modèles d.avis CSE/ }),
-		).toHaveCount(0);
-		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toHaveCount(0);
-
-		// Gap actions stay fully visible
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toBeVisible();
-		// Escape hatch for a mis-declared CSE flag stays available
-		await expect(
-			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
-		).toBeVisible();
-	});
-
-	test("compliance choice page drops the CSE opinion bullets", async ({
-		page,
-	}) => {
-		test.slow();
-		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
-
-		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
-		).toBeVisible();
-		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
-		).toHaveCount(0);
-		await expect(
-			page.getByText(/Transmettre l.avis ou les avis du CSE/),
-		).toHaveCount(0);
-	});
-});
-
-test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion still shown", () => {
-	test.beforeAll(async () => {
-		await resetDeclarationToDraft();
-		await setCompanyHasCse(true);
-		await setCompanyWorkforce(200);
-	});
-
-	test("step 6 recap shows the CSE opinion mention", async ({ page }) => {
-		test.slow();
-		await reachStep6ComplianceRecap(page);
-
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toBeVisible();
-		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toBeVisible();
-		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toBeVisible();
-
-		// First declaration renders both alternative paths, each prefixed "Soit"
-		await expect(
-			page.getByText(/Soit mettre en place des actions correctives/),
-		).toBeVisible();
-		await expect(
-			page.getByText(
-				"Soit réaliser une évaluation conjointe des rémunérations",
-			),
-		).toBeVisible();
-	});
-
-	test("compliance choice page keeps the CSE opinion bullet", async ({
-		page,
-	}) => {
-		test.slow();
-		await completeDeclaration(page, { hasGap: true });
-		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
-
-		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
-		).toBeVisible();
-	});
-});
-
 // === GROUP I: tranches < 100 — the gap ≥ 5 % obligations stop at 100 salariés ===
 // Arbitrage 2026-07 (#4043, cahier de tests §6): the voluntary tier (< 50) declares
 // all 7 indicators every year, the 50-99 tier declares the 6 first ones outside its
@@ -662,6 +473,8 @@ test.describe("[CAS-13-6IND] GIP 75 (50-99) → direct completion", () => {
 });
 
 test.describe("[S11] CAS-04 with défavorable opinion — routing unchanged, opinion retained", () => {
+	test.describe.configure({ mode: "serial" });
+
 	const coordinate = complianceCoordinate("CAS-04");
 	test.beforeAll(async () => {
 		await resetDeclarationToDraft();

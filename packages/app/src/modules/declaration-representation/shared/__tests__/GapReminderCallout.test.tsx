@@ -16,7 +16,7 @@ describe("GapReminderCallout", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Objectif de 30 % atteint")).toBeInTheDocument();
+		expect(screen.getByText("Objectif de 30 % atteint.")).toBeInTheDocument();
 		expect(
 			screen.getByText(/au moins 30 % des cadres dirigeants/),
 		).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe("GapReminderCallout", () => {
 		);
 
 		expect(
-			screen.getByText("Objectif de 30 % non atteint"),
+			screen.getByText("Objectif de 30 % non atteint."),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/au moins 30 % des membres des instances dirigeantes/),
@@ -49,7 +49,7 @@ describe("GapReminderCallout", () => {
 		);
 
 		expect(
-			screen.getByText("Objectif de 40 % non atteint"),
+			screen.getByText("Objectif de 40 % non atteint."),
 		).toBeInTheDocument();
 	});
 

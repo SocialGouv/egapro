@@ -100,14 +100,14 @@ type QuartileInputRow = {
 	men: string;
 };
 
-const DEFAULT_ANNUAL_QUARTILES: QuartileInputRow[] = [
+export const DEFAULT_ANNUAL_QUARTILES: QuartileInputRow[] = [
 	{ ordinal: "1er", threshold: "10000", women: "3", men: "4" },
 	{ ordinal: "2e", threshold: "20000", women: "3", men: "4" },
 	{ ordinal: "3e", threshold: "30000", women: "2", men: "4" },
 	{ ordinal: "4e", women: "2", men: "3" },
 ];
 
-const DEFAULT_HOURLY_QUARTILES: QuartileInputRow[] = [
+export const DEFAULT_HOURLY_QUARTILES: QuartileInputRow[] = [
 	{ ordinal: "1er", threshold: "10", women: "3", men: "4" },
 	{ ordinal: "2e", threshold: "20", women: "3", men: "4" },
 	{ ordinal: "3e", threshold: "30", women: "2", men: "4" },
@@ -355,7 +355,7 @@ export async function reachStep6Recap(
  * Fill a gap-free funnel up to the review step, whatever shape the campaign year gives
  * it: the categories step is only presented when the tier owes indicator G that year, so
  * the quartiles land either on it or straight on the review. Callers pass the expectation
- * derived from the domain (`indicatorGRequiredForGip`).
+ * derived from the domain (`isIndicatorGRequiredForGip`).
  */
 export async function reachRecapWithoutGap(
 	page: Page,
