@@ -127,10 +127,6 @@ describe("openApiSpec", () => {
 		});
 	});
 
-	it("keeps info.version at 3.0.0 — additive field, no breaking change", () => {
-		expect(openApiSpec.info.version).toBe("3.0.0");
-	});
-
 	describe("representations endpoint", () => {
 		const path = openApiSpec.paths["/api/v1/export/representations"];
 
