@@ -7,8 +7,8 @@ import {
 	CATEGORY_SOURCES,
 	LEGACY_SOURCE_LABELS,
 } from "~/modules/declaration-remuneration/steps/step5/sources";
-import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
-import { compliancePathEnum, fileTypeEnum } from "~/server/db/schema";
+import { COMPLIANCE_PATHS, DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import { fileTypeEnum } from "~/server/db/schema";
 import {
 	listCompliancePathsByRound,
 	type PathChoiceRound,
@@ -133,7 +133,7 @@ function buildStatusHistoryLabelTable(): SuitFieldTable {
 		),
 	);
 
-	const pathRows = compliancePathEnum.enumValues.map((path) =>
+	const pathRows = COMPLIANCE_PATHS.map((path) =>
 		plainRow(
 			getStatusHistoryLabel("path_choice", path),
 			`Événement \`path_choice\` portant la valeur \`${path}\`.`,
@@ -162,7 +162,7 @@ function buildPathChoiceTable(round: PathChoiceRound): SuitFieldTable {
 		description: `Parcours de mise en conformité choisi après la ${ordinal} déclaration.`,
 		presence: "`null` tant qu'aucun choix n'a été fait à ce tour.",
 		sources: [
-			"`compliance_path` (`server/db/schema.ts`)",
+			"`COMPLIANCE_PATHS` (`modules/domain/types.ts`)",
 			"disponibilité par tour : événements `path_choice` des rulesets embarqués",
 		],
 		extraColumn: null,

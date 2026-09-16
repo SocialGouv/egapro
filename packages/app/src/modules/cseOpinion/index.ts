@@ -16,9 +16,4 @@ export type {
 	OpinionType,
 	UploadedFile,
 } from "./types";
-export {
-	CSE_OPINION_CONTENT_TYPES,
-	MAX_CSE_FILES,
-	STEP_TITLES,
-	TOTAL_STEPS,
-} from "./types";
+export { MAX_CSE_FILES, STEP_TITLES, TOTAL_STEPS } from "./types";

@@ -1,12 +1,10 @@
-import { compliancePathEnum } from "~/server/db/schema";
+import { COMPLIANCE_PATHS, type CompliancePathValue } from "~/modules/domain";
 import { listBundledRulesVersions, loadRules, type Rules } from "./engine";
-
-export type CompliancePath = (typeof compliancePathEnum.enumValues)[number];
 
 export type PathChoiceRound = 1 | 2;
 
-function isCompliancePath(value: string): value is CompliancePath {
-	return (compliancePathEnum.enumValues as readonly string[]).includes(value);
+function isCompliancePath(value: string): value is CompliancePathValue {
+	return (COMPLIANCE_PATHS as readonly string[]).includes(value);
 }
 
 // Read off the `path_choice` events rather than restated: the copied-by-hand
@@ -14,8 +12,8 @@ function isCompliancePath(value: string): value is CompliancePath {
 // ruleset has ever emitted.
 export function collectCompliancePathsByRound(
 	rulesets: readonly Rules[],
-): Record<PathChoiceRound, CompliancePath[]> {
-	const seen: Record<PathChoiceRound, Set<CompliancePath>> = {
+): Record<PathChoiceRound, CompliancePathValue[]> {
+	const seen: Record<PathChoiceRound, Set<CompliancePathValue>> = {
 		1: new Set(),
 		2: new Set(),
 	};
@@ -32,8 +30,8 @@ export function collectCompliancePathsByRound(
 	}
 
 	return {
-		1: compliancePathEnum.enumValues.filter((path) => seen[1].has(path)),
-		2: compliancePathEnum.enumValues.filter((path) => seen[2].has(path)),
+		1: COMPLIANCE_PATHS.filter((path) => seen[1].has(path)),
+		2: COMPLIANCE_PATHS.filter((path) => seen[2].has(path)),
 	};
 }
 
@@ -42,7 +40,7 @@ export function collectCompliancePathsByRound(
 // older declarations that chose it.
 export function listCompliancePathsByRound(): Record<
 	PathChoiceRound,
-	CompliancePath[]
+	CompliancePathValue[]
 > {
 	return collectCompliancePathsByRound(
 		listBundledRulesVersions().map(loadRules),

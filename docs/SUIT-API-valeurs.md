@@ -129,7 +129,7 @@ Parcours de mise en conformité choisi après la première déclaration.
 
 - **Endpoint** : `GET /api/v1/export/declarations`
 - **Présence** : `null` tant qu'aucun choix n'a été fait à ce tour.
-- **Source** : `compliance_path` (`server/db/schema.ts`) ; disponibilité par tour : événements `path_choice` des rulesets embarqués
+- **Source** : `COMPLIANCE_PATHS` (`modules/domain/types.ts`) ; disponibilité par tour : événements `path_choice` des rulesets embarqués
 
 | Valeur | Libellé FR | Signification |
 | --- | --- | --- |
@@ -143,7 +143,7 @@ Parcours de mise en conformité choisi après la seconde déclaration.
 
 - **Endpoint** : `GET /api/v1/export/declarations`
 - **Présence** : `null` tant qu'aucun choix n'a été fait à ce tour.
-- **Source** : `compliance_path` (`server/db/schema.ts`) ; disponibilité par tour : événements `path_choice` des rulesets embarqués
+- **Source** : `COMPLIANCE_PATHS` (`modules/domain/types.ts`) ; disponibilité par tour : événements `path_choice` des rulesets embarqués
 
 | Valeur | Libellé FR | Signification |
 | --- | --- | --- |

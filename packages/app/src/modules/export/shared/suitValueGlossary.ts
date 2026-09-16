@@ -3,9 +3,11 @@
 // pure derivation module has no business dragging in.
 import type { ContentType, OpinionType } from "~/modules/cseOpinion/types";
 import type { CATEGORY_SOURCES } from "~/modules/declaration-remuneration/steps/step5/sources";
-import type { DeclarationFsmStatus } from "~/modules/domain";
+import type {
+	CompliancePathValue,
+	DeclarationFsmStatus,
+} from "~/modules/domain";
 import type { fileTypeEnum } from "~/server/db/schema";
-import type { CompliancePath } from "~/server/rules/compliancePaths";
 import type { DeclarationEventType } from "./statusHistoryLabels";
 
 export type ActiveCategorySource = (typeof CATEGORY_SOURCES)[number]["value"];
@@ -41,7 +43,7 @@ export const EVENT_TYPE_MEANINGS: Record<DeclarationEventType, string> = {
 		"Fin de la démarche. Ne pas confondre avec l'état `demarche_completed` de `Parcours.Statut`, qui ne diffère que d'une lettre.",
 };
 
-export const COMPLIANCE_PATH_MEANINGS: Record<CompliancePath, string> = {
+export const COMPLIANCE_PATH_MEANINGS: Record<CompliancePathValue, string> = {
 	justify:
 		"L'entreprise justifie l'écart constaté ; aucun dépôt supplémentaire n'est attendu sur Egapro à ce titre.",
 	corrective_action:
