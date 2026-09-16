@@ -8,7 +8,6 @@ import {
 	eq,
 	ilike,
 	inArray,
-	isNotNull,
 	or,
 	type SQL,
 	sql,
@@ -36,6 +35,7 @@ import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
+import { publiclyReleasedCampaignCondition } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -81,8 +81,7 @@ export async function listRecentPublicDeclarations(limit: number) {
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		)
 		.orderBy(desc(publishedAt), asc(companies.siren))
@@ -185,8 +184,7 @@ export async function searchPublicDeclarations(
 	const baseConditions = [
 		notCancelledCondition(),
 		submittedDeclarationCondition(),
-		isNotNull(campaignDeadlines.publicDataReleaseDate),
-		sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+		publiclyReleasedCampaignCondition(),
 	];
 	if (input.q) {
 		const normalizedQuery = input.q.replace(/\s/g, "");
@@ -329,8 +327,7 @@ export async function listPublicCompanySirens(
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		)
 		.orderBy(asc(declarations.siren))
@@ -348,8 +345,7 @@ export async function countPublicCompanySirens(): Promise<number> {
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		);
 	return rows[0]?.total ?? 0;
