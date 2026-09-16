@@ -202,3 +202,76 @@ export async function deleteReferents(ids: string[]) {
 		await sql.end();
 	}
 }
+
+export type CampaignPublicRelease = {
+	exists: boolean;
+	publicDataReleaseDate: string | null;
+};
+
+export async function getCampaignPublicRelease(
+	year: number,
+): Promise<CampaignPublicRelease> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<{ date: string | null }[]>`
+			SELECT public_data_release_date::text AS date
+			FROM app_campaign_deadline
+			WHERE year = ${year}
+		`;
+		if (rows.length === 0)
+			return { exists: false, publicDataReleaseDate: null };
+		return { exists: true, publicDataReleaseDate: rows[0]?.date ?? null };
+	} finally {
+		await sql.end();
+	}
+}
+
+// Same far-future deadlines and null campaign_start_date as pushCampaignDeadlinesFarFuture when the row is missing — see its doc for why that column must stay null.
+export async function setPublicDataReleaseDate(
+	year: number,
+	date: string | null,
+) {
+	const sql = createConnection();
+	try {
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year,
+				public_data_release_date,
+				decl1_modification_deadline,
+				decl1_justification_deadline,
+				decl1_joint_evaluation_deadline,
+				decl2_modification_deadline,
+				decl2_justification_deadline,
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
+			) VALUES (
+				${year},
+				${date}::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date
+			)
+			ON CONFLICT (year) DO UPDATE SET
+				public_data_release_date = EXCLUDED.public_data_release_date
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+// The release filter compares to the server-side CURRENT_DATE, which the pinned campaign clock does not move.
+export async function dbDateInDays(offsetDays: number): Promise<string> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ date: string }]>`
+			SELECT (CURRENT_DATE + ${offsetDays}::int)::text AS date
+		`;
+		return rows[0]?.date ?? "";
+	} finally {
+		await sql.end();
+	}
+}
