@@ -286,21 +286,25 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 	async function insertOutboxRow(row: {
 		status: "pending" | "sending" | "sent" | "failed";
 		updatedAt: Date;
+		createdAt?: Date;
+		id?: string;
 	}) {
+		const id = row.id ?? crypto.randomUUID();
 		await sql`
 			INSERT INTO app_receipt_outbox
 				(id, kind, siren, year, recipient_email, status, created_at, updated_at)
 			VALUES (
-				${crypto.randomUUID()},
+				${id},
 				'declaration',
 				'123456789',
 				2026,
 				'declarant@example.fr',
 				${row.status},
-				${row.updatedAt},
+				${row.createdAt ?? row.updatedAt},
 				${row.updatedAt}
 			)
 		`;
+		return id;
 	}
 
 	async function countOutboxRows(): Promise<number> {
@@ -324,7 +328,7 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 			now,
 		});
 
-		expect(result).toEqual({ deleted: 1 });
+		expect(result).toEqual({ deleted: 1, forcedFailed: 0 });
 		expect(await countOutboxRows()).toBe(0);
 	});
 
@@ -341,7 +345,7 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 			now,
 		});
 
-		expect(result).toEqual({ deleted: 1 });
+		expect(result).toEqual({ deleted: 1, forcedFailed: 0 });
 	});
 
 	it("keeps a settled row within retention", async () => {
@@ -358,21 +362,19 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 			now,
 		});
 
-		expect(result).toEqual({ deleted: 0 });
+		expect(result).toEqual({ deleted: 0, forcedFailed: 0 });
 		expect(await countOutboxRows()).toBe(1);
 	});
 
-	// The row is live work for the retry pass, however old it looks — purging
-	// it would silently drop a receipt still owed.
-	it("never purges a pending or sending row, no matter its age", async () => {
+	// Age is judged on `created_at`: a row a permanently-down queue keeps
+	// retrying has `updated_at` bumped to "now" on every pass, so only
+	// `created_at` tells apart "genuinely old" from "just retried recently".
+	it("forces an old pending row to failed and purges it in the same run", async () => {
 		const now = new Date("2026-01-01T00:00:00Z");
-		await insertOutboxRow({
+		const id = await insertOutboxRow({
 			status: "pending",
-			updatedAt: new Date("2020-01-01T00:00:00Z"),
-		});
-		await insertOutboxRow({
-			status: "sending",
-			updatedAt: new Date("2020-01-01T00:00:00Z"),
+			createdAt: new Date("2024-11-27T00:00:00Z"), // 400 d old
+			updatedAt: new Date("2025-12-31T00:00:00Z"), // touched yesterday
 		});
 
 		const result = await runReceiptOutboxCleanup({
@@ -381,15 +383,74 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 			now,
 		});
 
-		expect(result).toEqual({ deleted: 0 });
-		expect(await countOutboxRows()).toBe(2);
+		expect(result).toEqual({ deleted: 1, forcedFailed: 1 });
+		expect(await countOutboxRows()).toBe(0);
+
+		const failureAudit = await sql<
+			[{ status: string; resource_id: string; error_message: string }]
+		>`
+			SELECT status, resource_id, error_message FROM audit.action_log
+			WHERE action = 'notification.outbox_delivery_failed'
+			ORDER BY created_at DESC
+			LIMIT 1
+		`;
+		expect(failureAudit[0]).toMatchObject({
+			status: "failure",
+			resource_id: id,
+		});
+		expect(failureAudit[0]?.error_message).toBeTruthy();
 	});
 
-	it("writes a success self-audit row with the deletion count", async () => {
+	it("forces an old sending row to failed and purges it the same way", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertOutboxRow({
+			status: "sending",
+			createdAt: new Date("2024-11-27T00:00:00Z"),
+			updatedAt: new Date("2025-12-31T00:00:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 1, forcedFailed: 1 });
+		expect(await countOutboxRows()).toBe(0);
+	});
+
+	it("leaves a recent pending row alone, however often it has been retried", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		// 30 d old, retried minutes ago — well within retention either way.
+		await insertOutboxRow({
+			status: "pending",
+			createdAt: new Date("2025-12-02T00:00:00Z"),
+			updatedAt: new Date("2025-12-31T23:50:00Z"),
+		});
+
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: 365,
+			now,
+		});
+
+		expect(result).toEqual({ deleted: 0, forcedFailed: 0 });
+		const [row] = await sql<[{ status: string }]>`
+			SELECT status FROM app_receipt_outbox
+		`;
+		expect(row?.status).toBe("pending");
+	});
+
+	it("writes a success self-audit row with the deletion and forced-failed counts", async () => {
 		const now = new Date("2026-01-01T00:00:00Z");
 		await insertOutboxRow({
 			status: "sent",
 			updatedAt: new Date("2024-11-27T00:00:00Z"),
+		});
+		await insertOutboxRow({
+			status: "pending",
+			createdAt: new Date("2024-11-27T00:00:00Z"),
+			updatedAt: new Date("2025-12-31T00:00:00Z"),
 		});
 
 		await runReceiptOutboxCleanup({ sql, retentionDays: 365, now });
@@ -404,7 +465,8 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 		`;
 		expect(selfAudit[0]?.status).toBe("success");
 		expect(selfAudit[0]?.metadata).toMatchObject({
-			deleted: 1,
+			deleted: 2,
+			forcedFailed: 1,
 			retentionDays: 365,
 		});
 	});

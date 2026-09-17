@@ -22,9 +22,9 @@ import postgres from "postgres";
  * Also purges `app_receipt_outbox`: it carries `recipient_email`, `user_id`
  * and `siren` on every row with no retention of its own, unlike
  * `audit.action_log` and the declarations it was written to acknowledge.
- * Only terminal rows (`sent` / `failed`) past retention are removed —
- * `pending`/`sending` rows are live work for `replayPendingReceipts` and are
- * never touched here, however old.
+ * `pending`/`sending` rows are live work for `replayPendingReceipts` while
+ * within retention; past it, they are force-failed (a queue that never comes
+ * back must not retain PII forever) and purged in the same run.
  *
  * Env vars:
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
@@ -54,6 +54,16 @@ const AUDIT_CLEANUP_CATEGORY = "system";
 
 const RECEIPT_OUTBOX_CLEANUP_ACTION = "system.receipt_outbox_cleanup";
 const RECEIPT_OUTBOX_SETTLED_STATUSES = ["sent", "failed"];
+const RECEIPT_OUTBOX_UNSETTLED_STATUSES = ["pending", "sending"];
+
+// Same action key `receiptOutbox.ts` uses when a row is force-failed after
+// exhausting its retry attempts — this is the retention-driven equivalent, so
+// `count(*) WHERE action = ...` keeps counting every way a receipt ends up
+// permanently undelivered under one metric, distinguished by `metadata.stage`.
+const RECEIPT_OUTBOX_DELIVERY_FAILED_ACTION =
+	"notification.outbox_delivery_failed";
+const RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR =
+	"Outbox retention window elapsed before delivery could complete";
 
 const DEFAULT_SHORT_RETENTION_DAYS = 180;
 const DEFAULT_LONG_RETENTION_DAYS = 365;
@@ -205,11 +215,22 @@ type RunReceiptOutboxCleanupArgs = {
 
 type ReceiptOutboxCleanupResult = {
 	deleted: number;
+	forcedFailed: number;
 };
 
 /**
  * Purge of `app_receipt_outbox`. Exported for the same reason as
  * `runAuditCleanup` — the integration test drives it directly.
+ *
+ * A row stuck `pending`/`sending` past retention (a permanently unreachable
+ * notifications queue, say) never reaches a terminal status on its own, so it
+ * would otherwise keep `recipient_email`/`user_id`/`siren` forever. Age is
+ * judged on `created_at`, not `updated_at` — a row retried every cron tick
+ * has its `updated_at` bumped to "now" on every pass regardless of how long
+ * it has actually existed. The force-fail backdates `updated_at` to
+ * `created_at` (already known to be past `threshold`) so the settled-rows
+ * purge below — built on the existing `(status, updated_at)` index — picks
+ * the row up in the same run, with no new index required.
  */
 export async function runReceiptOutboxCleanup({
 	sql,
@@ -218,13 +239,52 @@ export async function runReceiptOutboxCleanup({
 }: RunReceiptOutboxCleanupArgs): Promise<ReceiptOutboxCleanupResult> {
 	const threshold = subtractDays(now, retentionDays);
 
-	const deleted = await sql`
-		DELETE FROM app_receipt_outbox
-		WHERE status = ANY(${RECEIPT_OUTBOX_SETTLED_STATUSES})
-		AND updated_at < ${threshold}
-	`;
+	const { forcedFailedIds, deletedCount } = await sql.begin(async (tx) => {
+		const forcedFailed = await tx<{ id: string }[]>`
+			UPDATE app_receipt_outbox
+			SET status = 'failed',
+				last_error = ${RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR},
+				updated_at = created_at
+			WHERE status = ANY(${RECEIPT_OUTBOX_UNSETTLED_STATUSES})
+			AND created_at < ${threshold}
+			RETURNING id
+		`;
 
-	const deletedCount = Number(deleted.count ?? 0);
+		const deleted = await tx`
+			DELETE FROM app_receipt_outbox
+			WHERE status = ANY(${RECEIPT_OUTBOX_SETTLED_STATUSES})
+			AND updated_at < ${threshold}
+		`;
+
+		return {
+			forcedFailedIds: forcedFailed.map((row) => row.id),
+			deletedCount: Number(deleted.count ?? 0),
+		};
+	});
+
+	for (const id of forcedFailedIds) {
+		try {
+			await sql`
+				INSERT INTO audit.action_log (id, created_at, action, category, status, resource_type, resource_id, error_message, metadata)
+				VALUES (
+					${crypto.randomUUID()},
+					${new Date()},
+					${RECEIPT_OUTBOX_DELIVERY_FAILED_ACTION},
+					${AUDIT_CLEANUP_CATEGORY},
+					'failure',
+					'receipt_outbox',
+					${id},
+					${RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR},
+					${sql.json({ stage: "retention_cleanup" })}
+				)
+			`;
+		} catch (auditError) {
+			console.error(
+				"[receipt-outbox-cleanup] Forced a row to failed but its audit insert failed:",
+				auditError,
+			);
+		}
+	}
 
 	try {
 		await sql`
@@ -235,7 +295,11 @@ export async function runReceiptOutboxCleanup({
 				${RECEIPT_OUTBOX_CLEANUP_ACTION},
 				${AUDIT_CLEANUP_CATEGORY},
 				'success',
-				${sql.json({ deleted: deletedCount, retentionDays })}
+				${sql.json({
+					deleted: deletedCount,
+					forcedFailed: forcedFailedIds.length,
+					retentionDays,
+				})}
 			)
 		`;
 	} catch (auditError) {
@@ -245,7 +309,7 @@ export async function runReceiptOutboxCleanup({
 		);
 	}
 
-	return { deleted: deletedCount };
+	return { deleted: deletedCount, forcedFailed: forcedFailedIds.length };
 }
 
 const isMain = ((): boolean => {
@@ -300,7 +364,9 @@ if (isMain) {
 			sql,
 			retentionDays: receiptOutboxRetentionDays,
 		});
-		console.log(`[receipt-outbox-cleanup] Success — deleted=${result.deleted}`);
+		console.log(
+			`[receipt-outbox-cleanup] Success — deleted=${result.deleted} forcedFailed=${result.forcedFailed}`,
+		);
 	} catch (error) {
 		console.error("[receipt-outbox-cleanup] Failed:", error);
 		await logFailure(
