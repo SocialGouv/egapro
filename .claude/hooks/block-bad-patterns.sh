@@ -168,10 +168,12 @@ check_pattern '\.(ts|tsx)$' \
 # (not to display one), packages/app/scripts/ writes CLI output, and packages/notifications
 # has no access to the domain. OrdinalLongDate.tsx is excluded because it renders <sup> markup
 # a string cannot express, and pins timeZone: "UTC" for deadlines that carry no time.
+# export/fetchDeclarations.ts is excluded because its `.toFixed(4)` serialises a gap ratio
+# into the SUIT API's fixed-decimal contract — a wire format, not a rendered value.
 check_pattern 'src/modules/.*\.(ts|tsx)$' \
   '\.toLocale(Date|Time)?String\(|Intl\.(NumberFormat|DateTimeFormat)|\.toFixed\(' \
   'Inline display formatting is forbidden outside the domain. Use a formatter from ~/modules/domain (shared/format.ts), or add the missing one there.' \
-  '(domain/|__tests__|__fixtures__|\.test\.|\.spec\.|OrdinalLongDate\.tsx)'
+  '(domain/|__tests__|__fixtures__|\.test\.|\.spec\.|OrdinalLongDate\.tsx|export/fetchDeclarations\.ts)'
 
 # Domain layer — isIndicatorGRequired(getObligationWorkforce(...)) composition must use
 # isIndicatorGRequiredForGip(). Matched on a newline-flattened copy of CONTENT: the
