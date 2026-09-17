@@ -1,5 +1,5 @@
 import type { ChildProcess } from "node:child_process";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { withCampaignYear } from "../helpers/campaign-year";
 import { setCompanyHasCse } from "../helpers/db";
 import {
@@ -34,6 +34,9 @@ for (const coordinate of buildGrid()) {
 		const scenario =
 			FICHE_SCENARIOS[coordinate.fiche as keyof typeof FICHE_SCENARIOS];
 		test(coordinate.rappel, async ({ page }) => {
+			expect(coordinate.id, "échec volontaire pour tester le rendu").not.toBe(
+				"2030-249-CAS01",
+			);
 			await withCampaignYear(
 				{ page, year: coordinate.year, workforce: coordinate.workforce },
 				async () => {
