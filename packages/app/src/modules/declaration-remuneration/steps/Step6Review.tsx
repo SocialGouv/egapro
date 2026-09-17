@@ -29,6 +29,7 @@ import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { SubmitDeclarationModal } from "../shared/SubmitDeclarationModal";
 import { getSubmissionErrorMessage } from "../shared/submissionErrorMessage";
+import { useRefreshAfterSubmissionError } from "../shared/useRefreshAfterSubmissionError";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
@@ -111,25 +112,10 @@ export function Step6Review({
 		closeModal();
 		router.push(COMPLIANCE_PATH);
 	}, [closeModal, companyWorkforce, declarationYear, router]);
-	const { refetch: waitForServer } = api.declaration.getOrCreate.useQuery(
-		undefined,
-		{
-			enabled: false,
-			retry: 5,
-			retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
-		},
-	);
+	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const submitMutation = api.declaration.submit.useMutation({
 		onSuccess: completeSubmission,
-		onError: (error) => {
-			if (error.data) {
-				router.refresh();
-				return;
-			}
-			void waitForServer().then((result) => {
-				if (result.isSuccess) router.refresh();
-			});
-		},
+		onError: refreshAfterSubmissionError,
 	});
 	const submittedDespiteError = isSubmitted && submitMutation.isError;
 	useEffect(() => {

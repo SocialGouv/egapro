@@ -36,10 +36,12 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 
 vi.mock("~/trpc/react", () => ({
 	api: {
-		declaration: {
-			getOrCreate: {
+		profile: {
+			get: {
 				useQuery: () => ({ refetch: mockWaitForServer }),
 			},
+		},
+		declaration: {
 			submit: {
 				useMutation: ({
 					onSuccess,

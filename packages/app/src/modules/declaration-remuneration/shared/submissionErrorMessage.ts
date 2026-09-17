@@ -7,7 +7,7 @@ const USER_FACING_ERROR_CODES: ReadonlySet<string> = new Set([
 	"CONFLICT",
 ]);
 
-type SubmissionError = {
+export type SubmissionError = {
 	message: string;
 	data?: { code: string } | null;
 };

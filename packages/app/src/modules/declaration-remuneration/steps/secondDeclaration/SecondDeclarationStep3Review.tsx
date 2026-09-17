@@ -8,6 +8,7 @@ import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStep
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
 import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
+import { useRefreshAfterSubmissionError } from "~/modules/declaration-remuneration/shared/useRefreshAfterSubmissionError";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	type DeclarationFsmStatus,
@@ -77,25 +78,10 @@ export function SecondDeclarationStep3Review({
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);
-	const { refetch: waitForServer } = api.declaration.getOrCreate.useQuery(
-		undefined,
-		{
-			enabled: false,
-			retry: 5,
-			retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
-		},
-	);
+	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
 		onSuccess: completeSubmission,
-		onError: (error) => {
-			if (error.data) {
-				router.refresh();
-				return;
-			}
-			void waitForServer().then((result) => {
-				if (result.isSuccess) router.refresh();
-			});
-		},
+		onError: refreshAfterSubmissionError,
 	});
 	const submittedDespiteError = !isWritable && mutation.isError;
 	useEffect(() => {
