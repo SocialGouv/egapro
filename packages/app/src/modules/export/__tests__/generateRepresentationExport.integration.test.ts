@@ -73,9 +73,9 @@ describe("buildRepresentationExportRows — public release gate", () => {
 				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline,
 				decl2_cse_opinion_deadline
 			) VALUES
-				(${YEAR_RELEASED + 1},  CURRENT_DATE - 1, '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
-				(${YEAR_TODAY + 1},     CURRENT_DATE,     '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
-				(${YEAR_FUTURE + 1},    CURRENT_DATE + 1, '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
+				(${YEAR_RELEASED + 1},  (now() AT TIME ZONE 'Europe/Paris')::date - 1, '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
+				(${YEAR_TODAY + 1},     (now() AT TIME ZONE 'Europe/Paris')::date,     '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
+				(${YEAR_FUTURE + 1},    (now() AT TIME ZONE 'Europe/Paris')::date + 1, '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01'),
 				(${YEAR_NULL_DATE + 1}, NULL,             '2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01','2000-01-01')
 		`;
 

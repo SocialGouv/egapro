@@ -54,7 +54,7 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline,
 				decl2_cse_opinion_deadline
 			) VALUES (
-				${CAMPAIGN_YEAR}, CURRENT_DATE - 1,
+				${CAMPAIGN_YEAR}, (now() AT TIME ZONE 'Europe/Paris')::date - 1,
 				'2000-01-01', '2000-01-01', '2000-01-01',
 				'2000-01-01', '2000-01-01', '2000-01-01',
 				'2000-01-01'

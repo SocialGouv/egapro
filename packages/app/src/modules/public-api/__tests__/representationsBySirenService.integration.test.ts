@@ -30,6 +30,7 @@ const YEAR_RELEASED_TODAY = 2113;
 const YEAR_FUTURE = 2114;
 const YEAR_NULL_DATE = 2115;
 const YEAR_NO_CAMPAIGN = 2116;
+const YEAR_JOIN_OFFSET_GUARD = 2130;
 const REFERENCE_YEARS = [
 	YEAR_OLDEST,
 	YEAR_MIDDLE,
@@ -40,11 +41,16 @@ const REFERENCE_YEARS = [
 	YEAR_NO_CAMPAIGN,
 ];
 const CAMPAIGN_YEARS = REFERENCE_YEARS.map((year) => year + 1);
+const JOIN_OFFSET_GUARD_CAMPAIGN_YEARS = [
+	YEAR_JOIN_OFFSET_GUARD,
+	YEAR_JOIN_OFFSET_GUARD + 1,
+];
 
 // Dates computed by Postgres so that today does not depend on the machine time zone.
-const YESTERDAY = sqlExpr`CURRENT_DATE - 1`;
-const TODAY = sqlExpr`CURRENT_DATE`;
-const TOMORROW = sqlExpr`CURRENT_DATE + 1`;
+const PARIS_TODAY = sqlExpr`(now() AT TIME ZONE 'Europe/Paris')::date`;
+const YESTERDAY = sqlExpr`${PARIS_TODAY} - 1`;
+const TODAY = sqlExpr`${PARIS_TODAY}`;
+const TOMORROW = sqlExpr`${PARIS_TODAY} + 1`;
 
 function campaignRow(
 	year: number,
@@ -100,7 +106,7 @@ function declarationRow({
 async function cleanup(sql: ReturnType<typeof postgres>) {
 	await sql`DELETE FROM app_representation_declaration WHERE siren IN ${sql(SIRENS)}`;
 	await sql`DELETE FROM app_company WHERE siren IN ${sql(SIRENS)}`;
-	await sql`DELETE FROM app_campaign_deadline WHERE year IN ${sql(CAMPAIGN_YEARS)}`;
+	await sql`DELETE FROM app_campaign_deadline WHERE year IN ${sql([...CAMPAIGN_YEARS, ...JOIN_OFFSET_GUARD_CAMPAIGN_YEARS])}`;
 }
 
 describe("public representation services (real Postgres)", () => {
@@ -469,11 +475,23 @@ describe("public representation services (real Postgres)", () => {
 
 	it("reads the campaign of the reference year + 1, not the campaign of the reference year", async () => {
 		await db
-			.insert(representationDeclarations)
-			.values([declarationRow({ siren: SIREN_DIFFUSIBLE, year: YEAR_FUTURE })]);
+			.insert(campaignDeadlines)
+			.values([
+				campaignRow(YEAR_JOIN_OFFSET_GUARD, YESTERDAY),
+				campaignRow(YEAR_JOIN_OFFSET_GUARD + 1, TOMORROW),
+			]);
+		await db.insert(representationDeclarations).values([
+			declarationRow({
+				siren: SIREN_DIFFUSIBLE,
+				year: YEAR_JOIN_OFFSET_GUARD,
+			}),
+		]);
 
 		expect(
-			await getPublicRepresentationBySirenYear(SIREN_DIFFUSIBLE, YEAR_FUTURE),
+			await getPublicRepresentationBySirenYear(
+				SIREN_DIFFUSIBLE,
+				YEAR_JOIN_OFFSET_GUARD,
+			),
 		).toBeNull();
 	});
 });

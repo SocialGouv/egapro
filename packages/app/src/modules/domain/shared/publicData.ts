@@ -13,3 +13,13 @@ export function isYearPubliclyReleased(
 	if (releaseDate === null) return false;
 	return today >= releaseDate;
 }
+
+export function getTodayInParisCivilDateString(): string {
+	return new Date().toLocaleDateString("sv-SE", {
+		timeZone: "Europe/Paris",
+	});
+}
+
+export function getTodayInParisCivilDate(): Date {
+	return new Date(`${getTodayInParisCivilDateString()}T00:00:00Z`);
+}

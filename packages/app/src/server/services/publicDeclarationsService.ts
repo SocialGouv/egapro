@@ -12,6 +12,7 @@ import {
 	type SQL,
 	sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import {
 	NAF_SECTION_DIVISIONS,
@@ -203,6 +204,7 @@ export async function searchPublicDeclarations(
 		// Search results represent companies, not declaration-years. Keep only
 		// the newest publishable declaration for each SIREN; the detail route
 		// exposes the complete multi-year history.
+		const latestCampaign = alias(campaignDeadlines, "c2");
 		baseConditions.push(sql`${declarations.year} = (
 			SELECT MAX(d2.year)
 			FROM app_declaration d2
@@ -210,8 +212,7 @@ export async function searchPublicDeclarations(
 			WHERE d2.siren = ${declarations.siren}
 				AND d2.cancelled_at IS NULL
 				AND d2.status <> 'draft'
-				AND c2.public_data_release_date IS NOT NULL
-				AND c2.public_data_release_date <= CURRENT_DATE
+				AND ${publiclyReleasedCampaignCondition(latestCampaign)}
 		)`);
 	}
 

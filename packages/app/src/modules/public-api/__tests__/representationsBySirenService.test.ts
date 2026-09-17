@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { REPRESENTATION_CAMPAIGN_YEAR_OFFSET } from "~/modules/domain";
+
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	orReturnsUndefined: false,
@@ -166,12 +168,13 @@ function expectPublicationJoin(joins: Join[] | undefined) {
 	expect(join).toBeDefined();
 
 	const condition = join?.[1] as SqlNode;
-	expect(condition.sql).toContain("+ 1");
 	expect(condition.values.slice(0, 2)).toEqual(["cd.year", "rd.year"]);
+	expect(condition.values[2]).toBe(REPRESENTATION_CAMPAIGN_YEAR_OFFSET);
 
-	const release = condition.values[2] as SqlNode;
+	const release = condition.values[3] as SqlNode;
 	expect(release.sql).toContain("IS NOT NULL");
-	expect(release.sql).toContain("CURRENT_DATE");
+	expect(release.sql.toLowerCase()).toContain("at time zone 'europe/paris'");
+	expect(release.sql).toContain("::date");
 	expect(release.values).toEqual([
 		"cd.publicDataReleaseDate",
 		"cd.publicDataReleaseDate",

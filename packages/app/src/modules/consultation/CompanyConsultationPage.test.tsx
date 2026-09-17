@@ -57,7 +57,7 @@ describe("CompanyConsultationPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("offers only the years the filtered services returned", async () => {
+	it("offers the union of the years returned by both services, without duplicates", async () => {
 		mocks.getPublicDeclarationsBySiren.mockResolvedValue([
 			declarationFixture({ year: 2027 }),
 			declarationFixture({ year: 2026 }),

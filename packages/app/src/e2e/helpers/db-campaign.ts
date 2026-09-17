@@ -263,12 +263,11 @@ export async function setPublicDataReleaseDate(
 	}
 }
 
-// The release filter compares to the server-side CURRENT_DATE, which the pinned campaign clock does not move.
 export async function dbDateInDays(offsetDays: number): Promise<string> {
 	const sql = createConnection();
 	try {
 		const rows = await sql<[{ date: string }]>`
-			SELECT (CURRENT_DATE + ${offsetDays}::int)::text AS date
+			SELECT ((now() AT TIME ZONE 'Europe/Paris')::date + ${offsetDays}::int)::text AS date
 		`;
 		return rows[0]?.date ?? "";
 	} finally {

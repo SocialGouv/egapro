@@ -1,7 +1,10 @@
 import { and, desc, isNotNull, lte } from "drizzle-orm";
 import { cache } from "react";
 
-import { getCurrentYear } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getTodayInParisCivilDateString,
+} from "~/modules/domain";
 
 import { db } from ".";
 import { campaignDeadlines } from "./schema";
@@ -23,14 +26,7 @@ export const GLOBAL_SETTINGS_ID = 1;
  * which honours the override. Do not "fix" it to read globalThis directly.
  */
 export const getActiveCampaignYear = cache(async (): Promise<number> => {
-	// `.date` columns are stored as "YYYY-MM-DD" in Europe/Paris civil time, so
-	// we compare them against the Paris calendar date. We force the timezone
-	// explicitly because production containers run in UTC — relying on the
-	// system locale would flip the result across midnight for ~2h each night
-	// (Paris in summer is UTC+2). `sv-SE` renders dates as ISO "YYYY-MM-DD".
-	const today = new Date().toLocaleDateString("sv-SE", {
-		timeZone: "Europe/Paris",
-	});
+	const today = getTodayInParisCivilDateString();
 
 	const rows = await db
 		.select({ year: campaignDeadlines.year })
