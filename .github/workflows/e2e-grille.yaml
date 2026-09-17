@@ -1,9 +1,12 @@
-# Nightly acceptance run: rolls the 185-coordinate grid from docs/cahier-de-tests.md.
+# Nightly acceptance run: rolls the 185-coordinate grid from docs/cahier-de-tests.md,
+# whole and in one job, to produce the grille-recette.md report.
 #
-# Sharding note — if duration becomes a bottleneck the lever is --shard=i/N in a
-# job matrix (each runner on its own :3000 + docker stack), with the blob reporter
-# and `merge-reports` to reassemble a single HTML/JSON output. Explicit decision
-# not to implement this as long as the run fits within the nightly window.
+# It is NOT the gate: the same grid also runs on every pull request to
+# alpha, sharded three ways inside .github/workflows/e2e.yaml. This workflow keeps
+# running unsharded on purpose — its deliverable is the recette report, which the
+# JSON reporter of playwright.grille.config.ts writes at a single known path and
+# scripts/report-grille.ts reads. Sharding would mean merging blob reports back
+# into that path for no gain: the nightly window is not the constraint here.
 
 name: 🧪 Recette grille (nightly)
 

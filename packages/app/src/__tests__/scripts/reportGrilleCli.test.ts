@@ -230,9 +230,7 @@ describe("main — CLI entrypoint", () => {
 		await runMain(["--results", results, "--out", out]);
 
 		const output = readFileSync(out, "utf-8");
-		expect(output).toContain(
-			"**0 passés / 0 échoués / 185 non joués** sur 185",
-		);
+		expect(output).toContain("**0 passé / 0 échoué / 185 non joués** sur 185");
 		expect(output).toContain("Fichier de résultats illisible ou invalide");
 	});
 
@@ -243,9 +241,7 @@ describe("main — CLI entrypoint", () => {
 		await runMain(["--results", missingResults, "--out", out]);
 
 		const output = readFileSync(out, "utf-8");
-		expect(output).toContain(
-			"**0 passés / 0 échoués / 185 non joués** sur 185",
-		);
+		expect(output).toContain("**0 passé / 0 échoué / 185 non joués** sur 185");
 		expect(output).toContain(
 			`Fichier de résultats introuvable (${missingResults})`,
 		);

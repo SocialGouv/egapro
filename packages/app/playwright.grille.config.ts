@@ -2,11 +2,15 @@ import { defineConfig, devices } from "@playwright/test";
 import baseConfig from "./playwright.config";
 import { AUTH_FILE } from "./src/e2e/helpers/login";
 
-// The 185-coordinate grid (#4022) is a nightly asset, not a PR gate: it lives on
-// its own config so `pnpm test:e2e` never collects it (belt: the base config
-// also carries a `testIgnore` on **/grille/**). It reuses the base ProConnect
-// login (the `setup` project + shared storageState) and dev server, and diverges
-// only on collection, budget and reporting.
+// The 185-coordinate grid (#4022) lives on its own config so `pnpm test:e2e`
+// never collects it (belt: the base config also carries a `testIgnore` on
+// **/grille/**). Two workflows drive that config: the PR gate shards it three
+// ways alongside the main suite (.github/workflows/e2e.yaml), and the nightly
+// recette runs it whole to produce grille-recette.md
+// (.github/workflows/e2e-grille.yaml). The separation is collection, not
+// audience — it reuses the base ProConnect login (the `setup` project + shared
+// storageState) and dev server, and diverges only on collection, budget and
+// reporting.
 export default defineConfig({
 	...baseConfig,
 	testDir: "./src/e2e/grille",
@@ -29,7 +33,8 @@ export default defineConfig({
 	],
 	// Structural, not tuning: the grid drives one shared test company (single SIREN,
 	// one ProConnect storageState, a callback bound to :3000), so coordinates must
-	// run one at a time.
+	// run one at a time *on a given machine*. Parallelism comes from --shard, where
+	// each runner brings its own database, dev server and :3000.
 	workers: 1,
 	projects: [
 		{
