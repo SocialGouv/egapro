@@ -218,6 +218,19 @@ describe("Playwright collection stays shardable", () => {
 		expect(logout).toBeGreaterThan(chromium);
 	});
 
+	it("retries a failed `chromium` test before `logout`, not after it", () => {
+		// `retries: 2` in CI re-dispatches failed tests. The default
+		// `retryStrategy: "immediate"` puts them back at the head of the queue;
+		// `"isolated"` appends them to the tail, where they would run once
+		// `logout` has already released the shared user's declaration locks.
+		const config = readFileSync(
+			join(APP_ROOT, "playwright.config.ts"),
+			"utf-8",
+		);
+
+		expect(config).not.toMatch(/retryStrategy:\s*["']isolated["']/);
+	});
+
 	it("keeps one worker as the only serialisation left on the grid", () => {
 		// With the file-level serial group gone, `workers: 1` in the grid's OWN
 		// config is what keeps the 185 coordinates off each other's shared SIREN —

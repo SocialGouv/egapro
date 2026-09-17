@@ -52,6 +52,9 @@ export default defineConfig({
 		// structural: both projects now sit in the SAME dependency phase, and what
 		// still serialises them is `workers: 1` above draining the declaration-ordered
 		// queue one group at a time. Raising `workers` would let them interleave.
+		// CI retries keep that order: under the default `retryStrategy: "immediate"`
+		// a failed `chromium` test is re-queued at the HEAD of the queue, before
+		// `logout`. `"isolated"` appends retries to the tail — behind `logout`.
 		{
 			name: "logout",
 			testMatch: /logout\.e2e\.ts$/,
