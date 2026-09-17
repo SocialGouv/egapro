@@ -21,13 +21,28 @@ export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	payload: NotificationPayloadMap[T];
 	scheduledFor?: Date;
 	attachments?: PublisherAttachment[];
+	// Dedup key: pg-boss rejects a second send under the same (UUID) job id instead of queuing a twin.
+	jobId?: string;
 };
 
 export type PublishResult =
 	| { status: "enqueued"; id: string }
+	| { status: "duplicate"; id: string }
 	| { status: "error"; error: string };
 
 export type EnqueueResult = PublishResult | { status: "queue_unavailable" };
+
+const UNIQUE_VIOLATION = "23505";
+
+// SQLSTATE, not the message — the driver's message text is localised by the server's `lc_messages`.
+function isDuplicateJobId(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		(error as { code?: unknown }).code === UNIQUE_VIOLATION
+	);
+}
 
 const RETRY_AFTER_FAILURE_MS = 30_000;
 const DEFAULT_RETRY_LIMIT = 5;
@@ -97,6 +112,7 @@ function readPositiveInt(name: string, fallback: number): number {
  *
  * Graceful degradation:
  * - URL missing or queue unreachable → `{ status: "queue_unavailable" }` (no throw)
+ * - `jobId` already queued → `{ status: "duplicate", id }` (no throw)
  * - `boss.send` throws → `{ status: "error", error }` (no throw)
  *
  * Audit logging is the caller's responsibility: branch on the returned
@@ -144,12 +160,25 @@ export async function enqueueNotification<T extends NotificationType>(
 				DEFAULT_RETRY_DELAY_SECONDS,
 			),
 			startAfter: startAfterSeconds,
+			...(input.jobId ? { id: input.jobId } : {}),
 		});
+		// A null resolution with an explicit id means that job is already there.
+		if (jobId === null && input.jobId) {
+			return { status: "duplicate", id: input.jobId };
+		}
 		return { status: "enqueued", id: jobId ?? "" };
 	} catch (error) {
+		if (input.jobId && isDuplicateJobId(error)) {
+			return { status: "duplicate", id: input.jobId };
+		}
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return { status: "error", error: message };
 	}
+}
+
+// Reuses `getPublisher`'s cache/backoff, so this costs nothing beyond what `enqueueNotification` already pays.
+export async function isPublisherAvailable(): Promise<boolean> {
+	return (await getPublisher()) !== null;
 }
 
 /**

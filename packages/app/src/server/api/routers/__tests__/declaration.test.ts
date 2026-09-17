@@ -27,17 +27,17 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
-const { mockEnqueueReceipt } = vi.hoisted(() => ({
-	mockEnqueueReceipt: vi.fn().mockResolvedValue(undefined),
-}));
+const { mockRecordReceiptIntent, mockDeliverRecordedReceipt } = vi.hoisted(
+	() => ({
+		mockRecordReceiptIntent: vi.fn().mockResolvedValue("outbox-1"),
+		mockDeliverRecordedReceipt: vi.fn().mockResolvedValue(undefined),
+	}),
+);
 
-// submitDeclaration and submitJointEvaluation enqueue their confirmation
-// receipt themselves, after their transaction commits — mock the dynamic
-// import so it can be asserted without touching the real queue. Most tests
-// below don't pass a session email, so the guarded call never fires and this
-// mock stays untouched (issue #4300).
-vi.mock("~/modules/mail/server", () => ({
-	enqueueReceipt: mockEnqueueReceipt,
+// The submit mutations record their receipt intent in-transaction — mock it out to keep the real queue and PDF renderer out of these tests.
+vi.mock("~/modules/mail/receiptIntent", () => ({
+	recordReceiptIntent: mockRecordReceiptIntent,
+	deliverRecordedReceipt: mockDeliverRecordedReceipt,
 }));
 
 const { mockGetCampaignDeadlines } = vi.hoisted(() => ({
@@ -399,7 +399,8 @@ function createSimpleSelectDb(
 describe("declarationRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
-		mockEnqueueReceipt.mockResolvedValue(undefined);
+		mockRecordReceiptIntent.mockResolvedValue("outbox-1");
+		mockDeliverRecordedReceipt.mockResolvedValue(undefined);
 	});
 
 	afterEach(() => {
@@ -1363,15 +1364,18 @@ describe("declarationRouter", () => {
 				const result = await caller.submitJointEvaluation();
 
 				expect(result).toEqual({ success: true });
-				expect(mockEnqueueReceipt).toHaveBeenCalledTimes(1);
-				expect(mockEnqueueReceipt).toHaveBeenCalledWith({
-					kind: "jointEvaluation",
-					to: "user@example.com",
-					siren: "339787277",
-					year: expect.any(Number),
-					userId: "user-1",
-					isResend: false,
-				});
+				expect(mockRecordReceiptIntent).toHaveBeenCalledTimes(1);
+				expect(mockRecordReceiptIntent).toHaveBeenCalledWith(
+					expect.anything(),
+					{
+						kind: "jointEvaluation",
+						to: "user@example.com",
+						siren: "339787277",
+						year: expect.any(Number),
+						userId: "user-1",
+					},
+				);
+				expect(mockDeliverRecordedReceipt).toHaveBeenCalledWith("outbox-1");
 			});
 
 			it("does not enqueue any receipt when the session has no email", async () => {
@@ -1386,7 +1390,8 @@ describe("declarationRouter", () => {
 				const result = await caller.submitJointEvaluation();
 
 				expect(result).toEqual({ success: true });
-				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+				expect(mockRecordReceiptIntent).not.toHaveBeenCalled();
+				expect(mockDeliverRecordedReceipt).toHaveBeenCalledWith(null);
 			});
 
 			it("does not enqueue a receipt when the declaration is missing", async () => {
@@ -1403,7 +1408,8 @@ describe("declarationRouter", () => {
 				);
 
 				await expect(caller.submitJointEvaluation()).rejects.toThrow();
-				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+				expect(mockRecordReceiptIntent).not.toHaveBeenCalled();
+				expect(mockDeliverRecordedReceipt).not.toHaveBeenCalled();
 			});
 		});
 	});
