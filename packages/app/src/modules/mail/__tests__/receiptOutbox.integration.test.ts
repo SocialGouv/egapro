@@ -5,6 +5,7 @@ import { db } from "~/server/db";
 import { deliverRecordedReceipt, recordReceiptIntent } from "../receiptIntent";
 import {
 	deliverReceiptIntent,
+	RECEIPT_OUTBOX_MAX_ATTEMPTS,
 	RECEIPT_OUTBOX_RETRY_AFTER_MS,
 	replayPendingReceipts,
 } from "../receiptOutbox";
@@ -152,6 +153,29 @@ describe("receipt outbox (#4542)", () => {
 
 		expect(second).toEqual({ claimed: 0, sent: 0, failed: 0 });
 		expect(await queuedJobCount(id)).toBe(1);
+	});
+
+	it("parks a stale sending row after its last interrupted attempt", async () => {
+		const id = await db.transaction((tx) => recordReceiptIntent(tx, INTENT));
+		await sql`
+			UPDATE app_receipt_outbox
+			SET status = 'sending',
+				attempts = ${RECEIPT_OUTBOX_MAX_ATTEMPTS},
+				updated_at = NOW() - INTERVAL '1 day'
+			WHERE id = ${id}
+		`;
+
+		const result = await replayPendingReceipts({ now: laterBy(STALE) });
+
+		expect(result).toEqual({ claimed: 1, sent: 0, failed: 1 });
+		const [row] = await rows();
+		expect(row).toMatchObject({
+			status: "failed",
+			attempts: RECEIPT_OUTBOX_MAX_ATTEMPTS,
+			last_error:
+				"Maximum delivery attempts reached after interrupted delivery",
+		});
+		expect(await queuedJobCount(id)).toBe(0);
 	});
 
 	// The row id doubles as the pg-boss job id, so even a row wrongly reclaimed

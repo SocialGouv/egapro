@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, gte, lt, or, sql } from "drizzle-orm";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { logAction } from "~/server/audit/log";
 import { db } from "~/server/db";
@@ -13,6 +13,9 @@ export const RECEIPT_OUTBOX_RETRY_AFTER_MS = 5 * 60_000;
 
 // Caps one retry pass so a backlog cannot exhaust the pod.
 export const RECEIPT_OUTBOX_REPLAY_LIMIT = 20;
+
+const INTERRUPTED_DELIVERY_EXHAUSTED_ERROR =
+	"Maximum delivery attempts reached after interrupted delivery";
 
 type OutboxRow = typeof receiptOutbox.$inferSelect;
 
@@ -28,6 +31,7 @@ async function claim(id: string, staleBefore: Date): Promise<OutboxRow | null> {
 		.where(
 			and(
 				eq(receiptOutbox.id, id),
+				lt(receiptOutbox.attempts, RECEIPT_OUTBOX_MAX_ATTEMPTS),
 				or(
 					eq(receiptOutbox.status, "pending"),
 					and(
@@ -40,6 +44,27 @@ async function claim(id: string, staleBefore: Date): Promise<OutboxRow | null> {
 		.returning();
 
 	return row ?? null;
+}
+
+async function failExhaustedReceipts(
+	staleBefore: Date,
+	updatedAt: Date,
+): Promise<{ id: string }[]> {
+	return db
+		.update(receiptOutbox)
+		.set({
+			status: "failed",
+			lastError: INTERRUPTED_DELIVERY_EXHAUSTED_ERROR,
+			updatedAt,
+		})
+		.where(
+			and(
+				eq(receiptOutbox.status, "sending"),
+				gte(receiptOutbox.attempts, RECEIPT_OUTBOX_MAX_ATTEMPTS),
+				lt(receiptOutbox.updatedAt, staleBefore),
+			),
+		)
+		.returning({ id: receiptOutbox.id });
 }
 
 async function settle(row: OutboxRow, error: string | null, sent: boolean) {
@@ -93,23 +118,51 @@ export async function replayPendingReceipts(
 ): Promise<ReplayResult> {
 	const now = options.now ?? new Date();
 	const limit = options.limit ?? RECEIPT_OUTBOX_REPLAY_LIMIT;
+	const retryBefore = new Date(now.getTime() - RECEIPT_OUTBOX_RETRY_AFTER_MS);
+	const staleBefore = new Date(now.getTime() - staleAfterMs());
+	const exhaustedRows = await failExhaustedReceipts(staleBefore, now);
+	const result: ReplayResult = {
+		claimed: exhaustedRows.length,
+		sent: 0,
+		failed: exhaustedRows.length,
+	};
+
+	for (const { id } of exhaustedRows) {
+		const errorMessage = reportReceiptFailure(
+			new Error(INTERRUPTED_DELIVERY_EXHAUSTED_ERROR),
+			{ stage: "replay", outboxId: id },
+		);
+		void logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+			status: "failure",
+			resourceType: "receipt_outbox",
+			resourceId: id,
+			errorMessage,
+			metadata: { stage: "replay" },
+		});
+	}
 
 	const candidates = await db
 		.select({ id: receiptOutbox.id })
 		.from(receiptOutbox)
 		.where(
 			and(
-				inArray(receiptOutbox.status, ["pending", "sending"]),
-				lt(
-					receiptOutbox.updatedAt,
-					new Date(now.getTime() - RECEIPT_OUTBOX_RETRY_AFTER_MS),
+				lt(receiptOutbox.attempts, RECEIPT_OUTBOX_MAX_ATTEMPTS),
+				or(
+					and(
+						eq(receiptOutbox.status, "pending"),
+						lt(receiptOutbox.updatedAt, retryBefore),
+					),
+					and(
+						eq(receiptOutbox.status, "sending"),
+						lt(receiptOutbox.updatedAt, staleBefore),
+					),
 				),
 			),
 		)
 		.orderBy(asc(receiptOutbox.createdAt))
 		.limit(limit);
 
-	const result: ReplayResult = { claimed: 0, sent: 0, failed: 0 };
 	for (const { id } of candidates) {
 		let outcome: "sent" | "failed" | "skipped";
 		try {

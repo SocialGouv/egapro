@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
 	reportReceiptFailure: vi.fn().mockReturnValue("boom"),
 	logAction: vi.fn(),
 	claimed: [] as unknown[][],
+	exhausted: [] as unknown[],
 	candidates: [] as unknown[],
 	settleCalls: [] as Record<string, unknown>[],
 	settleError: null as Error | null,
@@ -29,7 +30,10 @@ vi.mock("~/server/db", () => ({
 			set: (patch: Record<string, unknown>) => ({
 				where: () => {
 					const isClaim = patch.status === "sending";
-					if (!isClaim) {
+					const isExhaustion =
+						patch.lastError ===
+						"Maximum delivery attempts reached after interrupted delivery";
+					if (!isClaim && !isExhaustion) {
 						mocks.settleCalls.push(patch);
 						if (mocks.settleError) return Promise.reject(mocks.settleError);
 					}
@@ -37,7 +41,13 @@ vi.mock("~/server/db", () => ({
 						returning: () => Promise<unknown[]>;
 					};
 					statement.returning = () =>
-						Promise.resolve(isClaim ? (mocks.claimed.shift() ?? []) : []);
+						Promise.resolve(
+							isClaim
+								? (mocks.claimed.shift() ?? [])
+								: isExhaustion
+									? mocks.exhausted
+									: [],
+						);
 					return statement;
 				},
 			}),
@@ -83,6 +93,7 @@ describe("deliverReceiptIntent", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.claimed = [];
+		mocks.exhausted = [];
 		mocks.candidates = [];
 		mocks.settleCalls = [];
 		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
@@ -172,6 +183,7 @@ describe("replayPendingReceipts", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mocks.claimed = [];
+		mocks.exhausted = [];
 		mocks.candidates = [];
 		mocks.settleCalls = [];
 		mocks.settleError = null;
@@ -184,6 +196,28 @@ describe("replayPendingReceipts", () => {
 
 		expect(result).toEqual({ claimed: 0, sent: 0, failed: 0 });
 		expect(mocks.logAction).not.toHaveBeenCalled();
+	});
+
+	it("parks and reports stale rows that exhausted their attempts", async () => {
+		mocks.exhausted = [{ id: "row-max" }];
+
+		const result = await replayPendingReceipts();
+
+		expect(result).toEqual({ claimed: 1, sent: 0, failed: 1 });
+		expect(mocks.sendReceipt).not.toHaveBeenCalled();
+		expect(mocks.reportReceiptFailure).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: "Maximum delivery attempts reached after interrupted delivery",
+			}),
+			{ stage: "replay", outboxId: "row-max" },
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.NOTIFICATION_OUTBOX_DELIVERY_FAILED,
+				status: "failure",
+				resourceId: "row-max",
+			}),
+		);
 	});
 
 	it("delivers every stale row and counts the outcomes", async () => {
