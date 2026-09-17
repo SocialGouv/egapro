@@ -1,4 +1,4 @@
-import { computeWorkforceTotal, percentageOf } from "~/modules/domain";
+import { computePercentage, computeWorkforceTotal } from "~/modules/domain";
 import stepStyles from "../Step6Review.module.scss";
 
 type Props = {
@@ -15,11 +15,11 @@ export function QuartileColumn({ title, quartiles }: Props) {
 			<div className={stepStyles.subSection}>
 				{quartiles.map((q) => {
 					const total = computeWorkforceTotal(q.womenCount, q.menCount) || 1;
-					const pct = percentageOf(q.womenCount, total).toFixed(1);
+					const pct = computePercentage(q.womenCount, total);
 					return (
 						<div className={stepStyles.flex1} key={`f-${q.label}`}>
 							<p className="fr-text--sm fr-mb-0">{q.label}</p>
-							<strong className="fr-text--sm">{pct} %</strong>
+							<strong className="fr-text--sm">{pct}</strong>
 						</div>
 					);
 				})}
@@ -29,11 +29,11 @@ export function QuartileColumn({ title, quartiles }: Props) {
 			<div className={stepStyles.subSection}>
 				{quartiles.map((q) => {
 					const total = computeWorkforceTotal(q.womenCount, q.menCount) || 1;
-					const pct = percentageOf(q.menCount, total).toFixed(1);
+					const pct = computePercentage(q.menCount, total);
 					return (
 						<div className={stepStyles.flex1} key={`m-${q.label}`}>
 							<p className="fr-text--sm fr-mb-0">{q.label}</p>
-							<strong className="fr-text--sm">{pct} %</strong>
+							<strong className="fr-text--sm">{pct}</strong>
 						</div>
 					);
 				})}

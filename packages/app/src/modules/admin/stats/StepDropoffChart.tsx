@@ -10,10 +10,11 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
-
-import { formatCount, formatPercent } from "./formatters";
+import {
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	formatCount,
+	formatFixedPercentage,
+} from "~/modules/domain";
 import styles from "./StepDropoffChart.module.scss";
 import type { StepDropoffRow } from "./types";
 
@@ -62,7 +63,7 @@ function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
-					{formatPercent(row.dropoffRate, { withUnit: true })} d'abandon
+					{formatFixedPercentage(row.dropoffRate, { withUnit: true })} d'abandon
 				</li>
 				<li className={styles.tooltipItem}>
 					{formatCount(row.abandoned)} sur {formatCount(row.total)} déclarations{" "}

@@ -1,4 +1,4 @@
-import { formatCount, formatPercent } from "./formatters";
+import { formatCount, formatFixedPercentage } from "~/modules/domain";
 import type { StepDropoffRow } from "./types";
 
 type Props = {
@@ -62,7 +62,7 @@ export function StepDropoffTable({ rows }: Props) {
 										{wizardRows.map((row) => (
 											<tr key={row.key}>
 												<th scope="row">{row.label}</th>
-												<td>{formatPercent(row.dropoffRate)}</td>
+												<td>{formatFixedPercentage(row.dropoffRate)}</td>
 												<td>{formatCount(row.abandoned)}</td>
 												<td>{formatCount(row.total)}</td>
 											</tr>
@@ -83,7 +83,7 @@ export function StepDropoffTable({ rows }: Props) {
 										{postSubmitRows.map((row) => (
 											<tr key={row.key}>
 												<th scope="row">{row.label}</th>
-												<td>{formatPercent(row.dropoffRate)}</td>
+												<td>{formatFixedPercentage(row.dropoffRate)}</td>
 												<td>{formatCount(row.abandoned)}</td>
 												<td>{formatCount(row.total)}</td>
 											</tr>
