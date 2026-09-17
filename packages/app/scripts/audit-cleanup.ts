@@ -210,10 +210,7 @@ type ReceiptOutboxCleanupResult = {
 	forcedFailed: number;
 };
 
-/**
- * Purge of `app_receipt_outbox`. Exported for the same reason as
- * `runAuditCleanup` — the integration test drives it directly.
- */
+// Exported for the same reason as `runAuditCleanup` — the integration test drives it directly.
 export async function runReceiptOutboxCleanup({
 	sql,
 	retentionDays,
@@ -233,6 +230,7 @@ export async function runReceiptOutboxCleanup({
 			RETURNING id
 		`;
 
+		// Backdating updated_at above lets this same DELETE (same updated_at index) purge the row right away.
 		const deleted = await tx`
 			DELETE FROM app_receipt_outbox
 			WHERE status = ANY(${RECEIPT_OUTBOX_SETTLED_STATUSES})
