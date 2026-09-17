@@ -6,6 +6,12 @@ on:
       - alpha
   workflow_dispatch:
 
+# Five shards run the PR's own code (pnpm install, build, tests) with whatever
+# token `checkout` leaves in the git config. `merge` needs to write PR comments
+# and keeps its own broader block; every other job only ever reads.
+permissions:
+  contents: read
+
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
@@ -84,6 +90,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # This job only ever reads its own checkout; no step pushes or pulls.
+          persist-credentials: false
       - uses: pnpm/action-setup@v6
       - name: Set up Node
         uses: actions/setup-node@v7
@@ -258,8 +267,13 @@ jobs:
 
   merge:
     name: "e2e rapport fusionné"
-    # always(): a merged report is most useful precisely when a shard is red.
-    if: always()
+    # A merged report is most useful precisely when a shard is red, hence not a
+    # plain success-only condition — but `always()` would also run this job, and
+    # rewrite the sticky PR comment to a stale "0 passé", on a run that
+    # `cancel-in-progress` superseded before any shard finished. `!cancelled()`
+    # keeps the report on a real failure without that overwrite on a run nobody
+    # is waiting on any more.
+    if: ${{ !cancelled() }}
     needs: shard
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -328,8 +342,12 @@ jobs:
       # A job summary only shows on the run page, never on the pull request, so one
       # comment — edited in place on every run — carries the verdict and the link.
       # A fork's token cannot write to the base repository: skipped there.
+      # Purely informational: a `gh api` hiccup here (rate limit, transient 5xx)
+      # must not fail `merge` and turn the required check red on a run where
+      # every shard passed.
       - name: Comment the recette report on the pull request
         if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

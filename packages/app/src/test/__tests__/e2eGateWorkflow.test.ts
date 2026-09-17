@@ -101,6 +101,15 @@ describe("E2E gate workflow", () => {
 		expect(workflow).not.toContain("--pass-with-no-tests");
 	});
 
+	it("never cancels the surviving shards when one of them turns red", () => {
+		// A cancelled shard is indistinguishable from one that never ran: without
+		// `fail-fast: false`, one red coordinate would take the whole grid's
+		// diagnostic down with it.
+		const shardBody = jobs.find((job) => job.body.includes("--shard="))?.body;
+
+		expect(shardBody).toMatch(/fail-fast:\s*false/);
+	});
+
 	it("fails a shard that collects no test", () => {
 		const shardBody = jobs.find((job) => job.body.includes("--shard="))?.body;
 
@@ -189,6 +198,26 @@ describe("Playwright collection stays shardable", () => {
 	it("keeps one worker as the ordering guarantee between `chromium` and `logout`", () => {
 		const config = readFileSync(
 			join(APP_ROOT, "playwright.config.ts"),
+			"utf-8",
+		);
+
+		expect(config).toMatch(/workers:\s*1/);
+		// `workers: 1` alone only serialises execution; the invariant `logout`
+		// depends on — releasing the shared user's locks after `chromium`, not
+		// before it — also needs `chromium` declared first in the queue.
+		const chromium = config.indexOf('name: "chromium"');
+		const logout = config.indexOf('name: "logout"');
+
+		expect(chromium).toBeGreaterThan(-1);
+		expect(logout).toBeGreaterThan(chromium);
+	});
+
+	it("keeps one worker as the only serialisation left on the grid", () => {
+		// With the file-level serial group gone, `workers: 1` in the grid's OWN
+		// config is what keeps the 185 coordinates off each other's shared SIREN —
+		// the base config's `workers: 1` protects a different collection.
+		const config = readFileSync(
+			join(APP_ROOT, "playwright.grille.config.ts"),
 			"utf-8",
 		);
 
