@@ -106,7 +106,11 @@ describe("deliverReceiptIntent", () => {
 		mocks.candidates = [];
 		mocks.settleCalls = [];
 		mocks.settleWhereConditions = [];
-		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
+		mocks.sendReceipt.mockResolvedValue({
+			sent: true,
+			error: null,
+			countsAsAttempt: true,
+		});
 	});
 
 	it("renders and queues the claimed row, then marks it sent", async () => {
@@ -149,7 +153,8 @@ describe("deliverReceiptIntent", () => {
 		mocks.claimed = [[outboxRow({ attempts: 2 })]];
 		mocks.sendReceipt.mockResolvedValue({
 			sent: false,
-			error: "queue_unavailable",
+			error: "smtp timeout",
+			countsAsAttempt: true,
 		});
 
 		const outcome = await deliverReceiptIntent("row-1");
@@ -157,6 +162,29 @@ describe("deliverReceiptIntent", () => {
 		expect(outcome).toBe("failed");
 		expect(mocks.settleCalls[0]).toMatchObject({
 			status: "pending",
+			lastError: "smtp timeout",
+		});
+		expect(mocks.settleCalls[0]).not.toHaveProperty("sentAt");
+		expect(mocks.settleCalls[0]).not.toHaveProperty("attempts");
+	});
+
+	// A queue outage is not something a retry attempt could have fixed, so the
+	// claim above is given back instead of spent — the row stays owed at its
+	// pre-claim attempt count and is picked up again on the next pass.
+	it("gives back the attempt when the queue was unreachable", async () => {
+		mocks.claimed = [[outboxRow({ attempts: 2 })]];
+		mocks.sendReceipt.mockResolvedValue({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+
+		const outcome = await deliverReceiptIntent("row-1");
+
+		expect(outcome).toBe("deferred");
+		expect(mocks.settleCalls[0]).toMatchObject({
+			status: "pending",
+			attempts: 1,
 			lastError: "queue_unavailable",
 		});
 		expect(mocks.settleCalls[0]).not.toHaveProperty("sentAt");
@@ -164,7 +192,11 @@ describe("deliverReceiptIntent", () => {
 
 	it("parks a row that has exhausted its attempts", async () => {
 		mocks.claimed = [[outboxRow({ attempts: RECEIPT_OUTBOX_MAX_ATTEMPTS })]];
-		mocks.sendReceipt.mockResolvedValue({ sent: false, error: "boom" });
+		mocks.sendReceipt.mockResolvedValue({
+			sent: false,
+			error: "boom",
+			countsAsAttempt: true,
+		});
 
 		await deliverReceiptIntent("row-1");
 
@@ -178,7 +210,11 @@ describe("deliverReceiptIntent", () => {
 	// sent, but the reason it went out degraded stays readable on it.
 	it("keeps the degradation reason on a row that did go out", async () => {
 		mocks.claimed = [[outboxRow()]];
-		mocks.sendReceipt.mockResolvedValue({ sent: true, error: "pdf render KO" });
+		mocks.sendReceipt.mockResolvedValue({
+			sent: true,
+			error: "pdf render KO",
+			countsAsAttempt: true,
+		});
 
 		await deliverReceiptIntent("row-1");
 
@@ -219,7 +255,11 @@ describe("replayPendingReceipts", () => {
 		mocks.settleCalls = [];
 		mocks.settleWhereConditions = [];
 		mocks.settleError = null;
-		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
+		mocks.sendReceipt.mockResolvedValue({
+			sent: true,
+			error: null,
+			countsAsAttempt: true,
+		});
 		mocks.reportReceiptFailure.mockReturnValue("boom");
 	});
 
@@ -259,8 +299,12 @@ describe("replayPendingReceipts", () => {
 			[outboxRow({ id: "row-2" })],
 		];
 		mocks.sendReceipt
-			.mockResolvedValueOnce({ sent: true, error: null })
-			.mockResolvedValueOnce({ sent: false, error: "boom" });
+			.mockResolvedValueOnce({ sent: true, error: null, countsAsAttempt: true })
+			.mockResolvedValueOnce({
+				sent: false,
+				error: "boom",
+				countsAsAttempt: true,
+			});
 
 		const result = await replayPendingReceipts();
 
@@ -295,6 +339,23 @@ describe("replayPendingReceipts", () => {
 
 		expect(result).toEqual({ claimed: 0, sent: 0, failed: 0 });
 		expect(mocks.sendReceipt).not.toHaveBeenCalled();
+		expect(mocks.logAction).not.toHaveBeenCalled();
+	});
+
+	// A row given back for a queue outage made no progress either way — it must
+	// not inflate `claimed`, nor trigger the batch audit row on its own.
+	it("does not count a deferred row as claimed", async () => {
+		mocks.candidates = [{ id: "row-1" }];
+		mocks.claimed = [[outboxRow({ id: "row-1", attempts: 2 })]];
+		mocks.sendReceipt.mockResolvedValue({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+
+		const result = await replayPendingReceipts();
+
+		expect(result).toEqual({ claimed: 0, sent: 0, failed: 0 });
 		expect(mocks.logAction).not.toHaveBeenCalled();
 	});
 

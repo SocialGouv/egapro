@@ -16,7 +16,11 @@ vi.mock("pg-boss", () => ({
 	},
 }));
 
-import { __resetPublisherForTests, enqueueNotification } from "../publisher.js";
+import {
+	__resetPublisherForTests,
+	enqueueNotification,
+	isPublisherAvailable,
+} from "../publisher.js";
 
 const BASE_INPUT = {
 	type: "joint_evaluation_submitted" as const,
@@ -53,6 +57,24 @@ describe("enqueueNotification — graceful degradation", () => {
 		const result = await enqueueNotification(BASE_INPUT);
 		expect(result).toEqual({ status: "queue_unavailable" });
 		expect(mockSend).not.toHaveBeenCalled();
+	});
+
+	it("reports unavailable with no connection string, without calling send", async () => {
+		const available = await isPublisherAvailable();
+		expect(available).toBe(false);
+		expect(mockSend).not.toHaveBeenCalled();
+	});
+
+	it("reports available once the publisher starts, from the same cache enqueueNotification uses", async () => {
+		process.env.NOTIFICATIONS_DATABASE_URL =
+			"postgres://user:pwd@localhost:5432/db";
+		mockStart.mockResolvedValue(undefined);
+		mockCreateQueue.mockResolvedValue(undefined);
+
+		const available = await isPublisherAvailable();
+
+		expect(available).toBe(true);
+		expect(mockStart).toHaveBeenCalledTimes(1);
 	});
 
 	it("returns error when boss.send throws (DB outage mid-call)", async () => {

@@ -188,6 +188,16 @@ export async function enqueueNotification<T extends NotificationType>(
 }
 
 /**
+ * Cheap pre-flight for a caller that wants to skip expensive work (rendering
+ * a PDF, say) when there is nowhere to send it. Shares `getPublisher`'s cache
+ * and backoff, so this costs nothing beyond what `enqueueNotification` would
+ * already have paid.
+ */
+export async function isPublisherAvailable(): Promise<boolean> {
+	return (await getPublisher()) !== null;
+}
+
+/**
  * Reset the cached boss singleton — test-only hook to clear module state
  * between integration scenarios.
  */

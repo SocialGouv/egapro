@@ -69,7 +69,35 @@ async function failExhaustedReceipts(
 		.returning({ id: receiptOutbox.id });
 }
 
-async function settle(row: OutboxRow, error: string | null, sent: boolean) {
+async function settle(
+	row: OutboxRow,
+	error: string | null,
+	sent: boolean,
+	countsAsAttempt: boolean,
+) {
+	// The queue being unreachable is not something a retry attempt could have
+	// fixed, so the claim above is given back rather than spent: the row stays
+	// owed at its pre-claim attempt count instead of marching toward exhaustion
+	// for a condition retrying does nothing about.
+	if (!sent && !countsAsAttempt) {
+		await db
+			.update(receiptOutbox)
+			.set({
+				status: "pending",
+				attempts: row.attempts - 1,
+				lastError: error,
+				updatedAt: new Date(),
+			})
+			.where(
+				and(
+					eq(receiptOutbox.id, row.id),
+					eq(receiptOutbox.status, "sending"),
+					eq(receiptOutbox.attempts, row.attempts),
+				),
+			);
+		return;
+	}
+
 	const exhausted = row.attempts >= RECEIPT_OUTBOX_MAX_ATTEMPTS;
 	await db
 		.update(receiptOutbox)
@@ -92,11 +120,11 @@ async function settle(row: OutboxRow, error: string | null, sent: boolean) {
 export async function deliverReceiptIntent(
 	id: string,
 	now: Date = new Date(),
-): Promise<"sent" | "failed" | "skipped"> {
+): Promise<"sent" | "failed" | "skipped" | "deferred"> {
 	const row = await claim(id, new Date(now.getTime() - staleAfterMs()));
 	if (!row) return "skipped";
 
-	const { sent, error } = await sendReceipt({
+	const { sent, error, countsAsAttempt } = await sendReceipt({
 		kind: row.kind,
 		to: row.recipientEmail,
 		siren: row.siren,
@@ -106,8 +134,9 @@ export async function deliverReceiptIntent(
 		outboxId: row.id,
 	});
 
-	await settle(row, error, sent);
-	return sent ? "sent" : "failed";
+	await settle(row, error, sent, countsAsAttempt);
+	if (sent) return "sent";
+	return countsAsAttempt ? "failed" : "deferred";
 }
 
 // Reclaim only well past the retry window, so the owning request finishes first.
@@ -172,7 +201,7 @@ export async function replayPendingReceipts(
 		.limit(limit);
 
 	for (const { id } of candidates) {
-		let outcome: "sent" | "failed" | "skipped";
+		let outcome: "sent" | "failed" | "skipped" | "deferred";
 		try {
 			outcome = await deliverReceiptIntent(id, now);
 		} catch (error) {
@@ -195,7 +224,7 @@ export async function replayPendingReceipts(
 			result.failed += 1;
 			continue;
 		}
-		if (outcome === "skipped") continue;
+		if (outcome === "skipped" || outcome === "deferred") continue;
 		result.claimed += 1;
 		if (outcome === "sent") result.sent += 1;
 		else result.failed += 1;

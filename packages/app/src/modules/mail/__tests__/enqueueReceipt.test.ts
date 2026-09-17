@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	enqueueNotification: vi.fn(),
+	isPublisherAvailable: vi.fn(),
 	logAction: vi.fn(),
 	captureException: vi.fn(),
 	buildDeclarationAttachments: vi.fn(),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("notifications/publisher", () => ({
 	enqueueNotification: mocks.enqueueNotification,
+	isPublisherAvailable: mocks.isPublisherAvailable,
 }));
 
 vi.mock("@sentry/nextjs", () => ({
@@ -95,6 +97,7 @@ function auditMetadataOf(): Record<string, unknown> {
 describe("enqueueReceipt", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mocks.isPublisherAvailable.mockResolvedValue(true);
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
@@ -623,6 +626,7 @@ describe("enqueueReceipt — variant derivation", () => {
 describe("sendReceipt — outbox path", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mocks.isPublisherAvailable.mockResolvedValue(true);
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
@@ -641,7 +645,7 @@ describe("sendReceipt — outbox path", () => {
 			outboxId: OUTBOX_ID,
 		});
 
-		expect(outcome).toEqual({ sent: true, error: null });
+		expect(outcome).toEqual({ sent: true, error: null, countsAsAttempt: true });
 		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
 			expect.objectContaining({ jobId: OUTBOX_ID }),
 		);
@@ -672,7 +676,7 @@ describe("sendReceipt — outbox path", () => {
 			outboxId: OUTBOX_ID,
 		});
 
-		expect(outcome).toEqual({ sent: true, error: null });
+		expect(outcome).toEqual({ sent: true, error: null, countsAsAttempt: true });
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "success",
@@ -682,7 +686,10 @@ describe("sendReceipt — outbox path", () => {
 		);
 	});
 
-	it("reports the queue error so the row stays owed", async () => {
+	// The queue dropping between the availability check and the actual send is
+	// the same condition as failing that check outright — neither is something
+	// a retry attempt could fix, so the row must not be charged for it.
+	it("reports the queue error so the row stays owed, without charging an attempt", async () => {
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "queue_unavailable",
 		});
@@ -693,7 +700,36 @@ describe("sendReceipt — outbox path", () => {
 			outboxId: OUTBOX_ID,
 		});
 
-		expect(outcome).toEqual({ sent: false, error: "queue_unavailable" });
+		expect(outcome).toEqual({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+	});
+
+	it("skips the PDF render entirely when the queue is unreachable before it starts", async () => {
+		mocks.isPublisherAvailable.mockResolvedValue(false);
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.enqueueNotification).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "queue_unavailable",
+				metadata: expect.objectContaining({ outboxId: OUTBOX_ID }),
+			}),
+		);
 	});
 
 	it("reports a dropped PDF without claiming the receipt failed", async () => {
@@ -705,7 +741,11 @@ describe("sendReceipt — outbox path", () => {
 			outboxId: OUTBOX_ID,
 		});
 
-		expect(outcome).toEqual({ sent: true, error: "render KO" });
+		expect(outcome).toEqual({
+			sent: true,
+			error: "render KO",
+			countsAsAttempt: true,
+		});
 	});
 
 	it("reports a thrown failure and stamps the outbox id on the audit row", async () => {
@@ -717,7 +757,11 @@ describe("sendReceipt — outbox path", () => {
 			outboxId: OUTBOX_ID,
 		});
 
-		expect(outcome).toEqual({ sent: false, error: "boom" });
+		expect(outcome).toEqual({
+			sent: false,
+			error: "boom",
+			countsAsAttempt: true,
+		});
 		expect(auditMetadataOf()).toMatchObject({ outboxId: OUTBOX_ID });
 	});
 });

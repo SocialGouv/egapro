@@ -1,7 +1,10 @@
 import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import { and, eq, isNull } from "drizzle-orm";
-import { enqueueNotification } from "notifications/publisher";
+import {
+	enqueueNotification,
+	isPublisherAvailable,
+} from "notifications/publisher";
 import type {
 	NotificationPayloadMap,
 	NotificationType,
@@ -49,6 +52,10 @@ export type SendReceiptOutcome = {
 	sent: boolean;
 	// Set even on a degraded (but sent) receipt, not only on failure.
 	error: string | null;
+	// False only when the queue itself was unreachable — the outbox path reads
+	// this to give the retry attempt back instead of burning it on a condition
+	// no attempt could have fixed.
+	countsAsAttempt: boolean;
 };
 
 const KIND_TO_TYPE = {
@@ -256,6 +263,26 @@ export async function sendReceipt(
 	const { kind, to, siren, year, userId, isResend, outboxId } = input;
 	const type = KIND_TO_TYPE[kind];
 
+	if (!(await isPublisherAvailable())) {
+		void logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "failure",
+			userId,
+			userEmail: to,
+			siren,
+			errorMessage: "queue_unavailable",
+			metadata: {
+				type,
+				kind,
+				year,
+				isResend,
+				...(outboxId === undefined ? {} : { outboxId }),
+			},
+		});
+
+		return { sent: false, error: "queue_unavailable", countsAsAttempt: false };
+	}
+
 	try {
 		const context = await readReceiptContext(siren, year);
 		const payload = await buildConfirmationPayload(type, siren, year, context);
@@ -277,6 +304,9 @@ export async function sendReceipt(
 		// `duplicate` means the job already reached pg-boss before the process died — it counts as sent.
 		const queued =
 			result.status === "enqueued" || result.status === "duplicate";
+		// Reachable despite the pre-flight check above: the queue can still drop
+		// between that check and this call.
+		const queueUnavailable = result.status === "queue_unavailable";
 
 		// A receipt that never left matters more than one that left without its
 		// PDF, so the queue error wins the single error column when both happen.
@@ -316,7 +346,11 @@ export async function sendReceipt(
 			},
 		});
 
-		return { sent: queued, error: errorMessage };
+		return {
+			sent: queued,
+			error: errorMessage,
+			countsAsAttempt: !queueUnavailable,
+		};
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
@@ -336,7 +370,7 @@ export async function sendReceipt(
 			},
 		});
 
-		return { sent: false, error: message };
+		return { sent: false, error: message, countsAsAttempt: true };
 	}
 }
 
