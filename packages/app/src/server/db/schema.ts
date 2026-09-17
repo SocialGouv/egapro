@@ -699,6 +699,7 @@ export const cseOpinionFiles = createTable(
 			t.type,
 		),
 		index("cse_opinion_file_declaration_idx").on(t.declarationId),
+		index("cse_opinion_file_file_idx").on(t.fileId),
 	],
 );
 

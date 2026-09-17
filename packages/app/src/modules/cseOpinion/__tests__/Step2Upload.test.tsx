@@ -14,6 +14,7 @@ import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
 import type {
 	ContentTypeColumn,
+	FileContentTypeAssociation,
 	StoredFileContentType,
 	UploadedFile,
 } from "../types";
@@ -30,7 +31,10 @@ let deleteMutationOptions: {
 	onError?: () => void;
 } = {};
 let setTypesMutationOptions: {
-	onSuccess?: () => void;
+	onSuccess?: (
+		data: unknown,
+		variables: { associations: FileContentTypeAssociation[] },
+	) => void;
 	onError?: () => void;
 } = {};
 
@@ -67,7 +71,11 @@ vi.mock("~/trpc/react", () => ({
 			setFileContentTypes: {
 				useMutation: (options: typeof setTypesMutationOptions = {}) => {
 					setTypesMutationOptions = options;
-					return { mutate: setTypesMutateMock, isPending: false, error: null };
+					return {
+						mutate: setTypesMutateMock,
+						isPending: false,
+						error: null,
+					};
 				},
 			},
 		},
@@ -106,6 +114,16 @@ const DUAL_COLUMNS = computeContentTypeColumns({
 	secondDeclGapConsulted: true,
 	firstDeclGapHigh: true,
 	secondDeclGapHigh: true,
+});
+
+// Two distinct content types on a single declaration — used to race two
+// independent setFileContentTypes calls against each other (#4102).
+const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: false,
+	firstDeclGapConsulted: true,
+	secondDeclGapConsulted: null,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: false,
 });
 
 function getFileInput() {
@@ -559,12 +577,24 @@ describe("Step2Upload", () => {
 				name: "Exactitude — 1re déclaration — avis-1.pdf",
 			}),
 		);
+		// The first write is still in flight (#4102): the second toggle is
+		// queued rather than dispatched as a concurrent request.
 		await user.click(
 			screen.getByRole("checkbox", {
 				name: "Justification — 1re déclaration — avis-1.pdf",
 			}),
 		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
 
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
 		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
 			associations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
@@ -610,7 +640,7 @@ describe("Step2Upload", () => {
 		).toBeInTheDocument();
 
 		act(() => {
-			setTypesMutationOptions.onSuccess?.();
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
 		});
 
 		expect(
@@ -618,6 +648,298 @@ describe("Step2Upload", () => {
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
 			),
 		).not.toBeInTheDocument();
+	});
+
+	it("rolls back an optimistic check and blocks submission when persisting the association fails (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Optimistic check: the box ticks locally before the server confirms.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// The server rejects the association: the confirmed truth is still
+		// "nothing associated", so the box must roll back to it, not stay
+		// checked on a value the server never actually committed.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		// Reproduces the issue exactly: canSubmit must be re-derived from the
+		// rolled-back state, not from the optimistic value the failed save
+		// never persisted — so submit blocks on the missing content type.
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks submission while an association save is still in flight, independently of click speed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			// The matrix is otherwise complete: only the in-flight save should
+			// block submission here, not a missing association.
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+
+		const submit = screen.getByRole("button", { name: "Soumettre" });
+		expect(submit).toBeDisabled();
+		expect(
+			screen.getByText("Enregistrement des associations en cours…"),
+		).toBeInTheDocument();
+
+		await user.click(submit);
+
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Valider" }),
+		).not.toBeInTheDocument();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(submit).toBeEnabled();
+	});
+
+	it("reconciles the display from the write that actually resolves last, not a ref an earlier failure can clobber (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Toggle 1 (accuracy): optimistic check, request #1 fires.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		// Toggle 2 (gap), before request #1 has resolved: optimistic check,
+		// but request #1 is still in flight so this only queues the combined
+		// payload rather than firing a second, concurrent request (#4102).
+		await user.click(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// Request #1 fails: the combined toggle is still queued to be sent, so
+		// the display must not roll back to what request #1 alone covered.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).toBeChecked();
+
+		// The queued write is dispatched as request #2, carrying both
+		// associations — this is what the ticket describes as "the second
+		// mutation contains both associations".
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+			],
+		});
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).toBeChecked();
+
+		// canSubmit is re-derived from the reconciled map: both types are now
+		// covered, so submit must open the finalize modal.
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("checkbox", {
+				name: "Je certifie que les avis transmis sont conformes.",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("keeps a deleted file's association out of the confirmed map even when another file's save is still optimistic and unconfirmed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+			initialAssociations: [
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-2" },
+			],
+		});
+
+		// file-1's association save is still in flight and unconfirmed.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Supprimer avis-2.pdf" }),
+		);
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-2" });
+		});
+
+		// file-1's save then fails: the rollback must not have adopted the
+		// still-optimistic file-1 association as confirmed truth just because
+		// it was part of the displayed map when file-2 was deleted.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		).not.toBeChecked();
+	});
+
+	it("does not let a save that resolves after its file was deleted resurrect that association as confirmed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		// The in-flight save for file-1 resolves after the deletion (#4102).
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		await user.click(screen.getByRole("button", { name: "Soumettre" }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("strips a deleted file from the queued write instead of letting it get the whole batch rejected server-side (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		// Queued while the first save (file-1) is still in flight.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 2e déclaration — avis-2.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(
+			screen.getAllByRole("button", { name: /Supprimer/ })[0] as HTMLElement,
+		);
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-2" },
+			],
+		});
 	});
 
 	it("hydrates the matrix from the stored associations on return (S10)", () => {

@@ -58,6 +58,8 @@ Le `fileId` est renvoyé par l'endpoint `/files`.
 
 Cette section décrit comment lire les champs déduits du parcours de la déclaration (`Parcours`, exposé par `/export/declarations`). Elle ne concerne **pas** `/export/representations`, dont le payload est indépendant.
 
+Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Historique_statuts[]`, `Parcours_apres_declaration_1` / `_2`, les quatre `Type` / `type`, `Source_categories_emplois` — sont publiées dans [`SUIT-API-valeurs.md`](SUIT-API-valeurs.md), une page générée depuis le code et tenue à jour par la CI.
+
 ### Cycle de vie : les 8 états et leurs transitions
 
 Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa soumission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
@@ -113,11 +115,15 @@ Deux lectures de la taille de l'entreprise coexistent :
 - `Parcours.Regime_obligations` — le **paquet d'obligations** applicable : `voluntary` (< 50, volontariat), `mandatory` (assujettissement standard) ou `mandatory_with_compliance` (assujettissement avec parcours de conformité).
 - `Parcours.Tranche_effectif` — le **bucket de segmentation** : `<50`, `50-99`, `100-149`, `150-249`, `250+`.
 
-Quand l'effectif GIP est inconnu, `Tranche_effectif` vaut `null` (jamais replié sur `<50`), tandis que `Regime_obligations` relève alors du volontariat.
+Quand l'effectif GIP est inconnu (entreprise absente du fichier GIP de l'année), `Tranche_effectif` vaut `<50`, aligné sur `Regime_obligations` qui relève alors du volontariat — `Tranche_effectif === "<50"` si et seulement si `Regime_obligations === "voluntary"`. `Parcours.Effectif`, lui, reste `null` : c'est le seul champ qui continue de signaler l'absence de ligne GIP pour l'année.
 
 ### Masquage de `CSE_existant`
 
 `CSE_existant` vaut `null` — et non `false` — pour les entreprises sous le seuil CSE (100 salariés) : l'information n'est simplement **pas exportée** pour ces entreprises, elle n'est pas absente au sens d'un CSE inexistant. Ne pas interpréter `null` comme « pas de CSE ».
+
+### Relier un fichier d'avis CSE à `Avis_CSE`
+
+Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` : la liste des `{ Numero_declaration, Type }` que ce fichier couvre, dans le même vocabulaire que `Avis_CSE` (`Numero_declaration` ∈ {1, 2}, `Type` ∈ {`accuracy`, `gap`}). `Fichiers_CSE` et `Avis_CSE` sont tous deux regroupés par déclaration : c'est la clé de jointure entre un PDF et l'avis qu'il porte — comparer `Fichiers_CSE[].Contenus[]` à `Avis_CSE[]` sur `(Numero_declaration, Type)` à l'intérieur d'une même entrée de `Declarations[]`. Un fichier peut couvrir plusieurs contenus (ex. un même PDF pour l'exactitude et la justification d'une même déclaration). `Contenus` vaut `[]` pour un fichier déposé mais pas encore associé — possible tant que l'étape 2 de l'avis CSE n'est pas finalisée, celle-ci refusant tout fichier orphelin. Côté `/files`, l'équivalent anglais est `contents: [{ declarationNumber, type }]`, présent uniquement sur les items `cse_opinion` (absent sur `joint_evaluation`, qui n'a pas de notion de contenu) ; `/files` ne résout que la déclaration active pour `(siren, année)` — les fichiers d'une déclaration annulée n'y apparaissent plus dès qu'une redéclaration est active.
 
 ### Flags d'obligation figés vs statut évolutif
 

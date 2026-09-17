@@ -39,6 +39,7 @@ describe("withAuditedRoute", () => {
 			status: "success",
 			ipAddress: "203.0.113.99",
 			userAgent: "RouteAgent",
+			origin: { source: "route", route: "/api/test", operation: "GET" },
 		});
 	});
 
@@ -53,6 +54,29 @@ describe("withAuditedRoute", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			status: "failure",
 			errorMessage: "HTTP 401",
+			origin: { source: "route", operation: "GET" },
+		});
+	});
+
+	// The stdout `route` field must never carry the query string.
+	it("strips the query string from the origin route", async () => {
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
+			async () => new Response("nope", { status: 403 }),
+		);
+
+		const request = new Request(
+			"http://localhost/api/declaration-pdf?year=2026",
+			{ method: "GET" },
+		);
+		await handler(request);
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			origin: {
+				source: "route",
+				route: "/api/declaration-pdf",
+				operation: "GET",
+			},
 		});
 	});
 
@@ -69,6 +93,20 @@ describe("withAuditedRoute", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			status: "failure",
 			errorMessage: "boom",
+		});
+	});
+
+	it("logs 'Unknown error' and re-throws when the handler rejects with a non-Error", async () => {
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
+			() => Promise.reject("not-an-error"),
+		);
+
+		await expect(handler(buildRequest())).rejects.toBe("not-an-error");
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorMessage: "Unknown error",
+			origin: { source: "route", route: "/api/test", operation: "GET" },
 		});
 	});
 

@@ -1,0 +1,1 @@
+CREATE INDEX "cse_opinion_file_file_idx" ON "app_cse_opinion_file" USING btree ("file_id");

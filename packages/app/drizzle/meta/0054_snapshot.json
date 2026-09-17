@@ -1,5 +1,5 @@
 {
-	"id": "cd777782-755d-47ba-bcc5-003475ecda72",
+	"id": "5f2fc8ef-cf65-45bd-a21b-dc09abc5fe77",
 	"prevId": "744c5c3b-6233-4fce-98f2-b0e96072cf6c",
 	"version": "7",
 	"dialect": "postgresql",
@@ -335,6 +335,21 @@
 					"columns": [
 						{
 							"expression": "declaration_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"cse_opinion_file_file_idx": {
+					"name": "cse_opinion_file_file_idx",
+					"columns": [
+						{
+							"expression": "file_id",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -2298,118 +2313,6 @@
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.app_receipt_outbox": {
-			"name": "app_receipt_outbox",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"kind": {
-					"name": "kind",
-					"type": "receipt_kind",
-					"typeSchema": "public",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"year": {
-					"name": "year",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"recipient_email": {
-					"name": "recipient_email",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"user_id": {
-					"name": "user_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"status": {
-					"name": "status",
-					"type": "receipt_outbox_status",
-					"typeSchema": "public",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "'pending'"
-				},
-				"attempts": {
-					"name": "attempts",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true,
-					"default": 0
-				},
-				"last_error": {
-					"name": "last_error",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"updated_at": {
-					"name": "updated_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"sent_at": {
-					"name": "sent_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				}
-			},
-			"indexes": {
-				"receipt_outbox_unsettled_idx": {
-					"name": "receipt_outbox_unsettled_idx",
-					"columns": [
-						{
-							"expression": "status",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "updated_at",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"where": "\"status\" IN ('pending', 'sending')",
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
 		"public.app_referent": {
 			"name": "app_referent",
 			"schema": "",
@@ -3136,22 +3039,6 @@
 			"name": "file_type",
 			"schema": "public",
 			"values": ["cse_opinion", "joint_evaluation"]
-		},
-		"public.receipt_kind": {
-			"name": "receipt_kind",
-			"schema": "public",
-			"values": [
-				"declaration",
-				"secondDeclaration",
-				"cseOpinion",
-				"jointEvaluation",
-				"representation"
-			]
-		},
-		"public.receipt_outbox_status": {
-			"name": "receipt_outbox_status",
-			"schema": "public",
-			"values": ["pending", "sending", "sent", "failed"]
 		},
 		"public.referent_type": {
 			"name": "referent_type",

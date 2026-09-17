@@ -33,9 +33,29 @@ export type SuitParcours = {
 	Prochaines_etapes_possibles: SuitNextStep[];
 };
 
+/** One quartile table of indicator F, keyed by its GIP-MDS export label. */
+export type SuitQuartileTable = Record<string, number | string | null>;
+
+/**
+ * One indicator G category row of the export. The per-measure fields are read by
+ * name (`*_ecart`, `Effectif_*`), so the index signature carries them; the few the
+ * specs narrow on are named explicitly.
+ */
+export type SuitIndicatorGCategory = {
+	Effectif_F: number | null;
+	Effectif_H: number | null;
+	Effectif_horaire_F: number | null;
+	Effectif_horaire_H: number | null;
+	Rem_annuelle_base_H: string | null;
+} & Record<string, unknown>;
+
 export type SuitDeclaration = {
 	SIREN: string;
 	Parcours: SuitParcours;
+	Indicateurs: {
+		F: { annuel: SuitQuartileTable; horaire: SuitQuartileTable };
+		G: SuitIndicatorGCategory[];
+	} & Record<string, unknown>;
 	Date_modification: string | null;
 	Date_annulation: string | null;
 	Historique_statuts: Array<{ Statut: string; Libelle_statut: unknown }>;

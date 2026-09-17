@@ -7,7 +7,7 @@ import {
 	MY_SPACE,
 	remunerationStepHref,
 } from "~/modules/routes";
-import { TEST_USER_PHONE } from "./constants";
+import { TEST_SIREN, TEST_USER_PHONE } from "./constants";
 import {
 	pinCampaignYear,
 	setServerCampaignYear,
@@ -16,6 +16,7 @@ import {
 	deleteCseOpinions,
 	deleteJointEvaluationFiles,
 	ensureCurrentYearDeclaration,
+	getCurrentDbYear,
 	insertCseOpinion,
 	insertJointEvaluationFile,
 	resetDeclarationToDraft,
@@ -30,9 +31,12 @@ import {
 	resetCampaignYear as resetCampaignYearData,
 	setCampaignDeadlines,
 } from "./helpers/db-campaign";
+import { insertHistoryEvents } from "./helpers/declaration-history";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
+// The `/mon-espace` surfaces, gathered here by #4114: the démarche panel, the
+// Ressources cell, the closure badges of the previous-years table, and the history page.
 // Per-variant panel rendering is covered by my-space/__tests__/DeclarationProcessPanel.test.tsx.
 
 const PANEL_ID = "declaration-process-panel";
@@ -620,5 +624,43 @@ test.describe("Mon espace — closure badges of the previous-years table", () =>
 				.locator(".fr-badge");
 			await expect(currentYearBadge).toHaveText("À compléter");
 		});
+	});
+});
+
+// List rendering + "Voir plus" pagination are covered by declarationHistory/__tests__/HistoryListSection.test.tsx.
+
+test.describe("Declaration history page", () => {
+	test.setTimeout(60_000);
+
+	let year: number;
+
+	test.beforeAll(async () => {
+		year = await getCurrentDbYear();
+		await ensureCurrentYearDeclaration();
+		await insertHistoryEvents(3, year);
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("displays history entries (S2)", async ({ page }) => {
+		await page.goto(`/mon-espace/historique/${TEST_SIREN}/${year}`);
+
+		await expect(
+			page.getByRole("heading", {
+				level: 1,
+				name: "Historique des modifications",
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByText(`Démarche des indicateurs de rémunération ${year}`),
+		).toBeVisible();
+
+		// #4256: same removal as the company banner, on the other `/mon-espace/**` surface.
+		await expect(page.locator(".fr-breadcrumb")).toHaveCount(0);
+
+		const items = page.locator("main ul > li");
+		await expect(items).toHaveCount(3);
 	});
 });

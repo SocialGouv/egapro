@@ -128,8 +128,8 @@ const timingMiddleware = t.middleware(async ({ next }) => {
  * in `~/server/audit/trpcMiddleware` and is wrapped here so it integrates
  * with the tRPC middleware pipeline (correct return type).
  */
-const auditMiddleware = t.middleware(({ ctx, path, getRawInput, next }) =>
-	runAuditMiddleware({ ctx, path, getRawInput, next }),
+const auditMiddleware = t.middleware(({ ctx, type, path, getRawInput, next }) =>
+	runAuditMiddleware({ ctx, type, path, getRawInput, next }),
 );
 
 /**

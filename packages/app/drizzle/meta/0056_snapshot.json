@@ -1,6 +1,6 @@
 {
-	"id": "cd777782-755d-47ba-bcc5-003475ecda72",
-	"prevId": "5f2fc8ef-cf65-45bd-a21b-dc09abc5fe77",
+	"id": "d7cbdd35-5138-4d5d-a9ca-aa299346d7d1",
+	"prevId": "cd777782-755d-47ba-bcc5-003475ecda72",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -2413,6 +2413,28 @@
 					],
 					"isUnique": false,
 					"where": "\"status\" IN ('pending', 'sending')",
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"receipt_outbox_settled_idx": {
+					"name": "receipt_outbox_settled_idx",
+					"columns": [
+						{
+							"expression": "status",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "updated_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"where": "\"status\" IN ('sent', 'failed')",
 					"concurrently": false,
 					"method": "btree",
 					"with": {}

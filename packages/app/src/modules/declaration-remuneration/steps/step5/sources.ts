@@ -12,7 +12,7 @@ export const CATEGORY_SOURCES = [
 
 // Dropped from the select in #3361, but declarations saved before then still
 // carry these in app_job.source (free varchar, never migrated).
-const LEGACY_SOURCE_LABELS: Record<string, string> = {
+export const LEGACY_SOURCE_LABELS: Record<string, string> = {
 	"convention-collective": "Convention collective",
 	"classification-interne": "Classification interne",
 	autre: "Autre",

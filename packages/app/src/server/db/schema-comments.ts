@@ -154,6 +154,10 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		file_name: "SUIT: Fichiers_CSE.Nom_fichier",
 		uploaded_at: "SUIT: Fichiers_CSE.Date_upload",
 	},
+	cse_opinion_file: {
+		declaration_number: "SUIT: Fichiers_CSE.Contenus.Numero_declaration",
+		type: "SUIT: Fichiers_CSE.Contenus.Type",
+	},
 	job_category: {
 		name: "SUIT: Indicateurs.G.Nom_categorie",
 	},
