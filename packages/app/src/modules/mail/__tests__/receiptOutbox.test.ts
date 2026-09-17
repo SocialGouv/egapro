@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 	exhausted: [] as unknown[],
 	candidates: [] as unknown[],
 	settleCalls: [] as Record<string, unknown>[],
-	settleWhereConditions: [] as unknown[],
+	settleWhereConditions: [] as SQL[],
 	settleError: null as Error | null,
 }));
 
@@ -29,7 +29,7 @@ vi.mock("~/server/db", () => ({
 		// never consumes the rows queued for the next claim.
 		update: () => ({
 			set: (patch: Record<string, unknown>) => ({
-				where: (condition: unknown) => {
+				where: (condition: import("drizzle-orm").SQL) => {
 					const isClaim = patch.status === "sending";
 					const isExhaustion =
 						patch.lastError ===
@@ -66,7 +66,9 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 
+import type { SQL } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { receiptOutbox } from "~/server/db/schema";
 import {
@@ -74,6 +76,9 @@ import {
 	RECEIPT_OUTBOX_MAX_ATTEMPTS,
 	replayPendingReceipts,
 } from "../receiptOutbox";
+
+// Same casing as the app's db instance, so the generated column names match.
+const dialect = new PgDialect({ casing: "snake_case" });
 
 function outboxRow(overrides: Record<string, unknown> = {}) {
 	return {
@@ -192,12 +197,15 @@ describe("deliverReceiptIntent", () => {
 
 		await deliverReceiptIntent(row.id);
 
-		expect(mocks.settleWhereConditions[0]).toEqual(
+		const expected = dialect.sqlToQuery(
 			and(
 				eq(receiptOutbox.id, row.id),
 				eq(receiptOutbox.status, "sending"),
 				eq(receiptOutbox.attempts, row.attempts),
-			),
+			) as SQL,
+		);
+		expect(dialect.sqlToQuery(mocks.settleWhereConditions[0] as SQL)).toEqual(
+			expected,
 		);
 	});
 });
