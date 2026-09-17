@@ -929,8 +929,6 @@ export const exports = createTable(
 	(t) => [unique("export_year_version_idx").on(t.year, t.version)],
 );
 
-// ── Receipt outbox ──────────────────────────────────────────────────
-
 export const receiptKindEnum = pgEnum("receipt_kind", [
 	"declaration",
 	"secondDeclaration",
@@ -978,9 +976,7 @@ export const receiptOutbox = createTable(
 		index("receipt_outbox_unsettled_idx")
 			.on(t.status, t.updatedAt)
 			.where(sql`"status" IN ('pending', 'sending')`),
-		// The purge cron's query: terminal rows past retention, oldest first.
-		// `updated_at` is the settlement timestamp for both outcomes — `sent_at`
-		// stays null on a `failed` row, so it cannot anchor this predicate.
+		// The purge cron's query — `sent_at` stays null on `failed`, so `updated_at` anchors both outcomes.
 		index("receipt_outbox_settled_idx")
 			.on(t.status, t.updatedAt)
 			.where(sql`"status" IN ('sent', 'failed')`),

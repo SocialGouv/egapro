@@ -366,9 +366,7 @@ describe("runReceiptOutboxCleanup (integration)", () => {
 		expect(await countOutboxRows()).toBe(1);
 	});
 
-	// Age is judged on `created_at`: a row a permanently-down queue keeps
-	// retrying has `updated_at` bumped to "now" on every pass, so only
-	// `created_at` tells apart "genuinely old" from "just retried recently".
+	// created_at, not updated_at, decides age — a retried row's updated_at resets every pass.
 	it("forces an old pending row to failed and purges it in the same run", async () => {
 		const now = new Date("2026-01-01T00:00:00Z");
 		const id = await insertOutboxRow({

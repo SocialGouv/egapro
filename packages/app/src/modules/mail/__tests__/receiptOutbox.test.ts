@@ -23,10 +23,7 @@ vi.mock("~/server/audit/log", () => ({
 
 vi.mock("~/server/db", () => ({
 	db: {
-		// `update` serves two different statements: the claim, which moves a row
-		// to `sending` and reads it back, and the settle, which writes the final
-		// status. They are told apart by the status being written, so a settle
-		// never consumes the rows queued for the next claim.
+		// The claim and the settle share `update` — told apart by the status being written.
 		update: () => ({
 			set: (patch: Record<string, unknown>) => ({
 				where: (condition: import("drizzle-orm").SQL) => {
@@ -137,8 +134,7 @@ describe("deliverReceiptIntent", () => {
 		});
 	});
 
-	// The claim is the lock: a row already taken by the retry pass (or already
-	// sent) must not be rendered a second time.
+	// The claim is the lock — an already-taken or already-sent row must not be rendered twice.
 	it("does nothing when the row is no longer claimable", async () => {
 		mocks.claimed = [[]];
 
@@ -168,9 +164,7 @@ describe("deliverReceiptIntent", () => {
 		expect(mocks.settleCalls[0]).not.toHaveProperty("attempts");
 	});
 
-	// A queue outage is not something a retry attempt could have fixed, so the
-	// claim above is given back instead of spent — the row stays owed at its
-	// pre-claim attempt count and is picked up again on the next pass.
+	// A queue outage isn't fixable by retrying, so the claim is given back instead of spent.
 	it("gives back the attempt when the queue was unreachable", async () => {
 		mocks.claimed = [[outboxRow({ attempts: 2 })]];
 		mocks.sendReceipt.mockResolvedValue({
@@ -206,8 +200,7 @@ describe("deliverReceiptIntent", () => {
 		});
 	});
 
-	// A receipt that left without its PDF is still a receipt: the row settles as
-	// sent, but the reason it went out degraded stays readable on it.
+	// A receipt sent without its PDF still settles as sent, degradation noted on the row.
 	it("keeps the degradation reason on a row that did go out", async () => {
 		mocks.claimed = [[outboxRow()]];
 		mocks.sendReceipt.mockResolvedValue({
@@ -224,9 +217,7 @@ describe("deliverReceiptIntent", () => {
 		});
 	});
 
-	// A pass that outlived its own claim must not overwrite whatever reclaimed
-	// the row in the meantime — the WHERE clause re-checks status and attempts,
-	// the same lock discipline as the claim itself.
+	// A pass that outlived its claim must not overwrite whatever reclaimed the row meanwhile.
 	it("settles only the row this pass still owns", async () => {
 		const row = outboxRow({ attempts: 3 });
 		mocks.claimed = [[row]];
@@ -329,8 +320,7 @@ describe("replayPendingReceipts", () => {
 		);
 	});
 
-	// A row another pass grabbed first is not this pass's work, and must not be
-	// counted — nor audited as if a receipt had moved.
+	// A row another pass grabbed first is not this pass's work — must not be counted or audited.
 	it("ignores a candidate that a concurrent pass already claimed", async () => {
 		mocks.candidates = [{ id: "row-1" }];
 		mocks.claimed = [[]];
@@ -342,8 +332,7 @@ describe("replayPendingReceipts", () => {
 		expect(mocks.logAction).not.toHaveBeenCalled();
 	});
 
-	// A row given back for a queue outage made no progress either way — it must
-	// not inflate `claimed`, nor trigger the batch audit row on its own.
+	// A deferred row made no progress — must not inflate `claimed` or trigger a batch audit.
 	it("does not count a deferred row as claimed", async () => {
 		mocks.candidates = [{ id: "row-1" }];
 		mocks.claimed = [[outboxRow({ id: "row-1", attempts: 2 })]];
@@ -359,10 +348,7 @@ describe("replayPendingReceipts", () => {
 		expect(mocks.logAction).not.toHaveBeenCalled();
 	});
 
-	// A DB error on one row's claim/settle (connection drop, pool timeout) must
-	// not abort the rest of the batch — it is counted like any other failure,
-	// reported to Sentry/console, and given its own audit row, then the pass
-	// moves on to the next candidate.
+	// A DB error on one row must not abort the rest of the batch.
 	it("keeps replaying the rest of the batch after one row's claim/settle throws", async () => {
 		mocks.candidates = [{ id: "row-1" }, { id: "row-2" }];
 		mocks.claimed = [

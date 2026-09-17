@@ -38,10 +38,7 @@ export async function deliverRecordedReceipt(id: string | null): Promise<void> {
 		const { deliverReceiptIntent } = await import("./receiptOutbox");
 		await deliverReceiptIntent(id);
 	} catch (error) {
-		// Both imports stay dynamic, not hoisted: a static import would drag
-		// `enqueueReceipt`'s Sentry/notifications chain and `~/server/audit/log`'s
-		// db client into every caller of this file, including ones that never
-		// reach a failing delivery.
+		// Dynamic, not hoisted: a static import would drag this chain into every caller, even non-failing ones.
 		const [{ reportReceiptFailure }, { logAction }] = await Promise.all([
 			import("./enqueueReceipt"),
 			import("~/server/audit/log"),

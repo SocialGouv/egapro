@@ -52,9 +52,7 @@ export type SendReceiptOutcome = {
 	sent: boolean;
 	// Set even on a degraded (but sent) receipt, not only on failure.
 	error: string | null;
-	// False only when the queue itself was unreachable — the outbox path reads
-	// this to give the retry attempt back instead of burning it on a condition
-	// no attempt could have fixed.
+	// False only when the queue itself was unreachable — a condition no attempt could have fixed.
 	countsAsAttempt: boolean;
 };
 
@@ -339,8 +337,7 @@ export async function sendReceipt(
 		// `duplicate` means the job already reached pg-boss before the process died — it counts as sent.
 		const queued =
 			result.status === "enqueued" || result.status === "duplicate";
-		// Reachable despite the pre-flight check above: the queue can still drop
-		// between that check and this call.
+		// The queue can still drop between the pre-flight check above and this call.
 		const queueUnavailable = result.status === "queue_unavailable";
 
 		// A receipt that never left matters more than one that left without its

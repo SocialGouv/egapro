@@ -239,9 +239,7 @@ describe("enqueueNotification — job id deduplication", () => {
 		expect(options).not.toHaveProperty("id");
 	});
 
-	// A replay of a receipt whose first attempt did reach the queue must not
-	// produce a second e-mail (issue #4542): the duplicate key is the proof the
-	// job is already there, not a failure to report.
+	// The duplicate key is proof the job is already there, not a failure to report.
 	it("reports a duplicate when the id is already taken", async () => {
 		mockSend.mockRejectedValue(
 			Object.assign(new Error("duplicate key value"), { code: "23505" }),

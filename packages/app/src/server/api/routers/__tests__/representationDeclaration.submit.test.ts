@@ -281,10 +281,7 @@ describe("representationDeclarationRouter.submit", () => {
 			);
 		});
 
-		// Regression guard (#4542): the acknowledgement owed by a committed
-		// submission has to commit with it. Recorded after the transaction
-		// closed, it is lost the moment the process dies — which is exactly how
-		// the receipts went missing on the test environment.
+		// The acknowledgement owed by a committed submission has to commit with it.
 		it("records the intent while the storing transaction is still open", async () => {
 			const mock = createMockDb();
 			let openWhenRecorded: boolean | null = null;

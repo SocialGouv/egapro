@@ -7,9 +7,7 @@ export const POST = withAuditedRoute(
 	receiptRetryHandler,
 );
 
-// The Edge middleware already rejects a missing/wrong secret before this
-// route is reached — this call is defense in depth for the case a future
-// matcher edit drops `/api/receipts/retry` from coverage without notice.
+// Defense in depth — the Edge middleware already rejects a missing/wrong secret before this route is reached.
 async function receiptRetryHandler(request: Request): Promise<Response> {
 	const gatewayError = assertGatewaySource(request);
 	if (gatewayError) return gatewayError;

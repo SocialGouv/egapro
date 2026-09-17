@@ -10,12 +10,7 @@ import {
 	replayPendingReceipts,
 } from "../receiptOutbox";
 
-// Issue #4542 — acknowledgements went missing because the receipt was queued
-// after the commit, by the very process that was about to be OOM-killed, with
-// nothing anywhere recording that one was owed. These run against the real
-// Postgres driver and the real pg-boss queue: a mocked db cannot show that the
-// intent rolls back with its transaction, nor that a replayed row produces one
-// job and not two.
+// Real Postgres + pg-boss: a mocked db can't show the intent rolling back with its transaction, or a replay producing one job, not two.
 describe("receipt outbox (#4542)", () => {
 	let sql!: ReturnType<typeof postgres>;
 
@@ -77,8 +72,7 @@ describe("receipt outbox (#4542)", () => {
 		return row?.count ?? 0;
 	}
 
-	// Audit writes are fire-and-forget (`void logAction`), so the row lands a
-	// tick or two after the call returns.
+	// `void logAction` is fire-and-forget, so the row lands a tick or two after the call returns.
 	async function waitForAudit(outboxId: string, expected: number) {
 		for (let attempt = 0; attempt < 50; attempt++) {
 			if ((await enqueueAuditCount(outboxId)) >= expected) return;
@@ -178,9 +172,7 @@ describe("receipt outbox (#4542)", () => {
 		expect(await queuedJobCount(id)).toBe(0);
 	});
 
-	// The row id doubles as the pg-boss job id, so even a row wrongly reclaimed
-	// — a process that died between `send` and the status write — cannot put a
-	// second copy of the same acknowledgement in the queue.
+	// The row id doubles as the pg-boss job id, so even a wrongly reclaimed row can't send a second copy.
 	it("sends no second copy when a row whose job already left is reclaimed", async () => {
 		const id = await db.transaction((tx) => recordReceiptIntent(tx, INTENT));
 		await deliverReceiptIntent(id);
@@ -212,10 +204,7 @@ describe("receipt outbox (#4542)", () => {
 		}
 	});
 
-	// A row given back after a queue outage keeps its old submission date but
-	// gets a fresh `updatedAt`. A batch capped below the backlog size must not
-	// keep re-selecting that same row while starving one it has never tried —
-	// this is what would otherwise happen during a sustained outage.
+	// A deferred row keeps its old submission date but gets a fresh `updatedAt` — must not starve untried rows.
 	it("serves the row least recently touched first, not the oldest submission first", async () => {
 		const recentlyTouchedId = await db.transaction((tx) =>
 			recordReceiptIntent(tx, INTENT),

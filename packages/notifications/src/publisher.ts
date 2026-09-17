@@ -21,13 +21,7 @@ export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	payload: NotificationPayloadMap[T];
 	scheduledFor?: Date;
 	attachments?: PublisherAttachment[];
-	/**
-	 * Caller-chosen job id, used as the deduplication key. pg-boss stores it as
-	 * the primary key of its `job` table, so a second send under the same id is
-	 * rejected by the unique constraint rather than creating a twin job — which
-	 * is what lets a retry path replay a send it is not sure ever reached the
-	 * queue. Must be a UUID: the column is typed `uuid`.
-	 */
+	// Dedup key: pg-boss rejects a second send under the same (UUID) job id instead of queuing a twin.
 	jobId?: string;
 };
 
@@ -40,11 +34,7 @@ export type EnqueueResult = PublishResult | { status: "queue_unavailable" };
 
 const UNIQUE_VIOLATION = "23505";
 
-/**
- * True when the driver rejected the insert because the job id is already taken
- * — the job reached the queue on an earlier attempt. Read off the SQLSTATE
- * rather than the message, which is localised by the server's `lc_messages`.
- */
+// SQLSTATE, not the message — the driver's message text is localised by the server's `lc_messages`.
 function isDuplicateJobId(error: unknown): boolean {
 	return (
 		typeof error === "object" &&
@@ -172,8 +162,7 @@ export async function enqueueNotification<T extends NotificationType>(
 			startAfter: startAfterSeconds,
 			...(input.jobId ? { id: input.jobId } : {}),
 		});
-		// `send` resolves to null when the queue policy refuses the job — with an
-		// explicit id that means the very same job is already there.
+		// A null resolution with an explicit id means that job is already there.
 		if (jobId === null && input.jobId) {
 			return { status: "duplicate", id: input.jobId };
 		}
@@ -187,12 +176,7 @@ export async function enqueueNotification<T extends NotificationType>(
 	}
 }
 
-/**
- * Cheap pre-flight for a caller that wants to skip expensive work (rendering
- * a PDF, say) when there is nowhere to send it. Shares `getPublisher`'s cache
- * and backoff, so this costs nothing beyond what `enqueueNotification` would
- * already have paid.
- */
+// Reuses `getPublisher`'s cache/backoff, so this costs nothing beyond what `enqueueNotification` already pays.
 export async function isPublisherAvailable(): Promise<boolean> {
 	return (await getPublisher()) !== null;
 }

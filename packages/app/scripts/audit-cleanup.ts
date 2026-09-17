@@ -19,12 +19,7 @@ import postgres from "postgres";
  * through `logFailure`, which inserts outside any transaction so the record
  * survives the rollback.
  *
- * Also purges `app_receipt_outbox`: it carries `recipient_email`, `user_id`
- * and `siren` on every row with no retention of its own, unlike
- * `audit.action_log` and the declarations it was written to acknowledge.
- * `pending`/`sending` rows are live work for `replayPendingReceipts` while
- * within retention; past it, they are force-failed (a queue that never comes
- * back must not retain PII forever) and purged in the same run.
+ * Also purges `app_receipt_outbox` — it carries PII with no retention of its own.
  *
  * Env vars:
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
@@ -56,10 +51,7 @@ const RECEIPT_OUTBOX_CLEANUP_ACTION = "system.receipt_outbox_cleanup";
 const RECEIPT_OUTBOX_SETTLED_STATUSES = ["sent", "failed"];
 const RECEIPT_OUTBOX_UNSETTLED_STATUSES = ["pending", "sending"];
 
-// Same action key `receiptOutbox.ts` uses when a row is force-failed after
-// exhausting its retry attempts — this is the retention-driven equivalent, so
-// `count(*) WHERE action = ...` keeps counting every way a receipt ends up
-// permanently undelivered under one metric, distinguished by `metadata.stage`.
+// Same action key as receiptOutbox.ts's exhausted-attempts failure, so both causes count under one metric.
 const RECEIPT_OUTBOX_DELIVERY_FAILED_ACTION =
 	"notification.outbox_delivery_failed";
 const RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR =
@@ -221,16 +213,6 @@ type ReceiptOutboxCleanupResult = {
 /**
  * Purge of `app_receipt_outbox`. Exported for the same reason as
  * `runAuditCleanup` — the integration test drives it directly.
- *
- * A row stuck `pending`/`sending` past retention (a permanently unreachable
- * notifications queue, say) never reaches a terminal status on its own, so it
- * would otherwise keep `recipient_email`/`user_id`/`siren` forever. Age is
- * judged on `created_at`, not `updated_at` — a row retried every cron tick
- * has its `updated_at` bumped to "now" on every pass regardless of how long
- * it has actually existed. The force-fail backdates `updated_at` to
- * `created_at` (already known to be past `threshold`) so the settled-rows
- * purge below — built on the existing `(status, updated_at)` index — picks
- * the row up in the same run, with no new index required.
  */
 export async function runReceiptOutboxCleanup({
 	sql,
@@ -240,6 +222,7 @@ export async function runReceiptOutboxCleanup({
 	const threshold = subtractDays(now, retentionDays);
 
 	const { forcedFailedIds, deletedCount } = await sql.begin(async (tx) => {
+		// created_at, not updated_at: a stuck row's updated_at is bumped on every retry regardless of true age.
 		const forcedFailed = await tx<{ id: string }[]>`
 			UPDATE app_receipt_outbox
 			SET status = 'failed',
@@ -357,8 +340,7 @@ if (isMain) {
 		failed = true;
 	}
 
-	// Independent of the audit-log cleanup above: one purge failing must not
-	// skip the other, and each gets its own self-audit row.
+	// Independent of the audit-log cleanup above — one purge failing must not skip the other.
 	try {
 		const result = await runReceiptOutboxCleanup({
 			sql,

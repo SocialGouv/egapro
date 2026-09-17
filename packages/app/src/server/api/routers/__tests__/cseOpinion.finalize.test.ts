@@ -17,10 +17,7 @@ vi.mock("~/server/services/s3", () => ({
 	deleteFile: vi.fn(),
 }));
 
-// finalize() records the "démarche terminée" receipt inside its own
-// transaction and delivers it once the commit is through (issues #4300, #4542)
-// — mock the intent module so the calls can be asserted without touching the
-// real queue.
+// finalize() records the intent inside its own transaction and delivers it after commit — mock it out.
 vi.mock("~/modules/mail/receiptIntent", () => ({
 	recordReceiptIntent: mocks.recordReceiptIntent,
 	deliverRecordedReceipt: mocks.deliverRecordedReceipt,
@@ -313,8 +310,7 @@ describe("cseOpinionRouter.finalize", () => {
 			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith("outbox-1");
 		});
 
-		// Regression guard (#4542): recording the intent outside the transaction
-		// is the very window that lost acknowledgements when the process died.
+		// Recording the intent outside the transaction is the window that lost acknowledgements.
 		it("records the intent on the transaction handle, not on the ambient db", async () => {
 			const ctx = createMockDbForFinalize();
 			const caller = await createCaller(ctx.db);

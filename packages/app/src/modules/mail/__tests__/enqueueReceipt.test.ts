@@ -620,9 +620,7 @@ describe("enqueueReceipt — variant derivation", () => {
 	});
 });
 
-// Issue #4542 — the outbox path calls `sendReceipt` directly, because unlike
-// the "Renvoyer" button it needs the outcome back to settle its row, and it
-// needs the send deduplicated against a replay of the same row.
+// Unlike "Renvoyer", the outbox path calls `sendReceipt` directly for the outcome and dedup against a replay.
 describe("sendReceipt — outbox path", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -662,8 +660,7 @@ describe("sendReceipt — outbox path", () => {
 		expect(auditMetadataOf()).not.toHaveProperty("outboxId");
 	});
 
-	// A replay whose first attempt did reach the queue must read as delivered,
-	// not as a failure to retry — otherwise the row would be sent forever.
+	// A replay whose first attempt reached the queue must read as delivered, not as a retry failure.
 	it("treats an already-queued job as sent", async () => {
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "duplicate",
@@ -686,9 +683,7 @@ describe("sendReceipt — outbox path", () => {
 		);
 	});
 
-	// The queue dropping between the availability check and the actual send is
-	// the same condition as failing that check outright — neither is something
-	// a retry attempt could fix, so the row must not be charged for it.
+	// The queue dropping mid-send is the same unfixable-by-retry condition as failing the check outright.
 	it("reports the queue error so the row stays owed, without charging an attempt", async () => {
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "queue_unavailable",

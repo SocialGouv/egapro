@@ -310,9 +310,7 @@ describe("gateway middleware (/api/v1/*)", () => {
 
 describe("gateway middleware (/api/receipts/retry)", () => {
 	it("returns 403 when X-Gateway-Forwarded is absent, unlike the /api/v1/* fallback", async () => {
-		// The only caller is the receipt-outbox-retry CronJob, so — unlike
-		// /api/v1/*, which also serves browser sessions — there is no
-		// legitimate absent-header case to fall through to.
+		// Unlike /api/v1/*, no browser session ever calls this route, so an absent header has no fallback.
 		const res = await middleware(makeRequest(API_RECEIPTS_RETRY));
 		expect(res.status).toBe(403);
 	});

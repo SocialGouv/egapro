@@ -34,11 +34,7 @@ const { mockRecordReceiptIntent, mockDeliverRecordedReceipt } = vi.hoisted(
 	}),
 );
 
-// submitDeclaration and submitJointEvaluation record the receipt they owe
-// inside their own transaction, then hand it to the delivery path once the
-// commit is through (issues #4300, #4542). Mocking the intent module keeps the
-// real queue and the real PDF renderer out of these tests. Most tests below
-// don't pass a session email, so no intent is recorded at all.
+// The submit mutations record their receipt intent in-transaction — mock it out to keep the real queue and PDF renderer out of these tests.
 vi.mock("~/modules/mail/receiptIntent", () => ({
 	recordReceiptIntent: mockRecordReceiptIntent,
 	deliverRecordedReceipt: mockDeliverRecordedReceipt,

@@ -40,12 +40,9 @@ import {
  *    when it is **present** — absence is forwarded to the route handler
  *    which falls back to NextAuth session auth.
  *
- * 4. `/api/receipts/retry` — same shared secret as `/api/v1/*`, but unlike
- *    the mixed SUIT endpoints there is no legitimate session-based caller:
- *    only the `receipt-outbox-retry` CronJob calls this route, in-cluster.
- *    Absence of the header is therefore rejected here too, before the
- *    request reaches `withAuditedRoute` — an unauthenticated caller must not
- *    be able to make the app write an `audit.action_log` row on every call.
+ * 4. `/api/receipts/retry` — same shared secret as `/api/v1/*`, but no
+ *    session fallback: an absent header is rejected here too, before
+ *    `withAuditedRoute` can write an audit row for it.
  */
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
@@ -157,8 +154,7 @@ function gatewayMiddleware(request: NextRequest) {
 	return NextResponse.next();
 }
 
-// Unlike `gatewayMiddleware`, there is no session-based branch to fall
-// through to: an absent header is rejected here too, not just a wrong one.
+// Unlike `gatewayMiddleware`, an absent header is rejected too, not just a wrong one.
 function receiptsGatewayMiddleware(request: NextRequest) {
 	const forwarded = request.headers.get("x-gateway-forwarded");
 

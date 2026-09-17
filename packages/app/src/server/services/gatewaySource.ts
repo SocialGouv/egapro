@@ -1,21 +1,6 @@
 import "server-only";
 
-/**
- * Guard for endpoints with no legitimate caller besides the gateway or an
- * in-cluster CronJob: SUIT-only `/api/v1/*` routes, and `/api/receipts/retry`.
- *
- * Both send `X-Gateway-Forwarded: <EGAPRO_GATEWAY_SHARED_SECRET>` — APISIX
- * (see `.kontinuous/templates/apisix-suit.yaml`) for SUIT traffic, the
- * `receipt-outbox-retry` CronJob directly for its own route. The Edge
- * middleware (`src/middleware.ts`) already rejects an absent, empty or
- * mismatched value with 403 for both, so by the time a request reaches here
- * the header is a valid secret — this call is defense in depth against a
- * future middleware/matcher regression, not the primary check.
- *
- * Mixed endpoints that must serve both the gateway and a browser session —
- * e.g. `/api/v1/files/:fileId` — do **not** call this guard; they dispatch
- * on `isGatewayForwarded(request)` instead.
- */
+// Defense in depth: `src/middleware.ts` already 403s a missing/wrong `X-Gateway-Forwarded` secret before this runs.
 export function assertGatewaySource(request: Request): Response | null {
 	if (!isGatewayForwarded(request)) {
 		return Response.json(

@@ -11,9 +11,7 @@ export const RECEIPT_OUTBOX_MAX_ATTEMPTS = 5;
 // A normal send happens within a second or two; past this, the row belongs to a dead process.
 export const RECEIPT_OUTBOX_RETRY_AFTER_MS = 5 * 60_000;
 
-// Caps one retry pass so a backlog cannot exhaust the pod — each render adds
-// up to ~160Mi of peak memory to a pod already tight enough to have dropped
-// the receipts this outbox exists to replay.
+// Caps one retry pass so a backlog cannot exhaust the pod — each render adds up to ~160Mi.
 export const RECEIPT_OUTBOX_REPLAY_LIMIT = 5;
 
 const INTERRUPTED_DELIVERY_EXHAUSTED_ERROR =
@@ -75,10 +73,7 @@ async function settle(
 	sent: boolean,
 	countsAsAttempt: boolean,
 ) {
-	// The queue being unreachable is not something a retry attempt could have
-	// fixed, so the claim above is given back rather than spent: the row stays
-	// owed at its pre-claim attempt count instead of marching toward exhaustion
-	// for a condition retrying does nothing about.
+	// A queue outage isn't fixable by retrying, so the claim is given back rather than spent.
 	if (!sent && !countsAsAttempt) {
 		await db
 			.update(receiptOutbox)
@@ -197,10 +192,7 @@ export async function replayPendingReceipts(
 				),
 			),
 		)
-		// Least-recently-touched first, not oldest-submitted first: a row given
-		// back for a queue outage gets `updatedAt` bumped to now (see `settle`),
-		// so it sorts behind every row this pass hasn't tried yet instead of
-		// occupying the same batch slot again next pass.
+		// Least-recently-touched first — a deferred row's bumped `updatedAt` sorts it behind untried ones.
 		.orderBy(asc(receiptOutbox.updatedAt))
 		.limit(limit);
 
@@ -209,9 +201,7 @@ export async function replayPendingReceipts(
 		try {
 			outcome = await deliverReceiptIntent(id, now);
 		} catch (error) {
-			// claim()/settle() are the only unguarded steps below (sendReceipt never
-			// throws) — one row's DB error must not abort the rest of the batch, so
-			// it is counted like any other failed row and the pass moves on.
+			// A DB error on one row must not abort the rest of the batch.
 			const errorMessage = reportReceiptFailure(error, {
 				stage: "replay",
 				outboxId: id,
