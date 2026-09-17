@@ -37,6 +37,14 @@ function currentDeclarationFilter(siren: string, year: number) {
 	return and(eq(declarations.siren, siren), eq(declarations.year, year));
 }
 
+function currentDeclarationOrder() {
+	return [
+		sql`${declarations.cancelledAt} is null desc`,
+		sql`${declarations.createdAt} desc nulls last`,
+		desc(declarations.id),
+	];
+}
+
 /**
  * La ligne que `/api/upload` écrit réellement, résolue de façon déterministe.
  *
@@ -63,11 +71,7 @@ export async function resolveCurrentDeclarationId(
 		.select({ id: declarations.id })
 		.from(declarations)
 		.where(currentDeclarationFilter(siren, year))
-		.orderBy(
-			sql`${declarations.cancelledAt} is null desc`,
-			sql`${declarations.createdAt} desc nulls last`,
-			desc(declarations.id),
-		)
+		.orderBy(...currentDeclarationOrder())
 		.limit(1);
 	return rows[0]?.id ?? null;
 }
@@ -104,11 +108,7 @@ export async function resolveExportDeclarationId(
 				submittedDeclarationCondition(),
 			),
 		)
-		.orderBy(
-			sql`${declarations.cancelledAt} is null desc`,
-			sql`${declarations.createdAt} desc nulls last`,
-			desc(declarations.id),
-		)
+		.orderBy(...currentDeclarationOrder())
 		.limit(1);
 	return rows[0] ?? null;
 }
