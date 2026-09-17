@@ -10,13 +10,18 @@ const mockSubmitMutate = vi.fn();
 const mockSubmitReset = vi.fn();
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
+const mockWaitForServer = vi.fn();
 const mockDisclose = vi.fn();
 const mockConceal = vi.fn();
+type MockSubmissionError = {
+	message: string;
+	data?: { code: string };
+};
 const mockSubmitState = {
-	error: null as { message: string; data?: { code: string } } | null,
+	error: null as MockSubmissionError | null,
 	isPending: false,
 	onSuccess: undefined as (() => void) | undefined,
-	onError: undefined as (() => void) | undefined,
+	onError: undefined as ((error: MockSubmissionError) => void) | undefined,
 };
 
 vi.mock("next/navigation", () => ({
@@ -32,13 +37,16 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
+			getOrCreate: {
+				useQuery: () => ({ refetch: mockWaitForServer }),
+			},
 			submit: {
 				useMutation: ({
 					onSuccess,
 					onError,
 				}: {
 					onSuccess: () => void;
-					onError: () => void;
+					onError: (error: MockSubmissionError) => void;
 				}) => {
 					mockSubmitState.onSuccess = onSuccess;
 					mockSubmitState.onError = onError;
@@ -161,6 +169,8 @@ describe("Step6Review", () => {
 		mockSubmitReset.mockReset();
 		mockPush.mockReset();
 		mockRefresh.mockReset();
+		mockWaitForServer.mockReset();
+		mockWaitForServer.mockResolvedValue({ isSuccess: true });
 		mockDisclose.mockReset();
 		mockConceal.mockReset();
 		mockSubmitState.error = null;
@@ -169,13 +179,34 @@ describe("Step6Review", () => {
 		mockSubmitState.onError = undefined;
 	});
 
-	it("re-reads the server state when the submission fails", () => {
+	it("re-reads the server state when the server rejects the submission", () => {
 		renderSubmissionReview();
 
-		act(() => mockSubmitState.onError?.());
+		act(() => mockSubmitState.onError?.(RULES_ENGINE_REFUSAL));
 
 		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(mockWaitForServer).not.toHaveBeenCalled();
 		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("waits for the server before refreshing after a network failure", async () => {
+		let markServerReachable: (result: { isSuccess: boolean }) => void =
+			() => {};
+		mockWaitForServer.mockReturnValue(
+			new Promise((resolve) => {
+				markServerReachable = resolve;
+			}),
+		);
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onError?.({ message: "Failed to fetch" }));
+
+		expect(mockWaitForServer).toHaveBeenCalledTimes(1);
+		expect(mockRefresh).not.toHaveBeenCalled();
+
+		await act(async () => markServerReachable({ isSuccess: true }));
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
 	});
 
 	it("completes the submission once the refreshed page shows it went through", () => {

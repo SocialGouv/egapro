@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,12 +8,17 @@ import { SecondDeclarationStep3Review } from "../SecondDeclarationStep3Review";
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
+const mockWaitForServer = vi.fn();
 const mockReset = vi.fn();
 const mockConceal = vi.fn();
+type MockSubmissionError = {
+	message: string;
+	data?: { code: string };
+};
 const mockMutationState = {
-	error: null as { message: string; data?: { code: string } } | null,
+	error: null as MockSubmissionError | null,
 	isPending: false,
-	onError: undefined as (() => void) | undefined,
+	onError: undefined as ((error: MockSubmissionError) => void) | undefined,
 };
 
 vi.mock("next/navigation", () => ({
@@ -29,10 +34,13 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
+			getOrCreate: {
+				useQuery: () => ({ refetch: mockWaitForServer }),
+			},
 			submitSecondDeclaration: {
 				useMutation: (opts: {
 					onSuccess?: () => void;
-					onError?: () => void;
+					onError?: (error: MockSubmissionError) => void;
 				}) => {
 					mockMutationState.onError = opts.onError;
 					return {
@@ -160,6 +168,8 @@ describe("SecondDeclarationStep3Review", () => {
 		mockMutate.mockClear();
 		mockPush.mockClear();
 		mockRefresh.mockClear();
+		mockWaitForServer.mockReset();
+		mockWaitForServer.mockResolvedValue({ isSuccess: true });
 		mockReset.mockClear();
 		mockConceal.mockClear();
 		mockMutationState.error = null;
@@ -331,13 +341,37 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).not.toHaveBeenCalled();
 	});
 
-	it("re-reads the server state when the submission fails", () => {
+	it("re-reads the server state when the server rejects the submission", () => {
 		renderStep3();
 
-		mockMutationState.onError?.();
+		mockMutationState.onError?.({
+			message: "No matching transition",
+			data: { code: "INTERNAL_SERVER_ERROR" },
+		});
 
 		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(mockWaitForServer).not.toHaveBeenCalled();
 		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("waits for the server before refreshing after a network failure", async () => {
+		let markServerReachable: (result: { isSuccess: boolean }) => void =
+			() => {};
+		mockWaitForServer.mockReturnValue(
+			new Promise((resolve) => {
+				markServerReachable = resolve;
+			}),
+		);
+		renderStep3();
+
+		act(() => mockMutationState.onError?.({ message: "Failed to fetch" }));
+
+		expect(mockWaitForServer).toHaveBeenCalledTimes(1);
+		expect(mockRefresh).not.toHaveBeenCalled();
+
+		await act(async () => markServerReachable({ isSuccess: true }));
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
 	});
 
 	it("completes the submission once the refreshed status shows it went through", () => {

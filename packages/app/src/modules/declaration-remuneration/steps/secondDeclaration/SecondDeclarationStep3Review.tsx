@@ -77,10 +77,25 @@ export function SecondDeclarationStep3Review({
 			router.push(getPostComplianceDestination(cseOpinionRequired));
 		}
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);
+	const { refetch: waitForServer } = api.declaration.getOrCreate.useQuery(
+		undefined,
+		{
+			enabled: false,
+			retry: 5,
+			retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
+		},
+	);
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
 		onSuccess: completeSubmission,
-		// The response can be lost after the commit (restarted process): only a fresh server render tells whether it went through.
-		onError: () => router.refresh(),
+		onError: (error) => {
+			if (error.data) {
+				router.refresh();
+				return;
+			}
+			void waitForServer().then((result) => {
+				if (result.isSuccess) router.refresh();
+			});
+		},
 	});
 	const submittedDespiteError = !isWritable && mutation.isError;
 	useEffect(() => {
