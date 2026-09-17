@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
 	notCancelledCondition,
 	resolveCurrentDeclarationId,
+	resolveExportDeclarationId,
 	submittedDeclarationCondition,
 } from "../declarationConditions";
 
@@ -97,6 +98,74 @@ describe("resolveCurrentDeclarationId", () => {
 		).resolves.toBe("decl-1");
 		await expect(
 			resolveCurrentDeclarationId(empty.db as never, "123456789", 2026),
+		).resolves.toBeNull();
+	});
+});
+
+describe("resolveExportDeclarationId", () => {
+	function stubDb(rows: { id: string; cancelledAt: Date | null }[]) {
+		const captured: { where?: SQL; orderBy?: SQL[] } = {};
+		const chain = {
+			from: () => chain,
+			where: (clause: SQL) => {
+				captured.where = clause;
+				return chain;
+			},
+			orderBy: (...clauses: SQL[]) => {
+				captured.orderBy = clauses;
+				return chain;
+			},
+			limit: () => Promise.resolve(rows),
+		};
+		return { db: { select: () => chain }, captured };
+	}
+
+	// Same total order as `resolveCurrentDeclarationId` — this resolver only
+	// adds a stricter `where`, it must not weaken the tie-break.
+	it("orders by active, then most recent, then id to break every tie", async () => {
+		const { db, captured } = stubDb([{ id: "decl-1", cancelledAt: null }]);
+
+		await resolveExportDeclarationId(db as never, "123456789", 2026);
+
+		const rendered = (captured.orderBy ?? []).map((clause) =>
+			dialect.sqlToQuery(clause).sql.toLowerCase(),
+		);
+		expect(rendered).toHaveLength(3);
+		expect(rendered[0]).toContain("cancelled_at");
+		expect(rendered[0]).toContain("is null desc");
+		expect(rendered[1]).toContain("created_at");
+		expect(rendered[1]).toContain("desc");
+		expect(rendered[1]).toContain("nulls last");
+		expect(rendered[2]).toContain("id");
+		expect(rendered[2]).toContain("desc");
+	});
+
+	// The defect this resolver fixes: a draft opened after a cancellation
+	// (redéclaration en cours) must never win over the submitted declaration
+	// it redeclares — unlike `resolveCurrentDeclarationId`, which the write
+	// path (upload/lock) deliberately keeps blind to `status`.
+	it("scopes on siren and year and excludes draft declarations", async () => {
+		const { db, captured } = stubDb([]);
+
+		await resolveExportDeclarationId(db as never, "123456789", 2026);
+
+		const { sql, params } = dialect.sqlToQuery(captured.where as SQL);
+		expect(sql).toContain("siren");
+		expect(sql).toContain("year");
+		expect(sql).toContain("status");
+		expect(params).toEqual(["123456789", 2026, "draft"]);
+	});
+
+	it("returns the resolved id and cancellation date, or null when no submitted declaration exists", async () => {
+		const cancelledAt = new Date("2027-04-01T12:00:00Z");
+		const found = stubDb([{ id: "decl-1", cancelledAt }]);
+		const empty = stubDb([]);
+
+		await expect(
+			resolveExportDeclarationId(found.db as never, "123456789", 2026),
+		).resolves.toEqual({ id: "decl-1", cancelledAt });
+		await expect(
+			resolveExportDeclarationId(empty.db as never, "123456789", 2026),
 		).resolves.toBeNull();
 	});
 });
