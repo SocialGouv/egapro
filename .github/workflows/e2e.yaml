@@ -291,24 +291,16 @@ jobs:
             -c playwright.merge.config.ts \
             "${{ github.workspace }}/blob-report"
           cp packages/app/merged-results.json packages/app/playwright-report/merged-results.json
-      - name: Summarise what actually ran
+      - name: Generate the recette report
         if: always()
         run: |
           set -euo pipefail
-          [ -f packages/app/merged-results.json ] || exit 0
-          # `setup` is the ProConnect login replayed as a dependency inside every
-          # shard, so it is reported apart: the number to compare with the suite
-          # total and the 185 coordinates is the one excluding it.
-          {
-            echo "### Tests exécutés (rapport fusionné)"
-            echo ""
-            echo "| Projet | Tests |"
-            echo "|---|---|"
-            jq -r '[.. | objects | select(has("projectName")) | .projectName]
-                   | group_by(.) | map("| \(.[0]) | \(length) |") | .[]' packages/app/merged-results.json
-            echo ""
-            echo "Total hors \`setup\` : **$(jq '[.. | objects | select(has("projectName")) | select(.projectName != "setup")] | length' packages/app/merged-results.json)**"
-          } >> "$GITHUB_STEP_SUMMARY"
+          pnpm --filter app report:grille \
+            --results merged-results.json \
+            --out playwright-report/grille-recette.md \
+            --scope "tous les cas (185 coordonnées)" \
+            --commit "${{ github.sha }}" \
+            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       - name: Upload merged Playwright report
         uses: actions/upload-artifact@v4
         if: always()

@@ -47,9 +47,11 @@ export default defineConfig({
 		// projects and replays a dependency project whole inside every shard that
 		// needs it, so making `chromium` a dependency would collapse the whole
 		// suite into one shard. Sharing `setup` as the sole dependency keeps both
-		// projects top-level — hence shardable — while the declaration order below
-		// still runs `chromium` before `logout` within a shard, which is what the
-		// lock release in api/auth/logout expects.
+		// projects top-level — hence shardable. The ordering `logout` needs (after
+		// `chromium`, which the lock release in api/auth/logout expects) is no longer
+		// structural: both projects now sit in the SAME dependency phase, and what
+		// still serialises them is `workers: 1` above draining the declaration-ordered
+		// queue one group at a time. Raising `workers` would let them interleave.
 		{
 			name: "logout",
 			testMatch: /logout\.e2e\.ts$/,

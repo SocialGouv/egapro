@@ -78,6 +78,12 @@ describe("E2E gate workflow", () => {
 		expect(scalar(aggregatorBody, "if")).toBe("always()");
 	});
 
+	it("fails that job unless every dependency reported success", () => {
+		expect(aggregatorBody).toContain("needs.shard.result");
+		expect(aggregatorBody).toContain("needs.merge.result");
+		expect(aggregatorBody).toMatch(/!=\s*"success"/);
+	});
+
 	it("makes that job wait on every other job of the workflow", () => {
 		const needs = scalar(aggregatorBody, "needs") ?? "";
 		const others = jobs
@@ -122,6 +128,19 @@ describe("E2E gate workflow", () => {
 			).toEqual(Array.from({ length: entry.total }, (_, index) => index + 1));
 		}
 	});
+
+	it("publishes the complete merged recette report in the job summary", () => {
+		const mergeBody = jobs.find((job) => job.id === "merge")?.body ?? "";
+		const reportStep = mergeBody.slice(
+			mergeBody.indexOf("- name: Generate the recette report"),
+			mergeBody.indexOf("- name: Upload merged Playwright report"),
+		);
+
+		expect(reportStep).toContain("if: always()");
+		expect(reportStep).toContain("report:grille");
+		expect(reportStep).toContain("--results merged-results.json");
+		expect(reportStep).toContain("--out playwright-report/grille-recette.md");
+	});
 });
 
 describe("Playwright collection stays shardable", () => {
@@ -138,6 +157,15 @@ describe("Playwright collection stays shardable", () => {
 
 		expect(logout).toContain('dependencies: ["setup"]');
 		expect(logout).not.toContain('"chromium"');
+	});
+
+	it("keeps one worker as the ordering guarantee between `chromium` and `logout`", () => {
+		const config = readFileSync(
+			join(APP_ROOT, "playwright.config.ts"),
+			"utf-8",
+		);
+
+		expect(config).toMatch(/workers:\s*1/);
 	});
 
 	it("keeps the grid free of a file-level serial group", () => {
