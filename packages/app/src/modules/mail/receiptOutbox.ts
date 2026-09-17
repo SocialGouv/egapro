@@ -11,8 +11,10 @@ export const RECEIPT_OUTBOX_MAX_ATTEMPTS = 5;
 // A normal send happens within a second or two; past this, the row belongs to a dead process.
 export const RECEIPT_OUTBOX_RETRY_AFTER_MS = 5 * 60_000;
 
-// Caps one retry pass so a backlog cannot exhaust the pod.
-export const RECEIPT_OUTBOX_REPLAY_LIMIT = 20;
+// Caps one retry pass so a backlog cannot exhaust the pod — each render adds
+// up to ~160Mi of peak memory to a pod already tight enough to have dropped
+// the receipts this outbox exists to replay.
+export const RECEIPT_OUTBOX_REPLAY_LIMIT = 5;
 
 const INTERRUPTED_DELIVERY_EXHAUSTED_ERROR =
 	"Maximum delivery attempts reached after interrupted delivery";
@@ -77,7 +79,13 @@ async function settle(row: OutboxRow, error: string | null, sent: boolean) {
 			updatedAt: new Date(),
 			...(sent ? { sentAt: new Date() } : {}),
 		})
-		.where(eq(receiptOutbox.id, row.id));
+		.where(
+			and(
+				eq(receiptOutbox.id, row.id),
+				eq(receiptOutbox.status, "sending"),
+				eq(receiptOutbox.attempts, row.attempts),
+			),
+		);
 }
 
 // Called both by the submitting request and, if that never happened, by the retry endpoint.

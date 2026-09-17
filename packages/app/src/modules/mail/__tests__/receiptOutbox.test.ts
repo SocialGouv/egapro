@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
 	exhausted: [] as unknown[],
 	candidates: [] as unknown[],
 	settleCalls: [] as Record<string, unknown>[],
+	settleWhereConditions: [] as unknown[],
 	settleError: null as Error | null,
 }));
 
@@ -28,13 +29,14 @@ vi.mock("~/server/db", () => ({
 		// never consumes the rows queued for the next claim.
 		update: () => ({
 			set: (patch: Record<string, unknown>) => ({
-				where: () => {
+				where: (condition: unknown) => {
 					const isClaim = patch.status === "sending";
 					const isExhaustion =
 						patch.lastError ===
 						"Maximum delivery attempts reached after interrupted delivery";
 					if (!isClaim && !isExhaustion) {
 						mocks.settleCalls.push(patch);
+						mocks.settleWhereConditions.push(condition);
 						if (mocks.settleError) return Promise.reject(mocks.settleError);
 					}
 					const statement = Promise.resolve(undefined) as Promise<undefined> & {
@@ -64,7 +66,9 @@ vi.mock("~/server/db", () => ({
 	},
 }));
 
+import { and, eq } from "drizzle-orm";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { receiptOutbox } from "~/server/db/schema";
 import {
 	deliverReceiptIntent,
 	RECEIPT_OUTBOX_MAX_ATTEMPTS,
@@ -96,6 +100,7 @@ describe("deliverReceiptIntent", () => {
 		mocks.exhausted = [];
 		mocks.candidates = [];
 		mocks.settleCalls = [];
+		mocks.settleWhereConditions = [];
 		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
 	});
 
@@ -177,6 +182,24 @@ describe("deliverReceiptIntent", () => {
 			lastError: "pdf render KO",
 		});
 	});
+
+	// A pass that outlived its own claim must not overwrite whatever reclaimed
+	// the row in the meantime — the WHERE clause re-checks status and attempts,
+	// the same lock discipline as the claim itself.
+	it("settles only the row this pass still owns", async () => {
+		const row = outboxRow({ attempts: 3 });
+		mocks.claimed = [[row]];
+
+		await deliverReceiptIntent(row.id);
+
+		expect(mocks.settleWhereConditions[0]).toEqual(
+			and(
+				eq(receiptOutbox.id, row.id),
+				eq(receiptOutbox.status, "sending"),
+				eq(receiptOutbox.attempts, row.attempts),
+			),
+		);
+	});
 });
 
 describe("replayPendingReceipts", () => {
@@ -186,6 +209,7 @@ describe("replayPendingReceipts", () => {
 		mocks.exhausted = [];
 		mocks.candidates = [];
 		mocks.settleCalls = [];
+		mocks.settleWhereConditions = [];
 		mocks.settleError = null;
 		mocks.sendReceipt.mockResolvedValue({ sent: true, error: null });
 		mocks.reportReceiptFailure.mockReturnValue("boom");

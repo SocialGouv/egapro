@@ -14,6 +14,10 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 0
+      # concurrencyPolicy: Forbid means a Job stuck instead of failing (e.g. its
+      # pod parked in CreateContainerConfigError over a missing secret key)
+      # blocks every following tick indefinitely without this.
+      activeDeadlineSeconds: 540
       template:
         metadata:
           labels:
@@ -42,7 +46,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  curl -X POST "http://app:3000/api/receipts/retry" \
+                  curl -X POST "http://app/api/receipts/retry" \
                     -H "X-Gateway-Forwarded: ${EGAPRO_GATEWAY_SHARED_SECRET}" \
                     --connect-timeout 10 \
                     --max-time 300 \
