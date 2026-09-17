@@ -211,4 +211,36 @@ describe("receipt outbox (#4542)", () => {
 			expect(await queuedJobCount(id)).toBe(1);
 		}
 	});
+
+	// A row given back after a queue outage keeps its old submission date but
+	// gets a fresh `updatedAt`. A batch capped below the backlog size must not
+	// keep re-selecting that same row while starving one it has never tried —
+	// this is what would otherwise happen during a sustained outage.
+	it("serves the row least recently touched first, not the oldest submission first", async () => {
+		const recentlyTouchedId = await db.transaction((tx) =>
+			recordReceiptIntent(tx, INTENT),
+		);
+		const neverTouchedId = await db.transaction((tx) =>
+			recordReceiptIntent(tx, INTENT),
+		);
+
+		await sql`
+			UPDATE app_receipt_outbox
+			SET created_at = NOW() - INTERVAL '60 minutes',
+				updated_at = NOW() - INTERVAL '6 minutes'
+			WHERE id = ${recentlyTouchedId}
+		`;
+		await sql`
+			UPDATE app_receipt_outbox
+			SET created_at = NOW() - INTERVAL '30 minutes',
+				updated_at = NOW() - INTERVAL '30 minutes'
+			WHERE id = ${neverTouchedId}
+		`;
+
+		const result = await replayPendingReceipts({ now: new Date(), limit: 1 });
+
+		expect(result.claimed).toBe(1);
+		expect(await queuedJobCount(neverTouchedId)).toBe(1);
+		expect(await queuedJobCount(recentlyTouchedId)).toBe(0);
+	});
 });

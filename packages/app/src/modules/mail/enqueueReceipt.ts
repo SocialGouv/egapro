@@ -256,6 +256,45 @@ async function buildAttachmentsOrDrop(
 	}
 }
 
+function logEnqueueFailure(params: {
+	userId: string | null;
+	to: string;
+	siren: string;
+	errorMessage: string;
+	type: ConfirmationType;
+	kind: ReceiptKind;
+	year: number;
+	isResend: boolean;
+	outboxId: string | undefined;
+}): void {
+	const {
+		userId,
+		to,
+		siren,
+		errorMessage,
+		type,
+		kind,
+		year,
+		isResend,
+		outboxId,
+	} = params;
+	void logAction({
+		action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+		status: "failure",
+		userId,
+		userEmail: to,
+		siren,
+		errorMessage,
+		metadata: {
+			type,
+			kind,
+			year,
+			isResend,
+			...(outboxId === undefined ? {} : { outboxId }),
+		},
+	});
+}
+
 // Never throws — a mail failure must not surface as a failed submission; the outcome is returned instead.
 export async function sendReceipt(
 	input: SendReceiptInput,
@@ -264,20 +303,16 @@ export async function sendReceipt(
 	const type = KIND_TO_TYPE[kind];
 
 	if (!(await isPublisherAvailable())) {
-		void logAction({
-			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-			status: "failure",
+		logEnqueueFailure({
 			userId,
-			userEmail: to,
+			to,
 			siren,
 			errorMessage: "queue_unavailable",
-			metadata: {
-				type,
-				kind,
-				year,
-				isResend,
-				...(outboxId === undefined ? {} : { outboxId }),
-			},
+			type,
+			kind,
+			year,
+			isResend,
+			outboxId,
 		});
 
 		return { sent: false, error: "queue_unavailable", countsAsAttempt: false };
@@ -354,20 +389,16 @@ export async function sendReceipt(
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "Unknown error";
 		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
-		void logAction({
-			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-			status: "failure",
+		logEnqueueFailure({
 			userId,
-			userEmail: to,
+			to,
 			siren,
 			errorMessage: message,
-			metadata: {
-				type,
-				kind,
-				year,
-				isResend,
-				...(outboxId === undefined ? {} : { outboxId }),
-			},
+			type,
+			kind,
+			year,
+			isResend,
+			outboxId,
 		});
 
 		return { sent: false, error: message, countsAsAttempt: true };

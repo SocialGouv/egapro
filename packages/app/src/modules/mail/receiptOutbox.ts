@@ -197,7 +197,11 @@ export async function replayPendingReceipts(
 				),
 			),
 		)
-		.orderBy(asc(receiptOutbox.createdAt))
+		// Least-recently-touched first, not oldest-submitted first: a row given
+		// back for a queue outage gets `updatedAt` bumped to now (see `settle`),
+		// so it sorts behind every row this pass hasn't tried yet instead of
+		// occupying the same batch slot again next pass.
+		.orderBy(asc(receiptOutbox.updatedAt))
 		.limit(limit);
 
 	for (const { id } of candidates) {
