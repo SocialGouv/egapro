@@ -1,6 +1,7 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
+import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
@@ -430,18 +431,11 @@ export async function fetchJointEvaluationFilesByDeclaration(
 export async function resolveActiveDeclarationId(
 	siren: string,
 	year: number,
-	database: DB = db,
 ): Promise<string | null> {
-	const rows = await database
+	const rows = await db
 		.select({ id: declarations.id })
 		.from(declarations)
-		.where(
-			and(
-				eq(declarations.siren, siren),
-				eq(declarations.year, year),
-				notCancelledCondition(),
-			),
-		)
+		.where(activeDeclarationFilter(siren, year))
 		.limit(1);
 	return rows[0]?.id ?? null;
 }
