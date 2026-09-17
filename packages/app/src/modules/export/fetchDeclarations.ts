@@ -11,6 +11,7 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
+	resolveActiveDeclarationId,
 } from "./queries";
 
 import {
@@ -133,14 +134,32 @@ export type CseRow = {
 	opinionDate: string | null;
 };
 
+export type CseFileContent = {
+	declarationNumber: number;
+	type: string;
+};
+
 export type FileRow = {
 	id: string;
-	siren: string;
-	year: number;
+	declarationId: string;
 	fileName: string;
 	filePath: string;
 	uploadedAt: Date;
+	contents?: CseFileContent[];
 };
+
+function compareCseFileContent(a: CseFileContent, b: CseFileContent): number {
+	if (a.declarationNumber !== b.declarationNumber) {
+		return a.declarationNumber - b.declarationNumber;
+	}
+	return a.type.localeCompare(b.type);
+}
+
+export function sortCseFileContents(
+	contents: CseFileContent[],
+): CseFileContent[] {
+	return [...contents].sort(compareCseFileContent);
+}
 
 // ── Build indicators from declaration columns ─────────────────────────
 
@@ -331,6 +350,10 @@ export function buildCseFilePayload(file: FileRow) {
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
 		downloadUrl: apiV1FileHref(file.id),
+		contents: sortCseFileContents(file.contents ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
 	};
 }
 
@@ -355,6 +378,12 @@ function buildFichierPayload(
 		Nom_fichier: file.fileName,
 		Date_upload: file.uploadedAt.toISOString(),
 		URL_telechargement: apiV1FileHref(file.id),
+		...(type === "cse_opinion" && {
+			Contenus: sortCseFileContents(file.contents ?? []).map((c) => ({
+				Numero_declaration: c.declarationNumber,
+				Type: c.type,
+			})),
+		}),
 	};
 }
 

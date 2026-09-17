@@ -71,29 +71,24 @@ async function apiExportDeclarationsHandler(
 		const rows = await fetchSubmittedDeclarations(date_begin, dateEnd);
 
 		const declarationIds = rows.map((r) => r.declarationId);
-		const sirenYearKeys = rows.map((r) => ({
-			siren: r.siren,
-			year: r.year,
-		}));
 
 		const [indicatorGMap, cseMap, cseFilesMap, jointEvalFilesMap] =
 			await Promise.all([
 				fetchIndicatorGByDeclaration(declarationIds),
 				fetchCseOpinionsByDeclaration(declarationIds),
-				fetchCseFilesByDeclaration(sirenYearKeys),
-				fetchJointEvaluationFilesByDeclaration(sirenYearKeys),
+				fetchCseFilesByDeclaration(declarationIds),
+				fetchJointEvaluationFilesByDeclaration(declarationIds),
 			]);
 
-		const data = rows.map((row) => {
-			const key = `${row.siren}-${row.year}`;
-			return assembleDeclaration(
+		const data = rows.map((row) =>
+			assembleDeclaration(
 				row,
 				indicatorGMap.get(row.declarationId) ?? [],
 				cseMap.get(row.declarationId) ?? [],
-				cseFilesMap.get(key) ?? [],
-				jointEvalFilesMap.get(key) ?? [],
-			);
-		});
+				cseFilesMap.get(row.declarationId) ?? [],
+				jointEvalFilesMap.get(row.declarationId) ?? [],
+			),
+		);
 
 		return Response.json({
 			Date_debut: date_begin,
