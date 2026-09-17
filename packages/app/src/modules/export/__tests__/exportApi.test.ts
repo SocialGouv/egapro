@@ -345,6 +345,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 	});
 
 	it("should return assembled declarations with flat indicator columns", async () => {
@@ -593,12 +595,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -675,12 +676,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse-2027.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -697,9 +697,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichiers_CSE).toEqual([
 			{
@@ -756,12 +754,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse-2027.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -904,12 +901,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchJointEval.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "je-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "eval.pdf",
 							filePath: "/s3/je",
 							uploadedAt: new Date("2027-04-01T09:00:00Z"),
@@ -926,9 +922,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchJointEval).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichier_evaluation_conjointe).toEqual({
 			Id: "je-1",

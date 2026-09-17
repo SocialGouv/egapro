@@ -354,8 +354,6 @@ describe("GET /api/v1/export/declarations — Fichiers_CSE[].Contenus integratio
 		);
 		expect(decl).toBeDefined();
 
-		// 3 files in, 3 items out — a naive SQL join on cse_opinion_file (2 rows
-		// for file A, 2 rows for file B) would have produced 5.
 		expect(decl.Fichiers_CSE).toHaveLength(3);
 
 		const fileA = decl.Fichiers_CSE.find(
@@ -419,5 +417,121 @@ describe("GET /api/v1/export/declarations — Fichiers_CSE[].Contenus integratio
 			decl.Fichiers_CSE.find((f: { Id: string }) => f.Id === FILE_B),
 		).toBeUndefined();
 		expect(decl.Fichiers_CSE).toHaveLength(2);
+	});
+});
+
+describe("GET /api/v1/export/declarations and /api/v1/files — cross-declaration file isolation integration (#4535)", () => {
+	let sql!: ReturnType<typeof postgres>;
+
+	const SIREN = "444555666";
+	const YEAR = 2027;
+	const USER_ID = "export-viczei-integration-user";
+	const DECL_CANCELLED = "export-decl-viczei-cancelled";
+	const DECL_ACTIVE = "export-decl-viczei-active";
+	const FILE_CANCELLED = "export-file-viczei-cancelled";
+	const FILE_ACTIVE = "export-file-viczei-active";
+
+	beforeAll(() => {
+		sql = postgres(env.DATABASE_URL, { max: 1 });
+	});
+
+	async function cleanup() {
+		await sql`DELETE FROM app_cse_opinion_file WHERE declaration_id IN (${DECL_CANCELLED}, ${DECL_ACTIVE})`;
+		await sql`DELETE FROM app_file WHERE declaration_id IN (${DECL_CANCELLED}, ${DECL_ACTIVE})`;
+		await sql`DELETE FROM app_declaration WHERE id IN (${DECL_CANCELLED}, ${DECL_ACTIVE})`;
+		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
+	}
+
+	afterAll(async () => {
+		if (!sql) return;
+		await cleanup();
+		await sql.end();
+	});
+
+	beforeEach(async () => {
+		await cleanup();
+
+		await sql`
+			INSERT INTO app_user (id, email, first_name, last_name)
+			VALUES (${USER_ID}, 'dir.rh.viczei@example.fr', 'Dir', 'RH')
+		`;
+		await sql`
+			INSERT INTO app_company (siren, name, workforce)
+			VALUES (${SIREN}, 'Entreprise Redeclaree', 250)
+		`;
+		await sql`
+			INSERT INTO app_declaration (id, siren, year, declarant_id, status, cancelled_at, created_at, updated_at)
+			VALUES
+				(${DECL_CANCELLED}, ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2027-06-10T12:00:00Z', '2027-06-01T00:00:00Z', '2027-06-01T00:00:00Z'),
+				(${DECL_ACTIVE},    ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', NULL,                   '2027-06-12T00:00:00Z', '2027-06-12T09:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_file (id, declaration_id, file_name, file_path, type, uploaded_at)
+			VALUES
+				(${FILE_CANCELLED}, ${DECL_CANCELLED}, 'avis-declaration-annulee.pdf', ${`${SIREN}/${YEAR}/cancelled.pdf`}, 'cse_opinion', '2027-06-05T08:00:00Z'),
+				(${FILE_ACTIVE},    ${DECL_ACTIVE},    'avis-redeclaration.pdf',       ${`${SIREN}/${YEAR}/active.pdf`},    'cse_opinion', '2027-06-12T08:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_cse_opinion_file (id, declaration_id, declaration_number, type, file_id)
+			VALUES
+				('assoc-viczei-cancelled', ${DECL_CANCELLED}, 1, 'accuracy', ${FILE_CANCELLED}),
+				('assoc-viczei-active',    ${DECL_ACTIVE},    1, 'accuracy', ${FILE_ACTIVE})
+		`;
+	});
+
+	function gatewayRequest(
+		path: string,
+		params: Record<string, string>,
+	): Request {
+		const searchParams = new URLSearchParams(params);
+		return new Request(`http://localhost${path}?${searchParams}`, {
+			headers: { "x-gateway-forwarded": "test-value" },
+		});
+	}
+
+	it("keeps each declaration's Fichiers_CSE to its own files when a cancelled declaration and its redeclaration share (siren, year) and the same (Numero_declaration, Type)", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const response = await GET(
+			gatewayRequest("/api/v1/export/declarations", {
+				date_begin: "2027-06-01",
+				date_end: "2027-06-13",
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		const declarations = body.Declarations.filter(
+			(d: { SIREN: string }) => d.SIREN === SIREN,
+		);
+		expect(declarations).toHaveLength(2);
+
+		const cancelled = declarations.find(
+			(d: { id: string }) => d.id === DECL_CANCELLED,
+		);
+		const active = declarations.find(
+			(d: { id: string }) => d.id === DECL_ACTIVE,
+		);
+
+		expect(cancelled.Fichiers_CSE.map((f: { Id: string }) => f.Id)).toEqual([
+			FILE_CANCELLED,
+		]);
+		expect(active.Fichiers_CSE.map((f: { Id: string }) => f.Id)).toEqual([
+			FILE_ACTIVE,
+		]);
+	});
+
+	it("/api/v1/files excludes the cancelled declaration's file once a redeclaration is active", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		const response = await GET(
+			gatewayRequest("/api/v1/files", {
+				siren: SIREN,
+				year: String(YEAR),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.files.map((f: { id: string }) => f.id)).toEqual([FILE_ACTIVE]);
 	});
 });

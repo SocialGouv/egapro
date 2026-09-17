@@ -11,6 +11,7 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
+	resolveActiveDeclarationId,
 } from "./queries";
 
 import {
@@ -136,8 +137,7 @@ export type CseFileContent = {
 
 export type FileRow = {
 	id: string;
-	siren: string;
-	year: number;
+	declarationId: string;
 	fileName: string;
 	filePath: string;
 	uploadedAt: Date;

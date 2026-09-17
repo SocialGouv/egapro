@@ -365,41 +365,31 @@ export async function getDeclarationsWithIndicatorG(
 // ── File queries (CSE opinion files + joint evaluation files) ────────
 
 async function fetchFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 	type: "cse_opinion" | "joint_evaluation",
 ): Promise<FileRow[]> {
-	if (keys.length === 0) return [];
+	if (declarationIds.length === 0) return [];
 	return db
 		.select({
 			id: files.id,
-			siren: declarations.siren,
-			year: declarations.year,
+			declarationId: files.declarationId,
 			fileName: files.fileName,
 			filePath: files.filePath,
 			uploadedAt: files.uploadedAt,
 		})
 		.from(files)
-		.innerJoin(declarations, eq(files.declarationId, declarations.id))
 		.where(
-			and(
-				eq(files.type, type),
-				or(
-					...keys.map((k) =>
-						and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
-					),
-				),
-			),
+			and(eq(files.type, type), inArray(files.declarationId, declarationIds)),
 		);
 }
 
 export async function fetchCseFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(declarationIds, "cse_opinion");
 	if (rows.length === 0) return new Map();
 
-	// Separate query: a join would duplicate the file row once per content.
 	const contentRows = await db
 		.select({
 			fileId: cseOpinionFiles.fileId,
@@ -423,15 +413,37 @@ export async function fetchCseFilesByDeclaration(
 		})),
 	}));
 
-	return groupByKey(filesWithContents, (r) => `${r.siren}-${r.year}`);
+	return groupByKey(filesWithContents, (r) => r.declarationId);
 }
 
 export async function fetchJointEvaluationFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "joint_evaluation");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(
+		declarationIds,
+		"joint_evaluation",
+	);
+	return groupByKey(rows, (r) => r.declarationId);
+}
+
+export async function resolveActiveDeclarationId(
+	siren: string,
+	year: number,
+	database: DB = db,
+): Promise<string | null> {
+	const rows = await database
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				eq(declarations.year, year),
+				notCancelledCondition(),
+			),
+		)
+		.limit(1);
+	return rows[0]?.id ?? null;
 }
 
 // ── Single file lookup (for download) ────────────────────────────────

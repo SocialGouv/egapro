@@ -4,6 +4,7 @@ const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchFileById = vi.fn().mockResolvedValue(undefined);
 const mockFetchFileBySiren = vi.fn().mockResolvedValue(undefined);
+const mockResolveActiveDeclarationId = vi.fn().mockResolvedValue("decl-1");
 const mockAuth = vi.fn().mockResolvedValue(null);
 const mockLogAction = vi.fn().mockResolvedValue(undefined);
 
@@ -14,6 +15,8 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchJointFiles(...args),
 	fetchFileById: (...args: unknown[]) => mockFetchFileById(...args),
 	fetchFileBySiren: (...args: unknown[]) => mockFetchFileBySiren(...args),
+	resolveActiveDeclarationId: (...args: unknown[]) =>
+		mockResolveActiveDeclarationId(...args),
 	fetchSubmittedDeclarations: vi.fn().mockResolvedValue([]),
 	fetchIndicatorGByDeclaration: vi.fn().mockResolvedValue(new Map()),
 	fetchCseOpinionsByDeclaration: vi.fn().mockResolvedValue(new Map()),
@@ -62,6 +65,7 @@ describe("GET /api/v1/files", () => {
 		vi.clearAllMocks();
 		mockFetchCseFiles.mockResolvedValue(new Map());
 		mockFetchJointFiles.mockResolvedValue(new Map());
+		mockResolveActiveDeclarationId.mockResolvedValue("decl-1");
 	});
 
 	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
@@ -134,12 +138,11 @@ describe("GET /api/v1/files", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "cse-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse.pdf",
 							filePath: "123456789/2027/abc.pdf",
 							uploadedAt: new Date("2027-03-10T08:00:00Z"),
@@ -151,12 +154,11 @@ describe("GET /api/v1/files", () => {
 		mockFetchJointFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "joint-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "evaluation.pdf",
 							filePath: "123456789/2027/def.pdf",
 							uploadedAt: new Date("2027-03-12T09:00:00Z"),
@@ -196,12 +198,11 @@ describe("GET /api/v1/files", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "cse-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse.pdf",
 							filePath: "123456789/2027/abc.pdf",
 							uploadedAt: new Date("2027-03-10T08:00:00Z"),
@@ -231,16 +232,53 @@ describe("GET /api/v1/files", () => {
 		]);
 	});
 
-	it("should call queries with correct siren and year", async () => {
+	it("should resolve the active declaration and query files by its id", async () => {
+		mockResolveActiveDeclarationId.mockResolvedValue("decl-active");
+
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = gatewayForwardedRequest(
 			"http://localhost/api/v1/files?siren=987654321&year=2026",
 		);
 		await GET(request);
 
-		const expectedKey = [{ siren: "987654321", year: 2026 }];
-		expect(mockFetchCseFiles).toHaveBeenCalledWith(expectedKey);
-		expect(mockFetchJointFiles).toHaveBeenCalledWith(expectedKey);
+		expect(mockResolveActiveDeclarationId).toHaveBeenCalledWith(
+			"987654321",
+			2026,
+		);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-active"]);
+		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-active"]);
+	});
+
+	it("returns no files when the only declaration for (siren, year) is cancelled — a cancelled declaration's files must not leak into its redeclaration (#4535)", async () => {
+		mockResolveActiveDeclarationId.mockResolvedValue(null);
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"decl-cancelled",
+					[
+						{
+							id: "cse-1",
+							declarationId: "decl-cancelled",
+							fileName: "avis-cse.pdf",
+							filePath: "123456789/2027/abc.pdf",
+							uploadedAt: new Date("2027-03-10T08:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/files/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files?siren=123456789&year=2027",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith([]);
+		expect(mockFetchJointFiles).toHaveBeenCalledWith([]);
+		const body = await response.json();
+		expect(body.files).toEqual([]);
 	});
 });
 
