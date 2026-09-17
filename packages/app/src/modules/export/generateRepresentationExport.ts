@@ -10,7 +10,9 @@ import {
 } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
 import {
+	campaignDeadlines,
 	companies,
 	gipMdsData,
 	representationDeclarations,
@@ -115,6 +117,7 @@ async function fetchSubmittedRepresentationDeclarations(
 		})
 		.from(representationDeclarations)
 		.innerJoin(companies, eq(representationDeclarations.siren, companies.siren))
+		.innerJoin(campaignDeadlines, releasedRepresentationCampaignJoin())
 		.leftJoin(
 			gipMdsData,
 			and(

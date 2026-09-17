@@ -1,7 +1,10 @@
 import "server-only";
 
 import { and, desc, eq } from "drizzle-orm";
-import { isYearPubliclyReleased } from "~/modules/domain";
+import {
+	getTodayInParisCivilDate,
+	isYearPubliclyReleased,
+} from "~/modules/domain";
 import { db } from "~/server/db";
 import {
 	notCancelledCondition,
@@ -94,14 +97,11 @@ async function fetchRows(
 	}));
 }
 
-function isReleased(
-	publicDataReleaseDate: string | null,
-	today: Date,
-): boolean {
+function isReleased(publicDataReleaseDate: string | null): boolean {
 	const releaseDate = publicDataReleaseDate
-		? new Date(`${publicDataReleaseDate}T00:00:00`)
+		? new Date(`${publicDataReleaseDate}T00:00:00Z`)
 		: null;
-	return isYearPubliclyReleased(releaseDate, today);
+	return isYearPubliclyReleased(releaseDate, getTodayInParisCivilDate());
 }
 
 export async function getPublicDeclarationsBySiren(
@@ -109,11 +109,8 @@ export async function getPublicDeclarationsBySiren(
 	limit?: number,
 ): Promise<PublicDeclarationDTO[]> {
 	const rows = await fetchRows(siren);
-	const today = new Date();
 
-	const released = rows.filter((r) =>
-		isReleased(r.publicDataReleaseDate, today),
-	);
+	const released = rows.filter((r) => isReleased(r.publicDataReleaseDate));
 	const limited = limit !== undefined ? released.slice(0, limit) : released;
 	return limited.map((r) => toPublicDeclaration(r.declaration, r.company));
 }
@@ -126,8 +123,7 @@ export async function getPublicDeclarationBySirenYear(
 	const row = rows[0];
 	if (!row) return null;
 
-	const today = new Date();
-	if (!isReleased(row.publicDataReleaseDate, today)) return null;
+	if (!isReleased(row.publicDataReleaseDate)) return null;
 
 	return toPublicDeclaration(row.declaration, row.company);
 }

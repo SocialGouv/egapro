@@ -267,7 +267,11 @@ export {
 // Percentage & proportion numeric cores
 export { percentageOf, proportionOf } from "./shared/percentage";
 // Public data release gate
-export { isYearPubliclyReleased } from "./shared/publicData";
+export {
+	getTodayInParisCivilDate,
+	getTodayInParisCivilDateString,
+	isYearPubliclyReleased,
+} from "./shared/publicData";
 // Quartile helpers
 export {
 	computeQuartileMin,
@@ -310,6 +314,7 @@ export {
 	isRepresentationDeclarationSubmitted,
 	isRepresentationNotSubject,
 	isRepresentationPublicationRequired,
+	REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
 	REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR,
 	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,

@@ -119,7 +119,7 @@ export const representationsPaths = {
 			operationId: "searchPublicRepresentations",
 			summary: "Rechercher des déclarations de représentation équilibrée",
 			description:
-				"Recherche paginée sur les déclarations de représentation équilibrée (art. D. 1142-19) soumises. Les résultats sont filtrables par texte libre, région, département, code NAF et année. Les brouillons ne sont jamais inclus.",
+				"Recherche paginée sur les déclarations de représentation équilibrée (art. D. 1142-19) soumises et publiées. Les résultats sont filtrables par texte libre, région, département, code NAF et année. Les brouillons ne sont jamais inclus, et une année n'apparaît qu'à partir de la date de rendu public de sa campagne.",
 			parameters: buildSearchParameters({
 				description: "Filtre par année de référence de la déclaration.",
 				example: 2026,
@@ -150,7 +150,7 @@ export const representationsPaths = {
 			summary:
 				"Lister les déclarations de représentation équilibrée d'une entreprise",
 			description:
-				"Retourne toutes les déclarations de représentation équilibrée soumises pour le SIREN donné, triées par année décroissante. Les brouillons ne sont jamais retournés.",
+				"Retourne toutes les déclarations de représentation équilibrée soumises et publiées pour le SIREN donné, triées par année décroissante. Les brouillons ne sont jamais retournés, et une année n'apparaît qu'à partir de la date de rendu public de sa campagne.",
 			parameters: [sirenParam, limitOnlyParam],
 			responses: {
 				"200": {
@@ -176,7 +176,7 @@ export const representationsPaths = {
 			summary:
 				"Consulter une déclaration de représentation équilibrée par SIREN et année",
 			description:
-				"Retourne la déclaration de représentation équilibrée soumise pour le SIREN et l'année (de référence) donnés. Retourne 404 si aucune déclaration soumise n'existe pour cette année (brouillon ou absence de déclaration).",
+				"Retourne la déclaration de représentation équilibrée soumise pour le SIREN et l'année (de référence) donnés, à partir de la date de rendu public de sa campagne. Retourne 404 si aucune déclaration soumise n'existe pour cette année (brouillon ou absence de déclaration) ou si elle n'est pas encore publiée.",
 			parameters: [
 				sirenParam,
 				{
@@ -199,7 +199,7 @@ export const representationsPaths = {
 				},
 				"400": errorResponse("SIREN ou année invalide."),
 				"404": errorResponse(
-					"Déclaration non trouvée ou non soumise (brouillon).",
+					"Déclaration non trouvée, non soumise (brouillon) ou non encore publiée.",
 				),
 				"500": serverErrorResponse,
 			},

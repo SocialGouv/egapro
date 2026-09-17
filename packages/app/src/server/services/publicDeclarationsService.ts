@@ -8,11 +8,11 @@ import {
 	eq,
 	ilike,
 	inArray,
-	isNotNull,
 	or,
 	type SQL,
 	sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import {
 	NAF_SECTION_DIVISIONS,
@@ -36,6 +36,7 @@ import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
+import { publiclyReleasedCampaignCondition } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -81,8 +82,7 @@ export async function listRecentPublicDeclarations(limit: number) {
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		)
 		.orderBy(desc(publishedAt), asc(companies.siren))
@@ -185,8 +185,7 @@ export async function searchPublicDeclarations(
 	const baseConditions = [
 		notCancelledCondition(),
 		submittedDeclarationCondition(),
-		isNotNull(campaignDeadlines.publicDataReleaseDate),
-		sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+		publiclyReleasedCampaignCondition(),
 	];
 	if (input.q) {
 		const normalizedQuery = input.q.replace(/\s/g, "");
@@ -205,6 +204,7 @@ export async function searchPublicDeclarations(
 		// Search results represent companies, not declaration-years. Keep only
 		// the newest publishable declaration for each SIREN; the detail route
 		// exposes the complete multi-year history.
+		const latestCampaign = alias(campaignDeadlines, "c2");
 		baseConditions.push(sql`${declarations.year} = (
 			SELECT MAX(d2.year)
 			FROM app_declaration d2
@@ -212,8 +212,7 @@ export async function searchPublicDeclarations(
 			WHERE d2.siren = ${declarations.siren}
 				AND d2.cancelled_at IS NULL
 				AND d2.status <> 'draft'
-				AND c2.public_data_release_date IS NOT NULL
-				AND c2.public_data_release_date <= CURRENT_DATE
+				AND ${publiclyReleasedCampaignCondition(latestCampaign)}
 		)`);
 	}
 
@@ -329,8 +328,7 @@ export async function listPublicCompanySirens(
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		)
 		.orderBy(asc(declarations.siren))
@@ -348,8 +346,7 @@ export async function countPublicCompanySirens(): Promise<number> {
 			and(
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		);
 	return rows[0]?.total ?? 0;
