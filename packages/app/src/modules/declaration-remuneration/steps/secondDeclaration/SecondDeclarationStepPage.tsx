@@ -147,6 +147,11 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						workforce: getObligationWorkforce(company.gipWorkforce),
 						hasCse: company.hasCse,
 					})}
+					declarationUpdatedAt={
+						data.declaration.updatedAt
+							? new Date(data.declaration.updatedAt).getTime()
+							: null
+					}
 					declarationYear={currentYear}
 					secondDeclarationCategories={reviewCategories}
 					siren={data.declaration.siren}

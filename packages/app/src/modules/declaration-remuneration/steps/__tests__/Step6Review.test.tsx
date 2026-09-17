@@ -1,6 +1,6 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SUBMISSION_UNCONFIRMED_MESSAGE } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { noPayGapReferences } from "~/test/gipGapFixtures";
@@ -10,9 +10,9 @@ const mockSubmitMutate = vi.fn();
 const mockSubmitReset = vi.fn();
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
-const mockWaitForServer = vi.fn();
 const mockDisclose = vi.fn();
 const mockConceal = vi.fn();
+const mockTrackFunnelComplete = vi.fn();
 type MockSubmissionError = {
 	message: string;
 	data?: { code: string };
@@ -20,6 +20,7 @@ type MockSubmissionError = {
 const mockSubmitState = {
 	error: null as MockSubmissionError | null,
 	isPending: false,
+	networkMode: undefined as string | undefined,
 	onSuccess: undefined as (() => void) | undefined,
 	onError: undefined as ((error: MockSubmissionError) => void) | undefined,
 };
@@ -34,22 +35,25 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 	getDsfrModal: () => ({ disclose: mockDisclose, conceal: mockConceal }),
 }));
 
+vi.mock("~/modules/analytics", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/analytics")>()),
+	trackFunnelComplete: (...args: unknown[]) => mockTrackFunnelComplete(...args),
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
-		profile: {
-			get: {
-				useQuery: () => ({ refetch: mockWaitForServer }),
-			},
-		},
 		declaration: {
 			submit: {
 				useMutation: ({
+					networkMode,
 					onSuccess,
 					onError,
 				}: {
+					networkMode?: string;
 					onSuccess: () => void;
 					onError: (error: MockSubmissionError) => void;
 				}) => {
+					mockSubmitState.networkMode = networkMode;
 					mockSubmitState.onSuccess = onSuccess;
 					mockSubmitState.onError = onError;
 					return {
@@ -171,14 +175,25 @@ describe("Step6Review", () => {
 		mockSubmitReset.mockReset();
 		mockPush.mockReset();
 		mockRefresh.mockReset();
-		mockWaitForServer.mockReset();
-		mockWaitForServer.mockResolvedValue({ isSuccess: true });
 		mockDisclose.mockReset();
 		mockConceal.mockReset();
+		mockTrackFunnelComplete.mockReset();
 		mockSubmitState.error = null;
 		mockSubmitState.isPending = false;
+		mockSubmitState.networkMode = undefined;
 		mockSubmitState.onSuccess = undefined;
 		mockSubmitState.onError = undefined;
+		vi.stubGlobal("fetch", vi.fn());
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("submits with networkMode 'always' so an offline attempt fails fast instead of pausing", () => {
+		renderSubmissionReview();
+
+		expect(mockSubmitState.networkMode).toBe("always");
 	});
 
 	it("re-reads the server state when the server rejects the submission", () => {
@@ -187,28 +202,30 @@ describe("Step6Review", () => {
 		act(() => mockSubmitState.onError?.(RULES_ENGINE_REFUSAL));
 
 		expect(mockRefresh).toHaveBeenCalledTimes(1);
-		expect(mockWaitForServer).not.toHaveBeenCalled();
+		expect(fetch).not.toHaveBeenCalled();
 		expect(mockPush).not.toHaveBeenCalled();
 	});
 
 	it("waits for the server before refreshing after a network failure", async () => {
-		let markServerReachable: (result: { isSuccess: boolean }) => void =
-			() => {};
-		mockWaitForServer.mockReturnValue(
-			new Promise((resolve) => {
-				markServerReachable = resolve;
-			}),
-		);
-		renderSubmissionReview();
+		vi.useFakeTimers();
+		try {
+			vi.mocked(fetch)
+				.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+				.mockResolvedValueOnce(new Response("OK", { status: 200 }));
+			renderSubmissionReview();
 
-		act(() => mockSubmitState.onError?.({ message: "Failed to fetch" }));
+			act(() => mockSubmitState.onError?.({ message: "Failed to fetch" }));
+			await act(() => vi.advanceTimersByTimeAsync(0));
 
-		expect(mockWaitForServer).toHaveBeenCalledTimes(1);
-		expect(mockRefresh).not.toHaveBeenCalled();
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(mockRefresh).not.toHaveBeenCalled();
 
-		await act(async () => markServerReachable({ isSuccess: true }));
+			await act(() => vi.advanceTimersByTimeAsync(1_000));
 
-		expect(mockRefresh).toHaveBeenCalledTimes(1);
+			expect(mockRefresh).toHaveBeenCalledTimes(1);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("completes the submission once the refreshed page shows it went through", () => {
@@ -224,6 +241,30 @@ describe("Step6Review", () => {
 		);
 		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
 			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("does not re-track the funnel completion when the server refuses a declaration submitted from another tab", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockTrackFunnelComplete).not.toHaveBeenCalled();
+	});
+
+	it("tracks the funnel completion when resuming after this tab's response was lost", () => {
+		mockSubmitState.error = { message: "Failed to fetch" };
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
 		);
 	});
 
@@ -265,6 +306,7 @@ describe("Step6Review", () => {
 
 		act(() => mockSubmitState.onSuccess?.());
 
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
 		expect(mockConceal).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite",
@@ -274,20 +316,14 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("still navigates if funnel tracking storage is unavailable", () => {
+	it("still navigates if funnel tracking throws", () => {
+		mockTrackFunnelComplete.mockImplementation(() => {
+			throw new Error("Tracking blocked");
+		});
 		renderSubmissionReview();
-		const storage = vi
-			.spyOn(Storage.prototype, "getItem")
-			.mockImplementation(() => {
-				throw new Error("Storage blocked");
-			});
-		try {
-			act(() => mockSubmitState.onSuccess?.());
-			expect(mockConceal).toHaveBeenCalledTimes(1);
-			expect(mockPush).toHaveBeenCalledTimes(1);
-		} finally {
-			storage.mockRestore();
-		}
+		act(() => mockSubmitState.onSuccess?.());
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledTimes(1);
 	});
 
 	it("shows a submission error in the modal and clears it on close", async () => {

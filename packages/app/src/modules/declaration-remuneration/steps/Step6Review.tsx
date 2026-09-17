@@ -96,6 +96,10 @@ export function Step6Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const finishSubmission = useCallback(() => {
+		closeModal();
+		router.push(COMPLIANCE_PATH);
+	}, [closeModal, router]);
 	const completeSubmission = useCallback(() => {
 		// A blocked sessionStorage must not prevent navigation after submission.
 		try {
@@ -109,18 +113,27 @@ export function Step6Review({
 		} catch {
 			// Tracking is best effort; the declaration is already submitted.
 		}
-		closeModal();
-		router.push(COMPLIANCE_PATH);
-	}, [closeModal, companyWorkforce, declarationYear, router]);
+		finishSubmission();
+	}, [companyWorkforce, declarationYear, finishSubmission]);
 	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const submitMutation = api.declaration.submit.useMutation({
+		networkMode: "always",
 		onSuccess: completeSubmission,
 		onError: refreshAfterSubmissionError,
 	});
 	const submittedDespiteError = isSubmitted && submitMutation.isError;
+	// A server answer most likely means another tab submitted and tracked it; a lost response means this tab did.
+	const submittedElsewhere = Boolean(submitMutation.error?.data);
 	useEffect(() => {
-		if (submittedDespiteError) completeSubmission();
-	}, [submittedDespiteError, completeSubmission]);
+		if (!submittedDespiteError) return;
+		if (submittedElsewhere) finishSubmission();
+		else completeSubmission();
+	}, [
+		submittedDespiteError,
+		submittedElsewhere,
+		finishSubmission,
+		completeSubmission,
+	]);
 	const handleCloseModal = () => {
 		if (submitMutation.isPending) return;
 		submitMutation.reset();

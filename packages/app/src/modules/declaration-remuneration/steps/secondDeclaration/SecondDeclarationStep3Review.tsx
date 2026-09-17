@@ -31,6 +31,8 @@ import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator
 type Props = {
 	cseApplicable: boolean;
 	cseOpinionRequired: boolean;
+	// Bumped by the server on every successful submit, even a self-loop status transition.
+	declarationUpdatedAt: number | null;
 	declarationYear: number;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
@@ -40,6 +42,7 @@ type Props = {
 export function SecondDeclarationStep3Review({
 	cseApplicable,
 	cseOpinionRequired,
+	declarationUpdatedAt,
 	declarationYear,
 	secondDeclarationCategories,
 	siren,
@@ -48,6 +51,7 @@ export function SecondDeclarationStep3Review({
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const isWritable = isSecondDeclarationWritable(status);
+	const submissionAttemptFingerprintRef = useRef(declarationUpdatedAt);
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some((cat) =>
@@ -80,10 +84,13 @@ export function SecondDeclarationStep3Review({
 	}, [closeModal, cseOpinionRequired, gapsExist, router]);
 	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		networkMode: "always",
 		onSuccess: completeSubmission,
 		onError: refreshAfterSubmissionError,
 	});
-	const submittedDespiteError = !isWritable && mutation.isError;
+	const submittedDespiteError =
+		mutation.isError &&
+		declarationUpdatedAt !== submissionAttemptFingerprintRef.current;
 	useEffect(() => {
 		if (submittedDespiteError) completeSubmission();
 	}, [submittedDespiteError, completeSubmission]);
@@ -201,7 +208,10 @@ export function SecondDeclarationStep3Review({
 					isSecondDeclaration
 					modalRef={modalRef}
 					onClose={handleCloseModal}
-					onSubmit={() => mutation.mutate()}
+					onSubmit={() => {
+						submissionAttemptFingerprintRef.current = declarationUpdatedAt;
+						mutation.mutate();
+					}}
 					year={declarationYear}
 				/>
 			) : null}
