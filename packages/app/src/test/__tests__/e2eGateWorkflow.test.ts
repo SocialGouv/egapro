@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
  * Tooling assertions on the E2E gate.
  *
  * The gate spreads the main suite and the 185-coordinate grid over five runners,
- * and three of the properties that make it a gate at all fail SILENTLY — nothing
+ * and most of the properties that make it a gate at all fail SILENTLY — nothing
  * turns red, the check just stops covering what it claims to cover:
  *
  *  - Playwright disables its "no tests found" error under `--shard`, so an empty
@@ -16,7 +16,13 @@ import { describe, expect, it } from "vitest";
  *  - Playwright shards top-level projects only and replays dependency projects
  *    whole, so putting `logout` back downstream of `chromium` — or restoring a
  *    file-level serial group on the grid — hands every test to shard 1 and leaves
- *    the others empty.
+ *    the others empty;
+ *  - `workers: 1` is what still orders `chromium` before `logout` and what still
+ *    serialises the grid's 185 coordinates once the dependency / serial group
+ *    above is gone — raise it in either config and nothing turns red either;
+ *  - `fail-fast: true` on the shard matrix would cancel every surviving shard the
+ *    moment one turns red, and a cancelled shard reads the same as one that never
+ *    ran.
  *
  * Each of those is one line away at any time, and none of them would show up in a
  * green run. Hence this file.
