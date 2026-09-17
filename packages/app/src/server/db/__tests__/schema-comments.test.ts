@@ -152,6 +152,21 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		expect(SCHEMA_COLUMN_COMMENTS.file?.file_path).toBeUndefined();
 	});
 
+	it("annotates cse_opinion_file columns exposed by SUIT (#4535)", () => {
+		const cseOpinionFile = SCHEMA_COLUMN_COMMENTS.cse_opinion_file;
+		expect(cseOpinionFile?.declaration_number).toBe(
+			"SUIT: Fichiers_CSE.Contenus.Numero_declaration",
+		);
+		expect(cseOpinionFile?.type).toBe("SUIT: Fichiers_CSE.Contenus.Type");
+	});
+
+	it("does not annotate cse_opinion_file join keys (not exposed as raw values in SUIT JSON)", () => {
+		const cseOpinionFile = SCHEMA_COLUMN_COMMENTS.cse_opinion_file;
+		expect(cseOpinionFile?.id).toBeUndefined();
+		expect(cseOpinionFile?.declaration_id).toBeUndefined();
+		expect(cseOpinionFile?.file_id).toBeUndefined();
+	});
+
 	it("annotates indicator G job_category columns without GIP-MDS prefix", () => {
 		const jobCat = SCHEMA_COLUMN_COMMENTS.job_category;
 		expect(jobCat?.name).toBe("SUIT: Indicateurs.G.Nom_categorie");
@@ -204,6 +219,7 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 			"user",
 			"cse_opinion",
 			"file",
+			"cse_opinion_file",
 			"job_category",
 			"employee_category",
 		] as const;

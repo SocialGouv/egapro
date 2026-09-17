@@ -78,6 +78,58 @@ describe("openApiSpec", () => {
 		expect(details.items.type).toBe("object");
 	});
 
+	describe("Fichiers_CSE[].Contenus schema (#4535)", () => {
+		const responseSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema;
+		const declarationSchema = responseSchema.properties.Declarations.items;
+		const fichiersCse = declarationSchema.properties.Fichiers_CSE;
+
+		it("declares Contenus as an array on each Fichiers_CSE item", () => {
+			const contenus = fichiersCse.items.properties.Contenus;
+			expect(contenus).toBeDefined();
+			expect(contenus.type).toBe("array");
+		});
+
+		it("mirrors Avis_CSE's vocabulary: Numero_declaration in {1, 2}, Type in {accuracy, gap}", () => {
+			const item = fichiersCse.items.properties.Contenus.items;
+			expect(item.properties.Numero_declaration.enum).toEqual([1, 2]);
+			expect(item.properties.Type.enum).toEqual(["accuracy", "gap"]);
+		});
+
+		it("does not add Contenus to Fichier_evaluation_conjointe (unchanged)", () => {
+			const jointEval =
+				declarationSchema.properties.Fichier_evaluation_conjointe;
+			const variants = jointEval.oneOf as ReadonlyArray<{
+				type?: string;
+				properties?: Record<string, unknown>;
+			}>;
+			const objectVariant = variants.find((v) => v.type === "object");
+			expect(objectVariant).toBeDefined();
+			expect(objectVariant?.properties?.Contenus).toBeUndefined();
+		});
+	});
+
+	describe("/files contents schema (#4535)", () => {
+		const filesSchema =
+			openApiSpec.paths["/api/v1/files"].get.responses["200"].content[
+				"application/json"
+			].schema;
+		const fileItemSchema = filesSchema.properties.files.items;
+
+		it("declares contents as an array on the shared file item schema", () => {
+			const contents = fileItemSchema.properties.contents;
+			expect(contents).toBeDefined();
+			expect(contents.type).toBe("array");
+		});
+
+		it("mirrors the declarations export vocabulary in English keys", () => {
+			const item = fileItemSchema.properties.contents.items;
+			expect(item.properties.declarationNumber.enum).toEqual([1, 2]);
+			expect(item.properties.type.enum).toEqual(["accuracy", "gap"]);
+		});
+	});
+
 	describe("representations endpoint", () => {
 		const path = openApiSpec.paths["/api/v1/export/representations"];
 

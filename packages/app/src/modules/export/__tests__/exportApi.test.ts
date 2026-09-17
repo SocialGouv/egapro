@@ -345,6 +345,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 	});
 
 	it("should return assembled declarations with flat indicator columns", async () => {
@@ -593,12 +595,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -675,12 +676,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse-2027.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -697,9 +697,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichiers_CSE).toEqual([
 			{
@@ -708,7 +706,87 @@ describe("GET /api/v1/export/declarations", () => {
 				Nom_fichier: "avis-cse-2027.pdf",
 				Date_upload: "2027-03-10T08:30:00.000Z",
 				URL_telechargement: "/api/v1/files/file-abc",
+				Contenus: [],
 			},
+		]);
+	});
+
+	it("should expose Fichiers_CSE[].Contenus, sorted by declaration number then accuracy before gap (#4535)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "file-abc",
+							declarationId: "decl-1",
+							fileName: "avis-cse-2027.pdf",
+							filePath: "/s3/path",
+							uploadedAt: new Date("2027-03-10T08:30:00Z"),
+							contents: [
+								{ declarationNumber: 2, type: "gap" },
+								{ declarationNumber: 1, type: "gap" },
+								{ declarationNumber: 1, type: "accuracy" },
+								{ declarationNumber: 2, type: "accuracy" },
+							],
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Declarations[0].Fichiers_CSE[0].Contenus).toEqual([
+			{ Numero_declaration: 1, Type: "accuracy" },
+			{ Numero_declaration: 1, Type: "gap" },
+			{ Numero_declaration: 2, Type: "accuracy" },
+			{ Numero_declaration: 2, Type: "gap" },
 		]);
 	});
 
@@ -823,12 +901,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchJointEval.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "je-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "eval.pdf",
 							filePath: "/s3/je",
 							uploadedAt: new Date("2027-04-01T09:00:00Z"),
@@ -845,9 +922,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchJointEval).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichier_evaluation_conjointe).toEqual({
 			Id: "je-1",

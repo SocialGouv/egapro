@@ -1,6 +1,7 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
+import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
@@ -9,6 +10,7 @@ import {
 } from "~/server/db/declarationConditions";
 import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
@@ -364,47 +366,78 @@ export async function getDeclarationsWithIndicatorG(
 // ── File queries (CSE opinion files + joint evaluation files) ────────
 
 async function fetchFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 	type: "cse_opinion" | "joint_evaluation",
 ): Promise<FileRow[]> {
-	if (keys.length === 0) return [];
+	if (declarationIds.length === 0) return [];
 	return db
 		.select({
 			id: files.id,
-			siren: declarations.siren,
-			year: declarations.year,
+			declarationId: files.declarationId,
 			fileName: files.fileName,
 			filePath: files.filePath,
 			uploadedAt: files.uploadedAt,
 		})
 		.from(files)
-		.innerJoin(declarations, eq(files.declarationId, declarations.id))
 		.where(
-			and(
-				eq(files.type, type),
-				or(
-					...keys.map((k) =>
-						and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
-					),
-				),
-			),
+			and(eq(files.type, type), inArray(files.declarationId, declarationIds)),
 		);
 }
 
 export async function fetchCseFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(declarationIds, "cse_opinion");
+	if (rows.length === 0) return new Map();
+
+	const contentRows = await db
+		.select({
+			fileId: cseOpinionFiles.fileId,
+			declarationNumber: cseOpinionFiles.declarationNumber,
+			type: cseOpinionFiles.type,
+		})
+		.from(cseOpinionFiles)
+		.where(
+			inArray(
+				cseOpinionFiles.fileId,
+				rows.map((r) => r.id),
+			),
+		);
+	const contentsByFileId = groupByKey(contentRows, (r) => r.fileId);
+
+	const filesWithContents: FileRow[] = rows.map((file) => ({
+		...file,
+		contents: (contentsByFileId.get(file.id) ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
+	}));
+
+	return groupByKey(filesWithContents, (r) => r.declarationId);
 }
 
 export async function fetchJointEvaluationFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "joint_evaluation");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(
+		declarationIds,
+		"joint_evaluation",
+	);
+	return groupByKey(rows, (r) => r.declarationId);
+}
+
+export async function resolveActiveDeclarationId(
+	siren: string,
+	year: number,
+): Promise<string | null> {
+	const rows = await db
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+	return rows[0]?.id ?? null;
 }
 
 // ── Single file lookup (for download) ────────────────────────────────
