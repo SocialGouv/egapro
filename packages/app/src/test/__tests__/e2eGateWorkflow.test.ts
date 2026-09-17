@@ -129,17 +129,44 @@ describe("E2E gate workflow", () => {
 		}
 	});
 
+	const mergeBody = jobs.find((job) => job.id === "merge")?.body ?? "";
+
+	function stepOf(name: string): string {
+		const start = mergeBody.indexOf(`- name: ${name}`);
+		if (start === -1) return "";
+		const next = mergeBody.indexOf("- name: ", start + 1);
+		return mergeBody.slice(start, next === -1 ? undefined : next);
+	}
+
 	it("publishes the complete merged recette report in the job summary", () => {
-		const mergeBody = jobs.find((job) => job.id === "merge")?.body ?? "";
-		const reportStep = mergeBody.slice(
-			mergeBody.indexOf("- name: Generate the recette report"),
-			mergeBody.indexOf("- name: Upload merged Playwright report"),
-		);
+		const reportStep = stepOf("Generate the recette report");
 
 		expect(reportStep).toContain("if: always()");
 		expect(reportStep).toContain("report:grille");
 		expect(reportStep).toContain("--results merged-results.json");
 		expect(reportStep).toContain("--out playwright-report/grille-recette.md");
+	});
+
+	it("points the failure evidence at the uploaded report, which carries the traces", () => {
+		const uploadStep = stepOf("Upload merged Playwright report");
+
+		expect(uploadStep).toContain("id: upload-report");
+		expect(mergeBody.indexOf(uploadStep)).toBeLessThan(
+			mergeBody.indexOf(stepOf("Generate the recette report")),
+		);
+		expect(mergeBody).toContain("steps.upload-report.outputs.artifact-url");
+	});
+
+	it("links the run summary from one sticky comment on the pull request", () => {
+		const commentStep = stepOf(
+			"Comment the recette report on the pull request",
+		);
+
+		expect(commentStep).toContain("always()");
+		expect(commentStep).toContain("github.event_name == 'pull_request'");
+		expect(commentStep).toContain("<!-- e2e-recette-grille -->");
+		expect(commentStep).toContain("PATCH");
+		expect(mergeBody).toMatch(/pull-requests:\s*write/);
 	});
 });
 

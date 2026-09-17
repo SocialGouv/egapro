@@ -263,6 +263,9 @@ jobs:
     needs: shard
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -291,17 +294,10 @@ jobs:
             -c playwright.merge.config.ts \
             "${{ github.workspace }}/blob-report"
           cp packages/app/merged-results.json packages/app/playwright-report/merged-results.json
-      - name: Generate the recette report
-        if: always()
-        run: |
-          set -euo pipefail
-          pnpm --filter app report:grille \
-            --results merged-results.json \
-            --out playwright-report/grille-recette.md \
-            --scope "tous les cas (185 coordonnées)" \
-            --commit "${{ github.sha }}" \
-            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # Uploaded before the recette report is generated: the report links each
+      # failure to this artifact, the merged HTML report that carries the traces.
       - name: Upload merged Playwright report
+        id: upload-report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -309,6 +305,63 @@ jobs:
           path: packages/app/playwright-report/
           retention-days: 7
           if-no-files-found: ignore
+      - name: Generate the recette report
+        if: always()
+        env:
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          set -euo pipefail
+          pnpm --filter app report:grille \
+            --results merged-results.json \
+            --out playwright-report/grille-recette.md \
+            --scope "tous les cas (185 coordonnées)" \
+            --commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --report-url "$REPORT_URL"
+      - name: Upload recette report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grille-recette
+          path: packages/app/playwright-report/grille-recette.md
+          retention-days: 7
+          if-no-files-found: ignore
+      # A job summary only shows on the run page, never on the pull request, so one
+      # comment — edited in place on every run — carries the verdict and the link.
+      # A fork's token cannot write to the base repository: skipped there.
+      - name: Comment the recette report on the pull request
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          set -euo pipefail
+          report=packages/app/playwright-report/grille-recette.md
+          marker="<!-- e2e-recette-grille -->"
+          {
+            echo "$marker"
+            echo "### 🧪 Recette E2E — grille 185 coordonnées"
+            echo ""
+            if [ -f "$report" ]; then
+              sed -n '/^| Date |/,/^$/p' "$report"
+              grep '^### ❌ ' "$report" | sed 's/^### ❌ /- ❌ /' || true
+              echo ""
+            else
+              echo "> ⚠️ Rapport de recette absent : voir les logs du run."
+              echo ""
+            fi
+            echo "➡️ [Grille complète dans le résumé du run]($RUN_URL) · [Rapport Playwright et traces]($REPORT_URL)"
+          } > "$RUNNER_TEMP/recette-comment.md"
+          comment_id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              -F body=@"$RUNNER_TEMP/recette-comment.md" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              -F body=@"$RUNNER_TEMP/recette-comment.md" > /dev/null
+          fi
 
   e2e:
     # The required status check of `alpha`, and it has to be this shape. A matrix

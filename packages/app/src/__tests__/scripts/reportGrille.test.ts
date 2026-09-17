@@ -56,9 +56,7 @@ describe("buildReport — header verdict", () => {
 
 		const report = buildReport(baseOptions(results));
 
-		expect(report).toContain(
-			"**185 passés / 0 échoués / 0 non joués** sur 185",
-		);
+		expect(report).toContain("**185 passés / 0 échoué / 0 non joué** sur 185");
 		expect(report).toContain("# Recette métier — Grille 185 coordonnées");
 	});
 
@@ -75,8 +73,20 @@ describe("buildReport — header verdict", () => {
 		});
 
 		expect(report).toContain(
-			"**12 passés / 0 échoués / 173 non joués** sur 185",
+			"**12 passés / 0 échoué / 173 non joués** sur 185",
 		);
+	});
+
+	it("agrees each count in number — singular up to 1, plural from 2", () => {
+		const [passedId, ...failedIds] = GRID.slice(0, 3).map((c) => c.id);
+		const results = new Map<string, CoordResult>([
+			...resultsFor(passedId ? [passedId] : []),
+			...resultsFor(failedIds, { status: "failed" }),
+		]);
+
+		const report = buildReport(baseOptions(results));
+
+		expect(report).toContain("**1 passé / 2 échoués / 182 non joués** sur 185");
 	});
 
 	it("marks the 185 coordinates non joués when the JSON is absent", () => {
@@ -86,9 +96,7 @@ describe("buildReport — header verdict", () => {
 				"Fichier de résultats introuvable (playwright-report/grille-results.json)",
 		});
 
-		expect(report).toContain(
-			"**0 passés / 0 échoués / 185 non joués** sur 185",
-		);
+		expect(report).toContain("**0 passé / 0 échoué / 185 non joués** sur 185");
 		expect(report).toContain(
 			"> ⚠️ Fichier de résultats introuvable (playwright-report/grille-results.json) — les 185 coordonnées sont marquées non jouées.",
 		);
@@ -135,9 +143,7 @@ describe("buildReport — failures section", () => {
 		expect(report).toContain(
 			"**Preuve** : [trace Playwright](https://ci.example.com/report)",
 		);
-		expect(report).toContain(
-			"**0 passés / 1 échoués / 184 non joués** sur 185",
-		);
+		expect(report).toContain("**0 passé / 1 échoué / 184 non joués** sur 185");
 	});
 
 	it("falls back to a placeholder step when the failing step is unknown", () => {
