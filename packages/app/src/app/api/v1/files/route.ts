@@ -9,7 +9,7 @@ import {
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
-import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
+import { resolveExportDeclarationId } from "~/server/db/declarationConditions";
 import { assertGatewaySource } from "~/server/services/gatewaySource";
 
 /**
@@ -64,11 +64,19 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 
 		const { siren, year } = parsed.data;
 
-		const declarationId = await resolveCurrentDeclarationId(db, siren, year);
+		const resolved = await resolveExportDeclarationId(db, siren, year);
 
-		if (declarationId === null) {
-			return Response.json({ siren, year, files: [] });
+		if (resolved === null) {
+			return Response.json({
+				siren,
+				year,
+				declarationId: null,
+				cancelledAt: null,
+				files: [],
+			});
 		}
+
+		const { id: declarationId, cancelledAt } = resolved;
 
 		const [cseFilesMap, jointFilesMap] = await Promise.all([
 			fetchCseFilesByDeclaration([declarationId]),
@@ -85,6 +93,8 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 		return Response.json({
 			siren,
 			year,
+			declarationId,
+			cancelledAt: cancelledAt?.toISOString() ?? null,
 			files: [...cseFiles, ...jointFiles],
 		});
 	} catch (error) {

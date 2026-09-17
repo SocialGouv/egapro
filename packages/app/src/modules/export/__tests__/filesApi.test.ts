@@ -5,7 +5,9 @@ const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchFileById = vi.fn().mockResolvedValue(undefined);
 const mockFetchFileBySiren = vi.fn().mockResolvedValue(undefined);
-const mockResolveCurrentDeclarationId = vi.fn().mockResolvedValue("decl-1");
+const mockResolveExportDeclarationId = vi
+	.fn()
+	.mockResolvedValue({ id: "decl-1", cancelledAt: null });
 const mockAuth = vi.fn().mockResolvedValue(null);
 const mockLogAction = vi.fn().mockResolvedValue(undefined);
 
@@ -24,8 +26,8 @@ vi.mock("~/modules/export/queries", () => ({
 vi.mock("~/server/db", () => ({ db: {} }));
 
 vi.mock("~/server/db/declarationConditions", () => ({
-	resolveCurrentDeclarationId: (...args: unknown[]) =>
-		mockResolveCurrentDeclarationId(...args),
+	resolveExportDeclarationId: (...args: unknown[]) =>
+		mockResolveExportDeclarationId(...args),
 }));
 
 vi.mock("~/server/auth", () => ({
@@ -71,7 +73,10 @@ describe("GET /api/v1/files", () => {
 		vi.clearAllMocks();
 		mockFetchCseFiles.mockResolvedValue(new Map());
 		mockFetchJointFiles.mockResolvedValue(new Map());
-		mockResolveCurrentDeclarationId.mockResolvedValue("decl-1");
+		mockResolveExportDeclarationId.mockResolvedValue({
+			id: "decl-1",
+			cancelledAt: null,
+		});
 	});
 
 	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
@@ -239,7 +244,10 @@ describe("GET /api/v1/files", () => {
 	});
 
 	it("should resolve the current declaration and query files by its id", async () => {
-		mockResolveCurrentDeclarationId.mockResolvedValue("decl-current");
+		mockResolveExportDeclarationId.mockResolvedValue({
+			id: "decl-current",
+			cancelledAt: null,
+		});
 
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = gatewayForwardedRequest(
@@ -247,7 +255,7 @@ describe("GET /api/v1/files", () => {
 		);
 		await GET(request);
 
-		expect(mockResolveCurrentDeclarationId).toHaveBeenCalledWith(
+		expect(mockResolveExportDeclarationId).toHaveBeenCalledWith(
 			db,
 			"987654321",
 			2026,
@@ -256,8 +264,11 @@ describe("GET /api/v1/files", () => {
 		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-current"]);
 	});
 
-	it("returns the cancelled declaration's files when it is the only declaration for (siren, year) — the fallback matches /export/declarations, which still exposes it (#4535)", async () => {
-		mockResolveCurrentDeclarationId.mockResolvedValue("decl-cancelled");
+	it("exposes the resolved declaration's id and cancellation date at the response root (#4535)", async () => {
+		mockResolveExportDeclarationId.mockResolvedValue({
+			id: "decl-cancelled",
+			cancelledAt: new Date("2027-04-01T12:00:00Z"),
+		});
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
@@ -282,9 +293,9 @@ describe("GET /api/v1/files", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-cancelled"]);
-		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-cancelled"]);
 		const body = await response.json();
+		expect(body.declarationId).toBe("decl-cancelled");
+		expect(body.cancelledAt).toBe("2027-04-01T12:00:00.000Z");
 		expect(body.files).toEqual([
 			{
 				id: "cse-1",
@@ -297,8 +308,8 @@ describe("GET /api/v1/files", () => {
 		]);
 	});
 
-	it("returns no files when no declaration at all exists for (siren, year)", async () => {
-		mockResolveCurrentDeclarationId.mockResolvedValue(null);
+	it("returns no files, declarationId or cancelledAt when no submitted declaration exists for (siren, year)", async () => {
+		mockResolveExportDeclarationId.mockResolvedValue(null);
 
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = gatewayForwardedRequest(
@@ -310,6 +321,8 @@ describe("GET /api/v1/files", () => {
 		expect(mockFetchCseFiles).not.toHaveBeenCalled();
 		expect(mockFetchJointFiles).not.toHaveBeenCalled();
 		const body = await response.json();
+		expect(body.declarationId).toBeNull();
+		expect(body.cancelledAt).toBeNull();
 		expect(body.files).toEqual([]);
 	});
 });

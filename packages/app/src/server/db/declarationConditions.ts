@@ -71,3 +71,44 @@ export async function resolveCurrentDeclarationId(
 		.limit(1);
 	return rows[0]?.id ?? null;
 }
+
+export type ExportDeclarationResolution = {
+	id: string;
+	cancelledAt: Date | null;
+};
+
+/**
+ * La déclaration exposée aux lecteurs d'export (`/export/declarations`,
+ * `/files`) pour un couple (siren, année) : le pendant lecture de
+ * `resolveCurrentDeclarationId`, avec le même ordre total, mais qui écarte
+ * d'abord les brouillons via `submittedDeclarationCondition`. Un brouillon
+ * ouvert après une annulation (redéclaration en cours) ne doit jamais
+ * masquer la déclaration transmise qu'il redéclare — parmi les déclarations
+ * transmises restantes, l'active gagne, sinon la plus récente annulée.
+ *
+ * Ne réutilise pas `resolveCurrentDeclarationId` : celle-ci sert le garde de
+ * verrou et `uploadPipeline`, dont le comportement en écriture (une
+ * déclaration en brouillon reste ciblable) ne doit pas changer.
+ */
+export async function resolveExportDeclarationId(
+	db: DbOrTx,
+	siren: string,
+	year: number,
+): Promise<ExportDeclarationResolution | null> {
+	const rows = await db
+		.select({ id: declarations.id, cancelledAt: declarations.cancelledAt })
+		.from(declarations)
+		.where(
+			and(
+				currentDeclarationFilter(siren, year),
+				submittedDeclarationCondition(),
+			),
+		)
+		.orderBy(
+			sql`${declarations.cancelledAt} is null desc`,
+			sql`${declarations.createdAt} desc nulls last`,
+			desc(declarations.id),
+		)
+		.limit(1);
+	return rows[0] ?? null;
+}
