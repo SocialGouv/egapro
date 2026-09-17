@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { db } from "~/server/db";
 
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchFileById = vi.fn().mockResolvedValue(undefined);
 const mockFetchFileBySiren = vi.fn().mockResolvedValue(undefined);
-const mockResolveActiveDeclarationId = vi.fn().mockResolvedValue("decl-1");
+const mockResolveCurrentDeclarationId = vi.fn().mockResolvedValue("decl-1");
 const mockAuth = vi.fn().mockResolvedValue(null);
 const mockLogAction = vi.fn().mockResolvedValue(undefined);
 
@@ -15,11 +16,16 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchJointFiles(...args),
 	fetchFileById: (...args: unknown[]) => mockFetchFileById(...args),
 	fetchFileBySiren: (...args: unknown[]) => mockFetchFileBySiren(...args),
-	resolveActiveDeclarationId: (...args: unknown[]) =>
-		mockResolveActiveDeclarationId(...args),
 	fetchSubmittedDeclarations: vi.fn().mockResolvedValue([]),
 	fetchIndicatorGByDeclaration: vi.fn().mockResolvedValue(new Map()),
 	fetchCseOpinionsByDeclaration: vi.fn().mockResolvedValue(new Map()),
+}));
+
+vi.mock("~/server/db", () => ({ db: {} }));
+
+vi.mock("~/server/db/declarationConditions", () => ({
+	resolveCurrentDeclarationId: (...args: unknown[]) =>
+		mockResolveCurrentDeclarationId(...args),
 }));
 
 vi.mock("~/server/auth", () => ({
@@ -65,7 +71,7 @@ describe("GET /api/v1/files", () => {
 		vi.clearAllMocks();
 		mockFetchCseFiles.mockResolvedValue(new Map());
 		mockFetchJointFiles.mockResolvedValue(new Map());
-		mockResolveActiveDeclarationId.mockResolvedValue("decl-1");
+		mockResolveCurrentDeclarationId.mockResolvedValue("decl-1");
 	});
 
 	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
@@ -232,8 +238,8 @@ describe("GET /api/v1/files", () => {
 		]);
 	});
 
-	it("should resolve the active declaration and query files by its id", async () => {
-		mockResolveActiveDeclarationId.mockResolvedValue("decl-active");
+	it("should resolve the current declaration and query files by its id", async () => {
+		mockResolveCurrentDeclarationId.mockResolvedValue("decl-current");
 
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = gatewayForwardedRequest(
@@ -241,16 +247,17 @@ describe("GET /api/v1/files", () => {
 		);
 		await GET(request);
 
-		expect(mockResolveActiveDeclarationId).toHaveBeenCalledWith(
+		expect(mockResolveCurrentDeclarationId).toHaveBeenCalledWith(
+			db,
 			"987654321",
 			2026,
 		);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-active"]);
-		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-active"]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-current"]);
+		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-current"]);
 	});
 
-	it("returns no files when the only declaration for (siren, year) is cancelled — a cancelled declaration's files must not leak into its redeclaration (#4535)", async () => {
-		mockResolveActiveDeclarationId.mockResolvedValue(null);
+	it("returns the cancelled declaration's files when it is the only declaration for (siren, year) — the fallback matches /export/declarations, which still exposes it (#4535)", async () => {
+		mockResolveCurrentDeclarationId.mockResolvedValue("decl-cancelled");
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
@@ -275,8 +282,33 @@ describe("GET /api/v1/files", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith([]);
-		expect(mockFetchJointFiles).toHaveBeenCalledWith([]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-cancelled"]);
+		expect(mockFetchJointFiles).toHaveBeenCalledWith(["decl-cancelled"]);
+		const body = await response.json();
+		expect(body.files).toEqual([
+			{
+				id: "cse-1",
+				type: "cse_opinion",
+				fileName: "avis-cse.pdf",
+				uploadedAt: "2027-03-10T08:00:00.000Z",
+				downloadUrl: "/api/v1/files/cse-1",
+				contents: [],
+			},
+		]);
+	});
+
+	it("returns no files when no declaration at all exists for (siren, year)", async () => {
+		mockResolveCurrentDeclarationId.mockResolvedValue(null);
+
+		const { GET } = await import("~/app/api/v1/files/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/files?siren=123456789&year=2027",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchCseFiles).not.toHaveBeenCalled();
+		expect(mockFetchJointFiles).not.toHaveBeenCalled();
 		const body = await response.json();
 		expect(body.files).toEqual([]);
 	});

@@ -6,9 +6,10 @@ import {
 	exportFilesQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
-	resolveActiveDeclarationId,
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { db } from "~/server/db";
+import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
 import { assertGatewaySource } from "~/server/services/gatewaySource";
 
 /**
@@ -63,20 +64,23 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 
 		const { siren, year } = parsed.data;
 
-		const activeDeclarationId = await resolveActiveDeclarationId(siren, year);
-		const declarationIds = activeDeclarationId ? [activeDeclarationId] : [];
+		const declarationId = await resolveCurrentDeclarationId(db, siren, year);
+
+		if (declarationId === null) {
+			return Response.json({ siren, year, files: [] });
+		}
 
 		const [cseFilesMap, jointFilesMap] = await Promise.all([
-			fetchCseFilesByDeclaration(declarationIds),
-			fetchJointEvaluationFilesByDeclaration(declarationIds),
+			fetchCseFilesByDeclaration([declarationId]),
+			fetchJointEvaluationFilesByDeclaration([declarationId]),
 		]);
 
-		const cseFiles = declarationIds
-			.flatMap((id) => cseFilesMap.get(id) ?? [])
-			.map(buildCseFilePayload);
-		const jointFiles = declarationIds
-			.flatMap((id) => jointFilesMap.get(id) ?? [])
-			.map(buildJointEvaluationFilePayload);
+		const cseFiles = (cseFilesMap.get(declarationId) ?? []).map(
+			buildCseFilePayload,
+		);
+		const jointFiles = (jointFilesMap.get(declarationId) ?? []).map(
+			buildJointEvaluationFilePayload,
+		);
 
 		return Response.json({
 			siren,

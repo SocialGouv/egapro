@@ -535,3 +535,76 @@ describe("GET /api/v1/export/declarations and /api/v1/files — cross-declaratio
 		expect(body.files.map((f: { id: string }) => f.id)).toEqual([FILE_ACTIVE]);
 	});
 });
+
+describe("GET /api/v1/files — falls back to the most recent cancelled declaration (#4535)", () => {
+	let sql!: ReturnType<typeof postgres>;
+
+	const SIREN = "777888999";
+	const YEAR = 2027;
+	const USER_ID = "files-cancelled-fallback-integration-user";
+	const DECL_CANCELLED = "files-decl-cancelled-only";
+	const FILE_CANCELLED = "files-file-cancelled-only";
+
+	beforeAll(() => {
+		sql = postgres(env.DATABASE_URL, { max: 1 });
+	});
+
+	async function cleanup() {
+		await sql`DELETE FROM app_cse_opinion_file WHERE declaration_id = ${DECL_CANCELLED}`;
+		await sql`DELETE FROM app_file WHERE declaration_id = ${DECL_CANCELLED}`;
+		await sql`DELETE FROM app_declaration WHERE id = ${DECL_CANCELLED}`;
+		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
+	}
+
+	afterAll(async () => {
+		if (!sql) return;
+		await cleanup();
+		await sql.end();
+	});
+
+	beforeEach(async () => {
+		await cleanup();
+
+		await sql`
+			INSERT INTO app_user (id, email, first_name, last_name)
+			VALUES (${USER_ID}, 'dir.rh.cancelled-only@example.fr', 'Dir', 'RH')
+		`;
+		await sql`
+			INSERT INTO app_company (siren, name, workforce)
+			VALUES (${SIREN}, 'Entreprise Annulee Sans Redeclaration', 250)
+		`;
+		await sql`
+			INSERT INTO app_declaration (id, siren, year, declarant_id, status, cancelled_at, created_at, updated_at)
+			VALUES (${DECL_CANCELLED}, ${SIREN}, ${YEAR}, ${USER_ID}, 'demarche_completed', '2027-06-10T12:00:00Z', '2027-06-01T00:00:00Z', '2027-06-01T00:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_file (id, declaration_id, file_name, file_path, type, uploaded_at)
+			VALUES (${FILE_CANCELLED}, ${DECL_CANCELLED}, 'avis-declaration-annulee-seule.pdf', ${`${SIREN}/${YEAR}/cancelled-only.pdf`}, 'cse_opinion', '2027-06-05T08:00:00Z')
+		`;
+		await sql`
+			INSERT INTO app_cse_opinion_file (id, declaration_id, declaration_number, type, file_id)
+			VALUES ('assoc-cancelled-only', ${DECL_CANCELLED}, 1, 'accuracy', ${FILE_CANCELLED})
+		`;
+	});
+
+	function gatewayRequest(params: Record<string, string>): Request {
+		const searchParams = new URLSearchParams(params);
+		return new Request(`http://localhost/api/v1/files?${searchParams}`, {
+			headers: { "x-gateway-forwarded": "test-value" },
+		});
+	}
+
+	it("returns the cancelled declaration's file when it is the only declaration for (siren, year), consistent with /export/declarations still exposing it", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		const response = await GET(
+			gatewayRequest({ siren: SIREN, year: String(YEAR) }),
+		);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.files.map((f: { id: string }) => f.id)).toEqual([
+			FILE_CANCELLED,
+		]);
+	});
+});

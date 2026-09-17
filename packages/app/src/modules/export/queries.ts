@@ -1,7 +1,6 @@
 import "server-only";
 
 import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
-import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
@@ -426,18 +425,6 @@ export async function fetchJointEvaluationFilesByDeclaration(
 		"joint_evaluation",
 	);
 	return groupByKey(rows, (r) => r.declarationId);
-}
-
-export async function resolveActiveDeclarationId(
-	siren: string,
-	year: number,
-): Promise<string | null> {
-	const rows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(activeDeclarationFilter(siren, year))
-		.limit(1);
-	return rows[0]?.id ?? null;
 }
 
 // ── Single file lookup (for download) ────────────────────────────────
