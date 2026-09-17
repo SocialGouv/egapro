@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { env } from "~/env.js";
+import { formatCount } from "~/modules/domain";
 import { JsonLd } from "~/modules/shared/JsonLd";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
 import styles from "./ConsultationSearchPage.module.scss";
@@ -24,7 +25,7 @@ type Props = {
 };
 
 function resultsLabel(count: number): string {
-	const formatted = count.toLocaleString("fr-FR");
+	const formatted = formatCount(count);
 	return count > 1
 		? `${formatted} entreprises déclarantes`
 		: `${formatted} entreprise déclarante`;

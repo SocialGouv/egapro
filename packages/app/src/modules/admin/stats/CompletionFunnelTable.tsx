@@ -1,4 +1,4 @@
-import { formatCount } from "./formatters";
+import { formatCount, formatWholePercentage } from "~/modules/domain";
 import type { FunnelRow } from "./types";
 
 type Props = {
@@ -43,7 +43,7 @@ export function CompletionFunnelTable({ rows, caption }: Props) {
 										<tr key={row.key}>
 											<th scope="row">{row.label}</th>
 											<td>{formatCount(row.count)}</td>
-											<td>{row.pctOfStart} %</td>
+											<td>{formatWholePercentage(row.pctOfStart)}</td>
 											<td>{formatDrop(row.pctDropFromPrev)}</td>
 										</tr>
 									))}

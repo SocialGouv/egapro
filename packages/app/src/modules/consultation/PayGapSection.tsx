@@ -1,11 +1,12 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { formatRatioAsPercentage } from "~/modules/domain";
 import {
 	IndicatorCard,
 	type IndicatorCardTooltip,
 } from "~/modules/shared/IndicatorCard";
-import { formatGap, gapDirection } from "./formatters";
+import { gapDirection } from "./formatters";
 import styles from "./indicatorSection.module.scss";
 
 export type GapCardContent = {
@@ -31,7 +32,7 @@ function GapCard({ content }: { content: GapCardContent }) {
 	const direction = gapDirection(content.value);
 	return (
 		<IndicatorCard title={content.title} tooltip={content.tooltip}>
-			<p className={styles.value}>{formatGap(content.value)}</p>
+			<p className={styles.value}>{formatRatioAsPercentage(content.value)}</p>
 			<p className={styles.direction}>
 				{direction.prefix}
 				{direction.emphasis && <strong>{direction.emphasis}</strong>}

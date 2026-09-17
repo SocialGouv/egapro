@@ -10,11 +10,13 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { formatMonthDay, percentageOf } from "~/modules/domain";
-
+import {
+	formatCount,
+	formatMonthDay,
+	formatWholePercentage,
+	percentageOf,
+} from "~/modules/domain";
 import styles from "./CampaignProgressionChart.module.scss";
-import { formatCount } from "./formatters";
 import type { CampaignProgressionSeries } from "./types";
 
 type TooltipEntry = {
@@ -109,8 +111,8 @@ function ProgressionTooltip({
 					const pct = Math.round(percentageOf(entry.value, total));
 					return (
 						<li className={styles.tooltipItem} key={entry.name}>
-							{year} : {formatCount(entry.value)} déclarations ({pct} % du
-							total)
+							{year} : {formatCount(entry.value)} déclarations (
+							{formatWholePercentage(pct)} du total)
 						</li>
 					);
 				})}
