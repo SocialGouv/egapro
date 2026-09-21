@@ -56,6 +56,99 @@ function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
 	return getDefaultCampaignDeadlines(base);
 }
 
+type PlaygroundRadioProps = {
+	id: string;
+	name: string;
+	label: string;
+	checked: boolean;
+	onChange: () => void;
+	compact?: boolean;
+};
+
+function PlaygroundRadio({
+	id,
+	name,
+	label,
+	checked,
+	onChange,
+	compact = false,
+}: PlaygroundRadioProps) {
+	const className = compact
+		? "fr-radio-group fr-radio-group--sm"
+		: "fr-radio-group";
+	return (
+		<div className={className}>
+			<input
+				checked={checked}
+				id={id}
+				name={name}
+				onChange={onChange}
+				type="radio"
+			/>
+			<label className="fr-label" htmlFor={id}>
+				{label}
+			</label>
+		</div>
+	);
+}
+
+type PlaygroundCheckboxProps = {
+	id: string;
+	label: string;
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+};
+
+function PlaygroundCheckbox({
+	id,
+	label,
+	checked,
+	onChange,
+}: PlaygroundCheckboxProps) {
+	return (
+		<div className="fr-checkbox-group">
+			<input
+				checked={checked}
+				id={id}
+				onChange={(event) => onChange(event.currentTarget.checked)}
+				type="checkbox"
+			/>
+			<label className="fr-label" htmlFor={id}>
+				{label}
+			</label>
+		</div>
+	);
+}
+
+type DeadlineDateInputProps = {
+	deadlineKey: keyof CampaignDeadlines;
+	value: Date | null;
+	onChange: (key: keyof CampaignDeadlines, value: string) => void;
+};
+
+function DeadlineDateInput({
+	deadlineKey,
+	value,
+	onChange,
+}: DeadlineDateInputProps) {
+	return (
+		<div className="fr-col-12 fr-col-md-4">
+			<div className="fr-input-group">
+				<label className="fr-label" htmlFor={`deadline-${deadlineKey}`}>
+					{deadlineKey}
+				</label>
+				<input
+					className="fr-input"
+					id={`deadline-${deadlineKey}`}
+					onChange={(event) => onChange(deadlineKey, event.currentTarget.value)}
+					type="date"
+					value={value ? toInputDate(value) : ""}
+				/>
+			</div>
+		</div>
+	);
+}
+
 /**
  * Dev playground for the DeclarationProcessPanel. Lets you pick any variant
  * and any deadline configuration (future / past / custom per-field) and opens
@@ -91,8 +184,43 @@ export function PanelPlayground() {
 		setDeadlines((prev) => ({ ...prev, [key]: parsed }));
 	}
 
-	function getDeadlineInputValue(value: Date | null): string {
-		return value ? toInputDate(value) : "";
+	function renderVariantOption(value: PanelVariant) {
+		return (
+			<PlaygroundRadio
+				checked={variant === value}
+				id={`variant-${value}`}
+				key={value}
+				label={value}
+				name="variant"
+				onChange={() => setVariant(value)}
+			/>
+		);
+	}
+
+	function renderCompliancePathOption(
+		value: (typeof COMPLIANCE_PATHS)[number],
+	) {
+		return (
+			<PlaygroundRadio
+				checked={compliancePath === value}
+				id={`path-${value}`}
+				key={value}
+				label={value}
+				name="compliancePath"
+				onChange={() => setCompliancePath(value)}
+			/>
+		);
+	}
+
+	function renderDeadlineInput(key: keyof CampaignDeadlines) {
+		return (
+			<DeadlineDateInput
+				deadlineKey={key}
+				key={key}
+				onChange={updateDeadline}
+				value={deadlines[key]}
+			/>
+		);
 	}
 
 	return (
@@ -110,20 +238,7 @@ export function PanelPlayground() {
 							Variant
 						</legend>
 						<div className="fr-fieldset__content">
-							{VARIANTS.map((v) => (
-								<div className="fr-radio-group" key={v}>
-									<input
-										checked={variant === v}
-										id={`variant-${v}`}
-										name="variant"
-										onChange={() => setVariant(v)}
-										type="radio"
-									/>
-									<label className="fr-label" htmlFor={`variant-${v}`}>
-										{v}
-									</label>
-								</div>
-							))}
+							{VARIANTS.map(renderVariantOption)}
 						</div>
 					</fieldset>
 				</div>
@@ -134,86 +249,44 @@ export function PanelPlayground() {
 							Compliance path
 						</legend>
 						<div className="fr-fieldset__content">
-							{COMPLIANCE_PATHS.map((p) => (
-								<div className="fr-radio-group" key={p}>
-									<input
-										checked={compliancePath === p}
-										id={`path-${p}`}
-										name="compliancePath"
-										onChange={() => setCompliancePath(p)}
-										type="radio"
-									/>
-									<label className="fr-label" htmlFor={`path-${p}`}>
-										{p}
-									</label>
-								</div>
-							))}
+							{COMPLIANCE_PATHS.map(renderCompliancePathOption)}
 						</div>
 					</fieldset>
 
-					<div className="fr-checkbox-group">
-						<input
-							checked={secondDeclarationSubmitted}
-							id="second-decl-submitted"
-							onChange={(e) =>
-								setSecondDeclarationSubmitted(e.currentTarget.checked)
-							}
-							type="checkbox"
-						/>
-						<label className="fr-label" htmlFor="second-decl-submitted">
-							Seconde déclaration soumise
-						</label>
-					</div>
+					<PlaygroundCheckbox
+						checked={secondDeclarationSubmitted}
+						id="second-decl-submitted"
+						label="Seconde déclaration soumise"
+						onChange={setSecondDeclarationSubmitted}
+					/>
 
-					<div className="fr-checkbox-group">
-						<input
-							checked={compliancePathApplicable}
-							id="compliance-path-applicable"
-							onChange={(e) =>
-								setCompliancePathApplicable(e.currentTarget.checked)
-							}
-							type="checkbox"
-						/>
-						<label className="fr-label" htmlFor="compliance-path-applicable">
-							Parcours de conformité applicable (étape 2 visible)
-						</label>
-					</div>
+					<PlaygroundCheckbox
+						checked={compliancePathApplicable}
+						id="compliance-path-applicable"
+						label="Parcours de conformité applicable (étape 2 visible)"
+						onChange={setCompliancePathApplicable}
+					/>
 
-					<div className="fr-checkbox-group">
-						<input
-							checked={hasPrefillData}
-							id="has-prefill-data"
-							onChange={(e) => setHasPrefillData(e.currentTarget.checked)}
-							type="checkbox"
-						/>
-						<label className="fr-label" htmlFor="has-prefill-data">
-							Données préremplies disponibles
-						</label>
-					</div>
+					<PlaygroundCheckbox
+						checked={hasPrefillData}
+						id="has-prefill-data"
+						label="Données préremplies disponibles"
+						onChange={setHasPrefillData}
+					/>
 
-					<div className="fr-checkbox-group">
-						<input
-							checked={indicatorGRequired}
-							id="indicator-g-required"
-							onChange={(e) => setIndicatorGRequired(e.currentTarget.checked)}
-							type="checkbox"
-						/>
-						<label className="fr-label" htmlFor="indicator-g-required">
-							Indicateur G requis
-						</label>
-					</div>
+					<PlaygroundCheckbox
+						checked={indicatorGRequired}
+						id="indicator-g-required"
+						label="Indicateur G requis"
+						onChange={setIndicatorGRequired}
+					/>
 
-					<div className="fr-checkbox-group">
-						<input
-							checked={cseOpinionRequired}
-							id="cse-opinion-required"
-							onChange={(e) => setCseOpinionRequired(e.currentTarget.checked)}
-							type="checkbox"
-						/>
-						<label className="fr-label" htmlFor="cse-opinion-required">
-							Avis CSE requis (étape 3 visible)
-						</label>
-					</div>
+					<PlaygroundCheckbox
+						checked={cseOpinionRequired}
+						id="cse-opinion-required"
+						label="Avis CSE requis (étape 3 visible)"
+						onChange={setCseOpinionRequired}
+					/>
 				</div>
 			</div>
 
@@ -222,62 +295,37 @@ export function PanelPlayground() {
 					Deadlines
 				</legend>
 				<div className="fr-fieldset__content">
-					<div className="fr-radio-group fr-radio-group--sm">
-						<input
-							checked={preset === "future"}
-							id="preset-future"
-							name="preset"
-							onChange={() => setPreset("future")}
-							type="radio"
-						/>
-						<label className="fr-label" htmlFor="preset-future">
-							Toutes futures (2099) — boutons Modifier visibles
-						</label>
-					</div>
-					<div className="fr-radio-group fr-radio-group--sm">
-						<input
-							checked={preset === "past"}
-							id="preset-past"
-							name="preset"
-							onChange={() => setPreset("past")}
-							type="radio"
-						/>
-						<label className="fr-label" htmlFor="preset-past">
-							Toutes passées (2020) — boutons Modifier cachés
-						</label>
-					</div>
-					<div className="fr-radio-group fr-radio-group--sm">
-						<input
-							checked={preset === "custom"}
-							id="preset-custom"
-							name="preset"
-							onChange={() => setPreset("custom")}
-							type="radio"
-						/>
-						<label className="fr-label" htmlFor="preset-custom">
-							Personnalisé (modifier un champ ci-dessous)
-						</label>
-					</div>
+					<PlaygroundRadio
+						checked={preset === "future"}
+						compact
+						id="preset-future"
+						label="Toutes futures (2099) — boutons Modifier visibles"
+						name="preset"
+						onChange={() => setPreset("future")}
+					/>
+					<PlaygroundRadio
+						checked={preset === "past"}
+						compact
+						id="preset-past"
+						label="Toutes passées (2020) — boutons Modifier cachés"
+						name="preset"
+						onChange={() => setPreset("past")}
+					/>
+					<PlaygroundRadio
+						checked={preset === "custom"}
+						compact
+						id="preset-custom"
+						label="Personnalisé (modifier un champ ci-dessous)"
+						name="preset"
+						onChange={() => setPreset("custom")}
+					/>
 				</div>
 			</fieldset>
 
 			<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
-				{(Object.keys(deadlines) as (keyof CampaignDeadlines)[]).map((key) => (
-					<div className="fr-col-12 fr-col-md-4" key={key}>
-						<div className="fr-input-group">
-							<label className="fr-label" htmlFor={`deadline-${key}`}>
-								{key}
-							</label>
-							<input
-								className="fr-input"
-								id={`deadline-${key}`}
-								onChange={(e) => updateDeadline(key, e.currentTarget.value)}
-								type="date"
-								value={getDeadlineInputValue(deadlines[key])}
-							/>
-						</div>
-					</div>
-				))}
+				{(Object.keys(deadlines) as (keyof CampaignDeadlines)[]).map(
+					renderDeadlineInput,
+				)}
 			</div>
 
 			<div className="fr-btns-group fr-btns-group--inline fr-mb-4w">
