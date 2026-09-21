@@ -189,6 +189,7 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 					email: "t4185-agent@example.fr",
 					siret: `${PARITY_UNDER.siren}00015`,
 					isAdmin: true,
+					adminMfaAt: Math.floor(Date.now() / 1000),
 					impersonation: null,
 				},
 				expires: "",
