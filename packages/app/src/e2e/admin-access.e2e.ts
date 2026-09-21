@@ -174,7 +174,12 @@ test.describe("admin navigation with increased text spacing", () => {
 					} else {
 						await expect(menuButton).toBeHidden();
 					}
-					await expect(links.first()).toBeVisible();
+					for (const link of await links.all()) {
+						await expect(link).toBeVisible();
+					}
+					await expect(
+						page.getByRole("heading", { name: heading, level: 1 }),
+					).toBeVisible();
 					await expect
 						.poll(async () => {
 							const navBox = await nav.boundingBox();
