@@ -121,7 +121,7 @@ describe("FileUpload", () => {
 		// underlined link target).
 		expect(link).toHaveTextContent("avis.pdf");
 		expect(link).not.toHaveTextContent("PDF – 2 Ko");
-		expect(screen.getByText("PDF – 2 Ko")).toBeInTheDocument();
+		expect(screen.getByText("PDF – 2 Ko")).toHaveClass("fr-text-mention--grey");
 	});
 
 	it("creates an object URL per file and revokes it on unmount", () => {
