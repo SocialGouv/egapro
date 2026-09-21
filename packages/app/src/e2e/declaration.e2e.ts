@@ -41,6 +41,56 @@ async function goToStep(page: Page, step: number) {
 	await expect(page.getByText(`Étape ${step} sur 6`)).toBeVisible();
 }
 
+async function checkPayGapAtZoom(page: Page, caption: string) {
+	for (const row of [
+		"Horaire brute moyenne",
+		"Annuelle brute médiane",
+		"Horaire brute médiane",
+	]) {
+		for (const sex of ["Femmes", "Hommes"]) {
+			await page.getByRole("textbox", { name: `${row} — ${sex}` }).fill("1000");
+		}
+	}
+
+	await page.setViewportSize({ width: 640, height: 360 });
+	const region = page.getByRole("region", {
+		name: `${caption} — faire défiler le tableau horizontalement`,
+	});
+	const table = region.getByRole("table", { name: caption });
+	const measurements = await table.evaluate((element) =>
+		Array.from(
+			element.querySelectorAll(
+				"thead th:last-child strong, thead th:last-child span, tbody tr td:first-child strong",
+			),
+		).map((label) => {
+			const cell = label.closest("th, td");
+			return {
+				text: label.textContent?.trim(),
+				left: label.getBoundingClientRect().left,
+				right: label.getBoundingClientRect().right,
+				cellLeft: cell?.getBoundingClientRect().left ?? 0,
+				cellRight: cell?.getBoundingClientRect().right ?? 0,
+			};
+		}),
+	);
+	expect(measurements).toHaveLength(6);
+	for (const label of measurements) {
+		expect(label.left, label.text).toBeGreaterThanOrEqual(label.cellLeft);
+		expect(label.right, label.text).toBeLessThanOrEqual(label.cellRight);
+	}
+
+	await expect(region).toHaveAttribute("tabindex", "0");
+	await region.evaluate((element) => {
+		element.scrollLeft = 0;
+	});
+	await region.press("ArrowRight");
+	await expect(region).toBeFocused();
+	await expect(region).toHaveCSS("outline-style", "solid");
+	await expect
+		.poll(() => region.evaluate((element) => element.scrollLeft))
+		.toBeGreaterThan(0);
+}
+
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
 
@@ -130,6 +180,7 @@ test.describe("Declaration workflow", () => {
 		await expect(
 			page.getByRole("table").getByText("6,25 %", { exact: true }),
 		).toBeVisible();
+		await checkPayGapAtZoom(page, "Écart de rémunération");
 	});
 
 	test("step 3 - Rémunération variable inline editing", async ({ page }) => {
@@ -147,6 +198,10 @@ test.describe("Declaration workflow", () => {
 
 		// Verify gap is computed
 		await expect(page.getByText("9,09 %")).toBeVisible();
+		await checkPayGapAtZoom(
+			page,
+			"Écart de rémunération variable ou complémentaire",
+		);
 
 		// Verify beneficiary inputs are present
 		await expect(
