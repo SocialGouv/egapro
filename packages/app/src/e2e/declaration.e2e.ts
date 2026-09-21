@@ -80,9 +80,13 @@ async function checkPayGapAtZoom(page: Page, caption: string) {
 	}
 
 	await expect(region).toHaveAttribute("tabindex", "0");
+	expect(
+		await region.evaluate((element) => element.scrollWidth - element.clientWidth),
+	).toBeGreaterThan(0);
 	await region.evaluate((element) => {
 		element.scrollLeft = 0;
 	});
+	await expect.poll(() => region.evaluate((element) => element.scrollLeft)).toBe(0);
 	await region.press("ArrowRight");
 	await expect(region).toBeFocused();
 	await expect(region).toHaveCSS("outline-style", "solid");
