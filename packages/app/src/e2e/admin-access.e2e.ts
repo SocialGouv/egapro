@@ -104,7 +104,7 @@ const TEXT_SPACING_CSS = `
     letter-spacing: 0.12em !important;
     word-spacing: 0.16em !important;
   }
-  html body p { margin-bottom: 2em !important; }
+  html body main#content p { margin-bottom: 2em !important; }
 `;
 
 const ADMIN_SPACING_ROUTES = [
