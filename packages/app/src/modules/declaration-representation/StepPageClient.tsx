@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -78,14 +78,32 @@ export function StepPageClient({
 	const mustBypassPublicationStep =
 		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
 
-	useEffect(() => {
-		if (mustBypassPublicationStep && bypassHref !== undefined) {
-			router.replace(bypassHref);
-		}
-	}, [mustBypassPublicationStep, bypassHref, router]);
-
 	if (definition === undefined) return null;
-	if (mustBypassPublicationStep) return null;
+	if (mustBypassPublicationStep && bypassHref !== undefined) {
+		return (
+			<>
+				<h1 className="fr-h4">
+					Démarche des indicateurs de représentation {campaignYear}
+				</h1>
+				<div
+					aria-live="polite"
+					className="fr-alert fr-alert--info fr-mb-4w"
+					role="status"
+				>
+					<h2 className="fr-alert__title">
+						L’étape de publication n’est pas nécessaire
+					</h2>
+					<p>
+						Aucun écart n’est calculable pour cette déclaration. Vous pouvez
+						continuer vers le récapitulatif.
+					</p>
+					<Link className="fr-btn" href={bypassHref}>
+						Continuer vers le récapitulatif
+					</Link>
+				</div>
+			</>
+		);
+	}
 
 	const StepComponent = definition.Component;
 
