@@ -126,7 +126,7 @@ const noGapCategories: EmployeeCategoryRow[] = [
 	}),
 ];
 
-const INITIAL_UPDATED_AT = 1_700_000_000_000;
+const INITIAL_SUBMISSION_COUNT = 0;
 
 function step3Review(
 	overrides: Partial<ComponentProps<typeof SecondDeclarationStep3Review>> = {},
@@ -135,9 +135,9 @@ function step3Review(
 		<SecondDeclarationStep3Review
 			cseApplicable
 			cseOpinionRequired={false}
-			declarationUpdatedAt={INITIAL_UPDATED_AT}
 			declarationYear={2025}
 			secondDeclarationCategories={mockCategories}
+			secondDeclarationSubmissionCount={INITIAL_SUBMISSION_COUNT}
 			siren="532847196"
 			status="corrective_actions_chosen"
 			{...overrides}
@@ -404,7 +404,7 @@ describe("SecondDeclarationStep3Review", () => {
 		rerender(
 			step3Review({
 				...overrides,
-				declarationUpdatedAt: INITIAL_UPDATED_AT + 1,
+				secondDeclarationSubmissionCount: INITIAL_SUBMISSION_COUNT + 1,
 				status: "awaiting_cse_opinion",
 			}),
 		);
@@ -427,7 +427,7 @@ describe("SecondDeclarationStep3Review", () => {
 		rerender(
 			step3Review({
 				...overrides,
-				declarationUpdatedAt: INITIAL_UPDATED_AT + 1,
+				secondDeclarationSubmissionCount: INITIAL_SUBMISSION_COUNT + 1,
 				status: "awaiting_cse_opinion",
 			}),
 		);
@@ -444,7 +444,7 @@ describe("SecondDeclarationStep3Review", () => {
 		rerender(
 			step3Review({
 				...overrides,
-				declarationUpdatedAt: INITIAL_UPDATED_AT + 1,
+				secondDeclarationSubmissionCount: INITIAL_SUBMISSION_COUNT + 1,
 				status: "awaiting_cse_opinion",
 			}),
 		);
@@ -462,7 +462,7 @@ describe("SecondDeclarationStep3Review", () => {
 		const { rerender } = renderStep3(overrides);
 		const savedBeforeSubmit = {
 			...overrides,
-			declarationUpdatedAt: INITIAL_UPDATED_AT + 1,
+			secondDeclarationSubmissionCount: INITIAL_SUBMISSION_COUNT + 1,
 		};
 		rerender(step3Review(savedBeforeSubmit));
 		mockMutate.mockImplementationOnce(() => {
@@ -490,11 +490,11 @@ describe("SecondDeclarationStep3Review", () => {
 		const { rerender } = renderStep3(overrides);
 		expect(mockPush).not.toHaveBeenCalled();
 
-		// Same status both times: the self-loop transition never changes it, only `declarationUpdatedAt` does.
+		// Same status both times: the self-loop transition only adds a submission event.
 		rerender(
 			step3Review({
 				...overrides,
-				declarationUpdatedAt: INITIAL_UPDATED_AT + 1,
+				secondDeclarationSubmissionCount: INITIAL_SUBMISSION_COUNT + 1,
 			}),
 		);
 
@@ -513,6 +513,29 @@ describe("SecondDeclarationStep3Review", () => {
 		expect(mockPush).not.toHaveBeenCalled();
 
 		rerender(step3Review());
+
+		expect(mockPush).not.toHaveBeenCalled();
+		expect(mockConceal).not.toHaveBeenCalled();
+	});
+
+	it("does not treat a concurrent save as a completed transmission", () => {
+		mockMutationState.error = { message: "Failed to fetch" };
+		const { rerender } = renderStep3();
+
+		rerender(step3Review({ status: "awaiting_revision_choice" }));
+
+		expect(mockPush).not.toHaveBeenCalled();
+		expect(mockConceal).not.toHaveBeenCalled();
+	});
+
+	it("keeps a lock refusal visible even if another session submitted", () => {
+		mockMutationState.error = {
+			message: "Déclaration verrouillée",
+			data: { code: "CONFLICT" },
+		};
+		const { rerender } = renderStep3();
+
+		rerender(step3Review({ secondDeclarationSubmissionCount: 1 }));
 
 		expect(mockPush).not.toHaveBeenCalled();
 		expect(mockConceal).not.toHaveBeenCalled();

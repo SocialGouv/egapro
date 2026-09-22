@@ -31,9 +31,8 @@ import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator
 type Props = {
 	cseApplicable: boolean;
 	cseOpinionRequired: boolean;
-	// Bumped by the server on every successful submit, even a self-loop status transition.
-	declarationUpdatedAt: number | null;
 	declarationYear: number;
+	secondDeclarationSubmissionCount: number;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 	status: DeclarationFsmStatus | null;
@@ -42,8 +41,8 @@ type Props = {
 export function SecondDeclarationStep3Review({
 	cseApplicable,
 	cseOpinionRequired,
-	declarationUpdatedAt,
 	declarationYear,
+	secondDeclarationSubmissionCount,
 	secondDeclarationCategories,
 	siren,
 	status,
@@ -51,7 +50,9 @@ export function SecondDeclarationStep3Review({
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const isWritable = isSecondDeclarationWritable(status);
-	const submissionAttemptFingerprintRef = useRef(declarationUpdatedAt);
+	const submissionAttemptFingerprintRef = useRef(
+		secondDeclarationSubmissionCount,
+	);
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some((cat) =>
@@ -90,7 +91,9 @@ export function SecondDeclarationStep3Review({
 	});
 	const submittedDespiteError =
 		mutation.isError &&
-		declarationUpdatedAt !== submissionAttemptFingerprintRef.current;
+		mutation.error?.data?.code !== "CONFLICT" &&
+		mutation.error?.data?.code !== "FORBIDDEN" &&
+		secondDeclarationSubmissionCount > submissionAttemptFingerprintRef.current;
 	useEffect(() => {
 		if (submittedDespiteError) completeSubmission();
 	}, [submittedDespiteError, completeSubmission]);
@@ -209,7 +212,8 @@ export function SecondDeclarationStep3Review({
 					modalRef={modalRef}
 					onClose={handleCloseModal}
 					onSubmit={() => {
-						submissionAttemptFingerprintRef.current = declarationUpdatedAt;
+						submissionAttemptFingerprintRef.current =
+							secondDeclarationSubmissionCount;
 						mutation.mutate();
 					}}
 					year={declarationYear}

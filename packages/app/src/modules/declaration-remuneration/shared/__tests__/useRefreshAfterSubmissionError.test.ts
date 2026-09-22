@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRefresh = vi.fn();
@@ -52,6 +53,18 @@ describe("useRefreshAfterSubmissionError", () => {
 			"/api/healthz",
 			expect.objectContaining({ cache: "no-store" }),
 		);
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+	});
+
+	it("refreshes after a network failure under StrictMode", async () => {
+		vi.mocked(fetch).mockResolvedValue(new Response("OK", { status: 200 }));
+		const { result } = renderHook(() => useRefreshAfterSubmissionError(), {
+			wrapper: StrictMode,
+		});
+
+		act(() => result.current({ message: "Failed to fetch" }));
+		await act(() => vi.advanceTimersByTimeAsync(0));
+
 		expect(mockRefresh).toHaveBeenCalledTimes(1);
 	});
 

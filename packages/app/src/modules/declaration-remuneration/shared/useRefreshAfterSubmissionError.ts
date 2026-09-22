@@ -34,6 +34,7 @@ export function useRefreshAfterSubmissionError() {
 	const router = useRouter();
 	const isMountedRef = useRef(true);
 	useEffect(() => {
+		isMountedRef.current = true;
 		return () => {
 			isMountedRef.current = false;
 		};
