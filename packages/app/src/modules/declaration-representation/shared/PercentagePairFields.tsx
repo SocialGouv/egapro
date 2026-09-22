@@ -169,9 +169,9 @@ export function PercentagePairFields({
 			) : null}
 			<div
 				aria-atomic="true"
-				aria-live="polite"
 				className="fr-messages-group"
 				id={errorId}
+				role="alert"
 			>
 				{error ? <p className="fr-message fr-message--error">{error}</p> : null}
 			</div>

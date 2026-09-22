@@ -224,9 +224,10 @@ export function FileUpload({
 			/>
 
 			<div
-				aria-live="polite"
+				aria-atomic="true"
 				className={`fr-messages-group ${styles.messagesGroup}`}
 				id={messagesId}
+				role="alert"
 			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
 			</div>
