@@ -465,6 +465,35 @@ describe("declarationRouter", () => {
 			expect(mockTransaction).toHaveBeenCalled();
 		});
 
+		it("counts only second declaration submissions in the event history", async () => {
+			const tx = createGetOrCreateTx([mockDeclaration]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				select: vi
+					.fn()
+					.mockImplementationOnce(gipSelect)
+					.mockReturnValue({
+						from: () => ({
+							where: () =>
+								Promise.resolve([
+									{ eventType: "second_declaration_submit" },
+									{ eventType: "step_change" },
+									{ eventType: "second_declaration_submit" },
+								]),
+						}),
+					}),
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getOrCreate();
+
+			expect(result.secondDeclarationSubmissionCount).toBe(2);
+			expect(result.hasSubmittedSecondDeclaration).toBe(true);
+		});
+
 		it("creates new declaration when none exists", async () => {
 			const tx = createGetOrCreateTx([], [mockDeclaration]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
