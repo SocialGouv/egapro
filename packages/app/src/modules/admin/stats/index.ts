@@ -6,12 +6,6 @@ export { CampaignRateTile } from "./CampaignRateTile";
 export { CompletionFunnelChart } from "./CompletionFunnelChart";
 export { CompletionFunnelTable } from "./CompletionFunnelTable";
 export { CseStatusConfirmationsTile } from "./CseStatusConfirmationsTile";
-export {
-	formatCount,
-	formatDays,
-	formatDecimal,
-	formatPercent,
-} from "./formatters";
 export { StagnationDaysFilter } from "./StagnationDaysFilter";
 export { StatsBarChart } from "./StatsBarChart";
 export { StatsBarTable } from "./StatsBarTable";

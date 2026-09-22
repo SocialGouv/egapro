@@ -12,20 +12,25 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 	const SIREN_WINDOW_END = "900000003";
 	const SIREN_DRAFT = "900000004";
 	const SIREN_BEFORE_WINDOW = "900000005";
+	const SIREN_NO_CAMPAIGN = "900000006";
 	const ALL_SIRENS = [
 		SIREN_WINDOW_START,
 		SIREN_NON_DIFFUSIBLE,
 		SIREN_WINDOW_END,
 		SIREN_DRAFT,
 		SIREN_BEFORE_WINDOW,
+		SIREN_NO_CAMPAIGN,
 	];
 	const YEAR = 2029;
+	const CAMPAIGN_YEAR = YEAR + 1;
+	const YEAR_NO_CAMPAIGN = 2031;
 	const DECL_IDS = [
 		"suit-repr-window-start",
 		"suit-repr-non-diffusible",
 		"suit-repr-window-end",
 		"suit-repr-draft",
 		"suit-repr-before-window",
+		"suit-repr-no-campaign",
 	];
 
 	const DATE_BEGIN = "2030-03-15";
@@ -34,6 +39,7 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 	async function cleanup() {
 		await sql`DELETE FROM app_representation_declaration WHERE id IN ${sql(DECL_IDS)}`;
 		await sql`DELETE FROM app_company WHERE siren IN ${sql(ALL_SIRENS)}`;
+		await sql`DELETE FROM app_campaign_deadline WHERE year = ${CAMPAIGN_YEAR}`;
 	}
 
 	beforeAll(() => {
@@ -56,7 +62,8 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 				(${SIREN_NON_DIFFUSIBLE}, 'Entreprise Non Diffusible', '2 rue Secrete, 69001 Lyon',     '70.10Z', 'Activites des sieges sociaux',      'Auvergne-Rhône-Alpes', '69', 'Rhône',            'N'),
 				(${SIREN_WINDOW_END},     'Entreprise Borne Fin',      '3 rue Brouillon, 44000 Nantes', '46.90Z', 'Commerce de gros non specialise',   'Pays de la Loire',     '44', 'Loire-Atlantique', 'O'),
 				(${SIREN_DRAFT},          'Entreprise Brouillon',      '4 rue Brouillon, 33000 Bordeaux','43.99C','Travaux de maconnerie generale',    'Nouvelle-Aquitaine',   '33', 'Gironde',          'O'),
-				(${SIREN_BEFORE_WINDOW},  'Entreprise Hors Fenetre',   '5 rue Ancienne, 59000 Lille',   '10.71C', 'Boulangerie et boulangerie-patisserie', 'Hauts-de-France',  '59', 'Nord',             'O')
+				(${SIREN_BEFORE_WINDOW},  'Entreprise Hors Fenetre',   '5 rue Ancienne, 59000 Lille',   '10.71C', 'Boulangerie et boulangerie-patisserie', 'Hauts-de-France',  '59', 'Nord',             'O'),
+				(${SIREN_NO_CAMPAIGN},    'Entreprise Sans Campagne',  '6 rue Sans Campagne, 35000 Rennes', '62.02A', 'Conseil en systemes informatiques', 'Bretagne',      '35', 'Ille-et-Vilaine',  'O')
 		`;
 		await sql`
 			INSERT INTO app_representation_declaration
@@ -69,7 +76,8 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 				('suit-repr-non-diffusible', ${SIREN_NON_DIFFUSIBLE}, ${YEAR}, '2029-01-01', '2029-12-31', 30.00, 70.00, NULL, 25.00, 75.00, NULL, '2030-03-02', 'https://example.fr/non-diffusible', 'Affichage', 'submitted', '2030-03-17T09:30:00Z'),
 				('suit-repr-window-end',     ${SIREN_WINDOW_END},     ${YEAR}, NULL,         NULL,         NULL,  NULL,  'aucun_cadre_dirigeant', NULL, NULL, 'aucune_instance_dirigeante', NULL, NULL, NULL, 'submitted', '2030-03-20T00:00:00Z'),
 				('suit-repr-draft',          ${SIREN_DRAFT},          ${YEAR}, NULL,         NULL,         50.00, 50.00, NULL, 50.00, 50.00, NULL, NULL, NULL, NULL, 'draft',     '2030-03-17T09:30:00Z'),
-				('suit-repr-before-window',  ${SIREN_BEFORE_WINDOW},  ${YEAR}, NULL,         NULL,         10.00, 90.00, NULL, 20.00, 80.00, NULL, NULL, NULL, NULL, 'submitted', '2030-03-14T23:59:59Z')
+				('suit-repr-before-window',  ${SIREN_BEFORE_WINDOW},  ${YEAR}, NULL,         NULL,         10.00, 90.00, NULL, 20.00, 80.00, NULL, NULL, NULL, NULL, 'submitted', '2030-03-14T23:59:59Z'),
+				('suit-repr-no-campaign',    ${SIREN_NO_CAMPAIGN},    ${YEAR_NO_CAMPAIGN}, NULL, NULL,     35.00, 65.00, NULL, 36.00, 64.00, NULL, NULL, NULL, NULL, 'submitted', '2030-03-16T00:00:00Z')
 		`;
 	});
 
@@ -317,5 +325,33 @@ describe("GET /api/v1/export/representations — integration (#4127)", () => {
 		`;
 		expect(logs).toHaveLength(1);
 		expect(logs[0]).toMatchObject({ status: "failure" });
+	});
+	it("ignores the public release date entirely, unlike the public accesses", async () => {
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year, public_data_release_date,
+				decl1_modification_deadline, decl1_justification_deadline, decl1_joint_evaluation_deadline,
+				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
+			) VALUES (
+				${CAMPAIGN_YEAR}, CURRENT_DATE + 1,
+				'2000-01-01', '2000-01-01', '2000-01-01',
+				'2000-01-01', '2000-01-01', '2000-01-01',
+				'2000-01-01'
+			)
+		`;
+
+		const body = await fetchWindow({
+			date_begin: DATE_BEGIN,
+			date_end: "2030-03-21",
+		});
+
+		const rows = seededOnly(body.Representations);
+		expect(rows.map((r) => r.Année_référence)).toContain(YEAR);
+		expect(rows.map((r) => r.Année_référence)).toContain(YEAR_NO_CAMPAIGN);
+		expect(bySiren(body.Representations, SIREN_NON_DIFFUSIBLE)).toMatchObject({
+			SIREN: SIREN_NON_DIFFUSIBLE,
+			Raison_sociale: "Entreprise Non Diffusible",
+		});
 	});
 });

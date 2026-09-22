@@ -6,15 +6,48 @@ on:
       - alpha
   workflow_dispatch:
 
+# Five shards run the PR's own code (pnpm install, build, tests) with whatever
+# token `checkout` leaves in the git config. `merge` needs to write PR comments
+# and keeps its own broader block; every other job only ever reads.
+permissions:
+  contents: read
+
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  e2e:
-    name: "Test e2e"
+  shard:
+    name: "e2e ${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.total }}"
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 25
+    strategy:
+      # A red shard must not cancel its siblings: their results are what makes the
+      # failure diagnosable, and a cancelled shard is indistinguishable from a
+      # shard that never ran.
+      fail-fast: false
+      matrix:
+        include:
+          - suite: suite
+            script: test:e2e
+            shard: 1
+            total: 2
+          - suite: suite
+            script: test:e2e
+            shard: 2
+            total: 2
+          - suite: grille
+            script: test:e2e:grille
+            shard: 1
+            total: 3
+          - suite: grille
+            script: test:e2e:grille
+            shard: 2
+            total: 3
+          - suite: grille
+            script: test:e2e:grille
+            shard: 3
+            total: 3
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
       AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
@@ -57,6 +90,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # This job only ever reads its own checkout; no step pushes or pulls.
+          persist-credentials: false
       - uses: pnpm/action-setup@v6
       - name: Set up Node
         uses: actions/setup-node@v7
@@ -65,6 +101,33 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      # Runs before the browser, the docker stack and the Next build: `--list` neither
+      # starts the web server nor runs globalSetup, so an unbalanced shard graph is
+      # caught in a minute instead of after a full provisioning.
+      - name: Guard against an empty shard
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ github.workspace }}/shard-list.json
+        run: |
+          set -euo pipefail
+          # Collecting the tests loads them, and loading them resolves the workspace
+          # packages they import. `test:e2e` builds them through its `pretest` hook;
+          # `test:e2e:grille` has no such hook, so the build is made explicit here for
+          # both rather than left to differ between two shards of the same gate.
+          pnpm --filter notifications build
+          # Playwright disables its own "no tests found" error as soon as --shard is
+          # set, so a shard that collects nothing exits 0 and the gate reads green
+          # while a whole slice of the suite never ran. That is not hypothetical: a
+          # dependency between top-level projects, or a file-level serial group, makes
+          # Playwright hand every test to shard 1 and leave the others empty.
+          # The `setup` project is replayed inside every shard as a dependency, so it
+          # is never evidence that the shard has work of its own — hence excluded.
+          pnpm --filter app ${{ matrix.script }} --list --reporter=json --shard=${{ matrix.shard }}/${{ matrix.total }}
+          COUNT=$(jq '[.. | objects | select(has("projectName")) | select(.projectName != "setup")] | length' "$PLAYWRIGHT_JSON_OUTPUT_FILE")
+          echo "- \`${{ matrix.suite }} ${{ matrix.shard }}/${{ matrix.total }}\` : **$COUNT** tests collectés (hors \`setup\`)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "::error::le shard ${{ matrix.shard }}/${{ matrix.total }} de « ${{ matrix.suite }} » ne collecte aucun test"
+            exit 1
+          fi
       - name: Install Chromium manually (bypass Playwright extractor)
         shell: bash
         timeout-minutes: 5
@@ -175,23 +238,175 @@ jobs:
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
-      - name: Run E2E tests
-        run: pnpm test:e2e
+      # The blob reporter is passed on the command line rather than written into
+      # either config: playwright.grille.config.ts keeps producing the JSON report
+      # that the nightly recette workflow turns into grille-recette.md, untouched.
+      - name: Run E2E shard
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: ${{ github.workspace }}/blob-report/${{ matrix.suite }}-${{ matrix.shard }}.zip
+        run: pnpm --filter app ${{ matrix.script }} --reporter=blob,github --shard=${{ matrix.shard }}/${{ matrix.total }}
       - name: Stop services
         if: always()
         run: docker compose down
-      - name: Upload Playwright report
+      - name: Upload blob report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blob-report-${{ matrix.suite }}-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Upload Playwright traces
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-traces-${{ matrix.suite }}-${{ matrix.shard }}
+          path: packages/app/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  merge:
+    name: "e2e rapport fusionné"
+    # A merged report is most useful precisely when a shard is red, hence not a
+    # plain success-only condition — but `always()` would also run this job, and
+    # rewrite the sticky PR comment to a stale "0 passé", on a run that
+    # `cancel-in-progress` superseded before any shard finished. `!cancelled()`
+    # keeps the report on a real failure without that overwrite on a run nobody
+    # is waiting on any more.
+    if: ${{ !cancelled() }}
+    needs: shard
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: blob-report
+          pattern: blob-report-*
+          merge-multiple: true
+      - name: Merge into a single HTML report
+        run: |
+          set -euo pipefail
+          if ! ls blob-report/*.zip > /dev/null 2>&1; then
+            echo "::warning::aucun rapport blob à fusionner (tous les shards ont échoué avant d'en produire un)"
+            exit 0
+          fi
+          pnpm --filter app exec playwright merge-reports \
+            -c playwright.merge.config.ts \
+            "${{ github.workspace }}/blob-report"
+          cp packages/app/merged-results.json packages/app/playwright-report/merged-results.json
+      # Uploaded before the recette report is generated: the report links each
+      # failure to this artifact, the merged HTML report that carries the traces.
+      - name: Upload merged Playwright report
+        id: upload-report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: packages/app/playwright-report/
           retention-days: 7
-      - name: Upload Playwright traces
+          if-no-files-found: ignore
+      - name: Generate the recette report
+        if: always()
+        env:
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          set -euo pipefail
+          pnpm --filter app report:grille \
+            --results merged-results.json \
+            --out playwright-report/grille-recette.md \
+            --scope "tous les cas (185 coordonnées)" \
+            --commit "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --report-url "$REPORT_URL"
+      - name: Upload recette report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-traces
-          path: packages/app/test-results/
+          name: grille-recette
+          path: packages/app/playwright-report/grille-recette.md
           retention-days: 7
           if-no-files-found: ignore
+      # A job summary only shows on the run page, never on the pull request, so one
+      # comment — edited in place on every run — carries the verdict and the link.
+      # A fork's token cannot write to the base repository: skipped there.
+      # Purely informational: a `gh api` hiccup here (rate limit, transient 5xx)
+      # must not fail `merge` and turn the required check red on a run where
+      # every shard passed.
+      - name: Comment the recette report on the pull request
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPORT_URL: ${{ steps.upload-report.outputs.artifact-url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          set -euo pipefail
+          report=packages/app/playwright-report/grille-recette.md
+          marker="<!-- e2e-recette-grille -->"
+          {
+            echo "$marker"
+            echo "### 🧪 Recette E2E — grille 185 coordonnées"
+            echo ""
+            if [ -f "$report" ]; then
+              sed -n '/^| Date |/,/^$/p' "$report"
+              grep '^### ❌ ' "$report" | sed 's/^### ❌ /- ❌ /' || true
+              echo ""
+            else
+              echo "> ⚠️ Rapport de recette absent : voir les logs du run."
+              echo ""
+            fi
+            echo "➡️ [Grille complète dans le résumé du run]($RUN_URL) · [Rapport Playwright et traces]($REPORT_URL)"
+          } > "$RUNNER_TEMP/recette-comment.md"
+          comment_id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
+              -F body=@"$RUNNER_TEMP/recette-comment.md" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              -F body=@"$RUNNER_TEMP/recette-comment.md" > /dev/null
+          fi
+
+  e2e:
+    # The required status check of `alpha`, and it has to be this shape. A matrix
+    # job publishes contexts named "e2e suite 1/2", never "Test e2e", so branch
+    # protection would wait forever on a context nobody emits. And `if: always()`
+    # is load-bearing rather than defensive: a job skipped because one of its
+    # `needs` failed is counted as PASSING by branch protection, so without it a
+    # red shard would quietly let the pull request merge.
+    name: "Test e2e"
+    if: always()
+    needs: [shard, merge]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every shard and the merge to have succeeded
+        run: |
+          set -euo pipefail
+          shards='${{ needs.shard.result }}'
+          merge='${{ needs.merge.result }}'
+          echo "shards=$shards merge=$merge"
+          status=0
+          if [ "$shards" != "success" ]; then
+            echo "::error::au moins un shard E2E n'est pas passé (résultat agrégé : $shards)"
+            status=1
+          fi
+          if [ "$merge" != "success" ]; then
+            echo "::error::la fusion des rapports n'est pas passée (résultat : $merge)"
+            status=1
+          fi
+          exit "$status"

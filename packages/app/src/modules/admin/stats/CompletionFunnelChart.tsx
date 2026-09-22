@@ -10,9 +10,8 @@ import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/lib/core";
 import { useEffect, useState } from "react";
-
+import { formatCount, formatWholePercentage } from "~/modules/domain";
 import styles from "./CompletionFunnelChart.module.scss";
-import { formatCount } from "./formatters";
 import type { FunnelRow } from "./types";
 
 echarts.use([
@@ -152,7 +151,7 @@ export function buildTooltipFormatter(
 		const { row } = params.data;
 		const head =
 			`<strong>${row.label}</strong><br/>` +
-			`${formatCount(row.count)} déclarations (${row.pctOfStart} % du funnel)`;
+			`${formatCount(row.count)} déclarations (${formatWholePercentage(row.pctOfStart)} du funnel)`;
 		if (row.pctDropFromPrev === null) {
 			return head;
 		}
@@ -165,7 +164,7 @@ export function buildTooltipFormatter(
 
 export function labelFormatter(params: LabelFormatterParams): string {
 	const { row } = params.data;
-	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${row.pctOfStart} %}`;
+	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${formatWholePercentage(row.pctOfStart)}}`;
 }
 
 export function buildEchartsOption(

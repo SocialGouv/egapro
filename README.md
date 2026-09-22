@@ -138,6 +138,14 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 2. Saisir l'email : `test@fia1.fr`
 3. Cliquer sur **Se connecter**
 
+#### Pourquoi le port 3000 est obligatoire
+
+L'application ne parle pas à ProConnect directement : elle passe par **Charon**, le proxy OAuth de la Fabrique (fournisseur `proconnecttest`). C'est l'URL renseignée dans `EGAPRO_PROCONNECT_ISSUER`, identique à celle des environnements déployés (`.kontinuous/env/*/templates/proconnect.configmap.yaml`).
+
+Charon tient la liste des adresses de retour autorisées pour egapro, et la seule adresse locale qu'elle contient est `http://localhost:3000`. Un serveur de dev sur un autre port mène donc à un échec de connexion — ce n'est ni une contrainte Next.js ni une contrainte Playwright. C'est aussi pour cette raison que `pnpm test:e2e` exige le port 3000, et que plusieurs serveurs de dev locaux ne peuvent pas se connecter en parallèle sans que cette liste soit élargie côté infra.
+
+Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRET`) sont fournis par l'équipe et ne sont jamais commités.
+
 ## Scripts utiles
 
 | Commande | Description |

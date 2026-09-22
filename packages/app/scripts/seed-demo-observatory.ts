@@ -476,6 +476,8 @@ const COMPANIES: SeedCompany[] = [
 ];
 
 const SIRENS = COMPANIES.map((company) => company.siren);
+// Representations store the reference year; the campaign releasing them is YEAR, the last one seeded.
+const REPRESENTATION_REFERENCE_YEAR = YEAR - 1;
 const YEARS = [
 	...new Set(
 		COMPANIES.flatMap((company) =>
@@ -694,9 +696,9 @@ async function main() {
 						publish_date, publish_modalities, status, submitted_at,
 						created_at, updated_at
 					) VALUES (
-						${`seed-observatory-representation-${company.siren}-${YEAR}`},
-						${company.siren}, ${YEAR}, ${SEED_USER_ID},
-						${`${YEAR - 1}-01-01`}, ${`${YEAR - 1}-12-31`},
+						${`seed-observatory-representation-${company.siren}-${REPRESENTATION_REFERENCE_YEAR}`},
+						${company.siren}, ${REPRESENTATION_REFERENCE_YEAR}, ${SEED_USER_ID},
+						${`${REPRESENTATION_REFERENCE_YEAR}-01-01`}, ${`${REPRESENTATION_REFERENCE_YEAR}-12-31`},
 						${executiveWomenPercent},
 						${executiveWomenPercent === null ? null : 100 - executiveWomenPercent},
 						${representationIsComputable ? null : "aucun_cadre_dirigeant"},

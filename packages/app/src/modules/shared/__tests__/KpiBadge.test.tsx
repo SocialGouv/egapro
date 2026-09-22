@@ -42,6 +42,14 @@ describe("KpiBadge", () => {
 		expect(badge?.textContent).toContain("=");
 	});
 
+	it("renders a single narrow no-break space before `pts` for zero delta", () => {
+		const { container } = render(
+			<KpiBadge delta={{ points: 0, comparisonLabel: "vs 2025" }} />,
+		);
+		const badge = container.querySelector(".fr-badge");
+		expect(badge?.textContent).toBe("= 0 pts vs 2025");
+	});
+
 	it("inverts colors: positive delta becomes error when inverted", () => {
 		const { container } = render(
 			<KpiBadge delta={{ points: 1.2, comparisonLabel: "vs 2025" }} inverted />,

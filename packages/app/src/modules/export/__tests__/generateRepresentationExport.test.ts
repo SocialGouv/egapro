@@ -1,7 +1,11 @@
 import { eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { representationDeclarations } from "~/server/db/schema";
+import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
+import {
+	campaignDeadlines,
+	representationDeclarations,
+} from "~/server/db/schema";
 import {
 	buildRepresentationExportRows,
 	generateRepresentationXlsx,
@@ -94,7 +98,10 @@ describe("buildRepresentationExportRows", () => {
 	const mockOrderBy = vi.fn();
 	const mockWhere = vi.fn(() => ({ orderBy: mockOrderBy }));
 	const mockLeftJoin = vi.fn(() => ({ where: mockWhere }));
-	const mockInnerJoin = vi.fn(() => ({ leftJoin: mockLeftJoin }));
+	const mockInnerJoin = vi.fn(() => ({
+		innerJoin: mockInnerJoin,
+		leftJoin: mockLeftJoin,
+	}));
 	const mockFrom = vi.fn(() => ({ innerJoin: mockInnerJoin }));
 	const mockSelect = vi.fn((_projection: Record<string, unknown>) => ({
 		from: mockFrom,
@@ -112,11 +119,28 @@ describe("buildRepresentationExportRows", () => {
 		expect(rows).toEqual([]);
 	});
 
-	it("restricts the query to submitted declarations", async () => {
+	it("restricts the query to submitted, publicly released declarations", async () => {
 		await buildRepresentationExportRows(mockDb as never);
 
 		expect(mockWhere).toHaveBeenCalledWith(
 			eq(representationDeclarations.status, "submitted"),
+		);
+		expect(mockInnerJoin).toHaveBeenCalledWith(
+			campaignDeadlines,
+			releasedRepresentationCampaignJoin(),
+		);
+	});
+
+	it("keeps the public-release join when the download is filtered", async () => {
+		await buildRepresentationExportRows(mockDb as never, {
+			year: 2027,
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(mockInnerJoin).toHaveBeenCalledWith(
+			campaignDeadlines,
+			releasedRepresentationCampaignJoin(),
 		);
 	});
 
