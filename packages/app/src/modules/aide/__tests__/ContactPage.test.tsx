@@ -64,15 +64,13 @@ describe("ContactPage", () => {
 		expect(backLink).toHaveAttribute("href", "/aide");
 	});
 
-	it("renders the download link for regional referents", () => {
+	it("does not render the unavailable regional referents download", () => {
 		render(<ContactPage />);
-		const downloadLink = screen.getByRole("link", {
-			name: /télécharger la liste des référents/i,
-		});
-		expect(downloadLink).toHaveAttribute(
-			"href",
-			"/assets/documents/referents-egapro-dreets.xlsx",
-		);
+		expect(
+			screen.queryByRole("link", {
+				name: /télécharger la liste des référents/i,
+			}),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders a link to the public referents search page", () => {

@@ -44,14 +44,6 @@ export function ContactPage() {
 									Rechercher un référent par région ou département
 								</Link>
 							</p>
-							<a
-								className="fr-link fr-link--download"
-								download
-								href="/assets/documents/referents-egapro-dreets.xlsx"
-							>
-								Télécharger la liste des référents Egapro - Dreets
-								<span className="fr-link__detail">EXCEL – 61,88 Ko</span>
-							</a>
 						</div>
 
 						<div className="fr-mb-4w">
