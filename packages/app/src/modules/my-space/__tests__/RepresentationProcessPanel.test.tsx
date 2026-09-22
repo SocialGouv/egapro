@@ -201,12 +201,16 @@ describe("RepresentationProcessPanel", () => {
 		});
 
 		it("expands the declaration step into its three bullets", () => {
-			const { panel } = renderPanel({ declaration: DRAFT });
+			const { panel, dialog } = renderPanel({ declaration: DRAFT });
 			expect(panel.getByText("Écarts de représentation")).toBeInTheDocument();
 			expect(panel.getByText("Cadres dirigeants")).toBeInTheDocument();
 			expect(panel.getByText("Instances dirigeantes")).toBeInTheDocument();
 			expect(
 				panel.getByText("Informations de publication"),
+			).toBeInTheDocument();
+			expect(dialog.querySelectorAll("ul > li")).toHaveLength(3);
+			expect(
+				panel.getByText("Cadres dirigeants").closest("li"),
 			).toBeInTheDocument();
 		});
 
