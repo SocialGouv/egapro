@@ -1054,7 +1054,7 @@ export const openApiSpec = {
 				operationId: "getFiles",
 				summary: "Lister les fichiers CSE et évaluations conjointes",
 				description:
-					"Retourne les métadonnées des fichiers (avis CSE et évaluations conjointes) pour un SIREN et une année donnés.",
+					"Retourne les métadonnées des fichiers (avis CSE et évaluations conjointes) pour un SIREN et une année donnés. Résolution de la déclaration source, parmi les déclarations **transmises** uniquement (un brouillon en cours — redéclaration après annulation — est ignoré) : la déclaration active si elle existe, sinon la plus récente déclaration annulée (par date de création). `declarationId` et `cancelledAt` identifient dans la réponse la déclaration retenue (`cancelledAt` vaut `null` pour la déclaration active).",
 				parameters: [
 					{
 						name: "siren",
@@ -1083,6 +1083,17 @@ export const openApiSpec = {
 									properties: {
 										siren: { type: "string", example: "319159877" },
 										year: { type: "integer", example: 2026 },
+										declarationId: {
+											type: ["string", "null"],
+											description:
+												"Identifiant de la déclaration dont proviennent les fichiers. `null` si aucune déclaration transmise n'existe pour ce couple (siren, année).",
+										},
+										cancelledAt: {
+											type: ["string", "null"],
+											format: "date-time",
+											description:
+												"Date d'annulation de la déclaration retenue, `null` si elle est active (ou si `declarationId` est `null`).",
+										},
 										files: { type: "array", items: fileMetadataSchema },
 									},
 								},
