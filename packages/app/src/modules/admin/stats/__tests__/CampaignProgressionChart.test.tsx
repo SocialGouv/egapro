@@ -104,6 +104,11 @@ describe("CampaignProgressionChart", () => {
 		expect(container.querySelector("figcaption")?.textContent).toMatch(
 			/progression cumulative/i,
 		);
+		expect(
+			screen.getByRole("group", {
+				name: /Courbe de progression cumulative.*tableau ci-dessous/i,
+			}),
+		).toBeInTheDocument();
 	});
 });
 

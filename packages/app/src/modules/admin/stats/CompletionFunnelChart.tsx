@@ -256,14 +256,16 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 	}
 
 	const option = buildEchartsOption(rows, dropThreshold, dsfrPalette);
+	const figureCaption = `${caption}. Nombre de déclarations à chaque jalon du funnel, avec le pourcentage du funnel et la chute par rapport à l'étape précédente. Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{caption}. Nombre de déclarations à chaque jalon du funnel, avec le
-				pourcentage du funnel et la chute par rapport à l'étape précédente. Les
-				données équivalentes sont disponibles dans le tableau ci-dessous.
-			</figcaption>
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div aria-label={caption} className={styles.chartContainer} role="img">
 				<ReactECharts
 					className={styles.chart}
