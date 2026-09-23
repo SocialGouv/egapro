@@ -116,11 +116,12 @@ export function ProfileModal() {
 								<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
 									Tous les champs sont obligatoires.
 								</p>
-								<form autoComplete="off" id="profile-form" onSubmit={onSubmit}>
+								<form id="profile-form" onSubmit={onSubmit}>
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
 												error={errors.lastName?.message ?? null}
+												autoComplete="family-name"
 												inputId="profile-last-name"
 												label="Nom"
 												registration={form.register("lastName")}
@@ -129,6 +130,7 @@ export function ProfileModal() {
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
 												error={errors.firstName?.message ?? null}
+												autoComplete="given-name"
 												inputId="profile-first-name"
 												label="Prénom"
 												registration={form.register("firstName")}
@@ -184,6 +186,7 @@ export function ProfileModal() {
 }
 
 type IdentityFieldProps = {
+	autoComplete: string;
 	error: string | null;
 	inputId: string;
 	label: string;
@@ -191,6 +194,7 @@ type IdentityFieldProps = {
 };
 
 function IdentityField({
+	autoComplete,
 	error,
 	inputId,
 	label,
@@ -210,6 +214,7 @@ function IdentityField({
 				aria-describedby={messagesId}
 				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
+				autoComplete={autoComplete}
 				className="fr-input"
 				id={inputId}
 				type="text"
