@@ -69,7 +69,12 @@ export function PayGapTable({
 			className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.fixedTable} ${className ?? ""}`}
 		>
 			<div className="fr-table__wrapper">
-				<div className="fr-table__container">
+				<section
+					aria-label={`${caption} — faire défiler le tableau horizontalement`}
+					className={`fr-table__container ${styles.scrollRegion}`}
+					// biome-ignore lint/a11y/noNoninteractiveTabindex: A horizontally scrolling region must be reachable by keyboard.
+					tabIndex={0}
+				>
 					<div className="fr-table__content">
 						<table>
 							<caption>{caption}</caption>
@@ -188,7 +193,7 @@ export function PayGapTable({
 							</tbody>
 						</table>
 					</div>
-				</div>
+				</section>
 			</div>
 		</div>
 	);
