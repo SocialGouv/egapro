@@ -116,6 +116,86 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getByText("Catégorie d'emplois n°1")).toBeInTheDocument();
 	});
 
+	it("describes the pay table and associates each value with its section, row and column across categories", () => {
+		render(
+			<>
+				<CategoryRecapTable
+					category={makeCategory({ name: "Cadres" })}
+					declarationYear={2025}
+					index={0}
+				/>
+				<CategoryRecapTable
+					category={makeCategory({ name: "Employés" })}
+					declarationYear={2025}
+					index={1}
+				/>
+			</>,
+		);
+
+		const payTables = screen
+			.getAllByRole("table")
+			.filter((table) =>
+				table
+					.querySelector("caption")
+					?.textContent?.includes("Tableau des rémunérations brutes"),
+			)
+			.map((table) => table as HTMLTableElement);
+		expect(payTables).toHaveLength(2);
+		const allIds = payTables.flatMap((table) =>
+			Array.from(table.querySelectorAll("[id]"), (element) => element.id),
+		);
+		expect(new Set(allIds).size).toBe(allIds.length);
+
+		payTables.forEach((table, categoryIndex) => {
+			expect(table.querySelector("caption")).toHaveTextContent(
+				`Catégorie d'emplois n°${categoryIndex + 1}`,
+			);
+			expect(table.querySelector("caption")).toHaveTextContent("2025");
+			expect(table.querySelector("caption")).toHaveTextContent(
+				"quatre colonnes (Donnée, Femmes, Hommes et Écart) et deux sections",
+			);
+
+			const columnHeaders = Array.from(table.querySelectorAll("thead th[id]"));
+			expect(columnHeaders.map((header) => header.textContent?.trim())).toEqual(
+				["Femmes", "Hommes", "Écart Seuil réglementaire : 5 %"],
+			);
+			expect(table.tBodies).toHaveLength(2);
+
+			Array.from(table.tBodies).forEach((body, sectionIndex) => {
+				const section = body.querySelector('th[scope="rowgroup"]');
+				expect(section).toHaveTextContent(
+					sectionIndex === 0
+						? "Rémunération annuelle brute"
+						: "Rémunération horaire brute",
+				);
+				expect(body.querySelector('th[scope="colgroup"]')).toBeNull();
+				expect(body.rows).toHaveLength(4);
+
+				Array.from(body.rows)
+					.slice(1)
+					.forEach((row, rowIndex) => {
+						const rowHeader = row.querySelector('th[scope="row"]');
+						const expectedLabel = [
+							"Salaire de base",
+							"Composantes variables",
+							"Total",
+						][rowIndex];
+						if (!expectedLabel) throw new Error("Unexpected pay table row");
+						expect(rowHeader).toHaveTextContent(expectedLabel);
+						const cells = Array.from(row.querySelectorAll("td"));
+						expect(cells).toHaveLength(3);
+						cells.forEach((cell, columnIndex) => {
+							expect(cell.getAttribute("headers")?.split(" ")).toEqual([
+								section?.id,
+								rowHeader?.id,
+								columnHeaders[columnIndex]?.id,
+							]);
+						});
+					});
+			});
+		});
+	});
+
 	it("explains a non-calculable category while keeping its tables", () => {
 		render(
 			<CategoryRecapTable

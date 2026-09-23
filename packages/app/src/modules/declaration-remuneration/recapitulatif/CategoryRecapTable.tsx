@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
@@ -103,6 +104,22 @@ export function CategoryRecapTable({
 	category,
 	declarationYear,
 }: Props) {
+	const tableId = useId();
+	const columnIds = {
+		women: `${tableId}-women`,
+		men: `${tableId}-men`,
+		gap: `${tableId}-gap`,
+	};
+	const annualSectionId = `${tableId}-annual`;
+	const hourlySectionId = `${tableId}-hourly`;
+	const annualBaseId = `${tableId}-annual-base`;
+	const annualVariableId = `${tableId}-annual-variable`;
+	const annualTotalId = `${tableId}-annual-total`;
+	const hourlyBaseId = `${tableId}-hourly-base`;
+	const hourlyVariableId = `${tableId}-hourly-variable`;
+	const hourlyTotalId = `${tableId}-hourly-total`;
+	const cellHeaders = (sectionId: string, rowId: string, columnId: string) =>
+		`${sectionId} ${rowId} ${columnId}`;
 	const annualWomenSum = computeTotal(
 		category.annualBaseWomen ?? "",
 		category.annualVariableWomen ?? "",
@@ -154,15 +171,21 @@ export function CategoryRecapTable({
 					<div className="fr-table__container">
 						<div className="fr-table__content">
 							<table>
-								<caption>{`${heading} – ${declarationYear}`}</caption>
+								<caption>
+									{`${heading} – ${declarationYear}. Tableau des rémunérations brutes : quatre colonnes (Donnée, Femmes, Hommes et Écart) et deux sections (rémunération annuelle et rémunération horaire).`}
+								</caption>
 								<thead>
 									<tr>
 										<th scope="col">
 											<span className="fr-sr-only">Donnée</span>
 										</th>
-										<th scope="col">Femmes</th>
-										<th scope="col">Hommes</th>
-										<th scope="col">
+										<th id={columnIds.women} scope="col">
+											Femmes
+										</th>
+										<th id={columnIds.men} scope="col">
+											Hommes
+										</th>
+										<th id={columnIds.gap} scope="col">
 											Écart{" "}
 											<span className={indicatorStyles.gapHeaderHint}>
 												Seuil réglementaire : 5 %
@@ -172,93 +195,226 @@ export function CategoryRecapTable({
 								</thead>
 								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} scope="colgroup">
+										<th colSpan={4} id={annualSectionId} scope="rowgroup">
 											Rémunération annuelle brute
 										</th>
 									</tr>
 									<tr className={styles.regularRow}>
-										<th scope="row">Salaire de base</th>
-										<td className={indicatorStyles.numeric}>
+										<th id={annualBaseId} scope="row">
+											Salaire de base
+										</th>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualBaseId,
+												columnIds.women,
+											)}
+										>
 											{formatCurrency(category.annualBaseWomen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualBaseId,
+												columnIds.men,
+											)}
+										>
 											{formatCurrency(category.annualBaseMen)}
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
+										<td
+											className={indicatorStyles.gapNumeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualBaseId,
+												columnIds.gap,
+											)}
+										>
 											<GapCell gap={annualBaseGap} />
 										</td>
 									</tr>
 									<tr className={styles.regularRow}>
-										<th scope="row">
+										<th id={annualVariableId} scope="row">
 											Composantes variables
 											<br />
 											ou complémentaires
 										</th>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualVariableId,
+												columnIds.women,
+											)}
+										>
 											{formatCurrency(category.annualVariableWomen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualVariableId,
+												columnIds.men,
+											)}
+										>
 											{formatCurrency(category.annualVariableMen)}
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
+										<td
+											className={indicatorStyles.gapNumeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualVariableId,
+												columnIds.gap,
+											)}
+										>
 											<GapCell gap={annualVarGap} />
 										</td>
 									</tr>
 									<tr className={styles.totalRow}>
-										<th scope="row">Total</th>
-										<td className={indicatorStyles.numeric}>
+										<th id={annualTotalId} scope="row">
+											Total
+										</th>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualTotalId,
+												columnIds.women,
+											)}
+										>
 											<strong>{formatTotal(annualWomenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												annualSectionId,
+												annualTotalId,
+												columnIds.men,
+											)}
+										>
 											<strong>{formatTotal(annualMenSum, "€")}</strong>
 										</td>
-										<td>
+										<td
+											headers={cellHeaders(
+												annualSectionId,
+												annualTotalId,
+												columnIds.gap,
+											)}
+										>
 											<span className="fr-sr-only">Non applicable</span>
 										</td>
 									</tr>
-
+								</tbody>
+								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} scope="colgroup">
+										<th colSpan={4} id={hourlySectionId} scope="rowgroup">
 											Rémunération horaire brute
 										</th>
 									</tr>
 									<tr className={styles.regularRow}>
-										<th scope="row">Salaire de base</th>
-										<td className={indicatorStyles.numeric}>
+										<th id={hourlyBaseId} scope="row">
+											Salaire de base
+										</th>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyBaseId,
+												columnIds.women,
+											)}
+										>
 											{formatCurrency(category.hourlyBaseWomen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyBaseId,
+												columnIds.men,
+											)}
+										>
 											{formatCurrency(category.hourlyBaseMen)}
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
+										<td
+											className={indicatorStyles.gapNumeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyBaseId,
+												columnIds.gap,
+											)}
+										>
 											<GapCell gap={hourlyBaseGap} />
 										</td>
 									</tr>
 									<tr className={styles.regularRow}>
-										<th scope="row">
+										<th id={hourlyVariableId} scope="row">
 											Composantes variables
 											<br />
 											ou complémentaires
 										</th>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyVariableId,
+												columnIds.women,
+											)}
+										>
 											{formatCurrency(category.hourlyVariableWomen)}
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyVariableId,
+												columnIds.men,
+											)}
+										>
 											{formatCurrency(category.hourlyVariableMen)}
 										</td>
-										<td className={indicatorStyles.gapNumeric}>
+										<td
+											className={indicatorStyles.gapNumeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyVariableId,
+												columnIds.gap,
+											)}
+										>
 											<GapCell gap={hourlyVarGap} />
 										</td>
 									</tr>
 									<tr className={styles.totalRow}>
-										<th scope="row">Total</th>
-										<td className={indicatorStyles.numeric}>
+										<th id={hourlyTotalId} scope="row">
+											Total
+										</th>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyTotalId,
+												columnIds.women,
+											)}
+										>
 											<strong>{formatTotal(hourlyWomenSum, "€")}</strong>
 										</td>
-										<td className={indicatorStyles.numeric}>
+										<td
+											className={indicatorStyles.numeric}
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyTotalId,
+												columnIds.men,
+											)}
+										>
 											<strong>{formatTotal(hourlyMenSum, "€")}</strong>
 										</td>
-										<td>
+										<td
+											headers={cellHeaders(
+												hourlySectionId,
+												hourlyTotalId,
+												columnIds.gap,
+											)}
+										>
 											<span className="fr-sr-only">Non applicable</span>
 										</td>
 									</tr>
