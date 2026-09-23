@@ -37,6 +37,7 @@ describe("adminStatsRouter.getUsersPerCompany (real Postgres)", () => {
 					email: "upc-int-admin@example.fr",
 					siret: `${SIREN_MONO}00015`,
 					isAdmin: true,
+					adminMfaAt: Math.floor(Date.now() / 1000),
 					impersonation: null,
 				},
 				expires: "",

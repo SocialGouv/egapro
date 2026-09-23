@@ -27,12 +27,10 @@ export const gipMdsRouter = createTRPCRouter({
 			const result = await importGipCsvToDb(ctx.db, csvContent);
 			return result;
 		} catch (error) {
+			console.error("gipMds.importFromUrl failed", error);
 			throw new TRPCError({
 				code: "INTERNAL_SERVER_ERROR",
-				message:
-					error instanceof Error
-						? error.message
-						: "Erreur lors de l'import GIP MDS",
+				message: "Erreur lors de l'import GIP MDS",
 			});
 		}
 	}),
