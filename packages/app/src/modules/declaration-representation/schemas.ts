@@ -215,7 +215,10 @@ export const publicationSchema = z
 					.trim()
 					.min(1, "L'adresse de la page internet est obligatoire.")
 					.max(500, "L'adresse de la page internet est trop longue.")
-					.refine(isTolerantUrl, "L'adresse de la page internet est invalide."),
+					.refine(
+						isTolerantUrl,
+						"Format attendu : https://www.exemple.fr/egalite. Vérifiez l'adresse de la page internet.",
+					),
 			}),
 			z.object({
 				hasWebsite: z.literal(false),

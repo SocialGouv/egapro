@@ -213,6 +213,9 @@ export function Step4Publication() {
 					<label className="fr-label" htmlFor={urlId}>
 						Indiquez l'adresse de la page Internet (URL) sur laquelle seront
 						publiés les écarts calculables.
+						<span className="fr-hint-text">
+							Format attendu : https://www.exemple.fr/egalite
+						</span>
 					</label>
 					<input
 						aria-describedby={urlMessagesId}
