@@ -41,9 +41,7 @@
 	height: 1px;
 }
 
-// Figma spec: the "Voir les modèles" link sits directly under the paragraph,
-// and the "Mettre à jour l'existence d'un CSE" secondary button stacks below
-// it on its own row. align-items keeps the button hugging its content width.
+// The unavailable templates message and the CSE update button stack in this group.
 .ctaGroup {
 	display: flex;
 	flex-direction: column;
