@@ -2,7 +2,6 @@
 
 import { TrackedLink } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { CSE_OPINION } from "~/modules/routes";
 import styles from "./NextStepsBox.module.scss";
 import { UpdateCseModal } from "./UpdateCseModal";
 
@@ -48,13 +47,9 @@ export function NextStepsBox({
 								L&apos;avis du CSE devra être transmis lors de la dernière étape
 								de la démarche.
 							</p>
-							<TrackedLink
-								className="fr-link"
-								href={CSE_OPINION}
-								trackingId="cse_models"
-							>
-								Voir les modèles d&apos;avis CSE
-							</TrackedLink>
+							<p className="fr-mb-0">
+								Les modèles d&apos;avis du CSE ne sont pas encore disponibles.
+							</p>
 							{cseApplicable && (
 								<button
 									aria-controls="update-cse-modal"
