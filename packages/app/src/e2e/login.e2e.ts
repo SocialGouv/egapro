@@ -18,6 +18,27 @@ test.describe("Login page", () => {
 		).toBeVisible();
 	});
 
+	test("keeps ProConnect within a mobile viewport at 200% zoom", async ({
+		page,
+	}) => {
+		// 390 physical pixels at 200% browser zoom yield a 195px CSS viewport.
+		await page.setViewportSize({ width: 195, height: 422 });
+		await page.goto(LOGIN);
+		await dismissCookieBanner(page);
+
+		const button = page.getByRole("button", {
+			name: /s.identifier avec\s*proconnect/i,
+		});
+		await expect(button.locator(".fr-connect__login")).toBeVisible();
+		await expect(button.locator(".fr-connect__brand")).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: /qu.est-ce que proconnect/i }),
+		).toBeVisible();
+		expect(
+			await page.evaluate(() => document.documentElement.scrollWidth),
+		).toBeLessThanOrEqual(195);
+	});
+
 	test("hides the public help banner", async ({ page }) => {
 		await page.goto(LOGIN);
 		await dismissCookieBanner(page);
