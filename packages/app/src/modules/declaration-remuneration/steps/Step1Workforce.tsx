@@ -181,13 +181,14 @@ export function Step1Workforce({
 		});
 
 	function handleFieldChange(field: WorkforceField, value: string) {
-		setRaw((prev) => ({ ...prev, [field]: value }));
 		setFieldErrors((prev) =>
 			prev.filter(
 				(error) => error.fieldId !== workforceFieldIdFromField(field),
 			),
 		);
 		const parsed = parseIntegerInput(value);
+		if (parsed === null && value !== "") return;
+		setRaw((prev) => ({ ...prev, [field]: value }));
 		if (parsed === null) return;
 		form.setValue(field, parsed);
 		setField({ ...values, [field]: parsed });
