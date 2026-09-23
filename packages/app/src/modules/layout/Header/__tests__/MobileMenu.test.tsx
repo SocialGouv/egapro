@@ -36,7 +36,7 @@ describe("MobileMenu", () => {
 		).toBeInTheDocument();
 	});
 
-	it("hides the main navigation and renders the inline user block when signed in", async () => {
+	it("renders the main navigation and inline user block when signed in", async () => {
 		mocks.auth.mockResolvedValue({
 			user: {
 				email: "jean.dupont@example.fr",
@@ -48,8 +48,8 @@ describe("MobileMenu", () => {
 		render(await MobileMenu());
 
 		expect(
-			screen.queryByRole("navigation", { name: "Menu principal" }),
-		).not.toBeInTheDocument();
+			screen.getByRole("navigation", { name: "Menu principal" }),
+		).toBeInTheDocument();
 		expect(
 			screen.queryByRole("link", { name: "Se connecter" }),
 		).not.toBeInTheDocument();
