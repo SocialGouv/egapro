@@ -133,6 +133,19 @@ describe("ProfileModal — shell", () => {
 		);
 	});
 
+	it("renders autocomplete tokens for identity fields", () => {
+		render(<ProfileModal />);
+		expect(document.getElementById("profile-last-name")).toHaveAttribute(
+			"autocomplete",
+			"family-name",
+		);
+		expect(document.getElementById("profile-first-name")).toHaveAttribute(
+			"autocomplete",
+			"given-name",
+		);
+		expect(getForm()).not.toHaveAttribute("autocomplete", "off");
+	});
+
 	it("renders the Enregistrer and Annuler buttons", () => {
 		render(<ProfileModal />);
 		expect(
