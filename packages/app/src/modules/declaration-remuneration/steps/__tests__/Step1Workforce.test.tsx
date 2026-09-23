@@ -211,6 +211,41 @@ describe("Step1Workforce", () => {
 		expect(within(hourlyRow).getAllByRole("cell")[2]).toHaveTextContent("10");
 	});
 
+	it.each([
+		"10.2",
+		"10,5",
+		"-3",
+		"abc",
+		"12a",
+	])("ignores non-numeric pasted workforce value %s", async (invalidValue) => {
+		const user = userEvent.setup();
+		renderStep1(FILLED);
+
+		const womenInput = screen.getByLabelText(ANNUAL_WOMEN);
+		await user.click(womenInput);
+		await user.paste(invalidValue);
+
+		expect(womenInput).toHaveValue("10");
+		const annualRow = screen
+			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.closest("tr") as HTMLElement;
+		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("30");
+	});
+
+	it("ignores non-numeric typed characters and keeps the displayed total", async () => {
+		const user = userEvent.setup();
+		renderStep1(FILLED);
+
+		const womenInput = screen.getByLabelText(ANNUAL_WOMEN);
+		await user.type(womenInput, "abc");
+
+		expect(womenInput).toHaveValue("10");
+		const annualRow = screen
+			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.closest("tr") as HTMLElement;
+		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("30");
+	});
+
 	it("blocks submit while the form is empty", async () => {
 		const user = userEvent.setup();
 		renderStep1();
