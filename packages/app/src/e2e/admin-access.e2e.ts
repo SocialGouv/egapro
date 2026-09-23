@@ -98,6 +98,125 @@ test.describe("admin access", () => {
 	});
 });
 
+const TEXT_SPACING_CSS = `
+  html body, html body * {
+    line-height: 1.5 !important;
+    letter-spacing: 0.12em !important;
+    word-spacing: 0.16em !important;
+  }
+  html body main#content p { margin-bottom: 2em !important; }
+`;
+
+const ADMIN_SPACING_ROUTES = [
+	{ path: ADMIN_REFERENTS, heading: "Liste des référents Egapro" },
+	{ path: ADMIN_SETTINGS, heading: "Paramètres de la plateforme" },
+	{ path: ADMIN_STATS, heading: "Statistiques" },
+] as const;
+
+const ADMIN_SPACING_WIDTHS = [1280, 769, 768, 767, 375, 320] as const;
+
+test.describe("admin navigation with increased text spacing", () => {
+	for (const { path, heading } of ADMIN_SPACING_ROUTES) {
+		test(`${path} keeps its navigation and content readable`, async ({
+			page,
+		}) => {
+			await page.goto(path);
+			await expect(
+				page.getByRole("heading", { name: heading, level: 1 }),
+			).toBeVisible();
+			await page.evaluate(() => document.fonts.ready);
+			await page.addStyleTag({ content: TEXT_SPACING_CSS });
+
+			const nav = page.locator("nav.fr-sidemenu");
+			const main = page.locator("main#content");
+			const links = nav.locator("a.fr-sidemenu__link");
+			await expect(links).toHaveCount(6);
+
+			const computed = await links.first().evaluate((link) => {
+				const style = getComputedStyle(link);
+				return {
+					fontSize: Number.parseFloat(style.fontSize),
+					lineHeight: Number.parseFloat(style.lineHeight),
+					letterSpacing: Number.parseFloat(style.letterSpacing),
+					wordSpacing: Number.parseFloat(style.wordSpacing),
+				};
+			});
+			expect(computed.lineHeight / computed.fontSize).toBeCloseTo(1.5, 2);
+			expect(computed.letterSpacing / computed.fontSize).toBeCloseTo(0.12, 2);
+			expect(computed.wordSpacing / computed.fontSize).toBeCloseTo(0.16, 2);
+			const paragraph = main.locator("p").first();
+			await expect(paragraph).toBeVisible();
+			const paragraphSpacing = await paragraph.evaluate((element) => {
+				const style = getComputedStyle(element);
+				return (
+					Number.parseFloat(style.marginBottom) /
+					Number.parseFloat(style.fontSize)
+				);
+			});
+			expect(paragraphSpacing).toBeCloseTo(2, 2);
+
+			for (const width of ADMIN_SPACING_WIDTHS) {
+				await test.step(`${width}px`, async () => {
+					await page.setViewportSize({ width, height: 900 });
+					const menuButton = page.getByRole("button", {
+						name: "Administration",
+					});
+					const mobile = width < 768;
+					if (mobile) {
+						await expect(menuButton).toBeVisible();
+						if ((await menuButton.getAttribute("aria-expanded")) === "true") {
+							await menuButton.click();
+						}
+						await expect(menuButton).toHaveAttribute("aria-expanded", "false");
+						await expect(links.first()).toBeHidden();
+						await menuButton.click();
+						await expect(menuButton).toHaveAttribute("aria-expanded", "true");
+					} else {
+						await expect(menuButton).toBeHidden();
+					}
+					for (const link of await links.all()) {
+						await expect(link).toBeVisible();
+					}
+					await expect(
+						page.getByRole("heading", { name: heading, level: 1 }),
+					).toBeVisible();
+					await expect
+						.poll(async () => {
+							const navBox = await nav.boundingBox();
+							const mainBox = await main.boundingBox();
+							if (!navBox || !mainBox) return false;
+							return mobile
+								? navBox.y + navBox.height <= mainBox.y + 1
+								: navBox.x + navBox.width <= mainBox.x + 1;
+						})
+						.toBe(true);
+
+					const clippedLabels = await links.evaluateAll((items) =>
+						items
+							.filter((link) => {
+								const range = document.createRange();
+								range.selectNodeContents(link);
+								const text = range.getBoundingClientRect();
+								const box = link.getBoundingClientRect();
+								return (
+									text.left < box.left - 1 ||
+									text.right > box.right + 1 ||
+									text.top < box.top - 1 ||
+									text.bottom > box.bottom + 1
+								);
+							})
+							.map((link) => link.textContent?.trim()),
+					);
+					expect(clippedLabels).toEqual([]);
+				});
+			}
+
+			await nav.getByRole("link", { name: "Accueil" }).click();
+			await expect(page).toHaveURL(urlPattern(ADMIN));
+		});
+	}
+});
+
 // Years outside the seven-campaign grid the rest of the suite pins (#4022), so these
 // fixtures cannot collide with a spec that reasons in campaign years.
 const FLOORED_YEAR = 2018;

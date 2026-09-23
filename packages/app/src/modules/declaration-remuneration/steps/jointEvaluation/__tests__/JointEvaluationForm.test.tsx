@@ -111,6 +111,9 @@ describe("JointEvaluationForm", () => {
 
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
+		expect(screen.getByText(/Déclaration effectuée le/)).toHaveClass(
+			"fr-text-mention--grey",
+		);
 	});
 
 	it("shows a titled error alert when submitting without a file", () => {
@@ -261,7 +264,7 @@ describe("JointEvaluationForm", () => {
 				screen.getByText(
 					`Déposé le ${formatLongDate(existingFile.uploadedAt)}`,
 				),
-			).toBeInTheDocument();
+			).toHaveClass("fr-text-mention--grey");
 		});
 
 		it("keeps the upload zone available so the report can still be replaced", () => {

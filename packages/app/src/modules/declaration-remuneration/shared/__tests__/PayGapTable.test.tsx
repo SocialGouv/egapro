@@ -37,6 +37,20 @@ function gipRow(overrides: Partial<PayGapRow> = {}): PayGapRow {
 }
 
 describe("PayGapTable", () => {
+	it("exposes the scrollable table as a labelled keyboard stop", async () => {
+		const user = userEvent.setup();
+		renderTable(DEFAULT_PAY_GAP_ROWS);
+
+		const scrollRegion = screen.getByRole("region", {
+			name: "Écarts de rémunération — faire défiler le tableau horizontalement",
+		});
+		await user.tab();
+		expect(scrollRegion).toHaveFocus();
+		expect(scrollRegion).toContainElement(
+			screen.getByRole("table", { name: "Écarts de rémunération" }),
+		);
+	});
+
 	it("shows the GIP gap while both operands are untouched", () => {
 		renderTable([gipRow()]);
 
