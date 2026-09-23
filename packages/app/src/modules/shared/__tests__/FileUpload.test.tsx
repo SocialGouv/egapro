@@ -84,6 +84,24 @@ describe("FileUpload", () => {
 		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
 	});
 
+	it("exposes upload errors as an atomic alert", () => {
+		render(
+			<FileUpload
+				{...baseProps}
+				error="Le format du fichier n'est pas supporté."
+				onFilesChange={vi.fn()}
+				selectedFiles={[]}
+			/>,
+		);
+
+		const messages = document.querySelector(".fr-messages-group");
+		expect(messages).toHaveAttribute("role", "alert");
+		expect(messages).toHaveAttribute("aria-atomic", "true");
+		expect(messages).toHaveTextContent(
+			"Le format du fichier n'est pas supporté.",
+		);
+	});
+
 	it("opens the file dialog when the select button is clicked", async () => {
 		const user = userEvent.setup();
 		render(

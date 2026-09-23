@@ -296,7 +296,7 @@ describe("PercentagePairFields — live regions", () => {
 		render(<Harness />);
 		const { messages, announcement } = liveRegions();
 
-		expect(messages).toHaveAttribute("aria-live", "polite");
+		expect(messages).toHaveAttribute("role", "alert");
 		expect(messages).toHaveAttribute("aria-atomic", "true");
 		expect(messages.textContent).toBe("");
 		expect(announcement).toHaveAttribute("aria-live", "polite");

@@ -1,6 +1,11 @@
 export function CampaignRateTileLoading() {
 	return (
-		<p aria-live="polite" className="fr-text--sm">
+		<p
+			aria-atomic="true"
+			aria-live="polite"
+			className="fr-text--sm"
+			role="status"
+		>
 			Chargement du taux de déclaration…
 		</p>
 	);
