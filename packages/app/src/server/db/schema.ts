@@ -928,3 +928,57 @@ export const exports = createTable(
 	}),
 	(t) => [unique("export_year_version_idx").on(t.year, t.version)],
 );
+
+export const receiptKindEnum = pgEnum("receipt_kind", [
+	"declaration",
+	"secondDeclaration",
+	"cseOpinion",
+	"jointEvaluation",
+	"representation",
+]);
+
+export const receiptOutboxStatusEnum = pgEnum("receipt_outbox_status", [
+	"pending",
+	"sending",
+	"sent",
+	"failed",
+]);
+
+// `id` doubles as the pg-boss job id, so replaying a row whose send may already have landed cannot produce a second e-mail.
+export const receiptOutbox = createTable(
+	"receipt_outbox",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		kind: receiptKindEnum().notNull(),
+		siren: d.varchar({ length: 9 }).notNull(),
+		year: d.integer().notNull(),
+		recipientEmail: d.varchar({ length: 255 }).notNull(),
+		userId: d.varchar({ length: 255 }),
+		status: receiptOutboxStatusEnum().notNull().default("pending"),
+		attempts: d.integer().notNull().default(0),
+		lastError: d.text(),
+		createdAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		sentAt: d.timestamp({ withTimezone: true }),
+	}),
+	(t) => [
+		// The retry endpoint's only query: the unfinished rows, oldest first.
+		index("receipt_outbox_unsettled_idx")
+			.on(t.status, t.updatedAt)
+			.where(sql`"status" IN ('pending', 'sending')`),
+		// The purge cron's query — `sent_at` stays null on `failed`, so `updated_at` anchors both outcomes.
+		index("receipt_outbox_settled_idx")
+			.on(t.status, t.updatedAt)
+			.where(sql`"status" IN ('sent', 'failed')`),
+	],
+);

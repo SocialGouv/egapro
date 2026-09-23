@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
+	recordReceiptIntent: vi.fn().mockResolvedValue("outbox-1"),
+	deliverRecordedReceipt: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("~/modules/mail/server", () => ({
-	enqueueReceipt: mocks.enqueueReceipt,
+vi.mock("~/modules/mail/receiptIntent", () => ({
+	recordReceiptIntent: mocks.recordReceiptIntent,
+	deliverRecordedReceipt: mocks.deliverRecordedReceipt,
 }));
 
 import {
@@ -247,7 +249,8 @@ describe("representationDeclarationRouter.submit", () => {
 
 	describe("accusé de réception", () => {
 		beforeEach(() => {
-			mocks.enqueueReceipt.mockClear().mockResolvedValue(undefined);
+			mocks.recordReceiptIntent.mockClear().mockResolvedValue("outbox-1");
+			mocks.deliverRecordedReceipt.mockClear().mockResolvedValue(undefined);
 		});
 
 		it("acknowledges the transmission to the declarant (S20)", async () => {
@@ -255,14 +258,17 @@ describe("representationDeclarationRouter.submit", () => {
 
 			await submit(mock, FULL_PAYLOAD);
 
-			expect(mocks.enqueueReceipt).toHaveBeenCalledWith({
-				kind: "representation",
-				to: "declarant@exemple.fr",
-				siren: SIREN,
-				year: YEAR,
-				userId: USER_ID,
-				isResend: false,
-			});
+			expect(mocks.recordReceiptIntent).toHaveBeenCalledWith(
+				expect.anything(),
+				{
+					kind: "representation",
+					to: "declarant@exemple.fr",
+					siren: SIREN,
+					year: YEAR,
+					userId: USER_ID,
+				},
+			);
+			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith("outbox-1");
 		});
 
 		it("stores the declaration before acknowledging it", async () => {
@@ -271,8 +277,23 @@ describe("representationDeclarationRouter.submit", () => {
 			await submit(mock, FULL_PAYLOAD);
 
 			expect(mock.onConflictDoUpdate).toHaveBeenCalledBefore(
-				mocks.enqueueReceipt,
+				mocks.recordReceiptIntent,
 			);
+		});
+
+		// The acknowledgement owed by a committed submission has to commit with it.
+		it("records the intent while the storing transaction is still open", async () => {
+			const mock = createMockDb();
+			let openWhenRecorded: boolean | null = null;
+			mocks.recordReceiptIntent.mockImplementation(async () => {
+				openWhenRecorded = mock.isTransactionOpen();
+				return "outbox-1";
+			});
+
+			await submit(mock, FULL_PAYLOAD);
+
+			expect(openWhenRecorded).toBe(true);
+			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith("outbox-1");
 		});
 
 		it("skips the acknowledgement when the account carries no e-mail", async () => {
@@ -281,7 +302,8 @@ describe("representationDeclarationRouter.submit", () => {
 			await submit(mock, FULL_PAYLOAD, buildSession({ email: null }));
 
 			expect(mock.insert).toHaveBeenCalled();
-			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+			expect(mocks.recordReceiptIntent).not.toHaveBeenCalled();
+			expect(mocks.deliverRecordedReceipt).toHaveBeenCalledWith(null);
 		});
 
 		it("sends no acknowledgement when the payload is rejected", async () => {
@@ -291,7 +313,8 @@ describe("representationDeclarationRouter.submit", () => {
 				submit(mock, { ...FULL_PAYLOAD, executiveMenPercent: 30 }),
 			).rejects.toMatchObject({ code: "BAD_REQUEST" });
 
-			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+			expect(mocks.recordReceiptIntent).not.toHaveBeenCalled();
+			expect(mocks.deliverRecordedReceipt).not.toHaveBeenCalled();
 		});
 
 		it("sends no acknowledgement once the campaign is closed", async () => {
@@ -302,7 +325,8 @@ describe("representationDeclarationRouter.submit", () => {
 				code: "FORBIDDEN",
 			});
 
-			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+			expect(mocks.recordReceiptIntent).not.toHaveBeenCalled();
+			expect(mocks.deliverRecordedReceipt).not.toHaveBeenCalled();
 		});
 	});
 });
