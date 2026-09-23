@@ -82,7 +82,7 @@ export function SearchForm() {
 				<div className="fr-col-12 fr-col-md-4">
 					<div className="fr-input-group">
 						<label className="fr-label" htmlFor="search-query">
-							SIREN / Nom entreprise
+							Numéro Siren ou le nom de l'entreprise
 						</label>
 						<input
 							className="fr-input"
