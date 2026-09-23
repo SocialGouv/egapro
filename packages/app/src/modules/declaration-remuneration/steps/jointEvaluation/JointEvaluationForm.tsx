@@ -138,7 +138,7 @@ export function JointEvaluationForm({
 						<p className="fr-h6 fr-mb-2v">
 							{formatLongDate(jointEvaluationDeadline)}
 						</p>
-						<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
+						<p className="fr-mb-0 fr-text--sm fr-text-mention--grey">
 							Déclaration effectuée le {declarationDate}
 						</p>
 					</div>
@@ -158,7 +158,7 @@ export function JointEvaluationForm({
 									<NewTabNotice />
 								</a>
 							</p>
-							<p className="fr-mb-0 fr-text--xs fr-text--mention-grey">
+							<p className="fr-mb-0 fr-text--xs fr-text-mention--grey">
 								Déposé le {formatLongDate(existingFile.uploadedAt)}
 							</p>
 						</div>

@@ -84,6 +84,9 @@ describe("ContentTypeMatrix", () => {
 
 		expect(screen.getByText("PDF – 61,88 Ko")).toBeInTheDocument();
 		expect(screen.getByText("PDF")).toBeInTheDocument();
+		expect(screen.getByText("PDF – 61,88 Ko")).toHaveClass(
+			"fr-text-mention--grey",
+		);
 	});
 
 	it("renders one checkbox per file and column combination", () => {

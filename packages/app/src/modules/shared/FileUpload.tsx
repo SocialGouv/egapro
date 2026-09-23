@@ -191,7 +191,7 @@ export function FileUpload({
 							>
 								{file.name}
 							</a>
-							<p className="fr-text--xs fr-text--mention-grey fr-mb-0">
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
 								{formatFileMeta(getExtensionLabel(file.name), file.size)}
 							</p>
 						</div>
