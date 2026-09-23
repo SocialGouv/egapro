@@ -41,6 +41,10 @@
 	// ~776px card (Figma page 5); narrow viewports scroll via the DSFR table
 	// wrapper (RGAA reflow).
 	table-layout: fixed;
+	// Keep the 140px inputs and their units readable when the viewport is
+	// reduced by browser zoom. The DSFR container provides the keyboard-usable
+	// horizontal scroll when this minimum is wider than the viewport.
+	min-width: 48rem;
 }
 
 .fixedTable table thead th:nth-child(2),
