@@ -35,13 +35,13 @@ vi.mock("~/server/db/getCampaignDeadlines", () => ({
 
 const SIREN = "339787277";
 
-function makeCompanyRow() {
+function makeCompanyRow(workforceEma: string | null = "100.00") {
 	return {
 		siren: SIREN,
 		name: "Test Company",
 		address: "1 rue de Paris",
 		nafCode: "6202A",
-		workforceEma: "100.00",
+		workforceEma,
 		hasCse: true,
 	};
 }
@@ -86,14 +86,16 @@ async function makeCaller({
 	declRows = [],
 	eventRows = [],
 	representationDeclarationRows = [],
+	workforceEma = "100.00",
 }: {
 	declRows?: unknown[];
 	eventRows?: unknown[];
 	representationDeclarationRows?: unknown[];
+	workforceEma?: string | null;
 } = {}) {
 	const queries: QueryLog[] = [];
 	const rowsByTable = new Map<unknown, unknown[]>([
-		[companies, [makeCompanyRow()]],
+		[companies, [makeCompanyRow(workforceEma)]],
 		[declarations, declRows],
 		[files, []],
 		[gipMdsData, []],
@@ -292,6 +294,28 @@ describe("companyRouter.getWithDeclarations", () => {
 	it("offers the representation démarche when no workforce is known", async () => {
 		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
 		const { caller } = await makeCaller();
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(result.declarations.some((d) => d.type === "representation")).toBe(
+			true,
+		);
+	});
+
+	it("hides the representation démarche below 50 employees", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		const { caller } = await makeCaller({ workforceEma: "49.00" });
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(result.declarations.some((d) => d.type === "representation")).toBe(
+			false,
+		);
+	});
+
+	it("keeps the representation démarche at exactly 50 employees", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		const { caller } = await makeCaller({ workforceEma: "50.00" });
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
 
