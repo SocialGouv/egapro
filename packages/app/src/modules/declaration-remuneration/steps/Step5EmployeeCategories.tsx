@@ -113,7 +113,7 @@ export function Step5EmployeeCategories({
 			hourlyMaxWomen={hourlyMaxWomen}
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
-			instructionText="Saisissez les données manquantes avant de valider votre indicateur."
+			instructionText="Renseignez les informations nécessaires pour le calcul de l'indicateur ou importez-les via le bouton ci-dessous"
 			isPendingSaveOverride={isPendingSave}
 			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}

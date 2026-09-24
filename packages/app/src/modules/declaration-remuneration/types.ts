@@ -125,7 +125,7 @@ export const STEP_TITLES = [
 	"Écart de rémunération variable ou complémentaire",
 	"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
 	"Écart de rémunération par catégories de salariés",
-	"Récapitulatif de votre déclaration",
+	"Récapitulatif de la déclaration",
 ] as const;
 
 export const TOTAL_STEPS = REMUNERATION_STEP_NUMBERS.length;

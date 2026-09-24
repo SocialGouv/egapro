@@ -617,7 +617,7 @@ export function CategoryForm({
 
 				{referencePeriodPicker ?? (
 					<div className={stepStyles.categoryHeader}>
-						<p className="fr-mb-0">
+						<p className="fr-mb-0 fr-text--bold">
 							Période de référence pour le calcul des indicateurs :{" "}
 							<span className={stepStyles.periodDate}>
 								01/01/{referenceYear} - 31/12/{referenceYear}.

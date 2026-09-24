@@ -207,7 +207,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 		);
 		expect(
 			screen.getByText(
-				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+				"Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire (en cas d'erreur, pensez à corriger votre DSN).",
 			),
 		).toBeInTheDocument();
 		expect(

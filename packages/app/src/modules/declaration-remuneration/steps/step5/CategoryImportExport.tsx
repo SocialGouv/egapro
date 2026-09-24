@@ -176,7 +176,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 											<p className="fr-mb-0">
 												Téléchargez le fichier à remplir, complétez-le en vous
 												aidant si besoin du guide de remplissage, puis
-												redéposez-le ci-dessus pour importer les données.
+														déposez-le ci-dessus pour importer les données.
 											</p>
 										</div>
 
