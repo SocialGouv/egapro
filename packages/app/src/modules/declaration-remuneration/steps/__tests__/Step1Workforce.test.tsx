@@ -158,6 +158,24 @@ describe("Step1Workforce", () => {
 		).toBeInTheDocument();
 	});
 
+	it("renders the workforce instruction for indicator calculation", () => {
+		render(
+			<Step1Workforce
+				declarationSiren="123456789"
+				declarationYear={2026}
+				initialData={emptyStep1Data()}
+			/>,
+		);
+		expect(
+			screen.getByText(
+				"Renseignez le nombre de salariés en effectif physique pris en compte pour le calcul des indicateurs.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText("Renseignez l'effectif physique de votre entreprise."),
+		).not.toBeInTheDocument();
+	});
+
 	it("renders initial data and totals each row independently", () => {
 		renderStep1(FILLED);
 		expect(screen.getByLabelText(ANNUAL_WOMEN)).toHaveValue("10");

@@ -285,7 +285,7 @@ export function Step1Workforce({
 						<p className={`fr-mb-0 ${common.fontMedium}`}>
 							{isPrefilled
 								? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-								: "Renseignez l'effectif physique de votre entreprise."}
+							: "Renseignez le nombre de salariés en effectif physique pris en compte pour le calcul des indicateurs."}
 							<TooltipButton
 								id="tooltip-workforce"
 								label="Information sur les effectifs"
