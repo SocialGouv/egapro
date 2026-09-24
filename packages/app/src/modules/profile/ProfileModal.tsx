@@ -110,8 +110,9 @@ export function ProfileModal() {
 									</div>
 								</div>
 								<p className="fr-text--regular fr-text-title--grey fr-mb-2w">
-									Vérifier les données affichées et compléter les informations
-									manquantes si nécessaire.
+									Vérifier les informations pré-remplies à partir de votre
+									compte ProConnect et compléter les informations manquantes si
+									nécessaire.
 								</p>
 								<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
 									Tous les champs sont obligatoires.
@@ -139,9 +140,6 @@ export function ProfileModal() {
 										<p className="fr-mb-0">
 											E-mail :{" "}
 											<strong>{profileQuery.data?.email || "—"}</strong>
-										</p>
-										<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-											Source : ProConnect.
 										</p>
 									</div>
 									<PhoneField
