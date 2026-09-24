@@ -501,7 +501,13 @@ describe("declaration_confirmation variants", () => {
 			"les indicateurs relatifs aux écarts de rémunération",
 		);
 		expect(mail.html).toContain(RAISON_SOCIALE);
-		expect(mail.html).toContain("accuse réception de cette transmission");
+		if (variant === "completed") {
+			expect(mail.html).not.toContain(
+				"ne vaut pas contrôle de conformité de votre déclaration",
+			);
+		} else {
+			expect(mail.html).toContain("accuse réception de cette transmission");
+		}
 		expect(mail.html).toContain("SIREN :");
 		expect(mail.html).toContain(SIREN);
 		expect(mail.html).toContain("au titre des données");

@@ -46,7 +46,6 @@ export const buildDeclarationConfirmationMail: MailBuilder<
 				<EmailShell previewText={previewText}>
 					<EmailGreeting>Bonjour,</EmailGreeting>
 					{introParagraph}
-					{accuseParagraph}
 					<EmailParagraph>
 						Votre démarche est désormais terminée. Vous pouvez à tout moment
 						consulter et télécharger votre déclaration depuis votre espace.
