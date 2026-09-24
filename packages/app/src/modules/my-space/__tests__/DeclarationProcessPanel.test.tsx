@@ -106,7 +106,7 @@ describe("DeclarationProcessPanel", () => {
 		});
 
 		it("renders step 1 details with bullet points", () => {
-			const { panel } = renderPanel("start");
+			const { panel, dialog } = renderPanel("start");
 			expect(
 				panel.getByText(/Indicateurs pré-remplis à vérifier/),
 			).toBeInTheDocument();
@@ -114,6 +114,10 @@ describe("DeclarationProcessPanel", () => {
 				panel.getByText(
 					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
+			).toBeInTheDocument();
+			expect(dialog.querySelectorAll("ul > li")).toHaveLength(2);
+			expect(
+				panel.getByText(/Indicateurs pré-remplis à vérifier/).closest("li"),
 			).toBeInTheDocument();
 		});
 

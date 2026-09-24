@@ -271,13 +271,16 @@ function Step2Row({
 					/>
 				) : (
 					<>
-						{status !== "pending" &&
-							STEP2_ITEMS.map((item) => (
-								<div className={styles.bulletItem} key={item}>
-									<span aria-hidden="true" className={styles.bullet} />
-									<p className="fr-mb-0">{item}</p>
-								</div>
-							))}
+						{status !== "pending" && (
+							<ul className={styles.bulletList}>
+								{STEP2_ITEMS.map((item) => (
+									<li className={styles.bulletItem} key={item}>
+										<span aria-hidden="true" className={styles.bullet} />
+										<p className="fr-mb-0">{item}</p>
+									</li>
+								))}
+							</ul>
+						)}
 						<div className={styles.deadlineRow}>
 							<span
 								aria-hidden="true"
