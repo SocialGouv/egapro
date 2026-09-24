@@ -28,13 +28,13 @@ export function ThemeModal() {
 								</button>
 							</div>
 							<div className="fr-modal__content">
-								<h1 className="fr-modal__title" id="fr-theme-modal-title">
+								<h2 className="fr-modal__title" id="fr-theme-modal-title">
 									<span
 										aria-hidden="true"
 										className="fr-icon-theme-fill fr-icon--lg"
 									/>
 									Paramètres d'affichage
-								</h1>
+								</h2>
 								<div className="fr-display" id="fr-display">
 									<fieldset className="fr-fieldset">
 										<legend
