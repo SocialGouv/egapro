@@ -26,11 +26,6 @@ export async function ComplianceConfirmation() {
 				Votre parcours de mise en conformité {currentYear} est terminé
 			</p>
 
-			<p className="fr-mb-0">
-				Votre entreprise ne dispose pas de CSE. Aucun avis CSE n&apos;est
-				requis.
-			</p>
-
 			<DownloadDeclarationPdfButton year={currentYear} />
 
 			<div className="fr-mt-4w">

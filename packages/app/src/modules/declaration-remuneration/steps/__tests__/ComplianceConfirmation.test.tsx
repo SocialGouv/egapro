@@ -41,12 +41,12 @@ describe("ComplianceConfirmation", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows the no CSE message", async () => {
+	it("does not show an unnecessary CSE message", async () => {
 		render(await ComplianceConfirmation());
 
 		expect(
-			screen.getByText(/Votre entreprise ne dispose pas de CSE/),
-		).toBeInTheDocument();
+			screen.queryByText(/Votre entreprise ne dispose pas de CSE/),
+		).not.toBeInTheDocument();
 	});
 
 	it("has a link to mon espace", async () => {
