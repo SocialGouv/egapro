@@ -51,7 +51,7 @@ describe("StepIndicator", () => {
 
 		expect(screen.getByText("Étape 4 sur 5")).toBeInTheDocument();
 		expect(
-			screen.getByText("Récapitulatif de votre déclaration"),
+			screen.getByText("Récapitulatif de la déclaration"),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText("Écart de rémunération par catégories de salariés"),

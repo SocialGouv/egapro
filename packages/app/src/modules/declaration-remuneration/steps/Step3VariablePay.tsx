@@ -314,7 +314,7 @@ export function Step3VariablePay({
 
 					<p className={`fr-mb-0 ${common.fontMedium}`}>
 						{gipPrefillData
-							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
+							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire (en cas d'erreur, pensez à corriger votre DSN)."
 							: "Renseignez les informations avant de valider vos indicateurs."}
 						{!gipPrefillData && (
 							<TooltipButton
