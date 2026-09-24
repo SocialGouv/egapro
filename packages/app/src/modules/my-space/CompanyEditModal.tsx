@@ -117,7 +117,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</h2>
 								<p className="fr-mb-4w">
 									{cseApplicable
-										? "Vérifier les données affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
+										? "Vérifier les informations affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
 										: "Vérifier les données affichées."}{" "}
 									Si vous constatez une erreur, veuillez{" "}
 									<a
@@ -217,7 +217,14 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 					<InfoRow label="Raison sociale :" value={company.name} />
 					<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
 					<InfoRow label="Adresse :" value={company.address} />
-					<InfoRow label="Code NAF :" value={company.nafCode} />
+					<InfoRow
+						label="Code NAF :"
+						value={
+							company.nafLabel
+								? `${company.nafCode} — ${company.nafLabel}`
+								: company.nafCode
+						}
+					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 					Source : INSEE.
