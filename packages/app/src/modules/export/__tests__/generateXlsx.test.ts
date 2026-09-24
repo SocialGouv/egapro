@@ -189,6 +189,8 @@ describe("generateXlsx", () => {
 		for (const col of INDICATOR_G_COLUMNS) {
 			expect(headers).toContain(col.header);
 		}
+		expect(headers).toContain("Source des catégories d'emplois");
+		expect(headers).not.toContain("Source");
 	});
 
 	it("keeps a null hourly headcount blank while filling a populated one (#4368)", async () => {
