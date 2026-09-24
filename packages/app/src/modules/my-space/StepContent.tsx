@@ -101,7 +101,7 @@ export function Step1Content({
 				</BulletRow>
 				{indicatorGRequired && (
 					<BulletRow>
-						Indicateurs de rémunération par catégories de salariés à remplir
+						Indicateur de rémunération par catégories de salariés à remplir
 					</BulletRow>
 				)}
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
