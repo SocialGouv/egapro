@@ -8,7 +8,8 @@ import {
 	isSexRemunerationComplete,
 } from "~/modules/domain";
 
-export const CATEGORY_NAME_MAX_LENGTH = 255;
+export const CATEGORY_NAME_MAX_LENGTH = 250;
+const CATEGORY_NAME_LEGACY_MAX_LENGTH = 255;
 export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
 
 export const updateStep1Schema = z.object({
@@ -136,23 +137,33 @@ const employeeCategoryDataSchema = z
 		},
 	);
 
-export const updateEmployeeCategoriesSchema = z.object({
-	declarationType: z.enum(["initial", "correction"]),
-	source: z.string().min(1),
-	categories: z
-		.array(
-			z.object({
-				name: z
-					.string()
-					.min(1)
-					.max(CATEGORY_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH_MESSAGE),
-				data: employeeCategoryDataSchema,
-			}),
-		)
-		.max(50),
-	referencePeriodStart: z.string().optional(),
-	referencePeriodEnd: z.string().optional(),
-});
+export const updateEmployeeCategoriesSchema = z
+	.object({
+		declarationType: z.enum(["initial", "correction"]),
+		source: z.string().min(1),
+		categories: z
+			.array(
+				z.object({
+					name: z.string().min(1).max(CATEGORY_NAME_LEGACY_MAX_LENGTH),
+					data: employeeCategoryDataSchema,
+				}),
+			)
+			.max(50),
+		referencePeriodStart: z.string().optional(),
+		referencePeriodEnd: z.string().optional(),
+	})
+	.superRefine((value, context) => {
+		if (value.declarationType !== "initial") return;
+		value.categories.forEach((category, index) => {
+			if (category.name.length > CATEGORY_NAME_MAX_LENGTH) {
+				context.addIssue({
+					code: "custom",
+					message: CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+					path: ["categories", index, "name"],
+				});
+			}
+		});
+	});
 
 export const categoryFormEntrySchema = z.object({
 	name: z
@@ -180,6 +191,14 @@ export const categoryFormSchema = z.object({
 			"Veuillez sélectionner la source utilisée pour déterminer les catégories d'emplois.",
 		),
 	categories: z.array(categoryFormEntrySchema),
+});
+
+export const categoryCorrectionFormSchema = categoryFormSchema.extend({
+	categories: z.array(
+		categoryFormEntrySchema.extend({
+			name: z.string().max(CATEGORY_NAME_LEGACY_MAX_LENGTH),
+		}),
+	),
 });
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
