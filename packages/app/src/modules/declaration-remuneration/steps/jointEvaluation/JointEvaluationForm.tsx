@@ -108,7 +108,7 @@ export function JointEvaluationForm({
 
 					<div className={common.flexColumnGapHalf}>
 						<h2 className="fr-h5 fr-mb-0">
-							Évaluation conjointe des rémunérations
+							Dépôt du rapport de l&apos;évaluation conjointe des rémunérations
 						</h2>
 						<p className="fr-mb-0">
 							<TrackedLink

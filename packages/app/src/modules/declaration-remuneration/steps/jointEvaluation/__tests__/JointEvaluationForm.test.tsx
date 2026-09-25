@@ -90,7 +90,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: /évaluation conjointe des rémunérations/i,
+				name: "Dépôt du rapport de l'évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();
