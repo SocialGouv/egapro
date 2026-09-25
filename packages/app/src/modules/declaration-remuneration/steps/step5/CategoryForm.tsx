@@ -6,6 +6,7 @@ import { useFieldArray } from "react-hook-form";
 
 import {
 	type CategoryFormValues,
+	categoryCorrectionFormSchema,
 	categoryFormSchema,
 } from "~/modules/declaration-remuneration/schemas";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
@@ -198,14 +199,17 @@ export function CategoryForm({
 			? fromDatabaseRows(initialCategories, nextId)
 			: [createEmptyCategory(nextId())];
 
-	const form = useZodForm(categoryFormSchema, {
-		defaultValues: defaultValuesOverride
-			? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
-			: {
-					source: initialSource,
-					categories: toFormValues(initialCats, preserveLegacyPay),
-				},
-	});
+	const form = useZodForm(
+		readOnlyLabel ? categoryCorrectionFormSchema : categoryFormSchema,
+		{
+			defaultValues: defaultValuesOverride
+				? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
+				: {
+						source: initialSource,
+						categories: toFormValues(initialCats, preserveLegacyPay),
+					},
+		},
+	);
 	const clearNonApplicableCategoryPay = useCallback(
 		(index: number) => {
 			const category = form.getValues(`categories.${index}`);
