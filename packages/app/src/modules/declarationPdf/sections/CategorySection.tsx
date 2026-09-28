@@ -203,7 +203,9 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 				{data.categories.length > 0 ? (
 					<View style={styles.infoBody}>
 						<View style={styles.infoLabelColumn}>
-							<Text style={styles.infoLabel}>Source</Text>
+							<Text style={styles.infoLabel}>
+								Source des catégories d'emplois
+							</Text>
 						</View>
 						<View style={styles.infoValueColumn}>
 							<Text style={styles.infoValue}>{data.source ?? "-"}</Text>

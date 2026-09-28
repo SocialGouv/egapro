@@ -67,7 +67,10 @@ describe("CategorySection", () => {
 				})}
 			/>,
 		);
-		expect(screen.getByText("Source")).toBeInTheDocument();
+		expect(
+			screen.getByText("Source des catégories d'emplois"),
+		).toBeInTheDocument();
+		expect(screen.queryByText("Source")).not.toBeInTheDocument();
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 		expect(
 			screen.getByText("Catégorie d'emplois n°1 : Ouvriers"),
