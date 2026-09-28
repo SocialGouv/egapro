@@ -6,7 +6,12 @@ import {
 	diffusibleCompanyCondition,
 	publicCompanyNameSortKey,
 } from "~/server/db/companyConditions";
-import { companies, representationDeclarations } from "~/server/db/schema";
+import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
+import {
+	campaignDeadlines,
+	companies,
+	representationDeclarations,
+} from "~/server/db/schema";
 import type { PublicRepresentationCompanySource } from "./representationProjection";
 import {
 	publicRepresentationColumns,
@@ -117,6 +122,7 @@ export async function searchPublicRepresentations(
 				companies,
 				eq(representationDeclarations.siren, companies.siren),
 			)
+			.innerJoin(campaignDeadlines, releasedRepresentationCampaignJoin())
 			.where(where)
 			.orderBy(
 				desc(representationDeclarations.year),
@@ -132,6 +138,7 @@ export async function searchPublicRepresentations(
 				companies,
 				eq(representationDeclarations.siren, companies.siren),
 			)
+			.innerJoin(campaignDeadlines, releasedRepresentationCampaignJoin())
 			.where(where),
 	]);
 
@@ -156,6 +163,7 @@ async function fetchRows(siren: string, year?: number) {
 		})
 		.from(representationDeclarations)
 		.innerJoin(companies, eq(representationDeclarations.siren, companies.siren))
+		.innerJoin(campaignDeadlines, releasedRepresentationCampaignJoin())
 		.where(
 			and(
 				eq(representationDeclarations.siren, siren),

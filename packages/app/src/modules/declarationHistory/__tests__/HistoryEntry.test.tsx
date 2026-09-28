@@ -103,5 +103,19 @@ describe("HistoryEntry", () => {
 		);
 		const timeEl = screen.getByRole("time");
 		expect(timeEl).toHaveAttribute("dateTime", "2026-09-28T13:10:00.000Z");
+		expect(timeEl).toHaveTextContent("28 septembre 2026");
+	});
+
+	it("S4: gives the first of the month its French ordinal, and the time a 24-hour clock", () => {
+		render(
+			<ul>
+				<HistoryEntry
+					item={{ ...baseItem, createdAt: new Date(2026, 5, 1, 9, 5) }}
+				/>
+			</ul>,
+		);
+
+		expect(screen.getByText("1\u1d49\u02b3 juin 2026")).toBeInTheDocument();
+		expect(screen.getByText("09:05")).toBeInTheDocument();
 	});
 });

@@ -9,8 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { FILENAME_ERROR_MESSAGES } from "~/modules/shared";
-import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
+import { FILENAME_ERROR_MESSAGES, SUBMIT_LABEL } from "~/modules/shared";
 import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
 import type {

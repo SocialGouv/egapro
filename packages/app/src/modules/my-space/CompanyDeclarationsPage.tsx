@@ -3,6 +3,7 @@ import type {
 	RepresentationCampaign,
 } from "~/modules/domain";
 import {
+	formatLongDate,
 	getCurrentYear,
 	getDeclarationDisplayContext,
 	getObligationWorkforce,
@@ -46,11 +47,7 @@ function getLastActionDate(
 	);
 	if (!currentYearDeclaration?.updatedAt) return null;
 
-	return new Intl.DateTimeFormat("fr-FR", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	}).format(currentYearDeclaration.updatedAt);
+	return formatLongDate(currentYearDeclaration.updatedAt);
 }
 
 export function CompanyDeclarationsPage({

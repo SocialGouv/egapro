@@ -170,11 +170,15 @@ describe("searchPublicDeclarations", () => {
 			col: "declarations.status",
 			value: "draft",
 		});
-		expect(conditions).toContainEqual({
-			op: "isNotNull",
-			col: "campaignDeadlines.publicDataReleaseDate",
-		});
-		expect(conditions).toContainEqual(expect.objectContaining({ op: "sql" }));
+		expect(conditions).toContainEqual(
+			expect.objectContaining({
+				op: "sql",
+				values: [
+					"campaignDeadlines.publicDataReleaseDate",
+					"campaignDeadlines.publicDataReleaseDate",
+				],
+			}),
+		);
 	});
 
 	it("matches a partial name only for a diffusible company", async () => {
@@ -272,7 +276,7 @@ describe("searchPublicDeclarations", () => {
 		await searchPublicDeclarations({ ...DEFAULT_INPUT, region: ["11"] });
 
 		const conditions = (captured.where as { args: Array<{ op: string }> }).args;
-		expect(conditions).toHaveLength(5);
+		expect(conditions).toHaveLength(4);
 		expect(conditions.some((c) => c.op === "or")).toBe(false);
 	});
 
@@ -373,7 +377,7 @@ describe("searchPublicDeclarations", () => {
 		await searchPublicDeclarations(DEFAULT_INPUT);
 
 		const conditions = (captured.where as { args: Array<{ op: string }> }).args;
-		expect(conditions).toHaveLength(5);
+		expect(conditions).toHaveLength(4);
 		expect(conditions.some((c) => c.op === "or")).toBe(false);
 		expect(conditions.some((c) => c.op === "ilike")).toBe(false);
 	});

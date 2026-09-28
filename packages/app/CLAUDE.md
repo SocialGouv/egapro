@@ -152,7 +152,7 @@ pnpm check:write      # Biome : corrige lint + format d'un coup
 pnpm a11y:dev         # side-car ultra11y (dashboard sur 127.0.0.1:4111) — optionnel
 ```
 
-`pnpm test:e2e` et `pnpm test:lighthouse` exigent `pnpm dev` sur le **port 3000** — la passerelle de test ProConnect n'enregistre que ce callback.
+`pnpm test:e2e` et `pnpm test:lighthouse` exigent `pnpm dev` sur le **port 3000** — la connexion ProConnect passe par le proxy OAuth **Charon**, dont la liste d'adresses de retour autorisées pour egapro ne contient, en local, que `http://localhost:3000`. Détail et conséquences → README, § Connexion ProConnect.
 
 ### Base de données
 

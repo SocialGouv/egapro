@@ -1,9 +1,8 @@
-import { gapRatioToPercent } from "~/modules/domain";
+import { formatRatioAsPercentage, gapRatioToPercent } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { SingleGenderBar } from "~/modules/shared/GenderBar";
 import { IndicatorCard } from "~/modules/shared/IndicatorCard";
-import { formatGap } from "./formatters";
 import { GenderDetailsTable } from "./GenderDetailsTable";
 import styles from "./indicatorSection.module.scss";
 import { INDICATOR_TOOLTIPS } from "./tooltips";
@@ -42,7 +41,9 @@ export function VariableBeneficiariesCard({ declaration }: Props) {
 					label={
 						<>
 							Femmes bénéficiaires de rémunération variable et complémentaire :{" "}
-							<strong>{formatGap(variableProportionWomen)}</strong>
+							<strong>
+								{formatRatioAsPercentage(variableProportionWomen)}
+							</strong>
 						</>
 					}
 					percent={gapRatioToPercent(variableProportionWomen)}
@@ -52,7 +53,7 @@ export function VariableBeneficiariesCard({ declaration }: Props) {
 					label={
 						<>
 							Hommes bénéficiaires de rémunération variable et complémentaire :{" "}
-							<strong>{formatGap(variableProportionMen)}</strong>
+							<strong>{formatRatioAsPercentage(variableProportionMen)}</strong>
 						</>
 					}
 					percent={gapRatioToPercent(variableProportionMen)}
@@ -67,8 +68,8 @@ export function VariableBeneficiariesCard({ declaration }: Props) {
 							{
 								label: ROW_LABEL,
 								values: [
-									formatGap(variableProportionWomen),
-									formatGap(variableProportionMen),
+									formatRatioAsPercentage(variableProportionWomen),
+									formatRatioAsPercentage(variableProportionMen),
 								],
 							},
 						]}

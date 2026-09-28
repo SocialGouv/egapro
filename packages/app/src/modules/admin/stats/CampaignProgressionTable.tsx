@@ -1,6 +1,4 @@
-import { formatMonthDay } from "~/modules/domain";
-
-import { formatCount } from "./formatters";
+import { formatCount, formatMonthDay } from "~/modules/domain";
 import type { CampaignProgressionSeries } from "./types";
 
 type Props = {

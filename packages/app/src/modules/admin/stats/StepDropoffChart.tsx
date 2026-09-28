@@ -10,10 +10,11 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
-
-import { formatCount, formatPercent } from "./formatters";
+import {
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	formatCount,
+	formatFixedPercentage,
+} from "~/modules/domain";
 import styles from "./StepDropoffChart.module.scss";
 import type { StepDropoffRow } from "./types";
 
@@ -62,7 +63,7 @@ function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
-					{formatPercent(row.dropoffRate, { withUnit: true })} d'abandon
+					{formatFixedPercentage(row.dropoffRate, { withUnit: true })} d'abandon
 				</li>
 				<li className={styles.tooltipItem}>
 					{formatCount(row.abandoned)} sur {formatCount(row.total)} déclarations{" "}
@@ -83,13 +84,16 @@ export function StepDropoffChart({ rows }: Props) {
 			</p>
 		);
 	}
+	const figureCaption = `${CHART_CAPTION} Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{CHART_CAPTION} Les données équivalentes sont disponibles dans le
-				tableau ci-dessous.
-			</figcaption>
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div
 				aria-label={CHART_CAPTION}
 				className={styles.chartContainer}

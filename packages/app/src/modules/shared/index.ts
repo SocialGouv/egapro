@@ -27,7 +27,6 @@ export { SUBMIT_LABEL } from "./submitLabels";
 export {
 	FILE_TOO_LARGE_ERROR,
 	formatFileMeta,
-	formatFileSize,
 	MAX_FILE_SIZE,
 	MAX_FILE_SIZE_LABEL,
 	S3_PART_MIN_SIZE,

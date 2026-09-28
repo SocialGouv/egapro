@@ -12,7 +12,7 @@ import {
 	YAxis,
 } from "recharts";
 
-import { formatCount, formatDays } from "./formatters";
+import { formatCount, formatDays } from "~/modules/domain";
 import styles from "./StepDurationsChart.module.scss";
 import type { StepDurationRow } from "./types";
 
@@ -82,13 +82,16 @@ export function StepDurationsChart({ rows }: Props) {
 			</p>
 		);
 	}
+	const figureCaption = `${CHART_CAPTION} Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{CHART_CAPTION} Les données équivalentes sont disponibles dans le
-				tableau ci-dessous.
-			</figcaption>
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div
 				aria-label={CHART_CAPTION}
 				className={styles.chartContainer}

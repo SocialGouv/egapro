@@ -81,7 +81,7 @@ scan WARN "Ratio→percentage on a gap column — extract a named domain helper"
   'Number\([a-zA-Z_.]*[gG]ap[a-zA-Z_.]*\)[[:space:]]*\*[[:space:]]*100'
 scan WARN "Reference/data year (year - 1) — candidate for a getReferenceYear(year) helper" \
   '\.year[[:space:]]*-[[:space:]]*1'
-scan WARN "toLocaleString(\"fr-FR\") — probable duplicate of formatCount/formatRate/formatCurrency" \
+scan WARN "toLocaleString(\"fr-FR\") — display formatting belongs in domain/shared/format.ts" \
   'toLocaleString.*fr-FR|toLocaleString.*"fr"'
 
 echo ""

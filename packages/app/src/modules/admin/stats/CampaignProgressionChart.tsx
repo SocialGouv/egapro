@@ -10,11 +10,13 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { formatMonthDay, percentageOf } from "~/modules/domain";
-
+import {
+	formatCount,
+	formatMonthDay,
+	formatWholePercentage,
+	percentageOf,
+} from "~/modules/domain";
 import styles from "./CampaignProgressionChart.module.scss";
-import { formatCount } from "./formatters";
 import type { CampaignProgressionSeries } from "./types";
 
 type TooltipEntry = {
@@ -109,8 +111,8 @@ function ProgressionTooltip({
 					const pct = Math.round(percentageOf(entry.value, total));
 					return (
 						<li className={styles.tooltipItem} key={entry.name}>
-							{year} : {formatCount(entry.value)} déclarations ({pct} % du
-							total)
+							{year} : {formatCount(entry.value)} déclarations (
+							{formatWholePercentage(pct)} du total)
 						</li>
 					);
 				})}
@@ -135,13 +137,16 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 			</p>
 		);
 	}
+	const figureCaption = `${CHART_CAPTION} Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{CHART_CAPTION} Les données équivalentes sont disponibles dans le
-				tableau ci-dessous.
-			</figcaption>
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div
 				aria-label={CHART_CAPTION}
 				className={styles.chartContainer}

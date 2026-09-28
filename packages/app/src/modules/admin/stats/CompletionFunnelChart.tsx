@@ -10,9 +10,8 @@ import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import ReactECharts from "echarts-for-react/lib/core";
 import { useEffect, useState } from "react";
-
+import { formatCount, formatWholePercentage } from "~/modules/domain";
 import styles from "./CompletionFunnelChart.module.scss";
-import { formatCount } from "./formatters";
 import type { FunnelRow } from "./types";
 
 echarts.use([
@@ -152,7 +151,7 @@ export function buildTooltipFormatter(
 		const { row } = params.data;
 		const head =
 			`<strong>${row.label}</strong><br/>` +
-			`${formatCount(row.count)} déclarations (${row.pctOfStart} % du funnel)`;
+			`${formatCount(row.count)} déclarations (${formatWholePercentage(row.pctOfStart)} du funnel)`;
 		if (row.pctDropFromPrev === null) {
 			return head;
 		}
@@ -165,7 +164,7 @@ export function buildTooltipFormatter(
 
 export function labelFormatter(params: LabelFormatterParams): string {
 	const { row } = params.data;
-	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${row.pctOfStart} %}`;
+	return `{name|${row.label}}\n{value|${formatCount(row.count)}}\n{pct|${formatWholePercentage(row.pctOfStart)}}`;
 }
 
 export function buildEchartsOption(
@@ -257,14 +256,16 @@ export function CompletionFunnelChart({ caption, rows, dropThreshold }: Props) {
 	}
 
 	const option = buildEchartsOption(rows, dropThreshold, dsfrPalette);
+	const figureCaption = `${caption}. Nombre de déclarations à chaque jalon du funnel, avec le pourcentage du funnel et la chute par rapport à l'étape précédente. Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				{caption}. Nombre de déclarations à chaque jalon du funnel, avec le
-				pourcentage du funnel et la chute par rapport à l'étape précédente. Les
-				données équivalentes sont disponibles dans le tableau ci-dessous.
-			</figcaption>
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
 			<div aria-label={caption} className={styles.chartContainer} role="img">
 				<ReactECharts
 					className={styles.chart}

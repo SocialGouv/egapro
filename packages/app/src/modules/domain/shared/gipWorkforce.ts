@@ -1,6 +1,6 @@
 import { classifyCompanySize } from "./companySize";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
-import { formatCount } from "./submissionRate";
+import { formatCount } from "./format";
 
 // The one label every user-facing surface shows for the voluntary tier, whether
 // the company is absent from the GIP file or present with a sub-threshold

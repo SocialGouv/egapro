@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatLongDate, formatTime } from "~/modules/domain";
 import type { DeclarationEventType, HistoryEventDisplay } from "./eventDisplay";
 import { getHistoryEventDisplay } from "./eventDisplay";
 
@@ -18,18 +19,6 @@ export type HistoryItem = {
 type Props = {
 	item: HistoryItem;
 };
-
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-	day: "numeric",
-	month: "long",
-	year: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("fr-FR", {
-	hour: "2-digit",
-	minute: "2-digit",
-	hour12: false,
-});
 
 function formatActorName(actor: HistoryItem["actor"]): string {
 	if (!actor) return "Système";
@@ -73,11 +62,11 @@ export function HistoryEntry({ item }: Props) {
 						className="fr-text--sm fr-text--bold"
 						dateTime={createdAt.toISOString()}
 					>
-						{dateFormatter.format(createdAt)}
+						{formatLongDate(createdAt)}
 					</time>
 					<br />
 					<span className="fr-text--sm fr-text-mention--grey">
-						{timeFormatter.format(createdAt)}
+						{formatTime(createdAt)}
 					</span>
 				</div>
 				<div className="fr-col-12 fr-col-md-4">

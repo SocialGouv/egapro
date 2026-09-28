@@ -1,13 +1,12 @@
 "use client";
 
+import { formatCount } from "~/modules/domain";
 import {
 	CampaignRateTileError,
 	CampaignRateTileLoading,
 } from "~/modules/shared";
 import { api } from "~/trpc/react";
-
 import { AdminKpiTile } from "./AdminKpiTile";
-import { formatCount } from "./formatters";
 
 type Props = {
 	year: number;

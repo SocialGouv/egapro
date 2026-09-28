@@ -17,6 +17,12 @@ import {
 	setGipWorkforce,
 	setRepresentationWorkforceWindow,
 } from "./helpers/db";
+import {
+	dbDateInDays,
+	deleteCampaignDeadlines,
+	getCampaignPublicRelease,
+	setPublicDataReleaseDate,
+} from "./helpers/db-campaign";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 
 /**
@@ -352,30 +358,66 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		expect(response.headers()["content-type"]).toContain("application/pdf");
 	});
 
-	test("the public API republishes the raw declared gaps and no verdict", async ({
+	test("the public API serves the declaration only once its campaign is publicly released", async ({
 		browser,
 	}) => {
+		const releaseYear = referenceYear + 1;
+		const baseline = await getCampaignPublicRelease(releaseYear);
+		const detailUrl = `/api/public/representations/${TEST_SIREN}/${referenceYear}`;
+		const historyUrl = `/api/public/representations/${TEST_SIREN}`;
 		const anonCtx = await browser.newContext({ storageState: undefined });
-		try {
-			const response = await anonCtx.request.get(
-				`/api/public/representations/${TEST_SIREN}/${referenceYear}`,
-			);
+
+		async function historyYears(): Promise<number[]> {
+			const response = await anonCtx.request.get(historyUrl);
 			expect(response.status()).toBe(200);
+			const rows: { year: number }[] = await response.json();
+			return rows.map((row) => row.year);
+		}
 
-			const body = await response.json();
-			expect(body.siren).toBe(TEST_SIREN);
-			expect(body.year).toBe(referenceYear);
-			expect(body.executiveWomenPercent).toBe(EXECUTIVE_WOMEN_PERCENT);
-			expect(body.memberMenPercent).toBe(100 - MEMBER_WOMEN_PERCENT);
-			expect(body.publishUrl).toBe(PUBLISH_URL);
-			expect(body.referencePeriodStart).toBe(`${referenceYear}-01-01`);
+		try {
+			await test.step("no release date — the transmitted declaration stays private", async () => {
+				await setPublicDataReleaseDate(releaseYear, null);
 
-			// V2 product rule: the public API diffuses raw declared data only — never
-			// a compliance verdict nor a score, whatever the gaps say.
-			for (const key of Object.keys(body)) {
-				expect(key).not.toMatch(/verdict|score|conformit|compliance/i);
-			}
+				expect((await anonCtx.request.get(detailUrl)).status()).toBe(404);
+				expect(await historyYears()).not.toContain(referenceYear);
+			});
+
+			await test.step("a release date still to come — same answer", async () => {
+				await setPublicDataReleaseDate(releaseYear, await dbDateInDays(1));
+
+				expect((await anonCtx.request.get(detailUrl)).status()).toBe(404);
+				expect(await historyYears()).not.toContain(referenceYear);
+			});
+
+			await test.step("the release date reached — the raw declared gaps, and no verdict", async () => {
+				await setPublicDataReleaseDate(releaseYear, await dbDateInDays(0));
+
+				const response = await anonCtx.request.get(detailUrl);
+				expect(response.status()).toBe(200);
+
+				const body = await response.json();
+				expect(body.siren).toBe(TEST_SIREN);
+				expect(body.year).toBe(referenceYear);
+				expect(body.executiveWomenPercent).toBe(EXECUTIVE_WOMEN_PERCENT);
+				expect(body.memberMenPercent).toBe(100 - MEMBER_WOMEN_PERCENT);
+				expect(body.publishUrl).toBe(PUBLISH_URL);
+				expect(body.referencePeriodStart).toBe(`${referenceYear}-01-01`);
+				expect(await historyYears()).toContain(referenceYear);
+
+				// V2 product rule: the public API diffuses raw declared data only, never a compliance verdict nor a score.
+				for (const key of Object.keys(body)) {
+					expect(key).not.toMatch(/verdict|score|conformit|compliance/i);
+				}
+			});
 		} finally {
+			if (baseline.exists) {
+				await setPublicDataReleaseDate(
+					releaseYear,
+					baseline.publicDataReleaseDate,
+				);
+			} else {
+				await deleteCampaignDeadlines(releaseYear);
+			}
 			await anonCtx.close();
 		}
 	});

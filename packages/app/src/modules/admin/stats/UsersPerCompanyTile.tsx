@@ -1,13 +1,12 @@
 "use client";
 
+import { formatCount, formatDecimal } from "~/modules/domain";
 import {
 	CampaignRateTileError,
 	CampaignRateTileLoading,
 } from "~/modules/shared";
 import { api } from "~/trpc/react";
-
 import { AdminKpiTile } from "./AdminKpiTile";
-import { formatCount, formatDecimal } from "./formatters";
 
 export function UsersPerCompanyTile() {
 	const query = api.adminStats.getUsersPerCompany.useQuery(undefined, {

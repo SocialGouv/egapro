@@ -191,7 +191,7 @@ export function FileUpload({
 							>
 								{file.name}
 							</a>
-							<p className="fr-text--xs fr-text--mention-grey fr-mb-0">
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
 								{formatFileMeta(getExtensionLabel(file.name), file.size)}
 							</p>
 						</div>
@@ -224,9 +224,10 @@ export function FileUpload({
 			/>
 
 			<div
-				aria-live="polite"
+				aria-atomic="true"
 				className={`fr-messages-group ${styles.messagesGroup}`}
 				id={messagesId}
+				role="alert"
 			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
 			</div>

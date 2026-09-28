@@ -7,6 +7,7 @@ export const REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029;
 export const REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR = 2026;
 export const REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000;
 export const REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3;
+export const REPRESENTATION_CAMPAIGN_YEAR_OFFSET = 1;
 
 export type RepresentationComplianceVerdict =
 	| "compliant"
@@ -58,7 +59,7 @@ export function deriveExecutivesNotComputableReason(
 }
 
 export function getRepresentationCampaignYear(referenceYear: number): number {
-	return referenceYear + 1;
+	return referenceYear + REPRESENTATION_CAMPAIGN_YEAR_OFFSET;
 }
 
 export function isPresumedSubjectToRepresentation(

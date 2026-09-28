@@ -1,4 +1,4 @@
-import { formatCount } from "./formatters";
+import { formatCount } from "~/modules/domain";
 
 export type StatsTableColumn<Row> = {
 	key: Extract<keyof Row, string>;

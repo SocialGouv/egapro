@@ -1,25 +1,5 @@
-import { gapRatioToPercent, percentageOf } from "~/modules/domain";
+import { percentageOf } from "~/modules/domain";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api/constants";
-
-const PERCENT_FORMAT: Intl.NumberFormatOptions = { maximumFractionDigits: 2 };
-
-export const MISSING_VALUE = "—";
-
-/** Percentage from a 0-1 ratio — the shape every gap column is stored in. */
-export function formatGap(ratio: number | null): string {
-	return formatPercent(gapRatioToPercent(ratio));
-}
-
-/** Percentage from a value already expressed on a 0-100 scale. */
-export function formatPercent(value: number | null): string {
-	if (value === null) return MISSING_VALUE;
-	return `${value.toLocaleString("fr-FR", PERCENT_FORMAT)} %`;
-}
-
-export function formatCount(value: number | null): string {
-	if (value === null) return MISSING_VALUE;
-	return Math.round(value).toLocaleString("fr-FR");
-}
 
 /** Share of `part` in `total`, on a 0-100 scale, or null when undecidable. */
 export function shareOf(

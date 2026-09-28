@@ -74,4 +74,25 @@ describe("gipMdsRouter.importFromUrl — access control", () => {
 			"https://api.suit.example.com/gipmds/latest",
 		);
 	});
+
+	it("does not copy an import failure into the client error", async () => {
+		const technicalError = new Error("Failed query: INSERT INTO gip_mds_data");
+		mocks.fetchGipCsv.mockRejectedValue(technicalError);
+		const logged = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		try {
+			const caller = await buildCaller(adminSession);
+			await expect(caller.importFromUrl()).rejects.toMatchObject({
+				code: "INTERNAL_SERVER_ERROR",
+				message: "Erreur lors de l'import GIP MDS",
+			});
+			expect(logged).toHaveBeenCalledWith(
+				"gipMds.importFromUrl failed",
+				technicalError,
+			);
+		} finally {
+			logged.mockRestore();
+		}
+	});
 });

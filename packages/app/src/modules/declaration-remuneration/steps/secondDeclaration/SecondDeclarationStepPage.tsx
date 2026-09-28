@@ -149,6 +149,9 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					})}
 					declarationYear={currentYear}
 					secondDeclarationCategories={reviewCategories}
+					secondDeclarationSubmissionCount={
+						data.secondDeclarationSubmissionCount
+					}
 					siren={data.declaration.siren}
 					status={data.declaration.status}
 				/>

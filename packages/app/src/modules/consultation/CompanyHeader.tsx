@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getReferenceYearFor } from "~/modules/domain";
+import { formatRoundedCount, getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import type { AppHref } from "~/modules/routes";
 import styles from "./CompanyHeader.module.scss";
-import { companyLocation, formatCount, formatNaf } from "./formatters";
+import { companyLocation, formatNaf } from "./formatters";
 
 type Props = {
 	name: string | null;
@@ -68,7 +68,7 @@ export function CompanyHeader({
 		activity.push({
 			// The headcount reported for a campaign is the previous civil year's.
 			label: `Effectif annuel moyen en ${getReferenceYearFor(year)}`,
-			value: formatCount(workforceEma),
+			value: formatRoundedCount(workforceEma),
 		});
 	}
 

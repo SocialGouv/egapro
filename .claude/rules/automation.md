@@ -14,7 +14,7 @@ Quatre hooks, exécutés par le harnais, pas par toi.
 
 **`UserPromptSubmit` → `check-ultra11y-plugin.sh`** — au premier message d'une session. Compare **hors ligne** la version du plugin ultra11y installé au tag épinglé dans `a11y.yaml`, et ne touche au réseau qu'en cas d'écart. C'est le seul des quatre endroits où vit la version d'ultra11y que le dépôt ne peut pas pinner — et c'est celui qui avait dérivé de 4.5.1 à 5.40.1 sans que rien ne le dise. Détail → `.claude/rules/rgaa.md`.
 
-**`PreToolUse` → `block-bad-patterns.sh`** (matcher `Edit|Write`) — **22 patterns bloqués avant l'écriture**. C'est la couche machine : ce qu'elle attrape n'a pas besoin d'être re-vérifié à la main, et ce qu'elle bloque ne se contourne pas.
+**`PreToolUse` → `block-bad-patterns.sh`** (matcher `Edit|Write`) — **23 patterns bloqués avant l'écriture**. C'est la couche machine : ce qu'elle attrape n'a pas besoin d'être re-vérifié à la main, et ce qu'elle bloque ne se contourne pas.
 
 | Bloqué | Fichiers | À la place |
 |---|---|---|
@@ -28,6 +28,7 @@ Quatre hooks, exécutés par le harnais, pas par toi.
 | `from "zod"` | `routers/*.ts`, `.tsx` | importer depuis `~/modules/{domain}/schemas.ts` |
 | `getFullYear()`, `slice/substring/substr(0, 9)`, `SIREN_LENGTH = 9`, `.getMonth()`, `.getDate()` | `.ts/.tsx` (hors `domain/`, tests) | helpers de `~/modules/domain` |
 | `>= GAP_ALERT_THRESHOLD`, `(men - women)`, `cancelledAt !== null` | `.ts/.tsx` (hors `domain/`, tests) | `gapLevel()`, `computeGap()`, `isCancelled()` |
+| `toLocaleString()`, `toLocaleDateString()`, `Intl.NumberFormat`, `Intl.DateTimeFormat`, `.toFixed()` | `src/modules/**` (hors `domain/`, tests, `OrdinalLongDate.tsx`) | un formateur de `~/modules/domain` (`shared/format.ts`) |
 | `.tsx` non-route dans `src/app/` | `src/app/**` | déplacer dans `src/modules/` et importer depuis le barrel |
 
 Nouvelle règle mécanique → ajouter un `check_pattern` dans le script. **Si un hook bloque ton édition, ne cherche pas à le contourner** : repense l'approche.

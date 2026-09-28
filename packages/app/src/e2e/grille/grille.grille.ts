@@ -11,8 +11,6 @@ import { mailChainAvailable } from "../helpers/receipts";
 import { buildGrid } from "./coordinates";
 import { FICHE_SCENARIOS } from "./scenarios";
 
-test.describe.configure({ mode: "serial" });
-
 // #4293 — CAS-03 and CAS-09 close the démarche on the path choice itself, with no
 // upload screen after it: their acknowledgement is only observable in the mail
 // chain. The grid workflow already runs Mailpit and sets MAIL_ENABLED, but no

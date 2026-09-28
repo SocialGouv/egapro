@@ -216,13 +216,16 @@ domain/
     declarationFlags.ts     # isComplianceProcessRequired, isComplianceProcessRevisionRequired
     declarationLock.ts      # DEFAULT_LOCK_TIMEOUT_MINUTES, LOCK_HEARTBEAT_INTERVAL_MS
     declarationStatus.ts    # computeDeclarationStatus, isCancelled, isDeclarationSubmitted
-    gap.ts                  # computeGap, computeGapBetween, computeGapRatio, gapLevel, formatGap
+    format.ts               # formatGap, formatCount, formatCurrency, formatLongDate, … (tout l'affichage)
+    gap.ts                  # computeGap, computeGapBetween, computeGapRatio, gapLevel
     percentage.ts           # percentageOf, proportionOf
     siren.ts                # extractSiren, formatSiren, validateSiren
     workforce.ts            # computeWorkforceTotal, sumQuartileWorkforce, sumCategoryWorkforce
-    …                       # (submissionRate, quartile, regions, number, format, …)
+    …                       # (submissionRate, quartile, regions, number, …)
   __tests__/      # 100% coverage sur toutes les fonctions
 ```
+
+`format.ts` est le **seul endroit** où une valeur devient du texte affichable — nombres, pourcentages, montants, durées, tailles de fichier, dates et heures. Un composant n'appelle jamais `toLocaleString`, `Intl.*` ni `toFixed` lui-même : la règle de nommage et la discipline associées vivent dans `.claude/rules/code-quality.md` (« Formatage d'affichage »), et le hook `block-bad-patterns` refuse le motif hors du domaine.
 
 **Pourquoi cette discipline** :
 

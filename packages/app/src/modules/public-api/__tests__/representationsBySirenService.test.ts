@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { REPRESENTATION_CAMPAIGN_YEAR_OFFSET } from "~/modules/domain";
+
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	orReturnsUndefined: false,
@@ -24,6 +26,10 @@ vi.mock("~/server/db/schema", () => ({
 		nafCode: "c.nafCode",
 		nafLabel: "c.nafLabel",
 		statutDiffusion: "c.statutDiffusion",
+	},
+	campaignDeadlines: {
+		year: "cd.year",
+		publicDataReleaseDate: "cd.publicDataReleaseDate",
 	},
 	representationDeclarations: {
 		siren: "rd.siren",
@@ -93,9 +99,13 @@ function makeRawRow(overrides: RawRow = {}): RawRow {
 	};
 }
 
+type Join = [table: unknown, condition: unknown];
+
 type Captured = {
 	rowsWhere?: unknown;
 	countWhere?: unknown;
+	rowsJoins?: Join[];
+	countJoins?: Join[];
 	orderBy?: unknown[];
 	limit?: number;
 	offset?: number;
@@ -121,9 +131,16 @@ function setDb(rows: RawRow[], countRows: RawRow[] = [{ total: rows.length }]) {
 			},
 		});
 
+		const joins: Join[] = [];
+		if (isCount) captured.countJoins = joins;
+		else captured.rowsJoins = joins;
+
 		const chain = {
 			from: () => chain,
-			innerJoin: () => chain,
+			innerJoin: (table: unknown, condition: unknown) => {
+				joins.push([table, condition]);
+				return chain;
+			},
 			where: (condition: unknown) => {
 				if (isCount) {
 					captured.countWhere = condition;
@@ -140,6 +157,28 @@ function setDb(rows: RawRow[], countRows: RawRow[] = [{ total: rows.length }]) {
 
 		return chain;
 	});
+}
+
+type SqlNode = { sql: string; values: unknown[] };
+
+function expectPublicationJoin(joins: Join[] | undefined) {
+	const join = joins?.find(
+		([table]) => (table as { year?: string })?.year === "cd.year",
+	);
+	expect(join).toBeDefined();
+
+	const condition = join?.[1] as SqlNode;
+	expect(condition.values.slice(0, 2)).toEqual(["cd.year", "rd.year"]);
+	expect(condition.values[2]).toBe(REPRESENTATION_CAMPAIGN_YEAR_OFFSET);
+
+	const release = condition.values[3] as SqlNode;
+	expect(release.sql).toContain("IS NOT NULL");
+	expect(release.sql.toLowerCase()).toContain("at time zone 'europe/paris'");
+	expect(release.sql).toContain("::date");
+	expect(release.values).toEqual([
+		"cd.publicDataReleaseDate",
+		"cd.publicDataReleaseDate",
+	]);
 }
 
 async function importService() {
@@ -180,6 +219,16 @@ describe("searchPublicRepresentations", () => {
 
 		expect(captured.rowsWhere).toEqual({ and: [SUBMITTED_ONLY] });
 		expect(captured.countWhere).toEqual({ and: [SUBMITTED_ONLY] });
+	});
+
+	it("gates both the data query and the count query on the published campaign", async () => {
+		setDb([]);
+		const { searchPublicRepresentations } = await importService();
+
+		await searchPublicRepresentations({ limit: 10, offset: 0 });
+
+		expectPublicationJoin(captured.rowsJoins);
+		expectPublicationJoin(captured.countJoins);
 	});
 
 	it("keeps the submitted filter alongside every optional filter", async () => {
@@ -337,6 +386,15 @@ describe("getPublicRepresentationsBySiren", () => {
 		});
 	});
 
+	it("gates the history on the published campaign", async () => {
+		setDb([]);
+		const { getPublicRepresentationsBySiren } = await importService();
+
+		await getPublicRepresentationsBySiren(SIREN);
+
+		expectPublicationJoin(captured.rowsJoins);
+	});
+
 	it("applies the optional limit", async () => {
 		setDb([
 			makeRawRow({ year: 2026 }),
@@ -373,6 +431,15 @@ describe("getPublicRepresentationBySirenYear", () => {
 				{ eq: ["rd.year", 2026] },
 			],
 		});
+	});
+
+	it("gates the detail on the published campaign", async () => {
+		setDb([]);
+		const { getPublicRepresentationBySirenYear } = await importService();
+
+		await getPublicRepresentationBySirenYear(SIREN, 2026);
+
+		expectPublicationJoin(captured.rowsJoins);
 	});
 
 	it("returns null when no submitted declaration matches the year", async () => {

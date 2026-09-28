@@ -41,6 +41,64 @@ async function goToStep(page: Page, step: number) {
 	await expect(page.getByText(`Étape ${step} sur 6`)).toBeVisible();
 }
 
+async function checkPayGapAtZoom(page: Page, caption: string) {
+	for (const row of [
+		"Horaire brute moyenne",
+		"Annuelle brute médiane",
+		"Horaire brute médiane",
+	]) {
+		for (const sex of ["Femmes", "Hommes"]) {
+			await page.getByRole("textbox", { name: `${row} — ${sex}` }).fill("1000");
+		}
+	}
+
+	await page.setViewportSize({ width: 640, height: 360 });
+	const region = page.getByRole("region", {
+		name: `${caption} — faire défiler le tableau horizontalement`,
+	});
+	const table = region.getByRole("table", { name: caption });
+	const measurements = await table.evaluate((element) =>
+		Array.from(
+			element.querySelectorAll(
+				"thead th:last-child strong, thead th:last-child span, tbody tr td:first-child strong",
+			),
+		).map((label) => {
+			const cell = label.closest("th, td");
+			return {
+				text: label.textContent?.trim(),
+				left: label.getBoundingClientRect().left,
+				right: label.getBoundingClientRect().right,
+				cellLeft: cell?.getBoundingClientRect().left ?? 0,
+				cellRight: cell?.getBoundingClientRect().right ?? 0,
+			};
+		}),
+	);
+	expect(measurements).toHaveLength(6);
+	for (const label of measurements) {
+		expect(label.left, label.text).toBeGreaterThanOrEqual(label.cellLeft);
+		expect(label.right, label.text).toBeLessThanOrEqual(label.cellRight);
+	}
+
+	await expect(region).toHaveAttribute("tabindex", "0");
+	expect(
+		await region.evaluate(
+			(element) => element.scrollWidth - element.clientWidth,
+		),
+	).toBeGreaterThan(0);
+	await region.evaluate((element) => {
+		element.scrollLeft = 0;
+	});
+	await expect
+		.poll(() => region.evaluate((element) => element.scrollLeft))
+		.toBe(0);
+	await region.press("ArrowRight");
+	await expect(region).toBeFocused();
+	await expect(region).toHaveCSS("outline-style", "solid");
+	await expect
+		.poll(() => region.evaluate((element) => element.scrollLeft))
+		.toBeGreaterThan(0);
+}
+
 test.describe("Declaration workflow", () => {
 	test.describe.configure({ mode: "serial" });
 
@@ -130,6 +188,7 @@ test.describe("Declaration workflow", () => {
 		await expect(
 			page.getByRole("table").getByText("6,25 %", { exact: true }),
 		).toBeVisible();
+		await checkPayGapAtZoom(page, "Écart de rémunération");
 	});
 
 	test("step 3 - Rémunération variable inline editing", async ({ page }) => {
@@ -147,6 +206,10 @@ test.describe("Declaration workflow", () => {
 
 		// Verify gap is computed
 		await expect(page.getByText("9,09 %")).toBeVisible();
+		await checkPayGapAtZoom(
+			page,
+			"Écart de rémunération variable ou complémentaire",
+		);
 
 		// Verify beneficiary inputs are present
 		await expect(
@@ -1179,5 +1242,51 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 
 		await nameInput.fill("a".repeat(300));
 		await expect(nameInput).toHaveJSProperty("value.length", 255);
+	});
+});
+
+// #2968 — the step 6 quartile card built its share by hand with `.toFixed(1)`, so it
+// printed "40.0 %" among the comma-separated figures of every other card on the same
+// page. The share now goes through the domain formatter. The formatter itself is unit
+// tested; what only the browser proves is that the card renders shares at all — it
+// needs a funnel that actually submitted step 4, otherwise it stays on "Aucune donnée
+// renseignée." and a decimal-point assertion passes on an empty card.
+test.describe("Step 6 — quartile shares are written with a decimal comma (#2968)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("the recap card writes 40,0 %, never 40.0 %", async ({ page }) => {
+		test.slow();
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
+		await goToStep(page, 6);
+
+		const quartileCard = page
+			.getByText(
+				"Proportion de femmes et d'hommes dans chaque quartile salarial",
+			)
+			.locator("xpath=../..");
+
+		await expect(
+			quartileCard.getByText("Aucune donnée renseignée."),
+		).toHaveCount(0);
+		// Both tables, both sexes, four quartiles: the card holds sixteen shares.
+		await expect(quartileCard.getByText(/^\d{1,3},\d %$/)).toHaveCount(16);
+
+		// The 4th quartile is 2 women against 3 men on either table, so its women
+		// share is an exact 40 % — the value the old `.toFixed(1)` wrote "40.0 %".
+		await expect(quartileCard.getByText("40,0 %", { exact: true })).toHaveCount(
+			2,
+		);
+		await expect(quartileCard.getByText(/\d\.\d/)).toHaveCount(0);
 	});
 });

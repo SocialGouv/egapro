@@ -43,9 +43,21 @@ Les helpers **spécifiques à l'UI** (classes de badge, libellés DSFR) restent 
 
 ## DRY : 3 répétitions = extraction
 
-Trois occurrences de la même logique ou du même markup → extraire. Points chauds : les constantes partagées (`shared/constants.ts` du module, jamais dupliquées), les schémas Zod partagés, les fonctions de formatage (`formatSiren`, `formatPhone`).
+Trois occurrences de la même logique ou du même markup → extraire. Points chauds : les constantes partagées (`shared/constants.ts` du module, jamais dupliquées), les schémas Zod partagés, les formateurs d'affichage (section suivante).
 
 > La règle DRY propre aux **tests** (mocks centralisés dans `src/test/setup.ts`) vit dans `rules/testing.md`, sa source unique.
+
+## Formatage d'affichage
+
+Un formateur vit dans le **domaine** : `~/modules/domain/shared/format.ts`, exporté par le barrel. Un formateur qui porte une **règle métier** (`formatSiren`, `formatWorkforceForUser`) reste à côté de sa règle, mais s'appuie sur les primitives de `format.ts` plutôt que de refaire la conversion.
+
+**Le nom dit l'échelle qu'il lit et la convention qu'il écrit.** Jamais un nom pour deux sens : `formatGap` a longtemps désigné une valeur 0–100 dans le domaine et un ratio 0–1 dans l'observatoire, et donner à l'un l'entrée de l'autre affichait `717 %` ou `0,07 %`. D'où `formatRatioAsPercentage` (0–1), `formatPrecisePercentage` (0–100, jusqu'à 2 décimales), `formatFixedPercentage` (0–100, 1 décimale toujours écrite), `formatWholePercentage` (aucune décimale).
+
+**Un composant ne convertit jamais lui-même** une quantité (montant, effectif, pourcentage, durée) ou une date en texte — pas même par `String(n)` ou une interpolation `{n} %`, que le hook ne voit pas. S'il manque un formateur, on l'ajoute dans `format.ts` ; on ne l'écrit pas en ligne « juste cette fois ».
+
+**Changer la convention décimale d'un écran est une décision produit**, pas l'effet de bord d'une refacto : chaque écran tient ses décimales de sa maquette. Déplacer, renommer et fusionner des formateurs à sortie identique se fait librement ; aligner deux conventions se demande.
+
+> La mécanique (le motif bloqué, son périmètre, ses exclusions) vit dans `rules/automation.md`, sa source unique.
 
 ## Pas de constante inutile
 

@@ -234,6 +234,17 @@ describe("CompanyDeclarationsPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("S3: writes the first of the month with its French ordinal, as the representation panel does", () => {
+		renderPage({
+			declarations: [
+				makeDeclaration("remuneration", { updatedAt: new Date(2026, 5, 1) }),
+			],
+		});
+		expect(
+			screen.getByText("Dernière action le 1\u1d49\u02b3 juin 2026"),
+		).toBeInTheDocument();
+	});
+
 	it("renders without a last action date when there is no declaration", () => {
 		renderPage({ declarations: [] });
 		expect(
