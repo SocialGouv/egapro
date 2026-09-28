@@ -103,6 +103,7 @@ export {
 // Declaration edit lock constants
 export {
 	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	DECLARATION_SUPERSEDED_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	LOCK_HEARTBEAT_INTERVAL_MS,
 } from "./shared/declarationLock";
@@ -111,6 +112,7 @@ export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
 export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
+export type { SubmissionLockTarget } from "./shared/declarationStatus";
 export {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
@@ -124,7 +126,7 @@ export {
 	isDraft,
 	isInComplianceProcess,
 	isJointEvaluationWritable,
-	isSecondDeclarationDeadlineApplicable,
+	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
@@ -156,9 +158,12 @@ export {
 export type {
 	DeclarationEventType,
 	DeclarationStatusEvent,
+	SubmissionHistoryEvent,
+	SubsequentSubmissions,
 	TrajectoryEntry,
 } from "./shared/declarationTrajectory";
 export {
+	deriveSubsequentSubmissions,
 	findLastEvent,
 	getCseOpinionCompletedAt,
 	getDeclarationTrajectory,
@@ -170,6 +175,7 @@ export {
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
+	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
 export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
 export {

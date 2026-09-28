@@ -210,9 +210,9 @@ function buildDb() {
 							},
 						};
 					}
-					return {
+					return Object.assign(Promise.resolve([]), {
 						limit: async () => [{ siren: SIREN, workforce: 80, hasCse: false }],
-					};
+					});
 				},
 				innerJoin: () => ({
 					where: async () => [],

@@ -14,11 +14,13 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
+	deriveSubsequentSubmissions,
 	getCurrentYear,
 	getObligationWorkforce,
 	hasGapsAboveThreshold,
 	isCseOpinionRequired,
 	isDraft,
+	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
 	isTriennialYear,
 	parseGipWorkforce,
@@ -57,11 +59,13 @@ import {
 	purgeDraftSlice,
 } from "./declarationHelpers";
 import {
+	assertFirstDeclarationModifiable,
 	buildHistoryInserts,
 	buildStepChangeInsert,
 	computeProjectionUpdates,
 	getCurrentRound,
 	hasLockingEventForRound,
+	loadSubsequentSubmissions,
 } from "./statusHistoryHelpers";
 
 const PATH_LOCKED_ERROR =
@@ -263,37 +267,20 @@ export const declarationRouter = createTRPCRouter({
 			: await fetchPreviousYearJobCategories(ctx.db, siren, year);
 
 		const declarationId = result.declaration.id;
-		let hasSubmittedSecondDeclaration = false;
-		let secondDeclarationSubmissionCount = 0;
-		let hasSubmittedCseOpinion = false;
-		let hasSubmittedJointEvaluation = false;
-		if (declarationId !== "") {
-			const eventRows = await ctx.db
-				.select({ eventType: declarationStatusHistory.eventType })
-				.from(declarationStatusHistory)
-				.where(eq(declarationStatusHistory.declarationId, declarationId));
-			if (Array.isArray(eventRows)) {
-				for (const row of eventRows) {
-					if (row.eventType === "second_declaration_submit") {
-						hasSubmittedSecondDeclaration = true;
-						secondDeclarationSubmissionCount++;
-					} else if (row.eventType === "cse_opinion_submit") {
-						hasSubmittedCseOpinion = true;
-					} else if (row.eventType === "joint_evaluation_submit") {
-						hasSubmittedJointEvaluation = true;
-					}
-				}
-			}
-		}
+		const subsequentSubmissions =
+			declarationId === ""
+				? deriveSubsequentSubmissions([])
+				: await loadSubsequentSubmissions(ctx.db, declarationId);
 
 		return {
 			...result,
 			gipPrefillData,
 			previousYearCategories,
-			hasSubmittedSecondDeclaration,
-			secondDeclarationSubmissionCount,
-			hasSubmittedCseOpinion,
-			hasSubmittedJointEvaluation,
+			...subsequentSubmissions,
+			isFirstDeclarationLocked: isLockedBySubsequentSubmission(
+				subsequentSubmissions,
+				"first_declaration",
+			),
 		};
 	}),
 
@@ -566,7 +553,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: declarationModifiableWriteProcedure
+	updateEmployeeCategories: declarationLockedWriteProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -585,12 +572,8 @@ export const declarationRouter = createTRPCRouter({
 						message: "Déclaration introuvable",
 					});
 
-				const existingJobs = await tx
-					.select()
-					.from(jobCategories)
-					.where(eq(jobCategories.declarationId, declaration.id));
-
 				if (input.declarationType === "initial") {
+					await assertFirstDeclarationModifiable(tx, declaration.id);
 					await deleteJobAndEmployeeCategories(tx, declaration.id);
 
 					for (let i = 0; i < input.categories.length; i++) {
@@ -633,6 +616,11 @@ export const declarationRouter = createTRPCRouter({
 							code: "FORBIDDEN",
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",
 						});
+
+					const existingJobs = await tx
+						.select()
+						.from(jobCategories)
+						.where(eq(jobCategories.declarationId, declaration.id));
 
 					for (const job of existingJobs) {
 						const cat = input.categories[job.categoryIndex];
