@@ -226,7 +226,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Maximum **2 déclarations par année civile** (la première initiale + une corrective si l'écart dépasse 5%).
 - Le PDF d'évaluation conjointe est **optionnel** (un seul fichier par déclaration, écrasé si re-uploadé).
 - Le choix de parcours est **verrouillé** dès qu'une action aval a été enregistrée pour le round courant (la procédure renvoie `CONFLICT`).
-- Échéances configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`. Elles sont **informatives** (affichées, jamais bloquantes) : la modifiabilité d'une étape dépend uniquement des soumissions ultérieures (voir §4).
+- Échéances configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`. Elles sont **informatives** (affichées, jamais bloquantes) : la modifiabilité d'une étape dépend uniquement des soumissions ultérieures (voir §2).
 
 **Données persistées** : `declarations.secondDeclarationStep`, `declarations.compliancePath`, `declarationStatusHistory`, `files` (`type = joint_evaluation`).
 
