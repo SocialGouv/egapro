@@ -315,7 +315,7 @@ export function Step3VariablePay({
 					<p className={`fr-mb-0 ${common.fontMedium}`}>
 						{gipPrefillData
 							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs."
-							: "Renseignez les informations avant de valider vos indicateurs."}
+							: "Renseignez les données nécessaires au calcul des indicateurs."}
 						{!gipPrefillData && (
 							<TooltipButton
 								id="tooltip-step3-info"

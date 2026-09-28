@@ -201,7 +201,7 @@ export function Step2PayGap({
 					<p className={`fr-mb-0 ${common.fontMedium}`}>
 						{gipPrefillData
 							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez les informations avant de valider vos indicateurs."}
+							: "Renseignez les données nécessaires au calcul des indicateurs."}
 						{!gipPrefillData && (
 							<TooltipButton
 								id="tooltip-step2-info"

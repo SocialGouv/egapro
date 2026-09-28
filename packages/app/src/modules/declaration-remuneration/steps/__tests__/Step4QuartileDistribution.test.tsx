@@ -147,7 +147,7 @@ describe("Step4QuartileDistribution", () => {
 		);
 		expect(
 			screen.getByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Renseignez les données nécessaires au calcul des indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(
@@ -157,6 +157,9 @@ describe("Step4QuartileDistribution", () => {
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Information sur la confidentialité des données"),
 		).toBeInTheDocument();
 	});
 

@@ -159,13 +159,7 @@ describe("Step1Workforce", () => {
 	});
 
 	it("renders the workforce instruction for indicator calculation", () => {
-		render(
-			<Step1Workforce
-				declarationSiren="123456789"
-				declarationYear={2026}
-				initialData={emptyStep1Data()}
-			/>,
-		);
+		renderStep1();
 		expect(
 			screen.getByText(
 				"Renseignez le nombre de salariés en effectif physique pris en compte pour le calcul des indicateurs.",
