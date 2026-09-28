@@ -78,5 +78,10 @@ describe("StepDropoffChart", () => {
 				/barres rouges signalent une phase dont le taux dépasse 15/i,
 			),
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole("group", {
+				name: /Taux d'abandon par phase.*tableau ci-dessous/i,
+			}),
+		).toBeInTheDocument();
 	});
 });

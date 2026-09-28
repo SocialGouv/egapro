@@ -1,5 +1,27 @@
 .proConnectGroup {
+	container-type: inline-size;
+
 	:global(.fr-connect--proconnect)::before {
 		background-image: url("/assets/images/proconnect-logo.svg");
+	}
+
+	@container (max-width: 14rem) {
+		:global(.fr-connect--proconnect) {
+			width: 100%;
+			padding: 4em 0 0.625em;
+			align-items: center;
+		}
+
+		:global(.fr-connect--proconnect)::before {
+			top: 0.625em;
+			left: 50%;
+			margin-top: 0;
+			transform: translateX(-50%);
+		}
+
+		:global(.fr-connect__login) {
+			white-space: normal;
+			text-align: center;
+		}
 	}
 }
