@@ -13,9 +13,14 @@ import {
 	isDraft,
 	isInComplianceProcess,
 	isJointEvaluationWritable,
-	isSecondDeclarationDeadlineApplicable,
+	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
+	type SubmissionLockTarget,
 } from "../shared/declarationStatus";
+import {
+	deriveSubsequentSubmissions,
+	type SubmissionHistoryEvent,
+} from "../shared/declarationTrajectory";
 import type { CampaignDeadlines, DeclarationFsmStatus } from "../types";
 import { DECLARATION_FSM_STATUSES } from "../types";
 
@@ -248,95 +253,123 @@ describe("hasStartedSecondDeclaration", () => {
 	});
 });
 
-describe("isSecondDeclarationDeadlineApplicable", () => {
-	const NO_SECOND_DECLARATION = {
-		secondDeclarationStep: null,
-		secondDeclarationPathChoice: null,
-	};
+describe("isLockedBySubsequentSubmission", () => {
+	const locks = (
+		events: SubmissionHistoryEvent[],
+		target: SubmissionLockTarget,
+	) =>
+		isLockedBySubsequentSubmission(deriveSubsequentSubmissions(events), target);
 
-	const PHASE_1_STATUSES: (DeclarationFsmStatus | null)[] = [
-		null,
-		"draft",
-		"awaiting_compliance_path_choice",
-		"joint_evaluation_chosen",
-	];
+	describe("first_declaration target", () => {
+		it.each<SubmissionHistoryEvent>([
+			{ eventType: "second_declaration_submit", round: null },
+			{ eventType: "joint_evaluation_submit", round: 1 },
+			{ eventType: "joint_evaluation_submit", round: 2 },
+			{ eventType: "cse_opinion_submit", round: null },
+		])("is locked by $eventType (round $round) alone", (event) => {
+			expect(locks([event], "first_declaration")).toBe(true);
+		});
 
-	it.each(
-		PHASE_1_STATUSES,
-	)("returns false for the phase-1 status %s (first-declaration deadline governs)", (status) => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status,
-				...NO_SECOND_DECLARATION,
-			}),
-		).toBe(false);
+		it.each([
+			"submit",
+			"path_choice",
+			"step_change",
+			"demarche_complete",
+			"cancel",
+		])("is not locked by %s", (eventType) => {
+			expect(locks([{ eventType, round: 1 }], "first_declaration")).toBe(false);
+		});
+
+		it("is not locked without any event", () => {
+			expect(locks([], "first_declaration")).toBe(false);
+		});
+
+		it("stays unlocked after a submission followed by path choices", () => {
+			expect(
+				locks(
+					[
+						{ eventType: "submit", round: null },
+						{ eventType: "path_choice", round: 1 },
+						{ eventType: "demarche_complete", round: null },
+					],
+					"first_declaration",
+				),
+			).toBe(false);
+		});
 	});
 
-	const ALWAYS_PHASE_2_STATUSES: DeclarationFsmStatus[] = [
-		"corrective_actions_chosen",
-		"awaiting_revision_choice",
-		"revised_joint_evaluation_chosen",
-	];
+	describe("path choice targets", () => {
+		it.each<SubmissionLockTarget>([
+			"path_choice_round_1",
+			"path_choice_round_2",
+		])("%s is locked by a CSE opinion submission", (target) => {
+			expect(
+				locks([{ eventType: "cse_opinion_submit", round: null }], target),
+			).toBe(true);
+		});
 
-	it.each(
-		ALWAYS_PHASE_2_STATUSES,
-	)("returns true for the second-declaration status %s even before any step/path is recorded", (status) => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status,
-				...NO_SECOND_DECLARATION,
-			}),
-		).toBe(true);
-	});
+		it("round 1 is locked by a round-1 joint evaluation submission", () => {
+			expect(
+				locks(
+					[{ eventType: "joint_evaluation_submit", round: 1 }],
+					"path_choice_round_1",
+				),
+			).toBe(true);
+		});
 
-	it("returns true for corrective_actions_chosen with both second-declaration columns still null", () => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status: "corrective_actions_chosen",
-				secondDeclarationStep: null,
-				secondDeclarationPathChoice: null,
-			}),
-		).toBe(true);
-	});
+		it.each([
+			2,
+			null,
+		])("round 1 is not locked by a joint evaluation submission of round %s", (round) => {
+			expect(
+				locks(
+					[{ eventType: "joint_evaluation_submit", round }],
+					"path_choice_round_1",
+				),
+			).toBe(false);
+		});
 
-	const TERMINAL_STATUSES: DeclarationFsmStatus[] = [
-		"awaiting_cse_opinion",
-		"demarche_completed",
-	];
+		it.each([
+			1,
+			2,
+			null,
+		])("round 2 is locked by any joint evaluation submission (round %s)", (round) => {
+			expect(
+				locks(
+					[{ eventType: "joint_evaluation_submit", round }],
+					"path_choice_round_2",
+				),
+			).toBe(true);
+		});
 
-	it.each(
-		TERMINAL_STATUSES,
-	)("returns false for the round-1 terminal status %s when no second declaration was started", (status) => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status,
-				...NO_SECOND_DECLARATION,
-			}),
-		).toBe(false);
-	});
+		it.each<SubmissionLockTarget>([
+			"path_choice_round_1",
+			"path_choice_round_2",
+		])("%s is not locked by a second declaration submission", (target) => {
+			expect(
+				locks(
+					[{ eventType: "second_declaration_submit", round: null }],
+					target,
+				),
+			).toBe(false);
+		});
 
-	it.each(
-		TERMINAL_STATUSES,
-	)("returns true for the terminal status %s once a second-declaration step was reached", (status) => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status,
-				secondDeclarationStep: 2,
-				secondDeclarationPathChoice: null,
-			}),
-		).toBe(true);
-	});
-
-	it.each(
-		TERMINAL_STATUSES,
-	)("returns true for the terminal status %s once a second-declaration path was chosen", (status) => {
-		expect(
-			isSecondDeclarationDeadlineApplicable({
-				status,
-				secondDeclarationStep: null,
-				secondDeclarationPathChoice: "justify",
-			}),
-		).toBe(true);
+		it.each<SubmissionLockTarget>([
+			"path_choice_round_1",
+			"path_choice_round_2",
+		])("%s is not locked by submit, path_choice or step_change", (target) => {
+			expect(
+				locks(
+					[
+						{ eventType: "submit", round: null },
+						{ eventType: "path_choice", round: 1 },
+						{ eventType: "path_choice", round: 2 },
+						{ eventType: "step_change", round: 3 },
+					],
+					target,
+				),
+			).toBe(false);
+		});
 	});
 });
 

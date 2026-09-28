@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	type DeclarationStatusEvent,
+	deriveSubsequentSubmissions,
 	findLastEvent,
 	getCseOpinionCompletedAt,
 	getDeclarationTrajectory,
@@ -208,6 +209,51 @@ describe("event-type-specific getters", () => {
 
 	it("hasSubmittedSecondDeclaration returns false when no such event exists", () => {
 		expect(hasSubmittedSecondDeclaration([])).toBe(false);
+	});
+
+	it("deriveSubsequentSubmissions counts every second declaration submission and flags the downstream ones", () => {
+		expect(
+			deriveSubsequentSubmissions([
+				{ eventType: "submit", round: null },
+				{ eventType: "second_declaration_submit", round: null },
+				{ eventType: "step_change", round: 2 },
+				{ eventType: "second_declaration_submit", round: null },
+				{ eventType: "joint_evaluation_submit", round: 2 },
+				{ eventType: "cse_opinion_submit", round: null },
+			]),
+		).toEqual({
+			hasSubmittedSecondDeclaration: true,
+			secondDeclarationSubmissionCount: 2,
+			hasSubmittedJointEvaluation: true,
+			hasSubmittedRound1JointEvaluation: false,
+			hasSubmittedCseOpinion: true,
+		});
+	});
+
+	it("deriveSubsequentSubmissions flags a round-1 joint evaluation submission", () => {
+		expect(
+			deriveSubsequentSubmissions([
+				{ eventType: "joint_evaluation_submit", round: 1 },
+			]),
+		).toMatchObject({
+			hasSubmittedJointEvaluation: true,
+			hasSubmittedRound1JointEvaluation: true,
+		});
+	});
+
+	it("deriveSubsequentSubmissions reports nothing submitted without downstream events", () => {
+		expect(
+			deriveSubsequentSubmissions([
+				{ eventType: "submit", round: null },
+				{ eventType: "path_choice", round: 1 },
+			]),
+		).toEqual({
+			hasSubmittedSecondDeclaration: false,
+			secondDeclarationSubmissionCount: 0,
+			hasSubmittedJointEvaluation: false,
+			hasSubmittedRound1JointEvaluation: false,
+			hasSubmittedCseOpinion: false,
+		});
 	});
 
 	it("path tâtonnement: 3 path_choice events round=1 preserves the latest as winner", () => {
