@@ -124,6 +124,28 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).toContain("6202A");
 	});
 
+	it("shows the NAF label alone when the code is missing", () => {
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, nafCode: null }} />,
+		);
+
+		expect(container.textContent).toContain(
+			"Conseil en systèmes et logiciels informatiques",
+		);
+		expect(container.textContent).not.toContain("null —");
+	});
+
+	it("shows the NAF code alone when the label is missing", () => {
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, nafLabel: null }} />,
+		);
+
+		expect(container.textContent).toContain("6202A");
+		expect(container.textContent).not.toContain(
+			"Conseil en systèmes et logiciels informatiques",
+		);
+	});
+
 	it("renders formatted workforce", () => {
 		const { container } = render(<CompanyEditModal company={company} />);
 

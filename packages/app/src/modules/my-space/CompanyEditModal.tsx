@@ -15,6 +15,7 @@ import { CONTACT } from "~/modules/routes";
 import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
+import { formatNafForDisplay } from "./formatNafForDisplay";
 import { formatSiren } from "./formatSiren";
 import { updateHasCseSchema } from "./schemas";
 import { useUpdateHasCse } from "./useUpdateHasCse";
@@ -28,6 +29,7 @@ type Props = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
+		nafLabel: string | null;
 		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
@@ -203,6 +205,7 @@ type CompanyReadonlySectionProps = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
+		nafLabel: string | null;
 		gipWorkforce: number | null;
 	};
 };
@@ -219,11 +222,7 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 					<InfoRow label="Adresse :" value={company.address} />
 					<InfoRow
 						label="Code NAF :"
-						value={
-							company.nafLabel
-								? `${company.nafCode} — ${company.nafLabel}`
-								: company.nafCode
-						}
+						value={formatNafForDisplay(company.nafCode, company.nafLabel)}
 					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
