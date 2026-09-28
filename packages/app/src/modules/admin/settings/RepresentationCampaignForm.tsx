@@ -26,7 +26,7 @@ const DATE_FIELDS: readonly DateFieldKey[] = [
 const FIELD_LABELS: Record<DateFieldKey, string> = {
 	campaignStartDate: "Date de démarrage de la campagne",
 	campaignEndDate: "Date de clôture de la campagne",
-	declarationDeadline: "Date limite de déclaration",
+	declarationDeadline: "Échéance de déclaration",
 };
 
 export function RepresentationCampaignForm({ initialYear }: Props) {

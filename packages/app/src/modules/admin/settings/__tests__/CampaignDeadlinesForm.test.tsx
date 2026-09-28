@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -183,12 +183,43 @@ describe("CampaignDeadlinesForm", () => {
 		);
 		expect(
 			screen.getAllByLabelText(
-				/date limite de dépôt du rapport d'évaluation conjointe/i,
+				/échéance de dépôt du rapport d'évaluation conjointe/i,
 			),
 		).toHaveLength(2);
 		expect(
-			screen.getByLabelText(/date limite de dépôt de l'avis du cse/i),
+			screen.getByLabelText(/échéance de dépôt de l'avis du cse/i),
 		).toBeInTheDocument();
+	});
+
+	it.each([
+		["Première déclaration", 3],
+		["Deuxième déclaration", 4],
+	])("labels the %s fieldset deadlines as échéances", (legend, count) => {
+		render(
+			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
+		);
+		const fieldset = screen
+			.getByText(legend, { selector: "legend" })
+			.closest("fieldset") as HTMLElement;
+		expect(
+			within(fieldset).getByLabelText(/^échéance de modification/i),
+		).toBeInTheDocument();
+		expect(
+			within(fieldset).getByLabelText(/^échéance de justification/i),
+		).toBeInTheDocument();
+		expect(
+			within(fieldset).getByLabelText(
+				/^échéance de dépôt du rapport d'évaluation conjointe/i,
+			),
+		).toBeInTheDocument();
+		expect(within(fieldset).getAllByText(/échéance/i)).toHaveLength(count);
+	});
+
+	it("does not display any 'date limite' label", () => {
+		render(
+			<CampaignDeadlinesForm configuredYears={[2026]} initialYear={2026} />,
+		);
+		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
 	});
 
 	it("submits the round-2 joint evaluation and CSE opinion deadlines as separate values", async () => {
