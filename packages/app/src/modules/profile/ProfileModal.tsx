@@ -120,8 +120,8 @@ export function ProfileModal() {
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
-												error={errors.lastName?.message ?? null}
 												autoComplete="family-name"
+												error={errors.lastName?.message ?? null}
 												inputId="profile-last-name"
 												label="Nom"
 												registration={form.register("lastName")}
@@ -129,8 +129,8 @@ export function ProfileModal() {
 										</div>
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
-												error={errors.firstName?.message ?? null}
 												autoComplete="given-name"
+												error={errors.firstName?.message ?? null}
 												inputId="profile-first-name"
 												label="Prénom"
 												registration={form.register("firstName")}

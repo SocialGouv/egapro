@@ -143,7 +143,10 @@ describe("ProfileModal — shell", () => {
 			"autocomplete",
 			"given-name",
 		);
-		expect(getForm()).not.toHaveAttribute("autocomplete", "off");
+		expect(getElement("profile-form")).not.toHaveAttribute(
+			"autocomplete",
+			"off",
+		);
 	});
 
 	it("renders the Enregistrer and Annuler buttons", () => {
