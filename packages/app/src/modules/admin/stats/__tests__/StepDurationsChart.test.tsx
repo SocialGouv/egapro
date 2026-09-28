@@ -68,5 +68,10 @@ describe("StepDurationsChart", () => {
 		expect(
 			screen.getByText(/jalon de la démarche post-soumission/i),
 		).toBeInTheDocument();
+		expect(
+			screen.getByRole("group", {
+				name: /Délai médian et 90e percentile.*tableau ci-dessous/i,
+			}),
+		).toBeInTheDocument();
 	});
 });
