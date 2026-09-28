@@ -570,7 +570,15 @@ test.describe("Représentation équilibrée — écarts non calculables", () => 
 		).toHaveCount(0);
 
 		await page.goto(`${FUNNEL_ROOT}/etape/4`);
-		await page.waitForURL(`**${FUNNEL_ROOT}/etape/5`);
+		await expect(
+			page.getByRole("status").getByRole("heading", {
+				name: "L’étape de publication n’est pas nécessaire",
+			}),
+		).toBeVisible();
+		await page
+			.getByRole("link", { name: "Continuer vers le récapitulatif" })
+			.click();
+		await expectOnStep(page, 5, "Récapitulatif");
 	});
 
 	test("a step beyond the reached one redirects back to the reachable step", async ({
