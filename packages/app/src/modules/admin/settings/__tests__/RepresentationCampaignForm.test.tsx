@@ -106,6 +106,14 @@ describe("RepresentationCampaignForm", () => {
 		expect(deadlineInput()).toHaveValue("2026-04-15");
 	});
 
+	it("labels the declaration deadline field as an échéance", () => {
+		render(<RepresentationCampaignForm initialYear={2026} />);
+		expect(
+			screen.getByLabelText(/^échéance de déclaration/i),
+		).toBeInTheDocument();
+		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
+	});
+
 	it("lists every year from FIRST_DECLARATION_YEAR up to ten years ahead", () => {
 		render(<RepresentationCampaignForm initialYear={2026} />);
 		const select = screen.getByLabelText(
