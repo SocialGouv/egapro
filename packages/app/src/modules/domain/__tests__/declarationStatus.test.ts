@@ -51,28 +51,17 @@ describe("isComplianceProcessCompleted", () => {
 });
 
 describe("isDeclarationWritingClosed", () => {
-	const past = new Date("2020-01-01T00:00:00Z");
-	const future = new Date("2999-01-01T00:00:00Z");
-
-	it("closes writing only when the démarche is completed and the deadline elapsed", () => {
-		expect(isDeclarationWritingClosed("demarche_completed", past)).toBe(true);
-	});
-
-	it("keeps writing open while the modification deadline has not elapsed", () => {
-		expect(isDeclarationWritingClosed("demarche_completed", future)).toBe(
-			false,
-		);
-	});
-
-	it("keeps writing open while the démarche is still running", () => {
-		expect(
-			isDeclarationWritingClosed("awaiting_compliance_path_choice", past),
-		).toBe(false);
-		expect(isDeclarationWritingClosed("awaiting_cse_opinion", past)).toBe(
-			false,
-		);
-		expect(isDeclarationWritingClosed("draft", past)).toBe(false);
-		expect(isDeclarationWritingClosed(null, past)).toBe(false);
+	it.each([
+		["demarche_completed", true, true],
+		["demarche_completed", false, false],
+		["awaiting_compliance_path_choice", true, false],
+		["awaiting_cse_opinion", true, false],
+		["awaiting_cse_opinion", false, false],
+		["draft", true, false],
+		[null, true, false],
+		[null, false, false],
+	])("status %s, superseded %s → closed %s", (status, superseded, expected) => {
+		expect(isDeclarationWritingClosed(status, superseded)).toBe(expected);
 	});
 });
 
