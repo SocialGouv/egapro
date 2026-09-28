@@ -6,6 +6,7 @@ import type {
 } from "../types";
 import { isDeadlinePassed } from "./campaign";
 import { getDeclarationProcessStepDeadline } from "./declarationProcessStep";
+import type { SubsequentSubmissions } from "./declarationTrajectory";
 
 export function isDeclarationSubmitted(status: string | null): boolean {
 	return status !== null && status !== "draft";
@@ -67,26 +68,33 @@ export function hasStartedSecondDeclaration(declaration: {
 	);
 }
 
-export function isSecondDeclarationDeadlineApplicable(declaration: {
-	status: DeclarationFsmStatus | null;
-	secondDeclarationStep: number | null;
-	secondDeclarationPathChoice: CompliancePath | null;
-}): boolean {
-	switch (declaration.status) {
-		case null:
-		case "draft":
-		case "awaiting_compliance_path_choice":
-		case "joint_evaluation_chosen":
-			return false;
-		case "corrective_actions_chosen":
-		case "awaiting_revision_choice":
-		case "revised_joint_evaluation_chosen":
-			return true;
-		// Terminal states are reachable from round 1 too, so the second-declaration
-		// deadline only governs them once a correction round has actually started.
-		case "awaiting_cse_opinion":
-		case "demarche_completed":
-			return hasStartedSecondDeclaration(declaration);
+export type SubmissionLockTarget =
+	| "first_declaration"
+	| "path_choice_round_1"
+	| "path_choice_round_2";
+
+// Events, not the FSM status: `demarche_completed` is also reachable straight from the first declaration.
+export function isLockedBySubsequentSubmission(
+	submissions: SubsequentSubmissions,
+	target: SubmissionLockTarget,
+): boolean {
+	switch (target) {
+		case "first_declaration":
+			return (
+				submissions.hasSubmittedSecondDeclaration ||
+				submissions.hasSubmittedJointEvaluation ||
+				submissions.hasSubmittedCseOpinion
+			);
+		case "path_choice_round_1":
+			return (
+				submissions.hasSubmittedCseOpinion ||
+				submissions.hasSubmittedRound1JointEvaluation
+			);
+		case "path_choice_round_2":
+			return (
+				submissions.hasSubmittedCseOpinion ||
+				submissions.hasSubmittedJointEvaluation
+			);
 	}
 }
 
