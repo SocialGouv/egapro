@@ -26,7 +26,7 @@ export function getStepStatuses(
 	}
 }
 
-function isFirstDeclarationModifiable(submitted: {
+export function isFirstDeclarationModifiable(submitted: {
 	secondDeclaration: boolean;
 	jointEvaluation: boolean;
 	cseOpinion: boolean;

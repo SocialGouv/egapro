@@ -11,7 +11,6 @@ import { isIndicatorGRequiredForGip } from "~/modules/domain";
 import { LAST_REMUNERATION_STEP, remunerationStepHref } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
-import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 type StepPageProps = {
@@ -54,10 +53,6 @@ export default async function StepPage({ params }: StepPageProps) {
 	}
 
 	const isModificationClosed = data.isFirstDeclarationLocked;
-	// The banner still cites the date; it drives nothing.
-	const modificationDeadline = isModificationClosed
-		? (await getCampaignDeadlines(d.year)).decl1ModificationDeadline
-		: undefined;
 
 	const gip = data.gipPrefillData;
 
@@ -116,7 +111,6 @@ export default async function StepPage({ params }: StepPageProps) {
 				hasCse={company.hasCse}
 				initialSource={initialSource}
 				modificationClosed={isModificationClosed}
-				modificationDeadline={modificationDeadline}
 				step={step}
 				step1Data={step1Data}
 				step2Data={step2Data}

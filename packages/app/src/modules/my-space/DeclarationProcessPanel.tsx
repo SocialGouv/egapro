@@ -11,7 +11,11 @@ import type {
 import { mySpaceHistoryHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
-import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
+import {
+	getStepStatuses,
+	isFirstDeclarationModifiable,
+	VerticalStepper,
+} from "./VerticalStepper";
 
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
 const PANEL_TITLE_ID = "declaration-process-panel-title";
@@ -118,7 +122,14 @@ export function DeclarationProcessPanel({
 							year={year}
 						/>
 						{variant === "closed" && (
-							<ClosedMessage cseOpinionRequired={cseOpinionRequired} />
+							<ClosedMessage
+								cseOpinionRequired={cseOpinionRequired}
+								firstDeclarationModifiable={isFirstDeclarationModifiable({
+									cseOpinion: hasSubmittedCseOpinion,
+									jointEvaluation: hasSubmittedJointEvaluation,
+									secondDeclaration: hasSubmittedSecondDeclaration,
+								})}
+							/>
 						)}
 					</div>
 					<div>
@@ -194,18 +205,33 @@ function StartAlert() {
 	);
 }
 
-function ClosedMessage({
+function getClosedMessage({
 	cseOpinionRequired,
+	firstDeclarationModifiable,
 }: {
 	cseOpinionRequired: boolean;
+	firstDeclarationModifiable: boolean;
+}): string {
+	if (cseOpinionRequired) {
+		return "Cette démarche est terminée. Vos avis du CSE restent modifiables.";
+	}
+	return firstDeclarationModifiable
+		? "Cette démarche est terminée. Votre déclaration reste modifiable."
+		: "Cette démarche est terminée.";
+}
+
+function ClosedMessage({
+	cseOpinionRequired,
+	firstDeclarationModifiable,
+}: {
+	cseOpinionRequired: boolean;
+	firstDeclarationModifiable: boolean;
 }) {
 	return (
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">
-				{cseOpinionRequired
-					? "Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance."
-					: "Cette démarche est terminée."}
+				{getClosedMessage({ cseOpinionRequired, firstDeclarationModifiable })}
 			</p>
 		</div>
 	);

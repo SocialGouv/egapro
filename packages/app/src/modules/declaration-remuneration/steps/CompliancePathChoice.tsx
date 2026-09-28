@@ -41,6 +41,7 @@ import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBan
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	currentYear: number;
+	declarationModifiable: boolean;
 	declarationSiren: string;
 	declarationYear: number;
 	cseOpinionRequired: boolean;
@@ -55,6 +56,7 @@ export function CompliancePathChoice({
 	campaignDeadlines,
 	cseOpinionRequired,
 	currentYear,
+	declarationModifiable,
 	declarationSiren,
 	declarationYear,
 	email,
@@ -120,9 +122,6 @@ export function CompliancePathChoice({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const modificationDeadline = isSecondRound
-		? campaignDeadlines.decl2ModificationDeadline
-		: campaignDeadlines.decl1ModificationDeadline;
 	const pathChoiceDeadline = selectPathChoiceDeadline(
 		campaignDeadlines,
 		isSecondRound,
@@ -157,9 +156,9 @@ export function CompliancePathChoice({
 				</div>
 
 				<DeclarationSuccessBanner
+					declarationModifiable={declarationModifiable}
 					email={email}
 					isSecondDeclaration={isSecondRound}
-					modificationDeadline={modificationDeadline}
 					pdfDownloadHref={pdfDownloadHref}
 					year={currentYear}
 				/>
@@ -178,7 +177,7 @@ export function CompliancePathChoice({
 
 					<div className="fr-highlight fr-mb-0">
 						<p className="fr-mb-1w">
-							Date limite pour choisir un parcours de mise en conformité
+							Échéance pour choisir un parcours de mise en conformité
 						</p>
 						<p className="fr-text--xl fr-text--bold fr-mb-0">
 							{formatLongDate(pathChoiceDeadline)}

@@ -36,26 +36,19 @@ vi.mock("~/modules/declaration-remuneration", async () => {
 });
 
 import StepPage from "~/app/declaration-remuneration/(with-banner)/etape/[step]/page";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 const YEAR = 2026;
 const SIREN = "123456789";
 
-type PageProps = { modificationClosed: boolean; modificationDeadline?: Date };
+type PageProps = { modificationClosed: boolean };
 
 function mockPage({
 	isFirstDeclarationLocked,
-	decl1ModificationDeadline,
 }: {
 	isFirstDeclarationLocked: boolean;
-	decl1ModificationDeadline: Date;
 }) {
-	vi.mocked(getCampaignDeadlines).mockResolvedValue({
-		...getDefaultCampaignDeadlines(YEAR),
-		decl1ModificationDeadline,
-	});
 	vi.mocked(api.company.get).mockResolvedValue({
 		gipWorkforce: 200,
 		hasCse: true,
@@ -82,29 +75,22 @@ describe("StepPage read-only rule", () => {
 		vi.mocked(getCampaignDeadlines).mockReset();
 	});
 
-	it("opens a superseded first declaration read-only with the banner, whatever the deadlines", async () => {
-		const farFuture = new Date("2999-01-01T00:00:00Z");
-		mockPage({
-			isFirstDeclarationLocked: true,
-			decl1ModificationDeadline: farFuture,
-		});
+	it("opens a superseded first declaration read-only with the banner, without reading any deadline", async () => {
+		mockPage({ isFirstDeclarationLocked: true });
 
 		const props = await renderStep();
 
 		expect(props.modificationClosed).toBe(true);
-		expect(props.modificationDeadline).toEqual(farFuture);
+		expect(props).not.toHaveProperty("modificationDeadline");
+		expect(getCampaignDeadlines).not.toHaveBeenCalled();
 	});
 
 	it("opens a non-superseded first declaration writable without banner, even with every deadline past", async () => {
-		mockPage({
-			isFirstDeclarationLocked: false,
-			decl1ModificationDeadline: new Date("2020-01-01T00:00:00Z"),
-		});
+		mockPage({ isFirstDeclarationLocked: false });
 
 		const props = await renderStep();
 
 		expect(props.modificationClosed).toBe(false);
-		expect(props.modificationDeadline).toBeUndefined();
 		expect(getCampaignDeadlines).not.toHaveBeenCalled();
 	});
 });

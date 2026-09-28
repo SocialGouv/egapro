@@ -347,7 +347,7 @@ describe("DeclarationProcessPanel", () => {
 			expect(panel.getByText("Démarche close")).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+					"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
 				),
 			).toBeInTheDocument();
 		});
@@ -377,7 +377,9 @@ describe("DeclarationProcessPanel", () => {
 		it("renders the Modifier link on the first declaration while nothing later was transmitted", () => {
 			const { panel } = renderPanel("compliance");
 			expect(panel.getByText("Modifier")).toBeInTheDocument();
-			expect(panel.getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
+			expect(
+				panel.getByText("Modifiable jusqu'à votre prochaine transmission"),
+			).toBeInTheDocument();
 		});
 
 		it("keeps the Modifier link once the deadline has passed, without the closed wording", () => {
