@@ -101,7 +101,6 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 	it("returns the updated first-declaration opinion after a real re-submission", async () => {
 		const caller = createCaller();
 
-		// First submission of the CSE opinion step: the accuracy opinion is favorable.
 		await caller.saveOpinions({
 			firstDeclaration: {
 				accuracyOpinion: "favorable",
@@ -114,10 +113,6 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 
 		expect(await fetchAccuracyOpinion()).toBe("favorable");
 
-		// The user flips the flag (OUI -> NON, issue #4574) and re-submits through
-		// the same mutation the CSE opinion form uses — `saveOpinions` deletes the
-		// previous rows and re-inserts fresh ones, which a raw SQL `UPDATE` on the
-		// original row would never exercise.
 		await caller.saveOpinions({
 			firstDeclaration: {
 				accuracyOpinion: "unfavorable",
