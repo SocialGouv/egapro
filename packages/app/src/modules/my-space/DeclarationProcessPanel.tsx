@@ -36,6 +36,8 @@ type Props = {
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
 	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedJointEvaluation: boolean;
+	hasSubmittedCseOpinion: boolean;
 	siren: string;
 	ctaHref: string;
 	lockedByOther: boolean;
@@ -54,6 +56,8 @@ export function DeclarationProcessPanel({
 	variant,
 	displayContext,
 	hasSubmittedSecondDeclaration,
+	hasSubmittedJointEvaluation,
+	hasSubmittedCseOpinion,
 	siren,
 	ctaHref,
 	lockedByOther,
@@ -100,10 +104,12 @@ export function DeclarationProcessPanel({
 							campaignDeadlines={campaignDeadlines}
 							compliancePathApplicable={compliancePathApplicable}
 							cseOpinionRequired={cseOpinionRequired}
+							cseOpinionSubmitted={hasSubmittedCseOpinion}
 							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
 							hasPrefillData={hasPrefillData}
 							indicatorGRequired={indicatorGRequired}
+							jointEvaluationSubmitted={hasSubmittedJointEvaluation}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							step1={step1}
 							step2={step2}

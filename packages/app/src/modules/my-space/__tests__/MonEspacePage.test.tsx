@@ -83,6 +83,7 @@ vi.mock("~/trpc/server", () => ({
 						secondDeclarationPathChoice: null,
 						hasSubmittedSecondDeclaration: false,
 
+						hasSubmittedJointEvaluation: false,
 						hasSubmittedCseOpinion: false,
 						cseRequired: false,
 						hasJointEvaluationFile: false,
