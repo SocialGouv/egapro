@@ -324,7 +324,7 @@ export function PanelPlayground() {
 						checked={preset === "future"}
 						compact
 						id="preset-future"
-						label="Toutes futures (2099) — boutons Modifier visibles"
+						label="Toutes futures (2099)"
 						name="preset"
 						onChange={() => setPreset("future")}
 					/>
@@ -332,7 +332,7 @@ export function PanelPlayground() {
 						checked={preset === "past"}
 						compact
 						id="preset-past"
-						label="Toutes passées (2020) — boutons Modifier cachés"
+						label="Toutes passées (2020) — « Modifier » inchangé"
 						name="preset"
 						onChange={() => setPreset("past")}
 					/>
