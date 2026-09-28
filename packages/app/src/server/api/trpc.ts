@@ -71,17 +71,51 @@ export function isAdminMfaRequiredTRPCError(error: {
 	return error.cause instanceof AdminMfaRequiredError;
 }
 
+export const UNEXPECTED_ERROR_MESSAGE =
+	"Une erreur est survenue. Veuillez réessayer.";
+
+/**
+ * tRPC copies the original stack onto the INTERNAL_SERVER_ERROR it creates for
+ * an unknown Error. An explicit TRPCError keeps its own stack, even when its
+ * message happens to equal the message of its cause.
+ */
+export function isUnexpectedTRPCError(error: TRPCError): boolean {
+	if (error.code !== "INTERNAL_SERVER_ERROR") return false;
+	return (
+		(error.cause instanceof Error && error.stack === error.cause.stack) ||
+		Boolean(error.stack?.includes("getTRPCErrorFromUnknown"))
+	);
+}
+
+export function logTRPCError(
+	error: TRPCError,
+	path: string | undefined,
+	isDevelopment: boolean,
+): void {
+	if (isUnexpectedTRPCError(error)) {
+		console.error(
+			`tRPC failed on ${path ?? "<no-path>"}`,
+			error.cause ?? error,
+		);
+	} else if (isDevelopment) {
+		console.error(`tRPC failed on ${path ?? "<no-path>"}`, error);
+	}
+}
+
 const t = initTRPC.context<typeof createTRPCContext>().create({
 	transformer: superjson,
 	errorFormatter({ shape, error }) {
+		const unexpected = isUnexpectedTRPCError(error);
+		const data = {
+			...shape.data,
+			zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+			[ADMIN_MFA_REQUIRED_MARKER]: isAdminMfaRequiredTRPCError(error),
+		};
+		if (unexpected) delete data.stack;
 		return {
 			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : null,
-				[ADMIN_MFA_REQUIRED_MARKER]: isAdminMfaRequiredTRPCError(error),
-			},
+			message: unexpected ? UNEXPECTED_ERROR_MESSAGE : shape.message,
+			data,
 		};
 	},
 });

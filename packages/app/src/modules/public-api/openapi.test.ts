@@ -283,10 +283,13 @@ describe("publicOpenApiSpec", () => {
 			).toBe("#/components/schemas/PublicRepresentation");
 		});
 
-		it("documents a 404 for a missing or draft-only declaration", () => {
+		it("documents a 404 for a missing, draft-only or unreleased declaration", () => {
 			expect(bySirenYear.responses["404"]).toBeDefined();
 			expect(bySirenYear.responses["404"].description).toMatch(
 				/non trouvée|brouillon/i,
+			);
+			expect(bySirenYear.responses["404"].description).toMatch(
+				/non encore publiée/i,
 			);
 		});
 
@@ -372,6 +375,9 @@ describe("publicOpenApiSpec", () => {
 				"/api/public/declarations/{siren}",
 				"/api/public/declarations/{siren}/{year}",
 				"/api/public/declarations/export",
+				"/api/public/representations",
+				"/api/public/representations/{siren}",
+				"/api/public/representations/{siren}/{year}",
 			] as const) {
 				expect(publicOpenApiSpec.paths[path].get.description).toMatch(
 					/rendu public|publié/i,

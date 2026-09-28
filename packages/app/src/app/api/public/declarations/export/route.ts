@@ -1,4 +1,4 @@
-import { and, eq, ilike, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, ilike, isNull } from "drizzle-orm";
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -17,6 +17,7 @@ import {
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import { publiclyReleasedCampaignCondition } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
 	companies,
@@ -79,8 +80,7 @@ async function fetchPublishableDeclarations(
 			campaignDeadlines,
 			and(
 				eq(campaignDeadlines.year, declarations.year),
-				isNotNull(campaignDeadlines.publicDataReleaseDate),
-				sql`${campaignDeadlines.publicDataReleaseDate} <= CURRENT_DATE`,
+				publiclyReleasedCampaignCondition(),
 			),
 		)
 		.leftJoin(

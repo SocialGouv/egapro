@@ -490,6 +490,12 @@ Les 3 divergences relevées en transcrivant le fichier Excel ont été arbitrée
 
 ## 7. Lancer la recette
 
+### Sur chaque pull request (bloquant)
+
+Depuis #4132, les 185 coordonnées tournent sur **toute pull request vers `alpha`**, dans `.github/workflows/e2e.yaml`, à côté de la suite E2E principale : la grille est répartie sur 3 runners (`--shard=i/3`) et la suite sur 2, et le check requis « Test e2e » est un job agrégateur qui ne passe que si les cinq shards passent. Une coordonnée rouge bloque donc la pull request.
+
+Chaque runner monte sa propre stack docker, sa base et son serveur sur `:3000` ; les coordonnées restent séquentielles à l'intérieur d'un runner (`workers: 1`). Le run publie un rapport HTML fusionné (artefact `playwright-report`) et les traces de chaque shard.
+
 ### Depuis l'onglet Actions (déclenchement manuel)
 
 1. Accédez à **Actions → Recette grille (nightly)** dans le dépôt GitHub.
@@ -497,7 +503,7 @@ Les 3 divergences relevées en transcrivant le fichier Excel ont été arbitrée
 3. Choisissez l'**Année de campagne** (`toutes` pour les 185 coordonnées, ou une année précise de 2027 à 2033) et la **Tranche d'effectif** (`toutes`, `49`, `99`, `149`, `249`, `250P`).
 4. Le rapport de recette apparaît dans le **résumé du run** et est téléchargeable en artefact (`grille-recette`).
 
-Le workflow tourne aussi automatiquement chaque nuit à 2h UTC. Un échec nocturne fait échouer le job et notifie les watchers du dépôt — aucune pull request n'est bloquée.
+Le workflow tourne aussi automatiquement chaque nuit à 2h UTC. Il reste **non shardé** et non bloquant : son livrable est le rapport `grille-recette.md`, que le reporter JSON de `playwright.grille.config.ts` écrit à un chemin unique. Le blocage des pull requests est assuré par `e2e.yaml`, décrit ci-dessus.
 
 ### En local
 

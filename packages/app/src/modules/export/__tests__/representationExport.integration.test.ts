@@ -13,6 +13,8 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 	const SIREN_DRAFT = "111222333";
 	const ALL_SIRENS = [SIREN_DIFFUSIBLE, SIREN_NON_DIFFUSIBLE, SIREN_DRAFT];
 	const YEAR = 2027;
+	// Reference year N is released by campaign N + 1.
+	const CAMPAIGN_YEAR = YEAR + 1;
 	const DECL_IDS = [
 		"repr-export-diffusible",
 		"repr-export-non-diffusible",
@@ -22,6 +24,7 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 	async function cleanup() {
 		await sql`DELETE FROM app_representation_declaration WHERE id IN ${sql(DECL_IDS)}`;
 		await sql`DELETE FROM app_company WHERE siren IN ${sql(ALL_SIRENS)}`;
+		await sql`DELETE FROM app_campaign_deadline WHERE year = ${CAMPAIGN_YEAR}`;
 	}
 
 	beforeAll(() => {
@@ -43,6 +46,19 @@ describe("GET /api/public/representations/export — integration (#4155)", () =>
 				(${SIREN_DIFFUSIBLE},     'Entreprise Diffusible',     '1 rue de la Paix, 75002 Paris', '62.02A', 'Conseil en systemes informatiques', 'Île-de-France', '75', 'Paris',  'O'),
 				(${SIREN_NON_DIFFUSIBLE}, 'Entreprise Non Diffusible', '2 rue Secrete, 69001 Lyon',     '70.10Z', 'Activites des sieges sociaux',      'Auvergne-Rhône-Alpes', '69', 'Rhône', 'N'),
 				(${SIREN_DRAFT},          'Entreprise Brouillon',      '3 rue Brouillon, 44000 Nantes', '46.90Z', 'Commerce de gros non specialise',   'Pays de la Loire', '44', 'Loire-Atlantique', 'O')
+		`;
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year, public_data_release_date,
+				decl1_modification_deadline, decl1_justification_deadline, decl1_joint_evaluation_deadline,
+				decl2_modification_deadline, decl2_justification_deadline, decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
+			) VALUES (
+				${CAMPAIGN_YEAR}, (now() AT TIME ZONE 'Europe/Paris')::date - 1,
+				'2000-01-01', '2000-01-01', '2000-01-01',
+				'2000-01-01', '2000-01-01', '2000-01-01',
+				'2000-01-01'
+			)
 		`;
 		await sql`
 			INSERT INTO app_representation_declaration

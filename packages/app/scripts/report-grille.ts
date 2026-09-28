@@ -163,6 +163,10 @@ function escapeMdCell(value: string): string {
 	return value.replace(/\|/g, "\\|");
 }
 
+function countOf(count: number, label: string): string {
+	return `${count} ${label}${count > 1 ? "s" : ""}`;
+}
+
 function sanitizeReportUrl(url: string): string {
 	const lower = url.toLowerCase();
 	if (
@@ -245,7 +249,7 @@ export function buildReport(opts: ReportOptions): string {
 	lines.push("| Date | Commit | Périmètre | Durée | Résultat |");
 	lines.push("|---|---|---|---|---|");
 	lines.push(
-		`| ${formatDate(startTime)} | \`${escapeMdCell(commit.slice(0, 7))}\` | ${escapeMdCell(scope)} | ${formatDuration(durationMs)} | **${passed} passés / ${failed} échoués / ${notPlayed} non joués** sur ${grid.length} |`,
+		`| ${formatDate(startTime)} | \`${escapeMdCell(commit.slice(0, 7))}\` | ${escapeMdCell(scope)} | ${formatDuration(durationMs)} | **${countOf(passed, "passé")} / ${countOf(failed, "échoué")} / ${countOf(notPlayed, "non joué")}** sur ${grid.length} |`,
 	);
 	lines.push("");
 

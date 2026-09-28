@@ -49,6 +49,11 @@ check_pattern() {
 
 # --- Rules (add new ones here) ---
 
+# DSFR text colors use fr-text-{role}--{color}; fr-text--* is for typography.
+check_pattern '\.(tsx|jsx)$' \
+  'fr-text--(mention|default|label|title|inverted)-' \
+  'Invalid DSFR text color class. Use fr-text-mention--grey, fr-text-default--grey, etc.; fr-text--* is for typography.'
+
 # Suppression comments — all code files
 check_pattern '\.(ts|tsx|js|jsx)$' \
   'biome-ignore|eslint-disable|@ts-ignore|@ts-expect-error' \

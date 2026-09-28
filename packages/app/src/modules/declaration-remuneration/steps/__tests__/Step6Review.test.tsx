@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SUBMISSION_UNCONFIRMED_MESSAGE } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { Step6Review } from "../Step6Review";
@@ -8,17 +9,25 @@ import { Step6Review } from "../Step6Review";
 const mockSubmitMutate = vi.fn();
 const mockSubmitReset = vi.fn();
 const mockPush = vi.fn();
+const mockRefresh = vi.fn();
 const mockDisclose = vi.fn();
 const mockConceal = vi.fn();
+const mockTrackFunnelComplete = vi.fn();
+type MockSubmissionError = {
+	message: string;
+	data?: { code: string };
+};
 const mockSubmitState = {
-	error: null as { message: string } | null,
+	error: null as MockSubmissionError | null,
 	isPending: false,
+	networkMode: undefined as string | undefined,
 	onSuccess: undefined as (() => void) | undefined,
+	onError: undefined as ((error: MockSubmissionError) => void) | undefined,
 };
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
-	useRouter: () => ({ push: mockPush }),
+	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 }));
 
 vi.mock("~/modules/shared", async (importOriginal) => ({
@@ -26,16 +35,32 @@ vi.mock("~/modules/shared", async (importOriginal) => ({
 	getDsfrModal: () => ({ disclose: mockDisclose, conceal: mockConceal }),
 }));
 
+vi.mock("~/modules/analytics", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/analytics")>()),
+	trackFunnelComplete: (...args: unknown[]) => mockTrackFunnelComplete(...args),
+}));
+
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submit: {
-				useMutation: ({ onSuccess }: { onSuccess: () => void }) => {
+				useMutation: ({
+					networkMode,
+					onSuccess,
+					onError,
+				}: {
+					networkMode?: string;
+					onSuccess: () => void;
+					onError: (error: MockSubmissionError) => void;
+				}) => {
+					mockSubmitState.networkMode = networkMode;
 					mockSubmitState.onSuccess = onSuccess;
+					mockSubmitState.onError = onError;
 					return {
 						mutate: mockSubmitMutate,
 						reset: mockSubmitReset,
 						isPending: mockSubmitState.isPending,
+						isError: mockSubmitState.error !== null,
 						error: mockSubmitState.error,
 					};
 				},
@@ -117,38 +142,98 @@ const emptyStep4Data = () => ({
 	],
 });
 
-function renderSubmissionReview() {
-	return render(
+function submissionReview(isSubmitted = false) {
+	return (
 		<Step6Review
 			companyWorkforce={null}
 			declaration={emptyDeclaration()}
 			declarationYear={2025}
 			indicatorGRequired
+			isSubmitted={isSubmitted}
 			step2Data={emptyStep2Data()}
 			step2Gaps={noPayGapReferences()}
 			step3Data={emptyStep3Data()}
 			step3Gaps={noPayGapReferences()}
 			step4Data={emptyStep4Data()}
-		/>,
+		/>
 	);
 }
+
+function renderSubmissionReview() {
+	return render(submissionReview());
+}
+
+const RULES_ENGINE_REFUSAL = {
+	message:
+		'No matching transition for state="awaiting_compliance_path_choice" action="submit". Facts: {}',
+	data: { code: "INTERNAL_SERVER_ERROR" },
+};
 
 describe("Step6Review", () => {
 	beforeEach(() => {
 		mockSubmitMutate.mockReset();
 		mockSubmitReset.mockReset();
 		mockPush.mockReset();
+		mockRefresh.mockReset();
 		mockDisclose.mockReset();
 		mockConceal.mockReset();
+		mockTrackFunnelComplete.mockReset();
 		mockSubmitState.error = null;
 		mockSubmitState.isPending = false;
+		mockSubmitState.networkMode = undefined;
 		mockSubmitState.onSuccess = undefined;
+		mockSubmitState.onError = undefined;
+		vi.stubGlobal("fetch", vi.fn());
 	});
 
-	it("closes the modal before navigating after a successful submission", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("submits with networkMode 'always' so an offline attempt fails fast instead of pausing", () => {
 		renderSubmissionReview();
 
-		act(() => mockSubmitState.onSuccess?.());
+		expect(mockSubmitState.networkMode).toBe("always");
+	});
+
+	it("re-reads the server state when the server rejects the submission", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onError?.(RULES_ENGINE_REFUSAL));
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(fetch).not.toHaveBeenCalled();
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("waits for the server before refreshing after a network failure", async () => {
+		vi.useFakeTimers();
+		try {
+			vi.mocked(fetch)
+				.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+				.mockResolvedValueOnce(new Response("OK", { status: 200 }));
+			renderSubmissionReview();
+
+			act(() => mockSubmitState.onError?.({ message: "Failed to fetch" }));
+			await act(() => vi.advanceTimersByTimeAsync(0));
+
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(mockRefresh).not.toHaveBeenCalled();
+
+			await act(() => vi.advanceTimersByTimeAsync(1_000));
+
+			expect(mockRefresh).toHaveBeenCalledTimes(1);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("completes the submission once the refreshed page shows it went through", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		rerender(submissionReview(true));
 
 		expect(mockConceal).toHaveBeenCalledTimes(1);
 		expect(mockPush).toHaveBeenCalledWith(
@@ -159,24 +244,93 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("still navigates if funnel tracking storage is unavailable", () => {
+	it("does not re-track the funnel completion when the server refuses a declaration submitted from another tab", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockTrackFunnelComplete).not.toHaveBeenCalled();
+	});
+
+	it("tracks the funnel completion when resuming after this tab's response was lost", () => {
+		mockSubmitState.error = { message: "Failed to fetch" };
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
+	it("keeps the modal mounted while a retry is pending when the refresh reveals the submission", () => {
+		mockSubmitState.isPending = true;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(document.getElementById("submit-declaration-modal")).not.toBeNull();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		mockSubmitState.isPending = false;
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		rerender(submissionReview(true));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("shows a generic message instead of a technical server error", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
 		renderSubmissionReview();
-		const storage = vi
-			.spyOn(Storage.prototype, "getItem")
-			.mockImplementation(() => {
-				throw new Error("Storage blocked");
-			});
-		try {
-			act(() => mockSubmitState.onSuccess?.());
-			expect(mockConceal).toHaveBeenCalledTimes(1);
-			expect(mockPush).toHaveBeenCalledTimes(1);
-		} finally {
-			storage.mockRestore();
-		}
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		const alert = within(modal).getByRole("alert", { hidden: true });
+		expect(alert).toHaveTextContent(SUBMISSION_UNCONFIRMED_MESSAGE);
+		expect(alert).not.toHaveTextContent("No matching transition");
+	});
+
+	it("closes the modal before navigating after a successful submission", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onSuccess?.());
+
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("still navigates if funnel tracking throws", () => {
+		mockTrackFunnelComplete.mockImplementation(() => {
+			throw new Error("Tracking blocked");
+		});
+		renderSubmissionReview();
+		act(() => mockSubmitState.onSuccess?.());
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledTimes(1);
 	});
 
 	it("shows a submission error in the modal and clears it on close", async () => {
-		mockSubmitState.error = { message: "La soumission a échoué." };
+		mockSubmitState.error = {
+			message: "La soumission a échoué.",
+			data: { code: "FORBIDDEN" },
+		};
 		renderSubmissionReview();
 		const modal = document.getElementById("submit-declaration-modal");
 		if (!modal) throw new Error("Submit modal not found");

@@ -268,6 +268,7 @@ export const declarationRouter = createTRPCRouter({
 
 		const declarationId = result.declaration.id;
 		let hasSubmittedSecondDeclaration = false;
+		let secondDeclarationSubmissionCount = 0;
 		let hasSubmittedCseOpinion = false;
 		let hasSubmittedJointEvaluation = false;
 		if (declarationId !== "") {
@@ -279,6 +280,7 @@ export const declarationRouter = createTRPCRouter({
 				for (const row of eventRows) {
 					if (row.eventType === "second_declaration_submit") {
 						hasSubmittedSecondDeclaration = true;
+						secondDeclarationSubmissionCount++;
 					} else if (row.eventType === "cse_opinion_submit") {
 						hasSubmittedCseOpinion = true;
 					} else if (row.eventType === "joint_evaluation_submit") {
@@ -293,6 +295,7 @@ export const declarationRouter = createTRPCRouter({
 			gipPrefillData,
 			previousYearCategories,
 			hasSubmittedSecondDeclaration,
+			secondDeclarationSubmissionCount,
 			hasSubmittedCseOpinion,
 			hasSubmittedJointEvaluation,
 		};
