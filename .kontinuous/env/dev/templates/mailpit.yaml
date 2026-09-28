@@ -35,9 +35,13 @@ spec:
               value: /data/mailpit.db
             - name: MP_DISABLE_VERSION_CHECK
               value: "true"
+            # Le smtpd n'écoute qu'en loopback : tout le trafic SMTP externe
+            # transite par le sidecar smtp-demux (voir ci-dessous).
+            - name: MP_SMTP_BIND_ADDR
+              value: 127.0.0.1:1026
           ports:
-            - name: smtp
-              containerPort: 1025
+            - name: smtp-internal
+              containerPort: 1026
             - name: web
               containerPort: 8025
           readinessProbe:
@@ -56,9 +60,79 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+        # Démultiplexeur TCP devant le smtpd. Le Prometheus de la plateforme
+        # sonde TOUS les ports de TOUS les services en HTTP (le NetworkPolicy
+        # fabrique `netpol-ingress` autorise le namespace monitoring en union,
+        # impossible d'exclure le port 1025 côté produit). Chaque sonde HTTP
+        # sur le port SMTP générait une réponse « 500 5.5.2 Syntax error »
+        # que Mailpit diffuse en toast d'erreur dans l'UI web (#4547).
+        # Ici : trafic HTTP → UI Mailpit (réponse 200), tout le reste → smtpd.
+        - name: smtp-demux
+          image: haproxy:3.2.23-alpine3.24
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: smtp
+              containerPort: 1025
+          readinessProbe:
+            tcpSocket:
+              port: smtp
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          volumeMounts:
+            - name: smtp-demux-config
+              mountPath: /usr/local/etc/haproxy
+              readOnly: true
       volumes:
         - name: data
           emptyDir: {}
+        - name: smtp-demux-config
+          configMap:
+            name: mailpit-smtp-demux
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mailpit-smtp-demux
+  namespace: {{ .Values.global.namespace }}
+data:
+  haproxy.cfg: |
+    # nbthread borné : par défaut HAProxy démarre un thread par cœur du nœud
+    # et dépasse la limite mémoire du conteneur (OOMKilled).
+    global
+      nbthread 2
+      maxconn 2000
+
+    defaults
+      mode tcp
+      timeout connect 5s
+      timeout client 1h
+      timeout server 1h
+
+    # Les clients SMTP attendent la bannière du serveur : sans données client
+    # après `inspect-delay`, on bascule sur le backend par défaut (smtpd).
+    frontend smtp_demux
+      bind *:1025
+      tcp-request inspect-delay 2s
+      tcp-request content accept if HTTP
+      use_backend mailpit_ui if HTTP
+      default_backend mailpit_smtp
+
+    backend mailpit_ui
+      server ui 127.0.0.1:8025
+
+    backend mailpit_smtp
+      server smtp 127.0.0.1:1026
 ---
 apiVersion: v1
 kind: Service

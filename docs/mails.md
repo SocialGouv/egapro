@@ -189,6 +189,12 @@ Si `DATABASE_URL` est absent côté worker, `registerSchedules` warn et **les ra
 | Preprod | Mailpit in-cluster | Oui | Oui |
 | Prod | Tipimail (secret `smtp-app`) | Oui | Oui (Europe/Paris) |
 
+### Mailpit in-cluster : démultiplexage SMTP/HTTP (#4547)
+
+Le Prometheus de la plateforme sonde en HTTP **tous les ports de tous les services** (y compris le 1025 SMTP), et le NetworkPolicy fabrique `netpol-ingress` autorise ce trafic en union — impossible de l'exclure côté produit. Chaque sonde HTTP sur le smtpd produisait une réponse `500 5.5.2 Syntax error` que Mailpit diffuse en **toast d'erreur dans son UI web**.
+
+Le déploiement Mailpit embarque donc un sidecar HAProxy (`smtp-demux`, template `.kontinuous/env/*/templates/mailpit.yaml`) qui écoute le port 1025 exposé par le Service et démultiplexe : trafic HTTP → UI Mailpit (8025), tout le reste → smtpd. Le smtpd de Mailpit n'écoute plus qu'en loopback (`MP_SMTP_BIND_ADDR=127.0.0.1:1026`). Conséquence : les clients SMTP reçoivent la bannière avec ~2 s de latence (`inspect-delay`), sans impact fonctionnel.
+
 ---
 
 ## Tester un mail localement

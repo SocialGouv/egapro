@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
 import {
@@ -298,6 +298,52 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getAllByText("Tous les salariés").length,
 		).toBeGreaterThanOrEqual(1);
+	});
+
+	it("gives quartile placeholders accessible meanings", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step4Data={{
+					annual: [
+						{ threshold: "20700.35", women: 0 },
+						{ threshold: "25750.99", men: 0 },
+						{ threshold: "34900.99", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 30, men: 60 },
+						{ threshold: "15", women: 40, men: 30 },
+						{ threshold: "20", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+				}}
+			/>,
+		);
+
+		const annualTable = screen.getByRole("table", {
+			name: "Quartile annuel – 2025",
+		});
+		const hourlyTable = screen.getByRole("table", {
+			name: "Quartile horaire – 2025",
+		});
+
+		expect(
+			within(annualTable).getByRole("columnheader", { name: "Quartile" }),
+		).toBeInTheDocument();
+		expect(
+			within(hourlyTable).getByRole("columnheader", { name: "Quartile" }),
+		).toBeInTheDocument();
+		expect(within(annualTable).getAllByText("Non renseigné")).toHaveLength(2);
+		expect(
+			within(annualTable).getAllByRole("cell", { name: "0" }),
+		).toHaveLength(2);
+		expect(
+			within(annualTable).getByText("Sans limite supérieure"),
+		).toBeInTheDocument();
+		expect(
+			within(annualTable).getAllByText("Non applicable").length,
+		).toBeGreaterThan(0);
 	});
 
 	it("locks the computed quartile percentages and grand totals (iso-behaviour)", () => {

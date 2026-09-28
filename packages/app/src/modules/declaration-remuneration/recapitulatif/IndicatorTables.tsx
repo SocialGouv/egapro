@@ -53,6 +53,15 @@ function GapCell({ gap }: { gap: number | null }) {
 	);
 }
 
+function AccessiblePlaceholder({ label }: { label: string }) {
+	return (
+		<>
+			<span aria-hidden="true">-</span>
+			<span className="fr-sr-only">{label}</span>
+		</>
+	);
+}
+
 export function EmptyNotice() {
 	return <p className={styles.emptyNotice}>Aucune donnée renseignée.</p>;
 }
@@ -289,7 +298,9 @@ function QuartileDistributionTable({
 								<caption>{caption}</caption>
 								<thead>
 									<tr>
-										<th scope="col" />
+										<th scope="col">
+											<span className="fr-sr-only">Quartile</span>
+										</th>
 										<th colSpan={2} scope="col">
 											Tranche de rémunération
 											<br />
@@ -324,32 +335,48 @@ function QuartileDistributionTable({
 										const min =
 											i === 0 ? `0 ${unit}` : formatCurrency(prev, unit);
 										const max =
-											i === 3 ? "-" : formatCurrency(q.threshold, unit);
+											i === 3 ? (
+												<AccessiblePlaceholder label="Sans limite supérieure" />
+											) : (
+												formatCurrency(q.threshold, unit)
+											);
 										const lineTotal = computeWorkforceTotal(
 											q.women ?? 0,
 											q.men ?? 0,
 										);
+										const womenCount =
+											q.women === undefined ? (
+												<AccessiblePlaceholder label="Non renseigné" />
+											) : (
+												q.women
+											);
+										const menCount =
+											q.men === undefined ? (
+												<AccessiblePlaceholder label="Non renseigné" />
+											) : (
+												q.men
+											);
+										const womenPercentage =
+											lineTotal > 0 ? (
+												computePercentage(q.women ?? 0, lineTotal)
+											) : (
+												<AccessiblePlaceholder label="Non applicable" />
+											);
+										const menPercentage =
+											lineTotal > 0 ? (
+												computePercentage(q.men ?? 0, lineTotal)
+											) : (
+												<AccessiblePlaceholder label="Non applicable" />
+											);
 										return (
 											<tr key={QUARTILE_LABELS[i]}>
 												<th scope="row">{QUARTILE_LABELS[i]}</th>
 												<td className={styles.numeric}>{min}</td>
 												<td className={styles.numeric}>{max}</td>
-												<td className={styles.numeric}>
-													{q.women !== undefined ? q.women : "-"}
-												</td>
-												<td className={styles.numeric}>
-													{q.men !== undefined ? q.men : "-"}
-												</td>
-												<td className={styles.percent}>
-													{lineTotal > 0
-														? computePercentage(q.women ?? 0, lineTotal)
-														: "-"}
-												</td>
-												<td className={styles.percent}>
-													{lineTotal > 0
-														? computePercentage(q.men ?? 0, lineTotal)
-														: "-"}
-												</td>
+												<td className={styles.numeric}>{womenCount}</td>
+												<td className={styles.numeric}>{menCount}</td>
+												<td className={styles.percent}>{womenPercentage}</td>
+												<td className={styles.percent}>{menPercentage}</td>
 											</tr>
 										);
 									})}
@@ -359,19 +386,27 @@ function QuartileDistributionTable({
 											<span className="fr-sr-only">Non applicable</span>
 										</td>
 										<td className={styles.numeric}>
-											<strong>{totalWomen || "-"}</strong>
+											<strong>{totalWomen}</strong>
 										</td>
 										<td className={styles.numeric}>
-											<strong>{totalMen || "-"}</strong>
+											<strong>{totalMen}</strong>
 										</td>
 										<td className={styles.percent}>
 											<strong>
-												{total > 0 ? computePercentage(totalWomen, total) : "-"}
+												{total > 0 ? (
+													computePercentage(totalWomen, total)
+												) : (
+													<AccessiblePlaceholder label="Non applicable" />
+												)}
 											</strong>
 										</td>
 										<td className={styles.percent}>
 											<strong>
-												{total > 0 ? computePercentage(totalMen, total) : "-"}
+												{total > 0 ? (
+													computePercentage(totalMen, total)
+												) : (
+													<AccessiblePlaceholder label="Non applicable" />
+												)}
 											</strong>
 										</td>
 									</tr>

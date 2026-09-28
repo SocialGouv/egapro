@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
+import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
+import { useRefreshAfterSubmissionError } from "~/modules/declaration-remuneration/shared/useRefreshAfterSubmissionError";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	type DeclarationFsmStatus,
@@ -30,6 +32,7 @@ type Props = {
 	cseApplicable: boolean;
 	cseOpinionRequired: boolean;
 	declarationYear: number;
+	secondDeclarationSubmissionCount: number;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
 	status: DeclarationFsmStatus | null;
@@ -39,6 +42,7 @@ export function SecondDeclarationStep3Review({
 	cseApplicable,
 	cseOpinionRequired,
 	declarationYear,
+	secondDeclarationSubmissionCount,
 	secondDeclarationCategories,
 	siren,
 	status,
@@ -46,6 +50,9 @@ export function SecondDeclarationStep3Review({
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
 	const isWritable = isSecondDeclarationWritable(status);
+	const submissionAttemptFingerprintRef = useRef(
+		secondDeclarationSubmissionCount,
+	);
 
 	const parsed = parseEmployeeCategories(secondDeclarationCategories);
 	const gapsExist = parsed.some((cat) =>
@@ -68,21 +75,36 @@ export function SecondDeclarationStep3Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const completeSubmission = useCallback(() => {
+		closeModal();
+		if (gapsExist) {
+			router.push(COMPLIANCE_PATH);
+		} else {
+			router.push(getPostComplianceDestination(cseOpinionRequired));
+		}
+	}, [closeModal, cseOpinionRequired, gapsExist, router]);
+	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const mutation = api.declaration.submitSecondDeclaration.useMutation({
-		onSuccess: () => {
-			closeModal();
-			if (gapsExist) {
-				router.push(COMPLIANCE_PATH);
-			} else {
-				router.push(getPostComplianceDestination(cseOpinionRequired));
-			}
-		},
+		networkMode: "always",
+		onSuccess: completeSubmission,
+		onError: refreshAfterSubmissionError,
 	});
+	const submittedDespiteError =
+		mutation.isError &&
+		mutation.error?.data?.code !== "CONFLICT" &&
+		mutation.error?.data?.code !== "FORBIDDEN" &&
+		secondDeclarationSubmissionCount > submissionAttemptFingerprintRef.current;
+	useEffect(() => {
+		if (submittedDespiteError) completeSubmission();
+	}, [submittedDespiteError, completeSubmission]);
 	const handleCloseModal = () => {
 		if (mutation.isPending) return;
 		mutation.reset();
 		closeModal();
 	};
+	const submissionError = getSubmissionErrorMessage(mutation.error);
+	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
+	const showSubmitModal = isWritable || mutation.isError || mutation.isPending;
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -182,14 +204,18 @@ export function SecondDeclarationStep3Review({
 				previousHref={complianceStepHref(2)}
 			/>
 
-			{isWritable ? (
+			{showSubmitModal ? (
 				<SubmitDeclarationModal
-					error={mutation.error?.message}
+					error={submissionError}
 					isPending={mutation.isPending}
 					isSecondDeclaration
 					modalRef={modalRef}
 					onClose={handleCloseModal}
-					onSubmit={() => mutation.mutate()}
+					onSubmit={() => {
+						submissionAttemptFingerprintRef.current =
+							secondDeclarationSubmissionCount;
+						mutation.mutate();
+					}}
 					year={declarationYear}
 				/>
 			) : null}
