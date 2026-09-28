@@ -132,6 +132,11 @@ describe("CompletionFunnelChart (S-K19-C1..C5)", () => {
 		);
 		expect(container.querySelector("figure")).not.toBeNull();
 		expect(container.querySelector("figcaption")).not.toBeNull();
+		expect(
+			screen.getByRole("group", {
+				name: /Funnel principal\. Nombre de déclarations à chaque jalon du funnel/,
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("S-K19-C4: assigns palette colors to each jalon when no drop is above the threshold", () => {
