@@ -34,15 +34,15 @@ const DECL2_FIELDS: readonly DateFieldKey[] = [
 const FIELD_LABELS: Record<DateFieldKey, string> = {
 	campaignStartDate: "Date de démarrage de la campagne",
 	publicDataReleaseDate: "Date de rendu public des données",
-	decl1ModificationDeadline: "Date limite de modification",
-	decl1JustificationDeadline: "Date limite de justification",
+	decl1ModificationDeadline: "Échéance de modification",
+	decl1JustificationDeadline: "Échéance de justification",
 	decl1JointEvaluationDeadline:
-		"Date limite de dépôt du rapport d'évaluation conjointe",
-	decl2ModificationDeadline: "Date limite de modification",
-	decl2JustificationDeadline: "Date limite de justification",
+		"Échéance de dépôt du rapport d'évaluation conjointe",
+	decl2ModificationDeadline: "Échéance de modification",
+	decl2JustificationDeadline: "Échéance de justification",
 	decl2JointEvaluationDeadline:
-		"Date limite de dépôt du rapport d'évaluation conjointe",
-	decl2CseOpinionDeadline: "Date limite de dépôt de l'avis du CSE",
+		"Échéance de dépôt du rapport d'évaluation conjointe",
+	decl2CseOpinionDeadline: "Échéance de dépôt de l'avis du CSE",
 };
 
 /**
