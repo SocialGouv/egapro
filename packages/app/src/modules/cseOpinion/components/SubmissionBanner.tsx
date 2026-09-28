@@ -38,7 +38,7 @@ export function SubmissionBanner({ email, deadline, year }: Props) {
 						Un accusé de réception a été envoyé à l'adresse e-mail{" "}
 						<strong>{email}</strong>.
 					</p>
-					<p className="fr-text--sm fr-text--mention-grey fr-mb-2w">
+					<p className="fr-text--sm fr-text-mention--grey fr-mb-2w">
 						Si ce n'est pas le cas, vérifiez vos courriers indésirables ou SPAM.
 						Sinon, cliquez sur le bouton ci-dessous.
 					</p>

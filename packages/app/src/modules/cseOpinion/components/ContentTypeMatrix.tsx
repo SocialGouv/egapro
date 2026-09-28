@@ -113,7 +113,7 @@ export function ContentTypeMatrix({
 														{file.fileName}
 														<NewTabNotice />
 													</a>
-													<span className="fr-text--xs fr-text--mention-grey fr-mb-0">
+													<span className="fr-text--xs fr-text-mention--grey fr-mb-0">
 														{fileMeta(file.fileSize)}
 													</span>
 												</span>
