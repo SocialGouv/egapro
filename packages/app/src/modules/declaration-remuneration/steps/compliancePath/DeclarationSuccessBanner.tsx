@@ -3,6 +3,13 @@ import { ResendReceiptButton } from "~/modules/mail";
 import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./DeclarationSuccessBanner.module.scss";
 
+const MODIFIABLE_SENTENCE = {
+	first:
+		"Vous pouvez modifier votre déclaration jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE.",
+	second:
+		"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+} as const;
+
 type Props = {
 	declarationModifiable: boolean;
 	email: string;
@@ -36,9 +43,7 @@ export function DeclarationSuccessBanner({
 					</div>
 					{declarationModifiable && (
 						<p className="fr-mb-0">
-							{isSecondDeclaration
-								? "Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité."
-								: "Vous pouvez modifier votre déclaration jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE."}
+							{MODIFIABLE_SENTENCE[isSecondDeclaration ? "second" : "first"]}
 						</p>
 					)}
 					{pdfDownloadHref && (
