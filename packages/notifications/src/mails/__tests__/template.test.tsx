@@ -172,6 +172,19 @@ describe("EmailReceiptDisclaimer", () => {
 			"ne vaut pas contrôle de conformité de votre dépôt.",
 		);
 	});
+
+	it("keeps only the acknowledgement when the conformity disclaimer is disabled", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer
+					receiptNoun="déclaration"
+					withConformityDisclaimer={false}
+				/>
+			</EmailShell>,
+		);
+		expect(html).toContain("accuse réception de cette transmission.");
+		expect(html).not.toContain("ne vaut pas contrôle de conformité");
+	});
 });
 
 describe("EmailComplianceCriteriaList", () => {
