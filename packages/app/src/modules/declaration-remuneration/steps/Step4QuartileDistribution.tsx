@@ -363,8 +363,9 @@ export function Step4QuartileDistribution({
 					{gipPrefillData ? (
 						<p className="fr-mb-0">
 							<strong>
-								Vérifiez les informations préremplies à partir de vos données DSN et
-								modifiez-les si nécessaire (en cas d'erreur, pensez à corriger votre DSN).
+								Vérifiez les informations préremplies à partir de vos données
+								DSN et modifiez-les si nécessaire (en cas d'erreur, pensez à
+								corriger votre DSN).
 							</strong>
 						</p>
 					) : (
