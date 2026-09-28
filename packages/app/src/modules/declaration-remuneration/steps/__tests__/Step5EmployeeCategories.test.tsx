@@ -270,6 +270,24 @@ describe("Step5EmployeeCategories", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("keeps each category table in a reflowable frame", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+
+		const tables = screen.getAllByRole("table");
+		expect(tables).toHaveLength(3);
+		for (const table of tables) {
+			expect(table.closest(".fr-table__container")).toBeInTheDocument();
+			expect(table.querySelectorAll("col")).toHaveLength(4);
+			expect(table.querySelector("col")?.className).toContain("colLabel");
+		}
+	});
+
 	it("renders table section headers", () => {
 		render(
 			<Step5EmployeeCategories
