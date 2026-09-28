@@ -352,7 +352,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.getByText(
-				/Votre rapport de l'évaluation conjointe a été transmise/,
+				/Votre rapport de l'évaluation conjointe a été transmis/,
 			),
 		).toBeInTheDocument();
 		// The banner keeps the small variant; the confirmation screens take 40px.
@@ -368,7 +368,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.queryByText(
-				/Votre rapport de l'évaluation conjointe a été transmise/,
+				/Votre rapport de l'évaluation conjointe a été transmis/,
 			),
 		).not.toBeInTheDocument();
 	});

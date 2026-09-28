@@ -16,18 +16,14 @@ vi.mock("../LockContext", () => ({
 
 import { DeclarationModificationClosedAlert } from "../DeclarationModificationClosedAlert";
 
-const DEADLINE = new Date("2026-03-01T00:00:00Z");
-
 describe("DeclarationModificationClosedAlert", () => {
 	afterEach(() => {
 		contextState.reason = null;
 	});
 
-	it("renders the info alert with the deadline when the reason is modification_closed", () => {
+	it("renders the info alert when the reason is modification_closed", () => {
 		contextState.reason = "modification_closed";
-		const { container } = render(
-			<DeclarationModificationClosedAlert deadline={DEADLINE} />,
-		);
+		const { container } = render(<DeclarationModificationClosedAlert />);
 
 		const alert = container.querySelector("div.fr-alert");
 		expect(alert).toHaveClass("fr-alert--info", "fr-alert--sm");
@@ -39,41 +35,34 @@ describe("DeclarationModificationClosedAlert", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the deadline through OrdinalLongDate (1er mars 2026)", () => {
+	it("says a later step was transmitted, without any date", () => {
 		contextState.reason = "modification_closed";
-		const { container } = render(
-			<DeclarationModificationClosedAlert deadline={DEADLINE} />,
-		);
+		const { container } = render(<DeclarationModificationClosedAlert />);
 
-		expect(container.querySelector("sup")?.textContent).toBe("er");
-		expect(container.textContent).toContain(
-			"modification close depuis le 1er mars 2026",
+		expect(container.textContent).toBe(
+			"Votre déclaration n'est plus modifiable : une étape suivante de votre démarche a déjà été transmise (seconde déclaration, rapport d'évaluation conjointe ou avis du CSE). À titre d'information, vous pouvez consulter chaque étape en lecture seule.",
 		);
+		expect(container.textContent).not.toMatch(/modification close depuis/);
+		expect(container.querySelector("sup")).toBeNull();
 	});
 
 	it("renders nothing when the reason is lock", () => {
 		contextState.reason = "lock";
-		const { container } = render(
-			<DeclarationModificationClosedAlert deadline={DEADLINE} />,
-		);
+		const { container } = render(<DeclarationModificationClosedAlert />);
 
 		expect(container).toBeEmptyDOMElement();
 	});
 
 	it("renders nothing when the reason is impersonation", () => {
 		contextState.reason = "impersonation";
-		const { container } = render(
-			<DeclarationModificationClosedAlert deadline={DEADLINE} />,
-		);
+		const { container } = render(<DeclarationModificationClosedAlert />);
 
 		expect(container).toBeEmptyDOMElement();
 	});
 
 	it("renders nothing when there is no read-only reason", () => {
 		contextState.reason = null;
-		const { container } = render(
-			<DeclarationModificationClosedAlert deadline={DEADLINE} />,
-		);
+		const { container } = render(<DeclarationModificationClosedAlert />);
 
 		expect(container).toBeEmptyDOMElement();
 	});

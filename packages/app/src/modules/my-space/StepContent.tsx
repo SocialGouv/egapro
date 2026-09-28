@@ -36,6 +36,11 @@ const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
 	justify: "Justification des écarts de rémunération",
 };
 
+const FIRST_DECLARATION_MENTION =
+	"Modifiable jusqu'à votre prochaine transmission";
+const SECOND_DECLARATION_MENTION =
+	"Modifiable jusqu'au choix de votre nouveau parcours";
+
 const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
 
 function StepTitle({
@@ -117,12 +122,14 @@ export function Step1Content({
 				{title}
 				<TransmittedRow
 					label="Votre déclaration a été transmise"
+					mention={
+						firstDeclarationModifiable && variant !== "closed"
+							? FIRST_DECLARATION_MENTION
+							: undefined
+					}
 					modification={
 						firstDeclarationModifiable
-							? {
-									href: remunerationStepHref(FIRST_REMUNERATION_STEP),
-									until: campaignDeadlines.decl1ModificationDeadline,
-								}
+							? { href: remunerationStepHref(FIRST_REMUNERATION_STEP) }
 							: undefined
 					}
 					viewHref={DECLARATION_REMUNERATION_RECAP}
@@ -163,10 +170,10 @@ export function Step2Content({
 	const secondDeclarationModification = isSecondDeclarationWritable(
 		declarationFsmStatus,
 	)
-		? {
-				href: complianceStepHref(1),
-				until: campaignDeadlines.decl2ModificationDeadline,
-			}
+		? { href: complianceStepHref(1) }
+		: undefined;
+	const secondDeclarationMention = secondDeclarationModification
+		? SECOND_DECLARATION_MENTION
 		: undefined;
 
 	if (variant === "compliance_choice") {
@@ -180,6 +187,7 @@ export function Step2Content({
 				{secondDeclarationSubmitted && (
 					<TransmittedRow
 						label="Votre seconde déclaration a été transmise"
+						mention={secondDeclarationMention}
 						modification={secondDeclarationModification}
 						viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
@@ -213,6 +221,7 @@ export function Step2Content({
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
+				mention={secondDeclarationMention}
 				modification={secondDeclarationModification}
 				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 				viewLabel="Voir le récapitulatif de la seconde déclaration"
@@ -248,6 +257,7 @@ export function Step2Content({
 			{secondDeclarationSubmitted && (
 				<TransmittedRow
 					label="Votre seconde déclaration a été transmise"
+					mention={secondDeclarationMention}
 					modification={secondDeclarationModification}
 					viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 					viewLabel="Voir le récapitulatif de la seconde déclaration"
@@ -258,10 +268,7 @@ export function Step2Content({
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					modification={
 						jointEvaluationWritable
-							? {
-									href: COMPLIANCE_JOINT_EVALUATION,
-									until: campaignDeadlines.decl2JointEvaluationDeadline,
-								}
+							? { href: COMPLIANCE_JOINT_EVALUATION }
 							: undefined
 					}
 				/>
@@ -301,10 +308,7 @@ export function Step3Content({
 				{title}
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
-					modification={{
-						href: cseOpinionStepHref(2),
-						until: campaignDeadlines.decl2CseOpinionDeadline,
-					}}
+					modification={{ href: cseOpinionStepHref(2) }}
 				/>
 			</div>
 		);

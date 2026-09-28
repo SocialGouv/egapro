@@ -12,9 +12,9 @@ export function AideCallout({ year, deadline }: Props) {
 		<div
 			className={`fr-callout fr-callout--orange-terre-battue ${styles.callout}`}
 		>
-			<h2 className="fr-callout__title">Date limite de déclaration</h2>
+			<h2 className="fr-callout__title">Échéance de déclaration</h2>
 			<p className="fr-callout__text">
-				La date limite de déclaration pour l'année {year} est fixée au{" "}
+				L'échéance de déclaration pour l'année {year} est fixée au{" "}
 				<strong>{formatLongDate(deadline)}</strong>.
 			</p>
 		</div>

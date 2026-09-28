@@ -209,6 +209,30 @@ describe("FAQ states no deadline the campaign settings can move", () => {
 		expect(answersOf(sectionId)).not.toMatch(DAY_AND_MONTH);
 	});
 
+	it("presents deadlines as information, never as a gate on transmitting or modifying", () => {
+		const calendar = answersOf("calendrier-modification");
+
+		expect(calendar).toContain("Quelles sont les échéances ?");
+		expect(calendar).toContain("Rien n'est bloqué");
+		expect(calendar).toContain("Les échéances n'y changent rien.");
+		expect(calendar).not.toMatch(/dates? limites?/i);
+		expect(calendar).not.toMatch(/passe en lecture seule/);
+	});
+
+	it("says modifiability by the event that closes it", () => {
+		const calendar = answersOf("calendrier-modification");
+
+		expect(calendar).toContain(
+			"jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE",
+		);
+		expect(calendar).toContain(
+			"jusqu'au choix de votre nouveau parcours de mise en conformité",
+		);
+		expect(calendar).toContain(
+			"vos avis du CSE, même une fois la démarche close",
+		);
+	});
+
 	it("sends the reader to the campaign's own dates rather than naming them", () => {
 		expect(answersOf("calendrier-modification")).toMatch(/Mon espace/);
 	});

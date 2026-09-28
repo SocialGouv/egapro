@@ -505,15 +505,13 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			);
 		});
 
-		it("shows the CSE opinion deadline on the transmitted row of the closed variant", () => {
+		it("shows neither a date nor a mention on the transmitted row of the closed variant", () => {
 			const { panel } = renderPanel("closed");
 			const row = panel.getByText("Vos avis du CSE ont été transmis")
 				.parentElement as HTMLElement;
-			expect(row).toHaveTextContent(
-				longDateText(DEADLINES.decl2CseOpinionDeadline),
-			);
+			expect(row).not.toHaveTextContent(/Modifiable jusqu'/);
 			expect(row).not.toHaveTextContent(
-				longDateText(DEADLINES.decl2JointEvaluationDeadline),
+				longDateText(DEADLINES.decl2CseOpinionDeadline),
 			);
 		});
 	});
@@ -522,18 +520,36 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("mentions the CSE opinions still being modifiable when cseOpinionRequired is true", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: true });
 			expect(
-				panel.getByText(/Les avis du CSE restent modifiables/),
+				panel.getByText(
+					"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
+				),
 			).toBeInTheDocument();
 		});
 
-		it("shows the plain closed message when cseOpinionRequired is false", () => {
+		it("says the declaration stays modifiable when there is no CSE opinion and nothing superseded it (S8)", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: false });
 			expect(
-				panel.getByText("Cette démarche est terminée."),
+				panel.getByText(
+					"Cette démarche est terminée. Votre déclaration reste modifiable.",
+				),
 			).toBeInTheDocument();
 			expect(
 				panel.queryByText(/Les avis du CSE restent modifiables/),
 			).not.toBeInTheDocument();
+		});
+
+		it.each([
+			["a second declaration", { hasSubmittedSecondDeclaration: true }],
+			["a joint evaluation report", { hasSubmittedJointEvaluation: true }],
+		])("shows the plain closed message when there is no CSE opinion and %s superseded the first declaration", (_label, overrides) => {
+			const { panel } = renderPanel("closed", {
+				cseOpinionRequired: false,
+				...overrides,
+			});
+			expect(
+				panel.getByText("Cette démarche est terminée."),
+			).toBeInTheDocument();
+			expect(panel.queryByText(/reste modifiable/)).not.toBeInTheDocument();
 		});
 	});
 
@@ -630,13 +646,22 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(panel.getAllByText("Modifier")).toHaveLength(1);
 		});
 
-		it("advertises a modification deadline on the CSE avis row only", () => {
+		it("carries no mention under any row of a closed panel (superseded first declaration, CSE avis, no Modifier)", () => {
 			const { panel } = renderPanel("closed", CLOSED_OVERRIDES);
 
-			expect(panel.getAllByText(/Modifiable jusqu'au/)).toHaveLength(1);
+			expect(panel.queryByText(/Modifiable jusqu'/)).not.toBeInTheDocument();
 			expect(
 				panel.queryByText(/Modification close depuis/),
 			).not.toBeInTheDocument();
+		});
+
+		it("carries no mention on the first declaration row of a closed panel where Modifier is still offered", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				cseOpinionRequired: false,
+			});
+
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'/)).not.toBeInTheDocument();
 		});
 	});
 
@@ -649,12 +674,23 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it.each<DeclarationFsmStatus>([
 			"corrective_actions_chosen",
 			"awaiting_revision_choice",
-		])("offers Modifier on the second declaration row for the status %s", (declarationFsmStatus) => {
-			const { dialog } = renderPanel("cse", {
+		])("offers Modifier on the second declaration row for the status %s, with its mention", (declarationFsmStatus) => {
+			const { panel, dialog } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
 				declarationFsmStatus,
 			});
 			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.getByText("Modifiable jusqu'au choix de votre nouveau parcours"),
+			).toBeInTheDocument();
+		});
+
+		it("gives the joint evaluation row a Modifier but no mention", () => {
+			const { panel } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "joint_evaluation_chosen",
+			});
+			expect(panel.queryByText(/Modifiable jusqu'au choix/)).toBeNull();
 		});
 
 		it.each<DeclarationFsmStatus>([
@@ -714,6 +750,32 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 				expect(dialog.querySelector(DECL1_MODIFY)).not.toBeInTheDocument();
 				expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
 			});
+		});
+
+		it.each(
+			VARIANTS.filter((variant) => variant !== "closed"),
+		)("shows the first declaration mention on variant %s when Modifier is offered", (variant) => {
+			const { panel } = renderPanel(variant);
+			expect(
+				panel.getByText("Modifiable jusqu'à votre prochaine transmission"),
+			).toBeInTheDocument();
+		});
+
+		it("shows no first declaration mention on the closed variant, even when Modifier is offered", () => {
+			const { panel, dialog } = renderPanel("closed");
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.queryByText("Modifiable jusqu'à votre prochaine transmission"),
+			).not.toBeInTheDocument();
+		});
+
+		it.each(
+			SUPERSEDING,
+		)("shows no first declaration mention once %s was transmitted", (_label, overrides) => {
+			const { panel } = renderPanel("compliance", overrides);
+			expect(
+				panel.queryByText("Modifiable jusqu'à votre prochaine transmission"),
+			).not.toBeInTheDocument();
 		});
 
 		it("does not let the path choice supersede the first declaration", () => {

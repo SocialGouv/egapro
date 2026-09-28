@@ -5,15 +5,17 @@ import styles from "./DeclarationProcessPanel.module.scss";
 
 export type StepStatus = "pending" | "current" | "complete";
 
-type Modification = { href: AppHref; until: Date };
+type Modification = { href: AppHref };
 
 export function TransmittedRow({
 	label,
+	mention,
 	modification,
 	viewHref,
 	viewLabel = "Voir le récapitulatif de la déclaration",
 }: {
 	label: string;
+	mention?: string;
 	modification?: Modification;
 	viewHref?: AppHref;
 	viewLabel?: string;
@@ -23,11 +25,7 @@ export function TransmittedRow({
 			<span aria-hidden="true" className="fr-icon-check-line fr-icon--sm" />
 			<div className={styles.transmittedInfo}>
 				<p className="fr-mb-0">{label}</p>
-				{modification && (
-					<p className="fr-text-mention--grey fr-mb-0">
-						Modifiable jusqu'au <OrdinalLongDate date={modification.until} />
-					</p>
-				)}
+				{mention && <p className="fr-text-mention--grey fr-mb-0">{mention}</p>}
 			</div>
 			<div className={styles.transmittedActions}>
 				{viewHref && (

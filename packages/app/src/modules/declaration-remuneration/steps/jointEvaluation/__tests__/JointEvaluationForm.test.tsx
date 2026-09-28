@@ -109,6 +109,8 @@ describe("JointEvaluationForm", () => {
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
+		expect(screen.getByText("Échéance")).toBeInTheDocument();
+		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
 		expect(screen.getByText(/Déclaration effectuée le/)).toHaveClass(
