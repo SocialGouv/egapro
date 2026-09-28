@@ -5,52 +5,98 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
+import { getReferencePeriod, getReferenceYearFor } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep1Schema } from "../schemas";
 import common from "../shared/common.module.scss";
 import { DefinitionAccordion } from "../shared/DefinitionAccordion";
-import { DEV_STEP1_CATEGORIES } from "../shared/devFillData";
+import { DEV_STEP1_ROWS } from "../shared/devFillData";
 import { DraftLoadingState } from "../shared/draft/DraftLoadingState";
 import { useDeclarationDraft } from "../shared/draft/useDeclarationDraft";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import type { FieldError } from "../shared/formError/types";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
+import { useLockContext } from "../shared/lock/LockContext";
 import { PrefillResetConfirmDialog } from "../shared/PrefillResetConfirmDialog";
 import { PrefillResetWarning } from "../shared/PrefillResetWarning";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
+import { Step1WorkforceDefinition } from "./Step1WorkforceDefinition";
+import { WorkforceTableRow } from "./step1/WorkforceTableRow";
+import type { WorkforceField } from "./step1/workforceRows";
+import {
+	WORKFORCE_FIELDS,
+	WORKFORCE_ROWS,
+	workforceFieldErrorMessage,
+	workforceFieldId,
+	workforceFieldIdFromField,
+} from "./step1/workforceRows";
+
+type RawValues = Record<WorkforceField, string>;
 
 type Step1WorkforceProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step1Data;
 	gipPrefillData?: GipPrefillData;
 };
 
+const WORKFORCE_ALERT_ID = "step1-workforce-error";
+
+function toRaw(values: Step1Data): RawValues {
+	return {
+		totalWomen: values.totalWomen > 0 ? String(values.totalWomen) : "",
+		totalMen: values.totalMen > 0 ? String(values.totalMen) : "",
+		hourlyWomen: values.hourlyWomen > 0 ? String(values.hourlyWomen) : "",
+		hourlyMen: values.hourlyMen > 0 ? String(values.hourlyMen) : "",
+	};
+}
+
+function parseIntegerInput(raw: string): number | null {
+	if (raw === "") return null;
+	if (/\D/.test(raw)) return null;
+	return Number.parseInt(raw, 10);
+}
+
 export function Step1Workforce({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 }: Step1WorkforceProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly } = useLockContext();
 	const isPrefilled = !!gipPrefillData;
 
-	const hasInitialData = initialData.totalWomen > 0 || initialData.totalMen > 0;
+	const hasInitialData = WORKFORCE_FIELDS.some(
+		(field) => initialData[field] > 0,
+	);
 
 	const dbValues = useMemo(
-		() => ({
+		(): Step1Data => ({
 			totalWomen: initialData.totalWomen,
 			totalMen: initialData.totalMen,
+			hourlyWomen: initialData.hourlyWomen,
+			hourlyMen: initialData.hourlyMen,
 		}),
-		[initialData.totalWomen, initialData.totalMen],
+		[
+			initialData.totalWomen,
+			initialData.totalMen,
+			initialData.hourlyWomen,
+			initialData.hourlyMen,
+		],
 	);
 
 	const {
@@ -73,56 +119,47 @@ export function Step1Workforce({
 		defaultValues: dbValues,
 	});
 
-	const totalWomen = form.watch("totalWomen");
-	const totalMen = form.watch("totalMen");
-	const total = totalWomen + totalMen;
+	const values: Record<WorkforceField, number> = {
+		totalWomen: form.watch("totalWomen"),
+		totalMen: form.watch("totalMen"),
+		hourlyWomen: form.watch("hourlyWomen"),
+		hourlyMen: form.watch("hourlyMen"),
+	};
 
-	const [womenRaw, setWomenRaw] = useState(() =>
-		initialData.totalWomen > 0 ? String(initialData.totalWomen) : "",
-	);
-	const [menRaw, setMenRaw] = useState(() =>
-		initialData.totalMen > 0 ? String(initialData.totalMen) : "",
-	);
-	const [womenError, setWomenError] = useState<string | null>(null);
-	const [menError, setMenError] = useState<string | null>(null);
+	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const draftHydrated = useDraftHydration(isLoadingDraft, draft, (d) => {
-		if (typeof d.totalWomen === "number") {
-			form.setValue("totalWomen", d.totalWomen);
-			setWomenRaw(d.totalWomen > 0 ? String(d.totalWomen) : "");
-		}
-		if (typeof d.totalMen === "number") {
-			form.setValue("totalMen", d.totalMen);
-			setMenRaw(d.totalMen > 0 ? String(d.totalMen) : "");
+		for (const field of WORKFORCE_FIELDS) {
+			const value = d[field];
+			if (typeof value !== "number") continue;
+			form.setValue(field, value);
+			setRaw((prev) => ({
+				...prev,
+				[field]: value > 0 ? String(value) : "",
+			}));
 		}
 	});
 
 	const hasData = hasInitialData || hasDraft;
 
 	const dialogRef = useRef<HTMLDialogElement | null>(null);
-	const pendingSubmitData = useRef<{
-		totalWomen: number;
-		totalMen: number;
-	} | null>(null);
+	const pendingSubmitData = useRef<Step1Data | null>(null);
 	const [validationError, setValidationError] = useState<string | null>(null);
 
 	const mutation = api.declaration.updateStep1.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/2");
+			router.push(remunerationStepHref(2));
 		},
 	});
 
-	function parseIntegerInput(raw: string): number | null {
-		if (raw === "") return null;
-		if (/\D/.test(raw)) return null;
-		return Number.parseInt(raw, 10);
-	}
-
 	const shouldConfirmReset =
 		hasInitialData &&
-		(parseIntegerInput(womenRaw) !== dbValues.totalWomen ||
-			parseIntegerInput(menRaw) !== dbValues.totalMen);
+		WORKFORCE_FIELDS.some(
+			(field) => parseIntegerInput(raw[field]) !== dbValues[field],
+		);
 
 	function handleConfirm() {
 		dialogRef.current?.close();
@@ -138,44 +175,63 @@ export function Step1Workforce({
 
 	const showResetWarning =
 		gipPrefillData !== undefined &&
-		((gipPrefillData.step1.totalWomen !== null &&
-			parseIntegerInput(womenRaw) !== gipPrefillData.step1.totalWomen) ||
-			(gipPrefillData.step1.totalMen !== null &&
-				parseIntegerInput(menRaw) !== gipPrefillData.step1.totalMen));
+		WORKFORCE_FIELDS.some((field) => {
+			const prefilled = gipPrefillData.step1[field];
+			return prefilled !== null && parseIntegerInput(raw[field]) !== prefilled;
+		});
 
-	function handleWomenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const raw = e.target.value;
-		setWomenRaw(raw);
-		setWomenError(null);
-		const value = parseIntegerInput(raw);
-		if (value === null) return;
-		form.setValue("totalWomen", value);
-		setField({ totalWomen: value, totalMen });
+	function handleFieldChange(field: WorkforceField, value: string) {
+		setRaw((prev) => ({ ...prev, [field]: value }));
+		setFieldErrors((prev) =>
+			prev.filter(
+				(error) => error.fieldId !== workforceFieldIdFromField(field),
+			),
+		);
+		const parsed = parseIntegerInput(value);
+		if (parsed === null) return;
+		form.setValue(field, parsed);
+		setField({ ...values, [field]: parsed });
 	}
 
-	function handleMenChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const raw = e.target.value;
-		setMenRaw(raw);
-		setMenError(null);
-		const value = parseIntegerInput(raw);
-		if (value === null) return;
-		form.setValue("totalMen", value);
-		setField({ totalWomen, totalMen: value });
+	function fillForDev() {
+		const [annual, hourly] = DEV_STEP1_ROWS;
+		const filled: Step1Data = {
+			totalWomen: annual?.women ?? 50,
+			totalMen: annual?.men ?? 50,
+			hourlyWomen: hourly?.women ?? 50,
+			hourlyMen: hourly?.men ?? 50,
+		};
+		for (const field of WORKFORCE_FIELDS) {
+			form.setValue(field, filled[field]);
+		}
+		setRaw(toRaw(filled));
+		setFieldErrors([]);
+		setField(filled);
 	}
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
 	const onSubmit = form.handleSubmit((data) => {
-		const womenEmpty = womenRaw === "";
-		const menEmpty = menRaw === "";
-
-		if (womenEmpty) {
-			setWomenError("Veuillez renseigner le nombre de femmes.");
+		setValidationAttempt((attempt) => attempt + 1);
+		const missing: FieldError[] = [];
+		for (const row of WORKFORCE_ROWS) {
+			if (raw[row.womenField] === "") {
+				missing.push({
+					fieldId: workforceFieldId(row, "women"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "women"),
+				});
+			}
+			if (raw[row.menField] === "") {
+				missing.push({
+					fieldId: workforceFieldId(row, "men"),
+					category: "empty",
+					message: workforceFieldErrorMessage(row, "men"),
+				});
+			}
 		}
-		if (menEmpty) {
-			setMenError("Veuillez renseigner le nombre d'hommes.");
-		}
-		if (womenEmpty || menEmpty) return;
+		setFieldErrors(missing);
+		if (missing.length > 0) return;
 
 		setValidationError(null);
 		if (shouldConfirmReset) {
@@ -193,208 +249,132 @@ export function Step1Workforce({
 				className={common.flexColumnGap2}
 				onSubmit={onSubmit}
 			>
-				<StepTitleRow
-					hasData={hasData}
-					isPendingSave={isPendingSave}
-					isSaving={isSaving}
-					onDevFill={() => {
-						const womenValue = DEV_STEP1_CATEGORIES[0]?.women ?? 50;
-						const menValue = DEV_STEP1_CATEGORIES[0]?.men ?? 50;
-						form.setValue("totalWomen", womenValue);
-						form.setValue("totalMen", menValue);
-						setWomenRaw(String(womenValue));
-						setMenRaw(String(menValue));
-						setField({ totalWomen: womenValue, totalMen: menValue });
-					}}
-					title={
-						<h1 className="fr-h4 fr-mb-0">
-							Déclaration des indicateurs de rémunération {declarationYear}
-						</h1>
-					}
-				/>
+				{/* Read-only mode is enforced per control (readOnly inputs, disabled
+				    buttons): a fieldset-level `disabled` would hide the content from
+				    some assistive technologies (#3803). */}
+				<fieldset className={common.readOnlyFieldset}>
+					<legend className="fr-sr-only">Effectifs</legend>
+					<StepTitleRow
+						devFillDisabled={isReadOnly}
+						hasData={hasData}
+						isPendingSave={isPendingSave}
+						isSaving={isSaving}
+						onDevFill={fillForDev}
+						title={
+							<h1 className="fr-h4 fr-mb-0">
+								Déclaration des indicateurs de rémunération {declarationYear}
+							</h1>
+						}
+					/>
 
-				<StepIndicator currentStep={1} />
+					<StepIndicator
+						currentStep={1}
+						indicatorGRequired={indicatorGRequired}
+					/>
 
-				<div className={common.flexColumnGap1}>
-					<p className="fr-mb-0">
-						Période de référence pour le calcul des indicateurs : 01/01/2026 -
-						31/12/2026.
-						<TooltipButton
-							id="tooltip-period"
-							label="Information sur la période de référence"
-							text="Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/2026."
-						/>
-					</p>
+					<div className={common.flexColumnGap1}>
+						<p className="fr-mb-0">
+							{`Période de référence pour le calcul des indicateurs : ${getReferencePeriod(declarationYear)}.`}
+							<TooltipButton
+								id="tooltip-period"
+								label="Information sur la période de référence"
+								text={`Pour les entreprises créées en cours d'année, cette période correspond à la durée d'activité effective depuis la date de création jusqu'au 31/12/${getReferenceYearFor(declarationYear)}.`}
+							/>
+						</p>
 
-					<p className={`fr-mb-0 ${common.fontMedium}`}>
-						{isPrefilled
-							? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-							: "Renseignez l'effectif physique de votre entreprise."}
-						<TooltipButton
-							id="tooltip-workforce"
-							label="Information sur les effectifs"
-							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
-						/>
-					</p>
+						<p className={`fr-mb-0 ${common.fontMedium}`}>
+							{isPrefilled
+								? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+								: "Renseignez l'effectif physique de votre entreprise."}
+							<TooltipButton
+								id="tooltip-workforce"
+								label="Information sur les effectifs"
+								text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+							/>
+						</p>
 
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-				</div>
+						<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+					</div>
 
-				<div className={common.dataSection}>
-					<div className={common.flexColumnGapHalf}>
-						<div
-							className={`fr-table fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
-						>
-							<div className="fr-table__wrapper">
-								<div className="fr-table__container">
-									<div className="fr-table__content">
-										<table>
-											<caption>
-												Effectifs physiques pris en compte pour le calcul des
-												indicateurs
-											</caption>
-											<colgroup>
-												<col className={styles.labelCol} />
-												<col className={styles.inputCol} />
-												<col className={styles.inputCol} />
-												<col className={styles.totalCol} />
-											</colgroup>
-											<thead>
-												<tr>
-													<th scope="col">{/* vide */}</th>
-													<th scope="col">Femmes</th>
-													<th scope="col">Hommes</th>
-													<th scope="col">Total</th>
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td>
-														<strong>Nombre de salariés</strong>
-													</td>
-													<td>
-														<div
-															className={
-																womenError
-																	? "fr-input-group fr-input-group--error"
-																	: "fr-input-group"
-															}
-														>
-															<input
-																aria-describedby={
-																	womenError ? "women-error" : undefined
-																}
-																aria-invalid={womenError ? true : undefined}
-																aria-label="Nombre de femmes"
-																className={`fr-input ${common.numericInput}${womenError ? "fr-input--error" : ""}`}
-																disabled={isImpersonating}
-																inputMode="numeric"
-																onChange={handleWomenChange}
-																pattern="[0-9]*"
-																type="text"
-																value={womenRaw}
-															/>
-															{womenError && (
-																<p className="fr-error-text" id="women-error">
-																	{womenError}
-																</p>
-															)}
-														</div>
-													</td>
-													<td>
-														<div
-															className={
-																menError
-																	? "fr-input-group fr-input-group--error"
-																	: "fr-input-group"
-															}
-														>
-															<input
-																aria-describedby={
-																	menError ? "men-error" : undefined
-																}
-																aria-invalid={menError ? true : undefined}
-																aria-label="Nombre d'hommes"
-																className={`fr-input ${common.numericInput}${menError ? "fr-input--error" : ""}`}
-																disabled={isImpersonating}
-																inputMode="numeric"
-																onChange={handleMenChange}
-																pattern="[0-9]*"
-																type="text"
-																value={menRaw}
-															/>
-															{menError && (
-																<p className="fr-error-text" id="men-error">
-																	{menError}
-																</p>
-															)}
-														</div>
-													</td>
-													<td>
-														<strong>{total}</strong>
-													</td>
-												</tr>
-											</tbody>
-										</table>
+					<div className={`${common.dataSection} ${common.tableGap}`}>
+						<div className={common.flexColumnGapHalf}>
+							<div
+								className={`fr-table fr-table--bordered fr-table--no-caption fr-mt-0 fr-mb-0 ${styles.workforceTable}`}
+							>
+								<div className="fr-table__wrapper">
+									<div className="fr-table__container">
+										<div className="fr-table__content">
+											<table>
+												<caption>
+													Effectifs physiques pris en compte pour le calcul des
+													indicateurs
+												</caption>
+												<colgroup>
+													<col className={styles.labelCol} />
+													<col className={styles.inputCol} />
+													<col className={styles.inputCol} />
+													<col className={styles.totalCol} />
+												</colgroup>
+												<thead>
+													<tr>
+														<th scope="col">Nombre de salariés</th>
+														<th scope="col">Femmes</th>
+														<th scope="col">Hommes</th>
+														<th scope="col">Total</th>
+													</tr>
+												</thead>
+												<tbody>
+													{WORKFORCE_ROWS.map((row) => (
+														<WorkforceTableRow
+															disabled={isImpersonating}
+															errorAlertId={WORKFORCE_ALERT_ID}
+															errors={fieldErrors}
+															key={row.basis}
+															onFieldChange={handleFieldChange}
+															raw={raw}
+															readOnly={isReadOnly}
+															row={row}
+															values={values}
+														/>
+													))}
+												</tbody>
+											</table>
+										</div>
 									</div>
 								</div>
 							</div>
+
+							{isPrefilled && <PrefillSource year={declarationYear} />}
+
+							{showResetWarning && <PrefillResetWarning />}
+
+							<FieldErrorAlert
+								errors={fieldErrors}
+								id={WORKFORCE_ALERT_ID}
+								validationAttempt={validationAttempt}
+							/>
 						</div>
 
-						{isPrefilled && (
-							<PrefillSource periodEnd={gipPrefillData.periodEnd} />
-						)}
-
-						{showResetWarning && <PrefillResetWarning />}
+						<DefinitionAccordion
+							id="accordion-step1"
+							title="Définitions et méthode de calcul"
+						>
+							<Step1WorkforceDefinition />
+						</DefinitionAccordion>
 					</div>
 
-					<DefinitionAccordion
-						id="accordion-step1"
-						title="Définitions et méthode de calcul"
-					>
-						<div className="fr-callout">
-							<p>Les informations affichées incluront notamment&nbsp;:</p>
-							<ul>
-								<li>Dernière situation connue&nbsp;?</li>
-								<li>Effectif physique moyen&nbsp;?</li>
-								<li>
-									Comment sont intégrés les salariés entrés et sortis&nbsp;?
-								</li>
-								<li>
-									Comment sont traités les changements de situation (ex. passage
-									du temps plein au temps partiel)&nbsp;?
-								</li>
-								<li>
-									Les absences de six mois ou plus, continues ou discontinues,
-									sont-elles exclues du calcul&nbsp;?
-								</li>
-								<li>
-									Comment sont prises en compte les absences de trois mois, avec
-									leur recalcul en équivalent temps plein (ETP)&nbsp;?
-								</li>
-								<li>
-									Le détail des règles de calcul, illustré par des exemples
-									concrets selon les types de salariés&nbsp;? (Salariés à
-									prendre en compte / Salariés à exclure)
-								</li>
-							</ul>
-						</div>
-					</DefinitionAccordion>
-				</div>
+					<FormErrors
+						mutationError={mutation.error?.message}
+						validationError={validationError}
+					/>
 
-				<FormErrors
-					mutationError={mutation.error?.message}
-					validationError={validationError}
-				/>
-
-				<FormActions
-					className="fr-mt-0"
-					isSubmitting={mutation.isPending}
-					mimoquageNextHref={
-						hasInitialData ? "/declaration-remuneration/etape/2" : undefined
-					}
-					previousHref="/"
-				/>
+					<FormActions
+						isSubmitting={mutation.isPending}
+						mimoquageNextHref={
+							hasInitialData ? remunerationStepHref(2) : undefined
+						}
+					/>
+				</fieldset>
 			</form>
 			<PrefillResetConfirmDialog
 				dialogRef={dialogRef}

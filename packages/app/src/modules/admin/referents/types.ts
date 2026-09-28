@@ -1,4 +1,7 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { inferRouterOutputs } from "@trpc/server";
 
-export type ReferentSearchRow =
-	RouterOutputs["adminReferents"]["search"]["rows"][number];
+import type { adminReferentsRouter } from "~/server/api/routers/adminReferents";
+
+type AdminReferentsOutputs = inferRouterOutputs<typeof adminReferentsRouter>;
+
+export type ReferentSearchRow = AdminReferentsOutputs["search"]["rows"][number];

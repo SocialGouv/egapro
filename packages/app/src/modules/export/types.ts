@@ -32,6 +32,8 @@ export type ExportRow = {
 	// Employees
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 
 	// Scores (indicators A, B, F, G)
 	remunerationScore: number | null;
@@ -131,6 +133,8 @@ export type IndicatorGRow = {
 	categorySource: string;
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;

@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const GATEWAY_SECRET = "test-gateway-shared-secret-at-least-32-chars";
@@ -15,20 +15,49 @@ vi.mock("~/env", () => ({
 			"test-gateway-shared-secret-at-least-32-chars",
 	},
 }));
+vi.mock("~/modules/domain", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("~/modules/domain")>();
+	return {
+		...actual,
+		resolveAdminAccess: vi.fn(actual.resolveAdminAccess),
+	};
+});
 
-import { middleware } from "~/middleware";
+import { config, middleware } from "~/middleware";
+import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
+import {
+	ADMIN,
+	API_SEARCH,
+	API_V1_PREFIX,
+	CSE_OPINION,
+	DECLARATION_REMUNERATION,
+	MY_SPACE,
+} from "~/modules/routes";
+
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
+function adminToken(elapsed: number) {
+	return { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() - elapsed };
+}
 
 function makeRequest(
-	pathname = "/admin",
+	pathnameAndSearch = "/admin",
 	headers: Record<string, string> = {},
 ): NextRequest {
-	const url = `http://localhost${pathname}`;
+	const url = `http://localhost${pathnameAndSearch}`;
+	const parsed = new URL(url);
 	const headerMap = new Map(
 		Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
 	);
 	return {
 		url,
-		nextUrl: { pathname },
+		nextUrl: {
+			pathname: parsed.pathname,
+			search: parsed.search,
+			searchParams: parsed.searchParams,
+		},
 		headers: {
 			get: (name: string) => headerMap.get(name.toLowerCase()) ?? null,
 		},
@@ -48,6 +77,14 @@ describe("admin middleware", () => {
 		);
 	});
 
+	it("preserves the query string in the callbackUrl", async () => {
+		mockGetToken.mockResolvedValue(null);
+		const res = await middleware(makeRequest("/admin/users?tab=active&page=2"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin%2Fusers%3Ftab%3Dactive%26page%3D2",
+		);
+	});
+
 	it("forces re-login when the token has no isAdmin field (pre-PR token)", async () => {
 		mockGetToken.mockResolvedValue({ id: "u1" });
 		const res = await middleware(makeRequest("/admin"));
@@ -62,10 +99,136 @@ describe("admin middleware", () => {
 		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
 	});
 
-	it("lets admin users through", async () => {
-		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+	it("lets an admin with a two-factor authentication inside the window through", async () => {
+		mockGetToken.mockResolvedValue(adminToken(0));
 		const res = await middleware(makeRequest("/admin"));
 		// NextResponse.next() does not set a redirect location
+		expect(res.headers.get("location")).toBeNull();
+	});
+
+	it("marks the backoffice response no-store", async () => {
+		// A browser back after an expiry must not restore a backoffice page
+		// from the cache.
+		mockGetToken.mockResolvedValue(adminToken(0));
+		const res = await middleware(makeRequest("/admin/declarations"));
+		expect(res.headers.get("cache-control")).toBe("no-store");
+	});
+
+	it("sends an admin whose authentication expired to the resume screen", async () => {
+		mockGetToken.mockResolvedValue(adminToken(ADMIN_MFA_WINDOW_SECONDS + 1));
+		const res = await middleware(makeRequest("/admin/declarations"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin%2Fdeclarations",
+		);
+	});
+
+	it("sends an admin with no two-factor authentication to the resume screen", async () => {
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin",
+		);
+	});
+
+	it("carries the deep link, query string included, into the resume screen", async () => {
+		// The resume action aims back at the page the agent asked for.
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: true });
+		const res = await middleware(
+			makeRequest("/admin/declarations/abc?onglet=historique"),
+		);
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice?retour=%2Fadmin%2Fdeclarations%2Fabc%3Fonglet%3Dhistorique",
+		);
+	});
+
+	it("never redirects an admin to an external site, whatever the state", async () => {
+		// The product rules out reopening ProConnect in the middle of a
+		// navigation: every refusal stays on an Egapro URL.
+		for (const token of [
+			null,
+			{ id: "u1" },
+			{ id: "u1", isAdmin: false },
+			{ id: "u1", isAdmin: true },
+			adminToken(ADMIN_MFA_WINDOW_SECONDS + 1),
+		]) {
+			mockGetToken.mockResolvedValue(token);
+			const res = await middleware(makeRequest("/admin"));
+			const location = res.headers.get("location");
+			if (location) expect(new URL(location).origin).toBe("http://localhost");
+		}
+	});
+
+	it("still turns a non-admin away silently when the second factor is fresh", async () => {
+		// Passing the second factor grants nothing on its own: without the
+		// grant, the backoffice is never even mentioned.
+		mockGetToken.mockResolvedValue({
+			id: "u1",
+			isAdmin: false,
+			adminMfaAt: nowSeconds(),
+		});
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe("http://localhost/mon-espace");
+	});
+
+	it("fails closed to /login on a decision the switch does not recognize", async () => {
+		mockGetToken.mockResolvedValue(adminToken(0));
+		vi.mocked(resolveAdminAccess).mockReturnValueOnce({
+			type: "unknown",
+		} as unknown as ReturnType<typeof resolveAdminAccess>);
+		const res = await middleware(makeRequest("/admin"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Fadmin",
+		);
+	});
+});
+
+describe("session middleware (session-gated user routes)", () => {
+	beforeEach(() => {
+		mockGetToken.mockReset();
+	});
+
+	// Routes covered by the matcher block — must capture the requested URL into
+	// `callbackUrl` so the user lands back on the page they originally aimed at
+	// after ProConnect sign-in (ticket #3617).
+	const sessionGatedPaths = [
+		"/mon-espace/historique/123456789/2024",
+		"/declaration-remuneration/commencer",
+		"/avis-cse/2024/123456789",
+	];
+
+	for (const path of sessionGatedPaths) {
+		it(`redirects an unauthenticated user from ${path} to /login with callbackUrl`, async () => {
+			mockGetToken.mockResolvedValue(null);
+			const res = await middleware(makeRequest(path));
+			const expectedCallback = encodeURIComponent(path);
+			expect(res.headers.get("location")).toBe(
+				`http://localhost/login?callbackUrl=${expectedCallback}`,
+			);
+		});
+
+		it(`lets an authenticated user through on ${path}`, async () => {
+			mockGetToken.mockResolvedValue({ id: "u1" });
+			const res = await middleware(makeRequest(path));
+			// NextResponse.next() does not set a redirect location
+			expect(res.headers.get("location")).toBeNull();
+		});
+	}
+
+	it("preserves the query string when redirecting an unauthenticated user", async () => {
+		mockGetToken.mockResolvedValue(null);
+		const res = await middleware(makeRequest("/avis-cse?annee=2024"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/login?callbackUrl=%2Favis-cse%3Fannee%3D2024",
+		);
+	});
+
+	it("does not enforce isAdmin on session-gated routes", async () => {
+		// A non-admin authenticated user must reach `/mon-espace`, unlike on
+		// `/admin/*` where they would be redirected away. Guards against a
+		// regression where the session middleware accidentally inherits the
+		// admin check.
+		mockGetToken.mockResolvedValue({ id: "u1", isAdmin: false });
+		const res = await middleware(makeRequest("/mon-espace"));
 		expect(res.headers.get("location")).toBeNull();
 	});
 });
@@ -141,5 +304,83 @@ describe("gateway middleware (/api/v1/*)", () => {
 			}),
 		);
 		expect(mockGetToken).not.toHaveBeenCalled();
+	});
+});
+
+describe("search redirect (/api/search → /api/public/declarations)", () => {
+	async function redirectTarget(pathnameAndSearch: string): Promise<URL> {
+		const res = (await middleware(
+			makeRequest(pathnameAndSearch),
+		)) as NextResponse;
+		const location = res.headers.get("location");
+		if (location === null) {
+			throw new Error("expected a redirect location header");
+		}
+		return new URL(location);
+	}
+
+	it("redirects to /api/public/declarations with a 308 status", async () => {
+		const res = (await middleware(makeRequest("/api/search"))) as NextResponse;
+		expect(res.status).toBe(308);
+		expect(new URL(res.headers.get("location") ?? "").pathname).toBe(
+			"/api/public/declarations",
+		);
+	});
+
+	it("preserves the passthrough query params unchanged", async () => {
+		const target = await redirectTarget(
+			"/api/search?q=test&departement=75&region=11&limit=20&offset=40",
+		);
+		expect(target.searchParams.get("q")).toBe("test");
+		expect(target.searchParams.get("departement")).toBe("75");
+		expect(target.searchParams.get("region")).toBe("11");
+		expect(target.searchParams.get("limit")).toBe("20");
+		expect(target.searchParams.get("offset")).toBe("40");
+	});
+
+	it("renames section_naf to naf", async () => {
+		const target = await redirectTarget("/api/search?section_naf=A");
+		expect(target.searchParams.get("naf")).toBe("A");
+		expect(target.searchParams.has("section_naf")).toBe(false);
+	});
+
+	it("renames section_naf while keeping the other params (S7)", async () => {
+		const target = await redirectTarget("/api/search?section_naf=A&q=test");
+		expect(target.pathname).toBe("/api/public/declarations");
+		expect(target.searchParams.get("naf")).toBe("A");
+		expect(target.searchParams.get("q")).toBe("test");
+		expect(target.searchParams.has("section_naf")).toBe(false);
+	});
+
+	it("redirects with no query string when none is provided", async () => {
+		const target = await redirectTarget("/api/search");
+		expect(target.pathname).toBe("/api/public/declarations");
+		expect(target.search).toBe("");
+	});
+
+	it("does not call getToken on /api/search (no JWT parsing on a public redirect)", async () => {
+		mockGetToken.mockReset();
+		await middleware(makeRequest("/api/search?q=test"));
+		expect(mockGetToken).not.toHaveBeenCalled();
+	});
+});
+
+describe("matcher coverage", () => {
+	// Next reads `config.matcher` at build time and cannot evaluate an imported
+	// constant there, so those six patterns are written out by hand. This pins
+	// them to `~/modules/routes`: renaming a section without updating the matcher
+	// would leave it silently unguarded.
+	it("covers every section the middleware guards", () => {
+		const patterns = new Set<string>(config.matcher);
+		for (const section of [
+			ADMIN,
+			MY_SPACE,
+			DECLARATION_REMUNERATION,
+			CSE_OPINION,
+		]) {
+			expect(patterns.has(`${section}/:path*`)).toBe(true);
+		}
+		expect(patterns.has(`${API_V1_PREFIX}:path*`)).toBe(true);
+		expect(patterns.has(API_SEARCH)).toBe(true);
 	});
 });

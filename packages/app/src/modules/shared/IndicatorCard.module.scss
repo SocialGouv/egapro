@@ -1,0 +1,45 @@
+.card {
+	display: flex;
+	align-items: flex-start;
+	gap: 3.5rem;
+	padding: 1rem;
+	border: 1px solid var(--border-default-grey);
+	background: var(--background-default-grey);
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+}
+
+.aside {
+	flex: 0 0 auto;
+}
+
+.main {
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+	flex-direction: column;
+}
+
+.header {
+	display: flex;
+	min-height: 2rem;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.title {
+	margin: 0;
+	padding-top: 0.25rem;
+	color: var(--text-title-grey);
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.5rem;
+}
+
+.body {
+	margin-top: 1rem;
+}

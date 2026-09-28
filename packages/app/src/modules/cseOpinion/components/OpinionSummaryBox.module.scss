@@ -1,3 +1,28 @@
 .container {
 	background: var(--background-alt-blue-france);
 }
+
+.list {
+	list-style: none;
+	padding-left: 0;
+}
+
+.item {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+}
+
+.item + .item {
+	margin-top: 0.5rem;
+}
+
+.checkIcon {
+	flex: 0 0 auto;
+}
+
+.bullet {
+	flex: 0 0 auto;
+	width: 1rem;
+	text-align: center;
+}

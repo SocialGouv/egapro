@@ -1,0 +1,129 @@
+import "server-only";
+
+import { and, desc, eq } from "drizzle-orm";
+import {
+	getTodayInParisCivilDate,
+	isYearPubliclyReleased,
+} from "~/modules/domain";
+import { db } from "~/server/db";
+import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
+import {
+	campaignDeadlines,
+	companies,
+	declarations,
+	gipMdsData,
+} from "~/server/db/schema";
+import type {
+	PublicCompanySource,
+	PublicDeclarationSource,
+} from "./projection";
+import { publicDeclarationColumns, toPublicDeclaration } from "./projection";
+import type { PublicDeclarationDTO } from "./schemas";
+
+type DeclarationRow = {
+	declaration: PublicDeclarationSource;
+	company: PublicCompanySource;
+	publicDataReleaseDate: string | null;
+};
+
+async function fetchRows(
+	siren: string,
+	year?: number,
+): Promise<DeclarationRow[]> {
+	const yearFilter =
+		year !== undefined ? eq(declarations.year, year) : undefined;
+
+	const rows = await db
+		.select({
+			...publicDeclarationColumns,
+			companySiren: companies.siren,
+			companyName: companies.name,
+			companyAddress: companies.address,
+			companyCity: companies.city,
+			companyRegionCode: companies.regionCode,
+			companyRegion: companies.region,
+			companyDepartmentCode: companies.departmentCode,
+			companyDepartmentLabel: companies.departmentLabel,
+			companyCountryCode: companies.countryCode,
+			companyCountryLabel: companies.countryLabel,
+			companyNafCode: companies.nafCode,
+			companyNafLabel: companies.nafLabel,
+			companyStatutDiffusion: companies.statutDiffusion,
+			workforceEma: gipMdsData.workforceEma,
+			publicDataReleaseDate: campaignDeadlines.publicDataReleaseDate,
+		})
+		.from(declarations)
+		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, declarations.siren),
+				eq(gipMdsData.year, declarations.year),
+			),
+		)
+		.leftJoin(campaignDeadlines, eq(campaignDeadlines.year, declarations.year))
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				notCancelledCondition(),
+				submittedDeclarationCondition(),
+				yearFilter,
+			),
+		)
+		.orderBy(desc(declarations.year));
+
+	return rows.map((row) => ({
+		declaration: row,
+		company: {
+			siren: row.companySiren,
+			name: row.companyName,
+			address: row.companyAddress ?? null,
+			city: row.companyCity ?? null,
+			regionCode: row.companyRegionCode ?? null,
+			region: row.companyRegion ?? null,
+			departmentCode: row.companyDepartmentCode ?? null,
+			departmentLabel: row.companyDepartmentLabel ?? null,
+			countryCode: row.companyCountryCode ?? null,
+			countryLabel: row.companyCountryLabel ?? null,
+			nafCode: row.companyNafCode ?? null,
+			nafLabel: row.companyNafLabel ?? null,
+			statutDiffusion: row.companyStatutDiffusion ?? null,
+			workforceEma: row.workforceEma ?? null,
+		},
+		publicDataReleaseDate: row.publicDataReleaseDate ?? null,
+	}));
+}
+
+function isReleased(publicDataReleaseDate: string | null): boolean {
+	const releaseDate = publicDataReleaseDate
+		? new Date(`${publicDataReleaseDate}T00:00:00Z`)
+		: null;
+	return isYearPubliclyReleased(releaseDate, getTodayInParisCivilDate());
+}
+
+export async function getPublicDeclarationsBySiren(
+	siren: string,
+	limit?: number,
+): Promise<PublicDeclarationDTO[]> {
+	const rows = await fetchRows(siren);
+
+	const released = rows.filter((r) => isReleased(r.publicDataReleaseDate));
+	const limited = limit !== undefined ? released.slice(0, limit) : released;
+	return limited.map((r) => toPublicDeclaration(r.declaration, r.company));
+}
+
+export async function getPublicDeclarationBySirenYear(
+	siren: string,
+	year: number,
+): Promise<PublicDeclarationDTO | null> {
+	const rows = await fetchRows(siren, year);
+	const row = rows[0];
+	if (!row) return null;
+
+	if (!isReleased(row.publicDataReleaseDate)) return null;
+
+	return toPublicDeclaration(row.declaration, row.company);
+}

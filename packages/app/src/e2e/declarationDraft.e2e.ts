@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import { remunerationStepHref } from "~/modules/routes";
 import {
 	pushCampaignDeadlinesFarFuture,
 	resetDeclarationToDraft,
@@ -21,20 +23,25 @@ test.describe("Declaration draft round-trip", () => {
 		const ctx1 = await browser.newContext({ storageState: AUTH_FILE });
 		const page1 = await ctx1.newPage();
 		try {
-			await page1.goto("/declaration-remuneration/etape/1");
-			await page1.waitForURL("**/declaration-remuneration/etape/1");
+			await page1.goto(remunerationStepHref(1));
+			await page1.waitForURL(urlGlob(remunerationStepHref(1)));
 
 			const womenInput1 = page1.getByRole("textbox", {
-				name: "Nombre de femmes",
+				name: "Rémunération annuelle — Nombre de femmes",
 			});
 			await expect(womenInput1).toBeVisible({ timeout: 30_000 });
 			await womenInput1.fill("75");
 
+			// The tRPC batch-stream link always answers HTTP 200 — headers go out
+			// before the procedure runs, and stay 200 even on failure — so a
+			// status check proves nothing. Reading the streamed body proves
+			// nothing either: it is gone from CDP once the page consumed it
+			// (#4102). Match the mutation and let the next assertion be the
+			// real check.
 			await page1.waitForResponse(
 				(r) =>
 					r.url().includes("declarationDraft.save") &&
-					r.request().method() === "POST" &&
-					r.status() === 200,
+					r.request().method() === "POST",
 				{ timeout: 15_000 },
 			);
 		} finally {
@@ -44,11 +51,11 @@ test.describe("Declaration draft round-trip", () => {
 		const ctx2 = await browser.newContext({ storageState: AUTH_FILE });
 		const page2 = await ctx2.newPage();
 		try {
-			await page2.goto("/declaration-remuneration/etape/1");
-			await page2.waitForURL("**/declaration-remuneration/etape/1");
+			await page2.goto(remunerationStepHref(1));
+			await page2.waitForURL(urlGlob(remunerationStepHref(1)));
 
 			const womenInput2 = page2.getByRole("textbox", {
-				name: "Nombre de femmes",
+				name: "Rémunération annuelle — Nombre de femmes",
 			});
 			await expect(womenInput2).toHaveValue("75", { timeout: 30_000 });
 		} finally {

@@ -8,16 +8,55 @@ import {
 	type NotificationPayloadMap,
 	type NotificationType,
 } from "../index.js";
+import {
+	getAvisCseUrl,
+	getCompliancePathUrl,
+	getJointEvaluationUrl,
+	getLoginUrl,
+	getMySpaceUrl,
+} from "../shared/urls.js";
+import {
+	CSE_OPINION_RECEIPT_VARIANTS,
+	DECLARATION_CONFIRMATION_VARIANTS,
+} from "../types.js";
 
 const SIREN = "552100554";
 const YEAR = 2027;
 const DEADLINE = "2027-06-01T00:00:00.000Z";
+const RAISON_SOCIALE = "Société Démo";
+const COMPLIANCE_DEADLINE = "2028-09-01T00:00:00.000Z";
+const COMPLIANCE_DEADLINE_FR = "1ᵉʳ septembre 2028";
 
 const PAYLOADS: NotificationPayloadMap = {
-	declaration_confirmation: { siren: SIREN, year: YEAR },
-	second_declaration_confirmation: { siren: SIREN, year: YEAR },
-	cse_opinion_receipt: { siren: SIREN, year: YEAR },
-	joint_evaluation_submitted: { siren: SIREN, year: YEAR },
+	declaration_confirmation: {
+		siren: SIREN,
+		year: YEAR,
+		variant: "completed",
+		raisonSociale: RAISON_SOCIALE,
+	},
+	second_declaration_confirmation: {
+		siren: SIREN,
+		year: YEAR,
+		variant: "completed",
+		raisonSociale: RAISON_SOCIALE,
+	},
+	cse_opinion_receipt: {
+		siren: SIREN,
+		year: YEAR,
+		variant: "single",
+		raisonSociale: RAISON_SOCIALE,
+	},
+	joint_evaluation_submitted: {
+		siren: SIREN,
+		year: YEAR,
+		variant: "completed",
+		raisonSociale: RAISON_SOCIALE,
+	},
+	representation_receipt: {
+		siren: SIREN,
+		year: YEAR,
+		raisonSociale: RAISON_SOCIALE,
+	},
 	cycle_opening_info: { siren: SIREN, year: YEAR, deadline: DEADLINE },
 	declaration_deadline_reminder: {
 		siren: SIREN,
@@ -29,17 +68,19 @@ const PAYLOADS: NotificationPayloadMap = {
 		siren: SIREN,
 		year: YEAR,
 		deadline: "2027-07-01T00:00:00.000Z",
+		round: "first",
 	},
 	second_declaration_reminder: {
 		siren: SIREN,
 		year: YEAR,
-		deadline: "2028-01-01T00:00:00.000Z",
-		daysRemaining: 90,
+		deadline: "2027-12-01T00:00:00.000Z",
+		daysRemaining: 30,
 	},
 	joint_evaluation_reminder: {
 		siren: SIREN,
 		year: YEAR,
 		deadline: "2027-09-01T00:00:00.000Z",
+		round: "first",
 	},
 	cse_opinion_reminder: {
 		siren: SIREN,
@@ -101,49 +142,202 @@ describe("isNotificationType", () => {
 });
 
 describe("per-type rendering details", () => {
-	it("declaration_confirmation acknowledges the declaration", async () => {
+	it("declaration_confirmation completed variant ends the process toward the user space", async () => {
 		const mail = await buildMail("declaration_confirmation", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "completed",
+			raisonSociale: RAISON_SOCIALE,
 		});
 		expect(mail.subject).toBe(
-			"Egapro - Accusé de réception de votre déclaration des indicateurs",
+			"Egapro - Transmission de déclaration et fin de démarche",
 		);
-		expect(mail.html.toLowerCase()).toContain("récapitulatif");
-		expect(mail.html).toContain("/declaration?siren=552100554");
+		expect(mail.html.toLowerCase()).toContain(
+			"démarche est désormais terminée",
+		);
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain(RAISON_SOCIALE);
 	});
 
-	it("second_declaration_confirmation mentions the corrective second declaration", async () => {
+	it("second_declaration_confirmation variant=completed ends the process", async () => {
 		const mail = await buildMail("second_declaration_confirmation", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "completed",
+			raisonSociale: "Société Démo",
 		});
 		expect(mail.subject).toBe(
-			"Egapro - Accusé de réception de votre seconde déclaration",
+			"Egapro - Transmission de la seconde déclaration et fin de démarche",
 		);
-		expect(mail.html.toLowerCase()).toContain("actions correctives");
-		expect(mail.html).toContain("/declaration?siren=552100554");
+		expect(mail.html).toContain("Société Démo");
+		expect(mail.html).toContain("552 100 554");
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain("/mon-espace");
 	});
 
-	it("cse_opinion_receipt mentions CSE", async () => {
-		const mail = await buildMail("cse_opinion_receipt", {
+	it("second_declaration_confirmation variant=cse_to_deposit asks for the CSE opinion", async () => {
+		const mail = await buildMail("second_declaration_confirmation", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "cse_to_deposit",
+			raisonSociale: "Société Démo",
 		});
-		expect(mail.subject).toBe("Egapro - Réception de l'avis du CSE");
-		expect(mail.html).toContain("CSE");
-		expect(mail.html).toContain("/declaration?siren=552100554");
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de la seconde déclaration",
+		);
+		expect(mail.html).toContain("Déposer");
+		expect(mail.html).toContain("première et la seconde déclaration");
+		expect(mail.html).toContain("/avis-cse");
 	});
 
-	it("joint_evaluation_submitted confirms upload", async () => {
+	it("second_declaration_confirmation variant=path_to_select names the compliance deadline", async () => {
+		const mail = await buildMail("second_declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "path_to_select",
+			raisonSociale: "Société Démo",
+			complianceDeadline: DEADLINE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de la seconde déclaration",
+		);
+		expect(mail.html).toContain("Sélectionner le parcours");
+		expect(mail.html).toContain("5 %");
+		expect(mail.html).toContain("1ᵉʳ juin 2027");
+		expect(mail.html).toContain(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
+	it("second_declaration_confirmation variant=path_to_select requires the compliance deadline", async () => {
+		await expect(
+			buildMail("second_declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: "Société Démo",
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
+	});
+
+	it("joint_evaluation_submitted variant=completed ends the process", async () => {
 		const mail = await buildMail("joint_evaluation_submitted", {
 			siren: SIREN,
 			year: YEAR,
+			variant: "completed",
+			raisonSociale: RAISON_SOCIALE,
 		});
 		expect(mail.subject).toContain("évaluation conjointe");
-		expect(mail.html.toLowerCase()).toContain("évaluation conjointe");
-		expect(mail.html).toContain("Prochaine étape");
+		expect(mail.subject).toContain("et fin de démarche");
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("Votre démarche est désormais terminée");
+		expect(mail.html).toContain("Mon espace");
 		expect(mail.html).toContain("/mon-espace");
+		expect(mail.html).not.toContain("/avis-cse");
+	});
+
+	it("joint_evaluation_submitted variant=cse_to_deposit asks for the CSE opinion", async () => {
+		const mail = await buildMail("joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_to_deposit",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations",
+		);
+		expect(mail.subject).not.toContain("fin de démarche");
+		expect(mail.html).toContain(
+			"Vous devez à présent déposer le ou les avis du CSE portant sur",
+		);
+		expect(mail.html).toContain(
+			"exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
+		);
+		expect(mail.html).toContain("Déposer le ou les avis");
+		expect(mail.html).toContain("/avis-cse");
+	});
+
+	it("joint_evaluation_submitted variant=cse_first_and_second covers both declarations", async () => {
+		const mail = await buildMail("joint_evaluation_submitted", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_first_and_second",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Dépôt rapport de l'évaluation conjointe des rémunérations",
+		);
+		expect(mail.html).toContain("pour la première et la seconde déclaration");
+		expect(mail.html).toContain(
+			"exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).toContain(
+			"justification éventuelle des écarts de rémunération supérieurs ou égaux à 5 %",
+		);
+		expect(mail.html).toContain("Déposer le ou les avis");
+		expect(mail.html).toContain("/avis-cse");
+	});
+
+	it("joint_evaluation_submitted throws on an unknown variant", async () => {
+		await expect(
+			buildMail("joint_evaluation_submitted", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "not_a_variant" as never,
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/Unknown joint_evaluation_submitted variant/);
+	});
+
+	it("representation_receipt acknowledges the balanced representation declaration", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de la déclaration de la représentation équilibrée",
+		);
+		expect(mail.html).toContain(
+			"la déclaration des indicateurs de représentation équilibrée",
+		);
+		expect(mail.html).toContain("pour l&#x27;année");
+		expect(mail.html).toContain("2028");
+		expect(mail.html).toContain("au titre des données");
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).not.toContain("période de référence");
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("SIREN :");
+		expect(mail.html).toContain(SIREN);
+		expect(mail.html).toContain("accuse réception de cette transmission");
+		expect(mail.html).toContain("démarche est désormais terminée");
+	});
+
+	it("representation_receipt closes the journey on the user space without any CSE follow-up", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain(getMySpaceUrl());
+		expect(mail.html).not.toContain("/avis-cse");
+		expect(mail.html).not.toContain("/declaration-remuneration");
+	});
+
+	it("representation_receipt escapes the raisonSociale", async () => {
+		const mail = await buildMail("representation_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			raisonSociale: "<script>alert(1)</script>",
+		});
+
+		expect(mail.html).not.toContain("<script>alert(1)</script>");
 	});
 
 	it("cycle_opening_info announces the declaration period", async () => {
@@ -156,71 +350,113 @@ describe("per-type rendering details", () => {
 			"Egapro - Ouverture de la période de déclaration des indicateurs Egapro",
 		);
 		expect(mail.html.toLowerCase()).toContain("1ᵉʳ juin");
-		expect(mail.html).toContain("/declaration?siren=552100554");
+		expect(mail.html).toContain("/declaration-remuneration");
 	});
 
 	it.each([
 		30, 10,
-	] as const)("declaration_deadline_reminder J-%i exposes the count", async (daysRemaining) => {
+	] as const)("declaration_deadline_reminder J-%i keeps the Figma copy", async (daysRemaining) => {
 		const mail = await buildMail("declaration_deadline_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: DEADLINE,
 			daysRemaining,
 		});
-		expect(mail.subject).toContain(`${daysRemaining} jours`);
-		expect(mail.html).toContain(`${daysRemaining} jours`);
+		expect(mail.subject).toBe(
+			`[Rappel] Egapro - Déclarez vos indicateurs d'égalité professionnelle pour l'année ${YEAR}`,
+		);
+		expect(mail.html).toContain("pas encore été transmise");
+		expect(mail.html).toContain(String(YEAR));
+		expect(mail.html).toContain("Compléter ma déclaration");
+		expect(mail.html).toContain(getLoginUrl());
+		expect(mail.html).toContain("/declaration-remuneration");
 	});
 
-	it("compliance_path_choice_reminder names the 5 % threshold", async () => {
+	it("compliance_path_choice_reminder round=first names the 5 % threshold", async () => {
 		const mail = await buildMail("compliance_path_choice_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2027-07-01T00:00:00.000Z",
+			round: "first",
 		});
 		expect(mail.subject.toLowerCase()).toContain("parcours");
 		expect(mail.html).toContain("5 %");
+		expect(mail.html).toContain("fait apparaître");
+		expect(mail.html).not.toContain("de nouveau");
+		expect(mail.html).toContain("Sélectionner le parcours");
 	});
 
-	it.each([
-		90, 30,
-	] as const)("second_declaration_reminder J-%i exposes the count", async (daysRemaining) => {
-		const mail = await buildMail("second_declaration_reminder", {
+	it("compliance_path_choice_reminder round=second references the second declaration", async () => {
+		const mail = await buildMail("compliance_path_choice_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2028-01-01T00:00:00.000Z",
-			daysRemaining,
+			round: "second",
 		});
-		expect(mail.subject).toContain(`${daysRemaining} jours`);
-		expect(mail.html).toContain("actions correctives");
+		expect(mail.html).toContain("de nouveau");
+		expect(mail.html).toContain("dans votre seconde déclaration");
+		expect(mail.html).toContain("1ᵉʳ janvier 2028");
 	});
 
-	it("joint_evaluation_reminder references the report deadline", async () => {
+	it.each([
+		30, 15,
+	] as const)("second_declaration_reminder J-%i keeps the Figma copy", async (daysRemaining) => {
+		const mail = await buildMail("second_declaration_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2027-12-01T00:00:00.000Z",
+			daysRemaining,
+		});
+		expect(mail.subject).toContain("Déclarez à nouveau");
+		expect(mail.html).toContain("actions correctives");
+		expect(mail.html).toContain("seconde déclaration");
+		expect(mail.html).toContain("1ᵉʳ décembre 2027");
+		expect(mail.html).toContain("Mon espace");
+	});
+
+	it("joint_evaluation_reminder round=first references the report deadline", async () => {
 		const mail = await buildMail("joint_evaluation_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2027-09-01T00:00:00.000Z",
+			round: "first",
 		});
 		expect(mail.subject.toLowerCase()).toContain("évaluation conjointe");
 		expect(mail.html).toContain("1ᵉʳ septembre");
-		expect(mail.html).toContain("/mon-espace");
+		expect(mail.html).toContain("fait apparaître");
+		expect(mail.html).toContain("Déposer le rapport");
+		expect(mail.html).toContain(getJointEvaluationUrl());
+	});
+
+	it("joint_evaluation_reminder round=second references the second declaration", async () => {
+		const mail = await buildMail("joint_evaluation_reminder", {
+			siren: SIREN,
+			year: YEAR,
+			deadline: "2028-03-01T00:00:00.000Z",
+			round: "second",
+		});
+		expect(mail.html).toContain("de nouveau");
+		expect(mail.html).toContain("dans votre seconde déclaration");
+		expect(mail.html).toContain("Mon espace");
 	});
 
 	it.each([
-		["compliance", "exactitude"],
-		["justify_oct", "1er octobre"],
-		["justify_dec", "justification"],
-		["corrective", "actions correctives"],
-		["joint_eval", "évaluation conjointe"],
-	] as const)("cse_opinion_reminder variant=%s shows %s context", async (variant, marker) => {
+		"compliance",
+		"justify_oct",
+		"justify_dec",
+		"corrective",
+		"joint_eval",
+	] as const)("cse_opinion_reminder variant=%s renders the unified content", async (variant) => {
 		const mail = await buildMail("cse_opinion_reminder", {
 			siren: SIREN,
 			year: YEAR,
 			deadline: "2028-03-01T00:00:00.000Z",
 			variant,
 		});
-		expect(mail.subject).toContain("CSE");
-		expect(mail.html.toLowerCase()).toContain(marker.toLowerCase());
+		expect(mail.subject).toContain("avis du CSE");
+		expect(mail.html).toContain("exactitude des données");
+		expect(mail.html).toContain("justification des écarts");
+		expect(mail.html).toContain("/avis-cse");
 	});
 
 	it("next_cycle_handover announces closure and next cycle", async () => {
@@ -238,11 +474,170 @@ describe("per-type rendering details", () => {
 	});
 });
 
-describe("HTML safety", () => {
-	it("does not leak raw HTML from a payload field even when builders ignore it", async () => {
+describe("declaration_confirmation variants", () => {
+	const loginUrl = getLoginUrl();
+	const avisCseUrl = getAvisCseUrl();
+	const compliancePathUrl = getCompliancePathUrl();
+
+	it("covers every declared variant", () => {
+		expect(DECLARATION_CONFIRMATION_VARIANTS).toStrictEqual([
+			"completed",
+			"cse_to_deposit",
+			"path_to_select",
+		]);
+	});
+
+	it.each(
+		DECLARATION_CONFIRMATION_VARIANTS,
+	)("%s shares the common intro naming the indicators and the company", async (variant) => {
 		const mail = await buildMail("declaration_confirmation", {
-			siren: "<script>alert(1)</script>",
+			siren: SIREN,
 			year: YEAR,
+			variant,
+			raisonSociale: RAISON_SOCIALE,
+			complianceDeadline: COMPLIANCE_DEADLINE,
+		});
+		expect(mail.html).toContain(
+			"les indicateurs relatifs aux écarts de rémunération",
+		);
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("accuse réception de cette transmission");
+		expect(mail.html).toContain("SIREN :");
+		expect(mail.html).toContain(SIREN);
+		expect(mail.html).toContain("au titre des données");
+	});
+
+	it("completed: subject, 'Mon espace' CTA and matching link both point to the user space", async () => {
+		const mail = await buildMail("declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "completed",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe(
+			"Egapro - Transmission de déclaration et fin de démarche",
+		);
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain("démarche est désormais terminée");
+		// Button and fallback link share the mon-espace URL, so it appears at least twice
+		expect(mail.html.split(getMySpaceUrl()).length - 1).toBeGreaterThanOrEqual(
+			2,
+		);
+		expect(mail.html).not.toContain("/connexion");
+	});
+
+	it("cse_to_deposit: subject, deposit CTA to the declaration URL and fallback link to the connection URL", async () => {
+		const mail = await buildMail("declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "cse_to_deposit",
+			raisonSociale: RAISON_SOCIALE,
+		});
+		expect(mail.subject).toBe("Egapro - Transmission de déclaration");
+		expect(mail.html).toContain("Déposer l&#x27;avis");
+		expect(mail.html).toContain("déposer l&#x27;avis du CSE");
+		expect(mail.html).toContain(`href="${avisCseUrl}"`);
+		expect(mail.html).toContain(`href="${loginUrl}"`);
+		expect(mail.html).toContain(`>${loginUrl}<`);
+	});
+
+	it("path_to_select: subject, 5 % gap wording, compliance deadline and split button/link URLs", async () => {
+		const mail = await buildMail("declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "path_to_select",
+			raisonSociale: RAISON_SOCIALE,
+			complianceDeadline: COMPLIANCE_DEADLINE,
+		});
+		expect(mail.subject).toBe("Egapro - Transmission de la déclaration");
+		expect(mail.html).toContain("Sélectionner le parcours");
+		expect(mail.html).toContain("supérieurs ou égaux à 5 %");
+		// The verbatim ISO leaking into the mail was the reported bug.
+		expect(mail.html).toContain(COMPLIANCE_DEADLINE_FR);
+		expect(mail.html).not.toContain(COMPLIANCE_DEADLINE);
+		expect(mail.html).toContain(`href="${compliancePathUrl}"`);
+		expect(mail.html).toContain(`>${loginUrl}<`);
+	});
+
+	it("path_to_select: requires the compliance deadline", async () => {
+		await expect(
+			buildMail("declaration_confirmation", {
+				siren: SIREN,
+				year: YEAR,
+				variant: "path_to_select",
+				raisonSociale: RAISON_SOCIALE,
+			}),
+		).rejects.toThrow(/complianceDeadline is required/);
+	});
+});
+
+describe("cse_opinion_receipt variants", () => {
+	const buildReceipt = (
+		variant: (typeof CSE_OPINION_RECEIPT_VARIANTS)[number],
+	) =>
+		buildMail("cse_opinion_receipt", {
+			siren: SIREN,
+			year: YEAR,
+			variant,
+			raisonSociale: RAISON_SOCIALE,
+		});
+
+	it("covers every declared variant", () => {
+		expect(CSE_OPINION_RECEIPT_VARIANTS).toStrictEqual([
+			"single",
+			"with_gap",
+			"first_and_second",
+		]);
+	});
+
+	it.each(
+		CSE_OPINION_RECEIPT_VARIANTS,
+	)("%s ends the process with the 'Mon espace' CTA and names the company", async (variant) => {
+		const mail = await buildReceipt(variant);
+		expect(mail.subject).toBe("Egapro - Dépôt d'avis CSE et fin de démarche");
+		expect(mail.html).toContain("accuse réception");
+		expect(mail.html).toContain("démarche est désormais terminée");
+		expect(mail.html).toContain("Mon espace");
+		expect(mail.html).toContain("/mon-espace");
+		expect(mail.html).not.toContain("/declaration?siren=");
+		expect(mail.html).toContain(RAISON_SOCIALE);
+		expect(mail.html).toContain("SIREN :");
+		expect(mail.html).toContain(SIREN);
+	});
+
+	it("single: 'exactitude' intro without the gap bullet list", async () => {
+		const mail = await buildReceipt("single");
+		expect(mail.html).toContain(
+			"l&#x27;avis du CSE sur l&#x27;exactitude des données et des méthodes de calcul utilisées",
+		);
+		expect(mail.html).not.toContain("<ul");
+		expect(mail.html).not.toContain("justification éventuelle des écarts");
+	});
+
+	it("with_gap: 'les avis CSE' intro with the gap justification bullet list", async () => {
+		const mail = await buildReceipt("with_gap");
+		expect(mail.html).toContain("les avis CSE");
+		expect(mail.html).not.toContain("première et la seconde déclaration");
+		expect(mail.html).toContain("<ul");
+		expect(mail.html).toContain("justification éventuelle des écarts");
+	});
+
+	it("first_and_second: names the two declarations with the gap justification bullet list", async () => {
+		const mail = await buildReceipt("first_and_second");
+		expect(mail.html).toContain("les avis CSE");
+		expect(mail.html).toContain("première et la seconde déclaration");
+		expect(mail.html).toContain("<ul");
+		expect(mail.html).toContain("justification éventuelle des écarts");
+	});
+});
+
+describe("HTML safety", () => {
+	it("does not leak raw HTML from the raisonSociale field", async () => {
+		const mail = await buildMail("declaration_confirmation", {
+			siren: SIREN,
+			year: YEAR,
+			variant: "completed",
+			raisonSociale: "<script>alert(1)</script>",
 		});
 		expect(mail.html).not.toContain("<script>alert(1)</script>");
 	});

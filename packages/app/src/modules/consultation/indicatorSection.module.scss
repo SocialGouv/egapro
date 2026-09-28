@@ -1,0 +1,102 @@
+.section {
+	margin-top: 3rem;
+}
+
+.header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1.5rem;
+	margin-bottom: 1rem;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+}
+
+.title {
+	margin: 0;
+	color: var(--text-title-grey);
+	font-size: 1.125rem;
+	font-weight: 700;
+	line-height: 1.75rem;
+}
+
+.threshold {
+	margin: 0.5rem 0 0;
+	color: var(--text-mention-grey);
+	font-size: 1rem;
+	line-height: 1.5rem;
+}
+
+.cardGrid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.5rem;
+
+	@include respond-to(sm) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.value {
+	margin: 0;
+	color: var(--text-default-grey);
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 2.25rem;
+}
+
+.direction {
+	margin: 1rem 0 0;
+	color: var(--text-mention-grey);
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+}
+
+.totalLabel {
+	margin: 0;
+	color: var(--text-title-grey);
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1.5rem;
+}
+
+.totalValue {
+	margin: 0.5rem 0 0;
+	color: var(--text-default-grey);
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 2.25rem;
+}
+
+.workforceLayout {
+	display: flex;
+	align-items: flex-start;
+	gap: 3.5rem;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+}
+
+.workforceTotal {
+	flex: 0 0 auto;
+}
+
+.workforceChart {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.accordionSlot {
+	margin-top: 1rem;
+}
+
+.stackedBars {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}

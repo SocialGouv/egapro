@@ -1,38 +1,34 @@
-import Link from "next/link";
-import { DownloadDeclarationPdfButton } from "~/modules/declarationPdf";
-import { DsfrPictogram } from "~/modules/layout";
+import { getReferenceYearFor } from "~/modules/domain";
+import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
+import {
+	buildRemunerationDocuments,
+	offersTransmittedElements,
+} from "~/modules/shared/demarcheDocuments";
+import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
-import common from "../shared/common.module.scss";
 
 export async function ComplianceConfirmation() {
-	const data = await api.declaration.getOrCreate();
+	const [session, data] = await Promise.all([
+		auth(),
+		api.declaration.getOrCreate(),
+	]);
 	const currentYear = data.declaration.year;
 
 	return (
-		<div className={common.flexColumnGap2}>
-			<h1 className="fr-h4 fr-mb-0">
-				Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-				salariés
-			</h1>
-
-			<div className="fr-mt-2w fr-mb-2w">
-				<DsfrPictogram
-					path="/dsfr/artwork/pictograms/system/success.svg"
-					size={64}
-				/>
-			</div>
-
-			<p className="fr-text--lg fr-text--bold fr-mb-0">
-				Votre parcours de mise en conformité {currentYear} est terminé
-			</p>
-
-			<DownloadDeclarationPdfButton year={currentYear} />
-
-			<div className="fr-mt-4w">
-				<Link className="fr-btn" href="/mon-espace">
-					Mon espace
-				</Link>
-			</div>
-		</div>
+		<DemarcheConfirmation
+			documents={buildRemunerationDocuments({
+				dataYear: getReferenceYearFor(currentYear),
+				hasSecondDeclaration: data.hasSubmittedSecondDeclaration,
+				hasTransmittedElements: offersTransmittedElements(data),
+				year: currentYear,
+			})}
+			email={session?.user?.email ?? "adresse@exemple.fr"}
+			receiptKind={
+				data.hasSubmittedSecondDeclaration ? "secondDeclaration" : "declaration"
+			}
+			receiptYear={currentYear}
+			successMessage={`Votre parcours ${currentYear} est désormais terminé`}
+			title={`Démarche des indicateurs de rémunération ${currentYear}`}
+		/>
 	);
 }

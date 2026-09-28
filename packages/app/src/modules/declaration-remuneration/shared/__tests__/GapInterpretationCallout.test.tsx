@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { PayGapRow } from "~/modules/declaration-remuneration/types";
+import { DIVERGENT_HOURLY_MEDIAN } from "~/test/gipGapFixtures";
 import {
 	GapInterpretationCallout,
 	hasHighPayGap,
@@ -40,6 +41,15 @@ function makeRows(overrides: {
 			menValue: overrides.hourlyMedianM ?? "",
 		},
 	];
+}
+
+/** Attach the GIP-published gap to one of the standard rows. */
+function withGipReference(
+	rows: PayGapRow[],
+	label: string,
+	gipReference: PayGapRow["gipReference"],
+): PayGapRow[] {
+	return rows.map((r) => (r.label === label ? { ...r, gipReference } : r));
 }
 
 describe("GapInterpretationCallout", () => {
@@ -98,6 +108,55 @@ describe("GapInterpretationCallout", () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows gap magnitude (no minus sign) in prose when women earn more", () => {
+		// Women earn more → signed gap is negative; prose must show magnitude, not "-16,7 %".
+		const rows = makeRows({
+			annualMeanW: "35000",
+			annualMeanM: "30000",
+			annualMedianW: "34000",
+			annualMedianM: "29000",
+			hourlyMeanW: "18",
+			hourlyMeanM: "15",
+			hourlyMedianW: "17",
+			hourlyMedianM: "14",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(container.textContent).not.toMatch(/-\d/);
+		expect(container.textContent).toMatch(/16,66\s*%/);
+	});
+
+	it("renders '-' for gaps whose rows are missing from the input (defensive fallback)", () => {
+		const rows = makeRows({
+			annualMeanW: "25000",
+			annualMeanM: "30000",
+			hourlyMedianW: "11",
+			hourlyMedianM: "14",
+		}).filter(
+			(r) =>
+				r.label !== "Annuelle brute médiane" &&
+				r.label !== "Horaire brute moyenne",
+		);
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(
+			screen.getByText(/Écart en défaveur des femmes/),
+		).toBeInTheDocument();
+		expect(container.textContent).toMatch(
+			/rémunération médiane inférieure de -\./,
+		);
+		expect(container.textContent).toMatch(/autour de -\./);
+	});
+
 	it("renders balanced title for payGap variant when gaps are below 5%", () => {
 		// 2 rows women-lower, 2 rows men-lower => balanced direction, all gaps < 5%
 		const rows = makeRows({
@@ -119,6 +178,67 @@ describe("GapInterpretationCallout", () => {
 		expect(
 			screen.getByText(/Les rémunérations annuelles et médianes/),
 		).toBeInTheDocument();
+	});
+
+	it("announces men-disfavored direction, not balanced, when a significant gap is outvoted 2-2 by sub-threshold rows (#4034 defect A)", () => {
+		// Annual mean crosses the threshold at -20% (men disfavored). The three other rows sit
+		// well under 0.5% and split 2 women-lower / 1 men-lower — a raw majority vote over all
+		// four rows ties 2-2 and used to fall back to "balanced" despite the orange accent.
+		const rows = makeRows({
+			annualMeanW: "30000",
+			annualMeanM: "25000",
+			annualMedianW: "29995",
+			annualMedianM: "30000",
+			hourlyMeanW: "14.995",
+			hourlyMeanM: "15",
+			hourlyMedianW: "15",
+			hourlyMedianM: "14.995",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Écart entre hommes et femmes/),
+		).not.toBeInTheDocument();
+	});
+
+	it("announces men-disfavored direction, not the opposite, when outvoted 3-1 by sub-threshold rows (#4034 defect B)", () => {
+		// Same significant -20% row (men disfavored), but all three sub-threshold rows point
+		// the other way. A raw majority vote (1 vs 3) used to flip the announced direction to
+		// "women" while still displaying the 20% magnitude of the men-disfavoring row as evidence.
+		const rows = makeRows({
+			annualMeanW: "30000",
+			annualMeanM: "25000",
+			annualMedianW: "29995",
+			annualMedianM: "30000",
+			hourlyMeanW: "14.995",
+			hourlyMeanM: "15",
+			hourlyMedianW: "14.996",
+			hourlyMedianM: "15",
+		});
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+		expect(
+			screen.getByText(/Écart en défaveur des hommes/),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Écart en défaveur des femmes/),
+		).not.toBeInTheDocument();
+		expect(container.textContent).toMatch(/20,00\s*%/);
 	});
 
 	it("renders women disfavored title for variablePay variant", () => {
@@ -170,6 +290,71 @@ describe("GapInterpretationCallout", () => {
 
 		const callout = container.querySelector(".fr-callout");
 		expect(callout).toHaveClass("fr-callout--orange-terre-battue");
+	});
+
+	it("uses orange accent class when only the GIP gap crosses the threshold", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "30000",
+				annualMeanM: "30500",
+				annualMedianW: "30000",
+				annualMedianM: "30200",
+				hourlyMeanW: "15",
+				hourlyMeanM: "15.2",
+				hourlyMedianW: DIVERGENT_HOURLY_MEDIAN.women,
+				hourlyMedianM: DIVERGENT_HOURLY_MEDIAN.men,
+			}),
+			"Horaire brute médiane",
+			DIVERGENT_HOURLY_MEDIAN,
+		);
+
+		const { container } = render(
+			<GapInterpretationCallout rows={rows} variant="payGap" />,
+		);
+
+		expect(container.querySelector(".fr-callout")).toHaveClass(
+			"fr-callout--orange-terre-battue",
+		);
+	});
+
+	it("reads the GIP gap into the prose while the operands are untouched", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "25000",
+				annualMeanM: "30000",
+				annualMedianW: "24000",
+				annualMedianM: "29000",
+				hourlyMeanW: "12",
+				hourlyMeanM: "15",
+			}),
+			"Annuelle brute moyenne",
+			{ women: "25000", men: "30000", gap: "0.2222" },
+		);
+
+		render(<GapInterpretationCallout rows={rows} variant="payGap" />);
+
+		expect(screen.getByText("22,22 %")).toBeInTheDocument();
+		expect(screen.queryByText("16,66 %")).not.toBeInTheDocument();
+	});
+
+	it("falls back to the recomputed gap in the prose once an operand is edited", () => {
+		const rows = withGipReference(
+			makeRows({
+				annualMeanW: "24000",
+				annualMeanM: "30000",
+				annualMedianW: "24000",
+				annualMedianM: "29000",
+				hourlyMeanW: "12",
+				hourlyMeanM: "16",
+			}),
+			"Annuelle brute moyenne",
+			{ women: "25000", men: "30000", gap: "0.2222" },
+		);
+
+		render(<GapInterpretationCallout rows={rows} variant="payGap" />);
+
+		expect(screen.getByText("20,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("22,22 %")).not.toBeInTheDocument();
 	});
 
 	it("uses blue accent class when all gaps are < 5%", () => {
@@ -294,5 +479,24 @@ describe("hasHighPayGap", () => {
 			annualMeanM: "30000",
 		});
 		expect(hasHighPayGap(rows)).toBe(true);
+	});
+
+	// Recomputing 0,10 € against 0,10 € yields 0 %, so the row only crosses the
+	// threshold when the GIP's own 7,19 % is read instead.
+	it("returns true on a GIP gap that recomputation would keep below the threshold", () => {
+		const operands = {
+			hourlyMedianW: DIVERGENT_HOURLY_MEDIAN.women,
+			hourlyMedianM: DIVERGENT_HOURLY_MEDIAN.men,
+		};
+		expect(hasHighPayGap(makeRows(operands))).toBe(false);
+		expect(
+			hasHighPayGap(
+				withGipReference(
+					makeRows(operands),
+					"Horaire brute médiane",
+					DIVERGENT_HOURLY_MEDIAN,
+				),
+			),
+		).toBe(true);
 	});
 });

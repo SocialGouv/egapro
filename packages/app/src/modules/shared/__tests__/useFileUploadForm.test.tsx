@@ -9,7 +9,8 @@ import {
 	vi,
 } from "vitest";
 
-import type { UploadFileResult } from "../uploadFile";
+import { FILENAME_ERROR_MESSAGES } from "../fileNameValidation";
+import type { UploadFailureReason, UploadFileResult } from "../uploadFile";
 import { useFileUploadForm } from "../useFileUploadForm";
 
 vi.mock("../uploadFile", () => ({
@@ -95,7 +96,49 @@ describe("useFileUploadForm", () => {
 		expect(result.current.uploadError).toBe("Boom");
 	});
 
-	it("handleSubmit prevents default and shows an error when no file is selected", () => {
+	it("surfaces a validateFileName rejection in uploadError and keeps no file selected", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "cse_opinion" }),
+		);
+
+		act(() => {
+			result.current.handleFilesChange(
+				[],
+				FILENAME_ERROR_MESSAGES.forbidden_char,
+			);
+		});
+
+		expect(result.current.uploadError).toBe(
+			FILENAME_ERROR_MESSAGES.forbidden_char,
+		);
+		expect(result.current.selectedFiles).toEqual([]);
+	});
+
+	it("never calls uploadFile for a file rejected by validateFileName", async () => {
+		const onAllUploaded = vi.fn();
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "cse_opinion", onAllUploaded }),
+		);
+		attachDialog(result);
+
+		act(() => {
+			result.current.handleFilesChange(
+				[],
+				FILENAME_ERROR_MESSAGES.invisible_char,
+			);
+		});
+		await act(async () => {
+			await result.current.handleConfirm();
+		});
+
+		expect(uploadFileMock).not.toHaveBeenCalled();
+		expect(onAllUploaded).not.toHaveBeenCalled();
+		expect(result.current.uploadError).toBe(
+			FILENAME_ERROR_MESSAGES.invisible_char,
+		);
+	});
+
+	it("handleSubmit prevents default and flags the missing file", () => {
 		const { result } = renderHook(() =>
 			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
@@ -106,9 +149,25 @@ describe("useFileUploadForm", () => {
 		});
 
 		expect(event.preventDefault).toHaveBeenCalled();
-		expect(result.current.uploadError).toBe(
-			"Veuillez sélectionner au moins un fichier avant de soumettre.",
+		expect(result.current.hasMissingFile).toBe(true);
+		expect(result.current.uploadError).toBeNull();
+	});
+
+	it("clears the missing-file flag as soon as a file is selected", () => {
+		const { result } = renderHook(() =>
+			useFileUploadForm({ flowType: "joint_evaluation" }),
 		);
+
+		act(() => {
+			result.current.handleSubmit(preventSubmit());
+		});
+		expect(result.current.hasMissingFile).toBe(true);
+
+		act(() => {
+			result.current.handleFilesChange([makeFile()], null);
+		});
+
+		expect(result.current.hasMissingFile).toBe(false);
 	});
 
 	it("handleSubmit opens the native dialog when DSFR API is unavailable", () => {
@@ -315,17 +374,7 @@ describe("useFileUploadForm", () => {
 	});
 
 	const reasonCases: Array<{
-		reason:
-			| "scan_unavailable"
-			| "max_files"
-			| "unauthorized"
-			| "not_found"
-			| "too_large"
-			| "wrong_type"
-			| "empty"
-			| "missing_flow"
-			| "missing_filename"
-			| "server_error";
+		reason: Exclude<UploadFailureReason, "virus">;
 		serverError: string;
 		expected: string;
 	}> = [
@@ -376,9 +425,19 @@ describe("useFileUploadForm", () => {
 			expected: "Nom manquant",
 		},
 		{
+			reason: "invalid_filename",
+			serverError: "Nom de fichier invalide",
+			expected: "Nom de fichier invalide",
+		},
+		{
 			reason: "server_error",
 			serverError: "ignored",
 			expected: "Erreur lors de l'upload du fichier. Merci de réessayer.",
+		},
+		{
+			reason: "aborted",
+			serverError: "ignored",
+			expected: "L'upload a été interrompu. Merci de réessayer.",
 		},
 	];
 
@@ -468,5 +527,61 @@ describe("useFileUploadForm", () => {
 		);
 		expect(result.current.isPending).toBe(false);
 		expect(onAllUploaded).not.toHaveBeenCalled();
+	});
+
+	describe("autoUpload mode", () => {
+		it("uploads immediately on selection, without staging or a confirm step", async () => {
+			const onUploaded = vi.fn();
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "cse_opinion",
+					onUploaded,
+					onAllUploaded,
+					autoUpload: true,
+				}),
+			);
+			uploadFileMock.mockResolvedValue({
+				ok: true,
+				fileId: "id-1",
+				fileName: "a.pdf",
+			} satisfies UploadFileResult);
+
+			await act(async () => {
+				result.current.handleFilesChange([makeFile("a.pdf")], null);
+				await new Promise((resolve) => setTimeout(resolve, 0));
+			});
+
+			expect(uploadFileMock).toHaveBeenCalledWith(expect.any(File), {
+				flowType: "cse_opinion",
+			});
+			expect(onUploaded).toHaveBeenCalledWith({
+				fileId: "id-1",
+				fileName: "a.pdf",
+			});
+			expect(onAllUploaded).toHaveBeenCalledTimes(1);
+			// Files surface through the consumer's listing, never staged here.
+			expect(result.current.selectedFiles).toEqual([]);
+			expect(result.current.isPending).toBe(false);
+		});
+
+		it("does not upload when the selection carries a validation error", () => {
+			const onAllUploaded = vi.fn();
+			const { result } = renderHook(() =>
+				useFileUploadForm({
+					flowType: "cse_opinion",
+					onAllUploaded,
+					autoUpload: true,
+				}),
+			);
+
+			act(() => {
+				result.current.handleFilesChange([], "Format non supporté");
+			});
+
+			expect(uploadFileMock).not.toHaveBeenCalled();
+			expect(onAllUploaded).not.toHaveBeenCalled();
+			expect(result.current.uploadError).toBe("Format non supporté");
+		});
 	});
 });

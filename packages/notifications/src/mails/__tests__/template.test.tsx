@@ -3,11 +3,15 @@ import { describe, expect, it } from "vitest";
 import { formatFrenchDate, formatSiren } from "../shared/formatters.js";
 import { renderEmail } from "../shared/render.js";
 import { getMySpaceUrl, getPublicUrl } from "../shared/urls.js";
+import { EmailComplianceCriteriaList } from "../template/EmailComplianceCriteriaList.js";
+import { EmailContactParagraph } from "../template/EmailContactParagraph.js";
 import { EmailCtaWithLink } from "../template/EmailCtaWithLink.js";
 import { EmailGreeting } from "../template/EmailGreeting.js";
 import { EmailInfoList } from "../template/EmailInfoList.js";
 import { EmailParagraph } from "../template/EmailParagraph.js";
+import { EmailReceiptDisclaimer } from "../template/EmailReceiptDisclaimer.js";
 import { EmailShell } from "../template/EmailShell.js";
+import { COMPLIANCE_CRITERIA_ITEMS } from "../template/mailCopy.js";
 
 describe("EmailShell", () => {
 	it("renders the DSFR header, illustration band and footer", async () => {
@@ -98,6 +102,103 @@ describe("EmailCtaWithLink", () => {
 		expect(occurrences).toBeGreaterThanOrEqual(2);
 		// The DSFR primary-button border construct
 		expect(html).toContain("solid 1px #000091");
+	});
+
+	it("uses linkHref for the fallback link while keeping href on the button", async () => {
+		const href = "https://test.example/declaration";
+		const linkHref = "https://test.example/connexion";
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailCtaWithLink
+					href={href}
+					label="Déposer l'avis"
+					linkHref={linkHref}
+				/>
+			</EmailShell>,
+		);
+		// The button targets href, the fallback link targets linkHref (both href attr and visible text)
+		expect(html).toContain(`href="${href}"`);
+		expect(html).toContain(`href="${linkHref}"`);
+		expect(html).toContain(`>${linkHref}<`);
+		// The button destination is never shown as the fallback link text
+		expect(html).not.toContain(`>${href}<`);
+	});
+});
+
+describe("EmailContactParagraph", () => {
+	it("renders the shared DREETS contact wording", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailContactParagraph />
+			</EmailShell>,
+		);
+		expect(html).toContain(
+			"Pour tout renseignement, vous pouvez contacter votre référent égalité",
+		);
+		expect(html).toContain(
+			"au sein de votre DREETS en répondant à ce message.",
+		);
+	});
+});
+
+describe("EmailReceiptDisclaimer", () => {
+	it("parameterises only the receipt noun (dépôt vs déclaration)", async () => {
+		const { html: depot } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="dépôt" />
+			</EmailShell>,
+		);
+		const { html: declaration } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="déclaration" />
+			</EmailShell>,
+		);
+		expect(depot).toContain("de votre dépôt.");
+		expect(depot).not.toContain("de votre déclaration");
+		expect(declaration).toContain("de votre déclaration.");
+	});
+
+	it("renders as a single continuous text node (no React separators around the noun)", async () => {
+		// Guards the byte-identical constraint: the disclaimer is built from one
+		// template string, so the sentence stays uninterrupted around the noun. If
+		// it regressed to a `{receiptNoun}` expression, React would split the text
+		// with `<!-- -->` markers and this exact substring would no longer match.
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailReceiptDisclaimer receiptNoun="dépôt" />
+			</EmailShell>,
+		);
+		expect(html).toContain(
+			"ne vaut pas contrôle de conformité de votre dépôt.",
+		);
+	});
+});
+
+describe("EmailComplianceCriteriaList", () => {
+	it("renders both regulatory criteria as list items in a shared, unemphasised list", async () => {
+		const { html } = await renderEmail(
+			<EmailShell previewText="t">
+				<EmailComplianceCriteriaList />
+			</EmailShell>,
+		);
+		// Both criteria present (apostrophe-free substrings — the HTML escapes ')
+		expect(html).toContain("des méthodes de calcul utilisées");
+		expect(html).toContain("supérieurs ou égaux à 5 %");
+		// Rendered as <li> items with the shared per-item spacing
+		expect(html).toContain('<li style="margin-bottom:4px">');
+		// Plain weight — bold was removed from both mails
+		const ul = html.slice(html.indexOf("<ul"), html.indexOf("</ul>"));
+		expect(ul).not.toContain("<strong>");
+	});
+});
+
+describe("COMPLIANCE_CRITERIA_ITEMS", () => {
+	it("holds the two regulatory criteria with the exact wording", () => {
+		expect(COMPLIANCE_CRITERIA_ITEMS).toHaveLength(2);
+		expect(COMPLIANCE_CRITERIA_ITEMS[0]).toContain(
+			"méthodes de calcul utilisées",
+		);
+		expect(COMPLIANCE_CRITERIA_ITEMS[1]).toContain("supérieurs ou égaux à 5 %");
 	});
 });
 

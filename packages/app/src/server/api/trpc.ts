@@ -8,16 +8,32 @@
  */
 
 import { initTRPC, TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getCurrentYear } from "~/modules/domain";
-import { parseSiren } from "~/modules/shared/parseSiren";
+import {
+	ADMIN_MFA_REQUIRED_MARKER,
+	ADMIN_MFA_REQUIRED_MESSAGE,
+	AdminMfaRequiredError,
+} from "~/modules/admin/shared/adminMfaGuard";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	getCurrentYear,
+	isAdminMfaFresh,
+	isDeadlinePassed,
+	isDeclarationSubmitted,
+	isSecondDeclarationDeadlineApplicable,
+} from "~/modules/domain";
 import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddleware";
 import { auth } from "~/server/auth";
-import { assertNotImpersonating } from "~/server/auth/companyAccess";
+import {
+	assertNotImpersonating,
+	getEffectiveSiren,
+} from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { declarations } from "~/server/db/schema";
+import { getActiveLock } from "~/server/services/declarationLockService";
 
 /**
  * 1. CONTEXT
@@ -48,16 +64,58 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
+// Extracted so the marker detection is unit-testable without a full tRPC HTTP round trip.
+export function isAdminMfaRequiredTRPCError(error: {
+	cause?: unknown;
+}): boolean {
+	return error.cause instanceof AdminMfaRequiredError;
+}
+
+export const UNEXPECTED_ERROR_MESSAGE =
+	"Une erreur est survenue. Veuillez réessayer.";
+
+/**
+ * tRPC copies the original stack onto the INTERNAL_SERVER_ERROR it creates for
+ * an unknown Error. An explicit TRPCError keeps its own stack, even when its
+ * message happens to equal the message of its cause.
+ */
+export function isUnexpectedTRPCError(error: TRPCError): boolean {
+	if (error.code !== "INTERNAL_SERVER_ERROR") return false;
+	return (
+		(error.cause instanceof Error && error.stack === error.cause.stack) ||
+		Boolean(error.stack?.includes("getTRPCErrorFromUnknown"))
+	);
+}
+
+export function logTRPCError(
+	error: TRPCError,
+	path: string | undefined,
+	isDevelopment: boolean,
+): void {
+	if (isUnexpectedTRPCError(error)) {
+		console.error(
+			`tRPC failed on ${path ?? "<no-path>"}`,
+			error.cause ?? error,
+		);
+	} else if (isDevelopment) {
+		console.error(`tRPC failed on ${path ?? "<no-path>"}`, error);
+	}
+}
+
 const t = initTRPC.context<typeof createTRPCContext>().create({
 	transformer: superjson,
 	errorFormatter({ shape, error }) {
+		const unexpected = isUnexpectedTRPCError(error);
+		const data = {
+			...shape.data,
+			zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+			[ADMIN_MFA_REQUIRED_MARKER]: isAdminMfaRequiredTRPCError(error),
+		};
+		if (unexpected) delete data.stack;
 		return {
 			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : null,
-			},
+			message: unexpected ? UNEXPECTED_ERROR_MESSAGE : shape.message,
+			data,
 		};
 	},
 });
@@ -104,8 +162,8 @@ const timingMiddleware = t.middleware(async ({ next }) => {
  * in `~/server/audit/trpcMiddleware` and is wrapped here so it integrates
  * with the tRPC middleware pipeline (correct return type).
  */
-const auditMiddleware = t.middleware(({ ctx, path, getRawInput, next }) =>
-	runAuditMiddleware({ ctx, path, getRawInput, next }),
+const auditMiddleware = t.middleware(({ ctx, type, path, getRawInput, next }) =>
+	runAuditMiddleware({ ctx, type, path, getRawInput, next }),
 );
 
 /**
@@ -154,6 +212,13 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 			message: "Accès réservé aux administrateurs.",
 		});
 	}
+	if (!isAdminMfaFresh(ctx.session.user.adminMfaAt, new Date())) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: ADMIN_MFA_REQUIRED_MESSAGE,
+			cause: new AdminMfaRequiredError(),
+		});
+	}
 	return next({ ctx });
 });
 
@@ -164,16 +229,12 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
  * Use this for any procedure that operates on company-scoped data.
  */
 export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	// Admin impersonation short-circuit: when an admin is currently mimoquing
-	// a company, every company-scoped procedure operates on the impersonated
-	// SIREN instead of the admin's own SIRET from ProConnect. The admin flag
-	// is checked to prevent a non-admin from ever resolving a foreign SIREN.
-	const impersonatedSiren =
-		ctx.session.user.isAdmin && ctx.session.user.impersonation
-			? ctx.session.user.impersonation.siren
-			: null;
-
-	const siren = impersonatedSiren ?? parseSiren(ctx.session.user.siret);
+	// The impersonation short-circuit is not re-implemented here: it lives in
+	// `getEffectiveSiren`, which also holds the MFA-window condition (#4466).
+	// One module decides which company a session acts on, so a procedure can
+	// never keep resolving a foreign SIREN that the pages have already stopped
+	// resolving.
+	const siren = getEffectiveSiren(ctx.session);
 	if (!siren) {
 		throw new TRPCError({
 			code: "BAD_REQUEST",
@@ -200,6 +261,11 @@ export const companyWriteProcedure = companyProcedure.use(({ ctx, next }) => {
  * `declarationProcedure` (reads) and `declarationWriteProcedure` (mutations)
  * so the lookup logic stays in a single place. Throws `NOT_FOUND` when the
  * declaration does not exist yet.
+ *
+ * Cancelled declarations are excluded (`cancelledAt IS NULL`): after an admin
+ * cancellation a fresh draft is created alongside the cancelled row, so the
+ * resolver must target the active one — otherwise write procedures (and the
+ * modification-deadline guard) would operate on the stale cancelled row.
  */
 async function fetchCurrentDeclarationId(
 	database: typeof db,
@@ -209,7 +275,13 @@ async function fetchCurrentDeclarationId(
 	const rows = await database
 		.select({ id: declarations.id })
 		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
+		.where(
+			and(
+				eq(declarations.siren, siren),
+				eq(declarations.year, year),
+				isNull(declarations.cancelledAt),
+			),
+		)
 		.limit(1);
 
 	const declaration = rows[0];
@@ -254,3 +326,76 @@ export const declarationWriteProcedure = companyWriteProcedure.use(
 		return next({ ctx: { ...ctx, declarationId } });
 	},
 );
+
+/**
+ * Declaration-scoped write procedure guarded by the collaborative edit lock.
+ *
+ * Same as {@link declarationWriteProcedure} plus the `enforceLock` middleware:
+ * the request only proceeds when an **active** lock on `ctx.declarationId` is
+ * held by the current user. Any other case — no lock, an expired lock, or a
+ * lock held by another co-declarant — is rejected with `CONFLICT` so two
+ * co-declarants can never write to the same declaration concurrently.
+ * The editing UI is responsible for acquiring the lock via
+ * `declarationLock.acquireLock` before enabling writes.
+ */
+export const declarationLockedWriteProcedure = declarationWriteProcedure.use(
+	async ({ ctx, next }) => {
+		const lock = await getActiveLock(ctx.db, ctx.declarationId);
+		if (!lock || lock.userId !== ctx.session.user.id) {
+			throw new TRPCError({
+				code: "CONFLICT",
+				message: DECLARATION_LOCK_CONFLICT_MESSAGE,
+			});
+		}
+		return next();
+	},
+);
+
+/**
+ * Declaration write procedure guarded by the relevant modification deadline.
+ *
+ * Same as {@link declarationLockedWriteProcedure} plus a server-side cutoff:
+ * once the declaration is submitted, writes are rejected with `FORBIDDEN`
+ * after the applicable modification deadline has passed. This mirrors the client
+ * `modification_closed` read-only state so the deadline is enforced even when
+ * a request bypasses the disabled UI (issue #3716). A draft is never blocked —
+ * the cutoff only applies to an already-submitted declaration.
+ *
+ * The applicable deadline depends on the declaration phase: the
+ * `updateEmployeeCategories` mutation is shared by the first declaration
+ * (step 5) and the corrective-action second declaration (step 2). The second
+ * declaration legitimately happens after the first deadline, so whenever the
+ * declaration is in the second-declaration phase (including after a re-open
+ * from `awaiting_revision_choice`) the *second*-declaration deadline applies
+ * instead of the first — `isSecondDeclarationDeadlineApplicable` decides.
+ */
+export const declarationModifiableWriteProcedure =
+	declarationLockedWriteProcedure.use(async ({ ctx, next }) => {
+		const rows = await ctx.db
+			.select({
+				status: declarations.status,
+				year: declarations.year,
+				secondDeclarationStep: declarations.secondDeclarationStep,
+				secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
+			})
+			.from(declarations)
+			.where(eq(declarations.id, ctx.declarationId))
+			.limit(1);
+
+		const declaration = rows[0];
+		if (declaration && isDeclarationSubmitted(declaration.status)) {
+			const { decl1ModificationDeadline, decl2ModificationDeadline } =
+				await getCampaignDeadlines(declaration.year);
+			const deadline = isSecondDeclarationDeadlineApplicable(declaration)
+				? decl2ModificationDeadline
+				: decl1ModificationDeadline;
+			if (isDeadlinePassed(deadline)) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message:
+						"La date limite de modification de la déclaration est dépassée.",
+				});
+			}
+		}
+		return next();
+	});

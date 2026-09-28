@@ -1,19 +1,69 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SUBMISSION_UNCONFIRMED_MESSAGE } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { noPayGapReferences } from "~/test/gipGapFixtures";
 import { Step6Review } from "../Step6Review";
 
 const mockSubmitMutate = vi.fn();
+const mockSubmitReset = vi.fn();
+const mockPush = vi.fn();
+const mockRefresh = vi.fn();
+const mockDisclose = vi.fn();
+const mockConceal = vi.fn();
+const mockTrackFunnelComplete = vi.fn();
+type MockSubmissionError = {
+	message: string;
+	data?: { code: string };
+};
+const mockSubmitState = {
+	error: null as MockSubmissionError | null,
+	isPending: false,
+	networkMode: undefined as string | undefined,
+	onSuccess: undefined as (() => void) | undefined,
+	onError: undefined as ((error: MockSubmissionError) => void) | undefined,
+};
+
+vi.mock("next/navigation", () => ({
+	usePathname: vi.fn(),
+	useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
+}));
+
+vi.mock("~/modules/shared", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/shared")>()),
+	getDsfrModal: () => ({ disclose: mockDisclose, conceal: mockConceal }),
+}));
+
+vi.mock("~/modules/analytics", async (importOriginal) => ({
+	...(await importOriginal<typeof import("~/modules/analytics")>()),
+	trackFunnelComplete: (...args: unknown[]) => mockTrackFunnelComplete(...args),
+}));
 
 vi.mock("~/trpc/react", () => ({
 	api: {
 		declaration: {
 			submit: {
-				useMutation: () => ({
-					mutate: mockSubmitMutate,
-					isPending: false,
-					error: null,
-				}),
+				useMutation: ({
+					networkMode,
+					onSuccess,
+					onError,
+				}: {
+					networkMode?: string;
+					onSuccess: () => void;
+					onError: (error: MockSubmissionError) => void;
+				}) => {
+					mockSubmitState.networkMode = networkMode;
+					mockSubmitState.onSuccess = onSuccess;
+					mockSubmitState.onError = onError;
+					return {
+						mutate: mockSubmitMutate,
+						reset: mockSubmitReset,
+						isPending: mockSubmitState.isPending,
+						isError: mockSubmitState.error !== null,
+						error: mockSubmitState.error,
+					};
+				},
 			},
 		},
 		company: {
@@ -34,6 +84,8 @@ function makeCategory(
 		name: "",
 		womenCount: null,
 		menCount: null,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
 		annualBaseWomen: null,
 		annualBaseMen: null,
 		annualVariableWomen: null,
@@ -48,8 +100,6 @@ function makeCategory(
 
 const emptyDeclaration = () => ({
 	siren: "",
-	totalWomen: null,
-	totalMen: null,
 	status: null,
 });
 
@@ -92,15 +142,246 @@ const emptyStep4Data = () => ({
 	],
 });
 
+function submissionReview(isSubmitted = false) {
+	return (
+		<Step6Review
+			companyWorkforce={null}
+			declaration={emptyDeclaration()}
+			declarationYear={2025}
+			indicatorGRequired
+			isSubmitted={isSubmitted}
+			step2Data={emptyStep2Data()}
+			step2Gaps={noPayGapReferences()}
+			step3Data={emptyStep3Data()}
+			step3Gaps={noPayGapReferences()}
+			step4Data={emptyStep4Data()}
+		/>
+	);
+}
+
+function renderSubmissionReview() {
+	return render(submissionReview());
+}
+
+const RULES_ENGINE_REFUSAL = {
+	message:
+		'No matching transition for state="awaiting_compliance_path_choice" action="submit". Facts: {}',
+	data: { code: "INTERNAL_SERVER_ERROR" },
+};
+
 describe("Step6Review", () => {
+	beforeEach(() => {
+		mockSubmitMutate.mockReset();
+		mockSubmitReset.mockReset();
+		mockPush.mockReset();
+		mockRefresh.mockReset();
+		mockDisclose.mockReset();
+		mockConceal.mockReset();
+		mockTrackFunnelComplete.mockReset();
+		mockSubmitState.error = null;
+		mockSubmitState.isPending = false;
+		mockSubmitState.networkMode = undefined;
+		mockSubmitState.onSuccess = undefined;
+		mockSubmitState.onError = undefined;
+		vi.stubGlobal("fetch", vi.fn());
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("submits with networkMode 'always' so an offline attempt fails fast instead of pausing", () => {
+		renderSubmissionReview();
+
+		expect(mockSubmitState.networkMode).toBe("always");
+	});
+
+	it("re-reads the server state when the server rejects the submission", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onError?.(RULES_ENGINE_REFUSAL));
+
+		expect(mockRefresh).toHaveBeenCalledTimes(1);
+		expect(fetch).not.toHaveBeenCalled();
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("waits for the server before refreshing after a network failure", async () => {
+		vi.useFakeTimers();
+		try {
+			vi.mocked(fetch)
+				.mockRejectedValueOnce(new TypeError("Failed to fetch"))
+				.mockResolvedValueOnce(new Response("OK", { status: 200 }));
+			renderSubmissionReview();
+
+			act(() => mockSubmitState.onError?.({ message: "Failed to fetch" }));
+			await act(() => vi.advanceTimersByTimeAsync(0));
+
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(mockRefresh).not.toHaveBeenCalled();
+
+			await act(() => vi.advanceTimersByTimeAsync(1_000));
+
+			expect(mockRefresh).toHaveBeenCalledTimes(1);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("completes the submission once the refreshed page shows it went through", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		rerender(submissionReview(true));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("does not re-track the funnel completion when the server refuses a declaration submitted from another tab", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockTrackFunnelComplete).not.toHaveBeenCalled();
+	});
+
+	it("tracks the funnel completion when resuming after this tab's response was lost", () => {
+		mockSubmitState.error = { message: "Failed to fetch" };
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+	});
+
+	it("keeps the modal mounted while a retry is pending when the refresh reveals the submission", () => {
+		mockSubmitState.isPending = true;
+		const { rerender } = renderSubmissionReview();
+
+		rerender(submissionReview(true));
+
+		expect(document.getElementById("submit-declaration-modal")).not.toBeNull();
+		expect(mockPush).not.toHaveBeenCalled();
+
+		mockSubmitState.isPending = false;
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		rerender(submissionReview(true));
+
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("shows a generic message instead of a technical server error", () => {
+		mockSubmitState.error = RULES_ENGINE_REFUSAL;
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		const alert = within(modal).getByRole("alert", { hidden: true });
+		expect(alert).toHaveTextContent(SUBMISSION_UNCONFIRMED_MESSAGE);
+		expect(alert).not.toHaveTextContent("No matching transition");
+	});
+
+	it("closes the modal before navigating after a successful submission", () => {
+		renderSubmissionReview();
+
+		act(() => mockSubmitState.onSuccess?.());
+
+		expect(mockTrackFunnelComplete).toHaveBeenCalledTimes(1);
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite",
+		);
+		expect(mockConceal.mock.invocationCallOrder[0]).toBeLessThan(
+			mockPush.mock.invocationCallOrder[0] ?? 0,
+		);
+	});
+
+	it("still navigates if funnel tracking throws", () => {
+		mockTrackFunnelComplete.mockImplementation(() => {
+			throw new Error("Tracking blocked");
+		});
+		renderSubmissionReview();
+		act(() => mockSubmitState.onSuccess?.());
+		expect(mockConceal).toHaveBeenCalledTimes(1);
+		expect(mockPush).toHaveBeenCalledTimes(1);
+	});
+
+	it("shows a submission error in the modal and clears it on close", async () => {
+		mockSubmitState.error = {
+			message: "La soumission a échoué.",
+			data: { code: "FORBIDDEN" },
+		};
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		expect(
+			within(modal).getByRole("alert", { hidden: true }),
+		).toHaveTextContent("La soumission a échoué.");
+		expect(mockPush).not.toHaveBeenCalled();
+		await userEvent.click(
+			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
+		);
+		expect(mockSubmitReset).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not submit again while the request is pending", async () => {
+		mockSubmitState.isPending = true;
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+		const user = userEvent.setup();
+		await user.click(within(modal).getByRole("checkbox", { hidden: true }));
+		const validate = within(modal).getByRole("button", {
+			name: "Envoi en cours…",
+			hidden: true,
+		});
+		expect(validate).toBeDisabled();
+		expect(
+			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
+		).toBeDisabled();
+		expect(
+			within(modal).getByRole("button", { name: "Fermer", hidden: true }),
+		).toBeDisabled();
+		await user.click(validate);
+		expect(mockSubmitMutate).not.toHaveBeenCalled();
+		expect(mockSubmitReset).not.toHaveBeenCalled();
+	});
 	it("renders title and stepper at step 6", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getByText("Étape 6 sur 6")).toBeInTheDocument();
@@ -109,13 +390,39 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Récapitulatif de la déclaration" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders description text", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -127,10 +434,14 @@ describe("Step6Review", () => {
 	it("renders section headings", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -138,17 +449,21 @@ describe("Step6Review", () => {
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateurs par catégorie de salariés"),
+			screen.getByText("Indicateur par catégories de salariés"),
 		).toBeInTheDocument();
 	});
 
 	it("renders SavedIndicator", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -158,10 +473,14 @@ describe("Step6Review", () => {
 	it("renders all 4 recap card titles", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -186,10 +505,14 @@ describe("Step6Review", () => {
 	it("does not render Modifier buttons", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -199,10 +522,14 @@ describe("Step6Review", () => {
 	it("does not render check icons on cards", () => {
 		const { container } = render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -213,10 +540,14 @@ describe("Step6Review", () => {
 	it("renders tooltip buttons on cards 3 and 4 only", () => {
 		const { container } = render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -227,8 +558,10 @@ describe("Step6Review", () => {
 	it("shows side-by-side Annuelle/Horaire brute with gaps for step 2", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "95",
 					indicatorAAnnualMen: "100",
@@ -239,8 +572,13 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "80",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getAllByText("Annuelle brute").length).toBeGreaterThanOrEqual(
@@ -251,8 +589,8 @@ describe("Step6Review", () => {
 		);
 		expect(screen.getAllByText("Moyenne").length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByText("Médiane").length).toBeGreaterThanOrEqual(2);
-		expect(screen.getAllByText("5,0 %").length).toBeGreaterThanOrEqual(1);
-		expect(screen.getAllByText("3,0 %").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("5,00 %").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText("3,00 %").length).toBeGreaterThanOrEqual(1);
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
@@ -260,10 +598,14 @@ describe("Step6Review", () => {
 	it("shows 'Aucune donnée renseignée' for empty steps", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -274,9 +616,12 @@ describe("Step6Review", () => {
 	it("renders step 3 with side-by-side gaps and proportion", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={{
 					indicatorBAnnualWomen: "95",
 					indicatorBAnnualMen: "100",
@@ -289,21 +634,29 @@ describe("Step6Review", () => {
 					indicatorEWomen: "45",
 					indicatorEMen: "55",
 				}}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
+				totalMen={100}
+				totalWomen={90}
 			/>,
 		);
-		expect(screen.getByText("45 %")).toBeInTheDocument();
-		expect(screen.getByText("55 %")).toBeInTheDocument();
+		// Proportion = beneficiaries / workforce total, not the raw beneficiary count
+		expect(screen.getByText("50,0 %")).toBeInTheDocument();
+		expect(screen.getByText("55,0 %")).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 	});
 
 	it("renders quartile data stacked annual then hourly", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={{
 					annual: [
 						{ threshold: "1000", women: 46, men: 54 },
@@ -334,10 +687,14 @@ describe("Step6Review", () => {
 	it("renders step 5 category gaps side-by-side", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 				step5Categories={[
 					makeCategory({
@@ -364,17 +721,23 @@ describe("Step6Review", () => {
 			1,
 		);
 		expect(screen.getAllByText("Salaire de base").length).toBe(2);
-		expect(screen.getAllByText("Composantes variables").length).toBe(2);
+		expect(
+			screen.getAllByText("Composantes variables ou complémentaires").length,
+		).toBe(2);
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
 	it("renders previous link pointing to step 5", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -384,29 +747,57 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders next as a submit button when not submitted", () => {
+	it("renders previous link pointing to step 4 when indicatorGRequired is false", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired={false}
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/etape/4",
+		);
+	});
+
+	it("renders next as a submit button labelled Transmettre when not submitted", () => {
+		render(
+			<Step6Review
+				companyWorkforce={null}
+				declaration={emptyDeclaration()}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
 		expect(
-			screen.getByRole("button", { name: /suivant/i }),
+			screen.getByRole("button", { name: /transmettre/i }),
 		).toBeInTheDocument();
 	});
 
 	it("renders next link pointing to compliance path when already submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -419,15 +810,19 @@ describe("Step6Review", () => {
 	it("routes next link to /avis-cse when status is awaiting_cse_opinion", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={{
 					...emptyDeclaration(),
 					status: "awaiting_cse_opinion",
 				}}
 				declarationYear={2025}
 				hasCse={true}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -440,11 +835,15 @@ describe("Step6Review", () => {
 	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -461,11 +860,15 @@ describe("Step6Review", () => {
 	it("does not render PDF download button when submitted", () => {
 		render(
 			<Step6Review
+				companyWorkforce={null}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				isSubmitted
 				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
 			/>,
 		);
@@ -474,16 +877,16 @@ describe("Step6Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("shows 'Prochaines étapes' callout when a gap >= 5%", () => {
+	it("shows 'Prochaines étapes' callout when an indicator-G gap is at least 5%", () => {
 		render(
 			<Step6Review
+				companyWorkforce={300}
 				declaration={{
 					siren: "532847196",
-					totalWomen: null,
-					totalMen: null,
 					status: null,
 				}}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "90",
 					indicatorAAnnualMen: "100",
@@ -494,8 +897,13 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "100",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
@@ -504,6 +912,11 @@ describe("Step6Review", () => {
 		expect(
 			screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/ont encore été identifiés/),
+		).not.toBeInTheDocument();
+		expect(screen.getByText(/vous pouvez :/)).toBeInTheDocument();
+		expect(screen.queryByText(/vous devez :/)).not.toBeInTheDocument();
 		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /critères objectifs/ }),
@@ -516,11 +929,60 @@ describe("Step6Review", () => {
 		).toBeInTheDocument();
 	});
 
+	it("does not show 'Prochaines étapes' for an A-F-only negative gap", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "110",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("shows 'Prochaines étapes' when an indicator-G gap is unfavourable to men", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "110", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+
+		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
+	});
+
 	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
 		render(
 			<Step6Review
+				companyWorkforce={300}
 				declaration={emptyDeclaration()}
 				declarationYear={2025}
+				indicatorGRequired
 				step2Data={{
 					indicatorAAnnualWomen: "98",
 					indicatorAAnnualMen: "100",
@@ -531,10 +993,238 @@ describe("Step6Review", () => {
 					indicatorCHourlyWomen: "99",
 					indicatorCHourlyMen: "100",
 				}}
+				step2Gaps={noPayGapReferences()}
 				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
 				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+				]}
 			/>,
 		);
 		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' for an A-F-only gap when G is below the threshold", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' callout below 100 employees even with a high gap", () => {
+		// Phase 2 is reserved to 100+ companies — a 50-99 firm never enters it.
+		render(
+			<Step6Review
+				companyWorkforce={80}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("does not show 'Prochaines étapes' callout when indicator G is not part of the declaration", () => {
+		// Phase 2 requires indicator G — a 100+ firm that doesn't declare G stays out.
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired={false}
+				step2Data={{
+					indicatorAAnnualWomen: "90",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
+	});
+
+	it("keys the callout off the indicator-G gap, not the A-F gaps", () => {
+		render(
+			<Step6Review
+				companyWorkforce={300}
+				declaration={{ siren: "532847196", status: null }}
+				declarationYear={2025}
+				indicatorGRequired
+				step2Data={{
+					indicatorAAnnualWomen: "98",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "100",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "90",
+					indicatorCAnnualMen: "100",
+					indicatorCHourlyWomen: "100",
+					indicatorCHourlyMen: "100",
+				}}
+				step2Gaps={noPayGapReferences()}
+				step3Data={emptyStep3Data()}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[
+					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+				]}
+			/>,
+		);
+		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
+	});
+
+	describe("CSE consultation section gating (issue #3945)", () => {
+		// An indicator-G gap of 10% at 300 employees → the "Prochaines étapes"
+		// callout renders; only the CSE consultation part is driven by hasCse.
+		function renderWithHasCse(hasCse: boolean | null) {
+			return render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					hasCse={hasCse}
+					indicatorGRequired
+					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+		}
+
+		it.each([
+			false,
+			null,
+		] as const)("hides the CSE consultation section but keeps gap actions and the CSE update button when hasCse is %s", (hasCse) => {
+			renderWithHasCse(hasCse);
+
+			expect(
+				screen.queryByRole("heading", {
+					name: "Informer et consulter le CSE",
+				}),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/obligatoirement informer et consulter le CSE/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/L'avis du CSE devra être transmis/),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText(/avis à transmettre lors de la dernière étape/),
+			).not.toBeInTheDocument();
+
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { name: "Actions à engager" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: "Mettre à jour l'existence d'un CSE",
+				}),
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/Soit mettre en place des actions correctives/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Soit réaliser une évaluation conjointe des rémunérations",
+				),
+			).toBeInTheDocument();
+		});
+
+		it("shows the CSE consultation section when hasCse is true", () => {
+			renderWithHasCse(true);
+
+			expect(
+				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/L'avis du CSE devra être transmis/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/avis à transmettre lors de la dernière étape/),
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByText(/À la suite de l'analyse de vos données/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					/vous devez informer et consulter le CSE sur cette justification/,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(/Soit mettre en place des actions correctives/),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Soit réaliser une évaluation conjointe des rémunérations",
+				),
+			).toBeInTheDocument();
+		});
 	});
 });

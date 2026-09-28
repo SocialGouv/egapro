@@ -1,13 +1,13 @@
 "use client";
 
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import type { QuartileData } from "~/modules/declaration-remuneration/types";
 import {
 	computePercentage,
 	displayDecimal,
 	padDecimalOnBlur,
 } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import type { QuartileFieldErrors } from "./QuartileTable";
 
@@ -45,7 +45,7 @@ function menAriaLabel(tableType: TableType, index: number) {
 
 function pct(q: QuartileData, gender: "women" | "men") {
 	const total = (q.women ?? 0) + (q.men ?? 0);
-	if (total === 0) return "-";
+	if (total === 0) return "- %";
 	return computePercentage(q[gender] ?? 0, total);
 }
 
@@ -68,6 +68,7 @@ type Props = {
 	min: string;
 	errors: QuartileFieldErrors;
 	disabled: boolean;
+	readOnly?: boolean;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 };
 
@@ -78,6 +79,7 @@ export function QuartileTableRow({
 	min,
 	errors,
 	disabled,
+	readOnly = false,
 	onQuartileChange,
 }: Props) {
 	const isLast = index === 3;
@@ -139,6 +141,7 @@ export function QuartileTableRow({
 								onChange={(e) =>
 									onQuartileChange(index, "threshold", e.target.value)
 								}
+								readOnly={readOnly}
 								type="text"
 								value={displayDecimal(quartile.threshold ?? "")}
 							/>
@@ -179,6 +182,7 @@ export function QuartileTableRow({
 						inputMode="numeric"
 						onChange={(e) => onQuartileChange(index, "women", e.target.value)}
 						pattern="[0-9]*"
+						readOnly={readOnly}
 						type="text"
 						value={quartile.women ?? ""}
 					/>
@@ -216,6 +220,7 @@ export function QuartileTableRow({
 						inputMode="numeric"
 						onChange={(e) => onQuartileChange(index, "men", e.target.value)}
 						pattern="[0-9]*"
+						readOnly={readOnly}
 						type="text"
 						value={quartile.men ?? ""}
 					/>

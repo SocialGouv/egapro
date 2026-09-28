@@ -1,4 +1,4 @@
-type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+import type { CompliancePathValue as CompliancePath } from "../types";
 
 type DeclarationLike = {
 	firstDeclarationPathChoice: CompliancePath | null;
@@ -31,4 +31,15 @@ export function getDeclarationDisplayContext(
 		shouldShowJointEvaluation: paths.includes("joint_evaluation"),
 		shouldShowCseOpinion: declaration.cseRequired,
 	};
+}
+
+export type CseOpinionResolvedInput = {
+	cseRequired: boolean;
+	hasSubmittedCseOpinion: boolean;
+};
+
+export function isCseOpinionResolved(
+	declaration: CseOpinionResolvedInput,
+): boolean {
+	return declaration.hasSubmittedCseOpinion || !declaration.cseRequired;
 }

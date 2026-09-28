@@ -1,0 +1,33 @@
+.resultsHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1rem;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+.resultsTitle {
+	margin: 0;
+	color: var(--text-title-grey);
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 1.75rem;
+}
+
+.listFooter {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 1.5rem;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

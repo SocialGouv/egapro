@@ -1,6 +1,6 @@
 import { formatShortDate, formatShortDateTime } from "~/modules/domain";
+import { apiV1FileHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
-
 import { STATUS_LABELS } from "./shared/constants";
 import type { DeclarationDetail } from "./types";
 
@@ -39,9 +39,15 @@ export function DeclarationSummary({
 					<td>{declaration.remunerationScore ?? "—"}</td>
 				</tr>
 				<tr>
-					<th scope="row">Effectif femmes / hommes</th>
+					<th scope="row">Effectif annuel femmes / hommes</th>
 					<td>
 						{declaration.totalWomen ?? "—"} / {declaration.totalMen ?? "—"}
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Effectif horaire femmes / hommes</th>
+					<td>
+						{declaration.hourlyWomen ?? "—"} / {declaration.hourlyMen ?? "—"}
 					</td>
 				</tr>
 				<tr>
@@ -193,10 +199,10 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 							<td>{formatShortDate(file.uploadedAt)}</td>
 							<td>
 								<a
-									aria-label={`Télécharger ${file.fileName}`}
+									aria-label={`Télécharger ${file.fileName} (PDF)`}
 									className="fr-btn fr-btn--sm fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
 									download
-									href={`/api/v1/files/${file.id}`}
+									href={apiV1FileHref(file.id)}
 								>
 									Télécharger
 								</a>

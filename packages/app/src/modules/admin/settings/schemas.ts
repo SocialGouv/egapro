@@ -29,12 +29,14 @@ export const campaignDeadlinesFormSchema = z
 	.object({
 		year: campaignYearSchema,
 		campaignStartDate: optionalIsoDateString,
+		publicDataReleaseDate: optionalIsoDateString,
 		decl1ModificationDeadline: isoDateString,
 		decl1JustificationDeadline: isoDateString,
 		decl1JointEvaluationDeadline: isoDateString,
 		decl2ModificationDeadline: isoDateString,
 		decl2JustificationDeadline: isoDateString,
 		decl2JointEvaluationDeadline: isoDateString,
+		decl2CseOpinionDeadline: isoDateString,
 	})
 	.refine(
 		(data) => data.decl1ModificationDeadline < data.decl2ModificationDeadline,
@@ -52,6 +54,36 @@ export type CampaignDeadlinesFormValues = z.output<
 	typeof campaignDeadlinesFormSchema
 >;
 
-export const getCampaignDeadlinesByYearSchema = z.object({
+const campaignYearParamSchema = z.object({
 	year: campaignYearSchema,
 });
+
+export const getCampaignDeadlinesByYearSchema = campaignYearParamSchema;
+
+export const getRepresentationCampaignByYearSchema = campaignYearParamSchema;
+
+export const representationCampaignFormSchema = z
+	.object({
+		year: campaignYearSchema,
+		campaignStartDate: isoDateString,
+		campaignEndDate: isoDateString,
+		declarationDeadline: isoDateString,
+	})
+	.refine((data) => data.campaignStartDate < data.campaignEndDate, {
+		message:
+			"La date de démarrage de la campagne doit être antérieure à la date de clôture.",
+		path: ["campaignEndDate"],
+	});
+
+export type RepresentationCampaignFormInput = z.input<
+	typeof representationCampaignFormSchema
+>;
+export type RepresentationCampaignFormValues = z.output<
+	typeof representationCampaignFormSchema
+>;
+
+export const updateLockTimeoutSchema = z.object({
+	timeoutMinutes: z.number().int().min(1).max(1440),
+});
+
+export type UpdateLockTimeoutInput = z.infer<typeof updateLockTimeoutSchema>;

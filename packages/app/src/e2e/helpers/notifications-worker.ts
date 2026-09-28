@@ -1,5 +1,6 @@
 import { type ChildProcess, spawn } from "node:child_process";
 import path from "node:path";
+import postgres from "postgres";
 
 const NOTIFICATIONS_DATABASE_URL =
 	process.env.NOTIFICATIONS_DATABASE_URL ??
@@ -78,4 +79,23 @@ export async function killWorker(worker: ChildProcess): Promise<void> {
 
 export function isMailFlowEnabled(): boolean {
 	return process.env.MAIL_ENABLED === "true";
+}
+
+/**
+ * Drop everything still queued in pg-boss.
+ *
+ * The worker only runs while this spec file does, so every receipt other specs
+ * enqueued meanwhile is still pending: starting the worker would drain that
+ * backlog into Mailpit and make "how many receipts did this flow send?" count
+ * other specs' mail. Purging first scopes the mailbox to the test at hand.
+ */
+export async function clearNotificationQueue(): Promise<void> {
+	const sql = postgres(NOTIFICATIONS_DATABASE_URL, { max: 1 });
+	try {
+		await sql`DELETE FROM pgboss.job`;
+	} catch {
+		// The schema only exists once pg-boss has started at least once.
+	} finally {
+		await sql.end();
+	}
 }

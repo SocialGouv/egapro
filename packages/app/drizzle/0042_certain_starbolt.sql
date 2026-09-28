@@ -1,0 +1,1 @@
+ALTER TABLE "app_campaign_deadline" ADD COLUMN "public_data_release_date" date;

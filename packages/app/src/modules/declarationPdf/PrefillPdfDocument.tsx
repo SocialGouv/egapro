@@ -1,5 +1,10 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
+import {
+	formatWorkforceForUser,
+	getReferenceYearFor,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./pdfStyles";
 
@@ -90,7 +95,22 @@ const SECTIONS: Section[] = [
 	},
 ];
 
-function formatValue(value: string | number | null | undefined): string {
+// The headcount follows the same rule as every other surface: a company of the
+// voluntary tier is shown its bracket, not its exact figure (issue 3914).
+const WORKFORCE_FIELD = "workforceEma";
+
+function formatValue(
+	key: string,
+	value: string | number | null | undefined,
+): string {
+	// Ahead of the empty-value guard on purpose: the column is nullable and the
+	// route only 404s on a missing GIP row, so a present row with no headcount
+	// reaches here — and an unknown headcount is the voluntary tier, "< 50",
+	// exactly as on the five other surfaces. Falling through to "—" would make
+	// this PDF the lone dissenter.
+	if (key === WORKFORCE_FIELD) {
+		return formatWorkforceForUser(parseGipWorkforce(value));
+	}
 	if (value === null || value === undefined || value === "") return "—";
 	return String(value);
 }
@@ -110,7 +130,7 @@ export function PrefillPdfDocument({ data }: Props) {
 						Données préremplies {data.year} (issues des données DSN)
 					</Text>
 					<Text style={styles.subtitle}>
-						Au titre des données {data.year - 1}
+						Au titre des données {getReferenceYearFor(data.year)}
 					</Text>
 					<Text style={styles.companyInfo}>
 						{data.companyName} — SIREN {data.siren}
@@ -134,7 +154,7 @@ export function PrefillPdfDocument({ data }: Props) {
 								>
 									<Text style={styles.tableCellLabel}>{label}</Text>
 									<Text style={styles.tableCellValue}>
-										{formatValue(data.row[key])}
+										{formatValue(key, data.row[key])}
 									</Text>
 								</View>
 							);

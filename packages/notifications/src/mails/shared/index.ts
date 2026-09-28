@@ -1,3 +1,4 @@
+export { getRepresentationCampaignYear } from "./campaign.js";
 export {
 	escapeHtml,
 	formatFrenchDate,
@@ -7,9 +8,13 @@ export {
 export { type RenderedEmail, renderEmail } from "./render.js";
 export {
 	getAssetUrl,
-	getConnectionUrl,
+	getAvisCseUrl,
+	getCompliancePathUrl,
+	getCorrectiveActionsUrl,
 	getDeclarationUrl,
 	getImageUrl,
+	getJointEvaluationUrl,
+	getLoginUrl,
 	getMySpaceUrl,
 	getPublicUrl,
 } from "./urls.js";

@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-
+import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
 import type {
 	CampaignDeadlines,
 	DeclarationDisplayContext,
+	DeclarationFsmStatus,
 } from "~/modules/domain";
+import { mySpaceHistoryHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
+import type { LockHolderDisplay } from "./types";
 import { getStepStatuses, VerticalStepper } from "./VerticalStepper";
 
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
@@ -23,24 +26,38 @@ export type PanelVariant =
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
+	compliancePathApplicable: boolean;
+	cseOpinionRequired: boolean;
+	declarationFsmStatus: DeclarationFsmStatus | null;
 	year: number;
+	hasPrefillData: boolean;
+	indicatorGRequired: boolean;
 	lastActionDate: string | null;
 	variant: PanelVariant;
 	displayContext: DeclarationDisplayContext;
 	hasSubmittedSecondDeclaration: boolean;
 	siren: string;
 	ctaHref: string;
+	lockedByOther: boolean;
+	lockHolder: LockHolderDisplay | null;
 };
 
 export function DeclarationProcessPanel({
 	campaignDeadlines,
+	compliancePathApplicable,
+	cseOpinionRequired,
+	declarationFsmStatus,
 	year,
+	hasPrefillData,
+	indicatorGRequired,
 	lastActionDate,
 	variant,
 	displayContext,
 	hasSubmittedSecondDeclaration,
 	siren,
 	ctaHref,
+	lockedByOther,
+	lockHolder,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -72,27 +89,43 @@ export function DeclarationProcessPanel({
 							siren={siren}
 							year={year}
 						/>
-						{(variant === "start" || variant === "compliance_choice") && (
-							<StartAlert />
+						{lockedByOther && lockHolder && (
+							<DeclarationLockAlert holder={lockHolder} />
 						)}
+						{indicatorGRequired &&
+							(variant === "start" || variant === "compliance_choice") && (
+								<StartAlert />
+							)}
 						<VerticalStepper
 							campaignDeadlines={campaignDeadlines}
+							compliancePathApplicable={compliancePathApplicable}
+							cseOpinionRequired={cseOpinionRequired}
+							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
+							hasPrefillData={hasPrefillData}
+							indicatorGRequired={indicatorGRequired}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
-							siren={siren}
 							step1={step1}
 							step2={step2}
 							step3={step3}
 							variant={variant}
 							year={year}
 						/>
-						{variant === "closed" && <ClosedMessage />}
+						{variant === "closed" && (
+							<ClosedMessage cseOpinionRequired={cseOpinionRequired} />
+						)}
 					</div>
 					<div>
 						<HelpSection />
 						<div className={styles.footer}>
-							<a className="fr-btn" href={ctaHref}>
-								{getCtaLabel(variant)}
+							<a
+								aria-describedby={PANEL_TITLE_ID}
+								className="fr-btn"
+								href={ctaHref}
+							>
+								{lockedByOther
+									? "Consulter en lecture seule"
+									: getCtaLabel(variant)}
 							</a>
 						</div>
 					</div>
@@ -104,7 +137,7 @@ export function DeclarationProcessPanel({
 
 function getCtaLabel(variant: PanelVariant): string {
 	if (variant === "closed") return "Voir la déclaration";
-	if (variant === "start") return "Commencer la déclaration";
+	if (variant === "start") return "Commencer";
 	return "Continuer";
 }
 
@@ -134,7 +167,7 @@ function PanelHeader({
 				)}
 				<Link
 					className={`fr-link ${styles.historyLink}`}
-					href={`/mon-espace/historique/${siren}/${year}`}
+					href={mySpaceHistoryHref(siren, year)}
 				>
 					Voir l'historique
 				</Link>
@@ -155,13 +188,18 @@ function StartAlert() {
 	);
 }
 
-function ClosedMessage() {
+function ClosedMessage({
+	cseOpinionRequired,
+}: {
+	cseOpinionRequired: boolean;
+}) {
 	return (
 		<div className={styles.closedMessage}>
 			<p className="fr-text--bold fr-mb-0">Démarche close</p>
 			<p className="fr-mb-0">
-				Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à
-				l'échéance.
+				{cseOpinionRequired
+					? "Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance."
+					: "Cette démarche est terminée."}
 			</p>
 		</div>
 	);

@@ -1,8 +1,14 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { inferRouterOutputs } from "@trpc/server";
+
+import type { adminDeclarationsRouter } from "~/server/api/routers/adminDeclarations";
+
+type AdminDeclarationsOutputs = inferRouterOutputs<
+	typeof adminDeclarationsRouter
+>;
 
 export type DeclarationSearchRow =
-	RouterOutputs["adminDeclarations"]["search"]["rows"][number];
+	AdminDeclarationsOutputs["search"]["rows"][number];
 
 export type DeclarationDetail = NonNullable<
-	RouterOutputs["adminDeclarations"]["getById"]
+	AdminDeclarationsOutputs["getById"]
 >;

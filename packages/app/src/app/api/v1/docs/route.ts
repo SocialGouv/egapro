@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { env } from "~/env.js";
+import { API_V1_OPENAPI } from "~/modules/routes";
 
 export function GET() {
 	if (env.NEXT_PUBLIC_EGAPRO_ENV === "prod") {
@@ -21,7 +22,7 @@ export function GET() {
   <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
   <script>
     SwaggerUIBundle({
-      url: "/api/v1/openapi.json?v=" + Date.now(),
+      url: "${API_V1_OPENAPI}?v=" + Date.now(),
       dom_id: "#swagger-ui",
       deepLinking: true,
       presets: [

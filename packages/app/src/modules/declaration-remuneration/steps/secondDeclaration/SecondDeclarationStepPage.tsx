@@ -1,10 +1,22 @@
 import { notFound, redirect } from "next/navigation";
 
-import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
+import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
+import {
+	formatShortDate,
+	getObligationWorkforce,
+	isCseOpinionRequired,
+	isCseRequired,
+	shouldRedirectSubmittedToRecap,
+} from "~/modules/domain";
+import {
+	COMPLIANCE_PATH,
+	complianceStepHref,
+	toComplianceStep,
+} from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
-import { SECOND_DECLARATION_TOTAL_STEPS } from "./constants";
+import { COMPLIANCE_FUNNEL } from "./funnelConfig";
 import { SecondDeclarationStep1Info } from "./SecondDeclarationStep1Info";
 import { SecondDeclarationStep2Form } from "./SecondDeclarationStep2Form";
 import { SecondDeclarationStep3Review } from "./SecondDeclarationStep3Review";
@@ -13,12 +25,22 @@ type Props = {
 	step: number;
 };
 
-export async function SecondDeclarationStepPage({ step }: Props) {
-	if (Number.isNaN(step) || step < 1 || step > SECOND_DECLARATION_TOTAL_STEPS) {
+export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
+	const step = toComplianceStep(rawStep);
+	if (step === null) {
 		notFound();
 	}
 
 	const data = await api.declaration.getOrCreate();
+
+	// This funnel only belongs to the corrective-action path, which the FSM only
+	// offers on the initial round (`saveCompliancePath` rejects it on revision).
+	// Without that choice the company has no second declaration to fill, so send
+	// it back to the compliance path page rather than exposing the steps.
+	if (data.declaration.firstDeclarationPathChoice !== "corrective_action") {
+		redirect(COMPLIANCE_PATH);
+	}
+
 	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
@@ -33,7 +55,7 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 			modificationDeadline: campaignDeadlines.decl2ModificationDeadline,
 		})
 	) {
-		redirect("/declaration-remuneration/parcours-conformite/etape/3");
+		redirect(complianceStepHref(3));
 	}
 
 	const initialCategories = mapToEmployeeCategoryRows(
@@ -55,40 +77,57 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 
 	const initialSource = data.jobCategories[0]?.source;
 
-	const declarationDate = data.declaration.updatedAt
-		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
-		: new Date().toLocaleDateString("fr-FR");
+	const declarationDate = formatShortDate(
+		data.declaration.updatedAt
+			? new Date(data.declaration.updatedAt)
+			: new Date(),
+	);
+
+	const stepTracker = (
+		<FunnelStepTracker
+			config={COMPLIANCE_FUNNEL}
+			dimensions={campaignYearDimension(currentYear)}
+			step={step}
+		/>
+	);
 
 	if (step === 1) {
 		return (
-			<SecondDeclarationStep1Info
-				declarationDate={declarationDate}
-				declarationSiren={data.declaration.siren}
-				declarationYear={currentYear}
-				modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
-			/>
+			<>
+				{stepTracker}
+				<SecondDeclarationStep1Info
+					declarationDate={declarationDate}
+					declarationSiren={data.declaration.siren}
+					declarationYear={currentYear}
+					modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
+				/>
+			</>
 		);
 	}
 
 	if (step === 2) {
 		return (
-			<HydrateClient>
-				<SecondDeclarationStep2Form
-					declarationSiren={data.declaration.siren}
-					declarationYear={currentYear}
-					initialEndDate={
-						data.declaration.secondDeclReferencePeriodEnd ?? undefined
-					}
-					initialFirstDeclarationCategories={initialCategories}
-					initialSecondDeclarationCategories={
-						correctionCategories.length > 0 ? correctionCategories : undefined
-					}
-					initialSource={initialSource}
-					initialStartDate={
-						data.declaration.secondDeclReferencePeriodStart ?? undefined
-					}
-				/>
-			</HydrateClient>
+			<>
+				{stepTracker}
+				<HydrateClient>
+					<SecondDeclarationStep2Form
+						declarationSiren={data.declaration.siren}
+						declarationYear={currentYear}
+						initialEndDate={
+							data.declaration.secondDeclReferencePeriodEnd ?? undefined
+						}
+						initialFirstDeclarationCategories={initialCategories}
+						initialSecondDeclarationCategories={
+							correctionCategories.length > 0 ? correctionCategories : undefined
+						}
+						initialSource={initialSource}
+						initialStartDate={
+							data.declaration.secondDeclReferencePeriodStart ?? undefined
+						}
+						status={data.declaration.status}
+					/>
+				</HydrateClient>
+			</>
 		);
 	}
 
@@ -97,13 +136,26 @@ export async function SecondDeclarationStepPage({ step }: Props) {
 		correctionCategories.length > 0 ? correctionCategories : initialCategories;
 
 	return (
-		<HydrateClient>
-			<SecondDeclarationStep3Review
-				declarationYear={currentYear}
-				hasCse={company.hasCse}
-				secondDeclarationCategories={reviewCategories}
-				siren={data.declaration.siren}
-			/>
-		</HydrateClient>
+		<>
+			{stepTracker}
+			<HydrateClient>
+				<SecondDeclarationStep3Review
+					cseApplicable={isCseRequired(
+						getObligationWorkforce(company.gipWorkforce),
+					)}
+					cseOpinionRequired={isCseOpinionRequired({
+						workforce: getObligationWorkforce(company.gipWorkforce),
+						hasCse: company.hasCse,
+					})}
+					declarationYear={currentYear}
+					secondDeclarationCategories={reviewCategories}
+					secondDeclarationSubmissionCount={
+						data.secondDeclarationSubmissionCount
+					}
+					siren={data.declaration.siren}
+					status={data.declaration.status}
+				/>
+			</HydrateClient>
+		</>
 	);
 }

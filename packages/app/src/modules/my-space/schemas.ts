@@ -11,10 +11,14 @@ export const updateHasCseSchema = z.object({
 	hasCse: z.boolean(),
 });
 
-/** Radio buttons always produce strings — transform "true"/"false" to boolean. */
-const hasCseFromRadio = z
-	.union([z.boolean(), z.literal("true"), z.literal("false")])
-	.transform((v): boolean => (typeof v === "string" ? v === "true" : v));
+const CSE_RADIO_ERROR = "Veuillez renseigner si un CSE a été mis en place.";
+
+const hasCseFromRadio = z.unknown().transform((v, ctx) => {
+	if (v === true || v === "true") return true;
+	if (v === false || v === "false") return false;
+	ctx.addIssue({ code: "custom", message: CSE_RADIO_ERROR });
+	return z.NEVER;
+});
 
 export function createMissingInfoSchema(
 	needsPhone: boolean,

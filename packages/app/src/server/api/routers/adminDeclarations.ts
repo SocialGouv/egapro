@@ -20,14 +20,24 @@ import {
 	cancelDeclarationSchema,
 	getDeclarationByIdSchema,
 	getRecapSchema,
+	releaseLockSchema,
 	searchDeclarationsSchema,
 } from "~/modules/admin/declarations/schemas";
-import { getCurrentYear } from "~/modules/domain";
 import {
-	mapToEmployeeCategoryRows,
-	mapToStepData,
-} from "~/server/api/routers/declarationHelpers";
+	floorWorkforce,
+	getCurrentYear,
+	getDeclarationReferencePeriod,
+	isCancelled,
+	parseGipWorkforce,
+} from "~/modules/domain";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import {
+	gipSizeRangeFilter,
+	gipWorkforceJoinCondition,
+	gipWorkforceSortKey,
+} from "~/server/db/gipWorkforceConditions";
 import {
 	companies,
 	cseOpinions,
@@ -35,10 +45,16 @@ import {
 	declarations,
 	employeeCategories,
 	files,
+	gipMdsData,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
+import {
+	getActiveLock,
+	releaseLockAsAdmin,
+} from "~/server/services/declarationLockService";
 
+// `workforce` is absent: nullable joined column, sorted via gipWorkforceSortKey.
 const sortColumnMap = {
 	siren: declarations.siren,
 	companyName: companies.name,
@@ -92,12 +108,21 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				filters.push(isNull(declarations.cancelledAt));
 			}
 
+			if (input.sizeRange) {
+				filters.push(gipSizeRangeFilter(input.sizeRange));
+			}
+
 			const where = filters.length > 0 ? and(...filters) : undefined;
-			const orderDir = input.sortOrder === "asc" ? asc : desc;
-			const orderColumn = sortColumnMap[input.sortBy];
+			const orderBy =
+				input.sortBy === "workforce"
+					? gipWorkforceSortKey(input.sortOrder)
+					: (input.sortOrder === "asc" ? asc : desc)(
+							sortColumnMap[input.sortBy],
+						);
 			const offset = (input.page - 1) * input.pageSize;
 
-			const [rows, totalResult] = await Promise.all([
+			// Join and filter on BOTH queries, else count and pagination describe another population.
+			const [rawRows, totalResult] = await Promise.all([
 				ctx.db
 					.select({
 						id: declarations.id,
@@ -109,26 +134,33 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						createdAt: declarations.createdAt,
 						updatedAt: declarations.updatedAt,
 						companyName: companies.name,
+						workforceEma: gipMdsData.workforceEma,
 						declarantEmail: users.email,
 						declarantFirstName: users.firstName,
 						declarantLastName: users.lastName,
 					})
 					.from(declarations)
 					.innerJoin(companies, eq(declarations.siren, companies.siren))
+					.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 					.innerJoin(users, eq(declarations.declarantId, users.id))
 					.where(where)
-					.orderBy(orderDir(orderColumn))
+					.orderBy(orderBy)
 					.limit(input.pageSize)
 					.offset(offset),
 				ctx.db
 					.select({ total: count() })
 					.from(declarations)
 					.innerJoin(companies, eq(declarations.siren, companies.siren))
+					.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 					.innerJoin(users, eq(declarations.declarantId, users.id))
 					.where(where),
 			]);
 
 			const total = totalResult[0]?.total ?? 0;
+			const rows = rawRows.map(({ workforceEma, ...row }) => ({
+				...row,
+				workforce: floorWorkforce(parseGipWorkforce(workforceEma)),
+			}));
 
 			return {
 				rows,
@@ -151,6 +183,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					currentStep: declarations.currentStep,
 					totalWomen: declarations.totalWomen,
 					totalMen: declarations.totalMen,
+					hourlyWomen: declarations.hourlyWomen,
+					hourlyMen: declarations.hourlyMen,
 					remunerationScore: declarations.remunerationScore,
 					firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 					createdAt: declarations.createdAt,
@@ -159,7 +193,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companyName: companies.name,
 					companyAddress: companies.address,
 					companyNafCode: companies.nafCode,
-					companyWorkforce: companies.workforce,
+					companyWorkforceEma: gipMdsData.workforceEma,
 					companyHasCse: companies.hasCse,
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
@@ -168,16 +202,19 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
+				.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 				.innerJoin(users, eq(declarations.declarantId, users.id))
 				.where(eq(declarations.id, input.id))
 				.limit(1);
 
-			const declaration = rows[0];
-			if (!declaration) {
+			const row = rows[0];
+			if (!row) {
 				return null;
 			}
 
-			const [declarationFiles, opinions, siblingRows, historyRows] =
+			const { companyWorkforceEma, ...declaration } = row;
+
+			const [declarationFiles, opinions, siblingRows, historyRows, activeLock] =
 				await Promise.all([
 					ctx.db
 						.select({
@@ -221,13 +258,14 @@ export const adminDeclarationsRouter = createTRPCRouter({
 						.from(declarationStatusHistory)
 						.where(eq(declarationStatusHistory.declarationId, input.id))
 						.orderBy(desc(declarationStatusHistory.createdAt)),
+					getActiveLock(ctx.db, input.id),
 				]);
 
 			const siblings = siblingRows.map((s) => ({
 				id: s.id,
 				cancelledAt: s.cancelledAt,
 				updatedAt: s.updatedAt,
-				status: s.cancelledAt !== null ? "cancelled" : (s.status ?? "draft"),
+				status: isCancelled(s) ? "cancelled" : (s.status ?? "draft"),
 			}));
 
 			const findLatest = (eventType: string): Date | null => {
@@ -237,9 +275,15 @@ export const adminDeclarationsRouter = createTRPCRouter({
 
 			return {
 				...declaration,
+				companyWorkforce: floorWorkforce(
+					parseGipWorkforce(companyWorkforceEma),
+				),
 				files: declarationFiles,
 				cseOpinions: opinions,
 				siblings,
+				lock: activeLock
+					? { holder: activeLock.email, expiresAt: activeLock.expiresAt }
+					: null,
 				demarcheCompletedAt: findLatest("demarche_complete"),
 				secondDeclarationSubmittedAt: findLatest("second_declaration_submit"),
 			};
@@ -263,7 +307,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				throw new TRPCError({ code: "NOT_FOUND" });
 			}
 
-			if (declaration.cancelledAt !== null) {
+			if (isCancelled(declaration)) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
 					message: "déclaration déjà annulée",
@@ -293,6 +337,22 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			return { id: input.id, cancelledAt };
 		}),
 
+	releaseLock: adminProcedure
+		.input(releaseLockSchema)
+		.mutation(async ({ input, ctx }) => {
+			const lock = await getActiveLock(ctx.db, input.declarationId);
+			if (!lock) {
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "aucun verrou actif sur cette déclaration",
+				});
+			}
+
+			await releaseLockAsAdmin(ctx.db, input.declarationId);
+
+			return { declarationId: input.declarationId };
+		}),
+
 	getRecap: adminProcedure
 		.input(getRecapSchema)
 		.query(async ({ ctx, input }) => {
@@ -303,13 +363,14 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companySiren: companies.siren,
 					companyNafCode: companies.nafCode,
 					companyAddress: companies.address,
-					companyWorkforce: companies.workforce,
+					companyWorkforceEma: gipMdsData.workforceEma,
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
 					declarantLastName: users.lastName,
 				})
 				.from(declarations)
 				.innerJoin(companies, eq(declarations.siren, companies.siren))
+				.leftJoin(gipMdsData, gipWorkforceJoinCondition())
 				.innerJoin(users, eq(declarations.declarantId, users.id))
 				.where(eq(declarations.id, input.id))
 				.limit(1);
@@ -355,6 +416,8 @@ export const adminDeclarationsRouter = createTRPCRouter({
 								declarationType: employeeCategories.declarationType,
 								womenCount: employeeCategories.womenCount,
 								menCount: employeeCategories.menCount,
+								hourlyWomenCount: employeeCategories.hourlyWomenCount,
+								hourlyMenCount: employeeCategories.hourlyMenCount,
 								annualBaseWomen: employeeCategories.annualBaseWomen,
 								annualBaseMen: employeeCategories.annualBaseMen,
 								annualVariableWomen: employeeCategories.annualVariableWomen,
@@ -369,14 +432,20 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					: [];
 
 			const d = row.declaration;
-			const { step2Data, step3Data, step4Data } = mapToStepData(d);
+			const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+				mapToStepData(d);
 			const step5Categories = mapToEmployeeCategoryRows(
 				jobs,
 				empCats,
 				isCorrection ? "correction" : "initial",
 			);
 			const step5Source = jobs[0]?.source ?? null;
-			const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
+			const referencePeriod = getDeclarationReferencePeriod(
+				d.year,
+				isCorrection,
+				d.secondDeclReferencePeriodStart,
+				d.secondDeclReferencePeriodEnd,
+			);
 			const declarantName = [row.declarantFirstName, row.declarantLastName]
 				.filter(Boolean)
 				.join(" ");
@@ -387,7 +456,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					siren: row.companySiren,
 					nafCode: row.companyNafCode,
 					address: row.companyAddress,
-					workforce: row.companyWorkforce,
+					gipWorkforce: parseGipWorkforce(row.companyWorkforceEma),
 				},
 				declarationYear: d.year,
 				referencePeriod,
@@ -396,9 +465,13 @@ export const adminDeclarationsRouter = createTRPCRouter({
 				isCorrection,
 				totalWomen: d.totalWomen,
 				totalMen: d.totalMen,
+				hourlyWomen: d.hourlyWomen,
+				hourlyMen: d.hourlyMen,
 				step2Data,
 				step3Data,
 				step4Data,
+				step2Gaps,
+				step3Gaps,
 				step5Categories,
 				step5Source,
 			};

@@ -1,0 +1,1 @@
+ALTER TABLE "app_company" ADD COLUMN "statut_diffusion" varchar(1);

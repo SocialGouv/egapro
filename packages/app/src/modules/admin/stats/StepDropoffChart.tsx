@@ -10,10 +10,11 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { DROPOFF_RATE_ALERT_THRESHOLD } from "~/modules/domain";
-
-import { formatCount, formatPercent } from "./formatters";
+import {
+	DROPOFF_RATE_ALERT_THRESHOLD,
+	formatCount,
+	formatFixedPercentage,
+} from "~/modules/domain";
 import styles from "./StepDropoffChart.module.scss";
 import type { StepDropoffRow } from "./types";
 
@@ -32,6 +33,8 @@ type DropoffTooltipProps = {
 	active?: boolean;
 	payload?: TooltipEntry[];
 };
+
+const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-soumission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} %.`;
 
 const WIZARD_NORMAL_COLOR = "var(--background-action-high-blue-france)";
 const WIZARD_ALERT_COLOR = "var(--background-action-high-red-marianne)";
@@ -60,7 +63,7 @@ function DropoffTooltip({ active, payload }: DropoffTooltipProps) {
 			</p>
 			<ul className={styles.tooltipList}>
 				<li className={styles.tooltipItem}>
-					{formatPercent(row.dropoffRate, { withUnit: true })} d'abandon
+					{formatFixedPercentage(row.dropoffRate, { withUnit: true })} d'abandon
 				</li>
 				<li className={styles.tooltipItem}>
 					{formatCount(row.abandoned)} sur {formatCount(row.total)} déclarations{" "}
@@ -81,53 +84,58 @@ export function StepDropoffChart({ rows }: Props) {
 			</p>
 		);
 	}
+	const figureCaption = `${CHART_CAPTION} Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				Taux d'abandon par phase de la démarche déclarative : pourcentage de
-				déclarations entrées sur chaque étape du wizard ou phase post-soumission
-				et qui n'ont pas progressé depuis le délai sélectionné. Les barres
-				rouges signalent une phase dont le taux dépasse{" "}
-				{DROPOFF_RATE_ALERT_THRESHOLD} %. Les données équivalentes sont
-				disponibles dans le tableau ci-dessous.
-			</figcaption>
-			<ResponsiveContainer>
-				<BarChart
-					data={rows}
-					layout="vertical"
-					margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
-				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						domain={[0, 100]}
-						label={{
-							value: "Taux d'abandon (%)",
-							position: "insideBottom",
-							offset: -8,
-						}}
-						tickFormatter={(value: number) => `${value}`}
-						type="number"
-					/>
-					<YAxis
-						dataKey="label"
-						interval={0}
-						tick={{ fontSize: 12 }}
-						type="category"
-						width={260}
-					/>
-					<Tooltip content={<DropoffTooltip />} />
-					<Bar
-						dataKey="dropoffRate"
-						fill={WIZARD_NORMAL_COLOR}
-						name="Taux d'abandon"
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
+			<div
+				aria-label={CHART_CAPTION}
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<BarChart
+						data={rows}
+						layout="vertical"
+						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}
 					>
-						{rows.map((row) => (
-							<Cell fill={getBarColor(row)} key={row.key} />
-						))}
-					</Bar>
-				</BarChart>
-			</ResponsiveContainer>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							domain={[0, 100]}
+							label={{
+								value: "Taux d'abandon (%)",
+								position: "insideBottom",
+								offset: -8,
+							}}
+							tickFormatter={(value: number) => `${value}`}
+							type="number"
+						/>
+						<YAxis
+							dataKey="label"
+							interval={0}
+							tick={{ fontSize: 12 }}
+							type="category"
+							width={260}
+						/>
+						<Tooltip content={<DropoffTooltip />} />
+						<Bar
+							dataKey="dropoffRate"
+							fill={WIZARD_NORMAL_COLOR}
+							name="Taux d'abandon"
+						>
+							{rows.map((row) => (
+								<Cell fill={getBarColor(row)} key={row.key} />
+							))}
+						</Bar>
+					</BarChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }

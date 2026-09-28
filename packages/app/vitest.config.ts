@@ -39,7 +39,10 @@ export default defineConfig({
 		exclude: [
 			"src/**/*.integration.test.ts",
 			"src/**/*.e2e.{ts,tsx}",
-			"src/e2e/**",
+			// Playwright specs live under src/e2e; the pure grille derivation
+			// (src/e2e/grille) is isomorphic and carries vitest unit tests, so only
+			// the specs are excluded here, not the whole directory.
+			"src/e2e/**/*.e2e.{ts,tsx}",
 			"node_modules",
 			".next",
 		],
@@ -64,6 +67,7 @@ export default defineConfig({
 				// Dev-only playground for visually testing the declaration process panel.
 				"src/app/test-panel/**",
 				"src/modules/my-space/PanelPlayground.tsx",
+				"src/modules/declaration-representation/RepresentationPlayground.tsx",
 			],
 			thresholds: {
 				statements: 75,

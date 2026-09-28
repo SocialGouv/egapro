@@ -7,6 +7,8 @@
  * same underscore-separated French style to stay consistent.
  */
 
+import { proportionOf } from "~/modules/domain";
+
 /** Indicator A — mean global remuneration. */
 export const INDICATOR_A_LABELS = {
 	annualWomen: "Rem_globale_annuelle_moyenne_F",
@@ -63,7 +65,7 @@ export const INDICATOR_D_GAP_LABELS = {
 	hourly: "Taux_horaire_variable_médian_ecart",
 } as const;
 
-/** Indicator E proportion labels — ratio 0..1, mirrors GIP CSV. */
+/** Indicator E proportion labels — ratio 0..1 of the same-sex workforce, independent of each other. */
 export const INDICATOR_E_PROPORTION_LABELS = {
 	women: "Proportion_variable_F",
 	men: "Proportion_variable_H",
@@ -116,6 +118,35 @@ export const INDICATOR_F_HOURLY_MEN_LABELS = [
 	"Quartile4_Taux_horaire_global_proportion_H",
 ] as const;
 
+/** Indicator F — declared headcount labels, per period, sex and quartile index (1..4). */
+export const INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS = [
+	"Quartile1_Rem_globale_annuelle_nb_F",
+	"Quartile2_Rem_globale_annuelle_nb_F",
+	"Quartile3_Rem_globale_annuelle_nb_F",
+	"Quartile4_Rem_globale_annuelle_nb_F",
+] as const;
+
+export const INDICATOR_F_ANNUAL_MEN_COUNT_LABELS = [
+	"Quartile1_Rem_globale_annuelle_nb_H",
+	"Quartile2_Rem_globale_annuelle_nb_H",
+	"Quartile3_Rem_globale_annuelle_nb_H",
+	"Quartile4_Rem_globale_annuelle_nb_H",
+] as const;
+
+export const INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS = [
+	"Quartile1_Taux_horaire_global_nb_F",
+	"Quartile2_Taux_horaire_global_nb_F",
+	"Quartile3_Taux_horaire_global_nb_F",
+	"Quartile4_Taux_horaire_global_nb_F",
+] as const;
+
+export const INDICATOR_F_HOURLY_MEN_COUNT_LABELS = [
+	"Quartile1_Taux_horaire_global_nb_H",
+	"Quartile2_Taux_horaire_global_nb_H",
+	"Quartile3_Taux_horaire_global_nb_H",
+	"Quartile4_Taux_horaire_global_nb_H",
+] as const;
+
 /**
  * Compute the women/men proportion inside one indicator F quartile from the
  * declared headcounts. Returns `null` when data is missing or the quartile
@@ -126,5 +157,5 @@ export function quartileProportion(
 	totalCount: number | null,
 ): number | null {
 	if (count === null || totalCount === null || totalCount === 0) return null;
-	return Math.round((count / totalCount) * 10_000) / 10_000;
+	return Math.round(proportionOf(count, totalCount) * 10_000) / 10_000;
 }

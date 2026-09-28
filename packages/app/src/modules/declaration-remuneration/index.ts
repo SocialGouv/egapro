@@ -3,6 +3,8 @@ export { MissingSiret } from "./MissingSiret";
 export { RecapitulatifPage } from "./recapitulatif";
 export { StepPageClient } from "./StepPageClient";
 export {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormEntrySchema,
 	categoryFormSchema,
 	saveCompliancePathSchema,
@@ -12,6 +14,7 @@ export {
 	updateStep3Schema,
 	updateStep4Schema,
 } from "./schemas";
+export { CompanyBanner } from "./shared/CompanyBanner";
 export { computeIndicatorPercentages } from "./shared/computeIndicatorPercentages";
 export { DevFillButton } from "./shared/DevFillButton";
 export type {
@@ -25,6 +28,12 @@ export {
 	getDraftInput,
 	saveDraftInput,
 } from "./shared/draft/schemas";
+export {
+	getFunnelSteps,
+	getNextStepHref,
+	getPreviousStepHref,
+	INDICATOR_G_STEP,
+} from "./shared/funnelSteps";
 export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
 export type {
 	GipMdsRow,
@@ -33,6 +42,21 @@ export type {
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
 export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
+export type { PayGapReferences } from "./shared/indicatorRowMapping";
+export { gipPayGapReferences } from "./shared/indicatorRowMapping";
+export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
+export {
+	LockProvider,
+	useLockContext,
+	useReadOnlyContext,
+} from "./shared/lock/LockContext";
+export type {
+	DeclarationLockState,
+	LockHolder,
+	LockHolderDisplay,
+	ReadOnlyReason,
+} from "./shared/lock/types";
+export { useDeclarationLock } from "./shared/lock/useDeclarationLock";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
@@ -44,12 +68,15 @@ export { Step4QuartileDistribution } from "./steps/Step4QuartileDistribution";
 export { Step5EmployeeCategories } from "./steps/Step5EmployeeCategories";
 export { Step6Review } from "./steps/Step6Review";
 export {
+	COMPLIANCE_FUNNEL,
+	SECOND_DECLARATION_STEP_TITLES,
 	SECOND_DECLARATION_TOTAL_STEPS,
 	SecondDeclarationStep1Info,
 	SecondDeclarationStep2Form,
 	SecondDeclarationStep3Review,
 	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
+export { formatCategorySource } from "./steps/step5/sources";
 export { parseEmployeeCategories } from "./steps/step6";
 export type {
 	EmployeeCategoryRow,

@@ -51,14 +51,8 @@ describe("AidePage", () => {
 		expect(callout).toHaveTextContent(/2026/);
 	});
 
-	it("renders the three resource cards", async () => {
+	it("renders the two resource cards", async () => {
 		render(await AidePage());
-		expect(
-			screen.getByRole("heading", {
-				level: 2,
-				name: /nouveau site : ce qui change/i,
-			}),
-		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
@@ -71,6 +65,19 @@ describe("AidePage", () => {
 				name: /indicateurs de représentation/i,
 			}),
 		).toBeInTheDocument();
+	});
+
+	// The "Nouveau site" card linked to `/aide/nouveau-site`, which has no page
+	// and no redirect. Removing the card was the product decision; this
+	// pins the removal so it cannot come back without a page behind it.
+	it("does not offer the retired « Nouveau site » card", async () => {
+		render(await AidePage());
+		expect(
+			screen.queryByRole("heading", {
+				level: 2,
+				name: /nouveau site : ce qui change/i,
+			}),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the textes de référence section", async () => {

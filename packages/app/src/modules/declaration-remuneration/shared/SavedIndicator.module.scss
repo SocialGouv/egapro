@@ -26,3 +26,21 @@
 .spinning {
 	animation: spin 1s linear infinite;
 }
+
+// RGAA 13.8 — une animation qui se répète indéfiniment doit pouvoir être neutralisée.
+// Le critère vise d'abord le contenu clignotant porteur d'information ; ce spinner n'en est
+// pas un et il est transitoire, mais `prefers-reduced-motion` est le réglage SYSTÈME par
+// lequel quelqu'un déclare que le mouvement lui pose problème — vestibulaire, migraine,
+// trouble de l'attention. Le respecter ne coûte rien ici.
+//
+// On neutralise plutôt qu'on ne masque : l'icône reste visible et garde son rôle
+// d'indicateur, elle cesse seulement de tourner. La supprimer retirerait l'information.
+//
+// `@media` de préférence utilisateur, pas de point de rupture : la règle SCSS du dépôt
+// interdit les media queries de largeur (il faut `respond-from`/`respond-to`), et celle-ci
+// n'en est pas une.
+@media (prefers-reduced-motion: reduce) {
+	.spinning {
+		animation: none;
+	}
+}

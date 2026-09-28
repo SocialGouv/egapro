@@ -1,176 +1,67 @@
-# Figma Workflow
-
-> **Used by**: `code-dev` (quand un ticket cite une URL Figma dans sa section `## Référence Figma`), `architect` (lecture survol des écrans pour découper). Hors pipeline : tout agent implémentant depuis un design Figma.
-
-When implementing from a Figma design, follow this phased approach strictly. Figma reste la **source unique de vérité visuelle** : pas de mockup HTML intermédiaire, pas de screenshots téléchargés en avance — `code-dev` interroge Figma à la demande via le MCP `figma-dev` au moment de l'implémentation.
-
+---
+paths:
+  - "src/**/*.tsx"
+  - "src/**/*.scss"
 ---
 
-## Phase 1 — Overview (new screens only)
+# Implémenter depuis Figma
 
-When multiple screens need to be created:
+> La discipline de **construction**. La **vérification** du rendu est un gate séparé et indépendant (`design-validator`) → `rules/visual-quality-validation.md`. Vaut aussi pour un fix UI ad-hoc hors pipeline.
 
-- Do **NOT** dive into screen details immediately
-- Focus on **navigation flow** between screens and **shared components**
-- Draft the navigation structure and identify common components first
-- Only then proceed to Phase 2
+Figma est la **source unique de vérité visuelle** : pas de mockup HTML intermédiaire, pas de screenshots téléchargés à l'avance. On interroge Figma à la demande, au moment d'implémenter.
 
-## Phase 2 — Screen-by-screen implementation
+## Serveur et outils
 
-- Process screens **one at a time** to avoid context saturation
-- Only move to the next screen after the current one is fully complete
-- If screens already exist in the app, skip Phase 1 and start here
+Le seul serveur branché est l'**officiel `figma`** (`https://mcp.figma.com/mcp`, OAuth, seat développeur). Il marche **headless depuis une URL node-id** — pas besoin de l'app desktop. Aucune référence historique à un serveur local ou tiers (type Framelink) n'est valide.
 
-## Phase 3 — Per-screen rules (pixel perfect)
+Chaque outil prend `fileKey` + `nodeId`, extraits de l'URL `figma.com/design/:fileKey/:name?node-id=X-Y` → `nodeId = X:Y` (le `-` devient `:`).
 
-For each screen, ensure:
+| Outil | Ce qu'il rend |
+|---|---|
+| `get_metadata` | **carte structurelle** d'un frame (ids, types, noms, positions, tailles). Pour naviguer un grand écran et choisir les node-ids enfants. **Jamais sur une page entière** (>200 k caractères → overflow). Sans `nodeId` → liste les pages |
+| `get_design_context` | **l'outil principal** : code de référence + map des tokens inline + screenshot + doc du composant Figma + URLs des assets |
+| `get_variable_defs` | les variables/tokens **par leur nom** (`$background-action-high-blue-france` → `#000091`) — le pont direct vers DSFR. Sur un node layer/composant précis, pas une page (« nothing selected ») |
+| `get_screenshot` | PNG du node — URL courte + instructions curl. `maxDimension` cappe le côté long |
 
-- **Exact placement**: elements must be positioned exactly as in the design
-- **Correct text styles**: use the right DSFR text classes (`fr-h1`, `fr-text--sm`, `fr-text--xs`, etc.)
-- **No missing elements**: every element from the design must be present
-- **Interactive placeholders**: tooltips, accordions, or other interactive elements without defined content -> use lorem ipsum
-- **Spacing & margins**: check DSFR spacing classes (`fr-mb-1w`, `fr-mt-3w`, etc.) match the design
-- **Element order**: verify the DOM order matches the visual order in the design
+**Pas de Code Connect ici** : `get_code_connect_map` renvoie `{}`. Les composants DSFR vivent dans des bibliothèques **partagées (État)** qu'egapro consomme sans les posséder, donc aucun mapping ne peut y être attaché. La correspondance node → classe DSFR passe par la traduction ci-dessous.
 
-### Visual fidelity checklist (mandatory per element)
+## Règle d'or : le code rendu est une référence à traduire, pas à coller
 
-For **every** element in the Figma tree, check these properties — not just structure:
+`get_design_context` sort du **React + Tailwind avec des valeurs en dur** (`bg-[#000091]`, `px-[24px]`, `text-[18px]`). L'outil le dit lui-même. egapro est en **DSFR vanilla** (classes `fr-*` en markup, pas de wrapper React) : ne jamais garder de Tailwind, de px ni de hex brut.
 
-#### 1. Text color
+Traduire depuis le **nom du token** (`get_variable_defs`), jamais en rétro-devinant depuis un hex :
 
-Read the `fill` color from Figma nodes. If it differs from the default (`#161616`), apply the matching DSFR class. **Always validate the exact class name** against the DSFR MCP (`get_color_tokens`) or the actual CSS in `public/dsfr/` — never guess class names.
+| Figma | DSFR |
+|---|---|
+| token de couleur | `var(--<même-nom>)` ou la classe `fr-*` correspondante |
+| 12 / 14 / 16 / 18 / 20 px | `fr-text--xs` / `fr-text--sm` / *(défaut)* / `fr-text--lg` / `fr-text--xl` |
+| `fontWeight ≥ 600` | `<strong>` ou `fr-text--bold` |
+| `itemSpacing` 8 / 16 / 24 / 32 / 40 px | `1w` / `2w` / `3w` / `4w` / `5w` |
 
-Common pitfalls:
-- **Wrong class name**: e.g., `fr-text--mention-grey` does not exist, the correct class is `fr-text-mention--grey`
-- **Missing CSS file**: DSFR utility classes (colors, spacing) live in separate CSS files (e.g., `utility/colors/colors.min.css`) that may not be loaded in `layout.tsx`. A correct class with a missing CSS file silently fails.
+Le node est nommé sémantiquement (« Thème clair / Primaire / LG ») et `get_design_context` renvoie souvent sa doc DSFR : s'en servir pour retrouver le markup, **validé** via le MCP `dsfr` (`rules/styling-dsfr.md`).
 
-#### 2. Font size
+## Granularité
 
-Read `fontSize` from the Figma node's `textStyle`. Map to the correct DSFR class:
+- **Une URL = un node précis** (`?node-id=…`). Une URL de fichier générique oblige à deviner l'écran.
+- **Un frame à la fois.** Un gros node explose le contexte : `get_metadata` pour cartographier, puis `get_design_context` sur les enfants pertinents. Si une réponse est trop grosse, redescendre node par node — **jamais** retomber sur une extraction de texte à plat, qui rate les éléments structurels (encarts, lignes de source, paragraphes de description).
+- **Frames archivées** : l'ancienne version d'un écran garde le même nom préfixé `[ARCHIVE]`, posée à gauche de la nouvelle. Ne jamais implémenter ni mesurer depuis un `[ARCHIVE]`. Dans le doute sur lequel est courant, **demander le node-id à l'utilisateur**.
 
-| Figma px | DSFR class | Note |
-|---|---|---|
-| 12px | `fr-text--xs` | |
-| 14px | `fr-text--sm` | |
-| 16px | *(none)* | Default body size |
-| 18px | `fr-text--lg` | |
-| 20px | `fr-text--xl` | |
+## Les pièges qui survivent à une lecture soignée
 
-**Never assume a size** — always verify from the Figma node.
+**Le bold que l'API cache.** `get_design_context` n'expose que le style **dominant** d'un node texte : un chiffre en gras dans une phrase régulière est invisible. Dès qu'un bold est plausible — et **systématiquement sur un tableau ou une grille de données, cellule par cellule** — faire un `get_screenshot` ciblé du node. Les patterns habituels : lignes/colonnes de total, libellés de première colonne, valeurs calculées.
 
-#### 3. Font weight (critical — never skip)
+**Les marges qui s'additionnent.** Dans un conteneur flex, les marges **s'ajoutent** au `gap` (pas de collapse) : `margin-top: 32px` dans un parent `gap: 24px` fait 56px. En flux normal, les marges verticales collapsent à `max(top, bottom)`. Et les composants DSFR ont leurs **marges internes** : retirer une classe utilitaire ne les enlève pas — il faut `fr-mb-0` explicitement.
 
-**Every text node's font weight must be replicated exactly.** This is one of the most commonly missed properties. Read the `fontWeight` or `textStyle` name from the Figma node:
+**Le groupement imbriqué.** Figma groupe souvent avec des gaps différents (tableau + source à 8px, dans un conteneur à 24px). Le code doit reproduire l'imbrication, pas aplatir.
 
-- `fontWeight` >= 600 or textStyle containing "Bold"/"SemiBold" → wrap in `<strong>`, `<b>`, or use `fr-text--bold`
-- `fontWeight` < 600 or textStyle containing "Regular"/"Normal" → no bold wrapper
+**Ne pas retirer ce que le node montre.** Chaque bordure, séparateur ou sous-cellule visible dans le node doit exister dans le rendu — un tableau bordé DSFR trace une bordure sur **chaque** cellule. Le node fait autorité, pas ton interprétation du layout : dans le doute (« ces deux sous-cellules ne forment-elles pas une colonne unique ? »), confirmer **avant** de retirer. Symétriquement, **ne rien ajouter** qui n'ait pas de node correspondant (tooltip, icône, décoration).
 
-**Do not assume any cell, label, or value is regular weight by default** — always check the Figma data.
+**Mesurer, pas comparer à l'œil.** Toute dimension — largeur de colonne, bordure, gap, taille — se lit sur le node (`get_metadata` → `width`) et se confronte à la valeur **mesurée** du DOM. Deux colonnes que le Figma donne à 115px / 151px ne sont pas « 15 % / 15 % ». Ce qui « semble à peu près bon » est exactement ce qui dérive.
 
-**Figma API limitations**: the API only exposes the *dominant* style of a text node. Character-level overrides (e.g., a bold number inside a regular sentence) are invisible. When the API shows `Regular` but bold is plausible, **always download a screenshot** (`get_screenshot`) to verify visually.
+**Le texte est verbatim.** Copier le texte tel quel — « X, Y et Z » n'est pas « X, Y, Z ». Les placeholders comptent : « - % », « - € », jamais un « - » nu si le Figma affiche l'unité. Les **fautes d'orthographe** du design se corrigent silencieusement dans le code.
 
-**Tables and data grids**: always download a screenshot and verify bold **cell-by-cell**. Common bold patterns:
-- Summary/total columns or rows
-- Row labels (first column)
-- Computed values (percentages, gaps, scores)
-- Do not assume only headers are bold — data cells are often bold too
+**Les états.** Vérifier vide / partiel / rempli. Un « - % » manquant à vide est un défaut au même titre qu'une valeur fausse.
 
-#### 4. Exact text content
+## Erreurs de design
 
-Copy text **verbatim** from Figma (after fixing typos). Never paraphrase, summarize, or approximate.
-
-Example: if the design says *"X, Y et Z"*, do not write *"X, Y, Z"*.
-
-#### 5. Component structure
-
-Never assume a design system component's internal structure. Always verify with `get_component_doc` from the DSFR MCP before writing HTML.
-
-Example: a callout might look like it has a separate `<h3>` title, but the DSFR spec may expect inline bold text within a `<p>`.
-
-#### 6. Element position relative to siblings
-
-Check the Figma y-coordinate order. If an element appears between a title and a table in Figma, it must be between them in the DOM.
-
-Consider that components may encapsulate siblings: if a title is inside a component, content placed "below the title" may need to go inside that component too.
-
-#### 7. Spacing between elements
-
-For **every pair of adjacent elements**, compare the Figma spacing with the code's margin/gap:
-
-1. **Read Figma spacing**: fetch the parent frame with `get_design_context` and read its `itemSpacing` / `gap`
-2. **Map to DSFR**: `1w` = 8px, `2w` = 16px, `3w` = 24px, `4w` = 32px, `5w` = 40px
-3. **Verify the CSS value**: check in `public/dsfr/dsfr.css` — never guess (e.g., `3w` = 24px, not 12px)
-4. **Flex vs. normal flow**: in flex containers, margins **add to** gap (no collapsing). In normal flow, vertical margins collapse to `max(top, bottom)`. A `margin-top: 32px` child inside a `gap: 24px` flex parent = 56px total, not 32px.
-5. **Nesting groups**: Figma often groups elements with different gap values (e.g., table + source in a group with 8px gap, inside a container with 24px gap). The code must reproduce this nesting.
-6. **Design system default margins**: framework components (stepper, breadcrumb, etc.) have built-in margins from CSS. Removing a utility class (e.g., `fr-mb-3w`) doesn't remove the base margin — use `fr-mb-0` to explicitly zero it.
-
-#### 8. Nested styling
-
-When a sentence contains mixed styles (e.g., *"écart de **4,5 %**"*), the bold portion must be wrapped in `<strong>`. Do not flatten styles.
-
-#### 9. No phantom elements
-
-Do not add elements (tooltips, icons, decorations) that are not present in the Figma design. Every element must have a corresponding Figma node.
-
----
-
-## Per-screen verification method (mandatory)
-
-When comparing a Figma screen to existing code, **never** rely on a flat text extraction (`text:` lines). Instead:
-
-1. **Fetch the content frame** with full depth via `get_design_context`
-2. **Walk the node tree top-to-bottom**, listing every visible element in order: headings, paragraphs, alerts, tables, source lines, accordions, buttons, etc.
-3. **Build a structural checklist** — one line per element with its type, text, and position relative to siblings
-4. **Compare element-by-element** against the current code's JSX, checking:
-   - Is every Figma element present in the code?
-   - Is the order identical?
-   - Are conditional elements correctly scoped?
-5. **Flag every discrepancy** before writing any code
-
-This prevents missing structural elements (alert blocks, source lines, description paragraphs) that a flat text search would overlook.
-
----
-
-## Phase 4 — Final verification
-
-L'implémentation pixel-perfect (Phases 1–3) repose sur la **lecture structurelle** de l'arbre Figma via `mcp__figma-dev__get_figma_data` — chaque propriété (color, fontSize, fontWeight, itemSpacing) est mappée à sa classe / token DSFR. Quand cette lecture a été faite proprement, la Phase 4 sert juste à **fermer la boucle** : confirmer que le rendu réel correspond au plan, et produire les artefacts pour la review humaine.
-
-### 1. Sanity check structurel
-
-Reparcourir mentalement la checklist Phase 3 sur l'écran fini : couleurs, fontSize, fontWeight (cell-by-cell sur les tableaux), texte verbatim, ordre des éléments, espacements. Si un doute persiste sur un point d'ambiguïté de l'API (typiquement les overrides char-level de bold dans un tableau), faire un appel ciblé à `mcp__figma-dev__download_figma_images` sur le node concerné pour confirmer visuellement.
-
-### 2. Screenshots dev server pour la review humaine
-
-Avec un browser MCP (Playwright ou next-devtools `browser_eval`) :
-
-1. **Navigate** vers la page dans le dev server
-2. **Take a screenshot** du rendu (desktop 1280×800 + mobile 375×667)
-3. **Joindre les images au body de la PR** — c'est le signal visuel principal pour le reviewer humain
-
-Si aucun browser MCP n'est dispo, demander à l'utilisateur de fournir le screenshot.
-
-### Points qui échappent souvent à la lecture structurelle seule
-
-- Wrong DSFR class name **qui n'existe pas** (ex : `fr-text--mention-grey` au lieu de `fr-text-mention--grey`) → la classe est silencieusement ignorée, le token attendu n'est pas appliqué. Vérifier dans `public/dsfr/dsfr.css` que la classe existe bien.
-- DSFR utility class correcte mais **CSS file pas chargé** dans `layout.tsx` (ex : `utility/colors/colors.min.css`). Confirmer dans le DOM que la prop CSS est bien appliquée.
-- Marges par défaut d'un composant DSFR qui s'additionnent à tes utilities (`fr-mb-3w` qui s'ajoute à la marge interne du composant).
-
-Ces 3 cas typiques sont les seuls où un screenshot du rendu apporte une info que la lecture structurelle ne donne pas.
-
----
-
-## Design errors & typos
-
-- If **illogical or inconsistent elements** appear in the design, do **NOT** implement them
-- **Notify the user** about the inconsistency and ask how to proceed
-- Examples: duplicate elements, contradictory states, impossible layouts
-- If the design contains **spelling mistakes** (e.g., "horraire" instead of "horaire"), fix them silently in the code — do not reproduce typos
-
----
-
-## Tooling
-
-- Always use the **`figma`** MCP server (`get_design_context`) to fetch design data
-- Use `search_components` and `get_component_doc` from the **`dsfr`** MCP to verify component structure
-- When Figma data is too large, **do NOT fall back to flat text extraction**. Instead, fetch child nodes individually and walk the tree structure to build the element checklist described above
-- Use `get_screenshot` to get PNG screenshots for visual comparison (especially for tables, bold verification, and Phase 4 validation)
+Si le design contient des éléments **illogiques ou contradictoires** (doublons, états impossibles, layout irréalisable), ne pas les implémenter : **prévenir l'utilisateur** et demander comment procéder.

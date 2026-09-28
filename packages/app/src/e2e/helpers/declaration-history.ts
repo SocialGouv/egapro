@@ -8,7 +8,11 @@ function createConnection() {
 	return postgres(url, { max: 1 });
 }
 
-export async function insertHistoryEvents(count: number, year: number) {
+export async function insertHistoryEvents(
+	count: number,
+	year: number,
+	options: { firstEventAt?: Date } = {},
+) {
 	const sql = createConnection();
 	try {
 		const decl = await sql`
@@ -19,8 +23,10 @@ export async function insertHistoryEvents(count: number, year: number) {
 
 		await sql`DELETE FROM app_declaration_status_history WHERE declaration_id = ${declarationId}`;
 
+		const firstEventAt = options.firstEventAt?.getTime() ?? Date.now();
+
 		for (let i = 0; i < count; i++) {
-			const createdAt = new Date(Date.now() - i * 60_000);
+			const createdAt = new Date(firstEventAt - i * 60_000);
 			await sql`
 				INSERT INTO app_declaration_status_history
 				(id, declaration_id, event_type, created_at)

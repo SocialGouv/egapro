@@ -1,0 +1,210 @@
+{
+	"standard": "rgaa",
+	"secondaryMappings": [
+		{
+			"standard": "rgaa",
+			"ruleId": "dyn-live-region",
+			"criterion": "7.4",
+			"note": {
+				"fr": "Ara classe la mise à jour d'une région live sous 7.4 (changement de contexte) ; activé pour egapro (cf. #3873).",
+				"en": "Ara classifies live-region updates under 7.4; enabled for egapro (see #3873)."
+			}
+		}
+	],
+	"sample": {
+		"pages": [
+			{
+				"id": "accueil",
+				"name": "Page d'accueil",
+				"url": "http://localhost:3000/",
+				"sources": ["src/app/page.tsx", "src/modules/home/HomePage.tsx"]
+			},
+			{
+				"id": "consultation-publique",
+				"name": "Consultation publique des résultats",
+				"url": "http://localhost:3000/index-egapro/recherche",
+				"sources": [
+					"src/app/index-egapro/recherche/page.tsx",
+					"src/modules/consultation/ConsultationSearchPage.tsx",
+					"src/modules/consultation/PublicSearchForm.tsx",
+					"src/modules/consultation/SearchResultItem.tsx",
+					"src/modules/consultation/SearchPagination.tsx",
+					"src/modules/consultation/DownloadDataModal.tsx",
+					"src/modules/shared/MultiSelectField.tsx"
+				]
+			},
+			{
+				"id": "consultation-entreprise",
+				"name": "Consultation publique — fiche entreprise",
+				"url": "http://localhost:3000/index-egapro/entreprise/998900001",
+				"sources": [
+					"src/app/index-egapro/entreprise/[siren]/page.tsx",
+					"src/modules/consultation/CompanyConsultationPage.tsx",
+					"src/modules/consultation/CompanyHeader.tsx",
+					"src/modules/consultation/RemunerationTab.tsx",
+					"src/modules/consultation/RepresentationTab.tsx",
+					"src/modules/consultation/PayGapSection.tsx",
+					"src/modules/consultation/QuartileSection.tsx",
+					"src/modules/consultation/YearSelector.tsx",
+					"src/modules/shared/IndicatorCard.tsx",
+					"src/modules/shared/DataDetailsAccordion.tsx",
+					"src/modules/shared/GenderBar.tsx"
+				]
+			},
+			{
+				"id": "nous-contacter",
+				"name": "Nous contacter",
+				"url": "http://localhost:3000/aide/nous-contacter",
+				"sources": ["src/app/aide/nous-contacter/page.tsx"]
+			},
+			{
+				"id": "mentions-legales",
+				"name": "Mentions légales",
+				"url": "http://localhost:3000/mentions-legales",
+				"sources": ["src/app/mentions-legales/page.tsx"]
+			},
+			{
+				"id": "declaration-accessibilite",
+				"name": "Déclaration d'accessibilité",
+				"url": "http://localhost:3000/declaration-accessibilite",
+				"sources": ["src/app/declaration-accessibilite/page.tsx"]
+			},
+			{
+				"id": "plan-du-site",
+				"name": "Plan du site",
+				"url": "http://localhost:3000/plan-du-site",
+				"sources": ["src/app/plan-du-site/page.tsx"]
+			},
+			{
+				"id": "aide",
+				"name": "Aide",
+				"url": "http://localhost:3000/aide",
+				"sources": ["src/app/aide/page.tsx"]
+			},
+			{
+				"id": "login",
+				"name": "Authentification",
+				"url": "http://localhost:3000/login",
+				"sources": ["src/app/login/page.tsx"]
+			},
+			{
+				"id": "donnees-personnelles",
+				"name": "Données personnelles",
+				"url": "http://localhost:3000/donnees-personnelles",
+				"sources": ["src/app/donnees-personnelles/page.tsx"]
+			},
+			{
+				"id": "faq",
+				"name": "Foire aux questions",
+				"url": "http://localhost:3000/faq",
+				"sources": ["src/app/faq/page.tsx"]
+			},
+			{
+				"id": "referents",
+				"name": "Référents égalité professionnelle",
+				"url": "http://localhost:3000/referents",
+				"sources": ["src/app/referents/page.tsx"]
+			},
+			{
+				"id": "mon-espace",
+				"name": "Mon espace",
+				"url": "http://localhost:3000/mon-espace",
+				"sources": ["src/app/mon-espace/page.tsx"],
+				"auth": true,
+				"notes": "Connexion ProConnect requise (compte de test de la suite E2E)."
+			},
+			{
+				"id": "declaration-etape-2",
+				"name": "Déclaration — étape 2 sur 6",
+				"url": "http://localhost:3000/declaration-remuneration/etape/2",
+				"auth": true,
+				"notes": "Formulaire le plus dense du tunnel : saisie des effectifs. Déclaration en brouillon."
+			},
+			{
+				"id": "declaration-recapitulatif",
+				"name": "Déclaration — récapitulatif",
+				"url": "http://localhost:3000/declaration-remuneration/recapitulatif",
+				"auth": true,
+				"notes": "Page de tableaux récapitulatifs avant transmission."
+			},
+			{
+				"id": "parcours-conformite",
+				"name": "Parcours de conformité — choix du parcours",
+				"url": "http://localhost:3000/declaration-remuneration/parcours-conformite",
+				"auth": true,
+				"notes": "Déclaration transmise avec un écart ≥ 5 %."
+			},
+			{
+				"id": "avis-cse-etape-1",
+				"name": "Avis du CSE — étape 1 sur 2",
+				"url": "http://localhost:3000/avis-cse/etape/1",
+				"auth": true,
+				"notes": "Entreprise ayant déclaré un CSE."
+			},
+			{
+				"id": "admin",
+				"name": "Backoffice",
+				"url": "http://localhost:3000/admin",
+				"sources": ["src/app/admin/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "gestion-des-cookies",
+				"name": "Gestion des cookies",
+				"url": "http://localhost:3000/gestion-des-cookies",
+				"sources": ["src/app/gestion-des-cookies/page.tsx"]
+			},
+			{
+				"id": "admin-declarations",
+				"name": "Backoffice — déclarations",
+				"url": "http://localhost:3000/admin/declarations",
+				"sources": ["src/app/admin/declarations/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "admin-impersonate",
+				"name": "Backoffice — mimoquer une entreprise",
+				"url": "http://localhost:3000/admin/impersonate",
+				"sources": ["src/app/admin/impersonate/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "admin-liste-referents",
+				"name": "Backoffice — liste des référents",
+				"url": "http://localhost:3000/admin/liste-referents",
+				"sources": ["src/app/admin/liste-referents/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "admin-parametres",
+				"name": "Backoffice — paramètres",
+				"url": "http://localhost:3000/admin/parametres",
+				"sources": ["src/app/admin/parametres/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			},
+			{
+				"id": "admin-stats",
+				"name": "Backoffice — statistiques",
+				"url": "http://localhost:3000/admin/stats",
+				"sources": ["src/app/admin/stats/page.tsx"],
+				"auth": true,
+				"notes": "Requiert un compte listé dans ADMIN_EMAILS."
+			}
+		],
+		"transverse": [
+			"En-tête (marque République française, nom du service, accès rapide)",
+			"Navigation principale et menu mobile",
+			"Fil d'Ariane",
+			"Pied de page",
+			"Liens d'évitement",
+			"Modale de réglage d'affichage (thème clair/sombre)",
+			"Modale de profil",
+			"Bandeau de mimoquage (administrateurs)"
+		]
+	}
+}

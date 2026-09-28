@@ -210,7 +210,10 @@ while read -r result; do
             bash "$SCRIPT_DIR/log_event.sh" "$AID" RATE_LIMITED "ticket=$TICKET retry_in=${RETRY_IN}s"
             echo "  ⏸ ticket #$TICKET rate-limited (loop driver will back off)"
             N_RATE_LIMITED=$((N_RATE_LIMITED + 1))
-            # Board status is left as-is (typically still In progress).
+            # Back to To Do so the loop can pick the ticket up again once the
+            # back-off elapses: dispatch_plan only ever considers To Do, so
+            # leaving it In progress stranded the ticket permanently.
+            bash "$SCRIPT_DIR/set_ticket_status.sh" "$TICKET" "To Do" >/dev/null 2>&1 || true
             ;;
 
         failed)

@@ -23,6 +23,9 @@ vi.mock("~/trpc/server", () => ({
 		company: {
 			get: vi.fn(),
 		},
+		jointEvaluation: {
+			getFile: vi.fn(),
+		},
 	},
 }));
 
@@ -31,24 +34,31 @@ vi.mock("../JointEvaluationForm", () => ({
 	JointEvaluationForm: ({
 		jointEvaluationDeadline,
 		declarationDate,
+		existingFile,
 	}: {
 		jointEvaluationDeadline: Date;
 		declarationDate: string;
+		existingFile: { fileName: string } | null;
 	}) => (
 		<div>
 			<span data-testid="joint-evaluation-deadline">
 				{jointEvaluationDeadline.toLocaleDateString("fr-FR")}
 			</span>
 			<span data-testid="declaration-date">{declarationDate}</span>
+			<span data-testid="existing-file">
+				{existingFile?.fileName ?? "none"}
+			</span>
 		</div>
 	),
 }));
 
 import { redirect } from "next/navigation";
+import { formatLongDate, getDefaultCampaignDeadlines } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
 const DECLARATION_YEAR = 2025;
+const DEFAULT_DEADLINES = getDefaultCampaignDeadlines(DECLARATION_YEAR);
 
 function mockDeclaration(
 	pathChoices: {
@@ -69,6 +79,7 @@ function mockDeclaration(
 		},
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
+	vi.mocked(api.jointEvaluation.getFile).mockResolvedValue(null as never);
 }
 
 describe("JointEvaluationPage", () => {
@@ -92,11 +103,13 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
+			DEFAULT_DEADLINES.decl1JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
 		);
 	});
 
-	it("renders the form when secondDeclarationPathChoice is joint_evaluation (revised round)", async () => {
+	it("serves the round-2 deadline, never the round-1 one, on the revised round", async () => {
 		mockDeclaration(
 			{
 				firstDeclarationPathChoice: "corrective_action",
@@ -108,8 +121,35 @@ describe("JointEvaluationPage", () => {
 		const page = await JointEvaluationPage();
 		render(page);
 
-		expect(screen.getByTestId("joint-evaluation-deadline")).toHaveTextContent(
-			new Date("2025-08-01T00:00:00").toLocaleDateString("fr-FR"),
+		const deadline = screen.getByTestId("joint-evaluation-deadline");
+		expect(deadline).toHaveTextContent(
+			DEFAULT_DEADLINES.decl2JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
+		);
+		expect(deadline).not.toHaveTextContent(
+			DEFAULT_DEADLINES.decl1JointEvaluationDeadline.toLocaleDateString(
+				"fr-FR",
+			),
+		);
+	});
+
+	it("never serves the CSE opinion deadline, which closes a later step", async () => {
+		mockDeclaration(
+			{
+				firstDeclarationPathChoice: "corrective_action",
+				secondDeclarationPathChoice: "joint_evaluation",
+			},
+			new Date("2025-06-15"),
+		);
+
+		const page = await JointEvaluationPage();
+		render(page);
+
+		expect(
+			screen.getByTestId("joint-evaluation-deadline"),
+		).not.toHaveTextContent(
+			DEFAULT_DEADLINES.decl2CseOpinionDeadline.toLocaleDateString("fr-FR"),
 		);
 	});
 
@@ -123,7 +163,7 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			new Date("2025-06-15").toLocaleDateString("fr-FR"),
+			formatLongDate(new Date("2025-06-15")),
 		);
 	});
 
@@ -134,7 +174,32 @@ describe("JointEvaluationPage", () => {
 		render(page);
 
 		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			new Date().toLocaleDateString("fr-FR"),
+			formatLongDate(new Date()),
 		);
+	});
+
+	it("passes the already-deposited report down to the form (#4222)", async () => {
+		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null);
+		vi.mocked(api.jointEvaluation.getFile).mockResolvedValue({
+			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			fileName: "rapport-evaluation-conjointe.pdf",
+			uploadedAt: new Date("2025-06-20"),
+		} as never);
+
+		const page = await JointEvaluationPage();
+		render(page);
+
+		expect(screen.getByTestId("existing-file")).toHaveTextContent(
+			"rapport-evaluation-conjointe.pdf",
+		);
+	});
+
+	it("passes no report down when none has been deposited yet", async () => {
+		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null);
+
+		const page = await JointEvaluationPage();
+		render(page);
+
+		expect(screen.getByTestId("existing-file")).toHaveTextContent("none");
 	});
 });

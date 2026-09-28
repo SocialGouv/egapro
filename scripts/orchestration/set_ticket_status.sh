@@ -9,7 +9,7 @@ fi
 # set_ticket_status.sh <ticket_number> <status_label>
 #
 # Moves an issue to the given status on the EGAPRO V2 GitHub project board.
-# Encapsulates the 3 GraphQL calls described in .claude/rules/github-board.md
+# Encapsulates the 3 GraphQL calls described in .claude/pipeline/board.md
 # (snippets 1, 2, 3, 4) into a single command:
 #
 #   1. Resolve issue node ID (or get it from cache)
@@ -38,6 +38,9 @@ fi
 
 set -euo pipefail
 
+# Resolve script dir to locate sibling scripts (set_ticket_date.sh).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <ticket_number> <status_label>" >&2
     echo "  status_label: Backlog | To Do | In progress | In review" >&2
@@ -51,7 +54,7 @@ PROJECT_ID="${EGAPRO_PROJECT_ID:-PVT_kwDOAh0HH84BFsK7}"
 STATUS_FIELD_ID="${EGAPRO_STATUS_FIELD_ID:-PVTSSF_lADOAh0HH84BFsK7zg29EI8}"
 
 # Map human-readable label to single-select option ID
-# (cf. .claude/rules/github-board.md)
+# (cf. .claude/pipeline/board.md)
 case "$STATUS_RAW" in
     Backlog|backlog)               OPTION_ID="f75ad846" ;;
     "To Do"|"To do"|"to do"|Todo|todo) OPTION_ID="61e4505c" ;;
@@ -133,3 +136,17 @@ mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
   --jq '.data.updateProjectV2ItemFieldValue.projectV2Item.id' >/dev/null
 
 echo "ticket #$TICKET → $STATUS_RAW"
+
+# Stamp the Start date on the first "In progress" transition (idempotent).
+# This is the single choke point for "implementation started" across every mode
+# (/implement task/bug, code-dev, epic_loop), so the board's Start date column
+# is populated automatically. Best-effort: never fail the status move on this.
+if [ "$OPTION_ID" = "47fc9ee4" ]; then
+    # Best-effort: a date failure must never fail the status move. But it must
+    # not be silent either — stderr is left open and a warning is emitted, so a
+    # dropped stamp shows up instead of leaving a ticket In progress with an
+    # empty Start date and no trace of why.
+    if ! bash "$SCRIPT_DIR/set_ticket_date.sh" "$TICKET" start --if-empty >/dev/null; then
+        echo "WARNING: ticket #$TICKET moved to In progress but its Start date could not be stamped" >&2
+    fi
+fi

@@ -88,3 +88,51 @@ export const getCompletionFunnelSchema = z.object({
 export type GetCompletionFunnelInput = z.infer<
 	typeof getCompletionFunnelSchema
 >;
+
+/**
+ * Input for `adminStats.getMatomoFunnel`.
+ *
+ * Same year/workforce filter couple as the sibling procedures. The workforce
+ * bucket only segments the declaration funnel — `cse_opinion` /
+ * `compliance_path` emit only the campaign-year dimension, so the service
+ * applies `sizeRange` to the declaration funnel alone.
+ */
+export const getMatomoFunnelSchema = z.object({
+	year: z.number().int().min(2000).max(2100),
+	sizeRange: z.enum(COMPANY_SIZE_RANGE_KEYS).optional(),
+});
+
+export type GetMatomoFunnelInput = z.infer<typeof getMatomoFunnelSchema>;
+
+/**
+ * Shape of a single row returned by the Matomo Reporting API `Events.*`
+ * methods. Only the fields the funnel service consumes are validated; any extra
+ * Matomo columns (nb_visits, nb_uniq_visitors…) are stripped.
+ */
+export const matomoEventRowSchema = z.object({
+	label: z.string(),
+	nb_events: z.number().optional(),
+	idsubdatatable: z.union([z.number(), z.string()]).optional(),
+	// `nb_visits` is returned by `DevicesDetection.getType` (device breakdown);
+	// `avg_event_value` by `Events.*` for actions carrying a numeric value (mean
+	// import duration). Matomo occasionally serialises the average as a string.
+	nb_visits: z.number().optional(),
+	avg_event_value: z.union([z.number(), z.string()]).optional(),
+});
+
+export type MatomoEventRow = z.infer<typeof matomoEventRowSchema>;
+
+/**
+ * Response of a Matomo Reporting API `Events.*` call: either an array of event
+ * rows, or an error object (`{ result, message }`) Matomo returns on a bad
+ * request. Validating at this external boundary lets `matomo.ts` degrade a
+ * malformed/unexpected response to an empty funnel instead of trusting an
+ * unchecked `as` cast.
+ */
+export const matomoReportingResponseSchema = z.union([
+	z.array(matomoEventRowSchema),
+	z.object({
+		result: z.string().optional(),
+		message: z.string().optional(),
+	}),
+]);

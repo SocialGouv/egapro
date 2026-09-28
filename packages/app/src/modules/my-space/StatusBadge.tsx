@@ -20,6 +20,14 @@ const BADGE_CONFIG: Record<
 		label: "Effectué",
 		className: "fr-badge fr-badge--sm fr-badge--success fr-badge--no-icon",
 	},
+	closed_incomplete: {
+		label: "Clôturée - incomplète",
+		className: "fr-badge fr-badge--sm fr-badge--warning fr-badge--no-icon",
+	},
+	closed_not_done: {
+		label: "Clôturée - non effectuée",
+		className: "fr-badge fr-badge--sm fr-badge--error fr-badge--no-icon",
+	},
 };
 
 export function StatusBadge({ status }: Props) {

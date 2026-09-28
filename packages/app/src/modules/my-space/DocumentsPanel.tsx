@@ -1,5 +1,13 @@
 "use client";
 
+import { getReferenceYearFor, isDeclarationSubmitted } from "~/modules/domain";
+import {
+	API_DECLARATION_PDF,
+	API_PREFILL_PDF,
+	API_REPRESENTATION_PDF,
+	API_TRANSMITTED_PDF,
+} from "~/modules/routes";
+import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -13,45 +21,79 @@ type DocumentResource = {
 	href: string;
 };
 
-function getResources(declaration: DeclarationItem): DocumentResource[] {
+function resourceSubtitle(declaration: DeclarationItem): string {
+	return formatDocumentSubtitle(
+		declaration.year,
+		getReferenceYearFor(declaration.year),
+	);
+}
+
+function getRepresentationResources(
+	declaration: DeclarationItem,
+): DocumentResource[] {
+	if (declaration.status !== "done" || declaration.notSubject) return [];
+	const referenceYear = getReferenceYearFor(declaration.year);
+	return [
+		{
+			title: "Télécharger le récapitulatif de la déclaration",
+			subtitle: resourceSubtitle(declaration),
+			href: `${API_REPRESENTATION_PDF}?year=${referenceYear}`,
+		},
+	];
+}
+
+function getRemunerationResources(
+	declaration: DeclarationItem,
+): DocumentResource[] {
 	const resources: DocumentResource[] = [];
-	if (declaration.type !== "remuneration") return resources;
+	const subtitle = resourceSubtitle(declaration);
 
-	const subtitle = `Année ${declaration.year} au titre des données ${declaration.year - 1}`;
-
-	// Available as soon as the GIP MDS prefill has been loaded for this year.
 	if (declaration.hasPrefillData) {
 		resources.push({
 			title: "Télécharger les données préremplies (issues des données DSN)",
 			subtitle,
-			href: `/api/prefill-pdf?year=${declaration.year}`,
+			href: `${API_PREFILL_PDF}?year=${declaration.year}`,
 		});
 	}
 
-	// Available once the initial declaration has been submitted.
-	if (declaration.status === "done") {
+	if (isDeclarationSubmitted(declaration.fsmStatus)) {
 		resources.push({
 			title: "Télécharger le récapitulatif de la déclaration des indicateurs",
 			subtitle,
-			href: `/api/declaration-pdf?year=${declaration.year}`,
-		});
-		resources.push({
-			title: "Télécharger le récapitulatif des éléments transmis",
-			subtitle,
-			href: `/api/transmitted-pdf?year=${declaration.year}`,
+			href: `${API_DECLARATION_PDF}?year=${declaration.year}`,
 		});
 	}
 
-	// Available once the second (corrective) declaration has been submitted.
 	if (declaration.hasSubmittedSecondDeclaration) {
 		resources.push({
 			title: "Télécharger le récapitulatif de la seconde déclaration",
 			subtitle,
-			href: `/api/declaration-pdf?type=correction&year=${declaration.year}`,
+			href: `${API_DECLARATION_PDF}?type=correction&year=${declaration.year}`,
+		});
+	}
+
+	if (
+		declaration.hasSubmittedCseOpinion ||
+		declaration.hasJointEvaluationFile
+	) {
+		resources.push({
+			title: "Télécharger le récapitulatif des éléments transmis",
+			subtitle,
+			href: `${API_TRANSMITTED_PDF}?year=${declaration.year}`,
 		});
 	}
 
 	return resources;
+}
+
+function getResources(declaration: DeclarationItem): DocumentResource[] {
+	if (declaration.type === "representation") {
+		return getRepresentationResources(declaration);
+	}
+	if (declaration.type === "remuneration") {
+		return getRemunerationResources(declaration);
+	}
+	return [];
 }
 
 export function getDocumentResourceCount(declaration: DeclarationItem): number {
@@ -97,21 +139,11 @@ export function DocumentsPanel({ declaration }: Props) {
 						<ul className={styles.documentList}>
 							{resources.map((resource) => (
 								<li className={styles.documentItem} key={resource.href}>
-									<div className="fr-card fr-card--sm fr-card--download fr-enlarge-link">
-										<div className="fr-card__body">
-											<div className="fr-card__content">
-												<h3 className="fr-card__title">
-													<a download href={resource.href}>
-														{resource.title}
-													</a>
-												</h3>
-												<p className="fr-card__desc">{resource.subtitle}</p>
-												<div className="fr-card__end">
-													<p className="fr-card__detail">PDF</p>
-												</div>
-											</div>
-										</div>
-									</div>
+									<DownloadCard
+										description={resource.subtitle}
+										href={resource.href}
+										title={resource.title}
+									/>
 								</li>
 							))}
 						</ul>

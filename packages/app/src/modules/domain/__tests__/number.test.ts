@@ -6,6 +6,7 @@ import {
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
+	toNullableNumber,
 } from "../shared/number";
 
 describe("parseNumber", () => {
@@ -27,6 +28,24 @@ describe("parseNumber", () => {
 
 	it("returns NaN for empty string", () => {
 		expect(parseNumber("")).toBeNaN();
+	});
+});
+
+describe("toNullableNumber", () => {
+	it("returns null for empty values", () => {
+		expect(toNullableNumber(null)).toBeNull();
+		expect(toNullableNumber(undefined)).toBeNull();
+		expect(toNullableNumber("")).toBeNull();
+	});
+
+	it("parses numeric strings and numbers", () => {
+		expect(toNullableNumber("60.00")).toBe(60);
+		expect(toNullableNumber(20.4)).toBe(20.4);
+	});
+
+	it("returns null for non-finite values", () => {
+		expect(toNullableNumber("abc")).toBeNull();
+		expect(toNullableNumber(Number.NaN)).toBeNull();
 	});
 });
 

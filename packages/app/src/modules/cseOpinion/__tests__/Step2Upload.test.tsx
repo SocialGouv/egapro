@@ -6,18 +6,37 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { FILENAME_ERROR_MESSAGES, SUBMIT_LABEL } from "~/modules/shared";
+import { computeContentTypeColumns } from "../contentTypeColumns";
 import { Step2Upload } from "../Step2Upload";
+import type {
+	ContentTypeColumn,
+	FileContentTypeAssociation,
+	StoredFileContentType,
+	UploadedFile,
+} from "../types";
 
 const pushMock = vi.fn();
 const refreshMock = vi.fn();
-const invalidateMock = vi.fn();
-let deleteMutationOptions: {
-	onSuccess?: () => void;
-	onError?: () => void;
-} = {};
+const invalidateFilesMock = vi.fn();
+const invalidateTypesMock = vi.fn();
 const deleteMutateMock = vi.fn();
 const finalizeMutateAsyncMock = vi.fn();
+const setTypesMutateMock = vi.fn();
+let deleteMutationOptions: {
+	onSuccess?: (data: unknown, variables: { fileId: string }) => void;
+	onError?: () => void;
+} = {};
+let setTypesMutationOptions: {
+	onSuccess?: (
+		data: unknown,
+		variables: { associations: FileContentTypeAssociation[] },
+	) => void;
+	onError?: () => void;
+} = {};
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
@@ -37,15 +56,9 @@ vi.mock("~/trpc/react", () => ({
 	api: {
 		cseOpinion: {
 			deleteFile: {
-				useMutation: (
-					options: { onSuccess?: () => void; onError?: () => void } = {},
-				) => {
+				useMutation: (options: typeof deleteMutationOptions = {}) => {
 					deleteMutationOptions = options;
-					return {
-						mutate: deleteMutateMock,
-						isPending: false,
-						error: null,
-					};
+					return { mutate: deleteMutateMock, isPending: false, error: null };
 				},
 			},
 			finalize: {
@@ -55,10 +68,21 @@ vi.mock("~/trpc/react", () => ({
 					error: null,
 				}),
 			},
+			setFileContentTypes: {
+				useMutation: (options: typeof setTypesMutationOptions = {}) => {
+					setTypesMutationOptions = options;
+					return {
+						mutate: setTypesMutateMock,
+						isPending: false,
+						error: null,
+					};
+				},
+			},
 		},
 		useUtils: () => ({
 			cseOpinion: {
-				getFiles: { invalidate: invalidateMock },
+				getFiles: { invalidate: invalidateFilesMock },
+				getFileContentTypes: { invalidate: invalidateTypesMock },
 			},
 		}),
 	},
@@ -68,27 +92,89 @@ const { uploadFile: uploadFileMock } = (await import(
 	"~/modules/shared/uploadFile"
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
+const SINGLE_COLUMN = computeContentTypeColumns({
+	hasSecondDeclaration: false,
+	firstDeclGapConsulted: false,
+	secondDeclGapConsulted: null,
+	firstDeclGapHigh: false,
+	secondDeclGapHigh: false,
+});
+
+const TWO_ACCURACY_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: true,
+	firstDeclGapConsulted: false,
+	secondDeclGapConsulted: false,
+	firstDeclGapHigh: false,
+	secondDeclGapHigh: false,
+});
+
+const DUAL_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: true,
+	firstDeclGapConsulted: true,
+	secondDeclGapConsulted: true,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: true,
+});
+
+// Two distinct content types on a single declaration — used to race two
+// independent setFileContentTypes calls against each other (#4102).
+const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
+	hasSecondDeclaration: false,
+	firstDeclGapConsulted: true,
+	secondDeclGapConsulted: null,
+	firstDeclGapHigh: true,
+	secondDeclGapHigh: false,
+});
+
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
 }
 
-function makeFile(name: string, id: string) {
-	return { id, fileName: name, uploadedAt: new Date("2026-03-15") };
+function makeFile(name: string, id: string): UploadedFile {
+	return {
+		id,
+		fileName: name,
+		uploadedAt: new Date("2026-03-15"),
+		fileSize: 63365,
+	};
+}
+
+function renderStep(
+	props: {
+		existingFiles?: UploadedFile[];
+		columns?: ContentTypeColumn[];
+		initialAssociations?: StoredFileContentType[];
+		isReadOnly?: boolean;
+	} = {},
+) {
+	return render(
+		<LockProvider isReadOnly={props.isReadOnly ?? false}>
+			<Step2Upload
+				columns={props.columns ?? SINGLE_COLUMN}
+				declarationYear={2026}
+				existingFiles={props.existingFiles}
+				initialAssociations={props.initialAssociations}
+				siren="123456789"
+			/>
+		</LockProvider>,
+	);
 }
 
 describe("Step2Upload", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		refreshMock.mockReset();
-		invalidateMock.mockReset();
+		invalidateFilesMock.mockReset();
+		invalidateTypesMock.mockReset();
 		deleteMutateMock.mockReset();
 		finalizeMutateAsyncMock.mockReset();
 		finalizeMutateAsyncMock.mockResolvedValue({ success: true });
+		setTypesMutateMock.mockReset();
 		uploadFileMock.mockReset();
 		deleteMutationOptions = {};
+		setTypesMutationOptions = {};
 		// jsdom doesn't implement <dialog>; stub showModal/close so the dialog
-		// actually toggles its `open` attribute and its contents become visible
-		// to Testing Library queries.
+		// actually toggles its `open` attribute and its contents become visible.
 		HTMLDialogElement.prototype.showModal = function showModal() {
 			this.setAttribute("open", "");
 		};
@@ -102,7 +188,7 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the page title", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep();
 
 		expect(
 			screen.getByText("Transmettre l'avis ou les avis du CSE"),
@@ -110,22 +196,31 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the stepper at step 2", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep();
 
 		expect(screen.getByText(/Étape 2 sur 2/)).toBeInTheDocument();
 	});
 
 	it("renders the file upload instructions", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep();
 
 		expect(
-			screen.getByText(/Veuillez importer l'ensemble des avis de votre CSE/),
+			screen.getByText(/renseigner le type de document correspondant/),
 		).toBeInTheDocument();
 		expect(screen.getByText(/Taille maximale.*pdf/)).toBeInTheDocument();
 	});
 
-	it("renders the dropzone with select button", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("renders the dropzone with a single-file select button when one avis is required", () => {
+		renderStep();
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeInTheDocument();
+		expect(screen.getByText("ou glisser-le ici")).toBeInTheDocument();
+	});
+
+	it("renders a multi-file select button when several avis are required", () => {
+		renderStep({ columns: TWO_ACCURACY_COLUMNS });
 
 		expect(
 			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
@@ -133,64 +228,59 @@ describe("Step2Upload", () => {
 		expect(screen.getByText("ou glisser-les ici")).toBeInTheDocument();
 	});
 
-	it("renders a hidden file input", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("renders a hidden file input accepting pdf", () => {
+		renderStep();
 
 		const fileInput = getFileInput();
-		expect(fileInput).toBeInTheDocument();
 		expect(fileInput).toHaveAttribute("type", "file");
 		expect(fileInput).toHaveAttribute("accept", ".pdf");
 	});
 
 	it("renders the opinion summary box", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep({ columns: DUAL_COLUMNS });
 
 		expect(screen.getByText("Avis CSE à transmettre :")).toBeInTheDocument();
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 	});
 
-	it("renders previous link and add file button", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("renders previous link and submit button", () => {
+		renderStep();
 
 		const previousLink = screen.getByRole("link", { name: /Précédent/ });
-		expect(previousLink).toBeInTheDocument();
 		expect(previousLink).toHaveAttribute("href", "/avis-cse/etape/1");
-
 		expect(
-			screen.getByRole("button", { name: /Soumettre/ }),
+			screen.getByRole("button", { name: "Transmettre" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows error when submitting without file", async () => {
-		const user = userEvent.setup();
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("keeps the submit button enabled even before any file is added", () => {
+		renderStep();
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
-
-		expect(
-			screen.getByText(
-				"Veuillez sélectionner au moins un fichier avant de soumettre.",
-			),
-		).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
 	});
 
-	it("sets aria-invalid on file input when error occurs", async () => {
-		const user = userEvent.setup();
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("does not render the matrix when there is no existing file", () => {
+		renderStep();
 
-		const fileInput = getFileInput();
-		expect(fileInput).toHaveAttribute("aria-invalid", "false");
-
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
-
-		expect(fileInput).toHaveAttribute("aria-invalid", "true");
+		expect(screen.queryByRole("table")).not.toBeInTheDocument();
 	});
 
-	it("shows error for non-PDF file", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+	it("shows the extension/MIME error for a .txt file", () => {
+		renderStep();
 
 		const file = new File(["content"], "test.txt", { type: "text/plain" });
+		fireEvent.change(getFileInput(), { target: { files: [file] } });
+
+		expect(
+			screen.getByText(FILENAME_ERROR_MESSAGES.extension_mime_mismatch),
+		).toBeInTheDocument();
+	});
+
+	it("shows the unsupported-format error for a valid-named non-PDF file", () => {
+		renderStep();
+
+		const file = new File(["content"], "image.png", { type: "image/png" });
 		const fileInput = getFileInput();
 
 		fireEvent.change(fileInput, { target: { files: [file] } });
@@ -203,15 +293,13 @@ describe("Step2Upload", () => {
 	});
 
 	it("shows error for file exceeding 10 MB", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep();
 
 		const largeContent = new ArrayBuffer(11 * 1024 * 1024);
 		const file = new File([largeContent], "large.pdf", {
 			type: "application/pdf",
 		});
-		const fileInput = getFileInput();
-
-		fireEvent.change(fileInput, { target: { files: [file] } });
+		fireEvent.change(getFileInput(), { target: { files: [file] } });
 
 		expect(
 			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
@@ -219,193 +307,676 @@ describe("Step2Upload", () => {
 	});
 
 	it("renders the confirmation modal dialog", () => {
-		const { container } = render(
-			<Step2Upload declarationYear={2026} siren="123456789" />,
-		);
+		const { container } = renderStep();
 
 		const dialog = container.querySelector("dialog");
-		expect(dialog).toBeInTheDocument();
 		expect(dialog).toHaveAttribute("id", "cse-submit-modal");
 	});
 
-	it("accepts PDF file and shows file card", () => {
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
-
-		const file = new File(["content"], "avis-cse.pdf", {
-			type: "application/pdf",
-		});
-		const fileInput = getFileInput();
-
-		fireEvent.change(fileInput, { target: { files: [file] } });
-
-		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
-		expect(screen.getByText("Importation réussie")).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /Supprimer/ }),
-		).toBeInTheDocument();
-	});
-
-	it("removes file when delete button is clicked", async () => {
-		const user = userEvent.setup();
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
-
-		const file = new File(["content"], "avis-cse.pdf", {
-			type: "application/pdf",
-		});
-		const fileInput = getFileInput();
-
-		fireEvent.change(fileInput, { target: { files: [file] } });
-
-		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
-
-		await user.click(screen.getByRole("button", { name: /Supprimer/ }));
-
-		expect(screen.queryByText("avis-cse.pdf")).not.toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
-		).toBeInTheDocument();
-	});
-
-	it("shows existing file cards when files are provided", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[
-					makeFile("avis-1.pdf", "file-1"),
-					makeFile("avis-2.pdf", "file-2"),
-				]}
-				siren="123456789"
-			/>,
-		);
-
-		expect(screen.getByText("avis-1.pdf")).toBeInTheDocument();
-		expect(screen.getByText("avis-2.pdf")).toBeInTheDocument();
-		expect(screen.getAllByText("Fichier transmis")).toHaveLength(2);
-	});
-
-	it("renders a view link for each existing file", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[
-					makeFile("avis-1.pdf", "file-1"),
-					makeFile("avis-2.pdf", "file-2"),
-				]}
-				siren="123456789"
-			/>,
-		);
-
-		const viewLinks = screen.getAllByRole("link", { name: /Visualiser/ });
-		expect(viewLinks).toHaveLength(2);
-		expect(viewLinks[0]).toHaveAttribute("href", "/api/v1/files/file-1");
-		expect(viewLinks[1]).toHaveAttribute("href", "/api/v1/files/file-2");
-		expect(viewLinks[0]).toHaveAttribute("target", "_blank");
-	});
-
-	it("shows submit button when files exist but under limit", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
-				siren="123456789"
-			/>,
-		);
-
-		expect(
-			screen.getByRole("button", { name: /Soumettre/ }),
-		).toBeInTheDocument();
-	});
-
-	it("shows file count in hint text", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[
-					makeFile("avis-1.pdf", "file-1"),
-					makeFile("avis-2.pdf", "file-2"),
-				]}
-				siren="123456789"
-			/>,
-		);
-
-		expect(screen.getByText(/2\/4 fichiers/)).toBeInTheDocument();
-	});
-
-	it("disables dropzone when max files reached", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[
-					makeFile("avis-1.pdf", "f1"),
-					makeFile("avis-2.pdf", "f2"),
-					makeFile("avis-3.pdf", "f3"),
-					makeFile("avis-4.pdf", "f4"),
-				]}
-				siren="123456789"
-			/>,
-		);
-
-		const selectButton = screen.getByRole("button", {
-			name: /Sélectionner des fichiers/,
-		});
-		expect(selectButton).toBeDisabled();
-		expect(
-			screen.getByRole("button", { name: /Soumettre/ }),
-		).toBeInTheDocument();
-	});
-
-	it("uploads the file then finalizes and redirects on success", async () => {
-		const user = userEvent.setup();
+	it("auto-uploads a selected PDF immediately, never showing an import action, and does not finalize", async () => {
 		uploadFileMock.mockResolvedValue({
 			ok: true,
 			fileId: "new-file",
 			fileName: "avis.pdf",
 		});
 
-		render(<Step2Upload declarationYear={2026} siren="123456789" />);
+		renderStep();
 
-		const file = new File(["content"], "avis.pdf", {
-			type: "application/pdf",
-		});
+		const file = new File(["content"], "avis.pdf", { type: "application/pdf" });
 		fireEvent.change(getFileInput(), { target: { files: [file] } });
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
-
-		const certifyCheckbox = screen.getByRole("checkbox");
-		await user.click(certifyCheckbox);
-		await user.click(screen.getByRole("button", { name: "Valider" }));
-
+		// Selection alone triggers the upload — no intermediate "Importer" step.
 		await waitFor(() => {
 			expect(uploadFileMock).toHaveBeenCalledWith(file, {
 				flowType: "cse_opinion",
 			});
 		});
 		await waitFor(() => {
-			expect(invalidateMock).toHaveBeenCalled();
+			expect(invalidateFilesMock).toHaveBeenCalled();
 		});
+		expect(invalidateTypesMock).toHaveBeenCalled();
 		expect(refreshMock).toHaveBeenCalled();
-		await waitFor(() => {
-			expect(finalizeMutateAsyncMock).toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Importer le ou les fichiers" }),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("renders the matrix with the existing files and the required content-type columns", () => {
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 		});
-		await waitFor(() => {
-			expect(pushMock).toHaveBeenCalledWith("/avis-cse/confirmation");
+
+		expect(screen.getByRole("link", { name: /avis-1\.pdf/ })).toHaveAttribute(
+			"href",
+			"/api/v1/files/file-1",
+		);
+		expect(screen.getAllByRole("checkbox")).toHaveLength(DUAL_COLUMNS.length);
+	});
+
+	it("renders the second-declaration column headers when a second declaration must be displayed", () => {
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		const secondDeclarationColumns = DUAL_COLUMNS.filter(
+			(column) => column.declarationNumber === 2,
+		);
+		expect(secondDeclarationColumns).toHaveLength(2);
+		expect(screen.getAllByText("2e déclaration")).toHaveLength(
+			secondDeclarationColumns.length,
+		);
+		for (const column of secondDeclarationColumns) {
+			expect(
+				screen.getByRole("columnheader", {
+					name: new RegExp(`${column.label}[\\s\\S]*2e déclaration`),
+				}),
+			).toBeInTheDocument();
+		}
+	});
+
+	it("does not show a file counter in the hint text", () => {
+		renderStep({
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+		});
+
+		expect(screen.queryByText(/fichiers\)/)).not.toBeInTheDocument();
+	});
+
+	it("disables the dropzone when the max number of files is reached", () => {
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "f1"),
+				makeFile("avis-2.pdf", "f2"),
+				makeFile("avis-3.pdf", "f3"),
+				makeFile("avis-4.pdf", "f4"),
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeDisabled();
+	});
+
+	it("caps the deposit at one file per required avis, below MAX_CSE_FILES (#4299)", () => {
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "f1"),
+				makeFile("avis-2.pdf", "f2"),
+			],
+		});
+
+		// Two required avis, two files deposited: the 4 MAX_CSE_FILES slots are
+		// irrelevant, no third file may be added even with nothing associated.
+		expect(
+			screen.getByRole("button", { name: /Sélectionner des fichiers/ }),
+		).toBeDisabled();
+		expect(getFileInput()).toBeDisabled();
+	});
+
+	it("disables the dropzone once every required content type is covered, even with slots remaining (#4299)", () => {
+		renderStep({
+			// Two required columns (1:accuracy, 2:accuracy), one file covering
+			// both: fileQuota is 2, so with a single existing file remainingSlots
+			// is 1 — a real free slot. Only the isComplete guard can close the
+			// dropzone here; without it this test would pass regardless.
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeDisabled();
+		expect(getFileInput()).toBeDisabled();
+	});
+
+	it("re-enables the dropzone once an association is cleared, freeing a required content type (#4299)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeDisabled();
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 2e déclaration — avis-1.pdf",
+			}),
+		);
+
+		expect(
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+		).toBeEnabled();
+		expect(getFileInput()).toBeEnabled();
+	});
+
+	it("reveals the missing-content error only after a submit attempt, blocking finalize (S8)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Loading files must not surface the error, and the button stays enabled.
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		const submit = screen.getByRole("button", { name: "Transmettre" });
+		expect(submit).toBeEnabled();
+
+		await user.click(submit);
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
+			),
+		).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("hides the missing-content error again once the required association is completed", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+	});
+
+	it("blocks finalize and names a file row left without any checked checkbox", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+			// file-1 covers the only required column; file-2 stays orphan.
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		// The required column is covered, so the missing-content error stays hidden.
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Chaque fichier doit être associé à au moins un type de contenu",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Le fichier «\s*avis-2\.pdf\s*» n'est associé/),
+		).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("persists the full association payload through setFileContentTypes when a checkbox is toggled (S7)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
 		});
 	});
 
-	it("finalizes without uploading when only existing files are present", async () => {
+	it("allows one file to cover several content types (S7)", async () => {
 		const user = userEvent.setup();
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
-				siren="123456789"
-			/>,
+		renderStep({
+			columns: DUAL_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		// The first write is still in flight (#4102): the second toggle is
+		// queued rather than dispatched as a concurrent request.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Justification — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+			],
+		});
+	});
+
+	it("frees a content type and re-persists when its checkbox is unchecked (S6)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
 		);
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
+		expect(setTypesMutateMock).toHaveBeenCalledWith({ associations: [] });
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+	});
 
-		const certifyCheckbox = screen.getByRole("checkbox");
-		await user.click(certifyCheckbox);
+	it("surfaces an error when persisting the association fails", () => {
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByText(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			),
+		).toBeInTheDocument();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, { associations: [] });
+		});
+
+		expect(
+			screen.queryByText(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			),
+		).not.toBeInTheDocument();
+	});
+
+	it("rolls back an optimistic check and blocks submission when persisting the association fails (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Optimistic check: the box ticks locally before the server confirms.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// The server rejects the association: the confirmed truth is still
+		// "nothing associated", so the box must roll back to it, not stay
+		// checked on a value the server never actually committed.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		// Reproduces the issue exactly: canSubmit must be re-derived from the
+		// rolled-back state, not from the optimistic value the failed save
+		// never persisted — so submit blocks on the missing content type.
+		await user.click(screen.getByRole("button", { name: SUBMIT_LABEL }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks submission while an association save is still in flight, independently of click speed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			// The matrix is otherwise complete: only the in-flight save should
+			// block submission here, not a missing association.
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+
+		const submit = screen.getByRole("button", { name: SUBMIT_LABEL });
+		expect(submit).toBeDisabled();
+		expect(
+			screen.getByText("Enregistrement des associations en cours…"),
+		).toBeInTheDocument();
+
+		await user.click(submit);
+
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Valider" }),
+		).not.toBeInTheDocument();
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(submit).toBeEnabled();
+	});
+
+	it("reconciles the display from the write that actually resolves last, not a ref an earlier failure can clobber (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: ACCURACY_AND_GAP_COLUMNS,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		// Toggle 1 (accuracy): optimistic check, request #1 fires.
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		// Toggle 2 (gap), before request #1 has resolved: optimistic check,
+		// but request #1 is still in flight so this only queues the combined
+		// payload rather than firing a second, concurrent request (#4102).
+		await user.click(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+		expect(setTypesMutateMock).toHaveBeenCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		// Request #1 fails: the combined toggle is still queued to be sent, so
+		// the display must not roll back to what request #1 alone covered.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).toBeChecked();
+
+		// The queued write is dispatched as request #2, carrying both
+		// associations — this is what the ticket describes as "the second
+		// mutation contains both associations".
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+			],
+		});
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+					{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.getByRole("checkbox", { name: "Justification — avis-1.pdf" }),
+		).toBeChecked();
+
+		// canSubmit is re-derived from the reconciled map: both types are now
+		// covered, so submit must open the finalize modal.
+		await user.click(screen.getByRole("button", { name: SUBMIT_LABEL }));
+
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("checkbox", {
+				name: "Je certifie que les avis transmis sont conformes.",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("keeps a deleted file's association out of the confirmed map even when another file's save is still optimistic and unconfirmed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+			initialAssociations: [
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-2" },
+			],
+		});
+
+		// file-1's association save is still in flight and unconfirmed.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Supprimer avis-2.pdf" }),
+		);
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-2" });
+		});
+
+		// file-1's save then fails: the rollback must not have adopted the
+		// still-optimistic file-1 association as confirmed truth just because
+		// it was part of the displayed map when file-2 was deleted.
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		).not.toBeChecked();
+	});
+
+	it("does not let a save that resolves after its file was deleted resurrect that association as confirmed (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		// The in-flight save for file-1 resolves after the deletion (#4102).
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		);
+		act(() => {
+			setTypesMutationOptions.onError?.();
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
+
+		await user.click(screen.getByRole("button", { name: SUBMIT_LABEL }));
+
+		expect(screen.getByText("Un avis CSE est manquant")).toBeInTheDocument();
+		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
+	});
+
+	it("strips a deleted file from the queued write instead of letting it get the whole batch rejected server-side (#4102)", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: TWO_ACCURACY_COLUMNS,
+			existingFiles: [
+				makeFile("avis-1.pdf", "file-1"),
+				makeFile("avis-2.pdf", "file-2"),
+			],
+		});
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 1re déclaration — avis-1.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		// Queued while the first save (file-1) is still in flight.
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Exactitude — 2e déclaration — avis-2.pdf",
+			}),
+		);
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+
+		fireEvent.click(
+			screen.getAllByRole("button", { name: /Supprimer/ })[0] as HTMLElement,
+		);
+		act(() => {
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+		});
+
+		act(() => {
+			setTypesMutationOptions.onSuccess?.(undefined, {
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+		});
+
+		expect(setTypesMutateMock).toHaveBeenCalledTimes(2);
+		expect(setTypesMutateMock).toHaveBeenLastCalledWith({
+			associations: [
+				{ declarationNumber: 2, type: "accuracy", fileId: "file-2" },
+			],
+		});
+	});
+
+	it("hydrates the matrix from the stored associations on return (S10)", () => {
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+		expect(
+			screen.queryByText("Un avis CSE est manquant"),
+		).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
+	});
+
+	it("opens the finalize modal then finalizes and redirects when the matrix is complete", async () => {
+		const user = userEvent.setup();
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Je certifie que les avis transmis sont conformes.",
+			}),
+		);
 		await user.click(screen.getByRole("button", { name: "Valider" }));
 
 		await waitFor(() => {
@@ -417,22 +988,51 @@ describe("Step2Upload", () => {
 		});
 	});
 
+	it("discloses the finalize modal through the DSFR runtime when available", async () => {
+		const user = userEvent.setup();
+		const disclose = vi.fn();
+		// Simulate the DSFR JS runtime so getDsfrModal returns its modal API.
+		(
+			window as unknown as { dsfr: () => { modal: { disclose: () => void } } }
+		).dsfr = () => ({ modal: { disclose } });
+
+		try {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				initialAssociations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+
+			await user.click(screen.getByRole("button", { name: "Transmettre" }));
+
+			expect(disclose).toHaveBeenCalled();
+		} finally {
+			delete (window as unknown as { dsfr?: unknown }).dsfr;
+		}
+	});
+
 	it("shows an error and does not redirect when finalize fails", async () => {
 		const user = userEvent.setup();
 		finalizeMutateAsyncMock.mockRejectedValueOnce(
 			new Error("Au moins un fichier d'avis CSE doit être transmis."),
 		);
 
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
-				siren="123456789"
-			/>,
-		);
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
 
-		await user.click(screen.getByRole("button", { name: /Soumettre/ }));
-		await user.click(screen.getByRole("checkbox"));
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Je certifie que les avis transmis sont conformes.",
+			}),
+		);
 		await user.click(screen.getByRole("button", { name: "Valider" }));
 
 		await waitFor(() => {
@@ -443,44 +1043,149 @@ describe("Step2Upload", () => {
 		expect(pushMock).not.toHaveBeenCalled();
 	});
 
-	it("invalidates the file list and clears the deleting state on delete success", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
-				siren="123456789"
-			/>,
+	it("falls back to a generic error when finalize rejects with a non-Error value", async () => {
+		const user = userEvent.setup();
+		finalizeMutateAsyncMock.mockRejectedValueOnce("boom");
+
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		await user.click(screen.getByRole("button", { name: "Transmettre" }));
+		await user.click(
+			screen.getByRole("checkbox", {
+				name: "Je certifie que les avis transmis sont conformes.",
+			}),
 		);
+		await user.click(screen.getByRole("button", { name: "Valider" }));
 
-		const deleteButton = screen.getByTitle("Supprimer avis-1.pdf");
-		fireEvent.click(deleteButton);
+		await waitFor(() => {
+			expect(
+				screen.getByText("Erreur lors de la validation du dépôt."),
+			).toBeInTheDocument();
+		});
+		expect(pushMock).not.toHaveBeenCalled();
+	});
 
+	it("clears the association and refreshes on delete success", () => {
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+			],
+		});
+
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).toBeChecked();
+
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
 		expect(deleteMutateMock).toHaveBeenCalledWith({ fileId: "file-1" });
 
 		act(() => {
-			deleteMutationOptions.onSuccess?.();
+			deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
 		});
-		expect(invalidateMock).toHaveBeenCalled();
+
+		expect(invalidateFilesMock).toHaveBeenCalled();
+		expect(invalidateTypesMock).toHaveBeenCalled();
 		expect(refreshMock).toHaveBeenCalled();
+		expect(
+			screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+		).not.toBeChecked();
 	});
 
 	it("clears the deleting state when the delete mutation fails", () => {
-		render(
-			<Step2Upload
-				declarationYear={2026}
-				existingFiles={[makeFile("avis-1.pdf", "file-1")]}
-				siren="123456789"
-			/>,
-		);
+		renderStep({
+			columns: SINGLE_COLUMN,
+			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+		});
 
-		const deleteButton = screen.getByTitle("Supprimer avis-1.pdf");
-		fireEvent.click(deleteButton);
+		fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
 
-		// Simulate the failure callback registered with the mutation.
 		expect(() => {
 			act(() => {
 				deleteMutationOptions.onError?.();
 			});
 		}).not.toThrow();
+	});
+
+	describe("declaration lock", () => {
+		it("disables the file upload select button when locked", () => {
+			renderStep({ isReadOnly: true });
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeDisabled();
+		});
+
+		it("disables the submit button when locked", () => {
+			renderStep({ isReadOnly: true });
+
+			expect(
+				screen.getByRole("button", { name: "Transmettre" }),
+			).toBeDisabled();
+		});
+
+		it("disables the matrix delete and checkbox controls when locked", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: true,
+			});
+
+			expect(
+				screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+			).toBeDisabled();
+			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
+		});
+
+		it("keeps the controls enabled when the lock is inactive", () => {
+			renderStep({ isReadOnly: false });
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeEnabled();
+			expect(screen.getByRole("button", { name: "Transmettre" })).toBeEnabled();
+		});
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			vi.mocked(useSession).mockReset();
+		});
+
+		it("disables the upload and submit controls under the static provider when impersonating", () => {
+			vi.mocked(useSession).mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			// The layout feeds `isReadOnly={false}` but impersonation must still
+			// disable writes through the unified context.
+			renderStep({
+				columns: TWO_ACCURACY_COLUMNS,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: false,
+			});
+
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: "Transmettre" }),
+			).toBeDisabled();
+			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
+		});
 	});
 });

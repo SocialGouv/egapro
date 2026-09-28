@@ -1,13 +1,102 @@
-import { expect, type Page, test } from "@playwright/test";
-import { resetDeclarationToDraft } from "./helpers/db";
+import { readFileSync } from "node:fs";
+import { expect, type Locator, type Page, test } from "@playwright/test";
+import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
+import { getReferenceYearFor } from "~/modules/domain";
+import {
+	DECLARATION_REMUNERATION,
+	MY_SPACE,
+	remunerationStepHref,
+} from "~/modules/routes";
+import { withCampaignYear } from "./helpers/campaign-year";
+import {
+	clearCategoryHourlyCounts,
+	clearDeclarationDraft,
+	deleteCurrentYearCategories,
+	getCurrentDbYear,
+	resetDeclarationToDraft,
+	resetGipWorkforce,
+	setGipWorkforce,
+} from "./helpers/db";
+import {
+	categoryPayCells,
+	categoryPayInput,
+	categoryWorkforceInput,
+	fillCategoryPayAmounts,
+	fillStep4Quartiles,
+	STEP1_WORKFORCE,
+	STEP5_WORKFORCE_REMINDER,
+	submitFromStep6Recap,
+	submitStepsThroughPayGaps,
+	submitStepsThroughQuartiles,
+} from "./helpers/declaration-flows";
+
+// Render-structure assertions are covered by the step component tests in declaration-remuneration/**/__tests__.
 
 /** Navigate to a declaration step, ensuring the declaration is initialized first. */
 async function goToStep(page: Page, step: number) {
-	await page.goto("/declaration-remuneration");
-	await page.waitForURL("**/declaration-remuneration/etape/**");
+	await page.goto(DECLARATION_REMUNERATION);
+	await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 	await page.goto(`/declaration-remuneration/etape/${step}`);
 	await page.waitForURL(`**/declaration-remuneration/etape/${step}`);
 	await expect(page.getByText(`Étape ${step} sur 6`)).toBeVisible();
+}
+
+async function checkPayGapAtZoom(page: Page, caption: string) {
+	for (const row of [
+		"Horaire brute moyenne",
+		"Annuelle brute médiane",
+		"Horaire brute médiane",
+	]) {
+		for (const sex of ["Femmes", "Hommes"]) {
+			await page.getByRole("textbox", { name: `${row} — ${sex}` }).fill("1000");
+		}
+	}
+
+	await page.setViewportSize({ width: 640, height: 360 });
+	const region = page.getByRole("region", {
+		name: `${caption} — faire défiler le tableau horizontalement`,
+	});
+	const table = region.getByRole("table", { name: caption });
+	const measurements = await table.evaluate((element) =>
+		Array.from(
+			element.querySelectorAll(
+				"thead th:last-child strong, thead th:last-child span, tbody tr td:first-child strong",
+			),
+		).map((label) => {
+			const cell = label.closest("th, td");
+			return {
+				text: label.textContent?.trim(),
+				left: label.getBoundingClientRect().left,
+				right: label.getBoundingClientRect().right,
+				cellLeft: cell?.getBoundingClientRect().left ?? 0,
+				cellRight: cell?.getBoundingClientRect().right ?? 0,
+			};
+		}),
+	);
+	expect(measurements).toHaveLength(6);
+	for (const label of measurements) {
+		expect(label.left, label.text).toBeGreaterThanOrEqual(label.cellLeft);
+		expect(label.right, label.text).toBeLessThanOrEqual(label.cellRight);
+	}
+
+	await expect(region).toHaveAttribute("tabindex", "0");
+	expect(
+		await region.evaluate(
+			(element) => element.scrollWidth - element.clientWidth,
+		),
+	).toBeGreaterThan(0);
+	await region.evaluate((element) => {
+		element.scrollLeft = 0;
+	});
+	await expect
+		.poll(() => region.evaluate((element) => element.scrollLeft))
+		.toBe(0);
+	await region.press("ArrowRight");
+	await expect(region).toBeFocused();
+	await expect(region).toHaveCSS("outline-style", "solid");
+	await expect
+		.poll(() => region.evaluate((element) => element.scrollLeft))
+		.toBeGreaterThan(0);
 }
 
 test.describe("Declaration workflow", () => {
@@ -20,11 +109,13 @@ test.describe("Declaration workflow", () => {
 
 	test.beforeEach(async ({ page }) => {
 		// Auth is handled by storageState from auth.setup.ts
-		await page.goto("/declaration-remuneration");
-		await page.waitForURL("**/declaration-remuneration/etape/**");
+		await page.goto(DECLARATION_REMUNERATION);
+		await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
 	});
 
-	test("displays step 1 after login", async ({ page }) => {
+	test("displays step 1 with the N-1 reference period after login (#4075)", async ({
+		page,
+	}) => {
 		await expect(
 			page.getByRole("heading", {
 				name: /Déclaration des indicateurs de rémunération/i,
@@ -32,20 +123,20 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
-	});
 
-	test("shows company name and SIREN in banner", async ({ page }) => {
-		await expect(page.getByText(/130 025 265/)).toBeVisible();
-		// Company name comes from external Weez API; may fall back to "Entreprise {siren}"
+		// Expectation derived from getReferenceYearFor, never getReferencePeriod (the
+		// function the bug lived in), so reverting the fix fails this test instead of
+		// tautologically tracking it.
+		const referenceYear = getReferenceYearFor(await getCurrentDbYear());
 		await expect(
 			page.getByText(
-				/DIRECTION INTERMINISTERIELLE DU NUMERIQUE|Entreprise 130025265/,
+				`Période de référence pour le calcul des indicateurs : 01/01/${referenceYear} - 31/12/${referenceYear}.`,
 			),
 		).toBeVisible();
 	});
 
 	test("navigates through step 1 - Effectifs", async ({ page }) => {
-		await page.waitForURL("**/declaration-remuneration/etape/1");
+		await page.waitForURL(urlGlob(remunerationStepHref(1)));
 
 		// Verify stepper
 		await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
@@ -53,16 +144,28 @@ test.describe("Declaration workflow", () => {
 			page.getByRole("heading", { name: /Effectifs/i }),
 		).toBeVisible();
 
-		// Fill workforce data directly in the table
-		await page.getByRole("textbox", { name: "Nombre de femmes" }).fill("10");
-		await page.getByRole("textbox", { name: "Nombre d'hommes" }).fill("15");
+		// Fill workforce data directly in the table, one row per pay basis
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("15");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("10");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("15");
 
-		// Verify total is computed
-		await expect(page.getByText("25", { exact: true })).toBeVisible();
+		// Verify each row total is computed
+		await expect(page.getByText("25", { exact: true }).first()).toBeVisible();
 
 		// Submit and navigate to step 2
 		await page.getByRole("button", { name: "Suivant" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/2");
+		await page.waitForURL(urlGlob(remunerationStepHref(2)));
 	});
 
 	test("step 2 - Écart de rémunération inline editing", async ({ page }) => {
@@ -83,8 +186,9 @@ test.describe("Declaration workflow", () => {
 
 		// Verify gap is computed and displayed in the table cell
 		await expect(
-			page.getByRole("table").getByText("6,3 %", { exact: true }),
+			page.getByRole("table").getByText("6,25 %", { exact: true }),
 		).toBeVisible();
+		await checkPayGapAtZoom(page, "Écart de rémunération");
 	});
 
 	test("step 3 - Rémunération variable inline editing", async ({ page }) => {
@@ -101,7 +205,11 @@ test.describe("Declaration workflow", () => {
 			.fill("5500");
 
 		// Verify gap is computed
-		await expect(page.getByText("9,1 %")).toBeVisible();
+		await expect(page.getByText("9,09 %")).toBeVisible();
+		await checkPayGapAtZoom(
+			page,
+			"Écart de rémunération variable ou complémentaire",
+		);
 
 		// Verify beneficiary inputs are present
 		await expect(
@@ -109,34 +217,6 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole("textbox", { name: "Bénéficiaires hommes" }),
-		).toBeVisible();
-	});
-
-	test("step 4 - inverted quartile table layout (rows = quartiles, columns = F/H/%F/%H)", async ({
-		page,
-	}) => {
-		await goToStep(page, 4);
-
-		await expect(page.getByText("Étape 4 sur 6")).toBeVisible();
-
-		// S1 — quartile labels live in rowheaders (rows are quartiles in the new layout)
-		await expect(
-			page.getByRole("rowheader", { name: /1er quartile/ }).first(),
-		).toBeVisible();
-		await expect(
-			page.getByRole("rowheader", { name: /4e quartile/ }).first(),
-		).toBeVisible();
-		// "Tous les salariés" total row exists in both tables
-		await expect(
-			page.getByRole("rowheader", { name: "Tous les salariés" }),
-		).toHaveCount(2);
-		// Header row exposes the new column "Nombre de femmes" / "Nombre d'hommes"
-		await expect(
-			page.getByRole("columnheader", { name: /Nombre de femmes/ }).first(),
-		).toBeVisible();
-		// Accordion present
-		await expect(
-			page.getByRole("button", { name: /Définitions et méthode de calcul/ }),
 		).toBeVisible();
 	});
 
@@ -216,17 +296,19 @@ test.describe("Declaration workflow", () => {
 
 		await page.getByRole("button", { name: "Suivant" }).click();
 
-		// Recap alert with anchor links
-		const alert = page.getByRole("alert").first();
+		// Target the recap by its accessible description rather than by DOM order:
+		// coherence alerts can legitimately be rendered before it.
+		const alert = page.getByRole("alert").filter({
+			has: page.locator("#step4-error-summary-invalid"),
+		});
 		await expect(alert).toBeVisible();
-		await expect(alert).toContainText(/Le formulaire contient des erreurs/);
 		await expect(
-			alert
-				.getByRole("link")
-				.filter({
-					has: page.locator("text=/quartile/"),
-				})
-				.first(),
+			alert.getByRole("heading", { name: "Valeur invalide" }),
+		).toBeVisible();
+		await expect(
+			alert.getByRole("link", {
+				name: "Seuil 2e quartile (rémunération annuelle) — Les seuils doivent être strictement croissants",
+			}),
 		).toBeVisible();
 	});
 
@@ -258,74 +340,74 @@ test.describe("Declaration workflow", () => {
 		).toBeVisible();
 	});
 
-	test("step 5 - Catégories de salariés page structure", async ({ page }) => {
-		await goToStep(page, 5);
-
-		await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
-
-		// Verify category source combobox
-		await expect(
-			page.getByRole("combobox", {
-				name: /source utilisée pour déterminer les catégories/i,
-			}),
-		).toBeVisible();
-
-		// Verify category 1 form fields
-		await expect(page.getByRole("textbox", { name: "Libellé" })).toBeVisible();
-		await expect(
-			page.getByRole("textbox", { name: "Effectif femmes, catégorie 1" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("textbox", {
-				name: "Salaire de base annuel femmes, catégorie 1",
-			}),
-		).toBeVisible();
-	});
-
-	test("step 6 - Review page", async ({ page }) => {
-		await goToStep(page, 6);
-
-		await expect(page.getByText("Étape 6 sur 6")).toBeVisible();
-		await expect(
-			page.getByRole("heading", {
-				name: /Récapitulatif de votre déclaration/i,
-			}),
-		).toBeVisible();
-	});
-
-	test("accordion displays definitions", async ({ page }) => {
+	test("step 1 - empty submission names every missing field in the error alert (#4235)", async ({
+		page,
+	}) => {
 		await goToStep(page, 1);
 
-		const accordion = page.getByRole("button", {
-			name: /Définitions et méthode de calcul/i,
+		// Clear any GIP-prefilled counts so the "empty → required error" path fires.
+		await page
+			.getByRole("textbox", {
+				name: "Rémunération annuelle — Nombre de femmes",
+			})
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération annuelle — Nombre d'hommes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre de femmes" })
+			.fill("");
+		await page
+			.getByRole("textbox", { name: "Rémunération horaire — Nombre d'hommes" })
+			.fill("");
+
+		await page.getByRole("button", { name: "Suivant" }).click();
+
+		const alert = page.locator(".fr-alert--error").first();
+		await expect(alert).toBeVisible();
+		await expect(alert).toContainText("Champ vide");
+		await expect(alert).toContainText(
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre d'hommes pour la rémunération annuelle.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre de femmes pour la rémunération horaire.",
+		);
+		await expect(alert).toContainText(
+			"Renseignez le nombre d'hommes pour la rémunération horaire.",
+		);
+
+		// #3971 guarded the inline message against overflowing its <td> (DSFR 1.14
+		// sets white-space: nowrap on table cells). Since #4235 the message lives in
+		// the alert under the table, so that overflow cannot occur by construction —
+		// what has to hold now is that the cell carries the state and nothing else,
+		// with the input pointing at the alert that names it.
+		await expect(page.locator("td .fr-error-text")).toHaveCount(0);
+		const womenInput = page.getByRole("textbox", {
+			name: "Rémunération annuelle — Nombre de femmes",
 		});
-		await expect(accordion).toBeVisible();
+		await expect(womenInput).toHaveAttribute("aria-invalid", "true");
+		const describedBy = await womenInput.getAttribute("aria-describedby");
+		expect(describedBy).toBeTruthy();
+		await expect(page.locator(`#${describedBy}`)).toContainText(
+			"Renseignez le nombre de femmes pour la rémunération annuelle.",
+		);
 	});
 
 	test("previous button navigates back", async ({ page }) => {
-		await page.goto("/declaration-remuneration/etape/2");
+		await page.goto(remunerationStepHref(2));
 
 		await page.getByRole("link", { name: "Précédent" }).click();
-		await page.waitForURL("**/declaration-remuneration/etape/1");
-	});
-
-	test("previous button is present on step pages", async ({ page }) => {
-		await goToStep(page, 6);
-
-		const previousLink = page.getByRole("link", { name: "Précédent" });
-		await expect(previousLink).toBeVisible();
+		await page.waitForURL(urlGlob(remunerationStepHref(1)));
 	});
 
 	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit leaves declaration page", async ({ page }) => {
 		await goToStep(page, 6);
 
-		// Click the "Suivant" submit button to open the confirmation modal
-		await page.getByRole("button", { name: "Suivant" }).click();
-
-		// Check the certification checkbox (click on the label, as DSFR checkbox label intercepts pointer events)
-		await page.getByText(/Je certifie/).click();
-		await page.getByRole("button", { name: "Valider" }).click();
+		await submitFromStep6Recap(page);
 
 		// After submission, compliance path kicks in. Destination depends on hasCse
 		// and gap state — exact routing is tested in compliance.e2e.ts.
@@ -334,5 +416,877 @@ test.describe("Declaration workflow", () => {
 			(url) => !url.pathname.includes("/declaration-remuneration/etape/"),
 			{ timeout: 15_000 },
 		);
+		await expect(page.locator("#submit-declaration-modal")).not.toBeVisible();
+	});
+});
+
+// #4260 — the quartile headcount check used to be an ignorable warning rendered above
+// both tables, and the hourly table was checked against the GIP hourly reference (so it
+// was unchecked without a GIP prefill). Both tables are now held to the step 1
+// "Effectifs physiques" counts, divergence blocks the step, and the message sits under
+// the offending table, below its "Source : DSN" note when prefill data exists, once
+// per table. The unit tests cover the derivation and source-note ordering; what only
+// the browser proves here is that "Suivant" no longer navigates and that the focus
+// lands on the message of the table at fault.
+test.describe("Step 4 — quartile totals must match the step 1 headcount (#4260)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("a diverging total blocks the step until it is corrected, on either table", async ({
+		page,
+	}) => {
+		test.slow();
+
+		const annualNote = page.getByRole("alert").filter({
+			has: page.locator("#step4-coherence-annual-inconsistent"),
+		});
+		const hourlyNote = page.getByRole("alert").filter({
+			has: page.locator("#step4-coherence-hourly-inconsistent"),
+		});
+		const annualWomenMismatchMessage = `Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : ${STEP1_WORKFORCE.women}).`;
+		const next = page.getByRole("button", { name: "Suivant" });
+
+		await submitStepsThroughPayGaps(page);
+
+		await test.step("étape 4 — le total annuel de femmes diverge de l'étape 1", async () => {
+			await fillStep4Quartiles(page);
+			// Q4 women 2 → 4 makes the annual women total 12 against the 10 of step 1.
+			// Each cell stays under the per-cell cap, so only the total is at fault.
+			await page
+				.getByRole("textbox", { name: "Nombre de femmes 4e quartile annuel" })
+				.fill("4");
+
+			await expect(annualNote).toContainText(annualWomenMismatchMessage);
+			await expect(hourlyNote).toHaveCount(0);
+
+			// This journey has a GIP workforce row but no DSN prefill payload, so it has
+			// no source note. Its browser-level invariant is that the message belongs to
+			// the table it indicts: after the annual table and before the hourly one —
+			// not above both, as the old warning was. The source-note variant is covered
+			// by Step4QuartileCoherence.test.tsx.
+			const placement = await annualNote.evaluate((note) => {
+				const captioned = (needle: string) =>
+					Array.from(document.querySelectorAll("table")).find((table) =>
+						table.querySelector("caption")?.textContent?.includes(needle),
+					);
+				const annual = captioned("Rémunération annuelle");
+				const hourly = captioned("Rémunération horaire");
+				if (!annual || !hourly) return null;
+				return {
+					afterAnnualTable: Boolean(
+						annual.compareDocumentPosition(note) &
+							Node.DOCUMENT_POSITION_FOLLOWING,
+					),
+					beforeHourlyTable: Boolean(
+						hourly.compareDocumentPosition(note) &
+							Node.DOCUMENT_POSITION_PRECEDING,
+					),
+				};
+			});
+			expect(placement).toEqual({
+				afterAnnualTable: true,
+				beforeHourlyTable: true,
+			});
+		});
+
+		await test.step("« Suivant » ne quitte pas l'étape et le focus va sur le message du tableau", async () => {
+			await next.click();
+
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(4)));
+			await expect(annualNote).toBeFocused();
+			// One message, under the table at fault — no second copy in a summary.
+			await expect(
+				page.getByText(annualWomenMismatchMessage, { exact: true }),
+			).toHaveCount(1);
+		});
+
+		await test.step("le contrôle horaire vit sur l'effectif horaire de l'étape 1", async () => {
+			await page
+				.getByRole("textbox", { name: "Nombre de femmes 4e quartile annuel" })
+				.fill("2");
+			await expect(annualNote).toHaveCount(0);
+
+			// The hourly table used to be checked against the GIP hourly reference; it
+			// answers to the hourly headcount of step 1 now (#4247), which this journey
+			// declares equal to the annual one, so breaking its men total blocks too.
+			await page
+				.getByRole("textbox", { name: "Nombre d'hommes 4e quartile horaire" })
+				.fill("5");
+
+			await next.click();
+
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(4)));
+			await expect(hourlyNote).toContainText(
+				`(nombre total horaire : ${STEP1_WORKFORCE.men})`,
+			);
+			await expect(hourlyNote).toBeFocused();
+		});
+
+		await test.step("les deux totaux corrigés, l'étape se valide", async () => {
+			await page
+				.getByRole("textbox", { name: "Nombre d'hommes 4e quartile horaire" })
+				.fill("3");
+			await expect(hourlyNote).toHaveCount(0);
+
+			await next.click();
+			await page.waitForURL(urlGlob(remunerationStepHref(5)));
+		});
+	});
+});
+
+// #4254 — a category used to declare one "Effectif physique" line. It now declares a
+// headcount on each of the two pay bases of step 1, and each basis answers for itself:
+// its own step 1 total, and its own pay amounts. The table rendering, the message
+// wording and the per-basis completeness rule are unit-tested; what only the browser
+// proves is the chain end to end — that both counts reach Postgres and come back on a
+// reload, and that a row written before the columns existed still reopens with its
+// annual figures intact, since the migration backfills nothing.
+test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	const rowTotal = (page: Page, rowLabel: string) =>
+		page
+			.getByRole("row")
+			.filter({
+				has: page.getByRole("rowheader", { exact: true, name: rowLabel }),
+			})
+			.getByRole("cell")
+			.last();
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+		// Categories outlive resetDeclarationToDraft, and a pre-populated step 5
+		// replaces the source select this journey drives with read-only text.
+		await deleteCurrentYearCategories();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+		await deleteCurrentYearCategories();
+	});
+
+	test("each basis carries its own count, its own checks and its own persistence", async ({
+		page,
+	}) => {
+		test.slow();
+
+		const next = page.getByRole("button", { name: "Suivant" });
+		const inconsistent = page.locator("#step5-categories-error-inconsistent");
+		const emptyFields = page.locator("#step5-categories-error-empty");
+		const count = (basis: "annual" | "hourly", sex: "women" | "men") =>
+			categoryWorkforceInput(page, { basis, sex });
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
+
+		await test.step("le tableau des effectifs porte les deux bases, sous le rappel", async () => {
+			await page
+				.getByRole("combobox", {
+					name: /source utilisée pour déterminer les catégories/i,
+				})
+				.selectOption("accord-entreprise");
+			await page
+				.getByRole("textbox", { name: "Libellé" })
+				.fill("Catégorie test");
+
+			await expect(page.getByText(STEP5_WORKFORCE_REMINDER)).toBeVisible();
+			await expect(
+				page.getByRole("heading", {
+					name: "Nombre de salariés en effectif physique",
+				}),
+			).toBeVisible();
+
+			await count("annual", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men));
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+
+			// The Total is computed per row: the hourly one has nothing to add up
+			// until both of its cells are entered.
+			await expect(rowTotal(page, "Rémunération annuelle")).toHaveText(
+				String(STEP1_WORKFORCE.women + STEP1_WORKFORCE.men),
+			);
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
+
+			await count("hourly", "men").fill(String(STEP1_WORKFORCE.men));
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText(
+				String(STEP1_WORKFORCE.women + STEP1_WORKFORCE.men),
+			);
+		});
+
+		await test.step("la cohérence avec l'étape 1 nomme la ligne fautive", async () => {
+			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
+
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women - 1));
+			await next.click();
+
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
+			await expect(inconsistent).toHaveText(
+				`Le total des effectifs femmes de la ligne « Rémunération horaire » (${STEP1_WORKFORCE.women - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.women}).`,
+			);
+
+			// Same divergence on the other row: only the row at fault is named, so
+			// the two bases cannot be satisfied by one another.
+			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men - 1));
+			await next.click();
+
+			await expect(inconsistent).toHaveText(
+				`Le total des effectifs hommes de la ligne « Rémunération annuelle » (${STEP1_WORKFORCE.men - 1}) ne correspond pas à l'effectif déclaré à l'étape 1 (${STEP1_WORKFORCE.men}).`,
+			);
+		});
+
+		await test.step("un effectif n'exige que les rémunérations de sa base", async () => {
+			// The annual headcount is emptied: an unknown headcount claims nothing.
+			// Only 0 on both rows of one sex suspends the category's remuneration
+			// (#3678), which is covered by the dedicated journey below.
+			await count("annual", "women").fill("");
+			await count("annual", "men").fill("");
+			for (const measure of [
+				"Salaire de base annuel",
+				"Composantes variables annuelles",
+			] as const) {
+				await categoryPayInput(page, { measure, sex: "femmes" }).fill("");
+				await categoryPayInput(page, { measure, sex: "hommes" }).fill("");
+			}
+			await categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "femmes",
+			}).fill("");
+
+			await next.click();
+
+			// Exactly one message: the hourly headcount claims its own missing field
+			// and the four emptied annual amounts are claimed by nobody.
+			await expect(emptyFields).toHaveText(
+				"Renseignez le salaire de base horaire des femmes pour la catégorie d'emplois n°1.",
+			);
+		});
+
+		await test.step("les huit compteurs et rémunérations franchissent l'étape et reviennent", async () => {
+			await count("annual", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("annual", "men").fill(String(STEP1_WORKFORCE.men));
+			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
+
+			await next.click();
+			await page.waitForURL(urlGlob(remunerationStepHref(6)));
+
+			await page.goto(remunerationStepHref(5));
+			for (const basis of ["annual", "hourly"] as const) {
+				await expect(count(basis, "women")).toHaveValue(
+					String(STEP1_WORKFORCE.women),
+				);
+				await expect(count(basis, "men")).toHaveValue(
+					String(STEP1_WORKFORCE.men),
+				);
+			}
+		});
+
+		await test.step("une catégorie antérieure aux colonnes rouvre sans rien perdre", async () => {
+			await clearDeclarationDraft();
+			await clearCategoryHourlyCounts();
+			await page.reload();
+
+			await expect(count("annual", "women")).toHaveValue(
+				String(STEP1_WORKFORCE.women),
+			);
+			await expect(count("annual", "men")).toHaveValue(
+				String(STEP1_WORKFORCE.men),
+			);
+			await expect(count("hourly", "women")).toHaveValue("");
+			await expect(count("hourly", "men")).toHaveValue("");
+			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
+		});
+	});
+
+	test("le modèle d'import porte les treize colonnes et alimente les deux bases (#4276)", async ({
+		page,
+	}) => {
+		test.slow();
+
+		// Keys = the thirteen template columns in their spec order, values = a
+		// distinct number per column, so a mapping shifted by the two headcount
+		// columns inserted mid-list lands a value in the wrong input instead of
+		// staying green.
+		const importedValues = {
+			"Libellé de la catégorie": "Ouvriers",
+			"Annuel effectif femmes": "11",
+			"Annuel effectif hommes": "12",
+			"Horaire effectif femmes": "13",
+			"Horaire effectif hommes": "14",
+			"Annuel base femmes (€)": "101",
+			"Annuel base hommes (€)": "102",
+			"Annuel variable femmes (€)": "103",
+			"Annuel variable hommes (€)": "104",
+			"Horaire base femmes (€)": "105",
+			"Horaire base hommes (€)": "106",
+			"Horaire variable femmes (€)": "107",
+			"Horaire variable hommes (€)": "108",
+		};
+
+		const inputByHeader: Record<
+			Exclude<keyof typeof importedValues, "Libellé de la catégorie">,
+			Locator
+		> = {
+			"Annuel effectif femmes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "women",
+			}),
+			"Annuel effectif hommes": categoryWorkforceInput(page, {
+				basis: "annual",
+				sex: "men",
+			}),
+			"Horaire effectif femmes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "women",
+			}),
+			"Horaire effectif hommes": categoryWorkforceInput(page, {
+				basis: "hourly",
+				sex: "men",
+			}),
+			"Annuel base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "femmes",
+			}),
+			"Annuel base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base annuel",
+				sex: "hommes",
+			}),
+			"Annuel variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "femmes",
+			}),
+			"Annuel variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables annuelles",
+				sex: "hommes",
+			}),
+			"Horaire base femmes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "femmes",
+			}),
+			"Horaire base hommes (€)": categoryPayInput(page, {
+				measure: "Salaire de base horaire",
+				sex: "hommes",
+			}),
+			"Horaire variable femmes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "femmes",
+			}),
+			"Horaire variable hommes (€)": categoryPayInput(page, {
+				measure: "Composantes variables horaires",
+				sex: "hommes",
+			}),
+		};
+
+		await page.goto(remunerationStepHref(5));
+		await page.getByRole("button", { name: "Importer les données" }).click();
+
+		const panel = page.getByRole("dialog", {
+			name: "Importer vos données depuis un fichier",
+		});
+		await expect(panel).toBeVisible();
+
+		const templateHeaders =
+			await test.step("le modèle téléchargé porte les treize colonnes attendues", async () => {
+				const [download] = await Promise.all([
+					page.waitForEvent("download"),
+					panel
+						.getByRole("button", { name: "Fichier d'import à remplir" })
+						.click(),
+				]);
+
+				expect(download.suggestedFilename()).toBe("modele-indicateur-g.csv");
+
+				const template = readFileSync(await download.path(), "utf8").replace(
+					/^\uFEFF/,
+					"",
+				);
+				expect(template.split(";")).toEqual(Object.keys(importedValues));
+
+				return template;
+			});
+
+		await test.step("un fichier au format du modèle renseigne les treize champs", async () => {
+			// Built on the very header line the app just served, so the template and
+			// the parser are asserted against each other, not against a copy.
+			const csv = `\uFEFF${templateHeaders}\n${Object.values(importedValues).join(";")}`;
+
+			await panel.getByLabel("Sélectionner des fichiers").setInputFiles({
+				buffer: Buffer.from(csv, "utf8"),
+				mimeType: "text/csv",
+				name: "categories.csv",
+			});
+			await panel
+				.getByRole("button", { exact: true, name: "Importer" })
+				.click();
+
+			await expect(panel).toBeHidden();
+
+			const { "Libellé de la catégorie": name, ...amounts } = importedValues;
+
+			const category = page.getByRole("button", {
+				name: `Catégorie d'emplois n°1 : ${name}`,
+			});
+			await expect(category).toBeVisible();
+
+			// An imported category remounts its accordion, which DSFR brings back
+			// folded — its fields reach the DOM only once it is disclosed.
+			if ((await category.getAttribute("aria-expanded")) !== "true") {
+				await category.click();
+			}
+
+			for (const [header, value] of Object.entries(amounts)) {
+				// Pay amounts come back through the form's decimal formatting;
+				// headcounts are plain integers.
+				const shown = header.endsWith("(€)") ? `${value},00` : value;
+				await expect(
+					inputByHeader[header as keyof typeof inputByHeader],
+				).toHaveValue(shown);
+			}
+		});
+	});
+});
+
+test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3678)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	// The second category has no women at all, on either basis: it declares no
+	// remuneration, while the first one carries the rest of the step 1 headcount
+	// so both bases still reconcile and the step can be submitted.
+	const SECOND_CATEGORY_MEN = 5;
+	const FIRST_CATEGORY = {
+		women: STEP1_WORKFORCE.women,
+		men: STEP1_WORKFORCE.men - SECOND_CATEGORY_MEN,
+	} as const;
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+		await deleteCurrentYearCategories();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+		await deleteCurrentYearCategories();
+	});
+
+	test("keeps pay tables visible, clears and disables them, and persists no pay", async ({
+		page,
+	}) => {
+		test.slow();
+
+		const next = page.getByRole("button", { name: "Suivant" });
+		const count = (
+			categoryIndex: number,
+			basis: "annual" | "hourly",
+			sex: "women" | "men",
+		) => categoryWorkforceInput(page, { basis, categoryIndex, sex });
+		const expectPayCells = async (
+			categoryIndex: number,
+			state: "enabled" | "disabled",
+		) => {
+			for (const cell of categoryPayCells(page, categoryIndex)) {
+				if (state === "enabled") {
+					await expect(cell).toBeEnabled();
+				} else {
+					await expect(cell).toBeDisabled();
+					await expect(cell).toHaveValue("");
+				}
+			}
+			const status = page
+				.locator('[data-testid="category-pay-status"]')
+				.nth(categoryIndex - 1);
+			if (state === "disabled") {
+				await expect(status).toHaveText("Aucun écart à calculer");
+			} else {
+				await expect(status).toBeEmpty();
+			}
+		};
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL("**/declaration-remuneration/etape/5");
+
+		await test.step("une catégorie neuve déclare ses rémunérations : vide n'est pas 0", async () => {
+			await page
+				.getByRole("combobox", {
+					name: /source utilisée pour déterminer les catégories/i,
+				})
+				.selectOption("accord-entreprise");
+			await page.locator("#cat-0-name").fill("Cadres");
+
+			await expectPayCells(1, "enabled");
+
+			for (const basis of ["annual", "hourly"] as const) {
+				await count(1, basis, "women").fill(String(FIRST_CATEGORY.women));
+				await count(1, basis, "men").fill(String(FIRST_CATEGORY.men));
+			}
+			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
+		});
+
+		await test.step("un 0 isolé ou deux 0 croisés laissent les rémunérations actives", async () => {
+			await page.getByRole("button", { name: /Ajouter une catégorie/ }).click();
+			await page.locator("#cat-1-name").fill("Employés");
+			for (const basis of ["annual", "hourly"] as const) {
+				await count(2, basis, "women").fill("3");
+				await count(2, basis, "men").fill(String(SECOND_CATEGORY_MEN));
+			}
+			await expectPayCells(2, "enabled");
+
+			await count(2, "hourly", "women").fill("0");
+			await expectPayCells(2, "enabled");
+
+			await count(2, "annual", "men").fill("0");
+			await expectPayCells(2, "enabled");
+
+			await count(2, "annual", "men").fill(String(SECOND_CATEGORY_MEN));
+			await count(2, "hourly", "women").fill("3");
+			for (const basis of ["annual", "hourly"] as const) {
+				for (const sex of ["women", "men"] as const) {
+					await expect(count(2, basis, sex)).toBeEnabled();
+				}
+			}
+			await expectPayCells(1, "enabled");
+		});
+
+		await test.step("deux 0 dans la même colonne vident et désactivent les huit champs", async () => {
+			await fillCategoryPayAmounts(page, {
+				categoryIndex: 2,
+				men: "900",
+				women: "900",
+			});
+			await count(2, "annual", "women").fill("0");
+			await expectPayCells(2, "enabled");
+			for (const cell of categoryPayCells(page, 2)) {
+				await expect(cell).toHaveValue("900,00");
+			}
+
+			await count(2, "hourly", "women").fill("0");
+			await expectPayCells(2, "disabled");
+
+			await count(2, "annual", "women").fill("3");
+			await expectPayCells(2, "enabled");
+			for (const cell of categoryPayCells(page, 2)) {
+				await expect(cell).toHaveValue("");
+			}
+		});
+
+		await test.step("la catégorie sans femmes franchit l'étape sans persister de rémunération", async () => {
+			await count(2, "annual", "women").fill("0");
+			await count(2, "hourly", "women").fill("0");
+			await expectPayCells(2, "disabled");
+
+			await next.click();
+			await page.waitForURL("**/declaration-remuneration/etape/6");
+			await expect(
+				page.getByRole("heading", { name: /Récapitulatif/ }),
+			).toBeVisible();
+
+			await page.goto("/declaration-remuneration/etape/5");
+			await expect(count(2, "annual", "women")).toHaveValue("0");
+			await expectPayCells(2, "disabled");
+
+			await count(2, "annual", "women").fill("3");
+			await count(2, "hourly", "women").fill("3");
+			await expectPayCells(2, "enabled");
+			for (const cell of categoryPayCells(page, 2)) {
+				await expect(cell).toHaveValue("");
+			}
+			for (const cell of categoryPayCells(page)) {
+				await expect(cell).not.toHaveValue("");
+			}
+		});
+	});
+});
+
+// The suite baseline above is a >= 250 GIP company: 6 steps, CSE field, indicator G required.
+// Below, the same journeys are replayed for the two smaller GIP profiles of #3929/#3934.
+test.describe("Workforce comes from the GIP file, not the company registry", () => {
+	test.describe.configure({ mode: "serial" });
+
+	let currentYear: number;
+
+	test.beforeAll(async () => {
+		currentYear = await getCurrentDbYear();
+	});
+
+	test.afterAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.describe("company absent from the GIP file", () => {
+		test.beforeAll(async () => {
+			await setGipWorkforce(null);
+			await resetDeclarationToDraft();
+		});
+
+		test('mon espace shows "< 50" and drops the CSE field and the edit button', async ({
+			page,
+		}) => {
+			await page.goto(MY_SPACE);
+
+			const companyInfo = page
+				.locator("dl")
+				.filter({ hasText: "Effectif annuel moyen" })
+				.first();
+			await expect(companyInfo).toContainText(
+				`Effectif annuel moyen en ${currentYear - 1} :`,
+			);
+			await expect(companyInfo).toContainText("< 50");
+			await expect(companyInfo).not.toContainText("Existence d'un CSE");
+			await expect(
+				page.getByRole("button", { exact: true, name: "Modifier" }),
+			).toHaveCount(0);
+		});
+
+		// #4043: absent from the GIP file → obligation workforce 0 → voluntary tier,
+		// which declares all 7 indicators every year. Step 5 is therefore presented
+		// (it used to be skipped), and the funnel keeps its 6 steps.
+		test("the funnel keeps the indicator G step", async ({ page }) => {
+			await page.goto(remunerationStepHref(5));
+
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
+			await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			await expect(
+				page.getByRole("heading", {
+					name: /Écart de rémunération par catégories de salariés/,
+				}),
+			).toBeVisible();
+		});
+	});
+
+	// Issue 3914: the bracket used to key on "absent from the GIP file", so a
+	// company present in the file under the threshold rendered its exact
+	// headcount. The two cases are one tier and must read the same.
+	test.describe("company present in the GIP file below the voluntary threshold", () => {
+		test.beforeAll(async () => {
+			await setGipWorkforce(37);
+			await resetDeclarationToDraft();
+		});
+
+		test("mon espace brackets the headcount instead of printing it", async ({
+			page,
+		}) => {
+			await page.goto(MY_SPACE);
+
+			const companyInfo = page
+				.locator("dl")
+				.filter({ hasText: "Effectif annuel moyen" })
+				.first();
+			await expect(companyInfo).toContainText(
+				`Effectif annuel moyen en ${currentYear - 1} :`,
+			);
+			await expect(companyInfo).toContainText("< 50");
+			await expect(companyInfo).not.toContainText("37");
+		});
+	});
+
+	// GIP workforce of 70 (bracket 50-99): whether indicator G / step 5 applies
+	// flips on the campaign year via isIndicatorGRequired(70, year) — never below
+	// 2030, and only in a triennial year from 2030. Pinning both years keeps the
+	// two branches exercised instead of letting the assertion silently flip red
+	// when the calendar reaches 2030 (#4067). withCampaignYear seeds the GIP row
+	// for the pinned year and tears the coordinate down afterwards.
+	test.describe("GIP workforce of 70 — indicator G gated by the pinned year", () => {
+		test.describe.configure({ mode: "serial" });
+
+		test("6-indicator year (2029): banners show the workforce and the funnel drops step 5", async ({
+			page,
+		}) => {
+			await withCampaignYear({ page, year: 2029, workforce: 70 }, async () => {
+				await page.goto(MY_SPACE);
+
+				const companyInfo = page
+					.locator("dl")
+					.filter({ hasText: "Effectif annuel moyen" })
+					.first();
+				await expect(companyInfo).toContainText("70");
+				await expect(companyInfo).not.toContainText("Existence d'un CSE");
+				// Nothing is editable below 100, so the edit entry point is dropped too.
+				await expect(
+					page.getByRole("button", { exact: true, name: "Modifier" }),
+				).toHaveCount(0);
+
+				await page.goto(remunerationStepHref(1));
+				await expect(page.getByText("Étape 1 sur 5")).toBeVisible();
+				// 2029 campaign → workforce reference year N-1 = 2028 (getWorkforceYear).
+				await expect(
+					page.getByText("Effectif annuel moyen en 2028 :"),
+				).toBeVisible();
+				await expect(page.getByText("Existence d'un CSE :")).toHaveCount(0);
+
+				await submitStepsThroughQuartiles(page);
+				await page.waitForURL(urlGlob(remunerationStepHref(6)));
+				await expect(page.getByText("Étape 5 sur 5")).toBeVisible();
+			});
+		});
+
+		test("7-indicator year (2030): the funnel regains the indicator-G step", async ({
+			page,
+		}) => {
+			await withCampaignYear({ page, year: 2030, workforce: 70 }, async () => {
+				await page.goto(remunerationStepHref(1));
+				await expect(page.getByText("Étape 1 sur 6")).toBeVisible();
+				await page.goto(remunerationStepHref(5));
+				await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
+			});
+		});
+	});
+});
+
+// #4067 — withCampaignYear isolates one coordinate from the next. After a
+// declaration is built under year N, moving to year N+1 must leave no trace of N
+// (declaration, files, CSE opinion, has_cse). This proves it at the /mon-espace
+// listing, which aggregates every year's declaration for the SIREN — the very
+// surface interference #1 of the spec warns would otherwise show 7 rows after a
+// grid run. The rigorous, row-count proof of resetCampaignYear lives in
+// db-campaign.resetCampaignYear.integration.test.ts.
+//
+// Two things make the assertion narrower than it looks. The listing carries one
+// row per declaration type the company is in scope for — here rémunération only,
+// since #3702 gates the représentation line behind a GIP pre-filter this 250-employee
+// coordinate does not clear — so a bare row count would encode that arity instead of
+// the isolation property. And a row cannot be matched on its text: a campaign-year row
+// legitimately mentions N-1, the reference year its figures describe. Only the Année
+// cell discriminates.
+test.describe("withCampaignYear leaves no residue between two year coordinates (#4067)", () => {
+	test("a run pinned on 2033 leaves no trace of the 2032 coordinate", async ({
+		page,
+	}) => {
+		test.slow();
+		// Coordinate A: create a declaration under 2032, then let the fixture tear it down.
+		await withCampaignYear({ page, year: 2032, workforce: 250 }, async () => {
+			await page.goto(DECLARATION_REMUNERATION);
+			await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
+		});
+
+		// Coordinate B: 2033 is listed, 2032 is gone — A left no residue.
+		await withCampaignYear({ page, year: 2033, workforce: 250 }, async () => {
+			await page.goto(DECLARATION_REMUNERATION);
+			await page.waitForURL(urlGlob(`${DECLARATION_REMUNERATION}/etape/**`));
+
+			await page.goto(MY_SPACE);
+			const currentDeclarations = page.locator(
+				'table[aria-labelledby="demarches-en-cours-title"] tbody tr',
+			);
+			const rowsForYear = (year: string) =>
+				currentDeclarations.filter({
+					has: page.getByRole("cell", { name: year, exact: true }),
+				});
+
+			await expect(rowsForYear("2032")).toHaveCount(0);
+			await expect(rowsForYear("2033")).toHaveCount(1);
+			await expect(rowsForYear("2033")).toContainText("Rémunération");
+		});
+	});
+});
+
+// Regression guard for #3943: the indicator G category label maps to a
+// varchar(255) column. Before the fix the field accepted unbounded input, so an
+// over-long label made Postgres reject the insert and surfaced the raw Drizzle
+// SQL query to the user (broken UX + technical disclosure). The fix bounds the
+// input client-side and documents the limit with a DSFR hint.
+test.describe("Indicator G — category label is bounded to 255 characters (#3943)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		// >= 250 workforce → the funnel keeps step 5 / indicator G.
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("caps the label input at 255 chars and exposes the DSFR hint", async ({
+		page,
+	}) => {
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
+
+		// Pick a source when categories aren't pre-populated, so the editable
+		// category form (with its label input) is rendered.
+		const sourceSelect = page.getByRole("combobox", {
+			name: /source utilisée pour déterminer les catégories/i,
+		});
+		if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
+			await sourceSelect.selectOption("accord-entreprise");
+		}
+
+		const nameInput = page.locator("#cat-0-name");
+		await expect(nameInput).toBeVisible();
+
+		// The hint is wired to the field for assistive tech. #4254 gave it the Figma
+		// text; the 255 limit it used to spell out is now carried by the maxLength
+		// attribute asserted below and by the Zod message, not by the hint.
+		await expect(page.locator("#cat-0-name-hint")).toHaveText(
+			"En référence à l'accord ou à la décision unilatérale",
+		);
+		await expect(nameInput).toHaveAttribute(
+			"aria-describedby",
+			/cat-0-name-hint/,
+		);
+
+		// The guard that prevents the varchar(255) overflow (and thus the raw SQL
+		// error at submit) is the maxLength cap on the native input.
+		await expect(nameInput).toHaveAttribute("maxlength", "255");
+
+		await nameInput.fill("a".repeat(300));
+		await expect(nameInput).toHaveJSProperty("value.length", 255);
+	});
+});
+
+// #2968 — the step 6 quartile card built its share by hand with `.toFixed(1)`, so it
+// printed "40.0 %" among the comma-separated figures of every other card on the same
+// page. The share now goes through the domain formatter. The formatter itself is unit
+// tested; what only the browser proves is that the card renders shares at all — it
+// needs a funnel that actually submitted step 4, otherwise it stays on "Aucune donnée
+// renseignée." and a decimal-point assertion passes on an empty card.
+test.describe("Step 6 — quartile shares are written with a decimal comma (#2968)", () => {
+	test.describe.configure({ mode: "serial" });
+
+	test.beforeAll(async () => {
+		await resetGipWorkforce();
+		await resetDeclarationToDraft();
+	});
+
+	test.afterAll(async () => {
+		await resetDeclarationToDraft();
+	});
+
+	test("the recap card writes 40,0 %, never 40.0 %", async ({ page }) => {
+		test.slow();
+
+		await submitStepsThroughQuartiles(page);
+		await page.waitForURL(urlGlob(remunerationStepHref(5)));
+		await goToStep(page, 6);
+
+		const quartileCard = page
+			.getByText(
+				"Proportion de femmes et d'hommes dans chaque quartile salarial",
+			)
+			.locator("xpath=../..");
+
+		await expect(
+			quartileCard.getByText("Aucune donnée renseignée."),
+		).toHaveCount(0);
+		// Both tables, both sexes, four quartiles: the card holds sixteen shares.
+		await expect(quartileCard.getByText(/^\d{1,3},\d %$/)).toHaveCount(16);
+
+		// The 4th quartile is 2 women against 3 men on either table, so its women
+		// share is an exact 40 % — the value the old `.toFixed(1)` wrote "40.0 %".
+		await expect(quartileCard.getByText("40,0 %", { exact: true })).toHaveCount(
+			2,
+		);
+		await expect(quartileCard.getByText(/\d\.\d/)).toHaveCount(0);
 	});
 });

@@ -3,36 +3,39 @@ import { describe, expect, it } from "vitest";
 import {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
+	getCompanySizeRange,
+	getOptionalCompanySizeRange,
 	isCseRequired,
 } from "../shared/companySize";
+import {
+	COMPANY_SIZE_ANNUAL_MIN,
+	COMPANY_SIZE_VOLUNTARY_MAX,
+} from "../shared/constants";
 
-describe("classifyCompanySize", () => {
-	it("returns voluntary for workforce below 50", () => {
-		expect(classifyCompanySize(10)).toBe("voluntary");
-		expect(classifyCompanySize(49)).toBe("voluntary");
+describe("regulatory size constants", () => {
+	// Boundary behavior lives symbolically in demarcheDecisionTable.test.ts
+	// (#3975); the literal values are pinned here (COMPANY_SIZE_RANGES below
+	// carries its own literals, independent of these constants).
+	it("pins the voluntary/mandatory boundary at 50", () => {
+		expect(COMPANY_SIZE_VOLUNTARY_MAX).toBe(50);
 	});
 
-	it("returns triennial for workforce between 50 and 99", () => {
-		expect(classifyCompanySize(50)).toBe("triennial");
-		expect(classifyCompanySize(75)).toBe("triennial");
-		expect(classifyCompanySize(99)).toBe("triennial");
-	});
-
-	it("returns annual for workforce >= 100", () => {
-		expect(classifyCompanySize(100)).toBe("annual");
-		expect(classifyCompanySize(500)).toBe("annual");
+	it("pins the compliance-obligation + CSE boundary at 100", () => {
+		expect(COMPANY_SIZE_ANNUAL_MIN).toBe(100);
 	});
 });
 
-describe("isCseRequired", () => {
-	it("returns false for workforce below 100", () => {
-		expect(isCseRequired(50)).toBe(false);
-		expect(isCseRequired(99)).toBe(false);
-	});
-
-	it("returns true for workforce at or above 100", () => {
-		expect(isCseRequired(100)).toBe(true);
-		expect(isCseRequired(500)).toBe(true);
+describe("classifyCompanySize", () => {
+	it("classifies each obligation package by its workforce band", () => {
+		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX - 1)).toBe(
+			"voluntary",
+		);
+		expect(classifyCompanySize(COMPANY_SIZE_VOLUNTARY_MAX)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN - 1)).toBe("mandatory");
+		expect(classifyCompanySize(COMPANY_SIZE_ANNUAL_MIN)).toBe(
+			"mandatory_with_compliance",
+		);
+		expect(classifyCompanySize(300)).toBe("mandatory_with_compliance");
 	});
 });
 
@@ -76,5 +79,49 @@ describe("COMPANY_SIZE_RANGES", () => {
 			max: null,
 			label: "250 salariés et plus",
 		});
+	});
+});
+
+describe("getCompanySizeRange", () => {
+	it("maps a workforce to its bucket key", () => {
+		expect(getCompanySizeRange(0)).toBe("<50");
+		expect(getCompanySizeRange(49)).toBe("<50");
+		expect(getCompanySizeRange(50)).toBe("50-99");
+		expect(getCompanySizeRange(99)).toBe("50-99");
+		expect(getCompanySizeRange(100)).toBe("100-149");
+		expect(getCompanySizeRange(149)).toBe("100-149");
+		expect(getCompanySizeRange(150)).toBe("150-249");
+		expect(getCompanySizeRange(249)).toBe("150-249");
+		expect(getCompanySizeRange(250)).toBe("250+");
+		expect(getCompanySizeRange(10000)).toBe("250+");
+	});
+});
+
+describe("getOptionalCompanySizeRange", () => {
+	it("maps a known workforce to the same bucket as getCompanySizeRange", () => {
+		for (const workforce of [0, 49, 50, 99, 100, 149, 150, 249, 250, 10000]) {
+			expect(getOptionalCompanySizeRange(workforce)).toBe(
+				getCompanySizeRange(workforce),
+			);
+		}
+	});
+
+	it("puts an unknown workforce in no bucket at all", () => {
+		expect(getOptionalCompanySizeRange(null)).toBeUndefined();
+	});
+
+	// An unknown headcount folded into `<50` would assert a size the source does
+	// not give — the mistake `coalesce(workforce_ema, 0)` makes on the SQL side.
+	it("never folds an unknown workforce into the smallest bucket", () => {
+		expect(getOptionalCompanySizeRange(null)).not.toBe("<50");
+		expect(getOptionalCompanySizeRange(0)).toBe("<50");
+	});
+});
+
+describe("isCseRequired", () => {
+	it("is size-based only: true from 100 employees", () => {
+		expect(isCseRequired(99)).toBe(false);
+		expect(isCseRequired(100)).toBe(true);
+		expect(isCseRequired(250)).toBe(true);
 	});
 });

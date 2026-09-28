@@ -1,4 +1,6 @@
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
+import styles from "./ReferencePeriodPicker.module.scss";
 
 type Props = {
 	startDate: string;
@@ -6,6 +8,7 @@ type Props = {
 	onStartDateChange: (value: string) => void;
 	onEndDateChange: (value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
 };
 
 export function ReferencePeriodPicker({
@@ -14,23 +17,22 @@ export function ReferencePeriodPicker({
 	onStartDateChange,
 	onEndDateChange,
 	disabled = false,
+	readOnly = false,
 }: Props) {
 	return (
-		<div>
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters fr-mb-2w">
-				<div className="fr-col-auto">
-					<p className="fr-mb-0 fr-text--medium">
-						Quelle est la période de référence pour le calcul de
-						l&apos;indicateur ?
-					</p>
-				</div>
-				<div className="fr-col-auto">
-					<TooltipButton
-						id="tooltip-second-decl-period"
-						label="Informations sur la période prise en compte pour la seconde déclaration"
-					/>
-				</div>
-			</div>
+		<fieldset
+			className={`${styles.fieldset} ${readOnly ? common.readOnlyFieldset : ""}`}
+		>
+			<legend className={`fr-mb-2w ${styles.legend}`}>
+				<span>
+					Quelle est la période de référence pour le calcul de l&apos;indicateur
+					?
+				</span>
+				<TooltipButton
+					id="tooltip-second-decl-period"
+					label="Informations sur la période prise en compte pour la seconde déclaration"
+				/>
+			</legend>
 			<div className="fr-grid-row fr-grid-row--gutters">
 				<div className="fr-col-12 fr-col-md-4">
 					<div className="fr-input-group">
@@ -43,6 +45,7 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-start-date"
 							onChange={(e) => onStartDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={startDate}
 						/>
@@ -59,12 +62,13 @@ export function ReferencePeriodPicker({
 							disabled={disabled}
 							id="period-end-date"
 							onChange={(e) => onEndDateChange(e.target.value)}
+							readOnly={readOnly}
 							type="date"
 							value={endDate}
 						/>
 					</div>
 				</div>
 			</div>
-		</div>
+		</fieldset>
 	);
 }

@@ -7,6 +7,30 @@ global:
   # `packages/notifications/src/index.ts` exits cleanly when the queue DB URL
   # is absent — so a namespace without pg-notifications just runs an idle pod.
   notificationsEnabled: true
+  # One-off, idempotent post-deploy repair for location columns added by
+  # migration 0047. It only processes incomplete rows and can safely rerun.
+  companyLocationBackfillEnabled: true
+  # Post-deploy repair of the NAF pair (#4087): rows written between #3077 and
+  # #4087 carry a NAF 2025 code next to a rév. 2 label. No column records which
+  # nomenclature wrote a row, so every row with a NAF code is re-read from the
+  # registry on every deploy — writes are a no-op on an already-aligned row,
+  # but the registry call itself is not, unlike companyLocationBackfillEnabled
+  # above (whose predicate shrinks to the residual after the first run). This
+  # is NOT self-limiting: flip this flag to false for an environment once a
+  # run there has been confirmed complete (job logs: "N updated, M already
+  # aligned, 0 failed"), or every later deploy re-sweeps the whole company
+  # table against a third-party API for no further correction.
+  companyNafBackfillEnabled: true
+  # Deterministic Observatoire fixtures. Kept off by default and enabled only
+  # by the dev overlay used for ephemeral branch review apps.
+  observatoryDemoSeedEnabled: false
+  # Daily refresh of the remote data.gouv.fr resource. Enable once the dataset,
+  # resource and sealed API key have been provisioned by the publisher account.
+  dataGouv:
+    enabled: false
+    apiUrl: "https://www.data.gouv.fr/api/1"
+    datasetId: ""
+    resourceId: ""
   # APISIX standalone gateway in front of the SUIT API.
   # Templates: .kontinuous/templates/apisix-suit.yaml + apisix-suit.ingress.yaml.
   # Scoped under `global:` because only `global.*` values are propagated to the
@@ -37,6 +61,14 @@ app:
         name: "suit"
     - secretRef:
         name: "suit"
+    # Client certificate presented to the SUIT API (mTLS, issue #3911). Kept out
+    # of the `suit` secret above because that one is non-optional: a half-sealed
+    # state there would stop the pod from starting. Optional here, so SUIT calls
+    # simply go out without a client certificate until ops seals the two keys
+    # (EGAPRO_SUIT_CLIENT_CERT_P12_BASE64 / _PASSWORD) into it.
+    - secretRef:
+        name: "suit-client-cert"
+        optional: true
     - secretRef:
         name: "next-auth"
     - configMapRef:
@@ -61,6 +93,13 @@ app:
         optional: true
     - configMapRef:
         name: "valkey"
+        optional: true
+    # Matomo Reporting API token for the admin funnel widget (issue #3646).
+    # Optional: the admin chart degrades to "no data" when absent. The base
+    # URL falls back to NEXT_PUBLIC_MATOMO_URL, so only the token is a secret —
+    # ops creates the `matomo` sealed-secret (key MATOMO_API_TOKEN) per env.
+    - secretRef:
+        name: "matomo"
         optional: true
   env:
     - name: POSTGRES_HOST

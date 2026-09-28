@@ -1,329 +1,461 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const queryResults: unknown[][] = [];
-let callIndex = 0;
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
 
-vi.mock("~/server/db", () => {
-	const makeChain = () => ({
+type TableKey =
+	| "declarations"
+	| "companies"
+	| "users"
+	| "gipMdsData"
+	| "jobCategories"
+	| "employeeCategories"
+	| "declarationStatusHistory";
+
+// Result sets keyed by the queried table. buildPdfData issues most queries via
+// `Promise.all`, so execution order is not stable — the mock keys results by the
+// table passed to `.from()` (via the schema token's `__table` tag) instead of by
+// call order. `declarationStatusHistory` is queried up to twice per build
+// (second_declaration_submit then submit), so it holds a FIFO sub-queue.
+const results = new Map<TableKey, unknown[][]>();
+
+function settle(table: TableKey) {
+	const queued = results.get(table);
+	const result = queued?.shift() ?? [];
+	return Object.assign(Promise.resolve(result), {
+		limit: () => Promise.resolve(result),
+		orderBy: () => ({ limit: () => Promise.resolve(result) }),
+	});
+}
+
+vi.mock("~/server/db", () => ({
+	db: {
 		select: () => ({
-			from: () => ({
-				where: () => {
-					const idx = callIndex++;
-					const result = queryResults[idx] ?? [];
-					return Object.assign(Promise.resolve(result), {
-						limit: () => Promise.resolve(result),
-					});
-				},
+			from: (table: { __table: TableKey }) => ({
+				where: () => settle(table.__table),
 			}),
 		}),
-	});
-	return { db: makeChain() };
-});
+	},
+}));
 
 vi.mock("~/server/db/schema", () => ({
-	declarations: { siren: "siren", year: "year" },
-	companies: { siren: "siren" },
-	jobCategories: { declarationId: "declarationId" },
-	employeeCategories: { jobCategoryId: "jobCategoryId" },
+	declarations: {
+		__table: "declarations",
+		id: "id",
+		siren: "siren",
+		year: "year",
+	},
+	companies: { __table: "companies", siren: "siren" },
+	users: { __table: "users", id: "id" },
+	gipMdsData: { __table: "gipMdsData", siren: "siren", year: "year" },
+	jobCategories: { __table: "jobCategories", declarationId: "declarationId" },
+	employeeCategories: {
+		__table: "employeeCategories",
+		jobCategoryId: "jobCategoryId",
+	},
+	declarationStatusHistory: {
+		__table: "declarationStatusHistory",
+		declarationId: "declarationId",
+		eventType: "eventType",
+		createdAt: "createdAt",
+	},
+	// Pulled in at module scope by the ~/modules/public-api barrel, which
+	// buildPdfData reaches transitively through server/auth/config.
+	representationDeclarations: {
+		__table: "representationDeclarations",
+		siren: "siren",
+		year: "year",
+		status: "status",
+		referencePeriodStart: "referencePeriodStart",
+		referencePeriodEnd: "referencePeriodEnd",
+		executiveWomenPercent: "executiveWomenPercent",
+		executiveMenPercent: "executiveMenPercent",
+		notComputableReasonExecutives: "notComputableReasonExecutives",
+		memberWomenPercent: "memberWomenPercent",
+		memberMenPercent: "memberMenPercent",
+		notComputableReasonMembers: "notComputableReasonMembers",
+		publishDate: "publishDate",
+		publishUrl: "publishUrl",
+		publishModalities: "publishModalities",
+	},
 }));
 
 vi.mock("~/server/api/routers/declarationHelpers", () => ({
+	activeDeclarationFilter: (siren: string, year: number) => ({ siren, year }),
+	mapToStepData: (d: Record<string, unknown>) => ({
+		step2Data: {
+			indicatorAAnnualWomen: (d.indicatorAAnnualWomen as string) ?? "",
+		},
+		step3Data: { indicatorEWomen: (d.indicatorEWomen as string) ?? "" },
+		step4Data: { annual: [], hourly: [] },
+	}),
 	mapToEmployeeCategoryRows: (
-		_jobs: unknown[],
+		jobs: { name: string }[],
 		_empCats: unknown[],
 		_type: string,
-	) => [],
-	activeDeclarationFilter: (siren: string, year: number) => ({
-		siren,
-		year,
-		cancelledAt: "IS NULL",
-	}),
+	) => jobs.map((j) => ({ name: j.name })),
 }));
 
 vi.mock("drizzle-orm", () => ({
 	and: (...args: unknown[]) => args,
+	desc: (col: unknown) => col,
 	eq: (col: unknown, val: unknown) => ({ col, val }),
-	isNull: (col: unknown) => ({ col, op: "isNull" }),
+	inArray: (col: unknown, values: unknown) => ({ col, values }),
 }));
 
-function resetMocks() {
-	callIndex = 0;
-	queryResults.length = 0;
+// One entry per table. `declarationStatusHistory` takes an array of result sets
+// (consumed FIFO) since it can be queried twice within one build.
+type QueueSpec = Partial<
+	Record<Exclude<TableKey, "declarationStatusHistory">, unknown[]>
+> & { declarationStatusHistory?: unknown[][] };
+
+function queue(spec: QueueSpec) {
+	results.clear();
+	for (const [table, value] of Object.entries(spec)) {
+		if (table === "declarationStatusHistory") {
+			results.set(table, value as unknown[][]);
+		} else {
+			results.set(table as TableKey, [value as unknown[]]);
+		}
+	}
+}
+
+const SUBMITTED = new Date("2026-03-05T10:00:00Z");
+const SECOND_SUBMIT = new Date("2026-06-05T10:00:00Z");
+const NOW = new Date("2026-03-09T00:00:00Z");
+
+async function importBuild() {
+	const { buildPdfData } = await import("../buildPdfData");
+	return buildPdfData;
 }
 
 describe("buildPdfData", () => {
-	it("throws when declaration not found", async () => {
-		resetMocks();
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("Déclaration introuvable");
+	beforeEach(() => {
+		results.clear();
 	});
 
-	it("throws when only cancelled declarations exist for (siren, year)", async () => {
-		resetMocks();
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("Déclaration introuvable");
-	});
-
-	it("throws when declaration is not submitted", async () => {
-		resetMocks();
-		queryResults.push([{ siren: "123456789", year: 2026, status: "draft" }]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		await expect(
-			buildPdfData("123456789", 2026, new Date("2026-03-09")),
-		).rejects.toThrow("La déclaration n'est pas encore soumise");
-	});
-
-	it("returns transformed data for a submitted declaration", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid",
-				siren: "123456789",
-				year: 2026,
-				status: "submitted",
-				totalWomen: 50,
-				totalMen: 60,
-				// Indicator A (step 2 — mean)
-				indicatorAAnnualWomen: "45000",
-				indicatorAAnnualMen: "50000",
-				indicatorAHourlyWomen: "22",
-				indicatorAHourlyMen: "24",
-				// Indicator C (step 2 — median)
-				indicatorCAnnualWomen: "44000",
-				indicatorCAnnualMen: "49000",
-				indicatorCHourlyWomen: "21",
-				indicatorCHourlyMen: "23",
-				// Indicator B (step 3 — variable mean)
-				indicatorBAnnualWomen: "5000",
-				indicatorBAnnualMen: "6000",
-				indicatorBHourlyWomen: "2",
-				indicatorBHourlyMen: "3",
-				// Indicator D (step 3 — variable median)
-				indicatorDAnnualWomen: "4800",
-				indicatorDAnnualMen: "5800",
-				indicatorDHourlyWomen: "1.9",
-				indicatorDHourlyMen: "2.9",
-				// Indicator E (step 3 — beneficiaries)
-				indicatorEWomen: "80",
-				indicatorEMen: "75",
-				// Indicator F annual (step 4)
-				indicatorFAnnualThreshold1: "40000",
-				indicatorFAnnualThreshold2: "50000",
-				indicatorFAnnualThreshold3: "60000",
-				indicatorFAnnualWomen1: 10,
-				indicatorFAnnualWomen2: 12,
-				indicatorFAnnualWomen3: 14,
-				indicatorFAnnualWomen4: 14,
-				indicatorFAnnualMen1: 15,
-				indicatorFAnnualMen2: 13,
-				indicatorFAnnualMen3: 12,
-				indicatorFAnnualMen4: 10,
-				// Indicator F hourly (step 4)
-				indicatorFHourlyThreshold1: null,
-				indicatorFHourlyThreshold2: null,
-				indicatorFHourlyThreshold3: null,
-				indicatorFHourlyWomen1: null,
-				indicatorFHourlyWomen2: null,
-				indicatorFHourlyWomen3: null,
-				indicatorFHourlyWomen4: null,
-				indicatorFHourlyMen1: null,
-				indicatorFHourlyMen2: null,
-				indicatorFHourlyMen3: null,
-				indicatorFHourlyMen4: null,
-			},
-		]);
-		// Query 2: companies
-		queryResults.push([{ siren: "123456789", name: "Acme Corp" }]);
-		// Query 3: jobCategories (empty — mapToEmployeeCategoryRows is mocked)
-		queryResults.push([]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"123456789",
-			2026,
-			new Date("2026-03-09"),
+	it("throws when the declaration is not found", async () => {
+		queue({ declarations: [] });
+		const buildPdfData = await importBuild();
+		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
+			"Déclaration introuvable",
 		);
+	});
 
-		expect(result.companyName).toBe("Acme Corp");
-		expect(result.siren).toBe("123456789");
+	it("throws when the declaration is still a draft", async () => {
+		queue({
+			declarations: [
+				{ id: "d1", siren: "123456789", year: 2026, status: "draft" },
+			],
+		});
+		const buildPdfData = await importBuild();
+		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
+			"La déclaration n'est pas encore soumise",
+		);
+	});
+
+	it("assembles declarant, company, GIP workforce, source and transmission date for an initial declaration", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d1",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-1",
+					totalWomen: 50,
+					totalMen: 60,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					indicatorAAnnualWomen: "45000",
+					indicatorEWomen: "80",
+				},
+			],
+			companies: [
+				{
+					siren: "123456789",
+					name: "Société Démo",
+					address: "1 rue de la Paix, 75002 Paris",
+					nafCode: "6201Z",
+					nafLabel: "Programmation informatique",
+				},
+			],
+			users: [
+				{
+					firstName: "Jean",
+					lastName: "Martin",
+					email: "email@example.fr",
+					phone: "0102030405",
+				},
+			],
+			gipMdsData: [{ workforceEma: "250.7" }],
+			jobCategories: [
+				{
+					id: "job-1",
+					name: "Ouvriers",
+					categoryIndex: 0,
+					source: "accord-entreprise",
+				},
+			],
+			employeeCategories: [{ jobCategoryId: "job-1" }],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
 		expect(result.year).toBe(2026);
-		expect(result.generatedAt).toBe("9 mars 2026");
+		expect(result.workforceYear).toBe(2025);
+		expect(result.isSecondDeclaration).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+		expect(result.transmittedAt).toBe("05/03/2026");
+
+		expect(result.declarant).toEqual({
+			name: "Jean Martin",
+			email: "email@example.fr",
+			phone: "0102030405",
+		});
+
+		expect(result.company).toEqual({
+			name: "Société Démo",
+			siren: "123456789",
+			address: "1 rue de la Paix, 75002 Paris",
+			nafCode: "6201Z",
+			nafLabel: "Programmation informatique",
+			workforceDisplay: (250).toLocaleString("fr-FR"),
+		});
+
 		expect(result.totalWomen).toBe(50);
 		expect(result.totalMen).toBe(60);
-
-		// step1Categories is empty: per-category workforce breakdown is not stored in flat columns
-		expect(result.step1Categories).toEqual([]);
-
-		expect(result.step2Rows).toEqual([
-			{
-				label: "Annuelle brute moyenne",
-				womenValue: "45000",
-				menValue: "50000",
-			},
-			{ label: "Horaire brute moyenne", womenValue: "22", menValue: "24" },
-			{
-				label: "Annuelle brute médiane",
-				womenValue: "44000",
-				menValue: "49000",
-			},
-			{ label: "Horaire brute médiane", womenValue: "21", menValue: "23" },
-		]);
-
-		expect(result.step3Data.beneficiaryWomen).toBe("80");
-		expect(result.step3Data.beneficiaryMen).toBe("75");
-		expect(result.step3Data.rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "5000", menValue: "6000" },
-			{ label: "Horaire brute moyenne", womenValue: "2", menValue: "3" },
-			{ label: "Annuelle brute médiane", womenValue: "4800", menValue: "5800" },
-			{ label: "Horaire brute médiane", womenValue: "1.9", menValue: "2.9" },
-		]);
-
-		expect(result.step4Categories).toEqual([
-			{
-				name: "annual:1er quartile",
-				womenCount: 10,
-				menCount: 15,
-				womenValue: "40000",
-			},
-			{
-				name: "annual:2e quartile",
-				womenCount: 12,
-				menCount: 13,
-				womenValue: "50000",
-			},
-			{
-				name: "annual:3e quartile",
-				womenCount: 14,
-				menCount: 12,
-				womenValue: "60000",
-			},
-			{
-				name: "annual:4e quartile",
-				womenCount: 14,
-				menCount: 10,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:1er quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:2e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:3e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-			{
-				name: "hourly:4e quartile",
-				womenCount: undefined,
-				menCount: undefined,
-				womenValue: undefined,
-			},
-		]);
-
-		// step5Categories comes from mapToEmployeeCategoryRows mock (returns [])
-		expect(result.step5Categories).toEqual([]);
+		expect(result.categories).toEqual([{ name: "Ouvriers" }]);
+		expect(result.source).toBe("Accord d'entreprise");
 	});
 
-	it("falls back to default company name when company not found", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid-2",
-				siren: "999999999",
-				year: 2026,
-				status: "submitted",
-				totalWomen: null,
-				totalMen: null,
-			},
-		]);
-		// Query 2: companies (not found)
-		queryResults.push([]);
-		// Query 3: jobCategories (empty)
-		queryResults.push([]);
+	it("displays the GIP-absent placeholder and a humanised source when GIP data and label are missing", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d2",
+					siren: "987654321",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-2",
+					totalWomen: null,
+					totalMen: null,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+				},
+			],
+			companies: [{ siren: "987654321", name: "Autre Démo" }],
+			users: [{ firstName: "Alice", lastName: null, email: null, phone: null }],
+			gipMdsData: [], // GIP data absent
+			jobCategories: [
+				{
+					id: "job-9",
+					name: "Cadres",
+					categoryIndex: 0,
+					source: "convention-maison",
+				},
+			],
+			employeeCategories: [{ jobCategoryId: "job-9" }],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("987654321", 2026, NOW);
 
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"999999999",
-			2026,
-			new Date("2026-03-09"),
+		expect(result.company.workforceDisplay).toBe(
+			GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 		);
+		expect(result.company.address).toBe("");
+		expect(result.company.nafCode).toBeNull();
+		expect(result.declarant).toEqual({
+			name: "Alice",
+			email: "",
+			phone: "",
+		});
+		// Unknown source value is humanised rather than printed as a raw slug.
+		expect(result.source).toBe("Convention maison");
+	});
 
-		expect(result.companyName).toBe("Entreprise 999999999");
+	it("falls back to a synthesized company name and zeroed totals when the company row is missing", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d3",
+					siren: "111222333",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: null,
+					totalMen: null,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+				},
+			],
+			companies: [], // company row missing
+			gipMdsData: [],
+			jobCategories: [], // empty → employeeCategories query is skipped
+			// no declarantId → users query is skipped
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("111222333", 2026, NOW);
+
+		expect(result.company.name).toBe("Entreprise 111222333");
 		expect(result.totalWomen).toBe(0);
 		expect(result.totalMen).toBe(0);
-		expect(result.step1Categories).toEqual([]);
-		expect(result.step2Rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-			{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-		]);
-		expect(result.step3Data.rows).toEqual([
-			{ label: "Annuelle brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Horaire brute moyenne", womenValue: "", menValue: "" },
-			{ label: "Annuelle brute médiane", womenValue: "", menValue: "" },
-			{ label: "Horaire brute médiane", womenValue: "", menValue: "" },
-		]);
-		expect(result.step3Data.beneficiaryWomen).toBe("");
-		expect(result.step3Data.beneficiaryMen).toBe("");
+		expect(result.declarant).toEqual({ name: "", email: "", phone: "" });
+		expect(result.categories).toEqual([]);
+		expect(result.source).toBeNull();
 	});
 
-	it("fetches employee categories when job categories exist", async () => {
-		resetMocks();
-		// Query 1: declarations
-		queryResults.push([
-			{
-				id: "decl-uuid-3",
-				siren: "111222333",
-				year: 2026,
-				status: "submitted",
-				totalWomen: 10,
-				totalMen: 10,
-			},
-		]);
-		// Query 2: companies
-		queryResults.push([{ siren: "111222333", name: "Test Corp" }]);
-		// Query 3: jobCategories — returns one job
-		queryResults.push([{ id: "job-1" }]);
-		// Query 4: employeeCategories for job-1
-		queryResults.push([{ jobCategoryId: "job-1" }]);
-
-		const { buildPdfData } = await import("../buildPdfData");
-		const result = await buildPdfData(
-			"111222333",
-			2026,
-			new Date("2026-03-09"),
-		);
-
-		// step5Categories still empty because mapToEmployeeCategoryRows is mocked to return []
-		expect(result.step5Categories).toEqual([]);
-		expect(result.companyName).toBe("Test Corp");
-		expect(result.step4Categories).toHaveLength(8);
-		expect(result.step4Categories[0]).toMatchObject({
-			name: "annual:1er quartile",
-			womenCount: undefined,
-			menCount: undefined,
-			womenValue: undefined,
+	it("uses the second_declaration_submit date and the captured reference period for a correction declaration", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d4",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: "user-1",
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: "2025-07-01",
+					secondDeclReferencePeriodEnd: "2026-06-30",
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			users: [
+				{
+					firstName: "Jean",
+					lastName: "Martin",
+					email: "email@example.fr",
+					phone: "",
+				},
+			],
+			gipMdsData: [{ workforceEma: "120" }],
+			jobCategories: [
+				{
+					id: "job-1",
+					name: "Ouvriers",
+					categoryIndex: 0,
+					source: "accord-groupe",
+				},
+			],
+			employeeCategories: [{ jobCategoryId: "job-1" }],
+			// correction: second_declaration_submit event resolves first
+			declarationStatusHistory: [[{ createdAt: SECOND_SUBMIT }]],
 		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
+
+		expect(result.isSecondDeclaration).toBe(true);
+		expect(result.transmittedAt).toBe("05/06/2026");
+		expect(result.referencePeriod).toBe("01/07/2025 - 30/06/2026");
+	});
+
+	it("falls back to the civil reference period for a correction predating mandatory capture", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d4bis",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: null,
+					secondDeclReferencePeriodEnd: null,
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			declarationStatusHistory: [[{ createdAt: SECOND_SUBMIT }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
+
+		expect(result.isSecondDeclaration).toBe(true);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+	});
+
+	it("ignores a captured reference period on an initial declaration", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d4ter",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 10,
+					totalMen: 10,
+					updatedAt: new Date("2026-03-01T00:00:00Z"),
+					secondDeclReferencePeriodStart: "2025-07-01",
+					secondDeclReferencePeriodEnd: "2026-06-30",
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			declarationStatusHistory: [[{ createdAt: SUBMITTED }]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
+		expect(result.isSecondDeclaration).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+	});
+
+	it("falls back through submit then updatedAt when no matching status event exists", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d5",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 1,
+					totalMen: 1,
+					updatedAt: new Date("2026-02-14T00:00:00Z"),
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			// correction: second_declaration_submit (empty), then submit (empty)
+			// → falls back to updatedAt
+			declarationStatusHistory: [[], []],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW, "correction");
+
+		expect(result.transmittedAt).toBe("14/02/2026");
+	});
+
+	it("falls back to `now` when the declaration has no updatedAt and no submit event", async () => {
+		queue({
+			declarations: [
+				{
+					id: "d6",
+					siren: "123456789",
+					year: 2026,
+					status: "submitted",
+					declarantId: null,
+					totalWomen: 1,
+					totalMen: 1,
+					updatedAt: null,
+				},
+			],
+			companies: [{ siren: "123456789", name: "Société Démo" }],
+			gipMdsData: [],
+			jobCategories: [],
+			// submit event empty → falls back to `now`
+			declarationStatusHistory: [[]],
+		});
+		const buildPdfData = await importBuild();
+		const result = await buildPdfData("123456789", 2026, NOW);
+
+		expect(result.transmittedAt).toBe("09/03/2026");
 	});
 });

@@ -1,0 +1,99 @@
+.review {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+// Figma spec: label column fixed at 237px next to a fluid value column, pairs
+// laid out as a grid so a value that wraps (communication modalities) cannot
+// push the following label out of line.
+:global(dl).definitionList {
+	display: grid;
+	grid-template-columns: 237px minmax(0, 1fr);
+	column-gap: 0.625rem;
+	row-gap: 0.5rem;
+	margin: 0;
+
+	@include respond-to(sm) {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: 0.25rem;
+	}
+}
+
+.definitionList dd {
+	margin: 0;
+	color: var(--text-title-grey);
+}
+
+.definitionList dd :global(.fr-link) {
+	color: var(--text-action-high-blue-france);
+}
+
+.definitionList dt {
+	color: var(--text-mention-grey);
+}
+
+.cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.5rem;
+}
+
+.card {
+	flex: 1 1 20rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--border-default-grey);
+	border-radius: 4px;
+	background: var(--background-default-grey);
+	// Figma spec: recap card text uses title-grey, not the default body grey.
+	color: var(--text-title-grey);
+}
+
+.percentages {
+	display: flex;
+	align-items: flex-end;
+	gap: 0.5rem;
+}
+
+.percentage {
+	width: 100px;
+}
+
+// Figma spec ("Section Content" = row / align-items flex-end / gap 8px): the
+// verdict badge sits on the values row, filling the space after Hommes.
+.percentages .badgeRow {
+	flex: 1;
+}
+
+.nextSteps {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding-top: 1.875rem;
+	border-top: 1px solid var(--border-default-grey);
+	// Figma: 16px between Publication and the separator; .review gap is 32px.
+	margin-top: -1rem;
+}
+
+// DSFR renders badges as inline flex boxes; the wrapper keeps the badge hugging
+// its text instead of stretching over the whole column width.
+.badgeRow {
+	display: flex;
+	align-items: flex-start;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 1rem;
+}

@@ -149,8 +149,13 @@ describe("v2027.1.json — structural consistency", () => {
 			rules.states.some((s) => s.terminal === true) ||
 			(() => {
 				const toStates = new Set(rules.transitions.map((t) => t.to));
-				const fromStates = new Set(rules.transitions.flatMap((t) => t.from));
-				return [...toStates].some((id) => !fromStates.has(id));
+				// Terminal = reachable and with no transition leaving it for a
+				// *different* state. A self-loop (e.g. a re-submittable CSE deposit
+				// looping on demarche_completed) does not disqualify it.
+				return [...toStates].some(
+					(id) =>
+						!rules.transitions.some((t) => t.from.includes(id) && t.to !== id),
+				);
 			})();
 		expect(hasTerminal).toBe(true);
 	});

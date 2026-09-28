@@ -1,9 +1,18 @@
 import { z } from "zod";
-import { COMPLIANCE_PATHS } from "~/modules/declaration-remuneration/steps/compliancePath/constants";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	COMPLIANCE_PATHS,
+	FIRST_DECLARATION_YEAR,
+	getCurrentYear,
+} from "~/modules/domain";
 import { sirenInputSchema } from "~/modules/my-space/schemas";
 
 export const submitDeclarationSchema = z.object({}).optional();
+
+export const e2eClockSchema = z.object({
+	campaignYear: z.number().int().min(2018).max(2100),
+});
+
+export type E2eClockInput = z.infer<typeof e2eClockSchema>;
 
 export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),
@@ -22,7 +31,7 @@ export const declarationHistoryInputSchema = z.object({
 	year: z
 		.number()
 		.int()
-		.min(2018)
+		.min(FIRST_DECLARATION_YEAR)
 		.max(getCurrentYear() + 1),
 	limit: z.number().int().min(1).max(50).default(10),
 	offset: z.number().int().min(0).default(0),

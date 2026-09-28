@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+	GAP_PERSISTS_CONDITION,
+	GAP_RESOLVED_CONDITION,
+	STAGE_LABELS,
+} from "./helpers/nextStepLabels";
+import { DROPPED_ROOT_KEYS, RELOCATED_ROOT_KEYS } from "./helpers/parcoursKeys";
+
 const mockFetchSubmitted = vi.fn().mockResolvedValue([]);
 const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
@@ -107,6 +114,49 @@ const nullIndicators = {
 	}>,
 };
 
+// These cases differ from the fixtures above by a handful of columns only,
+// so they go through a factory and spell out just what they exercise.
+function declarationRow(overrides: Record<string, unknown> = {}) {
+	return {
+		declarationId: "decl-1",
+		siren: "123456789",
+		year: 2027,
+		status: "awaiting_compliance_path_choice",
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		totalWomen: 100,
+		totalMen: 150,
+		submittedAt: null,
+		firstDeclarationPathChoiceAt: null,
+		secondDeclarationPathChoiceAt: null,
+		secondDeclarationSubmittedAt: null,
+		jointEvaluationSubmittedAt: null,
+		cseOpinionCompletedAt: null,
+		demarcheCompletedAt: null,
+		complianceProcessRequired: false,
+		complianceProcessRevisionRequired: false,
+		cseRequired: true,
+		indicatorGRequired: false,
+		rulesVersion: "2027.1",
+		secondDeclReferencePeriodStart: null,
+		secondDeclReferencePeriodEnd: null,
+		createdAt: new Date("2027-03-15T10:00:00Z"),
+		updatedAt: new Date("2027-03-15T12:00:00Z"),
+		cancelledAt: null,
+		companyName: "ACME Corp",
+		workforceEma: "250.00",
+		nafCode: "62.02",
+		address: "1 rue test",
+		hasCse: true,
+		declarantFirstName: "Jean",
+		declarantLastName: "Dupont",
+		declarantEmail: "jean@acme.fr",
+		declarantPhone: "0612345678",
+		...nullIndicators,
+		...overrides,
+	};
+}
+
 describe("GET /api/v1/export/declarations", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -211,7 +261,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "111111111",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 50,
@@ -232,8 +282,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-01T00:00:00Z"),
 				updatedAt: new Date("2027-01-01T00:00:00Z"),
+				cancelledAt: null,
 				companyName: "Test",
-				workforce: 100,
+				workforceEma: "100.00",
 				nafCode: "62.01",
 				address: "1 rue",
 				hasCse: false,
@@ -247,7 +298,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-2",
 				siren: "222222222",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 60,
@@ -268,8 +319,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-01-02T00:00:00Z"),
 				updatedAt: new Date("2027-01-02T00:00:00Z"),
+				cancelledAt: null,
 				companyName: "Test2",
-				workforce: 200,
+				workforceEma: "200.00",
 				nafCode: "62.02",
 				address: "2 rue",
 				hasCse: true,
@@ -293,6 +345,8 @@ describe("GET /api/v1/export/declarations", () => {
 
 		expect(mockFetchIndicatorG).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 	});
 
 	it("should return assembled declarations with flat indicator columns", async () => {
@@ -301,7 +355,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -322,8 +376,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -367,13 +422,122 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Fichier_evaluation_conjointe");
 	});
 
+	it("should send the GIP annual average workforce as Effectif, not the Weez value (#3929)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "432491777",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 30,
+				totalMen: 40,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "70.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: null,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Parcours.Effectif).toBe(70);
+		expect(decl.Parcours.Indicateur_G_requis).toBe(false);
+	});
+
+	it("should send a null Effectif when the company is absent from the GIP file", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "999999999",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 10,
+				totalMen: 10,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "Hors GIP",
+				workforceEma: null,
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: null,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Nombre).toBe(1);
+		expect(body.Declarations[0].Parcours.Effectif).toBeNull();
+		// Workforce-0 (absent from GIP) is in the voluntary (< 50) tier → 7-indicator
+		// volunteering, so indicator G is required (#4043).
+		expect(body.Declarations[0].Parcours.Indicateur_G_requis).toBe(true);
+	});
+
 	it("should expose CSE opinion declarationNumber alongside type", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -394,8 +558,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -430,12 +595,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -475,7 +639,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -496,8 +660,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -511,12 +676,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCseFiles.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "file-abc",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "avis-cse-2027.pdf",
 							filePath: "/s3/path",
 							uploadedAt: new Date("2027-03-10T08:30:00Z"),
@@ -533,9 +697,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchCseFiles).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichiers_CSE).toEqual([
 			{
@@ -544,17 +706,18 @@ describe("GET /api/v1/export/declarations", () => {
 				Nom_fichier: "avis-cse-2027.pdf",
 				Date_upload: "2027-03-10T08:30:00.000Z",
 				URL_telechargement: "/api/v1/files/file-abc",
+				Contenus: [],
 			},
 		]);
 	});
 
-	it("should omit cseOpinions / cseFiles when no CSE file is attached", async () => {
+	it("should expose Fichiers_CSE[].Contenus, sorted by declaration number then accuracy before gap (#4535)", async () => {
 		mockFetchSubmitted.mockResolvedValue([
 			{
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -575,8 +738,88 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchCseFiles.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "file-abc",
+							declarationId: "decl-1",
+							fileName: "avis-cse-2027.pdf",
+							filePath: "/s3/path",
+							uploadedAt: new Date("2027-03-10T08:30:00Z"),
+							contents: [
+								{ declarationNumber: 2, type: "gap" },
+								{ declarationNumber: 1, type: "gap" },
+								{ declarationNumber: 1, type: "accuracy" },
+								{ declarationNumber: 2, type: "accuracy" },
+							],
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.Declarations[0].Fichiers_CSE[0].Contenus).toEqual([
+			{ Numero_declaration: 1, Type: "accuracy" },
+			{ Numero_declaration: 1, Type: "gap" },
+			{ Numero_declaration: 2, Type: "accuracy" },
+			{ Numero_declaration: 2, Type: "gap" },
+		]);
+	});
+
+	it("should omit cseOpinions / cseFiles when no CSE file is attached", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -621,7 +864,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -642,8 +885,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -657,12 +901,11 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchJointEval.mockResolvedValue(
 			new Map([
 				[
-					"123456789-2027",
+					"decl-1",
 					[
 						{
 							id: "je-1",
-							siren: "123456789",
-							year: 2027,
+							declarationId: "decl-1",
 							fileName: "eval.pdf",
 							filePath: "/s3/je",
 							uploadedAt: new Date("2027-04-01T09:00:00Z"),
@@ -679,9 +922,7 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(200);
-		expect(mockFetchJointEval).toHaveBeenCalledWith([
-			{ siren: "123456789", year: 2027 },
-		]);
+		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1"]);
 		const body = await response.json();
 		expect(body.Declarations[0].Fichier_evaluation_conjointe).toEqual({
 			Id: "je-1",
@@ -698,7 +939,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -719,8 +960,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -730,7 +972,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarantPhone: "0612345678",
 				...nullIndicators,
 				globalAnnualMeanGap: "0.0455",
-				variableProportionWomen: "0.4523",
+				variableProportionWomen: "0.5625",
 				annualQuartile1ProportionWomen: "0.3333",
 			},
 		]);
@@ -747,7 +989,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Indicateurs.A.Rem_globale_annuelle_moyenne_ecart).toBe(
 			"0.0455",
 		);
-		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.4523");
+		expect(decl.Indicateurs.E.Proportion_variable_F).toBe("0.5625");
 		expect(
 			decl.Indicateurs.F.annuel.Quartile1_Rem_globale_annuelle_proportion_F,
 		).toBe("0.3333");
@@ -759,7 +1001,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -780,8 +1022,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -827,7 +1070,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -848,8 +1091,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -884,7 +1128,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -905,8 +1149,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -995,8 +1240,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-10-15T14:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: true,
@@ -1009,6 +1255,8 @@ describe("GET /api/v1/export/declarations", () => {
 				variableAnnualMeanGap: "0.08",
 			},
 		]);
+		// Significant gap (≈9.1% > 5%) for the initial round → complianceProcessRequired=true
+		// Plus a correction entry with the same gap → complianceProcessRevisionRequired=true
 		mockFetchIndicatorG.mockResolvedValueOnce(
 			new Map([
 				[
@@ -1016,11 +1264,27 @@ describe("GET /api/v1/export/declarations", () => {
 					[
 						{
 							categoryName: "cadres",
+							source: null,
 							declarationType: "initial",
 							womenCount: 10,
-							menCount: 10,
-							annualBaseWomen: "100",
-							annualBaseMen: "100",
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+						{
+							categoryName: "cadres",
+							source: null,
+							declarationType: "correction",
+							womenCount: 10,
+							menCount: 11,
+							annualBaseWomen: "10000",
+							annualBaseMen: "11000",
 							annualVariableWomen: null,
 							annualVariableMen: null,
 							hourlyBaseWomen: null,
@@ -1046,13 +1310,13 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Parcours_conformite");
 		expect(decl.Parcours_apres_declaration_1).toBe("corrective_action");
 		expect(decl.Parcours_apres_declaration_2).toBe("joint_evaluation");
-		expect(decl.Parcours_de_conformite_requis).toBe(true);
-		expect(decl.Parcours_de_conformite_revision_requis).toBe(true);
+		expect(decl.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(decl.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
 		expect(decl).not.toHaveProperty("Phase_2_requise");
 		expect(decl).not.toHaveProperty("Phase_2_revision_requise");
-		expect(decl.Avis_CSE_requis).toBe(true);
-		expect(decl.Indicateur_G_requis).toBe(true);
-		expect(decl.Version_regles).toBe("2027.1");
+		expect(decl.Parcours.Avis_CSE_requis).toBe(true);
+		expect(decl.Parcours.Indicateur_G_requis).toBe(true);
+		expect(decl.Parcours).not.toHaveProperty("Version_regles");
 		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
 		expect(decl.Date_parcours_apres_declaration_1).toBe(
 			"2027-04-01T10:00:00.000Z",
@@ -1065,6 +1329,141 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Date_avis_CSE).toBe("2027-10-01T13:00:00.000Z");
 		expect(decl.Date_fin_demarche).toBe("2027-10-15T14:00:00.000Z");
 		expect(decl.Seconde_declaration.Statut).toBe(true);
+		for (const key of RELOCATED_ROOT_KEYS) {
+			expect(decl).not.toHaveProperty(key);
+		}
+		for (const key of DROPPED_ROOT_KEYS) {
+			expect(decl).not.toHaveProperty(key);
+			expect(decl.Parcours).not.toHaveProperty(key);
+		}
+	});
+
+	it("should thread the job-category source into Source_categories_emplois (#3944)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchIndicatorG.mockResolvedValueOnce(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							categoryName: "cadres",
+							source: "accord-branche",
+							declarationType: "initial",
+							womenCount: 10,
+							menCount: 10,
+							annualBaseWomen: "100",
+							annualBaseMen: "100",
+							annualVariableWomen: null,
+							annualVariableMen: null,
+							hourlyBaseWomen: null,
+							hourlyBaseMen: null,
+							hourlyVariableWomen: null,
+							hourlyVariableMen: null,
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should expose Source_categories_emplois=null when the declaration has no indicator G (#3944)", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		const decl = (await response.json()).Declarations[0];
+		expect(decl.Source_categories_emplois).toBeNull();
 	});
 
 	it("should include Historique_statuts with FR labels and Numero_declaration on path_choice entries", async () => {
@@ -1073,7 +1472,7 @@ describe("GET /api/v1/export/declarations", () => {
 				declarationId: "decl-1",
 				siren: "123456789",
 				year: 2027,
-				status: "submitted",
+				status: "awaiting_compliance_path_choice",
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: null,
 				totalWomen: 100,
@@ -1094,8 +1493,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-04-01T10:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -1172,8 +1572,9 @@ describe("GET /api/v1/export/declarations", () => {
 				secondDeclReferencePeriodEnd: null,
 				createdAt: new Date("2027-03-15T10:00:00Z"),
 				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
 				companyName: "ACME Corp",
-				workforce: 250,
+				workforceEma: "250.00",
 				nafCode: "62.02",
 				address: "1 rue test",
 				hasCse: false,
@@ -1195,5 +1596,149 @@ describe("GET /api/v1/export/declarations", () => {
 		const body = await response.json();
 		expect(body.Declarations[0].Seconde_declaration.Statut).toBe(false);
 		expect(body.Declarations[0].Date_seconde_declaration).toBeNull();
+	});
+
+	describe("Parcours.Prochaines_etapes_possibles", () => {
+		async function exportedDeclarations(rows: Record<string, unknown>[]) {
+			mockFetchSubmitted.mockResolvedValue(rows);
+			const { GET } = await import("~/app/api/v1/export/declarations/route");
+			const response = await GET(
+				gatewayForwardedRequest(
+					"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+				),
+			);
+
+			expect(response.status).toBe(200);
+			return response.json();
+		}
+
+		it("serialises the three compliance paths of a CSE-bound company as the last Parcours key (S3)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "awaiting_compliance_path_choice",
+					cseRequired: true,
+				}),
+			]);
+			const { Parcours } = body.Declarations[0];
+
+			expect(Object.keys(Parcours).at(-1)).toBe("Prochaines_etapes_possibles");
+			expect(
+				Parcours.Prochaines_etapes_possibles.map(
+					(step: { Identifiant_transition: string }) =>
+						step.Identifiant_transition,
+				),
+			).toEqual([
+				"choose_path_initial_justify_with_cse",
+				"choose_path_initial_corrective_action",
+				"choose_path_initial_joint_evaluation",
+			]);
+			for (const step of Parcours.Prochaines_etapes_possibles) {
+				expect(step).not.toHaveProperty("Condition");
+			}
+		});
+
+		it("keeps the Condition of an undecided guard through JSON serialisation (S4)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "corrective_actions_chosen",
+					cseRequired: true,
+				}),
+			]);
+
+			expect(body.Declarations[0].Parcours.Prochaines_etapes_possibles).toEqual(
+				[
+					{
+						Identifiant_transition: "submit_second_declaration_persistent_gap",
+						Action: "submit_second_declaration",
+						Etat_cible: "awaiting_revision_choice",
+						Libelle: STAGE_LABELS.revisionChoice,
+						Condition: GAP_PERSISTS_CONDITION,
+					},
+					{
+						Identifiant_transition:
+							"submit_second_declaration_resolved_with_cse",
+						Action: "submit_second_declaration",
+						Etat_cible: "awaiting_cse_opinion",
+						Libelle: STAGE_LABELS.cseOpinion,
+						Condition: GAP_RESOLVED_CONDITION,
+					},
+				],
+			);
+		});
+
+		it("exports an empty array for a cancelled declaration, with no redeclare step invented (S5)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					status: "corrective_actions_chosen",
+					cancelledAt: new Date("2027-04-15T08:00:00Z"),
+				}),
+			]);
+			const decl = body.Declarations[0];
+
+			expect(decl.Parcours.Prochaines_etapes_possibles).toEqual([]);
+			expect(decl.Parcours.Annulee).toBe(true);
+			expect(decl.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+			expect(decl.Parcours.Statut).toBe("corrective_actions_chosen");
+		});
+
+		it("keeps offering the CSE opinion on a completed démarche (S6)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({ status: "demarche_completed", cseRequired: true }),
+			]);
+			const { Parcours } = body.Declarations[0];
+
+			expect(Parcours.Annulee).toBe(false);
+			expect(Parcours.Prochaines_etapes_possibles).toEqual([
+				{
+					Identifiant_transition: "submit_cse_opinion",
+					Action: "submit_cse_opinion",
+					Etat_cible: "demarche_completed",
+					Libelle: STAGE_LABELS.completion,
+				},
+			]);
+		});
+
+		it("answers 200 with both declarations when the stored rules version is missing or unknown, without rewriting it (S7)", async () => {
+			const body = await exportedDeclarations([
+				declarationRow({
+					declarationId: "decl-null-version",
+					status: "corrective_actions_chosen",
+					rulesVersion: null,
+				}),
+				declarationRow({
+					declarationId: "decl-unknown-version",
+					siren: "987654321",
+					status: "corrective_actions_chosen",
+					rulesVersion: "1999.0",
+				}),
+			]);
+			const [nullVersion, unknownVersion] = body.Declarations;
+
+			expect(body.Nombre).toBe(2);
+			expect(nullVersion.Parcours).not.toHaveProperty("Version_regles");
+			expect(unknownVersion.Parcours).not.toHaveProperty("Version_regles");
+			expect(nullVersion.Parcours.Prochaines_etapes_possibles).not.toHaveLength(
+				0,
+			);
+			expect(unknownVersion.Parcours.Prochaines_etapes_possibles).toEqual(
+				nullVersion.Parcours.Prochaines_etapes_possibles,
+			);
+		});
+
+		it("leaves the envelope and the payload root untouched (S10)", async () => {
+			const body = await exportedDeclarations([declarationRow()]);
+
+			expect(Object.keys(body)).toEqual([
+				"Date_debut",
+				"Date_fin",
+				"Nombre",
+				"Declarations",
+			]);
+			expect(body.Date_debut).toBe("2027-03-15");
+			expect(body.Date_fin).toBe("2027-03-16");
+			expect(body.Declarations[0]).not.toHaveProperty(
+				"Prochaines_etapes_possibles",
+			);
+		});
 	});
 });

@@ -1,5 +1,6 @@
-import common from "~/modules/declaration-remuneration/shared/common.module.scss";
+import { Fragment } from "react";
 import { QUARTILE_NAMES } from "~/modules/declaration-remuneration/shared/constants";
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import stepStyles from "~/modules/declaration-remuneration/steps/Step6Review.module.scss";
 import type {
 	EmployeeCategoryRow,
@@ -7,7 +8,7 @@ import type {
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
-import { computeGap } from "~/modules/domain";
+import { formatVariablePayProportion, resolveGap } from "~/modules/domain";
 import { CardTitle } from "./CardTitle";
 import { GapColumn } from "./GapColumn";
 import { GapSideBySide } from "./GapSideBySide";
@@ -18,7 +19,13 @@ type Props = {
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	/** Persisted gaps for steps 2 and 3 — shown as recorded rather than recomputed. */
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories: EmployeeCategoryRow[];
+	indicatorGRequired: boolean;
+	totalWomen?: number;
+	totalMen?: number;
 	/**
 	 * In the Step6Review (in-flow) the cards expose tooltips for the quartile
 	 * and category sections. The post-submission recap renders the same cards
@@ -28,9 +35,7 @@ type Props = {
 };
 
 function EmptyDataNotice() {
-	return (
-		<p className={`fr-mb-0 ${common.mentionGrey}`}>Aucune donnée renseignée.</p>
-	);
+	return <p className="fr-mb-0">Aucune donnée renseignée.</p>;
 }
 
 /**
@@ -43,42 +48,55 @@ export function IndicatorSections({
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories,
+	indicatorGRequired,
+	totalWomen,
+	totalMen,
 	withTooltips = false,
 }: Props) {
-	const annualMeanGap = computeGap(
+	const annualMeanGap = resolveGap(
 		step2Data.indicatorAAnnualWomen,
 		step2Data.indicatorAAnnualMen,
+		step2Gaps[0],
 	);
-	const hourlyMeanGap = computeGap(
+	const hourlyMeanGap = resolveGap(
 		step2Data.indicatorAHourlyWomen,
 		step2Data.indicatorAHourlyMen,
+		step2Gaps[1],
 	);
-	const annualMedianGap = computeGap(
+	const annualMedianGap = resolveGap(
 		step2Data.indicatorCAnnualWomen,
 		step2Data.indicatorCAnnualMen,
+		step2Gaps[2],
 	);
-	const hourlyMedianGap = computeGap(
+	const hourlyMedianGap = resolveGap(
 		step2Data.indicatorCHourlyWomen,
 		step2Data.indicatorCHourlyMen,
+		step2Gaps[3],
 	);
 	const hasStep2Data = Object.values(step2Data).some((v) => v !== "");
 
-	const step3AnnualMeanGap = computeGap(
+	const step3AnnualMeanGap = resolveGap(
 		step3Data.indicatorBAnnualWomen,
 		step3Data.indicatorBAnnualMen,
+		step3Gaps[0],
 	);
-	const step3HourlyMeanGap = computeGap(
+	const step3HourlyMeanGap = resolveGap(
 		step3Data.indicatorBHourlyWomen,
 		step3Data.indicatorBHourlyMen,
+		step3Gaps[1],
 	);
-	const step3AnnualMedianGap = computeGap(
+	const step3AnnualMedianGap = resolveGap(
 		step3Data.indicatorDAnnualWomen,
 		step3Data.indicatorDAnnualMen,
+		step3Gaps[2],
 	);
-	const step3HourlyMedianGap = computeGap(
+	const step3HourlyMedianGap = resolveGap(
 		step3Data.indicatorDHourlyWomen,
 		step3Data.indicatorDHourlyMen,
+		step3Gaps[3],
 	);
 	const hasStep3Data = Object.values(step3Data).some((v) => v !== "");
 
@@ -90,150 +108,170 @@ export function IndicatorSections({
 
 	return (
 		<>
-			<h2 className="fr-h6 fr-mb-0">
-				Indicateurs pour l&apos;ensemble de vos salariés
-			</h2>
+			<div className={stepStyles.group}>
+				<h2 className="fr-h6 fr-mb-0">
+					Indicateurs pour l&apos;ensemble de vos salariés
+				</h2>
 
-			<div className={stepStyles.section}>
-				{/* Card: Pay gap (Step 2) */}
-				<div className={stepStyles.card}>
-					<CardTitle>Écart de rémunération</CardTitle>
-					{hasStep2Data ? (
-						<GapSideBySide
-							annualMeanGap={annualMeanGap}
-							annualMedianGap={annualMedianGap}
-							hourlyMeanGap={hourlyMeanGap}
-							hourlyMedianGap={hourlyMedianGap}
-						/>
-					) : (
-						<EmptyDataNotice />
-					)}
-				</div>
-
-				{/* Card: Variable pay (Step 3) */}
-				<div className={stepStyles.card}>
-					<CardTitle>
-						Écart de rémunération variable ou complémentaire
-					</CardTitle>
-					{hasStep3Data ? (
-						<>
+				<div className={stepStyles.section}>
+					{/* Card: Pay gap (Step 2) */}
+					<div className={stepStyles.card}>
+						<CardTitle>Écart de rémunération</CardTitle>
+						{hasStep2Data ? (
 							<GapSideBySide
-								annualMeanGap={step3AnnualMeanGap}
-								annualMedianGap={step3AnnualMedianGap}
-								hourlyMeanGap={step3HourlyMeanGap}
-								hourlyMedianGap={step3HourlyMedianGap}
+								annualMeanGap={annualMeanGap}
+								annualMedianGap={annualMedianGap}
+								hourlyMeanGap={hourlyMeanGap}
+								hourlyMedianGap={hourlyMedianGap}
 							/>
-							<div className={stepStyles.sideBySide}>
-								<div className={stepStyles.column}>
-									<p className="fr-text--bold fr-text--sm fr-mb-0">
-										Proportion
-									</p>
-									<div className={stepStyles.subSection}>
-										<div className={stepStyles.flex1}>
-											<p
-												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
-											>
-												Femmes
-											</p>
-											<strong>
-												{step3Data.indicatorEWomen
-													? `${step3Data.indicatorEWomen} %`
-													: "-"}
-											</strong>
-										</div>
-										<div className={stepStyles.flex1}>
-											<p
-												className={`fr-text--xs fr-mb-0 ${common.mentionGrey}`}
-											>
-												Hommes
-											</p>
-											<strong>
-												{step3Data.indicatorEMen
-													? `${step3Data.indicatorEMen} %`
-													: "-"}
-											</strong>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
+
+					{/* Card: Variable pay (Step 3) */}
+					<div className={stepStyles.card}>
+						<CardTitle>
+							Écart de rémunération variable ou complémentaire
+						</CardTitle>
+						{hasStep3Data ? (
+							<>
+								<GapSideBySide
+									annualMeanGap={step3AnnualMeanGap}
+									annualMedianGap={step3AnnualMedianGap}
+									hourlyMeanGap={step3HourlyMeanGap}
+									hourlyMedianGap={step3HourlyMedianGap}
+								/>
+								<div className={stepStyles.sideBySide}>
+									<div className={stepStyles.column}>
+										<p className="fr-text--bold fr-text--sm fr-mb-0">
+											Proportion
+										</p>
+										<div className={stepStyles.subSection}>
+											<div className={stepStyles.flex1}>
+												<p className="fr-text--sm fr-mb-0">Femmes</p>
+												<strong className="fr-text--sm">
+													{formatVariablePayProportion(
+														step3Data.indicatorEWomen,
+														totalWomen,
+													)}
+												</strong>
+											</div>
+											<div className={stepStyles.flex1}>
+												<p className="fr-text--sm fr-mb-0">Hommes</p>
+												<strong className="fr-text--sm">
+													{formatVariablePayProportion(
+														step3Data.indicatorEMen,
+														totalMen,
+													)}
+												</strong>
+											</div>
 										</div>
 									</div>
+									<div className={stepStyles.verticalSeparator} />
+									<div className={stepStyles.column} />
 								</div>
-								<div className={stepStyles.verticalSeparator} />
-								<div className={stepStyles.column} />
-							</div>
-						</>
-					) : (
-						<EmptyDataNotice />
-					)}
-				</div>
+							</>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
 
-				{/* Card: Quartile distribution (Step 4) */}
-				<div className={stepStyles.card}>
-					<CardTitle tooltipId={withTooltips ? "tooltip-quartile" : undefined}>
-						Proportion de femmes et d&apos;hommes dans chaque quartile salarial
-					</CardTitle>
-					{hasStep4Data ? (
-						<>
-							<QuartileColumn
-								quartiles={step4Data.annual.map((q, i) => ({
-									label: QUARTILE_NAMES[i] ?? "",
-									womenCount: q.women ?? 0,
-									menCount: q.men ?? 0,
-								}))}
-								title="Rémunération annuelle brute moyenne"
-							/>
-							<QuartileColumn
-								quartiles={step4Data.hourly.map((q, i) => ({
-									label: QUARTILE_NAMES[i] ?? "",
-									womenCount: q.women ?? 0,
-									menCount: q.men ?? 0,
-								}))}
-								title="Rémunération horaire brute moyenne"
-							/>
-						</>
-					) : (
-						<EmptyDataNotice />
-					)}
+					{/* Card: Quartile distribution (Step 4) */}
+					<div className={stepStyles.card}>
+						<CardTitle
+							tooltipId={withTooltips ? "tooltip-quartile" : undefined}
+						>
+							Proportion de femmes et d&apos;hommes dans chaque quartile
+							salarial
+						</CardTitle>
+						{hasStep4Data ? (
+							<>
+								<QuartileColumn
+									quartiles={step4Data.annual.map((q, i) => ({
+										label: QUARTILE_NAMES[i] ?? "",
+										womenCount: q.women ?? 0,
+										menCount: q.men ?? 0,
+									}))}
+									title="Rémunération annuelle brute moyenne"
+								/>
+								<QuartileColumn
+									quartiles={step4Data.hourly.map((q, i) => ({
+										label: QUARTILE_NAMES[i] ?? "",
+										womenCount: q.women ?? 0,
+										menCount: q.men ?? 0,
+									}))}
+									title="Rémunération horaire brute moyenne"
+								/>
+							</>
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
 				</div>
 			</div>
 
-			<h2 className="fr-h6 fr-mb-0">Indicateurs par catégorie de salariés</h2>
+			{indicatorGRequired && (
+				<div className={stepStyles.group}>
+					<h2 className="fr-h6 fr-mb-0">
+						Indicateur par catégories de salariés
+					</h2>
 
-			{/* Card: Employee categories (Step 5) */}
-			<div className={stepStyles.card}>
-				<CardTitle tooltipId={withTooltips ? "tooltip-categories" : undefined}>
-					Écart de rémunération par catégories de salariés
-				</CardTitle>
-				{step5Parsed.length > 0 ? (
-					step5Parsed.map((cat) => (
-						<div key={cat.index}>
-							<p className="fr-text--bold fr-mb-0">{cat.name}</p>
-							<div className={stepStyles.sideBySide}>
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.annualBaseGap },
-										{
-											label: "Composantes variables",
-											gap: cat.annualVariableGap,
-										},
-									]}
-									title="Annuelle brute"
-								/>
-								<div className={stepStyles.verticalSeparator} />
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.hourlyBaseGap },
-										{
-											label: "Composantes variables",
-											gap: cat.hourlyVariableGap,
-										},
-									]}
-									title="Horaire brute"
-								/>
-							</div>
-						</div>
-					))
-				) : (
-					<EmptyDataNotice />
-				)}
-			</div>
+					{/* Card: Employee categories (Step 5) */}
+					<div className={stepStyles.card}>
+						<CardTitle
+							tooltipId={withTooltips ? "tooltip-categories" : undefined}
+						>
+							Écart de rémunération par catégories de salariés
+						</CardTitle>
+						{step5Parsed.length > 0 ? (
+							step5Parsed.map((cat) => {
+								const categoryColumns = [
+									{
+										title: "Annuelle brute",
+										base: cat.annualBaseGap,
+										variable: cat.annualVariableGap,
+									},
+									{
+										title: "Horaire brute",
+										base: cat.hourlyBaseGap,
+										variable: cat.hourlyVariableGap,
+									},
+								];
+								return (
+									<div key={cat.index}>
+										<p className="fr-text--bold fr-text--sm fr-mb-0">
+											{cat.name}
+										</p>
+										<div className={stepStyles.sideBySide}>
+											{categoryColumns.map((col, index) => (
+												<Fragment key={col.title}>
+													{index > 0 && (
+														<div className={stepStyles.verticalSeparator} />
+													)}
+													<GapColumn
+														columns={[
+															{ label: "Salaire de base", gap: col.base },
+															{
+																label:
+																	"Composantes variables ou complémentaires",
+																gap: col.variable,
+															},
+														]}
+														title={col.title}
+													/>
+												</Fragment>
+											))}
+										</div>
+									</div>
+								);
+							})
+						) : (
+							<EmptyDataNotice />
+						)}
+					</div>
+				</div>
+			)}
 		</>
 	);
 }

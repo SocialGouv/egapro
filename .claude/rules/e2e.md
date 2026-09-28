@@ -1,0 +1,34 @@
+---
+paths:
+  - "src/e2e/**"
+---
+
+# Tests E2E (Playwright)
+
+> Propriétaire **exclusif** : l'agent `e2e-dev`. `code-dev` ne touche jamais à `src/e2e/**` — il possède les TU et l'intégration, pas l'E2E. Quand la gate tourne et ce qui se passe sur régression → `.claude/pipeline/orchestration.md`. Pour les TU et tests d'intégration → `rules/testing.md`.
+
+## Peu de scénarios, mais riches
+
+Contrairement aux tests unitaires — nombreux, ciblés, 100 % de couverture — on privilégie **peu de scénarios E2E globaux** qui rejouent un parcours utilisateur complet (`test.describe` + `test.step`, souvent `mode: "serial"`). Une nouvelle fonctionnalité se **greffe** dans le scénario existant qui couvre déjà ce parcours. Un **nouveau fichier** `*.e2e.ts` est réservé à un parcours ou une page réellement nouveaux.
+
+## Couverture des pages
+
+Chaque route de `src/app/**/page.tsx` doit avoir une couverture E2E : la page rend sans erreur, le contenu et les titres clés sont visibles, les pages d'erreur (404, 500, 503) affichent le bon statut et le bon message.
+
+Le mandat porte sur la **couverture d'un parcours**, pas sur chaque édition d'un fichier de page. Une modification purement visuelle (SCSS, `className`, libellé, espacement) sur une route déjà couverte ne le déclenche pas, et il ne prime **jamais** sur le critère de criticité d'`e2e-dev` : entre « la page est modifiée » et « le parcours change », c'est la criticité qui tranche.
+
+## Contrats de fidélité Figma
+
+La suite porte aussi les contrats de fidélité visuelle — la couche de régression **permanente** que le gate `design-validator`, ponctuel et dégradable si la session ProConnect manque, ne fournit pas. Il n'y a **ni moteur générique ni dossier de fixtures** : un contrat est un `*.e2e.ts` dédié qui porte ses valeurs attendues en constantes de module et les asserte via `getComputedStyle` / `getBoundingClientRect`. Quatre existent (`breadcrumb-spacing`, `stepper-spacing`, `declaration-header-alignment`, `second-declaration-info-styling`) — les copier plutôt qu'en inventer la forme. L'assertion s'imbrique dans le scénario qui atteint déjà l'écran dans le bon état, jamais un tunnel rejoué pour une mesure. Discipline d'écriture → `rules/visual-quality-validation.md`.
+
+## Lancer la suite
+
+`pnpm test:e2e`, avec le dev server sur le **port 3000** : la connexion ProConnect passe par **Charon**, le proxy OAuth de la Fabrique, et la liste d'adresses de retour qu'il tient pour egapro ne contient en local que `http://localhost:3000` — `auth.setup.ts` échoue donc sur tout autre port. Ce n'est pas un réglage du dépôt : l'élargir se fait côté infra. Un run E2E en worktree doit binder le dev server sur `PORT=3000` pendant que la stack docker garde ses ports dérivés de l'index. Contexte complet → README, § Connexion ProConnect.
+
+Le port 3000 étant une ressource globale unique, **tous les runs E2E du dépôt sont de fait sérialisés** : ne jamais lancer une gate E2E de fin d'epic (background) et un `e2e-dev` en mode ticket (foreground) en même temps. Les deux échouent proprement sur un port occupé, mais l'un des deux sera à relancer.
+
+`e2e.yaml` rejoue aussi la suite en CI sur toute PR ciblant `alpha` (check « Test e2e »), **et avec elle les 185 coordonnées de la grille de recette** (`pnpm test:e2e:grille`) : depuis #4132 les deux tournent en shards parallèles — 2 pour la suite, 3 pour la grille — sous un job agrégateur qui porte le nom du check requis. Une coordonnée rouge bloque donc la PR, au même titre qu'un spec rouge. `e2e-grille.yaml` reste le run nocturne, qui produit le rapport de recette.
+
+Conséquence pour qui touche au graphe de projets ou aux modes d'exécution : Playwright ne shard que les projets de **premier niveau** et rejoue un projet de dépendance en entier dans chaque shard — mettre un projet en aval d'un autre renvoie donc toute sa collection dans le premier shard. Un `test.describe.configure({ mode: "serial" })` au niveau d'un fichier ne rend insécable que **ce fichier** : `admin-access`, `campaign-year`… le sont déjà et se répartissent normalement entre shards. Le problème n'apparaît que si un seul bloc `serial` concentre l'essentiel de la collection, comme la grille avant #4132 — un shard hérite alors de la quasi-totalité des tests et les autres restent vides. Le workflow refuse un shard qui ne collecte rien, précisément pour que cette annulation silencieuse de la parallélisation se voie.
+
+Le run local d'`e2e-dev` reste la gate qui précède l'ouverture de la PR.

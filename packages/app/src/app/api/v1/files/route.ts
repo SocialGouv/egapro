@@ -6,6 +6,7 @@ import {
 	exportFilesQuerySchema,
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
+	resolveActiveDeclarationId,
 } from "~/modules/export";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { assertGatewaySource } from "~/server/services/gatewaySource";
@@ -62,16 +63,20 @@ async function apiFilesHandler(request: Request): Promise<Response> {
 
 		const { siren, year } = parsed.data;
 
+		const activeDeclarationId = await resolveActiveDeclarationId(siren, year);
+		const declarationIds = activeDeclarationId ? [activeDeclarationId] : [];
+
 		const [cseFilesMap, jointFilesMap] = await Promise.all([
-			fetchCseFilesByDeclaration([{ siren, year }]),
-			fetchJointEvaluationFilesByDeclaration([{ siren, year }]),
+			fetchCseFilesByDeclaration(declarationIds),
+			fetchJointEvaluationFilesByDeclaration(declarationIds),
 		]);
 
-		const mapKey = `${siren}-${year}`;
-		const cseFiles = (cseFilesMap.get(mapKey) ?? []).map(buildCseFilePayload);
-		const jointFiles = (jointFilesMap.get(mapKey) ?? []).map(
-			buildJointEvaluationFilePayload,
-		);
+		const cseFiles = declarationIds
+			.flatMap((id) => cseFilesMap.get(id) ?? [])
+			.map(buildCseFilePayload);
+		const jointFiles = declarationIds
+			.flatMap((id) => jointFilesMap.get(id) ?? [])
+			.map(buildJointEvaluationFilePayload);
 
 		return Response.json({
 			siren,

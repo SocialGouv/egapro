@@ -1,17 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
+import { remunerationStepHref } from "~/modules/routes";
 import { FormActions } from "../FormActions";
+import { LockProvider, useLockContext } from "../lock/LockContext";
+
+vi.mock("../lock/LockContext", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../lock/LockContext")>();
+	return { ...actual, useLockContext: vi.fn(actual.useLockContext) };
+});
 
 const mockedUseSession = vi.mocked(useSession);
 
+const PREVIOUS_HREF = remunerationStepHref(1);
+const NEXT_HREF = remunerationStepHref(3);
+
 describe("FormActions", () => {
 	it("renders previous link when previousHref is provided", () => {
-		render(<FormActions previousHref="/step/1" />);
+		render(<FormActions previousHref={PREVIOUS_HREF} />);
 
 		const link = screen.getByRole("link", { name: /précédent/i });
-		expect(link).toHaveAttribute("href", "/step/1");
+		expect(link).toHaveAttribute("href", PREVIOUS_HREF);
 	});
 
 	it("renders submit button when no nextHref is provided", () => {
@@ -22,10 +31,10 @@ describe("FormActions", () => {
 	});
 
 	it("renders next link when nextHref is provided", () => {
-		render(<FormActions nextHref="/step/3" />);
+		render(<FormActions nextHref={NEXT_HREF} />);
 
 		const link = screen.getByRole("link", { name: /suivant/i });
-		expect(link).toHaveAttribute("href", "/step/3");
+		expect(link).toHaveAttribute("href", NEXT_HREF);
 	});
 
 	it("shows 'Enregistrement…' when isSubmitting is true", () => {
@@ -68,7 +77,14 @@ describe("FormActions", () => {
 		it("disables the submit button and renders a tooltip when impersonating without a saved record", () => {
 			mockImpersonating();
 
-			render(<FormActions />);
+			// The static provider folds impersonation into the unified context the
+			// same way the layouts do in production; FormActions reads `isReadOnly`
+			// from there.
+			render(
+				<LockProvider>
+					<FormActions />
+				</LockProvider>,
+			);
 
 			const button = screen.getByRole("button", { name: /suivant/i });
 			expect(button).toBeDisabled();
@@ -81,7 +97,9 @@ describe("FormActions", () => {
 			mockImpersonating();
 
 			render(
-				<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />,
+				<LockProvider>
+					<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />
+				</LockProvider>,
 			);
 
 			expect(
@@ -107,6 +125,59 @@ describe("FormActions", () => {
 			render(<FormActions />);
 
 			expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("declaration lock", () => {
+		it("disables the submit button when the declaration is locked by another user", () => {
+			render(
+				<LockProvider isReadOnly>
+					<FormActions />
+				</LockProvider>,
+			);
+
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+
+		it("keeps the submit button enabled when the lock is inactive", () => {
+			render(
+				<LockProvider isReadOnly={false}>
+					<FormActions />
+				</LockProvider>,
+			);
+
+			expect(
+				screen.getByRole("button", { name: /suivant/i }),
+			).not.toBeDisabled();
+		});
+
+		it("disables the submit button while the lock is still being acquired", () => {
+			vi.mocked(useLockContext).mockReturnValueOnce({
+				isReadOnly: false,
+				reason: null,
+				holder: null,
+				isLoading: true,
+			});
+
+			render(<FormActions />);
+
+			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		});
+
+		it("renders a Link instead of the submit button when locked with mimoquageNextHref", () => {
+			render(
+				<LockProvider isReadOnly>
+					<FormActions mimoquageNextHref="/declaration-remuneration/etape/2" />
+				</LockProvider>,
+			);
+
+			expect(
+				screen.queryByRole("button", { name: /suivant/i }),
+			).not.toBeInTheDocument();
+			expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+				"href",
+				"/declaration-remuneration/etape/2",
+			);
 		});
 	});
 });

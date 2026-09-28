@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import {
 	declarationStatusHistory,
@@ -80,10 +81,10 @@ export type ProjectionUpdate = Partial<typeof declarations.$inferInsert>;
 
 export function computeProjectionUpdates(
 	events: ReadonlyArray<RuleEvent>,
-	nextStatus: string,
+	nextStatus: DeclarationFsmStatus,
 ): ProjectionUpdate {
 	const projection: ProjectionUpdate = {
-		status: nextStatus as typeof declarations.$inferInsert.status,
+		status: nextStatus,
 	};
 
 	for (const event of events) {

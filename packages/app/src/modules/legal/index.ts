@@ -1,7 +1,9 @@
 export { AccessibilityPage } from "./AccessibilityPage";
 export { CookiesPage } from "./CookiesPage";
 export { LegalNoticePage } from "./LegalNoticePage";
+export { MatomoOptOut } from "./MatomoOptOut";
 export { PrivacyPolicyPage } from "./PrivacyPolicyPage";
-export { buildRobots } from "./robots";
+export { buildMetadataRobots, buildRobots } from "./robots";
 export { SitemapPage } from "./SitemapPage";
-export { buildSitemap } from "./sitemap";
+export { buildSitemap, COMPANY_URLS_PER_SITEMAP } from "./sitemap";
+export { escapeXml } from "./xml";

@@ -121,11 +121,19 @@ data:
             rejected_code: 429
           prometheus: {}
     # Routes:
-    #   - 3 SUIT API endpoints (Bearer-auth via `suit-api`)
+    #   - 4 SUIT API endpoints (Bearer-auth via `suit-api`)
     #   - 2 docs endpoints + 1 static asset prefix (public via `suit-docs`)
     routes:
       - id: suit-export-declarations
         uri: /api/v1/export/declarations
+        methods: [GET]
+        plugin_config_id: suit-api
+        upstream:
+          type: roundrobin
+          nodes:
+            "app:80": 1
+      - id: suit-export-representations
+        uri: /api/v1/export/representations
         methods: [GET]
         plugin_config_id: suit-api
         upstream:

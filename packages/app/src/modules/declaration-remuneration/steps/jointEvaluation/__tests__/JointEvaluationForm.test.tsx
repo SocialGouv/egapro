@@ -1,7 +1,16 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSession } from "next-auth/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { formatLongDate } from "~/modules/domain";
 import { JointEvaluationForm } from "../JointEvaluationForm";
 
 const mockPush = vi.fn();
@@ -44,10 +53,11 @@ const { uploadFile: uploadFileMock } = (await import(
 )) as unknown as { uploadFile: ReturnType<typeof vi.fn> };
 
 const defaultProps = {
+	cseOpinionRequired: false,
 	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
-	hasCse: null as boolean | null,
+	existingFile: null,
 	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
 };
 
@@ -86,21 +96,39 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("group", {
+				name: "Évaluation conjointe des rémunérations",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
 		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
+		expect(screen.getByText(/Déclaration effectuée le/)).toHaveClass(
+			"fr-text-mention--grey",
+		);
 	});
 
-	it("shows an error when submitting without a file", () => {
+	it("shows a titled error alert when submitting without a file", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		const submitButton = screen.getByRole("button", { name: /transmettre/i });
 		fireEvent.click(submitButton);
 
+		const title = screen.getByText(
+			/le rapport de l'évaluation conjointe est manquant/i,
+		);
+		expect(title).toHaveClass("fr-alert__title");
+		expect(title.closest(".fr-alert--error")).toBeInTheDocument();
 		expect(
-			screen.getByText(/veuillez sélectionner au moins un fichier/i),
+			screen.getByText(/importez le rapport de l'évaluation conjointe/i),
 		).toBeInTheDocument();
 	});
 
@@ -137,7 +165,7 @@ describe("JointEvaluationForm", () => {
 		fireEvent.click(screen.getByRole("button", { name: /transmettre/i }));
 
 		expect(
-			screen.queryByText(/veuillez sélectionner un fichier/i),
+			screen.queryByText(/le rapport de l'évaluation conjointe est manquant/i),
 		).not.toBeInTheDocument();
 
 		expect(
@@ -158,8 +186,7 @@ describe("JointEvaluationForm", () => {
 	it.each([
 		[true, "/avis-cse"],
 		[false, "/declaration-remuneration/parcours-conformite/confirmation"],
-		[null, "/declaration-remuneration/parcours-conformite/confirmation"],
-	])("uploads the file and redirects after confirmation when hasCse=%s", async (hasCse, expectedRedirect) => {
+	])("uploads the file and redirects after confirmation when cseOpinionRequired=%s", async (cseOpinionRequired, expectedRedirect) => {
 		const user = userEvent.setup();
 		uploadFileMock.mockResolvedValue({
 			ok: true,
@@ -168,7 +195,10 @@ describe("JointEvaluationForm", () => {
 		});
 
 		const { container } = render(
-			<JointEvaluationForm {...defaultProps} hasCse={hasCse} />,
+			<JointEvaluationForm
+				{...defaultProps}
+				cseOpinionRequired={cseOpinionRequired}
+			/>,
 		);
 
 		const input = container.querySelector(
@@ -194,6 +224,106 @@ describe("JointEvaluationForm", () => {
 		});
 		await waitFor(() => {
 			expect(mockPush).toHaveBeenCalledWith(expectedRedirect);
+		});
+	});
+
+	describe("rapport déjà déposé (#4222)", () => {
+		const existingFile = {
+			id: "8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			fileName: "rapport-evaluation-conjointe.pdf",
+			uploadedAt: new Date("2026-06-20T09:30:00"),
+		};
+
+		it("lists the deposited report with a new-tab link to the stored file", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(screen.getByText("Rapport déjà déposé")).toBeInTheDocument();
+
+			const link = screen.getByRole("link", {
+				name: /rapport-evaluation-conjointe\.pdf/,
+			});
+			expect(link).toHaveAttribute(
+				"href",
+				"/api/v1/files/8f14e45f-ea4c-4f0b-9c1d-7a2b3c4d5e6f",
+			);
+			expect(link).toHaveAttribute("target", "_blank");
+			expect(link).toHaveAttribute("rel", "noopener noreferrer");
+			expect(
+				within(link).getByText("(ouvre une nouvelle fenêtre)"),
+			).toBeInTheDocument();
+		});
+
+		it("states the deposit date of the existing report", () => {
+			render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(
+				screen.getByText(
+					`Déposé le ${formatLongDate(existingFile.uploadedAt)}`,
+				),
+			).toHaveClass("fr-text-mention--grey");
+		});
+
+		it("keeps the upload zone available so the report can still be replaced", () => {
+			const { container } = render(
+				<JointEvaluationForm {...defaultProps} existingFile={existingFile} />,
+			);
+
+			expect(container.querySelector('input[type="file"]')).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeInTheDocument();
+		});
+
+		it("renders no deposited-report block when no file exists yet", () => {
+			render(<JointEvaluationForm {...defaultProps} />);
+
+			expect(screen.queryByText("Rapport déjà déposé")).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("link", {
+					name: /rapport-evaluation-conjointe\.pdf/,
+				}),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("admin impersonation", () => {
+		afterEach(() => {
+			vi.mocked(useSession).mockReset();
+		});
+
+		it("disables the upload and submit controls under the static provider when impersonating", () => {
+			vi.mocked(useSession).mockReturnValue({
+				data: {
+					user: {
+						id: "admin-1",
+						impersonation: { siren: "123456789", name: "Acme" },
+					},
+					expires: "2099-01-01",
+				},
+				status: "authenticated",
+			} as unknown as ReturnType<typeof useSession>);
+
+			// The layout feeds `isReadOnly={false}` but impersonation must still
+			// disable writes through the unified context. The fieldset itself
+			// stays enabled so its content remains exposed to assistive
+			// technologies; each control is disabled individually.
+			const { container } = render(
+				<LockProvider isReadOnly={false}>
+					<JointEvaluationForm {...defaultProps} />
+				</LockProvider>,
+			);
+
+			expect(container.querySelector("fieldset")).not.toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			).toBeDisabled();
+			expect(
+				screen.getByRole("button", { name: /transmettre/i }),
+			).toBeDisabled();
 		});
 	});
 });

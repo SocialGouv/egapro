@@ -1,11 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { TrackedLink } from "~/modules/analytics";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { CSE_OPINION } from "~/modules/routes";
 import styles from "./NextStepsBox.module.scss";
 import { UpdateCseModal } from "./UpdateCseModal";
 
 type Props = {
+	cseApplicable: boolean;
+	cseOpinionRequired: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
 	isSecondDeclaration?: boolean;
@@ -13,96 +16,95 @@ type Props = {
 
 /** Shared "Prochaines étapes" box with CSE consultation info and gap warnings */
 export function NextStepsBox({
+	cseApplicable,
+	cseOpinionRequired,
 	hasGapsAboveThreshold,
 	siren,
 	isSecondDeclaration,
 }: Props) {
-	const containerClass = isSecondDeclaration
-		? styles.nextStepsCompact
-		: styles.nextSteps;
-
 	return (
 		<>
-			<div className={containerClass}>
+			<div className={styles.nextSteps}>
 				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
 
-				<div className={styles.section}>
-					{!isSecondDeclaration && (
+				{cseOpinionRequired && (
+					<div className={styles.section}>
 						<h4 className="fr-text--bold fr-text--md fr-mb-0">
 							Informer et consulter le CSE
 						</h4>
-					)}
 
-					<p className="fr-mb-0">
-						Au cours du temps imparti pour réaliser votre déclaration, vous
-						devez{" "}
-						<strong>
-							obligatoirement informer et consulter le CSE sur l&apos;exactitude
-							des données déclarées
-						</strong>
-						.
-					</p>
-
-					<div>
 						<p className="fr-mb-0">
-							Le ou les avis du CSE devront être transmis sur le portail lors de
-							la dernière étape.
+							Au cours du temps imparti pour réaliser votre déclaration, vous
+							devez{" "}
+							<strong>
+								obligatoirement informer et consulter le CSE sur
+								l&apos;exactitude des données déclarées
+							</strong>
+							.
 						</p>
-						<div className={`fr-mt-1w ${styles.linksRow}`}>
+
+						<div className={styles.ctaGroup}>
+							<p className="fr-mb-0">
+								L&apos;avis du CSE devra être transmis lors de la dernière étape
+								de la démarche.
+							</p>
+							<TrackedLink
+								className="fr-link"
+								href={CSE_OPINION}
+								trackingId="cse_models"
+							>
+								Voir les modèles d&apos;avis CSE
+							</TrackedLink>
+							{cseApplicable && (
+								<button
+									aria-controls="update-cse-modal"
+									className="fr-btn fr-btn--secondary"
+									data-fr-opened="false"
+									type="button"
+								>
+									Mettre à jour l&apos;existence d&apos;un CSE
+								</button>
+							)}
+						</div>
+					</div>
+				)}
+
+				{!cseOpinionRequired && cseApplicable && (
+					<div className={styles.section}>
+						<div className={styles.ctaGroup}>
 							<button
 								aria-controls="update-cse-modal"
-								className={`fr-link ${styles.linkButton}`}
+								className="fr-btn fr-btn--secondary"
 								data-fr-opened="false"
 								type="button"
 							>
 								Mettre à jour l&apos;existence d&apos;un CSE
 							</button>
-							<Link className="fr-link" href="/avis-cse">
-								Voir les modèles d&apos;avis CSE
-							</Link>
 						</div>
 					</div>
-				</div>
-
-				{!isSecondDeclaration && hasGapsAboveThreshold && (
-					<hr className={styles.separator} />
 				)}
+
+				{hasGapsAboveThreshold && <hr className={styles.separator} />}
 
 				{hasGapsAboveThreshold && (
 					<div className={styles.section}>
-						{isSecondDeclaration ? (
-							<p className="fr-text--bold fr-mb-0">
-								Des écarts ont été de nouveau détectés
+						<div className={styles.alertHeader}>
+							<p
+								className={`fr-badge fr-badge--warning fr-badge--sm ${styles.alertBadge}`}
+							>
+								Écarts détectés
 							</p>
-						) : (
-							<div className={styles.alertHeader}>
-								<p
-									className={`fr-badge fr-badge--warning fr-badge--sm ${styles.alertBadge}`}
-								>
-									Écarts détectés
-								</p>
-								<h4 className="fr-text--bold fr-text--md fr-mb-0">
-									Actions à engager
-								</h4>
-							</div>
-						)}
+							<h4 className="fr-text--bold fr-text--md fr-mb-0">
+								Actions à engager
+							</h4>
+						</div>
 
 						<p className="fr-mb-0">
-							Suite à l&apos;analyse de vos données de l&apos;indicateur par
-							catégorie de salariés,{" "}
-							{isSecondDeclaration ? (
-								<>
-									<strong>des écarts &ge; 5 % ont été identifiés</strong>. Vous
-									devez{" "}
-									<strong>engager un des parcours de mise en conformité</strong>{" "}
-									suivant&nbsp;:
-								</>
-							) : (
-								<>
-									des écarts &ge; 5 % ont été identifiés. Vous devez engager un
-									des parcours de mise en conformité suivant&nbsp;:
-								</>
-							)}
+							À la suite de l&apos;analyse de vos données de l&apos;indicateur
+							par catégories de salariés, des écarts &ge; 5 % ont{" "}
+							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
+							. Vous devez engager un des parcours de mise en conformité
+							suivant&nbsp;:
 						</p>
 
 						<ul>
@@ -112,26 +114,31 @@ export function NextStepsBox({
 									sexistes.
 								</strong>{" "}
 								Si vous choisissez ce parcours, vous devez informer et consulter
-								le CSE (avis à transmettre sur le portail lors de la dernière
-								étape)
+								le CSE sur cette justification
+								{cseOpinionRequired
+									? " (avis à transmettre lors de la dernière étape de la démarche)."
+									: "."}
 							</li>
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous pouvez&nbsp;:
+							objectifs et non sexistes, vous{" "}
+							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
 						</p>
 						<ul>
 							{!isSecondDeclaration && (
 								<li>
 									<strong>
-										Mettre en place des actions correctives et effectuer une
-										seconde déclaration dans un délai de 6 mois
+										Soit mettre en place des actions correctives et effectuer
+										une seconde déclaration dans un délai de 6 mois
 									</strong>
 								</li>
 							)}
 							<li>
 								<strong>
-									Réaliser une évaluation conjointe des rémunérations
+									{isSecondDeclaration
+										? "Réaliser une évaluation conjointe des rémunérations"
+										: "Soit réaliser une évaluation conjointe des rémunérations"}
 								</strong>
 							</li>
 						</ul>
@@ -144,43 +151,46 @@ export function NextStepsBox({
 					<h4 className="fr-text--bold fr-text--md fr-mb-0">Pour vous aider</h4>
 					<ul className="fr-raw-list fr-links-group">
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="objective_criteria"
 							>
 								Qu&apos;entend-on par critères objectifs et non sexistes ?
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="corrective_actions"
 							>
 								En savoir plus sur actions correctives et seconde déclaration
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 						<li>
-							<a
+							<TrackedLink
 								className="fr-link"
 								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="joint_evaluation"
 							>
 								En savoir plus sur évaluation conjointe des rémunérations
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</li>
 					</ul>
 				</div>
 			</div>
 
-			<UpdateCseModal siren={siren} />
+			<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
 		</>
 	);
 }

@@ -1,4 +1,11 @@
+import { getTableName } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+	COMPANY_SIZE_ANNUAL_MIN,
+	COMPANY_SIZE_VOLUNTARY_MAX,
+} from "~/modules/domain";
+import { companies, declarations, gipMdsData } from "~/server/db/schema";
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -8,13 +15,40 @@ vi.mock("~/server/db", () => ({
 	db: {},
 }));
 
+const {
+	fetchMatomoFunnelMock,
+	fetchMatomoCategoryModelMock,
+	fetchMatomoHelpLinksMock,
+	fetchMatomoDeviceBreakdownMock,
+	fetchMatomoCseStatusConfirmationsMock,
+} = vi.hoisted(() => ({
+	fetchMatomoFunnelMock: vi.fn(),
+	fetchMatomoCategoryModelMock: vi.fn(),
+	fetchMatomoHelpLinksMock: vi.fn(),
+	fetchMatomoDeviceBreakdownMock: vi.fn(),
+	fetchMatomoCseStatusConfirmationsMock: vi.fn(),
+}));
+vi.mock("~/server/services/matomo", () => ({
+	fetchMatomoFunnel: fetchMatomoFunnelMock,
+	fetchMatomoCategoryModel: fetchMatomoCategoryModelMock,
+	fetchMatomoHelpLinks: fetchMatomoHelpLinksMock,
+	fetchMatomoDeviceBreakdown: fetchMatomoDeviceBreakdownMock,
+	fetchMatomoCseStatusConfirmations: fetchMatomoCseStatusConfirmationsMock,
+}));
+
 type SelectChain = {
 	from: ReturnType<typeof vi.fn>;
 	innerJoin: ReturnType<typeof vi.fn>;
+	leftJoin: ReturnType<typeof vi.fn>;
 	where: ReturnType<typeof vi.fn>;
 	groupBy: ReturnType<typeof vi.fn>;
 	orderBy: ReturnType<typeof vi.fn>;
 };
+
+/** Names of the tables a mocked join spy was handed, in call order. */
+function joinedTableNames(spy: ReturnType<typeof vi.fn>): string[] {
+	return spy.mock.calls.map(([table]) => getTableName(table));
+}
 
 type StepRow = {
 	step: number;
@@ -68,6 +102,7 @@ function buildDb(
 	const chain: SelectChain = {
 		from: vi.fn().mockReturnThis(),
 		innerJoin: vi.fn().mockReturnThis(),
+		leftJoin: vi.fn().mockReturnThis(),
 		where: vi.fn().mockReturnThis(),
 		groupBy: vi.fn().mockReturnThis(),
 		orderBy,
@@ -152,7 +187,12 @@ function flattenSql(value: unknown): string {
 }
 
 const adminSession = {
-	user: { id: "admin-1", email: "a@b.c", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "a@b.c",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 
@@ -244,7 +284,7 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		]);
 	});
 
-	it("joins history → declarations always, and additionally on companies when a sizeRange filter is provided", async () => {
+	it("joins history → declarations only, and no workforce table, without a sizeRange filter", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -254,17 +294,64 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		} as never);
 
 		await caller.getCampaignProgression({ years: [2026] });
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(1);
 
-		db.__chain.innerJoin.mockClear();
+		expect(joinedTableNames(db.__chain.innerJoin)).toEqual([
+			getTableName(declarations),
+		]);
+		expect(db.__chain.leftJoin).not.toHaveBeenCalled();
+	});
+
+	// Counting the joins would keep passing whichever table is joined: the whole
+	// point of the fix is that the workforce comes from the GIP file, not from
+	// the Weez/INSEE `company.workforce`.
+	it("scopes a sizeRange filter on the GIP table, never on companies", async () => {
+		const db = buildDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
 		await caller.getCampaignProgression({
 			years: [2026],
 			sizeRange: "50-99",
 		});
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(2);
+
+		expect(joinedTableNames(db.__chain.leftJoin)).toEqual([
+			getTableName(gipMdsData),
+		]);
+		expect(joinedTableNames(db.__chain.innerJoin)).not.toContain(
+			getTableName(companies),
+		);
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+50\s+AND\s+99/,
+		);
 	});
 
-	it("uses gte (open-ended) workforce filter when sizeRange is 250+", async () => {
+	// LEFT and not INNER: a company absent from the GIP file must fall out of the
+	// bucket through NULL propagation, not be dropped from the query altogether.
+	it("joins the GIP table on the left so an absent company only leaves the bucket", async () => {
+		const db = buildDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCampaignProgression({
+			years: [2026],
+			sizeRange: "50-99",
+		});
+
+		expect(db.__chain.leftJoin).toHaveBeenCalledTimes(1);
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).not.toMatch(
+			/coalesce/i,
+		);
+	});
+
+	it("uses an open-ended GIP workforce filter when sizeRange is 250+", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -277,7 +364,13 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 			years: [2026],
 			sizeRange: "250+",
 		});
-		expect(db.__chain.innerJoin).toHaveBeenCalledTimes(2);
+
+		expect(joinedTableNames(db.__chain.leftJoin)).toEqual([
+			getTableName(gipMdsData),
+		]);
+		const whereSql = flattenSql(db.__chain.where.mock.calls[0]?.[0]);
+		expect(whereSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+		expect(whereSql).not.toMatch(/BETWEEN/i);
 	});
 
 	it("validates the years array (min 1, max 5)", async () => {
@@ -448,7 +541,9 @@ describe("adminStatsRouter.getStepDurations", () => {
 		expect(step3?.p90Days).toBeNull();
 	});
 
-	it("passes a workforce filter into the SQL when sizeRange is provided (S5)", async () => {
+	// Asserting only the number of `execute` calls would pass whatever predicate
+	// the query carries — including none, or one reading `company.workforce`.
+	it("filters the wizard CTE on the floored GIP workforce when sizeRange is provided (S5)", async () => {
 		const db = buildDb([], []);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -458,7 +553,26 @@ describe("adminStatsRouter.getStepDurations", () => {
 		} as never);
 
 		await caller.getStepDurations({ year: 2025, sizeRange: "250+" });
-		expect(db.execute).toHaveBeenCalledTimes(5);
+
+		const wizardSql = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(wizardSql).toMatch(/LEFT JOIN/i);
+		expect(wizardSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+	});
+
+	it("leaves the wizard CTE unbucketed when no sizeRange is provided (S5)", async () => {
+		const db = buildDb([], []);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getStepDurations({ year: 2025 });
+
+		const wizardSql = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(wizardSql).toMatch(/AND\s+TRUE/);
+		expect(wizardSql).not.toMatch(/BETWEEN/i);
 	});
 
 	it("validates the year input bounds", async () => {
@@ -855,7 +969,7 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			key: "5",
 			phase: "wizard",
 			step: 5,
-			label: "Écart par catégorie de salariés",
+			label: "Écart par catégories de salariés",
 			total: 0,
 			abandoned: 0,
 			dropoffRate: 0,
@@ -1309,17 +1423,13 @@ describe("adminStatsRouter.getCampaignStats", () => {
 		expect(result.previousYearRate).toBeNull();
 	});
 
-	it("computes the obligation predicate differently for triennial vs non-triennial years (smoke check via call wiring)", async () => {
-		const { result: triennial } = await callStats(
-			{ year: 2027 },
-			[100, 80, 0, 0],
-		);
-		const { result: nonTriennial } = await callStats(
-			{ year: 2026 },
-			[100, 80, 0, 0],
-		);
-		expect(triennial.totalObligated).toBe(100);
-		expect(nonTriennial.totalObligated).toBe(100);
+	it("computes the obligation predicate differently pre/post the V2 scheme year (smoke check via call wiring)", async () => {
+		// From 2027 the SQL predicate widens to ema >= 50 (50-99 become subject);
+		// before 2027 it stays ema >= 100. Both branches must wire the four queries.
+		const { result: postV2 } = await callStats({ year: 2028 }, [100, 80, 0, 0]);
+		const { result: preV2 } = await callStats({ year: 2026 }, [100, 80, 0, 0]);
+		expect(postV2.totalObligated).toBe(100);
+		expect(preV2.totalObligated).toBe(100);
 	});
 
 	it("inflates the size filter when sizeRange covers the voluntary-only bucket (still computes a result)", async () => {
@@ -1599,6 +1709,28 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		expect(result.revisionFunnel[3]?.pctDropFromPrev).toBe(33);
 	});
 
+	it("S-K19-9: revision 'action submitted' counts only round-2 joint evaluations, never the pre-revision corrective submit (no funnel inversion)", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		// Promise.all order is main, compliance, revision, cse → revision is #3.
+		const revisionSql = flattenSql(db.execute.mock.calls[2]?.[0]);
+		// The only submit-type action available during a revision is a round-2
+		// joint evaluation (corrective_action is forbidden in revision).
+		expect(revisionSql).toContain("joint_evaluation_submit");
+		// second_declaration_submit is always round 2 but is the PRE-revision
+		// corrective action: counting it would push "action submitted" above
+		// "path chosen" for declarations still in awaiting_revision_choice.
+		expect(revisionSql).not.toContain("second_declaration_submit");
+	});
+
 	it("S-K19-6: the revision funnel is empty when no declaration is in revision (count[0] === 0)", async () => {
 		const db = buildFunnelDb({
 			main: {
@@ -1693,7 +1825,10 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		]);
 	});
 
-	it("S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true", async () => {
+	// The CSE answer is only collectable since the 100-employee guard: scoping
+	// the base to `has_cse = true` alone counts the legacy answers of companies
+	// that are no longer subject to the obligation (#4185).
+	it("S-K19-10: CSE funnel SQL scopes the base to companies.has_cse = true AND the CSE headcount threshold", async () => {
 		const db = buildFunnelDb();
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
@@ -1707,9 +1842,56 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
 		expect(cseSqlText).toMatch(/hasCse/);
 		expect(cseSqlText).toMatch(/hasCse[^=]*=\s*true/);
+		expect(cseSqlText).toMatch(
+			new RegExp(
+				`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_ANNUAL_MIN}`,
+			),
+		);
 
 		const mainSqlText = flattenSql(db.execute.mock.calls[0]?.[0]);
 		expect(mainSqlText).not.toMatch(/hasCse/);
+	});
+
+	// `isCseRequired` (>= 100, year-agnostic), not `isObligatedForYear` (>= 50
+	// under the V2 scheme): two different rules over the same input, and the
+	// looser one would let the legacy answers back in.
+	it("S-K19-10b: CSE funnel SQL bounds on the CSE threshold, not on the declaration-obligation one", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		const cseSqlText = flattenSql(db.execute.mock.calls[3]?.[0]);
+		expect(cseSqlText).not.toMatch(
+			new RegExp(
+				`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_VOLUNTARY_MAX}`,
+			),
+		);
+	});
+
+	it("S-K19-10c: the CSE headcount bound is absent from the three other funnels", async () => {
+		const db = buildFunnelDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCompletionFunnel({ year: 2026 });
+
+		for (const index of [0, 1, 2]) {
+			expect(flattenSql(db.execute.mock.calls[index]?.[0])).not.toMatch(
+				new RegExp(
+					`floor\\(\\s*workforceEma\\s*\\)\\s*>=\\s*${COMPANY_SIZE_ANNUAL_MIN}`,
+				),
+			);
+		}
 	});
 
 	it("S-K19-11: CSE funnel SQL excludes cancelled declarations", async () => {
@@ -1737,8 +1919,11 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			headers: new Headers(),
 		} as never);
 		await callerNoSize.getCompletionFunnel({ year: 2026 });
+		// `workforce_ema` is now permanently present (join + CSE threshold), so
+		// the bucket predicate itself is what tells the two calls apart.
 		const cseWithoutSize = flattenSql(dbWithoutSize.execute.mock.calls[3]?.[0]);
-		expect(cseWithoutSize).not.toMatch(/workforce/i);
+		expect(cseWithoutSize).not.toMatch(/BETWEEN/i);
+		expect(cseWithoutSize).toMatch(/AND\s+TRUE/);
 
 		const dbWithSize = buildFunnelDb();
 		const callerSize = adminStatsRouter.createCaller({
@@ -1751,7 +1936,9 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			sizeRange: "100-149",
 		});
 		const cseWithSize = flattenSql(dbWithSize.execute.mock.calls[3]?.[0]);
-		expect(cseWithSize).toMatch(/workforce/i);
+		expect(cseWithSize).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+100\s+AND\s+149/,
+		);
 	});
 
 	it("coerces SQL numeric strings to numbers (pg sometimes returns COUNT(...) as a string)", async () => {
@@ -1773,5 +1960,429 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		const result = await caller.getCompletionFunnel({ year: 2026 });
 
 		expect(result.mainFunnel.map((r) => r.count)).toEqual([50, 40, 30, 20]);
+	});
+});
+
+describe("adminStatsRouter.getMatomoFunnel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: {
+				user: { id: "u", email: "u@x", isAdmin: false },
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoFunnel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			declarationFunnel: [
+				{
+					key: "start",
+					label: "Démarrage",
+					count: 10,
+					pctOfStart: 100,
+					pctDropFromPrev: null,
+				},
+			],
+			cseFunnel: [],
+			complianceFunnel: [],
+		};
+		fetchMatomoFunnelMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: {
+				user: {
+					id: "admin",
+					email: "a@x",
+					isAdmin: true,
+					adminMfaAt: Math.floor(Date.now() / 1000),
+				},
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoFunnel({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoFunnelMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+		expect(result).toBe(output);
+	});
+});
+
+const nonAdminSession = {
+	user: { id: "u", email: "u@x", isAdmin: false },
+	expires: "",
+};
+
+describe("adminStatsRouter.getMatomoCategoryModel", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoCategoryModel({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = { rows: [], avgImportDurationSeconds: 12 };
+		fetchMatomoCategoryModelMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoCategoryModel({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoCategoryModelMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCategoryModel({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoCategoryModel({ year: 2101 }),
+		).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoHelpLinks", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoHelpLinks({ year: 2026 })).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			rows: [{ key: "cse_models", label: "Modèles", count: 3 }],
+		};
+		fetchMatomoHelpLinksMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoHelpLinks({
+			year: 2026,
+			sizeRange: "250+",
+		});
+
+		expect(fetchMatomoHelpLinksMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "250+",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getMatomoHelpLinks({ year: 1999 })).rejects.toThrow();
+		await expect(caller.getMatomoHelpLinks({ year: 2101 })).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoDeviceBreakdown", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 2026 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("delegates to the Matomo service with the year/size filter", async () => {
+		const output = {
+			rows: [
+				{
+					key: "modification",
+					label: "Modification (déclaration)",
+					desktop: 1,
+					smartphone: 2,
+					tablet: 0,
+				},
+			],
+		};
+		fetchMatomoDeviceBreakdownMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoDeviceBreakdown({
+			year: 2026,
+			sizeRange: "<50",
+		});
+
+		expect(fetchMatomoDeviceBreakdownMock).toHaveBeenCalledWith({
+			year: 2026,
+			sizeRange: "<50",
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoDeviceBreakdown({ year: 2101 }),
+		).rejects.toThrow();
+	});
+});
+
+describe("adminStatsRouter.getMatomoCseStatusConfirmations", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 2026 }),
+		).rejects.toThrow(/administrateurs/i);
+	});
+
+	it("delegates to the Matomo service with the year only (sizeRange is ignored)", async () => {
+		const output = { total: 55, yes: 42, no: 13 };
+		fetchMatomoCseStatusConfirmationsMock.mockResolvedValue(output);
+
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getMatomoCseStatusConfirmations({
+			year: 2026,
+			sizeRange: "50-99",
+		});
+
+		expect(fetchMatomoCseStatusConfirmationsMock).toHaveBeenCalledWith({
+			year: 2026,
+		});
+		expect(result).toBe(output);
+	});
+
+	it("validates the year bounds", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildDb(),
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 1999 }),
+		).rejects.toThrow();
+		await expect(
+			caller.getMatomoCseStatusConfirmations({ year: 2101 }),
+		).rejects.toThrow();
+	});
+});
+
+type UsersPerCompanyRow = {
+	total_companies: number | string;
+	mono: number | string;
+	multi: number | string;
+	avg_per_company: number | string;
+	max_users: number | string;
+};
+
+function buildUsersPerCompanyDb(row?: UsersPerCompanyRow) {
+	const execute = vi.fn().mockResolvedValue(row ? [row] : []);
+	return { select: vi.fn(), execute };
+}
+
+describe("adminStatsRouter.getUsersPerCompany", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	it("rejects non-admin callers", async () => {
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db: buildUsersPerCompanyDb(),
+			session: nonAdminSession,
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.getUsersPerCompany()).rejects.toThrow(
+			/administrateurs/i,
+		);
+	});
+
+	it("maps the SQL aggregate row to the typed UsersPerCompany shape", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: 3,
+			mono: 1,
+			multi: 2,
+			avg_per_company: 2.3333333333333335,
+			max_users: 4,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 3,
+			mono: 1,
+			multi: 2,
+			avgPerCompany: 2.3333333333333335,
+			maxUsers: 4,
+		});
+	});
+
+	it("coerces SQL numeric strings to numbers (pg may serialise COUNT/AVG as text)", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: "10",
+			mono: "6",
+			multi: "4",
+			avg_per_company: "1.8",
+			max_users: "5",
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 10,
+			mono: 6,
+			multi: 4,
+			avgPerCompany: 1.8,
+			maxUsers: 5,
+		});
+	});
+
+	it("defaults every field to 0 when the aggregate query returns no row", async () => {
+		const db = buildUsersPerCompanyDb();
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getUsersPerCompany();
+
+		expect(result).toEqual({
+			totalCompanies: 0,
+			mono: 0,
+			multi: 0,
+			avgPerCompany: 0,
+			maxUsers: 0,
+		});
+	});
+
+	it("counts distinct users per siren via a single grouped CTE", async () => {
+		const db = buildUsersPerCompanyDb({
+			total_companies: 0,
+			mono: 0,
+			multi: 0,
+			avg_per_company: 0,
+			max_users: 0,
+		});
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getUsersPerCompany();
+
+		expect(db.execute).toHaveBeenCalledTimes(1);
+		const sqlText = flattenSql(db.execute.mock.calls[0]?.[0]);
+		expect(sqlText).toContain("DISTINCT");
+		expect(sqlText).toMatch(/GROUP BY/i);
 	});
 });

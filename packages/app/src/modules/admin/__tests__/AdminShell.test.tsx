@@ -23,6 +23,18 @@ describe("AdminShell", () => {
 		expect(screen.getByText("test content")).toBeInTheDocument();
 	});
 
+	it("wraps children in a focusable main landmark targeted by the skip link", () => {
+		render(
+			<AdminShell>
+				<p>test content</p>
+			</AdminShell>,
+		);
+		const main = screen.getByRole("main");
+		expect(main).toHaveAttribute("id", "content");
+		expect(main).toHaveAttribute("tabindex", "-1");
+		expect(main).toContainElement(screen.getByText("test content"));
+	});
+
 	it("wraps content in a fluid container", () => {
 		const { container } = render(<AdminShell>children</AdminShell>);
 		const wrapper = container.firstElementChild as HTMLElement;

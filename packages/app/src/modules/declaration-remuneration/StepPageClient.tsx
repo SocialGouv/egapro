@@ -1,6 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
+import { useFunnelTracking } from "~/modules/analytics";
+import type { DeclarationFsmStatus } from "~/modules/domain";
+import {
+	getOptionalCompanySizeRange,
+	isDeclarationSubmitted,
+	isIndicatorGRequiredForGip,
+} from "~/modules/domain";
+import {
+	DECLARATION_FUNNEL,
+	declarationFunnelDimensions,
+} from "./shared/funnelConfig";
 import type { GipPrefillData } from "./shared/gipMdsMapping";
+import type { PayGapReferences } from "./shared/indicatorRowMapping";
+import { DeclarationModificationClosedAlert } from "./shared/lock/DeclarationModificationClosedAlert";
+import { LockProvider, useLockContext } from "./shared/lock/LockContext";
 import { Step1Workforce } from "./steps/Step1Workforce";
 import { Step2PayGap } from "./steps/Step2PayGap";
 import { Step3VariablePay } from "./steps/Step3VariablePay";
@@ -18,102 +33,171 @@ import type {
 type StepPageClientProps = {
 	step: number;
 	declaration: {
+		id: string;
 		siren: string;
 		year: number;
 		totalWomen: number | null;
 		totalMen: number | null;
-		status: string | null;
+		hourlyWomen: number | null;
+		hourlyMen: number | null;
+		status: DeclarationFsmStatus | null;
 	};
+	// GIP-MDS annual average workforce; `null` = absent from the GIP file, i.e. not subject to the declaration.
+	companyWorkforce: number | null;
 	gipPrefillData?: GipPrefillData;
 	step1Data: Step1Data;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step4Data: Step4Data;
 	step5Categories: EmployeeCategoryRow[];
 	initialSource?: string;
 	hasCse?: boolean | null;
+	modificationClosed?: boolean;
+	modificationDeadline?: Date;
 };
 
 export function StepPageClient({
 	step,
 	declaration,
+	companyWorkforce,
 	gipPrefillData,
 	step1Data,
 	step2Data,
 	step3Data,
+	step2Gaps,
+	step3Gaps,
 	step4Data,
 	step5Categories,
 	initialSource,
 	hasCse = null,
+	modificationClosed = false,
+	modificationDeadline,
 }: StepPageClientProps) {
-	switch (step) {
-		case 1:
-			return (
-				<Step1Workforce
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step1Data}
-				/>
-			);
-		case 2:
-			return (
-				<Step2PayGap
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step2Data}
-				/>
-			);
-		case 3:
-			return (
-				<Step3VariablePay
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step3Data}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 4:
-			return (
-				<Step4QuartileDistribution
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					gipPrefillData={gipPrefillData}
-					initialData={step4Data}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 5:
-			return (
-				<Step5EmployeeCategories
-					declarationSiren={declaration.siren}
-					declarationYear={declaration.year}
-					initialCategories={step5Categories}
-					initialSource={initialSource}
-					maxMen={declaration.totalMen ?? undefined}
-					maxWomen={declaration.totalWomen ?? undefined}
-				/>
-			);
-		case 6:
-			return (
-				<Step6Review
-					declaration={declaration}
-					declarationYear={declaration.year}
-					hasCse={hasCse}
-					isSubmitted={
-						declaration.status !== null && declaration.status !== "draft"
-					}
-					step2Data={step2Data}
-					step3Data={step3Data}
-					step4Data={step4Data}
-					step5Categories={step5Categories}
-				/>
-			);
-		default:
-			return null;
+	const sizeRange = getOptionalCompanySizeRange(companyWorkforce);
+
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		companyWorkforce,
+		declaration.year,
+	);
+
+	const dimensions = useMemo(
+		() => declarationFunnelDimensions(declaration.year, sizeRange),
+		[declaration.year, sizeRange],
+	);
+	useFunnelTracking(DECLARATION_FUNNEL, { step, dimensions });
+
+	// The lock is already acquired by the ancestor provider — a second dynamic
+	// one here would re-acquire it and race the heartbeat. This only folds the
+	// funnel-specific `modificationClosed` cutoff into the inherited state.
+	const {
+		holder: lockHolder,
+		isLoading: isLockLoading,
+		isReadOnly: isLockReadOnly,
+		reason: lockReason,
+	} = useLockContext();
+	const isReadOnly = isLockReadOnly || modificationClosed;
+	const reason = modificationClosed ? "modification_closed" : lockReason;
+	const holder = modificationClosed ? null : lockHolder;
+
+	function renderStep() {
+		switch (step) {
+			case 1:
+				return (
+					<Step1Workforce
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
+						initialData={step1Data}
+					/>
+				);
+			case 2:
+				return (
+					<Step2PayGap
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
+						initialData={step2Data}
+					/>
+				);
+			case 3:
+				return (
+					<Step3VariablePay
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						indicatorGRequired={indicatorGRequired}
+						initialData={step3Data}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 4:
+				return (
+					<Step4QuartileDistribution
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						gipPrefillData={gipPrefillData}
+						hourlyMaxMen={declaration.hourlyMen ?? undefined}
+						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
+						indicatorGRequired={indicatorGRequired}
+						initialData={step4Data}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 5:
+				return (
+					<Step5EmployeeCategories
+						declarationSiren={declaration.siren}
+						declarationYear={declaration.year}
+						hourlyMaxMen={declaration.hourlyMen ?? undefined}
+						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
+						indicatorGRequired={indicatorGRequired}
+						initialCategories={step5Categories}
+						initialSource={initialSource}
+						maxMen={declaration.totalMen ?? undefined}
+						maxWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			case 6:
+				return (
+					<Step6Review
+						companyWorkforce={companyWorkforce}
+						declaration={declaration}
+						declarationYear={declaration.year}
+						hasCse={hasCse}
+						indicatorGRequired={indicatorGRequired}
+						isSubmitted={isDeclarationSubmitted(declaration.status)}
+						step2Data={step2Data}
+						step2Gaps={step2Gaps}
+						step3Data={step3Data}
+						step3Gaps={step3Gaps}
+						step4Data={step4Data}
+						step5Categories={step5Categories}
+						totalMen={declaration.totalMen ?? undefined}
+						totalWomen={declaration.totalWomen ?? undefined}
+					/>
+				);
+			default:
+				return null;
+		}
 	}
+
+	return (
+		<LockProvider
+			holder={holder}
+			isLoading={isLockLoading}
+			isReadOnly={isReadOnly}
+			reason={reason}
+		>
+			{modificationClosed && modificationDeadline ? (
+				<DeclarationModificationClosedAlert deadline={modificationDeadline} />
+			) : null}
+			{renderStep()}
+		</LockProvider>
+	);
 }

@@ -62,15 +62,10 @@ export async function findDraftDeclarations(
 	`;
 }
 
-// 3. Compliance path choice reminder (J-15 before 1er juillet):
-// declarations submitted with gap >= 5% awaiting the user's compliance
-// decision. Covers two rounds:
-//  - Round 1: status='awaiting_compliance_path_choice' + first choice NULL
-//  - Round 2: status='awaiting_revision_choice' (after second declaration
-//    with persistent gap) + second choice NULL. In round 2 the *first*
-//    choice is already set to 'corrective_action', so filtering on it
-//    would silently exclude every round-2 recipient.
-export async function findAwaitingComplianceChoice(
+// 3a. Compliance path choice reminder — round 1 (J-15 before 1er juillet):
+// first declaration submitted with gap >= 5 % and no compliance path chosen
+// yet.
+export async function findAwaitingCompliancePathChoiceFirstRound(
 	sql: Sql,
 	year: number,
 ): Promise<ReminderRecipient[]> {
@@ -85,11 +80,32 @@ export async function findAwaitingComplianceChoice(
 		WHERE d.year = ${year}
 			AND d.cancelled_at IS NULL
 			AND u.email IS NOT NULL
-			AND (
-				(d.status = 'awaiting_compliance_path_choice' AND d.first_declaration_path_choice IS NULL)
-				OR
-				(d.status = 'awaiting_revision_choice' AND d.second_declaration_path_choice IS NULL)
-			)
+			AND d.status = 'awaiting_compliance_path_choice'
+			AND d.first_declaration_path_choice IS NULL
+	`;
+}
+
+// 3b. Compliance path choice reminder — round 2 (J-15 before 1er janvier N+1):
+// second declaration submitted with a persistent gap >= 5 %, awaiting the
+// user's revision choice. In round 2 the *first* choice is already set to
+// 'corrective_action', so we filter on the (still NULL) second choice.
+export async function findAwaitingCompliancePathChoiceSecondRound(
+	sql: Sql,
+	year: number,
+): Promise<ReminderRecipient[]> {
+	return sql<ReminderRecipient[]>`
+		SELECT
+			d.siren AS siren,
+			d.year AS year,
+			u.email AS email,
+			d.declarant_id AS "userId"
+		FROM app_declaration d
+		JOIN app_user u ON u.id = d.declarant_id
+		WHERE d.year = ${year}
+			AND d.cancelled_at IS NULL
+			AND u.email IS NOT NULL
+			AND d.status = 'awaiting_revision_choice'
+			AND d.second_declaration_path_choice IS NULL
 	`;
 }
 
@@ -118,11 +134,10 @@ export async function findCorrectiveSecondDeclarationPending(
 	`;
 }
 
-// 5. Joint evaluation reminder (1er août): declarations on the
-// joint-evaluation track without an uploaded joint_evaluation file.
-// `secondDeclarationPathChoice` takes precedence over `first*` once the
-// user re-chose at Round 2 (corrective Round 1 → joint_evaluation Round 2).
-export async function findJointEvaluationPending(
+// 5a. Joint evaluation reminder — round 1 (J-30 / J-15 before 1er septembre):
+// the joint-evaluation path was chosen at the first declaration and no round-2
+// choice has been made yet, without an uploaded joint_evaluation file.
+export async function findJointEvaluationPendingFirstRound(
 	sql: Sql,
 	year: number,
 ): Promise<ReminderRecipient[]> {
@@ -137,7 +152,37 @@ export async function findJointEvaluationPending(
 		WHERE d.year = ${year}
 			AND d.cancelled_at IS NULL
 			AND u.email IS NOT NULL
-			AND COALESCE(d.second_declaration_path_choice, d.first_declaration_path_choice) = 'joint_evaluation'
+			AND d.first_declaration_path_choice = 'joint_evaluation'
+			AND d.second_declaration_path_choice IS NULL
+			AND NOT EXISTS (
+				SELECT 1
+				FROM app_file f
+				WHERE f.declaration_id = d.id
+					AND f.type = 'joint_evaluation'
+			)
+	`;
+}
+
+// 5b. Joint evaluation reminder — round 2 (J-30 / J-15 before 1er mars N+1):
+// the joint-evaluation path was chosen at the second declaration (after a
+// persistent gap), without an uploaded joint_evaluation file. The round-2
+// choice takes precedence over the round-1 one.
+export async function findJointEvaluationPendingSecondRound(
+	sql: Sql,
+	year: number,
+): Promise<ReminderRecipient[]> {
+	return sql<ReminderRecipient[]>`
+		SELECT
+			d.siren AS siren,
+			d.year AS year,
+			u.email AS email,
+			d.declarant_id AS "userId"
+		FROM app_declaration d
+		JOIN app_user u ON u.id = d.declarant_id
+		WHERE d.year = ${year}
+			AND d.cancelled_at IS NULL
+			AND u.email IS NOT NULL
+			AND d.second_declaration_path_choice = 'joint_evaluation'
 			AND NOT EXISTS (
 				SELECT 1
 				FROM app_file f

@@ -11,24 +11,25 @@ import type {
 	DeclarationType,
 } from "~/modules/domain";
 
-export type CompanyItem = {
-	siren: string;
-	name: string;
-	declarationStatus: DeclarationStatus;
-};
-
-export type ViewMode = "list" | "table";
-
 export type CompanyDetail = {
 	siren: string;
 	name: string;
 	address: string | null;
 	nafCode: string | null;
-	workforce: number | null;
+	nafLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
+
+export type LockHolderDisplay = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+};
 
 export type DeclarationItem = {
 	type: DeclarationType;
@@ -45,4 +46,5 @@ export type DeclarationItem = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	notSubject: boolean;
 };

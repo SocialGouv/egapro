@@ -1,0 +1,26 @@
+.legend:global(.fr-fieldset__legend--regular) {
+	font-weight: 500;
+}
+
+.radioGroup :global(.fr-fieldset__element) {
+	margin-bottom: 1.5rem;
+}
+
+.radioGroup:global(.fr-fieldset--error) {
+	background-image: none;
+}
+
+.radioGroup:global(.fr-fieldset--error) .legend {
+	background-image: none;
+	color: var(--text-title-grey);
+}
+
+.radioZone {
+	flex: 1 1 100%;
+	max-width: 100%;
+}
+
+.radioZoneError {
+	border-left: 2px solid var(--border-plain-error);
+	padding-left: 1rem;
+}

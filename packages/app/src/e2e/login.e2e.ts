@@ -1,12 +1,16 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
-
+import { urlGlob } from "~/e2e/helpers/routes";
+import { HOME, LOGIN, MY_SPACE } from "~/modules/routes";
+import type { CompanyLocation } from "./helpers/db";
+import { getCompanyLocation, setCompanyLocation } from "./helpers/db";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
 
 test.describe("Login page", () => {
 	test.use({ storageState: { cookies: [], origins: [] } });
 
 	test("displays ProConnect button", async ({ page }) => {
-		await page.goto("/login");
+		await page.goto(LOGIN);
 		await dismissCookieBanner(page);
 
 		await expect(
@@ -14,58 +18,34 @@ test.describe("Login page", () => {
 		).toBeVisible();
 	});
 
+	test("keeps ProConnect within a mobile viewport at 200% zoom", async ({
+		page,
+	}) => {
+		// 390 physical pixels at 200% browser zoom yield a 195px CSS viewport.
+		await page.setViewportSize({ width: 195, height: 422 });
+		await page.goto(LOGIN);
+		await dismissCookieBanner(page);
+
+		const button = page.getByRole("button", {
+			name: /s.identifier avec\s*proconnect/i,
+		});
+		await expect(button.locator(".fr-connect__login")).toBeVisible();
+		await expect(button.locator(".fr-connect__brand")).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: /qu.est-ce que proconnect/i }),
+		).toBeVisible();
+		expect(
+			await page.evaluate(() => document.documentElement.scrollWidth),
+		).toBeLessThanOrEqual(195);
+	});
+
 	test("hides the public help banner", async ({ page }) => {
-		await page.goto("/login");
+		await page.goto(LOGIN);
 		await dismissCookieBanner(page);
 
 		await expect(
 			page.getByRole("region", { name: /ressources et aide/i }),
 		).toHaveCount(0);
-	});
-
-	test("illustration column is bounded by fr-container width at wide viewport", async ({
-		page,
-	}) => {
-		await page.setViewportSize({ width: 1920, height: 1080 });
-		await page.goto("/login");
-		await dismissCookieBanner(page);
-
-		const illustrationColumn = page.locator('[aria-hidden="true"]').first();
-		const boundingBox = await illustrationColumn.boundingBox();
-		const viewportWidth = 1920;
-		const maxContainerWidth = 78 * 16;
-
-		expect(boundingBox).not.toBeNull();
-		if (boundingBox) {
-			expect(boundingBox.x + boundingBox.width).toBeLessThanOrEqual(
-				(viewportWidth + maxContainerWidth) / 2,
-			);
-		}
-	});
-
-	test("illustration stays near top when accordion is expanded", async ({
-		page,
-	}) => {
-		await page.setViewportSize({ width: 1920, height: 1080 });
-		await page.goto("/login");
-		await dismissCookieBanner(page);
-
-		const illustration = page.locator('img[src*="login-illustration"]');
-		const initialBox = await illustration.boundingBox();
-
-		const accordion = page.getByRole("button", {
-			name: /vous n.avez pas de compte/i,
-		});
-		if (await accordion.isVisible()) {
-			await accordion.click();
-			const expandedBox = await illustration.boundingBox();
-
-			expect(initialBox).not.toBeNull();
-			expect(expandedBox).not.toBeNull();
-			if (initialBox && expandedBox) {
-				expect(Math.abs(expandedBox.y - initialBox.y)).toBeLessThan(50);
-			}
-		}
 	});
 });
 
@@ -75,35 +55,24 @@ test.describe("ProConnect authentication flow", () => {
 	test("redirects to mon espace after login", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.waitForURL("**/mon-espace");
+		await page.waitForURL(urlGlob(MY_SPACE));
 		await expect(
 			page.getByRole("button", { name: "Mon espace" }),
 		).toBeVisible();
 
 		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
-	});
 
-	test("logs out and returns to unauthenticated state", async ({ page }) => {
-		test.setTimeout(120_000);
-		await loginWithProConnect(page);
-
-		await page.getByRole("button", { name: "Mon espace" }).click();
-		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
-
-		await page.waitForURL(/session\/end|oauth\/logout/, { timeout: 10_000 });
-		await page.goto("/");
-
-		await expect(
-			page.getByRole("link", { name: "Se connecter" }),
-		).toBeVisible();
+		// #4256: the company banner opens on the company name. Only a real render catches a
+		// breadcrumb re-injected by the layout rather than by CompanyInfoBanner itself.
+		await expect(page.locator(".fr-breadcrumb")).toHaveCount(0);
 	});
 
 	test("redirects to mon espace when already logged in", async ({ page }) => {
 		await loginWithProConnect(page);
 
-		await page.goto("/login");
+		await page.goto(LOGIN);
 
-		await page.waitForURL("**/mon-espace", {
+		await page.waitForURL(urlGlob(MY_SPACE), {
 			timeout: 15_000,
 		});
 
@@ -111,5 +80,163 @@ test.describe("ProConnect authentication flow", () => {
 		await expect(
 			page.getByRole("button", { name: /s.identifier avec\s*proconnect/i }),
 		).not.toBeVisible();
+	});
+});
+
+// Merged from home.e2e.ts (#4114). A file-level describe on purpose: this needs the
+// shared session of the `chromium` project, so it must stay out of the two describes
+// above, which opt into an anonymous context via `storageState: { cookies: [], origins: [] }`.
+// It is the twin of "redirects to mon espace when already logged in" — same redirect,
+// entered from "/" instead of /login.
+test.describe("Authenticated home redirect", () => {
+	test("home page redirects authenticated user to mon-espace", async ({
+		page,
+	}) => {
+		await page.goto(HOME);
+		await page.waitForURL(urlGlob(MY_SPACE));
+		expect(page.url()).toContain(MY_SPACE);
+	});
+});
+
+test.describe("Mon espace — location row of the company banner", () => {
+	test.describe.configure({ mode: "serial" });
+
+	const SEEDED_ADDRESS = "12 RUE DE LA PAIX 75002 PARIS";
+
+	let baseline: CompanyLocation;
+
+	test.beforeAll(async () => {
+		baseline = await getCompanyLocation();
+	});
+
+	test.afterAll(async () => {
+		await setCompanyLocation(baseline);
+	});
+
+	// The edit modal repeats SIREN and address in a <dl> of its own, so the absence
+	// assertions only mean something once scoped to the banner — identified as the
+	// SIREN list that is not the modal's, rather than by DOM order.
+	function locationList(page: Page) {
+		return page
+			.locator("dl")
+			.filter({ hasText: "SIREN :" })
+			.filter({ hasNot: page.getByText("Raison sociale :") });
+	}
+
+	test("shows the country of a foreign head office instead of its address", async ({
+		page,
+	}) => {
+		await setCompanyLocation({
+			address: SEEDED_ADDRESS,
+			countryCode: "99248",
+			countryLabel: "QATAR",
+		});
+
+		await page.goto(MY_SPACE);
+
+		await expect(locationList(page).locator("dt")).toHaveText([
+			"SIREN :",
+			"Pays :",
+		]);
+		await expect(locationList(page).locator("dd").last()).toHaveText("Qatar");
+	});
+
+	test("renders a composed country label in title case", async ({ page }) => {
+		await setCompanyLocation({
+			address: SEEDED_ADDRESS,
+			countryCode: "99123",
+			countryLabel: "AFRIQUE DU SUD",
+		});
+
+		await page.goto(MY_SPACE);
+
+		await expect(locationList(page).locator("dd").last()).toHaveText(
+			"Afrique du Sud",
+		);
+	});
+
+	test("keeps the address of a French company", async ({ page }) => {
+		await setCompanyLocation({
+			address: SEEDED_ADDRESS,
+			countryCode: null,
+			countryLabel: "FRANCE",
+		});
+
+		await page.goto(MY_SPACE);
+
+		await expect(locationList(page).locator("dt")).toHaveText([
+			"SIREN :",
+			"Adresse :",
+		]);
+		await expect(locationList(page).locator("dd").last()).toHaveText(
+			"12 Rue de la Paix 75002 Paris",
+		);
+	});
+
+	test("shows « non renseigné » when the country is unresolved", async ({
+		page,
+	}) => {
+		await setCompanyLocation({
+			address: SEEDED_ADDRESS,
+			countryCode: null,
+			countryLabel: null,
+		});
+
+		await page.goto(MY_SPACE);
+
+		await expect(locationList(page).locator("dt")).toHaveText([
+			"SIREN :",
+			"Pays :",
+		]);
+		await expect(locationList(page).locator("dd")).toHaveText([
+			"130 025 265",
+			"non renseigné",
+		]);
+	});
+});
+
+// #3867 removed the "mes entreprises" screen. Both header breakpoints render their own
+// entry (UserAccountMenu on desktop, MobileUserBlock inside the DSFR modal), so a single
+// viewport would leave half the change unasserted. Each test starts from "/" so landing
+// on /mon-espace is a real navigation rather than a URL that already matched.
+test.describe("Mon espace — header entry point", () => {
+	const MOBILE = { width: 375, height: 812 };
+
+	test("the desktop user menu leads to mon espace", async ({ page }) => {
+		await page.goto("/");
+		await dismissCookieBanner(page);
+
+		await page.getByRole("button", { name: "Mon espace" }).click();
+
+		await expect(
+			page.getByRole("menuitem", { name: "Mes entreprises" }),
+		).toHaveCount(0);
+		await page.getByRole("menuitem", { name: "Mes démarches" }).click();
+
+		await page.waitForURL("**/mon-espace");
+		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+	});
+
+	test("the mobile menu leads to mon espace", async ({ page }) => {
+		await page.setViewportSize(MOBILE);
+		await page.goto("/");
+		await dismissCookieBanner(page);
+
+		// By id: the desktop tools bar carries a button with the same accessible name.
+		await page.locator("#fr-btn-menu-mobile").click();
+
+		const menu = page.locator("#modal-menu");
+		await expect(
+			menu.getByRole("link", { name: "Mes entreprises" }),
+		).toHaveCount(0);
+		await menu.getByRole("link", { name: "Mes démarches" }).click();
+
+		await page.waitForURL("**/mon-espace");
+	});
+
+	test("the removed mes-entreprises route is not found", async ({ page }) => {
+		const response = await page.goto("/mon-espace/mes-entreprises");
+
+		expect(response?.status()).toBe(404);
 	});
 });

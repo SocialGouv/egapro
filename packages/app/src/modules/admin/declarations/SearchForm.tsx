@@ -3,8 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+import type { CompanySizeRange } from "~/modules/domain";
+import { ADMIN_DECLARATIONS, routeWithQuery } from "~/modules/routes";
+import { CompanySizeFilter } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
-
 import type { SearchDeclarationsFormValues } from "./schemas";
 import { searchDeclarationsFormSchema } from "./schemas";
 
@@ -12,7 +14,7 @@ export function SearchForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
-	const { register, handleSubmit, reset } = useZodForm(
+	const { register, handleSubmit, reset, setValue, watch } = useZodForm(
 		searchDeclarationsFormSchema,
 		{
 			defaultValues: {
@@ -22,19 +24,25 @@ export function SearchForm() {
 				dateFrom: searchParams.get("dateFrom") ?? "",
 				dateTo: searchParams.get("dateTo") ?? "",
 				status:
-					(searchParams.get("status") as
-						| ""
-						| "draft"
-						| "awaiting_compliance_path_choice"
-						| "corrective_actions_chosen"
-						| "joint_evaluation_chosen"
-						| "awaiting_revision_choice"
-						| "revised_joint_evaluation_chosen"
-						| "awaiting_cse_opinion"
-						| "demarche_completed"
-						| "cancelled") ?? "",
+					(searchParams.get(
+						"status",
+					) as SearchDeclarationsFormValues["status"]) ?? "",
+				sizeRange:
+					(searchParams.get(
+						"sizeRange",
+					) as SearchDeclarationsFormValues["sizeRange"]) ?? "",
 			},
 		},
+	);
+
+	// Controlled component: driven by watch/setValue rather than `register`.
+	const sizeRange = watch("sizeRange");
+
+	const handleSizeRangeChange = useCallback(
+		(next: CompanySizeRange | undefined) => {
+			setValue("sizeRange", next ?? "");
+		},
+		[setValue],
 	);
 
 	const onSubmit = useCallback(
@@ -46,7 +54,7 @@ export function SearchForm() {
 				}
 			}
 			params.set("page", "1");
-			router.push(`/admin/declarations?${params.toString()}`);
+			router.push(routeWithQuery(ADMIN_DECLARATIONS, params));
 		},
 		[router],
 	);
@@ -59,8 +67,9 @@ export function SearchForm() {
 			dateFrom: "",
 			dateTo: "",
 			status: "",
+			sizeRange: "",
 		});
-		router.push("/admin/declarations");
+		router.push(ADMIN_DECLARATIONS);
 	}, [reset, router]);
 
 	return (
@@ -136,6 +145,14 @@ export function SearchForm() {
 							{...register("dateTo")}
 						/>
 					</div>
+				</div>
+				<div className="fr-col-12 fr-col-md-3">
+					<CompanySizeFilter
+						id="search-size-range"
+						label="Effectif"
+						onChange={handleSizeRangeChange}
+						value={sizeRange === "" ? undefined : sizeRange}
+					/>
 				</div>
 				<div className="fr-col-12 fr-col-md-3">
 					<div className="fr-select-group">

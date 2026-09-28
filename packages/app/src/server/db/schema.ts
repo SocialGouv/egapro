@@ -8,6 +8,8 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { CURRENT_RULES_VERSION } from "~/server/rules/version";
+
 /**
  * Multi-project schema: all tables are prefixed with `app_`.
  *
@@ -79,8 +81,12 @@ export const declarations = createTable(
 			.varchar({ length: 255 })
 			.notNull()
 			.references(() => users.id),
+		// Physical workforce, split by the pay basis each indicator is computed on
+		// (#4247): `total*` is the annual basis, `hourly*` the hourly one.
 		totalWomen: d.integer(),
 		totalMen: d.integer(),
+		hourlyWomen: d.integer(),
+		hourlyMen: d.integer(),
 		remunerationScore: d.integer(),
 		variableRemunerationScore: d.integer(),
 		quartileScore: d.integer(),
@@ -174,7 +180,10 @@ export const declarations = createTable(
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
 		cseRequired: d.boolean().notNull().default(false),
-		rulesVersion: d.varchar("rules_version").notNull().default("2027.1"),
+		rulesVersion: d
+			.varchar("rules_version")
+			.notNull()
+			.default(CURRENT_RULES_VERSION),
 		cancelledAt: d.timestamp({ withTimezone: false, mode: "date" }),
 		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
@@ -246,7 +255,56 @@ export const declarationsRelations = relations(
 		jobCategories: many(jobCategories),
 		cseOpinions: many(cseOpinions),
 		files: many(files),
+		cseOpinionFiles: many(cseOpinionFiles),
 		statusHistory: many(declarationStatusHistory),
+	}),
+);
+
+// ── Declaration edit lock ──────────────────────────────────────────
+
+export const declarationLocks = createTable(
+	"declaration_lock",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id, { onDelete: "cascade" }),
+		lockedByUserId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		lockedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastHeartbeatAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		expiresAt: d.timestamp({ withTimezone: true }).notNull(),
+	}),
+	(t) => [
+		uniqueIndex("declaration_lock_declaration_id_unique").on(t.declarationId),
+		index("declaration_lock_expires_at_idx").on(t.expiresAt),
+	],
+);
+
+export const declarationLocksRelations = relations(
+	declarationLocks,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [declarationLocks.declarationId],
+			references: [declarations.id],
+		}),
+		lockedBy: one(users, {
+			fields: [declarationLocks.lockedByUserId],
+			references: [users.id],
+		}),
 	}),
 );
 
@@ -307,6 +365,8 @@ export const employeeCategories = createTable(
 		declarationType: declarationTypeEnum().notNull(),
 		womenCount: d.integer(),
 		menCount: d.integer(),
+		hourlyWomenCount: d.integer(),
+		hourlyMenCount: d.integer(),
 		annualBaseWomen: d.numeric(),
 		annualBaseMen: d.numeric(),
 		annualVariableWomen: d.numeric(),
@@ -403,6 +463,14 @@ export const gipMdsData = createTable(
 		annualQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		annualQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		annualQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		annualQuartile1WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile2WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile3WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile4WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile1MenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile2MenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile3MenCount: d.numeric({ precision: 9, scale: 2 }),
+		annualQuartile4MenCount: d.numeric({ precision: 9, scale: 2 }),
 		// Indicator F — Quartile distribution (hourly)
 		hourlyQuartileThreshold1: d.numeric({ precision: 9, scale: 2 }),
 		hourlyQuartileThreshold2: d.numeric({ precision: 9, scale: 2 }),
@@ -415,6 +483,14 @@ export const gipMdsData = createTable(
 		hourlyQuartile2ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile3ProportionMen: d.numeric({ precision: 9, scale: 4 }),
 		hourlyQuartile4ProportionMen: d.numeric({ precision: 9, scale: 4 }),
+		hourlyQuartile1WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile2WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile3WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile4WomenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile1MenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile2MenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile3MenCount: d.numeric({ precision: 9, scale: 2 }),
+		hourlyQuartile4MenCount: d.numeric({ precision: 9, scale: 2 }),
 		// Confidence index
 		confidenceIndex: d.numeric({ precision: 9, scale: 4 }),
 		confidenceExoticContracts: d.numeric({ precision: 9, scale: 4 }),
@@ -451,9 +527,20 @@ export const companies = createTable("company", (d) => ({
 	siren: d.varchar({ length: 9 }).notNull().primaryKey(),
 	name: d.varchar({ length: 255 }).notNull(),
 	address: d.varchar({ length: 500 }),
+	city: d.varchar({ length: 255 }),
 	nafCode: d.varchar({ length: 10 }),
+	nafLabel: d.varchar({ length: 255 }),
+	regionCode: d.varchar({ length: 3 }),
+	region: d.varchar({ length: 255 }),
+	departmentCode: d.varchar({ length: 3 }),
+	departmentLabel: d.varchar({ length: 255 }),
+	// Tri-state country, never collapsed: France = (null, "FRANCE"),
+	// abroad = (COG code, Weez label), unknown = (null, null).
+	countryCode: d.varchar({ length: 5 }),
+	countryLabel: d.varchar({ length: 255 }),
 	workforce: d.integer(),
 	hasCse: d.boolean(),
+	statutDiffusion: d.varchar({ length: 1 }),
 	createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 	updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
 }));
@@ -492,6 +579,7 @@ export const companiesRelations = relations(companies, ({ many }) => ({
 	userCompanies: many(userCompanies),
 	declarations: many(declarations),
 	gipMdsData: many(gipMdsData),
+	representationDeclarations: many(representationDeclarations),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -573,29 +661,166 @@ export const files = createTable(
 	],
 );
 
-export const filesRelations = relations(files, ({ one }) => ({
+export const filesRelations = relations(files, ({ one, many }) => ({
 	declaration: one(declarations, {
 		fields: [files.declarationId],
 		references: [declarations.id],
 	}),
+	cseOpinionFiles: many(cseOpinionFiles),
 }));
+
+// ── CSE opinion file associations ──────────────────────────────────
+
+export const cseOpinionFiles = createTable(
+	"cse_opinion_file",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		declarationId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => declarations.id),
+		declarationNumber: d.integer().notNull(),
+		type: d.varchar({ length: 20 }).notNull(),
+		fileId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => files.id, { onDelete: "cascade" }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		unique("cse_opinion_file_decl_number_type_idx").on(
+			t.declarationId,
+			t.declarationNumber,
+			t.type,
+		),
+		index("cse_opinion_file_declaration_idx").on(t.declarationId),
+		index("cse_opinion_file_file_idx").on(t.fileId),
+	],
+);
+
+export const cseOpinionFilesRelations = relations(
+	cseOpinionFiles,
+	({ one }) => ({
+		declaration: one(declarations, {
+			fields: [cseOpinionFiles.declarationId],
+			references: [declarations.id],
+		}),
+		file: one(files, {
+			fields: [cseOpinionFiles.fileId],
+			references: [files.id],
+		}),
+	}),
+);
 
 // ── Campaign deadlines (configurable per year) ────────────────────
 
 export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 	year: d.integer().notNull().primaryKey(),
-	// Campaign milestones
 	gipPublicationDate: d.date(),
 	campaignStartDate: d.date(),
-	// Declaration 1
+	publicDataReleaseDate: d.date(),
 	decl1ModificationDeadline: d.date().notNull(),
 	decl1JustificationDeadline: d.date().notNull(),
 	decl1JointEvaluationDeadline: d.date().notNull(),
-	// Declaration 2
 	decl2ModificationDeadline: d.date().notNull(),
 	decl2JustificationDeadline: d.date().notNull(),
 	decl2JointEvaluationDeadline: d.date().notNull(),
+	decl2CseOpinionDeadline: d.date().notNull(),
 }));
+
+// ── Representation campaign deadlines (configurable per year) ─────
+
+export const representationCampaigns = createTable(
+	"representation_campaign",
+	(d) => ({
+		year: d.integer().notNull().primaryKey(),
+		campaignStartDate: d.date().notNull(),
+		campaignEndDate: d.date().notNull(),
+		declarationDeadline: d.date().notNull(),
+	}),
+);
+
+// ── Representation declaration (art. D. 1142-19) ───────────────────
+
+export const representationNotComputableExecutivesEnum = pgEnum(
+	"representation_not_computable_executives",
+	["aucun_cadre_dirigeant", "un_seul_cadre_dirigeant"],
+);
+
+export const representationNotComputableMembersEnum = pgEnum(
+	"representation_not_computable_members",
+	["aucune_instance_dirigeante"],
+);
+
+export const representationDeclarationStatusEnum = pgEnum(
+	"representation_declaration_status",
+	["draft", "submitted", "not_subject"],
+);
+
+export const representationDeclarations = createTable(
+	"representation_declaration",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren),
+		year: d.integer().notNull(),
+		declarantId: d.varchar({ length: 255 }).references(() => users.id),
+		legacyDeclarant: d.jsonb(),
+		importedFromV1At: d.timestamp("imported_from_v1_at", {
+			withTimezone: true,
+		}),
+		referencePeriodStart: d.date(),
+		referencePeriodEnd: d.date(),
+		executiveWomenPercent: d.numeric({ precision: 5, scale: 2 }),
+		executiveMenPercent: d.numeric({ precision: 5, scale: 2 }),
+		notComputableReasonExecutives: representationNotComputableExecutivesEnum(),
+		memberWomenPercent: d.numeric({ precision: 5, scale: 2 }),
+		memberMenPercent: d.numeric({ precision: 5, scale: 2 }),
+		notComputableReasonMembers: representationNotComputableMembersEnum(),
+		publishDate: d.date(),
+		publishUrl: d.varchar({ length: 500 }),
+		publishModalities: d.text(),
+		currentStep: d.integer().default(0),
+		status: representationDeclarationStatusEnum().notNull().default("draft"),
+		submittedAt: d.timestamp({ withTimezone: true }),
+		draft: d.jsonb(),
+		draftUpdatedAt: d.timestamp({ withTimezone: true }),
+		createdAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+		updatedAt: d.timestamp({ withTimezone: true }).$defaultFn(() => new Date()),
+	}),
+	(t) => [
+		uniqueIndex("representation_declaration_siren_year_unique").on(
+			t.siren,
+			t.year,
+		),
+		index("representation_declaration_declarant_idx").on(t.declarantId),
+	],
+);
+
+export const representationDeclarationsRelations = relations(
+	representationDeclarations,
+	({ one }) => ({
+		declarant: one(users, {
+			fields: [representationDeclarations.declarantId],
+			references: [users.id],
+		}),
+		company: one(companies, {
+			fields: [representationDeclarations.siren],
+			references: [companies.siren],
+		}),
+	}),
+);
 
 // ── Global settings (singleton) ────────────────────────────────────
 
@@ -608,6 +833,7 @@ export const campaignDeadlines = createTable("campaign_deadline", (d) => ({
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
 	activeCampaignYear: d.integer(),
+	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })
 		.notNull()

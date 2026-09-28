@@ -8,77 +8,86 @@ function createConnection() {
 	return postgres(url, { max: 1 });
 }
 
-const PREV_YEAR_DECL_ID_PREFIX = "e2e-prev-year-decl-";
-const PREV_YEAR_DECL_ID_SUFFIX = "-000000000000";
-const PREV_YEAR_JOB_CATEGORY_IDS = [
-	"e2e-jobcat-1111-0000-000000000000",
-	"e2e-jobcat-2222-0000-000000000000",
-	"e2e-jobcat-3333-0000-000000000000",
-] as const;
-
-function previousYearDeclId(yearsBack: number) {
-	return `${PREV_YEAR_DECL_ID_PREFIX}${String(yearsBack).padStart(4, "0")}${PREV_YEAR_DECL_ID_SUFFIX}`;
-}
-
-export async function insertPreviousYearDeclaration(yearsBack = 1) {
+/**
+ * Full teardown of one campaign-year coordinate for the test SIREN (#4067).
+ *
+ * The E2E grid (#4022) runs 185 declarations across 7 campaign years on a single
+ * test company, so residue between two coordinates would surface as erratic,
+ * undiagnosable failures on a multi-hour nightly run. This purges every
+ * year-scoped row for (siren, year) in foreign-key dependency order (children
+ * first), then flattens the two `app_company` columns that are shared across all
+ * years and would otherwise leak from one coordinate to the next.
+ *
+ * The declaration lock is released explicitly (before the declaration it hangs
+ * off) so a coordinate never inherits the lock of the previous one — even though
+ * the FK would cascade — because the guarantee must be verifiable, not incidental.
+ * The whole sequence runs in one transaction: a mid-teardown failure must never
+ * leave a half-purged coordinate behind.
+ */
+export async function resetCampaignYear(year: number) {
 	const sql = createConnection();
-	const yearResult = await sql`
-		SELECT EXTRACT(YEAR FROM CURRENT_DATE)::int - ${yearsBack} AS target_year
-	`;
-	const targetYear = yearResult[0]?.target_year as number;
-	const declId = previousYearDeclId(yearsBack);
-
 	try {
-		const users = await sql`
-			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
-		`;
-		const userId = users[0]?.user_id;
-		if (!userId) return;
-
-		await sql`
-			INSERT INTO app_declaration (id, siren, year, declarant_id, total_women, total_men, current_step, status, created_at, updated_at)
-			VALUES (${declId}, ${TEST_SIREN}, ${targetYear}, ${userId}, 150, 200, 6, 'demarche_completed', NOW(), NOW())
-			ON CONFLICT DO NOTHING
-		`;
-
-		const categories = [
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[0],
-				index: 0,
-				name: "Cadres dirigeants",
-			},
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[1],
-				index: 1,
-				name: "Ingénieurs et cadres",
-			},
-			{
-				id: PREV_YEAR_JOB_CATEGORY_IDS[2],
-				index: 2,
-				name: "Techniciens",
-			},
-		];
-
-		for (const cat of categories) {
-			await sql`
-				INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
-				VALUES (${cat.id}, ${declId}, ${cat.index}, ${cat.name}, 'accord-entreprise')
-				ON CONFLICT DO NOTHING
+		await sql.begin(async (tx) => {
+			await tx`
+				DELETE FROM app_employee_category
+				WHERE job_category_id IN (
+					SELECT jc.id FROM app_job_category jc
+					INNER JOIN app_declaration d ON d.id = jc.declaration_id
+					WHERE d.siren = ${TEST_SIREN} AND d.year = ${year}
+				)
 			`;
-		}
-	} finally {
-		await sql.end();
-	}
-}
-
-export async function deletePreviousYearDeclaration(yearsBack = 1) {
-	const sql = createConnection();
-	const declId = previousYearDeclId(yearsBack);
-
-	try {
-		await sql`DELETE FROM app_employee_category WHERE job_category_id = ANY(${PREV_YEAR_JOB_CATEGORY_IDS})`;
-		await sql`DELETE FROM app_job_category WHERE declaration_id = ${declId}`;
-		await sql`DELETE FROM app_declaration WHERE id = ${declId}`;
+			await tx`
+				DELETE FROM app_job_category
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			// cse_opinion_file references both cse_opinion and file, so it goes first.
+			await tx`
+				DELETE FROM app_cse_opinion_file
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			await tx`
+				DELETE FROM app_cse_opinion
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			await tx`
+				DELETE FROM app_file
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			await tx`
+				DELETE FROM app_declaration_status_history
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			await tx`
+				DELETE FROM app_declaration_lock
+				WHERE declaration_id IN (
+					SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+				)
+			`;
+			await tx`
+				DELETE FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year}
+			`;
+			await tx`
+				DELETE FROM app_gip_mds_data WHERE siren = ${TEST_SIREN} AND year = ${year}
+			`;
+			await tx`
+				DELETE FROM app_campaign_deadline WHERE year = ${year}
+			`;
+			// app_company is NOT year-scoped: flatten the columns a coordinate mutates
+			// (setCompanyHasCse / setCompanyWorkforce) so they cannot bleed forward.
+			await tx`
+				UPDATE app_company SET has_cse = NULL, workforce = NULL WHERE siren = ${TEST_SIREN}
+			`;
+		});
 	} finally {
 		await sql.end();
 	}
@@ -91,6 +100,7 @@ type CampaignDeadlineDates = {
 	decl2ModificationDeadline: string;
 	decl2JustificationDeadline: string;
 	decl2JointEvaluationDeadline: string;
+	decl2CseOpinionDeadline: string;
 };
 
 export async function setCampaignDeadlines(
@@ -107,7 +117,8 @@ export async function setCampaignDeadlines(
 				decl1_joint_evaluation_deadline,
 				decl2_modification_deadline,
 				decl2_justification_deadline,
-				decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
 			) VALUES (
 				${year},
 				${dates.decl1ModificationDeadline},
@@ -115,7 +126,8 @@ export async function setCampaignDeadlines(
 				${dates.decl1JointEvaluationDeadline},
 				${dates.decl2ModificationDeadline},
 				${dates.decl2JustificationDeadline},
-				${dates.decl2JointEvaluationDeadline}
+				${dates.decl2JointEvaluationDeadline},
+				${dates.decl2CseOpinionDeadline}
 			)
 			ON CONFLICT (year) DO UPDATE SET
 				decl1_modification_deadline = EXCLUDED.decl1_modification_deadline,
@@ -123,7 +135,8 @@ export async function setCampaignDeadlines(
 				decl1_joint_evaluation_deadline = EXCLUDED.decl1_joint_evaluation_deadline,
 				decl2_modification_deadline = EXCLUDED.decl2_modification_deadline,
 				decl2_justification_deadline = EXCLUDED.decl2_justification_deadline,
-				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline
+				decl2_joint_evaluation_deadline = EXCLUDED.decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline = EXCLUDED.decl2_cse_opinion_deadline
 		`;
 	} finally {
 		await sql.end();
@@ -190,122 +203,73 @@ export async function deleteReferents(ids: string[]) {
 	}
 }
 
-type SeededCampaignDeclaration = {
-	siren: string;
-	year: number;
-	submittedAt: string;
-	workforce: number;
-	remunerationScore?: number | null;
-	quartileScore?: number | null;
-	categoryScore?: number | null;
+export type CampaignPublicRelease = {
+	exists: boolean;
+	publicDataReleaseDate: string | null;
 };
 
-export async function seedSubmittedDeclarationsForStats(
-	rows: SeededCampaignDeclaration[],
-) {
-	if (rows.length === 0) return;
+export async function getCampaignPublicRelease(
+	year: number,
+): Promise<CampaignPublicRelease> {
 	const sql = createConnection();
 	try {
-		const users = await sql`
-			SELECT user_id FROM app_user_company WHERE siren = ${TEST_SIREN} LIMIT 1
+		const rows = await sql<{ date: string | null }[]>`
+			SELECT public_data_release_date::text AS date
+			FROM app_campaign_deadline
+			WHERE year = ${year}
 		`;
-		const declarantId = users[0]?.user_id as string | undefined;
-		if (!declarantId) {
-			throw new Error(
-				"seedSubmittedDeclarationsForStats: no declarant found for TEST_SIREN",
-			);
-		}
-		for (const row of rows) {
-			await sql`
-				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
-				VALUES (${row.siren}, ${`E2E Stats Co. ${row.siren}`}, ${row.workforce}, NOW(), NOW())
-				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
-			`;
-			const remunerationScore = row.remunerationScore ?? null;
-			const quartileScore = row.quartileScore ?? null;
-			const categoryScore = row.categoryScore ?? null;
-			const inserted = await sql<[{ id: string }]>`
-				INSERT INTO app_declaration (
-					id, siren, year, declarant_id, current_step, status,
-					remuneration_score, quartile_score, category_score,
-					created_at, updated_at
-				)
-				VALUES (
-					gen_random_uuid(), ${row.siren}, ${row.year}, ${declarantId}, 6,
-					'demarche_completed',
-					${remunerationScore}, ${quartileScore}, ${categoryScore},
-					NOW(), NOW()
-				)
-				ON CONFLICT (siren, year) WHERE cancelled_at IS NULL DO UPDATE SET
-					status = 'demarche_completed',
-					remuneration_score = EXCLUDED.remuneration_score,
-					quartile_score = EXCLUDED.quartile_score,
-					category_score = EXCLUDED.category_score
-				RETURNING id
-			`;
-			const declarationId = inserted[0]?.id;
-			if (!declarationId) continue;
-			await sql`
-				DELETE FROM app_declaration_status_history
-				WHERE declaration_id = ${declarationId}
-				  AND event_type = 'submit'
-			`;
-			await sql`
-				INSERT INTO app_declaration_status_history
-				(id, declaration_id, event_type, created_at)
-				VALUES (gen_random_uuid(), ${declarationId}, 'submit', ${row.submittedAt})
-			`;
-		}
+		if (rows.length === 0)
+			return { exists: false, publicDataReleaseDate: null };
+		return { exists: true, publicDataReleaseDate: rows[0]?.date ?? null };
 	} finally {
 		await sql.end();
 	}
 }
 
-type SeededGipMdsRow = {
-	siren: string;
-	year: number;
-	workforceEma: number;
-};
-
-export async function seedGipMdsObligatedPopulation(rows: SeededGipMdsRow[]) {
-	if (rows.length === 0) return;
+// Same far-future deadlines and null campaign_start_date as pushCampaignDeadlinesFarFuture when the row is missing — see its doc for why that column must stay null.
+export async function setPublicDataReleaseDate(
+	year: number,
+	date: string | null,
+) {
 	const sql = createConnection();
 	try {
-		for (const row of rows) {
-			await sql`
-				INSERT INTO app_company (siren, name, workforce, created_at, updated_at)
-				VALUES (${row.siren}, ${`E2E GIP Co. ${row.siren}`}, ${Math.floor(row.workforceEma)}, NOW(), NOW())
-				ON CONFLICT (siren) DO UPDATE SET workforce = EXCLUDED.workforce
-			`;
-			await sql`
-				INSERT INTO app_gip_mds_data (siren, year, workforce_ema, imported_at)
-				VALUES (${row.siren}, ${row.year}, ${row.workforceEma}, NOW())
-				ON CONFLICT (siren, year) DO UPDATE SET
-					workforce_ema = EXCLUDED.workforce_ema
-			`;
-		}
+		await sql`
+			INSERT INTO app_campaign_deadline (
+				year,
+				public_data_release_date,
+				decl1_modification_deadline,
+				decl1_justification_deadline,
+				decl1_joint_evaluation_deadline,
+				decl2_modification_deadline,
+				decl2_justification_deadline,
+				decl2_joint_evaluation_deadline,
+				decl2_cse_opinion_deadline
+			) VALUES (
+				${year},
+				${date}::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date,
+				'2099-12-31'::date
+			)
+			ON CONFLICT (year) DO UPDATE SET
+				public_data_release_date = EXCLUDED.public_data_release_date
+		`;
 	} finally {
 		await sql.end();
 	}
 }
 
-export async function deleteSeededGipMdsRows(sirens: string[]) {
-	if (sirens.length === 0) return;
+export async function dbDateInDays(offsetDays: number): Promise<string> {
 	const sql = createConnection();
 	try {
-		await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${sirens})`;
-	} finally {
-		await sql.end();
-	}
-}
-
-export async function deleteSeededCampaignDeclarations(sirens: string[]) {
-	if (sirens.length === 0) return;
-	const sql = createConnection();
-	try {
-		await sql`DELETE FROM app_declaration WHERE siren = ANY(${sirens})`;
-		await sql`DELETE FROM app_gip_mds_data WHERE siren = ANY(${sirens})`;
-		await sql`DELETE FROM app_company WHERE siren = ANY(${sirens})`;
+		const rows = await sql<[{ date: string }]>`
+			SELECT ((now() AT TIME ZONE 'Europe/Paris')::date + ${offsetDays}::int)::text AS date
+		`;
+		return rows[0]?.date ?? "";
 	} finally {
 		await sql.end();
 	}

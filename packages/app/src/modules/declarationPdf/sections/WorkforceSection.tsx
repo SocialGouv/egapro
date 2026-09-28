@@ -1,44 +1,56 @@
-import { Text, View } from "@react-pdf/renderer";
-
-import { styles } from "../pdfStyles";
+import { View } from "@react-pdf/renderer";
+import { computeWorkforceTotal } from "~/modules/domain";
 import type { DeclarationPdfData } from "../types";
+import { SectionBanner } from "./headings";
+import { Cell, Row, Table } from "./tableParts";
+import { PAY_TABLE } from "./tableWidths";
 
 export function WorkforceSection({ data }: { data: DeclarationPdfData }) {
+	const rows = [
+		{
+			label: "Rémunération annuelle",
+			women: data.totalWomen,
+			men: data.totalMen,
+		},
+		{
+			label: "Rémunération horaire",
+			women: data.hourlyWomen,
+			men: data.hourlyMen,
+		},
+	];
+
 	return (
-		<View style={styles.card}>
-			<Text style={styles.cardTitle}>
-				Effectifs pris en compte pour le calcul
-			</Text>
-			<View style={styles.tableHeader}>
-				<Text style={[styles.tableCellLabel, styles.tableHeaderText]}>
-					Catégorie
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Femmes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Hommes
-				</Text>
-				<Text style={[styles.tableCellValue, styles.tableHeaderText]}>
-					Total
-				</Text>
-			</View>
-			{data.step1Categories.map((cat) => (
-				<View key={cat.name} style={styles.tableRow}>
-					<Text style={styles.tableCellLabel}>{cat.name}</Text>
-					<Text style={styles.tableCellValue}>{cat.women}</Text>
-					<Text style={styles.tableCellValue}>{cat.men}</Text>
-					<Text style={styles.tableCellValue}>{cat.women + cat.men}</Text>
-				</View>
-			))}
-			<View style={styles.tableRowLast}>
-				<Text style={styles.tableCellLabelBold}>Total</Text>
-				<Text style={styles.tableCellValueBold}>{data.totalWomen}</Text>
-				<Text style={styles.tableCellValueBold}>{data.totalMen}</Text>
-				<Text style={styles.tableCellValueBold}>
-					{data.totalWomen + data.totalMen}
-				</Text>
-			</View>
+		<View wrap={false}>
+			<SectionBanner title="Effectifs physiques pris en compte pour le calcul des indicateurs" />
+			<Table>
+				<Row>
+					<Cell header text="Nombre de salariés" width={PAY_TABLE.label} />
+					<Cell header text="Femmes" width={PAY_TABLE.value} />
+					<Cell header text="Hommes" width={PAY_TABLE.value} />
+					<Cell header text="Total" width={PAY_TABLE.total} />
+				</Row>
+				{rows.map((row) => (
+					<Row key={row.label}>
+						<Cell bold text={row.label} width={PAY_TABLE.label} />
+						<Cell
+							align="right"
+							text={String(row.women)}
+							width={PAY_TABLE.value}
+						/>
+						<Cell
+							align="right"
+							text={String(row.men)}
+							width={PAY_TABLE.value}
+						/>
+						<Cell
+							align="right"
+							bold
+							text={String(computeWorkforceTotal(row.women, row.men))}
+							width={PAY_TABLE.total}
+						/>
+					</Row>
+				))}
+			</Table>
 		</View>
 	);
 }

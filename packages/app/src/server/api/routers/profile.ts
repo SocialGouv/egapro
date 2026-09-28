@@ -1,7 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
-import { updatePhoneSchema } from "~/modules/profile/schemas";
+import {
+	updatePhoneSchema,
+	updateProfileSchema,
+} from "~/modules/profile/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { users } from "~/server/db/schema";
 
@@ -34,6 +37,21 @@ export const profileRouter = createTRPCRouter({
 			await ctx.db
 				.update(users)
 				.set({ phone: input.phone })
+				.where(eq(users.id, ctx.session.user.id));
+
+			return { success: true };
+		}),
+
+	updateProfile: protectedProcedure
+		.input(updateProfileSchema)
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(users)
+				.set({
+					firstName: input.firstName,
+					lastName: input.lastName,
+					phone: input.phone,
+				})
 				.where(eq(users.id, ctx.session.user.id));
 
 			return { success: true };

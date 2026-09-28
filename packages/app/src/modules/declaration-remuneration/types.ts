@@ -1,12 +1,21 @@
+import type { GipGapReference } from "~/modules/domain";
+import { REMUNERATION_STEP_NUMBERS } from "~/modules/routes";
+
 export type WorkforceRow = {
 	name: string;
 	women: number;
 	men: number;
 };
 
+/**
+ * Physical workforce declared at step 1, one headcount per pay basis (#4247):
+ * `total*` for annual remuneration, `hourly*` for hourly remuneration.
+ */
 export type Step1Data = {
 	totalWomen: number;
 	totalMen: number;
+	hourlyWomen: number;
+	hourlyMen: number;
 };
 
 export type Step2Data = {
@@ -57,12 +66,20 @@ export type PayGapRow = {
 	label: string;
 	womenValue: string;
 	menValue: string;
+	/** GIP-supplied gap for this row, authoritative while both operands stay untouched. */
+	gipReference?: GipGapReference;
 };
 
+/**
+ * One employee category, with a physical headcount per pay basis (#4254):
+ * `womenCount`/`menCount` for annual remuneration, `hourly*Count` for hourly.
+ */
 export type EmployeeCategoryRow = {
 	name: string;
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;
@@ -80,6 +97,8 @@ export type EmployeeCategorySubmitData = {
 		data: {
 			womenCount?: number;
 			menCount?: number;
+			hourlyWomenCount?: number;
+			hourlyMenCount?: number;
 			annualBaseWomen?: string;
 			annualBaseMen?: string;
 			annualVariableWomen?: string;
@@ -105,8 +124,8 @@ export const STEP_TITLES = [
 	"Écart de rémunération",
 	"Écart de rémunération variable ou complémentaire",
 	"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
-	"Écart de rémunération par catégories de salariés (salaire de base et primes)",
+	"Écart de rémunération par catégories de salariés",
 	"Récapitulatif de votre déclaration",
 ] as const;
 
-export const TOTAL_STEPS = 6;
+export const TOTAL_STEPS = REMUNERATION_STEP_NUMBERS.length;

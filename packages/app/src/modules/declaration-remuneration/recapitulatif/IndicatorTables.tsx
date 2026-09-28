@@ -1,14 +1,19 @@
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import type {
 	Step2Data,
 	Step3Data,
 	Step4Data,
 } from "~/modules/declaration-remuneration/types";
+import type { GipGapReference } from "~/modules/domain";
 import {
-	computeGap,
 	computePercentage,
+	computeWorkforceTotal,
 	formatCurrency,
 	formatGap,
-	GAP_ALERT_THRESHOLD,
+	formatVariablePayProportion,
+	gapLevel,
+	resolveGap,
+	sumQuartileWorkforce,
 } from "~/modules/domain";
 import styles from "./IndicatorTables.module.scss";
 
@@ -16,15 +21,22 @@ type Props = {
 	declarationYear: number;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	/** Persisted gaps for steps 2 and 3 — shown as recorded rather than recomputed. */
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 };
 
 type GapRow = {
 	label: string;
 	women: string;
 	men: string;
+	/** Gap as persisted on the declaration, shown instead of recomputing it. */
+	reference?: GipGapReference;
 };
 
 function HighGapBadge() {
@@ -32,12 +44,21 @@ function HighGapBadge() {
 }
 
 function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gap !== null && gap >= GAP_ALERT_THRESHOLD;
+	const isHigh = gapLevel(gap) === "high";
 	return (
 		<span className={styles.gapCell}>
 			<strong>{formatGap(gap)}</strong>
 			{isHigh && <HighGapBadge />}
 		</span>
+	);
+}
+
+function AccessiblePlaceholder({ label }: { label: string }) {
+	return (
+		<>
+			<span aria-hidden="true">-</span>
+			<span className="fr-sr-only">{label}</span>
+		</>
 	);
 }
 
@@ -81,7 +102,7 @@ function GapTable({
 							</thead>
 							<tbody>
 								{rows.map((row) => {
-									const gap = computeGap(row.women, row.men);
+									const gap = resolveGap(row.women, row.men, row.reference);
 									return (
 										<tr key={row.label}>
 											<th scope="row">{row.label}</th>
@@ -106,15 +127,22 @@ function GapTable({
 	);
 }
 
-/** Workforce row (Femmes / Hommes / Total). */
+/** Workforce rows, one per pay basis (Femmes / Hommes / Total). */
 function WorkforceTable({
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 }: {
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 }) {
-	const total = (totalWomen ?? 0) + (totalMen ?? 0);
+	const rows = [
+		{ label: "Rémunération annuelle", women: totalWomen, men: totalMen },
+		{ label: "Rémunération horaire", women: hourlyWomen, men: hourlyMen },
+	];
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -124,21 +152,25 @@ function WorkforceTable({
 							<caption>Effectifs physiques pris en compte</caption>
 							<thead>
 								<tr>
-									<th scope="col" />
+									<th scope="col">Nombre de salariés</th>
 									<th scope="col">Femmes</th>
 									<th scope="col">Hommes</th>
 									<th scope="col">Total</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<th scope="row">Nombre de salariés</th>
-									<td className={styles.numeric}>{totalWomen ?? 0}</td>
-									<td className={styles.numeric}>{totalMen ?? 0}</td>
-									<td className={styles.numeric}>
-										<strong>{total}</strong>
-									</td>
-								</tr>
+								{rows.map((row) => (
+									<tr key={row.label}>
+										<th scope="row">{row.label}</th>
+										<td className={styles.numeric}>{row.women ?? 0}</td>
+										<td className={styles.numeric}>{row.men ?? 0}</td>
+										<td className={styles.numeric}>
+											<strong>
+												{computeWorkforceTotal(row.women ?? 0, row.men ?? 0)}
+											</strong>
+										</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
 					</div>
@@ -165,7 +197,7 @@ function ProportionTable({
 	const eMen = Number.parseInt(indicatorEMen, 10);
 	const tWomen = totalWomen ?? 0;
 	const tMen = totalMen ?? 0;
-	const grandTotal = tWomen + tMen;
+	const grandTotal = computeWorkforceTotal(tWomen, tMen);
 	return (
 		<div className="fr-table fr-table--no-caption fr-mt-0 fr-mb-0">
 			<div className="fr-table__wrapper">
@@ -197,11 +229,9 @@ function ProportionTable({
 									<td className={styles.numeric}>
 										{Number.isNaN(eWomen) ? "-" : eWomen}
 									</td>
-									<td className={styles.numeric}>
+									<td className={styles.percent}>
 										<strong>
-											{Number.isNaN(eWomen)
-												? "-"
-												: computePercentage(eWomen, tWomen)}
+											{formatVariablePayProportion(eWomen, tWomen)}
 										</strong>
 									</td>
 								</tr>
@@ -213,10 +243,8 @@ function ProportionTable({
 									<td className={styles.numeric}>
 										{Number.isNaN(eMen) ? "-" : eMen}
 									</td>
-									<td className={styles.numeric}>
-										<strong>
-											{Number.isNaN(eMen) ? "-" : computePercentage(eMen, tMen)}
-										</strong>
+									<td className={styles.percent}>
+										<strong>{formatVariablePayProportion(eMen, tMen)}</strong>
 									</td>
 								</tr>
 							</tbody>
@@ -251,16 +279,11 @@ function QuartileDistributionTable({
 		(q) => q.threshold !== "" || q.women !== undefined || q.men !== undefined,
 	);
 	if (!hasData) return null;
-	const totalWomen = quartiles.reduce((s, q) => s + (q.women ?? 0), 0);
-	const totalMen = quartiles.reduce((s, q) => s + (q.men ?? 0), 0);
-	const total = totalWomen + totalMen;
-
-	function fmt(value: string | undefined) {
-		if (!value) return "-";
-		const n = Number.parseFloat(value);
-		if (Number.isNaN(n)) return "-";
-		return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
-	}
+	const {
+		women: totalWomen,
+		men: totalMen,
+		total,
+	} = sumQuartileWorkforce(quartiles);
 
 	const trancheKind = unit === "€" ? "annuelle brute" : "horaire brute";
 
@@ -275,7 +298,9 @@ function QuartileDistributionTable({
 								<caption>{caption}</caption>
 								<thead>
 									<tr>
-										<th scope="col" />
+										<th scope="col">
+											<span className="fr-sr-only">Quartile</span>
+										</th>
 										<th colSpan={2} scope="col">
 											Tranche de rémunération
 											<br />
@@ -307,50 +332,81 @@ function QuartileDistributionTable({
 									{quartiles.map((q, i) => {
 										const prev =
 											i === 0 ? "0" : (quartiles[i - 1]?.threshold ?? "");
-										const min = i === 0 ? `0 ${unit}` : fmt(prev);
-										const max = i === 3 ? "-" : fmt(q.threshold);
-										const lineTotal = (q.women ?? 0) + (q.men ?? 0);
+										const min =
+											i === 0 ? `0 ${unit}` : formatCurrency(prev, unit);
+										const max =
+											i === 3 ? (
+												<AccessiblePlaceholder label="Sans limite supérieure" />
+											) : (
+												formatCurrency(q.threshold, unit)
+											);
+										const lineTotal = computeWorkforceTotal(
+											q.women ?? 0,
+											q.men ?? 0,
+										);
+										const womenCount =
+											q.women === undefined ? (
+												<AccessiblePlaceholder label="Non renseigné" />
+											) : (
+												q.women
+											);
+										const menCount =
+											q.men === undefined ? (
+												<AccessiblePlaceholder label="Non renseigné" />
+											) : (
+												q.men
+											);
+										const womenPercentage =
+											lineTotal > 0 ? (
+												computePercentage(q.women ?? 0, lineTotal)
+											) : (
+												<AccessiblePlaceholder label="Non applicable" />
+											);
+										const menPercentage =
+											lineTotal > 0 ? (
+												computePercentage(q.men ?? 0, lineTotal)
+											) : (
+												<AccessiblePlaceholder label="Non applicable" />
+											);
 										return (
 											<tr key={QUARTILE_LABELS[i]}>
 												<th scope="row">{QUARTILE_LABELS[i]}</th>
 												<td className={styles.numeric}>{min}</td>
 												<td className={styles.numeric}>{max}</td>
-												<td className={styles.numeric}>
-													{q.women !== undefined ? q.women : "-"}
-												</td>
-												<td className={styles.numeric}>
-													{q.men !== undefined ? q.men : "-"}
-												</td>
-												<td className={styles.numeric}>
-													{lineTotal > 0
-														? computePercentage(q.women ?? 0, lineTotal)
-														: "-"}
-												</td>
-												<td className={styles.numeric}>
-													{lineTotal > 0
-														? computePercentage(q.men ?? 0, lineTotal)
-														: "-"}
-												</td>
+												<td className={styles.numeric}>{womenCount}</td>
+												<td className={styles.numeric}>{menCount}</td>
+												<td className={styles.percent}>{womenPercentage}</td>
+												<td className={styles.percent}>{menPercentage}</td>
 											</tr>
 										);
 									})}
 									<tr>
 										<th scope="row">Tous les salariés</th>
-										<td colSpan={2} />
-										<td className={styles.numeric}>
-											<strong>{totalWomen || "-"}</strong>
+										<td colSpan={2}>
+											<span className="fr-sr-only">Non applicable</span>
 										</td>
 										<td className={styles.numeric}>
-											<strong>{totalMen || "-"}</strong>
+											<strong>{totalWomen}</strong>
 										</td>
 										<td className={styles.numeric}>
+											<strong>{totalMen}</strong>
+										</td>
+										<td className={styles.percent}>
 											<strong>
-												{total > 0 ? computePercentage(totalWomen, total) : "-"}
+												{total > 0 ? (
+													computePercentage(totalWomen, total)
+												) : (
+													<AccessiblePlaceholder label="Non applicable" />
+												)}
 											</strong>
 										</td>
-										<td className={styles.numeric}>
+										<td className={styles.percent}>
 											<strong>
-												{total > 0 ? computePercentage(totalMen, total) : "-"}
+												{total > 0 ? (
+													computePercentage(totalMen, total)
+												) : (
+													<AccessiblePlaceholder label="Non applicable" />
+												)}
 											</strong>
 										</td>
 									</tr>
@@ -368,30 +424,38 @@ export function IndicatorTables({
 	declarationYear,
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 }: Props) {
 	const step2Rows: GapRow[] = [
 		{
 			label: "Annuelle brute moyenne",
 			women: step2Data.indicatorAAnnualWomen,
 			men: step2Data.indicatorAAnnualMen,
+			reference: step2Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: step2Data.indicatorAHourlyWomen,
 			men: step2Data.indicatorAHourlyMen,
+			reference: step2Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: step2Data.indicatorCAnnualWomen,
 			men: step2Data.indicatorCAnnualMen,
+			reference: step2Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: step2Data.indicatorCHourlyWomen,
 			men: step2Data.indicatorCHourlyMen,
+			reference: step2Gaps[3],
 		},
 	];
 
@@ -400,21 +464,25 @@ export function IndicatorTables({
 			label: "Annuelle brute moyenne",
 			women: step3Data.indicatorBAnnualWomen,
 			men: step3Data.indicatorBAnnualMen,
+			reference: step3Gaps[0],
 		},
 		{
 			label: "Horaire brute moyenne",
 			women: step3Data.indicatorBHourlyWomen,
 			men: step3Data.indicatorBHourlyMen,
+			reference: step3Gaps[1],
 		},
 		{
 			label: "Annuelle brute médiane",
 			women: step3Data.indicatorDAnnualWomen,
 			men: step3Data.indicatorDAnnualMen,
+			reference: step3Gaps[2],
 		},
 		{
 			label: "Horaire brute médiane",
 			women: step3Data.indicatorDHourlyWomen,
 			men: step3Data.indicatorDHourlyMen,
+			reference: step3Gaps[3],
 		},
 	];
 
@@ -424,7 +492,12 @@ export function IndicatorTables({
 				<h3 className="fr-h6 fr-mb-0">
 					Effectifs physiques pris en compte pour le calcul des indicateurs
 				</h3>
-				<WorkforceTable totalMen={totalMen} totalWomen={totalWomen} />
+				<WorkforceTable
+					hourlyMen={hourlyMen}
+					hourlyWomen={hourlyWomen}
+					totalMen={totalMen}
+					totalWomen={totalWomen}
+				/>
 			</section>
 
 			<section className={styles.section}>

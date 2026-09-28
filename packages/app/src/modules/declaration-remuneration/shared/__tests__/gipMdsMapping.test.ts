@@ -1,87 +1,44 @@
 import { describe, expect, it } from "vitest";
+import {
+	DIVERGENT_HOURLY_MEDIAN,
+	makeGipRow,
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import type { GipMdsRow } from "../gipMdsMapping";
 import { mapGipToFormData } from "../gipMdsMapping";
 
-/** Minimal GipMdsRow with all fields null except the ones we set. */
-function makeRow(overrides: Partial<GipMdsRow> = {}): GipMdsRow {
-	return {
-		siren: "123456789",
-		year: 2026,
-		importedAt: null,
-		periodStart: "2026-01-01",
-		periodEnd: "2026-12-31",
-		workforceEma: null,
-		menCountAnnualGlobal: null,
-		womenCountAnnualGlobal: null,
-		menCountHourlyGlobal: null,
-		womenCountHourlyGlobal: null,
-		menCountAnnualVariable: null,
-		womenCountAnnualVariable: null,
-		globalAnnualMeanGap: null,
-		globalAnnualMeanWomen: null,
-		globalAnnualMeanMen: null,
-		globalHourlyMeanGap: null,
-		globalHourlyMeanWomen: null,
-		globalHourlyMeanMen: null,
-		variableAnnualMeanGap: null,
-		variableAnnualMeanWomen: null,
-		variableAnnualMeanMen: null,
-		variableHourlyMeanGap: null,
-		variableHourlyMeanWomen: null,
-		variableHourlyMeanMen: null,
-		globalAnnualMedianGap: null,
-		globalAnnualMedianWomen: null,
-		globalAnnualMedianMen: null,
-		globalHourlyMedianGap: null,
-		globalHourlyMedianWomen: null,
-		globalHourlyMedianMen: null,
-		variableAnnualMedianGap: null,
-		variableAnnualMedianWomen: null,
-		variableAnnualMedianMen: null,
-		variableHourlyMedianGap: null,
-		variableHourlyMedianWomen: null,
-		variableHourlyMedianMen: null,
-		variableProportionWomen: null,
-		variableProportionMen: null,
-		annualQuartileThreshold1: null,
-		annualQuartileThreshold2: null,
-		annualQuartileThreshold3: null,
-		annualQuartile1ProportionWomen: null,
-		annualQuartile2ProportionWomen: null,
-		annualQuartile3ProportionWomen: null,
-		annualQuartile4ProportionWomen: null,
-		annualQuartile1ProportionMen: null,
-		annualQuartile2ProportionMen: null,
-		annualQuartile3ProportionMen: null,
-		annualQuartile4ProportionMen: null,
-		hourlyQuartileThreshold1: null,
-		hourlyQuartileThreshold2: null,
-		hourlyQuartileThreshold3: null,
-		hourlyQuartile1ProportionWomen: null,
-		hourlyQuartile2ProportionWomen: null,
-		hourlyQuartile3ProportionWomen: null,
-		hourlyQuartile4ProportionWomen: null,
-		hourlyQuartile1ProportionMen: null,
-		hourlyQuartile2ProportionMen: null,
-		hourlyQuartile3ProportionMen: null,
-		hourlyQuartile4ProportionMen: null,
-		confidenceIndex: null,
-		confidenceExoticContracts: null,
-		confidenceUnitMeasure: null,
-		confidenceSuspensionRatio: null,
-		confidenceLongSuspensions: null,
-		confidenceNoEndSuspensions: null,
-		confidenceSickLeaveRatio: null,
-		confidenceLongSickLeave: null,
-		confidenceNoSickLeave: null,
-		confidenceQuota250: null,
-		confidenceQuota0: null,
-		confidenceMultiYear: null,
-		confidenceFpRatio: null,
-		confidenceExtremeRemuneration: null,
-		confidenceExtremeRate: null,
-		...overrides,
-	};
+/** Row from the bug report: 37 F / 33 H annual, 34 F / 32 H hourly, all nb set. */
+function makeBugRepoRow(): GipMdsRow {
+	return makeGipRow({
+		womenCountAnnualGlobal: "37",
+		menCountAnnualGlobal: "33",
+		womenCountHourlyGlobal: "34",
+		menCountHourlyGlobal: "32",
+		annualQuartileThreshold1: "25000",
+		annualQuartileThreshold2: "30000",
+		annualQuartileThreshold3: "35000",
+		annualQuartile1WomenCount: "11",
+		annualQuartile2WomenCount: "10",
+		annualQuartile3WomenCount: "8",
+		annualQuartile4WomenCount: "8",
+		annualQuartile1MenCount: "7",
+		annualQuartile2MenCount: "8",
+		annualQuartile3MenCount: "9",
+		annualQuartile4MenCount: "9",
+		hourlyQuartileThreshold1: "13.74",
+		hourlyQuartileThreshold2: "17.58",
+		hourlyQuartileThreshold3: "21.98",
+		hourlyQuartile1WomenCount: "10",
+		hourlyQuartile2WomenCount: "9",
+		hourlyQuartile3WomenCount: "8",
+		hourlyQuartile4WomenCount: "7",
+		hourlyQuartile1MenCount: "8",
+		hourlyQuartile2MenCount: "8",
+		hourlyQuartile3MenCount: "8",
+		hourlyQuartile4MenCount: "8",
+	});
 }
 
 describe("mapGipToFormData", () => {
@@ -89,61 +46,79 @@ describe("mapGipToFormData", () => {
 		expect(mapGipToFormData(null)).toBeNull();
 	});
 
-	it("maps step1 workforce from annual global counts", () => {
-		const row = makeRow({
+	it("maps step1 workforce from the annual and hourly global counts", () => {
+		const row = makeGipRow({
 			womenCountAnnualGlobal: "120.5",
 			menCountAnnualGlobal: "80.3",
+			womenCountHourlyGlobal: "118.4",
+			menCountHourlyGlobal: "79.6",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step1).toEqual({
 			totalWomen: 121,
 			totalMen: 80,
+			hourlyWomen: 118,
+			hourlyMen: 80,
 		});
 	});
 
 	it("returns null workforce when values are null", () => {
-		const row = makeRow();
+		const row = makeGipRow();
 		const result = mapGipToFormData(row);
 		expect(result?.step1).toEqual({
 			totalWomen: null,
 			totalMen: null,
+			hourlyWomen: null,
+			hourlyMen: null,
 		});
 	});
 
-	it("maps step2 pay gap (indicators A+C)", () => {
-		const row = makeRow({
+	it("maps step2 pay gap (indicators A+C) with each block's GIP gap", () => {
+		const row = makeGipRow({
 			globalAnnualMeanWomen: "35000.00",
 			globalAnnualMeanMen: "38000.00",
+			globalAnnualMeanGap: "0.0789",
 			globalHourlyMeanWomen: "18.50",
 			globalHourlyMeanMen: "20.00",
+			globalHourlyMeanGap: "0.0750",
 			globalAnnualMedianWomen: "33000.00",
 			globalAnnualMedianMen: "36000.00",
+			globalAnnualMedianGap: "0.0833",
 			globalHourlyMedianWomen: "17.50",
 			globalHourlyMedianMen: "19.00",
+			globalHourlyMedianGap: "0.0789",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step2).toEqual({
 			annualMeanWomen: "35000.00",
 			annualMeanMen: "38000.00",
+			annualMeanGap: "0.0789",
 			hourlyMeanWomen: "18.50",
 			hourlyMeanMen: "20.00",
+			hourlyMeanGap: "0.0750",
 			annualMedianWomen: "33000.00",
 			annualMedianMen: "36000.00",
+			annualMedianGap: "0.0833",
 			hourlyMedianWomen: "17.50",
 			hourlyMedianMen: "19.00",
+			hourlyMedianGap: "0.0789",
 		});
 	});
 
-	it("maps step3 variable pay (indicators B+D+E)", () => {
-		const row = makeRow({
+	it("maps step3 variable pay (indicators B+D+E) with each block's GIP gap", () => {
+		const row = makeGipRow({
 			variableAnnualMeanWomen: "5000.00",
 			variableAnnualMeanMen: "7000.00",
+			variableAnnualMeanGap: "0.2857",
 			variableHourlyMeanWomen: "2.50",
 			variableHourlyMeanMen: "3.50",
+			variableHourlyMeanGap: "0.2857",
 			variableAnnualMedianWomen: "4000.00",
 			variableAnnualMedianMen: "6000.00",
+			variableAnnualMedianGap: "0.3333",
 			variableHourlyMedianWomen: "2.00",
 			variableHourlyMedianMen: "3.00",
+			variableHourlyMedianGap: "0.3333",
 			womenCountAnnualVariable: "90.2",
 			menCountAnnualVariable: "70.8",
 		});
@@ -151,153 +126,109 @@ describe("mapGipToFormData", () => {
 		expect(result?.step3).toEqual({
 			annualMeanWomen: "5000.00",
 			annualMeanMen: "7000.00",
+			annualMeanGap: "0.2857",
 			hourlyMeanWomen: "2.50",
 			hourlyMeanMen: "3.50",
+			hourlyMeanGap: "0.2857",
 			annualMedianWomen: "4000.00",
 			annualMedianMen: "6000.00",
+			annualMedianGap: "0.3333",
 			hourlyMedianWomen: "2.00",
 			hourlyMedianMen: "3.00",
+			hourlyMedianGap: "0.3333",
 			beneficiaryCountWomen: 90,
 			beneficiaryCountMen: 71,
 		});
 	});
 
-	it("maps step4 quartile data from proportions", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "100",
-			menCountAnnualGlobal: "100",
-			annualQuartileThreshold1: "25000",
-			annualQuartileThreshold2: "30000",
-			annualQuartileThreshold3: "35000",
-			annualQuartile1ProportionWomen: "0.6",
-			annualQuartile2ProportionWomen: "0.5",
-			annualQuartile3ProportionWomen: "0.4",
-			annualQuartile4ProportionWomen: "0.3",
-			annualQuartile1ProportionMen: "0.4",
-			annualQuartile2ProportionMen: "0.5",
-			annualQuartile3ProportionMen: "0.6",
-			annualQuartile4ProportionMen: "0.7",
+	it("carries the GIP gap even when it diverges from the rounded operands", () => {
+		const row = makeGipRow({
+			variableHourlyMedianWomen: DIVERGENT_HOURLY_MEDIAN.women,
+			variableHourlyMedianMen: DIVERGENT_HOURLY_MEDIAN.men,
+			variableHourlyMedianGap: DIVERGENT_HOURLY_MEDIAN.gap,
 		});
 		const result = mapGipToFormData(row);
-		// totalAll = 200, quartileSize = 50
+		expect(result?.step3.hourlyMedianGap).toBe(DIVERGENT_HOURLY_MEDIAN.gap);
+	});
+
+	it("reads step4 quartile counts verbatim from the GIP nb columns", () => {
+		const result = mapGipToFormData(makeBugRepoRow());
 		expect(result?.step4.annual.thresholds).toEqual([
 			"25000",
 			"30000",
 			"35000",
 		]);
-		expect(result?.step4.annual.womenCounts).toEqual([30, 25, 20, 15]);
-		expect(result?.step4.annual.menCounts).toEqual([20, 25, 30, 35]);
+		// nb columns are the source of truth: never the proportion-derived 42/30
+		expect(result?.step4.annual.womenCounts).toEqual([11, 10, 8, 8]);
+		expect(result?.step4.annual.menCounts).toEqual([7, 8, 9, 9]);
+		expect(result?.step4.hourly.womenCounts).toEqual([10, 9, 8, 7]);
+		expect(result?.step4.hourly.menCounts).toEqual([8, 8, 8, 8]);
 	});
 
-	it("handles null quartile proportions", () => {
-		const row = makeRow({
+	it("exposes only thresholds and counts per table, no reference headcount", () => {
+		const result = mapGipToFormData(makeBugRepoRow());
+		expect(result?.step4.annual).toEqual({
+			thresholds: ["25000", "30000", "35000"],
+			womenCounts: [11, 10, 8, 8],
+			menCounts: [7, 8, 9, 9],
+		});
+		expect(result?.step4.hourly).toEqual({
+			thresholds: ["13.74", "17.58", "21.98"],
+			womenCounts: [10, 9, 8, 7],
+			menCounts: [8, 8, 8, 8],
+		});
+	});
+
+	it("leaves quartile cells empty when the GIP row has no nb columns (no proportion fallback)", () => {
+		const row = makeGipRow({
 			womenCountAnnualGlobal: "100",
 			menCountAnnualGlobal: "100",
+			annualQuartileThreshold1: "25000",
+			// proportions present but nb absent: must NOT be recomputed from proportions
+			annualQuartile1ProportionWomen: "0.6",
+			annualQuartile1ProportionMen: "0.4",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step4.annual.womenCounts).toEqual([null, null, null, null]);
 		expect(result?.step4.annual.menCounts).toEqual([null, null, null, null]);
+		expect(result?.step4.hourly.womenCounts).toEqual([null, null, null, null]);
+		expect(result?.step4.hourly.menCounts).toEqual([null, null, null, null]);
 	});
 
-	it("maps confidence index and period end", () => {
-		const row = makeRow({
-			confidenceIndex: "0.85",
-			periodEnd: "2026-12-31",
+	it("keeps a partially filled nb column as-is (only the filled cells)", () => {
+		const row = makeGipRow({
+			annualQuartile1WomenCount: "11",
+			annualQuartile2WomenCount: "10",
+			annualQuartile1MenCount: "7",
 		});
 		const result = mapGipToFormData(row);
-		expect(result?.confidenceIndex).toBe("0.85");
-		expect(result?.periodEnd).toBe("2026-12-31");
+		expect(result?.step4.annual.womenCounts).toEqual([11, 10, null, null]);
+		expect(result?.step4.annual.menCounts).toEqual([7, null, null, null]);
 	});
 
-	it("computes zero quartile size when workforce is zero", () => {
-		const row = makeRow({
-			annualQuartile1ProportionWomen: "0.5",
-			annualQuartile1ProportionMen: "0.5",
-		});
+	it("rounds a non-integer nb value to the nearest integer", () => {
+		const row = makeGipRow({ annualQuartile1WomenCount: "10.6" });
 		const result = mapGipToFormData(row);
-		// totalAll = 0, quartileSize = 0, count = round(0.5 * 0) = 0
-		expect(result?.step4.annual.womenCounts[0]).toBe(0);
-		expect(result?.step4.annual.menCounts[0]).toBe(0);
+		expect(result?.step4.annual.womenCounts[0]).toBe(11);
 	});
 
-	it("returns all null step2 fields when row has no indicator A/C data", () => {
-		const row = makeRow();
+	it("returns null count for a non-numeric nb value (toInt NaN branch)", () => {
+		const row = makeGipRow({ annualQuartile1WomenCount: "N/A" });
 		const result = mapGipToFormData(row);
-		expect(result?.step2).toEqual({
-			annualMeanWomen: null,
-			annualMeanMen: null,
-			hourlyMeanWomen: null,
-			hourlyMeanMen: null,
-			annualMedianWomen: null,
-			annualMedianMen: null,
-			hourlyMedianWomen: null,
-			hourlyMedianMen: null,
-		});
+		expect(result?.step4.annual.womenCounts[0]).toBeNull();
 	});
 
-	it("returns all null step3 fields when row has no indicator B/D/E data", () => {
-		const row = makeRow();
+	it("returns an all-null step4 block when the GIP row carries no quartile data", () => {
+		const row = makeGipRow();
 		const result = mapGipToFormData(row);
-		expect(result?.step3).toEqual({
-			annualMeanWomen: null,
-			annualMeanMen: null,
-			hourlyMeanWomen: null,
-			hourlyMeanMen: null,
-			annualMedianWomen: null,
-			annualMedianMen: null,
-			hourlyMedianWomen: null,
-			hourlyMedianMen: null,
-			beneficiaryCountWomen: null,
-			beneficiaryCountMen: null,
-		});
-	});
-
-	it("handles zero workforce for variable pay beneficiaries", () => {
-		const row = makeRow({
-			womenCountAnnualVariable: "0",
-			menCountAnnualVariable: "0",
-		});
-		const result = mapGipToFormData(row);
-		expect(result?.step3.beneficiaryCountWomen).toBe(0);
-		expect(result?.step3.beneficiaryCountMen).toBe(0);
-	});
-
-	it("maps hourly quartile data from proportions", () => {
-		const row = makeRow({
-			womenCountHourlyGlobal: "80",
-			menCountHourlyGlobal: "120",
-			hourlyQuartileThreshold1: "13.74",
-			hourlyQuartileThreshold2: "17.58",
-			hourlyQuartileThreshold3: "21.98",
-			hourlyQuartile1ProportionWomen: "0.6",
-			hourlyQuartile2ProportionWomen: "0.4",
-			hourlyQuartile3ProportionWomen: "0.3",
-			hourlyQuartile4ProportionWomen: "0.2",
-			hourlyQuartile1ProportionMen: "0.4",
-			hourlyQuartile2ProportionMen: "0.6",
-			hourlyQuartile3ProportionMen: "0.7",
-			hourlyQuartile4ProportionMen: "0.8",
-		});
-		const result = mapGipToFormData(row);
-		// totalAll = 200, quartileSize = 50
-		expect(result?.step4.hourly.thresholds).toEqual([
-			"13.74",
-			"17.58",
-			"21.98",
-		]);
-		expect(result?.step4.hourly.womenCounts).toEqual([30, 20, 15, 10]);
-		expect(result?.step4.hourly.menCounts).toEqual([20, 30, 35, 40]);
+		expect(result?.step4).toEqual(nullGipStep4());
 	});
 
 	it("returns 3-element thresholds tuple (Q1-Q3 only, no Q4)", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "100",
-			menCountAnnualGlobal: "100",
+		const row = makeGipRow({
 			annualQuartileThreshold1: "25000",
 			annualQuartileThreshold2: "32000",
 			annualQuartileThreshold3: "40000",
-			annualQuartile1ProportionWomen: "0.5",
-			annualQuartile1ProportionMen: "0.5",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step4.annual.thresholds).toEqual([
@@ -307,90 +238,69 @@ describe("mapGipToFormData", () => {
 		]);
 	});
 
-	it("handles proportions at boundary 0 (mono-gender quartile: all men)", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "0",
-			menCountAnnualGlobal: "200",
-			annualQuartile1ProportionWomen: "0",
-			annualQuartile1ProportionMen: "1",
-			annualQuartile2ProportionWomen: "0",
-			annualQuartile2ProportionMen: "1",
-			annualQuartile3ProportionWomen: "0",
-			annualQuartile3ProportionMen: "1",
-			annualQuartile4ProportionWomen: "0",
-			annualQuartile4ProportionMen: "1",
+	it("maps confidence index and period end", () => {
+		const row = makeGipRow({
+			confidenceIndex: "0.85",
+			periodEnd: "2026-12-31",
 		});
 		const result = mapGipToFormData(row);
-		// totalAll = 200, quartileSize = 50
-		expect(result?.step4.annual.womenCounts).toEqual([0, 0, 0, 0]);
-		expect(result?.step4.annual.menCounts).toEqual([50, 50, 50, 50]);
+		expect(result?.confidenceIndex).toBe("0.85");
+		expect(result?.periodEnd).toBe("2026-12-31");
 	});
 
-	it("handles proportions at boundary 1 (mono-gender quartile: all women)", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "200",
-			menCountAnnualGlobal: "0",
-			annualQuartile1ProportionWomen: "1",
-			annualQuartile1ProportionMen: "0",
-		});
+	it("returns all null step2 fields when row has no indicator A/C data", () => {
+		const row = makeGipRow();
 		const result = mapGipToFormData(row);
-		// totalAll = 200, quartileSize = 50
-		expect(result?.step4.annual.womenCounts[0]).toBe(50);
-		expect(result?.step4.annual.menCounts[0]).toBe(0);
+		expect(result?.step2).toEqual(nullGipStep2());
 	});
 
-	it("handles proportions that do not sum to exactly 1 (floating point)", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "100",
-			menCountAnnualGlobal: "100",
-			annualQuartile1ProportionWomen: "0.5347",
-			annualQuartile1ProportionMen: "0.4652",
+	it("returns all null step3 fields when row has no indicator B/D/E data", () => {
+		const row = makeGipRow();
+		const result = mapGipToFormData(row);
+		expect(result?.step3).toEqual(nullGipStep3());
+	});
+
+	it("handles zero workforce for variable pay beneficiaries", () => {
+		const row = makeGipRow({
+			womenCountAnnualVariable: "0",
+			menCountAnnualVariable: "0",
 		});
 		const result = mapGipToFormData(row);
-		// quartileSize = 50, womenCount = round(0.5347 * 50) = 27
-		expect(result?.step4.annual.womenCounts[0]).toBe(27);
-		// menCount = round(0.4652 * 50) = 23
-		expect(result?.step4.annual.menCounts[0]).toBe(23);
-		// 27 + 23 = 50 = quartileSize, rounding works out
+		expect(result?.step3.beneficiaryCountWomen).toBe(0);
+		expect(result?.step3.beneficiaryCountMen).toBe(0);
 	});
 
 	it("maps step1 with zero workforce", () => {
-		const row = makeRow({
+		const row = makeGipRow({
 			womenCountAnnualGlobal: "0",
 			menCountAnnualGlobal: "180",
+			womenCountHourlyGlobal: "0",
+			menCountHourlyGlobal: "178",
 		});
 		const result = mapGipToFormData(row);
 		expect(result?.step1).toEqual({
 			totalWomen: 0,
 			totalMen: 180,
+			hourlyWomen: 0,
+			hourlyMen: 178,
 		});
 	});
 
 	it("handles confidence index at 0", () => {
-		const row = makeRow({ confidenceIndex: "0" });
+		const row = makeGipRow({ confidenceIndex: "0" });
 		const result = mapGipToFormData(row);
 		expect(result?.confidenceIndex).toBe("0");
 	});
 
 	it("handles confidence index at 1", () => {
-		const row = makeRow({ confidenceIndex: "1" });
+		const row = makeGipRow({ confidenceIndex: "1" });
 		const result = mapGipToFormData(row);
 		expect(result?.confidenceIndex).toBe("1");
 	});
 
 	it("returns null for non-numeric workforce string (toInt NaN branch)", () => {
-		const row = makeRow({ womenCountAnnualGlobal: "N/A" });
+		const row = makeGipRow({ womenCountAnnualGlobal: "N/A" });
 		const result = mapGipToFormData(row);
 		expect(result?.step1.totalWomen).toBeNull();
-	});
-
-	it("returns null for non-numeric quartile proportion string (proportionToCount NaN branch)", () => {
-		const row = makeRow({
-			womenCountAnnualGlobal: "100",
-			menCountAnnualGlobal: "100",
-			annualQuartile1ProportionWomen: "N/A",
-		});
-		const result = mapGipToFormData(row);
-		expect(result?.step4.annual.womenCounts[0]).toBeNull();
 	});
 });

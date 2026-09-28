@@ -1,0 +1,387 @@
+import { render, within } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import type { RepresentationCampaign } from "~/modules/domain";
+import {
+	DECLARATION_REPRESENTATION,
+	LAST_REPRESENTATION_STEP,
+	representationStepHref,
+} from "~/modules/routes";
+import { RepresentationProcessPanel } from "../RepresentationProcessPanel";
+import type { DeclarationItem } from "../types";
+
+const SIREN = "532847196";
+const CAMPAIGN_YEAR = 2026;
+const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
+
+// The panel resolves the campaign window against the real clock, so the open
+// window is stretched wide enough to stay open whenever the suite runs.
+const OPEN_CAMPAIGN: RepresentationCampaign = {
+	campaignStartDate: new Date(2000, 0, 1),
+	campaignEndDate: new Date(2099, 11, 31),
+	declarationDeadline: new Date(CAMPAIGN_YEAR, 2, 1),
+};
+
+const CLOSED_CAMPAIGN: RepresentationCampaign = {
+	campaignStartDate: new Date(2019, 0, 1),
+	campaignEndDate: new Date(2019, 11, 31),
+	declarationDeadline: new Date(2019, 2, 1),
+};
+
+function makeDeclaration(
+	overrides: Partial<DeclarationItem> = {},
+): DeclarationItem {
+	return {
+		type: "representation",
+		siren: SIREN,
+		year: CAMPAIGN_YEAR,
+		status: "to_complete",
+		fsmStatus: null,
+		currentStep: 0,
+		updatedAt: null,
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
+		hasSubmittedSecondDeclaration: false,
+		hasSubmittedCseOpinion: false,
+		cseRequired: false,
+		hasJointEvaluationFile: false,
+		hasPrefillData: false,
+		notSubject: false,
+		...overrides,
+	};
+}
+
+const DRAFT = makeDeclaration({ status: "in_progress", currentStep: 3 });
+const SUBMITTED = makeDeclaration({
+	status: "done",
+	currentStep: LAST_REPRESENTATION_STEP,
+});
+// A not-subject row is reset to step 0 yet mapped "done": the flag settles it.
+const NOT_SUBJECT = makeDeclaration({
+	status: "done",
+	currentStep: 0,
+	notSubject: true,
+});
+
+const NOT_SUBJECT_MESSAGE =
+	"Votre entreprise n'est pas assujettie à la publication et à la déclaration des écarts éventuels de représentation entre les femmes et les hommes.";
+
+function renderPanel({
+	campaign = OPEN_CAMPAIGN,
+	declaration,
+}: {
+	campaign?: RepresentationCampaign;
+	declaration?: DeclarationItem;
+} = {}) {
+	const { container } = render(
+		<RepresentationProcessPanel
+			campaign={campaign}
+			campaignYear={CAMPAIGN_YEAR}
+			declaration={declaration}
+		/>,
+	);
+	const dialog = container.querySelector("dialog") as HTMLElement;
+	return { panel: within(dialog), dialog };
+}
+
+// Scoped to the footer: the transmitted-declaration row also renders an
+// `a.fr-btn` (its view button), so an unqualified selector would pick
+// whichever one comes first in the DOM instead of the panel's actual CTA.
+function getCta(dialog: HTMLElement) {
+	return dialog.querySelector(".footer a.fr-btn");
+}
+
+describe("RepresentationProcessPanel", () => {
+	it("renders a labelled modal dialog carrying the panel id", () => {
+		const { dialog } = renderPanel();
+		expect(dialog).toHaveAttribute("id", "representation-process-panel");
+		expect(dialog).toHaveAttribute("aria-modal", "true");
+		const titleId = dialog.getAttribute("aria-labelledby");
+		expect(dialog.querySelector(`#${titleId}`)?.tagName).toBe("H2");
+	});
+
+	it("renders the title with the campaign year", () => {
+		const { panel } = renderPanel();
+		const title = panel.getByText(
+			`Démarche des indicateurs de représentation ${CAMPAIGN_YEAR}`,
+		);
+		expect(title).toBeInTheDocument();
+		expect(title.tagName).toBe("H2");
+	});
+
+	it("renders the Rixain reminder with both representation targets", () => {
+		const { panel } = renderPanel();
+		expect(panel.getByText(/loi Rixain/)).toBeInTheDocument();
+		expect(
+			panel.getByText("30 % minimum de chaque sexe depuis le 1ᵉʳ mars 2026"),
+		).toBeInTheDocument();
+		expect(
+			panel.getByText("40 % minimum de chaque sexe à compter du 1ᵉʳ mars 2029"),
+		).toBeInTheDocument();
+	});
+
+	it("renders the campaign deadline on the declaration step", () => {
+		const { panel } = renderPanel();
+		expect(panel.getByText("Échéance : 1ᵉʳ mars 2026")).toBeInTheDocument();
+	});
+
+	it("renders the deadline overridden by the back-office campaign", () => {
+		const { panel } = renderPanel({
+			campaign: {
+				...OPEN_CAMPAIGN,
+				declarationDeadline: new Date(CAMPAIGN_YEAR, 3, 15),
+			},
+		});
+		expect(panel.getByText("Échéance : 15 avril 2026")).toBeInTheDocument();
+	});
+
+	it("renders help section buttons", () => {
+		const { dialog } = renderPanel();
+		const texts = [...dialog.querySelectorAll("button.fr-link")].map(
+			(b) => b.textContent,
+		);
+		expect(texts).toContain("Détail des étapes");
+		expect(texts).toContain("Centre d'aide");
+	});
+
+	it("describes the CTA link by the panel title", () => {
+		const { dialog } = renderPanel();
+		const describedBy = getCta(dialog)?.getAttribute("aria-describedby");
+		expect(describedBy).toBeTruthy();
+		expect(dialog.querySelector(`#${describedBy}`)).toHaveTextContent(
+			/Démarche des indicateurs de représentation/,
+		);
+	});
+
+	describe("variant: start", () => {
+		it('renders a "Commencer" CTA pointing to the funnel entry point', () => {
+			const { dialog } = renderPanel();
+			const cta = getCta(dialog);
+			expect(cta).toHaveTextContent(/^Commencer$/);
+			expect(cta).toHaveAttribute("href", DECLARATION_REPRESENTATION);
+		});
+
+		it("marks the subjection check as the current step", () => {
+			const { panel } = renderPanel();
+			expect(panel.getAllByText("Étape en cours")).toHaveLength(1);
+			expect(
+				panel.getByText("Vérification de l'assujettissement"),
+			).toBeInTheDocument();
+		});
+
+		it("keeps the declaration step collapsed to its heading", () => {
+			const { panel } = renderPanel();
+			expect(
+				panel.getByText("Déclaration des écarts de représentation"),
+			).toBeInTheDocument();
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+		});
+
+		it("renders the deadline without bullets or a transmission line", () => {
+			const { panel } = renderPanel();
+			expect(panel.getByText(/^Échéance :/)).toBeInTheDocument();
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Votre déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
+
+		it("does not render a last action date when the démarche was never touched", () => {
+			const { panel } = renderPanel({ declaration: makeDeclaration() });
+			expect(panel.queryByText(/Dernière action/)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("variant: draft", () => {
+		it('renders a "Reprendre" CTA pointing to the step the draft stopped at', () => {
+			const { dialog } = renderPanel({ declaration: DRAFT });
+			const cta = getCta(dialog);
+			expect(cta).toHaveTextContent(/^Reprendre$/);
+			expect(cta).toHaveAttribute("href", representationStepHref(3));
+		});
+
+		it("expands the declaration step into its three bullets", () => {
+			const { panel } = renderPanel({ declaration: DRAFT });
+			expect(panel.getByText("Écarts de représentation")).toBeInTheDocument();
+			expect(panel.getByText("Cadres dirigeants")).toBeInTheDocument();
+			expect(panel.getByText("Instances dirigeantes")).toBeInTheDocument();
+			expect(
+				panel.getByText("Informations de publication"),
+			).toBeInTheDocument();
+		});
+
+		it("marks the subjection check as done and the declaration as current", () => {
+			const { panel } = renderPanel({ declaration: DRAFT });
+			expect(panel.getAllByText("Étape terminée")).toHaveLength(1);
+			expect(panel.getAllByText("Étape en cours")).toHaveLength(1);
+		});
+
+		it("renders the last action date of the draft", () => {
+			const { panel } = renderPanel({
+				declaration: makeDeclaration({
+					status: "in_progress",
+					currentStep: 3,
+					updatedAt: new Date(2026, 1, 10),
+				}),
+			});
+			expect(
+				panel.getByText("Dernière action le 10 février 2026"),
+			).toBeInTheDocument();
+		});
+
+		it("does not announce the démarche as closed", () => {
+			const { panel } = renderPanel({ declaration: DRAFT });
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+		});
+
+		it('does not render "Votre déclaration a été transmise"', () => {
+			const { panel } = renderPanel({ declaration: DRAFT });
+			expect(
+				panel.queryByText("Votre déclaration a été transmise"),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("variant: submitted", () => {
+		it('renders a "Voir la déclaration" CTA pointing to the recap', () => {
+			const { dialog } = renderPanel({ declaration: SUBMITTED });
+			const cta = getCta(dialog);
+			expect(cta).toHaveTextContent(/^Voir la déclaration$/);
+			expect(cta).toHaveAttribute("href", RECAP_HREF);
+		});
+
+		it("marks both steps as done", () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			expect(panel.getAllByText("Étape terminée")).toHaveLength(2);
+			expect(panel.queryByText("Étape en cours")).not.toBeInTheDocument();
+		});
+
+		it("does not announce the démarche as closed while the campaign is open", () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+		});
+
+		it('replaces the three bullets and the deadline with "Votre déclaration a été transmise"', () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+			expect(panel.queryByText("Cadres dirigeants")).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Instances dirigeantes"),
+			).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Informations de publication"),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it("renders a view button to the recap, without a Modifier button or a modifiable-until mention", () => {
+			const { panel } = renderPanel({ declaration: SUBMITTED });
+			const viewButton = panel.getByTitle(
+				"Voir le récapitulatif de la déclaration",
+			);
+			expect(viewButton).toHaveAttribute("href", RECAP_HREF);
+			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("variant: not_subject", () => {
+		it('renders a "Modifier" CTA pointing back to the funnel entry point', () => {
+			const { dialog } = renderPanel({ declaration: NOT_SUBJECT });
+			const cta = getCta(dialog);
+			expect(cta).toHaveTextContent(/^Modifier$/);
+			expect(cta).toHaveAttribute("href", DECLARATION_REPRESENTATION);
+		});
+
+		it("keeps the subjection check as the only step, done, with no deadline", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.getAllByText("Étape terminée")).toHaveLength(1);
+			expect(panel.queryByText("Étape en cours")).not.toBeInTheDocument();
+			expect(panel.queryByText("Étape à venir")).not.toBeInTheDocument();
+			expect(
+				panel.getByText("Vérification de l'assujettissement"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText("Déclaration des écarts de représentation"),
+			).not.toBeInTheDocument();
+			expect(
+				panel.queryByText("Écarts de représentation"),
+			).not.toBeInTheDocument();
+			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
+		});
+
+		it("states the company is not subject, without the Rixain reminder", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.getByText(NOT_SUBJECT_MESSAGE)).toBeInTheDocument();
+			expect(panel.queryByText(/loi Rixain/)).not.toBeInTheDocument();
+		});
+
+		it("does not announce the démarche as closed while the campaign is open", () => {
+			const { panel } = renderPanel({ declaration: NOT_SUBJECT });
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("campaign closed", () => {
+		const declarations: Array<[string, DeclarationItem | undefined]> = [
+			["no démarche", undefined],
+			["an untouched démarche", makeDeclaration()],
+			["a draft", DRAFT],
+			["a submitted démarche", SUBMITTED],
+			["a not-subject démarche", NOT_SUBJECT],
+		];
+
+		for (const [label, declaration] of declarations) {
+			it(`announces the démarche as closed with ${label}`, () => {
+				const { panel, dialog } = renderPanel({
+					campaign: CLOSED_CAMPAIGN,
+					declaration,
+				});
+				expect(panel.getByText("Démarche close")).toBeInTheDocument();
+				expect(
+					panel.getByText("Cette démarche est terminée."),
+				).toBeInTheDocument();
+				expect(panel.queryByText(NOT_SUBJECT_MESSAGE)).not.toBeInTheDocument();
+				const cta = getCta(dialog);
+				expect(cta).toHaveTextContent(/^Voir la déclaration$/);
+				expect(cta).toHaveAttribute("href", RECAP_HREF);
+			});
+		}
+	});
+
+	describe("campaign closed — transmission line", () => {
+		it('shows "Votre déclaration a été transmise" alongside "Démarche close" for a transmitted démarche', () => {
+			const { panel } = renderPanel({
+				campaign: CLOSED_CAMPAIGN,
+				declaration: SUBMITTED,
+			});
+			expect(panel.getByText("Démarche close")).toBeInTheDocument();
+			expect(
+				panel.getByText("Votre déclaration a été transmise"),
+			).toBeInTheDocument();
+		});
+
+		// The closed variant renders step 2 "complete" whether or not anything was
+		// transmitted, so the line must follow the declaration, not the step status.
+		const noTransmission: Array<[string, DeclarationItem | undefined]> = [
+			["no démarche", undefined],
+			["an untouched démarche", makeDeclaration()],
+			["a draft", DRAFT],
+			['a not-subject démarche despite status "done"', NOT_SUBJECT],
+		];
+
+		for (const [label, declaration] of noTransmission) {
+			it(`does not render the transmission line with ${label}`, () => {
+				const { panel } = renderPanel({
+					campaign: CLOSED_CAMPAIGN,
+					declaration,
+				});
+				expect(
+					panel.queryByText("Votre déclaration a été transmise"),
+				).not.toBeInTheDocument();
+			});
+		}
+	});
+});

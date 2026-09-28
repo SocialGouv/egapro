@@ -1,13 +1,21 @@
-import { getWorkforceYear } from "~/modules/domain";
-import { Breadcrumb } from "~/modules/layout";
+import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
+import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { LockHolderDisplay } from "~/modules/declaration-remuneration/shared/lock/types";
+import {
+	formatWorkforceForUser,
+	getObligationWorkforce,
+	getWorkforceYear,
+	isCseRequired,
+} from "~/modules/domain";
+import { Breadcrumb, RouteScrollReset } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
-
+import { MY_SPACE } from "~/modules/routes";
 import styles from "./CseOpinionLayout.module.scss";
 
 type CompanyData = {
 	name: string;
 	siren: string;
-	workforce: number | null;
+	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
 
@@ -15,15 +23,24 @@ type Props = {
 	company: CompanyData;
 	declarationYear: number;
 	children: React.ReactNode;
+	isReadOnly?: boolean;
+	lockHolder?: LockHolderDisplay | null;
 };
 
 export function CseOpinionLayout({
 	company,
 	declarationYear,
 	children,
+	isReadOnly = false,
+	lockHolder = null,
 }: Props) {
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
+
 	return (
-		<>
+		<main id="content" tabIndex={-1}>
+			<RouteScrollReset />
 			<div className={`fr-py-3w ${styles.banner}`}>
 				<div className="fr-container">
 					<Breadcrumb
@@ -31,7 +48,7 @@ export function CseOpinionLayout({
 							{ label: "Mon espace", href: "/" },
 							{
 								label: company.name,
-								href: "/mon-espace",
+								href: MY_SPACE,
 							},
 							{
 								label: `Démarche des indicateurs de rémunération ${declarationYear}`,
@@ -48,34 +65,41 @@ export function CseOpinionLayout({
 								{company.name} - {formatSiren(company.siren)}
 							</p>
 						</div>
-						{company.workforce !== null && (
+						<div className="fr-col-auto">
+							<p className="fr-mb-0 fr-text--sm">
+								Effectif annuel moyen en {getWorkforceYear()} :{" "}
+								<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
+							</p>
+						</div>
+						{cseApplicable && (
 							<div className="fr-col-auto">
 								<p className="fr-mb-0 fr-text--sm">
-									Effectif annuel moyen en {getWorkforceYear()} :{" "}
-									<strong>{company.workforce}</strong>
+									Existence d'un CSE :{" "}
+									<strong>
+										{company.hasCse === null
+											? "Non renseigné"
+											: company.hasCse
+												? "Oui"
+												: "Non"}
+									</strong>
 								</p>
 							</div>
 						)}
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-text--sm">
-								Existence d'un CSE :{" "}
-								<strong>
-									{company.hasCse === null
-										? "Non renseigné"
-										: company.hasCse
-											? "Oui"
-											: "Non"}
-								</strong>
-							</p>
-						</div>
 					</div>
 				</div>
 			</div>
-			<main className="fr-container fr-py-7w" id="content">
-				<div className="fr-grid-row fr-grid-row--center">
-					<div className="fr-col-12 fr-col-lg-8">{children}</div>
-				</div>
-			</main>
-		</>
+			<div className="fr-container fr-py-7w">
+				<LockProvider holder={lockHolder} isReadOnly={isReadOnly}>
+					<div className="fr-grid-row fr-grid-row--center">
+						<div className="fr-col-12 fr-col-lg-8">
+							{isReadOnly && lockHolder && (
+								<DeclarationLockAlert holder={lockHolder} />
+							)}
+							{children}
+						</div>
+					</div>
+				</LockProvider>
+			</div>
+		</main>
 	);
 }

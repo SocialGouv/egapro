@@ -39,14 +39,27 @@ function makeDisplayContextFromPaths(
 	};
 }
 
+type LockHolder = {
+	firstName: string | null;
+	lastName: string | null;
+	email: string | null;
+};
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
+	compliancePathApplicable: true,
+	cseOpinionRequired: true,
 	year: FUTURE_YEAR,
+	hasPrefillData: true,
+	indicatorGRequired: true,
 	lastActionDate: "12 mars 2026" as string | null,
+	declarationFsmStatus: null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
+	lockedByOther: false,
+	lockHolder: null as LockHolder | null,
 };
 
 function renderPanel(
@@ -92,13 +105,6 @@ describe("DeclarationProcessPanel", () => {
 			);
 		});
 
-		it("renders the info alert", () => {
-			const { panel } = renderPanel("start");
-			expect(
-				panel.getByText(/Vous devez au préalable disposer/),
-			).toBeInTheDocument();
-		});
-
 		it("renders step 1 details with bullet points", () => {
 			const { panel } = renderPanel("start");
 			expect(
@@ -106,9 +112,19 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					/Indicateurs de rémunération par catégorie de salariés à remplir/,
+					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
+		});
+
+		it("describes indicators as manual when no prefill data is available", () => {
+			const { panel } = renderPanel("start", { hasPrefillData: false });
+			expect(
+				panel.getByText("Indicateurs pour l'ensemble des salariés à remplir"),
+			).toBeInTheDocument();
+			expect(
+				panel.queryByText(/Indicateurs pré-remplis à vérifier/),
+			).not.toBeInTheDocument();
 		});
 
 		it("renders the CTA link with correct href", () => {
@@ -118,7 +134,19 @@ describe("DeclarationProcessPanel", () => {
 				"href",
 				"/declaration-remuneration?siren=532847196",
 			);
-			expect(cta).toHaveTextContent("Commencer la déclaration");
+			expect(cta).toHaveTextContent(/^Commencer$/);
+		});
+
+		it("describes the CTA link by the panel title", () => {
+			const { dialog } = renderPanel("start");
+			const cta = dialog.querySelector("a.fr-btn");
+			const describedBy = cta?.getAttribute("aria-describedby");
+			expect(describedBy).toBeTruthy();
+			const description = dialog.querySelector(`#${describedBy}`);
+			expect(description?.tagName).toBe("H2");
+			expect(description).toHaveTextContent(
+				/Démarche des indicateurs de rémunération/,
+			);
 		});
 
 		it("renders help section buttons", () => {
@@ -127,6 +155,46 @@ describe("DeclarationProcessPanel", () => {
 			const texts = [...buttons].map((b) => b.textContent);
 			expect(texts).toContain("Détail des étapes");
 			expect(texts).toContain("Centre d'aide");
+		});
+	});
+
+	describe("encart accord de branche selon indicatorGRequired (#4267)", () => {
+		const BRANCH_AGREEMENT_TEXT = /Vous devez au préalable disposer/;
+
+		function infoAlert(dialog: HTMLElement) {
+			return dialog.querySelector(".fr-alert.fr-alert--info");
+		}
+
+		it("renders the info alert on the start variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the start variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("start", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
+		});
+
+		it("renders the info alert on the compliance_choice variant when indicator G applies", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: true,
+			});
+			expect(infoAlert(dialog)).toBeInTheDocument();
+			expect(panel.getByText(BRANCH_AGREEMENT_TEXT)).toBeInTheDocument();
+		});
+
+		it("hides the info alert on the compliance_choice variant when indicator G does not apply", () => {
+			const { panel, dialog } = renderPanel("compliance_choice", {
+				indicatorGRequired: false,
+			});
+			expect(infoAlert(dialog)).not.toBeInTheDocument();
+			expect(panel.queryByText(BRANCH_AGREEMENT_TEXT)).not.toBeInTheDocument();
 		});
 	});
 
@@ -318,6 +386,75 @@ describe("DeclarationProcessPanel", () => {
 			expect(
 				panel.getByText(/Modification close depuis le/),
 			).toBeInTheDocument();
+		});
+	});
+
+	describe("lock held by another co-declarant", () => {
+		const lockHolder = {
+			firstName: "Alice",
+			lastName: "Martin",
+			email: "alice.martin@example.fr",
+		};
+
+		it("renders the lock alert naming the current editor", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const alert = dialog.querySelector('[role="alert"]');
+			expect(alert).toBeInTheDocument();
+			expect(alert).toHaveTextContent("Déclaration en cours de modification");
+			expect(alert).toHaveTextContent("Alice Martin");
+		});
+
+		it('replaces the CTA label with "Consulter en lecture seule"', () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveTextContent("Consulter en lecture seule");
+			expect(cta).not.toHaveTextContent("Commencer");
+		});
+
+		it("keeps the CTA href pointing to the declaration for read-only access", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveAttribute(
+				"href",
+				"/declaration-remuneration?siren=532847196",
+			);
+		});
+
+		it("does not render the alert when lockedByOther is true but no holder is resolved", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder: null,
+			});
+			expect(dialog.querySelector('[role="alert"]')).not.toBeInTheDocument();
+		});
+	});
+
+	describe("declaration not locked by another user", () => {
+		it("does not render the lock alert", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: false,
+				lockHolder: null,
+			});
+			expect(dialog.querySelector('[role="alert"]')).not.toBeInTheDocument();
+		});
+
+		it("keeps the regular CTA label", () => {
+			const { dialog } = renderPanel("start", { lockedByOther: false });
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1];
+			expect(cta).toHaveTextContent(/^Commencer$/);
+			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});
 });

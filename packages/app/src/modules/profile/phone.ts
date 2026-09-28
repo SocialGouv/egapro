@@ -2,7 +2,9 @@ import { z } from "zod";
 
 const FRENCH_LOCAL_REGEX = /^0\d{9}$/;
 const INTERNATIONAL_REGEX = /^\+\d{8,15}$/;
-const PHONE_ERROR = "Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55";
+export const PHONE_FORMAT_MESSAGE =
+	"Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55";
+const PHONE_ERROR = "Veuillez renseigner votre numéro de téléphone";
 
 /** Strip whitespace, dots, and dashes. Keeps + and digits. */
 export function normalizePhone(value: string): string {

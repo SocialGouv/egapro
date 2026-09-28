@@ -6,9 +6,6 @@ export const SECOND_DECLARATION_TOTAL_STEPS = 3;
 export const SECOND_DECLARATION_STEP_TITLES = [
 	"",
 	"Actions correctives et seconde déclaration",
-	"Seconde déclaration des écarts de rémunération par catégorie de salariés",
+	"Seconde déclaration des écarts de rémunération par catégories de salariés",
 	"Récapitulatif de votre déclaration",
 ] as const;
-
-export const BASE_PATH =
-	"/declaration-remuneration/parcours-conformite" as const;

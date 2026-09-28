@@ -2,4 +2,21 @@
 	border: 1px solid var(--border-default-grey);
 	border-radius: 4px;
 	padding: 1rem;
+
+	// DSFR sizes an inline fieldset element to its own label, so "Favorable"
+	// ends up visibly narrower than "Défavorable". The Figma gives the options
+	// of a group equal widths filling the row, which also makes the whole tile
+	// the pointer target rather than just the words.
+	// Scoped to the group's own options: a descendant selector would also stretch
+	// the options of any fieldset a future card variant happens to nest.
+	:global(.fr-fieldset > .fr-fieldset__element--inline) {
+		flex: 1 1 0;
+	}
+
+	// Figma spaces the two options by 24px. DSFR's own element padding only
+	// yields 16, and it also aligns the outer tiles with the card edge — so the
+	// missing 8 are added as a column gap rather than by widening that padding.
+	:global(.fr-fieldset) {
+		column-gap: 0.5rem;
+	}
 }

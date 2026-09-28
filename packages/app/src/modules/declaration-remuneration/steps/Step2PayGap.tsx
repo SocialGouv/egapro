@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
+import { remunerationStepHref } from "~/modules/routes";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { updateStep2Schema } from "../schemas";
@@ -17,32 +19,48 @@ import { useDraftAutoSave } from "../shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "../shared/draft/useDraftHydration";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
+import { FieldErrorAlert } from "../shared/formError/FieldErrorAlert";
+import {
+	derivePayGapErrors,
+	payGapFieldId,
+} from "../shared/formError/payGapErrors";
+import type { FieldError } from "../shared/formError/types";
 import { GapInterpretationCallout } from "../shared/GapInterpretationCallout";
 import type { GipPrefillData } from "../shared/gipMdsMapping";
 import { gipToStep2 } from "../shared/gipToStepData";
-import { getStep2FieldName, step2ToRows } from "../shared/indicatorRowMapping";
+import {
+	getStep2FieldName,
+	gipPayGapReferences,
+	step2ToRows,
+} from "../shared/indicatorRowMapping";
+import { useLockContext } from "../shared/lock/LockContext";
 import { PayGapTable } from "../shared/PayGapTable";
 import { PrefillSource } from "../shared/PrefillSource";
 import { StepIndicator } from "../shared/StepIndicator";
 import { StepTitleRow } from "../shared/StepTitleRow";
-import { TooltipButton } from "../shared/TooltipButton";
 import type { PayGapField, Step2Data } from "../types";
 
 type Step2PayGapProps = {
 	declarationSiren: string;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	initialData: Step2Data;
 	gipPrefillData?: GipPrefillData;
 };
 
+const PAY_GAP_ID_PREFIX = "step2-paygap";
+const PAY_GAP_ALERT_ID = "step2-paygap-error";
+
 export function Step2PayGap({
 	declarationSiren,
 	declarationYear,
+	indicatorGRequired,
 	initialData,
 	gipPrefillData,
 }: Step2PayGapProps) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
+	const { isReadOnly } = useLockContext();
 
 	const hasSavedData = Object.values(initialData).some((v) => v !== "");
 	const rawDefaults = hasSavedData
@@ -89,20 +107,24 @@ export function Step2PayGap({
 		});
 	});
 
-	useDraftAutoSave(form, draftHydrated, (values) =>
+	useDraftAutoSave(form, draftHydrated && !isReadOnly, (values) =>
 		setField(values as Step2Data),
 	);
 
 	const formData = form.watch();
-	const rows = step2ToRows(formData as Step2Data);
+	const rows = step2ToRows(
+		formData as Step2Data,
+		gipPayGapReferences(gipPrefillData?.step2),
+	);
 
 	const hasData = hasInitialData || hasDraft;
-	const [validationError, setValidationError] = useState<string | null>(null);
+	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
 
 	const mutation = api.declaration.updateStep2.useMutation({
 		onSuccess: () => {
 			clearDraft();
-			router.push("/declaration-remuneration/etape/3");
+			router.push(remunerationStepHref(3));
 		},
 	});
 
@@ -114,17 +136,19 @@ export function Step2PayGap({
 		if (normalized !== "" && Number.parseFloat(normalized) < 0) return;
 		const fieldName = getStep2FieldName(index, field);
 		form.setValue(fieldName, normalized);
+		setFieldErrors((errors) =>
+			errors.filter(
+				(error) =>
+					error.fieldId !== payGapFieldId(PAY_GAP_ID_PREFIX, index, field),
+			),
+		);
 	}
 
 	const onSubmit = form.handleSubmit(() => {
-		const incomplete = rows.some((r) => !r.womenValue || !r.menValue);
-		if (incomplete) {
-			setValidationError(
-				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
-			);
-			return;
-		}
-		setValidationError(null);
+		setValidationAttempt((attempt) => attempt + 1);
+		const errors = derivePayGapErrors(PAY_GAP_ID_PREFIX, rows);
+		setFieldErrors(errors);
+		if (errors.length > 0) return;
 		mutation.mutate(form.getValues() as Step2Data);
 	});
 
@@ -134,121 +158,140 @@ export function Step2PayGap({
 			className={common.flexColumnGap2}
 			onSubmit={onSubmit}
 		>
-			<StepTitleRow
-				hasData={hasData}
-				isPendingSave={isPendingSave}
-				isSaving={isSaving}
-				onDevFill={() => {
-					DEV_STEP2_ROWS.forEach((row, i) => {
-						const womenField = getStep2FieldName(i, "womenValue");
-						const menField = getStep2FieldName(i, "menValue");
-						form.setValue(womenField, padDecimalToTwo(row.womenValue));
-						form.setValue(menField, padDecimalToTwo(row.menValue));
-					});
-				}}
-				title={
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
-				}
-			/>
+			{/* Read-only mode is enforced per control (readOnly inputs, disabled
+			    buttons): a fieldset-level `disabled` would hide the content from
+			    some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
+				<legend className="fr-sr-only">Écarts de rémunération</legend>
+				<StepTitleRow
+					devFillDisabled={isReadOnly}
+					hasData={hasData}
+					isPendingSave={isPendingSave}
+					isSaving={isSaving}
+					onDevFill={() => {
+						DEV_STEP2_ROWS.forEach((row, i) => {
+							const womenField = getStep2FieldName(i, "womenValue");
+							const menField = getStep2FieldName(i, "menValue");
+							form.setValue(womenField, padDecimalToTwo(row.womenValue));
+							form.setValue(menField, padDecimalToTwo(row.menValue));
+						});
+						setFieldErrors([]);
+					}}
+					title={
+						<h1 className="fr-h4 fr-mb-0">
+							Déclaration des indicateurs de rémunération {declarationYear}
+						</h1>
+					}
+				/>
 
-			<StepIndicator currentStep={2} />
+				<StepIndicator
+					currentStep={2}
+					indicatorGRequired={indicatorGRequired}
+				/>
 
-			<div className={common.flexColumnGap1}>
-				<p className="fr-mb-0">
-					Ces indicateurs mesurent la différence de rémunération, moyenne et
-					médiane, entre les femmes et les hommes, exprimée en pourcentage du
-					salaire masculin correspondant. Ils couvrent l&apos;ensemble de la
-					rémunération : la partie fixe ainsi que les composantes variables ou
-					complémentaires.
-				</p>
+				<div className={common.flexColumnGap1}>
+					<p className="fr-mb-0">
+						Ces indicateurs mesurent la différence de rémunération, moyenne et
+						médiane, entre les femmes et les hommes, exprimée en pourcentage du
+						salaire masculin correspondant. Ils couvrent l&apos;ensemble de la
+						rémunération : la partie fixe ainsi que les composantes variables ou
+						complémentaires.
+					</p>
 
-				<p className={`fr-mb-0 ${common.fontMedium}`}>
-					{gipPrefillData
-						? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
-						: "Renseignez les informations avant de valider vos indicateurs."}
-					{!gipPrefillData && (
-						<TooltipButton
-							id="tooltip-step2-info"
-							label="Information sur la confidentialité des données"
-							text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
-						/>
-					)}
-				</p>
+					<p className={`fr-mb-0 ${common.fontMedium}`}>
+						{gipPrefillData
+							? "Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+							: "Renseignez les informations avant de valider vos indicateurs."}
+						{!gipPrefillData && (
+							<TooltipButton
+								id="tooltip-step2-info"
+								label="Information sur la confidentialité des données"
+								text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+							/>
+						)}
+					</p>
 
-				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-			</div>
-
-			<div className={common.dataSection}>
-				<div className={common.flexColumnGapHalf}>
-					<PayGapTable
-						caption="Écart de rémunération"
-						columnHeader="Rémunération"
-						disabled={isImpersonating}
-						onRowChange={handleRowChange}
-						rows={rows}
-					/>
-
-					{gipPrefillData && (
-						<PrefillSource
-							periodEnd={gipPrefillData.periodEnd}
-							tooltipId="tooltip-source-step2"
-						/>
-					)}
+					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
 				</div>
 
-				<DefinitionAccordion
-					id="accordion-step2"
-					title="Définitions et méthode de calcul"
-				>
-					<div className="fr-callout">
-						<ul>
-							<li>
-								Quelles composantes variables ou complémentaires sont incluses
-								dans le calcul (ex. prime de cooptation, prime d&apos;astreinte,
-								prime d&apos;avancement) et avec quel niveau de détail&nbsp;?
-							</li>
-							<li>
-								Comment les rémunérations sont-elles reconstituées à partir des
-								données disponibles&nbsp;?
-							</li>
-							<li>
-								Comment expliquer l&apos;écart entre les pourcentages annuels et
-								horaires (ex. ×12 = annuel)&nbsp;?
-							</li>
-							<li>
-								Les données seraient-elles plus pertinentes en mensuel
-								brut&nbsp;?
-							</li>
-							<li>
-								Comment sont traitées les spécificités des UES, notamment
-								lorsque&nbsp;:
-							</li>
-							<li>
-								les salariés n&apos;ont pas tous le même nombre d&apos;heures
-								pour un équivalent temps plein, certains salariés sont au
-								forfait jours&nbsp;?
-							</li>
-						</ul>
+				<div className={`${common.dataSection} ${common.tableGap}`}>
+					<div className={common.flexColumnGapHalf}>
+						<PayGapTable
+							caption="Écart de rémunération"
+							columnHeader={
+								<span className="fr-sr-only">Type de rémunération</span>
+							}
+							disabled={isImpersonating}
+							errorAlertId={PAY_GAP_ALERT_ID}
+							errors={fieldErrors}
+							idPrefix={PAY_GAP_ID_PREFIX}
+							onRowChange={handleRowChange}
+							readOnly={isReadOnly}
+							rows={rows}
+						/>
+
+						{gipPrefillData && (
+							<PrefillSource
+								tooltipId="tooltip-source-step2"
+								year={declarationYear}
+							/>
+						)}
+
+						<FieldErrorAlert
+							errors={fieldErrors}
+							id={PAY_GAP_ALERT_ID}
+							validationAttempt={validationAttempt}
+						/>
 					</div>
-				</DefinitionAccordion>
-			</div>
 
-			<GapInterpretationCallout rows={rows} />
+					<DefinitionAccordion
+						id="accordion-step2"
+						title="Définitions et méthode de calcul"
+					>
+						<div className="fr-callout">
+							<ul>
+								<li>
+									Quelles composantes variables ou complémentaires sont incluses
+									dans le calcul (ex. prime de cooptation, prime
+									d&apos;astreinte, prime d&apos;avancement) et avec quel niveau
+									de détail&nbsp;?
+								</li>
+								<li>
+									Comment les rémunérations sont-elles reconstituées à partir
+									des données disponibles&nbsp;?
+								</li>
+								<li>
+									Comment expliquer l&apos;écart entre les pourcentages annuels
+									et horaires (ex. ×12 = annuel)&nbsp;?
+								</li>
+								<li>
+									Les données seraient-elles plus pertinentes en mensuel
+									brut&nbsp;?
+								</li>
+								<li>
+									Comment sont traitées les spécificités des UES, notamment
+									lorsque&nbsp;:
+								</li>
+								<li>
+									les salariés n&apos;ont pas tous le même nombre d&apos;heures
+									pour un équivalent temps plein, certains salariés sont au
+									forfait jours&nbsp;?
+								</li>
+							</ul>
+						</div>
+					</DefinitionAccordion>
+				</div>
 
-			<FormErrors
-				mutationError={mutation.error?.message}
-				validationError={validationError}
-			/>
+				<GapInterpretationCallout rows={rows} />
 
-			<FormActions
-				isSubmitting={mutation.isPending}
-				mimoquageNextHref={
-					hasSavedData ? "/declaration-remuneration/etape/3" : undefined
-				}
-				previousHref="/declaration-remuneration/etape/1"
-			/>
+				<FormErrors mutationError={mutation.error?.message} />
+
+				<FormActions
+					isSubmitting={mutation.isPending}
+					mimoquageNextHref={hasSavedData ? remunerationStepHref(3) : undefined}
+					previousHref={remunerationStepHref(1)}
+				/>
+			</fieldset>
 		</form>
 	);
 }

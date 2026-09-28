@@ -1,9 +1,10 @@
-import { and, between, eq, gte, inArray, type SQL, sql } from "drizzle-orm";
+import { and, eq, inArray, type SQL, sql } from "drizzle-orm";
 
 import {
 	getCampaignProgressionSchema,
 	getCampaignStatsSchema,
 	getCompletionFunnelSchema,
+	getMatomoFunnelSchema,
 	getStepDropoffRateSchema,
 	getStepDurationsSchema,
 } from "~/modules/admin/stats/schemas";
@@ -11,14 +12,20 @@ import type {
 	CampaignProgressionPoint,
 	CampaignProgressionSeries,
 	CampaignStats,
+	CategoryModelUsage,
 	CompletionFunnelOutput,
+	CseStatusConfirmations,
+	DeviceBreakdown,
 	FunnelRow,
+	HelpLinkClicks,
+	MatomoFunnelOutput,
 	StepDropoffRow,
 	StepDurationRow,
+	UsersPerCompany,
 } from "~/modules/admin/stats/types";
 import {
+	alignCampaignYear,
 	COMPANY_SIZE_ANNUAL_MIN,
-	COMPANY_SIZE_RANGES,
 	COMPANY_SIZE_VOLUNTARY_MAX,
 	type CompanySizeRange,
 	computeRate,
@@ -28,18 +35,29 @@ import {
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
 	getStepLabel,
-	isTriennialYear,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
+	percentageOf,
+	roundOneDecimal,
+	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { gipSizeRangeFilter } from "~/server/db/gipWorkforceConditions";
 import {
 	companies,
 	declarationStatusHistory,
 	declarations,
 	gipMdsData,
+	userCompanies,
 } from "~/server/db/schema";
+import {
+	fetchMatomoCategoryModel,
+	fetchMatomoCseStatusConfirmations,
+	fetchMatomoDeviceBreakdown,
+	fetchMatomoFunnel,
+	fetchMatomoHelpLinks,
+} from "~/server/services/matomo";
 
 /** Minimum number of completed transitions before showing a median / p90. */
 const STEP_DURATION_MIN_SAMPLE = 5;
@@ -76,29 +94,39 @@ function buildSeries(rows: AggregatedRow[]): CampaignProgressionSeries[] {
 		.map(([year, points]) => ({ year, points }));
 }
 
-// Mirrors `isObligatedForYear` (domain) as a SQL predicate so the workforce
-// bracket is enforced server-side and stays symmetric between numerator and denominator.
+// Mirrors `isObligatedForYear` (domain) as a SQL predicate: mandatory from >= 50
+// since the V2 scheme (V2_FIRST_CAMPAIGN_YEAR), >= 100 for earlier years. Kept
+// symmetric between numerator and denominator by construction.
 function obligationWorkforceFilter(
 	year: number,
 	sizeRange: CompanySizeRange | undefined,
 ): SQL {
 	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	const triennialActive = isTriennialYear(year);
-	const triennialClause = triennialActive
-		? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX} AND ${ema} < ${COMPANY_SIZE_ANNUAL_MIN}`
-		: sql`false`;
-	const annualClause = sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
-	const baseObligation = sql`((${triennialClause}) OR (${annualClause}))`;
+	const baseObligation =
+		alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR
+			? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
+			: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 
 	if (!sizeRange) return baseObligation;
 
-	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
-	const bucket =
-		max === null
-			? sql`${ema} >= ${min}`
-			: sql`${ema} BETWEEN ${min} AND ${max}`;
-	return sql`(${bucket}) AND ${baseObligation}`;
+	return sql`(${gipSizeRangeFilter(sizeRange)}) AND ${baseObligation}`;
 }
+
+// The GIP file is the single source of the headcount across the admin layer, so
+// every workforce predicate below reads `workforce_ema` rather than the Weez /
+// INSEE `company.workforce`. LEFT on purpose: a company absent from the file has
+// no headcount, and letting the NULL propagate keeps it out of the workforce
+// filters without dropping it from the unfiltered totals, which an INNER JOIN
+// would do.
+const gipWorkforceJoin = sql`LEFT JOIN ${gipMdsData}
+				ON ${gipMdsData.siren} = ${declarations.siren}
+				AND ${gipMdsData.year} = ${declarations.year}`;
+
+// Mirrors `isCseRequired` (domain) as a SQL predicate: >= 100 employees, with no
+// dependency on the campaign year. Deliberately not `obligationWorkforceFilter`,
+// which mirrors `isObligatedForYear` and drops to >= 50 under the V2 scheme —
+// two different rules over the same input. Floored like `floorWorkforce`.
+const cseRequiredWorkforceFilter = sql`floor(${gipMdsData.workforceEma}) >= ${COMPANY_SIZE_ANNUAL_MIN}`;
 
 type AggregatedMilestone = {
 	sample_size: number | string;
@@ -155,12 +183,7 @@ export const adminStatsRouter = createTRPCRouter({
 			];
 
 			if (input.sizeRange) {
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				filters.push(
-					max === null
-						? gte(companies.workforce, min)
-						: between(companies.workforce, min, max),
-				);
+				filters.push(gipSizeRangeFilter(input.sizeRange));
 			}
 
 			const dayExpr = sql<string>`to_char(${declarationStatusHistory.createdAt}, 'YYYY-MM-DD')`;
@@ -178,7 +201,13 @@ export const adminStatsRouter = createTRPCRouter({
 				);
 
 			const scoped = input.sizeRange
-				? query.innerJoin(companies, eq(declarations.siren, companies.siren))
+				? query.leftJoin(
+						gipMdsData,
+						and(
+							eq(gipMdsData.siren, declarations.siren),
+							eq(gipMdsData.year, declarations.year),
+						) as SQL,
+					)
 				: query;
 
 			const rows = await scoped
@@ -281,13 +310,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getStepDurations: adminProcedure
 		.input(getStepDurationsSchema)
 		.query(async ({ ctx, input }): Promise<StepDurationRow[]> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const wizardRowsRaw = await ctx.db.execute<{
 				step: number;
@@ -310,6 +333,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = ${declarationStatusHistory.declarationId}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarationStatusHistory.eventType} = 'step_change'
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -403,6 +427,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -436,6 +461,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -476,6 +502,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -515,6 +542,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = s.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -579,13 +607,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getStepDropoffRate: adminProcedure
 		.input(getStepDropoffRateSchema)
 		.query(async ({ ctx, input }): Promise<StepDropoffRow[]> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const wizardRawRows = await ctx.db.execute<{
 				step: number | string;
@@ -617,6 +639,7 @@ export const adminStatsRouter = createTRPCRouter({
 					ON ${declarations.id} = lsc.declaration_id
 				INNER JOIN ${companies}
 					ON ${companies.siren} = ${declarations.siren}
+				${gipWorkforceJoin}
 				WHERE ${declarations.year} = ${input.year}
 					AND ${declarations.cancelledAt} IS NULL
 					AND lsc.step < ${WIZARD_TERMINAL_STEP}
@@ -643,8 +666,7 @@ export const adminStatsRouter = createTRPCRouter({
 				const aggregate = byStep.get(step);
 				const total = aggregate?.total ?? 0;
 				const abandoned = aggregate?.abandoned ?? 0;
-				const dropoffRate =
-					total === 0 ? 0 : Math.round((abandoned / total) * 1000) / 10;
+				const dropoffRate = roundOneDecimal(percentageOf(abandoned, total));
 				return {
 					key: String(step),
 					phase: "wizard",
@@ -675,6 +697,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'submit'
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -689,6 +712,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 1
 						AND h.value = 'corrective_action'
@@ -705,6 +729,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 1
 						AND h.value = 'joint_evaluation'
@@ -721,6 +746,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'second_declaration_submit'
 						AND h.round = 2
 						AND ${declarations.year} = ${input.year}
@@ -736,6 +762,7 @@ export const adminStatsRouter = createTRPCRouter({
 						ON ${declarations.id} = h.declaration_id
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE h.event_type = 'path_choice'
 						AND h.round = 2
 						AND ${declarations.year} = ${input.year}
@@ -750,6 +777,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.cseRequired} = true
 						AND ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
@@ -786,6 +814,7 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM ${declarations}
 				INNER JOIN ${companies}
 					ON ${companies.siren} = ${declarations.siren}
+				${gipWorkforceJoin}
 				LEFT JOIN latest_activity la
 					ON la.declaration_id = ${declarations.id}
 				WHERE ${declarations.year} = ${input.year}
@@ -823,8 +852,7 @@ export const adminStatsRouter = createTRPCRouter({
 				({ key, label, status }) => {
 					const total = totalsByPhase.get(status) ?? 0;
 					const abandoned = abandonedByPhase.get(status) ?? 0;
-					const dropoffRate =
-						total === 0 ? 0 : Math.round((abandoned / total) * 1000) / 10;
+					const dropoffRate = roundOneDecimal(percentageOf(abandoned, total));
 					return {
 						key,
 						phase: "post_submit",
@@ -843,13 +871,7 @@ export const adminStatsRouter = createTRPCRouter({
 	getCompletionFunnel: adminProcedure
 		.input(getCompletionFunnelSchema)
 		.query(async ({ ctx, input }): Promise<CompletionFunnelOutput> => {
-			const sizeFilterSql = (() => {
-				if (!input.sizeRange) return sql`TRUE`;
-				const { min, max } = COMPANY_SIZE_RANGES[input.sizeRange];
-				return max === null
-					? sql`${companies.workforce} >= ${min}`
-					: sql`${companies.workforce} BETWEEN ${min} AND ${max}`;
-			})();
+			const sizeFilterSql = gipSizeRangeFilter(input.sizeRange);
 
 			const mainFunnelPromise = ctx.db.execute<{
 				draft_started: number | string;
@@ -862,6 +884,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -885,6 +908,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -901,6 +925,13 @@ export const adminStatsRouter = createTRPCRouter({
 				FROM base
 			`);
 
+			// `revision_action_submitted` counts only round-2 joint evaluations.
+			// During a revision the only submit-type action is a round-2 joint
+			// evaluation (the corrective path is forbidden in revision). The
+			// corrective `second_declaration_submit` is always round 2 but is the
+			// PRE-revision action, so counting it here would push this jalon above
+			// `revision_path_chosen` for declarations still in
+			// `awaiting_revision_choice` (an inverted, >100 % funnel step).
 			const revisionFunnelPromise = ctx.db.execute<{
 				revision_required: number | string;
 				revision_path_chosen: number | string;
@@ -912,6 +943,7 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${sizeFilterSql}
@@ -928,7 +960,7 @@ export const adminStatsRouter = createTRPCRouter({
 				SELECT
 					COUNT(DISTINCT base.declaration_id)::int AS revision_required,
 					${countDeclarationsWithEvent({ eventType: "path_choice", round: 2, alias: "revision_path_chosen" })},
-					${countDeclarationsWithEvent({ eventType: ["second_declaration_submit", "joint_evaluation_submit"], round: 2, alias: "revision_action_submitted" })},
+					${countDeclarationsWithEvent({ eventType: "joint_evaluation_submit", round: 2, alias: "revision_action_submitted" })},
 					${countDeclarationsWithEvent({ eventType: "demarche_complete", alias: "demarche_completed" })}
 				FROM base
 			`);
@@ -945,9 +977,11 @@ export const adminStatsRouter = createTRPCRouter({
 					FROM ${declarations}
 					INNER JOIN ${companies}
 						ON ${companies.siren} = ${declarations.siren}
+					${gipWorkforceJoin}
 					WHERE ${declarations.year} = ${input.year}
 						AND ${declarations.cancelledAt} IS NULL
 						AND ${companies.hasCse} = true
+						AND ${cseRequiredWorkforceFilter}
 						AND ${sizeFilterSql}
 				)
 				SELECT
@@ -997,6 +1031,89 @@ export const adminStatsRouter = createTRPCRouter({
 				cseFunnel: buildFunnelRows(FUNNEL_CSE_KEY_STEPS, cseCounts),
 			};
 		}),
+
+	getMatomoFunnel: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<MatomoFunnelOutput> => {
+			return fetchMatomoFunnel({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoCategoryModel: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<CategoryModelUsage> => {
+			return fetchMatomoCategoryModel({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoHelpLinks: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<HelpLinkClicks> => {
+			return fetchMatomoHelpLinks({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	getMatomoDeviceBreakdown: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<DeviceBreakdown> => {
+			return fetchMatomoDeviceBreakdown({
+				year: input.year,
+				sizeRange: input.sizeRange,
+			});
+		}),
+
+	// CSE-status confirmation volume (oui/non), read anonymously from Matomo —
+	// no SIREN is ever pushed, so this is a confirmation-action count, not a
+	// distinct-company count. `sizeRange` is ignored (the event carries only the
+	// campaign-year dimension).
+	getMatomoCseStatusConfirmations: adminProcedure
+		.input(getMatomoFunnelSchema)
+		.query(({ input }): Promise<CseStatusConfirmations> => {
+			return fetchMatomoCseStatusConfirmations({ year: input.year });
+		}),
+
+	// Distinct users per company, read from the existing `user_company` table.
+	// Aggregate output only (no SIREN / email). This structural "stock" metric
+	// cannot be produced by anonymised Matomo, hence the direct DB read.
+	getUsersPerCompany: adminProcedure.query(
+		async ({ ctx }): Promise<UsersPerCompany> => {
+			const rows = await ctx.db.execute<{
+				total_companies: number | string;
+				mono: number | string;
+				multi: number | string;
+				avg_per_company: number | string;
+				max_users: number | string;
+			}>(sql`
+				WITH per_company AS (
+					SELECT ${userCompanies.siren} AS siren,
+						COUNT(DISTINCT ${userCompanies.userId}) AS c
+					FROM ${userCompanies}
+					GROUP BY ${userCompanies.siren}
+				)
+				SELECT
+					COUNT(*)::int AS total_companies,
+					COUNT(*) FILTER (WHERE c = 1)::int AS mono,
+					COUNT(*) FILTER (WHERE c > 1)::int AS multi,
+					COALESCE(AVG(c), 0)::float AS avg_per_company,
+					COALESCE(MAX(c), 0)::int AS max_users
+				FROM per_company
+			`);
+			const row = rows[0];
+			return {
+				totalCompanies: Number(row?.total_companies ?? 0),
+				mono: Number(row?.mono ?? 0),
+				multi: Number(row?.multi ?? 0),
+				avgPerCompany: Number(row?.avg_per_company ?? 0),
+				maxUsers: Number(row?.max_users ?? 0),
+			};
+		},
+	),
 });
 function countDeclarationsWithEvent(opts: {
 	eventType: string | readonly string[];
@@ -1040,12 +1157,11 @@ function buildFunnelRows(
 	const start = numbers[0] ?? 0;
 	return steps.map((step, idx) => {
 		const count = numbers[idx] ?? 0;
-		const pctOfStart = start === 0 ? 0 : Math.round((count / start) * 100);
+		const pctOfStart = Math.round(percentageOf(count, start));
 		let pctDropFromPrev: number | null = null;
 		if (idx > 0) {
 			const prev = numbers[idx - 1] ?? 0;
-			pctDropFromPrev =
-				prev === 0 ? 0 : Math.round(((prev - count) / prev) * 100);
+			pctDropFromPrev = Math.round(percentageOf(prev - count, prev));
 		}
 		return {
 			key: step.key,

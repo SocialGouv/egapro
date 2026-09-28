@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 
-import { categoryFormSchema } from "~/modules/declaration-remuneration/schemas";
+import {
+	type CategoryFormValues,
+	categoryFormSchema,
+} from "~/modules/declaration-remuneration/schemas";
+import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
 	createDevStep5Categories,
@@ -12,26 +16,49 @@ import {
 } from "~/modules/declaration-remuneration/shared/devFillData";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { FieldErrorAlert } from "~/modules/declaration-remuneration/shared/formError/FieldErrorAlert";
+import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
+import {
+	describedByForField,
+	findFieldError,
+} from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
-import { TooltipButton } from "~/modules/declaration-remuneration/shared/TooltipButton";
 import {
 	CATEGORY_SOURCES,
-	SOURCE_LABELS,
+	formatCategorySource,
 } from "~/modules/declaration-remuneration/steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
-import { padDecimalOnBlur, padDecimalToTwo } from "~/modules/domain";
+import {
+	CATEGORY_PAY_FIELDS,
+	isCategoryPayApplicable,
+	padDecimalOnBlur,
+	padDecimalToTwo,
+	shouldRetainCategoryPayValues,
+	sumCategoryWorkforce,
+} from "~/modules/domain";
+import type { AppHref } from "~/modules/routes";
+import { getDsfrCollapse } from "~/modules/shared";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
-import { CategoryDataTable } from "./CategoryDataTable";
+import { WORKFORCE_ROWS } from "../step1/workforceRows";
+import { CategoryAccordionItem } from "./CategoryAccordionItem";
+import { categoryDataFieldId } from "./CategoryDataTable";
 import { CategoryImportExport } from "./CategoryImportExport";
+import {
+	collectCategoryPayErrors,
+	payFieldsForCountField,
+} from "./categoryPayErrors";
 import {
 	createEmptyCategory,
 	type EmployeeCategory,
 	fromDatabaseRows,
+	toCategoryHeadcounts,
 	toSubmitData,
+	withoutPayValuesWhenNotApplicable,
 } from "./categorySerializer";
 import { DeleteCategoryDialog } from "./DeleteCategoryDialog";
 
@@ -40,20 +67,57 @@ function createIdGenerator() {
 	return () => id++;
 }
 
-function toFormValues(cats: EmployeeCategory[]) {
-	return cats.map((c) => ({
-		name: c.name,
-		womenCount: c.womenCount,
-		menCount: c.menCount,
-		annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
-		annualBaseMen: padDecimalToTwo(c.annualBaseMen),
-		annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
-		annualVariableMen: padDecimalToTwo(c.annualVariableMen),
-		hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
-		hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
-		hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
-		hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
-	}));
+type FormCategory = CategoryFormValues["categories"][number];
+
+function normalizeCategoryForForm(
+	category: FormCategory,
+	preserveLegacyPay: boolean,
+): FormCategory {
+	return shouldRetainCategoryPayValues(
+		toCategoryHeadcounts(category),
+		category,
+		preserveLegacyPay,
+	)
+		? category
+		: withoutPayValuesWhenNotApplicable(category);
+}
+
+function toFormValues(
+	cats: EmployeeCategory[],
+	preserveLegacyPay: boolean,
+): FormCategory[] {
+	return cats.map((c) =>
+		normalizeCategoryForForm(
+			{
+				name: c.name,
+				womenCount: c.womenCount,
+				menCount: c.menCount,
+				hourlyWomenCount: c.hourlyWomenCount,
+				hourlyMenCount: c.hourlyMenCount,
+				annualBaseWomen: padDecimalToTwo(c.annualBaseWomen),
+				annualBaseMen: padDecimalToTwo(c.annualBaseMen),
+				annualVariableWomen: padDecimalToTwo(c.annualVariableWomen),
+				annualVariableMen: padDecimalToTwo(c.annualVariableMen),
+				hourlyBaseWomen: padDecimalToTwo(c.hourlyBaseWomen),
+				hourlyBaseMen: padDecimalToTwo(c.hourlyBaseMen),
+				hourlyVariableWomen: padDecimalToTwo(c.hourlyVariableWomen),
+				hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
+			},
+			preserveLegacyPay,
+		),
+	);
+}
+
+function normalizeFormValues(
+	values: CategoryFormValues,
+	preserveLegacyPay: boolean,
+): CategoryFormValues {
+	return {
+		source: values.source,
+		categories: values.categories.map((category) =>
+			normalizeCategoryForForm(category, preserveLegacyPay),
+		),
+	};
 }
 
 type Props = {
@@ -63,11 +127,15 @@ type Props = {
 	instructionText: string;
 	tooltipPrefix: string;
 	accordionId: string;
-	previousHref: string;
+	previousHref: AppHref;
 	initialCategories: EmployeeCategoryRow[];
 	initialSource?: string;
 	maxWomen?: number;
 	maxMen?: number;
+	hourlyMaxWomen?: number;
+	hourlyMaxMen?: number;
+	/** Reminder shown under the description on the first declaration only. */
+	reminderText?: string;
 	onSubmit: (data: EmployeeCategorySubmitData) => void;
 	isSubmitting: boolean;
 	submitError?: string | null;
@@ -75,43 +143,20 @@ type Props = {
 	referencePeriodPicker?: ReactNode;
 	descriptionText?: string;
 	disabled?: boolean;
-	mimoquageNextHref?: string;
+	readOnly?: boolean;
+	nextHref?: AppHref;
+	mimoquageNextHref?: AppHref;
 	hasDataOverride?: boolean;
 	isSavingOverride?: boolean;
 	isPendingSaveOverride?: boolean;
-	onValuesChange?: (values: {
-		source: string;
-		categories: {
-			name: string;
-			womenCount: string;
-			menCount: string;
-			annualBaseWomen: string;
-			annualBaseMen: string;
-			annualVariableWomen: string;
-			annualVariableMen: string;
-			hourlyBaseWomen: string;
-			hourlyBaseMen: string;
-			hourlyVariableWomen: string;
-			hourlyVariableMen: string;
-		}[];
-	}) => void;
-	defaultValuesOverride?: {
-		source: string;
-		categories: {
-			name: string;
-			womenCount: string;
-			menCount: string;
-			annualBaseWomen: string;
-			annualBaseMen: string;
-			annualVariableWomen: string;
-			annualVariableMen: string;
-			hourlyBaseWomen: string;
-			hourlyBaseMen: string;
-			hourlyVariableWomen: string;
-			hourlyVariableMen: string;
-		}[];
-	};
+	onValuesChange?: (values: CategoryFormValues) => void;
+	defaultValuesOverride?: CategoryFormValues;
 };
+
+const CATEGORY_ALERT_ID = "step5-categories-error";
+// The step-5 checks are form-level (a source not picked, totals that do not
+// reconcile), so they anchor on the form itself rather than on one cell.
+const CATEGORY_FORM_FIELD_ID = "step5-categories";
 
 export function CategoryForm({
 	referenceYear,
@@ -125,6 +170,9 @@ export function CategoryForm({
 	initialSource = "",
 	maxWomen,
 	maxMen,
+	hourlyMaxWomen,
+	hourlyMaxMen,
+	reminderText,
 	onSubmit,
 	isSubmitting,
 	submitError,
@@ -132,6 +180,8 @@ export function CategoryForm({
 	referencePeriodPicker,
 	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
+	readOnly = false,
+	nextHref,
 	mimoquageNextHref,
 	hasDataOverride,
 	isSavingOverride = false,
@@ -141,6 +191,7 @@ export function CategoryForm({
 }: Props) {
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
+	const preserveLegacyPay = readOnly || disabled;
 
 	const initialCats =
 		initialCategories.length > 0
@@ -148,11 +199,44 @@ export function CategoryForm({
 			: [createEmptyCategory(nextId())];
 
 	const form = useZodForm(categoryFormSchema, {
-		defaultValues: defaultValuesOverride ?? {
-			source: initialSource,
-			categories: toFormValues(initialCats),
-		},
+		defaultValues: defaultValuesOverride
+			? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
+			: {
+					source: initialSource,
+					categories: toFormValues(initialCats, preserveLegacyPay),
+				},
 	});
+	const clearNonApplicableCategoryPay = useCallback(
+		(index: number) => {
+			const category = form.getValues(`categories.${index}`);
+			if (
+				!category ||
+				isCategoryPayApplicable(toCategoryHeadcounts(category))
+			) {
+				return false;
+			}
+			let cleared = false;
+			for (const payField of CATEGORY_PAY_FIELDS) {
+				const path = `categories.${index}.${payField}` as const;
+				if (form.getValues(path) !== "") {
+					form.setValue(path, "");
+					cleared = true;
+				}
+			}
+			return cleared;
+		},
+		[form],
+	);
+
+	// Editability can change without remounting the form. Official legacy pay is
+	// preserved while non-editable, then normalized once editing becomes possible.
+	// This effect depends only on scalar state, never on the watched array.
+	useEffect(() => {
+		if (preserveLegacyPay) return;
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+	}, [clearNonApplicableCategoryPay, form, preserveLegacyPay]);
 
 	useEffect(() => {
 		if (!onValuesChange) return;
@@ -163,7 +247,7 @@ export function CategoryForm({
 		return () => sub.unsubscribe();
 	}, [form, onValuesChange]);
 
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, remove, replace } = useFieldArray({
 		control: form.control,
 		name: "categories",
 	});
@@ -172,9 +256,32 @@ export function CategoryForm({
 	const [hasDataInternal, setHasData] = useState(hasInitialData);
 	const hasData =
 		hasDataOverride !== undefined ? hasDataOverride : hasDataInternal;
-	const [workforceError, setWorkforceError] = useState("");
+	const [categoryErrors, setCategoryErrors] = useState<FieldError[]>([]);
+	const [validationAttempt, setValidationAttempt] = useState(0);
+	const [expandedByFieldId, setExpandedByFieldId] = useState<
+		Record<string, boolean>
+	>({});
 	const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 	const deleteDialogRef = useRef<HTMLDialogElement>(null);
+	const accordionHeaderRefs = useRef<Array<HTMLButtonElement | null>>([]);
+	const accordionCollapseRefs = useRef<Array<HTMLDivElement | null>>([]);
+	const pendingFocusIndex = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (pendingFocusIndex.current === null) return;
+		const index = pendingFocusIndex.current;
+		pendingFocusIndex.current = null;
+		const reveal = () => {
+			const collapse = accordionCollapseRefs.current[index];
+			if (collapse) getDsfrCollapse(collapse)?.disclose();
+			// Focus the new category's first field (the "Libellé" input) rather than
+			// the accordion header, so the user can start filling it in immediately.
+			const firstField = document.getElementById(`cat-${index}-name`);
+			(firstField ?? accordionHeaderRefs.current[index])?.focus();
+		};
+		const id = window.requestAnimationFrame(reveal);
+		return () => window.cancelAnimationFrame(id);
+	});
 
 	const closeDeleteDialog = useCallback(() => {
 		deleteDialogRef.current?.close();
@@ -189,16 +296,56 @@ export function CategoryForm({
 		return (e: React.ChangeEvent<HTMLInputElement>) => {
 			const raw = e.target.value.replace(/\s/g, "").replace(",", ".");
 			const formField = field as Exclude<keyof EmployeeCategory, "id">;
-			if (raw === "") {
-				form.setValue(`categories.${index}.${formField}`, raw);
-				setHasData(false);
-				return;
+			const changedFieldId = categoryDataFieldId(index, field);
+			// A headcount drives every pay cell of its category, a pay cell only
+			// drives its own error.
+			const isCountField = payFieldsForCountField(field).length > 0;
+			const categoryPayFieldIds = new Set(
+				isCountField
+					? CATEGORY_PAY_FIELDS.map((payField) =>
+							categoryDataFieldId(index, payField),
+						)
+					: [],
+			);
+			const releasedPayFieldIds = new Set(
+				isCountField && (raw === "" || Number.parseInt(raw, 10) === 0)
+					? payFieldsForCountField(field).map((payField) =>
+							categoryDataFieldId(index, payField),
+						)
+					: [],
+			);
+			if (raw !== "") {
+				if (isInteger && /\D/.test(raw)) return;
+				const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
+				if (Number.isNaN(n) || n < 0) return;
 			}
-			if (isInteger && /\D/.test(raw)) return;
-			const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
-			if (Number.isNaN(n) || n < 0) return;
 			form.setValue(`categories.${index}.${formField}`, raw);
+			const categoryPayApplicable = isCategoryPayApplicable(
+				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
+			);
+			setCategoryErrors((errors) =>
+				errors.filter((error) => {
+					if (error.fieldId === changedFieldId) return false;
+					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
+						return error.category === "invalid";
+					if (!categoryPayFieldIds.has(error.fieldId)) return true;
+					// A category without one sex has no pay fields to correct. A 0
+					// on just one row still releases that row's own fields (#4254).
+					return (
+						categoryPayApplicable && !releasedPayFieldIds.has(error.fieldId)
+					);
+				}),
+			);
 			setHasData(false);
+		};
+	}
+
+	function handleHeadcountBlur(index: number) {
+		return () => {
+			if (readOnly) return false;
+			// Wait until the edit is committed so a transient 0 while replacing a
+			// multi-digit count cannot irreversibly erase the remuneration values.
+			return clearNonApplicableCategoryPay(index);
 		};
 	}
 
@@ -217,13 +364,18 @@ export function CategoryForm({
 
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
-		const formEntry = toFormValues([empty])[0];
-		if (formEntry) append(formEntry);
+		const formEntry = toFormValues([empty], false)[0];
+		if (formEntry) {
+			pendingFocusIndex.current = fields.length;
+			append(formEntry);
+		}
+		setCategoryErrors([]);
 		setHasData(false);
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		form.setValue("categories", toFormValues(imported));
+		replace(toFormValues(imported, false));
+		setCategoryErrors([]);
 		setHasData(false);
 	}
 
@@ -237,7 +389,10 @@ export function CategoryForm({
 	// land at the top instead of staying near the category they just folded.
 	// Snapshot the button's viewport offset before the toggle and restore it
 	// after the next layout pass so the click feels in-place.
-	function handleAccordionToggle(e: React.MouseEvent<HTMLButtonElement>) {
+	function handleAccordionToggle(
+		e: React.MouseEvent<HTMLButtonElement>,
+		fieldId: string,
+	) {
 		const button = e.currentTarget;
 		const offsetBefore = button.getBoundingClientRect().top;
 		requestAnimationFrame(() => {
@@ -246,95 +401,193 @@ export function CategoryForm({
 			if (Math.abs(drift) > 1) {
 				window.scrollBy({ top: drift, behavior: "instant" });
 			}
+			setExpandedByFieldId((prev) => ({
+				...prev,
+				[fieldId]: button.getAttribute("aria-expanded") === "true",
+			}));
 		});
 	}
 
 	function confirmRemoveCategory() {
 		if (deleteIndex !== null) {
 			remove(deleteIndex);
+			setCategoryErrors([]);
 			setHasData(false);
 		}
 		closeDeleteDialog();
 	}
 
 	const categories = form.watch("categories");
-	const sourceError = form.formState.errors.source?.message;
+	const sourceSummaryError = findFieldError(categoryErrors, "source-select");
 
-	const handleFormSubmit = form.handleSubmit((data) => {
-		setWorkforceError("");
-
-		const emptyNames = data.categories.some((cat) => !cat.name.trim());
-		if (emptyNames) {
-			setWorkforceError(
-				"Le nom de chaque catégorie d'emplois est obligatoire.",
+	function handleErrorAnchorClick(error: FieldError) {
+		const match = /^cat-(\d+)-/.exec(error.fieldId);
+		if (!match) return;
+		const index = Number.parseInt(match[1] ?? "", 10);
+		const field = fields[index];
+		if (!field) return;
+		setExpandedByFieldId((expanded) => ({ ...expanded, [field.id]: true }));
+		requestAnimationFrame(() => {
+			const collapse = accordionCollapseRefs.current[index];
+			if (collapse) getDsfrCollapse(collapse)?.disclose();
+			requestAnimationFrame(() =>
+				document.getElementById(error.fieldId)?.focus(),
 			);
-			return;
-		}
+		});
+	}
 
-		const names = data.categories.map((cat) => cat.name.trim().toLowerCase());
-		const hasDuplicates = names.length !== new Set(names).size;
-		if (hasDuplicates) {
-			setWorkforceError(
-				"Les noms des catégories d'emplois doivent être uniques.",
-			);
-			return;
-		}
+	const handleFormSubmit = form.handleSubmit(
+		(data) => {
+			const normalizedData = normalizeFormValues(data, false);
+			setValidationAttempt((attempt) => attempt + 1);
+			setCategoryErrors([]);
 
-		if (maxWomen !== undefined || maxMen !== undefined) {
-			const totalWomen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.womenCount ? Number.parseInt(cat.womenCount, 10) : 0),
-				0,
+			const emptyNameIndex = normalizedData.categories.findIndex(
+				(cat) => !cat.name.trim(),
 			);
-			const totalMen = data.categories.reduce(
-				(sum, cat) =>
-					sum + (cat.menCount ? Number.parseInt(cat.menCount, 10) : 0),
-				0,
-			);
-
-			const errors: string[] = [];
-			if (maxWomen !== undefined && totalWomen !== maxWomen) {
-				errors.push(
-					`Le total des effectifs femmes (${totalWomen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxWomen}).`,
-				);
-			}
-			if (maxMen !== undefined && totalMen !== maxMen) {
-				errors.push(
-					`Le total des effectifs hommes (${totalMen}) ne correspond pas à l'effectif déclaré à l'étape 1 (${maxMen}).`,
-				);
-			}
-			if (errors.length > 0) {
-				setWorkforceError(errors.join(" "));
+			if (emptyNameIndex >= 0) {
+				form.setError(`categories.${emptyNameIndex}.name`, {
+					message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+				});
+				setCategoryErrors([
+					{
+						fieldId: `cat-${emptyNameIndex}-name`,
+						category: "empty",
+						message: "Le nom de chaque catégorie d'emplois est obligatoire.",
+						anchor: true,
+					},
+				]);
 				return;
 			}
-		}
 
-		onSubmit(
-			toSubmitData(
-				data.categories.map((cat, i) => ({
-					id: i,
-					...cat,
-				})),
-				data.source,
-			),
-		);
-	});
+			const names = normalizedData.categories.map((cat) =>
+				cat.name.trim().toLowerCase(),
+			);
+			const hasDuplicates = names.length !== new Set(names).size;
+			if (hasDuplicates) {
+				setCategoryErrors([
+					{
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "invalid",
+						message: "Les noms des catégories d'emplois doivent être uniques.",
+					},
+				]);
+				return;
+			}
+
+			const payErrors = collectCategoryPayErrors(normalizedData.categories);
+			if (payErrors.length > 0) {
+				setCategoryErrors(payErrors);
+				return;
+			}
+
+			const maxByBasis = {
+				annual: { women: maxWomen, men: maxMen },
+				hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
+			} as const;
+			const sums = sumCategoryWorkforce(normalizedData.categories);
+			const workforceErrors: FieldError[] = [];
+			for (const row of WORKFORCE_ROWS) {
+				for (const [sex, sexLabel] of [
+					["women", "femmes"],
+					["men", "hommes"],
+				] as const) {
+					const max = maxByBasis[row.basis][sex];
+					const total = sums[row.basis][sex];
+					if (max === undefined || total === max) continue;
+					workforceErrors.push({
+						fieldId: CATEGORY_FORM_FIELD_ID,
+						category: "inconsistent",
+						message: `Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
+					});
+				}
+			}
+			if (workforceErrors.length > 0) {
+				setCategoryErrors(workforceErrors);
+				return;
+			}
+
+			onSubmit(
+				toSubmitData(
+					normalizedData.categories.map((cat, i) => ({
+						id: i,
+						...cat,
+					})),
+					normalizedData.source,
+				),
+			);
+		},
+		(errors) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			const invalidErrors: FieldError[] = [];
+			if (errors.source) {
+				invalidErrors.push({
+					fieldId: "source-select",
+					category: "empty",
+					message:
+						errors.source.message?.toString() ??
+						"Veuillez sélectionner la source utilisée pour déterminer les catégories d'emplois.",
+					anchor: true,
+				});
+			}
+			if (Array.isArray(errors.categories)) {
+				errors.categories.forEach((categoryError, index) => {
+					if (!categoryError?.name) return;
+					invalidErrors.push({
+						fieldId: `cat-${index}-name`,
+						category: "invalid",
+						message:
+							categoryError.name.message?.toString() ??
+							"Le libellé de la catégorie d'emploi est invalide.",
+						anchor: true,
+					});
+				});
+			}
+			setCategoryErrors(invalidErrors);
+		},
+	);
+
+	function handleSubmitEvent(event: React.FormEvent<HTMLFormElement>) {
+		if (disabled || readOnly) {
+			event.preventDefault();
+			return;
+		}
+		// A keyboard submit does not necessarily blur the active headcount cell.
+		// Normalize the live form first so a failed request cannot leave stale pay
+		// in the persisted draft.
+		form.getValues("categories").forEach((_, index) => {
+			clearNonApplicableCategoryPay(index);
+		});
+		void handleFormSubmit(event);
+	}
 
 	return (
 		<form
 			autoComplete="off"
 			className={stepStyles.form}
-			onSubmit={handleFormSubmit}
+			onSubmit={handleSubmitEvent}
 		>
 			<StepTitleRow
+				devFillDisabled={disabled || readOnly}
 				hasData={hasData}
 				isPendingSave={isPendingSaveOverride}
 				isSaving={isSavingOverride}
 				onDevFill={() => {
-					if (maxWomen == null || maxMen == null) return;
-					const devCats = createDevStep5Categories(nextId, maxWomen, maxMen);
-					form.setValue("categories", toFormValues(devCats));
+					if (
+						maxWomen == null ||
+						maxMen == null ||
+						hourlyMaxWomen == null ||
+						hourlyMaxMen == null
+					) {
+						return;
+					}
+					const devCats = createDevStep5Categories(nextId, {
+						annual: { women: maxWomen, men: maxMen },
+						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
+					});
+					replace(toFormValues(devCats, false));
 					form.setValue("source", DEV_STEP5_SOURCE);
+					setCategoryErrors([]);
 					setHasData(false);
 				}}
 				title={title}
@@ -343,19 +596,44 @@ export function CategoryForm({
 			{stepper}
 
 			<div className={stepStyles.categoryBlock}>
-				<p className="fr-mb-0">{descriptionText}</p>
-
-				{readOnlyLabel ? (
+				<p className="fr-mb-0">
+					{descriptionText}
+					{reminderText ? (
+						<>
+							<br />
+							{reminderText}
+						</>
+					) : null}
+				</p>
+				{readOnlyLabel && (
 					<p className="fr-mb-0">
 						Source utilisée pour déterminer les catégories d&apos;emplois :{" "}
 						<span className="fr-text--bold">
-							{SOURCE_LABELS[form.watch("source")] ?? form.watch("source")}
+							{formatCategorySource(form.watch("source"))}
 						</span>
 					</p>
-				) : (
+				)}
+				<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
+
+				{referencePeriodPicker ?? (
+					<div className={stepStyles.categoryHeader}>
+						<p className="fr-mb-0">
+							Période de référence pour le calcul des indicateurs :{" "}
+							<span className={stepStyles.periodDate}>
+								01/01/{referenceYear} - 31/12/{referenceYear}.
+							</span>
+						</p>
+						<TooltipButton
+							id={`${tooltipPrefix}-period`}
+							label="Information sur la période de référence"
+						/>
+					</div>
+				)}
+
+				{!readOnlyLabel && (
 					<div
 						className={`fr-select-group ${
-							sourceError ? "fr-select-group--error" : ""
+							sourceSummaryError ? "fr-select-group--error" : ""
 						} ${stepStyles.sourceSelectGroup}`}
 					>
 						<label className="fr-label" htmlFor="source-select">
@@ -363,16 +641,23 @@ export function CategoryForm({
 							d&apos;emplois ?
 						</label>
 						<select
-							aria-describedby={sourceError ? "source-error" : undefined}
-							aria-invalid={Boolean(sourceError)}
+							aria-describedby={describedByForField(
+								CATEGORY_ALERT_ID,
+								sourceSummaryError,
+							)}
+							aria-invalid={sourceSummaryError ? true : undefined}
 							className="fr-select"
-							disabled={disabled}
+							disabled={disabled || readOnly}
 							id="source-select"
 							{...form.register("source")}
 							onChange={(e) => {
 								form.setValue("source", e.target.value, {
 									shouldValidate: true,
 								});
+								form.clearErrors("source");
+								setCategoryErrors((errors) =>
+									errors.filter((error) => error.fieldId !== "source-select"),
+								);
 								setHasData(false);
 							}}
 						>
@@ -385,24 +670,6 @@ export function CategoryForm({
 								</option>
 							))}
 						</select>
-						{sourceError && (
-							<p className="fr-error-text" id="source-error">
-								{sourceError}
-							</p>
-						)}
-					</div>
-				)}
-
-				{referencePeriodPicker ?? (
-					<div className={stepStyles.categoryHeader}>
-						<p className="fr-mb-0">
-							Période de référence pour le calcul des indicateurs : 01/01/
-							{referenceYear} - 31/12/{referenceYear}.
-						</p>
-						<TooltipButton
-							id={`${tooltipPrefix}-period`}
-							label="Information sur la période de référence"
-						/>
 					</div>
 				)}
 			</div>
@@ -417,122 +684,106 @@ export function CategoryForm({
 						label="Information sur la saisie"
 					/>
 				</div>
-				<div className={stepStyles.obligatoiresRow}>
-					<p className="fr-mb-0">Tous les champs sont obligatoires.</p>
-					{!readOnlyLabel && (
-						<CategoryImportExport
-							disabled={disabled}
-							onImport={handleImportCategories}
-						/>
-					)}
-				</div>
-			</div>
-
-			<div className="fr-accordions-group" data-fr-group="false">
-				{fields.map((field, index) => {
-					const cat = categories[index];
-					const collapseId = `${baseId}-accordion-${index}`;
-					const headingId = `${collapseId}-heading`;
-					const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
-					const catName = cat?.name?.trim() ?? "";
-					const categoryLabel = catName
-						? `${categoryNumber} : ${catName}`
-						: categoryNumber;
-
-					return (
-						<section
-							aria-labelledby={headingId}
-							className="fr-accordion"
-							key={field.id}
-						>
-							<h2 className="fr-accordion__title">
-								<button
-									aria-controls={collapseId}
-									aria-expanded="true"
-									className="fr-accordion__btn"
-									id={headingId}
-									onClick={handleAccordionToggle}
-									type="button"
-								>
-									{categoryLabel}
-								</button>
-							</h2>
-							<div
-								className="fr-collapse fr-collapse--expanded"
-								id={collapseId}
-							>
-								<div className={stepStyles.categoryBlock}>
-									{readOnlyLabel ? (
-										<p className="fr-mb-0">
-											<span className="fr-text--bold">Libellé : </span>
-											{cat?.name}
-										</p>
-									) : (
-										<div className="fr-input-group fr-mb-0">
-											<label className="fr-label" htmlFor={`cat-${index}-name`}>
-												Libellé
-											</label>
-											<input
-												className="fr-input"
-												disabled={disabled}
-												id={`cat-${index}-name`}
-												{...form.register(`categories.${index}.name`)}
-												onChange={(e) => {
-													form.setValue(
-														`categories.${index}.name`,
-														e.target.value,
-													);
-													setHasData(false);
-												}}
-												type="text"
-											/>
-										</div>
-									)}
-
-									<CategoryDataTable
-										category={
-											cat ? { id: index, ...cat } : createEmptyCategory(index)
-										}
-										categoryIndex={index}
-										disabled={disabled}
-										onDecimalBlur={handleDecimalBlur}
-										onPositiveNumberChange={handlePositiveNumberChange}
-									/>
-
-									{!readOnlyLabel && fields.length > 1 && (
-										<div className={stepStyles.deleteRow}>
-											<button
-												className="fr-btn fr-btn--tertiary fr-icon-delete-line fr-btn--icon-left fr-btn--sm"
-												disabled={disabled}
-												onClick={() => askRemoveCategory(index)}
-												type="button"
-											>
-												Supprimer
-											</button>
-										</div>
-									)}
-								</div>
-							</div>
-						</section>
-					);
-				})}
-			</div>
-
-			<div className={stepStyles.categoryFooter}>
-				<p className="fr-text--bold fr-mb-0">
-					Nombre de catégories : {fields.length}
-				</p>
 				{!readOnlyLabel && (
-					<button
-						className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
-						disabled={disabled}
-						onClick={addCategory}
-						type="button"
-					>
-						Ajouter une catégorie d&apos;emplois
-					</button>
+					<CategoryImportExport
+						disabled={disabled || readOnly}
+						onImport={handleImportCategories}
+					/>
 				)}
 			</div>
+
+			<fieldset
+				className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
+				id={CATEGORY_FORM_FIELD_ID}
+			>
+				<legend className="fr-sr-only">Catégories d&apos;emplois</legend>
+				<div className="fr-accordions-group" data-fr-group="false">
+					{fields.map((field, index) => {
+						const cat = categories[index];
+						// Preserve the official values of legacy locked declarations that
+						// predate #3678; editable and newly saved categories are normalized.
+						const payApplicable = cat
+							? shouldRetainCategoryPayValues(
+									toCategoryHeadcounts(cat),
+									cat,
+									preserveLegacyPay,
+								)
+							: true;
+						return (
+							<CategoryAccordionItem
+								baseId={baseId}
+								category={
+									cat ? { id: index, ...cat } : createEmptyCategory(index)
+								}
+								collapseRef={(node) => {
+									accordionCollapseRefs.current[index] = node;
+								}}
+								disabled={disabled}
+								errorAlertId={CATEGORY_ALERT_ID}
+								errors={categoryErrors}
+								fieldId={field.id}
+								headerRef={(node) => {
+									accordionHeaderRefs.current[index] = node;
+								}}
+								index={index}
+								isExpanded={expandedByFieldId[field.id] ?? true}
+								key={field.id}
+								nameError={
+									form.formState.errors.categories?.[index]?.name?.message
+								}
+								nameProps={{
+									...form.register(`categories.${index}.name`),
+									onChange: (e) => {
+										form.setValue(`categories.${index}.name`, e.target.value);
+										form.clearErrors(`categories.${index}.name`);
+										setCategoryErrors((errors) =>
+											errors.filter(
+												(error) =>
+													error.fieldId !== `cat-${index}-name` &&
+													(error.fieldId !== CATEGORY_FORM_FIELD_ID ||
+														error.category !== "invalid"),
+											),
+										);
+										setHasData(false);
+									},
+								}}
+								onAccordionToggle={(e) => handleAccordionToggle(e, field.id)}
+								onAskRemove={askRemoveCategory}
+								onDecimalBlur={handleDecimalBlur}
+								onHeadcountBlur={handleHeadcountBlur}
+								onPositiveNumberChange={handlePositiveNumberChange}
+								payApplicable={payApplicable}
+								readOnly={readOnly}
+								readOnlyLabel={readOnlyLabel}
+								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}
+							/>
+						);
+					})}
+				</div>
+
+				<div className={stepStyles.categoryFooter}>
+					<p className="fr-text--bold fr-mb-0">
+						Nombre de catégories : {fields.length}
+					</p>
+					{!readOnlyLabel && (
+						<button
+							className="fr-btn fr-btn--secondary fr-icon-add-line fr-btn--icon-left"
+							disabled={disabled || readOnly}
+							onClick={addCategory}
+							type="button"
+						>
+							Ajouter une catégorie d&apos;emplois
+						</button>
+					)}
+				</div>
+			</fieldset>
+
+			<FieldErrorAlert
+				errors={categoryErrors}
+				id={CATEGORY_ALERT_ID}
+				onErrorAnchorClick={handleErrorAnchorClick}
+				validationAttempt={validationAttempt}
+			/>
 
 			<DefinitionAccordion
 				id={accordionId}
@@ -565,14 +816,13 @@ export function CategoryForm({
 				</div>
 			</DefinitionAccordion>
 
-			<FormErrors
-				mutationError={submitError}
-				validationError={workforceError}
-			/>
+			<FormErrors mutationError={submitError} />
 
 			<FormActions
+				className="fr-mt-0"
 				isSubmitting={isSubmitting}
 				mimoquageNextHref={mimoquageNextHref}
+				nextHref={nextHref}
 				previousHref={previousHref}
 			/>
 

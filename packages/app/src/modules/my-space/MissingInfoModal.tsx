@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useIsImpersonating } from "~/modules/auth";
@@ -10,8 +11,11 @@ import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 
 import { DECLARATION_PROCESS_PANEL_ID } from "./DeclarationProcessPanel";
-import styles from "./DeclarationProcessPanel.module.scss";
+import panelStyles from "./DeclarationProcessPanel.module.scss";
+import styles from "./MissingInfoModal.module.scss";
+import { REPRESENTATION_PROCESS_PANEL_ID } from "./RepresentationProcessPanel";
 import { createMissingInfoSchema } from "./schemas";
+import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MISSING_INFO_PANEL_ID = "missing-info-modal";
 const PANEL_TITLE_ID = "missing-info-modal-title";
@@ -20,6 +24,7 @@ type Props = {
 	siren: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
 };
 
 function getDescription(needsPhone: boolean, needsCse: boolean): string {
@@ -34,12 +39,18 @@ function getDescription(needsPhone: boolean, needsCse: boolean): string {
 
 type OpenerType = "remuneration" | "representation";
 
-export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
+export function MissingInfoModal({
+	siren,
+	userPhone,
+	hasCse,
+	cseApplicable,
+}: Props) {
 	const isImpersonating = useIsImpersonating();
+	const router = useRouter();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const openerTypeRef = useRef<OpenerType>("remuneration");
 	const needsPhone = !userPhone;
-	const needsCse = hasCse === null;
+	const needsCse = cseApplicable && hasCse === null;
 
 	const schema = useMemo(
 		() => createMissingInfoSchema(needsPhone, needsCse),
@@ -54,7 +65,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 	const cseError = form.formState.errors.hasCse?.message ?? null;
 
 	const updatePhoneMutation = api.profile.updatePhone.useMutation();
-	const updateHasCseMutation = api.company.updateHasCse.useMutation();
+	const updateHasCseMutation = useUpdateHasCse();
 
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
@@ -97,26 +108,24 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 				const hasCseValue = data.hasCse as boolean;
 				await updateHasCseMutation.mutateAsync({ siren, hasCse: hasCseValue });
 			}
-			if (openerTypeRef.current === "remuneration") {
-				// Register listener BEFORE closing so we catch the dsfr.conceal event
-				const dialog = dialogRef.current;
-				if (dialog) {
-					dialog.addEventListener(
-						"dsfr.conceal",
-						() => {
-							const panel = document.getElementById(
-								DECLARATION_PROCESS_PANEL_ID,
-							);
-							if (panel) getDsfrModal(panel)?.disclose();
-						},
-						{ once: true },
-					);
-				}
-				closeModal();
-			} else {
-				closeModal();
-				window.location.href = `/declaration-remuneration?siren=${siren}`;
+			router.refresh();
+			// Register listener BEFORE closing so we catch the dsfr.conceal event
+			const dialog = dialogRef.current;
+			if (dialog) {
+				const targetPanelId =
+					openerTypeRef.current === "remuneration"
+						? DECLARATION_PROCESS_PANEL_ID
+						: REPRESENTATION_PROCESS_PANEL_ID;
+				dialog.addEventListener(
+					"dsfr.conceal",
+					() => {
+						const panel = document.getElementById(targetPanelId);
+						if (panel) getDsfrModal(panel)?.disclose();
+					},
+					{ once: true },
+				);
 			}
+			closeModal();
 		} catch {
 			setSubmitError(
 				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
@@ -137,12 +146,12 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 		<dialog
 			aria-labelledby={PANEL_TITLE_ID}
 			aria-modal="true"
-			className={`fr-modal ${styles.sidePanel}`}
+			className={`fr-modal ${panelStyles.sidePanel}`}
 			id={MISSING_INFO_PANEL_ID}
 			ref={dialogRef}
 		>
-			<div className={styles.panelContainer}>
-				<div className={styles.panelHeader}>
+			<div className={panelStyles.panelContainer}>
+				<div className={panelStyles.panelHeader}>
 					<button
 						aria-controls={MISSING_INFO_PANEL_ID}
 						className="fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-btn--icon-right fr-icon-close-line"
@@ -152,13 +161,16 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 						Fermer
 					</button>
 				</div>
-				<div className={styles.panelContent}>
+				<div className={panelStyles.panelContent}>
 					<div>
 						<h2 className="fr-h5 fr-mb-3w" id={PANEL_TITLE_ID}>
 							Informations manquantes
 						</h2>
 						<p className="fr-text--regular fr-mb-3w">
 							{getDescription(needsPhone, needsCse)}
+						</p>
+						<p className="fr-text--regular fr-text-title--grey fr-mb-3w">
+							Tous les champs sont obligatoires.
 						</p>
 						{needsPhone && (
 							<PhoneField
@@ -173,13 +185,15 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 									cseError ? "missing-info-cse-error" : undefined
 								}
 								className={
-									cseError ? "fr-fieldset fr-fieldset--error" : "fr-fieldset"
+									cseError
+										? `fr-fieldset fr-fieldset--error ${styles.cseFieldset}`
+										: `fr-fieldset ${styles.cseFieldset}`
 								}
 							>
 								<legend className="fr-fieldset__legend fr-text--regular">
 									Un CSE a-t-il été mis en place dans votre entreprise ?
 								</legend>
-								<div className="fr-fieldset__element">
+								<div className="fr-fieldset__element fr-fieldset__element--inline">
 									<div className="fr-radio-group fr-radio-rich">
 										<input
 											id="missing-info-cse-yes"
@@ -192,7 +206,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 										</label>
 									</div>
 								</div>
-								<div className="fr-fieldset__element">
+								<div className="fr-fieldset__element fr-fieldset__element--inline">
 									<div className="fr-radio-group fr-radio-rich">
 										<input
 											id="missing-info-cse-no"
@@ -217,21 +231,18 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 							</fieldset>
 						)}
 						{submitError && (
-							<div
-								aria-live="polite"
-								className="fr-alert fr-alert--error fr-mt-2w"
-							>
+							<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
 								<p>{submitError}</p>
 							</div>
 						)}
 					</div>
 					<div>
-						<div className={styles.helpSection}>
+						<div className={panelStyles.helpSection}>
 							<hr className="fr-hr" />
 							<p className="fr-text--lg fr-text--bold fr-mb-0">
 								Pour vous aider
 							</p>
-							<div className={styles.helpLinks}>
+							<div className={panelStyles.helpLinks}>
 								<button className="fr-link" type="button">
 									Détail des étapes
 								</button>
@@ -240,7 +251,7 @@ export function MissingInfoModal({ siren, userPhone, hasCse }: Props) {
 								</button>
 							</div>
 						</div>
-						<div className={styles.footer}>
+						<div className={panelStyles.footer}>
 							<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
 								<li>
 									<button

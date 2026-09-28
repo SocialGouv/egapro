@@ -1,6 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step3VariablePay } from "../Step3VariablePay";
 
 const mockMutate = vi.fn();
@@ -33,11 +38,16 @@ const emptyStep3Data = () => ({
 });
 
 describe("Step3VariablePay", () => {
+	beforeEach(() => {
+		mockMutate.mockClear();
+	});
+
 	it("renders the pay gap table with 4 rows", () => {
 		render(
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -47,11 +57,28 @@ describe("Step3VariablePay", () => {
 		expect(screen.getByText("Horaire brute médiane")).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", {
+				name: "Rémunérations variables ou complémentaires",
+			}),
+		).toBeInTheDocument();
+	});
+
 	it("renders the beneficiaries table with workforce totals", () => {
 		render(
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={60}
 				maxWomen={50}
@@ -68,6 +95,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -86,6 +114,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -101,6 +130,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					indicatorBAnnualWomen: "100",
 					indicatorBAnnualMen: "200",
@@ -123,6 +153,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -135,6 +166,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -162,6 +194,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -175,7 +208,7 @@ describe("Step3VariablePay", () => {
 		await user.type(menInput, "100");
 
 		// Gap = 5.0 %
-		expect(screen.getByText("5,0 %")).toBeInTheDocument();
+		expect(screen.getByText("5,00 %")).toBeInTheDocument();
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
@@ -185,6 +218,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -201,12 +235,13 @@ describe("Step3VariablePay", () => {
 		expect(menInput).toHaveValue("20");
 	});
 
-	it("blocks beneficiary count exceeding max workforce", async () => {
+	it("blocks beneficiary count exceeding max workforce, keeping the typed value visible", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -218,8 +253,259 @@ describe("Step3VariablePay", () => {
 		await user.clear(womenInput);
 		await user.type(womenInput, "20");
 
-		// Should show validation error since 20 > 15
-		expect(screen.getByText(/ne peut pas dépasser/i)).toBeInTheDocument();
+		// The error message must name the value the field actually shows.
+		expect(womenInput).toHaveValue("20");
+		expect(
+			screen.getByText(
+				"Le nombre de femmes bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (15).",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("lets an over-max beneficiary value be corrected downward via backspace", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+		expect(womenInput).toHaveValue("20");
+
+		await user.type(womenInput, "{backspace}");
+		expect(womenInput).toHaveValue("2");
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
+	});
+
+	it("blocks submit when a beneficiary value exceeding max workforce was set outside a keystroke", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={{
+					indicatorBAnnualWomen: "100",
+					indicatorBAnnualMen: "100",
+					indicatorBHourlyWomen: "100",
+					indicatorBHourlyMen: "100",
+					indicatorDAnnualWomen: "100",
+					indicatorDAnnualMen: "100",
+					indicatorDHourlyWomen: "100",
+					indicatorDHourlyMen: "100",
+					indicatorEWomen: "20",
+					indicatorEMen: "10",
+				}}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		expect(womenInput).toHaveValue("20");
+
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(
+			screen.getByText(
+				"Le nombre de femmes bénéficiaires ne peut pas dépasser l'effectif de l'étape 1 (15).",
+			),
+		).toBeInTheDocument();
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("associates the beneficiaries error with the women input (RGAA 11.10)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
+		expect(womenInput).toHaveAttribute(
+			"aria-describedby",
+			"step3-beneficiaries-error-invalid",
+		);
+		expect(menInput).not.toHaveAttribute("aria-invalid");
+		expect(menInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
+			"id",
+			"step3-beneficiaries-error-invalid",
+		);
+	});
+
+	it("associates the beneficiaries error with the men input (RGAA 11.10)", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
+
+		await user.clear(menInput);
+		await user.type(menInput, "30");
+
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+		expect(menInput).toHaveAttribute(
+			"aria-describedby",
+			"step3-beneficiaries-error-invalid",
+		);
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.getByText(/ne peut pas dépasser/i)).toHaveAttribute(
+			"id",
+			"step3-beneficiaries-error-invalid",
+		);
+	});
+
+	it("clears the error association once the value is valid again", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "20");
+		expect(womenInput).toHaveAttribute("aria-invalid", "true");
+
+		await user.clear(womenInput);
+		await user.type(womenInput, "10");
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(womenInput).not.toHaveAttribute("aria-describedby");
+		expect(screen.queryByText(/ne peut pas dépasser/i)).not.toBeInTheDocument();
+	});
+
+	it("keeps the other beneficiary error when one sex is corrected", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+				maxMen={25}
+				maxWomen={15}
+			/>,
+		);
+		const womenInput = screen.getByLabelText("Bénéficiaires femmes");
+		const menInput = screen.getByLabelText("Bénéficiaires hommes");
+		await user.type(womenInput, "20");
+		await user.type(menInput, "30");
+
+		expect(womenInput).toHaveClass("fr-input--error");
+		expect(menInput).toHaveClass("fr-input--error");
+		await user.clear(womenInput);
+		await user.type(womenInput, "10");
+
+		expect(womenInput).not.toHaveAttribute("aria-invalid");
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Le nombre d'hommes bénéficiaires ne peut pas dépasser",
+		);
+	});
+
+	it("clears only the corrected pay amount after submit", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
+		await user.type(womenInput, "100");
+
+		await waitFor(() => expect(womenInput).not.toHaveAttribute("aria-invalid"));
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("places each prefill source before its alert and focuses the first error block", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step3VariablePay
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: nullGipStep4(),
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				indicatorGRequired
+				initialData={emptyStep3Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const sources = Array.from(
+			document.querySelectorAll<HTMLElement>("p.fr-text-mention--grey"),
+		);
+		const alerts = screen.getAllByRole("alert");
+		expect(sources).toHaveLength(2);
+		expect(alerts).toHaveLength(2);
+		for (const index of [0, 1]) {
+			const source = sources[index];
+			const alert = alerts[index];
+			expect(source).toBeDefined();
+			expect(alert).toBeDefined();
+			expect(
+				(source as HTMLElement).compareDocumentPosition(alert as HTMLElement) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
+		}
+		await waitFor(() => expect(alerts[0]).toHaveFocus());
+		expect(alerts[1]).not.toHaveFocus();
 	});
 
 	it("renders previous link pointing to step 2", () => {
@@ -227,6 +513,7 @@ describe("Step3VariablePay", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -242,18 +529,15 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
 					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "5000",
 						annualMeanMen: "7000",
 						hourlyMeanWomen: "2.50",
@@ -265,21 +549,11 @@ describe("Step3VariablePay", () => {
 						beneficiaryCountWomen: 45,
 						beneficiaryCountMen: 60,
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -297,44 +571,23 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
 					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "900",
 						annualMeanMen: "1000",
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);
@@ -351,44 +604,24 @@ describe("Step3VariablePay", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 80, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
+					step1: {
+						totalWomen: 80,
+						totalMen: 100,
+						hourlyWomen: 80,
+						hourlyMen: 100,
 					},
+					step2: nullGipStep2(),
 					step3: {
+						...nullGipStep3(),
 						annualMeanWomen: "900",
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
 						beneficiaryCountWomen: 0,
 						beneficiaryCountMen: 0,
 					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep3Data()}
 			/>,
 		);

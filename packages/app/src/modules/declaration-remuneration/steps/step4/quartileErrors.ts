@@ -1,4 +1,5 @@
 import type { QuartileTuple } from "~/modules/declaration-remuneration";
+import type { FieldErrorCategory } from "../../shared/formError/types";
 import type { QuartileFieldErrors } from "./QuartileTable";
 
 export type TableType = "annual" | "hourly";
@@ -20,6 +21,7 @@ export type FieldErrorMap = Record<
 >;
 
 export type RecapEntry = {
+	category: FieldErrorCategory;
 	id: string;
 	label: string;
 };
@@ -159,6 +161,9 @@ export function buildRecap(errors: FieldErrorMap): RecapEntry[] {
 							: "Effectif hommes";
 				const ordinal = `${i + 1}${i === 0 ? "er" : "e"}`;
 				out.push({
+					category: message.includes("strictement croissants")
+						? "invalid"
+						: "empty",
 					id,
 					label: `${fieldLabel} ${ordinal} quartile (${TABLE_LABEL[table]}) — ${message}`,
 				});

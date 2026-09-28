@@ -242,242 +242,242 @@
 	{
 		"siren": "542034327",
 		"name": "BP FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "403609779",
 		"name": "SHURGARD FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "775675598",
 		"name": "ECLAIREUSES ET ECLAIREURS DE FRANCE (EEDF)",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "899697957",
 		"name": "JOTT FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "775682024",
 		"name": "SCOUTS ET GUIDES DE FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "378047500",
 		"name": "B & B HOTELS FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "804354264",
 		"name": "APM FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "331790436",
 		"name": "FRANCE INCENDIE (SCUTUM INCENDIE)",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "833859986",
 		"name": "L.D.M. FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "501527303",
 		"name": "INTERCHANGE FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "822949293",
 		"name": "ONLY STORES FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "511709677",
 		"name": "ADENES FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "997536818",
 		"name": "MIDAS FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "500492004",
 		"name": "BDO FRANCE (BDO) (BDO)",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "380744870",
 		"name": "KFC FRANCE SAS",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "434704201",
 		"name": "SKECHERS USA FRANCE (SKECHERS)",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "841219702",
 		"name": "L'INNOMINATO FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "797610730",
 		"name": "EDPR FRANCE HOLDING",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "341515047",
 		"name": "WASHTEC FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "791016108",
 		"name": "SUPERDRY FRANCE",
-		"workforce": 150,
+		"workforce": null,
 		"bucket": "medium-100"
 	},
 	{
 		"siren": "442154456",
 		"name": "KITSUNE FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "351322722",
 		"name": "RISO FRANCE SA",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "433464997",
 		"name": "FRANCE MENUISIERS (LE ROI DE LA FENETRE - FERMETURES DU PORHOET)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "377791223",
 		"name": "ASICS FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "327753281",
 		"name": "BELFOR (FRANCE)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "552146425",
 		"name": "VINK FRANCE (VINK TUYAUTERIE INDUSTRIELLE VTI) (SCERT)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "378619209",
 		"name": "XPO MAINTENANCE FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "301364824",
 		"name": "ECONOCOM FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "492842729",
 		"name": "AESOP FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "491498291",
 		"name": "INTS FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "602058653",
 		"name": "PPG ILE DE FRANCE (PPG IDF)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "753625268",
 		"name": "K-WAY FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "393602685",
 		"name": "TOD'S FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "493473003",
 		"name": "RIA FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "517780870",
 		"name": "ACUITIS FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "302208616",
 		"name": "FRANCE DISTRIBUTION",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "312285133",
 		"name": "LINDAB FRANCE",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "333784262",
 		"name": "E.S.I. FRANCE (ESI)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "542015516",
 		"name": "DUFRY FRANCE SA",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "487734691",
 		"name": "ETNA FRANCE (ETNALIFT ; ETNADIRECT)",
-		"workforce": 150,
-		"bucket": "medium-100"
+		"workforce": null,
+		"bucket": "medium-150"
 	},
 	{
 		"siren": "592033930",

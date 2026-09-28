@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildRobots } from "../robots";
+import { buildMetadataRobots, buildRobots } from "../robots";
 
 const BASE_URL = "https://egapro.travail.gouv.fr";
 
@@ -49,5 +49,15 @@ describe("buildRobots", () => {
 		expect(rule?.disallow).toBe("/");
 		expect(rule?.allow).toBeUndefined();
 		expect(robots.sitemap).toBeUndefined();
+	});
+});
+
+describe("buildMetadataRobots", () => {
+	it("emits no directive in prod so pages stay indexable", () => {
+		expect(buildMetadataRobots(true)).toBeUndefined();
+	});
+
+	it("marks pages noindex outside of prod", () => {
+		expect(buildMetadataRobots(false)).toEqual({ follow: false, index: false });
 	});
 });

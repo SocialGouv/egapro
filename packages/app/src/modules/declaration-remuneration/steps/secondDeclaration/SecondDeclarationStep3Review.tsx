@@ -1,62 +1,68 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { NextStepsBox } from "~/modules/declaration-remuneration/shared/NextStepsBox";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { SubmitDeclarationModal } from "~/modules/declaration-remuneration/shared/SubmitDeclarationModal";
+import { getSubmissionErrorMessage } from "~/modules/declaration-remuneration/shared/submissionErrorMessage";
+import { useRefreshAfterSubmissionError } from "~/modules/declaration-remuneration/shared/useRefreshAfterSubmissionError";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
-import { GAP_ALERT_THRESHOLD } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
+import {
+	type DeclarationFsmStatus,
+	hasHighGap,
+	isSecondDeclarationWritable,
+} from "~/modules/domain";
+import {
+	getCurrentStageHref,
+	getPostComplianceDestination,
+} from "~/modules/navigation";
+import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
-import { GapColumn } from "../step6/GapColumn";
+import { GapBadge } from "../step6/GapBadge";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
-import { BASE_PATH } from "./constants";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
 type Props = {
+	cseApplicable: boolean;
+	cseOpinionRequired: boolean;
 	declarationYear: number;
-	hasCse: boolean | null;
+	secondDeclarationSubmissionCount: number;
 	secondDeclarationCategories: EmployeeCategoryRow[];
 	siren: string;
+	status: DeclarationFsmStatus | null;
 };
 
 export function SecondDeclarationStep3Review({
+	cseApplicable,
+	cseOpinionRequired,
 	declarationYear,
-	hasCse,
+	secondDeclarationSubmissionCount,
 	secondDeclarationCategories,
 	siren,
+	status,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-
-	const parsed = parseEmployeeCategories(secondDeclarationCategories);
-	const gapsExist = parsed.some(
-		(cat) =>
-			(cat.annualBaseGap !== null &&
-				cat.annualBaseGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.annualVariableGap !== null &&
-				cat.annualVariableGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.hourlyBaseGap !== null &&
-				cat.hourlyBaseGap >= GAP_ALERT_THRESHOLD) ||
-			(cat.hourlyVariableGap !== null &&
-				cat.hourlyVariableGap >= GAP_ALERT_THRESHOLD),
+	const isWritable = isSecondDeclarationWritable(status);
+	const submissionAttemptFingerprintRef = useRef(
+		secondDeclarationSubmissionCount,
 	);
 
-	const mutation = api.declaration.submitSecondDeclaration.useMutation({
-		onSuccess: () => {
-			if (gapsExist) {
-				router.push(BASE_PATH);
-			} else {
-				router.push(getPostComplianceDestination(hasCse));
-			}
-		},
-	});
+	const parsed = parseEmployeeCategories(secondDeclarationCategories);
+	const gapsExist = parsed.some((cat) =>
+		hasHighGap([
+			cat.annualBaseGap,
+			cat.annualVariableGap,
+			cat.hourlyBaseGap,
+			cat.hourlyVariableGap,
+		]),
+	);
 
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
@@ -69,11 +75,47 @@ export function SecondDeclarationStep3Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const completeSubmission = useCallback(() => {
+		closeModal();
+		if (gapsExist) {
+			router.push(COMPLIANCE_PATH);
+		} else {
+			router.push(getPostComplianceDestination(cseOpinionRequired));
+		}
+	}, [closeModal, cseOpinionRequired, gapsExist, router]);
+	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
+	const mutation = api.declaration.submitSecondDeclaration.useMutation({
+		networkMode: "always",
+		onSuccess: completeSubmission,
+		onError: refreshAfterSubmissionError,
+	});
+	const submittedDespiteError =
+		mutation.isError &&
+		mutation.error?.data?.code !== "CONFLICT" &&
+		mutation.error?.data?.code !== "FORBIDDEN" &&
+		secondDeclarationSubmissionCount > submissionAttemptFingerprintRef.current;
+	useEffect(() => {
+		if (submittedDespiteError) completeSubmission();
+	}, [submittedDespiteError, completeSubmission]);
+	const handleCloseModal = () => {
+		if (mutation.isPending) return;
+		mutation.reset();
+		closeModal();
+	};
+	const submissionError = getSubmissionErrorMessage(mutation.error);
+	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
+	const showSubmitModal = isWritable || mutation.isError || mutation.isPending;
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
+		if (!isWritable) return;
 		openModal();
 	}
+
+	const nextHref = isWritable
+		? undefined
+		: getCurrentStageHref(status, cseOpinionRequired);
+	const nextLabel = isWritable ? SUBMIT_LABEL : "Suivant";
 
 	return (
 		<form
@@ -83,55 +125,60 @@ export function SecondDeclarationStep3Review({
 		>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-					salariés
+					Parcours de mise en conformité pour l&apos;indicateur
+					par&nbsp;catégories de salariés
 				</h1>
 				<SavedIndicator hasData={true} />
 			</div>
 
 			<SecondDeclarationStepIndicator currentStep={3} />
 
-			<p className={`fr-mb-0 ${common.mentionGrey}`}>
+			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre seconde déclaration des écarts de rémunération par
-				catégorie de salariés aux services du ministère chargé du travail.
+				transmettre votre seconde déclaration des écarts de rémunération par
+				catégories de salariés aux services du ministère chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateurs par catégorie de salariés</h2>
+			<h2 className="fr-h5 fr-mb-0">Indicateur par catégories de salariés</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">
-					Écart de rémunération par catégories de salariés (salaire de base et
-					primes)
+					Écart de rémunération par catégories de salariés
 				</CardTitle>
 				{parsed.length > 0 ? (
 					parsed.map((cat) => (
 						<div key={cat.index}>
-							<p className="fr-text--bold fr-mb-0">
-								[Catégorie d&apos;emplois n°{cat.index + 1}]
+							<p className="fr-text--sm fr-text--bold fr-mb-0">
+								Catégorie d&apos;emplois n°{cat.index + 1} : {cat.name}
 							</p>
 							<div className={stepStyles.sideBySide}>
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.annualBaseGap },
-										{
-											label: "Composantes variables ou complémentaires",
-											gap: cat.annualVariableGap,
-										},
-									]}
-									title="Annuelle brute"
-								/>
+								<div className={stepStyles.column}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										Annuelle brute
+									</p>
+									<div className={stepStyles.gapGrid}>
+										<p className="fr-text--sm fr-mb-0">Salaire de base</p>
+										<p className="fr-text--sm fr-mb-0">
+											Composantes variables ou complémentaires
+										</p>
+										<GapBadge gap={cat.annualBaseGap} />
+										<GapBadge gap={cat.annualVariableGap} />
+									</div>
+								</div>
 								<div className={stepStyles.verticalSeparator} />
-								<GapColumn
-									columns={[
-										{ label: "Salaire de base", gap: cat.hourlyBaseGap },
-										{
-											label: "Composantes variables ou complémentaires",
-											gap: cat.hourlyVariableGap,
-										},
-									]}
-									title="Horaire brute"
-								/>
+								<div className={stepStyles.column}>
+									<p className="fr-text--bold fr-text--sm fr-mb-0">
+										Horaire brute
+									</p>
+									<div className={stepStyles.gapGrid}>
+										<p className="fr-text--sm fr-mb-0">Salaire de base</p>
+										<p className="fr-text--sm fr-mb-0">
+											Composantes variables ou complémentaires
+										</p>
+										<GapBadge gap={cat.hourlyBaseGap} />
+										<GapBadge gap={cat.hourlyVariableGap} />
+									</div>
+								</div>
 							</div>
 						</div>
 					))
@@ -143,24 +190,35 @@ export function SecondDeclarationStep3Review({
 			</div>
 
 			<NextStepsBox
+				cseApplicable={cseApplicable}
+				cseOpinionRequired={cseOpinionRequired}
 				hasGapsAboveThreshold={gapsExist}
 				isSecondDeclaration
 				siren={siren}
 			/>
 
 			<FormActions
-				nextLabel="Soumettre"
-				previousHref={`${BASE_PATH}/etape/2`}
+				className="fr-mt-0"
+				nextHref={nextHref}
+				nextLabel={nextLabel}
+				previousHref={complianceStepHref(2)}
 			/>
 
-			<SubmitDeclarationModal
-				isPending={mutation.isPending}
-				isSecondDeclaration
-				modalRef={modalRef}
-				onClose={closeModal}
-				onSubmit={() => mutation.mutate()}
-				year={declarationYear}
-			/>
+			{showSubmitModal ? (
+				<SubmitDeclarationModal
+					error={submissionError}
+					isPending={mutation.isPending}
+					isSecondDeclaration
+					modalRef={modalRef}
+					onClose={handleCloseModal}
+					onSubmit={() => {
+						submissionAttemptFingerprintRef.current =
+							secondDeclarationSubmissionCount;
+						mutation.mutate();
+					}}
+					year={declarationYear}
+				/>
+			) : null}
 		</form>
 	);
 }

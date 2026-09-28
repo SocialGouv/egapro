@@ -1,5 +1,37 @@
 // OpenAPI 3.1 specification for the declarations export API.
 
+// Submodule imports, not the barrels: `~/modules/cseOpinion` and
+// `~/modules/declaration-remuneration` both re-export React components, which a
+// plain specification object has no business dragging in.
+import { opinionTypeSchema } from "~/modules/cseOpinion/schemas";
+import { CSE_OPINION_CONTENT_TYPES } from "~/modules/cseOpinion/types";
+import {
+	CATEGORY_SOURCES,
+	LEGACY_SOURCE_LABELS,
+} from "~/modules/declaration-remuneration/steps/step5/sources";
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
+import {
+	fileTypeEnum,
+	representationNotComputableExecutivesEnum,
+	representationNotComputableMembersEnum,
+} from "~/server/db/schema";
+import { listCompliancePathsByRound } from "~/server/rules/compliancePaths";
+import { DECLARATION_EVENT_TYPE_LABELS } from "./shared/statusHistoryLabels";
+
+const VALUE_TABLES_DOC = "docs/SUIT-API-valeurs.md";
+
+const COMPLIANCE_PATHS_BY_ROUND = listCompliancePathsByRound();
+
+const CSE_OPINION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
+	"cse_opinion";
+const JOINT_EVALUATION_FILE_TYPE: (typeof fileTypeEnum.enumValues)[number] =
+	"joint_evaluation";
+
+const JOB_CATEGORY_SOURCES = [
+	...CATEGORY_SOURCES.map((source) => source.value),
+	...Object.keys(LEGACY_SOURCE_LABELS),
+];
+
 const declarantSchema = {
 	type: "object",
 	description: "Personne physique ayant réalisé la déclaration.",
@@ -22,6 +54,16 @@ const indicatorGCategorySchema = {
 		},
 		Effectif_F: { type: ["integer", "null"] },
 		Effectif_H: { type: ["integer", "null"] },
+		Effectif_horaire_F: {
+			type: ["integer", "null"],
+			description:
+				"Effectif féminin de la catégorie retenu pour le taux horaire (peut différer de Effectif_F si des salariés sont exclus du calcul horaire).",
+		},
+		Effectif_horaire_H: {
+			type: ["integer", "null"],
+			description:
+				"Effectif masculin de la catégorie retenu pour le taux horaire (peut différer de Effectif_H si des salariés sont exclus du calcul horaire).",
+		},
 		Rem_annuelle_base_F: { type: ["string", "null"] },
 		Rem_annuelle_base_H: { type: ["string", "null"] },
 		Rem_annuelle_variable_F: { type: ["string", "null"] },
@@ -30,6 +72,26 @@ const indicatorGCategorySchema = {
 		Taux_horaire_base_H: { type: ["string", "null"] },
 		Taux_horaire_variable_F: { type: ["string", "null"] },
 		Taux_horaire_variable_H: { type: ["string", "null"] },
+		Rem_annuelle_base_ecart: {
+			type: ["string", "null"],
+			description:
+				"Écart de rémunération annuelle de base : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
+		},
+		Rem_annuelle_variable_ecart: {
+			type: ["string", "null"],
+			description:
+				"Écart de rémunération annuelle variable : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
+		},
+		Taux_horaire_base_ecart: {
+			type: ["string", "null"],
+			description:
+				"Écart de taux horaire de base : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
+		},
+		Taux_horaire_variable_ecart: {
+			type: ["string", "null"],
+			description:
+				"Écart de taux horaire variable : ratio signé (H−F)/H, chaîne à 4 décimales (échelle numeric(9,4), alignée sur les écarts A–D). Null si données manquantes ou effectif H nul.",
+		},
 	},
 } as const;
 
@@ -44,50 +106,107 @@ const cseOpinionSchema = {
 		},
 		Type: {
 			type: "string",
+			enum: [...CSE_OPINION_CONTENT_TYPES],
+			description: `Objet de la consultation du CSE. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
+		},
+		Avis: {
+			description: `Sens de l'avis rendu par le CSE. \`null\` si l'avis n'a pas été renseigné. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...opinionTypeSchema.options] },
+				{ type: "null" },
+			],
+		},
+		Date: { type: ["string", "null"], format: "date" },
+	},
+} as const;
+
+const cseFileContentSchema = {
+	type: "object",
+	properties: {
+		Numero_declaration: {
+			type: "integer",
+			enum: [1, 2],
+			description:
+				"Numéro de déclaration concernée par ce contenu : 1 = déclaration initiale, 2 = seconde déclaration.",
+		},
+		Type: {
+			type: "string",
 			enum: ["accuracy", "gap"],
 			description:
-				"Type d'avis CSE : 'accuracy' = avis sur l'exactitude des données, 'gap' = avis sur les mesures de correction de l'écart",
+				"Type de contenu couvert par le fichier — même vocabulaire que Avis_CSE.Type, pour relier un fichier à son avis via (Numero_declaration, Type).",
 		},
-		Avis: { type: ["string", "null"] },
-		Date: { type: ["string", "null"], format: "date" },
+	},
+} as const;
+
+const fileContentSchema = {
+	type: "object",
+	properties: {
+		declarationNumber: {
+			type: "integer",
+			enum: [1, 2],
+			description:
+				"Declaration number covered by this content: 1 = initial declaration, 2 = second declaration.",
+		},
+		type: {
+			type: "string",
+			enum: ["accuracy", "gap"],
+			description:
+				"Content type covered by the file — same vocabulary as the declarations export's Avis_CSE.Type.",
+		},
 	},
 } as const;
 
 const indicatorFAnnualSchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — rémunération globale annuelle. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — rémunération globale annuelle. Seuils et proportions F/H en chaîne numérique (échelle numeric(9,4)), proportions entre 0 et 1 ; effectifs déclarés (nb_F/nb_H) en entiers, null si non déclarés.",
 	properties: {
 		Seuil_Q1_Rem_globale: { type: ["string", "null"] },
-		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile1_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
+		Quartile1_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile1_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 		Seuil_Q2_Rem_globale: { type: ["string", "null"] },
-		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile2_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
+		Quartile2_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile2_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 		Seuil_Q3_Rem_globale: { type: ["string", "null"] },
-		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
-		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["number", "null"] },
-		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["number", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile3_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
+		Quartile3_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile3_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_F: { type: ["string", "null"] },
+		Quartile4_Rem_globale_annuelle_proportion_H: { type: ["string", "null"] },
+		Quartile4_Rem_globale_annuelle_nb_F: { type: ["integer", "null"] },
+		Quartile4_Rem_globale_annuelle_nb_H: { type: ["integer", "null"] },
 	},
 } as const;
 
 const indicatorFHourlySchema = {
 	type: "object",
 	description:
-		"Répartition par quartile — taux horaire global. Seuils en euros (chaîne numérique) ; proportions F/H entre 0 et 1.",
+		"Répartition par quartile — taux horaire global. Seuils et proportions F/H en chaîne numérique (échelle numeric(9,4)), proportions entre 0 et 1 ; effectifs déclarés (nb_F/nb_H) en entiers, null si non déclarés.",
 	properties: {
 		Seuil_Q1_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile1_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile1_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile1_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile1_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
+		Quartile1_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile1_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 		Seuil_Q2_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile2_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile2_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile2_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile2_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
+		Quartile2_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile2_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 		Seuil_Q3_Taux_horaire_global: { type: ["string", "null"] },
-		Quartile3_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile3_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
-		Quartile4_Taux_horaire_global_proportion_F: { type: ["number", "null"] },
-		Quartile4_Taux_horaire_global_proportion_H: { type: ["number", "null"] },
+		Quartile3_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile3_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
+		Quartile3_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile3_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
+		Quartile4_Taux_horaire_global_proportion_F: { type: ["string", "null"] },
+		Quartile4_Taux_horaire_global_proportion_H: { type: ["string", "null"] },
+		Quartile4_Taux_horaire_global_nb_F: { type: ["integer", "null"] },
+		Quartile4_Taux_horaire_global_nb_H: { type: ["integer", "null"] },
 	},
 } as const;
 
@@ -104,6 +223,16 @@ const indicatorsSchema = {
 				Rem_globale_annuelle_moyenne_H: { type: ["string", "null"] },
 				Taux_horaire_global_moyen_F: { type: ["string", "null"] },
 				Taux_horaire_global_moyen_H: { type: ["string", "null"] },
+				Rem_globale_annuelle_moyenne_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération globale annuelle moyenne : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_global_moyen_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire global moyen : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		B: {
@@ -114,6 +243,16 @@ const indicatorsSchema = {
 				Rem_variable_annuelle_moyenne_H: { type: ["string", "null"] },
 				Taux_horaire_variable_moyen_F: { type: ["string", "null"] },
 				Taux_horaire_variable_moyen_H: { type: ["string", "null"] },
+				Rem_variable_annuelle_moyenne_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération variable annuelle moyenne : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_variable_moyen_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire variable moyen : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		C: {
@@ -124,6 +263,16 @@ const indicatorsSchema = {
 				Rem_globale_annuelle_médiane_H: { type: ["string", "null"] },
 				Taux_globale_annuelle_médiane_F: { type: ["string", "null"] },
 				Taux_globale_annuelle_médiane_H: { type: ["string", "null"] },
+				Rem_globale_annuelle_médiane_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération globale annuelle médiane : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_global_médian_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire global médian : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		D: {
@@ -134,14 +283,35 @@ const indicatorsSchema = {
 				Rem_variable_annuelle_médiane_H: { type: ["string", "null"] },
 				Taux_horaire_variable_médian_F: { type: ["string", "null"] },
 				Taux_horaire_variable_médian_H: { type: ["string", "null"] },
+				Rem_variable_annuelle_médiane_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de rémunération variable annuelle médiane : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
+				Taux_horaire_variable_médian_ecart: {
+					type: ["string", "null"],
+					description:
+						"Écart de taux horaire variable médian : ratio signé (H−F)/H, chaîne à 4 décimales, calculé par le GIP-MDS.",
+				},
 			},
 		},
 		E: {
 			type: "object",
-			description: "Effectifs bénéficiaires d'une rémunération variable",
+			description:
+				"Effectifs bénéficiaires d'une rémunération variable, et la part de l'effectif de chaque genre qu'ils représentent. Les deux proportions sont indépendantes et ne somment pas à 1.",
 			properties: {
 				Effectif_F_rem_annuelle_variable: { type: ["string", "null"] },
 				Effectif_H_rem_annuelle_variable: { type: ["string", "null"] },
+				Proportion_variable_F: {
+					type: ["string", "null"],
+					description:
+						"Part des femmes de l'effectif bénéficiant d'une rémunération variable, soit bénéficiaires femmes / effectif femmes (ratio entre 0 et 1).",
+				},
+				Proportion_variable_H: {
+					type: ["string", "null"],
+					description:
+						"Part des hommes de l'effectif bénéficiant d'une rémunération variable, soit bénéficiaires hommes / effectif hommes (ratio entre 0 et 1).",
+				},
 			},
 		},
 		F: {
@@ -182,11 +352,6 @@ const declarationSchema = {
 			type: ["string", "null"],
 			example: "THALES LAS FRANCE SAS",
 		},
-		Effectif: {
-			type: ["integer", "null"],
-			description: "Effectif total",
-			example: 7403,
-		},
 		Code_NAF: {
 			type: ["string", "null"],
 			description: "Code NAF/APE",
@@ -198,51 +363,123 @@ const declarationSchema = {
 		},
 		CSE_existant: {
 			type: ["boolean", "null"],
-			description: "Présence d'un CSE (>= 50 salariés)",
-		},
-		Annee: {
-			type: "integer",
-			description: "Année de la déclaration",
-			example: 2026,
-		},
-		Statut: {
-			type: "string",
-			description: "Statut de la déclaration",
-			example: "submitted",
+			description: "Présence d'un CSE (>= 100 salariés)",
 		},
 		Parcours_apres_declaration_1: {
-			type: ["string", "null"],
-			description:
-				"Parcours après la première déclaration (justify, corrective_action, joint_evaluation)",
+			description: `Parcours de mise en conformité choisi après la première déclaration. \`null\` tant qu'aucun choix n'a été fait. Valeurs dérivées des événements \`path_choice\` de tour 1 du moteur de règles ; signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...COMPLIANCE_PATHS_BY_ROUND[1]] },
+				{ type: "null" },
+			],
 		},
 		Parcours_apres_declaration_2: {
-			type: ["string", "null"],
-			description:
-				"Parcours après la seconde déclaration (justify, corrective_action, joint_evaluation)",
+			description: `Parcours de mise en conformité choisi après la seconde déclaration. \`null\` tant qu'aucun choix n'a été fait. Valeurs dérivées des événements \`path_choice\` de tour 2 du moteur de règles — l'offre y est plus étroite qu'au tour 1 ; signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [
+				{ type: "string", enum: [...COMPLIANCE_PATHS_BY_ROUND[2]] },
+				{ type: "null" },
+			],
 		},
-		Parcours_de_conformite_requis: {
-			type: "boolean",
+		Parcours: {
+			type: "object",
 			description:
-				"Indique si le parcours de conformité (mesures correctives après déclaration 1) est requis.",
-		},
-		Parcours_de_conformite_revision_requis: {
-			type: "boolean",
-			description:
-				"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
-		},
-		Avis_CSE_requis: {
-			type: "boolean",
-			description: "Indique si un avis CSE est requis pour cette déclaration.",
-		},
-		Indicateur_G_requis: {
-			type: "boolean",
-			description:
-				"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
-		},
-		Version_regles: {
-			type: ["string", "null"],
-			description:
-				"Version du moteur de règles métier utilisée à la soumission.",
+				"Données déduites du parcours de la déclaration — calculées par Egapro, jamais saisies par l'entreprise.",
+			properties: {
+				Annee: {
+					type: "integer",
+					description: "Année de la déclaration",
+					example: 2026,
+				},
+				Effectif: {
+					type: ["integer", "null"],
+					description:
+						"Effectif total, arrondi à l'entier inférieur (floored). `null` si l'effectif GIP est inconnu.",
+					example: 7403,
+				},
+				Tranche_effectif: {
+					type: "string",
+					description:
+						"Bucket de segmentation calculé sur l'effectif floored. Une entreprise absente du fichier GIP de l'année relève de la tranche `<50`, alignée sur `Regime_obligations`.",
+					enum: ["<50", "50-99", "100-149", "150-249", "250+"],
+				},
+				Regime_obligations: {
+					type: "string",
+					enum: ["voluntary", "mandatory", "mandatory_with_compliance"],
+					description:
+						"Paquet d'obligations attaché à la taille de l'entreprise, classifié sur l'effectif GIP exact (jamais floored). Une entreprise absente du fichier GIP relève du volontariat.",
+				},
+				Statut: {
+					type: "string",
+					description:
+						"Statut courant de la déclaration dans le moteur FSM. Dérivé de l'autorité DECLARATION_FSM_STATUSES — toute évolution du vocabulaire FSM se répercute ici automatiquement. Sémantique : « demarche_completed » signifie qu'aucune action supplémentaire n'est attendue sur Egapro ; il peut être atteint dès le choix du parcours « justify » lorsque l'entreprise n'a pas de CSE (la justification des écarts ne donne lieu à aucun dépôt sur la plateforme).",
+					enum: [...DECLARATION_FSM_STATUSES],
+					example: "demarche_completed",
+				},
+				Annulee: {
+					type: "boolean",
+					description:
+						"Indique si la déclaration a été annulée. `Date_annulation` (à la racine) porte la date d'annulation et prime sur `Statut`, lequel reste figé à sa valeur d'avant annulation.",
+				},
+				Parcours_de_conformite_requis: {
+					type: "boolean",
+					description:
+						"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la soumission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
+				},
+				Parcours_de_conformite_revision_requis: {
+					type: "boolean",
+					description:
+						"Indique si une révision du parcours de conformité est requise après la seconde déclaration.",
+				},
+				Avis_CSE_requis: {
+					type: "boolean",
+					description:
+						"Indique si un avis CSE est requis pour cette déclaration.",
+				},
+				Indicateur_G_requis: {
+					type: "boolean",
+					description:
+						"Indique si l'indicateur G est requis (déclaration à 7 indicateurs).",
+				},
+				Prochaines_etapes_possibles: {
+					type: "array",
+					description:
+						"Liste des transitions offertes depuis le statut courant, dérivée du ruleset versionné. `Identifiant_transition` est stable et destiné au diff côté SUIT ; `Libelle` est l'intitulé de l'étape d'arrivée ; `Condition`, quand elle est présente, décrit le fait encore inconnu qui départagera les variantes. Tableau vide si la déclaration est annulée.",
+					items: {
+						type: "object",
+						properties: {
+							Identifiant_transition: {
+								type: "string",
+								description:
+									"Identifiant stable de la transition dans le ruleset — sert au diff côté SUIT.",
+							},
+							Action: {
+								type: "string",
+								description: "Action déclenchant la transition.",
+							},
+							Etat_cible: {
+								type: "string",
+								enum: [...DECLARATION_FSM_STATUSES],
+								description: "Statut atteint si la transition est exécutée.",
+							},
+							Libelle: {
+								type: ["string", "null"],
+								description:
+									"Intitulé du stage de l'étape d'arrivée. `null` si l'état cible n'appartient à aucun stage.",
+							},
+							Condition: {
+								type: "string",
+								description:
+									"Fait encore inconnu qui départagera les variantes, présent uniquement quand la garde est indécise.",
+							},
+						},
+						required: [
+							"Identifiant_transition",
+							"Action",
+							"Etat_cible",
+							"Libelle",
+						],
+					},
+				},
+			},
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
@@ -298,17 +535,8 @@ const declarationSchema = {
 				properties: {
 					Statut: {
 						type: "string",
-						enum: [
-							"submit",
-							"path_choice",
-							"second_declaration_submit",
-							"joint_evaluation_submit",
-							"cse_opinion_submit",
-							"cancel",
-							"demarche_complete",
-						],
-						description:
-							"Type d'événement brut issu de l'enum `declaration_event_type`.",
+						enum: Object.keys(DECLARATION_EVENT_TYPE_LABELS),
+						description: `Type d'événement brut issu de l'enum \`declaration_event_type\`. Signification de chaque valeur : \`${VALUE_TABLES_DOC}\`.`,
 					},
 					Libelle_statut: {
 						type: "string",
@@ -339,6 +567,18 @@ const declarationSchema = {
 			type: ["integer", "null"],
 			description:
 				"Effectif hommes pris en compte pour la rémunération globale annuelle",
+		},
+		Effectif_F_rem_horaire_globale: {
+			type: ["integer", "null"],
+			description: "Effectif femmes pris en compte pour le taux horaire global",
+		},
+		Effectif_H_rem_horaire_globale: {
+			type: ["integer", "null"],
+			description: "Effectif hommes pris en compte pour le taux horaire global",
+		},
+		Source_categories_emplois: {
+			description: `Source de détermination des catégories d'emplois pour l'indicateur G, servie brute depuis une colonne texte libre. \`null\` si aucun indicateur G déclaré. L'énumération inclut les valeurs historiques, retirées du formulaire mais jamais migrées : un consommateur qui valide strictement doit les accepter. Signification de chacune : \`${VALUE_TABLES_DOC}\`.`,
+			oneOf: [{ type: "string", enum: JOB_CATEGORY_SOURCES }, { type: "null" }],
 		},
 		Indicateurs: indicatorsSchema,
 		Seconde_declaration: {
@@ -377,7 +617,7 @@ const declarationSchema = {
 					Id: { type: "string", description: "Identifiant unique du fichier" },
 					Type: {
 						type: "string",
-						enum: ["cse_opinion"],
+						enum: [CSE_OPINION_FILE_TYPE],
 						description: "Type : avis CSE",
 					},
 					Nom_fichier: {
@@ -391,6 +631,12 @@ const declarationSchema = {
 						description:
 							"URL relative pour télécharger le fichier via GET /api/v1/files/{fileId}",
 						example: "/api/v1/files/abc-123",
+					},
+					Contenus: {
+						type: "array",
+						items: cseFileContentSchema,
+						description:
+							"Contenus de l'avis CSE couverts par ce fichier — relie le fichier à ses entrées Avis_CSE via (Numero_declaration, Type). Un fichier peut couvrir plusieurs contenus. Tableau vide si aucune association n'est encore enregistrée (étape 2 de l'avis CSE non finalisée).",
 					},
 				},
 			},
@@ -408,7 +654,7 @@ const declarationSchema = {
 						},
 						Type: {
 							type: "string",
-							enum: ["joint_evaluation"],
+							enum: [JOINT_EVALUATION_FILE_TYPE],
 							description: "Type : évaluation conjointe",
 						},
 						Nom_fichier: {
@@ -433,14 +679,108 @@ const declarationSchema = {
 	},
 } as const;
 
+const representationSchema = {
+	type: "object",
+	description:
+		"Déclaration de représentation équilibrée F/H (art. D. 1142-19) — écarts parmi les cadres dirigeants et les membres des instances dirigeantes.",
+	properties: {
+		id: {
+			type: "string",
+			format: "uuid",
+			description: "Identifiant interne de la déclaration (UUID)",
+			example: "11111111-2222-4333-8444-555555555555",
+		},
+		SIREN: {
+			type: "string",
+			description: "SIREN de l'entreprise (9 chiffres)",
+			example: "319159877",
+		},
+		Raison_sociale: {
+			type: ["string", "null"],
+			example: "THALES LAS FRANCE SAS",
+		},
+		Adresse: {
+			type: ["string", "null"],
+			example: "2 AVENUE GAY-LUSSAC, 78990 ELANCOURT",
+		},
+		Code_NAF: {
+			type: ["string", "null"],
+			description: "Code NAF/APE",
+			example: "26.51A",
+		},
+		Région: { type: ["string", "null"], example: "Île-de-France" },
+		Département: { type: ["string", "null"], example: "Yvelines" },
+		Année_référence: {
+			type: "integer",
+			description:
+				"Année de référence des écarts déclarés (N−1 de l'année de campagne).",
+			example: 2026,
+		},
+		Période_référence_début: { type: ["string", "null"], format: "date" },
+		Période_référence_fin: { type: ["string", "null"], format: "date" },
+		Pourcentage_femmes_cadres: {
+			type: ["number", "null"],
+			description:
+				"Part de femmes parmi les cadres dirigeants, entre 0 et 100.",
+		},
+		Pourcentage_hommes_cadres: {
+			type: ["number", "null"],
+			description: "Part d'hommes parmi les cadres dirigeants, entre 0 et 100.",
+		},
+		Motif_non_calculabilité_cadres: {
+			description:
+				"Motif de non-calculabilité de l'écart cadres dirigeants. `null` si calculable.",
+			oneOf: [
+				{
+					type: "string",
+					enum: [...representationNotComputableExecutivesEnum.enumValues],
+				},
+				{ type: "null" },
+			],
+		},
+		Pourcentage_femmes_membres: {
+			type: ["number", "null"],
+			description:
+				"Part de femmes parmi les membres des instances dirigeantes, entre 0 et 100.",
+		},
+		Pourcentage_hommes_membres: {
+			type: ["number", "null"],
+			description:
+				"Part d'hommes parmi les membres des instances dirigeantes, entre 0 et 100.",
+		},
+		Motif_non_calculabilité_membres: {
+			description:
+				"Motif de non-calculabilité de l'écart instances dirigeantes. `null` si calculable.",
+			oneOf: [
+				{
+					type: "string",
+					enum: [...representationNotComputableMembersEnum.enumValues],
+				},
+				{ type: "null" },
+			],
+		},
+		Date_publication: { type: ["string", "null"], format: "date" },
+		URL_publication: { type: ["string", "null"] },
+		Modalités_communication: {
+			type: ["string", "null"],
+			description: "Modalités de communication des résultats aux salariés.",
+		},
+		Date_déclaration: {
+			type: ["string", "null"],
+			format: "date-time",
+			description: "Date de soumission de la déclaration.",
+		},
+	},
+} as const;
+
 const fileMetadataSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string", description: "File unique identifier" },
 		type: {
 			type: "string",
-			enum: ["cse_opinion", "joint_evaluation"],
-			description: "File type: CSE opinion or joint evaluation",
+			enum: [...fileTypeEnum.enumValues],
+			description: `File type: CSE opinion or joint evaluation. Value reference: \`${VALUE_TABLES_DOC}\`.`,
 		},
 		fileName: {
 			type: "string",
@@ -453,6 +793,12 @@ const fileMetadataSchema = {
 			description:
 				"Relative URL to download the file via GET /api/v1/files/{fileId}",
 			example: "/api/v1/files/abc-123",
+		},
+		contents: {
+			type: "array",
+			items: fileContentSchema,
+			description:
+				"CSE opinion contents covered by this file (type='cse_opinion' only). A file can cover several contents; empty array if none is registered yet. Not meaningful for type='joint_evaluation'.",
 		},
 	},
 } as const;
@@ -480,7 +826,7 @@ export const openApiSpec = {
 		title: "EGAPRO — API d'export",
 		description:
 			"API REST sécurisée permettant de consulter les déclarations d'égalité professionnelle et les fichiers associés (avis CSE, évaluations conjointes). L'accès nécessite une clé API transmise en Bearer token. L'authentification ainsi qu'un quota (rate limit) sont appliqués en amont par la passerelle EGAPRO.",
-		version: "2.1.0",
+		version: "3.1.0",
 		contact: {
 			name: "Équipe EGAPRO — DNUM",
 		},
@@ -504,7 +850,7 @@ export const openApiSpec = {
 				summary:
 					"Lister les déclarations par date de soumission ou d'annulation",
 				description:
-					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS.",
+					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS. Version majeure 3.0.0 : rupture de compatibilité — les données déduites du parcours (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous l'objet `Parcours`, sans doublon déprécié à la racine. L'URL reste inchangée (`/api/v1/export/declarations`, aucun `/api/v2`) ; la mise en service doit être coordonnée avec l'équipe SUIT avant déploiement.",
 				parameters: [
 					{
 						name: "date_begin",
@@ -620,6 +966,85 @@ export const openApiSpec = {
 								},
 							},
 						},
+					},
+				},
+			},
+		},
+		"/api/v1/export/representations": {
+			get: {
+				operationId: "getRepresentations",
+				summary: "Lister les déclarations de représentation équilibrée",
+				description:
+					"Retourne les déclarations de représentation équilibrée F/H (art. D. 1142-19) soumises dont la date de soumission (`Date_déclaration`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Identité et localisation complètes, y compris pour les entreprises non diffusibles (SUIT est un destinataire de contrôle authentifié).",
+				parameters: [
+					{
+						name: "date_begin",
+						in: "query",
+						required: true,
+						description: "Date de début (inclusive). Format YYYY-MM-DD.",
+						example: "2026-03-01",
+						schema: { type: "string", format: "date" },
+					},
+					{
+						name: "date_end",
+						in: "query",
+						required: false,
+						description:
+							"Date de fin (exclusive). Format YYYY-MM-DD. Si omis, retourne uniquement le jour de `date_begin` (équivalent à `date_begin + 1 jour`).",
+						example: "2026-03-24",
+						schema: { type: "string", format: "date" },
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Liste des déclarations de représentation équilibrée correspondant à la plage de dates",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										Date_debut: {
+											type: "string",
+											format: "date",
+											example: "2026-03-01",
+										},
+										Date_fin: {
+											type: "string",
+											format: "date",
+											example: "2026-03-24",
+										},
+										Nombre: {
+											type: "integer",
+											description: "Nombre de déclarations retournées",
+											example: 5,
+										},
+										Representations: {
+											type: "array",
+											items: representationSchema,
+										},
+									},
+								},
+							},
+						},
+					},
+					"401": {
+						description:
+							"Clé API manquante ou invalide (renvoyé par la passerelle)",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"429": {
+						description:
+							"Quota dépassé (rate limit appliqué par la passerelle)",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"400": {
+						description: "Paramètres invalides",
+						content: { "application/json": { schema: errorSchema } },
+					},
+					"500": {
+						description: "Erreur serveur",
+						content: { "application/json": { schema: errorSchema } },
 					},
 				},
 			},

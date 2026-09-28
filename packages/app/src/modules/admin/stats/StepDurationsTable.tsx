@@ -1,4 +1,4 @@
-import { formatCount, formatDays } from "./formatters";
+import { formatCount, formatDays } from "~/modules/domain";
 import type { StepDurationRow } from "./types";
 
 type Props = {

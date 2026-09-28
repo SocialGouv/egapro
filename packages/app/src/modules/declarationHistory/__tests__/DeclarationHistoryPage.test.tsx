@@ -22,13 +22,15 @@ describe("DeclarationHistoryPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders breadcrumb with Mon espace link", () => {
+	it("does not render a breadcrumb", () => {
 		render(<DeclarationHistoryPage siren="130025265" year={2026} />);
 
-		expect(screen.getByRole("link", { name: "Mon espace" })).toHaveAttribute(
-			"href",
-			"/mon-espace",
-		);
+		expect(
+			screen.queryByRole("navigation", { name: "vous êtes ici :" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: "Mon espace" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the history list section", () => {

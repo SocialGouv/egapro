@@ -20,7 +20,7 @@
 	bottom: 0;
 	width: min(640px, 100vw);
 	background: var(--background-default-grey);
-	box-shadow: var(--lifted);
+	box-shadow: var(--lifted-shadow);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -40,6 +40,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+	gap: 2rem;
 }
 
 // Vertical stepper
@@ -71,10 +72,6 @@
 
 .stepRowComplete:not(:last-child)::before {
 	background-color: var(--background-flat-success);
-}
-
-.stepRowCurrent:not(:last-child)::before {
-	background-color: var(--background-action-high-info);
 }
 
 .stepCircle {
@@ -166,6 +163,11 @@
 	gap: 0.5rem;
 }
 
+// Not-subject message
+.notSubjectMessage {
+	color: var(--text-title-grey);
+}
+
 // Help section
 .helpSection {
 	display: flex;
@@ -186,6 +188,7 @@
 .helpLinks {
 	display: flex;
 	flex-direction: column;
+	align-items: flex-start;
 	gap: 1rem;
 }
 

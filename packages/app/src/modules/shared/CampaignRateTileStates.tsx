@@ -1,6 +1,11 @@
 export function CampaignRateTileLoading() {
 	return (
-		<p aria-live="polite" className="fr-text--sm">
+		<p
+			aria-atomic="true"
+			aria-live="polite"
+			className="fr-text--sm"
+			role="status"
+		>
 			Chargement du taux de déclaration…
 		</p>
 	);
@@ -8,7 +13,7 @@ export function CampaignRateTileLoading() {
 
 export function CampaignRateTileError() {
 	return (
-		<div aria-live="polite" className="fr-alert fr-alert--error">
+		<div className="fr-alert fr-alert--error" role="alert">
 			<p>Une erreur est survenue lors du chargement du taux de déclaration.</p>
 		</div>
 	);

@@ -1,0 +1,14 @@
+# Source of the GIP-MDS file consumed by POST /api/gip-mds/import (daily
+# CronJob at 03:00). Points at SUIT Validation, which requires the mTLS client
+# certificate sealed in `suit-client-cert` — the import fails until that secret
+# carries the certificate.
+#
+# Production deliberately has no such ConfigMap: the route answers 412 there,
+# which keeps the nightly import from replacing real declarant data with the
+# validation dataset.
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gip-mds
+data:
+  EGAPRO_GIP_MDS_API_URL: "https://api.suit.valid.travail.gouv.fr/suit/api/externe/egapro/gipmds/latest"

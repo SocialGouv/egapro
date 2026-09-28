@@ -1,10 +1,21 @@
 import { z } from "zod";
 
-import { COMPLIANCE_PATHS } from "./steps/compliancePath/constants";
+import {
+	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
+	COMPLIANCE_PATHS,
+	isCategoryPayApplicable,
+	isSexRemunerationComplete,
+} from "~/modules/domain";
+
+export const CATEGORY_NAME_MAX_LENGTH = 255;
+export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
 
 export const updateStep1Schema = z.object({
 	totalWomen: z.number().int().min(0),
 	totalMen: z.number().int().min(0),
+	hourlyWomen: z.number().int().min(0),
+	hourlyMen: z.number().int().min(0),
 });
 
 export const updateStep2Schema = z.object({
@@ -76,36 +87,81 @@ export const updateStep4Schema = z.object({
 	hourly: tableSchema,
 });
 
-const employeeCategoryDataSchema = z.object({
-	womenCount: z.number().int().min(0).optional(),
-	menCount: z.number().int().min(0).optional(),
-	annualBaseWomen: z.string().optional(),
-	annualBaseMen: z.string().optional(),
-	annualVariableWomen: z.string().optional(),
-	annualVariableMen: z.string().optional(),
-	hourlyBaseWomen: z.string().optional(),
-	hourlyBaseMen: z.string().optional(),
-	hourlyVariableWomen: z.string().optional(),
-	hourlyVariableMen: z.string().optional(),
-});
+/**
+ * Each pay basis carries its own headcount and its own pay fields (#4254).
+ * For an applicable category, a headcount only requires its basis' pay data;
+ * the absence of one sex from both workforce rows (#3678) takes precedence.
+ */
+const employeeCategoryDataSchema = z
+	.object({
+		womenCount: z.number().int().min(0).optional(),
+		menCount: z.number().int().min(0).optional(),
+		hourlyWomenCount: z.number().int().min(0).optional(),
+		hourlyMenCount: z.number().int().min(0).optional(),
+		annualBaseWomen: z.string().optional(),
+		annualBaseMen: z.string().optional(),
+		annualVariableWomen: z.string().optional(),
+		annualVariableMen: z.string().optional(),
+		hourlyBaseWomen: z.string().optional(),
+		hourlyBaseMen: z.string().optional(),
+		hourlyVariableWomen: z.string().optional(),
+		hourlyVariableMen: z.string().optional(),
+	})
+	.refine(
+		(data) =>
+			isCategoryPayApplicable(data) ||
+			CATEGORY_PAY_FIELDS.every((field) => !data[field]),
+		{
+			message:
+				"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.",
+		},
+	)
+	.refine(
+		(data) =>
+			!isCategoryPayApplicable(data) ||
+			CATEGORY_PAY_BASES.every(
+				(base) =>
+					isSexRemunerationComplete(
+						data[base.womenCountField],
+						base.womenPayFields.map((field) => data[field]),
+					) &&
+					isSexRemunerationComplete(
+						data[base.menCountField],
+						base.menPayFields.map((field) => data[field]),
+					),
+			),
+		{
+			message:
+				"Veuillez renseigner toutes les données de rémunération avant de passer à l'étape suivante.",
+		},
+	);
 
 export const updateEmployeeCategoriesSchema = z.object({
 	declarationType: z.enum(["initial", "correction"]),
 	source: z.string().min(1),
-	categories: z.array(
-		z.object({
-			name: z.string().min(1),
-			data: employeeCategoryDataSchema,
-		}),
-	),
+	categories: z
+		.array(
+			z.object({
+				name: z
+					.string()
+					.min(1)
+					.max(CATEGORY_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH_MESSAGE),
+				data: employeeCategoryDataSchema,
+			}),
+		)
+		.max(50),
 	referencePeriodStart: z.string().optional(),
 	referencePeriodEnd: z.string().optional(),
 });
 
 export const categoryFormEntrySchema = z.object({
-	name: z.string(),
+	name: z
+		.string()
+		.max(CATEGORY_NAME_MAX_LENGTH, CATEGORY_NAME_MAX_LENGTH_MESSAGE),
 	womenCount: z.string(),
 	menCount: z.string(),
+	hourlyWomenCount: z.string(),
+	hourlyMenCount: z.string(),
 	annualBaseWomen: z.string(),
 	annualBaseMen: z.string(),
 	annualVariableWomen: z.string(),
@@ -125,6 +181,8 @@ export const categoryFormSchema = z.object({
 		),
 	categories: z.array(categoryFormEntrySchema),
 });
+
+export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 export const saveCompliancePathSchema = z.object({
 	path: z.enum(COMPLIANCE_PATHS),

@@ -2,8 +2,9 @@
 
 import Script from "next/script";
 import { useRef } from "react";
+import { API_V1_OPENAPI } from "~/modules/routes";
 
-export function SwaggerUI() {
+export function SwaggerUI({ specUrl = API_V1_OPENAPI }: { specUrl?: string }) {
 	const initializedRef = useRef(false);
 
 	const tryInit = () => {
@@ -12,7 +13,7 @@ export function SwaggerUI() {
 		initializedRef.current = true;
 
 		window.SwaggerUIBundle({
-			url: "/api/v1/openapi.json",
+			url: specUrl,
 			dom_id: "#swagger-ui",
 			deepLinking: true,
 			presets: [

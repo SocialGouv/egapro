@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { resendReceiptSchema } from "~/modules/mail/schemas";
-import { companyProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { companyWriteProcedure, createTRPCRouter } from "~/server/api/trpc";
 
 export const mailRouter = createTRPCRouter({
-	resendReceipt: companyProcedure
+	resendReceipt: companyWriteProcedure
 		.input(resendReceiptSchema)
 		.mutation(async ({ ctx, input }) => {
 			const email = ctx.session.user.email;

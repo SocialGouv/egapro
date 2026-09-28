@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS } from "~/modules/domain";
 import { Breadcrumb, NewTabNotice } from "~/modules/layout";
-
+import { REFERENTS } from "~/modules/routes";
 import type { PublicReferentDetail as PublicReferentDetailData } from "./types";
 
 type Props = {
@@ -23,7 +23,7 @@ export function PublicReferentDetail({ referent }: Props) {
 					{ label: "Accueil", href: "/" },
 					{
 						label: "Référents Égalité Professionnelle",
-						href: "/referents",
+						href: REFERENTS,
 					},
 					{ label: referent.name },
 				]}
@@ -31,7 +31,7 @@ export function PublicReferentDetail({ referent }: Props) {
 
 			<Link
 				className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mb-2w"
-				href="/referents"
+				href={REFERENTS}
 			>
 				Retour à la recherche
 			</Link>

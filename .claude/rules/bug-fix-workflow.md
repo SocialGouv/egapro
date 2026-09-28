@@ -1,81 +1,51 @@
-# Bug Fix Workflow
-
-> **Used by**: `code-dev` (issue type Bug, ou label `bug`), `bug-analyst` (phase analyse). Hors pipeline : l'agent principal quand il traite un fix.
-
-Quand un ticket est un **bug** (issue type Bug, label `bug`, ou description explicite d'un comportement incorrect), `code-dev` suit un protocole strict **reproduire → fixer → valider**, en s'appuyant sur l'analyse postée par `bug-analyst` dans le commentaire `## Analyse du bug` (root cause, fichiers à modifier, fix proposé).
-
-Cette discipline évite deux pièges fréquents :
-1. "Je crois que j'ai fixé" sans preuve → régression un mois plus tard
-2. Fix accidentel qui ne cible pas la root cause → bug réapparaît sous une autre forme
-
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
 ---
 
-## Protocole obligatoire
+# Corriger un bug
 
-### 1. Reproduire
+> Le protocole vaut pour tout le monde : la pipeline (`bug-analyst` analyse, `code-dev` fixe et verrouille en TU, `e2e-dev` verrouille le parcours) comme une session directe. La répartition des rôles dans la pipeline est dans `.claude/pipeline/orchestration.md`.
 
-**Avant d'écrire le fix**, écrire un test qui reproduit le bug.
+Deux pièges justifient à eux seuls la discipline : « je crois que j'ai fixé » sans preuve, qui revient en régression un mois plus tard ; et le fix accidentel qui ne vise pas la cause racine, donc le bug qui reparaît sous une autre forme.
 
-- **Bug UI / comportement utilisateur** → test E2E Playwright dans `src/e2e/<feature>.e2e.ts`
-- **Bug logique métier / domain** → test unitaire Vitest dans `__tests__/` à côté du module
-- **Bug API / tRPC** → test unitaire du router ou test d'intégration selon le cas
+## Deux choses distinctes vivent sous le mot « reproduire »
 
-Le test **doit échouer** sur `master` (ou la branche de base). Si le test passe avant le fix, c'est qu'il ne reproduit pas réellement le bug → revoir le test.
+| | **Vérification one-shot** | **Test de non-régression** |
+|---|---|---|
+| But | prouver que le fix agit, maintenant | empêcher le bug de revenir |
+| Quand | pendant l'implémentation | après le fix, prouvé par revert-verify |
+| Durée de vie | éphémère — consignée dans le body de la PR | permanente — commitée dans la suite |
+| Obligatoire ? | **toujours** | **non** — soumis à la criticité |
 
-Commit intermédiaire possible : `test(<scope>): reproduce bug #NNN` (avant le fix).
+La **vérification one-shot est toujours due**, quel que soit le bug — même un bug d'infra ou un écart purement visuel, fût-elle manuelle. Elle relève de celui qui a le worktree, le dev server et le fix sous la main. Un bug sans test permanent n'est donc pas un bug non vérifié.
 
-### 2. Identifier la root cause
+Le **test permanent** dépend du type de bug : logique métier ou API → test unitaire (ou d'intégration si le défaut est au DB-layer) ; UI / parcours → E2E Playwright, **seulement si le bug est assez critique** (parcours critique, fort risque de régression) et de préférence imbriqué dans le scénario existant. Un bug mineur ou cosmétique n'en reçoit en général pas.
 
-Ne pas se contenter du symptôme. Lire le code en amont (stack trace, appelants, schémas Zod, migrations DB). Si la root cause n'est pas claire :
-- `nextjs_call(get_errors)` pour les erreurs compile/runtime
-- `kubectl logs` si le bug vient d'un env de review (voir mémoire utilisateur)
-- Lire les PRs récentes qui touchent le fichier incriminé (`git log -p <file>`)
+## Le protocole
 
-### 3. Fixer
+**1. Identifier la cause racine.** Ne pas s'arrêter au symptôme : remonter les appelants, la stack trace, les schémas Zod, les migrations. `nextjs_call(get_errors)` pour les erreurs compile/runtime, `git log -p <fichier>` pour les changements récents, les logs d'un env de review si le bug y est spécifique (scrubber avant de citer — `rules/git-artefact-hygiene.md`).
 
-Modifier le code pour faire passer le test. Le fix doit cibler la **root cause**, pas masquer le symptôme :
-- ❌ `if (value == null) return "default";` pour masquer un `undefined` qui ne devrait jamais arriver
-- ✅ Fixer la fonction en amont qui propage le `undefined`
+**2. Fixer la cause, pas le symptôme.**
 
-### 4. Valider
+```ts
+// INTERDIT — masque un undefined qui ne devrait jamais arriver
+if (value == null) return "default";
 
-- Le test de reproduction **passe**
-- `pnpm typecheck` + `pnpm lint:check` verts
-- Tous les autres tests passent (pas de régression : `pnpm test`)
-- Si le bug touche l'UI : rejouer manuellement le scénario dans le dev server avant de passer en **In review**
+// CORRECT — corriger la fonction en amont qui propage le undefined
+```
 
-### 5. Commit
+**3. Prouver le test par revert-verify.** Reverse-appliquer le diff **source** (`git apply -R`) → le test doit être **RED** ; ré-appliquer → **GREEN**. Un test qui passe sans le fix ne reproduit pas le bug : le retravailler.
 
-Commit du fix : `fix(<scope>): <description courte> (#NNN)`.
+**4. Consigner.** La vérification one-shot va dans le body de la PR, sous forme observable : ce qui a été fait → valeur **avant** / valeur **après**. Sans cette trace, personne ne peut distinguer un fix vérifié d'un fix plausible. Pour un bug visuel ou CSS, la preuve est une **mesure DOM** (`getBoundingClientRect`, `getComputedStyle`, `Range.getClientRects`), jamais un jugement à l'œil.
 
-Le test de reproduction commit précédemment (ou inclus dans ce même commit) fait partie de la suite de non-régression permanente.
+**5. Commit** : `fix(<scope>): <description courte> (#NNN)`. Le test de reproduction est commité séparément (`test(<scope>): …`).
 
----
+## Bug de pipeline ou de déploiement
 
-## Cas particulier : bug de pipeline / déploiement
+CI/CD, Docker, Kubernetes n'ont pas forcément de test automatisable. Alors : documenter la reproduction manuelle (commandes exactes) sur le ticket, tester le fix dans un environnement de review, joindre les logs avant/après (scrubbés), et si possible ajouter une assertion de monitoring qui rattrapera la régression.
 
-Les bugs touchant CI/CD, Docker, Kubernetes n'ont pas forcément de test automatisable. Dans ce cas :
+## Écart visuel Figma ↔ app
 
-1. Documenter la reproduction manuelle dans le commentaire du ticket (commandes exactes, logs)
-2. Tester le fix dans un environnement de review (voir mémoire utilisateur : namespace K8s, URL, mail test)
-3. Joindre les logs **avant** et **après** fix en commentaire du ticket
-4. Si possible, ajouter un monitoring/assertion pour détecter la régression (health check, alerte)
-
----
-
-## Cas particulier : visual mismatch (Figma ↔ app)
-
-Quand le bug est un **écart visuel** entre le rendu de l'app et le design Figma de référence (couleur fausse, espacement décalé, typo wrong weight, élément manquant), le protocole « test qui échoue avant fix » ne s'applique pas tel quel : il n'y a pas de test unitaire / E2E qui asserte du pixel-perfect.
-
-`bug-analyst` aura déjà identifié le delta dans son commentaire `## Analyse du bug` (sous-stratégie `visual mismatch`) — pour chaque divergence, il liste la propriété Figma concernée (`fontWeight`, `fill`, `itemSpacing`, …) et le fichier/composant à corriger.
-
-Protocole côté `code-dev` :
-
-1. **Lire l'analyse** posté par `bug-analyst` → savoir exactement quelles propriétés sont en écart
-2. **Implémenter le fix** en suivant `rules/figma-workflow.md` Phase 3 (mapping Figma → DSFR : couleur → token, fontSize → `fr-text--*`, fontWeight ≥ 600 → `<strong>`, itemSpacing → `fr-m{b,t,r,l}-Xw`)
-3. **Vérifier le rendu** :
-   - Démarrer le dev server, naviguer via Playwright sur la page concernée
-   - Re-lire le node Figma via `mcp__figma-dev__get_figma_data` et confirmer que chaque propriété est maintenant alignée
-   - `mcp__figma-dev__download_figma_images` uniquement pour les cas ambigus (typiquement bold cell-by-cell sur tableaux où l'API ne révèle que le style dominant)
-4. **Inclure des screenshots dev server** (desktop + mobile) dans le body de la PR — c'est le signal visuel pour la review humaine
-5. **Pas de test E2E de record** sur le pixel-perfect : Lighthouse couvre l'a11y, la fidélité visuelle reste en revue humaine + check structurel agent
+Il n'y a pas de test unitaire du pixel-perfect, mais il y a mieux qu'une revue à l'œil. Corriger en suivant `rules/figma-workflow.md` (mapping token → DSFR), puis **re-mesurer le rendu** contre le node — c'est la vérification one-shot, et elle est due comme les autres. La plupart des écrans n'ont que ça : quatre écrans seulement portent un **contrat de fidélité** E2E permanent (`src/e2e/{breadcrumb-spacing,stepper-spacing,declaration-header-alignment,second-declaration-info-styling}.e2e.ts`). Si le bug tombe sur l'un d'eux, c'est le contrat qui verrouille : soit le code s'y conforme, soit le contrat est mis à jour avec le nouveau node en référence. Sinon, joindre les screenshots dev server (desktop + mobile) au body de la PR — c'est le signal pour la revue humaine. Voir `rules/visual-quality-validation.md`.

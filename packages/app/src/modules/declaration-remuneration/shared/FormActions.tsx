@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useReadOnlyGuard } from "~/modules/auth";
-
+import type { AppHref } from "~/modules/routes";
 import styles from "./FormActions.module.scss";
+import { useLockContext } from "./lock/LockContext";
 
 type FormActionsProps = {
-	previousHref?: string;
-	nextHref?: string;
+	previousHref?: AppHref;
+	nextHref?: AppHref;
 	nextLabel?: string;
 	isSubmitting?: boolean;
 	nextDisabled?: boolean;
@@ -20,7 +21,7 @@ type FormActionsProps = {
 	 *   forward without any saved data would skip a step (issue #3230).
 	 * Ignored when `nextHref` is set (the button is already a Link).
 	 */
-	mimoquageNextHref?: string;
+	mimoquageNextHref?: AppHref;
 };
 
 export function FormActions({
@@ -32,7 +33,8 @@ export function FormActions({
 	className,
 	mimoquageNextHref,
 }: FormActionsProps) {
-	const { isReadOnly, buttonProps, tooltip } = useReadOnlyGuard();
+	const { buttonProps, tooltip } = useReadOnlyGuard();
+	const { isReadOnly, isLoading: isLockLoading } = useLockContext();
 
 	return (
 		<div className={`${styles.actions} ${className ?? ""}`}>
@@ -69,7 +71,9 @@ export function FormActions({
 					<button
 						{...buttonProps}
 						className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-						disabled={isReadOnly || isSubmitting || nextDisabled}
+						disabled={
+							isReadOnly || isLockLoading || isSubmitting || nextDisabled
+						}
 						type="submit"
 					>
 						{isSubmitting ? "Enregistrement…" : nextLabel}

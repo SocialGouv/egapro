@@ -11,6 +11,7 @@ import { withSentryConfig } from "@sentry/nextjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
+	typedRoutes: true,
 	async redirects() {
 		// Hash fragments are stripped by the browser before the request reaches the server.
 		return [
@@ -23,6 +24,16 @@ const config = {
 				source: "/admin/stats/plateforme",
 				destination: "/admin/stats",
 				permanent: false,
+			},
+			{
+				source: "/api/public/declaration/:siren",
+				destination: "/api/public/declarations/:siren",
+				permanent: true,
+			},
+			{
+				source: "/api/public/declaration/:siren/:year",
+				destination: "/api/public/declarations/:siren/:year",
+				permanent: true,
 			},
 		];
 	},

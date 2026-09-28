@@ -1,3 +1,4 @@
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import { type RuleEvent, type Rules, RulesSchema } from "./schema";
 import rawV20271 from "./v2027.1.json";
 
@@ -188,6 +189,14 @@ const BUNDLED_VERSIONS: Record<string, unknown> = {
 	"2027.1": rawV20271,
 };
 
+export function isKnownRulesVersion(version: string): boolean {
+	return Object.hasOwn(BUNDLED_VERSIONS, version);
+}
+
+export function listBundledRulesVersions(): string[] {
+	return Object.keys(BUNDLED_VERSIONS);
+}
+
 export function loadRules(version: string): Rules {
 	const cached = cache.get(version);
 	if (cached) return cached;
@@ -207,7 +216,7 @@ export function applyAction(
 	facts: Facts,
 	action: string,
 	rules: Rules,
-): { nextStatus: string; events: RuleEvent[] } {
+): { nextStatus: DeclarationFsmStatus; events: RuleEvent[] } {
 	const currentState = facts.currentState as string | undefined;
 	const computations = (rules.computations ?? {}) as Record<
 		string,
@@ -217,7 +226,9 @@ export function applyAction(
 
 	for (const transition of rules.transitions) {
 		if (transition.action !== action) continue;
-		if (currentState && !transition.from.includes(currentState)) continue;
+		// `from` is DeclarationFsmStatus[]; `.some(===)` compares the wider `string` currentState without a cast.
+		if (currentState && !transition.from.some((from) => from === currentState))
+			continue;
 
 		if (!matchesPayload(transition.matchPayload, facts)) continue;
 
@@ -234,6 +245,23 @@ export function applyAction(
 	throw new Error(
 		`No matching transition for state="${currentState ?? "(none)"}" action="${action}". Facts: ${JSON.stringify(facts)}`,
 	);
+}
+
+/** Evaluates a named computation of a ruleset against a facts object (parity locks between the versioned ruleset and the domain functions). */
+export function evaluateComputation(
+	rules: Rules,
+	name: string,
+	facts: Facts,
+): boolean {
+	const computations = (rules.computations ?? {}) as Record<
+		string,
+		ComputationNode
+	>;
+	const computation = computations[name];
+	if (computation === undefined) {
+		throw new Error(`Unknown computation: "${name}"`);
+	}
+	return evaluatePredicate(computation, facts, computations, rules.thresholds);
 }
 
 export function _resetCacheForTests(): void {

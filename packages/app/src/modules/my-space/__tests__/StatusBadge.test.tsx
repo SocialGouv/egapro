@@ -30,4 +30,22 @@ describe("StatusBadge", () => {
 		expect(badge).toHaveClass("fr-badge--sm");
 		expect(badge).toHaveClass("fr-badge--no-icon");
 	});
+
+	it("renders a warning badge for closed_incomplete status", () => {
+		render(<StatusBadge status="closed_incomplete" />);
+		const badge = screen.getByText("Clôturée - incomplète");
+		expect(badge).toBeInTheDocument();
+		expect(badge).toHaveClass("fr-badge--warning");
+		expect(badge).toHaveClass("fr-badge--sm");
+		expect(badge).toHaveClass("fr-badge--no-icon");
+	});
+
+	it("renders an error badge for closed_not_done status, with the exact label (not the Figma typo)", () => {
+		render(<StatusBadge status="closed_not_done" />);
+		const badge = screen.getByText("Clôturée - non effectuée");
+		expect(badge).toBeInTheDocument();
+		expect(badge).toHaveClass("fr-badge--error");
+		expect(badge).toHaveClass("fr-badge--sm");
+		expect(badge).toHaveClass("fr-badge--no-icon");
+	});
 });

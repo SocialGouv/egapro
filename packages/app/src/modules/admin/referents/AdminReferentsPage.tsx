@@ -208,8 +208,8 @@ function ReferentsContent() {
 			</div>
 			{deleteError && (
 				<div
-					aria-live="polite"
 					className="fr-alert fr-alert--error fr-alert--sm fr-mb-2w"
+					role="alert"
 				>
 					<p>{deleteError}</p>
 				</div>

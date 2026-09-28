@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+	prefilledGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -40,6 +46,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -63,21 +70,53 @@ describe("Step4QuartileDistribution", () => {
 		expect(screen.getAllByText(/Tous les salariés/).length).toBe(2);
 	});
 
+	it("gives every column header a non-empty accessible name, including the previously empty quartile header (RGAA 5.7)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		for (const header of screen.getAllByRole("columnheader")) {
+			expect(header).toHaveAccessibleName();
+		}
+		expect(
+			screen.getAllByRole("columnheader", { name: "Quartile" }),
+		).toHaveLength(2);
+	});
+
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Distribution par quartile" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders renumeration tranche header and Pourcentage columns", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
 		const headers = screen.getAllByRole("columnheader");
 		const annualHeader = headers.find((h) =>
-			/Tranche de rémunération[\s\S]*annuelle brute/.test(h.textContent ?? ""),
+			/Montants des tranches[\s\S]*annuelle brut/.test(h.textContent ?? ""),
 		);
 		expect(annualHeader).toBeDefined();
 		const hourlyHeader = headers.find((h) =>
-			/Tranche de rémunération[\s\S]*horaire brute/.test(h.textContent ?? ""),
+			/Montants des tranches[\s\S]*horaire brut/.test(h.textContent ?? ""),
 		);
 		expect(hourlyHeader).toBeDefined();
 		expect(screen.getAllByText(/Pourcentage/).length).toBeGreaterThanOrEqual(4);
@@ -88,6 +127,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -96,19 +136,25 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders instruction text and mandatory fields notice", () => {
+	it("renders the non-prefilled instruction text and mandatory fields notice without GIP prefill", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
 		expect(
 			screen.getByText(
-				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+				"Renseignez les informations avant de valider vos indicateurs.",
 			),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+			),
+		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
 		).toBeInTheDocument();
@@ -119,6 +165,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -133,6 +180,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -149,6 +197,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -162,6 +211,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -182,6 +232,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -199,6 +250,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 				maxMen={25}
 				maxWomen={15}
@@ -217,6 +269,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -236,19 +289,20 @@ describe("Step4QuartileDistribution", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders DSN source line on both tables even without GIP prefill", () => {
+	it("does not render the DSN source line without GIP prefill", () => {
 		render(
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
 		expect(
-			screen.getAllByText(
+			screen.queryByText(
 				/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/,
-			).length,
-		).toBe(2);
+			),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders accordion", () => {
@@ -256,6 +310,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -269,6 +324,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -284,45 +340,20 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
 					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
-					step4: {
-						annual: {
-							thresholds: ["25000", "32000", "40000"],
-							womenCounts: [30, 25, 20, 15],
-							menCounts: [20, 25, 30, 35],
-						},
-						hourly: {
-							thresholds: ["13.74", "17.58", "21.98"],
-							womenCounts: [28, 22, 18, 12],
-							menCounts: [22, 28, 32, 38],
-						},
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: prefilledGipStep4(),
 					confidenceIndex: "0.85",
 					periodStart: "2026-01-01",
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -340,45 +371,20 @@ describe("Step4QuartileDistribution", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
-					step2: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
 					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodStart: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -393,6 +399,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "20000", women: 60, men: 30 },
@@ -418,6 +425,7 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					annual: [
 						{ threshold: "", women: 10, men: 15 },
@@ -442,9 +450,100 @@ describe("Step4QuartileDistribution", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
+	});
+
+	it("caps the hourly table against the step 1 headcount, not against the GIP hourly block", async () => {
+		const user = userEvent.setup();
+		const gipThresholdsOnly = nullGipStep4();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: {
+						totalWomen: 177,
+						totalMen: 180,
+						hourlyWomen: 177,
+						hourlyMen: 180,
+					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: {
+						annual: {
+							...gipThresholdsOnly.annual,
+							thresholds: ["25000", "32000", "40000"],
+						},
+						hourly: {
+							...gipThresholdsOnly.hourly,
+							thresholds: ["13.74", "17.58", "21.98"],
+						},
+					},
+					confidenceIndex: null,
+					periodEnd: "2026-12-31",
+				}}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+				maxMen={180}
+				maxWomen={177}
+			/>,
+		);
+
+		// 160 used to be rejected in the hourly table against the GIP reference of
+		// 153; the only cap left is the step 1 headcount, shared by both tables.
+		const hourlyWomen = screen.getByLabelText(
+			/Nombre de femmes 1er quartile horaire/i,
+		) as HTMLInputElement;
+		await user.clear(hourlyWomen);
+		await user.type(hourlyWomen, "160");
+		expect(hourlyWomen).toHaveValue("160");
+		expect(hourlyWomen).not.toHaveAttribute("aria-invalid");
+		expect(
+			screen.queryByText(/fichier GIP pour le taux horaire/i),
+		).not.toBeInTheDocument();
+
+		const annualWomen = screen.getByLabelText(
+			/Nombre de femmes 1er quartile annuel/i,
+		) as HTMLInputElement;
+		await user.clear(annualWomen);
+		await user.type(annualWomen, "160");
+		expect(annualWomen).toHaveValue("160");
+		expect(annualWomen).not.toHaveAttribute("aria-invalid");
+	});
+
+	it("caps each table at the step 1 headcount of its own pay basis", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				hourlyMaxMen={175}
+				hourlyMaxWomen={170}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+				maxMen={180}
+				maxWomen={177}
+			/>,
+		);
+
+		for (const [label, max] of [
+			[/Nombre de femmes 1er quartile annuel/i, 177],
+			[/Nombre de femmes 1er quartile horaire/i, 170],
+		] as const) {
+			const input = screen.getByLabelText(label) as HTMLInputElement;
+			await user.clear(input);
+			await user.type(input, "200");
+			expect(input).not.toHaveValue("200");
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			const describedBy = input.getAttribute("aria-describedby");
+			expect(describedBy).toBeTruthy();
+			expect(document.getElementById(describedBy as string)).toHaveTextContent(
+				`Le nombre ne peut pas dépasser l'effectif de l'étape 1 (${max}).`,
+			);
+		}
 	});
 });

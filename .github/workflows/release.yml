@@ -1,5 +1,9 @@
 name: 🔖 Release
 
+# Manual-only releaser for the beta channel. The alpha channel was extracted
+# into release-alpha.yaml (also manual): merging to alpha no longer publishes
+# a prerelease — and therefore no longer auto-deploys to prod — on its own.
+# master is intentionally out of scope here (never in the trigger nor the gate).
 on:
   workflow_dispatch:
 
@@ -22,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -35,10 +39,10 @@ jobs:
           audience: socialgouv
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -54,7 +58,12 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_push_gpgsign: false
-          git_tag_gpgsign: true
+          # Tag signing must stay off: semantic-release >= 20 creates
+          # lightweight tags (`git tag <name> <sha>`, no -m), and
+          # tag.gpgSign=true turns them into signed tags that require a
+          # message — git then aborts in CI with "Terminal is dumb, but
+          # EDITOR unset". Release commits (master/beta) remain GPG-signed.
+          git_tag_gpgsign: false
 
       - name: Semantic Release
         env:

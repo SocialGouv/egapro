@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AppHref } from "~/modules/routes";
 
 type Props = {
-	href: string;
+	href: AppHref;
 	className?: string;
 	children: React.ReactNode;
+	onClick?: () => void;
 };
 
-export function NavLink({ href, className, children }: Props) {
+export function NavLink({ href, className, children, onClick }: Props) {
 	const pathname = usePathname();
 	const isActive =
 		pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -19,6 +21,7 @@ export function NavLink({ href, className, children }: Props) {
 			aria-current={isActive ? "page" : undefined}
 			className={className}
 			href={href}
+			onClick={onClick}
 		>
 			{children}
 		</Link>

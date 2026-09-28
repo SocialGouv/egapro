@@ -60,7 +60,12 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(mockDb, null, impersonation);
 
 			await expect(
-				caller.updateStep1({ totalWomen: 10, totalMen: 20 }),
+				caller.updateStep1({
+					totalWomen: 10,
+					totalMen: 20,
+					hourlyWomen: 10,
+					hourlyMen: 20,
+				}),
 			).rejects.toThrow("Mode mimoquage");
 		});
 
@@ -147,6 +152,8 @@ describe("declarationRouter", () => {
 									declarantId: "user-1",
 									totalWomen: null,
 									totalMen: null,
+									hourlyWomen: null,
+									hourlyMen: null,
 								},
 							]),
 						}),

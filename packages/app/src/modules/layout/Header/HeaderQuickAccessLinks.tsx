@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Session } from "next-auth";
-
+import { HELP, LOGIN } from "~/modules/routes";
 import { UserAccountMenu } from "./UserAccountMenu";
 
 type Props = {
@@ -26,7 +26,7 @@ export function HeaderQuickAccessLinks({ session, userPhone }: Props) {
 			<li>
 				<Link
 					className="fr-btn fr-btn--tertiary-no-outline fr-icon-information-line fr-btn--icon-left"
-					href="/aide"
+					href={HELP}
 				>
 					Aide
 				</Link>
@@ -34,6 +34,7 @@ export function HeaderQuickAccessLinks({ session, userPhone }: Props) {
 			<li>
 				{session?.user ? (
 					<UserAccountMenu
+						adminMfaAt={session.user.adminMfaAt}
 						isAdmin={session.user.isAdmin}
 						userEmail={session.user.email ?? ""}
 						userName={session.user.name ?? "Utilisateur"}
@@ -42,7 +43,7 @@ export function HeaderQuickAccessLinks({ session, userPhone }: Props) {
 				) : (
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-account-circle-fill"
-						href="/login"
+						href={LOGIN}
 					>
 						Se connecter
 					</Link>

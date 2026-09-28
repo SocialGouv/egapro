@@ -1,125 +1,95 @@
 ---
-description: General code quality rules — always loaded
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+  - "src/**/*.js"
+  - "src/**/*.jsx"
 ---
 
-# Code Quality
+# Qualité de code
 
-> **Used by**: toute personne ou agent écrivant du code. Enforced par `structural-auditor` (17 règles), `block-bad-patterns.sh` hook, et `code-dev` pendant l'implémentation.
+> Chargée dès qu'un fichier `.ts/.tsx/.js/.jsx` sous `src/` est lu ou édité. Vérifiée après coup par `structural-auditor`.
+>
+> Ce qu'un hook bloque mécaniquement n'est **pas** répété ici (`any`, `process.env`, `../../`, suppressions de lint, `.tsx` non-route dans `src/app/`, helpers domain ré-inlinés) — la liste vit dans `rules/automation.md`. Ce fichier ne porte que ce qui demande du jugement.
 
-## Zero suppression comments
+## Pas de commentaire par défaut
 
-Never add `biome-ignore`, `eslint-disable`, `@ts-ignore`, or `@ts-expect-error`.
-Fix the underlying issue instead. If a rule is genuinely wrong for the entire project, update the Biome config.
+Le code produit ne porte **aucun** commentaire descriptif (`// fetch user`), JSDoc, référence au ticket (`// for ticket #42`), TODO/FIXME (ouvrir une issue), en-tête de section (`// --- helpers ---`), ni paraphrase de la ligne d'en dessous. Le nom de la fonction ou de la variable doit suffire.
 
-## No comments by default
+**Seule exception** : un `// ` d'une ligne qui explique un **WHY non-évident** — contrainte cachée, invariant subtil, workaround référencé, comportement contre-intuitif. Test : si le retirer ne gênerait pas un futur lecteur, il ne fallait pas l'écrire.
 
-Les agents dev (`code-dev`, et plus largement tout agent qui écrit du code via la pipeline `/analyse` → `/implement`) **ne doivent pas ajouter de commentaires** dans le code produit. Aucun :
+La règle porte sur le **code nouvellement écrit ou modifié**. Les commentaires legacy déjà présents ne se suppriment pas dans le cadre du ticket courant — pas de scope creep.
 
-- Commentaire descriptif (`// fetch user`, `// loop over items`) — le nom de fonction/variable doit suffire
-- JSDoc ou docstring multi-lignes
-- Commentaire référençant le ticket, la feature, le fix (`// for ticket #42`, `// fixes the X bug`) — le contexte vit dans le commit message et la PR
-- Commentaire « TODO » / « FIXME » — ouvrir une issue à la place
-- Section header en commentaire (`// --- helpers ---`) — découper en fichiers/modules à la place
-- Commentaire qui paraphrase le code juste en dessous
+## Source unique d'une règle métier
 
-**Seule exception autorisée** : un commentaire `// ` court (une ligne) qui explique un **WHY non-évident** — contrainte cachée, invariant subtil, workaround pour un bug spécifique référencé, comportement contre-intuitif qui surprendrait un lecteur. Si retirer le commentaire ne gênerait pas un futur lecteur, il ne faut pas l'écrire.
+Une règle métier existe à **exactement un endroit** : `~/modules/domain`, en fonction pure, importée depuis le barrel. Les appelants la **consomment**, ils ne la re-dérivent jamais en ligne.
 
-Les commentaires legacy déjà présents dans le code et qui n'enfreignent pas cette règle ne sont **pas** à supprimer dans le cadre du ticket courant — pas de scope creep. La règle s'applique au **code nouvellement écrit ou modifié** par l'agent.
+Ce n'est pas seulement du DRY, c'est de la **justesse sous changement**. Quand une règle réglementaire bouge — une convention de signe, un seuil, une classification — il faut pouvoir éditer **une** fonction et que chaque écran, export, PDF et routeur suive. Toute copie hors du domaine est un bug en attente du jour où la règle change.
 
-Enforced par `structural-auditor` (rule 2.17) sur les fichiers modifiés.
+| Règle métier | Fonction à appeler | Ne jamais ré-inliner en |
+|---|---|---|
+| Écart signé `((men − women)/men)×100` | `computeGap` / `computeGapBetween` | `((m - w) / m) * 100` dans un composant ou un export |
+| Franchissement du seuil d'alerte (5 %, positif seulement) | `gapLevel(gap) === "high"` | `gap >= GAP_ALERT_THRESHOLD` dispersé |
+| Quel sexe un jeu d'écarts défavorise | une fonction nommée de `gap.ts` | `parseFloat(w) < parseFloat(m)` compté dans un composant |
+| Ratio stocké (0..1) → pourcentage | un helper domain nommé | `Number(row.gap) * 100` dans la couche export |
+| Déclaration annulée | `isCancelled()` | `cancelledAt !== null` |
+| CSE obligatoire (≥ 100) | `isCseRequired()` | `workforce >= 100` |
 
-## DRY: 3+ repetitions = extract
+Avant d'ajouter un calcul ou une classification dans un composant, un routeur, un PDF ou un export : *est-ce une règle métier ?* Si oui, elle va dans le domaine (fonction pure + test unitaire) et l'appelant l'importe. Si la fonction manque, **l'ajouter** — jamais la ré-implémenter.
 
-If the same logic or markup appears 3 or more times, extract it into a shared function or component.
+Quand deux points d'appel ont besoin d'**intentions différentes** sur les mêmes entrées (« écart au-dessus du seuil dans les deux sens » pour un encart, « positif seulement » pour un badge de conformité), chaque intention est sa **propre fonction nommée** — jamais deux morceaux de code qui se ressemblent et dont la divergence se lit comme un accident.
 
-Common duplication hotspots to watch for:
-- **Test mocks** — standard mocks (next/link, next/navigation, server-only) live in `src/test/setup.ts`. Never duplicate them in test files.
-- **Constants** — shared domain constants go in the module's `shared/constants.ts`. Never duplicate a constant across multiple files.
-- **Validation schemas** — shared Zod schemas go in a module-level file (e.g. `phone.ts`). Never duplicate regex or validation logic.
-- **Utility functions** — shared formatting functions (formatSiren, formatPhone, etc.) go in the module's barrel or a shared utils file.
+Les helpers **spécifiques à l'UI** (classes de badge, libellés DSFR) restent dans le module de la feature : seule la logique pure va dans le domaine.
 
-## No useless constants
+## DRY : 3 répétitions = extraction
 
-Do not extract a value into a `const` at module scope unless it is:
-- Used in multiple places, OR
-- A magic number/string that benefits from a descriptive name
+Trois occurrences de la même logique ou du même markup → extraire. Points chauds : les constantes partagées (`shared/constants.ts` du module, jamais dupliquées), les schémas Zod partagés, les formateurs d'affichage (section suivante).
 
-A constant used exactly once right below its definition adds noise, not clarity.
+> La règle DRY propre aux **tests** (mocks centralisés dans `src/test/setup.ts`) vit dans `rules/testing.md`, sa source unique.
 
-## No custom components in `src/app/`
+## Formatage d'affichage
 
-`src/app/` must **only** contain Next.js route files: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `global-error.tsx`, `template.tsx`, `default.tsx`.
+Un formateur vit dans le **domaine** : `~/modules/domain/shared/format.ts`, exporté par le barrel. Un formateur qui porte une **règle métier** (`formatSiren`, `formatWorkforceForUser`) reste à côté de sa règle, mais s'appuie sur les primitives de `format.ts` plutôt que de refaire la conversion.
 
-Any custom component (client or server) **must** live in `src/modules/{domain}/`. The `page.tsx` imports from the module barrel.
+**Le nom dit l'échelle qu'il lit et la convention qu'il écrit.** Jamais un nom pour deux sens : `formatGap` a longtemps désigné une valeur 0–100 dans le domaine et un ratio 0–1 dans l'observatoire, et donner à l'un l'entrée de l'autre affichait `717 %` ou `0,07 %`. D'où `formatRatioAsPercentage` (0–1), `formatPrecisePercentage` (0–100, jusqu'à 2 décimales), `formatFixedPercentage` (0–100, 1 décimale toujours écrite), `formatWholePercentage` (aucune décimale).
 
-```tsx
-// CORRECT — page.tsx is a thin wrapper
-import { ErrorTrigger } from "~/modules/testError";
-export default function Page() { return <ErrorTrigger />; }
+**Un composant ne convertit jamais lui-même** une quantité (montant, effectif, pourcentage, durée) ou une date en texte — pas même par `String(n)` ou une interpolation `{n} %`, que le hook ne voit pas. S'il manque un formateur, on l'ajoute dans `format.ts` ; on ne l'écrit pas en ligne « juste cette fois ».
 
-// FORBIDDEN — custom component next to page.tsx
-src/app/test-error/ErrorTrigger.tsx  // ← BLOCKED by hook
-```
+**Changer la convention décimale d'un écran est une décision produit**, pas l'effet de bord d'une refacto : chaque écran tient ses décimales de sa maquette. Déplacer, renommer et fusionner des formateurs à sortie identique se fait librement ; aligner deux conventions se demande.
 
-This rule is **enforced by the `block-bad-patterns` hook** — creating a non-route `.tsx` file in `src/app/` will be rejected.
+> La mécanique (le motif bloqué, son périmètre, ses exclusions) vit dans `rules/automation.md`, sa source unique.
 
-## Domain layer (`~/modules/domain`)
+## Pas de constante inutile
 
-All **pure business rules** (isomorphic, zero React/tRPC/Drizzle deps) live in `~/modules/domain`. Always import from the barrel:
-
-```ts
-import { getCurrentYear, extractSiren, GAP_ALERT_THRESHOLD } from "~/modules/domain";
-```
-
-Rules:
-- **No inline `new Date().getFullYear()`** — use `getCurrentYear()` or `getCseYear()` from domain.
-- **No inline `siret.slice(0, 9)`** — use `extractSiren(siret)` from domain.
-- **No hardcoded thresholds** (5%, 50, 100) — use named constants (`GAP_ALERT_THRESHOLD`, `COMPANY_SIZE_*`).
-- **New business rules** must be added to domain as pure functions with unit tests.
-- **UI-specific helpers** (badge classes, DSFR labels) stay in the feature module — only pure logic goes in domain.
+Ne pas extraire une valeur en `const` au niveau module sauf si elle est utilisée à plusieurs endroits, ou si c'est un nombre/une chaîne magique qui gagne à être nommé. Une constante utilisée une seule fois, juste en dessous de sa définition, ajoute du bruit, pas de la clarté.
 
 ## Imports
 
-- Use the `~/` path alias (mapped to `src/`). Never use relative paths that go up more than one level (`../../`).
-- Import from module barrels (`~/modules/layout`), not internal files.
+Alias `~/` (mappé sur `src/`), et import depuis le **barrel** du module (`~/modules/layout`), jamais depuis un fichier interne.
 
-## File size
+## Taille de fichier
 
-Keep files under 200 lines. Split at 400. Files over 800 lines are forbidden.
+< 200 lignes idéal · 200–400 acceptable · > 400 découper · > 800 **interdit**.
 
-## TypeScript
+## Typage
 
-- `strict: true`, `noUncheckedIndexedAccess: true`
-- No explicit `any` — use `unknown` + narrowing
-- Shared object types in `types.ts` at module level
-- Component props: `type Props = { ... }` (never `any`)
+`strict: true` et `noUncheckedIndexedAccess: true` sont actifs. Les types d'objets partagés vont dans le `types.ts` du module ; les props de composant sont un `type Props = { … }`.
 
-## Naming conventions
+## Nommage
 
-| Type | Convention | Example |
+| Type | Convention | Exemple |
 |---|---|---|
-| React component | PascalCase | `HeaderBrand.tsx` |
+| Composant React | PascalCase | `HeaderBrand.tsx` |
 | Hook | camelCase + `use` | `useNavigation.ts` |
-| Utility | camelCase | `formatDate.ts` |
-| Type / Interface | PascalCase | `type UserProfile = ...` |
-| Constant | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
-| Module folder | camelCase | `modules/layout/` |
+| Utilitaire | camelCase | `formatDate.ts` |
+| Type / Interface | PascalCase | `type UserProfile = …` |
+| Constante | SCREAMING_SNAKE | `const MAX_RETRY = 3` |
+| Dossier de module | camelCase | `modules/layout/` |
 
-## General rules
+Nommer d'après **ce que la chose est ou affiche**, pas d'après sa place dans l'arbre : `DeclarationSummaryCard`, pas `LeftPanelCard`.
 
-- **Immutability**: never mutate objects/arrays — always spread (`{ ...obj, key: val }`)
-- **Error handling**: always `try/catch` with explicit user-facing error message
-- **Input validation**: Zod at system boundaries (forms, route params, API body)
+## Divers
 
-## Form conventions
-
-- **No manual form state**: never use multiple `useState` for form fields. Use `useZodForm` from `~/modules/shared`.
-- **No inline validation**: never write manual `if (!field) { setError(...) }` in handleSubmit. Use Zod schemas via `zodResolver`.
-- **No router-level schemas**: never define Zod schemas in `src/server/api/routers/`. Define them in `src/modules/{domain}/schemas.ts` and import from there.
-- **Shared schemas**: the same Zod schema must be used by both the form (`useZodForm`) and the tRPC procedure (`.input()`).
-
-## Environment variables
-
-Declared and validated in `src/env.js` via `@t3-oss/env-nextjs` + Zod. **Never read `process.env` directly** — always `import { env } from "~/env.js"`.
-
-To add a variable: declare in `src/env.js` (`server` or `client` section) + add to `runtimeEnv` + add to `.env` local. Pass `SKIP_ENV_VALIDATION=1` to bypass validation (Docker build, CI without secrets).
+- **Immutabilité** : jamais de mutation d'objet ou de tableau — toujours un spread.
+- **Erreurs** : `try/catch` avec un message explicite destiné à l'utilisateur.
+- **Validation** : Zod aux frontières du système (formulaires, params de route, body d'API).

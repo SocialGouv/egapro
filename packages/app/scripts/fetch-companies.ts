@@ -19,6 +19,7 @@ const DEFAULT_PER_BUCKET = 40;
 type Bucket =
 	| "medium-50"
 	| "medium-100"
+	| "medium-150"
 	| "large-250"
 	| "large-1000"
 	| "large-5000";
@@ -38,8 +39,13 @@ const BUCKET_CONFIGS: Array<{
 	{ bucket: "medium-50", tranchesCodes: ["21"], workforceRange: [50, 99] },
 	{
 		bucket: "medium-100",
+		tranchesCodes: ["22"],
+		workforceRange: [100, 149],
+	},
+	{
+		bucket: "medium-150",
 		tranchesCodes: ["22", "31"],
-		workforceRange: [100, 249],
+		workforceRange: [150, 249],
 	},
 	{
 		bucket: "large-250",
@@ -76,7 +82,7 @@ const SEARCH_QUERIES = [
 	"centre",
 ];
 
-/** Convert INSEE tranche_effectif_salarie code to a midpoint headcount estimate. */
+/** Convert INSEE tranche_effectif_salarie code to a midpoint headcount estimate, clamped to bucket range. */
 function estimateWorkforce(
 	code: string | null,
 	range: [number, number],
@@ -92,8 +98,11 @@ function estimateWorkforce(
 		"52": 7500,
 		"53": 20000,
 	};
-	if (code && code in map) return map[code] ?? range[0];
-	return Math.round((range[0] + range[1]) / 2);
+	const mid =
+		code && code in map
+			? (map[code] ?? range[0])
+			: Math.round((range[0] + range[1]) / 2);
+	return Math.min(Math.max(mid, range[0]), range[1]);
 }
 
 async function fetchPage(
@@ -194,10 +203,11 @@ const perBucket = perBucketArg
 	? Number.parseInt(perBucketArg.split("=")[1] ?? "", 10)
 	: DEFAULT_PER_BUCKET;
 
-console.error(`Fetching companies for 5 workforce buckets...`);
+console.error(`Fetching companies for 6 workforce buckets...`);
 console.error(`Target: ${perBucket} unique companies per bucket\n`);
 
 const allCompanies: Company[] = [];
+const globalSirens = new Set<string>();
 
 for (const config of BUCKET_CONFIGS) {
 	console.error(
@@ -210,7 +220,10 @@ for (const config of BUCKET_CONFIGS) {
 		perBucket,
 	);
 
-	const bucketCompanies = [...bucketMap.values()].slice(0, perBucket);
+	const bucketCompanies = [...bucketMap.values()]
+		.filter((c) => !globalSirens.has(c.siren))
+		.slice(0, perBucket);
+	for (const c of bucketCompanies) globalSirens.add(c.siren);
 	allCompanies.push(...bucketCompanies);
 	console.error(
 		`→ ${bucketCompanies.length} companies kept for ${config.bucket}`,

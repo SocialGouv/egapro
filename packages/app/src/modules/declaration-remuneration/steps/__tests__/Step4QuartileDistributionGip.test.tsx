@@ -1,5 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+	prefilledGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step4QuartileDistribution } from "../Step4QuartileDistribution";
 
 const mockMutate = vi.fn();
@@ -33,29 +39,8 @@ const emptyStep4Data = () => ({
 	],
 });
 
-const nullStep2 = {
-	annualMeanWomen: null,
-	annualMeanMen: null,
-	hourlyMeanWomen: null,
-	hourlyMeanMen: null,
-	annualMedianWomen: null,
-	annualMedianMen: null,
-	hourlyMedianWomen: null,
-	hourlyMedianMen: null,
-};
-
-const nullStep3 = {
-	annualMeanWomen: null,
-	annualMeanMen: null,
-	hourlyMeanWomen: null,
-	hourlyMeanMen: null,
-	annualMedianWomen: null,
-	annualMedianMen: null,
-	hourlyMedianWomen: null,
-	hourlyMedianMen: null,
-	beneficiaryCountWomen: null,
-	beneficiaryCountMen: null,
-};
+const nullStep2 = nullGipStep2();
+const nullStep3 = nullGipStep3();
 
 describe("Step4QuartileDistribution — GIP prefill", () => {
 	it("uses gipPrefillData when no initialCategories", () => {
@@ -64,24 +49,19 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
-					step4: {
-						annual: {
-							thresholds: ["25000", "32000", "40000"],
-							womenCounts: [30, 25, 20, 15],
-							menCounts: [20, 25, 30, 35],
-						},
-						hourly: {
-							thresholds: ["13.74", "17.58", "21.98"],
-							womenCounts: [28, 22, 18, 12],
-							menCounts: [22, 28, 32, 38],
-						},
-					},
+					step4: prefilledGipStep4(),
 					confidenceIndex: "0.85",
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -99,7 +79,12 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
 					step4: {
@@ -117,6 +102,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -131,24 +117,19 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: null, totalMen: null },
+					step1: {
+						totalWomen: null,
+						totalMen: null,
+						hourlyWomen: null,
+						hourlyMen: null,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -164,7 +145,12 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 200, totalMen: 0 },
+					step1: {
+						totalWomen: 200,
+						totalMen: 0,
+						hourlyWomen: 200,
+						hourlyMen: 0,
+					},
 					step2: nullStep2,
 					step3: nullStep3,
 					step4: {
@@ -182,6 +168,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 					confidenceIndex: null,
 					periodEnd: null,
 				}}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);
@@ -194,5 +181,44 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 		const totalCells = screen.getAllByRole("cell");
 		const menTotalCells = totalCells.filter((cell) => cell.textContent === "0");
 		expect(menTotalCells.length).toBeGreaterThanOrEqual(1);
+	});
+
+	it("renders the prefilled intro text and DSN source line on both tables", () => {
+		render(
+			<Step4QuartileDistribution
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
+					step2: nullStep2,
+					step3: nullStep3,
+					step4: prefilledGipStep4(),
+					confidenceIndex: "0.85",
+					periodEnd: "2026-12-31",
+				}}
+				indicatorGRequired
+				initialData={emptyStep4Data()}
+			/>,
+		);
+		expect(
+			screen.getByText(
+				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				"Renseignez les informations avant de valider vos indicateurs.",
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getAllByText(
+				/Source\s*:\s*DSN \(Déclarations Sociales Nominatives\)/,
+			).length,
+		).toBe(2);
 	});
 });

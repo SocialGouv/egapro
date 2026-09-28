@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useId } from "react";
+import type { AppHref } from "~/modules/routes";
+import { HOME } from "~/modules/routes";
 
 type BreadcrumbItem = {
 	label: string;
-	href?: string;
+	href?: AppHref;
 };
 
 type Props = {
@@ -36,7 +38,7 @@ export function Breadcrumb({ items }: Props) {
 				<ol className="fr-breadcrumb__list">
 					{parentItems.map((item) => (
 						<li key={item.href ?? item.label}>
-							<Link className="fr-breadcrumb__link" href={item.href ?? "/"}>
+							<Link className="fr-breadcrumb__link" href={item.href ?? HOME}>
 								{item.label}
 							</Link>
 						</li>

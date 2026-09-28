@@ -21,7 +21,12 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-const emptyStep1Data = () => ({ totalWomen: 0, totalMen: 0 });
+const emptyStep1Data = () => ({
+	totalWomen: 0,
+	totalMen: 0,
+	hourlyWomen: 0,
+	hourlyMen: 0,
+});
 
 describe("Step1Workforce dev fill", () => {
 	it("fills workforce when dev fill button is clicked", async () => {
@@ -30,13 +35,20 @@ describe("Step1Workforce dev fill", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1Data()}
 			/>,
 		);
 
 		await user.click(screen.getByRole("button", { name: "[DEV] Remplir" }));
 
-		expect(screen.getByLabelText("Nombre de femmes")).toHaveValue("120");
-		expect(screen.getByLabelText("Nombre d'hommes")).toHaveValue("130");
+		for (const basis of ["Rémunération annuelle", "Rémunération horaire"]) {
+			expect(screen.getByLabelText(`${basis} — Nombre de femmes`)).toHaveValue(
+				"120",
+			);
+			expect(screen.getByLabelText(`${basis} — Nombre d'hommes`)).toHaveValue(
+				"130",
+			);
+		}
 	});
 });

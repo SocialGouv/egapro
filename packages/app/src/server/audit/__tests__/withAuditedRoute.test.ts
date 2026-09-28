@@ -8,6 +8,9 @@ vi.mock("../log", () => ({
 const { withAuditedRoute } = await import("../withAuditedRoute");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
+/** The shape Next hands a dynamic segment: the context is required, not optional. */
+type SirenRouteContext = { params: Promise<{ siren: string }> };
+
 function buildRequest() {
 	return new Request("http://localhost/api/test", {
 		headers: {
@@ -36,6 +39,7 @@ describe("withAuditedRoute", () => {
 			status: "success",
 			ipAddress: "203.0.113.99",
 			userAgent: "RouteAgent",
+			origin: { source: "route", route: "/api/test", operation: "GET" },
 		});
 	});
 
@@ -50,6 +54,29 @@ describe("withAuditedRoute", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			status: "failure",
 			errorMessage: "HTTP 401",
+			origin: { source: "route", operation: "GET" },
+		});
+	});
+
+	// The stdout `route` field must never carry the query string.
+	it("strips the query string from the origin route", async () => {
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
+			async () => new Response("nope", { status: 403 }),
+		);
+
+		const request = new Request(
+			"http://localhost/api/declaration-pdf?year=2026",
+			{ method: "GET" },
+		);
+		await handler(request);
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			origin: {
+				source: "route",
+				route: "/api/declaration-pdf",
+				operation: "GET",
+			},
 		});
 	});
 
@@ -66,6 +93,20 @@ describe("withAuditedRoute", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			status: "failure",
 			errorMessage: "boom",
+		});
+	});
+
+	it("logs 'Unknown error' and re-throws when the handler rejects with a non-Error", async () => {
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
+			() => Promise.reject("not-an-error"),
+		);
+
+		await expect(handler(buildRequest())).rejects.toBe("not-an-error");
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			errorMessage: "Unknown error",
+			origin: { source: "route", route: "/api/test", operation: "GET" },
 		});
 	});
 
@@ -108,5 +149,87 @@ describe("withAuditedRoute", () => {
 		expect(response.status).toBe(200);
 		expect(consoleSpy).toHaveBeenCalled();
 		consoleSpy.mockRestore();
+	});
+	it("forwards the Next route context to the handler", async () => {
+		const seen: unknown[] = [];
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			async (_request: Request, routeContext: SirenRouteContext) => {
+				seen.push(await routeContext.params);
+				return new Response(null, { status: 200 });
+			},
+		);
+
+		await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "123456789" }),
+		});
+
+		expect(seen).toEqual([{ siren: "123456789" }]);
+	});
+
+	it("forwards the Next route context to resolveContext", async () => {
+		const handler = withAuditedRoute(
+			{
+				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
+				resolveContext: async (
+					_request: Request,
+					routeContext: SirenRouteContext,
+				) => ({ siren: (await routeContext.params).siren }),
+			},
+			async (_request: Request, _routeContext: SirenRouteContext) =>
+				new Response(null, { status: 200 }),
+		);
+
+		await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "987654321" }),
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			siren: "987654321",
+		});
+	});
+
+	// Replaces "still works when the route context is omitted", which pinned the
+	// very defect this signature removes: the wrapper used to widen the context
+	// to `TRouteContext | undefined`, so a handler that *requires* it — the shape
+	// Next gives a dynamic segment — was rejected with TS2345. A static handler
+	// now takes exactly one argument, and the assertion below is a compile-time
+	// one: `wrapDynamicRoute` would not type-check under the old signature.
+	it("accepts a handler whose route context is required", async () => {
+		async function dynamicRoute(
+			_request: Request,
+			{ params }: SirenRouteContext,
+		) {
+			return Response.json(await params);
+		}
+
+		const handler = withAuditedRoute(
+			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			dynamicRoute,
+		);
+		const response = await handler(buildRequest(), {
+			params: Promise.resolve({ siren: "123456789" }),
+		});
+
+		expect(await response.json()).toEqual({ siren: "123456789" });
+	});
+
+	it("wraps a static handler as a one-argument handler", async () => {
+		const handler = withAuditedRoute(
+			{
+				action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD,
+				resolveContext: (request) => ({
+					metadata: { path: new URL(request.url).pathname },
+				}),
+			},
+			async () => new Response(null, { status: 200 }),
+		);
+
+		const response = await handler(buildRequest());
+
+		expect(response.status).toBe(200);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			metadata: { path: "/api/test" },
+		});
 	});
 });

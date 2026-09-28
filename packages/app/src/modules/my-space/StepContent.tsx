@@ -1,0 +1,324 @@
+import type { ReactNode } from "react";
+import type {
+	CampaignDeadlines,
+	DeclarationDisplayContext,
+	DeclarationFsmStatus,
+} from "~/modules/domain";
+import {
+	getReferenceYearFor,
+	isJointEvaluationWritable,
+	isSecondDeclarationWritable,
+	selectPathChoiceDeadline,
+} from "~/modules/domain";
+import {
+	COMPLIANCE_JOINT_EVALUATION,
+	complianceStepHref,
+	cseOpinionStepHref,
+	DECLARATION_REMUNERATION_RECAP,
+	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+	FIRST_REMUNERATION_STEP,
+	remunerationStepHref,
+} from "~/modules/routes";
+import type { PanelVariant } from "./DeclarationProcessPanel";
+import styles from "./DeclarationProcessPanel.module.scss";
+import type { StepStatus } from "./StepRows";
+import { DeadlineRow, TransmittedRow } from "./StepRows";
+
+type CompliancePath = NonNullable<
+	DeclarationDisplayContext["firstDeclarationPathChoice"]
+>;
+
+/** Panel wording for each compliance path. Shorter than the funnel option
+ * titles, and free of the round suffix the table's step labels carry. */
+const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
+	corrective_action: "Actions correctives et seconde déclaration",
+	joint_evaluation: "Évaluation conjointe des rémunérations",
+	justify: "Justification des écarts de rémunération",
+};
+
+const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
+
+function StepTitle({
+	children,
+	status,
+}: {
+	children: ReactNode;
+	status: StepStatus;
+}) {
+	return (
+		<p
+			className={`fr-text--bold fr-mb-0 ${status === "pending" ? "fr-text-mention--grey" : ""}`.trim()}
+		>
+			{children}
+		</p>
+	);
+}
+
+function BulletRow({ children }: { children: ReactNode }) {
+	return (
+		<div className={styles.bulletItem}>
+			<span aria-hidden="true" className={styles.bullet} />
+			<p className="fr-mb-0">{children}</p>
+		</div>
+	);
+}
+
+export function Step1Content({
+	campaignDeadlines,
+	indicatorGRequired,
+	hasPrefillData,
+	status,
+	variant,
+	year,
+}: {
+	campaignDeadlines: CampaignDeadlines;
+	indicatorGRequired: boolean;
+	hasPrefillData: boolean;
+	status: StepStatus;
+	variant: PanelVariant;
+	year: number;
+}) {
+	const refYear = getReferenceYearFor(year);
+	const title = (
+		<StepTitle status={status}>
+			Déclaration des indicateurs de rémunération
+		</StepTitle>
+	);
+
+	if (variant === "start") {
+		return (
+			<div className={styles.stepContent}>
+				<div>
+					{title}
+					<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
+						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
+					</p>
+				</div>
+				<BulletRow>
+					{hasPrefillData
+						? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+						: "Indicateurs pour l'ensemble des salariés à remplir"}
+				</BulletRow>
+				{indicatorGRequired && (
+					<BulletRow>
+						Indicateurs de rémunération par catégories de salariés à remplir
+					</BulletRow>
+				)}
+				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
+			</div>
+		);
+	}
+
+	if (status === "complete") {
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				<TransmittedRow
+					label="Votre déclaration a été transmise"
+					modification={
+						variant === "closed"
+							? undefined
+							: {
+									href: remunerationStepHref(FIRST_REMUNERATION_STEP),
+									until: campaignDeadlines.decl1ModificationDeadline,
+								}
+					}
+					viewHref={DECLARATION_REMUNERATION_RECAP}
+				/>
+			</div>
+		);
+	}
+
+	return title;
+}
+
+export function Step2Content({
+	campaignDeadlines,
+	declarationFsmStatus,
+	displayContext,
+	secondDeclarationSubmitted,
+	status,
+	variant,
+}: {
+	campaignDeadlines: CampaignDeadlines;
+	declarationFsmStatus: DeclarationFsmStatus | null;
+	displayContext: DeclarationDisplayContext;
+	secondDeclarationSubmitted: boolean;
+	status: StepStatus;
+	variant: PanelVariant;
+}) {
+	const title = (
+		<StepTitle status={status}>
+			Parcours de mise en conformité pour l'indicateur par catégories de
+			salariés si écarts &ge; 5&nbsp;%
+		</StepTitle>
+	);
+
+	if (variant === "start") {
+		return title;
+	}
+
+	if (variant === "compliance_choice") {
+		const pathChoiceDeadline = selectPathChoiceDeadline(
+			campaignDeadlines,
+			secondDeclarationSubmitted,
+		);
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				{secondDeclarationSubmitted && (
+					<TransmittedRow
+						label="Votre seconde déclaration a été transmise"
+						modification={{
+							href: complianceStepHref(1),
+							until: campaignDeadlines.decl2ModificationDeadline,
+						}}
+						viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
+						viewLabel="Voir le récapitulatif de la seconde déclaration"
+					/>
+				)}
+				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
+				<DeadlineRow date={pathChoiceDeadline} />
+			</div>
+		);
+	}
+
+	if (variant === "compliance") {
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
+				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
+			</div>
+		);
+	}
+
+	const activeCompliancePath =
+		displayContext.secondDeclarationPathChoice ??
+		displayContext.firstDeclarationPathChoice;
+
+	if (variant === "evaluation") {
+		const jointEvaluationDeadline =
+			declarationFsmStatus === "joint_evaluation_chosen"
+				? campaignDeadlines.decl1JointEvaluationDeadline
+				: campaignDeadlines.decl2JointEvaluationDeadline;
+		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
+			<TransmittedRow
+				label="Votre seconde déclaration a été transmise"
+				modification={{
+					href: complianceStepHref(1),
+					until: campaignDeadlines.decl2ModificationDeadline,
+				}}
+				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
+				viewLabel="Voir le récapitulatif de la seconde déclaration"
+			/>
+		) : null;
+
+		if (activeCompliancePath === "corrective_action") {
+			return (
+				<div className={styles.stepContent}>
+					{title}
+					{secondDeclTransmittedRow}
+					<DeadlineRow date={campaignDeadlines.decl2JustificationDeadline} />
+				</div>
+			);
+		}
+
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				{secondDeclTransmittedRow}
+				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				<DeadlineRow date={jointEvaluationDeadline} />
+			</div>
+		);
+	}
+
+	const secondDeclarationWritable =
+		isSecondDeclarationWritable(declarationFsmStatus);
+	const jointEvaluationWritable =
+		isJointEvaluationWritable(declarationFsmStatus);
+
+	return (
+		<div className={styles.stepContent}>
+			{title}
+			{secondDeclarationSubmitted && (
+				<TransmittedRow
+					label="Votre seconde déclaration a été transmise"
+					modification={
+						secondDeclarationWritable
+							? {
+									href: complianceStepHref(1),
+									until: campaignDeadlines.decl2ModificationDeadline,
+								}
+							: undefined
+					}
+					viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
+					viewLabel="Voir le récapitulatif de la seconde déclaration"
+				/>
+			)}
+			{displayContext.shouldShowJointEvaluation && (
+				<TransmittedRow
+					label="Votre rapport de l'évaluation conjointe a été transmis"
+					modification={
+						jointEvaluationWritable
+							? {
+									href: COMPLIANCE_JOINT_EVALUATION,
+									until: campaignDeadlines.decl2JointEvaluationDeadline,
+								}
+							: undefined
+					}
+				/>
+			)}
+			{displayContext.shouldShowGapJustification && (
+				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
+			)}
+		</div>
+	);
+}
+
+export function Step3Content({
+	campaignDeadlines,
+	status,
+	variant,
+}: {
+	campaignDeadlines: CampaignDeadlines;
+	status: StepStatus;
+	variant: PanelVariant;
+}) {
+	const title = (
+		<StepTitle status={status}>Déposer le ou les avis du CSE</StepTitle>
+	);
+
+	if (
+		variant === "start" ||
+		variant === "compliance_choice" ||
+		variant === "compliance" ||
+		variant === "evaluation"
+	) {
+		return title;
+	}
+
+	if (variant === "closed") {
+		return (
+			<div className={styles.stepContent}>
+				{title}
+				<TransmittedRow
+					label="Vos avis du CSE ont été transmis"
+					modification={{
+						href: cseOpinionStepHref(2),
+						until: campaignDeadlines.decl2CseOpinionDeadline,
+					}}
+				/>
+			</div>
+		);
+	}
+
+	// cse variant
+	return (
+		<div className={styles.stepContent}>
+			{title}
+			<DeadlineRow date={campaignDeadlines.decl2CseOpinionDeadline} />
+		</div>
+	);
+}

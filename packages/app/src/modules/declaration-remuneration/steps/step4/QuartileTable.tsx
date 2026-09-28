@@ -1,7 +1,7 @@
 "use client";
 
 import type { QuartileTuple } from "~/modules/declaration-remuneration/types";
-import { computePercentage } from "~/modules/domain";
+import { computePercentage, sumQuartileWorkforce } from "~/modules/domain";
 import stepStyles from "../Step4QuartileDistribution.module.scss";
 import { QuartileTableRow } from "./QuartileTableRow";
 
@@ -27,8 +27,14 @@ type Props = {
 	];
 	readingNote?: React.ReactNode;
 	sourceNote?: React.ReactNode;
+	/** Rendered below sourceNote — the per-table coherence error alert. */
+	errorNote?: React.ReactNode;
 	onQuartileChange: (index: number, field: Field, value: string) => void;
 	disabled?: boolean;
+	readOnly?: boolean;
+	/** Reference headcount for this table (annual or hourly), when known. */
+	referenceWomen?: number;
+	referenceMen?: number;
 };
 
 export function QuartileTable({
@@ -39,28 +45,38 @@ export function QuartileTable({
 	errors,
 	readingNote,
 	sourceNote,
+	errorNote,
 	onQuartileChange,
 	disabled = false,
+	readOnly = false,
+	referenceWomen,
+	referenceMen,
 }: Props) {
-	const totalWomen = quartiles.reduce((sum, q) => sum + (q.women ?? 0), 0);
-	const totalMen = quartiles.reduce((sum, q) => sum + (q.men ?? 0), 0);
-	const totalAll = totalWomen + totalMen;
+	const {
+		women: totalWomen,
+		men: totalMen,
+		total: totalAll,
+	} = sumQuartileWorkforce(quartiles);
 	const trancheSuffix =
-		tableType === "annual" ? "annuelle brute" : "horaire brute";
+		tableType === "annual"
+			? "de rémunération annuelle brut"
+			: "de rémunération horaire brut";
 
 	return (
 		<div className={stepStyles.tableWrapper}>
-			<h3 className="fr-h5 fr-mb-0">{title}</h3>
+			<h3 className="fr-h6 fr-mb-0">{title}</h3>
 			<div className={stepStyles.tableSection}>
 				{readingNote}
 				<div
-					className={`fr-table fr-table--no-scroll fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
+					className={`fr-table fr-table--bordered fr-table--no-scroll fr-table--no-caption fr-mt-0 fr-mb-0 ${stepStyles.quartileTable}`}
 				>
 					<div className="fr-table__wrapper">
 						<div className="fr-table__container">
 							<div className="fr-table__content">
 								<table>
-									<caption className="fr-sr-only">{title}</caption>
+									{/* fr-table--no-caption keeps the caption in the a11y tree (sr-only)
+									    without reserving the DSFR --table-offset top space. */}
+									<caption>{title}</caption>
 									<colgroup>
 										<col className={stepStyles.colRowLabel} />
 										<col className={stepStyles.colMin} />
@@ -72,9 +88,11 @@ export function QuartileTable({
 									</colgroup>
 									<thead>
 										<tr>
-											<th scope="col">{/* row label */}</th>
+											<th scope="col">
+												<span className="fr-sr-only">Quartile</span>
+											</th>
 											<th colSpan={2} scope="col">
-												Tranche de rémunération
+												Montants des tranches
 												<br />
 												{trancheSuffix}
 											</th>
@@ -110,24 +128,39 @@ export function QuartileTable({
 												min={mins[i] ?? ""}
 												onQuartileChange={onQuartileChange}
 												quartile={quartiles[i] ?? { threshold: undefined }}
+												readOnly={readOnly}
 												tableType={tableType}
 											/>
 										))}
 										<tr>
 											<th scope="row">Tous les salariés</th>
-											<td className={stepStyles.minCell} />
-											<td className={stepStyles.maxCell} />
+											<td className={stepStyles.minCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
+											<td className={stepStyles.maxCell}>
+												<span className="fr-sr-only">Non applicable</span>
+											</td>
 											<td
 												className={stepStyles.numericCell}
 												data-mobile-label="Nombre de femmes"
 											>
 												<strong>{totalAll > 0 ? totalWomen : "-"}</strong>
+												{referenceWomen !== undefined && (
+													<span className="fr-hint-text">
+														Référence&nbsp;: {referenceWomen}
+													</span>
+												)}
 											</td>
 											<td
 												className={stepStyles.numericCell}
 												data-mobile-label="Nombre d'hommes"
 											>
 												<strong>{totalAll > 0 ? totalMen : "-"}</strong>
+												{referenceMen !== undefined && (
+													<span className="fr-hint-text">
+														Référence&nbsp;: {referenceMen}
+													</span>
+												)}
 											</td>
 											<td
 												className={stepStyles.numericCell}
@@ -152,6 +185,7 @@ export function QuartileTable({
 				</div>
 
 				{sourceNote}
+				{errorNote}
 			</div>
 		</div>
 	);

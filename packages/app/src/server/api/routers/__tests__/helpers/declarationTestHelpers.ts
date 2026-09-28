@@ -47,6 +47,7 @@ export function createCaller(
 	mockDb: unknown,
 	siret: string | null = "33978727700015",
 	impersonation: { siren: string; name: string } | null = null,
+	email?: string,
 ) {
 	return import("~/server/api/routers/declaration").then(
 		({ declarationRouter }) =>
@@ -55,8 +56,12 @@ export function createCaller(
 				session: {
 					user: {
 						id: "user-1",
+						email,
 						siret,
 						isAdmin: impersonation !== null,
+						// An impersonation only bites while the admin MFA window is open (#4466).
+						adminMfaAt:
+							impersonation !== null ? Math.floor(Date.now() / 1000) : null,
 						impersonation,
 					},
 					expires: "",

@@ -1,0 +1,7 @@
+.callout:global(.fr-callout--orange-terre-battue) {
+	background-image: linear-gradient(
+		0deg,
+		var(--text-default-warning),
+		var(--text-default-warning)
+	);
+}

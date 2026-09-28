@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest";
 
+import type { DeclarationFsmStatus } from "~/modules/domain";
 import type { CseRow, IndicatorGEntry } from "../fetchDeclarations";
 import {
 	assembleDeclaration,
 	buildIndicatorG,
 	buildIndicators,
 } from "../fetchDeclarations";
+import type { RawHistoryEntry } from "../queries";
+import {
+	GAP_PERSISTS_CONDITION,
+	GAP_RESOLVED_CONDITION,
+	STAGE_LABELS,
+} from "./helpers/nextStepLabels";
+import {
+	DROPPED_ROOT_KEYS,
+	PARCOURS_KEYS,
+	RELOCATED_ROOT_KEYS,
+} from "./helpers/parcoursKeys";
 
 // Minimal DeclarationRow used by buildIndicators / assembleDeclaration
 const baseRow = {
@@ -17,6 +29,8 @@ const baseRow = {
 	secondDeclarationPathChoice: null,
 	totalWomen: 100,
 	totalMen: 150,
+	hourlyWomen: 100,
+	hourlyMen: 150,
 	submittedAt: null as Date | null,
 	firstDeclarationPathChoiceAt: null as Date | null,
 	secondDeclarationPathChoiceAt: null as Date | null,
@@ -35,7 +49,7 @@ const baseRow = {
 	updatedAt: new Date("2027-03-15T12:00:00Z"),
 	cancelledAt: null as Date | null,
 	companyName: "ACME Corp",
-	workforce: 250,
+	workforceEma: "250.00" as string | null,
 	nafCode: "62.02",
 	address: "1 rue test",
 	hasCse: true,
@@ -100,8 +114,9 @@ const baseRow = {
 	variableAnnualMedianGap: "0.1200",
 	variableHourlyMedianGap: "0.0600",
 	// Proportions E
-	variableProportionWomen: "0.4523",
-	variableProportionMen: "0.5477",
+	// Indicator E proportions are per-sex coverage rates: they do NOT sum to 1.
+	variableProportionWomen: "0.5625",
+	variableProportionMen: "0.6000",
 	// Proportions F annual (persisted)
 	annualQuartile1ProportionWomen: "0.5556",
 	annualQuartile1ProportionMen: "0.4444",
@@ -120,13 +135,15 @@ const baseRow = {
 	hourlyQuartile3ProportionMen: "0.5410",
 	hourlyQuartile4ProportionWomen: "0.3509",
 	hourlyQuartile4ProportionMen: "0.6491",
-	statusHistoryArray: [] as Array<{
-		eventType: string;
-		value: string | null;
-		round: number | null;
-		createdAt: string;
-	}>,
+	statusHistoryArray: [] as RawHistoryEntry[],
 };
+
+function withHistory(
+	statusHistoryArray: RawHistoryEntry[],
+	overrides: Partial<typeof baseRow> = {},
+): typeof baseRow {
+	return { ...baseRow, ...overrides, statusHistoryArray };
+}
 
 describe("buildIndicators", () => {
 	it("should map indicator A with GIP labels", () => {
@@ -180,6 +197,40 @@ describe("buildIndicators", () => {
 		expect(result.F.horaire).not.toHaveProperty("Seuil_Q4_Taux_horaire_global");
 	});
 
+	it("should expose indicator F declared headcounts (#4528) next to their quartile proportions", () => {
+		const result = buildIndicators(baseRow);
+
+		// Annual — each quartile's nb_F/nb_H sits right after its proportions.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBe(35);
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_F).toBe(30);
+		expect(result.F.annuel.Quartile2_Rem_globale_annuelle_nb_H).toBe(32);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_F).toBe(28);
+		expect(result.F.annuel.Quartile3_Rem_globale_annuelle_nb_H).toBe(33);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_F).toBe(27);
+		expect(result.F.annuel.Quartile4_Rem_globale_annuelle_nb_H).toBe(35);
+
+		// Hourly — same 8 keys, distinct values, so a copy/paste mistake between
+		// annual and hourly would fail this assertion.
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_F).toBe(40);
+		expect(result.F.horaire.Quartile1_Taux_horaire_global_nb_H).toBe(25);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_F).toBe(32);
+		expect(result.F.horaire.Quartile2_Taux_horaire_global_nb_H).toBe(30);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_F).toBe(28);
+		expect(result.F.horaire.Quartile3_Taux_horaire_global_nb_H).toBe(33);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBe(37);
+	});
+
+	it("should not expose the raw GIP headcounts or a 'Tous les salariés' total for indicator F (#4528)", () => {
+		const result = buildIndicators(baseRow);
+
+		expect(result.F.annuel).not.toHaveProperty("Effectif");
+		expect(result.F.annuel).not.toHaveProperty("Effectif_total");
+		expect(result.F.horaire).not.toHaveProperty("Effectif");
+		expect(result.F.horaire).not.toHaveProperty("Effectif_total");
+	});
+
 	it("should expose gap labels for indicators A/B/C/D", () => {
 		const result = buildIndicators(baseRow);
 
@@ -196,8 +247,8 @@ describe("buildIndicators", () => {
 	it("should expose proportion labels for indicator E", () => {
 		const result = buildIndicators(baseRow);
 
-		expect(result.E.Proportion_variable_F).toBe("0.4523");
-		expect(result.E.Proportion_variable_H).toBe("0.5477");
+		expect(result.E.Proportion_variable_F).toBe("0.5625");
+		expect(result.E.Proportion_variable_H).toBe("0.6000");
 	});
 
 	it("should return null for F proportions and gap labels when DB columns are null", () => {
@@ -233,6 +284,24 @@ describe("buildIndicators", () => {
 		expect(
 			result.F.annuel.Quartile2_Rem_globale_annuelle_proportion_F,
 		).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBeNull();
+	});
+
+	it("should return null for a quartile's declared headcount when its DB column is null, independently of the others (#4528)", () => {
+		const partialRow = {
+			...baseRow,
+			indicatorFAnnualWomen1: null,
+			indicatorFHourlyMen4: null,
+		};
+
+		const result = buildIndicators(partialRow);
+
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_F).toBeNull();
+		// Untouched sibling columns still expose their declared value.
+		expect(result.F.annuel.Quartile1_Rem_globale_annuelle_nb_H).toBe(28);
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_H).toBeNull();
+		expect(result.F.horaire.Quartile4_Taux_horaire_global_nb_F).toBe(20);
 	});
 });
 
@@ -241,9 +310,12 @@ describe("buildIndicatorG", () => {
 		const entries: IndicatorGEntry[] = [
 			{
 				categoryName: "Ouvriers",
+				source: null,
 				declarationType: "initial",
 				womenCount: 40,
 				menCount: 45,
+				hourlyWomenCount: 8,
+				hourlyMenCount: 6,
 				annualBaseWomen: "24000",
 				annualBaseMen: "25500",
 				annualVariableWomen: "1200",
@@ -255,9 +327,12 @@ describe("buildIndicatorG", () => {
 			},
 			{
 				categoryName: "Ouvriers",
+				source: null,
 				declarationType: "correction",
 				womenCount: 42,
 				menCount: 44,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "24800",
 				annualBaseMen: "25200",
 				annualVariableWomen: "1350",
@@ -277,6 +352,12 @@ describe("buildIndicatorG", () => {
 		expect(result.initial[0]?.Effectif_F).toBe(40);
 		expect(result.correction[0]?.Effectif_F).toBe(42);
 		expect(result.initial[0]?.Rem_annuelle_base_F).toBe("24000");
+		// #4368 — hourly headcount rides alongside the annual one, unchanged
+		// columns, null passed through as-is (never an invented 0).
+		expect(result.initial[0]?.Effectif_horaire_F).toBe(8);
+		expect(result.initial[0]?.Effectif_horaire_H).toBe(6);
+		expect(result.correction[0]?.Effectif_horaire_F).toBeNull();
+		expect(result.correction[0]?.Effectif_horaire_H).toBeNull();
 	});
 
 	it("should return empty arrays when no entries", () => {
@@ -284,6 +365,95 @@ describe("buildIndicatorG", () => {
 
 		expect(result.initial).toEqual([]);
 		expect(result.correction).toEqual([]);
+	});
+
+	const gEntry = (overrides: Partial<IndicatorGEntry>): IndicatorGEntry => ({
+		categoryName: "Cadres",
+		source: null,
+		declarationType: "initial",
+		womenCount: 50,
+		menCount: 60,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
+		annualBaseWomen: "10000",
+		annualBaseMen: "11000",
+		annualVariableWomen: "1000",
+		annualVariableMen: "1010",
+		hourlyBaseWomen: "20",
+		hourlyBaseMen: "22",
+		hourlyVariableWomen: "2",
+		hourlyVariableMen: "2.5",
+		...overrides,
+	});
+
+	it("should compute the four signed base/variable gap ratios as 4-decimal strings", () => {
+		const [category] = buildIndicatorG([gEntry({})]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0909");
+		expect(category?.Rem_annuelle_variable_ecart).toBe("0.0099");
+		expect(category?.Taux_horaire_base_ecart).toBe("0.0909");
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	it('formats a zero gap (F = H) as "0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "1000.00", annualBaseMen: "1000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
+	});
+
+	it("formats a small negative gap without dropping trailing zeros", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyBaseWomen: "12.00", hourlyBaseMen: "11.99" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_base_ecart).toBe("-0.0008");
+	});
+
+	it("formats a gap with a whole-number operand keeping 4 decimals", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyVariableWomen: "2", hourlyVariableMen: "2.5" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_variable_ecart).toBe("0.2000");
+	});
+
+	it('never formats a negligible negative gap as "-0.0000"', () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseWomen: "30000.01", annualBaseMen: "30000.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBe("0.0000");
+	});
+
+	// #4205: the Total gap is not computed anywhere (UI or export).
+	it("does not expose any Total gap ratio in the export payload", () => {
+		const [category] = buildIndicatorG([gEntry({})]).initial;
+
+		expect(category).not.toHaveProperty("Rem_annuelle_total_ecart");
+		expect(category).not.toHaveProperty("Taux_horaire_total_ecart");
+	});
+
+	it("nulls a component gap when either of its salary values is missing", () => {
+		const [womenMissing] = buildIndicatorG([
+			gEntry({ annualBaseWomen: null }),
+		]).initial;
+		const [menMissing] = buildIndicatorG([
+			gEntry({ annualBaseMen: null }),
+		]).initial;
+
+		expect(womenMissing?.Rem_annuelle_base_ecart).toBeNull();
+		expect(menMissing?.Rem_annuelle_base_ecart).toBeNull();
+		expect(womenMissing?.Rem_annuelle_variable_ecart).toBe("0.0099");
+	});
+
+	it("nulls a component gap when the men value is zero", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualBaseMen: "0" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_base_ecart).toBeNull();
 	});
 });
 
@@ -295,9 +465,9 @@ describe("assembleDeclaration", () => {
 		expect(Object.keys(result)[0]).toBe("id");
 		expect(result.SIREN).toBe("123456789");
 		expect(result.Raison_sociale).toBe("ACME Corp");
-		expect(result.Effectif).toBe(250);
+		expect(result.Parcours.Effectif).toBe(250);
 		expect(result.CSE_existant).toBe(true);
-		expect(result.Annee).toBe(2027);
+		expect(result.Parcours.Annee).toBe(2027);
 		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
 		expect(result.Effectif_H_rem_annuelle_globale).toBe(150);
 		expect(result.Declarant.Email).toBe("jean@acme.fr");
@@ -307,6 +477,188 @@ describe("assembleDeclaration", () => {
 		expect(result).not.toHaveProperty("Fichiers_CSE");
 		expect(result).not.toHaveProperty("Fichier_evaluation_conjointe");
 		expect(result.Date_creation).toBe("2027-03-15T10:00:00.000Z");
+	});
+
+	it("exposes the GIP annual average workforce as Parcours.Effectif, floored to the lower integer", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "99.97" }, [], [])
+				.Parcours.Effectif,
+		).toBe(99);
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "70.00" }, [], [])
+				.Parcours.Effectif,
+		).toBe(70);
+	});
+
+	it("exposes a null Parcours.Effectif when the company is absent from the GIP file", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: null }, [], []).Parcours
+				.Effectif,
+		).toBeNull();
+	});
+
+	it("groups the path-derived data under Parcours, in schema order (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(Object.keys(result.Parcours)).toEqual([...PARCOURS_KEYS]);
+		expect(result.Parcours).toEqual({
+			Annee: 2027,
+			Effectif: 250,
+			Tranche_effectif: "250+",
+			Regime_obligations: "mandatory_with_compliance",
+			Statut: "awaiting_compliance_path_choice",
+			Annulee: false,
+			Parcours_de_conformite_requis: false,
+			Parcours_de_conformite_revision_requis: false,
+			Avis_CSE_requis: false,
+			Indicateur_G_requis: true,
+			Prochaines_etapes_possibles: [
+				{
+					Identifiant_transition: "choose_path_initial_justify_without_cse",
+					Action: "choose_compliance_path",
+					Etat_cible: "demarche_completed",
+					Libelle: STAGE_LABELS.completion,
+				},
+				{
+					Identifiant_transition: "choose_path_initial_corrective_action",
+					Action: "choose_compliance_path",
+					Etat_cible: "corrective_actions_chosen",
+					Libelle: STAGE_LABELS.correctiveActions,
+				},
+				{
+					Identifiant_transition: "choose_path_initial_joint_evaluation",
+					Action: "choose_compliance_path",
+					Etat_cible: "joint_evaluation_chosen",
+					Libelle: STAGE_LABELS.jointEvaluation,
+				},
+			],
+		});
+	});
+
+	it("no longer exposes the relocated keys at the payload root (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		for (const key of RELOCATED_ROOT_KEYS) {
+			expect(result).not.toHaveProperty(key);
+			expect(result.Parcours).toHaveProperty(key);
+		}
+	});
+
+	it("drops the ruleset version from the payload, root and Parcours alike", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		for (const key of DROPPED_ROOT_KEYS) {
+			expect(result).not.toHaveProperty(key);
+			expect(result.Parcours).not.toHaveProperty(key);
+		}
+	});
+
+	it("keeps the declared per-sex headcounts at the root, outside Parcours (#4326)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Effectif_F_rem_annuelle_globale).toBe(100);
+		expect(result.Effectif_H_rem_annuelle_globale).toBe(150);
+		expect(result.Parcours).not.toHaveProperty(
+			"Effectif_F_rem_annuelle_globale",
+		);
+		expect(result.Parcours).not.toHaveProperty(
+			"Effectif_H_rem_annuelle_globale",
+		);
+	});
+
+	it("buckets Tranche_effectif on the floored headcount, never on the raw GIP value", () => {
+		// 149.7 falls in no bucket once compared raw — getCompanySizeRange would
+		// fall back to "<50" and misreport a 149-employee company as voluntary.
+		const result = assembleDeclaration(
+			{ ...baseRow, workforceEma: "149.7" },
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Effectif).toBe(149);
+		expect(result.Parcours.Tranche_effectif).toBe("100-149");
+	});
+
+	it("classifies Regime_obligations on the exact GIP value, not the floored one", () => {
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "149.7" }, [], [])
+				.Parcours.Regime_obligations,
+		).toBe("mandatory_with_compliance");
+		expect(
+			assembleDeclaration({ ...baseRow, workforceEma: "49.99" }, [], [])
+				.Parcours.Regime_obligations,
+		).toBe("voluntary");
+	});
+
+	it.each([
+		["49.99", 49, "<50", "voluntary"],
+		["70.00", 70, "50-99", "mandatory"],
+		["100.00", 100, "100-149", "mandatory_with_compliance"],
+		["150.00", 150, "150-249", "mandatory_with_compliance"],
+		["250.00", 250, "250+", "mandatory_with_compliance"],
+	])("maps a GIP workforce of %s to Effectif %i, bucket %s and regime %s", (workforceEma, effectif, tranche, regime) => {
+		const { Parcours } = assembleDeclaration(
+			{ ...baseRow, workforceEma },
+			[],
+			[],
+		);
+
+		expect(Parcours.Effectif).toBe(effectif);
+		expect(Parcours.Tranche_effectif).toBe(tranche);
+		expect(Parcours.Regime_obligations).toBe(regime);
+	});
+
+	it("buckets Tranche_effectif to <50 and the regime voluntary when the company is absent from the GIP file", () => {
+		const { Parcours } = assembleDeclaration(
+			{ ...baseRow, workforceEma: null },
+			[],
+			[],
+		);
+
+		expect(Parcours.Effectif).toBeNull();
+		expect(Parcours.Tranche_effectif).toBe("<50");
+		expect(Parcours.Regime_obligations).toBe("voluntary");
+	});
+
+	it("flags Parcours.Annulee alongside the root Date_annulation", () => {
+		const active = assembleDeclaration(baseRow, [], []);
+		const cancelled = assembleDeclaration(
+			{ ...baseRow, cancelledAt: new Date("2027-04-15T08:00:00Z") },
+			[],
+			[],
+		);
+
+		expect(active.Parcours.Annulee).toBe(false);
+		expect(active.Date_annulation).toBeNull();
+		expect(cancelled.Parcours.Annulee).toBe(true);
+		expect(cancelled.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+	});
+
+	it("nulls CSE_existant below the CSE threshold even when a legacy hasCse value exists", () => {
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: "70.00", hasCse: true },
+				[],
+				[],
+			).CSE_existant,
+		).toBeNull();
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: null, hasCse: true },
+				[],
+				[],
+			).CSE_existant,
+		).toBeNull();
+	});
+
+	it("keeps CSE_existant at or above the CSE threshold", () => {
+		expect(
+			assembleDeclaration(
+				{ ...baseRow, workforceEma: "100.00", hasCse: false },
+				[],
+				[],
+			).CSE_existant,
+		).toBe(false);
 	});
 
 	it("should include indicator A–F values with GIP labels", () => {
@@ -322,9 +674,12 @@ describe("assembleDeclaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "initial",
 				womenCount: 50,
 				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -336,9 +691,12 @@ describe("assembleDeclaration", () => {
 			},
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "correction",
 				womenCount: 52,
 				menCount: 58,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "53000",
 				annualBaseMen: "55000",
 				annualVariableWomen: null,
@@ -358,6 +716,150 @@ describe("assembleDeclaration", () => {
 		expect(result.Seconde_declaration.Correction?.[0]?.Effectif_F).toBe(52);
 	});
 
+	it("should expose the job-category source as Source_categories_emplois (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "accord-branche",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should read Source_categories_emplois from the first entry, all entries sharing the same source (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "decision-unilaterale",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+			{
+				categoryName: "Employés",
+				source: "decision-unilaterale",
+				declarationType: "initial",
+				womenCount: 30,
+				menCount: 20,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "30000",
+				annualBaseMen: "31000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("decision-unilaterale");
+	});
+
+	it("should set Source_categories_emplois to null when the declaration has no indicator G (#3944)", () => {
+		const result = assembleDeclaration(baseRow, [], []);
+
+		expect(result.Source_categories_emplois).toBeNull();
+	});
+
+	it("should read Source_categories_emplois from the first initial entry even when correction entries appear first (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: "accord-entreprise",
+				declarationType: "correction",
+				womenCount: 50,
+				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+			{
+				categoryName: "Cadres",
+				source: "accord-branche",
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBe("accord-branche");
+	});
+
+	it("should fall back to null when the first indicator G entry carries no source (#3944)", () => {
+		const indicatorG: IndicatorGEntry[] = [
+			{
+				categoryName: "Cadres",
+				source: null,
+				declarationType: "initial",
+				womenCount: 50,
+				menCount: 60,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
+				annualBaseWomen: "52000",
+				annualBaseMen: "56000",
+				annualVariableWomen: null,
+				annualVariableMen: null,
+				hourlyBaseWomen: null,
+				hourlyBaseMen: null,
+				hourlyVariableWomen: null,
+				hourlyVariableMen: null,
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, indicatorG, []);
+
+		expect(result.Source_categories_emplois).toBeNull();
+	});
+
 	it("should map CSE opinions when at least one CSE file is present", () => {
 		const opinions: CseRow[] = [
 			{
@@ -370,8 +872,7 @@ describe("assembleDeclaration", () => {
 		const files = [
 			{
 				id: "file-xyz",
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				fileName: "avis-cse.pdf",
 				filePath: "/s3/path",
 				uploadedAt: new Date("2027-02-10T08:30:00Z"),
@@ -410,8 +911,7 @@ describe("assembleDeclaration", () => {
 		const files = [
 			{
 				id: "file-xyz",
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				fileName: "avis-cse-original.pdf",
 				filePath: "/s3/path",
 				uploadedAt: new Date("2027-02-10T08:30:00Z"),
@@ -427,15 +927,56 @@ describe("assembleDeclaration", () => {
 				Nom_fichier: "avis-cse-original.pdf",
 				Date_upload: "2027-02-10T08:30:00.000Z",
 				URL_telechargement: "/api/v1/files/file-xyz",
+				Contenus: [],
 			},
 		]);
+	});
+
+	it("should expose a CSE file's Contenus, sorted by declaration number then accuracy before gap (#4535)", () => {
+		const files = [
+			{
+				id: "file-xyz",
+				declarationId: "decl-1",
+				fileName: "avis-cse-original.pdf",
+				filePath: "/s3/path",
+				uploadedAt: new Date("2027-02-10T08:30:00Z"),
+				contents: [
+					{ declarationNumber: 2, type: "gap" },
+					{ declarationNumber: 1, type: "gap" },
+					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 2, type: "accuracy" },
+				],
+			},
+		];
+
+		const result = assembleDeclaration(baseRow, [], [], files);
+
+		expect(result.Fichiers_CSE?.[0]?.Contenus).toEqual([
+			{ Numero_declaration: 1, Type: "accuracy" },
+			{ Numero_declaration: 1, Type: "gap" },
+			{ Numero_declaration: 2, Type: "accuracy" },
+			{ Numero_declaration: 2, Type: "gap" },
+		]);
+	});
+
+	it("should not add Contenus to the joint evaluation file (#4535)", () => {
+		const file = {
+			id: "je-1",
+			declarationId: "decl-1",
+			fileName: "eval-originale.pdf",
+			filePath: "/s3/je",
+			uploadedAt: new Date("2027-04-01T09:00:00Z"),
+		};
+
+		const result = assembleDeclaration(baseRow, [], [], [], [file]);
+
+		expect(result.Fichier_evaluation_conjointe).not.toHaveProperty("Contenus");
 	});
 
 	it("should expose the joint evaluation file with stored fileName", () => {
 		const file = {
 			id: "je-1",
-			siren: "123456789",
-			year: 2027,
+			declarationId: "decl-1",
 			fileName: "eval-originale.pdf",
 			filePath: "/s3/je",
 			uploadedAt: new Date("2027-04-01T09:00:00Z"),
@@ -456,16 +997,14 @@ describe("assembleDeclaration", () => {
 		const files = [
 			{
 				id: "je-old",
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				fileName: "old.pdf",
 				filePath: "/s3/old",
 				uploadedAt: new Date("2027-03-01T09:00:00Z"),
 			},
 			{
 				id: "je-new",
-				siren: "123456789",
-				year: 2027,
+				declarationId: "decl-1",
 				fileName: "new.pdf",
 				filePath: "/s3/new",
 				uploadedAt: new Date("2027-06-01T09:00:00Z"),
@@ -509,9 +1048,12 @@ describe("assembleDeclaration", () => {
 		const indicatorG: IndicatorGEntry[] = [
 			{
 				categoryName: "Cadres",
+				source: null,
 				declarationType: "initial",
 				womenCount: 12,
 				menCount: 18,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: "52000",
 				annualBaseMen: "56000",
 				annualVariableWomen: null,
@@ -530,7 +1072,7 @@ describe("assembleDeclaration", () => {
 		expect(result.Indicateurs.G).toHaveLength(1);
 		expect(result.Indicateurs.G?.[0]?.Effectif_F).toBe(12);
 		expect(result.SIREN).toBe("123456789");
-		expect(result.Effectif).toBe(250);
+		expect(result.Parcours.Effectif).toBe(250);
 	});
 
 	it("should expose Historique_statuts as empty array when no history (S7)", () => {
@@ -540,23 +1082,20 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should expose Historique_statuts with FR labels for submit + demarche_complete (S1)", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "submit",
-					value: null,
-					round: null,
-					createdAt: "2027-03-15T10:00:00.123Z",
-				},
-				{
-					eventType: "demarche_complete",
-					value: null,
-					round: null,
-					createdAt: "2027-10-15T14:00:00.456Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "submit",
+				value: null,
+				round: null,
+				createdAt: "2027-03-15T10:00:00.123Z",
+			},
+			{
+				eventType: "demarche_complete",
+				value: null,
+				round: null,
+				createdAt: "2027-10-15T14:00:00.456Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -575,17 +1114,14 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should expose Numero_declaration and Libelle for path_choice corrective_action (S2)", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "path_choice",
-					value: "corrective_action",
-					round: 1,
-					createdAt: "2027-04-01T10:00:00.000Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "path_choice",
+				value: "corrective_action",
+				round: 1,
+				createdAt: "2027-04-01T10:00:00.000Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -600,41 +1136,38 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should expose all 5 lifecycle entries with FR labels (S3)", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "submit",
-					value: null,
-					round: null,
-					createdAt: "2027-03-15T10:00:00.000Z",
-				},
-				{
-					eventType: "path_choice",
-					value: "joint_evaluation",
-					round: 1,
-					createdAt: "2027-04-01T10:00:00.000Z",
-				},
-				{
-					eventType: "joint_evaluation_submit",
-					value: null,
-					round: null,
-					createdAt: "2027-09-01T12:00:00.000Z",
-				},
-				{
-					eventType: "cse_opinion_submit",
-					value: null,
-					round: null,
-					createdAt: "2027-10-01T13:00:00.000Z",
-				},
-				{
-					eventType: "demarche_complete",
-					value: null,
-					round: null,
-					createdAt: "2027-10-15T14:00:00.000Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "submit",
+				value: null,
+				round: null,
+				createdAt: "2027-03-15T10:00:00.000Z",
+			},
+			{
+				eventType: "path_choice",
+				value: "joint_evaluation",
+				round: 1,
+				createdAt: "2027-04-01T10:00:00.000Z",
+			},
+			{
+				eventType: "joint_evaluation_submit",
+				value: null,
+				round: null,
+				createdAt: "2027-09-01T12:00:00.000Z",
+			},
+			{
+				eventType: "cse_opinion_submit",
+				value: null,
+				round: null,
+				createdAt: "2027-10-01T13:00:00.000Z",
+			},
+			{
+				eventType: "demarche_complete",
+				value: null,
+				round: null,
+				createdAt: "2027-10-15T14:00:00.000Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -661,23 +1194,20 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should expose two path_choice entries with their own Numero_declaration (S4)", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "path_choice",
-					value: "justify",
-					round: 1,
-					createdAt: "2027-04-01T10:00:00.000Z",
-				},
-				{
-					eventType: "path_choice",
-					value: "corrective_action",
-					round: 2,
-					createdAt: "2027-08-01T10:00:00.000Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "path_choice",
+				value: "justify",
+				round: 1,
+				createdAt: "2027-04-01T10:00:00.000Z",
+			},
+			{
+				eventType: "path_choice",
+				value: "corrective_action",
+				round: 2,
+				createdAt: "2027-08-01T10:00:00.000Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -695,10 +1225,8 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should expose cancel entry with FR label while keeping Date_annulation (S5)", () => {
-		const row = {
-			...baseRow,
-			cancelledAt: new Date("2027-04-15T08:00:00Z"),
-			statusHistoryArray: [
+		const row = withHistory(
+			[
 				{
 					eventType: "submit",
 					value: null,
@@ -712,7 +1240,8 @@ describe("assembleDeclaration", () => {
 					createdAt: "2027-04-15T08:00:00.000Z",
 				},
 			],
-		};
+			{ cancelledAt: new Date("2027-04-15T08:00:00Z") },
+		);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -726,23 +1255,20 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should preserve the order returned by the query without re-sorting", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "demarche_complete",
-					value: null,
-					round: null,
-					createdAt: "2027-10-15T14:00:00.000Z",
-				},
-				{
-					eventType: "submit",
-					value: null,
-					round: null,
-					createdAt: "2027-03-15T10:00:00.000Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "demarche_complete",
+				value: null,
+				round: null,
+				createdAt: "2027-10-15T14:00:00.000Z",
+			},
+			{
+				eventType: "submit",
+				value: null,
+				round: null,
+				createdAt: "2027-03-15T10:00:00.000Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -753,17 +1279,14 @@ describe("assembleDeclaration", () => {
 	});
 
 	it("should not add Numero_declaration key when path_choice round is null", () => {
-		const row = {
-			...baseRow,
-			statusHistoryArray: [
-				{
-					eventType: "path_choice",
-					value: null,
-					round: null,
-					createdAt: "2027-04-01T10:00:00.000Z",
-				},
-			],
-		};
+		const row = withHistory([
+			{
+				eventType: "path_choice",
+				value: null,
+				round: null,
+				createdAt: "2027-04-01T10:00:00.000Z",
+			},
+		]);
 
 		const result = assembleDeclaration(row, [], []);
 
@@ -773,5 +1296,428 @@ describe("assembleDeclaration", () => {
 		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
 			"Choix du parcours",
 		);
+	});
+});
+
+describe("assembleDeclaration — compliance flags", () => {
+	// Compliance flags are driven by indicator G (per job-category gaps), not by
+	// the aggregate indicators A/B on the row. computeGap = ((men-women)/men)*100,
+	// so 10000/11000 ≈ +9.1% (significant), 10000/10400 ≈ +3.8% (below 5%),
+	// 11000/10000 = -10% (significant, unfavourable to men).
+	const entry = (
+		declarationType: "initial" | "correction",
+		annualBaseWomen: string,
+		annualBaseMen: string,
+	): IndicatorGEntry => ({
+		categoryName: "Cadres",
+		source: null,
+		declarationType,
+		womenCount: 50,
+		menCount: 60,
+		hourlyWomenCount: null,
+		hourlyMenCount: null,
+		annualBaseWomen,
+		annualBaseMen,
+		annualVariableWomen: null,
+		annualVariableMen: null,
+		hourlyBaseWomen: null,
+		hourlyBaseMen: null,
+		hourlyVariableWomen: null,
+		hourlyVariableMen: null,
+	});
+	const significantInitial = [entry("initial", "10000", "11000")];
+	const smallInitial = [entry("initial", "10000", "10400")];
+	const negativeSignificantInitial = [entry("initial", "11000", "10000")];
+	// Correction entries (same gap magnitudes, different declarationType)
+	const significantCorrection = [entry("correction", "10000", "11000")];
+	const smallCorrection = [entry("correction", "10000", "10400")];
+	const negativeSignificantCorrection = [entry("correction", "11000", "10000")];
+
+	it("requires the compliance process for >= 100 employees with indicator G and a category gap >= 5%", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
+
+		const result = assembleDeclaration(row, significantInitial, []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+	});
+
+	it("does not require the compliance process when the indicator G gap is below 5%", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
+
+		const result = assembleDeclaration(row, smallInitial, []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the compliance process below 100 employees even with a gap", () => {
+		const row = { ...baseRow, workforceEma: "99.00" };
+
+		const result = assembleDeclaration(row, significantInitial, []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("does not require the compliance process without indicator G", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("does not require the compliance process when the indicator G categories carry no gap data", () => {
+		const row = { ...baseRow, workforceEma: "300.00" };
+
+		const result = assembleDeclaration(row, [entry("initial", "0", "0")], []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("requires the compliance process when the indicator G gap is negative and significant", () => {
+		// Women earn more than men: the gap is unfavourable to men but still opens
+		// the compliance path (bidirectional rule).
+		const row = { ...baseRow, workforceEma: "300.00" };
+
+		const result = assembleDeclaration(row, negativeSignificantInitial, []);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+	});
+
+	it("treats a company absent from the GIP file as 0 for the derived flags", () => {
+		const row = { ...baseRow, workforceEma: null };
+
+		const result = assembleDeclaration(row, significantInitial, []);
+
+		expect(result.Parcours.Effectif).toBeNull();
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+		// Workforce-0 derives from the missing GIP effectif; it lands in the
+		// voluntary (< 50) tier, which files all 7 indicators (#4043).
+		expect(result.Parcours.Indicateur_G_requis).toBe(true);
+	});
+
+	it("derives the flags from the GIP workforce, never from the Weez value (#3929)", () => {
+		const row = { ...baseRow, workforceEma: "70.00" };
+
+		const result = assembleDeclaration(row, significantInitial, []);
+
+		expect(result.Parcours.Effectif).toBe(70);
+		expect(result.Parcours.Indicateur_G_requis).toBe(false);
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(false);
+	});
+
+	it("compares the indicator G threshold on the exact GIP value", () => {
+		const below = assembleDeclaration(
+			{ ...baseRow, workforceEma: "149.99" },
+			significantInitial,
+			[],
+		);
+		const atThreshold = assembleDeclaration(
+			{ ...baseRow, workforceEma: "150.00" },
+			significantInitial,
+			[],
+		);
+
+		expect(below.Parcours.Indicateur_G_requis).toBe(false);
+		expect(atThreshold.Parcours.Indicateur_G_requis).toBe(true);
+	});
+
+	it("compares the compliance threshold on the exact GIP value", () => {
+		const below = assembleDeclaration(
+			{ ...baseRow, workforceEma: "99.97" },
+			significantInitial,
+			[],
+		);
+		const atThreshold = assembleDeclaration(
+			{ ...baseRow, workforceEma: "100.00" },
+			significantInitial,
+			[],
+		);
+
+		expect(below.Parcours.Parcours_de_conformite_requis).toBe(false);
+		expect(atThreshold.Parcours.Parcours_de_conformite_requis).toBe(true);
+	});
+
+	it("requires the revision when a second declaration was submitted with a correction gap >= 5%", () => {
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...significantCorrection],
+			[],
+		);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
+	});
+
+	it("does not require the revision without a submitted second declaration", () => {
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			secondDeclarationSubmittedAt: null,
+		};
+
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...significantCorrection],
+			[],
+		);
+
+		expect(result.Parcours.Parcours_de_conformite_requis).toBe(true);
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("does not require the revision when the correction gap is below 5%", () => {
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...smallCorrection],
+			[],
+		);
+
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+
+	it("requires the revision when the correction gap is negative and significant", () => {
+		// Women earn more than men in the correction: still triggers the revision
+		// (bidirectional rule, same as the initial compliance check).
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(
+			row,
+			[...significantInitial, ...negativeSignificantCorrection],
+			[],
+		);
+
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(true);
+	});
+
+	it("does not require the revision when there are no correction categories", () => {
+		// No correction entries → hasGapsAboveThreshold([]) = false → no revision.
+		const row = {
+			...baseRow,
+			workforceEma: "300.00",
+			secondDeclarationSubmittedAt: new Date("2027-06-01T11:00:00Z"),
+		};
+
+		const result = assembleDeclaration(row, significantInitial, []);
+
+		expect(result.Parcours.Parcours_de_conformite_revision_requis).toBe(false);
+	});
+});
+
+describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
+	// baseRow narrows status to its own literal; these cases walk the whole FSM.
+	type RowOverrides = Omit<Partial<typeof baseRow>, "status"> & {
+		status?: DeclarationFsmStatus;
+	};
+
+	function rowWith(overrides: RowOverrides) {
+		return { ...baseRow, ...overrides };
+	}
+
+	function stepsOf(overrides: RowOverrides) {
+		return assembleDeclaration(rowWith(overrides), [], []).Parcours
+			.Prochaines_etapes_possibles;
+	}
+
+	function transitionIds(overrides: RowOverrides) {
+		return stepsOf(overrides).map((step) => step.Identifiant_transition);
+	}
+
+	it("offers the three compliance paths of a CSE-bound company, none conditional (S3)", () => {
+		const steps = stepsOf({
+			status: "awaiting_compliance_path_choice",
+			cseRequired: true,
+		});
+
+		expect(steps).toEqual([
+			{
+				Identifiant_transition: "choose_path_initial_justify_with_cse",
+				Action: "choose_compliance_path",
+				Etat_cible: "awaiting_cse_opinion",
+				Libelle: STAGE_LABELS.cseOpinion,
+			},
+			{
+				Identifiant_transition: "choose_path_initial_corrective_action",
+				Action: "choose_compliance_path",
+				Etat_cible: "corrective_actions_chosen",
+				Libelle: STAGE_LABELS.correctiveActions,
+			},
+			{
+				Identifiant_transition: "choose_path_initial_joint_evaluation",
+				Action: "choose_compliance_path",
+				Etat_cible: "joint_evaluation_chosen",
+				Libelle: STAGE_LABELS.jointEvaluation,
+			},
+		]);
+		for (const step of steps) {
+			expect(step).not.toHaveProperty("Condition");
+		}
+	});
+
+	it("drops the without-CSE first choice when the CSE opinion is required (S3)", () => {
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+			}),
+		).not.toContain("choose_path_initial_justify_without_cse");
+	});
+
+	it("splits the second declaration on the gap that is not known yet (S4)", () => {
+		const steps = stepsOf({
+			status: "corrective_actions_chosen",
+			cseRequired: true,
+		});
+
+		expect(steps).toEqual([
+			{
+				Identifiant_transition: "submit_second_declaration_persistent_gap",
+				Action: "submit_second_declaration",
+				Etat_cible: "awaiting_revision_choice",
+				Libelle: STAGE_LABELS.revisionChoice,
+				Condition: GAP_PERSISTS_CONDITION,
+			},
+			{
+				Identifiant_transition: "submit_second_declaration_resolved_with_cse",
+				Action: "submit_second_declaration",
+				Etat_cible: "awaiting_cse_opinion",
+				Libelle: STAGE_LABELS.cseOpinion,
+				Condition: GAP_RESOLVED_CONDITION,
+			},
+		]);
+	});
+
+	it("does not advertise a second-declaration resubmission from awaiting_revision_choice", () => {
+		// The ruleset accepts submit_second_declaration from there — a company may
+		// resubmit its correction while parked — but the app routes that state to
+		// the compliance-path screen, so the expected next step is the choice.
+		const steps = stepsOf({
+			status: "awaiting_revision_choice",
+			cseRequired: true,
+		});
+
+		expect(steps.map((step) => step.Action)).toEqual([
+			"choose_compliance_path",
+			"choose_compliance_path",
+		]);
+		expect(steps.map((step) => step.Identifiant_transition)).toEqual([
+			"choose_path_revised_justify_with_cse",
+			"choose_path_revised_joint_evaluation",
+		]);
+		// Nothing conditional survives: the two gap variants are gone with it.
+		for (const step of steps) {
+			expect(step).not.toHaveProperty("Condition");
+		}
+	});
+
+	it("drops the resolved-without-CSE variant the stored CSE fact decides false (S4)", () => {
+		expect(
+			transitionIds({
+				status: "corrective_actions_chosen",
+				cseRequired: true,
+			}),
+		).not.toContain("submit_second_declaration_resolved_without_cse");
+	});
+
+	it("empties the steps of a cancelled declaration while keeping its last status (S5)", () => {
+		const result = assembleDeclaration(
+			rowWith({
+				status: "corrective_actions_chosen",
+				cseRequired: true,
+				cancelledAt: new Date("2027-04-15T08:00:00Z"),
+			}),
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+		expect(result.Parcours.Annulee).toBe(true);
+		expect(result.Date_annulation).toBe("2027-04-15T08:00:00.000Z");
+		expect(result.Parcours.Statut).toBe("corrective_actions_chosen");
+	});
+
+	it("still offers the CSE opinion on a completed démarche that was not cancelled (S6)", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "demarche_completed", cseRequired: true }),
+			[],
+			[],
+		);
+
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([
+			{
+				Identifiant_transition: "submit_cse_opinion",
+				Action: "submit_cse_opinion",
+				Etat_cible: "demarche_completed",
+				Libelle: STAGE_LABELS.completion,
+			},
+		]);
+		expect(result.Parcours.Annulee).toBe(false);
+	});
+
+	it("does not advertise the CSE opinion on a completed démarche when no CSE is required", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "demarche_completed", cseRequired: false }),
+			[],
+			[],
+		);
+
+		// The engine still accepts the action (a company may gain a CSE after
+		// completing), but an unrequired opinion is not an expected next step.
+		expect(result.Parcours.Avis_CSE_requis).toBe(false);
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+	});
+
+	// The column is NOT NULL in the schema, so only an unknown version reaches
+	// this boundary; the null case is pinned on buildNextStepsPayload itself.
+	it("derives the steps from the fallback ruleset for an unknown stored version (S7)", () => {
+		const result = assembleDeclaration(
+			rowWith({ status: "corrective_actions_chosen", rulesVersion: "1999.0" }),
+			[],
+			[],
+		);
+
+		expect(result.Parcours).not.toHaveProperty("Version_regles");
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual(
+			stepsOf({ status: "corrective_actions_chosen" }),
+		);
+		expect(result.Parcours.Prochaines_etapes_possibles).not.toHaveLength(0);
+	});
+
+	it("filters on the stored cseRequired column, never on one recomputed from hasCse and the headcount", () => {
+		// A 250-employee company with a CSE would recompute to cseRequired=true;
+		// a 70-employee one without a CSE to false. The stored column wins both ways.
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: false,
+				hasCse: true,
+				workforceEma: "250.00",
+			}),
+		).toContain("choose_path_initial_justify_without_cse");
+
+		expect(
+			transitionIds({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+				hasCse: false,
+				workforceEma: "70.00",
+			}),
+		).toContain("choose_path_initial_justify_with_cse");
 	});
 });

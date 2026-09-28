@@ -1,15 +1,5 @@
+import type { CompliancePathValue } from "~/modules/domain";
 import { CompliancePathOption } from "./CompliancePathOption";
-import type { CompliancePathValue } from "./constants";
-
-export function getCompliancePathHref(path: CompliancePathValue): string {
-	if (path === "corrective_action") {
-		return "/declaration-remuneration/parcours-conformite/etape/1";
-	}
-	if (path === "joint_evaluation") {
-		return "/declaration-remuneration/parcours-conformite/evaluation-conjointe";
-	}
-	return "/avis-cse";
-}
 
 export function JointEvaluationOption({
 	checked,
@@ -30,18 +20,19 @@ export function JointEvaluationOption({
 				disabled={disabled}
 				id="path-joint"
 				learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-				learnMoreLabel="En savoir plus sur évaluation conjointe des rémunérations"
+				learnMoreLabel="En savoir plus sur l'évaluation conjointe des rémunérations"
+				learnMoreTrackingId="joint_evaluation"
 				name="compliance-path"
 				onChange={onChange}
-				title="Évaluation conjointe des rémunérations"
+				title="Mettre en place une évaluation conjointe des rémunérations"
 				value="joint_evaluation"
 			>
-				<p className="fr-mb-0">
+				<p>
 					Vous choisissez de procéder à une évaluation conjointe des
 					rémunérations afin d&apos;identifier et de corriger les écarts
 					constatés :
 				</p>
-				<ul className="fr-mt-1w fr-mb-0">
+				<ul>
 					<li>
 						Élaboration du rapport préalable (à déposer sur le portail Egapro)
 					</li>
@@ -58,11 +49,13 @@ export function JointEvaluationOption({
 
 export function JustifyOption({
 	checked,
+	cseOpinionRequired,
 	deadline,
 	disabled,
 	onChange,
 }: {
 	checked: boolean;
+	cseOpinionRequired: boolean;
 	deadline: Date;
 	disabled?: boolean;
 	onChange: () => void;
@@ -79,26 +72,37 @@ export function JustifyOption({
 				title="Justifier les écarts de rémunération ≥ 5 %"
 				value="justify"
 			>
-				<p className="fr-mb-0">
+				<p>
 					Vous avez la possibilité de justifier vos écarts par des critères
 					objectifs et non sexistes :
 				</p>
-				<ul className="fr-mt-1w fr-mb-0">
-					<li>Informer et consulter votre CSE sur cette justification</li>
-					<li>Transmettre l&apos;avis du CSE</li>
-				</ul>
+				{/* Announcing the CSE steps to a company that has none sends it looking
+				    for a screen it will never have to fill in. */}
+				{cseOpinionRequired ? (
+					<ul>
+						<li>Informer et consulter votre CSE sur cette justification</li>
+						<li>Transmettre l&apos;avis du CSE</li>
+					</ul>
+				) : (
+					<p>
+						En l&apos;absence de CSE, aucun avis n&apos;est à transmettre :
+						votre démarche est finalisée dès ce choix.
+					</p>
+				)}
 			</CompliancePathOption>
 		</div>
 	);
 }
 
 export function SecondRoundOptions({
+	cseOpinionRequired,
 	disabled,
 	justificationDeadline,
 	jointEvaluationDeadline,
 	selectedPath,
 	setSelectedPath,
 }: {
+	cseOpinionRequired: boolean;
 	disabled?: boolean;
 	justificationDeadline: Date;
 	jointEvaluationDeadline: Date;
@@ -109,10 +113,17 @@ export function SecondRoundOptions({
 		<>
 			<JustifyOption
 				checked={selectedPath === "justify"}
+				cseOpinionRequired={cseOpinionRequired}
 				deadline={justificationDeadline}
 				disabled={disabled}
 				onChange={() => setSelectedPath("justify")}
 			/>
+
+			<h3 className="fr-h6 fr-mt-1w fr-mb-0">
+				Si la justification n&apos;est pas possible par des critères objectifs
+				et non sexistes
+			</h3>
+
 			<JointEvaluationOption
 				checked={selectedPath === "joint_evaluation"}
 				deadline={jointEvaluationDeadline}
@@ -125,6 +136,7 @@ export function SecondRoundOptions({
 
 export function FirstRoundOptions({
 	correctiveActionDeadline,
+	cseOpinionRequired,
 	disabled,
 	jointEvaluationDeadline,
 	justificationDeadline,
@@ -132,6 +144,7 @@ export function FirstRoundOptions({
 	setSelectedPath,
 }: {
 	correctiveActionDeadline: Date;
+	cseOpinionRequired: boolean;
 	disabled?: boolean;
 	jointEvaluationDeadline: Date;
 	justificationDeadline: Date;
@@ -142,17 +155,18 @@ export function FirstRoundOptions({
 		<>
 			<JustifyOption
 				checked={selectedPath === "justify"}
+				cseOpinionRequired={cseOpinionRequired}
 				deadline={justificationDeadline}
 				disabled={disabled}
 				onChange={() => setSelectedPath("justify")}
 			/>
 
-			<h3 className="fr-h6 fr-mt-3w fr-mb-0">
+			<h3 className="fr-h6 fr-mt-1w fr-mb-0">
 				Si la justification n&apos;est pas possible par des critères objectifs
 				et non sexistes
 			</h3>
 
-			<div className="fr-fieldset__element fr-mt-2w">
+			<div className="fr-fieldset__element">
 				<CompliancePathOption
 					checked={selectedPath === "corrective_action"}
 					deadline={correctiveActionDeadline}
@@ -160,17 +174,18 @@ export function FirstRoundOptions({
 					id="path-corrective"
 					learnMoreHref="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 					learnMoreLabel="En savoir plus sur actions correctives et seconde déclaration"
+					learnMoreTrackingId="corrective_actions"
 					name="compliance-path"
 					onChange={() => setSelectedPath("corrective_action")}
-					title="Actions correctives et seconde déclaration"
+					title="Effectuer des actions correctives et une seconde déclaration"
 					value="corrective_action"
 				>
-					<p className="fr-mb-0">
+					<p>
 						Vous souhaitez mettre en place des actions correctives, puis
-						recalculer et redéclarer l&apos;indicateur par catégorie de salariés
-						:
+						recalculer et redéclarer l&apos;indicateur par catégories
+						de&nbsp;salariés :
 					</p>
-					<ul className="fr-mt-1w fr-mb-0">
+					<ul>
 						<li>
 							Mettre en place des actions correctives par accord ou par plan
 							d&apos;action
@@ -179,13 +194,17 @@ export function FirstRoundOptions({
 							Redéclarer l&apos;indicateur dans un délai de 6 mois après votre
 							première déclaration
 						</li>
-						<li>
-							Informer et consulter votre CSE sur l&apos;exactitude des données
-							et éventuellement, sur la justification des écarts ≥ 5 %
-						</li>
-						<li>Transmettre l&apos;avis ou les avis du CSE</li>
+						{cseOpinionRequired && (
+							<li>
+								Informer et consulter votre CSE sur l&apos;exactitude des
+								données et éventuellement, sur la justification des écarts ≥ 5 %
+							</li>
+						)}
+						{cseOpinionRequired && (
+							<li>Transmettre l&apos;avis ou les avis du CSE</li>
+						)}
 					</ul>
-					<p className="fr-mt-1w fr-mb-0">
+					<p>
 						Si des écarts non justifiés persistent, vous devez engager une
 						évaluation conjointe des rémunérations.
 					</p>

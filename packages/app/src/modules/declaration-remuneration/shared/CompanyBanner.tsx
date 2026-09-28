@@ -1,4 +1,9 @@
-import { getWorkforceYear } from "~/modules/domain";
+import {
+	formatWorkforceForUser,
+	getObligationWorkforce,
+	getWorkforceYear,
+	isCseRequired,
+} from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatSiren } from "~/modules/my-space";
 
@@ -8,7 +13,7 @@ type CompanyBannerProps = {
 	company: {
 		name: string;
 		siren: string;
-		workforce: number | null;
+		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
 	currentPageLabel: string;
@@ -18,36 +23,39 @@ export function CompanyBanner({
 	company,
 	currentPageLabel,
 }: CompanyBannerProps) {
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(company.gipWorkforce),
+	);
+
 	return (
 		<div className={`fr-py-3w ${styles.banner}`}>
 			<div className="fr-container">
 				<Breadcrumb
 					items={[
 						{ label: "Mon espace", href: "/" },
+						{ label: company.name },
 						{ label: currentPageLabel },
 					]}
 				/>
 
-				<div className="fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
-					<div className="fr-col-auto">
-						<p
-							className={`fr-text--bold fr-mb-0 fr-flex fr-flex--align-center ${styles.companyInfo}`}
-						>
-							<span aria-hidden="true" className="fr-icon-building-line" />
-							{company.name} - {formatSiren(company.siren)}
-						</p>
+				<div className={styles.companyRow}>
+					<p className="fr-text--bold fr-mb-0">{company.name}</p>
+
+					<div className={styles.datapoint}>
+						<span>{"SIREN :"}</span>
+						<strong>{formatSiren(company.siren)}</strong>
 					</div>
-					{company.workforce !== null && (
-						<div className="fr-col-auto">
-							<p className="fr-mb-0 fr-text--sm">
-								Effectif annuel moyen en {getWorkforceYear()} :{" "}
-								<strong>{company.workforce}</strong>
-							</p>
-						</div>
-					)}
-					<div className="fr-col-auto">
-						<p className="fr-mb-0 fr-text--sm">
-							Existence d'un CSE :{" "}
+
+					<div className={styles.datapoint}>
+						<span>
+							{"Effectif annuel moyen en"} {getWorkforceYear()} {":"}
+						</span>
+						<strong>{formatWorkforceForUser(company.gipWorkforce)}</strong>
+					</div>
+
+					{cseApplicable && (
+						<div className={styles.datapoint}>
+							<span>{"Existence d'un CSE :"}</span>
 							<strong>
 								{company.hasCse === null
 									? "Non renseigné"
@@ -55,8 +63,8 @@ export function CompanyBanner({
 										? "Oui"
 										: "Non"}
 							</strong>
-						</p>
-					</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

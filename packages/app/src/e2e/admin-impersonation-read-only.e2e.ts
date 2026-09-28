@@ -1,9 +1,16 @@
 import { expect, test } from "@playwright/test";
-
+import {
+	API_UPLOAD,
+	cseOpinionStepHref,
+	remunerationStepHref,
+} from "~/modules/routes";
 import {
 	ensureCurrentYearDeclaration,
 	resetDeclarationToDraft,
+	resetGipWorkforce,
+	setCompanyHasCse,
 } from "./helpers/db";
+import { startImpersonation, stopImpersonation } from "./helpers/impersonation";
 
 const TEST_SIREN = "130025265";
 
@@ -15,30 +22,45 @@ test.describe("admin impersonation — read-only guards", () => {
 		// every render and would otherwise throw FORBIDDEN.
 		await ensureCurrentYearDeclaration();
 		await resetDeclarationToDraft();
+		// The CSE test below opens /avis-cse, which is only reachable when an
+		// opinion is actually owed. State it here instead of inheriting whatever
+		// the previously executed spec file happened to leave behind.
+		await resetGipWorkforce();
+		await setCompanyHasCse(true);
 	});
 
 	test.afterEach(async ({ page }) => {
-		// Best-effort stop of any impersonation left over so the next test
-		// (or the next describe block) starts from a clean session.
-		await page.goto("/admin/impersonate");
-		const stopBtn = page.getByRole("button", { name: /arrêter le mimoquage/i });
-		if (await stopBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-			await stopBtn.click();
-		}
+		await stopImpersonation(page);
 	});
 
 	test("form submit is disabled with a read-only tooltip during mimoquage", async ({
 		page,
 	}) => {
-		await page.goto("/admin/impersonate");
-		await page.getByLabel("SIREN de l'entreprise").fill(TEST_SIREN);
-		await page.getByRole("button", { name: "Rechercher" }).click();
-		await page.getByRole("button", { name: /valider et mimoquer/i }).click();
-
-		await page.waitForURL("**/mon-espace");
+		await startImpersonation(page, TEST_SIREN);
 		await expect(page.getByText(/vous mimoquez l'entreprise/i)).toBeVisible();
 
-		await page.goto("/declaration-remuneration/etape/1");
+		await page.goto(remunerationStepHref(1));
+
+		const submitButton = page.getByRole("button", { name: /suivant/i });
+		await expect(submitButton).toBeVisible();
+		await expect(submitButton).toBeDisabled();
+		const tooltipId = await submitButton.getAttribute("aria-describedby");
+		expect(tooltipId).not.toBeNull();
+		await expect(page.locator(`#${tooltipId}`)).toContainText(/mimoquage/i);
+	});
+
+	// `/avis-cse/etape/1` renders under the layout's StaticLockProvider (fed by
+	// `getLockReadState`, which is lock-only and stays false during mimoquage).
+	// After unifying impersonation + lock into LockContext (#3765), the static
+	// path must still disable writes during impersonation — exactly the surface
+	// that regressed before the StaticLockProvider folded `useIsImpersonating`
+	// in. The dynamic path (declaration step 1) is covered above.
+	test("CSE opinion submit is disabled with a read-only tooltip during mimoquage", async ({
+		page,
+	}) => {
+		await startImpersonation(page, TEST_SIREN);
+
+		await page.goto(cseOpinionStepHref(1));
 
 		const submitButton = page.getByRole("button", { name: /suivant/i });
 		await expect(submitButton).toBeVisible();
@@ -51,13 +73,9 @@ test.describe("admin impersonation — read-only guards", () => {
 	test("file upload endpoint returns 403 during impersonation", async ({
 		page,
 	}) => {
-		await page.goto("/admin/impersonate");
-		await page.getByLabel("SIREN de l'entreprise").fill(TEST_SIREN);
-		await page.getByRole("button", { name: "Rechercher" }).click();
-		await page.getByRole("button", { name: /valider et mimoquer/i }).click();
-		await page.waitForURL("**/mon-espace");
+		await startImpersonation(page, TEST_SIREN);
 
-		const response = await page.request.post("/api/upload", {
+		const response = await page.request.post(API_UPLOAD, {
 			headers: {
 				"content-type": "application/pdf",
 				"x-filename": "impersonated.pdf",

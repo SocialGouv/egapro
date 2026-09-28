@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-	auth: vi.fn(),
-	runUploadPipeline: vi.fn(),
-	logAction: vi.fn().mockResolvedValue(undefined),
-	getActiveLock: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+	class DeclarationLockedByOtherUserError extends Error {}
+	return {
+		auth: vi.fn(),
+		runUploadPipeline: vi.fn(),
+		logAction: vi.fn().mockResolvedValue(undefined),
+		assertDeclarationUnlockedForWrite: vi.fn(),
+		DeclarationLockedByOtherUserError,
+	};
+});
 
 vi.mock("~/server/auth", () => ({
 	auth: mocks.auth,
@@ -19,28 +23,13 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,
 }));
 
-// The route resolves the current-year declaration before streaming the body so
-// it can refuse a target locked by another co-declarant (epic #3556). Mock the
-// db lookup to return one declaration and the lock service to a configurable
-// holder.
-vi.mock("~/server/db", () => ({
-	db: {
-		select: () => ({
-			from: () => ({
-				where: () => ({
-					limit: async () => [{ id: "decl-1" }],
-				}),
-			}),
-		}),
-	},
-}));
-
-vi.mock("~/server/db/schema", () => ({
-	declarations: { id: "id", siren: "siren", year: "year" },
-}));
+// Only the guard verdict is mocked here: its three semantics live in
+// `declarationLockService.test.ts`, which owns the declaration lookup.
+vi.mock("~/server/db", () => ({ db: {} }));
 
 vi.mock("~/server/services/declarationLockService", () => ({
-	getActiveLock: mocks.getActiveLock,
+	assertDeclarationUnlockedForWrite: mocks.assertDeclarationUnlockedForWrite,
+	DeclarationLockedByOtherUserError: mocks.DeclarationLockedByOtherUserError,
 }));
 
 function validSession() {
@@ -78,11 +67,28 @@ function buildRequest(
 	return new Request("http://localhost/api/upload", init as RequestInit);
 }
 
+// HTTP header values are ByteStrings (Latin-1), so a non-Latin-1 filename
+// (e.g. the U+202E RTL-override) cannot be set on a real `Request` header. A
+// browser percent-decodes the value before the handler reads it, so in
+// production the handler does receive the raw codepoint. We reproduce that by
+// overriding `headers.get("x-filename")` while leaving every other header and
+// the body intact, exercising the handler's branch with the exact input.
+function buildRequestWithRawFilename(
+	headers: Record<string, string>,
+	rawFileName: string,
+): Request {
+	const request = buildRequest({ ...headers, "X-Filename": "placeholder.pdf" });
+	const realGet = request.headers.get.bind(request.headers);
+	request.headers.get = (name: string) =>
+		name.toLowerCase() === "x-filename" ? rawFileName : realGet(name);
+	return request;
+}
+
 describe("POST /api/upload", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		// Default: declaration free of any active lock, so the upload proceeds.
-		mocks.getActiveLock.mockResolvedValue(null);
+		mocks.assertDeclarationUnlockedForWrite.mockResolvedValue(undefined);
 	});
 
 	it("returns 400 when X-Flow-Type is missing", async () => {
@@ -131,6 +137,35 @@ describe("POST /api/upload", () => {
 				action: "cse_opinion.upload_file",
 				status: "failure",
 				errorMessage: "HTTP 401",
+			}),
+		);
+	});
+
+	it.each([
+		["a siret whose first nine characters are not digits", "1234A678900015"],
+		["a siret shorter than a siren", "1234"],
+		["no siret", null],
+	])("returns 401 and writes an audit failure row for %s", async (_label, siret) => {
+		mocks.auth.mockResolvedValue({
+			user: { id: "user-1", email: "user@example.com", siret },
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "f.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(401);
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "HTTP 401",
+				siren: null,
 			}),
 		);
 	});
@@ -203,13 +238,38 @@ describe("POST /api/upload", () => {
 		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
 	});
 
-	it("returns 400 when the file name is invalid", async () => {
+	it("returns 400 invalid_filename when the name exceeds 200 characters", async () => {
 		validSession();
 		const { POST } = await import("../route");
 		const response = await POST(
 			buildRequest({
 				"Content-Type": "application/pdf",
-				"X-Filename": "avis/cse.pdf",
+				"X-Filename": `${"a".repeat(197)}.pdf`,
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(body.error).toContain("200");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: too_long",
+			}),
+		);
+	});
+
+	it("returns 400 invalid_filename when the name contains a forbidden character", async () => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "avis<cse.pdf",
 				"X-Flow-Type": "cse_opinion",
 			}),
 		);
@@ -227,7 +287,63 @@ describe("POST /api/upload", () => {
 		);
 	});
 
-	it("trims the file name before passing it to the upload pipeline", async () => {
+	it.each([
+		["RLO override", "avis\u202Ecse.pdf"],
+		["RLI isolate", "avis\u2067cse.pdf"],
+		["soft hyphen before the real extension", "evil.exe\u00AD.pdf"],
+		["leading BOM", "\uFEFFavis.pdf"],
+		["trailing BOM", "avis.pdf\uFEFF"],
+	])("returns 400 invalid_filename when the name contains %s", async (_label, rawFileName) => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequestWithRawFilename(
+				{
+					"Content-Type": "application/pdf",
+					"X-Flow-Type": "cse_opinion",
+				},
+				rawFileName,
+			),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: invisible_char",
+			}),
+		);
+	});
+
+	it("returns 400 invalid_filename when the extension does not match the declared MIME type", async () => {
+		validSession();
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "image/png",
+				"X-Filename": "avis-cse.pdf",
+				"X-Flow-Type": "cse_opinion",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.reason).toBe("invalid_filename");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "cse_opinion.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 400 invalid_filename: extension_mime_mismatch",
+			}),
+		);
+	});
+
+	it("does not short-circuit a valid filename: the pipeline runs normally", async () => {
 		validSession();
 		mocks.runUploadPipeline.mockResolvedValue({
 			ok: true,
@@ -240,16 +356,16 @@ describe("POST /api/upload", () => {
 		const response = await POST(
 			buildRequest({
 				"Content-Type": "application/pdf",
-				"X-Filename": "  avis-cse.pdf  ",
+				"X-Filename": "avis-cse.pdf",
 				"X-Flow-Type": "cse_opinion",
 			}),
 		);
 
 		expect(response.status).toBe(200);
+		const body = await response.json();
+		expect(body.reason).toBeUndefined();
 		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
-			expect.objectContaining({
-				fileName: "avis-cse.pdf",
-			}),
+			expect.objectContaining({ fileName: "avis-cse.pdf" }),
 		);
 	});
 
@@ -294,6 +410,41 @@ describe("POST /api/upload", () => {
 					fileId: "file-uuid",
 					fileName: "avis-cse.pdf",
 				}),
+			}),
+		);
+	});
+
+	it("passes the trimmed filename to the pipeline and audits it for a padded name", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "avis.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		// The padded value is injected past header normalisation (a real Headers
+		// instance trims surrounding spaces), so the route's own trim() is what
+		// must produce "avis.pdf".
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequestWithRawFilename(
+				{
+					"Content-Type": "application/pdf",
+					"X-Flow-Type": "cse_opinion",
+				},
+				"  avis.pdf  ",
+			),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ fileName: "avis.pdf" }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				metadata: expect.objectContaining({ fileName: "avis.pdf" }),
 			}),
 		);
 	});
@@ -462,13 +613,9 @@ describe("POST /api/upload", () => {
 
 	it("returns 409 and audits a failure row when another co-declarant holds the lock", async () => {
 		validSession();
-		mocks.getActiveLock.mockResolvedValue({
-			userId: "user-2",
-			email: "other@example.com",
-			firstName: "Bob",
-			lastName: "Durand",
-			expiresAt: new Date(Date.now() + 30 * 60_000),
-		});
+		mocks.assertDeclarationUnlockedForWrite.mockRejectedValue(
+			new mocks.DeclarationLockedByOtherUserError(),
+		);
 
 		const { POST } = await import("../route");
 		const response = await POST(
@@ -492,15 +639,28 @@ describe("POST /api/upload", () => {
 		);
 	});
 
-	it("proceeds when the session user holds the lock", async () => {
+	it("propagates an unexpected guard failure instead of reporting a conflict", async () => {
 		validSession();
-		mocks.getActiveLock.mockResolvedValue({
-			userId: "user-1",
-			email: "user@example.com",
-			firstName: "Alice",
-			lastName: "Martin",
-			expiresAt: new Date(Date.now() + 30 * 60_000),
-		});
+		mocks.assertDeclarationUnlockedForWrite.mockRejectedValue(
+			new Error("database unreachable"),
+		);
+
+		const { POST } = await import("../route");
+
+		await expect(
+			POST(
+				buildRequest({
+					"Content-Type": "application/pdf",
+					"X-Filename": "avis-cse.pdf",
+					"X-Flow-Type": "cse_opinion",
+				}),
+			),
+		).rejects.toThrow("database unreachable");
+		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
+	});
+
+	it("proceeds when the guard raises no conflict", async () => {
+		validSession();
 		mocks.runUploadPipeline.mockResolvedValue({
 			ok: true,
 			fileId: "file-uuid",
@@ -519,5 +679,13 @@ describe("POST /api/upload", () => {
 
 		expect(response.status).toBe(200);
 		expect(mocks.runUploadPipeline).toHaveBeenCalled();
+		// The guard must vet the very (siren, year) the pipeline then writes to.
+		const [, guardSiren, guardYear, guardUserId] =
+			mocks.assertDeclarationUnlockedForWrite.mock.calls[0] ?? [];
+		expect(guardSiren).toBe("123456789");
+		expect(guardUserId).toBe("user-1");
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ siren: guardSiren, year: guardYear }),
+		);
 	});
 });

@@ -14,17 +14,56 @@ import { CampaignProgressionTable } from "./CampaignProgressionTable";
 import { CampaignRateTile } from "./CampaignRateTile";
 import { CompletionFunnelChart } from "./CompletionFunnelChart";
 import { CompletionFunnelTable } from "./CompletionFunnelTable";
+import { CseStatusConfirmationsTile } from "./CseStatusConfirmationsTile";
 import { StagnationDaysFilter } from "./StagnationDaysFilter";
+import { type BarSeries, StatsBarChart } from "./StatsBarChart";
+import { StatsBarTable, type StatsTableColumn } from "./StatsBarTable";
 import styles from "./StatsDashboard.module.scss";
 import { StepDropoffChart } from "./StepDropoffChart";
 import { StepDropoffTable } from "./StepDropoffTable";
 import { StepDurationsChart } from "./StepDurationsChart";
 import { StepDurationsTable } from "./StepDurationsTable";
+import type { DeviceBreakdownRow, LabeledCount } from "./types";
+import { UsersPerCompanyTile } from "./UsersPerCompanyTile";
 import { useDebouncedValue } from "./useDebouncedValue";
 import { YearsFilter } from "./YearsFilter";
 
 const STAGNATION_DEBOUNCE_MS = 500;
 const DEFAULT_SELECTION_COUNT = 3;
+
+const USAGE_BAR_COLOR = "var(--blue-france-sun-113-625)";
+
+const MODEL_SERIES: BarSeries<LabeledCount>[] = [
+	{ key: "count", name: "Occurrences", color: USAGE_BAR_COLOR },
+];
+const HELP_SERIES: BarSeries<LabeledCount>[] = [
+	{ key: "count", name: "Clics", color: USAGE_BAR_COLOR },
+];
+const DEVICE_SERIES: BarSeries<DeviceBreakdownRow>[] = [
+	{
+		key: "desktop",
+		name: "Ordinateur",
+		color: "var(--blue-france-sun-113-625)",
+	},
+	{
+		key: "smartphone",
+		name: "Mobile",
+		color: "var(--green-emeraude-main-632)",
+	},
+	{ key: "tablet", name: "Tablette", color: "var(--blue-cumulus-main-526)" },
+];
+
+const MODEL_TABLE_COLUMNS: StatsTableColumn<LabeledCount>[] = [
+	{ key: "count", label: "Occurrences" },
+];
+const HELP_TABLE_COLUMNS: StatsTableColumn<LabeledCount>[] = [
+	{ key: "count", label: "Clics" },
+];
+const DEVICE_TABLE_COLUMNS: StatsTableColumn<DeviceBreakdownRow>[] = [
+	{ key: "desktop", label: "Ordinateur" },
+	{ key: "smartphone", label: "Mobile" },
+	{ key: "tablet", label: "Tablette" },
+];
 
 type Props = {
 	currentYear: number;
@@ -46,7 +85,12 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 		STAGNATION_DEBOUNCE_MS,
 	);
 
-	const activeYear = selectedYears[0] ?? currentYear;
+	// Single-year widgets key off the most recent selected campaign. `YearsFilter`
+	// emits the selection sorted ascending, so `selectedYears[0]` is the OLDEST
+	// year — using it would blank every per-campaign widget as soon as the user
+	// toggles a year. Take the max so the active campaign is order-independent.
+	const activeYear =
+		selectedYears.length > 0 ? Math.max(...selectedYears) : currentYear;
 
 	const progressionQuery = api.adminStats.getCampaignProgression.useQuery(
 		{ years: selectedYears, sizeRange },
@@ -73,6 +117,39 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 	);
 
 	const funnelQuery = api.adminStats.getCompletionFunnel.useQuery(
+		{ year: activeYear, sizeRange },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
+	);
+
+	const matomoFunnelQuery = api.adminStats.getMatomoFunnel.useQuery(
+		{ year: activeYear, sizeRange },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
+	);
+
+	const matomoCategoryModelQuery =
+		api.adminStats.getMatomoCategoryModel.useQuery(
+			{ year: activeYear, sizeRange },
+			{
+				enabled: selectedYears.length > 0,
+				placeholderData: (prev) => prev,
+			},
+		);
+
+	const matomoHelpLinksQuery = api.adminStats.getMatomoHelpLinks.useQuery(
+		{ year: activeYear, sizeRange },
+		{
+			enabled: selectedYears.length > 0,
+			placeholderData: (prev) => prev,
+		},
+	);
+
+	const matomoDeviceQuery = api.adminStats.getMatomoDeviceBreakdown.useQuery(
 		{ year: activeYear, sizeRange },
 		{
 			enabled: selectedYears.length > 0,
@@ -130,7 +207,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{progressionQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des statistiques.
 									</p>
@@ -172,7 +249,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{stepDurationsQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des délais par
 										étape.
@@ -204,7 +281,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								<p aria-live="polite">Chargement du graphique…</p>
 							)}
 							{stepDropoffQuery.isError && (
-								<div aria-live="polite" className="fr-alert fr-alert--error">
+								<div className="fr-alert fr-alert--error" role="alert">
 									<p>
 										Une erreur est survenue lors du chargement des taux
 										d'abandon.
@@ -218,6 +295,28 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 								</>
 							)}
 						</section>
+					</div>
+				</div>
+			</section>
+
+			<section className="fr-mt-6w" id="comptes">
+				<h2 className="fr-h2">Comptes &amp; engagement CSE</h2>
+				<p>
+					Confirmations du statut CSE mesurées côté navigateur (Matomo,
+					anonymisé — volume de confirmations sur l&apos;année, pas
+					d&apos;entreprises distinctes) et répartition des utilisateurs par
+					entreprise (lecture directe en base).
+				</p>
+				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+					<div className="fr-col-12 fr-col-md-6">
+						<div className={styles.card}>
+							<UsersPerCompanyTile />
+						</div>
+					</div>
+					<div className="fr-col-12 fr-col-md-6">
+						<div className={styles.card}>
+							<CseStatusConfirmationsTile year={activeYear} />
+						</div>
 					</div>
 				</div>
 			</section>
@@ -236,7 +335,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 					</p>
 				)}
 				{funnelQuery.isError && (
-					<div aria-live="polite" className="fr-alert fr-alert--error fr-mt-4w">
+					<div className="fr-alert fr-alert--error fr-mt-4w" role="alert">
 						<p>Une erreur est survenue lors du chargement des funnels.</p>
 					</div>
 				)}
@@ -341,6 +440,226 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 						</div>
 					</div>
 				)}
+			</section>
+
+			<section className="fr-mt-6w" id="matomo">
+				<h2 className="fr-h2">Funnels Matomo (parcours client)</h2>
+				<p>
+					Parcours mesurés côté navigateur par Matomo pour la campagne
+					sélectionnée, lus en direct via la Reporting API. Le filtre par
+					tranche d'effectif ne s'applique qu'au funnel de déclaration.
+				</p>
+
+				{matomoFunnelQuery.isLoading && !matomoFunnelQuery.data && (
+					<p aria-live="polite" className="fr-mt-4w">
+						Chargement des funnels Matomo…
+					</p>
+				)}
+				{matomoFunnelQuery.isError && (
+					<div className="fr-alert fr-alert--error fr-mt-4w" role="alert">
+						<p>
+							Une erreur est survenue lors du chargement des funnels Matomo.
+						</p>
+					</div>
+				)}
+
+				{matomoFunnelQuery.data && (
+					<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-declaration-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-declaration-heading">
+									Déclaration des indicateurs
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — déclaration des indicateurs"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.declarationFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — déclaration des indicateurs"
+									rows={matomoFunnelQuery.data.declarationFunnel}
+								/>
+							</section>
+						</div>
+
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-cse-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-cse-heading">
+									Avis du CSE
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — avis du CSE"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.cseFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — avis du CSE"
+									rows={matomoFunnelQuery.data.cseFunnel}
+								/>
+							</section>
+						</div>
+
+						<div className="fr-col-12 fr-col-md-6">
+							<section
+								aria-labelledby="matomo-funnel-compliance-heading"
+								className={styles.card}
+							>
+								<h3 className="fr-h3" id="matomo-funnel-compliance-heading">
+									Parcours conformité
+								</h3>
+								<CompletionFunnelChart
+									caption="Funnel Matomo — parcours conformité"
+									dropThreshold={FUNNEL_DROP_ALERT_THRESHOLD}
+									rows={matomoFunnelQuery.data.complianceFunnel}
+								/>
+								<CompletionFunnelTable
+									caption="Funnel Matomo — parcours conformité"
+									rows={matomoFunnelQuery.data.complianceFunnel}
+								/>
+							</section>
+						</div>
+					</div>
+				)}
+			</section>
+
+			<section className="fr-mt-6w" id="matomo-usage">
+				<h2 className="fr-h2">Usage Matomo (modèle, aide, appareils)</h2>
+				<p>
+					Indicateurs d&apos;usage mesurés côté navigateur pour l&apos;année
+					sélectionnée. Ces événements ne portent pas de dimension de campagne :
+					ils sont comptés par année calendaire et ne réagissent donc pas au
+					filtre par tranche d&apos;effectif.
+				</p>
+
+				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
+					<div className="fr-col-12 fr-col-md-6">
+						<section
+							aria-labelledby="matomo-model-heading"
+							className={styles.card}
+						>
+							<h3 className="fr-h3" id="matomo-model-heading">
+								Usage du modèle (indicateur par catégorie)
+							</h3>
+							{matomoCategoryModelQuery.isError && (
+								<div className="fr-alert fr-alert--error" role="alert">
+									<p>
+										Une erreur est survenue lors du chargement de l&apos;usage
+										du modèle.
+									</p>
+								</div>
+							)}
+							{matomoCategoryModelQuery.isLoading &&
+								!matomoCategoryModelQuery.data && (
+									<p aria-live="polite">Chargement…</p>
+								)}
+							{matomoCategoryModelQuery.data && (
+								<>
+									<StatsBarChart
+										caption="Usage du modèle de l'indicateur par catégorie"
+										data={matomoCategoryModelQuery.data.rows}
+										series={MODEL_SERIES}
+										valueAxisLabel="Occurrences"
+									/>
+									{matomoCategoryModelQuery.data.avgImportDurationSeconds !==
+										null && (
+										<p className="fr-text--sm fr-text-mention--grey fr-mt-1w">
+											Durée moyenne de remplissage avant import :{" "}
+											{matomoCategoryModelQuery.data.avgImportDurationSeconds} s
+										</p>
+									)}
+									<StatsBarTable
+										caption="Usage du modèle de l'indicateur par catégorie"
+										columns={MODEL_TABLE_COLUMNS}
+										rowHeader="Indicateur"
+										rows={matomoCategoryModelQuery.data.rows}
+									/>
+								</>
+							)}
+						</section>
+					</div>
+
+					<div className="fr-col-12 fr-col-md-6">
+						<section
+							aria-labelledby="matomo-help-heading"
+							className={styles.card}
+						>
+							<h3 className="fr-h3" id="matomo-help-heading">
+								Liens d&apos;aide les plus cliqués
+							</h3>
+							{matomoHelpLinksQuery.isError && (
+								<div className="fr-alert fr-alert--error" role="alert">
+									<p>
+										Une erreur est survenue lors du chargement des liens
+										d&apos;aide.
+									</p>
+								</div>
+							)}
+							{matomoHelpLinksQuery.isLoading && !matomoHelpLinksQuery.data && (
+								<p aria-live="polite">Chargement…</p>
+							)}
+							{matomoHelpLinksQuery.data && (
+								<>
+									<StatsBarChart
+										caption="Clics sur les liens d'aide, par lien"
+										data={matomoHelpLinksQuery.data.rows}
+										series={HELP_SERIES}
+										valueAxisLabel="Clics"
+									/>
+									<StatsBarTable
+										caption="Clics sur les liens d'aide, par lien"
+										columns={HELP_TABLE_COLUMNS}
+										rowHeader="Lien d'aide"
+										rows={matomoHelpLinksQuery.data.rows}
+									/>
+								</>
+							)}
+						</section>
+					</div>
+
+					<div className="fr-col-12 fr-col-md-6">
+						<section
+							aria-labelledby="matomo-device-heading"
+							className={styles.card}
+						>
+							<h3 className="fr-h3" id="matomo-device-heading">
+								Répartition par appareil
+							</h3>
+							{matomoDeviceQuery.isError && (
+								<div className="fr-alert fr-alert--error" role="alert">
+									<p>
+										Une erreur est survenue lors du chargement de la répartition
+										par appareil.
+									</p>
+								</div>
+							)}
+							{matomoDeviceQuery.isLoading && !matomoDeviceQuery.data && (
+								<p aria-live="polite">Chargement…</p>
+							)}
+							{matomoDeviceQuery.data && (
+								<>
+									<StatsBarChart
+										caption="Répartition par type d'appareil et par comportement"
+										data={matomoDeviceQuery.data.rows}
+										series={DEVICE_SERIES}
+										valueAxisLabel="Visites"
+									/>
+									<StatsBarTable
+										caption="Répartition par type d'appareil et par comportement"
+										columns={DEVICE_TABLE_COLUMNS}
+										rowHeader="Comportement"
+										rows={matomoDeviceQuery.data.rows}
+									/>
+								</>
+							)}
+						</section>
+					</div>
+				</div>
 			</section>
 		</>
 	);

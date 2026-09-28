@@ -105,11 +105,109 @@ export type FunnelRow = {
  * - `mainFunnel`: all declarations of the year.
  * - `complianceFunnel`: sub-population that crossed the alert threshold.
  * - `revisionFunnel`: sub-population that re-entered a revision cycle.
- * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`).
+ * - `cseFunnel`: declarations whose company has a CSE (`companies.has_cse = true`)
+ *   and is actually subject to the CSE obligation — the GIP headcount of the
+ *   year is at least `COMPANY_SIZE_ANNUAL_MIN`. Without that bound, answers
+ *   inherited from before the threshold guard would still be counted.
  */
 export type CompletionFunnelOutput = {
 	mainFunnel: FunnelRow[];
 	complianceFunnel: FunnelRow[];
 	revisionFunnel: FunnelRow[];
 	cseFunnel: FunnelRow[];
+};
+
+/**
+ * Output of `adminStats.getMatomoFunnel` — the client-side funnels measured by
+ * Matomo, read live from the Reporting API rather than the DB.
+ *
+ * One `FunnelRow[]` per tracked scenario of the taxonomy
+ * (`MATOMO_EVENT_CATEGORY`): the jalons are `funnel_start` → each
+ * `step_complete` (by `step_<n>` name) → `funnel_complete`. Every funnel is
+ * empty (all `count = 0`) when `MATOMO_API_TOKEN` is not configured.
+ */
+export type MatomoFunnelOutput = {
+	declarationFunnel: FunnelRow[];
+	cseFunnel: FunnelRow[];
+	complianceFunnel: FunnelRow[];
+};
+
+/**
+ * One labelled metric of a Matomo behavioural-usage bar widget — a category /
+ * series name and its count. Reused by the model-usage and help-link widgets.
+ */
+export type LabeledCount = {
+	key: string;
+	label: string;
+	count: number;
+};
+
+/**
+ * Output of `adminStats.getMatomoCategoryModel` — usage of the
+ * indicator-by-category model for one campaign year: successful imports and
+ * import failures by error type.
+ * `avgImportDurationSeconds` is the mean time between opening the import modal
+ * and a successful import (null when no sample). All-empty / null when
+ * `MATOMO_API_TOKEN` is absent.
+ */
+export type CategoryModelUsage = {
+	rows: LabeledCount[];
+	avgImportDurationSeconds: number | null;
+};
+
+/**
+ * Output of `adminStats.getMatomoHelpLinks` — clicks on instrumented help links
+ * (`help/help_link_click`), one row per link slug, sorted by descending count.
+ * Empty when Matomo is not configured.
+ */
+export type HelpLinkClicks = {
+	rows: LabeledCount[];
+};
+
+/**
+ * One behaviour of the device-split widget: number of visits per device type
+ * where the behaviour's marker event fired.
+ */
+export type DeviceBreakdownRow = {
+	key: string;
+	label: string;
+	desktop: number;
+	smartphone: number;
+	tablet: number;
+};
+
+/**
+ * Output of `adminStats.getMatomoDeviceBreakdown` — device split for the three
+ * tracked behaviours (modification, dépôt, consultation). Empty when Matomo is
+ * not configured.
+ */
+export type DeviceBreakdown = {
+	rows: DeviceBreakdownRow[];
+};
+
+/**
+ * Output of `adminStats.getMatomoCseStatusConfirmations` — volume of CSE-status
+ * confirmations (`cse_status / cse_status_confirm`) for one campaign year, split
+ * by the bounded oui/non label. Read from Matomo (anonymised, no SIREN): it
+ * counts confirmation *actions* (forward-only), not distinct companies. All zero
+ * when Matomo is not configured.
+ */
+export type CseStatusConfirmations = {
+	total: number;
+	yes: number;
+	no: number;
+};
+
+/**
+ * Output of `adminStats.getUsersPerCompany` — distribution of distinct users
+ * per company, read live from the existing `user_company` table. Aggregate only
+ * (no SIREN / email in the payload). `mono` = companies with exactly one user,
+ * `multi` = companies with two or more.
+ */
+export type UsersPerCompany = {
+	totalCompanies: number;
+	mono: number;
+	multi: number;
+	avgPerCompany: number;
+	maxUsers: number;
 };

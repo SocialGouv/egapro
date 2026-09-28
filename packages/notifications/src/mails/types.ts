@@ -1,9 +1,10 @@
 export const NOTIFICATION_TYPES = [
-	// Event-driven (4 — déclenchés par mutation tRPC / upload)
+	// Event-driven (5 — déclenchés par mutation tRPC / upload)
 	"declaration_confirmation",
 	"second_declaration_confirmation",
 	"cse_opinion_receipt",
 	"joint_evaluation_submitted",
+	"representation_receipt",
 	// Schedule-driven (7 — déclenchés par pg-boss cron)
 	"cycle_opening_info",
 	"declaration_deadline_reminder",
@@ -25,12 +26,25 @@ export type DeadlinePayload = CompanyScopedPayload & {
 	deadline: string;
 };
 
+// First vs second round of the compliance process. Round 1 follows the
+// initial declaration (gap >= 5 %); round 2 follows the second declaration
+// when the gap persists. Drives the round-specific reminder copy.
+export type ReminderRound = "first" | "second";
+
 export type DeclarationDeadlineReminderPayload = DeadlinePayload & {
 	daysRemaining: 30 | 10;
 };
 
+export type CompliancePathChoiceReminderPayload = DeadlinePayload & {
+	round: ReminderRound;
+};
+
 export type SecondDeclarationReminderPayload = DeadlinePayload & {
-	daysRemaining: 90 | 30;
+	daysRemaining: 30 | 15;
+};
+
+export type JointEvaluationReminderPayload = DeadlinePayload & {
+	round: ReminderRound;
 };
 
 export const CSE_OPINION_REMINDER_VARIANTS = [
@@ -48,22 +62,73 @@ export type CseOpinionReminderPayload = DeadlinePayload & {
 	variant: CseOpinionReminderVariant;
 };
 
+export const DECLARATION_CONFIRMATION_VARIANTS = [
+	"completed",
+	"cse_to_deposit",
+	"path_to_select",
+] as const;
+
+export type DeclarationConfirmationVariant =
+	(typeof DECLARATION_CONFIRMATION_VARIANTS)[number];
+
+export const JOINT_EVALUATION_SUBMITTED_VARIANTS = [
+	"completed",
+	"cse_to_deposit",
+	"cse_first_and_second",
+] as const;
+
+export type JointEvaluationSubmittedVariant =
+	(typeof JOINT_EVALUATION_SUBMITTED_VARIANTS)[number];
+
+export const CSE_OPINION_RECEIPT_VARIANTS = [
+	"single",
+	"with_gap",
+	"first_and_second",
+] as const;
+
+export type CseOpinionReceiptVariant =
+	(typeof CSE_OPINION_RECEIPT_VARIANTS)[number];
+
+export type DeclarationConfirmationPayload = CompanyScopedPayload & {
+	variant: DeclarationConfirmationVariant;
+	raisonSociale: string;
+	complianceDeadline?: string;
+};
+
+export type SecondDeclarationConfirmationPayload =
+	DeclarationConfirmationPayload;
+
+export type JointEvaluationSubmittedPayload = CompanyScopedPayload & {
+	variant: JointEvaluationSubmittedVariant;
+	raisonSociale: string;
+};
+
+export type CseOpinionReceiptPayload = CompanyScopedPayload & {
+	variant: CseOpinionReceiptVariant;
+	raisonSociale: string;
+};
+
 export type NextCycleHandoverPayload = {
 	siren: string;
 	previousYear: number;
 	nextYear: number;
 };
 
+export type RepresentationReceiptPayload = CompanyScopedPayload & {
+	raisonSociale: string;
+};
+
 export type NotificationPayloadMap = {
-	declaration_confirmation: CompanyScopedPayload;
-	second_declaration_confirmation: CompanyScopedPayload;
-	cse_opinion_receipt: CompanyScopedPayload;
-	joint_evaluation_submitted: CompanyScopedPayload;
+	declaration_confirmation: DeclarationConfirmationPayload;
+	second_declaration_confirmation: SecondDeclarationConfirmationPayload;
+	cse_opinion_receipt: CseOpinionReceiptPayload;
+	joint_evaluation_submitted: JointEvaluationSubmittedPayload;
+	representation_receipt: RepresentationReceiptPayload;
 	cycle_opening_info: DeadlinePayload;
 	declaration_deadline_reminder: DeclarationDeadlineReminderPayload;
-	compliance_path_choice_reminder: DeadlinePayload;
+	compliance_path_choice_reminder: CompliancePathChoiceReminderPayload;
 	second_declaration_reminder: SecondDeclarationReminderPayload;
-	joint_evaluation_reminder: DeadlinePayload;
+	joint_evaluation_reminder: JointEvaluationReminderPayload;
 	cse_opinion_reminder: CseOpinionReminderPayload;
 	next_cycle_handover: NextCycleHandoverPayload;
 };

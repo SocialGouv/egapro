@@ -62,6 +62,7 @@ for EPIC_N in "$@"; do
                 subIssues(first: 50) {
                     nodes {
                         number
+                        body
                         state
                         labels(first: 5) { nodes { name } }
                         projectItems(first: 1) {

@@ -9,7 +9,7 @@ import type {
 
 type CompliancePath = "justify" | "corrective_action" | "joint_evaluation";
 
-type DbDeclaration = {
+export type DbDeclaration = {
 	type: DeclarationType;
 	year: number;
 	status: DeclarationStatus;
@@ -23,6 +23,7 @@ type DbDeclaration = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	notSubject: boolean;
 };
 
 export function buildDeclarationList(
@@ -30,6 +31,7 @@ export function buildDeclarationList(
 	dbDeclarations: DbDeclaration[],
 	currentYear: number,
 	yearsWithPrefill: Set<number> = new Set(),
+	representationVisible = true,
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
@@ -53,8 +55,9 @@ export function buildDeclarationList(
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
+				notSubject: existing.notSubject,
 			});
-		} else {
+		} else if (type !== "representation" || representationVisible) {
 			rows.push({
 				type,
 				siren,
@@ -71,6 +74,7 @@ export function buildDeclarationList(
 				hasJointEvaluationFile: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
+				notSubject: false,
 			});
 		}
 	}
@@ -95,6 +99,7 @@ export function buildDeclarationList(
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,
+			notSubject: d.notSubject,
 		});
 	}
 

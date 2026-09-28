@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
+import { getDeclarationReferencePeriod, isDraft } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
-import {
-	mapToEmployeeCategoryRows,
-	mapToStepData,
-} from "~/server/api/routers/declarationHelpers";
+import { MY_SPACE } from "~/modules/routes";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 import { api } from "~/trpc/server";
@@ -47,14 +47,18 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	if (isCorrection) {
 		if (!data.hasSubmittedSecondDeclaration) notFound();
 	} else {
-		if (d.status === "draft") notFound();
+		if (isDraft(d.status)) notFound();
 	}
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(d);
 
-	// declarations does not store custom period windows — every declaration
-	// covers the full calendar year. The period is derived from d.year.
-	const referencePeriod = `01/01/${d.year} - 31/12/${d.year}`;
+	const referencePeriod = getDeclarationReferencePeriod(
+		d.year,
+		isCorrection,
+		d.secondDeclReferencePeriodStart,
+		d.secondDeclReferencePeriodEnd,
+	);
 
 	const step5Categories =
 		data.jobCategories.length > 0
@@ -76,19 +80,23 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 				<Breadcrumb
 					items={[
 						{ label: "Accueil", href: "/" },
-						{ label: "Mon espace", href: "/mon-espace" },
+						{ label: "Mon espace", href: MY_SPACE },
 						{ label: `Récapitulatif de la déclaration ${d.year}` },
 					]}
 				/>
 				<Link
 					className="fr-link fr-icon-arrow-left-line fr-link--icon-left fr-mt-2w"
-					href="/mon-espace"
+					href={MY_SPACE}
 				>
 					Retour
 				</Link>
 			</div>
 
-			<main className="fr-container fr-pb-7w fr-pt-7w" id="content">
+			<main
+				className="fr-container fr-pb-7w fr-pt-7w"
+				id="content"
+				tabIndex={-1}
+			>
 				<div className="fr-grid-row fr-grid-row--center">
 					<div className="fr-col-12 fr-col-lg-8">
 						<RecapitulatifPage
@@ -97,15 +105,19 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 								siren: company.siren,
 								nafCode: company.nafCode,
 								address: company.address,
-								workforce: company.workforce,
+								gipWorkforce: company.gipWorkforce,
 							}}
 							declarantEmail={session.user.email ?? ""}
 							declarantName={session.user.name ?? ""}
 							declarationYear={d.year}
+							hourlyMen={d.hourlyMen}
+							hourlyWomen={d.hourlyWomen}
 							isCorrection={isCorrection}
 							referencePeriod={referencePeriod}
 							step2Data={step2Data}
+							step2Gaps={step2Gaps}
 							step3Data={step3Data}
+							step3Gaps={step3Gaps}
 							step4Data={step4Data}
 							step5Categories={step5Categories}
 							step5Source={step5Source}

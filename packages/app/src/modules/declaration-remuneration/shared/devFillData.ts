@@ -1,9 +1,11 @@
 import type { EmployeeCategory } from "../steps/step5/categorySerializer";
+import { withoutPayValuesWhenNotApplicable } from "../steps/step5/categorySerializer";
 import type { PayGapRow, WorkforceRow } from "../types";
 
 // Step 1 - Workforce (120 women + 130 men = 250 total)
-export const DEV_STEP1_CATEGORIES: WorkforceRow[] = [
-	{ name: "Nombre de salariés", women: 120, men: 130 },
+export const DEV_STEP1_ROWS: WorkforceRow[] = [
+	{ name: "Rémunération annuelle", women: 120, men: 130 },
+	{ name: "Rémunération horaire", women: 120, men: 130 },
 ];
 
 // Step 2 - Pay gap (4 rows, some gaps > 5%, some < 5%)
@@ -75,13 +77,23 @@ function distribute(total: number, ratios: readonly number[]): number[] {
 	return floored;
 }
 
+export type DevStep5Totals = {
+	annual: { women: number; men: number };
+	hourly: { women: number; men: number };
+};
+
+/** Small step-1 totals can leave one sex absent from both workforce rows in a
+ * category. The development filler drops that category's remuneration so its
+ * generated values remain submittable (#3678). */
+
 export function createDevStep5Categories(
 	nextId: () => number,
-	totalWomen: number,
-	totalMen: number,
+	totals: DevStep5Totals,
 ): EmployeeCategory[] {
-	const womenCounts = distribute(totalWomen, WOMEN_RATIOS);
-	const menCounts = distribute(totalMen, MEN_RATIOS);
+	const womenCounts = distribute(totals.annual.women, WOMEN_RATIOS);
+	const menCounts = distribute(totals.annual.men, MEN_RATIOS);
+	const hourlyWomenCounts = distribute(totals.hourly.women, WOMEN_RATIOS);
+	const hourlyMenCounts = distribute(totals.hourly.men, MEN_RATIOS);
 
 	return [
 		{
@@ -89,6 +101,8 @@ export function createDevStep5Categories(
 			name: "Ouvriers",
 			womenCount: String(womenCounts[0]),
 			menCount: String(menCounts[0]),
+			hourlyWomenCount: String(hourlyWomenCounts[0]),
+			hourlyMenCount: String(hourlyMenCounts[0]),
 			annualBaseWomen: "24000",
 			annualBaseMen: "25500",
 			annualVariableWomen: "1200",
@@ -103,6 +117,8 @@ export function createDevStep5Categories(
 			name: "Employés",
 			womenCount: String(womenCounts[1]),
 			menCount: String(menCounts[1]),
+			hourlyWomenCount: String(hourlyWomenCounts[1]),
+			hourlyMenCount: String(hourlyMenCounts[1]),
 			annualBaseWomen: "27000",
 			annualBaseMen: "28000",
 			annualVariableWomen: "1800",
@@ -117,6 +133,8 @@ export function createDevStep5Categories(
 			name: "Techniciens et agents de maîtrise",
 			womenCount: String(womenCounts[2]),
 			menCount: String(menCounts[2]),
+			hourlyWomenCount: String(hourlyWomenCounts[2]),
+			hourlyMenCount: String(hourlyMenCounts[2]),
 			annualBaseWomen: "35000",
 			annualBaseMen: "37500",
 			annualVariableWomen: "3500",
@@ -131,6 +149,8 @@ export function createDevStep5Categories(
 			name: "Ingénieurs et cadres",
 			womenCount: String(womenCounts[3]),
 			menCount: String(menCounts[3]),
+			hourlyWomenCount: String(hourlyWomenCounts[3]),
+			hourlyMenCount: String(hourlyMenCounts[3]),
 			annualBaseWomen: "48000",
 			annualBaseMen: "52000",
 			annualVariableWomen: "6000",
@@ -140,5 +160,5 @@ export function createDevStep5Categories(
 			hourlyVariableWomen: "3.12",
 			hourlyVariableMen: "3.90",
 		},
-	];
+	].map(withoutPayValuesWhenNotApplicable);
 }

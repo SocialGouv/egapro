@@ -1,27 +1,30 @@
-import { and, eq } from "drizzle-orm";
-import { z } from "zod";
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	getCurrentYear,
+} from "~/modules/domain";
 import { validateFileName } from "~/modules/shared/fileNameValidation";
-import { parseSiren } from "~/modules/shared/parseSiren";
 import {
 	ALLOWED_UPLOAD_MIME_TYPES,
 	type FlowType,
 } from "~/modules/shared/uploadConfig";
 import { logAction } from "~/server/audit/log";
-import {
-	buildRequestContext,
-	type RequestContext,
-} from "~/server/audit/requestContext";
-import { auth } from "~/server/auth";
+import { buildRequestContext } from "~/server/audit/requestContext";
+import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
-import { declarations } from "~/server/db/schema";
-import { getActiveLock } from "~/server/services/declarationLockService";
 import {
-	type PipelineFailureReason,
+	assertDeclarationUnlockedForWrite,
+	DeclarationLockedByOtherUserError,
+} from "~/server/services/declarationLockService";
+import {
 	runUploadPipeline,
 	type UploadPipelineResult,
 } from "~/server/services/uploadPipeline";
+import {
+	mapFailureToHttp,
+	uploadAuditMetadataSchema,
+	writeFailure,
+} from "./uploadAudit";
 
 const FLOW_TO_ACTION: Record<FlowType, AuditActionKey> = {
 	cse_opinion: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
@@ -79,8 +82,7 @@ export async function POST(request: Request): Promise<Response> {
 
 	const action = FLOW_TO_ACTION[flowType];
 
-	const session = await auth();
-	const siren = parseSiren(session?.user?.siret);
+	const { session, siren } = await getSessionSiren(request);
 	if (!session?.user || !siren) {
 		writeFailure({
 			action,
@@ -215,38 +217,29 @@ export async function POST(request: Request): Promise<Response> {
 	const safeFileName = fileName.trim();
 	const year = getCurrentYear();
 
-	// Collaborative edit lock (epic #3556). This route is not tRPC, so the lock
-	// is enforced inline against the service rather than via the
-	// `declarationLockedWriteProcedure` middleware. The upload is refused when
-	// another co-declarant holds an active lock on the same declaration; a free
-	// lock (or one held by this user) lets the upload proceed. The check runs
-	// before the body is streamed so no bandwidth is wasted on a locked target.
-	const declarationRows = await db
-		.select({ id: declarations.id })
-		.from(declarations)
-		.where(and(eq(declarations.siren, siren), eq(declarations.year, year)))
-		.limit(1);
-	const lockedDeclarationId = declarationRows[0]?.id;
-	if (lockedDeclarationId) {
-		const lock = await getActiveLock(db, lockedDeclarationId);
-		if (lock && lock.userId !== userId) {
-			writeFailure({
-				action,
-				flowType,
-				fileName,
-				fileId: null,
-				errorMessage: "HTTP 409 locked_by_other",
-				userId,
-				userEmail,
-				siren,
-				requestContext,
-				startedAt,
-			});
-			return Response.json(
-				{ error: "Déclaration verrouillée par un autre utilisateur." },
-				{ status: 409 },
-			);
+	// Before the body is streamed: no bandwidth wasted on a locked target.
+	try {
+		await assertDeclarationUnlockedForWrite(db, siren, year, session.user.id);
+	} catch (error) {
+		if (!(error instanceof DeclarationLockedByOtherUserError)) {
+			throw error;
 		}
+		writeFailure({
+			action,
+			flowType,
+			fileName,
+			fileId: null,
+			errorMessage: "HTTP 409 locked_by_other",
+			userId,
+			userEmail,
+			siren,
+			requestContext,
+			startedAt,
+		});
+		return Response.json(
+			{ error: DECLARATION_LOCK_CONFLICT_MESSAGE },
+			{ status: 409 },
+		);
 	}
 
 	let result: UploadPipelineResult;
@@ -296,53 +289,6 @@ export async function POST(request: Request): Promise<Response> {
 			userAgent: requestContext.userAgent,
 			durationMs: Date.now() - startedAt,
 		});
-		if (userEmail) {
-			void (async () => {
-				if (flowType === "cse_opinion") {
-					const { enqueueReceipt } = await import("~/modules/mail/server");
-					await enqueueReceipt({
-						kind: "cseOpinion",
-						to: userEmail,
-						siren,
-						year,
-						userId,
-						isResend: false,
-					});
-					return;
-				}
-				if (flowType === "joint_evaluation") {
-					const { enqueueNotification } = await import(
-						"notifications/publisher"
-					);
-					const enqueueResult = await enqueueNotification({
-						type: "joint_evaluation_submitted",
-						recipientEmail: userEmail,
-						recipientUserId: userId,
-						siren,
-						payload: { siren, year },
-					});
-					void logAction({
-						action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
-						status: enqueueResult.status === "enqueued" ? "success" : "failure",
-						userId,
-						userEmail,
-						siren,
-						...(enqueueResult.status === "enqueued"
-							? {
-									resourceType: "notification",
-									resourceId: enqueueResult.id,
-								}
-							: {
-									errorMessage:
-										enqueueResult.status === "error"
-											? enqueueResult.error
-											: "queue_unavailable",
-								}),
-						metadata: { type: "joint_evaluation_submitted" },
-					});
-				}
-			})();
-		}
 		return Response.json({
 			fileId: result.fileId,
 			fileName: result.fileName,
@@ -373,116 +319,4 @@ export async function POST(request: Request): Promise<Response> {
 		},
 		{ status },
 	);
-}
-
-function mapFailureToHttp(reason: PipelineFailureReason): {
-	status: number;
-	errorMessage: string;
-} {
-	switch (reason) {
-		case "not_found":
-			return { status: 403, errorMessage: "HTTP 403 declaration_not_found" };
-		case "max_files":
-			return { status: 400, errorMessage: "HTTP 400 max_files" };
-		case "too_large":
-			return { status: 400, errorMessage: "HTTP 400 too_large" };
-		case "wrong_type":
-			return { status: 400, errorMessage: "HTTP 400 wrong_type" };
-		case "empty":
-			return { status: 400, errorMessage: "HTTP 400 empty_file" };
-		case "virus":
-			return { status: 422, errorMessage: "HTTP 422 virus_detected" };
-		case "scan_unavailable":
-			return { status: 503, errorMessage: "HTTP 503 antivirus_unavailable" };
-		case "aborted":
-			// 499 is the nginx-style "client closed request" status. The body is
-			// never consumed by the client (they are gone), so the status is
-			// purely for server-side observability.
-			return { status: 499, errorMessage: "HTTP 499 client_aborted" };
-		case "server_error":
-			return { status: 500, errorMessage: "HTTP 500 server_error" };
-	}
-}
-
-/**
- * Strips control characters (including ANSI escape sequences) and clips to
- * 255 chars before a user-supplied string is persisted to the audit log or
- * echoed to a terminal via console.error. Defence-in-depth: a crafted header
- * could carry escape sequences that mislead log readers.
- */
-function sanitizeUserText(value: string): string {
-	let out = "";
-	for (const ch of value) {
-		const code = ch.codePointAt(0) ?? 0;
-		if (code >= 0x20 && code !== 0x7f) out += ch;
-	}
-	return out.slice(0, 255);
-}
-
-/**
- * Audit metadata schema for /api/upload. Fields sourced from user input
- * (fileName, virusName) use `sanitizedUserString` so future additions to the
- * schema are sanitised by construction — a new untrusted string just has to
- * reuse the same transform. Internal literals (flowType, fileId, s3Cleanup)
- * are already constrained and do not need sanitisation.
- */
-const sanitizedUserString = z.string().transform(sanitizeUserText);
-
-const uploadAuditMetadataSchema = z.object({
-	flowType: z.enum(["cse_opinion", "joint_evaluation"]),
-	fileId: z.string().optional(),
-	fileName: sanitizedUserString.optional(),
-	virusName: sanitizedUserString.optional(),
-	s3Cleanup: z.enum(["ok", "failed"]).optional(),
-});
-
-type AuditFailureInput = {
-	action: AuditActionKey;
-	flowType: FlowType;
-	fileName: string | null;
-	fileId: string | null;
-	errorMessage: string;
-	userId: string | null;
-	userEmail: string | null;
-	siren: string | null;
-	requestContext: RequestContext;
-	startedAt: number;
-	virusName?: string | null;
-	s3Cleanup?: "ok" | "failed" | null;
-};
-
-function writeFailure({
-	action,
-	flowType,
-	fileName,
-	fileId,
-	errorMessage,
-	userId,
-	userEmail,
-	siren,
-	requestContext,
-	startedAt,
-	virusName = null,
-	s3Cleanup = null,
-}: AuditFailureInput): void {
-	const metadata = uploadAuditMetadataSchema.parse({
-		flowType,
-		fileName: fileName ?? undefined,
-		fileId: fileId ?? undefined,
-		virusName: virusName ?? undefined,
-		s3Cleanup: s3Cleanup ?? undefined,
-	});
-
-	void logAction({
-		action,
-		status: "failure",
-		userId,
-		userEmail,
-		siren,
-		metadata,
-		errorMessage,
-		ipAddress: requestContext.ipAddress,
-		userAgent: requestContext.userAgent,
-		durationMs: Date.now() - startedAt,
-	});
 }

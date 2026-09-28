@@ -1,6 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import {
+	nullGipStep2,
+	nullGipStep3,
+	nullGipStep4,
+} from "~/test/gipGapFixtures";
 import { Step2PayGap } from "../Step2PayGap";
 
 const mockMutate = vi.fn();
@@ -36,6 +41,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -45,11 +51,26 @@ describe("Step2PayGap", () => {
 		expect(screen.getByText("Horaire brute médiane")).toBeInTheDocument();
 	});
 
+	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Écarts de rémunération" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders instruction text and mandatory fields notice", () => {
 		render(
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -68,12 +89,13 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
-		expect(screen.getByText("Rémunération")).toBeInTheDocument();
-		expect(screen.getByText("Femmes")).toBeInTheDocument();
-		expect(screen.getByText("Hommes")).toBeInTheDocument();
+		expect(screen.getByText("Type de rémunération")).toBeInTheDocument();
+		expect(screen.getByText("Rémunération des femmes")).toBeInTheDocument();
+		expect(screen.getByText("Rémunération des hommes")).toBeInTheDocument();
 		expect(
 			screen.getByText("Écart", { selector: "strong" }),
 		).toBeInTheDocument();
@@ -85,6 +107,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={{
 					indicatorAAnnualWomen: "100",
 					indicatorAAnnualMen: "200",
@@ -105,6 +128,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -117,6 +141,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -144,6 +169,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -157,7 +183,7 @@ describe("Step2PayGap", () => {
 		await user.type(menInput, "100");
 
 		// Gap = |((100-95)/100)*100| = 5.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("5,0 %").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("5,00 %").length).toBeGreaterThan(0);
 		expect(screen.getByText("élevé")).toBeInTheDocument();
 	});
 
@@ -167,6 +193,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -180,7 +207,7 @@ describe("Step2PayGap", () => {
 		await user.type(menInput, "100");
 
 		// Gap = 3.0 % — table cell + interpretation callout
-		expect(screen.getAllByText("3,0 %").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("3,00 %").length).toBeGreaterThan(0);
 		expect(screen.queryByText("faible")).not.toBeInTheDocument();
 		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
 	});
@@ -190,6 +217,7 @@ describe("Step2PayGap", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -205,8 +233,14 @@ describe("Step2PayGap", () => {
 				declarationSiren="123456789"
 				declarationYear={2025}
 				gipPrefillData={{
-					step1: { totalWomen: 100, totalMen: 100 },
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
 					step2: {
+						...nullGipStep2(),
 						annualMeanWomen: "35000",
 						annualMeanMen: "38000",
 						hourlyMeanWomen: "18",
@@ -216,33 +250,12 @@ describe("Step2PayGap", () => {
 						hourlyMedianWomen: "17",
 						hourlyMedianMen: "19",
 					},
-					step3: {
-						annualMeanWomen: null,
-						annualMeanMen: null,
-						hourlyMeanWomen: null,
-						hourlyMeanMen: null,
-						annualMedianWomen: null,
-						annualMedianMen: null,
-						hourlyMedianWomen: null,
-						hourlyMedianMen: null,
-						beneficiaryCountWomen: null,
-						beneficiaryCountMen: null,
-					},
-					step4: {
-						annual: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-						hourly: {
-							thresholds: [null, null, null],
-							womenCounts: [null, null, null, null],
-							menCounts: [null, null, null, null],
-						},
-					},
+					step3: nullGipStep3(),
+					step4: nullGipStep4(),
 					confidenceIndex: null,
 					periodEnd: "2026-12-31",
 				}}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -251,12 +264,13 @@ describe("Step2PayGap", () => {
 		expect(womenInput).toHaveValue("35\u202f000,00");
 	});
 
-	it("shows validation error on submit when fields are incomplete", async () => {
+	it("names each empty amount in the error alert on submit", async () => {
 		const user = userEvent.setup();
 		render(
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep2Data()}
 			/>,
 		);
@@ -264,11 +278,83 @@ describe("Step2PayGap", () => {
 		const submitButton = screen.getByRole("button", { name: /suivant/i });
 		await user.click(submitButton);
 
+		const alert = screen.getByRole("alert");
+		expect(within(alert).getByText("Champ vide")).toBeInTheDocument();
+		expect(alert).toHaveTextContent(
+			"Renseignez le montant Annuelle brute moyenne pour les femmes.",
+		);
+		expect(alert).toHaveTextContent(
+			"Renseignez le montant Horaire brute médiane pour les hommes.",
+		);
+		const table = screen.getByRole("table");
+		const definitions = screen
+			.getByRole("button", { name: "Définitions et méthode de calcul" })
+			.closest("section");
 		expect(
-			screen.getByText(
-				/Veuillez renseigner toutes les données de rémunération/,
-			),
-		).toBeInTheDocument();
+			table.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(definitions).not.toBeNull();
+		expect(
+			alert.compareDocumentPosition(definitions as HTMLElement) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("clears only the corrected amount from the shared error state", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const womenInput = screen.getByLabelText("Annuelle brute moyenne — Femmes");
+		const menInput = screen.getByLabelText("Annuelle brute moyenne — Hommes");
+		await user.type(womenInput, "100");
+
+		await waitFor(() => expect(womenInput).not.toHaveAttribute("aria-invalid"));
+		expect(menInput).toHaveAttribute("aria-invalid", "true");
+		expect(screen.getByRole("alert")).not.toHaveTextContent(
+			"Renseignez le montant Annuelle brute moyenne pour les femmes.",
+		);
+	});
+
+	it("places prefill source before the error alert", async () => {
+		const user = userEvent.setup();
+		render(
+			<Step2PayGap
+				declarationSiren="123456789"
+				declarationYear={2025}
+				gipPrefillData={{
+					step1: {
+						totalWomen: 100,
+						totalMen: 100,
+						hourlyWomen: 100,
+						hourlyMen: 100,
+					},
+					step2: nullGipStep2(),
+					step3: nullGipStep3(),
+					step4: nullGipStep4(),
+					confidenceIndex: null,
+					periodEnd: null,
+				}}
+				indicatorGRequired
+				initialData={emptyStep2Data()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const source = document.querySelector("p.fr-text-mention--grey");
+		const alert = screen.getByRole("alert");
+		expect(source).not.toBeNull();
+		expect(
+			(source as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 });

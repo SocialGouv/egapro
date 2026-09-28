@@ -1,19 +1,27 @@
 import "server-only";
 
-import { and, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
+import { activeDeclarationFilter } from "~/server/api/routers/declarationHelpers";
 import type { DB } from "~/server/db";
 import { db } from "~/server/db";
 import {
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
+import {
 	companies,
+	cseOpinionFiles,
 	cseOpinions,
 	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	files,
+	gipMdsData,
 	jobCategories,
 	users,
 } from "~/server/db/schema";
 import type { CseRow, FileRow, IndicatorGEntry } from "./fetchDeclarations";
+import type { DeclarationEventType } from "./shared/statusHistoryLabels";
 import type { IndicatorGRow } from "./types";
 
 // postgres.js returns ISO strings (not Date) for raw `sql<>` aggregations like
@@ -23,7 +31,7 @@ const toDate = (value: unknown): Date | null =>
 	value == null ? null : new Date(value as string | number | Date);
 
 export type RawHistoryEntry = {
-	eventType: string;
+	eventType: DeclarationEventType;
 	value: string | null;
 	round: number | null;
 	createdAt: string;
@@ -67,6 +75,7 @@ function statusHistoryArray() {
 		)
 		FROM ${declarationStatusHistory}
 		WHERE ${declarationStatusHistory.declarationId} = ${declarations.id}
+		AND ${declarationStatusHistory.eventType} != ${"step_change"}
 	)`.mapWith((value: unknown) =>
 		Array.isArray(value) ? (value as RawHistoryEntry[]) : [],
 	);
@@ -196,6 +205,8 @@ export async function fetchSubmittedDeclarations(
 			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
+			hourlyWomen: declarations.hourlyWomen,
+			hourlyMen: declarations.hourlyMen,
 			cseRequired: declarations.cseRequired,
 			rulesVersion: declarations.rulesVersion,
 			secondDeclReferencePeriodStart:
@@ -206,7 +217,7 @@ export async function fetchSubmittedDeclarations(
 			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
@@ -215,6 +226,13 @@ export async function fetchSubmittedDeclarations(
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, declarations.siren),
+				eq(gipMdsData.year, declarations.year),
+			),
+		)
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
 			or(
@@ -223,10 +241,10 @@ export async function fetchSubmittedDeclarations(
 					lt(declarations.cancelledAt, new Date(`${dateEnd}T00:00:00Z`)),
 				),
 				and(
-					ne(declarations.status, "draft"),
+					submittedDeclarationCondition(),
 					gte(declarations.updatedAt, new Date(`${dateBegin}T00:00:00Z`)),
 					lt(declarations.updatedAt, new Date(`${dateEnd}T00:00:00Z`)),
-					isNull(declarations.cancelledAt),
+					notCancelledCondition(),
 				),
 			),
 		);
@@ -236,16 +254,20 @@ export async function fetchSubmittedDeclarations(
 
 export async function fetchIndicatorGByDeclaration(
 	declarationIds: string[],
+	database: DB = db,
 ): Promise<Map<string, IndicatorGEntry[]>> {
 	if (declarationIds.length === 0) return new Map();
 
-	const rows = await db
+	const rows = await database
 		.select({
 			declarationId: jobCategories.declarationId,
 			categoryName: jobCategories.name,
+			source: jobCategories.source,
 			declarationType: employeeCategories.declarationType,
 			womenCount: employeeCategories.womenCount,
 			menCount: employeeCategories.menCount,
+			hourlyWomenCount: employeeCategories.hourlyWomenCount,
+			hourlyMenCount: employeeCategories.hourlyMenCount,
 			annualBaseWomen: employeeCategories.annualBaseWomen,
 			annualBaseMen: employeeCategories.annualBaseMen,
 			annualVariableWomen: employeeCategories.annualVariableWomen,
@@ -304,6 +326,8 @@ export async function buildIndicatorGRows(
 			categorySource: jobCategories.source,
 			womenCount: employeeCategories.womenCount,
 			menCount: employeeCategories.menCount,
+			hourlyWomenCount: employeeCategories.hourlyWomenCount,
+			hourlyMenCount: employeeCategories.hourlyMenCount,
 			annualBaseWomen: employeeCategories.annualBaseWomen,
 			annualBaseMen: employeeCategories.annualBaseMen,
 			annualVariableWomen: employeeCategories.annualVariableWomen,
@@ -320,7 +344,7 @@ export async function buildIndicatorGRows(
 			employeeCategories,
 			eq(employeeCategories.jobCategoryId, jobCategories.id),
 		)
-		.where(and(ne(declarations.status, "draft"), eq(declarations.year, year)));
+		.where(and(submittedDeclarationCondition(), eq(declarations.year, year)));
 }
 
 // ── Indicator G presence check ──────────────────────────────────────
@@ -342,47 +366,78 @@ export async function getDeclarationsWithIndicatorG(
 // ── File queries (CSE opinion files + joint evaluation files) ────────
 
 async function fetchFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 	type: "cse_opinion" | "joint_evaluation",
 ): Promise<FileRow[]> {
-	if (keys.length === 0) return [];
+	if (declarationIds.length === 0) return [];
 	return db
 		.select({
 			id: files.id,
-			siren: declarations.siren,
-			year: declarations.year,
+			declarationId: files.declarationId,
 			fileName: files.fileName,
 			filePath: files.filePath,
 			uploadedAt: files.uploadedAt,
 		})
 		.from(files)
-		.innerJoin(declarations, eq(files.declarationId, declarations.id))
 		.where(
-			and(
-				eq(files.type, type),
-				or(
-					...keys.map((k) =>
-						and(eq(declarations.siren, k.siren), eq(declarations.year, k.year)),
-					),
-				),
-			),
+			and(eq(files.type, type), inArray(files.declarationId, declarationIds)),
 		);
 }
 
 export async function fetchCseFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "cse_opinion");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(declarationIds, "cse_opinion");
+	if (rows.length === 0) return new Map();
+
+	const contentRows = await db
+		.select({
+			fileId: cseOpinionFiles.fileId,
+			declarationNumber: cseOpinionFiles.declarationNumber,
+			type: cseOpinionFiles.type,
+		})
+		.from(cseOpinionFiles)
+		.where(
+			inArray(
+				cseOpinionFiles.fileId,
+				rows.map((r) => r.id),
+			),
+		);
+	const contentsByFileId = groupByKey(contentRows, (r) => r.fileId);
+
+	const filesWithContents: FileRow[] = rows.map((file) => ({
+		...file,
+		contents: (contentsByFileId.get(file.id) ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
+	}));
+
+	return groupByKey(filesWithContents, (r) => r.declarationId);
 }
 
 export async function fetchJointEvaluationFilesByDeclaration(
-	keys: Array<{ siren: string; year: number }>,
+	declarationIds: string[],
 ): Promise<Map<string, FileRow[]>> {
-	if (keys.length === 0) return new Map();
-	const rows = await fetchFilesByDeclaration(keys, "joint_evaluation");
-	return groupByKey(rows, (r) => `${r.siren}-${r.year}`);
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(
+		declarationIds,
+		"joint_evaluation",
+	);
+	return groupByKey(rows, (r) => r.declarationId);
+}
+
+export async function resolveActiveDeclarationId(
+	siren: string,
+	year: number,
+): Promise<string | null> {
+	const rows = await db
+		.select({ id: declarations.id })
+		.from(declarations)
+		.where(activeDeclarationFilter(siren, year))
+		.limit(1);
+	return rows[0]?.id ?? null;
 }
 
 // ── Single file lookup (for download) ────────────────────────────────

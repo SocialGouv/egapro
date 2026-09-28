@@ -1,20 +1,40 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import {
 	getEffectiveGipPrefillData,
+	INDICATOR_G_STEP,
+	STEP_TITLES,
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import { shouldRedirectSubmittedToRecap } from "~/modules/domain";
 import {
-	mapToEmployeeCategoryRows,
-	mapToStepData,
-} from "~/server/api/routers/declarationHelpers";
+	isDeadlinePassed,
+	isDeclarationSubmitted,
+	isIndicatorGRequiredForGip,
+} from "~/modules/domain";
+import { LAST_REMUNERATION_STEP, remunerationStepHref } from "~/modules/routes";
+import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 type StepPageProps = {
 	params: Promise<{ step: string }>;
 };
+
+export async function generateMetadata({
+	params,
+}: StepPageProps): Promise<Metadata> {
+	const { step: stepParam } = await params;
+	const step = Number.parseInt(stepParam, 10);
+	const stepTitle = STEP_TITLES[step];
+
+	return {
+		title: stepTitle
+			? `Étape ${step} sur ${TOTAL_STEPS} — ${stepTitle}`
+			: "Déclaration des écarts de rémunération",
+	};
+}
 
 export default async function StepPage({ params }: StepPageProps) {
 	const { step: stepParam } = await params;
@@ -28,18 +48,22 @@ export default async function StepPage({ params }: StepPageProps) {
 	const d = data.declaration;
 	const company = await api.company.get({ siren: d.siren });
 
-	if (d.status !== "draft" && step !== 6) {
-		const { decl1ModificationDeadline } = await getCampaignDeadlines(d.year);
-		if (
-			shouldRedirectSubmittedToRecap({
-				status: d.status,
-				step,
-				recapStep: 6,
-				modificationDeadline: decl1ModificationDeadline,
-			})
-		) {
-			redirect("/declaration-remuneration/etape/6");
-		}
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		company.gipWorkforce,
+		d.year,
+	);
+
+	if (step === INDICATOR_G_STEP && !indicatorGRequired) {
+		redirect(remunerationStepHref(LAST_REMUNERATION_STEP));
+	}
+
+	const isSubmitted = isDeclarationSubmitted(d.status);
+	let modificationDeadline: Date | undefined;
+	let isModificationClosed = false;
+	if (isSubmitted) {
+		const deadlines = await getCampaignDeadlines(d.year);
+		modificationDeadline = deadlines.decl1ModificationDeadline;
+		isModificationClosed = isDeadlinePassed(modificationDeadline);
 	}
 
 	const gip = data.gipPrefillData;
@@ -47,15 +71,20 @@ export default async function StepPage({ params }: StepPageProps) {
 	const step1Data = {
 		totalWomen: d.totalWomen ?? gip?.step1.totalWomen ?? 0,
 		totalMen: d.totalMen ?? gip?.step1.totalMen ?? 0,
+		hourlyWomen: d.hourlyWomen ?? gip?.step1.hourlyWomen ?? 0,
+		hourlyMen: d.hourlyMen ?? gip?.step1.hourlyMen ?? 0,
 	};
 
 	const effectiveGipPrefillData = getEffectiveGipPrefillData(
 		gip,
 		d.totalWomen,
 		d.totalMen,
+		d.hourlyWomen,
+		d.hourlyMen,
 	);
 
-	const { step2Data, step3Data, step4Data } = mapToStepData(d);
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(d);
 
 	const hasCurrentYearCategories = data.jobCategories.length > 0;
 
@@ -69,6 +98,8 @@ export default async function StepPage({ params }: StepPageProps) {
 				name: cat.name,
 				womenCount: null,
 				menCount: null,
+				hourlyWomenCount: null,
+				hourlyMenCount: null,
 				annualBaseWomen: null,
 				annualBaseMen: null,
 				annualVariableWomen: null,
@@ -86,14 +117,19 @@ export default async function StepPage({ params }: StepPageProps) {
 	return (
 		<HydrateClient>
 			<StepPageClient
+				companyWorkforce={company.gipWorkforce}
 				declaration={d}
 				gipPrefillData={effectiveGipPrefillData ?? undefined}
 				hasCse={company.hasCse}
 				initialSource={initialSource}
+				modificationClosed={isModificationClosed}
+				modificationDeadline={modificationDeadline}
 				step={step}
 				step1Data={step1Data}
 				step2Data={step2Data}
+				step2Gaps={step2Gaps}
 				step3Data={step3Data}
+				step3Gaps={step3Gaps}
 				step4Data={step4Data}
 				step5Categories={step5Categories}
 			/>

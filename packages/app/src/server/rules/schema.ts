@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 
 const JsonScalarSchema = z.union([
 	z.string(),
@@ -65,11 +66,11 @@ export type RuleEvent = z.infer<typeof EventSchema>;
 
 export const TransitionSchema = z.object({
 	id: z.string(),
-	from: z.array(z.string()).min(1),
+	from: z.array(z.enum(DECLARATION_FSM_STATUSES)).min(1),
 	action: z.string(),
 	matchPayload: z.record(z.string(), z.unknown()).optional(),
 	guard: PredicateSchema.optional(),
-	to: z.string(),
+	to: z.enum(DECLARATION_FSM_STATUSES),
 	events: z.array(EventSchema),
 });
 
@@ -81,7 +82,7 @@ export const StageSchema = z.object({
 });
 
 export const StateSchema = z.object({
-	id: z.string(),
+	id: z.enum(DECLARATION_FSM_STATUSES),
 	stage: z.number().nullable(),
 	terminal: z.boolean().optional(),
 });

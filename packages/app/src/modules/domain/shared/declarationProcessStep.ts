@@ -20,17 +20,17 @@ export function getDeclarationProcessStepDeadline(
 		case "draft":
 			return deadlines.decl1ModificationDeadline;
 		case "awaiting_compliance_path_choice":
-			return deadlines.decl2ModificationDeadline;
+			return deadlines.pathChoiceRound1Deadline;
 		case "corrective_actions_chosen":
 			return deadlines.decl2ModificationDeadline;
 		case "awaiting_revision_choice":
-			return deadlines.decl2JointEvaluationDeadline;
+			return deadlines.pathChoiceDeadline;
 		case "joint_evaluation_chosen":
 			return deadlines.decl1JointEvaluationDeadline;
 		case "revised_joint_evaluation_chosen":
 			return deadlines.decl2JointEvaluationDeadline;
 		case "awaiting_cse_opinion":
-			return deadlines.decl2JointEvaluationDeadline;
+			return deadlines.decl2CseOpinionDeadline;
 		case "demarche_completed":
 			return null;
 	}

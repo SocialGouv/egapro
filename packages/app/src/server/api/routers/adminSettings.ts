@@ -3,10 +3,21 @@ import { eq } from "drizzle-orm";
 import {
 	campaignDeadlinesFormSchema,
 	getCampaignDeadlinesByYearSchema,
+	getRepresentationCampaignByYearSchema,
+	representationCampaignFormSchema,
+	updateLockTimeoutSchema,
 } from "~/modules/admin/settings/schemas";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
+} from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { campaignDeadlines } from "~/server/db/schema";
+import {
+	campaignDeadlines,
+	globalSettings,
+	representationCampaigns,
+} from "~/server/db/schema";
 
 /**
  * Admin / settings router — edits platform-wide global variables.
@@ -52,12 +63,14 @@ export const adminSettingsRouter = createTRPCRouter({
 					exists: true as const,
 					gipPublicationDate: row.gipPublicationDate,
 					campaignStartDate: row.campaignStartDate,
+					publicDataReleaseDate: row.publicDataReleaseDate,
 					decl1ModificationDeadline: row.decl1ModificationDeadline,
 					decl1JustificationDeadline: row.decl1JustificationDeadline,
 					decl1JointEvaluationDeadline: row.decl1JointEvaluationDeadline,
 					decl2ModificationDeadline: row.decl2ModificationDeadline,
 					decl2JustificationDeadline: row.decl2JustificationDeadline,
 					decl2JointEvaluationDeadline: row.decl2JointEvaluationDeadline,
+					decl2CseOpinionDeadline: row.decl2CseOpinionDeadline,
 				};
 			}
 
@@ -67,6 +80,7 @@ export const adminSettingsRouter = createTRPCRouter({
 				exists: false as const,
 				gipPublicationDate: toNullableIsoDate(defaults.gipPublicationDate),
 				campaignStartDate: toNullableIsoDate(defaults.campaignStartDate),
+				publicDataReleaseDate: null,
 				decl1ModificationDeadline: toIsoDate(
 					defaults.decl1ModificationDeadline,
 				),
@@ -85,7 +99,39 @@ export const adminSettingsRouter = createTRPCRouter({
 				decl2JointEvaluationDeadline: toIsoDate(
 					defaults.decl2JointEvaluationDeadline,
 				),
+				decl2CseOpinionDeadline: toIsoDate(defaults.decl2CseOpinionDeadline),
 			};
+		}),
+
+	getLockTimeout: adminProcedure.query(async ({ ctx }) => {
+		const [row] = await ctx.db
+			.select({
+				declarationLockTimeoutMinutes:
+					globalSettings.declarationLockTimeoutMinutes,
+			})
+			.from(globalSettings)
+			.where(eq(globalSettings.id, 1))
+			.limit(1);
+
+		return {
+			timeoutMinutes:
+				row?.declarationLockTimeoutMinutes ?? DEFAULT_LOCK_TIMEOUT_MINUTES,
+		};
+	}),
+
+	updateLockTimeout: adminProcedure
+		.input(updateLockTimeoutSchema)
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(globalSettings)
+				.set({
+					declarationLockTimeoutMinutes: input.timeoutMinutes,
+					updatedAt: new Date(),
+					updatedBy: ctx.session.user.id,
+				})
+				.where(eq(globalSettings.id, 1));
+
+			return { success: true as const };
 		}),
 
 	/**
@@ -100,12 +146,14 @@ export const adminSettingsRouter = createTRPCRouter({
 			const values = {
 				year: input.year,
 				campaignStartDate: input.campaignStartDate,
+				publicDataReleaseDate: input.publicDataReleaseDate,
 				decl1ModificationDeadline: input.decl1ModificationDeadline,
 				decl1JustificationDeadline: input.decl1JustificationDeadline,
 				decl1JointEvaluationDeadline: input.decl1JointEvaluationDeadline,
 				decl2ModificationDeadline: input.decl2ModificationDeadline,
 				decl2JustificationDeadline: input.decl2JustificationDeadline,
 				decl2JointEvaluationDeadline: input.decl2JointEvaluationDeadline,
+				decl2CseOpinionDeadline: input.decl2CseOpinionDeadline,
 			};
 
 			// `gipPublicationDate` is written exclusively by the SUIT CSV import,
@@ -115,6 +163,56 @@ export const adminSettingsRouter = createTRPCRouter({
 				target: campaignDeadlines.year,
 				set: values,
 			});
+
+			return { success: true as const };
+		}),
+
+	getRepresentationCampaignByYear: adminProcedure
+		.input(getRepresentationCampaignByYearSchema)
+		.query(async ({ ctx, input }) => {
+			const [row] = await ctx.db
+				.select()
+				.from(representationCampaigns)
+				.where(eq(representationCampaigns.year, input.year))
+				.limit(1);
+
+			if (row) {
+				return {
+					year: row.year,
+					isDefault: false as const,
+					campaignStartDate: row.campaignStartDate,
+					campaignEndDate: row.campaignEndDate,
+					declarationDeadline: row.declarationDeadline,
+				};
+			}
+
+			const defaults = getDefaultRepresentationCampaign(input.year);
+			return {
+				year: input.year,
+				isDefault: true as const,
+				campaignStartDate: toIsoDate(defaults.campaignStartDate),
+				campaignEndDate: toIsoDate(defaults.campaignEndDate),
+				declarationDeadline: toIsoDate(defaults.declarationDeadline),
+			};
+		}),
+
+	upsertRepresentationCampaign: adminProcedure
+		.input(representationCampaignFormSchema)
+		.mutation(async ({ ctx, input }) => {
+			const values = {
+				year: input.year,
+				campaignStartDate: input.campaignStartDate,
+				campaignEndDate: input.campaignEndDate,
+				declarationDeadline: input.declarationDeadline,
+			};
+
+			await ctx.db
+				.insert(representationCampaigns)
+				.values(values)
+				.onConflictDoUpdate({
+					target: representationCampaigns.year,
+					set: values,
+				});
 
 			return { success: true as const };
 		}),

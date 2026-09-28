@@ -10,9 +10,12 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-
-import { formatMonthDay } from "~/modules/domain";
-
+import {
+	formatCount,
+	formatMonthDay,
+	formatWholePercentage,
+	percentageOf,
+} from "~/modules/domain";
 import styles from "./CampaignProgressionChart.module.scss";
 import type { CampaignProgressionSeries } from "./types";
 
@@ -41,6 +44,9 @@ type MergedPoint = {
 } & {
 	[year: number]: number | null;
 };
+
+const CHART_CAPTION =
+	"Courbe de progression cumulative des déclarations soumises par année.";
 
 // DSFR palette — pulled from design system tokens, not guessed.
 const EMPHASIS_COLOR = "var(--background-action-high-blue-france)";
@@ -102,11 +108,11 @@ function ProgressionTooltip({
 					if (entry.value == null) return null;
 					const year = Number(entry.name);
 					const total = totals[year] ?? 0;
-					const pct = total > 0 ? Math.round((entry.value / total) * 100) : 0;
+					const pct = Math.round(percentageOf(entry.value, total));
 					return (
 						<li className={styles.tooltipItem} key={entry.name}>
-							{year} : {entry.value.toLocaleString("fr-FR")} déclarations ({pct}{" "}
-							% du total)
+							{year} : {formatCount(entry.value)} déclarations (
+							{formatWholePercentage(pct)} du total)
 						</li>
 					);
 				})}
@@ -131,40 +137,47 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 			</p>
 		);
 	}
+	const figureCaption = `${CHART_CAPTION} Les données équivalentes sont disponibles dans le tableau ci-dessous.`;
 
 	return (
-		<figure className={styles.chartWrapper}>
-			<figcaption className="fr-sr-only">
-				Courbe de progression cumulative des déclarations soumises par année.
-				Les données équivalentes sont disponibles dans le tableau ci-dessous.
-			</figcaption>
-			<ResponsiveContainer>
-				<LineChart data={data}>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis
-						dataKey="dayOfYear"
-						interval={6}
-						tickFormatter={(value: string) => formatMonthDay(value)}
-					/>
-					<YAxis
-						tickFormatter={(value: number) => value.toLocaleString("fr-FR")}
-					/>
-					<Tooltip content={<ProgressionTooltip totals={totals} />} />
-					<Legend />
-					{series.map(({ year }) => (
-						<Line
-							connectNulls
-							dataKey={year}
-							dot={false}
-							key={year}
-							name={String(year)}
-							stroke={colorForYear(year, currentYear)}
-							strokeWidth={year === currentYear ? 3 : 2}
-							type="monotone"
+		// biome-ignore lint/a11y/useSemanticElements: RGAA 1.9.1 requires an explicit figure/group role
+		<figure
+			aria-label={figureCaption}
+			className={styles.chartWrapper}
+			role="group"
+		>
+			<figcaption className="fr-sr-only">{figureCaption}</figcaption>
+			<div
+				aria-label={CHART_CAPTION}
+				className={styles.chartContainer}
+				role="img"
+			>
+				<ResponsiveContainer>
+					<LineChart data={data}>
+						<CartesianGrid strokeDasharray="3 3" />
+						<XAxis
+							dataKey="dayOfYear"
+							interval={6}
+							tickFormatter={(value: string) => formatMonthDay(value)}
 						/>
-					))}
-				</LineChart>
-			</ResponsiveContainer>
+						<YAxis tickFormatter={(value: number) => formatCount(value)} />
+						<Tooltip content={<ProgressionTooltip totals={totals} />} />
+						<Legend />
+						{series.map(({ year }) => (
+							<Line
+								connectNulls
+								dataKey={year}
+								dot={false}
+								key={year}
+								name={String(year)}
+								stroke={colorForYear(year, currentYear)}
+								strokeWidth={year === currentYear ? 3 : 2}
+								type="monotone"
+							/>
+						))}
+					</LineChart>
+				</ResponsiveContainer>
+			</div>
 		</figure>
 	);
 }

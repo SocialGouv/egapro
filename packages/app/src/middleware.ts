@@ -2,15 +2,32 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { env } from "~/env";
+import { resolveAdminAccess } from "~/modules/domain";
+import {
+	ADMIN,
+	ADMIN_MFA_RESUME,
+	API_PUBLIC_DECLARATIONS,
+	API_SEARCH,
+	API_V1_PREFIX,
+	LOGIN,
+	MY_SPACE,
+} from "~/modules/routes";
 
 /**
- * Next.js Edge middleware handling two independent concerns:
+ * Next.js Edge middleware handling three concerns:
  *
- * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and enforces
- *    `isAdmin`. Defense in depth: `src/app/admin/layout.tsx` re-checks the
- *    session on the Node runtime in case the token is missing the flag.
+ * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and applies the
+ *    shared decision table of `resolveAdminAccess` — admin grant *and* a
+ *    two-factor authentication inside the window. Defense in depth:
+ *    `src/app/admin/layout.tsx` runs the same table on the Node runtime.
  *
- * 2. `/api/v1/*` — belt-and-suspenders against APISIX bypass. The APISIX
+ * 2. `/mon-espace/*`, `/declaration-remuneration/*`, `/avis-cse/*` — session
+ *    gating only (no `isAdmin` check). Captures the requested URL into
+ *    `callbackUrl` so the user returns to the page they originally aimed at
+ *    after ProConnect sign-in. The Node-runtime `auth()` guards in layouts
+ *    remain as defense in depth.
+ *
+ * 3. `/api/v1/*` — belt-and-suspenders against APISIX bypass. The APISIX
  *    gateway (see `.kontinuous/templates/apisix-suit.configmap.yaml`) injects
  *    `X-Gateway-Forwarded: <EGAPRO_GATEWAY_SHARED_SECRET>` via its
  *    `proxy-rewrite` plugin. A pod compromised in-cluster could otherwise
@@ -25,28 +42,78 @@ import { env } from "~/env";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (pathname.startsWith("/api/v1/")) {
+	if (pathname === API_SEARCH) {
+		return searchRedirect(request);
+	}
+
+	if (pathname.startsWith(API_V1_PREFIX)) {
 		return gatewayMiddleware(request);
 	}
 
-	return adminMiddleware(request);
+	if (pathname.startsWith(ADMIN)) {
+		return adminMiddleware(request);
+	}
+
+	return sessionMiddleware(request);
+}
+
+function searchRedirect(request: NextRequest) {
+	const target = new URL(API_PUBLIC_DECLARATIONS, request.url);
+	for (const [key, value] of request.nextUrl.searchParams.entries()) {
+		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
+	}
+	return NextResponse.redirect(target, 308);
+}
+
+function redirectToLogin(request: NextRequest) {
+	const loginUrl = new URL(LOGIN, request.url);
+	loginUrl.searchParams.set(
+		"callbackUrl",
+		`${request.nextUrl.pathname}${request.nextUrl.search}`,
+	);
+	return NextResponse.redirect(loginUrl);
 }
 
 async function adminMiddleware(request: NextRequest) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
-	// Force re-login when there is no token OR when the token predates the
-	// `isAdmin` field (users signed in before this PR). The DB sync runs in
-	// the `jwt` callback on sign-in, so a fresh token is the only way to get
-	// the correct flag.
-	if (!token || token.isAdmin === undefined) {
-		const loginUrl = new URL("/login", request.url);
-		loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
-		return NextResponse.redirect(loginUrl);
-	}
+	// The Edge runtime can settle freshness itself: the token is already decoded here, and the rule compares two numbers.
+	const decision = resolveAdminAccess(token, new Date());
 
-	if (!token.isAdmin) {
-		return NextResponse.redirect(new URL("/mon-espace", request.url));
+	switch (decision.type) {
+		// The DB sync runs in the `jwt` callback, so a fresh sign-in is the only way to obtain the grant flag.
+		case "login":
+			return redirectToLogin(request);
+		// Silent refusal: a user without the grant is never told the backoffice exists.
+		case "monEspace":
+			return NextResponse.redirect(new URL(MY_SPACE, request.url));
+		// Explicit refusal on an Egapro screen: reopening ProConnect mid-navigation is ruled out by the product.
+		case "resume": {
+			const resumeUrl = new URL(ADMIN_MFA_RESUME, request.url);
+			resumeUrl.searchParams.set(
+				"retour",
+				`${request.nextUrl.pathname}${request.nextUrl.search}`,
+			);
+			return NextResponse.redirect(resumeUrl);
+		}
+		case "allow":
+			return noStore(NextResponse.next());
+		default:
+			return redirectToLogin(request);
+	}
+}
+
+// A browser back after an expiry must not restore a backoffice page from the cache.
+function noStore(response: NextResponse) {
+	response.headers.set("Cache-Control", "no-store");
+	return response;
+}
+
+async function sessionMiddleware(request: NextRequest) {
+	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
+
+	if (!token) {
+		return redirectToLogin(request);
 	}
 
 	return NextResponse.next();
@@ -93,6 +160,17 @@ function constantTimeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
+// Next reads this at build time and cannot evaluate an imported constant, so
+// these patterns are the one place route paths stay written out; the "matcher
+// coverage" test in `__tests__/middleware.test.ts` pins them against
+// `~/modules/routes`.
 export const config = {
-	matcher: ["/admin/:path*", "/api/v1/:path*"],
+	matcher: [
+		"/admin/:path*",
+		"/api/v1/:path*",
+		"/api/search",
+		"/mon-espace/:path*",
+		"/declaration-remuneration/:path*",
+		"/avis-cse/:path*",
+	],
 };

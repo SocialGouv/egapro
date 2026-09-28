@@ -9,6 +9,8 @@ type Props = {
 	onConsultedChange: (value: boolean) => void;
 	onOpinionChange: (value: OpinionType) => void;
 	onDateChange: (value: string) => void;
+	readOnly?: boolean;
+	showConsultationQuestion?: boolean;
 };
 
 export function GapConsultationCard({
@@ -19,6 +21,8 @@ export function GapConsultationCard({
 	onConsultedChange,
 	onOpinionChange,
 	onDateChange,
+	readOnly = false,
+	showConsultationQuestion = true,
 }: Props) {
 	const legendId = `${id}-legend`;
 	const opinionLegendId = `${id}-opinion-legend`;
@@ -28,53 +32,59 @@ export function GapConsultationCard({
 		<div className={styles.card}>
 			<p className="fr-text--bold fr-mb-3w" id={legendId}>
 				Justification des écarts &ge; 5 % par des critères objectifs et non
-				sexistes de l'indicateur de rémunération par catégorie de salariés
+				sexistes de l'indicateur de rémunération par catégories de salariés
 			</p>
 
-			<fieldset aria-labelledby={legendId} className="fr-fieldset">
-				<legend
-					className="fr-fieldset__legend--regular fr-fieldset__legend"
-					id={`${id}-question-legend`}
-				>
-					Avez-vous informé et consulté le CSE sur la justification des écarts
-					&ge; 5 % ?
-				</legend>
-				<div className="fr-fieldset__element fr-fieldset__element--inline">
-					<div className="fr-radio-group fr-radio-rich">
-						<input
-							checked={consulted === true}
-							id={`${id}-yes`}
-							name={`${id}-consulted`}
-							onChange={() => onConsultedChange(true)}
-							type="radio"
-							value="yes"
-						/>
-						<label className="fr-label" htmlFor={`${id}-yes`}>
-							Oui
-						</label>
+			{showConsultationQuestion && (
+				<fieldset aria-labelledby={legendId} className="fr-fieldset">
+					<legend
+						className="fr-fieldset__legend--regular fr-fieldset__legend"
+						id={`${id}-question-legend`}
+					>
+						Avez-vous informé et consulté le CSE sur la justification des écarts
+						&ge; 5 % ?
+					</legend>
+					<div className="fr-fieldset__element fr-fieldset__element--inline">
+						<div className="fr-radio-group fr-radio-rich">
+							<input
+								checked={consulted === true}
+								disabled={readOnly}
+								id={`${id}-yes`}
+								name={`${id}-consulted`}
+								onChange={() => onConsultedChange(true)}
+								required
+								type="radio"
+								value="yes"
+							/>
+							<label className="fr-label" htmlFor={`${id}-yes`}>
+								Oui
+							</label>
+						</div>
 					</div>
-				</div>
-				<div className="fr-fieldset__element fr-fieldset__element--inline">
-					<div className="fr-radio-group fr-radio-rich">
-						<input
-							checked={consulted === false}
-							id={`${id}-no`}
-							name={`${id}-consulted`}
-							onChange={() => onConsultedChange(false)}
-							type="radio"
-							value="no"
-						/>
-						<label className="fr-label" htmlFor={`${id}-no`}>
-							Non
-						</label>
+					<div className="fr-fieldset__element fr-fieldset__element--inline">
+						<div className="fr-radio-group fr-radio-rich">
+							<input
+								checked={consulted === false}
+								disabled={readOnly}
+								id={`${id}-no`}
+								name={`${id}-consulted`}
+								onChange={() => onConsultedChange(false)}
+								required
+								type="radio"
+								value="no"
+							/>
+							<label className="fr-label" htmlFor={`${id}-no`}>
+								Non
+							</label>
+						</div>
 					</div>
-				</div>
-				<div
-					aria-live="polite"
-					className="fr-messages-group"
-					id={`${id}-messages`}
-				/>
-			</fieldset>
+					<div
+						aria-live="polite"
+						className="fr-messages-group"
+						id={`${id}-messages`}
+					/>
+				</fieldset>
+			)}
 
 			{consulted && (
 				<>
@@ -89,9 +99,11 @@ export function GapConsultationCard({
 							<div className="fr-radio-group fr-radio-rich">
 								<input
 									checked={opinion === "favorable"}
+									disabled={readOnly}
 									id={`${id}-favorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("favorable")}
+									required
 									type="radio"
 									value="favorable"
 								/>
@@ -104,9 +116,11 @@ export function GapConsultationCard({
 							<div className="fr-radio-group fr-radio-rich">
 								<input
 									checked={opinion === "unfavorable"}
+									disabled={readOnly}
 									id={`${id}-unfavorable`}
 									name={`${id}-opinion`}
 									onChange={() => onOpinionChange("unfavorable")}
+									required
 									type="radio"
 									value="unfavorable"
 								/>
@@ -127,6 +141,7 @@ export function GapConsultationCard({
 							id={dateId}
 							onChange={(e) => onDateChange(e.target.value)}
 							placeholder="Sélectionner une date"
+							readOnly={readOnly}
 							type="date"
 							value={date}
 						/>

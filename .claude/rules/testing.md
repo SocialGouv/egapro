@@ -3,74 +3,46 @@ paths:
   - "src/**/__tests__/**"
 ---
 
-# Testing
+# Tests unitaires et d'intégration
 
-> **Used by**: `code-dev` (écrit TU + E2E), `validator` (exécute `pnpm test`), `structural-auditor` (règle 2.13). Auto-chargé via `paths:`.
+> Chargée sur `src/**/__tests__/**`. Propriétaire dans la pipeline : `code-dev`, qui écrit ses tests dans la foulée de l'implémentation ; `structural-auditor` vérifie ensuite qu'aucun test n'a été affaibli. Pour les E2E Playwright → `rules/e2e.md` (propriétaire : `e2e-dev`).
 
-## 75% minimum code coverage (enforced)
+## Couverture
 
-Global code coverage must stay **at or above 75%** for statements, branches, functions, and lines. This is enforced by Vitest coverage thresholds — `pnpm test --coverage` will fail if any metric drops below 75%.
+75 % minimum en global (statements, branches, functions, lines) — seuil **appliqué** par Vitest, `pnpm test --coverage` échoue en dessous. **100 %** sur les fichiers de logique ; seules exceptions, les thin wrappers `src/app/*/page.tsx` et les chemins déjà exclus par `vitest.config.ts` (`src/trpc`, `src/server/db`, `src/server/auth`, `src/app/api`, `env.js`, instrumentation).
 
-Run `pnpm test --coverage` to check the current coverage report.
+Les tests vivent dans un `__tests__/` à côté du module qu'ils testent, jamais dans `src/app/`.
 
-## 100% coverage on logic files
+## Tests des scripts de `packages/app/scripts/`
 
-Every file with logic must have corresponding tests. The only exception is thin route wrappers in `src/app/*/page.tsx`.
+Les scripts sont écrits en TypeScript et importés par alias `#scripts/<nom>`, sans extension — jamais par chemin littéral, sinon un renommage casse le test en silence.
 
-## Test observable behavior
+Leur test vit dans le `__tests__/` du module de `src/` que le script exerce : `src/server/db/__tests__/` pour un backfill ou un import en base, `src/server/audit/__tests__/` pour une purge d'audit. `src/__tests__/scripts/` est réservé aux scripts sans domaine d'accueil — l'outillage de CI (`check-journal`, `check-cahier`, `report-grille`) et la validation des jeux de données générés.
 
-Test what the user sees and what the API returns — not internal implementation details.
+Les tests restent sous `src/` : les `include` de `vitest.config.ts` et de `vitest.integration.config.ts` ne couvrent que `src/**`, et les seuils de couverture à 75 % sont calculés sur ce périmètre.
 
-```ts
-// CORRECT
-it("displays an error message when SIREN is invalid", ...)
-it("returns NOT_FOUND when declaration does not exist", ...)
+## Ce qu'on teste
 
-// USELESS
-it("calls setSiren setter once", ...)
-it("re-renders 3 times", ...)
-```
+Le **comportement observable** : ce que l'utilisateur voit, ce que l'API retourne. Pas le nombre de rendus, pas l'appel d'un setter.
 
-## Test file location
+Pour chaque unité : cas nominal, cas d'erreur (entrée invalide, échec réseau, donnée absente), cas limites (tableau vide, valeurs de bord, `null`/`undefined`).
 
-Tests live in `__tests__/` subfolder next to the module they test. Never in `src/app/`.
+Compter des **comportements et des classes d'équivalence**, pas des branches `if`/`else` — une branche peut demander plusieurs tests, plusieurs branches peuvent n'en demander qu'un. Sur un seuil métier, tester des deux côtés **et** exactement dessus (seuil d'alerte à 5 % → 4,9 / 5,0 / 5,1), en utilisant la constante de `~/modules/domain`, jamais un `5` en dur.
 
-## Cover all paths
+## Mocks
 
-For each function/component, test:
-- Nominal case (happy path)
-- Error cases (invalid input, network failure, missing data)
-- Edge cases (empty arrays, boundary values, null/undefined)
+Mocker **uniquement les frontières** : `next/navigation`, `next/link`, `server-only`, tRPC, la DB. Jamais l'unité sous test ni ses helpers internes.
 
-## Mock boundaries only
+Les mocks communs sont définis **une fois** dans `src/test/setup.ts` et auto-chargés par Vitest — `next/link`, `next/navigation`, `next/image`, `next-auth/react`, `server-only`, `~/trpc/server`. Ne jamais les redupliquer dans un fichier de test ; un `vi.mock()` local reste possible pour un override ponctuel, il a la priorité.
 
-Mock external dependencies (next/navigation, next/link, server-only, tRPC, DB).
-Never mock the unit under test or its internal helpers.
+## Pièges déjà rencontrés
 
-## Standard mocks (centralized in `src/test/setup.ts`)
+- **Mocks réels et complets** — typer le mock avec le vrai type et remplir chaque champ requis. Pas de mock partiel. Dans le doute, ouvrir le modèle et comparer les champs.
+- **Asserter le vrai état initial** — vérifier l'état dans lequel le code démarre réellement (`loading: true`), jamais un état inventé.
+- **Async** — toujours `await waitFor(() => expect(…))`, jamais `setTimeout` / `setImmediate`.
+- **Re-render** — changer le mock **avant** d'appeler `rerender()` ; `rerender()` seul ne change rien.
+- **Spy console** — n'espionner `console.error`/`console.warn` que si le code les appelle vraiment.
 
-All common mocks are defined once in `setup.ts` and auto-loaded by Vitest. Never duplicate them in test files:
-- `next/link` → simple `<a>` tag
-- `next/navigation` → `usePathname` + `useRouter` stubs
-- `next/image` → `<div role="img">`
-- `next-auth/react` → `signIn` stub
-- `server-only` → empty module
-- `~/trpc/server` → `HydrateClient` passthrough
+## Tests d'intégration
 
-Tests needing specific overrides can call `vi.mock()` locally — it takes precedence over `setup.ts`.
-
-## E2E: every page must be tested
-
-Every route in `src/app/` **must** have corresponding E2E tests in `src/e2e/`. When creating or modifying a page, verify that an E2E test exists for it and update it if needed.
-
-E2E tests must cover at minimum:
-- The page renders without errors
-- Key content/headings are visible
-- Error pages (404, 500, 503) display correct status and messaging
-
-Run `pnpm test:e2e` to execute all E2E tests (requires the dev server running on port 3000).
-
-**Checklist before completing any page-related task:**
-1. List all routes in `src/app/**/page.tsx`
-2. Verify each has a matching E2E test in `src/e2e/*.e2e.ts`
-3. Add missing E2E tests for any uncovered page
+`*.integration.test.ts`, vraie base Postgres jetable via testcontainers, lancés par `pnpm test:integration` (exige Docker). **Obligatoires** dès qu'un changement touche le DB-layer ou du SQL non trivial : les tests unitaires mockent le driver et ratent les bugs de driver. Voir `rules/audit-logging.md`.

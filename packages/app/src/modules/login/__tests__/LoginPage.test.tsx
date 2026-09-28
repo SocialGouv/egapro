@@ -1,6 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { signInMock } = vi.hoisted(() => ({ signInMock: vi.fn() }));
+
+vi.mock("next-auth/react", () => ({
+	signIn: signInMock,
+	useSession: () => ({ data: null, status: "unauthenticated" }),
+}));
+
 import { LoginPage } from "../LoginPage";
+
+beforeEach(() => {
+	signInMock.mockReset();
+});
 
 describe("LoginPage", () => {
 	it("renders the main landmark with id content", () => {
@@ -34,5 +46,41 @@ describe("LoginPage", () => {
 				name: /s'identifier avec\s*proconnect/i,
 			}),
 		).toBeInTheDocument();
+	});
+
+	it("forwards callbackUrl through to ProConnect signIn", () => {
+		// Observable behavior of the prop drill LoginPage → LoginForm →
+		// ProConnectButton: the deepest call receives the propagated URL.
+		render(<LoginPage callbackUrl="/mon-espace/mes-entreprises" />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+		expect(signInMock).toHaveBeenCalledWith("proconnect", {
+			callbackUrl: "/mon-espace/mes-entreprises",
+		});
+	});
+
+	it("carries the admin step-up requirement end-to-end for a backoffice destination", () => {
+		// Same prop drill, but LoginForm's isAdminReturnPath check now adds a
+		// third argument to the deepest call — the epic's whole point.
+		render(<LoginPage callbackUrl="/admin/users" />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+		expect(signInMock).toHaveBeenCalledWith(
+			"proconnect",
+			{ callbackUrl: "/admin/users" },
+			expect.anything(),
+		);
+	});
+
+	it("falls back to /mon-espace when no callbackUrl is provided", () => {
+		render(<LoginPage />);
+		screen
+			.getByRole("button", { name: /s'identifier avec\s*proconnect/i })
+			.click();
+		expect(signInMock).toHaveBeenCalledWith("proconnect", {
+			callbackUrl: "/mon-espace",
+		});
 	});
 });

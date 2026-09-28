@@ -8,6 +8,7 @@ const DATA_DIR = resolve(APP_ROOT, "data");
 type Bucket =
 	| "medium-50"
 	| "medium-100"
+	| "medium-150"
 	| "large-250"
 	| "large-1000"
 	| "large-5000";
@@ -21,7 +22,8 @@ type Company = {
 
 const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 	"medium-50": [50, 99],
-	"medium-100": [100, 249],
+	"medium-100": [100, 149],
+	"medium-150": [150, 249],
 	"large-250": [250, 999],
 	"large-1000": [1000, 4999],
 	"large-5000": [5000, 20000],
@@ -30,6 +32,7 @@ const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 const BUCKETS: Bucket[] = [
 	"medium-50",
 	"medium-100",
+	"medium-150",
 	"large-250",
 	"large-1000",
 	"large-5000",
@@ -45,6 +48,244 @@ function parseCsvRows(csvContent: string): string[][] {
 	return lines.slice(3).map((l) => l.split(";"));
 }
 
+function parseHeaders(csvContent: string): string[] {
+	return (csvContent.split("\n")[2] ?? "").split(";").map((h) => h.trim());
+}
+
+function toNum(value: string | undefined): number | null {
+	if (value === undefined || value === "") return null;
+	const parsed = Number.parseFloat(value.replace(",", "."));
+	return Number.isNaN(parsed) ? null : parsed;
+}
+
+type QuartileBlock = {
+	referenceF: string;
+	referenceH: string;
+	nbF: [string, string, string, string];
+	nbH: [string, string, string, string];
+	proportionF: [string, string, string, string];
+};
+
+const QUARTILE_BLOCKS: QuartileBlock[] = [
+	{
+		referenceF: "Effectif_F_rem_annuelle_globale",
+		referenceH: "Effectif_H_rem_annuelle_globale",
+		nbF: [1, 2, 3, 4].map((q) => `Quartile${q}_Rem_globale_annuelle_nb_F`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		nbH: [1, 2, 3, 4].map((q) => `Quartile${q}_Rem_globale_annuelle_nb_H`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		proportionF: [1, 2, 3, 4].map(
+			(q) => `Quartile${q}_Rem_globale_annuelle_proportion_F`,
+		) as [string, string, string, string],
+	},
+	{
+		referenceF: "Effectif_F_taux_horaire_global",
+		referenceH: "Effectif_H_taux_horaire_global",
+		nbF: [1, 2, 3, 4].map((q) => `Quartile${q}_Taux_horaire_global_nb_F`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		nbH: [1, 2, 3, 4].map((q) => `Quartile${q}_Taux_horaire_global_nb_H`) as [
+			string,
+			string,
+			string,
+			string,
+		],
+		proportionF: [1, 2, 3, 4].map(
+			(q) => `Quartile${q}_Taux_horaire_global_proportion_F`,
+		) as [string, string, string, string],
+	},
+];
+
+/**
+ * Per file and per block, assert nb columns are the source of truth: their
+ * sums equal the block reference headcount and the proportions are derived
+ * from them. Blocks with a null reference or a null nb cell are skipped
+ * (edge-case rows with empty blocks).
+ */
+function assertNbCoherence(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const block of QUARTILE_BLOCKS) {
+			const refF = toNum(row[col(block.referenceF)]);
+			const refH = toNum(row[col(block.referenceH)]);
+			const nbF = block.nbF.map((h) => toNum(row[col(h)]));
+			const nbH = block.nbH.map((h) => toNum(row[col(h)]));
+			const propF = block.proportionF.map((h) => toNum(row[col(h)]));
+
+			const blockIsFilled =
+				refF !== null &&
+				refH !== null &&
+				nbF.every((v) => v !== null) &&
+				nbH.every((v) => v !== null);
+			if (!blockIsFilled) continue;
+
+			const sumF = nbF.reduce<number>((a, v) => a + (v ?? 0), 0);
+			const sumH = nbH.reduce<number>((a, v) => a + (v ?? 0), 0);
+			expect(
+				sumF,
+				`${fileName} SIREN ${siren} ${block.referenceF}: Σ nb_F ${sumF} should equal reference ${refF}`,
+			).toBe(refF);
+			expect(
+				sumH,
+				`${fileName} SIREN ${siren} ${block.referenceH}: Σ nb_H ${sumH} should equal reference ${refH}`,
+			).toBe(refH);
+
+			for (let q = 0; q < 4; q++) {
+				const denom = (nbF[q] ?? 0) + (nbH[q] ?? 0);
+				if (denom === 0) continue;
+				const derived = (nbF[q] ?? 0) / denom;
+				expect(
+					derived,
+					`${fileName} SIREN ${siren} ${block.proportionF[q]}: nb_F/(nb_F+nb_H) should match proportion_F`,
+				).toBeCloseTo(propF[q] ?? 0, 4);
+			}
+		}
+	}
+}
+
+/** Confidence columns the DTS v3 format dropped; the generator must not emit them. */
+const COLUMNS_ABSENT_FROM_V3 = [
+	"indice_suspensions_longues",
+	"indice_suspensions_sans_fin",
+	"indice_arrets_longs",
+	"indice_sup_annee_civile",
+	"indice_ratio_FP",
+];
+
+/** Variable-pay beneficiaries are a subset of the block headcount, per sex. */
+const BENEFICIARY_BLOCKS = [
+	{
+		beneficiaries: "Effectif_F_rem_annuelle_variable",
+		workforce: "Effectif_F_rem_annuelle_globale",
+	},
+	{
+		beneficiaries: "Effectif_H_rem_annuelle_variable",
+		workforce: "Effectif_H_rem_annuelle_globale",
+	},
+];
+
+function assertBeneficiariesWithinWorkforce(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const block of BENEFICIARY_BLOCKS) {
+			const beneficiaries = toNum(row[col(block.beneficiaries)]);
+			const workforce = toNum(row[col(block.workforce)]);
+			if (beneficiaries === null || workforce === null) continue;
+			expect(
+				beneficiaries,
+				`${fileName} SIREN ${siren}: ${block.beneficiaries} ${beneficiaries} should not exceed ${block.workforce} ${workforce}`,
+			).toBeLessThanOrEqual(workforce);
+		}
+	}
+}
+
+/**
+ * The 8 GIP `*_ecart` columns and the rounded operand pair each is derived
+ * from. Operand names are used as parsed by `parseHeaders` (trailing spaces
+ * trimmed, e.g. the raw `Taux_horaire_variable_median_F ` header).
+ */
+const ECART_PAIRS: {
+	ecart: string;
+	womenOperand: string;
+	menOperand: string;
+}[] = [
+	{
+		ecart: "Rem_globale_annuelle_moyenne_ecart",
+		womenOperand: "Rem_globale_annuelle_moyenne_F",
+		menOperand: "Rem_globale_annuelle_moyenne_H",
+	},
+	{
+		ecart: "Taux_horaire_global_moyen_ecart",
+		womenOperand: "Taux_horaire_global_moyen_F",
+		menOperand: "Taux_horaire_global_moyen_H",
+	},
+	{
+		ecart: "Rem_variable_annuelle_moyenne_ecart",
+		womenOperand: "Rem_variable_annuelle_moyenne_F",
+		menOperand: "Rem_variable_annuelle_moyenne_H",
+	},
+	{
+		ecart: "Taux_horaire_variable_moyen_ecart",
+		womenOperand: "Taux_horaire_variable_moyen_F",
+		menOperand: "Taux_horaire_variable_moyen_H",
+	},
+	{
+		ecart: "Rem_globale_annuelle_mediane_ecart",
+		womenOperand: "Rem_globale_annuelle_mediane_F",
+		menOperand: "Rem_globale_annuelle_mediane_H",
+	},
+	{
+		ecart: "Taux_horaire_global_median_ecart",
+		womenOperand: "Taux_globale_annuelle_mediane_F",
+		menOperand: "Taux_globale_annuelle_mediane_H",
+	},
+	{
+		ecart: "Rem_variable_annuelle_mediane_ecart",
+		womenOperand: "Rem_variable_annuelle_mediane_F",
+		menOperand: "Rem_variable_annuelle_mediane_H",
+	},
+	{
+		ecart: "Taux_horaire_variable_median_ecart",
+		womenOperand: "Taux_horaire_variable_median_F",
+		menOperand: "Taux_horaire_variable_median_H",
+	},
+];
+
+// A gap stored on 4 decimals can only deviate from (H - F) / H by at most half
+// a unit in the 4th decimal — 5e-5 — since the operands are already rounded and
+// the ecart is `fmt4`-rounded. The pre-fix bug computed ecarts on full-precision
+// operands, drifting well past this bound.
+const ECART_ROUNDING_TOLERANCE = 5e-5;
+
+/**
+ * Every `*_ecart` column must equal `(H - F) / H` recomputed from its own
+ * rounded operands (within the 4-decimal rounding tolerance). Pairs where any
+ * of the three cells is null/empty, or where H is 0, are skipped.
+ */
+function assertEcartsDerivedFromRoundedOperands(fileName: string) {
+	const csv = readFileSync(resolve(DATA_DIR, fileName), "utf-8");
+	const headers = parseHeaders(csv);
+	const col = (name: string) => headers.indexOf(name);
+	const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+	for (const row of rows) {
+		const siren = row[0];
+		for (const pair of ECART_PAIRS) {
+			const ecart = toNum(row[col(pair.ecart)]);
+			const women = toNum(row[col(pair.womenOperand)]);
+			const men = toNum(row[col(pair.menOperand)]);
+			if (ecart === null || women === null || men === null || men === 0)
+				continue;
+			const recomputed = (men - women) / men;
+			expect(
+				Math.abs(ecart - recomputed),
+				`${fileName} SIREN ${siren} ${pair.ecart}: ${ecart} should equal (H-F)/H=${recomputed} from rounded operands ${women}/${men}`,
+			).toBeLessThanOrEqual(ECART_ROUNDING_TOLERANCE);
+		}
+	}
+}
+
 describe("companies.json", () => {
 	it("has a bucket field on every entry", () => {
 		const companies = loadCompanies();
@@ -54,7 +295,7 @@ describe("companies.json", () => {
 		}
 	});
 
-	it("has all 5 buckets represented", () => {
+	it("has all 6 buckets represented", () => {
 		const companies = loadCompanies();
 		for (const bucket of BUCKETS) {
 			const count = companies.filter((c) => c.bucket === bucket).length;
@@ -78,6 +319,12 @@ describe("companies.json", () => {
 		}
 	});
 
+	it("has globally unique SIRENs across all buckets", () => {
+		const companies = loadCompanies();
+		const sirens = companies.map((c) => c.siren);
+		expect(new Set(sirens).size).toBe(sirens.length);
+	});
+
 	it("contains no companies with fewer than 50 employees", () => {
 		const companies = loadCompanies();
 		for (const c of companies) {
@@ -96,6 +343,72 @@ describe("mock-gip-mds.csv", () => {
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
 		const rows = parseCsvRows(csv);
 		expect(rows.length).toBeGreaterThan(0);
+	});
+
+	it("has the v3 header with 82 columns (66 existing + 16 nb)", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		expect(parseHeaders(csv)).toHaveLength(82);
+	});
+
+	it("emits none of the 5 confidence columns absent from the v3 format", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		for (const h of COLUMNS_ABSENT_FROM_V3) {
+			expect(headers, `${h} is not part of the v3 format`).not.toContain(h);
+		}
+	});
+
+	it("never reports more variable-pay beneficiaries than the block headcount", () => {
+		assertBeneficiariesWithinWorkforce("mock-gip-mds.csv");
+	});
+
+	it("carries the 16 nb quartile headers and the 12 de-accented median headers", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		for (const block of QUARTILE_BLOCKS) {
+			for (const h of [...block.nbF, ...block.nbH]) {
+				expect(headers, `missing nb header ${h}`).toContain(h);
+			}
+		}
+		for (const h of [
+			"Rem_globale_annuelle_mediane_F",
+			"Taux_horaire_variable_median_H",
+		]) {
+			expect(headers, `missing de-accented median header ${h}`).toContain(h);
+		}
+		expect(headers).not.toContain("Rem_globale_annuelle_médiane_F");
+		expect(headers).not.toContain("Taux_horaire_variable_médian_H");
+	});
+
+	it("has nb counts as source of truth: Σ nb === reference and proportions derived from nb", () => {
+		assertNbCoherence("mock-gip-mds.csv");
+	});
+
+	it("derives every *_ecart from its own rounded operands (ecart = (H-F)/H)", () => {
+		assertEcartsDerivedFromRoundedOperands("mock-gip-mds.csv");
+	});
+
+	it("no longer duplicates the annual gap into the hourly gap (hours model breaks the tie)", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const headers = parseHeaders(csv);
+		const col = (name: string) => headers.indexOf(name);
+		const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+		let comparable = 0;
+		let distinct = 0;
+		for (const row of rows) {
+			const hourly = toNum(row[col("Taux_horaire_global_moyen_ecart")]);
+			const annual = toNum(row[col("Rem_globale_annuelle_moyenne_ecart")]);
+			if (hourly === null || annual === null) continue;
+			comparable++;
+			if (Math.abs(hourly - annual) >= ECART_ROUNDING_TOLERANCE) distinct++;
+		}
+
+		expect(comparable).toBeGreaterThan(0);
+		expect(
+			distinct / comparable,
+			`hourly mean gap duplicates the annual mean gap on ${comparable - distinct}/${comparable} rows`,
+		).toBeGreaterThan(0.9);
 	});
 
 	it("has at least 100 data rows (multi-bucket coverage)", () => {
@@ -146,7 +459,7 @@ describe("mock-gip-mds.csv", () => {
 		}
 	});
 
-	it("all 5 buckets are represented in the CSV via companies.json cross-reference", () => {
+	it("all 6 buckets are represented in the CSV via companies.json cross-reference", () => {
 		const companies = loadCompanies();
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
 		const rows = parseCsvRows(csv).filter((r) => r.length > 1);
@@ -169,5 +482,71 @@ describe("mock-gip-mds.csv", () => {
 				`bucket ${bucket} not represented in CSV`,
 			).toBe(true);
 		}
+	});
+
+	it("medium-100 and medium-150 buckets have Effectif_RCD within their respective ranges", () => {
+		const companies = loadCompanies();
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+
+		const tieredBuckets: Bucket[] = ["medium-100", "medium-150"];
+		for (const bucket of tieredBuckets) {
+			const [min, max] = BUCKET_WORKFORCE_RANGES[bucket];
+			const bucketSirens = new Set(
+				companies.filter((c) => c.bucket === bucket).map((c) => c.siren),
+			);
+			const bucketRows = rows.filter((r) => r[0] && bucketSirens.has(r[0]));
+
+			expect(
+				bucketRows.length,
+				`bucket ${bucket} should have rows in CSV`,
+			).toBeGreaterThan(0);
+
+			for (const row of bucketRows) {
+				const siren = row[0];
+				const effectifRcd = Number.parseFloat((row[1] ?? "").replace(",", "."));
+				expect(
+					effectifRcd,
+					`SIREN ${siren} in bucket ${bucket}: Effectif_RCD ${effectifRcd} should be >= ${min}`,
+				).toBeGreaterThanOrEqual(min);
+				expect(
+					effectifRcd,
+					`SIREN ${siren} in bucket ${bucket}: Effectif_RCD ${effectifRcd} should be <= ${max}`,
+				).toBeLessThanOrEqual(max);
+			}
+		}
+	});
+});
+
+describe("mock-gip-mds-edge-cases.csv", () => {
+	it("has the v3 header with 82 columns", () => {
+		const csv = readFileSync(
+			resolve(DATA_DIR, "mock-gip-mds-edge-cases.csv"),
+			"utf-8",
+		);
+		expect(parseHeaders(csv)).toHaveLength(82);
+	});
+
+	it("emits none of the 5 confidence columns absent from the v3 format", () => {
+		const csv = readFileSync(
+			resolve(DATA_DIR, "mock-gip-mds-edge-cases.csv"),
+			"utf-8",
+		);
+		const headers = parseHeaders(csv);
+		for (const h of COLUMNS_ABSENT_FROM_V3) {
+			expect(headers, `${h} is not part of the v3 format`).not.toContain(h);
+		}
+	});
+
+	it("keeps nb counts coherent on filled blocks (empty blocks skipped)", () => {
+		assertNbCoherence("mock-gip-mds-edge-cases.csv");
+	});
+
+	it("derives every present *_ecart from its own rounded operands", () => {
+		assertEcartsDerivedFromRoundedOperands("mock-gip-mds-edge-cases.csv");
+	});
+
+	it("never reports more variable-pay beneficiaries than the block headcount", () => {
+		assertBeneficiariesWithinWorkforce("mock-gip-mds-edge-cases.csv");
 	});
 });

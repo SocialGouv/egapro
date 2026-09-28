@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { fetchCseBySiren, fetchSanctionBySiren } from "../suit";
+import { fetchCseBySiren } from "../suit";
 
 describe("fetchCseBySiren", () => {
 	const fetchSpy = vi.fn();
@@ -41,7 +41,8 @@ describe("fetchCseBySiren", () => {
 		expect(result).toBe(false);
 	});
 
-	it("returns null on non-ok response", async () => {
+	it("logs the status on a non-ok response, so a 404 reads as endpoint-not-open", async () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 		fetchSpy.mockResolvedValueOnce({
 			ok: false,
 			status: 404,
@@ -50,72 +51,20 @@ describe("fetchCseBySiren", () => {
 		const result = await fetchCseBySiren("000000000");
 
 		expect(result).toBeNull();
+		// Tells a missing endpoint apart from a certificate problem.
+		expect(warnSpy).toHaveBeenCalledWith("[suit] CSE lookup: HTTP 404");
 	});
 
-	it("returns null on network error", async () => {
+	it("returns null and logs on network error", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		fetchSpy.mockRejectedValueOnce(new Error("Network error"));
 
 		const result = await fetchCseBySiren("123456789");
 
 		expect(result).toBeNull();
-	});
-});
-
-describe("fetchSanctionBySiren", () => {
-	const fetchSpy = vi.fn();
-
-	beforeEach(() => {
-		vi.stubGlobal("fetch", fetchSpy);
-	});
-
-	afterEach(() => {
-		vi.restoreAllMocks();
-	});
-
-	it("returns no sanction when SUIT says sanction is false", async () => {
-		fetchSpy.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ siren: "339787277", sanction: false }),
-		});
-
-		const result = await fetchSanctionBySiren("339787277");
-
-		expect(result).toEqual({ hasSanction: false, validityDate: null });
-		expect(fetchSpy).toHaveBeenCalledWith(
-			"https://api.suit.example.com/suit/api/externe/portail/sanction/339787277",
-			expect.objectContaining({
-				headers: { Accept: "application/json" },
-			}),
+		expect(errorSpy).toHaveBeenCalledWith(
+			"[suit] CSE lookup failed",
+			expect.any(Error),
 		);
-	});
-
-	it("returns sanction when SUIT says sanction is true", async () => {
-		fetchSpy.mockResolvedValueOnce({
-			ok: true,
-			json: async () => ({ siren: "123456789", sanction: true }),
-		});
-
-		const result = await fetchSanctionBySiren("123456789");
-
-		expect(result).toEqual({ hasSanction: true, validityDate: null });
-	});
-
-	it("returns null on non-ok response", async () => {
-		fetchSpy.mockResolvedValueOnce({
-			ok: false,
-			status: 404,
-		});
-
-		const result = await fetchSanctionBySiren("000000000");
-
-		expect(result).toBeNull();
-	});
-
-	it("returns null on network error", async () => {
-		fetchSpy.mockRejectedValueOnce(new Error("Network error"));
-
-		const result = await fetchSanctionBySiren("123456789");
-
-		expect(result).toBeNull();
 	});
 });

@@ -29,6 +29,7 @@ const baseRow: DeclarationSearchRow = {
 	createdAt: new Date("2024-06-15T10:00:00Z"),
 	updatedAt: new Date("2024-06-15T10:00:00Z"),
 	companyName: "ACME Corp",
+	workforce: 99,
 	declarantEmail: "alice@example.com",
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
@@ -54,20 +55,85 @@ describe("DeclarationTable", () => {
 		);
 	});
 
-	it("shows SIREN, year, status, email and date", () => {
+	it("shows SIREN, year, workforce, status, email and date", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		expect(screen.getByText("123456789")).toBeInTheDocument();
 		expect(screen.getByText("2024")).toBeInTheDocument();
+		expect(screen.getByText("99")).toBeInTheDocument();
 		expect(screen.getByText("Transmise")).toBeInTheDocument();
 		expect(screen.getByText("alice@example.com")).toBeInTheDocument();
 		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
 	});
 
-	it("shows empty state when no rows", () => {
+	it("places the Effectif column between Année and Statut", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const headers = screen
+			.getAllByRole("columnheader")
+			.map((header) => header.textContent?.replace(/[▲▼\s]+$/, ""));
+		expect(headers).toEqual([
+			"SIREN",
+			"Entreprise",
+			"Année",
+			"Effectif",
+			"Statut",
+			"Email déclarant",
+			"Date de dépôt",
+		]);
+
+		const cells = screen.getAllByRole("cell").map((cell) => cell.textContent);
+		expect(cells[2]).toBe("2024");
+		expect(cells[3]).toBe("99");
+		expect(cells[4]).toBe("Transmise");
+	});
+
+	it("shows a dash when the GIP headcount is unknown", () => {
+		render(
+			<DeclarationTable
+				{...defaultProps}
+				rows={[{ ...baseRow, workforce: null }]}
+			/>,
+		);
+
+		const cells = screen.getAllByRole("cell").map((cell) => cell.textContent);
+		expect(cells[3]).toBe("—");
+	});
+
+	it("names the workforce column and its GIP-MDS source in the caption", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const caption = document.querySelector("caption");
+		expect(caption?.textContent).toContain("effectif");
+		expect(caption?.textContent).toContain("GIP-MDS");
+	});
+
+	it("exposes aria-sort on the sorted column and hides the sort glyph", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const sortedHeader = screen
+			.getByRole("button", { name: /date de dépôt/i })
+			.closest("th");
+		expect(sortedHeader).toHaveAttribute("aria-sort", "descending");
+
+		const unsortedHeader = screen
+			.getByRole("button", { name: /^siren/i })
+			.closest("th");
+		expect(unsortedHeader).not.toHaveAttribute("aria-sort");
+
+		const glyph = sortedHeader?.querySelector("[aria-hidden='true']");
+		expect(glyph).not.toBeNull();
+	});
+
+	it("shows empty state spanning every column when no rows", () => {
 		render(<DeclarationTable {...defaultProps} rows={[]} total={0} />);
 
-		expect(screen.getByText("Aucune déclaration trouvée.")).toBeInTheDocument();
+		const emptyCell = screen.getByText("Aucune déclaration trouvée.");
+		expect(emptyCell).toBeInTheDocument();
+		expect(emptyCell).toHaveAttribute(
+			"colspan",
+			String(screen.getAllByRole("columnheader").length),
+		);
 	});
 
 	it("shows result count", () => {

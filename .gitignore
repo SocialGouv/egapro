@@ -38,10 +38,18 @@ packages/notifications/dist/
 # vscode
 .vscode/
 
+# Codex local workspace, except shared repository skills.
+.codex/*
+!.codex/skills/
+!.codex/skills/**/
+!.codex/skills/**/SKILL.md
+!.codex/config.toml
+
 # claude code — ignore everything, then whitelist shared config
 .claude/*
 !.claude/agents/
 !.claude/hooks/
+!.claude/pipeline/
 !.claude/rules/
 !.claude/skills/
 !.claude/settings.json
@@ -50,3 +58,23 @@ packages/notifications/dist/
 suit-client-certs/
 suit-signing-keys/
 *.key
+
+# Private V1 migration inputs and generated snapshots
+scripts/migration-v1/private/
+scripts/migration-v1/*.dump
+scripts/migration-v1/*.backup
+scripts/migration-v1/*-failure-*.log
+scripts/migration-v1/*-snapshot/
+**/migration-v1-*-failure-*.log
+**/.*.partial.*/
+
+# Local Matomo — generated API token + credentials (never commit)
+scripts/matomo-local/.secrets/*
+!scripts/matomo-local/.secrets/.gitkeep
+
+# Python bytecode (matomo-local provisioning/seed scripts)
+__pycache__/
+*.pyc
+
+# Artefacts de la skill impeccable — jamais commités
+.impeccable/

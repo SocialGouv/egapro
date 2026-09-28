@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCaller } from "./helpers/declarationTestHelpers";
+import { withLockMiddleware } from "./helpers/lockTestHelpers";
+
+// submit and updateStep1 run through `declarationLockedWriteProcedure`: the
+// lock middleware issues two `ctx.db.select` calls (declaration resolution +
+// active-lock lookup) before the handler. `withLockMiddleware` answers both
+// with the current user holding the lock; getOrCreate stays on `createCaller`.
+function createLockedCaller(db: unknown) {
+	return createCaller(withLockMiddleware(db));
+}
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -46,6 +55,8 @@ type StoredRow = {
 	status: string;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	cancelledAt: Date | null;
 	submittedAt: Date | null;
 };
@@ -103,6 +114,8 @@ function buildTx() {
 							status: values.status ?? "draft",
 							totalWomen: null,
 							totalMen: null,
+							hourlyWomen: null,
+							hourlyMen: null,
 							cancelledAt: null,
 							submittedAt: null,
 						};
@@ -230,6 +243,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "submitted",
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 				cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 				submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 			},
@@ -259,6 +274,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "submitted",
 				totalWomen: 30,
 				totalMen: 40,
+				hourlyWomen: 30,
+				hourlyMen: 40,
 				cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 				submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 			},
@@ -271,6 +288,8 @@ describe("declaration cancellation redeposit flow", () => {
 				status: "draft",
 				totalWomen: null,
 				totalMen: null,
+				hourlyWomen: null,
+				hourlyMen: null,
 				cancelledAt: null,
 				submittedAt: null,
 			},
@@ -295,6 +314,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 30,
 			totalMen: 40,
+			hourlyWomen: 30,
+			hourlyMen: 40,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 		};
@@ -307,13 +328,15 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: 50,
 			totalMen: 60,
+			hourlyWomen: 50,
+			hourlyMen: 60,
 			cancelledAt: null,
 			submittedAt: null,
 		};
 		buildActiveStore([cancelledRow, activeRow]);
 
 		const db = buildDb();
-		const caller = await createCaller(db);
+		const caller = await createLockedCaller(db);
 
 		const result = await caller.submit();
 
@@ -334,6 +357,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 12,
 			totalMen: 18,
+			hourlyWomen: 12,
+			hourlyMen: 18,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-25T08:00:00Z`),
 		};
@@ -346,15 +371,22 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: null,
 			totalMen: null,
+			hourlyWomen: null,
+			hourlyMen: null,
 			cancelledAt: null,
 			submittedAt: null,
 		};
 		buildActiveStore([cancelledRow, activeRow]);
 
 		const db = buildDb();
-		const caller = await createCaller(db);
+		const caller = await createLockedCaller(db);
 
-		await caller.updateStep1({ totalWomen: 70, totalMen: 80 });
+		await caller.updateStep1({
+			totalWomen: 70,
+			totalMen: 80,
+			hourlyWomen: 70,
+			hourlyMen: 80,
+		});
 
 		expect(activeRow.totalWomen).toBe(70);
 		expect(activeRow.totalMen).toBe(80);
@@ -372,6 +404,8 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "submitted",
 			totalWomen: 30,
 			totalMen: 40,
+			hourlyWomen: 30,
+			hourlyMen: 40,
 			cancelledAt: new Date(`${YEAR}-04-01T08:00:00Z`),
 			submittedAt: new Date(`${YEAR}-03-01T08:00:00Z`),
 		};
@@ -384,13 +418,15 @@ describe("declaration cancellation redeposit flow", () => {
 			status: "draft",
 			totalWomen: 50,
 			totalMen: 60,
+			hourlyWomen: 50,
+			hourlyMen: 60,
 			cancelledAt: null,
 			submittedAt: null,
 		};
 		buildActiveStore([cancelledRow, activeRow]);
 
 		const db = buildDb();
-		const caller = await createCaller(db);
+		const caller = await createLockedCaller(db);
 
 		await caller.submit();
 

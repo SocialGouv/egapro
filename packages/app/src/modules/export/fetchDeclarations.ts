@@ -11,9 +11,24 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
+	resolveActiveDeclarationId,
 } from "./queries";
 
-import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
+import {
+	classifyCompanySize,
+	computeGapHighFlags,
+	computeGapRatio,
+	floorWorkforce,
+	getCompanySizeRange,
+	getObligationWorkforce,
+	isCancelled,
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
+	isCseRequired,
+	isIndicatorGRequiredForGip,
+	parseGipWorkforce,
+} from "~/modules/domain";
+import { apiV1FileHref } from "~/modules/routes";
 import type { DeclarationRow } from "./queries";
 import {
 	INDICATOR_A_GAP_LABELS,
@@ -26,19 +41,19 @@ import {
 	INDICATOR_D_LABELS,
 	INDICATOR_E_LABELS,
 	INDICATOR_E_PROPORTION_LABELS,
+	INDICATOR_F_ANNUAL_MEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_MEN_LABELS,
 	INDICATOR_F_ANNUAL_THRESHOLD_LABELS,
+	INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS,
 	INDICATOR_F_ANNUAL_WOMEN_LABELS,
+	INDICATOR_F_HOURLY_MEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_MEN_LABELS,
 	INDICATOR_F_HOURLY_THRESHOLD_LABELS,
+	INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS,
 	INDICATOR_F_HOURLY_WOMEN_LABELS,
 } from "./shared/apiLabels";
-import {
-	type DeclarationEventType,
-	getStatusHistoryLabel,
-} from "./shared/statusHistoryLabels";
-
-const COMPLIANCE_PROCESS_SIZE_MIN = 100;
+import { buildNextStepsPayload } from "./shared/nextStepsPayload";
+import { getStatusHistoryLabel } from "./shared/statusHistoryLabels";
 
 function deriveExportFlags(
 	row: DeclarationRow,
@@ -49,25 +64,42 @@ function deriveExportFlags(
 	indicatorGRequired: boolean;
 } {
 	const hasIndicatorG = indicatorGEntries.length > 0;
-	const globalAnnualMeanGap = row.globalAnnualMeanGap
-		? Number(row.globalAnnualMeanGap) * 100
-		: null;
-	const variableAnnualMeanGap = row.variableAnnualMeanGap
-		? Number(row.variableAnnualMeanGap) * 100
-		: null;
-	const workforce = row.workforce;
+	const workforce = parseGipWorkforce(row.workforceEma);
+	// Compliance flags are driven by indicator G (per job-category gaps), the
+	// same source as the UI (Step6Review) and the declaration router — NOT by
+	// the aggregate indicators A/B stored on the row. The initial declaration's
+	// categories gate the compliance process; the correction's gate the revision.
+	const { firstDeclGapHigh, secondDeclGapHigh } =
+		computeGapHighFlags(indicatorGEntries);
+	const complianceInput = {
+		workforce,
+		hasIndicatorG,
+		hasSignificantIndicatorGGap: firstDeclGapHigh,
+	};
 	const complianceProcessRequired =
-		workforce !== null &&
-		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
-		hasIndicatorG &&
-		globalAnnualMeanGap !== null &&
-		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
-	const complianceProcessRevisionRequired =
-		complianceProcessRequired &&
-		row.secondDeclarationSubmittedAt !== null &&
-		variableAnnualMeanGap !== null &&
-		Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
-	const indicatorGRequiredFlag = isIndicatorGRequired(workforce ?? 0, row.year);
+		isComplianceProcessRequired(complianceInput);
+	const complianceProcessRevisionRequired = isComplianceProcessRevisionRequired(
+		{
+			...complianceInput,
+			hasSignificantCorrectionIndicatorGGap: secondDeclGapHigh,
+			events:
+				row.secondDeclarationSubmittedAt === null
+					? []
+					: [
+							{
+								eventType: "second_declaration_submit",
+								value: null,
+								round: null,
+								createdAt: row.secondDeclarationSubmittedAt,
+								actorUserId: null,
+							},
+						],
+		},
+	);
+	const indicatorGRequiredFlag = isIndicatorGRequiredForGip(
+		workforce,
+		row.year,
+	);
 	return {
 		complianceProcessRequired,
 		complianceProcessRevisionRequired,
@@ -79,9 +111,12 @@ function deriveExportFlags(
 
 export type IndicatorGEntry = {
 	categoryName: string;
-	declarationType: string;
+	source: string | null;
+	declarationType: "initial" | "correction";
 	womenCount: number | null;
 	menCount: number | null;
+	hourlyWomenCount: number | null;
+	hourlyMenCount: number | null;
 	annualBaseWomen: string | null;
 	annualBaseMen: string | null;
 	annualVariableWomen: string | null;
@@ -99,14 +134,32 @@ export type CseRow = {
 	opinionDate: string | null;
 };
 
+export type CseFileContent = {
+	declarationNumber: number;
+	type: string;
+};
+
 export type FileRow = {
 	id: string;
-	siren: string;
-	year: number;
+	declarationId: string;
 	fileName: string;
 	filePath: string;
 	uploadedAt: Date;
+	contents?: CseFileContent[];
 };
+
+function compareCseFileContent(a: CseFileContent, b: CseFileContent): number {
+	if (a.declarationNumber !== b.declarationNumber) {
+		return a.declarationNumber - b.declarationNumber;
+	}
+	return a.type.localeCompare(b.type);
+}
+
+export function sortCseFileContents(
+	contents: CseFileContent[],
+): CseFileContent[] {
+	return [...contents].sort(compareCseFileContent);
+}
 
 // ── Build indicators from declaration columns ─────────────────────────
 
@@ -118,22 +171,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.annualQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[0]]:
 			row.annualQuartile1ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFAnnualWomen1 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[0]]: row.indicatorFAnnualMen1 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[1]]:
 			row.indicatorFAnnualThreshold2 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[1]]:
 			row.annualQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[1]]:
 			row.annualQuartile2ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFAnnualWomen2 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[1]]: row.indicatorFAnnualMen2 ?? null,
 		[INDICATOR_F_ANNUAL_THRESHOLD_LABELS[2]]:
 			row.indicatorFAnnualThreshold3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[2]]:
 			row.annualQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[2]]:
 			row.annualQuartile3ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFAnnualWomen3 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[2]]: row.indicatorFAnnualMen3 ?? null,
 		[INDICATOR_F_ANNUAL_WOMEN_LABELS[3]]:
 			row.annualQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_ANNUAL_MEN_LABELS[3]]:
 			row.annualQuartile4ProportionMen ?? null,
+		[INDICATOR_F_ANNUAL_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFAnnualWomen4 ?? null,
+		[INDICATOR_F_ANNUAL_MEN_COUNT_LABELS[3]]: row.indicatorFAnnualMen4 ?? null,
 	};
 
 	const hourlyQuartile = {
@@ -143,22 +208,34 @@ export function buildIndicators(row: DeclarationRow) {
 			row.hourlyQuartile1ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[0]]:
 			row.hourlyQuartile1ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[0]]:
+			row.indicatorFHourlyWomen1 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[0]]: row.indicatorFHourlyMen1 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[1]]:
 			row.indicatorFHourlyThreshold2 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[1]]:
 			row.hourlyQuartile2ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[1]]:
+			row.indicatorFHourlyWomen2 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[1]]: row.indicatorFHourlyMen2 ?? null,
 		[INDICATOR_F_HOURLY_THRESHOLD_LABELS[2]]:
 			row.indicatorFHourlyThreshold3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[2]]:
 			row.hourlyQuartile3ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[2]]:
+			row.indicatorFHourlyWomen3 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[2]]: row.indicatorFHourlyMen3 ?? null,
 		[INDICATOR_F_HOURLY_WOMEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionWomen ?? null,
 		[INDICATOR_F_HOURLY_MEN_LABELS[3]]:
 			row.hourlyQuartile4ProportionMen ?? null,
+		[INDICATOR_F_HOURLY_WOMEN_COUNT_LABELS[3]]:
+			row.indicatorFHourlyWomen4 ?? null,
+		[INDICATOR_F_HOURLY_MEN_COUNT_LABELS[3]]: row.indicatorFHourlyMen4 ?? null,
 	};
 
 	return {
@@ -209,19 +286,46 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
+// Round before toFixed(4): formatting the raw ratio turns a negligible negative gap into "-0.0000".
+function formatRatio(r: number | null): string | null {
+	if (r === null) return null;
+	const rounded = Math.round(r * 10000) / 10000;
+	return rounded.toFixed(4);
+}
+
 function toIndicatorGCategory(entry: IndicatorGEntry) {
+	const {
+		annualBaseWomen: abW,
+		annualBaseMen: abM,
+		annualVariableWomen: avW,
+		annualVariableMen: avM,
+		hourlyBaseWomen: hbW,
+		hourlyBaseMen: hbM,
+		hourlyVariableWomen: hvW,
+		hourlyVariableMen: hvM,
+	} = entry;
 	return {
 		Nom_categorie: entry.categoryName,
 		Effectif_F: entry.womenCount,
 		Effectif_H: entry.menCount,
-		Rem_annuelle_base_F: entry.annualBaseWomen,
-		Rem_annuelle_base_H: entry.annualBaseMen,
-		Rem_annuelle_variable_F: entry.annualVariableWomen,
-		Rem_annuelle_variable_H: entry.annualVariableMen,
-		Taux_horaire_base_F: entry.hourlyBaseWomen,
-		Taux_horaire_base_H: entry.hourlyBaseMen,
-		Taux_horaire_variable_F: entry.hourlyVariableWomen,
-		Taux_horaire_variable_H: entry.hourlyVariableMen,
+		Effectif_horaire_F: entry.hourlyWomenCount,
+		Effectif_horaire_H: entry.hourlyMenCount,
+		Rem_annuelle_base_F: abW,
+		Rem_annuelle_base_H: abM,
+		Rem_annuelle_variable_F: avW,
+		Rem_annuelle_variable_H: avM,
+		Taux_horaire_base_F: hbW,
+		Taux_horaire_base_H: hbM,
+		Taux_horaire_variable_F: hvW,
+		Taux_horaire_variable_H: hvM,
+		Rem_annuelle_base_ecart: formatRatio(computeGapRatio(abW ?? "", abM ?? "")),
+		Rem_annuelle_variable_ecart: formatRatio(
+			computeGapRatio(avW ?? "", avM ?? ""),
+		),
+		Taux_horaire_base_ecart: formatRatio(computeGapRatio(hbW ?? "", hbM ?? "")),
+		Taux_horaire_variable_ecart: formatRatio(
+			computeGapRatio(hvW ?? "", hvM ?? ""),
+		),
 	};
 }
 
@@ -245,7 +349,11 @@ export function buildCseFilePayload(file: FileRow) {
 		type: "cse_opinion" as const,
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
-		downloadUrl: `/api/v1/files/${file.id}`,
+		downloadUrl: apiV1FileHref(file.id),
+		contents: sortCseFileContents(file.contents ?? []).map((c) => ({
+			declarationNumber: c.declarationNumber,
+			type: c.type,
+		})),
 	};
 }
 
@@ -255,7 +363,7 @@ export function buildJointEvaluationFilePayload(file: FileRow) {
 		type: "joint_evaluation" as const,
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
-		downloadUrl: `/api/v1/files/${file.id}`,
+		downloadUrl: apiV1FileHref(file.id),
 	};
 }
 
@@ -269,7 +377,13 @@ function buildFichierPayload(
 		Type: type,
 		Nom_fichier: file.fileName,
 		Date_upload: file.uploadedAt.toISOString(),
-		URL_telechargement: `/api/v1/files/${file.id}`,
+		URL_telechargement: apiV1FileHref(file.id),
+		...(type === "cse_opinion" && {
+			Contenus: sortCseFileContents(file.contents ?? []).map((c) => ({
+				Numero_declaration: c.declarationNumber,
+				Type: c.type,
+			})),
+		}),
 	};
 }
 
@@ -295,25 +409,47 @@ export function assembleDeclaration(
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
+	const cancelled = isCancelled(row);
+
+	// Obligation regime uses the exact value; the segmentation bucket uses the floored one.
+	const gipWorkforce = parseGipWorkforce(row.workforceEma);
+	const flooredWorkforce = floorWorkforce(gipWorkforce);
 
 	return {
 		id: row.declarationId,
 		SIREN: row.siren,
 		Raison_sociale: row.companyName,
-		Effectif: row.workforce,
 		Code_NAF: row.nafCode,
 		Adresse: row.address,
-		CSE_existant: row.hasCse,
-		Annee: row.year,
-		Statut: row.status,
+		// The CSE field only exists for companies at or above the CSE threshold; legacy sub-100 values are not exported.
+		CSE_existant: isCseRequired(getObligationWorkforce(gipWorkforce))
+			? row.hasCse
+			: null,
 		Parcours_apres_declaration_1: row.firstDeclarationPathChoice,
 		Parcours_apres_declaration_2: row.secondDeclarationPathChoice,
-		Parcours_de_conformite_requis: flags.complianceProcessRequired,
-		Parcours_de_conformite_revision_requis:
-			flags.complianceProcessRevisionRequired,
-		Avis_CSE_requis: row.cseRequired,
-		Indicateur_G_requis: flags.indicatorGRequired,
-		Version_regles: row.rulesVersion,
+		Parcours: {
+			Annee: row.year,
+			Effectif: flooredWorkforce,
+			Tranche_effectif: getCompanySizeRange(
+				getObligationWorkforce(flooredWorkforce),
+			),
+			Regime_obligations: classifyCompanySize(
+				getObligationWorkforce(gipWorkforce),
+			),
+			Statut: row.status,
+			Annulee: cancelled,
+			Parcours_de_conformite_requis: flags.complianceProcessRequired,
+			Parcours_de_conformite_revision_requis:
+				flags.complianceProcessRevisionRequired,
+			Avis_CSE_requis: row.cseRequired,
+			Indicateur_G_requis: flags.indicatorGRequired,
+			Prochaines_etapes_possibles: buildNextStepsPayload({
+				status: row.status,
+				rulesVersion: row.rulesVersion,
+				cseRequired: row.cseRequired,
+				cancelled,
+			}),
+		},
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
 		Date_soumission: row.submittedAt?.toISOString() ?? null,
@@ -331,10 +467,7 @@ export function assembleDeclaration(
 		Historique_statuts: row.statusHistoryArray.map((entry) => {
 			const base = {
 				Statut: entry.eventType,
-				Libelle_statut: getStatusHistoryLabel(
-					entry.eventType as DeclarationEventType,
-					entry.value,
-				),
+				Libelle_statut: getStatusHistoryLabel(entry.eventType, entry.value),
 				Date: entry.createdAt,
 			};
 			return entry.eventType === "path_choice" && entry.round !== null
@@ -343,6 +476,11 @@ export function assembleDeclaration(
 		}),
 		Effectif_F_rem_annuelle_globale: row.totalWomen,
 		Effectif_H_rem_annuelle_globale: row.totalMen,
+		Effectif_F_rem_horaire_globale: row.hourlyWomen,
+		Effectif_H_rem_horaire_globale: row.hourlyMen,
+		Source_categories_emplois:
+			indicatorGEntries.find((e) => e.declarationType === "initial")?.source ??
+			null,
 		Indicateurs: {
 			...buildIndicators(row),
 			G: initial.length > 0 ? initial : null,

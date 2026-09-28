@@ -3,3 +3,27 @@
 	flex-direction: column;
 	gap: 1.5rem;
 }
+
+// Figma: "MD - Texte standard - Medium" (500). DSFR ships no 500 weight
+// utility — only light (300), regular (400), bold (700) and heavy (900).
+.introText {
+	font-weight: 500;
+	// Figma: "$text-title-grey" — kept here since this rule already overrides font-weight.
+	color: var(--text-title-grey);
+}
+
+.readOnlyFieldset {
+	border: none;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+
+	// Read-only inputs mirror the DSFR disabled styling so the locked state
+	// stays visually identical while the content remains exposed to assistive
+	// technologies (issue 3803).
+	input[readonly] {
+		color: var(--text-disabled-grey);
+		box-shadow: inset 0 -2px 0 0 var(--border-disabled-grey);
+		cursor: default;
+	}
+}

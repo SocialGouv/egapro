@@ -1,15 +1,14 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import styles from "./FileUpload.module.scss";
-import { FILE_TOO_LARGE_ERROR, MAX_FILE_SIZE } from "./uploadConfig";
-
-function formatFileSize(bytes: number): string {
-	if (bytes < 1024) return `${bytes} o`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} Ko`;
-	return `${(bytes / (1024 * 1024)).toFixed(2)} Mo`;
-}
+import { validateFileName } from "./fileNameValidation";
+import {
+	FILE_TOO_LARGE_ERROR,
+	formatFileMeta,
+	MAX_FILE_SIZE,
+} from "./uploadConfig";
 
 function getExtensionLabel(name: string): string {
 	const ext = name.split(".").pop()?.toUpperCase();
@@ -28,10 +27,11 @@ type Props = {
 	/** Human-readable hint displayed under the label (e.g. "pdf, docx, jpg"). */
 	acceptLabel: string;
 	/** Maximum number of files that can be selected. */
-	maxFiles?: number;
+	maxFileCount?: number;
 	/**
 	 * When true, the dropzone, file input and selection button are all
-	 * disabled. Consumers can still render the component to preserve layout,
+	 * disabled. The same controls also lock on their own once `maxFileCount`
+	 * is reached. Consumers can still render the component to preserve layout,
 	 * but the user cannot add files (e.g. during admin impersonation).
 	 */
 	disabled?: boolean;
@@ -45,15 +45,30 @@ export function FileUpload({
 	accept,
 	allowedMimeTypes,
 	acceptLabel,
-	maxFiles = 1,
+	maxFileCount = 1,
 	disabled = false,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
 	const [isDragging, setIsDragging] = useState(false);
+	const [objectUrls, setObjectUrls] = useState<string[]>([]);
+
+	useEffect(() => {
+		const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+		setObjectUrls(urls);
+		return () => {
+			urls.forEach((url) => {
+				URL.revokeObjectURL(url);
+			});
+		};
+	}, [selectedFiles]);
 
 	const validateFile = useCallback(
 		(file: File): string | null => {
+			const fileNameResult = validateFileName(file.name, file.type);
+			if (!fileNameResult.ok) {
+				return fileNameResult.message;
+			}
 			if (!allowedMimeTypes.includes(file.type)) {
 				return `Format de fichier non supporté. Formats acceptés : ${acceptLabel}.`;
 			}
@@ -68,7 +83,7 @@ export function FileUpload({
 	const processFiles = useCallback(
 		(newFiles: FileList | File[]) => {
 			const filesToAdd = Array.from(newFiles);
-			const remainingSlots = maxFiles - selectedFiles.length;
+			const remainingSlots = maxFileCount - selectedFiles.length;
 			const capped = filesToAdd.slice(0, remainingSlots);
 
 			for (const file of capped) {
@@ -80,7 +95,7 @@ export function FileUpload({
 			}
 			onFilesChange([...selectedFiles, ...capped], null);
 		},
-		[onFilesChange, validateFile, selectedFiles, maxFiles],
+		[onFilesChange, validateFile, selectedFiles, maxFileCount],
 	);
 
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -120,7 +135,7 @@ export function FileUpload({
 	}
 
 	const messagesId = `${inputId}-messages`;
-	const canAddMore = !disabled && selectedFiles.length < maxFiles;
+	const canAddMore = !disabled && selectedFiles.length < maxFileCount;
 
 	return (
 		<div>
@@ -141,37 +156,49 @@ export function FileUpload({
 				ref={dropzoneRef}
 			>
 				<span aria-hidden="true" className="fr-icon-file-add-fill" />
-				<span>
-					<button
-						className={styles.selectButton}
-						disabled={!canAddMore}
-						onClick={() => fileInputRef.current?.click()}
-						type="button"
-					>
-						Sélectionner des fichiers
-						<span
-							aria-hidden="true"
-							className="fr-icon-upload-line fr-icon--sm"
-						/>
-					</button>
-				</span>
-				<p className="fr-text--sm fr-mb-0">ou glisser-les ici</p>
+				<div className={styles.dropzoneActions}>
+					<span>
+						<button
+							className={styles.selectButton}
+							disabled={!canAddMore}
+							onClick={() => fileInputRef.current?.click()}
+							type="button"
+						>
+							{maxFileCount === 1
+								? "Sélectionner un fichier"
+								: "Sélectionner des fichiers"}
+							<span
+								aria-hidden="true"
+								className="fr-icon-upload-line fr-icon--sm"
+							/>
+						</button>
+					</span>
+					<p className="fr-text--sm fr-mb-0">
+						{maxFileCount === 1 ? "ou glisser-le ici" : "ou glisser-les ici"}
+					</p>
+				</div>
 			</section>
 
 			{selectedFiles.map((file, index) => (
 				<div className={`${styles.fileCard} fr-mt-2w`} key={file.name}>
-					<p className="fr-text--md fr-mb-0">{file.name}</p>
-					<p className="fr-text--xs fr-text--mention-grey fr-mb-1w">
-						{getExtensionLabel(file.name)} – {formatFileSize(file.size)}
-					</p>
 					<div className={styles.fileCardFooter}>
-						<p className="fr-message fr-message--valid fr-mb-0">
-							Importation réussie
-						</p>
+						<div className={styles.fileCardInfo}>
+							<a
+								aria-label={`Télécharger ${file.name}`}
+								className="fr-link fr-icon-download-line fr-link--icon-right"
+								download={file.name}
+								href={objectUrls[index] ?? "#"}
+							>
+								{file.name}
+							</a>
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
+								{formatFileMeta(getExtensionLabel(file.name), file.size)}
+							</p>
+						</div>
 						<button
+							aria-label={`Supprimer ${file.name}`}
 							className="fr-btn fr-btn--tertiary fr-btn--sm fr-icon-delete-line"
 							onClick={() => handleRemove(index)}
-							title={`Supprimer ${file.name}`}
 							type="button"
 						>
 							Supprimer
@@ -184,10 +211,11 @@ export function FileUpload({
 				accept={accept}
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
+				aria-label="Sélectionner des fichiers"
 				className="fr-sr-only"
-				disabled={disabled}
+				disabled={!canAddMore}
 				id={inputId}
-				multiple={maxFiles > 1}
+				multiple={maxFileCount > 1}
 				name={inputId}
 				onChange={handleFileChange}
 				ref={fileInputRef}
@@ -196,9 +224,10 @@ export function FileUpload({
 			/>
 
 			<div
-				aria-live="polite"
-				className="fr-messages-group fr-mt-1w"
+				aria-atomic="true"
+				className={`fr-messages-group ${styles.messagesGroup}`}
 				id={messagesId}
+				role="alert"
 			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
 			</div>

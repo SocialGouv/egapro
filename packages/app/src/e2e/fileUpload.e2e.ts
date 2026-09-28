@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import { API_UPLOAD, CSE_OPINION } from "~/modules/routes";
 import {
 	selectCompliancePath,
 	uploadJointEvalPdf,
@@ -70,7 +72,7 @@ test.describe("file upload + view access control", () => {
 		// `uploadJointEvalPdf` clicks the modal's Valider but returns before the
 		// async upload + router.push settles. Wait for the post-compliance
 		// destination so the S3 commit + DB insert have actually landed.
-		await page.waitForURL("**/avis-cse/**", { timeout: 15_000 });
+		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 15_000 });
 
 		const uploaded = await getLatestJointEvaluationFileIdForTestSiren();
 		expect(uploaded).not.toBeNull();
@@ -159,7 +161,7 @@ test.describe("file upload + view access control", () => {
 		// proxy GET /api/v1/* anyway, but the app-side invariant matters.
 		const anonCtx = await browser.newContext({ storageState: undefined });
 		try {
-			const response = await anonCtx.request.post("/api/upload", {
+			const response = await anonCtx.request.post(API_UPLOAD, {
 				headers: {
 					"X-Gateway-Forwarded": DEV_GATEWAY_SHARED_SECRET,
 					"Content-Type": "application/pdf",

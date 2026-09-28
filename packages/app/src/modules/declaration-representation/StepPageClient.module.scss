@@ -1,0 +1,13 @@
+// A .fr-btns-group cannot host this layout: DSFR 1.14 clamps any icon-carrying
+// .fr-btn inside a group to an icon-only 2.5rem box (truncating the labels),
+// unless the whole group shares one icon side via fr-btns-group--icon-left/right
+// — which cannot express Précédent (icon left) + Suivant (icon right).
+// A plain flex row keeps both labels fully visible, with Précédent on the left
+// and Suivant on the right as per the Figma spec.
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 3rem;
+}

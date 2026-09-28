@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { API_TEST_SENTRY } from "~/modules/routes";
 
 /** Client component with buttons to trigger client-side and server-side errors for Sentry testing. */
 export function ErrorTrigger() {
@@ -14,7 +15,7 @@ export function ErrorTrigger() {
 	const handleServerError = async () => {
 		setServerResult(null);
 		try {
-			const response = await fetch("/api/test-sentry");
+			const response = await fetch(API_TEST_SENTRY);
 			const data = (await response.json()) as { error?: string };
 			setServerResult(
 				`Statut ${String(response.status)} — ${data.error ?? "Erreur envoyée à Sentry"}`,

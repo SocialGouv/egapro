@@ -3,36 +3,49 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { TrackedLink } from "~/modules/analytics";
 import { useReadOnlyGuard } from "~/modules/auth";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { getPostComplianceDestination } from "~/modules/declaration-remuneration/shared/complianceNavigation";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
+import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
+import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { FileUpload, useFileUploadForm } from "~/modules/shared";
+import { getPostComplianceDestination } from "~/modules/navigation";
+import { apiV1FileHref, COMPLIANCE_PATH } from "~/modules/routes";
+import { FileUpload, SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
-
+import styles from "./JointEvaluationForm.module.scss";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
 const EMPTY_DB_VALUES = {} as Record<string, never>;
 
+type ExistingFile = {
+	id: string;
+	fileName: string;
+	uploadedAt: Date;
+};
+
 type Props = {
+	cseOpinionRequired: boolean;
 	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
-	hasCse: boolean | null;
+	existingFile: ExistingFile | null;
 	jointEvaluationDeadline: Date;
 };
 
 export function JointEvaluationForm({
+	cseOpinionRequired,
 	declarationDate,
 	declarationSiren,
 	declarationYear,
-	hasCse,
+	existingFile,
 	jointEvaluationDeadline,
 }: Props) {
 	const router = useRouter();
 	const readOnlyGuard = useReadOnlyGuard();
+	const { isReadOnly } = useLockContext();
 
 	const { clearDraft } = useDeclarationDraft({
 		siren: declarationSiren,
@@ -54,16 +67,17 @@ export function JointEvaluationForm({
 		// recorded and the "Mon espace" panel + table reflect the new step.
 		submitJointEvaluationMutation.mutate(undefined, {
 			onSettled: () => {
-				router.push(getPostComplianceDestination(hasCse));
+				router.push(getPostComplianceDestination(cseOpinionRequired));
 			},
 		});
-	}, [clearDraft, hasCse, router, submitJointEvaluationMutation]);
+	}, [clearDraft, cseOpinionRequired, router, submitJointEvaluationMutation]);
 
 	const {
 		closeModal,
 		handleConfirm,
 		handleFilesChange,
 		handleSubmit,
+		hasMissingFile,
 		isPending,
 		modalRef,
 		selectedFiles,
@@ -75,132 +89,178 @@ export function JointEvaluationForm({
 
 	return (
 		<>
-			<form
-				autoComplete="off"
-				className={common.flexColumnGap2}
-				onSubmit={handleSubmit}
-			>
-				<div className={common.flexBetween}>
-					<h1 className="fr-h4 fr-mb-0">
-						Parcours de mise en conformité pour l&apos;indicateur par catégorie
-						de salariés
-					</h1>
-				</div>
-
-				<div className={common.flexColumnGap1}>
-					<h2 className="fr-h5 fr-mb-0">
+			<form autoComplete="off" onSubmit={handleSubmit}>
+				{/* Read-only mode is enforced per control (disabled upload and submit
+				    button): a fieldset-level `disabled` would hide the content from
+				    some assistive technologies (#3803). */}
+				<fieldset
+					className={`${common.readOnlyFieldset} ${common.flexColumnGap2}`}
+				>
+					<legend className="fr-sr-only">
 						Évaluation conjointe des rémunérations
-					</h2>
-					<p className="fr-mb-0">
-						<a
-							className="fr-link"
-							href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							En savoir plus sur évaluation conjointe des rémunérations
-							<NewTabNotice />
-						</a>
-					</p>
-				</div>
-
-				<p className="fr-mb-0">
-					Vous devez{" "}
-					<strong>
-						déposer le rapport de l&apos;évaluation conjointe, ci-dessous.
-					</strong>{" "}
-					L&apos;accord ou le plan d&apos;action conclu doit être déposé sur
-					TéléAccord.
-				</p>
-
-				<div className="fr-highlight">
-					<p className="fr-mb-1v fr-text--md">Date limite</p>
-					<p className="fr-h6 fr-mb-1v">
-						{formatLongDate(jointEvaluationDeadline)}
-					</p>
-					<p className="fr-mb-0 fr-text--sm fr-text--mention-grey">
-						Déclaration effectuée le {declarationDate}
-					</p>
-				</div>
-
-				<div>
-					<label className="fr-label" htmlFor="joint-evaluation-file-upload">
-						Veuillez importer/déposer le rapport de l&apos;évaluation conjointe.
-						<span className="fr-hint-text">
-							Taille maximale : 10 Mo. Format supporté : pdf.
-						</span>
-					</label>
-				</div>
-
-				<FileUpload
-					accept=".pdf"
-					acceptLabel="pdf"
-					allowedMimeTypes={["application/pdf"]}
-					disabled={readOnlyGuard.isReadOnly}
-					error={uploadError}
-					inputId="joint-evaluation-file-upload"
-					onFilesChange={handleFilesChange}
-					selectedFiles={selectedFiles}
-				/>
-
-				<div>
-					<div className="fr-callout fr-callout--blue-france">
-						<h3 className="fr-callout__title fr-h6">
-							Ce que vous devez faire dans un délai de 2 mois
-						</h3>
-						<ul className="fr-mb-0">
-							<li>Élaboration du rapport</li>
-							<li>
-								Déposez le rapport dans la zone de dépôt prévue sur cette page
-							</li>
-						</ul>
+					</legend>
+					<div className={common.flexBetween}>
+						<h1 className="fr-h4 fr-mb-0">
+							Parcours de mise en conformité pour l&apos;indicateur par
+							catégories de salariés
+						</h1>
 					</div>
-					<div className="fr-callout">
-						<h3 className="fr-callout__title fr-h6">Après dépôt du rapport</h3>
-						<ul className="fr-mb-2w">
-							<li>
-								Réaliser l&apos;analyse conjointe et définir des actions
-								correctrices
-							</li>
-							<li>
-								Mettre en place l&apos;accord collectif (ou à défaut un plan
-								d&apos;action)
-							</li>
-						</ul>
+
+					<div className={common.flexColumnGapHalf}>
+						<h2 className="fr-h5 fr-mb-0">
+							Évaluation conjointe des rémunérations
+						</h2>
 						<p className="fr-mb-0">
-							Les accords conclus devront être déposés sur{" "}
-							<a
+							<TrackedLink
 								className="fr-link"
-								href="https://www.teleaccord.travail.gouv.fr"
+								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 								rel="noopener noreferrer"
 								target="_blank"
+								trackingId="joint_evaluation"
 							>
-								TéléAccord
+								En savoir plus sur évaluation conjointe des rémunérations
 								<NewTabNotice />
-							</a>
+							</TrackedLink>
 						</p>
 					</div>
-				</div>
 
-				<div className={`fr-mt-4w ${common.flexBetween}`}>
-					<Link
-						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
-						href="/declaration-remuneration/parcours-conformite"
-					>
-						Précédent
-					</Link>
-					<span>
-						<button
-							{...readOnlyGuard.buttonProps}
-							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={isPending || readOnlyGuard.isReadOnly}
-							type="submit"
+					<p className="fr-mb-0">
+						Vous devez{" "}
+						<strong>
+							déposer le rapport de l&apos;évaluation conjointe, ci-dessous.
+						</strong>{" "}
+						L&apos;accord ou le plan d&apos;action conclu doit être déposé sur
+						TéléAccord.
+					</p>
+
+					<div className="fr-highlight">
+						<p className="fr-mb-2v fr-text--md">Date limite</p>
+						<p className="fr-h6 fr-mb-2v">
+							{formatLongDate(jointEvaluationDeadline)}
+						</p>
+						<p className="fr-mb-0 fr-text--sm fr-text-mention--grey">
+							Déclaration effectuée le {declarationDate}
+						</p>
+					</div>
+
+					{existingFile && (
+						<div className={styles.panelWhite}>
+							<p className="fr-mb-1v fr-text--bold">Rapport déjà déposé</p>
+							<p className="fr-mb-1v">
+								<a
+									className="fr-link"
+									href={apiV1FileHref(existingFile.id)}
+									rel="noopener noreferrer"
+									target="_blank"
+									title={`Visualiser ${existingFile.fileName}`}
+								>
+									{existingFile.fileName}
+									<NewTabNotice />
+								</a>
+							</p>
+							<p className="fr-mb-0 fr-text--xs fr-text-mention--grey">
+								Déposé le {formatLongDate(existingFile.uploadedAt)}
+							</p>
+						</div>
+					)}
+
+					<div>
+						<label className="fr-label" htmlFor="joint-evaluation-file-upload">
+							Veuillez importer/déposer le rapport de l&apos;évaluation
+							conjointe.
+							<span className="fr-hint-text fr-mt-1v">
+								Taille maximale : 10 Mo. Format supporté : pdf.
+							</span>
+						</label>
+					</div>
+
+					<FileUpload
+						accept=".pdf"
+						acceptLabel="pdf"
+						allowedMimeTypes={["application/pdf"]}
+						disabled={isReadOnly}
+						error={uploadError}
+						inputId="joint-evaluation-file-upload"
+						onFilesChange={handleFilesChange}
+						selectedFiles={selectedFiles}
+					/>
+
+					{/* `role="alert"` over a permanent `aria-live` wrapper: an always-rendered container is a flex item, and would add a phantom 2rem gap. */}
+					{hasMissingFile && (
+						<div className="fr-alert fr-alert--error" role="alert">
+							<h3 className="fr-alert__title">
+								Le rapport de l&apos;évaluation conjointe est manquant
+							</h3>
+							<p>
+								Importez le rapport de l&apos;évaluation conjointe des
+								rémunérations avant de le transmettre.
+							</p>
+						</div>
+					)}
+
+					<div>
+						<div className={styles.panelBlue}>
+							<h3 className="fr-h6 fr-mb-2w">
+								Ce que vous devez faire dans un délai de 2 mois
+							</h3>
+							<ul className="fr-mb-0">
+								<li>Élaboration du rapport</li>
+								<li>
+									Déposez le rapport dans la zone de dépôt prévue sur cette page
+								</li>
+							</ul>
+						</div>
+						<div className={styles.panelWhite}>
+							<h3 className="fr-h6 fr-mb-2w">Après dépôt du rapport</h3>
+							<ul className="fr-mb-2w">
+								<li>
+									Réaliser l&apos;analyse conjointe et définir des actions
+									correctrices
+								</li>
+								<li>
+									Mettre en place l&apos;accord collectif (ou à défaut un plan
+									d&apos;action)
+								</li>
+							</ul>
+							<p className="fr-mb-0">
+								Les accords conclus devront être déposés sur{" "}
+								<a
+									className="fr-link"
+									href="https://www.teleaccord.travail.gouv.fr"
+									rel="noopener noreferrer"
+									target="_blank"
+								>
+									TéléAccord
+									<NewTabNotice />
+								</a>
+							</p>
+						</div>
+					</div>
+
+					<FormErrors
+						mutationError={submitJointEvaluationMutation.error?.message}
+					/>
+
+					<div className={common.flexBetween}>
+						<Link
+							className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
+							href={COMPLIANCE_PATH}
 						>
-							Transmettre
-						</button>
-						{readOnlyGuard.tooltip}
-					</span>
-				</div>
+							Précédent
+						</Link>
+						<span>
+							<button
+								{...readOnlyGuard.buttonProps}
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								disabled={isPending || isReadOnly}
+								type="submit"
+							>
+								{SUBMIT_LABEL}
+							</button>
+							{readOnlyGuard.tooltip}
+						</span>
+					</div>
+				</fieldset>
 			</form>
 
 			<JointEvaluationSubmitModal

@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { formatShortDate } from "~/modules/domain";
+import { formatShortDate, isCancelled } from "~/modules/domain";
+import { ADMIN_DECLARATIONS, adminDeclarationHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-
 import { STATUS_LABELS } from "./shared/constants";
 import type { DeclarationSearchRow } from "./types";
 
@@ -24,6 +24,7 @@ const COLUMN_LABELS: Record<SortColumn, string> = {
 	siren: "SIREN",
 	companyName: "Entreprise",
 	year: "Année",
+	workforce: "Effectif",
 	status: "Statut",
 	declarantEmail: "Email déclarant",
 	createdAt: "Date de dépôt",
@@ -37,11 +38,18 @@ export function DeclarationTable({
 	sortBy,
 	sortOrder,
 }: Props) {
-	const { handleSort, handlePageChange, sortIcon } = useSortableTable({
-		basePath: "/admin/declarations",
-		sortBy,
-		sortOrder,
-	});
+	const { handleSort, handlePageChange, ariaSort, sortIcon } = useSortableTable(
+		{
+			basePath: ADMIN_DECLARATIONS,
+			sortBy,
+			sortOrder,
+		},
+	);
+
+	const renderSortIcon = (column: SortColumn) => {
+		const icon = sortIcon(column);
+		return icon ? <span aria-hidden="true">{icon}</span> : null;
+	};
 
 	return (
 		<>
@@ -49,20 +57,20 @@ export function DeclarationTable({
 				{total} résultat{total > 1 ? "s" : ""}
 			</p>
 			<DsfrTable
-				caption="Liste des déclarations avec SIREN, entreprise, année, statut, email déclarant et date de dépôt."
+				caption="Liste des déclarations avec SIREN, entreprise, année, effectif issu du fichier GIP-MDS, statut, email déclarant et date de dépôt."
 				className=""
 			>
 				<thead>
 					<tr>
 						{SORT_COLUMNS.map((col) => (
-							<th key={col} scope="col">
+							<th aria-sort={ariaSort(col)} key={col} scope="col">
 								<button
 									className="fr-text--sm"
 									onClick={() => handleSort(col)}
 									type="button"
 								>
 									{COLUMN_LABELS[col]}
-									{sortIcon(col)}
+									{renderSortIcon(col)}
 								</button>
 							</th>
 						))}
@@ -73,13 +81,14 @@ export function DeclarationTable({
 						<tr key={row.id}>
 							<td>{row.siren}</td>
 							<td>
-								<Link href={`/admin/declarations/${row.id}`}>
+								<Link href={adminDeclarationHref(row.id)}>
 									{row.companyName}
 								</Link>
 							</td>
 							<td>{row.year}</td>
+							<td>{row.workforce ?? "—"}</td>
 							<td>
-								{row.cancelledAt !== null ? (
+								{isCancelled(row) ? (
 									<span className="fr-badge fr-badge--warning">Annulée</span>
 								) : (
 									(STATUS_LABELS[row.status ?? ""] ?? row.status)
@@ -91,7 +100,7 @@ export function DeclarationTable({
 					))}
 					{rows.length === 0 && (
 						<tr>
-							<td colSpan={6}>Aucune déclaration trouvée.</td>
+							<td colSpan={7}>Aucune déclaration trouvée.</td>
 						</tr>
 					)}
 				</tbody>

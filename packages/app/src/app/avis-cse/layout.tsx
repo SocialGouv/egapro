@@ -1,7 +1,12 @@
 import { redirect } from "next/navigation";
 import { CseOpinionLayout } from "~/modules/cseOpinion";
+import { getObligationWorkforce, isCseOpinionRequired } from "~/modules/domain";
+import { getPostComplianceDestination } from "~/modules/navigation";
+import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
+import { getLockReadState } from "~/server/services/declarationLockService";
 import { api } from "~/trpc/server";
 
 export default async function CseOpinionRootLayout({
@@ -12,7 +17,7 @@ export default async function CseOpinionRootLayout({
 	const session = await auth();
 
 	if (!session?.user) {
-		redirect("/login");
+		redirect(LOGIN);
 	}
 
 	const siren = getEffectiveSiren(session);
@@ -25,10 +30,32 @@ export default async function CseOpinionRootLayout({
 		api.declaration.getOrCreate(),
 	]);
 
+	// Reads the company's live answer rather than the declaration snapshot, so a
+	// démarche parked here by a stale snapshot recovers on its own.
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(company.gipWorkforce),
+		hasCse: company.hasCse,
+	});
+
+	// This funnel's fields are all required, so landing here with no opinion to
+	// transmit is a dead end.
+	if (!cseOpinionRequired) {
+		redirect(getPostComplianceDestination(cseOpinionRequired));
+	}
+
+	const declaration = declarationData.declaration;
+	const { isReadOnly, lockHolder } = await getLockReadState(
+		db,
+		declaration.id,
+		session.user.id,
+	);
+
 	return (
 		<CseOpinionLayout
 			company={company}
-			declarationYear={declarationData.declaration.year}
+			declarationYear={declaration.year}
+			isReadOnly={isReadOnly}
+			lockHolder={lockHolder}
 		>
 			{children}
 		</CseOpinionLayout>

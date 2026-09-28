@@ -5,9 +5,9 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import { impersonateSearchSchema } from "~/modules/admin/schemas";
+import { MY_SPACE } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-
 import { CompanyPreviewCard } from "./CompanyPreviewCard";
 
 /**
@@ -50,7 +50,7 @@ export function ImpersonateForm() {
 			await session.update({
 				impersonation: { siren: preview.siren, name: preview.name },
 			});
-			router.push("/mon-espace");
+			router.push(MY_SPACE);
 		} finally {
 			setStarting(false);
 		}
@@ -114,7 +114,7 @@ export function ImpersonateForm() {
 
 			{serverError && (
 				<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
-					<h3 className="fr-alert__title">Erreur</h3>
+					<h2 className="fr-alert__title">Erreur</h2>
 					<p>{serverError}</p>
 				</div>
 			)}

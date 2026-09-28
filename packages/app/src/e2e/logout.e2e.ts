@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-
+import { HOME } from "~/modules/routes";
 import { loginWithProConnect } from "./helpers/login";
 
 test.describe("Logout flow", () => {
@@ -11,7 +11,7 @@ test.describe("Logout flow", () => {
 		await page.getByRole("menuitem", { name: "Se déconnecter" }).click();
 
 		await page.waitForURL(/session\/end|oauth\/logout/, { timeout: 10_000 });
-		await page.goto("/");
+		await page.goto(HOME);
 
 		await expect(
 			page.getByRole("link", { name: "Se connecter" }),

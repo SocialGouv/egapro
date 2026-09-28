@@ -15,7 +15,7 @@ export function SecondDeclarationStepIndicator({ currentStep }: Props) {
 			: undefined;
 
 	return (
-		<div className="fr-stepper fr-mb-3w">
+		<div className="fr-stepper">
 			<h2 className="fr-stepper__title">
 				{title}
 				<span className="fr-stepper__state">

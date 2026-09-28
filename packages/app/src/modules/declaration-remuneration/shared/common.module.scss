@@ -31,6 +31,12 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
+
+	// this container uses flex `gap` (margins add, not collapse) — strip the shared stepper's mt/mb so gaps stay 32px
+	> :global(.fr-stepper) {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
 }
 
 .dataSection {
@@ -48,7 +54,7 @@
 .flexBetween {
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-items: flex-start;
 }
 
 .flexBaseline {
@@ -59,4 +65,24 @@
 
 .numericInput {
 	text-align: right;
+}
+
+.tableGap {
+	margin-top: 2rem;
+}
+
+.readOnlyFieldset {
+	border: none;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+
+	// Read-only inputs mirror the DSFR disabled styling so the locked state
+	// stays visually identical while the content remains exposed to assistive
+	// technologies (issue 3803).
+	input[readonly] {
+		color: var(--text-disabled-grey);
+		box-shadow: inset 0 -2px 0 0 var(--border-disabled-grey);
+		cursor: default;
+	}
 }

@@ -38,7 +38,7 @@ describe("getStepLabel", () => {
 		expect(getStepLabel(2)).toBe("Écart de rémunération");
 		expect(getStepLabel(3)).toBe("Écart de rémunération variable");
 		expect(getStepLabel(4)).toBe("Quartiles de rémunération");
-		expect(getStepLabel(5)).toBe("Écart par catégorie de salariés");
+		expect(getStepLabel(5)).toBe("Écart par catégories de salariés");
 		expect(getStepLabel(6)).toBe("Récapitulatif");
 	});
 

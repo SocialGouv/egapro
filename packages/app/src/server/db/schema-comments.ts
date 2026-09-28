@@ -22,7 +22,7 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
 		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
 		cse_required: "SUIT: Avis_CSE_requis",
-		rules_version: "SUIT: Version_regles",
+		rules_version: "FSM ruleset pinned at submission; not exposed to SUIT",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",
 		total_men: "SUIT: Effectif_H_rem_annuelle_globale",
 		created_at: "SUIT: Date_creation",
@@ -123,9 +123,18 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 	},
 	company: {
 		name: "SUIT: Raison_sociale",
-		workforce: "SUIT: Effectif",
-		naf_code: "SUIT: Code_NAF",
+		workforce:
+			"Weez/INSEE: effectif d'identité, non utilisé comme effectif de référence. L'effectif de référence (stats admin/publiques, export, back-office) provient de gip_mds_data.workforce_ema",
+		naf_code:
+			"Weez: activiteprincipaleunitelegale (NAF rév. 2), la nomenclature du libellé naf_label. Le code NAF 2025 est suivi séparément (#4089)",
 		address: "SUIT: Adresse",
+		region: "Weez: libellé région (dérivé du code postal établissement)",
+		department_code: "Weez: code département (dérivé du code postal)",
+		department_label: "Weez: libellé département (dérivé du code postal)",
+		country_code:
+			"Weez: code pays COG INSEE du siège (codepaysetrangeretablissement). null pour la France comme pour un pays inconnu — c'est country_label qui distingue les deux",
+		country_label:
+			"Weez: libellé du pays du siège, en capitales (libellepaysetrangeretablissement). 'FRANCE' si l'unité légale porte un code postal, null si le pays n'a pas pu être résolu",
 		has_cse: "SUIT: CSE_existant",
 	},
 	user: {
@@ -144,6 +153,10 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		id: "SUIT: Fichiers_CSE.Id",
 		file_name: "SUIT: Fichiers_CSE.Nom_fichier",
 		uploaded_at: "SUIT: Fichiers_CSE.Date_upload",
+	},
+	cse_opinion_file: {
+		declaration_number: "SUIT: Fichiers_CSE.Contenus.Numero_declaration",
+		type: "SUIT: Fichiers_CSE.Contenus.Type",
 	},
 	job_category: {
 		name: "SUIT: Indicateurs.G.Nom_categorie",

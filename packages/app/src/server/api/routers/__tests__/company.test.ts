@@ -2,7 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
 
+const { syncCseRequirementMock } = vi.hoisted(() => ({
+	syncCseRequirementMock: vi.fn(),
+}));
+
 vi.mock("~/server/services/suit");
+vi.mock("~/server/services/weez");
+vi.mock("~/server/services/cseRequirementSync", () => ({
+	syncCseRequirement: syncCseRequirementMock,
+}));
 
 describe("computeDeclarationStatus", () => {
 	it("returns to_complete when no declaration exists", () => {
@@ -84,6 +92,7 @@ vi.mock("~/server/db", () => ({
 const mockLimit = vi.fn();
 const mockWhere = vi.fn();
 const mockInnerJoin = vi.fn();
+const mockLeftJoin = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
 const mockUpdate = vi.fn();
@@ -94,7 +103,10 @@ function createMockDb(rows: unknown[]) {
 	mockLimit.mockResolvedValue(rows);
 	mockWhere.mockReturnValue({ limit: mockLimit });
 	mockInnerJoin.mockReturnValue({ where: mockWhere });
-	mockFrom.mockReturnValue({ innerJoin: mockInnerJoin });
+	// `where` on the leftJoin() result supports the impersonation bypass path
+	// (no innerJoin); `innerJoin` supports the owner path.
+	mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 	mockSelect.mockReturnValue({ from: mockFrom });
 
 	mockUpdateWhere.mockResolvedValue(undefined);
@@ -126,7 +138,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: null,
 		};
 
@@ -147,6 +159,94 @@ describe("findUserCompany CSE auto-fetch", () => {
 		expect(result.hasCse).toBe(true);
 	});
 
+	it("does not fetch CSE below 100 GIP employees, comparing on the exact value", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		const fetchCseMock = vi.mocked(fetchCseBySiren);
+
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: "99.97",
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCseMock).not.toHaveBeenCalled();
+		expect(mockUpdate).not.toHaveBeenCalled();
+		expect(result.hasCse).toBeNull();
+		expect(result.gipWorkforce).toBe(99.97);
+	});
+
+	it("does not fetch CSE when the company is absent from the GIP file", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		const fetchCseMock = vi.mocked(fetchCseBySiren);
+
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: null,
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCseMock).not.toHaveBeenCalled();
+		expect(result.hasCse).toBeNull();
+		expect(result.gipWorkforce).toBeNull();
+	});
+
+	it("exposes the GIP workforce and never the Weez company workforce (#3929)", async () => {
+		const { fetchCseBySiren } = await import("~/server/services/suit");
+		vi.mocked(fetchCseBySiren).mockResolvedValue(null);
+
+		const mockDb = createMockDb([
+			{
+				siren: "123456789",
+				name: "Test Company",
+				address: "1 rue de Paris",
+				nafCode: "6202A",
+				workforceEma: "70.00",
+				hasCse: null,
+			},
+		]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "123456789" });
+
+		expect(result.gipWorkforce).toBe(70);
+		expect(result).not.toHaveProperty("workforce");
+		expect(result).not.toHaveProperty("workforceEma");
+	});
+
 	it("does not fetch CSE when hasCse is already set", async () => {
 		const { fetchCseBySiren } = await import("~/server/services/suit");
 		const fetchCseMock = vi.mocked(fetchCseBySiren);
@@ -156,7 +256,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: false,
 		};
 
@@ -185,7 +285,7 @@ describe("findUserCompany CSE auto-fetch", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: null,
 		};
 
@@ -221,6 +321,212 @@ describe("findUserCompany CSE auto-fetch", () => {
 	});
 });
 
+describe("findUserCompany NAF label enrichment", () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	async function callGet(companyRow: unknown) {
+		const mockDb = createMockDb([companyRow]);
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+		return caller.get({ siren: "339787277" });
+	}
+
+	it("backfills nafLabel from Weez when null and persists it", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 100,
+			statutDiffusion: null,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).toHaveBeenCalledWith("339787277");
+		expect(mockSet).toHaveBeenCalledWith({
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+		});
+		expect(result.nafLabel).toBe("Programmation informatique");
+	});
+
+	it("rewrites a stale NAF 2025 code alongside the rév. 2 label", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Z",
+			nafLabel: "Autres assurances",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 100,
+			statutDiffusion: null,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Y",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(mockSet).toHaveBeenCalledWith({
+			nafCode: "65.12Z",
+			nafLabel: "Autres assurances",
+		});
+		expect(result.nafCode).toBe("65.12Z");
+		expect(result.nafLabel).toBe("Autres assurances");
+	});
+
+	it("writes nothing when Weez returns a label without a code", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+			name: "Test Company",
+			address: null,
+			nafCode: null,
+			nafLabel: "Autres assurances",
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: "FRANCE",
+			workforce: 100,
+			statutDiffusion: null,
+		});
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "65.12Y",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(mockSet).not.toHaveBeenCalled();
+		expect(result.nafCode).toBe("65.12Y");
+		expect(result.nafLabel).toBeNull();
+	});
+
+	it("does not call Weez when nafLabel is already present", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBe("Programmation informatique");
+	});
+
+	it("does not call Weez for a non-diffusible company (no nafCode)", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Entreprise non diffusible",
+			address: null,
+			nafCode: null,
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBeNull();
+	});
+
+	it("keeps nafLabel null and does not throw when Weez fails", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		vi.mocked(fetchCompanyBySiren).mockRejectedValue(new Error("Weez down"));
+
+		const result = await callGet({
+			siren: "339787277",
+			name: "Test Company",
+			address: null,
+			nafCode: "62.01Z",
+			nafLabel: null,
+			workforceEma: "100.00",
+			hasCse: true,
+		});
+
+		expect(result.nafLabel).toBeNull();
+	});
+
+	it("does not backfill during admin impersonation (read-only)", async () => {
+		const { fetchCompanyBySiren } = await import("~/server/services/weez");
+		const mockDb = createMockDb([
+			{
+				siren: "339787277",
+				name: "Test Company",
+				address: null,
+				nafCode: "62.01Z",
+				nafLabel: null,
+				workforceEma: "100.00",
+				hasCse: true,
+			},
+		]);
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: {
+				user: {
+					id: "admin-1",
+					isAdmin: true,
+					// An impersonation only bites while the admin MFA window is open (#4466).
+					adminMfaAt: Math.floor(Date.now() / 1000),
+					impersonation: { siren: "339787277" },
+				},
+				expires: "",
+			},
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.get({ siren: "339787277" });
+
+		expect(fetchCompanyBySiren).not.toHaveBeenCalled();
+		expect(result.nafLabel).toBeNull();
+	});
+});
+
 describe("companyRouter.updateHasCse", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -236,14 +542,15 @@ describe("companyRouter.updateHasCse", () => {
 			name: "Test Company",
 			address: "1 rue de Paris",
 			nafCode: "6202A",
-			workforce: 100,
+			workforceEma: "100.00",
 			hasCse: false,
 		};
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
 		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockFrom.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 
 		mockUpdateWhere.mockResolvedValue(undefined);
@@ -264,6 +571,112 @@ describe("companyRouter.updateHasCse", () => {
 		expect(mockSet).toHaveBeenCalledWith({ hasCse: true });
 	});
 
+	it("realigns the declaration on the new CSE answer", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: "250.00",
+			hasCse: true,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		mockUpdateWhere.mockResolvedValue(undefined);
+		mockSet.mockReturnValue({ where: mockUpdateWhere });
+		mockUpdate.mockReturnValue({ set: mockSet });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await caller.updateHasCse({ siren: "339787277", hasCse: false });
+
+		expect(syncCseRequirementMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				siren: "339787277",
+				hasCse: false,
+				workforce: 250,
+				actorUserId: "user-1",
+			}),
+		);
+	});
+
+	it("refuses the update below the CSE threshold (GIP workforce < 100)", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: "70.00",
+			hasCse: null,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: true }),
+		).rejects.toThrow("réservé aux entreprises de 100 salariés et plus");
+		expect(mockSet).not.toHaveBeenCalled();
+	});
+
+	it("refuses the update when the company is absent from the GIP file", async () => {
+		const companyRow = {
+			siren: "339787277",
+			name: "Test Company",
+			address: "1 rue de Paris",
+			nafCode: "6202A",
+			workforceEma: null,
+			hasCse: null,
+		};
+
+		mockLimit.mockResolvedValue([companyRow]);
+		mockWhere.mockReturnValue({ limit: mockLimit });
+		mockInnerJoin.mockReturnValue({ where: mockWhere });
+		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
+		mockSelect.mockReturnValue({ from: mockFrom });
+
+		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(
+			caller.updateHasCse({ siren: "339787277", hasCse: true }),
+		).rejects.toThrow("réservé aux entreprises de 100 salariés et plus");
+		expect(mockSet).not.toHaveBeenCalled();
+	});
+
 	it("refuses the update when the admin is impersonating the company", async () => {
 		const mockDb = { select: mockSelect, update: mockUpdate } as unknown;
 
@@ -274,6 +687,8 @@ describe("companyRouter.updateHasCse", () => {
 				user: {
 					id: "user-1",
 					isAdmin: true,
+					// An impersonation only bites while the admin MFA window is open (#4466).
+					adminMfaAt: Math.floor(Date.now() / 1000),
 					impersonation: { siren: "339787277", name: "Acme" },
 				},
 				expires: "",
@@ -285,90 +700,5 @@ describe("companyRouter.updateHasCse", () => {
 			caller.updateHasCse({ siren: "339787277", hasCse: true }),
 		).rejects.toThrow("Mode mimoquage");
 		expect(mockSet).not.toHaveBeenCalled();
-	});
-});
-
-describe("companyRouter.getSanctionStatus", () => {
-	beforeEach(() => {
-		vi.resetAllMocks();
-	});
-
-	afterEach(() => {
-		vi.restoreAllMocks();
-	});
-
-	it("returns sanction status from SUIT API", async () => {
-		const { fetchSanctionBySiren } = await import("~/server/services/suit");
-		const fetchSanctionMock = vi.mocked(fetchSanctionBySiren);
-		fetchSanctionMock.mockResolvedValue({
-			hasSanction: false,
-			validityDate: null,
-		});
-
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforce: 100,
-			hasCse: true,
-		};
-
-		const mockDb = createMockDb([companyRow]);
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
-
-		const result = await caller.getSanctionStatus({ siren: "339787277" });
-
-		expect(fetchSanctionMock).toHaveBeenCalledWith("339787277");
-		expect(result).toEqual({ hasSanction: false, validityDate: null });
-	});
-
-	it("returns default no-sanction when SUIT returns null", async () => {
-		const { fetchSanctionBySiren } = await import("~/server/services/suit");
-		const fetchSanctionMock = vi.mocked(fetchSanctionBySiren);
-		fetchSanctionMock.mockResolvedValue(null);
-
-		const companyRow = {
-			siren: "339787277",
-			name: "Test Company",
-			address: "1 rue de Paris",
-			nafCode: "6202A",
-			workforce: 100,
-			hasCse: true,
-		};
-
-		const mockDb = createMockDb([companyRow]);
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
-
-		const result = await caller.getSanctionStatus({ siren: "339787277" });
-
-		expect(result).toEqual({ hasSanction: false, validityDate: null });
-	});
-
-	it("throws when company is not found", async () => {
-		const mockDb = createMockDb([]);
-
-		const { companyRouter } = await import("../company");
-		const caller = companyRouter.createCaller({
-			db: mockDb,
-			session: { user: { id: "user-1" }, expires: "" },
-			headers: new Headers(),
-		} as never);
-
-		await expect(
-			caller.getSanctionStatus({ siren: "000000000" }),
-		).rejects.toThrow("Company not found or access denied");
 	});
 });

@@ -1,0 +1,13 @@
+.links {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+
+.format {
+	margin: 0.25rem 0 0;
+	color: var(--text-mention-grey);
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+}

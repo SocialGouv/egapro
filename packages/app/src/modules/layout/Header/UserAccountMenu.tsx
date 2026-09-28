@@ -1,8 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	type MouseEvent as ReactMouseEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
+import { ADMIN_HOME_PATH, triggerAdminStepUp } from "~/modules/admin/access";
+import { isAdminMfaFresh } from "~/modules/domain";
+import { API_AUTH_LOGOUT, MY_SPACE } from "~/modules/routes";
 import { getDsfrModal } from "~/modules/shared";
 import styles from "./UserAccountMenu.module.scss";
 
@@ -11,6 +20,7 @@ interface UserAccountMenuProps {
 	userEmail: string;
 	userPhone?: string;
 	isAdmin?: boolean;
+	adminMfaAt?: number | null;
 }
 
 /** Dropdown menu in the header for authenticated users. */
@@ -19,6 +29,7 @@ export function UserAccountMenu({
 	userEmail,
 	userPhone,
 	isAdmin,
+	adminMfaAt,
 }: UserAccountMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const wrapperRef = useRef<HTMLDivElement>(null);
@@ -35,6 +46,20 @@ export function UserAccountMenu({
 		const modal = document.getElementById("profile-modal");
 		if (modal) getDsfrModal(modal)?.disclose();
 	}, [close]);
+
+	// No intermediate Egapro screen on this door: a stale or missing second
+	// factor triggers ProConnect directly from the click, through the same
+	// step-up entry point as the resume screen and the login button. A fresh
+	// one lets the link navigate to `/admin` as-is — no ProConnect passage.
+	const handleAdminClick = useCallback(
+		(event: ReactMouseEvent<HTMLAnchorElement>) => {
+			close();
+			if (isAdminMfaFresh(adminMfaAt, new Date())) return;
+			event.preventDefault();
+			triggerAdminStepUp(ADMIN_HOME_PATH);
+		},
+		[adminMfaAt, close],
+	);
 
 	const getMenuItems = useCallback(
 		() =>
@@ -63,6 +88,13 @@ export function UserAccountMenu({
 		function handleKeyDown(event: KeyboardEvent) {
 			switch (event.key) {
 				case "Escape":
+					close();
+					break;
+				case "Tab":
+					// APG menu pattern: Tab dismisses the menu. Focus is handed back
+					// to the toggle button (via close) instead of letting the default
+					// move happen inside a menu that is about to unmount.
+					event.preventDefault();
 					close();
 					break;
 				case "ArrowDown": {
@@ -107,6 +139,7 @@ export function UserAccountMenu({
 				aria-expanded={isOpen}
 				aria-haspopup="menu"
 				className="fr-btn fr-btn--tertiary fr-icon-account-circle-line fr-btn--icon-left"
+				id="user-account-menu-button"
 				onClick={() => setIsOpen((prev) => !prev)}
 				ref={buttonRef}
 				type="button"
@@ -115,53 +148,72 @@ export function UserAccountMenu({
 			</button>
 
 			{isOpen && (
-				<div className={styles.dropdown} ref={menuRef} role="menu">
+				<div className={styles.dropdown} ref={menuRef}>
+					{/* The user info block sits outside the role="menu" element: a menu
+					    may only own menuitem/group/separator children, and static text
+					    would be skipped by screen readers in menu navigation mode. */}
 					<div className={styles.userInfo}>
 						<p className={styles.userName}>{userName}</p>
 						<p className={styles.userEmail}>{userEmail}</p>
 						{userPhone && <p className={styles.userEmail}>{userPhone}</p>}
 					</div>
 
-					<div className={styles.links}>
-						{isAdmin && (
+					{/* The two inner divs stay role-less: generic containers are
+					    ownership-transparent, so the menuitems remain owned by the
+					    menu (verified against axe aria-required-children). */}
+					<div
+						aria-labelledby="user-account-menu-button"
+						className={styles.menu}
+						role="menu"
+					>
+						<div className={styles.links}>
+							{isAdmin && (
+								<Link
+									className={styles.menuLink}
+									href={ADMIN_HOME_PATH}
+									onClick={handleAdminClick}
+									role="menuitem"
+									tabIndex={-1}
+								>
+									Administration
+								</Link>
+							)}
 							<Link
 								className={styles.menuLink}
-								href="/admin"
+								href={MY_SPACE}
 								onClick={close}
 								role="menuitem"
+								tabIndex={-1}
 							>
-								Administration
+								Mes démarches
 							</Link>
-						)}
-						<Link
-							className={styles.menuLink}
-							href="/mon-espace/mes-entreprises"
-							onClick={close}
-							role="menuitem"
-						>
-							Mes entreprises
-						</Link>
-						<button
-							className={styles.menuLink}
-							onClick={openProfileModal}
-							role="menuitem"
-							type="button"
-						>
-							Voir mon profil
-						</button>
-					</div>
+							<button
+								className={styles.menuLink}
+								onClick={openProfileModal}
+								role="menuitem"
+								tabIndex={-1}
+								type="button"
+							>
+								Voir mon profil
+							</button>
+						</div>
 
-					<div className={styles.logout}>
-						{/* Native <a> required: this route redirects to an external IdP (ProConnect),
-						    so we need a full browser navigation, not a client-side RSC fetch. */}
-						<a
-							className={styles.logoutLink}
-							href="/api/auth/logout"
-							role="menuitem"
-						>
-							<span aria-hidden="true" className="fr-icon-logout-box-r-line" />
-							Se déconnecter
-						</a>
+						<div className={styles.logout}>
+							{/* Native <a> required: this route redirects to an external IdP (ProConnect),
+							    so we need a full browser navigation, not a client-side RSC fetch. */}
+							<a
+								className={styles.logoutLink}
+								href={API_AUTH_LOGOUT}
+								role="menuitem"
+								tabIndex={-1}
+							>
+								<span
+									aria-hidden="true"
+									className="fr-icon-logout-box-r-line"
+								/>
+								Se déconnecter
+							</a>
+						</div>
 					</div>
 				</div>
 			)}

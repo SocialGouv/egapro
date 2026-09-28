@@ -1,0 +1,58 @@
+{{- if .Values.global.dataGouv.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-gouv-refresh-daily
+  namespace: {{ .Values.global.namespace }}
+spec:
+  schedule: "30 4 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 1800
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 900
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: data-gouv-refresh-daily
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 100
+            runAsNonRoot: true
+          containers:
+            - name: publish
+              image: curlimages/curl:8.12.1
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: DATA_GOUV_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: data-gouv
+                      key: DATA_GOUV_API_KEY
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  curl --request PUT \
+                    "{{ .Values.global.dataGouv.apiUrl }}/datasets/{{ .Values.global.dataGouv.datasetId }}/resources/{{ .Values.global.dataGouv.resourceId }}/" \
+                    --header "X-API-KEY: ${DATA_GOUV_API_KEY}" \
+                    --header "Content-Type: application/json" \
+                    --data '{"title":"Indicateurs EgaPro A à F","description":"Données publiques des indicateurs de rémunération A à F, mises à jour quotidiennement.","format":"csv","url":"https://{{ .Values.global.host }}/api/public/declarations/export?format=csv"}' \
+                    --connect-timeout 10 \
+                    --max-time 120 \
+                    --fail \
+                    --silent \
+                    --show-error
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 24Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+{{- end }}

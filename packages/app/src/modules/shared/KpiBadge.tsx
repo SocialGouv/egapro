@@ -36,7 +36,7 @@ export function getKpiBadgeRendering(
 	return {
 		className: "fr-badge fr-badge--no-icon",
 		arrow: "=",
-		signedValue: `0${NARROW_NBSP}`,
+		signedValue: "0",
 	};
 }
 

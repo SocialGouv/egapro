@@ -1,8 +1,10 @@
+import { API_UPLOAD } from "~/modules/routes";
 import type { FlowType } from "./uploadConfig";
 
 export type UploadFailureReason =
 	| "missing_flow"
 	| "missing_filename"
+	| "invalid_filename"
 	| "wrong_type"
 	| "too_large"
 	| "empty"
@@ -41,7 +43,7 @@ export async function uploadFile(
 	file: File,
 	options: UploadFileOptions,
 ): Promise<UploadFileResult> {
-	const response = await fetch("/api/upload", {
+	const response = await fetch(API_UPLOAD, {
 		method: "POST",
 		headers: {
 			"Content-Type": file.type || "application/octet-stream",
@@ -72,6 +74,7 @@ export async function uploadFile(
 const VALID_REASONS = new Set<UploadFailureReason>([
 	"missing_flow",
 	"missing_filename",
+	"invalid_filename",
 	"wrong_type",
 	"too_large",
 	"empty",

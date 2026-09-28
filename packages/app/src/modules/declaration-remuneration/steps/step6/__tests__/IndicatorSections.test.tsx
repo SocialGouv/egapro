@@ -1,0 +1,204 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import type {
+	Step2Data,
+	Step3Data,
+	Step4Data,
+} from "~/modules/declaration-remuneration/types";
+import {
+	DIVERGENT_HOURLY_MEDIAN,
+	noPayGapReferences,
+} from "~/test/gipGapFixtures";
+import { IndicatorSections } from "../IndicatorSections";
+
+const emptyStep2Data = (): Step2Data => ({
+	indicatorAAnnualWomen: "",
+	indicatorAAnnualMen: "",
+	indicatorAHourlyWomen: "",
+	indicatorAHourlyMen: "",
+	indicatorCAnnualWomen: "",
+	indicatorCAnnualMen: "",
+	indicatorCHourlyWomen: "",
+	indicatorCHourlyMen: "",
+});
+
+const emptyStep4Data = (): Step4Data => ({
+	annual: [{}, {}, {}, {}],
+	hourly: [{}, {}, {}, {}],
+});
+
+// All four gap fields are populated so GapBadge never renders "-"; the only "-"
+// cells left in the card are the two proportion values under test.
+const step3WithProportion = (
+	indicatorEWomen: string,
+	indicatorEMen: string,
+): Step3Data => ({
+	indicatorBAnnualWomen: "95",
+	indicatorBAnnualMen: "100",
+	indicatorBHourlyWomen: "95",
+	indicatorBHourlyMen: "100",
+	indicatorDAnnualWomen: "95",
+	indicatorDAnnualMen: "100",
+	indicatorDHourlyWomen: "95",
+	indicatorDHourlyMen: "100",
+	indicatorEWomen,
+	indicatorEMen,
+});
+
+describe("IndicatorSections", () => {
+	it("renders variable pay proportion as a share of the workforce total, not the raw beneficiary count", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={100}
+				totalWomen={200}
+			/>,
+		);
+
+		expect(screen.getByText("47,5 %")).toBeInTheDocument();
+		expect(screen.getByText("80,0 %")).toBeInTheDocument();
+		expect(screen.queryByText("95 %")).not.toBeInTheDocument();
+		expect(screen.queryByText("110 %")).not.toBeInTheDocument();
+	});
+
+	it("renders '- %' for the proportion when the workforce total is zero", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={0}
+				totalWomen={0}
+			/>,
+		);
+
+		expect(screen.getByText("Proportion")).toBeInTheDocument();
+		expect(screen.getAllByText("- %")).toHaveLength(2);
+	});
+
+	it("renders '- %' for the proportion when the workforce total is missing", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+			/>,
+		);
+
+		expect(screen.getAllByText("- %")).toHaveLength(2);
+	});
+
+	// Step 6 is the last screen before submitting: the gap reviewed here has to be
+	// the one that will be recorded, so it reads the GIP value like every other
+	// read-only surface instead of recomputing from the rounded operands.
+	it("shows the GIP gap for the row it was published for", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const step3Gaps = noPayGapReferences();
+		step3Gaps[3] = { women, men, gap };
+
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={{
+					...step3WithProportion("95", "80"),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: men,
+				}}
+				step3Gaps={step3Gaps}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={100}
+				totalWomen={200}
+			/>,
+		);
+
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+	});
+
+	it("recomputes the reviewed gap once an operand no longer matches the GIP one", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const step3Gaps = noPayGapReferences();
+		step3Gaps[3] = { women, men, gap };
+
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={{
+					...step3WithProportion("95", "80"),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: "0.12",
+				}}
+				step3Gaps={step3Gaps}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+				totalMen={100}
+				totalWomen={200}
+			/>,
+		);
+
+		expect(screen.getByText("16,66 %")).toBeInTheDocument();
+		expect(screen.queryByText("7,19 %")).not.toBeInTheDocument();
+	});
+
+	it("renders the per-category indicator section when indicatorGRequired is true", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+			/>,
+		);
+
+		expect(
+			screen.getByText("Indicateur par catégories de salariés"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Écart de rémunération par catégories de salariés"),
+		).toBeInTheDocument();
+	});
+
+	it("hides the per-category indicator section when indicatorGRequired is false", () => {
+		render(
+			<IndicatorSections
+				indicatorGRequired={false}
+				step2Data={emptyStep2Data()}
+				step2Gaps={noPayGapReferences()}
+				step3Data={step3WithProportion("95", "80")}
+				step3Gaps={noPayGapReferences()}
+				step4Data={emptyStep4Data()}
+				step5Categories={[]}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Indicateur par catégories de salariés"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Écart de rémunération par catégories de salariés"),
+		).not.toBeInTheDocument();
+	});
+});

@@ -1,4 +1,5 @@
 import { Breadcrumb, NewTabNotice } from "~/modules/layout";
+import { ACCESSIBILITY } from "~/modules/routes";
 
 /** Mentions légales page. */
 export function LegalNoticePage() {
@@ -42,7 +43,7 @@ export function LegalNoticePage() {
 					Index Egapro est partiellement conforme avec le référentiel général
 					d'amélioration de l'accessibilité (RGAA), version 4.1. Pour en savoir
 					plus, consultez notre{" "}
-					<a href="/declaration-accessibilite">déclaration d'accessibilité</a>.
+					<a href={ACCESSIBILITY}>déclaration d'accessibilité</a>.
 				</p>
 
 				<h3 className="fr-h6">Signaler un dysfonctionnement</h3>

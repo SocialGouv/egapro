@@ -1,16 +1,35 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
-import { computeGap, GAP_ALERT_THRESHOLD } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
+import { useCallback, useEffect, useRef } from "react";
+import { trackFunnelComplete } from "~/modules/analytics";
+import type { DeclarationFsmStatus } from "~/modules/domain";
+import {
+	getObligationWorkforce,
+	getOptionalCompanySizeRange,
+	hasGapsAboveThreshold,
+	isComplianceProcessRequired,
+	isCseOpinionRequired,
+	isCseRequired,
+} from "~/modules/domain";
+import { getCurrentStageHref } from "~/modules/navigation";
+import { COMPLIANCE_PATH } from "~/modules/routes";
+import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
-import { getCurrentStageHref } from "../shared/complianceNavigation";
+import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
+import {
+	DECLARATION_FUNNEL,
+	declarationFunnelDimensions,
+} from "../shared/funnelConfig";
+import { getPreviousStepHref } from "../shared/funnelSteps";
+import type { PayGapReferences } from "../shared/indicatorRowMapping";
 import { NextStepsBox } from "../shared/NextStepsBox";
 import { SavedIndicator } from "../shared/SavedIndicator";
 import { StepIndicator } from "../shared/StepIndicator";
 import { SubmitDeclarationModal } from "../shared/SubmitDeclarationModal";
+import { getSubmissionErrorMessage } from "../shared/submissionErrorMessage";
+import { useRefreshAfterSubmissionError } from "../shared/useRefreshAfterSubmissionError";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
@@ -19,45 +38,51 @@ import type {
 } from "../types";
 import stepStyles from "./Step6Review.module.scss";
 import { IndicatorSections } from "./step6/IndicatorSections";
-import { parseEmployeeCategories } from "./step6/parseStep5Categories";
-
-/** Check if any gap value is >= the regulatory threshold */
-function hasAnyHighGap(gaps: (number | null)[]): boolean {
-	return gaps.some((g) => g !== null && Math.abs(g) >= GAP_ALERT_THRESHOLD);
-}
 
 type Props = {
 	declaration: {
 		siren: string;
-		totalWomen: number | null;
-		totalMen: number | null;
-		status: string | null;
+		status: DeclarationFsmStatus | null;
 	};
+	// Official GIP/DSN workforce — canonical source for the Matomo size bucket
+	// (see StepPageClient), kept consistent with all business decisions.
+	companyWorkforce: number | null;
 	declarationYear: number;
+	indicatorGRequired: boolean;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories?: EmployeeCategoryRow[];
+	totalWomen?: number;
+	totalMen?: number;
 	isSubmitted?: boolean;
 	hasCse?: boolean | null;
 };
 
 export function Step6Review({
 	declaration,
+	companyWorkforce,
 	declarationYear,
+	indicatorGRequired,
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories = [],
+	totalWomen,
+	totalMen,
 	isSubmitted = false,
 	hasCse = null,
 }: Props) {
 	const router = useRouter();
 	const modalRef = useRef<HTMLDialogElement>(null);
-	const submitMutation = api.declaration.submit.useMutation({
-		onSuccess: () => {
-			router.push("/declaration-remuneration/parcours-conformite");
-		},
+	const cseApplicable = isCseRequired(getObligationWorkforce(companyWorkforce));
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(companyWorkforce),
+		hasCse,
 	});
 
 	const openModal = useCallback(() => {
@@ -71,65 +96,62 @@ export function Step6Review({
 			getDsfrModal(modalRef.current)?.conceal();
 		}
 	}, []);
+	const finishSubmission = useCallback(() => {
+		closeModal();
+		router.push(COMPLIANCE_PATH);
+	}, [closeModal, router]);
+	const completeSubmission = useCallback(() => {
+		// A blocked sessionStorage must not prevent navigation after submission.
+		try {
+			trackFunnelComplete(
+				DECLARATION_FUNNEL,
+				declarationFunnelDimensions(
+					declarationYear,
+					getOptionalCompanySizeRange(companyWorkforce),
+				),
+			);
+		} catch {
+			// Tracking is best effort; the declaration is already submitted.
+		}
+		finishSubmission();
+	}, [companyWorkforce, declarationYear, finishSubmission]);
+	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
+	const submitMutation = api.declaration.submit.useMutation({
+		networkMode: "always",
+		onSuccess: completeSubmission,
+		onError: refreshAfterSubmissionError,
+	});
+	const submittedDespiteError = isSubmitted && submitMutation.isError;
+	// A server answer most likely means another tab submitted and tracked it; a lost response means this tab did.
+	const submittedElsewhere = Boolean(submitMutation.error?.data);
+	useEffect(() => {
+		if (!submittedDespiteError) return;
+		if (submittedElsewhere) finishSubmission();
+		else completeSubmission();
+	}, [
+		submittedDespiteError,
+		submittedElsewhere,
+		finishSubmission,
+		completeSubmission,
+	]);
+	const handleCloseModal = () => {
+		if (submitMutation.isPending) return;
+		submitMutation.reset();
+		closeModal();
+	};
+	const submissionError = getSubmissionErrorMessage(submitMutation.error);
+	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
+	const showSubmitModal =
+		!isSubmitted || submitMutation.isError || submitMutation.isPending;
 
-	// Step 2 gaps
-	const annualMeanGap = computeGap(
-		step2Data.indicatorAAnnualWomen,
-		step2Data.indicatorAAnnualMen,
-	);
-	const hourlyMeanGap = computeGap(
-		step2Data.indicatorAHourlyWomen,
-		step2Data.indicatorAHourlyMen,
-	);
-	const annualMedianGap = computeGap(
-		step2Data.indicatorCAnnualWomen,
-		step2Data.indicatorCAnnualMen,
-	);
-	const hourlyMedianGap = computeGap(
-		step2Data.indicatorCHourlyWomen,
-		step2Data.indicatorCHourlyMen,
-	);
+	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
 
-	// Step 3 gaps
-	const step3AnnualMeanGap = computeGap(
-		step3Data.indicatorBAnnualWomen,
-		step3Data.indicatorBAnnualMen,
-	);
-	const step3HourlyMeanGap = computeGap(
-		step3Data.indicatorBHourlyWomen,
-		step3Data.indicatorBHourlyMen,
-	);
-	const step3AnnualMedianGap = computeGap(
-		step3Data.indicatorDAnnualWomen,
-		step3Data.indicatorDAnnualMen,
-	);
-	const step3HourlyMedianGap = computeGap(
-		step3Data.indicatorDHourlyWomen,
-		step3Data.indicatorDHourlyMen,
-	);
-
-	// Step 5 categories — parsed here to feed `allGaps` below; the cards
-	// re-parse internally inside IndicatorSections (negligible cost).
-	const step5Parsed = parseEmployeeCategories(step5Categories);
-
-	// Check if any gap exceeds the regulatory threshold
-	const allGaps = [
-		annualMeanGap,
-		hourlyMeanGap,
-		annualMedianGap,
-		hourlyMedianGap,
-		step3AnnualMeanGap,
-		step3AnnualMedianGap,
-		step3HourlyMeanGap,
-		step3HourlyMedianGap,
-		...step5Parsed.flatMap((cat) => [
-			cat.annualBaseGap,
-			cat.annualVariableGap,
-			cat.hourlyBaseGap,
-			cat.hourlyVariableGap,
-		]),
-	];
-	const highGap = hasAnyHighGap(allGaps);
+	// Phase 2 gate — only significant indicator-G gaps require a compliance path.
+	const complianceProcessRequired = isComplianceProcessRequired({
+		workforce: companyWorkforce,
+		hasIndicatorG: indicatorGRequired,
+		hasSignificantIndicatorGGap,
+	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -144,60 +166,78 @@ export function Step6Review({
 			className={stepStyles.formColumn}
 			onSubmit={handleSubmit}
 		>
-			{/* Title + save status */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
-				<div className="fr-col">
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
+			{/* Read-only mode is enforced per control (the submit button reads the
+			    lock context): a fieldset-level `disabled` would hide the content
+			    from some assistive technologies (#3803). */}
+			<fieldset className={common.readOnlyFieldset}>
+				<legend className="fr-sr-only">Récapitulatif de la déclaration</legend>
+				<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
+					<div className="fr-col">
+						<h1 className="fr-h4 fr-mb-0">
+							Déclaration des indicateurs de rémunération {declarationYear}
+						</h1>
+					</div>
+					<div className="fr-col-auto">
+						<SavedIndicator hasData={true} />
+					</div>
 				</div>
-				<div className="fr-col-auto">
-					<SavedIndicator hasData={true} />
+
+				<StepIndicator
+					currentStep={6}
+					indicatorGRequired={indicatorGRequired}
+				/>
+
+				<div className={stepStyles.recapBody}>
+					<p className={`fr-mb-0 ${stepStyles.intro}`}>
+						Vérifiez que toutes les informations ont été complétées avant de
+						transmettre votre déclaration aux services du ministère chargé du
+						travail.
+					</p>
+
+					<IndicatorSections
+						indicatorGRequired={indicatorGRequired}
+						step2Data={step2Data}
+						step2Gaps={step2Gaps}
+						step3Data={step3Data}
+						step3Gaps={step3Gaps}
+						step4Data={step4Data}
+						step5Categories={step5Categories}
+						totalMen={totalMen}
+						totalWomen={totalWomen}
+						withTooltips
+					/>
+
+					{complianceProcessRequired && declaration.siren && (
+						<NextStepsBox
+							cseApplicable={cseApplicable}
+							cseOpinionRequired={cseOpinionRequired}
+							hasGapsAboveThreshold={complianceProcessRequired}
+							siren={declaration.siren}
+						/>
+					)}
 				</div>
-			</div>
 
-			<StepIndicator currentStep={6} />
-
-			<p className="fr-mb-0">
-				Vérifiez que toutes les informations ont été complétées avant de
-				soumettre votre déclaration aux services du ministère chargé du travail.
-			</p>
-
-			<IndicatorSections
-				step2Data={step2Data}
-				step3Data={step3Data}
-				step4Data={step4Data}
-				step5Categories={step5Categories}
-				withTooltips
-			/>
-
-			{/* Next steps callout when high gap detected */}
-			{highGap && declaration.siren && (
-				<NextStepsBox
-					hasGapsAboveThreshold={highGap}
-					siren={declaration.siren}
+				<FormActions
+					nextHref={
+						isSubmitted
+							? getCurrentStageHref(declaration.status, cseOpinionRequired)
+							: undefined
+					}
+					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
+					previousHref={getPreviousStepHref(6, indicatorGRequired)}
 				/>
-			)}
 
-			<FormActions
-				nextHref={
-					isSubmitted
-						? getCurrentStageHref(declaration.status, hasCse)
-						: undefined
-				}
-				nextLabel="Suivant"
-				previousHref="/declaration-remuneration/etape/5"
-			/>
-
-			{!isSubmitted && (
-				<SubmitDeclarationModal
-					isPending={submitMutation.isPending}
-					modalRef={modalRef}
-					onClose={closeModal}
-					onSubmit={() => submitMutation.mutate()}
-					year={declarationYear}
-				/>
-			)}
+				{showSubmitModal && (
+					<SubmitDeclarationModal
+						error={submissionError}
+						isPending={submitMutation.isPending}
+						modalRef={modalRef}
+						onClose={handleCloseModal}
+						onSubmit={() => submitMutation.mutate()}
+						year={declarationYear}
+					/>
+				)}
+			</fieldset>
 		</form>
 	);
 }

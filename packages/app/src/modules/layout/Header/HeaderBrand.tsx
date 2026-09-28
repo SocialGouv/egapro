@@ -14,7 +14,12 @@ export function HeaderBrand() {
 						et des solidarités
 					</p>
 				</div>
-				<div className="fr-header__navbar">
+				{/* RGAA 9.2: mobile counterpart of the desktop quick-access <nav>
+				    (`.fr-header__tools-links` in HeaderQuickAccess). The two share
+				    the same accessible name because only one is displayed per
+				    breakpoint (DSFR hides the navbar on desktop and the tools bar
+				    on mobile). */}
+				<nav aria-label="Accès rapides" className="fr-header__navbar">
 					<button
 						aria-controls="modal-menu"
 						aria-haspopup="dialog"
@@ -25,7 +30,7 @@ export function HeaderBrand() {
 					>
 						Menu
 					</button>
-				</div>
+				</nav>
 			</div>
 			<div className="fr-header__service">
 				<Link

@@ -1,8 +1,17 @@
 import { redirect } from "next/navigation";
-import { ConfirmationPage } from "~/modules/cseOpinion";
+import {
+	campaignYearDimension,
+	FunnelCompleteTracker,
+} from "~/modules/analytics";
+import { ConfirmationPage, CSE_FUNNEL } from "~/modules/cseOpinion";
 import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers";
+import { getReferenceYearFor } from "~/modules/domain";
+import { MY_SPACE } from "~/modules/routes";
+import { offersTransmittedElements } from "~/modules/shared/demarcheDocuments";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
+
+export const metadata = { title: "Confirmation de l'avis du CSE" };
 
 export default async function CseOpinionConfirmationPage() {
 	const [session, declarationData] = await Promise.all([
@@ -11,15 +20,22 @@ export default async function CseOpinionConfirmationPage() {
 	]);
 
 	if (!isDeclarationSubmitted(declarationData.declaration.status)) {
-		redirect("/mon-espace");
+		redirect(MY_SPACE);
 	}
 
 	return (
-		<ConfirmationPage
-			dataYear={declarationData.declaration.year - 1}
-			declarationYear={declarationData.declaration.year}
-			email={session?.user?.email ?? undefined}
-			hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
-		/>
+		<>
+			<FunnelCompleteTracker
+				config={CSE_FUNNEL}
+				dimensions={campaignYearDimension(declarationData.declaration.year)}
+			/>
+			<ConfirmationPage
+				dataYear={getReferenceYearFor(declarationData.declaration.year)}
+				declarationYear={declarationData.declaration.year}
+				email={session?.user?.email ?? undefined}
+				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
+				hasTransmittedElements={offersTransmittedElements(declarationData)}
+			/>
+		</>
 	);
 }

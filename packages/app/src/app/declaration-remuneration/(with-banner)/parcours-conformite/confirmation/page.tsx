@@ -1,5 +1,20 @@
-import { ComplianceConfirmation } from "~/modules/declaration-remuneration";
+import type { Metadata } from "next";
+
+import { FunnelCompleteTracker } from "~/modules/analytics";
+import {
+	COMPLIANCE_FUNNEL,
+	ComplianceConfirmation,
+} from "~/modules/declaration-remuneration";
+
+export const metadata: Metadata = {
+	title: "Confirmation — Parcours de mise en conformité",
+};
 
 export default function ComplianceConfirmationPage() {
-	return <ComplianceConfirmation />;
+	return (
+		<>
+			<FunnelCompleteTracker config={COMPLIANCE_FUNNEL} />
+			<ComplianceConfirmation />
+		</>
+	);
 }

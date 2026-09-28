@@ -1,0 +1,115 @@
+import type { DeclarationStatus } from "../types";
+
+export const REPRESENTATION_TARGET_INITIAL = 30;
+export const REPRESENTATION_TARGET_RAISED = 40;
+export const REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029;
+/** First campaign year the Rixain quota is enforceable (declaration due 1 March). */
+export const REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR = 2026;
+export const REPRESENTATION_SUBJECTION_WORKFORCE_MIN = 1000;
+export const REPRESENTATION_SUBJECTION_WINDOW_YEARS = 3;
+export const REPRESENTATION_CAMPAIGN_YEAR_OFFSET = 1;
+
+export type RepresentationComplianceVerdict =
+	| "compliant"
+	| "non_compliant"
+	| "not_applicable";
+
+export type ExecutivesCount = "none" | "one" | "two_or_more";
+
+export type WorkforceHistoryEntry = { year: number; workforceEma: number };
+
+export function getRepresentationTarget(campaignYear: number): number {
+	return campaignYear >= REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR
+		? REPRESENTATION_TARGET_RAISED
+		: REPRESENTATION_TARGET_INITIAL;
+}
+
+/**
+ * Regulatory notice shown under the representation gaps. The raised target is
+ * announced only while it is still ahead — once the campaign has reached it,
+ * repeating "attendus en 2029" would describe the present as the future.
+ */
+export function getRepresentationThresholdNotice(campaignYear: number): string {
+	const target = getRepresentationTarget(campaignYear);
+	const since = `1ᵉʳ mars ${REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR}`;
+	const base = `Seuil réglementaire : ${target} % (Loi Rixain – obligation depuis le ${since}`;
+	return target >= REPRESENTATION_TARGET_RAISED
+		? `${base})`
+		: `${base}, ${REPRESENTATION_TARGET_RAISED} % attendus en ${REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR})`;
+}
+
+export function computeRepresentationVerdict(
+	womenPercent: number | null,
+	menPercent: number | null,
+	campaignYear: number,
+): RepresentationComplianceVerdict {
+	if (womenPercent === null || menPercent === null) return "not_applicable";
+	const target = getRepresentationTarget(campaignYear);
+	return Math.min(womenPercent, menPercent) >= target
+		? "compliant"
+		: "non_compliant";
+}
+
+export function deriveExecutivesNotComputableReason(
+	count: ExecutivesCount,
+): "aucun_cadre_dirigeant" | "un_seul_cadre_dirigeant" | null {
+	if (count === "none") return "aucun_cadre_dirigeant";
+	if (count === "one") return "un_seul_cadre_dirigeant";
+	return null;
+}
+
+export function getRepresentationCampaignYear(referenceYear: number): number {
+	return referenceYear + REPRESENTATION_CAMPAIGN_YEAR_OFFSET;
+}
+
+export function isPresumedSubjectToRepresentation(
+	workforcesByYear: WorkforceHistoryEntry[],
+	referenceYear: number,
+): boolean {
+	const window = workforcesByYear
+		.filter((entry) => entry.year <= referenceYear)
+		.sort((a, b) => b.year - a.year)
+		.slice(0, REPRESENTATION_SUBJECTION_WINDOW_YEARS);
+
+	if (window.length === 0) return true;
+
+	return window.every(
+		(entry) => entry.workforceEma >= REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+	);
+}
+
+export function isRepresentationPublicationRequired(
+	executivesCount: ExecutivesCount,
+	hasManagementBody: boolean,
+): boolean {
+	return executivesCount === "two_or_more" || hasManagementBody === true;
+}
+
+export type RepresentationDeclarationStatus =
+	| "draft"
+	| "not_subject"
+	| "submitted";
+
+export function isRepresentationDeclarationSubmitted(
+	status: RepresentationDeclarationStatus | null | undefined,
+): boolean {
+	return status === "submitted";
+}
+
+export function isRepresentationNotSubject(
+	status: RepresentationDeclarationStatus | null | undefined,
+): boolean {
+	return status === "not_subject";
+}
+
+export function computeRepresentationDeclarationStatus(declaration: {
+	status: RepresentationDeclarationStatus;
+	currentStep: number | null;
+}): DeclarationStatus {
+	if (
+		isRepresentationNotSubject(declaration.status) ||
+		isRepresentationDeclarationSubmitted(declaration.status)
+	)
+		return "done";
+	return (declaration.currentStep ?? 0) === 0 ? "to_complete" : "in_progress";
+}

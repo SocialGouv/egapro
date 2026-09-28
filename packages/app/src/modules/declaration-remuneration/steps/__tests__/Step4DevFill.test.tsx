@@ -43,6 +43,7 @@ describe("Step4QuartileDistribution dev fill", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2025}
+				indicatorGRequired
 				initialData={emptyStep4Data()}
 			/>,
 		);

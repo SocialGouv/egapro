@@ -1,22 +1,34 @@
 import type { ReactNode } from "react";
+import type { GapDirection } from "~/modules/domain";
 import {
-	computeGap,
-	computeProportion,
 	formatGapCompact,
+	formatVariablePayProportion,
 	GAP_ALERT_THRESHOLD,
+	gapLevel,
+	gapMagnitude,
+	resolveGap,
+	significantGapDirection,
 } from "~/modules/domain";
 import type { PayGapRow } from "../types";
 import styles from "./InterpretationCallout.module.scss";
+import { PAY_GAP_LABELS } from "./indicatorRowMapping";
 
-/** Returns true when at least one row crosses the regulatory gap threshold. */
-export function hasHighPayGap(rows: PayGapRow[]): boolean {
-	return rows.some((r) => {
-		const gap = computeGap(r.womenValue, r.menValue);
-		return gap !== null && gap >= GAP_ALERT_THRESHOLD;
-	});
+const [
+	ANNUAL_MEAN_LABEL,
+	HOURLY_MEAN_LABEL,
+	ANNUAL_MEDIAN_LABEL,
+	HOURLY_MEDIAN_LABEL,
+] = PAY_GAP_LABELS;
+
+/** Gap shown for one row: the GIP value while untouched, else recomputed from the declared operands. */
+function rowGap(row: PayGapRow): number | null {
+	return resolveGap(row.womenValue, row.menValue, row.gipReference);
 }
 
-type GapDirection = "women" | "men" | "balanced";
+/** Returns true when at least one row crosses the regulatory gap threshold (either direction). */
+export function hasHighPayGap(rows: PayGapRow[]): boolean {
+	return rows.some((r) => gapLevel(rowGap(r)) === "high");
+}
 
 type GapAnalysis = {
 	direction: GapDirection;
@@ -29,43 +41,33 @@ type GapAnalysis = {
 
 function analyzeGaps(rows: PayGapRow[]): GapAnalysis {
 	const findRow = (label: string) => rows.find((r) => r.label === label);
-	const annualMean = findRow("Annuelle brute moyenne");
-	const annualMedian = findRow("Annuelle brute médiane");
-	const hourlyMean = findRow("Horaire brute moyenne");
-	const hourlyMedian = findRow("Horaire brute médiane");
+	const annualMean = findRow(ANNUAL_MEAN_LABEL);
+	const annualMedian = findRow(ANNUAL_MEDIAN_LABEL);
+	const hourlyMean = findRow(HOURLY_MEAN_LABEL);
+	const hourlyMedian = findRow(HOURLY_MEDIAN_LABEL);
 
-	const annualMeanGap = annualMean
-		? computeGap(annualMean.womenValue, annualMean.menValue)
-		: null;
-	const annualMedianGap = annualMedian
-		? computeGap(annualMedian.womenValue, annualMedian.menValue)
-		: null;
-	const hourlyMeanGap = hourlyMean
-		? computeGap(hourlyMean.womenValue, hourlyMean.menValue)
-		: null;
-	const hourlyMedianGap = hourlyMedian
-		? computeGap(hourlyMedian.womenValue, hourlyMedian.menValue)
-		: null;
+	const annualMeanSignedGap = annualMean ? rowGap(annualMean) : null;
+	const annualMedianSignedGap = annualMedian ? rowGap(annualMedian) : null;
+	const hourlyMeanSignedGap = hourlyMean ? rowGap(hourlyMean) : null;
+	const hourlyMedianSignedGap = hourlyMedian ? rowGap(hourlyMedian) : null;
 
-	const gaps = [annualMeanGap, annualMedianGap, hourlyMeanGap, hourlyMedianGap];
-	const hasHighGap = gaps.some((g) => g !== null && g >= GAP_ALERT_THRESHOLD);
+	const annualMeanGap = gapMagnitude(annualMeanSignedGap);
+	const annualMedianGap = gapMagnitude(annualMedianSignedGap);
+	const hourlyMeanGap = gapMagnitude(hourlyMeanSignedGap);
+	const hourlyMedianGap = gapMagnitude(hourlyMedianSignedGap);
 
-	// When no gap reaches the regulatory threshold, treat the situation as
-	// balanced — sub-threshold deltas are not interpreted as disfavor.
-	let direction: GapDirection = "balanced";
-	if (hasHighGap) {
-		let womenLowerCount = 0;
-		let menLowerCount = 0;
-		for (const row of rows) {
-			const w = Number.parseFloat(row.womenValue);
-			const m = Number.parseFloat(row.menValue);
-			if (Number.isNaN(w) || Number.isNaN(m)) continue;
-			if (w < m) womenLowerCount++;
-			if (m < w) menLowerCount++;
-		}
-		if (womenLowerCount > menLowerCount) direction = "women";
-		else if (menLowerCount > womenLowerCount) direction = "men";
-	}
+	const signedGaps = [
+		annualMeanSignedGap,
+		annualMedianSignedGap,
+		hourlyMeanSignedGap,
+		hourlyMedianSignedGap,
+	];
+	const hasHighGap = signedGaps.some((g) => gapLevel(g) === "high");
+
+	// Direction is derived only from rows crossing the threshold, weighted by magnitude —
+	// `significantGapDirection` returns "balanced" by itself when none does, so the two
+	// never disagree the way an unfiltered majority vote could.
+	const direction: GapDirection = significantGapDirection(signedGaps);
 
 	return {
 		direction,
@@ -132,7 +134,7 @@ function buildPayGapBody(analysis: GapAnalysis): {
 
 	return {
 		title: "Écart entre hommes et femmes",
-		body: "Les rémunérations annuelles et médianes sont très proches, avec des écarts inférieurs à 5 %. Les différences horaires sont également limitées.",
+		body: `Les rémunérations annuelles et médianes sont très proches, avec des écarts inférieurs à ${GAP_ALERT_THRESHOLD} %. Les différences horaires sont également limitées.`,
 		interpretation:
 			"Les écarts sont faibles et ne révèlent pas d'inégalité significative.",
 	};
@@ -153,8 +155,8 @@ function buildVariablePayBody(
 	const fmtGap = (g: number | null) =>
 		g !== null ? `${formatGapCompact(g)} %` : "-";
 
-	const womenPct = computeProportion(beneficiaryWomen ?? "", maxWomen);
-	const menPct = computeProportion(beneficiaryMen ?? "", maxMen);
+	const womenPct = formatVariablePayProportion(beneficiaryWomen, maxWomen);
+	const menPct = formatVariablePayProportion(beneficiaryMen, maxMen);
 
 	if (direction === "women") {
 		return {

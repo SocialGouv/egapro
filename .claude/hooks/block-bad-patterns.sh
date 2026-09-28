@@ -16,6 +16,18 @@ else
   exit 0
 fi
 
+# Every rule below is an egapro rule: they name egapro modules (~/env.js), egapro conventions
+# (the ~/ alias, DSFR classes) and egapro directories. A session often edits files in OTHER
+# repositories — a vendored tool, an upstream clone under the scratchpad — where the same
+# pattern is correct and the advice is simply wrong (a plain Node CLI has no ~/env.js to
+# import). Matching on the extension alone made those edits fail with egapro's reasoning.
+if [ -n "$CLAUDE_PROJECT_DIR" ] && [ -n "$FILE_PATH" ]; then
+  case "$FILE_PATH" in
+    "$CLAUDE_PROJECT_DIR"/*) ;;
+    *) exit 0 ;;
+  esac
+fi
+
 # Block if CONTENT matches PATTERN and FILE_PATH matches FILE_FILTER.
 # Optional 4th arg: exclude filter (skip if FILE_PATH matches).
 check_pattern() {
@@ -37,6 +49,11 @@ check_pattern() {
 
 # --- Rules (add new ones here) ---
 
+# DSFR text colors use fr-text-{role}--{color}; fr-text--* is for typography.
+check_pattern '\.(tsx|jsx)$' \
+  'fr-text--(mention|default|label|title|inverted)-' \
+  'Invalid DSFR text color class. Use fr-text-mention--grey, fr-text-default--grey, etc.; fr-text--* is for typography.'
+
 # Suppression comments — all code files
 check_pattern '\.(ts|tsx|js|jsx)$' \
   'biome-ignore|eslint-disable|@ts-ignore|@ts-expect-error' \
@@ -56,11 +73,13 @@ check_pattern '\.(tsx|jsx)$' \
   'Inline <svg> is forbidden. Use DsfrPictogram, public/assets/*.svg + <Image> (next/image), or DSFR icon classes (fr-icon-*).' \
   '(DsfrPictogram\.tsx|ErrorArtwork\.tsx|packages/notifications/)'
 
-# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry configs)
+# Direct process.env — use ~/env.js instead (exclude env.js, instrumentation, next.config, sentry
+# configs, and packages/app/scripts/: standalone node scripts run outside the Next.js runtime and
+# cannot import ~/env.js, which validates the whole app env and would abort a migration pod).
 check_pattern '\.(ts|tsx)$' \
   'process\.env' \
   'Direct process.env is forbidden. Use: import { env } from "~/env.js".' \
-  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|migrate.*\.mjs|e2e/helpers/|packages/notifications/)'
+  '(env\.js|instrumentation(-client)?\.ts|next\.config|trpc/react\.tsx|sentry\.(client|server|edge)\.config\.ts|global-setup\.ts|integration-setup\.ts|playwright\.config|drizzle[^/]*\.config|packages/app/scripts/|e2e/helpers/|packages/notifications/)'
 
 # Deep relative imports — use ~/ path alias (exclude packages/notifications which has no path alias)
 check_pattern '\.(ts|tsx)$' \
@@ -105,14 +124,75 @@ check_pattern '\.(tsx|jsx)$' \
 # Domain layer — getFullYear() must come from ~/modules/domain (allow domain/ itself and tests)
 check_pattern '\.(ts|tsx)$' \
   'getFullYear\(\)' \
-  'Inline getFullYear() is forbidden. Use getCurrentYear() or getCseYear() from ~/modules/domain.' \
+  'Inline getFullYear() is forbidden. Use getCurrentYear(), getWorkforceYear() or getReferenceYearFor() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
 
-# Domain layer — slice(0, 9) for SIREN extraction must come from ~/modules/domain
+# Domain layer — slice/substring/substr(0, 9) for SIREN extraction must come from ~/modules/domain
 check_pattern '\.(ts|tsx)$' \
   'slice\(0,[[:space:]]*9\)' \
   'Inline slice(0, 9) is forbidden. Use extractSiren() from ~/modules/domain.' \
   '(domain/|__tests__|\.test\.|\.spec\.)'
+
+check_pattern '\.(ts|tsx)$' \
+  '(substring|substr)\(0,[[:space:]]*9\)' \
+  'Inline substring/substr(0, 9) is forbidden. Use extractSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — inline date arithmetic (getMonth/getDate) must use domain campaign helpers
+check_pattern '\.(ts|tsx)$' \
+  '\.(getMonth|getDate)\(\)' \
+  'Inline .getMonth()/.getDate() is forbidden. Use campaign date helpers from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — inline gap threshold classification must use gapLevel() from ~/modules/domain
+check_pattern '\.(ts|tsx)$' \
+  '(>=|<)[[:space:]]*GAP_ALERT_THRESHOLD' \
+  'Inline gap threshold comparison is forbidden. Use gapLevel(gap) === "high" from ~/modules/domain (or a named domain helper for the "either direction" intent).' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — inline signed-gap formula must use computeGap()/computeGapBetween()
+check_pattern '\.(ts|tsx)$' \
+  '\([[:space:]]*[a-zA-Z_.]*[mM]en[a-zA-Z_.]*[[:space:]]*-[[:space:]]*[a-zA-Z_.]*[wW]omen' \
+  'Inline ((men - women)/men) gap formula is forbidden. Use computeGap()/computeGapBetween() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — cancelled-declaration check must use isCancelled()
+check_pattern '\.(ts|tsx)$' \
+  'cancelledAt[[:space:]]*!==?[[:space:]]*null' \
+  'Inline cancelledAt !== null is forbidden. Use isCancelled() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Domain layer — SIREN extraction via a length const evades the literal slice(0, 9) rule
+check_pattern '\.(ts|tsx)$' \
+  '(slice|substring|substr)\(0,[[:space:]]*[A-Za-z_]*SIREN[A-Za-z_]*\)|SIREN_LENGTH[[:space:]]*=[[:space:]]*9' \
+  'Inline SIREN extraction is forbidden (even via a SIREN_LENGTH const). Use extractSiren()/parseSiren() from ~/modules/domain.' \
+  '(domain/|__tests__|\.test\.|\.spec\.)'
+
+# Display formatting — every number, date and duration becomes text in ~/modules/domain.
+# Scoped to src/modules/: server/db/getGlobalSettings.ts uses "sv-SE" to COMPUTE an ISO date
+# (not to display one), packages/app/scripts/ writes CLI output, and packages/notifications
+# has no access to the domain. OrdinalLongDate.tsx is excluded because it renders <sup> markup
+# a string cannot express, and pins timeZone: "UTC" for deadlines that carry no time.
+# export/fetchDeclarations.ts is excluded because its `.toFixed(4)` serialises a gap ratio
+# into the SUIT API's fixed-decimal contract — a wire format, not a rendered value.
+check_pattern 'src/modules/.*\.(ts|tsx)$' \
+  '\.toLocale(Date|Time)?String\(|Intl\.(NumberFormat|DateTimeFormat)|\.toFixed\(' \
+  'Inline display formatting is forbidden outside the domain. Use a formatter from ~/modules/domain (shared/format.ts), or add the missing one there.' \
+  '(domain/|__tests__|__fixtures__|\.test\.|\.spec\.|OrdinalLongDate\.tsx|export/fetchDeclarations\.ts)'
+
+# Domain layer — isIndicatorGRequired(getObligationWorkforce(...)) composition must use
+# isIndicatorGRequiredForGip(). Matched on a newline-flattened copy of CONTENT: the
+# formatter breaks this call across two lines at most call sites, and check_pattern's
+# plain `grep -E` matches line by line, so a pattern anchored on a single line would
+# almost never trigger.
+if [[ "$FILE_PATH" =~ \.(ts|tsx)$ ]] &&
+  [[ ! "$FILE_PATH" =~ (domain/|__tests__|\.test\.|\.spec\.) ]]; then
+  FLATTENED_CONTENT=$(echo "$CONTENT" | tr '\n' ' ')
+  if echo "$FLATTENED_CONTENT" | grep -qE 'isIndicatorGRequired\([[:space:]]*getObligationWorkforce'; then
+    echo "Blocked: Inline isIndicatorGRequired(getObligationWorkforce(...)) composition is forbidden. Use isIndicatorGRequiredForGip() from ~/modules/domain." >&2
+    exit 2
+  fi
+fi
 
 # Zod imports forbidden in router files — schemas must be in ~/modules/{domain}/schemas.ts
 check_pattern 'routers/.*\.ts$' \

@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
+import { emitActivityLog } from "./activityLog";
 import { logAction } from "./log";
 import { buildRequestContext } from "./requestContext";
 
@@ -33,37 +34,53 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"declaration.getOrCreate": AUDIT_ACTIONS.DECLARATION_READ_GIP_DATA,
 	"declaration.getStatusHistory": AUDIT_ACTIONS.DECLARATION_HISTORY_READ,
 
+	// ── declaration lock sensitive reads (expose holder PII) ─
+	"declarationLock.getActiveLockForCurrentDeclaration":
+		AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ,
+	"declarationLock.getLockState": AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ,
+
 	// ── cse opinion mutations ──────────────────────────────
 	"cseOpinion.saveOpinions": AUDIT_ACTIONS.CSE_OPINION_SAVE,
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,
 	"cseOpinion.finalize": AUDIT_ACTIONS.CSE_OPINION_FINALIZE,
+	"cseOpinion.setFileContentTypes": AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES,
+
+	// ── joint evaluation sensitive read (exposes filed report) ─
+	"jointEvaluation.getFile": AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE,
 
 	// ── company mutations ──────────────────────────────────
+	"company.get": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
+	"company.getWithDeclarations": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"company.updateHasCse": AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
 
 	// ── profile mutations + sensitive read ─────────────────
 	"profile.updatePhone": AUDIT_ACTIONS.PROFILE_UPDATE_PHONE,
+	"profile.updateProfile": AUDIT_ACTIONS.PROFILE_UPDATE,
 	"profile.get": AUDIT_ACTIONS.PROFILE_READ,
 
 	// ── admin sensitive reads ─────────────────────────────
 	"adminDeclarations.search": AUDIT_ACTIONS.ADMIN_DECLARATIONS_SEARCH,
 	"adminDeclarations.getById": AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID,
 	"adminDeclarations.getRecap": AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP,
+	"admin.searchCompany": AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY,
 
 	// ── admin declaration mutations ───────────────────────
 	"adminDeclarations.cancel": AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL,
+	"adminDeclarations.releaseLock": AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK,
 
 	// ── public searches ────────────────────────────────────
 	"publicReferents.search": AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
 
-	// ── public stats reads ─────────────────────────────────
-	"publicStats.getCurrentCampaignRate":
-		AUDIT_ACTIONS.PUBLIC_STATS_GET_CURRENT_CAMPAIGN_RATE,
-
 	// ── admin settings mutations ──────────────────────────
 	"adminSettings.upsertCampaignDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+	"adminSettings.updateLockTimeout":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT,
+	"adminSettings.getRepresentationCampaignByYear":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN,
+	"adminSettings.upsertRepresentationCampaign":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN,
 
 	// ── admin stats sensitive reads ──────────────────────
 	"adminStats.getCampaignProgression":
@@ -74,6 +91,17 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 		AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE,
 	"adminStats.getCompletionFunnel":
 		AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL,
+	"adminStats.getMatomoFunnel": AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL,
+	"adminStats.getMatomoCategoryModel":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL,
+	"adminStats.getMatomoHelpLinks":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS,
+	"adminStats.getMatomoDeviceBreakdown":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN,
+	"adminStats.getMatomoCseStatusConfirmations":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS,
+	"adminStats.getUsersPerCompany":
+		AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY,
 
 	// ── gip mds ────────────────────────────────────────────
 	"gipMds.importFromUrl": AUDIT_ACTIONS.GIP_MDS_IMPORT,
@@ -83,8 +111,29 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"declarationDraft.save": AUDIT_ACTIONS.DRAFT_SAVE,
 	"declarationDraft.clear": AUDIT_ACTIONS.DRAFT_CLEAR,
 
+	// ── representation declaration ─────────────────────────
+	"representationDeclaration.get": AUDIT_ACTIONS.REPRESENTATION_GET,
+	"representationDeclaration.saveDraft":
+		AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
+	"representationDeclaration.submit": AUDIT_ACTIONS.REPRESENTATION_SUBMIT,
+	"representationDeclaration.declareNotSubject":
+		AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT,
+
 	// ── mail ──────────────────────────────────────────────
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
+};
+
+/**
+ * Per-path metadata allowlist. When a path is listed here, only these input
+ * keys are kept in `audit.action_log.metadata` — everything else on the raw
+ * input (percentages, free-text fields, etc.) is dropped before sanitization.
+ * Paths not listed keep the default behavior (full sanitized input).
+ */
+const METADATA_ALLOWED_KEYS: Partial<Record<string, readonly string[]>> = {
+	"representationDeclaration.get": ["year"],
+	"representationDeclaration.saveDraft": ["year"],
+	"representationDeclaration.submit": ["year"],
+	"representationDeclaration.declareNotSubject": ["year"],
 };
 
 type SessionLike = {
@@ -95,89 +144,117 @@ type SessionLike = {
 	} | null;
 } | null;
 
+type ProcedureType = "query" | "mutation" | "subscription";
+
 type AuditMiddlewareInput<TResult> = {
 	ctx: {
 		session: SessionLike;
 		headers: Headers;
 	};
+	type: ProcedureType;
 	path: string;
 	getRawInput: () => Promise<unknown>;
 	next: () => Promise<TResult>;
 };
 
-/**
- * Generic helper that records every mutation and every explicitly-listed
- * sensitive query into `audit.action_log`.
- *
- * Designed to be wrapped in a `t.middleware(...)` call from `~/server/api/trpc`
- * (kept generic so it returns whatever the tRPC pipeline expects).
- *
- * - Lookup is path-based (e.g. `declaration.submit`) — paths not in the map
- *   are skipped.
- * - Captures status, duration, error message, user identity and request
- *   metadata (IP, user-agent).
- * - Always re-throws errors so the audit log never alters business behavior.
- */
+type MiddlewareFailure = { errorCode: string; errorMessage: string };
+
+// tRPC v11's next() resolves { ok: false, error } for a downstream failure (guard, validation, resolver) instead of throwing.
+function isFailedMiddlewareResult(
+	result: unknown,
+): result is { ok: false; error: unknown } {
+	return (
+		typeof result === "object" &&
+		result !== null &&
+		"ok" in result &&
+		result.ok === false
+	);
+}
+
+function describeFailure(error: unknown): MiddlewareFailure {
+	if (error instanceof TRPCError) {
+		return {
+			errorCode: error.code,
+			errorMessage: `${error.code}: ${error.message}`,
+		};
+	}
+	return {
+		errorCode: "ERROR",
+		errorMessage: error instanceof Error ? error.message : "Unknown error",
+	};
+}
+
+async function readRawInput(
+	getRawInput: () => Promise<unknown>,
+): Promise<unknown> {
+	try {
+		return await getRawInput();
+	} catch {
+		return undefined;
+	}
+}
+
 export async function auditMiddleware<TResult>({
 	ctx,
+	type,
 	path,
 	getRawInput,
 	next,
 }: AuditMiddlewareInput<TResult>): Promise<TResult> {
 	const action = PROCEDURE_TO_ACTION[path];
-
-	// Path is not auditable — short-circuit, no overhead beyond the lookup.
-	if (!action) {
-		return next();
-	}
-
 	const startedAt = Date.now();
 	const requestContext = buildRequestContext(ctx.headers);
 	const userId = ctx.session?.user?.id ?? null;
-	const userEmail = ctx.session?.user?.email ?? null;
 	const siren = parseSiren(ctx.session?.user?.siret);
-	let rawInput: unknown;
-	try {
-		rawInput = await getRawInput();
-	} catch {
-		rawInput = undefined;
-	}
-	const metadata = sanitizeMetadata(rawInput);
+	const rawInput = await readRawInput(getRawInput);
+	const metadata = action ? sanitizeMetadata(rawInput, path) : null;
+
+	const record = (failure: MiddlewareFailure | null): void => {
+		const status = failure ? "failure" : "success";
+		const durationMs = Date.now() - startedAt;
+
+		// An unmapped path gets a stdout line but no audit.action_log row; a mapped one gets its single line from logAction.
+		if (!action) {
+			emitActivityLog({
+				source: "trpc",
+				action: null,
+				category: null,
+				route: path,
+				operation: type,
+				status,
+				errorCode: failure?.errorCode ?? null,
+				durationMs,
+				userId,
+				siren,
+				ip: requestContext.ipAddress,
+				rawInput,
+			});
+			return;
+		}
+
+		void logAction({
+			action,
+			status,
+			userId,
+			userEmail: ctx.session?.user?.email ?? null,
+			siren,
+			metadata,
+			errorMessage: failure?.errorMessage,
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+			durationMs,
+			origin: { source: "trpc", route: path, operation: type, rawInput },
+		});
+	};
 
 	try {
 		const result = await next();
-		void logAction({
-			action,
-			status: "success",
-			userId,
-			userEmail,
-			siren,
-			metadata,
-			ipAddress: requestContext.ipAddress,
-			userAgent: requestContext.userAgent,
-			durationMs: Date.now() - startedAt,
-		});
+		record(
+			isFailedMiddlewareResult(result) ? describeFailure(result.error) : null,
+		);
 		return result;
 	} catch (error) {
-		const errorMessage =
-			error instanceof TRPCError
-				? `${error.code}: ${error.message}`
-				: error instanceof Error
-					? error.message
-					: "Unknown error";
-
-		void logAction({
-			action,
-			status: "failure",
-			userId,
-			userEmail,
-			siren,
-			metadata,
-			errorMessage,
-			ipAddress: requestContext.ipAddress,
-			userAgent: requestContext.userAgent,
-			durationMs: Date.now() - startedAt,
-		});
+		record(describeFailure(error));
 		throw error;
 	}
 }
@@ -187,13 +264,29 @@ export async function auditMiddleware<TResult>({
  * storage. Recursively walks objects and arrays to drop `undefined` fields
  * and strip obviously-technical sensitive keys at every depth.
  *
+ * When `path` has an entry in {@link METADATA_ALLOWED_KEYS}, only those top-level
+ * input keys are kept before sanitization.
+ *
  * Wraps non-object scalars into `{ value }` so the column can stay typed as
  * `Record<string, unknown>`.
  */
-function sanitizeMetadata(rawInput: unknown): AuditMetadata | null {
+function sanitizeMetadata(
+	rawInput: unknown,
+	path: string,
+): AuditMetadata | null {
 	if (rawInput === undefined || rawInput === null) return null;
 
-	const sanitized = sanitizeValue(rawInput);
+	const allowedKeys = METADATA_ALLOWED_KEYS[path];
+	const scopedInput =
+		allowedKeys && typeof rawInput === "object" && !Array.isArray(rawInput)
+			? Object.fromEntries(
+					allowedKeys
+						.filter((key) => key in (rawInput as Record<string, unknown>))
+						.map((key) => [key, (rawInput as Record<string, unknown>)[key]]),
+				)
+			: rawInput;
+
+	const sanitized = sanitizeValue(scopedInput);
 	if (sanitized === undefined) return null;
 
 	if (
@@ -248,4 +341,8 @@ const SENSITIVE_KEYS = new Set([
 	"access_key",
 	"private_key",
 	"data",
+	// Identity PII: the row already carries user_email, and audit-logging.md
+	// forbids duplicating PII that is not the email or the siren.
+	"firstname",
+	"lastname",
 ]);

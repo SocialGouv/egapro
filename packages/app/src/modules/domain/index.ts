@@ -1,22 +1,62 @@
 // Types
 
+// Admin two-factor authentication — accepted levels and freshness window
+export type { AdminMfaFailure } from "./shared/adminMfa";
+export {
+	ADMIN_MFA_ACR_VALUES,
+	ADMIN_MFA_WINDOW_SECONDS,
+	isAdminMfaAcr,
+	isAdminMfaFresh,
+	resolveAdminAccess,
+} from "./shared/adminMfa";
 // Campaign
 export {
+	getCurrentDate,
 	getCurrentYear,
 	getDeclarationDeadline,
+	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
+	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
+	getReferencePeriod,
+	getReferenceYearFor,
+	getRepresentationDeadline,
 	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
+	isRepresentationCampaignOpen,
+	MAX_CAMPAIGN_YEAR,
+	MIN_CAMPAIGN_YEAR,
+	parseCampaignYear,
+	selectJointEvaluationDeadline,
+	selectPathChoiceDeadline,
 	shouldRedirectSubmittedToRecap,
 } from "./shared/campaign";
+// Campaign alignment — temporary recette bridge mapping 2026 → 2027, delete when 2027 arrives
+export {
+	alignCampaignYear,
+	CAMPAIGN_YEAR_ALIGNED_ON_V2,
+} from "./shared/campaignAlignment";
+// Campaign clock — test-only override seam behind getCurrentYear (issue #4022)
+export {
+	clearCampaignYearOverride,
+	readCampaignYearOverride,
+	writeCampaignYearOverride,
+} from "./shared/campaignClock";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
+	formatObservatoryWorkforce,
+	getCompanySizeRange,
+	getOptionalCompanySizeRange,
 	isCseRequired,
+	isObservatoryWorkforceRange,
+	OBSERVATORY_WORKFORCE_RANGE_KEYS,
+	OBSERVATORY_WORKFORCE_RANGES,
 } from "./shared/companySize";
 // Global score computation (sum of sub-scores from the EgaPro index)
 export type { GlobalScoreInputs } from "./shared/computeGlobalScore";
@@ -25,36 +65,67 @@ export { computeGlobalScore } from "./shared/computeGlobalScore";
 export {
 	COMPANY_SIZE_ANNUAL_MIN,
 	COMPANY_SIZE_VOLUNTARY_MAX,
+	DRAFT_EXPIRY_DAYS,
 	EXPECTED_DECLARATION_TYPES,
 	FIRST_DECLARATION_YEAR,
 	GAP_ALERT_THRESHOLD,
+	GAP_DISPLAY_DECIMALS,
 	MAX_CSE_FILES,
 	QUARTILE_COUNT,
 	QUARTILE_MIN_INCREMENT,
 	QUARTILE_THRESHOLD_COUNT,
+	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
 // Declaration display context
-export type { DeclarationDisplayContext } from "./shared/declarationDisplay";
-export { getDeclarationDisplayContext } from "./shared/declarationDisplay";
+export type {
+	CseOpinionResolvedInput,
+	DeclarationDisplayContext,
+} from "./shared/declarationDisplay";
+export {
+	getDeclarationDisplayContext,
+	isCseOpinionResolved,
+} from "./shared/declarationDisplay";
 // Declaration derived flags (compliance process, revision, indicator G)
 export type {
 	ComplianceProcessRequiredInput,
 	ComplianceProcessRevisionRequiredInput,
+	CseOpinionRequiredInput,
+	CseReconciliationInput,
+	CseReconciliationOutcome,
 	DeclarationForFlags,
 } from "./shared/declarationFlags";
 export {
 	isComplianceProcessRequired,
 	isComplianceProcessRevisionRequired,
+	isCseOpinionRequired,
+	resolveCseReconciliation,
 } from "./shared/declarationFlags";
+// Declaration edit lock constants
+export {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	LOCK_HEARTBEAT_INTERVAL_MS,
+} from "./shared/declarationLock";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
 export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
 export {
+	applyDeclarationClosure,
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
+	hasStartedSecondDeclaration,
 	isCancelled,
+	isCompliancePathStepApplicable,
+	isComplianceProcessCompleted,
+	isDeclarationSubmitted,
+	isDeclarationWritingClosed,
+	isDraft,
+	isInComplianceProcess,
+	isJointEvaluationWritable,
+	isSecondDeclarationDeadlineApplicable,
+	isSecondDeclarationWritable,
 } from "./shared/declarationStatus";
 // Declaration steps labels (A–F stepper), post-submit milestones, K19 funnels
 export type {
@@ -100,27 +171,71 @@ export {
 	hasEvent,
 	hasSubmittedSecondDeclaration,
 } from "./shared/declarationTrajectory";
+export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
+export {
+	CATEGORY_PAY_BASES,
+	CATEGORY_PAY_FIELDS,
+	isCategoryPayApplicable,
+	isSexRemunerationComplete,
+	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+	PAY_FIELDS_MEN,
+	PAY_FIELDS_WOMEN,
+	shouldRetainCategoryPayValues,
+} from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
 	computePercentage,
 	computeProportion,
+	formatCount,
 	formatCurrency,
+	formatDays,
+	formatDecimal,
+	formatFileSize,
+	formatFixedPercentage,
 	formatGap,
 	formatGapCompact,
+	formatIsoDate,
 	formatLongDate,
 	formatMonthDay,
+	formatOptionalIsoDate,
+	formatPercentage,
+	formatPointsAbs,
+	formatPrecisePercentage,
+	formatRatioAsPercentage,
+	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
+	formatTime,
 	formatTotal,
+	formatWholePercentage,
+	MISSING_VALUE,
+	NARROW_NBSP,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
+export type { GipGapReference } from "./shared/gap";
 export {
 	computeGap,
+	computeGapBetween,
+	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
 	gapLevel,
+	gapMagnitude,
+	gapRatioToPercent,
 	hasGapsAboveThreshold,
+	hasHighGap,
+	resolveGap,
+	resolveGapRatio,
+	significantGapDirection,
 } from "./shared/gap";
+// GIP annual average workforce — canonical headcount for obligations & display
+export {
+	floorWorkforce,
+	formatWorkforceForUser,
+	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getObligationWorkforce,
+	parseGipWorkforce,
+} from "./shared/gipWorkforce";
 // Indicator G — applicability rules (workforce thresholds, triennial cycle, universal year)
 export {
 	getApplicableIndicators,
@@ -129,8 +244,16 @@ export {
 	INDICATOR_G_TRIENNIAL_MIN,
 	INDICATOR_G_UNIVERSAL_YEAR,
 	isIndicatorGRequired,
+	isIndicatorGRequiredForGip,
 	isTriennialYear,
 } from "./shared/indicatorG";
+// NAF activity nomenclature
+export type { NafSection } from "./shared/naf";
+export {
+	NAF_SECTION_CODES,
+	NAF_SECTION_DIVISIONS,
+	NAF_SECTIONS,
+} from "./shared/naf";
 // Number parsing & normalization (French locale)
 export {
 	displayDecimal,
@@ -139,40 +262,97 @@ export {
 	padDecimalOnBlur,
 	padDecimalToTwo,
 	parseNumber,
+	toNullableNumber,
 } from "./shared/number";
+// Percentage & proportion numeric cores
+export { percentageOf, proportionOf } from "./shared/percentage";
+// Public data release gate
+export {
+	getTodayInParisCivilDate,
+	getTodayInParisCivilDateString,
+	isYearPubliclyReleased,
+} from "./shared/publicData";
 // Quartile helpers
-export { computeQuartileMin, migrateLegacyThresholds } from "./shared/quartile";
-export type { CountyCode, RegionCode } from "./shared/regions";
+export {
+	computeQuartileMin,
+	isQuartileImbalanced,
+	migrateLegacyThresholds,
+	quartileImbalanceDirection,
+} from "./shared/quartile";
+export type {
+	CompanyLocation,
+	CountyCode,
+	RegionCode,
+} from "./shared/regions";
 // Regions & counties
 export {
 	COUNTIES,
 	COUNTY_CODES,
+	COUNTY_TO_REGION,
+	getCountyCodeFromPostalCode,
+	getLocationFromPostalCode,
+	getRegionCodeFromCountyCode,
 	REGION_CODES,
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
-// Score brackets for public stats distribution chart
-export type { ScoreBracket, ScoreBracketId } from "./shared/scoreBracket";
-export { getScoreBracket, SCORE_BRACKETS } from "./shared/scoreBracket";
+// Representation equilibrium (art. D. 1142-19)
+export type {
+	ExecutivesCount,
+	RepresentationComplianceVerdict,
+	RepresentationDeclarationStatus,
+	WorkforceHistoryEntry,
+} from "./shared/representation";
+export {
+	computeRepresentationDeclarationStatus,
+	computeRepresentationVerdict,
+	deriveExecutivesNotComputableReason,
+	getRepresentationCampaignYear,
+	getRepresentationTarget,
+	getRepresentationThresholdNotice,
+	isPresumedSubjectToRepresentation,
+	isRepresentationDeclarationSubmitted,
+	isRepresentationNotSubject,
+	isRepresentationPublicationRequired,
+	REPRESENTATION_CAMPAIGN_YEAR_OFFSET,
+	REPRESENTATION_OBLIGATION_FROM_CAMPAIGN_YEAR,
+	REPRESENTATION_SUBJECTION_WINDOW_YEARS,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+	REPRESENTATION_TARGET_INITIAL,
+	REPRESENTATION_TARGET_RAISED,
+	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
+} from "./shared/representation";
 // SIREN utilities
 export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
-// Submission rate helpers (shared by admin/public stats routers and KPI tiles)
+// Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
 	buildCampaignRateTileProps,
 	computeRate,
-	formatCount,
-	formatPointsAbs,
-	formatRate,
-	NARROW_NBSP,
 	roundOneDecimal,
 } from "./shared/submissionRate";
+// Indicator E — variable pay proportion (beneficiaries over same-sex workforce)
+export {
+	formatVariablePayProportion,
+	variablePayProportion,
+} from "./shared/variablePay";
+// Workforce sums (quartiles, categories)
+export {
+	computeWorkforceTotal,
+	sumCategoryWorkforce,
+	sumQuartileWorkforce,
+} from "./shared/workforce";
 export type {
 	CampaignDeadlines,
 	CompanySize,
 	CompanySizeRange,
+	CompliancePathValue,
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
+	GapDirection,
 	GapLevel,
+	ObservatoryWorkforceRange,
+	RepresentationCampaign,
 } from "./types";
+export { COMPLIANCE_PATHS, DECLARATION_FSM_STATUSES } from "./types";

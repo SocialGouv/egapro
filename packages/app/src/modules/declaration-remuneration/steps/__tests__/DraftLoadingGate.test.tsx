@@ -74,7 +74,7 @@ function expectLoadingState() {
 	expect(status).toHaveTextContent(/Chargement du brouillon/i);
 }
 
-const emptyStep1 = { totalWomen: 0, totalMen: 0 };
+const emptyStep1 = { totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 };
 const emptyStep2 = {
 	indicatorAAnnualWomen: "",
 	indicatorAAnnualMen: "",
@@ -116,6 +116,7 @@ describe("DraftLoadingGate", () => {
 			<Step1Workforce
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep1}
 			/>,
 		);
@@ -128,6 +129,7 @@ describe("DraftLoadingGate", () => {
 			<Step2PayGap
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep2}
 			/>,
 		);
@@ -140,6 +142,7 @@ describe("DraftLoadingGate", () => {
 			<Step3VariablePay
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep3}
 			/>,
 		);
@@ -152,6 +155,7 @@ describe("DraftLoadingGate", () => {
 			<Step4QuartileDistribution
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialData={emptyStep4}
 			/>,
 		);
@@ -164,6 +168,7 @@ describe("DraftLoadingGate", () => {
 			<Step5EmployeeCategories
 				declarationSiren="123456789"
 				declarationYear={2026}
+				indicatorGRequired
 				initialCategories={[]}
 				initialSource={undefined}
 			/>,
@@ -184,7 +189,11 @@ describe("DraftLoadingGate", () => {
 					decl1JointEvaluationDeadline: new Date("2026-05-01"),
 					decl2JustificationDeadline: new Date("2026-09-01"),
 					decl2JointEvaluationDeadline: new Date("2026-11-01"),
+					decl2CseOpinionDeadline: new Date("2026-12-01"),
+					pathChoiceDeadline: new Date("2027-01-01"),
+					pathChoiceRound1Deadline: new Date("2026-07-01"),
 				}}
+				cseOpinionRequired={true}
 				currentYear={2026}
 				declarationSiren="123456789"
 				declarationYear={2026}
@@ -214,6 +223,7 @@ describe("DraftLoadingGate", () => {
 				declarationSiren="123456789"
 				declarationYear={2026}
 				initialFirstDeclarationCategories={[]}
+				status="corrective_actions_chosen"
 			/>,
 		);
 		expectLoadingState();
@@ -223,10 +233,11 @@ describe("DraftLoadingGate", () => {
 		mockLoadingDraft();
 		const { container } = render(
 			<JointEvaluationForm
+				cseOpinionRequired={false}
 				declarationDate="01/01/2026"
 				declarationSiren="123456789"
 				declarationYear={2026}
-				hasCse={null}
+				existingFile={null}
 				jointEvaluationDeadline={new Date("2026-05-01")}
 			/>,
 		);

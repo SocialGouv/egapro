@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { urlGlob } from "~/e2e/helpers/routes";
+import { DECLARATION_REMUNERATION_RECAP, MY_SPACE } from "~/modules/routes";
 import { setDeclarationComplianceState } from "./helpers/db";
+
+// Recap-page rendering is covered by recapitulatif/__tests__/RecapitulatifPage.test.tsx.
 
 test.describe("Recapitulatif page", () => {
 	test.beforeAll(async () => {
@@ -9,8 +13,10 @@ test.describe("Recapitulatif page", () => {
 		});
 	});
 
-	test("displays recap page with h1 and download button", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
+	test("renders the recap route with its heading and download button", async ({
+		page,
+	}) => {
+		await page.goto(DECLARATION_REMUNERATION_RECAP);
 
 		await expect(
 			page.getByRole("heading", {
@@ -18,53 +24,27 @@ test.describe("Recapitulatif page", () => {
 				name: /Déclaration des indicateurs de rémunération/,
 			}),
 		).toBeVisible();
-
 		await expect(page.getByRole("link", { name: "Télécharger" })).toBeVisible();
 	});
 
-	test("displays info sections", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
+	test("closes on a secondary 'Mon espace' action that returns to Mon espace", async ({
+		page,
+	}) => {
+		await page.goto(DECLARATION_REMUNERATION_RECAP);
 
+		// Scoped to <main>: the breadcrumb above it links to "Mon espace" too.
+		const bottomAction = page
+			.getByRole("main")
+			.getByRole("link", { name: "Mon espace", exact: true });
+
+		await expect(bottomAction).toHaveClass(/fr-btn--secondary/);
+		await expect(bottomAction).not.toHaveClass(/fr-btn--primary/);
 		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations déclarant",
-			}),
-		).toBeVisible();
+			page.getByRole("link", { name: "Retour à Mon Espace" }),
+		).toHaveCount(0);
 
-		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations entreprise",
-			}),
-		).toBeVisible();
-
-		await expect(
-			page.getByRole("heading", {
-				level: 2,
-				name: "Informations calcul",
-			}),
-		).toBeVisible();
-	});
-
-	test("displays indicator sections", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
-
-		await expect(
-			page.getByText("Indicateurs pour l'ensemble de vos salariés"),
-		).toBeVisible();
-
-		await expect(
-			page.getByText("Indicateurs par catégorie de salariés"),
-		).toBeVisible();
-	});
-
-	test("displays return button", async ({ page }) => {
-		await page.goto("/declaration-remuneration/recapitulatif");
-
-		await expect(
-			page.getByRole("link", { name: /Retour à Mon Espace/ }),
-		).toBeVisible();
+		await bottomAction.click();
+		await page.waitForURL(urlGlob(MY_SPACE));
 	});
 
 	test("returns 404 for non-submitted declaration with correction type", async ({

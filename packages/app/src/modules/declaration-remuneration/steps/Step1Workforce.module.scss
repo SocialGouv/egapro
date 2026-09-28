@@ -1,6 +1,18 @@
+// Minimum width of a workforce-count input, sized for a 6-digit value. Shared
+// between the input rule (which keeps the value readable) and the column rule
+// so both stay in sync (RGAA 10.4).
+$workforce-input-min-width: 6rem;
+
 .workforceTable {
 	table {
 		width: 100%;
+	}
+
+	// Keep the entered workforce count readable at 200% zoom / narrow
+	// viewports (RGAA 10.4): the cell must never crush the input below the
+	// width of a 6-digit count — the DSFR table wrapper scrolls instead.
+	input {
+		min-width: $workforce-input-min-width;
 	}
 
 	@include respond-from(md) {
@@ -12,15 +24,17 @@
 
 .labelCol {
 	@include respond-from(md) {
-		width: 20%;
+		// Figma: 197.5 / 790 — the four columns share equal width.
+		width: 25%;
 	}
 }
 
 .inputCol {
-	min-width: 6rem;
+	min-width: $workforce-input-min-width;
 
 	@include respond-from(md) {
-		width: 30%;
+		// Figma: 197.5 / 790 — same width as the label column.
+		width: 25%;
 	}
 }
 
@@ -28,6 +42,7 @@
 	min-width: 4rem;
 
 	@include respond-from(md) {
-		width: 20%;
+		// Figma: 197.5 / 790 — same width as the input columns.
+		width: 25%;
 	}
 }

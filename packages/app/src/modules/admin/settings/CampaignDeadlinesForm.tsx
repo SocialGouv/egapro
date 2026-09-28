@@ -16,10 +16,7 @@ type Props = {
 	configuredYears: number[];
 };
 
-type DateFieldKey = Exclude<
-	keyof CampaignDeadlinesFormInput,
-	"year" | "gipPublicationDate"
->;
+type DateFieldKey = Exclude<keyof CampaignDeadlinesFormInput, "year">;
 
 const DECL1_FIELDS: readonly DateFieldKey[] = [
 	"decl1ModificationDeadline",
@@ -31,16 +28,21 @@ const DECL2_FIELDS: readonly DateFieldKey[] = [
 	"decl2ModificationDeadline",
 	"decl2JustificationDeadline",
 	"decl2JointEvaluationDeadline",
+	"decl2CseOpinionDeadline",
 ];
 
 const FIELD_LABELS: Record<DateFieldKey, string> = {
 	campaignStartDate: "Date de démarrage de la campagne",
+	publicDataReleaseDate: "Date de rendu public des données",
 	decl1ModificationDeadline: "Date limite de modification",
 	decl1JustificationDeadline: "Date limite de justification",
-	decl1JointEvaluationDeadline: "Date limite de l'avis du CSE",
+	decl1JointEvaluationDeadline:
+		"Date limite de dépôt du rapport d'évaluation conjointe",
 	decl2ModificationDeadline: "Date limite de modification",
 	decl2JustificationDeadline: "Date limite de justification",
-	decl2JointEvaluationDeadline: "Date limite de l'avis du CSE",
+	decl2JointEvaluationDeadline:
+		"Date limite de dépôt du rapport d'évaluation conjointe",
+	decl2CseOpinionDeadline: "Date limite de dépôt de l'avis du CSE",
 };
 
 /**
@@ -71,6 +73,7 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 		form.reset({
 			year: selectedYear,
 			campaignStartDate: deadlinesQuery.data.campaignStartDate ?? "",
+			publicDataReleaseDate: deadlinesQuery.data.publicDataReleaseDate ?? "",
 			decl1ModificationDeadline: deadlinesQuery.data.decl1ModificationDeadline,
 			decl1JustificationDeadline:
 				deadlinesQuery.data.decl1JustificationDeadline,
@@ -81,6 +84,7 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 				deadlinesQuery.data.decl2JustificationDeadline,
 			decl2JointEvaluationDeadline:
 				deadlinesQuery.data.decl2JointEvaluationDeadline,
+			decl2CseOpinionDeadline: deadlinesQuery.data.decl2CseOpinionDeadline,
 		});
 	}, [deadlinesQuery.data, form, selectedYear]);
 
@@ -146,14 +150,22 @@ export function CampaignDeadlinesForm({ initialYear, configuredYears }: Props) {
 					<fieldset className="fr-fieldset">
 						<legend className="fr-fieldset__legend">Campagne</legend>
 						<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
-							<div className="fr-col-12 fr-col-md-6">
+							<div className="fr-col-12 fr-col-md-4">
 								<GipPublicationReadOnly value={gipPublicationDate} />
 							</div>
-							<div className="fr-col-12 fr-col-md-6">
+							<div className="fr-col-12 fr-col-md-4">
 								<DateField
 									error={form.formState.errors.campaignStartDate?.message}
 									fieldKey="campaignStartDate"
 									register={form.register("campaignStartDate")}
+									required={false}
+								/>
+							</div>
+							<div className="fr-col-12 fr-col-md-4">
+								<DateField
+									error={form.formState.errors.publicDataReleaseDate?.message}
+									fieldKey="publicDataReleaseDate"
+									register={form.register("publicDataReleaseDate")}
 									required={false}
 								/>
 							</div>
@@ -292,12 +304,14 @@ function buildDefaults(year: number): CampaignDeadlinesFormInput {
 	return {
 		year,
 		campaignStartDate: "",
+		publicDataReleaseDate: "",
 		decl1ModificationDeadline: "",
 		decl1JustificationDeadline: "",
 		decl1JointEvaluationDeadline: "",
 		decl2ModificationDeadline: "",
 		decl2JustificationDeadline: "",
 		decl2JointEvaluationDeadline: "",
+		decl2CseOpinionDeadline: "",
 	};
 }
 

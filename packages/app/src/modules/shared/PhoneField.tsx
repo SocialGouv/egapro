@@ -3,7 +3,10 @@
 import type { ChangeEvent } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { formatPhoneInput } from "~/modules/profile/phone";
+import {
+	formatPhoneInput,
+	PHONE_FORMAT_MESSAGE,
+} from "~/modules/profile/phone";
 
 type PhoneFieldProps = {
 	className?: string;
@@ -30,20 +33,26 @@ export function PhoneField({
 			className={`${error ? "fr-input-group fr-input-group--error" : "fr-input-group"}${className ? ` ${className}` : ""}`}
 		>
 			<label className="fr-label" htmlFor={inputId}>
-				Numéro de téléphone (obligatoire)
-				<span className="fr-hint-text">
-					Format attendu : 01 22 33 44 55 ou +33 1 22 33 44 55
-				</span>
+				Numéro de téléphone
+				<span className="fr-hint-text">{PHONE_FORMAT_MESSAGE}</span>
 			</label>
 			<input
 				aria-describedby={messagesId}
+				aria-invalid={error ? "true" : undefined}
+				aria-required="true"
+				autoComplete="tel"
 				className="fr-input"
 				id={inputId}
 				type="tel"
 				{...registration}
 				onChange={handleChange}
 			/>
-			<div aria-live="polite" className="fr-messages-group" id={messagesId}>
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="fr-messages-group"
+				id={messagesId}
+			>
 				{error && <p className="fr-message fr-message--error">{error}</p>}
 			</div>
 		</div>

@@ -3,45 +3,27 @@ paths:
   - "src/server/api/**/*.ts"
 ---
 
-# tRPC API
+# API tRPC
 
-> **Used by**: `code-dev` (écriture routers), `security-auditor` (A01/A03/A04), `structural-auditor` (règle 2.14). Auto-chargé via `paths:`.
+> Chargée sur `src/server/api/**`. Vérifiée par `structural-auditor` et `security-auditor`.
 
-## Zod schemas in module folders (shared frontend/backend)
+## Schémas
 
-Zod schemas live in `src/modules/{domain}/schemas.ts` — **never** in `src/server/api/routers/`.
-Routers import schemas from modules. Forms use the same schemas via `useZodForm`.
+Les schémas Zod vivent dans `src/modules/{domaine}/schemas.ts`, **jamais** dans `src/server/api/routers/`. Le routeur les importe, le formulaire importe les mêmes via `useZodForm` — un seul schéma valide les deux côtés. Un fichier de routeur ne fait donc **jamais** `import { z } from "zod"` (bloqué par le hook).
 
-```ts
-// FORBIDDEN — inline schema in router
-export const myRouter = createTRPCRouter({
-  create: protectedProcedure
-    .input(z.object({ siren: z.string(), year: z.number() }))
-    .mutation(...)
-});
+## Accès
 
-// FORBIDDEN — schema in src/server/api/routers/schemas.ts
-import { createInput } from "./schemas";
+- Toute procédure non publique est un `protectedProcedure`, pas un `publicProcedure`.
+- **Toute mutation vérifie la propriété** : le `userId` vient de la session, jamais de l'input client. Un identifiant fourni par le client ne sert qu'à désigner la ressource, jamais à autoriser l'accès.
+- Écriture multiple ou lecture-puis-écriture → `db.transaction()` (`rules/database-drizzle.md`).
+- Toute mutation, et toute query exposant des données sensibles, se câble à l'audit (`rules/audit-logging.md`).
 
-// CORRECT — schema in src/modules/{domain}/schemas.ts
-import { createInput } from "~/modules/myDomain/schemas";
-export const myRouter = createTRPCRouter({
-  create: protectedProcedure.input(createInput).mutation(...)
-});
-```
+## Erreurs
 
-Router files must **never** `import { z } from "zod"` — all Zod usage is in module schema files.
+Toujours `TRPCError`, jamais un `Error` nu, avec le code qui porte la sémantique HTTP :
 
-## TRPCError with proper codes
+`NOT_FOUND` (n'existe pas) · `BAD_REQUEST` (entrée invalide passée à travers Zod) · `FORBIDDEN` (droits insuffisants) · `UNAUTHORIZED` (non authentifié) · `CONFLICT` (doublon ou conflit d'état) · `INTERNAL_SERVER_ERROR` (échec inattendu).
 
-Always throw `TRPCError` (not plain `Error`) with the appropriate HTTP-semantic code:
-- `NOT_FOUND` — resource does not exist
-- `BAD_REQUEST` — invalid input that passed Zod
-- `FORBIDDEN` — user lacks permission
-- `UNAUTHORIZED` — user not authenticated
-- `CONFLICT` — duplicate or state conflict
-- `INTERNAL_SERVER_ERROR` — unexpected failure
+## Requêtes
 
-## No raw SQL
-
-Use Drizzle query builder. Raw SQL is a last resort and must be reviewed for injection risks.
+Query builder Drizzle uniquement. Le SQL brut est un dernier recours, et il passe alors par une revue d'injection explicite.

@@ -1,89 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
+import { GIP_WORKFORCE_VOLUNTARY_DISPLAY } from "~/modules/domain";
+import {
+	DIVERGENT_HOURLY_MEDIAN,
+	noPayGapReferences,
+} from "~/test/gipGapFixtures";
 import { RecapitulatifPage } from "../RecapitulatifPage";
-
-function makeCategory(
-	overrides: Partial<EmployeeCategoryRow> = {},
-): EmployeeCategoryRow {
-	return {
-		name: "",
-		womenCount: null,
-		menCount: null,
-		annualBaseWomen: null,
-		annualBaseMen: null,
-		annualVariableWomen: null,
-		annualVariableMen: null,
-		hourlyBaseWomen: null,
-		hourlyBaseMen: null,
-		hourlyVariableWomen: null,
-		hourlyVariableMen: null,
-		...overrides,
-	};
-}
-
-const defaultCompany = () => ({
-	name: "ACME Corp",
-	siren: "123456789",
-	nafCode: "6201Z",
-	address: "1 rue de Paris, 75001 Paris",
-	workforce: 250,
-});
-
-const emptyStep2Data = () => ({
-	indicatorAAnnualWomen: "",
-	indicatorAAnnualMen: "",
-	indicatorAHourlyWomen: "",
-	indicatorAHourlyMen: "",
-	indicatorCAnnualWomen: "",
-	indicatorCAnnualMen: "",
-	indicatorCHourlyWomen: "",
-	indicatorCHourlyMen: "",
-});
-
-const emptyStep3Data = () => ({
-	indicatorBAnnualWomen: "",
-	indicatorBAnnualMen: "",
-	indicatorBHourlyWomen: "",
-	indicatorBHourlyMen: "",
-	indicatorDAnnualWomen: "",
-	indicatorDAnnualMen: "",
-	indicatorDHourlyWomen: "",
-	indicatorDHourlyMen: "",
-	indicatorEWomen: "",
-	indicatorEMen: "",
-});
-
-const emptyStep4Data = () => ({
-	annual: [
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-	],
-	hourly: [
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-		{ threshold: "" },
-	],
-});
-
-const defaultProps = () => ({
-	company: defaultCompany(),
-	declarationYear: 2025,
-	referencePeriod: "01/01/2025 - 31/12/2025",
-	declarantName: "Marie Dupont",
-	declarantEmail: "marie@acme.fr",
-	isCorrection: false,
-	totalWomen: 120,
-	totalMen: 130,
-	step2Data: emptyStep2Data(),
-	step3Data: emptyStep3Data(),
-	step4Data: emptyStep4Data(),
-	step5Categories: [] as EmployeeCategoryRow[],
-	step5Source: null as string | null,
-});
+import {
+	defaultCompany,
+	defaultProps,
+	emptyStep2Data,
+	emptyStep3Data,
+	makeCategory,
+} from "./fixtures";
 
 describe("RecapitulatifPage", () => {
 	it("renders h1 with year", () => {
@@ -96,16 +25,31 @@ describe("RecapitulatifPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it("demotes the title to h3 when embedded via titleTag (no second h1)", () => {
+		render(<RecapitulatifPage {...defaultProps()} titleTag="h3" />);
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: /Déclaration des indicateurs de rémunération 2025/,
+			}),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+	});
+
 	it("renders 'Télécharger' tertiary download button", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
 		expect(link.className).toContain("fr-btn--tertiary");
 	});
 
 	it("renders download link with correction param when isCorrection", () => {
 		render(<RecapitulatifPage {...defaultProps()} isCorrection />);
-		const link = screen.getByRole("link", { name: "Télécharger" });
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de rémunération (PDF)",
+		});
 		expect(link).toHaveAttribute(
 			"href",
 			"/api/declaration-pdf?year=2025&type=correction",
@@ -117,8 +61,8 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.queryByRole("navigation", { name: /vous êtes ici/i }),
 		).not.toBeInTheDocument();
-		// The only "Retour" link in the component is the bottom primary
-		// "Retour à Mon Espace" button — there is no top "Retour" link.
+		// The bottom action is the full "Mon espace" button — there is
+		// no standalone top "Retour" breadcrumb link.
 		expect(
 			screen.queryByRole("link", { name: "Retour" }),
 		).not.toBeInTheDocument();
@@ -151,12 +95,13 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("1 rue de Paris, 75001 Paris")).toBeInTheDocument();
 		expect(screen.getByText("Code NAF")).toBeInTheDocument();
 		expect(screen.getByText("6201Z")).toBeInTheDocument();
-		expect(
-			screen.getByText("Effectif annuel moyen en 2025"),
-		).toBeInTheDocument();
-		// "250" appears both as company.workforce and as 120 + 130 total in the
-		// workforce table — both are expected.
-		expect(screen.getAllByText("250").length).toBeGreaterThanOrEqual(1);
+		const workforceLabel = screen.getByText("Effectif annuel moyen en 2025");
+		expect(workforceLabel).toBeInTheDocument();
+		// "250" also appears as the 120 + 130 total of the workforce table, so the
+		// company value is read from the row that carries the label.
+		expect(workforceLabel.parentElement).toHaveTextContent(
+			"Effectif annuel moyen en 2025250",
+		);
 	});
 
 	it("renders 'Informations calcul' with single-line reference period", () => {
@@ -252,6 +197,50 @@ describe("RecapitulatifPage", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	// The recap is a read-only surface: it must print the gap that was recorded
+	// and published, not a fresh recomputation that can drift from it.
+	it("shows the recorded GIP gap rather than recomputing it from the operands", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const gaps = noPayGapReferences();
+		gaps[3] = { women, men, gap };
+
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step3Data={{
+					...emptyStep3Data(),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: men,
+				}}
+				step3Gaps={gaps}
+			/>,
+		);
+
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+	});
+
+	it("recomputes the recap gap once an operand no longer matches the GIP one", () => {
+		const { women, men, gap } = DIVERGENT_HOURLY_MEDIAN;
+		const gaps = noPayGapReferences();
+		gaps[3] = { women, men, gap };
+
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step3Data={{
+					...emptyStep3Data(),
+					indicatorDHourlyWomen: women,
+					indicatorDHourlyMen: "0.12",
+				}}
+				step3Gaps={gaps}
+			/>,
+		);
+
+		expect(screen.getByText("16,66 %")).toBeInTheDocument();
+		expect(screen.queryByText("7,19 %")).not.toBeInTheDocument();
+	});
+
 	it("renders proportion table when step3 indicatorE values are present", () => {
 		render(
 			<RecapitulatifPage
@@ -311,6 +300,90 @@ describe("RecapitulatifPage", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("gives quartile placeholders accessible meanings", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step4Data={{
+					annual: [
+						{ threshold: "20700.35", women: 0 },
+						{ threshold: "25750.99", men: 0 },
+						{ threshold: "34900.99", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 30, men: 60 },
+						{ threshold: "15", women: 40, men: 30 },
+						{ threshold: "20", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+				}}
+			/>,
+		);
+
+		const annualTable = screen.getByRole("table", {
+			name: "Quartile annuel – 2025",
+		});
+		const hourlyTable = screen.getByRole("table", {
+			name: "Quartile horaire – 2025",
+		});
+
+		expect(
+			within(annualTable).getByRole("columnheader", { name: "Quartile" }),
+		).toBeInTheDocument();
+		expect(
+			within(hourlyTable).getByRole("columnheader", { name: "Quartile" }),
+		).toBeInTheDocument();
+		expect(within(annualTable).getAllByText("Non renseigné")).toHaveLength(2);
+		expect(
+			within(annualTable).getAllByRole("cell", { name: "0" }),
+		).toHaveLength(2);
+		expect(
+			within(annualTable).getByText("Sans limite supérieure"),
+		).toBeInTheDocument();
+		expect(
+			within(annualTable).getAllByText("Non applicable").length,
+		).toBeGreaterThan(0);
+	});
+
+	it("locks the computed quartile percentages and grand totals (iso-behaviour)", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step4Data={{
+					annual: [
+						{ threshold: "20700.35", women: 30, men: 60 },
+						{ threshold: "25750.99", women: 40, men: 30 },
+						{ threshold: "34900.99", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+					hourly: [
+						{ threshold: "10", women: 30, men: 60 },
+						{ threshold: "15", women: 40, men: 30 },
+						{ threshold: "20", women: 24, men: 31 },
+						{ threshold: "", women: 15, men: 26 },
+					],
+				}}
+			/>,
+		);
+		for (const pct of [
+			"33,3 %",
+			"66,7 %",
+			"57,1 %",
+			"42,9 %",
+			"43,6 %",
+			"56,4 %",
+			"36,6 %",
+			"63,4 %",
+			"42,6 %",
+			"57,4 %",
+		]) {
+			expect(screen.getAllByText(pct)).toHaveLength(2);
+		}
+		expect(screen.getAllByText("109")).toHaveLength(2);
+		expect(screen.getAllByText("147")).toHaveLength(2);
+	});
+
 	it("renders one category table per step5 category with matching heading", () => {
 		render(
 			<RecapitulatifPage
@@ -331,9 +404,13 @@ describe("RecapitulatifPage", () => {
 		expect(
 			screen.getByText("Catégorie d'emplois n°2 : Techniciens"),
 		).toBeInTheDocument();
-		expect(screen.getAllByText("Effectif physique").length).toBe(2);
-		// "Total salariés : 78" total label must appear for the first category row.
-		expect(screen.getByText("Total salariés : 78")).toBeInTheDocument();
+		// One headcount table per category, each with an annual and hourly row
+		// (#4368) — plus the company-wide "Indicateurs pour l'ensemble de vos
+		// salariés" table above, which already carries the same two labels.
+		expect(screen.getAllByText("Rémunération annuelle").length).toBe(3);
+		expect(screen.getAllByText("Rémunération horaire").length).toBe(3);
+		// The first category's annual headcount total: 53 + 25 = 78.
+		expect(screen.getByText("78")).toBeInTheDocument();
 	});
 
 	it("renders source line when step5Source is provided", () => {
@@ -348,12 +425,22 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("Accord d'entreprise")).toBeInTheDocument();
 	});
 
-	it("renders return button linking to mon-espace", () => {
-		render(<RecapitulatifPage {...defaultProps()} />);
-		const returnLink = screen.getByRole("link", {
-			name: "Retour à Mon Espace",
-		});
+	// The Figma reference shows a single secondary "Mon espace" instance, so the
+	// bottom action must not vary with isCorrection.
+	it.each([
+		false,
+		true,
+	])("renders the same secondary 'Mon espace' bottom action (isCorrection: %s)", (isCorrection) => {
+		render(
+			<RecapitulatifPage {...defaultProps()} isCorrection={isCorrection} />,
+		);
+		const returnLink = screen.getByRole("link", { name: "Mon espace" });
 		expect(returnLink).toHaveAttribute("href", "/mon-espace");
+		expect(returnLink.className).toContain("fr-btn--secondary");
+		expect(returnLink.className).not.toContain("fr-btn--primary");
+		expect(
+			screen.queryByRole("link", { name: "Retour à Mon Espace" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("does not render its own ResourceBanner (PublicChrome handles it)", () => {
@@ -381,16 +468,75 @@ describe("RecapitulatifPage", () => {
 		expect(screen.queryByText("Adresse")).not.toBeInTheDocument();
 	});
 
-	it("hides Effectif annuel moyen when company.workforce is null", () => {
+	it("omits the Nom Prénom row when declarantName is empty", () => {
+		render(<RecapitulatifPage {...defaultProps()} declarantName="" />);
+		expect(
+			screen.getByRole("heading", { level: 2, name: "Informations déclarant" }),
+		).toBeInTheDocument();
+		expect(screen.queryByText("Nom Prénom")).not.toBeInTheDocument();
+		expect(screen.getByText("marie@acme.fr")).toBeInTheDocument();
+	});
+
+	it("humanises the source key when it is not a known label", () => {
+		render(
+			<RecapitulatifPage {...defaultProps()} step5Source="source-inconnue" />,
+		);
+		expect(screen.getByText("Source inconnue")).toBeInTheDocument();
+		expect(screen.queryByText("source-inconnue")).not.toBeInTheDocument();
+	});
+
+	// Regression #4014: legacy values must render identically here and in the PDF.
+	it("labels a legacy source value saved before the step 5 options changed", () => {
 		render(
 			<RecapitulatifPage
 				{...defaultProps()}
-				company={{ ...defaultCompany(), workforce: null }}
+				step5Source="convention-collective"
+			/>,
+		);
+		expect(screen.getByText("Convention collective")).toBeInTheDocument();
+	});
+
+	it("shows '< 50' when company.gipWorkforce is null", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: null }}
 			/>,
 		);
 		expect(
-			screen.queryByText(/Effectif annuel moyen en/),
-		).not.toBeInTheDocument();
+			screen.getByText("Effectif annuel moyen en 2025"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
+	});
+
+	it("shows '< 50' instead of the exact headcount when the company is in the GIP file below the threshold", () => {
+		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
+		// company present with 37 employees rendered "37".
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: 37 }}
+			/>,
+		);
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
+		expect(screen.queryByText("37")).not.toBeInTheDocument();
+	});
+
+	it("floors a decimal company.gipWorkforce for display", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: 99.97 }}
+			/>,
+		);
+		expect(
+			screen.getByText("Effectif annuel moyen en 2025"),
+		).toBeInTheDocument();
+		expect(screen.getByText("99")).toBeInTheDocument();
 	});
 
 	it("flags 'élevé' badge on high gaps (>= 5%)", () => {
@@ -405,7 +551,6 @@ describe("RecapitulatifPage", () => {
 				}}
 			/>,
 		);
-		// At least one "élevé" badge somewhere on the page.
 		const badges = screen.getAllByText("élevé");
 		expect(badges.length).toBeGreaterThanOrEqual(1);
 	});

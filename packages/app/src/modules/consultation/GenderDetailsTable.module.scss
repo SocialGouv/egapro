@@ -1,0 +1,38 @@
+.table {
+	table-layout: fixed;
+
+	> thead > tr > th:not(:first-child),
+	> tbody > tr > td {
+		text-align: center;
+	}
+
+	> thead > tr > th:first-child,
+	> tbody > tr > th {
+		text-align: left;
+	}
+
+	// DSFR keeps cells on a single line and scrolls the wrapper instead; inside
+	// these fixed-layout cards a long row label would overflow onto its value.
+	> thead > tr > th,
+	> tbody > tr > th,
+	> tbody > tr > td {
+		white-space: normal;
+	}
+
+	> thead > tr > th:not(:last-child),
+	> tbody > tr > th:not(:last-child),
+	> tbody > tr > td:not(:last-child) {
+		border-inline-end: 1px solid var(--border-default-grey);
+	}
+
+	> tbody > tr > td {
+		font-weight: 700;
+	}
+
+	> tbody > tr > th[scope="row"] {
+		background-color: var(--background-default-grey);
+		// DSFR draws a darker vertical line on row headers. Keep its horizontal
+		// separator and let the shared border above draw every column uniformly.
+		background-size: 100% 1px, 0 0;
+	}
+}

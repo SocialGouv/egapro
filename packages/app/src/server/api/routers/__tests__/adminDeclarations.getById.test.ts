@@ -13,7 +13,12 @@ const DECL_ID_2 = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 const DECL_ID_3 = "6ba7b812-9dad-11d1-80b4-00c04fd430c8";
 
 const adminSession = {
-	user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "admin@example.fr",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 
@@ -44,6 +49,14 @@ const baseDeclaration = {
 	declarantPhone: null,
 };
 
+type LockRow = {
+	userId: string;
+	email: string | null;
+	firstName: string | null;
+	lastName: string | null;
+	expiresAt: Date;
+};
+
 function buildDb(options: {
 	declaration: typeof baseDeclaration | null;
 	siblings?: {
@@ -52,8 +65,9 @@ function buildDb(options: {
 		cancelledAt: Date | null;
 		updatedAt: Date;
 	}[];
+	lock?: LockRow | null;
 }) {
-	const { declaration, siblings = [] } = options;
+	const { declaration, siblings = [], lock = null } = options;
 
 	let selectCallCount = 0;
 	return {
@@ -63,11 +77,12 @@ function buildDb(options: {
 			const chain = {
 				from: vi.fn().mockReturnThis(),
 				innerJoin: vi.fn().mockReturnThis(),
+				leftJoin: vi.fn().mockReturnThis(),
 				where: vi.fn().mockReturnThis(),
 				limit: vi.fn().mockImplementation(() => {
 					if (callIndex === 1)
 						return Promise.resolve(declaration ? [declaration] : []);
-					return chain;
+					return Promise.resolve(lock ? [lock] : []);
 				}),
 				orderBy: vi.fn().mockResolvedValue(callIndex === 4 ? siblings : []),
 			};
@@ -158,5 +173,46 @@ describe("adminDeclarationsRouter — getById", () => {
 
 		expect(result?.siblings[0]?.status).toBe("submitted");
 		expect(result?.siblings[0]?.cancelledAt).toBeNull();
+	});
+
+	it("exposes lock as null when the declaration is not locked", async () => {
+		const db = buildDb({ declaration: baseDeclaration, lock: null });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getById({ id: DECL_ID_1 });
+
+		expect(result?.lock).toBeNull();
+	});
+
+	it("exposes the lock holder and expiry when the declaration is locked", async () => {
+		const expiresAt = new Date("2026-03-20T10:00:00Z");
+		const db = buildDb({
+			declaration: baseDeclaration,
+			lock: {
+				userId: "user-9",
+				email: "editor@example.fr",
+				firstName: "Bob",
+				lastName: "Martin",
+				expiresAt,
+			},
+		});
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getById({ id: DECL_ID_1 });
+
+		expect(result?.lock).toEqual({
+			holder: "editor@example.fr",
+			expiresAt,
+		});
 	});
 });

@@ -9,3 +9,12 @@ onlyBuiltDependencies:
   - protobufjs
   - sharp
   - ssh2
+
+# @react-pdf/textkit 6.2.0 NFD-decomposed Latin text for embedded fonts, and the
+# renderer misplaces the resulting combining marks — every French diacritic was
+# drawn next to its letter instead of over it (#4017). Fixed upstream in 6.3.0
+# (diegomura/react-pdf#3384), which the transitive '^6.2.0' range already allows.
+# Pinned here so a re-resolution cannot fall back to 6.2.0.
+overrides:
+  '@react-pdf/textkit': '^6.3.0'
+

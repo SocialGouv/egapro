@@ -1,8 +1,14 @@
 import { redirect } from "next/navigation";
 
+import {
+	formatLongDate,
+	getObligationWorkforce,
+	isCseOpinionRequired,
+	selectJointEvaluationDeadline,
+} from "~/modules/domain";
+import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
-
 import { JointEvaluationForm } from "./JointEvaluationForm";
 
 export async function JointEvaluationPage() {
@@ -14,23 +20,35 @@ export async function JointEvaluationPage() {
 		data.declaration.secondDeclarationPathChoice === "joint_evaluation";
 
 	if (!isInitialJoint && !isRevisedJoint) {
-		redirect("/declaration-remuneration/parcours-conformite");
+		redirect(COMPLIANCE_PATH);
 	}
 
-	const company = await api.company.get({ siren: data.declaration.siren });
+	const [company, existingFile] = await Promise.all([
+		api.company.get({ siren: data.declaration.siren }),
+		api.jointEvaluation.getFile(),
+	]);
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
-	const declarationDate = data.declaration.updatedAt
-		? new Date(data.declaration.updatedAt).toLocaleDateString("fr-FR")
-		: new Date().toLocaleDateString("fr-FR");
+	const declarationDate = formatLongDate(
+		data.declaration.updatedAt
+			? new Date(data.declaration.updatedAt)
+			: new Date(),
+	);
 
 	return (
 		<JointEvaluationForm
+			cseOpinionRequired={isCseOpinionRequired({
+				workforce: getObligationWorkforce(company.gipWorkforce),
+				hasCse: company.hasCse,
+			})}
 			declarationDate={declarationDate}
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
-			hasCse={company.hasCse}
-			jointEvaluationDeadline={campaignDeadlines.decl1JointEvaluationDeadline}
+			existingFile={existingFile}
+			jointEvaluationDeadline={selectJointEvaluationDeadline(
+				campaignDeadlines,
+				isRevisedJoint,
+			)}
 		/>
 	);
 }

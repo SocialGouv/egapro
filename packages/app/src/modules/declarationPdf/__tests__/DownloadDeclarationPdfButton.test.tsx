@@ -10,7 +10,7 @@ describe("DownloadDeclarationPdfButton", () => {
 			name: /Télécharger le récapitulatif/,
 		});
 		expect(link).toHaveAttribute("href", "/api/declaration-pdf?year=2025");
-		expect(link).toHaveAttribute("download");
+		expect(link).not.toHaveAttribute("download");
 	});
 
 	it("renders a download link without year param when year is omitted", () => {

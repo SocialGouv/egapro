@@ -1,20 +1,7 @@
-.sectionHeader {
-	// DSFR's `.fr-table__content table tbody td` rule wins on specificity, so
-	// override the variable it reads instead of fighting the selector.
-	--background-default-grey: var(--background-contrast-grey);
-	background-color: var(--background-contrast-grey);
-}
-
 .sourceSelectGroup {
-	max-width: 18rem;
-}
-
-.obligatoiresRow {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-	flex-wrap: wrap;
+	:global(.fr-select) {
+		max-width: 18rem;
+	}
 }
 
 .deleteRow {
@@ -25,22 +12,71 @@
 .inputCell {
 	display: flex;
 	align-items: center;
+	// Push the input + unit to the right edge of the cell so the units (€ / nb)
+	// line up vertically across rows and align with the right-aligned Total values.
+	justify-content: flex-end;
 	gap: 0.375rem;
 }
 
 .compactInput {
-	width: 100px;
-	max-width: 100px;
+	// Wide enough, with trimmed horizontal padding, to fit a 7-figure amount
+	// (e.g. "1 234 567,00") without clipping.
+	width: 140px;
+	max-width: 140px;
+	padding: 0.25rem;
 }
 
-.nameColumnHeader {
-	width: 230px;
+.dataRow {
+	height: 64px;
+}
+
+:global(.fr-table__content) table tbody td.totalCell,
+:global(.fr-table__content) table tbody td.gapCell {
+	text-align: right;
+}
+
+.fixedTable table {
+	// Column widths come from the <colgroup> below (not content), so all three
+	// category tables share the same wide label column and none overflows the
+	// ~776px card (Figma page 5); narrow viewports scroll via the DSFR table
+	// wrapper (RGAA reflow).
+	table-layout: fixed;
+	// Keep the 140px inputs and their units readable when the viewport is
+	// reduced by browser zoom. The DSFR container provides the keyboard-usable
+	// horizontal scroll when this minimum is wider than the viewport.
+	min-width: 48rem;
+}
+
+.fixedTable table thead th:nth-child(2),
+.fixedTable table thead th:nth-child(3) {
+	// Let "Rémunération des femmes/hommes" wrap instead of overflowing the cell,
+	// without touching the écart header's own two-line layout.
+	white-space: normal;
+}
+
+// Shared label column across the effectifs and rémunération tables so their
+// left column lines up (Figma page 5).
+.colLabel {
+	width: 28%;
+}
+
+// Three equal data columns in every category table, so the effectifs table
+// (femmes / hommes / total) and the rémunération tables (femmes / hommes /
+// écart) share the same vertical rules (Figma node 10905-44316).
+.colData {
+	width: 24%;
 }
 
 .form {
 	display: flex;
 	flex-direction: column;
 	gap: 2rem;
+
+	// this form uses flex `gap` (margins add, not collapse) — strip the shared stepper's mt/mb so gaps stay 32px
+	> :global(.fr-stepper) {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
 }
 
 .categoryBlock {
@@ -68,7 +104,10 @@
 }
 
 .descriptionTitle {
-	font-size: 1.125rem;
+	font-weight: 500;
+}
+
+.periodDate {
 	font-weight: 500;
 }
 

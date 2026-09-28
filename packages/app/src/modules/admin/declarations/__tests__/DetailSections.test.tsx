@@ -22,6 +22,8 @@ const declaration: DeclarationDetail = {
 	currentStep: 6,
 	totalWomen: 120,
 	totalMen: 80,
+	hourlyWomen: 120,
+	hourlyMen: 80,
 	remunerationScore: 85,
 	firstDeclarationPathChoice: null,
 	demarcheCompletedAt: null,
@@ -55,6 +57,7 @@ const declaration: DeclarationDetail = {
 		},
 	],
 	siblings: [],
+	lock: null,
 };
 
 describe("DeclarationSummary", () => {
@@ -137,7 +140,7 @@ describe("FilesSection", () => {
 		expect(screen.getByText("avis-cse.pdf")).toBeInTheDocument();
 		expect(screen.getByText("Avis CSE")).toBeInTheDocument();
 		const link = screen.getByRole("link", {
-			name: "Télécharger avis-cse.pdf",
+			name: "Télécharger avis-cse.pdf (PDF)",
 		});
 		expect(link).toHaveAttribute("href", "/api/v1/files/file-1");
 	});

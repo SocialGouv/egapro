@@ -266,11 +266,11 @@ describe("parseGipCsv", () => {
 		expect(result.rows[0]).not.toHaveProperty("confidenceExoticContracts");
 	});
 
-	it("trims whitespace from header names (trailing space on column)", () => {
+	it("trims whitespace from header names (trailing space on de-accented v3 median column)", () => {
 		const csv = [
 			"destinataire;projet;horodatage;date_debut;date_fin;nb_lignes",
 			"foo;bar;2026-03-01;2026-01-01;2026-12-31;1",
-			"SIREN;Taux_horaire_variable_médian_F ;Taux_horaire_variable_médian_H",
+			"SIREN;Taux_horaire_variable_median_F ;Taux_horaire_variable_median_H",
 			"123456789;0,47;0,51",
 		].join("\n");
 
@@ -333,6 +333,27 @@ describe("fetchGipCsv", () => {
 		expect(fetch).toHaveBeenCalledWith("https://example.com/gip.csv", {
 			signal: expect.any(AbortSignal),
 		});
+
+		vi.unstubAllGlobals();
+	});
+
+	it("goes through the SUIT client when the URL is on the SUIT origin", async () => {
+		const fetchSpy = vi.fn().mockResolvedValue({
+			ok: true,
+			text: vi.fn().mockResolvedValue(VALID_CSV),
+			status: 200,
+			statusText: "OK",
+		});
+		vi.stubGlobal("fetch", fetchSpy);
+
+		// EGAPRO_SUIT_API_URL is https://api.suit.example.com in the test env.
+		await fetchGipCsv(
+			"https://api.suit.example.com/suit/api/externe/egapro/gipmds/latest",
+		);
+
+		// `redirect: "error"` is only added by suitAwareFetch, so it proves the
+		// GIP fetch is wired through the certificate-bearing path.
+		expect(fetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
 
 		vi.unstubAllGlobals();
 	});

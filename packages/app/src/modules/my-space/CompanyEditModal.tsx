@@ -1,20 +1,26 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 
-import { getCurrentYear } from "~/modules/domain";
-import { getDsfrModal } from "~/modules/shared";
+import {
+	formatWorkforceForUser,
+	getObligationWorkforce,
+	getWorkforceYear,
+	isCseRequired,
+} from "~/modules/domain";
+import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
+import { CONTACT } from "~/modules/routes";
+import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import { api } from "~/trpc/react";
 import styles from "./CompanyEditModal.module.scss";
 import { formatSiren } from "./formatSiren";
 import { updateHasCseSchema } from "./schemas";
+import { useUpdateHasCse } from "./useUpdateHasCse";
 
 export const MODAL_ID = "company-edit-modal";
 const MODAL_TITLE_ID = "company-edit-modal-title";
-const CURRENT_YEAR = getCurrentYear();
 
 type Props = {
 	company: {
@@ -22,7 +28,7 @@ type Props = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
-		workforce: number | null;
+		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
 };
@@ -30,6 +36,9 @@ type Props = {
 export function CompanyEditModal({ company: initialCompany }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const router = useRouter();
+	const cseApplicable = isCseRequired(
+		getObligationWorkforce(initialCompany.gipWorkforce),
+	);
 
 	const form = useZodForm(updateHasCseSchema, {
 		defaultValues: {
@@ -40,26 +49,50 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 
 	const hasCse = form.watch("hasCse");
 
+	const [submitError, setSubmitError] = useState<string | null>(null);
+
 	const closeModal = useCallback(() => {
 		const dialog = dialogRef.current;
 		if (dialog) getDsfrModal(dialog)?.conceal();
 	}, []);
 
-	const updateHasCseMutation = api.company.updateHasCse.useMutation({
+	useDsfrDialogOpen(
+		dialogRef,
+		useCallback(() => {
+			form.reset({
+				siren: initialCompany.siren,
+				hasCse: initialCompany.hasCse ?? undefined,
+			});
+			setSubmitError(null);
+		}, [form, initialCompany.siren, initialCompany.hasCse]),
+	);
+
+	const updateHasCseMutation = useUpdateHasCse({
 		onSuccess: () => {
 			closeModal();
 			router.refresh();
 		},
 	});
 
-	const onSubmit = form.handleSubmit((data) => {
+	const onSubmit = form.handleSubmit(async (data) => {
 		if (data.hasCse === undefined) return;
-		updateHasCseMutation.mutate({ siren: data.siren, hasCse: data.hasCse });
+		try {
+			setSubmitError(null);
+			await updateHasCseMutation.mutateAsync({
+				siren: data.siren,
+				hasCse: data.hasCse,
+			});
+		} catch {
+			setSubmitError(
+				"Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
+			);
+		}
 	});
 
 	return (
 		<dialog
 			aria-labelledby={MODAL_TITLE_ID}
+			aria-modal="true"
 			className="fr-modal"
 			id={MODAL_ID}
 			ref={dialogRef}
@@ -83,20 +116,18 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									Modifier les informations
 								</h2>
 								<p className="fr-mb-4w">
-									Vérifier les données affichées et compléter l'information
-									manquantes sur l'existence d'un CSE si nécessaire. Si vous
-									constatez une erreur, veuillez{" "}
+									{cseApplicable
+										? "Vérifier les données affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
+										: "Vérifier les données affichées."}{" "}
+									Si vous constatez une erreur, veuillez{" "}
 									<a
-										className="fr-link fr-icon-external-link-line fr-link--icon-right"
-										href="/aide/nous-contacter"
+										className={`fr-link fr-icon-external-link-line fr-link--icon-right ${styles.contactLink}`}
+										href={CONTACT}
 										rel="noopener noreferrer"
 										target="_blank"
 									>
 										nous contacter
-										<span className="fr-sr-only">
-											{" "}
-											(ouvre une nouvelle fenêtre)
-										</span>
+										<NewTabNotice />
 									</a>
 									.
 								</p>
@@ -107,39 +138,53 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 									onSubmit={onSubmit}
 								>
 									<CompanyReadonlySection company={initialCompany} />
-									<Controller
-										control={form.control}
-										name="hasCse"
-										render={({ field }) => (
-											<CseRadioGroup
-												hasCse={field.value ?? null}
-												setHasCse={field.onChange}
-											/>
-										)}
-									/>
+									{cseApplicable && (
+										<Controller
+											control={form.control}
+											name="hasCse"
+											render={({ field }) => (
+												<CseRadioGroup
+													hasCse={field.value ?? null}
+													setHasCse={field.onChange}
+												/>
+											)}
+										/>
+									)}
+									{submitError && (
+										<div
+											className="fr-alert fr-alert--error fr-mt-2w"
+											role="alert"
+										>
+											<p>{submitError}</p>
+										</div>
+									)}
 								</form>
 							</div>
 							<div className="fr-modal__footer">
 								<ul className="fr-btns-group fr-btns-group--right fr-btns-group--inline-reverse fr-btns-group--inline-lg">
-									<li>
-										<button
-											className="fr-btn"
-											disabled={
-												hasCse === undefined || updateHasCseMutation.isPending
-											}
-											form="company-edit-form"
-											type="submit"
-										>
-											Enregistrer
-										</button>
-									</li>
+									{cseApplicable && (
+										<li>
+											<button
+												className="fr-btn"
+												disabled={
+													hasCse === undefined || updateHasCseMutation.isPending
+												}
+												form="company-edit-form"
+												type="submit"
+											>
+												{updateHasCseMutation.isPending
+													? "Enregistrement…"
+													: "Enregistrer"}
+											</button>
+										</li>
+									)}
 									<li>
 										<button
 											aria-controls={MODAL_ID}
 											className="fr-btn fr-btn--secondary"
 											type="button"
 										>
-											Annuler
+											{cseApplicable ? "Annuler" : "Fermer"}
 										</button>
 									</li>
 								</ul>
@@ -158,30 +203,36 @@ type CompanyReadonlySectionProps = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
-		workforce: number | null;
+		gipWorkforce: number | null;
 	};
 };
 
 function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
+	const workforceYear = getWorkforceYear();
+
 	return (
 		<>
 			<div className={`fr-mb-4w ${styles.section}`}>
-				<InfoRow label="Raison sociale :" value={company.name} />
-				<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
-				<InfoRow label="Adresse :" value={company.address} />
-				<InfoRow label="Code NAF :" value={company.nafCode} />
+				<dl className={styles.infoList}>
+					<InfoRow label="Raison sociale :" value={company.name} />
+					<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
+					<InfoRow label="Adresse :" value={company.address} />
+					<InfoRow label="Code NAF :" value={company.nafCode} />
+				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 					Source : INSEE.
 				</p>
 			</div>
 
 			<div className={`fr-mb-4w ${styles.section}`}>
-				<InfoRow
-					label={`Effectif annuel moyen en ${CURRENT_YEAR} :`}
-					value={company.workforce?.toLocaleString("fr-FR")}
-				/>
+				<dl className={styles.infoList}>
+					<InfoRow
+						label={`Effectif annuel moyen en ${workforceYear} :`}
+						value={formatWorkforceForUser(company.gipWorkforce)}
+					/>
+				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
-					Source : DSN (Déclarations sociales nominatives).
+					Source : DSN (Déclarations Sociales Nominatives).
 				</p>
 			</div>
 		</>
@@ -195,10 +246,12 @@ type InfoRowProps = {
 
 function InfoRow({ label, value }: InfoRowProps) {
 	return (
-		<p className={`fr-mb-0 ${styles.infoRow}`}>
-			<span className={styles.label}>{label}</span>
-			<strong>{value ?? "—"}</strong>
-		</p>
+		<div className={styles.infoRow}>
+			<dt className={styles.label}>{label}</dt>
+			<dd>
+				<strong>{value ?? "—"}</strong>
+			</dd>
+		</div>
 	);
 }
 
@@ -211,8 +264,7 @@ function CseRadioGroup({ hasCse, setHasCse }: CseRadioGroupProps) {
 	return (
 		<fieldset className={`fr-fieldset ${styles.cseFieldset}`}>
 			<legend className="fr-fieldset__legend--regular fr-fieldset__legend">
-				Existence d'un CSE{" "}
-				<span className={styles.requiredHint}>(obligatoire)</span>
+				Existence d'un CSE (obligatoire)
 			</legend>
 			<div className="fr-fieldset__element fr-fieldset__element--inline">
 				<div className="fr-radio-group fr-radio-rich">

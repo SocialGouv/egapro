@@ -1,12 +1,20 @@
+"use client";
+
 import Image from "next/image";
 
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
+import type { AppHref } from "~/modules/routes";
 import styles from "./AideResourceCards.module.scss";
 
 type ResourceCardProps = {
-	badge?: string;
+	trackingId: string;
 	title: string;
 	description: string;
-	href: string;
+	href: AppHref;
 	imageSrc: string;
 	/** Alt text for the card image. Defaults to "" (decorative) since the card title provides context. */
 	imageAlt?: string;
@@ -15,7 +23,7 @@ type ResourceCardProps = {
 };
 
 function ResourceCard({
-	badge,
+	trackingId,
 	title,
 	description,
 	href,
@@ -28,17 +36,19 @@ function ResourceCard({
 		<div className={`fr-card fr-card--horizontal fr-enlarge-link${sizeClass}`}>
 			<div className="fr-card__body">
 				<div className="fr-card__content">
-					{badge && (
-						<div className="fr-card__start">
-							<ul className="fr-tags-group">
-								<li>
-									<p className="fr-tag fr-tag--sm">{badge}</p>
-								</li>
-							</ul>
-						</div>
-					)}
 					<h2 className="fr-card__title">
-						<a href={href}>{title}</a>
+						<a
+							href={href}
+							onClick={() =>
+								trackEvent({
+									category: MATOMO_EVENT_CATEGORY.HELP,
+									action: MATOMO_ACTION.AIDE_RESOURCE_CLICK,
+									name: trackingId,
+								})
+							}
+						>
+							{title}
+						</a>
 					</h2>
 					<p className="fr-card__desc">{description}</p>
 				</div>
@@ -58,20 +68,9 @@ function ResourceCard({
 	);
 }
 
-/** Three resource cards: new site announcement + two indicator guides. */
 export function AideResourceCards() {
 	return (
 		<div className="fr-grid-row fr-grid-row--gutters">
-			<div className="fr-col-12">
-				<ResourceCard
-					badge="Nouveau"
-					description="Retrouvez toutes les informations sur les changements apportés par la refonte du site et leurs impacts sur votre déclaration."
-					href="/aide/nouveau-site"
-					imageSrc="/assets/images/aide/nouveau-site.png"
-					size="sm"
-					title="Nouveau site : ce qui change pour votre déclaration"
-				/>
-			</div>
 			<div className="fr-col-12 fr-col-md-6">
 				<ResourceCard
 					description="Tout savoir sur les indicateurs préremplis via votre DSN, les écarts de rémunération par catégorie et les modalités de calcul."
@@ -79,6 +78,7 @@ export function AideResourceCards() {
 					imageSrc="/assets/images/aide/indicateurs-remuneration.png"
 					size="sm"
 					title="Indicateurs de rémunération"
+					trackingId="indicateurs-remuneration"
 				/>
 			</div>
 			<div className="fr-col-12 fr-col-md-6">
@@ -88,6 +88,7 @@ export function AideResourceCards() {
 					imageSrc="/assets/images/aide/indicateurs-representation.png"
 					size="sm"
 					title="Indicateurs de représentation"
+					trackingId="indicateurs-representation"
 				/>
 			</div>
 		</div>

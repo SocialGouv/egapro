@@ -1,143 +1,66 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
-import { formatLongDate } from "~/modules/domain";
+import { and, desc, eq, inArray } from "drizzle-orm";
+
+import { formatCategorySource } from "~/modules/declaration-remuneration";
+import {
+	formatShortDate,
+	formatWorkforceForUser,
+	getDeclarationReferencePeriod,
+	getReferenceYearFor,
+	isDraft,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import {
 	activeDeclarationFilter,
 	mapToEmployeeCategoryRows,
 } from "~/server/api/routers/declarationHelpers";
+import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { db } from "~/server/db";
 import {
 	companies,
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
+	gipMdsData,
 	jobCategories,
+	users,
 } from "~/server/db/schema";
 
-import type { DeclarationPdfData, QuartileCategory } from "./types";
+import type { DeclarationPdfData } from "./types";
 
-const QUARTILE_NAMES = [
-	"1er quartile",
-	"2e quartile",
-	"3e quartile",
-	"4e quartile",
-] as const;
-
-type Declaration = typeof declarations.$inferSelect;
-
-function buildStep2Rows(d: Declaration) {
-	return [
-		{
-			label: "Annuelle brute moyenne",
-			womenValue: d.indicatorAAnnualWomen ?? "",
-			menValue: d.indicatorAAnnualMen ?? "",
-		},
-		{
-			label: "Horaire brute moyenne",
-			womenValue: d.indicatorAHourlyWomen ?? "",
-			menValue: d.indicatorAHourlyMen ?? "",
-		},
-		{
-			label: "Annuelle brute médiane",
-			womenValue: d.indicatorCAnnualWomen ?? "",
-			menValue: d.indicatorCAnnualMen ?? "",
-		},
-		{
-			label: "Horaire brute médiane",
-			womenValue: d.indicatorCHourlyWomen ?? "",
-			menValue: d.indicatorCHourlyMen ?? "",
-		},
-	];
+async function getLatestEventDate(
+	declarationId: string,
+	eventType: "submit" | "second_declaration_submit",
+): Promise<Date | null> {
+	const [row] = await db
+		.select({ createdAt: declarationStatusHistory.createdAt })
+		.from(declarationStatusHistory)
+		.where(
+			and(
+				eq(declarationStatusHistory.declarationId, declarationId),
+				eq(declarationStatusHistory.eventType, eventType),
+			),
+		)
+		.orderBy(desc(declarationStatusHistory.createdAt))
+		.limit(1);
+	return row?.createdAt ?? null;
 }
 
-function buildStep3Data(d: Declaration) {
-	const rows = [
-		{
-			label: "Annuelle brute moyenne",
-			womenValue: d.indicatorBAnnualWomen ?? "",
-			menValue: d.indicatorBAnnualMen ?? "",
-		},
-		{
-			label: "Horaire brute moyenne",
-			womenValue: d.indicatorBHourlyWomen ?? "",
-			menValue: d.indicatorBHourlyMen ?? "",
-		},
-		{
-			label: "Annuelle brute médiane",
-			womenValue: d.indicatorDAnnualWomen ?? "",
-			menValue: d.indicatorDAnnualMen ?? "",
-		},
-		{
-			label: "Horaire brute médiane",
-			womenValue: d.indicatorDHourlyWomen ?? "",
-			menValue: d.indicatorDHourlyMen ?? "",
-		},
-	];
-	return {
-		rows,
-		beneficiaryWomen: d.indicatorEWomen ?? "",
-		beneficiaryMen: d.indicatorEMen ?? "",
-	};
-}
-
-function buildQuartileCategories(d: Declaration): QuartileCategory[] {
-	const annualThresholds = [
-		d.indicatorFAnnualThreshold1,
-		d.indicatorFAnnualThreshold2,
-		d.indicatorFAnnualThreshold3,
-		null, // Q4 has no threshold (column removed in migration #3352)
-	];
-	const annualWomen = [
-		d.indicatorFAnnualWomen1,
-		d.indicatorFAnnualWomen2,
-		d.indicatorFAnnualWomen3,
-		d.indicatorFAnnualWomen4,
-	];
-	const annualMen = [
-		d.indicatorFAnnualMen1,
-		d.indicatorFAnnualMen2,
-		d.indicatorFAnnualMen3,
-		d.indicatorFAnnualMen4,
-	];
-
-	const hourlyThresholds = [
-		d.indicatorFHourlyThreshold1,
-		d.indicatorFHourlyThreshold2,
-		d.indicatorFHourlyThreshold3,
-		null, // Q4 has no threshold (column removed in migration #3352)
-	];
-	const hourlyWomen = [
-		d.indicatorFHourlyWomen1,
-		d.indicatorFHourlyWomen2,
-		d.indicatorFHourlyWomen3,
-		d.indicatorFHourlyWomen4,
-	];
-	const hourlyMen = [
-		d.indicatorFHourlyMen1,
-		d.indicatorFHourlyMen2,
-		d.indicatorFHourlyMen3,
-		d.indicatorFHourlyMen4,
-	];
-
-	const annualCategories: QuartileCategory[] = QUARTILE_NAMES.map(
-		(quartileName, i) => ({
-			name: `annual:${quartileName}`,
-			womenCount: annualWomen[i] ?? undefined,
-			menCount: annualMen[i] ?? undefined,
-			womenValue: annualThresholds[i] ?? undefined,
-		}),
-	);
-
-	const hourlyCategories: QuartileCategory[] = QUARTILE_NAMES.map(
-		(quartileName, i) => ({
-			name: `hourly:${quartileName}`,
-			womenCount: hourlyWomen[i] ?? undefined,
-			menCount: hourlyMen[i] ?? undefined,
-			womenValue: hourlyThresholds[i] ?? undefined,
-		}),
-	);
-
-	return [...annualCategories, ...hourlyCategories];
+async function resolveTransmittedDate(
+	declarationId: string,
+	updatedAt: Date,
+	declarationType: "initial" | "correction",
+): Promise<Date> {
+	if (declarationType === "correction") {
+		const second = await getLatestEventDate(
+			declarationId,
+			"second_declaration_submit",
+		);
+		if (second) return second;
+	}
+	const submit = await getLatestEventDate(declarationId, "submit");
+	return submit ?? updatedAt;
 }
 
 export async function buildPdfData(
@@ -156,53 +79,102 @@ export async function buildPdfData(
 		throw new Error("Déclaration introuvable");
 	}
 
-	if (declaration.status === "draft") {
+	if (isDraft(declaration.status)) {
 		throw new Error("La déclaration n'est pas encore soumise");
 	}
 
-	const [company] = await db
-		.select()
-		.from(companies)
-		.where(eq(companies.siren, siren))
-		.limit(1);
+	const [[company], [gip], jobs, transmittedDate, declarantRows] =
+		await Promise.all([
+			db.select().from(companies).where(eq(companies.siren, siren)).limit(1),
+			db
+				.select({ workforceEma: gipMdsData.workforceEma })
+				.from(gipMdsData)
+				.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+				.limit(1),
+			db
+				.select()
+				.from(jobCategories)
+				.where(eq(jobCategories.declarationId, declaration.id)),
+			resolveTransmittedDate(
+				declaration.id,
+				declaration.updatedAt ?? now,
+				declarationType,
+			),
+			declaration.declarantId
+				? db
+						.select({
+							firstName: users.firstName,
+							lastName: users.lastName,
+							email: users.email,
+							phone: users.phone,
+						})
+						.from(users)
+						.where(eq(users.id, declaration.declarantId))
+						.limit(1)
+				: Promise.resolve([]),
+		]);
 
-	const jobs = await db
-		.select()
-		.from(jobCategories)
-		.where(eq(jobCategories.declarationId, declaration.id));
+	const declarant = declarantRows[0];
 
 	const jobIds = jobs.map((j) => j.id);
-	let empCats: (typeof employeeCategories.$inferSelect)[] = [];
-	if (jobIds.length > 0) {
-		const results = await Promise.all(
-			jobIds.map((id) =>
-				db
+	const empCats =
+		jobIds.length > 0
+			? await db
 					.select()
 					.from(employeeCategories)
-					.where(eq(employeeCategories.jobCategoryId, id)),
-			),
-		);
-		empCats = results.flat();
-	}
+					.where(inArray(employeeCategories.jobCategoryId, jobIds))
+			: [];
 
-	const step5Categories = mapToEmployeeCategoryRows(
-		jobs,
-		empCats,
-		declarationType,
-	);
+	const categories =
+		jobs.length > 0
+			? mapToEmployeeCategoryRows(jobs, empCats, declarationType)
+			: [];
+
+	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
+		mapToStepData(declaration);
+
+	const gipWorkforce = parseGipWorkforce(gip?.workforceEma);
+
+	const rawSource = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex)[0]
+		?.source;
+	const source = rawSource ? formatCategorySource(rawSource) : null;
 
 	return {
-		companyName: company?.name ?? `Entreprise ${siren}`,
-		siren,
 		year,
-		generatedAt: formatLongDate(now),
+		workforceYear: getReferenceYearFor(year),
 		isSecondDeclaration: declarationType === "correction",
+		transmittedAt: formatShortDate(transmittedDate),
+		referencePeriod: getDeclarationReferencePeriod(
+			year,
+			declarationType === "correction",
+			declaration.secondDeclReferencePeriodStart,
+			declaration.secondDeclReferencePeriodEnd,
+		),
+		declarant: {
+			name: [declarant?.firstName, declarant?.lastName]
+				.filter(Boolean)
+				.join(" "),
+			email: declarant?.email ?? "",
+			phone: declarant?.phone ?? "",
+		},
+		company: {
+			name: company?.name ?? `Entreprise ${siren}`,
+			siren,
+			address: company?.address ?? "",
+			nafCode: company?.nafCode ?? null,
+			nafLabel: company?.nafLabel ?? null,
+			workforceDisplay: formatWorkforceForUser(gipWorkforce),
+		},
 		totalWomen: declaration.totalWomen ?? 0,
 		totalMen: declaration.totalMen ?? 0,
-		step1Categories: [],
-		step2Rows: buildStep2Rows(declaration),
-		step3Data: buildStep3Data(declaration),
-		step4Categories: buildQuartileCategories(declaration),
-		step5Categories,
+		hourlyWomen: declaration.hourlyWomen ?? 0,
+		hourlyMen: declaration.hourlyMen ?? 0,
+		step2Data,
+		step3Data,
+		step4Data,
+		step2Gaps,
+		step3Gaps,
+		categories,
+		source,
 	};
 }

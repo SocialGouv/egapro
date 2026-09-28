@@ -52,6 +52,22 @@ ENV NEXT_PUBLIC_MATOMO_SITE_ID=$NEXT_PUBLIC_MATOMO_SITE_ID
 # via package.json exports, so the dist must exist when Next.js starts.
 RUN pnpm --filter notifications build
 
+# Bundle the standalone maintenance scripts for the minimal production image.
+# Their sources are TypeScript and some of them import shared modules from src/;
+# bundling keeps that single source of truth without shipping tsx or the app
+# source tree. Output stays .mjs so Node reads it as ESM whatever package.json
+# the runner ends up with, and lands in scripts/ so that import.meta.url-relative
+# paths (migrate reads ../drizzle) resolve exactly as they did before.
+RUN pnpm --filter app exec esbuild \
+    scripts/migrate.ts \
+    scripts/audit-cleanup.ts \
+    scripts/declaration-cleanup.ts \
+    scripts/backfill-company-naf.ts \
+    scripts/backfill-company-region-department.ts \
+    scripts/seed-demo-observatory.ts \
+    --bundle --platform=node --format=esm --packages=external \
+    --outdir=scripts --out-extension:.js=.bundle.mjs
+
 # Produce a self-contained runtime tree for the notifications worker. The
 # output bundles its own `node_modules/.pnpm` store, so the symlinks
 # resolve at runtime without depending on the workspace `.pnpm` store we
@@ -59,14 +75,23 @@ RUN pnpm --filter notifications build
 # don't use injected workspace packages).
 RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 
-# Build with Next.js cache persisted across builds
-# Sentry auth token and release are mounted as BuildKit secrets to avoid leaking in image layers
-# and to preserve build cache (ARG would invalidate cache on every new release)
+# Build with Next.js cache persisted across builds.
+# The Sentry auth token stays a BuildKit secret: it is a credential and must never
+# land in an image layer. The three public values below are ARGs on purpose — they
+# are inlined into the client bundle by the footer, and a secret is NOT part of the
+# layer cache key. As a secret, promoting a release would reuse the bundle Review
+# Auto already built for the same commit and ship the branch name instead of the
+# tag. Declaring them here, right before the build, keeps the dependency layers
+# shared: this layer is already invalidated by the source tree itself.
+ARG APP_VERSION
+ARG PR_NUMBER
+ARG SENTRY_RELEASE
 RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
-    --mount=type=secret,id=sentry_release \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
-    NEXT_PUBLIC_SENTRY_RELEASE=$(cat /run/secrets/sentry_release 2>/dev/null | tr '/' '-') \
+    NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \
+    NEXT_PUBLIC_APP_VERSION=$APP_VERSION \
+    NEXT_PUBLIC_PR_NUMBER=$PR_NUMBER \
     pnpm --filter app build
 
 
@@ -93,10 +118,17 @@ COPY --from=builder --chown=1000:1000 /app/packages/app/drizzle ./packages/app/d
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/drizzle-orm ./packages/app/node_modules/drizzle-orm
 COPY --from=builder --chown=1000:1000 /app/packages/app/node_modules/postgres ./packages/app/node_modules/postgres
 COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/entrypoint.sh ./packages/app/scripts/entrypoint.sh
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.mjs ./packages/app/scripts/migrate.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/migrate.bundle.mjs ./packages/app/scripts/migrate.bundle.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-region-department.bundle.mjs ./packages/app/scripts/backfill-company-region-department.bundle.mjs
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/backfill-company-naf.bundle.mjs ./packages/app/scripts/backfill-company-naf.bundle.mjs
+# Development/review-app fixture loaded by the optional post-deploy hook.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/seed-demo-observatory.bundle.mjs ./packages/app/scripts/seed-demo-observatory.bundle.mjs
 # Standalone script invoked by the audit-cleanup CronJob (issue #3268 — direct
 # DB access replaces the former curl → /api/audit/cleanup HTTP trigger).
-COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.mjs ./packages/app/scripts/audit-cleanup.mjs
+# declaration-cleanup is deliberately NOT copied: its CronJob has never found it
+# in this image. That packaging gap predates the TypeScript migration and is
+# tracked on its own — fixing it here would be a behaviour change out of scope.
+COPY --from=builder --chown=1000:1000 /app/packages/app/scripts/audit-cleanup.bundle.mjs ./packages/app/scripts/audit-cleanup.bundle.mjs
 
 # Notifications worker — independent workspace, runs as its own K8s
 # Deployment (notifications-deployment.yaml). Source = `pnpm deploy` output

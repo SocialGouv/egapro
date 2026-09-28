@@ -1,21 +1,40 @@
-import type { CampaignDeadlines } from "~/modules/domain";
-import { getCurrentYear, getDeclarationDisplayContext } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	RepresentationCampaign,
+} from "~/modules/domain";
+import {
+	formatLongDate,
+	getCurrentYear,
+	getDeclarationDisplayContext,
+	getObligationWorkforce,
+	isCompliancePathStepApplicable,
+	isCseOpinionRequired,
+	isCseRequired,
+	isIndicatorGRequiredForGip,
+} from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
+import { hasArchives } from "./archivesAvailability";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
 import { DeclarationsSection } from "./DeclarationsSection";
 import { computeCtaHref, computePanelVariant } from "./declarationProcessState";
 import { MissingInfoModal } from "./MissingInfoModal";
-import type { CompanyDetail, DeclarationItem } from "./types";
+import type {
+	CompanyDetail,
+	DeclarationItem,
+	LockHolderDisplay,
+} from "./types";
 import { WelcomeBanner } from "./WelcomeBanner";
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
-	hasNoSanction: boolean;
+	lockedByOther: boolean;
+	lockHolder: LockHolderDisplay | null;
+	representationCampaign: RepresentationCampaign;
 	userPhone: string | null;
 };
 
@@ -28,27 +47,45 @@ function getLastActionDate(
 	);
 	if (!currentYearDeclaration?.updatedAt) return null;
 
-	return new Intl.DateTimeFormat("fr-FR", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	}).format(currentYearDeclaration.updatedAt);
+	return formatLongDate(currentYearDeclaration.updatedAt);
 }
 
 export function CompanyDeclarationsPage({
 	campaignDeadlines,
 	company,
 	declarations,
-	hasNoSanction,
+	lockedByOther,
+	lockHolder,
+	representationCampaign,
 	userPhone,
 }: Props) {
 	const currentYear = getCurrentYear();
+	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
+	const cseApplicable = isCseRequired(obligationWorkforce);
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: obligationWorkforce,
+		hasCse: company.hasCse,
+	});
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		company.gipWorkforce,
+		currentYear,
+	);
 	const lastActionDate = getLastActionDate(declarations, currentYear);
 	const currentDeclaration = declarations.find(
 		(d) => d.type === "remuneration" && d.year === currentYear,
 	);
+	const compliancePathApplicable =
+		cseApplicable &&
+		indicatorGRequired &&
+		isCompliancePathStepApplicable({
+			status: currentDeclaration?.fsmStatus ?? null,
+			firstDeclarationPathChoice:
+				currentDeclaration?.firstDeclarationPathChoice ?? null,
+			secondDeclarationPathChoice:
+				currentDeclaration?.secondDeclarationPathChoice ?? null,
+		});
 	const panelVariant = computePanelVariant(currentDeclaration);
-	const ctaHref = computeCtaHref(currentDeclaration, company.siren);
+	const ctaHref = computeCtaHref(currentDeclaration);
 	const displayContext = getDeclarationDisplayContext({
 		firstDeclarationPathChoice:
 			currentDeclaration?.firstDeclarationPathChoice ?? null,
@@ -58,31 +95,40 @@ export function CompanyDeclarationsPage({
 	});
 
 	return (
-		<main id="content">
+		<main id="content" tabIndex={-1}>
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
 				campaignDeadlines={campaignDeadlines}
+				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}
-				hasNoSanction={hasNoSanction}
+				representationCampaign={representationCampaign}
 				userPhone={userPhone}
 			/>
-			<ArchivesSection />
+			{hasArchives && <ArchivesSection />}
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
+				cseApplicable={cseApplicable}
 				hasCse={company.hasCse}
 				siren={company.siren}
 				userPhone={userPhone}
 			/>
 			<DeclarationProcessPanel
 				campaignDeadlines={campaignDeadlines}
+				compliancePathApplicable={compliancePathApplicable}
+				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={ctaHref}
+				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
+				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
+				indicatorGRequired={indicatorGRequired}
 				lastActionDate={lastActionDate}
+				lockedByOther={lockedByOther}
+				lockHolder={lockHolder}
 				siren={company.siren}
 				variant={panelVariant}
 				year={currentYear}

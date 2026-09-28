@@ -66,7 +66,9 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 			"SUIT: Parcours_apres_declaration_2",
 		);
 		expect(decl?.cse_required).toBe("SUIT: Avis_CSE_requis");
-		expect(decl?.rules_version).toBe("SUIT: Version_regles");
+		expect(decl?.rules_version).toBe(
+			"FSM ruleset pinned at submission; not exposed to SUIT",
+		);
 		expect(decl?.total_women).toBe("SUIT: Effectif_F_rem_annuelle_globale");
 		expect(decl?.total_men).toBe("SUIT: Effectif_H_rem_annuelle_globale");
 		expect(decl?.created_at).toBe("SUIT: Date_creation");
@@ -110,10 +112,17 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 	it("annotates company identity columns exposed by SUIT", () => {
 		const company = SCHEMA_COLUMN_COMMENTS.company;
 		expect(company?.name).toBe("SUIT: Raison_sociale");
-		expect(company?.workforce).toBe("SUIT: Effectif");
-		expect(company?.naf_code).toBe("SUIT: Code_NAF");
 		expect(company?.address).toBe("SUIT: Adresse");
 		expect(company?.has_cse).toBe("SUIT: CSE_existant");
+	});
+
+	it("names the registry field and nomenclature behind naf_code", () => {
+		// Not a SUIT column: the code comes from the Weez registry, and the
+		// nomenclature has to be named — a NAF 2025 code next to the rév. 2
+		// label is exactly the mismatch #4087 fixed.
+		expect(SCHEMA_COLUMN_COMMENTS.company?.naf_code).toBe(
+			"Weez: activiteprincipaleunitelegale (NAF rév. 2), la nomenclature du libellé naf_label. Le code NAF 2025 est suivi séparément (#4089)",
+		);
 	});
 
 	it("annotates declarant columns exposed by SUIT", () => {
@@ -141,6 +150,21 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 
 	it("does not annotate file_path (not exposed in SUIT JSON)", () => {
 		expect(SCHEMA_COLUMN_COMMENTS.file?.file_path).toBeUndefined();
+	});
+
+	it("annotates cse_opinion_file columns exposed by SUIT (#4535)", () => {
+		const cseOpinionFile = SCHEMA_COLUMN_COMMENTS.cse_opinion_file;
+		expect(cseOpinionFile?.declaration_number).toBe(
+			"SUIT: Fichiers_CSE.Contenus.Numero_declaration",
+		);
+		expect(cseOpinionFile?.type).toBe("SUIT: Fichiers_CSE.Contenus.Type");
+	});
+
+	it("does not annotate cse_opinion_file join keys (not exposed as raw values in SUIT JSON)", () => {
+		const cseOpinionFile = SCHEMA_COLUMN_COMMENTS.cse_opinion_file;
+		expect(cseOpinionFile?.id).toBeUndefined();
+		expect(cseOpinionFile?.declaration_id).toBeUndefined();
+		expect(cseOpinionFile?.file_id).toBeUndefined();
 	});
 
 	it("annotates indicator G job_category columns without GIP-MDS prefix", () => {
@@ -183,27 +207,46 @@ describe("SCHEMA_COLUMN_COMMENTS", () => {
 		);
 	});
 
-	it("uses SUIT prefix (not GIP-MDS) for all T2 entries", () => {
+	it("uses a SUIT or Weez source prefix (never GIP-MDS) for all T2 entries", () => {
 		// Scoped to T2 tables only. The `declaration` table is excluded because T1
 		// (PR #3312) populates it with `GIP-MDS | SUIT: ...` indicator A–F entries;
 		// the T2 keys inside `declaration` are already validated verbatim by the
 		// per-key tests above ("annotates all declaration meta columns…",
-		// "annotates second declaration columns").
+		// "annotates second declaration columns"). `company` mixes SUIT columns
+		// with Weez-sourced region/department columns.
 		const t2Tables = [
 			"company",
 			"user",
 			"cse_opinion",
 			"file",
+			"cse_opinion_file",
 			"job_category",
 			"employee_category",
 		] as const;
 		const allComments = t2Tables.flatMap((table) =>
 			Object.values(SCHEMA_COLUMN_COMMENTS[table] ?? {}),
 		);
+		// `Weez/INSEE` is the compound source label of `company.workforce`, which is
+		// no longer the SUIT Effectif since #3929 — still a Weez-first declaration.
 		for (const comment of allComments) {
-			expect(comment).toMatch(/^SUIT: /);
+			expect(comment).toMatch(/^(SUIT|Weez|Weez\/INSEE): /);
 			expect(comment).not.toContain("GIP-MDS");
 		}
+	});
+
+	it("no longer presents company.workforce as the SUIT Effectif (#3929)", () => {
+		const workforce = SCHEMA_COLUMN_COMMENTS.company?.workforce;
+		expect(workforce).toBeDefined();
+		expect(workforce).not.toBe("SUIT: Effectif");
+		expect(workforce).toMatch(/^Weez\/INSEE: /);
+		expect(workforce).toContain("gip_mds_data.workforce_ema");
+	});
+
+	it("annotates the Weez-sourced company region/department columns", () => {
+		const company = SCHEMA_COLUMN_COMMENTS.company;
+		expect(company?.region).toMatch(/^Weez: /);
+		expect(company?.department_code).toMatch(/^Weez: /);
+		expect(company?.department_label).toMatch(/^Weez: /);
 	});
 
 	// ── T1 tests (PR #3313 — Indicators A–F GIP-MDS | SUIT) ──────────────────

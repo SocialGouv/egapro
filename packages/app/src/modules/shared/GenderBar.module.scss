@@ -1,0 +1,101 @@
+// Bar widths are data, and data cannot reach CSS through an inline style here:
+// `style={}` is blocked repo-wide. One class per whole percent keeps the fill
+// server-rendered, JS-free and hook-clean; 1 % is finer than the eye reads on a
+// bar this size, so nothing is lost by quantising.
+@for $step from 0 through 100 {
+	.w#{$step} {
+		width: #{$step * 1%};
+	}
+}
+
+.track {
+	display: flex;
+	overflow: hidden;
+	height: 1.5rem;
+	border: 1px solid var(--border-default-grey);
+	background: var(--background-default-grey);
+}
+
+.trackPlain {
+	border: 0;
+}
+
+.segment {
+	height: 100%;
+}
+
+.women {
+	background: var(--egapro-chart-women);
+}
+
+.men {
+	background: var(--egapro-chart-men);
+}
+
+.legend {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	margin: 0.5rem 0 0;
+}
+
+.legendSingle {
+	justify-content: flex-start;
+}
+
+.legendItem {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	margin: 0;
+	color: var(--text-title-grey);
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+}
+
+.swatch {
+	width: 0.75rem;
+	height: 0.75rem;
+	flex: 0 0 0.75rem;
+	margin-top: 0.4rem;
+}
+
+.row {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 0.5rem 0;
+
+	@include respond-to(sm) {
+		flex-direction: column;
+		gap: 0.25rem;
+
+		// Stacked, the label's flex-basis would become a height.
+		.rowLabel {
+			flex: 0 0 auto;
+		}
+	}
+}
+
+.rowLabel {
+	flex: 0 0 8rem;
+	padding-top: 0.125rem;
+	color: var(--text-title-grey);
+	font-size: 0.875rem;
+	line-height: 1.5rem;
+}
+
+.rowBar {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+// DSFR gives `hr` a 1.5rem bottom padding and draws its line with a
+// background-image; the shorthand below would otherwise paint that padding too.
+.separator {
+	height: 1px;
+	padding: 0;
+	border: 0;
+	margin: 0;
+	background: var(--border-default-grey);
+}

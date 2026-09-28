@@ -56,10 +56,19 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
+// Deterministic blob URL factory: jsdom returns a random `blob:nodedata:<uuid>`
+// which makes the FileUpload download-link `href` non-assertable. A stable
+// `blob:mock/<name>` lets tests verify the generated object URL precisely.
+URL.createObjectURL = vi.fn(
+	(blob: Blob) => `blob:mock/${blob instanceof File ? blob.name : "blob"}`,
+) as unknown as typeof URL.createObjectURL;
+URL.revokeObjectURL = vi.fn() as unknown as typeof URL.revokeObjectURL;
+
 // Global mock for ~/env — provides test values for all server env vars.
 vi.mock("~/env", () => ({
 	env: {
 		NODE_ENV: "test",
+		ADMIN_EMAILS: "agent@example.fr",
 		DATABASE_URL: "postgres://localhost/test",
 		AUTH_SECRET: "test-secret",
 		EGAPRO_PROCONNECT_CLIENT_ID: "test-client-id",
@@ -67,6 +76,8 @@ vi.mock("~/env", () => ({
 		EGAPRO_PROCONNECT_ISSUER: "https://proconnect.example.com",
 		EGAPRO_WEEZ_API_URL: "https://weez.example.com/api",
 		EGAPRO_SUIT_API_URL: "https://api.suit.example.com",
+		EGAPRO_JDMA_DEMARCHE_ID: "4169",
+		EGAPRO_JDMA_BUTTON_ID: "4730",
 		EGAPRO_GATEWAY_SHARED_SECRET:
 			"test-gateway-shared-secret-at-least-32-chars",
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
@@ -75,10 +86,17 @@ vi.mock("~/env", () => ({
 
 // Global mock for ~/modules/layout — provides NewTabNotice, Breadcrumb, DsfrPictogram and ResourceBanner passthroughs.
 vi.mock("~/modules/layout", () => ({
-	DsfrPictogram: ({ path }: { path: string }) =>
-		React.createElement("svg", { "aria-hidden": "true", "data-src": path }),
+	// className carries the DSFR colour modifier (fr-artwork--*), so it has to
+	// survive the mock for tests that assert on the artwork's colour.
+	DsfrPictogram: ({ className, path }: { className?: string; path: string }) =>
+		React.createElement("svg", {
+			"aria-hidden": "true",
+			className,
+			"data-src": path,
+		}),
 	ResourceBanner: () =>
 		React.createElement("div", { "data-testid": "resource-banner" }),
+	RouteScrollReset: () => null,
 	NewTabNotice: () =>
 		React.createElement(
 			"span",

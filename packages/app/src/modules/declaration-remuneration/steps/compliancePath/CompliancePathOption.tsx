@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 
+import { TrackedLink } from "~/modules/analytics";
 import { formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-
+import type { AppHref } from "~/modules/routes";
 import styles from "./CompliancePathOption.module.scss";
 
 type Props = {
@@ -14,8 +15,9 @@ type Props = {
 	title: string;
 	children: ReactNode;
 	deadline: Date;
-	learnMoreHref?: string;
+	learnMoreHref?: AppHref;
 	learnMoreLabel?: string;
+	learnMoreTrackingId?: string;
 	disabled?: boolean;
 };
 
@@ -30,6 +32,7 @@ export function CompliancePathOption({
 	deadline,
 	learnMoreHref,
 	learnMoreLabel,
+	learnMoreTrackingId,
 	disabled = false,
 }: Props) {
 	return (
@@ -44,13 +47,16 @@ export function CompliancePathOption({
 					type="radio"
 					value={value}
 				/>
-				<label className="fr-label fr-text--bold fr-h6 fr-mb-0" htmlFor={id}>
+				<label
+					className={`fr-label fr-text--bold fr-h6 fr-mb-0 ${styles.title}`}
+					htmlFor={id}
+				>
 					{title}
 				</label>
 			</div>
-			<div className="fr-mt-2w fr-pl-4w">
+			<div className={`fr-mt-2w fr-pl-4w ${styles.body}`}>
 				{children}
-				<p className="fr-text--sm fr-mb-1w fr-mt-2w">
+				<p className="fr-text--sm">
 					<span
 						aria-hidden="true"
 						className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
@@ -58,15 +64,16 @@ export function CompliancePathOption({
 					Échéance au {formatLongDate(deadline)}
 				</p>
 				{learnMoreHref && (
-					<a
-						className="fr-link fr-text--sm"
+					<TrackedLink
+						className={`fr-link ${styles.learnMore}`}
 						href={learnMoreHref}
 						rel="noopener noreferrer"
 						target="_blank"
+						trackingId={learnMoreTrackingId ?? "compliance_learn_more"}
 					>
 						{learnMoreLabel ?? "En savoir plus"}
 						<NewTabNotice />
-					</a>
+					</TrackedLink>
 				)}
 			</div>
 		</div>

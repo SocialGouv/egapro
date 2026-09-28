@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-
+import { LOGIN } from "~/modules/routes";
 import { Footer } from "./Footer";
 import { ResourceBanner } from "./ResourceBanner";
+import { isAdminRoute } from "./shared/routeUtils";
 
 /**
  * Renders the public help banner + footer on every route except the backoffice.
@@ -13,12 +14,10 @@ import { ResourceBanner } from "./ResourceBanner";
  */
 export function PublicChrome() {
 	const pathname = usePathname();
-	// Match the `/admin` segment boundary so hypothetical sibling routes like
-	// `/administrator` or `/admin-tools` keep the public chrome.
-	if (pathname === "/admin" || pathname?.startsWith("/admin/")) {
+	if (isAdminRoute(pathname)) {
 		return null;
 	}
-	const showResourceBanner = pathname !== "/login";
+	const showResourceBanner = pathname !== LOGIN;
 	return (
 		<>
 			{showResourceBanner && <ResourceBanner />}

@@ -14,9 +14,18 @@
  * The generated CSV follows the exact GIP MDS format:
  * - Line 1: metadata headers
  * - Line 2: metadata values
- * - Line 3: column headers (75 columns)
+ * - Line 3: column headers (82 columns)
  * - Lines 4+: data rows (one per SIREN)
  */
+
+import {
+	distributeByLargestRemainder,
+	fmt2,
+	fmt4,
+	gapFromRounded,
+	proportionMen,
+	proportionWomen,
+} from "./gipMockShared";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -33,6 +42,7 @@ type CompanyProfile =
 type Bucket =
 	| "medium-50"
 	| "medium-100"
+	| "medium-150"
 	| "large-250"
 	| "large-1000"
 	| "large-5000";
@@ -47,6 +57,7 @@ type CompanyData = {
 const BUCKET_PROFILES: Record<Bucket, [CompanyProfile, CompanyProfile]> = {
 	"medium-50": ["balanced", "industry_moderate"],
 	"medium-100": ["balanced", "services_low_pay"],
+	"medium-150": ["men_disfavored", "industry_moderate"],
 	"large-250": ["women_disfavored_low", "balanced"],
 	"large-1000": ["women_disfavored_high", "tech_high_pay"],
 	"large-5000": ["finance_high_gap", "women_disfavored_low"],
@@ -75,14 +86,6 @@ function randInt(min: number, max: number): number {
 	return Math.round(randBetween(min, max));
 }
 
-function fmt2(n: number): string {
-	return n.toFixed(2).replace(".", ",");
-}
-
-function fmt4(n: number): string {
-	return n.toFixed(4).replace(".", ",");
-}
-
 // ── Company loading ────────────────────────────────────────────────
 
 type InputCompany = {
@@ -94,7 +97,8 @@ type InputCompany = {
 
 const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 	"medium-50": [50, 99],
-	"medium-100": [100, 249],
+	"medium-100": [100, 149],
+	"medium-150": [150, 249],
 	"large-250": [250, 999],
 	"large-1000": [1000, 4999],
 	"large-5000": [5000, 20000],
@@ -228,49 +232,62 @@ function generateRow(company: CompanyData): string[] {
 	const variableWomen = Math.round(
 		totalWomen * variablePayRatio * randBetween(0.8, 1.0),
 	);
-	const variableMen = Math.round(
-		totalMen * variablePayRatio * randBetween(0.9, 1.1),
+	const variableMen = Math.min(
+		totalMen,
+		Math.round(totalMen * variablePayRatio * randBetween(0.9, 1.1)),
 	);
 
-	// Hourly rates (annual / 1820 hours standard)
-	const hourlyWomenRate = baseSalaryWomen / 1820;
-	const hourlyMenRate = baseSalaryMen / 1820;
+	// Hours model — women work 93-100% of men's hours (part-time more frequent)
+	const hoursH = randBetween(1800, 1850);
+	const hoursW = hoursH * randBetween(0.93, 1.0);
 
-	// Gaps (as proportion: (men - women) / men)
-	const annualMeanGap = (baseSalaryMen - baseSalaryWomen) / baseSalaryMen;
-	const hourlyMeanGap = (hourlyMenRate - hourlyWomenRate) / hourlyMenRate;
+	const annualWomenFmt = fmt2(baseSalaryWomen);
+	const annualMenFmt = fmt2(baseSalaryMen);
+	const annualMeanGap = gapFromRounded(annualWomenFmt, annualMenFmt) ?? 0;
+
+	// Global mean — hourly (sex-specific hours give a distinct ratio from annual)
+	const hourlyWomenFmt = fmt2(baseSalaryWomen / hoursW);
+	const hourlyMenFmt = fmt2(baseSalaryMen / hoursH);
+	const hourlyMeanGap = gapFromRounded(hourlyWomenFmt, hourlyMenFmt) ?? 0;
 
 	// Median: slight deviation from mean
 	const medianFactor = randBetween(0.92, 1.08);
 	const annualMedianWomen = baseSalaryWomen * medianFactor;
 	const annualMedianMen =
 		baseSalaryMen * medianFactor * randBetween(0.98, 1.02);
+	const annualMedianWomenFmt = fmt2(annualMedianWomen);
+	const annualMedianMenFmt = fmt2(annualMedianMen);
 	const annualMedianGap =
-		(annualMedianMen - annualMedianWomen) / annualMedianMen;
+		gapFromRounded(annualMedianWomenFmt, annualMedianMenFmt) ?? 0;
 
-	const hourlyMedianWomen = hourlyWomenRate * medianFactor;
-	const hourlyMedianMen =
-		hourlyMenRate * medianFactor * randBetween(0.98, 1.02);
+	const hourlyMedianWomenFmt = fmt2(annualMedianWomen / hoursW);
+	const hourlyMedianMenFmt = fmt2(annualMedianMen / hoursH);
 	const hourlyMedianGap =
-		(hourlyMedianMen - hourlyMedianWomen) / hourlyMedianMen;
+		gapFromRounded(hourlyMedianWomenFmt, hourlyMedianMenFmt) ?? 0;
 
-	// Variable pay gaps
+	const variableAnnualWomenFmt = fmt2(variableAmountWomen);
+	const variableAnnualMenFmt = fmt2(variableAmountMen);
 	const variableAnnualMeanGap =
-		(variableAmountMen - variableAmountWomen) / variableAmountMen;
-	const variableHourlyWomen = variableAmountWomen / 1820;
-	const variableHourlyMen = variableAmountMen / 1820;
+		gapFromRounded(variableAnnualWomenFmt, variableAnnualMenFmt) ?? 0;
+
+	const variableHourlyWomenFmt = fmt2(variableAmountWomen / hoursW);
+	const variableHourlyMenFmt = fmt2(variableAmountMen / hoursH);
 	const variableHourlyMeanGap =
-		(variableHourlyMen - variableHourlyWomen) / variableHourlyMen;
+		gapFromRounded(variableHourlyWomenFmt, variableHourlyMenFmt) ?? 0;
 
 	const variableMedianWomen = variableAmountWomen * randBetween(0.85, 1.15);
 	const variableMedianMen = variableAmountMen * randBetween(0.85, 1.15);
+	const variableAnnualMedianWomenFmt = fmt2(variableMedianWomen);
+	const variableAnnualMedianMenFmt = fmt2(variableMedianMen);
 	const variableAnnualMedianGap =
-		(variableMedianMen - variableMedianWomen) / variableMedianMen;
-	const variableHourlyMedianWomen = variableMedianWomen / 1820;
-	const variableHourlyMedianMen = variableMedianMen / 1820;
+		gapFromRounded(variableAnnualMedianWomenFmt, variableAnnualMedianMenFmt) ??
+		0;
+
+	const variableHourlyMedianWomenFmt = fmt2(variableMedianWomen / hoursW);
+	const variableHourlyMedianMenFmt = fmt2(variableMedianMen / hoursH);
 	const variableHourlyMedianGap =
-		(variableHourlyMedianMen - variableHourlyMedianWomen) /
-		variableHourlyMedianMen;
+		gapFromRounded(variableHourlyMedianWomenFmt, variableHourlyMedianMenFmt) ??
+		0;
 
 	// Variable pay proportions
 	const proportionVariableWomen =
@@ -307,10 +324,15 @@ function generateRow(company: CompanyData): string[] {
 		),
 	);
 
-	// Hourly quartile thresholds — Q1-Q3 only
-	const hq1 = q1Threshold / 1820;
-	const hq2 = q2Threshold / 1820;
-	const hq3 = q3Threshold / 1820;
+	// Hourly quartile thresholds — population-weighted average hours (unbiased)
+	const totalHourly = hourlyMen + hourlyWomen;
+	const avgHours =
+		totalHourly > 0
+			? (hoursH * hourlyMen + hoursW * hourlyWomen) / totalHourly
+			: (hoursH + hoursW) / 2;
+	const hq1 = q1Threshold / avgHours;
+	const hq2 = q2Threshold / avgHours;
+	const hq3 = q3Threshold / avgHours;
 
 	// Hourly quartile proportions (slight variation from annual)
 	const hq1WomenProp = Math.min(
@@ -330,24 +352,50 @@ function generateRow(company: CompanyData): string[] {
 		Math.max(0, q4WomenProp + randBetween(-0.03, 0.03)),
 	);
 
+	// Counts first, proportions derived from them — the reverse cannot guarantee
+	// that the quartile cells sum back to the block's reference headcount.
+	const annualWomenCounts = distributeByLargestRemainder(totalWomen, [
+		q1WomenProp,
+		q2WomenProp,
+		q3WomenProp,
+		q4WomenProp,
+	]);
+	const annualMenCounts = distributeByLargestRemainder(totalMen, [
+		1 - q1WomenProp,
+		1 - q2WomenProp,
+		1 - q3WomenProp,
+		1 - q4WomenProp,
+	]);
+	const hourlyWomenCounts = distributeByLargestRemainder(hourlyWomen, [
+		hq1WomenProp,
+		hq2WomenProp,
+		hq3WomenProp,
+		hq4WomenProp,
+	]);
+	const hourlyMenCounts = distributeByLargestRemainder(hourlyMen, [
+		1 - hq1WomenProp,
+		1 - hq2WomenProp,
+		1 - hq3WomenProp,
+		1 - hq4WomenProp,
+	]);
+	const nb = (counts: number[], i: number): string => String(counts[i] ?? 0);
+	const propF = (w: number[], m: number[], i: number): string =>
+		fmt4(proportionWomen(w[i] ?? 0, m[i] ?? 0));
+	const propH = (w: number[], m: number[], i: number): string =>
+		fmt4(proportionMen(w[i] ?? 0, m[i] ?? 0));
+
 	// Confidence index
 	const confidenceIndex = randBetween(0.5, 0.99);
 	const confExo = randBetween(0, 0.5);
 	const confUnit = randBetween(0, 0.3);
 	const confSuspRatio = randBetween(0, 0.3);
-	const confLongSusp = randBetween(0, 0.1);
-	const confNoEndSusp = randBetween(0, 0.05);
 	const confSickRatio = randBetween(0, 0.2);
-	const confLongSick = randBetween(0, 0.95);
 	const confNoSick = randBetween(0, 0.05);
 	const confQuota250 = randBetween(0, 0.3);
 	const confQuota0 = randBetween(0, 0.2);
-	const confMultiYear = randBetween(0, 0.2);
-	const confFpRatio = randBetween(0, 0.95);
 	const confExtRem = randBetween(0, 0.95);
 	const confExtRate = randBetween(0, 0.05);
 
-	// Build the row (75 fields in CSV order)
 	return [
 		siren,
 		fmt2(workforce),
@@ -359,77 +407,84 @@ function generateRow(company: CompanyData): string[] {
 		String(variableWomen),
 		// Indicator A — Global mean
 		fmt4(annualMeanGap),
-		fmt2(baseSalaryWomen),
-		fmt2(baseSalaryMen),
+		annualWomenFmt,
+		annualMenFmt,
 		fmt4(hourlyMeanGap),
-		fmt2(hourlyWomenRate),
-		fmt2(hourlyMenRate),
+		hourlyWomenFmt,
+		hourlyMenFmt,
 		// Indicator B — Variable mean
 		fmt4(variableAnnualMeanGap),
-		fmt2(variableAmountWomen),
-		fmt2(variableAmountMen),
+		variableAnnualWomenFmt,
+		variableAnnualMenFmt,
 		fmt4(variableHourlyMeanGap),
-		fmt2(variableHourlyWomen),
-		fmt2(variableHourlyMen),
+		variableHourlyWomenFmt,
+		variableHourlyMenFmt,
 		// Indicator C — Global median
 		fmt4(annualMedianGap),
-		fmt2(annualMedianWomen),
-		fmt2(annualMedianMen),
+		annualMedianWomenFmt,
+		annualMedianMenFmt,
 		fmt4(hourlyMedianGap),
-		fmt2(hourlyMedianWomen),
-		fmt2(hourlyMedianMen),
+		hourlyMedianWomenFmt,
+		hourlyMedianMenFmt,
 		// Indicator D — Variable median
 		fmt4(variableAnnualMedianGap),
-		fmt2(variableMedianWomen),
-		fmt2(variableMedianMen),
+		variableAnnualMedianWomenFmt,
+		variableAnnualMedianMenFmt,
 		fmt4(variableHourlyMedianGap),
-		fmt2(variableHourlyMedianWomen),
-		fmt2(variableHourlyMedianMen),
+		variableHourlyMedianWomenFmt,
+		variableHourlyMedianMenFmt,
 		// Indicator E — Variable pay proportions
 		fmt4(proportionVariableWomen),
 		fmt4(proportionVariableMen),
-		// Indicator F — Annual quartile thresholds (Q1-Q3 only)
+		// Indicator F — Annual quartiles: thresholds, nb_F, nb_H, then proportions
 		fmt2(q1Threshold),
 		fmt2(q2Threshold),
 		fmt2(q3Threshold),
-		// Annual quartile proportions (women)
-		fmt4(q1WomenProp),
-		fmt4(q2WomenProp),
-		fmt4(q3WomenProp),
-		fmt4(q4WomenProp),
-		// Annual quartile proportions (men = 1 - women)
-		fmt4(1 - q1WomenProp),
-		fmt4(1 - q2WomenProp),
-		fmt4(1 - q3WomenProp),
-		fmt4(1 - q4WomenProp),
-		// Hourly quartile thresholds (Q1-Q3 only)
+		nb(annualWomenCounts, 0),
+		nb(annualWomenCounts, 1),
+		nb(annualWomenCounts, 2),
+		nb(annualWomenCounts, 3),
+		nb(annualMenCounts, 0),
+		nb(annualMenCounts, 1),
+		nb(annualMenCounts, 2),
+		nb(annualMenCounts, 3),
+		propF(annualWomenCounts, annualMenCounts, 0),
+		propF(annualWomenCounts, annualMenCounts, 1),
+		propF(annualWomenCounts, annualMenCounts, 2),
+		propF(annualWomenCounts, annualMenCounts, 3),
+		propH(annualWomenCounts, annualMenCounts, 0),
+		propH(annualWomenCounts, annualMenCounts, 1),
+		propH(annualWomenCounts, annualMenCounts, 2),
+		propH(annualWomenCounts, annualMenCounts, 3),
+		// Indicator F — Hourly quartiles: thresholds, nb_F, nb_H, then proportions
 		fmt2(hq1),
 		fmt2(hq2),
 		fmt2(hq3),
-		// Hourly quartile proportions (women)
-		fmt4(hq1WomenProp),
-		fmt4(hq2WomenProp),
-		fmt4(hq3WomenProp),
-		fmt4(hq4WomenProp),
-		// Hourly quartile proportions (men)
-		fmt4(1 - hq1WomenProp),
-		fmt4(1 - hq2WomenProp),
-		fmt4(1 - hq3WomenProp),
-		fmt4(1 - hq4WomenProp),
+		nb(hourlyWomenCounts, 0),
+		nb(hourlyWomenCounts, 1),
+		nb(hourlyWomenCounts, 2),
+		nb(hourlyWomenCounts, 3),
+		nb(hourlyMenCounts, 0),
+		nb(hourlyMenCounts, 1),
+		nb(hourlyMenCounts, 2),
+		nb(hourlyMenCounts, 3),
+		propF(hourlyWomenCounts, hourlyMenCounts, 0),
+		propF(hourlyWomenCounts, hourlyMenCounts, 1),
+		propF(hourlyWomenCounts, hourlyMenCounts, 2),
+		propF(hourlyWomenCounts, hourlyMenCounts, 3),
+		propH(hourlyWomenCounts, hourlyMenCounts, 0),
+		propH(hourlyWomenCounts, hourlyMenCounts, 1),
+		propH(hourlyWomenCounts, hourlyMenCounts, 2),
+		propH(hourlyWomenCounts, hourlyMenCounts, 3),
 		// Confidence indices
 		fmt4(confidenceIndex),
 		fmt4(confExo),
 		fmt4(confUnit),
 		fmt4(confSuspRatio),
-		fmt4(confLongSusp),
-		fmt4(confNoEndSusp),
 		fmt4(confSickRatio),
-		fmt4(confLongSick),
 		fmt4(confNoSick),
 		fmt4(confQuota250),
 		fmt4(confQuota0),
-		fmt4(confMultiYear),
-		fmt4(confFpRatio),
 		fmt4(confExtRem),
 		fmt4(confExtRate),
 	];
@@ -458,23 +513,31 @@ const HEADERS = [
 	"Taux_horaire_variable_moyen_ecart",
 	"Taux_horaire_variable_moyen_F",
 	"Taux_horaire_variable_moyen_H",
-	"Rem_globale_annuelle_médiane_ecart",
-	"Rem_globale_annuelle_médiane_F",
-	"Rem_globale_annuelle_médiane_H",
-	"Taux_horaire_global_médian_ecart",
-	"Taux_globale_annuelle_médiane_F",
-	"Taux_globale_annuelle_médiane_H",
-	"Rem_variable_annuelle_médiane_ecart",
-	"Rem_variable_annuelle_médiane_F",
-	"Rem_variable_annuelle_médiane_H",
-	"Taux_horaire_variable_médian_ecart",
-	"Taux_horaire_variable_médian_F ",
-	"Taux_horaire_variable_médian_H",
+	"Rem_globale_annuelle_mediane_ecart",
+	"Rem_globale_annuelle_mediane_F",
+	"Rem_globale_annuelle_mediane_H",
+	"Taux_horaire_global_median_ecart",
+	"Taux_globale_annuelle_mediane_F",
+	"Taux_globale_annuelle_mediane_H",
+	"Rem_variable_annuelle_mediane_ecart",
+	"Rem_variable_annuelle_mediane_F",
+	"Rem_variable_annuelle_mediane_H",
+	"Taux_horaire_variable_median_ecart",
+	"Taux_horaire_variable_median_F ",
+	"Taux_horaire_variable_median_H",
 	"Proportion_variable_F",
 	"Proportion_variable_H",
 	"Seuil_Q1_Rem_globale",
 	"Seuil_Q2_Rem_globale",
 	"Seuil_Q3_Rem_globale",
+	"Quartile1_Rem_globale_annuelle_nb_F",
+	"Quartile2_Rem_globale_annuelle_nb_F",
+	"Quartile3_Rem_globale_annuelle_nb_F",
+	"Quartile4_Rem_globale_annuelle_nb_F",
+	"Quartile1_Rem_globale_annuelle_nb_H",
+	"Quartile2_Rem_globale_annuelle_nb_H",
+	"Quartile3_Rem_globale_annuelle_nb_H",
+	"Quartile4_Rem_globale_annuelle_nb_H",
 	"Quartile1_Rem_globale_annuelle_proportion_F",
 	"Quartile2_Rem_globale_annuelle_proportion_F",
 	"Quartile3_Rem_globale_annuelle_proportion_F",
@@ -486,6 +549,14 @@ const HEADERS = [
 	"Seuil_Q1_Taux_horaire_global",
 	"Seuil_Q2_Taux_horaire_global",
 	"Seuil_Q3_Taux_horaire_global",
+	"Quartile1_Taux_horaire_global_nb_F",
+	"Quartile2_Taux_horaire_global_nb_F",
+	"Quartile3_Taux_horaire_global_nb_F",
+	"Quartile4_Taux_horaire_global_nb_F",
+	"Quartile1_Taux_horaire_global_nb_H",
+	"Quartile2_Taux_horaire_global_nb_H",
+	"Quartile3_Taux_horaire_global_nb_H",
+	"Quartile4_Taux_horaire_global_nb_H",
 	"Quartile1_Taux_horaire_global_proportion_F",
 	"Quartile2_Taux_horaire_global_proportion_F",
 	"Quartile3_Taux_horaire_global_proportion_F",
@@ -498,15 +569,10 @@ const HEADERS = [
 	"indice_nature_exo",
 	"indice_unite",
 	"indice_ratio_suspensions",
-	"indice_suspensions_longues",
-	"indice_suspensions_sans_fin",
 	"indice_ratio_arrets",
-	"indice_arrets_longs",
 	"indice_arrets_0",
 	"indice_quotite250",
 	"indice_quotite0",
-	"indice_sup_annee_civile",
-	"indice_ratio_FP",
 	"indice_rem_extremes",
 	"indice_taux_extremes",
 ];
@@ -558,6 +624,7 @@ console.error("\nBucket distribution:");
 const buckets: Bucket[] = [
 	"medium-50",
 	"medium-100",
+	"medium-150",
 	"large-250",
 	"large-1000",
 	"large-5000",

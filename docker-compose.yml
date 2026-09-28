@@ -51,7 +51,7 @@ services:
       sh -c "corepack enable && pnpm --filter app db:push"
 
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
@@ -68,7 +68,7 @@ services:
       retries: 5
 
   minio-init:
-    image: minio/mc
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       minio:
         condition: service_healthy
@@ -77,13 +77,15 @@ services:
              mc mb --ignore-existing local/egapro-dev-app &&
              mc anonymous set none local/egapro-dev-app"
 
-  maildev:
-    image: maildev/maildev:2.2.1
+  mailpit:
+    image: axllent/mailpit:v1.31.0
     ports:
-      - "${MAILDEV_SMTP_PORT:-1025}:1025"
-      - "${MAILDEV_WEB_PORT:-1080}:1080"
+      - "${MAILPIT_SMTP_PORT:-${MAILDEV_SMTP_PORT:-1025}}:1025"
+      - "${MAILPIT_WEB_PORT:-${MAILDEV_WEB_PORT:-1080}}:8025"
+    environment:
+      MP_DISABLE_VERSION_CHECK: "true"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1080"]
+      test: ["CMD", "/mailpit", "readyz"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -113,9 +115,103 @@ services:
       timeout: 5s
       retries: 5
 
+  # ---------------------------------------------------------------------------
+  # Local Matomo stack — lets you test the full tracking plan (events, CNIL
+  # exemption config, and the /admin/stats Reporting-API widgets) end-to-end
+  # without touching the production instance. See scripts/matomo-local/README.md
+  # ---------------------------------------------------------------------------
+  matomo-db:
+    image: mariadb:11.4
+    profiles: ["matomo"]
+    restart: always
+    command: --max-allowed-packet=64MB
+    environment:
+      MARIADB_DATABASE: matomo
+      MARIADB_USER: matomo
+      MARIADB_PASSWORD: matomo
+      MARIADB_ROOT_PASSWORD: matomo
+    volumes:
+      - matomodbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  matomo:
+    image: matomo:5-apache
+    profiles: ["matomo"]
+    restart: always
+    ports:
+      - "${MATOMO_HOST_PORT:-8080}:80"
+    environment:
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_DBNAME: matomo
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: matomo
+    volumes:
+      - matomodata:/var/www/html
+    depends_on:
+      matomo-db:
+        condition: service_healthy
+
+  # One-shot provisioner. Installs Matomo (if the volume is empty), then creates
+  # the "Egapro Local" site, the campaign_year / workforce_range custom
+  # dimensions, an app API token, applies the CNIL privacy config and registers
+  # localhost:8080 as a trusted host. Idempotent — safe to re-run on every `up`.
+  matomo-init:
+    image: python:3.13-slim
+    profiles: ["matomo"]
+    restart: "no"
+    environment:
+      MATOMO_URL: http://matomo
+      MATOMO_SU_LOGIN: admin
+      MATOMO_SU_PASSWORD: ${MATOMO_SU_PASSWORD:-changeme123}
+      MATOMO_SU_EMAIL: admin@example.com
+      MATOMO_SITE_NAME: Egapro Local
+      MATOMO_SITE_URL: http://localhost:3000
+      MATOMO_DB_HOST: matomo-db
+      MATOMO_DB_NAME: matomo
+      MATOMO_DB_USER: matomo
+      MATOMO_DB_PASSWORD: matomo
+      MATOMO_TRUSTED_HOSTS: matomo,localhost:8080,127.0.0.1:8080
+    volumes:
+      - ./scripts/matomo-local:/setup:ro
+      - ./scripts/matomo-local/.secrets:/out
+      # Same volume Matomo serves from — lets the script register localhost:8080
+      # as a trusted host in config.ini.php (no API exists for that).
+      - matomodata:/matomo
+    depends_on:
+      matomo:
+        condition: service_started
+    command: ["python", "/setup/cnil-setup.py"]
+
+  # One-shot seeder. Fires synthetic events for the FULL tracking plan (page
+  # views, the three funnels with abandons, and every standalone action across
+  # the 9 categories) so /admin/stats shows realistic data. Idempotent — skips
+  # a year already seeded. Run `python /setup/seed-events.py verify` to audit
+  # the live instance for CNIL compliance.
+  matomo-seed:
+    image: python:3.13-slim
+    profiles: ["matomo"]
+    restart: "no"
+    environment:
+      MATOMO_URL: http://matomo
+      MATOMO_SITE_ID: "1"
+    volumes:
+      - ./scripts/matomo-local:/setup:ro
+      - ./scripts/matomo-local/.secrets:/out:ro
+    depends_on:
+      matomo-init:
+        condition: service_completed_successfully
+    command: ["python", "/setup/seed-events.py"]
+
 volumes:
   pgdata:
   notifpgdata:
   miniodata:
   clamdata:
   valkeydata:
+  matomodata:
+  matomodbdata:

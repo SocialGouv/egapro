@@ -1,24 +1,47 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import {
+	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getWorkforceYear,
+} from "~/modules/domain";
 import { CompanyInfoBanner } from "../CompanyInfoBanner";
 import type { CompanyDetail } from "../types";
 
+// gipWorkforce is >= 100 by default so the CSE row is visible in tests
+// exercising the historical CSE badge/value behavior.
 const baseCompany: CompanyDetail = {
 	siren: "532847196",
 	name: "Alpha Solutions",
 	address: null,
 	nafCode: null,
-	workforce: null,
+	nafLabel: null,
+	countryCode: null,
+	countryLabel: "FRANCE",
+	gipWorkforce: 250,
 	hasCse: null,
 };
 
 describe("CompanyInfoBanner", () => {
-	it("renders the company name as an h2 heading", () => {
+	it("renders the company name as the page h1 heading", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
-			screen.getByRole("heading", { level: 2, name: "Alpha Solutions" }),
+			screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
 		).toBeInTheDocument();
+	});
+
+	it("structures company data as a description list", () => {
+		const { container } = render(
+			<CompanyInfoBanner
+				company={{ ...baseCompany, address: "12 RUE DE PARIS, 75001 PARIS" }}
+			/>,
+		);
+		const terms = Array.from(container.querySelectorAll("dl dt")).map(
+			(dt) => dt.textContent,
+		);
+		expect(terms).toContain("SIREN :");
+		expect(terms).toContain("Adresse :");
+		expect(terms).toContain("Existence d'un CSE :");
 	});
 
 	it("renders the formatted SIREN", () => {
@@ -26,11 +49,14 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.getByText("532 847 196")).toBeInTheDocument();
 	});
 
-	it("renders a breadcrumb with a link to /mon-espace/mes-entreprises", () => {
+	it("does not render a breadcrumb", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
-		const link = screen.getByRole("link", { name: "Mon espace" });
-		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute("href", "/mon-espace/mes-entreprises");
+		expect(
+			screen.queryByRole("navigation", { name: "vous êtes ici :" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("link", { name: "Mon espace" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the address when provided", () => {
@@ -51,9 +77,33 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.getByText("62.01Z")).toBeInTheDocument();
 	});
 
+	it("renders the NAF code with its activity label when provided", () => {
+		render(
+			<CompanyInfoBanner
+				company={{
+					...baseCompany,
+					nafCode: "62.01Z",
+					nafLabel: "Programmation informatique",
+				}}
+			/>,
+		);
+		expect(
+			screen.getByText("62.01Z — Programmation informatique"),
+		).toBeInTheDocument();
+	});
+
 	it("renders the workforce when provided", () => {
-		render(<CompanyInfoBanner company={{ ...baseCompany, workforce: 150 }} />);
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 150 }} />,
+		);
 		expect(screen.getByText("150")).toBeInTheDocument();
+	});
+
+	it("labels the workforce with the N-1 reference year, not the current campaign year", () => {
+		render(<CompanyInfoBanner company={baseCompany} />);
+		expect(
+			screen.getByText(`Effectif annuel moyen en ${getWorkforceYear()} :`),
+		).toBeInTheDocument();
 	});
 
 	it("renders 'À compléter' badge when hasCse is null", () => {
@@ -81,15 +131,167 @@ describe("CompanyInfoBanner", () => {
 		expect(screen.queryByText("Code NAF :")).not.toBeInTheDocument();
 	});
 
-	it("does not render workforce section when workforce is null", () => {
-		render(<CompanyInfoBanner company={baseCompany} />);
-		expect(screen.queryByText(/Effectif annuel moyen/)).not.toBeInTheDocument();
+	it("renders '< 50' and hides the CSE row when gipWorkforce is null", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
 	});
 
-	it("renders the 'Modifier' button", () => {
+	it("shows '< 50' instead of the exact headcount of a company present in the GIP file below the threshold", () => {
+		// Issue 3914: the bracket was keyed on "absent from the GIP file", so a
+		// company present with 37 employees rendered "37".
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
+		);
+		expect(
+			screen.getByText(GIP_WORKFORCE_VOLUNTARY_DISPLAY),
+		).toBeInTheDocument();
+		expect(screen.queryByText("37")).not.toBeInTheDocument();
+	});
+
+	it("floors the workforce display and hides the CSE row below the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+		);
+		expect(screen.getByText("99")).toBeInTheDocument();
+		expect(screen.queryByText("Existence d'un CSE :")).not.toBeInTheDocument();
+	});
+
+	it("shows the workforce and the CSE row at or above the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+		);
+		expect(screen.getByText("250")).toBeInTheDocument();
+		expect(screen.getByText("Existence d'un CSE :")).toBeInTheDocument();
+	});
+
+	it("renders the 'Modifier' button at or above the 100 threshold", () => {
 		render(<CompanyInfoBanner company={baseCompany} />);
 		expect(
 			screen.getByRole("button", { name: "Modifier" }),
 		).toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button between 50 and 99 (nothing is editable)", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button just below the 100 threshold", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button below 50", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 42 }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the 'Modifier' button when the company is absent from the GIP file", () => {
+		render(
+			<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Modifier" }),
+		).not.toBeInTheDocument();
+	});
+
+	describe("country row (#4279)", () => {
+		it("shows 'Pays : <libellé>' and no 'Adresse :' for a known foreign country, even with an address stored", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: "99248",
+						countryLabel: "QATAR",
+						address: "58 AV SOME STREET",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Pays :")).toBeInTheDocument();
+			expect(screen.getByText("Qatar")).toBeInTheDocument();
+			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
+		});
+
+		it("shows 'Adresse :' and no 'Pays :' for a French company with an address", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: null,
+						countryLabel: "FRANCE",
+						address: "12 RUE DE PARIS, 75001 PARIS",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Adresse :")).toBeInTheDocument();
+			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
+		});
+
+		it("shows 'Pays : non renseigné' and no 'Adresse :' when the country is unknown, even with an address stored", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: null,
+						countryLabel: null,
+						address: "58 AV SOME STREET",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Pays :")).toBeInTheDocument();
+			expect(screen.getByText("non renseigné")).toBeInTheDocument();
+			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
+			expect(screen.getByText("SIREN :")).toBeInTheDocument();
+		});
+
+		it("shows 'Pays : non renseigné' when the country code is set but the label is missing (defensive)", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: "99248",
+						countryLabel: null,
+					}}
+				/>,
+			);
+			expect(screen.getByText("Pays :")).toBeInTheDocument();
+			expect(screen.getByText("non renseigné")).toBeInTheDocument();
+		});
+
+		it("renders a composed country label in title case", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: "99123",
+						countryLabel: "AFRIQUE DU SUD",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Afrique du Sud")).toBeInTheDocument();
+		});
+
+		it("does not render the country row for a French company without an address", () => {
+			render(<CompanyInfoBanner company={baseCompany} />);
+			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
+			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
+		});
 	});
 });

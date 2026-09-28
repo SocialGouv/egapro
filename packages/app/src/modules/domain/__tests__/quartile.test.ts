@@ -1,8 +1,46 @@
 import { describe, expect, it } from "vitest";
 import {
 	computeQuartileMin,
+	isQuartileImbalanced,
 	migrateLegacyThresholds,
+	QUARTILE_BALANCE_LOWER,
+	QUARTILE_BALANCE_UPPER,
+	quartileImbalanceDirection,
 } from "../shared/quartile";
+
+describe("quartile balance band", () => {
+	it("is parity ±5pp", () => {
+		expect(QUARTILE_BALANCE_LOWER).toBeCloseTo(0.45);
+		expect(QUARTILE_BALANCE_UPPER).toBeCloseTo(0.55);
+	});
+});
+
+describe("quartileImbalanceDirection", () => {
+	it("returns women when women are under-represented (below the band)", () => {
+		expect(quartileImbalanceDirection(0.4)).toBe("women");
+	});
+
+	it("returns men when men are under-represented (above the band)", () => {
+		expect(quartileImbalanceDirection(0.6)).toBe("men");
+	});
+
+	it("returns balanced within the band", () => {
+		expect(quartileImbalanceDirection(0.5)).toBe("balanced");
+		expect(quartileImbalanceDirection(0.45)).toBe("balanced");
+		expect(quartileImbalanceDirection(0.55)).toBe("balanced");
+	});
+});
+
+describe("isQuartileImbalanced", () => {
+	it("is true outside the band", () => {
+		expect(isQuartileImbalanced(0.4)).toBe(true);
+		expect(isQuartileImbalanced(0.6)).toBe(true);
+	});
+
+	it("is false within the band", () => {
+		expect(isQuartileImbalanced(0.5)).toBe(false);
+	});
+});
 
 describe("computeQuartileMin", () => {
 	it("returns null for null", () => {

@@ -14,21 +14,27 @@ import {
 } from "~/modules/declaration-remuneration/schemas";
 import { mapGipToFormData } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
-	COMPANY_SIZE_ANNUAL_MIN,
 	getCurrentYear,
+	getObligationWorkforce,
 	hasGapsAboveThreshold,
+	isCseOpinionRequired,
+	isDraft,
+	isSecondDeclarationWritable,
 	isTriennialYear,
+	parseGipWorkforce,
 } from "~/modules/domain";
 import {
 	companyProcedure,
-	companyWriteProcedure,
 	createTRPCRouter,
+	declarationLockedWriteProcedure,
+	declarationModifiableWriteProcedure,
 	protectedProcedure,
 } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
+import type { DB } from "~/server/db";
 import {
 	companies,
 	declarationStatusHistory,
@@ -80,6 +86,19 @@ type DbLike = {
 	};
 };
 
+async function findGipWorkforce(
+	database: DB,
+	siren: string,
+	year: number,
+): Promise<number | null> {
+	const rows = await database
+		.select({ workforceEma: gipMdsData.workforceEma })
+		.from(gipMdsData)
+		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
+		.limit(1);
+	return parseGipWorkforce(rows[0]?.workforceEma);
+}
+
 async function loadEmployeeCategoriesForDeclaration(
 	database: DbLike,
 	declarationId: string,
@@ -104,16 +123,17 @@ async function loadEmployeeCategoriesForDeclaration(
 function buildSubmitFacts(
 	declaration: DeclarationRow,
 	company: CompanyRow,
+	gipWorkforce: number | null,
 	hasIndicatorGData: boolean,
 	hasGap: boolean,
 ): Record<string, unknown> {
-	const workforce = company.workforce ?? 0;
 	return {
 		currentState: declaration.status,
-		workforce,
+		workforce: getObligationWorkforce(gipWorkforce),
 		hasCse: company.hasCse === true,
 		indicatorGCalculated: hasIndicatorGData,
 		gap: hasGap ? 100 : 0,
+		year: declaration.year,
 		isTriennialYear: isTriennialYear(declaration.year),
 	};
 }
@@ -244,7 +264,9 @@ export const declarationRouter = createTRPCRouter({
 
 		const declarationId = result.declaration.id;
 		let hasSubmittedSecondDeclaration = false;
+		let secondDeclarationSubmissionCount = 0;
 		let hasSubmittedCseOpinion = false;
+		let hasSubmittedJointEvaluation = false;
 		if (declarationId !== "") {
 			const eventRows = await ctx.db
 				.select({ eventType: declarationStatusHistory.eventType })
@@ -254,8 +276,11 @@ export const declarationRouter = createTRPCRouter({
 				for (const row of eventRows) {
 					if (row.eventType === "second_declaration_submit") {
 						hasSubmittedSecondDeclaration = true;
+						secondDeclarationSubmissionCount++;
 					} else if (row.eventType === "cse_opinion_submit") {
 						hasSubmittedCseOpinion = true;
+					} else if (row.eventType === "joint_evaluation_submit") {
+						hasSubmittedJointEvaluation = true;
 					}
 				}
 			}
@@ -266,11 +291,13 @@ export const declarationRouter = createTRPCRouter({
 			gipPrefillData,
 			previousYearCategories,
 			hasSubmittedSecondDeclaration,
+			secondDeclarationSubmissionCount,
 			hasSubmittedCseOpinion,
+			hasSubmittedJointEvaluation,
 		};
 	}),
 
-	updateStep1: companyWriteProcedure
+	updateStep1: declarationModifiableWriteProcedure
 		.input(updateStep1Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -285,7 +312,9 @@ export const declarationRouter = createTRPCRouter({
 
 				const hasChanged =
 					existing[0]?.totalWomen !== input.totalWomen ||
-					existing[0]?.totalMen !== input.totalMen;
+					existing[0]?.totalMen !== input.totalMen ||
+					existing[0]?.hourlyWomen !== input.hourlyWomen ||
+					existing[0]?.hourlyMen !== input.hourlyMen;
 
 				if (hasChanged) {
 					const declarationId = existing[0]?.id;
@@ -302,6 +331,8 @@ export const declarationRouter = createTRPCRouter({
 					.set({
 						totalWomen: input.totalWomen,
 						totalMen: input.totalMen,
+						hourlyWomen: input.hourlyWomen,
+						hourlyMen: input.hourlyMen,
 						currentStep: 1,
 						updatedAt: new Date(),
 						...(hasChanged
@@ -372,7 +403,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep2: companyWriteProcedure
+	updateStep2: declarationModifiableWriteProcedure
 		.input(updateStep2Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -421,7 +452,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep3: companyWriteProcedure
+	updateStep3: declarationModifiableWriteProcedure
 		.input(updateStep3Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -472,7 +503,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateStep4: companyWriteProcedure
+	updateStep4: declarationModifiableWriteProcedure
 		.input(updateStep4Schema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -535,7 +566,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	updateEmployeeCategories: companyWriteProcedure
+	updateEmployeeCategories: declarationModifiableWriteProcedure
 		.input(updateEmployeeCategoriesSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -597,6 +628,12 @@ export const declarationRouter = createTRPCRouter({
 						);
 					}
 				} else {
+					if (!isSecondDeclarationWritable(declaration.status))
+						throw new TRPCError({
+							code: "FORBIDDEN",
+							message: "La seconde déclaration n'est pas ouverte à la saisie.",
+						});
+
 					for (const job of existingJobs) {
 						const cat = input.categories[job.categoryIndex];
 						if (!cat) continue;
@@ -633,7 +670,7 @@ export const declarationRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	submit: companyWriteProcedure.mutation(async ({ ctx }) => {
+	submit: declarationModifiableWriteProcedure.mutation(async ({ ctx }) => {
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
@@ -657,6 +694,8 @@ export const declarationRouter = createTRPCRouter({
 				message: "Entreprise introuvable",
 			});
 
+		const gipWorkforce = await findGipWorkforce(ctx.db, siren, year);
+
 		const initialCategories = await loadEmployeeCategoriesForDeclaration(
 			ctx.db,
 			declaration.id,
@@ -670,6 +709,7 @@ export const declarationRouter = createTRPCRouter({
 		const facts = buildSubmitFacts(
 			declaration,
 			company,
+			gipWorkforce,
 			hasIndicatorGData,
 			hasGap,
 		);
@@ -682,16 +722,19 @@ export const declarationRouter = createTRPCRouter({
 			ctx.session.user.id,
 		);
 
-		// Snapshot `cseRequired` à la soumission (figé pour le reste du cycle FSM
-		// même si l'admin modifie ensuite `companies.hasCse`). C'est cette valeur
-		// que les transitions FSM aval (saveCompliancePath, submitJointEvaluation,
-		// cseOpinion.finalize) liront comme guard.
-		const cseRequiredSnapshot =
-			(company.workforce ?? 0) >= COMPANY_SIZE_ANNUAL_MIN &&
-			company.hasCse === true;
+		// Snapshot `cseRequired` à la soumission : c'est cette valeur que les
+		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
+		// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
+		// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
+		// elle-même change.
+		const cseRequiredSnapshot = isCseOpinionRequired({
+			workforce: getObligationWorkforce(gipWorkforce),
+			hasCse: company.hasCse,
+		});
 
 		await ctx.db.transaction(async (tx) => {
-			if (declaration.status === "draft" && historyInserts.length > 0) {
+			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
 			await tx
@@ -735,7 +778,7 @@ export const declarationRouter = createTRPCRouter({
 		return { success: true };
 	}),
 
-	saveCompliancePath: companyWriteProcedure
+	saveCompliancePath: declarationLockedWriteProcedure
 		.input(saveCompliancePathInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const siren = ctx.siren;
@@ -810,73 +853,97 @@ export const declarationRouter = createTRPCRouter({
 				await purgeDraftSlice(tx, siren, year, "compliance");
 			});
 
+			// The "justify" path with no CSE (round 1 or round 2) ends the
+			// démarche right here — no upload step follows to carry the
+			// acknowledgement, unlike the corrective-action / joint-evaluation
+			// paths. Every other event.type is either a transient path choice
+			// with more steps ahead, or absent — so this only fires on those
+			// two terminal transitions.
+			const isDemarcheComplete = events.some(
+				(event) => event.type === "demarche_complete",
+			);
+			const email = ctx.session.user.email;
+			if (isDemarcheComplete && email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: isRound2 ? "secondDeclaration" : "declaration",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
+
 			return { success: true };
 		}),
 
-	submitSecondDeclaration: companyWriteProcedure.mutation(async ({ ctx }) => {
-		const siren = ctx.siren;
-		const year = getCurrentYear();
+	submitSecondDeclaration: declarationLockedWriteProcedure.mutation(
+		async ({ ctx }) => {
+			const siren = ctx.siren;
+			const year = getCurrentYear();
 
-		const [declaration] = await ctx.db
-			.select()
-			.from(declarations)
-			.where(activeDeclarationFilter(siren, year))
-			.limit(1);
+			const [declaration] = await ctx.db
+				.select()
+				.from(declarations)
+				.where(activeDeclarationFilter(siren, year))
+				.limit(1);
 
-		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
-		const correctionCategories = await loadEmployeeCategoriesForDeclaration(
-			ctx.db,
-			declaration.id,
-			"correction",
-		);
-		const stillHasGap = hasGapsAboveThreshold(correctionCategories);
+			const correctionCategories = await loadEmployeeCategoriesForDeclaration(
+				ctx.db,
+				declaration.id,
+				"correction",
+			);
+			const stillHasGap = hasGapsAboveThreshold(correctionCategories);
 
-		const rules = loadRules(declaration.rulesVersion);
-		const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
-		const { nextStatus, events } = applyAction(
-			facts,
-			"submit_second_declaration",
-			rules,
-		);
+			const rules = loadRules(declaration.rulesVersion);
+			const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
+			const { nextStatus, events } = applyAction(
+				facts,
+				"submit_second_declaration",
+				rules,
+			);
 
-		const projection = computeProjectionUpdates(events, nextStatus);
-		const historyInserts = buildHistoryInserts(
-			declaration.id,
-			events,
-			ctx.session.user.id,
-		);
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
 
-		await ctx.db.transaction(async (tx) => {
-			await tx.insert(declarationStatusHistory).values(historyInserts);
-			await tx
-				.update(declarations)
-				.set({
-					...projection,
-					secondDeclarationStep: 3,
-					updatedAt: new Date(),
-				})
-				.where(activeDeclarationFilter(siren, year));
-			await purgeDraftSlice(tx, siren, year, "second");
-		});
-
-		const email = ctx.session.user.email;
-		if (email) {
-			const { enqueueReceipt } = await import("~/modules/mail/server");
-			await enqueueReceipt({
-				kind: "secondDeclaration",
-				to: email,
-				siren,
-				year,
-				userId: ctx.session.user.id,
-				isResend: false,
+			await ctx.db.transaction(async (tx) => {
+				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.update(declarations)
+					.set({
+						...projection,
+						secondDeclarationStep: 3,
+						updatedAt: new Date(),
+					})
+					.where(activeDeclarationFilter(siren, year));
+				await purgeDraftSlice(tx, siren, year, "second");
 			});
-		}
 
-		return { success: true };
-	}),
+			const email = ctx.session.user.email;
+			if (email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: "secondDeclaration",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
 
-	submitJointEvaluation: companyWriteProcedure
+			return { success: true };
+		},
+	),
+
+	submitJointEvaluation: declarationLockedWriteProcedure
 		.input(submitJointEvaluationSchema)
 		.mutation(async ({ ctx }) => {
 			const siren = ctx.siren;
@@ -913,6 +980,19 @@ export const declarationRouter = createTRPCRouter({
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "joint");
 			});
+
+			const email = ctx.session.user.email;
+			if (email) {
+				const { enqueueReceipt } = await import("~/modules/mail/server");
+				await enqueueReceipt({
+					kind: "jointEvaluation",
+					to: email,
+					siren,
+					year,
+					userId: ctx.session.user.id,
+					isResend: false,
+				});
+			}
 
 			return { success: true };
 		}),

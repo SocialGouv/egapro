@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { MissingSiret } from "~/modules/declaration-remuneration";
+import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getEffectiveSiren } from "~/server/auth/companyAccess";
 
@@ -18,7 +19,7 @@ export default async function DeclarationRootLayout({
 	const session = await auth();
 
 	if (!session?.user) {
-		redirect("/login");
+		redirect(LOGIN);
 	}
 
 	const siren = getEffectiveSiren(session);

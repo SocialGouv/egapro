@@ -52,4 +52,31 @@ describe("RulesSchema", () => {
 			expect(typeof s.stage).toBe("number");
 		}
 	});
+
+	// schema.ts binds the engine JSON to DECLARATION_FSM_STATUSES via z.enum, so an out-of-union state fails the parse.
+	it("rejects a state id outside the FSM union", () => {
+		const bad = {
+			...rawV20271,
+			states: [...rawV20271.states, { id: "not_a_real_state", stage: null }],
+		};
+		expect(() => RulesSchema.parse(bad)).toThrow();
+	});
+
+	it("rejects a transition targeting a state outside the FSM union", () => {
+		const [first, ...rest] = rawV20271.transitions;
+		const bad = {
+			...rawV20271,
+			transitions: [{ ...first, to: "not_a_real_state" }, ...rest],
+		};
+		expect(() => RulesSchema.parse(bad)).toThrow();
+	});
+
+	it("rejects a transition whose from references a state outside the FSM union", () => {
+		const [first, ...rest] = rawV20271.transitions;
+		const bad = {
+			...rawV20271,
+			transitions: [{ ...first, from: ["not_a_real_state"] }, ...rest],
+		};
+		expect(() => RulesSchema.parse(bad)).toThrow();
+	});
 });

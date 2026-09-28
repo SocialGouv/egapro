@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const adminLinks = [
-	{ href: "/admin", label: "Accueil" },
-	{ href: "/admin/declarations", label: "Déclarations" },
-	{ href: "/admin/impersonate", label: "Mimoquer un Siren" },
-	{ href: "/admin/liste-referents", label: "Référents" },
-	{ href: "/admin/stats", label: "Statistiques" },
-	{ href: "/admin/parametres", label: "Paramètres" },
-] as const;
+import { ADMIN, ADMIN_NAV_LINKS } from "~/modules/routes";
 
 export function AdminNavigation() {
 	const pathname = usePathname();
@@ -31,11 +23,9 @@ export function AdminNavigation() {
 						Administration
 					</div>
 					<ul className="fr-sidemenu__list">
-						{adminLinks.map(({ href, label }) => {
+						{ADMIN_NAV_LINKS.map(({ href, label }) => {
 							const isActive =
-								href === "/admin"
-									? pathname === "/admin"
-									: pathname.startsWith(href);
+								href === ADMIN ? pathname === ADMIN : pathname.startsWith(href);
 
 							const itemClass = isActive
 								? "fr-sidemenu__item fr-sidemenu__item--active"

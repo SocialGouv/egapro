@@ -1,9 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useState } from "react";
 
-import type { CampaignDeadlines } from "~/modules/domain";
+import type {
+	CampaignDeadlines,
+	RepresentationCampaign,
+} from "~/modules/domain";
 import {
 	formatShortDate,
 	getCurrentYear,
@@ -20,6 +22,7 @@ import {
 	getDocumentResourceCount,
 	getDocumentsPanelId,
 } from "./DocumentsPanel";
+import { RepresentationProcessPanel } from "./RepresentationProcessPanel";
 import { StatusBadge } from "./StatusBadge";
 import type { DeclarationItem, DeclarationType } from "./types";
 
@@ -33,17 +36,18 @@ type Props = {
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
-	hasNoSanction: boolean;
+	cseApplicable: boolean;
+	representationCampaign: RepresentationCampaign;
 };
-
-const REPRESENTATION_DEADLINE_PREFIX = "01/03";
 
 function getDeadlineCell(
 	declaration: DeclarationItem,
 	campaignDeadlines: CampaignDeadlines,
+	representationCampaign: RepresentationCampaign,
 ): string {
 	if (declaration.type === "representation") {
-		return `${REPRESENTATION_DEADLINE_PREFIX}/${declaration.year}`;
+		if (declaration.notSubject) return "-";
+		return formatShortDate(representationCampaign.declarationDeadline);
 	}
 	const deadline = getDeclarationProcessStepDeadline(
 		declaration.fsmStatus,
@@ -61,13 +65,17 @@ export function DeclarationsSection({
 	declarations,
 	userPhone,
 	hasCse,
-	hasNoSanction,
+	cseApplicable,
+	representationCampaign,
 }: Props) {
 	const currentYear = getCurrentYear();
 	const currentYearDeclarations = declarations.filter(
 		(d) => d.year >= currentYear,
 	);
 	const previousDeclarations = declarations.filter((d) => d.year < currentYear);
+	const currentRepresentationDeclaration = declarations.find(
+		(d) => d.type === "representation" && d.year === currentYear,
+	);
 
 	const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0] ?? 10);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -99,57 +107,32 @@ export function DeclarationsSection({
 
 	return (
 		<div className="fr-container fr-my-6w">
-			<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
-				<div className="fr-col">
-					<h2 className="fr-mb-0">Démarche en cours</h2>
-				</div>
-				{hasNoSanction && (
-					<div className="fr-col-auto">
-						<a
-							className="fr-btn fr-btn--secondary fr-btn--icon-left fr-icon-download-line"
-							download
-							href="/api/no-sanction-pdf"
-						>
-							Télécharger l'attestation de non sanction (PDF)
-						</a>
-					</div>
-				)}
-			</div>
+			<h2 className="fr-h3 fr-mb-4w" id="demarches-en-cours-title">
+				Démarche en cours
+			</h2>
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
 					campaignDeadlines={campaignDeadlines}
-					caption={
-						<>
-							Ce tableau présente la liste des démarches en cours.
-							<br />
-							Chaque ligne correspond à une démarche, avec les informations
-							suivantes : le type de démarche, l'année concernée, l'étape
-							actuelle, la date d'échéance, l'état d'avancement et les
-							ressources disponibles.
-						</>
-					}
+					cseApplicable={cseApplicable}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
+					labelledById="demarches-en-cours-title"
+					representationCampaign={representationCampaign}
 					userPhone={userPhone}
 				/>
 			)}
 			{visiblePreviousDeclarations.length > 0 && (
 				<>
-					<h2 className="fr-mt-6w fr-mb-3w">Années précédentes</h2>
+					<h2 className="fr-h3 fr-mt-6w fr-mb-3w" id="annees-precedentes-title">
+						Années précédentes
+					</h2>
 					<DeclarationsTable
 						campaignDeadlines={campaignDeadlines}
-						caption={
-							<>
-								Ce tableau présente l'historique des démarches.
-								<br />
-								Chaque ligne correspond à une démarche passée, avec les
-								informations suivantes : le type de démarche, l'année concernée,
-								les différentes étapes, les échéances, l'état final et les
-								ressources associées.
-							</>
-						}
+						cseApplicable={cseApplicable}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
+						labelledById="annees-precedentes-title"
+						representationCampaign={representationCampaign}
 						userPhone={userPhone}
 					/>
 				</>
@@ -184,6 +167,11 @@ export function DeclarationsSection({
 					totalPages={totalPages}
 				/>
 			)}
+			<RepresentationProcessPanel
+				campaign={representationCampaign}
+				campaignYear={currentYear}
+				declaration={currentRepresentationDeclaration}
+			/>
 		</div>
 	);
 }
@@ -191,25 +179,28 @@ export function DeclarationsSection({
 type DeclarationsTableProps = {
 	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
-	caption: ReactNode;
+	labelledById: string;
 	userPhone: string | null;
 	hasCse: boolean | null;
+	cseApplicable: boolean;
+	representationCampaign: RepresentationCampaign;
 };
 
 function DeclarationsTable({
 	campaignDeadlines,
 	declarations,
-	caption,
+	labelledById,
 	userPhone,
 	hasCse,
+	cseApplicable,
+	representationCampaign,
 }: DeclarationsTableProps) {
 	return (
 		<div className={`fr-table ${styles.tableNoCaptionOffset}`}>
 			<div className="fr-table__wrapper">
 				<div className="fr-table__container">
 					<div className="fr-table__content">
-						<table className={styles.tableSm}>
-							<caption className="fr-sr-only">{caption}</caption>
+						<table aria-labelledby={labelledById} className={styles.tableSm}>
 							<thead>
 								<tr>
 									<th scope="col">Déclaration</th>
@@ -227,6 +218,7 @@ function DeclarationsTable({
 										<tr key={`${declaration.type}-${declaration.year}`}>
 											<td>
 												<DeclarationLink
+													cseApplicable={cseApplicable}
 													hasCse={hasCse}
 													type={declaration.type}
 													userPhone={userPhone}
@@ -235,10 +227,14 @@ function DeclarationsTable({
 												</DeclarationLink>
 											</td>
 											<td>{declaration.year}</td>
+											<td>{getDeclarationProcessStepLabel(declaration)}</td>
 											<td>
-												{getDeclarationProcessStepLabel(declaration.fsmStatus)}
+												{getDeadlineCell(
+													declaration,
+													campaignDeadlines,
+													representationCampaign,
+												)}
 											</td>
-											<td>{getDeadlineCell(declaration, campaignDeadlines)}</td>
 											<td>
 												<StatusBadge status={declaration.status} />
 											</td>
@@ -247,7 +243,7 @@ function DeclarationsTable({
 													<>
 														<button
 															aria-controls={getDocumentsPanelId(declaration)}
-															className={`fr-link ${styles.linkUnderlined}`}
+															className={`fr-link fr-link--sm ${styles.linkUnderlined}`}
 															data-fr-opened="false"
 															type="button"
 														>

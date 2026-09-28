@@ -32,6 +32,26 @@ describe("GapConsultationCard", () => {
 		).toBeInTheDocument();
 	});
 
+	it("hides the consultation question and shows the opinion when consultation is implicit", () => {
+		render(
+			<GapConsultationCard
+				{...defaultProps}
+				consulted={true}
+				showConsultationQuestion={false}
+			/>,
+		);
+
+		expect(
+			screen.queryByText(
+				/Avez-vous informé et consulté le CSE sur la justification des écarts/,
+			),
+		).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Oui")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Non")).not.toBeInTheDocument();
+		expect(screen.getByText("Quel est l'avis du CSE ?")).toBeInTheDocument();
+		expect(screen.getByLabelText(/Date de l'avis/)).toBeInTheDocument();
+	});
+
 	it("checks Oui radio when consulted is true", () => {
 		render(<GapConsultationCard {...defaultProps} consulted={true} />);
 

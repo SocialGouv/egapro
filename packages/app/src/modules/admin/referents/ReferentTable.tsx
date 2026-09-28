@@ -3,9 +3,9 @@
 import { useCallback } from "react";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS } from "~/modules/domain";
+import { ADMIN_REFERENTS } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
-
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 import { COLUMN_LABELS } from "./shared/constants";
@@ -36,7 +36,7 @@ export function ReferentTable({
 }: Props) {
 	const { handleSort, handlePageChange, ariaSort, sortIcon } = useSortableTable(
 		{
-			basePath: "/admin/liste-referents",
+			basePath: ADMIN_REFERENTS,
 			sortBy,
 			sortOrder,
 		},

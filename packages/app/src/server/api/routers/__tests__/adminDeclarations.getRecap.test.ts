@@ -2,8 +2,8 @@ import { getTableName } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	declarations,
 	declarationStatusHistory,
+	declarations,
 	employeeCategories,
 	jobCategories,
 } from "~/server/db/schema";
@@ -20,7 +20,12 @@ const DECL_ID = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 const MISSING_ID = "6ba7b899-9dad-11d1-80b4-00c04fd430c8";
 
 const adminSession = {
-	user: { id: "admin-1", email: "admin@example.fr", isAdmin: true },
+	user: {
+		id: "admin-1",
+		email: "admin@example.fr",
+		isAdmin: true,
+		adminMfaAt: Math.floor(Date.now() / 1000),
+	},
 	expires: "",
 };
 
@@ -37,6 +42,8 @@ const baseDeclarationRow = {
 	secondDeclarationPathChoice: null,
 	demarcheCompletedAt: null,
 	secondDeclarationSubmittedAt: null,
+	secondDeclReferencePeriodStart: null as string | null,
+	secondDeclReferencePeriodEnd: null as string | null,
 	createdAt: new Date("2026-03-01"),
 	updatedAt: new Date("2026-03-15"),
 	cancelledAt: null,
@@ -55,7 +62,7 @@ type JoinedRow = {
 	companySiren: string;
 	companyNafCode: string | null;
 	companyAddress: string | null;
-	companyWorkforce: number | null;
+	companyWorkforceEma: string | null;
 	declarantEmail: string;
 	declarantFirstName: string | null;
 	declarantLastName: string | null;
@@ -67,11 +74,22 @@ const baseJoinedRow: JoinedRow = {
 	companySiren: "123456789",
 	companyNafCode: "6201Z",
 	companyAddress: "1 rue de Paris",
-	companyWorkforce: 200,
+	companyWorkforceEma: "200.00",
 	declarantEmail: "alice@example.fr",
 	declarantFirstName: "Alice",
 	declarantLastName: "Dupont",
 };
+
+// Deliberately off the civil year: the assertion only discriminates if the
+// persisted window cannot be produced by getReferencePeriod.
+const rowWithCapturedPeriod = (): JoinedRow => ({
+	...baseJoinedRow,
+	declaration: {
+		...baseDeclarationRow,
+		secondDeclReferencePeriodStart: "2025-07-01",
+		secondDeclReferencePeriodEnd: "2026-06-30",
+	},
+});
 
 function buildDb(options: {
 	row: JoinedRow | null;
@@ -105,6 +123,7 @@ function buildDb(options: {
 					return chain;
 				}),
 				innerJoin: vi.fn().mockReturnThis(),
+				leftJoin: vi.fn().mockReturnThis(),
 				where: vi.fn().mockImplementation(resolve),
 			};
 			return chain;
@@ -145,10 +164,11 @@ describe("adminDeclarationsRouter — getRecap", () => {
 			siren: "123456789",
 			nafCode: "6201Z",
 			address: "1 rue de Paris",
-			workforce: 200,
+			gipWorkforce: 200,
 		});
+		expect(result.company).not.toHaveProperty("workforce");
 		expect(result.declarationYear).toBe(2026);
-		expect(result.referencePeriod).toBe("01/01/2026 - 31/12/2026");
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 		expect(result.declarantName).toBe("Alice Dupont");
 		expect(result.declarantEmail).toBe("alice@example.fr");
 		expect(result.isCorrection).toBe(false);
@@ -156,6 +176,38 @@ describe("adminDeclarationsRouter — getRecap", () => {
 		expect(result.totalMen).toBe(50);
 		expect(result.step5Categories).toEqual([]);
 		expect(result.step5Source).toBeNull();
+	});
+
+	it("exposes a null gipWorkforce when the company is absent from the GIP file", async () => {
+		const db = buildDb({
+			row: { ...baseJoinedRow, companyWorkforceEma: null },
+		});
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.company.gipWorkforce).toBeNull();
+	});
+
+	it("keeps the exact fractional GIP workforce", async () => {
+		const db = buildDb({
+			row: { ...baseJoinedRow, companyWorkforceEma: "99.97" },
+		});
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.company.gipWorkforce).toBe(99.97);
 	});
 
 	it("flags isCorrection=true when a second_declaration_submit event exists", async () => {
@@ -170,6 +222,50 @@ describe("adminDeclarationsRouter — getRecap", () => {
 		const result = await caller.getRecap({ id: DECL_ID });
 
 		expect(result.isCorrection).toBe(true);
+	});
+
+	it("returns the reference period captured at step 2 of the second declaration", async () => {
+		const db = buildDb({ row: rowWithCapturedPeriod(), hasSecondSubmit: true });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.referencePeriod).toBe("01/07/2025 - 30/06/2026");
+	});
+
+	it("falls back to the civil period for a correction predating mandatory capture", async () => {
+		const db = buildDb({ row: baseJoinedRow, hasSecondSubmit: true });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.isCorrection).toBe(true);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
+	});
+
+	it("ignores a captured reference period when the declaration is not a correction", async () => {
+		const db = buildDb({ row: rowWithCapturedPeriod() });
+		const { adminDeclarationsRouter } = await import("../adminDeclarations");
+		const caller = adminDeclarationsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		const result = await caller.getRecap({ id: DECL_ID });
+
+		expect(result.isCorrection).toBe(false);
+		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 	});
 
 	it("exposes step5Source from the first job category when jobs exist", async () => {

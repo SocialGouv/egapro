@@ -4,13 +4,13 @@
 // server-only transitive imports (auth → db → postgres) into this client
 // component bundle. The barrel re-exports server components that drag them in.
 import { ReferentsSearchForm } from "~/modules/referents/shared/ReferentsSearchForm";
-
+import { ADMIN_REFERENTS } from "~/modules/routes";
 import { searchReferentsFormSchema } from "./schemas";
 
 export function SearchForm() {
 	return (
 		<ReferentsSearchForm
-			basePath="/admin/liste-referents"
+			basePath={ADMIN_REFERENTS}
 			emptyCountyLabel="Tous"
 			emptyRegionLabel="Toutes"
 			fieldPrefix="search"

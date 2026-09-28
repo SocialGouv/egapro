@@ -28,7 +28,7 @@ describe("SiblingDeclarationsSection", () => {
 
 		expect(
 			screen.getByRole("heading", {
-				level: 3,
+				level: 2,
 				name: "Autres déclarations pour ce SIREN / cette année",
 			}),
 		).toBeInTheDocument();

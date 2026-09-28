@@ -1,5 +1,10 @@
 import Link from "next/link";
+import { formatWorkforceForUser } from "~/modules/domain";
+import { MY_SPACE } from "~/modules/routes";
+import { FileFormatDetail } from "~/modules/shared";
 import common from "../shared/common.module.scss";
+import type { PayGapReferences } from "../shared/indicatorRowMapping";
+import { formatCategorySource } from "../steps/step5/sources";
 import type {
 	EmployeeCategoryRow,
 	Step2Data,
@@ -10,22 +15,12 @@ import { CategoryRecapTable } from "./CategoryRecapTable";
 import { EmptyNotice, IndicatorTables } from "./IndicatorTables";
 import styles from "./RecapitulatifPage.module.scss";
 
-const SOURCE_LABELS: Record<string, string> = {
-	"convention-collective": "Convention collective",
-	"accord-entreprise": "Accord d'entreprise",
-	"accord-groupe": "Accord de groupe",
-	"accord-branche": "Accord de branche",
-	"decision-unilaterale": "Décision unilatérale",
-	"classification-interne": "Classification interne",
-	autre: "Autre",
-};
-
 type CompanyInfo = {
 	name: string;
 	siren: string;
 	nafCode: string | null;
 	address: string | null;
-	workforce: number | null;
+	gipWorkforce: number | null;
 };
 
 type Props = {
@@ -37,11 +32,18 @@ type Props = {
 	isCorrection: boolean;
 	totalWomen: number | null;
 	totalMen: number | null;
+	hourlyWomen: number | null;
+	hourlyMen: number | null;
 	step2Data: Step2Data;
 	step3Data: Step3Data;
 	step4Data: Step4Data;
+	step2Gaps: PayGapReferences;
+	step3Gaps: PayGapReferences;
 	step5Categories: EmployeeCategoryRow[];
 	step5Source: string | null;
+	// Demote the page title when the recap is embedded in a host page that
+	// already renders its own <h1> (e.g. /admin/declarations/[id]) — RGAA 9.1.
+	titleTag?: "h1" | "h3";
 };
 
 type InfoItem = { label: string; value: string };
@@ -79,11 +81,16 @@ export function RecapitulatifPage({
 	isCorrection,
 	totalWomen,
 	totalMen,
+	hourlyWomen,
+	hourlyMen,
 	step2Data,
 	step3Data,
 	step4Data,
+	step2Gaps,
+	step3Gaps,
 	step5Categories,
 	step5Source,
+	titleTag: TitleTag = "h1",
 }: Props) {
 	const declarantItems: InfoItem[] = [];
 	if (declarantName) {
@@ -101,39 +108,42 @@ export function RecapitulatifPage({
 	if (company.nafCode) {
 		companyItems.push({ label: "Code NAF", value: company.nafCode });
 	}
-	if (company.workforce !== null) {
-		companyItems.push({
-			label: `Effectif annuel moyen en ${declarationYear}`,
-			value: String(company.workforce),
-		});
-	}
+	companyItems.push({
+		label: `Effectif annuel moyen en ${declarationYear}`,
+		value: formatWorkforceForUser(company.gipWorkforce),
+	});
 
-	const sourceLabel = step5Source
-		? (SOURCE_LABELS[step5Source] ?? step5Source)
-		: null;
+	const sourceLabel = step5Source ? formatCategorySource(step5Source) : null;
 
 	const indexedCategories = step5Categories.map((cat, i) => ({
 		...cat,
 		position: i,
 	}));
 
+	const pdfHref = buildPdfHref(declarationYear, isCorrection);
+
 	return (
 		<div className={common.flexColumnGap2}>
-			{/* Title row — Marianne Bold 24/32 per Figma (DSFR fr-h4) */}
-			<div className="fr-grid-row fr-grid-row--middle fr-grid-row--gutters">
+			<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
 				<div className="fr-col">
-					<h1 className="fr-h4 fr-mb-0">
-						Déclaration des indicateurs de rémunération {declarationYear}
-					</h1>
+					<TitleTag className="fr-h4 fr-mb-0">
+						{isCorrection
+							? `Seconde déclaration des écarts de rémunération par catégories de salariés ${declarationYear}`
+							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
+					</TitleTag>
 				</div>
 				<div className="fr-col-auto">
 					<a
+						aria-label="Télécharger la déclaration des indicateurs de rémunération (PDF)"
 						className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
 						download
-						href={buildPdfHref(declarationYear, isCorrection)}
+						href={pdfHref}
 					>
 						Télécharger
 					</a>
+					<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
+						<FileFormatDetail href={pdfHref} />
+					</p>
 				</div>
 			</div>
 
@@ -146,27 +156,31 @@ export function RecapitulatifPage({
 				title="Informations calcul"
 			/>
 
-			{/* Indicators for all employees */}
-			<section>
-				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs pour l&apos;ensemble de vos salariés
-				</h2>
-				<div className={styles.indicatorsSection}>
-					<IndicatorTables
-						declarationYear={declarationYear}
-						step2Data={step2Data}
-						step3Data={step3Data}
-						step4Data={step4Data}
-						totalMen={totalMen}
-						totalWomen={totalWomen}
-					/>
-				</div>
-			</section>
+			{!isCorrection && (
+				<section>
+					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
+						Indicateurs pour l&apos;ensemble de vos salariés
+					</h2>
+					<div className={styles.indicatorsSection}>
+						<IndicatorTables
+							declarationYear={declarationYear}
+							hourlyMen={hourlyMen}
+							hourlyWomen={hourlyWomen}
+							step2Data={step2Data}
+							step2Gaps={step2Gaps}
+							step3Data={step3Data}
+							step3Gaps={step3Gaps}
+							step4Data={step4Data}
+							totalMen={totalMen}
+							totalWomen={totalWomen}
+						/>
+					</div>
+				</section>
+			)}
 
-			{/* Indicators by employee category */}
 			<section>
 				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateurs par catégorie de salariés
+					Indicateur par catégories de salariés
 				</h2>
 				{sourceLabel && (
 					<p className={`fr-mb-3w ${styles.sourceLine}`}>
@@ -192,12 +206,11 @@ export function RecapitulatifPage({
 				</div>
 			</section>
 
-			{/* Primary action — return to Mon Espace */}
 			<Link
-				className={`fr-btn fr-btn--primary ${styles.primaryAction}`}
-				href="/mon-espace"
+				className={`fr-btn fr-btn--secondary ${styles.bottomAction}`}
+				href={MY_SPACE}
 			>
-				Retour à Mon Espace
+				Mon espace
 			</Link>
 		</div>
 	);

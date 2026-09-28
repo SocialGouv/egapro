@@ -94,7 +94,7 @@ spec:
           # no longer mounts these vars (removed from `global.env` once the
           # publisher pattern landed). The `mail` configmap exposes
           # MAIL_ENABLED / SMTP_HOST / SMTP_PORT / SMTP_SECURE / MAIL_FROM
-          # pointing at the in-cluster MailDev for dev / preprod review
+          # pointing at the in-cluster Mailpit for dev / preprod review
           # apps. The `notifications` configmap is optional and lets ops
           # tune retry / batch knobs without rebuilding.
           envFrom:
@@ -105,6 +105,13 @@ spec:
                 name: notifications
                 optional: true
           env:
+            # Public URL of the environment (prod / preprod / review app), same
+            # host as the app (cf. NEXTAUTH_URL in values.yaml). Injected into
+            # the mail links (CTA, footer, Marianne fonts) rendered by the
+            # worker. Without it, urls.ts falls back to production → wrong links
+            # outside prod.
+            - name: EGAPRO_PUBLIC_URL
+              value: "https://{{ .Values.global.host }}"
             # pg-boss queue DB — dedicated infra, isolated from the main app
             # so a crash here does not block business mutations. The secret
             # name is overridable; `optional: true` keeps the pod alive when

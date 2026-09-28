@@ -1,3 +1,10 @@
+"use client";
+
+import {
+	MATOMO_ACTION,
+	MATOMO_EVENT_CATEGORY,
+	trackEvent,
+} from "~/modules/analytics";
 import type { FaqItem } from "./types";
 
 type Props = {
@@ -12,6 +19,24 @@ export function FaqAccordionGroup({
 	sectionId,
 	subsectionIndex,
 }: Props) {
+	// DSFR JS toggles `aria-expanded` on click; read it on the next frame so we
+	// only count opens, not closes.
+	function handleAccordionClick(
+		event: React.MouseEvent<HTMLButtonElement>,
+		accordionId: string,
+	): void {
+		const button = event.currentTarget;
+		requestAnimationFrame(() => {
+			if (button.getAttribute("aria-expanded") === "true") {
+				trackEvent({
+					category: MATOMO_EVENT_CATEGORY.HELP,
+					action: MATOMO_ACTION.FAQ_SECTION_OPEN,
+					name: accordionId,
+				});
+			}
+		});
+	}
+
 	return (
 		<div className="fr-accordions-group" data-fr-group="false">
 			{items.map((item, index) => {
@@ -23,6 +48,7 @@ export function FaqAccordionGroup({
 								aria-controls={accordionId}
 								aria-expanded={false}
 								className="fr-accordion__btn"
+								onClick={(event) => handleAccordionClick(event, accordionId)}
 								type="button"
 							>
 								{item.question}

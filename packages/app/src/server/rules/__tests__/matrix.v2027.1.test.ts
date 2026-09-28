@@ -30,6 +30,9 @@ function base(currentState: string, overrides: Partial<Facts> = {}): Facts {
 		indicatorGCalculated: true,
 		gap: 10,
 		hasCse: true,
+		// `year` mirrors the fact now assembled by buildSubmitFacts (#4043); it feeds
+		// the indicatorGRequired computation's 2030 down-extension branch.
+		year: 2027,
 		isTriennialYear: true,
 		...overrides,
 	};
@@ -74,6 +77,38 @@ const MATRIX: Case[] = [
 			gap: 2,
 			indicatorGCalculated: false,
 			hasCse: false,
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
+	},
+	{
+		// #4043 rule 3: a < 50 company with a computed indicator G and a gap >= 5%
+		// still completes directly — no compliance process, no CSE below 100.
+		label:
+			"submit_to_demarche_completed_directly: voluntary tier (workforce 30) with indicator G gap >= 5%",
+		from: "draft",
+		action: "submit",
+		facts: base("draft", {
+			workforce: 30,
+			gap: 10,
+			indicatorGCalculated: true,
+			hasCse: true,
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
+	},
+	{
+		// #4043 rule 3: same for the 50-99 band — mandatory yearly, but a gap >= 5%
+		// triggers no obligation below 100.
+		label:
+			"submit_to_demarche_completed_directly: 50-99 band (workforce 75) with indicator G gap >= 5%",
+		from: "draft",
+		action: "submit",
+		facts: base("draft", {
+			workforce: 75,
+			gap: 10,
+			indicatorGCalculated: true,
+			hasCse: true,
 		}),
 		expectedTo: "demarche_completed",
 		expectedEvents: [{ type: "submit" }, { type: "demarche_complete" }],
@@ -156,6 +191,46 @@ const MATRIX: Case[] = [
 		from: "corrective_actions_chosen",
 		action: "submit_second_declaration",
 		facts: base("corrective_actions_chosen", {
+			cseRequired: false,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "demarche_completed",
+		expectedEvents: [
+			{ type: "second_declaration_submit", round: 2 },
+			{ type: "demarche_complete" },
+		],
+	},
+
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap still persists",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
+			cseRequired: true,
+			action: { stillHasGap: true },
+		}),
+		expectedTo: "awaiting_revision_choice",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved with CSE",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
+			cseRequired: true,
+			action: { stillHasGap: false },
+		}),
+		expectedTo: "awaiting_cse_opinion",
+		expectedEvents: [{ type: "second_declaration_submit", round: 2 }],
+	},
+	{
+		label:
+			"submit_second_declaration re-submit from awaiting_revision_choice, gap resolved without CSE",
+		from: "awaiting_revision_choice",
+		action: "submit_second_declaration",
+		facts: base("awaiting_revision_choice", {
 			cseRequired: false,
 			action: { stillHasGap: false },
 		}),
@@ -255,13 +330,57 @@ const MATRIX: Case[] = [
 			{ type: "demarche_complete" },
 		],
 	},
+
+	{
+		label: "cse_no_longer_required → demarche_completed",
+		from: "awaiting_cse_opinion",
+		action: "sync_cse_requirement",
+		facts: base("awaiting_cse_opinion", { cseRequired: false }),
+		expectedTo: "demarche_completed",
+		expectedEvents: [{ type: "demarche_complete" }],
+	},
 ];
 
-describe("matrix v2027.1 — all 18 transitions", () => {
+describe("matrix v2027.1 — all 22 transitions (incl. every from-state)", () => {
 	it.each(MATRIX)("$label", ({ facts, action, expectedTo, expectedEvents }) => {
 		const result = applyAction(facts, action, rules);
 		expect(result.nextStatus).toBe(expectedTo);
 		expect(result.events).toEqual(expectedEvents);
+	});
+});
+
+describe("submit_cse_opinion is re-entrant from demarche_completed", () => {
+	it("re-accepts the action once the démarche is completed, staying completed", () => {
+		// The CSE deposit form stays editable and re-submittable after completion,
+		// so submit_cse_opinion must loop on demarche_completed instead of throwing.
+		const facts = base("demarche_completed");
+		const result = applyAction(facts, "submit_cse_opinion", rules);
+
+		expect(result.nextStatus).toBe("demarche_completed");
+		expect(result.events).toEqual([
+			{ type: "cse_opinion_submit" },
+			{ type: "demarche_complete" },
+		]);
+	});
+});
+
+describe("sync_cse_requirement only fires when the opinion is no longer owed", () => {
+	it("throws while the CSE opinion is still due", () => {
+		// Guarded on the refreshed snapshot: a company that still has a CSE must
+		// stay on the deposit step.
+		const facts = base("awaiting_cse_opinion", { cseRequired: true });
+
+		expect(() => applyAction(facts, "sync_cse_requirement", rules)).toThrow(
+			/No matching transition/,
+		);
+	});
+
+	it("throws from any state other than awaiting_cse_opinion", () => {
+		const facts = base("demarche_completed", { cseRequired: false });
+
+		expect(() => applyAction(facts, "sync_cse_requirement", rules)).toThrow(
+			/No matching transition/,
+		);
 	});
 });
 

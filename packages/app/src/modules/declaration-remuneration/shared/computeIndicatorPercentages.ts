@@ -1,6 +1,15 @@
-import { computeGapRatio } from "~/modules/domain";
+import type { GipGapReference } from "~/modules/domain";
+import {
+	computeWorkforceTotal,
+	proportionOf,
+	resolveGapRatio,
+	variablePayProportion,
+} from "~/modules/domain";
+import type { GipMdsRow } from "./gipMdsMapping";
 
 type DeclarationRowSubset = {
+	totalWomen: number | null;
+	totalMen: number | null;
 	indicatorAAnnualWomen: string | null;
 	indicatorAAnnualMen: string | null;
 	indicatorAHourlyWomen: string | null;
@@ -66,9 +75,33 @@ type ComputedPercentages = {
 	hourlyQuartile4ProportionMen: number | null;
 };
 
-function gapOrNull(women: string | null, men: string | null): number | null {
+function gapOrNull(
+	women: string | null,
+	men: string | null,
+	reference: GipGapReference | null,
+): number | null {
 	if (women === null || men === null) return null;
-	return computeGapRatio(women, men);
+	return resolveGapRatio(women, men, reference);
+}
+
+/** Build the GIP reference for one indicator block, or `null` when no GIP row is available. */
+function gipGap(
+	gip: GipMdsRow | null | undefined,
+	women: keyof GipMdsRow,
+	men: keyof GipMdsRow,
+	gap: keyof GipMdsRow,
+): GipGapReference | null {
+	if (!gip) return null;
+	return {
+		women: asNumericString(gip[women]),
+		men: asNumericString(gip[men]),
+		gap: asNumericString(gip[gap]),
+	};
+}
+
+/** Drizzle numeric columns come back as strings; anything else (dates, numbers) is not an operand. */
+function asNumericString(value: GipMdsRow[keyof GipMdsRow]): string | null {
+	return typeof value === "string" ? value : null;
 }
 
 function proportionFromCounts(
@@ -76,35 +109,27 @@ function proportionFromCounts(
 	men: number | null,
 ): { women: number | null; men: number | null } {
 	if (women === null || men === null) return { women: null, men: null };
-	const total = women + men;
+	const total = computeWorkforceTotal(women, men);
 	if (total === 0) return { women: null, men: null };
 	return {
-		women: Math.round((women / total) * 10_000) / 10_000,
-		men: Math.round((men / total) * 10_000) / 10_000,
+		women: Math.round(proportionOf(women, total) * 10_000) / 10_000,
+		men: Math.round(proportionOf(men, total) * 10_000) / 10_000,
 	};
 }
 
-function proportionFromStrings(
-	women: string | null,
-	men: string | null,
-): { women: number | null; men: number | null } {
-	if (women === null || men === null) return { women: null, men: null };
-	const w = Number(women);
-	const m = Number(men);
-	if (Number.isNaN(w) || Number.isNaN(m)) return { women: null, men: null };
-	const total = w + m;
-	if (total === 0) return { women: null, men: null };
-	return {
-		women: w / total,
-		men: m / total,
-	};
-}
-
+/**
+ * Derives the percentage columns persisted on a declaration.
+ *
+ * The 8 gaps are resolved rather than recomputed: while the declarant has not touched an
+ * indicator's operands, the GIP `*_ecart` value stays authoritative — the GIP computes it on
+ * full-precision figures but publishes the operands rounded to 2 decimals, so recomputing from
+ * those operands drifts (up to ~9 points on hourly variable pay). Passing no `gip` row falls
+ * back to recomputing everything.
+ */
 export function computeIndicatorPercentages(
 	row: DeclarationRowSubset,
+	gip?: GipMdsRow | null,
 ): ComputedPercentages {
-	const eProps = proportionFromStrings(row.indicatorEWomen, row.indicatorEMen);
-
 	const fAnnual1 = proportionFromCounts(
 		row.indicatorFAnnualWomen1,
 		row.indicatorFAnnualMen1,
@@ -143,37 +168,91 @@ export function computeIndicatorPercentages(
 		globalAnnualMeanGap: gapOrNull(
 			row.indicatorAAnnualWomen,
 			row.indicatorAAnnualMen,
+			gipGap(
+				gip,
+				"globalAnnualMeanWomen",
+				"globalAnnualMeanMen",
+				"globalAnnualMeanGap",
+			),
 		),
 		globalHourlyMeanGap: gapOrNull(
 			row.indicatorAHourlyWomen,
 			row.indicatorAHourlyMen,
+			gipGap(
+				gip,
+				"globalHourlyMeanWomen",
+				"globalHourlyMeanMen",
+				"globalHourlyMeanGap",
+			),
 		),
 		variableAnnualMeanGap: gapOrNull(
 			row.indicatorBAnnualWomen,
 			row.indicatorBAnnualMen,
+			gipGap(
+				gip,
+				"variableAnnualMeanWomen",
+				"variableAnnualMeanMen",
+				"variableAnnualMeanGap",
+			),
 		),
 		variableHourlyMeanGap: gapOrNull(
 			row.indicatorBHourlyWomen,
 			row.indicatorBHourlyMen,
+			gipGap(
+				gip,
+				"variableHourlyMeanWomen",
+				"variableHourlyMeanMen",
+				"variableHourlyMeanGap",
+			),
 		),
 		globalAnnualMedianGap: gapOrNull(
 			row.indicatorCAnnualWomen,
 			row.indicatorCAnnualMen,
+			gipGap(
+				gip,
+				"globalAnnualMedianWomen",
+				"globalAnnualMedianMen",
+				"globalAnnualMedianGap",
+			),
 		),
 		globalHourlyMedianGap: gapOrNull(
 			row.indicatorCHourlyWomen,
 			row.indicatorCHourlyMen,
+			gipGap(
+				gip,
+				"globalHourlyMedianWomen",
+				"globalHourlyMedianMen",
+				"globalHourlyMedianGap",
+			),
 		),
 		variableAnnualMedianGap: gapOrNull(
 			row.indicatorDAnnualWomen,
 			row.indicatorDAnnualMen,
+			gipGap(
+				gip,
+				"variableAnnualMedianWomen",
+				"variableAnnualMedianMen",
+				"variableAnnualMedianGap",
+			),
 		),
 		variableHourlyMedianGap: gapOrNull(
 			row.indicatorDHourlyWomen,
 			row.indicatorDHourlyMen,
+			gipGap(
+				gip,
+				"variableHourlyMedianWomen",
+				"variableHourlyMedianMen",
+				"variableHourlyMedianGap",
+			),
 		),
-		variableProportionWomen: eProps.women,
-		variableProportionMen: eProps.men,
+		variableProportionWomen: variablePayProportion(
+			row.indicatorEWomen,
+			row.totalWomen,
+		),
+		variableProportionMen: variablePayProportion(
+			row.indicatorEMen,
+			row.totalMen,
+		),
 		annualQuartile1ProportionWomen: fAnnual1.women,
 		annualQuartile2ProportionWomen: fAnnual2.women,
 		annualQuartile3ProportionWomen: fAnnual3.women,

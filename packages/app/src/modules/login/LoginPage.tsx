@@ -3,14 +3,18 @@ import Image from "next/image";
 import { LoginForm } from "./LoginForm";
 import styles from "./LoginPage.module.scss";
 
-export function LoginPage() {
+type Props = {
+	callbackUrl?: string;
+};
+
+export function LoginPage({ callbackUrl }: Props) {
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className={styles.container}>
 				<div className={styles.columns}>
 					<div className={styles.formColumn}>
 						<div className={styles.formInner}>
-							<LoginForm />
+							<LoginForm callbackUrl={callbackUrl} />
 						</div>
 					</div>
 

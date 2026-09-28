@@ -1,12 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { getCurrentYear, getDefaultCampaignDeadlines } from "~/modules/domain";
+import type { RepresentationCampaign } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getDefaultCampaignDeadlines,
+	getDefaultRepresentationCampaign,
+} from "~/modules/domain";
 import { DeclarationsSection } from "../DeclarationsSection";
 import type { DeclarationItem } from "../types";
 
+const SIREN = "532847196";
 const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
+const representationCampaign = getDefaultRepresentationCampaign(currentYear);
 
 const NO_COMPLIANCE = {
 	fsmStatus: null,
@@ -18,12 +25,13 @@ const NO_COMPLIANCE = {
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
+	notSubject: false,
 } as const;
 
 const declarations: DeclarationItem[] = [
 	{
 		type: "remuneration",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear,
 		status: "to_complete",
 		currentStep: 0,
@@ -32,7 +40,7 @@ const declarations: DeclarationItem[] = [
 	},
 	{
 		type: "representation",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear,
 		status: "to_complete",
 		currentStep: 0,
@@ -41,7 +49,7 @@ const declarations: DeclarationItem[] = [
 	},
 	{
 		type: "remuneration",
-		siren: "532847196",
+		siren: SIREN,
 		year: currentYear - 1,
 		status: "done",
 		currentStep: 6,
@@ -52,14 +60,20 @@ const declarations: DeclarationItem[] = [
 ];
 
 function renderSection(
-	overrides?: Partial<{ declarations: DeclarationItem[] }>,
+	overrides?: Partial<{
+		declarations: DeclarationItem[];
+		representationCampaign: RepresentationCampaign;
+	}>,
 ) {
 	return render(
 		<DeclarationsSection
 			campaignDeadlines={campaignDeadlines}
+			cseApplicable={true}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
-			hasNoSanction={false}
+			representationCampaign={
+				overrides?.representationCampaign ?? representationCampaign
+			}
 			userPhone="0122334455"
 		/>,
 	);
@@ -68,9 +82,12 @@ function renderSection(
 describe("DeclarationsSection", () => {
 	it("renders the 'Démarche en cours' heading", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Démarche en cours" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Démarche en cours",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders the table column headers including Échéance and Ressources", () => {
@@ -116,15 +133,38 @@ describe("DeclarationsSection", () => {
 	it("renders a Documents link for completed declarations", () => {
 		renderSection();
 		expect(
-			screen.getByRole("button", { name: "Documents (2)" }),
+			screen.getByRole("button", { name: "Documents (1)" }),
+		).toBeInTheDocument();
+	});
+
+	it("renders a Documents link for a submitted declaration still in its compliance process", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "remuneration",
+					siren: SIREN,
+					year: currentYear - 1,
+					status: "in_progress",
+					currentStep: 6,
+					updatedAt: new Date("2025-03-15"),
+					...NO_COMPLIANCE,
+					fsmStatus: "awaiting_compliance_path_choice",
+				},
+			],
+		});
+		expect(
+			screen.getByRole("button", { name: "Documents (1)" }),
 		).toBeInTheDocument();
 	});
 
 	it("renders 'Années précédentes' heading when there are past declarations", () => {
 		renderSection();
-		expect(
-			screen.getByRole("heading", { level: 2, name: "Années précédentes" }),
-		).toBeInTheDocument();
+		const heading = screen.getByRole("heading", {
+			level: 2,
+			name: "Années précédentes",
+		});
+		expect(heading).toBeInTheDocument();
+		expect(heading).toHaveClass("fr-h3");
 	});
 
 	it("renders 'Rémunération' and 'Représentation' buttons", () => {
@@ -139,6 +179,108 @@ describe("DeclarationsSection", () => {
 		expect(represButtons).toHaveLength(1);
 	});
 
+	it("uses DSFR SM (14px) link size on every table link", () => {
+		renderSection();
+		const tableLinks = screen.getAllByRole("button", {
+			name: /^(Rémunération|Représentation|Documents \(\d+\))$/,
+		});
+		expect(tableLinks.length).toBeGreaterThan(0);
+		for (const link of tableLinks) {
+			expect(link).toHaveClass("fr-link", "fr-link--sm");
+		}
+	});
+
+	it("shows the first representation step in the 'Étape' column", () => {
+		renderSection();
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByText(
+				"Vérification de l'assujettissement",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("shows the draft step title in the 'Étape' column of an in-progress representation row", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "representation",
+					siren: SIREN,
+					year: currentYear,
+					status: "in_progress",
+					currentStep: 3,
+					updatedAt: new Date("2026-02-10"),
+					...NO_COMPLIANCE,
+				},
+			],
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByText(
+				"Écarts de représentation - Instances dirigeantes",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("renders the whole not-subject representation row: no step, no deadline, no resource", () => {
+		renderSection({
+			declarations: [
+				{
+					type: "representation",
+					siren: SIREN,
+					year: currentYear,
+					status: "done",
+					currentStep: 0,
+					updatedAt: new Date("2026-02-10"),
+					...NO_COMPLIANCE,
+					notSubject: true,
+				},
+			],
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		const [, notSubjectRow] = within(currentTable as HTMLElement).getAllByRole(
+			"row",
+		);
+		const cells = within(notSubjectRow as HTMLElement).getAllByRole("cell");
+
+		expect(cells.map((cell) => cell.textContent)).toEqual([
+			"Représentation",
+			String(currentYear),
+			"Non-assujetti",
+			"-",
+			"Effectué",
+			"Aucune",
+		]);
+		expect(
+			within(notSubjectRow as HTMLElement).queryByRole("button", {
+				name: /^Documents/,
+			}),
+		).not.toBeInTheDocument();
+	});
+
+	it("takes the representation deadline from the campaign, not from a fixed 1st of March", () => {
+		renderSection({
+			representationCampaign: {
+				...representationCampaign,
+				declarationDeadline: new Date(currentYear, 3, 15),
+			},
+		});
+		const [currentTable] = screen.getAllByRole("table");
+		expect(
+			within(currentTable as HTMLElement).getByText(`15/04/${currentYear}`),
+		).toBeInTheDocument();
+	});
+
+	it("renders the representation side panel once, wired to the representation link", () => {
+		const { container } = renderSection();
+		expect(
+			container.querySelectorAll("#representation-process-panel"),
+		).toHaveLength(1);
+		expect(
+			screen.getByRole("button", { name: "Représentation" }),
+		).toHaveAttribute("aria-controls", "representation-process-panel");
+	});
+
 	it("does not render the page size selector when there are 20 rows or fewer", () => {
 		renderSection();
 		expect(
@@ -151,7 +293,7 @@ describe("DeclarationsSection", () => {
 			{ length: 21 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -179,7 +321,7 @@ describe("DeclarationsSection", () => {
 			{ length: 15 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -207,7 +349,7 @@ describe("DeclarationsSection", () => {
 			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -248,7 +390,7 @@ describe("DeclarationsSection", () => {
 			{ length: 80 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,
@@ -277,7 +419,7 @@ describe("DeclarationsSection", () => {
 			{ length: 25 },
 			(_, i) => ({
 				type: "remuneration" as const,
-				siren: "532847196",
+				siren: SIREN,
 				year: currentYear - i,
 				status: "done" as const,
 				currentStep: 6,

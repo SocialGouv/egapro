@@ -1,70 +1,40 @@
 import Link from "next/link";
 
 import { Breadcrumb } from "~/modules/layout";
+import type { PublicPage } from "~/modules/routes";
+import { getPublicPages, HOME } from "~/modules/routes";
 
-/** Plan du site page. */
+function PageList({ pages }: { pages: readonly PublicPage[] }) {
+	return (
+		<ul className="fr-raw-list fr-mb-4w">
+			{pages.map(({ path, label }) => (
+				<li className="fr-mb-2w" key={path}>
+					<Link className="fr-link" href={path}>
+						{label}
+					</Link>
+				</li>
+			))}
+		</ul>
+	);
+}
+
+// Both sections render from `~/modules/routes`, the same inventory
+// `sitemap.xml` filters — this page used to hold its own list, which had drifted.
 export function SitemapPage() {
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
 				<Breadcrumb
-					items={[{ label: "Accueil", href: "/" }, { label: "Plan du site" }]}
+					items={[{ label: "Accueil", href: HOME }, { label: "Plan du site" }]}
 				/>
 
 				<h1 className="fr-h1 fr-mt-4w">Plan du site</h1>
 
 				<h2 className="fr-h4">Pages principales</h2>
-				<ul className="fr-raw-list fr-mb-4w">
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/">
-							Accueil
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/aide">
-							Aide et ressources
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/faq">
-							Questions fréquentes (FAQ)
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/login">
-							Connexion
-						</Link>
-					</li>
-				</ul>
+				<PageList pages={getPublicPages("main")} />
 
 				<h2 className="fr-h4">Pages légales</h2>
-				<ul className="fr-raw-list">
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/mentions-legales">
-							Mentions légales
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/donnees-personnelles">
-							Données personnelles
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/gestion-des-cookies">
-							Gestion des cookies
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/declaration-accessibilite">
-							Déclaration d'accessibilité
-						</Link>
-					</li>
-					<li className="fr-mb-2w">
-						<Link className="fr-link" href="/plan-du-site">
-							Plan du site
-						</Link>
-					</li>
-				</ul>
+				<PageList pages={getPublicPages("legal")} />
 			</div>
 		</main>
 	);

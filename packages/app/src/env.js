@@ -41,11 +41,42 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		EGAPRO_PROCONNECT_CLIENT_ID: z.string(),
-		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string(),
-		EGAPRO_PROCONNECT_ISSUER: z.string().url(),
+		// ProConnect is the production identity provider. The three values are
+		// optional so a fresh checkout boots without them: `getProviders()`
+		// registers the provider only when all three are present. Requiring
+		// them used to force contributors — and the pipeline's browser
+		// validators, which provision a worktree from scratch — to invent
+		// placeholder values just to satisfy this schema, producing an app
+		// that booted with a sign-in button that could never work.
+		EGAPRO_PROCONNECT_CLIENT_ID: z.string().optional(),
+		EGAPRO_PROCONNECT_CLIENT_SECRET: z.string().optional(),
+		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
+		// Dev-only credentials sign-in, off by default. Registered only when
+		// NODE_ENV is not production — `getProviders()` throws outright if this
+		// is ever true in a production runtime. Parsed as a literal string
+		// rather than `z.coerce.boolean()`, which would turn "false" into true.
+		EGAPRO_DEV_AUTH: z
+			.enum(["true", "false"])
+			.optional()
+			.default("false")
+			.transform((value) => value === "true"),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
+		// Client certificate presented to the SUIT API (mTLS). The .p12 bundle is
+		// base64-encoded so it travels as a plain env var — no volume to mount.
+		// Both are optional: while they are absent, SUIT calls go out without a
+		// client certificate, as they did before (local dev, review apps). In
+		// cluster they come from the dedicated `suit-client-cert` sealed-secret,
+		// mounted `optional: true` so a not-yet-sealed state cannot stop the pod.
+		// Locally: `pnpm suit:encode-cert <cert.p12>` prints both lines.
+		EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: z.string().optional(),
+		EGAPRO_SUIT_CLIENT_CERT_PASSWORD: z.string().optional(),
+		// « Je donne mon avis » (jedonnemonavis.numerique.gouv.fr) — EGAPRO's
+		// démarche and button identifiers on the JDMA platform. Defaults are the
+		// values registered on JDMA (démarche 4169 / button 4730); overridable per
+		// environment without a code change.
+		EGAPRO_JDMA_DEMARCHE_ID: z.string().default("4169"),
+		EGAPRO_JDMA_BUTTON_ID: z.string().default("4730"),
 		// Shared secret injected by the APISIX gateway (plugin `proxy-rewrite`)
 		// into `X-Gateway-Forwarded` on every SUIT request it proxies. The
 		// middleware (`src/middleware.ts`) verifies this header on
@@ -64,7 +95,37 @@ export const env = createEnv({
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
-		EGAPRO_MOCK_SUIT_SANCTION: z.coerce.boolean().optional().default(false),
+		// Matomo Reporting API — server-side token for the admin funnel widget.
+		// Optional: when absent the matomo service degrades to an empty funnel
+		// (the admin chart shows "no data") instead of throwing.
+		MATOMO_API_TOKEN: z.string().optional(),
+		// Server-side Matomo base URL for the Reporting API. Falls back to
+		// NEXT_PUBLIC_MATOMO_URL when unset.
+		MATOMO_API_URL: z.url().optional(),
+		// E2E-only clock override (issue #4022). Gates the /api/e2e-clock test
+		// route that pilots the campaign year. Defaults to false and is declared
+		// in NO .kontinuous env config, so the route stays 404 in preproduction
+		// and production regardless of NODE_ENV.
+		EGAPRO_E2E_CLOCK: z.coerce.boolean().optional().default(false),
+		// E2E-only admin two-factor seam (issue #4467). ProConnect's integration
+		// platform advertises `eidas1-mfa`, but the FIA1V2 test identity has no
+		// second factor a headless run can present, so the suite could never obtain
+		// a backoffice session once #4461 started demanding one. With this flag on,
+		// a sign-in that reached the app on a loopback host is dated as if
+		// ProConnect had returned the MFA level.
+		//
+		// Declared in NO .kontinuous env config — `e2eFlagsAbsentFromDeployConfig`
+		// fails the build if that ever changes — and the seam additionally demands
+		// a loopback host, a barrier no configuration can grant a deployed pod.
+		//
+		// Parsed as a literal string rather than `z.coerce.boolean()`, which turns
+		// the string "false" into true: EGAPRO_E2E_CLOCK only escapes that trap
+		// because nothing ever sets it to "false" explicitly.
+		EGAPRO_E2E_ADMIN_MFA: z
+			.enum(["true", "false"])
+			.optional()
+			.default("false")
+			.transform((value) => value === "true"),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
@@ -72,7 +133,7 @@ export const env = createEnv({
 		ADMIN_EMAILS: z.string().optional().default(""),
 		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
 		// access logs, 12 months for security logs). Consumed directly by the
-		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.mjs, issue
+		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.ts, issue
 		// #3268) — no HTTP trigger in play anymore.
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS: z.coerce
 			.number()
@@ -84,6 +145,16 @@ export const env = createEnv({
 			.int()
 			.positive()
 			.default(365),
+		// Retention (years) for declaration data, consumed by the
+		// declaration-cleanup CronJob (packages/app/scripts/declaration-cleanup.ts,
+		// issue #3134). Default 6 (durée légale retenue). The .max(50) guard catches
+		// a misconfigured value that would silently disable the RGPD purge.
+		EGAPRO_DECLARATION_RETENTION_YEARS: z.coerce
+			.number()
+			.int()
+			.positive()
+			.max(50)
+			.default(6),
 		// MAIL_*, SMTP_* are intentionally NOT declared here — they are consumed
 		// exclusively by the notifications worker (packages/notifications).
 		// See packages/notifications/README.md for the runtime config surface.
@@ -92,6 +163,9 @@ export const env = createEnv({
 		// The handler reads process.env.VALKEY_URL directly (it runs outside
 		// the app module graph), but we declare it here for validation and docs.
 		VALKEY_URL: z.url().optional(),
+		// Optional comma-separated API tokens. Recognised tokens receive the
+		// documented higher public-API quota; anonymous access remains available.
+		EGAPRO_PUBLIC_API_TOKENS: z.string().optional().default(""),
 	},
 
 	/**
@@ -106,6 +180,12 @@ export const env = createEnv({
 			.default("dev"),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
+		// Release identifier shown in the footer (git tag in prod, branch name on
+		// review apps). Inlined at build time, so optional — absent in local dev.
+		NEXT_PUBLIC_APP_VERSION: z.string().optional(),
+		// Pull-request number resolved at build time on review apps, for the
+		// footer's PR link. Digits only; absent outside review builds.
+		NEXT_PUBLIC_PR_NUMBER: z.string().regex(/^\d+$/).optional(),
 		NEXT_PUBLIC_MATOMO_URL: z.string().url().optional(),
 		NEXT_PUBLIC_MATOMO_SITE_ID: z.string().optional(),
 	},
@@ -122,8 +202,15 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_CLIENT_SECRET:
 			process.env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 		EGAPRO_PROCONNECT_ISSUER: process.env.EGAPRO_PROCONNECT_ISSUER,
+		EGAPRO_DEV_AUTH: process.env.EGAPRO_DEV_AUTH,
 		EGAPRO_WEEZ_API_URL: process.env.EGAPRO_WEEZ_API_URL,
 		EGAPRO_SUIT_API_URL: process.env.EGAPRO_SUIT_API_URL,
+		EGAPRO_SUIT_CLIENT_CERT_P12_BASE64:
+			process.env.EGAPRO_SUIT_CLIENT_CERT_P12_BASE64,
+		EGAPRO_SUIT_CLIENT_CERT_PASSWORD:
+			process.env.EGAPRO_SUIT_CLIENT_CERT_PASSWORD,
+		EGAPRO_JDMA_DEMARCHE_ID: process.env.EGAPRO_JDMA_DEMARCHE_ID,
+		EGAPRO_JDMA_BUTTON_ID: process.env.EGAPRO_JDMA_BUTTON_ID,
 		EGAPRO_GATEWAY_SHARED_SECRET: process.env.EGAPRO_GATEWAY_SHARED_SECRET,
 		S3_ENDPOINT: process.env.S3_ENDPOINT,
 		S3_REGION: process.env.S3_REGION,
@@ -135,16 +222,24 @@ export const env = createEnv({
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
-		EGAPRO_MOCK_SUIT_SANCTION: process.env.EGAPRO_MOCK_SUIT_SANCTION,
+		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
+		MATOMO_API_URL: process.env.MATOMO_API_URL,
+		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
+		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
+		EGAPRO_DECLARATION_RETENTION_YEARS:
+			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
+		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
+		NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+		NEXT_PUBLIC_PR_NUMBER: process.env.NEXT_PUBLIC_PR_NUMBER,
 		NEXT_PUBLIC_MATOMO_URL: process.env.NEXT_PUBLIC_MATOMO_URL,
 		NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID,
 	},
@@ -159,3 +254,40 @@ export const env = createEnv({
 	 */
 	emptyStringAsUndefined: true,
 });
+
+/**
+ * ProConnect is optional in the schema so a fresh worktree boots without it,
+ * but a production runtime without it is a broken deploy: the app would come
+ * up with an empty provider list, pass its health checks, and leave nobody
+ * able to sign in. Requiring the three values here keeps that failure loud —
+ * the same protection the mandatory schema used to give — without forcing
+ * placeholder values on local checkouts.
+ *
+ * Skipped when env validation is off (`next build` runs with NODE_ENV
+ * production and SKIP_ENV_VALIDATION=1, and the secrets are injected at
+ * runtime, not at build time).
+ *
+ * Server-only: this module also lands in client bundles (imported through
+ * shared modules), where reading a server-side variable throws — the guard
+ * keeps the check from ever evaluating there.
+ */
+if (
+	typeof window === "undefined" &&
+	!process.env.SKIP_ENV_VALIDATION &&
+	env.NODE_ENV === "production"
+) {
+	const missing = [
+		["EGAPRO_PROCONNECT_CLIENT_ID", env.EGAPRO_PROCONNECT_CLIENT_ID],
+		["EGAPRO_PROCONNECT_CLIENT_SECRET", env.EGAPRO_PROCONNECT_CLIENT_SECRET],
+		["EGAPRO_PROCONNECT_ISSUER", env.EGAPRO_PROCONNECT_ISSUER],
+	]
+		.filter(([, value]) => !value)
+		.map(([name]) => name);
+
+	if (missing.length > 0) {
+		throw new Error(
+			`Missing ProConnect configuration in production: ${missing.join(", ")}. ` +
+				"Without it no user can sign in — refusing to start.",
+		);
+	}
+}

@@ -1,31 +1,25 @@
-import { and, eq, isNotNull, ne, or } from "drizzle-orm";
+import { and, eq, isNotNull, or } from "drizzle-orm";
 
-import { GAP_ALERT_THRESHOLD, isIndicatorGRequired } from "~/modules/domain";
+import {
+	computeGapHighFlags,
+	floorWorkforce,
+	isComplianceProcessRequired,
+	isComplianceProcessRevisionRequired,
+	isIndicatorGRequiredForGip,
+	parseGipWorkforce,
+} from "~/modules/domain";
 import type { DB } from "~/server/db";
-import { companies, declarations, users } from "~/server/db/schema";
+import { submittedDeclarationCondition } from "~/server/db/declarationConditions";
+import { companies, declarations, gipMdsData, users } from "~/server/db/schema";
 import { mapCseOpinions } from "./mapIndicators";
 import {
 	fetchCseOpinionsByDeclaration,
+	fetchIndicatorGByDeclaration,
 	getDeclarationsWithIndicatorG,
 	indicatorColumns,
 	statusHistoryProjection,
 } from "./queries";
 import type { ExportRow } from "./types";
-
-const COMPLIANCE_PROCESS_SIZE_MIN = 100;
-
-function computeComplianceProcessRequired(
-	workforce: number | null,
-	hasIndicatorG: boolean,
-	globalAnnualMeanGap: number | null,
-): boolean {
-	if (workforce === null || globalAnnualMeanGap === null) return false;
-	return (
-		workforce >= COMPLIANCE_PROCESS_SIZE_MIN &&
-		hasIndicatorG &&
-		Math.abs(globalAnnualMeanGap) >= GAP_ALERT_THRESHOLD
-	);
-}
 
 export async function buildExportRows(
 	db: DB,
@@ -40,6 +34,8 @@ export async function buildExportRows(
 			secondDeclarationPathChoice: declarations.secondDeclarationPathChoice,
 			totalWomen: declarations.totalWomen,
 			totalMen: declarations.totalMen,
+			hourlyWomen: declarations.hourlyWomen,
+			hourlyMen: declarations.hourlyMen,
 			remunerationScore: declarations.remunerationScore,
 			variableRemunerationScore: declarations.variableRemunerationScore,
 			quartileScore: declarations.quartileScore,
@@ -54,7 +50,7 @@ export async function buildExportRows(
 			cancelledAt: declarations.cancelledAt,
 			declarationId: declarations.id,
 			companyName: companies.name,
-			workforce: companies.workforce,
+			workforceEma: gipMdsData.workforceEma,
 			nafCode: companies.nafCode,
 			address: companies.address,
 			hasCse: companies.hasCse,
@@ -67,12 +63,19 @@ export async function buildExportRows(
 		})
 		.from(declarations)
 		.innerJoin(companies, eq(declarations.siren, companies.siren))
+		.leftJoin(
+			gipMdsData,
+			and(
+				eq(gipMdsData.siren, declarations.siren),
+				eq(gipMdsData.year, declarations.year),
+			),
+		)
 		.innerJoin(users, eq(declarations.declarantId, users.id))
 		.where(
 			and(
 				eq(declarations.year, year),
 				or(
-					ne(declarations.status, "draft"),
+					submittedDeclarationCondition(),
 					isNotNull(declarations.cancelledAt),
 				),
 			),
@@ -80,37 +83,50 @@ export async function buildExportRows(
 
 	const declarationIds = rows.map((r) => r.declarationId);
 
-	const [hasIndicatorG, cseMap] = await Promise.all([
+	const [hasIndicatorG, cseMap, indicatorGMap] = await Promise.all([
 		getDeclarationsWithIndicatorG(db, declarationIds),
 		fetchCseOpinionsByDeclaration(declarationIds, db),
+		fetchIndicatorGByDeclaration(declarationIds, db),
 	]);
 
 	return rows.map((row) => {
 		const hasIndicatorGForThisDecl = hasIndicatorG.has(row.declarationId);
-		const globalAnnualMeanGap = row.globalAnnualMeanGap
-			? Number(row.globalAnnualMeanGap) * 100
-			: null;
-		const variableAnnualMeanGap = row.variableAnnualMeanGap
-			? Number(row.variableAnnualMeanGap) * 100
-			: null;
-		const complianceProcessRequired = computeComplianceProcessRequired(
-			row.workforce,
-			hasIndicatorGForThisDecl,
-			globalAnnualMeanGap,
-		);
+		const workforce = parseGipWorkforce(row.workforceEma);
+		// Compliance flags are driven by indicator G (per job-category gaps),
+		// the same source as the UI and the declaration router — not by the
+		// aggregate indicators A/B on the row.
+		const indicatorGEntries = indicatorGMap.get(row.declarationId) ?? [];
+		const { firstDeclGapHigh, secondDeclGapHigh } =
+			computeGapHighFlags(indicatorGEntries);
+		const complianceInput = {
+			workforce,
+			hasIndicatorG: hasIndicatorGForThisDecl,
+			hasSignificantIndicatorGGap: firstDeclGapHigh,
+		};
+		const complianceProcessRequired =
+			isComplianceProcessRequired(complianceInput);
 		const complianceProcessRevisionRequired =
-			complianceProcessRequired &&
-			row.secondDeclarationSubmittedAt !== null &&
-			variableAnnualMeanGap !== null &&
-			Math.abs(variableAnnualMeanGap) >= GAP_ALERT_THRESHOLD;
-		const indicatorGRequired = isIndicatorGRequired(
-			row.workforce ?? 0,
-			row.year,
-		);
+			isComplianceProcessRevisionRequired({
+				...complianceInput,
+				hasSignificantCorrectionIndicatorGGap: secondDeclGapHigh,
+				events:
+					row.secondDeclarationSubmittedAt === null
+						? []
+						: [
+								{
+									eventType: "second_declaration_submit",
+									value: null,
+									round: null,
+									createdAt: row.secondDeclarationSubmittedAt,
+									actorUserId: null,
+								},
+							],
+			});
+		const indicatorGRequired = isIndicatorGRequiredForGip(workforce, row.year);
 		return {
 			siren: row.siren,
 			companyName: row.companyName,
-			workforce: row.workforce,
+			workforce: floorWorkforce(workforce),
 			nafCode: row.nafCode,
 			address: row.address,
 			hasCse: row.hasCse,
@@ -140,6 +156,8 @@ export async function buildExportRows(
 			cancelledAt: row.cancelledAt?.toISOString() ?? null,
 			totalWomen: row.totalWomen,
 			totalMen: row.totalMen,
+			hourlyWomen: row.hourlyWomen,
+			hourlyMen: row.hourlyMen,
 			remunerationScore: row.remunerationScore,
 			variableRemunerationScore: row.variableRemunerationScore,
 			quartileScore: row.quartileScore,
