@@ -19,6 +19,7 @@ export type DbDeclaration = {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
+	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
@@ -51,6 +52,7 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
+				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
@@ -69,6 +71,7 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
+				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
@@ -95,6 +98,7 @@ export function buildDeclarationList(
 			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
+			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,

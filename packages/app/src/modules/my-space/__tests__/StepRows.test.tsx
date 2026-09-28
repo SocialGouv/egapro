@@ -22,7 +22,7 @@ describe("TransmittedRow", () => {
 		expect(container.querySelector(".fr-icon-check-line")).toBeInTheDocument();
 	});
 
-	it("with a modification window still open: shows the modify affordance and its date", () => {
+	it("with a modification: shows the modify affordance and its date", () => {
 		const { getByText, queryByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
@@ -34,15 +34,27 @@ describe("TransmittedRow", () => {
 		expect(getByText("Modifier")).toHaveAttribute("href", MODIFY_HREF);
 	});
 
-	it("with a modification window already closed: shows the closed wording and hides the modify button", () => {
-		const { getByText, queryByText } = render(
+	it("with a past date: still offers Modifier, since the date no longer gates it", () => {
+		const { getByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
 				modification={{ href: MODIFY_HREF, until: PAST_DEADLINE }}
 			/>,
 		);
-		expect(getByText(/Modification close depuis le/)).toBeInTheDocument();
-		expect(queryByText("Modifier")).not.toBeInTheDocument();
+		expect(getByText("Modifier")).toHaveAttribute("href", MODIFY_HREF);
+	});
+
+	it.each([
+		["a future date", FUTURE_DEADLINE],
+		["a past date", PAST_DEADLINE],
+	])("never renders the closed-modification wording with %s", (_label, until) => {
+		const { queryByText } = render(
+			<TransmittedRow
+				label="Votre déclaration a été transmise"
+				modification={{ href: MODIFY_HREF, until }}
+			/>,
+		);
+		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
 	});
 
 	it("without a modification: renders neither the deadline wording nor a modify button (Repeq — immutable once transmitted)", () => {

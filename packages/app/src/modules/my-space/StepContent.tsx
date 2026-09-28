@@ -65,6 +65,7 @@ function BulletRow({ children }: { children: ReactNode }) {
 
 export function Step1Content({
 	campaignDeadlines,
+	firstDeclarationModifiable,
 	indicatorGRequired,
 	hasPrefillData,
 	status,
@@ -72,6 +73,7 @@ export function Step1Content({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	firstDeclarationModifiable: boolean;
 	indicatorGRequired: boolean;
 	hasPrefillData: boolean;
 	status: StepStatus;
@@ -116,12 +118,12 @@ export function Step1Content({
 				<TransmittedRow
 					label="Votre déclaration a été transmise"
 					modification={
-						variant === "closed"
-							? undefined
-							: {
+						firstDeclarationModifiable
+							? {
 									href: remunerationStepHref(FIRST_REMUNERATION_STEP),
 									until: campaignDeadlines.decl1ModificationDeadline,
 								}
+							: undefined
 					}
 					viewHref={DECLARATION_REMUNERATION_RECAP}
 				/>
@@ -158,6 +160,15 @@ export function Step2Content({
 		return title;
 	}
 
+	const secondDeclarationModification = isSecondDeclarationWritable(
+		declarationFsmStatus,
+	)
+		? {
+				href: complianceStepHref(1),
+				until: campaignDeadlines.decl2ModificationDeadline,
+			}
+		: undefined;
+
 	if (variant === "compliance_choice") {
 		const pathChoiceDeadline = selectPathChoiceDeadline(
 			campaignDeadlines,
@@ -169,10 +180,7 @@ export function Step2Content({
 				{secondDeclarationSubmitted && (
 					<TransmittedRow
 						label="Votre seconde déclaration a été transmise"
-						modification={{
-							href: complianceStepHref(1),
-							until: campaignDeadlines.decl2ModificationDeadline,
-						}}
+						modification={secondDeclarationModification}
 						viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
 					/>
@@ -205,10 +213,7 @@ export function Step2Content({
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
-				modification={{
-					href: complianceStepHref(1),
-					until: campaignDeadlines.decl2ModificationDeadline,
-				}}
+				modification={secondDeclarationModification}
 				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 				viewLabel="Voir le récapitulatif de la seconde déclaration"
 			/>
@@ -234,8 +239,6 @@ export function Step2Content({
 		);
 	}
 
-	const secondDeclarationWritable =
-		isSecondDeclarationWritable(declarationFsmStatus);
 	const jointEvaluationWritable =
 		isJointEvaluationWritable(declarationFsmStatus);
 
@@ -245,14 +248,7 @@ export function Step2Content({
 			{secondDeclarationSubmitted && (
 				<TransmittedRow
 					label="Votre seconde déclaration a été transmise"
-					modification={
-						secondDeclarationWritable
-							? {
-									href: complianceStepHref(1),
-									until: campaignDeadlines.decl2ModificationDeadline,
-								}
-							: undefined
-					}
+					modification={secondDeclarationModification}
 					viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 					viewLabel="Voir le récapitulatif de la seconde déclaration"
 				/>
