@@ -20,18 +20,13 @@ export function isComplianceProcessCompleted(status: string | null): boolean {
 	return status === "demarche_completed";
 }
 
-// Neither condition alone closes writing: `demarche_completed` is reached as
-// early as March for a no-gap declaration, and `decl1ModificationDeadline`
-// routinely elapses months before the compliance-path pages stop needing to
-// write. Distinct from the step-level cutoff, which uses `isDeclarationSubmitted`.
+// `demarche_completed` alone does not close writing: a first declaration that no
+// later submission supersedes stays writable.
 export function isDeclarationWritingClosed(
 	status: string | null,
-	decl1ModificationDeadline: Date,
+	isFirstDeclarationSuperseded: boolean,
 ): boolean {
-	return (
-		isComplianceProcessCompleted(status) &&
-		isDeadlinePassed(decl1ModificationDeadline)
-	);
+	return isComplianceProcessCompleted(status) && isFirstDeclarationSuperseded;
 }
 
 export function getCurrentCompliancePath(declaration: {
