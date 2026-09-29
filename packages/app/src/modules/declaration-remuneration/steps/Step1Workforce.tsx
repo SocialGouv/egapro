@@ -181,13 +181,14 @@ export function Step1Workforce({
 		});
 
 	function handleFieldChange(field: WorkforceField, value: string) {
-		setRaw((prev) => ({ ...prev, [field]: value }));
 		setFieldErrors((prev) =>
 			prev.filter(
 				(error) => error.fieldId !== workforceFieldIdFromField(field),
 			),
 		);
 		const parsed = parseIntegerInput(value);
+		if (parsed === null && value !== "") return;
+		setRaw((prev) => ({ ...prev, [field]: value }));
 		if (parsed === null) return;
 		form.setValue(field, parsed);
 		setField({ ...values, [field]: parsed });
@@ -284,7 +285,7 @@ export function Step1Workforce({
 
 						<p className={`fr-mb-0 ${common.fontMedium}`}>
 							{isPrefilled
-								? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire avant de valider vos indicateurs (en cas d'erreur, pensez à corriger votre DSN)."
+								? "Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire (en cas d'erreur, pensez à corriger votre DSN)."
 								: "Renseignez l'effectif physique de votre entreprise."}
 							<TooltipButton
 								id="tooltip-workforce"

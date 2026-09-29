@@ -12,6 +12,7 @@ import {
 	NAF_SECTIONS,
 	REGION_CODES,
 	REGIONS,
+	REGIONS_TO_COUNTIES,
 } from "~/modules/domain";
 import { OBSERVATORY_SEARCH } from "~/modules/routes";
 
@@ -100,15 +101,19 @@ export function HomeSearchForm() {
 							name="departement"
 						>
 							<option value="">Tous les départements</option>
-							{Object.entries(COUNTIES)
-								.sort(([left], [right]) =>
-									left.localeCompare(right, "fr", { numeric: true }),
-								)
-								.map(([code, department]) => (
-									<option key={code} value={code}>
-										{code} — {department}
-									</option>
-								))}
+							{REGION_CODES.map((regionCode) => (
+								<optgroup key={regionCode} label={REGIONS[regionCode]}>
+									{[...REGIONS_TO_COUNTIES[regionCode]]
+										.sort((left, right) =>
+											left.localeCompare(right, "fr", { numeric: true }),
+										)
+										.map((code) => (
+											<option key={code} value={code}>
+												{code} — {COUNTIES[code]}
+											</option>
+										))}
+								</optgroup>
+							))}
 						</select>
 					</div>
 				</div>

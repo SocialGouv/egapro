@@ -3,8 +3,10 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
 	applyDeclarationClosure,
+	COMPANY_SIZE_VOLUNTARY_MAX,
 	computeDeclarationStatus,
 	computeRepresentationDeclarationStatus,
+	deriveSubsequentSubmissions,
 	getCurrentDate,
 	getCurrentYear,
 	getObligationWorkforce,
@@ -191,6 +193,7 @@ export const companyRouter = createTRPCRouter({
 					.select({
 						declarationId: declarationStatusHistory.declarationId,
 						eventType: declarationStatusHistory.eventType,
+						round: declarationStatusHistory.round,
 					})
 					.from(declarationStatusHistory)
 					.innerJoin(
@@ -223,16 +226,12 @@ export const companyRouter = createTRPCRouter({
 
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
-			const declarationIdsWithSecondDecl = new Set(
-				eventRows
-					.filter((r) => r.eventType === "second_declaration_submit")
-					.map((r) => r.declarationId),
-			);
-			const declarationIdsWithCseOpinion = new Set(
-				eventRows
-					.filter((r) => r.eventType === "cse_opinion_submit")
-					.map((r) => r.declarationId),
-			);
+			const eventsByDeclarationId = new Map<string, typeof eventRows>();
+			for (const row of eventRows) {
+				const events = eventsByDeclarationId.get(row.declarationId);
+				if (events) events.push(row);
+				else eventsByDeclarationId.set(row.declarationId, [row]);
+			}
 
 			const pastYears = [
 				...new Set(
@@ -252,7 +251,12 @@ export const companyRouter = createTRPCRouter({
 			const representationRow = currentYearRepresentationDeclarationRows[0];
 			const representationVisible =
 				representationRow !== undefined ||
-				isPresumedSubjectToRepresentation(representationWorkforceHistory, year);
+				(getObligationWorkforce(company.gipWorkforce) >=
+					COMPANY_SIZE_VOLUNTARY_MAX &&
+					isPresumedSubjectToRepresentation(
+						representationWorkforceHistory,
+						year,
+					));
 			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => {
 				const projectedStatus = computeDeclarationStatus({
 					status: d.status,
@@ -270,6 +274,9 @@ export const companyRouter = createTRPCRouter({
 							now: getCurrentDate(),
 						})
 					: projectedStatus;
+				const submissions = deriveSubsequentSubmissions(
+					eventsByDeclarationId.get(d.id) ?? [],
+				);
 				return {
 					type: "remuneration" as const,
 					year: d.year,
@@ -279,8 +286,10 @@ export const companyRouter = createTRPCRouter({
 					updatedAt: d.updatedAt,
 					firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 					secondDeclarationPathChoice: d.secondDeclarationPathChoice,
-					hasSubmittedSecondDeclaration: declarationIdsWithSecondDecl.has(d.id),
-					hasSubmittedCseOpinion: declarationIdsWithCseOpinion.has(d.id),
+					hasSubmittedSecondDeclaration:
+						submissions.hasSubmittedSecondDeclaration,
+					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
+					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 					hasPrefillData: yearsWithPrefill.has(d.year),
@@ -303,6 +312,7 @@ export const companyRouter = createTRPCRouter({
 					firstDeclarationPathChoice: null,
 					secondDeclarationPathChoice: null,
 					hasSubmittedSecondDeclaration: false,
+					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
 					cseRequired: false,
 					hasJointEvaluationFile: false,

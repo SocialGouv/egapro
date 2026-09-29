@@ -52,6 +52,7 @@ const company = {
 	name: "Alpha Solutions",
 	address: "12 rue des Innovateurs, 75011 Paris",
 	nafCode: "6202A",
+	nafLabel: "Conseil en systèmes et logiciels informatiques",
 	gipWorkforce: 2256,
 	hasCse: null as boolean | null,
 };
@@ -93,6 +94,17 @@ describe("CompanyEditModal", () => {
 		expect(terms).toContain("SIREN :");
 		expect(terms).toContain("Adresse :");
 		expect(terms).toContain("Code NAF :");
+		expect(container.textContent).toContain(
+			"6202A — Conseil en systèmes et logiciels informatiques",
+		);
+	});
+
+	it("renders the requested wording", () => {
+		const { container } = render(<CompanyEditModal company={company} />);
+
+		expect(container.textContent).toContain(
+			"Vérifier les informations affichées et compléter l'information sur l'existence d'un CSE si nécessaire.",
+		);
 	});
 
 	it("renders the modal with company info", () => {
@@ -110,6 +122,28 @@ describe("CompanyEditModal", () => {
 			"12 rue des Innovateurs, 75011 Paris",
 		);
 		expect(container.textContent).toContain("6202A");
+	});
+
+	it("shows the NAF label alone when the code is missing", () => {
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, nafCode: null }} />,
+		);
+
+		expect(container.textContent).toContain(
+			"Conseil en systèmes et logiciels informatiques",
+		);
+		expect(container.textContent).not.toContain("null —");
+	});
+
+	it("shows the NAF code alone when the label is missing", () => {
+		const { container } = render(
+			<CompanyEditModal company={{ ...company, nafLabel: null }} />,
+		);
+
+		expect(container.textContent).toContain("6202A");
+		expect(container.textContent).not.toContain(
+			"Conseil en systèmes et logiciels informatiques",
+		);
 	});
 
 	it("renders formatted workforce", () => {

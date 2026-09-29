@@ -43,7 +43,9 @@ describe("SearchForm", () => {
 	it("renders all search fields and omits the removed Index / Valeur pair", () => {
 		render(<SearchForm />);
 
-		expect(screen.getByLabelText("SIREN / Nom entreprise")).toBeInTheDocument();
+		expect(
+			screen.getByLabelText("Numéro Siren ou le nom de l'entreprise"),
+		).toBeInTheDocument();
 		expect(screen.getByLabelText("Email déclarant")).toBeInTheDocument();
 		expect(screen.getByLabelText("Année")).toBeInTheDocument();
 		expect(screen.getByLabelText("Date de dépôt (du)")).toBeInTheDocument();
@@ -76,7 +78,9 @@ describe("SearchForm", () => {
 
 		render(<SearchForm />);
 
-		expect(screen.getByLabelText("SIREN / Nom entreprise")).toHaveValue("ACME");
+		expect(
+			screen.getByLabelText("Numéro Siren ou le nom de l'entreprise"),
+		).toHaveValue("ACME");
 		expect(screen.getByLabelText("Année")).toHaveValue(2024);
 	});
 

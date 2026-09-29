@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
+import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+} from "~/modules/declaration-remuneration/schemas";
 import { getReferenceYearFor } from "~/modules/domain";
 import {
 	DECLARATION_REMUNERATION,
@@ -1193,8 +1197,9 @@ test.describe("withCampaignYear leaves no residue between two year coordinates (
 // varchar(255) column. Before the fix the field accepted unbounded input, so an
 // over-long label made Postgres reject the insert and surfaced the raw Drizzle
 // SQL query to the user (broken UX + technical disclosure). The fix bounds the
-// input client-side and documents the limit with a DSFR hint.
-test.describe("Indicator G — category label is bounded to 255 characters (#3943)", () => {
+// input client-side and documents the limit with a DSFR hint; the product limit
+// is now CATEGORY_NAME_MAX_LENGTH, below the column width.
+test.describe("Indicator G — category label is bounded to CATEGORY_NAME_MAX_LENGTH characters (#3943)", () => {
 	test.describe.configure({ mode: "serial" });
 
 	test.beforeAll(async () => {
@@ -1207,7 +1212,7 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 		await resetDeclarationToDraft();
 	});
 
-	test("caps the label input at 255 chars and exposes the DSFR hint", async ({
+	test("caps the label input at CATEGORY_NAME_MAX_LENGTH chars and exposes the DSFR hints", async ({
 		page,
 	}) => {
 		await submitStepsThroughQuartiles(page);
@@ -1226,22 +1231,31 @@ test.describe("Indicator G — category label is bounded to 255 characters (#394
 		await expect(nameInput).toBeVisible();
 
 		// The hint is wired to the field for assistive tech. #4254 gave it the Figma
-		// text; the 255 limit it used to spell out is now carried by the maxLength
-		// attribute asserted below and by the Zod message, not by the hint.
+		// text; the limit is carried by its own hint, the maxLength attribute
+		// asserted below and the Zod message.
 		await expect(page.locator("#cat-0-name-hint")).toHaveText(
 			"En référence à l'accord ou à la décision unilatérale",
 		);
+		await expect(page.locator("#cat-0-name-limit")).toHaveText(
+			CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+		);
 		await expect(nameInput).toHaveAttribute(
 			"aria-describedby",
-			/cat-0-name-hint/,
+			/cat-0-name-hint cat-0-name-limit/,
 		);
 
 		// The guard that prevents the varchar(255) overflow (and thus the raw SQL
 		// error at submit) is the maxLength cap on the native input.
-		await expect(nameInput).toHaveAttribute("maxlength", "255");
+		await expect(nameInput).toHaveAttribute(
+			"maxlength",
+			String(CATEGORY_NAME_MAX_LENGTH),
+		);
 
 		await nameInput.fill("a".repeat(300));
-		await expect(nameInput).toHaveJSProperty("value.length", 255);
+		await expect(nameInput).toHaveJSProperty(
+			"value.length",
+			CATEGORY_NAME_MAX_LENGTH,
+		);
 	});
 });
 

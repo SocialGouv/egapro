@@ -8,6 +8,7 @@ import {
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
 import { formatInseeTitleCase } from "./formatInseeTitleCase";
+import { formatNafForDisplay } from "./formatNafForDisplay";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
 import type { CompanyDetail } from "./types";
@@ -101,9 +102,7 @@ export function CompanyInfoBanner({ company }: Props) {
 							<dt>Code NAF :</dt>
 							<dd>
 								<strong>
-									{company.nafLabel
-										? `${company.nafCode} — ${company.nafLabel}`
-										: company.nafCode}
+									{formatNafForDisplay(company.nafCode, company.nafLabel)}
 								</strong>
 							</dd>
 						</div>

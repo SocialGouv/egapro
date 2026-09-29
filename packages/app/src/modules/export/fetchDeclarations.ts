@@ -11,7 +11,6 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
-	resolveActiveDeclarationId,
 } from "./queries";
 
 import {

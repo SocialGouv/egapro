@@ -15,6 +15,7 @@ import { CONTACT } from "~/modules/routes";
 import { getDsfrModal, useDsfrDialogOpen } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import styles from "./CompanyEditModal.module.scss";
+import { formatNafForDisplay } from "./formatNafForDisplay";
 import { formatSiren } from "./formatSiren";
 import { updateHasCseSchema } from "./schemas";
 import { useUpdateHasCse } from "./useUpdateHasCse";
@@ -28,6 +29,7 @@ type Props = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
+		nafLabel: string | null;
 		gipWorkforce: number | null;
 		hasCse: boolean | null;
 	};
@@ -117,7 +119,7 @@ export function CompanyEditModal({ company: initialCompany }: Props) {
 								</h2>
 								<p className="fr-mb-4w">
 									{cseApplicable
-										? "Vérifier les données affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
+										? "Vérifier les informations affichées et compléter l'information sur l'existence d'un CSE si nécessaire."
 										: "Vérifier les données affichées."}{" "}
 									Si vous constatez une erreur, veuillez{" "}
 									<a
@@ -203,6 +205,7 @@ type CompanyReadonlySectionProps = {
 		name: string;
 		address: string | null;
 		nafCode: string | null;
+		nafLabel: string | null;
 		gipWorkforce: number | null;
 	};
 };
@@ -217,7 +220,10 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 					<InfoRow label="Raison sociale :" value={company.name} />
 					<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
 					<InfoRow label="Adresse :" value={company.address} />
-					<InfoRow label="Code NAF :" value={company.nafCode} />
+					<InfoRow
+						label="Code NAF :"
+						value={formatNafForDisplay(company.nafCode, company.nafLabel)}
+					/>
 				</dl>
 				<p className={`fr-text--sm fr-mb-0 ${styles.sourceText}`}>
 					Source : INSEE.

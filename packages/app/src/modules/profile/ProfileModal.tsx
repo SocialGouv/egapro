@@ -110,16 +110,18 @@ export function ProfileModal() {
 									</div>
 								</div>
 								<p className="fr-text--regular fr-text-title--grey fr-mb-2w">
-									Vérifier les données affichées et compléter les informations
-									manquantes si nécessaire.
+									Vérifier les informations pré-remplies à partir de votre
+									compte ProConnect et compléter les informations manquantes si
+									nécessaire.
 								</p>
 								<p className="fr-text--regular fr-text-title--grey fr-mb-4w">
 									Tous les champs sont obligatoires.
 								</p>
-								<form autoComplete="off" id="profile-form" onSubmit={onSubmit}>
+								<form id="profile-form" onSubmit={onSubmit}>
 									<div className="fr-grid-row fr-grid-row--gutters fr-mb-4w">
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
+												autoComplete="family-name"
 												error={errors.lastName?.message ?? null}
 												inputId="profile-last-name"
 												label="Nom"
@@ -128,6 +130,7 @@ export function ProfileModal() {
 										</div>
 										<div className="fr-col-12 fr-col-md-6">
 											<IdentityField
+												autoComplete="given-name"
 												error={errors.firstName?.message ?? null}
 												inputId="profile-first-name"
 												label="Prénom"
@@ -139,9 +142,6 @@ export function ProfileModal() {
 										<p className="fr-mb-0">
 											E-mail :{" "}
 											<strong>{profileQuery.data?.email || "—"}</strong>
-										</p>
-										<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-											Source : ProConnect.
 										</p>
 									</div>
 									<PhoneField
@@ -184,6 +184,7 @@ export function ProfileModal() {
 }
 
 type IdentityFieldProps = {
+	autoComplete: string;
 	error: string | null;
 	inputId: string;
 	label: string;
@@ -191,6 +192,7 @@ type IdentityFieldProps = {
 };
 
 function IdentityField({
+	autoComplete,
 	error,
 	inputId,
 	label,
@@ -210,6 +212,7 @@ function IdentityField({
 				aria-describedby={messagesId}
 				aria-invalid={error ? "true" : undefined}
 				aria-required="true"
+				autoComplete={autoComplete}
 				className="fr-input"
 				id={inputId}
 				type="text"

@@ -13,8 +13,6 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-const MODIFICATION_DEADLINE = new Date("2027-03-01");
-
 function renderBanner(
 	overrides: Partial<
 		React.ComponentProps<typeof DeclarationSuccessBanner>
@@ -22,8 +20,8 @@ function renderBanner(
 ) {
 	return render(
 		<DeclarationSuccessBanner
+			declarationModifiable
 			email="test@example.fr"
-			modificationDeadline={MODIFICATION_DEADLINE}
 			year={2026}
 			{...overrides}
 		/>,
@@ -31,13 +29,46 @@ function renderBanner(
 }
 
 describe("DeclarationSuccessBanner", () => {
-	it("announces the first declaration and its modification deadline", () => {
+	it("announces the first declaration and that it stays modifiable until a later transmission, without a date", () => {
 		renderBanner();
 
 		expect(
 			screen.getByText("Votre déclaration a été transmise"),
 		).toBeInTheDocument();
-		expect(screen.getByText("1ᵉʳ mars 2027")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Vous pouvez modifier votre déclaration jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE.",
+			),
+		).toBeInTheDocument();
+		expect(screen.queryByText(/jusqu'au /)).not.toBeInTheDocument();
+	});
+
+	it("says the second declaration stays modifiable until the new path is chosen", () => {
+		renderBanner({ isSecondDeclaration: true });
+
+		expect(
+			screen.getByText(
+				"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Vous pouvez modifier votre déclaration/),
+		).not.toBeInTheDocument();
+	});
+
+	it.each([
+		false,
+		true,
+	])("drops the modification sentence when the declaration is no longer modifiable (isSecondDeclaration: %s)", (isSecondDeclaration) => {
+		renderBanner({ declarationModifiable: false, isSecondDeclaration });
+
+		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Renvoyer l'accusé de réception" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/Un accusé de réception a été envoyé/),
+		).toBeInTheDocument();
 	});
 
 	it("announces the second declaration when it is one", () => {

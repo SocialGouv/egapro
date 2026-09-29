@@ -139,6 +139,9 @@ describe("Step4Publication — fields", () => {
 
 		expect(urlField()).toBeInTheDocument();
 		expect(urlField()).toHaveAttribute("aria-required", "true");
+		expect(
+			screen.getByText("Format attendu : https://www.exemple.fr/egalite"),
+		).toBeInTheDocument();
 		expect(modalitiesField()).not.toBeInTheDocument();
 	});
 
@@ -259,6 +262,21 @@ describe("Step4Publication — step validator", () => {
 		expect(await runStepValidator()).toBe(false);
 		expect(
 			screen.getByText(VALIDATION_MESSAGES.urlRequired),
+		).toBeInTheDocument();
+	});
+
+	it("suggests the expected URL format for an invalid page address", async () => {
+		renderStep({
+			draft: {
+				publishDate: WEBSITE_PUBLICATION.publishDate,
+				hasWebsite: true,
+				publishUrl: "pas une url",
+			},
+		});
+
+		expect(await runStepValidator()).toBe(false);
+		expect(
+			screen.getByText(VALIDATION_MESSAGES.urlInvalid),
 		).toBeInTheDocument();
 	});
 

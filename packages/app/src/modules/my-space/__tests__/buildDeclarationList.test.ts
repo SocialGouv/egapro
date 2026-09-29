@@ -11,6 +11,7 @@ const EMPTY_DECLARATION = {
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
+	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
@@ -250,6 +251,22 @@ describe("buildDeclarationList", () => {
 			year: 2025,
 			status: "done",
 		});
+	});
+
+	it("propagates the submission flags from DB records, current and previous years", () => {
+		const flags = {
+			hasSubmittedSecondDeclaration: true,
+			hasSubmittedJointEvaluation: true,
+			hasSubmittedCseOpinion: true,
+		};
+		const result = buildDeclarationList(
+			SIREN,
+			[makeDbDeclaration(flags), makeDbDeclaration({ ...flags, year: 2025 })],
+			2026,
+		);
+
+		expect(result[0]).toMatchObject({ year: 2026, ...flags });
+		expect(result.at(-1)).toMatchObject({ year: 2025, ...flags });
 	});
 
 	it("propagates cseRequired from DB records", () => {

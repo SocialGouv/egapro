@@ -22,7 +22,7 @@ import {
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { StepStatus } from "./StepRows";
-import { DeadlineRow, TransmittedRow } from "./StepRows";
+import { BulletList, BulletRow, DeadlineRow, TransmittedRow } from "./StepRows";
 
 type CompliancePath = NonNullable<
 	DeclarationDisplayContext["firstDeclarationPathChoice"]
@@ -35,6 +35,11 @@ const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
 	joint_evaluation: "Évaluation conjointe des rémunérations",
 	justify: "Justification des écarts de rémunération",
 };
+
+const FIRST_DECLARATION_MENTION =
+	"Modifiable jusqu'à votre prochaine transmission";
+const SECOND_DECLARATION_MENTION =
+	"Modifiable jusqu'au choix de votre nouveau parcours";
 
 const PATH_CHOICE_LABEL = "Choix du parcours de mise en conformité";
 
@@ -54,17 +59,9 @@ function StepTitle({
 	);
 }
 
-function BulletRow({ children }: { children: ReactNode }) {
-	return (
-		<div className={styles.bulletItem}>
-			<span aria-hidden="true" className={styles.bullet} />
-			<p className="fr-mb-0">{children}</p>
-		</div>
-	);
-}
-
 export function Step1Content({
 	campaignDeadlines,
+	firstDeclarationModifiable,
 	indicatorGRequired,
 	hasPrefillData,
 	status,
@@ -72,6 +69,7 @@ export function Step1Content({
 	year,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	firstDeclarationModifiable: boolean;
 	indicatorGRequired: boolean;
 	hasPrefillData: boolean;
 	status: StepStatus;
@@ -94,16 +92,18 @@ export function Step1Content({
 						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
 					</p>
 				</div>
-				<BulletRow>
-					{hasPrefillData
-						? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
-						: "Indicateurs pour l'ensemble des salariés à remplir"}
-				</BulletRow>
-				{indicatorGRequired && (
+				<BulletList>
 					<BulletRow>
-						Indicateur de rémunération par catégories de salariés à remplir
+						{hasPrefillData
+							? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+							: "Indicateurs pour l'ensemble des salariés à remplir"}
 					</BulletRow>
-				)}
+					{indicatorGRequired && (
+						<BulletRow>
+							Indicateur de rémunération par catégories de salariés à remplir
+						</BulletRow>
+					)}
+				</BulletList>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
@@ -115,13 +115,15 @@ export function Step1Content({
 				{title}
 				<TransmittedRow
 					label="Votre déclaration a été transmise"
+					mention={
+						firstDeclarationModifiable && variant !== "closed"
+							? FIRST_DECLARATION_MENTION
+							: undefined
+					}
 					modification={
-						variant === "closed"
-							? undefined
-							: {
-									href: remunerationStepHref(FIRST_REMUNERATION_STEP),
-									until: campaignDeadlines.decl1ModificationDeadline,
-								}
+						firstDeclarationModifiable
+							? { href: remunerationStepHref(FIRST_REMUNERATION_STEP) }
+							: undefined
 					}
 					viewHref={DECLARATION_REMUNERATION_RECAP}
 				/>
@@ -158,6 +160,15 @@ export function Step2Content({
 		return title;
 	}
 
+	const secondDeclarationModification = isSecondDeclarationWritable(
+		declarationFsmStatus,
+	)
+		? { href: complianceStepHref(1) }
+		: undefined;
+	const secondDeclarationMention = secondDeclarationModification
+		? SECOND_DECLARATION_MENTION
+		: undefined;
+
 	if (variant === "compliance_choice") {
 		const pathChoiceDeadline = selectPathChoiceDeadline(
 			campaignDeadlines,
@@ -169,15 +180,15 @@ export function Step2Content({
 				{secondDeclarationSubmitted && (
 					<TransmittedRow
 						label="Votre seconde déclaration a été transmise"
-						modification={{
-							href: complianceStepHref(1),
-							until: campaignDeadlines.decl2ModificationDeadline,
-						}}
+						mention={secondDeclarationMention}
+						modification={secondDeclarationModification}
 						viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
 					/>
 				)}
-				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
+				<BulletList>
+					<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={pathChoiceDeadline} />
 			</div>
 		);
@@ -187,7 +198,9 @@ export function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
@@ -205,10 +218,8 @@ export function Step2Content({
 		const secondDeclTransmittedRow = secondDeclarationSubmitted ? (
 			<TransmittedRow
 				label="Votre seconde déclaration a été transmise"
-				modification={{
-					href: complianceStepHref(1),
-					until: campaignDeadlines.decl2ModificationDeadline,
-				}}
+				mention={secondDeclarationMention}
+				modification={secondDeclarationModification}
 				viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 				viewLabel="Voir le récapitulatif de la seconde déclaration"
 			/>
@@ -228,14 +239,14 @@ export function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				{secondDeclTransmittedRow}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={jointEvaluationDeadline} />
 			</div>
 		);
 	}
 
-	const secondDeclarationWritable =
-		isSecondDeclarationWritable(declarationFsmStatus);
 	const jointEvaluationWritable =
 		isJointEvaluationWritable(declarationFsmStatus);
 
@@ -245,14 +256,8 @@ export function Step2Content({
 			{secondDeclarationSubmitted && (
 				<TransmittedRow
 					label="Votre seconde déclaration a été transmise"
-					modification={
-						secondDeclarationWritable
-							? {
-									href: complianceStepHref(1),
-									until: campaignDeadlines.decl2ModificationDeadline,
-								}
-							: undefined
-					}
+					mention={secondDeclarationMention}
+					modification={secondDeclarationModification}
 					viewHref={DECLARATION_REMUNERATION_RECAP_CORRECTION}
 					viewLabel="Voir le récapitulatif de la seconde déclaration"
 				/>
@@ -262,16 +267,15 @@ export function Step2Content({
 					label="Votre rapport de l'évaluation conjointe a été transmis"
 					modification={
 						jointEvaluationWritable
-							? {
-									href: COMPLIANCE_JOINT_EVALUATION,
-									until: campaignDeadlines.decl2JointEvaluationDeadline,
-								}
+							? { href: COMPLIANCE_JOINT_EVALUATION }
 							: undefined
 					}
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
-				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
+				</BulletList>
 			)}
 		</div>
 	);
@@ -305,10 +309,7 @@ export function Step3Content({
 				{title}
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
-					modification={{
-						href: cseOpinionStepHref(2),
-						until: campaignDeadlines.decl2CseOpinionDeadline,
-					}}
+					modification={{ href: cseOpinionStepHref(2) }}
 				/>
 			</div>
 		);

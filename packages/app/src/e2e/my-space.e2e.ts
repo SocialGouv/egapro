@@ -86,7 +86,7 @@ test.describe("Declaration process panel", () => {
 			await expect(panel.getByText("Démarche close")).toBeVisible();
 			await expect(
 				panel.getByText(
-					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+					"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
 				),
 			).toBeVisible();
 
@@ -229,11 +229,14 @@ test.describe("Declaration process panel", () => {
 
 				await expect(panel.getByText("Démarche close")).toBeVisible();
 				await expect(
-					panel.getByText("Cette démarche est terminée.", { exact: true }),
+					panel.getByText(
+						"Cette démarche est terminée. Votre déclaration reste modifiable.",
+						{ exact: true },
+					),
 				).toBeVisible();
 				await expect(
 					panel.getByText(
-						"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+						"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
 					),
 				).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
@@ -328,11 +331,14 @@ test.describe("Declaration process panel", () => {
 
 				await expect(panel.getByText("Démarche close")).toBeVisible();
 				await expect(
-					panel.getByText("Cette démarche est terminée.", { exact: true }),
+					panel.getByText(
+						"Cette démarche est terminée. Votre déclaration reste modifiable.",
+						{ exact: true },
+					),
 				).toBeVisible();
 				await expect(
 					panel.getByText(
-						"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+						"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
 					),
 				).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
