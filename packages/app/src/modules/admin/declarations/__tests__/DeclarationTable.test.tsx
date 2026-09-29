@@ -187,10 +187,10 @@ describe("DeclarationTable", () => {
 		expect(link).toHaveClass("companyLink");
 	});
 
-	it("does not truncate a short company name", () => {
+	it("renders a short company name as the full link text", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const link = screen.getByRole("link", { name: "ACME Corp" });
-		expect(link).toHaveClass("companyLink");
+		expect(link).toHaveTextContent(/^ACME Corp$/);
 	});
 });

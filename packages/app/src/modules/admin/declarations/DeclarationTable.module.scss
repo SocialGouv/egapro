@@ -1,7 +1,3 @@
-.companyColumn {
-	width: 40ch;
-}
-
 .companyLink {
 	display: inline-block;
 	max-width: 40ch;
@@ -9,6 +5,7 @@
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	white-space: nowrap;
+	width: max-content;
 
 	&:hover,
 	&:focus-visible {

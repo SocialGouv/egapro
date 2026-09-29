@@ -64,14 +64,7 @@ export function DeclarationTable({
 				<thead>
 					<tr>
 						{SORT_COLUMNS.map((col) => (
-							<th
-								aria-sort={ariaSort(col)}
-								className={
-									col === "companyName" ? styles.companyColumn : undefined
-								}
-								key={col}
-								scope="col"
-							>
+							<th aria-sort={ariaSort(col)} key={col} scope="col">
 								<button
 									className="fr-text--sm"
 									onClick={() => handleSort(col)}
