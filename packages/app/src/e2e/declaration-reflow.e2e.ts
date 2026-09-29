@@ -15,7 +15,7 @@ import {
 	STEP5_CATEGORY_NAME,
 	submitFromStep6Recap,
 } from "./helpers/declaration-flows";
-import { urlGlob } from "./helpers/routes";
+import { urlGlob, urlPattern } from "./helpers/routes";
 
 const DESKTOP = { width: 1280, height: 720 };
 const REFLOW = { width: 320, height: 256 };
@@ -51,7 +51,7 @@ test.describe("declaration review recaps at 320px", () => {
 		await test.step("first declaration recap (étape 6)", async () => {
 			await reachStep6Recap(page, { hasGap: true });
 			await page.setViewportSize(REFLOW);
-			await expect(page).toHaveURL(urlGlob(remunerationStepHref(6)));
+			await expect(page).toHaveURL(urlPattern(remunerationStepHref(6)));
 			await expect(
 				page.getByText("Écart de rémunération", { exact: true }),
 			).toBeVisible();
@@ -80,7 +80,7 @@ test.describe("declaration review recaps at 320px", () => {
 		await test.step("second declaration recap (étape 3)", async () => {
 			await page.setViewportSize(REFLOW);
 			await page.goto(complianceStepHref(3));
-			await expect(page).toHaveURL(urlGlob(complianceStepHref(3)));
+			await expect(page).toHaveURL(urlPattern(complianceStepHref(3)));
 			await expect(
 				page.getByText(`Catégorie d'emplois n°1 : ${STEP5_CATEGORY_NAME}`),
 			).toBeVisible();
