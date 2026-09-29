@@ -172,4 +172,25 @@ describe("DeclarationTable", () => {
 		expect(screen.getByText("Transmise")).toBeInTheDocument();
 		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
 	});
+
+	it("names the company link with the full company name and truncates it visually", () => {
+		const longName =
+			"Société Démo des Établissements Industriels et Commerciaux Réunis de la Région Centre-Val de Loire";
+		render(
+			<DeclarationTable
+				{...defaultProps}
+				rows={[{ ...baseRow, companyName: longName }]}
+			/>,
+		);
+
+		const link = screen.getByRole("link", { name: longName });
+		expect(link).toHaveClass("companyLink");
+	});
+
+	it("does not truncate a short company name", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const link = screen.getByRole("link", { name: "ACME Corp" });
+		expect(link).toHaveClass("companyLink");
+	});
 });
