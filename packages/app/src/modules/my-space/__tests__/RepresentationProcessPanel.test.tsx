@@ -201,17 +201,17 @@ describe("RepresentationProcessPanel", () => {
 		});
 
 		it("expands the declaration step into its three bullets", () => {
-			const { panel, dialog } = renderPanel({ declaration: DRAFT });
+			const { panel } = renderPanel({ declaration: DRAFT });
 			expect(panel.getByText("Écarts de représentation")).toBeInTheDocument();
 			expect(panel.getByText("Cadres dirigeants")).toBeInTheDocument();
 			expect(panel.getByText("Instances dirigeantes")).toBeInTheDocument();
 			expect(
 				panel.getByText("Informations de publication"),
 			).toBeInTheDocument();
-			expect(dialog.querySelectorAll("ul > li")).toHaveLength(3);
-			expect(
-				panel.getByText("Cadres dirigeants").closest("li"),
-			).toBeInTheDocument();
+			const lists = panel.getAllByRole("list", { hidden: true });
+			expect(lists).toHaveLength(1);
+			expect(lists[0]).toHaveAttribute("role", "list");
+			expect(panel.getAllByRole("listitem", { hidden: true })).toHaveLength(3);
 		});
 
 		it("marks the subjection check as done and the declaration as current", () => {

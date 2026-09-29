@@ -22,7 +22,7 @@ import {
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { StepStatus } from "./StepRows";
-import { DeadlineRow, TransmittedRow } from "./StepRows";
+import { BulletList, BulletRow, DeadlineRow, TransmittedRow } from "./StepRows";
 
 type CompliancePath = NonNullable<
 	DeclarationDisplayContext["firstDeclarationPathChoice"]
@@ -52,19 +52,6 @@ function StepTitle({
 			{children}
 		</p>
 	);
-}
-
-function BulletRow({ children }: { children: ReactNode }) {
-	return (
-		<li className={styles.bulletItem}>
-			<span aria-hidden="true" className={styles.bullet} />
-			<p className="fr-mb-0">{children}</p>
-		</li>
-	);
-}
-
-function BulletList({ children }: { children: ReactNode }) {
-	return <ul className={styles.bulletList}>{children}</ul>;
 }
 
 export function Step1Content({
