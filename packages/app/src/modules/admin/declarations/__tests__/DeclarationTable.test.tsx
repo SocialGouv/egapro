@@ -173,7 +173,7 @@ describe("DeclarationTable", () => {
 		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
 	});
 
-	it("names the company link with the full company name and truncates it visually", () => {
+	it("keeps the full company name as the link's accessible name and applies the visual truncation class", () => {
 		const longName =
 			"Société Démo des Établissements Industriels et Commerciaux Réunis de la Région Centre-Val de Loire";
 		render(
