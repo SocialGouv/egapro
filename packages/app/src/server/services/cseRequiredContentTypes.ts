@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { computeRequiredContentTypes } from "~/modules/cseOpinion/contentTypeColumns";
 import type { ContentTypeKey } from "~/modules/cseOpinion/types";
@@ -8,6 +8,7 @@ import { computeGapHighFlags } from "~/modules/domain";
 import { getCurrentRound } from "~/server/api/routers/statusHistoryHelpers";
 import type { db as database } from "~/server/db";
 import {
+	cseOpinionFiles,
 	cseOpinions,
 	employeeCategories,
 	jobCategories,
@@ -15,6 +16,7 @@ import {
 
 /** The root client or an open transaction — both expose the reads used here. */
 type Database = Pick<typeof database, "select">;
+type WritableDatabase = Pick<typeof database, "select" | "delete">;
 
 /**
  * Content types the parcours requires for a declaration, read from the DB.
@@ -83,4 +85,59 @@ export async function getRequiredContentTypes(
 		firstDeclGapHigh,
 		secondDeclGapHigh,
 	});
+}
+
+export function contentTypeKey(declarationNumber: number, type: string) {
+	return `${declarationNumber}:${type}`;
+}
+
+type StoredAssociation = {
+	id: string;
+	declarationNumber: number;
+	type: string;
+};
+
+export function findStaleAssociationIds(
+	required: ContentTypeKey[],
+	associations: StoredAssociation[],
+): string[] {
+	const requiredKeys = new Set(
+		required.map((spec) => contentTypeKey(spec.declarationNumber, spec.type)),
+	);
+	return associations
+		.filter(
+			(association) =>
+				!requiredKeys.has(
+					contentTypeKey(association.declarationNumber, association.type),
+				),
+		)
+		.map((association) => association.id);
+}
+
+export async function pruneStaleContentTypeAssociations(
+	db: WritableDatabase,
+	declarationId: string,
+): Promise<void> {
+	const required = await getRequiredContentTypes(db, declarationId);
+
+	const associations = await db
+		.select({
+			id: cseOpinionFiles.id,
+			declarationNumber: cseOpinionFiles.declarationNumber,
+			type: cseOpinionFiles.type,
+		})
+		.from(cseOpinionFiles)
+		.where(eq(cseOpinionFiles.declarationId, declarationId));
+
+	const staleIds = findStaleAssociationIds(required, associations);
+	if (staleIds.length === 0) return;
+
+	await db
+		.delete(cseOpinionFiles)
+		.where(
+			and(
+				eq(cseOpinionFiles.declarationId, declarationId),
+				inArray(cseOpinionFiles.id, staleIds),
+			),
+		);
 }

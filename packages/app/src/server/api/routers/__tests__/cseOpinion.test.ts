@@ -36,6 +36,20 @@ vi.mock("~/server/db/schema", () => ({
 	},
 }));
 
+const mockPruneStaleContentTypeAssociations = vi.fn();
+
+vi.mock(
+	"~/server/services/cseRequiredContentTypes",
+	async (importOriginal) => ({
+		...(await importOriginal<
+			typeof import("~/server/services/cseRequiredContentTypes")
+		>()),
+		getRequiredContentTypes: vi.fn(),
+		pruneStaleContentTypeAssociations: (...args: unknown[]) =>
+			mockPruneStaleContentTypeAssociations(...args),
+	}),
+);
+
 const mockDeleteS3File = vi.fn();
 const mockGetFileSize = vi.fn();
 
@@ -213,6 +227,33 @@ describe("cseOpinionRouter", () => {
 					}),
 				]),
 			);
+		});
+
+		it("prunes content-type associations that are no longer required once the opinions are saved", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions({
+				firstDeclaration: {
+					accuracyOpinion: "favorable",
+					accuracyDate: "2026-01-15",
+					gapConsulted: false,
+					gapOpinion: null,
+					gapDate: null,
+				},
+			});
+
+			expect(mockPruneStaleContentTypeAssociations).toHaveBeenCalledTimes(1);
+			expect(mockPruneStaleContentTypeAssociations).toHaveBeenCalledWith(
+				expect.objectContaining({ select: mockSelect, delete: mockDelete }),
+				"decl-1",
+			);
+			const [insertOrder] = mockValues.mock.invocationCallOrder;
+			const [pruneOrder] =
+				mockPruneStaleContentTypeAssociations.mock.invocationCallOrder;
+			expect(insertOrder).toBeDefined();
+			expect(pruneOrder).toBeDefined();
+			expect(insertOrder as number).toBeLessThan(pruneOrder as number);
 		});
 
 		it("inserts second declaration opinions when provided", async () => {
