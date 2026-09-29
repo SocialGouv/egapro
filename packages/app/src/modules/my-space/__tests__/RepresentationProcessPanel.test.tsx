@@ -209,6 +209,10 @@ describe("RepresentationProcessPanel", () => {
 			expect(
 				panel.getByText("Informations de publication"),
 			).toBeInTheDocument();
+			const lists = panel.getAllByRole("list", { hidden: true });
+			expect(lists).toHaveLength(1);
+			expect(lists[0]).toHaveAttribute("role", "list");
+			expect(panel.getAllByRole("listitem", { hidden: true })).toHaveLength(3);
 		});
 
 		it("marks the subjection check as done and the declaration as current", () => {

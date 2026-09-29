@@ -22,7 +22,7 @@ import {
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { StepStatus } from "./StepRows";
-import { DeadlineRow, TransmittedRow } from "./StepRows";
+import { BulletList, BulletRow, DeadlineRow, TransmittedRow } from "./StepRows";
 
 type CompliancePath = NonNullable<
 	DeclarationDisplayContext["firstDeclarationPathChoice"]
@@ -59,15 +59,6 @@ function StepTitle({
 	);
 }
 
-function BulletRow({ children }: { children: ReactNode }) {
-	return (
-		<div className={styles.bulletItem}>
-			<span aria-hidden="true" className={styles.bullet} />
-			<p className="fr-mb-0">{children}</p>
-		</div>
-	);
-}
-
 export function Step1Content({
 	campaignDeadlines,
 	firstDeclarationModifiable,
@@ -101,16 +92,18 @@ export function Step1Content({
 						Période de référence : 01/01/{refYear} - 31/12/{refYear}.
 					</p>
 				</div>
-				<BulletRow>
-					{hasPrefillData
-						? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
-						: "Indicateurs pour l'ensemble des salariés à remplir"}
-				</BulletRow>
-				{indicatorGRequired && (
+				<BulletList>
 					<BulletRow>
-						Indicateurs de rémunération par catégories de salariés à remplir
+						{hasPrefillData
+							? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+							: "Indicateurs pour l'ensemble des salariés à remplir"}
 					</BulletRow>
-				)}
+					{indicatorGRequired && (
+						<BulletRow>
+							Indicateurs de rémunération par catégories de salariés à remplir
+						</BulletRow>
+					)}
+				</BulletList>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
 			</div>
 		);
@@ -193,7 +186,9 @@ export function Step2Content({
 						viewLabel="Voir le récapitulatif de la seconde déclaration"
 					/>
 				)}
-				<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
+				<BulletList>
+					<BulletRow>{PATH_CHOICE_LABEL}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={pathChoiceDeadline} />
 			</div>
 		);
@@ -203,7 +198,9 @@ export function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={campaignDeadlines.decl2ModificationDeadline} />
 			</div>
 		);
@@ -242,7 +239,9 @@ export function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				{secondDeclTransmittedRow}
-				<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
+				</BulletList>
 				<DeadlineRow date={jointEvaluationDeadline} />
 			</div>
 		);
@@ -274,7 +273,9 @@ export function Step2Content({
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
-				<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
+				<BulletList>
+					<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
+				</BulletList>
 			)}
 		</div>
 	);

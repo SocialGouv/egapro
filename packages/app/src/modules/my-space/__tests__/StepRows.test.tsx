@@ -7,7 +7,12 @@ import {
 	FIRST_REMUNERATION_STEP,
 	remunerationStepHref,
 } from "~/modules/routes";
-import { DeadlineRow, TransmittedRow } from "../StepRows";
+import {
+	BulletList,
+	BulletRow,
+	DeadlineRow,
+	TransmittedRow,
+} from "../StepRows";
 
 const MODIFY_HREF = remunerationStepHref(FIRST_REMUNERATION_STEP);
 
@@ -109,5 +114,30 @@ describe("DeadlineRow", () => {
 			container.querySelector(".fr-icon-calendar-line"),
 		).toBeInTheDocument();
 		expect(getByText(/Échéance :/)).toBeInTheDocument();
+	});
+});
+
+describe("BulletList", () => {
+	it("keeps its list semantics with an explicit role despite list-style: none", () => {
+		const { container, getAllByRole } = render(
+			<BulletList>
+				<BulletRow>Premier</BulletRow>
+				<BulletRow>Second</BulletRow>
+			</BulletList>,
+		);
+		expect(container.querySelector("ul")).toHaveAttribute("role", "list");
+		expect(getAllByRole("listitem")).toHaveLength(2);
+	});
+
+	it("hides the decorative bullet from assistive technologies", () => {
+		const { container } = render(
+			<BulletList>
+				<BulletRow>Premier</BulletRow>
+			</BulletList>,
+		);
+		expect(container.querySelector("li > span")).toHaveAttribute(
+			"aria-hidden",
+			"true",
+		);
 	});
 });

@@ -117,6 +117,10 @@ describe("DeclarationProcessPanel", () => {
 					/Indicateurs de rémunération par catégories de salariés à remplir/,
 				),
 			).toBeInTheDocument();
+			const lists = panel.getAllByRole("list", { hidden: true });
+			expect(lists).toHaveLength(1);
+			expect(lists[0]).toHaveAttribute("role", "list");
+			expect(panel.getAllByRole("listitem", { hidden: true })).toHaveLength(2);
 		});
 
 		it("describes indicators as manual when no prefill data is available", () => {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { OrdinalLongDate } from "~/modules/declaration-remuneration/shared/OrdinalLongDate";
 import type { AppHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
@@ -55,5 +56,22 @@ export function DeadlineRow({ date }: { date: Date }) {
 				Échéance : <OrdinalLongDate date={date} />
 			</p>
 		</div>
+	);
+}
+
+export function BulletList({ children }: { children: ReactNode }) {
+	return (
+		<ul className={styles.bulletList} role="list">
+			{children}
+		</ul>
+	);
+}
+
+export function BulletRow({ children }: { children: ReactNode }) {
+	return (
+		<li className={styles.bulletItem}>
+			<span aria-hidden="true" className={styles.bullet} />
+			<p className="fr-mb-0">{children}</p>
+		</li>
 	);
 }
