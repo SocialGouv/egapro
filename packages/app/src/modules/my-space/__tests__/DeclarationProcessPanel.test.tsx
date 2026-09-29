@@ -281,7 +281,7 @@ describe("DeclarationProcessPanel", () => {
 				displayContext: makeDisplayContextFromPaths("corrective_action"),
 			});
 			expect(
-				panel.getByText("Déposer le ou les avis du CSE"),
+				panel.getByText("Dépôt du ou des avis du CSE"),
 			).toBeInTheDocument();
 		});
 

@@ -287,7 +287,7 @@ export function Step3Content({
 	variant: PanelVariant;
 }) {
 	const title = (
-		<StepTitle status={status}>Déposer le ou les avis du CSE</StepTitle>
+		<StepTitle status={status}>Dépôt du ou des avis du CSE</StepTitle>
 	);
 
 	if (
