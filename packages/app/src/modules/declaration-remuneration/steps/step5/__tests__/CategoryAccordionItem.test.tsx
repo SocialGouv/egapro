@@ -159,13 +159,20 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 			"maxlength",
 			String(CATEGORY_NAME_MAX_LENGTH),
 		);
+		expect(screen.getByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE)).toHaveAttribute(
+			"id",
+			"cat-0-name-limit",
+		);
 	});
 
 	it("renders no error and marks the input valid when nameError is absent", () => {
 		renderItem();
 		const input = document.getElementById("cat-0-name") as HTMLInputElement;
 		expect(input).not.toHaveAttribute("aria-invalid");
-		expect(input).toHaveAttribute("aria-describedby", "cat-0-name-hint");
+		expect(input).toHaveAttribute(
+			"aria-describedby",
+			"cat-0-name-hint cat-0-name-limit",
+		);
 		expect(
 			screen.queryByText(CATEGORY_NAME_MAX_LENGTH_MESSAGE, {
 				selector: ".fr-error-text",
@@ -197,7 +204,7 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 		expect(input).toHaveAttribute("aria-invalid", "true");
 		expect(input).toHaveAttribute(
 			"aria-describedby",
-			"cat-0-name-hint category-alert-invalid",
+			"cat-0-name-hint cat-0-name-limit category-alert-invalid",
 		);
 	});
 });

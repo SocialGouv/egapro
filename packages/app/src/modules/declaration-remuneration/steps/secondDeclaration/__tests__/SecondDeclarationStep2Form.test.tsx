@@ -156,6 +156,33 @@ describe("SecondDeclarationStep2Form", () => {
 		expect(screen.getByText("Étape 2 sur 3")).toBeInTheDocument();
 	});
 
+	it("keeps a historical 255-character label read-only and submits the correction", async () => {
+		const name = "a".repeat(255);
+		const user = userEvent.setup();
+		renderStep2({
+			initialFirstDeclarationCategories: mockCategories.map((category) => ({
+				...category,
+				name,
+			})),
+			initialSource: "accord-entreprise",
+			initialStartDate: "2024-01-01",
+			initialEndDate: "2024-12-31",
+		});
+		expect(
+			screen.getByRole("button", { name: `Catégorie d'emplois n°1 : ${name}` }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText("250 caractères maximum"),
+		).not.toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(mutateMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				declarationType: "correction",
+				categories: expect.arrayContaining([expect.objectContaining({ name })]),
+			}),
+		);
+	});
+
 	it("displays category label as read-only text", () => {
 		renderStep2();
 		// The category label is now carried by the accordion heading and the
