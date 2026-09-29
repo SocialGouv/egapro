@@ -42,6 +42,7 @@ import { loginWithProConnect } from "./helpers/login";
 const PANEL_ID = "declaration-process-panel";
 // Matches the year the panel renders and the year ensureCurrentYearDeclaration inserts.
 const CURRENT_YEAR = getCurrentYear();
+const STEP3_TITLE = "Dépôt du ou des avis du CSE";
 
 test.describe("Declaration process panel", () => {
 	test.describe.configure({ mode: "serial" });
@@ -89,6 +90,7 @@ test.describe("Declaration process panel", () => {
 					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
 				),
 			).toBeVisible();
+			await expect(panel.getByText(STEP3_TITLE)).toBeVisible();
 
 			// #4243: step 1 announces the transmitted declaration on every path,
 			// a closed démarche included, and keeps its view button.
@@ -165,7 +167,6 @@ test.describe("Declaration process panel", () => {
 	test.describe("voluntary company without CSE: compliance and CSE steps are hidden", () => {
 		const STEP2_TITLE =
 			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
-		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -267,7 +268,6 @@ test.describe("Declaration process panel", () => {
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
 			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
-		const STEP3_TITLE = "Déposer le ou les avis du CSE";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
