@@ -33,6 +33,7 @@ const CSE_OPINION_RECAP_TEXT = /avis du CSE devra être transmis/;
 const CSE_JUSTIFY_PARENTHESIS =
 	/avis à transmettre lors de la dernière étape de la démarche/;
 const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
+const CORRECTIVE_CSE_OPINION_BULLET = "Déposer le ou les avis du CSE";
 
 test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
 	test.describe.configure({ mode: "serial" });
@@ -89,9 +90,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		await expect(
 			page.getByText("Transmettre l'avis du CSE", { exact: true }),
 		).toHaveCount(0);
-		await expect(
-			page.getByText(/Transmettre l.avis ou les avis du CSE/),
-		).toHaveCount(0);
+		await expect(page.getByText(CORRECTIVE_CSE_OPINION_BULLET)).toHaveCount(0);
 	});
 });
 
@@ -134,6 +133,9 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 
 		await expect(
 			page.getByText("Transmettre l'avis du CSE", { exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByText(CORRECTIVE_CSE_OPINION_BULLET, { exact: true }),
 		).toBeVisible();
 	});
 });

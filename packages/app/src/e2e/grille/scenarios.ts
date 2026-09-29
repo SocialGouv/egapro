@@ -462,7 +462,7 @@ export const FICHE_SCENARIOS = {
 		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
 		await expect(
 			page.getByRole("heading", {
-				name: "Transmettre l'avis ou les avis du CSE",
+				name: "Dépôt du ou des avis du CSE",
 			}),
 		).toHaveCount(0);
 		await expect(page.locator("#first-decl-accuracy-favorable")).toHaveCount(0);
