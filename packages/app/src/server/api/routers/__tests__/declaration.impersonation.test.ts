@@ -167,9 +167,11 @@ describe("declarationRouter", () => {
 			const mockDb = {
 				select: vi.fn().mockReturnValue({
 					from: vi.fn().mockReturnValue({
-						where: vi.fn().mockReturnValue({
-							limit: vi.fn().mockResolvedValue([]),
-						}),
+						where: vi.fn().mockReturnValue(
+							Object.assign(Promise.resolve([]), {
+								limit: vi.fn().mockResolvedValue([]),
+							}),
+						),
 					}),
 				}),
 				transaction: mockTransaction,

@@ -84,7 +84,7 @@ function DeadlineBlock({
 }) {
 	return (
 		<div className={`fr-highlight ${common.flexColumnGapHalf}`}>
-			<p className="fr-mb-0">Date limite</p>
+			<p className="fr-mb-0">Échéance</p>
 			<p className="fr-mb-0 fr-text--lead fr-text--bold">
 				{formatLongDate(deadline)}
 			</p>

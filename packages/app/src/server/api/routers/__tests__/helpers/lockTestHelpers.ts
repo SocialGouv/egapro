@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import type { SubmissionHistoryEvent } from "~/modules/domain";
 
 export const LOCK_HOLDER_USER_ID = "user-1";
 
@@ -23,47 +24,37 @@ type LockOptions = {
 	declarationId?: string;
 	holder?: ReturnType<typeof buildLockHolder> | null;
 	/**
-	 * Declaration status returned to the `declarationModifiableWriteProcedure`
-	 * deadline guard (`select({ status, year, secondDeclarationStep,
-	 * secondDeclarationPathChoice })`). Defaults to `"draft"`, which makes the
-	 * guard a no-op (it only checks the deadline for submitted declarations).
-	 * Override to a submitted status to exercise the guard.
+	 * History rows returned to the `declarationModifiableWriteProcedure`
+	 * first-declaration guard (`select({ eventType, round })` issued right after
+	 * the lock lookup). Defaults to none, which leaves the guard inoperative.
+	 * Inject a downstream submission (`second_declaration_submit`,
+	 * `joint_evaluation_submit`, `cse_opinion_submit`) to exercise it.
 	 */
-	declarationStatus?: string;
-	/** Declaration year fed to the deadline guard (only read when not draft). */
-	declarationYear?: number;
-	/**
-	 * Second-declaration signal fed to the deadline guard. Since the guard now
-	 * routes the applicable deadline through
-	 * `isSecondDeclarationDeadlineApplicable`, these disambiguate the terminal
-	 * states (`awaiting_cse_opinion` / `demarche_completed`) between round 1 and
-	 * round 2. Default null → phase-1 for those states.
-	 */
-	secondDeclarationStep?: number | null;
-	secondDeclarationPathChoice?:
-		| "justify"
-		| "corrective_action"
-		| "joint_evaluation"
-		| null;
+	subsequentEvents?: SubmissionHistoryEvent[];
 };
 
-// Fixed fallback year for the deadline-guard mock. Irrelevant while the status
-// is "draft" (the guard short-circuits before reading the year / deadline).
-const GUARD_FALLBACK_YEAR = 2024;
+export function isGuardHistoryProjection(cols: unknown): boolean {
+	if (!cols || typeof cols !== "object" || Array.isArray(cols)) return false;
+	const keys = Object.keys(cols);
+	return (
+		keys.length === 2 && keys.includes("eventType") && keys.includes("round")
+	);
+}
 
 /**
- * Wrap a test's bespoke mock db so the two middleware selects that
+ * Wrap a test's bespoke mock db so the middleware selects that
  * `declarationLockedWriteProcedure` runs on `ctx.db` are answered before the
  * handler's own queries. The middleware always issues, in order: the
  * current-year declaration lookup (`fetchCurrentDeclarationId`, a plain
  * select) followed by the active-lock lookup (`getActiveLock`, the only select
  * that calls `.innerJoin`). Both are served here. Mutations on
  * `declarationModifiableWriteProcedure` add a third middleware select — the
- * deadline guard `select({ status, year, secondDeclarationStep,
- * secondDeclarationPathChoice })` — which is also served here (detected by its
- * projection, defaulting to a draft no-op). Every other call — the handler's
- * `transaction`, `update`, `insert`, `delete`, and any later top-level
- * `select` — is delegated to the inner db untouched.
+ * first-declaration guard reading the downstream submission events
+ * (`select({ eventType, round })`) — which is also served here, detected by its
+ * position right after the lock lookup and by its projection, so a locked
+ * procedure's own first select is never intercepted. Every other call — the
+ * handler's `transaction`, `update`, `insert`, `delete`, and any later
+ * top-level `select` — is delegated to the inner db untouched.
  */
 export function withLockMiddleware(
 	innerDb: unknown,
@@ -77,32 +68,6 @@ export function withLockMiddleware(
 	let middlewareSelectIndex = 0;
 
 	const select = vi.fn().mockImplementation((...args: unknown[]) => {
-		// declarationModifiableWriteProcedure deadline guard: a top-level
-		// `select({ status, year, secondDeclarationStep,
-		// secondDeclarationPathChoice })` issued after the two lock-middleware
-		// selects. Detected by its distinctive projection (status + year, unique
-		// across the router + middlewares) rather than by call order, so it stays
-		// robust whether the procedure under test is 2-select (locked) or 3-select
-		// (modifiable). Defaulting to "draft" makes the guard a no-op.
-		const cols = args[0];
-		if (cols && typeof cols === "object" && !Array.isArray(cols)) {
-			const keys = Object.keys(cols as Record<string, unknown>);
-			if (keys.includes("status") && keys.includes("year")) {
-				const limit = vi.fn().mockResolvedValue([
-					{
-						status: options.declarationStatus ?? "draft",
-						year: options.declarationYear ?? GUARD_FALLBACK_YEAR,
-						secondDeclarationStep: options.secondDeclarationStep ?? null,
-						secondDeclarationPathChoice:
-							options.secondDeclarationPathChoice ?? null,
-					},
-				]);
-				const where = vi.fn().mockReturnValue({ limit });
-				const from = vi.fn().mockReturnValue({ where });
-				return { from };
-			}
-		}
-
 		const callIndex = middlewareSelectIndex;
 		middlewareSelectIndex++;
 
@@ -123,6 +88,12 @@ export function withLockMiddleware(
 			return { from };
 		}
 
+		if (callIndex === 2 && isGuardHistoryProjection(args[0])) {
+			const where = vi.fn().mockResolvedValue(options.subsequentEvents ?? []);
+			const from = vi.fn().mockReturnValue({ where });
+			return { from };
+		}
+
 		const innerSelect = inner.select as
 			| ((...a: unknown[]) => unknown)
 			| undefined;
@@ -137,5 +108,19 @@ export function withLockMiddleware(
 			if (prop === "select") return select;
 			return Reflect.get(target, prop, receiver);
 		},
+	});
+}
+
+export function withTxGuardHistory(
+	innerSelect: (...args: unknown[]) => unknown,
+	subsequentEvents: SubmissionHistoryEvent[] = [],
+) {
+	return vi.fn().mockImplementation((...args: unknown[]) => {
+		if (isGuardHistoryProjection(args[0])) {
+			const where = vi.fn().mockResolvedValue(subsequentEvents);
+			const from = vi.fn().mockReturnValue({ where });
+			return { from };
+		}
+		return innerSelect(...args);
 	});
 }

@@ -9,8 +9,6 @@ import {
 } from "~/modules/routes";
 import { DeadlineRow, TransmittedRow } from "../StepRows";
 
-const FUTURE_DEADLINE = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-const PAST_DEADLINE = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30);
 const MODIFY_HREF = remunerationStepHref(FIRST_REMUNERATION_STEP);
 
 describe("TransmittedRow", () => {
@@ -22,38 +20,49 @@ describe("TransmittedRow", () => {
 		expect(container.querySelector(".fr-icon-check-line")).toBeInTheDocument();
 	});
 
-	it("with a modification window still open: shows the modify affordance and its date", () => {
-		const { getByText, queryByText } = render(
+	it("with a modification: shows the modify affordance", () => {
+		const { getByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				modification={{ href: MODIFY_HREF, until: FUTURE_DEADLINE }}
+				modification={{ href: MODIFY_HREF }}
 			/>,
 		);
-		expect(getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
-		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
 		expect(getByText("Modifier")).toHaveAttribute("href", MODIFY_HREF);
 	});
 
-	it("with a modification window already closed: shows the closed wording and hides the modify button", () => {
-		const { getByText, queryByText } = render(
+	it("renders the mention it is given under the label", () => {
+		const { getByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
-				modification={{ href: MODIFY_HREF, until: PAST_DEADLINE }}
+				mention="Modifiable jusqu'à votre prochaine transmission"
+				modification={{ href: MODIFY_HREF }}
 			/>,
 		);
-		expect(getByText(/Modification close depuis le/)).toBeInTheDocument();
-		expect(queryByText("Modifier")).not.toBeInTheDocument();
+		expect(
+			getByText("Modifiable jusqu'à votre prochaine transmission"),
+		).toBeInTheDocument();
 	});
 
-	it("without a modification: renders neither the deadline wording nor a modify button (Repeq — immutable once transmitted)", () => {
+	it("without a mention: renders no mention, even with a modification", () => {
+		const { container, getByText } = render(
+			<TransmittedRow
+				label="Votre déclaration a été transmise"
+				modification={{ href: MODIFY_HREF }}
+			/>,
+		);
+		expect(getByText("Modifier")).toBeInTheDocument();
+		expect(container.textContent).not.toMatch(/Modifiable jusqu'/);
+		expect(container.textContent).not.toMatch(/Modification close/);
+	});
+
+	it("without a modification: renders no modify button (immutable once transmitted)", () => {
 		const { queryByText } = render(
 			<TransmittedRow
 				label="Votre déclaration a été transmise"
 				viewHref={DECLARATION_REMUNERATION_RECAP}
 			/>,
 		);
-		expect(queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
-		expect(queryByText(/Modification close depuis le/)).not.toBeInTheDocument();
+		expect(queryByText(/Modifiable jusqu'/)).not.toBeInTheDocument();
 		expect(queryByText("Modifier")).not.toBeInTheDocument();
 	});
 

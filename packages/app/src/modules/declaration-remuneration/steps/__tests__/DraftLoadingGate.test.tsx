@@ -195,6 +195,7 @@ describe("DraftLoadingGate", () => {
 				}}
 				cseOpinionRequired={true}
 				currentYear={2026}
+				declarationModifiable={true}
 				declarationSiren="123456789"
 				declarationYear={2026}
 				email="user@example.com"

@@ -55,6 +55,7 @@ vi.mock("~/modules/declaration-remuneration", () => ({
 
 import WithBannerLayout from "~/app/declaration-remuneration/(with-banner)/layout";
 import { COMPANY_SIZE_ANNUAL_MIN } from "~/modules/domain";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 const SIREN = "123456789";
@@ -67,12 +68,16 @@ function mockLayout({
 	hasCse = true as boolean | null,
 	phone = PHONE as string | null,
 	profileFails = false,
+	status = "draft" as string,
+	isFirstDeclarationLocked = false,
 	user = DEFAULT_USER as Record<string, unknown>,
 }: {
 	gipWorkforce?: number | null;
 	hasCse?: boolean | null;
 	phone?: string | null;
 	profileFails?: boolean;
+	status?: string;
+	isFirstDeclarationLocked?: boolean;
 	user?: Record<string, unknown>;
 } = {}) {
 	mockAuth.mockResolvedValue({ user });
@@ -86,7 +91,8 @@ function mockLayout({
 		hasCse,
 	} as never);
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
-		declaration: { id: "d1", year: 2026, siren: SIREN, status: "draft" },
+		declaration: { id: "d1", year: 2026, siren: SIREN, status },
+		isFirstDeclarationLocked,
 	} as never);
 	if (profileFails) {
 		vi.mocked(api.profile.get).mockRejectedValue(new Error("NOT_FOUND"));
@@ -224,5 +230,38 @@ describe("WithBannerLayout", () => {
 		for (const [target] of mockRedirect.mock.calls) {
 			expect(target).not.toContain("/declaration-remuneration");
 		}
+	});
+
+	describe("edit lock suspension", () => {
+		async function lockAcquisitionSuspended() {
+			const element = (await renderLayout()) as unknown as {
+				props: { lockAcquisitionSuspended: boolean };
+			};
+			return element.props.lockAcquisitionSuspended;
+		}
+
+		it.each([
+			["demarche_completed", true, true],
+			["demarche_completed", false, false],
+			["awaiting_cse_opinion", true, false],
+			["corrective_actions_chosen", false, false],
+			["draft", false, false],
+		])("status %s, first declaration superseded %s → suspended %s", async (status, isFirstDeclarationLocked, expected) => {
+			mockLayout({ status, isFirstDeclarationLocked });
+
+			expect(await lockAcquisitionSuspended()).toBe(expected);
+		});
+
+		it("never reads the campaign deadlines", async () => {
+			vi.mocked(getCampaignDeadlines).mockClear();
+			mockLayout({
+				status: "demarche_completed",
+				isFirstDeclarationLocked: true,
+			});
+
+			await renderLayout();
+
+			expect(getCampaignDeadlines).not.toHaveBeenCalled();
+		});
 	});
 });

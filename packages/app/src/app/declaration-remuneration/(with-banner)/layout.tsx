@@ -15,7 +15,6 @@ import {
 	getEffectiveSiren,
 	isImpersonating,
 } from "~/server/auth/companyAccess";
-import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 
 /**
@@ -63,10 +62,9 @@ export default async function WithBannerLayout({
 	const declarationData = await api.declaration.getOrCreate();
 	const declaration = declarationData.declaration;
 
-	const deadlines = await getCampaignDeadlines(declaration.year);
 	const lockAcquisitionSuspended = isDeclarationWritingClosed(
 		declaration.status,
-		deadlines.decl1ModificationDeadline,
+		declarationData.isFirstDeclarationLocked,
 	);
 
 	return (

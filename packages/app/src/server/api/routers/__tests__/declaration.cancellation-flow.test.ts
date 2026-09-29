@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCaller } from "./helpers/declarationTestHelpers";
-import { withLockMiddleware } from "./helpers/lockTestHelpers";
+import {
+	withLockMiddleware,
+	withTxGuardHistory,
+} from "./helpers/lockTestHelpers";
 
 // submit and updateStep1 run through `declarationLockedWriteProcedure`: the
 // lock middleware issues two `ctx.db.select` calls (declaration resolution +
@@ -87,7 +90,8 @@ function activeRows() {
 
 function buildTx() {
 	return {
-		select: () => ({
+		execute: async () => [],
+		select: withTxGuardHistory(() => ({
 			from: () => ({
 				where: () => ({
 					limit: async () =>
@@ -96,7 +100,7 @@ function buildTx() {
 							.map((row) => ({ ...row, ...nullIndicators() })),
 				}),
 			}),
-		}),
+		})),
 		insert: () => ({
 			values: (values: Partial<StoredRow>) => ({
 				onConflictDoNothing: () => ({
@@ -210,9 +214,9 @@ function buildDb() {
 							},
 						};
 					}
-					return {
+					return Object.assign(Promise.resolve([]), {
 						limit: async () => [{ siren: SIREN, workforce: 80, hasCse: false }],
-					};
+					});
 				},
 				innerJoin: () => ({
 					where: async () => [],

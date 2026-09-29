@@ -3,6 +3,7 @@ import type {
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
 } from "~/modules/domain";
+import { isLockedBySubsequentSubmission } from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { Step1Content, Step2Content, Step3Content } from "./StepContent";
@@ -25,6 +26,23 @@ export function getStepStatuses(
 	}
 }
 
+export function isFirstDeclarationModifiable(submitted: {
+	secondDeclaration: boolean;
+	jointEvaluation: boolean;
+	cseOpinion: boolean;
+}): boolean {
+	return !isLockedBySubsequentSubmission(
+		{
+			hasSubmittedSecondDeclaration: submitted.secondDeclaration,
+			secondDeclarationSubmissionCount: submitted.secondDeclaration ? 1 : 0,
+			hasSubmittedJointEvaluation: submitted.jointEvaluation,
+			hasSubmittedRound1JointEvaluation: false,
+			hasSubmittedCseOpinion: submitted.cseOpinion,
+		},
+		"first_declaration",
+	);
+}
+
 export function VerticalStepper({
 	campaignDeadlines,
 	compliancePathApplicable,
@@ -33,6 +51,8 @@ export function VerticalStepper({
 	displayContext,
 	hasPrefillData,
 	indicatorGRequired,
+	jointEvaluationSubmitted,
+	cseOpinionSubmitted,
 	secondDeclarationSubmitted,
 	step1,
 	step2,
@@ -47,6 +67,8 @@ export function VerticalStepper({
 	displayContext: DeclarationDisplayContext;
 	hasPrefillData: boolean;
 	indicatorGRequired: boolean;
+	jointEvaluationSubmitted: boolean;
+	cseOpinionSubmitted: boolean;
 	secondDeclarationSubmitted: boolean;
 	step1: StepStatus;
 	step2: StepStatus;
@@ -62,6 +84,11 @@ export function VerticalStepper({
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
+					firstDeclarationModifiable={isFirstDeclarationModifiable({
+						cseOpinion: cseOpinionSubmitted,
+						jointEvaluation: jointEvaluationSubmitted,
+						secondDeclaration: secondDeclarationSubmitted,
+					})}
 					hasPrefillData={hasPrefillData}
 					indicatorGRequired={indicatorGRequired}
 					status={step1}

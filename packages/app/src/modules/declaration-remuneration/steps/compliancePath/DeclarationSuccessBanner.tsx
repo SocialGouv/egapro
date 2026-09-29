@@ -1,21 +1,27 @@
-import { formatLongDate } from "~/modules/domain";
 import { DsfrPictogram } from "~/modules/layout/shared/DsfrPictogram";
 import { ResendReceiptButton } from "~/modules/mail";
 import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./DeclarationSuccessBanner.module.scss";
 
+const MODIFIABLE_SENTENCE = {
+	first:
+		"Vous pouvez modifier votre déclaration jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE.",
+	second:
+		"Vous pouvez modifier votre seconde déclaration jusqu'au choix de votre nouveau parcours de mise en conformité.",
+} as const;
+
 type Props = {
+	declarationModifiable: boolean;
 	email: string;
 	isSecondDeclaration?: boolean;
-	modificationDeadline: Date;
 	pdfDownloadHref?: string;
 	year: number;
 };
 
 export function DeclarationSuccessBanner({
+	declarationModifiable,
 	email,
 	isSecondDeclaration = false,
-	modificationDeadline,
 	pdfDownloadHref,
 	year,
 }: Props) {
@@ -35,10 +41,11 @@ export function DeclarationSuccessBanner({
 								: "Votre déclaration a été transmise"}
 						</p>
 					</div>
-					<p className="fr-mb-0">
-						Vous pouvez modifier votre déclaration jusqu'au{" "}
-						<strong>{formatLongDate(modificationDeadline)}</strong>
-					</p>
+					{declarationModifiable && (
+						<p className="fr-mb-0">
+							{MODIFIABLE_SENTENCE[isSecondDeclaration ? "second" : "first"]}
+						</p>
+					)}
 					{pdfDownloadHref && (
 						<div className={styles.download}>
 							<FileDownloadLink

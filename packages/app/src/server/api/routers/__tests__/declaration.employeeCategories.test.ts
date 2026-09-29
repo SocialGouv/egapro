@@ -88,6 +88,7 @@ describe("declarationRouter", () => {
 			mockInsert.mockReturnValue({ values: mockValues });
 
 			return {
+				execute: vi.fn().mockResolvedValue(undefined),
 				select: txSelect,
 				update: mockUpdate,
 				delete: mockDelete,

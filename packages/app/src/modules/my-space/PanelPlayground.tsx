@@ -160,6 +160,10 @@ export function PanelPlayground() {
 		useState<(typeof COMPLIANCE_PATHS)[number]>("corrective_action");
 	const [secondDeclarationSubmitted, setSecondDeclarationSubmitted] =
 		useState(true);
+	const [jointEvaluationSubmitted, setJointEvaluationSubmitted] =
+		useState(false);
+	const [cseOpinionSubmitted, setCseOpinionSubmitted] = useState(false);
+	const [revisedJointEvaluation, setRevisedJointEvaluation] = useState(false);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
 	const [compliancePathApplicable, setCompliancePathApplicable] =
 		useState(true);
@@ -261,6 +265,27 @@ export function PanelPlayground() {
 					/>
 
 					<PlaygroundCheckbox
+						checked={jointEvaluationSubmitted}
+						id="joint-evaluation-submitted"
+						label="Rapport d'évaluation conjointe transmis"
+						onChange={setJointEvaluationSubmitted}
+					/>
+
+					<PlaygroundCheckbox
+						checked={cseOpinionSubmitted}
+						id="cse-opinion-submitted"
+						label="Avis du CSE transmis"
+						onChange={setCseOpinionSubmitted}
+					/>
+
+					<PlaygroundCheckbox
+						checked={revisedJointEvaluation}
+						id="revised-joint-evaluation"
+						label="Évaluation conjointe révisée choisie (variante évaluation)"
+						onChange={setRevisedJointEvaluation}
+					/>
+
+					<PlaygroundCheckbox
 						checked={compliancePathApplicable}
 						id="compliance-path-applicable"
 						label="Parcours de conformité applicable (étape 2 visible)"
@@ -299,7 +324,7 @@ export function PanelPlayground() {
 						checked={preset === "future"}
 						compact
 						id="preset-future"
-						label="Toutes futures (2099) — boutons Modifier visibles"
+						label="Toutes futures (2099)"
 						name="preset"
 						onChange={() => setPreset("future")}
 					/>
@@ -307,7 +332,7 @@ export function PanelPlayground() {
 						checked={preset === "past"}
 						compact
 						id="preset-past"
-						label="Toutes passées (2020) — boutons Modifier cachés"
+						label="Toutes passées (2020) — « Modifier » inchangé"
 						name="preset"
 						onChange={() => setPreset("past")}
 					/>
@@ -344,13 +369,19 @@ export function PanelPlayground() {
 				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
 				ctaHref={DECLARATION_REMUNERATION}
-				declarationFsmStatus={VARIANT_FSM_STATUS[variant]}
+				declarationFsmStatus={
+					variant === "evaluation" && revisedJointEvaluation
+						? "revised_joint_evaluation_chosen"
+						: VARIANT_FSM_STATUS[variant]
+				}
 				displayContext={getDeclarationDisplayContext({
 					firstDeclarationPathChoice: compliancePath,
 					secondDeclarationPathChoice: null,
 					cseRequired: cseOpinionRequired,
 				})}
 				hasPrefillData={hasPrefillData}
+				hasSubmittedCseOpinion={cseOpinionSubmitted}
+				hasSubmittedJointEvaluation={jointEvaluationSubmitted}
 				hasSubmittedSecondDeclaration={secondDeclarationSubmitted}
 				indicatorGRequired={indicatorGRequired}
 				lastActionDate="12 mars 2026"

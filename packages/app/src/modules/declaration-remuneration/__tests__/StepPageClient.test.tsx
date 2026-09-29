@@ -51,8 +51,6 @@ import { StepPageClient } from "../StepPageClient";
 
 const useSessionMock = useSession as unknown as Mock;
 
-const DEADLINE = new Date("2026-03-01T00:00:00Z");
-
 const baseProps = {
 	step: 1,
 	declaration: {
@@ -89,21 +87,16 @@ describe("StepPageClient — modification closed banner (#3716)", () => {
 		useSessionMock.mockReset();
 	});
 
-	it("renders the read-only banner with the deadline when modification is closed", () => {
-		render(
-			<StepPageClient
-				{...baseProps}
-				modificationClosed
-				modificationDeadline={DEADLINE}
-			/>,
-		);
+	it("renders the read-only banner, without a date, when modification is closed", () => {
+		render(<StepPageClient {...baseProps} modificationClosed />);
 
 		const paragraph = screen
 			.getByText(/Votre déclaration n'est plus modifiable/)
 			.closest("p");
 		expect(paragraph?.textContent).toContain(
-			"modification close depuis le 1er mars 2026",
+			"une étape suivante de votre démarche a déjà été transmise",
 		);
+		expect(paragraph?.textContent).not.toMatch(/modification close depuis/);
 		expect(screen.getByTestId("step-1")).toBeInTheDocument();
 	});
 
@@ -116,23 +109,8 @@ describe("StepPageClient — modification closed banner (#3716)", () => {
 		expect(screen.getByTestId("step-1")).toBeInTheDocument();
 	});
 
-	it("does not render the banner when closed but no deadline is provided", () => {
-		render(<StepPageClient {...baseProps} modificationClosed />);
-
-		expect(
-			screen.queryByText(/Votre déclaration n'est plus modifiable/),
-		).not.toBeInTheDocument();
-	});
-
 	it("renders the recap step (6) under the closed banner", () => {
-		render(
-			<StepPageClient
-				{...baseProps}
-				modificationClosed
-				modificationDeadline={DEADLINE}
-				step={6}
-			/>,
-		);
+		render(<StepPageClient {...baseProps} modificationClosed step={6} />);
 
 		expect(screen.getByTestId("step-6")).toBeInTheDocument();
 		expect(

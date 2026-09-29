@@ -56,6 +56,8 @@ const BASE_PROPS = {
 	declarationFsmStatus: null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
+	hasSubmittedJointEvaluation: false,
+	hasSubmittedCseOpinion: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,
@@ -345,7 +347,7 @@ describe("DeclarationProcessPanel", () => {
 			expect(panel.getByText("Démarche close")).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					"Cette démarche est terminée. Les avis du CSE restent modifiables jusqu'à l'échéance.",
+					"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
 				),
 			).toBeInTheDocument();
 		});
@@ -371,21 +373,23 @@ describe("DeclarationProcessPanel", () => {
 		expect(panel.queryByText(/Dernière action/)).not.toBeInTheDocument();
 	});
 
-	describe("modify button gating by deadline", () => {
-		it("renders the Modifier link when deadline is in the future", () => {
+	describe("modify button gating", () => {
+		it("renders the Modifier link on the first declaration while nothing later was transmitted", () => {
 			const { panel } = renderPanel("compliance");
 			expect(panel.getByText("Modifier")).toBeInTheDocument();
-			expect(panel.getByText(/Modifiable jusqu'au/)).toBeInTheDocument();
+			expect(
+				panel.getByText("Modifiable jusqu'à votre prochaine transmission"),
+			).toBeInTheDocument();
 		});
 
-		it("hides the Modifier link when the deadline has passed", () => {
+		it("keeps the Modifier link once the deadline has passed, without the closed wording", () => {
 			const { panel } = renderPanel("compliance", {
 				campaignDeadlines: getDefaultCampaignDeadlines(2020),
 			});
-			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(panel.getByText("Modifier")).toBeInTheDocument();
 			expect(
-				panel.getByText(/Modification close depuis le/),
-			).toBeInTheDocument();
+				panel.queryByText(/Modification close depuis le/),
+			).not.toBeInTheDocument();
 		});
 	});
 

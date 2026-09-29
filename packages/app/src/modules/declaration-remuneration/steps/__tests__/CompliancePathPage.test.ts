@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	getCompliancePathReadOnlyReason,
 	getComplianceState,
+	isConcernedDeclarationModifiable,
 } from "../CompliancePathPage";
 
 const noGapCategory = {
@@ -14,6 +15,53 @@ const highGapCategory = {
 	annualBaseWomen: "25000",
 	annualBaseMen: "35000",
 };
+
+describe("isConcernedDeclarationModifiable", () => {
+	it("first declaration: modifiable while no later submission locked it", () => {
+		expect(
+			isConcernedDeclarationModifiable({
+				isSecondRound: false,
+				status: "awaiting_compliance_path_choice",
+				isFirstDeclarationLocked: false,
+			}),
+		).toBe(true);
+	});
+
+	it("first declaration: not modifiable once a later submission locked it", () => {
+		expect(
+			isConcernedDeclarationModifiable({
+				isSecondRound: false,
+				status: "awaiting_cse_opinion",
+				isFirstDeclarationLocked: true,
+			}),
+		).toBe(false);
+	});
+
+	it.each([
+		["corrective_actions_chosen", true],
+		["awaiting_revision_choice", true],
+		["awaiting_cse_opinion", false],
+		["demarche_completed", false],
+	] as const)("second declaration follows isSecondDeclarationWritable (%s → %s)", (status, expected) => {
+		expect(
+			isConcernedDeclarationModifiable({
+				isSecondRound: true,
+				status,
+				isFirstDeclarationLocked: true,
+			}),
+		).toBe(expected);
+	});
+
+	it("second declaration ignores the first declaration lock", () => {
+		expect(
+			isConcernedDeclarationModifiable({
+				isSecondRound: true,
+				status: "corrective_actions_chosen",
+				isFirstDeclarationLocked: true,
+			}),
+		).toBe(true);
+	});
+});
 
 describe("getComplianceState", () => {
 	it("returns no_gap when no categories have gaps above threshold", () => {
