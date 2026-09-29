@@ -18,7 +18,7 @@
  */
 
 import type { GapDirection, GapLevel } from "../types";
-import { GAP_ALERT_THRESHOLD } from "./constants";
+import { GAP_ALERT_THRESHOLD, GAP_DISPLAY_DECIMALS } from "./constants";
 import { parseNumber } from "./number";
 
 /** Compute signed gap ratio: (men - women) / men. Returns null if invalid or men is 0. Range: typically -1..1.
@@ -158,6 +158,27 @@ export function gapRatioToPercent(
 	if (ratio === null || ratio === undefined || ratio === "") return null;
 	const n = typeof ratio === "number" ? ratio : Number(ratio);
 	return Number.isNaN(n) ? null : n * 100;
+}
+
+/** Decimal places a gap ratio (0-1 scale) keeps once truncated — the two-decimal
+ *  percentage `formatGap` displays, expressed as a ratio. */
+export const GAP_RATIO_DECIMALS = GAP_DISPLAY_DECIMALS + 2;
+
+/** Significant digits kept when normalising a scaled ratio before truncation — absorbs the
+ *  binary representation error a multiplication like `0.0887 * 10000` introduces, so only
+ *  genuine sub-unit precision gets truncated away. Mirrors what `formatGap` uses. */
+const GAP_RATIO_NORMALISATION_PRECISION = 12;
+
+/** Truncate a gap ratio to `GAP_RATIO_DECIMALS` places, so a persisted or exported value can
+ *  never diverge from the truncated percentage the screen shows for the same gap. Never
+ *  returns `-0`. */
+export function truncateGapRatio(ratio: number): number {
+	const scale = 10 ** GAP_RATIO_DECIMALS;
+	const truncated =
+		Math.trunc(
+			Number((ratio * scale).toPrecision(GAP_RATIO_NORMALISATION_PRECISION)),
+		) / scale;
+	return truncated === 0 ? 0 : truncated;
 }
 
 /** Sum base and variable compensation. Returns null only when both inputs are invalid. */
