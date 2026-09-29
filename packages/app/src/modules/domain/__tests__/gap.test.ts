@@ -8,6 +8,7 @@ import {
 	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
+	GAP_RATIO_DECIMALS,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -16,6 +17,7 @@ import {
 	resolveGap,
 	resolveGapRatio,
 	significantGapDirection,
+	truncateGapRatio,
 } from "../shared/gap";
 
 describe("regulatory constants", () => {
@@ -423,5 +425,45 @@ describe("gapRatioToPercent", () => {
 
 	it("returns null for a non-numeric string", () => {
 		expect(gapRatioToPercent("abc")).toBeNull();
+	});
+});
+
+describe("GAP_RATIO_DECIMALS", () => {
+	it("keeps four decimal places, matching the numeric(9,4) columns", () => {
+		expect(GAP_RATIO_DECIMALS).toBe(4);
+	});
+});
+
+describe("truncateGapRatio", () => {
+	it("truncates a positive ratio to four decimal places", () => {
+		expect(truncateGapRatio(0.0129775)).toBe(0.0129);
+	});
+
+	it("truncates without rounding up, unlike Math.round", () => {
+		expect(truncateGapRatio(0.0479817)).toBe(0.0479);
+		expect(truncateGapRatio(0.083969)).toBe(0.0839);
+		expect(truncateGapRatio(0.50495)).toBe(0.5049);
+	});
+
+	it("truncates a negative ratio toward zero", () => {
+		expect(truncateGapRatio(-0.0316795)).toBe(-0.0316);
+	});
+
+	it("matches the two-decimal percentage threshold at the boundary", () => {
+		expect(truncateGapRatio(0.04996)).toBe(0.0499);
+	});
+
+	it("leaves an already-precise ratio unchanged", () => {
+		expect(truncateGapRatio(0.05)).toBe(0.05);
+	});
+
+	it("never returns negative zero for a negligible negative ratio", () => {
+		const truncated = truncateGapRatio(-0.00001);
+		expect(truncated).toBe(0);
+		expect(Object.is(truncated, -0)).toBe(false);
+	});
+
+	it("returns 0 for an exact zero ratio", () => {
+		expect(truncateGapRatio(0)).toBe(0);
 	});
 });

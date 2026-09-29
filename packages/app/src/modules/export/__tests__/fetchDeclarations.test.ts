@@ -455,6 +455,22 @@ describe("buildIndicatorG", () => {
 
 		expect(category?.Rem_annuelle_base_ecart).toBeNull();
 	});
+
+	it("truncates a gap ratio instead of rounding it up past the alert threshold", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualVariableWomen: "50.00", annualVariableMen: "101.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_variable_ecart).toBe("0.5049");
+	});
+
+	it("truncates a gap ratio the same way on a second operand pair", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyBaseWomen: "12.00", hourlyBaseMen: "13.10" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_base_ecart).toBe("0.0839");
+	});
 });
 
 describe("assembleDeclaration", () => {
