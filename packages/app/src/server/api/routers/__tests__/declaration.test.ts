@@ -4,7 +4,10 @@ import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
-import { withLockMiddleware } from "./helpers/lockTestHelpers";
+import {
+	withLockMiddleware,
+	withTxGuardHistory,
+} from "./helpers/lockTestHelpers";
 
 // The 9 write mutations run through `declarationLockedWriteProcedure`, whose
 // middleware issues two extra `ctx.db.select` calls (declaration resolution +
@@ -96,7 +99,8 @@ function createMockTx(selectRows: unknown[] = []) {
 	mockInsert.mockReturnValue({ values: mockValues });
 
 	return {
-		select: mockSelect,
+		execute: vi.fn().mockResolvedValue(undefined),
+		select: withTxGuardHistory(mockSelect),
 		update: mockUpdate,
 		delete: mockDelete,
 		insert: mockInsert,
@@ -301,7 +305,8 @@ function createMutationTxMock(txSelectRows: unknown[] = []) {
 			});
 			const txInsert = vi.fn().mockReturnValue({ values: insertValues });
 			return fn({
-				select: txSelect,
+				execute: vi.fn().mockResolvedValue(undefined),
+				select: withTxGuardHistory(txSelect),
 				insert: txInsert,
 				update,
 				delete: vi.fn(),

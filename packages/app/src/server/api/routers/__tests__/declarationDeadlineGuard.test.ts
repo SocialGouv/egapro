@@ -139,7 +139,13 @@ function createStepDb() {
 			});
 			const values = vi.fn().mockResolvedValue(undefined);
 			const insert = vi.fn().mockReturnValue({ values });
-			return fn({ select, update, insert, delete: txDelete });
+			return fn({
+				execute: vi.fn().mockResolvedValue(undefined),
+				select,
+				update,
+				insert,
+				delete: txDelete,
+			});
 		});
 	return { db: { update, transaction } as unknown, set, transaction };
 }
@@ -178,7 +184,13 @@ function createCategoriesDb(options: {
 	const transaction = vi
 		.fn()
 		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-			fn({ select, update, insert, delete: txDelete }),
+			fn({
+				execute: vi.fn().mockResolvedValue(undefined),
+				select,
+				update,
+				insert,
+				delete: txDelete,
+			}),
 		);
 
 	return {

@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import {
 	DECLARATION_SUPERSEDED_MESSAGE,
 	type DeclarationFsmStatus,
@@ -98,6 +98,27 @@ export async function assertFirstDeclarationModifiable(
 			message: DECLARATION_SUPERSEDED_MESSAGE,
 		});
 	}
+}
+
+export type DeclarationTransaction = StatusHistoryReader & {
+	execute: DB["execute"];
+};
+
+export async function lockDeclaration(
+	tx: DeclarationTransaction,
+	declarationId: string,
+): Promise<void> {
+	await tx.execute(
+		sql`SELECT pg_advisory_xact_lock(hashtextextended(${declarationId}, 0))`,
+	);
+}
+
+export async function assertFirstDeclarationModifiableUnderLock(
+	tx: DeclarationTransaction,
+	declarationId: string,
+): Promise<void> {
+	await lockDeclaration(tx, declarationId);
+	await assertFirstDeclarationModifiable(tx, declarationId);
 }
 
 export async function getCurrentRound(

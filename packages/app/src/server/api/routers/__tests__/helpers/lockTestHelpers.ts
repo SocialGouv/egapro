@@ -33,7 +33,7 @@ type LockOptions = {
 	subsequentEvents?: SubmissionHistoryEvent[];
 };
 
-function isGuardHistoryProjection(cols: unknown): boolean {
+export function isGuardHistoryProjection(cols: unknown): boolean {
 	if (!cols || typeof cols !== "object" || Array.isArray(cols)) return false;
 	const keys = Object.keys(cols);
 	return (
@@ -108,5 +108,19 @@ export function withLockMiddleware(
 			if (prop === "select") return select;
 			return Reflect.get(target, prop, receiver);
 		},
+	});
+}
+
+export function withTxGuardHistory(
+	innerSelect: (...args: unknown[]) => unknown,
+	subsequentEvents: SubmissionHistoryEvent[] = [],
+) {
+	return vi.fn().mockImplementation((...args: unknown[]) => {
+		if (isGuardHistoryProjection(args[0])) {
+			const where = vi.fn().mockResolvedValue(subsequentEvents);
+			const from = vi.fn().mockReturnValue({ where });
+			return { from };
+		}
+		return innerSelect(...args);
 	});
 }

@@ -59,13 +59,14 @@ import {
 	purgeDraftSlice,
 } from "./declarationHelpers";
 import {
-	assertFirstDeclarationModifiable,
+	assertFirstDeclarationModifiableUnderLock,
 	buildHistoryInserts,
 	buildStepChangeInsert,
 	computeProjectionUpdates,
 	getCurrentRound,
 	hasLockingEventForRound,
 	loadSubsequentSubmissions,
+	lockDeclaration,
 } from "./statusHistoryHelpers";
 
 const PATH_LOCKED_ERROR =
@@ -291,6 +292,7 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				await assertFirstDeclarationModifiableUnderLock(tx, ctx.declarationId);
 				const existing = await tx
 					.select()
 					.from(declarations)
@@ -397,6 +399,7 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				await assertFirstDeclarationModifiableUnderLock(tx, ctx.declarationId);
 				const [existing] = await tx
 					.select({
 						id: declarations.id,
@@ -446,6 +449,7 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				await assertFirstDeclarationModifiableUnderLock(tx, ctx.declarationId);
 				const [existing] = await tx
 					.select({
 						id: declarations.id,
@@ -497,6 +501,7 @@ export const declarationRouter = createTRPCRouter({
 			const year = getCurrentYear();
 
 			await ctx.db.transaction(async (tx) => {
+				await assertFirstDeclarationModifiableUnderLock(tx, ctx.declarationId);
 				const [existing] = await tx
 					.select({
 						id: declarations.id,
@@ -573,7 +578,7 @@ export const declarationRouter = createTRPCRouter({
 					});
 
 				if (input.declarationType === "initial") {
-					await assertFirstDeclarationModifiable(tx, declaration.id);
+					await assertFirstDeclarationModifiableUnderLock(tx, declaration.id);
 					await deleteJobAndEmployeeCategories(tx, declaration.id);
 
 					for (let i = 0; i < input.categories.length; i++) {
@@ -722,6 +727,7 @@ export const declarationRouter = createTRPCRouter({
 		});
 
 		await ctx.db.transaction(async (tx) => {
+			await assertFirstDeclarationModifiableUnderLock(tx, declaration.id);
 			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
@@ -902,6 +908,7 @@ export const declarationRouter = createTRPCRouter({
 			);
 
 			await ctx.db.transaction(async (tx) => {
+				await lockDeclaration(tx, declaration.id);
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 				await tx
 					.update(declarations)
@@ -961,6 +968,7 @@ export const declarationRouter = createTRPCRouter({
 			);
 
 			await ctx.db.transaction(async (tx) => {
+				await lockDeclaration(tx, declaration.id);
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 				await tx
 					.update(declarations)
