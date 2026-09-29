@@ -1,6 +1,5 @@
 export function OrdinalLongDate({ date }: { date: Date }) {
 	const day = date.getUTCDate();
-	const suffix = day === 1 ? "er" : "e";
 	const monthYear = new Intl.DateTimeFormat("fr-FR", {
 		month: "long",
 		year: "numeric",
@@ -9,7 +8,7 @@ export function OrdinalLongDate({ date }: { date: Date }) {
 	return (
 		<>
 			{day}
-			<sup>{suffix}</sup> {monthYear}
+			{day === 1 && <sup>er</sup>} {monthYear}
 		</>
 	);
 }

@@ -13,13 +13,14 @@ describe("OrdinalLongDate", () => {
 		expect(container.textContent).toBe("1er mars 2026");
 	});
 
-	it("uses the 'e' suffix for any other day", () => {
-		const { container } = render(
-			<OrdinalLongDate date={new Date("2026-09-15T00:00:00Z")} />,
-		);
+	it.each([
+		["2026-09-15T00:00:00Z", "15 septembre 2026"],
+		["2027-02-28T00:00:00Z", "28 février 2027"],
+	])("renders any other day %s as a plain cardinal number", (iso, expected) => {
+		const { container } = render(<OrdinalLongDate date={new Date(iso)} />);
 
-		expect(container.querySelector("sup")?.textContent).toBe("e");
-		expect(container.textContent).toBe("15e septembre 2026");
+		expect(container.querySelector("sup")).toBeNull();
+		expect(container.textContent).toBe(expected);
 	});
 
 	it("reads the day in UTC, not the local timezone", () => {
