@@ -51,7 +51,7 @@ describe("SearchForm", () => {
 		expect(screen.getByLabelText("Date de dépôt (du)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Date de dépôt (au)")).toBeInTheDocument();
 		expect(screen.getByLabelText("Statut")).toBeInTheDocument();
-		expect(screen.getByLabelText("Effectif")).toBeInTheDocument();
+		expect(screen.getByLabelText("Effectif annuel moyen")).toBeInTheDocument();
 		// Regression guard for #3274 — keep these negative assertions next to
 		// their positive counterparts so a future reintroduction is caught here.
 		expect(screen.queryByLabelText("Index")).not.toBeInTheDocument();
@@ -89,7 +89,7 @@ describe("SearchForm", () => {
 
 		const options = Array.from(
 			screen
-				.getByLabelText<HTMLSelectElement>("Effectif")
+				.getByLabelText<HTMLSelectElement>("Effectif annuel moyen")
 				.querySelectorAll("option"),
 		).map((option) => option.value);
 
@@ -108,7 +108,7 @@ describe("SearchForm", () => {
 
 		render(<SearchForm />);
 
-		expect(screen.getByLabelText("Effectif")).toHaveValue("250+");
+		expect(screen.getByLabelText("Effectif annuel moyen")).toHaveValue("250+");
 	});
 
 	it("pushes the selected size bracket into the URL on submit", async () => {
@@ -116,7 +116,10 @@ describe("SearchForm", () => {
 		const user = userEvent.setup();
 		render(<SearchForm />);
 
-		await user.selectOptions(screen.getByLabelText("Effectif"), "100-149");
+		await user.selectOptions(
+			screen.getByLabelText("Effectif annuel moyen"),
+			"100-149",
+		);
 		await user.click(screen.getByRole("button", { name: "Rechercher" }));
 
 		await waitFor(() => expect(push).toHaveBeenCalled());
@@ -139,7 +142,7 @@ describe("SearchForm", () => {
 
 		await user.click(screen.getByRole("button", { name: "Réinitialiser" }));
 
-		expect(screen.getByLabelText("Effectif")).toHaveValue("");
+		expect(screen.getByLabelText("Effectif annuel moyen")).toHaveValue("");
 		expect(push).toHaveBeenCalledWith("/admin/declarations");
 	});
 });

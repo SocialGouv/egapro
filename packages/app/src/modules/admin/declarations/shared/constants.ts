@@ -1,3 +1,5 @@
+export const WORKFORCE_LABEL = "Effectif annuel moyen";
+
 export const STATUS_LABELS: Record<string, string> = {
 	draft: "Brouillon",
 	awaiting_compliance_path_choice: "Transmise",

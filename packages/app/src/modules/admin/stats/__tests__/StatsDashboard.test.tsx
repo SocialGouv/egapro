@@ -145,7 +145,9 @@ describe("StatsDashboard — structure and filters", () => {
 		render(
 			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
 		);
-		expect(screen.getByLabelText(/tranche d'effectif/i)).toBeInTheDocument();
+		expect(
+			screen.getByLabelText(/tranche d'effectif annuel moyen/i),
+		).toBeInTheDocument();
 		expect(
 			screen.getByLabelText(/considérer une déclaration abandonnée après/i),
 		).toBeInTheDocument();

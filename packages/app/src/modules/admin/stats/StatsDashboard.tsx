@@ -174,7 +174,7 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 				</div>
 				<div className="fr-col-12 fr-col-md-4">
 					<CompanySizeFilter
-						label="Tranche d'effectif"
+						label="Tranche d'effectif annuel moyen"
 						onChange={setSizeRange}
 						value={sizeRange}
 					/>

@@ -1,7 +1,7 @@
 import { formatShortDate, formatShortDateTime } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
-import { STATUS_LABELS } from "./shared/constants";
+import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
 import type { DeclarationDetail } from "./types";
 
 export function CancelledBadge({ cancelledAt }: { cancelledAt: Date }) {
@@ -94,7 +94,7 @@ export function CompanySection({
 						<td>{declaration.companyNafCode ?? "—"}</td>
 					</tr>
 					<tr>
-						<th scope="row">Effectif</th>
+						<th scope="row">{WORKFORCE_LABEL}</th>
 						<td>{declaration.companyWorkforce ?? "—"}</td>
 					</tr>
 					<tr>

@@ -66,7 +66,7 @@ describe("DeclarationTable", () => {
 		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
 	});
 
-	it("places the Effectif column between Année and Statut", () => {
+	it("places the Effectif annuel moyen column between Année and Statut", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const headers = screen
@@ -76,7 +76,7 @@ describe("DeclarationTable", () => {
 			"SIREN",
 			"Entreprise",
 			"Année",
-			"Effectif",
+			"Effectif annuel moyen",
 			"Statut",
 			"Email déclarant",
 			"Date de dépôt",
@@ -104,7 +104,7 @@ describe("DeclarationTable", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const caption = document.querySelector("caption");
-		expect(caption?.textContent).toContain("effectif");
+		expect(caption?.textContent).toContain("effectif annuel moyen");
 		expect(caption?.textContent).toContain("GIP-MDS");
 	});
 
