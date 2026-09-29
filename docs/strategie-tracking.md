@@ -105,7 +105,7 @@ abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
 
 | Clé | Étape |
 |---|---|
-| `step_1` | Renseigner les avis émis par le CSE |
+| `step_1` | Renseigner les informations du ou des avis du CSE |
 | `step_2` | Importer / déposer l'avis ou les avis du CSE |
 
 | Événement | Déclencheur précis |

@@ -17,7 +17,7 @@ const JUSTIFY_CSE_CONSULT =
 const JUSTIFY_CSE_OPINION = "Transmettre l'avis du CSE";
 const CORRECTIVE_CSE_CONSULT =
 	/Informer et consulter votre CSE sur l'exactitude/;
-const CORRECTIVE_CSE_OPINION = "Transmettre l'avis ou les avis du CSE";
+const CORRECTIVE_CSE_OPINION = "Déposer le ou les avis du CSE";
 const CORRECTIVE_ACTION_TITLE =
 	"Effectuer des actions correctives et une seconde déclaration";
 

@@ -62,6 +62,14 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
+	it("lists the CSE opinion deposit item in the obligations callout", () => {
+		renderStep1();
+
+		expect(
+			screen.getByText("Déposer le ou les avis du CSE"),
+		).toBeInTheDocument();
+	});
+
 	it("renders previous link to parcours-conformite and next to step 2", () => {
 		renderStep1();
 

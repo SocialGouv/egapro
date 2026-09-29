@@ -64,7 +64,7 @@ Clés d'étape : `step_1` Effectifs · `step_2` Écart de rémunération · `ste
 
 `storageKey` : `egapro:cse-funnel` · Dimensions : **année** · Émis par `FunnelStepTracker` sur `/avis-cse/etape/[step]` (start/step/abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
 
-Clés d'étape : `step_1` Renseigner les avis émis par le CSE · `step_2` Importer / déposer l'avis du CSE.
+Clés d'étape : `step_1` Renseigner les informations du ou des avis du CSE · `step_2` Importer / déposer l'avis du CSE.
 
 | `action` | Déclencheur | `name` | `value` |
 |---|---|---|---|

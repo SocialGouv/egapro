@@ -115,7 +115,7 @@ function ObligationsCallout() {
 						Informer et consulter votre CSE sur l&apos;exactitude des données et
 						éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
 					</li>
-					<li>Transmettre l&apos;avis ou les avis du CSE</li>
+					<li>Déposer le ou les avis du CSE</li>
 				</ul>
 			</div>
 		</div>
