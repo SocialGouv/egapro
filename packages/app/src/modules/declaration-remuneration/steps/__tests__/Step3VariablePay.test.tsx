@@ -101,7 +101,7 @@ describe("Step3VariablePay", () => {
 		);
 		expect(
 			screen.getByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Renseignez les données nécessaires au calcul des indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(

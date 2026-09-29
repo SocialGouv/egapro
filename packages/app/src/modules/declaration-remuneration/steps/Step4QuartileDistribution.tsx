@@ -6,6 +6,7 @@ import { useIsImpersonating } from "~/modules/auth";
 import { normalizeDecimalInput, padDecimalToTwo } from "~/modules/domain";
 import { remunerationStepHref } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 import { api } from "~/trpc/react";
 import { updateStep4Schema } from "../schemas";
 import common from "../shared/common.module.scss";
@@ -370,7 +371,12 @@ export function Step4QuartileDistribution({
 						</p>
 					) : (
 						<p className={`fr-mb-0 ${stepStyles.introMedium}`}>
-							Renseignez les informations avant de valider vos indicateurs.
+							Renseignez les données nécessaires au calcul des indicateurs.
+							<TooltipButton
+								id="tooltip-step4-info"
+								label="Information sur la confidentialité des données"
+								text="Les informations saisies sont confidentielles et utilisées uniquement pour le calcul des indicateurs d'égalité professionnelle."
+							/>
 						</p>
 					)}
 

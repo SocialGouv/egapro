@@ -212,7 +212,7 @@ describe("Step4QuartileDistribution — GIP prefill", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Renseignez les données nécessaires au calcul des indicateurs.",
 			),
 		).not.toBeInTheDocument();
 		expect(
