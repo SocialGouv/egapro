@@ -172,7 +172,7 @@ describe("ProfileModal — intro copy", () => {
 	it("renders the instruction paragraph followed by the obligatory-fields mention", () => {
 		render(<ProfileModal />);
 		const instruction = screen.getByText(
-			"Vérifier les données affichées et compléter les informations manquantes si nécessaire.",
+			"Vérifier les informations pré-remplies à partir de votre compte ProConnect et compléter les informations manquantes si nécessaire.",
 		);
 		const mention = screen.getByText("Tous les champs sont obligatoires.");
 
@@ -274,7 +274,7 @@ describe("ProfileModal — identity fields", () => {
 });
 
 describe("ProfileModal — email block", () => {
-	it("renders the e-mail in bold with the ProConnect source mention", () => {
+	it("renders the e-mail in bold without the ProConnect source mention", () => {
 		render(<ProfileModal />);
 		const value = screen.getByText("julien.martin@alpha-solution.fr");
 
@@ -282,10 +282,7 @@ describe("ProfileModal — email block", () => {
 		expect(value.parentElement).toHaveTextContent(
 			"E-mail : julien.martin@alpha-solution.fr",
 		);
-		expect(screen.getByText("Source : ProConnect.")).toHaveClass(
-			"fr-text--sm",
-			"fr-text-mention--grey",
-		);
+		expect(screen.queryByText("Source : ProConnect.")).not.toBeInTheDocument();
 	});
 
 	it("falls back to a dash when the profile carries no e-mail", () => {
