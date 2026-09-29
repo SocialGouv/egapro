@@ -160,18 +160,14 @@ export function gapRatioToPercent(
 	return Number.isNaN(n) ? null : n * 100;
 }
 
-/** Decimal places a gap ratio (0-1 scale) keeps once truncated — the two-decimal
- *  percentage `formatGap` displays, expressed as a ratio. */
-export const GAP_RATIO_DECIMALS = GAP_DISPLAY_DECIMALS + 2;
+const PERCENT_DECIMAL_SHIFT = 2;
 
-/** Significant digits kept when normalising a scaled ratio before truncation — absorbs the
- *  binary representation error a multiplication like `0.0887 * 10000` introduces, so only
- *  genuine sub-unit precision gets truncated away. Mirrors what `formatGap` uses. */
+export const GAP_RATIO_DECIMALS = GAP_DISPLAY_DECIMALS + PERCENT_DECIMAL_SHIFT;
+
+/** Absorbs IEEE 754 noise (`0.0887 * 10000` → `886.9999…`) so truncation never drops a real digit. */
 const GAP_RATIO_NORMALISATION_PRECISION = 12;
 
-/** Truncate a gap ratio to `GAP_RATIO_DECIMALS` places, so a persisted or exported value can
- *  never diverge from the truncated percentage the screen shows for the same gap. Never
- *  returns `-0`. */
+/** Single truncation rule shared by display, persistence and export, so they never disagree. */
 export function truncateGapRatio(ratio: number): number {
 	const scale = 10 ** GAP_RATIO_DECIMALS;
 	const truncated =

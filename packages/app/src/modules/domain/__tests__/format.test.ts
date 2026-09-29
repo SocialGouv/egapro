@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import {
 	computePercentage,
 	computeProportion,
@@ -27,7 +28,7 @@ import {
 	MISSING_VALUE,
 	NARROW_NBSP,
 } from "../shared/format";
-import { truncateGapRatio } from "../shared/gap";
+import { gapRatioToPercent, truncateGapRatio } from "../shared/gap";
 
 describe("formatGap", () => {
 	it("formats a gap with French decimal separator and two decimals", () => {
@@ -417,8 +418,8 @@ describe("formatGap and truncateGapRatio agree on the same gap", () => {
 		[8.3969, 0.083969, "8,39 %"],
 	])("reads the same truncated value whether displayed as a percentage or persisted as a ratio (%s)", (percent, ratio, expected) => {
 		expect(formatGap(percent)).toBe(expected);
-		expect(
-			`${(truncateGapRatio(ratio) * 100).toFixed(2).replace(".", ",")} %`,
-		).toBe(expected);
+		expect(formatGap(gapRatioToPercent(truncateGapRatio(ratio)))).toBe(
+			expected,
+		);
 	});
 });

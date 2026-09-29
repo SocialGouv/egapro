@@ -44,8 +44,6 @@ function oneFixedDecimal(value: number): string {
 	});
 }
 
-/** Truncate a gap given as a percentage by delegating to `truncateGapRatio`, so a value read
- *  off the screen can never diverge from the same gap persisted or exported as a ratio. */
 function truncateGap(gap: number): number {
 	return truncateGapRatio(gap / 100) * 100;
 }

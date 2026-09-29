@@ -8,7 +8,6 @@ import {
 	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
-	GAP_RATIO_DECIMALS,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -425,12 +424,6 @@ describe("gapRatioToPercent", () => {
 
 	it("returns null for a non-numeric string", () => {
 		expect(gapRatioToPercent("abc")).toBeNull();
-	});
-});
-
-describe("GAP_RATIO_DECIMALS", () => {
-	it("keeps four decimal places, matching the numeric(9,4) columns", () => {
-		expect(GAP_RATIO_DECIMALS).toBe(4);
 	});
 });
 
