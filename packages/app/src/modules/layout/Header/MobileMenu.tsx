@@ -47,7 +47,7 @@ export async function MobileMenu() {
 						userPhone={userPhone ?? undefined}
 					/>
 				)}
-				{!session?.user && <Navigation />}
+				<Navigation />
 			</div>
 		</div>
 	);

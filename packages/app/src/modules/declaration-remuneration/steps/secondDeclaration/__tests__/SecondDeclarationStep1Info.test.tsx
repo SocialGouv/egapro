@@ -78,7 +78,7 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline block as a DSFR highlight", () => {
 		renderStep1();
 
-		const deadlineBlock = screen.getByText("Date limite").parentElement;
+		const deadlineBlock = screen.getByText("Échéance").parentElement;
 		expect(deadlineBlock).toHaveClass("fr-highlight");
 		expect(deadlineBlock).not.toHaveClass("fr-pl-3w");
 	});
@@ -86,7 +86,7 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline lines with the expected DSFR typography", () => {
 		renderStep1();
 
-		expect(screen.getByText("Date limite")).not.toHaveClass("fr-text--sm");
+		expect(screen.getByText("Échéance")).not.toHaveClass("fr-text--sm");
 
 		const deadlineDate = screen.getByText(/1ᵉʳ décembre 2027/);
 		expect(deadlineDate).toHaveClass("fr-text--lead", "fr-text--bold");

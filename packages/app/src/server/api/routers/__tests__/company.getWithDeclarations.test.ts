@@ -35,13 +35,13 @@ vi.mock("~/server/db/getCampaignDeadlines", () => ({
 
 const SIREN = "339787277";
 
-function makeCompanyRow() {
+function makeCompanyRow(workforceEma: string | null = "100.00") {
 	return {
 		siren: SIREN,
 		name: "Test Company",
 		address: "1 rue de Paris",
 		nafCode: "6202A",
-		workforceEma: "100.00",
+		workforceEma,
 		hasCse: true,
 	};
 }
@@ -85,17 +85,21 @@ function makeSelectMock(
 async function makeCaller({
 	declRows = [],
 	eventRows = [],
+	jointEvaluationFileRows = [],
 	representationDeclarationRows = [],
+	workforceEma = "100.00",
 }: {
 	declRows?: unknown[];
 	eventRows?: unknown[];
+	jointEvaluationFileRows?: unknown[];
 	representationDeclarationRows?: unknown[];
+	workforceEma?: string | null;
 } = {}) {
 	const queries: QueryLog[] = [];
 	const rowsByTable = new Map<unknown, unknown[]>([
-		[companies, [makeCompanyRow()]],
+		[companies, [makeCompanyRow(workforceEma)]],
 		[declarations, declRows],
-		[files, []],
+		[files, jointEvaluationFileRows],
 		[gipMdsData, []],
 		[declarationStatusHistory, eventRows],
 		[representationDeclarations, representationDeclarationRows],
@@ -238,15 +242,25 @@ describe("companyRouter.getWithDeclarations", () => {
 		expect(remunerationDecls).toHaveLength(1);
 	});
 
-	it("flags the second declaration and the CSE opinion from the status history", async () => {
+	it("flags the second declaration, the joint evaluation and the CSE opinion from the status history", async () => {
 		const { caller } = await makeCaller({
 			declRows: [makeDeclRow(getCurrentYear())],
 			eventRows: [
 				{
 					declarationId: DECLARATION_ID,
 					eventType: "second_declaration_submit",
+					round: 1,
 				},
-				{ declarationId: DECLARATION_ID, eventType: "cse_opinion_submit" },
+				{
+					declarationId: DECLARATION_ID,
+					eventType: "joint_evaluation_submit",
+					round: 2,
+				},
+				{
+					declarationId: DECLARATION_ID,
+					eventType: "cse_opinion_submit",
+					round: null,
+				},
 			],
 		});
 
@@ -256,7 +270,70 @@ describe("companyRouter.getWithDeclarations", () => {
 			result.declarations.find((d) => d.type === "remuneration"),
 		).toMatchObject({
 			hasSubmittedSecondDeclaration: true,
+			hasSubmittedJointEvaluation: true,
 			hasSubmittedCseOpinion: true,
+		});
+	});
+
+	it("derives hasSubmittedJointEvaluation from the events, not from the uploaded file", async () => {
+		const { caller } = await makeCaller({
+			declRows: [makeDeclRow(getCurrentYear())],
+			jointEvaluationFileRows: [{ year: getCurrentYear() }],
+			eventRows: [
+				{
+					declarationId: DECLARATION_ID,
+					eventType: "path_choice",
+					round: 1,
+				},
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "remuneration"),
+		).toMatchObject({
+			hasJointEvaluationFile: true,
+			hasSubmittedJointEvaluation: false,
+		});
+	});
+
+	it("does not attribute another declaration's events to a row", async () => {
+		const { caller } = await makeCaller({
+			declRows: [makeDeclRow(getCurrentYear())],
+			eventRows: [
+				{
+					declarationId: "another-declaration",
+					eventType: "joint_evaluation_submit",
+					round: 1,
+				},
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "remuneration"),
+		).toMatchObject({
+			hasSubmittedSecondDeclaration: false,
+			hasSubmittedJointEvaluation: false,
+			hasSubmittedCseOpinion: false,
+		});
+	});
+
+	it("never flags a submission on the representation row", async () => {
+		const { caller } = await makeCaller({
+			representationDeclarationRows: [makeRepresentationDeclarationRow()],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "representation"),
+		).toMatchObject({
+			hasSubmittedSecondDeclaration: false,
+			hasSubmittedJointEvaluation: false,
+			hasSubmittedCseOpinion: false,
 		});
 	});
 
@@ -292,6 +369,28 @@ describe("companyRouter.getWithDeclarations", () => {
 	it("offers the representation démarche when no workforce is known", async () => {
 		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
 		const { caller } = await makeCaller();
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(result.declarations.some((d) => d.type === "representation")).toBe(
+			true,
+		);
+	});
+
+	it("hides the representation démarche below 50 employees", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		const { caller } = await makeCaller({ workforceEma: "49.00" });
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(result.declarations.some((d) => d.type === "representation")).toBe(
+			false,
+		);
+	});
+
+	it("keeps the representation démarche at exactly 50 employees", async () => {
+		getRepresentationWorkforceHistoryMock.mockResolvedValue([]);
+		const { caller } = await makeCaller({ workforceEma: "50.00" });
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
 

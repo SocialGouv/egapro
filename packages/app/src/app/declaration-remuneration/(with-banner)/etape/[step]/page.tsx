@@ -7,15 +7,10 @@ import {
 	StepPageClient,
 	TOTAL_STEPS,
 } from "~/modules/declaration-remuneration";
-import {
-	isDeadlinePassed,
-	isDeclarationSubmitted,
-	isIndicatorGRequiredForGip,
-} from "~/modules/domain";
+import { isIndicatorGRequiredForGip } from "~/modules/domain";
 import { LAST_REMUNERATION_STEP, remunerationStepHref } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
-import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
 
 type StepPageProps = {
@@ -57,14 +52,7 @@ export default async function StepPage({ params }: StepPageProps) {
 		redirect(remunerationStepHref(LAST_REMUNERATION_STEP));
 	}
 
-	const isSubmitted = isDeclarationSubmitted(d.status);
-	let modificationDeadline: Date | undefined;
-	let isModificationClosed = false;
-	if (isSubmitted) {
-		const deadlines = await getCampaignDeadlines(d.year);
-		modificationDeadline = deadlines.decl1ModificationDeadline;
-		isModificationClosed = isDeadlinePassed(modificationDeadline);
-	}
+	const isModificationClosed = data.isFirstDeclarationLocked;
 
 	const gip = data.gipPrefillData;
 
@@ -123,7 +111,6 @@ export default async function StepPage({ params }: StepPageProps) {
 				hasCse={company.hasCse}
 				initialSource={initialSource}
 				modificationClosed={isModificationClosed}
-				modificationDeadline={modificationDeadline}
 				step={step}
 				step1Data={step1Data}
 				step2Data={step2Data}

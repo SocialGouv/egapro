@@ -4,7 +4,10 @@ import {
 	createCaller,
 	mockDeclaration,
 } from "./helpers/declarationTestHelpers";
-import { withLockMiddleware } from "./helpers/lockTestHelpers";
+import {
+	withLockMiddleware,
+	withTxGuardHistory,
+} from "./helpers/lockTestHelpers";
 
 // The 9 write mutations run through `declarationLockedWriteProcedure`, whose
 // middleware issues two extra `ctx.db.select` calls (declaration resolution +
@@ -96,7 +99,8 @@ function createMockTx(selectRows: unknown[] = []) {
 	mockInsert.mockReturnValue({ values: mockValues });
 
 	return {
-		select: mockSelect,
+		execute: vi.fn().mockResolvedValue(undefined),
+		select: withTxGuardHistory(mockSelect),
 		update: mockUpdate,
 		delete: mockDelete,
 		insert: mockInsert,
@@ -301,7 +305,8 @@ function createMutationTxMock(txSelectRows: unknown[] = []) {
 			});
 			const txInsert = vi.fn().mockReturnValue({ values: insertValues });
 			return fn({
-				select: txSelect,
+				execute: vi.fn().mockResolvedValue(undefined),
+				select: withTxGuardHistory(txSelect),
 				insert: txInsert,
 				update,
 				delete: vi.fn(),
@@ -441,9 +446,11 @@ describe("declarationRouter", () => {
 		function gipSelect() {
 			return {
 				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockReturnValue({
-						limit: vi.fn().mockResolvedValue([]),
-					}),
+					where: vi.fn().mockReturnValue(
+						Object.assign(Promise.resolve([]), {
+							limit: vi.fn().mockResolvedValue([]),
+						}),
+					),
 				}),
 			};
 		}
@@ -492,6 +499,58 @@ describe("declarationRouter", () => {
 
 			expect(result.secondDeclarationSubmissionCount).toBe(2);
 			expect(result.hasSubmittedSecondDeclaration).toBe(true);
+		});
+
+		it.each([
+			{
+				events: [{ eventType: "submit", round: null }],
+				expected: {
+					hasSubmittedSecondDeclaration: false,
+					hasSubmittedJointEvaluation: false,
+					hasSubmittedCseOpinion: false,
+					isFirstDeclarationLocked: false,
+				},
+			},
+			{
+				events: [{ eventType: "joint_evaluation_submit", round: 1 }],
+				expected: {
+					hasSubmittedSecondDeclaration: false,
+					hasSubmittedJointEvaluation: true,
+					hasSubmittedCseOpinion: false,
+					isFirstDeclarationLocked: true,
+				},
+			},
+			{
+				events: [{ eventType: "cse_opinion_submit", round: null }],
+				expected: {
+					hasSubmittedSecondDeclaration: false,
+					hasSubmittedJointEvaluation: false,
+					hasSubmittedCseOpinion: true,
+					isFirstDeclarationLocked: true,
+				},
+			},
+		])("derives the downstream submission flags and the first-declaration lock from $events.0.eventType", async ({
+			events,
+			expected,
+		}) => {
+			const tx = createGetOrCreateTx([mockDeclaration]);
+			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+				fn(tx),
+			);
+			const mockDb = {
+				select: vi
+					.fn()
+					.mockImplementationOnce(gipSelect)
+					.mockReturnValue({
+						from: () => ({ where: () => Promise.resolve(events) }),
+					}),
+				transaction: mockTransaction,
+			} as unknown;
+			const caller = await createCaller(mockDb);
+
+			const result = await caller.getOrCreate();
+
+			expect(result).toMatchObject(expected);
 		});
 
 		it("creates new declaration when none exists", async () => {
@@ -1250,12 +1309,7 @@ describe("declarationRouter", () => {
 				cseRequired: false,
 			});
 			const ctx = createSimpleSelectDb(declaration);
-			const caller = await createCaller(
-				withLockMiddleware(ctx.db, {
-					declarationStatus: declaration.status,
-					declarationYear: declaration.year,
-				}),
-			);
+			const caller = await createCaller(withLockMiddleware(ctx.db));
 
 			await expect(
 				caller.saveCompliancePath({ path: "justify" }),

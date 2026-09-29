@@ -6,13 +6,8 @@ import {
 	getObligationWorkforce,
 	isCseOpinionRequired,
 	isCseRequired,
-	shouldRedirectSubmittedToRecap,
 } from "~/modules/domain";
-import {
-	COMPLIANCE_PATH,
-	complianceStepHref,
-	toComplianceStep,
-} from "~/modules/routes";
+import { COMPLIANCE_PATH, toComplianceStep } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api, HydrateClient } from "~/trpc/server";
@@ -44,19 +39,6 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 	const company = await api.company.get({ siren: data.declaration.siren });
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
-
-	// If the second declaration is submitted AND the modification deadline has
-	// passed, lock editing by redirecting non-recap steps to the recap.
-	if (
-		shouldRedirectSubmittedToRecap({
-			status: data.hasSubmittedSecondDeclaration ? "submitted" : null,
-			step,
-			recapStep: 3,
-			modificationDeadline: campaignDeadlines.decl2ModificationDeadline,
-		})
-	) {
-		redirect(complianceStepHref(3));
-	}
 
 	const initialCategories = mapToEmployeeCategoryRows(
 		data.jobCategories,

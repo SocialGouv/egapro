@@ -399,14 +399,23 @@ describe("StepPageClient — publication step skipped (S12)", () => {
 		);
 	});
 
-	it("redirects to the summary when the publication step is opened directly", () => {
+	it("offers an explicit link to the summary when publication is skipped", () => {
 		const { container } = renderStep({
 			step: 4,
 			initialDraft: { currentStep: 4, ...NO_COMPUTABLE_GAP },
 		});
 
-		expect(replace).toHaveBeenCalledWith(STEP_5_HREF);
-		expect(container).toBeEmptyDOMElement();
+		expect(replace).not.toHaveBeenCalled();
+		expect(screen.getByRole("status")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				name: "L’étape de publication n’est pas nécessaire",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Continuer vers le récapitulatif" }),
+		).toHaveAttribute("href", STEP_5_HREF);
+		expect(container).not.toBeEmptyDOMElement();
 	});
 
 	it("presents the publication step as soon as one gap is computable", () => {

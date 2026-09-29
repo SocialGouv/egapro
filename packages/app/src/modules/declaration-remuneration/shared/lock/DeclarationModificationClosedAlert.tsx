@@ -1,15 +1,8 @@
 "use client";
 
-import { OrdinalLongDate } from "../OrdinalLongDate";
 import { useLockContext } from "./LockContext";
 
-type DeclarationModificationClosedAlertProps = {
-	deadline: Date;
-};
-
-export function DeclarationModificationClosedAlert({
-	deadline,
-}: DeclarationModificationClosedAlertProps) {
+export function DeclarationModificationClosedAlert() {
 	const { reason } = useLockContext();
 	if (reason !== "modification_closed") return null;
 
@@ -19,9 +12,10 @@ export function DeclarationModificationClosedAlert({
 			role="status"
 		>
 			<p>
-				Votre déclaration n'est plus modifiable — modification close depuis le{" "}
-				<OrdinalLongDate date={deadline} />. À titre d'information, vous pouvez
-				consulter chaque étape en lecture seule.
+				Votre déclaration n'est plus modifiable : une étape suivante de votre
+				démarche a déjà été transmise (seconde déclaration, rapport d'évaluation
+				conjointe ou avis du CSE). À titre d'information, vous pouvez consulter
+				chaque étape en lecture seule.
 			</p>
 		</div>
 	);

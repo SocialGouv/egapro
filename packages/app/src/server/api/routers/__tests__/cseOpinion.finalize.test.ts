@@ -205,7 +205,13 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const transaction = vi
 		.fn()
 		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
-			fn({ select, insert, update, delete: vi.fn() }),
+			fn({
+				execute: vi.fn().mockResolvedValue(undefined),
+				select,
+				insert,
+				update,
+				delete: vi.fn(),
+			}),
 		);
 
 	return {

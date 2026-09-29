@@ -116,8 +116,57 @@ export function getPathChoiceAt(
 	);
 }
 
+export const SUBSEQUENT_SUBMISSION_EVENT_TYPES = [
+	"second_declaration_submit",
+	"joint_evaluation_submit",
+	"cse_opinion_submit",
+] as const satisfies ReadonlyArray<DeclarationEventType>;
+
+export type SubmissionHistoryEvent = {
+	eventType: string;
+	round: number | null;
+};
+
+export type SubsequentSubmissions = {
+	hasSubmittedSecondDeclaration: boolean;
+	secondDeclarationSubmissionCount: number;
+	hasSubmittedJointEvaluation: boolean;
+	hasSubmittedRound1JointEvaluation: boolean;
+	hasSubmittedCseOpinion: boolean;
+};
+
+export function deriveSubsequentSubmissions(
+	events: ReadonlyArray<SubmissionHistoryEvent>,
+): SubsequentSubmissions {
+	let secondDeclarationSubmissionCount = 0;
+	let hasSubmittedJointEvaluation = false;
+	let hasSubmittedRound1JointEvaluation = false;
+	let hasSubmittedCseOpinion = false;
+	for (const event of events) {
+		switch (event.eventType) {
+			case "second_declaration_submit":
+				secondDeclarationSubmissionCount++;
+				break;
+			case "joint_evaluation_submit":
+				hasSubmittedJointEvaluation = true;
+				if (event.round === 1) hasSubmittedRound1JointEvaluation = true;
+				break;
+			case "cse_opinion_submit":
+				hasSubmittedCseOpinion = true;
+				break;
+		}
+	}
+	return {
+		hasSubmittedSecondDeclaration: secondDeclarationSubmissionCount > 0,
+		secondDeclarationSubmissionCount,
+		hasSubmittedJointEvaluation,
+		hasSubmittedRound1JointEvaluation,
+		hasSubmittedCseOpinion,
+	};
+}
+
 export function hasSubmittedSecondDeclaration(
 	events: ReadonlyArray<DeclarationStatusEvent>,
 ): boolean {
-	return hasEvent(events, (e) => e.eventType === "second_declaration_submit");
+	return deriveSubsequentSubmissions(events).hasSubmittedSecondDeclaration;
 }

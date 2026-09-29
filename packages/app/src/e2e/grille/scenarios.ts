@@ -1,10 +1,9 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
 	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_PATH,
 	CSE_OPINION,
 	cseOpinionStepHref,
-	MY_SPACE,
 	remunerationStepHref,
 } from "~/modules/routes";
 import { withCampaignYear } from "../helpers/campaign-year";
@@ -23,8 +22,8 @@ import {
 	reachStep6Recap,
 	submitFromStep6Recap,
 } from "../helpers/declaration-flows";
-import { clickAndExpectDialogOpen, waitForDsfrModal } from "../helpers/dsfr";
 import { recapStepperLabel } from "../helpers/indicator-g";
+import { openPanneauDemarche, transmittedRow } from "../helpers/process-panel";
 import { expectCompletionReceiptWhenMailChainUp } from "../helpers/receipts";
 import { urlGlob, urlPattern } from "../helpers/routes";
 import type { Coordinate } from "./coordinates";
@@ -78,26 +77,6 @@ async function expectComplianceOptions(
 		if (options.joint) await expect(joint).toBeVisible();
 		if (options.justify) await expect(justify).toBeVisible();
 	});
-}
-
-const PROCESS_PANEL_ID = "declaration-process-panel";
-
-// The row's CSS-module class names are hashed, so its label is the only stable
-// anchor: the label <p> sits in the info column, whose parent is the row itself.
-function transmittedRow(page: Page, label: string) {
-	return page
-		.locator(`#${PROCESS_PANEL_ID}`)
-		.getByText(label, { exact: true })
-		.locator("xpath=../..");
-}
-
-async function openPanneauDemarche(page: Page): Promise<Locator> {
-	await page.goto(MY_SPACE);
-	await waitForDsfrModal(page, PROCESS_PANEL_ID);
-	const trigger = page.getByRole("button", { name: "Rémunération" }).first();
-	await expect(trigger).toBeVisible();
-	await clickAndExpectDialogOpen(page, trigger, PROCESS_PANEL_ID);
-	return page.locator(`#${PROCESS_PANEL_ID}`);
 }
 
 const ETAPE_PARCOURS_CONFORMITE =

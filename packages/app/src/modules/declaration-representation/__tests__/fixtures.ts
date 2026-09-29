@@ -92,7 +92,8 @@ export const VALIDATION_MESSAGES = {
 		`La date sélectionnée ne correspond pas à l'année de référence ${year}.`,
 	periodLength: "La période de référence doit couvrir 12 mois consécutifs.",
 	urlRequired: "L'adresse de la page internet est obligatoire.",
-	urlInvalid: "L'adresse de la page internet est invalide.",
+	urlInvalid:
+		"Format attendu : https://www.exemple.fr/egalite. Vérifiez l'adresse de la page internet.",
 	urlTooLong: "L'adresse de la page internet est trop longue.",
 	modalitiesRequired:
 		"La description des modalités de communication est obligatoire.",

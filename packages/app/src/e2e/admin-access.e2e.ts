@@ -53,6 +53,29 @@ test.describe("admin access", () => {
 		await expect(
 			page.getByRole("heading", { name: "Année de campagne active", level: 2 }),
 		).not.toBeVisible();
+
+		const firstRound = page.getByRole("group", {
+			name: "Première déclaration",
+		});
+		const secondRound = page.getByRole("group", {
+			name: "Deuxième déclaration",
+		});
+		for (const round of [firstRound, secondRound]) {
+			for (const label of [
+				"Échéance de modification",
+				"Échéance de justification",
+				"Échéance de dépôt du rapport d'évaluation conjointe",
+			]) {
+				await expect(round.getByLabel(label, { exact: true })).toBeVisible();
+			}
+		}
+		await expect(
+			secondRound.getByLabel("Échéance de dépôt de l'avis du CSE", {
+				exact: true,
+			}),
+		).toBeVisible();
+		await expect(page.getByLabel("Échéance de déclaration")).toBeVisible();
+		await expect(page.getByText(/date limite/i)).toHaveCount(0);
 	});
 
 	test("admin can reach /admin/liste-referents", async ({ page }) => {

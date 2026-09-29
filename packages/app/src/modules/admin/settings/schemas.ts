@@ -42,7 +42,7 @@ export const campaignDeadlinesFormSchema = z
 		(data) => data.decl1ModificationDeadline < data.decl2ModificationDeadline,
 		{
 			message:
-				"La deadline de la deuxième déclaration doit être postérieure à celle de la première.",
+				"L'échéance de modification de la deuxième déclaration doit être postérieure à celle de la première.",
 			path: ["decl2ModificationDeadline"],
 		},
 	);

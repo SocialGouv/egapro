@@ -60,3 +60,25 @@ describe("HomeSearchForm tracking", () => {
 		});
 	});
 });
+
+describe("HomeSearchForm departments", () => {
+	it("groups all departments by region", () => {
+		render(<HomeSearchForm />);
+
+		const select = screen.getByLabelText("Département");
+		const groups = Array.from(select.querySelectorAll("optgroup"));
+		const options = Array.from(select.querySelectorAll("option"));
+
+		expect(groups).toHaveLength(18);
+		expect(options).toHaveLength(102);
+		expect(
+			groups.find((group) => group.label === "Île-de-France"),
+		).toContainElement(
+			select.querySelector('option[value="75"]') as HTMLOptionElement,
+		);
+		expect(new Set(options.map((option) => option.value)).size).toBe(102);
+		expect(select.querySelector('option[value=""]')?.textContent).toBe(
+			"Tous les départements",
+		);
+	});
+});

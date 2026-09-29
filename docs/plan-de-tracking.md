@@ -95,7 +95,8 @@ Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2
 | `search` / `consultation_outbound` | Clic sur le lien « Observatoire » du header (vers le site de consultation) | — | — | `layout/shared/ConsultationNavLink.tsx` | K24 |
 | `help` / `faq_section_open` | Ouverture d'un accordéon FAQ (passage à `aria-expanded=true`, pas la fermeture) | id structurel `accordion-<section>-<sous-section>-<index>` | — | `faq/FaqAccordionGroup.tsx` | K21 |
 | `help` / `aide_resource_click` | Clic sur une carte ressource de `/aide` | id de la ressource (`indicateurs-remuneration`, `indicateurs-representation`) | — | `aide/AideResourceCards.tsx` | K21 |
-| `help` / `help_link_click` | Clic sur un lien d'accompagnement instrumenté (parcours déclaration / conformité) | slug du lien (`cse_models` \| `objective_criteria` \| `corrective_actions` \| `joint_evaluation`) | — | `analytics/TrackedLink.tsx` (`NextStepsBox`, `CompliancePathChoice`, `CompliancePathOption`, `JointEvaluationForm`) | K21 |
+| `help` / `help_link_click` | Clic sur un lien d'accompagnement instrumenté (parcours déclaration / conformité) | slug du lien (`objective_criteria` \| `corrective_actions` \| `joint_evaluation`) | — | `analytics/TrackedLink.tsx` (`CompliancePathChoice`, `CompliancePathOption`, `JointEvaluationForm`) | K21 |
+
 | `document` / `pdf_download` | Clic sur le bouton « Télécharger le récapitulatif (PDF) » | `main` \| `correction` | — | `declarationPdf/DownloadDeclarationPdfButton.tsx` | K20 |
 | `document` / `file_upload` | Upload réussi de **tous** les fichiers sélectionnés | `flowType` (enum non-PII du flux) | nombre de fichiers | `shared/useFileUploadForm.ts` | K20 |
 | `document` / `category_template_download` | Téléchargement du modèle de fichier d'import (étape 5) | `csv` | — | `declaration-remuneration/steps/step5/CategoryImportExport.tsx` | K20 |
@@ -113,6 +114,8 @@ Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2
 > CNIL : le comptage est donc un **volume de confirmations** (pas d'entreprises
 > distinctes). Les recherches n'émettent **que** les noms de facettes, jamais
 > leurs valeurs (la requête libre peut contenir un SIREN ou un nom d'entreprise).
+
+Le slug historique `cse_models` reste conservé dans les agrégats Matomo pour préserver les données déjà collectées, mais n'est plus émis depuis le récapitulatif.
 
 ## Dimensions personnalisées
 

@@ -44,7 +44,7 @@ export function PublicSearchForm({ values }: Props) {
 		<form action={SEARCH_PATH} method="get">
 			<search className="fr-search-bar fr-search-bar--lg">
 				<label className="fr-label" htmlFor="consultation-query">
-					Rechercher une entreprise par son nom ou son numéro SIREN
+					Numéro Siren ou le nom de l&apos;entreprise
 				</label>
 				<input
 					autoComplete="organization"

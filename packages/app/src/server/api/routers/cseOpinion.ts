@@ -24,6 +24,7 @@ import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
 	buildHistoryInserts,
 	computeProjectionUpdates,
+	lockDeclaration,
 } from "./statusHistoryHelpers";
 
 export const cseOpinionRouter = createTRPCRouter({
@@ -300,6 +301,7 @@ export const cseOpinionRouter = createTRPCRouter({
 		);
 
 		await ctx.db.transaction(async (tx) => {
+			await lockDeclaration(tx, ctx.declarationId);
 			await tx.insert(declarationStatusHistory).values(historyInserts);
 			await tx
 				.update(declarations)

@@ -13,16 +13,12 @@ vi.mock("~/server/auth", () => ({
 
 vi.mock("~/trpc/server", () => ({
 	api: {
-		company: {
-			get: vi.fn(),
-		},
 		declaration: {
 			getOrCreate: vi.fn(),
 		},
 	},
 }));
 
-import { COMPANY_SIZE_ANNUAL_MIN } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { resendReceiptMutate } from "~/test/resendReceiptApiMock";
 import { api } from "~/trpc/server";
@@ -31,34 +27,11 @@ import { ComplianceConfirmation } from "../ComplianceConfirmation";
 const DECLARATION_YEAR = 2025;
 const SIREN = "123456789";
 
-const AT_THRESHOLD = COMPANY_SIZE_ANNUAL_MIN;
-const UNDER_THRESHOLD = COMPANY_SIZE_ANNUAL_MIN - 1;
-
-const NO_CSE_REASON = /Votre entreprise ne dispose pas de CSE/;
-const UNDER_THRESHOLD_REASON = new RegExp(
-	`Votre effectif est inférieur à ${COMPANY_SIZE_ANNUAL_MIN} salariés`,
-);
-const NO_OPINION_REQUIRED = /Aucun avis CSE n'est requis/;
-
-type CompanyShape = {
-	gipWorkforce: number | null;
-	hasCse: boolean | null;
-};
-
-// The reason is not what these tests are about; any landing company will do.
-const ANY_COMPANY: CompanyShape = {
-	gipWorkforce: UNDER_THRESHOLD,
-	hasCse: false,
-};
-
-async function renderConfirmation(
-	company: CompanyShape,
-	{
-		hasSubmittedCseOpinion = false,
-		hasSubmittedJointEvaluation = false,
-		hasSubmittedSecondDeclaration = false,
-	} = {},
-) {
+async function renderConfirmation({
+	hasSubmittedCseOpinion = false,
+	hasSubmittedJointEvaluation = false,
+	hasSubmittedSecondDeclaration = false,
+} = {}) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: { year: DECLARATION_YEAR, siren: SIREN },
 		jobCategories: [],
@@ -68,7 +41,6 @@ async function renderConfirmation(
 		hasSubmittedJointEvaluation,
 		hasSubmittedSecondDeclaration,
 	} as never);
-	vi.mocked(api.company.get).mockResolvedValue(company as never);
 
 	render(await ComplianceConfirmation());
 }
@@ -79,7 +51,7 @@ describe("ComplianceConfirmation", () => {
 	});
 
 	it("marks the completion pictogram as a success rather than an error", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		// Without the modifier, the DSFR artwork paints its check in Marianne red
 		// — the twin end-of-journey screen already carried the green one (#3460).
@@ -90,7 +62,7 @@ describe("ComplianceConfirmation", () => {
 
 	// Both ends of the démarche share one maquette, hence one title, one sentence.
 	it("renders the confirmation title", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		expect(
 			screen.getByRole("heading", {
@@ -101,7 +73,7 @@ describe("ComplianceConfirmation", () => {
 	});
 
 	it("displays the completion message with declaration year", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		expect(
 			screen.getByText(
@@ -110,15 +82,26 @@ describe("ComplianceConfirmation", () => {
 		).toBeInTheDocument();
 	});
 
+	it("does not show an unnecessary CSE message", async () => {
+		await renderConfirmation();
+
+		expect(
+			screen.queryByText(/Votre entreprise ne dispose pas de CSE/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Aucun avis CSE n'est requis/),
+		).not.toBeInTheDocument();
+	});
+
 	it("has a link to mon espace", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		const link = screen.getByRole("link", { name: "Mon espace" });
 		expect(link).toHaveAttribute("href", "/mon-espace");
 	});
 
 	it("offers the declaration recap as a download card under its section heading", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		// The screen used to expose a bare button, diverging from the twin
 		// end-of-journey screen and from the maquette (#3460, #4029).
@@ -144,7 +127,7 @@ describe("ComplianceConfirmation", () => {
 	});
 
 	it("omits the second declaration card when none was submitted", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		expect(
 			screen.queryByRole("link", {
@@ -166,7 +149,7 @@ describe("ComplianceConfirmation", () => {
 			{ hasSubmittedCseOpinion: false, hasSubmittedJointEvaluation: true },
 			{ hasSubmittedCseOpinion: true, hasSubmittedJointEvaluation: true },
 		])("offers it once something was transmitted (cseOpinion: $hasSubmittedCseOpinion, jointEvaluation: $hasSubmittedJointEvaluation)", async (submissions) => {
-			await renderConfirmation(ANY_COMPANY, submissions);
+			await renderConfirmation(submissions);
 
 			expect(transmittedCard()).toHaveAttribute(
 				"href",
@@ -176,7 +159,7 @@ describe("ComplianceConfirmation", () => {
 		});
 
 		it("omits it when nothing was transmitted", async () => {
-			await renderConfirmation(ANY_COMPANY, {
+			await renderConfirmation({
 				hasSubmittedCseOpinion: false,
 				hasSubmittedJointEvaluation: false,
 			});
@@ -189,7 +172,7 @@ describe("ComplianceConfirmation", () => {
 		it("tells the user where the acknowledgement was sent", async () => {
 			// The screen used to give no trace at all that a receipt had been sent,
 			// unlike its twin end-of-funnel screen (issue 3914).
-			await renderConfirmation(ANY_COMPANY);
+			await renderConfirmation();
 
 			expect(
 				screen.getByText(/Un accusé de réception a été envoyé/),
@@ -198,7 +181,7 @@ describe("ComplianceConfirmation", () => {
 		});
 
 		it("resends the declaration receipt when no second declaration was submitted", async () => {
-			await renderConfirmation(ANY_COMPANY);
+			await renderConfirmation();
 
 			await userEvent.click(
 				screen.getByRole("button", { name: /Renvoyer l'accusé de réception/ }),
@@ -213,7 +196,7 @@ describe("ComplianceConfirmation", () => {
 		// Hard-coding "declaration" would resend the round-one receipt to a user who
 		// has since filed a corrective one; the twin screen already branches.
 		it("resends the second declaration receipt once one was submitted", async () => {
-			await renderConfirmation(ANY_COMPANY, {
+			await renderConfirmation({
 				hasSubmittedSecondDeclaration: true,
 			});
 
@@ -234,14 +217,14 @@ describe("ComplianceConfirmation", () => {
 			{ user: { email: null } },
 		])("falls back to a placeholder address when the session carries none (session: %s)", async (session) => {
 			vi.mocked(auth).mockResolvedValueOnce(session as never);
-			await renderConfirmation(ANY_COMPANY);
+			await renderConfirmation();
 
 			expect(screen.getByText("adresse@exemple.fr")).toBeInTheDocument();
 		});
 	});
 
 	it("renders the feedback banner", async () => {
-		await renderConfirmation(ANY_COMPANY);
+		await renderConfirmation();
 
 		expect(
 			screen.getByText("Comment s'est passée votre démarche ?"),
@@ -249,77 +232,5 @@ describe("ComplianceConfirmation", () => {
 		expect(
 			screen.getByRole("link", { name: /Je donne mon avis/ }),
 		).toBeInTheDocument();
-	});
-
-	describe("reason why no CSE opinion is required", () => {
-		it("looks the workforce up on the declaration's own company", async () => {
-			await renderConfirmation(ANY_COMPANY);
-
-			expect(api.company.get).toHaveBeenCalledWith({ siren: SIREN });
-		});
-
-		// Under the threshold no opinion is ever due, whatever the CSE answer — so
-		// the headcount is the operative reason and the CSE answer must not show
-		// through. hasCse:true is the case the redirect-loop fix makes reachable.
-		it.each([
-			true,
-			false,
-			null,
-		])("blames the workforce below the threshold whatever the CSE answer (hasCse: %s)", async (hasCse) => {
-			await renderConfirmation({ gipWorkforce: UNDER_THRESHOLD, hasCse });
-
-			expect(screen.getByText(UNDER_THRESHOLD_REASON)).toBeInTheDocument();
-			expect(screen.queryByText(NO_CSE_REASON)).not.toBeInTheDocument();
-		});
-
-		it("blames the workforce for a company absent from the GIP file", async () => {
-			await renderConfirmation({ gipWorkforce: null, hasCse: true });
-
-			expect(screen.getByText(UNDER_THRESHOLD_REASON)).toBeInTheDocument();
-			expect(screen.queryByText(NO_CSE_REASON)).not.toBeInTheDocument();
-		});
-
-		it.each([
-			false,
-			null,
-		])("blames the missing CSE at or above the threshold (hasCse: %s)", async (hasCse) => {
-			await renderConfirmation({ gipWorkforce: AT_THRESHOLD, hasCse });
-
-			expect(screen.getByText(NO_CSE_REASON)).toBeInTheDocument();
-			expect(
-				screen.queryByText(UNDER_THRESHOLD_REASON),
-			).not.toBeInTheDocument();
-		});
-
-		// The voluntary tier is named by its threshold, never by its exact headcount.
-		it.each([
-			{ gipWorkforce: 87, hasCse: false },
-			{ gipWorkforce: 3412, hasCse: false },
-		])("never prints the company's own headcount (gipWorkforce: $gipWorkforce)", async (company) => {
-			await renderConfirmation(company);
-
-			expect(document.body).not.toHaveTextContent(String(company.gipWorkforce));
-			expect(screen.getByText(NO_OPINION_REQUIRED)).toBeInTheDocument();
-		});
-
-		// Unreachable through routing: at this size with a CSE an opinion is due, so
-		// /avis-cse owns the démarche. Only the headcount claim is pinned — asserting
-		// the CSE-denial text would enshrine a statement that is false for it.
-		it("never claims a sub-threshold headcount for a large company with a CSE", async () => {
-			await renderConfirmation({ gipWorkforce: AT_THRESHOLD, hasCse: true });
-
-			expect(
-				screen.queryByText(UNDER_THRESHOLD_REASON),
-			).not.toBeInTheDocument();
-		});
-
-		it.each([
-			{ gipWorkforce: UNDER_THRESHOLD, hasCse: true },
-			{ gipWorkforce: AT_THRESHOLD, hasCse: false },
-		])("states that no opinion is required (gipWorkforce: $gipWorkforce, hasCse: $hasCse)", async (company) => {
-			await renderConfirmation(company);
-
-			expect(screen.getByText(NO_OPINION_REQUIRED)).toBeInTheDocument();
-		});
 	});
 });
