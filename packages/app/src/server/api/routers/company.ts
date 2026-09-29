@@ -3,6 +3,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Session } from "next-auth";
 import {
 	applyDeclarationClosure,
+	COMPANY_SIZE_VOLUNTARY_MAX,
 	computeDeclarationStatus,
 	computeRepresentationDeclarationStatus,
 	deriveSubsequentSubmissions,
@@ -250,7 +251,12 @@ export const companyRouter = createTRPCRouter({
 			const representationRow = currentYearRepresentationDeclarationRows[0];
 			const representationVisible =
 				representationRow !== undefined ||
-				isPresumedSubjectToRepresentation(representationWorkforceHistory, year);
+				(getObligationWorkforce(company.gipWorkforce) >=
+					COMPANY_SIZE_VOLUNTARY_MAX &&
+					isPresumedSubjectToRepresentation(
+						representationWorkforceHistory,
+						year,
+					));
 			const mappedDeclarations: DbDeclaration[] = declarationRows.map((d) => {
 				const projectedStatus = computeDeclarationStatus({
 					status: d.status,
