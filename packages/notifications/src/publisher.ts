@@ -34,13 +34,46 @@ export type EnqueueResult = PublishResult | { status: "queue_unavailable" };
 
 const UNIQUE_VIOLATION = "23505";
 
+function errorCode(error: unknown): string | null {
+	if (typeof error !== "object" || error === null) return null;
+	const { code } = error as { code?: unknown };
+	return typeof code === "string" ? code : null;
+}
+
 // SQLSTATE, not the message — the driver's message text is localised by the server's `lc_messages`.
 function isDuplicateJobId(error: unknown): boolean {
+	return errorCode(error) === UNIQUE_VIOLATION;
+}
+
+const TRANSIENT_ERROR_CODES = new Set([
+	"ECONNREFUSED",
+	"ECONNRESET",
+	"ECONNABORTED",
+	"ETIMEDOUT",
+	"EPIPE",
+	"EHOSTUNREACH",
+	"ENETUNREACH",
+	"EAI_AGAIN",
+	"08000",
+	"08003",
+	"08006",
+	"57P01",
+	"57P02",
+	"57P03",
+	"53300",
+]);
+const TRANSIENT_MESSAGE_PATTERN =
+	/ECONN(?:REFUSED|RESET|ABORTED)|ETIMEDOUT|connection terminated|connection timeout|server closed the connection|Client has encountered a connection error/i;
+
+function isTransientConnectionError(error: unknown): boolean {
+	if (typeof error !== "object" || error === null) return false;
+	const code = errorCode(error);
+	if (code !== null) return TRANSIENT_ERROR_CODES.has(code);
+	if (error instanceof AggregateError) {
+		return error.errors.some(isTransientConnectionError);
+	}
 	return (
-		typeof error === "object" &&
-		error !== null &&
-		"code" in error &&
-		(error as { code?: unknown }).code === UNIQUE_VIOLATION
+		error instanceof Error && TRANSIENT_MESSAGE_PATTERN.test(error.message)
 	);
 }
 
@@ -113,7 +146,8 @@ function readPositiveInt(name: string, fallback: number): number {
  * Graceful degradation:
  * - URL missing or queue unreachable → `{ status: "queue_unavailable" }` (no throw)
  * - `jobId` already queued → `{ status: "duplicate", id }` (no throw)
- * - `boss.send` throws → `{ status: "error", error }` (no throw)
+ * - `boss.send` throws a connection failure → `{ status: "queue_unavailable" }` (no throw)
+ * - `boss.send` throws anything else → `{ status: "error", error }` (no throw)
  *
  * Audit logging is the caller's responsibility: branch on the returned
  * `status` and invoke whatever audit sink fits the calling context.
@@ -170,6 +204,9 @@ export async function enqueueNotification<T extends NotificationType>(
 	} catch (error) {
 		if (input.jobId && isDuplicateJobId(error)) {
 			return { status: "duplicate", id: input.jobId };
+		}
+		if (isTransientConnectionError(error)) {
+			return { status: "queue_unavailable" };
 		}
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return { status: "error", error: message };
