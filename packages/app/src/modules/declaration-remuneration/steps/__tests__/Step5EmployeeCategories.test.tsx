@@ -192,7 +192,9 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		expect(
-			screen.getByText(/Saisissez les données manquantes/),
+			screen.getByText(
+				"Renseignez les informations nécessaires pour le calcul de l'indicateur ou importez-les via le bouton ci-dessous",
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
