@@ -664,6 +664,18 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
+	it("retains a validated declaration UUID for an admin read", async () => {
+		const id = "1a19fd4d-d851-4146-ae27-8402e5448126";
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "adminDeclarations.getById",
+			getRawInput: buildGetRawInput({ id, freeText: "private@example.com" }),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({ id });
+	});
+
 	it("does not attest unvalidated values from a failed tRPC call", async () => {
 		await auditMiddleware({
 			ctx: buildCtx(),

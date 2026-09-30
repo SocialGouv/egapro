@@ -17,7 +17,14 @@ type MetadataField =
 	| "kind"
 	| "variant"
 	| "isResend"
-	| "attachmentsDropped";
+	| "attachmentsDropped"
+	| "id"
+	| "declarationId"
+	| "fileId"
+	| "flowType";
+
+const UUID_PATTERN =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const RECEIPT_TYPES = new Set([
 	"declaration_confirmation",
@@ -44,8 +51,8 @@ const RECEIPT_VARIANTS = new Set([
 ]);
 
 // Every action starts with no metadata. Extend this map only for a concrete
-// audit need, with a validator below. In particular, raw search text, file
-// names and identifiers from request input are intentionally omitted.
+// audit need, with a validator below. Raw search text and file names are
+// omitted; technical identifiers are accepted only in UUID form.
 const FIELDS_BY_ACTION: Partial<
 	Record<AuditActionKey, readonly MetadataField[]>
 > = {
@@ -78,6 +85,14 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: ["format"],
 	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: ["acr", "authTime", "testSeam"],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: ["timeoutMinutes"],
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: ["id"],
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: ["id"],
+	[AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK]: ["declarationId"],
+	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
+	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType"],
+	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: ["fileId", "flowType"],
+	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: ["fileId"],
+	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: ["fileId"],
 	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: [
 		"type",
 		"kind",
@@ -128,6 +143,16 @@ function validValue(
 				: undefined;
 		case "format":
 			return value === "json" || value === "csv" ? value : undefined;
+		case "id":
+		case "declarationId":
+		case "fileId":
+			return typeof value === "string" && UUID_PATTERN.test(value)
+				? value
+				: undefined;
+		case "flowType":
+			return value === "cse_opinion" || value === "joint_evaluation"
+				? value
+				: undefined;
 		case "date_begin":
 		case "date_end":
 			return validIsoDate(value);

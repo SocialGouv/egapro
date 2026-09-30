@@ -161,6 +161,23 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps only a validated file UUID for a download", async () => {
+		const fileId = "45becf58-fdd2-428f-9a55-582a86e88592";
+		await logAction({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			status: "success",
+			metadata: { fileId, fileName: "private.pdf" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({ fileId });
+
+		await logAction({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			status: "failure",
+			metadata: { fileId: "private@example.com", fileName: "private.pdf" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
+	});
+
 	it("never throws even when the database insert fails", async () => {
 		mockInsertValues.mockRejectedValueOnce(new Error("db down"));
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
