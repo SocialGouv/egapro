@@ -41,6 +41,18 @@ export async function saveDeclaration(
     staff: true,
   });
 
+  // The declaration is saved under the declaring company: it must be owned too (IDOR otherwise).
+  const declaringSiren = declaration.entreprise?.entrepriseDéclarante?.siren;
+  if (declaringSiren !== declaration.commencer?.siren) {
+    await assertServerSession({
+      owner: {
+        check: declaringSiren || "",
+        message: "Not authorized to save declaration for this Siren.",
+      },
+      staff: true,
+    });
+  }
+
   const siren = declaration.commencer?.siren;
   const year = declaration.commencer?.annéeIndicateurs;
   const email = declaration.declarant?.email;

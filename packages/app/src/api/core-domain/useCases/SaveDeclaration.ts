@@ -43,6 +43,12 @@ export class SaveDeclaration implements UseCase<Input, void> {
 
     if (!siren || !year) throw new Error("Missing data");
 
+    // Callers authorize the user on `commencer.siren`: saving under another declaring company would let an
+    // owner of one siren write the declaration of any other. Staff (override) may correct the company.
+    if (!override && dto.commencer?.siren !== siren) {
+      throw new SaveDeclarationSirenMismatchError("Le Siren déclaré ne correspond pas à l'entreprise déclarante.");
+    }
+
     const pk: DeclarationPK = [new Siren(siren), new PositiveNumber(year)];
 
     const rawEntreprise = await this.entrepriseService.siren(pk[0]);
@@ -349,3 +355,5 @@ export class SaveDeclarationOverOneYearError extends AppError {}
 // Extends ValidationError so the existing catch passthrough (instanceof ValidationError) and the server
 // actions surface its message to the declarant instead of collapsing it to a generic error.
 export class SaveDeclarationClosedCompanyError extends ValidationError {}
+
+export class SaveDeclarationSirenMismatchError extends ValidationError {}
