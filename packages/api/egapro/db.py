@@ -7,7 +7,7 @@ import asyncpg
 from naf import DB as NAF
 from asyncstdlib.functools import lru_cache
 from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
-import ujson as json
+from egapro import jsonlib as json
 
 from egapro import config, models, sql, utils, helpers
 from egapro.constants import DEPARTEMENT_TO_REGION, DEPARTEMENTS, REGIONS, REGIONS_TO_DEPARTEMENTS

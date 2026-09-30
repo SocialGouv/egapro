@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 
 import fastjsonschema
-import ujson as json
+from egapro import jsonlib as json
 from stdnum.fr.siren import is_valid as siren_is_valid
 
 from egapro.utils import import_by_path

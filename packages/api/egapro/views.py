@@ -11,7 +11,13 @@ from roll.extensions import options
 from stdnum.fr.siren import is_valid as siren_is_valid
 
 from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema, pdf
-from egapro import loggers
+from egapro import jsonlib, loggers
+import roll.io
+
+# roll parses request bodies and serializes responses with the module-level `json`
+# it imported (ujson): route it through jsonlib to keep the ujson 1.35 output.
+roll.io.json = jsonlib
+roll.io.JSONDecodeError = jsonlib.JSONDecodeError
 
 GENERIC_ERROR = "Une erreur inattendue est survenue"
 

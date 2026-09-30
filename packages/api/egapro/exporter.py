@@ -10,7 +10,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
-import ujson as json
+from egapro import jsonlib as json
 
 from egapro import constants, db, models, sql, utils
 from egapro.utils import escape_formula

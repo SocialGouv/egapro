@@ -11,7 +11,7 @@ from pathlib import Path
 import minicli
 import progressist
 import yaml
-import ujson as json
+from egapro import jsonlib as json
 from openpyxl import load_workbook
 from openpyxl.worksheet._writer import ALL_TEMP_FILES
 import aioschedule as schedule
