@@ -290,7 +290,8 @@ type argument.
 `logAction` est la dernière barrière avant l'insert, quel que soit l'appelant
 (tRPC, route ou appel direct). Il conserve l'action, la catégorie, le statut,
 la date générée par la base, `user_id` et `siren` quand le contexte les
-fournit. `user_email` et `user_agent` sont toujours `null`. `ip_address`
+fournit sous forme validée (UUID pour `user_id`, 9 chiffres pour `siren`).
+`user_email` et `user_agent` sont toujours `null`. `ip_address`
 utilise `truncateIp()` (IPv4 /16, IPv6 /48, invalide → `null`). Le champ
 `error_message` ne contient qu'un code connu ou `ERROR`, jamais le texte
 libre de l'exception. `resource_type` accepte uniquement `declaration`

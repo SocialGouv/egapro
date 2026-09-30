@@ -38,7 +38,7 @@ describe("logAction persistence (real Postgres)", () => {
 		await logAction({
 			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
 			status: "failure",
-			userId: "user-1",
+			userId: "123e4567-e89b-12d3-a456-426614174000",
 			userEmail: "person@example.com",
 			siren: "123456789",
 			ipAddress: "203.0.113.45",
@@ -60,7 +60,7 @@ describe("logAction persistence (real Postgres)", () => {
 		expect(rows[0]).toMatchObject({
 			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
 			status: "failure",
-			user_id: "user-1",
+			user_id: "123e4567-e89b-12d3-a456-426614174000",
 			user_email: null,
 			siren: "123456789",
 			ip_address: "203.0.0.0",

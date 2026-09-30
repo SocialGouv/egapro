@@ -35,10 +35,11 @@ describe("logAction", () => {
 	});
 
 	it("inserts a row with all provided fields and resolves the category from the action key", async () => {
+		const userId = "123e4567-e89b-12d3-a456-426614174000";
 		await logAction({
 			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
 			status: "success",
-			userId: "user-1",
+			userId,
 			userEmail: "test@example.com",
 			siren: "123456789",
 			metadata: { year: 2026 },
@@ -53,7 +54,7 @@ describe("logAction", () => {
 			action: "declaration.submit",
 			category: "mutation",
 			status: "success",
-			userId: "user-1",
+			userId,
 			userEmail: null,
 			siren: "123456789",
 			metadata: { year: 2026 },
@@ -144,6 +145,19 @@ describe("logAction", () => {
 		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
 			resourceType: null,
 			resourceId: null,
+		});
+	});
+
+	it("rejects free text in attribution fields", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_LOGIN,
+			status: "success",
+			userId: "person@example.com",
+			siren: "123456789 extra",
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			userId: null,
+			siren: null,
 		});
 	});
 

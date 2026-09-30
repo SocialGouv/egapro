@@ -64,6 +64,7 @@ const DATABASE_ERROR_CODES = new Set([
 const RESOURCE_TYPES = new Set(["declaration", "notification"]);
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SIREN_PATTERN = /^\d{9}$/;
 
 function resourceType(value: string | null | undefined): string | null {
 	return value && RESOURCE_TYPES.has(value) ? value : null;
@@ -74,6 +75,14 @@ function resourceId(
 	value: string | null | undefined,
 ): string | null {
 	return type && value && UUID_PATTERN.test(value) ? value : null;
+}
+
+function userId(value: string | null | undefined): string | null {
+	return value && UUID_PATTERN.test(value) ? value : null;
+}
+
+function siren(value: string | null | undefined): string | null {
+	return value && SIREN_PATTERN.test(value) ? value : null;
 }
 
 function databaseErrorCode(message: string | null | undefined): string | null {
@@ -119,9 +128,9 @@ export async function logAction(input: LogActionInput): Promise<void> {
 			action: input.action,
 			category,
 			status: input.status,
-			userId: input.userId ?? null,
+			userId: userId(input.userId),
 			userEmail: null,
-			siren: input.siren ?? null,
+			siren: siren(input.siren),
 			resourceType: persistedResourceType,
 			resourceId: resourceId(persistedResourceType, input.resourceId),
 			errorMessage: databaseErrorCode(input.errorMessage),
