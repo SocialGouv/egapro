@@ -1,4 +1,5 @@
 import json
+from unittest import mock
 
 import pytest
 from egapro import db
@@ -244,82 +245,26 @@ async def test_empty_simulation_should_save_data(client):
     assert data == posted_data
 
 
-async def test_start_new_simulation_send_email_if_given(client, monkeypatch):
-    calls = 0
-    email_body = ""
-
-    def mock_send(to, subject, txt, html=None, reply_to=None, attachment=None):
-        assert to == "foo@bar.org"
-        nonlocal calls
-        nonlocal email_body
-        email_body = txt
-        calls += 1
-
-    monkeypatch.setattr("egapro.emails.send", mock_send)
-    resp = await client.post("/simulation", body={"foo": "bar"})
-    assert resp.status == 200
-    assert not calls
+async def test_start_new_simulation_never_sends_email(client, monkeypatch):
+    # Anonymous endpoint: it must not be usable to have us email any address.
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
     resp = await client.post(
         "/simulation",
-        body={"data": {"informationsDeclarant": {"email": "foo@bar.org"}}},
+        body={"data": {"informationsDeclarant": {"email": "victim@example.org"}}},
     )
     assert resp.status == 200
-    data = json.loads(resp.body)
-    assert data["id"] in email_body
+    assert "id" in json.loads(resp.body)
+    send.assert_not_called()
 
 
-async def test_send_code_endpoint(client, monkeypatch, body):
-    calls = 0
-    email_body = ""
-    recipient = None
-
-    def mock_send(to, subject, txt, html=None, reply_to=None, attachment=None):
-        assert to == "foo@bar.org"
-        nonlocal calls
-        nonlocal email_body
-        nonlocal recipient
-        email_body = txt
-        recipient = to
-        calls += 1
-
-    monkeypatch.setattr("egapro.emails.send", mock_send)
-
-    # Invalid UUID
-    resp = await client.post("/simulation/unknown/send-code", body=body)
-    assert resp.status == 400
-    assert json.loads(resp.body) == {"error": "Invalid data"}
-    assert not calls
-
-    # Not found UUID
-    resp = await client.post(
-        "/simulation/12345678-1234-5678-9012-123456789012/send-code",
-        body=body,
-    )
-    assert resp.status == 404
-    assert not calls
-
-    # Create simulation
-    uid = await db.simulation.create(
-        {
-            "déclaration": {"formValidated": "Valid"},
-            "entreprise": {"siren": "12345678"},
-            "informations": {"année_indicateurs": 2019},
-        }
-    )
-
-    # Missing email
-    resp = await client.post(f"/simulation/{uid}/send-code", body=body)
-    assert resp.status == 400
-    assert json.loads(resp.body) == {"error": "Missing `email` key"}
-    assert not calls
-
-    # Valid request.
-    resp = await client.post(
-        f"/simulation/{uid}/send-code", body={"email": "foo@bar.org"}
-    )
-    assert resp.status == 204
-    assert uid in email_body
-    assert recipient == "foo@bar.org"
+async def test_send_code_endpoint_is_gone(client, monkeypatch):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    uid = await db.simulation.create({"foo": "bar"})
+    resp = await client.post(f"/simulation/{uid}/send-code", body={"email": "victim@example.org"})
+    assert resp.status in (404, 405)
+    send.assert_not_called()
 
 
 async def test_put_simulation_never_sets_session_cookie(client):

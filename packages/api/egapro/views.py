@@ -512,25 +512,13 @@ async def me(request, response):
 
 @app.route("/simulation", methods=["POST"])
 async def start_simulation(request, response):
-    data = request.json
-    email = data.get("informationsDeclarant", {}).get("email")
+    # No email is sent from here anymore (nor from the removed
+    # /simulation/{uuid}/send-code): both let anyone, anonymously and without
+    # any rate limit, have us email any address. No client uses them since the
+    # simulator moved to the Next.js app.
     uid = await db.simulation.create(request.json)
     response.json = {"id": uid}
-    if email:
-        await emails.permalink.send(email, id=uid)
     response.status = 200
-
-
-# KILL THIS ENDPOINT
-@app.route("/simulation/{uuid}/send-code", methods=["POST"])
-async def send_simulation_code(request, response, uuid):
-    # Make sure given simulation exists
-    await db.simulation.get(uuid)
-    email = request.json.get("email", {})
-    response.status = 204
-    if not email:
-        raise HttpError(400, "Missing `email` key")
-    await emails.permalink.send(email, id=uuid)
 
 
 @app.route("/simulation/{uuid}")
