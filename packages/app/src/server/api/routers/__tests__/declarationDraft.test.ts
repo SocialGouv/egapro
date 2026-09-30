@@ -355,7 +355,7 @@ describe("declarationDraftRouter", () => {
 			expect(mocks.insert).not.toHaveBeenCalled();
 		});
 
-		it("emits DRAFT_SAVE audit log without draft content", async () => {
+		it("emits DRAFT_SAVE audit log with the target but without draft content", async () => {
 			const { auditMiddleware } = await import("~/server/audit/trpcMiddleware");
 
 			const input = {
@@ -381,7 +381,7 @@ describe("declarationDraftRouter", () => {
 					action: "declaration_draft.save",
 					status: "success",
 					userId: "user-1",
-					metadata: null,
+					metadata: { siren: SIREN, year: YEAR },
 				}),
 			);
 		});
