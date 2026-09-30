@@ -90,7 +90,9 @@ services:
 
   db:
     restart: always
-    image: postgres
+    # Pinned major: the floating `postgres` tag moved to 18, which refuses a volume
+    # mounted at /var/lib/postgresql/data (18+ keeps data in a versioned subdirectory).
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -98,11 +100,11 @@ services:
     ports:
       - "127.0.0.1:5438:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
 
   test_db:
     restart: always
-    image: postgres
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
