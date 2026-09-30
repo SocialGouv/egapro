@@ -2,6 +2,7 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Sql } from "postgres";
 import postgres from "postgres";
+import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
 
 /**
  * Audit log cleanup — direct DB access.
@@ -215,7 +216,11 @@ if (isMain) {
 		await sql.end();
 		process.exit(0);
 	} catch (error) {
-		console.error("[audit-cleanup] Failed:", AUDIT_CLEANUP_FAILURE_CODE);
+		console.error(
+			"[audit-cleanup] Failed:",
+			AUDIT_CLEANUP_FAILURE_CODE,
+			cleanupErrorDiagnostic(error),
+		);
 		await logAuditCleanupFailure(sql, error);
 		await sql.end();
 		process.exit(1);

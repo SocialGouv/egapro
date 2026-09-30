@@ -2,6 +2,7 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Sql } from "postgres";
 import postgres from "postgres";
+import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
 
 type PurgeSummary = {
 	s3Keys: string[];
@@ -123,9 +124,12 @@ export async function runDeclarationCleanup({
 		try {
 			await deleteObject(key);
 			purgedS3Objects++;
-		} catch {
+		} catch (error) {
 			failedS3Objects++;
-			console.error("[declaration-cleanup] S3 delete failed (key redacted)");
+			console.error(
+				"[declaration-cleanup] S3 delete failed (key redacted):",
+				cleanupErrorDiagnostic(error),
+			);
 		}
 	}
 
@@ -256,6 +260,7 @@ if (isMain) {
 		console.error(
 			"[declaration-cleanup] Failed:",
 			DECLARATION_CLEANUP_FAILURE_CODE,
+			cleanupErrorDiagnostic(error),
 		);
 		await logDeclarationCleanupFailure(sql, error);
 		exitCode = 1;

@@ -117,27 +117,28 @@ Add the matching `AUDIT_ACTIONS.*` entry and its category mapping in
 
 ### 4. New NextAuth event / auth flow
 
-Use `logAction` directly from `~/server/audit/log`, inside the NextAuth events
-or logger hooks:
+Use `logAction` directly from `~/server/audit/log`. For a successful login,
+write from the JWT sign-in branch after resolving the local database user:
 
 ```ts
-events: {
-  async signIn({ user }) {
-    const requestContext = await safeRequestContext();
-    void logAction({
-      action: AUDIT_ACTIONS.AUTH_LOGIN,
-      status: "success",
-      userId: user.id,
-      userEmail: user.email,
-      ipAddress: requestContext.ipAddress,
-      userAgent: requestContext.userAgent,
-    });
-  },
-},
+// Inside callbacks.jwt, in the `if (user)` sign-in branch, after `dbUser`
+// has been resolved and `token.id = dbUser.id` has been set:
+const requestContext = await safeRequestContext();
+void logAction({
+  action: AUDIT_ACTIONS.AUTH_LOGIN,
+  status: "success",
+  userId: dbUser.id,
+  siren: parseSiren(profileData.siret),
+  ipAddress: requestContext.ipAddress,
+  userAgent: requestContext.userAgent,
+});
 ```
 
 Notes:
 
+- Do not use `events.signIn` to attribute a successful login: its `user.id`
+  is the ProConnect subject, not the local user UUID, and `logAction` rejects
+  non-UUID identifiers. Do not emit a second `AUTH_LOGIN` row from that event.
 - `logger.error` (used for failed logins) MUST stay synchronous — NextAuth v4
   does not await it. Fire the async work inside a `void (async () => {...})()`
   IIFE.
@@ -280,7 +281,7 @@ type argument.
 | `v1/openapi.json` | idem. |
 | `gip-mds/mock` | Reads a checked-in fixture CSV (`data/mock-gip-mds.csv`) that stands in for the GIP MDS API until it exists. Fictional data only. |
 | `auth/logout/callback` | Bare redirect to `/` after the ProConnect end-session round-trip. The logout itself is audited by `auth/logout`; auditing the callback would double-count. |
-| `auth/[...nextauth]` | NextAuth's own catch-all. Audited one level down, in the NextAuth `events`/`logger` hooks (pattern §4) — wrapping the handler would duplicate every row. |
+| `auth/[...nextauth]` | NextAuth's own catch-all. Successful login is audited in the JWT callback and failures in the `logger` hook (pattern §4) — wrapping the handler would duplicate every row. |
 | `trpc/[trpc]` | tRPC's fetch adapter. Every procedure worth auditing is already covered by `auditMiddleware` + `PROCEDURE_TO_ACTION`; wrapping the adapter would log one opaque row per batched call. |
 
 ---
@@ -464,7 +465,7 @@ sensitive read:
   - [ ] tRPC sensitive query → `PROCEDURE_TO_ACTION` entry (category
         `read_sensitive`)
   - [ ] Route Handler → `withAuditedRoute(...)` wrapper + `cachedAuth`
-  - [ ] Auth event → `logAction` inside NextAuth `events` / `logger`
+  - [ ] Auth flow → `logAction` in the JWT sign-in branch or NextAuth `logger` hook, with the local user UUID for success
   - [ ] System / cron → direct `logAction` call
 - [ ] Any needed `metadata` key is explicitly permitted and validated for
       this action in `metadata.ts`; free text and PII are excluded

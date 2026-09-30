@@ -7,6 +7,18 @@ type MetadataField =
 	| "count"
 	| "limit"
 	| "format"
+	| "hasCse"
+	| "campaignStartDate"
+	| "campaignEndDate"
+	| "publicDataReleaseDate"
+	| "declarationDeadline"
+	| "decl1ModificationDeadline"
+	| "decl1JustificationDeadline"
+	| "decl1JointEvaluationDeadline"
+	| "decl2ModificationDeadline"
+	| "decl2JustificationDeadline"
+	| "decl2JointEvaluationDeadline"
+	| "decl2CseOpinionDeadline"
 	| "invalidYear"
 	| "acr"
 	| "authTime"
@@ -65,7 +77,7 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.DRAFT_SAVE]: ["siren", "year"],
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: ["siren", "year"],
 	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: ["siren"],
-	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: ["siren"],
+	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: ["siren", "hasCse"],
 	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: ["kind", "year"],
 	[AUDIT_ACTIONS.PDF_SIZE_PROBE]: ["year"],
 	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: ["years"],
@@ -79,8 +91,24 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN]: ["year"],
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS]: ["year"],
 	[AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY]: ["year"],
-	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: ["year"],
-	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: [
+		"year",
+		"campaignStartDate",
+		"campaignEndDate",
+		"declarationDeadline",
+	],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: [
+		"year",
+		"campaignStartDate",
+		"publicDataReleaseDate",
+		"decl1ModificationDeadline",
+		"decl1JustificationDeadline",
+		"decl1JointEvaluationDeadline",
+		"decl2ModificationDeadline",
+		"decl2JustificationDeadline",
+		"decl2JointEvaluationDeadline",
+		"decl2CseOpinionDeadline",
+	],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_GET]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: ["year"],
@@ -144,7 +172,7 @@ function validIsoDate(value: unknown): string | undefined {
 function validValue(
 	field: MetadataField,
 	value: unknown,
-): string | number | boolean | number[] | undefined {
+): string | number | boolean | number[] | null | undefined {
 	switch (field) {
 		case "year": {
 			const year =
@@ -181,7 +209,24 @@ function validValue(
 				? value
 				: undefined;
 		case "format":
-			return value === "json" || value === "csv" ? value : undefined;
+			return value === "json" || value === "csv" || value === "xlsx"
+				? value
+				: undefined;
+		case "hasCse":
+			return typeof value === "boolean" ? value : undefined;
+		case "campaignStartDate":
+		case "publicDataReleaseDate":
+			return value === null || value === "" ? null : validIsoDate(value);
+		case "campaignEndDate":
+		case "declarationDeadline":
+		case "decl1ModificationDeadline":
+		case "decl1JustificationDeadline":
+		case "decl1JointEvaluationDeadline":
+		case "decl2ModificationDeadline":
+		case "decl2JustificationDeadline":
+		case "decl2JointEvaluationDeadline":
+		case "decl2CseOpinionDeadline":
+			return validIsoDate(value);
 		case "id":
 		case "declarationId":
 		case "fileId":

@@ -191,6 +191,87 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps the validated XLSX export format", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			status: "success",
+			metadata: { format: "xlsx", search: "private@example.com" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			format: "xlsx",
+		});
+	});
+
+	it("keeps the controlled values of audited settings changes", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
+			status: "success",
+			metadata: { siren: "123456789", hasCse: false, name: "private" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			siren: "123456789",
+			hasCse: false,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+			status: "success",
+			metadata: {
+				year: 2026,
+				campaignStartDate: "",
+				publicDataReleaseDate: "2026-04-01",
+				decl1ModificationDeadline: "2026-05-01",
+				decl2CseOpinionDeadline: "2026-13-99",
+				freeText: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toEqual({
+			year: 2026,
+			campaignStartDate: null,
+			publicDataReleaseDate: "2026-04-01",
+			decl1ModificationDeadline: "2026-05-01",
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN,
+			status: "success",
+			metadata: {
+				year: 2026,
+				campaignStartDate: "2026-01-01",
+				campaignEndDate: "2026-12-31",
+				declarationDeadline: "2026-06-30",
+				secret: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[2]?.[0]?.metadata).toEqual({
+			year: 2026,
+			campaignStartDate: "2026-01-01",
+			campaignEndDate: "2026-12-31",
+			declarationDeadline: "2026-06-30",
+		});
+	});
+
+	it("keeps fixed NextAuth failure codes without error details", async () => {
+		for (const code of [
+			"JWT_SESSION_ERROR",
+			"OAUTH_CALLBACK_HANDLER_ERROR",
+			"OAUTH_PARSE_PROFILE_ERROR",
+		]) {
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: `${code}: private@example.com`,
+			});
+		}
+		expect(
+			mockInsertValues.mock.calls.map(([row]) => row.errorMessage),
+		).toEqual([
+			"JWT_SESSION_ERROR",
+			"OAUTH_CALLBACK_HANDLER_ERROR",
+			"OAUTH_PARSE_PROFILE_ERROR",
+		]);
+	});
+
 	it("never throws even when the database insert fails", async () => {
 		mockInsertValues.mockRejectedValueOnce(new Error("db down"));
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
