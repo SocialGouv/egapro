@@ -54,3 +54,23 @@ def test_init_fails_fast_in_production(monkeypatch):
 def test_allowed_origins(monkeypatch, value, expected):
     monkeypatch.setattr("egapro.config.ALLOW_ORIGIN", value)
     assert config.allowed_origins() == expected
+
+
+@pytest.mark.parametrize("flavour", ["preprod", "prod", "local"])
+def test_check_refuses_development_secret_in_deployed_flavours(monkeypatch, flavour):
+    # "local" is the default when EGAPRO_FLAVOUR is not set: fail closed.
+    monkeypatch.setenv("PRODUCTION", "true")
+    monkeypatch.setattr("egapro.config.FLAVOUR", flavour)
+    monkeypatch.setattr("egapro.config.SECRET", config._dev_defaults["SECRET"])
+    monkeypatch.setattr("egapro.config.DBPASS", "a-real-password")
+    with pytest.raises(RuntimeError, match="EGAPRO_SECRET"):
+        config.check()
+
+
+def test_check_lets_review_apps_run_with_development_secrets(monkeypatch):
+    # Review apps (global.env = dev) run the production image with dev credentials.
+    monkeypatch.setenv("PRODUCTION", "true")
+    monkeypatch.setattr("egapro.config.FLAVOUR", "dev")
+    monkeypatch.setattr("egapro.config.SECRET", config._dev_defaults["SECRET"])
+    monkeypatch.setattr("egapro.config.DBPASS", config._dev_defaults["DBPASS"])
+    config.check()

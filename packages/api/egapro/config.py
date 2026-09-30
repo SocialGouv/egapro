@@ -32,14 +32,19 @@ READONLY = False
 _dev_defaults = {"SECRET": SECRET, "DBPASS": DBPASS}
 
 
+# Deployments whose credentials may be the development ones (review apps). Any
+# other flavour, including an unset one, is checked: fail closed.
+DEV_FLAVOURS = {"dev"}
+
+
 def is_production():
     # Set by the production Docker image (see Dockerfile), not by Dockerfile.dev.
     return os.environ.get("PRODUCTION", "").lower() == "true"
 
 
 def check():
-    """Refuse to run a production instance with the development credentials."""
-    if not is_production():
+    """Refuse to run a deployed (non dev) instance with the development credentials."""
+    if not is_production() or FLAVOUR in DEV_FLAVOURS:
         return
     insecure = [
         key for key, default in _dev_defaults.items()

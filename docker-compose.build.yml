@@ -28,6 +28,8 @@ services:
       EGAPRO_DBUSER: ${EGAPRO_DBUSER:-postgres}
       EGAPRO_DBPASS: ${EGAPRO_DBPASS:-postgres}
       EGAPRO_STAFF: ${EGAPRO_STAFF:-""}
+      # Local production-image stack: development credentials are expected.
+      EGAPRO_FLAVOUR: dev
     ports:
       - "127.0.0.1:2626:2626"
     depends_on:

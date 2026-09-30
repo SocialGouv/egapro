@@ -130,6 +130,9 @@ api:
     EGAPRO_DBUSER: "$(PGUSER)"
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
+    # Deployment environment (dev/preprod/prod): Sentry environment, and only `dev`
+    # may run with development credentials (egapro/config.py check()).
+    EGAPRO_FLAVOUR: "{{ .Values.global.env }}"
     # Base URL of the links sent by email (defaults to the production domain otherwise).
     EGAPRO_DOMAIN: "https://{{ .Values.global.host }}"
   # image runs as USER 1001 (packages/api/Dockerfile)
@@ -236,6 +239,8 @@ files:
           value: "$(PGPASSWORD)"
         - name: EGAPRO_DBSSL
           value: "$(PGSSLMODE)"
+        - name: EGAPRO_FLAVOUR
+          ~tpl~value: "{{ $.Values.global.env }}"
         # - name: EGAPRO_SENTRY_DSN
         #   valueFrom:
         #     secretKeyRef:
