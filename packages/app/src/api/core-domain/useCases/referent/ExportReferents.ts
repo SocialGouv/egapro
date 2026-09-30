@@ -7,10 +7,9 @@ import { type SimpleObject } from "@common/utils/types";
 import { AsyncParser } from "@json2csv/node";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import JS_XLSX from "js-xlsx";
+import ExcelJS from "exceljs";
 import { groupBy, orderBy, partition } from "lodash";
 import { Readable } from "stream";
-import XLSX from "xlsx";
 
 import { type IReferentRepo } from "../../repo/IReferentRepo";
 
@@ -41,7 +40,7 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
         case "csv":
           return this.streamAsCSV(json);
         case "xlsx":
-          return this.streamAsXLSX(json);
+          return await this.streamAsXLSX(json);
         case "json":
         default:
           return this.streamAsJSON(json);
@@ -94,18 +93,15 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
     return parser.parse(json);
   }
 
-  private streamAsXLSX(json: ReferentDTO[]): Readable {
-    const workbook = XLSX.utils.book_new();
-    workbook.Props = {
-      Author: "Egapro",
-      CreatedDate: new Date(),
-      Company: "Ministère du Travail",
-    };
-    const worksheet = convertToWorksheet(json);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Référents EgaPro");
+  private async streamAsXLSX(json: ReferentDTO[]): Promise<Readable> {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Egapro";
+    workbook.company = "Ministère du Travail";
+    workbook.created = new Date();
+    fillWorksheet(workbook.addWorksheet("Référents EgaPro"), json);
 
-    const buf: Buffer = JS_XLSX.write(workbook, { type: "buffer" });
-    return Readable.from(buf);
+    const buf = await workbook.xlsx.writeBuffer();
+    return Readable.from(Buffer.from(buf));
   }
 }
 
@@ -120,59 +116,34 @@ const REGION_REF_NAME: SimpleObject<string> = {
   "06": "DEETS MAYOTTE",
 };
 
-const borderStyle = {
-  border: {
-    left: { style: "medium", color: {} },
-    top: { style: "medium", color: {} },
-    bottom: { style: "medium", color: {} },
-    right: { style: "medium", color: {} },
-  },
-};
-
 // CELL STYLE UTILS
-const fontStyle = {
-  font: { sz: "11", name: "Calibri", color: { rgb: "000000" } },
-  fill: {
-    patternType: "solid",
-    fgColor: { rgb: "FFFFFF" },
-  },
-  alignment: { vertical: "center", wrapText: "1" },
-};
-const fontBoldStyle = {
-  ...fontStyle,
-  font: {
-    ...fontStyle.font,
-    bold: true,
-  },
-};
-const fontLinkStyle = {
-  ...fontStyle,
-  font: {
-    ...fontStyle.font,
-    underline: true,
-    color: { rgb: "0000FF" },
-  },
+const mediumBorder: Partial<ExcelJS.Border> = { style: "medium" };
+const borderStyle: Partial<ExcelJS.Style> = {
+  border: { left: mediumBorder, top: mediumBorder, bottom: mediumBorder, right: mediumBorder },
 };
 
-const regionTitleFullStyle = {
-  fill: {
-    patternType: "solid",
-    fgColor: { rgb: "FFD8D8D8" },
-  },
-  font: {
-    ...fontBoldStyle.font,
-    name: "Arial",
-  },
-  alignment: { vertical: "center", horizontal: "center" },
+const whiteFill: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } };
+const baseFont: Partial<ExcelJS.Font> = { size: 11, name: "Calibri", color: { argb: "FF000000" } };
+
+const fontStyle: Partial<ExcelJS.Style> = {
+  font: baseFont,
+  fill: whiteFill,
+  alignment: { vertical: "middle", wrapText: true },
+};
+const fontBoldStyle: Partial<ExcelJS.Style> = {
+  ...fontStyle,
+  font: { ...baseFont, bold: true },
+};
+const fontLinkStyle: Partial<ExcelJS.Style> = {
+  ...fontStyle,
+  font: { ...baseFont, underline: true, color: { argb: "FF0000FF" } },
+};
+
+const regionTitleFullStyle: Partial<ExcelJS.Style> = {
+  fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFD8D8D8" } },
+  font: { ...baseFont, bold: true, name: "Arial" },
+  alignment: { vertical: "middle", horizontal: "center" },
   ...borderStyle,
-};
-
-const emptyBorderCell: XLSX.CellObject = {
-  t: "z",
-  v: "",
-  s: {
-    ...borderStyle,
-  },
 };
 
 // ---
@@ -181,14 +152,17 @@ type ReferentWithLabels = ReferentDTO & {
   countyName: string;
   regionName: string;
 };
-const A_LETTER = 65;
-const address = (addr: string): XLSX.CellAddress => {
-  const [col, ..._row] = addr.split("");
-  const row = _row.join("");
-  return { c: col.charCodeAt(0) - A_LETTER, r: parseInt(row) - 1 };
-};
 
-function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
+/** Region and county codes are numbers, except Corsica ("2A", "2B"): keep those as text. */
+const code = (value?: string) => (value && /^\d+$/.test(value) ? Number(value) : value ?? null);
+
+function fillWorksheet(worksheet: ExcelJS.Worksheet, data: ReferentDTO[]) {
+  const setCell = (address: string, value: ExcelJS.CellValue, style: Partial<ExcelJS.Style>) => {
+    const cell = worksheet.getCell(address);
+    cell.value = value;
+    cell.style = style;
+  };
+
   // add region name and country name
   const augmented = data.map<ReferentWithLabels>(item => ({
     ...item,
@@ -199,145 +173,56 @@ function convertToWorksheet(data: ReferentDTO[]): XLSX.WorkSheet {
   // sort alpha by regionname and county number
   const sorted = orderBy(augmented, ["regionName", "county"], ["asc", "asc"]);
   const grouped = groupBy(sorted, "regionName");
-  const sheet: XLSX.StrictWS = {};
-  const meta: XLSX.WorkSheet = {
-    "!merges": [],
-  };
 
-  /** Utils to quick add cells to merge like `mergeCells("A1", "A4")` */
-  const mergeCells = (s: string, e: string) =>
-    meta["!merges"]?.push({
-      s: address(s),
-      e: address(e),
-    });
-
-  // main title
-  sheet["C1"] = {
-    v: `LISTE DES RÉFÉRENTS ÉGALITÉ PROFESSIONNELLE AU ${format(Date.now(), "dd MMMM yyyy", {
+  // main title, on two lines
+  setCell(
+    "C1",
+    `LISTE DES RÉFÉRENTS ÉGALITÉ PROFESSIONNELLE AU ${format(Date.now(), "dd MMMM yyyy", {
       locale: fr,
     }).toLocaleUpperCase()}`,
-    t: "s",
-    s: {
-      font: {
-        ...fontBoldStyle,
-        sz: "14",
-      },
-      alignment: { vertical: "center", horizontal: "center" },
+    {
+      font: { ...baseFont, bold: true, size: 14 },
+      alignment: { vertical: "middle", horizontal: "center" },
     },
-  };
-
-  // merge main title in two steps
-  mergeCells("C1", "E1");
-  mergeCells("C1", "E2");
+  );
+  worksheet.mergeCells("C1:E2");
 
   // start after title
   let line = 2;
   for (const [regionName, region] of Object.entries(grouped)) {
     line++;
-    sheet[`A${line}`] = emptyBorderCell; // left side empty
-    mergeCells(`A${line}`, `B${line}`);
+    setCell(`A${line}`, null, borderStyle); // left side empty
+    worksheet.mergeCells(`A${line}:B${line}`);
 
     const [[coordRegionnale], restRegion] = partition(region, item => !item.county);
     const regionId = coordRegionnale?.region || restRegion[0]?.region;
 
-    sheet[`C${line}`] = {
-      t: "s",
-      v: REGION_REF_NAME[regionId] ?? `DREETS ${regionName.toLocaleUpperCase()}`,
-      s: regionTitleFullStyle,
-    };
-    mergeCells(`C${line}`, `E${line}`); // merge region title
+    setCell(`C${line}`, REGION_REF_NAME[regionId] ?? `DREETS ${regionName.toLocaleUpperCase()}`, regionTitleFullStyle);
+    worksheet.mergeCells(`C${line}:E${line}`); // merge region title
 
     if (coordRegionnale) {
       line++;
       const subCoordName = coordRegionnale.substitute?.name ? `\n${coordRegionnale.substitute?.name}` : "";
       const subCoordEmail = coordRegionnale.substitute?.email ? `\n${coordRegionnale.substitute?.email}` : "";
-      sheet[`A${line}`] = {
-        t: "n",
-        v: coordRegionnale.region,
-        s: {
-          ...fontStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`B${line}`] = emptyBorderCell;
-      sheet[`C${line}`] = {
-        t: "s",
-        v: "Coordination régionale",
-        s: {
-          ...fontBoldStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`D${line}`] = {
-        t: "s",
-        v: coordRegionnale.name + subCoordName,
-        s: {
-          ...fontBoldStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`E${line}`] = {
-        t: "s",
-        v: coordRegionnale.value + subCoordEmail,
-        s: {
-          ...fontLinkStyle,
-          ...borderStyle,
-        },
-      };
+      setCell(`A${line}`, code(coordRegionnale.region), { ...fontStyle, ...borderStyle });
+      setCell(`B${line}`, null, borderStyle);
+      setCell(`C${line}`, "Coordination régionale", { ...fontBoldStyle, ...borderStyle });
+      setCell(`D${line}`, coordRegionnale.name + subCoordName, { ...fontBoldStyle, ...borderStyle });
+      setCell(`E${line}`, coordRegionnale.value + subCoordEmail, { ...fontLinkStyle, ...borderStyle });
     }
 
     for (const referent of restRegion) {
       line++;
       const subName = referent.substitute?.name ? `\n${referent.substitute?.name}` : "";
       const subEmail = referent.substitute?.email ? `\n${referent.substitute?.email}` : "";
-      sheet[`A${line}`] = {
-        t: "n",
-        v: referent.region,
-        s: {
-          ...fontStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`B${line}`] = {
-        t: "n",
-        v: referent.county,
-        s: {
-          ...fontStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`C${line}`] = {
-        t: "s",
-        v: referent.countyName,
-        s: {
-          ...fontStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`D${line}`] = {
-        t: "s",
-        v: referent.name + subName,
-        s: {
-          ...fontStyle,
-          ...borderStyle,
-        },
-      };
-      sheet[`E${line}`] = {
-        t: "s",
-        v: referent.value + subEmail,
-        s: {
-          ...fontLinkStyle,
-          ...borderStyle,
-        },
-      };
+      setCell(`A${line}`, code(referent.region), { ...fontStyle, ...borderStyle });
+      setCell(`B${line}`, code(referent.county), { ...fontStyle, ...borderStyle });
+      setCell(`C${line}`, referent.countyName, { ...fontStyle, ...borderStyle });
+      setCell(`D${line}`, referent.name + subName, { ...fontStyle, ...borderStyle });
+      setCell(`E${line}`, referent.value + subEmail, { ...fontLinkStyle, ...borderStyle });
     }
   }
 
-  meta["!ref"] = `A1:E${line}`;
-  meta["!cols"] = [{ wpx: 50 }, { wpx: 80 }, { wpx: 170 }, { wpx: 260 }, { wpx: 420 }];
-
-  return {
-    ...meta,
-    ...sheet,
-  };
+  // Same widths as before (50, 80, 170, 260 and 420 px), in characters.
+  worksheet.columns = [{ width: 7 }, { width: 11 }, { width: 24 }, { width: 37 }, { width: 60 }];
 }
