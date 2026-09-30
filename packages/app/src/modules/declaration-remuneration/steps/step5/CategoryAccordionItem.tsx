@@ -1,6 +1,9 @@
 import type React from "react";
 
-import { CATEGORY_NAME_MAX_LENGTH } from "~/modules/declaration-remuneration/schemas";
+import {
+	CATEGORY_NAME_MAX_LENGTH,
+	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
+} from "~/modules/declaration-remuneration/schemas";
 import type { FieldError } from "~/modules/declaration-remuneration/shared/formError/types";
 import {
 	describedByForField,
@@ -129,7 +132,11 @@ export function CategoryAccordionItem({
 								</span>
 							</label>
 							<input
-								aria-describedby={[`cat-${index}-name-hint`, nameDescriptionId]
+								aria-describedby={[
+									`cat-${index}-name-hint`,
+									`cat-${index}-name-limit`,
+									nameDescriptionId,
+								]
 									.filter(Boolean)
 									.join(" ")}
 								aria-invalid={hasNameError ? true : undefined}
@@ -143,6 +150,9 @@ export function CategoryAccordionItem({
 								{...nameProps}
 								type="text"
 							/>
+							<p className="fr-hint-text" id={`cat-${index}-name-limit`}>
+								{CATEGORY_NAME_MAX_LENGTH_MESSAGE}
+							</p>
 						</div>
 					)}
 					<CategoryDataTable

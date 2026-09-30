@@ -94,7 +94,7 @@ Conventions de notation :
 - Le **calcul des écarts** est centralisé dans `computeGap(womenPay, menPay)` (positif si les hommes gagnent plus, négatif sinon).
 - **Seuil d'alerte** : `GAP_ALERT_THRESHOLD = 5%`. Au-delà, une **seconde déclaration** est obligatoire pour les entreprises ≥ 100 salariés (voir §5).
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
-- Une fois `submitted`, la déclaration peut être modifiée jusqu'à la **deadline `decl1ModificationDeadline`** (configurée par l'admin DGT, voir §12) ; après, elle bascule en lecture seule.
+- Une fois `submitted`, la déclaration reste modifiable tant qu'**aucune soumission ultérieure** ne l'a supplantée (seconde déclaration, évaluation conjointe ou avis du CSE) : seule la dernière soumission est modifiable. La modifiabilité est dite par l'événement qui la ferme (`isLockedBySubsequentSubmission`, `~/modules/domain/shared/declarationStatus.ts`, à partir de `deriveSubsequentSubmissions`) et non plus par une date ; `decl1ModificationDeadline` n'est plus un garde d'écriture, c'est une **échéance informative** (voir §12). Le serveur rejette une écriture sur une étape supplantée (`DECLARATION_SUPERSEDED_MESSAGE`).
 - En **admin impersonation**, l'écriture est bloquée (procédures `companyWriteProcedure` rejettent ; voir `~/modules/auth/useReadOnlyGuard`).
 - **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §13.7).
 - Chaque transition métier de la démarche (changement d'étape, soumission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
@@ -226,7 +226,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Maximum **2 déclarations par année civile** (la première initiale + une corrective si l'écart dépasse 5%).
 - Le PDF d'évaluation conjointe est **optionnel** (un seul fichier par déclaration, écrasé si re-uploadé).
 - Le choix de parcours est **verrouillé** dès qu'une action aval a été enregistrée pour le round courant (la procédure renvoie `CONFLICT`).
-- Deadlines configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`.
+- Échéances configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`. Elles sont **informatives** (affichées, jamais bloquantes) : la modifiabilité d'une étape dépend uniquement des soumissions ultérieures (voir §2).
 
 **Données persistées** : `declarations.secondDeclarationStep`, `declarations.compliancePath`, `declarationStatusHistory`, `files` (`type = joint_evaluation`).
 
@@ -448,7 +448,7 @@ API publique (aucune authentification, OpenAPI documentée) :
 
 - L'accès admin est gardé par le **middleware Edge** (`src/middleware.ts`) qui redirige vers `/login` si `isAdmin` est faux.
 - L'**impersonation** est tracée dans `adminImpersonationEvents` (audit trail dédié, lecture par `admin.getLastImpersonated`). Le callback JWT NextAuth injecte un `impersonation: { siren, startedAt }` dans la session active.
-- Les **deadlines** sont par année de campagne ; si aucune ligne n'existe en BDD pour l'année courante, des défauts viennent de `~/modules/domain` (`getDefaultCampaignDeadlines`).
+- Les **échéances** (anciennement « deadlines ») sont informatives et par année de campagne ; si aucune ligne n'existe en BDD pour l'année courante, des défauts viennent de `~/modules/domain` (`getDefaultCampaignDeadlines`).
 - Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`), sur l'effectif GIP-MDS de l'année (`gip_mds_data.workforce_ema`) — source unique de l'effectif, comme l'export et le back-office. Une entreprise absente du fichier GIP de l'année n'appartient à aucune tranche : elle reste comptée dans les totaux sans filtre, mais sort dès qu'une tranche est sélectionnée. Deux métriques d'engagement complètent les courbes : les **utilisateurs par entreprise** (agrégat BDD sur `user_company` — répartition mono/multi-utilisateurs, sans PII) et le **volume de confirmations du statut CSE** (event Matomo anonymisé `oui`/`non`, donc un comptage d'actions, pas d'entreprises distinctes).
 - L'**import GIP-MDS** est déclenché manuellement depuis la home admin (pas de cron en V2).
 - **Déverrouillage manuel** : depuis le détail d'une déclaration, l'admin peut libérer le verrou d'édition détenu par un autre utilisateur via le bouton `UnlockDeclarationButton` (procédure `adminDeclarations.releaseLock`). La confirmation est demandée dans une modale.

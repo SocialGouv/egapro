@@ -19,11 +19,16 @@ import {
 	files,
 } from "~/server/db/schema";
 import { applyAction, loadRules } from "~/server/rules/engine";
-import { getRequiredContentTypes } from "~/server/services/cseRequiredContentTypes";
+import {
+	contentTypeKey,
+	getRequiredContentTypes,
+	pruneStaleContentTypeAssociations,
+} from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
 	buildHistoryInserts,
 	computeProjectionUpdates,
+	lockDeclaration,
 } from "./statusHistoryHelpers";
 
 export const cseOpinionRouter = createTRPCRouter({
@@ -89,6 +94,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				}
 
 				await tx.insert(cseOpinions).values(rows);
+				await pruneStaleContentTypeAssociations(tx, ctx.declarationId);
 			});
 
 			return { success: true };
@@ -140,7 +146,9 @@ export const cseOpinionRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			const { associations } = input;
 
-			const keys = associations.map((a) => `${a.declarationNumber}:${a.type}`);
+			const keys = associations.map((a) =>
+				contentTypeKey(a.declarationNumber, a.type),
+			);
 			const uniqueKeys = new Set(keys);
 			if (uniqueKeys.size !== keys.length) {
 				throw new TRPCError({
@@ -250,11 +258,13 @@ export const cseOpinionRouter = createTRPCRouter({
 		);
 
 		const coveredKeys = new Set(
-			existingAssociations.map((a) => `${a.declarationNumber}:${a.type}`),
+			existingAssociations.map((a) =>
+				contentTypeKey(a.declarationNumber, a.type),
+			),
 		);
 
 		for (const required of requiredTypes) {
-			const key = `${required.declarationNumber}:${required.type}`;
+			const key = contentTypeKey(required.declarationNumber, required.type);
 			if (!coveredKeys.has(key)) {
 				const typeLabel =
 					required.type === "accuracy" ? "Exactitude" : "Justification";
@@ -300,6 +310,7 @@ export const cseOpinionRouter = createTRPCRouter({
 		);
 
 		await ctx.db.transaction(async (tx) => {
+			await lockDeclaration(tx, ctx.declarationId);
 			await tx.insert(declarationStatusHistory).values(historyInserts);
 			await tx
 				.update(declarations)

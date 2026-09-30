@@ -7,6 +7,7 @@ import {
 	isComplianceProcessCompleted,
 	isCseOpinionRequired,
 	isDraft,
+	isSecondDeclarationWritable,
 } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import {
@@ -71,6 +72,16 @@ export function getCompliancePathReadOnlyReason(params: {
 	return null;
 }
 
+export function isConcernedDeclarationModifiable(params: {
+	isSecondRound: boolean;
+	status: DeclarationFsmStatus;
+	isFirstDeclarationLocked: boolean;
+}): boolean {
+	return params.isSecondRound
+		? isSecondDeclarationWritable(params.status)
+		: !params.isFirstDeclarationLocked;
+}
+
 export async function CompliancePathPage() {
 	const session = await auth();
 	const data = await api.declaration.getOrCreate();
@@ -131,12 +142,19 @@ export async function CompliancePathPage() {
 		hasSubmittedJointEvaluation: data.hasSubmittedJointEvaluation,
 	});
 
+	const declarationModifiable = isConcernedDeclarationModifiable({
+		isSecondRound,
+		status: data.declaration.status,
+		isFirstDeclarationLocked: data.isFirstDeclarationLocked,
+	});
+
 	return (
 		<HydrateClient>
 			<CompliancePathChoice
 				campaignDeadlines={campaignDeadlines}
 				cseOpinionRequired={cseOpinionRequired}
 				currentYear={currentYear}
+				declarationModifiable={declarationModifiable}
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}

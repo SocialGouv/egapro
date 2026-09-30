@@ -55,7 +55,6 @@ type StepPageClientProps = {
 	initialSource?: string;
 	hasCse?: boolean | null;
 	modificationClosed?: boolean;
-	modificationDeadline?: Date;
 };
 
 export function StepPageClient({
@@ -73,7 +72,6 @@ export function StepPageClient({
 	initialSource,
 	hasCse = null,
 	modificationClosed = false,
-	modificationDeadline,
 }: StepPageClientProps) {
 	const sizeRange = getOptionalCompanySizeRange(companyWorkforce);
 
@@ -194,9 +192,7 @@ export function StepPageClient({
 			isReadOnly={isReadOnly}
 			reason={reason}
 		>
-			{modificationClosed && modificationDeadline ? (
-				<DeclarationModificationClosedAlert deadline={modificationDeadline} />
-			) : null}
+			{modificationClosed ? <DeclarationModificationClosedAlert /> : null}
 			{renderStep()}
 		</LockProvider>
 	);

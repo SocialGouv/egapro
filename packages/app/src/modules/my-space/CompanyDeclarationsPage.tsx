@@ -122,6 +122,12 @@ export function CompanyDeclarationsPage({
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
 				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
+				hasSubmittedCseOpinion={
+					currentDeclaration?.hasSubmittedCseOpinion ?? false
+				}
+				hasSubmittedJointEvaluation={
+					currentDeclaration?.hasSubmittedJointEvaluation ?? false
+				}
 				hasSubmittedSecondDeclaration={
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}

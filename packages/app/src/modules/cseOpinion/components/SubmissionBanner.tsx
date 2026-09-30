@@ -23,10 +23,10 @@ export function SubmissionBanner({ email, deadline, year }: Props) {
 					</div>
 					<div className="fr-col">
 						<p className="fr-text--bold fr-mb-1w">
-							Votre rapport de l'évaluation conjointe a été transmise
+							Votre rapport de l'évaluation conjointe a été transmis
 						</p>
 						<p className="fr-mb-0">
-							Vous pouvez modifier votre dépôt jusqu'au{" "}
+							Échéance pour transmettre l'avis ou les avis du CSE :{" "}
 							<strong>{formatLongDate(deadline)}</strong>
 						</p>
 					</div>

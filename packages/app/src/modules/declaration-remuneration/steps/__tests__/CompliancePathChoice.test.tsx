@@ -81,6 +81,7 @@ function compliancePathChoice(
 			campaignDeadlines={campaignDeadlines}
 			cseOpinionRequired={true}
 			currentYear={2026}
+			declarationModifiable={true}
 			declarationSiren={DECLARATION_SIREN}
 			declarationYear={DECLARATION_YEAR}
 			email="test@example.fr"
@@ -320,11 +321,26 @@ describe("CompliancePathChoice", () => {
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(
-				"Date limite pour choisir un parcours de mise en conformité",
+				"Échéance pour choisir un parcours de mise en conformité",
 			),
 		).toBeInTheDocument();
 		expect(screen.getByText("1ᵉʳ juillet 2026")).toBeInTheDocument();
 		expect(screen.queryByText("1ᵉʳ janvier 2027")).not.toBeInTheDocument();
+	});
+
+	it("tells a modifiable declaration it stays modifiable until a later transmission, with no date", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.getByText(/Vous pouvez modifier votre déclaration jusqu'à ce que/),
+		).toBeInTheDocument();
+	});
+
+	it("drops the modification sentence when the declaration is no longer modifiable", () => {
+		render(compliancePathChoice({ declarationModifiable: false }));
+		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
+		expect(
+			screen.getByText("Votre déclaration a été transmise"),
+		).toBeInTheDocument();
 	});
 
 	it("renders the round-2 path choice deadline (January 1st of the following year) when isSecondRound", () => {

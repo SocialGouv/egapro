@@ -23,12 +23,17 @@ vi.mock("~/trpc/server", () => ({
 }));
 
 import { redirect } from "next/navigation";
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { api } from "~/trpc/server";
 import { SecondDeclarationStepPage } from "../SecondDeclarationStepPage";
 
 const COMPLIANCE_PATH_URL = "/declaration-remuneration/parcours-conformite";
 
-function mockPathChoice(firstDeclarationPathChoice: string | null) {
+function mockPathChoice(
+	firstDeclarationPathChoice: string | null,
+	hasSubmittedSecondDeclaration = false,
+) {
 	vi.mocked(api.declaration.getOrCreate).mockResolvedValue({
 		declaration: {
 			firstDeclarationPathChoice,
@@ -41,7 +46,7 @@ function mockPathChoice(firstDeclarationPathChoice: string | null) {
 		},
 		jobCategories: [],
 		employeeCategories: [],
-		hasSubmittedSecondDeclaration: false,
+		hasSubmittedSecondDeclaration,
 	} as never);
 	vi.mocked(api.company.get).mockResolvedValue({ hasCse: null } as never);
 }
@@ -72,5 +77,19 @@ describe("SecondDeclarationStepPage", () => {
 		await SecondDeclarationStepPage({ step: 2 });
 
 		expect(redirect).not.toHaveBeenCalledWith(COMPLIANCE_PATH_URL);
+	});
+
+	it.each([
+		1, 2,
+	])("renders step %s of a submitted second declaration past its deadline, without redirecting", async (step) => {
+		mockPathChoice("corrective_action", true);
+		vi.mocked(getCampaignDeadlines).mockResolvedValue({
+			...getDefaultCampaignDeadlines(2025),
+			decl2ModificationDeadline: new Date("2020-01-01T00:00:00Z"),
+		});
+
+		await expect(SecondDeclarationStepPage({ step })).resolves.toBeDefined();
+
+		expect(redirect).not.toHaveBeenCalled();
 	});
 });

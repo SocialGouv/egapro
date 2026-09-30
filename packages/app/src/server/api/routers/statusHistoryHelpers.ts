@@ -1,5 +1,14 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
-import type { DeclarationFsmStatus } from "~/modules/domain";
+import { TRPCError } from "@trpc/server";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import {
+	DECLARATION_SUPERSEDED_MESSAGE,
+	type DeclarationFsmStatus,
+	deriveSubsequentSubmissions,
+	isLockedBySubsequentSubmission,
+	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
+	type SubmissionLockTarget,
+	type SubsequentSubmissions,
+} from "~/modules/domain";
 import type { DB } from "~/server/db";
 import {
 	declarationStatusHistory,
@@ -29,11 +38,10 @@ export async function loadDeclarationHistory(
 		.where(eq(declarationStatusHistory.declarationId, declarationId));
 }
 
-export async function hasLockingEventForRound(
+export async function loadSubsequentSubmissions(
 	database: StatusHistoryReader,
 	declarationId: string,
-	round: 1 | 2,
-): Promise<boolean> {
+): Promise<SubsequentSubmissions> {
 	const rows = await database
 		.select({
 			eventType: declarationStatusHistory.eventType,
@@ -44,20 +52,73 @@ export async function hasLockingEventForRound(
 			and(
 				eq(declarationStatusHistory.declarationId, declarationId),
 				inArray(declarationStatusHistory.eventType, [
-					"joint_evaluation_submit",
-					"cse_opinion_submit",
+					...SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 				]),
 			),
 		);
+	return deriveSubsequentSubmissions(rows);
+}
 
-	for (const row of rows) {
-		if (row.eventType === "cse_opinion_submit") return true;
-		if (row.eventType === "joint_evaluation_submit") {
-			if (round === 2) return true;
-			if (round === 1 && row.round === 1) return true;
-		}
+export async function isLockedBySubsequentSubmissionFor(
+	database: StatusHistoryReader,
+	declarationId: string,
+	target: SubmissionLockTarget,
+): Promise<boolean> {
+	return isLockedBySubsequentSubmission(
+		await loadSubsequentSubmissions(database, declarationId),
+		target,
+	);
+}
+
+export async function hasLockingEventForRound(
+	database: StatusHistoryReader,
+	declarationId: string,
+	round: 1 | 2,
+): Promise<boolean> {
+	return isLockedBySubsequentSubmissionFor(
+		database,
+		declarationId,
+		round === 1 ? "path_choice_round_1" : "path_choice_round_2",
+	);
+}
+
+export async function assertFirstDeclarationModifiable(
+	database: StatusHistoryReader,
+	declarationId: string,
+): Promise<void> {
+	if (
+		await isLockedBySubsequentSubmissionFor(
+			database,
+			declarationId,
+			"first_declaration",
+		)
+	) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: DECLARATION_SUPERSEDED_MESSAGE,
+		});
 	}
-	return false;
+}
+
+export type DeclarationTransaction = StatusHistoryReader & {
+	execute: DB["execute"];
+};
+
+export async function lockDeclaration(
+	tx: DeclarationTransaction,
+	declarationId: string,
+): Promise<void> {
+	await tx.execute(
+		sql`SELECT pg_advisory_xact_lock(hashtextextended(${declarationId}, 0))`,
+	);
+}
+
+export async function assertFirstDeclarationModifiableUnderLock(
+	tx: DeclarationTransaction,
+	declarationId: string,
+): Promise<void> {
+	await lockDeclaration(tx, declarationId);
+	await assertFirstDeclarationModifiable(tx, declarationId);
 }
 
 export async function getCurrentRound(

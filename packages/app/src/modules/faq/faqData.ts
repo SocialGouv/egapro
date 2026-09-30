@@ -417,14 +417,14 @@ export const FAQ_SECTIONS: FaqSection[] = [
 				title: "Les échéances",
 				items: [
 					{
-						question: "Quelles sont les dates limites ?",
+						question: "Quelles sont les échéances ?",
 						answer:
 							"Elles sont fixées campagne par campagne par l'administration et peuvent varier d'une année à l'autre. Aucune date n'est à retenir de mémoire : celles qui s'appliquent à votre entreprise sont affichées dans Mon espace et sur les écrans concernés.",
 					},
 					{
 						question: "Que se passe-t-il si une échéance est dépassée ?",
 						answer:
-							"L'écran concerné passe en lecture seule et l'action n'est plus possible. Les étapes déjà accomplies et les documents déjà transmis restent consultables et téléchargeables.",
+							"Rien n'est bloqué : vous pouvez toujours transmettre votre déclaration, votre seconde déclaration, votre rapport d'évaluation conjointe ou vos avis du CSE après la date affichée. L'échéance indique la date à laquelle la démarche est attendue. La déclaration de représentation équilibrée suit sa propre règle : elle se ferme à la clôture de sa campagne.",
 					},
 				],
 			},
@@ -434,7 +434,7 @@ export const FAQ_SECTIONS: FaqSection[] = [
 					{
 						question: "Puis-je modifier une déclaration déjà transmise ?",
 						answer:
-							"Oui, tant que la date limite de modification de la campagne n'est pas dépassée. Vous rouvrez votre déclaration, corrigez, puis transmettez à nouveau : la nouvelle version remplace la précédente et un nouvel accusé de réception vous est envoyé.",
+							"Oui. Votre déclaration reste modifiable jusqu'à ce que vous transmettiez une seconde déclaration, un rapport d'évaluation conjointe ou un avis du CSE ; votre seconde déclaration, jusqu'au choix de votre nouveau parcours de mise en conformité ; vos avis du CSE, même une fois la démarche close. Les échéances n'y changent rien. Vous rouvrez votre déclaration depuis Mon espace, corrigez, puis transmettez à nouveau : la nouvelle version remplace la précédente et un nouvel accusé de réception vous est envoyé. Une déclaration qui n'est plus modifiable reste consultable.",
 					},
 					{
 						question:

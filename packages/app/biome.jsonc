@@ -45,6 +45,21 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			// `list-style: none` fait perdre à WebKit la sémantique de liste (Safari/VoiceOver) :
+			// `role="list"` est le contournement documenté (bugs.webkit.org/show_bug.cgi?id=259487),
+			// donc légitimement « redondant » pour Biome, uniquement sur ce composant.
+			"includes": ["src/modules/my-space/StepRows.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noRedundantRoles": "off"
+					}
+				}
+			}
+		}
+	],
 	"html": {
 		"formatter": {
 			"enabled": true

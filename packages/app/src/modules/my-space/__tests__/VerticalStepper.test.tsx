@@ -70,6 +70,8 @@ const BASE_PROPS = {
 	lastActionDate: null as string | null,
 	displayContext: makeDisplayContext(),
 	hasSubmittedSecondDeclaration: false,
+	hasSubmittedJointEvaluation: false,
+	hasSubmittedCseOpinion: false,
 	siren: "532847196",
 	ctaHref: DECLARATION_REMUNERATION,
 	lockedByOther: false,
@@ -128,11 +130,11 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(link).toHaveAttribute("href", DECLARATION_REMUNERATION_RECAP);
 		});
 
-		it("Modifier link is hidden after deadline but view link remains", () => {
-			const { panel, dialog } = renderPanel("compliance", {
+		it("Modifier link stays offered after deadline, next to the view link", () => {
+			const { dialog } = renderPanel("compliance", {
 				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
 			});
-			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
 			expect(
 				dialog.querySelector(
 					'a[title="Voir le récapitulatif de la déclaration"]',
@@ -230,14 +232,11 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("keeps the view link on a closed démarche once the deadline has passed", () => {
-			const { panel, dialog } = renderPanel("closed", {
+			const { dialog } = renderPanel("closed", {
 				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
 				year: PAST_YEAR,
 			});
 			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
-			expect(
-				panel.queryByRole("link", { name: "Modifier" }),
-			).not.toBeInTheDocument();
 		});
 	});
 
@@ -417,7 +416,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
 		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
 		const CATEGORY_BULLET =
-			/Indicateurs de rémunération par catégories de salariés à remplir/;
+			/Indicateur de rémunération par catégories de salariés à remplir/;
 
 		it("renders both bullets on the start variant when indicator G applies", () => {
 			const { panel } = renderPanel("start", { indicatorGRequired: true });
@@ -506,15 +505,13 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			);
 		});
 
-		it("shows the CSE opinion deadline on the transmitted row of the closed variant", () => {
+		it("shows neither a date nor a mention on the transmitted row of the closed variant", () => {
 			const { panel } = renderPanel("closed");
 			const row = panel.getByText("Vos avis du CSE ont été transmis")
 				.parentElement as HTMLElement;
-			expect(row).toHaveTextContent(
-				longDateText(DEADLINES.decl2CseOpinionDeadline),
-			);
+			expect(row).not.toHaveTextContent(/Modifiable jusqu'/);
 			expect(row).not.toHaveTextContent(
-				longDateText(DEADLINES.decl2JointEvaluationDeadline),
+				longDateText(DEADLINES.decl2CseOpinionDeadline),
 			);
 		});
 	});
@@ -523,18 +520,36 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it("mentions the CSE opinions still being modifiable when cseOpinionRequired is true", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: true });
 			expect(
-				panel.getByText(/Les avis du CSE restent modifiables/),
+				panel.getByText(
+					"Cette démarche est terminée. Vos avis du CSE restent modifiables.",
+				),
 			).toBeInTheDocument();
 		});
 
-		it("shows the plain closed message when cseOpinionRequired is false", () => {
+		it("says the declaration stays modifiable when there is no CSE opinion and nothing superseded it (S8)", () => {
 			const { panel } = renderPanel("closed", { cseOpinionRequired: false });
 			expect(
-				panel.getByText("Cette démarche est terminée."),
+				panel.getByText(
+					"Cette démarche est terminée. Votre déclaration reste modifiable.",
+				),
 			).toBeInTheDocument();
 			expect(
 				panel.queryByText(/Les avis du CSE restent modifiables/),
 			).not.toBeInTheDocument();
+		});
+
+		it.each([
+			["a second declaration", { hasSubmittedSecondDeclaration: true }],
+			["a joint evaluation report", { hasSubmittedJointEvaluation: true }],
+		])("shows the plain closed message when there is no CSE opinion and %s superseded the first declaration", (_label, overrides) => {
+			const { panel } = renderPanel("closed", {
+				cseOpinionRequired: false,
+				...overrides,
+			});
+			expect(
+				panel.getByText("Cette démarche est terminée."),
+			).toBeInTheDocument();
+			expect(panel.queryByText(/reste modifiable/)).not.toBeInTheDocument();
 		});
 	});
 
@@ -631,13 +646,22 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(panel.getAllByText("Modifier")).toHaveLength(1);
 		});
 
-		it("advertises a modification deadline on the CSE avis row only", () => {
+		it("carries no mention under any row of a closed panel (superseded first declaration, CSE avis, no Modifier)", () => {
 			const { panel } = renderPanel("closed", CLOSED_OVERRIDES);
 
-			expect(panel.getAllByText(/Modifiable jusqu'au/)).toHaveLength(1);
+			expect(panel.queryByText(/Modifiable jusqu'/)).not.toBeInTheDocument();
 			expect(
 				panel.queryByText(/Modification close depuis/),
 			).not.toBeInTheDocument();
+		});
+
+		it("carries no mention on the first declaration row of a closed panel where Modifier is still offered", () => {
+			const { panel, dialog } = renderPanel("closed", {
+				cseOpinionRequired: false,
+			});
+
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+			expect(panel.queryByText(/Modifiable jusqu'/)).not.toBeInTheDocument();
 		});
 	});
 
@@ -650,12 +674,23 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		it.each<DeclarationFsmStatus>([
 			"corrective_actions_chosen",
 			"awaiting_revision_choice",
-		])("offers Modifier on the second declaration row for the status %s", (declarationFsmStatus) => {
-			const { dialog } = renderPanel("cse", {
+		])("offers Modifier on the second declaration row for the status %s, with its mention", (declarationFsmStatus) => {
+			const { panel, dialog } = renderPanel("cse", {
 				...SUBMITTED_ROWS,
 				declarationFsmStatus,
 			});
 			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.getByText("Modifiable jusqu'au choix de votre nouveau parcours"),
+			).toBeInTheDocument();
+		});
+
+		it("gives the joint evaluation row a Modifier but no mention", () => {
+			const { panel } = renderPanel("cse", {
+				...SUBMITTED_ROWS,
+				declarationFsmStatus: "joint_evaluation_chosen",
+			});
+			expect(panel.queryByText(/Modifiable jusqu'au choix/)).toBeNull();
 		});
 
 		it.each<DeclarationFsmStatus>([
@@ -681,6 +716,181 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				dialog.querySelector(JOINT_EVALUATION_MODIFY),
 			).not.toBeInTheDocument();
+		});
+	});
+	describe("« Modifier » de la 1ʳᵉ déclaration : supersédée ou non, dans toutes les variantes", () => {
+		const VARIANTS: PanelVariant[] = [
+			"compliance_choice",
+			"compliance",
+			"evaluation",
+			"cse",
+			"closed",
+		];
+		const SUPERSEDING: Array<[string, PanelOverrides]> = [
+			["a second declaration", { hasSubmittedSecondDeclaration: true }],
+			["a joint evaluation report", { hasSubmittedJointEvaluation: true }],
+			["a CSE opinion", { hasSubmittedCseOpinion: true }],
+		];
+
+		it.each(
+			VARIANTS,
+		)("offers Modifier on variant %s when nothing later was transmitted", (variant) => {
+			const { dialog } = renderPanel(variant);
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+			expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+		});
+
+		describe.each(
+			SUPERSEDING,
+		)("once %s was transmitted", (_label, overrides) => {
+			it.each(
+				VARIANTS,
+			)("withholds Modifier but keeps the view link on variant %s", (variant) => {
+				const { dialog } = renderPanel(variant, overrides);
+				expect(dialog.querySelector(DECL1_MODIFY)).not.toBeInTheDocument();
+				expect(dialog.querySelector(DECL1_VIEW)).toBeInTheDocument();
+			});
+		});
+
+		it.each(
+			VARIANTS.filter((variant) => variant !== "closed"),
+		)("shows the first declaration mention on variant %s when Modifier is offered", (variant) => {
+			const { panel } = renderPanel(variant);
+			expect(
+				panel.getByText("Modifiable jusqu'à votre prochaine transmission"),
+			).toBeInTheDocument();
+		});
+
+		it("shows no first declaration mention on the closed variant, even when Modifier is offered", () => {
+			const { panel, dialog } = renderPanel("closed");
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+			expect(
+				panel.queryByText("Modifiable jusqu'à votre prochaine transmission"),
+			).not.toBeInTheDocument();
+		});
+
+		it.each(
+			SUPERSEDING,
+		)("shows no first declaration mention once %s was transmitted", (_label, overrides) => {
+			const { panel } = renderPanel("compliance", overrides);
+			expect(
+				panel.queryByText("Modifiable jusqu'à votre prochaine transmission"),
+			).not.toBeInTheDocument();
+		});
+
+		it("does not let the path choice supersede the first declaration", () => {
+			const { dialog } = renderPanel("evaluation", {
+				displayContext: makeDisplayContext("joint_evaluation"),
+			});
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+		});
+
+		it.each([
+			{ label: "no CSE opinion due, no gap", cseOpinionRequired: false },
+			{
+				label: "150 employees without CSE, justification path",
+				cseOpinionRequired: false,
+				displayContext: makeDisplayContext("justify"),
+			},
+			{
+				label: "CSE opinion due but not transmitted",
+				cseOpinionRequired: true,
+			},
+		])("offers Modifier again on a closed démarche with $label", ({
+			cseOpinionRequired,
+			displayContext,
+		}) => {
+			const { dialog } = renderPanel("closed", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				cseOpinionRequired,
+				displayContext: displayContext ?? makeDisplayContext(),
+				year: PAST_YEAR,
+			});
+			expect(dialog.querySelector(DECL1_MODIFY)).toBeInTheDocument();
+		});
+	});
+
+	describe("« Modifier » de la seconde déclaration : selon isSecondDeclarationWritable, dans toutes les variantes", () => {
+		const WRITABLE: DeclarationFsmStatus[] = [
+			"corrective_actions_chosen",
+			"awaiting_revision_choice",
+		];
+		const NOT_WRITABLE: DeclarationFsmStatus[] = [
+			"awaiting_compliance_path_choice",
+			"joint_evaluation_chosen",
+			"revised_joint_evaluation_chosen",
+			"awaiting_cse_opinion",
+			"demarche_completed",
+		];
+		const VARIANTS: PanelVariant[] = [
+			"compliance_choice",
+			"evaluation",
+			"cse",
+			"closed",
+		];
+
+		describe.each(VARIANTS)("variant %s", (variant) => {
+			it.each(
+				WRITABLE,
+			)("offers Modifier for the status %s", (declarationFsmStatus) => {
+				const { dialog } = renderPanel(variant, {
+					declarationFsmStatus,
+					displayContext: makeDisplayContext("corrective_action"),
+					hasSubmittedSecondDeclaration: true,
+				});
+				expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+			});
+
+			it.each(
+				NOT_WRITABLE,
+			)("withholds Modifier for the status %s", (declarationFsmStatus) => {
+				const { dialog } = renderPanel(variant, {
+					declarationFsmStatus,
+					displayContext: makeDisplayContext("corrective_action"),
+					hasSubmittedSecondDeclaration: true,
+				});
+				expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+				expect(
+					dialog.querySelector('a[href*="type=correction"]'),
+				).toBeInTheDocument();
+			});
+		});
+
+		it("withholds Modifier when the revised joint evaluation was chosen after the second declaration", () => {
+			const { dialog } = renderPanel("evaluation", {
+				declarationFsmStatus: "revised_joint_evaluation_chosen",
+				displayContext: makeDisplayContext(
+					"corrective_action",
+					"joint_evaluation",
+				),
+				hasSubmittedSecondDeclaration: true,
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).not.toBeInTheDocument();
+		});
+
+		it("keeps Modifier on the second declaration past its date while the status allows it", () => {
+			const { dialog } = renderPanel("compliance_choice", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				declarationFsmStatus: "awaiting_revision_choice",
+				displayContext: makeDisplayContext("corrective_action"),
+				hasSubmittedSecondDeclaration: true,
+				year: PAST_YEAR,
+			});
+			expect(dialog.querySelector(DECL2_MODIFY)).toBeInTheDocument();
+		});
+	});
+
+	describe("« Modifier » des avis du CSE en démarche close, échéance passée", () => {
+		it("offers Modifier past the CSE opinion deadline", () => {
+			const { dialog } = renderPanel("closed", {
+				campaignDeadlines: getDefaultCampaignDeadlines(PAST_YEAR),
+				hasSubmittedCseOpinion: true,
+				year: PAST_YEAR,
+			});
+			expect(dialog.querySelector(CSE_MODIFY)).toBeInTheDocument();
+			expect(dialog.querySelector(CSE_MODIFY)?.textContent).toContain(
+				"Modifier",
+			);
 		});
 	});
 });

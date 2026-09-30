@@ -44,7 +44,7 @@ describe("AidePage", () => {
 		const callout = screen
 			.getByRole("heading", {
 				level: 2,
-				name: /date limite de déclaration/i,
+				name: /échéance de déclaration/i,
 			})
 			.closest(".fr-callout");
 		expect(callout).not.toBeNull();

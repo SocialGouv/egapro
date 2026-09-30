@@ -4,7 +4,7 @@ import { MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { HydrateClient } from "~/trpc/server";
 
-export const metadata = { title: "Accueil" };
+export const metadata = { title: { absolute: "Accueil — Egapro" } };
 
 export default async function Page() {
 	const session = await auth();

@@ -192,7 +192,9 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		expect(
-			screen.getByText(/Saisissez les données manquantes/),
+			screen.getByText(
+				"Renseignez les informations nécessaires pour le calcul de l'indicateur ou importez-les via le bouton ci-dessous",
+			),
 		).toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
@@ -555,6 +557,33 @@ describe("Step5EmployeeCategories", () => {
 			},
 		);
 		expect(nameInput).toHaveValue("Cadres");
+	});
+
+	it("rejects a restored 251-character category without saving or truncating it", async () => {
+		const user = userEvent.setup();
+		const name = "a".repeat(251);
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+				initialCategories={[makeCategory({ name })]}
+				initialSource="accord-entreprise"
+			/>,
+		);
+
+		const input = screen.getByLabelText(/^Libellé de la catégorie d'emploi/, {
+			selector: "#cat-0-name",
+		});
+		expect(input).toHaveValue(name);
+		expect(input).toHaveAttribute("maxlength", "250");
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"250 caractères maximum",
+		);
+		expect(input).toHaveValue(name);
+		expect(input).toHaveAttribute("aria-invalid", "true");
+		expect(mockMutate).not.toHaveBeenCalled();
 	});
 
 	it("submits data on form submit", async () => {

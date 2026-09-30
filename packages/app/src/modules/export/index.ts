@@ -12,7 +12,6 @@ export {
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
-	resolveActiveDeclarationId,
 } from "./fetchDeclarations";
 export type { RepresentationRow } from "./fetchRepresentations";
 export {

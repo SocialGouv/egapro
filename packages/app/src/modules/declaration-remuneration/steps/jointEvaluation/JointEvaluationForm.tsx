@@ -134,7 +134,7 @@ export function JointEvaluationForm({
 					</p>
 
 					<div className="fr-highlight">
-						<p className="fr-mb-2v fr-text--md">Date limite</p>
+						<p className="fr-mb-2v fr-text--md">Échéance</p>
 						<p className="fr-h6 fr-mb-2v">
 							{formatLongDate(jointEvaluationDeadline)}
 						</p>

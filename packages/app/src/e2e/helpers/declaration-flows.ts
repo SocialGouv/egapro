@@ -177,6 +177,8 @@ async function confirmPrefillResetIfAsked(page: Page) {
  * Since #4260 it is also the reference each step 4 quartile table is held to, so
  * the default quartile rows (DEFAULT_*_QUARTILES) sum to exactly these counts.
  */
+export const STEP5_CATEGORY_NAME = "Catégorie test";
+
 export const STEP1_WORKFORCE = { women: 10, men: 15 } as const;
 
 /**
@@ -309,7 +311,9 @@ async function fillStep5Categories(page: Page, options: { hasGap: boolean }) {
 	});
 	if (await sourceSelect.isVisible({ timeout: 1_000 }).catch(() => false)) {
 		await sourceSelect.selectOption("accord-entreprise");
-		await page.getByRole("textbox", { name: "Libellé" }).fill("Catégorie test");
+		await page
+			.getByRole("textbox", { name: "Libellé" })
+			.fill(STEP5_CATEGORY_NAME);
 		// The single category carries the whole step 1 headcount, on both bases.
 		const counts = {
 			women: String(STEP1_WORKFORCE.women),

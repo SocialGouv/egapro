@@ -147,16 +147,19 @@ describe("Step4QuartileDistribution", () => {
 		);
 		expect(
 			screen.getByText(
-				"Renseignez les informations avant de valider vos indicateurs.",
+				"Renseignez les données nécessaires au calcul des indicateurs.",
 			),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(
-				"Vérifiez les informations préremplies et modifiez-les si nécessaire avant de valider vos indicateurs.",
+				"Vérifiez les informations préremplies à partir de vos données DSN et modifiez-les si nécessaire (en cas d'erreur, pensez à corriger votre DSN).",
 			),
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByText("Tous les champs sont obligatoires."),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Information sur la confidentialité des données"),
 		).toBeInTheDocument();
 	});
 

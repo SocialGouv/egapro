@@ -21,7 +21,7 @@ import {
 	isRepresentationDeclarationTransmitted,
 	type RepresentationPanelVariant,
 } from "./declarationProcessState";
-import { TransmittedRow } from "./StepRows";
+import { BulletList, BulletRow, TransmittedRow } from "./StepRows";
 import type { DeclarationItem } from "./types";
 
 export const REPRESENTATION_PROCESS_PANEL_ID = "representation-process-panel";
@@ -271,13 +271,13 @@ function Step2Row({
 					/>
 				) : (
 					<>
-						{status !== "pending" &&
-							STEP2_ITEMS.map((item) => (
-								<div className={styles.bulletItem} key={item}>
-									<span aria-hidden="true" className={styles.bullet} />
-									<p className="fr-mb-0">{item}</p>
-								</div>
-							))}
+						{status !== "pending" && (
+							<BulletList>
+								{STEP2_ITEMS.map((item) => (
+									<BulletRow key={item}>{item}</BulletRow>
+								))}
+							</BulletList>
+						)}
 						<div className={styles.deadlineRow}>
 							<span
 								aria-hidden="true"
