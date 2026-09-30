@@ -10,9 +10,12 @@ import { type CreateOwnershipRequestDTO } from "@common/core-domain/dtos/CreateO
 import { type OwnershipRequestActionDTO } from "@common/core-domain/dtos/OwnershipRequestActionDTO";
 
 export async function putOwnershipRequest(formData: CreateOwnershipRequestDTO) {
+  const session = await assertServerSession();
+
   const usecase = new CreateOwnershipRequest(ownershipRequestRepo, entrepriseService);
 
-  return await usecase.execute(formData);
+  // The asker is always the logged-in user, whatever the client sent.
+  return await usecase.execute({ ...formData, askerEmail: session.user.email });
 }
 
 export async function acceptOwnershipRequest(ownershipRequestActionDTO: OwnershipRequestActionDTO) {

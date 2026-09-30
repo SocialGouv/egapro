@@ -25,6 +25,14 @@ export const GET: NextRouteHandler<"siren" | "year"> = async (_, { params: { sir
     });
   }
 
+  // The receipt contains the declarant's personal data: only owners of the siren (or staff) can download it.
+  const isOwner = session.user.companies.some(company => company.siren === siren);
+  if (!session.user.staff && !isOwner) {
+    return new NextResponse(null, {
+      status: StatusCodes.FORBIDDEN,
+    });
+  }
+
   try {
     const useCase = new DownloadDeclarationReceipt(declarationRepo, jsxPdfService);
     const buffer = await useCase.execute({ siren, year: +year });

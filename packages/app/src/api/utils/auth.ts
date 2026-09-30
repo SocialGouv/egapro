@@ -28,9 +28,12 @@ export const assertServerSession = async ({
     throw new UnexpectedSessionError(message);
   }
 
-  const shouldCheckOwner = typeof owner === "string" || owner?.check;
+  // An owner check with an empty siren must fail closed (only staff can pass), never be skipped.
+  const shouldCheckOwner = owner !== undefined;
+  const ownerSiren = typeof owner === "string" ? owner : owner?.check;
   const shouldCheckStaff = staff === true || staff?.check;
-  const isOwner = session.user.staff || session.user.companies.some(company => company.siren === shouldCheckOwner);
+  const isOwner =
+    session.user.staff || (!!ownerSiren && session.user.companies.some(company => company.siren === ownerSiren));
   const ownerErrorMessage = owner
     ? typeof owner === "string"
       ? defaultOwnerMessage
