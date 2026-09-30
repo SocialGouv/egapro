@@ -13,7 +13,9 @@ logger.addHandler(logging.StreamHandler())
 
 sentry = None
 
-# Never send credentials nor personal data to logs or Sentry.
+# Never send credentials to logs or Sentry, nor request headers/bodies (tokens,
+# declarations). Personal data is only logged where an audit trail needs it: the
+# email of authentication events (token requests, ownership checks).
 SENSITIVE_HEADERS = {"api-key", "authorization", "cookie", "set-cookie", "x-real-ip"}
 
 
