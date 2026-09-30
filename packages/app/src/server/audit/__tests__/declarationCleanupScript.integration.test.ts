@@ -9,11 +9,9 @@
  *  proves the FK-safe ordering, the cascade of `status_history`/`lock`, and
  *  the atomic rollback — a mocked driver would hide all of it.
  *
- * The `.mjs` script is a standalone CLI entry — we import its exported core
- * routine and drive it with our own `sql` client (never spawning `node`) and a
- * mocked `deleteObject` so no real S3 is touched. `logFailure` + the failure
- * audit row live in the un-exported `isMain` CLI wrapper, so this test locks
- * the testable contract: the atomic rollback and the success self-audit.
+ * The standalone CLI exports its core routine and failure audit writer, so
+ * these tests can drive them with a real `sql` client without spawning `node`.
+ * S3 operations use a mocked `deleteObject`; no real S3 is touched.
  */
 
 import postgres from "postgres";
@@ -27,7 +25,10 @@ import {
 	type Mock,
 	vi,
 } from "vitest";
-import { runDeclarationCleanup } from "#scripts/declaration-cleanup";
+import {
+	logDeclarationCleanupFailure,
+	runDeclarationCleanup,
+} from "#scripts/declaration-cleanup";
 import { env } from "~/env.js";
 
 const ACTION = "system.declaration_cleanup";
@@ -329,6 +330,12 @@ describe("declaration-cleanup.mjs (integration)", () => {
 			expect(await countByDeclaration("app_cse_opinion_file", declId)).toBe(1);
 			// No success self-audit is written when the transaction aborts.
 			expect(await countAuditByStatus("success")).toBe(0);
+			// The CLI records the failure after rollback, outside the transaction.
+			await logDeclarationCleanupFailure(
+				sql,
+				new Error(`declaration ${SIREN} by ${USER_EMAIL}`),
+			);
+			expect(await countAuditByStatus("failure")).toBe(1);
 			// S3 deletion only runs after a successful commit.
 			expect(deleteObject).not.toHaveBeenCalled();
 		} finally {
@@ -384,6 +391,36 @@ describe("declaration-cleanup.mjs (integration)", () => {
 			retentionYears: RETENTION,
 			cutoffYear: 2020,
 		});
+	});
+
+	it("records only a stable code after a declaration cleanup failure", async () => {
+		await logDeclarationCleanupFailure(
+			sql,
+			new Error(`declaration ${SIREN} by ${USER_EMAIL}`),
+		);
+
+		const rows = await sql<
+			{
+				action: string;
+				category: string;
+				status: string;
+				error_message: string | null;
+				metadata: Record<string, unknown> | null;
+				created_at: Date;
+			}[]
+		>`
+			SELECT action, category, status, error_message, metadata, created_at
+			FROM audit.action_log WHERE action = ${ACTION}
+		`;
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({
+			action: ACTION,
+			category: "system",
+			status: "failure",
+			error_message: "DECLARATION_CLEANUP_FAILED",
+			metadata: null,
+		});
+		expect(rows[0]?.created_at).toBeInstanceOf(Date);
 	});
 
 	it("records a success self-audit even when the database is empty", async () => {

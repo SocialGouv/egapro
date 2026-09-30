@@ -43,6 +43,7 @@ type RunAuditCleanupArgs = {
 const SHORT_RETENTION_CATEGORIES = ["read_sensitive", "public_search"];
 const AUDIT_CLEANUP_ACTION = "system.audit_cleanup";
 const AUDIT_CLEANUP_CATEGORY = "system";
+const AUDIT_CLEANUP_FAILURE_CODE = "AUDIT_CLEANUP_FAILED";
 
 const DEFAULT_SHORT_RETENTION_DAYS = 180;
 const DEFAULT_LONG_RETENTION_DAYS = 365;
@@ -148,18 +149,18 @@ export async function runAuditCleanup({
 				})}
 			)
 		`;
-	} catch (auditError) {
-		console.error(
-			"[audit-cleanup] Cleanup succeeded but self-audit insert failed:",
-			auditError,
-		);
+	} catch {
+		console.error("[audit-cleanup] Self-audit insert failed");
 	}
 
 	return summary;
 }
 
-async function logFailure(sql: Sql, error: unknown): Promise<void> {
-	const message = error instanceof Error ? error.message : "Unknown error";
+// The original exception can contain identifiers or deleted data: never persist it.
+export async function logAuditCleanupFailure(
+	sql: Sql,
+	_error: unknown,
+): Promise<void> {
 	try {
 		await sql`
 			INSERT INTO audit.action_log (id, created_at, action, category, status, error_message)
@@ -169,14 +170,11 @@ async function logFailure(sql: Sql, error: unknown): Promise<void> {
 				${AUDIT_CLEANUP_ACTION},
 				${AUDIT_CLEANUP_CATEGORY},
 				'failure',
-				${message}
+				${AUDIT_CLEANUP_FAILURE_CODE}
 			)
 		`;
-	} catch (auditError) {
-		console.error(
-			"[audit-cleanup] Failed to record failure in audit log:",
-			auditError,
-		);
+	} catch {
+		console.error("[audit-cleanup] Failed to record failure in audit log");
 	}
 }
 
@@ -217,8 +215,8 @@ if (isMain) {
 		await sql.end();
 		process.exit(0);
 	} catch (error) {
-		console.error("[audit-cleanup] Failed:", error);
-		await logFailure(sql, error);
+		console.error("[audit-cleanup] Failed:", AUDIT_CLEANUP_FAILURE_CODE);
+		await logAuditCleanupFailure(sql, error);
 		await sql.end();
 		process.exit(1);
 	}

@@ -25,6 +25,7 @@ type RunDeclarationCleanupArgs = {
 
 const DECLARATION_CLEANUP_ACTION = "system.declaration_cleanup";
 const DECLARATION_CLEANUP_CATEGORY = "system";
+const DECLARATION_CLEANUP_FAILURE_CODE = "DECLARATION_CLEANUP_FAILED";
 const DEFAULT_RETENTION_YEARS = 6;
 
 function getDatabaseUrl(): string {
@@ -122,12 +123,9 @@ export async function runDeclarationCleanup({
 		try {
 			await deleteObject(key);
 			purgedS3Objects++;
-		} catch (s3Error) {
+		} catch {
 			failedS3Objects++;
-			console.error(
-				"[declaration-cleanup] S3 delete failed (key redacted — embeds SIREN):",
-				s3Error,
-			);
+			console.error("[declaration-cleanup] S3 delete failed (key redacted)");
 		}
 	}
 
@@ -152,18 +150,18 @@ export async function runDeclarationCleanup({
 				})}
 			)
 		`;
-	} catch (auditError) {
-		console.error(
-			"[declaration-cleanup] Cleanup succeeded but self-audit insert failed:",
-			auditError,
-		);
+	} catch {
+		console.error("[declaration-cleanup] Self-audit insert failed");
 	}
 
 	return { purgedDeclarations, purgedFiles, purgedS3Objects, failedS3Objects };
 }
 
-async function logFailure(sql: Sql, error: unknown): Promise<void> {
-	const message = error instanceof Error ? error.message : "Unknown error";
+// The original exception can contain identifiers or deleted data: never persist it.
+export async function logDeclarationCleanupFailure(
+	sql: Sql,
+	_error: unknown,
+): Promise<void> {
 	try {
 		await sql`
 			INSERT INTO audit.action_log (id, created_at, action, category, status, error_message)
@@ -173,13 +171,12 @@ async function logFailure(sql: Sql, error: unknown): Promise<void> {
 				${DECLARATION_CLEANUP_ACTION},
 				${DECLARATION_CLEANUP_CATEGORY},
 				'failure',
-				${message}
+				${DECLARATION_CLEANUP_FAILURE_CODE}
 			)
 		`;
-	} catch (auditError) {
+	} catch {
 		console.error(
-			"[declaration-cleanup] Failed to record failure in audit log:",
-			auditError,
+			"[declaration-cleanup] Failed to record failure in audit log",
 		);
 	}
 }
@@ -256,8 +253,11 @@ if (isMain) {
 			exitCode = 1;
 		}
 	} catch (error) {
-		console.error("[declaration-cleanup] Failed:", error);
-		await logFailure(sql, error);
+		console.error(
+			"[declaration-cleanup] Failed:",
+			DECLARATION_CLEANUP_FAILURE_CODE,
+		);
+		await logDeclarationCleanupFailure(sql, error);
 		exitCode = 1;
 	} finally {
 		await sql.end();

@@ -12,10 +12,13 @@
 
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-// The .mjs script is a standalone CLI entry — we import its exported core
+// The script is a standalone CLI entry — we import its exported core
 // routine and drive it with our own `sql` client so we never spawn `node`
 // from within Vitest.
-import { runAuditCleanup } from "#scripts/audit-cleanup";
+import {
+	logAuditCleanupFailure,
+	runAuditCleanup,
+} from "#scripts/audit-cleanup";
 import { env } from "~/env.js";
 
 describe("audit-cleanup.mjs (integration)", () => {
@@ -232,13 +235,43 @@ describe("audit-cleanup.mjs (integration)", () => {
 			LIMIT 1
 		`;
 		expect(selfAudit[0]?.status).toBe("success");
-		expect(selfAudit[0]?.metadata).toMatchObject({
+		expect(selfAudit[0]?.metadata).toEqual({
 			deletedShort: 1,
 			deletedLong: 1,
 			deletedTotal: 2,
 			shortRetentionDays: 180,
 			longRetentionDays: 365,
 		});
+	});
+
+	it("records only a stable code after a cleanup failure", async () => {
+		await logAuditCleanupFailure(
+			sql,
+			new Error("contact: personne@example.fr, IP: 192.0.2.1"),
+		);
+
+		const rows = await sql<
+			{
+				action: string;
+				category: string;
+				status: string;
+				error_message: string | null;
+				metadata: Record<string, unknown> | null;
+				created_at: Date;
+			}[]
+		>`
+			SELECT action, category, status, error_message, metadata, created_at
+			FROM audit.action_log WHERE action = 'system.audit_cleanup'
+		`;
+		expect(rows).toHaveLength(1);
+		expect(rows[0]).toMatchObject({
+			action: "system.audit_cleanup",
+			category: "system",
+			status: "failure",
+			error_message: "AUDIT_CLEANUP_FAILED",
+			metadata: null,
+		});
+		expect(rows[0]?.created_at).toBeInstanceOf(Date);
 	});
 
 	it("executes a Date-based predicate without driver errors (regression guard)", async () => {
