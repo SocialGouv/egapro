@@ -27,7 +27,9 @@ def read(token):
 def require(view):
     @wraps(view)
     def wrapper(request, response, *args, **kwargs):
-        token = request.headers.get("API-KEY") or request.cookies.get("api-key")
+        # Header only: a token read from a cookie would be sent by the browser on
+        # cross-site requests (CSRF). Nothing sets the legacy `api-key` cookie anymore.
+        token = request.headers.get("API-KEY")
         if not token:
             logger.debug("Request without token on %s", request.path)
             raise HttpError(401, "No authentication token was provided.")

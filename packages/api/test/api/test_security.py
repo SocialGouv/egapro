@@ -217,3 +217,20 @@ async def test_access_is_logged_without_query_string(client, caplog):
     assert resp.status == 403
     assert "GET /token 403" in caplog.text
     assert "foo@bar.org" not in caplog.text
+
+
+# The token is only read from the API-KEY header, never from a cookie (CSRF).
+
+
+async def test_token_in_cookie_is_not_accepted(client, declaration):
+    from egapro import tokens
+
+    await declaration(siren="514027945", year=2020, owner="foo@bar.org")
+    client.logout()
+    token = tokens.create("foo@bar.org")
+    resp = await client.get(
+        "/declaration/514027945/2020", headers={"Cookie": f"api-key={token}"}
+    )
+    assert resp.status == 401
+    resp = await client.get("/declaration/514027945/2020", headers={"API-KEY": token})
+    assert resp.status == 200
