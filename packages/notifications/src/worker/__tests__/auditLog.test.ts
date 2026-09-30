@@ -89,6 +89,15 @@ describe("logAuditMain", () => {
 		]);
 	});
 
+	it("normalizes an unexpected status before insertion", async () => {
+		const { sql, calls } = sqlCapture();
+		await logAuditMain(sql, {
+			status: "rh@example.fr" as AuditRow["status"],
+		});
+		expect(calls[0]?.values[4]).toBe("failure");
+		expect(calls[0]?.values.at(-2)).toBe("notification_failed");
+	});
+
 	it("does not write when the main database is unavailable", async () => {
 		await expect(
 			logAuditMain(null, { status: "success" }),
@@ -96,7 +105,7 @@ describe("logAuditMain", () => {
 	});
 
 	it("does not let an audit insert failure interrupt the job", async () => {
-		const error = new Error("database down");
+		const error = new Error("database down for rh@example.fr");
 		const sql = Object.assign(() => Promise.reject(error), {
 			json: (value: unknown) => value,
 		}) as unknown as Sql;
@@ -105,8 +114,7 @@ describe("logAuditMain", () => {
 			logAuditMain(sql, { status: "failure", errorCode: "invalid_job" }),
 		).resolves.toBeUndefined();
 		expect(consoleSpy).toHaveBeenCalledWith(
-			"[notifications] audit insert failed:",
-			error,
+			"[notifications] audit insert failed",
 		);
 		consoleSpy.mockRestore();
 	});

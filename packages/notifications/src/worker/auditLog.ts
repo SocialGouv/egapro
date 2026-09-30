@@ -48,9 +48,10 @@ export async function logAuditMain(
 			? { poisonPill: rawMetadata.poisonPill }
 			: {}),
 	};
+	const status = row.status === "success" ? "success" : "failure";
 	const requestedErrorCode = row.errorCode;
 	const errorCode =
-		row.status === "failure"
+		status === "failure"
 			? requestedErrorCode !== undefined &&
 				ERROR_CODES.includes(requestedErrorCode)
 				? requestedErrorCode
@@ -68,7 +69,7 @@ export async function logAuditMain(
 				${new Date()},
 				${"notification.send"},
 				${"system"},
-				${row.status},
+				${status},
 				${typeof row.userId === "string" && UUID_RE.test(row.userId) ? row.userId : null},
 				${typeof row.siren === "string" && SIREN_RE.test(row.siren) ? row.siren : null},
 				${"notification"},
@@ -77,7 +78,7 @@ export async function logAuditMain(
 				${mainSql.json(metadata)}
 			)
 		`;
-	} catch (auditError) {
-		console.error("[notifications] audit insert failed:", auditError);
+	} catch {
+		console.error("[notifications] audit insert failed");
 	}
 }
