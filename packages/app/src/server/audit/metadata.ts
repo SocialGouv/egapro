@@ -188,10 +188,12 @@ function validValue(
 			return typeof value === "string" && UUID_PATTERN.test(value)
 				? value
 				: undefined;
-		case "siren":
-			return typeof value === "string" && /^\d{9}$/.test(value)
-				? value
-				: undefined;
+		case "siren": {
+			if (typeof value !== "string") return undefined;
+			// Match sirenSchema's accepted display form, then store the canonical ID.
+			const siren = value.replace(/\s/g, "");
+			return /^\d{9}$/.test(siren) ? siren : undefined;
+		}
 		case "flowType":
 			return value === "cse_opinion" || value === "joint_evaluation"
 				? value

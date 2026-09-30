@@ -718,6 +718,19 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual(target);
 	});
 
+	it("normalizes a spaced SIREN accepted by the admin input schema", async () => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "admin.searchCompany",
+			getRawInput: buildGetRawInput({ siren: "775 670 417" }),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			siren: "775670417",
+		});
+	});
+
 	it("does not attest unvalidated values from a failed tRPC call", async () => {
 		await auditMiddleware({
 			ctx: buildCtx(),
