@@ -49,8 +49,16 @@ app:
 keycloak:
   enabled: false
 
-maildev: {}
-pgweb: {}
+# maildev / pgweb are not exposed publicly (no ingress): use a port-forward, e.g.
+#   kubectl -n <namespace> port-forward svc/maildev 1080:1080
+#   kubectl -n <namespace> port-forward svc/pgweb 8081:80
+maildev:
+  ingress:
+    enabled: false
+pgweb:
+  pgweb:
+    ingress:
+      enabled: false
 
 redis:
   sentinel:
