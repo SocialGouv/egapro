@@ -1,9 +1,11 @@
-#version: 2
-#updates:
-#  - package-ecosystem: github-actions
-#    directory: "/"
-#    schedule:
-#      interval: monthly
+# GitHub Actions are pinned by commit SHA (supply chain): dependabot keeps the
+# pins and their `# vX.Y.Z` comments up to date. npm updates stay disabled below.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
 #  - package-ecosystem: "npm"
 #    labels:
 #      - bot
