@@ -1,4 +1,5 @@
-FROM python:3.9.7
+# Floating 3.12 tag: rebuilds pick up Python security releases (3.9 is end of life).
+FROM python:3.12
 
 WORKDIR /app
 
@@ -7,11 +8,10 @@ RUN chown myapp:myapp /app
 USER 1001
 ENV PATH=$PATH:/home/myapp/.local/bin
 
-RUN pip3 install pipenv --user
-
 COPY setup.py .
 COPY setup.cfg .
-RUN	pip install .[dev,test,prod]
+# Runtime dependencies only: no test/dev tooling in the production image.
+RUN	pip install .[prod]
 
 EXPOSE 2626
 
