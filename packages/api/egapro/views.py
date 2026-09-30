@@ -1,7 +1,6 @@
 import os
 import sys
 from functools import wraps
-from traceback import print_exc
 
 from naf import DB as NAF
 from roll import Roll, HttpError, HTTP_METHODS as CORS_METHODS
@@ -132,7 +131,11 @@ async def json_error_response(request, response, error):
             loggers.logger.error(str(context))
         else:
             loggers.log_request(request)
-            print_exc()
+            # Logged at ERROR with the traceback: Sentry's logging integration turns it
+            # into an event (roll has no Sentry integration of its own).
+            loggers.logger.error(
+                "Unexpected error on %s %s", request.method, request.path, exc_info=context
+            )
             error.message = GENERIC_ERROR
     if isinstance(error.message, (str, bytes)):
         error.message = {"error": error.message}
