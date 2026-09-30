@@ -324,3 +324,38 @@ def test_token_throttle_expires_and_stays_bounded(monkeypatch):
     for i in range(10):
         views.token_request_throttled(f"{i}@b.c", now=100)
     assert len(views._token_requests) <= 3
+
+
+# The anonymous public listing never loads a whole year in memory.
+
+
+async def test_public_declarations_listing_is_bounded_in_sql(client, monkeypatch):
+    limits = []
+
+    async def published(year, limit):
+        limits.append(limit)
+        return []
+
+    monkeypatch.setattr("egapro.db.declaration.published", published)
+    resp = await client.get("/public/declaration?limit=100000")
+    assert resp.status == 404  # nothing published in this test
+    assert limits and all(limit <= 100 for limit in limits)
+
+
+async def test_public_declarations_listing_skips_drafts(client, declaration):
+    await declaration(siren="514027945", year=2019, owner="foo@bar.org")
+    await declaration(siren="514027946", year=2019, owner="foo@bar.org", déclaration={"brouillon": True})
+    records = await db.declaration.published(2019, 10)
+    assert [r["siren"] for r in records] == ["514027945"]
+
+
+async def test_security_headers_on_api_responses(client, declaration):
+    await declaration(siren="514027945", year=2019, owner="foo@bar.org")
+    resp = await client.get("/declaration/514027945/2019")
+    assert resp.status == 200
+    assert resp.headers["X-Content-Type-Options"] == "nosniff"
+    assert resp.headers["X-Frame-Options"] == "DENY"
+    assert resp.headers["Cache-Control"] == "no-store"
+    public = await client.get("/config")
+    assert public.headers["X-Content-Type-Options"] == "nosniff"
+    assert "Cache-Control" not in public.headers

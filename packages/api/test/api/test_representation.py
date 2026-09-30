@@ -247,6 +247,7 @@ async def test_staff_can_load_not_owned_representation(client, monkeypatch, repr
     assert resp.status == 200
 
 
+@pytest.mark.unowned
 async def test_staff_can_put_not_owned_representation(
     client, monkeypatch, representation_equilibree, body
 ):
@@ -272,7 +273,9 @@ async def test_cannot_put_not_owned_representation(client, monkeypatch):
     }
 
 
+@pytest.mark.unowned
 async def test_owner_check_is_lower_case(client, body):
+    await db.ownership.put("514027945", "foo@bar.com")
     client.login("FOo@baR.com")
     await client.put("/representation-equilibree/514027945/2021", body=body)
     client.login("FOo@BAR.COM")

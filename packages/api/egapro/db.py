@@ -237,6 +237,19 @@ class declaration(table):
         return await cls.fetch(req)
 
     @classmethod
+    async def published(cls, year: int, limit: int):
+        # Feeds an anonymous endpoint: only published declarations (`data` holds the
+        # last published version, a draft lives in `draft`), bounded in SQL instead
+        # of loading a whole year in memory.
+        return await cls.fetch(
+            f"SELECT * FROM {cls.table_name} WHERE year=$1 AND data IS NOT NULL "
+            "AND NOT COALESCE((data->'déclaration'->>'brouillon')::boolean, false) "
+            "ORDER BY declared_at DESC NULLS LAST LIMIT $2",
+            int(year),
+            int(limit),
+        )
+
+    @classmethod
     async def completed(cls):
         # Do not select draft in this request, as it must reflect the declarations state
         return await cls.fetch(

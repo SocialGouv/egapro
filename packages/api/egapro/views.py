@@ -21,6 +21,12 @@ roll.io.JSONDecodeError = jsonlib.JSONDecodeError
 
 GENERIC_ERROR = "Une erreur inattendue est survenue"
 
+# Public, anonymous searches: bound the work one request can ask for. Every UES
+# result compares the query to each member company name (difflib, quadratic), so
+# an unbounded `q` and `limit` let a single request hold the event loop.
+SEARCH_MAX_QUERY_LENGTH = 100
+SEARCH_MAX_LIMIT = 100
+
 
 class Request(BaseRequest):
     def __init__(self, *args, **kwargs):
@@ -97,6 +103,17 @@ async def add_cors_headers(request, response):
 
 
 @app.listen("response")
+async def add_security_headers(request, response):
+    # The API is reached directly (outside the app's ingress headers).
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Authenticated responses carry declarations and personal data: never cache them.
+    if "email" in request:
+        response.headers["Cache-Control"] = "no-store"
+
+
+@app.listen("response")
 async def log_access(request, response):
     # The roll worker bypasses gunicorn access logs (--access-logfile), so log here.
     # Path only: no query string, headers nor body (tokens, personal data).
@@ -166,10 +183,11 @@ def ensure_owner(view):
         owners = await db.ownership.emails(siren)
         if declarant in owners:
             request["is_owner"] = True
-        # Allow to create a declaration for a siren without any owner yet.
-        elif owners:
+        # A siren without any owner is not up for grabs: ownership comes from
+        # ProConnect (synced by the app) or from staff, never from being first.
+        else:
             loggers.logger.debug(
-                "Non owner (%s) accessing owned resource %s %s", declarant, siren, args
+                "Non owner (%s) accessing resource %s %s", declarant, siren, args
             )
             if not request["staff"]:
                 if "error" not in request:
@@ -305,13 +323,13 @@ def public_declaration_data(record):
 @app.route("/public/declaration", methods=["GET"])
 async def get_public_all_declarations(request, response):
     declarations = []
-    limit = request.query.int("limit", 10)
+    limit = min(max(request.query.int("limit", 10), 1), SEARCH_MAX_LIMIT)
     years = sorted(constants.YEARS, reverse=True)
 
     stop_fetching = False
     for year in years:
         try:
-            records = await db.declaration.all(year)
+            records = await db.declaration.published(year, limit - len(declarations))
 
             for record in records:
                 try:
@@ -595,13 +613,6 @@ async def get_token(request, response):
         raise HttpError(400, "Missing email query string")
     token = tokens.create(email)
     response.json = {"token": token}
-
-# Public, anonymous searches: bound the work one request can ask for. Every UES
-# result compares the query to each member company name (difflib, quadratic), so
-# an unbounded `q` and `limit` let a single request hold the event loop.
-SEARCH_MAX_QUERY_LENGTH = 100
-SEARCH_MAX_LIMIT = 100
-
 
 def search_params(request):
     q = request.query.get("q", "").strip()[:SEARCH_MAX_QUERY_LENGTH]

@@ -281,6 +281,7 @@ async def test_get_entreprise_data_from_draft(client, declaration):
     assert resp.status == 404
 
 
+@pytest.mark.unowned
 async def test_me(client, declaration):
     at = datetime(2021, 2, 3, 4, 5, 6, tzinfo=timezone.utc)
     await declaration(owner="foo@bar.org", modified_at=at)

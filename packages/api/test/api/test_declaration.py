@@ -307,7 +307,9 @@ async def test_basic_declaration_without_declarant_should_be_ok(client, body):
     assert data["data"]["déclarant"] == {"email": "foo@bar.org"}
 
 
+@pytest.mark.unowned
 async def test_owner_email_should_be_lower_cased(client, body):
+    await db.ownership.put("514027945", "foo@baz.bar")
     client.login("FoO@BAZ.baR")
     resp = await client.put("/declaration/514027945/2019", body=body)
     assert resp.status == 204
@@ -381,18 +383,20 @@ async def test_cannot_load_not_owned_declaration(client, declaration):
     }
 
 
-async def test_draft_declaration_is_not_owned(client, declaration, body):
+@pytest.mark.unowned
+async def test_unowned_siren_cannot_be_claimed(client, body):
+    # A siren without owner is not up for grabs: ownership comes from ProConnect
+    # (synced by the app) or from staff, never from declaring first.
+    client.login("foo@bar.baz")
     body["déclaration"]["brouillon"] = True
-    client.login("foo@bar.baz")
-    resp = await client.put("/declaration/514027945/2019", body)
-    assert resp.status == 204
-    client.login("other@email.com")
-    del body["déclaration"]["brouillon"]
-    resp = await client.put("/declaration/514027945/2019", body)
-    assert resp.status == 204
-    client.login("foo@bar.baz")
     resp = await client.put("/declaration/514027945/2019", body)
     assert resp.status == 403
+    del body["déclaration"]["brouillon"]
+    resp = await client.put("/declaration/514027945/2019", body)
+    assert resp.status == 403
+    resp = await client.get("/declaration/514027945/2019")
+    assert resp.status == 403
+    assert await db.ownership.emails("514027945") == []
 
 
 async def test_staff_can_load_not_owned_declaration(client, monkeypatch, declaration):
@@ -403,6 +407,7 @@ async def test_staff_can_load_not_owned_declaration(client, monkeypatch, declara
     assert resp.status == 200
 
 
+@pytest.mark.unowned
 async def test_staff_can_put_not_owned_declaration(
     client, monkeypatch, declaration, body
 ):
@@ -432,7 +437,9 @@ async def test_cannot_put_not_owned_declaration(client, monkeypatch):
     }
 
 
+@pytest.mark.unowned
 async def test_owner_check_is_lower_case(client, body):
+    await db.ownership.put("514027945", "foo@bar.com")
     client.login("FOo@baR.com")
     await client.put("/declaration/514027945/2019", body=body)
     client.login("FOo@BAR.COM")

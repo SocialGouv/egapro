@@ -161,3 +161,25 @@ def client(app, event_loop):
     yield c
     c.logout()
     app.loop.run_until_complete(app.shutdown())
+
+
+# The API only lets owners (or staff) act on a siren: tests that declare as the
+# default user own the sirens they use. Tests about ownership itself opt out
+# with the `unowned` marker.
+DEFAULT_TEST_EMAIL = "foo@bar.org"
+TEST_SIRENS = ("514027945", "514027946", "123456782", "111111111")
+
+
+@pytest.fixture(autouse=True)
+def default_ownership(request):
+    # Only API tests: the `client` fixture opens the DB pool at app startup.
+    if "client" not in request.fixturenames or request.node.get_closest_marker("unowned"):
+        return
+    request.getfixturevalue("client")
+    loop = request.getfixturevalue("event_loop")
+
+    async def grant():
+        for siren in TEST_SIRENS:
+            await db.ownership.put(siren, DEFAULT_TEST_EMAIL)
+
+    loop.run_until_complete(grant())
