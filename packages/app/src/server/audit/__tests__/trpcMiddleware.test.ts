@@ -278,7 +278,7 @@ describe("auditMiddleware", () => {
 			siren: "123456789",
 			ipAddress: "203.0.113.10",
 			userAgent: "TestAgent",
-			metadata: { year: 2026, totalWomen: 10 },
+			metadata: { year: 2026 },
 			origin: {
 				source: "trpc",
 				route: "declaration.submit",
@@ -322,7 +322,7 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			action: "admin_settings.upsert_representation_campaign",
 			status: "success",
-			metadata: { year: 2026, campaignStartDate: "2026-02-01" },
+			metadata: { year: 2026 },
 		});
 	});
 
@@ -411,7 +411,7 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
 			action: "admin_declaration.release_lock",
 			status: "success",
-			metadata: { declarationId: "decl-1" },
+			metadata: null,
 		});
 	});
 
@@ -485,7 +485,7 @@ describe("auditMiddleware", () => {
 		});
 	});
 
-	it("strips sensitive metadata keys (token, password, …)", async () => {
+	it("drops phone numbers and secrets from tRPC metadata", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -500,10 +500,10 @@ describe("auditMiddleware", () => {
 		});
 
 		const metadata = mockLogAction.mock.calls[0]?.[0]?.metadata;
-		expect(metadata).toEqual({ phone: "0612345678" });
+		expect(metadata).toBeNull();
 	});
 
-	it("strips sensitive keys from nested objects and arrays", async () => {
+	it("drops nested objects and arrays from tRPC metadata", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -521,17 +521,10 @@ describe("auditMiddleware", () => {
 		});
 
 		const metadata = mockLogAction.mock.calls[0]?.[0]?.metadata;
-		expect(metadata).toEqual({
-			phone: "0612345678",
-			credentials: { expiresIn: 3600 },
-			items: [{ name: "ok" }, { name: "ok2" }],
-		});
+		expect(metadata).toBeNull();
 	});
 
-	// audit-logging.md forbids duplicating PII that is not already carried by
-	// user_email or siren — the identity of a profile update must never reach
-	// the 365-day `mutation` retention bucket.
-	it("strips the identity PII of a profile update and keeps the rest", async () => {
+	it("drops all profile fields from audit metadata", async () => {
 		const next = vi.fn(async () => okResult({ success: true }));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -545,12 +538,10 @@ describe("auditMiddleware", () => {
 			next,
 		});
 
-		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
-			phone: "+33122334455",
-		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
-	it("strips the identity keys whatever their casing", async () => {
+	it("drops identity keys whatever their casing", async () => {
 		const next = vi.fn(async () => okResult({ success: true }));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -564,12 +555,10 @@ describe("auditMiddleware", () => {
 			next,
 		});
 
-		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
-			phone: "+33122334455",
-		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
-	it("keeps null values, drops undefined fields and preserves array positions in metadata", async () => {
+	it("drops null, undefined and array values from audit metadata", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -584,11 +573,7 @@ describe("auditMiddleware", () => {
 			next,
 		});
 
-		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toStrictEqual({
-			phone: "0612345678",
-			extension: null,
-			items: [undefined, 1],
-		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
 	it("logs a null metadata rather than an empty object when every key is stripped", async () => {
@@ -665,7 +650,108 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
-	it("wraps a non-object input into a value field instead of applying the allowlist", async () => {
+	it("rejects a forged year even on a successful mapped procedure", async () => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "representationDeclaration.submit",
+			getRawInput: buildGetRawInput({
+				year: "2026 private@example.com",
+				publishModalities: "private text",
+			}),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
+	});
+
+	it("retains a validated declaration UUID for an admin read", async () => {
+		const id = "1a19fd4d-d851-4146-ae27-8402e5448126";
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "adminDeclarations.getById",
+			getRawInput: buildGetRawInput({ id, freeText: "private@example.com" }),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({ id });
+	});
+
+	it.each([
+		[
+			"adminDeclarations.getRecap",
+			"query",
+			{ id: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+		["adminSettings.upsertCampaignDeadlines", "mutation", { year: 2026 }],
+		[
+			"publicReferents.getById",
+			"query",
+			{ id: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+		["admin.searchCompany", "mutation", { siren: "123456789" }],
+		["company.getWithDeclarations", "query", { siren: "123456789" }],
+		["declarationDraft.save", "mutation", { siren: "123456789", year: 2026 }],
+		[
+			"declaration.getStatusHistory",
+			"query",
+			{ siren: "123456789", year: 2026 },
+		],
+		["mail.resendReceipt", "mutation", { kind: "declaration", year: 2026 }],
+		["adminStats.getCampaignStats", "query", { year: 2026 }],
+		["adminStats.getCampaignProgression", "query", { years: [2025, 2026] }],
+		[
+			"declarationLock.getLockState",
+			"query",
+			{ declarationId: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+	] as const)("retains the validated target for %s", async (path, type, target) => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type,
+			path,
+			getRawInput: buildGetRawInput({
+				...target,
+				freeText: "private@example.com",
+			}),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual(target);
+	});
+
+	it("normalizes a spaced SIREN accepted by the admin input schema", async () => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "admin.searchCompany",
+			getRawInput: buildGetRawInput({ siren: "775 670 417" }),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
+			siren: "775670417",
+		});
+	});
+
+	it("does not attest unvalidated values from a failed tRPC call", async () => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "representationDeclaration.submit",
+			getRawInput: buildGetRawInput({
+				year: 2026,
+				publishModalities: "private text",
+			}),
+			next: async () => ({
+				ok: false,
+				error: new TRPCError({ code: "BAD_REQUEST" }),
+			}),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			status: "failure",
+			metadata: null,
+		});
+	});
+
+	it("drops a non-object tRPC input", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -675,7 +761,7 @@ describe("auditMiddleware", () => {
 			next,
 		});
 
-		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({ value: 2025 });
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 	});
 
 	it("returns null metadata when input is empty", async () => {
@@ -723,7 +809,7 @@ describe("auditMiddleware", () => {
 		});
 	});
 
-	it("carries the real scalar raw input for the stdout mirror, not the { value } metadata wrapper", async () => {
+	it("carries the scalar raw input for the stdout mirror without persisting it", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({
 			ctx: buildCtx(),
@@ -733,9 +819,7 @@ describe("auditMiddleware", () => {
 			next,
 		});
 
-		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({
-			value: 2025,
-		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toBeNull();
 		expect(mockLogAction.mock.calls[0]?.[0]?.origin).toMatchObject({
 			rawInput: 2025,
 		});
