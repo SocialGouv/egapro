@@ -10,7 +10,7 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
 from egapro import config, constants, db
-from egapro.utils import flatten, remove_one_year
+from egapro.utils import escape_formula, flatten, remove_one_year
 
 
 def isodatetime(val):
@@ -82,7 +82,7 @@ WHITE_SPACES = re.compile(r"\s+")
 def clean_cell(value):
     if isinstance(value, str):
         value = WHITE_SPACES.sub(" ", ILLEGAL_CHARACTERS_RE.sub("", value).strip())
-    return value
+    return escape_formula(value)
 
 
 async def as_xlsx(max_rows=None, debug=False):

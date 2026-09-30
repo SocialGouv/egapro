@@ -296,7 +296,7 @@ def test_success_email_with_small_company():
       <li>Indicateur retour de congés maternité : non calculable</li>
       <li>Indicateur hautes rémunérations: 0</li>
     </ul>
-    <p>Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant : <a href="/index-egapro/declaration/?siren=514027945&year=2019">/index-egapro/declaration/?siren=514027945&year=2019</a></p>
+    <p>Si vous souhaitez visualiser ou modifier votre déclaration, veuillez cliquer sur le lien suivant : <a href="/index-egapro/declaration/?siren=514027945&amp;year=2019">/index-egapro/declaration/?siren=514027945&amp;year=2019</a></p>
     <p>Pour tout renseignement utile, vous pouvez contacter votre référent égalité professionnelle femmes-hommes au sein de votre DREETS en répondant à ce message.</p>
     <p>Veuillez agréer, Madame, Monsieur, nos salutations distinguées,</p>
     <p>Les services de l’administration du travail</p>
@@ -367,3 +367,12 @@ def test_success_email_attachment_small_company_non_calculable():
     pdf.set_creation_date(FAKE_NOW)
     # pdf.output("test/data/small_company_nc.pdf")
     assert bytes(pdf.output()) == Path("test/data/small_company_nc.pdf").read_bytes()
+
+
+def test_html_body_is_autoescaped_but_not_txt_body():
+    url = 'https://egapro.travail.gouv.fr/"><script>alert(1)</script>'
+    txt, html, *args = emails.success(url=url, **SMALL_COMPANY)
+    assert "<script>" not in html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+    # Text parts are not HTML, they must not be escaped.
+    assert url in txt

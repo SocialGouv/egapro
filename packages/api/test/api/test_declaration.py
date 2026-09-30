@@ -132,7 +132,7 @@ async def test_basic_declaration_should_save_data(client, body, monkeypatch):
         "/declaration/514027945/2019", body=body, headers={"X-REAL-IP": "1.1.1.1"}
     )
     assert resp.status == 204
-    logger.assert_called_with("514027945/2019 BY foo@bar.org FROM 1.1.1.1")
+    logger.assert_any_call("514027945/2019 BY foo@bar.org FROM 1.1.1.1")
     resp = await client.get("/declaration/514027945/2019")
     assert resp.status == 200
     data = json.loads(resp.body)
@@ -486,7 +486,7 @@ async def test_confirmed_declaration_should_send_email(client, monkeypatch, body
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
     assert "/index-egapro/declaration/?siren=514027945&year=2019" in txt
-    assert "/index-egapro/declaration/?siren=514027945&year=2019" in html
+    assert "/index-egapro/declaration/?siren=514027945&amp;year=2019" in html
     assert sender.call_args.kwargs["reply_to"] == replyToList
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2020.pdf"
 

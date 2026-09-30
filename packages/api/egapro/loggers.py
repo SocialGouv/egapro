@@ -12,17 +12,30 @@ logger.addHandler(logging.StreamHandler())
 
 sentry = None
 
+# Never send credentials nor personal data to logs or Sentry.
+SENSITIVE_HEADERS = {"api-key", "authorization", "cookie", "set-cookie", "x-real-ip"}
+
 
 def log_request(request):
-    logger.info(f"Path: {request.path}")
+    # Do not log the body nor the headers: they contain tokens and personal data.
+    logger.info(f"Request: {request.method} {request.path}")
     logger.info(f"User-agent: {request.headers.get('USER-AGENT')}")
-    try:
-        data = request.data
-    except:
-        pass
-    else:
-        logger.info(data.raw)
-        sentry_sdk.set_context("data", data.raw)
+
+
+def scrub_event(event, hint=None):
+    """Sentry `before_send` hook: remove credentials and personal data."""
+    event.pop("user", None)
+    request = event.get("request")
+    if isinstance(request, dict):
+        request.pop("cookies", None)
+        request.pop("data", None)
+        request.pop("query_string", None)
+        headers = request.get("headers")
+        if isinstance(headers, dict):
+            request["headers"] = {
+                k: v for k, v in headers.items() if k.lower() not in SENSITIVE_HEADERS
+            }
+    return event
 
 
 def init():
@@ -30,4 +43,6 @@ def init():
         config.SENTRY_DSN,
         release=metadata.version("egapro"),
         environment=config.FLAVOUR,
+        send_default_pii=False,
+        before_send=scrub_event,
     )

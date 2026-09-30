@@ -135,7 +135,7 @@ async def test_basic_representation_should_save_data(client, body, monkeypatch):
         "/representation-equilibree/514027945/2021", body=body, headers={"X-REAL-IP": "1.1.1.1"}
     )
     assert resp.status == 204
-    logger.assert_called_with("514027945/2021 BY foo@bar.org FROM 1.1.1.1")
+    logger.assert_any_call("514027945/2021 BY foo@bar.org FROM 1.1.1.1")
     resp = await client.get("/representation-equilibree/514027945/2021")
     assert resp.status == 200
     data = json.loads(resp.body)

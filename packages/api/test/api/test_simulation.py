@@ -287,9 +287,7 @@ async def test_send_code_endpoint(client, monkeypatch, body):
     # Invalid UUID
     resp = await client.post("/simulation/unknown/send-code", body=body)
     assert resp.status == 400
-    assert json.loads(resp.body) == {
-        "error": 'Invalid data: invalid input syntax for type uuid: "unknown"'
-    }
+    assert json.loads(resp.body) == {"error": "Invalid data"}
     assert not calls
 
     # Not found UUID

@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta, timezone
 from importlib import import_module
 
 import json
+import re
 
 
 def default_json(v):
@@ -55,6 +56,25 @@ def flatten(b, prefix="", delim=".", val=None, flatten_lists=False):
     else:
         val[prefix] = b
     return val
+
+
+# Spreadsheet software may interpret those leading characters as a formula.
+FORMULA_TRIGGERS = ("=", "+", "-", "@", "\t", "\r")
+NUMBER = re.compile(r"^[+-]?\d+([.,]\d+)?$")
+
+
+def escape_formula(value):
+    """Neutralize CSV/XLSX formula injection by prefixing risky strings with a `'`.
+
+    Only strings are concerned: numbers (including negative ones) are untouched, as
+    are strings holding a plain number (eg. "-12.5")."""
+    if (
+        isinstance(value, str)
+        and value.startswith(FORMULA_TRIGGERS)
+        and not NUMBER.match(value)
+    ):
+        return "'" + value
+    return value
 
 
 def unflatten(d, delim="."):

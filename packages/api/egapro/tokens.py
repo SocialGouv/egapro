@@ -34,12 +34,9 @@ def require(view):
         try:
             email = read(token)
         except ValueError:
-            logger.debug(
-                "Invalid token on %s (token: %s, referrer: %s)",
-                request.path,
-                token,
-                request.referrer,
-            )
+            # Never log the token itself, nor the referrer (it may carry the token
+            # in its query string, see the links sent by email).
+            logger.debug("Invalid token on %s", request.path)
             raise HttpError(401, "Invalid token")
         email = email.lower()
         request["email"] = email

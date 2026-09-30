@@ -31,7 +31,9 @@ async def test_request_token(client, monkeypatch):
     assert calls == 1
 
 
-async def test_request_token_with_allowed_ips(client, monkeypatch):
+async def test_request_token_never_returns_token_in_response(client, monkeypatch):
+    # Non regression: the token used to be returned directly for some X-REAL-IP
+    # values, which is a client controlled header.
     calls = 0
 
     def mock_send(to, subject, body):
@@ -40,13 +42,12 @@ async def test_request_token_with_allowed_ips(client, monkeypatch):
 
     client.logout()
     monkeypatch.setattr("egapro.emails.send", mock_send)
-    monkeypatch.setattr("egapro.config.ALLOWED_IPS", ["1.1.1.1"])
     resp = await client.post(
         "/token", body={"email": "foo@bar.org"}, headers={"X-REAL-IP": "1.1.1.1"}
     )
-    assert resp.status == 200
-    assert list(json.loads(resp.body).keys()) == ["token"]
-    assert calls == 0
+    assert resp.status == 204
+    assert not resp.body
+    assert calls == 1
 
 
 async def test_search_endpoint(client):
@@ -342,7 +343,7 @@ async def test_resend_receipt_endpoint(client, monkeypatch, declaration):
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
     assert "/index-egapro/declaration/?siren=514027945&year=2020" in txt
-    assert "/index-egapro/declaration/?siren=514027945&year=2020" in html
+    assert "/index-egapro/declaration/?siren=514027945&amp;year=2020" in html
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2021.pdf"
 
 
@@ -370,7 +371,7 @@ async def test_resend_receipt_endpoint_by_staff(client, monkeypatch, declaration
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
     assert "/index-egapro/declaration/?siren=514027945&year=2020" in txt
-    assert "/index-egapro/declaration/?siren=514027945&year=2020" in html
+    assert "/index-egapro/declaration/?siren=514027945&amp;year=2020" in html
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2021.pdf"
 
 

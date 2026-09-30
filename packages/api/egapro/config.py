@@ -25,9 +25,34 @@ STAFF = []
 SENTRY_DSN = ""
 FLAVOUR = "local"
 API_ENTREPRISES = ""
-ALLOWED_IPS = []
 DOMAIN = "https://egapro.travail.gouv.fr"
 READONLY = False
+
+# Development values that must be overridden by env vars in production.
+_dev_defaults = {"SECRET": SECRET, "DBPASS": DBPASS}
+
+
+def is_production():
+    # Set by the production Docker image (see Dockerfile), not by Dockerfile.dev.
+    return os.environ.get("PRODUCTION", "").lower() == "true"
+
+
+def check():
+    """Refuse to run a production instance with the development credentials."""
+    if not is_production():
+        return
+    insecure = [
+        key for key, default in _dev_defaults.items()
+        if not globals()[key] or globals()[key] == default
+    ]
+    if insecure:
+        names = ", ".join(f"EGAPRO_{key}" for key in insecure)
+        raise RuntimeError(f"Insecure configuration, please define: {names}")
+
+
+def allowed_origins():
+    """Explicit origins allowed by EGAPRO_ALLOW_ORIGIN (comma separated), "*" excluded."""
+    return [o.strip().rstrip("/") for o in ALLOW_ORIGIN.split(",") if o.strip() not in ("", "*")]
 
 
 def init():
@@ -39,6 +64,7 @@ def init():
                 real_type, typ = typ, lambda x: real_type(x.split(","))
             if env_key in os.environ:
                 globals()[key] = typ(os.environ[env_key])
+    check()
 
 
 def debug():

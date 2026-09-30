@@ -62,3 +62,28 @@ def test_flatten_should_flatten_lists():
 )
 def test_remove_one_year(input, output):
     assert utils.remove_one_year(date(*input)) == date(*output)
+
+
+@pytest.mark.parametrize(
+    "input,output",
+    [
+        ("=HYPERLINK(\"http://evil.com\")", "'=HYPERLINK(\"http://evil.com\")"),
+        ("+cmd|' /C calc'!A0", "'+cmd|' /C calc'!A0"),
+        ("-2+3", "'-2+3"),
+        ("@SUM(A1:A2)", "'@SUM(A1:A2)"),
+        ("\t=1+1", "'\t=1+1"),
+        ("\r=1+1", "'\r=1+1"),
+        ("Total Recall", "Total Recall"),
+        ("'https://egapro.travail.gouv.fr/", "'https://egapro.travail.gouv.fr/"),
+        ("", ""),
+        # Numbers, and strings holding a plain number, are left untouched.
+        (-12, -12),
+        (-12.5, -12.5),
+        (0, 0),
+        (None, None),
+        ("-12.5", "-12.5"),
+        ("+33", "+33"),
+    ],
+)
+def test_escape_formula(input, output):
+    assert utils.escape_formula(input) == output

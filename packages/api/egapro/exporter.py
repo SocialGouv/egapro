@@ -13,6 +13,7 @@ from progressist import ProgressBar
 import ujson as json
 
 from egapro import constants, db, models, sql, utils
+from egapro.utils import escape_formula
 
 def truthy(val):
     return False if val is False else True
@@ -91,7 +92,7 @@ async def public_data(path: Path):
                 data.grade or "NC",
             ]
         )
-    writer.writerows(rows)
+    writer.writerows([escape_formula(c) for c in row] for row in rows)
 
 
 async def full(dest):
@@ -120,13 +121,13 @@ async def indexes(path: Path):
                 data.grade,
             ]
         )
-    writer.writerows(rows)
+    writer.writerows([escape_formula(c) for c in row] for row in rows)
 
 WHITE_SPACES = re.compile(r"\s+")
 def clean_cell(value):
     if isinstance(value, str):
         value = WHITE_SPACES.sub(" ", ILLEGAL_CHARACTERS_RE.sub("", value).strip())
-    return value
+    return escape_formula(value)
 
 tranche_effectif_map = {
     "50:250": "50 à 250",
