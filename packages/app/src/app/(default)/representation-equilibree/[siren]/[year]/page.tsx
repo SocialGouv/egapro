@@ -26,6 +26,19 @@ export const dynamic = "force-dynamic";
 
 const proconnectManageOrganisationsUrl = process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL;
 
+/**
+ * This page is public. `DetailRepEq` is a client component: every prop it receives is serialized into the
+ * page payload, even the fields its public mode does not display. Strip the declarant's personal data
+ * before it leaves the server when the visitor is neither an owner nor staff.
+ */
+const toPublicRepEq = (repEq: RepresentationEquilibreeDTO): RepresentationEquilibreeDTO => ({
+  ...repEq,
+  email: "",
+  firstname: "",
+  lastname: "",
+  phoneNumber: "",
+});
+
 const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPageProps<"siren" | "year">) => {
   const year = +strYear;
   const useCase = new GetRepresentationEquilibreeBySirenAndYear(representationEquilibreeRepo);
@@ -121,7 +134,7 @@ const RepEqPage = async ({ params: { siren, year: strYear } }: NextServerPagePro
         </Box>
       )}
 
-      <DetailRepEq repEq={repEq} publicMode={!isOwner} />
+      <DetailRepEq repEq={isOwner ? repEq : toPublicRepEq(repEq)} publicMode={!isOwner} />
 
       {isOwner && (
         <>

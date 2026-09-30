@@ -49,13 +49,17 @@ jest.mock("@api/core-domain/useCases/GetRepresentationEquilibreeBySirenAndYear",
   GetRepresentationEquilibreeBySirenAndYearError: class extends Error {},
 }));
 
-// Mock DetailRepEq component
+// Mock DetailRepEq component (a client component: every prop it gets ends up in the page payload)
+const mockDetailRepEqProps = jest.fn();
 jest.mock("../../../Recap", () => ({
-  DetailRepEq: ({ repEq, publicMode }: { publicMode: boolean; repEq: RepresentationEquilibreeDTO }) => (
-    <div data-testid="detail-rep-eq">
-      Detail Mock - Public: {publicMode.toString()} - Siren: {repEq.siren}
-    </div>
-  ),
+  DetailRepEq: (props: { publicMode: boolean; repEq: RepresentationEquilibreeDTO }) => {
+    mockDetailRepEqProps(props);
+    return (
+      <div data-testid="detail-rep-eq">
+        Detail Mock - Public: {props.publicMode.toString()} - Siren: {props.repEq.siren}
+      </div>
+    );
+  },
 }));
 
 // Mock EditButton component
@@ -184,5 +188,34 @@ describe("RepEqPage", () => {
     expect(screen.getByText(/Cette déclaration a été validée et transmise/)).toBeInTheDocument();
     expect(screen.getByTestId("detail-rep-eq")).toHaveTextContent("Public: false");
     expect(screen.getByTestId("edit-button")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["an anonymous visitor", null],
+    [
+      "a user who does not own the siren",
+      { user: { email: "user@example.com", companies: [{ siren: "123456788" }], staff: false } },
+    ],
+  ])("never sends the declarant's personal data to %s", async (_, session) => {
+    mockExecute.mockResolvedValue(mockRepEq);
+    (getServerSession as jest.Mock).mockResolvedValue(session);
+
+    render((await RepEqPage(defaultProps)) as ReactElement);
+
+    const { repEq } = mockDetailRepEqProps.mock.calls[0][0];
+    expect(JSON.stringify(repEq)).not.toMatch(/Doe|John|0123456789|john\.doe@example\.com/);
+    expect(repEq.company.name).toBe("Test Company");
+    expect(repEq.executiveWomenPercent).toBe(40);
+  });
+
+  it("gives the declarant's data to the owner", async () => {
+    mockExecute.mockResolvedValue(mockRepEq);
+    (getServerSession as jest.Mock).mockResolvedValue({
+      user: { ...mockSession.user, companies: [{ siren: "123456789" }] },
+    });
+
+    render((await RepEqPage(defaultProps)) as ReactElement);
+
+    expect(mockDetailRepEqProps.mock.calls[0][0].repEq.email).toBe("john.doe@example.com");
   });
 });
