@@ -45,6 +45,15 @@ type LockHolder = {
 	email: string | null;
 };
 
+// jsdom applies no real stylesheet, so an `fr-sr-only` span stays part of `textContent`; strip it to isolate the visible label from its accessible-name suffix.
+function visibleText(element: Element): string {
+	const clone = element.cloneNode(true) as Element;
+	for (const hidden of clone.querySelectorAll(".fr-sr-only")) {
+		hidden.remove();
+	}
+	return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
+}
+
 const BASE_PROPS = {
 	campaignDeadlines: getDefaultCampaignDeadlines(FUTURE_YEAR),
 	compliancePathApplicable: true,
@@ -140,7 +149,17 @@ describe("DeclarationProcessPanel", () => {
 				"href",
 				"/declaration-remuneration?siren=532847196",
 			);
-			expect(cta).toHaveTextContent(/^Commencer$/);
+			expect(cta && visibleText(cta)).toBe("Commencer");
+		});
+
+		it("names the CTA explicitly for RGAA 6.1.1 without changing the visible label (#4137)", () => {
+			const { panel } = renderPanel("start");
+			expect(
+				panel.getByRole("link", {
+					hidden: true,
+					name: "Commencer la déclaration",
+				}),
+			).toHaveTextContent(/^Commencer/);
 		});
 
 		it("describes the CTA link by the panel title", () => {
@@ -230,7 +249,27 @@ describe("DeclarationProcessPanel", () => {
 			const { dialog } = renderPanel("compliance");
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
 			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Continuer");
+			expect(cta && visibleText(cta)).toBe("Continuer");
+		});
+	});
+
+	describe.each<PanelVariant>([
+		"compliance_choice",
+		"compliance",
+		"evaluation",
+		"cse",
+	])("CTA accessible name for the %s variant (RGAA 6.1.1, #4137)", (variant) => {
+		it("names the CTA explicitly without changing the visible label", () => {
+			const { panel, dialog } = renderPanel(variant);
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(visibleText(cta)).toBe("Continuer");
+			expect(
+				panel.getByRole("link", {
+					hidden: true,
+					name: "Continuer la démarche des indicateurs de rémunération",
+				}),
+			).toBe(cta);
 		});
 	});
 
@@ -356,10 +395,13 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it('renders "Voir la déclaration" CTA', () => {
-			const { dialog } = renderPanel("closed");
-			const footerCta = dialog.querySelector(".footer a.fr-btn");
-			expect(footerCta).toHaveTextContent("Voir la déclaration");
+		it('renders "Voir la déclaration" CTA whose accessible name equals its visible label', () => {
+			const { panel, dialog } = renderPanel("closed");
+			const footerCta = dialog.querySelector(".footer a.fr-btn") as HTMLElement;
+			expect(visibleText(footerCta)).toBe("Voir la déclaration");
+			expect(
+				panel.getByRole("link", { hidden: true, name: "Voir la déclaration" }),
+			).toBe(footerCta);
 		});
 
 		it("exposes a Modifier link for the CSE opinion step", () => {
@@ -421,9 +463,24 @@ describe("DeclarationProcessPanel", () => {
 				lockHolder,
 			});
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
-			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Consulter en lecture seule");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(visibleText(cta)).toBe("Consulter en lecture seule");
 			expect(cta).not.toHaveTextContent("Commencer");
+		});
+
+		it("names the CTA explicitly for a read-only visitor (RGAA 6.1.1, #4137)", () => {
+			const { panel, dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(
+				panel.getByRole("link", {
+					hidden: true,
+					name: "Consulter en lecture seule la démarche des indicateurs de rémunération",
+				}),
+			).toBe(cta);
 		});
 
 		it("keeps the CTA href pointing to the declaration for read-only access", () => {
@@ -460,8 +517,8 @@ describe("DeclarationProcessPanel", () => {
 		it("keeps the regular CTA label", () => {
 			const { dialog } = renderPanel("start", { lockedByOther: false });
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
-			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent(/^Commencer$/);
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(visibleText(cta)).toBe("Commencer");
 			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});
