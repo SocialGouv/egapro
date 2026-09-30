@@ -178,6 +178,19 @@ describe("logAction", () => {
 		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
 	});
 
+	it("keeps the signed SUIT download target without its filename", async () => {
+		const fileId = "6b3573f8-8723-45c9-98a0-641431843ddd";
+		await logAction({
+			action: AUDIT_ACTIONS.EXPORT_API_FILES,
+			status: "success",
+			metadata: { fileId, fileName: "f.pdf", year: "2026" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			fileId,
+			year: 2026,
+		});
+	});
+
 	it("never throws even when the database insert fails", async () => {
 		mockInsertValues.mockRejectedValueOnce(new Error("db down"));
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});

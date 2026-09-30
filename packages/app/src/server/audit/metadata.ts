@@ -75,7 +75,7 @@ const FIELDS_BY_ACTION: Partial<
 		"date_begin",
 		"date_end",
 	],
-	[AUDIT_ACTIONS.EXPORT_API_FILES]: ["year"],
+	[AUDIT_ACTIONS.EXPORT_API_FILES]: ["year", "fileId"],
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: ["count", "limit"],
 	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: ["count", "limit"],
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: ["year"],
