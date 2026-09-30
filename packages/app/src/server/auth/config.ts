@@ -703,6 +703,19 @@ export const authConfig = {
 						userAgent: requestContext.userAgent,
 					});
 				}
+
+				// NextAuth's signIn event receives the ProConnect subject, whereas
+				// the JWT branch has resolved the local user UUID (also on step-up).
+				const requestContext = await safeRequestContext();
+				void logAction({
+					action: AUDIT_ACTIONS.AUTH_LOGIN,
+					status: "success",
+					userId: dbUser.id,
+					userEmail: email,
+					siren: parseSiren(profileData.siret),
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
 			}
 
 			// Last, so it never doubles a close the branches above already made:
@@ -724,21 +737,6 @@ export const authConfig = {
 				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),
-	},
-	events: {
-		async signIn({ user }) {
-			const requestContext = await safeRequestContext();
-			const profileData = user as typeof user & { siret?: string | null };
-			void logAction({
-				action: AUDIT_ACTIONS.AUTH_LOGIN,
-				status: "success",
-				userId: user.id ?? null,
-				userEmail: user.email ?? null,
-				siren: parseSiren(profileData.siret),
-				ipAddress: requestContext.ipAddress,
-				userAgent: requestContext.userAgent,
-			});
-		},
 	},
 	logger: {
 		// NextAuth v4 expects a synchronous `(code, metadata) => void` logger.

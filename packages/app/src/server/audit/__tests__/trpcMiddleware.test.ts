@@ -676,6 +676,48 @@ describe("auditMiddleware", () => {
 		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual({ id });
 	});
 
+	it.each([
+		[
+			"adminDeclarations.getRecap",
+			"query",
+			{ id: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+		["adminSettings.upsertCampaignDeadlines", "mutation", { year: 2026 }],
+		[
+			"publicReferents.getById",
+			"query",
+			{ id: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+		["admin.searchCompany", "mutation", { siren: "123456789" }],
+		["company.getWithDeclarations", "query", { siren: "123456789" }],
+		["declarationDraft.save", "mutation", { siren: "123456789", year: 2026 }],
+		[
+			"declaration.getStatusHistory",
+			"query",
+			{ siren: "123456789", year: 2026 },
+		],
+		["mail.resendReceipt", "mutation", { kind: "declaration", year: 2026 }],
+		["adminStats.getCampaignStats", "query", { year: 2026 }],
+		["adminStats.getCampaignProgression", "query", { years: [2025, 2026] }],
+		[
+			"declarationLock.getLockState",
+			"query",
+			{ declarationId: "1a19fd4d-d851-4146-ae27-8402e5448126" },
+		],
+	] as const)("retains the validated target for %s", async (path, type, target) => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type,
+			path,
+			getRawInput: buildGetRawInput({
+				...target,
+				freeText: "private@example.com",
+			}),
+			next: async () => okResult(undefined),
+		});
+		expect(mockLogAction.mock.calls[0]?.[0]?.metadata).toEqual(target);
+	});
+
 	it("does not attest unvalidated values from a failed tRPC call", async () => {
 		await auditMiddleware({
 			ctx: buildCtx(),

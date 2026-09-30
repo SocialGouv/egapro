@@ -3,6 +3,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 
 type MetadataField =
 	| "year"
+	| "years"
 	| "count"
 	| "limit"
 	| "format"
@@ -21,6 +22,7 @@ type MetadataField =
 	| "id"
 	| "declarationId"
 	| "fileId"
+	| "siren"
 	| "flowType";
 
 const UUID_PATTERN =
@@ -57,7 +59,28 @@ const FIELDS_BY_ACTION: Partial<
 	Record<AuditActionKey, readonly MetadataField[]>
 > = {
 	[AUDIT_ACTIONS.DECLARATION_SUBMIT]: ["year"],
+	[AUDIT_ACTIONS.DECLARATION_HISTORY_READ]: ["siren", "year"],
+	[AUDIT_ACTIONS.DECLARATION_LOCK_STATE_READ]: ["declarationId"],
+	[AUDIT_ACTIONS.DRAFT_READ]: ["siren", "year"],
+	[AUDIT_ACTIONS.DRAFT_SAVE]: ["siren", "year"],
+	[AUDIT_ACTIONS.DRAFT_CLEAR]: ["siren", "year"],
+	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: ["siren"],
+	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: ["siren"],
+	[AUDIT_ACTIONS.MAIL_RECEIPT_RESEND]: ["kind", "year"],
+	[AUDIT_ACTIONS.PDF_SIZE_PROBE]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_CAMPAIGN_PROGRESSION]: ["years"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_CAMPAIGN_STATS]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DURATIONS]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_STEP_DROPOFF_RATE]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_COMPLETION_FUNNEL]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_FUNNEL]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_CATEGORY_MODEL]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_HELP_LINKS]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_MATOMO_DEVICE_BREAKDOWN]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_CSE_STATUS_CONFIRMATIONS]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_STATS_GET_USERS_PER_COMPANY]: ["year"],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: ["year"],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_GET]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: ["year"],
@@ -86,8 +109,11 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: ["acr", "authTime", "testSeam"],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: ["timeoutMinutes"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: ["id"],
+	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_CANCEL]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_RELEASE_LOCK]: ["declarationId"],
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: ["id"],
+	[AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY]: ["siren"],
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType"],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: ["fileId", "flowType"],
@@ -118,7 +144,7 @@ function validIsoDate(value: unknown): string | undefined {
 function validValue(
 	field: MetadataField,
 	value: unknown,
-): string | number | boolean | undefined {
+): string | number | boolean | number[] | undefined {
 	switch (field) {
 		case "year": {
 			const year =
@@ -132,6 +158,19 @@ function validValue(
 				? year
 				: undefined;
 		}
+		case "years":
+			return Array.isArray(value) &&
+				value.length >= 1 &&
+				value.length <= 5 &&
+				value.every(
+					(year) =>
+						typeof year === "number" &&
+						Number.isInteger(year) &&
+						year >= 2000 &&
+						year <= 2100,
+				)
+				? [...value]
+				: undefined;
 		case "count":
 		case "limit":
 		case "timeoutMinutes":
@@ -147,6 +186,10 @@ function validValue(
 		case "declarationId":
 		case "fileId":
 			return typeof value === "string" && UUID_PATTERN.test(value)
+				? value
+				: undefined;
+		case "siren":
+			return typeof value === "string" && /^\d{9}$/.test(value)
 				? value
 				: undefined;
 		case "flowType":
