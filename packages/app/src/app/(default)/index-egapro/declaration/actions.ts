@@ -12,7 +12,6 @@ import { DeclarationSpecificationError } from "@common/core-domain/domain/specif
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { ValidationError } from "@common/shared-domain";
 import { type ServerActionResponse } from "@common/utils/next";
-import assert from "assert";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({

@@ -37,7 +37,9 @@ export async function updateCompanyInfos(
   try {
     const useCase = new SaveDeclaration(declarationRepo, entrepriseService);
     await useCase.execute({ declaration, override: session?.user?.staff });
-    if (oldSiren && declaration.commencer?.annéeIndicateurs)
+    // Only a SIREN change leaves an old declaration behind: with the same SIREN this would delete the
+    // declaration that was just saved.
+    if (oldSiren && oldSiren !== declaration.commencer?.siren && declaration.commencer?.annéeIndicateurs)
       await declarationRepo.delete([new Siren(oldSiren), new PositiveNumber(declaration.commencer?.annéeIndicateurs)]);
 
     return {
