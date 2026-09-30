@@ -88,7 +88,7 @@ export const GET = withAuditedRoute(
         siren: session?.user?.siret
           ? extractSiren(session.user.siret)
           : null,
-        metadata: { /* non-PII query params, file names, etc. */ },
+        metadata: { /* fields explicitly allowed for this action */ },
       };
     },
   },
@@ -231,7 +231,7 @@ needs something `resolveContext` cannot produce.
 | Route | Action key(s) | Why not the wrapper |
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
-| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`rawSiren` on a 400, `count` on success) computed *during* the handler |
+| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch context computed *during* the handler; only validated counters survive the final metadata projection |
 | `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
 | `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
 | `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
@@ -240,8 +240,8 @@ needs something `resolveContext` cannot produce.
 
 `resolveContext` runs **before** the handler, so it cannot see a result count,
 a parsed body, or the branch the handler took. Converting these seven to the
-wrapper would flatten one row per call and drop that metadata — a net loss of
-audit fidelity. The wrapper's route-context argument (see below) removes the
+wrapper would flatten one row per call and lose the per-branch audit context.
+The wrapper's route-context argument (see below) removes the
 *type-level* blocker; it does not make the conversion desirable.
 
 Since #3764, `withAuditedRoute` is generic over the handler's arguments *after*
@@ -285,25 +285,31 @@ type argument.
 
 ---
 
-## Metadata sanitisation
+## Données conservées dans `audit.action_log`
 
-`logAction` accepts a free-form `metadata` jsonb field. The tRPC middleware
-runs every input through `sanitizeMetadata()` which recursively strips keys
-matching the `SENSITIVE_KEYS` blocklist at any depth:
+`logAction` est la dernière barrière avant l'insert, quel que soit l'appelant
+(tRPC, route ou appel direct). Il conserve l'action, la catégorie, le statut,
+la date générée par la base, `user_id` et `siren` quand le contexte les
+fournit. `user_email` et `user_agent` sont toujours `null`. `ip_address`
+utilise `truncateIp()` (IPv4 /16, IPv6 /48, invalide → `null`). Le champ
+`error_message` ne contient qu'un code connu ou `ERROR`, jamais le texte
+libre de l'exception. `resource_type` accepte uniquement `declaration`
+ou `notification` ; `resource_id` n'accepte qu'un UUID technique associé
+à un de ces types.
 
-```
-password, token, refresh_token, secret, client_secret, authorization,
-apikey, api_key, accesskey, access_key, private_key
-```
+`metadata` est fermé par défaut. `metadata.ts` déclare, **par action**, les
+clés utiles et leurs validateurs de valeur (année, compteur, booléen ou
+énumération). `logAction` reprojette systématiquement les métadonnées avec
+cette politique : une nouvelle route ou un appel direct ne peut pas la
+contourner. Les objets, tableaux, noms de fichiers, champs de recherche,
+numéros de téléphone et clés inconnues sont écartés. Ajouter une clé exige
+une justification d'audit, une valeur bornée et un test.
 
-When writing to `logAction` **directly** (route handlers, auth events, cron),
-the caller is responsible for sanitisation:
-
-- Never put secrets in `metadata`
-- Never put IP addresses in `metadata` — there is a dedicated `ipAddress`
-  column already
-- Do put business-relevant context: year, declarationId, fileName, action
-  parameters
+Le middleware tRPC lit l'input brut avant Zod. Il ne transmet de métadonnées
+à `logAction` que si la procédure réussit, puis utilise la même projection
+explicite par action. Un échec garde `metadata: null` afin qu'une valeur
+forgée ne soit pas présentée comme validée. Le miroir stdout conserve son
+contrat séparé décrit ci-dessous.
 
 ---
 
@@ -397,14 +403,10 @@ normalement. Aucune nouvelle variable d'environnement.
 échec de construction ou d'écriture de la ligne stdout n'empêche jamais
 l'insert, et un échec d'insert n'empêche jamais la ligne stdout (déjà émise).
 
-**Borne `error_message`** — `audit.action_log.error_message` est un `text()`
-sans limite ; un appelant non authentifié peut forger un message arbitrairement
-long (ex. une erreur de validation Zod qui sérialise tout l'input rejeté).
-`logAction` tronque à `AUDIT_ERROR_MESSAGE_MAX_LENGTH` (500 caractères) juste
-avant l'insert — seul point d'écriture en base, donc couvre tRPC, les routes
-et les appels directs. Le miroir stdout lit le message **non tronqué** via
-`deriveErrorCode` (qui n'en garde qu'un préfixe de toute façon) : ce
-comportement est inchangé.
+**`error_message` en base** — `logAction` réduit le message libre à un
+code court de la liste contrôlée ou à `ERROR`. Le miroir stdout continue
+d'utiliser `deriveErrorCode` sur le message original ; son contrat est
+inchangé.
 
 ---
 
@@ -434,8 +436,8 @@ Every new action key must pass the round-trip test in
 `AUDIT_ACTION_CATEGORIES`. Adding an action without its category mapping
 fails CI immediately.
 
-For tRPC middleware behaviour (opt-in query, metadata sanitisation,
-sensitive-key stripping, `ok: false` detection), extend the existing
+For tRPC middleware behaviour (opt-in query, metadata projection,
+failed-input rejection, `ok: false` detection), extend the existing
 `~/server/audit/__tests__/trpcMiddleware.test.ts`. For the stdout mirror
 itself (IP truncation, error-code derivation, input/inputKeys projection,
 the 16-key contract, the test-env guard), extend
@@ -463,8 +465,8 @@ sensitive read:
   - [ ] Route Handler → `withAuditedRoute(...)` wrapper + `cachedAuth`
   - [ ] Auth event → `logAction` inside NextAuth `events` / `logger`
   - [ ] System / cron → direct `logAction` call
-- [ ] `metadata` does not contain secrets / IP (use the column) / PII that is
-      not already in `user_email` or `siren`
+- [ ] Any needed `metadata` key is explicitly permitted and validated for
+      this action in `metadata.ts`; free text and PII are excluded
 - [ ] Existing unit tests still green (`actionKeys.test.ts` especially)
 - [ ] Manually verified on a review app: the row actually lands in
       `audit.action_log` with the expected category / status / metadata

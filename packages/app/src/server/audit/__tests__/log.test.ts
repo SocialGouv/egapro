@@ -24,7 +24,7 @@ vi.mock("../activityLog", async (importOriginal) => {
 	};
 });
 
-const { logAction, AUDIT_ERROR_MESSAGE_MAX_LENGTH } = await import("../log");
+const { logAction } = await import("../log");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
 describe("logAction", () => {
@@ -54,11 +54,11 @@ describe("logAction", () => {
 			category: "mutation",
 			status: "success",
 			userId: "user-1",
-			userEmail: "test@example.com",
+			userEmail: null,
 			siren: "123456789",
 			metadata: { year: 2026 },
-			ipAddress: "1.2.3.4",
-			userAgent: "Mozilla",
+			ipAddress: "1.2.0.0",
+			userAgent: null,
 			durationMs: 42,
 		});
 	});
@@ -80,6 +80,70 @@ describe("logAction", () => {
 			ipAddress: null,
 			userAgent: null,
 			durationMs: null,
+		});
+	});
+
+	it("rejects free, nested and forged metadata from a direct call", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
+			status: "failure",
+			metadata: {
+				year: "2026<script>",
+				fileName: "private.pdf",
+				phone: "0612345678",
+				nested: { secret: "value" },
+			},
+			ipAddress: "203.0.113.4:1234",
+			errorMessage: "MY_PRIVATE_VALUE: secret",
+		});
+
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			metadata: null,
+			ipAddress: null,
+			errorMessage: "ERROR",
+		});
+	});
+
+	it("keeps only validated action metadata and truncates IPv6", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD,
+			status: "success",
+			metadata: {
+				year: "2026",
+				invalidYear: false,
+				fileName: "private.pdf",
+			},
+			ipAddress: "2001:db8:abcd:1234::1",
+		});
+
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			metadata: { year: 2026, invalidYear: false },
+			ipAddress: "2001:db8:abcd::",
+		});
+	});
+
+	it("keeps a technical resource UUID and rejects arbitrary resource text", async () => {
+		const id = "123e4567-e89b-12d3-a456-426614174000";
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "success",
+			resourceType: "declaration",
+			resourceId: id,
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			resourceType: "declaration",
+			resourceId: id,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "failure",
+			resourceType: "person@example.com",
+			resourceId: "private@example.com",
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
+			resourceType: null,
+			resourceId: null,
 		});
 	});
 
@@ -223,12 +287,11 @@ describe("logAction", () => {
 				"fake-session-token-value",
 			);
 			expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
-				errorMessage:
-					"OAUTH_CALLBACK_ERROR: invalid_grant for code fake-session-token-value",
+				errorMessage: "OAUTH_CALLBACK_ERROR",
 			});
 		});
 
-		it("truncates a long errorMessage to AUDIT_ERROR_MESSAGE_MAX_LENGTH before inserting (#4526)", async () => {
+		it("reduces a long free-form error to a controlled code", async () => {
 			const longMessage = "a".repeat(2000);
 
 			await logAction({
@@ -238,16 +301,12 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
-			expect(row?.errorMessage).toBe(
-				longMessage.slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH),
-			);
+			expect(row?.errorMessage).toBe("ERROR");
 		});
 
-		it("never splits a surrogate pair straddling the truncation cut", async () => {
+		it("does not persist Unicode error content", async () => {
 			const surrogatePairEmoji = "😀";
-			const longMessage =
-				"a".repeat(AUDIT_ERROR_MESSAGE_MAX_LENGTH - 1) + surrogatePairEmoji;
+			const longMessage = "a".repeat(500) + surrogatePairEmoji;
 
 			await logAction({
 				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
@@ -256,13 +315,10 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toBe(longMessage);
-			expect([...(row?.errorMessage ?? "")]).toHaveLength(
-				AUDIT_ERROR_MESSAGE_MAX_LENGTH,
-			);
+			expect(row?.errorMessage).toBe("ERROR");
 		});
 
-		it("persists a short errorMessage unchanged", async () => {
+		it("persists only the code from a short errorMessage", async () => {
 			await logAction({
 				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
 				status: "failure",
@@ -270,10 +326,10 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toBe("BAD_REQUEST: invalid input");
+			expect(row?.errorMessage).toBe("BAD_REQUEST");
 		});
 
-		it("keeps deriving the stdout errorCode correctly and truncates the persisted row, for a long tRPC-shaped message", async () => {
+		it("uses the same short code for stdout and the database", async () => {
 			const longMessage = `BAD_REQUEST: ${"x".repeat(2000)}`;
 
 			await logAction({
@@ -286,7 +342,7 @@ describe("logAction", () => {
 				errorCode: "BAD_REQUEST",
 			});
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
+			expect(row?.errorMessage).toBe("BAD_REQUEST");
 		});
 
 		// A failure while building or emitting the stdout line must never block the DB insert, nor make logAction reject.

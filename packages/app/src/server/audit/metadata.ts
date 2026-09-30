@@ -1,0 +1,189 @@
+import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+
+type MetadataField =
+	| "year"
+	| "count"
+	| "limit"
+	| "format"
+	| "invalidYear"
+	| "acr"
+	| "authTime"
+	| "testSeam"
+	| "timeoutMinutes"
+	| "date_begin"
+	| "date_end"
+	| "type"
+	| "kind"
+	| "variant"
+	| "isResend"
+	| "attachmentsDropped";
+
+const RECEIPT_TYPES = new Set([
+	"declaration_confirmation",
+	"second_declaration_confirmation",
+	"cse_opinion_receipt",
+	"joint_evaluation_submitted",
+	"representation_receipt",
+]);
+const RECEIPT_KINDS = new Set([
+	"declaration",
+	"secondDeclaration",
+	"cseOpinion",
+	"jointEvaluation",
+	"representation",
+]);
+const RECEIPT_VARIANTS = new Set([
+	"completed",
+	"cse_to_deposit",
+	"path_to_select",
+	"cse_first_and_second",
+	"single",
+	"with_gap",
+	"first_and_second",
+]);
+
+// Every action starts with no metadata. Extend this map only for a concrete
+// audit need, with a validator below. In particular, raw search text, file
+// names and identifiers from request input are intentionally omitted.
+const FIELDS_BY_ACTION: Partial<
+	Record<AuditActionKey, readonly MetadataField[]>
+> = {
+	[AUDIT_ACTIONS.DECLARATION_SUBMIT]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN]: ["year"],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: ["year"],
+	[AUDIT_ACTIONS.REPRESENTATION_GET]: ["year"],
+	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: ["year"],
+	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: ["year"],
+	[AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT]: ["year"],
+	[AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD]: ["year"],
+	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: ["year"],
+	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: ["year"],
+	[AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD]: ["year", "invalidYear"],
+	[AUDIT_ACTIONS.EXPORT_GENERATE]: ["year"],
+	[AUDIT_ACTIONS.EXPORT_DOWNLOAD]: ["year"],
+	[AUDIT_ACTIONS.EXPORT_API_DECLARATIONS]: ["year", "date_begin", "date_end"],
+	[AUDIT_ACTIONS.EXPORT_API_REPRESENTATIONS]: [
+		"year",
+		"date_begin",
+		"date_end",
+	],
+	[AUDIT_ACTIONS.EXPORT_API_FILES]: ["year"],
+	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: ["count", "limit"],
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: ["count", "limit"],
+	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: ["year"],
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: ["year"],
+	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: ["format"],
+	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: ["format"],
+	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: ["format"],
+	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: ["acr", "authTime", "testSeam"],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: ["timeoutMinutes"],
+	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: [
+		"type",
+		"kind",
+		"year",
+		"isResend",
+		"variant",
+		"attachmentsDropped",
+	],
+};
+
+function validIsoDate(value: unknown): string | undefined {
+	if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+		return undefined;
+	const parsed = new Date(value);
+	return Number.isFinite(parsed.getTime()) &&
+		parsed.toISOString().slice(0, 10) === value &&
+		parsed.getUTCFullYear() >= 2000 &&
+		parsed.getUTCFullYear() <= 2100
+		? value
+		: undefined;
+}
+
+function validValue(
+	field: MetadataField,
+	value: unknown,
+): string | number | boolean | undefined {
+	switch (field) {
+		case "year": {
+			const year =
+				typeof value === "string" && /^\d{4}$/.test(value)
+					? Number(value)
+					: value;
+			return typeof year === "number" &&
+				Number.isInteger(year) &&
+				year >= 2000 &&
+				year <= 2100
+				? year
+				: undefined;
+		}
+		case "count":
+		case "limit":
+		case "timeoutMinutes":
+			return typeof value === "number" &&
+				Number.isSafeInteger(value) &&
+				value >= 0 &&
+				value <= 1000000
+				? value
+				: undefined;
+		case "format":
+			return value === "json" || value === "csv" ? value : undefined;
+		case "date_begin":
+		case "date_end":
+			return validIsoDate(value);
+		case "invalidYear":
+		case "testSeam":
+		case "isResend":
+		case "attachmentsDropped":
+			return typeof value === "boolean" ? value : undefined;
+		case "type":
+			return typeof value === "string" && RECEIPT_TYPES.has(value)
+				? value
+				: undefined;
+		case "kind":
+			return typeof value === "string" && RECEIPT_KINDS.has(value)
+				? value
+				: undefined;
+		case "variant":
+			return typeof value === "string" && RECEIPT_VARIANTS.has(value)
+				? value
+				: undefined;
+		case "acr":
+			return value === "eidas1" || value === "eidas1-mfa" ? value : undefined;
+		case "authTime":
+			return typeof value === "number" &&
+				Number.isSafeInteger(value) &&
+				value >= 0 &&
+				value <= 4102444800
+				? value
+				: undefined;
+	}
+}
+
+export function projectAuditMetadata(
+	action: AuditActionKey,
+	value: unknown,
+): AuditMetadata | null {
+	if (
+		typeof value !== "object" ||
+		value === null ||
+		Array.isArray(value) ||
+		value instanceof Date
+	)
+		return null;
+	const fields = FIELDS_BY_ACTION[action];
+	if (!fields) return null;
+	try {
+		const source = value as Record<string, unknown>;
+		const result: AuditMetadata = {};
+		for (const field of fields) {
+			const valid = validValue(field, source[field]);
+			if (valid !== undefined) result[field] = valid;
+		}
+		return Object.keys(result).length > 0 ? result : null;
+	} catch {
+		// A caller-supplied object with a throwing getter must not disrupt the
+		// request or the audit row.
+		return null;
+	}
+}

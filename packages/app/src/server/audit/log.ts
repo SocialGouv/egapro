@@ -9,7 +9,8 @@ import type {
 import { AUDIT_ACTION_CATEGORIES } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
-import { deriveErrorCode, emitActivityLog } from "./activityLog";
+import { deriveErrorCode, emitActivityLog, truncateIp } from "./activityLog";
+import { projectAuditMetadata } from "./metadata";
 
 // Stdout-mirror-only fields, never persisted to audit.action_log.
 export type LogActionOrigin = {
@@ -38,12 +39,49 @@ export type LogActionInput = {
 	origin?: LogActionOrigin;
 };
 
-// Bounds audit.action_log.error_message (unbounded text()) against a caller-controlled message, e.g. a Zod error echoing attacker-chosen input; the stdout mirror keeps reading the untruncated message.
-export const AUDIT_ERROR_MESSAGE_MAX_LENGTH = 500;
+const DATABASE_ERROR_CODES = new Set([
+	"ERROR",
+	"BAD_REQUEST",
+	"UNAUTHORIZED",
+	"FORBIDDEN",
+	"NOT_FOUND",
+	"METHOD_NOT_SUPPORTED",
+	"TIMEOUT",
+	"CONFLICT",
+	"PRECONDITION_FAILED",
+	"PAYLOAD_TOO_LARGE",
+	"UNPROCESSABLE_CONTENT",
+	"TOO_MANY_REQUESTS",
+	"CLIENT_CLOSED_REQUEST",
+	"INTERNAL_SERVER_ERROR",
+	"NOT_IMPLEMENTED",
+	"BAD_GATEWAY",
+	"SERVICE_UNAVAILABLE",
+	"GATEWAY_TIMEOUT",
+	"OAUTH_CALLBACK_ERROR",
+	"SIGNIN_OAUTH_ERROR",
+]);
+const RESOURCE_TYPES = new Set(["declaration", "notification"]);
+const UUID_PATTERN =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Code-point aware so a surrogate pair straddling the cut is never split into an unpaired surrogate.
-function truncateErrorMessage(message: string): string {
-	return [...message].slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH).join("");
+function resourceType(value: string | null | undefined): string | null {
+	return value && RESOURCE_TYPES.has(value) ? value : null;
+}
+
+function resourceId(
+	type: string | null,
+	value: string | null | undefined,
+): string | null {
+	return type && value && UUID_PATTERN.test(value) ? value : null;
+}
+
+function databaseErrorCode(message: string | null | undefined): string | null {
+	const code = deriveErrorCode(message);
+	if (!code) return null;
+	if (DATABASE_ERROR_CODES.has(code)) return code;
+	if (/^HTTP_[1-5]\d{2}$/.test(code)) return code;
+	return "ERROR";
 }
 
 // Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
@@ -76,22 +114,20 @@ export async function logAction(input: LogActionInput): Promise<void> {
 	}
 
 	try {
+		const persistedResourceType = resourceType(input.resourceType);
 		await db.insert(actionLogs).values({
 			action: input.action,
 			category,
 			status: input.status,
 			userId: input.userId ?? null,
-			userEmail: input.userEmail ?? null,
+			userEmail: null,
 			siren: input.siren ?? null,
-			resourceType: input.resourceType ?? null,
-			resourceId: input.resourceId ?? null,
-			errorMessage:
-				input.errorMessage != null
-					? truncateErrorMessage(input.errorMessage)
-					: null,
-			metadata: input.metadata ?? null,
-			ipAddress: input.ipAddress ?? null,
-			userAgent: input.userAgent ?? null,
+			resourceType: persistedResourceType,
+			resourceId: resourceId(persistedResourceType, input.resourceId),
+			errorMessage: databaseErrorCode(input.errorMessage),
+			metadata: projectAuditMetadata(input.action, input.metadata),
+			ipAddress: truncateIp(input.ipAddress),
+			userAgent: null,
 			durationMs: input.durationMs ?? null,
 		});
 	} catch (error) {
