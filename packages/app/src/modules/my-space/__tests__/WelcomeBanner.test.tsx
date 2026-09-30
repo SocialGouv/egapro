@@ -11,11 +11,11 @@ describe("WelcomeBanner", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the description about ProConnect", () => {
+	it("does not render the description about ProConnect", () => {
 		render(<WelcomeBanner />);
 		expect(
-			screen.getByText(/renseignées automatiquement via ProConnect/),
-		).toBeInTheDocument();
+			screen.queryByText(/renseignées automatiquement via ProConnect/),
+		).not.toBeInTheDocument();
 	});
 
 	it("has the DSFR info notice class", () => {
