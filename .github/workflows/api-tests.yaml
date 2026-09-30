@@ -8,6 +8,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
+permissions:
+  contents: read
+
 env:
   NODE_ENV: test
 
@@ -16,10 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Commit
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version-file: '.nvmrc'
 
@@ -28,9 +30,9 @@ jobs:
           run_install: false
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4.9.1
         with:
-          python-version: '3.9.21'
+          python-version: '3.12'
 
       - name: Install Dependencies
         if: steps.cache-dependencies.outputs.cache-hit != 'true'

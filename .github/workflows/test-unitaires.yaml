@@ -7,6 +7,9 @@ concurrency:
   cancel-in-progress: true
   group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}"
 
+permissions:
+  contents: read
+
 env:
   NODE_ENV: test
 
@@ -16,11 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
       - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
@@ -33,27 +36,30 @@ jobs:
         run: |
           pnpm build:app
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ./*
           key: "${{ github.sha }}"
   test:
     name: Execution Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # SonarCloud reads PR information with GITHUB_TOKEN
     needs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0 # Shallow clones should be disabled for better SonarCloud analysis
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ./*
           key: "${{ github.sha }}"
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
       - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
@@ -66,7 +72,7 @@ jobs:
           ls -la packages/app/coverage/
           cat packages/app/coverage/lcov.info | head -n 20
       - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
