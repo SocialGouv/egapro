@@ -109,8 +109,14 @@ async def test_public_endpoints_expose_published_version_not_pending_draft(
 # Errors details stay server side.
 
 
-async def test_database_data_error_is_generic(client):
-    resp = await client.get("/search?limit=-1")
+async def test_database_data_error_is_generic(client, monkeypatch):
+    from asyncpg.exceptions import DataError
+
+    async def mock_run(*args, **kwargs):
+        raise DataError("LIMIT must not be negative")
+
+    monkeypatch.setattr("egapro.db.search.run", mock_run)
+    resp = await client.get("/search?q=foo")
     assert resp.status == 400
     assert json.loads(resp.body) == {"error": "Invalid data"}
 
@@ -234,3 +240,59 @@ async def test_token_in_cookie_is_not_accepted(client, declaration):
     assert resp.status == 401
     resp = await client.get("/declaration/514027945/2020", headers={"API-KEY": token})
     assert resp.status == 200
+
+
+# Token links are never logged outside local development (redirectTo is client input).
+
+
+async def test_token_link_is_not_logged_in_production(client, monkeypatch, caplog):
+    monkeypatch.setattr("egapro.config.DOMAIN", "https://egapro.travail.gouv.fr")
+    monkeypatch.setattr("egapro.emails.send", mock.Mock())
+    resp = await client.post("/token", body={"email": "staff@example.org", "redirectTo": "localhost"})
+    assert resp.status == 204
+    assert not any("token=" in r.getMessage() for r in caplog.records)
+
+
+async def test_token_link_is_logged_in_local_development(client, monkeypatch, caplog):
+    caplog.set_level(logging.INFO, logger="egapro")
+    monkeypatch.setattr("egapro.config.DOMAIN", "http://localhost:3000")
+    monkeypatch.setattr("egapro.emails.send", mock.Mock())
+    await client.post("/token", body={"email": "dev@example.org"})
+    assert any("token=" in r.getMessage() for r in caplog.records)
+
+
+# Client supplied values cannot forge log lines.
+
+
+def test_logged_client_values_cannot_forge_lines():
+    # The real server URL-decodes the path (`%0A` becomes a newline); the testing
+    # client does not, so check the escaping helper every log call goes through.
+    from egapro import loggers
+
+    assert loggers.safe("/a\nFAKE LINE\r\x1b[31m") == "/a\\x0aFAKE LINE\\x0d\\x1b[31m"
+    assert loggers.safe("/declaration/123456782/2024") == "/declaration/123456782/2024"
+
+
+# Anonymous searches are bounded.
+
+
+async def test_search_bounds_query_and_limit(client, monkeypatch):
+    calls = []
+
+    async def run(**kwargs):
+        calls.append(kwargs)
+        return []
+
+    async def count(**kwargs):
+        return 0
+
+    for table in ("search", "search_representation_equilibree"):
+        monkeypatch.setattr(f"egapro.db.{table}.run", run)
+        monkeypatch.setattr(f"egapro.db.{table}.count", count)
+    for path in ("/search", "/representation-equilibree/search"):
+        resp = await client.get(f"{path}?q={'a' * 5000}&limit=100000&offset=-5")
+        assert resp.status == 200
+    for kwargs in calls:
+        assert len(kwargs["query"]) == 100
+        assert kwargs["limit"] == 100
+        assert kwargs["offset"] == 0

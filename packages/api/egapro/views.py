@@ -100,7 +100,7 @@ async def log_access(request, response):
     # The roll worker bypasses gunicorn access logs (--access-logfile), so log here.
     # Path only: no query string, headers nor body (tokens, personal data).
     if request.path != "/healthz":
-        loggers.logger.info(f"{request.method} {request.path} {response.status.value}")
+        loggers.logger.info(f"{request.method} {loggers.safe(request.path)} {response.status.value}")
 
 
 @app.listen("error")
@@ -134,7 +134,7 @@ async def json_error_response(request, response, error):
             # Logged at ERROR with the traceback: Sentry's logging integration turns it
             # into an event (roll has no Sentry integration of its own).
             loggers.logger.error(
-                "Unexpected error on %s %s", request.method, request.path, exc_info=context
+                "Unexpected error on %s %s", request.method, loggers.safe(request.path), exc_info=context
             )
             error.message = GENERIC_ERROR
     if isinstance(error.message, (str, bytes)):
@@ -547,11 +547,13 @@ async def send_token(request, response):
     email = request.json.get("email")
     if not email:
         raise HttpError(400, "Missing email key")
-    loggers.logger.info(f"Token request FOR {email} FROM {request.ip}")
+    loggers.logger.info(f"Token request FOR {loggers.safe(email)} FROM {loggers.safe(request.ip)}")
     token = tokens.create(email)
     redirectTo = (request.json.get("redirectTo") or "").lstrip("/")
     link = f"{config.DOMAIN}/{redirectTo}?token={token}"
-    if "localhost" in link or "127.0.0.1" in link:
+    # Local development only, decided by the configured domain: the link itself
+    # holds client input (redirectTo), and a token must never reach production logs.
+    if config.DOMAIN.startswith(("http://localhost", "http://127.0.0.1")):
         print(link)
         loggers.logger.info(link)
     body = emails.ACCESS_GRANTED.format(link=link)
@@ -570,12 +572,24 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+# Public, anonymous searches: bound the work one request can ask for. Every UES
+# result compares the query to each member company name (difflib, quadratic), so
+# an unbounded `q` and `limit` let a single request hold the event loop.
+SEARCH_MAX_QUERY_LENGTH = 100
+SEARCH_MAX_LIMIT = 100
+
+
+def search_params(request):
+    q = request.query.get("q", "").strip()[:SEARCH_MAX_QUERY_LENGTH]
+    limit = min(max(request.query.int("limit", 10), 0), SEARCH_MAX_LIMIT)
+    offset = max(request.query.int("offset", 0), 0)
+    return q, limit, offset
+
+
 # apiv2 ok
 @app.route("/representation-equilibree/search", methods=["GET"])
 async def search_representation_equilibree(request: Request, response: Response):
-    q = request.query.get("q", "").strip()
-    limit = request.query.int("limit", 10)
-    offset = request.query.int("offset", 0)
+    q, limit, offset = search_params(request)
     section_naf = request.query.get("naf", None)
     departement = request.query.get("departement", None)
     region = request.query.get("region", None)
@@ -656,9 +670,7 @@ async def put_representation(request, response, siren, year):
 # apiv2 ok
 @app.route("/search")
 async def search(request, response):
-    q = request.query.get("q", "").strip()
-    limit = request.query.int("limit", 10)
-    offset = request.query.int("offset", 0)
+    q, limit, offset = search_params(request)
     section_naf = request.query.get("section_naf", None)
     departement = request.query.get("departement", None)
     region = request.query.get("region", None)
