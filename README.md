@@ -65,6 +65,8 @@ Accès aux services :
 yarn dev
 ```
 
+Le service `files` lit ses identifiants basic-auth dans `packages/files/.htpasswd` (non versionné, format `htpasswd -B`). Ce fichier est généré par `scripts/files-htpasswd` (appelé par `yarn dev`, utilisateur/mot de passe `dev`/`dev` par défaut ; `scripts/files-htpasswd <user> <password>` pour le régénérer). En environnement Kubernetes, il est monté depuis le Secret `basic-auth` (clé `auth`).
+
 3. **Arrêter l'application**
 
 -   Utiliser `Ctrl+C` dans chaque terminal

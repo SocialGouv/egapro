@@ -54,6 +54,9 @@ venv/
 
 mnt/dgt.xlsx
 
+# files server basic-auth credentials (mounted from a k8s Secret, generated locally by scripts/files-htpasswd)
+.htpasswd
+
 # claude / playwright
 .claude/
 .playwright-mcp/

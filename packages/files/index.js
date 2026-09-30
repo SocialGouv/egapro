@@ -20,13 +20,21 @@ async function verifyPassword(providedPassword, storedHash) {
 
 const rootPath = process.env.ROOT_PATH || process.cwd();
 const trustedProxyIP = process.env.TRUSTED_PROXY_IP;
-const authPasswdFile = process.env.AUTH_PASSWD_FILE;
+// Basic-auth credentials (htpasswd format, bcrypt hashes) are never baked in the
+// image: they are mounted at runtime from the `basic-auth` Kubernetes Secret
+// (see .kontinuous/values.yaml) or generated locally by `scripts/files-htpasswd`.
+const authPasswdFile = process.env.AUTH_PASSWD_FILE || '/secrets/basic-auth.passwd';
 const whiteListIP = process.env.WHITELIST_IP.split(",");
 const filesPublic = process.env.FILES_PUBLIC.split(",").map(f=>`/${f}`);
 const filesRestricted = process.env.FILES_RESTRICTED.split(",").map(f=>`/${f}`);
 
 function readAuthFile(filePath) {
   const credentials = {};
+  if (!fs.existsSync(filePath)) {
+    // Fail closed: without credentials nobody can pass basic auth.
+    console.error(`Auth file ${filePath} not found: basic authentication is disabled for restricted files.`);
+    return credentials;
+  }
   const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
   content.split('\n').forEach(line => {
     const [username, password] = line.split(':');
@@ -39,12 +47,26 @@ function readAuthFile(filePath) {
 
 const users = readAuthFile(authPasswdFile);
 
+// Returns the last (right-most) entry of a comma separated forwarded-for list:
+// it is the one appended by the closest proxy, the only one a client cannot forge.
+function lastForwardedIp(header) {
+  if (!header) return undefined;
+  const ips = String(header).split(',').map(ip => ip.trim()).filter(Boolean);
+  return ips[ips.length - 1];
+}
+
 function getClientIp(req) {
-  if (req.headers['x-forwarded-for'] === trustedProxyIP) {
-    const xForwardedFor = req.headers['x-original-forwarded-for'];
-    return xForwardedFor.split(',')[0]; // Assuming the client IP is the first one in the list
+  // X-Real-IP is overwritten by the ingress controller with the TCP peer address
+  // ($remote_addr): client supplied values are never trusted.
+  const peerIp = req.headers['x-real-ip'];
+  if (trustedProxyIP && peerIp === trustedProxyIP) {
+    // Request relayed by our trusted upstream proxy: ingress-nginx copies the
+    // X-Forwarded-For it received into X-Original-Forwarded-For. The client IP is
+    // the entry appended by that proxy (the last one); earlier entries are
+    // client controlled and must be ignored.
+    return lastForwardedIp(req.headers['x-original-forwarded-for']);
   }
-  return req.headers['x-forwarded-for'];
+  return peerIp;
 }
 
 
@@ -79,10 +101,19 @@ app.use((req, res, next) => {
   }
 });
 
+const resolvedRootPath = path.resolve(rootPath);
+
 app.use((req, res) => {
   const filePath = req.path
-  res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(filePath));
-  res.sendFile(filePath, { root: rootPath });
+  // Defense in depth: only whitelisted names reach this handler, but make sure the
+  // resolved path can never escape the served directory.
+  const absolutePath = path.resolve(resolvedRootPath, '.' + filePath);
+  if (!absolutePath.startsWith(resolvedRootPath + path.sep)) {
+    res.status(404).send()
+    return
+  }
+  res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(absolutePath));
+  res.sendFile(absolutePath);
 })
 
 app.listen(port, () => {
