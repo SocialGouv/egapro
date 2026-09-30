@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from functools import wraps
 
 from naf import DB as NAF
@@ -541,12 +542,35 @@ class SimulationResource:
         response.status = 200
 
 
+# POST /token is anonymous and emails any address: at most one link per address
+# per cooldown (per process, bounded memory), so it cannot be used to mailbomb.
+TOKEN_EMAIL_COOLDOWN = 60
+TOKEN_EMAIL_MAX_TRACKED = 10_000
+_token_requests = {}
+
+
+def token_request_throttled(email, now=None):
+    now = time.monotonic() if now is None else now
+    if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
+        for key, at in list(_token_requests.items()):
+            if now - at >= TOKEN_EMAIL_COOLDOWN:
+                del _token_requests[key]
+        if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
+            _token_requests.clear()
+    last = _token_requests.get(email)
+    if last is not None and now - last < TOKEN_EMAIL_COOLDOWN:
+        return True
+    _token_requests[email] = now
+    return False
+
+
 @app.route("/token", methods=["POST"])
 async def send_token(request, response):
-    # TODO mailbomb management in nginx
     email = request.json.get("email")
     if not email:
         raise HttpError(400, "Missing email key")
+    if token_request_throttled(str(email).strip().lower()):
+        raise HttpError(429, "Un lien vient déjà d'être envoyé à cette adresse, veuillez patienter.")
     loggers.logger.info(f"Token request FOR {loggers.safe(email)} FROM {loggers.safe(request.ip)}")
     token = tokens.create(email)
     redirectTo = (request.json.get("redirectTo") or "").lstrip("/")

@@ -4,6 +4,7 @@ import uuid
 import pytest
 from roll.testing import Client as BaseClient
 
+from egapro import views as egapro_views
 from egapro.views import app as egapro_app
 from egapro import config as egapro_config
 from egapro import db, helpers, models, tokens
@@ -50,6 +51,8 @@ def pytest_runtest_setup(item):
         await db.terminate()
 
         helpers.get_entreprise_details.cache_clear()
+        # Token request throttling is per process: start each test from scratch.
+        egapro_views._token_requests.clear()
 
     asyncio.run(setup())
 

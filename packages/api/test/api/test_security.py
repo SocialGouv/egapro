@@ -296,3 +296,31 @@ async def test_search_bounds_query_and_limit(client, monkeypatch):
         assert len(kwargs["query"]) == 100
         assert kwargs["limit"] == 100
         assert kwargs["offset"] == 0
+
+
+# POST /token cannot be used to mailbomb an address.
+
+
+async def test_token_requests_are_throttled_per_address(client, monkeypatch):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post("/token", body={"email": "victim@example.org"})
+    assert resp.status == 204
+    resp = await client.post("/token", body={"email": "Victim@Example.org "})
+    assert resp.status == 429
+    assert send.call_count == 1
+    resp = await client.post("/token", body={"email": "other@example.org"})
+    assert resp.status == 204
+
+
+def test_token_throttle_expires_and_stays_bounded(monkeypatch):
+    from egapro import views
+
+    views._token_requests.clear()
+    assert not views.token_request_throttled("a@b.c", now=0)
+    assert views.token_request_throttled("a@b.c", now=30)
+    assert not views.token_request_throttled("a@b.c", now=61)
+    monkeypatch.setattr(views, "TOKEN_EMAIL_MAX_TRACKED", 3)
+    for i in range(10):
+        views.token_request_throttled(f"{i}@b.c", now=100)
+    assert len(views._token_requests) <= 3
