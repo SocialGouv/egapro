@@ -1,5 +1,20 @@
 import * as Sentry from "@sentry/nextjs";
 
+// Never ship credentials to Sentry.
+const SENSITIVE_HEADERS = ["authorization", "cookie", "proxy-authorization", "set-cookie", "x-api-key", "api-key"];
+
+/**
+ * Refuse to start a production server that signs sessions with the default secret (or none):
+ * anyone could forge a staff session. Reads the raw env var because `config.env` defaults to "dev".
+ */
+export const assertJwtSecretIsSet = (env: NodeJS.ProcessEnv = process.env) => {
+  if (env.NODE_ENV !== "production" || env.NEXT_PUBLIC_EGAPRO_ENV === "dev") return;
+  const secret = env.SECURITY_JWT_SECRET;
+  if (!secret || secret === "secret") {
+    throw new Error("SECURITY_JWT_SECRET must be set to a non-default value outside dev.");
+  }
+};
+
 // Hook to capture errors from nested React Server Components
 export const onRequestError = (
   error: Error,
@@ -9,7 +24,9 @@ export const onRequestError = (
   Sentry.captureException(error, {
     extra: {
       ...requestInfo,
-      requestHeaders: Object.fromEntries(request.headers),
+      requestHeaders: Object.fromEntries(
+        [...request.headers.entries()].filter(([key]) => !SENSITIVE_HEADERS.includes(key.toLowerCase())),
+      ),
     },
   });
 };
@@ -37,6 +54,8 @@ export const withServerAction = <T>(
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    assertJwtSecretIsSet();
+
     const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
     const IS_PRODUCTION = ENVIRONMENT === "production";
 

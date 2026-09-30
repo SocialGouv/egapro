@@ -22,6 +22,13 @@ export const EXPORT_MIME = {
 export const EXPORT_EXT = Object.keys(EXPORT_MIME);
 export type ValidExportExtension = (typeof EXPORT_EXT)[number];
 
+/**
+ * The CSV export is public and opened in spreadsheets: a cell starting with = + - @ (or a tab / carriage
+ * return) would be evaluated as a formula (CSV injection). Prefix it with a quote so it stays text.
+ */
+export const neutralizeFormula = (value: string | null | undefined) =>
+  value && /^[=+\-@\t\r]/.test(value) ? `'${value}` : value ?? "";
+
 export class ExportReferents implements UseCase<ValidExportExtension, Readable> {
   constructor(private readonly referentRepo: IReferentRepo) {}
 
@@ -59,7 +66,7 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
           default: "false",
         },
         {
-          value: "name",
+          value: (record: ReferentDTO) => neutralizeFormula(record.name),
           label: "Nom",
         },
         {
@@ -72,15 +79,15 @@ export class ExportReferents implements UseCase<ValidExportExtension, Readable> 
         },
         {
           label: "Contact",
-          value: "value",
+          value: (record: ReferentDTO) => neutralizeFormula(record.value),
         },
         {
           label: "Nom Suppléant",
-          value: (record: ReferentDTO) => record.substitute?.name || "",
+          value: (record: ReferentDTO) => neutralizeFormula(record.substitute?.name),
         },
         {
           label: "Email Suppléant",
-          value: (record: ReferentDTO) => record.substitute?.email || "",
+          value: (record: ReferentDTO) => neutralizeFormula(record.substitute?.email),
         },
       ],
     });

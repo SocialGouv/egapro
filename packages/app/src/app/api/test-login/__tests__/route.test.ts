@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { companiesUtils } from "@api/core-domain/infra/companies-store";
-import { config } from "@common/config";
 import { verify } from "jsonwebtoken";
 
 import { POST } from "../route";
@@ -12,7 +11,6 @@ jest.mock("@api/core-domain/infra/companies-store", () => ({
 }));
 jest.mock("@common/config", () => ({
   config: {
-    env: "dev",
     api: {
       security: {
         auth: { secret: "test-auth-secret" },
@@ -24,15 +22,20 @@ jest.mock("@common/config", () => ({
 
 const mockedHashCompanies = companiesUtils.hashCompanies as jest.Mock;
 
-// `config.env` is typed read-only; the mock object is mutable at runtime.
-const setEnv = (env: string) => {
-  (config as { env: string }).env = env;
+// The route reads the raw env var, not `config.env` (which defaults to "dev").
+const setEnv = (env: string | undefined) => {
+  if (env === undefined) delete process.env.NEXT_PUBLIC_EGAPRO_ENV;
+  else process.env.NEXT_PUBLIC_EGAPRO_ENV = env;
 };
 
 const post = (headers: Record<string, string> = {}, url = "https://app.test/api/test-login") =>
   POST(new Request(url, { headers, method: "POST" }) as never);
 
 describe("test-login route", () => {
+  const originalEnv = process.env.NEXT_PUBLIC_EGAPRO_ENV;
+
+  afterAll(() => setEnv(originalEnv));
+
   beforeEach(() => {
     jest.clearAllMocks();
     setEnv("dev");
@@ -81,14 +84,25 @@ describe("test-login route", () => {
     expect(setCookie).not.toContain("Secure");
   });
 
-  it("is disabled in production (404) and never establishes a session", async () => {
-    setEnv("prod");
+  it.each(["prod", undefined, ""])(
+    "is disabled outside dev/preprod (env=%p): 404 and never establishes a session",
+    async env => {
+      setEnv(env);
+
+      const res = await post({ "x-forwarded-proto": "https" });
+
+      expect(res.status).toBe(404);
+      await expect(res.json()).resolves.toEqual({ error: "Route désactivée" });
+      expect(res.headers.get("set-cookie")).toBeNull();
+      expect(mockedHashCompanies).not.toHaveBeenCalled();
+    },
+  );
+
+  it("is enabled on preprod", async () => {
+    setEnv("preprod");
 
     const res = await post({ "x-forwarded-proto": "https" });
 
-    expect(res.status).toBe(404);
-    await expect(res.json()).resolves.toEqual({ error: "Route désactivée en production" });
-    expect(res.headers.get("set-cookie")).toBeNull();
-    expect(mockedHashCompanies).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
   });
 });

@@ -4,6 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { HeaderQuickAccessItem } from "@codegouvfr/react-dsfr/Header";
 import { ConfigContext } from "@components/utils/ConfigProvider";
 import { Skeleton } from "@design-system/utils/client/skeleton";
+import { useDeclarationFormManager } from "@services/apiClient/useDeclarationFormManager";
 import { useSession } from "next-auth/react";
 import { useContext } from "react";
 
@@ -64,6 +65,9 @@ export const LoginLogoutHeaderItem = () => {
                 // redirects to the ProConnect end_session_endpoint so the IdP
                 // session is terminated too. Without it the next login is
                 // silently re-authenticated on the previous organization.
+                // The draft declaration persisted in localStorage holds personal data: don't leave it
+                // to the next user of the browser.
+                useDeclarationFormManager.persist.clearStorage();
                 window.location.href = "/api/auth/logout";
               },
             },

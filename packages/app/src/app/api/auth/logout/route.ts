@@ -10,16 +10,20 @@ const secret = config.api.security.auth.secret;
  * Resolve the public base URL behind the reverse proxy. On Kubernetes
  * `request.url` reflects the internal origin (https://localhost:3000), which
  * makes ProConnect reject the post_logout_redirect_uri and sends the user to a
- * dead localhost link. The ingress (Traefik) sets `x-forwarded-host` /
- * `x-forwarded-proto` with the public values, so prefer those.
+ * dead localhost link. Request headers (`host`, `x-forwarded-host`) are
+ * client-controlled and would let anyone forge the redirect target, so the
+ * canonical origin comes from configuration only: NEXTAUTH_URL, then the API v2 host.
  */
-function getPublicBaseUrl(request: NextRequest): string {
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  if (forwardedHost) {
-    const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
-    return `${forwardedProto}://${forwardedHost}`;
+function getPublicBaseUrl(): string {
+  const nextAuthUrl = process.env.NEXTAUTH_URL;
+  if (nextAuthUrl) {
+    try {
+      return new URL(nextAuthUrl).origin;
+    } catch {
+      // Invalid NEXTAUTH_URL: fall back to the configured host.
+    }
   }
-  return new URL(request.url).origin;
+  return config.host;
 }
 
 /**
@@ -45,9 +49,11 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const baseUrl = getPublicBaseUrl(request);
+  const baseUrl = getPublicBaseUrl();
   const redirectTarget = await buildLogoutRedirectUrl(token?.id_token ?? null, baseUrl);
   const response = NextResponse.redirect(redirectTarget);
+  // Also wipe the drafts persisted in local/session storage (declaration form, funnels) on browsers that support it.
+  response.headers.set("Clear-Site-Data", '"storage"');
 
   const isSecure = baseUrl.startsWith("https://");
   const sessionCookieName = isSecure ? "__Secure-next-auth.session-token" : "next-auth.session-token";

@@ -31,23 +31,27 @@ const formDataDefault: State["formData"] = {
 export const useDeclarationFormManager = create<Actions & State>()(
   persist(
     immer(
-      devtools((set, _get) => ({
-        formData: formDataDefault,
-        saveFormData: (data: DeclarationDTO) => set({ formData: data }),
-        savePageData: <K extends keyof DeclarationDTO>(page: K, data: DeclarationDTO[K]) =>
-          set(state => {
-            state.formData[page] = data;
-          }),
-        resetFormData: () =>
-          set({
-            formData: formDataDefault,
-          }),
-        setStatus: (status: DeclarationDTO["declaration-existante"]["status"]) => {
-          set(state => {
-            state.formData["declaration-existante"].status = status;
-          });
-        },
-      })),
+      devtools(
+        (set, _get) => ({
+          formData: formDataDefault,
+          saveFormData: (data: DeclarationDTO) => set({ formData: data }),
+          savePageData: <K extends keyof DeclarationDTO>(page: K, data: DeclarationDTO[K]) =>
+            set(state => {
+              state.formData[page] = data;
+            }),
+          resetFormData: () =>
+            set({
+              formData: formDataDefault,
+            }),
+          setStatus: (status: DeclarationDTO["declaration-existante"]["status"]) => {
+            set(state => {
+              state.formData["declaration-existante"].status = status;
+            });
+          },
+        }),
+        // Don't expose the declaration (personal data) to the Redux devtools extension outside dev.
+        { enabled: process.env.NODE_ENV === "development" },
+      ),
     ),
     {
       name: "ega-declaration-form",

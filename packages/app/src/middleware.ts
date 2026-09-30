@@ -44,7 +44,9 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' https://*.gouv.fr 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' https://*.gouv.fr 'unsafe-inline'${
+      process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
+    };
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'unsafe-inline';
     worker-src 'self' blob:;
@@ -76,6 +78,12 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
   });
 };
 
+// Never ship credentials to Sentry.
+const SENSITIVE_HEADERS = ["authorization", "cookie", "proxy-authorization", "set-cookie", "x-api-key", "api-key"];
+
+const safeHeaders = (headers: Headers) =>
+  Object.fromEntries([...headers.entries()].filter(([key]) => !SENSITIVE_HEADERS.includes(key.toLowerCase())));
+
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   try {
     const { pathname } = req.nextUrl;
@@ -89,7 +97,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
       }
     }
 
-    const isStaff = token?.user?.staff || token?.staff.impersonating || false;
+    const isStaff = token?.user?.staff || token?.staff?.impersonating || false;
     if (_config.api.security.auth.staffRoutes.some(route => pathname.startsWith(route)) && !isStaff) {
       return new NextResponse(null, { status: StatusCodes.FORBIDDEN });
     }
@@ -101,7 +109,7 @@ const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
       url: req.url,
       method: req.method,
       path: req.nextUrl.pathname,
-      headers: Object.fromEntries(req.headers),
+      headers: safeHeaders(req.headers),
     });
 
     // Return a generic error response

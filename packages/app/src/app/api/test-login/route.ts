@@ -1,4 +1,5 @@
 import { companiesUtils } from "@api/core-domain/infra/companies-store";
+import { areTestRoutesEnabled } from "@api/utils/testRoutes";
 import { config } from "@common/config";
 import { type Algorithm, sign } from "jsonwebtoken";
 import { type NextRequest, NextResponse } from "next/server";
@@ -16,11 +17,11 @@ const SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
  * fixed ProConnect sandbox test account without going through the OIDC flow —
  * Cypress cannot carry the state/PKCE cookies across ProConnect's external
  * superdomains (the real flow stays covered by manual/Playwright testing).
- * Disabled in production (404), mirroring /api/clean-test-user/declaration.
+ * Only enabled on dev and preprod (404 elsewhere), mirroring /api/clean-test-user/declaration.
  */
 export async function POST(request: NextRequest) {
-  if (config.env === "prod") {
-    return NextResponse.json({ error: "Route désactivée en production" }, { status: 404 });
+  if (!areTestRoutesEnabled()) {
+    return NextResponse.json({ error: "Route désactivée" }, { status: 404 });
   }
 
   // Seed Redis with the single active company; the session callback rehydrates

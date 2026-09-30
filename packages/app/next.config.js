@@ -3,6 +3,11 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   swcMinify: true,
+  // next/image is not used: disable the image optimizer (/_next/image answers 404), which removes its attack
+  // surface (e.g. GHSA-2xp9-vwfh-vxw4, AVIF RCE through sharp, not fixed on Next 14).
+  images: {
+    unoptimized: true,
+  },
   // TODO optimize deployed output in build mode
   //   output: "standalone",
   experimental: {
@@ -20,9 +25,10 @@ const nextConfig = {
       type: "asset/resource",
     });
 
-    // Configure source maps for production
+    // Configure source maps for production: generated for the Sentry upload, but not referenced from the
+    // bundles (hidden), and deleted from the image after the upload (see Dockerfile).
     if (!isServer && !dev) {
-      config.devtool = "source-map";
+      config.devtool = "hidden-source-map";
       config.optimization = {
         ...config.optimization,
         minimize: true,
@@ -127,7 +133,7 @@ module.exports = withSentryConfig(
     // Using custom tunnel implementation instead
     tunnelRoute: false,
     widenClientFileUpload: true,
-    hideSourceMaps: false,
+    hideSourceMaps: true,
     disableLogger: true,
 
     // Enable component names and release injection
