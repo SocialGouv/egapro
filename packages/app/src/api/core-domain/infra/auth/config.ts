@@ -62,25 +62,35 @@ export const monCompteProProvider = ProConnectProvider({
       }
     : {}),
 });
+// Session lifetime, also enforced inside the signed token (`exp`): the cookie's own expiry is only a
+// hint to the browser, a copied cookie would otherwise stay valid until the secret rotates.
+const sessionMaxAge = config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60; // 24 hours in prod and preprod, 7 days in dev
+
+/** Log a JWT error without its payload: some carry the decoded claims (email, phone, tokens). */
+const jwtErrorInfo = (error: unknown) => ({ name: (error as Error)?.name, message: (error as Error)?.message });
+
 export const authConfig: AuthOptions = {
   jwt: {
-    async encode({ token, secret }): Promise<string> {
+    async encode({ token, secret, maxAge }): Promise<string> {
       // Sign the token using HS256 without encrypting the payload.
       try {
-        return sign(token as JWT, secret, {
+        // A refreshed session gets a new validity window: drop the previous one.
+        const { exp: _exp, iat: _iat, ...claims } = (token ?? {}) as JWT & { exp?: number; iat?: number };
+        return sign(claims, secret, {
           algorithm: "HS256",
+          expiresIn: maxAge ?? sessionMaxAge,
         });
       } catch (error) {
-        logger.error({ error }, "Error while encoding token");
+        logger.error({ error: jwtErrorInfo(error) }, "Error while encoding token");
         throw new Error("Error while encoding token");
       }
     },
     async decode({ token, secret }): Promise<JWT | null> {
       try {
-        // Verify and decode the token using HS256.
+        // Verify and decode the token using HS256 (signature and expiry).
         return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
       } catch (error) {
-        logger.error({ error }, "Error while decoding token");
+        logger.error({ error: jwtErrorInfo(error) }, "Error while decoding token");
         return null;
       }
     },
@@ -108,7 +118,7 @@ export const authConfig: AuthOptions = {
   // force session to be stored as jwt in cookie instead of database
   session: {
     strategy: "jwt",
-    maxAge: config.env === "dev" ? 24 * 60 * 60 * 7 : 24 * 60 * 60, // 24 hours in prod and preprod, 7 days in dev
+    maxAge: sessionMaxAge,
   },
   providers: [
     GithubProvider({

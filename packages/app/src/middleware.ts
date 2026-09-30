@@ -132,7 +132,11 @@ const wrappedMiddleware = withAuth(
           const secretAsKey = new TextEncoder().encode(secret as string);
           return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
         } catch (error) {
-          logger.error({ error }, "Error while decoding token");
+          // Never log the error object: jose's JWTExpired/JWTClaimValidationFailed carry the decoded claims.
+          logger.error(
+            { error: { name: (error as Error)?.name, code: (error as { code?: string })?.code } },
+            "Error while decoding token",
+          );
           return null;
         }
       },
