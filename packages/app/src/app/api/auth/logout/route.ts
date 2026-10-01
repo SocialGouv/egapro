@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
         return null;
       }
       try {
-        return verify(rawToken, decodeSecret, { algorithms: ["HS256"] }) as JWT;
+        // Signature only: an expired session must still end the ProConnect session (id_token_hint).
+        return verify(rawToken, decodeSecret, { algorithms: ["HS256"], ignoreExpiration: true }) as JWT;
       } catch {
         return null;
       }

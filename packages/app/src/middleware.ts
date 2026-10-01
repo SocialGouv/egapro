@@ -130,7 +130,10 @@ const wrappedMiddleware = withAuth(
       async decode({ token, secret }): Promise<JWT | null> {
         try {
           const secretAsKey = new TextEncoder().encode(secret as string);
-          return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
+          // `exp` is required: a session signed before expiry was enforced would otherwise never expire.
+          return (
+            await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"], requiredClaims: ["exp"] })
+          ).payload as JWT;
         } catch (error) {
           // Never log the error object: jose's JWTExpired/JWTClaimValidationFailed carry the decoded claims.
           logger.error(

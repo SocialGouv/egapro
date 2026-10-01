@@ -2,12 +2,16 @@
  * @jest-environment node
  */
 import { captureError } from "@common/error";
+import { sign } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
 import middleware from "../middleware";
 
-// Run our middleware directly, without NextAuth decoding the cookie first.
-jest.mock("next-auth/middleware", () => ({ withAuth: (fn: unknown) => fn }));
+// Run our middleware directly, without NextAuth decoding the cookie first. The NextAuth options are kept on
+// the returned function so the session decoding can be tested on its own.
+jest.mock("next-auth/middleware", () => ({
+  withAuth: (fn: object, options: unknown) => Object.assign(fn, { authOptions: options }),
+}));
 jest.mock("@api/utils/pino", () => ({ logger: { error: jest.fn() } }));
 jest.mock("@common/error", () => ({ captureError: jest.fn() }));
 
@@ -35,9 +39,10 @@ describe("middleware", () => {
     expect(res.status).toBe(403);
   });
 
-  it("forbids the back office to an anonymous user", async () => {
+  it("sends an anonymous user (or an expired staff session) from the back office to login", async () => {
     const res = await call("/admin/declarations", null);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("/login?callbackUrl=");
   });
 
   it("does not crash when the token has no staff claim (403, not 500)", async () => {
@@ -78,5 +83,31 @@ describe("middleware", () => {
     const [, context] = (captureError as jest.Mock).mock.calls[0];
     expect(JSON.stringify(context)).not.toContain("SECRET");
     expect(context.headers["user-agent"]).toBe("jest");
+  });
+
+  describe("session token decoding", () => {
+    const SECRET = "test-session-secret";
+    const decode = (token: string) =>
+      (
+        middleware as unknown as {
+          authOptions: { jwt: { decode: (params: { secret: string; token: string }) => Promise<unknown> } };
+        }
+      ).authOptions.jwt.decode({ token, secret: SECRET });
+    const now = Math.floor(Date.now() / 1000);
+
+    it("accepts a valid session token", async () => {
+      const token = sign({ email: "u@test.fr", exp: now + 60 }, SECRET, { algorithm: "HS256" });
+      await expect(decode(token)).resolves.toMatchObject({ email: "u@test.fr" });
+    });
+
+    it("rejects an expired session token", async () => {
+      const token = sign({ email: "u@test.fr", exp: now - 60 }, SECRET, { algorithm: "HS256" });
+      await expect(decode(token)).resolves.toBeNull();
+    });
+
+    it("rejects a session token without expiry", async () => {
+      const token = sign({ email: "u@test.fr" }, SECRET, { algorithm: "HS256" });
+      await expect(decode(token)).resolves.toBeNull();
+    });
   });
 });

@@ -71,14 +71,16 @@ const jwtErrorInfo = (error: unknown) => ({ name: (error as Error)?.name, messag
 
 export const authConfig: AuthOptions = {
   jwt: {
-    async encode({ token, secret, maxAge }): Promise<string> {
+    maxAge: sessionMaxAge,
+    async encode({ token, secret }): Promise<string> {
       // Sign the token using HS256 without encrypting the payload.
       try {
         // A refreshed session gets a new validity window: drop the previous one.
         const { exp: _exp, iat: _iat, ...claims } = (token ?? {}) as JWT & { exp?: number; iat?: number };
+        // Always the session lifetime: next-auth passes its own `jwt.maxAge` (30 days by default) at sign-in.
         return sign(claims, secret, {
           algorithm: "HS256",
-          expiresIn: maxAge ?? sessionMaxAge,
+          expiresIn: sessionMaxAge,
         });
       } catch (error) {
         logger.error({ error: jwtErrorInfo(error) }, "Error while encoding token");
@@ -88,7 +90,10 @@ export const authConfig: AuthOptions = {
     async decode({ token, secret }): Promise<JWT | null> {
       try {
         // Verify and decode the token using HS256 (signature and expiry).
-        return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
+        const payload = verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
+        // jsonwebtoken accepts a token without `exp`: sessions signed before expiry was enforced would never expire.
+        if (typeof payload.exp !== "number") return null;
+        return payload;
       } catch (error) {
         logger.error({ error: jwtErrorInfo(error) }, "Error while decoding token");
         return null;

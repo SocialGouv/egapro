@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { fetchEndSessionEndpoint } from "@api/core-domain/infra/auth/proconnect-logout";
+import { sign } from "jsonwebtoken";
 import { getToken } from "next-auth/jwt";
 
 import { GET } from "../route";
@@ -84,5 +85,26 @@ describe("logout route", () => {
     mockedFetchEndSession.mockResolvedValue(null);
     const res = await call();
     expect(res.headers.get("location")).toBe("https://app.test/");
+  });
+
+  describe("session token decoding", () => {
+    const getDecode = async () => {
+      mockedGetToken.mockResolvedValue(null);
+      await call();
+      return mockedGetToken.mock.calls[0][0].decode as (params: { secret: string; token?: string }) => Promise<unknown>;
+    };
+    const expiredSince = Math.floor(Date.now() / 1000) - 60;
+
+    it("still reads the id_token of an expired session, to end the ProConnect session", async () => {
+      const decode = await getDecode();
+      const expired = sign({ id_token: "ID_TOKEN", exp: expiredSince }, "test-secret", { algorithm: "HS256" });
+      await expect(decode({ token: expired, secret: "test-secret" })).resolves.toMatchObject({ id_token: "ID_TOKEN" });
+    });
+
+    it("rejects a token with a wrong signature", async () => {
+      const decode = await getDecode();
+      const forged = sign({ id_token: "ID_TOKEN", exp: expiredSince }, "other-secret", { algorithm: "HS256" });
+      await expect(decode({ token: forged, secret: "test-secret" })).resolves.toBeNull();
+    });
   });
 });
