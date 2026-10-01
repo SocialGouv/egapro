@@ -353,7 +353,7 @@ Un sealed-secret **ne se complète pas** : il n'existe pas d'opération d'ajout,
 Pour ajouter ou retirer un admin :
 
 1. **dev/preprod** :
-   - relire la valeur courante depuis le Secret `admin` du namespace d'`alpha` (`kubectl get secret admin -n alpha -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro-alpha` sur le cluster `ovh-dev` (`kubectl --context ovh-dev -n egapro-alpha get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
    - modifier la liste (ajout/retrait d'un email) ;
    - re-sceller la liste complète, en lisant depuis stdin pour ne jamais l'écrire en clair sur disque :
      ```bash
@@ -364,7 +364,7 @@ Pour ajouter ou retirer un admin :
      ```
    - remplacer `encryptedData.ADMIN_EMAILS` dans **les deux** fichiers (`env/dev` et `env/preprod`) par le chiffré obtenu.
 2. **prod** :
-   - relire la valeur courante depuis le Secret `admin` du namespace `egapro` sur le cluster `ovh-prod` ;
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro` sur le cluster `ovh-prod` (`kubectl --context ovh-prod -n egapro get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
    - modifier la liste ;
    - re-sceller la liste complète :
      ```bash
