@@ -382,4 +382,33 @@ describe("computeIndicatorPercentages", () => {
 			expect(result.variableHourlyMedianGap).toBeCloseTo(0.0719);
 		});
 	});
+
+	describe("truncation — persisted ratio matches the truncated on-screen percentage", () => {
+		it("truncates a recomputed gap instead of letting the numeric(9,4) column round it", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				indicatorAAnnualWomen: "47000.00",
+				indicatorAAnnualMen: "47617.96",
+			});
+			expect(result.globalAnnualMeanGap).toBe(0.0129);
+		});
+
+		it("truncates toward zero on a negative recomputed gap", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				indicatorBAnnualWomen: "580.00",
+				indicatorBAnnualMen: "562.19",
+			});
+			expect(result.variableAnnualMeanGap).toBe(-0.0316);
+		});
+
+		it("truncates a gap already at the 5% alert boundary without crossing it", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				indicatorAAnnualWomen: "95.004",
+				indicatorAAnnualMen: "100",
+			});
+			expect(result.globalAnnualMeanGap).toBe(0.0499);
+		});
+	});
 });

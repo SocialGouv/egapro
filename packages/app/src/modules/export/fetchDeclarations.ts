@@ -18,6 +18,7 @@ import {
 	computeGapHighFlags,
 	computeGapRatio,
 	floorWorkforce,
+	GAP_RATIO_DECIMALS,
 	getCompanySizeRange,
 	getObligationWorkforce,
 	isCancelled,
@@ -26,6 +27,7 @@ import {
 	isCseRequired,
 	isIndicatorGRequiredForGip,
 	parseGipWorkforce,
+	truncateGapRatio,
 } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
 import type { DeclarationRow } from "./queries";
@@ -285,11 +287,9 @@ export function buildIndicators(row: DeclarationRow) {
 
 // ── Indicator G entries ─────────────────────────────────────────────
 
-// Round before toFixed(4): formatting the raw ratio turns a negligible negative gap into "-0.0000".
 function formatRatio(r: number | null): string | null {
 	if (r === null) return null;
-	const rounded = Math.round(r * 10000) / 10000;
-	return rounded.toFixed(4);
+	return truncateGapRatio(r).toFixed(GAP_RATIO_DECIMALS);
 }
 
 function toIndicatorGCategory(entry: IndicatorGEntry) {

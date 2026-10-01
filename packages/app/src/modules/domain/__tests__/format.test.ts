@@ -28,6 +28,7 @@ import {
 	MISSING_VALUE,
 	NARROW_NBSP,
 } from "../shared/format";
+import { gapRatioToPercent, truncateGapRatio } from "../shared/gap";
 
 describe("formatGap", () => {
 	it("formats a gap with French decimal separator and two decimals", () => {
@@ -404,6 +405,21 @@ describe("formatLongDate", () => {
 	it("gives the first of the month its French ordinal", () => {
 		expect(formatLongDate(new Date(2026, 5, 1))).toBe(
 			"1\u1d49\u02b3 juin 2026",
+		);
+	});
+});
+
+describe("formatGap and truncateGapRatio agree on the same gap", () => {
+	it.each([
+		[1.29775, 0.0129775, "1,29 %"],
+		[4.79817, 0.0479817, "4,79 %"],
+		[-3.16795, -0.0316795, "-3,16 %"],
+		[50.495, 0.50495, "50,49 %"],
+		[8.3969, 0.083969, "8,39 %"],
+	])("reads the same truncated value whether displayed as a percentage or persisted as a ratio (%s)", (percent, ratio, expected) => {
+		expect(formatGap(percent)).toBe(expected);
+		expect(formatGap(gapRatioToPercent(truncateGapRatio(ratio)))).toBe(
+			expected,
 		);
 	});
 });

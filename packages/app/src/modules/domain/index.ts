@@ -224,6 +224,7 @@ export {
 	computeGapHighFlags,
 	computeGapRatio,
 	computeTotal,
+	GAP_RATIO_DECIMALS,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -232,6 +233,7 @@ export {
 	resolveGap,
 	resolveGapRatio,
 	significantGapDirection,
+	truncateGapRatio,
 } from "./shared/gap";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
