@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ResourceBanner } from "../ResourceBanner";
 
 describe("ResourceBanner", () => {
-	it("renders three resource tiles with correct links", () => {
+	it("renders exactly two resource tiles with correct links", () => {
 		render(<ResourceBanner />);
 
 		const faqLink = screen.getByRole("link", {
@@ -17,13 +17,15 @@ describe("ResourceBanner", () => {
 		});
 		expect(aideLink).toHaveAttribute("href", "/aide");
 
-		const contactLink = screen.getByRole("link", {
-			name: /nous contacter/i,
-		});
-		expect(contactLink).toHaveAttribute("href", "/aide/nous-contacter");
+		expect(
+			screen.queryByRole("link", { name: /nous contacter/i }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Besoin d'aide ? Contactez nos services d'assistance"),
+		).not.toBeInTheDocument();
 	});
 
-	it("renders detail text for each tile", () => {
+	it("renders detail text for each remaining tile", () => {
 		render(<ResourceBanner />);
 
 		expect(
@@ -32,16 +34,13 @@ describe("ResourceBanner", () => {
 		expect(
 			screen.getByText("Recherchez et accédez à toutes nos ressources"),
 		).toBeInTheDocument();
-		expect(
-			screen.getByText("Besoin d'aide ? Contactez nos services d'assistance"),
-		).toBeInTheDocument();
 	});
 
-	it("renders three heading level 3 for tile titles", () => {
+	it("renders two heading level 3 for tile titles", () => {
 		render(<ResourceBanner />);
 
 		const headings = screen.getAllByRole("heading", { level: 3 });
-		expect(headings).toHaveLength(3);
+		expect(headings).toHaveLength(2);
 	});
 
 	it("renders a screen-reader-only section heading above the tiles", () => {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { AppHref } from "~/modules/routes";
-import { CONTACT, FAQ, HELP } from "~/modules/routes";
+import { FAQ, HELP } from "~/modules/routes";
 import styles from "./ResourceBanner.module.scss";
 import { DsfrPictogram } from "./shared/DsfrPictogram";
 
@@ -37,7 +37,6 @@ function ResourceTile({
 	);
 }
 
-/** Global resource banner with links to FAQ, reference texts and contact. */
 export function ResourceBanner() {
 	return (
 		<section
@@ -63,14 +62,6 @@ export function ResourceBanner() {
 									href={FAQ}
 									pictogramPath="/dsfr/artwork/pictograms/system/information.svg"
 									title="Questions fréquentes (FAQ)"
-								/>
-							</div>
-							<div className="fr-col-12 fr-col-md-4">
-								<ResourceTile
-									detail="Besoin d'aide ? Contactez nos services d'assistance"
-									href={CONTACT}
-									pictogramPath="/dsfr/artwork/pictograms/digital/avatar.svg"
-									title="Nous contacter"
 								/>
 							</div>
 						</div>
