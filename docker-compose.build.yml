@@ -39,7 +39,7 @@ services:
 
   db:
     restart: always
-    image: postgres
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -47,11 +47,11 @@ services:
     ports:
       - "127.0.0.1:5437:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
 
   test_db:
     restart: always
-    image: postgres
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -66,6 +66,9 @@ services:
     build:
       context: .
       dockerfile: ./packages/app/Dockerfile
+    environment:
+      # Local production-image stack: the development session secret is expected.
+      NEXT_PUBLIC_EGAPRO_ENV: dev
     ports:
       - "127.0.0.1:3000:3000"
     restart: "no"

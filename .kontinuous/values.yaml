@@ -90,6 +90,15 @@ nginx:
     preStop:
       exec:
         command: ["/pre-stop.sh"]
+  # image runs as USER 101 (ghcr.io/socialgouv/docker/nginx). No readOnlyRootFilesystem:
+  # nginx writes its proxy cache in /tmp/nginx-cache and its logs in /var/log/nginx.
+  securityContext:
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   resources:
     requests:
       cpu: 30m

@@ -65,12 +65,14 @@ Accès aux services :
 yarn dev
 ```
 
-Le service `files` lit ses identifiants basic-auth dans `packages/files/.htpasswd` (non versionné, format `htpasswd -B`). Ce fichier est généré par `scripts/files-htpasswd` (appelé par `yarn dev`, utilisateur/mot de passe `dev`/`dev` par défaut ; `scripts/files-htpasswd <user> <password>` pour le régénérer). En environnement Kubernetes, il est monté depuis le Secret `basic-auth` (clé `auth`).
+Le service `files` lit ses identifiants basic-auth dans `packages/files/.htpasswd` (non versionné, format `htpasswd -B -C 12`). Ce fichier est généré par `scripts/files-htpasswd` (appelé par `yarn dev`, utilisateur/mot de passe `dev`/`dev` par défaut ; `scripts/files-htpasswd <user> <password>` pour le régénérer). En environnement Kubernetes, il est monté depuis le Secret `basic-auth` (clé `auth`), qui doit lui aussi contenir un hash bcrypt (`$2y$`) : un hash `$apr1$` n'est jamais accepté.
 
 3. **Arrêter l'application**
 
 -   Utiliser `Ctrl+C` dans chaque terminal
 -   Pour l'API et maildev : `docker-compose down`
+
+> PostgreSQL est épinglé en 18 et son volume `pgdata` est monté sur `/var/lib/postgresql` (et non plus `/var/lib/postgresql/data`). Une base locale créée avant ce changement n'est plus vue : la sauvegarder avec `pg_dump` avant de mettre à jour, puis la restaurer, ou repartir d'un volume neuf avec `docker volume rm`.
 
 ### Tests et vérifications
 
@@ -198,11 +200,13 @@ yarn workspaces run lint
 
 ### Quel est le maildev pour un environnement de recette ?
 
-Ajouter le préfixe `maildev-` devant l'URL.
+Le maildev (comme pgweb) n'est plus exposé publiquement. Il s'ouvre par un port-forward sur le namespace de l'environnement :
 
-Si l'environnement est `https://egapro-feat-limit-char-11oson.ovh.fabrique.social.gouv.fr/`.
+```bash
+kubectl -n <namespace> port-forward svc/maildev 1080:1080
+```
 
-Le maildev se trouvera alors à `https://maildev-egapro-feat-limit-char-11oson.ovh.fabrique.social.gouv.fr/`
+Le maildev se trouve alors à `http://localhost:1080`.
 
 ## Fichiers
 
