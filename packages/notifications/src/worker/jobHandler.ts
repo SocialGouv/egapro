@@ -6,9 +6,6 @@ import { buildMail } from "../mails/index.js";
 import { validateJobData } from "../queue.js";
 import { logAuditMain } from "./auditLog.js";
 
-const SEND_AUDIT_ACTION = "notification.send";
-const SEND_AUDIT_CATEGORY = "system";
-
 export type JobHandlerDeps = {
 	transporter: Transporter | null;
 	mailFrom: string;
@@ -25,18 +22,24 @@ export function makeJobHandler(
 		const result = validateJobData(job.data);
 
 		if (!result.ok) {
+			const raw =
+				typeof job.data === "object" &&
+				job.data !== null &&
+				!Array.isArray(job.data)
+					? (job.data as Record<string, unknown>)
+					: null;
 			// Poison pill: malformed payload can never succeed. Log + return
 			// clean so pg-boss marks the job complete and stops retrying.
 			console.error(
-				`[notifications] dropping malformed job ${job.id}: ${result.reason}`,
+				`[notifications] dropping malformed job ${job.id}: invalid_job`,
 			);
 			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
 				status: "failure",
-				resourceType: "notification",
+				userId:
+					typeof raw?.recipientUserId === "string" ? raw.recipientUserId : null,
+				siren: typeof raw?.siren === "string" ? raw.siren : null,
 				resourceId: job.id,
-				errorMessage: result.reason,
+				errorCode: "invalid_job",
 				metadata: { attempt, poisonPill: true },
 			});
 			return;
@@ -51,20 +54,19 @@ export function makeJobHandler(
 			attachments,
 		} = result.data;
 
+		let phase: "render" | "transport" = "render";
 		try {
 			const { subject, html, text } = await buildMail(type, payload);
-			let messageId: string | null = null;
+			phase = "transport";
 			if (!mailEnabled || !transporter) {
-				console.log(
-					`[notifications] MAIL_ENABLED=false — would send ${type} to ${recipientEmail}`,
-				);
+				console.log(`[notifications] MAIL_ENABLED=false — would send ${type}`);
 			} else {
 				const decodedAttachments = attachments?.map((att) => ({
 					filename: att.filename,
 					content: Buffer.from(att.contentBase64, "base64"),
 					contentType: att.contentType,
 				}));
-				const info = await transporter.sendMail({
+				await transporter.sendMail({
 					from: mailFrom,
 					to: recipientEmail,
 					subject,
@@ -72,31 +74,22 @@ export function makeJobHandler(
 					html,
 					...(decodedAttachments ? { attachments: decodedAttachments } : {}),
 				});
-				messageId = info.messageId ?? null;
 			}
 			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
 				status: "success",
 				userId: recipientUserId,
-				userEmail: recipientEmail,
 				siren,
-				resourceType: "notification",
 				resourceId: job.id,
-				metadata: { type, attempt, messageId },
+				metadata: { type, attempt },
 			});
 		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
 			void logAuditMain(mainSql, {
-				action: SEND_AUDIT_ACTION,
-				category: SEND_AUDIT_CATEGORY,
 				status: "failure",
 				userId: recipientUserId,
-				userEmail: recipientEmail,
 				siren,
-				resourceType: "notification",
 				resourceId: job.id,
-				errorMessage: message,
+				errorCode:
+					phase === "render" ? "mail_render_failed" : "mail_transport_failed",
 				metadata: { type, attempt },
 			});
 			throw error;

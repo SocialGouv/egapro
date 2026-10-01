@@ -281,10 +281,8 @@ export async function enqueueReceipt(
 			...(result.status === "enqueued"
 				? { resourceType: "notification", resourceId: result.id }
 				: {}),
-			// Free text belongs in the dedicated column, not in `metadata`: a direct
-			// logAction call runs no sanitisation on the jsonb, so an exception
-			// message parked there would be one refactor away from carrying
-			// whatever a future throw site interpolates into it.
+			// Keep exception text out of metadata. logAction reduces this field
+			// to a controlled error code before the database insert.
 			...(errorMessage === null ? {} : { errorMessage }),
 			// A dropped attachment must not read as a clean send: the enqueue did
 			// succeed, so the row stays a success, but the degradation is stamped

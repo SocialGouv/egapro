@@ -210,6 +210,21 @@ describe("auth config — admin two-factor authentication", () => {
 			);
 		});
 
+		it("records a single login with the local user id, including a step-up", async () => {
+			await signInWith(
+				{ acr: "eidas1-mfa", auth_time: AUTH_TIME },
+				ADMIN_EMAIL,
+			);
+			const loginEntries = mockLogAction.mock.calls
+				.map(([entry]) => entry as Record<string, unknown>)
+				.filter((entry) => entry.action === "auth.login");
+			expect(loginEntries).toHaveLength(1);
+			expect(loginEntries[0]).toMatchObject({
+				userId: "uuid-123",
+				userEmail: ADMIN_EMAIL,
+			});
+		});
+
 		it("still records success when the level of an admin account carries no second factor — the sign-in itself did not fail", async () => {
 			await signInWith({ acr: "eidas1", auth_time: AUTH_TIME }, ADMIN_EMAIL);
 
@@ -246,10 +261,14 @@ describe("auth config — admin two-factor authentication", () => {
 			expect(entry).toHaveProperty("userAgent");
 		});
 
-		it("does not open an admin audit trail for a declarant sign-in", async () => {
+		it("does not open an admin MFA audit trail for a declarant sign-in", async () => {
 			await signInWith({ acr: "eidas1-mfa", auth_time: AUTH_TIME });
 
-			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mockLogAction).toHaveBeenCalledOnce();
+			expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+				action: "auth.login",
+				userId: "uuid-123",
+			});
 		});
 	});
 
