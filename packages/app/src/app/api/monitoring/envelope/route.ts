@@ -21,6 +21,30 @@ function getConfiguredDsn(): { projectId: string; publicKey: string } | null {
   }
 }
 
+// Room for a session replay segment, the largest item our front sends; anything bigger is not ours.
+export const MAX_ENVELOPE_BYTES = 10 * 1024 * 1024;
+
+/** Read the body as text, giving up (null) as soon as it exceeds `maxBytes`, whatever Content-Length claims. */
+async function readBodyWithLimit(request: NextRequest, maxBytes: number): Promise<string | null> {
+  if (Number(request.headers.get("content-length") ?? 0) > maxBytes) return null;
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+
 /** The tunnel is only called by our own front: CORS is limited to the canonical origin, without credentials. */
 function getCorsHeaders(request: NextRequest): Record<string, string> {
   const origin = request.headers.get("origin");
@@ -50,7 +74,10 @@ export async function POST(request: NextRequest) {
 
   try {
     // Get the raw body
-    const body = await request.text();
+    const body = await readBodyWithLimit(request, MAX_ENVELOPE_BYTES);
+    if (body === null) {
+      return new Response("Envelope too large", { status: 413 });
+    }
     // console.log("Received envelope body:", body);
     // console.log("Envelope body length:", body.length);
     // console.log("Envelope newlines count:", (body.match(/\n/g) || []).length);

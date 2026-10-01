@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { OPTIONS, POST } from "../route";
+import { MAX_ENVELOPE_BYTES, OPTIONS, POST } from "../route";
 
 jest.mock("@common/config", () => ({ config: { host: "https://app.test" } }));
 
@@ -49,6 +49,36 @@ describe("sentry tunnel route", () => {
     const res = await post(envelope(dsn));
 
     expect(res.status).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses an envelope larger than the limit without relaying it", async () => {
+    const oversized = `${envelope(DSN)}\n${"x".repeat(MAX_ENVELOPE_BYTES)}`;
+
+    const res = await post(oversized);
+
+    expect(res.status).toBe(413);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("stops reading an endless streamed envelope sent without Content-Length", async () => {
+    const chunk = new TextEncoder().encode("x".repeat(1024 * 1024));
+    // Never closes: the route has to give up on its own once the limit is reached.
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        controller.enqueue(chunk);
+      },
+    });
+
+    const res = await POST(
+      new Request("https://app.test/api/monitoring/envelope", {
+        method: "POST",
+        body: stream,
+        duplex: "half",
+      } as RequestInit) as never,
+    );
+
+    expect(res.status).toBe(413);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

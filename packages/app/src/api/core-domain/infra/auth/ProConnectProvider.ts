@@ -96,6 +96,9 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         const response = await fetch(userinfoEndpoint, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
+        if (!response.ok) {
+          throw new Error(`ProConnectProvider - userinfo request failed with status ${response.status}.`);
+        }
         const body = await response.text();
 
         if (body.startsWith("{")) {

@@ -1,4 +1,3 @@
-import { type DeclarationRaw } from "@api/core-domain/infra/db/DeclarationRaw";
 import { type Declaration, type DeclarationPK } from "@common/core-domain/domain/Declaration";
 import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { type Siren } from "@common/core-domain/domain/valueObjects/Siren";
@@ -9,7 +8,6 @@ export interface IDeclarationRepo extends Repo<Declaration> {
   count(): Promise<number>;
   getAllByEmail(emails: Email | Email[]): Promise<Declaration[]>;
   getAllBySiren(siren: Siren): Promise<Declaration[]>;
-  getAllSirenAndYear(): Promise<Array<Partial<DeclarationRaw>>>;
   getOneDeclarationOpmc(id: DeclarationPK): Promise<DeclarationOpmc | null>;
   limit(limit?: number): this;
   /** @deprecated - use saveWithIndex */

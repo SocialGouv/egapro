@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { assertJwtSecretIsSet } from "../instrumentation";
+import { assertJwtSecretIsSet, register } from "../instrumentation";
 
 jest.mock("@sentry/nextjs", () => ({}));
 
@@ -36,5 +36,30 @@ describe("assertJwtSecretIsSet", () => {
     { NODE_ENV: "production", NEXT_PUBLIC_EGAPRO_ENV: "dev", SECURITY_JWT_SECRET: "sikretfordevonly" },
   ])("does not check dev servers (%p)", vars => {
     expect(() => assertJwtSecretIsSet(env(vars))).not.toThrow();
+  });
+});
+
+describe("register", () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+    jest.restoreAllMocks();
+  });
+
+  it("stops the production server when the JWT secret is the dev one (Next 14 would only log the error)", async () => {
+    const exit = jest.spyOn(process, "exit").mockImplementation(() => {
+      throw new Error("process.exit");
+    });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    Object.assign(process.env, {
+      NEXT_RUNTIME: "nodejs",
+      NODE_ENV: "production",
+      NEXT_PUBLIC_EGAPRO_ENV: "prod",
+      SECURITY_JWT_SECRET: "sikretfordevonly",
+    });
+
+    await expect(register()).rejects.toThrow("process.exit");
+    expect(exit).toHaveBeenCalledWith(1);
   });
 });

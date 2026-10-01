@@ -42,11 +42,11 @@ const generateSigner = async () => {
 };
 
 /** The IdP: serves the userinfo body and its JWKS. */
-const mockIdp = (userinfoBody: string, jwks: object = { keys: [] }) => {
+const mockIdp = (userinfoBody: string, jwks: object = { keys: [] }, userinfoStatus = 200) => {
   global.fetch = jest.fn(async (input: RequestInfo | URL) =>
     String(input) === JWKS_URI
       ? new Response(JSON.stringify(jwks), { status: 200, headers: { "content-type": "application/json" } })
-      : new Response(userinfoBody, { status: 200 }),
+      : new Response(userinfoBody, { status: userinfoStatus }),
   ) as typeof fetch;
 };
 
@@ -96,6 +96,12 @@ describe("ProConnectProvider", () => {
         email: "json@fia1.fr",
         sub: "2",
       });
+    });
+
+    it("rejects an error response instead of taking its JSON body for a profile", async () => {
+      mockIdp(JSON.stringify({ error: "invalid_token" }), { keys: [] }, 401);
+
+      await expect(callUserinfoRequest({ client, tokens: { access_token: "at" } })).rejects.toThrow(/401/);
     });
 
     it("throws when access_token is missing", async () => {

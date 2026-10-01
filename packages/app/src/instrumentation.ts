@@ -57,7 +57,13 @@ export const withServerAction = <T>(
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    assertJwtSecretIsSet();
+    // Next 14 only logs an error thrown here and keeps serving 500s: exit so the deployment fails visibly.
+    try {
+      assertJwtSecretIsSet();
+    } catch (error) {
+      console.error((error as Error).message);
+      process.exit(1);
+    }
 
     const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
     const IS_PRODUCTION = ENVIRONMENT === "production";
