@@ -6,6 +6,8 @@ const app = express();
 const port = 8080;
 const bcrypt = require('bcryptjs');
 
+app.disable('x-powered-by');
+
 
 async function verifyPassword(providedPassword, storedHash) {
     try {
@@ -47,6 +49,40 @@ function readAuthFile(filePath) {
 
 const users = readAuthFile(authPasswdFile);
 
+// Compared against when the user name is unknown, so that a wrong name costs the
+// same bcrypt time as a wrong password (no user enumeration by timing).
+const unknownUserHash = bcrypt.hashSync('unknown-user', 10);
+
+// Basic auth is reachable from the internet: lock an IP out after repeated failures.
+const MAX_FAILED_ATTEMPTS = 10;
+const FAILED_ATTEMPTS_WINDOW_MS = 15 * 60 * 1000;
+const MAX_TRACKED_IPS = 10000;
+const failedAttempts = new Map();
+
+function isLockedOut(ip, now = Date.now()) {
+  const entry = failedAttempts.get(ip);
+  if (!entry) return false;
+  if (entry.resetAt <= now) {
+    failedAttempts.delete(ip);
+    return false;
+  }
+  return entry.count >= MAX_FAILED_ATTEMPTS;
+}
+
+function recordFailedAttempt(ip, now = Date.now()) {
+  if (failedAttempts.size >= MAX_TRACKED_IPS) {
+    for (const [trackedIp, entry] of failedAttempts) {
+      if (entry.resetAt <= now) failedAttempts.delete(trackedIp);
+    }
+  }
+  const entry = failedAttempts.get(ip);
+  if (entry && entry.resetAt > now) {
+    entry.count += 1;
+  } else if (failedAttempts.size < MAX_TRACKED_IPS) {
+    failedAttempts.set(ip, { count: 1, resetAt: now + FAILED_ATTEMPTS_WINDOW_MS });
+  }
+}
+
 // Returns the last (right-most) entry of a comma separated forwarded-for list:
 // it is the one appended by the closest proxy, the only one a client cannot forge.
 function lastForwardedIp(header) {
@@ -70,14 +106,21 @@ function getClientIp(req) {
 }
 
 
-async function basicAuthentication(req, res, next) {
-  const user = basicAuth(req);   
-  if(user && users[user.name]){
-    const hash = users[user.name]
-    if(await verifyPassword(user.pass, hash)){
+async function basicAuthentication(req, res, next, clientIp) {
+  const ipKey = clientIp || 'unknown';
+  if (isLockedOut(ipKey)) {
+    res.status(429).send('Too many failed attempts, try again later.');
+    return;
+  }
+  const user = basicAuth(req);
+  if (user) {
+    const knownUser = Object.hasOwn(users, user.name);
+    const passwordMatches = await verifyPassword(user.pass, knownUser ? users[user.name] : unknownUserHash);
+    if (knownUser && passwordMatches) {
       next();
       return;
     }
+    recordFailedAttempt(ipKey);
   }
   res.set('WWW-Authenticate', 'Basic realm="401"');
   res.status(401).send('Authentication required.');
@@ -93,7 +136,7 @@ app.use((req, res, next) => {
     if (clientIp && whiteListIP.includes(clientIp)) {
       next();
     } else {
-      basicAuthentication(req, res, next);
+      basicAuthentication(req, res, next, clientIp);
     }
   } else {
     res.status(404).send()
@@ -112,10 +155,21 @@ app.use((req, res) => {
     res.status(404).send()
     return
   }
-  res.setHeader('Content-Disposition', 'attachment; filename=' + path.basename(absolutePath));
-  res.sendFile(absolutePath);
+  // The attachment header only goes with the file itself: a missing export is a plain 404,
+  // without the server path that Express puts in its default error page.
+  res.sendFile(
+    absolutePath,
+    { headers: { 'Content-Disposition': 'attachment; filename=' + path.basename(absolutePath) } },
+    err => {
+      if (err && !res.headersSent) res.status(404).send();
+    },
+  );
 })
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
+  });
+}
+
+module.exports = { app };

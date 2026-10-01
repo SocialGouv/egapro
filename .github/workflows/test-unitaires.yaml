@@ -71,6 +71,11 @@ jobs:
           # Debug - check if coverage file exists
           ls -la packages/app/coverage/
           cat packages/app/coverage/lcov.info | head -n 20
+      - name: Test files server
+        working-directory: packages/files
+        run: |
+          pnpm install --frozen-lockfile --ignore-workspace
+          pnpm test
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
         env:

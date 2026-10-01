@@ -1,4 +1,5 @@
-FROM node:20
+FROM node:22
+ENV NODE_ENV=production
 RUN corepack enable && corepack prepare pnpm@10.29.2 --activate
 WORKDIR /app
 COPY pnpm-lock.yaml ./

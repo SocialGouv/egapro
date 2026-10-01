@@ -4,6 +4,9 @@ metadata:
   name: files-restricted
   annotations:
     kubernetes.io/ingress.class: nginx
+    # Basic auth is the only guard of these files for non-whitelisted IPs: cap the attempts per client
+    # before they reach the pod (the files server also locks an IP out after repeated failures).
+    nginx.ingress.kubernetes.io/limit-rpm: "30"
     # nginx.ingress.kubernetes.io/satisfy: "any"
     # nginx.ingress.kubernetes.io/whitelist-source-range: {{ .Values.whitelist | join "," | quote }}
     # nginx.ingress.kubernetes.io/auth-type: basic
