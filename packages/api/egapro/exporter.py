@@ -13,7 +13,7 @@ from progressist import ProgressBar
 from egapro import jsonlib as json
 
 from egapro import constants, db, models, sql, utils
-from egapro.utils import escape_formula
+from egapro.utils import escape_formula, escape_xlsx_formula
 
 def truthy(val):
     return False if val is False else True
@@ -127,7 +127,7 @@ WHITE_SPACES = re.compile(r"\s+")
 def clean_cell(value):
     if isinstance(value, str):
         value = WHITE_SPACES.sub(" ", ILLEGAL_CHARACTERS_RE.sub("", value).strip())
-    return escape_formula(value)
+    return escape_xlsx_formula(value)
 
 tranche_effectif_map = {
     "50:250": "50 à 250",

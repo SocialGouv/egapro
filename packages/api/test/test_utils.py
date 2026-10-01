@@ -87,3 +87,47 @@ def test_remove_one_year(input, output):
 )
 def test_escape_formula(input, output):
     assert utils.escape_formula(input) == output
+
+
+@pytest.mark.parametrize(
+    "input,output",
+    [
+        ('=HYPERLINK("http://evil.com")', '\'=HYPERLINK("http://evil.com")'),
+        ("+33 6 12 34 56 78", "+33 6 12 34 56 78"),
+        ("-2+3", "-2+3"),
+        ("@SUM(A1:A2)", "@SUM(A1:A2)"),
+        ("Total Recall", "Total Recall"),
+        (-12, -12),
+        (None, None),
+    ],
+)
+def test_escape_xlsx_formula(input, output):
+    assert utils.escape_xlsx_formula(input) == output
+
+
+@pytest.mark.parametrize(
+    "input,output",
+    [
+        ("foo@bar.org", "foo@bar.org"),
+        (" Foo.Bar+egapro@Sub.Example.FR ", "foo.bar+egapro@sub.example.fr"),
+        ("foo@bar.org, baz@bar.org", None),
+        ("foo@bar.org;baz@bar.org", None),
+        ("Foo <foo@bar.org>", None),
+        ('"foo"@bar.org', None),
+        ("foo@bar.org (comment)", None),
+        ("foo @bar.org", None),
+        ("foo@bar.org\nBcc: baz@bar.org", None),
+        ("foo@bar.org\x00", None),
+        ("foo@bar@baz.org", None),
+        ("foo@bar", None),
+        ("foo", None),
+        ("", None),
+        (None, None),
+        (["foo@bar.org"], None),
+        ("a" * 64 + "@" + "b" * 186 + ".fr", "a" * 64 + "@" + "b" * 186 + ".fr"),
+        ("a" * 64 + "@" + "b" * 187 + ".fr", None),
+        ("a@" + "b." * 50_000, None),
+    ],
+)
+def test_normalize_email(input, output):
+    assert utils.normalize_email(input) == output

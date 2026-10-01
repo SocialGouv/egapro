@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 from functools import wraps
@@ -56,18 +57,18 @@ class Request(BaseRequest):
     def domain(self):
         """Base URL used to build the links sent by email.
 
-        The `Origin` header is client controlled: only trust it when it matches the
-        configured domain, the host the request was routed to (ingress) or an
-        explicitly allowed origin, otherwise fall back to the configured domain."""
-        domain = (self.origin or f"https://{self.host}").rstrip("/")
-        allowed = {
-            config.DOMAIN.rstrip("/"),
-            f"https://{self.host}",
-            *config.allowed_origins(),
-        }
-        if domain not in allowed:
-            loggers.logger.warning("Untrusted origin for email links: %s", domain)
-            return config.DOMAIN.rstrip("/")
+        The `Origin` and `Host` headers are client controlled: only trust the origin
+        when it is the configured domain or an explicitly allowed origin, otherwise
+        fall back to the configured domain (EGAPRO_DOMAIN, set per environment)."""
+        default = config.DOMAIN.rstrip("/")
+        if not self.origin:
+            return default
+        domain = self.origin.rstrip("/")
+        if domain not in {default, *config.allowed_origins()}:
+            loggers.logger.warning(
+                "Untrusted origin for email links: %s", loggers.safe(domain)
+            )
+            return default
         return domain
 
     @property
@@ -582,16 +583,27 @@ def token_request_throttled(email, now=None):
     return False
 
 
+# redirectTo is written in a plain text email: a path, without any line break.
+REDIRECT_PATH = re.compile(r"[A-Za-z0-9/_.\-]*")
+
+
 @app.route("/token", methods=["POST"])
 async def send_token(request, response):
     email = request.json.get("email")
     if not email:
         raise HttpError(400, "Missing email key")
-    if token_request_throttled(str(email).strip().lower()):
+    # The throttle key, the token and the recipient must be the same single address.
+    email = utils.normalize_email(email)
+    if not email:
+        raise HttpError(400, "Adresse email invalide")
+    redirectTo = request.json.get("redirectTo") or ""
+    if not isinstance(redirectTo, str) or not REDIRECT_PATH.fullmatch(redirectTo):
+        raise HttpError(400, "Chemin de redirection invalide")
+    redirectTo = redirectTo.lstrip("/")
+    if token_request_throttled(email):
         raise HttpError(429, "Un lien vient déjà d'être envoyé à cette adresse, veuillez patienter.")
     loggers.logger.info(f"Token request FOR {loggers.safe(email)} FROM {loggers.safe(request.ip)}")
     token = tokens.create(email)
-    redirectTo = (request.json.get("redirectTo") or "").lstrip("/")
     link = f"{config.DOMAIN}/{redirectTo}?token={token}"
     # Local development only, decided by the configured domain: the link itself
     # holds client input (redirectTo), and a token must never reach production logs.

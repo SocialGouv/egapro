@@ -4,10 +4,11 @@ import json
 import logging
 from unittest import mock
 
+import jwt
 import pytest
 from asyncpg.exceptions import UndefinedTableError
 
-from egapro import config, db
+from egapro import config, db, tokens
 
 pytestmark = pytest.mark.asyncio
 
@@ -195,6 +196,43 @@ async def test_email_links_use_allowed_origin(client, monkeypatch, declaration):
     assert "https://preprod.egapro.fr/index-egapro/declaration/?siren=514027945" in txt
 
 
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {"Host": "evil.com"},
+        {"Host": "evil.com", "Origin": "https://evil.com"},
+    ],
+)
+async def test_email_links_ignore_the_host_header(
+    client, monkeypatch, declaration, headers
+):
+    sender = mock.Mock()
+    await declaration(siren="514027945", year=2020, owner="foo@bar.org")
+    monkeypatch.setattr("egapro.emails.send", sender)
+    resp = await client.post("/declaration/514027945/2020/receipt", headers=headers)
+    assert resp.status == 204
+    to, subject, txt, html = sender.call_args.args
+    assert "evil.com" not in txt
+    assert "evil.com" not in html
+    assert f"{config.DOMAIN}/index-egapro/declaration/?siren=514027945" in txt
+
+
+async def test_email_links_use_configured_domain_origin(
+    client, monkeypatch, declaration
+):
+    sender = mock.Mock()
+    await declaration(siren="514027945", year=2020, owner="foo@bar.org")
+    monkeypatch.setattr("egapro.emails.send", sender)
+    monkeypatch.setattr("egapro.config.DOMAIN", "https://egapro.example.fr")
+    resp = await client.post(
+        "/declaration/514027945/2020/receipt",
+        headers={"Origin": "https://egapro.example.fr/"},
+    )
+    assert resp.status == 204
+    to, subject, txt, html = sender.call_args.args
+    assert "https://egapro.example.fr/index-egapro/declaration/?siren=514027945" in txt
+
+
 # No token nor personal data in logs.
 
 
@@ -204,6 +242,16 @@ async def test_invalid_token_is_not_logged(client, caplog):
     resp = await client.get("/me")
     assert resp.status == 401
     assert "invalid.token.value" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    "payload,algorithm",
+    [({"sub": "foo@bar.org"}, "HS512"), ({"exp": 4102444800}, "HS256")],
+)
+async def test_unexpected_token_is_unauthorized(client, payload, algorithm):
+    client.default_headers["API-Key"] = jwt.encode(payload, config.SECRET, algorithm)
+    resp = await client.get("/me")
+    assert resp.status == 401
 
 
 async def test_request_body_is_not_logged(client, caplog):
@@ -324,6 +372,103 @@ def test_token_throttle_expires_and_stays_bounded(monkeypatch):
     for i in range(10):
         views.token_request_throttled(f"{i}@b.c", now=100)
     assert len(views._token_requests) <= 3
+
+
+@pytest.mark.parametrize(
+    "email",
+    [
+        "victim@example.org, other@example.org",
+        "victim@example.org;other@example.org",
+        "Victim <victim@example.org>",
+        "victim@example.org other@example.org",
+        "victim@example.org\nBcc: other@example.org",
+        "victim@example.org\x00",
+        "victim",
+        "@example.org",
+        ["victim@example.org"],
+    ],
+)
+async def test_token_request_accepts_a_single_address_only(client, monkeypatch, email):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post("/token", body={"email": email})
+    assert resp.status == 400
+    assert json.loads(resp.body) == {"error": "Adresse email invalide"}
+    assert not send.called
+
+
+async def test_token_is_sent_to_the_throttled_address(client, monkeypatch):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post("/token", body={"email": " Victim@Example.org "})
+    assert resp.status == 204
+    to, subject, body = send.call_args.args
+    assert to == "victim@example.org"
+    token = body.split("?token=")[1].split()[0]
+    assert tokens.read(token) == "victim@example.org"
+    resp = await client.post("/token", body={"email": "victim@example.org"})
+    assert resp.status == 429
+
+
+@pytest.mark.parametrize(
+    "redirect",
+    [
+        "declaration/\n\nCliquez plutôt sur https://evil.com",
+        "declaration/\r\nhttps://evil.com",
+        "declaration/ https://evil.com",
+        "declaration/?next=https://evil.com",
+        "https://evil.com",
+        ["declaration/"],
+    ],
+)
+async def test_token_redirect_cannot_inject_text_in_email(
+    client, monkeypatch, redirect
+):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post(
+        "/token", body={"email": "foo@bar.org", "redirectTo": redirect}
+    )
+    assert resp.status == 400
+    assert json.loads(resp.body) == {"error": "Chemin de redirection invalide"}
+    assert not send.called
+
+
+async def test_token_redirect_keeps_paths(client, monkeypatch):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post(
+        "/token",
+        body={
+            "email": "foo@bar.org",
+            "redirectTo": "//index-egapro/tableau_de-bord.v2/",
+        },
+    )
+    assert resp.status == 204
+    to, subject, body = send.call_args.args
+    assert f"{config.DOMAIN}/index-egapro/tableau_de-bord.v2/?token=" in body
+
+
+# Request bodies ujson 1.35 refused, or that broke the JSON layer, are a 400.
+
+
+@pytest.mark.parametrize(
+    "body", ['{"a": NaN}', '{"a": [Infinity]}', '{"a": -Infinity}']
+)
+async def test_non_finite_numbers_in_body_are_refused(client, body):
+    resp = await client.post("/simulation", body=body)
+    assert resp.status == 400
+
+
+async def test_deeply_nested_body_is_not_a_server_error(client):
+    nested = "[" * 1000 + "]" * 1000
+    resp = await client.post("/simulation", body='{"a":' + nested + "}")
+    assert resp.status == 200
+    resp = await client.get(f"/simulation/{json.loads(resp.body)['id']}")
+    assert resp.status == 200
+    assert json.loads(resp.body)["data"]["a"] == json.loads(nested)
+    resp = await client.post("/simulation", body="[" * 5000 + "]" * 5000)
+    assert resp.status == 400
 
 
 # The anonymous public listing never loads a whole year in memory.

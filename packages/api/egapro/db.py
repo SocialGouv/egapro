@@ -696,7 +696,7 @@ class archive(table):
 
 async def set_type_codecs(conn):
     await conn.set_type_codec(
-        "jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog"
+        "jsonb", encoder=json.dumps, decoder=json.loads_jsonb, schema="pg_catalog"
     )
     await conn.set_type_codec("uuid", encoder=str, decoder=str, schema="pg_catalog")
 

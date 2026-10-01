@@ -27,3 +27,37 @@ def test_scrub_event_removes_credentials_and_personal_data():
         "headers": {"User-Agent": "Mozilla"},
     }
     assert "secret" not in str(event)
+
+
+def test_scrub_event_removes_frame_local_variables():
+    def frames():
+        return {
+            "frames": [
+                {
+                    "function": "send_token",
+                    "vars": {"token": "secret", "email": "foo@bar.org"},
+                },
+                {"function": "read", "lineno": 12},
+            ]
+        }
+
+    event = {
+        "exception": {"values": [{"type": "ValueError", "stacktrace": frames()}, {}]},
+        "threads": {"values": [{"id": 1, "stacktrace": frames()}]},
+    }
+    event = loggers.scrub_event(event)
+    for key in ("exception", "threads"):
+        assert event[key]["values"][0]["stacktrace"]["frames"] == [
+            {"function": "send_token"},
+            {"function": "read", "lineno": 12},
+        ]
+    assert "secret" not in str(event)
+    assert "foo@bar.org" not in str(event)
+
+
+def test_sentry_never_collects_local_variables(monkeypatch):
+    calls = []
+    monkeypatch.setattr(loggers.sentry_sdk, "init", lambda *a, **kw: calls.append(kw))
+    loggers.init()
+    assert calls[0]["include_local_variables"] is False
+    assert calls[0]["before_send"] is loggers.scrub_event

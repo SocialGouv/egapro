@@ -49,6 +49,13 @@ def scrub_event(event, hint=None):
             request["headers"] = {
                 k: v for k, v in headers.items() if k.lower() not in SENSITIVE_HEADERS
             }
+    # Local variables hold tokens, emails and declarations: never send them, even
+    # if a future init forgets `include_local_variables=False`.
+    for key in ("exception", "threads"):
+        for value in (event.get(key) or {}).get("values") or []:
+            for frame in ((value or {}).get("stacktrace") or {}).get("frames") or []:
+                if isinstance(frame, dict):
+                    frame.pop("vars", None)
     return event
 
 
@@ -58,5 +65,6 @@ def init():
         release=metadata.version("egapro"),
         environment=config.FLAVOUR,
         send_default_pii=False,
+        include_local_variables=False,
         before_send=scrub_event,
     )

@@ -17,11 +17,12 @@ def create(email):
 
 
 def read(token):
+    # Any invalid token (wrong algorithm, bad claims, no subject) is a 401, not a 500.
     try:
         decoded = jwt.decode(token, config.SECRET, algorithms=[config.JWT_ALGORITHM])
-    except (jwt.DecodeError, jwt.ExpiredSignatureError):
+        return decoded["sub"]
+    except (jwt.InvalidTokenError, KeyError):
         raise ValueError
-    return decoded["sub"]
 
 
 def require(view):
