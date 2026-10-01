@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import timedelta
 from unittest import mock
 
@@ -135,7 +136,7 @@ async def test_basic_representation_should_save_data(client, body, monkeypatch):
         "/representation-equilibree/514027945/2021", body=body, headers={"X-REAL-IP": "1.1.1.1"}
     )
     assert resp.status == 204
-    logger.assert_called_with("514027945/2021 BY foo@bar.org FROM 1.1.1.1")
+    logger.assert_any_call("514027945/2021 BY foo@bar.org FROM 1.1.1.1")
     resp = await client.get("/representation-equilibree/514027945/2021")
     assert resp.status == 200
     data = json.loads(resp.body)
@@ -246,6 +247,7 @@ async def test_staff_can_load_not_owned_representation(client, monkeypatch, repr
     assert resp.status == 200
 
 
+@pytest.mark.unowned
 async def test_staff_can_put_not_owned_representation(
     client, monkeypatch, representation_equilibree, body
 ):
@@ -271,7 +273,9 @@ async def test_cannot_put_not_owned_representation(client, monkeypatch):
     }
 
 
+@pytest.mark.unowned
 async def test_owner_check_is_lower_case(client, body):
+    await db.ownership.put("514027945", "foo@bar.com")
     client.login("FOo@baR.com")
     await client.put("/representation-equilibree/514027945/2021", body=body)
     client.login("FOo@BAR.COM")
@@ -355,9 +359,7 @@ async def test_with_unknown_siren_or_year(client):
     assert resp.status == 404
 
 
-async def test_invalid_representation_data_should_raise_on_put(client, monkeypatch):
-    capture_message = mock.Mock()
-    monkeypatch.setattr("sentry_sdk.capture_message", capture_message)
+async def test_invalid_representation_data_should_raise_on_put(client, monkeypatch, caplog):
     resp = await client.put(
         "/representation-equilibree/514027945/2021",
         body={"foo": "bar"},
@@ -367,20 +369,21 @@ async def test_invalid_representation_data_should_raise_on_put(client, monkeypat
         "error": "data must contain "
         "['déclaration', 'déclarant', 'entreprise'] properties",
     }
-    assert capture_message.called_once
+    # Sentry's logging integration forwards ERROR records.
+    assert any(r.levelno == logging.ERROR and "data must contain" in r.getMessage() for r in caplog.records)
 
 
-async def test_uncaught_error_is_sent_to_sentry(client, monkeypatch, body):
-    capture_exception = mock.Mock()
-    monkeypatch.setattr("sentry_sdk.capture_exception", capture_exception)
+async def test_uncaught_error_is_sent_to_sentry(client, monkeypatch, body, caplog):
 
-    def mock_validate():
+    def mock_validate(*args, **kwargs):
         raise AttributeError
 
     monkeypatch.setattr("egapro.schema.validate", mock_validate)
     resp = await client.put("/representation-equilibree/514027945/2021", body=body)
     assert resp.status == 500
-    assert capture_exception.called_once
+    # Logged at ERROR with the traceback, which Sentry's logging integration sends.
+    errors = [r for r in caplog.records if r.levelno == logging.ERROR and r.exc_info]
+    assert errors and errors[0].exc_info[0] is AttributeError
 
 
 async def test_percentage_must_be_100(client, body):

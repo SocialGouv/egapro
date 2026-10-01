@@ -12,7 +12,6 @@ import { DeclarationSpecificationError } from "@common/core-domain/domain/specif
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 import { ValidationError } from "@common/shared-domain";
 import { type ServerActionResponse } from "@common/utils/next";
-import assert from "assert";
 
 export async function getDeclaration(siren: string, year: number) {
   await assertServerSession({
@@ -41,6 +40,18 @@ export async function saveDeclaration(
     },
     staff: true,
   });
+
+  // The declaration is saved under the declaring company: it must be owned too (IDOR otherwise).
+  const declaringSiren = declaration.entreprise?.entrepriseDéclarante?.siren;
+  if (declaringSiren !== declaration.commencer?.siren) {
+    await assertServerSession({
+      owner: {
+        check: declaringSiren || "",
+        message: "Not authorized to save declaration for this Siren.",
+      },
+      staff: true,
+    });
+  }
 
   const siren = declaration.commencer?.siren;
   const year = declaration.commencer?.annéeIndicateurs;

@@ -71,7 +71,8 @@ class Email:
     def __init__(self, subject, txt, html, attachment):
         self.subject = self.load(subject)
         self.txt = self.load(txt)
-        self.html = self.load(html)
+        # Only the HTML body must be escaped, text parts would show HTML entities.
+        self.html = self.load(html, autoescape=True)
         self.attachment = attachment
 
     async def send(self, to, **context):
@@ -89,10 +90,14 @@ class Email:
             (self.subject or "").render(**context).replace("\r", "").replace("\n", ""),
         )
 
-    def load(self, s):
+    def load(self, s, autoescape=False):
         try:
             return Template(
-                s or "", undefined=SilentUndefined, trim_blocks=True, lstrip_blocks=True
+                s or "",
+                undefined=SilentUndefined,
+                trim_blocks=True,
+                lstrip_blocks=True,
+                autoescape=autoescape,
             )
         except TemplateError as err:
             print(s)

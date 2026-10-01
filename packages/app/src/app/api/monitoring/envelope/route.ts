@@ -1,6 +1,62 @@
+import { config } from "@common/config";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * The tunnel only relays events for OUR Sentry project: the DSN comes from configuration,
+ * and an envelope that names another project or key is refused. Otherwise anyone could use
+ * this endpoint as an open relay to any project on the Sentry instance.
+ */
+function getConfiguredDsn(): { projectId: string; publicKey: string } | null {
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+  if (!dsn) return null;
+  try {
+    const dsnUrl = new URL(dsn);
+    const projectId = dsnUrl.pathname.split("/").filter(Boolean).pop();
+    if (!projectId || !/^\d+$/.test(projectId) || !dsnUrl.username) return null;
+    return { projectId, publicKey: dsnUrl.username };
+  } catch {
+    return null;
+  }
+}
+
+// Room for a session replay segment, the largest item our front sends; anything bigger is not ours.
+export const MAX_ENVELOPE_BYTES = 10 * 1024 * 1024;
+
+/** Read the body as text, giving up (null) as soon as it exceeds `maxBytes`, whatever Content-Length claims. */
+async function readBodyWithLimit(request: NextRequest, maxBytes: number): Promise<string | null> {
+  if (Number(request.headers.get("content-length") ?? 0) > maxBytes) return null;
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maxBytes) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+
+/** The tunnel is only called by our own front: CORS is limited to the canonical origin, without credentials. */
+function getCorsHeaders(request: NextRequest): Record<string, string> {
+  const origin = request.headers.get("origin");
+  let allowedOrigin: string | null = null;
+  try {
+    allowedOrigin = new URL(process.env.NEXTAUTH_URL || config.host).origin;
+  } catch {
+    // No canonical origin configured: same-origin requests don't need CORS headers anyway.
+  }
+  if (!origin || origin !== allowedOrigin) return {};
+  return { "Access-Control-Allow-Origin": origin, Vary: "Origin" };
+}
 
 export async function POST(request: NextRequest) {
   const sentryUrl = process.env.SENTRY_URL;
@@ -9,15 +65,23 @@ export async function POST(request: NextRequest) {
     return new Response("Sentry URL not configured", { status: 500 });
   }
 
+  const configuredDsn = getConfiguredDsn();
+  if (!configuredDsn) {
+    console.error("Sentry DSN not configured");
+    return new Response("Sentry DSN not configured", { status: 500 });
+  }
+  const { projectId, publicKey } = configuredDsn;
+
   try {
     // Get the raw body
-    const body = await request.text();
+    const body = await readBodyWithLimit(request, MAX_ENVELOPE_BYTES);
+    if (body === null) {
+      return new Response("Envelope too large", { status: 413 });
+    }
     // console.log("Received envelope body:", body);
     // console.log("Envelope body length:", body.length);
     // console.log("Envelope newlines count:", (body.match(/\n/g) || []).length);
     // Parse envelope format (newline-delimited JSON)
-    let projectId: string | undefined;
-    let publicKey: string | undefined;
 
     // Split into lines
     const lines = body.split("\n");
@@ -117,40 +181,17 @@ export async function POST(request: NextRequest) {
       // Parse header
       const header = JSON.parse(headerRaw);
 
-      // Try to get DSN from envelope header
+      // An envelope that names a DSN must name ours.
       if (header.dsn) {
         const dsnUrl = new URL(header.dsn);
-        projectId = dsnUrl.pathname.split("/")[1];
-        publicKey = dsnUrl.username;
-        // console.log("Parsed DSN from envelope:", { projectId, publicKey });
+        if (dsnUrl.pathname.split("/").filter(Boolean).pop() !== projectId || dsnUrl.username !== publicKey) {
+          return new Response("Unknown Sentry DSN", { status: 403 });
+        }
       }
     } catch (e) {
       console.error("Failed to parse envelope header:", e);
       return new Response("Invalid envelope header", { status: 400 });
     }
-
-    // Fallback to environment DSN if needed
-    if (!projectId || !publicKey) {
-      const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
-      if (dsn) {
-        try {
-          const dsnUrl = new URL(dsn);
-          projectId = dsnUrl.pathname.split("/")[1];
-          publicKey = dsnUrl.username;
-          // console.log("Parsed DSN from environment:", { projectId, publicKey });
-        } catch (e) {
-          console.warn("Could not parse environment DSN:", e);
-        }
-      }
-    }
-
-    if (!projectId || !publicKey) {
-      console.warn("Could not extract project details from DSN");
-      return new Response("Could not parse Sentry DSN", { status: 500 });
-    }
-
-    // Get origin for CORS headers
-    const origin = request.headers.get("origin");
 
     // Forward the request to Sentry's envelope endpoint
     const sentryResponse = await fetch(`${sentryUrl}/api/${projectId}/envelope/`, {
@@ -160,10 +201,8 @@ export async function POST(request: NextRequest) {
         // Forward original headers needed for client error reporting
         "Content-Type": "text/plain;charset=UTF-8",
         Accept: "*/*",
-        // Forward original auth header from client request
-        "X-Sentry-Auth":
-          request.headers.get("X-Sentry-Auth") ||
-          `Sentry sentry_key=${publicKey},sentry_version=7,sentry_client=sentry.javascript.nextjs/8.0.0`,
+        // Always authenticate with the configured key, never with a client-provided one.
+        "X-Sentry-Auth": `Sentry sentry_key=${publicKey},sentry_version=7,sentry_client=sentry.javascript.nextjs/8.0.0`,
       },
       // Use reconstructed envelope with proper newlines
       body: envelope,
@@ -195,16 +234,10 @@ export async function POST(request: NextRequest) {
     // Get Sentry response headers we want to forward
     const sentryHeaders = ["X-Sentry-Error", "X-Sentry-Rate-Limits", "Retry-After"];
 
-    // Get the request origin or default to *
-    const requestOrigin = request.headers.get("origin") || "*";
-
     const responseHeaders: Record<string, string> = {
       "Content-Type": "text/plain;charset=UTF-8",
-      "Access-Control-Allow-Origin": requestOrigin,
-      "Access-Control-Allow-Credentials": "true",
       "Access-Control-Expose-Headers": "X-Sentry-Error, X-Sentry-Rate-Limits, Retry-After",
-      // Add Vary header when using dynamic origin
-      ...(requestOrigin !== "*" ? { Vary: "Origin" } : {}),
+      ...getCorsHeaders(request),
     };
 
     // Forward specific Sentry headers if they exist
@@ -229,25 +262,14 @@ export async function POST(request: NextRequest) {
 
 // Handle OPTIONS requests for CORS
 export async function OPTIONS(request: NextRequest) {
-  // Get the request origin or default to *
-  const requestOrigin = request.headers.get("origin") || "*";
-
-  const headers: Record<string, string> = {
-    "Access-Control-Allow-Origin": requestOrigin,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": "Accept, Content-Type, X-Sentry-Auth",
-    "Access-Control-Expose-Headers": "X-Sentry-Error, X-Sentry-Rate-Limits, Retry-After",
-    "Access-Control-Max-Age": "86400",
-  };
-
-  // Add Vary header when using dynamic origin
-  if (requestOrigin !== "*") {
-    headers["Vary"] = "Origin";
-  }
-
   return new Response(null, {
     status: 200,
-    headers,
+    headers: {
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Accept, Content-Type, X-Sentry-Auth",
+      "Access-Control-Expose-Headers": "X-Sentry-Error, X-Sentry-Rate-Limits, Retry-After",
+      "Access-Control-Max-Age": "86400",
+      ...getCorsHeaders(request),
+    },
   });
 }

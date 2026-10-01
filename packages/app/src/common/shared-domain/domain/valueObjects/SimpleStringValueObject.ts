@@ -1,3 +1,4 @@
+import { printable } from "../../../utils/string";
 import { type Any } from "../../../utils/types";
 import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
@@ -22,7 +23,7 @@ export abstract class SimpleStringValueObject<Base extends SimpleStringValueObje
 
   public validate(): asserts this {
     if (!this.validator.test(this.value)) {
-      throw new ValidationError(`"${this.value}" is not a valid ${this.constructor.name.toLowerCase()}.`);
+      throw new ValidationError(`"${printable(this.value)}" is not a valid ${this.constructor.name.toLowerCase()}.`);
     }
   }
 }

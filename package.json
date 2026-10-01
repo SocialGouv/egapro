@@ -3,7 +3,7 @@
   "version": "3.18.5",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "scripts": {
     "dev": "scripts/dev",
@@ -40,7 +40,48 @@
       "@sentry/cli",
       "cypress",
       "es5-ext"
-    ]
+    ],
+    "overrides": {
+      "@babel/core@7.26.7": "^7.29.6",
+      "@babel/helpers@7.26.7": "^7.26.10",
+      "@babel/runtime@7.23.7": "^7.26.10",
+      "@octokit/plugin-paginate-rest@9.1.5": "^9.2.2",
+      "@octokit/request-error@5.0.1": "^5.1.1",
+      "@octokit/request@8.1.6": "^8.4.1",
+      "@tootallnate/once@2.0.0": "^2.0.1",
+      "ajv@6.12.6": "^6.14.0",
+      "ajv@8.12.0": "^8.18.0",
+      "baseline-browser-mapping@2.9.19": "^2.11.0",
+      "brace-expansion@1.1.11": "^1.1.21",
+      "brace-expansion@2.0.1": "^2.1.7",
+      "braces@3.0.2": "^3.0.3",
+      "browserslist@4.24.4": "^4.28.7",
+      "browserslist@4.28.1": "^4.28.7",
+      "cross-spawn@7.0.3": "^7.0.5",
+      "diff@4.0.2": "^4.0.4",
+      "es5-ext@0.10.62": "^0.10.63",
+      "flatted@3.2.9": "^3.4.2",
+      "form-data@4.0.1": "^4.0.6",
+      "handlebars@4.7.8": "^4.7.9",
+      "immutable@4.3.4": "^4.3.9",
+      "js-yaml@3.14.1": "^3.15.2",
+      "js-yaml@4.1.0": "^4.3.2",
+      "lodash@4.17.21": "^4.18.0",
+      "micromatch@4.0.5": "^4.0.8",
+      "minimatch@3.1.2": "^3.1.4",
+      "minimatch@8.0.4": "^8.0.6",
+      "minimatch@9.0.3": "^9.0.7",
+      "nanoid@3.3.7": "^3.3.18",
+      "picomatch@2.3.1": "^2.3.2",
+      "picomatch@4.0.2": "^4.0.4",
+      "postcss@8.4.31": "^8.5.23",
+      "qs@6.13.1": "^6.16.0",
+      "rollup@3.29.5": "^3.30.0",
+      "shell-quote@1.8.1": "^1.9.0",
+      "tmp@0.2.3": "^0.2.6",
+      "ws@8.16.0": "^8.21.0",
+      "yaml@1.10.2": "^1.10.3"
+    }
   },
   "packageManager": "pnpm@10.29.2"
 }

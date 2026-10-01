@@ -12,7 +12,15 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event.ref || github.event.pull_request.head.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   kontinuous:
+    # must match the permissions declared by the reusable workflow
+    permissions:
+      contents: read
+      id-token: write # OIDC (token-bureau / deployment)
+      pull-requests: read
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate-atlas.yaml@v1
     secrets: inherit

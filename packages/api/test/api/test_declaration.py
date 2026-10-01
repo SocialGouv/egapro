@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import timedelta
 from unittest import mock
 
@@ -132,7 +133,7 @@ async def test_basic_declaration_should_save_data(client, body, monkeypatch):
         "/declaration/514027945/2019", body=body, headers={"X-REAL-IP": "1.1.1.1"}
     )
     assert resp.status == 204
-    logger.assert_called_with("514027945/2019 BY foo@bar.org FROM 1.1.1.1")
+    logger.assert_any_call("514027945/2019 BY foo@bar.org FROM 1.1.1.1")
     resp = await client.get("/declaration/514027945/2019")
     assert resp.status == 200
     data = json.loads(resp.body)
@@ -306,7 +307,9 @@ async def test_basic_declaration_without_declarant_should_be_ok(client, body):
     assert data["data"]["déclarant"] == {"email": "foo@bar.org"}
 
 
+@pytest.mark.unowned
 async def test_owner_email_should_be_lower_cased(client, body):
+    await db.ownership.put("514027945", "foo@baz.bar")
     client.login("FoO@BAZ.baR")
     resp = await client.put("/declaration/514027945/2019", body=body)
     assert resp.status == 204
@@ -380,18 +383,20 @@ async def test_cannot_load_not_owned_declaration(client, declaration):
     }
 
 
-async def test_draft_declaration_is_not_owned(client, declaration, body):
+@pytest.mark.unowned
+async def test_unowned_siren_cannot_be_claimed(client, body):
+    # A siren without owner is not up for grabs: ownership comes from ProConnect
+    # (synced by the app) or from staff, never from declaring first.
+    client.login("foo@bar.baz")
     body["déclaration"]["brouillon"] = True
-    client.login("foo@bar.baz")
-    resp = await client.put("/declaration/514027945/2019", body)
-    assert resp.status == 204
-    client.login("other@email.com")
-    del body["déclaration"]["brouillon"]
-    resp = await client.put("/declaration/514027945/2019", body)
-    assert resp.status == 204
-    client.login("foo@bar.baz")
     resp = await client.put("/declaration/514027945/2019", body)
     assert resp.status == 403
+    del body["déclaration"]["brouillon"]
+    resp = await client.put("/declaration/514027945/2019", body)
+    assert resp.status == 403
+    resp = await client.get("/declaration/514027945/2019")
+    assert resp.status == 403
+    assert await db.ownership.emails("514027945") == []
 
 
 async def test_staff_can_load_not_owned_declaration(client, monkeypatch, declaration):
@@ -402,6 +407,7 @@ async def test_staff_can_load_not_owned_declaration(client, monkeypatch, declara
     assert resp.status == 200
 
 
+@pytest.mark.unowned
 async def test_staff_can_put_not_owned_declaration(
     client, monkeypatch, declaration, body
 ):
@@ -431,7 +437,9 @@ async def test_cannot_put_not_owned_declaration(client, monkeypatch):
     }
 
 
+@pytest.mark.unowned
 async def test_owner_check_is_lower_case(client, body):
+    await db.ownership.put("514027945", "foo@bar.com")
     client.login("FOo@baR.com")
     await client.put("/declaration/514027945/2019", body=body)
     client.login("FOo@BAR.COM")
@@ -486,7 +494,7 @@ async def test_confirmed_declaration_should_send_email(client, monkeypatch, body
     to, subject, txt, html = sender.call_args.args
     assert to == ["foo@bar.org", "foo@foo.foo"]
     assert "/index-egapro/declaration/?siren=514027945&year=2019" in txt
-    assert "/index-egapro/declaration/?siren=514027945&year=2019" in html
+    assert "/index-egapro/declaration/?siren=514027945&amp;year=2019" in html
     assert sender.call_args.kwargs["reply_to"] == replyToList
     assert sender.call_args.kwargs["attachment"][1] == "declaration_514027945_2020.pdf"
 
@@ -551,9 +559,7 @@ async def test_with_unknown_siren_or_year(client):
     assert resp.status == 404
 
 
-async def test_invalid_declaration_data_should_raise_on_put(client, monkeypatch):
-    capture_message = mock.Mock()
-    monkeypatch.setattr("sentry_sdk.capture_message", capture_message)
+async def test_invalid_declaration_data_should_raise_on_put(client, monkeypatch, caplog):
     resp = await client.put(
         "/declaration/514027945/2019",
         body={"foo": "bar"},
@@ -563,20 +569,21 @@ async def test_invalid_declaration_data_should_raise_on_put(client, monkeypatch)
         "error": "data must contain "
         "['déclaration', 'déclarant', 'entreprise'] properties",
     }
-    assert capture_message.called_once
+    # Sentry's logging integration forwards ERROR records.
+    assert any(r.levelno == logging.ERROR and "data must contain" in r.getMessage() for r in caplog.records)
 
 
-async def test_uncaught_error_is_sent_to_sentry(client, monkeypatch, body):
-    capture_exception = mock.Mock()
-    monkeypatch.setattr("sentry_sdk.capture_exception", capture_exception)
+async def test_uncaught_error_is_sent_to_sentry(client, monkeypatch, body, caplog):
 
-    def mock_validate():
+    def mock_validate(*args, **kwargs):
         raise AttributeError
 
     monkeypatch.setattr("egapro.schema.validate", mock_validate)
     resp = await client.put("/declaration/514027945/2019", body=body)
     assert resp.status == 500
-    assert capture_exception.called_once
+    # Logged at ERROR with the traceback, which Sentry's logging integration sends.
+    errors = [r for r in caplog.records if r.levelno == logging.ERROR and r.exc_info]
+    assert errors and errors[0].exc_info[0] is AttributeError
 
 
 async def test_must_set_augmentation_et_promotions_if_tranche_is_50_250(client, body):

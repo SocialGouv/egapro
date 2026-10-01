@@ -248,15 +248,13 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "egapro-local-secret",
       "redirectUris": [
-        "http://localhost:3000/*",
-        "https://*"
+        "http://localhost:3000/*"
       ],
       "webOrigins": [
-        "http://localhost:3000",
-        "https://*.ovh.fabrique.social.gouv.fr"
+        "http://localhost:3000"
       ],
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "publicClient": false,
       "protocol": "openid-connect",

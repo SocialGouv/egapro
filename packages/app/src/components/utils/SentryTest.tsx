@@ -23,28 +23,6 @@ export const SentryTest = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [typedText]);
 
-  const triggerServerError = useCallback(async () => {
-    try {
-      console.log("Making request to test endpoint...");
-      // Make a request to our test endpoint that will throw a server error
-      const response = await fetch("/apiv2/test-sentry-error?trigger=true");
-      console.log("Response status:", response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => "No error text available");
-        console.error("Server error details:", {
-          status: response.status,
-          statusText: response.statusText,
-          errorText,
-        });
-        throw new Error(`Server error: ${response.status} - ${errorText}`);
-      }
-    } catch (error) {
-      console.error("Server-side error test:", error);
-      throw error;
-    }
-  }, []);
-
   const triggerError = useCallback(() => {
     // Log configuration and start of error test
     console.log("Starting Sentry test with config:", {
@@ -73,9 +51,6 @@ export const SentryTest = () => {
       <div className="fr-grid-row fr-grid-row--gutters">
         <div className="fr-col-12 fr-col-md-6">
           <Button onClick={triggerError}>Trigger client-side error</Button>
-        </div>
-        <div className="fr-col-12 fr-col-md-6">
-          <Button onClick={triggerServerError}>Trigger server-side error</Button>
         </div>
       </div>
     </div>

@@ -5,8 +5,8 @@ services:
     image: djfarrelly/maildev
     command: bin/maildev --web 1080 --smtp 1025 --hide-extensions STARTTLS
     ports:
-      - "1025:1025"
-      - "1080:1080"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:1080:1080"
     restart: always
 
   api:
@@ -28,8 +28,10 @@ services:
       EGAPRO_DBUSER: ${EGAPRO_DBUSER:-postgres}
       EGAPRO_DBPASS: ${EGAPRO_DBPASS:-postgres}
       EGAPRO_STAFF: ${EGAPRO_STAFF:-""}
+      # Local production-image stack: development credentials are expected.
+      EGAPRO_FLAVOUR: dev
     ports:
-      - 2626:2626
+      - "127.0.0.1:2626:2626"
     depends_on:
       - db
       - test_db
@@ -37,25 +39,25 @@ services:
 
   db:
     restart: always
-    image: postgres
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: egapro
     ports:
-      - 5437:5432
+      - "127.0.0.1:5437:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
 
   test_db:
     restart: always
-    image: postgres
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: test_egapro
     ports:
-      - 5436:5432
+      - "127.0.0.1:5436:5432"
     volumes:
       - ./packages/api/egapro/sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
 
@@ -64,8 +66,11 @@ services:
     build:
       context: .
       dockerfile: ./packages/app/Dockerfile
+    environment:
+      # Local production-image stack: the development session secret is expected.
+      NEXT_PUBLIC_EGAPRO_ENV: dev
     ports:
-      - 3000:3000
+      - "127.0.0.1:3000:3000"
     restart: "no"
 
 volumes:

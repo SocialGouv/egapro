@@ -1,17 +1,33 @@
 import os
+import re
 import sys
+import time
 from functools import wraps
-from traceback import print_exc
 
 from naf import DB as NAF
-from roll import Roll, HttpError
+from roll import Roll, HttpError, HTTP_METHODS as CORS_METHODS
 from roll import Request as BaseRequest, Response
-from asyncpg.exceptions import DataError
-from roll.extensions import cors, options
+from asyncpg.exceptions import DataError, InterfaceError, PostgresError
+from roll.extensions import options
 from stdnum.fr.siren import is_valid as siren_is_valid
 
 from egapro import config, constants, db, emails, helpers, models, tokens, utils, schema, pdf
-from egapro import loggers
+from egapro import jsonlib, loggers
+import roll.io
+
+# roll parses request bodies and serializes responses with the module-level `json`
+# it imported (ujson): route it through jsonlib to keep the ujson 1.35 output.
+roll.io.json = jsonlib
+roll.io.JSONDecodeError = jsonlib.JSONDecodeError
+
+GENERIC_ERROR = "Une erreur inattendue est survenue"
+
+# Public, anonymous searches: bound the work one request can ask for. Every UES
+# result compares the query to each member company name (difflib, quadratic), so
+# an unbounded `q` and `limit` let a single request hold the event loop.
+SEARCH_MAX_QUERY_LENGTH = 100
+SEARCH_MAX_LIMIT = 100
+
 
 class Request(BaseRequest):
     def __init__(self, *args, **kwargs):
@@ -39,13 +55,26 @@ class Request(BaseRequest):
 
     @property
     def domain(self):
-        domain = self.origin or f"https://{self.host}"
-        if domain.endswith("/"):
-            domain += domain[:-1]
+        """Base URL used to build the links sent by email.
+
+        The `Origin` and `Host` headers are client controlled: only trust the origin
+        when it is the configured domain or an explicitly allowed origin, otherwise
+        fall back to the configured domain (EGAPRO_DOMAIN, set per environment)."""
+        default = config.DOMAIN.rstrip("/")
+        if not self.origin:
+            return default
+        domain = self.origin.rstrip("/")
+        if domain not in {default, *config.allowed_origins()}:
+            loggers.logger.warning(
+                "Untrusted origin for email links: %s", loggers.safe(domain)
+            )
+            return default
         return domain
 
     @property
     def ip(self):
+        # Set by the ingress, only used for logging and archiving, never for
+        # authorization.
         return self.headers.get("X-REAL-IP")
 
 
@@ -54,26 +83,79 @@ class App(Roll):
 
 
 app = App()
-cors(app, methods="*", headers=["*", "Content-Type"], credentials=True)
 options(app)
+
+
+@app.listen("response")
+async def add_cors_headers(request, response):
+    # Wildcard origin (default, EGAPRO_ALLOW_ORIGIN="*") never comes with credentials.
+    # Explicit origins (comma separated) are echoed back, with credentials allowed.
+    response.headers["Access-Control-Allow-Methods"] = ",".join(CORS_METHODS)
+    response.headers["Access-Control-Allow-Headers"] = "*,Content-Type,API-KEY"
+    allowed = config.allowed_origins()
+    if not allowed:
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return
+    response.headers["Vary"] = "Origin"
+    origin = (request.origin or "").rstrip("/")
+    if origin in allowed:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+
+
+@app.listen("response")
+async def add_security_headers(request, response):
+    # The API is reached directly (outside the app's ingress headers).
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Authenticated responses carry declarations and personal data: never cache them.
+    if "email" in request:
+        response.headers["Cache-Control"] = "no-store"
+
+
+@app.listen("response")
+async def log_access(request, response):
+    # The roll worker bypasses gunicorn access logs (--access-logfile), so log here.
+    # Path only: no query string, headers nor body (tokens, personal data).
+    if request.path != "/healthz":
+        loggers.logger.info(f"{request.method} {loggers.safe(request.path)} {response.status.value}")
 
 
 @app.listen("error")
 async def json_error_response(request, response, error):
     if error.status == 500:  # This error as not yet been caught
-        if isinstance(error.__context__, DataError):
+        # Database and unexpected errors details are only logged server side, never
+        # sent to the client.
+        context = error.__context__
+        # asyncpg raises client side data errors as InterfaceError + ValueError.
+        client_data_error = isinstance(context, InterfaceError) and isinstance(
+            context, ValueError
+        )
+        if isinstance(context, DataError) or client_data_error:
             response.status = 400
-            error.message = f"Invalid data: {error.__context__}"
-        elif isinstance(error.__context__, db.NoData):
+            loggers.log_request(request)
+            loggers.logger.error(f"Invalid data: {context}")
+            error.message = "Invalid data"
+        elif isinstance(context, db.NoData):
             response.status = 404
-            error.message = f"Resource not found: {error.__context__}"
-        elif isinstance(error.__context__, ValueError):
+            error.message = f"Resource not found: {context}"
+        elif isinstance(context, (PostgresError, InterfaceError)):
+            loggers.log_request(request)
+            loggers.logger.error(f"Database error: {context}")
+            error.message = GENERIC_ERROR
+        elif isinstance(context, ValueError):
             response.status = 422
             loggers.log_request(request)
-            loggers.logger.error(str(error.__context__))
+            loggers.logger.error(str(context))
         else:
             loggers.log_request(request)
-            print_exc()
+            # Logged at ERROR with the traceback: Sentry's logging integration turns it
+            # into an event (roll has no Sentry integration of its own).
+            loggers.logger.error(
+                "Unexpected error on %s %s", request.method, loggers.safe(request.path), exc_info=context
+            )
+            error.message = GENERIC_ERROR
     if isinstance(error.message, (str, bytes)):
         error.message = {"error": error.message}
     response.json = error.message
@@ -102,10 +184,11 @@ def ensure_owner(view):
         owners = await db.ownership.emails(siren)
         if declarant in owners:
             request["is_owner"] = True
-        # Allow to create a declaration for a siren without any owner yet.
-        elif owners:
+        # A siren without any owner is not up for grabs: ownership comes from
+        # ProConnect (synced by the app) or from staff, never from being first.
+        else:
             loggers.logger.debug(
-                "Non owner (%s) accessing owned resource %s %s", declarant, siren, args
+                "Non owner (%s) accessing resource %s %s", declarant, siren, args
             )
             if not request["staff"]:
                 if "error" not in request:
@@ -227,23 +310,34 @@ async def get_declarations(request, response, siren):
         raise HttpError(404, f"No declarations with siren {siren} for any year")
     response.json = declarations
 
+def public_declaration_data(record):
+    """Return the published data of a declaration record, or None.
+
+    `record.data` returns the draft when there is one, so only look at the published
+    version (`data` column), and never expose a draft publicly."""
+    data = record.get("data")
+    if not data or models.Data(data).is_draft():
+        return None
+    return data
+
+
 @app.route("/public/declaration", methods=["GET"])
 async def get_public_all_declarations(request, response):
     declarations = []
-    limit = request.query.int("limit", 10)
+    limit = min(max(request.query.int("limit", 10), 1), SEARCH_MAX_LIMIT)
     years = sorted(constants.YEARS, reverse=True)
 
     stop_fetching = False
     for year in years:
         try:
-            records = await db.declaration.all(year)
+            records = await db.declaration.published(year, limit - len(declarations))
 
             for record in records:
                 try:
-                    resource: models.Data = record.as_resource()
-                    if record.data.path("déclaration.brouillon"):
-                        pass
-                    declarations.append(db.declaration.public_data(resource["data"]))
+                    data = public_declaration_data(record)
+                    if data is None:
+                        continue
+                    declarations.append(db.declaration.public_data(data))
                     stop_fetching = len(declarations) == limit
                 except:
                     pass
@@ -267,10 +361,10 @@ async def get_public_declarations(request, response, siren):
     for year in years:
         try:
             record = await db.declaration.get(siren, year)
-            resource: models.Data = record.as_resource()
-            if record.data.path("déclaration.brouillon"):
-                pass
-            declarations.append(db.declaration.public_data(resource["data"]))
+            data = public_declaration_data(record)
+            if data is None:
+                continue
+            declarations.append(db.declaration.public_data(data))
         except:
             pass
         if len(declarations) == limit:
@@ -286,10 +380,10 @@ async def get_declaration(request, response, siren, year):
         record = await db.declaration.get(siren, year)
     except db.NoData:
         raise HttpError(404, f"No declaration with siren {siren} and year {year}")
-    resource: models.Data = record.as_resource()
-    if record.data.path("déclaration.brouillon"):
-        pass
-    response.json = db.declaration.public_data(resource["data"])
+    data = public_declaration_data(record)
+    if data is None:
+        raise HttpError(404, f"No declaration with siren {siren} and year {year}")
+    response.json = db.declaration.public_data(data)
 
 
 @app.route("/declaration/{siren:digit}/{year:digit}", methods=["GET"])
@@ -367,6 +461,8 @@ async def resend_representation_receipt(request, response, siren, year):
 
 
 @app.route("/representation-equilibree/{siren:digit}/{year:digit}/pdf", methods=["GET"])
+@tokens.require
+@ensure_owner
 async def send_representation_pdf(request, response, siren, year):
     try:
         record = await db.representation_equilibree.get(siren, year)
@@ -380,11 +476,13 @@ async def send_representation_pdf(request, response, siren, year):
     return response
 
 @app.route("/declaration/{siren:digit}/{year:digit}/pdf", methods=["GET"])
+@tokens.require
+@ensure_owner
 async def get_declaration_pdf(request, response, siren, year):
     try:
         record = await db.declaration.get(siren, year)
     except db.NoData:
-        raise HttpError(404, f"No représentation équilibrée with siren {siren} and year {year}")
+        raise HttpError(404, f"No declaration with siren {siren} and year {year}")
     data = record.data
     pdffile = pdf.declaration.main(data)
     response.headers['Content-Type'] = 'application/pdf'
@@ -434,25 +532,13 @@ async def me(request, response):
 
 @app.route("/simulation", methods=["POST"])
 async def start_simulation(request, response):
-    data = request.json
-    email = data.get("informationsDeclarant", {}).get("email")
+    # No email is sent from here anymore (nor from the removed
+    # /simulation/{uuid}/send-code): both let anyone, anonymously and without
+    # any rate limit, have us email any address. No client uses them since the
+    # simulator moved to the Next.js app.
     uid = await db.simulation.create(request.json)
     response.json = {"id": uid}
-    if email:
-        await emails.permalink.send(email, id=uid)
     response.status = 200
-
-
-# KILL THIS ENDPOINT
-@app.route("/simulation/{uuid}/send-code", methods=["POST"])
-async def send_simulation_code(request, response, uuid):
-    # Make sure given simulation exists
-    await db.simulation.get(uuid)
-    email = request.json.get("email", {})
-    response.status = 204
-    if not email:
-        raise HttpError(400, "Missing `email` key")
-    await emails.permalink.send(email, id=uuid)
 
 
 @app.route("/simulation/{uuid}")
@@ -475,25 +561,58 @@ class SimulationResource:
         response.status = 200
 
 
+# POST /token is anonymous and emails any address: at most one link per address
+# per cooldown (per process, bounded memory), so it cannot be used to mailbomb.
+TOKEN_EMAIL_COOLDOWN = 60
+TOKEN_EMAIL_MAX_TRACKED = 10_000
+_token_requests = {}
+
+
+def token_request_throttled(email, now=None):
+    now = time.monotonic() if now is None else now
+    last = _token_requests.get(email)
+    if last is not None and now - last < TOKEN_EMAIL_COOLDOWN:
+        return True
+    # Insertion order is request order (a refreshed address moves to the end): a full
+    # table only evicts its oldest addresses. Clearing it all would let a burst of
+    # distinct addresses reset the cooldown of every recipient at once.
+    _token_requests.pop(email, None)
+    while len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
+        _token_requests.pop(next(iter(_token_requests)))
+    _token_requests[email] = now
+    return False
+
+
+# redirectTo is written in a plain text email: a path, without any line break.
+REDIRECT_PATH = re.compile(r"[A-Za-z0-9/_.\-]*")
+
+
 @app.route("/token", methods=["POST"])
 async def send_token(request, response):
-    # TODO mailbomb management in nginx
     email = request.json.get("email")
     if not email:
         raise HttpError(400, "Missing email key")
-    loggers.logger.info(f"Token request FOR {email} FROM {request.ip}")
+    # The throttle key, the token and the recipient must be the same single address.
+    email = utils.normalize_email(email)
+    if not email:
+        raise HttpError(400, "Adresse email invalide")
+    redirectTo = request.json.get("redirectTo") or ""
+    if not isinstance(redirectTo, str) or not REDIRECT_PATH.fullmatch(redirectTo):
+        raise HttpError(400, "Chemin de redirection invalide")
+    redirectTo = redirectTo.lstrip("/")
+    if token_request_throttled(email):
+        raise HttpError(429, "Un lien vient déjà d'être envoyé à cette adresse, veuillez patienter.")
+    loggers.logger.info(f"Token request FOR {loggers.safe(email)} FROM {loggers.safe(request.ip)}")
     token = tokens.create(email)
-    if request.ip in config.ALLOWED_IPS:
-        response.json = {"token": token}
-    else:
-        redirectTo = request.json.get('redirectTo').lstrip("/")
-        link = f"{config.DOMAIN}/{redirectTo}?token={token}"
-        if "localhost" in link or "127.0.0.1" in link:
-            print(link)
-            loggers.logger.info(link)
-        body = emails.ACCESS_GRANTED.format(link=link)
-        emails.send(email, "Validation de l'email", body)
-        response.status = 204
+    link = f"{config.DOMAIN}/{redirectTo}?token={token}"
+    # Local development only, decided by the configured domain: the link itself
+    # holds client input (redirectTo), and a token must never reach production logs.
+    if config.DOMAIN.startswith(("http://localhost", "http://127.0.0.1")):
+        print(link)
+        loggers.logger.info(link)
+    body = emails.ACCESS_GRANTED.format(link=link)
+    emails.send(email, "Validation de l'email", body)
+    response.status = 204
 
 
 @app.route("/token", methods=["GET"])
@@ -507,12 +626,17 @@ async def get_token(request, response):
     token = tokens.create(email)
     response.json = {"token": token}
 
+def search_params(request):
+    q = request.query.get("q", "").strip()[:SEARCH_MAX_QUERY_LENGTH]
+    limit = min(max(request.query.int("limit", 10), 0), SEARCH_MAX_LIMIT)
+    offset = max(request.query.int("offset", 0), 0)
+    return q, limit, offset
+
+
 # apiv2 ok
 @app.route("/representation-equilibree/search", methods=["GET"])
 async def search_representation_equilibree(request: Request, response: Response):
-    q = request.query.get("q", "").strip()
-    limit = request.query.int("limit", 10)
-    offset = request.query.int("offset", 0)
+    q, limit, offset = search_params(request)
     section_naf = request.query.get("naf", None)
     departement = request.query.get("departement", None)
     region = request.query.get("region", None)
@@ -593,9 +717,7 @@ async def put_representation(request, response, siren, year):
 # apiv2 ok
 @app.route("/search")
 async def search(request, response):
-    q = request.query.get("q", "").strip()
-    limit = request.query.int("limit", 10)
-    offset = request.query.int("offset", 0)
+    q, limit, offset = search_params(request)
     section_naf = request.query.get("section_naf", None)
     departement = request.query.get("departement", None)
     region = request.query.get("region", None)

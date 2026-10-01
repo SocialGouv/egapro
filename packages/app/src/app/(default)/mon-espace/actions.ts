@@ -81,24 +81,24 @@ export async function getAllEmailsBySiren(siren: string) {
  */
 async function assertCanManageResponsables(sirens: string[]) {
   const session = await assertServerSession();
-  if (session.user.staff) return;
+  if (session.user.staff) return session;
 
-  const ownsEverySiren = sirens.every(siren =>
-    session.user.companies.some(company => company.siren === siren),
-  );
+  const ownsEverySiren = sirens.every(siren => session.user.companies.some(company => company.siren === siren));
   if (!ownsEverySiren) {
     throw new UnexpectedSessionError("Not authorized to manage responsables for this siren.");
   }
+  return session;
 }
 
-export async function removeSirens(email: string, sirens: string[], username?: string) {
-  await assertCanManageResponsables(sirens);
+// The audit log records who made the change: the session user, never a client-supplied name.
+export async function removeSirens(email: string, sirens: string[]) {
+  const session = await assertCanManageResponsables(sirens);
 
-  return await ownershipRepo.removeSirens(new Email(email), sirens, username || email);
+  return await ownershipRepo.removeSirens(new Email(email), sirens, session.user.email);
 }
 
-export async function addSirens(email: string, sirens: string[], username?: string) {
-  await assertCanManageResponsables(sirens);
+export async function addSirens(email: string, sirens: string[]) {
+  const session = await assertCanManageResponsables(sirens);
 
-  return await ownershipRepo.addSirens(new Email(email), sirens, username || email);
+  return await ownershipRepo.addSirens(new Email(email), sirens, session.user.email);
 }

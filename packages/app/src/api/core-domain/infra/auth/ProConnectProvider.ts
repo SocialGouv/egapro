@@ -1,4 +1,5 @@
 import { logger } from "@api/utils/pino";
+import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import { type OAuthConfig, type OAuthUserConfig } from "next-auth/providers/oauth";
 
 export interface Organization {
@@ -26,6 +27,37 @@ export interface ProConnectProfile {
   updated_at: Date;
 }
 
+// One key set per issuer: jose caches the keys and refetches them on rotation.
+const jwksByUri = new Map<string, JWTVerifyGetKey>();
+const getJwks = (jwksUri: string) => {
+  let jwks = jwksByUri.get(jwksUri);
+  if (!jwks) {
+    jwks = createRemoteJWKSet(new URL(jwksUri));
+    jwksByUri.set(jwksUri, jwks);
+  }
+  return jwks;
+};
+
+/**
+ * Verify the signed userinfo JWT against the issuer's published keys (JWKS from the discovery
+ * document): the claims decide which companies the user can declare for, so they are only
+ * trusted once the signature, the issuer and (when present) the audience are checked.
+ */
+export async function verifyUserinfoJwt(
+  jwt: string,
+  { issuer, jwksUri, clientId }: { clientId: string; issuer: string; jwksUri: string },
+  jwks: JWTVerifyGetKey = getJwks(jwksUri),
+): Promise<ProConnectProfile> {
+  const { payload } = await jwtVerify(jwt, jwks, { issuer });
+  if (payload.aud !== undefined) {
+    const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+    if (!audiences.includes(clientId)) {
+      throw new Error("ProConnectProvider - userinfo JWT audience mismatch.");
+    }
+  }
+  return payload as unknown as ProConnectProfile;
+}
+
 export function ProConnectProvider<P extends ProConnectProfile>(
   options: OAuthUserConfig<P> & { appTest?: boolean },
 ): OAuthConfig<P> {
@@ -36,7 +68,6 @@ export function ProConnectProvider<P extends ProConnectProfile>(
     id: "proconnect",
     type: "oauth",
     name: "Mon Compte Pro",
-    allowDangerousEmailAccountLinking: true,
     wellKnown: `${proconnectDiscoveryUrl}/.well-known/openid-configuration`,
     authorization: {
       // eidas0 = lowest *authorized* assurance level, i.e. the most permissive
@@ -56,8 +87,7 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         // ProConnect's /userinfo returns a SIGNED JWT (application/jwt), not JSON.
         // openid-client's `client.userinfo()` JSON.parses the raw body and throws
         // ("Unexpected token 'e', \"eyJhbGciOi\"... is not valid JSON"), breaking the
-        // OAuth callback. Fetch the endpoint ourselves and decode the JWT payload
-        // (same approach as the alpha/V2 provider).
+        // OAuth callback. Fetch the endpoint ourselves and verify the JWT.
         const userinfoEndpoint = client.issuer.metadata.userinfo_endpoint;
         if (!userinfoEndpoint) {
           throw new Error("ProConnectProvider - userinfo_endpoint missing from discovery.");
@@ -66,18 +96,21 @@ export function ProConnectProvider<P extends ProConnectProfile>(
         const response = await fetch(userinfoEndpoint, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
+        if (!response.ok) {
+          throw new Error(`ProConnectProvider - userinfo request failed with status ${response.status}.`);
+        }
         const body = await response.text();
 
         if (body.startsWith("{")) {
           return JSON.parse(body) as ProConnectProfile;
         }
 
-        const payload = body.split(".")[1];
-        if (!payload) {
-          throw new Error("ProConnectProvider - invalid JWT received from userinfo.");
+        const { issuer, jwks_uri } = client.issuer.metadata;
+        if (!jwks_uri) {
+          throw new Error("ProConnectProvider - jwks_uri missing from discovery.");
         }
 
-        return JSON.parse(Buffer.from(payload, "base64url").toString("utf-8")) as ProConnectProfile;
+        return verifyUserinfoJwt(body, { issuer, jwksUri: jwks_uri, clientId: String(client.metadata.client_id) });
       },
     },
     profile(profile) {

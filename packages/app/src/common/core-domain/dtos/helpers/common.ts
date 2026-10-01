@@ -44,8 +44,14 @@ export const searchSchema = z.object({
   page: z.coerce.number().min(0).default(0),
 });
 
+/** Public search: bound the work an anonymous query can ask of the database (same cap as the API). */
+export const SEARCH_MAX_QUERY_LENGTH = 100;
+
 export const consultationSchema = z.object({
-  query: z.string().optional(),
+  query: z
+    .string()
+    .transform(query => query.slice(0, SEARCH_MAX_QUERY_LENGTH))
+    .optional(),
   countyCode: countySchema.optional(),
   regionCode: regionSchema.optional(),
   nafSection: nafSectionSchema.optional(),

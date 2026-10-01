@@ -61,22 +61,8 @@ export class NodemailerGlobalMailerService implements IGlobalMailerService {
 }
 
 const handleRecipients = (recipients: SendMailOptions["to"]): string[] => {
-  let ret = [] as string[];
   if (!recipients) return [];
-
-  if (typeof recipients === "string") {
-    ret = [recipients];
-  } else if (Array.isArray(recipients)) {
-    for (const acceptedElt of recipients) {
-      if (typeof acceptedElt === "string") {
-        ret.push(acceptedElt);
-      } else {
-        ret.push(acceptedElt.address);
-      }
-    }
-  } else {
-    ret = [recipients?.address];
-  }
-
-  return ret;
+  if (typeof recipients === "string") return [recipients];
+  if (Array.isArray(recipients)) return recipients.flatMap(handleRecipients);
+  return recipients.address ? [recipients.address] : [];
 };

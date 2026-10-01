@@ -79,6 +79,7 @@ export const config = {
         secret: ensureApiEnvVar(process.env.SECURITY_JWT_SECRET, "secret"),
         isEmailLogin: ensureApiEnvVar(process.env.EMAIL_LOGIN, isTruthy, false),
         privateRoutes: [
+          "/admin",
           "/mon-espace/mes-declarations",
           "/mon-espace/les-entreprises",
           "/mon-espace/mes-entreprises",
@@ -108,7 +109,8 @@ export const config = {
           "/representation-equilibree/transmission",
           "/representation-equilibree/validation",
         ],
-        staffRoutes: ["/admin/liste-referents", "/admin/impersonate"],
+        // The whole back office is staff-only (declarations, rattachements, debug, referents, impersonate…).
+        staffRoutes: ["/admin"],
         charonUrl: ensureApiEnvVar(
           process.env.SECURITY_CHARON_URL,
           "https://egapro-charon.ovh.fabrique.social.gouv.fr",

@@ -7,7 +7,7 @@ import asyncpg
 from naf import DB as NAF
 from asyncstdlib.functools import lru_cache
 from asyncpg.exceptions import DuplicateDatabaseError, PostgresError
-import ujson as json
+from egapro import jsonlib as json
 
 from egapro import config, models, sql, utils, helpers
 from egapro.constants import DEPARTEMENT_TO_REGION, DEPARTEMENTS, REGIONS, REGIONS_TO_DEPARTEMENTS
@@ -235,6 +235,19 @@ class declaration(table):
         if year:
             req += f" WHERE year={year}"
         return await cls.fetch(req)
+
+    @classmethod
+    async def published(cls, year: int, limit: int):
+        # Feeds an anonymous endpoint: only published declarations (`data` holds the
+        # last published version, a draft lives in `draft`), bounded in SQL instead
+        # of loading a whole year in memory.
+        return await cls.fetch(
+            f"SELECT * FROM {cls.table_name} WHERE year=$1 AND data IS NOT NULL "
+            "AND NOT COALESCE((data->'déclaration'->>'brouillon')::boolean, false) "
+            "ORDER BY declared_at DESC NULLS LAST LIMIT $2",
+            int(year),
+            int(limit),
+        )
 
     @classmethod
     async def completed(cls):
@@ -683,7 +696,7 @@ class archive(table):
 
 async def set_type_codecs(conn):
     await conn.set_type_codec(
-        "jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog"
+        "jsonb", encoder=json.dumps, decoder=json.loads_jsonb, schema="pg_catalog"
     )
     await conn.set_type_codec("uuid", encoder=str, decoder=str, schema="pg_catalog")
 

@@ -45,6 +45,14 @@ app:
     NEXTAUTH_URL: "https://{{ .Values.global.host }}/api/auth"
     REDIS_HOST: "redis-master"
     REDIS_PORT: "6379"
+  # image runs as USER 1000 (packages/app/Dockerfile)
+  securityContext:
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
 nginx:
   ~chart: app
@@ -82,6 +90,15 @@ nginx:
     preStop:
       exec:
         command: ["/pre-stop.sh"]
+  # image runs as USER 101 (ghcr.io/socialgouv/docker/nginx). No readOnlyRootFilesystem:
+  # nginx writes its proxy cache in /tmp/nginx-cache and its logs in /var/log/nginx.
+  securityContext:
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   resources:
     requests:
       cpu: 30m
@@ -122,6 +139,19 @@ api:
     EGAPRO_DBUSER: "$(PGUSER)"
     EGAPRO_DBPASS: "$(PGPASSWORD)"
     EGAPRO_DBSSL: "$(PGSSLMODE)"
+    # Deployment environment (dev/preprod/prod): Sentry environment, and only `dev`
+    # may run with development credentials (egapro/config.py check()).
+    EGAPRO_FLAVOUR: "{{ .Values.global.env }}"
+    # Base URL of the links sent by email (defaults to the production domain otherwise).
+    EGAPRO_DOMAIN: "https://{{ .Values.global.host }}"
+  # image runs as USER 1001 (packages/api/Dockerfile)
+  securityContext:
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 
 pg:
   ~chart: pg
@@ -148,6 +178,7 @@ files:
   imagePackage: files
   vars:
     WHITELIST_IP: "94.23.250.213,37.187.27.197,37.187.137.149,217.182.225.117,217.182.225.113,217.182.142.112,51.38.59.32,51.254.44.90,212.83.139.156"
+    # htpasswd (bcrypt) file mounted from the `basic-auth` Secret (key `auth`), see volumes below
     AUTH_PASSWD_FILE: /secrets/basic-auth.passwd
     TRUSTED_PROXY_IP: "20.74.10.146"
     FILES_PUBLIC: index-egalite-fh.xlsx,dgt-export-representation.xlsx
@@ -176,14 +207,23 @@ files:
           path: basic-auth.passwd
   replicas: 1 # mandatory because volume is RWO
   strategyType: Recreate # idem
+  # files image runs as USER 1000, scheduler sidecar (api image) as USER 1001
   securityContext:
     fsGroup: 101
+    runAsNonRoot: true
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
   volumeMounts:
     - name: files
       # mountPath: /usr/share/nginx/html
       mountPath: /mnt/files
     - name: nginx-auth
       mountPath: /secrets
+      readOnly: true
   sidecars:
     - name: scheduler
       ~tpl~image: "{{ $.Values.global.registry }}/{{ $.Values.global.imageProject }}/{{ $.Values.global.imageRepository }}/api:{{ $.Values.global.imageTag }}"
@@ -208,6 +248,8 @@ files:
           value: "$(PGPASSWORD)"
         - name: EGAPRO_DBSSL
           value: "$(PGSSLMODE)"
+        - name: EGAPRO_FLAVOUR
+          ~tpl~value: "{{ $.Values.global.env }}"
         # - name: EGAPRO_SENTRY_DSN
         #   valueFrom:
         #     secretKeyRef:
@@ -215,6 +257,11 @@ files:
         #       key: API_SENTRY_DSN
         - name: SCHEDULER
           value: "True"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         resources:
           requests:
             cpu: 100m

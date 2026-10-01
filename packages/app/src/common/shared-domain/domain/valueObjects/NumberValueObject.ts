@@ -1,3 +1,4 @@
+import { printable } from "../../../utils/string";
 import { ValidationError } from "../ValidationError";
 import { ValueObject } from "../ValueObject";
 
@@ -26,7 +27,7 @@ export abstract class NumberValueObject<
 
   public validate(): asserts this {
     if (!(typeof this.value === "number" || typeof this.value === "bigint") || !this.validator(this.value)) {
-      throw new ValidationError(`"${this.value}" is not a valid ${this.constructor.name.toLowerCase()}.`);
+      throw new ValidationError(`"${printable(this.value)}" is not a valid ${this.constructor.name.toLowerCase()}.`);
     }
   }
 }

@@ -4,7 +4,7 @@ import pytest
 
 from egapro import db
 
-pytestmark = pytest.mark.asyncio
+pytestmark = [pytest.mark.asyncio, pytest.mark.unowned]
 
 
 async def test_get_owners(client):

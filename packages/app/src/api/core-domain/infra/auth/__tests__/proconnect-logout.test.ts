@@ -1,3 +1,7 @@
+import type * as proconnectLogout from "../proconnect-logout";
+
+type ProconnectLogoutModule = typeof proconnectLogout;
+
 describe("fetchEndSessionEndpoint", () => {
   const ORIGINAL = process.env.EGAPRO_PROCONNECT_DISCOVERY_URL;
 
@@ -9,7 +13,7 @@ describe("fetchEndSessionEndpoint", () => {
 
   const load = () => {
     jest.resetModules();
-    return require("../proconnect-logout").fetchEndSessionEndpoint as () => Promise<string | null>;
+    return jest.requireActual<ProconnectLogoutModule>("../proconnect-logout").fetchEndSessionEndpoint;
   };
 
   it("returns the end_session_endpoint from the discovery document", async () => {

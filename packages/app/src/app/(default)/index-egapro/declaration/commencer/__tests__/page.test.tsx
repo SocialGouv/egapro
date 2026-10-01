@@ -31,7 +31,7 @@ describe("CommencerPage", () => {
 
   it("should redirect to login when no session", async () => {
     mockGetServerSession.mockResolvedValue(null);
-    (redirect as jest.Mock).mockImplementation(() => {
+    (redirect as unknown as jest.Mock).mockImplementation(() => {
       throw new Error("NEXT_REDIRECT");
     });
 

@@ -21,3 +21,18 @@ export const isFalsy = (v?: string): boolean => !v || ["no", "false", "0"].inclu
  */
 export const escapeStringRegexp = (string: string) =>
   string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
+
+const PRINTABLE_MAX_LENGTH = 100;
+
+/**
+ * A client-supplied value made safe to embed in an error or log message: control characters escaped
+ * (a raw newline would forge a log line) and length capped.
+ */
+export const printable = (value: unknown): string => {
+  const escaped = String(value).replace(
+    // eslint-disable-next-line no-control-regex
+    /[\u0000-\u001f\u007f]/g,
+    c => `\\x${c.charCodeAt(0).toString(16).padStart(2, "0")}`,
+  );
+  return escaped.length > PRINTABLE_MAX_LENGTH ? `${escaped.slice(0, PRINTABLE_MAX_LENGTH)}…` : escaped;
+};

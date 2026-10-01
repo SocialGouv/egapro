@@ -5,7 +5,7 @@ import jwt
 from roll import HttpError
 
 from . import config, utils
-from .loggers import logger
+from .loggers import logger, safe
 
 
 def create(email):
@@ -17,29 +17,29 @@ def create(email):
 
 
 def read(token):
+    # Any invalid token (wrong algorithm, bad claims, no subject) is a 401, not a 500.
     try:
         decoded = jwt.decode(token, config.SECRET, algorithms=[config.JWT_ALGORITHM])
-    except (jwt.DecodeError, jwt.ExpiredSignatureError):
+        return decoded["sub"]
+    except (jwt.InvalidTokenError, KeyError):
         raise ValueError
-    return decoded["sub"]
 
 
 def require(view):
     @wraps(view)
     def wrapper(request, response, *args, **kwargs):
-        token = request.headers.get("API-KEY") or request.cookies.get("api-key")
+        # Header only: a token read from a cookie would be sent by the browser on
+        # cross-site requests (CSRF). Nothing sets the legacy `api-key` cookie anymore.
+        token = request.headers.get("API-KEY")
         if not token:
-            logger.debug("Request without token on %s", request.path)
+            logger.debug("Request without token on %s", safe(request.path))
             raise HttpError(401, "No authentication token was provided.")
         try:
             email = read(token)
         except ValueError:
-            logger.debug(
-                "Invalid token on %s (token: %s, referrer: %s)",
-                request.path,
-                token,
-                request.referrer,
-            )
+            # Never log the token itself, nor the referrer (it may carry the token
+            # in its query string, see the links sent by email).
+            logger.debug("Invalid token on %s", safe(request.path))
             raise HttpError(401, "Invalid token")
         email = email.lower()
         request["email"] = email

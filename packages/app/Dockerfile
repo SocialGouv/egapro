@@ -1,4 +1,4 @@
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION=22-alpine
 
 # Builder
 FROM node:$NODE_VERSION AS builder
@@ -54,6 +54,9 @@ RUN --mount=type=secret,id=sentry_auth_token export SENTRY_AUTH_TOKEN=$(cat /run
     export GENERATE_SOURCEMAP=true; \
     export SENTRY_ALLOW_FAILURE=true; \
     pnpm --filter app build
+
+# Source maps were uploaded to Sentry during the build: don't serve them (they expose the whole source).
+RUN find packages/app/.next -name "*.map" -type f -delete
 
 RUN pnpm --filter app deploy --legacy --prod /prod/app
 

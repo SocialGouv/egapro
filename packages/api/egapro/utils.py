@@ -1,7 +1,10 @@
 from datetime import date, datetime, timedelta, timezone
+from email.utils import parseaddr
 from importlib import import_module
+from unicodedata import category
 
 import json
+import re
 
 
 def default_json(v):
@@ -55,6 +58,55 @@ def flatten(b, prefix="", delim=".", val=None, flatten_lists=False):
     else:
         val[prefix] = b
     return val
+
+
+# Exactly one address: no list separator, display name, quote, comment, whitespace
+# nor control character (a list like "a@x.fr, b@x.fr" is delivered to everyone).
+EMAIL_MAX_LENGTH = 254
+EMAIL_PART = r"[^@\s\x00-\x1f\x7f,;<>()\[\]\"\\]+"
+EMAIL = re.compile(rf"{EMAIL_PART}@{EMAIL_PART}\.{EMAIL_PART}")
+
+
+def normalize_email(value):
+    """Return the lower cased address when `value` is a single valid email, else None."""
+    if not isinstance(value, str):
+        return None
+    value = value.strip().lower()
+    if len(value) > EMAIL_MAX_LENGTH:
+        return None
+    # Control (C0, C1) and invisible format characters (zero width, bidi overrides).
+    if any(category(char) in ("Cc", "Cf") for char in value):
+        return None
+    if not EMAIL.fullmatch(value) or parseaddr(value) != ("", value):
+        return None
+    return value
+
+
+# Spreadsheet software may interpret those leading characters as a formula.
+FORMULA_TRIGGERS = ("=", "+", "-", "@", "\t", "\r")
+# openpyxl only writes strings starting with "=" as formulas: the others are stored
+# as text cells, never evaluated, so a leading quote would only show up in the cell.
+XLSX_FORMULA_TRIGGERS = ("=",)
+NUMBER = re.compile(r"^[+-]?\d+([.,]\d+)?$")
+
+
+def escape_formula(value, triggers=FORMULA_TRIGGERS):
+    """Neutralize CSV formula injection by prefixing risky strings with a `'`.
+
+    Only strings are concerned: numbers (including negative ones) are untouched, as
+    are strings holding a plain number (eg. "-12.5")."""
+    if (
+        isinstance(value, str)
+        and value.startswith(triggers)
+        and not NUMBER.match(value)
+    ):
+        return "'" + value
+    return value
+
+
+def escape_xlsx_formula(value):
+    """Neutralize formula injection in a cell written by openpyxl."""
+    return escape_formula(value, XLSX_FORMULA_TRIGGERS)
 
 
 def unflatten(d, delim="."):

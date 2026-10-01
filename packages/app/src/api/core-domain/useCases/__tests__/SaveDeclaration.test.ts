@@ -3,7 +3,11 @@ import { type IDeclarationRepo } from "@api/core-domain/repo/IDeclarationRepo";
 import { type Declaration } from "@common/core-domain/domain/Declaration";
 import { type CreateDeclarationDTO } from "@common/core-domain/dtos/DeclarationDTO";
 
-import { SaveDeclaration, SaveDeclarationClosedCompanyError } from "../SaveDeclaration";
+import {
+  SaveDeclaration,
+  SaveDeclarationClosedCompanyError,
+  SaveDeclarationSirenMismatchError,
+} from "../SaveDeclaration";
 
 const SIREN = "384964508";
 const YEAR = 2023;
@@ -64,9 +68,7 @@ describe("SaveDeclaration — closed-company guard", () => {
   it("blocks creating a declaration for a closed company", async () => {
     const { useCase, saveWithIndex } = makeUseCase({ entreprise: makeEntreprise("2017-01-03") });
 
-    await expect(useCase.execute({ declaration: makeDto() })).rejects.toBeInstanceOf(
-      SaveDeclarationClosedCompanyError,
-    );
+    await expect(useCase.execute({ declaration: makeDto() })).rejects.toBeInstanceOf(SaveDeclarationClosedCompanyError);
     expect(saveWithIndex).not.toHaveBeenCalled();
   });
 
@@ -104,5 +106,34 @@ describe("SaveDeclaration — closed-company guard", () => {
     const useCase = new SaveDeclaration(repo, service);
 
     await expectNotBlockedAsClosed(useCase.execute({ declaration: makeDto() }));
+  });
+});
+
+describe("SaveDeclaration — the saved siren is the one that was authorized", () => {
+  // Server actions authorize `commencer.siren`; the declaration is saved under
+  // `entreprise.entrepriseDéclarante.siren`. They must be the same company.
+  const OTHER_SIREN = "552100554";
+  const mismatchedDto = () =>
+    ({
+      ...makeDto(),
+      entreprise: { entrepriseDéclarante: { siren: OTHER_SIREN } },
+    }) as unknown as CreateDeclarationDTO;
+
+  it("refuses a declaration whose declaring company differs from the declared siren", async () => {
+    const { useCase, saveWithIndex, getOne } = makeUseCase({ entreprise: makeEntreprise(undefined) });
+
+    await expect(useCase.execute({ declaration: mismatchedDto() })).rejects.toBeInstanceOf(
+      SaveDeclarationSirenMismatchError,
+    );
+    expect(getOne).not.toHaveBeenCalled();
+    expect(saveWithIndex).not.toHaveBeenCalled();
+  });
+
+  it("lets staff (override) save a corrected company", async () => {
+    const { useCase } = makeUseCase({ entreprise: makeEntreprise(undefined) });
+
+    await useCase.execute({ declaration: mismatchedDto(), override: true }).catch(error => {
+      expect(error).not.toBeInstanceOf(SaveDeclarationSirenMismatchError);
+    });
   });
 });

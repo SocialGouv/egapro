@@ -42,6 +42,17 @@ const config = {
   },
 };
 
-// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
+// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async.
+// next/jest prepends its own node_modules patterns to transformIgnorePatterns, which ignore every package but
+// the transpiled ones and make the ESM exceptions above (e.g. jose) dead: keep only ours for node_modules.
 // eslint-disable-next-line import/no-default-export
-export default createJestConfig(config);
+export default async () => {
+  const nextConfig = await createJestConfig(config)();
+  return {
+    ...nextConfig,
+    transformIgnorePatterns: [
+      ...(nextConfig.transformIgnorePatterns ?? []).filter(pattern => !pattern.includes("node_modules")),
+      ...config.transformIgnorePatterns,
+    ],
+  };
+};

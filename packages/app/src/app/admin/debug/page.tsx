@@ -6,6 +6,8 @@ import { cloneDeep } from "lodash";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 
+import { maskSecrets } from "./maskSecrets";
+
 export const revalidate = 0;
 
 const DebugPage = async () => {
@@ -15,7 +17,8 @@ const DebugPage = async () => {
     notFound();
   }
 
-  const clone = cloneDeep(config);
+  const clone = maskSecrets(cloneDeep(config));
+  const safeSession = maskSecrets(session);
   return (
     <CenteredContainer py="6w">
       <Heading as="h2" variant="h1" text="Admin Debug" />
@@ -23,7 +26,7 @@ const DebugPage = async () => {
       <DebugToggleSwitch />
       <hr />
       <h3>Session Content</h3>
-      <pre>{JSON.stringify(session, null, 2)}</pre>
+      <pre>{JSON.stringify(safeSession, null, 2)}</pre>
       <hr />
       <h3>Server Side Config</h3>
       <DebugButton alwaysOn obj={clone} infoText="server side config" />
