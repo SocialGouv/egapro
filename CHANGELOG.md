@@ -1,3 +1,12 @@
+## [3.18.6](https://github.com/SocialGouv/egapro/compare/v3.18.5...v3.18.6) (2026-10-01)
+
+
+### Bug Fixes
+
+* **app:** build cassé par un export non autorisé du tunnel Sentry ([#4691](https://github.com/SocialGouv/egapro/issues/4691)) ([a2ff490](https://github.com/SocialGouv/egapro/commit/a2ff490c30642d7d0e556bc0dae55570aeb656a9))
+* **preprod:** aligne ProConnect sur Charon ([#4251](https://github.com/SocialGouv/egapro/issues/4251)) ([31225b6](https://github.com/SocialGouv/egapro/commit/31225b6c1c8e48f1305ca1c54cdc99c0782c7232))
+* **security:** remédiation de l'audit de sécurité V1 ([#4681](https://github.com/SocialGouv/egapro/issues/4681)) ([93eb963](https://github.com/SocialGouv/egapro/commit/93eb96361152e67a84528e3ebad5d67869035955))
+
 ## [3.18.5](https://github.com/SocialGouv/egapro/compare/v3.18.4...v3.18.5) (2026-08-18)
 
 
