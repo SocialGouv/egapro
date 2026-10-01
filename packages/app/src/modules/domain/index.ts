@@ -13,7 +13,6 @@ export {
 export {
 	getCurrentDate,
 	getCurrentYear,
-	getDeclarationDeadline,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
@@ -21,8 +20,6 @@ export {
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
-	getRepresentationDeadline,
-	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,

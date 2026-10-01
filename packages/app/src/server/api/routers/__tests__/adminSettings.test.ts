@@ -13,9 +13,6 @@ vi.mock("~/server/db", () => ({
 
 const validInput = {
 	year: 2026,
-	gipPublicationDate: "2026-03-01",
-	campaignStartDate: "2026-03-15",
-	publicDataReleaseDate: "2026-06-01",
 	decl1ModificationDeadline: "2026-06-01",
 	decl1JustificationDeadline: "2026-06-01",
 	decl1JointEvaluationDeadline: "2026-08-01",
@@ -23,6 +20,12 @@ const validInput = {
 	decl2JustificationDeadline: "2026-12-01",
 	decl2JointEvaluationDeadline: "2027-01-01",
 	decl2CseOpinionDeadline: "2027-02-01",
+};
+
+const validCommonCalendarInput = {
+	year: 2026,
+	campaignStartDate: "2026-03-15",
+	publicDataReleaseDate: "2027-01-15",
 };
 
 const validRepresentationInput = {
@@ -151,6 +154,8 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.decl1ModificationDeadline).toBe("2026-06-01");
 		expect(result.decl2JointEvaluationDeadline).toBe("2027-01-01");
 		expect(result.decl2CseOpinionDeadline).toBe("2027-02-01");
+		expect(result.pathChoiceRound1Deadline).toBe("2026-07-01");
+		expect(result.pathChoiceDeadline).toBe("2027-01-01");
 	});
 
 	it("returns formatted defaults when no row exists", async () => {
@@ -171,38 +176,137 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
 		expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
 		expect(result.decl2CseOpinionDeadline).toBe("2028-02-01");
+		expect(result.pathChoiceRound1Deadline).toBe("2027-07-01");
+		expect(result.pathChoiceDeadline).toBe("2028-01-01");
 	});
 });
 
-describe("adminSettingsRouter — upsertCampaignDeadlines", () => {
+describe("adminSettingsRouter — upsertRemunerationDeadlines", () => {
 	beforeEach(() => vi.resetAllMocks());
 
 	it("calls insert().onConflictDoUpdate with the validated values", async () => {
 		const db = buildDb();
 		const caller = await buildCaller(db);
-		const result = await caller.upsertCampaignDeadlines(validInput);
+		const result = await caller.upsertRemunerationDeadlines(validInput);
 		expect(result).toEqual({ success: true });
-		expect(db.insert).toHaveBeenCalled();
-		expect(db.__insert.values).toHaveBeenCalledWith(
-			expect.objectContaining({
-				year: 2026,
-				publicDataReleaseDate: "2026-06-01",
-				decl1ModificationDeadline: "2026-06-01",
-				decl2JointEvaluationDeadline: "2027-01-01",
-				decl2CseOpinionDeadline: "2027-02-01",
-			}),
-		);
+		expect(db.insert).toHaveBeenCalledWith(campaignDeadlines);
+		expect(db.__insert.values).toHaveBeenCalledWith(validInput);
 		expect(db.__onConflict).toHaveBeenCalled();
 	});
 
+	it("only rewrites the seven remuneration deadlines on conflict", async () => {
+		const db = buildDb();
+		const caller = await buildCaller(db);
+
+		await caller.upsertRemunerationDeadlines({
+			...validInput,
+			campaignStartDate: "2026-03-15",
+			publicDataReleaseDate: "2027-01-15",
+		} as typeof validInput);
+
+		const { year, ...deadlines } = validInput;
+		expect(db.__onConflict).toHaveBeenCalledWith({
+			target: campaignDeadlines.year,
+			set: deadlines,
+		});
+		expect(db.__insert.values).toHaveBeenCalledWith({ year, ...deadlines });
+	});
+
 	it("rejects when decl2 is not strictly after decl1", async () => {
-		const caller = await buildCaller(buildDb());
+		const db = buildDb();
+		const caller = await buildCaller(db);
 		await expect(
-			caller.upsertCampaignDeadlines({
+			caller.upsertRemunerationDeadlines({
 				...validInput,
 				decl2ModificationDeadline: "2026-05-01",
 			}),
 		).rejects.toThrow();
+		expect(db.insert).not.toHaveBeenCalled();
+	});
+
+	it("rejects non-admin callers", async () => {
+		const caller = await buildCaller(buildDb(), nonAdminSession);
+		await expect(
+			caller.upsertRemunerationDeadlines(validInput),
+		).rejects.toThrow(/administrateurs/i);
+	});
+});
+
+describe("adminSettingsRouter — updateCommonCalendar", () => {
+	beforeEach(() => vi.resetAllMocks());
+
+	function buildUpdateDb(returnedRows: Array<{ year: number }>) {
+		const returning = vi.fn().mockResolvedValue(returnedRows);
+		const where = vi.fn().mockReturnValue({ returning });
+		const set = vi.fn().mockReturnValue({ where });
+		const update = vi.fn().mockReturnValue({ set });
+		return { db: buildDb({ update }), update, set, where, returning };
+	}
+
+	it("updates only the start and public release dates of the year", async () => {
+		const { db, update, set, where } = buildUpdateDb([{ year: 2026 }]);
+		const caller = await buildCaller(db);
+
+		const result = await caller.updateCommonCalendar(validCommonCalendarInput);
+
+		expect(result).toEqual({ success: true });
+		expect(update).toHaveBeenCalledWith(campaignDeadlines);
+		expect(set).toHaveBeenCalledWith({
+			campaignStartDate: "2026-03-15",
+			publicDataReleaseDate: "2027-01-15",
+		});
+		expect(where).toHaveBeenCalled();
+		expect(db.insert).not.toHaveBeenCalled();
+	});
+
+	it("writes null for cleared dates", async () => {
+		const { db, set } = buildUpdateDb([{ year: 2026 }]);
+		const caller = await buildCaller(db);
+
+		await caller.updateCommonCalendar({
+			year: 2026,
+			campaignStartDate: "",
+			publicDataReleaseDate: "",
+		});
+
+		expect(set).toHaveBeenCalledWith({
+			campaignStartDate: null,
+			publicDataReleaseDate: null,
+		});
+	});
+
+	it("refuses with PRECONDITION_FAILED when the year has no row, without inserting one", async () => {
+		const { db } = buildUpdateDb([]);
+		const caller = await buildCaller(db);
+
+		await expect(
+			caller.updateCommonCalendar({ ...validCommonCalendarInput, year: 2027 }),
+		).rejects.toMatchObject({
+			code: "PRECONDITION_FAILED",
+			message:
+				"Enregistrez d'abord les échéances de la démarche Rémunération pour 2027.",
+		});
+		expect(db.insert).not.toHaveBeenCalled();
+	});
+
+	it("rejects a malformed date before touching the database", async () => {
+		const { db, update } = buildUpdateDb([{ year: 2026 }]);
+		const caller = await buildCaller(db);
+
+		await expect(
+			caller.updateCommonCalendar({
+				...validCommonCalendarInput,
+				publicDataReleaseDate: "15/01/2027",
+			}),
+		).rejects.toThrow();
+		expect(update).not.toHaveBeenCalled();
+	});
+
+	it("rejects non-admin callers", async () => {
+		const caller = await buildCaller(buildDb(), nonAdminSession);
+		await expect(
+			caller.updateCommonCalendar(validCommonCalendarInput),
+		).rejects.toThrow(/administrateurs/i);
 	});
 });
 

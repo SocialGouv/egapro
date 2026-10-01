@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getCurrentDate,
 	getCurrentYear,
-	getDeclarationDeadline,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
@@ -11,8 +10,6 @@ import {
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
-	getRepresentationDeadline,
-	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
@@ -26,12 +23,6 @@ import {
 describe("getReferenceYearFor", () => {
 	it("returns the campaign year minus one", () => {
 		expect(getReferenceYearFor(2025)).toBe(2024);
-	});
-});
-
-describe("getRepresentationDeadline", () => {
-	it("returns March 1st of the given year", () => {
-		expect(getRepresentationDeadline(2025)).toBe("01/03/2025");
 	});
 });
 
@@ -216,18 +207,6 @@ describe("getWorkforceYear", () => {
 	it("returns current year - 1", () => {
 		vi.setSystemTime(new Date("2025-06-15"));
 		expect(getWorkforceYear()).toBe(2024);
-	});
-});
-
-describe("getDeclarationDeadline", () => {
-	it("returns 1er juin for the given year", () => {
-		expect(getDeclarationDeadline(2027)).toBe("1ᵉʳ juin 2027");
-	});
-});
-
-describe("getSecondDeclarationDeadline", () => {
-	it("returns 1ᵉʳ décembre for the given year", () => {
-		expect(getSecondDeclarationDeadline(2027)).toBe("1ᵉʳ décembre 2027");
 	});
 });
 

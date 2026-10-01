@@ -1,6 +1,6 @@
 import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
-import { formatIsoDate, formatLongDate } from "./format";
+import { formatIsoDate } from "./format";
 
 /** Returns the current campaign year: the E2E recette override when a grid run
  * pinned one (see campaignClock.ts — test-only, inert in production), the
@@ -55,11 +55,6 @@ export function getWorkforceYear(): number {
 	return getReferenceYearFor(getCurrentYear());
 }
 
-/** Representation-declaration deadline for a campaign year (March 1st), display format DD/MM/YYYY. */
-export function getRepresentationDeadline(year: number): string {
-	return `01/03/${year}`;
-}
-
 /** Regulatory reference period of a declaration campaign: the civil year preceding the campaign (N-1, as a declaration reports the prior year's data), format "DD/MM/YYYY - DD/MM/YYYY". */
 export function getReferencePeriod(campaignYear: number): string {
 	const referenceYear = getReferenceYearFor(campaignYear);
@@ -89,16 +84,6 @@ export function getDeclarationReferencePeriod(
 		return `${formatIsoDate(secondDeclReferencePeriodStart)} - ${formatIsoDate(secondDeclReferencePeriodEnd)}`;
 	}
 	return getReferencePeriod(campaignYear);
-}
-
-/** Returns the declaration modification deadline for a given year: `"1ᵉʳ juin 2027"`. */
-export function getDeclarationDeadline(year: number): string {
-	return formatLongDate(new Date(year, 5, 1));
-}
-
-/** Returns the second declaration modification deadline for a given year: `"1ᵉʳ décembre 2027"`. */
-export function getSecondDeclarationDeadline(year: number): string {
-	return formatLongDate(new Date(year, 11, 1));
 }
 
 /** Returns the derived deadline to choose a compliance path (January 1st of the following year). */

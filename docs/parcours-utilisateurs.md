@@ -589,30 +589,44 @@ sequenceDiagram
 - Création / édition / suppression à l'unité
 - **Import CSV** en masse (upsert basé sur région + département + nom)
 
-### 10.6 Paramétrage des deadlines de campagne et du verrou
+### 10.6 Paramètres de la plateforme : communs et par démarche
 
-`/admin/parametres` — deux sections :
+`/admin/parametres` sépare ce qui vaut pour toute la plateforme de ce qui appartient à chaque démarche. Chaque titre de niveau 2 nomme un périmètre ; l'année n'apparaît qu'au niveau 3, sur les seuls blocs qui en dépendent.
 
-**Deadlines de campagne** (par année) :
+**Un seul sélecteur « Année de campagne »**, en tête de page, pilote les trois blocs annuels (calendrier commun, échéances Rémunération, campagne Représentation). Il s'ouvre sur l'année de campagne courante (`getCurrentYear()`, celle que lisent Mon espace et le tunnel) et propose les années de `FIRST_DECLARATION_YEAR` à l'année courante + 10, suffixées « (non configurée) » quand `campaign_deadline` n'a pas de ligne pour elles.
+
+**Paramètres communs → Calendrier de la campagne {N}** (`adminSettings.updateCommonCalendar`, audit `ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR`) :
 
 | Champ | Rôle |
 |---|---|
-| `gipPublicationDate` | Date de publication des données GIP-MDS (lecture seule, vient du CSV importé) |
-| `campaignStartDate` | Date d'ouverture de la campagne |
-| `decl1ModificationDeadline` | Date limite pour modifier une première déclaration |
-| `decl2ModificationDeadline` | Date limite pour modifier une seconde déclaration |
-| `JustificationDeadline` | Date limite pour les justifications |
-| `JointEvaluationDeadline` | Date limite pour l'évaluation conjointe |
+| `gipPublicationDate` | Date de publication des données GIP-MDS — lecture seule, écrite par l'import du fichier SUIT |
+| `campaignStartDate` | Détermine l'année de campagne présentée sur la page Aide. N'ouvre ni ne ferme la saisie des déclarations |
+| `publicDataReleaseDate` | Date à partir de laquelle les indicateurs A à F et les écarts de représentation de la campagne sont publiés. Vide : non publiés |
 
-Si une année n'a pas de ligne en BDD, des **valeurs par défaut** sont calculées par `getDefaultCampaignDeadlines(year)` dans `~/modules/domain`.
+Ce bloc n'enregistre que sur une année déjà configurée : tant que `campaign_deadline` n'a pas de ligne pour l'année, le formulaire est désactivé et le serveur refuse la mutation (`PRECONDITION_FAILED`, « Enregistrez d'abord les échéances de la démarche Rémunération pour {N}. ») sans créer de ligne — les sept échéances sont obligatoires et ne doivent pas être inscrites sans avoir été relues.
 
-**Délai d'expiration du verrou** (global, toutes campagnes) :
+**Démarche Rémunération → Échéances de la campagne {N}** (`adminSettings.upsertRemunerationDeadlines`, audit `ADMIN_SETTINGS_UPSERT_DEADLINES`) — quatre groupes, dans l'ordre du parcours :
+
+| Groupe | Champs |
+|---|---|
+| Déclaration des indicateurs | `decl1ModificationDeadline` |
+| Parcours de mise en conformité — 1er tour | choix du parcours (calculé, `getPathChoiceRound1Deadline`, lecture seule), `decl1JustificationDeadline`, `decl1JointEvaluationDeadline`, `decl2ModificationDeadline` (seconde déclaration — actions correctives) |
+| Parcours de mise en conformité — 2nd tour | choix du parcours (calculé, `getPathChoiceDeadline`, lecture seule), `decl2JustificationDeadline`, `decl2JointEvaluationDeadline` |
+| Avis du CSE | `decl2CseOpinionDeadline` — s'applique à toutes les entreprises soumises à l'avis du CSE, quel que soit le parcours |
+
+Si une année n'a pas de ligne en BDD, le bloc affiche les **valeurs par défaut** de `getDefaultCampaignDeadlines(year)` (`~/modules/domain`) avec un badge « Valeurs par défaut ». L'enregistrement crée ou met à jour la ligne de l'année et ne réécrit que ces sept colonnes : le calendrier commun et la date GIP ne sont jamais touchés.
+
+**Démarche Rémunération → Verrou de déclaration** — formulaire distinct, indépendant de l'année sélectionnée ; il protège les déclarations de rémunération et les avis du CSE :
 
 | Champ | Rôle |
 |---|---|
 | `timeoutMinutes` | Durée en minutes après laquelle un verrou inactif expire (1–1440, défaut 30) |
 
 Stocké dans `globalSettings.declarationLockTimeoutMinutes`, mis à jour via `adminSettings.updateLockTimeout` (audit `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT`).
+
+**Démarche Représentation équilibrée → Campagne {N}** (`adminSettings.upsertRepresentationCampaign`) : ouverture, clôture et échéance de déclaration de la campagne représentation de l'année sélectionnée, défauts `getDefaultRepresentationCampaign(year)`.
+
+Chaque bloc a son propre bouton « Enregistrer » et n'écrit que ses propres colonnes.
 
 ### 10.7 Statistiques de campagne
 
