@@ -6,6 +6,7 @@ import { ADMIN_DECLARATIONS, adminDeclarationHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
+import styles from "./DeclarationTable.module.scss";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
 import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
@@ -81,7 +82,10 @@ export function DeclarationTable({
 						<tr key={row.id}>
 							<td>{row.siren}</td>
 							<td>
-								<Link href={adminDeclarationHref(row.id)}>
+								<Link
+									className={styles.companyLink}
+									href={adminDeclarationHref(row.id)}
+								>
 									{row.companyName}
 								</Link>
 							</td>

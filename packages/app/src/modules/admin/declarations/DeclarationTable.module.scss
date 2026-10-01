@@ -1,0 +1,16 @@
+.companyLink {
+	display: inline-block;
+	max-width: 40ch;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+	white-space: nowrap;
+	width: max-content;
+
+	&:hover,
+	&:focus-visible {
+		overflow: visible;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+}
