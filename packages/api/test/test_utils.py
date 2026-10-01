@@ -127,6 +127,9 @@ def test_escape_xlsx_formula(input, output):
         ("a" * 64 + "@" + "b" * 186 + ".fr", "a" * 64 + "@" + "b" * 186 + ".fr"),
         ("a" * 64 + "@" + "b" * 187 + ".fr", None),
         ("a@" + "b." * 50_000, None),
+        ("vic\u200btim@example.org", None),
+        ("victim@example.org\u202e", None),
+        ("victim\x85@example.org", None),
     ],
 )
 def test_normalize_email(input, output):

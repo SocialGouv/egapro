@@ -570,15 +570,15 @@ _token_requests = {}
 
 def token_request_throttled(email, now=None):
     now = time.monotonic() if now is None else now
-    if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
-        for key, at in list(_token_requests.items()):
-            if now - at >= TOKEN_EMAIL_COOLDOWN:
-                del _token_requests[key]
-        if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
-            _token_requests.clear()
     last = _token_requests.get(email)
     if last is not None and now - last < TOKEN_EMAIL_COOLDOWN:
         return True
+    # Insertion order is request order (a refreshed address moves to the end): a full
+    # table only evicts its oldest addresses. Clearing it all would let a burst of
+    # distinct addresses reset the cooldown of every recipient at once.
+    _token_requests.pop(email, None)
+    while len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
+        _token_requests.pop(next(iter(_token_requests)))
     _token_requests[email] = now
     return False
 

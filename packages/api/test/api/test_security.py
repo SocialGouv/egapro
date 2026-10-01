@@ -374,6 +374,21 @@ def test_token_throttle_expires_and_stays_bounded(monkeypatch):
     assert len(views._token_requests) <= 3
 
 
+def test_full_token_throttle_only_evicts_the_oldest_addresses(monkeypatch):
+    from egapro import views
+
+    views._token_requests.clear()
+    monkeypatch.setattr(views, "TOKEN_EMAIL_MAX_TRACKED", 3)
+    views.token_request_throttled("oldest@b.c", now=0)
+    views.token_request_throttled("victim@b.c", now=1)
+    views.token_request_throttled("other@b.c", now=2)
+    # The table is full of addresses still in their cooldown: a new address must not
+    # reset them all, only push out the oldest one.
+    assert not views.token_request_throttled("new@b.c", now=3)
+    assert views.token_request_throttled("victim@b.c", now=4)
+    assert "oldest@b.c" not in views._token_requests
+
+
 @pytest.mark.parametrize(
     "email",
     [

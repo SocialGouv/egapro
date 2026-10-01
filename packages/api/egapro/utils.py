@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parseaddr
 from importlib import import_module
+from unicodedata import category
 
 import json
 import re
@@ -72,6 +73,9 @@ def normalize_email(value):
         return None
     value = value.strip().lower()
     if len(value) > EMAIL_MAX_LENGTH:
+        return None
+    # Control (C0, C1) and invisible format characters (zero width, bidi overrides).
+    if any(category(char) in ("Cc", "Cf") for char in value):
         return None
     if not EMAIL.fullmatch(value) or parseaddr(value) != ("", value):
         return None
