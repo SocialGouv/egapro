@@ -15,7 +15,10 @@ const { upsertMutate, upsertState, queryState, invalidateCampaign } =
 		upsertMutate: vi.fn(),
 		upsertState: { isPending: false } as {
 			isPending: boolean;
-			onSuccess?: () => Promise<void> | void;
+			onSuccess?: (
+				result: { success: true },
+				variables: { year: number },
+			) => Promise<void> | void;
 			onError?: (err: { message: string }) => void;
 		},
 		queryState: { dataByYear: {}, isLoading: false } as {
@@ -37,8 +40,8 @@ vi.mock("~/trpc/react", () => ({
 			},
 			upsertRepresentationCampaign: {
 				useMutation: (opts: {
-					onSuccess?: () => Promise<void> | void;
-					onError?: (err: { message: string }) => void;
+					onSuccess?: typeof upsertState.onSuccess;
+					onError?: typeof upsertState.onError;
 				}) => {
 					upsertState.onSuccess = opts.onSuccess;
 					upsertState.onError = opts.onError;
@@ -98,7 +101,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("populates the three date fields from the query", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => {
 			expect(startInput()).toHaveValue("2026-02-01");
 		});
@@ -107,32 +110,23 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("labels the declaration deadline field as an échéance", () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		expect(
 			screen.getByLabelText(/^échéance de déclaration/i),
 		).toBeInTheDocument();
 		expect(screen.queryByText(/date limite/i)).not.toBeInTheDocument();
 	});
 
-	it("lists every year from FIRST_DECLARATION_YEAR up to ten years ahead", () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
-		const select = screen.getByLabelText(
-			/sélectionnez l'année de campagne à modifier/i,
-		);
-		const values = Array.from(select.querySelectorAll("option")).map(
-			(o) => o.value,
-		);
-		expect(values).toEqual(expect.arrayContaining(["2019", "2026", "2027"]));
+	it("has no year selector of its own", () => {
+		render(<RepresentationCampaignForm year={2026} />);
+		expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
 	});
 
 	it("reloads the fields for the newly selected year", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
-		await userEvent.selectOptions(
-			screen.getByLabelText(/sélectionnez l'année de campagne à modifier/i),
-			"2027",
-		);
+		rerender(<RepresentationCampaignForm year={2027} />);
 
 		await waitFor(() => expect(startInput()).toHaveValue("2027-01-01"));
 		expect(endInput()).toHaveValue("2027-12-31");
@@ -140,14 +134,11 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("shows the default-values badge only when no override is stored", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 		expect(screen.queryByText(/valeurs par défaut/i)).not.toBeInTheDocument();
 
-		await userEvent.selectOptions(
-			screen.getByLabelText(/sélectionnez l'année de campagne à modifier/i),
-			"2027",
-		);
+		rerender(<RepresentationCampaignForm year={2027} />);
 
 		await waitFor(() => {
 			expect(screen.getByText(/valeurs par défaut/i)).toBeInTheDocument();
@@ -155,7 +146,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("submits the loaded values on save", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
@@ -170,7 +161,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("submits the edited values rather than the loaded ones", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		fireEvent.change(startInput(), { target: { value: "2026-03-10" } });
@@ -185,13 +176,10 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("submits under the newly selected year, not the initial one", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		const { rerender } = render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
-		await userEvent.selectOptions(
-			screen.getByLabelText(/sélectionnez l'année de campagne à modifier/i),
-			"2027",
-		);
+		rerender(<RepresentationCampaignForm year={2027} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2027-01-01"));
 		fireEvent.change(endInput(), { target: { value: "2027-11-30" } });
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
@@ -206,7 +194,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("blocks submission when the start date is not before the end date", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		fireEvent.change(endInput(), { target: { value: "2026-01-15" } });
@@ -224,7 +212,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("blocks submission when the start and end dates are equal", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		fireEvent.change(endInput(), { target: { value: "2026-02-01" } });
@@ -239,12 +227,12 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("shows a success alert and invalidates the query on success", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() => expect(upsertMutate).toHaveBeenCalled());
-		await upsertState.onSuccess?.();
+		await upsertState.onSuccess?.({ success: true }, { year: 2026 });
 
 		await waitFor(() => {
 			expect(
@@ -257,7 +245,7 @@ describe("RepresentationCampaignForm", () => {
 	});
 
 	it("surfaces the server error when the mutation fails", async () => {
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		await waitFor(() => expect(startInput()).toHaveValue("2026-02-01"));
 
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
@@ -274,13 +262,13 @@ describe("RepresentationCampaignForm", () => {
 	it("disables the submit button while the query is loading", () => {
 		queryState.isLoading = true;
 		queryState.dataByYear = {};
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		expect(screen.getByRole("button", { name: /enregistrer/i })).toBeDisabled();
 	});
 
 	it("disables the submit button and shows progress while saving", async () => {
 		upsertState.isPending = true;
-		render(<RepresentationCampaignForm initialYear={2026} />);
+		render(<RepresentationCampaignForm year={2026} />);
 		expect(
 			screen.getByRole("button", { name: /enregistrement…/i }),
 		).toBeDisabled();

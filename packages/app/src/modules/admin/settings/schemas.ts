@@ -25,11 +25,9 @@ export const campaignYearSchema = z
 	.min(FIRST_DECLARATION_YEAR, `Année minimale : ${FIRST_DECLARATION_YEAR}.`)
 	.max(2100, "Année maximale : 2100.");
 
-export const campaignDeadlinesFormSchema = z
+export const remunerationDeadlinesFormSchema = z
 	.object({
 		year: campaignYearSchema,
-		campaignStartDate: optionalIsoDateString,
-		publicDataReleaseDate: optionalIsoDateString,
 		decl1ModificationDeadline: isoDateString,
 		decl1JustificationDeadline: isoDateString,
 		decl1JointEvaluationDeadline: isoDateString,
@@ -47,12 +45,27 @@ export const campaignDeadlinesFormSchema = z
 		},
 	);
 
-export type CampaignDeadlinesFormInput = z.input<
-	typeof campaignDeadlinesFormSchema
+export type RemunerationDeadlinesFormInput = z.input<
+	typeof remunerationDeadlinesFormSchema
 >;
-export type CampaignDeadlinesFormValues = z.output<
-	typeof campaignDeadlinesFormSchema
+export type RemunerationDeadlinesFormValues = z.output<
+	typeof remunerationDeadlinesFormSchema
 >;
+
+export const commonCalendarFormSchema = z.object({
+	year: campaignYearSchema,
+	campaignStartDate: optionalIsoDateString,
+	publicDataReleaseDate: optionalIsoDateString,
+});
+
+export type CommonCalendarFormInput = z.input<typeof commonCalendarFormSchema>;
+export type CommonCalendarFormValues = z.output<
+	typeof commonCalendarFormSchema
+>;
+
+export function getCommonCalendarPreconditionMessage(year: number): string {
+	return `Enregistrez d'abord les échéances de la démarche Rémunération pour ${year}.`;
+}
 
 const campaignYearParamSchema = z.object({
 	year: campaignYearSchema,

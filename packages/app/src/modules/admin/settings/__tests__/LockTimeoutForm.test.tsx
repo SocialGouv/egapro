@@ -50,6 +50,15 @@ describe("LockTimeoutForm", () => {
 		);
 	});
 
+	it("states that the timeout does not depend on the campaign year and what it protects", () => {
+		render(<LockTimeoutForm initialTimeoutMinutes={30} />);
+		expect(
+			screen.getByLabelText(/délai d'expiration du verrou/i),
+		).toHaveAccessibleName(
+			/indépendant de l'année de campagne sélectionnée\. s'applique aux déclarations de rémunération et aux avis du cse\./i,
+		);
+	});
+
 	it("submits the entered timeout", async () => {
 		render(<LockTimeoutForm initialTimeoutMinutes={30} />);
 		const input = screen.getByLabelText(/délai d'expiration du verrou/i);
