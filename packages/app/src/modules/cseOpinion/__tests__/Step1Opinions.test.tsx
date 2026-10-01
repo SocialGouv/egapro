@@ -178,7 +178,22 @@ describe("Step1Opinions", () => {
 		);
 
 		const heading = screen.getByRole("heading", { level: 1 });
-		expect(heading).toHaveTextContent("Transmettre l'avis ou les avis du CSE");
+		expect(heading).toHaveTextContent("Dépôt du ou des avis du CSE");
+	});
+
+	it("renders the stepper title and the intro text", () => {
+		render(
+			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
+		);
+
+		expect(
+			screen.getByText("Renseigner les informations du ou des avis du CSE"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Renseignez les informations relatives à l'avis ou aux avis émis par votre CSE.",
+			),
+		).toBeInTheDocument();
 	});
 
 	it("renders the obligatory-fields mention in the title grey of the intro text", () => {

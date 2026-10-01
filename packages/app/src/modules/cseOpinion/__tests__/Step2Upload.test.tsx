@@ -190,9 +190,7 @@ describe("Step2Upload", () => {
 	it("renders the page title", () => {
 		renderStep();
 
-		expect(
-			screen.getByText("Transmettre l'avis ou les avis du CSE"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Dépôt du ou des avis du CSE")).toBeInTheDocument();
 	});
 
 	it("renders the stepper at step 2", () => {
@@ -205,7 +203,7 @@ describe("Step2Upload", () => {
 		renderStep();
 
 		expect(
-			screen.getByText(/renseigner le type de document correspondant/),
+			screen.getByText(/renseigner le type d.avis correspondant/),
 		).toBeInTheDocument();
 		expect(screen.getByText(/Taille maximale.*pdf/)).toBeInTheDocument();
 	});
