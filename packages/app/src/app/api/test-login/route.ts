@@ -17,7 +17,7 @@ const SESSION_MAX_AGE_SECONDS = 24 * 60 * 60;
  * fixed ProConnect sandbox test account without going through the OIDC flow —
  * Cypress cannot carry the state/PKCE cookies across ProConnect's external
  * superdomains (the real flow stays covered by manual/Playwright testing).
- * Only enabled on dev and preprod (404 elsewhere), mirroring /api/clean-test-user/declaration.
+ * Only enabled on review apps (dev, 404 elsewhere), mirroring /api/clean-test-user/declaration.
  */
 export async function POST(request: NextRequest) {
   if (!areTestRoutesEnabled()) {

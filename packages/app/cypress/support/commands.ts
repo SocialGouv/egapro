@@ -64,12 +64,14 @@ Cypress.Commands.add("loginWithProConnect", () => {
   // Cypress cannot drive the real ProConnect OIDC flow: it spans external
   // superdomains (fca.integ01 / test-idp) and cy.origin loses the NextAuth
   // state/PKCE cookies, so the callback fails with "State cookie was missing".
-  // Use the dev-only /api/test-login bypass (disabled in prod) that establishes
-  // the session for the fixed ProConnect sandbox test account server-side.
+  // Use the review-app-only test-login bypass that establishes the session for
+  // the fixed ProConnect sandbox test account server-side. It is called under
+  // /apiv2 (rewritten to /api by Next): on a deployed app the ingress sends
+  // /api/* to the Python API, which does not know this route.
   cy.session(
     "proconnect-test-user",
     () => {
-      cy.request("POST", "/api/test-login").its("status").should("eq", 200);
+      cy.request("POST", "/apiv2/test-login").its("status").should("eq", 200);
     },
     {
       cacheAcrossSpecs: true,

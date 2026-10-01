@@ -12,7 +12,7 @@ const AUTHORIZED_EMAILS = ["egapro-e2e@fabrique.social.gouv.fr", "test@fia1.fr"]
 
 /**
  * Route API pour supprimer les déclarations de test lié à l'email.
- * Activée uniquement en dev et preprod.
+ * Activée uniquement sur les review apps (dev).
  */
 export async function POST() {
   if (!areTestRoutesEnabled()) {

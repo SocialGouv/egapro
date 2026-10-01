@@ -84,8 +84,8 @@ describe("test-login route", () => {
     expect(setCookie).not.toContain("Secure");
   });
 
-  it.each(["prod", undefined, ""])(
-    "is disabled outside dev/preprod (env=%p): 404 and never establishes a session",
+  it.each(["prod", "preprod", undefined, ""])(
+    "is disabled outside review apps (env=%p): 404 and never establishes a session",
     async env => {
       setEnv(env);
 
@@ -97,12 +97,4 @@ describe("test-login route", () => {
       expect(mockedHashCompanies).not.toHaveBeenCalled();
     },
   );
-
-  it("is enabled on preprod", async () => {
-    setEnv("preprod");
-
-    const res = await post({ "x-forwarded-proto": "https" });
-
-    expect(res.status).toBe(200);
-  });
 });
