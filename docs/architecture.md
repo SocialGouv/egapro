@@ -363,6 +363,7 @@ Pour ajouter ou retirer un admin :
        --from-file=/dev/stdin
      ```
    - remplacer `encryptedData.ADMIN_EMAILS` dans **les deux** fichiers (`env/dev` et `env/preprod`) par le chiffré obtenu.
+   - tant que le sealed-secret n'a pas été déployé sur `alpha`, la liste vit encore dans la ConfigMap `admin` de ce namespace : la relire avec `kubectl --context ovh-dev -n egapro-alpha get configmap admin -o jsonpath='{.data.ADMIN_EMAILS}'`.
 2. **prod** :
    - relire la valeur courante depuis le Secret `admin` du namespace `egapro` sur le cluster `ovh-prod` (`kubectl --context ovh-prod -n egapro get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
    - modifier la liste ;
