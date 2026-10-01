@@ -88,6 +88,9 @@ describe("CompanySection", () => {
 		expect(screen.getByText("ACME Corp")).toBeInTheDocument();
 		expect(screen.getByText("123 Rue de Paris")).toBeInTheDocument();
 		expect(screen.getByText("6201Z")).toBeInTheDocument();
+		expect(
+			screen.getByRole("rowheader", { name: "Effectif annuel moyen" }),
+		).toBeInTheDocument();
 		expect(screen.getByText("200")).toBeInTheDocument();
 		expect(screen.getByText("Oui")).toBeInTheDocument();
 	});

@@ -9,6 +9,7 @@ import { CompanySizeFilter } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import type { SearchDeclarationsFormValues } from "./schemas";
 import { searchDeclarationsFormSchema } from "./schemas";
+import { WORKFORCE_LABEL } from "./shared/constants";
 
 export function SearchForm() {
 	const router = useRouter();
@@ -149,7 +150,7 @@ export function SearchForm() {
 				<div className="fr-col-12 fr-col-md-3">
 					<CompanySizeFilter
 						id="search-size-range"
-						label="Effectif"
+						label={WORKFORCE_LABEL}
 						onChange={handleSizeRangeChange}
 						value={sizeRange === "" ? undefined : sizeRange}
 					/>
