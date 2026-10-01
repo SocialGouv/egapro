@@ -168,11 +168,27 @@ async def scheduler():
 
     try:
         while True:
-            await schedule.run_pending()
+            await run_due_jobs()
             await asyncio.sleep(1)
     finally:
         # Clean up database connection
         await db.terminate()
+
+
+async def run_due_jobs():
+    """Run due jobs without aioschedule 0.5.2's Python 3.11-incompatible run_pending.
+
+    That method passes bare coroutines to asyncio.wait(), which raises as soon
+    as the first export becomes due. The scheduler currently has one daily job.
+    """
+    jobs = [job.run() for job in list(schedule.jobs) if job.should_run]
+    if not jobs:
+        return
+    # gather accepts coroutines on Python 3.12 and preserves the old
+    # run_pending behaviour: a failed job does not kill the scheduler.
+    for result in await asyncio.gather(*jobs, return_exceptions=True):
+        if isinstance(result, BaseException):
+            loggers.logger.error("Scheduled job failed", exc_info=result)
 
 
 @minicli.cli

@@ -181,6 +181,19 @@ async def test_email_links_ignore_untrusted_origin(client, monkeypatch, declarat
     assert f"{config.DOMAIN}/index-egapro/declaration/?siren=514027945" in txt
 
 
+async def test_email_links_ignore_untrusted_host(client, monkeypatch, declaration):
+    sender = mock.Mock()
+    await declaration(siren="514027945", year=2020, owner="foo@bar.org")
+    monkeypatch.setattr("egapro.emails.send", sender)
+    resp = await client.post(
+        "/declaration/514027945/2020/receipt",
+        headers={"Host": "evil.com"},
+    )
+    assert resp.status == 204
+    assert "evil.com" not in str(sender.call_args)
+    assert config.DOMAIN in str(sender.call_args)
+
+
 async def test_email_links_use_allowed_origin(client, monkeypatch, declaration):
     sender = mock.Mock()
     await declaration(siren="514027945", year=2020, owner="foo@bar.org")
@@ -313,6 +326,34 @@ async def test_token_requests_are_throttled_per_address(client, monkeypatch):
     assert resp.status == 204
 
 
+@pytest.mark.parametrize(
+    "email",
+    [
+        "x <victim@example.org>",
+        "victim@example.org, other@example.org",
+        "victim\x00@example.org",
+        "victim\u202e@example.org",
+        ["victim@example.org"],
+    ],
+)
+async def test_token_rejects_non_plain_recipient(client, monkeypatch, email):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post("/token", body={"email": email})
+    assert resp.status == 400
+    send.assert_not_called()
+
+
+async def test_token_rejects_mail_body_injection(client, monkeypatch):
+    send = mock.Mock()
+    monkeypatch.setattr("egapro.emails.send", send)
+    resp = await client.post(
+        "/token", body={"email": "victim@example.org", "redirectTo": "welcome\nAttacker link: https://evil.com"}
+    )
+    assert resp.status == 400
+    send.assert_not_called()
+
+
 def test_token_throttle_expires_and_stays_bounded(monkeypatch):
     from egapro import views
 
@@ -324,6 +365,9 @@ def test_token_throttle_expires_and_stays_bounded(monkeypatch):
     for i in range(10):
         views.token_request_throttled(f"{i}@b.c", now=100)
     assert len(views._token_requests) <= 3
+    assert not views.token_request_throttled("new@b.c", now=100)
+    assert len(views._token_requests) <= 3
+    assert not views.token_request_throttled("new@b.c", now=161)
 
 
 # The anonymous public listing never loads a whole year in memory.

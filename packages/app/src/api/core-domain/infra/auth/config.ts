@@ -71,6 +71,7 @@ const jwtErrorInfo = (error: unknown) => ({ name: (error as Error)?.name, messag
 
 export const authConfig: AuthOptions = {
   jwt: {
+    maxAge: sessionMaxAge,
     async encode({ token, secret, maxAge }): Promise<string> {
       // Sign the token using HS256 without encrypting the payload.
       try {
@@ -88,7 +89,8 @@ export const authConfig: AuthOptions = {
     async decode({ token, secret }): Promise<JWT | null> {
       try {
         // Verify and decode the token using HS256 (signature and expiry).
-        return verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
+        const payload = verify(token as string, secret, { algorithms: ["HS256"] }) as JWT;
+        return typeof payload.exp === "number" ? payload : null;
       } catch (error) {
         logger.error({ error: jwtErrorInfo(error) }, "Error while decoding token");
         return null;

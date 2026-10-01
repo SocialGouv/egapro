@@ -2,12 +2,16 @@
  * @jest-environment node
  */
 import { captureError } from "@common/error";
+import { sign } from "jsonwebtoken";
 import { NextRequest } from "next/server";
+import { withAuth } from "next-auth/middleware";
 
 import middleware from "../middleware";
 
+const middlewareAuthOptions = (withAuth as jest.Mock).mock.calls[0][1];
+
 // Run our middleware directly, without NextAuth decoding the cookie first.
-jest.mock("next-auth/middleware", () => ({ withAuth: (fn: unknown) => fn }));
+jest.mock("next-auth/middleware", () => ({ withAuth: jest.fn((fn: unknown) => fn) }));
 jest.mock("@api/utils/pino", () => ({ logger: { error: jest.fn() } }));
 jest.mock("@common/error", () => ({ captureError: jest.fn() }));
 
@@ -78,5 +82,11 @@ describe("middleware", () => {
     const [, context] = (captureError as jest.Mock).mock.calls[0];
     expect(JSON.stringify(context)).not.toContain("SECRET");
     expect(context.headers["user-agent"]).toBe("jest");
+  });
+
+  it("rejects a legacy JWT without exp at the edge", async () => {
+    const secret = "x".repeat(32);
+    const token = sign({ email: "u@test.fr", user: { staff: true } }, secret, { algorithm: "HS256" });
+    await expect(middlewareAuthOptions.jwt.decode({ token, secret })).resolves.toBeNull();
   });
 });

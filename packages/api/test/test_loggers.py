@@ -1,4 +1,5 @@
 from egapro import loggers
+from unittest import mock
 
 
 def test_scrub_event_removes_credentials_and_personal_data():
@@ -18,6 +19,9 @@ def test_scrub_event_removes_credentials_and_personal_data():
                 "User-Agent": "Mozilla",
             },
         },
+        "exception": {
+            "values": [{"stacktrace": {"frames": [{"vars": {"data": "REDACT_ME"}}]}}]
+        },
     }
     event = loggers.scrub_event(event)
     assert "user" not in event
@@ -27,3 +31,11 @@ def test_scrub_event_removes_credentials_and_personal_data():
         "headers": {"User-Agent": "Mozilla"},
     }
     assert "secret" not in str(event)
+    assert "REDACT_ME" not in str(event)
+
+
+def test_sentry_does_not_capture_local_variables(monkeypatch):
+    init = mock.Mock()
+    monkeypatch.setattr(loggers.sentry_sdk, "init", init)
+    loggers.init()
+    assert init.call_args.kwargs["include_local_variables"] is False

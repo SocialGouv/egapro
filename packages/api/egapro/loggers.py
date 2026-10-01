@@ -49,6 +49,15 @@ def scrub_event(event, hint=None):
             request["headers"] = {
                 k: v for k, v in headers.items() if k.lower() not in SENSITIVE_HEADERS
             }
+    exceptions = event.get("exception")
+    if isinstance(exceptions, dict):
+        for exception in exceptions.get("values", []):
+            if isinstance(exception, dict):
+                stacktrace = exception.get("stacktrace")
+                if isinstance(stacktrace, dict):
+                    for frame in stacktrace.get("frames", []):
+                        if isinstance(frame, dict):
+                            frame.pop("vars", None)
     return event
 
 
@@ -58,5 +67,6 @@ def init():
         release=metadata.version("egapro"),
         environment=config.FLAVOUR,
         send_default_pii=False,
+        include_local_variables=False,
         before_send=scrub_event,
     )

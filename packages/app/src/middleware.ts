@@ -130,7 +130,8 @@ const wrappedMiddleware = withAuth(
       async decode({ token, secret }): Promise<JWT | null> {
         try {
           const secretAsKey = new TextEncoder().encode(secret as string);
-          return (await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] })).payload as JWT;
+          const { payload } = await jose.jwtVerify(token as string, secretAsKey, { algorithms: ["HS256"] });
+          return typeof payload.exp === "number" ? (payload as JWT) : null;
         } catch (error) {
           // Never log the error object: jose's JWTExpired/JWTClaimValidationFailed carry the decoded claims.
           logger.error(

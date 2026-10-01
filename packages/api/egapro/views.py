@@ -1,6 +1,8 @@
 import os
+import re
 import sys
 import time
+import unicodedata
 from functools import wraps
 
 from naf import DB as NAF
@@ -56,17 +58,12 @@ class Request(BaseRequest):
     def domain(self):
         """Base URL used to build the links sent by email.
 
-        The `Origin` header is client controlled: only trust it when it matches the
-        configured domain, the host the request was routed to (ingress) or an
-        explicitly allowed origin, otherwise fall back to the configured domain."""
+        The `Origin` and `Host` headers are client controlled: only trust a
+        configured domain, otherwise fall back to the canonical domain."""
         domain = (self.origin or f"https://{self.host}").rstrip("/")
-        allowed = {
-            config.DOMAIN.rstrip("/"),
-            f"https://{self.host}",
-            *config.allowed_origins(),
-        }
+        allowed = {config.DOMAIN.rstrip("/"), *config.allowed_origins()}
         if domain not in allowed:
-            loggers.logger.warning("Untrusted origin for email links: %s", domain)
+            loggers.logger.warning("Untrusted origin for email links: %s", loggers.safe(domain))
             return config.DOMAIN.rstrip("/")
         return domain
 
@@ -560,24 +557,26 @@ class SimulationResource:
         response.status = 200
 
 
-# POST /token is anonymous and emails any address: at most one link per address
-# per cooldown (per process, bounded memory), so it cannot be used to mailbomb.
+# Best-effort per-address cooldown within this process. The bounded table evicts
+# old entries under a large burst; ingress rate limiting remains necessary.
 TOKEN_EMAIL_COOLDOWN = 60
 TOKEN_EMAIL_MAX_TRACKED = 10_000
 _token_requests = {}
+PLAIN_EMAIL = re.compile(r"[^\s@<>,;:\"\\()\[\]]+@[^\s@<>,;:\"\\()\[\]]+\Z")
+SAFE_REDIRECT_PATH = re.compile(r"[A-Za-z0-9/_.-]*\Z")
 
 
 def token_request_throttled(email, now=None):
     now = time.monotonic() if now is None else now
-    if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
-        for key, at in list(_token_requests.items()):
-            if now - at >= TOKEN_EMAIL_COOLDOWN:
-                del _token_requests[key]
-        if len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
-            _token_requests.clear()
     last = _token_requests.get(email)
     if last is not None and now - last < TOKEN_EMAIL_COOLDOWN:
         return True
+    # Keep insertion order equal to request time, including a refreshed address.
+    _token_requests.pop(email, None)
+    while len(_token_requests) >= TOKEN_EMAIL_MAX_TRACKED:
+        # Evict only the oldest address. Refusing every new address when the
+        # table is full would let a burst of distinct recipients block all logins.
+        _token_requests.pop(next(iter(_token_requests)))
     _token_requests[email] = now
     return False
 
@@ -585,13 +584,22 @@ def token_request_throttled(email, now=None):
 @app.route("/token", methods=["POST"])
 async def send_token(request, response):
     email = request.json.get("email")
-    if not email:
-        raise HttpError(400, "Missing email key")
-    if token_request_throttled(str(email).strip().lower()):
+    if (
+        not isinstance(email, str)
+        or len(email) > 254
+        or any(ord(c) < 32 or ord(c) == 127 or unicodedata.category(c) == "Cf" for c in email)
+        or not PLAIN_EMAIL.fullmatch(email.strip())
+    ):
+        raise HttpError(400, "Invalid email")
+    email = email.strip().lower()
+    redirectTo = request.json.get("redirectTo") or ""
+    if not isinstance(redirectTo, str) or not SAFE_REDIRECT_PATH.fullmatch(redirectTo.lstrip("/")):
+        raise HttpError(400, "Invalid redirectTo")
+    redirectTo = redirectTo.lstrip("/")
+    if token_request_throttled(email):
         raise HttpError(429, "Un lien vient déjà d'être envoyé à cette adresse, veuillez patienter.")
     loggers.logger.info(f"Token request FOR {loggers.safe(email)} FROM {loggers.safe(request.ip)}")
     token = tokens.create(email)
-    redirectTo = (request.json.get("redirectTo") or "").lstrip("/")
     link = f"{config.DOMAIN}/{redirectTo}?token={token}"
     # Local development only, decided by the configured domain: the link itself
     # holds client input (redirectTo), and a token must never reach production logs.

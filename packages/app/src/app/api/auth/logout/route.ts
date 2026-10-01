@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
         return null;
       }
       try {
-        return verify(rawToken, decodeSecret, { algorithms: ["HS256"] }) as JWT;
+        // An expired local session may still need to terminate the IdP session.
+        return verify(rawToken, decodeSecret, { algorithms: ["HS256"], ignoreExpiration: true }) as JWT;
       } catch {
         return null;
       }

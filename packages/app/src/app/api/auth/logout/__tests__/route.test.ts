@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { fetchEndSessionEndpoint } from "@api/core-domain/infra/auth/proconnect-logout";
+import { sign } from "jsonwebtoken";
 import { getToken } from "next-auth/jwt";
 
 import { GET } from "../route";
@@ -84,5 +85,15 @@ describe("logout route", () => {
     mockedFetchEndSession.mockResolvedValue(null);
     const res = await call();
     expect(res.headers.get("location")).toBe("https://app.test/");
+  });
+
+  it("terminates the IdP session even when the local JWT has expired", async () => {
+    mockedGetToken.mockImplementation(async ({ decode, secret }: { decode: (params: { secret: string; token: string }) => Promise<unknown>; secret: string }) => {
+      const rawToken = sign({ id_token: "expired-id-token-fixture", exp: 1 }, secret, { algorithm: "HS256" });
+      return decode({ token: rawToken, secret });
+    });
+    mockedFetchEndSession.mockResolvedValue("https://issuer.test/session/end");
+    const res = await call();
+    expect(res.headers.get("location")).toContain("id_token_hint=expired-id-token-fixture");
   });
 });

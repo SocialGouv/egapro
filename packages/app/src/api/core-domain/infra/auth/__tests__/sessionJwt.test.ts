@@ -17,6 +17,10 @@ const { encode, decode } = authConfig.jwt!;
 const claims = { email: "u@test.fr", user: { email: "u@test.fr", staff: false, tokenApiV1: "t" } };
 
 describe("session JWT", () => {
+  it("passes the session lifetime to NextAuth's JWT encoder", () => {
+    expect(authConfig.jwt?.maxAge).toBe(authConfig.session?.maxAge);
+  });
+
   it("expires after the session max age (not only the cookie)", async () => {
     const jwt = await encode!({ token: claims as never, secret: SECRET, maxAge: 3600 });
     const { exp, iat } = decodeUnverified(jwt) as { exp: number; iat: number };
@@ -33,6 +37,11 @@ describe("session JWT", () => {
   it("rejects an expired session token", async () => {
     const expired = sign({ ...claims, exp: Math.floor(Date.now() / 1000) - 10 }, SECRET, { algorithm: "HS256" });
     await expect(decode!({ token: expired, secret: SECRET })).resolves.toBeNull();
+  });
+
+  it("rejects a legacy session token without an expiration", async () => {
+    const legacy = sign(claims, SECRET, { algorithm: "HS256" });
+    await expect(decode!({ token: legacy, secret: SECRET })).resolves.toBeNull();
   });
 
   it("accepts a valid session token", async () => {
