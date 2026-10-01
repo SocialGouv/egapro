@@ -164,6 +164,66 @@ describe("RecapitulatifPage", () => {
 		).toBeInTheDocument();
 	});
 
+	it.each([
+		{ year: 2026, workforce: 120, expected: false },
+		{ year: 2026, workforce: 200, expected: true },
+		{ year: 2027, workforce: 120, expected: false },
+		{ year: 2027, workforce: 200, expected: true },
+		{ year: 2028, workforce: 200, expected: false },
+		{ year: 2028, workforce: 250, expected: true },
+		{ year: 2028, workforce: null, expected: true },
+	])("shows indicator G only when due (year $year, workforce $workforce)", ({
+		year,
+		workforce,
+		expected,
+	}) => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: workforce }}
+				declarationYear={year}
+				step5Source="accord-entreprise"
+			/>,
+		);
+
+		const categoryHeading = screen.queryByRole("heading", {
+			name: "Indicateur par catégories de salariés",
+		});
+		const categorySource = screen.queryByText(
+			/Source utilisée pour déterminer les catégories d.*emplois/,
+		);
+		if (expected) {
+			expect(categoryHeading).toBeInTheDocument();
+			expect(categorySource).toBeInTheDocument();
+		} else {
+			expect(categoryHeading).not.toBeInTheDocument();
+			expect(categorySource).not.toBeInTheDocument();
+		}
+		expect(
+			screen.getByRole("heading", {
+				name: /Indicateurs pour l.*ensemble de vos salariés/,
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("hides previously recorded categories when indicator G is not due", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...defaultCompany(), gipWorkforce: 120 }}
+				declarationYear={2027}
+				step5Categories={[makeCategory({ name: "Cadres" })]}
+			/>,
+		);
+
+		expect(
+			screen.queryByRole("heading", {
+				name: "Indicateur par catégories de salariés",
+			}),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(/Cadres/)).not.toBeInTheDocument();
+	});
+
 	it("renders empty notices for empty indicator/category sections", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		// 2 gap tables (Écart + Variable) + 0 categories = 3 empty notices.
