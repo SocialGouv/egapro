@@ -15,10 +15,6 @@ export function WelcomeBanner() {
 						<span className="fr-notice__title">
 							Bienvenue sur votre espace Egapro
 						</span>
-						<span className="fr-notice__desc">
-							Vos informations professionnelles et personnelles ont été
-							renseignées automatiquement via ProConnect.
-						</span>
 					</p>
 					<button
 						className="fr-btn--close fr-btn"
