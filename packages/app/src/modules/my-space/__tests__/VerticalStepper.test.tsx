@@ -376,7 +376,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 	describe("rendu conditionnel des étapes selon le parcours (#3939)", () => {
 		const STEP2_TITLE = /Parcours de mise en conformité/;
-		const STEP3_TITLE = "Déposer le ou les avis du CSE";
+		const STEP3_TITLE = "Dépôt du ou des avis du CSE";
 		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
 
 		it("renders steps 2 and 3 when both compliancePathApplicable and cseOpinionRequired are true", () => {

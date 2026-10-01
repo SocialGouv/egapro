@@ -56,7 +56,7 @@ describe("getDeclarationProcessStepLabel", () => {
 			fsm: "revised_joint_evaluation_chosen",
 			label: "Évaluation conjointe des rémunérations",
 		},
-		{ fsm: "awaiting_cse_opinion", label: "Déposer le ou les avis CSE" },
+		{ fsm: "awaiting_cse_opinion", label: "Dépôt du ou des avis du CSE" },
 		{
 			fsm: "demarche_completed",
 			label: "Finalisation - Démarche des indicateurs de rémunération",
