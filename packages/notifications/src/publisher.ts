@@ -21,13 +21,61 @@ export type EnqueueInput<T extends NotificationType = NotificationType> = {
 	payload: NotificationPayloadMap[T];
 	scheduledFor?: Date;
 	attachments?: PublisherAttachment[];
+	// Dedup key: pg-boss rejects a second send under the same (UUID) job id instead of queuing a twin.
+	jobId?: string;
 };
 
 export type PublishResult =
 	| { status: "enqueued"; id: string }
+	| { status: "duplicate"; id: string }
 	| { status: "error"; error: string };
 
 export type EnqueueResult = PublishResult | { status: "queue_unavailable" };
+
+const UNIQUE_VIOLATION = "23505";
+
+function errorCode(error: unknown): string | null {
+	if (typeof error !== "object" || error === null) return null;
+	const { code } = error as { code?: unknown };
+	return typeof code === "string" ? code : null;
+}
+
+// SQLSTATE, not the message — the driver's message text is localised by the server's `lc_messages`.
+function isDuplicateJobId(error: unknown): boolean {
+	return errorCode(error) === UNIQUE_VIOLATION;
+}
+
+const TRANSIENT_ERROR_CODES = new Set([
+	"ECONNREFUSED",
+	"ECONNRESET",
+	"ECONNABORTED",
+	"ETIMEDOUT",
+	"EPIPE",
+	"EHOSTUNREACH",
+	"ENETUNREACH",
+	"EAI_AGAIN",
+	"08000",
+	"08003",
+	"08006",
+	"57P01",
+	"57P02",
+	"57P03",
+	"53300",
+]);
+const TRANSIENT_MESSAGE_PATTERN =
+	/ECONN(?:REFUSED|RESET|ABORTED)|ETIMEDOUT|connection terminated|connection timeout|server closed the connection|Client has encountered a connection error/i;
+
+function isTransientConnectionError(error: unknown): boolean {
+	if (typeof error !== "object" || error === null) return false;
+	const code = errorCode(error);
+	if (code !== null) return TRANSIENT_ERROR_CODES.has(code);
+	if (error instanceof AggregateError) {
+		return error.errors.some(isTransientConnectionError);
+	}
+	return (
+		error instanceof Error && TRANSIENT_MESSAGE_PATTERN.test(error.message)
+	);
+}
 
 const RETRY_AFTER_FAILURE_MS = 30_000;
 const DEFAULT_RETRY_LIMIT = 5;
@@ -97,7 +145,9 @@ function readPositiveInt(name: string, fallback: number): number {
  *
  * Graceful degradation:
  * - URL missing or queue unreachable → `{ status: "queue_unavailable" }` (no throw)
- * - `boss.send` throws → `{ status: "error", error }` (no throw)
+ * - `jobId` already queued → `{ status: "duplicate", id }` (no throw)
+ * - `boss.send` throws a connection failure → `{ status: "queue_unavailable" }` (no throw)
+ * - `boss.send` throws anything else → `{ status: "error", error }` (no throw)
  *
  * Audit logging is the caller's responsibility: branch on the returned
  * `status` and invoke whatever audit sink fits the calling context.
@@ -144,12 +194,28 @@ export async function enqueueNotification<T extends NotificationType>(
 				DEFAULT_RETRY_DELAY_SECONDS,
 			),
 			startAfter: startAfterSeconds,
+			...(input.jobId ? { id: input.jobId } : {}),
 		});
+		// A null resolution with an explicit id means that job is already there.
+		if (jobId === null && input.jobId) {
+			return { status: "duplicate", id: input.jobId };
+		}
 		return { status: "enqueued", id: jobId ?? "" };
 	} catch (error) {
+		if (input.jobId && isDuplicateJobId(error)) {
+			return { status: "duplicate", id: input.jobId };
+		}
+		if (isTransientConnectionError(error)) {
+			return { status: "queue_unavailable" };
+		}
 		const message = error instanceof Error ? error.message : "Unknown error";
 		return { status: "error", error: message };
 	}
+}
+
+// Reuses `getPublisher`'s cache/backoff, so this costs nothing beyond what `enqueueNotification` already pays.
+export async function isPublisherAvailable(): Promise<boolean> {
+	return (await getPublisher()) !== null;
 }
 
 /**

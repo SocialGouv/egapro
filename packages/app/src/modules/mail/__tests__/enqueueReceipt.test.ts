@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	enqueueNotification: vi.fn(),
+	isPublisherAvailable: vi.fn(),
 	logAction: vi.fn(),
 	captureException: vi.fn(),
 	buildDeclarationAttachments: vi.fn(),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("notifications/publisher", () => ({
 	enqueueNotification: mocks.enqueueNotification,
+	isPublisherAvailable: mocks.isPublisherAvailable,
 }));
 
 vi.mock("@sentry/nextjs", () => ({
@@ -46,7 +48,7 @@ vi.mock("~/server/db", () => ({
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
-import { enqueueReceipt } from "../enqueueReceipt";
+import { enqueueReceipt, sendReceipt } from "../enqueueReceipt";
 
 const PDF_ATTACHMENT = {
 	filename: "test.pdf",
@@ -95,6 +97,7 @@ function auditMetadataOf(): Record<string, unknown> {
 describe("enqueueReceipt", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mocks.isPublisherAvailable.mockResolvedValue(true);
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
@@ -614,5 +617,146 @@ describe("enqueueReceipt — variant derivation", () => {
 		await enqueueReceipt({ ...baseInput, kind: "declaration" });
 
 		expect(payloadOf().raisonSociale).toBe("552100554");
+	});
+});
+
+// Unlike "Renvoyer", the outbox path calls `sendReceipt` directly for the outcome and dedup against a replay.
+describe("sendReceipt — outbox path", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mocks.isPublisherAvailable.mockResolvedValue(true);
+		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
+		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "enqueued",
+			id: "job-1",
+		});
+		stubContext();
+	});
+
+	const OUTBOX_ID = "0f3f4d2e-1c2b-4a5e-9f11-2f9a8c7d6e5b";
+
+	it("hands the outbox id to the queue as the deduplication key", async () => {
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: true, error: null, countsAsAttempt: true });
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({ jobId: OUTBOX_ID }),
+		);
+		expect(auditMetadataOf()).toMatchObject({ outboxId: OUTBOX_ID });
+	});
+
+	it("sends no deduplication key for a resend, which is a deliberate second copy", async () => {
+		await sendReceipt({ ...baseInput, kind: "declaration", isResend: true });
+
+		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
+			jobId?: string;
+		};
+		expect(call.jobId).toBeUndefined();
+		expect(auditMetadataOf()).not.toHaveProperty("outboxId");
+	});
+
+	// A replay whose first attempt reached the queue must read as delivered, not as a retry failure.
+	it("treats an already-queued job as sent", async () => {
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "duplicate",
+			id: OUTBOX_ID,
+		});
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({ sent: true, error: null, countsAsAttempt: true });
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				resourceId: OUTBOX_ID,
+				metadata: expect.objectContaining({ alreadyQueued: true }),
+			}),
+		);
+	});
+
+	// The queue dropping mid-send is the same unfixable-by-retry condition as failing the check outright.
+	it("reports the queue error so the row stays owed, without charging an attempt", async () => {
+		mocks.enqueueNotification.mockResolvedValue({
+			status: "queue_unavailable",
+		});
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+	});
+
+	it("skips the PDF render entirely when the queue is unreachable before it starts", async () => {
+		mocks.isPublisherAvailable.mockResolvedValue(false);
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({
+			sent: false,
+			error: "queue_unavailable",
+			countsAsAttempt: false,
+		});
+		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.enqueueNotification).not.toHaveBeenCalled();
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				errorMessage: "queue_unavailable",
+				metadata: expect.objectContaining({ outboxId: OUTBOX_ID }),
+			}),
+		);
+	});
+
+	it("reports a dropped PDF without claiming the receipt failed", async () => {
+		mocks.buildDeclarationAttachments.mockRejectedValue(new Error("render KO"));
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({
+			sent: true,
+			error: "render KO",
+			countsAsAttempt: true,
+		});
+	});
+
+	it("reports a thrown failure and stamps the outbox id on the audit row", async () => {
+		mocks.enqueueNotification.mockRejectedValue(new Error("boom"));
+
+		const outcome = await sendReceipt({
+			...baseInput,
+			kind: "declaration",
+			outboxId: OUTBOX_ID,
+		});
+
+		expect(outcome).toEqual({
+			sent: false,
+			error: "boom",
+			countsAsAttempt: true,
+		});
+		expect(auditMetadataOf()).toMatchObject({ outboxId: OUTBOX_ID });
 	});
 });

@@ -1,21 +1,6 @@
 import "server-only";
 
-/**
- * Guard for SUIT-only `/api/v1/*` endpoints.
- *
- * APISIX (the gateway fronting SUIT traffic — see
- * `.kontinuous/templates/apisix-suit.yaml`) injects the `X-Gateway-Forwarded`
- * header on every proxied request. The Edge middleware
- * (`src/middleware.ts`) already rejects empty or mismatched values with 403,
- * so by the time the request reaches here the header is either absent
- * (session / public call) or a valid secret. An absent (or empty) header
- * means the caller reached the app pod directly and bypassed APISIX's
- * Bearer auth + rate-limit — reject with 403.
- *
- * Mixed endpoints that must serve both APISIX (SUIT) and browser
- * (admin / user) — e.g. `/api/v1/files/:fileId` — do **not** call this
- * guard; they dispatch on `isGatewayForwarded(request)` instead.
- */
+// Defense in depth: `src/middleware.ts` already 403s a missing/wrong `X-Gateway-Forwarded` secret before this runs.
 export function assertGatewaySource(request: Request): Response | null {
 	if (!isGatewayForwarded(request)) {
 		return Response.json(

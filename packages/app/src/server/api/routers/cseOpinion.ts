@@ -7,6 +7,10 @@ import {
 } from "~/modules/cseOpinion/schemas";
 import { getCurrentYear } from "~/modules/domain";
 import {
+	deliverRecordedReceipt,
+	recordReceiptIntent,
+} from "~/modules/mail/receiptIntent";
+import {
 	createTRPCRouter,
 	declarationProcedure,
 	declarationWriteProcedure,
@@ -309,6 +313,9 @@ export const cseOpinionRouter = createTRPCRouter({
 			ctx.session.user.id,
 		);
 
+		const email = ctx.session.user.email;
+		let receiptIntentId: string | null = null;
+
 		await ctx.db.transaction(async (tx) => {
 			await lockDeclaration(tx, ctx.declarationId);
 			await tx.insert(declarationStatusHistory).values(historyInserts);
@@ -335,20 +342,19 @@ export const cseOpinionRouter = createTRPCRouter({
 					})
 					.where(eq(declarations.id, ctx.declarationId));
 			}
+
+			receiptIntentId = email
+				? await recordReceiptIntent(tx, {
+						kind: "cseOpinion",
+						to: email,
+						siren: ctx.siren,
+						year: getCurrentYear(),
+						userId: ctx.session.user.id,
+					})
+				: null;
 		});
 
-		const email = ctx.session.user.email;
-		if (email) {
-			const { enqueueReceipt } = await import("~/modules/mail/server");
-			await enqueueReceipt({
-				kind: "cseOpinion",
-				to: email,
-				siren: ctx.siren,
-				year: getCurrentYear(),
-				userId: ctx.session.user.id,
-				isResend: false,
-			});
-		}
+		await deliverRecordedReceipt(receiptIntentId);
 
 		return { success: true };
 	}),

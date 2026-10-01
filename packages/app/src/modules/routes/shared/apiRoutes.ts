@@ -31,6 +31,8 @@ export function apiV1FileHref(fileId: string) {
 	return route(`/api/v1/files/${fileId}` as const);
 }
 
+export const API_RECEIPTS_RETRY = route("/api/receipts/retry");
+
 export const API_PUBLIC_DECLARATIONS = route("/api/public/declarations");
 export const API_PUBLIC_DECLARATIONS_EXPORT = route(
 	"/api/public/declarations/export",

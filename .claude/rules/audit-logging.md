@@ -176,7 +176,7 @@ false negative is a compliance gap.
 
 ## Route Handler coverage map (`src/app/api/**/route.ts`)
 
-Inventory refreshed by issue #3764 — **33 route files**, every one of them
+Inventory refreshed by issue #3764 — **34 route files**, every one of them
 accounted for below. Re-run the inventory with:
 
 ```bash
@@ -188,7 +188,7 @@ listed as a named exemption. The only third state this table accepts is a route
 whose wiring is in flight in a named open PR, and it is listed apart from the
 counts — never inside them.
 
-### Audited through `withAuditedRoute` (15)
+### Audited through `withAuditedRoute` (16)
 
 | Route | Action key |
 |---|---|
@@ -202,6 +202,7 @@ counts — never inside them.
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
 | `public/representations` | `PUBLIC_REPRESENTATIONS_SEARCH` |
 | `public/representations/export` | `PUBLIC_REPRESENTATIONS_EXPORT` |
+| `receipts/retry` | `NOTIFICATION_OUTBOX_REPLAY` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
 | `transmitted-pdf` | `PDF_TRANSMITTED_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |

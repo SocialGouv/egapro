@@ -19,10 +19,13 @@ import postgres from "postgres";
  * through `logFailure`, which inserts outside any transaction so the record
  * survives the rollback.
  *
+ * Also purges `app_receipt_outbox` — it carries PII with no retention of its own.
+ *
  * Env vars:
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
  *  - EGAPRO_AUDIT_RETENTION_SHORT_DAYS (optional, default 180)
  *  - EGAPRO_AUDIT_RETENTION_LONG_DAYS  (optional, default 365)
+ *  - EGAPRO_RECEIPT_OUTBOX_RETENTION_DAYS (optional, default 365)
  *
  * Issue: #3268 (cleanup jobs use direct DB access instead of HTTP endpoints).
  */
@@ -44,8 +47,19 @@ const SHORT_RETENTION_CATEGORIES = ["read_sensitive", "public_search"];
 const AUDIT_CLEANUP_ACTION = "system.audit_cleanup";
 const AUDIT_CLEANUP_CATEGORY = "system";
 
+const RECEIPT_OUTBOX_CLEANUP_ACTION = "system.receipt_outbox_cleanup";
+const RECEIPT_OUTBOX_SETTLED_STATUSES = ["sent", "failed"];
+const RECEIPT_OUTBOX_UNSETTLED_STATUSES = ["pending", "sending"];
+
+// Same action key as receiptOutbox.ts's exhausted-attempts failure, so both causes count under one metric.
+const RECEIPT_OUTBOX_DELIVERY_FAILED_ACTION =
+	"notification.outbox_delivery_failed";
+const RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR =
+	"Outbox retention window elapsed before delivery could complete";
+
 const DEFAULT_SHORT_RETENTION_DAYS = 180;
 const DEFAULT_LONG_RETENTION_DAYS = 365;
+const DEFAULT_RECEIPT_OUTBOX_RETENTION_DAYS = 365;
 
 function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -158,7 +172,12 @@ export async function runAuditCleanup({
 	return summary;
 }
 
-async function logFailure(sql: Sql, error: unknown): Promise<void> {
+async function logFailure(
+	sql: Sql,
+	action: string,
+	error: unknown,
+	logPrefix = "audit-cleanup",
+): Promise<void> {
 	const message = error instanceof Error ? error.message : "Unknown error";
 	try {
 		await sql`
@@ -166,7 +185,7 @@ async function logFailure(sql: Sql, error: unknown): Promise<void> {
 			VALUES (
 				${crypto.randomUUID()},
 				${new Date()},
-				${AUDIT_CLEANUP_ACTION},
+				${action},
 				${AUDIT_CLEANUP_CATEGORY},
 				'failure',
 				${message}
@@ -174,10 +193,104 @@ async function logFailure(sql: Sql, error: unknown): Promise<void> {
 		`;
 	} catch (auditError) {
 		console.error(
-			"[audit-cleanup] Failed to record failure in audit log:",
+			`[${logPrefix}] Failed to record failure in audit log:`,
 			auditError,
 		);
 	}
+}
+
+type RunReceiptOutboxCleanupArgs = {
+	sql: Sql;
+	retentionDays: number;
+	now?: Date;
+};
+
+type ReceiptOutboxCleanupResult = {
+	deleted: number;
+	forcedFailed: number;
+};
+
+// Exported for the same reason as `runAuditCleanup` — the integration test drives it directly.
+export async function runReceiptOutboxCleanup({
+	sql,
+	retentionDays,
+	now = new Date(),
+}: RunReceiptOutboxCleanupArgs): Promise<ReceiptOutboxCleanupResult> {
+	const threshold = subtractDays(now, retentionDays);
+
+	const { forcedFailedIds, deletedCount } = await sql.begin(async (tx) => {
+		// created_at, not updated_at: a stuck row's updated_at is bumped on every retry regardless of true age.
+		const forcedFailed = await tx<{ id: string }[]>`
+			UPDATE app_receipt_outbox
+			SET status = 'failed',
+				last_error = ${RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR},
+				updated_at = created_at
+			WHERE status = ANY(${RECEIPT_OUTBOX_UNSETTLED_STATUSES})
+			AND created_at < ${threshold}
+			RETURNING id
+		`;
+
+		// Backdating updated_at above lets this same DELETE (same updated_at index) purge the row right away.
+		const deleted = await tx`
+			DELETE FROM app_receipt_outbox
+			WHERE status = ANY(${RECEIPT_OUTBOX_SETTLED_STATUSES})
+			AND updated_at < ${threshold}
+		`;
+
+		return {
+			forcedFailedIds: forcedFailed.map((row) => row.id),
+			deletedCount: Number(deleted.count ?? 0),
+		};
+	});
+
+	for (const id of forcedFailedIds) {
+		try {
+			await sql`
+				INSERT INTO audit.action_log (id, created_at, action, category, status, resource_type, resource_id, error_message, metadata)
+				VALUES (
+					${crypto.randomUUID()},
+					${new Date()},
+					${RECEIPT_OUTBOX_DELIVERY_FAILED_ACTION},
+					${AUDIT_CLEANUP_CATEGORY},
+					'failure',
+					'receipt_outbox',
+					${id},
+					${RECEIPT_OUTBOX_RETENTION_EXCEEDED_ERROR},
+					${sql.json({ stage: "retention_cleanup" })}
+				)
+			`;
+		} catch (auditError) {
+			console.error(
+				"[receipt-outbox-cleanup] Forced a row to failed but its audit insert failed:",
+				auditError,
+			);
+		}
+	}
+
+	try {
+		await sql`
+			INSERT INTO audit.action_log (id, created_at, action, category, status, metadata)
+			VALUES (
+				${crypto.randomUUID()},
+				${new Date()},
+				${RECEIPT_OUTBOX_CLEANUP_ACTION},
+				${AUDIT_CLEANUP_CATEGORY},
+				'success',
+				${sql.json({
+					deleted: deletedCount,
+					forcedFailed: forcedFailedIds.length,
+					retentionDays,
+				})}
+			)
+		`;
+	} catch (auditError) {
+		console.error(
+			"[receipt-outbox-cleanup] Cleanup succeeded but self-audit insert failed:",
+			auditError,
+		);
+	}
+
+	return { deleted: deletedCount, forcedFailed: forcedFailedIds.length };
 }
 
 const isMain = ((): boolean => {
@@ -202,8 +315,13 @@ if (isMain) {
 		process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
 		DEFAULT_LONG_RETENTION_DAYS,
 	);
+	const receiptOutboxRetentionDays = toPositiveInt(
+		process.env.EGAPRO_RECEIPT_OUTBOX_RETENTION_DAYS,
+		DEFAULT_RECEIPT_OUTBOX_RETENTION_DAYS,
+	);
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
+	let failed = false;
 
 	try {
 		const result = await runAuditCleanup({
@@ -214,12 +332,32 @@ if (isMain) {
 		console.log(
 			`[audit-cleanup] Success — deletedShort=${result.deletedShort} deletedLong=${result.deletedLong} deletedTotal=${result.deletedTotal}`,
 		);
-		await sql.end();
-		process.exit(0);
 	} catch (error) {
 		console.error("[audit-cleanup] Failed:", error);
-		await logFailure(sql, error);
-		await sql.end();
-		process.exit(1);
+		await logFailure(sql, AUDIT_CLEANUP_ACTION, error, "audit-cleanup");
+		failed = true;
 	}
+
+	// Independent of the audit-log cleanup above — one purge failing must not skip the other.
+	try {
+		const result = await runReceiptOutboxCleanup({
+			sql,
+			retentionDays: receiptOutboxRetentionDays,
+		});
+		console.log(
+			`[receipt-outbox-cleanup] Success — deleted=${result.deleted} forcedFailed=${result.forcedFailed}`,
+		);
+	} catch (error) {
+		console.error("[receipt-outbox-cleanup] Failed:", error);
+		await logFailure(
+			sql,
+			RECEIPT_OUTBOX_CLEANUP_ACTION,
+			error,
+			"receipt-outbox-cleanup",
+		);
+		failed = true;
+	}
+
+	await sql.end();
+	process.exit(failed ? 1 : 0);
 }
