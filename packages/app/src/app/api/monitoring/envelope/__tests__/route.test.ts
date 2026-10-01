@@ -1,7 +1,8 @@
 /**
  * @jest-environment node
  */
-import { MAX_ENVELOPE_BYTES, OPTIONS, POST } from "../route";
+import { MAX_ENVELOPE_BYTES } from "../limits";
+import { OPTIONS, POST } from "../route";
 
 jest.mock("@common/config", () => ({ config: { host: "https://app.test" } }));
 

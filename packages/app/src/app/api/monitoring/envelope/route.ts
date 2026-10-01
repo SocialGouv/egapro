@@ -1,6 +1,8 @@
 import { config } from "@common/config";
 import { type NextRequest } from "next/server";
 
+import { MAX_ENVELOPE_BYTES } from "./limits";
+
 export const dynamic = "force-dynamic";
 
 /**
@@ -20,9 +22,6 @@ function getConfiguredDsn(): { projectId: string; publicKey: string } | null {
     return null;
   }
 }
-
-// Room for a session replay segment, the largest item our front sends; anything bigger is not ours.
-export const MAX_ENVELOPE_BYTES = 10 * 1024 * 1024;
 
 /** Read the body as text, giving up (null) as soon as it exceeds `maxBytes`, whatever Content-Length claims. */
 async function readBodyWithLimit(request: NextRequest, maxBytes: number): Promise<string | null> {
