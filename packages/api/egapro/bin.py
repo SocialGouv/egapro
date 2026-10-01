@@ -3,7 +3,7 @@ import sys
 import traceback
 import urllib.request
 from collections import Counter
-from datetime import date
+from datetime import date, datetime, time, timedelta
 from importlib import import_module
 from io import BytesIO
 from pathlib import Path
@@ -14,7 +14,6 @@ import yaml
 from egapro import jsonlib as json
 from openpyxl import load_workbook
 from openpyxl.worksheet._writer import ALL_TEMP_FILES
-import aioschedule as schedule
 import asyncio
 
 from egapro import (
@@ -150,6 +149,31 @@ async def run_all_exports():
             print(traceback.format_exc())
 
 
+# Exports run every day at midnight, in the container local time.
+EXPORTS_AT = time(0, 0)
+
+
+def seconds_until_next_run(now: datetime, at: time = EXPORTS_AT) -> float:
+    next_run = datetime.combine(now.date(), at)
+    if next_run <= now:
+        next_run += timedelta(days=1)
+    return (next_run - now).total_seconds()
+
+
+async def run_scheduled_exports(now=datetime.now, sleep=asyncio.sleep):
+    """Wait for the next scheduled time, then run all exports once."""
+    start = now()
+    next_run = start + timedelta(seconds=seconds_until_next_run(start))
+    # The event loop clock is not the wall clock: never run before the scheduled
+    # time, or the next iteration would schedule the same run again.
+    while (remaining := (next_run - now()).total_seconds()) > 0:
+        await sleep(remaining)
+    try:
+        await run_all_exports()
+    except Exception:
+        print(traceback.format_exc())
+
+
 @minicli.cli
 async def scheduler():
     print("Scheduler started")
@@ -164,12 +188,9 @@ async def scheduler():
         print(f"CRITICAL: Database initialization failed: {err}")
         return
 
-    schedule.every().day.at("00:00").do(run_all_exports)
-
     try:
         while True:
-            await schedule.run_pending()
-            await asyncio.sleep(1)
+            await run_scheduled_exports()
     finally:
         # Clean up database connection
         await db.terminate()
