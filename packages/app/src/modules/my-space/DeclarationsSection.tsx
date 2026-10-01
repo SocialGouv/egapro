@@ -203,7 +203,7 @@ function DeclarationsTable({
 						<table aria-labelledby={labelledById} className={styles.tableSm}>
 							<thead>
 								<tr>
-									<th scope="col">Déclaration</th>
+									<th scope="col">Démarche</th>
 									<th scope="col">Année</th>
 									<th scope="col">Étape</th>
 									<th scope="col">Échéance</th>

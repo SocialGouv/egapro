@@ -94,7 +94,7 @@ describe("DeclarationsSection", () => {
 	it("renders the table column headers including Échéance and Ressources", () => {
 		renderSection();
 		expect(
-			screen.getAllByRole("columnheader", { name: "Déclaration" }),
+			screen.getAllByRole("columnheader", { name: "Démarche" }),
 		).toHaveLength(2);
 		expect(screen.getAllByRole("columnheader", { name: "Année" })).toHaveLength(
 			2,
