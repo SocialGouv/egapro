@@ -22,15 +22,11 @@ const TEMPLATE_COLUMNS = [
 
 type TemplateKey = (typeof TEMPLATE_COLUMNS)[number]["key"];
 
-const HEADCOUNT_KEYS: ReadonlySet<string> = new Set(
-	CATEGORY_PAY_BASES.flatMap((base) => [
-		base.womenCountField,
-		base.menCountField,
-	]),
-);
-
 const HEADCOUNT_COLUMNS = TEMPLATE_COLUMNS.filter((column) =>
-	HEADCOUNT_KEYS.has(column.key),
+	CATEGORY_PAY_BASES.some(
+		(base) =>
+			base.womenCountField === column.key || base.menCountField === column.key,
+	),
 );
 
 const EXPECTED_HEADERS = TEMPLATE_COLUMNS.map((c) => c.header);

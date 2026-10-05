@@ -16,21 +16,24 @@ export function parseNumber(value: string): number {
 
 type NumericInput = string | number | null | undefined;
 
+const PLAIN_DECIMAL = /^-?\d+(\.\d+)?$/;
+
 /**
  * The reference text → number conversion: a finite number, else `null`.
  *
  * Reads canonical machine text (Postgres `numeric`, GIP file, CSV cell already
  * normalized): surrounding spaces are ignored, blank text is `null`, and the
- * WHOLE string must be a number — `"12abc"` is `null`, not 12. A French comma
- * is rejected (`"12,7"` → `null`): user input goes through
- * `normalizeDecimalInput` or `parseNumber` first. `Infinity` and `NaN`, as
- * text or as numbers, are `null`.
+ * WHOLE string must be a plain decimal — `"12abc"` is `null`, not 12, and
+ * the other notations `Number()` accepts (`"0x10"`, `"0b11"`, `"1e3"`) are
+ * `null` too. A French comma is rejected (`"12,7"` → `null`): user input goes
+ * through `normalizeDecimalInput` or `parseNumber` first. `Infinity` and `NaN`,
+ * as text or as numbers, are `null`.
  */
 export function toNullableNumber(value: NumericInput): number | null {
 	if (value === null || value === undefined) return null;
 	if (typeof value === "number") return Number.isFinite(value) ? value : null;
 	const trimmed = value.trim();
-	if (trimmed === "") return null;
+	if (!PLAIN_DECIMAL.test(trimmed)) return null;
 	const parsed = Number(trimmed);
 	return Number.isFinite(parsed) ? parsed : null;
 }
