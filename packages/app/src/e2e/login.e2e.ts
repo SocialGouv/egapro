@@ -1,9 +1,28 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
-import { HOME, LOGIN, MY_SPACE } from "~/modules/routes";
+import {
+	HOME,
+	LOGIN,
+	MY_SPACE,
+	OBSERVATORY_SEARCH,
+	observatoryCompanyHref,
+	routeWithQuery,
+} from "~/modules/routes";
+import { TEST_SIREN } from "./constants";
 import type { CompanyLocation } from "./helpers/db";
-import { getCompanyLocation, setCompanyLocation } from "./helpers/db";
+import {
+	cleanCurrentYearDeclarations,
+	getCompanyLocation,
+	seedDeclarationForYear,
+	setCompanyLocation,
+} from "./helpers/db";
+import {
+	type CampaignPublicRelease,
+	deleteCampaignDeadlines,
+	getCampaignPublicRelease,
+	setPublicDataReleaseDate,
+} from "./helpers/db-campaign";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
 
 test.describe("Login page", () => {
@@ -98,19 +117,50 @@ test.describe("Authenticated home redirect", () => {
 	});
 });
 
-test.describe("Mon espace — location row of the company banner", () => {
+test.describe("Company location row — Mon espace banner and observatory", () => {
 	test.describe.configure({ mode: "serial" });
 
 	const SEEDED_ADDRESS = "12 RUE DE LA PAIX 75002 PARIS";
+	const STREET_ONLY_ADDRESS = "12 RUE DE LA DEMO";
+	// Far below every year another spec pins, so its teardown cannot collide.
+	const PUBLISHED_YEAR = 2016;
+	const NO_DEPARTMENT = {
+		departmentCode: null,
+		departmentLabel: null,
+		regionCode: null,
+		region: null,
+	};
+	const PARIS = {
+		departmentCode: "75",
+		departmentLabel: "Paris",
+		regionCode: "11",
+		region: "Île-de-France",
+	};
 
 	let baseline: CompanyLocation;
+	let releaseBaseline: CampaignPublicRelease;
 
 	test.beforeAll(async () => {
 		baseline = await getCompanyLocation();
+		releaseBaseline = await getCampaignPublicRelease(PUBLISHED_YEAR);
+		await seedDeclarationForYear(PUBLISHED_YEAR, "demarche_completed", 6);
+		await setPublicDataReleaseDate(
+			PUBLISHED_YEAR,
+			`${PUBLISHED_YEAR + 1}-03-01`,
+		);
 	});
 
 	test.afterAll(async () => {
 		await setCompanyLocation(baseline);
+		await cleanCurrentYearDeclarations(PUBLISHED_YEAR);
+		if (releaseBaseline.exists) {
+			await setPublicDataReleaseDate(
+				PUBLISHED_YEAR,
+				releaseBaseline.publicDataReleaseDate,
+			);
+		} else {
+			await deleteCampaignDeadlines(PUBLISHED_YEAR);
+		}
 	});
 
 	// The edit modal repeats SIREN and address in a <dl> of its own, so the absence
@@ -123,6 +173,31 @@ test.describe("Mon espace — location row of the company banner", () => {
 			.filter({ hasNot: page.getByText("Raison sociale :") });
 	}
 
+	async function expectObservatoryLocation(
+		page: Page,
+		searchRow: string,
+		companyPageRow = searchRow,
+	) {
+		await test.step("search result", async () => {
+			await page.goto(routeWithQuery(OBSERVATORY_SEARCH, `q=${TEST_SIREN}`));
+			const facts = page
+				.getByRole("article")
+				.filter({ hasText: TEST_SIREN })
+				.locator("p > span");
+			await expect(facts.nth(1)).toHaveText(searchRow);
+		});
+
+		await test.step("company page", async () => {
+			await page.goto(observatoryCompanyHref(TEST_SIREN));
+			await expect(
+				page
+					.locator("p")
+					.filter({ hasText: "SIREN :" })
+					.locator(":scope > span"),
+			).toHaveText([`SIREN : ${TEST_SIREN}`, companyPageRow]);
+		});
+	}
+
 	test("shows the country of a foreign head office instead of its address", async ({
 		page,
 	}) => {
@@ -130,6 +205,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			address: SEEDED_ADDRESS,
 			countryCode: "99248",
 			countryLabel: "QATAR",
+			...NO_DEPARTMENT,
 		});
 
 		await page.goto(MY_SPACE);
@@ -146,6 +222,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			address: SEEDED_ADDRESS,
 			countryCode: "99123",
 			countryLabel: "AFRIQUE DU SUD",
+			...NO_DEPARTMENT,
 		});
 
 		await page.goto(MY_SPACE);
@@ -160,6 +237,7 @@ test.describe("Mon espace — location row of the company banner", () => {
 			address: SEEDED_ADDRESS,
 			countryCode: null,
 			countryLabel: "FRANCE",
+			...PARIS,
 		});
 
 		await page.goto(MY_SPACE);
@@ -173,25 +251,80 @@ test.describe("Mon espace — location row of the company banner", () => {
 		);
 	});
 
-	test("shows « non renseigné » when the country is unresolved", async ({
+	test("names a known foreign country alike on all three surfaces, never its bare street", async ({
 		page,
 	}) => {
 		await setCompanyLocation({
-			address: SEEDED_ADDRESS,
-			countryCode: null,
-			countryLabel: null,
+			address: STREET_ONLY_ADDRESS,
+			countryCode: "99131",
+			countryLabel: "BELGIQUE",
+			...NO_DEPARTMENT,
 		});
 
 		await page.goto(MY_SPACE);
+		await expect(locationList(page).locator("dt")).toHaveText([
+			"SIREN :",
+			"Pays :",
+		]);
+		await expect(locationList(page).locator("dd").last()).toHaveText(
+			"Belgique",
+		);
 
+		await expectObservatoryLocation(page, "Pays : Belgique");
+		await expect(page.getByText(STREET_ONLY_ADDRESS)).toHaveCount(0);
+	});
+
+	test("shows « inconnu » on all three surfaces when the country is unresolved", async ({
+		page,
+	}) => {
+		await setCompanyLocation({
+			address: STREET_ONLY_ADDRESS,
+			countryCode: null,
+			countryLabel: null,
+			...NO_DEPARTMENT,
+		});
+
+		await page.goto(MY_SPACE);
 		await expect(locationList(page).locator("dt")).toHaveText([
 			"SIREN :",
 			"Pays :",
 		]);
 		await expect(locationList(page).locator("dd")).toHaveText([
 			"130 025 265",
-			"non renseigné",
+			"inconnu",
 		]);
+
+		await expectObservatoryLocation(page, "Pays : inconnu");
+		await expect(page.getByText(STREET_ONLY_ADDRESS)).toHaveCount(0);
+		await expect(
+			page.locator('script[type="application/ld+json"]'),
+		).not.toContainText("addressCountry");
+	});
+
+	test("reads a company with no country but a French département as French", async ({
+		page,
+	}) => {
+		await setCompanyLocation({
+			address: SEEDED_ADDRESS,
+			countryCode: null,
+			countryLabel: null,
+			...PARIS,
+		});
+
+		await page.goto(MY_SPACE);
+		await expect(locationList(page).locator("dt")).toHaveText([
+			"SIREN :",
+			"Adresse :",
+		]);
+		await expect(locationList(page).locator("dd").last()).toHaveText(
+			"12 Rue de la Paix 75002 Paris",
+		);
+
+		await expectObservatoryLocation(
+			page,
+			"Adresse : Paris, Île-de-France",
+			`Adresse : ${SEEDED_ADDRESS}`,
+		);
 	});
 });
 
