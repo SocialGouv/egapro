@@ -10,7 +10,7 @@ type CampaignData = {
 	declarationDeadline: string;
 };
 
-const { upsertMutate, upsertState, queryState, invalidateCampaign } =
+const { upsertMutate, upsertState, queryState, invalidateCampaign, refetch } =
 	vi.hoisted(() => ({
 		upsertMutate: vi.fn(),
 		upsertState: { isPending: false } as {
@@ -21,10 +21,12 @@ const { upsertMutate, upsertState, queryState, invalidateCampaign } =
 			) => Promise<void> | void;
 			onError?: (err: { message: string }) => void;
 		},
-		queryState: { dataByYear: {}, isLoading: false } as {
+		queryState: { dataByYear: {}, isLoading: false, isError: false } as {
 			dataByYear: Record<number, unknown>;
 			isLoading: boolean;
+			isError: boolean;
 		},
+		refetch: vi.fn().mockResolvedValue(undefined),
 		invalidateCampaign: vi.fn().mockResolvedValue(undefined),
 	}));
 
@@ -35,6 +37,8 @@ vi.mock("~/trpc/react", () => ({
 				useQuery: (input: { year: number }) => ({
 					data: queryState.dataByYear[input.year],
 					isLoading: queryState.isLoading,
+					isError: queryState.isError,
+					refetch,
 				}),
 				invalidate: invalidateCampaign,
 			},
@@ -94,6 +98,8 @@ describe("RepresentationCampaignForm", () => {
 		invalidateCampaign.mockClear();
 		upsertState.isPending = false;
 		queryState.isLoading = false;
+		queryState.isError = false;
+		refetch.mockClear();
 		queryState.dataByYear = {
 			2026: storedCampaign,
 			2027: defaultCampaign,
@@ -264,6 +270,24 @@ describe("RepresentationCampaignForm", () => {
 		queryState.dataByYear = {};
 		render(<RepresentationCampaignForm year={2026} />);
 		expect(screen.getByRole("button", { name: /enregistrer/i })).toBeDisabled();
+	});
+
+	it("blocks any submission and offers a retry when the initial load fails", async () => {
+		queryState.isError = true;
+		queryState.dataByYear = {};
+		render(<RepresentationCampaignForm year={2026} />);
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/n'ont pas pu être chargées/i,
+		);
+		const save = screen.getByRole("button", { name: /enregistrer/i });
+		expect(save).toBeDisabled();
+		fireEvent.submit(save.closest("form") as HTMLFormElement);
+		await Promise.resolve();
+		expect(upsertMutate).not.toHaveBeenCalled();
+
+		await userEvent.click(screen.getByRole("button", { name: /réessayer/i }));
+		expect(refetch).toHaveBeenCalledTimes(1);
 	});
 
 	it("disables the submit button and shows progress while saving", async () => {

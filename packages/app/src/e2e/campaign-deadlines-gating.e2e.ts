@@ -143,7 +143,7 @@ async function saveDeadlinesThroughAdmin(
 		await save.click();
 		await expect(
 			page.getByText(
-				"L'échéance de modification de la deuxième déclaration doit être postérieure à celle de la première.",
+				"L'échéance de la seconde déclaration (actions correctives) doit être postérieure à l'échéance de déclaration.",
 			),
 		).toBeVisible();
 

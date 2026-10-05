@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-import { SettingsDateField } from "./SettingsFields";
+import {
+	SettingsDateField,
+	SettingsFormFooter,
+	type SettingsFormStatus,
+	SettingsLoadError,
+} from "./SettingsFields";
 import {
 	type RepresentationCampaignFormInput,
 	representationCampaignFormSchema,
@@ -29,7 +34,7 @@ const FIELD_LABELS: Record<DateFieldKey, string> = {
 };
 
 export function RepresentationCampaignForm({ year }: Props) {
-	const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+	const [status, setStatus] = useState<SettingsFormStatus>("idle");
 	const [serverError, setServerError] = useState<string | null>(null);
 
 	const utils = api.useUtils();
@@ -68,6 +73,7 @@ export function RepresentationCampaignForm({ year }: Props) {
 	});
 
 	const onSubmit = form.handleSubmit((values) => {
+		if (!campaignQuery.data) return;
 		setStatus("idle");
 		mutation.mutate(values);
 	});
@@ -80,6 +86,10 @@ export function RepresentationCampaignForm({ year }: Props) {
 				type="hidden"
 				{...form.register("year", { valueAsNumber: true })}
 			/>
+
+			{campaignQuery.isError && !campaignQuery.data && (
+				<SettingsLoadError onRetry={() => void campaignQuery.refetch()} />
+			)}
 
 			<div className="fr-p-3w fr-background-alt--grey">
 				{isDefault && (
@@ -108,32 +118,13 @@ export function RepresentationCampaignForm({ year }: Props) {
 				</fieldset>
 			</div>
 
-			{status === "success" && (
-				<div
-					aria-atomic="true"
-					aria-live="polite"
-					className="fr-alert fr-alert--success fr-alert--sm fr-mt-2w"
-				>
-					<p>Campagne représentation équilibrée enregistrée pour {year}.</p>
-				</div>
-			)}
-			{status === "error" && serverError && (
-				<div className="fr-alert fr-alert--error fr-mt-2w" role="alert">
-					<p>{serverError}</p>
-				</div>
-			)}
-
-			<ul className="fr-btns-group fr-btns-group--inline-sm fr-mt-2w">
-				<li>
-					<button
-						className="fr-btn"
-						disabled={mutation.isPending || campaignQuery.isLoading}
-						type="submit"
-					>
-						{mutation.isPending ? "Enregistrement…" : "Enregistrer"}
-					</button>
-				</li>
-			</ul>
+			<SettingsFormFooter
+				isPending={mutation.isPending}
+				serverError={serverError}
+				status={status}
+				submitDisabled={!campaignQuery.data}
+				successMessage={`Campagne représentation équilibrée enregistrée pour ${year}.`}
+			/>
 		</form>
 	);
 }

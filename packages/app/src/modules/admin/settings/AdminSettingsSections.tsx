@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import { FIRST_DECLARATION_YEAR, getCurrentYear } from "~/modules/domain";
 import { api } from "~/trpc/react";
 
 import { CommonCalendarForm } from "./CommonCalendarForm";
 import { LockTimeoutForm } from "./LockTimeoutForm";
 import { RemunerationDeadlinesForm } from "./RemunerationDeadlinesForm";
 import { RepresentationCampaignForm } from "./RepresentationCampaignForm";
+import { buildYearOptions } from "./yearOptions";
 
 type Props = {
 	initialYear: number;
@@ -102,19 +102,4 @@ export function AdminSettingsSections({
 			</section>
 		</>
 	);
-}
-
-function buildYearOptions(
-	configuredYears: readonly number[],
-): Array<{ year: number; label: string }> {
-	const max = getCurrentYear() + 10;
-	const configured = new Set(configuredYears);
-	const years: Array<{ year: number; label: string }> = [];
-	for (let y = FIRST_DECLARATION_YEAR; y <= max; y++) {
-		years.push({
-			year: y,
-			label: configured.has(y) ? String(y) : `${y} (non configurée)`,
-		});
-	}
-	return years;
 }

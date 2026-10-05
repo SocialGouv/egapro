@@ -40,7 +40,7 @@ export const remunerationDeadlinesFormSchema = z
 		(data) => data.decl1ModificationDeadline < data.decl2ModificationDeadline,
 		{
 			message:
-				"L'échéance de modification de la deuxième déclaration doit être postérieure à celle de la première.",
+				"L'échéance de la seconde déclaration (actions correctives) doit être postérieure à l'échéance de déclaration.",
 			path: ["decl2ModificationDeadline"],
 		},
 	);

@@ -11,7 +11,7 @@ type DeadlinesData = {
 	decl1ModificationDeadline: string;
 };
 
-const { updateMutate, updateState, queryState, invalidateDeadlines } =
+const { updateMutate, updateState, queryState, invalidateDeadlines, refetch } =
 	vi.hoisted(() => ({
 		updateMutate: vi.fn(),
 		updateState: { isPending: false } as {
@@ -22,11 +22,13 @@ const { updateMutate, updateState, queryState, invalidateDeadlines } =
 			) => Promise<void> | void;
 			onError?: (err: { message: string }) => void;
 		},
-		queryState: { data: undefined, isLoading: false } as {
+		queryState: { data: undefined, isLoading: false, isError: false } as {
 			data: DeadlinesData | undefined;
 			isLoading: boolean;
+			isError: boolean;
 		},
 		invalidateDeadlines: vi.fn().mockResolvedValue(undefined),
+		refetch: vi.fn().mockResolvedValue(undefined),
 	}));
 
 vi.mock("~/trpc/react", () => {
@@ -44,6 +46,8 @@ vi.mock("~/trpc/react", () => {
 						return {
 							data: raw ? selected.get(raw) : undefined,
 							isLoading: queryState.isLoading,
+							isError: queryState.isError,
+							refetch,
 						};
 					},
 				},
@@ -95,6 +99,8 @@ describe("CommonCalendarForm", () => {
 		updateState.isPending = false;
 		queryState.data = { ...configuredYear };
 		queryState.isLoading = false;
+		queryState.isError = false;
+		refetch.mockClear();
 	});
 
 	it("shows the GIP publication date read-only next to the two editable dates", async () => {
@@ -226,6 +232,42 @@ describe("CommonCalendarForm", () => {
 		expect(
 			screen.queryByText(/enregistrez d'abord les échéances/i),
 		).not.toBeInTheDocument();
+	});
+
+	it("blocks any submission and offers a retry when the initial load fails", async () => {
+		queryState.data = undefined;
+		queryState.isError = true;
+		render(<CommonCalendarForm year={2027} />);
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/n'ont pas pu être chargées/i,
+		);
+		const save = screen.getByRole("button", { name: /enregistrer/i });
+		expect(save).toBeDisabled();
+		fireEvent.submit(save.closest("form") as HTMLFormElement);
+		await Promise.resolve();
+		expect(updateMutate).not.toHaveBeenCalled();
+
+		await userEvent.click(screen.getByRole("button", { name: /réessayer/i }));
+		expect(refetch).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps clearing the dates possible after a successful load", async () => {
+		await renderLoaded();
+		fireEvent.change(startInput(), { target: { value: "" } });
+		fireEvent.change(releaseInput(), { target: { value: "" } });
+		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+		await waitFor(() => expect(updateMutate).toHaveBeenCalled());
+		expect(updateMutate.mock.calls[0]?.[0]).toEqual({
+			year: 2027,
+			campaignStartDate: null,
+			publicDataReleaseDate: null,
+		});
+	});
+
+	it("does not show the load error while the data is available", () => {
+		render(<CommonCalendarForm year={2027} />);
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 	});
 
 	it("disables the submit button and shows progress while saving", () => {

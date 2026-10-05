@@ -68,7 +68,7 @@ describe("remunerationDeadlinesFormSchema", () => {
 		expect(result.success).toBe(false);
 		if (!result.success) {
 			expect(result.error.issues[0]?.message).toBe(
-				"L'échéance de modification de la deuxième déclaration doit être postérieure à celle de la première.",
+				"L'échéance de la seconde déclaration (actions correctives) doit être postérieure à l'échéance de déclaration.",
 			);
 			expect(result.error.issues[0]?.path).toEqual([
 				"decl2ModificationDeadline",

@@ -31,6 +31,7 @@ const {
 	queryState,
 	invalidateDeadlines,
 	invalidateOverview,
+	refetch,
 } = vi.hoisted(() => ({
 	upsertMutate: vi.fn(),
 	upsertState: { isPending: false } as {
@@ -41,10 +42,12 @@ const {
 		) => Promise<void> | void;
 		onError?: (err: { message: string }) => void;
 	},
-	queryState: { data: undefined, isLoading: false } as {
+	queryState: { data: undefined, isLoading: false, isError: false } as {
 		data: DeadlinesData | undefined;
 		isLoading: boolean;
+		isError: boolean;
 	},
+	refetch: vi.fn().mockResolvedValue(undefined),
 	invalidateDeadlines: vi.fn().mockResolvedValue(undefined),
 	invalidateOverview: vi.fn().mockResolvedValue(undefined),
 }));
@@ -64,6 +67,8 @@ vi.mock("~/trpc/react", () => {
 						return {
 							data: raw ? selected.get(raw) : undefined,
 							isLoading: queryState.isLoading,
+							isError: queryState.isError,
+							refetch,
 						};
 					},
 				},
@@ -132,6 +137,8 @@ describe("RemunerationDeadlinesForm", () => {
 		upsertState.isPending = false;
 		queryState.data = { ...storedDeadlines };
 		queryState.isLoading = false;
+		queryState.isError = false;
+		refetch.mockClear();
 	});
 
 	it("groups the deadlines in four fieldsets following the path order", () => {
@@ -277,7 +284,7 @@ describe("RemunerationDeadlinesForm", () => {
 		await userEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
 		await waitFor(() =>
 			expect(
-				screen.getByText(/doit être postérieure à celle de la première/i),
+				screen.getByText(/doit être postérieure à l'échéance de déclaration/i),
 			).toBeInTheDocument(),
 		);
 		expect(upsertMutate).not.toHaveBeenCalled();
@@ -314,6 +321,24 @@ describe("RemunerationDeadlinesForm", () => {
 		).toHaveValue("");
 		expect(screen.getByRole("button", { name: /enregistrer/i })).toBeDisabled();
 		expect(screen.queryByText(/valeurs par défaut/i)).not.toBeInTheDocument();
+	});
+
+	it("blocks any submission and offers a retry when the initial load fails", async () => {
+		queryState.data = undefined;
+		queryState.isError = true;
+		render(<RemunerationDeadlinesForm year={2027} />);
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/n'ont pas pu être chargées/i,
+		);
+		const save = screen.getByRole("button", { name: /enregistrer/i });
+		expect(save).toBeDisabled();
+		fireEvent.submit(save.closest("form") as HTMLFormElement);
+		await Promise.resolve();
+		expect(upsertMutate).not.toHaveBeenCalled();
+
+		await userEvent.click(screen.getByRole("button", { name: /réessayer/i }));
+		expect(refetch).toHaveBeenCalledTimes(1);
 	});
 
 	it("shows a success alert and invalidates the year and the overview on success", async () => {
