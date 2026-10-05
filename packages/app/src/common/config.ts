@@ -8,9 +8,6 @@ export const config = {
   get searchRevalidate() {
     return this.env === "dev" ? 1 : 60 * 5;
   },
-  get nonce() {
-    return this.githubSha;
-  },
   githubSha: ensureNextEnvVar(process.env.NEXT_PUBLIC_GITHUB_SHA, "<githubSha>"),
   api_url: ensureNextEnvVar(process.env.NEXT_PUBLIC_API_URL, "/api"),
   get host() {

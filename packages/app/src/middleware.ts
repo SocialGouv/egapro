@@ -7,68 +7,58 @@ import { NextResponse } from "next/server";
 import { type JWT } from "next-auth/jwt";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
-const cspMiddleware: NextMiddlewareWithAuth = req => {
-  //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+/**
+ * Per-request nonce: Next.js reads it from the `Content-Security-Policy` request header and tags its
+ * own inline scripts with it, the root layout forwards `x-nonce` to react-dsfr and Matomo.
+ */
+const generateNonce = () => btoa(crypto.randomUUID());
 
-  // In dev environment, Next injects scripts for HMR, so we need to desactivate script-src.
-
-  // For trusted-types, there is a problem with the [revalidatePath bug](https://github.com/vercel/next.js/issues/49387), so we need to desactivate it in dev environment for the moment. Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
-  // const cspHeader = `
-  //   default-src 'self' https://*.gouv.fr;
-  //   connect-src 'self' https://*.gouv.fr;
-  //   font-src 'self' data: blob:;
-  //   media-src 'self' https://*.gouv.fr;
-  //   img-src 'self' data: https://*.gouv.fr;
-  //   script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${
-  //     process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
-  //   };
-  //   frame-src 'self' https://*.gouv.fr;
-  //   style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
-  //   frame-ancestors 'self' https://*.gouv.fr;
-  //   object-src 'none';
-  //   base-uri 'self' https://*.gouv.fr;
-  //   form-action 'self' https://*.gouv.fr;
-  //   block-all-mixed-content;
-  //   upgrade-insecure-requests; `;
-
-  // ${
-  //   process.env.NODE_ENV === "development"
-  //     ? ""
-  //     : `require-trusted-types-for 'script';
-  //        trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`
-  // }
-
-  const cspHeader = `
+/**
+ * Scripts must carry the request nonce: no `'unsafe-inline'`, so an injected `<script>` never runs.
+ * `'strict-dynamic'` trusts the scripts a nonced script loads (Next chunks, Matomo) and makes CSP 3
+ * browsers ignore host sources: a `https://*.gouv.fr` allowlist would trust any script served by any
+ * such host. `'self'` only remains for browsers without CSP 3. `base-uri 'self'` keeps an injected
+ * `<base>` from redirecting the nonced scripts' relative URLs to another host.
+ * Styles keep `'unsafe-inline'` because the DSFR and React set `style` attributes, which no nonce can
+ * cover. In development, Next injects `eval`-based HMR scripts, hence `'unsafe-eval'` there only.
+ */
+export const buildCspHeader = (nonce: string, isDevelopment = process.env.NODE_ENV === "development") =>
+  `
     default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' https://*.gouv.fr 'unsafe-inline'${
-      process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
-    };
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""};
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'unsafe-inline';
     worker-src 'self' blob:;
     frame-ancestors 'self' https://*.gouv.fr;
     object-src 'none';
-    base-uri 'self' https://*.gouv.fr;
+    base-uri 'self';
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
-    upgrade-insecure-requests; `;
+    upgrade-insecure-requests; `
+    // Replace newline characters and spaces
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+const cspMiddleware: NextMiddlewareWithAuth = req => {
+  // Always overwrite the request headers: Next.js reads the nonce from the inbound
+  // `Content-Security-Policy` header (`Content-Security-Policy-Report-Only` without it), a
+  // client-supplied value must never reach the renderer (GHSA-ffhc-5mcf-pf4q, nonce reflection,
+  // only fixed in Next 15.5).
+  const nonce = generateNonce();
+  const cspHeader = buildCspHeader(nonce);
+
+  // `x-nonce` is only read by the root layout: it stays on the request, the browser only needs the CSP.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.delete("Content-Security-Policy-Report-Only");
+  requestHeaders.set("Content-Security-Policy", cspHeader);
+  requestHeaders.set("x-nonce", nonce);
 
   const responseHeaders = new Headers();
-  //responseHeaders.set("x-nonce", nonce);
-  responseHeaders.set(
-    "Content-Security-Policy",
-    // Replace newline characters and spaces
-    cspHeader.replace(/\s{2,}/g, " ").trim(),
-  );
-
-  const requestHeaders = new Headers(req.headers);
-  responseHeaders.forEach((value, key) => {
-    requestHeaders.set(key, value);
-  });
+  responseHeaders.set("Content-Security-Policy", cspHeader);
 
   return NextResponse.next({
     headers: responseHeaders,
@@ -78,11 +68,12 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
   });
 };
 
-// Never ship credentials to Sentry.
-const SENSITIVE_HEADERS = ["authorization", "cookie", "proxy-authorization", "set-cookie", "x-api-key", "api-key"];
+// Allowlist of the request headers reported to Sentry: no credential (`cookie`, `authorization`, ...) and no
+// client IP (`x-forwarded-for`, `x-real-ip`) ever leaves the platform, whatever the proxies add.
+const REPORTED_HEADERS = ["accept", "accept-language", "content-type", "host", "user-agent"];
 
 const safeHeaders = (headers: Headers) =>
-  Object.fromEntries([...headers.entries()].filter(([key]) => !SENSITIVE_HEADERS.includes(key.toLowerCase())));
+  Object.fromEntries([...headers.entries()].filter(([key]) => REPORTED_HEADERS.includes(key.toLowerCase())));
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   try {

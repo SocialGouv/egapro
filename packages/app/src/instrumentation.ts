@@ -55,6 +55,10 @@ export const withServerAction = <T>(
   );
 };
 
+/**
+ * Next.js instrumentation hook: the Sentry SDK (v9+) no longer injects `sentry.server.config.ts` /
+ * `sentry.edge.config.ts` itself, each runtime loads its own configuration here.
+ */
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // Next 14 only logs an error thrown here and keeps serving 500s: exit so the deployment fails visibly.
@@ -65,85 +69,10 @@ export async function register() {
       process.exit(1);
     }
 
-    const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
-    const IS_PRODUCTION = ENVIRONMENT === "production";
-
-    Sentry.init({
-      dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-      environment: ENVIRONMENT,
-      sampleRate: 0.1,
-      tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-      debug: false,
-      // enableTracing: true,
-      enableTracing: false, // temp disable trying to reduce race condition error bubbling up
-
-      beforeSend(event) {
-        if (IS_PRODUCTION && !event.exception) return null;
-
-        const ignoreErrors = [
-          "ResizeObserver loop limit exceeded",
-          "Network request failed",
-          /^Loading chunk .* failed/,
-          /^Loading CSS chunk .* failed/,
-          /^ECONNREFUSED/,
-          /^ECONNRESET/,
-          /^ETIMEDOUT/,
-          "Database connection timeout",
-        ];
-
-        if (
-          event.exception &&
-          ignoreErrors.some(pattern => {
-            if (typeof pattern === "string") {
-              return event.exception?.values?.[0]?.value?.includes(pattern);
-            }
-            return pattern.test(event.exception?.values?.[0]?.value || "");
-          })
-        ) {
-          return null;
-        }
-
-        return event;
-      },
-    });
+    await import("../sentry.server.config");
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {
-    const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "dev";
-    const IS_PRODUCTION = ENVIRONMENT === "production";
-
-    Sentry.init({
-      dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-      environment: ENVIRONMENT,
-      enableTracing: false,
-      tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-      sampleRate: 0.1,
-      debug: false,
-
-      beforeSend(event) {
-        if (IS_PRODUCTION && !event.exception) return null;
-
-        const ignoreErrors = [
-          "ResizeObserver loop limit exceeded",
-          "Network request failed",
-          /^Loading chunk .* failed/,
-          /^Loading CSS chunk .* failed/,
-        ];
-
-        if (
-          event.exception &&
-          ignoreErrors.some(pattern => {
-            if (typeof pattern === "string") {
-              return event.exception?.values?.[0]?.value?.includes(pattern);
-            }
-            return pattern.test(event.exception?.values?.[0]?.value || "");
-          })
-        ) {
-          return null;
-        }
-
-        return event;
-      },
-    });
+    await import("../sentry.edge.config");
   }
 }

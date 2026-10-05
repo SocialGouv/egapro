@@ -34,7 +34,8 @@ _dev_defaults = {"SECRET": SECRET, "DBPASS": DBPASS}
 
 # Deployments whose credentials may be the development ones (review apps). Any
 # other flavour, including an unset one, is checked: fail closed.
-DEV_FLAVOURS = {"dev"}
+# Lowercase on purpose: init() reads every uppercase global from an EGAPRO_* env var.
+dev_flavours = {"dev"}
 
 
 def is_production():
@@ -44,7 +45,7 @@ def is_production():
 
 def check():
     """Refuse to run a deployed (non dev) instance with the development credentials."""
-    if not is_production() or FLAVOUR in DEV_FLAVOURS:
+    if not is_production() or FLAVOUR in dev_flavours:
         return
     insecure = [
         key for key, default in _dev_defaults.items()
@@ -53,6 +54,22 @@ def check():
     if insecure:
         names = ", ".join(f"EGAPRO_{key}" for key in insecure)
         raise RuntimeError(f"Insecure configuration, please define: {names}")
+
+
+# Lowercase too, or EGAPRO_TRUE_VALUES would redefine what "true" means.
+true_values = {"1", "true", "yes", "on"}
+false_values = {"", "0", "false", "no", "off"}
+
+
+def parse_bool(value):
+    """Parse an EGAPRO_* boolean env var. `bool("false")` is True: be explicit, and refuse
+    anything that is neither clearly true nor clearly false rather than guess."""
+    normalized = str(value).strip().lower()
+    if normalized in true_values:
+        return True
+    if normalized in false_values:
+        return False
+    raise ValueError(f"Invalid boolean value {value!r}, expected one of: 1, true, yes, on, 0, false, no, off")
 
 
 def allowed_origins():
@@ -65,7 +82,9 @@ def init():
         if key.isupper():
             env_key = "EGAPRO_" + key
             typ = type(value)
-            if typ in (list, tuple, set):
+            if typ is bool:
+                typ = parse_bool
+            elif typ in (list, tuple, set):
                 real_type, typ = typ, lambda x: real_type(x.split(","))
             if env_key in os.environ:
                 globals()[key] = typ(os.environ[env_key])

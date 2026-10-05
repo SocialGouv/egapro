@@ -92,30 +92,29 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
-const { withSentryConfig } = require("@sentry/nextjs");
+const { withSentryConfig } = require("@sentry/nextjs/config");
 
-module.exports = withSentryConfig(
-  nextConfig,
-  {
-    // Sentry webpack plugin options
-    org: process.env.SENTRY_ORG,
-    project: process.env.SENTRY_PROJECT,
-    url: process.env.SENTRY_URL,
-    authToken: process.env.SENTRY_AUTH_TOKEN,
+module.exports = withSentryConfig(nextConfig, {
+  // Sentry build plugin options
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  sentryUrl: process.env.SENTRY_URL,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 
-    // Source maps configuration
-    sourcemaps: {
-      assets: ".next/**/*.{js,map}",
-      ignore: ["node_modules/**/*"],
-      rewrite: true,
-      stripPrefix: ["webpack://_N_E/", "webpack://", "app://"],
-      urlPrefix: "app:///_next",
-    },
+  // Source maps: uploaded to Sentry, hidden from the bundles (see webpack devtool above) and deleted
+  // from the build output once uploaded (see also the Dockerfile).
+  sourcemaps: {
+    assets: ".next/**/*.{js,map}",
+    ignore: ["node_modules/**/*"],
+    deleteSourcemapsAfterUpload: true,
+  },
+  widenClientFileUpload: true,
 
-    // Debug and release configuration
-    silent: false,
-    debug: true,
-    release: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
+  // Release configuration (the Sentry instance is self-hosted: no build telemetry to sentry.io)
+  telemetry: false,
+  silent: false,
+  release: {
+    name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     setCommits: {
       auto: true,
@@ -123,29 +122,19 @@ module.exports = withSentryConfig(
     },
     deploy: {
       env: process.env.NEXT_PUBLIC_EGAPRO_ENV || "development",
-      dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     },
-    injectBuildInformation: true,
   },
-  {
-    // Sentry Next.js SDK options
-    // Note: tunnelRoute option doesn't work with self-hosted instances
-    // Using custom tunnel implementation instead
-    tunnelRoute: false,
-    widenClientFileUpload: true,
-    hideSourceMaps: true,
-    disableLogger: true,
 
-    // Enable component names and release injection
-    includeNames: true,
-    release: {
-      inject: true,
-      name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
-    },
+  // Note: tunnelRoute option doesn't work with self-hosted instances, the custom
+  // /api/monitoring/envelope tunnel is used instead (see sentry.client.config.ts).
+  tunnelRoute: false,
 
-    // Server instrumentation options
+  webpack: {
     autoInstrumentServerFunctions: true,
     autoInstrumentMiddleware: true,
-    automaticVercelMonitors: true,
+    // Strip the SDK debug logger from the bundles (was `disableLogger` before v11).
+    treeshake: {
+      removeDebugLogging: true,
+    },
   },
-);
+});

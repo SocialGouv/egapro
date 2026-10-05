@@ -2,12 +2,16 @@
  * @jest-environment node
  */
 import { companiesUtils } from "@api/core-domain/infra/companies-store";
+import { ownershipRepo } from "@api/core-domain/repo";
 import { verify } from "jsonwebtoken";
 
 import { POST } from "../route";
 
 jest.mock("@api/core-domain/infra/companies-store", () => ({
   companiesUtils: { hashCompanies: jest.fn() },
+}));
+jest.mock("@api/core-domain/repo", () => ({
+  ownershipRepo: { addSirens: jest.fn(), getAllSirenByEmail: jest.fn(), removeSirens: jest.fn() },
 }));
 jest.mock("@common/config", () => ({
   config: {
@@ -21,6 +25,10 @@ jest.mock("@common/config", () => ({
 }));
 
 const mockedHashCompanies = companiesUtils.hashCompanies as jest.Mock;
+const mockedOwnershipRepo = ownershipRepo as unknown as Record<
+  "addSirens" | "getAllSirenByEmail" | "removeSirens",
+  jest.Mock
+>;
 
 // The route reads the raw env var, not `config.env` (which defaults to "dev").
 const setEnv = (env: string | undefined) => {
@@ -40,6 +48,17 @@ describe("test-login route", () => {
     jest.clearAllMocks();
     setEnv("dev");
     mockedHashCompanies.mockResolvedValue("companies-hash");
+    mockedOwnershipRepo.getAllSirenByEmail.mockResolvedValue([]);
+  });
+
+  it("makes the test account owner of its SIREN, as a ProConnect sign-in does", async () => {
+    await post({ "x-forwarded-proto": "https" });
+
+    // Without it, the cleanup route between specs (declarations of the owned SIRENs) deletes nothing.
+    expect(mockedOwnershipRepo.addSirens).toHaveBeenCalledTimes(1);
+    const [email, sirens] = mockedOwnershipRepo.addSirens.mock.calls[0];
+    expect(email.getValue()).toBe("test@fia1.fr");
+    expect(sirens).toEqual(["130025265"]);
   });
 
   it("establishes a session for the fixed ProConnect test account and sets the secure cookie behind the proxy", async () => {
@@ -95,6 +114,7 @@ describe("test-login route", () => {
       await expect(res.json()).resolves.toEqual({ error: "Route désactivée" });
       expect(res.headers.get("set-cookie")).toBeNull();
       expect(mockedHashCompanies).not.toHaveBeenCalled();
+      expect(mockedOwnershipRepo.addSirens).not.toHaveBeenCalled();
     },
   );
 });

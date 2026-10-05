@@ -74,3 +74,53 @@ def test_check_lets_review_apps_run_with_development_secrets(monkeypatch):
     monkeypatch.setattr("egapro.config.SECRET", config._dev_defaults["SECRET"])
     monkeypatch.setattr("egapro.config.DBPASS", config._dev_defaults["DBPASS"])
     config.check()
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("1", True),
+        ("True", True),
+        ("true", True),
+        (" yes ", True),
+        ("on", True),
+        ("", False),
+        ("0", False),
+        ("False", False),
+        ("false", False),
+        ("no", False),
+        ("off", False),
+    ],
+)
+def test_parse_bool(value, expected):
+    assert config.parse_bool(value) is expected
+
+
+@pytest.mark.parametrize("value", ["maybe", "2", "nope"])
+def test_parse_bool_refuses_ambiguous_values(value):
+    with pytest.raises(ValueError):
+        config.parse_bool(value)
+
+
+def test_init_parses_boolean_env_vars(monkeypatch):
+    # init() rewrites the module globals: register them so they are restored after the test.
+    for key in ("SEND_EMAILS", "SMTP_SSL", "READONLY"):
+        monkeypatch.setattr(config, key, getattr(config, key))
+    # bool("false") is True: the config must not read "false" as enabled.
+    monkeypatch.setenv("EGAPRO_SEND_EMAILS", "false")
+    monkeypatch.setenv("EGAPRO_SMTP_SSL", "1")
+    monkeypatch.setenv("EGAPRO_READONLY", "")
+    config.init()
+    assert config.SEND_EMAILS is False
+    assert config.SMTP_SSL is True
+    assert config.READONLY is False
+
+
+@pytest.mark.parametrize("env_key", ["EGAPRO_TRUE_VALUES", "EGAPRO_DEV_FLAVOURS"])
+def test_init_only_reads_settings_from_env(monkeypatch, env_key):
+    # The parser vocabulary and the review-app flavours are not settings: no env var redefines them.
+    monkeypatch.setenv(env_key, "maybe,preprod")
+    config.init()
+    with pytest.raises(ValueError):
+        config.parse_bool("maybe")
+    assert config.dev_flavours == {"dev"}
