@@ -17,7 +17,10 @@ import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
-import { toCompanyInsertValues } from "~/server/db/companyInsert";
+import {
+	toCompanyInsertValues,
+	toCompanyRefreshValues,
+} from "~/server/db/companyInsert";
 import {
 	adminImpersonationEvents,
 	companies,
@@ -612,7 +615,10 @@ export const authConfig = {
 							.values(companyValues)
 							.onConflictDoUpdate({
 								target: companies.siren,
-								set: { ...companyValues, updatedAt: new Date() },
+								set: {
+									...toCompanyRefreshValues(companyValues),
+									updatedAt: new Date(),
+								},
 							});
 
 						await tx

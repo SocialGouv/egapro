@@ -312,6 +312,15 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Registry country (tri-state: France, foreign, unknown)
+export type { RegistryCountry } from "./shared/registryCountry";
+export {
+	FRANCE_COUNTRY,
+	headOfficeCountry,
+	isUnknownCountry,
+	legalUnitCountry,
+	UNKNOWN_COUNTRY,
+} from "./shared/registryCountry";
 // Representation equilibrium (art. D. 1142-19)
 export type {
 	ExecutivesCount,
