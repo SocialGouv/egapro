@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { DISPLAY_DECIMALS, truncateDecimals } from "../shared/decimal";
+import {
+	DISPLAY_DECIMALS,
+	RATIO_DECIMALS,
+	truncateDecimals,
+	truncateRatio,
+} from "../shared/decimal";
 
 describe("DISPLAY_DECIMALS", () => {
 	it("shows two decimals to the user", () => {
@@ -50,5 +55,22 @@ describe("truncateDecimals", () => {
 		expect(truncateDecimals(0.0887 * 10_000, 0)).toBe(887);
 		expect(truncateDecimals(12.98, 1)).toBe(12.9);
 		expect(truncateDecimals(12.98, 0)).toBe(12);
+	});
+});
+
+describe("truncateRatio", () => {
+	it("stores a ratio at two more decimals than the displayed percentage", () => {
+		expect(RATIO_DECIMALS).toBe(DISPLAY_DECIMALS + 2);
+	});
+
+	it("truncates to 4 decimals, so the stored ratio matches the displayed percentage", () => {
+		expect(truncateRatio(18 / 35)).toBe(0.5142);
+		expect(truncateRatio(2 / 3)).toBe(0.6666);
+		expect(truncateRatio(0.29)).toBe(0.29);
+	});
+
+	it("truncates negative ratios toward zero without producing -0", () => {
+		expect(truncateRatio(-0.03168)).toBe(-0.0316);
+		expect(Object.is(truncateRatio(-0.00001), 0)).toBe(true);
 	});
 });
