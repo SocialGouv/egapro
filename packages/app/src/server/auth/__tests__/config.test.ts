@@ -39,6 +39,7 @@ vi.mock("~/server/services/weez", () => ({
 	fetchCompanyBySiren: vi.fn(),
 }));
 
+import { fetchCompanyBySiren } from "~/server/services/weez";
 import { authConfig } from "../config";
 
 const { callbacks } = authConfig;
@@ -251,6 +252,82 @@ describe("auth config", () => {
 			await signIn({ firstName: null, lastName: null }, namelessProconnectUser);
 
 			expect(userTableUpdates()).toHaveLength(0);
+		});
+	});
+
+	describe("jwt callback — company refresh", () => {
+		const REGISTRY_COMPANY = {
+			name: "Société Démo",
+			address: "1 RUE DE LA PAIX, 75002 PARIS",
+			city: "PARIS",
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			regionCode: "11",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
+			workforce: 120,
+			statutDiffusion: "O",
+		};
+
+		function armCompanyUpsert() {
+			const onConflictDoUpdate = vi.fn().mockResolvedValue(undefined);
+			const values = vi.fn().mockReturnValue({
+				onConflictDoUpdate,
+				onConflictDoNothing: vi.fn().mockResolvedValue(undefined),
+			});
+			mockTransaction.mockImplementation((fn) =>
+				fn({ insert: vi.fn().mockReturnValue({ values }) }),
+			);
+			return { values, onConflictDoUpdate };
+		}
+
+		function signInWithSiret() {
+			return signIn({ firstName: "Alice", lastName: "Martin" }, {
+				...proconnectUser,
+				siret: "12345678900012",
+			} as User);
+		}
+
+		it("leaves the stored country out of the refresh when the head office fails", async () => {
+			vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+				...REGISTRY_COMPANY,
+				countryCode: null,
+				countryLabel: null,
+			});
+			const { values, onConflictDoUpdate } = armCompanyUpsert();
+
+			await signInWithSiret();
+
+			const { set } = onConflictDoUpdate.mock.calls[0]?.[0] as {
+				set: Record<string, unknown>;
+			};
+			expect(set).not.toHaveProperty("countryCode");
+			expect(set).not.toHaveProperty("countryLabel");
+			expect(set).toMatchObject({ name: "Société Démo", city: "PARIS" });
+			expect(values).toHaveBeenCalledWith(
+				expect.objectContaining({ countryCode: null, countryLabel: null }),
+			);
+		});
+
+		it("writes France over the stored country when the registry returns a postal code", async () => {
+			vi.mocked(fetchCompanyBySiren).mockResolvedValue({
+				...REGISTRY_COMPANY,
+				countryCode: null,
+				countryLabel: "FRANCE",
+			});
+			const { onConflictDoUpdate } = armCompanyUpsert();
+
+			await signInWithSiret();
+
+			expect(onConflictDoUpdate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					set: expect.objectContaining({
+						countryCode: null,
+						countryLabel: "FRANCE",
+					}),
+				}),
+			);
 		});
 	});
 
