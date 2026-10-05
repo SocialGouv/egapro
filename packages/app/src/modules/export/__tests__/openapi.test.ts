@@ -60,6 +60,18 @@ describe("openApiSpec", () => {
 		expect(Object.keys(declarationSchema.properties)[0]).toBe("id");
 	});
 
+	it("documents the initial transmission date as Date_transmission (#4303)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		expect(Object.keys(declarationSchema.properties)).toContain(
+			"Date_transmission",
+		);
+		expect(Object.keys(declarationSchema.properties)).not.toContain(
+			"Date_soumission",
+		);
+	});
+
 	it("should define 200, 400, and 500 responses", () => {
 		const responses =
 			openApiSpec.paths["/api/v1/export/declarations"].get.responses;

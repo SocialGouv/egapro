@@ -16,7 +16,7 @@ function buildEvent(
 describe("getHistoryEventDisplay", () => {
 	it("submit: returns non-empty label and recap page link", () => {
 		const result = getHistoryEventDisplay(buildEvent("submit"));
-		expect(result.label).toBe("Soumission de la déclaration");
+		expect(result.label).toBe("Transmission de la déclaration");
 		expect(result.pageLabel).toBe("Récapitulatif de votre déclaration");
 		expect(result.pageHref).toBe("/declaration-remuneration/recapitulatif");
 	});
@@ -34,7 +34,7 @@ describe("getHistoryEventDisplay", () => {
 		const result = getHistoryEventDisplay(
 			buildEvent("second_declaration_submit"),
 		);
-		expect(result.label).toBe("Soumission de la seconde déclaration");
+		expect(result.label).toBe("Transmission de la seconde déclaration");
 		expect(result.pageLabel).toBe("Parcours de mise en conformité");
 		expect(result.pageHref).toBe(
 			"/declaration-remuneration/parcours-conformite",

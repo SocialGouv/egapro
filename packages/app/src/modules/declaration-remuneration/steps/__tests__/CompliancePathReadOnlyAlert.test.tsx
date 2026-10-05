@@ -7,7 +7,10 @@ import type { CompliancePathReadOnlyReason } from "../compliancePath/constants";
 const CASES: Array<[CompliancePathReadOnlyReason, RegExp]> = [
 	["demarche_completed", /Votre démarche est finalisée/],
 	["cse_opinion_submitted", /L'avis du CSE a déjà été transmis/],
-	["second_declaration_submitted", /La seconde déclaration a déjà été soumise/],
+	[
+		"second_declaration_submitted",
+		/La seconde déclaration a déjà été transmise/,
+	],
 	[
 		"joint_evaluation_submitted",
 		/Le rapport d'évaluation conjointe a déjà été transmis/,

@@ -1118,7 +1118,7 @@ describe("assembleDeclaration", () => {
 		expect(result.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
-				Libelle_statut: "Soumission de la déclaration",
+				Libelle_statut: "Transmission de la déclaration",
 				Date: "2027-03-15T10:00:00.123Z",
 			},
 			{
@@ -1189,7 +1189,7 @@ describe("assembleDeclaration", () => {
 
 		expect(result.Historique_statuts).toHaveLength(5);
 		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
-			"Soumission de la déclaration",
+			"Transmission de la déclaration",
 		);
 		expect(result.Historique_statuts[1]?.Libelle_statut).toBe(
 			"Choix du parcours — Évaluation conjointe",

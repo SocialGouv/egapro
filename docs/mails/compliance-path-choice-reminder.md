@@ -11,7 +11,7 @@
 
 ## Destinataire
 
-`declarations.declarantId → app_user.email` — celui qui a soumis la 1ère ou la 2e déclaration sans avoir encore choisi de parcours.
+`declarations.declarantId → app_user.email` — celui qui a transmis la 1ère ou la 2e déclaration sans avoir encore choisi de parcours.
 
 ## Éligibilité (SQL — couvre Round 1 ET Round 2)
 

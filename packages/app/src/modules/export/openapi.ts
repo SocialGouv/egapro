@@ -422,7 +422,7 @@ const declarationSchema = {
 				Parcours_de_conformite_requis: {
 					type: "boolean",
 					description:
-						"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la soumission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
+						"Prédicat statique : indique si l'entreprise est soumise au parcours de conformité (effectif ≥ 100, indicateur G calculé, écart ≥ 5 %). Calculé à la transmission et figé — ne change jamais au fil de l'avancement de la démarche. Ne pas confondre avec « Statut » qui, lui, évolue à chaque transition FSM.",
 				},
 				Parcours_de_conformite_revision_requis: {
 					type: "boolean",
@@ -483,10 +483,10 @@ const declarationSchema = {
 		},
 		Date_creation: { type: ["string", "null"], format: "date-time" },
 		Date_modification: { type: ["string", "null"], format: "date-time" },
-		Date_soumission: {
+		Date_transmission: {
 			type: ["string", "null"],
 			format: "date-time",
-			description: "Date de soumission initiale de la déclaration.",
+			description: "Date de transmission initiale de la déclaration.",
 		},
 		Date_parcours_apres_declaration_1: {
 			type: ["string", "null"],
@@ -501,12 +501,12 @@ const declarationSchema = {
 		Date_seconde_declaration: {
 			type: ["string", "null"],
 			format: "date-time",
-			description: "Date de soumission de la seconde déclaration.",
+			description: "Date de transmission de la seconde déclaration.",
 		},
 		Date_evaluation_conjointe: {
 			type: ["string", "null"],
 			format: "date-time",
-			description: "Date de soumission du rapport d'évaluation conjointe.",
+			description: "Date de transmission du rapport d'évaluation conjointe.",
 		},
 		Date_avis_CSE: {
 			type: ["string", "null"],
@@ -541,7 +541,7 @@ const declarationSchema = {
 					Libelle_statut: {
 						type: "string",
 						description:
-							"Libellé FR lisible de l'événement (ex : « Soumission de la déclaration », « Choix du parcours — Actions correctives »).",
+							"Libellé FR lisible de l'événement (ex : « Transmission de la déclaration », « Choix du parcours — Actions correctives »).",
 					},
 					Date: {
 						type: "string",
@@ -589,7 +589,7 @@ const declarationSchema = {
 				Statut: {
 					type: "boolean",
 					description:
-						"`true` si la seconde déclaration a été soumise, `false` sinon.",
+						"`true` si la seconde déclaration a été transmise, `false` sinon.",
 				},
 				Periode_reference_debut: { type: ["string", "null"], format: "date" },
 				Periode_reference_fin: { type: ["string", "null"], format: "date" },
@@ -768,7 +768,7 @@ const representationSchema = {
 		Date_déclaration: {
 			type: ["string", "null"],
 			format: "date-time",
-			description: "Date de soumission de la déclaration.",
+			description: "Date de transmission de la déclaration.",
 		},
 	},
 } as const;
@@ -848,9 +848,9 @@ export const openApiSpec = {
 			get: {
 				operationId: "getDeclarations",
 				summary:
-					"Lister les déclarations par date de soumission ou d'annulation",
+					"Lister les déclarations par date de transmission ou d'annulation",
 				description:
-					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives soumises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS. Version majeure 3.0.0 : rupture de compatibilité — les données déduites du parcours (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous l'objet `Parcours`, sans doublon déprécié à la racine. L'URL reste inchangée (`/api/v1/export/declarations`, aucun `/api/v2`) ; la mise en service doit être coordonnée avec l'équipe SUIT avant déploiement.",
+					"Retourne les déclarations dont la date de mise à jour (`Date_modification`, pour les déclarations actives transmises) ou la date d'annulation (`Date_annulation`, pour les déclarations annulées) est comprise dans l'intervalle [`date_begin`, `date_end`[. Inclut les indicateurs A–G, la seconde déclaration, les avis CSE et le champ `Date_annulation` (renseigné si la déclaration est annulée). Les libellés des champs reprennent ceux du fichier GIP MDS. Version majeure 3.0.0 : rupture de compatibilité — les données déduites du parcours (année, effectif, statut, flags d'obligation, version des règles) sont regroupées sous l'objet `Parcours`, sans doublon déprécié à la racine. L'URL reste inchangée (`/api/v1/export/declarations`, aucun `/api/v2`) ; la mise en service doit être coordonnée avec l'équipe SUIT avant déploiement.",
 				parameters: [
 					{
 						name: "date_begin",
@@ -975,7 +975,7 @@ export const openApiSpec = {
 				operationId: "getRepresentations",
 				summary: "Lister les déclarations de représentation équilibrée",
 				description:
-					"Retourne les déclarations de représentation équilibrée F/H (art. D. 1142-19) soumises dont la date de soumission (`Date_déclaration`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Identité et localisation complètes, y compris pour les entreprises non diffusibles (SUIT est un destinataire de contrôle authentifié).",
+					"Retourne les déclarations de représentation équilibrée F/H (art. D. 1142-19) transmises dont la date de transmission (`Date_déclaration`) est comprise dans l'intervalle [`date_begin`, `date_end`[. Identité et localisation complètes, y compris pour les entreprises non diffusibles (SUIT est un destinataire de contrôle authentifié).",
 				parameters: [
 					{
 						name: "date_begin",

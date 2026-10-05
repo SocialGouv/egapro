@@ -43,10 +43,10 @@ AND NOT EXISTS (SELECT 1 FROM app_cse_opinion o WHERE o.declaration_id = d.id)
 |---|---|---|
 | `compliance` | `first_declaration_path_choice IS NULL AND second_declaration_path_choice IS NULL` | MG_B (100-149 sans 7e) + MG_C (150+ conforme G<5 %) — pas de parcours Phase 2 |
 | `justify_oct` / `justify_dec` | `first_declaration_path_choice = 'justify' OR second_declaration_path_choice = 'justify'` | MG_J1 + MG_J2 — parcours Justifier (R1 ou R2) |
-| `corrective` | `first_declaration_path_choice = 'corrective_action' AND status = 'awaiting_cse_opinion'` | MG_A — Actions correctives, 2e déclaration soumise + écarts corrigés (FSM transitionné vers `awaiting_cse_opinion`) |
+| `corrective` | `first_declaration_path_choice = 'corrective_action' AND status = 'awaiting_cse_opinion'` | MG_A — Actions correctives, 2e déclaration transmise + écarts corrigés (FSM transitionné vers `awaiting_cse_opinion`) |
 | `joint_eval` | `(first OR second path = 'joint_evaluation') AND EXISTS(app_file type='joint_evaluation')` | MG_E2 — rapport d'éval. conjointe déjà déposé (sinon le FSM attend encore le rapport, pas l'avis CSE) |
 
-> **Pourquoi pas de filtre paramétrique uniforme** : un filtre OR sur first/second path est trop permissif pour `compliance` (matcherait aussi les Phase 2). Un filtre simple `path = corrective_action` est trop permissif pour `corrective` (matcherait avant que la 2e décl ne soit soumise). Idem `joint_evaluation` doit checker l'existence du file. Le switch explicite par variant garantit la sémantique flowchart.
+> **Pourquoi pas de filtre paramétrique uniforme** : un filtre OR sur first/second path est trop permissif pour `compliance` (matcherait aussi les Phase 2). Un filtre simple `path = corrective_action` est trop permissif pour `corrective` (matcherait avant que la 2e décl ne soit transmise). Idem `joint_evaluation` doit checker l'existence du file. Le switch explicite par variant garantit la sémantique flowchart.
 
 ## Sujets (par variant)
 

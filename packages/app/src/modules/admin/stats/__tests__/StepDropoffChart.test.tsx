@@ -67,7 +67,7 @@ describe("StepDropoffChart", () => {
 			screen.getByText(/Taux d'abandon par phase de la démarche déclarative/i),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/wizard ou phase post-soumission/i),
+			screen.getByText(/wizard ou phase post-transmission/i),
 		).toBeInTheDocument();
 	});
 

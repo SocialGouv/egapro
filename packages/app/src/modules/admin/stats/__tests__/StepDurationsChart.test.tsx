@@ -63,10 +63,10 @@ describe("StepDurationsChart", () => {
 		).toBeInTheDocument();
 	});
 
-	it("mentions the post-soumission phase in the figcaption", () => {
+	it("mentions the post-transmission phase in the figcaption", () => {
 		render(<StepDurationsChart rows={POPULATED_ROWS} />);
 		expect(
-			screen.getByText(/jalon de la démarche post-soumission/i),
+			screen.getByText(/jalon de la démarche post-transmission/i),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("group", {

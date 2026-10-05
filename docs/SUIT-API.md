@@ -1,6 +1,6 @@
 # API EGAPRO — Équipe SUIT
 
-API REST sécurisée pour récupérer les déclarations soumises et les fichiers (avis CSE, évaluations conjointes).
+API REST sécurisée pour récupérer les déclarations transmises et les fichiers (avis CSE, évaluations conjointes).
 
 L'authentification et le quota (rate limit) sont appliqués par la passerelle EGAPRO (APISIX) en amont de l'application. Côté client, il suffit donc d'un en-tête `Authorization: Bearer <clé>`.
 
@@ -62,7 +62,7 @@ Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Histori
 
 ### Cycle de vie : les 8 états et leurs transitions
 
-Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa soumission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
+Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa transmission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
 
 | État source | Action | État cible | Condition |
 | --- | --- | --- | --- |
@@ -127,7 +127,7 @@ Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` 
 
 ### Flags d'obligation figés vs statut évolutif
 
-`Parcours.Parcours_de_conformite_requis`, `Parcours_de_conformite_revision_requis`, `Avis_CSE_requis` et `Indicateur_G_requis` sont des prédicats **calculés à la soumission et figés** : ils ne changent jamais au fil de l'avancement de la démarche.
+`Parcours.Parcours_de_conformite_requis`, `Parcours_de_conformite_revision_requis`, `Avis_CSE_requis` et `Indicateur_G_requis` sont des prédicats **calculés à la transmission et figés** : ils ne changent jamais au fil de l'avancement de la démarche.
 
 `Parcours.Statut`, à l'inverse, **évolue** à chaque transition FSM. Confondre les deux fait croire à tort qu'une obligation a disparu alors que la démarche a simplement avancé.
 
