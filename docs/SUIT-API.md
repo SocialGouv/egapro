@@ -139,6 +139,12 @@ Une déclaration annulée **remonte dans l'export**, sur la fenêtre de sa date 
 
 Le cycle de vie décrit ci-dessus (FSM, `Prochaines_etapes_possibles`) ne concerne **que** le parcours rémunération, exposé par `/export/declarations`. Il ne s'applique pas à `/export/representations`, dont le payload est indépendant et inchangé.
 
+## Rupture de compatibilité — version 4.0.0
+
+La version `4.0.0` renomme la clé `Date_soumission` en **`Date_transmission`** (même valeur : date de première transmission de la déclaration, ISO 8601), et les libellés `Libelle_statut` de `Historique_statuts` passent de « Soumission de la déclaration » à « Transmission de la déclaration » (idem pour la seconde déclaration). L'URL reste inchangée : `/api/v1/export/declarations`.
+
+⚠️ La mise en service doit être **coordonnée avec l'équipe SUIT avant déploiement**.
+
 ## Rupture de compatibilité — version 3.0.0
 
 La version `3.0.0` de l'API constitue une **rupture de compatibilité** : les données déduites du parcours (année, effectif, statut, flags d'obligation, version des règles) ont quitté la racine du payload pour l'objet `Parcours`, sans doublon déprécié. L'URL reste inchangée : `/api/v1/export/declarations` — aucun `/api/v2` n'est introduit.
