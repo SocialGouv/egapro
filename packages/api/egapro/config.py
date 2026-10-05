@@ -55,6 +55,21 @@ def check():
         raise RuntimeError(f"Insecure configuration, please define: {names}")
 
 
+TRUE_VALUES = {"1", "true", "yes", "on"}
+FALSE_VALUES = {"", "0", "false", "no", "off"}
+
+
+def parse_bool(value):
+    """Parse an EGAPRO_* boolean env var. `bool("false")` is True: be explicit, and refuse
+    anything that is neither clearly true nor clearly false rather than guess."""
+    normalized = str(value).strip().lower()
+    if normalized in TRUE_VALUES:
+        return True
+    if normalized in FALSE_VALUES:
+        return False
+    raise ValueError(f"Invalid boolean value {value!r}, expected one of: 1, true, yes, on, 0, false, no, off")
+
+
 def allowed_origins():
     """Explicit origins allowed by EGAPRO_ALLOW_ORIGIN (comma separated), "*" excluded."""
     return [o.strip().rstrip("/") for o in ALLOW_ORIGIN.split(",") if o.strip() not in ("", "*")]
@@ -65,7 +80,9 @@ def init():
         if key.isupper():
             env_key = "EGAPRO_" + key
             typ = type(value)
-            if typ in (list, tuple, set):
+            if typ is bool:
+                typ = parse_bool
+            elif typ in (list, tuple, set):
                 real_type, typ = typ, lambda x: real_type(x.split(","))
             if env_key in os.environ:
                 globals()[key] = typ(os.environ[env_key])
