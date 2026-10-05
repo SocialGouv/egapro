@@ -84,7 +84,39 @@ describe("PercentagePairFields — auto-complement (S5)", () => {
 		await userEvent.type(women, "35,5");
 
 		expect(women).toHaveValue("35,5");
-		expect(men).toHaveValue("64.5");
+		expect(men).toHaveValue("64,5");
+	});
+
+	it.each([
+		"33,3",
+		"33.3",
+	])("writes the complement of %s with a decimal comma, free of float noise", async (typed) => {
+		render(<Harness />);
+		const { women, men } = fields();
+
+		await userEvent.type(women, typed);
+
+		expect(women).toHaveValue(typed);
+		expect(men).toHaveValue("66,7");
+	});
+});
+
+describe("PercentagePairFields — aller-retour saisie ↔ valeur enregistrée", () => {
+	it.each([
+		"33,3",
+		"33.3",
+	])("stores 33.3 and 66.7 from %s, and redisplays them with a comma", async (typed) => {
+		render(<Harness />);
+		const { women, men } = fields();
+
+		await userEvent.type(women, typed);
+
+		const storedWomen = parsePercentInput(women.value);
+		const storedMen = parsePercentInput(men.value);
+		expect(storedWomen).toBe(33.3);
+		expect(storedMen).toBe(66.7);
+		expect(formatPercentInput(storedWomen)).toBe("33,3");
+		expect(formatPercentInput(storedMen)).toBe(men.value);
 	});
 });
 
@@ -128,7 +160,7 @@ describe("PercentagePairFields — input filtering", () => {
 		await userEvent.type(women, "12.34");
 
 		expect(women).toHaveValue("12.3");
-		expect(men).toHaveValue("87.7");
+		expect(men).toHaveValue("87,7");
 	});
 
 	it("refuses a fourth integer digit", async () => {
@@ -324,6 +356,17 @@ describe("PercentagePairFields — live regions", () => {
 		);
 	});
 
+	it("announces a decimal counterpart with a decimal comma", async () => {
+		render(<Harness />);
+		const { women } = fields();
+
+		await userEvent.type(women, "33,3");
+
+		expect(liveRegions().announcement).toHaveTextContent(
+			"Hommes : 66,7 % renseigné automatiquement.",
+		);
+	});
+
 	it("names the counterpart with its custom label", async () => {
 		render(<Harness menLabel="Hommes cadres" womenLabel="Femmes cadres" />);
 
@@ -348,8 +391,11 @@ describe("PercentagePairFields — live regions", () => {
 describe("complementPercentage", () => {
 	it.each([
 		["35", "65"],
-		["35,5", "64.5"],
-		["33.3", "66.7"],
+		["35,5", "64,5"],
+		["33.3", "66,7"],
+		["33,3", "66,7"],
+		["99.9", "0,1"],
+		["0,1", "99,9"],
 		["0", "100"],
 		["100", "0"],
 	])("complements %s to %s", (raw, expected) => {
@@ -409,6 +455,11 @@ describe("formatPercentInput", () => {
 	it("stringifies a stored percent and blanks undefined", () => {
 		expect(formatPercentInput(40)).toBe("40");
 		expect(formatPercentInput(undefined)).toBe("");
+	});
+
+	it("writes a decimal percent with a decimal comma", () => {
+		expect(formatPercentInput(66.7)).toBe("66,7");
+		expect(formatPercentInput(0.1)).toBe("0,1");
 	});
 });
 
