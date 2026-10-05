@@ -339,6 +339,45 @@ sequenceDiagram
 
 L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
+### 5.7 Provenance de `ADMIN_EMAILS`
+
+`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) décide qui reçoit le rôle admin : synchronisation bidirectionnelle à chaque connexion, l'ajout promeut et le retrait rétrograde. Deux listes distinctes, chacune scellée avec le certificat de son propre cluster :
+
+| Environnements | Manifeste(s) | Scope sealed-secret |
+|---|---|---|
+| Review apps, `alpha`, `rgaa-persist`, `perf-persist`, preprod (`beta`) | `.kontinuous/env/dev/templates/admin.sealed-secret.yaml` et `.kontinuous/env/preprod/templates/admin.sealed-secret.yaml` (même chiffré dans les deux : même cluster, même contrôleur) | `cluster-wide` — les namespaces de review app sont dynamiques (un par branche), un scope `namespace-wide`/`strict` ne se déchiffrerait que dans un seul |
+| Prod (tags `v*`) | `.kontinuous/env/prod/templates/admin.sealed-secret.yaml` | `namespace-wide`, `namespace: egapro` — cluster de prod, contrôleur et certificat distincts |
+
+Un sealed-secret **ne se complète pas** : il n'existe pas d'opération d'ajout, on re-scelle toujours la liste entière. La prise en compte a lieu à la **prochaine connexion** de l'utilisateur concerné.
+
+Pour ajouter ou retirer un admin :
+
+1. **dev/preprod** :
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro-alpha` sur le cluster `ovh-dev` (`kubectl --context ovh-dev -n egapro-alpha get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
+   - modifier la liste (ajout/retrait d'un email) ;
+   - re-sceller la liste complète, en lisant depuis stdin pour ne jamais l'écrire en clair sur disque :
+     ```bash
+     curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
+     printf '%s' "$LIST" | kubeseal --raw --scope cluster-wide \
+       --cert /tmp/cert-dev.pem --name admin \
+       --from-file=/dev/stdin
+     ```
+   - remplacer `encryptedData.ADMIN_EMAILS` dans **les deux** fichiers (`env/dev` et `env/preprod`) par le chiffré obtenu.
+   - tant que le sealed-secret n'a pas été déployé sur `alpha`, la liste vit encore dans la ConfigMap `admin` de ce namespace : la relire avec `kubectl --context ovh-dev -n egapro-alpha get configmap admin -o jsonpath='{.data.ADMIN_EMAILS}'`.
+2. **prod** :
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro` sur le cluster `ovh-prod` (`kubectl --context ovh-prod -n egapro get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
+   - modifier la liste ;
+   - re-sceller la liste complète :
+     ```bash
+     curl -s https://kubeseal.ovh-prod.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-prod.pem
+     printf '%s' "$LIST" | kubeseal --raw --scope namespace-wide --namespace egapro \
+       --cert /tmp/cert-prod.pem --name admin \
+       --from-file=/dev/stdin
+     ```
+   - remplacer `encryptedData.ADMIN_EMAILS` dans `.kontinuous/env/prod/templates/admin.sealed-secret.yaml`.
+
+Le Secret `admin` du namespace `egapro` sur `ovh-prod` n'existe qu'à partir de la première release V2 qui embarque le sealed-secret correspondant — avant ce tag, la lecture préalable de l'étape prod n'a rien à lire.
+
 ---
 
 ## 6. API tRPC
