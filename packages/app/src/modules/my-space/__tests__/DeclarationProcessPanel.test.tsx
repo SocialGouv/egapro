@@ -140,7 +140,15 @@ describe("DeclarationProcessPanel", () => {
 				"href",
 				"/declaration-remuneration?siren=532847196",
 			);
-			expect(cta).toHaveTextContent(/^Commencer$/);
+		});
+
+		it("names the CTA explicitly for RGAA 6.1.1 by appending a visually hidden suffix to the visible label (#4137)", () => {
+			const { dialog } = renderPanel("start");
+			const cta = dialog.querySelector("a.fr-btn") as HTMLElement;
+			expect(cta).toHaveAccessibleName("Commencer la déclaration");
+			expect(cta.querySelector(".fr-sr-only")).toHaveTextContent(
+				"la déclaration",
+			);
 		});
 
 		it("describes the CTA link by the panel title", () => {
@@ -225,12 +233,24 @@ describe("DeclarationProcessPanel", () => {
 				panel.queryByText(/Vous devez au préalable disposer/),
 			).not.toBeInTheDocument();
 		});
+	});
 
-		it('renders "Continuer" CTA', () => {
-			const { dialog } = renderPanel("compliance");
+	describe.each<PanelVariant>([
+		"compliance_choice",
+		"compliance",
+		"evaluation",
+		"cse",
+	])("CTA accessible name for the %s variant (RGAA 6.1.1, #4137)", (variant) => {
+		it('names the "Continuer" CTA explicitly by appending a visually hidden suffix', () => {
+			const { dialog } = renderPanel(variant);
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
-			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Continuer");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(cta).toHaveAccessibleName(
+				"Continuer la démarche des indicateurs de rémunération",
+			);
+			expect(cta.querySelector(".fr-sr-only")).toHaveTextContent(
+				"la démarche des indicateurs de rémunération",
+			);
 		});
 	});
 
@@ -356,10 +376,11 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it('renders "Voir la déclaration" CTA', () => {
+		it('renders "Voir la déclaration" CTA whose accessible name equals its visible label', () => {
 			const { dialog } = renderPanel("closed");
-			const footerCta = dialog.querySelector(".footer a.fr-btn");
-			expect(footerCta).toHaveTextContent("Voir la déclaration");
+			const footerCta = dialog.querySelector(".footer a.fr-btn") as HTMLElement;
+			expect(footerCta).toHaveAccessibleName("Voir la déclaration");
+			expect(footerCta.querySelector(".fr-sr-only")).toBeNull();
 		});
 
 		it("exposes a Modifier link for the CSE opinion step", () => {
@@ -421,9 +442,23 @@ describe("DeclarationProcessPanel", () => {
 				lockHolder,
 			});
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
-			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent("Consulter en lecture seule");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(cta).toHaveAccessibleName(
+				"Consulter en lecture seule la démarche des indicateurs de rémunération",
+			);
 			expect(cta).not.toHaveTextContent("Commencer");
+		});
+
+		it("appends the visually hidden suffix after the full read-only label (RGAA 6.1.1, #4137)", () => {
+			const { dialog } = renderPanel("start", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(cta.querySelector(".fr-sr-only")).toHaveTextContent(
+				"la démarche des indicateurs de rémunération",
+			);
 		});
 
 		it("keeps the CTA href pointing to the declaration for read-only access", () => {
@@ -460,8 +495,8 @@ describe("DeclarationProcessPanel", () => {
 		it("keeps the regular CTA label", () => {
 			const { dialog } = renderPanel("start", { lockedByOther: false });
 			const ctaLinks = dialog.querySelectorAll("a.fr-btn");
-			const cta = ctaLinks[ctaLinks.length - 1];
-			expect(cta).toHaveTextContent(/^Commencer$/);
+			const cta = ctaLinks[ctaLinks.length - 1] as HTMLElement;
+			expect(cta).toHaveAccessibleName("Commencer la déclaration");
 			expect(cta).not.toHaveTextContent("Consulter en lecture seule");
 		});
 	});

@@ -20,6 +20,9 @@ import {
 export const DECLARATION_PROCESS_PANEL_ID = "declaration-process-panel";
 const PANEL_TITLE_ID = "declaration-process-panel-title";
 
+// No leading space: the accname algorithm trims each node's own text before concatenating it, so the separator has to be its own sibling text node.
+const DEMARCHE_SUFFIX = "la démarche des indicateurs de rémunération";
+
 export type PanelVariant =
 	| "start"
 	| "compliance_choice"
@@ -140,9 +143,7 @@ export function DeclarationProcessPanel({
 								className="fr-btn"
 								href={ctaHref}
 							>
-								{lockedByOther
-									? "Consulter en lecture seule"
-									: getCtaLabel(variant)}
+								<CtaLabel lockedByOther={lockedByOther} variant={variant} />
 							</a>
 						</div>
 					</div>
@@ -156,6 +157,43 @@ function getCtaLabel(variant: PanelVariant): string {
 	if (variant === "closed") return "Voir la déclaration";
 	if (variant === "start") return "Commencer";
 	return "Continuer";
+}
+
+function getCtaAccessibleSuffix(variant: PanelVariant): string | null {
+	if (variant === "closed") return null;
+	if (variant === "start") return "la déclaration";
+	return DEMARCHE_SUFFIX;
+}
+
+function CtaLabel({
+	lockedByOther,
+	variant,
+}: {
+	lockedByOther: boolean;
+	variant: PanelVariant;
+}) {
+	if (lockedByOther) {
+		// Suffix trails the full visible label (not split mid-phrase) so it stays a contiguous prefix of the accessible name — WCAG 2.5.3 Label in Name.
+		return (
+			<>
+				Consulter en lecture seule{" "}
+				<span className="fr-sr-only">{DEMARCHE_SUFFIX}</span>
+			</>
+		);
+	}
+
+	const suffix = getCtaAccessibleSuffix(variant);
+	return (
+		<>
+			{getCtaLabel(variant)}
+			{suffix && (
+				<>
+					{" "}
+					<span className="fr-sr-only">{suffix}</span>
+				</>
+			)}
+		</>
+	);
 }
 
 function PanelHeader({
