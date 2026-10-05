@@ -75,6 +75,8 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
+// Display decimals — 2, truncated toward zero, for every percentage and average shown to the user
+export { DISPLAY_DECIMALS, truncateDecimals } from "./shared/decimal";
 // Declaration display context
 export type {
 	CseOpinionResolvedInput,
@@ -190,7 +192,6 @@ export {
 // Display formatting (%, €, units)
 export {
 	computePercentage,
-	computeProportion,
 	formatCount,
 	formatCurrency,
 	formatDays,
@@ -207,7 +208,6 @@ export {
 	formatPointsAbs,
 	formatPrecisePercentage,
 	formatRatioAsPercentage,
-	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
 	formatTime,
@@ -238,6 +238,7 @@ export {
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
 	floorWorkforce,
+	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,

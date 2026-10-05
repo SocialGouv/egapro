@@ -59,11 +59,11 @@ describe("variablePayProportion", () => {
 describe("formatVariablePayProportion", () => {
 	// The exact figures reported in issue #3940.
 	it("formats the ticket's women row", () => {
-		expect(formatVariablePayProportion("14", 35)).toBe("40,0 %");
+		expect(formatVariablePayProportion("14", 35)).toBe("40,00 %");
 	});
 
 	it("formats the ticket's men row", () => {
-		expect(formatVariablePayProportion("18", 35)).toBe("51,4 %");
+		expect(formatVariablePayProportion("18", 35)).toBe("51,42 %");
 	});
 
 	it("returns the empty placeholder when the proportion is unavailable", () => {

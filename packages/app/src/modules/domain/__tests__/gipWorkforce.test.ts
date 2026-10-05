@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "../shared/constants";
+import { MISSING_VALUE } from "../shared/format";
 import {
 	floorWorkforce,
+	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,
@@ -125,5 +127,42 @@ describe("floorWorkforce", () => {
 		// break their contract. Guards against merging the two helpers.
 		expect(floorWorkforce(37)).toBe(37);
 		expect(formatWorkforceForUser(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+	});
+});
+
+describe("formatWorkforceEma", () => {
+	it("keeps two decimals of the GIP average, truncated rather than rounded", () => {
+		expect(formatWorkforceEma(49.876)).toBe("49,87");
+		expect(formatWorkforceEma(99.999)).toBe("99,99");
+	});
+
+	it("never rounds a headcount up across a threshold", () => {
+		expect(formatWorkforceEma(COMPANY_SIZE_VOLUNTARY_MAX - 0.001)).toBe(
+			"49,99",
+		);
+	});
+
+	it("writes a whole average without a decimal part", () => {
+		expect(formatWorkforceEma(250)).toBe("250");
+		expect(formatWorkforceEma(250.004)).toBe("250");
+	});
+
+	it("drops a trailing zero, like the other figures of the observatory", () => {
+		expect(formatWorkforceEma(49.8)).toBe("49,8");
+	});
+
+	it("shows the exact figure even inside the voluntary tier", () => {
+		// The public observatory is not Mon espace: it shows the GIP average as is,
+		// where formatWorkforceForUser answers with the bracket.
+		expect(formatWorkforceEma(37.5)).toBe("37,5");
+		expect(formatWorkforceForUser(37.5)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+	});
+
+	it("groups thousands like any other count", () => {
+		expect(formatWorkforceEma(2256.456)).toBe("2\u202f256,45");
+	});
+
+	it("marks a missing headcount rather than printing a zero", () => {
+		expect(formatWorkforceEma(null)).toBe(MISSING_VALUE);
 	});
 });

@@ -19,6 +19,7 @@
 
 import type { GapDirection, GapLevel } from "../types";
 import { GAP_ALERT_THRESHOLD, GAP_DISPLAY_DECIMALS } from "./constants";
+import { truncateDecimals } from "./decimal";
 import { parseNumber } from "./number";
 
 /** Compute signed gap ratio: (men - women) / men. Returns null if invalid or men is 0. Range: typically -1..1.
@@ -164,17 +165,9 @@ const PERCENT_DECIMAL_SHIFT = 2;
 
 export const GAP_RATIO_DECIMALS = GAP_DISPLAY_DECIMALS + PERCENT_DECIMAL_SHIFT;
 
-/** Absorbs IEEE 754 noise (`0.0887 * 10000` → `886.9999…`) so truncation never drops a real digit. */
-const GAP_RATIO_NORMALISATION_PRECISION = 12;
-
 /** Single truncation rule shared by display, persistence and export, so they never disagree. */
 export function truncateGapRatio(ratio: number): number {
-	const scale = 10 ** GAP_RATIO_DECIMALS;
-	const truncated =
-		Math.trunc(
-			Number((ratio * scale).toPrecision(GAP_RATIO_NORMALISATION_PRECISION)),
-		) / scale;
-	return truncated === 0 ? 0 : truncated;
+	return truncateDecimals(ratio, GAP_RATIO_DECIMALS);
 }
 
 /** Sum base and variable compensation. Returns null only when both inputs are invalid. */
