@@ -1,4 +1,9 @@
-import { percentageOf } from "~/modules/domain";
+import {
+	ADDRESS_ROW_LABEL,
+	type CompanyLocationRow,
+	companyLocationRow,
+	percentageOf,
+} from "~/modules/domain";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api/constants";
 
 /** Share of `part` in `total`, on a 0-100 scale, or null when undecidable. */
@@ -10,32 +15,59 @@ export function shareOf(
 	return percentageOf(part, total);
 }
 
-export type CompanyLocation = { label: string; value: string };
-
-/**
- * Where a company sits, as both screens of the observatory name it. A company
- * registered abroad has no French département.
- */
-export function companyLocation(company: {
+type SearchLocationInput = {
 	countryCode: string | null;
 	countryLabel: string | null;
 	departmentLabel: string | null;
 	region: string | null;
-}): CompanyLocation | null {
+};
+
+const NON_DIFFUSIBLE_ROW: CompanyLocationRow = {
+	label: ADDRESS_ROW_LABEL,
+	value: NON_DIFFUSIBLE_LABEL,
+};
+
+function isMasked(...values: (string | null)[]): boolean {
+	return values.includes(NON_DIFFUSIBLE_LABEL);
+}
+
+function departmentAndRegion(company: SearchLocationInput): string {
+	return [company.departmentLabel, company.region].filter(Boolean).join(", ");
+}
+
+export function companyLocation(
+	company: SearchLocationInput,
+): CompanyLocationRow | null {
+	if (isMasked(company.countryLabel, company.departmentLabel, company.region)) {
+		return NON_DIFFUSIBLE_ROW;
+	}
+	return companyLocationRow({
+		countryCode: company.countryCode,
+		countryLabel: company.countryLabel,
+		departmentLabel: company.departmentLabel,
+		domesticAddress: departmentAndRegion(company),
+	});
+}
+
+export function companyPageLocation(
+	company: SearchLocationInput & { address: string | null },
+): CompanyLocationRow | null {
 	if (
-		company.countryLabel === NON_DIFFUSIBLE_LABEL ||
-		company.departmentLabel === NON_DIFFUSIBLE_LABEL ||
-		company.region === NON_DIFFUSIBLE_LABEL
+		isMasked(
+			company.address,
+			company.countryLabel,
+			company.departmentLabel,
+			company.region,
+		)
 	) {
-		return { label: "Adresse", value: NON_DIFFUSIBLE_LABEL };
+		return NON_DIFFUSIBLE_ROW;
 	}
-	if (company.countryCode && company.countryLabel) {
-		return { label: "Pays", value: company.countryLabel };
-	}
-	const value = [company.departmentLabel, company.region]
-		.filter(Boolean)
-		.join(", ");
-	return value ? { label: "Adresse", value } : null;
+	return companyLocationRow({
+		countryCode: company.countryCode,
+		countryLabel: company.countryLabel,
+		departmentLabel: company.departmentLabel,
+		domesticAddress: company.address || departmentAndRegion(company),
+	});
 }
 
 export function formatNaf(

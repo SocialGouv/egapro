@@ -43,6 +43,15 @@ export {
 	readCampaignYearOverride,
 	writeCampaignYearOverride,
 } from "./shared/campaignClock";
+// Company location display
+export type { CompanyLocationRow } from "./shared/companyLocationDisplay";
+export {
+	ADDRESS_ROW_LABEL,
+	COUNTRY_ROW_LABEL,
+	companyLocationRow,
+	formatInseeTitleCase,
+	UNKNOWN_COUNTRY_VALUE,
+} from "./shared/companyLocationDisplay";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
