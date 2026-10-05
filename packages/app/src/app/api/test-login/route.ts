@@ -1,4 +1,6 @@
 import { companiesUtils } from "@api/core-domain/infra/companies-store";
+import { ownershipRepo } from "@api/core-domain/repo";
+import { SyncOwnership } from "@api/core-domain/useCases/SyncOwnership";
 import { areTestRoutesEnabled } from "@api/utils/testRoutes";
 import { config } from "@common/config";
 import { type Algorithm, sign } from "jsonwebtoken";
@@ -23,6 +25,11 @@ export async function POST(request: NextRequest) {
   if (!areTestRoutesEnabled()) {
     return NextResponse.json({ error: "Route désactivée" }, { status: 404 });
   }
+
+  // Same ownership sync as a ProConnect sign-in: without it the test account owns no SIREN, and
+  // /api/clean-test-user/declaration, which only deletes the declarations of owned SIRENs, leaves the
+  // previous spec's declaration behind.
+  await new SyncOwnership(ownershipRepo).execute({ email: TEST_EMAIL, sirens: [TEST_SIREN], username: TEST_EMAIL });
 
   // Seed Redis with the single active company; the session callback rehydrates
   // `companies` from Redis using this hash (mono-entreprise: length 1).
