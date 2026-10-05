@@ -14,10 +14,13 @@ import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 const generateNonce = () => btoa(crypto.randomUUID());
 
 /**
- * Scripts must carry the request nonce or come from a trusted host: no `'unsafe-inline'`, so an
- * injected `<script>` never runs. Styles keep `'unsafe-inline'` because the DSFR and React set
- * `style` attributes, which no nonce can cover.
- * In development, Next injects `eval`-based HMR scripts, hence `'unsafe-eval'` there only.
+ * Scripts must carry the request nonce: no `'unsafe-inline'`, so an injected `<script>` never runs.
+ * `'strict-dynamic'` trusts the scripts a nonced script loads (Next chunks, Matomo) and makes CSP 3
+ * browsers ignore host sources: a `https://*.gouv.fr` allowlist would trust any script served by any
+ * such host. `'self'` only remains for browsers without CSP 3. `base-uri 'self'` keeps an injected
+ * `<base>` from redirecting the nonced scripts' relative URLs to another host.
+ * Styles keep `'unsafe-inline'` because the DSFR and React set `style` attributes, which no nonce can
+ * cover. In development, Next injects `eval`-based HMR scripts, hence `'unsafe-eval'` there only.
  */
 export const buildCspHeader = (nonce: string, isDevelopment = process.env.NODE_ENV === "development") =>
   `
@@ -26,13 +29,13 @@ export const buildCspHeader = (nonce: string, isDevelopment = process.env.NODE_E
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' https://*.gouv.fr 'nonce-${nonce}'${isDevelopment ? " 'unsafe-eval'" : ""};
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""};
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'unsafe-inline';
     worker-src 'self' blob:;
     frame-ancestors 'self' https://*.gouv.fr;
     object-src 'none';
-    base-uri 'self' https://*.gouv.fr;
+    base-uri 'self';
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
     upgrade-insecure-requests; `
@@ -42,18 +45,20 @@ export const buildCspHeader = (nonce: string, isDevelopment = process.env.NODE_E
 
 const cspMiddleware: NextMiddlewareWithAuth = req => {
   // Always overwrite the request headers: Next.js reads the nonce from the inbound
-  // `Content-Security-Policy` header, a client-supplied value must never reach the renderer
-  // (GHSA-ffhc-5mcf-pf4q, nonce reflection, only fixed in Next 15.5).
+  // `Content-Security-Policy` header (`Content-Security-Policy-Report-Only` without it), a
+  // client-supplied value must never reach the renderer (GHSA-ffhc-5mcf-pf4q, nonce reflection,
+  // only fixed in Next 15.5).
   const nonce = generateNonce();
+  const cspHeader = buildCspHeader(nonce);
+
+  // `x-nonce` is only read by the root layout: it stays on the request, the browser only needs the CSP.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.delete("Content-Security-Policy-Report-Only");
+  requestHeaders.set("Content-Security-Policy", cspHeader);
+  requestHeaders.set("x-nonce", nonce);
 
   const responseHeaders = new Headers();
-  responseHeaders.set("x-nonce", nonce);
-  responseHeaders.set("Content-Security-Policy", buildCspHeader(nonce));
-
-  const requestHeaders = new Headers(req.headers);
-  responseHeaders.forEach((value, key) => {
-    requestHeaders.set(key, value);
-  });
+  responseHeaders.set("Content-Security-Policy", cspHeader);
 
   return NextResponse.next({
     headers: responseHeaders,
@@ -63,11 +68,12 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
   });
 };
 
-// Never ship credentials to Sentry.
-const SENSITIVE_HEADERS = ["authorization", "cookie", "proxy-authorization", "set-cookie", "x-api-key", "api-key"];
+// Allowlist of the request headers reported to Sentry: no credential (`cookie`, `authorization`, ...) and no
+// client IP (`x-forwarded-for`, `x-real-ip`) ever leaves the platform, whatever the proxies add.
+const REPORTED_HEADERS = ["accept", "accept-language", "content-type", "host", "user-agent"];
 
 const safeHeaders = (headers: Headers) =>
-  Object.fromEntries([...headers.entries()].filter(([key]) => !SENSITIVE_HEADERS.includes(key.toLowerCase())));
+  Object.fromEntries([...headers.entries()].filter(([key]) => REPORTED_HEADERS.includes(key.toLowerCase())));
 
 const nextMiddleware: NextMiddlewareWithAuth = async (req, event) => {
   try {

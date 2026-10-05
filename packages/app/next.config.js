@@ -110,10 +110,9 @@ module.exports = withSentryConfig(nextConfig, {
   },
   widenClientFileUpload: true,
 
-  // Debug and release configuration (the Sentry instance is self-hosted: no build telemetry to sentry.io)
+  // Release configuration (the Sentry instance is self-hosted: no build telemetry to sentry.io)
   telemetry: false,
   silent: false,
-  debug: true,
   release: {
     name: process.env.SENTRY_RELEASE || process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
     dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
