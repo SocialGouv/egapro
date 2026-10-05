@@ -243,8 +243,8 @@ describe("getPathChoiceRound1Deadline", () => {
 });
 
 describe("selectPathChoiceDeadline", () => {
-	const ROUND_1_DEADLINE = new Date("2027-05-15T00:00:00");
-	const ROUND_2_DEADLINE = new Date("2027-11-20T00:00:00");
+	const ROUND_1_DEADLINE = new Date("2027-05-15T00:00:00Z");
+	const ROUND_2_DEADLINE = new Date("2027-11-20T00:00:00Z");
 	// Values that differ from the derived defaults prove the selector reads the given deadlines instead of recomputing them.
 	const deadlines = {
 		...getDefaultCampaignDeadlines(2027),
@@ -262,8 +262,8 @@ describe("selectPathChoiceDeadline", () => {
 });
 
 describe("selectJointEvaluationDeadline", () => {
-	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00");
-	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00");
+	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00Z");
+	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00Z");
 	const deadlines = {
 		...getDefaultCampaignDeadlines(2027),
 		decl1JointEvaluationDeadline: ROUND_1_DEADLINE,
@@ -478,22 +478,22 @@ describe("isRepresentationCampaignOpen", () => {
 });
 
 describe("isDeadlinePassed", () => {
-	const deadline = new Date("2026-06-01T00:00:00");
+	const deadline = new Date("2026-06-01T00:00:00Z");
 
 	it("returns false when now is before the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59"))).toBe(
+		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59Z"))).toBe(
 			false,
 		);
 	});
 
 	it("returns false when now equals the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00"))).toBe(
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00Z"))).toBe(
 			false,
 		);
 	});
 
 	it("returns true when now is after the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01"))).toBe(
+		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01Z"))).toBe(
 			true,
 		);
 	});
