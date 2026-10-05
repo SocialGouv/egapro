@@ -76,7 +76,12 @@ export {
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
 // Display decimals — 2, truncated toward zero, for every percentage and average shown to the user
-export { DISPLAY_DECIMALS, truncateDecimals } from "./shared/decimal";
+export {
+	DISPLAY_DECIMALS,
+	RATIO_DECIMALS,
+	truncateDecimals,
+	truncateRatio,
+} from "./shared/decimal";
 // Declaration display context
 export type {
 	CseOpinionResolvedInput,

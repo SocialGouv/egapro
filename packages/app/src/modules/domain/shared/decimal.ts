@@ -25,3 +25,11 @@ export function truncateDecimals(
 		scale;
 	return truncated === 0 ? 0 : truncated;
 }
+
+/** A percentage at {@link DISPLAY_DECIMALS} is a ratio at two more decimals: the `numeric(9,4)` columns. */
+export const RATIO_DECIMALS = DISPLAY_DECIMALS + 2;
+
+/** The display rule applied to a stored ratio, so persistence, export and display never disagree. */
+export function truncateRatio(ratio: number): number {
+	return truncateDecimals(ratio, RATIO_DECIMALS);
+}

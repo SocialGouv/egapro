@@ -6,11 +6,9 @@
  * proportions of indicator F. Both the displayed percentage and the persisted
  * value go through this module, so they cannot drift apart again.
  */
+import { truncateRatio } from "./decimal";
 import { computePercentage } from "./format";
 import { proportionOf } from "./percentage";
-
-/** Matches the `numeric(9,4)` column the ratio is persisted into. */
-const PROPORTION_SCALE = 10_000;
 
 type CountInput = string | number | null | undefined;
 
@@ -31,9 +29,7 @@ export function variablePayProportion(
 	const count = toCount(beneficiaries);
 	const total = toCount(workforce);
 	if (count === null || total === null || total === 0) return null;
-	return (
-		Math.round(proportionOf(count, total) * PROPORTION_SCALE) / PROPORTION_SCALE
-	);
+	return truncateRatio(proportionOf(count, total));
 }
 
 /** Formats the unrounded ratio, so the displayed digit never shifts with the 4-decimal storage rounding. */

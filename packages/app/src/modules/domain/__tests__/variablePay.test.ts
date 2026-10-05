@@ -24,14 +24,14 @@ describe("variablePayProportion", () => {
 		expect(women + men).toBeCloseTo(1.1625);
 	});
 
-	it("rounds to 4 decimals, matching the numeric(9,4) column", () => {
+	it("truncates to 4 decimals, matching the numeric(9,4) column and the display (#4633)", () => {
 		expect(variablePayProportion(1, 3)).toBe(0.3333);
-		expect(variablePayProportion(2, 3)).toBe(0.6667);
+		expect(variablePayProportion(2, 3)).toBe(0.6666);
 	});
 
 	it("accepts numeric strings coming from the DB and from form inputs", () => {
 		expect(variablePayProportion("14", 35)).toBe(0.4);
-		expect(variablePayProportion("18", "35")).toBe(0.5143);
+		expect(variablePayProportion("18", "35")).toBe(0.5142);
 	});
 
 	it("returns null when a count is missing", () => {
