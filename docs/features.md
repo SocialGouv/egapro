@@ -58,6 +58,7 @@ Conventions de notation :
 - Les entreprises sont rattachées via la table `userCompanies` (relation N-N entre `users` et `companies`).
 - En environnement local, le fournisseur de test ProConnect est **FIA1V2** (compte `test@fia1.fr`).
 - À la **déconnexion**, tous les verrous de modification détenus par l'utilisateur sont libérés (voir §13.7).
+- **Pays de l'entreprise** : à chaque connexion, le pays de l'entreprise rattachée est résolu via le registre (voir [§13.9](#139-résolution-du-pays-de-lentreprise-registre-weez)) et affiché dans le bandeau `CompanyInfoBanner` (`~/modules/my-space`) — ligne « Pays » si l'entreprise est à l'étranger, « Adresse » si elle est en France.
 
 ---
 
@@ -295,6 +296,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Public, sans authentification**.
 - L'indicateur **G n'est jamais exposé** (catégories d'emploi confidentielles).
 - L'export Excel est conçu pour un usage analyste / journaliste (pagination, filtres par année).
+- **Affichage du pays** : la recherche, la fiche entreprise (`CompanyHeader`) et le bandeau Mon espace partagent une seule règle (`companyLocationRow`, `~/modules/domain/shared/companyLocationDisplay.ts`) à trois issues — pays étranger connu (ligne « Pays », libellé mis en forme via `formatInseeTitleCase`), France (ligne « Adresse »), ou pays **inconnu** (ligne « Pays : inconnu ») quand le registre n'a rien déclaré. Une entreprise non diffusible masque sa localisation en amont de cette règle (`NON_DIFFUSIBLE_LABEL`, `~/modules/public-api`).
 
 ---
 
@@ -706,6 +708,23 @@ sequenceDiagram
 **Traçabilité** : chaque exécution écrit une ligne d'audit `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, catégorie `system`) récapitulant les compteurs (`purgedDeclarations`, `purgedFiles`, `purgedS3Objects`, `failedS3Objects`, `retentionYears`, `cutoffYear`). Le traitement est **idempotent** : relancé sur un état déjà purgé, il ne supprime rien de plus.
 
 **Données concernées** : `declarations` (+ cascade sur `jobCategories`, `employeeCategories`, `cseOpinions`, `cseOpinionFiles`, `files`, `declarationStatusHistory`, `declarationLocks`), objets S3, `audit.action_log`.
+
+### 13.9 Résolution du pays de l'entreprise (registre Weez)
+
+**À quoi ça sert** : attribuer à chaque entreprise un des trois états — **France**, **pays étranger connu**, ou **inconnu** — à partir du registre national (API Weez, qui expose les données INSEE Sirene), sans jamais inventer une géographie.
+
+**Déclenché par** : la connexion ProConnect (`fetchCompanyBySiren`, `~/server/services/weez.ts`), l'import GIP-MDS (même fonction, en boucle sur plusieurs milliers de SIREN), et un Job Kubernetes de réparation post-déploiement (voir [`architecture.md` §14.2](architecture.md#142-kontinuous-déploiement-kubernetes)).
+
+**Règle de résolution** (`legalUnitCountry` puis, si besoin, `headOfficeCountry`, `~/modules/domain/shared/registryCountry.ts`) :
+
+1. le registre déclare un pays étranger pour l'établissement → ce pays est retenu ;
+2. sinon, s'il déclare un code ou un libellé de pays mais aucun des deux n'est exploitable → **inconnu** ;
+3. sinon, si un code postal est présent → **France** ;
+4. sinon → un second appel au registre (siège social) tranche, faute de quoi le pays reste **inconnu**.
+
+**Garde-fou** : une résolution qui échoue ou ne renvoie rien au login **n'écrase jamais** un pays déjà connu en base (`toCompanyRefreshValues`, `~/server/db/companyInsert.ts`) — seul un résultat positif remplace la valeur précédente.
+
+**Données persistées** : `companies.countryCode` / `companies.countryLabel` (voir [`architecture.md` §7.1](architecture.md#71-schéma)).
 
 ---
 
