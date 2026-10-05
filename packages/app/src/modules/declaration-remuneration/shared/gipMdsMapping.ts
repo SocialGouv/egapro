@@ -1,3 +1,4 @@
+import { toRoundedInt } from "~/modules/domain";
 import type { gipMdsData } from "~/server/db/schema";
 
 /**
@@ -83,15 +84,15 @@ export type GipPrefillData = {
 export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 	if (!row) return null;
 
-	const totalWomen = toInt(row.womenCountAnnualGlobal);
-	const totalMen = toInt(row.menCountAnnualGlobal);
+	const totalWomen = toRoundedInt(row.womenCountAnnualGlobal);
+	const totalMen = toRoundedInt(row.menCountAnnualGlobal);
 
 	return {
 		step1: {
 			totalWomen,
 			totalMen,
-			hourlyWomen: toInt(row.womenCountHourlyGlobal),
-			hourlyMen: toInt(row.menCountHourlyGlobal),
+			hourlyWomen: toRoundedInt(row.womenCountHourlyGlobal),
+			hourlyMen: toRoundedInt(row.menCountHourlyGlobal),
 		},
 		step2: {
 			annualMeanWomen: row.globalAnnualMeanWomen,
@@ -120,8 +121,8 @@ export function mapGipToFormData(row: GipMdsRow | null): GipPrefillData | null {
 			hourlyMedianWomen: row.variableHourlyMedianWomen,
 			hourlyMedianMen: row.variableHourlyMedianMen,
 			hourlyMedianGap: row.variableHourlyMedianGap,
-			beneficiaryCountWomen: toInt(row.womenCountAnnualVariable),
-			beneficiaryCountMen: toInt(row.menCountAnnualVariable),
+			beneficiaryCountWomen: toRoundedInt(row.womenCountAnnualVariable),
+			beneficiaryCountMen: toRoundedInt(row.menCountAnnualVariable),
 		},
 		step4: {
 			annual: buildQuartileData(
@@ -263,13 +264,6 @@ export const CSV_TO_SCHEMA_MAP: Record<string, keyof GipMdsRow> = {
 	indice_taux_extremes: "confidenceExtremeRate",
 };
 
-/** Parse a Drizzle numeric string to a rounded integer, or null. */
-function toInt(value: string | null): number | null {
-	if (value === null) return null;
-	const parsed = Number.parseFloat(value);
-	return Number.isNaN(parsed) ? null : Math.round(parsed);
-}
-
 /**
  * Build quartile data from the GIP `nb_F`/`nb_H` columns.
  * The per-quartile headcounts are the source of truth — never derived from
@@ -284,16 +278,16 @@ function buildQuartileData(
 	return {
 		thresholds,
 		womenCounts: [
-			toInt(womenCounts[0]),
-			toInt(womenCounts[1]),
-			toInt(womenCounts[2]),
-			toInt(womenCounts[3]),
+			toRoundedInt(womenCounts[0]),
+			toRoundedInt(womenCounts[1]),
+			toRoundedInt(womenCounts[2]),
+			toRoundedInt(womenCounts[3]),
 		],
 		menCounts: [
-			toInt(menCounts[0]),
-			toInt(menCounts[1]),
-			toInt(menCounts[2]),
-			toInt(menCounts[3]),
+			toRoundedInt(menCounts[0]),
+			toRoundedInt(menCounts[1]),
+			toRoundedInt(menCounts[2]),
+			toRoundedInt(menCounts[3]),
 		],
 	};
 }

@@ -270,6 +270,8 @@ export {
 	padDecimalToTwo,
 	parseNumber,
 	toNullableNumber,
+	toRoundedInt,
+	toStrictInt,
 } from "./shared/number";
 // Percentage & proportion numeric cores
 export { percentageOf, proportionOf } from "./shared/percentage";

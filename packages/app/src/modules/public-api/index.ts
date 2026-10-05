@@ -18,7 +18,6 @@ export {
 	isCompanyDiffusible,
 	isPublicCompanyDiffusible,
 	publicDeclarationColumns,
-	toNumber,
 	toPublicDeclaration,
 } from "./projection";
 export type {

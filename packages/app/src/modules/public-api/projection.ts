@@ -1,3 +1,4 @@
+import { toNullableNumber } from "~/modules/domain";
 import { type companies, declarations } from "~/server/db/schema";
 import { NON_DIFFUSIBLE_LABEL } from "./constants";
 import type { PublicDeclarationDTO } from "./schemas";
@@ -120,12 +121,6 @@ function publicCompanyValue(
 	return diffusible ? (value ?? null) : NON_DIFFUSIBLE_LABEL;
 }
 
-export function toNumber(value: string | null): number | null {
-	if (value === null) return null;
-	const parsed = Number(value);
-	return Number.isNaN(parsed) ? null : parsed;
-}
-
 export function toPublicDeclaration(
 	declaration: PublicDeclarationSource,
 	company: PublicCompanySource,
@@ -152,67 +147,73 @@ export function toPublicDeclaration(
 		countryLabel: publicCompanyValue(company.countryLabel, diffusible),
 		nafCode: publicCompanyValue(company.nafCode, diffusible),
 		nafLabel: publicCompanyValue(company.nafLabel, diffusible),
-		workforceEma: toNumber(company.workforceEma),
+		workforceEma: toNullableNumber(company.workforceEma),
 		totalWomen: declaration.totalWomen,
 		totalMen: declaration.totalMen,
 		hourlyWomen: declaration.hourlyWomen,
 		hourlyMen: declaration.hourlyMen,
-		globalAnnualMeanGap: toNumber(declaration.globalAnnualMeanGap),
-		globalAnnualMedianGap: toNumber(declaration.globalAnnualMedianGap),
-		globalHourlyMeanGap: toNumber(declaration.globalHourlyMeanGap),
-		globalHourlyMedianGap: toNumber(declaration.globalHourlyMedianGap),
-		variableAnnualMeanGap: toNumber(declaration.variableAnnualMeanGap),
-		variableAnnualMedianGap: toNumber(declaration.variableAnnualMedianGap),
-		variableHourlyMeanGap: toNumber(declaration.variableHourlyMeanGap),
-		variableHourlyMedianGap: toNumber(declaration.variableHourlyMedianGap),
-		variableProportionWomen: toNumber(declaration.variableProportionWomen),
-		variableProportionMen: toNumber(declaration.variableProportionMen),
-		annualQuartile1ProportionWomen: toNumber(
+		globalAnnualMeanGap: toNullableNumber(declaration.globalAnnualMeanGap),
+		globalAnnualMedianGap: toNullableNumber(declaration.globalAnnualMedianGap),
+		globalHourlyMeanGap: toNullableNumber(declaration.globalHourlyMeanGap),
+		globalHourlyMedianGap: toNullableNumber(declaration.globalHourlyMedianGap),
+		variableAnnualMeanGap: toNullableNumber(declaration.variableAnnualMeanGap),
+		variableAnnualMedianGap: toNullableNumber(
+			declaration.variableAnnualMedianGap,
+		),
+		variableHourlyMeanGap: toNullableNumber(declaration.variableHourlyMeanGap),
+		variableHourlyMedianGap: toNullableNumber(
+			declaration.variableHourlyMedianGap,
+		),
+		variableProportionWomen: toNullableNumber(
+			declaration.variableProportionWomen,
+		),
+		variableProportionMen: toNullableNumber(declaration.variableProportionMen),
+		annualQuartile1ProportionWomen: toNullableNumber(
 			declaration.annualQuartile1ProportionWomen,
 		),
-		annualQuartile2ProportionWomen: toNumber(
+		annualQuartile2ProportionWomen: toNullableNumber(
 			declaration.annualQuartile2ProportionWomen,
 		),
-		annualQuartile3ProportionWomen: toNumber(
+		annualQuartile3ProportionWomen: toNullableNumber(
 			declaration.annualQuartile3ProportionWomen,
 		),
-		annualQuartile4ProportionWomen: toNumber(
+		annualQuartile4ProportionWomen: toNullableNumber(
 			declaration.annualQuartile4ProportionWomen,
 		),
-		annualQuartile1ProportionMen: toNumber(
+		annualQuartile1ProportionMen: toNullableNumber(
 			declaration.annualQuartile1ProportionMen,
 		),
-		annualQuartile2ProportionMen: toNumber(
+		annualQuartile2ProportionMen: toNullableNumber(
 			declaration.annualQuartile2ProportionMen,
 		),
-		annualQuartile3ProportionMen: toNumber(
+		annualQuartile3ProportionMen: toNullableNumber(
 			declaration.annualQuartile3ProportionMen,
 		),
-		annualQuartile4ProportionMen: toNumber(
+		annualQuartile4ProportionMen: toNullableNumber(
 			declaration.annualQuartile4ProportionMen,
 		),
-		hourlyQuartile1ProportionWomen: toNumber(
+		hourlyQuartile1ProportionWomen: toNullableNumber(
 			declaration.hourlyQuartile1ProportionWomen,
 		),
-		hourlyQuartile2ProportionWomen: toNumber(
+		hourlyQuartile2ProportionWomen: toNullableNumber(
 			declaration.hourlyQuartile2ProportionWomen,
 		),
-		hourlyQuartile3ProportionWomen: toNumber(
+		hourlyQuartile3ProportionWomen: toNullableNumber(
 			declaration.hourlyQuartile3ProportionWomen,
 		),
-		hourlyQuartile4ProportionWomen: toNumber(
+		hourlyQuartile4ProportionWomen: toNullableNumber(
 			declaration.hourlyQuartile4ProportionWomen,
 		),
-		hourlyQuartile1ProportionMen: toNumber(
+		hourlyQuartile1ProportionMen: toNullableNumber(
 			declaration.hourlyQuartile1ProportionMen,
 		),
-		hourlyQuartile2ProportionMen: toNumber(
+		hourlyQuartile2ProportionMen: toNullableNumber(
 			declaration.hourlyQuartile2ProportionMen,
 		),
-		hourlyQuartile3ProportionMen: toNumber(
+		hourlyQuartile3ProportionMen: toNullableNumber(
 			declaration.hourlyQuartile3ProportionMen,
 		),
-		hourlyQuartile4ProportionMen: toNumber(
+		hourlyQuartile4ProportionMen: toNullableNumber(
 			declaration.hourlyQuartile4ProportionMen,
 		),
 	};

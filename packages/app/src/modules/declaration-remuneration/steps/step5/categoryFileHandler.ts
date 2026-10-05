@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 
+import { CATEGORY_PAY_BASES, toStrictInt } from "~/modules/domain";
 import type { EmployeeCategory } from "./categorySerializer";
 
 /** Column definitions for the import/export template. */
@@ -20,6 +21,17 @@ const TEMPLATE_COLUMNS = [
 ] as const;
 
 type TemplateKey = (typeof TEMPLATE_COLUMNS)[number]["key"];
+
+const HEADCOUNT_KEYS: ReadonlySet<string> = new Set(
+	CATEGORY_PAY_BASES.flatMap((base) => [
+		base.womenCountField,
+		base.menCountField,
+	]),
+);
+
+const HEADCOUNT_COLUMNS = TEMPLATE_COLUMNS.filter((column) =>
+	HEADCOUNT_KEYS.has(column.key),
+);
 
 const EXPECTED_HEADERS = TEMPLATE_COLUMNS.map((c) => c.header);
 
@@ -113,6 +125,7 @@ async function parseXlsx(buffer: ArrayBuffer): Promise<ImportResult> {
 	if (!columnMapping.ok) return columnMapping.result;
 
 	const categories: EmployeeCategory[] = [];
+	const errors: ImportError[] = [];
 	let idCounter = 0;
 
 	for (let rowNum = 2; rowNum <= sheet.rowCount; rowNum++) {
@@ -125,6 +138,7 @@ async function parseXlsx(buffer: ArrayBuffer): Promise<ImportResult> {
 		const name = values[columnMapping.mapping.name] ?? "";
 		if (!name.trim()) continue;
 
+		errors.push(...invalidHeadcountErrors(values, columnMapping.mapping));
 		categories.push(
 			buildCategoryFromRow(values, columnMapping.mapping, idCounter++),
 		);
@@ -142,6 +156,8 @@ async function parseXlsx(buffer: ArrayBuffer): Promise<ImportResult> {
 			],
 		};
 	}
+
+	if (errors.length > 0) return { ok: false, errors };
 
 	return { ok: true, categories };
 }
@@ -174,6 +190,7 @@ function parseCsv(text: string): ImportResult {
 	if (!columnMapping.ok) return columnMapping.result;
 
 	const categories: EmployeeCategory[] = [];
+	const errors: ImportError[] = [];
 	let idCounter = 0;
 
 	for (let i = 1; i < lines.length; i++) {
@@ -184,6 +201,7 @@ function parseCsv(text: string): ImportResult {
 		const name = values[columnMapping.mapping.name] ?? "";
 		if (!name.trim()) continue;
 
+		errors.push(...invalidHeadcountErrors(values, columnMapping.mapping));
 		categories.push(
 			buildCategoryFromRow(values, columnMapping.mapping, idCounter++),
 		);
@@ -201,6 +219,8 @@ function parseCsv(text: string): ImportResult {
 			],
 		};
 	}
+
+	if (errors.length > 0) return { ok: false, errors };
 
 	return { ok: true, categories };
 }
@@ -284,6 +304,24 @@ function cellToString(value: unknown): string {
 
 function normalizeDecimal(value: string): string {
 	return value.replace(/,/g, ".").replace(/\s/g, "");
+}
+
+function invalidHeadcountErrors(
+	values: string[],
+	mapping: ColumnMapping,
+): ImportError[] {
+	const name = (values[mapping.name] ?? "").trim();
+	return HEADCOUNT_COLUMNS.flatMap<ImportError>(({ key, header }) => {
+		const raw = (values[mapping[key]] ?? "").trim();
+		const normalized = normalizeDecimal(raw);
+		if (normalized === "" || toStrictInt(normalized) !== null) return [];
+		return [
+			{
+				type: "invalid-value",
+				message: `La colonne « ${header} » de la catégorie « ${name} » doit contenir un nombre entier (valeur lue : ${raw}).`,
+			},
+		];
+	});
 }
 
 function buildCategoryFromRow(

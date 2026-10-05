@@ -7,6 +7,8 @@ import {
 	padDecimalToTwo,
 	parseNumber,
 	toNullableNumber,
+	toRoundedInt,
+	toStrictInt,
 } from "../shared/number";
 
 describe("parseNumber", () => {
@@ -46,6 +48,40 @@ describe("toNullableNumber", () => {
 	it("returns null for non-finite values", () => {
 		expect(toNullableNumber("abc")).toBeNull();
 		expect(toNullableNumber(Number.NaN)).toBeNull();
+	});
+});
+
+describe("text → number conversions share one reference", () => {
+	it.each([
+		{ input: "", nullable: null, rounded: null, strict: null },
+		{ input: " ", nullable: null, rounded: null, strict: null },
+		{ input: "12.7", nullable: 12.7, rounded: 13, strict: null },
+		{ input: "12,7", nullable: null, rounded: null, strict: null },
+		{ input: "12abc", nullable: null, rounded: null, strict: null },
+		{ input: "Infinity", nullable: null, rounded: null, strict: null },
+		{ input: 12, nullable: 12, rounded: 12, strict: 12 },
+		{ input: " 12 ", nullable: 12, rounded: 12, strict: 12 },
+		{ input: "12.0", nullable: 12, rounded: 12, strict: 12 },
+		{ input: "-3", nullable: -3, rounded: -3, strict: -3 },
+		{ input: 12.7, nullable: 12.7, rounded: 13, strict: null },
+		{
+			input: Number.POSITIVE_INFINITY,
+			nullable: null,
+			rounded: null,
+			strict: null,
+		},
+		{ input: Number.NaN, nullable: null, rounded: null, strict: null },
+		{ input: null, nullable: null, rounded: null, strict: null },
+		{ input: undefined, nullable: null, rounded: null, strict: null },
+	])("converts $input → nullable $nullable, rounded $rounded, strict $strict", ({
+		input,
+		nullable,
+		rounded,
+		strict,
+	}) => {
+		expect(toNullableNumber(input)).toBe(nullable);
+		expect(toRoundedInt(input)).toBe(rounded);
+		expect(toStrictInt(input)).toBe(strict);
 	});
 });
 
