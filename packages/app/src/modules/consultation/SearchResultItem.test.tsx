@@ -66,8 +66,8 @@ describe("SearchResultItem", () => {
 		render(
 			<SearchResultItem
 				declaration={declarationFixture({
-					countryCode: "BE",
-					countryLabel: "Belgique",
+					countryCode: "99131",
+					countryLabel: "BELGIQUE",
 					departmentLabel: null,
 					region: null,
 				})}
@@ -77,6 +77,23 @@ describe("SearchResultItem", () => {
 
 		expect(screen.getByText(/Pays/)).toBeInTheDocument();
 		expect(screen.getByText("Belgique")).toBeInTheDocument();
+	});
+
+	it("keeps the location line with an unknown country", () => {
+		render(
+			<SearchResultItem
+				declaration={declarationFixture({
+					countryCode: null,
+					countryLabel: null,
+					departmentLabel: null,
+					region: null,
+				})}
+				searchQuery=""
+			/>,
+		);
+
+		expect(screen.getByText(/Pays/)).toBeInTheDocument();
+		expect(screen.getByText("inconnu")).toBeInTheDocument();
 	});
 
 	it("omits a fact whose value is unknown", () => {

@@ -58,6 +58,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 			nafLabel: companies.nafLabel,
 			countryCode: companies.countryCode,
 			countryLabel: companies.countryLabel,
+			departmentLabel: companies.departmentLabel,
 			workforceEma: gipMdsData.workforceEma,
 			hasCse: companies.hasCse,
 		})
