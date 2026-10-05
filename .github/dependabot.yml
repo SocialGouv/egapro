@@ -1,31 +1,38 @@
 # GitHub Actions are pinned by commit SHA (supply chain): dependabot keeps the
-# pins and their `# vX.Y.Z` comments up to date. npm updates stay disabled below.
+# pins and their `# vX.Y.Z` comments up to date.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: monthly
-#  - package-ecosystem: "npm"
-#    labels:
-#      - bot
-#      - dependencies
-#    target-branch: master
-#    directory: "/"
-#    schedule:
-#      interval: weekly
-#      day: monday
-#      time: "01:00"
-#      timezone: Europe/Paris
-#    versioning-strategy: increase-if-necessary
-#    allow:
-#      - dependency-name: "*"
-#        dependency-type: direct
-#    ignore:
-#      - dependency-name: "@types/*"
-#        update-types:
-#          - "version-update:semver-patch"
-#          - "version-update:semver-minor"
-#      - dependency-name: "@types/node"
-#        versions:
-#          - ">=17"
+  # Security updates for the npm workspaces: grouped so one PR a week carries the
+  # patch/minor bumps of the direct dependencies, majors stay manual.
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: master
+    labels:
+      - bot
+      - dependencies
+    schedule:
+      interval: weekly
+      day: monday
+      time: "01:00"
+      timezone: Europe/Paris
+    versioning-strategy: increase-if-necessary
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "@types/*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
