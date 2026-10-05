@@ -73,8 +73,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"publicReferents.getById": AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
 
 	// ── admin settings mutations ──────────────────────────
-	"adminSettings.upsertCampaignDeadlines":
+	"adminSettings.upsertRemunerationDeadlines":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+	"adminSettings.updateCommonCalendar":
+		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR,
 	"adminSettings.updateLockTimeout":
 		AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT,
 	"adminSettings.getRepresentationCampaignByYear":

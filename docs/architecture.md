@@ -411,7 +411,7 @@ Définies dans `src/server/api/trpc.ts`. Les routers (un par domaine) composent 
 | `cseOpinion` | `routers/cseOpinion.ts` | `get`, `saveOpinions`, `uploadFile`, `deleteFile`, `getFiles`, `getFileContentTypes`, `setFileContentTypes`, `finalize` |
 | `admin` | `routers/admin.ts` | Gestion admin générale |
 | `adminDeclarations` | `routers/adminDeclarations.ts` | `search`, `getById`, `getRecap`, `releaseLock` |
-| `adminSettings` | `routers/adminSettings.ts` | `getOverview`, `getDeadlinesByYear`, `upsertCampaignDeadlines`, `getLockTimeout`, `updateLockTimeout` |
+| `adminSettings` | `routers/adminSettings.ts` | `getOverview`, `getDeadlinesByYear`, `upsertRemunerationDeadlines`, `updateCommonCalendar`, `getLockTimeout`, `updateLockTimeout`, `getRepresentationCampaignByYear`, `upsertRepresentationCampaign` |
 | `adminReferents` | `routers/adminReferents.ts` | CRUD référents |
 | `adminStats` | `routers/adminStats.ts` | Statistiques campagne |
 | `profile` | `routers/profile.ts` | `get`, `updatePhone` |
