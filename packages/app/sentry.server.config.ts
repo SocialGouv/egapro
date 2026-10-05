@@ -2,6 +2,7 @@
 // The config you add here will be used whenever the server handles a request.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { SENTRY_DATA_COLLECTION } from "@common/sentryDataCollection";
 import * as Sentry from "@sentry/nextjs";
 
 const ENVIRONMENT = process.env.NEXT_PUBLIC_EGAPRO_ENV || "development";
@@ -14,12 +15,12 @@ Sentry.init({
   // Basic configuration
   dsn: isCypressTest ? undefined : process.env.NEXT_PUBLIC_SENTRY_DSN, // Disable Sentry in Cypress
   environment: ENVIRONMENT,
-  debug: true, // Temporarily enable debug mode to troubleshoot
+  debug: false,
   dist: process.env.NEXT_PUBLIC_GITHUB_SHA || "dev",
 
+  dataCollection: SENTRY_DATA_COLLECTION,
+
   // Performance monitoring and source maps
-  // enableTracing: true,
-  enableTracing: false, // temp disable trying to reduce race condition error bubbling up
   attachStacktrace: true, // Attach stack traces to all messages
   normalizeDepth: 10, // Increase stack trace depth for better context
   tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0, // Sample 10% of traces in prod, all in dev
@@ -27,7 +28,6 @@ Sentry.init({
 
   // Error tracking configuration
   sampleRate: 0.1,
-  autoSessionTracking: true, // Enable automatic session tracking
   sendClientReports: true, // Enable immediate client reports
 
   beforeSend(event) {
