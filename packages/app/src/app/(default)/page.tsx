@@ -4,7 +4,8 @@ import { Box, Container, Grid, GridCol, Heading, ImgHome } from "@design-system"
 
 import styles from "./index.module.css";
 
-export const dynamic = "force-static";
+// Rendered per request like every other page: a prerendered page cannot carry the CSP script nonce.
+export const dynamic = "force-dynamic";
 
 const Home = async () => {
   return (

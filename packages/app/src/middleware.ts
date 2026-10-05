@@ -7,46 +7,26 @@ import { NextResponse } from "next/server";
 import { type JWT } from "next-auth/jwt";
 import { type NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 
-const cspMiddleware: NextMiddlewareWithAuth = req => {
-  //const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+/**
+ * Per-request nonce: Next.js reads it from the `Content-Security-Policy` request header and tags its
+ * own inline scripts with it, the root layout forwards `x-nonce` to react-dsfr and Matomo.
+ */
+const generateNonce = () => btoa(crypto.randomUUID());
 
-  // In dev environment, Next injects scripts for HMR, so we need to desactivate script-src.
-
-  // For trusted-types, there is a problem with the [revalidatePath bug](https://github.com/vercel/next.js/issues/49387), so we need to desactivate it in dev environment for the moment. Try to reactivate it when it will be fixed in Next (it seems to be fixed in Next 14).
-  // const cspHeader = `
-  //   default-src 'self' https://*.gouv.fr;
-  //   connect-src 'self' https://*.gouv.fr;
-  //   font-src 'self' data: blob:;
-  //   media-src 'self' https://*.gouv.fr;
-  //   img-src 'self' data: https://*.gouv.fr;
-  //   script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${
-  //     process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""
-  //   };
-  //   frame-src 'self' https://*.gouv.fr;
-  //   style-src 'self' https://*.gouv.fr 'nonce-${nonce}';
-  //   frame-ancestors 'self' https://*.gouv.fr;
-  //   object-src 'none';
-  //   base-uri 'self' https://*.gouv.fr;
-  //   form-action 'self' https://*.gouv.fr;
-  //   block-all-mixed-content;
-  //   upgrade-insecure-requests; `;
-
-  // ${
-  //   process.env.NODE_ENV === "development"
-  //     ? ""
-  //     : `require-trusted-types-for 'script';
-  //        trusted-types react-dsfr react-dsfr-asap nextjs#bundler matomo-next;`
-  // }
-
-  const cspHeader = `
+/**
+ * Scripts must carry the request nonce or come from a trusted host: no `'unsafe-inline'`, so an
+ * injected `<script>` never runs. Styles keep `'unsafe-inline'` because the DSFR and React set
+ * `style` attributes, which no nonce can cover.
+ * In development, Next injects `eval`-based HMR scripts, hence `'unsafe-eval'` there only.
+ */
+export const buildCspHeader = (nonce: string, isDevelopment = process.env.NODE_ENV === "development") =>
+  `
     default-src 'self' https://*.gouv.fr;
     connect-src 'self' https://*.gouv.fr;
     font-src 'self' data: blob:;
     media-src 'self' https://*.gouv.fr;
     img-src 'self' data: https://*.gouv.fr;
-    script-src 'self' https://*.gouv.fr 'unsafe-inline'${
-      process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
-    };
+    script-src 'self' https://*.gouv.fr 'nonce-${nonce}'${isDevelopment ? " 'unsafe-eval'" : ""};
     frame-src 'self' https://*.gouv.fr;
     style-src 'self' https://*.gouv.fr 'unsafe-inline';
     worker-src 'self' blob:;
@@ -55,15 +35,20 @@ const cspMiddleware: NextMiddlewareWithAuth = req => {
     base-uri 'self' https://*.gouv.fr;
     form-action 'self' https://*.gouv.fr;
     block-all-mixed-content;
-    upgrade-insecure-requests; `;
+    upgrade-insecure-requests; `
+    // Replace newline characters and spaces
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+const cspMiddleware: NextMiddlewareWithAuth = req => {
+  // Always overwrite the request headers: Next.js reads the nonce from the inbound
+  // `Content-Security-Policy` header, a client-supplied value must never reach the renderer
+  // (GHSA-ffhc-5mcf-pf4q, nonce reflection, only fixed in Next 15.5).
+  const nonce = generateNonce();
 
   const responseHeaders = new Headers();
-  //responseHeaders.set("x-nonce", nonce);
-  responseHeaders.set(
-    "Content-Security-Policy",
-    // Replace newline characters and spaces
-    cspHeader.replace(/\s{2,}/g, " ").trim(),
-  );
+  responseHeaders.set("x-nonce", nonce);
+  responseHeaders.set("Content-Security-Policy", buildCspHeader(nonce));
 
   const requestHeaders = new Headers(req.headers);
   responseHeaders.forEach((value, key) => {

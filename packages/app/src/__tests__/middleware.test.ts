@@ -5,7 +5,7 @@ import { captureError } from "@common/error";
 import { sign } from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
-import middleware from "../middleware";
+import middleware, { buildCspHeader } from "../middleware";
 
 // Run our middleware directly, without NextAuth decoding the cookie first. The NextAuth options are kept on
 // the returned function so the session decoding can be tested on its own.
@@ -70,6 +70,33 @@ describe("middleware", () => {
   it("does not allow unsafe-eval in the CSP outside development", async () => {
     const res = await call("/", null);
     expect(res.headers.get("content-security-policy")).not.toContain("unsafe-eval");
+  });
+
+  it("tags scripts with a per-request nonce instead of allowing inline scripts", async () => {
+    const first = await call("/", null);
+    const second = await call("/", null);
+
+    const csp = first.headers.get("content-security-policy") ?? "";
+    const nonce = first.headers.get("x-nonce") ?? "";
+    expect(nonce).not.toBe("");
+    expect(csp).toMatch(new RegExp(`script-src [^;]*'nonce-${nonce}'`));
+    expect(csp).not.toMatch(/script-src [^;]*'unsafe-inline'/);
+    expect(second.headers.get("x-nonce")).not.toBe(nonce);
+  });
+
+  it("replaces a client-supplied CSP header and nonce before the request reaches the renderer", async () => {
+    const forged = "'nonce-abc'\"><script>alert(1)</script>";
+    const res = await call("/", null, { "content-security-policy": forged, "x-nonce": forged });
+
+    const forwarded = res.headers.get("x-middleware-request-content-security-policy") ?? "";
+    expect(forwarded).not.toContain("<script>");
+    expect(forwarded).toContain(`'nonce-${res.headers.get("x-nonce")}'`);
+    expect(res.headers.get("x-middleware-request-x-nonce")).toBe(res.headers.get("x-nonce"));
+  });
+
+  it("only allows eval in development", () => {
+    expect(buildCspHeader("abc", true)).toMatch(/script-src [^;]*'unsafe-eval'/);
+    expect(buildCspHeader("abc", false)).not.toContain("unsafe-eval");
   });
 
   it("never sends cookies or authorization headers to Sentry", async () => {
