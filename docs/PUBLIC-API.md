@@ -120,9 +120,13 @@ Les deux exports — `/api/public/declarations/export` et `/api/public/represent
 | `xlsx` | 10 000 lignes |
 | `json`, `csv` | 200 000 lignes |
 
-Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSON (`{ "error": "…" }`) au lieu d'un export tronqué : ajoutez des filtres — typiquement `year` — ou, pour Excel, passez au format CSV. Le plafond JSON/CSV laisse plusieurs campagnes de marge à l'export complet sans filtre (environ 35 000 entreprises déclarantes par campagne) ; il borne la mémoire qu'une seule requête peut mobiliser.
+Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSON (`{ "error": "…" }`) au lieu d'un export tronqué : ajoutez des filtres — typiquement `year` — ou, pour Excel, passez au format CSV.
 
-Les exports JSON et CSV sont mis en cache **1 heure côté serveur** pour chaque jeu de filtres. Deux requêtes qui portent les mêmes filtres, dans un ordre différent ou avec des paramètres inconnus en plus, sont servies par la même entrée : une nouvelle déclaration publiée peut donc mettre jusqu'à une heure à apparaître dans un export, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`.
+Le plafond JSON/CSV est dimensionné pour l'export complet sans filtre, celui que publie la ressource data.gouv.fr et que sert le bouton « tout télécharger » de la consultation. Environ 35 000 entreprises déclarent par campagne et l'export couvre toutes les campagnes publiées depuis 2027 : 200 000 lignes laissent cinq campagnes de marge, tout en bornant la mémoire d'une requête (de l'ordre du gigaoctet au plafond, pour des pods limités à 2 Go). À l'approche du plafond, la ressource data.gouv.fr devra passer à un export par année (`year`).
+
+Les exports JSON et CSV sont mis en cache **1 heure côté serveur** pour chaque jeu de filtres. Deux requêtes qui portent les mêmes filtres, dans un ordre différent ou avec des paramètres inconnus en plus, sont servies par la même entrée. Une modification met donc jusqu'à une heure à se refléter dans un export, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600` — dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître des exports.
+
+Le cache est borné : une entrée filtrée de plus de 16 Mo compressés n'est pas mise en cache, et les entrées filtrées partagent un budget de 64 Mo écrits par heure. L'export sans filtre échappe à ces deux bornes — c'est le plus coûteux à recalculer, et il ne compte qu'une entrée par format. Les requêtes identiques simultanées qui manquent le cache ne déclenchent qu'un calcul par pod.
 
 ## Licence
 
