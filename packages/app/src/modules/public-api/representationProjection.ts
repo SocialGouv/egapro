@@ -1,6 +1,7 @@
+import { toNullableNumber } from "~/modules/domain";
 import { type companies, representationDeclarations } from "~/server/db/schema";
 import { NON_DIFFUSIBLE_LABEL } from "./constants";
-import { isPublicCompanyDiffusible, toNumber } from "./projection";
+import { isPublicCompanyDiffusible } from "./projection";
 import type { PublicRepresentationDTO } from "./schemas";
 
 export type PublicRepresentationSource = Pick<
@@ -72,11 +73,11 @@ export function toPublicRepresentation(
 		nafLabel: diffusible ? company.nafLabel : NON_DIFFUSIBLE_LABEL,
 		referencePeriodStart: declaration.referencePeriodStart,
 		referencePeriodEnd: declaration.referencePeriodEnd,
-		executiveWomenPercent: toNumber(declaration.executiveWomenPercent),
-		executiveMenPercent: toNumber(declaration.executiveMenPercent),
+		executiveWomenPercent: toNullableNumber(declaration.executiveWomenPercent),
+		executiveMenPercent: toNullableNumber(declaration.executiveMenPercent),
 		notComputableReasonExecutives: declaration.notComputableReasonExecutives,
-		memberWomenPercent: toNumber(declaration.memberWomenPercent),
-		memberMenPercent: toNumber(declaration.memberMenPercent),
+		memberWomenPercent: toNullableNumber(declaration.memberWomenPercent),
+		memberMenPercent: toNullableNumber(declaration.memberMenPercent),
 		notComputableReasonMembers: declaration.notComputableReasonMembers,
 		publishDate: declaration.publishDate,
 		publishUrl: declaration.publishUrl,

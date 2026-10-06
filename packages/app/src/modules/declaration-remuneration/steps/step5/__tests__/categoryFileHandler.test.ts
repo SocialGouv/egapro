@@ -273,6 +273,46 @@ describe("parseImportFile — CSV", () => {
 		expect(result.categories[0]?.annualBaseWomen).toBe("30000.50");
 	});
 
+	it("accepts a headcount written as a whole number with a zero decimal", async () => {
+		const csv = `${HEADER_LINE}\nOuvriers;10,0;12;8;9;;;;;;;;`;
+		const result = await parseImportFile(csvFile(csv));
+
+		expect(result.ok).toBe(true);
+	});
+
+	it("rejects a decimal headcount instead of letting it be truncated", async () => {
+		const csv = `${HEADER_LINE}\nOuvriers;12,7;12;8;9;;;;;;;;`;
+		const result = await parseImportFile(csvFile(csv));
+
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+
+		expect(result.errors).toEqual([
+			{
+				type: "invalid-value",
+				message:
+					"La colonne « Annuel effectif femmes » de la catégorie « Ouvriers » doit contenir un nombre entier (valeur lue : 12,7).",
+			},
+		]);
+	});
+
+	it("reports every non-integer headcount, across rows and columns", async () => {
+		const csv = [
+			HEADER_LINE,
+			"Ouvriers;10;12abc;8;9;;;;;;;;",
+			"Cadres;4;5;6;2,5;;;;;;;;",
+		].join("\n");
+		const result = await parseImportFile(csvFile(csv));
+
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
+
+		expect(result.errors.map((error) => error.message)).toEqual([
+			"La colonne « Annuel effectif hommes » de la catégorie « Ouvriers » doit contenir un nombre entier (valeur lue : 12abc).",
+			"La colonne « Horaire effectif hommes » de la catégorie « Cadres » doit contenir un nombre entier (valeur lue : 2,5).",
+		]);
+	});
+
 	it("parses a quoted field that contains the separator and escaped quotes", async () => {
 		const csv = `${HEADER_LINE}\n"Cadres ""séniors""; groupe A";10;12;;;;;;;;;;`;
 		const result = await parseImportFile(csvFile(csv));
