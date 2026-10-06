@@ -63,11 +63,12 @@
 	gap: 0.5rem;
 }
 
-// Bordered grid cell (étapes 2/3/5): value then badge, left-aligned.
+// Bordered grid cell (étapes 2/3/5): value+badge line, then the favored-sex
+// mention below — no extra gap, the two lines' own line-height spaces them
+// (Figma node 12242-247964).
 .gapCellStack {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
 }
 
 .gapCell {
