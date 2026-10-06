@@ -128,23 +128,25 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		campaignStartDate: null,
 		decl1ModificationDeadline: new Date(year, 5, 1),
 		decl1JustificationDeadline: new Date(year + 1, 2, 1),
-		decl1JointEvaluationDeadline: new Date(year, 7, 1),
-		decl2ModificationDeadline: new Date(year, 11, 1),
-		decl2JustificationDeadline: new Date(year, 11, 1),
+		decl1JointEvaluationDeadline: new Date(year, 8, 1),
+		decl2ModificationDeadline: new Date(year + 1, 0, 1),
+		decl2JustificationDeadline: new Date(year + 1, 2, 1),
 		decl2JointEvaluationDeadline: new Date(year + 1, 0, 1),
-		decl2CseOpinionDeadline: new Date(year + 1, 1, 1),
+		decl2CseOpinionDeadline: new Date(year + 1, 2, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};
 }
 
+/** Representation ("repeq") campaign defaults for a given year (fallback when no DB row exists). The declaration deadline is derived from the remuneration démarche's first-declaration default, per the PO's equal-deadline rule — not a fixed date of its own. */
 export function getDefaultRepresentationCampaign(
 	campaignYear: number,
 ): RepresentationCampaign {
 	return {
 		campaignStartDate: new Date(campaignYear, 0, 1),
 		campaignEndDate: new Date(campaignYear, 11, 31),
-		declarationDeadline: new Date(campaignYear, 2, 1),
+		declarationDeadline:
+			getDefaultCampaignDeadlines(campaignYear).decl1ModificationDeadline,
 	};
 }
 

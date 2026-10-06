@@ -74,9 +74,9 @@ describe("date helpers", () => {
 	it("defaults mirror the domain getDefaultCampaignDeadlines", () => {
 		const d = getDefaultReminderDeadlines(2027);
 		expect(d.decl1Modification).toBe("2027-06-01T00:00:00.000Z");
-		expect(d.decl1JointEvaluation).toBe("2027-08-01T00:00:00.000Z");
-		expect(d.decl2Modification).toBe("2027-12-01T00:00:00.000Z");
-		expect(d.decl2JointEvaluation).toBe("2028-02-01T00:00:00.000Z");
+		expect(d.decl1JointEvaluation).toBe("2027-09-01T00:00:00.000Z");
+		expect(d.decl2Modification).toBe("2028-01-01T00:00:00.000Z");
+		expect(d.decl2JointEvaluation).toBe("2028-01-01T00:00:00.000Z");
 		expect(d.pathChoiceRound1).toBe("2027-07-01T00:00:00.000Z");
 		expect(d.pathChoiceRound2).toBe("2028-01-01T00:00:00.000Z");
 	});
@@ -158,16 +158,16 @@ describe("handleDailyDeadlineReminders", () => {
 		});
 	});
 
-	it("sends the second-declaration reminder J-30 before 1er décembre", async () => {
+	it("sends the second-declaration reminder J-30 before 1er janvier N+1", async () => {
 		await handleDailyDeadlineReminders(
 			fakeSql,
-			parisMorning("2027-11-01", "+01:00"),
+			parisMorning("2027-12-02", "+01:00"),
 		);
 		const { params, payload } = dispatchFor("second_declaration_reminder");
 		expect(params.variant).toBe("d30");
 		expect(payload).toMatchObject({
 			year: 2027,
-			deadline: "2027-12-01T00:00:00.000Z",
+			deadline: "2028-01-01T00:00:00.000Z",
 			daysRemaining: 30,
 		});
 	});
@@ -175,29 +175,38 @@ describe("handleDailyDeadlineReminders", () => {
 	it("sends the joint-evaluation round-1 reminder J-30 before 1er septembre", async () => {
 		await handleDailyDeadlineReminders(
 			fakeSql,
-			parisMorning("2027-07-02", "+02:00"),
+			parisMorning("2027-08-02", "+02:00"),
 		);
 		const { params, payload } = dispatchFor("joint_evaluation_reminder");
 		expect(params.variant).toBe("first-d30");
 		expect(payload).toMatchObject({
 			year: 2027,
-			deadline: "2027-08-01T00:00:00.000Z",
+			deadline: "2027-09-01T00:00:00.000Z",
 			round: "first",
 		});
 	});
 
 	it("fires the round-2 joint evaluation reminder for the previous campaign year", async () => {
-		// 2 Jan 2028 = 1er février 2028 (decl2 joint-eval deadline of campaign
-		// 2027) − 30 days: campaign year must be resolved to 2027, not 2028.
+		// The round-2 joint-evaluation default now shares its date with two other milestones, so it cannot demonstrate the cross-year resolution on its own: configure campaign 2027 with a distinct, admin-set deadline instead.
+		mocks.getCampaignDeadlines.mockImplementation((_sql, year) =>
+			Promise.resolve(
+				year === 2027
+					? {
+							...getDefaultReminderDeadlines(year),
+							decl2JointEvaluation: "2028-02-15T00:00:00.000Z",
+						}
+					: getDefaultReminderDeadlines(year),
+			),
+		);
 		await handleDailyDeadlineReminders(
 			fakeSql,
-			parisMorning("2028-01-02", "+01:00"),
+			parisMorning("2028-01-16", "+01:00"),
 		);
 		const { params, payload } = dispatchFor("joint_evaluation_reminder");
 		expect(params.variant).toBe("second-d30");
 		expect(payload).toMatchObject({
 			year: 2027,
-			deadline: "2028-02-01T00:00:00.000Z",
+			deadline: "2028-02-15T00:00:00.000Z",
 			round: "second",
 		});
 	});

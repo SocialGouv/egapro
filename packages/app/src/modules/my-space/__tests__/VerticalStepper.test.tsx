@@ -18,6 +18,16 @@ import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
 const FUTURE_YEAR = 2099;
 const PAST_YEAR = 2020;
 
+// decl2ModificationDeadline, pathChoiceDeadline and decl2JointEvaluationDeadline all default to January 1st N+1: override each to a distinct date so a case below cannot pass by reading the wrong key.
+function distinctDeadlines(year: number) {
+	return {
+		...getDefaultCampaignDeadlines(year),
+		decl2ModificationDeadline: new Date(year + 1, 0, 2),
+		pathChoiceDeadline: new Date(year + 1, 0, 3),
+		decl2JointEvaluationDeadline: new Date(year + 1, 0, 4),
+	};
+}
+
 // `OrdinalLongDate` formats in UTC, so a hardcoded label would break on other timezones.
 function longDateText(date: Date): string {
 	const { container } = render(<OrdinalLongDate date={date} />);
@@ -202,7 +212,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("shows the round-2 path-choice deadline once the second declaration is submitted", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance_choice", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -212,6 +222,9 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			const deadlineRow = panel.getByText(/^Échéance :/);
 			expect(deadlineRow).toHaveTextContent(
 				`Échéance : ${longDateText(deadlines.pathChoiceDeadline)}`,
+			);
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines.decl2ModificationDeadline),
 			);
 		});
 	});
@@ -257,7 +270,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("names the pending path choice again after the second declaration", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance_choice", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -276,7 +289,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 		});
 
 		it("names the chosen path and its deadline for corrective actions", () => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("compliance", {
 				campaignDeadlines: deadlines,
 				displayContext: makeDisplayContext("corrective_action"),
@@ -285,8 +298,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				panel.getByText("Actions correctives et seconde déclaration"),
 			).toBeInTheDocument();
-			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
 				`Échéance : ${longDateText(deadlines.decl2ModificationDeadline)}`,
+			);
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines.pathChoiceDeadline),
 			);
 		});
 
@@ -341,7 +358,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			hasSubmittedSecondDeclaration,
 			deadlineKey,
 		}) => {
-			const deadlines = getDefaultCampaignDeadlines(FUTURE_YEAR);
+			const deadlines = distinctDeadlines(FUTURE_YEAR);
 			const { panel } = renderPanel("evaluation", {
 				campaignDeadlines: deadlines,
 				declarationFsmStatus,
@@ -352,8 +369,16 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 			expect(
 				panel.getByText("Évaluation conjointe des rémunérations"),
 			).toBeInTheDocument();
-			expect(panel.getByText(/^Échéance :/)).toHaveTextContent(
+			const deadlineRow = panel.getByText(/^Échéance :/);
+			expect(deadlineRow).toHaveTextContent(
 				`Échéance : ${longDateText(deadlines[deadlineKey])}`,
+			);
+			const otherKey =
+				deadlineKey === "decl1JointEvaluationDeadline"
+					? "decl2JointEvaluationDeadline"
+					: "decl1JointEvaluationDeadline";
+			expect(deadlineRow).not.toHaveTextContent(
+				longDateText(deadlines[otherKey]),
 			);
 		});
 	});
@@ -488,9 +513,12 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("étape 3 — échéance de l'avis du CSE (#4217)", () => {
 		const DEADLINES = getDefaultCampaignDeadlines(FUTURE_YEAR);
 
-		it("closes the CSE opinion a month after the round-2 joint evaluation", () => {
+		it("closes the CSE opinion after the round-2 joint evaluation", () => {
 			expect(DEADLINES.decl2CseOpinionDeadline).not.toEqual(
 				DEADLINES.decl2JointEvaluationDeadline,
+			);
+			expect(DEADLINES.decl2CseOpinionDeadline.getTime()).toBeGreaterThan(
+				DEADLINES.decl2JointEvaluationDeadline.getTime(),
 			);
 		});
 

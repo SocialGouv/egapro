@@ -5,7 +5,13 @@ import { getDeclarationProcessStepDeadline } from "../shared/declarationProcessS
 import type { DeclarationFsmStatus } from "../types";
 
 const YEAR = 2027;
-const deadlines = getDefaultCampaignDeadlines(YEAR);
+// decl2ModificationDeadline, pathChoiceDeadline and decl2JointEvaluationDeadline all default to January 1st N+1: give each a distinct date so a case below cannot pass by picking the wrong key.
+const deadlines = {
+	...getDefaultCampaignDeadlines(YEAR),
+	decl2ModificationDeadline: new Date(YEAR + 1, 0, 2),
+	pathChoiceDeadline: new Date(YEAR + 1, 0, 3),
+	decl2JointEvaluationDeadline: new Date(YEAR + 1, 0, 4),
+};
 
 describe("getDeclarationProcessStepDeadline", () => {
 	it("returns decl1ModificationDeadline when fsmStatus is null", () => {

@@ -36,7 +36,7 @@ describe("getRepresentationCampaign", () => {
 
 		expect(campaign.campaignStartDate).toEqual(new Date(2027, 0, 1));
 		expect(campaign.campaignEndDate).toEqual(new Date(2027, 11, 31));
-		expect(campaign.declarationDeadline).toEqual(new Date(2027, 2, 1));
+		expect(campaign.declarationDeadline).toEqual(new Date(2027, 5, 1));
 	});
 
 	it("matches the domain defaults exactly when no row exists", async () => {

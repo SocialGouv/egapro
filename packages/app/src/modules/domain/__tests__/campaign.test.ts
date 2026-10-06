@@ -291,24 +291,14 @@ describe("getDefaultCampaignDeadlines", () => {
 		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
 		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2028, 2, 1));
 		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
-			new Date(2027, 7, 1),
+			new Date(2027, 8, 1),
 		);
-		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
-		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2028, 0, 1));
+		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2028, 2, 1));
 		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
 			new Date(2028, 0, 1),
 		);
-		expect(deadlines.decl2CseOpinionDeadline).toEqual(new Date(2028, 1, 1));
-	});
-
-	it("keeps the round-2 joint evaluation and CSE opinion deadlines one month apart", () => {
-		const deadlines = getDefaultCampaignDeadlines(2027);
-		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
-			deadlines.decl2CseOpinionDeadline,
-		);
-		expect(deadlines.decl2JointEvaluationDeadline.getTime()).toBeLessThan(
-			deadlines.decl2CseOpinionDeadline.getTime(),
-		);
+		expect(deadlines.decl2CseOpinionDeadline).toEqual(new Date(2028, 2, 1));
 	});
 
 	it("exposes the derived path choice deadline at January 1st of year + 1", () => {
@@ -324,6 +314,76 @@ describe("getDefaultCampaignDeadlines", () => {
 	});
 });
 
+// Each pair asserts that the later milestone falls on or after the one that opens it — bounds inclusive, since several of the spec's milestones share a day.
+describe("getDefaultCampaignDeadlines — ordering", () => {
+	const deadlines = getDefaultCampaignDeadlines(2027);
+
+	it.each<[string, Date, Date]>([
+		[
+			"round-1 path choice is at or after the first-declaration deadline",
+			deadlines.pathChoiceRound1Deadline,
+			deadlines.decl1ModificationDeadline,
+		],
+		[
+			"round-1 justification is at or after the round-1 path choice",
+			deadlines.decl1JustificationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"round-1 joint evaluation is at or after the round-1 path choice",
+			deadlines.decl1JointEvaluationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"the second declaration is at or after the round-1 path choice",
+			deadlines.decl2ModificationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"round-2 path choice is at or after the second declaration",
+			deadlines.pathChoiceDeadline,
+			deadlines.decl2ModificationDeadline,
+		],
+		[
+			"round-2 justification is at or after the round-2 path choice",
+			deadlines.decl2JustificationDeadline,
+			deadlines.pathChoiceDeadline,
+		],
+		[
+			"round-2 joint evaluation is at or after the round-2 path choice",
+			deadlines.decl2JointEvaluationDeadline,
+			deadlines.pathChoiceDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-1 justification",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl1JustificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-1 joint evaluation",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl1JointEvaluationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the second declaration",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2ModificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-2 justification",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2JustificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-2 joint evaluation",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2JointEvaluationDeadline,
+		],
+	])("%s", (_label, later, earlier) => {
+		expect(later.getTime()).toBeGreaterThanOrEqual(earlier.getTime());
+	});
+});
+
 describe("getDefaultRepresentationCampaign", () => {
 	it("opens on January 1st and closes on December 31st of the campaign year", () => {
 		const campaign = getDefaultRepresentationCampaign(2027);
@@ -331,9 +391,12 @@ describe("getDefaultRepresentationCampaign", () => {
 		expect(campaign.campaignEndDate).toEqual(new Date(2027, 11, 31));
 	});
 
-	it("sets the declaration deadline on March 1st of the campaign year", () => {
+	it("derives the declaration deadline from the remuneration first-declaration default", () => {
 		expect(getDefaultRepresentationCampaign(2027).declarationDeadline).toEqual(
-			new Date(2027, 2, 1),
+			getDefaultCampaignDeadlines(2027).decl1ModificationDeadline,
+		);
+		expect(getDefaultRepresentationCampaign(2027).declarationDeadline).toEqual(
+			new Date(2027, 5, 1),
 		);
 	});
 
@@ -341,7 +404,17 @@ describe("getDefaultRepresentationCampaign", () => {
 		const campaign = getDefaultRepresentationCampaign(2030);
 		expect(campaign.campaignStartDate).toEqual(new Date(2030, 0, 1));
 		expect(campaign.campaignEndDate).toEqual(new Date(2030, 11, 31));
-		expect(campaign.declarationDeadline).toEqual(new Date(2030, 2, 1));
+		expect(campaign.declarationDeadline).toEqual(new Date(2030, 5, 1));
+	});
+
+	it("keeps the declaration deadline within the campaign window", () => {
+		const campaign = getDefaultRepresentationCampaign(2027);
+		expect(campaign.declarationDeadline.getTime()).toBeGreaterThanOrEqual(
+			campaign.campaignStartDate.getTime(),
+		);
+		expect(campaign.declarationDeadline.getTime()).toBeLessThanOrEqual(
+			campaign.campaignEndDate.getTime(),
+		);
 	});
 });
 
