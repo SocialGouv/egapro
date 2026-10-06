@@ -42,6 +42,7 @@ import {
 	declarationStatusHistory,
 	declarations,
 	employeeCategories,
+	files,
 	gipMdsData,
 	jobCategories,
 	userCompanies,
@@ -75,6 +76,12 @@ const PATH_LOCKED_ERROR =
 
 const PATH_CHOICE_UNAVAILABLE_ERROR =
 	"Le choix du parcours de mise en conformité n'est pas ouvert à cette étape de la démarche.";
+
+const JOINT_EVALUATION_FILE_MISSING_ERROR =
+	"Le rapport de l'évaluation conjointe doit être déposé avant sa transmission.";
+
+const JOINT_EVALUATION_UNAVAILABLE_ERROR =
+	"L'évaluation conjointe ne peut pas être transmise à cette étape de la démarche.";
 
 type DeclarationRow = typeof declarations.$inferSelect;
 type CompanyRow = typeof companies.$inferSelect;
@@ -949,12 +956,30 @@ export const declarationRouter = createTRPCRouter({
 
 			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
+			const [jointEvaluationFile] = await ctx.db
+				.select({ id: files.id })
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, declaration.id),
+						eq(files.type, "joint_evaluation"),
+					),
+				)
+				.limit(1);
+			if (!jointEvaluationFile) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: JOINT_EVALUATION_FILE_MISSING_ERROR,
+				});
+			}
+
 			const rules = loadRules(declaration.rulesVersion);
 			const facts = buildJointEvaluationFacts(declaration);
-			const { nextStatus, events } = applyAction(
+			const { nextStatus, events } = applyActionOrRefuse(
 				facts,
 				"submit_joint_evaluation",
 				rules,
+				JOINT_EVALUATION_UNAVAILABLE_ERROR,
 			);
 
 			const projection = computeProjectionUpdates(events, nextStatus);

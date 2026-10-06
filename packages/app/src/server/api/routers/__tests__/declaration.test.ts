@@ -401,6 +401,30 @@ function createSimpleSelectDb(
 	};
 }
 
+const JOINT_EVALUATION_FILE = { id: "file-joint-evaluation-1" };
+
+function createJointEvaluationDb(
+	declaration: DeclarationStateRow,
+	jointEvaluationFiles: unknown[] = [JOINT_EVALUATION_FILE],
+	txRows: unknown[] = [],
+) {
+	const queue = createSelectQueue([[declaration], jointEvaluationFiles]);
+	const m = createMutationTxMock(txRows);
+
+	return {
+		db: {
+			select: queue.select,
+			update: m.update,
+			insert: m.insert,
+			transaction: m.transaction,
+		} as unknown,
+		set: m.set,
+		update: m.update,
+		insert: m.insert,
+		insertValues: m.insertValues,
+	};
+}
+
 describe("declarationRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -1462,7 +1486,7 @@ describe("declarationRouter", () => {
 				cseRequired: true,
 				firstDeclarationPathChoice: "joint_evaluation",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createJointEvaluationDb(declaration);
 			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.submitJointEvaluation();
@@ -1489,7 +1513,7 @@ describe("declarationRouter", () => {
 				firstDeclarationPathChoice: "corrective_action",
 				secondDeclarationPathChoice: "joint_evaluation",
 			});
-			const ctx = createSimpleSelectDb(declaration);
+			const ctx = createJointEvaluationDb(declaration);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
@@ -1516,6 +1540,49 @@ describe("declarationRouter", () => {
 			await expect(caller.submitJointEvaluation()).rejects.toThrow();
 		});
 
+		describe("preconditions (#4757)", () => {
+			it("refuses the submission while no joint evaluation report has been uploaded", async () => {
+				const declaration = buildDeclaration({
+					status: "joint_evaluation_chosen",
+					cseRequired: false,
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createJointEvaluationDb(declaration, []);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.submitJointEvaluation()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"Le rapport de l'évaluation conjointe doit être déposé avant sa transmission.",
+				});
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+				expect(ctx.set).not.toHaveBeenCalled();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+
+			it("refuses the submission from a state where no joint evaluation was chosen", async () => {
+				const declaration = buildDeclaration({ status: "draft" });
+				const ctx = createJointEvaluationDb(declaration);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.submitJointEvaluation()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+				});
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+		});
+
 		it("purges the joint draft slice and keeps other slices after submitJointEvaluation", async () => {
 			const declaration = buildDeclaration({
 				status: "joint_evaluation_chosen",
@@ -1526,7 +1593,11 @@ describe("declarationRouter", () => {
 					cse: { step1: {} },
 				},
 			});
-			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const ctx = createJointEvaluationDb(
+				declaration,
+				[JOINT_EVALUATION_FILE],
+				[declaration],
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
@@ -1547,7 +1618,11 @@ describe("declarationRouter", () => {
 				firstDeclarationPathChoice: "joint_evaluation",
 				draft: { joint: { step1: { foo: "bar" } } },
 			});
-			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
+			const ctx = createJointEvaluationDb(
+				declaration,
+				[JOINT_EVALUATION_FILE],
+				[declaration],
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitJointEvaluation();
@@ -1573,7 +1648,7 @@ describe("declarationRouter", () => {
 					cseRequired: true,
 					firstDeclarationPathChoice: "joint_evaluation",
 				});
-				const ctx = createSimpleSelectDb(declaration);
+				const ctx = createJointEvaluationDb(declaration);
 				const caller = await createLockedCaller(
 					ctx.db,
 					undefined,
@@ -1601,7 +1676,7 @@ describe("declarationRouter", () => {
 					cseRequired: true,
 					firstDeclarationPathChoice: "joint_evaluation",
 				});
-				const ctx = createSimpleSelectDb(declaration);
+				const ctx = createJointEvaluationDb(declaration);
 				const caller = await createLockedCaller(ctx.db);
 
 				const result = await caller.submitJointEvaluation();
