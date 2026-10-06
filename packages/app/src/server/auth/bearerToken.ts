@@ -11,9 +11,8 @@ export function assertBearerToken(
 	request: Request,
 	{ expectedToken, tokenName }: BearerTokenOptions,
 ): Response | null {
-	// Fail closed: a forgotten secret must never leave the route unauthenticated.
 	if (!expectedToken) {
-		console.error(`[bearer-token] ${tokenName} is not configured — refusing`);
+		reportMissingToken(tokenName);
 		return unauthorized();
 	}
 
@@ -26,6 +25,14 @@ export function assertBearerToken(
 	}
 
 	return null;
+}
+
+const reportedMissingTokens = new Set<string>();
+
+function reportMissingToken(tokenName: string): void {
+	if (reportedMissingTokens.has(tokenName)) return;
+	reportedMissingTokens.add(tokenName);
+	console.error(`[bearer-token] ${tokenName} is not configured — refusing`);
 }
 
 function sha256(value: string): Buffer {

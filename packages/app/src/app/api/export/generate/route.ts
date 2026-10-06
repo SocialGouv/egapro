@@ -2,7 +2,10 @@ import { env } from "~/env.js";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
 import { generateYearlyExport } from "~/modules/export";
-import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
+import {
+	auditedExportYear,
+	exportYearOptionalQuerySchema,
+} from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { assertBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
@@ -10,19 +13,15 @@ import { db } from "~/server/db";
 /**
  * POST /api/export/generate
  *
- * Trigger yearly export XLSX generation. Called by the K8s CronJob with a
- * Bearer token (EGAPRO_EXPORT_API_TOKEN).
+ * Trigger yearly export XLSX generation. Called by the K8s CronJob.
  * Optional query param `year` (YYYY) — defaults to current year.
  */
 export const POST = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.EXPORT_GENERATE,
-		resolveContext: (request) => {
-			const url = new URL(request.url);
-			return {
-				metadata: { year: url.searchParams.get("year") ?? null },
-			};
-		},
+		resolveContext: (request) => ({
+			metadata: { year: auditedExportYear(request) },
+		}),
 	},
 	exportGenerateHandler,
 );

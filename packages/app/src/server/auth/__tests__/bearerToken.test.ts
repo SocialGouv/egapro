@@ -26,6 +26,20 @@ describe("assertBearerToken", () => {
 		expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(TOKEN_NAME));
 	});
 
+	it("logs a missing token once, not on every refused request", () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const options = {
+			expectedToken: undefined,
+			tokenName: "EGAPRO_ONCE_API_TOKEN",
+		};
+
+		assertBearerToken(request(), options);
+		assertBearerToken(request(), options);
+		assertBearerToken(request(), options);
+
+		expect(errorSpy).toHaveBeenCalledTimes(1);
+	});
+
 	it("refuses an empty expected token, even against an empty bearer", () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -10,8 +10,20 @@ vi.mock("~/modules/export", () => ({
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
+const audited = vi.hoisted(() => ({
+	config: undefined as
+		| { resolveContext: (request: Request) => { metadata: unknown } }
+		| undefined,
+}));
+
 vi.mock("~/server/audit/withAuditedRoute", () => ({
-	withAuditedRoute: (_config: unknown, handler: unknown) => handler,
+	withAuditedRoute: (
+		config: typeof audited.config,
+		handler: unknown,
+	) => {
+		audited.config = config;
+		return handler;
+	},
 }));
 
 vi.mock("~/modules/audit", () => ({
@@ -85,5 +97,17 @@ describe("POST /api/export/generate", () => {
 			rowCount: 3,
 		});
 		expect(mocks.generateYearlyExport).toHaveBeenCalledWith({}, 2026);
+	});
+
+	it("keeps only a well-formed year in the audit metadata", async () => {
+		await loadRoute({ EGAPRO_EXPORT_API_TOKEN: "secret-token" });
+		const resolve = (query: string) =>
+			audited.config?.resolveContext(
+				new Request(`http://localhost/api/export/generate${query}`),
+			).metadata;
+
+		expect(resolve("?year=2026")).toEqual({ year: 2026 });
+		expect(resolve(`?year=${"x".repeat(10_000)}`)).toEqual({ year: null });
+		expect(resolve("")).toEqual({ year: null });
 	});
 });
