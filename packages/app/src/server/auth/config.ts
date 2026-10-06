@@ -26,6 +26,7 @@ import {
 } from "~/server/db/schema";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 import { parseAdminEmails } from "./parseAdminEmails";
+import { resolveRedirectTarget } from "./redirectTarget";
 
 /** Cap on the `name` field of an impersonation payload — avoids oversized
  *  tokens if an admin forges a huge string in the `session.update` call. */
@@ -475,16 +476,7 @@ export const authConfig = {
 	providers: getProviders(),
 	callbacks: {
 		redirect({ url, baseUrl }) {
-			if (url.startsWith(baseUrl)) {
-				const path = url.slice(baseUrl.length);
-				if (!path || path === "/") return `${baseUrl}/mon-espace`;
-				return url;
-			}
-			if (url.startsWith("/")) {
-				if (url === "/") return `${baseUrl}/mon-espace`;
-				return `${baseUrl}${url}`;
-			}
-			return `${baseUrl}/mon-espace`;
+			return resolveRedirectTarget(url, baseUrl);
 		},
 		async jwt({ token, user, account, trigger, session: sessionUpdate }) {
 			// Admin-triggered impersonation update. Guarded server-side: only
