@@ -18,6 +18,8 @@ audit log is a bug, not a missing enhancement.
 Infrastructure lives in `~/modules/audit` + `~/server/audit` — see issue
 SocialGouv/egapro#3174 for the design notes.
 
+**Retention documentation lives at [`docs/journaux-et-conservation.md`](../../docs/journaux-et-conservation.md)**, not here. Any change to what `audit.action_log` stores or to its retention window (content of `logAction`, `activityLog.ts`, `audit-cleanup.ts`, or the categories in `AUDIT_ACTION_CATEGORIES`) **must** update that page's §4.1 in the same PR — it is described there as a snapshot of this code, and a stale snapshot is worse than a missing one.
+
 ---
 
 ## When a new audit entry is REQUIRED

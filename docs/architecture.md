@@ -616,6 +616,8 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 
 `AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`. La rétention **des déclarations** (distincte de celle du log d'audit) est pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**, voir §9.6).
 
+Vue d'ensemble de tous les journaux produits par l'application (pas seulement celui-ci) et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
+
 ### 9.4 Wire-up obligatoire
 
 Toute nouvelle action audited requiert **3 points** :
