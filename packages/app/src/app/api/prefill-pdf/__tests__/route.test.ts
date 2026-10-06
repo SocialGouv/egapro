@@ -166,6 +166,18 @@ describe("GET /api/prefill-pdf", () => {
 		});
 	});
 
+	it.each([
+		["a refused download", false, "?year=2025"],
+		["an invalid year", true, "?year=abc"],
+	])("keeps %s out of every cache", async (_label, signedIn, query) => {
+		if (!signedIn) mocks.auth.mockResolvedValue(null);
+
+		const response = await GET(request(query));
+
+		expect(response.status).toBeGreaterThanOrEqual(400);
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+	});
+
 	it("audits the download as a sensitive read", async () => {
 		prefilledCompany();
 

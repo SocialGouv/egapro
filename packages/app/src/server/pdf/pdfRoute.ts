@@ -5,12 +5,9 @@ import { getPdfSize, pdfSizeKey, setPdfSize } from "./pdfSizeCache";
 
 type RenderPdf = () => Promise<Buffer>;
 
-/**
- * Reads the `year` query parameter as a number the audit row can carry. The raw
- * string never leaves this function: an unbounded caller-supplied value written
- * to `audit.action_log` would let anyone inflate the trace, and the row is
- * written for refused requests too.
- */
+const NO_STORE = "private, no-store";
+
+// The raw string never reaches the audit row, which is written for refused requests too.
 export function readRequestedYear(request: Request): {
 	year: number | null;
 	invalid: boolean;
@@ -23,8 +20,18 @@ export function readRequestedYear(request: Request): {
 	return { year, invalid: year === null };
 }
 
+export function pdfErrorResponse(
+	body: string | null,
+	status: number,
+): Response {
+	return new Response(body, {
+		status,
+		headers: { "Cache-Control": NO_STORE },
+	});
+}
+
 export function invalidYearResponse(): Response {
-	return new Response("Paramètre 'year' invalide", { status: 400 });
+	return pdfErrorResponse("Paramètre 'year' invalide", 400);
 }
 
 export function pdfHeaders(
@@ -35,7 +42,7 @@ export function pdfHeaders(
 		"Content-Type": "application/pdf",
 		"Content-Disposition": `attachment; filename="${filename}"`,
 		"Content-Length": String(byteLength),
-		"Cache-Control": "private, no-store",
+		"Cache-Control": NO_STORE,
 	};
 }
 

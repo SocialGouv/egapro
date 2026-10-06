@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { pdfHeaders, readRequestedYear } from "../pdfRoute";
+import {
+	invalidYearResponse,
+	pdfErrorResponse,
+	pdfHeaders,
+	readRequestedYear,
+} from "../pdfRoute";
 
 describe("pdfHeaders", () => {
 	it("describes the PDF attachment", () => {
@@ -46,5 +51,32 @@ describe("readRequestedYear", () => {
 			year: null,
 			invalid: true,
 		});
+	});
+});
+
+describe("pdfErrorResponse", () => {
+	it("answers the status with a body kept out of every cache", async () => {
+		const response = pdfErrorResponse("Non autorisé", 401);
+
+		expect(response.status).toBe(401);
+		expect(await response.text()).toBe("Non autorisé");
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+	});
+
+	it("answers a body-less error for HEAD probes", async () => {
+		const response = pdfErrorResponse(null, 404);
+
+		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("");
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+	});
+});
+
+describe("invalidYearResponse", () => {
+	it("is a non-cacheable 400", () => {
+		const response = invalidYearResponse();
+
+		expect(response.status).toBe(400);
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
 	});
 });

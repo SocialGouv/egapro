@@ -13,6 +13,7 @@ import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
 	invalidYearResponse,
+	pdfErrorResponse,
 	pdfHeaders,
 	readRequestedYear,
 	renderPdfAndCacheSize,
@@ -44,7 +45,7 @@ async function resolvePrefillPdf(
 ): Promise<ResolvedPrefillPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { error: new Response("Non autorisé", { status: 401 }) };
+		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
 	const requestedYear = readRequestedYear(request);
@@ -60,7 +61,7 @@ async function resolvePrefillPdf(
 		.limit(1);
 
 	if (!row) {
-		return { error: new Response("Aucune donnée préremplie", { status: 404 }) };
+		return { error: pdfErrorResponse("Aucune donnée préremplie", 404) };
 	}
 
 	const [company] = await db
@@ -100,7 +101,7 @@ export const GET = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[prefill-pdf]", error);
-			return new Response("Impossible de générer le PDF", { status: 500 });
+			return pdfErrorResponse("Impossible de générer le PDF", 500);
 		}
 	},
 );
@@ -114,7 +115,7 @@ export const HEAD = withAuditedRoute(
 		try {
 			const resolved = await resolvePrefillPdf(request);
 			if (resolved.error) {
-				return new Response(null, { status: resolved.error.status });
+				return pdfErrorResponse(null, resolved.error.status);
 			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
@@ -126,7 +127,7 @@ export const HEAD = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[prefill-pdf:head]", error);
-			return new Response(null, { status: 500 });
+			return pdfErrorResponse(null, 500);
 		}
 	},
 );

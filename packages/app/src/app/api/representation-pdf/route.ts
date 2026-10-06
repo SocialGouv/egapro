@@ -10,6 +10,7 @@ import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import {
 	invalidYearResponse,
+	pdfErrorResponse,
 	pdfHeaders,
 	readRequestedYear,
 	renderPdfAndCacheSize,
@@ -45,7 +46,7 @@ async function resolveRepresentationPdf(
 ): Promise<ResolvedRepresentationPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { error: new Response("Non autorisé", { status: 401 }) };
+		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
 	const requestedYear = readRequestedYear(request);
@@ -81,10 +82,10 @@ export const GET = withAuditedRoute(
 			});
 		} catch (error) {
 			if (error instanceof RepresentationDeclarationNotFoundError) {
-				return new Response("Déclaration introuvable", { status: 404 });
+				return pdfErrorResponse("Déclaration introuvable", 404);
 			}
 			console.error("[representation-pdf]", error);
-			return new Response("Impossible de générer le PDF", { status: 400 });
+			return pdfErrorResponse("Impossible de générer le PDF", 400);
 		}
 	},
 );
@@ -98,7 +99,7 @@ export const HEAD = withAuditedRoute(
 		try {
 			const resolved = await resolveRepresentationPdf(request);
 			if (resolved.error) {
-				return new Response(null, { status: resolved.error.status });
+				return pdfErrorResponse(null, resolved.error.status);
 			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
@@ -110,10 +111,10 @@ export const HEAD = withAuditedRoute(
 			});
 		} catch (error) {
 			if (error instanceof RepresentationDeclarationNotFoundError) {
-				return new Response(null, { status: 404 });
+				return pdfErrorResponse(null, 404);
 			}
 			console.error("[representation-pdf:head]", error);
-			return new Response(null, { status: 400 });
+			return pdfErrorResponse(null, 400);
 		}
 	},
 );
