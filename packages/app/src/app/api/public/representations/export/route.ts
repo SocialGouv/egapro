@@ -14,11 +14,7 @@ import {
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
-import {
-	publicExportCacheKey,
-	readCachedExport,
-	storeCachedExport,
-} from "~/server/services/publicExportCache";
+import { cachedPublicExport } from "~/server/services/publicExportCache";
 
 // Defaults to xlsx: this endpoint shipped as an Excel-only download and
 // existing callers pass no format at all.
@@ -73,26 +69,26 @@ export const GET = withAuditedRoute(
 				);
 			}
 			if (format.data === "csv") {
-				const cached = await readCachedExport(
-					publicExportCacheKey("representations", "csv", input.data),
+				const body = await cachedPublicExport(
+					"representations",
+					"csv",
+					input.data,
+					async () => {
+						const rows = await fetchWithinExportLimit("csv", (limit) =>
+							buildRepresentationExportRows(db, input.data, limit),
+						);
+						return rows instanceof Response
+							? rows
+							: generateRepresentationCsv(rows);
+					},
 				);
-				if (cached !== null) return csvExportResponse(cached);
+				return body instanceof Response ? body : csvExportResponse(body);
 			}
 
-			const rows = await fetchWithinExportLimit(format.data, (limit) =>
+			const rows = await fetchWithinExportLimit("xlsx", (limit) =>
 				buildRepresentationExportRows(db, input.data, limit),
 			);
 			if (rows instanceof Response) return rows;
-
-			if (format.data === "csv") {
-				const body = generateRepresentationCsv(rows);
-				await storeCachedExport(
-					publicExportCacheKey("representations", "csv", input.data),
-					body,
-				);
-				return csvExportResponse(body);
-			}
-
 			const xlsxBuffer = await generateRepresentationXlsx(rows);
 
 			return new NextResponse(new Uint8Array(xlsxBuffer), {

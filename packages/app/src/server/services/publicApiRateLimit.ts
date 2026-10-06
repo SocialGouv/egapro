@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "~/env";
-import { discardValkey, getValkey, withValkeyTimeout } from "./valkey";
+import { rateLimitValkey, withValkeyTimeout } from "./valkey";
 
 const WINDOW_SECONDS = 60;
 const REDIS_TIMEOUT_MS = 1_500;
@@ -73,7 +73,7 @@ function incrementMemory(key: string): number {
 }
 
 async function increment(key: string): Promise<number> {
-	const redis = await getValkey();
+	const redis = await rateLimitValkey.client();
 	if (redis) {
 		try {
 			const redisKey = `public-api-rate:${key}`;
@@ -86,7 +86,7 @@ async function increment(key: string): Promise<number> {
 			);
 			return Number(count);
 		} catch {
-			discardValkey(redis);
+			rateLimitValkey.discard(redis);
 		}
 	}
 	return incrementMemory(key);

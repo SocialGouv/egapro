@@ -4,19 +4,17 @@ import { createClient, type RedisClientType } from "redis";
 import { env } from "~/env";
 
 const CONNECT_TIMEOUT_MS = 1_500;
-let valkeyClient: RedisClientType | null = null;
-let valkeyConnection: Promise<RedisClientType | null> | null = null;
 
-/**
- * The application's own Valkey client, shared by every server-side consumer
- * (rate limiting, export cache). Resolves to `null` when Valkey is not
- * configured or unreachable: callers fall back rather than fail.
- */
-export async function getValkey(): Promise<RedisClientType | null> {
-	if (!env.VALKEY_URL) return null;
-	if (valkeyClient?.isReady) return valkeyClient;
-	if (valkeyConnection) return valkeyConnection;
-	valkeyConnection = (async () => {
+export type ValkeyConnection = {
+	client(): Promise<RedisClientType | null>;
+	discard(client: RedisClientType): void;
+};
+
+export function createValkeyConnection(): ValkeyConnection {
+	let current: RedisClientType | null = null;
+	let pending: Promise<RedisClientType | null> | null = null;
+
+	async function connect(): Promise<RedisClientType | null> {
 		let client: RedisClientType | null = null;
 		try {
 			client = createClient({
@@ -25,26 +23,36 @@ export async function getValkey(): Promise<RedisClientType | null> {
 			}) as RedisClientType;
 			client.on("error", () => undefined);
 			client.on("end", () => {
-				if (valkeyClient === client) valkeyClient = null;
+				if (current === client) current = null;
 			});
 			await withValkeyTimeout(client.connect(), CONNECT_TIMEOUT_MS);
-			valkeyClient = client;
-			return valkeyClient;
+			current = client;
+			return current;
 		} catch {
 			client?.destroy();
 			return null;
-		} finally {
-			valkeyConnection = null;
 		}
-	})();
-	return valkeyConnection;
+	}
+
+	return {
+		async client() {
+			if (!env.VALKEY_URL) return null;
+			if (current?.isReady) return current;
+			pending ??= connect().finally(() => {
+				pending = null;
+			});
+			return pending;
+		},
+		discard(client) {
+			if (current === client) current = null;
+			client.destroy();
+		},
+	};
 }
 
-/** Drops a client that failed a command, so the next call reconnects. */
-export function discardValkey(client: RedisClientType): void {
-	if (valkeyClient === client) valkeyClient = null;
-	client.destroy();
-}
+// Separate sockets: a multi-megabyte export transfer must never delay a rate-limit INCR.
+export const rateLimitValkey = createValkeyConnection();
+export const exportCacheValkey = createValkeyConnection();
 
 export async function withValkeyTimeout<T>(
 	promise: Promise<T>,

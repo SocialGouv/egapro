@@ -10,11 +10,9 @@ const mocks = vi.hoisted(() => ({
 	getValkey: vi.fn(),
 }));
 
-vi.mock("~/server/services/valkey", () => ({
-	getValkey: mocks.getValkey,
-	discardValkey: vi.fn(),
-	withValkeyTimeout: <T>(promise: Promise<T>) => promise,
-}));
+vi.mock("~/server/services/valkey", async () =>
+	(await import("~/test/fakeValkey")).mockValkeyModule(mocks.getValkey),
+);
 
 vi.mock("~/modules/export", () => ({
 	buildRepresentationExportRows: mocks.buildRows,

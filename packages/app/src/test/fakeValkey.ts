@@ -1,11 +1,5 @@
 import { vi } from "vitest";
 
-/**
- * In-memory stand-in for the shared Valkey client, covering the commands the
- * server code issues: GET/SET for the export cache, and the counter scripts —
- * INCR for the rate limiter, INCRBY `arguments[0]` for the export cache budget
- * — which both return the counter after incrementing it.
- */
 export function createFakeValkey() {
 	const store = new Map<string, string>();
 	const counters = new Map<string, number>();
@@ -18,17 +12,23 @@ export function createFakeValkey() {
 		}),
 		eval: vi.fn(
 			async (
-				script: string,
+				_script: string,
 				options: { keys: string[]; arguments: string[] },
 			) => {
 				const key = options.keys[0] ?? "";
-				const step = script.includes("INCRBY")
-					? Number(options.arguments[0])
-					: 1;
-				const used = (counters.get(key) ?? 0) + step;
+				const used =
+					(counters.get(key) ?? 0) + Number(options.arguments[0] ?? 0);
 				counters.set(key, used);
 				return used;
 			},
 		),
+	};
+}
+
+export function mockValkeyModule(exportCacheClient: () => Promise<unknown>) {
+	return {
+		exportCacheValkey: { client: exportCacheClient, discard: vi.fn() },
+		rateLimitValkey: { client: async () => null, discard: vi.fn() },
+		withValkeyTimeout: <T>(promise: Promise<T>) => promise,
 	};
 }

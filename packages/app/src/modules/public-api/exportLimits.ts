@@ -3,16 +3,9 @@ import { PUBLIC_API_EXPORT_HEADERS } from "./httpHeaders";
 
 export type PublicExportFormat = "json" | "csv" | "xlsx";
 
-/** An Excel workbook is assembled in memory cell by cell: far below the text formats. */
 export const MAX_XLSX_EXPORT_ROWS = 10_000;
 
-/**
- * Safety ceiling of the JSON and CSV exports, which stay unfiltered for the
- * data.gouv.fr resource and the "tout télécharger" button. About 35 000
- * companies declare per campaign and the exports span every published
- * campaign since 2027: this leaves five campaigns of headroom while bounding
- * what one request may hold in memory.
- */
+// Sized for the unfiltered open-data export: see docs/PUBLIC-API.md, « Plafonds et cache des exports ».
 export const MAX_EXPORT_ROWS = 200_000;
 
 function exportRowLimit(format: PublicExportFormat): number {
@@ -25,10 +18,7 @@ function exportTooLargeMessage(format: PublicExportFormat): string {
 		: `L’export est limité à ${formatCount(MAX_EXPORT_ROWS)} lignes. Ajoutez des filtres, par exemple une année avec le paramètre year.`;
 }
 
-/**
- * Fetches one row past the format's cap, so an oversized result is detected
- * without loading it, and answers 413 instead of the rows when it is exceeded.
- */
+// One row past the cap detects an oversized result without loading it.
 export async function fetchWithinExportLimit<Row>(
 	format: PublicExportFormat,
 	fetchRows: (limit: number) => Promise<Row[]>,

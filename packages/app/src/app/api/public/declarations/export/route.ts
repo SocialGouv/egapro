@@ -28,11 +28,7 @@ import {
 } from "~/server/db/schema";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
-import {
-	publicExportCacheKey,
-	readCachedExport,
-	storeCachedExport,
-} from "~/server/services/publicExportCache";
+import { cachedPublicExport } from "~/server/services/publicExportCache";
 
 export function OPTIONS(): Response {
 	return new Response(null, {
@@ -266,21 +262,12 @@ export const GET = withAuditedRoute(
 
 			const input = inputResult.data;
 
-			if (format !== "xlsx") {
-				const cached = await readCachedExport(
-					publicExportCacheKey("declarations", format, input),
-				);
-				if (cached !== null) return textExportResponse(format, cached);
-			}
-
-			const rows = await fetchWithinExportLimit(format, (limit) =>
-				fetchPublishableDeclarations(input, limit),
-			);
-			if (rows instanceof Response) return rows;
-			const data = rows.map(toPublicDTO);
-
 			if (format === "xlsx") {
-				return new NextResponse(await formatWorkbook(data), {
+				const rows = await fetchWithinExportLimit(format, (limit) =>
+					fetchPublishableDeclarations(input, limit),
+				);
+				if (rows instanceof Response) return rows;
+				return new NextResponse(await formatWorkbook(rows.map(toPublicDTO)), {
 					headers: {
 						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type":
@@ -291,15 +278,22 @@ export const GET = withAuditedRoute(
 				});
 			}
 
-			const body =
-				format === "csv"
-					? formatCsv(data)
-					: JSON.stringify({ data, count: data.length });
-			await storeCachedExport(
-				publicExportCacheKey("declarations", format, input),
-				body,
+			const body = await cachedPublicExport(
+				"declarations",
+				format,
+				input,
+				async () => {
+					const rows = await fetchWithinExportLimit(format, (limit) =>
+						fetchPublishableDeclarations(input, limit),
+					);
+					if (rows instanceof Response) return rows;
+					const data = rows.map(toPublicDTO);
+					return format === "csv"
+						? formatCsv(data)
+						: JSON.stringify({ data, count: data.length });
+				},
 			);
-			return textExportResponse(format, body);
+			return body instanceof Response ? body : textExportResponse(format, body);
 		} catch (error) {
 			console.error(
 				"[api/public/declarations/export]",

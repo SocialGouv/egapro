@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { formatCount } from "~/modules/domain";
 import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "~/modules/public-api";
 import { createFakeValkey } from "~/test/fakeValkey";
 
@@ -10,11 +9,9 @@ const mocks = vi.hoisted(() => ({
 	queryLimit: vi.fn(),
 }));
 
-vi.mock("~/server/services/valkey", () => ({
-	getValkey: mocks.getValkey,
-	discardValkey: vi.fn(),
-	withValkeyTimeout: <T>(promise: Promise<T>) => promise,
-}));
+vi.mock("~/server/services/valkey", async () =>
+	(await import("~/test/fakeValkey")).mockValkeyModule(mocks.getValkey),
+);
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
@@ -393,7 +390,7 @@ describe("GET /api/public/declarations/export", () => {
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(await response.json()).toEqual(
 			expect.objectContaining({
-				error: expect.stringContaining(formatCount(MAX_XLSX_EXPORT_ROWS)),
+				error: expect.stringContaining("10\u202f000 lignes"),
 			}),
 		);
 	});
@@ -422,7 +419,7 @@ describe("GET /api/public/declarations/export", () => {
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(response.headers.get("Cache-Control")).toContain("max-age=3600");
 		expect(await response.json()).toEqual({
-			error: expect.stringContaining(formatCount(MAX_EXPORT_ROWS)),
+			error: expect.stringContaining("200\u202f000 lignes"),
 		});
 	});
 
@@ -454,6 +451,41 @@ describe("GET /api/public/declarations/export", () => {
 				"max-age=3600",
 			);
 			expect(await cachedResponse.text()).toBe(firstBody);
+		});
+
+		it.each([
+			"?format=csv",
+			"",
+		])("runs one database query for concurrent identical requests (%s)", async (search) => {
+			let release: () => void = () => undefined;
+			const gate = new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			const rows = [buildRow()];
+			const ordered = {
+				limit: async () => {
+					await gate;
+					return rows;
+				},
+			};
+			const chain = {
+				from: () => chain,
+				innerJoin: () => chain,
+				leftJoin: () => chain,
+				where: () => chain,
+				orderBy: () => ordered,
+			};
+			mocks.dbSelect.mockReturnValue(chain);
+
+			const pending = [callGet(search), callGet(search), callGet(search)];
+			await vi.waitFor(() => expect(mocks.dbSelect).toHaveBeenCalled());
+			release();
+			const responses = await Promise.all(pending);
+
+			expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
+			const bodies = await Promise.all(responses.map((r) => r.text()));
+			expect(new Set(bodies).size).toBe(1);
+			expect(responses.every((r) => r.status === 200)).toBe(true);
 		});
 
 		it("queries the database again for a different filter set", async () => {
