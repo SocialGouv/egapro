@@ -14,7 +14,13 @@ import {
 	declarationStatusHistory,
 	type declarations,
 } from "~/server/db/schema";
-import type { RuleEvent } from "~/server/rules/engine";
+import {
+	applyAction,
+	type Facts,
+	NoMatchingTransitionError,
+	type RuleEvent,
+	type Rules,
+} from "~/server/rules/engine";
 
 type DbLike = DB | Parameters<DB["transaction"]>[0] extends (
 	tx: infer T,
@@ -136,6 +142,26 @@ export async function getCurrentRound(
 		)
 		.limit(1);
 	return rows.length > 0 ? 2 : 1;
+}
+
+export function applyActionOrRefuse(
+	facts: Facts,
+	action: string,
+	rules: Rules,
+	refusalMessage: string,
+): ReturnType<typeof applyAction> {
+	try {
+		return applyAction(facts, action, rules);
+	} catch (error) {
+		if (error instanceof NoMatchingTransitionError) {
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: refusalMessage,
+				cause: error,
+			});
+		}
+		throw error;
+	}
 }
 
 export type ProjectionUpdate = Partial<typeof declarations.$inferInsert>;

@@ -59,6 +59,7 @@ import {
 	purgeDraftSlice,
 } from "./declarationHelpers";
 import {
+	applyActionOrRefuse,
 	assertFirstDeclarationModifiableUnderLock,
 	buildHistoryInserts,
 	buildStepChangeInsert,
@@ -71,6 +72,9 @@ import {
 
 const PATH_LOCKED_ERROR =
 	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
+
+const PATH_CHOICE_UNAVAILABLE_ERROR =
+	"Le choix du parcours de mise en conformité n'est pas ouvert à cette étape de la démarche.";
 
 type DeclarationRow = typeof declarations.$inferSelect;
 type CompanyRow = typeof companies.$inferSelect;
@@ -809,26 +813,19 @@ export const declarationRouter = createTRPCRouter({
 				});
 			}
 
-			let fsmCurrentState = declaration.status;
-			if (isRound2 && fsmCurrentState !== "awaiting_revision_choice") {
-				fsmCurrentState = "awaiting_revision_choice";
-			} else if (
-				!isRound2 &&
-				fsmCurrentState !== "awaiting_compliance_path_choice"
-			) {
-				fsmCurrentState = "awaiting_compliance_path_choice";
-			}
-
 			const rules = loadRules(declaration.rulesVersion);
 			const facts = {
-				currentState: fsmCurrentState,
+				currentState: declaration.status,
 				cseRequired: declaration.cseRequired,
+				firstDeclarationPathChoice: declaration.firstDeclarationPathChoice,
+				secondDeclarationPathChoice: declaration.secondDeclarationPathChoice,
 				action: { path: input.path },
 			};
-			const { nextStatus, events } = applyAction(
+			const { nextStatus, events } = applyActionOrRefuse(
 				facts,
 				"choose_compliance_path",
 				rules,
+				PATH_CHOICE_UNAVAILABLE_ERROR,
 			);
 
 			const projection = computeProjectionUpdates(events, nextStatus);

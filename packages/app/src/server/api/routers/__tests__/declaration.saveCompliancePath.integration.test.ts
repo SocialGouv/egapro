@@ -170,4 +170,49 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		`;
 		expect(rows).toHaveLength(0);
 	});
+
+	// #4757 — the status used to be overwritten before the transition, so a
+	// draft that was never submitted could close the démarche on its own.
+	it("refuses a path choice on a draft that was never submitted, recording nothing", async () => {
+		const declarationId = await insertDeclaration("draft");
+		await acquireLock(declarationId);
+
+		await expect(
+			createCaller().saveCompliancePath({ path: "justify" }),
+		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		const [declaration] = await sql<{ status: string }[]>`
+			SELECT status FROM app_declaration WHERE id = ${declarationId}
+		`;
+		expect(declaration?.status).toBe("draft");
+		const history = await sql`
+			SELECT 1 FROM app_declaration_status_history
+			WHERE declaration_id = ${declarationId}
+		`;
+		expect(history).toHaveLength(0);
+		const receipts = await sql`
+			SELECT 1 FROM audit.action_log
+			WHERE user_id = ${USER_ID} AND action = 'notification.enqueue'
+		`;
+		expect(receipts).toHaveLength(0);
+	});
+
+	it("lets a first-round path chosen earlier be revised", async () => {
+		const declarationId = await insertDeclaration("corrective_actions_chosen");
+		await acquireLock(declarationId);
+
+		await createCaller().saveCompliancePath({ path: "joint_evaluation" });
+
+		const [declaration] = await sql<
+			{ status: string; first_declaration_path_choice: string }[]
+		>`
+			SELECT status, first_declaration_path_choice FROM app_declaration
+			WHERE id = ${declarationId}
+		`;
+		expect(declaration).toEqual({
+			status: "joint_evaluation_chosen",
+			first_declaration_path_choice: "joint_evaluation",
+		});
+	});
 });

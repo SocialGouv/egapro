@@ -1252,6 +1252,144 @@ describe("declarationRouter", () => {
 			).rejects.toThrow();
 		});
 
+		describe("preconditions enforced by the rules engine (#4757)", () => {
+			it.each([
+				"justify",
+				"corrective_action",
+				"joint_evaluation",
+			] as const)("refuses %s on a draft that was never submitted, without recording anything", async (path) => {
+				const declaration = buildDeclaration({
+					status: "draft",
+					cseRequired: false,
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.saveCompliancePath({ path })).rejects.toMatchObject(
+					{ code: "PRECONDITION_FAILED" },
+				);
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+				expect(ctx.set).not.toHaveBeenCalled();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+
+			it("refuses a path choice once the démarche is completed", async () => {
+				const declaration = buildDeclaration({
+					status: "demarche_completed",
+					cseRequired: false,
+					firstDeclarationPathChoice: "justify",
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(
+					caller.saveCompliancePath({ path: "corrective_action" }),
+				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+			});
+
+			it("refuses a path choice on a CSE opinion step reached without any path choice", async () => {
+				const declaration = buildDeclaration({
+					status: "awaiting_cse_opinion",
+					cseRequired: true,
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(
+					caller.saveCompliancePath({ path: "justify" }),
+				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+			});
+
+			it("refuses a revision choice when the second declaration resolved the gap", async () => {
+				const declaration = buildDeclaration({
+					status: "awaiting_cse_opinion",
+					cseRequired: true,
+					firstDeclarationPathChoice: "corrective_action",
+				});
+				const ctx = createSimpleSelectDb(
+					declaration,
+					[{ eventType: "second_declaration_submit" }],
+					[],
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await expect(
+					caller.saveCompliancePath({ path: "joint_evaluation" }),
+				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+			});
+
+			it("lets the first-round path be chosen again after corrective action was picked", async () => {
+				const declaration = buildDeclaration({
+					status: "corrective_actions_chosen",
+					cseRequired: true,
+					firstDeclarationPathChoice: "corrective_action",
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.saveCompliancePath({ path: "joint_evaluation" });
+
+				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+				expect(setCall.status).toBe("joint_evaluation_chosen");
+				expect(setCall.firstDeclarationPathChoice).toBe("joint_evaluation");
+				expect(ctx.insertValues.mock.calls[0]?.[0]).toEqual([
+					expect.objectContaining({
+						eventType: "path_choice",
+						value: "joint_evaluation",
+						round: 1,
+					}),
+				]);
+			});
+
+			it("lets the first-round path be chosen again while the CSE opinion of a justification is pending", async () => {
+				const declaration = buildDeclaration({
+					status: "awaiting_cse_opinion",
+					cseRequired: true,
+					firstDeclarationPathChoice: "justify",
+				});
+				const ctx = createSimpleSelectDb(declaration);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.saveCompliancePath({ path: "corrective_action" });
+
+				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+				expect(setCall.status).toBe("corrective_actions_chosen");
+				expect(setCall.firstDeclarationPathChoice).toBe("corrective_action");
+			});
+
+			it("lets the revision path be chosen again after a revised joint evaluation was picked", async () => {
+				const declaration = buildDeclaration({
+					status: "revised_joint_evaluation_chosen",
+					cseRequired: true,
+					firstDeclarationPathChoice: "corrective_action",
+					secondDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createSimpleSelectDb(
+					declaration,
+					[{ eventType: "second_declaration_submit" }],
+					[],
+				);
+				const caller = await createLockedCaller(ctx.db);
+
+				await caller.saveCompliancePath({ path: "justify" });
+
+				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
+				expect(setCall.status).toBe("awaiting_cse_opinion");
+				expect(setCall.secondDeclarationPathChoice).toBe("justify");
+				expect(ctx.insertValues.mock.calls[0]?.[0]).toEqual([
+					expect.objectContaining({ eventType: "path_choice", round: 2 }),
+				]);
+			});
+		});
+
 		it("purges the compliance draft slice and keeps other slices after saveCompliancePath", async () => {
 			const declaration = buildDeclaration({
 				status: "awaiting_compliance_path_choice",

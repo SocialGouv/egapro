@@ -160,6 +160,42 @@ describe("v2027.1.json — structural consistency", () => {
 		expect(hasTerminal).toBe(true);
 	});
 
+	it("every choice revision reopens a state that offers its action", () => {
+		for (const revision of rules.choiceRevisions ?? []) {
+			expect(
+				rules.transitions.some(
+					(t) =>
+						t.action === revision.action && t.from.includes(revision.reopens),
+				),
+				`revision "${revision.id}" reopens "${revision.reopens}", which offers no "${revision.action}" transition`,
+			).toBe(true);
+		}
+	});
+
+	it("no choice revision shadows a transition already offered from its from-states", () => {
+		for (const revision of rules.choiceRevisions ?? []) {
+			for (const from of revision.from) {
+				expect(
+					rules.transitions.some(
+						(t) => t.action === revision.action && t.from.includes(from),
+					),
+					`revision "${revision.id}" starts from "${from}", which already offers "${revision.action}"`,
+				).toBe(false);
+			}
+		}
+	});
+
+	it("declares the compliance-path revisions of both rounds", () => {
+		expect(
+			(rules.choiceRevisions ?? []).map((revision) => revision.reopens),
+		).toEqual(
+			expect.arrayContaining([
+				"awaiting_compliance_path_choice",
+				"awaiting_revision_choice",
+			]),
+		);
+	});
+
 	it("every threshold value is a finite positive number", () => {
 		for (const [key, val] of Object.entries(rules.thresholds)) {
 			expect(
