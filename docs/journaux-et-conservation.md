@@ -87,6 +87,8 @@ Cette page n'utilise que les six valeurs suivantes dans la colonne Statut, et au
 | Annoncée, non appliquée | Durée promise publiquement, sans mécanisme qui l'applique |
 | Non définie dans le dépôt | Relève de la plateforme d'hébergement ou d'un tiers, pas du code applicatif |
 
+Dans la colonne Durée, « Illimitée de fait » accompagne le statut « Aucune purge » : aucune durée n'a été fixée et rien ne supprime ces données.
+
 ## 4. Journaux
 
 ### 4.1 Journal d'audit des actions
@@ -261,7 +263,7 @@ Reprend `packages/app/src/modules/legal/CookiesPage.tsx`, qui alimente la page p
 | Sentry (erreurs, traces, sessions enregistrées) | Administrateurs de l'instance Sentry de l'équipe |
 | Logs de la passerelle API SUIT | Équipe d'exploitation de la plateforme |
 | Ingress, logs PostgreSQL, sauvegardes PostgreSQL | Équipe d'exploitation de la plateforme |
-| Fournisseur SMTP | Fournisseur SMTP (contrat porté par l'équipe d'exploitation de la plateforme) |
+| Fournisseur SMTP | Équipe d'exploitation de la plateforme, qui porte le contrat avec le fournisseur SMTP |
 | ProConnect | DINUM (opérateur de ProConnect) |
 | Cookie d'opposition Matomo | Équipe d'exploitation de la plateforme (configuration de l'instance Matomo) |
 
