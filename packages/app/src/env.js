@@ -166,6 +166,13 @@ export const env = createEnv({
 		// Optional comma-separated API tokens. Recognised tokens receive the
 		// documented higher public-API quota; anonymous access remains available.
 		EGAPRO_PUBLIC_API_TOKENS: z.string().optional().default(""),
+		// Server-side: read by the ArchivesSection Server Component at runtime, overridable per environment without a rebuild.
+		SUPPORT_JIRA_URL: z
+			.string()
+			.url()
+			.default(
+				"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
+			),
 	},
 
 	/**
@@ -235,6 +242,7 @@ export const env = createEnv({
 			process.env.EGAPRO_DECLARATION_RETENTION_YEARS,
 		VALKEY_URL: process.env.VALKEY_URL,
 		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
+		SUPPORT_JIRA_URL: process.env.SUPPORT_JIRA_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
