@@ -30,6 +30,15 @@ function buildDatabaseUrl() {
 	return undefined;
 }
 
+// Parsed as a literal string rather than `z.coerce.boolean()`, which turns
+// any non-empty string — "false" included — into true.
+const literalBooleanFlag = () =>
+	z
+		.enum(["true", "false"])
+		.optional()
+		.default("false")
+		.transform((value) => value === "true");
+
 export const env = createEnv({
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -53,13 +62,8 @@ export const env = createEnv({
 		EGAPRO_PROCONNECT_ISSUER: z.string().url().optional(),
 		// Dev-only credentials sign-in, off by default. Registered only when
 		// NODE_ENV is not production — `getProviders()` throws outright if this
-		// is ever true in a production runtime. Parsed as a literal string
-		// rather than `z.coerce.boolean()`, which would turn "false" into true.
-		EGAPRO_DEV_AUTH: z
-			.enum(["true", "false"])
-			.optional()
-			.default("false")
-			.transform((value) => value === "true"),
+		// is ever true in a production runtime.
+		EGAPRO_DEV_AUTH: literalBooleanFlag(),
 		EGAPRO_WEEZ_API_URL: z.string().url(),
 		EGAPRO_SUIT_API_URL: z.string().url(),
 		// Client certificate presented to the SUIT API (mTLS). The .p12 bundle is
@@ -106,7 +110,7 @@ export const env = createEnv({
 		// route that pilots the campaign year. Defaults to false and is declared
 		// in NO .kontinuous env config, so the route stays 404 in preproduction
 		// and production regardless of NODE_ENV.
-		EGAPRO_E2E_CLOCK: z.coerce.boolean().optional().default(false),
+		EGAPRO_E2E_CLOCK: literalBooleanFlag(),
 		// E2E-only admin two-factor seam (issue #4467). ProConnect's integration
 		// platform advertises `eidas1-mfa`, but the FIA1V2 test identity has no
 		// second factor a headless run can present, so the suite could never obtain
