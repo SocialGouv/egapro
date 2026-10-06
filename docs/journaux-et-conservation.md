@@ -1,7 +1,7 @@
 # Journaux générés et durées de conservation
 
 > **Objet** : recenser les journaux (logs) produits par EGAPRO V2 et les données métier qui portent des données personnelles, avec leur durée de conservation.
-> **Public** : équipe technique (section 4 et 5, détaillées) et DPO (tableau de synthèse en section 2, lisible sans lire le code).
+> **Public** : équipe technique (sections 4 et 5, détaillées) et DPO (tableau de synthèse en section 2, lisible sans lire le code).
 > **État des lieux au** : 2026-10-06, sur `alpha` au commit `59d70abae`.
 >
 > **Avertissement** : cette page décrit ce que le dépôt **configure** — le code, les scripts, les manifests de déploiement. Elle ne constitue pas la preuve que chaque traitement planifié tourne effectivement en production ; cette supervision relève de [#2710](https://github.com/SocialGouv/egapro/issues/2710).
@@ -51,14 +51,14 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 
 | Élément | Finalité | Données personnelles | Durée | Statut | Détail |
 |---|---|---|---|---|---|
-| Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant et e-mail de l'utilisateur, SIREN, adresse IP complète, agent utilisateur, message d'erreur | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
+| Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant et e-mail de l'utilisateur, SIREN, adresse IP complète, agent utilisateur, métadonnées, message d'erreur | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
 | Ligne d'activité applicative | Diagnostic opérationnel, collectée par la plateforme d'hébergement | Identifiant utilisateur, SIREN, IP tronquée | Non définie dans le dépôt | Non définie dans le dépôt | [4.2](#42-ligne-dactivité-applicative) |
 | Logs applicatifs stdout/stderr | Diagnostic d'erreur | Messages et traces d'erreur ; e-mail du destinataire si l'envoi réel est désactivé | Non définie dans le dépôt | Non définie dans le dépôt | [4.3](#43-logs-applicatifs-stdout-et-stderr) |
 | Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs, sessions enregistrées | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
 | File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
-| Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | — | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
+| Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
 | Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
-| Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | — | Aucune purge | [4.8](#48-journal-dimpersonation-admin) |
+| Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | Illimitée de fait | Aucune purge | [4.8](#48-journal-dimpersonation-admin) |
 | Matomo | Mesure d'audience exemptée CNIL | Logs de visite (IP anonymisée), cookie de mesure d'audience | 750 j (logs), 13 mois (cookie) | Paramétrée hors dépôt | [4.9](#49-matomo) |
 | Logs de la passerelle API SUIT | Sécurité et diagnostic de l'accès API | IP du client, requêtes | Non définie dans le dépôt | Non définie dans le dépôt | [4.10](#410-logs-de-la-passerelle-api-suit) |
 | Historique des CronJobs | Diagnostic d'exécution des traitements planifiés | Logs des scripts exécutés | 3 exécutions réussies et 3 en échec, par CronJob | Appliquée par le code | [4.11](#411-historique-des-cronjobs) |
@@ -70,7 +70,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Élément | Finalité | Données personnelles | Durée | Statut | Détail |
 |---|---|---|---|---|---|
 | Déclarations de rémunération et données rattachées | Obligation légale de déclaration de l'index | Identifiant du déclarant, avis CSE et évaluation conjointe (PDF) | 6 ans | Prévue, non exécutée | [5.1](#51-déclarations-de-rémunération-et-données-rattachées) |
-| Représentation équilibrée | Obligation légale de déclaration | Identifiant du déclarant ; pour la reprise V1, coordonnées du déclarant historique | — | Aucune purge | [5.2](#52-représentation-équilibrée) |
+| Représentation équilibrée | Obligation légale de déclaration | Identifiant du déclarant ; pour la reprise V1, coordonnées du déclarant historique | Illimitée de fait | Aucune purge | [5.2](#52-représentation-équilibrée) |
 | Comptes utilisateurs | Gestion des accès à la plateforme | Prénom, nom, e-mail, téléphone | 2 ans après la dernière déclaration ou l'inactivité du compte (annoncé) | Annoncée, non appliquée | [5.3](#53-comptes-utilisateurs) |
 | Cookies | Authentification, préférence d'affichage, mesure d'audience | — | 1 an à 13 mois selon le cookie, 30 min pour le cookie de session Matomo | Appliquée par le code (cookies techniques) ; Paramétrée hors dépôt (cookies Matomo) | [5.4](#54-cookies) |
 
@@ -97,7 +97,16 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 
 **Durée** : 180 jours pour les catégories `read_sensitive` et `public_search` (lectures à fort volume contenant une IP), 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — des ConfigMaps optionnelles (`audit-retention`) permettraient de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent.
 
-Ne sont pas recopiées ici : les ~90 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
+| Catégorie | Durée |
+|---|---|
+| `read_sensitive` | 180 jours |
+| `public_search` | 180 jours |
+| `auth` | 365 jours |
+| `mutation` | 365 jours |
+| `export` | 365 jours |
+| `system` | 365 jours |
+
+Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
 
 **Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts`.
 
@@ -105,7 +114,7 @@ Ne sont pas recopiées ici : les ~90 clés d'action ni le détail par catégorie
 
 ### 4.2 Ligne d'activité applicative
 
-En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicatif (tRPC ou route) émet une ligne JSON sur la sortie standard : type d'événement, action, catégorie, route, statut, code d'erreur, durée, identifiant utilisateur, SIREN, IP tronquée (les deux derniers octets masqués en IPv4, les trois derniers groupes masqués en IPv6), et les **noms** (jamais les valeurs) des champs d'entrée. Cette ligne est collectée par la plateforme d'hébergement, en dehors du dépôt.
+En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicatif (tRPC ou route) émet une ligne JSON sur la sortie standard : type d'événement, action, catégorie, route, statut, code d'erreur, durée, identifiant utilisateur, SIREN, IP tronquée (les deux derniers octets masqués en IPv4, seuls les trois premiers groupes conservés en IPv6, soit un préfixe /48), et les **noms** (jamais les valeurs) des champs d'entrée. Cette ligne est collectée par la plateforme d'hébergement, en dehors du dépôt.
 
 **Durée** : non définie dans le dépôt — c'est la plateforme d'hébergement qui fixe la durée de rétention de ses journaux collectés.
 
@@ -171,7 +180,7 @@ Solution de mesure d'audience, paramétrée en mode « exempté » conformément
 
 La passerelle APISIX qui protège l'API privée consommée par SUIT (système d'information de l'inspection du travail) écrit ses propres logs d'accès (IP du client, requêtes) sur un volume qui ne survit pas au-delà du pod qui l'a écrit.
 
-**Durée** : non définie dans le dépôt — aucun mécanisme de purge ou de rotation n'y est configuré.
+**Durée** : non définie dans le dépôt — aucun mécanisme de purge ou de rotation n'y est configuré. Le volume étant éphémère, les logs disparaissent a priori avec le pod (à confirmer auprès de l'équipe d'exploitation).
 
 **Sources** : `.kontinuous/templates/apisix-suit.yaml`.
 
@@ -185,7 +194,7 @@ Kubernetes conserve l'historique des exécutions de chaque CronJob de maintenanc
 
 Compteur en mémoire ou dans un cache partagé, par IP ou par jeton d'API (sous forme d'empreinte, jamais la valeur en clair), pour limiter le nombre d'appels par minute à l'API publique.
 
-**Durée** : 60 secondes (fenêtre glissante de comptage), appliquée par le code.
+**Durée** : 60 secondes (fenêtre fixe d'une minute), appliquée par le code.
 
 **Sources** : `packages/app/src/server/services/publicApiRateLimit.ts`.
 
@@ -201,7 +210,7 @@ Rien dans `.kontinuous/` ne configure explicitement : les logs d'ingress, les lo
 
 Couvre la déclaration elle-même, les catégories d'emploi et de salariés, les avis CSE (dont les fichiers PDF stockés sur S3), l'historique des statuts et les verrous collaboratifs.
 
-**Durée annoncée** : 6 ans — une déclaration est éligible à la purge si son année est strictement inférieure à l'année courante moins 6 (variable d'environnement `EGAPRO_DECLARATION_RETENTION_YEARS`, valeur par défaut 6).
+**Durée annoncée** : 6 ans — une déclaration est éligible à la purge si son année est strictement inférieure à l'année courante moins 6 (variable d'environnement `EGAPRO_DECLARATION_RETENTION_YEARS`, valeur par défaut 6). Une ConfigMap optionnelle (`declaration-retention`) permettrait de la surcharger, mais aucune n'est définie dans le dépôt : c'est donc la valeur par défaut (6 ans) qui s'applique.
 
 **Statut : Prévue, non exécutée.** Le CronJob quotidien `declaration-cleanup-daily` est configuré et son script (`packages/app/scripts/declaration-cleanup.ts`) est fonctionnel, mais le fichier compilé qu'il invoque n'est pas copié dans l'image de production — le CronJob ne trouve donc jamais le script qu'il doit exécuter. [#2710](https://github.com/SocialGouv/egapro/issues/2710) constate l'effet (absence de preuve d'exécution) ; [#4773](https://github.com/SocialGouv/egapro/issues/4773) corrige la cause.
 
@@ -252,7 +261,7 @@ Reprend `packages/app/src/modules/legal/CookiesPage.tsx`, qui alimente la page p
 | Sentry (erreurs, traces, sessions enregistrées) | Administrateurs de l'instance Sentry de l'équipe |
 | Logs de la passerelle API SUIT | Équipe d'exploitation de la plateforme |
 | Ingress, logs PostgreSQL, sauvegardes PostgreSQL | Équipe d'exploitation de la plateforme |
-| Fournisseur SMTP | Équipe d'exploitation de la plateforme |
+| Fournisseur SMTP | Fournisseur SMTP (contrat porté par l'équipe d'exploitation de la plateforme) |
 | ProConnect | DINUM (opérateur de ProConnect) |
 | Cookie d'opposition Matomo | Équipe d'exploitation de la plateforme (configuration de l'instance Matomo) |
 

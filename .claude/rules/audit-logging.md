@@ -412,6 +412,8 @@ comportement est inchangé.
 
 ## Category → retention mapping (CNIL compliance)
 
+Any change here must also update [`docs/journaux-et-conservation.md`](../../docs/journaux-et-conservation.md) §4.1 (see top of this file).
+
 | Category | Retention | When to use |
 |---|---|---|
 | `read_sensitive` | **180 days** | Lectures sensibles (GIP data, PDFs, personal data). High volume, contain IP. |
