@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
@@ -80,6 +80,7 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import { api } from "~/trpc/react";
 import { AdminReferentsPage } from "../AdminReferentsPage";
 
 describe("AdminReferentsPage", () => {
@@ -117,5 +118,38 @@ describe("AdminReferentsPage", () => {
 		expect(
 			screen.getByRole("button", { name: "Importer" }),
 		).toBeInTheDocument();
+	});
+
+	it("neutralises spreadsheet formulas in the CSV export", async () => {
+		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
+			data: [
+				{
+					region: "11",
+					county: "75",
+					name: "=1+1",
+					type: "email",
+					value: "email@example.fr",
+					principal: true,
+					substituteName: '@SUM("A1")',
+					substituteEmail: null,
+				},
+			],
+			refetch: vi.fn(),
+			isFetching: false,
+		} as never);
+		vi.mocked(URL.createObjectURL).mockClear();
+
+		render(<AdminReferentsPage />);
+		fireEvent.click(screen.getByRole("button", { name: "Export CSV" }));
+
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledOnce());
+		const blob = vi.mocked(URL.createObjectURL).mock.calls[0]?.[0] as Blob;
+		const [header, dataLine] = (await blob.text()).split("\n");
+		expect(header).toBe(
+			"region;county;name;type;value;principal;substituteName;substituteEmail",
+		);
+		expect(dataLine).toBe(
+			`"11";"75";"'=1+1";"email";"email@example.fr";"true";"'@SUM(""A1"")";""`,
+		);
 	});
 });
