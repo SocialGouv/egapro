@@ -17,10 +17,7 @@ const audited = vi.hoisted(() => ({
 }));
 
 vi.mock("~/server/audit/withAuditedRoute", () => ({
-	withAuditedRoute: (
-		config: typeof audited.config,
-		handler: unknown,
-	) => {
+	withAuditedRoute: (config: typeof audited.config, handler: unknown) => {
 		audited.config = config;
 		return handler;
 	},
