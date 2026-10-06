@@ -744,6 +744,17 @@ Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directem
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
 
+**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`, job `a11y-pages` d'`a11y.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
+
+| Variable | Source | Exposée à |
+|---|---|---|
+| `AUTH_SECRET` | générée à chaque run (`openssl rand`, masquée) — aucun secret GitHub | tout le job |
+| `EGAPRO_PROCONNECT_CLIENT_ID` / `_CLIENT_SECRET` / `_ISSUER` | secrets GitHub — la connexion E2E est une vraie connexion ProConnect (FIA1V2 via Charon) | steps `Build` (env.js refuse un build de production sans ProConnect) et exécution des tests |
+| `EGAPRO_WEEZ_API_URL` | secret GitHub — appelé à chaque connexion pour renseigner l'entreprise | idem |
+| `EGAPRO_SUIT_API_URL` | valeur factice `https://suit.invalid` — exigée par env.js, jamais jointe en CI (pas de certificat mTLS) | tout le job |
+
+Une nouvelle variable secrète nécessaire aux E2E se pose de la même façon : au niveau des steps qui lancent l'app, jamais du job.
+
 ### 10.6 Verrou collaboratif — sécurité IDOR
 
 Le router `declarationLock` résout toujours l'ID de déclaration côté serveur à partir du SIREN de la session (`resolveOwnDeclarationId`) — jamais depuis le seul input client. Cela empêche un co-déclarant de verrouiller ou libérer une déclaration appartenant à une autre entreprise en forgeant un `declarationId` arbitraire.

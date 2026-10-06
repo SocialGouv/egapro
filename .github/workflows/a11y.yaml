@@ -294,15 +294,16 @@ jobs:
     # est derrière ProConnect), donc de la même stack que la suite E2E. Les étapes
     # d'infrastructure ci-dessous sont volontairement alignées sur .github/workflows/e2e.yaml —
     # c'est ce fichier qui fait foi pour le pin Chromium (CFT_BUILD).
+    #
+    # Secrets : même découpage que le job `shard` d'e2e.yaml (#4699). AUTH_SECRET est généré
+    # par run ; ProConnect et Weez ne sont exposés qu'au build et au balayage, les deux seules
+    # steps qui font tourner l'app — pas à l'Action ultra11y ni à l'adjudication par le modèle,
+    # qui travaillent sur les instantanés hors navigateur ; SUIT pointe vers un nom qui ne se
+    # résout pas.
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       NEXTAUTH_URL: http://localhost:3000/api/auth
-      EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
-      EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
-      EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-      EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
-      EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
+      EGAPRO_SUIT_API_URL: https://suit.invalid
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       EGAPRO_E2E_CLOCK: "true"
       # Same test-only admin two-factor seam as e2e.yaml (#4467): dynamic.a11y.ts
@@ -326,6 +327,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+      - name: Generate a run-local AUTH_SECRET
+        run: |
+          set -euo pipefail
+          auth_secret=$(openssl rand -base64 32)
+          echo "::add-mask::$auth_secret"
+          echo "AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v6
       - name: Set up Node
         uses: actions/setup-node@v7
@@ -446,6 +453,11 @@ jobs:
       - name: Start services
         run: docker compose up -d
       - name: Build
+        env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -467,6 +479,11 @@ jobs:
       - name: ultra11y — balayage RGAA des pages (Playwright)
         continue-on-error: true
         timeout-minutes: 25
+        env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
         run: pnpm --filter app test:e2e:a11y
       # L'Action n'a plus besoin de `sample`/`storage-state`/`runtime` : `audit` réingère
       # `.ultra11y/pages/` tout seul dès que le répertoire existe. Elle fait le reste — audit
