@@ -143,6 +143,10 @@ Notes:
   IIFE.
 - For login failures, pass metadata through `buildAuthErrorMessage()` so OAuth
   tokens / state / code_verifier are stripped from the log line.
+- NextAuth also feeds the `logger` from `POST /api/auth/_log`, an anonymous
+  endpoint whose body picks the level and code. The `[...nextauth]` route
+  answers it `204` without reaching NextAuth, so only server-side events write
+  audit rows — keep it that way.
 
 ### 5. New cron-triggered / system action
 
