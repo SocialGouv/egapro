@@ -25,8 +25,12 @@ describe("/api/auth/[...nextauth]", () => {
 		mocks.handler.mockResolvedValue(new Response("handled"));
 	});
 
-	it("drops client log beacons without handing them to NextAuth", async () => {
-		const response = await POST(post("_log"), context(["_log"]));
+	it.each([
+		[["_log"]],
+		[["_log", "x"]],
+		[["_log", "a", "b"]],
+	])("drops client log beacons without handing them to NextAuth (%j)", async (segments) => {
+		const response = await POST(post(segments.join("/")), context(segments));
 
 		expect(response.status).toBe(204);
 		expect(mocks.handler).not.toHaveBeenCalled();
