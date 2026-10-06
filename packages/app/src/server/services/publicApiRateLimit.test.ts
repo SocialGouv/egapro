@@ -66,3 +66,52 @@ describe("enforcePublicApiRateLimit", () => {
 		).toMatchObject({ status: 429 });
 	});
 });
+
+describe("checkPublicApiRateLimit", () => {
+	function headers(init: HeadersInit = {}) {
+		return new Headers({ "x-real-ip": "203.0.113.9", ...init });
+	}
+
+	it("allows a call within the anonymous quota", async () => {
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		expect(await checkPublicApiRateLimit(headers())).toBe("allowed");
+	});
+
+	it("reports an unknown bearer token as invalid", async () => {
+		mocks.env.EGAPRO_PUBLIC_API_TOKENS = "known-token";
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		expect(
+			await checkPublicApiRateLimit(
+				headers({ Authorization: "Bearer unknown-token" }),
+			),
+		).toBe("invalid_token");
+	});
+
+	it("reports the 121st anonymous call of the minute as limited", async () => {
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		for (let index = 0; index < 120; index += 1) {
+			expect(await checkPublicApiRateLimit(headers())).toBe("allowed");
+		}
+
+		expect(await checkPublicApiRateLimit(headers())).toBe("limited");
+	});
+
+	it("shares one quota between the REST check and the headers check", async () => {
+		const { checkPublicApiRateLimit, enforcePublicApiRateLimit } = await import(
+			"./publicApiRateLimit"
+		);
+
+		for (let index = 0; index < 120; index += 1) {
+			expect(
+				await enforcePublicApiRateLimit(
+					request({ "x-real-ip": "203.0.113.9" }),
+				),
+			).toBeNull();
+		}
+
+		expect(await checkPublicApiRateLimit(headers())).toBe("limited");
+	});
+});

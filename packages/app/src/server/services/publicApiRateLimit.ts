@@ -73,10 +73,10 @@ function fingerprint(value: string): string {
 	return createHash("sha256").update(value).digest("hex").slice(0, 24);
 }
 
-function clientAddress(request: Request): string {
-	const forwardedFor = request.headers.get("x-forwarded-for");
+function clientAddress(headers: Headers): string {
+	const forwardedFor = headers.get("x-forwarded-for");
 	return (
-		request.headers.get("x-real-ip")?.trim() ||
+		headers.get("x-real-ip")?.trim() ||
 		forwardedFor?.split(",").at(-1)?.trim() ||
 		"unknown"
 	);
@@ -131,28 +131,40 @@ async function increment(key: string): Promise<number> {
 	return incrementMemory(key);
 }
 
+export const PUBLIC_API_INVALID_TOKEN_MESSAGE = "Jeton d’API invalide.";
+export const PUBLIC_API_RATE_LIMITED_MESSAGE =
+	"Quota d’appels dépassé. Réessayez dans une minute.";
+
+export type PublicApiRateLimitVerdict = "allowed" | "invalid_token" | "limited";
+
+export async function checkPublicApiRateLimit(
+	headers: Headers,
+): Promise<PublicApiRateLimitVerdict> {
+	const authorization = headers.get("authorization");
+	const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+	if (bearer && !configuredTokens().has(bearer)) return "invalid_token";
+	const quota = bearer ? 1_200 : 120;
+	const identity = bearer
+		? `token:${fingerprint(bearer)}`
+		: `ip:${fingerprint(clientAddress(headers))}`;
+	const bucket = Math.floor(Date.now() / (WINDOW_SECONDS * 1000));
+	const count = await increment(`${identity}:${bucket}`);
+	return count <= quota ? "allowed" : "limited";
+}
+
 export async function enforcePublicApiRateLimit(
 	request: Request,
 ): Promise<Response | null> {
-	const authorization = request.headers.get("authorization");
-	const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
-	const tokens = configuredTokens();
-	if (bearer && !tokens.has(bearer)) {
+	const verdict = await checkPublicApiRateLimit(request.headers);
+	if (verdict === "allowed") return null;
+	if (verdict === "invalid_token") {
 		return Response.json(
-			{ error: "Jeton d’API invalide." },
+			{ error: PUBLIC_API_INVALID_TOKEN_MESSAGE },
 			{ status: 401, headers: { "Access-Control-Allow-Origin": "*" } },
 		);
 	}
-	const authenticated = bearer !== undefined;
-	const quota = authenticated ? 1_200 : 120;
-	const identity = bearer
-		? `token:${fingerprint(bearer)}`
-		: `ip:${fingerprint(clientAddress(request))}`;
-	const bucket = Math.floor(Date.now() / (WINDOW_SECONDS * 1000));
-	const count = await increment(`${identity}:${bucket}`);
-	if (count <= quota) return null;
 	return Response.json(
-		{ error: "Quota d’appels dépassé. Réessayez dans une minute." },
+		{ error: PUBLIC_API_RATE_LIMITED_MESSAGE },
 		{
 			status: 429,
 			headers: {

@@ -31,6 +31,11 @@ import {
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
+import {
+	checkPublicApiRateLimit,
+	PUBLIC_API_INVALID_TOKEN_MESSAGE,
+	PUBLIC_API_RATE_LIMITED_MESSAGE,
+} from "~/server/services/publicApiRateLimit";
 
 /**
  * 1. CONTEXT
@@ -173,6 +178,29 @@ const auditMiddleware = t.middleware(({ ctx, type, path, getRawInput, next }) =>
 export const publicProcedure = t.procedure
 	.use(timingMiddleware)
 	.use(auditMiddleware);
+
+/**
+ * Public procedure sharing the per-client quota of the public REST API, so a
+ * tRPC call cannot be used to bypass the throttling of the REST endpoints.
+ */
+export const rateLimitedPublicProcedure = publicProcedure.use(
+	async ({ ctx, next }) => {
+		const verdict = await checkPublicApiRateLimit(ctx.headers);
+		if (verdict === "invalid_token") {
+			throw new TRPCError({
+				code: "UNAUTHORIZED",
+				message: PUBLIC_API_INVALID_TOKEN_MESSAGE,
+			});
+		}
+		if (verdict === "limited") {
+			throw new TRPCError({
+				code: "TOO_MANY_REQUESTS",
+				message: PUBLIC_API_RATE_LIMITED_MESSAGE,
+			});
+		}
+		return next();
+	},
+);
 
 /**
  * Protected (authenticated) procedure
