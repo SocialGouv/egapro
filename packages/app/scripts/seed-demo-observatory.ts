@@ -501,6 +501,9 @@ function indicatorValues(
 	const variable = point.variable;
 	const womenShare = 46 + (companyIndex % 10) * 2;
 	const quartileShift = (companyIndex % 7) - 2;
+	const women = (percent: number) =>
+		truncateRatio((percent + quartileShift) / 100);
+	const complement = (ratio: number) => truncateRatio(1 - ratio);
 
 	// The headcount split must add up to the company's workforce: the company
 	// page shows both, and a demo that contradicts itself reads as a bug.
@@ -525,14 +528,22 @@ function indicatorValues(
 		),
 		variableProportionWomen: truncateRatio(womenShare / 100),
 		variableProportionMen: truncateRatio((womenShare + 5) / 100),
-		annualQuartile1Women: truncateRatio((58 + quartileShift) / 100),
-		annualQuartile2Women: truncateRatio((54 + quartileShift) / 100),
-		annualQuartile3Women: truncateRatio((49 + quartileShift) / 100),
-		annualQuartile4Women: truncateRatio((43 + quartileShift) / 100),
-		hourlyQuartile1Women: truncateRatio((57 + quartileShift) / 100),
-		hourlyQuartile2Women: truncateRatio((53 + quartileShift) / 100),
-		hourlyQuartile3Women: truncateRatio((48 + quartileShift) / 100),
-		hourlyQuartile4Women: truncateRatio((42 + quartileShift) / 100),
+		annualQuartile1Women: women(58),
+		annualQuartile1Men: complement(women(58)),
+		annualQuartile2Women: women(54),
+		annualQuartile2Men: complement(women(54)),
+		annualQuartile3Women: women(49),
+		annualQuartile3Men: complement(women(49)),
+		annualQuartile4Women: women(43),
+		annualQuartile4Men: complement(women(43)),
+		hourlyQuartile1Women: women(57),
+		hourlyQuartile1Men: complement(women(57)),
+		hourlyQuartile2Women: women(53),
+		hourlyQuartile2Men: complement(women(53)),
+		hourlyQuartile3Women: women(48),
+		hourlyQuartile3Men: complement(women(48)),
+		hourlyQuartile4Women: women(42),
+		hourlyQuartile4Men: complement(women(42)),
 	};
 }
 
@@ -676,14 +687,14 @@ async function main() {
 							${values.globalAnnualMedianGap}, ${values.globalHourlyMedianGap},
 							${values.variableAnnualMedianGap}, ${values.variableHourlyMedianGap},
 							${values.variableProportionWomen}, ${values.variableProportionMen},
-							${values.annualQuartile1Women}, ${truncateRatio(1 - values.annualQuartile1Women)},
-							${values.annualQuartile2Women}, ${truncateRatio(1 - values.annualQuartile2Women)},
-							${values.annualQuartile3Women}, ${truncateRatio(1 - values.annualQuartile3Women)},
-							${values.annualQuartile4Women}, ${truncateRatio(1 - values.annualQuartile4Women)},
-							${values.hourlyQuartile1Women}, ${truncateRatio(1 - values.hourlyQuartile1Women)},
-							${values.hourlyQuartile2Women}, ${truncateRatio(1 - values.hourlyQuartile2Women)},
-							${values.hourlyQuartile3Women}, ${truncateRatio(1 - values.hourlyQuartile3Women)},
-							${values.hourlyQuartile4Women}, ${truncateRatio(1 - values.hourlyQuartile4Women)},
+							${values.annualQuartile1Women}, ${values.annualQuartile1Men},
+							${values.annualQuartile2Women}, ${values.annualQuartile2Men},
+							${values.annualQuartile3Women}, ${values.annualQuartile3Men},
+							${values.annualQuartile4Women}, ${values.annualQuartile4Men},
+							${values.hourlyQuartile1Women}, ${values.hourlyQuartile1Men},
+							${values.hourlyQuartile2Women}, ${values.hourlyQuartile2Men},
+							${values.hourlyQuartile3Women}, ${values.hourlyQuartile3Men},
+							${values.hourlyQuartile4Women}, ${values.hourlyQuartile4Men},
 							NOW(), NOW()
 						)
 					`;

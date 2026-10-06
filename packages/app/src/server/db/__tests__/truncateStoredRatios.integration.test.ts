@@ -12,7 +12,7 @@ const SCRATCH_SCHEMA = "migration_4784";
 const MIGRATION_MARKER = "(#4784)";
 const YEAR = 2100;
 
-const RATIO_COLUMNS = [
+const RATIO_COLUMNS: string[] = [
 	"global_annual_mean_gap",
 	"global_hourly_mean_gap",
 	"variable_annual_mean_gap",
@@ -30,7 +30,7 @@ const RATIO_COLUMNS = [
 			),
 		),
 	),
-] as const;
+];
 
 const GAP_BLOCKS = [
 	{ indicator: "A", kind: "global", stat: "mean" },
@@ -39,6 +39,8 @@ const GAP_BLOCKS = [
 	{ indicator: "D", kind: "variable", stat: "median" },
 ] as const;
 const BASES = ["Annual", "Hourly"] as const;
+
+type DeclarationRow = Parameters<typeof computeIndicatorPercentages>[0];
 
 type Columns = Record<string, string | number | null>;
 
@@ -52,8 +54,18 @@ function toSnakeColumns(columns: Columns): Columns {
 	);
 }
 
+function toCamelCase(name: string): string {
+	return name.replace(/_([a-z0-9])/g, (_, char: string) => char.toUpperCase());
+}
+
+function ratiosSetTo(value: string | null): Columns {
+	return Object.fromEntries(
+		RATIO_COLUMNS.map((column) => [toCamelCase(column), value]),
+	);
+}
+
 function nullRatios(): Columns {
-	return Object.fromEntries(RATIO_COLUMNS.map((column) => [column, null]));
+	return ratiosSetTo(null);
 }
 
 describe("#4784 stored ratios truncated — migration replayed on pre-existing rows (real Postgres)", () => {
@@ -61,10 +73,7 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 	let statements: string[] = [];
 
 	async function readMigrationStatements(): Promise<string[]> {
-		// `drizzle/` is outside `src/` so has no `~/` alias; vitest runs from the package root.
 		const dir = path.join(process.cwd(), "drizzle");
-		// Every rebase past a concurrent migration renumbers the file, so it is
-		// found by its issue marker rather than by a number that goes stale.
 		const files = (await readdir(dir)).filter((name) => name.endsWith(".sql"));
 		const contents = await Promise.all(
 			files.map(async (name) => await readFile(path.join(dir, name), "utf8")),
@@ -87,8 +96,6 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 	async function seedScratchTables() {
 		await sql.unsafe(`DROP SCHEMA IF EXISTS ${SCRATCH_SCHEMA} CASCADE`);
 		await sql.unsafe(`CREATE SCHEMA ${SCRATCH_SCHEMA}`);
-		// Copying the live tables cannot drift from `schema.ts`; foreign keys are not
-		// copied, so the rows need no company / user parents.
 		for (const table of ["app_declaration", "app_gip_mds_data"]) {
 			await sql.unsafe(`
 				CREATE TABLE ${SCRATCH_SCHEMA}.${table}
@@ -132,7 +139,7 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 
 	async function readRow(id: string): Promise<Record<string, string | null>> {
 		const rows = await sql<Record<string, string | null>[]>`
-			SELECT ${sql(RATIO_COLUMNS as unknown as string[])}
+			SELECT ${sql(RATIO_COLUMNS)}
 			FROM ${sql(SCRATCH_SCHEMA)}.app_declaration
 			WHERE id = ${id}
 		`;
@@ -174,11 +181,11 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 			indicatorEWomen: "18",
 			indicatorAAnnualWomen: "9500.02",
 			indicatorAAnnualMen: "10000",
-			annual_quartile1_proportion_women: "0.5143",
-			annual_quartile1_proportion_men: "0.4857",
-			annual_quartile2_proportion_women: "0.6667",
-			variable_proportion_women: "0.5143",
-			global_annual_mean_gap: "0.0500",
+			annualQuartile1ProportionWomen: "0.5143",
+			annualQuartile1ProportionMen: "0.4857",
+			annualQuartile2ProportionWomen: "0.6667",
+			variableProportionWomen: "0.5143",
+			globalAnnualMeanGap: "0.0500",
 		});
 
 		await applyMigration();
@@ -197,11 +204,11 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 			...nullRatios(),
 			totalWomen: 120,
 			totalMen: 80,
-			annual_quartile1_proportion_women: "0.5800",
-			annual_quartile1_proportion_men: "0.4200",
-			variable_proportion_women: "0.4600",
-			global_annual_mean_gap: "0.0440",
-			variable_hourly_median_gap: "0.0330",
+			annualQuartile1ProportionWomen: "0.5800",
+			annualQuartile1ProportionMen: "0.4200",
+			variableProportionWomen: "0.4600",
+			globalAnnualMeanGap: "0.0440",
+			variableHourlyMedianGap: "0.0330",
 		};
 		await insertDeclaration("seed-like", "998900001", seedLike);
 		const before = await readRow("seed-like");
@@ -221,9 +228,9 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 			indicatorFAnnualMen1: 0,
 			indicatorAAnnualWomen: "10",
 			indicatorAAnnualMen: "0",
-			annual_quartile1_proportion_women: "0.5000",
-			variable_proportion_women: "0.5000",
-			global_annual_mean_gap: "0.5000",
+			annualQuartile1ProportionWomen: "0.5000",
+			variableProportionWomen: "0.5000",
+			globalAnnualMeanGap: "0.5000",
 		});
 
 		await applyMigration();
@@ -232,6 +239,40 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 		expect(row.annual_quartile1_proportion_women).toBeNull();
 		expect(row.variable_proportion_women).toBeNull();
 		expect(row.global_annual_mean_gap).toBeNull();
+	});
+
+	it("keeps the stored ratio when only one of its two operands is present", async () => {
+		await insertDeclaration("half", "123456781", {
+			...ratiosSetTo("0.1234"),
+			indicatorFAnnualWomen1: 5,
+			indicatorFAnnualMen1: null,
+			indicatorAAnnualWomen: null,
+			indicatorAAnnualMen: "100",
+		});
+
+		await applyMigration();
+
+		const row = await readRow("half");
+		expect(row.annual_quartile1_proportion_women).toBe("0.1234");
+		expect(row.annual_quartile1_proportion_men).toBe("0.1234");
+		expect(row.global_annual_mean_gap).toBe("0.1234");
+	});
+
+	it("recomputes the gap when the GIP row exists but publishes no gap", async () => {
+		await insertGip("111111111", {
+			globalAnnualMeanWomen: "1000.00",
+			globalAnnualMeanMen: "1100.00",
+			globalAnnualMeanGap: null,
+		});
+		await insertDeclaration("gip-no-gap", "111111111", {
+			...nullRatios(),
+			indicatorAAnnualWomen: "1000",
+			indicatorAAnnualMen: "1100",
+		});
+
+		await applyMigration();
+
+		expect((await readRow("gip-no-gap")).global_annual_mean_gap).toBe("0.0909");
 	});
 
 	it("keeps the GIP gap while both operands still equal the GIP ones, and recomputes it once one was edited", async () => {
@@ -246,14 +287,12 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 		await insertGip("111111111", gipOperands);
 		await insertDeclaration("gip", "111111111", {
 			...nullRatios(),
-			// Annual operands untouched: the GIP gap stays authoritative.
 			indicatorAAnnualWomen: "1000",
 			indicatorAAnnualMen: "1100",
-			// Hourly woman operand edited: the gap is recomputed, (11 - 10.5) / 11.
 			indicatorAHourlyWomen: "10.5",
 			indicatorAHourlyMen: "11",
-			global_annual_mean_gap: "0.0909",
-			global_hourly_mean_gap: "0.0877",
+			globalAnnualMeanGap: "0.0909",
+			globalHourlyMeanGap: "0.0877",
 		});
 
 		await applyMigration();
@@ -300,8 +339,8 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 			indicatorFAnnualMen1: 17,
 			indicatorAAnnualWomen: "9500.02",
 			indicatorAAnnualMen: "10000",
-			annual_quartile1_proportion_women: "0.5143",
-			global_annual_mean_gap: "0.0500",
+			annualQuartile1ProportionWomen: "0.5143",
+			globalAnnualMeanGap: "0.0500",
 		});
 		await applyMigration();
 		const afterFirst = await readRow("legacy");
@@ -313,7 +352,6 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 	});
 
 	it("writes, on every one of the 26 columns, exactly what computeIndicatorPercentages computes", async () => {
-		// Deterministic pseudo-random rows: the migration must stay equivalent to the writer.
 		let seed = 4784;
 		const next = (limit: number) => {
 			seed = (seed * 48_271) % 2_147_483_647;
@@ -350,7 +388,6 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 					row[`indicator${indicator}${basis}Women`] = women;
 					row[`indicator${indicator}${basis}Men`] = men;
 					const gipKey = `${kind}${basis}${toTitle(stat)}`;
-					// Every third declaration has a GIP row, half of whose blocks are unchanged.
 					gipColumns[`${gipKey}Women`] = next(2) === 0 ? women : amount();
 					gipColumns[`${gipKey}Men`] = next(2) === 0 ? men : amount();
 					gipColumns[`${gipKey}Gap`] =
@@ -361,22 +398,19 @@ describe("#4784 stored ratios truncated — migration replayed on pre-existing r
 			if (hasGip) await insertGip(siren, gipColumns);
 			await insertDeclaration(`random-${index}`, siren, {
 				...row,
-				...Object.fromEntries(RATIO_COLUMNS.map((c) => [c, "0.1234"])),
+				...ratiosSetTo("0.1234"),
 			});
 			fixtures.push({
 				id: `random-${index}`,
 				row,
-				gip: hasGip ? (gipColumns as unknown as GipMdsRow) : null,
+				gip: hasGip ? (gipColumns as GipMdsRow) : null,
 			});
 		}
 
 		await applyMigration();
 
 		for (const { id, row, gip } of fixtures) {
-			const expected = computeIndicatorPercentages(
-				row as unknown as Parameters<typeof computeIndicatorPercentages>[0],
-				gip,
-			);
+			const expected = computeIndicatorPercentages(row as DeclarationRow, gip);
 			const stored = await readRow(id);
 			for (const [camel, value] of Object.entries(expected)) {
 				const column = toSnakeCase(camel);
