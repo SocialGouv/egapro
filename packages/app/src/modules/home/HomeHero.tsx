@@ -1,14 +1,18 @@
 import Link from "next/link";
+import { formatLongDate } from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
 import styles from "./HomeHero.module.scss";
 
 type InfoItemProps = {
 	iconClass: string;
 	title: string;
-	description: string;
+	description: string | string[];
 };
 
 function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
+	const descriptionLines = Array.isArray(description)
+		? description
+		: [description];
 	return (
 		<div className={styles.infoItem}>
 			<div aria-hidden="true" className={styles.infoItemIcon}>
@@ -16,14 +20,26 @@ function HeroInfoItem({ iconClass, title, description }: InfoItemProps) {
 			</div>
 			<div className={styles.infoItemContent}>
 				<p className={`fr-mb-0 ${styles.infoItemTitle}`}>{title}</p>
-				<p className="fr-text--sm fr-mb-0">{description}</p>
+				{descriptionLines.map((line) => (
+					<p className="fr-text--sm fr-mb-0" key={line}>
+						{line}
+					</p>
+				))}
 			</div>
 		</div>
 	);
 }
 
+type HomeHeroProps = {
+	remunerationDeadline: Date;
+	representationDeadline: Date;
+};
+
 /** Hero section of the home page: title, text, CTA button and key indicators. */
-export function HomeHero() {
+export function HomeHero({
+	remunerationDeadline,
+	representationDeadline,
+}: HomeHeroProps) {
 	return (
 		<section aria-labelledby="hero-heading" className={styles.hero}>
 			<div className="fr-container">
@@ -53,9 +69,12 @@ export function HomeHero() {
 								title="Entreprises de plus de 50 salariés"
 							/>
 							<HeroInfoItem
-								description="Déclaration annuelle obligatoire"
+								description={[
+									`Rémunération : ${formatLongDate(remunerationDeadline)}`,
+									`Représentation équilibrée : ${formatLongDate(representationDeadline)}`,
+								]}
 								iconClass="fr-icon-calendar-line"
-								title="Échéance : 1er mars"
+								title="Déclaration annuelle obligatoire"
 							/>
 						</div>
 					</div>

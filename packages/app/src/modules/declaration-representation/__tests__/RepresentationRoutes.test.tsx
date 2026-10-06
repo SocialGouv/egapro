@@ -74,19 +74,24 @@ const DECLARANT_EMAIL = "declarant@example.fr";
 
 const getDeclaration = vi.mocked(api.representationDeclaration.get);
 
+const DECLARATION_DEADLINE = new Date("2026-03-01T00:00:00.000Z");
+
 function mockFunnelState({
 	campaignOpen = true,
 	currentStep,
 	draft,
 	status,
+	declarationDeadline = DECLARATION_DEADLINE,
 }: {
 	campaignOpen?: boolean;
 	currentStep?: number;
 	draft?: unknown;
 	status?: string;
+	declarationDeadline?: Date;
 } = {}) {
 	getDeclaration.mockResolvedValue({
 		campaignOpen,
+		declarationDeadline,
 		declaration:
 			currentStep === undefined
 				? null
@@ -102,6 +107,7 @@ function stepPageProps() {
 		campaignYear: number;
 		campaignOpen: boolean;
 		isSubmitted: boolean;
+		declarationDeadline: string;
 		initialDraft: RepresentationDraft;
 	};
 }
@@ -319,6 +325,19 @@ describe("RepresentationStepPage — draft hydration", () => {
 		await renderStepPage("2");
 
 		expect(stepPageProps().initialDraft).toEqual({ currentStep: 2 });
+	});
+
+	it("hands the campaign's declaration deadline to the client funnel", async () => {
+		mockFunnelState({
+			currentStep: 2,
+			declarationDeadline: new Date("2027-04-15T00:00:00.000Z"),
+		});
+
+		await renderStepPage("2");
+
+		expect(stepPageProps().declarationDeadline).toBe(
+			"2027-04-15T00:00:00.000Z",
+		);
 	});
 
 	it("rebuilds the recap from submitted columns when the JSON draft was cleared", async () => {

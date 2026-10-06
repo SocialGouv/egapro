@@ -32,12 +32,16 @@ const registerStepValidator = vi.fn((validator: StepValidator | null) => {
 	latestValidator = validator;
 });
 
+const DEFAULT_DECLARATION_DEADLINE = new Date(2026, 2, 1);
+
 function renderStep({
 	draft = {},
 	isReadOnly = false,
+	declarationDeadline = DEFAULT_DECLARATION_DEADLINE,
 }: {
 	draft?: Partial<RepresentationDraft>;
 	isReadOnly?: boolean;
+	declarationDeadline?: Date;
 } = {}) {
 	const value: RepresentationDraftContextValue = {
 		year: REPRESENTATION_YEAR,
@@ -53,6 +57,7 @@ function renderStep({
 		isReadOnly,
 		previousHref: "/declaration-representation/etape/3",
 		registerStepValidator,
+		declarationDeadline,
 	};
 
 	return render(
@@ -181,6 +186,28 @@ describe("Step4Publication — fields", () => {
 
 		expect(modalitiesField()).toHaveAttribute("readonly");
 		expect(modalitiesField()).not.toBeDisabled();
+	});
+});
+
+describe("Step4Publication — intro deadline", () => {
+	it("announces the publication deadline without a yearly recurrence", () => {
+		renderStep();
+
+		const intro = screen.getByText(
+			"Vous devez publier vos écarts au plus tard le 1ᵉʳ mars 2026.",
+		);
+		expect(intro).toBeInTheDocument();
+		expect(intro.textContent).not.toMatch(/chaque année/);
+	});
+
+	it("follows the campaign's declaration deadline", () => {
+		renderStep({ declarationDeadline: new Date(2027, 3, 15) });
+
+		expect(
+			screen.getByText(
+				"Vous devez publier vos écarts au plus tard le 15 avril 2027.",
+			),
+		).toBeInTheDocument();
 	});
 });
 

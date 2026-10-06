@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { HomePage } from "~/modules/home";
 import { MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
+import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
+import { getActiveCampaignYear } from "~/server/db/getGlobalSettings";
+import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { HydrateClient } from "~/trpc/server";
 
 export const metadata = { title: { absolute: "Accueil — Egapro" } };
@@ -13,9 +16,18 @@ export default async function Page() {
 		redirect(MY_SPACE);
 	}
 
+	const year = await getActiveCampaignYear();
+	const [remunerationDeadlines, representationCampaign] = await Promise.all([
+		getCampaignDeadlines(year),
+		getRepresentationCampaign(year),
+	]);
+
 	return (
 		<HydrateClient>
-			<HomePage />
+			<HomePage
+				remunerationDeadline={remunerationDeadlines.decl1ModificationDeadline}
+				representationDeadline={representationCampaign.declarationDeadline}
+			/>
 		</HydrateClient>
 	);
 }

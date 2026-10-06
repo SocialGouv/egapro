@@ -92,6 +92,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 			return {
 				declaration: rows[0] ?? null,
 				campaignOpen: isRepresentationCampaignOpen(campaign, new Date()),
+				declarationDeadline: campaign.declarationDeadline,
 			};
 		}),
 
