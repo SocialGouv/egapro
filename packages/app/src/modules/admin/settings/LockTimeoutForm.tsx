@@ -50,7 +50,9 @@ export function LockTimeoutForm({ initialTimeoutMinutes }: Props) {
 				<label className="fr-label" htmlFor="lock-timeout-minutes">
 					Délai d'expiration du verrou de déclaration (minutes)
 					<span className="fr-hint-text">
-						Valeur entre 1 et 1440 minutes (24 heures maximum).
+						Indépendant de l'année de campagne sélectionnée. S'applique aux
+						déclarations de rémunération et aux avis du CSE. Valeur entre 1 et
+						1440 minutes (24 heures maximum).
 					</span>
 				</label>
 				<input

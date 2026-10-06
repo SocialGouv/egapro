@@ -66,7 +66,7 @@ const SECOND_ROW: FunnelRow = {
 
 const THIRD_ROW: FunnelRow = {
 	key: "submitted",
-	label: "Déclaration soumise",
+	label: "Déclaration transmise",
 	count: 30,
 	pctOfStart: 30,
 	pctDropFromPrev: 62,

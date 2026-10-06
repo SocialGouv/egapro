@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { formatWorkforceForUser } from "~/modules/domain";
+import {
+	formatWorkforceForUser,
+	isIndicatorGRequiredForGip,
+} from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
 import { FileFormatDetail } from "~/modules/shared";
 import common from "../shared/common.module.scss";
@@ -121,6 +124,10 @@ export function RecapitulatifPage({
 	}));
 
 	const pdfHref = buildPdfHref(declarationYear, isCorrection);
+	const indicatorGRequired = isIndicatorGRequiredForGip(
+		company.gipWorkforce,
+		declarationYear,
+	);
 
 	return (
 		<div className={common.flexColumnGap2}>
@@ -178,33 +185,35 @@ export function RecapitulatifPage({
 				</section>
 			)}
 
-			<section>
-				<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-					Indicateur par catégories de salariés
-				</h2>
-				{sourceLabel && (
-					<p className={`fr-mb-3w ${styles.sourceLine}`}>
-						<span className={styles.sourceLabel}>
-							Source utilisée pour déterminer les catégories d&apos;emplois :
-						</span>{" "}
-						<strong>{sourceLabel}</strong>
-					</p>
-				)}
-				<div className={styles.indicatorsSection}>
-					{indexedCategories.length > 0 ? (
-						indexedCategories.map((cat) => (
-							<CategoryRecapTable
-								category={cat}
-								declarationYear={declarationYear}
-								index={cat.position}
-								key={cat.position}
-							/>
-						))
-					) : (
-						<EmptyNotice />
+			{indicatorGRequired && (
+				<section>
+					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
+						Indicateur par catégories de salariés
+					</h2>
+					{sourceLabel && (
+						<p className={`fr-mb-3w ${styles.sourceLine}`}>
+							<span className={styles.sourceLabel}>
+								Source utilisée pour déterminer les catégories d&apos;emplois :
+							</span>{" "}
+							<strong>{sourceLabel}</strong>
+						</p>
 					)}
-				</div>
-			</section>
+					<div className={styles.indicatorsSection}>
+						{indexedCategories.length > 0 ? (
+							indexedCategories.map((cat) => (
+								<CategoryRecapTable
+									category={cat}
+									declarationYear={declarationYear}
+									index={cat.position}
+									key={cat.position}
+								/>
+							))
+						) : (
+							<EmptyNotice />
+						)}
+					</div>
+				</section>
+			)}
 
 			<Link
 				className={`fr-btn fr-btn--secondary ${styles.bottomAction}`}

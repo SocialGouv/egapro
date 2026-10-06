@@ -176,6 +176,19 @@ describe("generateXlsx", () => {
 		expect(headers).not.toContain("Phase_2_revision_requise");
 	});
 
+	it("names the initial transmission date column Date_transmission (#4303)", async () => {
+		const buffer = await generateXlsx([makeRow()], []);
+
+		const workbook = new ExcelJS.Workbook();
+		await workbook.xlsx.load(buffer as never);
+
+		const headers = workbook.getWorksheet("Déclarations")?.getRow(1)
+			.values as string[];
+
+		expect(headers).toContain("Date_transmission");
+		expect(headers).not.toContain("Date_soumission");
+	});
+
 	it("should have correct headers in Indicateur G sheet", async () => {
 		const buffer = await generateXlsx([], [makeIndicatorGRow()]);
 

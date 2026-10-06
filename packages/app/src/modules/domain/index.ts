@@ -13,7 +13,6 @@ export {
 export {
 	getCurrentDate,
 	getCurrentYear,
-	getDeclarationDeadline,
 	getDeclarationReferencePeriod,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
@@ -21,8 +20,6 @@ export {
 	getPathChoiceRound1Deadline,
 	getReferencePeriod,
 	getReferenceYearFor,
-	getRepresentationDeadline,
-	getSecondDeclarationDeadline,
 	getWorkforceYear,
 	isDeadlinePassed,
 	isRepresentationCampaignOpen,
@@ -276,6 +273,8 @@ export {
 	padDecimalToTwo,
 	parseNumber,
 	toNullableNumber,
+	toRoundedInt,
+	toStrictInt,
 } from "./shared/number";
 // Percentage & proportion numeric cores
 export { percentageOf, proportionOf } from "./shared/percentage";

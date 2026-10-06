@@ -3,10 +3,10 @@ import "server-only";
 import { and, eq, ilike } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
+import { toNullableNumber } from "~/modules/domain";
 import {
 	NON_DIFFUSIBLE_LABEL,
 	type PublicSearchInput,
-	toNumber,
 } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
@@ -147,11 +147,11 @@ function toExportRow(
 		departmentLabel: diffusible ? row.departmentLabel : NON_DIFFUSIBLE_LABEL,
 		nafCode: diffusible ? row.nafCode : NON_DIFFUSIBLE_LABEL,
 		nafLabel: diffusible ? row.nafLabel : NON_DIFFUSIBLE_LABEL,
-		executiveWomenPercent: toNumber(row.executiveWomenPercent),
-		executiveMenPercent: toNumber(row.executiveMenPercent),
+		executiveWomenPercent: toNullableNumber(row.executiveWomenPercent),
+		executiveMenPercent: toNullableNumber(row.executiveMenPercent),
 		notComputableReasonExecutives: row.notComputableReasonExecutives,
-		memberWomenPercent: toNumber(row.memberWomenPercent),
-		memberMenPercent: toNumber(row.memberMenPercent),
+		memberWomenPercent: toNullableNumber(row.memberWomenPercent),
+		memberMenPercent: toNullableNumber(row.memberMenPercent),
 		notComputableReasonMembers: row.notComputableReasonMembers,
 		publishDate: row.publishDate,
 		publishUrl: row.publishUrl,

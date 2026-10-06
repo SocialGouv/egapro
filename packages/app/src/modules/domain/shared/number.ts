@@ -14,13 +14,46 @@ export function parseNumber(value: string): number {
 	return Number.parseFloat(value.replace(/\s/g, "").replace(",", "."));
 }
 
-/** Coerce a stored numeric (DB string, number, or empty) to a finite number, else null. */
-export function toNullableNumber(
-	value: string | number | null | undefined,
-): number | null {
-	if (value == null || value === "") return null;
-	const parsed = typeof value === "number" ? value : Number(value);
+type NumericInput = string | number | null | undefined;
+
+const PLAIN_DECIMAL = /^-?\d+(\.\d+)?$/;
+
+/**
+ * The reference text → number conversion: a finite number, else `null`.
+ *
+ * Reads canonical machine text (Postgres `numeric`, GIP file, CSV cell already
+ * normalized): surrounding spaces are ignored, blank text is `null`, and the
+ * WHOLE string must be a plain decimal — `"12abc"` is `null`, not 12, and
+ * the other notations `Number()` accepts (`"0x10"`, `"0b11"`, `"1e3"`) are
+ * `null` too. A French comma is rejected (`"12,7"` → `null`): user input goes
+ * through `normalizeDecimalInput` or `parseNumber` first. `Infinity` and `NaN`,
+ * as text or as numbers, are `null`.
+ */
+export function toNullableNumber(value: NumericInput): number | null {
+	if (value === null || value === undefined) return null;
+	if (typeof value === "number") return Number.isFinite(value) ? value : null;
+	const trimmed = value.trim();
+	if (!PLAIN_DECIMAL.test(trimmed)) return null;
+	const parsed = Number(trimmed);
 	return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * {@link toNullableNumber} rounded to the nearest integer, for a source whose
+ * counts may legitimately carry decimals (GIP EMA headcounts): `"12.7"` → 13.
+ */
+export function toRoundedInt(value: NumericInput): number | null {
+	const parsed = toNullableNumber(value);
+	return parsed === null ? null : Math.round(parsed);
+}
+
+/**
+ * {@link toNullableNumber} restricted to integers, for a value that must
+ * already be one (a declared headcount): `"12.7"` → `null`, never truncated.
+ */
+export function toStrictInt(value: NumericInput): number | null {
+	const parsed = toNullableNumber(value);
+	return parsed !== null && Number.isInteger(parsed) ? parsed : null;
 }
 
 /**

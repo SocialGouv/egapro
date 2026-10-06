@@ -304,6 +304,47 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the remuneration deadlines upsert under the historical deadlines key", async () => {
+		const next = vi.fn(async () => okResult({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "adminSettings.upsertRemunerationDeadlines",
+			getRawInput: buildGetRawInput({
+				year: 2027,
+				decl1ModificationDeadline: "2027-06-01",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.upsert_deadlines",
+			status: "success",
+			metadata: { year: 2027, decl1ModificationDeadline: "2027-06-01" },
+		});
+	});
+
+	it("logs the common calendar update mutation under its own key", async () => {
+		const next = vi.fn(async () => okResult({ success: true }));
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "mutation",
+			path: "adminSettings.updateCommonCalendar",
+			getRawInput: buildGetRawInput({
+				year: 2027,
+				campaignStartDate: null,
+				publicDataReleaseDate: "2028-01-15",
+			}),
+			next,
+		});
+
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "admin_settings.update_common_calendar",
+			status: "success",
+			metadata: { year: 2027, publicDataReleaseDate: "2028-01-15" },
+		});
+	});
+
 	it("logs the representation campaign upsert mutation", async () => {
 		const next = vi.fn(async () => okResult({ success: true }));
 		await auditMiddleware({

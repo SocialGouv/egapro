@@ -328,7 +328,7 @@ describe("Step6Review", () => {
 
 	it("shows a submission error in the modal and clears it on close", async () => {
 		mockSubmitState.error = {
-			message: "La soumission a échoué.",
+			message: "La transmission a échoué.",
 			data: { code: "FORBIDDEN" },
 		};
 		renderSubmissionReview();
@@ -337,7 +337,7 @@ describe("Step6Review", () => {
 
 		expect(
 			within(modal).getByRole("alert", { hidden: true }),
-		).toHaveTextContent("La soumission a échoué.");
+		).toHaveTextContent("La transmission a échoué.");
 		expect(mockPush).not.toHaveBeenCalled();
 		await userEvent.click(
 			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
@@ -428,6 +428,9 @@ describe("Step6Review", () => {
 		);
 		expect(
 			screen.getByText(/Vérifiez que toutes les informations/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/avant de transmettre la déclaration aux services/),
 		).toBeInTheDocument();
 	});
 

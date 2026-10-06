@@ -1,6 +1,7 @@
 import { classifyCompanySize } from "./companySize";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
 import { formatCount, formatTruncatedDecimal, MISSING_VALUE } from "./format";
+import { toNullableNumber } from "./number";
 
 // The one label every user-facing surface shows for the voluntary tier, whether
 // the company is absent from the GIP file or present with a sub-threshold
@@ -15,9 +16,7 @@ export const GIP_WORKFORCE_VOLUNTARY_DISPLAY = `< ${COMPANY_SIZE_VOLUNTARY_MAX}`
 export function parseGipWorkforce(
 	raw: string | number | null | undefined,
 ): number | null {
-	if (raw === null || raw === undefined) return null;
-	const value = typeof raw === "number" ? raw : Number.parseFloat(raw);
-	return Number.isFinite(value) ? value : null;
+	return toNullableNumber(raw);
 }
 
 // A company absent from the GIP file is not subject to the declaration, which every

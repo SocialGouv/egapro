@@ -36,6 +36,12 @@ describe("parseGipWorkforce", () => {
 		expect(parseGipWorkforce(Number.POSITIVE_INFINITY)).toBeNull();
 	});
 
+	it("rejects a partially numeric string instead of reading its numeric prefix", () => {
+		expect(parseGipWorkforce("120abc")).toBeNull();
+		expect(parseGipWorkforce("99,97")).toBeNull();
+		expect(parseGipWorkforce("Infinity")).toBeNull();
+	});
+
 	it("keeps a negative value rather than silently coercing it", () => {
 		expect(parseGipWorkforce("-1.00")).toBe(-1);
 	});

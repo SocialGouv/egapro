@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { getCurrentYear } from "~/modules/domain";
+
 const { getOverviewMock, getLockTimeoutMock } = vi.hoisted(() => ({
 	getOverviewMock: vi.fn(),
 	getLockTimeoutMock: vi.fn(),
@@ -17,41 +19,25 @@ vi.mock("~/trpc/server", () => ({
 	HydrateClient: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("../CampaignDeadlinesForm", () => ({
-	CampaignDeadlinesForm: (props: {
+vi.mock("../AdminSettingsSections", () => ({
+	AdminSettingsSections: (props: {
 		initialYear: number;
 		configuredYears: number[];
+		lockTimeoutMinutes: number;
 	}) =>
 		React.createElement("div", {
-			"data-testid": "campaign-deadlines-form",
+			"data-testid": "admin-settings-sections",
 			"data-initial-year": props.initialYear,
 			"data-years": props.configuredYears.join(","),
-		}),
-}));
-
-vi.mock("../LockTimeoutForm", () => ({
-	LockTimeoutForm: (props: { initialTimeoutMinutes: number }) =>
-		React.createElement("div", {
-			"data-testid": "lock-timeout-form",
-			"data-initial-timeout": props.initialTimeoutMinutes,
-		}),
-}));
-
-vi.mock("../RepresentationCampaignForm", () => ({
-	RepresentationCampaignForm: (props: { initialYear: number }) =>
-		React.createElement("div", {
-			"data-testid": "representation-campaign-form",
-			"data-initial-year": props.initialYear,
+			"data-lock-timeout": props.lockTimeoutMinutes,
 		}),
 }));
 
 import { AdminSettingsPage } from "../AdminSettingsPage";
 
 describe("AdminSettingsPage", () => {
-	it("renders the deadlines section and passes configured years to the form", async () => {
-		getOverviewMock.mockResolvedValue({
-			configuredYears: [2025, 2026, 2027],
-		});
+	it("renders the page title above the settings sections", async () => {
+		getOverviewMock.mockResolvedValue({ configuredYears: [2026] });
 		getLockTimeoutMock.mockResolvedValue({ timeoutMinutes: 30 });
 		render(await AdminSettingsPage());
 		expect(
@@ -60,59 +46,32 @@ describe("AdminSettingsPage", () => {
 				name: /paramètres de la plateforme/i,
 			}),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", { level: 2, name: /échéances de campagne/i }),
-		).toBeInTheDocument();
-		expect(
-			screen.queryByRole("heading", { name: /année de campagne active/i }),
-		).not.toBeInTheDocument();
-		const deadlines = screen.getByTestId("campaign-deadlines-form");
-		expect(deadlines.getAttribute("data-initial-year")).toBe("2027");
-		expect(deadlines.getAttribute("data-years")).toBe("2025,2026,2027");
+		expect(screen.getByTestId("admin-settings-sections")).toBeInTheDocument();
 	});
 
-	it("falls back to the current calendar year when no year is configured", async () => {
+	it("opens on the current campaign year, not on the latest configured one", async () => {
 		getOverviewMock.mockResolvedValue({
-			configuredYears: [],
+			configuredYears: [2025, 2026, getCurrentYear() + 5],
 		});
 		getLockTimeoutMock.mockResolvedValue({ timeoutMinutes: 30 });
 		render(await AdminSettingsPage());
-		const deadlines = screen.getByTestId("campaign-deadlines-form");
-		expect(deadlines.getAttribute("data-initial-year")).toBe(
-			String(new Date().getFullYear()),
+		const sections = screen.getByTestId("admin-settings-sections");
+		expect(sections.getAttribute("data-initial-year")).toBe(
+			String(getCurrentYear()),
+		);
+		expect(sections.getAttribute("data-years")).toBe(
+			`2025,2026,${getCurrentYear() + 5}`,
 		);
 	});
 
-	it("seeds the representation campaign form with the current year, independently of the configured deadline years", async () => {
-		getOverviewMock.mockResolvedValue({ configuredYears: [2019, 2020] });
-		getLockTimeoutMock.mockResolvedValue({ timeoutMinutes: 30 });
-		render(await AdminSettingsPage());
-		expect(
-			screen.getByRole("heading", {
-				level: 2,
-				name: /campagne représentation équilibrée/i,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen
-				.getByTestId("campaign-deadlines-form")
-				.getAttribute("data-initial-year"),
-		).toBe("2020");
-		expect(
-			screen
-				.getByTestId("representation-campaign-form")
-				.getAttribute("data-initial-year"),
-		).toBe(String(new Date().getFullYear()));
-	});
-
-	it("renders the lock timeout section seeded with the stored timeout", async () => {
-		getOverviewMock.mockResolvedValue({ configuredYears: [2026] });
+	it("seeds the sections with the stored lock timeout", async () => {
+		getOverviewMock.mockResolvedValue({ configuredYears: [] });
 		getLockTimeoutMock.mockResolvedValue({ timeoutMinutes: 45 });
 		render(await AdminSettingsPage());
 		expect(
-			screen.getByRole("heading", { level: 2, name: /verrou de déclaration/i }),
-		).toBeInTheDocument();
-		const lockForm = screen.getByTestId("lock-timeout-form");
-		expect(lockForm.getAttribute("data-initial-timeout")).toBe("45");
+			screen
+				.getByTestId("admin-settings-sections")
+				.getAttribute("data-lock-timeout"),
+		).toBe("45");
 	});
 });

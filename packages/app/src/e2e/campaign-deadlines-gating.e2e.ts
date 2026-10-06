@@ -100,34 +100,38 @@ async function saveDeadlinesThroughAdmin(
 	page: Page,
 	dates: typeof PAST_DEADLINES,
 ) {
-	await test.step("admin — échéances de campagne", async () => {
+	await test.step("admin — échéances de la démarche Rémunération", async () => {
 		await page.goto(ADMIN_SETTINGS);
-		const section = page.getByLabel("Échéances de campagne", { exact: true });
+		const section = page
+			.getByRole("region", { name: "Démarche Rémunération" })
+			.getByRole("region", { name: /^Échéances de la campagne/ });
+		const declaration = section.getByRole("group", {
+			name: "Déclaration des indicateurs",
+		});
 		const firstRound = section.getByRole("group", {
-			name: "Première déclaration",
+			name: "Parcours de mise en conformité — 1er tour",
 		});
 		const secondRound = section.getByRole("group", {
-			name: "Deuxième déclaration",
+			name: "Parcours de mise en conformité — 2nd tour",
 		});
 		const save = section.getByRole("button", { name: "Enregistrer" });
-		const decl1Modification = firstRound.getByLabel(
-			"Échéance de modification",
+		const decl1Modification = declaration.getByLabel(
+			"Échéance de déclaration",
 			{ exact: true },
 		);
-		const decl2Modification = secondRound.getByLabel(
-			"Échéance de modification",
+		const decl2Modification = firstRound.getByLabel(
+			"Échéance de la seconde déclaration (actions correctives)",
 			{ exact: true },
 		);
-		// The selector defaults to the latest configured year, and a pick made before
-		// hydration is reverted, so retry until the form reflects the campaign year.
+		// A pick made before hydration is reverted, so retry until the form reflects the campaign year.
 		await expect(async () => {
-			await section
+			await page
 				.locator("#campaign-year-selector")
 				.selectOption(String(testDeclarationYear));
 			await expect(
-				section.getByText(
-					`Paramètres applicables à la campagne ${testDeclarationYear}.`,
-				),
+				section.getByRole("heading", {
+					name: `Échéances de la campagne ${testDeclarationYear}`,
+				}),
 			).toBeVisible({ timeout: 1_000 });
 		}).toPass({ timeout: 30_000 });
 		// The form resets itself once the year's row loads; filling before that would be overwritten.
@@ -139,13 +143,13 @@ async function saveDeadlinesThroughAdmin(
 		await save.click();
 		await expect(
 			page.getByText(
-				"L'échéance de modification de la deuxième déclaration doit être postérieure à celle de la première.",
+				"L'échéance de la seconde déclaration (actions correctives) doit être postérieure à l'échéance de déclaration.",
 			),
 		).toBeVisible();
 
 		await decl1Modification.fill(dates.decl1ModificationDeadline);
 		await firstRound
-			.getByLabel("Échéance de justification", { exact: true })
+			.getByLabel("Échéance de justification des écarts", { exact: true })
 			.fill(dates.decl1JustificationDeadline);
 		await firstRound
 			.getByLabel("Échéance de dépôt du rapport d'évaluation conjointe", {
@@ -154,15 +158,16 @@ async function saveDeadlinesThroughAdmin(
 			.fill(dates.decl1JointEvaluationDeadline);
 		await decl2Modification.fill(dates.decl2ModificationDeadline);
 		await secondRound
-			.getByLabel("Échéance de justification", { exact: true })
+			.getByLabel("Échéance de justification des écarts", { exact: true })
 			.fill(dates.decl2JustificationDeadline);
 		await secondRound
 			.getByLabel("Échéance de dépôt du rapport d'évaluation conjointe", {
 				exact: true,
 			})
 			.fill(dates.decl2JointEvaluationDeadline);
-		await secondRound
-			.getByLabel("Échéance de dépôt de l'avis du CSE", { exact: true })
+		await section
+			.getByRole("group", { name: "Avis du CSE" })
+			.getByLabel(/^Échéance de dépôt de l'avis du CSE/)
 			.fill(dates.decl2CseOpinionDeadline);
 		await save.click();
 		await expect(
