@@ -51,6 +51,14 @@ vi.mock("~/server/audit/log", () => ({
 	logAction: mocks.logAction,
 }));
 
+vi.mock("~/modules/export", async () => ({
+	toCsvField: (
+		await vi.importActual<typeof import("~/modules/export/shared/csv")>(
+			"~/modules/export/shared/csv",
+		)
+	).toCsvField,
+}));
+
 function setRows(rows: unknown[]) {
 	const ordered = Object.assign(Promise.resolve(rows), {
 		limit: () => Promise.resolve(rows),

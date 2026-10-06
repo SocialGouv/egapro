@@ -44,6 +44,7 @@ export {
 	EXPORT_VERSION,
 	INDICATOR_G_COLUMNS,
 } from "./shared/constants";
+export { toCsvField } from "./shared/csv";
 export {
 	DECLARATION_EVENT_TYPE_LABELS,
 	type DeclarationEventType,

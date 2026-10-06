@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { toCsvField } from "~/modules/export";
 import type {
 	PublicCompanySource,
 	PublicDeclarationDTO,
@@ -172,13 +173,6 @@ const CSV_HEADERS: Array<keyof PublicDeclarationDTO> = [
 ];
 
 const FORMAT_SCHEMA = z.enum(["json", "csv", "xlsx"]).default("json");
-
-function toCsvField(value: unknown): string {
-	if (value === null || value === undefined) return '""';
-	let str = String(value).replace(/"/g, '""');
-	if (/^[=+\-@|]/.test(str)) str = `'${str}`;
-	return `"${str}"`;
-}
 
 function formatCsv(rows: PublicDeclarationDTO[]): string {
 	const header = CSV_HEADERS.map(toCsvField).join(";");

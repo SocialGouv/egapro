@@ -18,6 +18,7 @@ import {
 	representationDeclarations,
 } from "~/server/db/schema";
 import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
+import { toCsvField } from "./shared/csv";
 
 export type RepresentationExportRow = {
 	referenceYear: number;
@@ -194,19 +195,6 @@ export async function generateRepresentationXlsx(
 
 	const arrayBuffer = await workbook.xlsx.writeBuffer();
 	return Buffer.from(arrayBuffer);
-}
-
-/**
- * CSV field, semicolon-separated as the declarations export already is — the
- * separator French spreadsheets open without an import dialog. A leading `=`,
- * `+`, `-`, `@` or `|` is prefixed with a quote so a spreadsheet reads the cell
- * as text instead of evaluating it as a formula.
- */
-function toCsvField(value: unknown): string {
-	if (value === null || value === undefined) return '""';
-	let field = String(value).replace(/"/g, '""');
-	if (/^[=+\-@|]/.test(field)) field = `'${field}`;
-	return `"${field}"`;
 }
 
 export function generateRepresentationCsv(
