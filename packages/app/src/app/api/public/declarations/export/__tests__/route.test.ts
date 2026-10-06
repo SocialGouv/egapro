@@ -1,12 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { campaignDeadlines } from "~/server/db/schema";
+
+const RELEASE_GATE_SENTINEL = "RELEASE_GATE_SENTINEL";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
+	publiclyReleasedCampaignCondition: vi.fn(() => "RELEASE_GATE_SENTINEL"),
+	innerJoinCalls: [] as unknown[][],
 }));
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
+}));
+
+vi.mock("~/server/db/publicReleaseConditions", () => ({
+	publiclyReleasedCampaignCondition: mocks.publiclyReleasedCampaignCondition,
+	releasedRepresentationCampaignJoin: vi.fn(),
 }));
 
 vi.mock("~/server/db/schema", () => ({
@@ -52,12 +62,16 @@ vi.mock("~/server/audit/log", () => ({
 }));
 
 function setRows(rows: unknown[]) {
+	mocks.innerJoinCalls.length = 0;
 	const ordered = Object.assign(Promise.resolve(rows), {
 		limit: () => Promise.resolve(rows),
 	});
 	const chain = {
 		from: () => chain,
-		innerJoin: () => chain,
+		innerJoin: (...args: unknown[]) => {
+			mocks.innerJoinCalls.push(args);
+			return chain;
+		},
 		leftJoin: () => chain,
 		where: () => chain,
 		orderBy: () => ordered,
@@ -378,5 +392,24 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	it.each([
+		["no filter", ""],
+		[
+			"with filters",
+			"?format=csv&year=2023&q=alpha&region=11&naf=C&workforceRanges=1000%2B",
+		],
+	])("gates the campaign-deadline join on the public release condition (%s)", async (_label, search) => {
+		setRows([buildRow()]);
+
+		await callGet(search);
+
+		const campaignJoinCall = mocks.innerJoinCalls.find(
+			([table]) => table === campaignDeadlines,
+		);
+		expect(campaignJoinCall).toBeDefined();
+		const joinCondition = campaignJoinCall?.[1] as { and: unknown[] };
+		expect(joinCondition.and).toContain(RELEASE_GATE_SENTINEL);
 	});
 });

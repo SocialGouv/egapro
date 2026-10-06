@@ -12,6 +12,8 @@ import {
 	users,
 } from "~/server/db/schema";
 import {
+	countPublicCompanySirens,
+	listPublicCompanySirens,
 	listRecentPublicDeclarations,
 	searchPublicDeclarations,
 } from "~/server/services/publicDeclarationsService";
@@ -181,6 +183,42 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 
 		expect(result.count).toBe(0);
 		expect(result.data).toEqual([]);
+	});
+
+	// 2103 deliberately has no app_campaign_deadline row: no foreign key ties
+	// app_declaration.year to it, and that path is never exercised otherwise.
+	it("excludes a year that has no campaign-deadline row at all, with or without a year filter (S5)", async () => {
+		await db
+			.insert(declarations)
+			.values([declarationRow({ siren: SIREN_A, year: 2103 })]);
+
+		const unfiltered = await searchPublicDeclarations({ limit: 10, offset: 0 });
+		expect(unfiltered.count).toBe(0);
+		expect(unfiltered.data).toEqual([]);
+
+		const filtered = await searchPublicDeclarations({
+			year: 2103,
+			limit: 10,
+			offset: 0,
+		});
+		expect(filtered.count).toBe(0);
+		expect(filtered.data).toEqual([]);
+	});
+
+	it("shows a SIREN once, on its published year, when it also has an unpublished and a campaign-less year (S6)", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_A, year: 2102 }),
+				declarationRow({ siren: SIREN_A, year: 2103 }),
+			]);
+
+		const result = await searchPublicDeclarations({ limit: 10, offset: 0 });
+
+		expect(result.count).toBe(1);
+		expect(result.data).toHaveLength(1);
+		expect(result.data[0]).toMatchObject({ siren: SIREN_A, year: 2100 });
 	});
 
 	it("excludes cancelled declarations even when released and submitted", async () => {
@@ -397,5 +435,37 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			year: 2100,
 			publishedAt: new Date("2026-08-31T10:00:00Z"),
 		});
+	});
+
+	it("does not expose a SIREN whose only declaration-years are unpublished, in the sitemap listing (S7)", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_B, year: 2102 }),
+				declarationRow({ siren: SIREN_C, year: 2103 }),
+			]);
+
+		const sirens = await listPublicCompanySirens();
+		expect(sirens).toContain(SIREN_A);
+		expect(sirens).not.toContain(SIREN_B);
+		expect(sirens).not.toContain(SIREN_C);
+	});
+
+	it("does not count a SIREN whose only declaration-years are unpublished (S7)", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_B, year: 2102 }),
+				declarationRow({ siren: SIREN_C, year: 2103 }),
+			]);
+		const withoutPublished = await countPublicCompanySirens();
+
+		await db
+			.insert(declarations)
+			.values([declarationRow({ siren: SIREN_A, year: 2100 })]);
+		const withPublished = await countPublicCompanySirens();
+
+		expect(withPublished).toBe(withoutPublished + 1);
 	});
 });
