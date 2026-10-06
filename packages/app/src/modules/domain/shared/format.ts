@@ -1,6 +1,8 @@
 import { CIVIL_DATE_TIME_ZONE } from "./civilDate";
 import { GAP_DISPLAY_DECIMALS } from "./constants";
+import { DISPLAY_DECIMALS, truncateDecimals } from "./decimal";
 import { gapRatioToPercent, truncateGapRatio } from "./gap";
+import { percentageOf } from "./percentage";
 
 /**
  * The one place a value becomes display text — counts, percentages, amounts,
@@ -10,11 +12,13 @@ import { gapRatioToPercent, truncateGapRatio } from "./gap";
  * separator, narrow no-break space thousand separator, and the appropriate unit
  * suffix (%, €, j, custom).
  *
- * A name says the scale it reads AND the decimal convention it writes, because
- * a screen owns its decimals: `formatGap` truncates to two, `formatPrecisePercentage`
- * keeps up to two, `formatFixedPercentage` always writes one. Never give one name
- * two conventions — `formatGap` used to mean both a 0-100 value and a 0-1 ratio,
- * and feeding one the other's input printed `717 %` or `0,07 %`.
+ * A percentage or an average shown to the user follows one rule, held by
+ * `decimal.ts`: two decimals, truncated toward zero. A name still says the scale
+ * it reads AND whether the two decimals are always written: `formatGap` and
+ * `computePercentage` always write two, `formatPrecisePercentage` drops trailing
+ * zeros. Never give one name two conventions — `formatGap` used to mean both a
+ * 0-100 value and a 0-1 ratio, and feeding one the other's input printed `717 %`
+ * or `0,07 %`.
  *
  * These are pure presentation helpers — they contain no business logic. A formatter
  * that carries a business rule (`formatSiren`, `formatWorkforceForUser`) lives next
@@ -45,6 +49,21 @@ function oneFixedDecimal(value: number): string {
 	});
 }
 
+/** Truncated to the display decimals, both always written: `40` → `"40,00"`, `51.428` → `"51,42"`. */
+function fixedTruncatedDecimals(value: number): string {
+	return truncateDecimals(value).toLocaleString("fr-FR", {
+		maximumFractionDigits: DISPLAY_DECIMALS,
+		minimumFractionDigits: DISPLAY_DECIMALS,
+	});
+}
+
+/** Truncated to the display decimals, trailing zeros dropped: `49.876` → `"49,87"`, `66.7` → `"66,7"`, `50` → `"50"`. */
+export function formatTruncatedDecimal(value: number): string {
+	return truncateDecimals(value).toLocaleString("fr-FR", {
+		maximumFractionDigits: DISPLAY_DECIMALS,
+	});
+}
+
 function truncateGap(gap: number): number {
 	return truncateGapRatio(gap / 100) * 100;
 }
@@ -61,13 +80,6 @@ export function formatGapCompact(gap: number | null): string {
 	return truncateGap(gap).toFixed(GAP_DISPLAY_DECIMALS).replace(".", ",");
 }
 
-/** Compute count/total as a formatted percentage string. `count` is a raw string from form input. */
-export function computeProportion(count: string, total?: number): string {
-	const n = Number.parseInt(count, 10);
-	if (Number.isNaN(n) || !total || total === 0) return "- %";
-	return `${((n / total) * 100).toFixed(1).replace(".", ",")} %`;
-}
-
 /**
  * Format a monetary amount held as a raw form string, with its unit:
  * `("1234.5", "€/h")` → `"1 234,5 €/h"`. An empty amount reads `"-"` alone —
@@ -80,16 +92,20 @@ export function formatCurrency(value?: string | null, unit = "€"): string {
 	return formatTotal(n, unit);
 }
 
-/** Format an already-computed percentage: `35` → `"35 %"`, `12.5` → `"12,5 %"`. Returns `"—"` for nullish values. */
+/**
+ * Echo a percentage the user typed, at the one decimal its field accepts:
+ * `35` → `"35 %"`, `12.5` → `"12,5 %"`. Returns `"—"` for nullish values.
+ * Not for a computed percentage — that one takes two truncated decimals.
+ */
 export function formatPercentage(value: number | null | undefined): string {
 	if (value === null || value === undefined) return "—";
 	return `${value.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
 }
 
-/** Compute count/total as a formatted percentage string. Both arguments are numbers. */
+/** Compute count/total as a percentage, two truncated decimals always written: `(18, 35)` → `"51,42 %"`. */
 export function computePercentage(count: number, total: number): string {
 	if (total === 0) return "- %";
-	return `${((count / total) * 100).toFixed(1).replace(".", ",")} %`;
+	return `${fixedTruncatedDecimals(percentageOf(count, total))} %`;
 }
 
 /** Format a numeric total with an arbitrary unit suffix: `(1234.5, "€")` → `"1 234,5 €"`. */
@@ -104,16 +120,10 @@ export function formatCount(value: number | null): string {
 	return value.toLocaleString("fr-FR");
 }
 
-/** Count rounded to the unit before grouping: `249.6` → `"250"`. For averages shown as a headcount. */
-export function formatRoundedCount(value: number | null): string {
-	if (value === null) return MISSING_VALUE;
-	return formatCount(Math.round(value));
-}
-
-/** Percentage already on the 0-100 scale, up to two decimals: `33.333` → `"33,33 %"`, `66.7` → `"66,7 %"`. */
+/** Percentage already on the 0-100 scale, up to two truncated decimals: `66.666` → `"66,66 %"`, `66.7` → `"66,7 %"`. */
 export function formatPrecisePercentage(value: number | null): string {
 	if (value === null) return MISSING_VALUE;
-	return `${value.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} %`;
+	return `${formatTruncatedDecimal(value)} %`;
 }
 
 /**

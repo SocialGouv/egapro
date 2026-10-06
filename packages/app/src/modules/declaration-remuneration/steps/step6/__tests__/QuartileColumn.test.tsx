@@ -12,8 +12,8 @@ describe("QuartileColumn", () => {
 			/>,
 		);
 
-		expect(screen.getByText("12,5 %")).toBeInTheDocument();
-		expect(screen.getByText("87,5 %")).toBeInTheDocument();
+		expect(screen.getByText("12,50 %")).toBeInTheDocument();
+		expect(screen.getByText("87,50 %")).toBeInTheDocument();
 		expect(screen.queryByText("12.5 %")).not.toBeInTheDocument();
 	});
 
@@ -25,7 +25,7 @@ describe("QuartileColumn", () => {
 			/>,
 		);
 
-		expect(screen.getAllByText("0,0 %")).toHaveLength(2);
+		expect(screen.getAllByText("0,00 %")).toHaveLength(2);
 		expect(screen.queryByText("- %")).not.toBeInTheDocument();
 	});
 
@@ -44,8 +44,8 @@ describe("QuartileColumn", () => {
 		expect(screen.getByText("Pourcentage de femmes")).toBeInTheDocument();
 		expect(screen.getByText("Pourcentage d'hommes")).toBeInTheDocument();
 		expect(screen.getAllByText("Q1")).toHaveLength(2);
-		expect(screen.getAllByText("50,0 %")).toHaveLength(2);
-		expect(screen.getByText("75,0 %")).toBeInTheDocument();
-		expect(screen.getByText("25,0 %")).toBeInTheDocument();
+		expect(screen.getAllByText("50,00 %")).toHaveLength(2);
+		expect(screen.getByText("75,00 %")).toBeInTheDocument();
+		expect(screen.getByText("25,00 %")).toBeInTheDocument();
 	});
 });
