@@ -191,6 +191,18 @@ describe("GET /api/declaration-pdf", () => {
 		});
 	});
 
+	it.each([
+		["correction", "correction"],
+		["initial", "initial"],
+		["x".repeat(5_000), "initial"],
+	])("audits the declaration type %#, normalised", async (type, expected) => {
+		await GET(request(`?year=${YEAR}&type=${type}`));
+
+		expect(auditRow()).toMatchObject({
+			metadata: { type: expected },
+		});
+	});
+
 	it("audits the download as a sensitive read", async () => {
 		await GET(request());
 

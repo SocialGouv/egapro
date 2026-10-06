@@ -15,9 +15,14 @@ import {
 
 const ROUTE = "declaration-pdf";
 
+function readDeclarationType(request: Request): "correction" | "initial" {
+	return new URL(request.url).searchParams.get("type") === "correction"
+		? "correction"
+		: "initial";
+}
+
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const url = new URL(request.url);
 	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
@@ -26,7 +31,7 @@ const resolveAuditContext = async (request: Request) => {
 		metadata: {
 			year: requestedYear.year,
 			invalidYear: requestedYear.invalid,
-			type: url.searchParams.get("type") ?? "initial",
+			type: readDeclarationType(request),
 		},
 	};
 };
@@ -52,9 +57,7 @@ async function resolveDeclarationPdf(
 		return { error: invalidYearResponse() };
 	}
 	const year = requestedYear.year ?? getCurrentYear();
-	const url = new URL(request.url);
-	const declarationType =
-		url.searchParams.get("type") === "correction" ? "correction" : "initial";
+	const declarationType = readDeclarationType(request);
 
 	const data = await buildPdfData(siren, year, new Date(), declarationType);
 	const filenamePrefix =
