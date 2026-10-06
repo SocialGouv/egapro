@@ -3,6 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { createClient, type RedisClientType } from "redis";
 import { env } from "~/env";
+import { extractIpAddress } from "~/server/audit/requestContext";
 
 const WINDOW_SECONDS = 60;
 const REDIS_TIMEOUT_MS = 1_500;
@@ -74,12 +75,7 @@ function fingerprint(value: string): string {
 }
 
 function clientAddress(request: Request): string {
-	const forwardedFor = request.headers.get("x-forwarded-for");
-	return (
-		request.headers.get("x-real-ip")?.trim() ||
-		forwardedFor?.split(",").at(-1)?.trim() ||
-		"unknown"
-	);
+	return extractIpAddress(request.headers) ?? "unknown";
 }
 
 function incrementMemory(key: string): number {
