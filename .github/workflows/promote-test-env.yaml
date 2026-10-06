@@ -31,6 +31,9 @@ concurrency:
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ inputs.target }}
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: "✅ Verify ${{ inputs.release }} is a published release"
