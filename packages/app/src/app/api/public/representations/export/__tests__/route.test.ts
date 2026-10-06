@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
 	buildRows: vi.fn(),
 	generateCsv: vi.fn(),
 	generateXlsx: vi.fn(),
 	logAction: vi.fn(),
+	getValkey: vi.fn(),
+}));
+
+vi.mock("~/server/services/valkey", () => ({
+	getValkey: mocks.getValkey,
+	discardValkey: vi.fn(),
+	withValkeyTimeout: <T>(promise: Promise<T>) => promise,
 }));
 
 vi.mock("~/modules/export", () => ({
@@ -21,6 +29,7 @@ beforeEach(() => {
 	mocks.buildRows.mockResolvedValue([]);
 	mocks.generateCsv.mockReturnValue("header");
 	mocks.generateXlsx.mockResolvedValue(Buffer.from("xlsx"));
+	mocks.getValkey.mockResolvedValue(null);
 });
 
 async function callGet(search = "") {
@@ -74,6 +83,34 @@ describe("GET /api/public/representations/export", () => {
 		expect(response.status).toBe(400);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(mocks.buildRows).not.toHaveBeenCalled();
+	});
+});
+
+describe("GET /api/public/representations/export — server-side cache", () => {
+	it("serves an equivalent CSV query from the cache without querying the database", async () => {
+		mocks.getValkey.mockResolvedValue(createFakeValkey());
+		mocks.generateCsv.mockReturnValue('"SIREN"\n"123456789"');
+		await callGet("?format=csv&region=11&region=84");
+		mocks.buildRows.mockClear();
+
+		const response = await callGet("?region=84&format=csv&page=2&region=11");
+
+		expect(mocks.buildRows).not.toHaveBeenCalled();
+		expect(response.headers.get("Content-Disposition")).toContain(
+			"index-egapro-representations-equilibrees.csv",
+		);
+		expect(await response.text()).toBe('"SIREN"\n"123456789"');
+	});
+
+	it("does not cache Excel workbooks", async () => {
+		const valkey = createFakeValkey();
+		mocks.getValkey.mockResolvedValue(valkey);
+
+		await callGet();
+		await callGet();
+
+		expect(valkey.set).not.toHaveBeenCalled();
+		expect(mocks.buildRows).toHaveBeenCalledTimes(2);
 	});
 });
 

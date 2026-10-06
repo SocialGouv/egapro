@@ -13,10 +13,26 @@ import {
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
+import {
+	publicExportCacheKey,
+	readCachedExport,
+	storeCachedExport,
+} from "~/server/services/publicExportCache";
 
 // Defaults to xlsx: this endpoint shipped as an Excel-only download and
 // existing callers pass no format at all.
 const FORMAT_SCHEMA = z.enum(["csv", "xlsx"]).default("xlsx");
+
+function csvExportResponse(body: string) {
+	return new NextResponse(body, {
+		headers: {
+			...PUBLIC_API_EXPORT_HEADERS,
+			"Content-Type": "text/csv; charset=utf-8",
+			"Content-Disposition":
+				'attachment; filename="index-egapro-representations-equilibrees.csv"',
+		},
+	});
+}
 
 export function OPTIONS(): Response {
 	return new Response(null, {
@@ -55,19 +71,22 @@ export const GET = withAuditedRoute(
 					{ status: 400, headers: PUBLIC_API_EXPORT_HEADERS },
 				);
 			}
-			const rows = await buildRepresentationExportRows(db, input.data);
-
 			if (format.data === "csv") {
-				return new NextResponse(generateRepresentationCsv(rows), {
-					headers: {
-						...PUBLIC_API_EXPORT_HEADERS,
-						"Content-Type": "text/csv; charset=utf-8",
-						"Content-Disposition":
-							'attachment; filename="index-egapro-representations-equilibrees.csv"',
-					},
-				});
+				const cacheKey = publicExportCacheKey(
+					"representations",
+					"csv",
+					input.data,
+				);
+				const cached = await readCachedExport(cacheKey);
+				if (cached !== null) return csvExportResponse(cached);
+				const body = generateRepresentationCsv(
+					await buildRepresentationExportRows(db, input.data),
+				);
+				await storeCachedExport(cacheKey, body);
+				return csvExportResponse(body);
 			}
 
+			const rows = await buildRepresentationExportRows(db, input.data);
 			const xlsxBuffer = await generateRepresentationXlsx(rows);
 
 			return new NextResponse(new Uint8Array(xlsxBuffer), {

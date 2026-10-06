@@ -1,15 +1,13 @@
 import "server-only";
 
 import { createHash, timingSafeEqual } from "node:crypto";
-import { createClient, type RedisClientType } from "redis";
 import { env } from "~/env";
+import { discardValkey, getValkey, withValkeyTimeout } from "./valkey";
 
 const WINDOW_SECONDS = 60;
 const REDIS_TIMEOUT_MS = 1_500;
 const MAX_MEMORY_BUCKETS = 50_000;
 const anonymousHits = new Map<string, { count: number; expiresAt: number }>();
-let redisClient: RedisClientType | null = null;
-let redisConnection: Promise<RedisClientType | null> | null = null;
 let lastMemorySweep = 0;
 
 function configuredTokens(): string[] {
@@ -31,54 +29,6 @@ function isConfiguredToken(candidate: string): boolean {
 		matched = timingSafeEqual(candidateDigest, sha256(token)) || matched;
 	}
 	return matched;
-}
-
-async function getRedis(): Promise<RedisClientType | null> {
-	if (!env.VALKEY_URL) return null;
-	if (redisClient?.isReady) return redisClient;
-	if (redisConnection) return redisConnection;
-	redisConnection = (async () => {
-		let client: RedisClientType | null = null;
-		try {
-			client = createClient({
-				url: env.VALKEY_URL,
-				socket: { connectTimeout: REDIS_TIMEOUT_MS },
-			}) as RedisClientType;
-			client.on("error", () => undefined);
-			client.on("end", () => {
-				if (redisClient === client) redisClient = null;
-			});
-			await withTimeout(client.connect(), REDIS_TIMEOUT_MS);
-			redisClient = client;
-			return redisClient;
-		} catch {
-			client?.destroy();
-			return null;
-		} finally {
-			redisConnection = null;
-		}
-	})();
-	return redisConnection;
-}
-
-async function withTimeout<T>(
-	promise: Promise<T>,
-	timeoutMs: number,
-): Promise<T> {
-	let timer: ReturnType<typeof setTimeout> | undefined;
-	try {
-		return await Promise.race([
-			promise,
-			new Promise<never>((_, reject) => {
-				timer = setTimeout(
-					() => reject(new Error("Valkey command timeout")),
-					timeoutMs,
-				);
-			}),
-		]);
-	} finally {
-		if (timer) clearTimeout(timer);
-	}
 }
 
 function fingerprint(value: string): string {
@@ -123,11 +73,11 @@ function incrementMemory(key: string): number {
 }
 
 async function increment(key: string): Promise<number> {
-	const redis = await getRedis();
+	const redis = await getValkey();
 	if (redis) {
 		try {
 			const redisKey = `public-api-rate:${key}`;
-			const count = await withTimeout(
+			const count = await withValkeyTimeout(
 				redis.eval(
 					"local count = redis.call('INCR', KEYS[1]); if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; return count",
 					{ keys: [redisKey], arguments: [String(WINDOW_SECONDS)] },
@@ -136,8 +86,7 @@ async function increment(key: string): Promise<number> {
 			);
 			return Number(count);
 		} catch {
-			if (redisClient === redis) redisClient = null;
-			redis.destroy();
+			discardValkey(redis);
 		}
 	}
 	return incrementMemory(key);

@@ -1,8 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
+	getValkey: vi.fn(),
+}));
+
+vi.mock("~/server/services/valkey", () => ({
+	getValkey: mocks.getValkey,
+	discardValkey: vi.fn(),
+	withValkeyTimeout: <T>(promise: Promise<T>) => promise,
 }));
 
 vi.mock("~/server/db", () => ({
@@ -129,6 +137,7 @@ describe("GET /api/public/declarations/export", () => {
 	beforeEach(() => {
 		vi.resetModules();
 		vi.clearAllMocks();
+		mocks.getValkey.mockResolvedValue(null);
 	});
 
 	it("returns JSON with data and count by default", async () => {
@@ -389,5 +398,78 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	describe("server-side cache", () => {
+		it.each([
+			[
+				"?format=csv&region=11&region=84",
+				"?region=84&utm_source=x&format=csv&region=11&limit=5",
+			],
+			["?naf=C&year=2027", "?year=2027&sort=name&naf=C&naf=C"],
+		])("serves %s again for %s without querying the database", async (first, equivalent) => {
+			mocks.getValkey.mockResolvedValue(createFakeValkey());
+			setRows([buildRow()]);
+			const firstResponse = await callGet(first);
+			const firstBody = await firstResponse.text();
+			mocks.dbSelect.mockClear();
+
+			const cachedResponse = await callGet(equivalent);
+
+			expect(mocks.dbSelect).not.toHaveBeenCalled();
+			expect(cachedResponse.status).toBe(200);
+			expect(cachedResponse.headers.get("Content-Type")).toBe(
+				firstResponse.headers.get("Content-Type"),
+			);
+			expect(cachedResponse.headers.get("Content-Disposition")).toBe(
+				firstResponse.headers.get("Content-Disposition"),
+			);
+			expect(cachedResponse.headers.get("Cache-Control")).toContain(
+				"max-age=3600",
+			);
+			expect(await cachedResponse.text()).toBe(firstBody);
+		});
+
+		it("queries the database again for a different filter set", async () => {
+			mocks.getValkey.mockResolvedValue(createFakeValkey());
+			setRows([buildRow()]);
+			await callGet("?format=csv&region=11");
+			mocks.dbSelect.mockClear();
+
+			await callGet("?format=csv&region=84");
+
+			expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
+		});
+
+		it("keeps the JSON and CSV entries of one filter set apart", async () => {
+			mocks.getValkey.mockResolvedValue(createFakeValkey());
+			setRows([buildRow()]);
+			await callGet("?format=csv");
+
+			const response = await callGet();
+
+			expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
+			expect((await response.json()).count).toBe(1);
+		});
+
+		it("does not cache Excel workbooks", async () => {
+			const valkey = createFakeValkey();
+			mocks.getValkey.mockResolvedValue(valkey);
+			setRows([buildRow()]);
+
+			await callGet("?format=xlsx");
+
+			expect(valkey.set).not.toHaveBeenCalled();
+		});
+
+		it("still answers from the database when Valkey is unavailable", async () => {
+			setRows([buildRow()]);
+			await callGet("?format=csv");
+
+			const response = await callGet("?format=csv");
+
+			expect(response.status).toBe(200);
+			expect(mocks.dbSelect).toHaveBeenCalledTimes(2);
+		});
 	});
 });

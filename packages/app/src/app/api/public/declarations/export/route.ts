@@ -27,6 +27,11 @@ import {
 } from "~/server/db/schema";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
+import {
+	publicExportCacheKey,
+	readCachedExport,
+	storeCachedExport,
+} from "~/server/services/publicExportCache";
 
 const MAX_XLSX_EXPORT_ROWS = 10_000;
 
@@ -174,6 +179,23 @@ const CSV_HEADERS: Array<keyof PublicDeclarationDTO> = [
 
 const FORMAT_SCHEMA = z.enum(["json", "csv", "xlsx"]).default("json");
 
+function textExportResponse(format: "json" | "csv", body: string) {
+	return new NextResponse(body, {
+		headers:
+			format === "csv"
+				? {
+						...PUBLIC_API_EXPORT_HEADERS,
+						"Content-Type": "text/csv; charset=utf-8",
+						"Content-Disposition":
+							'attachment; filename="index-egapro-remunerations.csv"',
+					}
+				: {
+						...PUBLIC_API_EXPORT_HEADERS,
+						"Content-Type": "application/json",
+					},
+	});
+}
+
 function formatCsv(rows: PublicDeclarationDTO[]): string {
 	const header = CSV_HEADERS.map(toCsvField).join(";");
 	const dataRows = rows.map((row) =>
@@ -243,34 +265,23 @@ export const GET = withAuditedRoute(
 				);
 			}
 
-			const rows = await fetchPublishableDeclarations(
-				inputResult.data,
-				format === "xlsx" ? MAX_XLSX_EXPORT_ROWS + 1 : undefined,
-			);
-			if (format === "xlsx" && rows.length > MAX_XLSX_EXPORT_ROWS) {
-				return NextResponse.json(
-					{
-						error:
-							"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
-					},
-					{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
-				);
-			}
-			const data = rows.map(toPublicDTO);
+			const input = inputResult.data;
 
-			if (format === "csv") {
-				const csv = formatCsv(data);
-				return new NextResponse(csv, {
-					headers: {
-						...PUBLIC_API_EXPORT_HEADERS,
-						"Content-Type": "text/csv; charset=utf-8",
-						"Content-Disposition":
-							'attachment; filename="index-egapro-remunerations.csv"',
-					},
-				});
-			}
 			if (format === "xlsx") {
-				return new NextResponse(await formatWorkbook(data), {
+				const rows = await fetchPublishableDeclarations(
+					input,
+					MAX_XLSX_EXPORT_ROWS + 1,
+				);
+				if (rows.length > MAX_XLSX_EXPORT_ROWS) {
+					return NextResponse.json(
+						{
+							error:
+								"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
+						},
+						{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
+					);
+				}
+				return new NextResponse(await formatWorkbook(rows.map(toPublicDTO)), {
 					headers: {
 						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type":
@@ -281,12 +292,17 @@ export const GET = withAuditedRoute(
 				});
 			}
 
-			return NextResponse.json(
-				{ data, count: data.length },
-				{
-					headers: PUBLIC_API_EXPORT_HEADERS,
-				},
-			);
+			const cacheKey = publicExportCacheKey("declarations", format, input);
+			const cached = await readCachedExport(cacheKey);
+			if (cached !== null) return textExportResponse(format, cached);
+
+			const data = (await fetchPublishableDeclarations(input)).map(toPublicDTO);
+			const body =
+				format === "csv"
+					? formatCsv(data)
+					: JSON.stringify({ data, count: data.length });
+			await storeCachedExport(cacheKey, body);
+			return textExportResponse(format, body);
 		} catch (error) {
 			console.error(
 				"[api/public/declarations/export]",
