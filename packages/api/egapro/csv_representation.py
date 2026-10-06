@@ -3,12 +3,12 @@
 import re
 from datetime import date
 
-from naf import DB as NAF
 from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
 from egapro import config, constants, db, sql
+from egapro.naf_utils import format_naf_code
 from egapro.utils import escape_xlsx_formula, flatten, remove_one_year
 
 
@@ -40,7 +40,7 @@ async def get_headers_columns():
 WHITE_SPACES = re.compile(r"\s+")
 
 def code_naf(code):
-    return None if not code else (code if code not in NAF else f"{code} - {NAF[code]}")
+    return format_naf_code(code) if code else None
 
 def clean_cell(value):
     if isinstance(value, str):

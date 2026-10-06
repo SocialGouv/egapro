@@ -2,7 +2,7 @@ import { indicatorNoteMax } from "@common/core-domain/computers/DeclarationCompu
 import { type DeclarationOpmc } from "@common/core-domain/domain/DeclarationOpmc";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { RemunerationsMode } from "@common/core-domain/domain/valueObjects/declaration/indicators/RemunerationsMode";
-import { NAF } from "@common/dict";
+import { getNafDescription } from "@common/dict";
 import { type NonEmptyString } from "@common/shared-domain/domain/valueObjects/NonEmptyString";
 import { formatDateToFr } from "@common/utils/date";
 import { isEqual } from "date-fns";
@@ -90,7 +90,7 @@ export const DeclarationReceipt = (input: DeclarationOpmc) => {
         },
         {
           key: "Code NAF",
-          value: nafCode ? `${nafCode} - ${NAF[nafCode].description}` : "Non diffusible",
+          value: nafCode ? `${nafCode} - ${getNafDescription(nafCode)}` : "Non diffusible",
         },
         {
           key: "Adresse",

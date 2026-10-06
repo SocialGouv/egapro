@@ -1,5 +1,4 @@
 import { type DeclarationSearchResultRaw } from "@api/core-domain/infra/db/raw";
-import { type NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
@@ -71,7 +70,7 @@ export const declarationSearchResultMap: Mapper<
               nafCode:
                 (value.entreprise.code_naf as string) === "[NON-DIFFUSIBLE]"
                   ? undefined
-                  : (value.entreprise.code_naf as keyof NAF),
+                  : value.entreprise.code_naf,
             },
             declarant: {
               email: value.déclarant.email,
