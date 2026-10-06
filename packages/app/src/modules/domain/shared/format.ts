@@ -1,3 +1,4 @@
+import { CIVIL_DATE_TIME_ZONE } from "./civilDate";
 import { GAP_DISPLAY_DECIMALS } from "./constants";
 import { DISPLAY_DECIMALS, truncateDecimals } from "./decimal";
 import { gapRatioToPercent, truncateGapRatio } from "./gap";
@@ -189,14 +190,25 @@ export function formatFileSize(bytes: number | null): string | null {
 	return `${formatter.format(bytes / ONE_MO)} Mo`;
 }
 
-/** Format a date in short French format: `new Date("2026-03-10")` → `"10/03/2026"`. Returns `"—"` for nullish values. */
-export function formatShortDate(date: Date | null | undefined): string {
-	if (!date) return "—";
+function shortDate(date: Date, timeZone?: string): string {
 	return new Intl.DateTimeFormat("fr-FR", {
 		day: "2-digit",
 		month: "2-digit",
 		year: "numeric",
+		timeZone,
 	}).format(new Date(date));
+}
+
+/** Format a timestamp's day in short French format, in the viewer's time zone: `"10/03/2026"`. Returns `"—"` for nullish values. */
+export function formatShortDate(date: Date | null | undefined): string {
+	if (!date) return MISSING_VALUE;
+	return shortDate(date);
+}
+
+/** Format a civil date (UTC midnight) in short French format: `new Date("2026-03-10")` → `"10/03/2026"`, whatever the viewer's time zone. Returns `"—"` for nullish values. */
+export function formatCivilShortDate(date: Date | null | undefined): string {
+	if (!date) return MISSING_VALUE;
+	return shortDate(date, CIVIL_DATE_TIME_ZONE);
 }
 
 /** Format a persisted ISO date string (`YYYY-MM-DD`) in short French format: `"2026-03-10"` → `"10/03/2026"`. */
@@ -222,11 +234,7 @@ export function formatShortDateTime(date: Date | null | undefined): string {
 	}).format(new Date(date));
 }
 
-/**
- * Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`.
- * The first day of a month takes the French ordinal: `"1ᵉʳ juin 2026"`.
- */
-export function formatLongDate(date: Date): string {
+function longDate(date: Date, timeZone?: string): string {
 	// `formatToParts` rather than a regex over the formatted string: the ordinal
 	// is applied to the day part itself, whatever separator or part order the
 	// runtime's locale data produces.
@@ -234,12 +242,47 @@ export function formatLongDate(date: Date): string {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
+		timeZone,
 	})
 		.formatToParts(date)
 		.map((part) =>
 			part.type === "day" && part.value === "1" ? "1ᵉʳ" : part.value,
 		)
 		.join("");
+}
+
+/**
+ * Format a timestamp's day in long French format, in the viewer's time zone:
+ * `"10 mars 2026"`. The first day of a month takes the French ordinal: `"1ᵉʳ juin 2026"`.
+ */
+export function formatLongDate(date: Date): string {
+	return longDate(date);
+}
+
+/**
+ * Format a civil date (UTC midnight) in long French format, whatever the viewer's
+ * time zone: `new Date("2026-06-01")` → `"1ᵉʳ juin 2026"`.
+ */
+export function formatCivilLongDate(date: Date): string {
+	return longDate(date, CIVIL_DATE_TIME_ZONE);
+}
+
+/**
+ * A civil date split for markup that styles the ordinal itself:
+ * `new Date("2026-03-01")` → `{ day: 1, monthYear: "mars 2026" }`.
+ */
+export function civilLongDateParts(date: Date): {
+	day: number;
+	monthYear: string;
+} {
+	return {
+		day: date.getUTCDate(),
+		monthYear: new Intl.DateTimeFormat("fr-FR", {
+			month: "long",
+			year: "numeric",
+			timeZone: CIVIL_DATE_TIME_ZONE,
+		}).format(date),
+	};
 }
 
 /** Format a `MM-DD` fragment (year-agnostic) to French short form: `"02-15"` → `"15/02"`. */

@@ -1,4 +1,4 @@
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import { ResendReceiptButton } from "~/modules/mail";
 import styles from "./SubmissionBanner.module.scss";
 
@@ -27,7 +27,7 @@ export function SubmissionBanner({ email, deadline, year }: Props) {
 						</p>
 						<p className="fr-mb-0">
 							Échéance pour transmettre l'avis ou les avis du CSE :{" "}
-							<strong>{formatLongDate(deadline)}</strong>
+							<strong>{formatCivilLongDate(deadline)}</strong>
 						</p>
 					</div>
 				</div>
