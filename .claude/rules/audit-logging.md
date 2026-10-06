@@ -274,7 +274,7 @@ type argument.
 |---|---|
 | `healthz` | Liveness probe hit by Kubernetes every few seconds. Returns `"OK"`, reads nothing. Explicitly excluded above. |
 | `e2e-clock` | Test-only clock override, unreachable in production. Auditing it would flood `action_log` from the E2E suite for zero compliance value. |
-| `test-sentry` | Throws on purpose to exercise Sentry capture; 404s in `prod`. No user data. |
+| `test-sentry` | Throws on purpose to exercise Sentry capture, for an admin with a fresh second factor only; 404s to anyone else and always in `prod`. No user data. |
 | `v1/docs` | Serves the static Swagger UI shell; 404s in `prod`. No data access. |
 | `public/openapi.json` | Static OpenAPI document, identical for every caller. |
 | `v1/openapi.json` | idem. |
