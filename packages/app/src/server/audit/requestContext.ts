@@ -10,14 +10,12 @@ function validIpAddress(value: string | undefined): string | null {
 	return isIP(candidate) === 0 ? null : candidate;
 }
 
-// The first x-forwarded-for entry is whatever the client sent; only x-real-ip
-// (set by the ingress) and the last entry (appended by our own proxy) are
-// trustworthy. Bounded to the audit `ip_address` varchar(45) column, whose
-// overflow would make the audit insert fail silently.
+// Only x-real-ip and the last x-forwarded-for entry are set by our own proxies; the first is client-controlled.
 export function extractIpAddress(headers: Headers): string | null {
-	const realIp = headers.get("x-real-ip");
-	if (realIp?.trim()) return validIpAddress(realIp);
-	return validIpAddress(headers.get("x-forwarded-for")?.split(",").at(-1));
+	return (
+		validIpAddress(headers.get("x-real-ip") ?? undefined) ??
+		validIpAddress(headers.get("x-forwarded-for")?.split(",").at(-1))
+	);
 }
 
 export function extractUserAgent(headers: Headers): string | null {

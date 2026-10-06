@@ -14,6 +14,14 @@ describe("extractIpAddress", () => {
 		expect(extractIpAddress(headers)).toBe("198.51.100.9");
 	});
 
+	it("falls back on the last x-forwarded-for entry when x-real-ip is invalid", () => {
+		const headers = new Headers({
+			"x-real-ip": "not-an-ip",
+			"x-forwarded-for": "203.0.113.1, 198.51.100.1",
+		});
+		expect(extractIpAddress(headers)).toBe("198.51.100.1");
+	});
+
 	it("takes the last x-forwarded-for entry, the one appended by our proxy", () => {
 		const headers = new Headers({
 			"x-forwarded-for": "203.0.113.1, 198.51.100.1",
