@@ -7,12 +7,19 @@ import { parseSiren } from "~/modules/domain";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext } from "~/server/audit/requestContext";
 import { fetchEndSessionEndpoint } from "~/server/auth/proconnect-logout";
+import { isCrossSiteRequest } from "~/server/auth/requestProvenance";
+import { expireSessionCookies } from "~/server/auth/sessionCookie";
 import { db } from "~/server/db";
 import { releaseAllLocksForUser } from "~/server/services/declarationLockService";
 
 export async function GET(request: NextRequest) {
-	const token = await getToken({ req: request });
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
+
+	if (isCrossSiteRequest(request.headers, baseUrl)) {
+		return NextResponse.redirect(new URL("/", baseUrl));
+	}
+
+	const token = await getToken({ req: request });
 
 	if (token) {
 		const requestContext = buildRequestContext(request.headers);
@@ -42,19 +49,7 @@ export async function GET(request: NextRequest) {
 
 	const redirectTarget = await buildLogoutRedirectUrl(token?.id_token, baseUrl);
 	const response = NextResponse.redirect(redirectTarget);
-
-	const isSecure = baseUrl.startsWith("https://");
-	const sessionCookieName = isSecure
-		? "__Secure-next-auth.session-token"
-		: "next-auth.session-token";
-	response.cookies.set(sessionCookieName, "", {
-		expires: new Date(0),
-		path: "/",
-		secure: isSecure,
-		httpOnly: true,
-		sameSite: "lax",
-	});
-
+	expireSessionCookies(request, response, baseUrl);
 	return response;
 }
 
