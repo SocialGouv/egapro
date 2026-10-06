@@ -2,6 +2,8 @@ app:
   annotations:
     oblik.socialgouv.io/min-limit-cpu: 2
     oblik.socialgouv.io/min-limit-memory: "512Mi"
+  vars:
+    EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
 
 global:
   observatoryDemoSeedEnabled: true

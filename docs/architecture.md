@@ -292,8 +292,8 @@ sequenceDiagram
 
 Le callback `jwt` (NextAuth) :
 
-1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id` et `isAdmin`.
-2. Injecte `userId`, `email`, `isAdmin` dans le token.
+1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id`.
+2. Calcule `isAdmin` : l'email doit figurer dans `ADMIN_EMAILS` **et** le claim ProConnect `roles` doit contenir `agent_public` — sauf si `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` vaut `false`, qui lève seulement cette seconde condition. Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle, flag à `true`) a `isAdmin = false`. Injecte `userId`, `email`, `isAdmin` dans le token ; la colonne `users.is_admin` suit la même valeur.
 3. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
 
 ### 5.4 Edge middleware (`src/middleware.ts`)
@@ -339,9 +339,15 @@ sequenceDiagram
 
 L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
-### 5.7 Provenance de `ADMIN_EMAILS`
+### 5.7 Provenance de `ADMIN_EMAILS` et condition d'agent public
 
-`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) décide qui reçoit le rôle admin : synchronisation bidirectionnelle à chaque connexion, l'ajout promeut et le retrait rétrograde. Deux listes distinctes, chacune scellée avec le certificat de son propre cluster :
+`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) ne suffit plus seule : depuis #4560, `isAdmin` exige en plus que ProConnect reconnaisse le compte comme **agent public** (claim `roles` contenant `agent_public`, scope demandé par le provider ProConnect). Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle) n'est pas admin. Synchronisation bidirectionnelle à chaque connexion sur cette double condition : l'un ou l'autre côté qui change (liste, ou rôle ProConnect) promeut ou rétrograde dès la connexion suivante.
+
+Le flag `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` (`src/env.js`, `"true"`/`"false"`, défaut `"true"`) lève **seulement** l'exigence `agent_public` — jamais `ADMIN_EMAILS`, ni la double authentification (§5.5). Il vaut `"false"` sur les review apps et en preprod (`.kontinuous/env/{dev,preprod}/values.yaml`, sous `app.vars`), pour garder l'accès aux prestataires de l'équipe dont l'organisation ProConnect n'est pas publique. Rien en production, où le défaut s'applique.
+
+La ligne d'audit `auth.admin_mfa` (`AUDIT_ACTIONS.AUTH_ADMIN_MFA`) est écrite pour tout compte **listé**, accordé ou non, et porte `roles` (`string[]`, ou `null` si le claim n'est pas arrivé) ainsi que `publicAgentRequired` (la valeur du flag à cette connexion) — ce qui permet de distinguer un claim non activé côté ProConnect d'un compte simplement non public.
+
+Deux listes distinctes pour `ADMIN_EMAILS`, chacune scellée avec le certificat de son propre cluster :
 
 | Environnements | Manifeste(s) | Scope sealed-secret |
 |---|---|---|

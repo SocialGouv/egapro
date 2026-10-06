@@ -131,6 +131,12 @@ export const env = createEnv({
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
 		 */
 		ADMIN_EMAILS: z.string().optional().default(""),
+		// Lifts the agent_public requirement on /admin; literal string, not z.coerce.boolean() ("false" would be truthy).
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: z
+			.enum(["true", "false"])
+			.optional()
+			.default("true")
+			.transform((value) => value === "true"),
 		// Audit log (issue #3174) — retention thresholds (CNIL: 6 months for
 		// access logs, 12 months for security logs). Consumed directly by the
 		// audit-cleanup CronJob (packages/app/scripts/audit-cleanup.ts, issue
@@ -227,6 +233,8 @@ export const env = createEnv({
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
 		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT:
+			process.env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
 		EGAPRO_AUDIT_RETENTION_SHORT_DAYS:
 			process.env.EGAPRO_AUDIT_RETENTION_SHORT_DAYS,
 		EGAPRO_AUDIT_RETENTION_LONG_DAYS:

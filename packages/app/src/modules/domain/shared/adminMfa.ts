@@ -27,6 +27,13 @@ export function isAdminMfaFresh(
 	return elapsedSeconds < ADMIN_MFA_WINDOW_SECONDS;
 }
 
+// The only ProConnect `roles` value tested: the other public-agent roles never arrive without it.
+export const PUBLIC_AGENT_ROLE = "agent_public";
+
+export function isPublicAgent(roles: unknown): boolean {
+	return Array.isArray(roles) && roles.includes(PUBLIC_AGENT_ROLE);
+}
+
 // Read from the session alone: a reason carried in the URL would be displayable at will.
 export type AdminMfaFailure = "expired" | "missing";
 
