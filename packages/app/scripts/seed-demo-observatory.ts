@@ -14,6 +14,7 @@
 
 import type { Sql, TransactionSql } from "postgres";
 import postgres from "postgres";
+import { truncateRatio } from "~/modules/domain";
 
 const args: Record<string, string | true> = Object.fromEntries(
 	process.argv
@@ -486,6 +487,10 @@ const YEARS = [
 	),
 ].sort((left, right) => left - right);
 
+function ratioOrNull(ratio: number | null): number | null {
+	return ratio === null ? null : truncateRatio(ratio);
+}
+
 function indicatorValues(
 	companyIndex: number,
 	point: HistoryPoint,
@@ -504,24 +509,30 @@ function indicatorValues(
 	return {
 		totalWomen,
 		totalMen: workforce - totalWomen,
-		globalAnnualMeanGap: annual,
-		globalHourlyMeanGap: hourly,
-		variableAnnualMeanGap: variable,
-		variableHourlyMeanGap: variable === null ? null : variable - 0.008,
-		globalAnnualMedianGap: annual === null ? null : annual - 0.006,
-		globalHourlyMedianGap: hourly === null ? null : hourly - 0.004,
-		variableAnnualMedianGap: variable === null ? null : variable - 0.005,
-		variableHourlyMedianGap: variable === null ? null : variable - 0.01,
-		variableProportionWomen: womenShare / 100,
-		variableProportionMen: (womenShare + 5) / 100,
-		annualQuartile1Women: (58 + quartileShift) / 100,
-		annualQuartile2Women: (54 + quartileShift) / 100,
-		annualQuartile3Women: (49 + quartileShift) / 100,
-		annualQuartile4Women: (43 + quartileShift) / 100,
-		hourlyQuartile1Women: (57 + quartileShift) / 100,
-		hourlyQuartile2Women: (53 + quartileShift) / 100,
-		hourlyQuartile3Women: (48 + quartileShift) / 100,
-		hourlyQuartile4Women: (42 + quartileShift) / 100,
+		globalAnnualMeanGap: ratioOrNull(annual),
+		globalHourlyMeanGap: ratioOrNull(hourly),
+		variableAnnualMeanGap: ratioOrNull(variable),
+		variableHourlyMeanGap: ratioOrNull(
+			variable === null ? null : variable - 0.008,
+		),
+		globalAnnualMedianGap: ratioOrNull(annual === null ? null : annual - 0.006),
+		globalHourlyMedianGap: ratioOrNull(hourly === null ? null : hourly - 0.004),
+		variableAnnualMedianGap: ratioOrNull(
+			variable === null ? null : variable - 0.005,
+		),
+		variableHourlyMedianGap: ratioOrNull(
+			variable === null ? null : variable - 0.01,
+		),
+		variableProportionWomen: truncateRatio(womenShare / 100),
+		variableProportionMen: truncateRatio((womenShare + 5) / 100),
+		annualQuartile1Women: truncateRatio((58 + quartileShift) / 100),
+		annualQuartile2Women: truncateRatio((54 + quartileShift) / 100),
+		annualQuartile3Women: truncateRatio((49 + quartileShift) / 100),
+		annualQuartile4Women: truncateRatio((43 + quartileShift) / 100),
+		hourlyQuartile1Women: truncateRatio((57 + quartileShift) / 100),
+		hourlyQuartile2Women: truncateRatio((53 + quartileShift) / 100),
+		hourlyQuartile3Women: truncateRatio((48 + quartileShift) / 100),
+		hourlyQuartile4Women: truncateRatio((42 + quartileShift) / 100),
 	};
 }
 
@@ -665,14 +676,14 @@ async function main() {
 							${values.globalAnnualMedianGap}, ${values.globalHourlyMedianGap},
 							${values.variableAnnualMedianGap}, ${values.variableHourlyMedianGap},
 							${values.variableProportionWomen}, ${values.variableProportionMen},
-							${values.annualQuartile1Women}, ${1 - values.annualQuartile1Women},
-							${values.annualQuartile2Women}, ${1 - values.annualQuartile2Women},
-							${values.annualQuartile3Women}, ${1 - values.annualQuartile3Women},
-							${values.annualQuartile4Women}, ${1 - values.annualQuartile4Women},
-							${values.hourlyQuartile1Women}, ${1 - values.hourlyQuartile1Women},
-							${values.hourlyQuartile2Women}, ${1 - values.hourlyQuartile2Women},
-							${values.hourlyQuartile3Women}, ${1 - values.hourlyQuartile3Women},
-							${values.hourlyQuartile4Women}, ${1 - values.hourlyQuartile4Women},
+							${values.annualQuartile1Women}, ${truncateRatio(1 - values.annualQuartile1Women)},
+							${values.annualQuartile2Women}, ${truncateRatio(1 - values.annualQuartile2Women)},
+							${values.annualQuartile3Women}, ${truncateRatio(1 - values.annualQuartile3Women)},
+							${values.annualQuartile4Women}, ${truncateRatio(1 - values.annualQuartile4Women)},
+							${values.hourlyQuartile1Women}, ${truncateRatio(1 - values.hourlyQuartile1Women)},
+							${values.hourlyQuartile2Women}, ${truncateRatio(1 - values.hourlyQuartile2Women)},
+							${values.hourlyQuartile3Women}, ${truncateRatio(1 - values.hourlyQuartile3Women)},
+							${values.hourlyQuartile4Women}, ${truncateRatio(1 - values.hourlyQuartile4Women)},
 							NOW(), NOW()
 						)
 					`;
