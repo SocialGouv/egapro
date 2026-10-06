@@ -581,8 +581,7 @@ export const authConfig = {
 					}
 				}
 
-				// ProConnect is the only source of the link, so a user moved to
-				// another organisation loses the former one at this sign-in (#4697).
+				// ProConnect is the only source of the link: a user moved elsewhere loses the former company.
 				const revokedSirens = await syncUserCompanyLink(
 					dbUser.id,
 					profileData.siret,

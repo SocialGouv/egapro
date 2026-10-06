@@ -77,7 +77,6 @@ vi.mock("~/server/db/schema", () => ({
 		stoppedAt: "stoppedAt",
 	},
 }));
-// The company link has its own integration test; these suites are about the MFA marker and impersonation.
 vi.mock("../companyLink", () => ({ syncUserCompanyLink: async () => [] }));
 vi.mock("~/server/audit/log", () => ({ logAction: vi.fn() }));
 
