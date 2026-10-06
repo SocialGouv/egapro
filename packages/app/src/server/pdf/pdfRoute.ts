@@ -12,6 +12,7 @@ export function pdfHeaders(
 		"Content-Type": "application/pdf",
 		"Content-Disposition": `attachment; filename="${filename}"`,
 		"Content-Length": String(byteLength),
+		"Cache-Control": "private, no-store",
 	};
 }
 

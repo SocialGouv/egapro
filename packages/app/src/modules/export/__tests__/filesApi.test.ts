@@ -373,7 +373,7 @@ describe("GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded)", () => 
 		expect(response.headers.get("Content-Disposition")).toBe(
 			`attachment; filename="avis-cse-evaluation.pdf"; filename*=UTF-8''avis-cse-evaluation.pdf`,
 		);
-		expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				action: "export.api_files",

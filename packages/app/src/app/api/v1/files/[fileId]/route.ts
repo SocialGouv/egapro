@@ -50,7 +50,6 @@ type ServeFileInput = CallerIdentity & {
 	requestContext: RequestContext;
 	fetchFile: () => Promise<{ filePath: string; fileName: string } | undefined>;
 	disposition: "inline" | "attachment";
-	cacheControl: string;
 	logLabel: string;
 	notFound: {
 		action: AuditActionKey;
@@ -76,7 +75,6 @@ async function serveFile({
 	siren = null,
 	fetchFile,
 	disposition,
-	cacheControl,
 	logLabel,
 	notFound,
 	success,
@@ -107,7 +105,7 @@ async function serveFile({
 			filePath: file.filePath,
 			fileName: file.fileName,
 			disposition,
-			cacheControl,
+			cacheControl: "private, no-store",
 		});
 
 		void logAction({
@@ -151,7 +149,6 @@ async function handleSuitDownload(
 		requestContext: buildRequestContext(request.headers),
 		fetchFile: () => fetchFileById(fileId),
 		disposition: "attachment",
-		cacheControl: "private, max-age=3600",
 		logLabel: "suit",
 		notFound: {
 			action: AUDIT_ACTIONS.EXPORT_API_FILES,
@@ -223,7 +220,6 @@ async function handleAdminDownload(
 		userEmail: session.user.email,
 		fetchFile: () => fetchFileById(fileId),
 		disposition: "attachment",
-		cacheControl: "private, max-age=3600",
 		logLabel: "admin",
 		notFound: {
 			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
@@ -269,7 +265,6 @@ async function handleAdminDownloadDemoted(
 		fetchFile: () =>
 			siren ? fetchFileBySiren(fileId, siren) : Promise.resolve(undefined),
 		disposition: "inline",
-		cacheControl: "private, no-store",
 		logLabel: "admin-demoted",
 		notFound: {
 			action: AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD,
@@ -302,7 +297,6 @@ async function handleUserDownload(
 		siren,
 		fetchFile: () => fetchFileBySiren(fileId, siren),
 		disposition: "inline",
-		cacheControl: "private, no-store",
 		logLabel: "session",
 		notFound: {
 			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
