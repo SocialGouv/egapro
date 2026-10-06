@@ -195,6 +195,16 @@ Le Prometheus de la plateforme sonde en HTTP **tous les ports de tous les servic
 
 Le déploiement Mailpit embarque donc un sidecar HAProxy (`smtp-demux`, template `.kontinuous/env/*/templates/mailpit.yaml`) qui écoute le port 1025 exposé par le Service et démultiplexe : trafic HTTP → UI Mailpit (8025), tout le reste → smtpd. Le smtpd de Mailpit n'écoute plus qu'en loopback (`MP_SMTP_BIND_ADDR=127.0.0.1:1026`). Conséquence : les clients SMTP reçoivent la bannière avec ~2 s de latence (`inspect-delay`), sans impact fonctionnel.
 
+### Mailpit in-cluster : authentification de l'interface web (#4695)
+
+L'Ingress `mailpit` (dev, preprod) est protégé par une authentification basic d'ingress-nginx : le secret `mailpit-basic-auth` (clé `auth`, ligne htpasswd) est scellé en cluster-wide dans `.kontinuous/env/{dev,preprod}/templates/mailpit-basic-auth.sealed-secret.yaml`. Les identifiants sont demandés à l'équipe ; ils ne figurent jamais dans le dépôt. Le SMTP interne (port 1025) n'est pas concerné. Pour (re)sceller :
+
+```bash
+htpasswd -nB <user> | kubeseal --scope cluster-wide --raw --from-file=/dev/stdin
+```
+
+La valeur obtenue remplace `auth:` dans les deux fichiers.
+
 ---
 
 ## Tester un mail localement
