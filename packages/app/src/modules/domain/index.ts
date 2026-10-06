@@ -40,6 +40,8 @@ export {
 	readCampaignYearOverride,
 	writeCampaignYearOverride,
 } from "./shared/campaignClock";
+// Civil dates (calendar days held as UTC midnight) vs timestamps
+export { civilDate } from "./shared/civilDate";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
@@ -186,8 +188,11 @@ export {
 } from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
+	civilLongDateParts,
 	computePercentage,
 	computeProportion,
+	formatCivilLongDate,
+	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
 	formatDays,

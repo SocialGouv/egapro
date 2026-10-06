@@ -9,7 +9,7 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { apiV1FileHref, COMPLIANCE_PATH } from "~/modules/routes";
@@ -136,7 +136,7 @@ export function JointEvaluationForm({
 					<div className="fr-highlight">
 						<p className="fr-mb-2v fr-text--md">Échéance</p>
 						<p className="fr-h6 fr-mb-2v">
-							{formatLongDate(jointEvaluationDeadline)}
+							{formatCivilLongDate(jointEvaluationDeadline)}
 						</p>
 						<p className="fr-mb-0 fr-text--sm fr-text-mention--grey">
 							Déclaration effectuée le {declarationDate}

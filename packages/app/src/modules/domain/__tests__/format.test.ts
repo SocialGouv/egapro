@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+	civilLongDateParts,
 	computePercentage,
 	computeProportion,
+	formatCivilLongDate,
+	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
 	formatDays,
@@ -406,6 +409,100 @@ describe("formatLongDate", () => {
 		expect(formatLongDate(new Date(2026, 5, 1))).toBe(
 			"1\u1d49\u02b3 juin 2026",
 		);
+	});
+
+	describe("on a timestamp", () => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("reads the day in the viewer's timezone", () => {
+			vi.stubEnv("TZ", "America/Cayenne");
+			expect(formatLongDate(new Date("2026-06-01T02:00:00Z"))).toBe(
+				"31 mai 2026",
+			);
+		});
+	});
+});
+
+const NEGATIVE_OFFSET_TIMEZONES = ["America/Cayenne", "Pacific/Tahiti"];
+
+describe("formatCivilLongDate", () => {
+	it("writes a civil date in full", () => {
+		expect(formatCivilLongDate(new Date("2026-06-12T00:00:00Z"))).toBe(
+			"12 juin 2026",
+		);
+	});
+
+	it("gives the first of the month its French ordinal", () => {
+		expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
+			"1\u1d49\u02b3 juin 2026",
+		);
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day instead of the day before", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
+				"1\u1d49\u02b3 juin 2026",
+			);
+		});
+	});
+});
+
+describe("formatCivilShortDate", () => {
+	it("formats a civil date in dd/mm/yyyy", () => {
+		expect(formatCivilShortDate(new Date("2026-03-01T00:00:00Z"))).toBe(
+			"01/03/2026",
+		);
+	});
+
+	it("returns dash for null", () => {
+		expect(formatCivilShortDate(null)).toBe(MISSING_VALUE);
+	});
+
+	it("returns dash for undefined", () => {
+		expect(formatCivilShortDate(undefined)).toBe(MISSING_VALUE);
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day instead of the day before", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(formatCivilShortDate(new Date("2026-03-01T00:00:00Z"))).toBe(
+				"01/03/2026",
+			);
+		});
+	});
+});
+
+describe("civilLongDateParts", () => {
+	it("splits a civil date into its day and its month and year", () => {
+		expect(civilLongDateParts(new Date("2026-03-01T00:00:00Z"))).toEqual({
+			day: 1,
+			monthYear: "mars 2026",
+		});
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day and month", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(civilLongDateParts(new Date("2026-03-01T00:00:00Z"))).toEqual({
+				day: 1,
+				monthYear: "mars 2026",
+			});
+		});
 	});
 });
 

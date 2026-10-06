@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import type { RepresentationCampaign } from "~/modules/domain";
 import {
+	civilDate,
 	getCurrentYear,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
@@ -263,7 +264,7 @@ describe("DeclarationsSection", () => {
 		renderSection({
 			representationCampaign: {
 				...representationCampaign,
-				declarationDeadline: new Date(currentYear, 3, 15),
+				declarationDeadline: civilDate(currentYear, 3, 15),
 			},
 		});
 		const [currentTable] = screen.getAllByRole("table");

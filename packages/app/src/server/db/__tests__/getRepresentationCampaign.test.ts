@@ -34,9 +34,13 @@ describe("getRepresentationCampaign", () => {
 
 		const campaign = await getRepresentationCampaign(2027);
 
-		expect(campaign.campaignStartDate).toEqual(new Date(2027, 0, 1));
-		expect(campaign.campaignEndDate).toEqual(new Date(2027, 11, 31));
-		expect(campaign.declarationDeadline).toEqual(new Date(2027, 2, 1));
+		expect(campaign.campaignStartDate).toEqual(
+			new Date("2027-01-01T00:00:00Z"),
+		);
+		expect(campaign.campaignEndDate).toEqual(new Date("2027-12-31T00:00:00Z"));
+		expect(campaign.declarationDeadline).toEqual(
+			new Date("2027-03-01T00:00:00Z"),
+		);
 	});
 
 	it("matches the domain defaults exactly when no row exists", async () => {
@@ -61,12 +65,16 @@ describe("getRepresentationCampaign", () => {
 
 		const campaign = await getRepresentationCampaign(2027);
 
-		expect(campaign.campaignStartDate).toEqual(new Date(2027, 1, 15));
-		expect(campaign.campaignEndDate).toEqual(new Date(2027, 8, 30));
-		expect(campaign.declarationDeadline).toEqual(new Date(2027, 3, 1));
+		expect(campaign.campaignStartDate).toEqual(
+			new Date("2027-02-15T00:00:00Z"),
+		);
+		expect(campaign.campaignEndDate).toEqual(new Date("2027-09-30T00:00:00Z"));
+		expect(campaign.declarationDeadline).toEqual(
+			new Date("2027-04-01T00:00:00Z"),
+		);
 	});
 
-	it("parses stored dates at local midnight, not UTC", async () => {
+	it("parses stored dates at UTC midnight of their civil day", async () => {
 		limitMock.mockResolvedValueOnce([
 			{
 				year: 2027,
@@ -79,8 +87,11 @@ describe("getRepresentationCampaign", () => {
 
 		const campaign = await getRepresentationCampaign(2027);
 
-		expect(campaign.campaignStartDate.getHours()).toBe(0);
-		expect(campaign.campaignStartDate.getDate()).toBe(1);
-		expect(campaign.campaignEndDate.getDate()).toBe(31);
+		expect(campaign.campaignStartDate.toISOString()).toBe(
+			"2027-01-01T00:00:00.000Z",
+		);
+		expect(campaign.campaignEndDate.toISOString()).toBe(
+			"2027-12-31T00:00:00.000Z",
+		);
 	});
 });
