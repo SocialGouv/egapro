@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "~/modules/public-api";
 import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
@@ -64,7 +65,32 @@ describe("GET /api/public/representations/export", () => {
 				naf: ["C"],
 				workforceRanges: ["1000+"],
 			}),
+			MAX_EXPORT_ROWS + 1,
 		);
+	});
+
+	it("answers 413 once a CSV export exceeds its safety cap", async () => {
+		mocks.buildRows.mockResolvedValue(new Array(MAX_EXPORT_ROWS + 1));
+
+		const response = await callGet("?format=csv");
+
+		expect(response.status).toBe(413);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(mocks.generateCsv).not.toHaveBeenCalled();
+	});
+
+	it("caps Excel downloads like the declarations export", async () => {
+		mocks.buildRows.mockResolvedValue(new Array(MAX_XLSX_EXPORT_ROWS + 1));
+
+		const response = await callGet();
+
+		expect(mocks.buildRows).toHaveBeenCalledWith(
+			expect.any(Object),
+			expect.any(Object),
+			MAX_XLSX_EXPORT_ROWS + 1,
+		);
+		expect(response.status).toBe(413);
+		expect(mocks.generateXlsx).not.toHaveBeenCalled();
 	});
 
 	it("uses the stable public filename for XLSX downloads", async () => {

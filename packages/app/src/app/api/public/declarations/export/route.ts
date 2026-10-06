@@ -10,6 +10,7 @@ import type {
 	PublicSearchInput,
 } from "~/modules/public-api";
 import {
+	fetchWithinExportLimit,
 	PUBLIC_API_EXPORT_HEADERS,
 	parsePublicSearchInput,
 	publicDeclarationColumns,
@@ -32,8 +33,6 @@ import {
 	readCachedExport,
 	storeCachedExport,
 } from "~/server/services/publicExportCache";
-
-const MAX_XLSX_EXPORT_ROWS = 10_000;
 
 export function OPTIONS(): Response {
 	return new Response(null, {
@@ -60,9 +59,9 @@ function exportFilters(input: PublicSearchInput) {
 
 async function fetchPublishableDeclarations(
 	input: PublicSearchInput,
-	limit?: number,
+	limit: number,
 ) {
-	const query = db
+	return db
 		.select({
 			...publicDeclarationColumns,
 			siren: companies.siren,
@@ -103,8 +102,8 @@ async function fetchPublishableDeclarations(
 				...exportFilters(input),
 			),
 		)
-		.orderBy(declarations.year, companies.siren);
-	return limit === undefined ? query : query.limit(limit);
+		.orderBy(declarations.year, companies.siren)
+		.limit(limit);
 }
 
 type ExportRow = Awaited<
@@ -267,21 +266,21 @@ export const GET = withAuditedRoute(
 
 			const input = inputResult.data;
 
-			if (format === "xlsx") {
-				const rows = await fetchPublishableDeclarations(
-					input,
-					MAX_XLSX_EXPORT_ROWS + 1,
+			if (format !== "xlsx") {
+				const cached = await readCachedExport(
+					publicExportCacheKey("declarations", format, input),
 				);
-				if (rows.length > MAX_XLSX_EXPORT_ROWS) {
-					return NextResponse.json(
-						{
-							error:
-								"L’export Excel est limité à 10 000 lignes. Ajoutez des filtres ou utilisez le format CSV.",
-						},
-						{ status: 413, headers: PUBLIC_API_EXPORT_HEADERS },
-					);
-				}
-				return new NextResponse(await formatWorkbook(rows.map(toPublicDTO)), {
+				if (cached !== null) return textExportResponse(format, cached);
+			}
+
+			const rows = await fetchWithinExportLimit(format, (limit) =>
+				fetchPublishableDeclarations(input, limit),
+			);
+			if (rows instanceof Response) return rows;
+			const data = rows.map(toPublicDTO);
+
+			if (format === "xlsx") {
+				return new NextResponse(await formatWorkbook(data), {
 					headers: {
 						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type":
@@ -292,16 +291,14 @@ export const GET = withAuditedRoute(
 				});
 			}
 
-			const cacheKey = publicExportCacheKey("declarations", format, input);
-			const cached = await readCachedExport(cacheKey);
-			if (cached !== null) return textExportResponse(format, cached);
-
-			const data = (await fetchPublishableDeclarations(input)).map(toPublicDTO);
 			const body =
 				format === "csv"
 					? formatCsv(data)
 					: JSON.stringify({ data, count: data.length });
-			await storeCachedExport(cacheKey, body);
+			await storeCachedExport(
+				publicExportCacheKey("declarations", format, input),
+				body,
+			);
 			return textExportResponse(format, body);
 		} catch (error) {
 			console.error(

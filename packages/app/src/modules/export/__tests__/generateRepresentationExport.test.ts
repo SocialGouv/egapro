@@ -156,6 +156,20 @@ describe("buildRepresentationExportRows", () => {
 		expect(mockWhere).toHaveBeenCalledTimes(1);
 	});
 
+	it("bounds the query when the caller passes a row limit", async () => {
+		const mockLimit = vi.fn().mockResolvedValue([makeDbRow()]);
+		mockOrderBy.mockReturnValue({ limit: mockLimit });
+
+		const rows = await buildRepresentationExportRows(
+			mockDb as never,
+			undefined,
+			200_001,
+		);
+
+		expect(mockLimit).toHaveBeenCalledWith(200_001);
+		expect(rows).toHaveLength(1);
+	});
+
 	it("keeps identity and location for a diffusible company", async () => {
 		mockOrderBy.mockResolvedValue([makeDbRow()]);
 

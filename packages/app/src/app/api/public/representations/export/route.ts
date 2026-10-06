@@ -7,6 +7,7 @@ import {
 	generateRepresentationXlsx,
 } from "~/modules/export";
 import {
+	fetchWithinExportLimit,
 	PUBLIC_API_EXPORT_HEADERS,
 	parsePublicSearchInput,
 } from "~/modules/public-api";
@@ -72,21 +73,26 @@ export const GET = withAuditedRoute(
 				);
 			}
 			if (format.data === "csv") {
-				const cacheKey = publicExportCacheKey(
-					"representations",
-					"csv",
-					input.data,
+				const cached = await readCachedExport(
+					publicExportCacheKey("representations", "csv", input.data),
 				);
-				const cached = await readCachedExport(cacheKey);
 				if (cached !== null) return csvExportResponse(cached);
-				const body = generateRepresentationCsv(
-					await buildRepresentationExportRows(db, input.data),
+			}
+
+			const rows = await fetchWithinExportLimit(format.data, (limit) =>
+				buildRepresentationExportRows(db, input.data, limit),
+			);
+			if (rows instanceof Response) return rows;
+
+			if (format.data === "csv") {
+				const body = generateRepresentationCsv(rows);
+				await storeCachedExport(
+					publicExportCacheKey("representations", "csv", input.data),
+					body,
 				);
-				await storeCachedExport(cacheKey, body);
 				return csvExportResponse(body);
 			}
 
-			const rows = await buildRepresentationExportRows(db, input.data);
 			const xlsxBuffer = await generateRepresentationXlsx(rows);
 
 			return new NextResponse(new Uint8Array(xlsxBuffer), {

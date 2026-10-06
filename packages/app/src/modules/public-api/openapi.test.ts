@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { formatCount } from "~/modules/domain";
+import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "./exportLimits";
 import { publicOpenApiSpec } from "./openapi";
 import {
 	publicDeclarationDTOSchema,
@@ -163,6 +165,12 @@ describe("publicOpenApiSpec", () => {
 			const content = operation.responses["200"].content;
 			expect(content["application/json"]).toBeDefined();
 			expect(content["text/csv"]).toBeDefined();
+		});
+
+		it("documents the 413 caps of every format", () => {
+			const description = operation.responses["413"].description;
+			expect(description).toContain(formatCount(MAX_XLSX_EXPORT_ROWS));
+			expect(description).toContain(formatCount(MAX_EXPORT_ROWS));
 		});
 	});
 

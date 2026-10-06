@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { formatCount } from "~/modules/domain";
+import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "~/modules/public-api";
 import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
 	getValkey: vi.fn(),
+	queryLimit: vi.fn(),
 }));
 
 vi.mock("~/server/services/valkey", () => ({
@@ -61,7 +64,10 @@ vi.mock("~/server/audit/log", () => ({
 
 function setRows(rows: unknown[]) {
 	const ordered = Object.assign(Promise.resolve(rows), {
-		limit: () => Promise.resolve(rows),
+		limit: (count: number) => {
+			mocks.queryLimit(count);
+			return Promise.resolve(rows);
+		},
 	});
 	const chain = {
 		from: () => chain,
@@ -382,22 +388,42 @@ describe("GET /api/public/declarations/export", () => {
 
 		const response = await callGet("?format=xlsx");
 
+		expect(mocks.queryLimit).toHaveBeenCalledWith(MAX_XLSX_EXPORT_ROWS + 1);
 		expect(response.status).toBe(413);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(await response.json()).toEqual(
-			expect.objectContaining({ error: expect.stringContaining("10 000") }),
+			expect.objectContaining({
+				error: expect.stringContaining(formatCount(MAX_XLSX_EXPORT_ROWS)),
+			}),
 		);
 	});
 
 	it.each([
 		"",
 		"?format=csv",
-	])("keeps complete open-data exports unbounded (%s)", async (search) => {
+	])("lets JSON and CSV exports go past the Excel cap (%s)", async (search) => {
 		setRows(Array.from({ length: 10_001 }, () => buildRow()));
 
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	it.each([
+		"",
+		"?format=csv",
+	])("answers 413 once a JSON or CSV export exceeds its safety cap (%s)", async (search) => {
+		setRows(new Array(MAX_EXPORT_ROWS + 1));
+
+		const response = await callGet(search);
+
+		expect(mocks.queryLimit).toHaveBeenCalledWith(MAX_EXPORT_ROWS + 1);
+		expect(response.status).toBe(413);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(response.headers.get("Cache-Control")).toContain("max-age=3600");
+		expect(await response.json()).toEqual({
+			error: expect.stringContaining(formatCount(MAX_EXPORT_ROWS)),
+		});
 	});
 
 	describe("server-side cache", () => {
@@ -450,6 +476,16 @@ describe("GET /api/public/declarations/export", () => {
 
 			expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
 			expect((await response.json()).count).toBe(1);
+		});
+
+		it("does not cache an oversized export", async () => {
+			const valkey = createFakeValkey();
+			mocks.getValkey.mockResolvedValue(valkey);
+			setRows(new Array(MAX_EXPORT_ROWS + 1));
+
+			await callGet("?format=csv");
+
+			expect(valkey.set).not.toHaveBeenCalled();
 		});
 
 		it("does not cache Excel workbooks", async () => {
