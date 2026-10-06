@@ -1,3 +1,10 @@
+## [3.18.7](https://github.com/SocialGouv/egapro/compare/v3.18.6...v3.18.7) (2026-10-06)
+
+
+### Bug Fixes
+
+* **security:** suite de la remédiation de l'audit de sécurité V1 ([#4720](https://github.com/SocialGouv/egapro/issues/4720)) ([f0702d1](https://github.com/SocialGouv/egapro/commit/f0702d1dafeeee4da6ec5ee5e2add0081ebaf5ef))
+
 ## [3.18.6](https://github.com/SocialGouv/egapro/compare/v3.18.5...v3.18.6) (2026-10-01)
 
 
