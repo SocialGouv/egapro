@@ -103,7 +103,7 @@ describe("StepDropoffTable", () => {
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: /Démarche post-soumission/i }),
+			screen.getByRole("rowheader", { name: /Démarche post-transmission/i }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("rowheader", { name: "Choix parcours conformité" }),
@@ -200,7 +200,7 @@ describe("StepDropoffTable", () => {
 		const dataRowheaders = rowheaderTexts.filter(
 			(text) =>
 				text !== "Parcours initial (wizard A–F)" &&
-				text !== "Démarche post-soumission",
+				text !== "Démarche post-transmission",
 		);
 		expect(dataRowheaders).toHaveLength(12);
 	});

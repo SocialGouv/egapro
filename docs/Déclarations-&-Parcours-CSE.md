@@ -64,7 +64,7 @@ flowchart TB
     P3 --> MR30["📧 Mail rappel échéance J-30<br/>(avant 1er juin)"]:::mail
     MR30 --> MR10["📧 Mail rappel échéance J-10<br/>(avant 1er juin)"]:::mail
     MR10 --> P4["1er JUIN — Deadline 1ère déclaration"]:::green
-    P4 --> S_P1["📋 Déclaration soumise"]:::state
+    P4 --> S_P1["📋 Déclaration transmise"]:::state
     S_P1 --> MD["📧 Mail confirmation 1ère déclaration"]:::mail
 
     %% ─── Routage post-Phase 1 par tranche ───
@@ -79,7 +79,7 @@ flowchart TB
     TR2 -- "100-149" --> HC_B{"A CSE ?"}:::diamond
     HC_B -- "OUI" --> MG_B["📧 Mail rappel avis CSE<br/>(exactitude données)<br/>avant 1er mars 2028"]:::mail
     MG_B --> CSE_B["Dépôt avis CSE<br/>(exactitude des données)"]:::pink
-    CSE_B --> S_B["📋 Avis CSE soumis"]:::state
+    CSE_B --> S_B["📋 Avis CSE transmis"]:::state
     S_B --> MH_B["📧 Mail confirmation avis CSE"]:::mail
     MH_B --> PUB_B["Publication A–F publique<br/>(G confidentiel)"]:::blue
     HC_B -- "NON" --> PUB_Bn["Publication A–F publique<br/>(G confidentiel)<br/>Pas de CSE"]:::blue
@@ -95,7 +95,7 @@ flowchart TB
     G1 -- "NON (conforme)" --> HC_C{"A CSE ?"}:::diamond
     HC_C -- "OUI" --> MG_C["📧 Mail rappel avis CSE<br/>(exactitude données)<br/>avant 1er mars 2028"]:::mail
     MG_C --> CSE_C["Dépôt avis CSE<br/>(exactitude des données)"]:::pink
-    CSE_C --> S_C["📋 Avis CSE soumis"]:::state
+    CSE_C --> S_C["📋 Avis CSE transmis"]:::state
     S_C --> MH_C["📧 Mail confirmation avis CSE"]:::mail
     MH_C --> PUB_C["Publication A–F publique<br/>(G confidentiel)"]:::blue
     HC_C -- "NON" --> PUB_Cn["Publication A–F publique<br/>(G confidentiel)<br/>Pas de CSE"]:::blue
@@ -116,7 +116,7 @@ flowchart TB
     HC_J -- "OUI" --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2028"]:::mail
     MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2028"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre<br/>(si pas encore déposé)"]:::mail
-    MG_J2 --> S_J["📋 Avis CSE soumis"]:::state
+    MG_J2 --> S_J["📋 Avis CSE transmis"]:::state
     S_J --> MH_J["📧 Mail confirmation avis CSE"]:::mail
     MH_J --> PUB_J["Publication A–F publique<br/>(G confidentiel)"]:::blue
     HC_J -- "NON" --> PUB_Jn["Publication A–F publique<br/>(G confidentiel)<br/>Pas de CSE"]:::blue
@@ -129,7 +129,7 @@ flowchart TB
     PA --> MSD3["📧 Mail rappel 2e décl J-90"]:::mail
     MSD3 --> MSD30["📧 Mail rappel 2e décl J-30 (1er déc 2027)"]:::mail
     MSD30 --> PA2["Seconde déclaration G<br/>(deadline 1er janvier 2028)"]:::pink
-    PA2 --> S_PA2["📋 2e déclaration soumise"]:::state
+    PA2 --> S_PA2["📋 2e déclaration transmise"]:::state
     S_PA2 --> MSDc["📧 Mail confirmation 2e déclaration"]:::mail
     MSDc --> PAG{"Écarts encore ≥ 5% ?"}:::diamond
     PAG -- "OUI (persistant)" --> R2["2e round<br/>(Justifier ou Éval. conjointe)"]:::pink
@@ -138,7 +138,7 @@ flowchart TB
     PAG -- "NON (corrigé)" --> HC_A{"A CSE ?"}:::diamond
     HC_A -- "OUI" --> MG_A["📧 Mail rappel avis CSE<br/>(exactitude 1ère + 2e décl<br/>+ justif. écarts si applicable)<br/>avant 1er mars 2028"]:::mail
     MG_A --> CSE_A["Dépôt avis CSE<br/>(exactitude 1ère et 2e déclaration<br/>+ justification des écarts si applicable)"]:::pink
-    CSE_A --> S_A["📋 Avis CSE soumis"]:::state
+    CSE_A --> S_A["📋 Avis CSE transmis"]:::state
     S_A --> MH_A["📧 Mail confirmation avis CSE"]:::mail
     MH_A --> PUB_A["Publication A–F publique<br/>(G confidentiel)"]:::blue
     HC_A -- "NON" --> PUB_An["Publication A–F publique<br/>(G confidentiel)<br/>Pas de CSE"]:::blue
@@ -150,12 +150,12 @@ flowchart TB
     %% ─── Chemin 4b-E : Évaluation conjointe (mail 1er août · rapport 1er sept · rappel CSE 1er déc) ───
     PE --> MG_E1["📧 Mail rappel dépôt éval. conjointe<br/>(envoyé 1er août)"]:::mail
     MG_E1 --> PE2["Dépôt rapport évaluation conjointe<br/>(deadline 1er septembre)"]:::pink
-    PE2 --> S_PE2["📋 Évaluation conjointe soumise"]:::state
+    PE2 --> S_PE2["📋 Évaluation conjointe transmise"]:::state
     S_PE2 --> M_PE2["📧 Mail confirmation rapport éval. conjointe"]:::mail
     M_PE2 --> HC_E{"A CSE ?"}:::diamond
     HC_E -- "OUI" --> MG_E2["📧 Mail rappel avis CSE<br/>(exactitude + éval. conjointe)<br/>envoyé 1er décembre"]:::mail
     MG_E2 --> CSE_E["Dépôt avis CSE<br/>(exactitude + évaluation conjointe)<br/>avant 1er mars 2028"]:::pink
-    CSE_E --> S_E["📋 Avis CSE soumis"]:::state
+    CSE_E --> S_E["📋 Avis CSE transmis"]:::state
     S_E --> MH_E["📧 Mail confirmation avis CSE"]:::mail
     MH_E --> PUB_E["Publication A–F publique<br/>(G confidentiel)"]:::blue
     HC_E -- "NON" --> PUB_En["Publication A–F publique<br/>(G confidentiel)<br/>Pas de CSE"]:::blue
@@ -216,7 +216,7 @@ flowchart TB
     MR10 --> P4["1er JUIN — Deadline 1ère déclaration"]:::green
     P4 --> SAVE_EFF["Validation d'une donnée par l'utilisateur<br/>« Sauvegarde des Effectifs »"]:::pink
     SAVE_EFF --> ST1_PROG["🟡 Déclaration des indicateurs<br/>de rémunération — En cours"]:::stageInProgress
-    ST1_PROG --> S_P1["📋 Déclaration soumise"]:::state
+    ST1_PROG --> S_P1["📋 Déclaration transmise"]:::state
     S_P1 --> ST1_DONE["✅ Déclaration des indicateurs<br/>de rémunération — Effectuée"]:::stageDone
     ST1_DONE --> MD["📧 Mail confirmation 1ère déclaration"]:::mail
 
@@ -234,7 +234,7 @@ flowchart TB
     HC_B -- "OUI" --> ST6B_PROG["🟡 Déposer le ou les<br/>avis CSE — En cours"]:::stageInProgress
     ST6B_PROG --> MG_B["📧 Mail rappel avis CSE<br/>(exactitude données)<br/>avant 1er mars 2028"]:::mail
     MG_B --> CSE_B["Dépôt avis CSE<br/>(exactitude des données)"]:::pink
-    CSE_B --> S_B["📋 Avis CSE soumis"]:::state
+    CSE_B --> S_B["📋 Avis CSE transmis"]:::state
     S_B --> ST6B_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
     ST6B_DONE --> ST7B_DONE["✅ Finalisation - Démarche des<br/>indicateurs de rémunération — Effectuée"]:::stageDone
     ST7B_DONE --> MH_B["📧 Mail confirmation avis CSE"]:::mail
@@ -254,7 +254,7 @@ flowchart TB
     HC_C -- "OUI" --> ST6C_PROG["🟡 Déposer le ou les<br/>avis CSE — En cours"]:::stageInProgress
     ST6C_PROG --> MG_C["📧 Mail rappel avis CSE<br/>(exactitude données)<br/>avant 1er mars 2028"]:::mail
     MG_C --> CSE_C["Dépôt avis CSE<br/>(exactitude des données)"]:::pink
-    CSE_C --> S_C["📋 Avis CSE soumis"]:::state
+    CSE_C --> S_C["📋 Avis CSE transmis"]:::state
     S_C --> ST6C_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
     ST6C_DONE --> ST7C_DONE["✅ Finalisation - Démarche des<br/>indicateurs de rémunération — Effectuée"]:::stageDone
     ST7C_DONE --> MH_C["📧 Mail confirmation avis CSE"]:::mail
@@ -281,7 +281,7 @@ flowchart TB
     ST6J_PROG --> MG_J1["📧 Mail rappel avis CSE<br/>(exactitude + justif. écarts)<br/>avant 1er mars 2028"]:::mail
     MG_J1 --> CSE_J["Dépôt avis CSE<br/>(exactitude + justification écarts)<br/>deadline 1er mars 2028"]:::pink
     CSE_J --> MG_J2["📧 Mail rappel 1er décembre<br/>(si pas encore déposé)"]:::mail
-    MG_J2 --> S_J["📋 Avis CSE soumis"]:::state
+    MG_J2 --> S_J["📋 Avis CSE transmis"]:::state
     S_J --> ST6J_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
     ST6J_DONE --> ST7J_DONE["✅ Finalisation - Démarche des<br/>indicateurs de rémunération — Effectuée"]:::stageDone
     ST7J_DONE --> MH_J["📧 Mail confirmation avis CSE"]:::mail
@@ -298,7 +298,7 @@ flowchart TB
     ST3_PROG --> MSD3["📧 Mail rappel 2e décl J-90"]:::mail
     MSD3 --> MSD30["📧 Mail rappel 2e décl J-30 (1er déc 2027)"]:::mail
     MSD30 --> PA2["Seconde déclaration G<br/>(deadline 1er janvier 2028)"]:::pink
-    PA2 --> S_PA2["📋 2e déclaration soumise"]:::state
+    PA2 --> S_PA2["📋 2e déclaration transmise"]:::state
     S_PA2 --> ST3_DONE["✅ Actions correctives et<br/>seconde déclaration — Effectuée"]:::stageDone
     ST3_DONE --> MSDc["📧 Mail confirmation 2e déclaration"]:::mail
     MSDc --> PAG{"Écarts encore ≥ 5% ?"}:::diamond
@@ -311,7 +311,7 @@ flowchart TB
     HC_A -- "OUI" --> ST6A_PROG["🟡 Déposer le ou les<br/>avis CSE — En cours"]:::stageInProgress
     ST6A_PROG --> MG_A["📧 Mail rappel avis CSE<br/>(exactitude 1ère + 2e décl<br/>+ justif. écarts si applicable)<br/>avant 1er mars 2028"]:::mail
     MG_A --> CSE_A["Dépôt avis CSE<br/>(exactitude 1ère et 2e déclaration<br/>+ justification des écarts si applicable)"]:::pink
-    CSE_A --> S_A["📋 Avis CSE soumis"]:::state
+    CSE_A --> S_A["📋 Avis CSE transmis"]:::state
     S_A --> ST6A_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
     ST6A_DONE --> ST7A_DONE["✅ Finalisation - Démarche des<br/>indicateurs de rémunération — Effectuée"]:::stageDone
     ST7A_DONE --> MH_A["📧 Mail confirmation avis CSE"]:::mail
@@ -327,14 +327,14 @@ flowchart TB
     PE --> ST5_PROG["🟡 Évaluation conjointe des<br/>rémunérations — En cours"]:::stageInProgress
     ST5_PROG --> MG_E1["📧 Mail rappel dépôt éval. conjointe<br/>(envoyé 1er août)"]:::mail
     MG_E1 --> PE2["Dépôt rapport évaluation conjointe<br/>(deadline 1er septembre)"]:::pink
-    PE2 --> S_PE2["📋 Évaluation conjointe soumise"]:::state
+    PE2 --> S_PE2["📋 Évaluation conjointe transmise"]:::state
     S_PE2 --> ST5_DONE["✅ Évaluation conjointe des<br/>rémunérations — Effectuée"]:::stageDone
     ST5_DONE --> M_PE2["📧 Mail confirmation rapport éval. conjointe"]:::mail
     M_PE2 --> HC_E{"A CSE ?"}:::diamond
     HC_E -- "OUI" --> ST6E_PROG["🟡 Déposer le ou les<br/>avis CSE — En cours"]:::stageInProgress
     ST6E_PROG --> MG_E2["📧 Mail rappel avis CSE<br/>(exactitude + éval. conjointe)<br/>envoyé 1er décembre"]:::mail
     MG_E2 --> CSE_E["Dépôt avis CSE<br/>(exactitude + évaluation conjointe)<br/>avant 1er mars 2028"]:::pink
-    CSE_E --> S_E["📋 Avis CSE soumis"]:::state
+    CSE_E --> S_E["📋 Avis CSE transmis"]:::state
     S_E --> ST6E_DONE["✅ Déposer le ou les<br/>avis CSE — Effectuée"]:::stageDone
     ST6E_DONE --> ST7E_DONE["✅ Finalisation - Démarche des<br/>indicateurs de rémunération — Effectuée"]:::stageDone
     ST7E_DONE --> MH_E["📧 Mail confirmation avis CSE"]:::mail

@@ -149,7 +149,7 @@ describe("buildPdfData", () => {
 		});
 		const buildPdfData = await importBuild();
 		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
-			"La déclaration n'est pas encore soumise",
+			"La déclaration n'est pas encore transmise",
 		);
 	});
 
