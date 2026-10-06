@@ -956,6 +956,15 @@ export const declarationRouter = createTRPCRouter({
 
 			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
 
+			const rules = loadRules(declaration.rulesVersion);
+			const facts = buildJointEvaluationFacts(declaration);
+			const { nextStatus, events } = applyActionOrRefuse(
+				facts,
+				"submit_joint_evaluation",
+				rules,
+				JOINT_EVALUATION_UNAVAILABLE_ERROR,
+			);
+
 			const [jointEvaluationFile] = await ctx.db
 				.select({ id: files.id })
 				.from(files)
@@ -972,15 +981,6 @@ export const declarationRouter = createTRPCRouter({
 					message: JOINT_EVALUATION_FILE_MISSING_ERROR,
 				});
 			}
-
-			const rules = loadRules(declaration.rulesVersion);
-			const facts = buildJointEvaluationFacts(declaration);
-			const { nextStatus, events } = applyActionOrRefuse(
-				facts,
-				"submit_joint_evaluation",
-				rules,
-				JOINT_EVALUATION_UNAVAILABLE_ERROR,
-			);
 
 			const projection = computeProjectionUpdates(events, nextStatus);
 			const historyInserts = buildHistoryInserts(

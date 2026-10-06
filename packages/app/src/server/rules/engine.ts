@@ -250,13 +250,19 @@ export class NoMatchingTransitionError extends Error {
 	}
 }
 
+function readCurrentState(facts: Facts): string | undefined {
+	return typeof facts.currentState === "string"
+		? facts.currentState
+		: undefined;
+}
+
 function resolveChoiceRevision(
 	facts: Facts,
 	action: string,
 	rules: Rules,
 	computations: Record<string, ComputationNode>,
 ): string | undefined {
-	const storedState = facts.currentState as string | undefined;
+	const storedState = readCurrentState(facts);
 	const revision = (rules.choiceRevisions ?? []).find(
 		(candidate) =>
 			candidate.action === action &&
@@ -307,11 +313,7 @@ export function applyAction(
 		return { nextStatus: transition.to, events: transition.events };
 	}
 
-	throw new NoMatchingTransitionError(
-		facts.currentState as string | undefined,
-		action,
-		facts,
-	);
+	throw new NoMatchingTransitionError(readCurrentState(facts), action, facts);
 }
 
 /** Evaluates a named computation of a ruleset against a facts object (parity locks between the versioned ruleset and the domain functions). */

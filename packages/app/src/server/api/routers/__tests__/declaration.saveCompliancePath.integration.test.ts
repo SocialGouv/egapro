@@ -171,8 +171,6 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		expect(rows).toHaveLength(0);
 	});
 
-	// #4757 — the status used to be overwritten before the transition, so a
-	// draft that was never submitted could close the démarche on its own.
 	it("refuses a path choice on a draft that was never submitted, recording nothing", async () => {
 		const declarationId = await insertDeclaration("draft");
 		await acquireLock(declarationId);
@@ -181,7 +179,6 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 			createCaller().saveCompliancePath({ path: "justify" }),
 		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 
-		await new Promise((resolve) => setTimeout(resolve, 500));
 		const [declaration] = await sql<{ status: string }[]>`
 			SELECT status FROM app_declaration WHERE id = ${declarationId}
 		`;
