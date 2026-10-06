@@ -118,6 +118,15 @@ export function gapMagnitude(gap: number | null): number | null {
 	return gap === null ? null : Math.abs(gap);
 }
 
+/** Sex favored by a signed gap (unlike `GapDirection`, which names the disfavored side).
+ *  Null when the gap is null, or when it displays as zero once truncated to the same
+ *  precision as `formatGap` — a gap too small to show must not carry a mention either. */
+export function gapFavoredSex(gap: number | null): "women" | "men" | null {
+	if (gap === null) return null;
+	if (truncateGapRatio(gap / 100) === 0) return null;
+	return gap > 0 ? "men" : "women";
+}
+
 /** True when any gap in the list reaches the alert threshold in either direction (via `gapLevel`). */
 export function hasHighGap(gaps: ReadonlyArray<number | null>): boolean {
 	return gaps.some((gap) => gapLevel(gap) === "high");

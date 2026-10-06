@@ -1,17 +1,6 @@
-.gapDisplay {
-	// Écart: value pinned right, badge (when present) at the far left, no divider (single cell).
-	display: flex;
-	align-items: baseline;
-	gap: 0.5rem;
-}
-
 .scrollRegion:focus-visible {
 	outline: 2px solid var(--border-action-high-blue-france);
 	outline-offset: 2px;
-}
-
-.gapValue {
-	margin-left: auto;
 }
 
 .inputWithUnit {

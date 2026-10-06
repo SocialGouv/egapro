@@ -63,15 +63,17 @@
 	gap: 0.5rem;
 }
 
-// Bordered grid cell (étape 5): full-width flex so margin-auto pins the value right, badge at the far left.
+// Bordered grid cell (étapes 2/3/5): value then badge, left-aligned.
+.gapCellStack {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
 .gapCell {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-}
-
-.gapValue {
-	margin-left: auto;
 }
 
 .subSection {

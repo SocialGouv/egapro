@@ -1,18 +1,16 @@
 import type { ReactElement } from "react";
 import {
 	displayDecimal,
-	formatGap,
-	gapLevel,
 	normalizeDecimalInput,
 	padDecimalOnBlur,
 	resolveGap,
 } from "~/modules/domain";
+import { GapBadge } from "../steps/step6/GapBadge";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
 import { payGapFieldId } from "./formError/payGapErrors";
 import type { FieldError } from "./formError/types";
 import { describedByForField, findFieldError } from "./formError/types";
-import { GAP_LEVEL_LABELS, gapBadgeClass } from "./gapBadge";
 import { numericInputClassName } from "./numericInputClassName";
 import styles from "./PayGapTable.module.scss";
 
@@ -105,7 +103,6 @@ export function PayGapTable({
 										row.menValue,
 										row.gipReference,
 									);
-									const level = gapLevel(gap);
 									const womenId = payGapFieldId(idPrefix, i, "womenValue");
 									const menId = payGapFieldId(idPrefix, i, "menValue");
 									const womenError = findFieldError(errors, womenId);
@@ -176,16 +173,7 @@ export function PayGapTable({
 												</span>
 											</td>
 											<td>
-												<span className={styles.gapDisplay}>
-													{level === "high" && (
-														<span className={gapBadgeClass(level)}>
-															{GAP_LEVEL_LABELS[level]}
-														</span>
-													)}
-													<span className={`fr-text--bold ${styles.gapValue}`}>
-														{formatGap(gap)}
-													</span>
-												</span>
+												<GapBadge gap={gap} layout="cell" />
 											</td>
 										</tr>
 									);

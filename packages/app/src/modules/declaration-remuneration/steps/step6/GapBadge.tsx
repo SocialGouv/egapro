@@ -1,16 +1,24 @@
 import {
+	GAP_FAVORED_SEX_MENTIONS,
 	GAP_LEVEL_LABELS,
 	gapBadgeClass,
 } from "~/modules/declaration-remuneration/shared/gapBadge";
-import { formatGap, gapLevel } from "~/modules/domain";
+import {
+	formatGap,
+	gapFavoredSex,
+	gapLevel,
+	gapMagnitude,
+} from "~/modules/domain";
 import stepStyles from "../Step6Review.module.scss";
 
 type Props = {
 	gap: number | null;
 	/**
-	 * "cell" pins the value to the right of a bordered grid cell with the badge
-	 * at the far left (Figma declaration tables). "inline" (default) keeps the
-	 * value then badge together, for the compact recap summary.
+	 * "cell" shows the absolute value with the badge to its right, and — unlike
+	 * "inline" — the favored-sex mention on a second line (Figma declaration
+	 * tables, étapes 2/3/5). "inline" (default) keeps the signed value then
+	 * badge together, for the compact recap summary and the second-declaration
+	 * review, which stay signed and unmentioned (Figma node 7548-75036).
 	 */
 	layout?: "inline" | "cell";
 };
@@ -25,10 +33,18 @@ export function GapBadge({ gap, layout = "inline" }: Props) {
 			<span className={gapBadgeClass(level)}>{GAP_LEVEL_LABELS[level]}</span>
 		) : null;
 	if (layout === "cell") {
+		const favoredSex = gapFavoredSex(gap);
 		return (
-			<span className={`fr-text--sm ${stepStyles.gapCell}`}>
-				{badge}
-				<strong className={stepStyles.gapValue}>{formatGap(gap)}</strong>
+			<span className={stepStyles.gapCellStack}>
+				<span className={`fr-text--sm ${stepStyles.gapCell}`}>
+					<strong>{formatGap(gapMagnitude(gap))}</strong>
+					{badge}
+				</span>
+				{favoredSex && (
+					<span className="fr-text--sm">
+						{GAP_FAVORED_SEX_MENTIONS[favoredSex]}
+					</span>
+				)}
 			</span>
 		);
 	}

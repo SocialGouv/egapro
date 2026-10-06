@@ -172,6 +172,51 @@ describe("PayGapTable", () => {
 	});
 });
 
+describe("PayGapTable — favored-sex mention", () => {
+	function row(overrides: Partial<PayGapRow> = {}): PayGapRow {
+		return {
+			label: "Annuelle brute moyenne",
+			womenValue: "",
+			menValue: "",
+			...overrides,
+		};
+	}
+
+	it("shows the absolute value, no badge, and the men mention for a low gap favoring men", () => {
+		renderTable([row({ womenValue: "98", menValue: "100" })]);
+
+		expect(screen.getByText("2,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("-2,00 %")).not.toBeInTheDocument();
+		expect(screen.queryByText("élevé")).not.toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+	});
+
+	it("shows the absolute value, the high badge, and the women mention for a high gap favoring women", () => {
+		renderTable([row({ womenValue: "106", menValue: "100" })]);
+
+		expect(screen.getByText("6,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("-6,00 %")).not.toBeInTheDocument();
+		expect(screen.getByText("élevé")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+
+	it("shows no mention for a zero gap", () => {
+		renderTable([row({ womenValue: "100", menValue: "100" })]);
+
+		expect(screen.getByText("0,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("en faveur des hommes")).not.toBeInTheDocument();
+		expect(screen.queryByText("en faveur des femmes")).not.toBeInTheDocument();
+	});
+
+	it("shows the unchanged placeholder without a mention when the men value is missing", () => {
+		renderTable([row({ womenValue: "100", menValue: "" })]);
+
+		expect(screen.getByText("-")).toBeInTheDocument();
+		expect(screen.queryByText("en faveur des hommes")).not.toBeInTheDocument();
+		expect(screen.queryByText("en faveur des femmes")).not.toBeInTheDocument();
+	});
+});
+
 describe("handlePayGapRowChange", () => {
 	const rows: PayGapRow[] = [
 		{ label: "Annuelle brute moyenne", womenValue: "10", menValue: "20" },

@@ -274,7 +274,7 @@ function RemunerationTable({
 							readOnly={readOnly}
 							value={valueFor(fields.baseMen)}
 						/>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<GapBadge
 								gap={computeGap(
 									valueFor(fields.baseWomen),
@@ -312,7 +312,7 @@ function RemunerationTable({
 							readOnly={readOnly}
 							value={valueFor(fields.variableMen)}
 						/>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<GapBadge
 								gap={computeGap(
 									valueFor(fields.variableWomen),
@@ -330,7 +330,7 @@ function RemunerationTable({
 						<td className={stepStyles.totalCell}>
 							{formatTotal(totalMen, "€")}
 						</td>
-						<td className={stepStyles.gapCell}>
+						<td>
 							<span className="fr-sr-only">Non applicable</span>
 						</td>
 					</tr>
