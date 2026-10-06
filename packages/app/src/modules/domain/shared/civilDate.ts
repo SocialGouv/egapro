@@ -17,3 +17,10 @@ export const CIVIL_DATE_TIME_ZONE = "UTC";
 export function civilDate(year: number, monthIndex: number, day: number): Date {
 	return new Date(Date.UTC(year, monthIndex, day));
 }
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+/** True once the whole civil day is behind `now`: a deadline or campaign end held as a civil date stays open until the next UTC midnight, not just until its own. */
+export function isCivilDayOver(day: Date, now: Date): boolean {
+	return now.getTime() >= day.getTime() + DAY_IN_MS;
+}

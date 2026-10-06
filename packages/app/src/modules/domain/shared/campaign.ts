@@ -1,6 +1,6 @@
 import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
-import { civilDate } from "./civilDate";
+import { civilDate, isCivilDayOver } from "./civilDate";
 import { formatIsoDate } from "./format";
 
 /** Returns the current campaign year: the E2E recette override when a grid run
@@ -155,14 +155,14 @@ export function isRepresentationCampaignOpen(
 ): boolean {
 	return (
 		now.getTime() >= campaign.campaignStartDate.getTime() &&
-		now.getTime() <= campaign.campaignEndDate.getTime()
+		!isCivilDayOver(campaign.campaignEndDate, now)
 	);
 }
 
-/** Returns true if the given deadline is strictly in the past. */
+/** Returns true once the deadline's civil day is over: the deadline day itself still counts as on time. */
 export function isDeadlinePassed(
 	deadline: Date,
 	now: Date = new Date(),
 ): boolean {
-	return now.getTime() > deadline.getTime();
+	return isCivilDayOver(deadline, now);
 }

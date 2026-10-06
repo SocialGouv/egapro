@@ -450,13 +450,16 @@ describe("isRepresentationCampaignOpen", () => {
 		).toBe(true);
 	});
 
-	it("returns true on the campaign end boundary", () => {
-		expect(
-			isRepresentationCampaignOpen(campaign, new Date("2027-12-31T00:00:00Z")),
-		).toBe(true);
+	it.each([
+		["the first instant of the last day", "2027-12-31T00:00:00Z"],
+		["one minute into the last day", "2027-12-31T00:01:00Z"],
+		["the last minute of the last day", "2027-12-31T23:59:00Z"],
+		["the last millisecond of the last day", "2027-12-31T23:59:59.999Z"],
+	])("returns true at %s", (_label, now) => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(now))).toBe(true);
 	});
 
-	it("returns false the day after the campaign ends", () => {
+	it("returns false from the first instant of the day after the campaign ends", () => {
 		expect(
 			isRepresentationCampaignOpen(campaign, new Date("2028-01-01T00:00:00Z")),
 		).toBe(false);
@@ -486,20 +489,17 @@ describe("isRepresentationCampaignOpen", () => {
 describe("isDeadlinePassed", () => {
 	const deadline = new Date("2026-06-01T00:00:00Z");
 
-	it("returns false when now is before the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59Z"))).toBe(
-			false,
-		);
+	it.each([
+		["the day before", "2026-05-31T23:59:59Z"],
+		["the first instant of the deadline day", "2026-06-01T00:00:00Z"],
+		["one second into the deadline day", "2026-06-01T00:00:01Z"],
+		["the last millisecond of the deadline day", "2026-06-01T23:59:59.999Z"],
+	])("returns false at %s", (_label, now) => {
+		expect(isDeadlinePassed(deadline, new Date(now))).toBe(false);
 	});
 
-	it("returns false when now equals the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00Z"))).toBe(
-			false,
-		);
-	});
-
-	it("returns true when now is after the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01Z"))).toBe(
+	it("returns true from the first instant of the day after the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-02T00:00:00Z"))).toBe(
 			true,
 		);
 	});
