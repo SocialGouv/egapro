@@ -1,8 +1,17 @@
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
 import { describe, expect, it } from "vitest";
 
 import {
+	API_DECLARATION_PDF,
+	API_PREFILL_PDF,
+	API_REPRESENTATION_PDF,
+	API_TRANSMITTED_PDF,
+	API_V1_FILES,
+} from "~/modules/routes";
+import {
 	buildContentSecurityPolicy,
 	buildSecurityHeaders,
+	FILE_ROUTES_WITHOUT_CSP,
 } from "~/server/security/securityHeaders.js";
 
 const MATOMO_URL = "https://matomo.example.fr/";
@@ -98,50 +107,101 @@ describe("buildContentSecurityPolicy", () => {
 });
 
 describe("buildSecurityHeaders", () => {
-	function headersFor(isDevelopment: boolean) {
-		const [entry, ...rest] = buildSecurityHeaders({
-			isDevelopment,
-			matomoUrl: MATOMO_URL,
-		});
-		expect(rest).toEqual([]);
-		return entry;
+	function headersAppliedTo(pathname: string, isDevelopment = false) {
+		return buildSecurityHeaders({ isDevelopment, matomoUrl: MATOMO_URL })
+			.filter(({ source }) =>
+				getPathMatch(source, { strict: true, removeUnnamedParams: true })(
+					pathname,
+				),
+			)
+			.flatMap(({ headers }) => headers);
 	}
 
-	it("applies to every path", () => {
-		expect(headersFor(false)?.source).toBe("/:path*");
+	function cspOf(pathname: string, isDevelopment = false) {
+		return headersAppliedTo(pathname, isDevelopment).filter(
+			({ key }) => key === "Content-Security-Policy",
+		);
+	}
+
+	const PAGES = [
+		"/",
+		"/mentions-legales",
+		"/index-egapro/recherche",
+		"/admin",
+		"/api/public/docs",
+		"/api/v1/docs",
+		"/api/v1/openapi.json",
+		"/api/v1/filesystem",
+		"/api/declaration-pdf-preview",
+	];
+
+	const FILE_ROUTES = [
+		"/api/declaration-pdf",
+		"/api/representation-pdf",
+		"/api/transmitted-pdf",
+		"/api/prefill-pdf",
+		"/api/prefill-pdf/",
+		"/api/v1/files",
+		"/api/v1/files/0b7c1d1e-5f4a-4d7e-9a1b-123456789abc",
+	];
+
+	const BASELINE_HEADERS = {
+		"X-Frame-Options": "DENY",
+		"Referrer-Policy": "strict-origin-when-cross-origin",
+		"Permissions-Policy":
+			"accelerometer=(), browsing-topics=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
+		"X-Content-Type-Options": "nosniff",
+	};
+
+	it("exempts exactly the routes that stream PDFs and stored files", () => {
+		expect(FILE_ROUTES_WITHOUT_CSP).toEqual([
+			API_DECLARATION_PDF,
+			API_REPRESENTATION_PDF,
+			API_TRANSMITTED_PDF,
+			API_PREFILL_PDF,
+			API_V1_FILES,
+		]);
 	});
 
-	it("sets the CSP and the anti-framing, referrer, permissions and sniffing headers", () => {
-		const headers = Object.fromEntries(
-			(headersFor(false)?.headers ?? []).map(({ key, value }) => [key, value]),
+	it.each(PAGES)("sends a single CSP on %s", (pathname) => {
+		expect(cspOf(pathname)).toEqual([
+			{
+				key: "Content-Security-Policy",
+				value: buildContentSecurityPolicy({
+					isDevelopment: false,
+					matomoUrl: MATOMO_URL,
+				}),
+			},
+		]);
+	});
+
+	it.each(
+		FILE_ROUTES,
+	)("sends no CSP on %s, so the browser PDF viewer can render it", (pathname) => {
+		expect(cspOf(pathname)).toEqual([]);
+	});
+
+	it.each([
+		...PAGES,
+		...FILE_ROUTES,
+	])("sends the anti-framing, referrer, permissions and sniffing headers once on %s", (pathname) => {
+		const headers = headersAppliedTo(pathname).filter(
+			({ key }) => key !== "Content-Security-Policy",
 		);
 
-		expect(headers).toEqual({
-			"Content-Security-Policy": buildContentSecurityPolicy({
-				isDevelopment: false,
-				matomoUrl: MATOMO_URL,
-			}),
-			"X-Frame-Options": "DENY",
-			"Referrer-Policy": "strict-origin-when-cross-origin",
-			"Permissions-Policy":
-				"accelerometer=(), browsing-topics=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()",
-			"X-Content-Type-Options": "nosniff",
-		});
+		expect(
+			Object.fromEntries(headers.map(({ key, value }) => [key, value])),
+		).toEqual(BASELINE_HEADERS);
+		expect(headers).toHaveLength(Object.keys(BASELINE_HEADERS).length);
 	});
 
 	it("leaves Strict-Transport-Security to the ingress, which already sends it", () => {
-		const keys = (headersFor(false)?.headers ?? []).map(({ key }) =>
-			key.toLowerCase(),
-		);
+		const keys = headersAppliedTo("/").map(({ key }) => key.toLowerCase());
 
 		expect(keys).not.toContain("strict-transport-security");
 	});
 
 	it("carries the development policy when built for development", () => {
-		const csp = headersFor(true)?.headers.find(
-			({ key }) => key === "Content-Security-Policy",
-		);
-
-		expect(csp?.value).toContain("'unsafe-eval'");
+		expect(cspOf("/", true)[0]?.value).toContain("'unsafe-eval'");
 	});
 });
