@@ -30,14 +30,6 @@ vi.mock("drizzle-orm", () => ({
 	asc: (col: unknown) => ({ asc: col }),
 }));
 
-vi.mock("~/modules/export", async () => ({
-	toCsvField: (
-		await vi.importActual<typeof import("~/modules/export/shared/csv")>(
-			"~/modules/export/shared/csv",
-		)
-	).toCsvField,
-}));
-
 vi.mock("~/modules/public-api", async () => ({
 	PUBLIC_API_EXPORT_HEADERS: (
 		await vi.importActual<typeof import("~/modules/public-api/httpHeaders")>(

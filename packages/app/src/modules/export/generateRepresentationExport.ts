@@ -3,6 +3,7 @@ import "server-only";
 import { and, eq, ilike } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
+import { toCsvField } from "~/modules/domain";
 import {
 	NON_DIFFUSIBLE_LABEL,
 	type PublicSearchInput,
@@ -18,7 +19,6 @@ import {
 	representationDeclarations,
 } from "~/server/db/schema";
 import { publicDeclarationFacetConditions } from "~/server/services/publicDeclarationsService";
-import { toCsvField } from "./shared/csv";
 
 export type RepresentationExportRow = {
 	referenceYear: number;

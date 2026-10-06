@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toCsvField } from "../csv";
+import { toCsvField } from "../shared/csv";
 
 describe("toCsvField", () => {
 	it("wraps a plain value in double quotes", () => {
@@ -37,6 +37,8 @@ describe("toCsvField", () => {
 		["-", "-2+3", `"'-2+3"`],
 		["@", "@SUM(A1:A2)", `"'@SUM(A1:A2)"`],
 		["|", "|cmd", `"'|cmd"`],
+		["a tab", "\t=1+1", `"'\t=1+1"`],
+		["a carriage return", "\r=1+1", `"'\r=1+1"`],
 	])("neutralises a value starting with %s", (_prefix, value, expected) => {
 		expect(toCsvField(value)).toBe(expected);
 	});

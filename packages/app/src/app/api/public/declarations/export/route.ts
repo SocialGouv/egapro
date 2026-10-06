@@ -3,7 +3,7 @@ import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { toCsvField } from "~/modules/export";
+import { toCsvField } from "~/modules/domain";
 import type {
 	PublicCompanySource,
 	PublicDeclarationDTO,
