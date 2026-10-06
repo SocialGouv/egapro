@@ -258,7 +258,7 @@ export function PanelPlayground() {
 					<PlaygroundCheckbox
 						checked={secondDeclarationSubmitted}
 						id="second-decl-submitted"
-						label="Seconde déclaration soumise"
+						label="Seconde déclaration transmise"
 						onChange={setSecondDeclarationSubmitted}
 					/>
 

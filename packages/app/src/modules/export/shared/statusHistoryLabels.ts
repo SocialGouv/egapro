@@ -1,9 +1,9 @@
 import type { CompliancePathValue } from "~/modules/domain";
 
 export const DECLARATION_EVENT_TYPE_LABELS = {
-	submit: "Soumission de la déclaration",
+	submit: "Transmission de la déclaration",
 	path_choice: "Choix du parcours",
-	second_declaration_submit: "Soumission de la seconde déclaration",
+	second_declaration_submit: "Transmission de la seconde déclaration",
 	joint_evaluation_submit: "Dépôt du rapport d'évaluation conjointe",
 	cse_opinion_submit: "Dépôt d'un avis CSE",
 	cancel: "Annulation de la déclaration",

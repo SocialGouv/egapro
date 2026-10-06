@@ -280,8 +280,8 @@ describe("buildRepresentationExportRows", () => {
 		const rows = await buildRepresentationExportRows(mockDb as never);
 
 		expect(rows[0]?.executiveWomenPercent).toBeNull();
-		// Postgres never returns "", but Number("") is 0 — pin the coercion down.
-		expect(rows[0]?.memberMenPercent).toBe(0);
+		// Postgres never returns "", but a blank value is unknown, never a 0 %.
+		expect(rows[0]?.memberMenPercent).toBeNull();
 	});
 });
 

@@ -1317,7 +1317,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Parcours.Avis_CSE_requis).toBe(true);
 		expect(decl.Parcours.Indicateur_G_requis).toBe(true);
 		expect(decl.Parcours).not.toHaveProperty("Version_regles");
-		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
+		expect(decl.Date_transmission).toBe("2027-03-15T10:00:00.000Z");
 		expect(decl.Date_parcours_apres_declaration_1).toBe(
 			"2027-04-01T10:00:00.000Z",
 		);
@@ -1533,7 +1533,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
-				Libelle_statut: "Soumission de la déclaration",
+				Libelle_statut: "Transmission de la déclaration",
 				Date: "2027-03-15T10:00:00.000Z",
 			},
 			{

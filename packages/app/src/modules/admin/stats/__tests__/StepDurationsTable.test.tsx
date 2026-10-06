@@ -128,7 +128,7 @@ describe("StepDurationsTable", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("rowheader", {
-				name: "Démarche post-soumission",
+				name: "Démarche post-transmission",
 			}),
 		).toBeInTheDocument();
 		expect(

@@ -217,7 +217,7 @@ describe("Step2Executives — saisie des pourcentages (S5)", () => {
 
 		await enterWomenPercent("35,5");
 
-		expect(percentFields().men).toHaveValue("64.5");
+		expect(percentFields().men).toHaveValue("64,5");
 		expect(lastDraft()).toMatchObject({
 			executiveMenPercent: 64.5,
 			executiveWomenPercent: 35.5,

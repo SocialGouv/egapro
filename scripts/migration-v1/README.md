@@ -329,7 +329,7 @@ e-mail de suppléance vides. Le remplacement reprend les UUID V1 et réinitialis
 les dates techniques de l'annuaire ; ces identifiants servent aux URLs de
 détail et doivent donc être considérés comme changés pendant la bascule.
 
-Une représentation soumise doit fournir les deux pourcentages de chaque
+Une représentation transmise doit fournir les deux pourcentages de chaque
 catégorie ou un motif de non-calculabilité. Son année V1, l'année portée dans
 le JSON et l'année de fin de période doivent coïncider. Les périodes se
 terminant un 29 février commencent le 1er mars de l'année précédente, ce qui

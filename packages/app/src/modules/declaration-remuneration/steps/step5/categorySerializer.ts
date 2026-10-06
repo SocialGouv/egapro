@@ -6,6 +6,7 @@ import {
 	CATEGORY_PAY_FIELDS,
 	type CategoryHeadcounts,
 	isCategoryPayApplicable,
+	toStrictInt,
 } from "~/modules/domain";
 
 export type EmployeeCategory = {
@@ -67,10 +68,8 @@ export function fromDatabaseRows(
 	}));
 }
 
-function toInt(val: string): number | undefined {
-	if (!val) return undefined;
-	const n = Number.parseInt(val, 10);
-	return Number.isNaN(n) ? undefined : n;
+function toHeadcount(val: string): number | undefined {
+	return toStrictInt(val) ?? undefined;
 }
 
 function toStr(val: string): string | undefined {
@@ -95,10 +94,10 @@ export function toCategoryHeadcounts(
 	cat: CategoryCountFields,
 ): ParsedCategoryHeadcounts {
 	return {
-		womenCount: toInt(cat.womenCount),
-		menCount: toInt(cat.menCount),
-		hourlyWomenCount: toInt(cat.hourlyWomenCount),
-		hourlyMenCount: toInt(cat.hourlyMenCount),
+		womenCount: toHeadcount(cat.womenCount),
+		menCount: toHeadcount(cat.menCount),
+		hourlyWomenCount: toHeadcount(cat.hourlyWomenCount),
+		hourlyMenCount: toHeadcount(cat.hourlyMenCount),
 	} satisfies CategoryHeadcounts;
 }
 

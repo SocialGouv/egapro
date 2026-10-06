@@ -1,6 +1,6 @@
 # API EGAPRO — Équipe SUIT
 
-API REST sécurisée pour récupérer les déclarations soumises et les fichiers (avis CSE, évaluations conjointes).
+API REST sécurisée pour récupérer les déclarations transmises et les fichiers (avis CSE, évaluations conjointes).
 
 L'authentification et le quota (rate limit) sont appliqués par la passerelle EGAPRO (APISIX) en amont de l'application. Côté client, il suffit donc d'un en-tête `Authorization: Bearer <clé>`.
 
@@ -62,7 +62,7 @@ Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Histori
 
 ### Cycle de vie : les 8 états et leurs transitions
 
-Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa soumission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
+Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La version du ruleset appliqué à une déclaration est figée à sa transmission, mais **n'est pas exposée dans le payload** : `Parcours.Prochaines_etapes_possibles` est déjà résolu côté Egapro contre le bon ruleset, il n'y a donc rien à rapprocher côté consommateur. Le tableau ci-dessous liste, pour chaque état source, les transitions possibles — dérivé du ruleset en vigueur (`v2027.1.json`) :
 
 | État source | Action | État cible | Condition |
 | --- | --- | --- | --- |
@@ -127,7 +127,7 @@ Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` 
 
 ### Flags d'obligation figés vs statut évolutif
 
-`Parcours.Parcours_de_conformite_requis`, `Parcours_de_conformite_revision_requis`, `Avis_CSE_requis` et `Indicateur_G_requis` sont des prédicats **calculés à la soumission et figés** : ils ne changent jamais au fil de l'avancement de la démarche.
+`Parcours.Parcours_de_conformite_requis`, `Parcours_de_conformite_revision_requis`, `Avis_CSE_requis` et `Indicateur_G_requis` sont des prédicats **calculés à la transmission et figés** : ils ne changent jamais au fil de l'avancement de la démarche.
 
 `Parcours.Statut`, à l'inverse, **évolue** à chaque transition FSM. Confondre les deux fait croire à tort qu'une obligation a disparu alors que la démarche a simplement avancé.
 
@@ -138,6 +138,12 @@ Une déclaration annulée **remonte dans l'export**, sur la fenêtre de sa date 
 ### Périmètre du cycle de vie
 
 Le cycle de vie décrit ci-dessus (FSM, `Prochaines_etapes_possibles`) ne concerne **que** le parcours rémunération, exposé par `/export/declarations`. Il ne s'applique pas à `/export/representations`, dont le payload est indépendant et inchangé.
+
+## Rupture de compatibilité — version 4.0.0
+
+La version `4.0.0` renomme la clé `Date_soumission` en **`Date_transmission`** (même valeur : date de première transmission de la déclaration, ISO 8601), et les libellés `Libelle_statut` de `Historique_statuts` passent de « Soumission de la déclaration » à « Transmission de la déclaration » (idem pour la seconde déclaration). L'URL reste inchangée : `/api/v1/export/declarations`.
+
+⚠️ La mise en service doit être **coordonnée avec l'équipe SUIT avant déploiement**.
 
 ## Rupture de compatibilité — version 3.0.0
 
