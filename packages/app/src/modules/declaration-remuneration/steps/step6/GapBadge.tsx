@@ -13,13 +13,7 @@ import stepStyles from "../Step6Review.module.scss";
 
 type Props = {
 	gap: number | null;
-	/**
-	 * "cell" shows the absolute value with the badge to its right, and — unlike
-	 * "inline" — the favored-sex mention on a second line (Figma declaration
-	 * tables, étapes 2/3/5). "inline" (default) keeps the signed value then
-	 * badge together, for the compact recap summary and the second-declaration
-	 * review, which stay signed and unmentioned (Figma node 7548-75036).
-	 */
+	/** "cell": absolute value + favored-sex mention (declaration tables); "inline": signed value (recap). */
 	layout?: "inline" | "cell";
 };
 

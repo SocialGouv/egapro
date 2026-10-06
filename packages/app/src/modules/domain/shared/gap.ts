@@ -118,9 +118,7 @@ export function gapMagnitude(gap: number | null): number | null {
 	return gap === null ? null : Math.abs(gap);
 }
 
-/** Sex favored by a signed gap (unlike `GapDirection`, which names the disfavored side).
- *  Null when the gap is null, or when it displays as zero once truncated to the same
- *  precision as `formatGap` — a gap too small to show must not carry a mention either. */
+/** Sex favored by a signed gap — unlike `GapDirection`, which names the disfavored side; null when it displays as zero. */
 export function gapFavoredSex(gap: number | null): "women" | "men" | null {
 	if (gap === null) return null;
 	if (truncateGapRatio(gap / 100) === 0) return null;
