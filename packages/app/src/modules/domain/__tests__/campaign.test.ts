@@ -19,6 +19,7 @@ import {
 	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 } from "../shared/campaign";
+import { formatCivilLongDate } from "../shared/format";
 
 describe("getReferenceYearFor", () => {
 	it("returns the campaign year minus one", () => {
@@ -364,8 +365,13 @@ describe("getDefaultCampaignDeadlines", () => {
 
 		it("keeps the deadline labels on their civil day", () => {
 			vi.stubEnv("TZ", timeZone);
-			expect(getDeclarationDeadline(2027)).toBe("1ᵉʳ juin 2027");
-			expect(getSecondDeclarationDeadline(2027)).toBe("1ᵉʳ décembre 2027");
+			const deadlines = getDefaultCampaignDeadlines(2027);
+			expect(formatCivilLongDate(deadlines.decl1ModificationDeadline)).toBe(
+				"1ᵉʳ juin 2027",
+			);
+			expect(formatCivilLongDate(deadlines.decl2ModificationDeadline)).toBe(
+				"1ᵉʳ décembre 2027",
+			);
 		});
 	});
 
