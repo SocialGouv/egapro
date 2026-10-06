@@ -153,6 +153,27 @@ describe("GET /api/transmitted-pdf", () => {
 		expect(response.status).toBe(500);
 	});
 
+	it.each([
+		["out of range", "1900"],
+		["not a number", "abc"],
+		["a number with a trailing suffix", "2025abc"],
+	])("answers 400 when the requested year is %s", async (_label, year) => {
+		const response = await GET(request(`?year=${year}`));
+
+		expect(response.status).toBe(400);
+		expect(mocks.buildTransmittedPdfData).not.toHaveBeenCalled();
+	});
+
+	it("audits an oversized year as null rather than the raw string", async () => {
+		const response = await GET(request(`?year=${"x".repeat(5_000)}`));
+
+		expect(response.status).toBe(400);
+		expect(auditRow()).toMatchObject({
+			status: "failure",
+			metadata: { year: null, invalidYear: true },
+		});
+	});
+
 	it("audits the download as a sensitive read", async () => {
 		await GET(request());
 
@@ -162,7 +183,7 @@ describe("GET /api/transmitted-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: String(YEAR) },
+			metadata: { year: YEAR, invalidYear: false },
 		});
 	});
 });

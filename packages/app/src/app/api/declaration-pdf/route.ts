@@ -6,7 +6,9 @@ import { getCurrentYear } from "~/modules/domain";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import {
+	invalidYearResponse,
 	pdfHeaders,
+	readRequestedYear,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
 } from "~/server/pdf/pdfRoute";
@@ -16,23 +18,25 @@ const ROUTE = "declaration-pdf";
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
 	const url = new URL(request.url);
+	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
 		metadata: {
-			year: url.searchParams.get("year") ?? null,
+			year: requestedYear.year,
+			invalidYear: requestedYear.invalid,
 			type: url.searchParams.get("type") ?? "initial",
 		},
 	};
 };
 
 type ResolvedDeclarationPdf =
-	| { unauthorized: Response }
+	| { error: Response }
 	| {
 			data: Awaited<ReturnType<typeof buildPdfData>>;
 			filename: string;
-			unauthorized?: undefined;
+			error?: undefined;
 	  };
 
 async function resolveDeclarationPdf(
@@ -40,12 +44,15 @@ async function resolveDeclarationPdf(
 ): Promise<ResolvedDeclarationPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { unauthorized: new Response("Non autorisé", { status: 401 }) };
+		return { error: new Response("Non autorisé", { status: 401 }) };
 	}
 
+	const requestedYear = readRequestedYear(request);
+	if (requestedYear.invalid) {
+		return { error: invalidYearResponse() };
+	}
+	const year = requestedYear.year ?? getCurrentYear();
 	const url = new URL(request.url);
-	const yearParam = url.searchParams.get("year");
-	const year = yearParam ? Number.parseInt(yearParam, 10) : getCurrentYear();
 	const declarationType =
 		url.searchParams.get("type") === "correction" ? "correction" : "initial";
 
@@ -66,7 +73,7 @@ export const GET = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveDeclarationPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) return resolved.error;
 
 			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
 				renderToBuffer(DeclarationPdfDocument({ data: resolved.data })),
@@ -90,7 +97,9 @@ export const HEAD = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveDeclarationPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) {
+				return new Response(null, { status: resolved.error.status });
+			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
 				renderToBuffer(DeclarationPdfDocument({ data: resolved.data })),

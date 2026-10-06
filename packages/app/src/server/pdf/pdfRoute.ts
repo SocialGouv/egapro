@@ -1,8 +1,31 @@
 import "server-only";
 
+import { parseCampaignYear } from "~/modules/domain";
 import { getPdfSize, pdfSizeKey, setPdfSize } from "./pdfSizeCache";
 
 type RenderPdf = () => Promise<Buffer>;
+
+/**
+ * Reads the `year` query parameter as a number the audit row can carry. The raw
+ * string never leaves this function: an unbounded caller-supplied value written
+ * to `audit.action_log` would let anyone inflate the trace, and the row is
+ * written for refused requests too.
+ */
+export function readRequestedYear(request: Request): {
+	year: number | null;
+	invalid: boolean;
+} {
+	const raw = new URL(request.url).searchParams.get("year");
+	if (!raw) {
+		return { year: null, invalid: false };
+	}
+	const year = parseCampaignYear(raw);
+	return { year, invalid: year === null };
+}
+
+export function invalidYearResponse(): Response {
+	return new Response("Paramètre 'year' invalide", { status: 400 });
+}
 
 export function pdfHeaders(
 	filename: string,

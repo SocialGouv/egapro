@@ -6,36 +6,20 @@ import {
 	type PrefillPdfData,
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
-import { getCurrentYear, parseCampaignYear } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
+	invalidYearResponse,
 	pdfHeaders,
+	readRequestedYear,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
 } from "~/server/pdf/pdfRoute";
 
 const ROUTE = "prefill-pdf";
-
-/**
- * Reads the `year` query parameter as a number the audit row can carry. The raw
- * string never leaves this function: an unbounded caller-supplied value written
- * to `audit.action_log` would let anyone inflate the trace, and the row is
- * written for refused requests too.
- */
-function readRequestedYear(request: Request): {
-	year: number | null;
-	invalid: boolean;
-} {
-	const raw = new URL(request.url).searchParams.get("year");
-	if (!raw) {
-		return { year: null, invalid: false };
-	}
-	const year = parseCampaignYear(raw);
-	return { year, invalid: year === null };
-}
 
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
@@ -65,9 +49,7 @@ async function resolvePrefillPdf(
 
 	const requestedYear = readRequestedYear(request);
 	if (requestedYear.invalid) {
-		return {
-			error: new Response("Paramètre 'year' invalide", { status: 400 }),
-		};
+		return { error: invalidYearResponse() };
 	}
 	const year = requestedYear.year ?? getCurrentYear();
 
