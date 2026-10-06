@@ -40,6 +40,20 @@ async function revokeLinks(tx: Tx, userId: string, keptSiren: string | null) {
 	return revokedSirens;
 }
 
+export async function isUserLinkedToSiren(
+	userId: string,
+	siren: string,
+): Promise<boolean> {
+	const rows = await db
+		.select({ siren: userCompanies.siren })
+		.from(userCompanies)
+		.where(
+			and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
+		)
+		.limit(1);
+	return rows.length > 0;
+}
+
 export async function syncUserCompanyLink(
 	userId: string,
 	siret: string | null | undefined,

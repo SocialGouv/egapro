@@ -12,6 +12,7 @@ import {
 } from "vitest";
 import { env } from "~/env.js";
 import { declarationDraftRouter } from "~/server/api/routers/declarationDraft";
+import { declarationLockRouter } from "~/server/api/routers/declarationLock";
 import { syncUserCompanyLink } from "~/server/auth/companyLink";
 import { authConfig } from "~/server/auth/config";
 import { db } from "~/server/db";
@@ -257,6 +258,52 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			await signIn(siretOf(FORMER_SIREN));
 
 			expect(await lockedSirens()).toEqual([FORMER_SIREN]);
+		});
+	});
+
+	describe("a session minted before a sign-in under another SIRET on another device", () => {
+		const RECHECK_SECONDS = 5 * 60;
+
+		async function companyCallerFor(token: JWT) {
+			const aged = {
+				...token,
+				companyLinkCheckedAt:
+					(token.companyLinkCheckedAt ?? 0) - RECHECK_SECONDS - 1,
+			};
+			const refreshed = await authConfig.callbacks.jwt({
+				token: aged,
+			} as unknown as Parameters<typeof authConfig.callbacks.jwt>[0]);
+			const session = authConfig.callbacks.session({
+				session: { user: { email: EMAIL }, expires: "" },
+				token: refreshed,
+			} as unknown as Parameters<typeof authConfig.callbacks.session>[0]);
+			return declarationLockRouter.createCaller({
+				db,
+				session,
+				headers: new Headers(),
+			} as never);
+		}
+
+		it("loses access to the former company once the re-check window has passed", async () => {
+			const formerDevice = await signIn(siretOf(FORMER_SIREN));
+			await signIn(siretOf(CURRENT_SIREN));
+
+			const caller = await companyCallerFor(formerDevice);
+
+			await expect(
+				caller.getActiveLockForCurrentDeclaration(),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		});
+
+		it("keeps access on the device that signed in last", async () => {
+			await signIn(siretOf(FORMER_SIREN));
+			const currentDevice = await signIn(siretOf(CURRENT_SIREN));
+
+			const caller = await companyCallerFor(currentDevice);
+
+			await expect(
+				caller.getActiveLockForCurrentDeclaration(),
+			).resolves.toEqual({ lockedByOther: false, holder: null });
 		});
 	});
 

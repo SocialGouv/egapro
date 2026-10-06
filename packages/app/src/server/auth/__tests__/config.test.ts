@@ -7,6 +7,7 @@ const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 const mockTransaction = vi.fn();
 const mockSyncUserCompanyLink = vi.fn();
+const mockIsUserLinkedToSiren = vi.fn();
 const mockLogAction = vi.fn();
 
 vi.mock("~/server/db", () => ({
@@ -39,6 +40,7 @@ vi.mock("~/server/db/schema", () => ({
 }));
 vi.mock("../companyLink", () => ({
 	syncUserCompanyLink: (...args: unknown[]) => mockSyncUserCompanyLink(...args),
+	isUserLinkedToSiren: (...args: unknown[]) => mockIsUserLinkedToSiren(...args),
 }));
 vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
@@ -69,6 +71,8 @@ describe("auth config", () => {
 		mockTransaction.mockReset();
 		mockSyncUserCompanyLink.mockReset();
 		mockSyncUserCompanyLink.mockResolvedValue([]);
+		mockIsUserLinkedToSiren.mockReset();
+		mockIsUserLinkedToSiren.mockResolvedValue(true);
 		mockLogAction.mockReset();
 	});
 
@@ -362,6 +366,114 @@ describe("auth config", () => {
 			await signIn({}, siretUser);
 
 			expect(revocationLogs()).toHaveLength(0);
+		});
+	});
+
+	describe("jwt callback — company link re-checked on an existing session", () => {
+		const SIRET = "12345678901234";
+		const SIREN = "123456789";
+		const RECHECK_SECONDS = 5 * 60;
+
+		function nowSeconds() {
+			return Math.floor(Date.now() / 1000);
+		}
+
+		function existingSession(fields: Partial<JWT> = {}): JWT {
+			return {
+				sub: "sub-123",
+				id: "uuid-123",
+				siret: SIRET,
+				isAdmin: false,
+				companyLinkCheckedAt: nowSeconds() - RECHECK_SECONDS - 1,
+				...fields,
+			} as JWT;
+		}
+
+		function readSession(token: JWT) {
+			return callJwt({ token, account: null });
+		}
+
+		it.each([
+			["older than the window", nowSeconds() - RECHECK_SECONDS - 1],
+			["absent", undefined],
+		])("keeps the SIRET while the link still exists, when the last check is %s", async (_case, checkedAt) => {
+			const before = nowSeconds();
+
+			const result = await readSession(
+				existingSession({ companyLinkCheckedAt: checkedAt }),
+			);
+
+			expect(mockIsUserLinkedToSiren).toHaveBeenCalledWith("uuid-123", SIREN);
+			expect(result.siret).toBe(SIRET);
+			expect(result.companyLinkCheckedAt).toBeGreaterThanOrEqual(before);
+		});
+
+		it("drops the SIRET once the user is no longer linked to its company", async () => {
+			mockIsUserLinkedToSiren.mockResolvedValue(false);
+
+			const result = await readSession(existingSession());
+
+			expect(result.siret).toBeNull();
+		});
+
+		it("does not query the database again inside the window", async () => {
+			const checkedAt = nowSeconds() - RECHECK_SECONDS + 30;
+
+			const result = await readSession(
+				existingSession({ companyLinkCheckedAt: checkedAt }),
+			);
+
+			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+			expect(result.siret).toBe(SIRET);
+			expect(result.companyLinkCheckedAt).toBe(checkedAt);
+		});
+
+		it("does not check while an admin's impersonation is in effect", async () => {
+			const result = await readSession(
+				existingSession({
+					isAdmin: true,
+					adminMfaAt: nowSeconds(),
+					impersonation: { siren: "987654321", name: "Société Démo" },
+				}),
+			);
+
+			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+			expect(result.siret).toBe(SIRET);
+		});
+
+		it("has nothing to check when the session carries no SIRET", async () => {
+			await readSession(existingSession({ siret: null }));
+
+			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+		});
+
+		it("keeps the session and retries on the next request when the database fails", async () => {
+			const checkedAt = nowSeconds() - RECHECK_SECONDS - 1;
+			mockIsUserLinkedToSiren.mockRejectedValue(new Error("connection lost"));
+			const consoleError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => undefined);
+
+			const result = await readSession(
+				existingSession({ companyLinkCheckedAt: checkedAt }),
+			);
+
+			expect(result.siret).toBe(SIRET);
+			expect(result.companyLinkCheckedAt).toBe(checkedAt);
+			expect(consoleError).toHaveBeenCalled();
+			consoleError.mockRestore();
+		});
+
+		it("stamps the check at sign-in, since the link has just been synced", async () => {
+			const before = nowSeconds();
+
+			const result = await signIn({}, {
+				...proconnectUser,
+				siret: SIRET,
+			} as User);
+
+			expect(result.companyLinkCheckedAt).toBeGreaterThanOrEqual(before);
+			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
 		});
 	});
 

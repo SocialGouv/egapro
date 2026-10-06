@@ -14,6 +14,7 @@ import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
 import { adminImpersonationEvents, companies, users } from "~/server/db/schema";
 import { syncUserCompanyLink } from "./companyLink";
+import { recheckCompanyLink, toEpochSeconds } from "./companyLinkRecheck";
 import { parseAdminEmails } from "./parseAdminEmails";
 
 /** Cap on the `name` field of an impersonation payload — avoids oversized
@@ -183,6 +184,7 @@ declare module "next-auth/jwt" {
 		// Seconds since the epoch. Absent when the level ProConnect returned
 		// proved no second factor.
 		adminMfaAt?: number;
+		companyLinkCheckedAt?: number;
 	}
 }
 
@@ -618,6 +620,7 @@ export const authConfig = {
 					[dbUser.firstName, dbUser.lastName].filter(Boolean).join(" ") ||
 					email;
 				token.siret = profileData.siret ?? null;
+				token.companyLinkCheckedAt = toEpochSeconds(new Date());
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
@@ -688,6 +691,10 @@ export const authConfig = {
 			// an explicit stop returns from the update branch, and a sign-in has
 			// just emptied the field.
 			await closeLapsedImpersonation(token, new Date());
+
+			if (!user && !exposedImpersonation(token, new Date())) {
+				await recheckCompanyLink(token, new Date());
+			}
 
 			return token;
 		},
