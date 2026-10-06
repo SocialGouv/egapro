@@ -3,65 +3,24 @@ import pytest
 from egapro import constants, helpers, models
 
 RECHERCHE_ENTREPRISE_SAMPLE = {
-    "activitePrincipale": "Conseil informatique",
-    "categorieJuridiqueUniteLegale": "5710",
-    "dateCreationUniteLegale": "2004-12-15",
-    "caractereEmployeurUniteLegale": "O",
-    "activitePrincipaleUniteLegale": "62.02A",
-    "conventions": [
+    "results": [
         {
-            "idcc": 1486,
-            "etat": "VIGUEUR_ETEN",
-            "id": "KALICONT000005635173",
-            "mtime": 1556652289,
-            "texte_de_base": "KALITEXT000005679895",
-            "title": "Convention collective nationale des bureaux d'études techniques, des cabinets d'ingénieurs-conseils et des sociétés de conseils du 15 décembre 1987. ",
-            "url": "https://www.legifrance.gouv.fr/affichIDCC.do?idConvention=KALICONT000005635173",
-            "shortTitle": "Bureaux d'études techniques, cabinets d'ingénieurs-conseils et sociétés de conseils",
+            "siren": "481912999",
+            "nom_raison_sociale": "FOOBAR",
+            "nom_complet": "FOOBAR COMPLET",
+            "activite_principale": "62.02A",
+            "date_fermeture": "2021-01-01",
+            "siege": {
+                "adresse": "2 RUE FOOBAR 75002 PARIS",
+                "commune": "75102",
+                "code_postal": "75002",
+                "libelle_commune": "PARIS 2",
+            },
+            "matching_etablissements": [],
         }
     ],
-    "etablissements": 5,
-    "etatAdministratifUniteLegale": "A",
-    "dateCessation": "2021-01-01",
-    "highlightLabel": "FOOBAR",
-    "label": "FOOBAR",
-    "matching": 2,
-    "firstMatchingEtablissement": {
-        "address": "2 RUE FOOBAR 75002 PARIS",
-        "codeCommuneEtablissement": "75102",
-        "codePostalEtablissement": "75002",
-        "libelleCommuneEtablissement": "PARIS 2",
-        "idccs": [],
-        "categorieEntreprise": "PME",
-        "siret": "48191299900037",
-        "etatAdministratifEtablissement": "A",
-        "etablissementSiege": True,
-        "activitePrincipaleEtablissement": "46.69B",
-    },
-    "allMatchingEtablissements": [
-        {
-            "address": "275 RUE FOOBAR 75002 PARIS",
-            "siret": "48191299900037",
-            "activitePrincipaleEtablissement": "46.69B",
-            "etablissementSiege": True,
-            "codeCommuneEtablissement": "75102",
-            "codePostalEtablissement": "75002",
-            "libelleCommuneEtablissement": "PARIS 2",
-        },
-        {
-            "address": "194 BOULEVARD DE FOOFOO 75003 PARIS",
-            "siret": "48191299900052",
-            "idccs": ["1486"],
-            "activitePrincipaleEtablissement": "46.69B",
-            "etablissementSiege": False,
-            "codeCommuneEtablissement": "75103",
-            "codePostalEtablissement": "75002",
-            "libelleCommuneEtablissement": "PARIS 2",
-        },
-    ],
-    "simpleLabel": "FOOBAR",
-    "siren": "481912999",
 }
+
 
 API_ENTREPRISES_SAMPLE = {
     "entreprise": {
@@ -372,9 +331,6 @@ async def test_recherche_entreprise(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_recherche_entreprise_with_date_radiation(monkeypatch):
-    limit = "2021-03-01"
-    RECHERCHE_ENTREPRISE_SAMPLE["dateCessation"] < limit
-
     async def mock_get(*args, **kwargs):
         return RECHERCHE_ENTREPRISE_SAMPLE
 
@@ -385,34 +341,23 @@ async def test_recherche_entreprise_with_date_radiation(monkeypatch):
         "Le Siren saisi correspond à une entreprise fermée, "
         "veuillez vérifier votre saisie"
     )
-    RECHERCHE_ENTREPRISE_SAMPLE["dateCessation"] > limit
 
 
 @pytest.mark.asyncio
 async def test_recherche_entreprise_with_foreign_company(monkeypatch):
     async def mock_get(*args, **kwargs):
         return {
-            "activitePrincipale": "Activités des sièges sociaux",
-            "categorieJuridiqueUniteLegale": "3120",
-            "dateCreationUniteLegale": "2018-12-11",
-            "caractereEmployeurUniteLegale": "O",
-            "activitePrincipaleUniteLegale": "70.10Z",
-            "etablissements": 2,
-            "etatAdministratifUniteLegale": "A",
-            "highlightLabel": "FOOBAR",
-            "label": "FOOBAR",
-            "matching": 2,
-            "firstMatchingEtablissement": {
-                "codePaysEtrangerEtablissement": "99134",
-                "idccs": [],
-                "categorieEntreprise": "PME",
-                "siret": "84457798100013",
-                "etatAdministratifEtablissement": "A",
-                "etablissementSiege": True,
-                "activitePrincipaleEtablissement": "70.10Z",
-            },
-            "simpleLabel": "FOOBAR",
-            "siren": "481912999",
+            "results": [
+                {
+                    "siren": "481912999",
+                    "nom_raison_sociale": "FOOBAR",
+                    "activite_principale": "70.10Z",
+                    "siege": {
+                        "code_pays_etranger": "99134",
+                        "libelle_commune_etranger": "MADRID",
+                    },
+                }
+            ]
         }
 
     monkeypatch.setattr("egapro.helpers.get", mock_get)
@@ -420,6 +365,7 @@ async def test_recherche_entreprise_with_foreign_company(monkeypatch):
     assert data == {
         "code_naf": "70.10Z",
         "code_pays": "ES",
+        "commune": "MADRID",
         "raison_sociale": "FOOBAR",
     }
 
@@ -428,31 +374,19 @@ async def test_recherche_entreprise_with_foreign_company(monkeypatch):
 async def test_recherche_entreprise_with_com_company(monkeypatch):
     async def mock_get(*args, **kwargs):
         return {
-            "activitePrincipale": "Activités des agences de travail temporaire",
-            "categorieJuridiqueUniteLegale": "5202",
-            "dateCreationUniteLegale": "2019-01-02",
-            "caractereEmployeurUniteLegale": "O",
-            "activitePrincipaleUniteLegale": "78.20Z",
-            "conventions": [{"idcc": 1413}, {"idcc": 2378}],
-            "etablissements": 1,
-            "etatAdministratifUniteLegale": "A",
-            "highlightLabel": "FOOBAR SAINT BARTHELEMY",
-            "label": "FOOBAR SAINT BARTHELEMY",
-            "matching": 1,
-            "firstMatchingEtablissement": {
-                "address": "RUE POUET FOO 97133 SAINT BARTHELEMY",
-                "codeCommuneEtablissement": "97701",
-                "codePostalEtablissement": "97133",
-                "libelleCommuneEtablissement": "SAINT BARTHELEMY",
-                "idccs": ["1413", "2378"],
-                "categorieEntreprise": "ETI",
-                "siret": "85069932300018",
-                "etatAdministratifEtablissement": "A",
-                "etablissementSiege": True,
-                "activitePrincipaleEtablissement": "78.20Z",
-            },
-            "simpleLabel": "FOOBAR SAINT BARTHELEMY",
-            "siren": "481912999",
+            "results": [
+                {
+                    "siren": "481912999",
+                    "nom_raison_sociale": "FOOBAR SAINT BARTHELEMY",
+                    "activite_principale": "78.20Z",
+                    "siege": {
+                        "adresse": "RUE POUET FOO 97133 SAINT BARTHELEMY",
+                        "commune": "97701",
+                        "code_postal": "97133",
+                        "libelle_commune": "SAINT BARTHELEMY",
+                    },
+                }
+            ]
         }
 
     monkeypatch.setattr("egapro.helpers.get", mock_get)
@@ -468,8 +402,11 @@ async def test_recherche_entreprise_with_com_company(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_recherche_entreprise_is_cached(monkeypatch):
-    RECHERCHE_ENTREPRISE_SAMPLE["label"] = "123 je vais dans les bois"
-    RECHERCHE_ENTREPRISE_SAMPLE["simpleLabel"] = "123 je vais dans les bois"
+    monkeypatch.setitem(
+        RECHERCHE_ENTREPRISE_SAMPLE["results"][0],
+        "nom_raison_sociale",
+        "123 je vais dans les bois",
+    )
 
     async def mock_get(*args, **kwargs):
         return RECHERCHE_ENTREPRISE_SAMPLE

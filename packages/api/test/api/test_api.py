@@ -225,10 +225,27 @@ async def test_validate_siren(client, monkeypatch):
         "région": "11",
     }
 
-    async def patch(siren, year):
-        return metadata
+    async def patch(url, *, params, headers):
+        assert url == "https://recherche-entreprises.api.gouv.fr/search"
+        assert params == {"q": "123456782", "per_page": 1}
+        assert headers == {"Referer": "egapro"}
+        return {
+            "results": [
+                {
+                    "siren": "123456782",
+                    "nom_raison_sociale": "FOOBAR",
+                    "activite_principale": "62.02A",
+                    "siege": {
+                        "adresse": "2 RUE FOOBAR 75002 PARIS 2",
+                        "commune": "75102",
+                        "code_postal": "75002",
+                        "libelle_commune": "PARIS 2",
+                    },
+                }
+            ]
+        }
 
-    monkeypatch.setattr("egapro.helpers.get_entreprise_details", patch)
+    monkeypatch.setattr("egapro.helpers.get", patch)
     resp = await client.get("/validate-siren?siren=1234567")
     assert resp.status == 422
     assert json.loads(resp.body) == {"error": "Numéro SIREN invalide: 1234567"}
@@ -240,14 +257,81 @@ async def test_validate_siren(client, monkeypatch):
     assert json.loads(resp.body) == metadata
 
 
-async def test_validate_unknown_siren(client, monkeypatch):
-    async def patch(siren, year):
-        return {}
+@pytest.mark.parametrize(
+    "response",
+    [
+        None,
+        {},
+        {"results": []},
+        {"results": [None]},
+        {"results": [{"siren": "111111111", "nom_complet": "Autre entreprise"}]},
+    ],
+)
+async def test_validate_unknown_siren(client, monkeypatch, response):
+    async def patch(*args, **kwargs):
+        return response
 
-    monkeypatch.setattr("egapro.helpers.load_from_recherche_entreprises", patch)
+    monkeypatch.setattr("egapro.helpers.get", patch)
     resp = await client.get("/validate-siren?siren=123456782")
     assert resp.status == 404
     assert json.loads(resp.body) == {"error": "Numéro SIREN inconnu: 123456782"}
+
+
+@pytest.mark.parametrize("nom_raison_sociale", [None, ""])
+@pytest.mark.parametrize("siege", [None, {}])
+async def test_validate_siren_name_fallback(
+    client, monkeypatch, nom_raison_sociale, siege
+):
+    async def patch(*args, **kwargs):
+        return {
+            "results": [
+                {
+                    "siren": "123456782",
+                    "nom_raison_sociale": nom_raison_sociale,
+                    "nom_complet": "ENTREPRISE INDIVIDUELLE",
+                    "siege": siege,
+                }
+            ]
+        }
+
+    monkeypatch.setattr("egapro.helpers.get", patch)
+    resp = await client.get("/validate-siren?siren=123456782")
+    assert resp.status == 200
+    assert json.loads(resp.body) == {"raison_sociale": "ENTREPRISE INDIVIDUELLE"}
+
+
+@pytest.mark.parametrize(
+    "date_fermeture,status",
+    [
+        ("2021-02-28", 404),
+        ("2021-03-01", 200),
+        ("2021-03-02", 200),
+        (None, 200),
+    ],
+)
+async def test_validate_siren_closure(client, monkeypatch, date_fermeture, status):
+    async def patch(*args, **kwargs):
+        return {
+            "results": [
+                {
+                    "siren": "123456782",
+                    "nom_complet": "FOOBAR",
+                    "date_fermeture": date_fermeture,
+                    "siege": {"date_fermeture": "2010-01-01"},
+                }
+            ]
+        }
+
+    monkeypatch.setattr("egapro.helpers.get", patch)
+    resp = await client.get("/validate-siren?siren=123456782&year=2020")
+    assert resp.status == status
+    assert json.loads(resp.body) == (
+        {
+            "error": "Le Siren saisi correspond à une entreprise fermée, veuillez vérifier votre saisie"
+        }
+        if status == 404
+        else {"raison_sociale": "FOOBAR"}
+    )
 
 
 async def test_get_entreprise_data(client, declaration):

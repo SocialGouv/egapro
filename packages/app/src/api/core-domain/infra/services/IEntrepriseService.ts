@@ -46,7 +46,7 @@ export interface ShortEtablissement {
   codeCommuneEtablissement: string;
   /** COG (Code Officiel Géographique) / Code Insee */
   codePaysEtrangerEtablissement?: string;
-  codePostalEtablissement: string; // TODO: may be undefined https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/412653180
+  codePostalEtablissement: string;
   etablissementSiege: boolean;
   idccs?: number[];
   libelleCommuneEtablissement: string;
