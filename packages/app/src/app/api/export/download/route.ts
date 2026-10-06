@@ -1,13 +1,16 @@
+import { env } from "~/env.js";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { downloadExport } from "~/modules/export/downloadExport";
 import { exportYearQuerySchema } from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { assertBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
 
 /**
  * GET /api/export/download?year=2026
  *
- * Download the yearly XLSX export file for a given year.
+ * Download the yearly XLSX export file for a given year. Requires the
+ * EGAPRO_EXPORT_API_TOKEN Bearer token.
  */
 export const GET = withAuditedRoute(
 	{
@@ -23,6 +26,14 @@ export const GET = withAuditedRoute(
 );
 
 async function exportDownloadHandler(request: Request): Promise<Response> {
+	const unauthorized = assertBearerToken(request, {
+		expectedToken: env.EGAPRO_EXPORT_API_TOKEN,
+		tokenName: "EGAPRO_EXPORT_API_TOKEN",
+	});
+	if (unauthorized) {
+		return unauthorized;
+	}
+
 	try {
 		const url = new URL(request.url);
 		const parsed = exportYearQuerySchema.safeParse({

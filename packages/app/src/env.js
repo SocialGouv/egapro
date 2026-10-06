@@ -95,6 +95,7 @@ export const env = createEnv({
 		NEXTAUTH_URL: z.string().url(),
 		EGAPRO_GIP_MDS_API_URL: z.string().url().optional(),
 		EGAPRO_GIP_MDS_API_TOKEN: z.string().optional(),
+		EGAPRO_EXPORT_API_TOKEN: z.string().optional(),
 		// Matomo Reporting API — server-side token for the admin funnel widget.
 		// Optional: when absent the matomo service degrades to an empty funnel
 		// (the admin chart shows "no data") instead of throwing.
@@ -222,6 +223,7 @@ export const env = createEnv({
 		NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 		EGAPRO_GIP_MDS_API_URL: process.env.EGAPRO_GIP_MDS_API_URL,
 		EGAPRO_GIP_MDS_API_TOKEN: process.env.EGAPRO_GIP_MDS_API_TOKEN,
+		EGAPRO_EXPORT_API_TOKEN: process.env.EGAPRO_EXPORT_API_TOKEN,
 		MATOMO_API_TOKEN: process.env.MATOMO_API_TOKEN,
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
