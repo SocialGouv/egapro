@@ -9,6 +9,9 @@ import { HydrateClient } from "~/trpc/server";
 
 export const metadata = { title: { absolute: "Accueil — Egapro" } };
 
+// Reads live campaign settings from the DB (admins can change them anytime).
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
 	const session = await auth();
 
