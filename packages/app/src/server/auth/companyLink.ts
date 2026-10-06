@@ -1,9 +1,12 @@
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { parseSiren } from "~/modules/domain";
-import { db } from "~/server/db";
+import { type DB, db } from "~/server/db";
 import { toCompanyInsertValues } from "~/server/db/companyInsert";
 import { companies, userCompanies } from "~/server/db/schema";
+import { releaseLocksForUserOnSirens } from "~/server/services/declarationLockService";
 import { fetchCompanyBySiren } from "~/server/services/weez";
+
+type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
 async function resolveCompanyValues(siren: string) {
 	try {
@@ -13,25 +16,44 @@ async function resolveCompanyValues(siren: string) {
 	}
 }
 
+// Two concurrent sign-ins under different SIRETs would each miss the other's uncommitted link and leave both.
+async function lockUserCompanyLinks(tx: Tx, userId: string) {
+	await tx.execute(
+		sql`SELECT pg_advisory_xact_lock(hashtextextended(${`app_user_company:${userId}`}, 0))`,
+	);
+}
+
+async function revokeLinks(tx: Tx, userId: string, keptSiren: string | null) {
+	const revoked = await tx
+		.delete(userCompanies)
+		.where(
+			keptSiren
+				? and(
+						eq(userCompanies.userId, userId),
+						ne(userCompanies.siren, keptSiren),
+					)
+				: eq(userCompanies.userId, userId),
+		)
+		.returning({ siren: userCompanies.siren });
+	const revokedSirens = revoked.map((row) => row.siren);
+	await releaseLocksForUserOnSirens(tx, userId, revokedSirens);
+	return revokedSirens;
+}
+
 export async function syncUserCompanyLink(
 	userId: string,
 	siret: string | null | undefined,
 ): Promise<string[]> {
 	const siren = parseSiren(siret);
-
-	// Fail-closed: the next sign-in carrying a valid SIRET recreates the link.
-	if (!siren) {
-		const revoked = await db
-			.delete(userCompanies)
-			.where(eq(userCompanies.userId, userId))
-			.returning({ siren: userCompanies.siren });
-		return revoked.map((row) => row.siren);
-	}
-
 	// Weez is an HTTP call: kept out of the transaction to avoid long locks.
-	const companyValues = await resolveCompanyValues(siren);
+	const companyValues = siren ? await resolveCompanyValues(siren) : null;
 
 	return db.transaction(async (tx) => {
+		await lockUserCompanyLinks(tx, userId);
+
+		// Fail-closed: the next sign-in carrying a valid SIRET recreates the link.
+		if (!siren || !companyValues) return revokeLinks(tx, userId, null);
+
 		await tx
 			.insert(companies)
 			.values(companyValues)
@@ -39,18 +61,11 @@ export async function syncUserCompanyLink(
 				target: companies.siren,
 				set: { ...companyValues, updatedAt: new Date() },
 			});
-
 		await tx
 			.insert(userCompanies)
 			.values({ userId, siren })
 			.onConflictDoNothing();
 
-		const revoked = await tx
-			.delete(userCompanies)
-			.where(
-				and(eq(userCompanies.userId, userId), ne(userCompanies.siren, siren)),
-			)
-			.returning({ siren: userCompanies.siren });
-		return revoked.map((row) => row.siren);
+		return revokeLinks(tx, userId, siren);
 	});
 }

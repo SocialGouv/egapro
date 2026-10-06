@@ -12,6 +12,7 @@ import {
 } from "vitest";
 import { env } from "~/env.js";
 import { declarationDraftRouter } from "~/server/api/routers/declarationDraft";
+import { syncUserCompanyLink } from "~/server/auth/companyLink";
 import { authConfig } from "~/server/auth/config";
 import { db } from "~/server/db";
 
@@ -72,6 +73,7 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 
 	async function cleanup() {
 		await sql`DELETE FROM audit.action_log WHERE user_id IN (SELECT id FROM app_user WHERE email = ${EMAIL})`;
+		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id IN (SELECT id FROM app_user WHERE email = ${EMAIL})`;
 		await sql`DELETE FROM app_declaration WHERE siren IN ${sql(SIRENS)}`;
 		await sql`DELETE FROM app_user_company WHERE siren IN ${sql(SIRENS)} OR user_id IN (SELECT id FROM app_user WHERE email = ${EMAIL})`;
 		await sql`DELETE FROM app_company WHERE siren IN ${sql(SIRENS)}`;
@@ -152,6 +154,110 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 		await signIn(siretOf(CURRENT_SIREN));
 
 		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
+	});
+
+	it("serialises the sync of one user behind a per-user lock, the SIRET-less branch included", async () => {
+		await signIn(siretOf(FORMER_SIREN));
+		const id = await userId();
+		const holder = postgres(env.DATABASE_URL, { max: 1 });
+		let releaseHolder!: () => void;
+		const holderReleased = new Promise<void>((resolve) => {
+			releaseHolder = resolve;
+		});
+		let lockTaken!: () => void;
+		const lockHeld = new Promise<void>((resolve) => {
+			lockTaken = resolve;
+		});
+
+		const holding = holder.begin(async (tx) => {
+			await tx`SELECT pg_advisory_xact_lock(hashtextextended(${`app_user_company:${id}`}, 0))`;
+			lockTaken();
+			await holderReleased;
+		});
+		await lockHeld;
+
+		let settled = false;
+		const sync = syncUserCompanyLink(id, undefined).then((revoked) => {
+			settled = true;
+			return revoked;
+		});
+		try {
+			await new Promise((resolve) => setTimeout(resolve, 300));
+			expect(settled).toBe(false);
+			expect(await linkedSirens()).toEqual([FORMER_SIREN]);
+		} finally {
+			releaseHolder();
+			await holding;
+			await holder.end();
+		}
+
+		expect(await sync).toEqual([FORMER_SIREN]);
+		expect(await linkedSirens()).toEqual([]);
+	});
+
+	describe("edit locks", () => {
+		async function declarationLockedBy(id: string, siren: string) {
+			const declarationId = `company-link-declaration-${siren}`;
+			await sql`
+				INSERT INTO app_company (siren, name) VALUES (${siren}, 'Société Démo')
+				ON CONFLICT (siren) DO NOTHING
+			`;
+			await sql`
+				INSERT INTO app_declaration (id, siren, year, declarant_id)
+				VALUES (${declarationId}, ${siren}, ${YEAR}, ${id})
+			`;
+			await sql`
+				INSERT INTO app_declaration_lock (
+					id, declaration_id, locked_by_user_id, locked_at, last_heartbeat_at, expires_at
+				)
+				VALUES (
+					${`company-link-lock-${siren}`}, ${declarationId}, ${id},
+					NOW(), NOW(), NOW() + INTERVAL '10 minutes'
+				)
+			`;
+		}
+
+		async function lockedSirens() {
+			const rows = await sql<{ siren: string }[]>`
+				SELECT d.siren FROM app_declaration_lock l
+				JOIN app_declaration d ON d.id = l.declaration_id
+				JOIN app_user u ON u.id = l.locked_by_user_id
+				WHERE u.email = ${EMAIL}
+				ORDER BY d.siren
+			`;
+			return rows.map((row) => row.siren);
+		}
+
+		it("releases the locks the user held on the company they lost, and only those", async () => {
+			await signIn(siretOf(FORMER_SIREN));
+			const id = await userId();
+			await declarationLockedBy(id, FORMER_SIREN);
+			await declarationLockedBy(id, CURRENT_SIREN);
+
+			await signIn(siretOf(CURRENT_SIREN));
+
+			expect(await lockedSirens()).toEqual([CURRENT_SIREN]);
+		});
+
+		it("releases every lock of the user when the SIRET is missing", async () => {
+			await signIn(siretOf(FORMER_SIREN));
+			const id = await userId();
+			await declarationLockedBy(id, FORMER_SIREN);
+
+			await signIn(undefined);
+
+			expect(await lockedSirens()).toEqual([]);
+		});
+
+		it("keeps the locks when the user signs in again with the same SIRET", async () => {
+			await signIn(siretOf(FORMER_SIREN));
+			const id = await userId();
+			await declarationLockedBy(id, FORMER_SIREN);
+
+			await signIn(siretOf(FORMER_SIREN));
+
+			expect(await lockedSirens()).toEqual([FORMER_SIREN]);
+		});
 	});
 
 	describe("the former company after a reconnection under another SIRET", () => {
