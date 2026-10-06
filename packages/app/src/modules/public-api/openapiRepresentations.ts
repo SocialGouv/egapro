@@ -84,13 +84,13 @@ export const publicRepresentationSchema = {
 		publishUrl: {
 			type: ["string", "null"],
 			description:
-				"URL de publication des résultats. `null` si non renseignée.",
+				"URL de publication des résultats. `null` si non renseignée, ou lorsque l'entreprise n'est pas diffusible.",
 			example: "https://exemple.fr/egalite-professionnelle",
 		},
 		publishModalities: {
 			type: ["string", "null"],
 			description:
-				"Modalités de publication en texte libre (ex. affichage interne), utilisées quand aucune URL n'est renseignée. `null` sinon.",
+				"Modalités de publication en texte libre (ex. affichage interne), utilisées quand aucune URL n'est renseignée. `null` sinon, ou lorsque l'entreprise n'est pas diffusible.",
 			example: "Affichage dans les locaux de l'entreprise",
 		},
 	},

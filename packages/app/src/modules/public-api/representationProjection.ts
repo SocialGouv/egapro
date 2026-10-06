@@ -80,7 +80,7 @@ export function toPublicRepresentation(
 		memberMenPercent: toNullableNumber(declaration.memberMenPercent),
 		notComputableReasonMembers: declaration.notComputableReasonMembers,
 		publishDate: declaration.publishDate,
-		publishUrl: declaration.publishUrl,
-		publishModalities: declaration.publishModalities,
+		publishUrl: diffusible ? declaration.publishUrl : null,
+		publishModalities: diffusible ? declaration.publishModalities : null,
 	};
 }

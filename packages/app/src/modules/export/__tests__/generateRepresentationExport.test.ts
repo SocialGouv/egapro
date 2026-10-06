@@ -184,7 +184,7 @@ describe("buildRepresentationExportRows", () => {
 		]);
 	});
 
-	it("masks identity and location of a non-diffusible company but keeps its SIREN and indicators", async () => {
+	it("masks identity, location and publication channel of a non-diffusible company but keeps its SIREN and indicators", async () => {
 		mockOrderBy.mockResolvedValue([
 			makeDbRow(),
 			makeDbRow({
@@ -193,6 +193,7 @@ describe("buildRepresentationExportRows", () => {
 				identityDiffusible: false,
 				executiveWomenPercent: "30.00",
 				executiveMenPercent: "70.00",
+				publishModalities: "Affichage dans les locaux",
 			}),
 		]);
 
@@ -213,7 +214,9 @@ describe("buildRepresentationExportRows", () => {
 			nafLabel: "Non-diffusible",
 			executiveWomenPercent: 30,
 			executiveMenPercent: 70,
-			publishUrl: "https://example.fr/representation",
+			publishDate: "2028-03-01",
+			publishUrl: null,
+			publishModalities: null,
 		});
 	});
 

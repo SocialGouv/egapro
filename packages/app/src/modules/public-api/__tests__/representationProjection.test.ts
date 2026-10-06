@@ -52,6 +52,8 @@ const MASKED_COMPANY_FIELDS = [
 	"nafLabel",
 ] as const;
 
+const MASKED_PUBLICATION_FIELDS = ["publishUrl", "publishModalities"] as const;
+
 const FORBIDDEN_KEYS = [
 	"verdict",
 	"isCompliant",
@@ -159,17 +161,40 @@ describe("toPublicRepresentation", () => {
 		expect(nonDiffusible.executiveWomenPercent).toBe(35.5);
 		expect(nonDiffusible.memberWomenPercent).toBe(42);
 
-		const keptKeys = EXPECTED_DTO_KEYS.filter(
-			(key) =>
-				!MASKED_COMPANY_FIELDS.includes(
-					key as (typeof MASKED_COMPANY_FIELDS)[number],
-				),
-		);
+		const maskedKeys = new Set<string>([
+			...MASKED_COMPANY_FIELDS,
+			...MASKED_PUBLICATION_FIELDS,
+		]);
+		const keptKeys = EXPECTED_DTO_KEYS.filter((key) => !maskedKeys.has(key));
 		for (const key of keptKeys) {
 			expect(nonDiffusible[key as keyof typeof nonDiffusible]).toEqual(
 				diffusible[key as keyof typeof diffusible],
 			);
 		}
+	});
+
+	it("hides the publication url and modalities of a non-diffusible company", () => {
+		const declaration = {
+			...declarationFixture,
+			publishModalities: "Affichage dans les locaux",
+		};
+		const diffusible = toPublicRepresentation(declaration, companyFixture);
+		const nonDiffusible = toPublicRepresentation(declaration, {
+			...companyFixture,
+			statutDiffusion: "N",
+		});
+
+		expect(diffusible.publishUrl).toBe(
+			"https://exemple.fr/egalite-professionnelle",
+		);
+		expect(diffusible.publishModalities).toBe("Affichage dans les locaux");
+		for (const field of MASKED_PUBLICATION_FIELDS) {
+			expect(nonDiffusible[field]).toBeNull();
+		}
+		expect(nonDiffusible.publishDate).toBe("2026-02-15");
+		expect(() =>
+			publicRepresentationDTOSchema.parse(nonDiffusible),
+		).not.toThrow();
 	});
 
 	it("uses the status and the legacy address fallback for masking", () => {

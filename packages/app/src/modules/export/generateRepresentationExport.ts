@@ -154,8 +154,8 @@ function toExportRow(
 		memberMenPercent: toNullableNumber(row.memberMenPercent),
 		notComputableReasonMembers: row.notComputableReasonMembers,
 		publishDate: row.publishDate,
-		publishUrl: row.publishUrl,
-		publishModalities: row.publishModalities,
+		publishUrl: diffusible ? row.publishUrl : null,
+		publishModalities: diffusible ? row.publishModalities : null,
 	};
 }
 
