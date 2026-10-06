@@ -38,4 +38,17 @@ describe("resolveRedirectTarget", () => {
 		const url = `${baseUrl}/dashboard`;
 		expect(resolveRedirectTarget(url, baseUrl)).toBe(url);
 	});
+
+	it("returns the parsed url, never the raw string, for a same-origin url", () => {
+		expect(resolveRedirectTarget(`${baseUrl}/da\tsh\r\nboard`, baseUrl)).toBe(
+			`${baseUrl}/dashboard`,
+		);
+	});
+
+	it.each([
+		"https://egapro.example.fr./dashboard",
+		"https://egapro.example.fr:8443/dashboard",
+	])("refuses %s, which is another origin", (url) => {
+		expect(resolveRedirectTarget(url, baseUrl)).toBe(home);
+	});
 });

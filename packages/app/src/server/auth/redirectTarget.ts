@@ -21,8 +21,6 @@ export function resolveRedirectTarget(url: string, baseUrl: string): string {
 
 	if (!isSameOrigin(url, baseUrl)) return home;
 
-	const { pathname } = new URL(url);
-	return pathname === "/" && !url.includes("?") && !url.includes("#")
-		? home
-		: url;
+	const { pathname, search, hash, href } = new URL(url);
+	return pathname === "/" && !search && !hash ? home : href;
 }
