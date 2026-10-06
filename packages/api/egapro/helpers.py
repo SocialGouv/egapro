@@ -231,34 +231,37 @@ async def load_from_recherche_entreprises(siren, year=constants.INVALID_YEAR):
     if config.API_ENTREPRISES:
         return await load_from_api_entreprises(siren, year)
     logger.debug("Calling Recherche Entreprises for siren %s", siren)
-    url = f"https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/entreprise/{siren}"
-    headers = {'Referer': 'egapro'}
-    data = await get(url, headers=headers)
-    if not data:
+    url = "https://recherche-entreprises.api.gouv.fr/search"
+    params = {"q": siren, "per_page": 1}
+    headers = {"Referer": "egapro"}
+    response = await get(url, params=params, headers=headers)
+    if not response or not response.get("results"):
         return {}
-    raison_sociale = data.get("simpleLabel")
-    limit = date(year+1, 3, 1)
-    radiation = data.get("dateCessation")
-    # if dateCessation comes before limit date, raise an error
-    if year and radiation and date.fromisoformat(radiation) < limit:
+    data = response["results"][0] or {}
+    if data.get("siren") != siren:
+        return {}
+    raison_sociale = data.get("nom_raison_sociale") or data.get("nom_complet")
+    radiation = data.get("date_fermeture")
+    if year and radiation and date.fromisoformat(radiation) < date(year + 1, 3, 1):
         raise ValueError(
             "Le Siren saisi correspond à une entreprise fermée, "
             "veuillez vérifier votre saisie"
         )
-    etablissement = data.get("firstMatchingEtablissement", {})
-    code_insee = etablissement.get("codeCommuneEtablissement")
+    etablissement = data.get("siege") or {}
+    code_insee = etablissement.get("commune")
     departement = code_insee_to_departement(code_insee)
     region = constants.DEPARTEMENT_TO_REGION.get(departement)
-    code_postal = etablissement.get("codePostalEtablissement")
-    commune = etablissement.get("libelleCommuneEtablissement")
-    adresse = etablissement.get("address")
+    code_postal = etablissement.get("code_postal")
+    commune = etablissement.get("libelle_commune") or etablissement.get(
+        "libelle_commune_etranger"
+    )
+    adresse = etablissement.get("adresse")
     if adresse and code_postal and code_postal in adresse:
         adresse = adresse.split(code_postal)[0].strip()
-    code_naf = data.get("activitePrincipaleUniteLegale")
-    code_pays = etablissement.get("codePaysEtrangerEtablissement")
+    code_pays = etablissement.get("code_pays_etranger")
     return {
         "raison_sociale": raison_sociale,
-        "code_naf": code_naf,
+        "code_naf": data.get("activite_principale"),
         "région": region,
         "département": departement,
         "adresse": adresse,

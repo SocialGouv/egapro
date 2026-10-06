@@ -148,11 +148,6 @@ declare namespace NodeJS {
          */
         EGAPRO_API_ENTREPRISES_URL?: string;
         /**
-         * Dist: `https://api.recherche-entreprises.fabrique.social.gouv.fr/api/v1/`  
-         * {@link [Local Env Dist](.env.development)}
-         */
-        EGAPRO_API_RECHERCHE_ENTREPRISES_URL?: string;
-        /**
          * No dist value.  
          * {@link [Local Env Dist](.env.development)}
          */
@@ -254,7 +249,6 @@ declare type ProcessEnvCustomKeys =
     | 'EGAPRO_STAFF'
     | 'EGAPRO_USE_API_ENTREPRISE'
     | 'EGAPRO_API_ENTREPRISES_URL'
-    | 'EGAPRO_API_RECHERCHE_ENTREPRISES_URL'
     | 'EGAPRO_BASE_URL'
     | 'EGAPRO_SITE_DESCRIPTION'
     | 'EGAPRO_ALLOW_ORIGIN'
