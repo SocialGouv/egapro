@@ -9,6 +9,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   build-app:
     permissions:
@@ -64,6 +67,12 @@ jobs:
 
   kontinuous:
     needs: [build-app]
+    # Mirrors the permissions the reusable workflow declares: a caller that
+    # grants less makes the nested job fail at startup.
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: read
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-production-atlas.yaml@v1
     secrets: inherit

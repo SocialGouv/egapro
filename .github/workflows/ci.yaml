@@ -10,6 +10,9 @@ concurrency:
 env:
   NODE_ENV: test
 
+permissions:
+  contents: read
+
 jobs:
   notifications-typecheck:
     name: Notifications · Typecheck

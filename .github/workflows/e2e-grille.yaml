@@ -46,6 +46,9 @@ concurrency:
   group: e2e-grille
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   grille:
     name: "Recette grille"
