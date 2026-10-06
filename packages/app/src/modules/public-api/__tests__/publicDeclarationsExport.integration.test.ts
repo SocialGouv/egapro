@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
 
 // The public release gate is SQL-enforced: a mocked driver cannot prove it.
-describe("GET /api/public/declarations/export — public release gate (#4566)", () => {
+describe("GET /api/public/declarations/export — public release gate", () => {
 	let sql!: ReturnType<typeof postgres>;
 
 	const DECLARANT_ID = "pub-export-declarant";

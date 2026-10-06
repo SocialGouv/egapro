@@ -185,8 +185,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		expect(result.data).toEqual([]);
 	});
 
-	// 2103 deliberately has no app_campaign_deadline row: no foreign key ties
-	// app_declaration.year to it, and that path is never exercised otherwise.
+	// 2103 deliberately has no app_campaign_deadline row — no FK enforces one.
 	it("excludes a year that has no campaign-deadline row at all, with or without a year filter (S5)", async () => {
 		await db
 			.insert(declarations)
