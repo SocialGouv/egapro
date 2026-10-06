@@ -3,11 +3,21 @@ import { NextResponse } from "next/server";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import type { CountyCode, RegionCode } from "~/modules/domain";
 import { COUNTIES, REGIONS } from "~/modules/domain";
+import { toCsvField } from "~/modules/export";
+import { PUBLIC_API_EXPORT_HEADERS } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { referents } from "~/server/db/schema";
+import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 
 type ReferentsFormat = "csv" | "json";
+
+export function OPTIONS(): Response {
+	return new Response(null, {
+		status: 204,
+		headers: PUBLIC_API_EXPORT_HEADERS,
+	});
+}
 
 /** Normalised so no caller-supplied string reaches the audit metadata jsonb. */
 function readFormat(request: Request): ReferentsFormat {
@@ -57,7 +67,7 @@ function formatCsv(rows: Awaited<ReturnType<typeof getAllReferents>>): string {
 				r.substituteName ?? "",
 				r.substituteEmail ?? "",
 			]
-				.map((val) => `"${String(val).replace(/"/g, '""')}"`)
+				.map(toCsvField)
 				.join(";"),
 		),
 	];
@@ -76,6 +86,8 @@ export const GET = withAuditedRoute(
 );
 
 async function referentsHandler(request: Request): Promise<Response> {
+	const limited = await enforcePublicApiRateLimit(request);
+	if (limited) return limited;
 	const format = readFormat(request);
 
 	const rows = await getAllReferents();
@@ -84,6 +96,7 @@ async function referentsHandler(request: Request): Promise<Response> {
 		const csv = formatCsv(rows);
 		return new NextResponse(csv, {
 			headers: {
+				...PUBLIC_API_EXPORT_HEADERS,
 				"Content-Type": "text/csv; charset=utf-8",
 				"Content-Disposition":
 					'attachment; filename="referents_egalite_professionnelle.csv"',
@@ -91,5 +104,5 @@ async function referentsHandler(request: Request): Promise<Response> {
 		});
 	}
 
-	return NextResponse.json(rows);
+	return NextResponse.json(rows, { headers: PUBLIC_API_EXPORT_HEADERS });
 }

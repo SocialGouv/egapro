@@ -30,6 +30,25 @@ vi.mock("drizzle-orm", () => ({
 	asc: (col: unknown) => ({ asc: col }),
 }));
 
+vi.mock("~/modules/export", async () => ({
+	toCsvField: (
+		await vi.importActual<typeof import("~/modules/export/shared/csv")>(
+			"~/modules/export/shared/csv",
+		)
+	).toCsvField,
+}));
+
+vi.mock("~/modules/public-api", async () => ({
+	PUBLIC_API_EXPORT_HEADERS: (
+		await vi.importActual<typeof import("~/modules/public-api/httpHeaders")>(
+			"~/modules/public-api/httpHeaders",
+		)
+	).PUBLIC_API_EXPORT_HEADERS,
+}));
+
+const ROUTE_URL =
+	"http://localhost/api/public/referents-egalite-professionnelle";
+
 function setRows(rows: unknown[]) {
 	mocks.dbSelect.mockReturnValue({
 		from: () => ({
@@ -198,5 +217,100 @@ describe("/api/public/referents-egalite-professionnelle", () => {
 			status: "failure",
 			errorMessage: "db down",
 		});
+	});
+
+	it("neutralises a value that a spreadsheet would evaluate as a formula", async () => {
+		setRows([
+			{
+				region: "11",
+				county: "75",
+				name: "=1+1",
+				type: "url",
+				value: '=HYPERLINK("http://example.fr")',
+				principal: true,
+				substituteName: "@SUM(A1:A2)",
+				substituteEmail: "-2+3",
+			},
+		]);
+
+		const { GET } = await import("../route");
+		const response = await GET(new Request(`${ROUTE_URL}?format=csv`));
+
+		const dataLine = (await response.text()).split("\n")[1];
+		expect(dataLine).toContain(`"'=1+1"`);
+		expect(dataLine).toContain(`"'=HYPERLINK(""http://example.fr"")"`);
+		expect(dataLine).toContain(`"'@SUM(A1:A2)"`);
+		expect(dataLine).toContain(`"'-2+3"`);
+		expect(dataLine).not.toMatch(/(^|;)"[=+\-@|]/);
+	});
+
+	it.each([
+		["json", ""],
+		["csv", "?format=csv"],
+	])("sends the public export CORS and cache headers (%s)", async (_format, query) => {
+		setRows([]);
+
+		const { GET } = await import("../route");
+		const response = await GET(new Request(`${ROUTE_URL}${query}`));
+
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(response.headers.get("Access-Control-Allow-Methods")).toBe(
+			"GET, OPTIONS",
+		);
+		expect(response.headers.get("Cache-Control")).toBe(
+			"public, max-age=3600, s-maxage=3600",
+		);
+	});
+
+	it("answers the CORS preflight with the public export headers", async () => {
+		const { OPTIONS } = await import("../route");
+		const response = OPTIONS();
+
+		expect(response.status).toBe(204);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
+			"Content-Type, Authorization",
+		);
+		expect(response.headers.get("Cache-Control")).toBe(
+			"public, max-age=3600, s-maxage=3600",
+		);
+	});
+
+	it("returns 429 without querying the database once the anonymous quota is spent", async () => {
+		setRows([]);
+		const { GET } = await import("../route");
+		const throttledRequest = () =>
+			new Request(`${ROUTE_URL}?format=csv`, {
+				headers: { "x-real-ip": "203.0.113.120" },
+			});
+
+		for (let index = 0; index < 120; index += 1) {
+			expect((await GET(throttledRequest())).status).toBe(200);
+		}
+		const response = await GET(throttledRequest());
+
+		expect(response.status).toBe(429);
+		expect(response.headers.get("Retry-After")).toBe("60");
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(mocks.dbSelect).toHaveBeenCalledTimes(120);
+		expect(mocks.logAction.mock.calls.at(-1)?.[0]).toMatchObject({
+			action: "public_referents.search",
+			status: "failure",
+			errorMessage: "HTTP 429",
+		});
+	});
+
+	it("rejects an unknown bearer token before querying the database", async () => {
+		setRows([]);
+
+		const { GET } = await import("../route");
+		const response = await GET(
+			new Request(ROUTE_URL, {
+				headers: { Authorization: "Bearer unknown-token" },
+			}),
+		);
+
+		expect(response.status).toBe(401);
+		expect(mocks.dbSelect).not.toHaveBeenCalled();
 	});
 });
