@@ -6,6 +6,8 @@ const mockFindFirst = vi.fn();
 const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 const mockTransaction = vi.fn();
+const mockSyncUserCompanyLink = vi.fn();
+const mockLogAction = vi.fn();
 
 vi.mock("~/server/db", () => ({
 	db: {
@@ -35,8 +37,11 @@ vi.mock("~/server/db/schema", () => ({
 		stoppedAt: "stoppedAt",
 	},
 }));
-vi.mock("~/server/services/weez", () => ({
-	fetchCompanyBySiren: vi.fn(),
+vi.mock("../companyLink", () => ({
+	syncUserCompanyLink: (...args: unknown[]) => mockSyncUserCompanyLink(...args),
+}));
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
 }));
 
 import { authConfig } from "../config";
@@ -62,6 +67,9 @@ describe("auth config", () => {
 		mockInsert.mockReset();
 		mockUpdate.mockReset();
 		mockTransaction.mockReset();
+		mockSyncUserCompanyLink.mockReset();
+		mockSyncUserCompanyLink.mockResolvedValue([]);
+		mockLogAction.mockReset();
 	});
 
 	describe("jwt callback", () => {
@@ -296,6 +304,64 @@ describe("auth config", () => {
 			);
 
 			expect(result.name).toBe(DECLARANT_EMAIL);
+		});
+	});
+
+	describe("jwt callback — company link", () => {
+		const siretUser = {
+			...proconnectUser,
+			siret: "12345678901234",
+		} as User & { siret: string };
+
+		function revocationLogs() {
+			return mockLogAction.mock.calls
+				.map(([input]) => input as Record<string, unknown>)
+				.filter((input) => input.action === "auth.company_link_revoked");
+		}
+
+		it("re-syncs the link from the ProConnect SIRET on every sign-in", async () => {
+			await signIn({}, siretUser);
+
+			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
+				"uuid-123",
+				"12345678901234",
+			);
+		});
+
+		it("re-syncs even without a SIRET, so the sign-in can revoke every link", async () => {
+			await signIn({}, proconnectUser);
+
+			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
+				"uuid-123",
+				undefined,
+			);
+		});
+
+		it("journals one revocation per company the user lost", async () => {
+			mockSyncUserCompanyLink.mockResolvedValue(["111111111", "222222222"]);
+
+			await signIn({}, siretUser);
+
+			expect(revocationLogs()).toEqual([
+				expect.objectContaining({
+					status: "success",
+					userId: "uuid-123",
+					userEmail: DECLARANT_EMAIL,
+					siren: "111111111",
+				}),
+				expect.objectContaining({
+					status: "success",
+					userId: "uuid-123",
+					userEmail: DECLARANT_EMAIL,
+					siren: "222222222",
+				}),
+			]);
+		});
+
+		it("journals nothing when no link was revoked", async () => {
+			await signIn({}, siretUser);
+
+			expect(revocationLogs()).toHaveLength(0);
 		});
 	});
 

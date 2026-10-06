@@ -6,25 +6,14 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import {
-	extractSiren,
-	isAdminMfaAcr,
-	isAdminMfaFresh,
-	parseSiren,
-} from "~/modules/domain";
+import { isAdminMfaAcr, isAdminMfaFresh, parseSiren } from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
-import { toCompanyInsertValues } from "~/server/db/companyInsert";
-import {
-	adminImpersonationEvents,
-	companies,
-	userCompanies,
-	users,
-} from "~/server/db/schema";
-import { fetchCompanyBySiren } from "~/server/services/weez";
+import { adminImpersonationEvents, companies, users } from "~/server/db/schema";
+import { syncUserCompanyLink } from "./companyLink";
 import { parseAdminEmails } from "./parseAdminEmails";
 
 /** Cap on the `name` field of an impersonation payload — avoids oversized
@@ -592,34 +581,25 @@ export const authConfig = {
 					}
 				}
 
-				// Link company (HTTP call outside transaction to avoid long locks)
-				if (profileData.siret) {
-					const siren = extractSiren(profileData.siret);
-
-					let companyValues: ReturnType<typeof toCompanyInsertValues>;
-					try {
-						companyValues = toCompanyInsertValues(
-							siren,
-							await fetchCompanyBySiren(siren),
-						);
-					} catch {
-						companyValues = toCompanyInsertValues(siren, null);
+				// ProConnect is the only source of the link, so a user moved to
+				// another organisation loses the former one at this sign-in (#4697).
+				const revokedSirens = await syncUserCompanyLink(
+					dbUser.id,
+					profileData.siret,
+				);
+				if (revokedSirens.length > 0) {
+					const requestContext = await safeRequestContext();
+					for (const revokedSiren of revokedSirens) {
+						await logAction({
+							action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
+							status: "success",
+							userId: dbUser.id,
+							userEmail: email,
+							siren: revokedSiren,
+							ipAddress: requestContext.ipAddress,
+							userAgent: requestContext.userAgent,
+						});
 					}
-
-					await db.transaction(async (tx) => {
-						await tx
-							.insert(companies)
-							.values(companyValues)
-							.onConflictDoUpdate({
-								target: companies.siren,
-								set: { ...companyValues, updatedAt: new Date() },
-							});
-
-						await tx
-							.insert(userCompanies)
-							.values({ userId: dbUser.id, siren })
-							.onConflictDoNothing();
-					});
 				}
 
 				// Sync the admin flag with `ADMIN_EMAILS` on every login.

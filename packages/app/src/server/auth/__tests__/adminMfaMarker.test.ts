@@ -32,9 +32,8 @@ vi.mock("~/server/db/schema", () => ({
 		stoppedAt: "stoppedAt",
 	},
 }));
-vi.mock("~/server/services/weez", () => ({
-	fetchCompanyBySiren: vi.fn(),
-}));
+// The company link has its own integration test; these suites are about the MFA marker and impersonation.
+vi.mock("../companyLink", () => ({ syncUserCompanyLink: async () => [] }));
 
 const mockLogAction = vi.fn();
 vi.mock("~/server/audit/log", () => ({
