@@ -57,7 +57,7 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 | `GET` | `/api/public/declarations` | Recherche paginée |
 | `GET` | `/api/public/declarations/{siren}` | Toutes les déclarations d'un SIREN |
 | `GET` | `/api/public/declarations/{siren}/{year}` | Déclaration d'un SIREN pour une année |
-| `GET` | `/api/public/declarations/export` | Export complet (JSON ou CSV) |
+| `GET` | `/api/public/declarations/export` | Export complet (JSON, CSV ou Excel) |
 | `GET` | `/api/public/openapi.json` | Spécification OpenAPI 3.1 |
 
 ### Recherche (`GET /api/public/declarations`)
@@ -96,7 +96,7 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/319159877/2026"
 
 ### Export complet (`GET /api/public/declarations/export`)
 
-Retourne l'intégralité des déclarations publiées. Le paramètre `format` accepte `json` (défaut) ou `csv`.
+Retourne l'intégralité des déclarations publiées, toutes années confondues. Le paramètre `format` accepte `json` (défaut), `csv` ou `xlsx`. Les filtres de la recherche (`q`, `region`, `departement`, `naf`, `year`…) peuvent être repris pour restreindre l'export ; `limit`, `offset` et `sort` sont ignorés.
 
 ```sh
 # JSON
@@ -105,7 +105,24 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export"
 # CSV (séparateur ;)
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv" \
   -o index-egapro-remunerations.csv
+
+# CSV d'une seule année
+curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv&year=2027" \
+  -o index-egapro-remunerations-2027.csv
 ```
+
+### Plafonds et cache des exports
+
+Les deux exports — `/api/public/declarations/export` et `/api/public/representations/export` (représentation équilibrée, `csv` ou `xlsx`) — appliquent un nombre maximal de lignes par requête :
+
+| Format | Plafond |
+| --- | --- |
+| `xlsx` | 10 000 lignes |
+| `json`, `csv` | 200 000 lignes |
+
+Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSON (`{ "error": "…" }`) au lieu d'un export tronqué : ajoutez des filtres — typiquement `year` — ou, pour Excel, passez au format CSV. Le plafond JSON/CSV laisse plusieurs campagnes de marge à l'export complet sans filtre (environ 35 000 entreprises déclarantes par campagne) ; il borne la mémoire qu'une seule requête peut mobiliser.
+
+Les exports JSON et CSV sont mis en cache **1 heure côté serveur** pour chaque jeu de filtres. Deux requêtes qui portent les mêmes filtres, dans un ordre différent ou avec des paramètres inconnus en plus, sont servies par la même entrée : une nouvelle déclaration publiée peut donc mettre jusqu'à une heure à apparaître dans un export, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`.
 
 ## Licence
 
