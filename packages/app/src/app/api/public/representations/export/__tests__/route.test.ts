@@ -68,6 +68,14 @@ describe("GET /api/public/representations/export", () => {
 		expect((await response.arrayBuffer()).byteLength).toBe(4);
 	});
 
+	it("audits an invalid format by name only, never the raw value", async () => {
+		await callGet(`?format=${"x".repeat(5_000)}`);
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "format" } }),
+		);
+	});
+
 	it("returns a CORS-readable validation error", async () => {
 		const response = await callGet("?format=json");
 

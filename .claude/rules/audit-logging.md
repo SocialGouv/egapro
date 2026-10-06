@@ -235,7 +235,7 @@ needs something `resolveContext` cannot produce.
 | Route | Action key(s) | Why not the wrapper |
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
-| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`rawSiren` on a 400, `count` on success) computed *during* the handler |
+| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`invalidParam` on a 400, `count` on success) computed *during* the handler |
 | `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
 | `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
 | `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
@@ -306,6 +306,10 @@ the caller is responsible for sanitisation:
 - Never put secrets in `metadata`
 - Never put IP addresses in `metadata` — there is a dedicated `ipAddress`
   column already
+- Never put a raw query or path parameter in `metadata`: the row is written
+  for refused requests too. Parse it with the route's schema and log the
+  result through `auditQueryMetadata()` (`~/server/audit/queryMetadata`) —
+  bounded values on success, `{ invalidParam }` otherwise
 - Do put business-relevant context: year, declarationId, fileName, action
   parameters
 

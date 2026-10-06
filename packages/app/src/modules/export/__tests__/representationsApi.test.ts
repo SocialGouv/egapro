@@ -3,6 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeRepresentationRow as makeRow } from "./helpers/representationRowFixture";
 
 const mockFetchRepresentations = vi.fn().mockResolvedValue([]);
+const mockLogAction = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
+}));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 
@@ -52,6 +57,34 @@ describe("GET /api/v1/export/representations", () => {
 		);
 
 		expect(response.status).toBe(403);
+	});
+
+	it("audits the validated date window", async () => {
+		const { GET } = await import("~/app/api/v1/export/representations/route");
+		await GET(
+			gatewayForwardedRequest(
+				"http://localhost/api/v1/export/representations?date_begin=2027-03-15",
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				metadata: { date_begin: "2027-03-15", date_end: null },
+			}),
+		);
+	});
+
+	it("audits an invalid date by name only, never the raw value", async () => {
+		const { GET } = await import("~/app/api/v1/export/representations/route");
+		await GET(
+			gatewayForwardedRequest(
+				`http://localhost/api/v1/export/representations?date_begin=${"x".repeat(5_000)}`,
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "date_begin" } }),
+		);
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {
