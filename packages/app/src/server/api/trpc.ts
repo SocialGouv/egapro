@@ -179,10 +179,7 @@ export const publicProcedure = t.procedure
 	.use(timingMiddleware)
 	.use(auditMiddleware);
 
-/**
- * Public procedure sharing the per-client quota of the public REST API, so a
- * tRPC call cannot be used to bypass the throttling of the REST endpoints.
- */
+/** Shares the public REST API quota so tRPC cannot be used to bypass its throttling. */
 export const rateLimitedPublicProcedure = publicProcedure.use(
 	async ({ ctx, next }) => {
 		const verdict = await checkPublicApiRateLimit(ctx.headers);
