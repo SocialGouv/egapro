@@ -188,11 +188,14 @@ jobs:
           fi
       - name: Générer le rapport de recette
         if: always()
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          REPORT_URL: ${{ format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
         run: |
           pnpm --filter app report:grille \
             --scope "${RECETTE_SCOPE:-tous les cas}" \
-            --commit "${{ github.sha }}" \
-            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --commit "$COMMIT_SHA" \
+            --report-url "$REPORT_URL"
       - name: Stop services
         if: always()
         run: docker compose down

@@ -41,11 +41,13 @@ jobs:
         id: pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
           # No PR yet is a normal state and must not fail the build, but an API
           # error must stay visible: without this, a bad token or a rate limit
           # is indistinguishable from "branch has no PR".
-          if ERR=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+          if ERR=$(gh api "repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls" \
                      --jq '.[0].number // empty' 2>&1 >pr-number.txt); then
             N=$(cat pr-number.txt)
           else
