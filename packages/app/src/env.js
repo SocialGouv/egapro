@@ -30,8 +30,7 @@ function buildDatabaseUrl() {
 	return undefined;
 }
 
-// Parsed as a literal string rather than `z.coerce.boolean()`, which turns
-// any non-empty string — "false" included — into true.
+// `z.coerce.boolean()` would turn the string "false" into true.
 const literalBooleanFlag = () =>
 	z
 		.enum(["true", "false"])

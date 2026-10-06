@@ -7,8 +7,6 @@ import { env } from "~/env.js";
  * Mock GIP MDS API endpoint.
  * Returns the full mock CSV data (300 companies) from data/mock-gip-mds.csv.
  * Used for development and testing until the real API is available.
- * Served on dev builds only (local, E2E, review apps — whose
- * EGAPRO_GIP_MDS_API_URL points here); 404 in preproduction and production.
  *
  * The CSV file is included in the standalone output via outputFileTracingIncludes
  * in next.config.js — no Dockerfile change needed.

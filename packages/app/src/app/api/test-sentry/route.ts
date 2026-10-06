@@ -2,12 +2,7 @@ import { env } from "~/env.js";
 import { isAdminMfaFresh } from "~/modules/domain";
 import { cachedAuth } from "~/server/audit/cachedAuth";
 
-/**
- * GET handler that throws a test error for Sentry server-side capture.
- * Reserved to admins with a fresh second factor — the same bar as
- * `adminProcedure` — so an anonymous caller cannot burn the Sentry quota;
- * blocked in production regardless.
- */
+// Same bar as `adminProcedure`, so an anonymous caller cannot burn the Sentry quota.
 export async function GET(request: Request) {
 	const session = await cachedAuth(request);
 	const isFreshAdmin =
