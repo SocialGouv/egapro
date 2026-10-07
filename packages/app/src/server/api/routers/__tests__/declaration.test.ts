@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import {
+	getDefaultCampaignDeadlines,
+	type SubmissionHistoryEvent,
+} from "~/modules/domain";
 import {
 	createCaller,
 	mockDeclaration,
@@ -348,81 +351,100 @@ function createSubmitMockDb(
 	};
 }
 
-function createOneRowSelectDb(
-	declaration: DeclarationStateRow,
-	correctionCategories: Array<Record<string, unknown>> = [],
-	txRows: unknown[] = [],
+// The compliance mutations read the démarche only once its declaration lock is
+// held, so every handler read is served by the transaction, in order; a read on
+// the outer db would bypass the lock and fails the test. `steps` records the
+// lock and the reads in the order they happen.
+function createUnderLockDb(
+	reads: unknown[][],
+	subsequentEvents: SubmissionHistoryEvent[] = [],
 ) {
-	const joinRows = correctionCategories.map((ec) => ({
-		employee_category: ec,
-	}));
-	const selectQueue = createSelectQueue([[declaration], joinRows]);
+	const steps: Array<"lock" | "read"> = [];
+	const pending = [...reads];
+	const where = vi.fn().mockImplementation(() => {
+		steps.push("read");
+		const rows = Promise.resolve(pending.shift() ?? []);
+		return Object.assign(rows, { limit: vi.fn().mockReturnValue(rows) });
+	});
+	const from = vi.fn().mockReturnValue({
+		where,
+		innerJoin: vi.fn().mockReturnValue({ where }),
+	});
+	const txSelect = withTxGuardHistory(
+		vi.fn().mockReturnValue({ from }),
+		subsequentEvents,
+	);
 
-	const m = createMutationTxMock(txRows);
+	const updateWhere = vi.fn().mockResolvedValue(undefined);
+	const set = vi.fn().mockReturnValue({ where: updateWhere });
+	const update = vi.fn().mockReturnValue({ set });
+	const insertValues = vi.fn().mockResolvedValue(undefined);
+	const insert = vi.fn().mockReturnValue({ values: insertValues });
+	const execute = vi.fn().mockImplementation(async () => {
+		steps.push("lock");
+	});
+
+	const transaction = vi
+		.fn()
+		.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+			fn({ execute, select: txSelect, insert, update, delete: vi.fn() }),
+		);
 
 	return {
 		db: {
-			select: selectQueue.select,
-			update: m.update,
-			insert: m.insert,
-			transaction: m.transaction,
+			select: () => {
+				throw new Error("read outside the declaration lock");
+			},
+			transaction,
 		} as unknown,
-		set: m.set,
-		update: m.update,
-		insert: m.insert,
-		insertValues: m.insertValues,
+		set,
+		insertValues,
+		steps,
 	};
 }
 
-function createSimpleSelectDb(
-	declaration: DeclarationStateRow,
-	historyForRound: unknown[] = [],
-	historyForLock: unknown[] = [],
+function createOneRowSelectDb(
+	declaration: DeclarationStateRow | null,
+	correctionCategories: Array<Record<string, unknown>> = [],
 	txRows: unknown[] = [],
 ) {
-	const queue = createSelectQueue([
-		[declaration],
-		historyForRound,
-		historyForLock,
+	return createUnderLockDb([
+		declaration ? [declaration] : [],
+		correctionCategories.map((ec) => ({ employee_category: ec })),
+		txRows,
 	]);
-	const m = createMutationTxMock(txRows);
+}
 
-	return {
-		db: {
-			select: queue.select,
-			update: m.update,
-			insert: m.insert,
-			transaction: m.transaction,
-		} as unknown,
-		set: m.set,
-		update: m.update,
-		insert: m.insert,
-		insertValues: m.insertValues,
-	};
+function createSimpleSelectDb(
+	declaration: DeclarationStateRow | null,
+	historyForRound: unknown[] = [],
+	historyForLock: SubmissionHistoryEvent[] = [],
+	txRows: unknown[] = [],
+) {
+	return createUnderLockDb(
+		[declaration ? [declaration] : [], historyForRound, txRows],
+		historyForLock,
+	);
 }
 
 const JOINT_EVALUATION_FILE = { id: "file-joint-evaluation-1" };
 
+const RESOLVED_CORRECTION_CATEGORY = {
+	annualBaseWomen: "100",
+	annualBaseMen: "100",
+};
+
 function createJointEvaluationDb(
-	declaration: DeclarationStateRow,
+	declaration: DeclarationStateRow | null,
 	jointEvaluationFiles: unknown[] = [JOINT_EVALUATION_FILE],
 	txRows: unknown[] = [],
 ) {
-	const queue = createSelectQueue([[declaration], jointEvaluationFiles]);
-	const m = createMutationTxMock(txRows);
-
-	return {
-		db: {
-			select: queue.select,
-			update: m.update,
-			insert: m.insert,
-			transaction: m.transaction,
-		} as unknown,
-		set: m.set,
-		update: m.update,
-		insert: m.insert,
-		insertValues: m.insertValues,
-	};
+	return createUnderLockDb([
+		declaration ? [declaration] : [],
+		[{ at: null }],
+		jointEvaluationFiles,
+		txRows,
+	]);
 }
 
 describe("declarationRouter", () => {
@@ -1060,14 +1082,62 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws NOT_FOUND when declaration is missing", async () => {
-			const selectQueue = createSelectQueue([[]]);
-			const mockDb = {
-				select: selectQueue.select,
-				update: vi.fn(),
-			} as unknown;
-			const caller = await createLockedCaller(mockDb);
+			const ctx = createOneRowSelectDb(null);
+			const caller = await createLockedCaller(ctx.db);
 
-			await expect(caller.submitSecondDeclaration()).rejects.toThrow();
+			await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+		});
+
+		describe("preconditions", () => {
+			it("refuses a second declaration without any corrected category, recording nothing", async () => {
+				const declaration = buildDeclaration({
+					status: "corrective_actions_chosen",
+					cseRequired: false,
+				});
+				const ctx = createOneRowSelectDb(declaration, []);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"Les données corrigées de la seconde déclaration doivent être renseignées avant sa transmission.",
+				});
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+				expect(ctx.set).not.toHaveBeenCalled();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
+
+			it("refuses a second declaration from a state that opens none", async () => {
+				const declaration = buildDeclaration({
+					status: "joint_evaluation_chosen",
+					firstDeclarationPathChoice: "joint_evaluation",
+				});
+				const ctx = createOneRowSelectDb(declaration, [
+					RESOLVED_CORRECTION_CATEGORY,
+				]);
+				const caller = await createLockedCaller(
+					ctx.db,
+					undefined,
+					undefined,
+					"user@example.com",
+				);
+
+				await expect(caller.submitSecondDeclaration()).rejects.toMatchObject({
+					code: "PRECONDITION_FAILED",
+					message:
+						"La seconde déclaration ne peut pas être transmise à cette étape de la démarche.",
+				});
+				expect(ctx.insertValues).not.toHaveBeenCalled();
+				expect(ctx.set).not.toHaveBeenCalled();
+				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+			});
 		});
 
 		it("purges the second draft slice and keeps other slices after submitSecondDeclaration", async () => {
@@ -1076,7 +1146,11 @@ describe("declarationRouter", () => {
 				cseRequired: false,
 				draft: { second: { step1: { foo: "bar" } }, main: { step1: {} } },
 			});
-			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
+			const ctx = createOneRowSelectDb(
+				declaration,
+				[RESOLVED_CORRECTION_CATEGORY],
+				[declaration],
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
@@ -1096,7 +1170,11 @@ describe("declarationRouter", () => {
 				cseRequired: false,
 				draft: { second: { step1: { foo: "bar" } } },
 			});
-			const ctx = createOneRowSelectDb(declaration, [], [declaration]);
+			const ctx = createOneRowSelectDb(
+				declaration,
+				[RESOLVED_CORRECTION_CATEGORY],
+				[declaration],
+			);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submitSecondDeclaration();
@@ -1530,14 +1608,12 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws NOT_FOUND when declaration is missing", async () => {
-			const selectQueue = createSelectQueue([[]]);
-			const mockDb = {
-				select: selectQueue.select,
-				update: vi.fn(),
-			} as unknown;
-			const caller = await createLockedCaller(mockDb);
+			const ctx = createJointEvaluationDb(null);
+			const caller = await createLockedCaller(ctx.db);
 
-			await expect(caller.submitJointEvaluation()).rejects.toThrow();
+			await expect(caller.submitJointEvaluation()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
 		});
 
 		describe("preconditions (#4757)", () => {
@@ -1686,21 +1762,61 @@ describe("declarationRouter", () => {
 			});
 
 			it("does not enqueue a receipt when the declaration is missing", async () => {
-				const selectQueue = createSelectQueue([[]]);
-				const mockDb = {
-					select: selectQueue.select,
-					update: vi.fn(),
-				} as unknown;
+				const ctx = createJointEvaluationDb(null);
 				const caller = await createLockedCaller(
-					mockDb,
+					ctx.db,
 					undefined,
 					undefined,
 					"user@example.com",
 				);
 
-				await expect(caller.submitJointEvaluation()).rejects.toThrow();
+				await expect(caller.submitJointEvaluation()).rejects.toMatchObject({
+					code: "NOT_FOUND",
+				});
 				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe("compliance mutations read the démarche under its declaration lock (#4661)", () => {
+		it("saveCompliancePath takes the lock before its first read", async () => {
+			const ctx = createSimpleSelectDb(
+				buildDeclaration({ status: "awaiting_compliance_path_choice" }),
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.saveCompliancePath({ path: "corrective_action" });
+
+			expect(ctx.steps[0]).toBe("lock");
+			expect(ctx.steps.filter((step) => step === "lock")).toHaveLength(1);
+		});
+
+		it("submitSecondDeclaration takes the lock before its first read", async () => {
+			const ctx = createOneRowSelectDb(
+				buildDeclaration({ status: "corrective_actions_chosen" }),
+				[RESOLVED_CORRECTION_CATEGORY],
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submitSecondDeclaration();
+
+			expect(ctx.steps[0]).toBe("lock");
+			expect(ctx.steps.filter((step) => step === "lock")).toHaveLength(1);
+		});
+
+		it("submitJointEvaluation takes the lock before its first read", async () => {
+			const ctx = createJointEvaluationDb(
+				buildDeclaration({
+					status: "joint_evaluation_chosen",
+					firstDeclarationPathChoice: "joint_evaluation",
+				}),
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submitJointEvaluation();
+
+			expect(ctx.steps[0]).toBe("lock");
+			expect(ctx.steps.filter((step) => step === "lock")).toHaveLength(1);
 		});
 	});
 
