@@ -206,22 +206,30 @@ L'interface web et l'API de Mailpit (dev, preprod) exigent une authentification 
 
 Les identifiants sont demandés à l'équipe ; ils ne figurent jamais dans le dépôt.
 
-Pour (re)sceller, sans écrire le mot de passe sur disque ni le passer en argument de commande :
+Pour (re)sceller, sans écrire le mot de passe sur disque ni le passer en argument de commande (certificat, scope et fichiers : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
 
 ```bash
+set -o pipefail
 curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
-read -rs MAILPIT_PASSWORD   # mot de passe long et aléatoire, saisi sans écho
-printf '%s' "$MAILPIT_PASSWORD" | htpasswd -niB <user> \
-  | kubeseal --raw --scope cluster-wide \
+read -rs MAILPIT_PASSWORD   # ≥ 24 caractères aléatoires, issus du gestionnaire de mots de passe
+LINE=$(printf '%s' "$MAILPIT_PASSWORD" | htpasswd -niB <user>)
+unset MAILPIT_PASSWORD
+if [[ "$LINE" == <user>:\$2y\$* ]]; then
+  printf '%s\n' "$LINE" | kubeseal --raw --scope cluster-wide \
     --cert /tmp/cert-dev.pem --name mailpit-basic-auth \
     --from-file=/dev/stdin
-unset MAILPIT_PASSWORD
+else
+  echo "ligne htpasswd invalide : rien n'est scellé" >&2
+fi
+unset LINE
 ```
 
-- `htpasswd -niB` lit le mot de passe sur stdin (`-i`), écrit la ligne `user:hash` sur stdout (`-n`) et hache en bcrypt (`-B`). Mailpit accepte aussi le texte clair, à ne jamais utiliser ici.
-- Le coût bcrypt reste celui par défaut de `htpasswd` (5) : Mailpit vérifie le hash à chaque requête, avec un CPU limité à 200m. C'est la longueur du mot de passe qui fait la robustesse.
-- Le chiffré obtenu remplace `encryptedData.auth` dans **les deux** fichiers (`env/dev` et `env/preprod`) : c'est le même chiffré, car il s'agit du même cluster et du même contrôleur.
+- `htpasswd -niB` lit le mot de passe sur stdin (`-i`), écrit la ligne `user:hash` sur stdout (`-n`) et hache en bcrypt (`-B`).
+- Le contrôle avant `kubeseal` n'est pas décoratif : **Mailpit désactive son authentification, sans erreur, si le fichier est vide**. Un `htpasswd` absent ou en échec scellerait une valeur vide et rouvrirait l'UI. Mailpit accepte aussi le texte clair, à ne jamais utiliser ici.
+- Le coût bcrypt reste celui par défaut de `htpasswd` (5) : Mailpit vérifie le hash à chaque requête, avec un CPU limité à 200m. C'est la longueur aléatoire du mot de passe qui fait la robustesse.
+- Le chiffré obtenu remplace `encryptedData.auth` dans **les deux** fichiers (`env/dev` et `env/preprod`).
 - Mailpit lit le fichier au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans les namespaces concernés.
+- Après déploiement, vérifier que `https://mailpit-<host>/` et `https://mailpit-<host>/api/v1/messages` répondent **401** sans identifiants.
 - Tant que le secret n'est pas déchiffrable, le pod `mailpit` ne démarre pas, car le volume ne peut pas être monté. Le SMTP des review apps est alors indisponible lui aussi.
 
 ---

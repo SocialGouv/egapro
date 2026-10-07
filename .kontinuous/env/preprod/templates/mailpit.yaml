@@ -39,12 +39,8 @@ spec:
             # transite par le sidecar smtp-demux (voir ci-dessous).
             - name: MP_SMTP_BIND_ADDR
               value: 127.0.0.1:1026
-            # Authentification basic de Mailpit lui-même (#4695) : elle couvre
-            # l'UI, l'API /api/v1 et le websocket quel que soit le chemin
-            # (Ingress, Service 8025, ou HTTP démultiplexé sur 1025). /livez et
-            # /readyz restent ouverts (sonde ci-dessous). Le SMTP n'est pas
-            # concerné. Fichier lu au démarrage : redémarrer le pod après un
-            # re-scellement.
+            # Auth portée par Mailpit et non par l'Ingress : elle protège aussi
+            # le Service 8025 et le HTTP démultiplexé sur 1025 (docs/mails.md).
             - name: MP_UI_AUTH_FILE
               value: /etc/mailpit/ui-auth/htpasswd
           ports:
