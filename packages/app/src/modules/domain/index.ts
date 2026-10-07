@@ -74,6 +74,8 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
+// CSV export field escaping
+export { toCsvField } from "./shared/csv";
 // Display decimals — 2, truncated toward zero, for every percentage and average shown to the user
 export {
 	DISPLAY_DECIMALS,

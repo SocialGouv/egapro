@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { env } from "~/env.js";
-import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
+import { MAX_EXPORT_ROWS, NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import { db } from "~/server/db";
 import { buildRepresentationExportRows } from "../generateRepresentationExport";
 
@@ -96,7 +96,11 @@ describe("buildRepresentationExportRows — public release gate", () => {
 	async function exportedSirens(
 		input?: Parameters<typeof buildRepresentationExportRows>[1],
 	) {
-		const rows = await buildRepresentationExportRows(db, input);
+		const rows = await buildRepresentationExportRows(
+			db,
+			input,
+			MAX_EXPORT_ROWS,
+		);
 		return rows
 			.filter((row) => ALL_SIRENS.includes(row.siren))
 			.map((row) => row.siren);
@@ -123,7 +127,11 @@ describe("buildRepresentationExportRows — public release gate", () => {
 	});
 
 	it("keeps masking a non-diffusible company that is released", async () => {
-		const rows = await buildRepresentationExportRows(db);
+		const rows = await buildRepresentationExportRows(
+			db,
+			undefined,
+			MAX_EXPORT_ROWS,
+		);
 		const hidden = rows.find((row) => row.siren === SIREN_HIDDEN);
 
 		expect(hidden).toMatchObject({

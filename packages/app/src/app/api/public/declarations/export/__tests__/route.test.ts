@@ -1,9 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	MAX_EXPORT_ROWS,
+	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+} from "~/modules/public-api";
+import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
+	getValkey: vi.fn(),
+	queryLimit: vi.fn(),
 }));
+
+vi.mock("~/server/services/valkey", async () =>
+	(await import("~/test/fakeValkey")).mockValkeyModule(mocks.getValkey),
+);
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
@@ -53,10 +66,14 @@ vi.mock("~/server/audit/log", () => ({
 
 function setRows(rows: unknown[]) {
 	const ordered = Object.assign(Promise.resolve(rows), {
-		limit: () => Promise.resolve(rows),
+		limit: (count: number) => {
+			mocks.queryLimit(count);
+			return Promise.resolve(rows);
+		},
 	});
 	const chain = {
 		from: () => chain,
+		$dynamic: () => chain,
 		innerJoin: () => chain,
 		leftJoin: () => chain,
 		where: () => chain,
@@ -129,6 +146,7 @@ describe("GET /api/public/declarations/export", () => {
 	beforeEach(() => {
 		vi.resetModules();
 		vi.clearAllMocks();
+		mocks.getValkey.mockResolvedValue(null);
 	});
 
 	it("returns JSON with data and count by default", async () => {
@@ -213,6 +231,17 @@ describe("GET /api/public/declarations/export", () => {
 		const header = csv.split("\n")[0]?.split(";") ?? [];
 		const workforceIndex = header.indexOf('"workforceEma"');
 		expect(line.split(";")[workforceIndex]).toBe('""');
+	});
+
+	it("publishes a negative gap as a number in CSV, without a formula guard", async () => {
+		setRows([buildRow({ globalAnnualMeanGap: "-0.0242" })]);
+
+		const response = await callGet("?format=csv");
+		const csv = await response.text();
+		const header = csv.split("\n")[0]?.split(";") ?? [];
+		const line = csv.split("\n")[1]?.split(";") ?? [];
+
+		expect(line[header.indexOf('"globalAnnualMeanGap"')]).toBe('"-0.0242"');
 	});
 
 	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {
@@ -370,21 +399,147 @@ describe("GET /api/public/declarations/export", () => {
 
 		const response = await callGet("?format=xlsx");
 
+		expect(mocks.queryLimit).toHaveBeenCalledWith(MAX_XLSX_EXPORT_ROWS + 1);
+		expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
+		expect(mocks.dbSelect).toHaveBeenCalledWith({ siren: "siren" });
 		expect(response.status).toBe(413);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(await response.json()).toEqual(
-			expect.objectContaining({ error: expect.stringContaining("10 000") }),
+			expect.objectContaining({
+				error: expect.stringContaining("10\u202f000 lignes"),
+			}),
 		);
 	});
 
 	it.each([
 		"",
 		"?format=csv",
-	])("keeps complete open-data exports unbounded (%s)", async (search) => {
+	])("lets JSON and CSV exports go past the Excel cap (%s)", async (search) => {
 		setRows(Array.from({ length: 10_001 }, () => buildRow()));
 
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	it.each([
+		"",
+		"?format=csv",
+	])("answers 413 once a JSON or CSV export exceeds its safety cap (%s)", async (search) => {
+		setRows(new Array(MAX_EXPORT_ROWS + 1));
+
+		const response = await callGet(search);
+
+		expect(mocks.queryLimit).toHaveBeenCalledWith(MAX_EXPORT_ROWS + 1);
+		expect(response.status).toBe(413);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(response.headers.get("Cache-Control")).toContain("max-age=3600");
+		expect(await response.json()).toEqual({
+			error: expect.stringContaining("200\u202f000 lignes"),
+		});
+	});
+
+	function gatedRows(rows: unknown[]) {
+		let release: () => void = () => undefined;
+		const gate = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const ordered = {
+			limit: async () => {
+				await gate;
+				return rows;
+			},
+		};
+		const chain = {
+			from: () => chain,
+			$dynamic: () => chain,
+			innerJoin: () => chain,
+			leftJoin: () => chain,
+			where: () => chain,
+			orderBy: () => ordered,
+		};
+		mocks.dbSelect.mockReturnValue(chain);
+		return release;
+	}
+
+	describe("server-side cache of the unfiltered exports", () => {
+		it.each([
+			["?format=csv", "?format=csv&utm_source=x&limit=5"],
+			["", "?sort=name&offset=20"],
+		])("serves %s again for %s without querying the database", async (first, equivalent) => {
+			mocks.getValkey.mockResolvedValue(createFakeValkey());
+			setRows([buildRow()]);
+			const firstResponse = await callGet(first);
+			const firstBody = await firstResponse.text();
+			mocks.dbSelect.mockClear();
+
+			const cachedResponse = await callGet(equivalent);
+
+			expect(mocks.dbSelect).not.toHaveBeenCalled();
+			expect(cachedResponse.status).toBe(200);
+			expect(cachedResponse.headers.get("Content-Type")).toBe(
+				firstResponse.headers.get("Content-Type"),
+			);
+			expect(cachedResponse.headers.get("Content-Disposition")).toBe(
+				firstResponse.headers.get("Content-Disposition"),
+			);
+			expect(cachedResponse.headers.get("Cache-Control")).toContain(
+				"max-age=3600",
+			);
+			expect(await cachedResponse.text()).toBe(firstBody);
+		});
+
+		it("never caches a filtered export", async () => {
+			const valkey = createFakeValkey();
+			mocks.getValkey.mockResolvedValue(valkey);
+			setRows([buildRow()]);
+			await callGet("?format=csv&region=11");
+
+			await callGet("?format=csv&region=11");
+
+			expect(mocks.dbSelect).toHaveBeenCalledTimes(2);
+			expect(valkey.get).not.toHaveBeenCalled();
+			expect(valkey.set).not.toHaveBeenCalled();
+		});
+
+		it("does not cache Excel workbooks", async () => {
+			const valkey = createFakeValkey();
+			mocks.getValkey.mockResolvedValue(valkey);
+			setRows([buildRow()]);
+
+			await callGet("?format=xlsx");
+
+			expect(valkey.set).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("concurrent computations of the uncached exports", () => {
+		it.each([
+			"?format=csv&region=11",
+			"?format=xlsx",
+		])("answers 503 with Retry-After past the per-pod limit (%s)", async (search) => {
+			const release = gatedRows([buildRow()]);
+
+			const running = Array.from(
+				{ length: MAX_CONCURRENT_PUBLIC_EXPORTS },
+				() => callGet(search),
+			);
+			await vi.waitFor(() =>
+				expect(mocks.dbSelect).toHaveBeenCalledTimes(
+					MAX_CONCURRENT_PUBLIC_EXPORTS,
+				),
+			);
+			const rejected = await callGet(search);
+			release();
+			const responses = await Promise.all(running);
+
+			expect(rejected.status).toBe(503);
+			expect(rejected.headers.get("Retry-After")).not.toBeNull();
+			expect(rejected.headers.get("Access-Control-Allow-Origin")).toBe("*");
+			expect(await rejected.json()).toEqual({
+				error: PUBLIC_EXPORT_BUSY_MESSAGE,
+			});
+			expect(responses.every((r) => r.status === 200)).toBe(true);
+		});
 	});
 });

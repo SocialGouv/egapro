@@ -1,15 +1,16 @@
 import "server-only";
 
-import { and, eq, ilike } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
-import { toNullableNumber } from "~/modules/domain";
+import { toCsvField, toNullableNumber } from "~/modules/domain";
 import {
 	maskNonDiffusibleRepresentation,
 	type PublicSearchInput,
 } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import { containsInsensitive } from "~/server/db/likeConditions";
 import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -76,7 +77,7 @@ function representationExportFilters(input: PublicSearchInput) {
 			? eq(representationDeclarations.siren, siren)
 			: and(
 					diffusibleCompanyCondition(),
-					ilike(companies.name, `%${input.q}%`),
+					containsInsensitive(companies.name, input.q),
 				);
 		if (queryFilter) conditions.push(queryFilter);
 	}
@@ -88,7 +89,8 @@ function representationExportFilters(input: PublicSearchInput) {
 
 async function fetchSubmittedRepresentationDeclarations(
 	db: DB,
-	input?: PublicSearchInput,
+	input: PublicSearchInput | undefined,
+	limit: number,
 ) {
 	const submitted = eq(representationDeclarations.status, "submitted");
 	const filters = input ? representationExportFilters(input) : [];
@@ -126,7 +128,8 @@ async function fetchSubmittedRepresentationDeclarations(
 			),
 		)
 		.where(filters.length > 0 ? and(submitted, ...filters) : submitted)
-		.orderBy(representationDeclarations.year, companies.siren);
+		.orderBy(representationDeclarations.year, companies.siren)
+		.limit(limit);
 }
 
 type RepresentationDeclarationRow = Awaited<
@@ -162,9 +165,10 @@ function toExportRow(
 
 export async function buildRepresentationExportRows(
 	db: DB,
-	input?: PublicSearchInput,
+	input: PublicSearchInput | undefined,
+	limit: number,
 ): Promise<RepresentationExportRow[]> {
-	const rows = await fetchSubmittedRepresentationDeclarations(db, input);
+	const rows = await fetchSubmittedRepresentationDeclarations(db, input, limit);
 	return rows.map(toExportRow);
 }
 
@@ -195,19 +199,6 @@ export async function generateRepresentationXlsx(
 
 	const arrayBuffer = await workbook.xlsx.writeBuffer();
 	return Buffer.from(arrayBuffer);
-}
-
-/**
- * CSV field, semicolon-separated as the declarations export already is — the
- * separator French spreadsheets open without an import dialog. A leading `=`,
- * `+`, `-`, `@` or `|` is prefixed with a quote so a spreadsheet reads the cell
- * as text instead of evaluating it as a formula.
- */
-function toCsvField(value: unknown): string {
-	if (value === null || value === undefined) return '""';
-	let field = String(value).replace(/"/g, '""');
-	if (/^[=+\-@|]/.test(field)) field = `'${field}`;
-	return `"${field}"`;
 }
 
 export function generateRepresentationCsv(
