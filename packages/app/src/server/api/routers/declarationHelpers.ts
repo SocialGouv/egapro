@@ -1,4 +1,14 @@
-import { and, desc, eq, getTableColumns, lt } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	getTableColumns,
+	gt,
+	lt,
+	max,
+	ne,
+	or,
+} from "drizzle-orm";
 import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/shared/computeIndicatorPercentages";
 // Submodule import, not the barrel: the barrel re-exports `shared/lock/types`,
 // which derives from this router's own module — going through it would close a
@@ -9,8 +19,10 @@ import {
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
 import {
+	declarationStatusHistory,
 	declarations,
 	employeeCategories,
+	files,
 	gipMdsData,
 	jobCategories,
 } from "~/server/db/schema";
@@ -329,4 +341,49 @@ export async function purgeDraftSlice(
 			draftUpdatedAt: isEmpty ? null : new Date(),
 		})
 		.where(activeDeclarationFilter(siren, year));
+}
+
+/**
+ * The joint evaluation report kept for the current choice. The single file row
+ * outlives the choice it was uploaded for, so a report predating the latest
+ * departure from the joint evaluation (another path chosen, or a second
+ * declaration opening round 2) belongs to an abandoned choice and does not count.
+ */
+export async function findJointEvaluationFile(
+	database: DbOrTx,
+	declarationId: string,
+) {
+	const [departure] = await database
+		.select({ at: max(declarationStatusHistory.createdAt) })
+		.from(declarationStatusHistory)
+		.where(
+			and(
+				eq(declarationStatusHistory.declarationId, declarationId),
+				or(
+					eq(declarationStatusHistory.eventType, "second_declaration_submit"),
+					and(
+						eq(declarationStatusHistory.eventType, "path_choice"),
+						ne(declarationStatusHistory.value, "joint_evaluation"),
+					),
+				),
+			),
+		);
+	const departedAt = departure?.at ?? null;
+
+	const [file] = await database
+		.select({
+			id: files.id,
+			fileName: files.fileName,
+			uploadedAt: files.uploadedAt,
+		})
+		.from(files)
+		.where(
+			and(
+				eq(files.declarationId, declarationId),
+				eq(files.type, "joint_evaluation"),
+				departedAt === null ? undefined : gt(files.uploadedAt, departedAt),
+			),
+		)
+		.limit(1);
+	return file ?? null;
 }
