@@ -49,7 +49,9 @@ describe("POST /api/export/generate", () => {
 
 		expect(response.status).toBe(401);
 		expect(mocks.generateYearlyExport).not.toHaveBeenCalled();
-		expect(errorSpy).toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_EXPORT_API_TOKEN"),
+		);
 	});
 
 	it("rejects an anonymous call", async () => {

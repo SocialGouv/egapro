@@ -49,7 +49,9 @@ describe("GET /api/export/download", () => {
 
 		expect(response.status).toBe(401);
 		expect(mocks.downloadExport).not.toHaveBeenCalled();
-		expect(errorSpy).toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_EXPORT_API_TOKEN"),
+		);
 	});
 
 	it("rejects an anonymous call", async () => {

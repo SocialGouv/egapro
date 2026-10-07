@@ -53,7 +53,9 @@ describe("POST /api/gip-mds/import", () => {
 
 		expect(response.status).toBe(401);
 		expect(mocks.fetchGipCsv).not.toHaveBeenCalled();
-		expect(errorSpy).toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_GIP_MDS_API_TOKEN"),
+		);
 	});
 
 	it("rejects a wrong bearer token", async () => {
