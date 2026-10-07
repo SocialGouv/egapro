@@ -23,7 +23,7 @@ function sha256(value: string): Buffer {
 	return createHash("sha256").update(value).digest();
 }
 
-/** Compares fixed-length digests against every configured token, with no early exit, so timing reveals nothing about a near match. */
+// Fixed-length digests, every token compared, no early exit: timing reveals nothing about a near match.
 function isConfiguredToken(candidate: string): boolean {
 	const candidateDigest = sha256(candidate);
 	let matched = false;

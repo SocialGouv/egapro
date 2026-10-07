@@ -2,10 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 export const REFERENT_LOOKUP_RATE_LIMITED = "rate_limited";
 
-/**
- * Maps a failed `publicReferents.getById` call: a malformed id reads as « introuvable » (null),
- * a quota hit must not, and anything else is a real failure for the error boundary.
- */
+// A malformed id reads as « introuvable », a quota hit must not.
 export function toReferentLookupFailure(
 	error: unknown,
 ): null | typeof REFERENT_LOOKUP_RATE_LIMITED {

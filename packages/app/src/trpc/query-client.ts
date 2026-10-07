@@ -8,7 +8,7 @@ import SuperJSON from "superjson";
 
 const MAX_CLIENT_QUERY_RETRIES = 3;
 
-/** React Query's default (3 client-side, none server-side), minus rate-limited calls: retrying a 429 only extends the quota hit. */
+// React Query's default policy, minus 429s: retrying one only extends the quota hit.
 export function shouldRetryQuery(
 	failureCount: number,
 	error: unknown,
