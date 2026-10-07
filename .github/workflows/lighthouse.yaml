@@ -31,7 +31,7 @@ jobs:
       # that declare no environment URL.
       - name: Load SocialGouv variables
         id: env
-        uses: socialgouv/kontinuous/.github/actions/env@5336cafe16252655513c78dc285b9dbdb6ab15d1 # v1
+        uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
       - name: Run Lighthouse CI
         run: pnpm test:lighthouse
         continue-on-error: true

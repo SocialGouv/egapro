@@ -154,7 +154,7 @@ jobs:
       # `persist-<sha>` image tag computed by the kontinuous dev defaults
       # with the version tag built above.
       - name: 🐳 Deploy on Kubernetes
-        uses: socialgouv/kontinuous/.github/actions/deploy-via-github@5336cafe16252655513c78dc285b9dbdb6ab15d1 # v1
+        uses: socialgouv/kontinuous/.github/actions/deploy-via-github@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
         env:
           KS_GIT_BRANCH: ${{ inputs.target }}-persist
         with:
@@ -168,7 +168,7 @@ jobs:
 
       - name: 🌐 Compute environment URL
         id: env
-        uses: socialgouv/kontinuous/.github/actions/env@5336cafe16252655513c78dc285b9dbdb6ab15d1 # v1
+        uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
         with:
           branch: ${{ inputs.target }}-persist
 

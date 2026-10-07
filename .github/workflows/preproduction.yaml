@@ -64,7 +64,7 @@ jobs:
   kontinuous:
     needs: [build-app]
     name: "Deploy on Kubernetes 🐳"
-    uses: socialgouv/workflows/.github/workflows/use-ks-gh-preproduction-atlas.yaml@3bf75fe8ab7f99520c7ca3963f84fe4880b4239a # v1
+    uses: socialgouv/workflows/.github/workflows/use-ks-gh-preproduction-atlas.yaml@1fd37c88ffc9b2db48746d815d03c73e5148f66b # v1.16.1
     secrets: inherit
 
   e2e:
