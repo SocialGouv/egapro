@@ -18,7 +18,7 @@ import {
 	declarations,
 	files,
 } from "~/server/db/schema";
-import { applyAction, loadRules } from "~/server/rules/engine";
+import { loadRules } from "~/server/rules/engine";
 import {
 	contentTypeKey,
 	getRequiredContentTypes,
@@ -26,10 +26,14 @@ import {
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
+	applyActionOrRefuse,
 	buildHistoryInserts,
 	computeProjectionUpdates,
 	lockDeclaration,
 } from "./statusHistoryHelpers";
+
+const CSE_OPINION_UNAVAILABLE_ERROR =
+	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -296,10 +300,11 @@ export const cseOpinionRouter = createTRPCRouter({
 
 		const rules = loadRules(declaration.rulesVersion);
 		const facts = { currentState: declaration.status };
-		const { nextStatus, events } = applyAction(
+		const { nextStatus, events } = applyActionOrRefuse(
 			facts,
 			"submit_cse_opinion",
 			rules,
+			CSE_OPINION_UNAVAILABLE_ERROR,
 		);
 
 		const projection = computeProjectionUpdates(events, nextStatus);

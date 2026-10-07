@@ -346,6 +346,22 @@ describe("cseOpinionRouter.finalize", () => {
 		);
 	});
 
+	it("refuses with PRECONDITION_FAILED from a state that awaits no CSE opinion, recording nothing", async () => {
+		const ctx = createMockDbForFinalize({
+			declaration: { ...DEFAULT_DECLARATION, status: "draft" },
+		});
+		const caller = await createCaller(ctx.db);
+
+		await expect(caller.finalize()).rejects.toMatchObject({
+			code: "PRECONDITION_FAILED",
+			message:
+				"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.",
+		});
+		expect(ctx.insertValues).not.toHaveBeenCalled();
+		expect(ctx.update).not.toHaveBeenCalled();
+		expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+	});
+
 	it("throws PRECONDITION_FAILED when no opinions exist", async () => {
 		const ctx = createMockDbForFinalize({ opinionCount: 0 });
 		const caller = await createCaller(ctx.db);
