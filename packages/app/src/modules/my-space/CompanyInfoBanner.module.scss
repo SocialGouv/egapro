@@ -2,14 +2,20 @@
 	background-color: var(--background-alt-blue-france);
 }
 
+.titleRow {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
 .title {
-	display: inline;
+	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
 .tooltipWrapper {
 	display: inline-flex;
-	margin-inline-start: 0.5rem;
-	vertical-align: middle;
+	flex-shrink: 0;
 }
 
 .infoRow {

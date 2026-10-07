@@ -23,7 +23,6 @@ type Props = {
 const INFO_SOURCE_TOOLTIP_ID = "company-info-source-tooltip";
 const INFO_SOURCE_LABEL = "Information sur la source des données";
 
-// Below 100 there's no edit entry point into this data, so the tooltip is the only access to its source.
 const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
 	voluntary: "Source : INSEE.",
 	mandatory:
@@ -84,7 +83,7 @@ export function CompanyInfoBanner({ company }: Props) {
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
-					<div className="fr-col">
+					<div className={`fr-col ${styles.titleRow}`}>
 						<h1 className={`fr-h4 fr-mb-0 ${styles.title}`}>{company.name}</h1>
 						{infoSourceText && (
 							<span className={styles.tooltipWrapper}>
