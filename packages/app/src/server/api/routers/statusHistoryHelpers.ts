@@ -10,10 +10,7 @@ import {
 	type SubsequentSubmissions,
 } from "~/modules/domain";
 import type { DB } from "~/server/db";
-import {
-	declarationStatusHistory,
-	type declarations,
-} from "~/server/db/schema";
+import { declarationStatusHistory, declarations } from "~/server/db/schema";
 import {
 	applyAction,
 	type Facts,
@@ -21,6 +18,7 @@ import {
 	type RuleEvent,
 	type Rules,
 } from "~/server/rules/engine";
+import { activeDeclarationFilter } from "./declarationHelpers";
 
 type DbLike = DB | Parameters<DB["transaction"]>[0] extends (
 	tx: infer T,
@@ -117,6 +115,31 @@ export async function lockDeclaration(
 	await tx.execute(
 		sql`SELECT pg_advisory_xact_lock(hashtextextended(${declarationId}, 0))`,
 	);
+}
+
+export async function lockAndReadDeclaration(
+	tx: DeclarationTransaction,
+	declarationId: string,
+	siren: string,
+	year: number,
+): Promise<typeof declarations.$inferSelect> {
+	await lockDeclaration(tx, declarationId);
+	const [declaration] = await tx
+		.select()
+		.from(declarations)
+		.where(
+			and(
+				eq(declarations.id, declarationId),
+				activeDeclarationFilter(siren, year),
+			),
+		)
+		.limit(1);
+	if (!declaration)
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Déclaration introuvable",
+		});
+	return declaration;
 }
 
 export async function assertFirstDeclarationModifiableUnderLock(

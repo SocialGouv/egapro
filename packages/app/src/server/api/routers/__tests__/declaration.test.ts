@@ -250,106 +250,23 @@ function buildCompany(overrides: Partial<CompanyRow> = {}): CompanyRow {
 	};
 }
 
-function createSelectQueue(rows: unknown[][]) {
-	let index = 0;
-	const innerJoin = vi.fn();
-
-	const limit = vi.fn().mockImplementation(() => {
-		const current = rows[index] ?? [];
-		index++;
-		return Promise.resolve(current);
-	});
-
-	const where = vi.fn().mockImplementation(() => {
-		const current = rows[index] ?? [];
-		const promise = Promise.resolve(current);
-		return Object.assign(promise, { limit });
-	});
-
-	innerJoin.mockReturnValue({ where });
-	const from = vi.fn().mockReturnValue({ where, innerJoin });
-
-	const select = vi.fn().mockImplementation(() => {
-		return { from };
-	});
-
-	const dropFirst = (): unknown[] => {
-		const first = rows[index] ?? [];
-		index++;
-		return first;
-	};
-
-	return { select, dropFirst, getIndex: () => index };
-}
-
-function createMutationTxMock(
-	txSelectRows: unknown[] = [],
-	txJoinRows: unknown[] = [],
-) {
-	const update = vi.fn();
-	const set = vi.fn();
-	const updateWhere = vi.fn().mockResolvedValue(undefined);
-	set.mockReturnValue({ where: updateWhere });
-	update.mockReturnValue({ set });
-
-	const insertReturning = vi.fn().mockResolvedValue([]);
-	const insertValues = vi.fn().mockReturnValue({ returning: insertReturning });
-	const insert = vi.fn().mockReturnValue({ values: insertValues });
-
-	const transaction = vi
-		.fn()
-		.mockImplementation(async (fn: (tx: unknown) => unknown) => {
-			const txSelect = vi.fn().mockReturnValue({
-				from: vi.fn().mockReturnValue({
-					where: vi.fn().mockImplementation(() => {
-						const promise = Promise.resolve(txSelectRows);
-						return Object.assign(promise, {
-							limit: vi.fn().mockResolvedValue(txSelectRows),
-						});
-					}),
-					innerJoin: vi.fn().mockReturnValue({
-						where: vi.fn().mockResolvedValue(txJoinRows),
-					}),
-				}),
-			});
-			const txInsert = vi.fn().mockReturnValue({ values: insertValues });
-			return fn({
-				execute: vi.fn().mockResolvedValue(undefined),
-				select: withTxGuardHistory(txSelect),
-				insert: txInsert,
-				update,
-				delete: vi.fn(),
-			});
-		});
-
-	return { update, set, insert, insertValues, transaction };
-}
-
 function createSubmitMockDb(
 	declaration: DeclarationStateRow,
 	company: CompanyRow,
 	employeeCategories: Array<Record<string, unknown>> = [],
 	gipWorkforceEma: string | null = null,
 ) {
-	const joinRows = employeeCategories.map((ec) => ({ employee_category: ec }));
 	const gipRows =
 		gipWorkforceEma === null ? [] : [{ workforceEma: gipWorkforceEma }];
-	const selectQueue = createSelectQueue([[declaration], [company], gipRows]);
-
-	const m = createMutationTxMock([declaration], joinRows);
-
-	return {
-		db: {
-			select: selectQueue.select,
-			update: m.update,
-			insert: m.insert,
-			transaction: m.transaction,
-		} as unknown,
-		set: m.set,
-		update: m.update,
-		insert: m.insert,
-		insertValues: m.insertValues,
-	};
+	return createUnderLockDb([
+		[declaration],
+		[company],
+		gipRows,
+		employeeCategories.map((ec) => ({ employee_category: ec })),
+		[declaration],
+		gipRows,
+		[declaration],
+	]);
 }
 
 // The compliance mutations read the démarche only once its declaration lock is
@@ -790,7 +707,13 @@ describe("declarationRouter", () => {
 			const company = buildCompany();
 			const ctx = createSubmitMockDb(declaration, company, []);
 			const caller = await createLockedCaller(ctx.db);
-			await expect(caller.submit()).rejects.toThrow(/No matching transition/);
+			await expect(caller.submit()).rejects.toMatchObject({
+				code: "PRECONDITION_FAILED",
+				message:
+					"La déclaration ne peut pas être transmise à cette étape de la démarche.",
+			});
+			expect(ctx.insertValues).not.toHaveBeenCalled();
+			expect(ctx.set).not.toHaveBeenCalled();
 		});
 
 		it("persists computed percentage columns on submit", async () => {
@@ -813,26 +736,20 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws NOT_FOUND when declaration is missing", async () => {
-			const selectQueue = createSelectQueue([[]]);
-			const update = vi.fn();
-			const mockDb = {
-				select: selectQueue.select,
-				update,
-			} as unknown;
-			const caller = await createLockedCaller(mockDb);
+			const ctx = createUnderLockDb([[]]);
+			const caller = await createLockedCaller(ctx.db);
 
-			await expect(caller.submit()).rejects.toThrow();
+			await expect(caller.submit()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
 		});
 
 		it("throws NOT_FOUND when company is missing", async () => {
-			const declaration = buildDeclaration({ status: "draft" });
-			const selectQueue = createSelectQueue([[declaration], []]);
-			const update = vi.fn();
-			const mockDb = {
-				select: selectQueue.select,
-				update,
-			} as unknown;
-			const caller = await createLockedCaller(mockDb);
+			const ctx = createUnderLockDb([
+				[buildDeclaration({ status: "draft" })],
+				[],
+			]);
+			const caller = await createLockedCaller(ctx.db);
 
 			await expect(caller.submit()).rejects.toThrow("Entreprise introuvable");
 		});
@@ -1860,7 +1777,21 @@ describe("declarationRouter", () => {
 		});
 	});
 
-	describe("compliance mutations read the démarche under its declaration lock (#4661)", () => {
+	describe("démarche mutations read their state under the declaration lock (#4661)", () => {
+		it("submit takes the lock before its first read", async () => {
+			const ctx = createSubmitMockDb(
+				buildDeclaration({ status: "draft" }),
+				buildCompany(),
+				[GAP_FREE_CATEGORY],
+			);
+			const caller = await createLockedCaller(ctx.db);
+
+			await caller.submit();
+
+			expect(ctx.steps[0]).toBe("lock");
+			expect(ctx.steps.filter((step) => step === "lock")).toHaveLength(1);
+		});
+
 		it("saveCompliancePath takes the lock before its first read", async () => {
 			const ctx = createSimpleSelectDb(
 				buildDeclaration({ status: "awaiting_compliance_path_choice" }),

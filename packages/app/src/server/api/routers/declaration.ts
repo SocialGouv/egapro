@@ -38,7 +38,6 @@ import {
 	assertNotImpersonating,
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
-import type { DB } from "~/server/db";
 import {
 	companies,
 	declarationStatusHistory,
@@ -49,7 +48,7 @@ import {
 	userCompanies,
 	users,
 } from "~/server/db/schema";
-import { applyAction, loadRules } from "~/server/rules/engine";
+import { loadRules } from "~/server/rules/engine";
 import {
 	activeDeclarationFilter,
 	applyPercentagesAfterUpdate,
@@ -63,6 +62,7 @@ import {
 } from "./declarationHelpers";
 import {
 	applyActionOrRefuse,
+	assertFirstDeclarationModifiable,
 	assertFirstDeclarationModifiableUnderLock,
 	buildHistoryInserts,
 	buildStepChangeInsert,
@@ -71,8 +71,11 @@ import {
 	getCurrentRound,
 	hasLockingEventForRound,
 	loadSubsequentSubmissions,
-	lockDeclaration,
+	lockAndReadDeclaration,
 } from "./statusHistoryHelpers";
+
+const SUBMIT_UNAVAILABLE_ERROR =
+	"La déclaration ne peut pas être transmise à cette étape de la démarche.";
 
 const INDICATOR_G_MISSING_ERROR =
 	"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.";
@@ -115,7 +118,7 @@ type DbLike = {
 };
 
 async function findGipWorkforce(
-	database: DB,
+	database: DeclarationTransaction,
 	siren: string,
 	year: number,
 ): Promise<number | null> {
@@ -197,27 +200,6 @@ function buildJointEvaluationFacts(
 		currentState: declaration.status,
 		cseRequired: declaration.cseRequired,
 	};
-}
-
-async function lockAndReadDeclaration(
-	tx: DeclarationTransaction,
-	declarationId: string,
-	siren: string,
-	year: number,
-): Promise<DeclarationRow> {
-	await lockDeclaration(tx, declarationId);
-	const [declaration] = await tx
-		.select()
-		.from(declarations)
-		.where(
-			and(
-				eq(declarations.id, declarationId),
-				activeDeclarationFilter(siren, year),
-			),
-		)
-		.limit(1);
-	if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
-	return declaration;
 }
 
 export const declarationRouter = createTRPCRouter({
@@ -724,41 +706,28 @@ export const declarationRouter = createTRPCRouter({
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
-		const [declaration] = await ctx.db
-			.select()
-			.from(declarations)
-			.where(activeDeclarationFilter(siren, year))
-			.limit(1);
-
-		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
-
-		const [company] = await ctx.db
-			.select()
-			.from(companies)
-			.where(eq(companies.siren, siren))
-			.limit(1);
-
-		if (!company)
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Entreprise introuvable",
-			});
-
-		const gipWorkforce = await findGipWorkforce(ctx.db, siren, year);
-
-		// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
-		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
-		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
-		// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
-		// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
-		// elle-même change.
-		const cseRequiredSnapshot = isCseOpinionRequired({
-			workforce: getObligationWorkforce(gipWorkforce),
-			hasCse: company.hasCse,
-		});
-
 		await ctx.db.transaction(async (tx) => {
-			await assertFirstDeclarationModifiableUnderLock(tx, declaration.id);
+			const declaration = await lockAndReadDeclaration(
+				tx,
+				ctx.declarationId,
+				siren,
+				year,
+			);
+			await assertFirstDeclarationModifiable(tx, declaration.id);
+
+			const [company] = await tx
+				.select()
+				.from(companies)
+				.where(eq(companies.siren, siren))
+				.limit(1);
+
+			if (!company)
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Entreprise introuvable",
+				});
+
+			const gipWorkforce = await findGipWorkforce(tx, siren, year);
 
 			const initialCategories = await loadEmployeeCategoriesForDeclaration(
 				tx,
@@ -769,7 +738,7 @@ export const declarationRouter = createTRPCRouter({
 			const hasGap =
 				hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
 
-			const { nextStatus, events } = applyAction(
+			const { nextStatus, events } = applyActionOrRefuse(
 				buildSubmitFacts(
 					declaration,
 					company,
@@ -779,6 +748,7 @@ export const declarationRouter = createTRPCRouter({
 				),
 				"submit",
 				loadRules(declaration.rulesVersion),
+				SUBMIT_UNAVAILABLE_ERROR,
 			);
 
 			if (
@@ -791,7 +761,17 @@ export const declarationRouter = createTRPCRouter({
 				});
 			}
 
-			const projection = computeProjectionUpdates(events, nextStatus);
+			// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
+			// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+			// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
+			// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
+			// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
+			// elle-même change.
+			const cseRequiredSnapshot = isCseOpinionRequired({
+				workforce: getObligationWorkforce(gipWorkforce),
+				hasCse: company.hasCse,
+			});
+
 			const historyInserts = buildHistoryInserts(
 				declaration.id,
 				events,
@@ -803,7 +783,7 @@ export const declarationRouter = createTRPCRouter({
 			await tx
 				.update(declarations)
 				.set({
-					...projection,
+					...computeProjectionUpdates(events, nextStatus),
 					cseRequired: cseRequiredSnapshot,
 					currentStep: 6,
 					updatedAt: new Date(),

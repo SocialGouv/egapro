@@ -100,7 +100,14 @@ function buildTx() {
 					limit: async () =>
 						activeRows()
 							.slice(0, 1)
-							.map((row) => ({ ...row, ...nullIndicators() })),
+							.map((row) => ({
+								...row,
+								...nullIndicators(),
+								rulesVersion: "2027.1",
+								cseRequired: false,
+								firstDeclarationPathChoice: null,
+								secondDeclarationPathChoice: null,
+							})),
 				}),
 				innerJoin: () => ({
 					where: async () => [{ employee_category: GAP_FREE_CATEGORY }],

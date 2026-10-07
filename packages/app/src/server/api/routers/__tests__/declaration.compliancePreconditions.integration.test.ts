@@ -92,7 +92,10 @@ async function uploadJointEvaluationReport(
 	`;
 }
 
-async function insertCorrectionCategory(declarationId: string) {
+async function insertCategory(
+	declarationId: string,
+	declarationType: "initial" | "correction",
+) {
 	const jobId = crypto.randomUUID();
 	await sql`
 		INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
@@ -101,7 +104,7 @@ async function insertCorrectionCategory(declarationId: string) {
 	await sql`
 		INSERT INTO app_employee_category
 			(id, job_category_id, declaration_type, women_count, men_count)
-		VALUES (${crypto.randomUUID()}, ${jobId}, 'correction', 5, 5)
+		VALUES (${crypto.randomUUID()}, ${jobId}, ${declarationType}, 5, 5)
 	`;
 }
 
@@ -175,6 +178,34 @@ beforeEach(async () => {
 });
 
 describe("compliance submissions re-read the démarche under the declaration lock (#4661)", () => {
+	it("refuses a declaration already transmitted by a concurrent request", async () => {
+		const id = await insertDeclaration({ status: "draft" });
+		await insertCategory(id, "initial");
+
+		const { blocked, outcome } = await runWhileDeclarationLockHeld({
+			observer: sql,
+			holder,
+			declarationId: id,
+			underLock: async (tx) => {
+				await recordEvent(id, { eventType: "submit", minutesAgo: 0 }, tx);
+				await recordEvent(
+					id,
+					{ eventType: "demarche_complete", minutesAgo: 0 },
+					tx,
+				);
+				await tx`UPDATE app_declaration SET status = 'demarche_completed' WHERE id = ${id}`;
+			},
+			request: () => createCaller().declaration.submit(),
+		});
+
+		expect(blocked).toBe(true);
+		expect(outcome).toMatchObject({
+			status: "rejected",
+			reason: { code: "PRECONDITION_FAILED" },
+		});
+		expect(await countEvents(id, "submit")).toBe(1);
+	});
+
 	it("refuses a path change once a joint evaluation committed while the request waited", async () => {
 		const id = await insertDeclaration({
 			status: "joint_evaluation_chosen",
@@ -244,7 +275,7 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			cseRequired: false,
 			firstDeclarationPathChoice: "corrective_action",
 		});
-		await insertCorrectionCategory(id);
+		await insertCategory(id, "correction");
 
 		const { blocked, outcome } = await runWhileDeclarationLockHeld({
 			observer: sql,
