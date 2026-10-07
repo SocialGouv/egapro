@@ -1,13 +1,21 @@
 import type { Session } from "next-auth";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ADMIN_MFA_WINDOW_SECONDS } from "~/modules/domain";
+import type { DbClient } from "~/server/services/declarationLockService";
 import {
 	assertNotImpersonating,
+	canAccessCompany,
 	getEffectiveSiren,
 	isImpersonating,
 	isImpersonatingSiren,
+	resolveAuthorizedSiren,
 } from "../companyAccess";
+import { isUserLinkedToSiren } from "../companyLink";
+
+const mockIsUserLinkedToSiren = vi.mocked(isUserLinkedToSiren);
+
+const DB = {} as DbClient;
 
 const NOW = new Date("2026-03-10T12:00:00Z");
 const NOW_SECONDS = Math.floor(NOW.getTime() / 1000);
@@ -302,5 +310,114 @@ describe("getEffectiveSiren", () => {
 				NOW,
 			),
 		).toBeNull();
+	});
+});
+
+describe("canAccessCompany", () => {
+	beforeEach(() => {
+		mockIsUserLinkedToSiren.mockReset();
+		mockIsUserLinkedToSiren.mockResolvedValue(true);
+	});
+
+	it("grants a declarant linked to the company in the database", async () => {
+		await expect(
+			canAccessCompany(DB, makeSession(), "532847196", NOW),
+		).resolves.toBe(true);
+		expect(mockIsUserLinkedToSiren).toHaveBeenCalledWith(
+			DB,
+			"user-1",
+			"532847196",
+		);
+	});
+
+	it("refuses a declarant whose link is gone, whatever the JWT still says", async () => {
+		mockIsUserLinkedToSiren.mockResolvedValue(false);
+
+		await expect(
+			canAccessCompany(
+				DB,
+				makeSession({ siret: "53284719600015" }),
+				"532847196",
+				NOW,
+			),
+		).resolves.toBe(false);
+	});
+
+	it("refuses without a session, and never queries", async () => {
+		await expect(canAccessCompany(DB, null, "532847196", NOW)).resolves.toBe(
+			false,
+		);
+		expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+	});
+
+	it("grants the impersonated SIREN without a link, and never queries", async () => {
+		await expect(
+			canAccessCompany(DB, impersonatingAdmin(), DEMO.siren, NOW),
+		).resolves.toBe(true);
+		expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+	});
+
+	it("checks the link for any other SIREN an impersonating admin asks for", async () => {
+		mockIsUserLinkedToSiren.mockResolvedValue(false);
+
+		await expect(
+			canAccessCompany(DB, impersonatingAdmin(), "987654321", NOW),
+		).resolves.toBe(false);
+	});
+
+	it("checks the link once the admin's MFA window has lapsed", async () => {
+		mockIsUserLinkedToSiren.mockResolvedValue(false);
+
+		await expect(
+			canAccessCompany(
+				DB,
+				impersonatingAdmin({ adminMfaAt: EXPIRED_MFA }),
+				DEMO.siren,
+				NOW,
+			),
+		).resolves.toBe(false);
+	});
+
+	it("propagates a database failure instead of granting access", async () => {
+		mockIsUserLinkedToSiren.mockRejectedValue(new Error("connection lost"));
+
+		await expect(
+			canAccessCompany(DB, makeSession(), "532847196", NOW),
+		).rejects.toThrow("connection lost");
+	});
+});
+
+describe("resolveAuthorizedSiren", () => {
+	beforeEach(() => {
+		mockIsUserLinkedToSiren.mockReset();
+		mockIsUserLinkedToSiren.mockResolvedValue(true);
+	});
+
+	it("resolves the session SIREN while the link exists", async () => {
+		await expect(
+			resolveAuthorizedSiren(DB, makeSession({ siret: "53284719600015" }), NOW),
+		).resolves.toBe("532847196");
+	});
+
+	it("resolves nothing once the link has been revoked", async () => {
+		mockIsUserLinkedToSiren.mockResolvedValue(false);
+
+		await expect(
+			resolveAuthorizedSiren(DB, makeSession({ siret: "53284719600015" }), NOW),
+		).resolves.toBeNull();
+	});
+
+	it("resolves nothing for a session without a SIRET, and never queries", async () => {
+		await expect(
+			resolveAuthorizedSiren(DB, makeSession({ siret: null }), NOW),
+		).resolves.toBeNull();
+		expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+	});
+
+	it("resolves the impersonated SIREN for an admin inside the window", async () => {
+		await expect(
+			resolveAuthorizedSiren(DB, impersonatingAdmin(), NOW),
+		).resolves.toBe(DEMO.siren);
+		expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
 	});
 });

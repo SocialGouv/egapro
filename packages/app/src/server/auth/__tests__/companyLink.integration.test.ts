@@ -16,10 +16,13 @@ import { declarationLockRouter } from "~/server/api/routers/declarationLock";
 import { syncUserCompanyLink } from "~/server/auth/companyLink";
 import { authConfig } from "~/server/auth/config";
 import { db } from "~/server/db";
+import { fetchCompanyBySiren } from "~/server/services/weez";
 
 vi.mock("~/server/services/weez", () => ({
-	fetchCompanyBySiren: vi.fn().mockResolvedValue(null),
+	fetchCompanyBySiren: vi.fn(),
 }));
+
+const AUDIT = { userEmail: "", ipAddress: null, userAgent: null };
 
 describe("company link re-synced on every ProConnect sign-in (real Postgres)", () => {
 	let sql!: ReturnType<typeof postgres>;
@@ -63,13 +66,19 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 	}
 
 	async function revocationLogs() {
-		const rows = await sql<{ siren: string | null; category: string }[]>`
-			SELECT a.siren, a.category FROM audit.action_log a
+		const rows = await sql<
+			{ siren: string | null; category: string; metadata: unknown }[]
+		>`
+			SELECT a.siren, a.category, a.metadata FROM audit.action_log a
 			JOIN app_user u ON u.id = a.user_id
 			WHERE u.email = ${EMAIL} AND a.action = 'auth.company_link_revoked'
 			ORDER BY a.siren
 		`;
-		return rows.map((row) => ({ siren: row.siren, category: row.category }));
+		return rows.map((row) => ({
+			siren: row.siren,
+			category: row.category,
+			metadata: row.metadata,
+		}));
 	}
 
 	async function cleanup() {
@@ -92,10 +101,20 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 	});
 
 	beforeEach(async () => {
+		vi.mocked(fetchCompanyBySiren).mockReset();
+		vi.mocked(fetchCompanyBySiren).mockResolvedValue(null);
 		await cleanup();
 	});
 
 	it("links the user to the company of the ProConnect SIRET", async () => {
+		await signIn(siretOf(CURRENT_SIREN));
+
+		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
+	});
+
+	it("still links the user when the company registry throws", async () => {
+		vi.mocked(fetchCompanyBySiren).mockRejectedValue(new Error("Weez down"));
+
 		await signIn(siretOf(CURRENT_SIREN));
 
 		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
@@ -115,7 +134,11 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 
 		expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
 		expect(await revocationLogs()).toEqual([
-			{ siren: FORMER_SIREN, category: "auth" },
+			{
+				siren: FORMER_SIREN,
+				category: "auth",
+				metadata: { reason: "siret_changed" },
+			},
 		]);
 	});
 
@@ -144,8 +167,16 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 
 		expect(await linkedSirens()).toEqual([]);
 		expect(await revocationLogs()).toEqual([
-			{ siren: FORMER_SIREN, category: "auth" },
-			{ siren: CURRENT_SIREN, category: "auth" },
+			{
+				siren: FORMER_SIREN,
+				category: "auth",
+				metadata: { reason: "siret_missing" },
+			},
+			{
+				siren: CURRENT_SIREN,
+				category: "auth",
+				metadata: { reason: "siret_missing" },
+			},
 		]);
 	});
 
@@ -178,7 +209,7 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 		await lockHeld;
 
 		let settled = false;
-		const sync = syncUserCompanyLink(id, undefined).then((revoked) => {
+		const sync = syncUserCompanyLink(id, undefined, AUDIT).then((revoked) => {
 			settled = true;
 			return revoked;
 		});
@@ -229,6 +260,24 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			return rows.map((row) => row.siren);
 		}
 
+		async function lockReleaseLogs() {
+			const rows = await sql<
+				{
+					siren: string | null;
+					resource_type: string | null;
+					resource_id: string | null;
+					metadata: unknown;
+				}[]
+			>`
+				SELECT a.siren, a.resource_type, a.resource_id, a.metadata
+				FROM audit.action_log a
+				JOIN app_user u ON u.id = a.user_id
+				WHERE u.email = ${EMAIL} AND a.action = 'declaration.lock_released'
+				ORDER BY a.siren
+			`;
+			return rows;
+		}
+
 		it("releases the locks the user held on the company they lost, and only those", async () => {
 			await signIn(siretOf(FORMER_SIREN));
 			const id = await userId();
@@ -238,6 +287,24 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			await signIn(siretOf(CURRENT_SIREN));
 
 			expect(await lockedSirens()).toEqual([CURRENT_SIREN]);
+		});
+
+		it("journals each lock released by force, against its declaration", async () => {
+			await signIn(siretOf(FORMER_SIREN));
+			const id = await userId();
+			await declarationLockedBy(id, FORMER_SIREN);
+			await declarationLockedBy(id, CURRENT_SIREN);
+
+			await signIn(siretOf(CURRENT_SIREN));
+
+			expect(await lockReleaseLogs()).toEqual([
+				{
+					siren: FORMER_SIREN,
+					resource_type: "declaration",
+					resource_id: `company-link-declaration-${FORMER_SIREN}`,
+					metadata: { reason: "company_link_revoked" },
+				},
+			]);
 		});
 
 		it("releases every lock of the user when the SIRET is missing", async () => {
@@ -258,20 +325,14 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			await signIn(siretOf(FORMER_SIREN));
 
 			expect(await lockedSirens()).toEqual([FORMER_SIREN]);
+			expect(await lockReleaseLogs()).toEqual([]);
 		});
 	});
 
 	describe("a session minted before a sign-in under another SIRET on another device", () => {
-		const RECHECK_SECONDS = 5 * 60;
-
 		async function companyCallerFor(token: JWT) {
-			const aged = {
-				...token,
-				companyLinkCheckedAt:
-					(token.companyLinkCheckedAt ?? 0) - RECHECK_SECONDS - 1,
-			};
 			const refreshed = await authConfig.callbacks.jwt({
-				token: aged,
+				token,
 			} as unknown as Parameters<typeof authConfig.callbacks.jwt>[0]);
 			const session = authConfig.callbacks.session({
 				session: { user: { email: EMAIL }, expires: "" },
@@ -284,7 +345,7 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			} as never);
 		}
 
-		it("loses access to the former company once the re-check window has passed", async () => {
+		it("loses access to the former company on its very next request", async () => {
 			const formerDevice = await signIn(siretOf(FORMER_SIREN));
 			await signIn(siretOf(CURRENT_SIREN));
 
@@ -292,7 +353,7 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 
 			await expect(
 				caller.getActiveLockForCurrentDeclaration(),
-			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			).rejects.toMatchObject({ code: "FORBIDDEN" });
 		});
 
 		it("keeps access on the device that signed in last", async () => {
@@ -300,6 +361,57 @@ describe("company link re-synced on every ProConnect sign-in (real Postgres)", (
 			const currentDevice = await signIn(siretOf(CURRENT_SIREN));
 
 			const caller = await companyCallerFor(currentDevice);
+
+			await expect(
+				caller.getActiveLockForCurrentDeclaration(),
+			).resolves.toEqual({ lockedByOther: false, holder: null });
+		});
+	});
+
+	describe("admin impersonation, which needs no company link", () => {
+		const FRESH_MFA_SECONDS = () => Math.floor(Date.now() / 1000) - 60;
+
+		async function adminCaller(adminMfaAt: number | null) {
+			await signIn(siretOf(CURRENT_SIREN));
+			return declarationLockRouter.createCaller({
+				db,
+				session: {
+					user: {
+						id: await userId(),
+						email: EMAIL,
+						siret: siretOf(CURRENT_SIREN),
+						isAdmin: true,
+						adminMfaAt,
+						impersonation: { siren: FORMER_SIREN, name: "Société Démo" },
+					},
+					expires: "",
+				},
+				headers: new Headers(),
+			} as never);
+		}
+
+		it("reads the impersonated company the admin is not linked to", async () => {
+			const caller = await adminCaller(FRESH_MFA_SECONDS());
+
+			expect(await linkedSirens()).toEqual([CURRENT_SIREN]);
+			await expect(
+				caller.getActiveLockForCurrentDeclaration(),
+			).resolves.toEqual({ lockedByOther: false, holder: null });
+		});
+
+		it("still refuses every write while impersonating", async () => {
+			const caller = await adminCaller(FRESH_MFA_SECONDS());
+
+			await expect(
+				caller.releaseLock({ declarationId: "any-declaration" }),
+			).rejects.toMatchObject({
+				code: "FORBIDDEN",
+				message: expect.stringContaining("mimoquage"),
+			});
+		});
+
+		it("falls back to the admin's own linked company once the MFA window has lapsed", async () => {
+			const caller = await adminCaller(null);
 
 			await expect(
 				caller.getActiveLockForCurrentDeclaration(),

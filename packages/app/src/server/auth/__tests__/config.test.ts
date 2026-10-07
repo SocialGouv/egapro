@@ -7,7 +7,6 @@ const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 const mockTransaction = vi.fn();
 const mockSyncUserCompanyLink = vi.fn();
-const mockIsUserLinkedToSiren = vi.fn();
 const mockLogAction = vi.fn();
 
 vi.mock("~/server/db", () => ({
@@ -40,7 +39,6 @@ vi.mock("~/server/db/schema", () => ({
 }));
 vi.mock("../companyLink", () => ({
 	syncUserCompanyLink: (...args: unknown[]) => mockSyncUserCompanyLink(...args),
-	isUserLinkedToSiren: (...args: unknown[]) => mockIsUserLinkedToSiren(...args),
 }));
 vi.mock("~/server/audit/log", () => ({
 	logAction: (...args: unknown[]) => mockLogAction(...args),
@@ -71,8 +69,6 @@ describe("auth config", () => {
 		mockTransaction.mockReset();
 		mockSyncUserCompanyLink.mockReset();
 		mockSyncUserCompanyLink.mockResolvedValue([]);
-		mockIsUserLinkedToSiren.mockReset();
-		mockIsUserLinkedToSiren.mockResolvedValue(true);
 		mockLogAction.mockReset();
 	});
 
@@ -317,18 +313,13 @@ describe("auth config", () => {
 			siret: "12345678901234",
 		} as User & { siret: string };
 
-		function revocationLogs() {
-			return mockLogAction.mock.calls
-				.map(([input]) => input as Record<string, unknown>)
-				.filter((input) => input.action === "auth.company_link_revoked");
-		}
-
 		it("re-syncs the link from the ProConnect SIRET on every sign-in", async () => {
 			await signIn({}, siretUser);
 
 			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
 				"uuid-123",
 				"12345678901234",
+				{ userEmail: DECLARANT_EMAIL, ipAddress: null, userAgent: null },
 			);
 		});
 
@@ -338,142 +329,28 @@ describe("auth config", () => {
 			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
 				"uuid-123",
 				undefined,
+				expect.objectContaining({ userEmail: DECLARANT_EMAIL }),
 			);
 		});
 
-		it("journals one revocation per company the user lost", async () => {
-			mockSyncUserCompanyLink.mockResolvedValue(["111111111", "222222222"]);
+		it("refuses the sign-in when the link cannot be re-synced", async () => {
+			mockSyncUserCompanyLink.mockRejectedValue(new Error("connection lost"));
 
-			await signIn({}, siretUser);
-
-			expect(revocationLogs()).toEqual([
-				expect.objectContaining({
-					status: "success",
-					userId: "uuid-123",
-					userEmail: DECLARANT_EMAIL,
-					siren: "111111111",
-				}),
-				expect.objectContaining({
-					status: "success",
-					userId: "uuid-123",
-					userEmail: DECLARANT_EMAIL,
-					siren: "222222222",
-				}),
-			]);
+			await expect(signIn({}, siretUser)).rejects.toThrow("connection lost");
 		});
 
-		it("journals nothing when no link was revoked", async () => {
-			await signIn({}, siretUser);
-
-			expect(revocationLogs()).toHaveLength(0);
-		});
-	});
-
-	describe("jwt callback — company link re-checked on an existing session", () => {
-		const SIRET = "12345678901234";
-		const SIREN = "123456789";
-		const RECHECK_SECONDS = 5 * 60;
-
-		function nowSeconds() {
-			return Math.floor(Date.now() / 1000);
-		}
-
-		function existingSession(fields: Partial<JWT> = {}): JWT {
-			return {
+		it("leaves an existing session alone: access is checked in the database on each request", async () => {
+			const token = {
 				sub: "sub-123",
 				id: "uuid-123",
-				siret: SIRET,
+				siret: "12345678901234",
 				isAdmin: false,
-				companyLinkCheckedAt: nowSeconds() - RECHECK_SECONDS - 1,
-				...fields,
 			} as JWT;
-		}
 
-		function readSession(token: JWT) {
-			return callJwt({ token, account: null });
-		}
+			const result = await callJwt({ token, account: null });
 
-		it.each([
-			["older than the window", nowSeconds() - RECHECK_SECONDS - 1],
-			["absent", undefined],
-		])("keeps the SIRET while the link still exists, when the last check is %s", async (_case, checkedAt) => {
-			const before = nowSeconds();
-
-			const result = await readSession(
-				existingSession({ companyLinkCheckedAt: checkedAt }),
-			);
-
-			expect(mockIsUserLinkedToSiren).toHaveBeenCalledWith("uuid-123", SIREN);
-			expect(result.siret).toBe(SIRET);
-			expect(result.companyLinkCheckedAt).toBeGreaterThanOrEqual(before);
-		});
-
-		it("drops the SIRET once the user is no longer linked to its company", async () => {
-			mockIsUserLinkedToSiren.mockResolvedValue(false);
-
-			const result = await readSession(existingSession());
-
-			expect(result.siret).toBeNull();
-		});
-
-		it("does not query the database again inside the window", async () => {
-			const checkedAt = nowSeconds() - RECHECK_SECONDS + 30;
-
-			const result = await readSession(
-				existingSession({ companyLinkCheckedAt: checkedAt }),
-			);
-
-			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
-			expect(result.siret).toBe(SIRET);
-			expect(result.companyLinkCheckedAt).toBe(checkedAt);
-		});
-
-		it("does not check while an admin's impersonation is in effect", async () => {
-			const result = await readSession(
-				existingSession({
-					isAdmin: true,
-					adminMfaAt: nowSeconds(),
-					impersonation: { siren: "987654321", name: "Société Démo" },
-				}),
-			);
-
-			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
-			expect(result.siret).toBe(SIRET);
-		});
-
-		it("has nothing to check when the session carries no SIRET", async () => {
-			await readSession(existingSession({ siret: null }));
-
-			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
-		});
-
-		it("keeps the session and retries on the next request when the database fails", async () => {
-			const checkedAt = nowSeconds() - RECHECK_SECONDS - 1;
-			mockIsUserLinkedToSiren.mockRejectedValue(new Error("connection lost"));
-			const consoleError = vi
-				.spyOn(console, "error")
-				.mockImplementation(() => undefined);
-
-			const result = await readSession(
-				existingSession({ companyLinkCheckedAt: checkedAt }),
-			);
-
-			expect(result.siret).toBe(SIRET);
-			expect(result.companyLinkCheckedAt).toBe(checkedAt);
-			expect(consoleError).toHaveBeenCalled();
-			consoleError.mockRestore();
-		});
-
-		it("stamps the check at sign-in, since the link has just been synced", async () => {
-			const before = nowSeconds();
-
-			const result = await signIn({}, {
-				...proconnectUser,
-				siret: SIRET,
-			} as User);
-
-			expect(result.companyLinkCheckedAt).toBeGreaterThanOrEqual(before);
-			expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
+			expect(mockSyncUserCompanyLink).not.toHaveBeenCalled();
+			expect(result.siret).toBe("12345678901234");
 		});
 	});
 

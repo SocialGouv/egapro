@@ -1,5 +1,5 @@
 import { AUDIT_ACTIONS, type AuditActionKey } from "~/modules/audit";
-import { isAdminMfaFresh, parseSiren } from "~/modules/domain";
+import { isAdminMfaFresh } from "~/modules/domain";
 import { fetchFileById, fetchFileBySiren } from "~/modules/export";
 import { logAction } from "~/server/audit/log";
 import {
@@ -192,7 +192,7 @@ async function handleSessionDownload(
 	if (session.user.isAdmin) {
 		return isAdminMfaFresh(session.user.adminMfaAt, new Date())
 			? handleAdminDownload(fileId, session, requestContext)
-			: handleAdminDownloadDemoted(fileId, session, requestContext);
+			: handleAdminDownloadDemoted(fileId, session, siren, requestContext);
 	}
 
 	if (!siren) {
@@ -247,17 +247,10 @@ const ADMIN_MFA_EXPIRED_ERROR =
 
 async function handleAdminDownloadDemoted(
 	fileId: string,
-	session: {
-		user: {
-			id?: string | null;
-			email?: string | null;
-			siret?: string | null;
-		};
-	},
+	session: { user: { id?: string | null; email?: string | null } },
+	siren: string | null,
 	requestContext: RequestContext,
 ): Promise<Response> {
-	const siren = parseSiren(session.user.siret);
-
 	return serveFile({
 		fileId,
 		requestContext,

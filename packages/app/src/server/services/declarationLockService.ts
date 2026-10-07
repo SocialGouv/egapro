@@ -229,13 +229,15 @@ export async function releaseAllLocksForUser(
 		.where(eq(declarationLocks.lockedByUserId, userId));
 }
 
+export type ReleasedLock = { declarationId: string; siren: string };
+
 export async function releaseLocksForUserOnSirens(
 	db: DbClient,
 	userId: string,
 	sirens: string[],
-): Promise<void> {
-	if (sirens.length === 0) return;
-	await db
+): Promise<ReleasedLock[]> {
+	if (sirens.length === 0) return [];
+	const released = await db
 		.delete(declarationLocks)
 		.where(
 			and(
@@ -247,6 +249,18 @@ export async function releaseLocksForUserOnSirens(
 						.from(declarations)
 						.where(inArray(declarations.siren, sirens)),
 				),
+			),
+		)
+		.returning({ declarationId: declarationLocks.declarationId });
+	if (released.length === 0) return [];
+
+	return db
+		.select({ declarationId: declarations.id, siren: declarations.siren })
+		.from(declarations)
+		.where(
+			inArray(
+				declarations.id,
+				released.map((lock) => lock.declarationId),
 			),
 		);
 }

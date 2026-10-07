@@ -14,7 +14,6 @@ import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
 import { adminImpersonationEvents, companies, users } from "~/server/db/schema";
 import { syncUserCompanyLink } from "./companyLink";
-import { recheckCompanyLink, toEpochSeconds } from "./companyLinkRecheck";
 import { parseAdminEmails } from "./parseAdminEmails";
 
 /** Cap on the `name` field of an impersonation payload — avoids oversized
@@ -184,7 +183,6 @@ declare module "next-auth/jwt" {
 		// Seconds since the epoch. Absent when the level ProConnect returned
 		// proved no second factor.
 		adminMfaAt?: number;
-		companyLinkCheckedAt?: number;
 	}
 }
 
@@ -584,24 +582,10 @@ export const authConfig = {
 				}
 
 				// ProConnect is the only source of the link: a user moved elsewhere loses the former company.
-				const revokedSirens = await syncUserCompanyLink(
-					dbUser.id,
-					profileData.siret,
-				);
-				if (revokedSirens.length > 0) {
-					const requestContext = await safeRequestContext();
-					for (const revokedSiren of revokedSirens) {
-						await logAction({
-							action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
-							status: "success",
-							userId: dbUser.id,
-							userEmail: email,
-							siren: revokedSiren,
-							ipAddress: requestContext.ipAddress,
-							userAgent: requestContext.userAgent,
-						});
-					}
-				}
+				await syncUserCompanyLink(dbUser.id, profileData.siret, {
+					userEmail: email,
+					...(await safeRequestContext()),
+				});
 
 				// Sync the admin flag with `ADMIN_EMAILS` on every login.
 				// Listing an email promotes the user; removing it demotes them.
@@ -620,7 +604,6 @@ export const authConfig = {
 					[dbUser.firstName, dbUser.lastName].filter(Boolean).join(" ") ||
 					email;
 				token.siret = profileData.siret ?? null;
-				token.companyLinkCheckedAt = toEpochSeconds(new Date());
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = shouldBeAdmin;
@@ -691,10 +674,6 @@ export const authConfig = {
 			// an explicit stop returns from the update branch, and a sign-in has
 			// just emptied the field.
 			await closeLapsedImpersonation(token, new Date());
-
-			if (!user && !exposedImpersonation(token, new Date())) {
-				await recheckCompanyLink(token, new Date());
-			}
 
 			return token;
 		},

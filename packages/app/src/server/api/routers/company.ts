@@ -27,6 +27,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
+	canAccessCompany,
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
@@ -39,17 +40,18 @@ import {
 	files,
 	gipMdsData,
 	representationDeclarations,
-	userCompanies,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
 import { fetchCseBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 async function findUserCompany(db: DB, session: Session, siren: string) {
-	const userId = session.user.id;
-	const bypassOwnership = isImpersonatingSiren(session, siren);
+	if (!(await canAccessCompany(db, session, siren))) {
+		throw new Error("Company not found or access denied");
+	}
+	const impersonating = isImpersonatingSiren(session, siren);
 
-	const baseQuery = db
+	const rows = await db
 		.select({
 			siren: companies.siren,
 			name: companies.name,
@@ -68,16 +70,9 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 				eq(gipMdsData.siren, companies.siren),
 				eq(gipMdsData.year, getCurrentYear()),
 			),
-		);
-
-	const rows = bypassOwnership
-		? await baseQuery.where(eq(companies.siren, siren)).limit(1)
-		: await baseQuery
-				.innerJoin(userCompanies, eq(userCompanies.siren, companies.siren))
-				.where(
-					and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
-				)
-				.limit(1);
+		)
+		.where(eq(companies.siren, siren))
+		.limit(1);
 
 	const row = rows[0];
 	if (!row) {
@@ -110,11 +105,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 	// Code and label are written together: a stored code may predate the rév. 2
 	// switch (#4087), and writing the label alone would pin a rév. 2 wording
 	// next to a NAF 2025 code.
-	if (
-		!bypassOwnership &&
-		company.nafCode !== null &&
-		company.nafLabel === null
-	) {
+	if (!impersonating && company.nafCode !== null && company.nafLabel === null) {
 		try {
 			const info = await fetchCompanyBySiren(company.siren);
 			if (info?.nafLabel && info.nafCode) {
