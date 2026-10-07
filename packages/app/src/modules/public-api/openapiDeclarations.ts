@@ -470,7 +470,7 @@ export const declarationsPaths = {
 				),
 				"500": serverErrorResponse,
 				"503": errorResponse(
-					"Trop d'exports filtrés ou Excel en cours de calcul : réessayez après le délai indiqué par l'en-tête `Retry-After`.",
+					"Trop d'exports en cours de calcul sur le serveur : réessayez après le délai indiqué par l'en-tête `Retry-After`.",
 				),
 			},
 		},

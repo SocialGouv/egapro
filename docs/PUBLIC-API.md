@@ -134,7 +134,7 @@ Seuls les trois exports complets, **sans aucun filtre**, sont mis en cache **1 h
 
 `limit`, `offset`, `sort` et les paramètres inconnus ne comptent pas comme des filtres. Une modification met donc jusqu'à une heure à se refléter dans ces exports, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`. Cela vaut dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître. Des requêtes simultanées sur un même export complet absent du cache ne déclenchent qu'un seul calcul par pod.
 
-Les autres exports (filtrés, ou au format Excel) sont recalculés à chaque requête. Un pod en calcule au plus **deux à la fois** : au-delà, l'API répond **`503 Service Unavailable`** avec un en-tête `Retry-After` (en secondes) et un message d'erreur JSON. Réessayez après ce délai.
+Les autres exports (filtrés, ou au format Excel) sont recalculés à chaque requête. Tous exports confondus, un pod calcule au plus **deux exports à la fois** — un export complet absent du cache compte aussi. Au-delà, l'API répond **`503 Service Unavailable`** avec un en-tête `Retry-After` (en secondes) et un message d'erreur JSON. Réessayez après ce délai.
 
 ## Licence
 

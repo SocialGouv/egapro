@@ -119,6 +119,29 @@ describe("servePublicExport — unfiltered exports", () => {
 		expect(produce).toHaveBeenCalledTimes(1);
 	});
 
+	it("counts an unfiltered computation against the per-pod slots", async () => {
+		const { servePublicExport, withPublicExportSlot } = await import(
+			"../publicExportCache"
+		);
+		const gate = deferred<string>();
+		const busy = Array.from({ length: MAX_CONCURRENT_PUBLIC_EXPORTS }, () =>
+			withPublicExportSlot(() => gate.promise),
+		);
+		const produce = vi.fn(async () => "body");
+
+		const rejected = await servePublicExport(
+			"declarations:csv",
+			inputOf(""),
+			produce,
+		);
+		gate.resolve("done");
+		await Promise.all(busy);
+
+		if (!(rejected instanceof Response)) throw new Error("expected a 503");
+		expect(rejected.status).toBe(503);
+		expect(produce).not.toHaveBeenCalled();
+	});
+
 	it("hands each concurrent caller its own readable copy of a 413", async () => {
 		const { servePublicExport } = await import("../publicExportCache");
 		const gate = deferred<Response>();

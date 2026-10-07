@@ -17,7 +17,7 @@ const gunzipAsync = promisify(gunzip);
 const inflight = new Map<UnfilteredPublicExport, Promise<string | Response>>();
 let runningExports = 0;
 
-export type UnfilteredPublicExport =
+type UnfilteredPublicExport =
 	| "declarations:csv"
 	| "declarations:json"
 	| "representations:csv";
@@ -92,13 +92,13 @@ async function cachedUnfilteredExport(
 
 	let running = inflight.get(name);
 	if (!running) {
-		running = (async () => {
+		running = withPublicExportSlot(async () => {
 			const produced = await produce();
 			if (typeof produced === "string") {
 				await storeCachedExport(name, produced);
 			}
 			return produced;
-		})().finally(() => {
+		}).finally(() => {
 			inflight.delete(name);
 		});
 		inflight.set(name, running);
@@ -121,7 +121,6 @@ export async function withPublicExportSlot<T>(
 	}
 }
 
-// The unfiltered exports bypass the slots: single-flight already bounds them to one computation per export and per pod.
 export function servePublicExport(
 	name: UnfilteredPublicExport,
 	input: PublicSearchInput,
