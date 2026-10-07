@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { PublicSearchInput } from "~/modules/public-api";
 import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -95,7 +96,8 @@ function readRow(sheet: ExcelJS.Worksheet, rowNumber: number): unknown[] {
 }
 
 describe("buildRepresentationExportRows", () => {
-	const mockOrderBy = vi.fn();
+	const mockLimit = vi.fn();
+	const mockOrderBy = vi.fn(() => ({ limit: mockLimit }));
 	const mockWhere = vi.fn(() => ({ orderBy: mockOrderBy }));
 	const mockLeftJoin = vi.fn(() => ({ where: mockWhere }));
 	const mockInnerJoin = vi.fn(() => ({
@@ -107,20 +109,22 @@ describe("buildRepresentationExportRows", () => {
 		from: mockFrom,
 	}));
 	const mockDb = { select: mockSelect };
+	const buildRows = (input?: PublicSearchInput) =>
+		buildRepresentationExportRows(mockDb as never, input, 10);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockOrderBy.mockResolvedValue([]);
+		mockLimit.mockResolvedValue([]);
 	});
 
 	it("returns an empty array when no submitted declaration exists", async () => {
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		expect(rows).toEqual([]);
 	});
 
 	it("restricts the query to submitted, publicly released declarations", async () => {
-		await buildRepresentationExportRows(mockDb as never);
+		await buildRows();
 
 		expect(mockWhere).toHaveBeenCalledWith(
 			eq(representationDeclarations.status, "submitted"),
@@ -132,7 +136,7 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("keeps the public-release join when the download is filtered", async () => {
-		await buildRepresentationExportRows(mockDb as never, {
+		await buildRows({
 			year: 2027,
 			limit: 10,
 			offset: 0,
@@ -145,7 +149,7 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("applies the observatory facets to filtered downloads", async () => {
-		await buildRepresentationExportRows(mockDb as never, {
+		await buildRows({
 			region: ["11", "84"],
 			workforceRanges: ["1000+"],
 			limit: 10,
@@ -156,10 +160,23 @@ describe("buildRepresentationExportRows", () => {
 		expect(mockWhere).toHaveBeenCalledTimes(1);
 	});
 
-	it("keeps identity and location for a diffusible company", async () => {
-		mockOrderBy.mockResolvedValue([makeDbRow()]);
+	it("bounds the query to the row limit of the caller", async () => {
+		mockLimit.mockResolvedValue([makeDbRow()]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRepresentationExportRows(
+			mockDb as never,
+			undefined,
+			200_001,
+		);
+
+		expect(mockLimit).toHaveBeenCalledWith(200_001);
+		expect(rows).toHaveLength(1);
+	});
+
+	it("keeps identity and location for a diffusible company", async () => {
+		mockLimit.mockResolvedValue([makeDbRow()]);
+
+		const rows = await buildRows();
 
 		expect(rows).toEqual([
 			{
@@ -185,7 +202,7 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("masks identity and location of a non-diffusible company but keeps its SIREN and indicators", async () => {
-		mockOrderBy.mockResolvedValue([
+		mockLimit.mockResolvedValue([
 			makeDbRow(),
 			makeDbRow({
 				siren: "987654321",
@@ -196,7 +213,7 @@ describe("buildRepresentationExportRows", () => {
 			}),
 		]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		expect(rows[0]).toMatchObject({
 			siren: "123456789",
@@ -218,12 +235,12 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("never exposes an address, neither for a diffusible nor for a non-diffusible company", async () => {
-		mockOrderBy.mockResolvedValue([
+		mockLimit.mockResolvedValue([
 			makeDbRow(),
 			makeDbRow({ siren: "987654321", identityDiffusible: false }),
 		]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		const projection = mockSelect.mock.calls[0]?.[0] ?? {};
 		expect(Object.keys(projection)).not.toContain("address");
@@ -232,9 +249,9 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("keeps identity when the database condition marks it diffusible", async () => {
-		mockOrderBy.mockResolvedValue([makeDbRow({ identityDiffusible: true })]);
+		mockLimit.mockResolvedValue([makeDbRow({ identityDiffusible: true })]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		expect(rows[0]).toMatchObject({
 			name: "Entreprise Diffusible",
@@ -243,7 +260,7 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("maps a non-computable declaration with null percentages and its reasons", async () => {
-		mockOrderBy.mockResolvedValue([
+		mockLimit.mockResolvedValue([
 			makeDbRow({
 				executiveWomenPercent: null,
 				executiveMenPercent: null,
@@ -257,7 +274,7 @@ describe("buildRepresentationExportRows", () => {
 			}),
 		]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		expect(rows[0]).toMatchObject({
 			executiveWomenPercent: null,
@@ -273,11 +290,11 @@ describe("buildRepresentationExportRows", () => {
 	});
 
 	it("maps an unparseable percentage to null rather than NaN", async () => {
-		mockOrderBy.mockResolvedValue([
+		mockLimit.mockResolvedValue([
 			makeDbRow({ executiveWomenPercent: "n/a", memberMenPercent: "" }),
 		]);
 
-		const rows = await buildRepresentationExportRows(mockDb as never);
+		const rows = await buildRows();
 
 		expect(rows[0]?.executiveWomenPercent).toBeNull();
 		// Postgres never returns "", but a blank value is unknown, never a 0 %.
