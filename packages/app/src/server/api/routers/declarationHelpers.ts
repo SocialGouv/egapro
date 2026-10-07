@@ -343,12 +343,8 @@ export async function purgeDraftSlice(
 		.where(activeDeclarationFilter(siren, year));
 }
 
-/**
- * The joint evaluation report kept for the current choice. The single file row
- * outlives the choice it was uploaded for, so a report predating the latest
- * departure from the joint evaluation (another path chosen, or a second
- * declaration opening round 2) belongs to an abandoned choice and does not count.
- */
+// The single report row outlives the choice it was uploaded for: one predating the
+// latest departure from the joint evaluation belongs to an abandoned choice.
 export async function findJointEvaluationFile(
 	database: DbOrTx,
 	declarationId: string,

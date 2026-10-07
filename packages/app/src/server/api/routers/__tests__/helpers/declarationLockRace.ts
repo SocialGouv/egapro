@@ -16,12 +16,8 @@ async function waitForBlockedBackend(observer: postgres.Sql) {
 	return false;
 }
 
-/**
- * Holds the declaration's advisory lock on `holder` while `underLock` writes,
- * fires `request` once the lock is taken, and commits only after `request` is
- * seen waiting on a lock. `blocked` proves the request queued behind the
- * lock; `outcome` is what it made of the state committed in the meantime.
- */
+// Commits `underLock` only once `request` is seen waiting on the lock, so the
+// request can only decide from what it reads after acquiring it.
 export async function runWhileDeclarationLockHeld<T>({
 	observer,
 	holder,
