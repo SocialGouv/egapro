@@ -655,7 +655,13 @@ export const declarationRouter = createTRPCRouter({
 						);
 					}
 				} else {
-					if (!isSecondDeclarationWritable(declaration.status))
+					const current = await lockAndReadDeclaration(
+						tx,
+						declaration.id,
+						siren,
+						year,
+					);
+					if (!isSecondDeclarationWritable(current.status))
 						throw new TRPCError({
 							code: "FORBIDDEN",
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",

@@ -92,6 +92,21 @@ async function uploadJointEvaluationReport(
 	`;
 }
 
+const COMPLETE_CATEGORY_DATA = {
+	womenCount: 9,
+	menCount: 9,
+	hourlyWomenCount: 9,
+	hourlyMenCount: 9,
+	annualBaseWomen: "30000",
+	annualBaseMen: "30000",
+	annualVariableWomen: "0",
+	annualVariableMen: "0",
+	hourlyBaseWomen: "20",
+	hourlyBaseMen: "20",
+	hourlyVariableWomen: "0",
+	hourlyVariableMen: "0",
+};
+
 async function insertCategory(
 	declarationId: string,
 	declarationType: "initial" | "correction",
@@ -204,6 +219,47 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			reason: { code: "PRECONDITION_FAILED" },
 		});
 		expect(await countEvents(id, "submit")).toBe(1);
+	});
+
+	it("refuses a corrected category write once the second declaration closed the démarche", async () => {
+		const id = await insertDeclaration({
+			status: "corrective_actions_chosen",
+			cseRequired: false,
+			firstDeclarationPathChoice: "corrective_action",
+		});
+		await insertCategory(id, "correction");
+
+		const { blocked, outcome } = await runWhileDeclarationLockHeld({
+			observer: sql,
+			holder,
+			declarationId: id,
+			underLock: async (tx) => {
+				await recordEvent(
+					id,
+					{ eventType: "second_declaration_submit", round: 2, minutesAgo: 0 },
+					tx,
+				);
+				await tx`UPDATE app_declaration SET status = 'demarche_completed' WHERE id = ${id}`;
+			},
+			request: () =>
+				createCaller().declaration.updateEmployeeCategories({
+					declarationType: "correction",
+					source: "manual",
+					categories: [{ name: "Cadres", data: COMPLETE_CATEGORY_DATA }],
+				}),
+		});
+
+		expect(blocked).toBe(true);
+		expect(outcome).toMatchObject({
+			status: "rejected",
+			reason: { code: "FORBIDDEN" },
+		});
+		const [category] = await sql<{ women_count: number }[]>`
+			SELECT ec.women_count FROM app_employee_category ec
+			JOIN app_job_category jc ON jc.id = ec.job_category_id
+			WHERE jc.declaration_id = ${id} AND ec.declaration_type = 'correction'
+		`;
+		expect(category?.women_count).toBe(5);
 	});
 
 	it("refuses a path change once a joint evaluation committed while the request waited", async () => {
