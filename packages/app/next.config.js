@@ -3,8 +3,10 @@
  * for Docker builds.
  */
 import { fileURLToPath } from "node:url";
+
+import "./src/env.js";
+
 import { withSentryConfig } from "@sentry/nextjs";
-import { env } from "./src/env.js";
 import { buildSecurityHeaders } from "./src/server/security/securityHeaders.js";
 
 /** @type {import("next").NextConfig} */
@@ -12,12 +14,9 @@ const config = {
 	output: "standalone",
 	typedRoutes: true,
 	poweredByHeader: false,
-	// Evaluated at build time: only build-time variables (NEXT_PUBLIC_*) can feed these headers.
+	// The Content-Security-Policy carries a per-request nonce, so `src/middleware.ts` sends it.
 	async headers() {
-		return buildSecurityHeaders({
-			isDevelopment: env.NODE_ENV === "development",
-			matomoUrl: env.NEXT_PUBLIC_MATOMO_URL,
-		});
+		return buildSecurityHeaders();
 	},
 	async redirects() {
 		// Hash fragments are stripped by the browser before the request reaches the server.

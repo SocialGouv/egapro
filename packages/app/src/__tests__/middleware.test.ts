@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const GATEWAY_SECRET = "test-gateway-shared-secret-at-least-32-chars";
@@ -23,46 +23,9 @@ vi.mock("~/modules/domain", async (importOriginal) => {
 	};
 });
 
-import { config, middleware } from "~/middleware";
+import { middleware } from "~/middleware";
 import { ADMIN_MFA_WINDOW_SECONDS, resolveAdminAccess } from "~/modules/domain";
-import {
-	ADMIN,
-	API_SEARCH,
-	API_V1_PREFIX,
-	CSE_OPINION,
-	DECLARATION_REMUNERATION,
-	MY_SPACE,
-} from "~/modules/routes";
-
-function nowSeconds(): number {
-	return Math.floor(Date.now() / 1000);
-}
-
-function adminToken(elapsed: number) {
-	return { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() - elapsed };
-}
-
-function makeRequest(
-	pathnameAndSearch = "/admin",
-	headers: Record<string, string> = {},
-): NextRequest {
-	const url = `http://localhost${pathnameAndSearch}`;
-	const parsed = new URL(url);
-	const headerMap = new Map(
-		Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
-	);
-	return {
-		url,
-		nextUrl: {
-			pathname: parsed.pathname,
-			search: parsed.search,
-			searchParams: parsed.searchParams,
-		},
-		headers: {
-			get: (name: string) => headerMap.get(name.toLowerCase()) ?? null,
-		},
-	} as unknown as NextRequest;
-}
+import { adminToken, makeRequest, nowSeconds } from "./middlewareRequest";
 
 describe("admin middleware", () => {
 	beforeEach(() => {
@@ -362,25 +325,5 @@ describe("search redirect (/api/search → /api/public/declarations)", () => {
 		mockGetToken.mockReset();
 		await middleware(makeRequest("/api/search?q=test"));
 		expect(mockGetToken).not.toHaveBeenCalled();
-	});
-});
-
-describe("matcher coverage", () => {
-	// Next reads `config.matcher` at build time and cannot evaluate an imported
-	// constant there, so those six patterns are written out by hand. This pins
-	// them to `~/modules/routes`: renaming a section without updating the matcher
-	// would leave it silently unguarded.
-	it("covers every section the middleware guards", () => {
-		const patterns = new Set<string>(config.matcher);
-		for (const section of [
-			ADMIN,
-			MY_SPACE,
-			DECLARATION_REMUNERATION,
-			CSE_OPINION,
-		]) {
-			expect(patterns.has(`${section}/:path*`)).toBe(true);
-		}
-		expect(patterns.has(`${API_V1_PREFIX}:path*`)).toBe(true);
-		expect(patterns.has(API_SEARCH)).toBe(true);
 	});
 });

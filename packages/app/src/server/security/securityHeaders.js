@@ -13,23 +13,33 @@ const PERMISSIONS_POLICY = [
 	.map((feature) => `${feature}=()`)
 	.join(", ");
 
-export const FILE_ROUTES_WITHOUT_CSP = [
-	"/api/declaration-pdf",
-	"/api/representation-pdf",
-	"/api/transmitted-pdf",
-	"/api/prefill-pdf",
-	"/api/v1/files",
-];
+export const NONCE_HEADER = "x-nonce";
 
-const EVERY_PATH = "/(.*)";
+const NONCE_BYTES = 16;
+const NONCE_SHAPE = /^[A-Za-z0-9+/]{22}==$/;
 
-// Chrome's built-in PDF viewer refuses to render a document served under a CSP.
-const EVERY_PATH_EXCEPT_FILE_ROUTES = `/((?!(?:${FILE_ROUTES_WITHOUT_CSP.map(
-	(route) => route.slice(1),
-).join("|")})(?:/|$)).*)`;
+export function generateNonce() {
+	const bytes = crypto.getRandomValues(new Uint8Array(NONCE_BYTES));
+	return btoa(String.fromCharCode(...bytes));
+}
 
 /**
- * @typedef {{ isDevelopment: boolean, matomoUrl?: string }} SecurityHeadersOptions
+ * @param {string | null | undefined} value
+ * @returns {value is string}
+ */
+export function isNonce(value) {
+	return typeof value === "string" && NONCE_SHAPE.test(value);
+}
+
+const CSP_REPORT_GROUP = "csp-endpoint";
+
+/**
+ * @typedef {{
+ *   isDevelopment: boolean,
+ *   nonce: string,
+ *   matomoUrl?: string,
+ *   sentryDsn?: string,
+ * }} ContentSecurityPolicyOptions
  */
 
 /** @param {string | undefined} url */
@@ -42,26 +52,75 @@ function originOf(url) {
 	}
 }
 
-/** @param {SecurityHeadersOptions} options */
-export function buildContentSecurityPolicy({ isDevelopment, matomoUrl }) {
+/**
+ * Mirrors the DSN grammar of the Sentry SDK: `<protocol>://<publicKey>@<host>[/<path>]/<projectId>`.
+ *
+ * @param {string | undefined} dsn
+ * @returns {{ origin: string, securityReportUrl: string } | undefined}
+ */
+export function sentryEndpointsOf(dsn) {
+	if (!dsn) return undefined;
+	let url;
+	try {
+		url = new URL(dsn);
+	} catch {
+		return undefined;
+	}
+	const segments = url.pathname.split("/").filter(Boolean);
+	const projectId = segments.pop();
+	if (
+		!["http:", "https:"].includes(url.protocol) ||
+		!/^\w+$/.test(url.username) ||
+		!projectId ||
+		!/^\d+$/.test(projectId) ||
+		// The URL lands in a header value, where `;` and `,` would split it.
+		!segments.every((segment) => /^[\w.~%-]+$/.test(segment))
+	) {
+		return undefined;
+	}
+	const base = [url.origin, ...segments].join("/");
+	return {
+		origin: url.origin,
+		securityReportUrl: `${base}/api/${projectId}/security/?sentry_key=${url.username}`,
+	};
+}
+
+/** @param {ContentSecurityPolicyOptions} options */
+export function buildContentSecurityPolicy({
+	isDevelopment,
+	nonce,
+	matomoUrl,
+	sentryDsn,
+}) {
 	const matomo = originOf(matomoUrl);
 	const matomoSources = matomo ? [matomo] : [];
+	const sentry = sentryEndpointsOf(sentryDsn);
 
 	/** @type {Record<string, string[]>} */
 	const directives = {
 		"default-src": ["'self'"],
+		// 'strict-dynamic' trusts what the nonced Next.js runtime loads (chunks, Matomo tracker);
+		// browsers that honour it ignore 'self' and the Matomo origin, kept for CSP Level 2.
 		// React relies on eval for its development-only error overlays.
 		"script-src": [
 			"'self'",
-			"'unsafe-inline'",
+			`'nonce-${nonce}'`,
+			"'strict-dynamic'",
 			...(isDevelopment ? ["'unsafe-eval'"] : []),
 			...matomoSources,
 		],
+		// next/image writes a `style` attribute, which no nonce can allow — and a nonce
+		// in this directive would switch 'unsafe-inline' off.
 		"style-src": ["'self'", "'unsafe-inline'"],
 		"img-src": ["'self'", "data:", "blob:", ...matomoSources],
 		"font-src": ["'self'", "data:"],
-		// Sentry is reached through the same-origin tunnel route, not its DSN host.
-		"connect-src": ["'self'", ...matomoSources],
+		// @sentry/nextjs only tunnels SaaS DSNs through `tunnelRoute`: a self-hosted
+		// instance is reached directly at the DSN host.
+		"connect-src": [
+			"'self'",
+			...matomoSources,
+			...(sentry ? [sentry.origin] : []),
+		],
 		"frame-src": matomo ? [matomo] : ["'none'"],
 		"worker-src": ["'self'", "blob:"],
 		"object-src": ["'none'"],
@@ -69,6 +128,12 @@ export function buildContentSecurityPolicy({ isDevelopment, matomoUrl }) {
 		// ProConnect is reached by script navigation and redirects, never by a form post.
 		"form-action": ["'self'"],
 		"frame-ancestors": ["'none'"],
+		...(sentry
+			? {
+					"report-uri": [sentry.securityReportUrl],
+					"report-to": [CSP_REPORT_GROUP],
+				}
+			: {}),
 	};
 
 	return Object.entries(directives)
@@ -76,25 +141,31 @@ export function buildContentSecurityPolicy({ isDevelopment, matomoUrl }) {
 		.join("; ");
 }
 
-/** @param {SecurityHeadersOptions} options */
-export function buildSecurityHeaders(options) {
+/**
+ * @param {ContentSecurityPolicyOptions} options
+ * @returns {{ "Content-Security-Policy": string, "Reporting-Endpoints"?: string }}
+ */
+export function buildContentSecurityPolicyHeaders(options) {
+	const sentry = sentryEndpointsOf(options.sentryDsn);
+	return {
+		"Content-Security-Policy": buildContentSecurityPolicy(options),
+		...(sentry
+			? {
+					"Reporting-Endpoints": `${CSP_REPORT_GROUP}="${sentry.securityReportUrl}"`,
+				}
+			: {}),
+	};
+}
+
+export function buildSecurityHeaders() {
 	return [
 		{
-			source: EVERY_PATH,
+			source: "/(.*)",
 			headers: [
 				{ key: "X-Frame-Options", value: "DENY" },
 				{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 				{ key: "Permissions-Policy", value: PERMISSIONS_POLICY },
 				{ key: "X-Content-Type-Options", value: "nosniff" },
-			],
-		},
-		{
-			source: EVERY_PATH_EXCEPT_FILE_ROUTES,
-			headers: [
-				{
-					key: "Content-Security-Policy",
-					value: buildContentSecurityPolicy(options),
-				},
 			],
 		},
 	];
