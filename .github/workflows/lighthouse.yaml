@@ -18,11 +18,11 @@ jobs:
       !startsWith(github.event.deployment.environment, 'build-')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.deployment.ref }}
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -34,7 +34,7 @@ jobs:
       # that declare no environment URL.
       - name: Load SocialGouv variables
         id: env
-        uses: socialgouv/kontinuous/.github/actions/env@v1
+        uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
       - name: Run Lighthouse CI
         run: pnpm test:lighthouse
         continue-on-error: true
@@ -62,7 +62,7 @@ jobs:
           echo "=== Files in .lighthouseci ==="
           ls -lh .lighthouseci/ 2>/dev/null || echo "Directory empty or missing"
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: lighthouse-report

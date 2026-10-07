@@ -63,5 +63,5 @@ jobs:
       id-token: write
       pull-requests: read
     if: needs.guard.outputs.protected == 'false'
-    uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate-atlas.yaml@v1
+    uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate-atlas.yaml@1fd37c88ffc9b2db48746d815d03c73e5148f66b # v1.16.1
     secrets: inherit
