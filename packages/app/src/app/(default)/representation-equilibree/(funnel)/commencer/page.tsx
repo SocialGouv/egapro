@@ -2,6 +2,7 @@ import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
+import { OtherCompaniesNotice } from "@components/OtherCompaniesNotice";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -63,13 +64,7 @@ const CommencerPage = async () => {
 
   return (
     <>
-      <Alert
-        severity="info"
-        small
-        className={fr.cx("fr-mb-3w")}
-        description="Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
-          correspondantes à la déclaration."
-      />
+      <Alert severity="info" small className={fr.cx("fr-mb-3w")} description={<OtherCompaniesNotice />} />
       <CommencerForm session={session} />
     </>
   );
