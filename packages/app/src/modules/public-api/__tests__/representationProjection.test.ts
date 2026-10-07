@@ -211,12 +211,74 @@ describe("toPublicRepresentation", () => {
 			);
 		}
 
-		const legacyNonDiffusible = toPublicRepresentation(declarationFixture, {
-			...companyFixture,
-			statutDiffusion: null,
-			address: null,
-		});
+		const legacyNonDiffusible = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			{ ...companyFixture, statutDiffusion: null, address: null },
+		);
 		expect(legacyNonDiffusible.name).toBe("Non-diffusible");
+		expect(legacyNonDiffusible.address).toBe("Non-diffusible");
+		expect(legacyNonDiffusible.publishUrl).toBeNull();
+		expect(legacyNonDiffusible.publishModalities).toBeNull();
+	});
+
+	it("produces exactly this DTO for a non-diffusible company", () => {
+		const dto = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			{ ...companyFixture, statutDiffusion: "N" },
+		);
+
+		expect(dto).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Non-diffusible",
+			address: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
+			referencePeriodStart: "2025-01-01",
+			referencePeriodEnd: "2025-12-31",
+			executiveWomenPercent: 35.5,
+			executiveMenPercent: 64.5,
+			notComputableReasonExecutives: null,
+			memberWomenPercent: 42,
+			memberMenPercent: 58,
+			notComputableReasonMembers: null,
+			publishDate: "2026-02-15",
+			publishUrl: null,
+			publishModalities: null,
+		});
+	});
+
+	it("produces exactly this DTO for a diffusible company", () => {
+		const dto = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			companyFixture,
+		);
+
+		expect(dto).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Société Démo",
+			address: "1 rue de la Paix, 75002 Paris",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			referencePeriodStart: "2025-01-01",
+			referencePeriodEnd: "2025-12-31",
+			executiveWomenPercent: 35.5,
+			executiveMenPercent: 64.5,
+			notComputableReasonExecutives: null,
+			memberWomenPercent: 42,
+			memberMenPercent: 58,
+			notComputableReasonMembers: null,
+			publishDate: "2026-02-15",
+			publishUrl: "https://exemple.fr/egalite-professionnelle",
+			publishModalities: "Affichage dans les locaux",
+		});
 	});
 
 	it("converts the numeric percentage strings to numbers", () => {

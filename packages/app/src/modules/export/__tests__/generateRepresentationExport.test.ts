@@ -8,6 +8,7 @@ import {
 } from "~/server/db/schema";
 import {
 	buildRepresentationExportRows,
+	generateRepresentationCsv,
 	generateRepresentationXlsx,
 	type RepresentationExportRow,
 } from "../generateRepresentationExport";
@@ -218,6 +219,75 @@ describe("buildRepresentationExportRows", () => {
 			publishUrl: null,
 			publishModalities: null,
 		});
+	});
+
+	it("produces exactly this row for a non-diffusible company", async () => {
+		mockOrderBy.mockResolvedValue([
+			makeDbRow({
+				identityDiffusible: false,
+				publishModalities: "Affichage dans les locaux",
+			}),
+		]);
+
+		const rows = await buildRepresentationExportRows(mockDb as never);
+
+		expect(rows).toEqual([
+			{
+				referenceYear: 2027,
+				siren: "123456789",
+				name: "Non-diffusible",
+				region: "Non-diffusible",
+				departmentCode: "Non-diffusible",
+				departmentLabel: "Non-diffusible",
+				nafCode: "Non-diffusible",
+				nafLabel: "Non-diffusible",
+				executiveWomenPercent: 40,
+				executiveMenPercent: 60,
+				notComputableReasonExecutives: null,
+				memberWomenPercent: 45.5,
+				memberMenPercent: 54.5,
+				notComputableReasonMembers: null,
+				publishDate: "2028-03-01",
+				publishUrl: null,
+				publishModalities: null,
+			},
+		]);
+	});
+
+	it("leaves the publication url and modalities cells empty in the CSV and XLSX of a non-diffusible company", async () => {
+		mockOrderBy.mockResolvedValue([
+			makeDbRow({ publishModalities: "Affichage dans les locaux" }),
+			makeDbRow({
+				siren: "987654321",
+				identityDiffusible: false,
+				publishModalities: "Affichage dans les locaux",
+			}),
+		]);
+		const rows = await buildRepresentationExportRows(mockDb as never);
+		const urlColumn = EXPECTED_HEADERS.indexOf("Url_publication");
+		const modalitiesColumn = EXPECTED_HEADERS.indexOf("Modalites_publication");
+
+		const csvLines = generateRepresentationCsv(rows).split("\n");
+		const diffusibleCsv = csvLines[1]?.split(";") ?? [];
+		const nonDiffusibleCsv = csvLines[2]?.split(";") ?? [];
+		expect(diffusibleCsv[urlColumn]).toBe(
+			'"https://example.fr/representation"',
+		);
+		expect(diffusibleCsv[modalitiesColumn]).toBe('"Affichage dans les locaux"');
+		expect(nonDiffusibleCsv[1]).toBe('"987654321"');
+		expect(nonDiffusibleCsv[urlColumn]).toBe('""');
+		expect(nonDiffusibleCsv[modalitiesColumn]).toBe('""');
+		expect(csvLines[2]).not.toContain("example.fr");
+
+		const workbook = await loadSheet(await generateRepresentationXlsx(rows));
+		const sheet = workbook.worksheets[0] as ExcelJS.Worksheet;
+		const diffusibleXlsx = readRow(sheet, 2);
+		const nonDiffusibleXlsx = readRow(sheet, 3);
+		expect(diffusibleXlsx[urlColumn]).toBe("https://example.fr/representation");
+		expect(diffusibleXlsx[modalitiesColumn]).toBe("Affichage dans les locaux");
+		expect(nonDiffusibleXlsx[1]).toBe("987654321");
+		expect(nonDiffusibleXlsx[urlColumn]).toBeNull();
+		expect(nonDiffusibleXlsx[modalitiesColumn]).toBeNull();
 	});
 
 	it("never exposes an address, neither for a diffusible nor for a non-diffusible company", async () => {
