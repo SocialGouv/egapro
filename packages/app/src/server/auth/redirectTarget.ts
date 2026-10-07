@@ -1,26 +1,31 @@
 const HOME_PATH = "/mon-espace";
 
-function isRelativePath(url: string): boolean {
-	return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
-}
+// A blob: URL carries the origin of the document that created it, so the origin check alone would let one through.
+const NAVIGABLE_PROTOCOLS = new Set(["https:", "http:"]);
 
-function isSameOrigin(url: string, baseUrl: string): boolean {
+function parseAgainst(url: string, base: URL): URL | null {
 	try {
-		return new URL(url).origin === new URL(baseUrl).origin;
+		return new URL(url, base);
 	} catch {
-		return false;
+		return null;
 	}
 }
 
 export function resolveRedirectTarget(url: string, baseUrl: string): string {
-	const home = `${baseUrl}${HOME_PATH}`;
+	const base = new URL(baseUrl);
+	const home = new URL(HOME_PATH, base).href;
+	const target = parseAgainst(url, base);
 
-	if (isRelativePath(url)) {
-		return url === "/" ? home : `${baseUrl}${url}`;
+	if (
+		target === null ||
+		target.origin !== base.origin ||
+		!NAVIGABLE_PROTOCOLS.has(target.protocol) ||
+		target.username !== "" ||
+		target.password !== ""
+	) {
+		return home;
 	}
 
-	if (!isSameOrigin(url, baseUrl)) return home;
-
-	const { pathname, search, hash, href } = new URL(url);
-	return pathname === "/" && !search && !hash ? home : href;
+	const isSiteRoot = target.pathname === "/" && !target.search && !target.hash;
+	return isSiteRoot ? home : target.href;
 }
