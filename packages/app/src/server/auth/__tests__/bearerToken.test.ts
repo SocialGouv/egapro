@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { assertBearerToken } from "../bearerToken";
+import { rejectInvalidBearerToken } from "../bearerToken";
 
 const TOKEN_NAME = "EGAPRO_TEST_API_TOKEN";
 
@@ -12,18 +12,20 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe("assertBearerToken", () => {
+describe("rejectInvalidBearerToken", () => {
 	it("refuses with 401 and logs when the expected token is not configured", async () => {
 		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-		const response = assertBearerToken(
+		const tokenName = "EGAPRO_UNSET_API_TOKEN";
+
+		const response = rejectInvalidBearerToken(
 			request({ authorization: "Bearer anything" }),
-			{ expectedToken: undefined, tokenName: TOKEN_NAME },
+			{ expectedToken: undefined, tokenName },
 		);
 
 		expect(response?.status).toBe(401);
 		await expect(response?.json()).resolves.toEqual({ error: "Unauthorized" });
-		expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(TOKEN_NAME));
+		expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(tokenName));
 	});
 
 	it("logs a missing token once, not on every refused request", () => {
@@ -33,26 +35,31 @@ describe("assertBearerToken", () => {
 			tokenName: "EGAPRO_ONCE_API_TOKEN",
 		};
 
-		assertBearerToken(request(), options);
-		assertBearerToken(request(), options);
-		assertBearerToken(request(), options);
+		rejectInvalidBearerToken(request(), options);
+		rejectInvalidBearerToken(request(), options);
+		rejectInvalidBearerToken(request(), options);
 
 		expect(errorSpy).toHaveBeenCalledTimes(1);
 	});
 
 	it("refuses an empty expected token, even against an empty bearer", () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const tokenName = "EGAPRO_EMPTY_API_TOKEN";
 
-		const response = assertBearerToken(request({ authorization: "Bearer " }), {
-			expectedToken: "",
-			tokenName: TOKEN_NAME,
-		});
+		const response = rejectInvalidBearerToken(
+			request({ authorization: "Bearer " }),
+			{
+				expectedToken: "",
+				tokenName,
+			},
+		);
 
 		expect(response?.status).toBe(401);
+		expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining(tokenName));
 	});
 
 	it("refuses a request without an authorization header", () => {
-		const response = assertBearerToken(request(), {
+		const response = rejectInvalidBearerToken(request(), {
 			expectedToken: "expected-token",
 			tokenName: TOKEN_NAME,
 		});
@@ -68,7 +75,7 @@ describe("assertBearerToken", () => {
 		["another scheme", "Basic expected-token"],
 		["a lowercase scheme", "bearer expected-token"],
 	])("refuses %s", (_label, authorization) => {
-		const response = assertBearerToken(request({ authorization }), {
+		const response = rejectInvalidBearerToken(request({ authorization }), {
 			expectedToken: "expected-token",
 			tokenName: TOKEN_NAME,
 		});
@@ -77,7 +84,7 @@ describe("assertBearerToken", () => {
 	});
 
 	it("accepts the matching bearer token", () => {
-		const response = assertBearerToken(
+		const response = rejectInvalidBearerToken(
 			request({ authorization: "Bearer expected-token" }),
 			{ expectedToken: "expected-token", tokenName: TOKEN_NAME },
 		);

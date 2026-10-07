@@ -4,7 +4,7 @@ import { getCurrentYear } from "~/modules/domain";
 import { generateYearlyExport } from "~/modules/export";
 import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
-import { assertBearerToken } from "~/server/auth/bearerToken";
+import { rejectInvalidBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
 
 /**
@@ -27,7 +27,7 @@ export const POST = withAuditedRoute(
 );
 
 async function exportGenerateHandler(request: Request): Promise<Response> {
-	const unauthorized = assertBearerToken(request, {
+	const unauthorized = rejectInvalidBearerToken(request, {
 		expectedToken: env.EGAPRO_EXPORT_API_TOKEN,
 		tokenName: "EGAPRO_EXPORT_API_TOKEN",
 	});

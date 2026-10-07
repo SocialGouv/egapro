@@ -7,7 +7,7 @@ type BearerTokenOptions = {
 	tokenName: string;
 };
 
-export function assertBearerToken(
+export function rejectInvalidBearerToken(
 	request: Request,
 	{ expectedToken, tokenName }: BearerTokenOptions,
 ): Response | null {

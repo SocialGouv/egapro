@@ -3,7 +3,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { downloadExport } from "~/modules/export/downloadExport";
 import { exportYearQuerySchema } from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
-import { assertBearerToken } from "~/server/auth/bearerToken";
+import { rejectInvalidBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
 
 /**
@@ -25,7 +25,7 @@ export const GET = withAuditedRoute(
 );
 
 async function exportDownloadHandler(request: Request): Promise<Response> {
-	const unauthorized = assertBearerToken(request, {
+	const unauthorized = rejectInvalidBearerToken(request, {
 		expectedToken: env.EGAPRO_EXPORT_API_TOKEN,
 		tokenName: "EGAPRO_EXPORT_API_TOKEN",
 	});
