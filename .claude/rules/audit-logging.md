@@ -236,7 +236,7 @@ needs something `resolveContext` cannot produce.
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
 | `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`invalidParam` on a 400, `count` on success) computed *during* the handler |
-| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
+| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem — `invalidParam` names `siren` or `year` |
 | `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
 | `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
 | `upload` | `CSE_OPINION_UPLOAD_FILE`, `JOINT_EVALUATION_UPLOAD_FILE` | The action key depends on the parsed multipart body |
