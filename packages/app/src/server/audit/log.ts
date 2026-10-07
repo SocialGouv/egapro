@@ -9,6 +9,7 @@ import type {
 import { AUDIT_ACTION_CATEGORIES } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
+import type { DbClient } from "~/server/services/declarationLockService";
 import { deriveErrorCode, emitActivityLog } from "./activityLog";
 
 // Stdout-mirror-only fields, never persisted to audit.action_log.
@@ -46,10 +47,7 @@ function truncateErrorMessage(message: string): string {
 	return [...message].slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH).join("");
 }
 
-// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
-export async function logAction(input: LogActionInput): Promise<void> {
-	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
-
+function mirrorToStdout(input: LogActionInput, category: AuditCategory): void {
 	try {
 		// inputKeys must reflect the caller's real input, not the allowlisted/wrapped projection persisted as `metadata`.
 		const stdoutInput = input.origin?.rawInput ?? input.metadata;
@@ -74,30 +72,50 @@ export async function logAction(input: LogActionInput): Promise<void> {
 			error,
 		});
 	}
+}
+
+function toActionLogRow(input: LogActionInput, category: AuditCategory) {
+	return {
+		action: input.action,
+		category,
+		status: input.status,
+		userId: input.userId ?? null,
+		userEmail: input.userEmail ?? null,
+		siren: input.siren ?? null,
+		resourceType: input.resourceType ?? null,
+		resourceId: input.resourceId ?? null,
+		errorMessage:
+			input.errorMessage != null
+				? truncateErrorMessage(input.errorMessage)
+				: null,
+		metadata: input.metadata ?? null,
+		ipAddress: input.ipAddress ?? null,
+		userAgent: input.userAgent ?? null,
+		durationMs: input.durationMs ?? null,
+	};
+}
+
+// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
+export async function logAction(input: LogActionInput): Promise<void> {
+	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+	mirrorToStdout(input, category);
 
 	try {
-		await db.insert(actionLogs).values({
-			action: input.action,
-			category,
-			status: input.status,
-			userId: input.userId ?? null,
-			userEmail: input.userEmail ?? null,
-			siren: input.siren ?? null,
-			resourceType: input.resourceType ?? null,
-			resourceId: input.resourceId ?? null,
-			errorMessage:
-				input.errorMessage != null
-					? truncateErrorMessage(input.errorMessage)
-					: null,
-			metadata: input.metadata ?? null,
-			ipAddress: input.ipAddress ?? null,
-			userAgent: input.userAgent ?? null,
-			durationMs: input.durationMs ?? null,
-		});
+		await db.insert(actionLogs).values(toActionLogRow(input, category));
 	} catch (error) {
 		console.error("[audit] Failed to write audit log entry", {
 			action: input.action,
 			error,
 		});
 	}
+}
+
+// Fail-closed, unlike `logAction`: the row commits or rolls back with the caller's transaction. Returns the stdout mirror, to run once that transaction has committed.
+export async function logActionInTransaction(
+	tx: DbClient,
+	input: LogActionInput,
+): Promise<() => void> {
+	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+	await tx.insert(actionLogs).values(toActionLogRow(input, category));
+	return () => mirrorToStdout(input, category);
 }

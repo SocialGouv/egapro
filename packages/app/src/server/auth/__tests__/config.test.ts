@@ -6,6 +6,8 @@ const mockFindFirst = vi.fn();
 const mockInsert = vi.fn();
 const mockUpdate = vi.fn();
 const mockTransaction = vi.fn();
+const mockSyncUserCompanyLink = vi.fn();
+const mockLogAction = vi.fn();
 
 vi.mock("~/server/db", () => ({
 	db: {
@@ -35,8 +37,11 @@ vi.mock("~/server/db/schema", () => ({
 		stoppedAt: "stoppedAt",
 	},
 }));
-vi.mock("~/server/services/weez", () => ({
-	fetchCompanyBySiren: vi.fn(),
+vi.mock("../companyLink", () => ({
+	syncUserCompanyLink: (...args: unknown[]) => mockSyncUserCompanyLink(...args),
+}));
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
 }));
 
 import { authConfig } from "../config";
@@ -62,6 +67,9 @@ describe("auth config", () => {
 		mockInsert.mockReset();
 		mockUpdate.mockReset();
 		mockTransaction.mockReset();
+		mockSyncUserCompanyLink.mockReset();
+		mockSyncUserCompanyLink.mockResolvedValue([]);
+		mockLogAction.mockReset();
 	});
 
 	describe("jwt callback", () => {
@@ -296,6 +304,53 @@ describe("auth config", () => {
 			);
 
 			expect(result.name).toBe(DECLARANT_EMAIL);
+		});
+	});
+
+	describe("jwt callback — company link", () => {
+		const siretUser = {
+			...proconnectUser,
+			siret: "12345678901234",
+		} as User & { siret: string };
+
+		it("re-syncs the link from the ProConnect SIRET on every sign-in", async () => {
+			await signIn({}, siretUser);
+
+			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
+				"uuid-123",
+				"12345678901234",
+				{ userEmail: DECLARANT_EMAIL, ipAddress: null, userAgent: null },
+			);
+		});
+
+		it("re-syncs even without a SIRET, so the sign-in can revoke every link", async () => {
+			await signIn({}, proconnectUser);
+
+			expect(mockSyncUserCompanyLink).toHaveBeenCalledWith(
+				"uuid-123",
+				undefined,
+				expect.objectContaining({ userEmail: DECLARANT_EMAIL }),
+			);
+		});
+
+		it("refuses the sign-in when the link cannot be re-synced", async () => {
+			mockSyncUserCompanyLink.mockRejectedValue(new Error("connection lost"));
+
+			await expect(signIn({}, siretUser)).rejects.toThrow("connection lost");
+		});
+
+		it("leaves an existing session alone: access is checked in the database on each request", async () => {
+			const token = {
+				sub: "sub-123",
+				id: "uuid-123",
+				siret: "12345678901234",
+				isAdmin: false,
+			} as JWT;
+
+			const result = await callJwt({ token, account: null });
+
+			expect(mockSyncUserCompanyLink).not.toHaveBeenCalled();
+			expect(result.siret).toBe("12345678901234");
 		});
 	});
 
