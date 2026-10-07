@@ -43,6 +43,15 @@ describe("toCsvField", () => {
 		expect(toCsvField(value)).toBe(expected);
 	});
 
+	it("keeps a negative number numeric", () => {
+		expect(toCsvField(-0.05)).toBe('"-0.05"');
+		expect(toCsvField(-0.0242)).toBe('"-0.0242"');
+	});
+
+	it("still neutralises a negative-looking string", () => {
+		expect(toCsvField("-5")).toBe(`"'-5"`);
+	});
+
 	it("neutralises a formula whose quotes are escaped", () => {
 		expect(toCsvField('=HYPERLINK("http://example.fr")')).toBe(
 			`"'=HYPERLINK(""http://example.fr"")"`,

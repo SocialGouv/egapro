@@ -215,6 +215,17 @@ describe("GET /api/public/declarations/export", () => {
 		expect(line.split(";")[workforceIndex]).toBe('""');
 	});
 
+	it("publishes a negative gap as a number in CSV, without a formula guard", async () => {
+		setRows([buildRow({ globalAnnualMeanGap: "-0.0242" })]);
+
+		const response = await callGet("?format=csv");
+		const csv = await response.text();
+		const header = csv.split("\n")[0]?.split(";") ?? [];
+		const line = csv.split("\n")[1]?.split(";") ?? [];
+
+		expect(line[header.indexOf('"globalAnnualMeanGap"')]).toBe('"-0.0242"');
+	});
+
 	it("exposes no score, /100 index or indicator-G key in the JSON payload (S6)", async () => {
 		setRows([buildRow()]);
 
