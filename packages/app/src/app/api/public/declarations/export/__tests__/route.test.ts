@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "~/modules/public-api";
+import {
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	MAX_EXPORT_ROWS,
+	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+} from "~/modules/public-api";
 import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
@@ -68,6 +73,7 @@ function setRows(rows: unknown[]) {
 	});
 	const chain = {
 		from: () => chain,
+		$dynamic: () => chain,
 		innerJoin: () => chain,
 		leftJoin: () => chain,
 		where: () => chain,
@@ -386,6 +392,8 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet("?format=xlsx");
 
 		expect(mocks.queryLimit).toHaveBeenCalledWith(MAX_XLSX_EXPORT_ROWS + 1);
+		expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
+		expect(mocks.dbSelect).toHaveBeenCalledWith({ siren: "siren" });
 		expect(response.status).toBe(413);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(await response.json()).toEqual(
@@ -423,13 +431,33 @@ describe("GET /api/public/declarations/export", () => {
 		});
 	});
 
-	describe("server-side cache", () => {
+	function gatedRows(rows: unknown[]) {
+		let release: () => void = () => undefined;
+		const gate = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const ordered = {
+			limit: async () => {
+				await gate;
+				return rows;
+			},
+		};
+		const chain = {
+			from: () => chain,
+			$dynamic: () => chain,
+			innerJoin: () => chain,
+			leftJoin: () => chain,
+			where: () => chain,
+			orderBy: () => ordered,
+		};
+		mocks.dbSelect.mockReturnValue(chain);
+		return release;
+	}
+
+	describe("server-side cache of the unfiltered exports", () => {
 		it.each([
-			[
-				"?format=csv&region=11&region=84",
-				"?region=84&utm_source=x&format=csv&region=11&limit=5",
-			],
-			["?naf=C&year=2027", "?year=2027&sort=name&naf=C&naf=C"],
+			["?format=csv", "?format=csv&utm_source=x&limit=5"],
+			["", "?sort=name&offset=20"],
 		])("serves %s again for %s without querying the database", async (first, equivalent) => {
 			mocks.getValkey.mockResolvedValue(createFakeValkey());
 			setRows([buildRow()]);
@@ -456,26 +484,8 @@ describe("GET /api/public/declarations/export", () => {
 		it.each([
 			"?format=csv",
 			"",
-		])("runs one database query for concurrent identical requests (%s)", async (search) => {
-			let release: () => void = () => undefined;
-			const gate = new Promise<void>((resolve) => {
-				release = resolve;
-			});
-			const rows = [buildRow()];
-			const ordered = {
-				limit: async () => {
-					await gate;
-					return rows;
-				},
-			};
-			const chain = {
-				from: () => chain,
-				innerJoin: () => chain,
-				leftJoin: () => chain,
-				where: () => chain,
-				orderBy: () => ordered,
-			};
-			mocks.dbSelect.mockReturnValue(chain);
+		])("runs one database query for concurrent unfiltered requests (%s)", async (search) => {
+			const release = gatedRows([buildRow()]);
 
 			const pending = [callGet(search), callGet(search), callGet(search)];
 			await vi.waitFor(() => expect(mocks.dbSelect).toHaveBeenCalled());
@@ -488,18 +498,20 @@ describe("GET /api/public/declarations/export", () => {
 			expect(responses.every((r) => r.status === 200)).toBe(true);
 		});
 
-		it("queries the database again for a different filter set", async () => {
-			mocks.getValkey.mockResolvedValue(createFakeValkey());
+		it("never caches a filtered export", async () => {
+			const valkey = createFakeValkey();
+			mocks.getValkey.mockResolvedValue(valkey);
 			setRows([buildRow()]);
 			await callGet("?format=csv&region=11");
-			mocks.dbSelect.mockClear();
 
-			await callGet("?format=csv&region=84");
+			await callGet("?format=csv&region=11");
 
-			expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
+			expect(mocks.dbSelect).toHaveBeenCalledTimes(2);
+			expect(valkey.get).not.toHaveBeenCalled();
+			expect(valkey.set).not.toHaveBeenCalled();
 		});
 
-		it("keeps the JSON and CSV entries of one filter set apart", async () => {
+		it("keeps the JSON and CSV entries apart", async () => {
 			mocks.getValkey.mockResolvedValue(createFakeValkey());
 			setRows([buildRow()]);
 			await callGet("?format=csv");
@@ -538,6 +550,54 @@ describe("GET /api/public/declarations/export", () => {
 
 			expect(response.status).toBe(200);
 			expect(mocks.dbSelect).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe("concurrent computations of the uncached exports", () => {
+		it.each([
+			"?format=csv&region=11",
+			"?format=xlsx",
+		])("answers 503 with Retry-After past the per-pod limit (%s)", async (search) => {
+			const release = gatedRows([buildRow()]);
+
+			const running = Array.from(
+				{ length: MAX_CONCURRENT_PUBLIC_EXPORTS },
+				() => callGet(search),
+			);
+			await vi.waitFor(() =>
+				expect(mocks.dbSelect).toHaveBeenCalledTimes(
+					MAX_CONCURRENT_PUBLIC_EXPORTS,
+				),
+			);
+			const rejected = await callGet(search);
+			release();
+			const responses = await Promise.all(running);
+
+			expect(rejected.status).toBe(503);
+			expect(rejected.headers.get("Retry-After")).not.toBeNull();
+			expect(rejected.headers.get("Access-Control-Allow-Origin")).toBe("*");
+			expect(await rejected.json()).toEqual({
+				error: PUBLIC_EXPORT_BUSY_MESSAGE,
+			});
+			expect(responses.every((r) => r.status === 200)).toBe(true);
+		});
+
+		it("frees the slots once the computations failed", async () => {
+			mocks.dbSelect.mockImplementation(() => {
+				throw new Error("db down");
+			});
+			const consoleSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			for (let index = 0; index < MAX_CONCURRENT_PUBLIC_EXPORTS; index += 1) {
+				expect((await callGet("?format=csv&region=11")).status).toBe(500);
+			}
+			consoleSpy.mockRestore();
+			setRows([buildRow()]);
+
+			const response = await callGet("?format=csv&region=11");
+
+			expect(response.status).toBe(200);
 		});
 	});
 });

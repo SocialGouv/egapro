@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { parsePublicSearchInput } from "~/modules/public-api";
+import {
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	parsePublicSearchInput,
+} from "~/modules/public-api";
 import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({ exportCacheClient: vi.fn() }));
@@ -33,71 +36,64 @@ beforeEach(() => {
 	mocks.exportCacheClient.mockResolvedValue(null);
 });
 
-describe("publicExportCacheKey", () => {
-	it("gives the same key to equivalent query strings", async () => {
-		const { publicExportCacheKey } = await import("../publicExportCache");
+describe("servePublicExport — unfiltered exports", () => {
+	it("caches the unfiltered export under one constant key, compressed, for one hour", async () => {
+		const valkey = createFakeValkey();
+		mocks.exportCacheClient.mockResolvedValue(valkey);
+		const { servePublicExport } = await import("../publicExportCache");
+		const body = '"2027";"123456789";"Société Démo"\n'.repeat(1_000);
+		const produce = vi.fn(async () => body);
 
-		const ordered = publicExportCacheKey(
-			"declarations",
-			"csv",
-			inputOf("q=Démo&region=11&region=84&naf=C&year=2027"),
-		);
-		const shuffled = publicExportCacheKey(
-			"declarations",
-			"csv",
-			inputOf(
-				"year=2027&naf=C&region=84&utm_source=x&region=11&q=Démo&region=11&limit=50&offset=20&sort=name",
-			),
+		await servePublicExport("declarations:csv", inputOf(""), produce);
+		const cached = await servePublicExport(
+			"declarations:csv",
+			inputOf("limit=5&offset=20&sort=name&utm_source=x"),
+			produce,
 		);
 
-		expect(shuffled).toBe(ordered);
-	});
-
-	it("separates different filters, formats and datasets", async () => {
-		const { publicExportCacheKey } = await import("../publicExportCache");
-		const base = inputOf("region=11");
-
-		const keys = new Set([
-			publicExportCacheKey("declarations", "csv", base),
-			publicExportCacheKey("declarations", "json", base),
-			publicExportCacheKey("representations", "csv", base),
-			publicExportCacheKey("declarations", "csv", inputOf("region=84")),
-			publicExportCacheKey(
-				"declarations",
-				"csv",
-				inputOf("region=11&year=2027"),
-			),
-			publicExportCacheKey("declarations", "csv", inputOf("")),
-			publicExportCacheKey("declarations", "csv", inputOf("departement=11")),
-			publicExportCacheKey("declarations", "csv", inputOf("workforceMin=50")),
-			publicExportCacheKey("declarations", "csv", inputOf("workforceMax=50")),
+		expect(cached).toBe(body);
+		expect(produce).toHaveBeenCalledTimes(1);
+		expect([...valkey.store.keys()]).toEqual([
+			"public-export:v2:declarations:csv",
 		]);
-
-		expect(keys.size).toBe(9);
+		expect(valkey.set).toHaveBeenCalledWith(
+			"public-export:v2:declarations:csv",
+			expect.any(String),
+			{ EX: 3_600 },
+		);
+		const [stored] = [...valkey.store.values()];
+		expect(stored?.length).toBeLessThan(body.length / 10);
 	});
 
-	it("never embeds the raw search text in the key", async () => {
-		const { publicExportCacheKey } = await import("../publicExportCache");
+	it("keeps the three unfiltered exports apart", async () => {
+		const valkey = createFakeValkey();
+		mocks.exportCacheClient.mockResolvedValue(valkey);
+		const { servePublicExport } = await import("../publicExportCache");
 
-		const key = publicExportCacheKey(
-			"declarations",
-			"csv",
-			inputOf("q=Société Démo"),
+		await servePublicExport("declarations:csv", inputOf(""), async () => "a");
+		await servePublicExport("declarations:json", inputOf(""), async () => "b");
+		await servePublicExport(
+			"representations:csv",
+			inputOf(""),
+			async () => "c",
 		);
 
-		expect(key).not.toContain("Démo");
+		expect([...valkey.store.keys()].sort((a, b) => a.localeCompare(b))).toEqual(
+			[
+				"public-export:v2:declarations:csv",
+				"public-export:v2:declarations:json",
+				"public-export:v2:representations:csv",
+			],
+		);
 	});
-});
 
-describe("cachedPublicExport", () => {
 	it("produces the body on every call without Valkey", async () => {
-		const { cachedPublicExport } = await import("../publicExportCache");
+		const { servePublicExport } = await import("../publicExportCache");
 		const produce = vi.fn(async () => "body");
 
-		await cachedPublicExport("declarations", "csv", inputOf(""), produce);
-		const second = await cachedPublicExport(
-			"declarations",
-			"csv",
+		await servePublicExport("declarations:csv", inputOf(""), produce);
+		const second = await servePublicExport(
+			"declarations:csv",
 			inputOf(""),
 			produce,
 		);
@@ -106,53 +102,15 @@ describe("cachedPublicExport", () => {
 		expect(produce).toHaveBeenCalledTimes(2);
 	});
 
-	it("serves an equivalent query from Valkey, compressed, with a one-hour expiry", async () => {
-		const valkey = createFakeValkey();
-		mocks.exportCacheClient.mockResolvedValue(valkey);
-		const { cachedPublicExport } = await import("../publicExportCache");
-		const body = '"2027";"123456789";"Société Démo"\n'.repeat(1_000);
-		const produce = vi.fn(async () => body);
-
-		await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("region=11&region=84"),
-			produce,
-		);
-		const cached = await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("region=84&limit=5&region=11"),
-			produce,
-		);
-
-		expect(cached).toBe(body);
-		expect(produce).toHaveBeenCalledTimes(1);
-		expect(valkey.set).toHaveBeenCalledWith(
-			expect.any(String),
-			expect.any(String),
-			{
-				EX: 3_600,
-			},
-		);
-		const [stored] = [...valkey.store.values()];
-		expect(stored?.length).toBeLessThan(body.length / 10);
-	});
-
-	it("runs one computation for concurrent identical requests", async () => {
-		const { cachedPublicExport } = await import("../publicExportCache");
+	it("runs one computation for concurrent unfiltered requests", async () => {
+		const { servePublicExport } = await import("../publicExportCache");
 		const gate = deferred<string>();
 		const produce = vi.fn(() => gate.promise);
 
 		const calls = [
-			cachedPublicExport("declarations", "csv", inputOf("naf=C"), produce),
-			cachedPublicExport(
-				"declarations",
-				"csv",
-				inputOf("naf=C&page=2"),
-				produce,
-			),
-			cachedPublicExport("declarations", "csv", inputOf("naf=C"), produce),
+			servePublicExport("declarations:csv", inputOf(""), produce),
+			servePublicExport("declarations:csv", inputOf("limit=5"), produce),
+			servePublicExport("declarations:csv", inputOf(""), produce),
 		];
 		await vi.waitFor(() => expect(produce).toHaveBeenCalled());
 		gate.resolve("body");
@@ -162,13 +120,13 @@ describe("cachedPublicExport", () => {
 	});
 
 	it("hands each concurrent caller its own readable copy of a 413", async () => {
-		const { cachedPublicExport } = await import("../publicExportCache");
+		const { servePublicExport } = await import("../publicExportCache");
 		const gate = deferred<Response>();
 		const produce = vi.fn(() => gate.promise);
 
 		const calls = [
-			cachedPublicExport("declarations", "json", inputOf(""), produce),
-			cachedPublicExport("declarations", "json", inputOf(""), produce),
+			servePublicExport("declarations:json", inputOf(""), produce),
+			servePublicExport("declarations:json", inputOf(""), produce),
 		];
 		await vi.waitFor(() => expect(produce).toHaveBeenCalled());
 		gate.resolve(Response.json({ error: "trop" }, { status: 413 }));
@@ -182,97 +140,29 @@ describe("cachedPublicExport", () => {
 		expect(produce).toHaveBeenCalledTimes(1);
 	});
 
-	it("computes again once the previous computation settled", async () => {
-		const { cachedPublicExport } = await import("../publicExportCache");
-		const produce = vi.fn(async () => "body");
-
-		await cachedPublicExport("declarations", "csv", inputOf("naf=C"), produce);
-		await cachedPublicExport("declarations", "csv", inputOf("naf=C"), produce);
-
-		expect(produce).toHaveBeenCalledTimes(2);
-	});
-
 	it("never caches a 413", async () => {
 		const valkey = createFakeValkey();
 		mocks.exportCacheClient.mockResolvedValue(valkey);
-		const { cachedPublicExport } = await import("../publicExportCache");
+		const { servePublicExport } = await import("../publicExportCache");
 
-		await cachedPublicExport("declarations", "csv", inputOf(""), async () =>
+		await servePublicExport("declarations:csv", inputOf(""), async () =>
 			Response.json({ error: "trop" }, { status: 413 }),
 		);
 
 		expect(valkey.set).not.toHaveBeenCalled();
 	});
 
-	it("stops caching filtered exports once the hourly budget is spent", async () => {
-		const valkey = createFakeValkey();
-		valkey.eval.mockResolvedValue(Number.MAX_SAFE_INTEGER);
-		mocks.exportCacheClient.mockResolvedValue(valkey);
-		const { cachedPublicExport } = await import("../publicExportCache");
-
-		await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("region=11"),
-			async () => "body",
-		);
-
-		expect(valkey.set).not.toHaveBeenCalled();
-	});
-
-	it("keeps caching the unfiltered export outside the budget", async () => {
-		const valkey = createFakeValkey();
-		valkey.eval.mockResolvedValue(Number.MAX_SAFE_INTEGER);
-		mocks.exportCacheClient.mockResolvedValue(valkey);
-		const { cachedPublicExport } = await import("../publicExportCache");
-
-		await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("limit=5&utm_source=x"),
-			async () => "body",
-		);
-
-		expect(valkey.eval).not.toHaveBeenCalled();
-		expect(valkey.set).toHaveBeenCalledTimes(1);
-	});
-
-	it("skips a filtered entry above 16 MB compressed but keeps the unfiltered one", async () => {
-		const valkey = createFakeValkey();
-		mocks.exportCacheClient.mockResolvedValue(valkey);
-		const { cachedPublicExport } = await import("../publicExportCache");
-		const { randomBytes } = await import("node:crypto");
-		const incompressible = randomBytes(13 * 1024 * 1024).toString("base64");
-
-		await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("region=11"),
-			async () => incompressible,
-		);
-		expect(valkey.set).not.toHaveBeenCalled();
-
-		await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf(""),
-			async () => incompressible,
-		);
-		expect(valkey.set).toHaveBeenCalledTimes(1);
-	});
-
 	it("fails open, logs and drops the cache client when Valkey errors", async () => {
 		const valkey = createFakeValkey();
 		valkey.get.mockRejectedValue(new Error("connection reset"));
-		valkey.eval.mockRejectedValue(new Error("connection reset"));
+		valkey.set.mockRejectedValue(new Error("connection reset"));
 		mocks.exportCacheClient.mockResolvedValue(valkey);
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-		const { cachedPublicExport } = await import("../publicExportCache");
+		const { servePublicExport } = await import("../publicExportCache");
 
-		const result = await cachedPublicExport(
-			"declarations",
-			"csv",
-			inputOf("region=11"),
+		const result = await servePublicExport(
+			"declarations:csv",
+			inputOf(""),
 			async () => "body",
 		);
 
@@ -293,17 +183,11 @@ describe("cachedPublicExport", () => {
 		const valkey = createFakeValkey();
 		mocks.exportCacheClient.mockResolvedValue(valkey);
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-		const { cachedPublicExport, publicExportCacheKey } = await import(
-			"../publicExportCache"
-		);
-		valkey.store.set(
-			publicExportCacheKey("declarations", "csv", inputOf("")),
-			"not-a-gzip-payload",
-		);
+		const { servePublicExport } = await import("../publicExportCache");
+		valkey.store.set("public-export:v2:declarations:csv", "not-a-gzip-payload");
 
-		const result = await cachedPublicExport(
-			"declarations",
-			"csv",
+		const result = await servePublicExport(
+			"declarations:csv",
 			inputOf(""),
 			async () => "fresh",
 		);
@@ -315,5 +199,97 @@ describe("cachedPublicExport", () => {
 			expect.any(String),
 		);
 		consoleSpy.mockRestore();
+	});
+});
+
+describe("servePublicExport — filtered exports", () => {
+	it.each([
+		"q=Démo",
+		"city=Paris",
+		"region=11",
+		"departement=75",
+		"naf=C",
+		"workforceRanges=1000%2B",
+		"workforceMin=50",
+		"workforceMax=50",
+		"year=2027",
+	])("never reads nor writes the cache for %s", async (query) => {
+		const valkey = createFakeValkey();
+		mocks.exportCacheClient.mockResolvedValue(valkey);
+		const { servePublicExport } = await import("../publicExportCache");
+		const produce = vi.fn(async () => "filtered");
+
+		await servePublicExport("declarations:csv", inputOf(query), produce);
+		const second = await servePublicExport(
+			"declarations:csv",
+			inputOf(query),
+			produce,
+		);
+
+		expect(second).toBe("filtered");
+		expect(produce).toHaveBeenCalledTimes(2);
+		expect(valkey.get).not.toHaveBeenCalled();
+		expect(valkey.set).not.toHaveBeenCalled();
+	});
+
+	it("computes concurrent filtered requests under the per-pod slots", async () => {
+		const { servePublicExport } = await import("../publicExportCache");
+		const gate = deferred<string>();
+		const produce = vi.fn(() => gate.promise);
+
+		const running = Array.from({ length: MAX_CONCURRENT_PUBLIC_EXPORTS }, () =>
+			servePublicExport("declarations:csv", inputOf("region=11"), produce),
+		);
+		const rejected = await servePublicExport(
+			"declarations:csv",
+			inputOf("region=11"),
+			produce,
+		);
+		gate.resolve("body");
+
+		expect(await Promise.all(running)).toEqual(["body", "body"]);
+		expect(rejected).toBeInstanceOf(Response);
+		expect(produce).toHaveBeenCalledTimes(MAX_CONCURRENT_PUBLIC_EXPORTS);
+	});
+});
+
+describe("withPublicExportSlot", () => {
+	it("answers 503 to the third concurrent computation", async () => {
+		const { withPublicExportSlot } = await import("../publicExportCache");
+		const gate = deferred<string>();
+
+		const running = [
+			withPublicExportSlot(() => gate.promise),
+			withPublicExportSlot(() => gate.promise),
+		];
+		const third = await withPublicExportSlot(async () => "never");
+		gate.resolve("done");
+
+		if (!(third instanceof Response)) throw new Error("expected a 503");
+		expect(third.status).toBe(503);
+		expect(third.headers.get("Retry-After")).not.toBeNull();
+		expect(await Promise.all(running)).toEqual(["done", "done"]);
+	});
+
+	it("frees its slot once a computation settles", async () => {
+		const { withPublicExportSlot } = await import("../publicExportCache");
+
+		for (let index = 0; index <= MAX_CONCURRENT_PUBLIC_EXPORTS; index += 1) {
+			expect(await withPublicExportSlot(async () => "body")).toBe("body");
+		}
+	});
+
+	it("frees its slot when a computation throws", async () => {
+		const { withPublicExportSlot } = await import("../publicExportCache");
+
+		for (let index = 0; index < MAX_CONCURRENT_PUBLIC_EXPORTS; index += 1) {
+			await expect(
+				withPublicExportSlot(async () => {
+					throw new Error("db down");
+				}),
+			).rejects.toThrow("db down");
+		}
+
+		expect(await withPublicExportSlot(async () => "body")).toBe("body");
 	});
 });

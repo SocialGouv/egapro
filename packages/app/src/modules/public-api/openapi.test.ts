@@ -172,6 +172,10 @@ describe("publicOpenApiSpec", () => {
 			expect(description).toContain(formatCount(MAX_XLSX_EXPORT_ROWS));
 			expect(description).toContain(formatCount(MAX_EXPORT_ROWS));
 		});
+
+		it("documents the 503 of a busy pod and its Retry-After", () => {
+			expect(operation.responses["503"].description).toContain("Retry-After");
+		});
 	});
 
 	describe("PublicDeclaration schema — data-model guarantees", () => {

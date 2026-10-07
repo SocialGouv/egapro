@@ -1,49 +1,36 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 import { gunzip, gzip } from "node:zlib";
-import type { PublicSearchInput } from "~/modules/public-api";
+import {
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	type PublicSearchInput,
+	publicExportBusyResponse,
+} from "~/modules/public-api";
 import { exportCacheValkey, withValkeyTimeout } from "./valkey";
 
 const TTL_SECONDS = 3_600;
 const COMMAND_TIMEOUT_MS = 5_000;
-const HOURLY_BYTE_BUDGET = 64 * 1024 * 1024;
-const MAX_ENTRY_BYTES = 16 * 1024 * 1024;
-const KEY_PREFIX = "public-export:v1";
+const NON_FILTER_FIELDS = new Set(["limit", "offset", "sort"]);
 const gzipAsync = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
-const inflight = new Map<string, Promise<string | Response>>();
+const inflight = new Map<UnfilteredPublicExport, Promise<string | Response>>();
+let runningExports = 0;
 
-export type PublicExportDataset = "declarations" | "representations";
+export type UnfilteredPublicExport =
+	| "declarations:csv"
+	| "declarations:json"
+	| "representations:csv";
 
-function normalizedFacet(values: readonly string[] | undefined) {
-	return values ? [...new Set(values)].sort() : null;
+// Every other field narrows the rows, so a filter added to the schema later is never served from the full-export key.
+function isUnfiltered(input: PublicSearchInput): boolean {
+	return Object.entries(input).every(
+		([field, value]) => NON_FILTER_FIELDS.has(field) || value === undefined,
+	);
 }
 
-function exportFilters(input: PublicSearchInput) {
-	return [
-		input.q ?? null,
-		input.city ?? null,
-		normalizedFacet(input.region),
-		normalizedFacet(input.departement),
-		normalizedFacet(input.naf),
-		normalizedFacet(input.workforceRanges),
-		input.workforceMin ?? null,
-		input.workforceMax ?? null,
-		input.year ?? null,
-	];
-}
-
-export function publicExportCacheKey(
-	dataset: PublicExportDataset,
-	format: string,
-	input: PublicSearchInput,
-): string {
-	const digest = createHash("sha256")
-		.update(JSON.stringify(exportFilters(input)))
-		.digest("hex");
-	return `${KEY_PREFIX}:${dataset}:${format}:${digest}`;
+function cacheKey(name: UnfilteredPublicExport): string {
+	return `public-export:v2:${name}`;
 }
 
 function logCacheFailure(operation: string, error: unknown) {
@@ -53,12 +40,17 @@ function logCacheFailure(operation: string, error: unknown) {
 	);
 }
 
-async function readCachedExport(key: string): Promise<string | null> {
+async function readCachedExport(
+	name: UnfilteredPublicExport,
+): Promise<string | null> {
 	const valkey = await exportCacheValkey.client();
 	if (!valkey) return null;
 	let payload: string | null;
 	try {
-		payload = await withValkeyTimeout(valkey.get(key), COMMAND_TIMEOUT_MS);
+		payload = await withValkeyTimeout(
+			valkey.get(cacheKey(name)),
+			COMMAND_TIMEOUT_MS,
+		);
 	} catch (error) {
 		logCacheFailure("read", error);
 		exportCacheValkey.discard(valkey);
@@ -74,38 +66,15 @@ async function readCachedExport(key: string): Promise<string | null> {
 }
 
 async function storeCachedExport(
-	key: string,
+	name: UnfilteredPublicExport,
 	body: string,
-	unfiltered: boolean,
 ): Promise<void> {
 	const valkey = await exportCacheValkey.client();
 	if (!valkey) return;
-	let payload: string;
 	try {
-		payload = (await gzipAsync(body)).toString("base64");
-	} catch (error) {
-		logCacheFailure("compress", error);
-		return;
-	}
-	// The unfiltered exports are a handful of keys bounded by MAX_EXPORT_ROWS: always worth caching.
-	if (!unfiltered && payload.length > MAX_ENTRY_BYTES) return;
-	const hour = Math.floor(Date.now() / (TTL_SECONDS * 1000));
-	try {
-		if (!unfiltered) {
-			const used = await withValkeyTimeout(
-				valkey.eval(
-					"local used = redis.call('INCRBY', KEYS[1], ARGV[1]); if used == tonumber(ARGV[1]) then redis.call('EXPIRE', KEYS[1], ARGV[2]); end; return used",
-					{
-						keys: [`${KEY_PREFIX}:budget:${hour}`],
-						arguments: [String(payload.length), String(2 * TTL_SECONDS)],
-					},
-				),
-				COMMAND_TIMEOUT_MS,
-			);
-			if (Number(used) > HOURLY_BYTE_BUDGET) return;
-		}
+		const payload = (await gzipAsync(body)).toString("base64");
 		await withValkeyTimeout(
-			valkey.set(key, payload, { EX: TTL_SECONDS }),
+			valkey.set(cacheKey(name), payload, { EX: TTL_SECONDS }),
 			COMMAND_TIMEOUT_MS,
 		);
 	} catch (error) {
@@ -114,31 +83,51 @@ async function storeCachedExport(
 	}
 }
 
-// Concurrent identical misses share one `produce` per pod; a 413 Response is shared, never cached.
-export async function cachedPublicExport(
-	dataset: PublicExportDataset,
-	format: string,
+async function cachedUnfilteredExport(
+	name: UnfilteredPublicExport,
+	produce: () => Promise<string | Response>,
+): Promise<string | Response> {
+	const cached = await readCachedExport(name);
+	if (cached !== null) return cached;
+
+	let running = inflight.get(name);
+	if (!running) {
+		running = (async () => {
+			const produced = await produce();
+			if (typeof produced === "string") {
+				await storeCachedExport(name, produced);
+			}
+			return produced;
+		})().finally(() => {
+			inflight.delete(name);
+		});
+		inflight.set(name, running);
+	}
+	const shared = await running;
+	return shared instanceof Response ? shared.clone() : shared;
+}
+
+export async function withPublicExportSlot<T>(
+	produce: () => Promise<T | Response>,
+): Promise<T | Response> {
+	if (runningExports >= MAX_CONCURRENT_PUBLIC_EXPORTS) {
+		return publicExportBusyResponse();
+	}
+	runningExports += 1;
+	try {
+		return await produce();
+	} finally {
+		runningExports -= 1;
+	}
+}
+
+// The unfiltered exports bypass the slots: single-flight already bounds them to one computation per export and per pod.
+export function servePublicExport(
+	name: UnfilteredPublicExport,
 	input: PublicSearchInput,
 	produce: () => Promise<string | Response>,
 ): Promise<string | Response> {
-	const key = publicExportCacheKey(dataset, format, input);
-	const cached = await readCachedExport(key);
-	if (cached !== null) return cached;
-
-	let running = inflight.get(key);
-	if (!running) {
-		const unfiltered = exportFilters(input).every((value) => value === null);
-		running = (async () => {
-			const result = await produce();
-			if (typeof result === "string") {
-				await storeCachedExport(key, result, unfiltered);
-			}
-			return result;
-		})().finally(() => {
-			inflight.delete(key);
-		});
-		inflight.set(key, running);
-	}
-	const result = await running;
-	return result instanceof Response ? result.clone() : result;
+	return isUnfiltered(input)
+		? cachedUnfilteredExport(name, produce)
+		: withPublicExportSlot(produce);
 }

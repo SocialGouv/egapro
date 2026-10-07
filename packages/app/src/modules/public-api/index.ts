@@ -3,11 +3,13 @@ export {
 	getPublicDeclarationBySirenYear,
 	getPublicDeclarationsBySiren,
 } from "./declarationsBySirenService";
-export type { PublicExportFormat } from "./exportLimits";
 export {
 	fetchWithinExportLimit,
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
 	MAX_EXPORT_ROWS,
 	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+	publicExportBusyResponse,
 } from "./exportLimits";
 export {
 	PUBLIC_API_EXPORT_HEADERS,

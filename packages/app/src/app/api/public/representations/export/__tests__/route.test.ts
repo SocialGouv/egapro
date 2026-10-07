@@ -111,19 +111,30 @@ describe("GET /api/public/representations/export", () => {
 });
 
 describe("GET /api/public/representations/export — server-side cache", () => {
-	it("serves an equivalent CSV query from the cache without querying the database", async () => {
+	it("serves the unfiltered CSV from the cache without querying the database", async () => {
 		mocks.getValkey.mockResolvedValue(createFakeValkey());
 		mocks.generateCsv.mockReturnValue('"SIREN"\n"123456789"');
-		await callGet("?format=csv&region=11&region=84");
+		await callGet("?format=csv");
 		mocks.buildRows.mockClear();
 
-		const response = await callGet("?region=84&format=csv&page=2&region=11");
+		const response = await callGet("?format=csv&page=2");
 
 		expect(mocks.buildRows).not.toHaveBeenCalled();
 		expect(response.headers.get("Content-Disposition")).toContain(
 			"index-egapro-representations-equilibrees.csv",
 		);
 		expect(await response.text()).toBe('"SIREN"\n"123456789"');
+	});
+
+	it("never caches a filtered CSV", async () => {
+		const valkey = createFakeValkey();
+		mocks.getValkey.mockResolvedValue(valkey);
+
+		await callGet("?format=csv&region=11");
+		await callGet("?format=csv&region=11");
+
+		expect(valkey.set).not.toHaveBeenCalled();
+		expect(mocks.buildRows).toHaveBeenCalledTimes(2);
 	});
 
 	it("does not cache Excel workbooks", async () => {

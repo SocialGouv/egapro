@@ -4,6 +4,9 @@ import {
 	fetchWithinExportLimit,
 	MAX_EXPORT_ROWS,
 	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+	PUBLIC_EXPORT_RETRY_AFTER_SECONDS,
+	publicExportBusyResponse,
 } from "../exportLimits";
 
 describe("fetchWithinExportLimit", () => {
@@ -65,5 +68,46 @@ describe("fetchWithinExportLimit", () => {
 
 		if (!(result instanceof Response)) throw new Error("expected a Response");
 		expect((await result.json()).error).toContain("year");
+	});
+
+	it("probes the cap on the light projection and only then loads the rows", async () => {
+		const probeRows = vi.fn(async () => ["siren"]);
+		const fetchRows = vi.fn(async () => ["row"]);
+
+		const rows = await fetchWithinExportLimit("xlsx", fetchRows, probeRows);
+
+		expect(probeRows).toHaveBeenCalledWith(MAX_XLSX_EXPORT_ROWS + 1);
+		expect(fetchRows).toHaveBeenCalledWith(MAX_XLSX_EXPORT_ROWS);
+		expect(rows).toEqual(["row"]);
+	});
+
+	it("never loads the full rows once the light probe exceeds the cap", async () => {
+		const fetchRows = vi.fn(async () => ["row"]);
+
+		const result = await fetchWithinExportLimit(
+			"xlsx",
+			fetchRows,
+			async (limit) => new Array<string>(limit),
+		);
+
+		expect(fetchRows).not.toHaveBeenCalled();
+		if (!(result instanceof Response)) throw new Error("expected a Response");
+		expect(result.status).toBe(413);
+	});
+});
+
+describe("publicExportBusyResponse", () => {
+	it("answers an uncacheable 503 with Retry-After and a French message", async () => {
+		const response = publicExportBusyResponse();
+
+		expect(response.status).toBe(503);
+		expect(response.headers.get("Retry-After")).toBe(
+			String(PUBLIC_EXPORT_RETRY_AFTER_SECONDS),
+		);
+		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(await response.json()).toEqual({
+			error: PUBLIC_EXPORT_BUSY_MESSAGE,
+		});
 	});
 });

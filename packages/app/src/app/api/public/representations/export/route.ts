@@ -14,7 +14,10 @@ import {
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
-import { cachedPublicExport } from "~/server/services/publicExportCache";
+import {
+	servePublicExport,
+	withPublicExportSlot,
+} from "~/server/services/publicExportCache";
 
 // Defaults to xlsx: this endpoint shipped as an Excel-only download and
 // existing callers pass no format at all.
@@ -69,9 +72,8 @@ export const GET = withAuditedRoute(
 				);
 			}
 			if (format.data === "csv") {
-				const body = await cachedPublicExport(
-					"representations",
-					"csv",
+				const body = await servePublicExport(
+					"representations:csv",
 					input.data,
 					async () => {
 						const rows = await fetchWithinExportLimit("csv", (limit) =>
@@ -85,13 +87,17 @@ export const GET = withAuditedRoute(
 				return body instanceof Response ? body : csvExportResponse(body);
 			}
 
-			const rows = await fetchWithinExportLimit("xlsx", (limit) =>
-				buildRepresentationExportRows(db, input.data, limit),
-			);
-			if (rows instanceof Response) return rows;
-			const xlsxBuffer = await generateRepresentationXlsx(rows);
+			const workbook = await withPublicExportSlot(async () => {
+				const rows = await fetchWithinExportLimit("xlsx", (limit) =>
+					buildRepresentationExportRows(db, input.data, limit),
+				);
+				return rows instanceof Response
+					? rows
+					: generateRepresentationXlsx(rows);
+			});
+			if (workbook instanceof Response) return workbook;
 
-			return new NextResponse(new Uint8Array(xlsxBuffer), {
+			return new NextResponse(new Uint8Array(workbook), {
 				headers: {
 					...PUBLIC_API_EXPORT_HEADERS,
 					"Content-Type":

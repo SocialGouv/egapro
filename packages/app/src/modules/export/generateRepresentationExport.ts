@@ -89,12 +89,12 @@ function representationExportFilters(input: PublicSearchInput) {
 
 async function fetchSubmittedRepresentationDeclarations(
 	db: DB,
-	input?: PublicSearchInput,
-	limit?: number,
+	input: PublicSearchInput | undefined,
+	limit: number,
 ) {
 	const submitted = eq(representationDeclarations.status, "submitted");
 	const filters = input ? representationExportFilters(input) : [];
-	const query = db
+	return db
 		.select({
 			year: representationDeclarations.year,
 			siren: companies.siren,
@@ -128,8 +128,8 @@ async function fetchSubmittedRepresentationDeclarations(
 			),
 		)
 		.where(filters.length > 0 ? and(submitted, ...filters) : submitted)
-		.orderBy(representationDeclarations.year, companies.siren);
-	return limit === undefined ? query : query.limit(limit);
+		.orderBy(representationDeclarations.year, companies.siren)
+		.limit(limit);
 }
 
 type RepresentationDeclarationRow = Awaited<
@@ -164,8 +164,8 @@ function toExportRow(
 
 export async function buildRepresentationExportRows(
 	db: DB,
-	input?: PublicSearchInput,
-	limit?: number,
+	input: PublicSearchInput | undefined,
+	limit: number,
 ): Promise<RepresentationExportRow[]> {
 	const rows = await fetchSubmittedRepresentationDeclarations(db, input, limit);
 	return rows.map(toExportRow);

@@ -416,7 +416,7 @@ export const declarationsPaths = {
 			operationId: "exportPublicDeclarations",
 			summary: "Exporter toutes les déclarations publiées",
 			description:
-				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. L'export JSON ou CSV est mis en cache 1 heure côté serveur pour chaque jeu de filtres.",
+				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. Seul l'export complet, sans filtre, en JSON ou CSV est mis en cache 1 heure côté serveur.",
 			parameters: [
 				{
 					name: "format",
@@ -469,6 +469,9 @@ export const declarationsPaths = {
 					`Export trop volumineux : plus de ${formatCount(MAX_XLSX_EXPORT_ROWS)} lignes en Excel, ou plus de ${formatCount(MAX_EXPORT_ROWS)} lignes en JSON ou CSV. Ajoutez des filtres (par exemple \`year\`) ou, pour Excel, utilisez le format CSV.`,
 				),
 				"500": serverErrorResponse,
+				"503": errorResponse(
+					"Trop d'exports filtrés ou Excel en cours de calcul : réessayez après le délai indiqué par l'en-tête `Retry-After`.",
+				),
 			},
 		},
 	},
