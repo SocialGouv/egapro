@@ -33,8 +33,9 @@ spec:
                 - -c
                 - |
                   YEAR=$(date -u +%Y)
+                  printf 'Authorization: Bearer %s\n' "${EGAPRO_EXPORT_API_TOKEN}" | \
                   curl -X POST "http://app:3000/api/export/generate?year=${YEAR}" \
-                    -H "Authorization: Bearer ${EGAPRO_EXPORT_API_TOKEN}" \
+                    -H @- \
                     --connect-timeout 10 \
                     --max-time 300 \
                     --fail \
