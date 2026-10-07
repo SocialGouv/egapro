@@ -6,8 +6,6 @@ import { resolveAdminAccess } from "~/modules/domain";
 import {
 	ADMIN,
 	ADMIN_MFA_RESUME,
-	API_PUBLIC_DECLARATIONS,
-	API_SEARCH,
 	API_V1_PREFIX,
 	LOGIN,
 	MY_SPACE,
@@ -42,10 +40,6 @@ import {
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	if (pathname === API_SEARCH) {
-		return searchRedirect(request);
-	}
-
 	if (pathname.startsWith(API_V1_PREFIX)) {
 		return gatewayMiddleware(request);
 	}
@@ -55,14 +49,6 @@ export async function middleware(request: NextRequest) {
 	}
 
 	return sessionMiddleware(request);
-}
-
-function searchRedirect(request: NextRequest) {
-	const target = new URL(API_PUBLIC_DECLARATIONS, request.url);
-	for (const [key, value] of request.nextUrl.searchParams.entries()) {
-		target.searchParams.append(key === "section_naf" ? "naf" : key, value);
-	}
-	return NextResponse.redirect(target, 308);
 }
 
 function redirectToLogin(request: NextRequest) {
@@ -168,7 +154,6 @@ export const config = {
 	matcher: [
 		"/admin/:path*",
 		"/api/v1/:path*",
-		"/api/search",
 		"/mon-espace/:path*",
 		"/declaration-remuneration/:path*",
 		"/avis-cse/:path*",

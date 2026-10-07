@@ -10,7 +10,25 @@ describe("GET /api/public/openapi.json", () => {
 		const body = await response.json();
 		expect(body.openapi).toBe("3.1.0");
 		expect(body.info.title).toBe("EGAPRO — API publique");
-		expect(body.paths["/api/public/declarations"]).toBeDefined();
+		expect(Object.keys(body.paths)).toEqual([
+			"/api/public/declarations/export",
+		]);
+	});
+
+	it("documents none of the withdrawn consultation endpoints", async () => {
+		const body = await GET().json();
+
+		for (const path of [
+			"/api/public/declarations",
+			"/api/public/declarations/{siren}",
+			"/api/public/declarations/{siren}/{year}",
+			"/api/public/representations",
+			"/api/public/representations/{siren}",
+			"/api/public/representations/{siren}/{year}",
+			"/api/public/representations/export",
+		]) {
+			expect(body.paths[path]).toBeUndefined();
+		}
 	});
 
 	it("sets open CORS and one-hour cache headers", () => {

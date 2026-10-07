@@ -138,15 +138,6 @@ export const publicSearchResultDTOSchema = z.object({
 
 export type PublicSearchResultDTO = z.infer<typeof publicSearchResultDTOSchema>;
 
-export const publicRepresentationSearchInputSchema = z.object({
-	...sharedSearchFields,
-	limit: z.number().int().min(1).max(100).default(10),
-});
-
-export type PublicRepresentationSearchInput = z.infer<
-	typeof publicRepresentationSearchInputSchema
->;
-
 export const publicRepresentationDTOSchema = z.object({
 	siren: z.string(),
 	year: z.number().int(),
@@ -174,13 +165,4 @@ export const publicRepresentationDTOSchema = z.object({
 
 export type PublicRepresentationDTO = z.infer<
 	typeof publicRepresentationDTOSchema
->;
-
-export const publicRepresentationSearchResultDTOSchema = z.object({
-	data: z.array(publicRepresentationDTOSchema),
-	count: z.number().int(),
-});
-
-export type PublicRepresentationSearchResultDTO = z.infer<
-	typeof publicRepresentationSearchResultDTOSchema
 >;

@@ -12,7 +12,7 @@ vi.mock("~/env", () => ({ env: mocks.env }));
 vi.mock("redis", () => ({ createClient: vi.fn() }));
 
 function request(headers: HeadersInit = {}) {
-	return new Request("http://localhost/api/public/declarations", {
+	return new Request("http://localhost/api/public/declarations/export", {
 		headers: { "x-real-ip": "203.0.113.8", ...headers },
 	});
 }
