@@ -1,11 +1,8 @@
 import {
 	buildSearchParameters,
-	corsAllowOriginHeader,
 	errorResponse,
-	limitOnlyParam,
 	publicNonDiffusibleIdentityProperties,
 	serverErrorResponse,
-	sirenParam,
 } from "./openapiShared";
 
 export const publicDeclarationSchema = {
@@ -238,23 +235,6 @@ export const publicDeclarationSchema = {
 	},
 } as const;
 
-export const publicSearchResultSchema = {
-	type: "object",
-	required: ["data", "count"],
-	properties: {
-		data: {
-			type: "array",
-			items: publicDeclarationSchema,
-			description: "Liste des déclarations correspondant à la recherche.",
-		},
-		count: {
-			type: "integer",
-			description: "Nombre total de résultats (avant pagination).",
-			example: 42,
-		},
-	},
-} as const;
-
 const declarationSearchExtras = [
 	{
 		name: "city",
@@ -327,88 +307,6 @@ function declarationExportFilterParameters() {
 }
 
 export const declarationsPaths = {
-	"/api/public/declarations": {
-		get: {
-			operationId: "searchPublicDeclarations",
-			summary: "Rechercher des déclarations",
-			description:
-				"Recherche paginée sur les entreprises ayant une déclaration publiée. Sans filtre d'année, une seule ligne — la plus récente — est retournée par SIREN. Les résultats sont filtrables par texte libre, ville, région, département, section NAF, effectif et année.",
-			parameters: declarationSearchParameters(),
-			responses: {
-				"200": {
-					description: "Liste paginée de déclarations.",
-					headers: {
-						"Access-Control-Allow-Origin": corsAllowOriginHeader,
-					},
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/PublicSearchResult" },
-						},
-					},
-				},
-				"400": errorResponse("Paramètres invalides."),
-				"500": serverErrorResponse,
-			},
-		},
-	},
-	"/api/public/declarations/{siren}": {
-		get: {
-			operationId: "getPublicDeclarationsBySiren",
-			summary: "Lister les déclarations d'une entreprise",
-			description:
-				"Retourne toutes les déclarations publiées pour le SIREN donné, triées par année décroissante. Seules les années dont la date de rendu public est atteinte sont retournées.",
-			parameters: [sirenParam, limitOnlyParam],
-			responses: {
-				"200": {
-					description: "Liste des déclarations publiées pour ce SIREN.",
-					content: {
-						"application/json": {
-							schema: {
-								type: "array",
-								items: { $ref: "#/components/schemas/PublicDeclaration" },
-							},
-						},
-					},
-				},
-				"400": errorResponse("SIREN invalide."),
-				"500": serverErrorResponse,
-			},
-		},
-	},
-	"/api/public/declarations/{siren}/{year}": {
-		get: {
-			operationId: "getPublicDeclarationBySirenYear",
-			summary: "Consulter une déclaration par SIREN et année",
-			description:
-				"Retourne la déclaration publiée pour le SIREN et l'année donnés. Retourne 404 si la déclaration n'existe pas ou si la date de rendu public de cette année n'est pas encore atteinte.",
-			parameters: [
-				sirenParam,
-				{
-					name: "year",
-					in: "path",
-					required: true,
-					description: "Année de la déclaration (YYYY).",
-					example: 2026,
-					schema: { type: "integer", minimum: 2018 },
-				},
-			],
-			responses: {
-				"200": {
-					description: "Déclaration publiée.",
-					content: {
-						"application/json": {
-							schema: { $ref: "#/components/schemas/PublicDeclaration" },
-						},
-					},
-				},
-				"400": errorResponse("SIREN ou année invalide."),
-				"404": errorResponse(
-					"Déclaration non trouvée ou non encore publiée (date de rendu public non atteinte).",
-				),
-				"500": serverErrorResponse,
-			},
-		},
-	},
 	"/api/public/declarations/export": {
 		get: {
 			operationId: "exportPublicDeclarations",

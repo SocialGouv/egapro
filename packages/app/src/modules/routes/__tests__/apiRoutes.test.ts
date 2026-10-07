@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
 	API_DECLARATION_PDF,
-	API_SEARCH,
 	API_TRPC,
 	API_UPLOAD,
 	API_V1_FILES,
@@ -29,6 +28,5 @@ describe("api routes", () => {
 
 	it("keeps the paths Next generates no type for", () => {
 		expect(API_TRPC).toBe("/api/trpc");
-		expect(API_SEARCH).toBe("/api/search");
 	});
 });

@@ -7,13 +7,11 @@ La fiche entreprise présente ces deux familles dans deux onglets, `Rémunérati
 ## Points d'accès
 
 - interface : `/index-egapro/recherche` ;
-- API de recherche : `/api/public/declarations` ;
-- historique d'un SIREN : `/api/public/declarations/{siren}` ;
-- représentation équilibrée : `/api/public/representations` et `/api/public/representations/{siren}` ;
-- exports filtrables : `/api/public/declarations/export?format=json|csv|xlsx` ;
-- export représentation : `/api/public/representations/export?format=csv|xlsx` ;
+- export filtrable des indicateurs de rémunération : `/api/public/declarations/export?format=json|csv|xlsx` ;
 - documentation OpenAPI : `/api/public/docs` et `/api/public/openapi.json` ;
 - flux RSS : `/index-egapro/actualites.xml`.
+
+La représentation équilibrée n'est exposée par aucune API publique : elle se consulte sur la fiche entreprise et sur data.gouv.fr. Les jeux de données complets sont publiés sur data.gouv.fr : [index égalité professionnelle](https://www.data.gouv.fr/datasets/index-egalite-professionnelle-f-h-des-entreprises-de-50-salaries-ou-plus) et [représentation équilibrée](https://www.data.gouv.fr/datasets/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes-entreprises).
 
 Les facettes `region`, `departement` et `naf` sont répétables — `?region=11&region=84` filtre sur l'une ou l'autre — et acceptent toujours la forme scalaire historique. `workforceRanges` filtre sur les tranches d'effectif de l'observatoire (`<50`, `50-99`, `100-249`, `250-999`, `1000+`), plusieurs tranches étant elles aussi combinées en « ou ».
 

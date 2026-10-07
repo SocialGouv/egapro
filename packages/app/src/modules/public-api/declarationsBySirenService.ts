@@ -29,13 +29,7 @@ type DeclarationRow = {
 	publicDataReleaseDate: string | null;
 };
 
-async function fetchRows(
-	siren: string,
-	year?: number,
-): Promise<DeclarationRow[]> {
-	const yearFilter =
-		year !== undefined ? eq(declarations.year, year) : undefined;
-
+async function fetchRows(siren: string): Promise<DeclarationRow[]> {
 	const rows = await db
 		.select({
 			...publicDeclarationColumns,
@@ -70,7 +64,6 @@ async function fetchRows(
 				eq(declarations.siren, siren),
 				notCancelledCondition(),
 				submittedDeclarationCondition(),
-				yearFilter,
 			),
 		)
 		.orderBy(desc(declarations.year));
@@ -113,17 +106,4 @@ export async function getPublicDeclarationsBySiren(
 	const released = rows.filter((r) => isReleased(r.publicDataReleaseDate));
 	const limited = limit !== undefined ? released.slice(0, limit) : released;
 	return limited.map((r) => toPublicDeclaration(r.declaration, r.company));
-}
-
-export async function getPublicDeclarationBySirenYear(
-	siren: string,
-	year: number,
-): Promise<PublicDeclarationDTO | null> {
-	const rows = await fetchRows(siren, year);
-	const row = rows[0];
-	if (!row) return null;
-
-	if (!isReleased(row.publicDataReleaseDate)) return null;
-
-	return toPublicDeclaration(row.declaration, row.company);
 }

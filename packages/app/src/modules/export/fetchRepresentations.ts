@@ -91,9 +91,8 @@ export type RepresentationRow = Awaited<
 >[number];
 
 /**
- * SUIT is a controlling authority — unlike the public representation export
- * (`generateRepresentationExport.ts`), identity and location fields are
- * always returned in full, including for non-diffusible companies (S30).
+ * SUIT is a controlling authority: identity and location fields are always
+ * returned in full, including for non-diffusible companies (S30).
  */
 export function assembleRepresentation(row: RepresentationRow) {
 	return {

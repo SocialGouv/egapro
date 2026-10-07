@@ -6,10 +6,7 @@ import {
 	publicRepresentationColumns,
 	toPublicRepresentation,
 } from "../representationProjection";
-import {
-	publicRepresentationDTOSchema,
-	publicRepresentationSearchInputSchema,
-} from "../schemas";
+import { publicRepresentationDTOSchema } from "../schemas";
 
 const declarationFixture: PublicRepresentationSource = {
 	year: 2026,
@@ -271,45 +268,5 @@ describe("toPublicRepresentation", () => {
 		expect(dto.publishUrl).toBeNull();
 		expect(dto.publishModalities).toBeNull();
 		expect(() => publicRepresentationDTOSchema.parse(dto)).not.toThrow();
-	});
-});
-
-describe("publicRepresentationSearchInputSchema", () => {
-	it("mirrors the declaration search contract", () => {
-		expect(publicRepresentationSearchInputSchema.parse({})).toEqual({
-			limit: 10,
-			offset: 0,
-		});
-		expect(
-			publicRepresentationSearchInputSchema.parse({
-				q: "acme",
-				region: "11",
-				departement: "75",
-				naf: "62.01Z",
-				year: 2026,
-				limit: 50,
-				offset: 20,
-			}),
-		).toEqual({
-			q: "acme",
-			region: ["11"],
-			departement: ["75"],
-			naf: ["62.01Z"],
-			year: 2026,
-			limit: 50,
-			offset: 20,
-		});
-		expect(
-			publicRepresentationSearchInputSchema.safeParse({ limit: 101 }).success,
-		).toBe(false);
-		expect(
-			publicRepresentationSearchInputSchema.safeParse({ limit: 0 }).success,
-		).toBe(false);
-		expect(
-			publicRepresentationSearchInputSchema.safeParse({ offset: -1 }).success,
-		).toBe(false);
-		expect(
-			publicRepresentationSearchInputSchema.safeParse({ q: "" }).success,
-		).toBe(false);
 	});
 });

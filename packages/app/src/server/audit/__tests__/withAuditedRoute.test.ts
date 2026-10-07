@@ -153,7 +153,7 @@ describe("withAuditedRoute", () => {
 	it("forwards the Next route context to the handler", async () => {
 		const seen: unknown[] = [];
 		const handler = withAuditedRoute(
-			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
 			async (_request: Request, routeContext: SirenRouteContext) => {
 				seen.push(await routeContext.params);
 				return new Response(null, { status: 200 });
@@ -170,7 +170,7 @@ describe("withAuditedRoute", () => {
 	it("forwards the Next route context to resolveContext", async () => {
 		const handler = withAuditedRoute(
 			{
-				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
+				action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD,
 				resolveContext: async (
 					_request: Request,
 					routeContext: SirenRouteContext,
@@ -204,7 +204,7 @@ describe("withAuditedRoute", () => {
 		}
 
 		const handler = withAuditedRoute(
-			{ action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN },
+			{ action: AUDIT_ACTIONS.PDF_DECLARATION_DOWNLOAD },
 			dynamicRoute,
 		);
 		const response = await handler(buildRequest(), {

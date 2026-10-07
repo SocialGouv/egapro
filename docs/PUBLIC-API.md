@@ -1,6 +1,6 @@
 # API publique EGAPRO
 
-API publique de consultation des déclarations d'index égalité professionnelle. Aucune authentification requise. Accessible depuis n'importe quelle origine (CORS `*`).
+API publique d'export des indicateurs de rémunération A à F des déclarations d'index égalité professionnelle. Aucune authentification requise. Accessible depuis n'importe quelle origine (CORS `*`).
 
 La spécification OpenAPI 3.1 complète est disponible à :
 
@@ -27,10 +27,7 @@ L'indicateur G (écart de rémunération déclaré par l'entreprise par catégor
 
 ### Identité des entreprises non diffusibles masquée
 
-Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible` :
-
-- rémunération : `name`, `address`, `city`, `regionCode`, `region`, `departmentCode`, `departmentLabel`, `countryCode`, `countryLabel`, `nafCode`, `nafLabel`
-- représentation : `name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`
+Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible` : `name`, `address`, `city`, `regionCode`, `region`, `departmentCode`, `departmentLabel`, `countryCode`, `countryLabel`, `nafCode`, `nafLabel`.
 
 Le SIREN, l'effectif EMA (`workforceEma`) et l'intégralité des indicateurs A–F restent disponibles.
 
@@ -38,7 +35,7 @@ Le SIREN, l'effectif EMA (`workforceEma`) et l'intégralité des indicateurs A�
 
 `nafCode` et `nafLabel` sont servis en **NAF rév. 2**, la nomenclature en vigueur, et forment un couple cohérent (le code et son libellé décrivent la même activité).
 
-Entre mars 2026 et la correction de l'issue #4087, `nafCode` a été servi en NAF 2025 (rév. 3) alors que `nafLabel` restait en rév. 2 : les consommateurs qui ont mis un code en cache sur cette période peuvent voir sa valeur changer pour les entreprises dont le code a été remappé par l'INSEE (par exemple `65.12Y` → `65.12Z`). Le filtre `naf` de l'endpoint représentation fait une égalité stricte sur ce code : une requête construite avec un code NAF 2025 ne renverra plus de résultat.
+Entre mars 2026 et la correction de l'issue #4087, `nafCode` a été servi en NAF 2025 (rév. 3) alors que `nafLabel` restait en rév. 2 : les consommateurs qui ont mis un code en cache sur cette période peuvent voir sa valeur changer pour les entreprises dont le code a été remappé par l'INSEE (par exemple `65.12Y` → `65.12Z`).
 
 Le passage au couple NAF 2025 complet (code **et** libellé) interviendra quand cette nomenclature deviendra la référence d'attribution des codes APE, au 1ᵉʳ janvier 2027.
 
@@ -54,45 +51,8 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 
 | Méthode | Chemin | Description |
 | --- | --- | --- |
-| `GET` | `/api/public/declarations` | Recherche paginée |
-| `GET` | `/api/public/declarations/{siren}` | Toutes les déclarations d'un SIREN |
-| `GET` | `/api/public/declarations/{siren}/{year}` | Déclaration d'un SIREN pour une année |
-| `GET` | `/api/public/declarations/export` | Export complet (JSON ou CSV) |
+| `GET` | `/api/public/declarations/export` | Export complet (JSON, CSV ou Excel) |
 | `GET` | `/api/public/openapi.json` | Spécification OpenAPI 3.1 |
-
-### Recherche (`GET /api/public/declarations`)
-
-| Paramètre | Type | Obligatoire | Description |
-| --- | --- | --- | --- |
-| `q` | string | non | Texte libre (raison sociale, SIREN) |
-| `region` | string | non | Code région (ex. `11`) |
-| `departement` | string | non | Code département (ex. `75`) |
-| `naf` | string | non | Code NAF, nomenclature **NAF rév. 2**, en égalité stricte (ex. `26.51A`) |
-| `year` | integer | non | Année de déclaration |
-| `limit` | integer | non | Résultats par page (1–100, défaut 10) |
-| `offset` | integer | non | Décalage de pagination (défaut 0) |
-
-Exemple :
-
-```sh
-curl "https://egapro.travail.gouv.fr/api/public/declarations?q=THALES&year=2026&limit=5"
-```
-
-### Par SIREN (`GET /api/public/declarations/{siren}`)
-
-Retourne toutes les années publiées pour un SIREN donné, triées par année décroissante.
-
-```sh
-curl "https://egapro.travail.gouv.fr/api/public/declarations/319159877"
-```
-
-### Par SIREN et année (`GET /api/public/declarations/{siren}/{year}`)
-
-Retourne la déclaration d'un SIREN pour une année précise. Retourne 404 si la date de rendu public n'est pas encore atteinte.
-
-```sh
-curl "https://egapro.travail.gouv.fr/api/public/declarations/319159877/2026"
-```
 
 ### Export complet (`GET /api/public/declarations/export`)
 
@@ -106,6 +66,15 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export"
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv" \
   -o index-egapro-remunerations.csv
 ```
+
+## Données complètes sur data.gouv.fr
+
+Les jeux de données publics complets sont publiés sur data.gouv.fr :
+
+- [Index égalité professionnelle F/H des entreprises de 50 salariés ou plus](https://www.data.gouv.fr/datasets/index-egalite-professionnelle-f-h-des-entreprises-de-50-salaries-ou-plus)
+- [Représentation équilibrée F/H dans les postes de direction des grandes entreprises](https://www.data.gouv.fr/datasets/representation-equilibree-f-h-dans-les-postes-de-direction-des-grandes-entreprises)
+
+La représentation équilibrée n'est exposée par aucune API publique : elle se consulte sur la fiche entreprise de l'observatoire et sur data.gouv.fr.
 
 ## Licence
 
