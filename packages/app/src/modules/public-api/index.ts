@@ -47,8 +47,6 @@ export {
 	parsePublicSearchPage,
 	publicDeclarationDTOSchema,
 	publicRepresentationDTOSchema,
-	publicRepresentationSearchInputSchema,
 	publicRepresentationSearchResultDTOSchema,
-	publicSearchInputSchema,
 	publicSearchResultDTOSchema,
 } from "./schemas";
