@@ -282,7 +282,10 @@ function createSelectQueue(rows: unknown[][]) {
 	return { select, dropFirst, getIndex: () => index };
 }
 
-function createMutationTxMock(txSelectRows: unknown[] = []) {
+function createMutationTxMock(
+	txSelectRows: unknown[] = [],
+	txJoinRows: unknown[] = [],
+) {
 	const update = vi.fn();
 	const set = vi.fn();
 	const updateWhere = vi.fn().mockResolvedValue(undefined);
@@ -303,6 +306,9 @@ function createMutationTxMock(txSelectRows: unknown[] = []) {
 						return Object.assign(promise, {
 							limit: vi.fn().mockResolvedValue(txSelectRows),
 						});
+					}),
+					innerJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue(txJoinRows),
 					}),
 				}),
 			});
@@ -328,14 +334,9 @@ function createSubmitMockDb(
 	const joinRows = employeeCategories.map((ec) => ({ employee_category: ec }));
 	const gipRows =
 		gipWorkforceEma === null ? [] : [{ workforceEma: gipWorkforceEma }];
-	const selectQueue = createSelectQueue([
-		[declaration],
-		[company],
-		gipRows,
-		joinRows,
-	]);
+	const selectQueue = createSelectQueue([[declaration], [company], gipRows]);
 
-	const m = createMutationTxMock([declaration]);
+	const m = createMutationTxMock([declaration], joinRows);
 
 	return {
 		db: {
@@ -429,7 +430,7 @@ function createSimpleSelectDb(
 
 const JOINT_EVALUATION_FILE = { id: "file-joint-evaluation-1" };
 
-const RESOLVED_CORRECTION_CATEGORY = {
+const GAP_FREE_CATEGORY = {
 	annualBaseWomen: "100",
 	annualBaseMen: "100",
 };
@@ -673,7 +674,7 @@ describe("declarationRouter", () => {
 		it("transitions draft → demarche_completed for small company without CSE (S1)", async () => {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany({ workforce: 80, hasCse: false });
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const ctx = createSubmitMockDb(declaration, company, [GAP_FREE_CATEGORY]);
 			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.submit();
@@ -795,7 +796,7 @@ describe("declarationRouter", () => {
 		it("persists computed percentage columns on submit", async () => {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany();
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const ctx = createSubmitMockDb(declaration, company, [GAP_FREE_CATEGORY]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -851,7 +852,7 @@ describe("declarationRouter", () => {
 				draft: { main: { step1: { foo: "bar" } }, cse: { step1: {} } },
 			});
 			const company = buildCompany();
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const ctx = createSubmitMockDb(declaration, company, [GAP_FREE_CATEGORY]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -871,7 +872,7 @@ describe("declarationRouter", () => {
 				draft: { main: { step1: { foo: "bar" } } },
 			});
 			const company = buildCompany();
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const ctx = createSubmitMockDb(declaration, company, [GAP_FREE_CATEGORY]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -888,7 +889,7 @@ describe("declarationRouter", () => {
 		it("does not call draft update when draft is null after submit", async () => {
 			const declaration = buildDeclaration({ status: "draft", draft: null });
 			const company = buildCompany();
-			const ctx = createSubmitMockDb(declaration, company, []);
+			const ctx = createSubmitMockDb(declaration, company, [GAP_FREE_CATEGORY]);
 			const caller = await createLockedCaller(ctx.db);
 
 			await caller.submit();
@@ -901,6 +902,84 @@ describe("declarationRouter", () => {
 		});
 	});
 
+	describe("submit — indicator G required by the same rule as the funnel's step 5 (#4757)", () => {
+		const INDICATOR_G_MISSING_ERROR =
+			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.";
+
+		async function submitWith(options: {
+			gipWorkforceEma: string;
+			year: number;
+			employeeCategories: Array<Record<string, unknown>>;
+		}) {
+			const ctx = createSubmitMockDb(
+				buildDeclaration({ status: "draft", year: options.year }),
+				buildCompany({ hasCse: false }),
+				options.employeeCategories,
+				options.gipWorkforceEma,
+			);
+			const caller = await createLockedCaller(
+				ctx.db,
+				undefined,
+				undefined,
+				"user@example.com",
+			);
+			return { ctx, submission: caller.submit() };
+		}
+
+		it.each([
+			{ tier: "150+ in 2027", gipWorkforceEma: "200.00", year: 2027 },
+			{ tier: "50–99 in 2030", gipWorkforceEma: "75.00", year: 2030 },
+			{
+				tier: "< 50, whose funnel always asks for it",
+				gipWorkforceEma: "30.00",
+				year: 2027,
+			},
+		])("refuses a declaration without indicator G data for $tier, recording nothing", async ({
+			gipWorkforceEma,
+			year,
+		}) => {
+			const { ctx, submission } = await submitWith({
+				gipWorkforceEma,
+				year,
+				employeeCategories: [],
+			});
+
+			await expect(submission).rejects.toMatchObject({
+				code: "PRECONDITION_FAILED",
+				message: INDICATOR_G_MISSING_ERROR,
+			});
+			expect(ctx.insertValues).not.toHaveBeenCalled();
+			expect(ctx.set).not.toHaveBeenCalled();
+			expect(mockEnqueueReceipt).not.toHaveBeenCalled();
+		});
+
+		it("accepts a 150+ declaration in 2027 that carries indicator G", async () => {
+			const { ctx, submission } = await submitWith({
+				gipWorkforceEma: "200.00",
+				year: 2027,
+				employeeCategories: [GAP_FREE_CATEGORY],
+			});
+
+			await expect(submission).resolves.toEqual({ success: true });
+			expect(ctx.set).toHaveBeenCalledWith(
+				expect.objectContaining({ status: "demarche_completed" }),
+			);
+		});
+
+		it("accepts a 50–99 declaration in 2027 without indicator G, which is not owed that year", async () => {
+			const { ctx, submission } = await submitWith({
+				gipWorkforceEma: "75.00",
+				year: 2027,
+				employeeCategories: [],
+			});
+
+			await expect(submission).resolves.toEqual({ success: true });
+			expect(ctx.set).toHaveBeenCalledWith(
+				expect.objectContaining({ status: "demarche_completed" }),
+			);
+		});
+	});
+
 	describe("submit — cseRequired snapshot", () => {
 		async function submitAndReadSnapshot(
 			gipWorkforceEma: string | null,
@@ -908,7 +987,12 @@ describe("declarationRouter", () => {
 		): Promise<boolean> {
 			const declaration = buildDeclaration({ status: "draft" });
 			const company = buildCompany({ hasCse });
-			const ctx = createSubmitMockDb(declaration, company, [], gipWorkforceEma);
+			const ctx = createSubmitMockDb(
+				declaration,
+				company,
+				[GAP_FREE_CATEGORY],
+				gipWorkforceEma,
+			);
 			const caller = await createLockedCaller(ctx.db);
 			await caller.submit();
 			const projectionCall = ctx.set.mock.calls
@@ -1119,9 +1203,7 @@ describe("declarationRouter", () => {
 					status: "joint_evaluation_chosen",
 					firstDeclarationPathChoice: "joint_evaluation",
 				});
-				const ctx = createOneRowSelectDb(declaration, [
-					RESOLVED_CORRECTION_CATEGORY,
-				]);
+				const ctx = createOneRowSelectDb(declaration, [GAP_FREE_CATEGORY]);
 				const caller = await createLockedCaller(
 					ctx.db,
 					undefined,
@@ -1148,7 +1230,7 @@ describe("declarationRouter", () => {
 			});
 			const ctx = createOneRowSelectDb(
 				declaration,
-				[RESOLVED_CORRECTION_CATEGORY],
+				[GAP_FREE_CATEGORY],
 				[declaration],
 			);
 			const caller = await createLockedCaller(ctx.db);
@@ -1172,7 +1254,7 @@ describe("declarationRouter", () => {
 			});
 			const ctx = createOneRowSelectDb(
 				declaration,
-				[RESOLVED_CORRECTION_CATEGORY],
+				[GAP_FREE_CATEGORY],
 				[declaration],
 			);
 			const caller = await createLockedCaller(ctx.db);
@@ -1794,7 +1876,7 @@ describe("declarationRouter", () => {
 		it("submitSecondDeclaration takes the lock before its first read", async () => {
 			const ctx = createOneRowSelectDb(
 				buildDeclaration({ status: "corrective_actions_chosen" }),
-				[RESOLVED_CORRECTION_CATEGORY],
+				[GAP_FREE_CATEGORY],
 			);
 			const caller = await createLockedCaller(ctx.db);
 

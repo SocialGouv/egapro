@@ -88,6 +88,9 @@ function activeRows() {
 	return store.filter((row) => row.cancelledAt === null);
 }
 
+// Indicator G data, which the declaration owes at the GIP-less (< 50) tier.
+const GAP_FREE_CATEGORY = { annualBaseWomen: "100", annualBaseMen: "100" };
+
 function buildTx() {
 	return {
 		execute: async () => [],
@@ -98,6 +101,9 @@ function buildTx() {
 						activeRows()
 							.slice(0, 1)
 							.map((row) => ({ ...row, ...nullIndicators() })),
+				}),
+				innerJoin: () => ({
+					where: async () => [{ employee_category: GAP_FREE_CATEGORY }],
 				}),
 			}),
 		})),
@@ -218,9 +224,6 @@ function buildDb() {
 						limit: async () => [{ siren: SIREN, workforce: 80, hasCse: false }],
 					});
 				},
-				innerJoin: () => ({
-					where: async () => [],
-				}),
 			}),
 		};
 	};

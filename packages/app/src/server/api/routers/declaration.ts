@@ -21,6 +21,7 @@ import {
 	hasGapsAboveThreshold,
 	isCseOpinionRequired,
 	isDraft,
+	isIndicatorGRequiredForGip,
 	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
 	isTriennialYear,
@@ -72,6 +73,9 @@ import {
 	loadSubsequentSubmissions,
 	lockDeclaration,
 } from "./statusHistoryHelpers";
+
+const INDICATOR_G_MISSING_ERROR =
+	"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.";
 
 const PATH_LOCKED_ERROR =
 	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
@@ -742,32 +746,6 @@ export const declarationRouter = createTRPCRouter({
 
 		const gipWorkforce = await findGipWorkforce(ctx.db, siren, year);
 
-		const initialCategories = await loadEmployeeCategoriesForDeclaration(
-			ctx.db,
-			declaration.id,
-			"initial",
-		);
-		const hasIndicatorGData = initialCategories.length > 0;
-		const hasGap =
-			hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
-
-		const rules = loadRules(declaration.rulesVersion);
-		const facts = buildSubmitFacts(
-			declaration,
-			company,
-			gipWorkforce,
-			hasIndicatorGData,
-			hasGap,
-		);
-		const { nextStatus, events } = applyAction(facts, "submit", rules);
-
-		const projection = computeProjectionUpdates(events, nextStatus);
-		const historyInserts = buildHistoryInserts(
-			declaration.id,
-			events,
-			ctx.session.user.id,
-		);
-
 		// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
 		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
 		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
@@ -781,6 +759,44 @@ export const declarationRouter = createTRPCRouter({
 
 		await ctx.db.transaction(async (tx) => {
 			await assertFirstDeclarationModifiableUnderLock(tx, declaration.id);
+
+			const initialCategories = await loadEmployeeCategoriesForDeclaration(
+				tx,
+				declaration.id,
+				"initial",
+			);
+			const hasIndicatorGData = initialCategories.length > 0;
+			const hasGap =
+				hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
+
+			const { nextStatus, events } = applyAction(
+				buildSubmitFacts(
+					declaration,
+					company,
+					gipWorkforce,
+					hasIndicatorGData,
+					hasGap,
+				),
+				"submit",
+				loadRules(declaration.rulesVersion),
+			);
+
+			if (
+				!hasIndicatorGData &&
+				isIndicatorGRequiredForGip(gipWorkforce, declaration.year)
+			) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: INDICATOR_G_MISSING_ERROR,
+				});
+			}
+
+			const projection = computeProjectionUpdates(events, nextStatus);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
 			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
