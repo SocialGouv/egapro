@@ -47,7 +47,11 @@ export const GET = withAuditedRoute(
 		resolveContext: (request) => {
 			const raw = new URL(request.url).searchParams.get("format") ?? "xlsx";
 			const parsed = FORMAT_SCHEMA.safeParse(raw);
-			return { metadata: { format: parsed.success ? parsed.data : raw } };
+			return {
+				metadata: parsed.success
+					? { format: parsed.data }
+					: { invalidParam: "format" },
+			};
 		},
 	},
 	async (request) => {

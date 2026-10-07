@@ -143,6 +143,10 @@ Notes:
   IIFE.
 - For login failures, pass metadata through `buildAuthErrorMessage()` so OAuth
   tokens / state / code_verifier are stripped from the log line.
+- NextAuth also feeds the `logger` from `POST /api/auth/_log`, an anonymous
+  endpoint whose body picks the level and code. The `[...nextauth]` route
+  answers it `204` without reaching NextAuth, so only server-side events write
+  audit rows — keep it that way.
 
 ### 5. New cron-triggered / system action
 
@@ -231,8 +235,8 @@ needs something `resolveContext` cannot produce.
 | Route | Action key(s) | Why not the wrapper |
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
-| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`rawSiren` on a 400, `count` on success) computed *during* the handler |
-| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
+| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch metadata (`invalidParam` on a 400, `count` on success) computed *during* the handler |
+| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem — `invalidParam` names `siren` or `year` |
 | `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
 | `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
 | `upload` | `CSE_OPINION_UPLOAD_FILE`, `JOINT_EVALUATION_UPLOAD_FILE` | The action key depends on the parsed multipart body |
@@ -274,7 +278,7 @@ type argument.
 |---|---|
 | `healthz` | Liveness probe hit by Kubernetes every few seconds. Returns `"OK"`, reads nothing. Explicitly excluded above. |
 | `e2e-clock` | Test-only clock override, unreachable in production. Auditing it would flood `action_log` from the E2E suite for zero compliance value. |
-| `test-sentry` | Throws on purpose to exercise Sentry capture; 404s in `prod`. No user data. |
+| `test-sentry` | Throws on purpose to exercise Sentry capture, for an admin with a fresh second factor only; 404s to anyone else and always in `prod`. No user data. |
 | `v1/docs` | Serves the static Swagger UI shell; 404s in `prod`. No data access. |
 | `public/openapi.json` | Static OpenAPI document, identical for every caller. |
 | `v1/openapi.json` | idem. |
@@ -302,6 +306,10 @@ the caller is responsible for sanitisation:
 - Never put secrets in `metadata`
 - Never put IP addresses in `metadata` — there is a dedicated `ipAddress`
   column already
+- Never put a raw query or path parameter in `metadata`: the row is written
+  for refused requests too. Parse it with the route's schema and log the
+  result through `auditQueryMetadata()` (`~/server/audit/queryMetadata`) —
+  bounded values on success, `{ invalidParam }` otherwise
 - Do put business-relevant context: year, declarationId, fileName, action
   parameters
 

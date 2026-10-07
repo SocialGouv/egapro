@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "~/env";
+import { extractIpAddress } from "~/server/audit/requestContext";
 import { rateLimitValkey, withValkeyTimeout } from "./valkey";
 
 const WINDOW_SECONDS = 60;
@@ -36,12 +37,7 @@ function fingerprint(value: string): string {
 }
 
 function clientAddress(headers: Headers): string {
-	const forwardedFor = headers.get("x-forwarded-for");
-	return (
-		headers.get("x-real-ip")?.trim() ||
-		forwardedFor?.split(",").at(-1)?.trim() ||
-		"unknown"
-	);
+	return extractIpAddress(headers) ?? "unknown";
 }
 
 function incrementMemory(key: string): number {

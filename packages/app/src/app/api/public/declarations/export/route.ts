@@ -253,7 +253,9 @@ export const GET = withAuditedRoute(
 			const raw = url.searchParams.get("format") ?? "json";
 			const parsed = FORMAT_SCHEMA.safeParse(raw);
 			return {
-				metadata: { format: parsed.success ? parsed.data : raw },
+				metadata: parsed.success
+					? { format: parsed.data }
+					: { invalidParam: "format" },
 			};
 		},
 	},

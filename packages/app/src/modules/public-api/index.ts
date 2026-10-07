@@ -33,6 +33,7 @@ export type {
 	PublicRepresentationSource,
 } from "./representationProjection";
 export {
+	maskNonDiffusibleRepresentation,
 	publicRepresentationColumns,
 	toPublicRepresentation,
 } from "./representationProjection";
@@ -50,11 +51,11 @@ export type {
 	PublicSearchResultDTO,
 } from "./schemas";
 export {
+	parsePublicRepresentationSearchPage,
 	parsePublicSearchInput,
+	parsePublicSearchPage,
 	publicDeclarationDTOSchema,
 	publicRepresentationDTOSchema,
-	publicRepresentationSearchInputSchema,
 	publicRepresentationSearchResultDTOSchema,
-	publicSearchInputSchema,
 	publicSearchResultDTOSchema,
 } from "./schemas";

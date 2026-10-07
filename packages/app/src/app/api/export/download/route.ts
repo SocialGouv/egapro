@@ -1,6 +1,7 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { downloadExport } from "~/modules/export/downloadExport";
 import { exportYearQuerySchema } from "~/modules/export/schemas";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 
@@ -15,7 +16,12 @@ export const GET = withAuditedRoute(
 		resolveContext: (request) => {
 			const url = new URL(request.url);
 			return {
-				metadata: { year: url.searchParams.get("year") ?? null },
+				metadata: auditQueryMetadata(
+					exportYearQuerySchema.safeParse({
+						year: url.searchParams.get("year") ?? undefined,
+					}),
+					(query) => ({ year: query.year }),
+				),
 			};
 		},
 	},
