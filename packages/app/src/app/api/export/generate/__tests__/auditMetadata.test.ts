@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { EXPORT_TOKEN } = vi.hoisted(() => ({ EXPORT_TOKEN: "export-token" }));
+
 const mocks = vi.hoisted(() => ({
 	generateYearlyExport: vi.fn(),
 	logAction: vi.fn(),
@@ -10,12 +12,17 @@ vi.mock("~/modules/export", () => ({
 }));
 vi.mock("~/server/audit/log", () => ({ logAction: mocks.logAction }));
 vi.mock("~/server/db", () => ({ db: {} }));
+// Satisfies the bearer check on EGAPRO_EXPORT_API_TOKEN, so the handler runs.
+vi.mock("~/env.js", () => ({
+	env: { EGAPRO_EXPORT_API_TOKEN: EXPORT_TOKEN },
+}));
 
 import { POST } from "../route";
 
 function request(query: string): Request {
 	return new Request(`http://localhost/api/export/generate${query}`, {
 		method: "POST",
+		headers: { authorization: `Bearer ${EXPORT_TOKEN}` },
 	});
 }
 
