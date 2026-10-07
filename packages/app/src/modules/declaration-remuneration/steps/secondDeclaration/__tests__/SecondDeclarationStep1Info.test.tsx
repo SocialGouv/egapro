@@ -12,7 +12,7 @@ function renderStep1() {
 			declarationDate="01/06/2027"
 			declarationSiren="123456789"
 			declarationYear={2027}
-			modificationDeadline={new Date("2027-12-01T00:00:00")}
+			modificationDeadline={new Date("2027-12-01T00:00:00Z")}
 		/>,
 	);
 }

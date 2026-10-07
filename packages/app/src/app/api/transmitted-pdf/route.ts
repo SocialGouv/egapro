@@ -3,9 +3,13 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { buildTransmittedPdfData } from "~/modules/declarationPdf/buildTransmittedPdfData";
 import { TransmittedPdfDocument } from "~/modules/declarationPdf/TransmittedPdfDocument";
 import { getCurrentYear } from "~/modules/domain";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import {
+	invalidYearResponse,
+	parseRequestedYear,
+	pdfErrorResponse,
 	pdfHeaders,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
@@ -15,21 +19,22 @@ const ROUTE = "transmitted-pdf";
 
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const url = new URL(request.url);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
-		metadata: { year: url.searchParams.get("year") ?? null },
+		metadata: auditQueryMetadata(parseRequestedYear(request), ({ year }) => ({
+			year,
+		})),
 	};
 };
 
 type ResolvedTransmittedPdf =
-	| { unauthorized: Response }
+	| { error: Response }
 	| {
 			data: Awaited<ReturnType<typeof buildTransmittedPdfData>>;
 			filename: string;
-			unauthorized?: undefined;
+			error?: undefined;
 	  };
 
 async function resolveTransmittedPdf(
@@ -37,12 +42,14 @@ async function resolveTransmittedPdf(
 ): Promise<ResolvedTransmittedPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { unauthorized: new Response("Non autorisé", { status: 401 }) };
+		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
-	const url = new URL(request.url);
-	const yearParam = url.searchParams.get("year");
-	const year = yearParam ? Number.parseInt(yearParam, 10) : getCurrentYear();
+	const requestedYear = parseRequestedYear(request);
+	if (!requestedYear.success) {
+		return { error: invalidYearResponse() };
+	}
+	const year = requestedYear.data.year ?? getCurrentYear();
 
 	const data = await buildTransmittedPdfData(siren, year, new Date());
 
@@ -60,7 +67,7 @@ export const GET = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveTransmittedPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) return resolved.error;
 
 			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
 				renderToBuffer(TransmittedPdfDocument({ data: resolved.data })),
@@ -71,7 +78,7 @@ export const GET = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[transmitted-pdf]", error);
-			return new Response("Impossible de générer le PDF", { status: 500 });
+			return pdfErrorResponse("Impossible de générer le PDF", 500);
 		}
 	},
 );
@@ -84,7 +91,9 @@ export const HEAD = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveTransmittedPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) {
+				return pdfErrorResponse(null, resolved.error.status);
+			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
 				renderToBuffer(TransmittedPdfDocument({ data: resolved.data })),
@@ -95,7 +104,7 @@ export const HEAD = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[transmitted-pdf:head]", error);
-			return new Response(null, { status: 500 });
+			return pdfErrorResponse(null, 500);
 		}
 	},
 );

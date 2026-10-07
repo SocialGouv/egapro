@@ -25,6 +25,8 @@ function buildRequest(path: string) {
 	return new Request(`http://localhost/api/public/representations/${path}`);
 }
 
+const OVERSIZED_SIREN = "x".repeat(5_000);
+
 async function callGet(rawSiren: string, query = "") {
 	const { GET } = await import("../route");
 	return GET(buildRequest(`${rawSiren}${query}`), {
@@ -38,8 +40,8 @@ describe("GET /api/public/representations/[siren]", () => {
 		mocks.logAction.mockReset();
 	});
 
-	it("returns 400 and logs a failure for an invalid siren", async () => {
-		const response = await callGet("abc");
+	it("returns 400 and logs a failure for an invalid siren, without the raw value", async () => {
+		const response = await callGet(OVERSIZED_SIREN);
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({
@@ -51,6 +53,7 @@ describe("GET /api/public/representations/[siren]", () => {
 				action: "public_representations.by_siren",
 				status: "failure",
 				siren: null,
+				metadata: { invalidParam: "siren" },
 			}),
 		);
 	});
