@@ -1,23 +1,25 @@
 import "server-only";
 
 import { parseCampaignYear } from "~/modules/domain";
+import type { QueryParseResult } from "~/server/audit/queryMetadata";
 import { getPdfSize, pdfSizeKey, setPdfSize } from "./pdfSizeCache";
 
 type RenderPdf = () => Promise<Buffer>;
 
 const NO_STORE = "private, no-store";
 
-// The raw string never reaches the audit row, which is written for refused requests too.
-export function readRequestedYear(request: Request): {
-	year: number | null;
-	invalid: boolean;
-} {
+// Shaped like a Zod `safeParse` so the audit row goes through `auditQueryMetadata`.
+export function parseRequestedYear(
+	request: Request,
+): QueryParseResult<{ year: number | null }> {
 	const raw = new URL(request.url).searchParams.get("year");
 	if (!raw) {
-		return { year: null, invalid: false };
+		return { success: true, data: { year: null } };
 	}
 	const year = parseCampaignYear(raw);
-	return { year, invalid: year === null };
+	return year === null
+		? { success: false, error: { issues: [{ path: ["year"] }] } }
+		: { success: true, data: { year } };
 }
 
 export function pdfErrorResponse(

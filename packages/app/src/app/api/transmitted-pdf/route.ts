@@ -3,13 +3,14 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { buildTransmittedPdfData } from "~/modules/declarationPdf/buildTransmittedPdfData";
 import { TransmittedPdfDocument } from "~/modules/declarationPdf/TransmittedPdfDocument";
 import { getCurrentYear } from "~/modules/domain";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import {
 	invalidYearResponse,
+	parseRequestedYear,
 	pdfErrorResponse,
 	pdfHeaders,
-	readRequestedYear,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
 } from "~/server/pdf/pdfRoute";
@@ -18,15 +19,13 @@ const ROUTE = "transmitted-pdf";
 
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
-		metadata: {
-			year: requestedYear.year,
-			invalidYear: requestedYear.invalid,
-		},
+		metadata: auditQueryMetadata(parseRequestedYear(request), ({ year }) => ({
+			year,
+		})),
 	};
 };
 
@@ -46,11 +45,11 @@ async function resolveTransmittedPdf(
 		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
-	const requestedYear = readRequestedYear(request);
-	if (requestedYear.invalid) {
+	const requestedYear = parseRequestedYear(request);
+	if (!requestedYear.success) {
 		return { error: invalidYearResponse() };
 	}
-	const year = requestedYear.year ?? getCurrentYear();
+	const year = requestedYear.data.year ?? getCurrentYear();
 
 	const data = await buildTransmittedPdfData(siren, year, new Date());
 

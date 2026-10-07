@@ -3,7 +3,7 @@ import type { AuditMetadata } from "~/modules/audit";
 export const AUDIT_TEXT_MAX_LENGTH = 200;
 export const AUDIT_LIST_MAX_ITEMS = 20;
 
-type QueryParseResult<T> =
+export type QueryParseResult<T> =
 	| { success: true; data: T }
 	| {
 			success: false;

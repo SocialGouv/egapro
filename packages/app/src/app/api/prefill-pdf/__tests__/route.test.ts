@@ -167,14 +167,14 @@ describe("GET /api/prefill-pdf", () => {
 	});
 
 	it.each([
-		["a refused download", false, "?year=2025"],
-		["an invalid year", true, "?year=abc"],
-	])("keeps %s out of every cache", async (_label, signedIn, query) => {
+		["a refused download", false, "?year=2025", 401],
+		["an invalid year", true, "?year=abc", 400],
+	])("keeps %s out of every cache", async (_label, signedIn, query, status) => {
 		if (!signedIn) mocks.auth.mockResolvedValue(null);
 
 		const response = await GET(request(query));
 
-		expect(response.status).toBeGreaterThanOrEqual(400);
+		expect(response.status).toBe(status);
 		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
 	});
 
@@ -189,7 +189,7 @@ describe("GET /api/prefill-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: YEAR, invalidYear: false },
+			metadata: { year: YEAR },
 		});
 	});
 
@@ -199,7 +199,7 @@ describe("GET /api/prefill-pdf", () => {
 		await GET(request(""));
 
 		expect(auditRow()).toMatchObject({
-			metadata: { year: null, invalidYear: false },
+			metadata: { year: null },
 		});
 	});
 
@@ -217,16 +217,14 @@ describe("GET /api/prefill-pdf", () => {
 	it.each([
 		["without a session", null, 401],
 		["with a session", { user: { id: "user-1", siret: SIRET } }, 400],
-	])("audits an oversized year as null %s", async (_label, session, status) => {
+	])("audits an oversized year by name only %s", async (_label, session, status) => {
 		mocks.auth.mockResolvedValue(session);
 
 		const response = await GET(request(`?year=${"x".repeat(5_000)}`));
 
 		expect(response.status).toBe(status);
-		expect(auditRow()).toMatchObject({
-			status: "failure",
-			metadata: { year: null, invalidYear: true },
-		});
+		expect(auditRow()).toMatchObject({ status: "failure" });
+		expect(auditRow().metadata).toEqual({ invalidParam: "year" });
 	});
 
 	it("answers 404 when no prefilled data exists for the year", async () => {

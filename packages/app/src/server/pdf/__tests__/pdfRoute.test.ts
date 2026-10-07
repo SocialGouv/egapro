@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
 	invalidYearResponse,
+	parseRequestedYear,
 	pdfErrorResponse,
 	pdfHeaders,
-	readRequestedYear,
 } from "../pdfRoute";
 
 describe("pdfHeaders", () => {
@@ -22,22 +22,22 @@ describe("pdfHeaders", () => {
 	});
 });
 
-describe("readRequestedYear", () => {
+describe("parseRequestedYear", () => {
 	function requestWith(query: string): Request {
 		return new Request(`https://egapro.test/api/declaration-pdf${query}`);
 	}
 
 	it("reads a valid campaign year as a number", () => {
-		expect(readRequestedYear(requestWith("?year=2027"))).toEqual({
-			year: 2027,
-			invalid: false,
+		expect(parseRequestedYear(requestWith("?year=2027"))).toEqual({
+			success: true,
+			data: { year: 2027 },
 		});
 	});
 
 	it("reports no year when none is requested", () => {
-		expect(readRequestedYear(requestWith(""))).toEqual({
-			year: null,
-			invalid: false,
+		expect(parseRequestedYear(requestWith(""))).toEqual({
+			success: true,
+			data: { year: null },
 		});
 	});
 
@@ -46,10 +46,10 @@ describe("readRequestedYear", () => {
 		["not a number", "abc"],
 		["a number with a trailing suffix", "2027abc"],
 		["oversized", "9".repeat(5_000)],
-	])("flags a year that is %s, without carrying the raw string", (_label, raw) => {
-		expect(readRequestedYear(requestWith(`?year=${raw}`))).toEqual({
-			year: null,
-			invalid: true,
+	])("flags a year that is %s by name, without carrying the raw string", (_label, raw) => {
+		expect(parseRequestedYear(requestWith(`?year=${raw}`))).toEqual({
+			success: false,
+			error: { issues: [{ path: ["year"] }] },
 		});
 	});
 });

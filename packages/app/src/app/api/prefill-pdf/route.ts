@@ -7,15 +7,16 @@ import {
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
 import { getCurrentYear } from "~/modules/domain";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
 	invalidYearResponse,
+	parseRequestedYear,
 	pdfErrorResponse,
 	pdfHeaders,
-	readRequestedYear,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
 } from "~/server/pdf/pdfRoute";
@@ -24,15 +25,13 @@ const ROUTE = "prefill-pdf";
 
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
-		metadata: {
-			year: requestedYear.year,
-			invalidYear: requestedYear.invalid,
-		},
+		metadata: auditQueryMetadata(parseRequestedYear(request), ({ year }) => ({
+			year,
+		})),
 	};
 };
 
@@ -48,11 +47,11 @@ async function resolvePrefillPdf(
 		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
-	const requestedYear = readRequestedYear(request);
-	if (requestedYear.invalid) {
+	const requestedYear = parseRequestedYear(request);
+	if (!requestedYear.success) {
 		return { error: invalidYearResponse() };
 	}
-	const year = requestedYear.year ?? getCurrentYear();
+	const year = requestedYear.data.year ?? getCurrentYear();
 
 	const [row] = await db
 		.select()

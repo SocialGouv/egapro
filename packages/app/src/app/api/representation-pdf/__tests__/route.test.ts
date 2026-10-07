@@ -205,25 +205,23 @@ describe("GET /api/representation-pdf", () => {
 		expect(mocks.buildRepresentationPdfData).not.toHaveBeenCalled();
 	});
 
-	it("audits an oversized year as null rather than the raw string", async () => {
+	it("audits an oversized year by name only, never the raw string", async () => {
 		const response = await GET(request(`?year=${"x".repeat(5_000)}`));
 
 		expect(response.status).toBe(400);
-		expect(auditRow()).toMatchObject({
-			status: "failure",
-			metadata: { year: null, invalidYear: true },
-		});
+		expect(auditRow()).toMatchObject({ status: "failure" });
+		expect(auditRow().metadata).toEqual({ invalidParam: "year" });
 	});
 
 	it.each([
-		["a refused download", false, "?year=2025"],
-		["an invalid year", true, "?year=abc"],
-	])("keeps %s out of every cache", async (_label, signedIn, query) => {
+		["a refused download", false, "?year=2025", 401],
+		["an invalid year", true, "?year=abc", 400],
+	])("keeps %s out of every cache", async (_label, signedIn, query, status) => {
 		if (!signedIn) mocks.auth.mockResolvedValue(null);
 
 		const response = await GET(request(query));
 
-		expect(response.status).toBeGreaterThanOrEqual(400);
+		expect(response.status).toBe(status);
 		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
 	});
 
@@ -236,7 +234,7 @@ describe("GET /api/representation-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: YEAR, invalidYear: false },
+			metadata: { year: YEAR },
 		});
 	});
 
@@ -358,7 +356,7 @@ describe("HEAD /api/representation-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: YEAR, invalidYear: false },
+			metadata: { year: YEAR },
 		});
 		expect(auditRow().action).not.toBe(
 			AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD,
