@@ -1,6 +1,7 @@
 import { env } from "~/env.js";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
+import { rejectInvalidBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
 import { fetchGipCsv, importGipCsvToDb } from "~/server/services/gipMds";
 
@@ -19,17 +20,12 @@ async function gipMdsImportHandler(request: Request): Promise<Response> {
 	// Fail closed. Skipping the check when the token is unset would turn this
 	// into an unauthenticated import the day EGAPRO_GIP_MDS_API_URL points at
 	// the real SUIT endpoint in an environment where the secret was forgotten.
-	const token = env.EGAPRO_GIP_MDS_API_TOKEN;
-	if (!token) {
-		console.error(
-			"[gip-mds/import] EGAPRO_GIP_MDS_API_TOKEN is not configured — refusing",
-		);
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
-	}
-
-	const authHeader = request.headers.get("authorization");
-	if (authHeader !== `Bearer ${token}`) {
-		return Response.json({ error: "Unauthorized" }, { status: 401 });
+	const unauthorized = rejectInvalidBearerToken(request, {
+		expectedToken: env.EGAPRO_GIP_MDS_API_TOKEN,
+		tokenName: "EGAPRO_GIP_MDS_API_TOKEN",
+	});
+	if (unauthorized) {
+		return unauthorized;
 	}
 
 	const url = env.EGAPRO_GIP_MDS_API_URL;
