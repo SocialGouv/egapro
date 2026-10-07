@@ -107,6 +107,21 @@ describe("content security policy", () => {
 		expect(forwardedRequestHeader(response, "x-nonce")).toBe(nonceOf(response));
 	});
 
+	it.each([
+		"/api/export/generate",
+		"/api/export/download?year=2026",
+		"/api/gip-mds/import",
+	])("hands the cron's bearer token to the handler of %s untouched", async (pathname) => {
+		const response = await middleware(
+			makeRequest(pathname, { authorization: "Bearer cron-token" }),
+		);
+
+		expect(response.status).toBe(200);
+		expect(forwardedRequestHeader(response, "authorization")).toBe(
+			"Bearer cron-token",
+		);
+	});
+
 	it("draws a different nonce on every request", async () => {
 		const nonces = new Set<string | undefined>();
 		for (let i = 0; i < 20; i++) {
