@@ -80,7 +80,7 @@ export async function buildPdfData(
 	}
 
 	if (isDraft(declaration.status)) {
-		throw new Error("La déclaration n'est pas encore soumise");
+		throw new Error("La déclaration n'est pas encore transmise");
 	}
 
 	const [[company], [gip], jobs, transmittedDate, declarantRows] =

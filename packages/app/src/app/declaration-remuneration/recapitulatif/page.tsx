@@ -8,7 +8,8 @@ import { MY_SPACE } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 	const session = await auth();
 	if (!session?.user) notFound();
 
-	const siren = getEffectiveSiren(session);
+	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) notFound();
 
 	// FIXME(#3373-followup): `getOrCreate` may insert an empty `draft` row

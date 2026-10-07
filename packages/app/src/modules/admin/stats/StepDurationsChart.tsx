@@ -33,7 +33,7 @@ type DurationsTooltipProps = {
 };
 
 const CHART_CAPTION =
-	"Délai médian et 90e percentile passé par les déclarations sur chaque étape du parcours indicateurs puis sur chaque jalon de la démarche post-soumission.";
+	"Délai médian et 90e percentile passé par les déclarations sur chaque étape du parcours indicateurs puis sur chaque jalon de la démarche post-transmission.";
 
 // Distinct DSFR palettes per phase — the colour break makes the wizard /
 // post-submit handoff readable without referencing the labels.

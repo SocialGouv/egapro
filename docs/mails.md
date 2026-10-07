@@ -38,7 +38,7 @@ Les six rappels liés à une échéance (déclaration, choix parcours R1/R2, 2�
 | 10 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | Rappel 7 | 5 schedules fixes (1er sept / 1er déc / 1er févr) | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` — **contenu unifié** |
 | 11 | `next_cycle_handover` | [`mails/next-cycle-handover.md`](mails/next-cycle-handover.md) | MI_* | `0 8 2 3 *` | — |
 
-**Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a soumis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
+**Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a transmis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
 
 ---
 

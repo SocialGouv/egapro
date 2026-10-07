@@ -304,13 +304,13 @@ function buildSecondDeclarationStatusTable(): SuitFieldTable {
 		field: "Seconde_declaration.Statut",
 		endpoint: DECLARATIONS_ENDPOINT,
 		description:
-			"Booléen, et non un état : indique si la seconde déclaration a été soumise.",
+			"Booléen, et non un état : indique si la seconde déclaration a été transmise.",
 		presence: "Toujours présent.",
 		sources: ["`assembleDeclaration` (`modules/export/fetchDeclarations.ts`)"],
 		extraColumn: null,
 		rows: [
-			plainRow("true", "Une seconde déclaration a été soumise."),
-			plainRow("false", "Aucune seconde déclaration n'a été soumise."),
+			plainRow("true", "Une seconde déclaration a été transmise."),
+			plainRow("false", "Aucune seconde déclaration n'a été transmise."),
 		],
 	};
 }

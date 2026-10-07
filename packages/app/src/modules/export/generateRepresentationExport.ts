@@ -3,10 +3,10 @@ import "server-only";
 import { and, eq, ilike } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
+import { toNullableNumber } from "~/modules/domain";
 import {
-	NON_DIFFUSIBLE_LABEL,
+	maskNonDiffusibleRepresentation,
 	type PublicSearchInput,
-	toNumber,
 } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
@@ -136,27 +136,28 @@ type RepresentationDeclarationRow = Awaited<
 function toExportRow(
 	row: RepresentationDeclarationRow,
 ): RepresentationExportRow {
-	const diffusible = row.identityDiffusible;
-
-	return {
-		referenceYear: row.year,
-		siren: row.siren,
-		name: diffusible ? row.name : NON_DIFFUSIBLE_LABEL,
-		region: diffusible ? row.region : NON_DIFFUSIBLE_LABEL,
-		departmentCode: diffusible ? row.departmentCode : NON_DIFFUSIBLE_LABEL,
-		departmentLabel: diffusible ? row.departmentLabel : NON_DIFFUSIBLE_LABEL,
-		nafCode: diffusible ? row.nafCode : NON_DIFFUSIBLE_LABEL,
-		nafLabel: diffusible ? row.nafLabel : NON_DIFFUSIBLE_LABEL,
-		executiveWomenPercent: toNumber(row.executiveWomenPercent),
-		executiveMenPercent: toNumber(row.executiveMenPercent),
-		notComputableReasonExecutives: row.notComputableReasonExecutives,
-		memberWomenPercent: toNumber(row.memberWomenPercent),
-		memberMenPercent: toNumber(row.memberMenPercent),
-		notComputableReasonMembers: row.notComputableReasonMembers,
-		publishDate: row.publishDate,
-		publishUrl: row.publishUrl,
-		publishModalities: row.publishModalities,
-	};
+	return maskNonDiffusibleRepresentation(
+		{
+			referenceYear: row.year,
+			siren: row.siren,
+			name: row.name,
+			region: row.region,
+			departmentCode: row.departmentCode,
+			departmentLabel: row.departmentLabel,
+			nafCode: row.nafCode,
+			nafLabel: row.nafLabel,
+			executiveWomenPercent: toNullableNumber(row.executiveWomenPercent),
+			executiveMenPercent: toNullableNumber(row.executiveMenPercent),
+			notComputableReasonExecutives: row.notComputableReasonExecutives,
+			memberWomenPercent: toNullableNumber(row.memberWomenPercent),
+			memberMenPercent: toNullableNumber(row.memberMenPercent),
+			notComputableReasonMembers: row.notComputableReasonMembers,
+			publishDate: row.publishDate,
+			publishUrl: row.publishUrl,
+			publishModalities: row.publishModalities,
+		},
+		row.identityDiffusible,
+	);
 }
 
 export async function buildRepresentationExportRows(

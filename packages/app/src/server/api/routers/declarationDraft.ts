@@ -12,9 +12,9 @@ import {
 	DRAFT_EXPIRY_DAYS,
 } from "~/modules/domain";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { isImpersonatingSiren } from "~/server/auth/companyAccess";
+import { canAccessCompany } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
-import { declarations, userCompanies } from "~/server/db/schema";
+import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
 
 const DRAFT_TTL_MS = DRAFT_EXPIRY_DAYS * 24 * 3600 * 1000;
@@ -24,18 +24,7 @@ async function assertOwnership(
 	session: Session,
 	siren: string,
 ): Promise<void> {
-	if (isImpersonatingSiren(session, siren)) return;
-
-	const userId = session.user.id;
-	const rows = await db
-		.select({ siren: userCompanies.siren })
-		.from(userCompanies)
-		.where(
-			and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
-		)
-		.limit(1);
-
-	if (!rows[0]) {
+	if (!(await canAccessCompany(db, session, siren))) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: "Accès refusé à ce SIREN.",

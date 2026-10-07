@@ -129,7 +129,7 @@ describe("GET /api/v1/export/declarations — Date_annulation integration", () =
 		expect(decl.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
-				Libelle_statut: "Soumission de la déclaration",
+				Libelle_statut: "Transmission de la déclaration",
 				Date: "2025-04-30T09:00:00.000Z",
 			},
 			{

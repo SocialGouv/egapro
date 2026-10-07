@@ -30,7 +30,7 @@ export function getStepLabel(step: number): string {
 }
 
 /**
- * Jalons post-soumission de la déclaration — étendent le KPI K4 au-delà des
+ * Jalons post-transmission de la déclaration — étendent le KPI K4 au-delà des
  * 7 étapes du wizard A–F. Ces jalons couvrent la « démarche complète » : choix
  * du parcours de conformité, actions correctives (seconde déclaration ou
  * évaluation conjointe), avis du CSE, et clôture.
@@ -124,14 +124,14 @@ export type PostSubmitDropoffPhaseKey =
 export const FUNNEL_MAIN_KEY_STEPS = [
 	{ key: "draft_started", label: "Brouillon créé" },
 	{ key: "indicators_filled", label: "Indicateurs saisis" },
-	{ key: "submitted", label: "Déclaration soumise" },
+	{ key: "submitted", label: "Déclaration transmise" },
 	{ key: "demarche_completed", label: "Démarche complète" },
 ] as const;
 
 export const FUNNEL_COMPLIANCE_KEY_STEPS = [
-	{ key: "submitted_with_alert", label: "Soumise (écart ≥ 5 %)" },
+	{ key: "submitted_with_alert", label: "Transmise (écart ≥ 5 %)" },
 	{ key: "path_chosen", label: "Parcours conformité choisi" },
-	{ key: "corrective_action_submitted", label: "Action soumise" },
+	{ key: "corrective_action_submitted", label: "Action transmise" },
 	{ key: "demarche_completed", label: "Démarche complète" },
 ] as const;
 
@@ -140,7 +140,7 @@ export const FUNNEL_REVISION_KEY_STEPS = [
 	{ key: "revision_path_chosen", label: "Choix de révision fait" },
 	{
 		key: "revision_action_submitted",
-		label: "Action de révision soumise",
+		label: "Action de révision transmise",
 	},
 	{ key: "demarche_completed", label: "Démarche complète" },
 ] as const;
@@ -148,8 +148,8 @@ export const FUNNEL_REVISION_KEY_STEPS = [
 export const FUNNEL_CSE_KEY_STEPS = [
 	{ key: "draft_started", label: "Brouillon créé" },
 	{ key: "indicators_filled", label: "Indicateurs saisis" },
-	{ key: "submitted", label: "Déclaration soumise" },
-	{ key: "cse_opinion_submitted", label: "Avis CSE soumis" },
+	{ key: "submitted", label: "Déclaration transmise" },
+	{ key: "cse_opinion_submitted", label: "Avis CSE transmis" },
 	{ key: "demarche_completed", label: "Démarche complète" },
 ] as const;
 

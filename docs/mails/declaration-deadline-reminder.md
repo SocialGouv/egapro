@@ -11,7 +11,7 @@
 
 ## Destinataire
 
-`declarations.declarantId → app_user.email` — celui qui a démarré la déclaration mais ne l'a pas encore soumise.
+`declarations.declarantId → app_user.email` — celui qui a démarré la déclaration mais ne l'a pas encore transmise.
 
 ## Éligibilité (SQL)
 

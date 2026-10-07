@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import { isUserLinkedToSiren } from "~/server/auth/companyLink";
 import {
 	createCaller,
 	mockDeclaration,
@@ -2027,7 +2028,6 @@ describe("declarationRouter", () => {
 
 		it("returns history items with actor for an authorized user", async () => {
 			const { db: mockDb } = buildMockDb([
-				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[mockHistoryItem],
 				[{ total: 1 }],
@@ -2055,7 +2055,6 @@ describe("declarationRouter", () => {
 		it("returns null actor when actorEmail is null", async () => {
 			const itemWithoutActor = { ...mockHistoryItem, actorEmail: null };
 			const { db: mockDb } = buildMockDb([
-				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[itemWithoutActor],
 				[{ total: 1 }],
@@ -2071,16 +2070,22 @@ describe("declarationRouter", () => {
 		});
 
 		it("throws FORBIDDEN when user has no access to the siren", async () => {
-			const { db: mockDb } = buildMockDb([[]]);
+			vi.mocked(isUserLinkedToSiren).mockResolvedValue(false);
+			const { db: mockDb } = buildMockDb([]);
 			const caller = await createCaller(mockDb);
 
 			await expect(
 				caller.getStatusHistory({ siren: SIREN, year: YEAR }),
 			).rejects.toMatchObject({ code: "FORBIDDEN" });
+			expect(isUserLinkedToSiren).toHaveBeenCalledWith(
+				mockDb,
+				expect.any(String),
+				SIREN,
+			);
 		});
 
 		it("throws NOT_FOUND when declaration does not exist", async () => {
-			const { db: mockDb } = buildMockDb([[{ siren: SIREN }], []]);
+			const { db: mockDb } = buildMockDb([[]]);
 			const caller = await createCaller(mockDb);
 
 			await expect(
@@ -2103,12 +2108,12 @@ describe("declarationRouter", () => {
 			});
 
 			expect(result.total).toBe(1);
+			expect(isUserLinkedToSiren).not.toHaveBeenCalled();
 		});
 
 		it("returns correct total and subset for paginated queries", async () => {
 			const item2 = { ...mockHistoryItem, id: "hist-2" };
 			const { db: mockDb, selectSpies } = buildMockDb([
-				[{ siren: SIREN }],
 				[{ id: "decl-1" }],
 				[item2],
 				[{ total: 5 }],
@@ -2124,8 +2129,8 @@ describe("declarationRouter", () => {
 
 			expect(result.items).toHaveLength(1);
 			expect(result.total).toBe(5);
-			expect(selectSpies[2]?.limit).toHaveBeenCalledWith(1);
-			expect(selectSpies[2]?.offset).toHaveBeenCalledWith(1);
+			expect(selectSpies[1]?.limit).toHaveBeenCalledWith(1);
+			expect(selectSpies[1]?.offset).toHaveBeenCalledWith(1);
 		});
 	});
 });

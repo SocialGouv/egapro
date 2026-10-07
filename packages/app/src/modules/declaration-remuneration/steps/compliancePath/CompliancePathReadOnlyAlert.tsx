@@ -6,7 +6,7 @@ const READ_ONLY_MESSAGES: Record<CompliancePathReadOnlyReason, string> = {
 	cse_opinion_submitted:
 		"L'avis du CSE a déjà été transmis. Le choix du parcours ne peut plus être modifié.",
 	second_declaration_submitted:
-		"La seconde déclaration a déjà été soumise. Le choix du parcours ne peut plus être modifié.",
+		"La seconde déclaration a déjà été transmise. Le choix du parcours ne peut plus être modifié.",
 	joint_evaluation_submitted:
 		"Le rapport d'évaluation conjointe a déjà été transmis. Le choix du parcours ne peut plus être modifié.",
 };

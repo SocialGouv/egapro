@@ -7,7 +7,7 @@ type Props = {
 
 const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
 	wizard: "Parcours initial (wizard A–F)",
-	post_submit: "Démarche post-soumission",
+	post_submit: "Démarche post-transmission",
 };
 
 /**
@@ -35,7 +35,7 @@ export function StepDurationsTable({ rows }: Props) {
 							<table>
 								<caption className="fr-sr-only">
 									Délai médian et 90e percentile en jours par étape du parcours
-									indicateurs et par jalon de la démarche post-soumission, et
+									indicateurs et par jalon de la démarche post-transmission, et
 									nombre de déclarations concernées.
 								</caption>
 								<thead>
