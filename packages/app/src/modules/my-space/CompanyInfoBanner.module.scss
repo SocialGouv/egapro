@@ -2,6 +2,16 @@
 	background-color: var(--background-alt-blue-france);
 }
 
+.title {
+	display: inline;
+}
+
+.tooltipWrapper {
+	display: inline-flex;
+	margin-inline-start: 0.5rem;
+	vertical-align: middle;
+}
+
 .infoRow {
 	display: flex;
 	flex-wrap: wrap;

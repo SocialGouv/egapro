@@ -1,9 +1,12 @@
 import {
+	type CompanySize,
+	classifyCompanySize,
 	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
 	isCseRequired,
 } from "~/modules/domain";
+import { TooltipButton } from "~/modules/shared/TooltipButton";
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
@@ -15,6 +18,17 @@ import type { CompanyDetail } from "./types";
 
 type Props = {
 	company: CompanyDetail;
+};
+
+const INFO_SOURCE_TOOLTIP_ID = "company-info-source-tooltip";
+const INFO_SOURCE_LABEL = "Information sur la source des données";
+
+// Below 100, the CSE field doesn't exist yet so there's no edit entry point into
+// the data this banner shows — the tooltip is the only access to its source.
+const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
+	voluntary: "Source : INSEE.",
+	mandatory:
+		"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
 };
 
 type CountryDisplay =
@@ -41,6 +55,8 @@ export function CompanyInfoBanner({ company }: Props) {
 	// The CSE field is the only editable datapoint and it starts at 100, so below
 	// that threshold the modal has nothing to offer and the entry point is hidden.
 	const cseApplicable = isCseRequired(obligationWorkforce);
+	const companySize = classifyCompanySize(obligationWorkforce);
+	const infoSourceText = INFO_SOURCE_TEXT_BY_SIZE[companySize];
 	const countryDisplay = resolveCountryDisplay(company);
 	const locationRow =
 		countryDisplay.kind === "domestic" ? (
@@ -70,7 +86,16 @@ export function CompanyInfoBanner({ company }: Props) {
 			<div className="fr-container">
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-1w">
 					<div className="fr-col">
-						<h1 className="fr-h4 fr-mb-0">{company.name}</h1>
+						<h1 className={`fr-h4 fr-mb-0 ${styles.title}`}>{company.name}</h1>
+						{infoSourceText && (
+							<span className={styles.tooltipWrapper}>
+								<TooltipButton
+									id={INFO_SOURCE_TOOLTIP_ID}
+									label={INFO_SOURCE_LABEL}
+									text={infoSourceText}
+								/>
+							</span>
+						)}
 					</div>
 					{cseApplicable && (
 						<div className="fr-col-auto">
