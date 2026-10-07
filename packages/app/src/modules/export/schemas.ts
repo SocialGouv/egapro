@@ -17,13 +17,6 @@ export const exportYearOptionalQuerySchema = z.object({
 		.optional(),
 });
 
-export function auditedExportYear(request: Request): number | null {
-	const parsed = exportYearQuerySchema.safeParse({
-		year: new URL(request.url).searchParams.get("year") ?? undefined,
-	});
-	return parsed.success ? parsed.data.year : null;
-}
-
 export const exportDeclarationsQuerySchema = z.object({
 	date_begin: z
 		.string()

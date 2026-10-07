@@ -1,10 +1,7 @@
 import { env } from "~/env.js";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { downloadExport } from "~/modules/export/downloadExport";
-import {
-	auditedExportYear,
-	exportYearQuerySchema,
-} from "~/modules/export/schemas";
+import { exportYearQuerySchema } from "~/modules/export/schemas";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { assertBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
@@ -17,9 +14,12 @@ import { db } from "~/server/db";
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.EXPORT_DOWNLOAD,
-		resolveContext: (request) => ({
-			metadata: { year: auditedExportYear(request) },
-		}),
+		resolveContext: (request) => {
+			const url = new URL(request.url);
+			return {
+				metadata: { year: url.searchParams.get("year") ?? null },
+			};
+		},
 	},
 	exportDownloadHandler,
 );
