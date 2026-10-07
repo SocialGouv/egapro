@@ -647,7 +647,6 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			).toBeVisible();
 			await expect(workforceAlert).toBeFocused();
 
-			// The gap is on a total across categories, not a cell: the alert closes the form.
 			const placement = await workforceAlert.evaluate(
 				(alert, [accordion, submit]) => ({
 					afterAccordion: Boolean(
