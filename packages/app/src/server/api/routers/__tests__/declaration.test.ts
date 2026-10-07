@@ -269,10 +269,7 @@ function createSubmitMockDb(
 	]);
 }
 
-// The compliance mutations read the démarche only once its declaration lock is
-// held, so every handler read is served by the transaction, in order; a read on
-// the outer db would bypass the lock and fails the test. `steps` records the
-// lock and the reads in the order they happen.
+// A read on the outer db would bypass the declaration lock, so it fails the test.
 function createUnderLockDb(
 	reads: unknown[][],
 	subsequentEvents: SubmissionHistoryEvent[] = [],
