@@ -42,10 +42,11 @@ jobs:
       - name: Publish to GitHub Wiki
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY}.wiki.git" /tmp/wiki
           cp schema-doc.md /tmp/wiki/Schema-Egapro-V2.md
           cd /tmp/wiki
           git add Schema-Egapro-V2.md

@@ -25,12 +25,13 @@ jobs:
       - name: Clone wiki
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           # Keep the token out of the process argument list (visible in `ps aux`)
           # by writing it to ~/.netrc instead of inlining it in the clone URL.
           echo "machine github.com login x-access-token password ${GITHUB_TOKEN}" > ~/.netrc
           chmod 600 ~/.netrc
-          git clone "https://github.com/${{ github.repository }}.wiki.git" /tmp/wiki
+          git clone "https://github.com/${REPOSITORY}.wiki.git" /tmp/wiki
 
       - name: Mirror markdown files
         shell: bash
@@ -53,6 +54,9 @@ jobs:
           fi
 
       - name: Commit and push
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -62,7 +66,7 @@ jobs:
             echo "No changes to sync."
             exit 0
           fi
-          git commit -m "Sync docs from ${{ github.ref_name }} ($(echo ${{ github.sha }} | cut -c1-7))"
+          git commit -m "Sync docs from ${REF_NAME} (${COMMIT_SHA:0:7})"
           # Retry with rebase to survive a concurrent push from another wiki-syncing
           # workflow (e.g. db-schema.yaml committing at the same time).
           for i in 1 2 3; do

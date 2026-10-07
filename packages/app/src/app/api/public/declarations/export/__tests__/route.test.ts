@@ -322,6 +322,14 @@ describe("GET /api/public/declarations/export", () => {
 		);
 	});
 
+	it("audits an invalid format by name only, never the raw value", async () => {
+		await callGet(`?format=${"x".repeat(5_000)}`);
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "format" } }),
+		);
+	});
+
 	it("defaults the audited format to json when the param is absent", async () => {
 		setRows([buildRow()]);
 

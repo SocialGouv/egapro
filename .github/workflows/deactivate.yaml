@@ -15,6 +15,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event.ref || github.event.pull_request.head.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   guard:
     name: "🛡️ Protected refs"
@@ -53,6 +56,12 @@ jobs:
 
   kontinuous:
     needs: guard
+    # Mirrors the permissions the reusable workflow declares: a caller that
+    # grants less makes the nested job fail at startup.
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: read
     if: needs.guard.outputs.protected == 'false'
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-deactivate-atlas.yaml@v1
     secrets: inherit

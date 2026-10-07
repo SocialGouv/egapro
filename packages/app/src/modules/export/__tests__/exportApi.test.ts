@@ -12,6 +12,11 @@ const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointEval = vi.fn().mockResolvedValue(new Map());
+const mockLogAction = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
+}));
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchSubmittedDeclarations: (...args: unknown[]) =>
@@ -176,6 +181,34 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(403);
+	});
+
+	it("audits the validated date window", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		await GET(
+			gatewayForwardedRequest(
+				"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				metadata: { date_begin: "2027-03-15", date_end: null },
+			}),
+		);
+	});
+
+	it("audits an invalid date by name only, never the raw value", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		await GET(
+			gatewayForwardedRequest(
+				`http://localhost/api/v1/export/declarations?date_begin=${"x".repeat(5_000)}`,
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "date_begin" } }),
+		);
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {

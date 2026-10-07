@@ -7,6 +7,9 @@ concurrency:
   group: lighthouse-${{ github.event.deployment.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lighthouse:
     name: "Lighthouse audit"

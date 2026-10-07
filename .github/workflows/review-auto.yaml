@@ -15,6 +15,9 @@ concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.ref }}
 
+permissions:
+  contents: read
+
 jobs:
   build-app:
     permissions:
@@ -38,11 +41,13 @@ jobs:
         id: pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
           # No PR yet is a normal state and must not fail the build, but an API
           # error must stay visible: without this, a bad token or a rate limit
           # is indistinguishable from "branch has no PR".
-          if ERR=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+          if ERR=$(gh api "repos/${REPOSITORY}/commits/${COMMIT_SHA}/pulls" \
                      --jq '.[0].number // empty' 2>&1 >pr-number.txt); then
             N=$(cat pr-number.txt)
           else
@@ -100,6 +105,12 @@ jobs:
 
   kontinuous:
     needs: [build-app]
+    # Mirrors the permissions the reusable workflow declares: a caller that
+    # grants less makes the nested job fail at startup.
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: read
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@v1
     secrets: inherit
