@@ -39,6 +39,14 @@ spec:
             # transite par le sidecar smtp-demux (voir ci-dessous).
             - name: MP_SMTP_BIND_ADDR
               value: 127.0.0.1:1026
+            # Authentification basic de Mailpit lui-même (#4695) : elle couvre
+            # l'UI, l'API /api/v1 et le websocket quel que soit le chemin
+            # (Ingress, Service 8025, ou HTTP démultiplexé sur 1025). /livez et
+            # /readyz restent ouverts (sonde ci-dessous). Le SMTP n'est pas
+            # concerné. Fichier lu au démarrage : redémarrer le pod après un
+            # re-scellement.
+            - name: MP_UI_AUTH_FILE
+              value: /etc/mailpit/ui-auth/htpasswd
           ports:
             - name: smtp-internal
               containerPort: 1026
@@ -60,13 +68,17 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: ui-auth
+              mountPath: /etc/mailpit/ui-auth
+              readOnly: true
         # Démultiplexeur TCP devant le smtpd. Le Prometheus de la plateforme
         # sonde TOUS les ports de TOUS les services en HTTP (le NetworkPolicy
         # fabrique `netpol-ingress` autorise le namespace monitoring en union,
         # impossible d'exclure le port 1025 côté produit). Chaque sonde HTTP
         # sur le port SMTP générait une réponse « 500 5.5.2 Syntax error »
         # que Mailpit diffuse en toast d'erreur dans l'UI web (#4547).
-        # Ici : trafic HTTP → UI Mailpit (réponse 200), tout le reste → smtpd.
+        # Ici : trafic HTTP → UI Mailpit (401 sans identifiants, sans toast),
+        # tout le reste → smtpd.
         - name: smtp-demux
           image: haproxy:3.2.23-alpine3.24
           securityContext:
@@ -99,6 +111,13 @@ spec:
         - name: smtp-demux-config
           configMap:
             name: mailpit-smtp-demux
+        - name: ui-auth
+          secret:
+            secretName: mailpit-basic-auth
+            items:
+              - key: auth
+                path: htpasswd
+            defaultMode: 0440
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -154,6 +173,10 @@ spec:
       targetPort: smtp
       appProtocol: tcp
 ---
+# Pas d'annotation `auth-type: basic` ici : l'authentification est celle de
+# Mailpit (MP_UI_AUTH_FILE). ingress-nginx vide l'en-tête Authorization avant
+# de relayer une requête qu'il a authentifiée (`proxy_set_header Authorization
+# ""` dans son nginx.tmpl) : Mailpit répondrait 401 à chaque requête, en boucle.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -162,9 +185,6 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: mailpit-basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: "Mailpit"
 spec:
   ingressClassName: nginx
   tls:
