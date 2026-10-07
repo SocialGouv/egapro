@@ -5,6 +5,7 @@ export const SUBMISSION_UNCONFIRMED_MESSAGE =
 const USER_FACING_ERROR_CODES: ReadonlySet<string> = new Set([
 	"FORBIDDEN",
 	"CONFLICT",
+	"PRECONDITION_FAILED",
 ]);
 
 export type SubmissionError = {
