@@ -280,7 +280,6 @@ function RemunerationTable({
 									valueFor(fields.baseWomen),
 									valueFor(fields.baseMen),
 								)}
-								layout="cell"
 							/>
 						</td>
 					</tr>
@@ -318,7 +317,6 @@ function RemunerationTable({
 									valueFor(fields.variableWomen),
 									valueFor(fields.variableMen),
 								)}
-								layout="cell"
 							/>
 						</td>
 					</tr>

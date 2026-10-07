@@ -173,7 +173,7 @@ export function PayGapTable({
 												</span>
 											</td>
 											<td>
-												<GapBadge gap={gap} layout="cell" />
+												<GapBadge gap={gap} />
 											</td>
 										</tr>
 									);

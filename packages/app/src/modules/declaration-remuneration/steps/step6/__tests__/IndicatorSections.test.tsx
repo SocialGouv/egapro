@@ -131,6 +131,9 @@ describe("IndicatorSections", () => {
 
 		expect(screen.getByText("7,19 %")).toBeInTheDocument();
 		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
+		expect(
+			screen.getByText("7,19 %").parentElement?.parentElement,
+		).toHaveTextContent("en faveur des hommes");
 	});
 
 	it("recomputes the reviewed gap once an operand no longer matches the GIP one", () => {
