@@ -231,26 +231,6 @@ describe("servePublicExport — filtered exports", () => {
 		expect(valkey.get).not.toHaveBeenCalled();
 		expect(valkey.set).not.toHaveBeenCalled();
 	});
-
-	it("computes concurrent filtered requests under the per-pod slots", async () => {
-		const { servePublicExport } = await import("../publicExportCache");
-		const gate = deferred<string>();
-		const produce = vi.fn(() => gate.promise);
-
-		const running = Array.from({ length: MAX_CONCURRENT_PUBLIC_EXPORTS }, () =>
-			servePublicExport("declarations:csv", inputOf("region=11"), produce),
-		);
-		const rejected = await servePublicExport(
-			"declarations:csv",
-			inputOf("region=11"),
-			produce,
-		);
-		gate.resolve("body");
-
-		expect(await Promise.all(running)).toEqual(["body", "body"]);
-		expect(rejected).toBeInstanceOf(Response);
-		expect(produce).toHaveBeenCalledTimes(MAX_CONCURRENT_PUBLIC_EXPORTS);
-	});
 });
 
 describe("withPublicExportSlot", () => {

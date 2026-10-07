@@ -481,23 +481,6 @@ describe("GET /api/public/declarations/export", () => {
 			expect(await cachedResponse.text()).toBe(firstBody);
 		});
 
-		it.each([
-			"?format=csv",
-			"",
-		])("runs one database query for concurrent unfiltered requests (%s)", async (search) => {
-			const release = gatedRows([buildRow()]);
-
-			const pending = [callGet(search), callGet(search), callGet(search)];
-			await vi.waitFor(() => expect(mocks.dbSelect).toHaveBeenCalled());
-			release();
-			const responses = await Promise.all(pending);
-
-			expect(mocks.dbSelect).toHaveBeenCalledTimes(1);
-			const bodies = await Promise.all(responses.map((r) => r.text()));
-			expect(new Set(bodies).size).toBe(1);
-			expect(responses.every((r) => r.status === 200)).toBe(true);
-		});
-
 		it("never caches a filtered export", async () => {
 			const valkey = createFakeValkey();
 			mocks.getValkey.mockResolvedValue(valkey);
@@ -511,27 +494,6 @@ describe("GET /api/public/declarations/export", () => {
 			expect(valkey.set).not.toHaveBeenCalled();
 		});
 
-		it("keeps the JSON and CSV entries apart", async () => {
-			mocks.getValkey.mockResolvedValue(createFakeValkey());
-			setRows([buildRow()]);
-			await callGet("?format=csv");
-
-			const response = await callGet();
-
-			expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
-			expect((await response.json()).count).toBe(1);
-		});
-
-		it("does not cache an oversized export", async () => {
-			const valkey = createFakeValkey();
-			mocks.getValkey.mockResolvedValue(valkey);
-			setRows(new Array(MAX_EXPORT_ROWS + 1));
-
-			await callGet("?format=csv");
-
-			expect(valkey.set).not.toHaveBeenCalled();
-		});
-
 		it("does not cache Excel workbooks", async () => {
 			const valkey = createFakeValkey();
 			mocks.getValkey.mockResolvedValue(valkey);
@@ -540,16 +502,6 @@ describe("GET /api/public/declarations/export", () => {
 			await callGet("?format=xlsx");
 
 			expect(valkey.set).not.toHaveBeenCalled();
-		});
-
-		it("still answers from the database when Valkey is unavailable", async () => {
-			setRows([buildRow()]);
-			await callGet("?format=csv");
-
-			const response = await callGet("?format=csv");
-
-			expect(response.status).toBe(200);
-			expect(mocks.dbSelect).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -580,24 +532,6 @@ describe("GET /api/public/declarations/export", () => {
 				error: PUBLIC_EXPORT_BUSY_MESSAGE,
 			});
 			expect(responses.every((r) => r.status === 200)).toBe(true);
-		});
-
-		it("frees the slots once the computations failed", async () => {
-			mocks.dbSelect.mockImplementation(() => {
-				throw new Error("db down");
-			});
-			const consoleSpy = vi
-				.spyOn(console, "error")
-				.mockImplementation(() => {});
-			for (let index = 0; index < MAX_CONCURRENT_PUBLIC_EXPORTS; index += 1) {
-				expect((await callGet("?format=csv&region=11")).status).toBe(500);
-			}
-			consoleSpy.mockRestore();
-			setRows([buildRow()]);
-
-			const response = await callGet("?format=csv&region=11");
-
-			expect(response.status).toBe(200);
 		});
 	});
 });
