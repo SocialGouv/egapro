@@ -31,6 +31,7 @@ Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiff
 
 - rémunération : `name`, `address`, `city`, `regionCode`, `region`, `departmentCode`, `departmentLabel`, `countryCode`, `countryLabel`, `nafCode`, `nafLabel`
 - représentation : `name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`
+- représentation, champs de publication : `publishUrl` et `publishModalities` valent `null` (et non `Non-diffusible`)
 
 Pour la représentation équilibrée, les champs de publication `publishUrl` et `publishModalities` valent `null` : l'URL ou les modalités de publication désignent l'entreprise aussi sûrement que sa raison sociale. Le même masquage s'applique aux colonnes `Url_publication` et `Modalites_publication` de l'export CSV / XLSX public.
 
