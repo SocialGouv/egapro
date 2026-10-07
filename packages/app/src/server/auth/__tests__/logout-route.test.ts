@@ -353,14 +353,34 @@ describe("GET /api/auth/logout", () => {
 		expect(mockFetchEndSession).not.toHaveBeenCalled();
 	});
 
-	it("refuses a same-site logout coming from another subdomain", async () => {
+	it("refuses a third-party redirect back to the logout that kept an egapro Referer", async () => {
 		mockGetToken.mockResolvedValue({ id: "user-123" });
 
 		const response = await GET(
-			buildRequest({
-				"sec-fetch-site": "same-site",
-				referer: "https://other.localhost:3000/page",
-			}),
+			buildRequest(
+				{
+					"sec-fetch-site": "cross-site",
+					referer: "http://localhost:3000/mon-espace",
+				},
+				{ [SESSION_COOKIE]: "session" },
+			),
+		);
+
+		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
+		expect(response.headers.getSetCookie()).toEqual([]);
+		expect(mockGetToken).not.toHaveBeenCalled();
+		expect(mockReleaseAllLocksForUser).not.toHaveBeenCalled();
+		expect(mockLogAction).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["another subdomain", "https://other.localhost:3000/page"],
+		["the trusted origin", "http://localhost:3000/mon-espace"],
+	])("refuses a same-site logout whose Referer is %s", async (_label, referer) => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
+
+		const response = await GET(
+			buildRequest({ "sec-fetch-site": "same-site", referer }),
 		);
 
 		expect(response.headers.getSetCookie()).toEqual([]);
