@@ -8,13 +8,21 @@ import {
 	ADMIN_MFA_RESUME,
 	API_PUBLIC_DECLARATIONS,
 	API_SEARCH,
+	API_V1_FILES,
 	API_V1_PREFIX,
+	CSE_OPINION,
+	DECLARATION_REMUNERATION,
 	LOGIN,
 	MY_SPACE,
 } from "~/modules/routes";
+import {
+	buildContentSecurityPolicyHeaders,
+	generateNonce,
+	NONCE_HEADER,
+} from "~/server/security/securityHeaders.js";
 
 /**
- * Next.js Edge middleware handling three concerns:
+ * Next.js Edge middleware handling four concerns:
  *
  * 1. `/admin/*` — backoffice guard. Decodes the NextAuth JWT and applies the
  *    shared decision table of `resolveAdminAccess` — admin grant *and* a
@@ -38,8 +46,49 @@ import {
  *    as the SUIT-vs-session discriminator, so we only validate the header
  *    when it is **present** — absence is forwarded to the route handler
  *    which falls back to NextAuth session auth.
+ *
+ * 4. Every response but a stored file — a per-request nonce CSP, also set on
+ *    the request so Next.js and server components can stamp the nonce.
  */
+type Forward = () => NextResponse;
+
+const SESSION_GATED_SECTIONS = [
+	MY_SPACE,
+	DECLARATION_REMUNERATION,
+	CSE_OPINION,
+];
+
 export async function middleware(request: NextRequest) {
+	// Chrome's built-in PDF viewer refuses to render a document served inline under a CSP.
+	if (isWithin(request.nextUrl.pathname, API_V1_FILES)) {
+		return route(request, () => NextResponse.next());
+	}
+
+	const nonce = generateNonce();
+	const policyHeaders = buildContentSecurityPolicyHeaders({
+		isDevelopment: env.NODE_ENV === "development",
+		nonce,
+		matomoUrl: env.NEXT_PUBLIC_MATOMO_URL,
+		sentryDsn: env.NEXT_PUBLIC_SENTRY_DSN,
+	});
+
+	const requestHeaders = new Headers(request.headers);
+	requestHeaders.set(NONCE_HEADER, nonce);
+	requestHeaders.set(
+		"Content-Security-Policy",
+		policyHeaders["Content-Security-Policy"],
+	);
+
+	const response = await route(request, () =>
+		NextResponse.next({ request: { headers: requestHeaders } }),
+	);
+	for (const [name, value] of Object.entries(policyHeaders)) {
+		response.headers.set(name, value);
+	}
+	return response;
+}
+
+function route(request: NextRequest, forward: Forward) {
 	const { pathname } = request.nextUrl;
 
 	if (pathname === API_SEARCH) {
@@ -47,14 +96,22 @@ export async function middleware(request: NextRequest) {
 	}
 
 	if (pathname.startsWith(API_V1_PREFIX)) {
-		return gatewayMiddleware(request);
+		return gatewayMiddleware(request, forward);
 	}
 
-	if (pathname.startsWith(ADMIN)) {
-		return adminMiddleware(request);
+	if (isWithin(pathname, ADMIN)) {
+		return adminMiddleware(request, forward);
 	}
 
-	return sessionMiddleware(request);
+	if (SESSION_GATED_SECTIONS.some((section) => isWithin(pathname, section))) {
+		return sessionMiddleware(request, forward);
+	}
+
+	return forward();
+}
+
+function isWithin(pathname: string, section: string) {
+	return pathname === section || pathname.startsWith(`${section}/`);
 }
 
 function searchRedirect(request: NextRequest) {
@@ -74,7 +131,7 @@ function redirectToLogin(request: NextRequest) {
 	return NextResponse.redirect(loginUrl);
 }
 
-async function adminMiddleware(request: NextRequest) {
+async function adminMiddleware(request: NextRequest, forward: Forward) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
 	// The Edge runtime can settle freshness itself: the token is already decoded here, and the rule compares two numbers.
@@ -97,7 +154,7 @@ async function adminMiddleware(request: NextRequest) {
 			return NextResponse.redirect(resumeUrl);
 		}
 		case "allow":
-			return noStore(NextResponse.next());
+			return noStore(forward());
 		default:
 			return redirectToLogin(request);
 	}
@@ -109,24 +166,24 @@ function noStore(response: NextResponse) {
 	return response;
 }
 
-async function sessionMiddleware(request: NextRequest) {
+async function sessionMiddleware(request: NextRequest, forward: Forward) {
 	const token = await getToken({ req: request, secret: env.AUTH_SECRET });
 
 	if (!token) {
 		return redirectToLogin(request);
 	}
 
-	return NextResponse.next();
+	return forward();
 }
 
-function gatewayMiddleware(request: NextRequest) {
+function gatewayMiddleware(request: NextRequest, forward: Forward) {
 	const forwarded = request.headers.get("x-gateway-forwarded");
 
 	// Truly absent (header not sent at all) → legitimate session-based call
 	// (admin / user) on a mixed endpoint, or a public route. The handler
 	// enforces its own auth.
 	if (forwarded === null) {
-		return NextResponse.next();
+		return forward();
 	}
 
 	// Header present → must be a non-empty value matching the shared secret.
@@ -142,7 +199,7 @@ function gatewayMiddleware(request: NextRequest) {
 		return new NextResponse(null, { status: 403 });
 	}
 
-	return NextResponse.next();
+	return forward();
 }
 
 /**
@@ -160,17 +217,7 @@ function constantTimeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
-// Next reads this at build time and cannot evaluate an imported constant, so
-// these patterns are the one place route paths stay written out; the "matcher
-// coverage" test in `__tests__/middleware.test.ts` pins them against
-// `~/modules/routes`.
+// Every HTML response needs the nonce: only build assets are left out.
 export const config = {
-	matcher: [
-		"/admin/:path*",
-		"/api/v1/:path*",
-		"/api/search",
-		"/mon-espace/:path*",
-		"/declaration-remuneration/:path*",
-		"/avis-cse/:path*",
-	],
+	matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
