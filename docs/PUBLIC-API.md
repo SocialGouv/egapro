@@ -111,7 +111,7 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv&y
   -o index-egapro-remunerations-2027.csv
 ```
 
-### Plafonds et cache des exports
+### Plafonds, cache et calculs simultanés
 
 Les deux exports — `/api/public/declarations/export` et `/api/public/representations/export` (représentation équilibrée, `csv` ou `xlsx`) — appliquent un nombre maximal de lignes par requête :
 
@@ -124,9 +124,17 @@ Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSO
 
 Le plafond JSON/CSV est dimensionné pour l'export complet sans filtre, celui que publie la ressource data.gouv.fr et que sert le bouton « tout télécharger » de la consultation. Environ 35 000 entreprises déclarent par campagne et l'export couvre toutes les campagnes publiées depuis 2027 : 200 000 lignes laissent cinq campagnes de marge, tout en bornant la mémoire d'une requête (de l'ordre du gigaoctet au plafond, pour des pods limités à 2 Go). À l'approche du plafond, la ressource data.gouv.fr devra passer à un export par année (`year`).
 
-Les exports JSON et CSV sont mis en cache **1 heure côté serveur** pour chaque jeu de filtres. Deux requêtes qui portent les mêmes filtres, dans un ordre différent ou avec des paramètres inconnus en plus, sont servies par la même entrée. Une modification met donc jusqu'à une heure à se refléter dans un export, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600` — dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître des exports.
+Seuls les trois exports complets, **sans aucun filtre**, sont mis en cache **1 heure côté serveur** :
 
-Le cache est borné : une entrée filtrée de plus de 16 Mo compressés n'est pas mise en cache, et les entrées filtrées partagent un budget de 64 Mo écrits par heure. L'export sans filtre échappe à ces deux bornes — c'est le plus coûteux à recalculer, et il ne compte qu'une entrée par format. Les requêtes identiques simultanées qui manquent le cache ne déclenchent qu'un calcul par pod.
+| Export | Utilisé par |
+| --- | --- |
+| `/api/public/declarations/export?format=csv` | la ressource data.gouv.fr, le bouton « tout télécharger » |
+| `/api/public/declarations/export` (JSON) | l'export complet documenté ci-dessus |
+| `/api/public/representations/export?format=csv` | le bouton « tout télécharger » |
+
+`limit`, `offset`, `sort` et les paramètres inconnus ne comptent pas comme des filtres. Une modification met donc jusqu'à une heure à se refléter dans ces exports, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`. Cela vaut dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître. Des requêtes simultanées sur un même export complet absent du cache ne déclenchent qu'un seul calcul par pod.
+
+Les autres exports (filtrés, ou au format Excel) sont recalculés à chaque requête. Un pod en calcule au plus **deux à la fois** : au-delà, l'API répond **`503 Service Unavailable`** avec un en-tête `Retry-After` (en secondes) et un message d'erreur JSON. Réessayez après ce délai.
 
 ## Licence
 
