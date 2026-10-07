@@ -348,9 +348,30 @@ describe("GET /api/auth/logout", () => {
 		expect(response.headers.get("Location")).toBe("http://localhost:3000/");
 		expect(response.headers.getSetCookie()).toEqual([]);
 		expect(mockGetToken).not.toHaveBeenCalled();
-		expect(mockLogAction).not.toHaveBeenCalled();
+		expect(mockLogAction).not.toHaveBeenCalledWith(
+			expect.objectContaining({ status: "success" }),
+		);
 		expect(mockReleaseAllLocksForUser).not.toHaveBeenCalled();
 		expect(mockFetchEndSession).not.toHaveBeenCalled();
+	});
+
+	it("writes a failure audit log without any user identity when refusing a cross-site logout", async () => {
+		mockGetToken.mockResolvedValue({ id: "user-123" });
+
+		await GET(
+			buildRequest({ ...CROSS_SITE_NAVIGATION, "user-agent": "test-agent" }),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledOnce();
+		const entry = mockLogAction.mock.calls[0]?.[0];
+		expect(entry).toMatchObject({
+			action: "auth.logout",
+			status: "failure",
+			errorMessage: expect.stringMatching(/^CROSS_SITE_REQUEST:/),
+			userAgent: "test-agent",
+		});
+		expect(entry).not.toHaveProperty("userId");
+		expect(entry).not.toHaveProperty("metadata");
 	});
 
 	it("refuses a third-party redirect back to the logout that kept an egapro Referer", async () => {
@@ -370,7 +391,9 @@ describe("GET /api/auth/logout", () => {
 		expect(response.headers.getSetCookie()).toEqual([]);
 		expect(mockGetToken).not.toHaveBeenCalled();
 		expect(mockReleaseAllLocksForUser).not.toHaveBeenCalled();
-		expect(mockLogAction).not.toHaveBeenCalled();
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({ status: "failure" }),
+		);
 	});
 
 	it.each([

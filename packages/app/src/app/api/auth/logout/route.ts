@@ -16,6 +16,14 @@ export async function GET(request: NextRequest) {
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
 
 	if (isCrossSiteRequest(request.headers, baseUrl)) {
+		const requestContext = buildRequestContext(request.headers);
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_LOGOUT,
+			status: "failure",
+			errorMessage: "CROSS_SITE_REQUEST: logout refused",
+			ipAddress: requestContext.ipAddress,
+			userAgent: requestContext.userAgent,
+		});
 		return NextResponse.redirect(new URL("/", baseUrl));
 	}
 
