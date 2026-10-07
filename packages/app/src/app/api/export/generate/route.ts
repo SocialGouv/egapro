@@ -3,6 +3,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import { getCurrentYear } from "~/modules/domain";
 import { generateYearlyExport } from "~/modules/export";
 import { exportYearOptionalQuerySchema } from "~/modules/export/schemas";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { rejectInvalidBearerToken } from "~/server/auth/bearerToken";
 import { db } from "~/server/db";
@@ -19,7 +20,12 @@ export const POST = withAuditedRoute(
 		resolveContext: (request) => {
 			const url = new URL(request.url);
 			return {
-				metadata: { year: url.searchParams.get("year") ?? null },
+				metadata: auditQueryMetadata(
+					exportYearOptionalQuerySchema.safeParse({
+						year: url.searchParams.get("year") ?? undefined,
+					}),
+					(query) => ({ year: query.year ?? null }),
+				),
 			};
 		},
 	},

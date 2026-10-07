@@ -170,6 +170,49 @@ describe("GET /api/declaration-pdf", () => {
 		expect(response.status).toBe(400);
 	});
 
+	it.each([
+		["out of range", "1900"],
+		["not a number", "abc"],
+		["a number with a trailing suffix", "2025abc"],
+	])("answers 400 when the requested year is %s", async (_label, year) => {
+		const response = await GET(request(`?year=${year}`));
+
+		expect(response.status).toBe(400);
+		expect(mocks.buildPdfData).not.toHaveBeenCalled();
+	});
+
+	it("audits an oversized year by name only, never the raw string", async () => {
+		const response = await GET(request(`?year=${"x".repeat(5_000)}`));
+
+		expect(response.status).toBe(400);
+		expect(auditRow()).toMatchObject({ status: "failure" });
+		expect(auditRow().metadata).toEqual({ invalidParam: "year" });
+	});
+
+	it.each([
+		["correction", "correction"],
+		["initial", "initial"],
+		["x".repeat(5_000), "initial"],
+	])("audits the declaration type %#, normalised", async (type, expected) => {
+		await GET(request(`?year=${YEAR}&type=${type}`));
+
+		expect(auditRow()).toMatchObject({
+			metadata: { type: expected },
+		});
+	});
+
+	it.each([
+		["a refused download", false, "?year=2025", 401],
+		["an invalid year", true, "?year=abc", 400],
+	])("keeps %s out of every cache", async (_label, signedIn, query, status) => {
+		if (!signedIn) mocks.auth.mockResolvedValue(null);
+
+		const response = await GET(request(query));
+
+		expect(response.status).toBe(status);
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+	});
+
 	it("audits the download as a sensitive read", async () => {
 		await GET(request());
 
@@ -179,7 +222,7 @@ describe("GET /api/declaration-pdf", () => {
 			userId: "user-1",
 			userEmail: "declarant@exemple.fr",
 			siren: SIREN,
-			metadata: { year: String(YEAR), type: "initial" },
+			metadata: { year: YEAR, type: "initial" },
 		});
 	});
 });

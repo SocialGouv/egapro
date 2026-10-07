@@ -24,7 +24,8 @@ vi.mock("../activityLog", async (importOriginal) => {
 	};
 });
 
-const { logAction, AUDIT_ERROR_MESSAGE_MAX_LENGTH } = await import("../log");
+const { logAction, logActionInTransaction, AUDIT_ERROR_MESSAGE_MAX_LENGTH } =
+	await import("../log");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
 describe("logAction", () => {
@@ -309,6 +310,68 @@ describe("logAction", () => {
 			expect(consoleSpy).toHaveBeenCalled();
 
 			consoleSpy.mockRestore();
+		});
+	});
+});
+
+describe("logActionInTransaction", () => {
+	const txInsertValues = vi.fn();
+	const tx = {
+		insert: () => ({ values: txInsertValues }),
+	} as unknown as Parameters<typeof logActionInTransaction>[0];
+
+	beforeEach(() => {
+		mockInsertValues.mockReset();
+		mockEmitActivityLog.mockReset();
+		txInsertValues.mockReset();
+		txInsertValues.mockResolvedValue(undefined);
+	});
+
+	it("writes the row through the caller's transaction, never the shared connection", async () => {
+		await logActionInTransaction(tx, {
+			action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
+			status: "success",
+			userId: "user-1",
+			siren: "123456789",
+			metadata: { reason: "siret_changed" },
+		});
+
+		expect(mockInsertValues).not.toHaveBeenCalled();
+		expect(txInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			action: "auth.company_link_revoked",
+			category: "auth",
+			userId: "user-1",
+			siren: "123456789",
+			metadata: { reason: "siret_changed" },
+		});
+	});
+
+	it("rejects when the insert fails, so the transaction rolls back", async () => {
+		txInsertValues.mockRejectedValue(new Error("db down"));
+
+		await expect(
+			logActionInTransaction(tx, {
+				action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
+				status: "success",
+			}),
+		).rejects.toThrow("db down");
+		expect(mockEmitActivityLog).not.toHaveBeenCalled();
+	});
+
+	it("leaves the stdout mirror to the caller, to run once the transaction has committed", async () => {
+		const mirror = await logActionInTransaction(tx, {
+			action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
+			status: "success",
+			siren: "123456789",
+		});
+
+		expect(mockEmitActivityLog).not.toHaveBeenCalled();
+		mirror();
+		expect(mockEmitActivityLog).toHaveBeenCalledOnce();
+		expect(mockEmitActivityLog.mock.calls[0]?.[0]).toMatchObject({
+			action: "auth.company_link_revoked",
+			category: "auth",
+			siren: "123456789",
 		});
 	});
 });

@@ -12,7 +12,7 @@ Audience : équipe métier / PO (référence pour les tests d'acceptance, les re
 2. [Parcours commun — connexion ProConnect](#2-parcours-commun--connexion-proconnect)
 3. [Employeur — première déclaration de l'index](#3-employeur--première-déclaration-de-lindex)
 4. [Employeur — consulter l'historique d'une démarche](#4-employeur--consulter-lhistorique-dune-démarche)
-5. [Employeur — modification d'une déclaration soumise](#5-employeur--modification-dune-déclaration-soumise)
+5. [Employeur — modification d'une déclaration transmise](#5-employeur--modification-dune-déclaration-transmise)
 6. [Employeur — parcours de conformité (seconde déclaration)](#6-employeur--parcours-de-conformité-seconde-déclaration)
 7. [Employeur — avis du CSE](#7-employeur--avis-du-cse)
 8. [Employeur — parcours de représentation équilibrée](#8-employeur--parcours-de-représentation-équilibrée)
@@ -42,7 +42,7 @@ Conventions :
 
 - Données réparties entre plusieurs interlocuteurs (paie, comptabilité, CSE)
 - Période de déclaration concentrée sur quelques mois (mars–septembre)
-- Risque d'erreur sur les chiffres → besoin de pouvoir **modifier** après soumission
+- Risque d'erreur sur les chiffres → besoin de pouvoir **modifier** après transmission
 - Plusieurs personnes peuvent avoir accès à la même déclaration (co-déclarants du même SIREN) → **verrou collaboratif** pour éviter les conflits
 
 ### 1.2 Citoyen / journaliste / contrôleur
@@ -147,7 +147,7 @@ sequenceDiagram
     end
 ```
 
-Si le verrou est détenu par un autre utilisateur, un bandeau `fr-alert--warning` indique l'identité du détenteur (prénom, nom, email) et tous les formulaires sont en lecture seule (les boutons de soumission sont masqués via `LockContext`).
+Si le verrou est détenu par un autre utilisateur, un bandeau `fr-alert--warning` indique l'identité du détenteur (prénom, nom, email) et tous les formulaires sont en lecture seule (les boutons d'envoi sont masqués via `LockContext`).
 
 Le verrou est **libéré automatiquement** :
 - À la fermeture ou navigation hors du wizard (unmount React)
@@ -174,7 +174,7 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 > **Pourquoi écrasable ?** Le calcul GIP est basé sur les DSN, qui peuvent contenir des erreurs (mauvais codage CSP, période incomplète). L'employeur reste responsable légalement, donc il doit pouvoir corriger.
 
-### 3.5 Soumission
+### 3.5 Transmission
 
 À l'étape 6, le clic sur **« Transmettre »** :
 
@@ -183,10 +183,10 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 3. Envoie un **mail de confirmation** (`declaration_confirmation`) à l'utilisateur. Le contenu du mail est adapté au contexte selon le variant sélectionné automatiquement :
    - **`path_to_select`** : écart ≥ 5% → le mail indique la deadline de choix du parcours de conformité
    - **`cse_to_deposit`** : CSE requis mais pas d'écart → le mail invite à déposer l'avis CSE
-   - **`completed`** : démarche complète → le mail confirme la soumission
+   - **`completed`** : démarche complète → le mail confirme la transmission
 4. Redirige vers `/declaration-remuneration/recapitulatif/` (vue lecture seule).
 
-**Contrôles bloquants** au moment de la soumission :
+**Contrôles bloquants** au moment de la transmission :
 
 - Cohérence des effectifs (somme F + H = effectif total)
 - Plafond de déclarations par année (`MAX = 2`, mais cas rare à ce stade)
@@ -194,7 +194,7 @@ Si le GIP-MDS a publié les indicateurs A–F pour ce SIREN et cette année (tab
 
 ### 3.6 Sorties possibles
 
-- **Soumission OK** → recap PDF + mail de confirmation (variant contextualisé)
+- **Transmission OK** → recap PDF + mail de confirmation (variant contextualisé)
 - **Abandon en cours** → brouillon en base, disparaît automatiquement au-delà de **2 mois** sans modification (cleanup)
 - **Erreur métier bloquante** → message inline, retour à l'étape concernée
 - **Verrou perdu pendant la saisie** (expiration ou reprise par un tiers) → le prochain "Suivant" reçoit un `CONFLICT`, l'utilisateur doit recharger la page
@@ -239,7 +239,7 @@ Les entrées sont triées **du plus récent au plus ancien**. La liste se charge
 
 ### 4.3 Actions tracées
 
-Sont consignés : les changements d'étape du wizard, la soumission de la déclaration, le choix du parcours de conformité, la soumission de la seconde déclaration, le dépôt de l'évaluation conjointe, le dépôt de l'avis CSE, l'annulation et la finalisation de la démarche.
+Sont consignés : les changements d'étape du wizard, la transmission de la déclaration, le choix du parcours de conformité, la transmission de la seconde déclaration, le dépôt de l'évaluation conjointe, le dépôt de l'avis CSE, l'annulation et la finalisation de la démarche.
 
 ### 4.4 Accès et confidentialité
 
@@ -251,7 +251,7 @@ Sont consignés : les changements d'étape du wizard, la soumission de la décla
 
 ---
 
-## 5. Employeur — modification d'une déclaration soumise
+## 5. Employeur — modification d'une déclaration transmise
 
 Tant que la **deadline de modification** (`decl1ModificationDeadline`, configurée par l'admin DGT par année) n'est pas atteinte, l'employeur peut **rouvrir** sa déclaration.
 
@@ -264,7 +264,7 @@ flowchart TD
     LockCheck -->|Libre| E[Retour étape 6<br/>en mode édition]
     LockCheck -->|Pris| E2[Lecture seule<br/>+ bandeau verrou]
     E --> F[Navigation libre<br/>entre les étapes]
-    F --> G[Re-soumission]
+    F --> G[Re-transmission]
     G --> H([Mail de confirmation mis à jour<br/>+ nouveau numéro de version])
 ```
 
@@ -282,7 +282,7 @@ Réservé aux entreprises **≥ 100 salariés** dont l'**écart calculé est ≥
 
 ```mermaid
 flowchart TD
-    Start([Première déclaration soumise]) --> Workforce{Effectif<br/>≥ 100 ?}
+    Start([Première déclaration transmise]) --> Workforce{Effectif<br/>≥ 100 ?}
     Workforce -->|Non| Stop1[Pas de seconde déclaration<br/>négociation hors plateforme]
     Workforce -->|Oui| Gap{Écart<br/>≥ 5% ?}
     Gap -->|Non| Stop2[Conforme<br/>aucune obligation supplémentaire]
@@ -296,7 +296,7 @@ flowchart TD
 | Choix du chemin | `/parcours-conformite/` | Sélection du chemin de conformité (enum `COMPLIANCE_PATHS`) |
 | 1 à 4 | `/parcours-conformite/etape/[1..4]` | Mêmes structures que la première déclaration (effectifs, A/C, B/D/E, quartiles) |
 | Évaluation conjointe | `/parcours-conformite/evaluation-conjointe` | Upload optionnel d'un PDF d'évaluation conjointe |
-| Confirmation | `/parcours-conformite/confirmation` | Page finale après soumission |
+| Confirmation | `/parcours-conformite/confirmation` | Page finale après transmission |
 
 ### 6.3 Règles métier
 
@@ -313,14 +313,14 @@ flowchart TD
 
 | Événement | Mail envoyé | Variants |
 |---|---|---|
-| Soumission de la seconde déclaration (`declaration.submitSecondDeclaration`) | `second_declaration_confirmation` | `completed` / `cse_to_deposit` / `path_to_select` |
+| Transmission de la seconde déclaration (`declaration.submitSecondDeclaration`) | `second_declaration_confirmation` | `completed` / `cse_to_deposit` / `path_to_select` |
 | Upload réussi d'un PDF d'évaluation conjointe (`POST /api/upload`, `X-Flow-Type: joint_evaluation`) | `joint_evaluation_submitted` | `cse_first_and_second` (si seconde déclaration) / `cse_to_deposit` (si CSE attendu) / `completed` |
 
 > **Pourquoi des variants pour l'évaluation conjointe ?** L'étape suivante varie selon la situation : si une seconde déclaration est déjà en cours, l'avis CSE doit couvrir les deux rounds ; sinon, la démarche peut être considérée complète ou le CSE reste à déposer.
 
 ### 6.5 Sortie
 
-À la confirmation de la seconde déclaration, mail de reçu (variant contextualisé) + retour à `/mon-espace` avec le statut **« seconde déclaration soumise »** affiché sur la fiche entreprise.
+À la confirmation de la seconde déclaration, mail de reçu (variant contextualisé) + retour à `/mon-espace` avec le statut **« seconde déclaration transmise »** affiché sur la fiche entreprise.
 
 ---
 
@@ -387,7 +387,7 @@ Le clic sur **« Transmettre »** (quand toutes les associations sont présentes
 
 | Variant | Condition |
 |---|---|
-| `first_and_second` | L'entreprise a soumis une seconde déclaration |
+| `first_and_second` | L'entreprise a transmis une seconde déclaration |
 | `with_gap` | Écart ≥ 5% (sans seconde déclaration) |
 | `single` | Avis CSE simple, démarche complète |
 
@@ -432,11 +432,11 @@ Si l'entreprise a déjà répondu (dans un sens ou dans l'autre) lors d'une visi
 Répondre « non concernée » **clôture immédiatement la démarche** de l'année en cours, sans passer par les étapes 1 à 5 :
 
 1. `declareNotSubject` bascule `status = not_subject`, réinitialise `currentStep` à 0 et efface tout brouillon existant.
-2. Aucun mail n'est envoyé (contrairement à la soumission complète).
+2. Aucun mail n'est envoyé (contrairement à la transmission complète).
 3. Dans Mon espace, la ligne affiche le libellé **« Non-assujetti »**, la colonne échéance affiche `-`, et le CTA du panneau latéral redevient « Commencer » (il rouvre l'écran d'assujettissement plutôt que le funnel).
 4. Aucune ressource PDF n'apparaît dans le panneau des documents (`DocumentsPanel`) pour cette année.
 
-**Revenir sur ce choix** : rouvrir `/declaration-representation`, répondre « concernée », puis avancer dans le funnel — le premier `saveDraft` fait automatiquement retomber le statut à `draft`. Le blocage `submitted` (déjà soumis) empêche toute redéclaration ultérieure en `not_subject` — `declareNotSubject` échoue alors en conflit.
+**Revenir sur ce choix** : rouvrir `/declaration-representation`, répondre « concernée », puis avancer dans le funnel — le premier `saveDraft` fait automatiquement retomber le statut à `draft`. Le blocage `submitted` (déjà transmis) empêche toute redéclaration ultérieure en `not_subject` — `declareNotSubject` échoue alors en conflit.
 
 ### 8.3 Parcours « concerné » (étapes 1 à 5)
 
@@ -446,16 +446,16 @@ Répondre « non concernée » **clôture immédiatement la démarche** de l'ann
 | 2 | `/etape/2` | Écarts de représentation femmes-hommes parmi les cadres dirigeants |
 | 3 | `/etape/3` | Écarts de représentation au sein des instances dirigeantes |
 | 4 (conditionnelle) | `/etape/4` | Informations de publication (date, URL ou modalités) |
-| 5 | `/etape/5` | Récapitulatif et soumission |
+| 5 | `/etape/5` | Récapitulatif et transmission |
 
 L'étape 4 n'apparaît que si l'entreprise compte **2 cadres dirigeants ou plus**, ou déclare disposer d'une **instance dirigeante** — sautée sinon dans les deux sens de navigation.
 
-Chaque changement d'étape déclenche un `saveDraft` (upsert du brouillon). La démarche est bloquée en écriture si la **campagne est fermée** (`isRepresentationCampaignOpen` → sinon `FORBIDDEN`), y compris pour `declareNotSubject`. À l'étape 5, la soumission (`submit`) re-valide l'intégralité du payload côté serveur, fige la déclaration (`status = submitted`) et déclenche l'envoi du mail `representation_receipt`.
+Chaque changement d'étape déclenche un `saveDraft` (upsert du brouillon). La démarche est bloquée en écriture si la **campagne est fermée** (`isRepresentationCampaignOpen` → sinon `FORBIDDEN`), y compris pour `declareNotSubject`. À l'étape 5, la transmission (`submit`) re-valide l'intégralité du payload côté serveur, fige la déclaration (`status = submitted`) et déclenche l'envoi du mail `representation_receipt`.
 
 ### 8.4 Sortie
 
 - **Non-assujetti** : retour direct à `/mon-espace`, aucune confirmation dédiée.
-- **Soumis** : redirection vers `/declaration-representation/confirmation`, mail de reçu envoyé, PDF récapitulatif téléchargeable à la demande depuis Mon espace (`GET /api/representation-pdf?year=...`).
+- **Transmis** : redirection vers `/declaration-representation/confirmation`, mail de reçu envoyé, PDF récapitulatif téléchargeable à la demande depuis Mon espace (`GET /api/representation-pdf?year=...`).
 
 ---
 
@@ -630,7 +630,7 @@ Chaque bloc a son propre bouton « Enregistrer » et n'écrit que ses propres co
 
 ### 10.7 Statistiques de campagne
 
-`/admin/stats/campagne` — courbes cumulatives de soumission par jour, **segmentées par tranche d'effectif** (`small / medium / large`, voir `COMPANY_SIZE_RANGES`).
+`/admin/stats/campagne` — courbes cumulatives de transmission par jour, **segmentées par tranche d'effectif** (`small / medium / large`, voir `COMPANY_SIZE_RANGES`).
 
 ### 10.8 Import GIP-MDS
 

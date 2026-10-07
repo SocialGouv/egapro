@@ -143,4 +143,26 @@ describe("POST /api/gip-mds/import", () => {
 			"https://suit.example.com/gipmds/latest",
 		);
 	});
+
+	it("answers a failed import with a generic message, keeping the detail in the server log", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const failure = new Error(
+			"connect ECONNREFUSED internal-host.example:5432 relation gip_mds_data",
+		);
+		mocks.fetchGipCsv.mockRejectedValue(failure);
+		const POST = await loadRoute({
+			EGAPRO_GIP_MDS_API_TOKEN: "expected-token",
+			EGAPRO_GIP_MDS_API_URL: "https://suit.example.com/gipmds/latest",
+		});
+
+		const response = await POST(
+			post({ authorization: "Bearer expected-token" }),
+		);
+
+		expect(response.status).toBe(500);
+		await expect(response.json()).resolves.toEqual({
+			error: "GIP MDS import failed",
+		});
+		expect(errorSpy).toHaveBeenCalledWith("[gip-mds/import] Failed:", failure);
+	});
 });

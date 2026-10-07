@@ -46,11 +46,6 @@ async function gipMdsImportHandler(request: Request): Promise<Response> {
 		});
 	} catch (error) {
 		console.error("[gip-mds/import] Failed:", error);
-		return Response.json(
-			{
-				error: error instanceof Error ? error.message : "GIP MDS import failed",
-			},
-			{ status: 500 },
-		);
+		return Response.json({ error: "GIP MDS import failed" }, { status: 500 });
 	}
 }

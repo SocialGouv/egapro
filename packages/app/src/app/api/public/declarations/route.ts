@@ -3,8 +3,13 @@ import { NextResponse } from "next/server";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	PUBLIC_API_SEARCH_HEADERS,
-	publicSearchInputSchema,
+	parsePublicSearchPage,
 } from "~/modules/public-api";
+import {
+	auditList,
+	auditQueryMetadata,
+	auditText,
+} from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { enforcePublicApiRateLimit } from "~/server/services/publicApiRateLimit";
 import { searchPublicDeclarations } from "~/server/services/publicDeclarationsService";
@@ -19,21 +24,20 @@ export async function OPTIONS(): Promise<Response> {
 export const GET = withAuditedRoute(
 	{
 		action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_SEARCH,
-		resolveContext: (request) => {
-			const url = new URL(request.url);
-			const q = url.searchParams.get("q");
-			return {
-				metadata: {
-					q: q ? q.slice(0, 200) : null,
-					region: url.searchParams.getAll("region"),
-					departement: url.searchParams.getAll("departement"),
-					naf: url.searchParams.getAll("naf"),
-					city: url.searchParams.get("city") ?? null,
-					sort: url.searchParams.get("sort") ?? null,
-					year: url.searchParams.get("year") ?? null,
-				},
-			};
-		},
+		resolveContext: (request) => ({
+			metadata: auditQueryMetadata(
+				parsePublicSearchPage(new URL(request.url).searchParams),
+				(input) => ({
+					q: auditText(input.q),
+					region: auditList(input.region),
+					departement: auditList(input.departement),
+					naf: auditList(input.naf),
+					city: auditText(input.city),
+					sort: input.sort ?? null,
+					year: input.year ?? null,
+				}),
+			),
+		}),
 	},
 	publicDeclarationsHandler,
 );
@@ -42,32 +46,7 @@ async function publicDeclarationsHandler(request: Request): Promise<Response> {
 	try {
 		const limited = await enforcePublicApiRateLimit(request);
 		if (limited) return limited;
-		const url = new URL(request.url);
-		const sp = url.searchParams;
-
-		const rawYear = sp.get("year");
-		const rawLimit = sp.get("limit");
-		const rawOffset = sp.get("offset");
-		const rawWorkforceMin = sp.get("workforceMin");
-		const rawWorkforceMax = sp.get("workforceMax");
-		// Facets are repeatable (`?region=A&region=B`); getAll also returns the
-		// single-value form the documented API has always accepted.
-		const rawInput = {
-			q: sp.get("q") ?? undefined,
-			city: sp.get("city") ?? undefined,
-			region: sp.getAll("region"),
-			departement: sp.getAll("departement"),
-			naf: sp.getAll("naf"),
-			workforceRanges: sp.getAll("workforceRanges"),
-			workforceMin: rawWorkforceMin ? Number(rawWorkforceMin) : undefined,
-			workforceMax: rawWorkforceMax ? Number(rawWorkforceMax) : undefined,
-			year: rawYear ? Number(rawYear) : undefined,
-			sort: sp.get("sort") ?? undefined,
-			limit: rawLimit ? Number(rawLimit) : undefined,
-			offset: rawOffset ? Number(rawOffset) : undefined,
-		};
-
-		const parsed = publicSearchInputSchema.safeParse(rawInput);
+		const parsed = parsePublicSearchPage(new URL(request.url).searchParams);
 
 		if (!parsed.success) {
 			return NextResponse.json(

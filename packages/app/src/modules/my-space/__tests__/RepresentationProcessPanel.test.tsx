@@ -2,6 +2,7 @@ import { render, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { RepresentationCampaign } from "~/modules/domain";
+import { civilDate } from "~/modules/domain";
 import {
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
@@ -17,15 +18,15 @@ const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
 // The panel resolves the campaign window against the real clock, so the open
 // window is stretched wide enough to stay open whenever the suite runs.
 const OPEN_CAMPAIGN: RepresentationCampaign = {
-	campaignStartDate: new Date(2000, 0, 1),
-	campaignEndDate: new Date(2099, 11, 31),
-	declarationDeadline: new Date(CAMPAIGN_YEAR, 2, 1),
+	campaignStartDate: civilDate(2000, 0, 1),
+	campaignEndDate: civilDate(2099, 11, 31),
+	declarationDeadline: civilDate(CAMPAIGN_YEAR, 2, 1),
 };
 
 const CLOSED_CAMPAIGN: RepresentationCampaign = {
-	campaignStartDate: new Date(2019, 0, 1),
-	campaignEndDate: new Date(2019, 11, 31),
-	declarationDeadline: new Date(2019, 2, 1),
+	campaignStartDate: civilDate(2019, 0, 1),
+	campaignEndDate: civilDate(2019, 11, 31),
+	declarationDeadline: civilDate(2019, 2, 1),
 };
 
 function makeDeclaration(
@@ -130,7 +131,7 @@ describe("RepresentationProcessPanel", () => {
 		const { panel } = renderPanel({
 			campaign: {
 				...OPEN_CAMPAIGN,
-				declarationDeadline: new Date(CAMPAIGN_YEAR, 3, 15),
+				declarationDeadline: civilDate(CAMPAIGN_YEAR, 3, 15),
 			},
 		});
 		expect(panel.getByText("Échéance : 15 avril 2026")).toBeInTheDocument();

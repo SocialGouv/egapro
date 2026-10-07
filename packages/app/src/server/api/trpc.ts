@@ -26,6 +26,7 @@ import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddle
 import { auth } from "~/server/auth";
 import {
 	assertNotImpersonating,
+	canAccessCompany,
 	getEffectiveSiren,
 } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
@@ -222,24 +223,30 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 /**
  * Company procedure — authenticated + SIREN extracted from session.
  *
- * Guarantees `ctx.siren` is a valid 9-digit SIREN.
+ * Guarantees `ctx.siren` is a valid 9-digit SIREN the caller may act on.
  * Use this for any procedure that operates on company-scoped data.
  */
-export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	// The impersonation short-circuit is not re-implemented here: it lives in
-	// `getEffectiveSiren`, which also holds the MFA-window condition (#4466).
-	// One module decides which company a session acts on, so a procedure can
-	// never keep resolving a foreign SIREN that the pages have already stopped
-	// resolving.
-	const siren = getEffectiveSiren(ctx.session);
-	if (!siren) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "SIRET manquant ou invalide dans la session",
-		});
-	}
-	return next({ ctx: { ...ctx, siren } });
-});
+export const companyProcedure = protectedProcedure.use(
+	async ({ ctx, next }) => {
+		// The impersonation short-circuit is not re-implemented here: it lives in
+		// `getEffectiveSiren` and `canAccessCompany`, which also hold the
+		// MFA-window condition (#4466).
+		const siren = getEffectiveSiren(ctx.session);
+		if (!siren) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "SIRET manquant ou invalide dans la session",
+			});
+		}
+		if (!(await canAccessCompany(ctx.db, ctx.session, siren))) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Accès refusé à cette entreprise.",
+			});
+		}
+		return next({ ctx: { ...ctx, siren } });
+	},
+);
 
 /**
  * Company-scoped write procedure — same as {@link companyProcedure} plus the

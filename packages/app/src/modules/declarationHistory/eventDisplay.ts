@@ -50,7 +50,7 @@ export function getHistoryEventDisplay(event: HistoryEvent) {
 		}
 		case "submit":
 			return {
-				label: "Soumission de la déclaration",
+				label: "Transmission de la déclaration",
 				pageLabel: "Récapitulatif de votre déclaration",
 				pageHref: DECLARATION_REMUNERATION_RECAP,
 			};
@@ -62,7 +62,7 @@ export function getHistoryEventDisplay(event: HistoryEvent) {
 			};
 		case "second_declaration_submit":
 			return {
-				label: "Soumission de la seconde déclaration",
+				label: "Transmission de la seconde déclaration",
 				pageLabel: "Parcours de mise en conformité",
 				pageHref: COMPLIANCE_PATH,
 			};

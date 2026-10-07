@@ -7,7 +7,7 @@ import type {
 	RepresentationCampaign,
 } from "~/modules/domain";
 import {
-	formatShortDate,
+	formatCivilShortDate,
 	getCurrentYear,
 	getDeclarationProcessStepDeadline,
 } from "~/modules/domain";
@@ -47,14 +47,14 @@ function getDeadlineCell(
 ): string {
 	if (declaration.type === "representation") {
 		if (declaration.notSubject) return "-";
-		return formatShortDate(representationCampaign.declarationDeadline);
+		return formatCivilShortDate(representationCampaign.declarationDeadline);
 	}
 	const deadline = getDeclarationProcessStepDeadline(
 		declaration.fsmStatus,
 		campaignDeadlines,
 	);
 	if (deadline === null) return "Clôturée";
-	return formatShortDate(deadline);
+	return formatCivilShortDate(deadline);
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];

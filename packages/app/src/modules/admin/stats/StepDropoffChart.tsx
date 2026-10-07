@@ -34,7 +34,7 @@ type DropoffTooltipProps = {
 	payload?: TooltipEntry[];
 };
 
-const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-soumission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} %.`;
+const CHART_CAPTION = `Taux d'abandon par phase de la démarche déclarative : pourcentage de déclarations entrées sur chaque étape du wizard ou phase post-transmission et qui n'ont pas progressé depuis le délai sélectionné. Les barres rouges signalent une phase dont le taux dépasse ${DROPOFF_RATE_ALERT_THRESHOLD} %.`;
 
 const WIZARD_NORMAL_COLOR = "var(--background-action-high-blue-france)";
 const WIZARD_ALERT_COLOR = "var(--background-action-high-red-marianne)";

@@ -21,7 +21,7 @@ const ROWS: FunnelRow[] = [
 	},
 	{
 		key: "submitted",
-		label: "Déclaration soumise",
+		label: "Déclaration transmise",
 		count: 30,
 		pctOfStart: 30,
 		pctDropFromPrev: 62,

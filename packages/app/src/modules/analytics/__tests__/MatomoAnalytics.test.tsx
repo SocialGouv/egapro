@@ -56,6 +56,12 @@ describe("MatomoAnalytics", () => {
 		expect(pushMock).toHaveBeenCalledWith(["HeatmapSessionRecording::disable"]);
 	});
 
+	it("hands the CSP nonce to the tracker loader", () => {
+		render(<MatomoAnalytics nonce="bm9uY2U=" />);
+
+		expect(trackAppRouterMock.mock.calls[0]?.[0].nonce).toBe("bm9uY2U=");
+	});
+
 	it("does not track when Matomo is not configured", async () => {
 		mockEnv.NEXT_PUBLIC_MATOMO_URL = undefined;
 		vi.resetModules();
