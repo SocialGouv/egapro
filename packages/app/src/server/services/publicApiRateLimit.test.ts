@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+	timingSafeEqual: vi.fn(),
 	env: {
 		EGAPRO_PUBLIC_API_TOKENS: "",
 		VALKEY_URL: "",
@@ -10,6 +11,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock("server-only", () => ({}));
 vi.mock("~/env", () => ({ env: mocks.env }));
 vi.mock("redis", () => ({ createClient: vi.fn() }));
+vi.mock("node:crypto", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("node:crypto")>();
+	mocks.timingSafeEqual.mockImplementation(actual.timingSafeEqual);
+	const mocked = { ...actual, timingSafeEqual: mocks.timingSafeEqual };
+	return { ...mocked, default: mocked };
+});
 
 function request(headers: HeadersInit = {}) {
 	return new Request("http://localhost/api/public/declarations", {
@@ -19,6 +26,7 @@ function request(headers: HeadersInit = {}) {
 
 beforeEach(() => {
 	vi.resetModules();
+	mocks.timingSafeEqual.mockClear();
 	mocks.env.EGAPRO_PUBLIC_API_TOKENS = "";
 	mocks.env.VALKEY_URL = "";
 });
@@ -87,6 +95,37 @@ describe("checkPublicApiRateLimit", () => {
 				headers({ Authorization: "Bearer unknown-token" }),
 			),
 		).toBe("invalid_token");
+	});
+
+	it("accepts any of the configured tokens", async () => {
+		mocks.env.EGAPRO_PUBLIC_API_TOKENS = "first-token, second-token";
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		expect(
+			await checkPublicApiRateLimit(
+				headers({ Authorization: "Bearer second-token" }),
+			),
+		).toBe("allowed");
+	});
+
+	it("rejects a prefix of a configured token", async () => {
+		mocks.env.EGAPRO_PUBLIC_API_TOKENS = "known-token";
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		expect(
+			await checkPublicApiRateLimit(headers({ Authorization: "Bearer known" })),
+		).toBe("invalid_token");
+	});
+
+	it("compares the bearer against every configured token in constant time", async () => {
+		mocks.env.EGAPRO_PUBLIC_API_TOKENS = "first-token,second-token,third-token";
+		const { checkPublicApiRateLimit } = await import("./publicApiRateLimit");
+
+		await checkPublicApiRateLimit(
+			headers({ Authorization: "Bearer first-token" }),
+		);
+
+		expect(mocks.timingSafeEqual).toHaveBeenCalledTimes(3);
 	});
 
 	it("reports the 121st anonymous call of the minute as limited", async () => {

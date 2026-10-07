@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient, type RedisClientType } from "redis";
 import { env } from "~/env";
 
@@ -12,13 +12,25 @@ let redisClient: RedisClientType | null = null;
 let redisConnection: Promise<RedisClientType | null> | null = null;
 let lastMemorySweep = 0;
 
-function configuredTokens(): Set<string> {
-	return new Set(
-		(env.EGAPRO_PUBLIC_API_TOKENS ?? "")
-			.split(",")
-			.map((token) => token.trim())
-			.filter(Boolean),
-	);
+function configuredTokens(): string[] {
+	return (env.EGAPRO_PUBLIC_API_TOKENS ?? "")
+		.split(",")
+		.map((token) => token.trim())
+		.filter(Boolean);
+}
+
+function sha256(value: string): Buffer {
+	return createHash("sha256").update(value).digest();
+}
+
+/** Compares fixed-length digests against every configured token, with no early exit, so timing reveals nothing about a near match. */
+function isConfiguredToken(candidate: string): boolean {
+	const candidateDigest = sha256(candidate);
+	let matched = false;
+	for (const token of configuredTokens()) {
+		matched = timingSafeEqual(candidateDigest, sha256(token)) || matched;
+	}
+	return matched;
 }
 
 async function getRedis(): Promise<RedisClientType | null> {
@@ -142,7 +154,7 @@ export async function checkPublicApiRateLimit(
 ): Promise<PublicApiRateLimitVerdict> {
 	const authorization = headers.get("authorization");
 	const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
-	if (bearer && !configuredTokens().has(bearer)) return "invalid_token";
+	if (bearer && !isConfiguredToken(bearer)) return "invalid_token";
 	const quota = bearer ? 1_200 : 120;
 	const identity = bearer
 		? `token:${fingerprint(bearer)}`
