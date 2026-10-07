@@ -54,15 +54,13 @@ jobs:
     name: "Recette grille"
     runs-on: ubuntu-22.04
     timeout-minutes: 130
+    # Same secret layout as the `shard` job of e2e.yaml (#4699), and for the same
+    # reasons: AUTH_SECRET generated per run, ProConnect and Weez scoped to Build and
+    # to the run itself, SUIT pointed at an unresolvable placeholder.
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       NEXTAUTH_URL: http://localhost:3000/api/auth
-      EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
-      EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
-      EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-      EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
-      EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
+      EGAPRO_SUIT_API_URL: https://suit.invalid
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       EGAPRO_E2E_CLOCK: "true"
       S3_ENDPOINT: http://localhost:9000
@@ -83,6 +81,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Generate a run-local AUTH_SECRET
+        run: |
+          set -euo pipefail
+          auth_secret=$(openssl rand -base64 32)
+          echo "::add-mask::$auth_secret"
+          echo "AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Set up Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -152,6 +156,11 @@ jobs:
       - name: Start services
         run: docker compose up -d
       - name: Build
+        env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -159,6 +168,10 @@ jobs:
         id: run-grille
         continue-on-error: true
         env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
           ANNEE: ${{ github.event.inputs.annee || 'toutes' }}
           TRANCHE: ${{ github.event.inputs.tranche || 'toutes' }}
         run: |
