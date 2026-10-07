@@ -9,6 +9,7 @@ import {
 	deriveSubsequentSubmissions,
 	getCurrentDate,
 	getCurrentYear,
+	getDeclarationProcessStepDeadline,
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCseRequired,
@@ -238,10 +239,16 @@ export const companyRouter = createTRPCRouter({
 					declarationRows.filter((d) => d.year < year).map((d) => d.year),
 				),
 			];
-			const pastYearDeadlines = await Promise.all(
-				pastYears.map((pastYear) => getCampaignDeadlines(pastYear)),
-			);
-			const deadlinesByYear = new Map(
+			// The current year is always resolved too: a row displays its own
+			// year's deadline (closed past rows included), and a brand-new current
+			// year placeholder (no DB row yet) still needs one to show.
+			const [currentYearDeadlines, pastYearDeadlines] = await Promise.all([
+				getCampaignDeadlines(year),
+				Promise.all(
+					pastYears.map((pastYear) => getCampaignDeadlines(pastYear)),
+				),
+			]);
+			const pastDeadlinesByYear = new Map(
 				pastYears.map((pastYear, index) => [
 					pastYear,
 					pastYearDeadlines[index],
@@ -262,18 +269,19 @@ export const companyRouter = createTRPCRouter({
 					status: d.status,
 					currentStep: d.currentStep,
 				});
-				const deadlines = deadlinesByYear.get(d.year);
-				const status = deadlines
-					? applyDeclarationClosure({
-							status: projectedStatus,
-							fsmStatus: d.status,
-							year: d.year,
-							currentYear: year,
-							deadlines,
-							// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
-							now: getCurrentDate(),
-						})
-					: projectedStatus;
+				const deadlines =
+					d.year === year
+						? currentYearDeadlines
+						: (pastDeadlinesByYear.get(d.year) ?? currentYearDeadlines);
+				const status = applyDeclarationClosure({
+					status: projectedStatus,
+					fsmStatus: d.status,
+					year: d.year,
+					currentYear: year,
+					deadlines,
+					// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
+					now: getCurrentDate(),
+				});
 				const submissions = deriveSubsequentSubmissions(
 					eventsByDeclarationId.get(d.id) ?? [],
 				);
@@ -293,6 +301,7 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 					hasPrefillData: yearsWithPrefill.has(d.year),
+					deadline: getDeclarationProcessStepDeadline(d.status, deadlines),
 					notSubject: false,
 				};
 			});
@@ -317,6 +326,9 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: false,
 					hasJointEvaluationFile: false,
 					hasPrefillData: false,
+					// Representation deadlines come from `representationCampaign`, not
+					// from `CampaignDeadlines` — this row never reads the field.
+					deadline: null,
 					notSubject: isRepresentationNotSubject(representationRow.status),
 				});
 			}
@@ -327,6 +339,7 @@ export const companyRouter = createTRPCRouter({
 				year,
 				yearsWithPrefill,
 				representationVisible,
+				currentYearDeadlines,
 			);
 
 			return { company, declarations: declarationItems };

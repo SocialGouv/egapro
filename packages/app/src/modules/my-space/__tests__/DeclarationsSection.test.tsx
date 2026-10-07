@@ -5,6 +5,7 @@ import type { RepresentationCampaign } from "~/modules/domain";
 import {
 	civilDate,
 	getCurrentYear,
+	getDeclarationProcessStepDeadline,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 } from "~/modules/domain";
@@ -15,6 +16,14 @@ const SIREN = "532847196";
 const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 const representationCampaign = getDefaultRepresentationCampaign(currentYear);
+
+// A remuneration row carries its own-year deadline on the fixture itself
+// (the router resolves it, DeclarationsSection just reads `declaration.deadline`).
+function remunerationDeadline(
+	fsmStatus: DeclarationItem["fsmStatus"],
+): Date | null {
+	return getDeclarationProcessStepDeadline(fsmStatus, campaignDeadlines);
+}
 
 const NO_COMPLIANCE = {
 	fsmStatus: null,
@@ -39,6 +48,7 @@ const declarations: DeclarationItem[] = [
 		currentStep: 0,
 		updatedAt: null,
 		...NO_COMPLIANCE,
+		deadline: remunerationDeadline(null),
 	},
 	{
 		type: "representation",
@@ -48,6 +58,7 @@ const declarations: DeclarationItem[] = [
 		currentStep: 0,
 		updatedAt: null,
 		...NO_COMPLIANCE,
+		deadline: null,
 	},
 	{
 		type: "remuneration",
@@ -58,6 +69,7 @@ const declarations: DeclarationItem[] = [
 		updatedAt: new Date("2025-03-15"),
 		...NO_COMPLIANCE,
 		fsmStatus: "demarche_completed",
+		deadline: remunerationDeadline("demarche_completed"),
 	},
 ];
 
@@ -69,7 +81,6 @@ function renderSection(
 ) {
 	return render(
 		<DeclarationsSection
-			campaignDeadlines={campaignDeadlines}
 			cseApplicable={true}
 			declarations={overrides?.declarations ?? declarations}
 			hasCse={true}
@@ -127,6 +138,27 @@ describe("DeclarationsSection", () => {
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});
 
+	it("renders a previous year's own deadline, not the current year's (#4710)", () => {
+		const ownYearDeadline = civilDate(currentYear - 1, 5, 1);
+		renderSection({
+			declarations: [
+				{
+					type: "remuneration",
+					siren: SIREN,
+					year: currentYear - 1,
+					status: "in_progress",
+					currentStep: 3,
+					updatedAt: null,
+					...NO_COMPLIANCE,
+					fsmStatus: "draft",
+					deadline: ownYearDeadline,
+				},
+			],
+		});
+		expect(screen.getByText(`01/06/${currentYear - 1}`)).toBeInTheDocument();
+		expect(screen.queryByText(`01/06/${currentYear}`)).not.toBeInTheDocument();
+	});
+
 	it("renders 'Aucune' for declarations with no resources", () => {
 		renderSection();
 		expect(screen.getAllByText("Aucune")).toHaveLength(2);
@@ -151,6 +183,7 @@ describe("DeclarationsSection", () => {
 					updatedAt: new Date("2025-03-15"),
 					...NO_COMPLIANCE,
 					fsmStatus: "awaiting_compliance_path_choice",
+					deadline: remunerationDeadline("awaiting_compliance_path_choice"),
 				},
 			],
 		});
@@ -213,6 +246,7 @@ describe("DeclarationsSection", () => {
 					currentStep: 3,
 					updatedAt: new Date("2026-02-10"),
 					...NO_COMPLIANCE,
+					deadline: null,
 				},
 			],
 		});
@@ -235,6 +269,7 @@ describe("DeclarationsSection", () => {
 					currentStep: 0,
 					updatedAt: new Date("2026-02-10"),
 					...NO_COMPLIANCE,
+					deadline: null,
 					notSubject: true,
 				},
 			],
@@ -301,6 +336,7 @@ describe("DeclarationsSection", () => {
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
 				...NO_COMPLIANCE,
+				deadline: null,
 			}),
 		);
 
@@ -329,6 +365,7 @@ describe("DeclarationsSection", () => {
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
 				...NO_COMPLIANCE,
+				deadline: null,
 			}),
 		);
 
@@ -357,6 +394,7 @@ describe("DeclarationsSection", () => {
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
 				...NO_COMPLIANCE,
+				deadline: null,
 			}),
 		);
 
@@ -398,6 +436,7 @@ describe("DeclarationsSection", () => {
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
 				...NO_COMPLIANCE,
+				deadline: null,
 			}),
 		);
 
@@ -427,6 +466,7 @@ describe("DeclarationsSection", () => {
 				currentStep: 6,
 				updatedAt: new Date("2025-01-01"),
 				...NO_COMPLIANCE,
+				deadline: null,
 			}),
 		);
 

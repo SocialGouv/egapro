@@ -217,6 +217,22 @@ describe("companyRouter.getWithDeclarations", () => {
 		expect(result.declarations).toBeDefined();
 	});
 
+	it("exposes the current year's own deadline on a brand-new remuneration placeholder, with no DB row yet", async () => {
+		const currentYear = getCurrentYear();
+		const { caller } = await makeCaller();
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === currentYear,
+			),
+		).toMatchObject({
+			deadline:
+				getDefaultCampaignDeadlines(currentYear).decl1ModificationDeadline,
+		});
+	});
+
 	it("falls back to step 0 for a remuneration row with no current step", async () => {
 		const { caller } = await makeCaller({
 			declRows: [{ ...makeDeclRow(getCurrentYear()), currentStep: null }],
@@ -771,8 +787,15 @@ describe("companyRouter.getWithDeclarations — past-campaign closure", () => {
 		).toMatchObject({ status: "done" });
 	});
 
-	it("S5 — the current-year row is never closed, whatever its deadline", async () => {
+	it("S5 — the current-year row is never closed even past an elapsed current-year deadline, but still shows its own deadline", async () => {
 		const currentYear = getCurrentYear();
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === currentYear
+					? pastDeadlines(y, { decl1ModificationDeadline: ELAPSED })
+					: getDefaultCampaignDeadlines(y),
+			),
+		);
 		const { caller } = await makeCaller({
 			declRows: [
 				{ ...makeDeclRow(currentYear), status: "draft", currentStep: 0 },
@@ -781,15 +804,18 @@ describe("companyRouter.getWithDeclarations — past-campaign closure", () => {
 
 		const result = await caller.getWithDeclarations({ siren: SIREN });
 
+		// The row is never closed purely on year — closure only applies to past years.
 		expect(
 			result.declarations.find(
 				(d) => d.type === "remuneration" && d.year === currentYear,
 			),
-		).toMatchObject({ status: "to_complete" });
-		expect(getCampaignDeadlinesMock).not.toHaveBeenCalledWith(currentYear);
+		).toMatchObject({ status: "to_complete", deadline: ELAPSED });
+		// The current year's deadlines ARE resolved now: the row displays its own.
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(currentYear);
 	});
 
-	it("S7 — resolves each past year's deadlines independently, one call per distinct year", async () => {
+	it("S7 — resolves each distinct year's deadlines independently, one call per year, current year included", async () => {
+		const currentYear = getCurrentYear();
 		getCampaignDeadlinesMock.mockImplementation((y: number) =>
 			Promise.resolve(
 				y === PAST_YEAR
@@ -825,9 +851,35 @@ describe("companyRouter.getWithDeclarations — past-campaign closure", () => {
 				(d) => d.type === "remuneration" && d.year === OTHER_PAST_YEAR,
 			),
 		).toMatchObject({ status: "closed_incomplete" });
-		expect(getCampaignDeadlinesMock).toHaveBeenCalledTimes(2);
+		// One call per distinct year present, plus the current year — always
+		// resolved so a current-year row (or its placeholder) has a deadline too.
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledTimes(3);
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(PAST_YEAR);
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(OTHER_PAST_YEAR);
+		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(currentYear);
+	});
+
+	it("S8 — exposes a past-year row's own-year deadline, not the current year's (#4710)", async () => {
+		const pastYearDeadline = new Date(2010, 0, 1);
+		const currentYearDeadline = new Date(2030, 0, 1);
+		getCampaignDeadlinesMock.mockImplementation((y: number) =>
+			Promise.resolve(
+				y === PAST_YEAR
+					? pastDeadlines(y, { decl2CseOpinionDeadline: pastYearDeadline })
+					: pastDeadlines(y, { decl2CseOpinionDeadline: currentYearDeadline }),
+			),
+		);
+		const { caller } = await makeCaller({
+			declRows: [{ ...makeDeclRow(PAST_YEAR), status: "awaiting_cse_opinion" }],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find(
+				(d) => d.type === "remuneration" && d.year === PAST_YEAR,
+			),
+		).toMatchObject({ deadline: pastYearDeadline });
 	});
 
 	it("S6 — a past-year representation-line badge is unaffected by remuneration closure", async () => {
