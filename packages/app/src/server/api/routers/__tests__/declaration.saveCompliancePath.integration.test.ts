@@ -100,6 +100,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 			INSERT INTO app_company (siren, name) VALUES (${SIREN}, 'Société AR Test')
 			ON CONFLICT DO NOTHING
 		`;
+		await sql`
+			INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN})
+			ON CONFLICT DO NOTHING
+		`;
 	});
 
 	afterAll(async () => {
@@ -108,6 +112,7 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		await sql`DELETE FROM app_declaration_lock WHERE locked_by_user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_declaration_status_history WHERE actor_user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_declaration WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 		await sql.end();

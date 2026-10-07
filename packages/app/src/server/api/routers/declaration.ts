@@ -36,7 +36,7 @@ import {
 } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
-	isImpersonatingSiren,
+	canAccessCompany,
 } from "~/server/auth/companyAccess";
 import {
 	companies,
@@ -45,7 +45,6 @@ import {
 	employeeCategories,
 	gipMdsData,
 	jobCategories,
-	userCompanies,
 	users,
 } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
@@ -1038,24 +1037,11 @@ export const declarationRouter = createTRPCRouter({
 	getStatusHistory: protectedProcedure
 		.input(declarationHistoryInputSchema)
 		.query(async ({ ctx, input }) => {
-			if (!isImpersonatingSiren(ctx.session, input.siren)) {
-				const access = await ctx.db
-					.select({ siren: userCompanies.siren })
-					.from(userCompanies)
-					.where(
-						and(
-							eq(userCompanies.userId, ctx.session.user.id),
-							eq(userCompanies.siren, input.siren),
-						),
-					)
-					.limit(1);
-
-				if (access.length === 0) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "Accès refusé à cette entreprise.",
-					});
-				}
+			if (!(await canAccessCompany(ctx.db, ctx.session, input.siren))) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Accès refusé à cette entreprise.",
+				});
 			}
 
 			const [declaration] = await ctx.db

@@ -660,8 +660,8 @@ describe("Step6Review", () => {
 			/>,
 		);
 		// Proportion = beneficiaries / workforce total, not the raw beneficiary count
-		expect(screen.getByText("50,0 %")).toBeInTheDocument();
-		expect(screen.getByText("55,0 %")).toBeInTheDocument();
+		expect(screen.getByText("50,00 %")).toBeInTheDocument();
+		expect(screen.getByText("55,00 %")).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 	});
 

@@ -177,11 +177,16 @@ beforeAll(async () => {
 		INSERT INTO app_company (siren, name) VALUES (${SIREN}, 'Société Démo')
 		ON CONFLICT DO NOTHING
 	`;
+	await sql`
+		INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN})
+		ON CONFLICT DO NOTHING
+	`;
 });
 
 afterAll(async () => {
 	if (!sql) return;
 	await cleanup();
+	await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 	await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 	await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 	await holder.end();
