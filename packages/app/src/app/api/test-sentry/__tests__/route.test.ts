@@ -40,6 +40,11 @@ describe("GET /api/test-sentry", () => {
 	it.each([
 		["an anonymous caller", null],
 		["a declarant", { id: "user-1", isAdmin: false }],
+		["a session that predates the admin field", { id: "user-1" }],
+		[
+			"an admin who never presented a second factor",
+			{ id: "admin-1", isAdmin: true },
+		],
 		[
 			"an admin whose second factor expired",
 			{ id: "admin-1", isAdmin: true, adminMfaAt: EXPIRED_MFA },
