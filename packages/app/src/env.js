@@ -120,15 +120,7 @@ export const env = createEnv({
 		// Declared in NO .kontinuous env config — `e2eFlagsAbsentFromDeployConfig`
 		// fails the build if that ever changes — and the seam additionally demands
 		// a loopback host, a barrier no configuration can grant a deployed pod.
-		//
-		// Parsed as a literal string rather than `z.coerce.boolean()`, which turns
-		// the string "false" into true: EGAPRO_E2E_CLOCK only escapes that trap
-		// because nothing ever sets it to "false" explicitly.
-		EGAPRO_E2E_ADMIN_MFA: z
-			.enum(["true", "false"])
-			.optional()
-			.default("false")
-			.transform((value) => value === "true"),
+		EGAPRO_E2E_ADMIN_MFA: literalBooleanFlag(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
