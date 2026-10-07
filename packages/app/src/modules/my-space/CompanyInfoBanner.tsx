@@ -23,8 +23,7 @@ type Props = {
 const INFO_SOURCE_TOOLTIP_ID = "company-info-source-tooltip";
 const INFO_SOURCE_LABEL = "Information sur la source des données";
 
-// Below 100, the CSE field doesn't exist yet so there's no edit entry point into
-// the data this banner shows — the tooltip is the only access to its source.
+// Below 100 there's no edit entry point into this data, so the tooltip is the only access to its source.
 const INFO_SOURCE_TEXT_BY_SIZE: Partial<Record<CompanySize, string>> = {
 	voluntary: "Source : INSEE.",
 	mandatory:
