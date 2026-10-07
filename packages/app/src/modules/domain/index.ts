@@ -342,7 +342,12 @@ export {
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
 // SIREN utilities
-export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+export {
+	extractSiren,
+	formatSiren,
+	parseSiren,
+	parseStrictSiren,
+} from "./shared/siren";
 // Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {
