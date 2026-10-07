@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, ilike } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import ExcelJS from "exceljs";
 
 import { toCsvField, toNullableNumber } from "~/modules/domain";
@@ -10,6 +10,7 @@ import {
 } from "~/modules/public-api";
 import type { DB } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import { containsInsensitive } from "~/server/db/likeConditions";
 import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -76,7 +77,7 @@ function representationExportFilters(input: PublicSearchInput) {
 			? eq(representationDeclarations.siren, siren)
 			: and(
 					diffusibleCompanyCondition(),
-					ilike(companies.name, `%${input.q}%`),
+					containsInsensitive(companies.name, input.q),
 				);
 		if (queryFilter) conditions.push(queryFilter);
 	}

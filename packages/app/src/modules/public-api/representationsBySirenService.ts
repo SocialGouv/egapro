@@ -1,11 +1,12 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "~/server/db";
 import {
 	diffusibleCompanyCondition,
 	publicCompanyNameSortKey,
 } from "~/server/db/companyConditions";
+import { containsInsensitive } from "~/server/db/likeConditions";
 import { releasedRepresentationCampaignJoin } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -71,10 +72,12 @@ export async function searchPublicRepresentations(
 
 	if (input.q) {
 		const normalizedQuery = input.q.replace(/\s/g, "");
-		const term = `%${input.q}%`;
 		const queryFilter = /^\d{9}$/.test(normalizedQuery)
 			? eq(representationDeclarations.siren, normalizedQuery)
-			: and(diffusibleCompanyCondition(), ilike(companies.name, term));
+			: and(
+					diffusibleCompanyCondition(),
+					containsInsensitive(companies.name, input.q),
+				);
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 

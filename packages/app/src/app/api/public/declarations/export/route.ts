@@ -1,4 +1,4 @@
-import { and, eq, ilike, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import {
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { diffusibleCompanyCondition } from "~/server/db/companyConditions";
+import { containsInsensitive } from "~/server/db/likeConditions";
 import { publiclyReleasedCampaignCondition } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -45,7 +46,7 @@ function exportFilters(input: PublicSearchInput) {
 			? eq(declarations.siren, siren)
 			: and(
 					diffusibleCompanyCondition(),
-					ilike(companies.name, `%${input.q}%`),
+					containsInsensitive(companies.name, input.q),
 				);
 		if (queryFilter) conditions.push(queryFilter);
 	}
