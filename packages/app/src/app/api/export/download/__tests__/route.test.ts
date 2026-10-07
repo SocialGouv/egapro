@@ -70,6 +70,34 @@ describe("GET /api/export/download", () => {
 		expect(mocks.downloadExport).not.toHaveBeenCalled();
 	});
 
+	it("refuses an empty configured token, even against an empty bearer", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const GET = await loadRoute({ EGAPRO_EXPORT_API_TOKEN: "" });
+
+		const response = await GET(get({ authorization: "Bearer " }));
+
+		expect(response.status).toBe(401);
+		expect(mocks.downloadExport).not.toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("EGAPRO_EXPORT_API_TOKEN"),
+		);
+	});
+
+	it.each([
+		["an empty bearer", "Bearer "],
+		["the raw token without scheme", "expected-token"],
+		["another scheme", "Basic expected-token"],
+		["a lowercase scheme", "bearer expected-token"],
+	])("rejects %s", async (_label, authorization) => {
+		const GET = await loadRoute({ EGAPRO_EXPORT_API_TOKEN: "expected-token" });
+
+		const response = await GET(get({ authorization }));
+
+		expect(response.status).toBe(401);
+		await expect(response.json()).resolves.toEqual({ error: "Unauthorized" });
+		expect(mocks.downloadExport).not.toHaveBeenCalled();
+	});
+
 	it("streams the export when the bearer token matches", async () => {
 		mocks.downloadExport.mockResolvedValue({
 			found: true,
