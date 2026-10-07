@@ -102,7 +102,7 @@ describe("CampaignProgressionChart", () => {
 		const { container } = renderWithTooltip({});
 		expect(container.querySelector("figure")).not.toBeNull();
 		expect(container.querySelector("figcaption")?.textContent).toMatch(
-			/progression cumulative/i,
+			/progression cumulative des déclarations transmises/i,
 		);
 		expect(
 			screen.getByRole("group", {

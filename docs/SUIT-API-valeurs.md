@@ -25,7 +25,7 @@ Plusieurs champs du payload portent le même nom sans porter le même vocabulair
 | --- | --- |
 | `Parcours.Statut` | État courant dans la machine à états. |
 | `Historique_statuts[].Statut` | Type d'événement d'une ligne d'historique. |
-| `Seconde_declaration.Statut` | Booléen : la seconde déclaration a-t-elle été soumise. |
+| `Seconde_declaration.Statut` | Booléen : la seconde déclaration a-t-elle été transmise. |
 
 ### `Type / type`
 
@@ -62,11 +62,11 @@ Plusieurs champs du payload portent le même nom sans porter le même vocabulair
 
 | Valeur | Libellé FR | Signification |
 | --- | --- | --- |
-| `draft` | — | Déclaration commencée et non soumise. N'apparaît dans l'export que pour une déclaration annulée : un brouillon non annulé n'est jamais exporté. |
-| `awaiting_compliance_path_choice` | (1ère déclaration) Choix du parcours de mise en conformité | Déclaration soumise avec un écart d'au moins 5 % : l'entreprise doit choisir son parcours de mise en conformité. |
+| `draft` | — | Déclaration commencée et non transmise. N'apparaît dans l'export que pour une déclaration annulée : un brouillon non annulé n'est jamais exporté. |
+| `awaiting_compliance_path_choice` | (1ère déclaration) Choix du parcours de mise en conformité | Déclaration transmise avec un écart d'au moins 5 % : l'entreprise doit choisir son parcours de mise en conformité. |
 | `corrective_actions_chosen` | Actions correctives et seconde déclaration | Parcours « actions correctives » choisi après la première déclaration ; une seconde déclaration est attendue. |
 | `joint_evaluation_chosen` | Évaluation conjointe des rémunérations | Parcours « évaluation conjointe » choisi après la première déclaration ; le rapport est attendu. |
-| `awaiting_revision_choice` | (2e déclaration) Choix du parcours de mise en conformité | Seconde déclaration soumise avec un écart persistant : l'entreprise doit choisir un second parcours. |
+| `awaiting_revision_choice` | (2e déclaration) Choix du parcours de mise en conformité | Seconde déclaration transmise avec un écart persistant : l'entreprise doit choisir un second parcours. |
 | `revised_joint_evaluation_chosen` | Évaluation conjointe des rémunérations | Parcours « évaluation conjointe » choisi après la seconde déclaration ; le rapport est attendu. |
 | `awaiting_cse_opinion` | Déposer le ou les avis CSE | Le ou les avis du CSE sont attendus. |
 | `demarche_completed` | Finalisation - Démarche des indicateurs de rémunération | Aucune action supplémentaire n'est attendue sur Egapro. Ne pas confondre avec l'événement `demarche_complete` de `Historique_statuts[].Statut`, qui ne diffère que d'une lettre. |
@@ -81,9 +81,9 @@ Type d'événement brut de la ligne d'historique. Ce n'est pas un état de la ma
 
 | Valeur | Libellé FR | Signification |
 | --- | --- | --- |
-| `submit` | Soumission de la déclaration | Soumission de la déclaration initiale. |
+| `submit` | Transmission de la déclaration | Transmission de la déclaration initiale. |
 | `path_choice` | Choix du parcours | Choix d'un parcours de mise en conformité. Seul événement à porter `Numero_declaration`. |
-| `second_declaration_submit` | Soumission de la seconde déclaration | Soumission de la seconde déclaration. |
+| `second_declaration_submit` | Transmission de la seconde déclaration | Transmission de la seconde déclaration. |
 | `joint_evaluation_submit` | Dépôt du rapport d'évaluation conjointe | Dépôt du rapport d'évaluation conjointe. |
 | `cse_opinion_submit` | Dépôt d'un avis CSE | Dépôt d'un avis du CSE. |
 | `cancel` | Annulation de la déclaration | Annulation de la déclaration. |
@@ -99,9 +99,9 @@ Libellé FR lisible de la ligne d'historique. La liste ci-dessous est exhaustive
 
 | Valeur | Signification |
 | --- | --- |
-| `Soumission de la déclaration` | Événement `submit`. |
+| `Transmission de la déclaration` | Événement `submit`. |
 | `Choix du parcours` | Événement `path_choice` dont le parcours est inconnu ou absent. |
-| `Soumission de la seconde déclaration` | Événement `second_declaration_submit`. |
+| `Transmission de la seconde déclaration` | Événement `second_declaration_submit`. |
 | `Dépôt du rapport d'évaluation conjointe` | Événement `joint_evaluation_submit`. |
 | `Dépôt d'un avis CSE` | Événement `cse_opinion_submit`. |
 | `Annulation de la déclaration` | Événement `cancel`. |
@@ -246,7 +246,7 @@ Source de détermination des catégories d'emplois de l'indicateur G. Servie bru
 
 ### `Seconde_declaration.Statut`
 
-Booléen, et non un état : indique si la seconde déclaration a été soumise.
+Booléen, et non un état : indique si la seconde déclaration a été transmise.
 
 - **Endpoint** : `GET /api/v1/export/declarations`
 - **Présence** : Toujours présent.
@@ -254,5 +254,5 @@ Booléen, et non un état : indique si la seconde déclaration a été soumise.
 
 | Valeur | Signification |
 | --- | --- |
-| `true` | Une seconde déclaration a été soumise. |
-| `false` | Aucune seconde déclaration n'a été soumise. |
+| `true` | Une seconde déclaration a été transmise. |
+| `false` | Aucune seconde déclaration n'a été transmise. |

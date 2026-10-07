@@ -93,7 +93,7 @@ beforeEach(() => {
 	submitState.onSuccess = undefined;
 });
 
-describe("Step5Review — soumission (S19)", () => {
+describe("Step5Review — transmission (S19)", () => {
 	it("opens the confirmation modal from the CTA without submitting", async () => {
 		renderReview({ draft: FULLY_COMPLIANT });
 
@@ -175,11 +175,11 @@ describe("Step5Review — soumission (S19)", () => {
 	});
 
 	it("surfaces the submission failure without leaving the screen", () => {
-		submitState.error = { message: "La soumission a échoué." };
+		submitState.error = { message: "La transmission a échoué." };
 		renderReview({ draft: FULLY_COMPLIANT });
 
 		expect(screen.getByRole("alert")).toHaveTextContent(
-			"La soumission a échoué.",
+			"La transmission a échoué.",
 		);
 		expect(push).not.toHaveBeenCalled();
 	});

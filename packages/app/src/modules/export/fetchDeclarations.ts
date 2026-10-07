@@ -451,7 +451,7 @@ export function assembleDeclaration(
 		},
 		Date_creation: row.createdAt?.toISOString() ?? null,
 		Date_modification: row.updatedAt?.toISOString() ?? null,
-		Date_soumission: row.submittedAt?.toISOString() ?? null,
+		Date_transmission: row.submittedAt?.toISOString() ?? null,
 		Date_parcours_apres_declaration_1:
 			row.firstDeclarationPathChoiceAt?.toISOString() ?? null,
 		Date_parcours_apres_declaration_2:

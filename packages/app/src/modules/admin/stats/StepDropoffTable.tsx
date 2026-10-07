@@ -7,7 +7,7 @@ type Props = {
 
 const PHASE_HEADERS: Record<StepDropoffRow["phase"], string> = {
 	wizard: "Parcours initial (wizard A–F)",
-	post_submit: "Démarche post-soumission",
+	post_submit: "Démarche post-transmission",
 };
 
 /**
@@ -36,7 +36,7 @@ export function StepDropoffTable({ rows }: Props) {
 								<caption className="fr-sr-only">
 									Taux d'abandon, nombre de déclarations abandonnées et nombre
 									total de déclarations entrées par phase du parcours déclaratif
-									: étapes du wizard A–F puis phases post-soumission.
+									: étapes du wizard A–F puis phases post-transmission.
 								</caption>
 								<thead>
 									<tr>

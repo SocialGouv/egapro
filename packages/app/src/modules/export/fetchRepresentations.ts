@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, eq, gte, lt } from "drizzle-orm";
 
-import { toNumber } from "~/modules/public-api";
+import { toNullableNumber } from "~/modules/domain";
 import { db } from "~/server/db";
 import { companies, representationDeclarations } from "~/server/db/schema";
 import { exportDeclarationsQuerySchema } from "./schemas";
@@ -107,11 +107,11 @@ export function assembleRepresentation(row: RepresentationRow) {
 		Année_référence: row.year,
 		Période_référence_début: row.referencePeriodStart,
 		Période_référence_fin: row.referencePeriodEnd,
-		Pourcentage_femmes_cadres: toNumber(row.executiveWomenPercent),
-		Pourcentage_hommes_cadres: toNumber(row.executiveMenPercent),
+		Pourcentage_femmes_cadres: toNullableNumber(row.executiveWomenPercent),
+		Pourcentage_hommes_cadres: toNullableNumber(row.executiveMenPercent),
 		Motif_non_calculabilité_cadres: row.notComputableReasonExecutives,
-		Pourcentage_femmes_membres: toNumber(row.memberWomenPercent),
-		Pourcentage_hommes_membres: toNumber(row.memberMenPercent),
+		Pourcentage_femmes_membres: toNullableNumber(row.memberWomenPercent),
+		Pourcentage_hommes_membres: toNullableNumber(row.memberMenPercent),
 		Motif_non_calculabilité_membres: row.notComputableReasonMembers,
 		Date_publication: row.publishDate,
 		URL_publication: row.publishUrl,

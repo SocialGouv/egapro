@@ -715,7 +715,7 @@ export const declarationRouter = createTRPCRouter({
 			ctx.session.user.id,
 		);
 
-		// Snapshot `cseRequired` à la soumission : c'est cette valeur que les
+		// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
 		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
 		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
 		// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
