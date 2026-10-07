@@ -851,15 +851,14 @@ describe("companyRouter.getWithDeclarations — past-campaign closure", () => {
 				(d) => d.type === "remuneration" && d.year === OTHER_PAST_YEAR,
 			),
 		).toMatchObject({ status: "closed_incomplete" });
-		// One call per distinct year present, plus the current year — always
-		// resolved so a current-year row (or its placeholder) has a deadline too.
+		// One call per distinct year, current year included.
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledTimes(3);
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(PAST_YEAR);
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(OTHER_PAST_YEAR);
 		expect(getCampaignDeadlinesMock).toHaveBeenCalledWith(currentYear);
 	});
 
-	it("S8 — exposes a past-year row's own-year deadline, not the current year's (#4710)", async () => {
+	it("S8 — exposes a past-year row's own-year deadline, not the current year's", async () => {
 		const pastYearDeadline = new Date(2010, 0, 1);
 		const currentYearDeadline = new Date(2030, 0, 1);
 		getCampaignDeadlinesMock.mockImplementation((y: number) =>

@@ -239,9 +239,7 @@ export const companyRouter = createTRPCRouter({
 					declarationRows.filter((d) => d.year < year).map((d) => d.year),
 				),
 			];
-			// The current year is always resolved too: a row displays its own
-			// year's deadline (closed past rows included), and a brand-new current
-			// year placeholder (no DB row yet) still needs one to show.
+			// Always resolved: a current-year placeholder with no DB row still shows a deadline.
 			const [currentYearDeadlines, pastYearDeadlines] = await Promise.all([
 				getCampaignDeadlines(year),
 				Promise.all(
@@ -279,7 +277,7 @@ export const companyRouter = createTRPCRouter({
 					year: d.year,
 					currentYear: year,
 					deadlines,
-					// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
+					// Same clock as `currentYear`, so the deadline check agrees with the year guard.
 					now: getCurrentDate(),
 				});
 				const submissions = deriveSubsequentSubmissions(
@@ -326,8 +324,7 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: false,
 					hasJointEvaluationFile: false,
 					hasPrefillData: false,
-					// Representation deadlines come from `representationCampaign`, not
-					// from `CampaignDeadlines` — this row never reads the field.
+					// Representation deadlines come from `representationCampaign`.
 					deadline: null,
 					notSubject: isRepresentationNotSubject(representationRow.status),
 				});

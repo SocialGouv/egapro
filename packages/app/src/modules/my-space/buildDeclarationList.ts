@@ -39,8 +39,7 @@ export function buildDeclarationList(
 	currentYear: number,
 	yearsWithPrefill: Set<number> = new Set(),
 	representationVisible = true,
-	// Only reached when the caller has nothing year-specific to hand in (e.g. a
-	// unit test exercising the list shape, not the closure rule).
+	// Fallback when the caller has no year-specific deadlines.
 	currentYearDeadlines: CampaignDeadlines = getDefaultCampaignDeadlines(
 		currentYear,
 	),

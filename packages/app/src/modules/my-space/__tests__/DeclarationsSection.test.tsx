@@ -17,8 +17,7 @@ const currentYear = getCurrentYear();
 const campaignDeadlines = getDefaultCampaignDeadlines(currentYear);
 const representationCampaign = getDefaultRepresentationCampaign(currentYear);
 
-// A remuneration row carries its own-year deadline on the fixture itself
-// (the router resolves it, DeclarationsSection just reads `declaration.deadline`).
+// The router resolves each row's deadline; the section only reads it.
 function remunerationDeadline(
 	fsmStatus: DeclarationItem["fsmStatus"],
 ): Date | null {
@@ -138,7 +137,7 @@ describe("DeclarationsSection", () => {
 		expect(screen.getByText("Effectué")).toBeInTheDocument();
 	});
 
-	it("renders a previous year's own deadline, not the current year's (#4710)", () => {
+	it("renders a previous year's own deadline, not the current year's", () => {
 		const ownYearDeadline = civilDate(currentYear - 1, 5, 1);
 		renderSection({
 			declarations: [
