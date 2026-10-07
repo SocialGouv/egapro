@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	PUBLIC_API_SEARCH_HEADERS,
-	publicRepresentationSearchInputSchema,
+	parsePublicRepresentationSearchPage,
 	searchPublicRepresentations,
 } from "~/modules/public-api";
 import {
@@ -26,9 +26,7 @@ export const GET = withAuditedRoute(
 		action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_SEARCH,
 		resolveContext: (request) => ({
 			metadata: auditQueryMetadata(
-				publicRepresentationSearchInputSchema.safeParse(
-					readSearchInput(new URL(request.url).searchParams),
-				),
+				parsePublicRepresentationSearchPage(new URL(request.url).searchParams),
 				(input) => ({
 					q: auditText(input.q),
 					region: auditList(input.region),
@@ -42,31 +40,14 @@ export const GET = withAuditedRoute(
 	publicRepresentationsHandler,
 );
 
-function readSearchInput(sp: URLSearchParams) {
-	const rawYear = sp.get("year");
-	const rawLimit = sp.get("limit");
-	const rawOffset = sp.get("offset");
-	// Facets are repeatable (`?region=A&region=B`); getAll also returns the
-	// single-value form the documented API has always accepted.
-	return {
-		q: sp.get("q") ?? undefined,
-		region: sp.getAll("region"),
-		departement: sp.getAll("departement"),
-		naf: sp.getAll("naf"),
-		year: rawYear ? Number(rawYear) : undefined,
-		limit: rawLimit ? Number(rawLimit) : undefined,
-		offset: rawOffset ? Number(rawOffset) : undefined,
-	};
-}
-
 async function publicRepresentationsHandler(
 	request: Request,
 ): Promise<Response> {
 	try {
 		const limited = await enforcePublicApiRateLimit(request);
 		if (limited) return limited;
-		const parsed = publicRepresentationSearchInputSchema.safeParse(
-			readSearchInput(new URL(request.url).searchParams),
+		const parsed = parsePublicRepresentationSearchPage(
+			new URL(request.url).searchParams,
 		);
 
 		if (!parsed.success) {

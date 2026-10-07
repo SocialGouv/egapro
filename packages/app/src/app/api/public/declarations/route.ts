@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	PUBLIC_API_SEARCH_HEADERS,
-	publicSearchInputSchema,
+	parsePublicSearchPage,
 } from "~/modules/public-api";
 import {
 	auditList,
@@ -26,9 +26,7 @@ export const GET = withAuditedRoute(
 		action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_SEARCH,
 		resolveContext: (request) => ({
 			metadata: auditQueryMetadata(
-				publicSearchInputSchema.safeParse(
-					readSearchInput(new URL(request.url).searchParams),
-				),
+				parsePublicSearchPage(new URL(request.url).searchParams),
 				(input) => ({
 					q: auditText(input.q),
 					region: auditList(input.region),
@@ -44,37 +42,11 @@ export const GET = withAuditedRoute(
 	publicDeclarationsHandler,
 );
 
-function readSearchInput(sp: URLSearchParams) {
-	const rawYear = sp.get("year");
-	const rawLimit = sp.get("limit");
-	const rawOffset = sp.get("offset");
-	const rawWorkforceMin = sp.get("workforceMin");
-	const rawWorkforceMax = sp.get("workforceMax");
-	// Facets are repeatable (`?region=A&region=B`); getAll also returns the
-	// single-value form the documented API has always accepted.
-	return {
-		q: sp.get("q") ?? undefined,
-		city: sp.get("city") ?? undefined,
-		region: sp.getAll("region"),
-		departement: sp.getAll("departement"),
-		naf: sp.getAll("naf"),
-		workforceRanges: sp.getAll("workforceRanges"),
-		workforceMin: rawWorkforceMin ? Number(rawWorkforceMin) : undefined,
-		workforceMax: rawWorkforceMax ? Number(rawWorkforceMax) : undefined,
-		year: rawYear ? Number(rawYear) : undefined,
-		sort: sp.get("sort") ?? undefined,
-		limit: rawLimit ? Number(rawLimit) : undefined,
-		offset: rawOffset ? Number(rawOffset) : undefined,
-	};
-}
-
 async function publicDeclarationsHandler(request: Request): Promise<Response> {
 	try {
 		const limited = await enforcePublicApiRateLimit(request);
 		if (limited) return limited;
-		const parsed = publicSearchInputSchema.safeParse(
-			readSearchInput(new URL(request.url).searchParams),
-		);
+		const parsed = parsePublicSearchPage(new URL(request.url).searchParams);
 
 		if (!parsed.success) {
 			return NextResponse.json(

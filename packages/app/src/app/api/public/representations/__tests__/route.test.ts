@@ -6,9 +6,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("~/modules/public-api", async () => {
-	// The route pulls both the service and the input schema from the barrel;
-	// only the service is faked, the real schema keeps the contract honest.
-	const { publicRepresentationSearchInputSchema } = await import(
+	// The route pulls both the service and the input parser from the barrel;
+	// only the service is faked, the real parser keeps the contract honest.
+	const { parsePublicRepresentationSearchPage } = await import(
 		"~/modules/public-api/schemas"
 	);
 	const { PUBLIC_API_SEARCH_HEADERS } = await import(
@@ -16,7 +16,7 @@ vi.mock("~/modules/public-api", async () => {
 	);
 	return {
 		PUBLIC_API_SEARCH_HEADERS,
-		publicRepresentationSearchInputSchema,
+		parsePublicRepresentationSearchPage,
 		searchPublicRepresentations: mocks.searchPublicRepresentations,
 	};
 });
