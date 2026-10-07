@@ -20,7 +20,7 @@ export function CoherenceNote({
 		.filter((error) => error.table === tableType)
 		.map((error) => ({
 			fieldId: `step4-${tableType}-${error.field}-coherence`,
-			category: "inconsistent",
+			category: "workforce",
 			message: coherenceErrorLabel(error),
 		}));
 	return (
