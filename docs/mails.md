@@ -197,40 +197,37 @@ Le déploiement Mailpit embarque donc un sidecar HAProxy (`smtp-demux`, template
 
 ### Mailpit in-cluster : authentification de l'interface web (#4695)
 
-L'interface web et l'API de Mailpit (dev, preprod) exigent une authentification basic, portée par Mailpit lui-même (`MP_UI_AUTH_FILE`) :
+L'interface web et l'API de Mailpit (dev, preprod) exigent une authentification basic, portée par Mailpit lui-même (`MP_UI_AUTH`) :
 
-- le secret `mailpit-basic-auth` (clé `auth`, ligne htpasswd en bcrypt) est scellé en cluster-wide dans `.kontinuous/env/{dev,preprod}/templates/mailpit-basic-auth.sealed-secret.yaml`, et monté en lecture seule dans le conteneur `mailpit` ;
+- le secret `mailpit-basic-auth` porte deux clés, `MAILPIT_USER` et `MAILPIT_PASSWORD`, scellées en cluster-wide dans `.kontinuous/env/{dev,preprod}/templates/mailpit-basic-auth.sealed-secret.yaml`. Le conteneur `mailpit` les reçoit par `secretKeyRef` (`optional: false`), et Kubernetes les assemble en `MP_UI_AUTH="$(MAILPIT_USER):$(MAILPIT_PASSWORD)"` ;
 - l'authentification couvre tous les chemins vers l'UI : l'Ingress `mailpit-<host>`, le Service (port 8025) et le HTTP démultiplexé sur le port 1025. Elle couvre aussi `/api/v1/*` et le websocket `/api/events`. Seuls `/livez` et `/readyz` restent ouverts, pour la sonde de readiness ;
 - le SMTP (port 1025, envoi par le worker) n'est pas concerné : il a sa propre option d'authentification, non activée ;
 - l'Ingress ne porte **pas** d'annotation `auth-type: basic`. ingress-nginx vide l'en-tête `Authorization` avant de relayer une requête qu'il a authentifiée. Mailpit ne verrait jamais les identifiants et répondrait 401 en boucle.
 
 Les identifiants sont demandés à l'équipe ; ils ne figurent jamais dans le dépôt.
 
-Pour (re)sceller, sans écrire le mot de passe sur disque ni le passer en argument de commande (certificat, scope et fichiers : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
+**Garde au démarrage.** Mailpit v1.31.0 désactive son authentification, sans erreur, si `MP_UI_AUTH` est vide, et l'accepte avec un utilisateur ou un mot de passe vide (`MP_UI_AUTH=":"` laisse entrer `curl -u :`). Il découpe aussi `MP_UI_AUTH` sur les espaces : un saut de ligne final dans une valeur scellée casserait la connexion. Le conteneur `mailpit` lance donc un court script avant `exec /mailpit` : si `MAILPIT_USER` ou `MAILPIT_PASSWORD` est vide ou contient un espace, ou si `MAILPIT_USER` contient `:`, il s'arrête en erreur. Sans le secret, ou avec une valeur invalide, le pod ne démarre pas et l'UI reste fermée ; le SMTP des review apps est alors indisponible lui aussi. Le mot de passe peut contenir `:`.
+
+Pour (re)sceller, sans écrire les valeurs sur disque ni les passer en argument de commande (certificat et scope : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
 
 ```bash
-set -o pipefail
 curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
-read -rs MAILPIT_PASSWORD   # ≥ 24 caractères aléatoires, issus du gestionnaire de mots de passe
-LINE=$(printf '%s' "$MAILPIT_PASSWORD" | htpasswd -niB <user>)
-unset MAILPIT_PASSWORD
-if [[ "$LINE" == <user>:\$2y\$* ]]; then
-  printf '%s\n' "$LINE" | kubeseal --raw --scope cluster-wide \
+read -r MAILPIT_USER
+read -rs MAILPIT_PASSWORD   # ≥ 24 caractères aléatoires sans espace, issus du gestionnaire de mots de passe
+for key in MAILPIT_USER MAILPIT_PASSWORD; do
+  printf '%s' "${!key}" | kubeseal --raw --scope cluster-wide \
     --cert /tmp/cert-dev.pem --name mailpit-basic-auth \
     --from-file=/dev/stdin
-else
-  echo "ligne htpasswd invalide : rien n'est scellé" >&2
-fi
-unset LINE
+  echo
+done
+unset MAILPIT_USER MAILPIT_PASSWORD
 ```
 
-- `htpasswd -niB` lit le mot de passe sur stdin (`-i`), écrit la ligne `user:hash` sur stdout (`-n`) et hache en bcrypt (`-B`).
-- Le contrôle avant `kubeseal` n'est pas décoratif : **Mailpit désactive son authentification, sans erreur, si le fichier est vide**. Un `htpasswd` absent ou en échec scellerait une valeur vide et rouvrirait l'UI. Mailpit accepte aussi le texte clair, à ne jamais utiliser ici.
-- Le coût bcrypt reste celui par défaut de `htpasswd` (5) : Mailpit vérifie le hash à chaque requête, avec un CPU limité à 200m. C'est la longueur aléatoire du mot de passe qui fait la robustesse.
-- Le chiffré obtenu remplace `encryptedData.auth` dans **les deux** fichiers (`env/dev` et `env/preprod`).
-- Mailpit lit le fichier au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans les namespaces concernés.
+- `printf '%s'` scelle la valeur sans saut de ligne final.
+- `${!key}` est la syntaxe bash ; en zsh, utiliser `${(P)key}`.
+- Les deux chiffrés remplacent `encryptedData.MAILPIT_USER` et `encryptedData.MAILPIT_PASSWORD` dans **les deux** fichiers (`env/dev` et `env/preprod`).
+- Mailpit lit `MP_UI_AUTH` au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans les namespaces concernés.
 - Après déploiement, vérifier que `https://mailpit-<host>/` et `https://mailpit-<host>/api/v1/messages` répondent **401** sans identifiants.
-- Tant que le secret n'est pas déchiffrable, le pod `mailpit` ne démarre pas, car le volume ne peut pas être monté. Le SMTP des review apps est alors indisponible lui aussi.
 
 ---
 
