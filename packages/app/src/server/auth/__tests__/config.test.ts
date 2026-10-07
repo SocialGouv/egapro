@@ -362,36 +362,7 @@ describe("auth config", () => {
 	describe("redirect callback", () => {
 		const baseUrl = "http://localhost:3000";
 
-		it("redirects to /mon-espace when url equals baseUrl", () => {
-			const result = callbacks.redirect({ url: baseUrl, baseUrl });
-			expect(result).toBe(`${baseUrl}/mon-espace`);
-		});
-
-		it("redirects to /mon-espace when url is baseUrl + /", () => {
-			const result = callbacks.redirect({
-				url: `${baseUrl}/`,
-				baseUrl,
-			});
-			expect(result).toBe(`${baseUrl}/mon-espace`);
-		});
-
-		it("redirects to /mon-espace when url is /", () => {
-			const result = callbacks.redirect({ url: "/", baseUrl });
-			expect(result).toBe(`${baseUrl}/mon-espace`);
-		});
-
-		it("preserves path when url starts with baseUrl and has a non-root path", () => {
-			const url = `${baseUrl}/dashboard`;
-			const result = callbacks.redirect({ url, baseUrl });
-			expect(result).toBe(url);
-		});
-
-		it("prefixes relative url with baseUrl", () => {
-			const result = callbacks.redirect({ url: "/dashboard", baseUrl });
-			expect(result).toBe(`${baseUrl}/dashboard`);
-		});
-
-		it("redirects to /mon-espace for external urls", () => {
+		it("delegates to resolveRedirectTarget, sending an external url to /mon-espace", () => {
 			const result = callbacks.redirect({
 				url: "https://evil.com/steal",
 				baseUrl,
