@@ -25,6 +25,7 @@ export type {
 	PublicRepresentationSource,
 } from "./representationProjection";
 export {
+	maskNonDiffusibleRepresentation,
 	publicRepresentationColumns,
 	toPublicRepresentation,
 } from "./representationProjection";

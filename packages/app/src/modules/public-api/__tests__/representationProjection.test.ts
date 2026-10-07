@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isPublicCompanyDiffusible } from "../projection";
 import {
+	maskNonDiffusibleRepresentation,
 	type PublicRepresentationCompanySource,
 	type PublicRepresentationSource,
 	publicRepresentationColumns,
@@ -95,6 +96,66 @@ describe("publicRepresentationColumns", () => {
 		expect(Object.keys(publicRepresentationColumns).sort()).toEqual(
 			declarationFields,
 		);
+	});
+});
+
+describe("maskNonDiffusibleRepresentation", () => {
+	const representation = {
+		siren: "123456789",
+		year: 2026,
+		name: "Société Démo",
+		region: "Île-de-France",
+		departmentCode: "75",
+		departmentLabel: "Paris",
+		nafCode: "62.01Z",
+		nafLabel: "Programmation informatique",
+		executiveWomenPercent: 35.5,
+		publishDate: "2026-02-15",
+		publishUrl: "https://exemple.fr/egalite-professionnelle",
+		publishModalities: "Affichage dans les locaux",
+	};
+
+	it("returns a diffusible representation untouched", () => {
+		expect(maskNonDiffusibleRepresentation(representation, true)).toBe(
+			representation,
+		);
+	});
+
+	it("masks identity and location with the label and nulls the publication channel", () => {
+		expect(maskNonDiffusibleRepresentation(representation, false)).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
+			executiveWomenPercent: 35.5,
+			publishDate: "2026-02-15",
+			publishUrl: null,
+			publishModalities: null,
+		});
+	});
+
+	it("masks the address only when the representation carries one", () => {
+		expect(
+			maskNonDiffusibleRepresentation(representation, false),
+		).not.toHaveProperty("address");
+		expect(
+			maskNonDiffusibleRepresentation(
+				{ ...representation, address: null },
+				false,
+			).address,
+		).toBe("Non-diffusible");
+	});
+
+	it("does not mutate its input", () => {
+		const input = { ...representation };
+
+		maskNonDiffusibleRepresentation(input, false);
+
+		expect(input).toEqual(representation);
 	});
 });
 
