@@ -81,6 +81,24 @@ describe("createValkeyConnection", () => {
 		expect(mocks.createClient).toHaveBeenCalledTimes(2);
 	});
 
+	it("destroys a client that is no longer ready before opening a new one", async () => {
+		mocks.env.VALKEY_URL = "redis://valkey:6379";
+		mocks.createClient.mockImplementation(() =>
+			fakeClient(async () => undefined),
+		);
+		const { createValkeyConnection } = await import("../valkey");
+		const connection = createValkeyConnection();
+		const first = await connection.client();
+		if (!first) throw new Error("expected a client");
+
+		Object.assign(first, { isReady: false });
+		const second = await connection.client();
+
+		expect(first.destroy).toHaveBeenCalledTimes(1);
+		expect(second).not.toBe(first);
+		expect(mocks.createClient).toHaveBeenCalledTimes(2);
+	});
+
 	it("gives each connection its own client", async () => {
 		mocks.env.VALKEY_URL = "redis://valkey:6379";
 		mocks.createClient.mockImplementation(() =>

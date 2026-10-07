@@ -38,6 +38,11 @@ export function createValkeyConnection(): ValkeyConnection {
 		async client() {
 			if (!env.VALKEY_URL) return null;
 			if (current?.isReady) return current;
+			if (current) {
+				const stale = current;
+				current = null;
+				stale.destroy();
+			}
 			pending ??= connect().finally(() => {
 				pending = null;
 			});
