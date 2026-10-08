@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Facts } from "../engine";
-import { _resetCacheForTests, applyAction, loadRules } from "../engine";
+import {
+	_resetCacheForTests,
+	applyAction,
+	loadRules,
+	NoMatchingTransitionError,
+} from "../engine";
 
 beforeEach(() => {
 	_resetCacheForTests();
@@ -384,11 +389,91 @@ describe("sync_cse_requirement only fires when the opinion is no longer owed", (
 	});
 });
 
+describe("choose_compliance_path — revising a choice the démarche has not locked (#4757)", () => {
+	it.each([
+		["corrective_actions_chosen", null],
+		["joint_evaluation_chosen", null],
+		["awaiting_cse_opinion", "justify"],
+	])("reopens the first-round choice from %s", (state, firstChoice) => {
+		const facts = base(state, {
+			cseRequired: true,
+			firstDeclarationPathChoice: firstChoice,
+			secondDeclarationPathChoice: null,
+			action: { path: "joint_evaluation" },
+		});
+
+		const result = applyAction(facts, "choose_compliance_path", rules);
+
+		expect(result.nextStatus).toBe("joint_evaluation_chosen");
+		expect(result.events).toEqual([
+			{ type: "path_choice", value: "joint_evaluation", round: 1 },
+		]);
+	});
+
+	it.each([
+		["revised_joint_evaluation_chosen", null],
+		["awaiting_cse_opinion", "justify"],
+	])("reopens the revision choice from %s", (state, secondChoice) => {
+		const facts = base(state, {
+			cseRequired: false,
+			firstDeclarationPathChoice: "corrective_action",
+			secondDeclarationPathChoice: secondChoice,
+			action: { path: "justify" },
+		});
+
+		const result = applyAction(facts, "choose_compliance_path", rules);
+
+		expect(result.nextStatus).toBe("demarche_completed");
+		expect(result.events).toEqual([
+			{ type: "path_choice", value: "justify", round: 2 },
+			{ type: "demarche_complete" },
+		]);
+	});
+
+	it.each([
+		["draft", null, null],
+		["demarche_completed", "justify", null],
+		["awaiting_cse_opinion", null, null],
+		["awaiting_cse_opinion", "joint_evaluation", null],
+		["awaiting_cse_opinion", "corrective_action", null],
+		["awaiting_cse_opinion", "corrective_action", "joint_evaluation"],
+	])("refuses a choice from %s (first: %s, second: %s)", (state, firstChoice, secondChoice) => {
+		const facts = base(state, {
+			cseRequired: false,
+			firstDeclarationPathChoice: firstChoice,
+			secondDeclarationPathChoice: secondChoice,
+			action: { path: "justify" },
+		});
+
+		expect(() => applyAction(facts, "choose_compliance_path", rules)).toThrow(
+			NoMatchingTransitionError,
+		);
+	});
+
+	it("never reopens a choice for another action", () => {
+		const facts = base("corrective_actions_chosen", {
+			cseRequired: true,
+			firstDeclarationPathChoice: "corrective_action",
+		});
+
+		expect(() => applyAction(facts, "submit_joint_evaluation", rules)).toThrow(
+			NoMatchingTransitionError,
+		);
+	});
+});
+
 describe("applyAction — no matching transition throws", () => {
 	it("throws when no transition matches the current state + action", () => {
 		const facts = base("demarche_completed");
 		expect(() => applyAction(facts, "submit", rules)).toThrow(
 			/No matching transition/,
+		);
+	});
+
+	it("throws a NoMatchingTransitionError the routers can turn into a refusal", () => {
+		const facts = base("draft");
+		expect(() => applyAction(facts, "submit_joint_evaluation", rules)).toThrow(
+			NoMatchingTransitionError,
 		);
 	});
 
