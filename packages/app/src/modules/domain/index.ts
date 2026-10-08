@@ -43,7 +43,10 @@ export {
 // Civil dates (calendar days held as UTC midnight) vs timestamps
 export { civilDate } from "./shared/civilDate";
 // Company obligation
-export { isObligatedForYear } from "./shared/companyObligation";
+export {
+	getObligationWorkforceMin,
+	isObligatedForYear,
+} from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,

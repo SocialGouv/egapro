@@ -18,8 +18,9 @@ export type CampaignProgressionSeries = {
 
 export type CampaignStats = {
 	totalObligated: number;
-	totalSubmitted: number;
-	submissionRate: number;
+	totalIndicatorsSubmitted: number;
+	totalDemarcheCompleted: number;
+	completionRate: number;
 	previousYearRate: number | null;
 };
 

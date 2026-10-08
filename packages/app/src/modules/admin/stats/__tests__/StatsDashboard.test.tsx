@@ -116,7 +116,11 @@ describe("StatsDashboard — structure and filters", () => {
 
 	it("renders the h1 Statistiques heading", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByRole("heading", { name: /^Statistiques$/i, level: 1 }),
@@ -125,7 +129,11 @@ describe("StatsDashboard — structure and filters", () => {
 
 	it("renders the campaign section h2 heading", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByRole("heading", { name: /Suivi de campagne/i, level: 2 }),
@@ -134,7 +142,11 @@ describe("StatsDashboard — structure and filters", () => {
 
 	it("renders the funnel section h2 heading", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByRole("heading", { name: /Funnels de complétion/i, level: 2 }),
@@ -143,7 +155,11 @@ describe("StatsDashboard — structure and filters", () => {
 
 	it("renders the global filters: YearsFilter, CompanySizeFilter, StagnationDaysFilter", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByLabelText(/tranche d'effectif annuel moyen/i),
@@ -155,14 +171,22 @@ describe("StatsDashboard — structure and filters", () => {
 
 	it("renders the CampaignRateTile", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(screen.getByTestId("campaign-rate-tile")).toBeInTheDocument();
 	});
 
 	it("keeps the most recent selected year active after toggling a year (regression: dashboard went blank because YearsFilter sorts ascending)", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		// Single-year widgets initially query the newest selected campaign.
 		expect(funnelUseQueryMock).toHaveBeenLastCalledWith(
@@ -189,10 +213,105 @@ describe("StatsDashboard — structure and filters", () => {
 			isError: false,
 			enabled: false,
 		});
-		render(<StatsDashboard availableYears={[]} currentYear={2026} />);
+		render(
+			<StatsDashboard
+				availableYears={[]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
 		expect(
 			screen.getByText(/sélectionnez au moins une année/i),
 		).toBeInTheDocument();
+	});
+});
+
+describe("StatsDashboard — test-data notice and definitions", () => {
+	beforeEach(() => {
+		progressionUseQueryMock.mockReset();
+		stepDurationsUseQueryMock.mockReset();
+		stepDropoffUseQueryMock.mockReset();
+		funnelUseQueryMock.mockReset();
+		statsUseQueryMock.mockReset();
+		defaultMocks();
+	});
+
+	it("shows the test-data notice when asked to", () => {
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice
+			/>,
+		);
+
+		const notice = screen
+			.getByText(/fichier GIP-MDS de test/)
+			.closest(".fr-notice");
+		expect(notice).toHaveClass("fr-notice--info");
+		expect(notice?.textContent).toMatch(
+			/campagnes antérieures peuvent être des données de démonstration/,
+		);
+	});
+
+	it("shows no test-data notice otherwise", () => {
+		const { container } = render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		expect(container.querySelector(".fr-notice")).toBeNull();
+		expect(screen.queryByText(/fichier GIP-MDS de test/)).toBeNull();
+	});
+
+	it("defines the population and the completed procedure under the rate tile", () => {
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		const definition = screen.getByText(/^Sont assujetties/);
+		expect(definition.textContent).toMatch(
+			/fichier GIP-MDS 2026 avec un effectif d.au moins 50 salariés/,
+		);
+		expect(definition.textContent).toMatch(
+			/Le taux et l.écart avec l.année précédente portent sur les démarches terminées/,
+		);
+	});
+
+	it("states the pre-V2 threshold when the active campaign predates it", () => {
+		render(
+			<StatsDashboard
+				availableYears={[2025, 2024]}
+				currentYear={2025}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		expect(screen.getByText(/^Sont assujetties/).textContent).toMatch(
+			/fichier GIP-MDS 2025 avec un effectif d.au moins 100 salariés/,
+		);
+	});
+
+	it("defines what the progression curve counts", () => {
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		expect(
+			screen.getByText(/^Cumul des déclarations dont les indicateurs/)
+				.textContent,
+		).toMatch(/Les déclarations annulées ne sont pas comptées/);
 	});
 });
 
@@ -213,7 +332,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(screen.getByText(/Chargement des funnels/i)).toBeInTheDocument();
 	});
@@ -225,7 +348,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: true,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(/erreur est survenue lors du chargement des funnels/i),
@@ -244,7 +371,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByRole("heading", { name: /Funnel principal/i }),
@@ -261,7 +392,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(/Aucune révision pour ces filtres/i),
@@ -283,7 +418,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByRole("heading", { name: /Funnel cycle de révision/i }),
@@ -302,7 +441,11 @@ describe("StatsDashboard — funnel section", () => {
 
 	it("passes placeholderData (prev) through for funnel query", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		const options = funnelUseQueryMock.mock.calls[0]?.[1] as
 			| { placeholderData: (prev: unknown) => unknown }
@@ -328,7 +471,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		const matomoSection = document.getElementById("matomo");
 		expect(matomoSection).not.toBeNull();
@@ -354,7 +501,11 @@ describe("StatsDashboard — funnel section", () => {
 			isError: true,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(/chargement des funnels Matomo/i),

@@ -5,6 +5,7 @@ import {
 	type CompanySizeRange,
 	DROPOFF_STAGNATION_DAYS_DEFAULT,
 	FUNNEL_DROP_ALERT_THRESHOLD,
+	getObligationWorkforceMin,
 } from "~/modules/domain";
 import { CompanySizeFilter } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -68,9 +69,14 @@ const DEVICE_TABLE_COLUMNS: StatsTableColumn<DeviceBreakdownRow>[] = [
 type Props = {
 	currentYear: number;
 	availableYears: number[];
+	showTestDataNotice: boolean;
 };
 
-export function StatsDashboard({ currentYear, availableYears }: Props) {
+export function StatsDashboard({
+	currentYear,
+	availableYears,
+	showTestDataNotice,
+}: Props) {
 	const [selectedYears, setSelectedYears] = useState(() =>
 		availableYears.slice(0, DEFAULT_SELECTION_COUNT),
 	);
@@ -162,6 +168,25 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 
 	return (
 		<>
+			{showTestDataNotice && (
+				<div className="fr-notice fr-notice--info fr-mb-4w">
+					<div className="fr-container">
+						<div className="fr-notice__body">
+							<p>
+								<span className="fr-notice__title">
+									Environnement de test&nbsp;:
+								</span>{" "}
+								<span className="fr-notice__desc">
+									la population assujettie provient d&apos;un fichier GIP-MDS de
+									test, et les campagnes antérieures peuvent être des données de
+									démonstration.
+								</span>
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
+
 			<h1 className="fr-h1">Statistiques</h1>
 
 			<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
@@ -192,8 +217,17 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 
 				<div className="fr-grid-row fr-grid-row--gutters fr-mt-4w">
 					<div className="fr-col-12 fr-col-md-6">
-						<div className={styles.card}>
+						<div className={`${styles.card} ${styles.stackedCard}`}>
 							<CampaignRateTile sizeRange={sizeRange} year={activeYear} />
+							<p className="fr-text--sm fr-text-mention--grey fr-mt-2w fr-mb-0">
+								Sont assujetties les entreprises présentes dans le fichier
+								GIP-MDS {activeYear} avec un effectif d&apos;au moins{" "}
+								{getObligationWorkforceMin(activeYear)} salariés. Une démarche
+								est terminée quand les indicateurs sont transmis et, le cas
+								échéant, le parcours de conformité et l&apos;avis du CSE
+								déposés. Le taux et l&apos;écart avec l&apos;année précédente
+								portent sur les démarches terminées.
+							</p>
 						</div>
 					</div>
 					<div className="fr-col-12 fr-col-md-6">
@@ -219,6 +253,12 @@ export function StatsDashboard({ currentYear, availableYears }: Props) {
 									series={progressionQuery.data}
 								/>
 							)}
+							<p className="fr-text--sm fr-text-mention--grey fr-mt-2w fr-mb-0">
+								Cumul des déclarations dont les indicateurs ont été transmis,
+								quel que soit l&apos;avancement de la démarche ensuite et que
+								l&apos;entreprise figure ou non dans le fichier GIP-MDS. Les
+								déclarations annulées ne sont pas comptées.
+							</p>
 						</div>
 					</div>
 				</div>

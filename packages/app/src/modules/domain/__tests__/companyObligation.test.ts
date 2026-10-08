@@ -1,6 +1,25 @@
 import { describe, expect, it } from "vitest";
 
-import { isObligatedForYear } from "../shared/companyObligation";
+import {
+	getObligationWorkforceMin,
+	isObligatedForYear,
+} from "../shared/companyObligation";
+
+describe("getObligationWorkforceMin", () => {
+	it("is 50 from the first V2 campaign onwards", () => {
+		expect(getObligationWorkforceMin(2027)).toBe(50);
+		expect(getObligationWorkforceMin(2030)).toBe(50);
+	});
+
+	it("is 50 in 2026, aligned on the first V2 campaign", () => {
+		expect(getObligationWorkforceMin(2026)).toBe(50);
+	});
+
+	it("is 100 on pre-V2 years", () => {
+		expect(getObligationWorkforceMin(2025)).toBe(100);
+		expect(getObligationWorkforceMin(2018)).toBe(100);
+	});
+});
 
 describe("isObligatedForYear", () => {
 	describe("voluntary tier (workforce < 50)", () => {
