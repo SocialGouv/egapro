@@ -59,7 +59,7 @@ jobs:
     steps:
       - name: Get GitHub App Token
         id: token
-        uses: SocialGouv/token-bureau@main
+        uses: SocialGouv/token-bureau@453f0eeb5add59489df124a0aedcb20a9b7fb027 # v0.0.10
         with:
           token-bureau-url: https://token-bureau.fabrique.social.gouv.fr
           audience: socialgouv
@@ -80,7 +80,7 @@ jobs:
           permissions: '{"issues":"read","organization_projects":"write"}'
 
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Stamp End date
         env:

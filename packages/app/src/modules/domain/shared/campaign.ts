@@ -159,7 +159,7 @@ export function isRepresentationCampaignOpen(
 	);
 }
 
-/** Returns true if the given deadline is strictly in the past. */
+/** Returns true once the deadline's civil day is over: the deadline day itself still counts as on time. */
 export function isDeadlinePassed(
 	deadline: Date,
 	now: Date = new Date(),

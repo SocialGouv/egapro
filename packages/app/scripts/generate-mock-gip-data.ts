@@ -86,6 +86,16 @@ function randInt(min: number, max: number): number {
 	return Math.round(randBetween(min, max));
 }
 
+// The GIP headcount is an annual average (EMA), hence fractional: 120 employees
+// read e.g. 120,37. The fraction is drawn from a PRNG seeded by the SIREN, not
+// from the shared one, so every other generated value stays byte-identical. It
+// stays below 1 so the EMA floors back to the bucketed workforce, and no
+// company changes size tier.
+function annualAverageWorkforce(siren: string, workforce: number): number {
+	const fraction = Math.floor(mulberry32(Number(siren))() * 100) / 100;
+	return workforce + fraction;
+}
+
 // ── Company loading ────────────────────────────────────────────────
 
 type InputCompany = {
@@ -398,7 +408,7 @@ function generateRow(company: CompanyData): string[] {
 
 	return [
 		siren,
-		fmt2(workforce),
+		fmt2(annualAverageWorkforce(siren, workforce)),
 		String(totalMen),
 		String(totalWomen),
 		String(hourlyMen),

@@ -7,13 +7,17 @@ vi.mock("next/script", () => ({
 	default: ({
 		src,
 		onLoad,
+		nonce,
 	}: {
 		src: string;
 		onLoad?: () => void;
 		strategy?: string;
+		nonce?: string;
 	}) => {
 		if (onLoad) onLoadCallbacks.push(onLoad);
-		return <script data-src={src} data-testid="next-script" />;
+		return (
+			<script data-nonce={nonce} data-src={src} data-testid="next-script" />
+		);
 	},
 }));
 
@@ -38,6 +42,16 @@ describe("SwaggerUI", () => {
 		const srcs = Array.from(scripts).map((s) => s.getAttribute("data-src"));
 		expect(srcs).toContain("/swagger-ui/swagger-ui-bundle.js");
 		expect(srcs).toContain("/swagger-ui/swagger-ui-standalone-preset.js");
+	});
+
+	it("stamps the CSP nonce on both Swagger UI scripts", async () => {
+		const { SwaggerUI } = await import("../SwaggerUI");
+		const { container } = render(<SwaggerUI nonce="bm9uY2U=" />);
+
+		const nonces = Array.from(
+			container.querySelectorAll("[data-testid='next-script']"),
+		).map((script) => script.getAttribute("data-nonce"));
+		expect(nonces).toEqual(["bm9uY2U=", "bm9uY2U="]);
 	});
 
 	it("should initialize SwaggerUIBundle when scripts are loaded", async () => {

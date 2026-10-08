@@ -8,7 +8,7 @@ import {
 describe("getStatusHistoryLabel", () => {
 	it("returns the base label for submit", () => {
 		expect(getStatusHistoryLabel("submit", null)).toBe(
-			"Soumission de la déclaration",
+			"Transmission de la déclaration",
 		);
 	});
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { TrackedLink } from "~/modules/analytics";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import type { AppHref } from "~/modules/routes";
 import styles from "./CompliancePathOption.module.scss";
@@ -61,7 +61,7 @@ export function CompliancePathOption({
 						aria-hidden="true"
 						className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
 					/>
-					Échéance au {formatLongDate(deadline)}
+					Échéance au {formatCivilLongDate(deadline)}
 				</p>
 				{learnMoreHref && (
 					<TrackedLink

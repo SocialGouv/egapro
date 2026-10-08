@@ -91,7 +91,7 @@ test.describe("file upload + view access control", () => {
 		expect(response.status()).toBe(200);
 		const disposition = response.headers()["content-disposition"] ?? "";
 		expect(disposition.toLowerCase()).toContain("attachment");
-		expect(response.headers()["cache-control"]).toBe("private, max-age=3600");
+		expect(response.headers()["cache-control"]).toBe("private, no-store");
 		// Body is a real PDF from the dummy fixture.
 		const body = await response.body();
 		expect(body.byteLength).toBeGreaterThan(0);

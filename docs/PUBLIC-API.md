@@ -31,6 +31,9 @@ Pour les entreprises dont le statut de diffusion est non diffusible (`statutDiff
 
 - rémunération : `name`, `address`, `city`, `regionCode`, `region`, `departmentCode`, `departmentLabel`, `countryCode`, `countryLabel`, `nafCode`, `nafLabel`
 - représentation : `name`, `address`, `region`, `departmentCode`, `departmentLabel`, `nafCode`, `nafLabel`
+- représentation, champs de publication : `publishUrl` et `publishModalities` valent `null` (et non `Non-diffusible`)
+
+Pour la représentation équilibrée, les champs de publication `publishUrl` et `publishModalities` valent `null` : l'URL ou les modalités de publication désignent l'entreprise aussi sûrement que sa raison sociale. Le même masquage s'applique aux colonnes `Url_publication` et `Modalites_publication` de l'export CSV / XLSX public.
 
 Le SIREN, l'effectif EMA (`workforceEma`) et l'intégralité des indicateurs A–F restent disponibles.
 
@@ -57,7 +60,7 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 | `GET` | `/api/public/declarations` | Recherche paginée |
 | `GET` | `/api/public/declarations/{siren}` | Toutes les déclarations d'un SIREN |
 | `GET` | `/api/public/declarations/{siren}/{year}` | Déclaration d'un SIREN pour une année |
-| `GET` | `/api/public/declarations/export` | Export complet (JSON ou CSV) |
+| `GET` | `/api/public/declarations/export` | Export complet (JSON, CSV ou Excel) |
 | `GET` | `/api/public/openapi.json` | Spécification OpenAPI 3.1 |
 
 ### Recherche (`GET /api/public/declarations`)
@@ -96,7 +99,7 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/319159877/2026"
 
 ### Export complet (`GET /api/public/declarations/export`)
 
-Retourne l'intégralité des déclarations publiées. Le paramètre `format` accepte `json` (défaut) ou `csv`.
+Retourne l'intégralité des déclarations publiées, toutes années confondues. Le paramètre `format` accepte `json` (défaut), `csv` ou `xlsx`. Les filtres de la recherche (`q`, `region`, `departement`, `naf`, `year`…) peuvent être repris pour restreindre l'export ; `limit`, `offset` et `sort` sont ignorés.
 
 ```sh
 # JSON
@@ -105,7 +108,36 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export"
 # CSV (séparateur ;)
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv" \
   -o index-egapro-remunerations.csv
+
+# CSV d'une seule année
+curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv&year=2027" \
+  -o index-egapro-remunerations-2027.csv
 ```
+
+### Plafonds, cache et calculs simultanés
+
+Les deux exports — `/api/public/declarations/export` et `/api/public/representations/export` (représentation équilibrée, `csv` ou `xlsx`) — appliquent un nombre maximal de lignes par requête :
+
+| Format | Plafond |
+| --- | --- |
+| `xlsx` | 10 000 lignes |
+| `json`, `csv` | 200 000 lignes |
+
+Au-delà, l'API répond **`413 Payload Too Large`** avec un message d'erreur JSON (`{ "error": "…" }`) au lieu d'un export tronqué : ajoutez des filtres — typiquement `year` — ou, pour Excel, passez au format CSV.
+
+Le plafond JSON/CSV est dimensionné pour l'export complet sans filtre, celui que publie la ressource data.gouv.fr et que sert le bouton « tout télécharger » de la consultation. Environ 35 000 entreprises déclarent par campagne et l'export couvre toutes les campagnes publiées depuis 2027 : 200 000 lignes laissent cinq campagnes de marge, tout en bornant la mémoire d'une requête (de l'ordre du gigaoctet au plafond, pour des pods limités à 2 Go). À l'approche du plafond, la ressource data.gouv.fr devra passer à un export par année (`year`).
+
+Seuls les trois exports complets, **sans aucun filtre**, sont mis en cache **1 heure côté serveur** :
+
+| Export | Utilisé par |
+| --- | --- |
+| `/api/public/declarations/export?format=csv` | la ressource data.gouv.fr, le bouton « tout télécharger » |
+| `/api/public/declarations/export` (JSON) | l'export complet documenté ci-dessus |
+| `/api/public/representations/export?format=csv` | le bouton « tout télécharger » |
+
+`limit`, `offset`, `sort` et les paramètres inconnus ne comptent pas comme des filtres. Une modification met donc jusqu'à une heure à se refléter dans ces exports, comme le permet déjà l'en-tête `Cache-Control: public, max-age=3600`. Cela vaut dans les deux sens : une nouvelle déclaration publiée peut tarder à apparaître, et un **retrait** (entreprise devenue non diffusible, déclaration annulée) peut tarder jusqu'à une heure à disparaître. Des requêtes simultanées sur un même export complet absent du cache ne déclenchent qu'un seul calcul par pod.
+
+Les autres exports (filtrés, ou au format Excel) sont recalculés à chaque requête. Tous exports confondus, un pod calcule au plus **deux exports à la fois** — un export complet absent du cache compte aussi. Au-delà, l'API répond **`503 Service Unavailable`** avec un en-tête `Retry-After` (en secondes) et un message d'erreur JSON. Réessayez après ce délai.
 
 ## Licence
 

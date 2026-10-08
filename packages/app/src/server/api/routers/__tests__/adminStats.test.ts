@@ -1605,7 +1605,7 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			},
 			{
 				key: "submitted",
-				label: "Déclaration soumise",
+				label: "Déclaration transmise",
 				count: 60,
 				pctOfStart: 60,
 				pctDropFromPrev: 25,
@@ -1803,14 +1803,14 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 			},
 			{
 				key: "submitted",
-				label: "Déclaration soumise",
+				label: "Déclaration transmise",
 				count: 60,
 				pctOfStart: 60,
 				pctDropFromPrev: 25,
 			},
 			{
 				key: "cse_opinion_submitted",
-				label: "Avis CSE soumis",
+				label: "Avis CSE transmis",
 				count: 50,
 				pctOfStart: 50,
 				pctDropFromPrev: 17,

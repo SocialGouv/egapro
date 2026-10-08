@@ -301,6 +301,22 @@ describe("Step6Review", () => {
 		expect(alert).not.toHaveTextContent("No matching transition");
 	});
 
+	it("shows why the server refused the submission", () => {
+		mockSubmitState.error = {
+			message:
+				"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+			data: { code: "PRECONDITION_FAILED" },
+		};
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		const alert = within(modal).getByRole("alert", { hidden: true });
+		expect(alert).toHaveTextContent(
+			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+		);
+	});
+
 	it("closes the modal before navigating after a successful submission", () => {
 		renderSubmissionReview();
 
@@ -328,7 +344,7 @@ describe("Step6Review", () => {
 
 	it("shows a submission error in the modal and clears it on close", async () => {
 		mockSubmitState.error = {
-			message: "La soumission a échoué.",
+			message: "La transmission a échoué.",
 			data: { code: "FORBIDDEN" },
 		};
 		renderSubmissionReview();
@@ -337,7 +353,7 @@ describe("Step6Review", () => {
 
 		expect(
 			within(modal).getByRole("alert", { hidden: true }),
-		).toHaveTextContent("La soumission a échoué.");
+		).toHaveTextContent("La transmission a échoué.");
 		expect(mockPush).not.toHaveBeenCalled();
 		await userEvent.click(
 			within(modal).getByRole("button", { name: "Annuler", hidden: true }),
@@ -428,6 +444,9 @@ describe("Step6Review", () => {
 		);
 		expect(
 			screen.getByText(/Vérifiez que toutes les informations/),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(/avant de transmettre la déclaration aux services/),
 		).toBeInTheDocument();
 	});
 
@@ -641,8 +660,8 @@ describe("Step6Review", () => {
 			/>,
 		);
 		// Proportion = beneficiaries / workforce total, not the raw beneficiary count
-		expect(screen.getByText("50,0 %")).toBeInTheDocument();
-		expect(screen.getByText("55,0 %")).toBeInTheDocument();
+		expect(screen.getByText("50,00 %")).toBeInTheDocument();
+		expect(screen.getByText("55,00 %")).toBeInTheDocument();
 		expect(screen.getByText("Proportion")).toBeInTheDocument();
 	});
 

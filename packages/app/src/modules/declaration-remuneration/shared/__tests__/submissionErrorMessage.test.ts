@@ -15,6 +15,10 @@ describe("getSubmissionErrorMessage", () => {
 			"La date limite de modification de la déclaration est dépassée.",
 		],
 		["CONFLICT", "Cette déclaration est en cours de modification."],
+		[
+			"PRECONDITION_FAILED",
+			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+		],
 	])("keeps the server message written for the user (%s)", (code, message) => {
 		expect(getSubmissionErrorMessage({ message, data: { code } })).toBe(
 			message,

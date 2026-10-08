@@ -254,6 +254,7 @@ describe("Step3Members — saisie des pourcentages", () => {
 
 		await userEvent.type(screen.getByLabelText(/Femmes/), typed);
 
+		expect(screen.getByLabelText(/Hommes/)).toHaveValue("66,7");
 		expect(setDraftValues).toHaveBeenLastCalledWith({
 			memberWomenPercent: 33.3,
 			memberMenPercent: 66.7,
@@ -288,8 +289,8 @@ describe("Step3Members — saisie des pourcentages", () => {
 			/>,
 		);
 
-		expect(screen.getByLabelText(/Femmes/)).toHaveValue("33.3");
-		expect(screen.getByLabelText(/Hommes/)).toHaveValue("66.7");
+		expect(screen.getByLabelText(/Femmes/)).toHaveValue("33,3");
+		expect(screen.getByLabelText(/Hommes/)).toHaveValue("66,7");
 		expect(screen.getByText("Conforme")).toBeInTheDocument();
 	});
 });

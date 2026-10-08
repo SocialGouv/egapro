@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { updateEmployeeCategoriesSchema } from "~/modules/declaration-remuneration/schemas";
 import {
 	type EmployeeCategory,
+	toCategoryHeadcounts,
 	toSubmitData,
 	withoutPayValuesWhenNotApplicable,
 } from "../categorySerializer";
@@ -81,6 +82,44 @@ describe("toSubmitData", () => {
 				...result,
 			}).success,
 		).toBe(true);
+	});
+});
+
+describe("toCategoryHeadcounts", () => {
+	it("reads integer headcounts, tolerating surrounding spaces and a .0 suffix", () => {
+		expect(
+			toCategoryHeadcounts(
+				category({
+					womenCount: "12",
+					menCount: " 7 ",
+					hourlyWomenCount: "12.0",
+					hourlyMenCount: "0",
+				}),
+			),
+		).toEqual({
+			womenCount: 12,
+			menCount: 7,
+			hourlyWomenCount: 12,
+			hourlyMenCount: 0,
+		});
+	});
+
+	it("leaves an empty headcount unknown", () => {
+		expect(toCategoryHeadcounts(category({ womenCount: "" })).womenCount).toBe(
+			undefined,
+		);
+	});
+
+	it("rejects a decimal headcount instead of truncating it", () => {
+		expect(
+			toCategoryHeadcounts(category({ womenCount: "12.7" })).womenCount,
+		).toBe(undefined);
+	});
+
+	it("rejects a partially numeric headcount instead of reading its prefix", () => {
+		expect(toCategoryHeadcounts(category({ menCount: "12abc" })).menCount).toBe(
+			undefined,
+		);
 	});
 });
 
