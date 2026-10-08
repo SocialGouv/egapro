@@ -6,9 +6,7 @@ describe("<AideProConnectPage />", () => {
   it("should render the page title", () => {
     render(<AideProConnectPage />);
 
-    const title = screen.getByText(
-      "Aide pour l'utilisation du service d'identification ProConnect (anciennement MonComptePro)",
-    );
+    const title = screen.getByText("Aide pour l'utilisation du service d'identification ProConnect");
     expect(title).toBeInTheDocument();
   });
 

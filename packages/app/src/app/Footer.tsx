@@ -55,9 +55,9 @@ export const Footer = () => (
                   href="/aide-proconnect"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={getExternalLinkTitle("Consulter l'aide ProConnect (ex MonComptePro)")}
+                  title={getExternalLinkTitle("Consulter l'aide ProConnect")}
                 >
-                  Consulter l'aide ProConnect (ex MonComptePro)
+                  Consulter l'aide ProConnect
                 </a>
               </li>
             </ul>
