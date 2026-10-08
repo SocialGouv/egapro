@@ -25,6 +25,13 @@ const INVALID: FieldError = {
 	message: "Le nombre de bénéficiaires ne peut pas dépasser l'effectif.",
 };
 
+const WORKFORCE: FieldError = {
+	fieldId: "row3-f",
+	category: "workforce",
+	message:
+		"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 10).",
+};
+
 describe("FieldErrorAlert", () => {
 	it("renders nothing without errors", () => {
 		const { container } = render(<FieldErrorAlert errors={[]} id={ALERT_ID} />);
@@ -62,6 +69,14 @@ describe("FieldErrorAlert", () => {
 		expect(alerts).toHaveLength(2);
 		expect(alerts[0]).toHaveTextContent("Champ vide");
 		expect(alerts[1]).toHaveTextContent("Valeur invalide");
+	});
+
+	it("titles the workforce category 'Nombre de salariés'", () => {
+		render(<FieldErrorAlert errors={[WORKFORCE]} id={ALERT_ID} />);
+
+		const alert = screen.getByRole("alert");
+		expect(within(alert).getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(alert).toHaveTextContent(WORKFORCE.message);
 	});
 
 	it("renders anchored messages as links to the offending input", () => {

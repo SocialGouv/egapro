@@ -24,6 +24,7 @@ import {
 	findFieldError,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
+import { coherenceErrorLabel } from "~/modules/declaration-remuneration/steps/step4/quartileCoherence";
 import {
 	CATEGORY_SOURCES,
 	formatCategorySource,
@@ -492,17 +493,19 @@ export function CategoryForm({
 			const sums = sumCategoryWorkforce(normalizedData.categories);
 			const workforceErrors: FieldError[] = [];
 			for (const row of WORKFORCE_ROWS) {
-				for (const [sex, sexLabel] of [
-					["women", "femmes"],
-					["men", "hommes"],
-				] as const) {
+				for (const sex of ["women", "men"] as const) {
 					const max = maxByBasis[row.basis][sex];
 					const total = sums[row.basis][sex];
 					if (max === undefined || total === max) continue;
 					workforceErrors.push({
 						fieldId: CATEGORY_FORM_FIELD_ID,
-						category: "inconsistent",
-						message: `Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
+						category: "workforce",
+						message: coherenceErrorLabel({
+							table: row.basis,
+							field: sex,
+							expected: max,
+							total,
+						}),
 					});
 				}
 			}
@@ -782,13 +785,6 @@ export function CategoryForm({
 				</div>
 			</fieldset>
 
-			<FieldErrorAlert
-				errors={categoryErrors}
-				id={CATEGORY_ALERT_ID}
-				onErrorAnchorClick={handleErrorAnchorClick}
-				validationAttempt={validationAttempt}
-			/>
-
 			<DefinitionAccordion
 				id={accordionId}
 				title="Définitions et méthode de calcul"
@@ -819,6 +815,13 @@ export function CategoryForm({
 					</ul>
 				</div>
 			</DefinitionAccordion>
+
+			<FieldErrorAlert
+				errors={categoryErrors}
+				id={CATEGORY_ALERT_ID}
+				onErrorAnchorClick={handleErrorAnchorClick}
+				validationAttempt={validationAttempt}
+			/>
 
 			<FormErrors mutationError={submitError} />
 

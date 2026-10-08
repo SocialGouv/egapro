@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FieldError, FieldErrorCategory } from "./types";
 import { FIELD_ERROR_TITLES, fieldErrorAlertId } from "./types";
 
-const CATEGORY_ORDER: FieldErrorCategory[] = [
-	"empty",
-	"invalid",
-	"inconsistent",
-];
+const CATEGORY_ORDER: FieldErrorCategory[] = ["empty", "invalid", "workforce"];
 
 function groupByCategory(
 	errors: readonly FieldError[],
