@@ -21,6 +21,12 @@ vi.mock("next/navigation", async () => {
 vi.mock("~/trpc/react", () => ({
 	api: {
 		adminDeclarations: {
+			listYears: {
+				useQuery: vi.fn().mockReturnValue({
+					data: [2026, 2025, 2024],
+					isLoading: false,
+				}),
+			},
 			search: {
 				useQuery: vi.fn().mockReturnValue({
 					data: {
@@ -51,6 +57,8 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import { api } from "~/trpc/react";
+
 import { AdminDeclarationsPage } from "../AdminDeclarationsPage";
 
 describe("AdminDeclarationsPage", () => {
@@ -77,5 +85,19 @@ describe("AdminDeclarationsPage", () => {
 	it("shows result count", () => {
 		render(<AdminDeclarationsPage />);
 		expect(screen.getByText("1 résultat")).toBeInTheDocument();
+	});
+
+	it("shows a loading state and withholds the search form while years are still loading", () => {
+		vi.mocked(api.adminDeclarations.listYears.useQuery).mockReturnValueOnce({
+			data: undefined,
+			isLoading: true,
+		} as never);
+
+		render(<AdminDeclarationsPage />);
+
+		expect(screen.getByText("Chargement...")).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Rechercher" }),
+		).not.toBeInTheDocument();
 	});
 });

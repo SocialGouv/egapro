@@ -1,6 +1,11 @@
+import type { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
+
 export const WORKFORCE_LABEL = "Effectif annuel moyen";
 
-export const STATUS_LABELS: Record<string, string> = {
+export type AdminDeclarationStatusFilter =
+	(typeof ADMIN_DECLARATION_STATUS_FILTERS)[number];
+
+export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	draft: "Brouillon",
 	awaiting_compliance_path_choice: "Transmise",
 	corrective_actions_chosen: "Actions correctives choisies",

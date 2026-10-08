@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { formatShortDateTime, isCancelled } from "~/modules/domain";
 import { adminDeclarationHref } from "~/modules/routes";
-import { STATUS_LABELS } from "./shared/constants";
+import {
+	type AdminDeclarationStatusFilter,
+	STATUS_LABELS,
+} from "./shared/constants";
 
 type Sibling = {
 	id: string;
@@ -35,7 +38,8 @@ export function SiblingDeclarationsSection({ siblings }: Props) {
 						{isCancelled(sibling) ? (
 							<span className="fr-badge fr-badge--warning">Annulée</span>
 						) : (
-							(STATUS_LABELS[sibling.status] ?? sibling.status)
+							(STATUS_LABELS[sibling.status as AdminDeclarationStatusFilter] ??
+							sibling.status)
 						)}
 					</li>
 				))}

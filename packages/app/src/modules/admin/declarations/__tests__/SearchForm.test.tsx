@@ -19,8 +19,11 @@ vi.mock("next/navigation", async () => {
 });
 
 import { COMPANY_SIZE_RANGES, type CompanySizeRange } from "~/modules/domain";
-
 import { SearchForm } from "../SearchForm";
+import { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
+import { STATUS_LABELS } from "../shared/constants";
+
+const TEST_YEARS = [2026, 2025, 2024];
 
 function mockRouterPush() {
 	const push = vi.fn();
@@ -41,7 +44,7 @@ describe("SearchForm", () => {
 	});
 
 	it("renders all search fields and omits the removed Index / Valeur pair", () => {
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		expect(
 			screen.getByLabelText("Numéro Siren ou le nom de l'entreprise"),
@@ -59,7 +62,7 @@ describe("SearchForm", () => {
 	});
 
 	it("renders search and reset buttons", () => {
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		expect(
 			screen.getByRole("button", { name: "Rechercher" }),
@@ -76,16 +79,73 @@ describe("SearchForm", () => {
 			>,
 		);
 
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		expect(
 			screen.getByLabelText("Numéro Siren ou le nom de l'entreprise"),
 		).toHaveValue("ACME");
-		expect(screen.getByLabelText("Année")).toHaveValue(2024);
+		expect(screen.getByLabelText("Année")).toHaveValue("2024");
+	});
+
+	it("offers the distinct years plus the all-years option, sorted as received", () => {
+		render(<SearchForm years={TEST_YEARS} />);
+
+		const options = Array.from(
+			screen
+				.getByLabelText<HTMLSelectElement>("Année")
+				.querySelectorAll("option"),
+		).map((option) => option.value);
+
+		expect(options).toEqual(["", ...TEST_YEARS.map(String)]);
+	});
+
+	it("offers every admin status filter with its label, plus the all-statuses option", () => {
+		render(<SearchForm years={TEST_YEARS} />);
+
+		const select = screen.getByLabelText<HTMLSelectElement>("Statut");
+		const options = Array.from(select.querySelectorAll("option"));
+
+		expect(options.map((option) => option.value)).toEqual([
+			"",
+			...ADMIN_DECLARATION_STATUS_FILTERS,
+		]);
+		expect(options.map((option) => option.textContent)).toEqual([
+			"Tous",
+			...ADMIN_DECLARATION_STATUS_FILTERS.map(
+				(status) => STATUS_LABELS[status],
+			),
+		]);
+		expect(options.map((option) => option.textContent)).toContain(
+			"Démarche terminée",
+		);
+	});
+
+	it("restores the year from the URL once its option exists", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "2025" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={TEST_YEARS} />);
+
+		expect(screen.getByLabelText("Année")).toHaveValue("2025");
+	});
+
+	it("restores the status from the URL", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ status: "demarche_completed" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={TEST_YEARS} />);
+
+		expect(screen.getByLabelText("Statut")).toHaveValue("demarche_completed");
 	});
 
 	it("offers the domain size brackets plus the all-sizes option", () => {
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		const options = Array.from(
 			screen
@@ -106,7 +166,7 @@ describe("SearchForm", () => {
 			>,
 		);
 
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		expect(screen.getByLabelText("Effectif annuel moyen")).toHaveValue("250+");
 	});
@@ -114,7 +174,7 @@ describe("SearchForm", () => {
 	it("pushes the selected size bracket into the URL on submit", async () => {
 		const push = mockRouterPush();
 		const user = userEvent.setup();
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		await user.selectOptions(
 			screen.getByLabelText("Effectif annuel moyen"),
@@ -138,7 +198,7 @@ describe("SearchForm", () => {
 		);
 		const push = mockRouterPush();
 		const user = userEvent.setup();
-		render(<SearchForm />);
+		render(<SearchForm years={TEST_YEARS} />);
 
 		await user.click(screen.getByRole("button", { name: "Réinitialiser" }));
 
