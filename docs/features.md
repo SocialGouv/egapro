@@ -535,6 +535,8 @@ Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automati
 
 **Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
 
+Vue d'ensemble de tous les journaux produits par l'application et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
+
 ### 13.3 Impersonation admin
 
 L'admin DGT peut **incarner** une entreprise pour la dépanner. Le mécanisme :
