@@ -80,7 +80,7 @@ async function cleanup(sql: ReturnType<typeof postgres>) {
 	await sql`DELETE FROM app_declaration WHERE siren IN ${sql(SIRENS)}`;
 	await sql`DELETE FROM app_company WHERE siren IN ${sql(SIRENS)}`;
 	await sql`DELETE FROM app_user WHERE id = ${DECLARANT_ID}`;
-	await sql`DELETE FROM app_campaign_deadline WHERE year IN (2100, 2101, 2102)`;
+	await sql`DELETE FROM app_campaign_deadline WHERE year IN (2100, 2101, 1902)`;
 }
 
 describe("searchPublicDeclarations (real Postgres)", () => {
@@ -124,7 +124,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			.values([
 				campaignRow({ year: 2100, publicDataReleaseDate: PAST_RELEASE }),
 				campaignRow({ year: 2101, publicDataReleaseDate: FUTURE_RELEASE }),
-				campaignRow({ year: 2102, publicDataReleaseDate: null }),
+				campaignRow({ year: 1902, publicDataReleaseDate: null }),
 			]);
 	});
 
@@ -176,7 +176,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			.insert(declarations)
 			.values([
 				declarationRow({ siren: SIREN_A, year: 2101 }),
-				declarationRow({ siren: SIREN_B, year: 2102 }),
+				declarationRow({ siren: SIREN_B, year: 1902 }),
 			]);
 
 		const result = await searchPublicDeclarations({ limit: 10, offset: 0 });
@@ -185,18 +185,18 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 		expect(result.data).toEqual([]);
 	});
 
-	// 2103 deliberately has no app_campaign_deadline row — no FK enforces one.
+	// 1903 deliberately has no app_campaign_deadline row — no FK enforces one.
 	it("excludes a year that has no campaign-deadline row at all, with or without a year filter (S5)", async () => {
 		await db
 			.insert(declarations)
-			.values([declarationRow({ siren: SIREN_A, year: 2103 })]);
+			.values([declarationRow({ siren: SIREN_A, year: 1903 })]);
 
 		const unfiltered = await searchPublicDeclarations({ limit: 10, offset: 0 });
 		expect(unfiltered.count).toBe(0);
 		expect(unfiltered.data).toEqual([]);
 
 		const filtered = await searchPublicDeclarations({
-			year: 2103,
+			year: 1903,
 			limit: 10,
 			offset: 0,
 		});
@@ -209,8 +209,8 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			.insert(declarations)
 			.values([
 				declarationRow({ siren: SIREN_A, year: 2100 }),
-				declarationRow({ siren: SIREN_A, year: 2102 }),
-				declarationRow({ siren: SIREN_A, year: 2103 }),
+				declarationRow({ siren: SIREN_A, year: 1902 }),
+				declarationRow({ siren: SIREN_A, year: 1903 }),
 			]);
 
 		const result = await searchPublicDeclarations({ limit: 10, offset: 0 });
@@ -441,8 +441,8 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			.insert(declarations)
 			.values([
 				declarationRow({ siren: SIREN_A, year: 2100 }),
-				declarationRow({ siren: SIREN_B, year: 2102 }),
-				declarationRow({ siren: SIREN_C, year: 2103 }),
+				declarationRow({ siren: SIREN_B, year: 1902 }),
+				declarationRow({ siren: SIREN_C, year: 1903 }),
 			]);
 
 		const sirens = await listPublicCompanySirens();
@@ -452,13 +452,15 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 	});
 
 	it("does not count a SIREN whose only declaration-years are unpublished (S7)", async () => {
+		const baseline = await countPublicCompanySirens();
 		await db
 			.insert(declarations)
 			.values([
-				declarationRow({ siren: SIREN_B, year: 2102 }),
-				declarationRow({ siren: SIREN_C, year: 2103 }),
+				declarationRow({ siren: SIREN_B, year: 1902 }),
+				declarationRow({ siren: SIREN_C, year: 1903 }),
 			]);
 		const withoutPublished = await countPublicCompanySirens();
+		expect(withoutPublished).toBe(baseline);
 
 		await db
 			.insert(declarations)

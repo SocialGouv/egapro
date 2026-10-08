@@ -55,6 +55,7 @@ vi.mock("drizzle-orm", () => ({
 	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) => ({ or: args }),
 	sql: (strings: TemplateStringsArray) => ({ sql: strings.join("") }),
+	ilike: (a: unknown, b: unknown) => ({ ilike: [a, b] }),
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -403,7 +404,8 @@ describe("GET /api/public/declarations/export", () => {
 	])("gates the campaign-deadline join on the public release condition (%s)", async (_label, search) => {
 		setRows([buildRow()]);
 
-		await callGet(search);
+		const response = await callGet(search);
+		expect(response.status).toBe(200);
 
 		const campaignJoinCall = mocks.innerJoinCalls.find(
 			([table]) => table === campaignDeadlines,
