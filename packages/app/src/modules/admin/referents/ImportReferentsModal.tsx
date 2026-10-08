@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -22,10 +22,15 @@ type Props = {
 export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState("");
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const resetForm = useCallback(() => {
+		setFile(null);
+		setError("");
+		if (fileInputRef.current) fileInputRef.current.value = "";
+	}, []);
 	const importMutation = api.adminReferents.import.useMutation({
 		onSuccess: () => {
-			setFile(null);
-			setError("");
+			resetForm();
 			onClose();
 			onSuccess();
 		},
@@ -33,6 +38,11 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 			setError(err.message);
 		},
 	});
+	const handleClose = useCallback(() => {
+		resetForm();
+		importMutation.reset();
+		onClose();
+	}, [importMutation, onClose, resetForm]);
 
 	const handleFileChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +90,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 								<button
 									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
-									onClick={onClose}
+									onClick={handleClose}
 									title="Fermer"
 									type="button"
 								>
@@ -111,6 +121,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 										disabled={importMutation.isPending}
 										id={`${MODAL_ID}-file`}
 										onChange={handleFileChange}
+										ref={fileInputRef}
 										type="file"
 									/>
 								</div>
@@ -146,7 +157,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 									<li>
 										<button
 											className="fr-btn fr-btn--secondary"
-											onClick={onClose}
+											onClick={handleClose}
 											type="button"
 										>
 											Annuler

@@ -5,10 +5,12 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const importMutate = vi.fn();
+const importReset = vi.fn();
 let mutationOnError: ((err: { message: string }) => void) | undefined;
 let mutationOnSuccess: (() => void) | undefined;
 
@@ -22,7 +24,7 @@ vi.mock("~/trpc/react", () => ({
 				}) => {
 					mutationOnSuccess = opts?.onSuccess;
 					mutationOnError = opts?.onError;
-					return { mutate: importMutate, isPending: false };
+					return { mutate: importMutate, reset: importReset, isPending: false };
 				},
 			},
 		},
@@ -101,6 +103,35 @@ describe("ImportReferentsModal", () => {
 			expect(screen.getByText(/Format invalide/)).toBeInTheDocument();
 		});
 		expect(importMutate).not.toHaveBeenCalled();
+	});
+
+	it("clears the selected file and error when cancelled", async () => {
+		const { onClose } = renderModal();
+		const input = screen.getByLabelText(/Fichier JSON/, {
+			selector: "input",
+		}) as HTMLInputElement;
+		await userEvent.upload(
+			input,
+			new File(["not-json"], "bad.json", { type: "application/json" }),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		);
+		await screen.findByText("Le fichier n'est pas un JSON valide.");
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Annuler", hidden: true }),
+		);
+
+		expect(onClose).toHaveBeenCalledOnce();
+		expect(importReset).toHaveBeenCalledOnce();
+		expect(input.files).toHaveLength(0);
+		expect(
+			screen.queryByText("Le fichier n'est pas un JSON valide."),
+		).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Importer", hidden: true }),
+		).toBeDisabled();
 	});
 
 	it("calls the mutation when the payload is valid", async () => {
