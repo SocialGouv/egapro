@@ -85,7 +85,23 @@ export const deleteReferentsSchema = z.object({
 	ids: z.array(z.string().uuid()).min(1).max(100),
 });
 
-export const importReferentsSchema = z.array(createReferentSchema).min(1);
+const importReferentSchema = z.preprocess((value) => {
+	if (value === null || typeof value !== "object" || Array.isArray(value)) {
+		return value;
+	}
+
+	const referent = value as Record<string, unknown>;
+	return {
+		...referent,
+		county: referent.county === null ? undefined : referent.county,
+		substituteName:
+			referent.substituteName === null ? undefined : referent.substituteName,
+		substituteEmail:
+			referent.substituteEmail === null ? undefined : referent.substituteEmail,
+	};
+}, createReferentSchema);
+
+export const importReferentsSchema = z.array(importReferentSchema).min(1);
 
 export type ImportReferentsInput = z.infer<typeof importReferentsSchema>;
 
