@@ -8,6 +8,7 @@ import {
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
 } from "~/modules/export";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { assertGatewaySource } from "~/server/services/gatewaySource";
 
@@ -31,10 +32,16 @@ export const GET = withAuditedRoute(
 		resolveContext: (request) => {
 			const url = new URL(request.url);
 			return {
-				metadata: {
-					date_begin: url.searchParams.get("date_begin") ?? null,
-					date_end: url.searchParams.get("date_end") ?? null,
-				},
+				metadata: auditQueryMetadata(
+					exportDeclarationsQuerySchema.safeParse({
+						date_begin: url.searchParams.get("date_begin") ?? undefined,
+						date_end: url.searchParams.get("date_end") ?? undefined,
+					}),
+					(window) => ({
+						date_begin: window.date_begin,
+						date_end: window.date_end ?? null,
+					}),
+				),
 			};
 		},
 	},

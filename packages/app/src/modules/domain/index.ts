@@ -40,6 +40,8 @@ export {
 	readCampaignYearOverride,
 	writeCampaignYearOverride,
 } from "./shared/campaignClock";
+// Civil dates (calendar days held as UTC midnight) vs timestamps
+export { civilDate } from "./shared/civilDate";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
@@ -72,6 +74,15 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
+// CSV export field escaping
+export { toCsvField } from "./shared/csv";
+// Display decimals — 2, truncated toward zero, for every percentage and average shown to the user
+export {
+	DISPLAY_DECIMALS,
+	RATIO_DECIMALS,
+	truncateDecimals,
+	truncateRatio,
+} from "./shared/decimal";
 // Declaration display context
 export type {
 	CseOpinionResolvedInput,
@@ -186,8 +197,10 @@ export {
 } from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)
 export {
+	civilLongDateParts,
 	computePercentage,
-	computeProportion,
+	formatCivilLongDate,
+	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
 	formatDays,
@@ -204,7 +217,6 @@ export {
 	formatPointsAbs,
 	formatPrecisePercentage,
 	formatRatioAsPercentage,
-	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
 	formatTime,
@@ -235,6 +247,7 @@ export {
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
 	floorWorkforce,
+	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 	getObligationWorkforce,

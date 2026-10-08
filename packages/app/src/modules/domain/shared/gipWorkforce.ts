@@ -1,6 +1,6 @@
 import { classifyCompanySize } from "./companySize";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
-import { formatCount } from "./format";
+import { formatCount, formatTruncatedDecimal, MISSING_VALUE } from "./format";
 import { toNullableNumber } from "./number";
 
 // The one label every user-facing surface shows for the voluntary tier, whether
@@ -51,6 +51,20 @@ export function formatWorkforceForUser(gipWorkforce: number | null): string {
 	}
 
 	return formatCount(Math.floor(gipWorkforce));
+}
+
+/**
+ * GIP annual average headcount as the PUBLIC OBSERVATORY shows it: the figure
+ * itself, two decimals truncated, like every other average shown to the user —
+ * `49.876` → `"49,87"`, `250` → `"250"`.
+ *
+ * Unlike `formatWorkforceForUser`, no bracket and no floor: the observatory
+ * publishes the GIP average as is, and truncation already keeps `49.99` from
+ * reading as `50`. Mon espace and the declaration keep `formatWorkforceForUser`.
+ */
+export function formatWorkforceEma(gipWorkforce: number | null): string {
+	if (gipWorkforce === null) return MISSING_VALUE;
+	return formatTruncatedDecimal(gipWorkforce);
 }
 
 /**

@@ -1,6 +1,8 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { civilDate } from "~/modules/domain";
+
 import {
 	DECLARATION_REMUNERATION_RECAP,
 	DECLARATION_REMUNERATION_RECAP_CORRECTION,
@@ -108,12 +110,13 @@ describe("TransmittedRow", () => {
 describe("DeadlineRow", () => {
 	it("renders the deadline with the calendar icon", () => {
 		const { container, getByText } = render(
-			<DeadlineRow date={new Date(2026, 2, 1)} />,
+			<DeadlineRow date={civilDate(2026, 2, 1)} />,
 		);
 		expect(
 			container.querySelector(".fr-icon-calendar-line"),
 		).toBeInTheDocument();
 		expect(getByText(/Échéance :/)).toBeInTheDocument();
+		expect(container.textContent).toContain("1er mars 2026");
 	});
 });
 

@@ -293,8 +293,11 @@ sequenceDiagram
 Le callback `jwt` (NextAuth) :
 
 1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id` et `isAdmin`.
-2. Injecte `userId`, `email`, `isAdmin` dans le token.
-3. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+2. À la connexion : réaligne `app_user_company` sur le SIRET ProConnect (`syncUserCompanyLink`, `src/server/auth/companyLink.ts`). Une transaction, sérialisée par utilisateur, crée le lien courant et supprime les autres ; un SIRET absent ou invalide supprime tous les liens. Les verrous d'édition détenus sur un SIREN révoqué sont libérés. Chaque révocation (`auth.company_link_revoked`, motif `siret_changed` / `siret_missing`) et chaque verrou libéré (`declaration.lock_released`) est journalisé **dans la même transaction**. Base indisponible : la connexion échoue.
+3. Injecte `userId`, `email`, `isAdmin`, `siret` dans le token.
+4. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+
+Le `siret` du token est une **déclaration**, pas une autorisation : un JWT ouvert sur un autre appareil le garde après une révocation. Toute surface qui agit pour une entreprise vérifie donc le lien en base à chaque requête : `canAccessCompany` / `resolveAuthorizedSiren` (`src/server/auth/companyAccess.ts`), utilisés par `companyProcedure`, les procédures qui reçoivent un `siren` en entrée, `getSessionSiren` (route handlers) et les pages. Seule exception, l'impersonation admin effective (fenêtre MFA ouverte), qui ne demande pas de lien sur le SIREN incarné. La requête porte sur la clé primaire `(user_id, siren)`.
 
 ### 5.4 Edge middleware (`src/middleware.ts`)
 
@@ -390,7 +393,7 @@ Une procédure tRPC = un appel typé bout-en-bout (input Zod, output inféré). 
 |---|---|---|
 | `publicProcedure` | rien | Public (non authentifié) |
 | `protectedProcedure` | session valide | Utilisateur connecté |
-| `companyProcedure` | session + binding SIREN (depuis le contexte) | Utilisateur agissant pour une entreprise |
+| `companyProcedure` | session + binding SIREN (depuis le contexte) + lien `app_user_company` vérifié en base (sauf impersonation effective) | Utilisateur agissant pour une entreprise |
 | `companyWriteProcedure` | + read-only guard (refus si impersonation) | Utilisateur, écriture |
 | `declarationProcedure` | `companyProcedure` + résolution déclaration | Utilisateur, lecture déclaration |
 | `declarationWriteProcedure` | + read-only guard | Utilisateur, écriture déclaration |
@@ -632,7 +635,7 @@ Toute nouvelle action audited requiert **3 points** :
 | Clé `AUDIT_ACTIONS` | Valeur en BDD | Catégorie | Surface |
 |---|---|---|---|
 | `DECLARATION_LOCK_ACQUIRED` | `declaration.lock_acquired` | `mutation` | `declarationLock.acquireLock` (tRPC, logAction direct) |
-| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) |
+| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) + libération forcée à la révocation d'un lien entreprise (connexion, `logActionInTransaction`, `metadata.reason = "company_link_revoked"`) |
 | `ADMIN_DECLARATION_RELEASE_LOCK` | `admin_declaration.release_lock` | `mutation` | `adminDeclarations.releaseLock` (tRPC, PROCEDURE_TO_ACTION) |
 | `DECLARATION_LOCK_STATE_READ` | `declaration.lock_state_read` | `read_sensitive` | `declarationLock.getLockState` (tRPC, PROCEDURE_TO_ACTION) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | `admin_settings.update_lock_timeout` | `mutation` | `adminSettings.updateLockTimeout` (tRPC, PROCEDURE_TO_ACTION) |
@@ -743,6 +746,17 @@ Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directem
 ### 10.5 Secrets
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
+
+**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`, job `a11y-pages` d'`a11y.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
+
+| Variable | Source | Exposée à |
+|---|---|---|
+| `AUTH_SECRET` | générée à chaque run (`openssl rand`, masquée) — aucun secret GitHub | tout le job |
+| `EGAPRO_PROCONNECT_CLIENT_ID` / `_CLIENT_SECRET` / `_ISSUER` | secrets GitHub — la connexion E2E est une vraie connexion ProConnect (FIA1V2 via Charon) | steps `Build` (env.js refuse un build de production sans ProConnect) et exécution des tests |
+| `EGAPRO_WEEZ_API_URL` | secret GitHub — appelé à chaque connexion pour renseigner l'entreprise | idem |
+| `EGAPRO_SUIT_API_URL` | valeur factice `https://suit.invalid` — exigée par env.js, jamais jointe en CI (pas de certificat mTLS) | tout le job |
+
+Une nouvelle variable secrète nécessaire aux E2E se pose de la même façon : au niveau des steps qui lancent l'app, jamais du job.
 
 ### 10.6 Verrou collaboratif — sécurité IDOR
 

@@ -160,6 +160,17 @@ describe("v2027.1.json — structural consistency", () => {
 		expect(hasTerminal).toBe(true);
 	});
 
+	it("declares the compliance-path revisions of both rounds", () => {
+		expect(
+			(rules.choiceRevisions ?? []).map((revision) => revision.reopens),
+		).toEqual(
+			expect.arrayContaining([
+				"awaiting_compliance_path_choice",
+				"awaiting_revision_choice",
+			]),
+		);
+	});
+
 	it("every threshold value is a finite positive number", () => {
 		for (const [key, val] of Object.entries(rules.thresholds)) {
 			expect(

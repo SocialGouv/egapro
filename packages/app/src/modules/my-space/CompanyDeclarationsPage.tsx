@@ -99,7 +99,6 @@ export function CompanyDeclarationsPage({
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
-				campaignDeadlines={campaignDeadlines}
 				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}

@@ -11,7 +11,7 @@ import {
 export const publicRepresentationSchema = {
 	type: "object",
 	description:
-		"Écarts de représentation équilibrée femmes-hommes parmi les cadres dirigeants et les instances dirigeantes (art. D. 1142-19). Ce schéma expose uniquement des **données brutes** déclarées par l'entreprise. Aucun verdict de conformité ni score n'est exposé. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible`.",
+		"Écarts de représentation équilibrée femmes-hommes parmi les cadres dirigeants et les instances dirigeantes (art. D. 1142-19). Ce schéma expose uniquement des **données brutes** déclarées par l'entreprise. Aucun verdict de conformité ni score n'est exposé. Pour les entreprises non diffusibles (`statutDiffusion === 'N'`), les champs d'identité, de localisation et d'activité valent `Non-diffusible`, et les champs de publication `publishUrl` et `publishModalities` valent `null`.",
 	required: ["siren", "year"],
 	properties: {
 		siren: {
@@ -84,13 +84,13 @@ export const publicRepresentationSchema = {
 		publishUrl: {
 			type: ["string", "null"],
 			description:
-				"URL de publication des résultats. `null` si non renseignée.",
+				"URL de publication des résultats. `null` si non renseignée, ou lorsque l'entreprise n'est pas diffusible.",
 			example: "https://exemple.fr/egalite-professionnelle",
 		},
 		publishModalities: {
 			type: ["string", "null"],
 			description:
-				"Modalités de publication en texte libre (ex. affichage interne), utilisées quand aucune URL n'est renseignée. `null` sinon.",
+				"Modalités de publication en texte libre (ex. affichage interne), utilisées quand aucune URL n'est renseignée. `null` sinon, ou lorsque l'entreprise n'est pas diffusible.",
 			example: "Affichage dans les locaux de l'entreprise",
 		},
 	},

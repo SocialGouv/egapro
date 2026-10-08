@@ -78,4 +78,32 @@ describe("PrefillPdfDocument", () => {
 
 		expect(screen.getAllByText("—").length).toBeGreaterThan(0);
 	});
+
+	it("prints the GIP gap ratios as percentages with two truncated decimals", () => {
+		renderPrefill({
+			workforceEma: "250.00",
+			globalAnnualMeanGap: "0.0887",
+			globalHourlyMeanGap: "-0.03168",
+		});
+
+		expect(screen.getByText("8,87 %")).toBeInTheDocument();
+		expect(screen.getByText("-3,16 %")).toBeInTheDocument();
+		expect(screen.queryByText("0.0887")).not.toBeInTheDocument();
+	});
+
+	it("prints the GIP proportions as percentages, not as raw ratios", () => {
+		renderPrefill({
+			workforceEma: "250.00",
+			variableProportionWomen: "0.4286",
+			variableProportionMen: "0.5000",
+			annualQuartile1ProportionWomen: "0.6667",
+			annualQuartile1ProportionMen: "0.3333",
+		});
+
+		expect(screen.getByText("42,86 %")).toBeInTheDocument();
+		expect(screen.getByText("50 %")).toBeInTheDocument();
+		expect(screen.getByText("66,67 %")).toBeInTheDocument();
+		expect(screen.getByText("33,33 %")).toBeInTheDocument();
+		expect(screen.queryByText("0.4286")).not.toBeInTheDocument();
+	});
 });

@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, isNull } from "drizzle-orm";
 import {
 	declarationHistoryInputSchema,
+	type SaveCompliancePathInput,
 	saveCompliancePathInputSchema,
 	submitJointEvaluationSchema,
 } from "~/modules/declaration/schemas";
@@ -20,6 +21,7 @@ import {
 	hasGapsAboveThreshold,
 	isCseOpinionRequired,
 	isDraft,
+	isIndicatorGRequiredForGip,
 	isLockedBySubsequentSubmission,
 	isSecondDeclarationWritable,
 	isTriennialYear,
@@ -34,9 +36,8 @@ import {
 } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
-	isImpersonatingSiren,
+	canAccessCompany,
 } from "~/server/auth/companyAccess";
-import type { DB } from "~/server/db";
 import {
 	companies,
 	declarationStatusHistory,
@@ -44,10 +45,9 @@ import {
 	employeeCategories,
 	gipMdsData,
 	jobCategories,
-	userCompanies,
 	users,
 } from "~/server/db/schema";
-import { applyAction, loadRules } from "~/server/rules/engine";
+import { loadRules } from "~/server/rules/engine";
 import {
 	activeDeclarationFilter,
 	applyPercentagesAfterUpdate,
@@ -56,21 +56,46 @@ import {
 	deleteJobAndEmployeeCategories,
 	fetchAllCategories,
 	fetchPreviousYearJobCategories,
+	findJointEvaluationFile,
 	purgeDraftSlice,
 } from "./declarationHelpers";
 import {
+	applyActionOrRefuse,
+	assertFirstDeclarationModifiable,
 	assertFirstDeclarationModifiableUnderLock,
 	buildHistoryInserts,
 	buildStepChangeInsert,
 	computeProjectionUpdates,
+	type DeclarationTransaction,
 	getCurrentRound,
 	hasLockingEventForRound,
 	loadSubsequentSubmissions,
-	lockDeclaration,
+	lockAndReadDeclaration,
 } from "./statusHistoryHelpers";
+
+const SUBMIT_UNAVAILABLE_ERROR =
+	"La déclaration ne peut pas être transmise à cette étape de la démarche.";
+
+const INDICATOR_G_MISSING_ERROR =
+	"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.";
 
 const PATH_LOCKED_ERROR =
 	"Le choix du parcours ne peut plus être modifié : une action aval a déjà été enregistrée.";
+
+const PATH_CHOICE_UNAVAILABLE_ERROR =
+	"Le choix du parcours de mise en conformité n'est pas ouvert à cette étape de la démarche.";
+
+const JOINT_EVALUATION_FILE_MISSING_ERROR =
+	"Le rapport de l'évaluation conjointe doit être déposé avant sa transmission.";
+
+const JOINT_EVALUATION_UNAVAILABLE_ERROR =
+	"L'évaluation conjointe ne peut pas être transmise à cette étape de la démarche.";
+
+const SECOND_DECLARATION_UNAVAILABLE_ERROR =
+	"La seconde déclaration ne peut pas être transmise à cette étape de la démarche.";
+
+const SECOND_DECLARATION_EMPTY_ERROR =
+	"Les données corrigées de la seconde déclaration doivent être renseignées avant sa transmission.";
 
 type DeclarationRow = typeof declarations.$inferSelect;
 type CompanyRow = typeof companies.$inferSelect;
@@ -92,7 +117,7 @@ type DbLike = {
 };
 
 async function findGipWorkforce(
-	database: DB,
+	database: DeclarationTransaction,
 	siren: string,
 	year: number,
 ): Promise<number | null> {
@@ -151,6 +176,19 @@ function buildSecondDeclarationFacts(
 		currentState: declaration.status,
 		cseRequired: declaration.cseRequired,
 		action: { stillHasGap },
+	};
+}
+
+function buildCompliancePathFacts(
+	declaration: DeclarationRow,
+	path: SaveCompliancePathInput["path"],
+): Record<string, unknown> {
+	return {
+		currentState: declaration.status,
+		cseRequired: declaration.cseRequired,
+		firstDeclarationPathChoice: declaration.firstDeclarationPathChoice,
+		secondDeclarationPathChoice: declaration.secondDeclarationPathChoice,
+		action: { path },
 	};
 }
 
@@ -616,7 +654,13 @@ export const declarationRouter = createTRPCRouter({
 						);
 					}
 				} else {
-					if (!isSecondDeclarationWritable(declaration.status))
+					const current = await lockAndReadDeclaration(
+						tx,
+						declaration.id,
+						siren,
+						year,
+					);
+					if (!isSecondDeclarationWritable(current.status))
 						throw new TRPCError({
 							code: "FORBIDDEN",
 							message: "La seconde déclaration n'est pas ouverte à la saisie.",
@@ -667,74 +711,84 @@ export const declarationRouter = createTRPCRouter({
 		const siren = ctx.siren;
 		const year = getCurrentYear();
 
-		const [declaration] = await ctx.db
-			.select()
-			.from(declarations)
-			.where(activeDeclarationFilter(siren, year))
-			.limit(1);
+		await ctx.db.transaction(async (tx) => {
+			const declaration = await lockAndReadDeclaration(
+				tx,
+				ctx.declarationId,
+				siren,
+				year,
+			);
+			await assertFirstDeclarationModifiable(tx, declaration.id);
 
-		if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+			const [company] = await tx
+				.select()
+				.from(companies)
+				.where(eq(companies.siren, siren))
+				.limit(1);
 
-		const [company] = await ctx.db
-			.select()
-			.from(companies)
-			.where(eq(companies.siren, siren))
-			.limit(1);
+			if (!company)
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Entreprise introuvable",
+				});
 
-		if (!company)
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Entreprise introuvable",
+			const gipWorkforce = await findGipWorkforce(tx, siren, year);
+
+			const initialCategories = await loadEmployeeCategoriesForDeclaration(
+				tx,
+				declaration.id,
+				"initial",
+			);
+			const hasIndicatorGData = initialCategories.length > 0;
+			const hasGap =
+				hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
+
+			const { nextStatus, events } = applyActionOrRefuse(
+				buildSubmitFacts(
+					declaration,
+					company,
+					gipWorkforce,
+					hasIndicatorGData,
+					hasGap,
+				),
+				"submit",
+				loadRules(declaration.rulesVersion),
+				SUBMIT_UNAVAILABLE_ERROR,
+			);
+
+			if (
+				!hasIndicatorGData &&
+				isIndicatorGRequiredForGip(gipWorkforce, declaration.year)
+			) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: INDICATOR_G_MISSING_ERROR,
+				});
+			}
+
+			// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
+			// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
+			// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
+			// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
+			// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
+			// elle-même change.
+			const cseRequiredSnapshot = isCseOpinionRequired({
+				workforce: getObligationWorkforce(gipWorkforce),
+				hasCse: company.hasCse,
 			});
 
-		const gipWorkforce = await findGipWorkforce(ctx.db, siren, year);
-
-		const initialCategories = await loadEmployeeCategoriesForDeclaration(
-			ctx.db,
-			declaration.id,
-			"initial",
-		);
-		const hasIndicatorGData = initialCategories.length > 0;
-		const hasGap =
-			hasIndicatorGData && hasGapsAboveThreshold(initialCategories);
-
-		const rules = loadRules(declaration.rulesVersion);
-		const facts = buildSubmitFacts(
-			declaration,
-			company,
-			gipWorkforce,
-			hasIndicatorGData,
-			hasGap,
-		);
-		const { nextStatus, events } = applyAction(facts, "submit", rules);
-
-		const projection = computeProjectionUpdates(events, nextStatus);
-		const historyInserts = buildHistoryInserts(
-			declaration.id,
-			events,
-			ctx.session.user.id,
-		);
-
-		// Snapshot `cseRequired` à la transmission : c'est cette valeur que les
-		// transitions FSM aval (saveCompliancePath, submitJointEvaluation,
-		// cseOpinion.finalize) liront comme guard, plutôt que `companies.hasCse`
-		// qui peut bouger en cours de cycle. Le snapshot n'est resynchronisé que
-		// par `syncCseRequirement` (company.updateHasCse), quand la réponse CSE
-		// elle-même change.
-		const cseRequiredSnapshot = isCseOpinionRequired({
-			workforce: getObligationWorkforce(gipWorkforce),
-			hasCse: company.hasCse,
-		});
-
-		await ctx.db.transaction(async (tx) => {
-			await assertFirstDeclarationModifiableUnderLock(tx, declaration.id);
+			const historyInserts = buildHistoryInserts(
+				declaration.id,
+				events,
+				ctx.session.user.id,
+			);
 			if (isDraft(declaration.status) && historyInserts.length > 0) {
 				await tx.insert(declarationStatusHistory).values(historyInserts);
 			}
 			await tx
 				.update(declarations)
 				.set({
-					...projection,
+					...computeProjectionUpdates(events, nextStatus),
 					cseRequired: cseRequiredSnapshot,
 					currentStep: 6,
 					updatedAt: new Date(),
@@ -778,73 +832,53 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			const [declaration] = await ctx.db
-				.select()
-				.from(declarations)
-				.where(activeDeclarationFilter(siren, year))
-				.limit(1);
+			const { events, isRound2 } = await ctx.db.transaction(async (tx) => {
+				const declaration = await lockAndReadDeclaration(
+					tx,
+					ctx.declarationId,
+					siren,
+					year,
+				);
 
-			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
+				const round = await getCurrentRound(tx, declaration.id);
 
-			const round = await getCurrentRound(ctx.db, declaration.id);
-			const isRound2 = round === 2;
+				if (round === 2 && input.path === "corrective_action") {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message:
+							"L'action corrective n'est pas un parcours disponible lors de la révision.",
+					});
+				}
 
-			if (isRound2 && input.path === "corrective_action") {
-				throw new TRPCError({
-					code: "BAD_REQUEST",
-					message:
-						"L'action corrective n'est pas un parcours disponible lors de la révision.",
-				});
-			}
+				if (await hasLockingEventForRound(tx, declaration.id, round)) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: PATH_LOCKED_ERROR,
+					});
+				}
 
-			const locked = await hasLockingEventForRound(
-				ctx.db,
-				declaration.id,
-				round,
-			);
-			if (locked) {
-				throw new TRPCError({
-					code: "CONFLICT",
-					message: PATH_LOCKED_ERROR,
-				});
-			}
+				const { nextStatus, events } = applyActionOrRefuse(
+					buildCompliancePathFacts(declaration, input.path),
+					"choose_compliance_path",
+					loadRules(declaration.rulesVersion),
+					PATH_CHOICE_UNAVAILABLE_ERROR,
+				);
 
-			let fsmCurrentState = declaration.status;
-			if (isRound2 && fsmCurrentState !== "awaiting_revision_choice") {
-				fsmCurrentState = "awaiting_revision_choice";
-			} else if (
-				!isRound2 &&
-				fsmCurrentState !== "awaiting_compliance_path_choice"
-			) {
-				fsmCurrentState = "awaiting_compliance_path_choice";
-			}
-
-			const rules = loadRules(declaration.rulesVersion);
-			const facts = {
-				currentState: fsmCurrentState,
-				cseRequired: declaration.cseRequired,
-				action: { path: input.path },
-			};
-			const { nextStatus, events } = applyAction(
-				facts,
-				"choose_compliance_path",
-				rules,
-			);
-
-			const projection = computeProjectionUpdates(events, nextStatus);
-			const historyInserts = buildHistoryInserts(
-				declaration.id,
-				events,
-				ctx.session.user.id,
-			);
-
-			await ctx.db.transaction(async (tx) => {
-				await tx.insert(declarationStatusHistory).values(historyInserts);
+				await tx
+					.insert(declarationStatusHistory)
+					.values(
+						buildHistoryInserts(declaration.id, events, ctx.session.user.id),
+					);
 				await tx
 					.update(declarations)
-					.set({ ...projection, updatedAt: new Date() })
+					.set({
+						...computeProjectionUpdates(events, nextStatus),
+						updatedAt: new Date(),
+					})
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "compliance");
+
+				return { events, isRound2: round === 2 };
 			});
 
 			// The "justify" path with no CSE (round 1 or round 2) ends the
@@ -877,43 +911,46 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			const [declaration] = await ctx.db
-				.select()
-				.from(declarations)
-				.where(activeDeclarationFilter(siren, year))
-				.limit(1);
-
-			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
-
-			const correctionCategories = await loadEmployeeCategoriesForDeclaration(
-				ctx.db,
-				declaration.id,
-				"correction",
-			);
-			const stillHasGap = hasGapsAboveThreshold(correctionCategories);
-
-			const rules = loadRules(declaration.rulesVersion);
-			const facts = buildSecondDeclarationFacts(declaration, stillHasGap);
-			const { nextStatus, events } = applyAction(
-				facts,
-				"submit_second_declaration",
-				rules,
-			);
-
-			const projection = computeProjectionUpdates(events, nextStatus);
-			const historyInserts = buildHistoryInserts(
-				declaration.id,
-				events,
-				ctx.session.user.id,
-			);
-
 			await ctx.db.transaction(async (tx) => {
-				await lockDeclaration(tx, declaration.id);
-				await tx.insert(declarationStatusHistory).values(historyInserts);
+				const declaration = await lockAndReadDeclaration(
+					tx,
+					ctx.declarationId,
+					siren,
+					year,
+				);
+
+				const correctionCategories = await loadEmployeeCategoriesForDeclaration(
+					tx,
+					declaration.id,
+					"correction",
+				);
+
+				const { nextStatus, events } = applyActionOrRefuse(
+					buildSecondDeclarationFacts(
+						declaration,
+						hasGapsAboveThreshold(correctionCategories),
+					),
+					"submit_second_declaration",
+					loadRules(declaration.rulesVersion),
+					SECOND_DECLARATION_UNAVAILABLE_ERROR,
+				);
+
+				if (correctionCategories.length === 0) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: SECOND_DECLARATION_EMPTY_ERROR,
+					});
+				}
+
+				await tx
+					.insert(declarationStatusHistory)
+					.values(
+						buildHistoryInserts(declaration.id, events, ctx.session.user.id),
+					);
 				await tx
 					.update(declarations)
 					.set({
-						...projection,
+						...computeProjectionUpdates(events, nextStatus),
 						secondDeclarationStep: 3,
 						updatedAt: new Date(),
 					})
@@ -944,35 +981,39 @@ export const declarationRouter = createTRPCRouter({
 			const siren = ctx.siren;
 			const year = getCurrentYear();
 
-			const [declaration] = await ctx.db
-				.select()
-				.from(declarations)
-				.where(activeDeclarationFilter(siren, year))
-				.limit(1);
-
-			if (!declaration) throw new TRPCError({ code: "NOT_FOUND" });
-
-			const rules = loadRules(declaration.rulesVersion);
-			const facts = buildJointEvaluationFacts(declaration);
-			const { nextStatus, events } = applyAction(
-				facts,
-				"submit_joint_evaluation",
-				rules,
-			);
-
-			const projection = computeProjectionUpdates(events, nextStatus);
-			const historyInserts = buildHistoryInserts(
-				declaration.id,
-				events,
-				ctx.session.user.id,
-			);
-
 			await ctx.db.transaction(async (tx) => {
-				await lockDeclaration(tx, declaration.id);
-				await tx.insert(declarationStatusHistory).values(historyInserts);
+				const declaration = await lockAndReadDeclaration(
+					tx,
+					ctx.declarationId,
+					siren,
+					year,
+				);
+
+				const { nextStatus, events } = applyActionOrRefuse(
+					buildJointEvaluationFacts(declaration),
+					"submit_joint_evaluation",
+					loadRules(declaration.rulesVersion),
+					JOINT_EVALUATION_UNAVAILABLE_ERROR,
+				);
+
+				if (!(await findJointEvaluationFile(tx, declaration.id))) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: JOINT_EVALUATION_FILE_MISSING_ERROR,
+					});
+				}
+
+				await tx
+					.insert(declarationStatusHistory)
+					.values(
+						buildHistoryInserts(declaration.id, events, ctx.session.user.id),
+					);
 				await tx
 					.update(declarations)
-					.set({ ...projection, updatedAt: new Date() })
+					.set({
+						...computeProjectionUpdates(events, nextStatus),
+						updatedAt: new Date(),
+					})
 					.where(activeDeclarationFilter(siren, year));
 				await purgeDraftSlice(tx, siren, year, "joint");
 			});
@@ -996,24 +1037,11 @@ export const declarationRouter = createTRPCRouter({
 	getStatusHistory: protectedProcedure
 		.input(declarationHistoryInputSchema)
 		.query(async ({ ctx, input }) => {
-			if (!isImpersonatingSiren(ctx.session, input.siren)) {
-				const access = await ctx.db
-					.select({ siren: userCompanies.siren })
-					.from(userCompanies)
-					.where(
-						and(
-							eq(userCompanies.userId, ctx.session.user.id),
-							eq(userCompanies.siren, input.siren),
-						),
-					)
-					.limit(1);
-
-				if (access.length === 0) {
-					throw new TRPCError({
-						code: "FORBIDDEN",
-						message: "Accès refusé à cette entreprise.",
-					});
-				}
+			if (!(await canAccessCompany(ctx.db, ctx.session, input.siren))) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Accès refusé à cette entreprise.",
+				});
 			}
 
 			const [declaration] = await ctx.db

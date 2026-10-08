@@ -1,9 +1,11 @@
+import { DISPLAY_DECIMALS } from "./decimal";
+
 // Regulatory thresholds
 /** Gap percentage that triggers an alert and compliance obligations. */
 export const GAP_ALERT_THRESHOLD = 5;
 
-/** Number of decimal places used when displaying a gap percentage to the user. */
-export const GAP_DISPLAY_DECIMALS = 2;
+/** Number of decimal places used when displaying a gap percentage to the user — the common display rule. */
+export const GAP_DISPLAY_DECIMALS = DISPLAY_DECIMALS;
 
 /** Workforce below this: voluntary declaration only. */
 export const COMPANY_SIZE_VOLUNTARY_MAX = 50;

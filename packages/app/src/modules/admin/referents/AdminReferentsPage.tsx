@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
 
-import type { CountyCode, RegionCode } from "~/modules/domain";
+import { type CountyCode, type RegionCode, toCsvField } from "~/modules/domain";
 import { api } from "~/trpc/react";
 import { DeleteModal, useDeleteModal } from "./DeleteConfirmationModal";
 import { ImportReferentsModal, useImportModal } from "./ImportReferentsModal";
@@ -43,12 +43,7 @@ function ExportButton() {
 				const csvRows = [
 					headers.join(";"),
 					...result.map((r) =>
-						headers
-							.map((h) => {
-								const val = r[h as keyof typeof r] ?? "";
-								return `"${String(val).replace(/"/g, '""')}"`;
-							})
-							.join(";"),
+						headers.map((h) => toCsvField(r[h as keyof typeof r])).join(";"),
 					),
 				];
 				content = csvRows.join("\n");
