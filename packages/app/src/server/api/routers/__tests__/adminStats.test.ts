@@ -144,19 +144,23 @@ function buildDropoffDb(
 	};
 }
 
-// FIFO queue: 4 parallel COUNT queries each consume one result in call order.
-function buildStatsDb(results: Array<Array<{ value: number }>>) {
+type CampaignCountsRow = {
+	indicatorsSubmitted: number;
+	demarcheCompleted: number;
+};
+
+function buildStatsDb(
+	results: Array<Array<{ value: number }> | Array<CampaignCountsRow>>,
+) {
 	const queue = [...results];
-	const select = vi.fn(() => {
-		const where = vi.fn(() => {
-			const next = queue.shift();
-			return Promise.resolve(next ?? []);
-		});
-		const innerJoin = vi.fn(() => ({ where }));
-		const from = vi.fn(() => ({ where, innerJoin }));
-		return { from };
+	const where = vi.fn((_condition: unknown) => {
+		const next = queue.shift();
+		return Promise.resolve(next ?? []);
 	});
-	return { select };
+	const innerJoin = vi.fn(() => ({ where }));
+	const from = vi.fn(() => ({ where, innerJoin }));
+	const select = vi.fn((_selection: Record<string, unknown>) => ({ from }));
+	return { select, where };
 }
 
 /**
@@ -371,6 +375,22 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		const whereSql = flattenSql(db.__chain.where.mock.calls[0]?.[0]);
 		expect(whereSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
 		expect(whereSql).not.toMatch(/BETWEEN/i);
+	});
+
+	it("leaves cancelled declarations out of the curve", async () => {
+		const db = buildDb([]);
+		const { adminStatsRouter } = await import("../adminStats");
+		const caller = adminStatsRouter.createCaller({
+			db,
+			session: adminSession,
+			headers: new Headers(),
+		} as never);
+
+		await caller.getCampaignProgression({ years: [2026] });
+
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).toMatch(
+			/cancelled_?at\s+is null/i,
+		);
 	});
 
 	it("validates the years array (min 1, max 5)", async () => {
@@ -1295,16 +1315,30 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 describe("adminStatsRouter.getCampaignStats", () => {
 	beforeEach(() => vi.resetAllMocks());
 
-	// The procedure runs 4 parallel queries in this order:
-	// [obligated(year), submitted(year), obligated(year-1), submitted(year-1)]
+	type StatsResults = [
+		obligated: number,
+		counts: CampaignCountsRow,
+		previousObligated: number,
+		previousCounts: CampaignCountsRow,
+	];
+
+	function counts(submitted: number, completed: number): CampaignCountsRow {
+		return { indicatorsSubmitted: submitted, demarcheCompleted: completed };
+	}
+
 	async function callStats(
 		input: {
 			year: number;
 			sizeRange?: "<50" | "50-99" | "100-149" | "150-249" | "250+";
 		},
-		results: number[],
+		[obligated, current, previousObligated, previous]: StatsResults,
 	) {
-		const db = buildStatsDb(results.map((value) => [{ value }]));
+		const db = buildStatsDb([
+			[{ value: obligated }],
+			[current],
+			[{ value: previousObligated }],
+			[previous],
+		]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -1315,48 +1349,123 @@ describe("adminStatsRouter.getCampaignStats", () => {
 		return { db, result };
 	}
 
-	it("returns rate, year-1 rate, and raw counts when all four queries have data", async () => {
-		const { result } = await callStats(
-			{ year: 2026 },
-			[5738, 4213, 5500, 3920],
-		);
+	it("returns both counts, the completion rate and the year-1 rate", async () => {
+		const { result } = await callStats({ year: 2026 }, [
+			5738,
+			counts(4800, 4213),
+			5500,
+			counts(4100, 3920),
+		]);
 
 		expect(result.totalObligated).toBe(5738);
-		expect(result.totalSubmitted).toBe(4213);
-		expect(result.submissionRate).toBeCloseTo(73.4, 1);
+		expect(result.totalIndicatorsSubmitted).toBe(4800);
+		expect(result.totalDemarcheCompleted).toBe(4213);
+		expect(result.completionRate).toBeCloseTo(73.4, 1);
 		expect(result.previousYearRate).toBeCloseTo(71.3, 1);
 	});
 
+	it("computes the rate and the year-1 rate on completed procedures, not on submitted indicators", async () => {
+		const { result } = await callStats({ year: 2026 }, [
+			200,
+			counts(24, 20),
+			100,
+			counts(40, 30),
+		]);
+
+		expect(result.completionRate).toBe(10);
+		expect(result.previousYearRate).toBe(30);
+	});
+
 	it("rounds rates to one decimal place", async () => {
-		const { result } = await callStats({ year: 2026 }, [3, 1, 3, 2]);
-		expect(result.submissionRate).toBe(33.3);
+		const { result } = await callStats({ year: 2026 }, [
+			3,
+			counts(1, 1),
+			3,
+			counts(2, 2),
+		]);
+		expect(result.completionRate).toBe(33.3);
 		expect(result.previousYearRate).toBe(66.7);
 	});
 
 	it("returns null previousYearRate when no obligated companies existed for year-1", async () => {
-		const { result } = await callStats({ year: 2026 }, [1000, 800, 0, 0]);
+		const { result } = await callStats({ year: 2026 }, [
+			1000,
+			counts(850, 800),
+			0,
+			counts(0, 0),
+		]);
 		expect(result.previousYearRate).toBeNull();
 	});
 
-	it("returns submissionRate=0 when totalObligated is 0 (avoids division by zero)", async () => {
-		const { result } = await callStats({ year: 2026 }, [0, 0, 100, 50]);
-		expect(result.submissionRate).toBe(0);
+	it("returns completionRate=0 when totalObligated is 0 (avoids division by zero)", async () => {
+		const { result } = await callStats({ year: 2026 }, [
+			0,
+			counts(0, 0),
+			100,
+			counts(60, 50),
+		]);
+		expect(result.completionRate).toBe(0);
 		expect(result.totalObligated).toBe(0);
-		expect(result.totalSubmitted).toBe(0);
+		expect(result.totalIndicatorsSubmitted).toBe(0);
+		expect(result.totalDemarcheCompleted).toBe(0);
 		expect(result.previousYearRate).toBe(50);
 	});
 
-	it("issues four parallel select calls (obligated + submitted, for year and year-1)", async () => {
-		const { db } = await callStats({ year: 2026 }, [10, 5, 10, 5]);
+	it("issues four parallel select calls (obligated + counts, for year and year-1)", async () => {
+		const { db } = await callStats({ year: 2026 }, [
+			10,
+			counts(6, 5),
+			10,
+			counts(6, 5),
+		]);
 		expect(db.select).toHaveBeenCalledTimes(4);
 	});
 
-	it("propagates the sizeRange filter to all four queries (numerator and denominator stay aligned)", async () => {
-		const { db } = await callStats(
-			{ year: 2026, sizeRange: "50-99" },
-			[10, 5, 10, 5],
+	it("counts distinct companies, not declarations, for both counters", async () => {
+		const { db } = await callStats({ year: 2026 }, [
+			10,
+			counts(6, 5),
+			10,
+			counts(6, 5),
+		]);
+
+		const countsSelection = db.select.mock.calls[1]?.[0];
+		expect(flattenSql(countsSelection?.indicatorsSubmitted)).toMatch(
+			/count\(distinct\s+siren\s*\)/i,
 		);
+		expect(flattenSql(countsSelection?.demarcheCompleted)).toMatch(
+			/count\(distinct\s+siren\s*\)\s+filter\s+\(where\s+status\s*=/i,
+		);
+	});
+
+	it("excludes cancelled and draft declarations from both counters, for year and year-1", async () => {
+		const { db } = await callStats({ year: 2026 }, [
+			10,
+			counts(6, 5),
+			10,
+			counts(6, 5),
+		]);
+
+		const countsWheres = [db.where.mock.calls[1], db.where.mock.calls[3]].map(
+			(call) => flattenSql(call?.[0]),
+		);
+		for (const whereSql of countsWheres) {
+			expect(whereSql).toMatch(/cancelled_?at\s+is null/i);
+			expect(whereSql).toMatch(/status\s*<>/i);
+		}
+	});
+
+	it("propagates the sizeRange filter to all four queries (numerator and denominator stay aligned)", async () => {
+		const { db } = await callStats({ year: 2026, sizeRange: "50-99" }, [
+			10,
+			counts(6, 5),
+			10,
+			counts(6, 5),
+		]);
 		expect(db.select).toHaveBeenCalledTimes(4);
+		for (const call of db.where.mock.calls) {
+			expect(flattenSql(call[0])).toMatch(/BETWEEN\s+50\s+AND\s+99/);
+		}
 	});
 
 	it("validates the year bounds (rejects year < 2000)", async () => {
@@ -1401,14 +1510,7 @@ describe("adminStatsRouter.getCampaignStats", () => {
 	});
 
 	it("defaults to 0 when a count query returns no row at all", async () => {
-		const db = {
-			select: vi.fn(() => {
-				const where = vi.fn(() => Promise.resolve([]));
-				const innerJoin = vi.fn(() => ({ where }));
-				const from = vi.fn(() => ({ where, innerJoin }));
-				return { from };
-			}),
-		};
+		const db = buildStatsDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({
 			db,
@@ -1418,39 +1520,58 @@ describe("adminStatsRouter.getCampaignStats", () => {
 
 		const result = await caller.getCampaignStats({ year: 2026 });
 		expect(result.totalObligated).toBe(0);
-		expect(result.totalSubmitted).toBe(0);
-		expect(result.submissionRate).toBe(0);
+		expect(result.totalIndicatorsSubmitted).toBe(0);
+		expect(result.totalDemarcheCompleted).toBe(0);
+		expect(result.completionRate).toBe(0);
 		expect(result.previousYearRate).toBeNull();
 	});
 
-	it("computes the obligation predicate differently pre/post the V2 scheme year (smoke check via call wiring)", async () => {
-		// From 2027 the SQL predicate widens to ema >= 50 (50-99 become subject);
-		// before 2027 it stays ema >= 100. Both branches must wire the four queries.
-		const { result: postV2 } = await callStats({ year: 2028 }, [100, 80, 0, 0]);
-		const { result: preV2 } = await callStats({ year: 2026 }, [100, 80, 0, 0]);
-		expect(postV2.totalObligated).toBe(100);
-		expect(preV2.totalObligated).toBe(100);
+	it("widens the obligation predicate to 50 from the V2 scheme and keeps 100 before it", async () => {
+		const { db: postV2 } = await callStats({ year: 2028 }, [
+			100,
+			counts(90, 80),
+			0,
+			counts(0, 0),
+		]);
+		const { db: preV2 } = await callStats({ year: 2025 }, [
+			100,
+			counts(90, 80),
+			0,
+			counts(0, 0),
+		]);
+
+		expect(flattenSql(postV2.where.mock.calls[0]?.[0])).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*>=\s*50/,
+		);
+		expect(flattenSql(preV2.where.mock.calls[0]?.[0])).toMatch(
+			/floor\(\s*workforceEma\s*\)\s*>=\s*100/,
+		);
 	});
 
 	it("inflates the size filter when sizeRange covers the voluntary-only bucket (still computes a result)", async () => {
-		const { result } = await callStats(
-			{ year: 2026, sizeRange: "<50" },
-			[0, 0, 0, 0],
-		);
+		const { result } = await callStats({ year: 2026, sizeRange: "<50" }, [
+			0,
+			counts(0, 0),
+			0,
+			counts(0, 0),
+		]);
 		expect(result.totalObligated).toBe(0);
 		expect(result.previousYearRate).toBeNull();
 	});
 
 	it("handles 250+ sizeRange (open-ended bucket)", async () => {
-		const { result } = await callStats(
-			{ year: 2026, sizeRange: "250+" },
-			[200, 150, 180, 120],
-		);
+		const { result } = await callStats({ year: 2026, sizeRange: "250+" }, [
+			200,
+			counts(170, 150),
+			180,
+			counts(130, 120),
+		]);
 		expect(result.totalObligated).toBe(200);
-		expect(result.submissionRate).toBeCloseTo(75, 1);
+		expect(result.completionRate).toBeCloseTo(75, 1);
 		expect(result.previousYearRate).toBeCloseTo(66.7, 1);
 	});
 });
+
 type FunnelAggregateRow = {
 	main?: {
 		draft_started: number;

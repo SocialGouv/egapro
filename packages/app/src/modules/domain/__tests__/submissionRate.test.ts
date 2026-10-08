@@ -40,9 +40,10 @@ describe("computeRate", () => {
 
 describe("buildCampaignRateTileProps", () => {
 	const data = {
-		totalSubmitted: 4213,
+		totalIndicatorsSubmitted: 4800,
+		totalDemarcheCompleted: 4213,
 		totalObligated: 5738,
-		submissionRate: 73.4,
+		completionRate: 73.4,
 		previousYearRate: 71.3,
 	};
 
@@ -52,11 +53,31 @@ describe("buildCampaignRateTileProps", () => {
 		);
 	});
 
-	it("names the campaign year and counts the companies behind the rate", () => {
+	it("names the campaign year and shows both counts over the same population", () => {
 		const props = buildCampaignRateTileProps(data, 2026, 2025);
 
 		expect(props.title).toBe("Taux de déclaration 2026");
-		expect(props.subtitle).toBe("4\u202f213 / 5\u202f738 entreprises");
+		expect(props.subtitle).toEqual([
+			"4\u202f800 / 5\u202f738 ont transmis leurs indicateurs",
+			"4\u202f213 / 5\u202f738 ont terminé leur démarche",
+		]);
+	});
+
+	it("derives the rate and the delta from completed procedures, not from submitted indicators", () => {
+		const props = buildCampaignRateTileProps(
+			{
+				totalIndicatorsSubmitted: 24,
+				totalDemarcheCompleted: 20,
+				totalObligated: 200,
+				completionRate: 10,
+				previousYearRate: 15,
+			},
+			2026,
+			2025,
+		);
+
+		expect(props.value).toBe("10,0\u202f%");
+		expect(props.delta).toEqual({ points: -5, comparisonLabel: "vs 2025" });
 	});
 
 	it("measures the delta against the comparison year", () => {
@@ -80,9 +101,10 @@ describe("buildCampaignRateTileProps", () => {
 		expect(
 			buildCampaignRateTileProps(
 				{
-					totalSubmitted: 0,
+					totalIndicatorsSubmitted: 0,
+					totalDemarcheCompleted: 0,
 					totalObligated: 0,
-					submissionRate: 0,
+					completionRate: 0,
 					previousYearRate: null,
 				},
 				2026,
