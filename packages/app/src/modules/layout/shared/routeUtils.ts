@@ -1,16 +1,24 @@
-import { ADMIN } from "~/modules/routes";
+import { ADMIN, MY_SPACE } from "~/modules/routes";
+
+// Segment-boundary match: a sibling route merely starting with the same characters (e.g. `/administrator` for root `/admin`) must not match.
+function isUnderRoute(pathname: string | null, root: string): boolean {
+	return (
+		pathname !== null && (pathname === root || pathname.startsWith(`${root}/`))
+	);
+}
+
 /**
  * Returns true for the `/admin` root and every nested `/admin/**` route.
- * Matches the `/admin` segment boundary so hypothetical sibling routes like
- * `/administrator` or `/admin-tools` keep the public chrome.
  *
  * Shared by `PublicChrome` (which renders no footer on those routes) and
  * `SkipLinks` (which hides the "Pied de page" skip link there so it never
  * points to a missing anchor — RGAA 12.7).
  */
 export function isAdminRoute(pathname: string | null): boolean {
-	return (
-		pathname !== null &&
-		(pathname === ADMIN || pathname.startsWith(`${ADMIN}/`))
-	);
+	return isUnderRoute(pathname, ADMIN);
+}
+
+// True for `/mon-espace` and every nested route (history pages included) — used by `Navigation` to hide the main nav bar there.
+export function isMySpaceRoute(pathname: string | null): boolean {
+	return isUnderRoute(pathname, MY_SPACE);
 }
