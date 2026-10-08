@@ -52,10 +52,10 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Élément | Finalité | Données personnelles | Durée | Statut | Détail |
 |---|---|---|---|---|---|
 | Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant et e-mail de l'utilisateur, SIREN, adresse IP complète, agent utilisateur, métadonnées, message d'erreur | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
-| Ligne d'activité applicative | Diagnostic opérationnel, collectée par la plateforme d'hébergement | Identifiant utilisateur, SIREN, IP tronquée | Non définie dans le dépôt | Non définie dans le dépôt | [4.2](#42-ligne-dactivité-applicative) |
+| Ligne d'activité applicative | Diagnostic opérationnel, collectée par la plateforme d'hébergement | Identifiant utilisateur, SIREN, IP tronquée, certaines valeurs de champs des routes HTTP | Non définie dans le dépôt | Non définie dans le dépôt | [4.2](#42-ligne-dactivité-applicative) |
 | Logs applicatifs stdout/stderr | Diagnostic d'erreur | Messages et traces d'erreur ; e-mail du destinataire si l'envoi réel est désactivé | Non définie dans le dépôt | Non définie dans le dépôt | [4.3](#43-logs-applicatifs-stdout-et-stderr) |
 | Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs, sessions enregistrées | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
-| File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
+| File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j à partir de la date de démarrage prévue (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
 | Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
 | Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
 | Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | Illimitée de fait | Aucune purge | [4.8](#48-journal-dimpersonation-admin) |
@@ -72,7 +72,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Déclarations de rémunération et données rattachées | Obligation légale de déclaration de l'index | Identifiant du déclarant, avis CSE et évaluation conjointe (PDF) | 6 ans | Prévue, non exécutée | [5.1](#51-déclarations-de-rémunération-et-données-rattachées) |
 | Représentation équilibrée | Obligation légale de déclaration | Identifiant du déclarant ; pour la reprise V1, coordonnées du déclarant historique | Illimitée de fait | Aucune purge | [5.2](#52-représentation-équilibrée) |
 | Comptes utilisateurs | Gestion des accès à la plateforme | Prénom, nom, e-mail, téléphone | 2 ans après la dernière déclaration ou l'inactivité du compte (annoncé) | Annoncée, non appliquée | [5.3](#53-comptes-utilisateurs) |
-| Cookies | Authentification, préférence d'affichage, mesure d'audience | — | 1 an à 13 mois selon le cookie, 30 min pour le cookie de session Matomo | Appliquée par le code (cookies techniques) ; Paramétrée hors dépôt (cookies Matomo) | [5.4](#54-cookies) |
+| Cookies | Authentification, préférence d'affichage, mesure d'audience | — | 30 jours pour la session applicative ; 1 an annoncé pour `fr-theme` ; jusqu’à 13 mois pour Matomo | Appliquée par le code (session) ; Annoncée, non appliquée (`fr-theme`) ; Paramétrée hors dépôt (Matomo) | [5.4](#54-cookies) |
 
 ## 3. Vocabulaire de statut
 
@@ -93,9 +93,9 @@ Dans la colonne Durée, « Illimitée de fait » accompagne le statut « Aucune 
 
 ### 4.1 Journal d'audit des actions
 
-Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Colonnes actuelles sur `alpha` : identifiant et e-mail de l'utilisateur, SIREN, action, catégorie, statut, type et identifiant de la ressource visée, message d'erreur (tronqué à 500 caractères), métadonnées JSON, adresse IP complète, agent utilisateur, durée de traitement.
+Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Colonnes actuelles sur `alpha` : identifiant et e-mail de l'utilisateur, SIREN, action, catégorie, statut, type et identifiant de la ressource visée, message d'erreur (tronqué à 500 caractères par `log.ts` seulement), métadonnées JSON, adresse IP complète, agent utilisateur, durée de traitement.
 
-**Trois points d'écriture** : l'application (`src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`, qui enregistre l'e-mail du destinataire) et l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`).
+**Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`, qui enregistre l'e-mail du destinataire), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`).
 
 **Durée** : 180 jours pour les catégories `read_sensitive` et `public_search` (lectures à fort volume contenant une IP), 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — des ConfigMaps optionnelles (`audit-retention`) permettraient de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent.
 
@@ -110,13 +110,13 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 
 Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
 
-**Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts`.
+**Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts` · `packages/app/scripts/declaration-cleanup.ts`.
 
 > **Cette section décrit `log.ts` tel qu'il est sur `alpha`** au moment de l'implémentation de cette page. Voir [section 8](#8-évolutions-en-cours) : une PR en cours change ce contenu.
 
 ### 4.2 Ligne d'activité applicative
 
-En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicatif (tRPC ou route) émet une ligne JSON sur la sortie standard : type d'événement, action, catégorie, route, statut, code d'erreur, durée, identifiant utilisateur, SIREN, IP tronquée (les deux derniers octets masqués en IPv4, seuls les trois premiers groupes conservés en IPv6, soit un préfixe /48), et les **noms** (jamais les valeurs) des champs d'entrée. Cette ligne est collectée par la plateforme d'hébergement, en dehors du dépôt.
+En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicatif (tRPC ou route) émet une ligne JSON sur la sortie standard : type d'événement, action, catégorie, route, statut, code d'erreur, durée, identifiant utilisateur, SIREN, IP tronquée (les deux derniers octets masqués en IPv4, seuls les trois premiers groupes conservés en IPv6, soit un préfixe /48), et les noms des champs d'entrée. Pour tRPC, le champ `input` est nul ; pour les routes HTTP, `input` conserve aussi les valeurs primitives de clés autorisées, notamment `siren`, `year`, `id`, `declarationId`, `fileId` et `region`. Cette ligne est collectée par la plateforme d'hébergement, en dehors du dépôt.
 
 **Durée** : non définie dans le dépôt — c'est la plateforme d'hébergement qui fixe la durée de rétention de ses journaux collectés.
 
@@ -124,7 +124,7 @@ En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicati
 
 ### 4.3 Logs applicatifs stdout et stderr
 
-Messages et traces d'erreur de l'application et du worker de notifications, écrits sur la sortie standard et d'erreur. Si l'envoi réel d'e-mail est désactivé (variable d'environnement `MAIL_ENABLED=false`, utilisée en développement et en préproduction), le worker trace l'e-mail du destinataire qui aurait reçu le message.
+Messages et traces d'erreur de l'application et du worker de notifications, écrits sur la sortie standard et d'erreur. Si l'envoi est désactivé (`MAIL_ENABLED=false`), le worker trace l'e-mail du destinataire qui aurait reçu le message. En développement et en préproduction, `MAIL_ENABLED=true` dirige les envois vers Mailpit.
 
 **Durée** : non définie dans le dépôt — relève de la plateforme d'hébergement.
 
@@ -142,9 +142,11 @@ Sentry capture les erreurs non gérées côté serveur et côté client, avec 10
 
 File `pg-boss` nommée `email-notification` : chaque e-mail transactionnel (confirmation de déclaration, rappel, avis CSE…) y transite sous forme de job, avec l'e-mail du destinataire, l'identifiant utilisateur, le SIREN, le contenu du message et les pièces jointes encodées.
 
-**Durée** : valeurs par défaut de la librairie `pg-boss` (version 12.18), jamais surchargées dans le code applicatif — un job traité est supprimé 7 jours après son traitement ; un job qui n'a jamais été traité expire 14 jours après sa création.
+**Durée** : valeurs par défaut de la librairie `pg-boss` (version 12.18), jamais surchargées dans le code applicatif — un job traité est supprimé 7 jours après son traitement ; un job qui n'a jamais été traité expire 14 jours après sa date de démarrage prévue (`start_after`).
 
-**Sources** : `packages/notifications/src/queue.ts` · `packages/notifications/src/publisher.ts` · `packages/notifications/src/index.ts`.
+**Environnements** : cette page décrit la production. En développement et en préproduction, les mails de test sont capturés par Mailpit, qui les conserve pendant la durée de vie du pod.
+
+**Sources** : `packages/notifications/src/queue.ts` · `packages/notifications/src/publisher.ts` · `packages/notifications/src/index.ts` · `.kontinuous/env/dev/templates/mail.configmap.yaml` · `.kontinuous/env/preprod/templates/mail.configmap.yaml`.
 
 ### 4.6 Journal de dédoublonnage des relances
 
@@ -245,12 +247,12 @@ Reprend `packages/app/src/modules/legal/CookiesPage.tsx`, qui alimente la page p
 | Cookie | Finalité | Durée |
 |---|---|---|
 | `fr-theme` | Préférence de thème d'affichage | 1 an |
-| `next-auth.session-token` | Authentification de l'utilisateur | 30 jours (égal au `maxAge` de la session) |
+| `next-auth.session-token` (ou `__Secure-next-auth.session-token` en HTTPS) | Authentification de l'utilisateur | 30 jours (égal au `maxAge` de la session) |
 | `_pk_id` | Identifiant de mesure d'audience Matomo | 13 mois |
 | `_pk_ses` | Session de mesure d'audience Matomo | 30 minutes |
 | Cookie d'opposition Matomo | Mémorise le refus de la mesure d'audience | Non définie dans le dépôt — posé par l'iframe officielle Matomo, dont la configuration de durée n'est pas dans ce dépôt |
 
-**Statut** : Appliquée par le code pour les deux cookies techniques (`fr-theme`, `next-auth.session-token`) ; Paramétrée hors dépôt pour les cookies Matomo.
+**Statut** : Appliquée par le code pour la session `next-auth.session-token` ; Annoncée, non appliquée pour `fr-theme` (le dépôt lit ce cookie, mais aucun code trouvé ne l’écrit ni ne lui fixe une durée) ; Paramétrée hors dépôt pour les cookies Matomo.
 
 **Sources** : `packages/app/src/modules/legal/CookiesPage.tsx` · `packages/app/src/modules/legal/MatomoOptOut.tsx` · `packages/app/src/server/auth/config.ts`.
 
@@ -277,6 +279,8 @@ Reportés tels quels, sans les atténuer :
 4. **Tables jamais purgées** : le journal d'impersonation admin et le journal de dédoublonnage des relances n'ont aucun mécanisme de suppression. Suites : [#4768](https://github.com/SocialGouv/egapro/issues/4768) et [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
 6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Suites : [#4772](https://github.com/SocialGouv/egapro/issues/4772) et [#3669](https://github.com/SocialGouv/egapro/issues/3669).
+
+7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
 ## 8. Évolutions en cours
 
