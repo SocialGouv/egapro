@@ -325,12 +325,13 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 			getTableName(companies),
 		);
 		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).toMatch(
-			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+50\s+AND\s+99/,
+			/coalesce\(\s*floor\(\s*workforceEma\s*\)\s*,\s*0\s*\)\s*BETWEEN\s+50\s+AND\s+99/,
 		);
 	});
 
-	// LEFT and not INNER: a company absent from the GIP file must fall out of the
-	// bucket through NULL propagation, not be dropped from the query altogether.
+	// LEFT and not INNER: a company absent from the GIP file must fall out of
+	// the query's totals, not be dropped from them altogether. It still leaves
+	// a non-smallest bucket: `coalesce(…, 0)` only folds it into `<50`.
 	it("joins the GIP table on the left so an absent company only leaves the bucket", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
@@ -346,8 +347,8 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		});
 
 		expect(db.__chain.leftJoin).toHaveBeenCalledTimes(1);
-		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).not.toMatch(
-			/coalesce/i,
+		expect(flattenSql(db.__chain.where.mock.calls[0]?.[0])).toMatch(
+			/coalesce\(\s*floor\(\s*workforceEma\s*\)\s*,\s*0\s*\)\s*BETWEEN\s+50\s+AND\s+99/,
 		);
 	});
 
@@ -369,7 +370,9 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 			getTableName(gipMdsData),
 		]);
 		const whereSql = flattenSql(db.__chain.where.mock.calls[0]?.[0]);
-		expect(whereSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+		expect(whereSql).toMatch(
+			/coalesce\(\s*floor\(\s*workforceEma\s*\)\s*,\s*0\s*\)\s*>=\s*250/,
+		);
 		expect(whereSql).not.toMatch(/BETWEEN/i);
 	});
 
@@ -556,7 +559,9 @@ describe("adminStatsRouter.getStepDurations", () => {
 
 		const wizardSql = flattenSql(db.execute.mock.calls[0]?.[0]);
 		expect(wizardSql).toMatch(/LEFT JOIN/i);
-		expect(wizardSql).toMatch(/floor\(\s*workforceEma\s*\)\s*>=\s*250/);
+		expect(wizardSql).toMatch(
+			/coalesce\(\s*floor\(\s*workforceEma\s*\)\s*,\s*0\s*\)\s*>=\s*250/,
+		);
 	});
 
 	it("leaves the wizard CTE unbucketed when no sizeRange is provided (S5)", async () => {
@@ -1937,7 +1942,7 @@ describe("adminStatsRouter.getCompletionFunnel", () => {
 		});
 		const cseWithSize = flattenSql(dbWithSize.execute.mock.calls[3]?.[0]);
 		expect(cseWithSize).toMatch(
-			/floor\(\s*workforceEma\s*\)\s*BETWEEN\s+100\s+AND\s+149/,
+			/coalesce\(\s*floor\(\s*workforceEma\s*\)\s*,\s*0\s*\)\s*BETWEEN\s+100\s+AND\s+149/,
 		);
 	});
 

@@ -5,9 +5,8 @@ import { env } from "~/env.js";
 import type { CompanySizeRange } from "~/modules/domain";
 import {
 	COMPANY_SIZE_RANGES,
-	floorWorkforce,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
-	getOptionalCompanySizeRange,
 	isCseRequired,
 	parseGipWorkforce,
 } from "~/modules/domain";
@@ -21,9 +20,9 @@ import { db } from "~/server/db";
 // The workforce predicates of `adminStats` are SQL mirrors of domain rules, and
 // a unit test that mocks the driver can only assert the SQL text. What the fix
 // relies on are properties of the engine itself: that `floor(x) >= 100` and
-// `x >= 100` agree on the decimals a `numeric(9,2)` column carries, and that a
-// NULL coming out of the LEFT JOIN drops the row from the bucket filters
-// without dropping it from the unfiltered totals.
+// `x >= 100` agree on the decimals a `numeric(9,2)` column carries, that a NULL
+// coming out of the LEFT JOIN never drops a row from the unfiltered totals, and
+// that it is folded into the smallest size bucket rather than dropped from it.
 describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 	let sql!: ReturnType<typeof postgres>;
 
@@ -174,10 +173,8 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 		);
 	}
 
-	function bucketInTypeScript(fixture: Fixture): CompanySizeRange | undefined {
-		return getOptionalCompanySizeRange(
-			floorWorkforce(parseGipWorkforce(fixture.workforceEma)),
-		);
+	function bucketInTypeScript(fixture: Fixture): CompanySizeRange {
+		return getCompanySizeRangeForGip(parseGipWorkforce(fixture.workforceEma));
 	}
 
 	function createCaller() {
@@ -296,8 +293,8 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 		});
 	});
 
-	// Second mirror pair: `gipSizeRangeFilter` against `getOptionalCompanySizeRange`.
-	describe("size bucket parity — SQL predicate ↔ getOptionalCompanySizeRange", () => {
+	// Second mirror pair: `gipSizeRangeFilter` against `getCompanySizeRangeForGip`.
+	describe("size bucket parity — SQL predicate ↔ getCompanySizeRangeForGip", () => {
 		it.each(
 			SIZE_RANGE_KEYS,
 		)("puts the same declarations in %s as the domain rule does", async (sizeRange) => {
@@ -308,26 +305,24 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 			expect((await funnelCounts(BUCKET_YEAR, sizeRange)).total).toBe(expected);
 		});
 
-		it("spreads the bucket fixtures over every bucket plus the no-bucket case", () => {
+		it("spreads the bucket fixtures over every bucket", () => {
 			const buckets = BUCKET_FIXTURES.map(bucketInTypeScript);
 
-			expect(new Set(buckets)).toEqual(
-				new Set([...SIZE_RANGE_KEYS, undefined]),
-			);
+			expect(new Set(buckets)).toEqual(new Set(SIZE_RANGE_KEYS));
 		});
 	});
 
-	describe("LEFT JOIN on the GIP file with the NULL propagated", () => {
+	describe("LEFT JOIN on the GIP file with the NULL coalesced", () => {
 		it("keeps a company absent from the GIP file in the unfiltered total", async () => {
 			expect((await funnelCounts(BUCKET_YEAR)).total).toBe(
 				BUCKET_FIXTURES.length,
 			);
 		});
 
-		// The `coalesce(workforce_ema, 0)` variant answers this one with 2: it
-		// turns "headcount unknown" into "small company".
-		it("leaves a company absent from the GIP file out of the smallest bucket", async () => {
-			expect((await funnelCounts(BUCKET_YEAR, "<50")).total).toBe(1);
+		// The variant that lets the NULL propagate instead would answer this one
+		// with 1: it would leave "headcount unknown" out of every bucket.
+		it("folds a company absent from the GIP file into the smallest bucket", async () => {
+			expect((await funnelCounts(BUCKET_YEAR, "<50")).total).toBe(2);
 		});
 
 		it("buckets on the GIP headcount and not on the Weez one", async () => {

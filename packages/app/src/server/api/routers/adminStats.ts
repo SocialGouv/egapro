@@ -115,9 +115,10 @@ function obligationWorkforceFilter(
 // The GIP file is the single source of the headcount across the admin layer, so
 // every workforce predicate below reads `workforce_ema` rather than the Weez /
 // INSEE `company.workforce`. LEFT on purpose: a company absent from the file has
-// no headcount, and letting the NULL propagate keeps it out of the workforce
-// filters without dropping it from the unfiltered totals, which an INNER JOIN
-// would do.
+// no headcount, and an INNER JOIN would drop it from the unfiltered totals too.
+// What happens to the NULL from there is up to each predicate: the obligation
+// filter lets it propagate out of the comparison, the size-bucket filter folds
+// it into the voluntary tier.
 const gipWorkforceJoin = sql`LEFT JOIN ${gipMdsData}
 				ON ${gipMdsData.siren} = ${declarations.siren}
 				AND ${gipMdsData.year} = ${declarations.year}`;

@@ -7,6 +7,7 @@ import {
 	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
 	parseGipWorkforce,
 } from "../shared/gipWorkforce";
@@ -133,6 +134,28 @@ describe("floorWorkforce", () => {
 		// break their contract. Guards against merging the two helpers.
 		expect(floorWorkforce(37)).toBe(37);
 		expect(formatWorkforceForUser(37)).toBe(GIP_WORKFORCE_VOLUNTARY_DISPLAY);
+	});
+});
+
+describe("getCompanySizeRangeForGip", () => {
+	it("folds a company absent from the GIP file into the smallest bucket", () => {
+		expect(getCompanySizeRangeForGip(null)).toBe("<50");
+	});
+
+	it("buckets a known headcount under 50 in the smallest bucket", () => {
+		expect(getCompanySizeRangeForGip(37)).toBe("<50");
+	});
+
+	it("floors a decimal headcount before bucketing it", () => {
+		// 99,97 floors to 99: still under the 100-149 lower bound.
+		expect(getCompanySizeRangeForGip(99.97)).toBe("50-99");
+		// 149,5 floors to 149: still inside 100-149, not 150-249.
+		expect(getCompanySizeRangeForGip(149.5)).toBe("100-149");
+	});
+
+	it("buckets a headcount above 250 in the open-ended bucket", () => {
+		expect(getCompanySizeRangeForGip(250)).toBe("250+");
+		expect(getCompanySizeRangeForGip(10000)).toBe("250+");
 	});
 });
 
