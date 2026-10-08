@@ -38,7 +38,14 @@ describe("isAdminMfaAcr", () => {
 	it.each([
 		"eidas2",
 		"eidas3",
-	])("rejects %s — an identity verification level, not a second factor", (acr) => {
+	])("accepts %s — ProConnect never issues it without a second factor", (acr) => {
+		expect(isAdminMfaAcr(acr)).toBe(true);
+	});
+
+	it.each([
+		"eidas0",
+		"eidas0-mfa",
+	])("rejects %s, a declarative identity level regardless of factor", (acr) => {
 		expect(isAdminMfaAcr(acr)).toBe(false);
 	});
 

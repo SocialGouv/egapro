@@ -91,9 +91,13 @@ describe("auth config — admin two-factor authentication", () => {
 			});
 		}
 
-		it("dates the session with auth_time when ProConnect reports a second factor", async () => {
+		it.each([
+			"eidas1-mfa",
+			"eidas2",
+			"eidas3",
+		])("dates the session with auth_time when ProConnect reports %s", async (acr) => {
 			const result = await signInWith({
-				acr: "eidas1-mfa",
+				acr,
 				auth_time: AUTH_TIME,
 			});
 
@@ -146,8 +150,8 @@ describe("auth config — admin two-factor authentication", () => {
 
 		it.each([
 			"eidas1",
-			"eidas2",
-			"eidas3",
+			"eidas0",
+			"eidas0-mfa",
 		])("signs the user in and leaves the session undated for %s", async (acr) => {
 			const result = await signInWith({ acr, auth_time: AUTH_TIME });
 
@@ -204,6 +208,18 @@ describe("auth config — admin two-factor authentication", () => {
 					userId: "uuid-123",
 					userEmail: ADMIN_EMAIL,
 					metadata: { acr: "eidas1-mfa", authTime: AUTH_TIME },
+				}),
+			);
+		});
+
+		it("records the strong eIDAS level of an admin account with authTime set", async () => {
+			await signInWith({ acr: "eidas2", auth_time: AUTH_TIME }, ADMIN_EMAIL);
+
+			expect(mockLogAction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: "auth.admin_mfa",
+					status: "success",
+					metadata: { acr: "eidas2", authTime: AUTH_TIME },
 				}),
 			);
 		});
