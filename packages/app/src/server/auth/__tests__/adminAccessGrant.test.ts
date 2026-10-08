@@ -42,6 +42,7 @@ vi.mock("~/server/db/schema", () => ({
 	adminImpersonationEvents: {},
 }));
 vi.mock("~/server/services/weez", () => ({ fetchCompanyBySiren: vi.fn() }));
+vi.mock("../companyLink", () => ({ syncUserCompanyLink: async () => [] }));
 
 const mockLogAction = vi.fn();
 vi.mock("~/server/audit/log", () => ({

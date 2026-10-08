@@ -30,8 +30,7 @@
 	height: 64px;
 }
 
-:global(.fr-table__content) table tbody td.totalCell,
-:global(.fr-table__content) table tbody td.gapCell {
+:global(.fr-table__content) table tbody td.totalCell {
 	text-align: right;
 }
 

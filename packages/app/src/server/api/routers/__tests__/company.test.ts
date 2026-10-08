@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { computeDeclarationStatus } from "~/modules/my-space/declarationStatus";
+import { isUserLinkedToSiren } from "~/server/auth/companyLink";
 
 const { syncCseRequirementMock } = vi.hoisted(() => ({
 	syncCseRequirementMock: vi.fn(),
@@ -91,7 +92,6 @@ vi.mock("~/server/db", () => ({
 
 const mockLimit = vi.fn();
 const mockWhere = vi.fn();
-const mockInnerJoin = vi.fn();
 const mockLeftJoin = vi.fn();
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
@@ -102,10 +102,7 @@ const mockUpdateWhere = vi.fn();
 function createMockDb(rows: unknown[]) {
 	mockLimit.mockResolvedValue(rows);
 	mockWhere.mockReturnValue({ limit: mockLimit });
-	mockInnerJoin.mockReturnValue({ where: mockWhere });
-	// `where` on the leftJoin() result supports the impersonation bypass path
-	// (no innerJoin); `innerJoin` supports the owner path.
-	mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockLeftJoin.mockReturnValue({ where: mockWhere });
 	mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 	mockSelect.mockReturnValue({ from: mockFrom });
 
@@ -318,6 +315,28 @@ describe("findUserCompany CSE auto-fetch", () => {
 		await expect(caller.get({ siren: "000000000" })).rejects.toThrow(
 			"Company not found or access denied",
 		);
+	});
+
+	it("refuses a company the user is no longer linked to, before reading it", async () => {
+		vi.mocked(isUserLinkedToSiren).mockResolvedValue(false);
+		const mockDb = createMockDb([{ siren: "339787277", name: "Test Company" }]);
+
+		const { companyRouter } = await import("../company");
+		const caller = companyRouter.createCaller({
+			db: mockDb,
+			session: { user: { id: "user-1" }, expires: "" },
+			headers: new Headers(),
+		} as never);
+
+		await expect(caller.get({ siren: "339787277" })).rejects.toThrow(
+			"Company not found or access denied",
+		);
+		expect(isUserLinkedToSiren).toHaveBeenCalledWith(
+			mockDb,
+			"user-1",
+			"339787277",
+		);
+		expect(mockSelect).not.toHaveBeenCalled();
 	});
 });
 
@@ -548,8 +567,7 @@ describe("companyRouter.updateHasCse", () => {
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ where: mockWhere });
 		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 
@@ -583,8 +601,7 @@ describe("companyRouter.updateHasCse", () => {
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ where: mockWhere });
 		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 
@@ -625,8 +642,7 @@ describe("companyRouter.updateHasCse", () => {
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ where: mockWhere });
 		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 
@@ -657,8 +673,7 @@ describe("companyRouter.updateHasCse", () => {
 
 		mockLimit.mockResolvedValue([companyRow]);
 		mockWhere.mockReturnValue({ limit: mockLimit });
-		mockInnerJoin.mockReturnValue({ where: mockWhere });
-		mockLeftJoin.mockReturnValue({ innerJoin: mockInnerJoin });
+		mockLeftJoin.mockReturnValue({ where: mockWhere });
 		mockFrom.mockReturnValue({ leftJoin: mockLeftJoin });
 		mockSelect.mockReturnValue({ from: mockFrom });
 

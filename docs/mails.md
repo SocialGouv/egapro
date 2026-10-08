@@ -38,7 +38,7 @@ Les six rappels liés à une échéance (déclaration, choix parcours R1/R2, 2�
 | 10 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | Rappel 7 | 5 schedules fixes (1er sept / 1er déc / 1er févr) | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` — **contenu unifié** |
 | 11 | `next_cycle_handover` | [`mails/next-cycle-handover.md`](mails/next-cycle-handover.md) | MI_* | `0 8 2 3 *` | — |
 
-**Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a soumis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
+**Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a transmis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
 
 ---
 
@@ -194,6 +194,40 @@ Si `DATABASE_URL` est absent côté worker, `registerSchedules` warn et **les ra
 Le Prometheus de la plateforme sonde en HTTP **tous les ports de tous les services** (y compris le 1025 SMTP), et le NetworkPolicy fabrique `netpol-ingress` autorise ce trafic en union — impossible de l'exclure côté produit. Chaque sonde HTTP sur le smtpd produisait une réponse `500 5.5.2 Syntax error` que Mailpit diffuse en **toast d'erreur dans son UI web**.
 
 Le déploiement Mailpit embarque donc un sidecar HAProxy (`smtp-demux`, template `.kontinuous/env/*/templates/mailpit.yaml`) qui écoute le port 1025 exposé par le Service et démultiplexe : trafic HTTP → UI Mailpit (8025), tout le reste → smtpd. Le smtpd de Mailpit n'écoute plus qu'en loopback (`MP_SMTP_BIND_ADDR=127.0.0.1:1026`). Conséquence : les clients SMTP reçoivent la bannière avec ~2 s de latence (`inspect-delay`), sans impact fonctionnel.
+
+### Mailpit in-cluster : authentification de l'interface web (#4695)
+
+L'interface web et l'API de Mailpit (dev, preprod) exigent une authentification basic, portée par Mailpit lui-même (`MP_UI_AUTH`) :
+
+- le secret `mailpit-basic-auth` porte deux clés, `MAILPIT_USER` et `MAILPIT_PASSWORD`, scellées en cluster-wide dans `.kontinuous/env/{dev,preprod}/templates/mailpit-basic-auth.sealed-secret.yaml`. Le conteneur `mailpit` les reçoit par `secretKeyRef` (`optional: false`), et Kubernetes les assemble en `MP_UI_AUTH="$(MAILPIT_USER):$(MAILPIT_PASSWORD)"` ;
+- l'authentification couvre tous les chemins vers l'UI : l'Ingress `mailpit-<host>`, le Service (port 8025) et le HTTP démultiplexé sur le port 1025. Elle couvre aussi `/api/v1/*` et le websocket `/api/events`. Seuls `/livez` et `/readyz` restent ouverts, pour la sonde de readiness ;
+- le SMTP (port 1025, envoi par le worker) n'est pas concerné : il a sa propre option d'authentification, non activée ;
+- l'Ingress ne porte **pas** d'annotation `auth-type: basic`. ingress-nginx vide l'en-tête `Authorization` avant de relayer une requête qu'il a authentifiée. Mailpit ne verrait jamais les identifiants et répondrait 401 en boucle.
+
+Les identifiants sont demandés à l'équipe ; ils ne figurent jamais dans le dépôt.
+
+**Garde au démarrage.** Mailpit v1.31.0 désactive son authentification, sans erreur, si `MP_UI_AUTH` est vide, et l'accepte avec un utilisateur ou un mot de passe vide (`MP_UI_AUTH=":"` laisse entrer `curl -u :`). Il découpe aussi `MP_UI_AUTH` sur les espaces : un saut de ligne final dans une valeur scellée casserait la connexion. Le conteneur `mailpit` lance donc un court script avant `exec /mailpit` : si `MAILPIT_USER` ou `MAILPIT_PASSWORD` est vide ou contient un espace, ou si `MAILPIT_USER` contient `:`, il s'arrête en erreur. Sans le secret, ou avec une valeur invalide, le pod ne démarre pas et l'UI reste fermée ; le SMTP des review apps est alors indisponible lui aussi. Le mot de passe peut contenir `:`.
+
+Pour (re)sceller, sans écrire les valeurs sur disque ni les passer en argument de commande (certificat et scope : même procédure que [`architecture.md` § 5.7](architecture.md#57-provenance-de-admin_emails)) :
+
+```bash
+curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
+read -r MAILPIT_USER
+read -rs MAILPIT_PASSWORD   # ≥ 24 caractères aléatoires sans espace, issus du gestionnaire de mots de passe
+for key in MAILPIT_USER MAILPIT_PASSWORD; do
+  printf '%s' "${!key}" | kubeseal --raw --scope cluster-wide \
+    --cert /tmp/cert-dev.pem --name mailpit-basic-auth \
+    --from-file=/dev/stdin
+  echo
+done
+unset MAILPIT_USER MAILPIT_PASSWORD
+```
+
+- `printf '%s'` scelle la valeur sans saut de ligne final.
+- `${!key}` est la syntaxe bash ; en zsh, utiliser `${(P)key}`.
+- Les deux chiffrés remplacent `encryptedData.MAILPIT_USER` et `encryptedData.MAILPIT_PASSWORD` dans **les deux** fichiers (`env/dev` et `env/preprod`).
+- Mailpit lit `MP_UI_AUTH` au démarrage : après un re-scellement, redémarrer le pod (`kubectl rollout restart deployment/mailpit`) dans les namespaces concernés.
+- Après déploiement, vérifier que `https://mailpit-<host>/` et `https://mailpit-<host>/api/v1/messages` répondent **401** sans identifiants.
 
 ---
 

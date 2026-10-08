@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: egapro
     ports:
-      - "${POSTGRES_HOST_PORT:-5438}:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5438}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: egapro_notifications
     ports:
-      - "${NOTIFICATIONS_POSTGRES_HOST_PORT:-5439}:5432"
+      - "127.0.0.1:${NOTIFICATIONS_POSTGRES_HOST_PORT:-5439}:5432"
     volumes:
       - notifpgdata:/var/lib/postgresql/data
     healthcheck:
@@ -53,8 +53,8 @@ services:
   minio:
     image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - "127.0.0.1:${MINIO_API_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -80,8 +80,8 @@ services:
   mailpit:
     image: axllent/mailpit:v1.31.0
     ports:
-      - "${MAILPIT_SMTP_PORT:-${MAILDEV_SMTP_PORT:-1025}}:1025"
-      - "${MAILPIT_WEB_PORT:-${MAILDEV_WEB_PORT:-1080}}:8025"
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-${MAILDEV_SMTP_PORT:-1025}}:1025"
+      - "127.0.0.1:${MAILPIT_WEB_PORT:-${MAILDEV_WEB_PORT:-1080}}:8025"
     environment:
       MP_DISABLE_VERSION_CHECK: "true"
     healthcheck:
@@ -93,7 +93,7 @@ services:
   clamavd:
     image: clamav/clamav-debian:1.5.2
     ports:
-      - "${CLAMAV_HOST_PORT:-3310}:3310"
+      - "127.0.0.1:${CLAMAV_HOST_PORT:-3310}:3310"
     volumes:
       - clamdata:/var/lib/clamav
     healthcheck:
@@ -106,7 +106,7 @@ services:
   valkey:
     image: valkey/valkey:8-alpine
     ports:
-      - "${VALKEY_HOST_PORT:-6379}:6379"
+      - "127.0.0.1:${VALKEY_HOST_PORT:-6379}:6379"
     volumes:
       - valkeydata:/data
     healthcheck:
@@ -143,7 +143,7 @@ services:
     profiles: ["matomo"]
     restart: always
     ports:
-      - "${MATOMO_HOST_PORT:-8080}:80"
+      - "127.0.0.1:${MATOMO_HOST_PORT:-8080}:80"
     environment:
       MATOMO_DATABASE_ADAPTER: mysql
       MATOMO_DATABASE_HOST: matomo-db

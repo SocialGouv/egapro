@@ -56,6 +56,11 @@ vi.mock("next-auth/react", () => ({
 // Global mock for server-only — avoids error in jsdom.
 vi.mock("server-only", () => ({}));
 
+// Sessions in unit tests stand for a linked user; denial cases override with `mockResolvedValue(false)`.
+vi.mock("~/server/auth/companyLink", () => ({
+	isUserLinkedToSiren: vi.fn(async () => true),
+}));
+
 // Deterministic blob URL factory: jsdom returns a random `blob:nodedata:<uuid>`
 // which makes the FileUpload download-link `href` non-assertable. A stable
 // `blob:mock/<name>` lets tests verify the generated object URL precisely.
@@ -82,6 +87,8 @@ vi.mock("~/env", () => ({
 			"test-gateway-shared-secret-at-least-32-chars",
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true,
+		SUPPORT_JIRA_URL:
+			"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
 	},
 }));
 

@@ -20,12 +20,17 @@ describe("ArchivesSection", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the disabled button", () => {
+	it("renders an active link to the support Jira portal, opening in a new tab", () => {
 		render(<ArchivesSection />);
-		const button = screen.getByRole("button", {
-			name: "Demander une déclaration archivée",
+		const link = screen.getByRole("link", {
+			name: /Demander une déclaration archivée.*nouvelle fenêtre/,
 		});
-		expect(button).toBeInTheDocument();
-		expect(button).toBeDisabled();
+		expect(link).toBeInTheDocument();
+		expect(link).toHaveAttribute(
+			"href",
+			"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
+		);
+		expect(link).toHaveAttribute("target", "_blank");
+		expect(link).toHaveAttribute("rel", "noopener noreferrer");
 	});
 });

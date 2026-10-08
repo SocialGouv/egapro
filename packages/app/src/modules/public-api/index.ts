@@ -4,6 +4,14 @@ export {
 	getPublicDeclarationsBySiren,
 } from "./declarationsBySirenService";
 export {
+	fetchWithinExportLimit,
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	MAX_EXPORT_ROWS,
+	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+	publicExportBusyResponse,
+} from "./exportLimits";
+export {
 	PUBLIC_API_EXPORT_HEADERS,
 	PUBLIC_API_OPENAPI_HEADERS,
 	PUBLIC_API_RESOURCE_HEADERS,
@@ -18,7 +26,6 @@ export {
 	isCompanyDiffusible,
 	isPublicCompanyDiffusible,
 	publicDeclarationColumns,
-	toNumber,
 	toPublicDeclaration,
 } from "./projection";
 export type {
@@ -26,6 +33,7 @@ export type {
 	PublicRepresentationSource,
 } from "./representationProjection";
 export {
+	maskNonDiffusibleRepresentation,
 	publicRepresentationColumns,
 	toPublicRepresentation,
 } from "./representationProjection";
@@ -43,11 +51,11 @@ export type {
 	PublicSearchResultDTO,
 } from "./schemas";
 export {
+	parsePublicRepresentationSearchPage,
 	parsePublicSearchInput,
+	parsePublicSearchPage,
 	publicDeclarationDTOSchema,
 	publicRepresentationDTOSchema,
-	publicRepresentationSearchInputSchema,
 	publicRepresentationSearchResultDTOSchema,
-	publicSearchInputSchema,
 	publicSearchResultDTOSchema,
 } from "./schemas";

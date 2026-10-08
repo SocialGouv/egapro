@@ -76,8 +76,8 @@ Conventions de notation :
 | 3 | `/declaration-remuneration/etape/3` | Indicateurs B, D, E — écart sur la rémunération variable + promotions |
 | 4 | `/declaration-remuneration/etape/4` | Quartiles (4 × 2 : annuel + horaire) — répartition des effectifs par tranche de salaire |
 | 5 | `/declaration-remuneration/etape/5` | Catégories de salariés (indicateur G, optionnel) |
-| 6 | `/declaration-remuneration/etape/6` | Récapitulatif et soumission |
-| — | `/declaration-remuneration/recapitulatif/` | Vue lecture seule de la déclaration soumise |
+| 6 | `/declaration-remuneration/etape/6` | Récapitulatif et transmission |
+| — | `/declaration-remuneration/recapitulatif/` | Vue lecture seule de la déclaration transmise |
 
 **Modules** : `~/modules/declaration-remuneration` (wizard, steps, recap), `~/modules/domain` (calculs et règles).
 
@@ -94,10 +94,10 @@ Conventions de notation :
 - Le **calcul des écarts** est centralisé dans `computeGap(womenPay, menPay)` (positif si les hommes gagnent plus, négatif sinon).
 - **Seuil d'alerte** : `GAP_ALERT_THRESHOLD = 5%`. Au-delà, une **seconde déclaration** est obligatoire pour les entreprises ≥ 100 salariés (voir §5).
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
-- Une fois `submitted`, la déclaration reste modifiable tant qu'**aucune soumission ultérieure** ne l'a supplantée (seconde déclaration, évaluation conjointe ou avis du CSE) : seule la dernière soumission est modifiable. La modifiabilité est dite par l'événement qui la ferme (`isLockedBySubsequentSubmission`, `~/modules/domain/shared/declarationStatus.ts`, à partir de `deriveSubsequentSubmissions`) et non plus par une date ; `decl1ModificationDeadline` n'est plus un garde d'écriture, c'est une **échéance informative** (voir §12). Le serveur rejette une écriture sur une étape supplantée (`DECLARATION_SUPERSEDED_MESSAGE`).
+- Une fois `submitted`, la déclaration reste modifiable tant qu'**aucune transmission ultérieure** ne l'a supplantée (seconde déclaration, évaluation conjointe ou avis du CSE) : seule la dernière transmission est modifiable. La modifiabilité est dite par l'événement qui la ferme (`isLockedBySubsequentSubmission`, `~/modules/domain/shared/declarationStatus.ts`, à partir de `deriveSubsequentSubmissions`) et non plus par une date ; `decl1ModificationDeadline` n'est plus un garde d'écriture, c'est une **échéance informative** (voir §12). Le serveur rejette une écriture sur une étape supplantée (`DECLARATION_SUPERSEDED_MESSAGE`).
 - En **admin impersonation**, l'écriture est bloquée (procédures `companyWriteProcedure` rejettent ; voir `~/modules/auth/useReadOnlyGuard`).
 - **Verrou collaboratif** : à l'entrée dans le wizard, le hook `useDeclarationLock` acquiert un verrou exclusif. Si une autre session détient déjà un verrou actif, le wizard s'ouvre en lecture seule avec un bandeau d'avertissement (voir §13.7).
-- Chaque transition métier de la démarche (changement d'étape, soumission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
+- Chaque transition métier de la démarche (changement d'étape, transmission, choix de parcours, etc.) écrit une ligne dans `declarationStatusHistory`, exploitée par la page d'historique (voir §3).
 - **Conservation limitée** : les déclarations dont l'année dépasse la fenêtre de rétention (défaut 6 ans) sont purgées automatiquement, avec toutes leurs données rattachées (voir §13.8).
 
 **Données persistées** : `declarations`, `jobCategories`, `employeeCategories`, `declarationStatusHistory`, `declarationLocks` (verrou d'édition temporaire).
@@ -108,7 +108,7 @@ Conventions de notation :
 
 **Pour qui** : employeur déclarant rattaché à l'entreprise (ou agent admin en impersonation sur le SIREN concerné).
 
-**À quoi ça sert** : consulter la **chronologie des actions** effectuées sur la démarche d'une année donnée — qui a fait quoi, quand, et sur quelle page. Donne une traçabilité complète : changements d'étape, soumission, choix de parcours de conformité, seconde déclaration, évaluation conjointe, dépôt d'avis CSE, annulation, finalisation.
+**À quoi ça sert** : consulter la **chronologie des actions** effectuées sur la démarche d'une année donnée — qui a fait quoi, quand, et sur quelle page. Donne une traçabilité complète : changements d'étape, transmission, choix de parcours de conformité, seconde déclaration, évaluation conjointe, dépôt d'avis CSE, annulation, finalisation.
 
 **Route** : `/mon-espace/historique/[siren]/[year]`
 
@@ -135,9 +135,9 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 | Événement (`eventType`) | Libellé affiché | Page liée |
 |---|---|---|
 | `step_change` | Modification de la page | Étape du wizard correspondante (si connue) |
-| `submit` | Soumission de la déclaration | Récapitulatif de votre déclaration |
+| `submit` | Transmission de la déclaration | Récapitulatif de votre déclaration |
 | `path_choice` | Choix du parcours de mise en conformité | Parcours de mise en conformité |
-| `second_declaration_submit` | Soumission de la seconde déclaration | Parcours de mise en conformité |
+| `second_declaration_submit` | Transmission de la seconde déclaration | Parcours de mise en conformité |
 | `joint_evaluation_submit` | Dépôt de l'évaluation conjointe | Évaluation conjointe |
 | `cse_opinion_submit` | Dépôt de l'avis CSE | Avis CSE |
 | `cancel` | Annulation de la déclaration | — |
@@ -226,7 +226,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Maximum **2 déclarations par année civile** (la première initiale + une corrective si l'écart dépasse 5%).
 - Le PDF d'évaluation conjointe est **optionnel** (un seul fichier par déclaration, écrasé si re-uploadé).
 - Le choix de parcours est **verrouillé** dès qu'une action aval a été enregistrée pour le round courant (la procédure renvoie `CONFLICT`).
-- Échéances configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`. Elles sont **informatives** (affichées, jamais bloquantes) : la modifiabilité d'une étape dépend uniquement des soumissions ultérieures (voir §2).
+- Échéances configurables par l'admin DGT : `decl2ModificationDeadline`, `JustificationDeadline`, `JointEvaluationDeadline`. Elles sont **informatives** (affichées, jamais bloquantes) : la modifiabilité d'une étape dépend uniquement des transmissions ultérieures (voir §2).
 
 **Données persistées** : `declarations.secondDeclarationStep`, `declarations.compliancePath`, `declarationStatusHistory`, `files` (`type = joint_evaluation`).
 
@@ -247,8 +247,8 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 | 2 | `/declaration-representation/etape/2` | Écarts cadres dirigeants |
 | 3 | `/declaration-representation/etape/3` | Écarts instances dirigeantes |
 | 4 (conditionnelle) | `/declaration-representation/etape/4` | Informations de publication |
-| 5 | `/declaration-representation/etape/5` | Récapitulatif et soumission |
-| — | `/declaration-representation/confirmation` | Confirmation après soumission |
+| 5 | `/declaration-representation/etape/5` | Récapitulatif et transmission |
+| — | `/declaration-representation/confirmation` | Confirmation après transmission |
 
 **Modules** : `~/modules/declaration-representation` (funnel, steps, PDF via `~/modules/declarationPdf`), `~/modules/domain/shared/representation.ts` (règles pures), `~/modules/my-space` (affichage du statut dans le panneau latéral et le tableau des démarches).
 
@@ -266,12 +266,12 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Objectif de représentation** : `REPRESENTATION_TARGET_INITIAL = 30` % (chaque sexe), porté à `REPRESENTATION_TARGET_RAISED = 40` % à compter de la campagne `REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029` (`getRepresentationTarget(campaignYear)`). L'année de campagne = année de référence + 1 (`getRepresentationCampaignYear`).
 - **Verdict** (`computeRepresentationVerdict`) : `compliant` si `min(%femmes, %hommes) >= objectif`, `non_compliant` sinon, `not_applicable` si l'indicateur n'est pas calculable (aucun ou un seul cadre dirigeant ; aucune instance dirigeante). Les deux indicateurs (cadres dirigeants / instances dirigeantes) gardent des verdicts **indépendants** — aucun verdict agrégé n'existe. Sans objet pour une déclaration `not_subject` (aucun pourcentage saisi).
 - **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
-- **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
-- **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la soumission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations soumises (une déclaration `not_subject` n'a pas de PDF).
+- **Campagne** : ouverte de `campaignStartDate` jusqu'à la fin du jour `campaignEndDate` inclus (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
+- **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la transmission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations transmises (une déclaration `not_subject` n'a pas de PDF).
 - **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
 - **Reprise V1** : le kit ponctuel `scripts/migration-v1` reprend depuis un dump les déclarations historiques sans jamais écraser une déclaration saisie nativement en V2. La procédure d'exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
 
-**Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (soumise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
+**Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (transmise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
 
 **Données persistées** : `representationCampaigns` (surcharges de campagne par année), `representationDeclarations` (une ligne par SIREN × année, contrainte unique `(siren, year)`, `status` ∈ `draft` / `submitted` / `not_subject`).
 
@@ -393,7 +393,7 @@ Téléchargement déclenché depuis :
 
 ### 11.2 Export Excel et API
 
-Export annuel XLSX, déclenché puis téléchargé :
+Export annuel XLSX, déclenché puis téléchargé. Les deux routes exigent le jeton `Authorization: Bearer` de `EGAPRO_EXPORT_API_TOKEN` (sealed-secret `export-api`) et répondent 401 sans lui, ou quand le jeton n'est pas configuré :
 
 | URL | Méthode | Format | Filtres |
 |---|---|---|---|

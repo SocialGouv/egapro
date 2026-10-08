@@ -52,8 +52,10 @@ describe("RemunerationTab", () => {
 		expect(screen.getAllByText(/^2\s256$/).length).toBeGreaterThan(0);
 		// The legend splits label and figure, so each is asserted on its own node.
 		expect(screen.getAllByText("Femmes :").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("752 (33 %)").length).toBeGreaterThan(0);
-		expect(screen.getAllByText(/^1\s504 \(67 %\)$/).length).toBeGreaterThan(0);
+		expect(screen.getAllByText("752 (33,33 %)").length).toBeGreaterThan(0);
+		expect(screen.getAllByText(/^1\s504 \(66,66 %\)$/).length).toBeGreaterThan(
+			0,
+		);
 
 		const accordions = screen.getAllByRole("button", {
 			name: "Détails des données",
@@ -133,6 +135,8 @@ describe("RemunerationTab", () => {
 		// One per quartile card (annual, hourly) in the bars, plus one per table.
 		expect(rows.length).toBeGreaterThanOrEqual(2);
 		expect(screen.getAllByText("33,33 %").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("66,66 %").length).toBeGreaterThan(0);
+		expect(screen.queryByText("66,67 %")).not.toBeInTheDocument();
 	});
 
 	it("renders stored quartile ratios as percentages", () => {

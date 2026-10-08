@@ -6,9 +6,13 @@ import {
 } from "~/modules/declarationPdf/buildRepresentationPdfData";
 import { RepresentationPdfDocument } from "~/modules/declarationPdf/RepresentationPdfDocument";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import {
+	invalidYearResponse,
+	parseRequestedYear,
+	pdfErrorResponse,
 	pdfHeaders,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
@@ -18,23 +22,22 @@ const ROUTE = "representation-pdf";
 
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const url = new URL(request.url);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
-		metadata: {
-			year: url.searchParams.get("year") ?? null,
-		},
+		metadata: auditQueryMetadata(parseRequestedYear(request), ({ year }) => ({
+			year,
+		})),
 	};
 };
 
 type ResolvedRepresentationPdf =
-	| { unauthorized: Response }
+	| { error: Response }
 	| {
 			data: Awaited<ReturnType<typeof buildRepresentationPdfData>>;
 			filename: string;
-			unauthorized?: undefined;
+			error?: undefined;
 	  };
 
 async function resolveRepresentationPdf(
@@ -42,15 +45,14 @@ async function resolveRepresentationPdf(
 ): Promise<ResolvedRepresentationPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { unauthorized: new Response("Non autorisé", { status: 401 }) };
+		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
-	const url = new URL(request.url);
-	const yearParam = url.searchParams.get("year");
-	const parsedYear = yearParam ? Number.parseInt(yearParam, 10) : Number.NaN;
-	const year = Number.isInteger(parsedYear)
-		? parsedYear
-		: getReferenceYearFor(getCurrentYear());
+	const requestedYear = parseRequestedYear(request);
+	if (!requestedYear.success) {
+		return { error: invalidYearResponse() };
+	}
+	const year = requestedYear.data.year ?? getReferenceYearFor(getCurrentYear());
 
 	const data = await buildRepresentationPdfData(siren, year, new Date());
 
@@ -68,7 +70,7 @@ export const GET = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveRepresentationPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) return resolved.error;
 
 			const body = await renderPdfAndCacheSize(ROUTE, resolved.data, () =>
 				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
@@ -79,10 +81,10 @@ export const GET = withAuditedRoute(
 			});
 		} catch (error) {
 			if (error instanceof RepresentationDeclarationNotFoundError) {
-				return new Response("Déclaration introuvable", { status: 404 });
+				return pdfErrorResponse("Déclaration introuvable", 404);
 			}
 			console.error("[representation-pdf]", error);
-			return new Response("Impossible de générer le PDF", { status: 400 });
+			return pdfErrorResponse("Impossible de générer le PDF", 400);
 		}
 	},
 );
@@ -95,7 +97,9 @@ export const HEAD = withAuditedRoute(
 	async (request) => {
 		try {
 			const resolved = await resolveRepresentationPdf(request);
-			if (resolved.unauthorized) return resolved.unauthorized;
+			if (resolved.error) {
+				return pdfErrorResponse(null, resolved.error.status);
+			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
 				renderToBuffer(RepresentationPdfDocument({ data: resolved.data })),
@@ -106,10 +110,10 @@ export const HEAD = withAuditedRoute(
 			});
 		} catch (error) {
 			if (error instanceof RepresentationDeclarationNotFoundError) {
-				return new Response(null, { status: 404 });
+				return pdfErrorResponse(null, 404);
 			}
 			console.error("[representation-pdf:head]", error);
-			return new Response(null, { status: 400 });
+			return pdfErrorResponse(null, 400);
 		}
 	},
 );

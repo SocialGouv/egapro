@@ -1,11 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "~/modules/public-api";
+import { createFakeValkey } from "~/test/fakeValkey";
 
 const mocks = vi.hoisted(() => ({
 	buildRows: vi.fn(),
 	generateCsv: vi.fn(),
 	generateXlsx: vi.fn(),
 	logAction: vi.fn(),
+	getValkey: vi.fn(),
 }));
+
+vi.mock("~/server/services/valkey", async () =>
+	(await import("~/test/fakeValkey")).mockValkeyModule(mocks.getValkey),
+);
 
 vi.mock("~/modules/export", () => ({
 	buildRepresentationExportRows: mocks.buildRows,
@@ -21,6 +28,7 @@ beforeEach(() => {
 	mocks.buildRows.mockResolvedValue([]);
 	mocks.generateCsv.mockReturnValue("header");
 	mocks.generateXlsx.mockResolvedValue(Buffer.from("xlsx"));
+	mocks.getValkey.mockResolvedValue(null);
 });
 
 async function callGet(search = "") {
@@ -55,7 +63,32 @@ describe("GET /api/public/representations/export", () => {
 				naf: ["C"],
 				workforceRanges: ["1000+"],
 			}),
+			MAX_EXPORT_ROWS + 1,
 		);
+	});
+
+	it("answers 413 once a CSV export exceeds its safety cap", async () => {
+		mocks.buildRows.mockResolvedValue(new Array(MAX_EXPORT_ROWS + 1));
+
+		const response = await callGet("?format=csv");
+
+		expect(response.status).toBe(413);
+		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(mocks.generateCsv).not.toHaveBeenCalled();
+	});
+
+	it("caps Excel downloads like the declarations export", async () => {
+		mocks.buildRows.mockResolvedValue(new Array(MAX_XLSX_EXPORT_ROWS + 1));
+
+		const response = await callGet();
+
+		expect(mocks.buildRows).toHaveBeenCalledWith(
+			expect.any(Object),
+			expect.any(Object),
+			MAX_XLSX_EXPORT_ROWS + 1,
+		);
+		expect(response.status).toBe(413);
+		expect(mocks.generateXlsx).not.toHaveBeenCalled();
 	});
 
 	it("uses the stable public filename for XLSX downloads", async () => {
@@ -68,12 +101,59 @@ describe("GET /api/public/representations/export", () => {
 		expect((await response.arrayBuffer()).byteLength).toBe(4);
 	});
 
+	it("audits an invalid format by name only, never the raw value", async () => {
+		await callGet(`?format=${"x".repeat(5_000)}`);
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "format" } }),
+		);
+	});
+
 	it("returns a CORS-readable validation error", async () => {
 		const response = await callGet("?format=json");
 
 		expect(response.status).toBe(400);
 		expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
 		expect(mocks.buildRows).not.toHaveBeenCalled();
+	});
+});
+
+describe("GET /api/public/representations/export — server-side cache", () => {
+	it("serves the unfiltered CSV from the cache without querying the database", async () => {
+		mocks.getValkey.mockResolvedValue(createFakeValkey());
+		mocks.generateCsv.mockReturnValue('"SIREN"\n"123456789"');
+		await callGet("?format=csv");
+		mocks.buildRows.mockClear();
+
+		const response = await callGet("?format=csv&page=2");
+
+		expect(mocks.buildRows).not.toHaveBeenCalled();
+		expect(response.headers.get("Content-Disposition")).toContain(
+			"index-egapro-representations-equilibrees.csv",
+		);
+		expect(await response.text()).toBe('"SIREN"\n"123456789"');
+	});
+
+	it("never caches a filtered CSV", async () => {
+		const valkey = createFakeValkey();
+		mocks.getValkey.mockResolvedValue(valkey);
+
+		await callGet("?format=csv&region=11");
+		await callGet("?format=csv&region=11");
+
+		expect(valkey.set).not.toHaveBeenCalled();
+		expect(mocks.buildRows).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not cache Excel workbooks", async () => {
+		const valkey = createFakeValkey();
+		mocks.getValkey.mockResolvedValue(valkey);
+
+		await callGet();
+		await callGet();
+
+		expect(valkey.set).not.toHaveBeenCalled();
+		expect(mocks.buildRows).toHaveBeenCalledTimes(2);
 	});
 });
 

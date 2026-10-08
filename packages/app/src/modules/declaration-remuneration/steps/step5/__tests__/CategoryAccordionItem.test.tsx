@@ -209,6 +209,23 @@ describe("CategoryAccordionItem — name length cap (#3943)", () => {
 	});
 });
 
+describe("CategoryAccordionItem — favored-sex mention", () => {
+	it("shows the absolute gap, the high badge, and the women mention — never a signed minus", () => {
+		renderItem({
+			category: {
+				...category,
+				annualBaseWomen: "106",
+				annualBaseMen: "100",
+			},
+		});
+
+		expect(screen.getByText("6,00 %")).toBeInTheDocument();
+		expect(screen.queryByText("-6,00 %")).not.toBeInTheDocument();
+		expect(screen.getByText("élevé")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+});
+
 describe("CategoryAccordionItem — Total row gap (#4205)", () => {
 	function totalRowGapCells() {
 		return screen.getAllByRole("rowheader", { name: "Total" }).map(

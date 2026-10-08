@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1.7
 
-ARG NODE_VERSION=24-alpine
 ARG PNPM_VERSION=10.8.1
 
 # Builder stage: install deps + build Next.js (standalone)
-FROM node:${NODE_VERSION} AS builder
+# Exact tag + digest, bumped by Dependabot (docker ecosystem). Never go below
+# 24.21.0: the global fetch() runs on the undici Node embeds, and 24.21.0 is the
+# first 24.x shipping undici >= 7.29.1.
+FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS builder
 
 WORKDIR /app
 
@@ -96,7 +98,7 @@ RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
-FROM node:${NODE_VERSION} AS runner
+FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS runner
 
 RUN apk --update --no-cache add ca-certificates && apk upgrade
 

@@ -9,6 +9,10 @@ export {
 	publicSearchReferentsSchema,
 } from "./schemas";
 export { PUBLIC_PAGE_SIZE } from "./shared/constants";
+export {
+	REFERENT_LOOKUP_RATE_LIMITED,
+	toReferentLookupFailure,
+} from "./shared/referentLookupFailure";
 export type {
 	PublicReferentDetail as PublicReferentDetailData,
 	PublicReferentListRow,

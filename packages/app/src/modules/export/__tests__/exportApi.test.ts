@@ -12,6 +12,11 @@ const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointEval = vi.fn().mockResolvedValue(new Map());
+const mockLogAction = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("~/server/audit/log", () => ({
+	logAction: (...args: unknown[]) => mockLogAction(...args),
+}));
 
 vi.mock("~/modules/export/queries", () => ({
 	fetchSubmittedDeclarations: (...args: unknown[]) =>
@@ -176,6 +181,34 @@ describe("GET /api/v1/export/declarations", () => {
 		const response = await GET(request);
 
 		expect(response.status).toBe(403);
+	});
+
+	it("audits the validated date window", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		await GET(
+			gatewayForwardedRequest(
+				"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				metadata: { date_begin: "2027-03-15", date_end: null },
+			}),
+		);
+	});
+
+	it("audits an invalid date by name only, never the raw value", async () => {
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		await GET(
+			gatewayForwardedRequest(
+				`http://localhost/api/v1/export/declarations?date_begin=${"x".repeat(5_000)}`,
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "date_begin" } }),
+		);
 	});
 
 	it("should return 400 when date_begin param is missing", async () => {
@@ -1317,7 +1350,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Parcours.Avis_CSE_requis).toBe(true);
 		expect(decl.Parcours.Indicateur_G_requis).toBe(true);
 		expect(decl.Parcours).not.toHaveProperty("Version_regles");
-		expect(decl.Date_soumission).toBe("2027-03-15T10:00:00.000Z");
+		expect(decl.Date_transmission).toBe("2027-03-15T10:00:00.000Z");
 		expect(decl.Date_parcours_apres_declaration_1).toBe(
 			"2027-04-01T10:00:00.000Z",
 		);
@@ -1533,7 +1566,7 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
-				Libelle_statut: "Soumission de la déclaration",
+				Libelle_statut: "Transmission de la déclaration",
 				Date: "2027-03-15T10:00:00.000Z",
 			},
 			{
