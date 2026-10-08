@@ -1,3 +1,4 @@
+import { isUnknownCountry } from "~/modules/domain";
 import type { companies } from "~/server/db/schema";
 import type { CompanyInfo } from "~/server/services/weez";
 
@@ -31,4 +32,14 @@ export function toCompanyInsertValues(
 		workforce: info.workforce,
 		statutDiffusion: info.statutDiffusion,
 	};
+}
+
+type CompanyInsertValues = typeof companies.$inferInsert;
+
+export function toCompanyRefreshValues(
+	values: CompanyInsertValues,
+): CompanyInsertValues {
+	if (!isUnknownCountry(values)) return values;
+	const { countryCode: _code, countryLabel: _label, ...rest } = values;
+	return rest;
 }

@@ -13,7 +13,7 @@ const COMPANY = {
 	city: "Paris",
 	region: "Île-de-France",
 	departmentLabel: "Paris",
-	countryLabel: null,
+	countryLabel: "FRANCE",
 	countryCode: null,
 	nafLabel: "Programmation informatique",
 	workforceEma: 248,
@@ -44,7 +44,7 @@ describe("companyPageStructuredData", () => {
 				"@type": "PostalAddress",
 				addressLocality: "Paris",
 				addressRegion: "Île-de-France",
-				addressCountry: "FR",
+				addressCountry: "FRANCE",
 			},
 		});
 	});
@@ -64,20 +64,80 @@ describe("companyPageStructuredData", () => {
 		const data = companyPageStructuredData(
 			{
 				...COMPANY,
-				city: "Bruxelles",
+				city: null,
 				region: null,
 				departmentLabel: null,
-				countryLabel: "Belgique",
-				countryCode: "BE",
+				countryLabel: "BELGIQUE",
+				countryCode: "99131",
 			},
 			ORIGIN,
 			false,
 		);
 
-		expect(nodeOfType(data, "Organization")?.address).toMatchObject({
-			addressLocality: "Bruxelles",
-			addressCountry: "BE",
+		expect(nodeOfType(data, "Organization")?.address).toEqual({
+			"@type": "PostalAddress",
+			addressCountry: "99131",
 		});
+	});
+
+	it("guesses no country for a company whose country is unknown", () => {
+		const address = nodeOfType(
+			companyPageStructuredData(
+				{ ...COMPANY, countryLabel: null, countryCode: null },
+				ORIGIN,
+				false,
+			),
+			"Organization",
+		)?.address;
+
+		expect(address).toEqual({
+			"@type": "PostalAddress",
+			addressLocality: "Paris",
+			addressRegion: "Île-de-France",
+		});
+	});
+
+	it("guesses no country from a known département alone", () => {
+		const address = nodeOfType(
+			companyPageStructuredData(
+				{
+					...COMPANY,
+					city: null,
+					region: null,
+					countryLabel: null,
+					countryCode: null,
+				},
+				ORIGIN,
+				false,
+			),
+			"Organization",
+		)?.address;
+
+		expect(address).toEqual({
+			"@type": "PostalAddress",
+			addressLocality: "Paris",
+		});
+	});
+
+	it("publishes no address when neither locality, region nor country is known", () => {
+		const organization = nodeOfType(
+			companyPageStructuredData(
+				{
+					...COMPANY,
+					city: null,
+					region: null,
+					departmentLabel: null,
+					countryLabel: null,
+					countryCode: null,
+				},
+				ORIGIN,
+				false,
+			),
+			"Organization",
+		);
+
+		expect(organization).toBeDefined();
+		expect(organization).not.toHaveProperty("address");
 	});
 
 	it("walks the breadcrumb from the observatory to the company", () => {

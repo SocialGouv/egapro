@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+	companyLocationRow,
 	formatWorkforceForUser,
 	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
@@ -23,6 +24,9 @@ type CompanyInfo = {
 	siren: string;
 	nafCode: string | null;
 	address: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 };
 
@@ -105,9 +109,13 @@ export function RecapitulatifPage({
 		{ label: "Raison sociale", value: company.name },
 		{ label: "SIREN", value: company.siren },
 	];
-	if (company.address) {
-		companyItems.push({ label: "Adresse", value: company.address });
-	}
+	const location = companyLocationRow({
+		countryCode: company.countryCode ?? null,
+		countryLabel: company.countryLabel ?? null,
+		departmentLabel: company.departmentLabel ?? null,
+		domesticAddress: company.address,
+	});
+	if (location) companyItems.push(location);
 	if (company.nafCode) {
 		companyItems.push({ label: "Code NAF", value: company.nafCode });
 	}

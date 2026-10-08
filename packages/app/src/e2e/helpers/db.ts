@@ -632,10 +632,15 @@ export type CompanyLocation = {
 	address: string | null;
 	countryCode: string | null;
 	countryLabel: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
+	regionCode: string | null;
+	region: string | null;
 };
 
 /**
- * Read the three columns that drive the location row of the Mon espace banner.
+ * Read the columns that drive the location row of the Mon espace banner and of
+ * the observatory.
  *
  * They are populated from the company registry at sign-in, so their value differs
  * between a local worktree (registry unreachable — everything null) and CI. A spec
@@ -645,15 +650,25 @@ export type CompanyLocation = {
 export async function getCompanyLocation(): Promise<CompanyLocation> {
 	const sql = createConnection();
 	try {
-		const rows = await sql`
-			SELECT address, country_code, country_label
+		const rows = await sql<CompanyLocation[]>`
+			SELECT address,
+			       country_code AS "countryCode",
+			       country_label AS "countryLabel",
+			       department_code AS "departmentCode",
+			       department_label AS "departmentLabel",
+			       region_code AS "regionCode",
+			       region
 			FROM app_company
 			WHERE siren = ${TEST_SIREN}
 		`;
 		return {
-			address: (rows[0]?.address as string | null) ?? null,
-			countryCode: (rows[0]?.country_code as string | null) ?? null,
-			countryLabel: (rows[0]?.country_label as string | null) ?? null,
+			address: rows[0]?.address ?? null,
+			countryCode: rows[0]?.countryCode ?? null,
+			countryLabel: rows[0]?.countryLabel ?? null,
+			departmentCode: rows[0]?.departmentCode ?? null,
+			departmentLabel: rows[0]?.departmentLabel ?? null,
+			regionCode: rows[0]?.regionCode ?? null,
+			region: rows[0]?.region ?? null,
 		};
 	} finally {
 		await sql.end();
@@ -667,7 +682,11 @@ export async function setCompanyLocation(location: CompanyLocation) {
 			UPDATE app_company
 			SET address = ${location.address},
 			    country_code = ${location.countryCode},
-			    country_label = ${location.countryLabel}
+			    country_label = ${location.countryLabel},
+			    department_code = ${location.departmentCode},
+			    department_label = ${location.departmentLabel},
+			    region_code = ${location.regionCode},
+			    region = ${location.region}
 			WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {

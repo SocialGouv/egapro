@@ -42,6 +42,13 @@ export {
 } from "./shared/campaignClock";
 // Civil dates (calendar days held as UTC midnight) vs timestamps
 export { civilDate } from "./shared/civilDate";
+// Company location display
+export type { CompanyLocationRow } from "./shared/companyLocationDisplay";
+export {
+	ADDRESS_ROW_LABEL,
+	companyLocationRow,
+	formatInseeTitleCase,
+} from "./shared/companyLocationDisplay";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
@@ -315,6 +322,15 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Registry country (tri-state: France, foreign, unknown)
+export type { RegistryCountry } from "./shared/registryCountry";
+export {
+	FRANCE_COUNTRY,
+	headOfficeCountry,
+	isUnknownCountry,
+	legalUnitCountry,
+	UNKNOWN_COUNTRY,
+} from "./shared/registryCountry";
 // Representation equilibrium (art. D. 1142-19)
 export type {
 	ExecutivesCount,

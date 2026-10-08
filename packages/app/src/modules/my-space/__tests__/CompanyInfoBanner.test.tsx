@@ -18,6 +18,7 @@ const baseCompany: CompanyDetail = {
 	nafLabel: null,
 	countryCode: null,
 	countryLabel: "FRANCE",
+	departmentLabel: null,
 	gipWorkforce: 250,
 	hasCse: null,
 };
@@ -244,7 +245,7 @@ describe("CompanyInfoBanner", () => {
 			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 		});
 
-		it("shows 'Pays : non renseigné' and no 'Adresse :' when the country is unknown, even with an address stored", () => {
+		it("shows 'Pays : inconnu' and no 'Adresse :' when the country is unknown, even with an address stored", () => {
 			render(
 				<CompanyInfoBanner
 					company={{
@@ -256,12 +257,12 @@ describe("CompanyInfoBanner", () => {
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
-			expect(screen.getByText("non renseigné")).toBeInTheDocument();
+			expect(screen.getByText("inconnu")).toBeInTheDocument();
 			expect(screen.queryByText("Adresse :")).not.toBeInTheDocument();
 			expect(screen.getByText("SIREN :")).toBeInTheDocument();
 		});
 
-		it("shows 'Pays : non renseigné' when the country code is set but the label is missing (defensive)", () => {
+		it("shows 'Pays : inconnu' when the country code is set but the label is missing (defensive)", () => {
 			render(
 				<CompanyInfoBanner
 					company={{
@@ -272,7 +273,42 @@ describe("CompanyInfoBanner", () => {
 				/>,
 			);
 			expect(screen.getByText("Pays :")).toBeInTheDocument();
-			expect(screen.getByText("non renseigné")).toBeInTheDocument();
+			expect(screen.getByText("inconnu")).toBeInTheDocument();
+		});
+
+		it("shows 'Pays : Belgique' for a Belgian company whose address is reduced to the street", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: "99131",
+						countryLabel: "BELGIQUE",
+						address: "12 RUE DE LA DEMO",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Pays :")).toBeInTheDocument();
+			expect(screen.getByText("Belgique")).toBeInTheDocument();
+			expect(screen.queryByText("12 Rue de la Demo")).not.toBeInTheDocument();
+		});
+
+		it("shows 'Adresse :' and no 'Pays :' when the country is blank but the French département is known", () => {
+			render(
+				<CompanyInfoBanner
+					company={{
+						...baseCompany,
+						countryCode: null,
+						countryLabel: null,
+						departmentLabel: "Nord",
+						address: "1 RUE DU NORD, 59000 LILLE",
+					}}
+				/>,
+			);
+			expect(screen.getByText("Adresse :")).toBeInTheDocument();
+			expect(
+				screen.getByText("1 Rue du Nord, 59000 Lille"),
+			).toBeInTheDocument();
+			expect(screen.queryByText("Pays :")).not.toBeInTheDocument();
 		});
 
 		it("renders a composed country label in title case", () => {

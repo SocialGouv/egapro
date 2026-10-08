@@ -518,6 +518,24 @@ describe("RecapitulatifPage", () => {
 		expect(screen.queryByText("Code NAF")).not.toBeInTheDocument();
 	});
 
+	it("shows the foreign country instead of a raw street", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{
+					...defaultCompany(),
+					countryCode: "99131",
+					countryLabel: "BELGIQUE",
+				}}
+			/>,
+		);
+		expect(screen.getByText("Pays")).toBeInTheDocument();
+		expect(screen.getByText("Belgique")).toBeInTheDocument();
+		expect(
+			screen.queryByText("1 rue de Paris, 75001 Paris"),
+		).not.toBeInTheDocument();
+	});
+
 	it("hides address when not available", () => {
 		render(
 			<RecapitulatifPage

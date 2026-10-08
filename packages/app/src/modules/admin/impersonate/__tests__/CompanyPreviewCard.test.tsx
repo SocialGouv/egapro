@@ -11,6 +11,9 @@ const BASE_COMPANY: PreviewCompany = {
 	siren: "123456789",
 	name: "ACME",
 	address: null,
+	countryCode: null,
+	countryLabel: "FRANCE",
+	departmentLabel: null,
 	nafCode: null,
 	workforce: null,
 	workforceYear: 2026,
@@ -33,6 +36,18 @@ describe("CompanyPreviewCard", () => {
 		expect(screen.getByText("10 Rue de la Paix")).toBeInTheDocument();
 		expect(screen.getByText("62.01Z")).toBeInTheDocument();
 		expect(screen.getByText("42")).toBeInTheDocument();
+	});
+
+	it("shows an unknown country without exposing the raw street", () => {
+		renderCard({
+			address: "10 Rue de la Paix",
+			countryCode: null,
+			countryLabel: null,
+		});
+		expect(screen.getByText("Pays :").parentElement).toHaveTextContent(
+			"Pays : inconnu",
+		);
+		expect(screen.queryByText("10 Rue de la Paix")).not.toBeInTheDocument();
 	});
 
 	it("omits the optional identity fields when null", () => {

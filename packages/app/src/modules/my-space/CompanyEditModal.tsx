@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 
 import {
+	companyLocationRow,
 	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
@@ -28,6 +29,9 @@ type Props = {
 		siren: string;
 		name: string;
 		address: string | null;
+		countryCode: string | null;
+		countryLabel: string | null;
+		departmentLabel: string | null;
 		nafCode: string | null;
 		nafLabel: string | null;
 		gipWorkforce: number | null;
@@ -204,6 +208,9 @@ type CompanyReadonlySectionProps = {
 		siren: string;
 		name: string;
 		address: string | null;
+		countryCode: string | null;
+		countryLabel: string | null;
+		departmentLabel: string | null;
 		nafCode: string | null;
 		nafLabel: string | null;
 		gipWorkforce: number | null;
@@ -212,6 +219,12 @@ type CompanyReadonlySectionProps = {
 
 function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 	const workforceYear = getWorkforceYear();
+	const location = companyLocationRow({
+		countryCode: company.countryCode,
+		countryLabel: company.countryLabel,
+		departmentLabel: company.departmentLabel,
+		domesticAddress: company.address,
+	});
 
 	return (
 		<>
@@ -219,7 +232,10 @@ function CompanyReadonlySection({ company }: CompanyReadonlySectionProps) {
 				<dl className={styles.infoList}>
 					<InfoRow label="Raison sociale :" value={company.name} />
 					<InfoRow label="SIREN :" value={formatSiren(company.siren)} />
-					<InfoRow label="Adresse :" value={company.address} />
+					<InfoRow
+						label={`${location?.label ?? "Adresse"} :`}
+						value={location?.value ?? null}
+					/>
 					<InfoRow
 						label="Code NAF :"
 						value={formatNafForDisplay(company.nafCode, company.nafLabel)}

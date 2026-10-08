@@ -1,4 +1,6 @@
 import {
+	companyLocationRow,
+	formatInseeTitleCase,
 	formatWorkforceForUser,
 	getObligationWorkforce,
 	getWorkforceYear,
@@ -7,7 +9,6 @@ import {
 
 import { MODAL_ID as COMPANY_EDIT_MODAL_ID } from "./CompanyEditModal";
 import styles from "./CompanyInfoBanner.module.scss";
-import { formatInseeTitleCase } from "./formatInseeTitleCase";
 import { formatNafForDisplay } from "./formatNafForDisplay";
 import { formatSiren } from "./formatSiren";
 import { StatusBadge } from "./StatusBadge";
@@ -17,53 +18,20 @@ type Props = {
 	company: CompanyDetail;
 };
 
-type CountryDisplay =
-	| { kind: "foreign"; label: string }
-	| { kind: "unknown" }
-	| { kind: "domestic" };
-
-// countryCode alone can't tell France from unresolved (it's null for both) — countryLabel decides.
-function resolveCountryDisplay(
-	company: Pick<CompanyDetail, "countryCode" | "countryLabel">,
-): CountryDisplay {
-	if (company.countryCode !== null && company.countryLabel !== null) {
-		return { kind: "foreign", label: company.countryLabel };
-	}
-	if (company.countryLabel === null) {
-		return { kind: "unknown" };
-	}
-	return { kind: "domestic" };
-}
-
 export function CompanyInfoBanner({ company }: Props) {
 	const workforceYear = getWorkforceYear();
 	const obligationWorkforce = getObligationWorkforce(company.gipWorkforce);
 	// The CSE field is the only editable datapoint and it starts at 100, so below
 	// that threshold the modal has nothing to offer and the entry point is hidden.
 	const cseApplicable = isCseRequired(obligationWorkforce);
-	const countryDisplay = resolveCountryDisplay(company);
-	const locationRow =
-		countryDisplay.kind === "domestic" ? (
-			company.address && (
-				<div className={styles.datapoint}>
-					<dt>Adresse :</dt>
-					<dd>
-						<strong>{formatInseeTitleCase(company.address)}</strong>
-					</dd>
-				</div>
-			)
-		) : (
-			<div className={styles.datapoint}>
-				<dt>Pays :</dt>
-				<dd>
-					<strong>
-						{countryDisplay.kind === "foreign"
-							? formatInseeTitleCase(countryDisplay.label)
-							: "non renseigné"}
-					</strong>
-				</dd>
-			</div>
-		);
+	const location = companyLocationRow({
+		countryCode: company.countryCode,
+		countryLabel: company.countryLabel,
+		departmentLabel: company.departmentLabel,
+		domesticAddress: company.address
+			? formatInseeTitleCase(company.address)
+			: null,
+	});
 
 	return (
 		<div className={`fr-pt-3w fr-pb-4w ${styles.banner}`}>
@@ -93,7 +61,14 @@ export function CompanyInfoBanner({ company }: Props) {
 							<strong>{formatSiren(company.siren)}</strong>
 						</dd>
 					</div>
-					{locationRow}
+					{location && (
+						<div className={styles.datapoint}>
+							<dt>{location.label} :</dt>
+							<dd>
+								<strong>{location.value}</strong>
+							</dd>
+						</div>
+					)}
 				</dl>
 
 				<dl className={styles.infoRow}>

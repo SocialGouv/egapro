@@ -106,6 +106,9 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 								siren: company.siren,
 								nafCode: company.nafCode,
 								address: company.address,
+								countryCode: company.countryCode,
+								countryLabel: company.countryLabel,
+								departmentLabel: company.departmentLabel,
 								gipWorkforce: company.gipWorkforce,
 							}}
 							declarantEmail={session.user.email ?? ""}

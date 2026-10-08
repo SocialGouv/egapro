@@ -108,7 +108,7 @@ type SeedCompany = {
 	siren: string;
 	name: string;
 	address: string;
-	city: string;
+	city: string | null;
 	region: string | null;
 	regionCode: string | null;
 	departmentCode: string | null;
@@ -284,14 +284,14 @@ const COMPANIES: SeedCompany[] = [
 	{
 		siren: "998900004",
 		name: "Brussels Equality Lab",
-		address: "Rue de la Loi 16, Bruxelles",
-		city: "Bruxelles",
+		address: "12 RUE DE LA DEMO",
+		city: null,
 		region: null,
 		regionCode: null,
 		departmentCode: null,
 		departmentLabel: null,
-		countryCode: "BE",
-		countryLabel: "Belgique",
+		countryCode: "99131",
+		countryLabel: "BELGIQUE",
 		nafCode: "70.22Z",
 		nafLabel: "Conseil pour les affaires",
 		workforce: 1350,
