@@ -393,7 +393,7 @@ Téléchargement déclenché depuis :
 
 ### 11.2 Export Excel et API
 
-Export annuel XLSX, déclenché puis téléchargé :
+Export annuel XLSX, déclenché puis téléchargé. Les deux routes exigent le jeton `Authorization: Bearer` de `EGAPRO_EXPORT_API_TOKEN` (sealed-secret `export-api`) et répondent 401 sans lui, ou quand le jeton n'est pas configuré :
 
 | URL | Méthode | Format | Filtres |
 |---|---|---|---|

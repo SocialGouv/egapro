@@ -25,11 +25,9 @@ const BOOLEAN_FLAGS = [
 	"EGAPRO_E2E_ADMIN_MFA",
 ] as const;
 
-type BooleanFlag = (typeof BOOLEAN_FLAGS)[number];
-
 async function loadEnvWith(
-	overrides: Partial<Record<BooleanFlag, string>>,
-): Promise<Record<BooleanFlag, unknown>> {
+	overrides: Record<string, string | undefined>,
+): Promise<Record<string, unknown>> {
 	for (const [name, value] of Object.entries({
 		...REQUIRED_SERVER_ENV,
 		...overrides,
@@ -37,19 +35,22 @@ async function loadEnvWith(
 		vi.stubEnv(name, value);
 	}
 	const { env } = await vi.importActual<{
-		env: Record<BooleanFlag, unknown>;
+		env: Record<string, unknown>;
 	}>("~/env.js");
 	return env;
 }
 
+beforeEach(() => {
+	vi.resetModules();
+});
+
+afterEach(() => {
+	vi.unstubAllEnvs();
+});
+
 describe("env boolean flags", () => {
 	beforeEach(() => {
-		vi.resetModules();
 		for (const flag of BOOLEAN_FLAGS) vi.stubEnv(flag, undefined);
-	});
-
-	afterEach(() => {
-		vi.unstubAllEnvs();
 	});
 
 	describe.each(BOOLEAN_FLAGS)("%s", (flag) => {
@@ -79,5 +80,34 @@ describe("env boolean flags", () => {
 		])("rejects the ambiguous value %s", async (value) => {
 			await expect(loadEnvWith({ [flag]: value })).rejects.toThrow();
 		});
+	});
+});
+
+describe("EGAPRO_EXPORT_API_TOKEN", () => {
+	async function loadExportApiToken(
+		value: string | undefined,
+	): Promise<unknown> {
+		const env = await loadEnvWith({ EGAPRO_EXPORT_API_TOKEN: value });
+		return env.EGAPRO_EXPORT_API_TOKEN;
+	}
+
+	it("drops the trailing newline a sealed secret often carries", async () => {
+		await expect(loadExportApiToken("export-token\n")).resolves.toBe(
+			"export-token",
+		);
+	});
+
+	it("keeps a token without surrounding whitespace unchanged", async () => {
+		await expect(loadExportApiToken("export-token")).resolves.toBe(
+			"export-token",
+		);
+	});
+
+	it("reduces a whitespace-only value to an empty token, which the routes refuse", async () => {
+		await expect(loadExportApiToken(" \n")).resolves.toBe("");
+	});
+
+	it("stays undefined when unset", async () => {
+		await expect(loadExportApiToken(undefined)).resolves.toBeUndefined();
 	});
 });
