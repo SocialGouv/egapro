@@ -121,6 +121,18 @@ describe("admin middleware", () => {
 		}
 	});
 
+	it("sends a listed non-public-agent to the resume screen, without a return query", async () => {
+		mockGetToken.mockResolvedValue({
+			id: "u1",
+			isAdmin: false,
+			adminAccessRefusal: { roles: [], organizationLabel: "Société Démo" },
+		});
+		const res = await middleware(makeRequest("/admin/declarations"));
+		expect(res.headers.get("location")).toBe(
+			"http://localhost/acces-backoffice",
+		);
+	});
+
 	it("still turns a non-admin away silently when the second factor is fresh", async () => {
 		// Passing the second factor grants nothing on its own: without the
 		// grant, the backoffice is never even mentioned.

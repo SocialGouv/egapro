@@ -16,6 +16,9 @@ export const devLoginSchema = z.object({
 				.string()
 				.regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres."),
 		),
+	// Lets a developer reproduce the admin backoffice's public-agent refusal
+	// screen locally, without a real ProConnect identity.
+	isPublicAgent: z.boolean().default(true),
 });
 
 export type DevLoginInput = z.infer<typeof devLoginSchema>;

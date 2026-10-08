@@ -310,9 +310,10 @@ describe("auth config — admin two-factor authentication", () => {
 			) as { authorization: { params: Record<string, unknown> } };
 		}
 
-		it("asks for the declarant scopes plus roles, and nothing more", () => {
+		it("asks for the declarant scopes plus roles and organization_label, and nothing more", () => {
 			expect(proconnectProvider().authorization.params).toEqual({
-				scope: "openid email given_name usual_name siret roles",
+				scope:
+					"openid email given_name usual_name siret roles organization_label",
 			});
 		});
 

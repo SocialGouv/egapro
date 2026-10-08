@@ -21,6 +21,7 @@ export default async function AdminLayout({
 		case "monEspace":
 			return redirect(MY_SPACE);
 		case "resume":
+		case "notPublicAgent":
 			return redirect(ADMIN_MFA_RESUME);
 		case "allow":
 			return <AdminShell>{children}</AdminShell>;

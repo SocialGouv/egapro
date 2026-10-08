@@ -34,12 +34,48 @@ export function isPublicAgent(roles: unknown): boolean {
 	return Array.isArray(roles) && roles.includes(PUBLIC_AGENT_ROLE);
 }
 
+// What the backoffice guard reports to the agent when a listed account is not granted access.
+export type AdminAccessRefusal = {
+	roles: string[];
+	organizationLabel: string | null;
+};
+
+export type ResolveAdminGrantInput = {
+	isListed: boolean;
+	roles: string[] | null;
+	requirePublicAgent: boolean;
+};
+
+export type ResolveAdminGrantResult = {
+	granted: boolean;
+	refusal: { roles: string[] } | null;
+};
+
+// The single rule deciding both the admin grant and its refusal — ProConnect's
+// roles-scope doc requires stating the rule, not just silently withholding
+// the grant, so the two outcomes must come from one place.
+export function resolveAdminGrant({
+	isListed,
+	roles,
+	requirePublicAgent,
+}: ResolveAdminGrantInput): ResolveAdminGrantResult {
+	// Unlisted accounts are never mentioned the backoffice exists, granted or not.
+	if (!isListed) return { granted: false, refusal: null };
+
+	if (isPublicAgent(roles) || !requirePublicAgent) {
+		return { granted: true, refusal: null };
+	}
+
+	return { granted: false, refusal: { roles: roles ?? [] } };
+}
+
 // Read from the session alone: a reason carried in the URL would be displayable at will.
 export type AdminMfaFailure = "expired" | "missing";
 
 export type AdminAccessDecision =
 	| { type: "login" }
 	| { type: "monEspace" }
+	| { type: "notPublicAgent" }
 	| { type: "resume"; reason: AdminMfaFailure }
 	| { type: "allow" };
 
@@ -47,6 +83,7 @@ export type AdminAccessDecision =
 export type AdminSessionState = {
 	isAdmin?: boolean;
 	adminMfaAt?: number | null;
+	adminAccessRefusal?: AdminAccessRefusal | null;
 };
 
 // The single decision table of the `/admin` surface: Edge middleware, backoffice layout and resume screen all run this one.
@@ -57,7 +94,13 @@ export function resolveAdminAccess(
 	// A token predating the admin field cannot be judged; only a fresh sign-in produces one that can.
 	if (!session || session.isAdmin === undefined) return { type: "login" };
 
-	if (!session.isAdmin) return { type: "monEspace" };
+	if (!session.isAdmin) {
+		// Only a listed-but-refused account carries this field — an unlisted one
+		// is still bounced away without ever learning the backoffice exists.
+		return session.adminAccessRefusal
+			? { type: "notPublicAgent" }
+			: { type: "monEspace" };
+	}
 
 	if (!isAdminMfaFresh(session.adminMfaAt, now)) {
 		return {

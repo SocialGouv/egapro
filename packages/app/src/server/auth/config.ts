@@ -6,12 +6,13 @@ import type { Provider } from "next-auth/providers/index";
 import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import type { AdminAccessRefusal } from "~/modules/domain";
 import {
 	isAdminMfaAcr,
 	isAdminMfaFresh,
-	isPublicAgent,
 	PUBLIC_AGENT_ROLE,
 	parseSiren,
+	resolveAdminGrant,
 } from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
 import { LOGIN } from "~/modules/routes";
@@ -175,6 +176,7 @@ declare module "next-auth" {
 			isAdmin: boolean;
 			impersonation?: Impersonation | null;
 			adminMfaAt?: number | null;
+			adminAccessRefusal?: AdminAccessRefusal | null;
 		} & DefaultSession["user"];
 	}
 }
@@ -190,6 +192,9 @@ declare module "next-auth/jwt" {
 		// Seconds since the epoch. Absent when the level ProConnect returned
 		// proved no second factor.
 		adminMfaAt?: number;
+		// Present only for a listed account that is not an admin: recalculated
+		// on every sign-in, never carried over from a previous grant.
+		adminAccessRefusal?: AdminAccessRefusal | null;
 	}
 }
 
@@ -358,6 +363,7 @@ function devAuthProvider(): Provider {
 		credentials: {
 			email: { label: "Adresse e-mail", type: "email" },
 			siret: { label: "SIRET", type: "text" },
+			isPublicAgent: { label: "Agent public", type: "checkbox" },
 		},
 		authorize(credentials, req) {
 			if (!isLoopbackRequest(req?.headers)) return null;
@@ -365,10 +371,12 @@ function devAuthProvider(): Provider {
 			const parsed = devLoginSchema.safeParse({
 				email: credentials?.email ?? "",
 				siret: credentials?.siret ?? "",
+				// A credentials provider only ever receives strings; absent reads as unchecked-by-default-true.
+				isPublicAgent: credentials?.isPublicAgent !== "false",
 			});
 			if (!parsed.success) return null;
 
-			const { email, siret } = parsed.data;
+			const { email, siret, isPublicAgent } = parsed.data;
 			const localPart = email.split("@")[0] ?? email;
 			return {
 				id: email,
@@ -377,8 +385,9 @@ function devAuthProvider(): Provider {
 				siret,
 				firstName: localPart,
 				lastName: null,
-				// Stands in for a public agent so local /admin checks need no real ProConnect identity.
-				roles: [PUBLIC_AGENT_ROLE],
+				// Lets local /admin checks reproduce either outcome without a real ProConnect identity.
+				roles: isPublicAgent ? [PUBLIC_AGENT_ROLE] : [],
+				organizationLabel: "Société Démo",
 			};
 		},
 	});
@@ -412,7 +421,8 @@ function getProviders(): Provider[] {
 			clientSecret: env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 			authorization: {
 				params: {
-					scope: "openid email given_name usual_name siret roles",
+					scope:
+						"openid email given_name usual_name siret roles organization_label",
 				},
 			},
 			idToken: true,
@@ -451,6 +461,7 @@ function getProviders(): Provider[] {
 					firstName: stringField(userinfo.given_name),
 					lastName: stringField(userinfo.usual_name),
 					roles: parseRoles(userinfo.roles),
+					organizationLabel: stringField(userinfo.organization_label),
 				};
 			},
 		});
@@ -548,6 +559,7 @@ export const authConfig = {
 					firstName?: string | null;
 					lastName?: string | null;
 					roles?: string[] | null;
+					organizationLabel?: string | null;
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
@@ -603,10 +615,12 @@ export const authConfig = {
 				// isGranted (not merely isListed) is the one habilitation every downstream guard reads.
 				const isListed = ADMIN_EMAILS.has(email.toLowerCase());
 				const roles = profileData.roles ?? null;
-				const isGranted =
-					isListed &&
-					(isPublicAgent(roles) ||
-						env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT === false);
+				const grant = resolveAdminGrant({
+					isListed,
+					roles,
+					requirePublicAgent: env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT !== false,
+				});
+				const isGranted = grant.granted;
 				if (isGranted !== dbUser.isAdmin) {
 					await db
 						.update(users)
@@ -624,6 +638,14 @@ export const authConfig = {
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = isGranted;
+				// Recalculated every sign-in, never carried over: a listed account
+				// that regains the grant must not keep a stale refusal around.
+				token.adminAccessRefusal = grant.refusal
+					? {
+							roles: grant.refusal.roles,
+							organizationLabel: profileData.organizationLabel ?? null,
+						}
+					: undefined;
 
 				// A sign-in — a step-up included — mints the token from scratch,
 				// so the mimoquage disappears on its own. The open row in the
@@ -704,6 +726,7 @@ export const authConfig = {
 				isAdmin: token.isAdmin ?? false,
 				impersonation: exposedImpersonation(token, new Date()),
 				adminMfaAt: token.adminMfaAt ?? null,
+				adminAccessRefusal: token.adminAccessRefusal ?? null,
 			},
 		}),
 	},
