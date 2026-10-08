@@ -267,9 +267,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 - CSE : non applicable (pas de question CSE dans le parcours sous 100 salariés)
 - Déclaration des 7 indicateurs (étape 5 incluse)
-- Soumission → fin de démarche directe
+- Transmission → fin de démarche directe
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-13]` : effectif GIP 30 (représentatif < 50), 7 indicateurs sans écart ≥ 5 %, soumission → fin de démarche directe → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13]` : effectif GIP 30 (représentatif < 50), 7 indicateurs sans écart ≥ 5 %, transmission → fin de démarche directe → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13\]"`
 
 ---
@@ -284,7 +284,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 7 indicateurs avec au moins un écart ≥ 5 % sur l'indicateur G
 - Ni parcours de conformité, ni seconde déclaration, ni évaluation conjointe, ni avis CSE → fin de démarche directe
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, soumission → aucune proposition de conformité → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-14]` : effectif GIP 30, écart ≥ 5 % à l'étape 5, transmission → aucune proposition de conformité → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-14\]"`
 
 ---
@@ -298,7 +298,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - CSE : non
 - Déclaration des 6 premiers indicateurs
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), soumission → fin de démarche directe → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-01-6IND] Path 14` : effectif GIP 120 (tranche 100-149), funnel en 5 étapes (étape catégories masquée), transmission → fin de démarche directe → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-01-6IND\]"`
 
 ---
@@ -313,7 +313,7 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 - Déclaration des 6 premiers indicateurs
 - Dépot avis CSE sur l'exactitude des données déclarées
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, soumission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-02-6IND] Path 15` : effectif GIP 120, funnel en 5 étapes, transmission → `/avis-cse` → dépôt de l'avis « exactitude » → confirmation.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-02-6IND\]"`
 
 ---
@@ -326,9 +326,9 @@ Correspondances de vocabulaire (Excel → application) : « 7ᵉ indicateur » =
 
 - CSE : non applicable (différence avec `CAS-01-6IND` qui tourne en 100-149 avec la question CSE)
 - Funnel sans étape 5 (indicateur G non applicable)
-- Soumission → fin de démarche directe
+- Transmission → fin de démarche directe
 
-**Test E2E** : `compliance.e2e.ts` — `[CAS-13-6IND]` : effectif GIP 75 (représentatif 50-99), funnel sans étape 5, soumission → fin de démarche directe → `/confirmation`.
+**Test E2E** : `compliance.e2e.ts` — `[CAS-13-6IND]` : effectif GIP 75 (représentatif 50-99), funnel sans étape 5, transmission → fin de démarche directe → `/confirmation`.
 **Exécuter** : `pnpm --filter app test:e2e --grep "\[CAS-13-6IND\]"`
 
 ---

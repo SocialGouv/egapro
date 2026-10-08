@@ -427,16 +427,16 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		for (const pct of [
-			"33,3 %",
-			"66,7 %",
-			"57,1 %",
-			"42,9 %",
-			"43,6 %",
-			"56,4 %",
-			"36,6 %",
-			"63,4 %",
-			"42,6 %",
-			"57,4 %",
+			"33,33 %",
+			"66,66 %",
+			"57,14 %",
+			"42,85 %",
+			"43,63 %",
+			"56,36 %",
+			"36,58 %",
+			"63,41 %",
+			"42,57 %",
+			"57,42 %",
 		]) {
 			expect(screen.getAllByText(pct)).toHaveLength(2);
 		}
@@ -516,6 +516,24 @@ describe("RecapitulatifPage", () => {
 			/>,
 		);
 		expect(screen.queryByText("Code NAF")).not.toBeInTheDocument();
+	});
+
+	it("shows the foreign country instead of a raw street", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{
+					...defaultCompany(),
+					countryCode: "99131",
+					countryLabel: "BELGIQUE",
+				}}
+			/>,
+		);
+		expect(screen.getByText("Pays")).toBeInTheDocument();
+		expect(screen.getByText("Belgique")).toBeInTheDocument();
+		expect(
+			screen.queryByText("1 rue de Paris, 75001 Paris"),
+		).not.toBeInTheDocument();
 	});
 
 	it("hides address when not available", () => {

@@ -15,15 +15,15 @@ export type FileType = (typeof fileTypeEnum.enumValues)[number];
 
 export const FSM_STATUS_MEANINGS: Record<DeclarationFsmStatus, string> = {
 	draft:
-		"Déclaration commencée et non soumise. N'apparaît dans l'export que pour une déclaration annulée : un brouillon non annulé n'est jamais exporté.",
+		"Déclaration commencée et non transmise. N'apparaît dans l'export que pour une déclaration annulée : un brouillon non annulé n'est jamais exporté.",
 	awaiting_compliance_path_choice:
-		"Déclaration soumise avec un écart d'au moins 5 % : l'entreprise doit choisir son parcours de mise en conformité.",
+		"Déclaration transmise avec un écart d'au moins 5 % : l'entreprise doit choisir son parcours de mise en conformité.",
 	corrective_actions_chosen:
 		"Parcours « actions correctives » choisi après la première déclaration ; une seconde déclaration est attendue.",
 	joint_evaluation_chosen:
 		"Parcours « évaluation conjointe » choisi après la première déclaration ; le rapport est attendu.",
 	awaiting_revision_choice:
-		"Seconde déclaration soumise avec un écart persistant : l'entreprise doit choisir un second parcours.",
+		"Seconde déclaration transmise avec un écart persistant : l'entreprise doit choisir un second parcours.",
 	revised_joint_evaluation_chosen:
 		"Parcours « évaluation conjointe » choisi après la seconde déclaration ; le rapport est attendu.",
 	awaiting_cse_opinion: "Le ou les avis du CSE sont attendus.",
@@ -32,10 +32,10 @@ export const FSM_STATUS_MEANINGS: Record<DeclarationFsmStatus, string> = {
 };
 
 export const EVENT_TYPE_MEANINGS: Record<DeclarationEventType, string> = {
-	submit: "Soumission de la déclaration initiale.",
+	submit: "Transmission de la déclaration initiale.",
 	path_choice:
 		"Choix d'un parcours de mise en conformité. Seul événement à porter `Numero_declaration`.",
-	second_declaration_submit: "Soumission de la seconde déclaration.",
+	second_declaration_submit: "Transmission de la seconde déclaration.",
 	joint_evaluation_submit: "Dépôt du rapport d'évaluation conjointe.",
 	cse_opinion_submit: "Dépôt d'un avis du CSE.",
 	cancel: "Annulation de la déclaration.",
@@ -121,7 +121,7 @@ export const HOMONYMS: SuitHomonym[] = [
 			},
 			{
 				field: "`Seconde_declaration.Statut`",
-				meaning: "Booléen : la seconde déclaration a-t-elle été soumise.",
+				meaning: "Booléen : la seconde déclaration a-t-elle été transmise.",
 			},
 		],
 	},

@@ -34,6 +34,25 @@ function renderHeader(location: LocationProps) {
 	);
 }
 
+function renderWithWorkforce(workforceEma: number | null) {
+	render(
+		<CompanyHeader
+			address={null}
+			backHref="/index-egapro/recherche"
+			countryCode={null}
+			countryLabel={null}
+			departmentLabel={null}
+			nafCode={null}
+			nafLabel={null}
+			name="Société Démo"
+			region={null}
+			siren="123456789"
+			workforceEma={workforceEma}
+			year={2027}
+		/>,
+	);
+}
+
 function locationFact(): string | null | undefined {
 	return screen.queryByText(/^(Adresse|Pays) :/)?.textContent;
 }
@@ -101,5 +120,32 @@ describe("CompanyHeader", () => {
 			"Code NAF : Non-diffusible",
 		);
 		expect(screen.queryByText(/Non-diffusible.*Non-diffusible/)).toBeNull();
+	});
+
+	it("shows the GIP average headcount with two truncated decimals", () => {
+		renderWithWorkforce(49.876);
+
+		expect(
+			screen.getByText("Effectif annuel moyen en 2026 :").parentElement,
+		).toHaveTextContent("Effectif annuel moyen en 2026 : 49,87");
+	});
+
+	it("does not round a fractional headcount up to the next unit", () => {
+		renderWithWorkforce(49.6);
+
+		expect(screen.getByText("49,6")).toBeInTheDocument();
+		expect(screen.queryByText("50")).toBeNull();
+	});
+
+	it("shows a whole headcount without a decimal part", () => {
+		renderWithWorkforce(250);
+
+		expect(screen.getByText("250")).toBeInTheDocument();
+	});
+
+	it("omits the headcount when the GIP has none", () => {
+		renderWithWorkforce(null);
+
+		expect(screen.queryByText(/Effectif annuel moyen/)).toBeNull();
 	});
 });

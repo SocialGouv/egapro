@@ -1,9 +1,12 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 
 import {
-	campaignDeadlinesFormSchema,
+	commonCalendarFormSchema,
 	getCampaignDeadlinesByYearSchema,
+	getCommonCalendarPreconditionMessage,
 	getRepresentationCampaignByYearSchema,
+	remunerationDeadlinesFormSchema,
 	representationCampaignFormSchema,
 	updateLockTimeoutSchema,
 } from "~/modules/admin/settings/schemas";
@@ -11,6 +14,8 @@ import {
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
+	getPathChoiceDeadline,
+	getPathChoiceRound1Deadline,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
@@ -57,10 +62,18 @@ export const adminSettingsRouter = createTRPCRouter({
 				.where(eq(campaignDeadlines.year, input.year))
 				.limit(1);
 
+			const pathChoiceDeadlines = {
+				pathChoiceRound1Deadline: toIsoDate(
+					getPathChoiceRound1Deadline(input.year),
+				),
+				pathChoiceDeadline: toIsoDate(getPathChoiceDeadline(input.year)),
+			};
+
 			if (row) {
 				return {
 					year: row.year,
 					exists: true as const,
+					...pathChoiceDeadlines,
 					gipPublicationDate: row.gipPublicationDate,
 					campaignStartDate: row.campaignStartDate,
 					publicDataReleaseDate: row.publicDataReleaseDate,
@@ -78,6 +91,7 @@ export const adminSettingsRouter = createTRPCRouter({
 			return {
 				year: input.year,
 				exists: false as const,
+				...pathChoiceDeadlines,
 				gipPublicationDate: toNullableIsoDate(defaults.gipPublicationDate),
 				campaignStartDate: toNullableIsoDate(defaults.campaignStartDate),
 				publicDataReleaseDate: null,
@@ -134,35 +148,40 @@ export const adminSettingsRouter = createTRPCRouter({
 			return { success: true as const };
 		}),
 
-	/**
-	 * Upsert all deadlines of a given campaign year in one call.
-	 *
-	 * `gipPublicationDate` is deliberately excluded from the payload — its value
-	 * is written by the SUIT CSV import and the admin form only displays it.
-	 */
-	upsertCampaignDeadlines: adminProcedure
-		.input(campaignDeadlinesFormSchema)
+	upsertRemunerationDeadlines: adminProcedure
+		.input(remunerationDeadlinesFormSchema)
 		.mutation(async ({ ctx, input }) => {
-			const values = {
-				year: input.year,
-				campaignStartDate: input.campaignStartDate,
-				publicDataReleaseDate: input.publicDataReleaseDate,
-				decl1ModificationDeadline: input.decl1ModificationDeadline,
-				decl1JustificationDeadline: input.decl1JustificationDeadline,
-				decl1JointEvaluationDeadline: input.decl1JointEvaluationDeadline,
-				decl2ModificationDeadline: input.decl2ModificationDeadline,
-				decl2JustificationDeadline: input.decl2JustificationDeadline,
-				decl2JointEvaluationDeadline: input.decl2JointEvaluationDeadline,
-				decl2CseOpinionDeadline: input.decl2CseOpinionDeadline,
-			};
+			const { year, ...deadlines } = input;
 
-			// `gipPublicationDate` is written exclusively by the SUIT CSV import,
-			// so we never touch it here — neither on insert (defaults to NULL)
-			// nor on conflict (the `set` object below omits it by construction).
-			await ctx.db.insert(campaignDeadlines).values(values).onConflictDoUpdate({
-				target: campaignDeadlines.year,
-				set: values,
-			});
+			await ctx.db
+				.insert(campaignDeadlines)
+				.values({ year, ...deadlines })
+				.onConflictDoUpdate({
+					target: campaignDeadlines.year,
+					set: deadlines,
+				});
+
+			return { success: true as const };
+		}),
+
+	updateCommonCalendar: adminProcedure
+		.input(commonCalendarFormSchema)
+		.mutation(async ({ ctx, input }) => {
+			const updated = await ctx.db
+				.update(campaignDeadlines)
+				.set({
+					campaignStartDate: input.campaignStartDate,
+					publicDataReleaseDate: input.publicDataReleaseDate,
+				})
+				.where(eq(campaignDeadlines.year, input.year))
+				.returning({ year: campaignDeadlines.year });
+
+			if (updated.length === 0) {
+				throw new TRPCError({
+					code: "PRECONDITION_FAILED",
+					message: getCommonCalendarPreconditionMessage(input.year),
+				});
+			}
 
 			return { success: true as const };
 		}),
@@ -218,11 +237,9 @@ export const adminSettingsRouter = createTRPCRouter({
 		}),
 });
 
-/** Format a non-null Date as a local-date YYYY-MM-DD string. */
+/** Format a civil date (UTC midnight) as its YYYY-MM-DD string. */
 function toIsoDate(date: Date): string {
-	// Shift by the local TZ offset so toISOString renders the local date, not UTC.
-	const localMs = date.getTime() - date.getTimezoneOffset() * 60_000;
-	return new Date(localMs).toISOString().slice(0, 10);
+	return date.toISOString().slice(0, 10);
 }
 
 /** Format an optional Date as a YYYY-MM-DD string or null. */

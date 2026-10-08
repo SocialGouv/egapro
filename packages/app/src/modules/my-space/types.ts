@@ -48,5 +48,6 @@ export type DeclarationItem = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	deadline: Date | null;
 	notSubject: boolean;
 };

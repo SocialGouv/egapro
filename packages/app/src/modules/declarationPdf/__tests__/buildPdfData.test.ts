@@ -149,7 +149,7 @@ describe("buildPdfData", () => {
 		});
 		const buildPdfData = await importBuild();
 		await expect(buildPdfData("123456789", 2026, NOW)).rejects.toThrow(
-			"La déclaration n'est pas encore soumise",
+			"La déclaration n'est pas encore transmise",
 		);
 	});
 
@@ -174,6 +174,9 @@ describe("buildPdfData", () => {
 					siren: "123456789",
 					name: "Société Démo",
 					address: "1 rue de la Paix, 75002 Paris",
+					countryCode: null,
+					countryLabel: "FRANCE",
+					departmentLabel: "Paris",
 					nafCode: "6201Z",
 					nafLabel: "Programmation informatique",
 				},
@@ -217,6 +220,9 @@ describe("buildPdfData", () => {
 			name: "Société Démo",
 			siren: "123456789",
 			address: "1 rue de la Paix, 75002 Paris",
+			countryCode: null,
+			countryLabel: "FRANCE",
+			departmentLabel: "Paris",
 			nafCode: "6201Z",
 			nafLabel: "Programmation informatique",
 			workforceDisplay: (250).toLocaleString("fr-FR"),

@@ -267,6 +267,23 @@ describe("toPublicDeclaration", () => {
 		expect(dto.globalHourlyMeanGap).toBeNull();
 	});
 
+	it("maps a blank or infinite numeric string to null rather than 0 or Infinity", () => {
+		const dto = toPublicDeclaration(
+			{
+				...declarationFixture,
+				globalAnnualMeanGap: "",
+				globalAnnualMedianGap: " ",
+				globalHourlyMedianGap: "Infinity",
+			},
+			{ ...companyFixture, workforceEma: "" },
+		);
+
+		expect(dto.globalAnnualMeanGap).toBeNull();
+		expect(dto.globalAnnualMedianGap).toBeNull();
+		expect(dto.globalHourlyMedianGap).toBeNull();
+		expect(dto.workforceEma).toBeNull();
+	});
+
 	it("passes through null integer counts", () => {
 		const dto = toPublicDeclaration(
 			{ ...declarationFixture, totalWomen: null, totalMen: null },

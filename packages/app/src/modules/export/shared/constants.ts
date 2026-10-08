@@ -37,7 +37,7 @@ export const DECLARATION_COLUMNS: Array<{
 	{ key: "rulesVersion", header: "Version_regles" },
 	{ key: "createdAt", header: "Date_creation" },
 	{ key: "updatedAt", header: "Date_modification" },
-	{ key: "submittedAt", header: "Date_soumission" },
+	{ key: "submittedAt", header: "Date_transmission" },
 	{
 		key: "firstDeclarationPathChoiceAt",
 		header: "Date_parcours_apres_declaration_1",

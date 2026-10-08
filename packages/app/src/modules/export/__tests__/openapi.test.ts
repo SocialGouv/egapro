@@ -22,7 +22,7 @@ describe("openApiSpec", () => {
 	it("should be a valid OpenAPI 3.1 structure", () => {
 		expect(openApiSpec.openapi).toBe("3.1.0");
 		expect(openApiSpec.info.title).toBeDefined();
-		expect(openApiSpec.info.version).toBe("3.1.0");
+		expect(openApiSpec.info.version).toBe("4.0.0");
 		expect(openApiSpec.paths).toBeDefined();
 	});
 
@@ -58,6 +58,18 @@ describe("openApiSpec", () => {
 		expect(declarationSchema.properties.id.type).toBe("string");
 		expect(declarationSchema.properties.id.format).toBe("uuid");
 		expect(Object.keys(declarationSchema.properties)[0]).toBe("id");
+	});
+
+	it("documents the initial transmission date as Date_transmission (#4303)", () => {
+		const declarationSchema =
+			openApiSpec.paths["/api/v1/export/declarations"].get.responses["200"]
+				.content["application/json"].schema.properties.Declarations.items;
+		expect(Object.keys(declarationSchema.properties)).toContain(
+			"Date_transmission",
+		);
+		expect(Object.keys(declarationSchema.properties)).not.toContain(
+			"Date_soumission",
+		);
 	});
 
 	it("should define 200, 400, and 500 responses", () => {

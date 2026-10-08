@@ -14,6 +14,7 @@
 
 import type { Sql, TransactionSql } from "postgres";
 import postgres from "postgres";
+import { truncateRatio } from "~/modules/domain";
 
 const args: Record<string, string | true> = Object.fromEntries(
 	process.argv
@@ -486,6 +487,10 @@ const YEARS = [
 	),
 ].sort((left, right) => left - right);
 
+function ratioOrNull(ratio: number | null): number | null {
+	return ratio === null ? null : truncateRatio(ratio);
+}
+
 function indicatorValues(
 	companyIndex: number,
 	point: HistoryPoint,
@@ -496,6 +501,9 @@ function indicatorValues(
 	const variable = point.variable;
 	const womenShare = 46 + (companyIndex % 10) * 2;
 	const quartileShift = (companyIndex % 7) - 2;
+	const women = (percent: number) =>
+		truncateRatio((percent + quartileShift) / 100);
+	const complement = (ratio: number) => truncateRatio(1 - ratio);
 
 	// The headcount split must add up to the company's workforce: the company
 	// page shows both, and a demo that contradicts itself reads as a bug.
@@ -504,24 +512,38 @@ function indicatorValues(
 	return {
 		totalWomen,
 		totalMen: workforce - totalWomen,
-		globalAnnualMeanGap: annual,
-		globalHourlyMeanGap: hourly,
-		variableAnnualMeanGap: variable,
-		variableHourlyMeanGap: variable === null ? null : variable - 0.008,
-		globalAnnualMedianGap: annual === null ? null : annual - 0.006,
-		globalHourlyMedianGap: hourly === null ? null : hourly - 0.004,
-		variableAnnualMedianGap: variable === null ? null : variable - 0.005,
-		variableHourlyMedianGap: variable === null ? null : variable - 0.01,
-		variableProportionWomen: womenShare / 100,
-		variableProportionMen: (womenShare + 5) / 100,
-		annualQuartile1Women: (58 + quartileShift) / 100,
-		annualQuartile2Women: (54 + quartileShift) / 100,
-		annualQuartile3Women: (49 + quartileShift) / 100,
-		annualQuartile4Women: (43 + quartileShift) / 100,
-		hourlyQuartile1Women: (57 + quartileShift) / 100,
-		hourlyQuartile2Women: (53 + quartileShift) / 100,
-		hourlyQuartile3Women: (48 + quartileShift) / 100,
-		hourlyQuartile4Women: (42 + quartileShift) / 100,
+		globalAnnualMeanGap: ratioOrNull(annual),
+		globalHourlyMeanGap: ratioOrNull(hourly),
+		variableAnnualMeanGap: ratioOrNull(variable),
+		variableHourlyMeanGap: ratioOrNull(
+			variable === null ? null : variable - 0.008,
+		),
+		globalAnnualMedianGap: ratioOrNull(annual === null ? null : annual - 0.006),
+		globalHourlyMedianGap: ratioOrNull(hourly === null ? null : hourly - 0.004),
+		variableAnnualMedianGap: ratioOrNull(
+			variable === null ? null : variable - 0.005,
+		),
+		variableHourlyMedianGap: ratioOrNull(
+			variable === null ? null : variable - 0.01,
+		),
+		variableProportionWomen: truncateRatio(womenShare / 100),
+		variableProportionMen: truncateRatio((womenShare + 5) / 100),
+		annualQuartile1Women: women(58),
+		annualQuartile1Men: complement(women(58)),
+		annualQuartile2Women: women(54),
+		annualQuartile2Men: complement(women(54)),
+		annualQuartile3Women: women(49),
+		annualQuartile3Men: complement(women(49)),
+		annualQuartile4Women: women(43),
+		annualQuartile4Men: complement(women(43)),
+		hourlyQuartile1Women: women(57),
+		hourlyQuartile1Men: complement(women(57)),
+		hourlyQuartile2Women: women(53),
+		hourlyQuartile2Men: complement(women(53)),
+		hourlyQuartile3Women: women(48),
+		hourlyQuartile3Men: complement(women(48)),
+		hourlyQuartile4Women: women(42),
+		hourlyQuartile4Men: complement(women(42)),
 	};
 }
 
@@ -665,14 +687,14 @@ async function main() {
 							${values.globalAnnualMedianGap}, ${values.globalHourlyMedianGap},
 							${values.variableAnnualMedianGap}, ${values.variableHourlyMedianGap},
 							${values.variableProportionWomen}, ${values.variableProportionMen},
-							${values.annualQuartile1Women}, ${1 - values.annualQuartile1Women},
-							${values.annualQuartile2Women}, ${1 - values.annualQuartile2Women},
-							${values.annualQuartile3Women}, ${1 - values.annualQuartile3Women},
-							${values.annualQuartile4Women}, ${1 - values.annualQuartile4Women},
-							${values.hourlyQuartile1Women}, ${1 - values.hourlyQuartile1Women},
-							${values.hourlyQuartile2Women}, ${1 - values.hourlyQuartile2Women},
-							${values.hourlyQuartile3Women}, ${1 - values.hourlyQuartile3Women},
-							${values.hourlyQuartile4Women}, ${1 - values.hourlyQuartile4Women},
+							${values.annualQuartile1Women}, ${values.annualQuartile1Men},
+							${values.annualQuartile2Women}, ${values.annualQuartile2Men},
+							${values.annualQuartile3Women}, ${values.annualQuartile3Men},
+							${values.annualQuartile4Women}, ${values.annualQuartile4Men},
+							${values.hourlyQuartile1Women}, ${values.hourlyQuartile1Men},
+							${values.hourlyQuartile2Women}, ${values.hourlyQuartile2Men},
+							${values.hourlyQuartile3Women}, ${values.hourlyQuartile3Men},
+							${values.hourlyQuartile4Women}, ${values.hourlyQuartile4Men},
 							NOW(), NOW()
 						)
 					`;

@@ -180,11 +180,8 @@ test.describe("Company location row — Mon espace banner and observatory", () =
 	) {
 		await test.step("search result", async () => {
 			await page.goto(routeWithQuery(OBSERVATORY_SEARCH, `q=${TEST_SIREN}`));
-			const facts = page
-				.getByRole("article")
-				.filter({ hasText: TEST_SIREN })
-				.locator("p > span");
-			await expect(facts.nth(1)).toHaveText(searchRow);
+			const result = page.getByRole("article").filter({ hasText: TEST_SIREN });
+			await expect(result.getByText(searchRow, { exact: true })).toBeVisible();
 		});
 
 		await test.step("company page", async () => {

@@ -9,6 +9,7 @@ import {
 	deriveSubsequentSubmissions,
 	getCurrentDate,
 	getCurrentYear,
+	getDeclarationProcessStepDeadline,
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCseRequired,
@@ -27,6 +28,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
 	assertNotImpersonating,
+	canAccessCompany,
 	isImpersonatingSiren,
 } from "~/server/auth/companyAccess";
 import type { DB } from "~/server/db";
@@ -39,17 +41,18 @@ import {
 	files,
 	gipMdsData,
 	representationDeclarations,
-	userCompanies,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
 import { fetchCseBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 async function findUserCompany(db: DB, session: Session, siren: string) {
-	const userId = session.user.id;
-	const bypassOwnership = isImpersonatingSiren(session, siren);
+	if (!(await canAccessCompany(db, session, siren))) {
+		throw new Error("Company not found or access denied");
+	}
+	const impersonating = isImpersonatingSiren(session, siren);
 
-	const baseQuery = db
+	const rows = await db
 		.select({
 			siren: companies.siren,
 			name: companies.name,
@@ -69,16 +72,9 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 				eq(gipMdsData.siren, companies.siren),
 				eq(gipMdsData.year, getCurrentYear()),
 			),
-		);
-
-	const rows = bypassOwnership
-		? await baseQuery.where(eq(companies.siren, siren)).limit(1)
-		: await baseQuery
-				.innerJoin(userCompanies, eq(userCompanies.siren, companies.siren))
-				.where(
-					and(eq(userCompanies.userId, userId), eq(userCompanies.siren, siren)),
-				)
-				.limit(1);
+		)
+		.where(eq(companies.siren, siren))
+		.limit(1);
 
 	const row = rows[0];
 	if (!row) {
@@ -111,11 +107,7 @@ async function findUserCompany(db: DB, session: Session, siren: string) {
 	// Code and label are written together: a stored code may predate the rév. 2
 	// switch (#4087), and writing the label alone would pin a rév. 2 wording
 	// next to a NAF 2025 code.
-	if (
-		!bypassOwnership &&
-		company.nafCode !== null &&
-		company.nafLabel === null
-	) {
+	if (!impersonating && company.nafCode !== null && company.nafLabel === null) {
 		try {
 			const info = await fetchCompanyBySiren(company.siren);
 			if (info?.nafLabel && info.nafCode) {
@@ -239,10 +231,14 @@ export const companyRouter = createTRPCRouter({
 					declarationRows.filter((d) => d.year < year).map((d) => d.year),
 				),
 			];
-			const pastYearDeadlines = await Promise.all(
-				pastYears.map((pastYear) => getCampaignDeadlines(pastYear)),
-			);
-			const deadlinesByYear = new Map(
+			// Always resolved: a current-year placeholder with no DB row still shows a deadline.
+			const [currentYearDeadlines, pastYearDeadlines] = await Promise.all([
+				getCampaignDeadlines(year),
+				Promise.all(
+					pastYears.map((pastYear) => getCampaignDeadlines(pastYear)),
+				),
+			]);
+			const pastDeadlinesByYear = new Map(
 				pastYears.map((pastYear, index) => [
 					pastYear,
 					pastYearDeadlines[index],
@@ -263,18 +259,19 @@ export const companyRouter = createTRPCRouter({
 					status: d.status,
 					currentStep: d.currentStep,
 				});
-				const deadlines = deadlinesByYear.get(d.year);
-				const status = deadlines
-					? applyDeclarationClosure({
-							status: projectedStatus,
-							fsmStatus: d.status,
-							year: d.year,
-							currentYear: year,
-							deadlines,
-							// Same clock as `currentYear` above: left to its default the deadline check would read the wall clock and contradict the year guard.
-							now: getCurrentDate(),
-						})
-					: projectedStatus;
+				const deadlines =
+					d.year === year
+						? currentYearDeadlines
+						: (pastDeadlinesByYear.get(d.year) ?? currentYearDeadlines);
+				const status = applyDeclarationClosure({
+					status: projectedStatus,
+					fsmStatus: d.status,
+					year: d.year,
+					currentYear: year,
+					deadlines,
+					// Same clock as `currentYear`, so the deadline check agrees with the year guard.
+					now: getCurrentDate(),
+				});
 				const submissions = deriveSubsequentSubmissions(
 					eventsByDeclarationId.get(d.id) ?? [],
 				);
@@ -294,6 +291,7 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 					hasPrefillData: yearsWithPrefill.has(d.year),
+					deadline: getDeclarationProcessStepDeadline(d.status, deadlines),
 					notSubject: false,
 				};
 			});
@@ -318,6 +316,8 @@ export const companyRouter = createTRPCRouter({
 					cseRequired: false,
 					hasJointEvaluationFile: false,
 					hasPrefillData: false,
+					// Representation deadlines come from `representationCampaign`.
+					deadline: null,
 					notSubject: isRepresentationNotSubject(representationRow.status),
 				});
 			}
@@ -328,6 +328,7 @@ export const companyRouter = createTRPCRouter({
 				year,
 				yearsWithPrefill,
 				representationVisible,
+				currentYearDeadlines,
 			);
 
 			return { company, declarations: declarationItems };

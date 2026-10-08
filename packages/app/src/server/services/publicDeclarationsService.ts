@@ -6,7 +6,6 @@ import {
 	countDistinct,
 	desc,
 	eq,
-	ilike,
 	inArray,
 	or,
 	type SQL,
@@ -36,6 +35,10 @@ import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
+import {
+	containsInsensitive,
+	startsWithInsensitive,
+} from "~/server/db/likeConditions";
 import { publiclyReleasedCampaignCondition } from "~/server/db/publicReleaseConditions";
 import {
 	campaignDeadlines,
@@ -46,7 +49,7 @@ import {
 
 export function nafSectionCondition(section: string) {
 	const range = NAF_SECTION_DIVISIONS[section.toUpperCase() as NafSection];
-	if (!range) return ilike(companies.nafCode, `${section}%`);
+	if (!range) return startsWithInsensitive(companies.nafCode, section);
 	return sql<boolean>`substring(${companies.nafCode} from '^[0-9]{2}')::integer between ${range[0]} and ${range[1]}`;
 }
 
@@ -115,7 +118,7 @@ export function publicDeclarationFacetConditions(
 	if (facets.city) {
 		const cityFilter = and(
 			diffusibleCompanyCondition(),
-			ilike(companies.city, `%${facets.city}%`),
+			containsInsensitive(companies.city, facets.city),
 		);
 		if (cityFilter) conditions.push(cityFilter);
 	}
@@ -189,10 +192,12 @@ export async function searchPublicDeclarations(
 	];
 	if (input.q) {
 		const normalizedQuery = input.q.replace(/\s/g, "");
-		const term = `%${input.q}%`;
 		const queryFilter = /^\d{9}$/.test(normalizedQuery)
 			? eq(declarations.siren, normalizedQuery)
-			: and(diffusibleCompanyCondition(), ilike(companies.name, term));
+			: and(
+					diffusibleCompanyCondition(),
+					containsInsensitive(companies.name, input.q),
+				);
 		if (queryFilter) baseConditions.push(queryFilter);
 	}
 

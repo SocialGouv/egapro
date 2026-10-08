@@ -28,6 +28,23 @@ describe("AUDIT_ACTIONS", () => {
 		).toBe("mutation");
 	});
 
+	it("maps the remuneration deadlines and common calendar admin settings to distinct mutations", () => {
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES).toBe(
+			"admin_settings.upsert_deadlines",
+		);
+		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR).toBe(
+			"admin_settings.update_common_calendar",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES],
+		).toBe("mutation");
+		expect(
+			AUDIT_ACTION_CATEGORIES[
+				AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR
+			],
+		).toBe("mutation");
+	});
+
 	it("maps the representation campaign upsert to a mutation", () => {
 		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN).toBe(
 			"admin_settings.upsert_representation_campaign",

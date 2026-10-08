@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 
-import type {
-	CampaignDeadlines,
-	RepresentationCampaign,
-} from "~/modules/domain";
-import {
-	formatShortDate,
-	getCurrentYear,
-	getDeclarationProcessStepDeadline,
-} from "~/modules/domain";
+import type { RepresentationCampaign } from "~/modules/domain";
+import { formatCivilShortDate, getCurrentYear } from "~/modules/domain";
 
 import { Pagination } from "~/modules/shared/Pagination";
 
@@ -32,7 +25,6 @@ const TYPE_LABELS: Record<DeclarationType, string> = {
 };
 
 type Props = {
-	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
 	userPhone: string | null;
 	hasCse: boolean | null;
@@ -42,26 +34,20 @@ type Props = {
 
 function getDeadlineCell(
 	declaration: DeclarationItem,
-	campaignDeadlines: CampaignDeadlines,
 	representationCampaign: RepresentationCampaign,
 ): string {
 	if (declaration.type === "representation") {
 		if (declaration.notSubject) return "-";
-		return formatShortDate(representationCampaign.declarationDeadline);
+		return formatCivilShortDate(representationCampaign.declarationDeadline);
 	}
-	const deadline = getDeclarationProcessStepDeadline(
-		declaration.fsmStatus,
-		campaignDeadlines,
-	);
-	if (deadline === null) return "Clôturée";
-	return formatShortDate(deadline);
+	if (declaration.deadline === null) return "Clôturée";
+	return formatCivilShortDate(declaration.deadline);
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const PAGE_SIZE_SELECTOR_THRESHOLD = 20;
 
 export function DeclarationsSection({
-	campaignDeadlines,
 	declarations,
 	userPhone,
 	hasCse,
@@ -112,7 +98,6 @@ export function DeclarationsSection({
 			</h2>
 			{visibleCurrentDeclarations.length > 0 && (
 				<DeclarationsTable
-					campaignDeadlines={campaignDeadlines}
 					cseApplicable={cseApplicable}
 					declarations={visibleCurrentDeclarations}
 					hasCse={hasCse}
@@ -127,7 +112,6 @@ export function DeclarationsSection({
 						Années précédentes
 					</h2>
 					<DeclarationsTable
-						campaignDeadlines={campaignDeadlines}
 						cseApplicable={cseApplicable}
 						declarations={visiblePreviousDeclarations}
 						hasCse={hasCse}
@@ -177,7 +161,6 @@ export function DeclarationsSection({
 }
 
 type DeclarationsTableProps = {
-	campaignDeadlines: CampaignDeadlines;
 	declarations: DeclarationItem[];
 	labelledById: string;
 	userPhone: string | null;
@@ -187,7 +170,6 @@ type DeclarationsTableProps = {
 };
 
 function DeclarationsTable({
-	campaignDeadlines,
 	declarations,
 	labelledById,
 	userPhone,
@@ -229,11 +211,7 @@ function DeclarationsTable({
 											<td>{declaration.year}</td>
 											<td>{getDeclarationProcessStepLabel(declaration)}</td>
 											<td>
-												{getDeadlineCell(
-													declaration,
-													campaignDeadlines,
-													representationCampaign,
-												)}
+												{getDeadlineCell(declaration, representationCampaign)}
 											</td>
 											<td>
 												<StatusBadge status={declaration.status} />

@@ -80,7 +80,7 @@ export async function buildPdfData(
 	}
 
 	if (isDraft(declaration.status)) {
-		throw new Error("La déclaration n'est pas encore soumise");
+		throw new Error("La déclaration n'est pas encore transmise");
 	}
 
 	const [[company], [gip], jobs, transmittedDate, declarantRows] =
@@ -161,6 +161,9 @@ export async function buildPdfData(
 			name: company?.name ?? `Entreprise ${siren}`,
 			siren,
 			address: company?.address ?? "",
+			countryCode: company?.countryCode ?? null,
+			countryLabel: company?.countryLabel ?? null,
+			departmentLabel: company?.departmentLabel ?? null,
 			nafCode: company?.nafCode ?? null,
 			nafLabel: company?.nafLabel ?? null,
 			workforceDisplay: formatWorkforceForUser(gipWorkforce),

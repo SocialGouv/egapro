@@ -303,4 +303,22 @@ describe("mapGipToFormData", () => {
 		const result = mapGipToFormData(row);
 		expect(result?.step1.totalWomen).toBeNull();
 	});
+
+	it("rejects a partially numeric count instead of reading its numeric prefix", () => {
+		const row = makeGipRow({
+			womenCountAnnualGlobal: "12abc",
+			womenCountAnnualVariable: "7 salariées",
+			annualQuartile1WomenCount: "10,6",
+		});
+		const result = mapGipToFormData(row);
+		expect(result?.step1.totalWomen).toBeNull();
+		expect(result?.step3.beneficiaryCountWomen).toBeNull();
+		expect(result?.step4.annual.womenCounts[0]).toBeNull();
+	});
+
+	it("returns null for an infinite count instead of carrying Infinity into the form", () => {
+		const row = makeGipRow({ menCountHourlyGlobal: "Infinity" });
+		const result = mapGipToFormData(row);
+		expect(result?.step1.hourlyMen).toBeNull();
+	});
 });

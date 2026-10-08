@@ -103,7 +103,7 @@ describe("fetchSubmittedDeclarations — composite temporal filter", () => {
 	});
 
 	it("should not gate the cancelled-window arm on status check", async () => {
-		// Annulation tardive d'une déclaration soumise hors fenêtre :
+		// Annulation tardive d'une déclaration transmise hors fenêtre :
 		// le filtre composite doit la capter sans exiger status<>'draft'
 		// dans la même conjonction. Le statut n'apparaît que dans l'arm 2.
 		const { fetchSubmittedDeclarations } = await import("../queries");
@@ -120,7 +120,7 @@ describe("fetchSubmittedDeclarations — composite temporal filter", () => {
 	});
 
 	it("should keep cancelled_at IS NULL on the active-submission arm to avoid double-counting", async () => {
-		// Soumission ET annulation toutes deux dans la fenêtre :
+		// Transmission ET annulation toutes deux dans la fenêtre :
 		// la déclaration doit être captée une seule fois. L'arm 2 exclut donc
 		// les annulations (cancelled_at IS NULL) que l'arm 1 capture déjà.
 		const { fetchSubmittedDeclarations } = await import("../queries");

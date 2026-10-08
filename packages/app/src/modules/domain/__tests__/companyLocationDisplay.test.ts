@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	ADDRESS_ROW_LABEL,
-	COUNTRY_ROW_LABEL,
 	companyLocationRow,
 	formatInseeTitleCase,
-	UNKNOWN_COUNTRY_VALUE,
 } from "../shared/companyLocationDisplay";
 
 describe("formatInseeTitleCase", () => {
@@ -47,12 +44,6 @@ describe("formatInseeTitleCase", () => {
 
 describe("companyLocationRow", () => {
 	const unknown = { label: "Pays", value: "inconnu" };
-
-	it("exposes the row labels and the unknown-country value", () => {
-		expect(COUNTRY_ROW_LABEL).toBe("Pays");
-		expect(ADDRESS_ROW_LABEL).toBe("Adresse");
-		expect(UNKNOWN_COUNTRY_VALUE).toBe("inconnu");
-	});
 
 	it("names the title-cased country of a company registered abroad, never its address", () => {
 		expect(

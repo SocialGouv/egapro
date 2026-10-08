@@ -14,6 +14,7 @@ Les schémas Zod vivent dans `src/modules/{domaine}/schemas.ts`, **jamais** dans
 ## Accès
 
 - Toute procédure non publique est un `protectedProcedure`, pas un `publicProcedure`.
+- Une procédure publique qui expose des données utilise `rateLimitedPublicProcedure` : elle partage le quota par client de l'API REST publique, que tRPC ne doit pas permettre de contourner.
 - **Toute mutation vérifie la propriété** : le `userId` vient de la session, jamais de l'input client. Un identifiant fourni par le client ne sert qu'à désigner la ressource, jamais à autoriser l'accès.
 - Écriture multiple ou lecture-puis-écriture → `db.transaction()` (`rules/database-drizzle.md`).
 - Toute mutation, et toute query exposant des données sensibles, se câble à l'audit (`rules/audit-logging.md`).
@@ -22,7 +23,7 @@ Les schémas Zod vivent dans `src/modules/{domaine}/schemas.ts`, **jamais** dans
 
 Toujours `TRPCError`, jamais un `Error` nu, avec le code qui porte la sémantique HTTP :
 
-`NOT_FOUND` (n'existe pas) · `BAD_REQUEST` (entrée invalide passée à travers Zod) · `FORBIDDEN` (droits insuffisants) · `UNAUTHORIZED` (non authentifié) · `CONFLICT` (doublon ou conflit d'état) · `INTERNAL_SERVER_ERROR` (échec inattendu).
+`NOT_FOUND` (n'existe pas) · `BAD_REQUEST` (entrée invalide passée à travers Zod) · `FORBIDDEN` (droits insuffisants) · `UNAUTHORIZED` (non authentifié) · `CONFLICT` (doublon ou conflit d'état) · `TOO_MANY_REQUESTS` (quota d'appels dépassé) · `INTERNAL_SERVER_ERROR` (échec inattendu).
 
 ## Requêtes
 
