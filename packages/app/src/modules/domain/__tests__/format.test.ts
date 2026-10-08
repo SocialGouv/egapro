@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	computePercentage,
 	computeProportion,
+	formatCivilLongDate,
 	formatCount,
 	formatCurrency,
 	formatDays,
@@ -405,6 +406,20 @@ describe("formatLongDate", () => {
 	it("gives the first of the month its French ordinal", () => {
 		expect(formatLongDate(new Date(2026, 5, 1))).toBe(
 			"1\u1d49\u02b3 juin 2026",
+		);
+	});
+});
+
+describe("formatCivilLongDate", () => {
+	afterEach(() => vi.unstubAllEnvs());
+
+	it.each([
+		"America/Cayenne",
+		"Pacific/Tahiti",
+	])("keeps the calendar day in %s", (timeZone) => {
+		vi.stubEnv("TZ", timeZone);
+		expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
+			"1ᵉʳ juin 2026",
 		);
 	});
 });

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId } from "react";
 import { Controller } from "react-hook-form";
 
 import { TrackedLink } from "~/modules/analytics";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { nextCalendarDay, publicationSchema } from "../schemas";
@@ -112,8 +112,8 @@ export function Step4Publication() {
 	return (
 		<div>
 			<p className={`fr-mb-2w ${styles.intro}`}>
-				Vous devez publier vos écarts au plus tard le{" "}
-				{formatLongDate(declarationDeadline)}.
+				Vous devez déclarer la publication de vos écarts au plus tard le{" "}
+				{formatCivilLongDate(declarationDeadline)}.
 			</p>
 			<p className={`fr-mb-2w ${styles.mandatory}`}>
 				Tous les champs sont obligatoires.

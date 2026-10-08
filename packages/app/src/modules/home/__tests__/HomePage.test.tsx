@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { civilDate } from "~/modules/domain";
 import { HomePage } from "../HomePage";
 
 // HomeNotice is a client component using useState — mock it to avoid issues in jsdom
@@ -9,8 +10,8 @@ vi.mock("../HomeNotice", () => ({
 	),
 }));
 
-const REMUNERATION_DEADLINE = new Date(2026, 5, 1);
-const REPRESENTATION_DEADLINE = new Date(2026, 2, 1);
+const REMUNERATION_DEADLINE = civilDate(2026, 5, 1);
+const REPRESENTATION_DEADLINE = civilDate(2026, 2, 1);
 
 function renderPage() {
 	return render(

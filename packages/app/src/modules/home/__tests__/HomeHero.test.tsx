@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { civilDate } from "~/modules/domain";
 import { HomeHero } from "../HomeHero";
 
-const REMUNERATION_DEADLINE = new Date(2026, 5, 1);
-const REPRESENTATION_DEADLINE = new Date(2026, 2, 1);
+const REMUNERATION_DEADLINE = civilDate(2026, 5, 1);
+const REPRESENTATION_DEADLINE = civilDate(2026, 2, 1);
 
 function renderHero() {
 	return render(
@@ -15,6 +16,8 @@ function renderHero() {
 }
 
 describe("HomeHero", () => {
+	afterEach(() => vi.unstubAllEnvs());
+
 	it("renders the main heading", () => {
 		renderHero();
 		expect(
@@ -65,10 +68,24 @@ describe("HomeHero", () => {
 		).toBeInTheDocument();
 	});
 
+	it.each([
+		"America/Cayenne",
+		"Pacific/Tahiti",
+	])("keeps both civil deadlines in %s", (timeZone) => {
+		vi.stubEnv("TZ", timeZone);
+		renderHero();
+		expect(
+			screen.getByText("Rémunération : 1ᵉʳ juin 2026"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Représentation équilibrée : 1ᵉʳ mars 2026"),
+		).toBeInTheDocument();
+	});
+
 	it("reflects a change to either deadline independently", () => {
 		render(
 			<HomeHero
-				remunerationDeadline={new Date(2027, 9, 15)}
+				remunerationDeadline={civilDate(2027, 9, 15)}
 				representationDeadline={REPRESENTATION_DEADLINE}
 			/>,
 		);

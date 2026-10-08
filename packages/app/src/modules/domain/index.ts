@@ -40,6 +40,7 @@ export {
 	readCampaignYearOverride,
 	writeCampaignYearOverride,
 } from "./shared/campaignClock";
+export { civilDate } from "./shared/civilDate";
 // Company obligation
 export { isObligatedForYear } from "./shared/companyObligation";
 // Company size
@@ -188,6 +189,7 @@ export {
 export {
 	computePercentage,
 	computeProportion,
+	formatCivilLongDate,
 	formatCount,
 	formatCurrency,
 	formatDays,

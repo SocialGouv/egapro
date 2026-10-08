@@ -216,7 +216,7 @@ export function formatShortDateTime(date: Date | null | undefined): string {
  * Format a date in long French format: `new Date("2026-03-10")` → `"10 mars 2026"`.
  * The first day of a month takes the French ordinal: `"1ᵉʳ juin 2026"`.
  */
-export function formatLongDate(date: Date): string {
+function longDate(date: Date, timeZone?: string): string {
 	// `formatToParts` rather than a regex over the formatted string: the ordinal
 	// is applied to the day part itself, whatever separator or part order the
 	// runtime's locale data produces.
@@ -224,12 +224,21 @@ export function formatLongDate(date: Date): string {
 		day: "numeric",
 		month: "long",
 		year: "numeric",
+		timeZone,
 	})
 		.formatToParts(date)
 		.map((part) =>
 			part.type === "day" && part.value === "1" ? "1ᵉʳ" : part.value,
 		)
 		.join("");
+}
+
+export function formatLongDate(date: Date): string {
+	return longDate(date);
+}
+
+export function formatCivilLongDate(date: Date): string {
+	return longDate(date, "UTC");
 }
 
 /** Format a `MM-DD` fragment (year-agnostic) to French short form: `"02-15"` → `"15/02"`. */

@@ -1,5 +1,6 @@
 import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
+import { civilDate, isCivilDayOver } from "./civilDate";
 import { formatIsoDate } from "./format";
 
 /** Returns the current campaign year: the E2E recette override when a grid run
@@ -88,12 +89,12 @@ export function getDeclarationReferencePeriod(
 
 /** Returns the derived deadline to choose a compliance path (January 1st of the following year). */
 export function getPathChoiceDeadline(year: number): Date {
-	return new Date(year + 1, 0, 1);
+	return civilDate(year + 1, 0, 1);
 }
 
 /** Returns the derived round-1 deadline to choose a compliance path (July 1st of the campaign year). */
 export function getPathChoiceRound1Deadline(year: number): Date {
-	return new Date(year, 6, 1);
+	return civilDate(year, 6, 1);
 }
 
 /**
@@ -126,13 +127,13 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 	return {
 		gipPublicationDate: null,
 		campaignStartDate: null,
-		decl1ModificationDeadline: new Date(year, 5, 1),
-		decl1JustificationDeadline: new Date(year + 1, 2, 1),
-		decl1JointEvaluationDeadline: new Date(year, 7, 1),
-		decl2ModificationDeadline: new Date(year, 11, 1),
-		decl2JustificationDeadline: new Date(year, 11, 1),
-		decl2JointEvaluationDeadline: new Date(year + 1, 0, 1),
-		decl2CseOpinionDeadline: new Date(year + 1, 1, 1),
+		decl1ModificationDeadline: civilDate(year, 5, 1),
+		decl1JustificationDeadline: civilDate(year + 1, 2, 1),
+		decl1JointEvaluationDeadline: civilDate(year, 7, 1),
+		decl2ModificationDeadline: civilDate(year, 11, 1),
+		decl2JustificationDeadline: civilDate(year, 11, 1),
+		decl2JointEvaluationDeadline: civilDate(year + 1, 0, 1),
+		decl2CseOpinionDeadline: civilDate(year + 1, 1, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};
@@ -142,9 +143,9 @@ export function getDefaultRepresentationCampaign(
 	campaignYear: number,
 ): RepresentationCampaign {
 	return {
-		campaignStartDate: new Date(campaignYear, 0, 1),
-		campaignEndDate: new Date(campaignYear, 11, 31),
-		declarationDeadline: new Date(campaignYear, 2, 1),
+		campaignStartDate: civilDate(campaignYear, 0, 1),
+		campaignEndDate: civilDate(campaignYear, 11, 31),
+		declarationDeadline: civilDate(campaignYear, 2, 1),
 	};
 }
 
@@ -154,7 +155,7 @@ export function isRepresentationCampaignOpen(
 ): boolean {
 	return (
 		now.getTime() >= campaign.campaignStartDate.getTime() &&
-		now.getTime() <= campaign.campaignEndDate.getTime()
+		!isCivilDayOver(campaign.campaignEndDate, now)
 	);
 }
 
@@ -163,5 +164,5 @@ export function isDeadlinePassed(
 	deadline: Date,
 	now: Date = new Date(),
 ): boolean {
-	return now.getTime() > deadline.getTime();
+	return isCivilDayOver(deadline, now);
 }

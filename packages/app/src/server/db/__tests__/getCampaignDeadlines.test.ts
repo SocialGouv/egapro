@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
+import { civilDate, getDefaultCampaignDeadlines } from "~/modules/domain";
 
 const limitMock = vi.fn();
 const dbMock = {
@@ -32,7 +32,7 @@ describe("getCampaignDeadlines", () => {
 
 		const deadlines = await getCampaignDeadlines(2027);
 
-		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
+		expect(deadlines.decl1ModificationDeadline).toEqual(civilDate(2027, 5, 1));
 		expect(deadlines.gipPublicationDate).toBeNull();
 		expect(deadlines.campaignStartDate).toBeNull();
 	});
@@ -65,7 +65,7 @@ describe("getCampaignDeadlines", () => {
 
 		const deadlines = await getCampaignDeadlines(2027);
 
-		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 6, 1));
-		expect(deadlines.campaignStartDate).toEqual(new Date(2027, 2, 5));
+		expect(deadlines.decl1ModificationDeadline).toEqual(civilDate(2027, 6, 1));
+		expect(deadlines.campaignStartDate).toEqual(civilDate(2027, 2, 5));
 	});
 });

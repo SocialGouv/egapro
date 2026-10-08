@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
 import styles from "./HomeHero.module.scss";
 
@@ -70,8 +70,8 @@ export function HomeHero({
 							/>
 							<HeroInfoItem
 								description={[
-									`Rémunération : ${formatLongDate(remunerationDeadline)}`,
-									`Représentation équilibrée : ${formatLongDate(representationDeadline)}`,
+									`Rémunération : ${formatCivilLongDate(remunerationDeadline)}`,
+									`Représentation équilibrée : ${formatCivilLongDate(representationDeadline)}`,
 								]}
 								iconClass="fr-icon-calendar-line"
 								title="Déclaration annuelle obligatoire"
