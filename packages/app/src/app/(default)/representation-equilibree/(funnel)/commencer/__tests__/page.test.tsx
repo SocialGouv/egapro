@@ -34,7 +34,7 @@ describe("CommencerPage (représentation équilibrée)", () => {
     expect(screen.getByText(/Vous devez déclarer pour d'autres entreprises/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "votre profil ProConnect" })).toHaveAttribute(
       "href",
-      "https://identite.proconnect.gouv.fr/users/start-sign-in",
+      "https://identite.proconnect.gouv.fr/manage-organizations",
     );
     expect(screen.queryByText(/visualiser ou modifier/)).not.toBeInTheDocument();
     expect(screen.queryByText(/unité économique et sociale/)).not.toBeInTheDocument();
