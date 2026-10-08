@@ -4,6 +4,7 @@ import {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
 	resolveAdminAccess,
 } from "~/modules/domain";
 
@@ -105,6 +106,33 @@ describe("isAdminMfaFresh", () => {
 		["Infinity", Number.POSITIVE_INFINITY],
 	])("is never fresh when the date is %s", (_label, adminMfaAt) => {
 		expect(isAdminMfaFresh(adminMfaAt, at(0))).toBe(false);
+	});
+});
+
+describe("isPublicAgent", () => {
+	it("accepts a roles array containing agent_public", () => {
+		expect(isPublicAgent(["agent_public"])).toBe(true);
+	});
+
+	it("accepts agent_public alongside the more specific roles it never arrives without", () => {
+		expect(isPublicAgent(["agent_public", "agent_public_etat"])).toBe(true);
+	});
+
+	it("rejects an empty roles array", () => {
+		expect(isPublicAgent([])).toBe(false);
+	});
+
+	it("rejects a roles array missing agent_public", () => {
+		expect(isPublicAgent(["agent_public_etat"])).toBe(false);
+	});
+
+	it.each([
+		["null", null],
+		["undefined", undefined],
+		["a string", "agent_public"],
+		["a plain object", { agent_public: true }],
+	])("rejects %s", (_label, roles) => {
+		expect(isPublicAgent(roles)).toBe(false);
 	});
 });
 

@@ -203,7 +203,12 @@ describe("auth config — admin two-factor authentication", () => {
 					status: "success",
 					userId: "uuid-123",
 					userEmail: ADMIN_EMAIL,
-					metadata: { acr: "eidas1-mfa", authTime: AUTH_TIME },
+					metadata: {
+						acr: "eidas1-mfa",
+						authTime: AUTH_TIME,
+						roles: null,
+						publicAgentRequired: true,
+					},
 				}),
 			);
 		});
@@ -215,7 +220,12 @@ describe("auth config — admin two-factor authentication", () => {
 				expect.objectContaining({
 					action: "auth.admin_mfa",
 					status: "success",
-					metadata: { acr: "eidas1", authTime: null },
+					metadata: {
+						acr: "eidas1",
+						authTime: null,
+						roles: null,
+						publicAgentRequired: true,
+					},
 				}),
 			);
 		});
@@ -229,7 +239,12 @@ describe("auth config — admin two-factor authentication", () => {
 			const [entry] = mockLogAction.mock.calls[0] as [
 				{ metadata: Record<string, unknown> },
 			];
-			expect(Object.keys(entry.metadata).sort()).toEqual(["acr", "authTime"]);
+			expect(Object.keys(entry.metadata).sort()).toEqual([
+				"acr",
+				"authTime",
+				"publicAgentRequired",
+				"roles",
+			]);
 			expect(JSON.stringify(entry)).not.toContain("header.");
 		});
 
@@ -295,9 +310,9 @@ describe("auth config — admin two-factor authentication", () => {
 			) as { authorization: { params: Record<string, unknown> } };
 		}
 
-		it("asks for the declarant scopes and nothing more", () => {
+		it("asks for the declarant scopes plus roles, and nothing more", () => {
 			expect(proconnectProvider().authorization.params).toEqual({
-				scope: "openid email given_name usual_name siret",
+				scope: "openid email given_name usual_name siret roles",
 			});
 		});
 
