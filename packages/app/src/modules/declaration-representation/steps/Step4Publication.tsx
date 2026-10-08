@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId } from "react";
 import { Controller } from "react-hook-form";
 
 import { TrackedLink } from "~/modules/analytics";
+import { formatCivilLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { nextCalendarDay, publicationSchema } from "../schemas";
@@ -18,8 +19,13 @@ type PublicationFieldErrors = Partial<
 >;
 
 export function Step4Publication() {
-	const { draft, setDraftValues, isReadOnly, registerStepValidator } =
-		useRepresentationDraftContext();
+	const {
+		draft,
+		setDraftValues,
+		isReadOnly,
+		registerStepValidator,
+		declarationDeadline,
+	} = useRepresentationDraftContext();
 	const referencePeriodEnd = draft.referencePeriodEnd;
 
 	const baseId = useId();
@@ -106,7 +112,8 @@ export function Step4Publication() {
 	return (
 		<div>
 			<p className={`fr-mb-2w ${styles.intro}`}>
-				Vous devez publier vos écarts chaque année, au plus tard le 1er mars.
+				Vous devez déclarer la publication de vos écarts au plus tard le{" "}
+				{formatCivilLongDate(declarationDeadline)}.
 			</p>
 			<p className={`fr-mb-2w ${styles.mandatory}`}>
 				Tous les champs sont obligatoires.

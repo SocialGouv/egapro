@@ -17,6 +17,7 @@ export type RepresentationDraftContextValue = {
 	isReadOnly: boolean;
 	previousHref: AppHref;
 	registerStepValidator: (validator: StepValidator | null) => void;
+	declarationDeadline: Date;
 };
 
 const RepresentationDraftContext =

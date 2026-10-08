@@ -51,6 +51,7 @@ import {
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
+const DECLARATION_DEADLINE = new Date(2026, 2, 1);
 const CLOSED_BANNER = "La campagne de représentation équilibrée est close";
 const TWO_OR_MORE = /^Deux cadres dirigeants ou plus/;
 const NONE = /^Aucun cadre dirigeant/;
@@ -90,6 +91,7 @@ function renderStep({
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
+			declarationDeadline={DECLARATION_DEADLINE}
 			initialDraft={initialDraft ?? { currentStep }}
 			isSubmitted={isSubmitted}
 			step={step}
@@ -295,6 +297,7 @@ describe("StepPageClient — étape invalide (S6)", () => {
 			<StepPageClient
 				campaignOpen
 				campaignYear={CAMPAIGN_YEAR}
+				declarationDeadline={DECLARATION_DEADLINE}
 				initialDraft={{ currentStep: 3 }}
 				step={3}
 				year={YEAR}

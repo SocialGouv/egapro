@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	OFFLINE_PUBLICATION,
 	REPRESENTATION_YEAR,
@@ -17,6 +16,7 @@ import type {
 import { RepresentationDraftProvider } from "~/modules/declaration-representation/shared/draft/DraftContext";
 import { PUBLICATION_STEP_NUMBER } from "~/modules/declaration-representation/steps";
 import type { RepresentationDraft } from "~/modules/declaration-representation/types";
+import { civilDate } from "~/modules/domain";
 import { Step4Publication } from "../Step4Publication";
 
 const ACCORDION_TITLE = "Obligation de transparence";
@@ -32,12 +32,16 @@ const registerStepValidator = vi.fn((validator: StepValidator | null) => {
 	latestValidator = validator;
 });
 
+const DEFAULT_DECLARATION_DEADLINE = civilDate(2026, 2, 1);
+
 function renderStep({
 	draft = {},
 	isReadOnly = false,
+	declarationDeadline = DEFAULT_DECLARATION_DEADLINE,
 }: {
 	draft?: Partial<RepresentationDraft>;
 	isReadOnly?: boolean;
+	declarationDeadline?: Date;
 } = {}) {
 	const value: RepresentationDraftContextValue = {
 		year: REPRESENTATION_YEAR,
@@ -53,6 +57,7 @@ function renderStep({
 		isReadOnly,
 		previousHref: "/declaration-representation/etape/3",
 		registerStepValidator,
+		declarationDeadline,
 	};
 
 	return render(
@@ -181,6 +186,43 @@ describe("Step4Publication — fields", () => {
 
 		expect(modalitiesField()).toHaveAttribute("readonly");
 		expect(modalitiesField()).not.toBeDisabled();
+	});
+});
+
+describe("Step4Publication — intro deadline", () => {
+	afterEach(() => vi.unstubAllEnvs());
+
+	it("announces the publication deadline without a yearly recurrence", () => {
+		renderStep();
+
+		const intro = screen.getByText(
+			"Vous devez déclarer la publication de vos écarts au plus tard le 1ᵉʳ mars 2026.",
+		);
+		expect(intro).toBeInTheDocument();
+		expect(intro.textContent).not.toMatch(/chaque année/);
+	});
+
+	it("follows the campaign's declaration deadline", () => {
+		renderStep({ declarationDeadline: civilDate(2027, 3, 15) });
+
+		expect(
+			screen.getByText(
+				"Vous devez déclarer la publication de vos écarts au plus tard le 15 avril 2027.",
+			),
+		).toBeInTheDocument();
+	});
+
+	it.each([
+		"America/Cayenne",
+		"Pacific/Tahiti",
+	])("keeps the civil deadline in %s", (timeZone) => {
+		vi.stubEnv("TZ", timeZone);
+		renderStep();
+		expect(
+			screen.getByText(
+				"Vous devez déclarer la publication de vos écarts au plus tard le 1ᵉʳ mars 2026.",
+			),
+		).toBeInTheDocument();
 	});
 });
 
