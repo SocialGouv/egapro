@@ -17,7 +17,7 @@ export const OtherCompaniesNotice = () => (
       <li>
         Si elles ne sont pas encore rattachées&nbsp;: rendez-vous dans la section «&nbsp;Organisations&nbsp;» de{" "}
         <a
-          href={config.proconnect.signinUrl}
+          href={config.proconnect.manageOrganisationUrl}
           target="_blank"
           rel="noopener noreferrer"
           title={getExternalLinkTitle(proconnectProfileLinkText)}
