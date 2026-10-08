@@ -118,7 +118,6 @@ export function DevLoginForm({ callbackUrl }: Props) {
 
 			<div className="fr-checkbox-group fr-mb-3w">
 				<input
-					defaultChecked
 					id="dev-login-is-public-agent"
 					type="checkbox"
 					{...form.register("isPublicAgent")}
