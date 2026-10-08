@@ -17,6 +17,14 @@ export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	cancelled: "Annulée",
 };
 
+export function statusLabel(
+	status: AdminDeclarationStatusFilter | string | null | undefined,
+): string | null | undefined {
+	return (
+		STATUS_LABELS[(status ?? "") as AdminDeclarationStatusFilter] ?? status
+	);
+}
+
 export const CANCEL_DECLARATION_BUTTON_LABEL = "Annuler la déclaration";
 export const CANCEL_DECLARATION_MODAL_TITLE = "Confirmer l'annulation";
 export const CANCEL_DECLARATION_MODAL_BODY =

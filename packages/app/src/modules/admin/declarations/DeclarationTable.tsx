@@ -9,11 +9,7 @@ import { useSortableTable } from "~/modules/shared/useSortableTable";
 import styles from "./DeclarationTable.module.scss";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-import {
-	type AdminDeclarationStatusFilter,
-	STATUS_LABELS,
-	WORKFORCE_LABEL,
-} from "./shared/constants";
+import { statusLabel, WORKFORCE_LABEL } from "./shared/constants";
 import type { DeclarationSearchRow } from "./types";
 
 type Props = {
@@ -99,9 +95,7 @@ export function DeclarationTable({
 								{isCancelled(row) ? (
 									<span className="fr-badge fr-badge--warning">Annulée</span>
 								) : (
-									(STATUS_LABELS[
-										(row.status ?? "") as AdminDeclarationStatusFilter
-									] ?? row.status)
+									statusLabel(row.status)
 								)}
 							</td>
 							<td>{row.declarantEmail}</td>
