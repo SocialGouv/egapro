@@ -1,4 +1,4 @@
-import { type COUNTIES, type CountryIsoCode, type NAF, type REGIONS } from "@common/dict";
+import { type COUNTIES, type CountryIsoCode, type REGIONS } from "@common/dict";
 import { type ClearObject } from "@common/utils/types";
 
 import { type CreateRepresentationEquilibreeDTO } from "./CreateRepresentationEquilibreeDTO";
@@ -12,7 +12,7 @@ export type RepresentationEquilibreeDTO = ClearObject<
       city: string;
       countryCode: CountryIsoCode;
       county?: keyof COUNTIES;
-      nafCode: keyof NAF | "[NON-DIFFUSIBLE]";
+      nafCode: string;
       name: string;
       postalCode: string;
       region?: keyof REGIONS;

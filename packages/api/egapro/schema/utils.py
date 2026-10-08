@@ -1,5 +1,4 @@
 from egapro import constants
-from naf import DB as NAF
 
 
 def regions():
@@ -11,7 +10,7 @@ def departements():
 
 
 def naf():
-    return {"type": "string", "enum": list(NAF.keys())}
+    return {"type": "string", "pattern": r"^\S+$"}
 
 
 def code_pays():

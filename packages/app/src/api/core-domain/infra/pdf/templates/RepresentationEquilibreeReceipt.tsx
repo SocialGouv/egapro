@@ -1,5 +1,5 @@
 import { type RepresentationEquilibree } from "@common/core-domain/domain/RepresentationEquilibree";
-import { NAF } from "@common/dict";
+import { getNafDescription } from "@common/dict";
 import { formatDateToFr } from "@common/utils/date";
 import { formatPrettyFloat, truncFloatToDecimal } from "@common/utils/number";
 import { isEqual } from "date-fns";
@@ -58,7 +58,7 @@ export const RepresentationEquilibreeReceipt = ({ repEq }: RepresentationEquilib
         },
         {
           key: "Code NAF",
-          value: nafCode ? `${nafCode} - ${NAF[nafCode].description}` : "Non diffusible",
+          value: nafCode ? `${nafCode} - ${getNafDescription(nafCode)}` : "Non diffusible",
         },
         {
           key: "Adresse",

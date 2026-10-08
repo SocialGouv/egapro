@@ -5,7 +5,7 @@ import { createModal } from "@codegouvfr/react-dsfr/Modal";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 import { CompanyWorkforceRange } from "@common/core-domain/domain/valueObjects/declaration/CompanyWorkforceRange";
 import { type CompanyDTO } from "@common/core-domain/dtos/CompanyDTO";
-import { COUNTRIES_ISO_TO_LIB, NAF } from "@common/dict";
+import { COUNTRIES_ISO_TO_LIB, getNafDescription } from "@common/dict";
 import { zodFr } from "@common/utils/zod";
 import { ClientBodyPortal } from "@components/utils/ClientBodyPortal";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -297,7 +297,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
         <GridCol sm={9} className="fr-pb-0">
           <strong>Code NAF</strong>
           <br />
-          {!nafCode ? "[NON-DIFFUSIBLE]" : `${nafCode} - ${NAF[nafCode] ? NAF[nafCode].description : ""}`}
+          {!nafCode ? "[NON-DIFFUSIBLE]" : `${nafCode} - ${getNafDescription(nafCode)}`}
         </GridCol>
         <GridCol sm={12}>
           <strong>Adresse</strong>
@@ -339,7 +339,7 @@ export const RecapCardCompany = ({ company, full, title, mode, onSubmit }: Props
       {countryIsoCode && countryIsoCode !== "FR" && <br />}
       Siren : <strong>{siren}</strong>
       <br />
-      Code NAF : <strong>{nafCode}</strong> - {nafCode && NAF[nafCode] ? NAF[nafCode].description : ""}
+      Code NAF : <strong>{nafCode}</strong> - {nafCode && getNafDescription(nafCode)}
       <br />
       {workforce?.range && (
         <>

@@ -1,5 +1,4 @@
 import { type RepresentationEquilibreeSearchResultRaw } from "@api/core-domain/infra/db/raw";
-import { type NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { EntityMap } from "@common/shared-domain/domain/EntityMap";
 
@@ -39,7 +38,7 @@ export const representationEquilibreeSearchResultMap: Mapper<
         postalCode: raw.company.code_postal,
         region: raw.company.région,
         siren: raw.company.siren,
-        nafCode: raw.company.code_naf === "[NON-DIFFUSIBLE]" ? undefined : (raw.company.code_naf as keyof NAF),
+        nafCode: raw.company.code_naf === "[NON-DIFFUSIBLE]" ? undefined : raw.company.code_naf,
       }),
     });
   },

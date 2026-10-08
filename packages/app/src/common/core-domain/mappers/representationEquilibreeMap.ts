@@ -1,5 +1,4 @@
 import { type RepresentationEquilibreeRaw } from "@api/core-domain/infra/db/raw";
-import { type NAF } from "@common/dict";
 import { type Mapper } from "@common/shared-domain";
 import { dateObjectToDateISOString } from "@common/utils/date";
 
@@ -24,8 +23,7 @@ export const representationEquilibreeMap: Required<
         postalCode: raw.data.entreprise.code_postal,
         region: raw.data.entreprise.région,
         siren: raw.data.entreprise.siren,
-        nafCode:
-          raw.data.entreprise.code_naf === "[NON-DIFFUSIBLE]" ? undefined : (raw.data.entreprise.code_naf as keyof NAF),
+        nafCode: raw.data.entreprise.code_naf === "[NON-DIFFUSIBLE]" ? undefined : raw.data.entreprise.code_naf,
       },
       declarant: {
         email: raw.data.déclarant.email,
@@ -93,8 +91,7 @@ export const representationEquilibreeMap: Required<
         entreprise: {
           siren: data.siren,
           adresse: obj.company.address,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- "[NON-DIFFUSIBLE]" sentinel not in CodeNaf type
-          code_naf: (obj.company.nafCode?.getValue() as any) || "[NON-DIFFUSIBLE]",
+          code_naf: obj.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]",
           code_pays: obj.company.countryCode?.getValue(),
           code_postal: obj.company.postalCode?.getValue(),
           commune: obj.company.city,
