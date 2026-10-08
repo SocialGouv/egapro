@@ -1,4 +1,5 @@
-import { DsfrPictogram } from "~/modules/layout";
+import { env } from "~/env.js";
+import { DsfrPictogram, NewTabNotice } from "~/modules/layout";
 
 import styles from "./ArchivesSection.module.scss";
 
@@ -21,14 +22,15 @@ export function ArchivesSection() {
 						</p>
 					</div>
 					<div className="fr-col-auto">
-						<button
+						<a
 							className="fr-btn fr-btn--tertiary"
-							disabled
-							title="Fonctionnalité à venir"
-							type="button"
+							href={env.SUPPORT_JIRA_URL}
+							rel="noopener noreferrer"
+							target="_blank"
 						>
 							Demander une déclaration archivée
-						</button>
+							<NewTabNotice />
+						</a>
 					</div>
 				</div>
 			</div>
