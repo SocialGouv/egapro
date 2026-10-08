@@ -1,6 +1,11 @@
+import type { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
+
 export const WORKFORCE_LABEL = "Effectif annuel moyen";
 
-export const STATUS_LABELS: Record<string, string> = {
+export type AdminDeclarationStatusFilter =
+	(typeof ADMIN_DECLARATION_STATUS_FILTERS)[number];
+
+export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	draft: "Brouillon",
 	awaiting_compliance_path_choice: "Transmise",
 	corrective_actions_chosen: "Actions correctives choisies",
@@ -11,6 +16,14 @@ export const STATUS_LABELS: Record<string, string> = {
 	demarche_completed: "Démarche terminée",
 	cancelled: "Annulée",
 };
+
+const LABEL_BY_STATUS: Readonly<Record<string, string>> = STATUS_LABELS;
+
+export function statusLabel(
+	status: string | null | undefined,
+): string | null | undefined {
+	return status ? (LABEL_BY_STATUS[status] ?? status) : status;
+}
 
 export const CANCEL_DECLARATION_BUTTON_LABEL = "Annuler la déclaration";
 export const CANCEL_DECLARATION_MODAL_TITLE = "Confirmer l'annulation";

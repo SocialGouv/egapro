@@ -65,6 +65,15 @@ const sortColumnMap = {
 } as const;
 
 export const adminDeclarationsRouter = createTRPCRouter({
+	listYears: adminProcedure.query(async ({ ctx }) => {
+		const rows = await ctx.db
+			.selectDistinct({ year: declarations.year })
+			.from(declarations)
+			.orderBy(desc(declarations.year));
+
+		return rows.map((row) => row.year);
+	}),
+
 	search: adminProcedure
 		.input(searchDeclarationsSchema)
 		.query(async ({ ctx, input }) => {
