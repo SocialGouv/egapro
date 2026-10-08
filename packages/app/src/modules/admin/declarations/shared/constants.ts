@@ -17,12 +17,12 @@ export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	cancelled: "Annulée",
 };
 
+const LABEL_BY_STATUS: Readonly<Record<string, string>> = STATUS_LABELS;
+
 export function statusLabel(
-	status: AdminDeclarationStatusFilter | string | null | undefined,
+	status: string | null | undefined,
 ): string | null | undefined {
-	return (
-		STATUS_LABELS[(status ?? "") as AdminDeclarationStatusFilter] ?? status
-	);
+	return status ? (LABEL_BY_STATUS[status] ?? status) : status;
 }
 
 export const CANCEL_DECLARATION_BUTTON_LABEL = "Annuler la déclaration";

@@ -36,7 +36,6 @@ function DeclarationsContent() {
 
 	const { data, isLoading } = api.adminDeclarations.search.useQuery(input);
 
-	// Mounting SearchForm before years resolve loses the URL's `year` value: its uncontrolled select finds no matching <option> yet.
 	if (isLoading || isYearsLoading) {
 		return <p>Chargement...</p>;
 	}
