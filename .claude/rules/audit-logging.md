@@ -309,7 +309,7 @@ ou `notification` ; `resource_id` n'accepte qu'un UUID technique associé
 clés utiles et leurs validateurs de valeur (année, compteur, booléen ou
 énumération, UUID technique de déclaration ou de fichier). `logAction` reprojette systématiquement les métadonnées avec
 cette politique : une nouvelle route ou un appel direct ne peut pas la
-contourner. Les objets, tableaux, noms de fichiers, champs de recherche,
+contourner. Les objets, tableaux libres, noms de fichiers, champs de recherche,
 numéros de téléphone et clés inconnues sont écartés. Ajouter une clé exige
 une justification d'audit, une valeur bornée et un test.
 
