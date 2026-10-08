@@ -192,8 +192,7 @@ declare module "next-auth/jwt" {
 		// Seconds since the epoch. Absent when the level ProConnect returned
 		// proved no second factor.
 		adminMfaAt?: number;
-		// Present only for a listed account that is not an admin: recalculated
-		// on every sign-in, never carried over from a previous grant.
+		// Only for a listed account that is not granted; recalculated on every sign-in.
 		adminAccessRefusal?: AdminAccessRefusal | null;
 	}
 }
@@ -638,8 +637,7 @@ export const authConfig = {
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
 				token.isAdmin = isGranted;
-				// Recalculated every sign-in, never carried over: a listed account
-				// that regains the grant must not keep a stale refusal around.
+				// Recalculated every sign-in so a regained grant never keeps a stale refusal.
 				token.adminAccessRefusal = grant.refusal
 					? {
 							roles: grant.refusal.roles,

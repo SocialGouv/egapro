@@ -51,9 +51,7 @@ export type ResolveAdminGrantResult = {
 	refusal: { roles: string[] } | null;
 };
 
-// The single rule deciding both the admin grant and its refusal — ProConnect's
-// roles-scope doc requires stating the rule, not just silently withholding
-// the grant, so the two outcomes must come from one place.
+// One rule for both the grant and its refusal, so the displayed refusal can never drift from the actual check.
 export function resolveAdminGrant({
 	isListed,
 	roles,
@@ -95,8 +93,7 @@ export function resolveAdminAccess(
 	if (!session || session.isAdmin === undefined) return { type: "login" };
 
 	if (!session.isAdmin) {
-		// Only a listed-but-refused account carries this field — an unlisted one
-		// is still bounced away without ever learning the backoffice exists.
+		// Only a listed-but-refused account carries the field: an unlisted one never learns the backoffice exists.
 		return session.adminAccessRefusal
 			? { type: "notPublicAgent" }
 			: { type: "monEspace" };

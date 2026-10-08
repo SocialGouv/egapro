@@ -14,8 +14,7 @@ function formatRoles(roles: string[]): string {
 	return roles.length > 0 ? roles.join(", ") : "aucun";
 }
 
-// ProConnect's roles-scope doc requires stating the blocking rule, the
-// user's roles and their organization — never a silent redirect.
+// ProConnect's roles-scope doc requires stating the rule, the roles and the organization, never a silent redirect.
 export function AdminAccessDeniedPage({
 	roles,
 	organizationLabel,

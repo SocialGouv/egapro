@@ -237,8 +237,7 @@ describe("resolveAdminAccess", () => {
 	});
 
 	it("keeps the silent Mon espace refusal when the refusal field is explicitly null", () => {
-		// A granted account that lost the grant on a later sign-in clears the
-		// field rather than leaving a stale refusal behind.
+		// A later grant clears the field instead of leaving a stale refusal behind.
 		expect(
 			resolveAdminAccess({ isAdmin: false, adminAccessRefusal: null }, at(0)),
 		).toEqual({ type: "monEspace" });
