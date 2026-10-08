@@ -121,20 +121,21 @@ describe("AdminReferentsPage", () => {
 	});
 
 	it("neutralises spreadsheet formulas in the CSV export", async () => {
+		const rows = [
+			{
+				region: "11",
+				county: "75",
+				name: "=1+1",
+				type: "email",
+				value: "email@example.fr",
+				principal: true,
+				substituteName: '@SUM("A1")',
+				substituteEmail: null,
+			},
+		];
 		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
-			data: [
-				{
-					region: "11",
-					county: "75",
-					name: "=1+1",
-					type: "email",
-					value: "email@example.fr",
-					principal: true,
-					substituteName: '@SUM("A1")',
-					substituteEmail: null,
-				},
-			],
-			refetch: vi.fn(),
+			data: rows,
+			refetch: vi.fn().mockResolvedValue({ data: rows }),
 			isFetching: false,
 		} as never);
 		vi.mocked(URL.createObjectURL).mockClear();
@@ -151,5 +152,75 @@ describe("AdminReferentsPage", () => {
 		expect(dataLine).toBe(
 			`"11";"75";"'=1+1";"email";"email@example.fr";"true";"'@SUM(""A1"")";""`,
 		);
+	});
+
+	it("exports fresh substitutes in both formats after a previous export", async () => {
+		const previous = {
+			region: "11",
+			county: "75",
+			name: "Référent de test",
+			type: "email",
+			value: "referent@example.fr",
+			principal: true,
+			substituteName: null,
+			substituteEmail: null,
+		};
+		const updated = {
+			...previous,
+			substituteName: "Suppléante de test",
+			substituteEmail: "suppleante@example.fr",
+		};
+		const updatedAgain = {
+			...updated,
+			substituteEmail: "nouvelle@example.fr",
+		};
+		const refetch = vi
+			.fn()
+			.mockResolvedValueOnce({ data: [previous] })
+			.mockResolvedValueOnce({ data: [updated] })
+			.mockResolvedValueOnce({ data: [updatedAgain] });
+		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
+			data: [previous],
+			refetch,
+			isFetching: false,
+		} as never);
+		vi.mocked(URL.createObjectURL).mockClear();
+
+		render(<AdminReferentsPage />);
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(1));
+		fireEvent.click(screen.getByRole("button", { name: "Export CSV" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(2));
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(3));
+
+		const firstBlob = vi.mocked(URL.createObjectURL).mock.calls[0]?.[0] as Blob;
+		const secondBlob = vi.mocked(URL.createObjectURL).mock
+			.calls[1]?.[0] as Blob;
+		const thirdBlob = vi.mocked(URL.createObjectURL).mock.calls[2]?.[0] as Blob;
+		expect(JSON.parse(await firstBlob.text())).toEqual([previous]);
+		expect(await secondBlob.text()).toContain(
+			'"Suppléante de test";"suppleante@example.fr"',
+		);
+		expect(JSON.parse(await thirdBlob.text())).toEqual([updatedAgain]);
+		expect(refetch).toHaveBeenCalledTimes(3);
+	});
+
+	it("does not download an export when fetching fails", async () => {
+		const refetch = vi
+			.fn()
+			.mockResolvedValue({ data: undefined, error: new Error() });
+		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
+			data: [{ substituteName: "Ancienne valeur" }],
+			refetch,
+			isFetching: false,
+		} as never);
+		vi.mocked(URL.createObjectURL).mockClear();
+
+		render(<AdminReferentsPage />);
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+
+		await waitFor(() => expect(refetch).toHaveBeenCalledOnce());
+		expect(URL.createObjectURL).not.toHaveBeenCalled();
 	});
 });
