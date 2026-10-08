@@ -44,9 +44,7 @@ type DatePreset = "future" | "past" | "custom";
 function toInputDate(d: Date): string {
 	const t = d.getTime();
 	if (Number.isNaN(t)) return "";
-	// Use UTC-shifted ISO to avoid TZ drift on toISOString.
-	const tzOffset = d.getTimezoneOffset() * 60_000;
-	return new Date(t - tzOffset).toISOString().slice(0, 10);
+	return d.toISOString().slice(0, 10);
 }
 
 function buildPresetDeadlines(preset: "future" | "past"): CampaignDeadlines {
@@ -182,7 +180,7 @@ export function PanelPlayground() {
 
 	function updateDeadline(key: keyof CampaignDeadlines, value: string) {
 		if (!value) return;
-		const parsed = new Date(`${value}T00:00:00`);
+		const parsed = new Date(`${value}T00:00:00Z`);
 		if (Number.isNaN(parsed.getTime())) return;
 		setPreset("custom");
 		setDeadlines((prev) => ({ ...prev, [key]: parsed }));
@@ -260,7 +258,7 @@ export function PanelPlayground() {
 					<PlaygroundCheckbox
 						checked={secondDeclarationSubmitted}
 						id="second-decl-submitted"
-						label="Seconde déclaration soumise"
+						label="Seconde déclaration transmise"
 						onChange={setSecondDeclarationSubmitted}
 					/>
 

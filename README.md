@@ -128,6 +128,8 @@ docker compose up -d
 pnpm dev:app
 ```
 
+> `docker-compose.yml` est réservé au développement local : ses services portent des identifiants par défaut publics (ceux écrits dans le fichier) et ne publient leurs ports que sur `127.0.0.1`. Ne jamais l'utiliser tel quel sur une machine exposée.
+
 L'application est accessible sur [http://localhost:3000](http://localhost:3000).
 
 ### Connexion ProConnect (environnement de test)

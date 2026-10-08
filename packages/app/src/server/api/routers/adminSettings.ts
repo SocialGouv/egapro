@@ -237,11 +237,9 @@ export const adminSettingsRouter = createTRPCRouter({
 		}),
 });
 
-/** Format a non-null Date as a local-date YYYY-MM-DD string. */
+/** Format a civil date (UTC midnight) as its YYYY-MM-DD string. */
 function toIsoDate(date: Date): string {
-	// Shift by the local TZ offset so toISOString renders the local date, not UTC.
-	const localMs = date.getTime() - date.getTimezoneOffset() * 60_000;
-	return new Date(localMs).toISOString().slice(0, 10);
+	return date.toISOString().slice(0, 10);
 }
 
 /** Format an optional Date as a YYYY-MM-DD string or null. */

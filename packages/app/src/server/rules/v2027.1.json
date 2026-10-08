@@ -301,5 +301,46 @@
 			"to": "demarche_completed",
 			"events": [{ "type": "demarche_complete" }]
 		}
+	],
+
+	"choiceRevisions": [
+		{
+			"id": "revise_initial_path_choice",
+			"description": "Le parcours de la 1re déclaration reste modifiable tant que la seconde déclaration ou l'évaluation conjointe n'est pas transmise : le choix repart de awaiting_compliance_path_choice.",
+			"action": "choose_compliance_path",
+			"from": ["corrective_actions_chosen", "joint_evaluation_chosen"],
+			"reopens": "awaiting_compliance_path_choice"
+		},
+		{
+			"id": "revise_initial_justify_before_cse_opinion",
+			"description": "Une justification de 1re déclaration en attente d'avis CSE reste modifiable tant que l'avis n'est pas transmis.",
+			"action": "choose_compliance_path",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"fact": "firstDeclarationPathChoice",
+				"op": "==",
+				"value": "justify"
+			},
+			"reopens": "awaiting_compliance_path_choice"
+		},
+		{
+			"id": "revise_revised_path_choice",
+			"description": "Le parcours de révision reste modifiable tant que l'évaluation conjointe révisée n'est pas transmise : le choix repart de awaiting_revision_choice.",
+			"action": "choose_compliance_path",
+			"from": ["revised_joint_evaluation_chosen"],
+			"reopens": "awaiting_revision_choice"
+		},
+		{
+			"id": "revise_revised_justify_before_cse_opinion",
+			"description": "Une justification de révision en attente d'avis CSE reste modifiable tant que l'avis n'est pas transmis.",
+			"action": "choose_compliance_path",
+			"from": ["awaiting_cse_opinion"],
+			"guard": {
+				"fact": "secondDeclarationPathChoice",
+				"op": "==",
+				"value": "justify"
+			},
+			"reopens": "awaiting_revision_choice"
+		}
 	]
 }

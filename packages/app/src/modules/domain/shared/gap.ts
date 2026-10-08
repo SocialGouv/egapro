@@ -19,6 +19,7 @@
 
 import type { GapDirection, GapLevel } from "../types";
 import { GAP_ALERT_THRESHOLD } from "./constants";
+import { RATIO_DECIMALS, truncateRatio } from "./decimal";
 import { parseNumber } from "./number";
 
 /** Compute signed gap ratio: (men - women) / men. Returns null if invalid or men is 0. Range: typically -1..1.
@@ -158,6 +159,13 @@ export function gapRatioToPercent(
 	if (ratio === null || ratio === undefined || ratio === "") return null;
 	const n = typeof ratio === "number" ? ratio : Number(ratio);
 	return Number.isNaN(n) ? null : n * 100;
+}
+
+export const GAP_RATIO_DECIMALS = RATIO_DECIMALS;
+
+/** Single truncation rule shared by display, persistence and export, so they never disagree. */
+export function truncateGapRatio(ratio: number): number {
+	return truncateRatio(ratio);
 }
 
 /** Sum base and variable compensation. Returns null only when both inputs are invalid. */

@@ -420,7 +420,7 @@ describe("CompliancePathChoice", () => {
 				screen.getByText(/Informer et consulter votre CSE sur l'exactitude/),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText("Transmettre l'avis ou les avis du CSE"),
+				screen.getByText("Déposer le ou les avis du CSE"),
 			).toBeInTheDocument();
 		});
 
@@ -431,7 +431,7 @@ describe("CompliancePathChoice", () => {
 				screen.queryByText(/Informer et consulter votre CSE sur l'exactitude/),
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByText("Transmettre l'avis ou les avis du CSE"),
+				screen.queryByText("Déposer le ou les avis du CSE"),
 			).not.toBeInTheDocument();
 		});
 

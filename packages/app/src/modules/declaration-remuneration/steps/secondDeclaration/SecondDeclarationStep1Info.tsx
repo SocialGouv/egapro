@@ -5,7 +5,7 @@ import { DraftLoadingState } from "~/modules/declaration-remuneration/shared/dra
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import styles from "./SecondDeclarationStep1Info.module.scss";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
@@ -86,7 +86,7 @@ function DeadlineBlock({
 		<div className={`fr-highlight ${common.flexColumnGapHalf}`}>
 			<p className="fr-mb-0">Échéance</p>
 			<p className="fr-mb-0 fr-text--lead fr-text--bold">
-				{formatLongDate(deadline)}
+				{formatCivilLongDate(deadline)}
 			</p>
 			<p className="fr-mb-0 fr-text-mention--grey">
 				Déclaration effectuée le {declarationDate}
@@ -115,7 +115,7 @@ function ObligationsCallout() {
 						Informer et consulter votre CSE sur l&apos;exactitude des données et
 						éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
 					</li>
-					<li>Transmettre l&apos;avis ou les avis du CSE</li>
+					<li>Déposer le ou les avis du CSE</li>
 				</ul>
 			</div>
 		</div>

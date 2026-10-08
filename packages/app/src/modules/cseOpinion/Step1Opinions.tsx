@@ -235,20 +235,17 @@ export function Step1Opinions({
 
 				{isJointEvaluation ? (
 					<h2 className="fr-h4 fr-mt-5w fr-mb-4w">
-						Transmettre l'avis ou les avis du CSE
+						Dépôt du ou des avis du CSE
 					</h2>
 				) : (
-					<h1 className="fr-h4 fr-mb-4w">
-						Transmettre l'avis ou les avis du CSE
-					</h1>
+					<h1 className="fr-h4 fr-mb-4w">Dépôt du ou des avis du CSE</h1>
 				)}
 
 				<CseStepIndicator currentStep={1} />
 
 				<p className={`fr-text--md fr-mb-2w ${styles.introText}`}>
-					Indiquez si le CSE a été consulté et précisez les avis émis avant de
-					transmettre votre déclaration aux services du ministère chargé du
-					Travail.
+					Renseignez les informations relatives à l'avis ou aux avis émis par
+					votre CSE.
 				</p>
 				<p className="fr-mb-4w fr-text-title--grey">
 					Tous les champs sont obligatoires.

@@ -143,6 +143,10 @@ Notes:
   IIFE.
 - For login failures, pass metadata through `buildAuthErrorMessage()` so OAuth
   tokens / state / code_verifier are stripped from the log line.
+- NextAuth also feeds the `logger` from `POST /api/auth/_log`, an anonymous
+  endpoint whose body picks the level and code. The `[...nextauth]` route
+  answers it `204` without reaching NextAuth, so only server-side events write
+  audit rows — keep it that way.
 
 ### 5. New cron-triggered / system action
 
@@ -276,7 +280,7 @@ type argument.
 |---|---|
 | `healthz` | Liveness probe hit by Kubernetes every few seconds. Returns `"OK"`, reads nothing. Explicitly excluded above. |
 | `e2e-clock` | Test-only clock override, unreachable in production. Auditing it would flood `action_log` from the E2E suite for zero compliance value. |
-| `test-sentry` | Throws on purpose to exercise Sentry capture; 404s in `prod`. No user data. |
+| `test-sentry` | Throws on purpose to exercise Sentry capture, for an admin with a fresh second factor only; 404s to anyone else and always in `prod`. No user data. |
 | `v1/docs` | Serves the static Swagger UI shell; 404s in `prod`. No data access. |
 | `public/openapi.json` | Static OpenAPI document, identical for every caller. |
 | `v1/openapi.json` | idem. |
@@ -314,6 +318,10 @@ Le middleware tRPC lit l'input brut avant Zod. Il ne transmet de métadonnées
 explicite par action. Un échec garde `metadata: null` afin qu'une valeur
 forgée ne soit pas présentée comme validée. Le miroir stdout conserve son
 contrat séparé décrit ci-dessous.
+
+Les routes peuvent utiliser `auditQueryMetadata()` pour valider les
+paramètres de recherche avant de les transmettre ; seuls les champs autorisés
+pour l'action sont persistés par `logAction` et `logActionInTransaction`.
 
 ---
 

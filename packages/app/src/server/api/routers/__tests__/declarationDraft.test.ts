@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { isUserLinkedToSiren } from "~/server/auth/companyLink";
 import { buildLockHolder } from "./helpers/lockTestHelpers";
 
 vi.mock("~/server/auth", () => ({
@@ -130,7 +131,7 @@ describe("declarationDraftRouter", () => {
 
 	describe("get", () => {
 		it("returns null when no declaration row exists", async () => {
-			const { db } = createMockDb([[{ siren: SIREN }], []]);
+			const { db } = createMockDb([[]]);
 			const caller = await createCaller(db);
 
 			const result = await caller.get({ siren: SIREN, year: YEAR });
@@ -140,7 +141,6 @@ describe("declarationDraftRouter", () => {
 
 		it("returns null when draft column is null", async () => {
 			const { db } = createMockDb([
-				[{ siren: SIREN }],
 				[{ draft: null, draftUpdatedAt: new Date() }],
 			]);
 			const caller = await createCaller(db);
@@ -153,7 +153,6 @@ describe("declarationDraftRouter", () => {
 		it("returns the draft when valid and not expired", async () => {
 			const draftData = { main: { step1: { workforce: 50 } } };
 			const { db } = createMockDb([
-				[{ siren: SIREN }],
 				[{ draft: draftData, draftUpdatedAt: new Date() }],
 			]);
 			const caller = await createCaller(db);
@@ -167,7 +166,6 @@ describe("declarationDraftRouter", () => {
 			const draftData = { main: { step1: { workforce: 50 } } };
 			const thirtyOneDaysAgo = new Date(Date.now() - 31 * 24 * 3600 * 1000);
 			const { db } = createMockDb([
-				[{ siren: SIREN }],
 				[{ draft: draftData, draftUpdatedAt: thirtyOneDaysAgo }],
 			]);
 			const caller = await createCaller(db);
@@ -181,7 +179,6 @@ describe("declarationDraftRouter", () => {
 			// #3594: draft read is decoupled from the campaign deadline — only the 30-day TTL gates it.
 			const draftData = { main: { step1: { workforce: 50 } } };
 			const { db } = createMockDb([
-				[{ siren: SIREN }],
 				[{ draft: draftData, draftUpdatedAt: new Date() }],
 			]);
 			const caller = await createCaller(db);
@@ -192,12 +189,14 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("throws FORBIDDEN when user does not own the siren", async () => {
-			const { db } = createMockDb([[]]);
+			vi.mocked(isUserLinkedToSiren).mockResolvedValue(false);
+			const { db } = createMockDb();
 			const caller = await createCaller(db);
 
 			await expect(caller.get({ siren: SIREN, year: YEAR })).rejects.toThrow(
 				FORBIDDEN_MSG,
 			);
+			expect(isUserLinkedToSiren).toHaveBeenCalledWith(db, "user-1", SIREN);
 		});
 
 		it("returns null without DB call when admin is impersonating", async () => {
@@ -214,7 +213,7 @@ describe("declarationDraftRouter", () => {
 
 	describe("save", () => {
 		it("inserts a new row when no declaration exists", async () => {
-			const { db, mocks } = createMockDb([[{ siren: SIREN }], []]);
+			const { db, mocks } = createMockDb([[]]);
 			const caller = await createCaller(db);
 
 			const result = await caller.save({
@@ -231,7 +230,6 @@ describe("declarationDraftRouter", () => {
 		it("updates the existing row when a declaration exists", async () => {
 			const existingDraft = { main: { step1: { workforce: 40 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -251,7 +249,6 @@ describe("declarationDraftRouter", () => {
 		it("merges new slice without overwriting existing slices", async () => {
 			const existingDraft = { main: { step1: { workforce: 50 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -274,7 +271,7 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("allows the autosave when no declaration row exists yet (create path)", async () => {
-			const { db, mocks } = createMockDb([[{ siren: SIREN }], []]);
+			const { db, mocks } = createMockDb([[]]);
 			const caller = await createCaller(db);
 
 			const result = await caller.save({
@@ -290,7 +287,6 @@ describe("declarationDraftRouter", () => {
 		it("allows the autosave when the lock is free (no active holder)", async () => {
 			const existingDraft = { main: { step1: { workforce: 40 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[],
 			]);
@@ -309,7 +305,6 @@ describe("declarationDraftRouter", () => {
 		it("throws CONFLICT when another co-declarant holds the lock", async () => {
 			const existingDraft = { main: { step1: { workforce: 40 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[foreignLockHolder()],
 			]);
@@ -327,7 +322,8 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("throws FORBIDDEN when user does not own the siren", async () => {
-			const { db } = createMockDb([[]]);
+			vi.mocked(isUserLinkedToSiren).mockResolvedValue(false);
+			const { db } = createMockDb();
 			const caller = await createCaller(db);
 
 			await expect(
@@ -390,7 +386,6 @@ describe("declarationDraftRouter", () => {
 	describe("clear", () => {
 		it("sets draft and draftUpdatedAt to null when no kind is given", async () => {
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: { main: { step1: { workforce: 50 } } } }],
 				[ownLockHolder()],
 			]);
@@ -410,7 +405,6 @@ describe("declarationDraftRouter", () => {
 				cse: { opinions: { opinion: "favorable" } },
 			};
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -433,7 +427,6 @@ describe("declarationDraftRouter", () => {
 		it("sets draft to null when clearing the last remaining slice", async () => {
 			const existingDraft = { main: { step1: { workforce: 50 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -447,7 +440,7 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("returns ok early when partial clear finds no existing draft", async () => {
-			const { db, mocks } = createMockDb([[{ siren: SIREN }], []]);
+			const { db, mocks } = createMockDb([[]]);
 			const caller = await createCaller(db);
 
 			const result = await caller.clear({
@@ -461,7 +454,8 @@ describe("declarationDraftRouter", () => {
 		});
 
 		it("throws FORBIDDEN when user does not own the siren", async () => {
-			const { db } = createMockDb([[]]);
+			vi.mocked(isUserLinkedToSiren).mockResolvedValue(false);
+			const { db } = createMockDb();
 			const caller = await createCaller(db);
 
 			await expect(caller.clear({ siren: SIREN, year: YEAR })).rejects.toThrow(
@@ -485,7 +479,6 @@ describe("declarationDraftRouter", () => {
 				main: { "1": { totalWomen: 50 }, "2": { payGap: 3.5 } },
 			};
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -512,7 +505,6 @@ describe("declarationDraftRouter", () => {
 				cse: { opinions: { opinion: "favorable" } },
 			};
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -535,7 +527,6 @@ describe("declarationDraftRouter", () => {
 		it("sets draft to null when clearing the last step of the last kind", async () => {
 			const existingDraft = { main: { "1": { totalWomen: 50 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[ownLockHolder()],
 			]);
@@ -556,7 +547,6 @@ describe("declarationDraftRouter", () => {
 		it("throws CONFLICT when another co-declarant holds the declaration lock", async () => {
 			const existingDraft = { main: { step1: { workforce: 50 } } };
 			const { db, mocks } = createMockDb([
-				[{ siren: SIREN }],
 				[{ id: DECLARATION_ID, draft: existingDraft }],
 				[foreignLockHolder()],
 			]);

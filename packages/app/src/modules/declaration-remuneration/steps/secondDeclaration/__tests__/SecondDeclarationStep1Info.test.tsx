@@ -12,7 +12,7 @@ function renderStep1() {
 			declarationDate="01/06/2027"
 			declarationSiren="123456789"
 			declarationYear={2027}
-			modificationDeadline={new Date("2027-12-01T00:00:00")}
+			modificationDeadline={new Date("2027-12-01T00:00:00Z")}
 		/>,
 	);
 }
@@ -59,6 +59,14 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByText(/Mettre en place des actions correctives/),
+		).toBeInTheDocument();
+	});
+
+	it("lists the CSE opinion deposit item in the obligations callout", () => {
+		renderStep1();
+
+		expect(
+			screen.getByText("Déposer le ou les avis du CSE"),
 		).toBeInTheDocument();
 	});
 

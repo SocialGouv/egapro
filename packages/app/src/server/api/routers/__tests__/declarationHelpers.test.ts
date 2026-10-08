@@ -415,7 +415,7 @@ describe("applyPercentagesAfterUpdate", () => {
 		await applyPercentagesAfterUpdate(tx as never, "123456789", 2025);
 
 		expect(set.mock.calls[0]?.[0]).toMatchObject({
-			globalAnnualMeanGap: ((110 - 100) / 110).toString(),
+			globalAnnualMeanGap: "0.0909",
 		});
 	});
 

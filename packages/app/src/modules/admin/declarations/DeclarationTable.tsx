@@ -6,9 +6,10 @@ import { ADMIN_DECLARATIONS, adminDeclarationHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import { Pagination } from "~/modules/shared/Pagination";
 import { useSortableTable } from "~/modules/shared/useSortableTable";
+import styles from "./DeclarationTable.module.scss";
 import type { SortColumn } from "./schemas";
 import { SORT_COLUMNS } from "./schemas";
-import { STATUS_LABELS } from "./shared/constants";
+import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
 import type { DeclarationSearchRow } from "./types";
 
 type Props = {
@@ -24,7 +25,7 @@ const COLUMN_LABELS: Record<SortColumn, string> = {
 	siren: "SIREN",
 	companyName: "Entreprise",
 	year: "Année",
-	workforce: "Effectif",
+	workforce: WORKFORCE_LABEL,
 	status: "Statut",
 	declarantEmail: "Email déclarant",
 	createdAt: "Date de dépôt",
@@ -57,7 +58,7 @@ export function DeclarationTable({
 				{total} résultat{total > 1 ? "s" : ""}
 			</p>
 			<DsfrTable
-				caption="Liste des déclarations avec SIREN, entreprise, année, effectif issu du fichier GIP-MDS, statut, email déclarant et date de dépôt."
+				caption="Liste des déclarations avec SIREN, entreprise, année, effectif annuel moyen issu du fichier GIP-MDS, statut, email déclarant et date de dépôt."
 				className=""
 			>
 				<thead>
@@ -81,7 +82,10 @@ export function DeclarationTable({
 						<tr key={row.id}>
 							<td>{row.siren}</td>
 							<td>
-								<Link href={adminDeclarationHref(row.id)}>
+								<Link
+									className={styles.companyLink}
+									href={adminDeclarationHref(row.id)}
+								>
 									{row.companyName}
 								</Link>
 							</td>

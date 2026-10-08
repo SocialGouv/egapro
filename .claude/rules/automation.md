@@ -28,7 +28,7 @@ Quatre hooks, exécutés par le harnais, pas par toi.
 | `from "zod"` | `routers/*.ts`, `.tsx` | importer depuis `~/modules/{domain}/schemas.ts` |
 | `getFullYear()`, `slice/substring/substr(0, 9)`, `SIREN_LENGTH = 9`, `.getMonth()`, `.getDate()` | `.ts/.tsx` (hors `domain/`, tests) | helpers de `~/modules/domain` |
 | `>= GAP_ALERT_THRESHOLD`, `(men - women)`, `cancelledAt !== null` | `.ts/.tsx` (hors `domain/`, tests) | `gapLevel()`, `computeGap()`, `isCancelled()` |
-| `toLocaleString()`, `toLocaleDateString()`, `Intl.NumberFormat`, `Intl.DateTimeFormat`, `.toFixed()` | `src/modules/**` (hors `domain/`, tests, `OrdinalLongDate.tsx`) | un formateur de `~/modules/domain` (`shared/format.ts`) |
+| `toLocaleString()`, `toLocaleDateString()`, `Intl.NumberFormat`, `Intl.DateTimeFormat`, `.toFixed()` | `src/modules/**` (hors `domain/`, tests, `export/fetchDeclarations.ts`) | un formateur de `~/modules/domain` (`shared/format.ts`) |
 | `.tsx` non-route dans `src/app/` | `src/app/**` | déplacer dans `src/modules/` et importer depuis le barrel |
 
 Nouvelle règle mécanique → ajouter un `check_pattern` dans le script. **Si un hook bloque ton édition, ne cherche pas à le contourner** : repense l'approche.

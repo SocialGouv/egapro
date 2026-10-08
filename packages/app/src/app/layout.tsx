@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Script from "next/script";
 
 import { env } from "~/env.js";
@@ -12,6 +13,7 @@ import {
 } from "~/modules/layout";
 import { buildMetadataRobots } from "~/modules/legal";
 import { ProfileModal } from "~/modules/profile";
+import { NONCE_HEADER } from "~/server/security/securityHeaders.js";
 import { TRPCReactProvider } from "~/trpc/react";
 
 // Overrides must win on specificity — this bundle loads before dsfr.min.css.
@@ -24,14 +26,16 @@ export const metadata: Metadata = {
 	robots: buildMetadataRobots(env.NEXT_PUBLIC_EGAPRO_ENV === "prod"),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
+	const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
+
 	return (
 		<html data-fr-scheme="system" lang="fr">
 			<head>
 				{/* Restore user theme from cookie before render to avoid flash */}
-				<Script id="dsfr-theme-init" strategy="beforeInteractive">
+				<Script id="dsfr-theme-init" nonce={nonce} strategy="beforeInteractive">
 					{`(function(){var c=document.cookie.match(/(?:^|; )fr-theme=([^;]*)/);if(c)document.documentElement.setAttribute('data-fr-scheme',decodeURIComponent(c[1]));})();`}
 				</Script>
 				<link href="/dsfr/dsfr.min.css" rel="stylesheet" />
@@ -58,7 +62,7 @@ export default function RootLayout({
 				/>
 			</head>
 			<body>
-				<MatomoAnalytics />
+				<MatomoAnalytics nonce={nonce} />
 				<SkipLinks />
 				<SessionProviderWrapper>
 					<TRPCReactProvider>
@@ -70,6 +74,7 @@ export default function RootLayout({
 					</TRPCReactProvider>
 				</SessionProviderWrapper>
 				<Script
+					nonce={nonce}
 					src="/dsfr/dsfr.module.min.js"
 					strategy="afterInteractive"
 					type="module"

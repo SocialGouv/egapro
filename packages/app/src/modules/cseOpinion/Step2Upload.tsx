@@ -244,9 +244,7 @@ export function Step2Upload({
 			<form autoComplete="off" onSubmit={handleFormSubmit}>
 				<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
 					<div className="fr-col">
-						<h1 className="fr-h4 fr-mb-0">
-							Transmettre l&apos;avis ou les avis du CSE
-						</h1>
+						<h1 className="fr-h4 fr-mb-0">Dépôt du ou des avis du CSE</h1>
 					</div>
 				</div>
 
@@ -254,8 +252,8 @@ export function Step2Upload({
 
 				<div>
 					<label className="fr-label" htmlFor="cse-file-upload">
-						Veuillez joindre les avis émis par votre CSE et renseigner le type
-						de document correspondant.
+						Veuillez importer/déposer le ou les avis émis par votre CSE et
+						renseigner le type d'avis correspondant.
 						<span className="fr-hint-text">
 							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
 						</span>

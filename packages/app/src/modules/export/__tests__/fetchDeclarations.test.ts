@@ -455,6 +455,22 @@ describe("buildIndicatorG", () => {
 
 		expect(category?.Rem_annuelle_base_ecart).toBeNull();
 	});
+
+	it("truncates a gap ratio instead of rounding it up past the alert threshold", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ annualVariableWomen: "50.00", annualVariableMen: "101.00" }),
+		]).initial;
+
+		expect(category?.Rem_annuelle_variable_ecart).toBe("0.5049");
+	});
+
+	it("truncates a gap ratio the same way on a second operand pair", () => {
+		const [category] = buildIndicatorG([
+			gEntry({ hourlyBaseWomen: "12.00", hourlyBaseMen: "13.10" }),
+		]).initial;
+
+		expect(category?.Taux_horaire_base_ecart).toBe("0.0839");
+	});
 });
 
 describe("assembleDeclaration", () => {
@@ -1102,7 +1118,7 @@ describe("assembleDeclaration", () => {
 		expect(result.Historique_statuts).toEqual([
 			{
 				Statut: "submit",
-				Libelle_statut: "Soumission de la déclaration",
+				Libelle_statut: "Transmission de la déclaration",
 				Date: "2027-03-15T10:00:00.123Z",
 			},
 			{
@@ -1173,7 +1189,7 @@ describe("assembleDeclaration", () => {
 
 		expect(result.Historique_statuts).toHaveLength(5);
 		expect(result.Historique_statuts[0]?.Libelle_statut).toBe(
-			"Soumission de la déclaration",
+			"Transmission de la déclaration",
 		);
 		expect(result.Historique_statuts[1]?.Libelle_statut).toBe(
 			"Choix du parcours — Évaluation conjointe",

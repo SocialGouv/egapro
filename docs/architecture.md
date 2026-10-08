@@ -293,8 +293,11 @@ sequenceDiagram
 Le callback `jwt` (NextAuth) :
 
 1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id` et `isAdmin`.
-2. Injecte `userId`, `email`, `isAdmin` dans le token.
-3. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+2. À la connexion : réaligne `app_user_company` sur le SIRET ProConnect (`syncUserCompanyLink`, `src/server/auth/companyLink.ts`). Une transaction, sérialisée par utilisateur, crée le lien courant et supprime les autres ; un SIRET absent ou invalide supprime tous les liens. Les verrous d'édition détenus sur un SIREN révoqué sont libérés. Chaque révocation (`auth.company_link_revoked`, motif `siret_changed` / `siret_missing`) et chaque verrou libéré (`declaration.lock_released`) est journalisé **dans la même transaction**. Base indisponible : la connexion échoue.
+3. Injecte `userId`, `email`, `isAdmin`, `siret` dans le token.
+4. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+
+Le `siret` du token est une **déclaration**, pas une autorisation : un JWT ouvert sur un autre appareil le garde après une révocation. Toute surface qui agit pour une entreprise vérifie donc le lien en base à chaque requête : `canAccessCompany` / `resolveAuthorizedSiren` (`src/server/auth/companyAccess.ts`), utilisés par `companyProcedure`, les procédures qui reçoivent un `siren` en entrée, `getSessionSiren` (route handlers) et les pages. Seule exception, l'impersonation admin effective (fenêtre MFA ouverte), qui ne demande pas de lien sur le SIREN incarné. La requête porte sur la clé primaire `(user_id, siren)`.
 
 ### 5.4 Edge middleware (`src/middleware.ts`)
 
@@ -339,6 +342,45 @@ sequenceDiagram
 
 L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
+### 5.7 Provenance de `ADMIN_EMAILS`
+
+`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) décide qui reçoit le rôle admin : synchronisation bidirectionnelle à chaque connexion, l'ajout promeut et le retrait rétrograde. Deux listes distinctes, chacune scellée avec le certificat de son propre cluster :
+
+| Environnements | Manifeste(s) | Scope sealed-secret |
+|---|---|---|
+| Review apps, `alpha`, `rgaa-persist`, `perf-persist`, preprod (`beta`) | `.kontinuous/env/dev/templates/admin.sealed-secret.yaml` et `.kontinuous/env/preprod/templates/admin.sealed-secret.yaml` (même chiffré dans les deux : même cluster, même contrôleur) | `cluster-wide` — les namespaces de review app sont dynamiques (un par branche), un scope `namespace-wide`/`strict` ne se déchiffrerait que dans un seul |
+| Prod (tags `v*`) | `.kontinuous/env/prod/templates/admin.sealed-secret.yaml` | `namespace-wide`, `namespace: egapro` — cluster de prod, contrôleur et certificat distincts |
+
+Un sealed-secret **ne se complète pas** : il n'existe pas d'opération d'ajout, on re-scelle toujours la liste entière. La prise en compte a lieu à la **prochaine connexion** de l'utilisateur concerné.
+
+Pour ajouter ou retirer un admin :
+
+1. **dev/preprod** :
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro-alpha` sur le cluster `ovh-dev` (`kubectl --context ovh-dev -n egapro-alpha get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
+   - modifier la liste (ajout/retrait d'un email) ;
+   - re-sceller la liste complète, en lisant depuis stdin pour ne jamais l'écrire en clair sur disque :
+     ```bash
+     curl -s https://kubeseal.ovh.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-dev.pem
+     printf '%s' "$LIST" | kubeseal --raw --scope cluster-wide \
+       --cert /tmp/cert-dev.pem --name admin \
+       --from-file=/dev/stdin
+     ```
+   - remplacer `encryptedData.ADMIN_EMAILS` dans **les deux** fichiers (`env/dev` et `env/preprod`) par le chiffré obtenu.
+   - tant que le sealed-secret n'a pas été déployé sur `alpha`, la liste vit encore dans la ConfigMap `admin` de ce namespace : la relire avec `kubectl --context ovh-dev -n egapro-alpha get configmap admin -o jsonpath='{.data.ADMIN_EMAILS}'`.
+2. **prod** :
+   - relire la valeur courante depuis le Secret `admin` du namespace `egapro` sur le cluster `ovh-prod` (`kubectl --context ovh-prod -n egapro get secret admin -o jsonpath='{.data.ADMIN_EMAILS}' | base64 -d`) ;
+   - modifier la liste ;
+   - re-sceller la liste complète :
+     ```bash
+     curl -s https://kubeseal.ovh-prod.fabrique.social.gouv.fr/v1/cert.pem -o /tmp/cert-prod.pem
+     printf '%s' "$LIST" | kubeseal --raw --scope namespace-wide --namespace egapro \
+       --cert /tmp/cert-prod.pem --name admin \
+       --from-file=/dev/stdin
+     ```
+   - remplacer `encryptedData.ADMIN_EMAILS` dans `.kontinuous/env/prod/templates/admin.sealed-secret.yaml`.
+
+Le Secret `admin` du namespace `egapro` sur `ovh-prod` n'existe qu'à partir de la première release V2 qui embarque le sealed-secret correspondant — avant ce tag, la lecture préalable de l'étape prod n'a rien à lire.
+
 ---
 
 ## 6. API tRPC
@@ -351,7 +393,7 @@ Une procédure tRPC = un appel typé bout-en-bout (input Zod, output inféré). 
 |---|---|---|
 | `publicProcedure` | rien | Public (non authentifié) |
 | `protectedProcedure` | session valide | Utilisateur connecté |
-| `companyProcedure` | session + binding SIREN (depuis le contexte) | Utilisateur agissant pour une entreprise |
+| `companyProcedure` | session + binding SIREN (depuis le contexte) + lien `app_user_company` vérifié en base (sauf impersonation effective) | Utilisateur agissant pour une entreprise |
 | `companyWriteProcedure` | + read-only guard (refus si impersonation) | Utilisateur, écriture |
 | `declarationProcedure` | `companyProcedure` + résolution déclaration | Utilisateur, lecture déclaration |
 | `declarationWriteProcedure` | + read-only guard | Utilisateur, écriture déclaration |
@@ -593,7 +635,7 @@ Toute nouvelle action audited requiert **3 points** :
 | Clé `AUDIT_ACTIONS` | Valeur en BDD | Catégorie | Surface |
 |---|---|---|---|
 | `DECLARATION_LOCK_ACQUIRED` | `declaration.lock_acquired` | `mutation` | `declarationLock.acquireLock` (tRPC, logAction direct) |
-| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) |
+| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) + libération forcée à la révocation d'un lien entreprise (connexion, `logActionInTransaction`, `metadata.reason = "company_link_revoked"`) |
 | `ADMIN_DECLARATION_RELEASE_LOCK` | `admin_declaration.release_lock` | `mutation` | `adminDeclarations.releaseLock` (tRPC, PROCEDURE_TO_ACTION) |
 | `DECLARATION_LOCK_STATE_READ` | `declaration.lock_state_read` | `read_sensitive` | `declarationLock.getLockState` (tRPC, PROCEDURE_TO_ACTION) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | `admin_settings.update_lock_timeout` | `mutation` | `adminSettings.updateLockTimeout` (tRPC, PROCEDURE_TO_ACTION) |
@@ -704,6 +746,17 @@ Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directem
 ### 10.5 Secrets
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
+
+**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`, job `a11y-pages` d'`a11y.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
+
+| Variable | Source | Exposée à |
+|---|---|---|
+| `AUTH_SECRET` | générée à chaque run (`openssl rand`, masquée) — aucun secret GitHub | tout le job |
+| `EGAPRO_PROCONNECT_CLIENT_ID` / `_CLIENT_SECRET` / `_ISSUER` | secrets GitHub — la connexion E2E est une vraie connexion ProConnect (FIA1V2 via Charon) | steps `Build` (env.js refuse un build de production sans ProConnect) et exécution des tests |
+| `EGAPRO_WEEZ_API_URL` | secret GitHub — appelé à chaque connexion pour renseigner l'entreprise | idem |
+| `EGAPRO_SUIT_API_URL` | valeur factice `https://suit.invalid` — exigée par env.js, jamais jointe en CI (pas de certificat mTLS) | tout le job |
+
+Une nouvelle variable secrète nécessaire aux E2E se pose de la même façon : au niveau des steps qui lancent l'app, jamais du job.
 
 ### 10.6 Verrou collaboratif — sécurité IDOR
 

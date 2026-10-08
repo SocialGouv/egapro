@@ -14,7 +14,7 @@ const PROCESS_STEP_LABELS: Record<DeclarationFsmStatus, string> = {
 		"Choix du parcours de mise en conformité (Deuxième déclaration)",
 	joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
 	revised_joint_evaluation_chosen: "Évaluation conjointe des rémunérations",
-	awaiting_cse_opinion: "Déposer le ou les avis CSE",
+	awaiting_cse_opinion: "Dépôt du ou des avis du CSE",
 	// "Finalisation - " prefix disambiguates the terminal step from step 1
 	// ("Déclaration des indicateurs de rémunération") — only one word apart.
 	demarche_completed: "Finalisation - Démarche des indicateurs de rémunération",

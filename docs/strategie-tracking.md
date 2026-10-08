@@ -69,7 +69,7 @@ ré-émet rien (mise à jour silencieuse de l'étape courante).
 
 ### 1. Déclaration Index — `declaration`
 
-Saisie des indicateurs A–F jusqu'à la soumission.
+Saisie des indicateurs A–F jusqu'à la transmission.
 `storageKey` : `egapro:declaration-funnel`.
 Émis par `useFunnelTracking` dans `declaration-remuneration/StepPageClient.tsx`
 (start / step / abandon) et `trackFunnelComplete` dans `steps/Step6Review.tsx`
@@ -105,7 +105,7 @@ abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
 
 | Clé | Étape |
 |---|---|
-| `step_1` | Renseigner les avis émis par le CSE |
+| `step_1` | Renseigner les informations du ou des avis du CSE |
 | `step_2` | Importer / déposer l'avis ou les avis du CSE |
 
 | Événement | Déclencheur précis |
@@ -113,7 +113,7 @@ abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
 | `funnel_start` | Arrivée sur `/avis-cse/etape/1` |
 | `step_complete` | Passage `étape 1 → 2` (`name = step_1`) |
 | `funnel_abandon` | `beforeunload` pendant le parcours |
-| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis soumis) |
+| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis transmis) |
 
 ### 3. Parcours-conformité — `compliance_path`
 

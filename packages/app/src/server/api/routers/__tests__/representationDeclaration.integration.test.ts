@@ -71,6 +71,10 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 			VALUES (${SIREN}, 'Société Représentation'), (${OTHER_SIREN}, 'Société Voisine')
 		`;
 		await sql`
+			INSERT INTO app_user_company (user_id, siren)
+			VALUES (${USER_ID}, ${SIREN}), (${USER_ID}, ${OTHER_SIREN})
+		`;
+		await sql`
 			INSERT INTO app_representation_campaign (year, campaign_start_date, campaign_end_date, declaration_deadline)
 			VALUES
 				(${OPEN_CAMPAIGN_YEAR}, '2000-01-01', '2999-12-31', '2000-03-01'),
@@ -82,6 +86,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 		if (!sql) return;
 		await sql`DELETE FROM app_representation_declaration WHERE siren IN (${SIREN}, ${OTHER_SIREN})`;
 		await sql`DELETE FROM app_representation_campaign WHERE year IN (${OPEN_CAMPAIGN_YEAR}, ${CLOSED_CAMPAIGN_YEAR})`;
+		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren IN (${SIREN}, ${OTHER_SIREN})`;
 		await sql`DELETE FROM audit.action_log WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;

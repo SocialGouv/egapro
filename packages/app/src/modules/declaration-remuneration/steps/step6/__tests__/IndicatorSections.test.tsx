@@ -62,8 +62,8 @@ describe("IndicatorSections", () => {
 			/>,
 		);
 
-		expect(screen.getByText("47,5 %")).toBeInTheDocument();
-		expect(screen.getByText("80,0 %")).toBeInTheDocument();
+		expect(screen.getByText("47,50 %")).toBeInTheDocument();
+		expect(screen.getByText("80,00 %")).toBeInTheDocument();
 		expect(screen.queryByText("95 %")).not.toBeInTheDocument();
 		expect(screen.queryByText("110 %")).not.toBeInTheDocument();
 	});

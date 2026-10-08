@@ -38,7 +38,8 @@ type MetadataField =
 	| "flowType"
 	| "s3Cleanup"
 	| "roles"
-	| "publicAgentRequired";
+	| "publicAgentRequired"
+	| "reason";
 
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -147,6 +148,8 @@ const FIELDS_BY_ACTION: Partial<
 		"roles",
 		"publicAgentRequired",
 	],
+	[AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED]: ["reason"],
+	[AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED]: ["reason"],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: ["timeoutMinutes"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: ["id"],
@@ -272,6 +275,12 @@ function validValue(
 				: undefined;
 		case "s3Cleanup":
 			return value === "ok" || value === "failed" ? value : undefined;
+		case "reason":
+			return value === "siret_changed" ||
+				value === "siret_missing" ||
+				value === "company_link_revoked"
+				? value
+				: undefined;
 		case "date_begin":
 		case "date_end":
 			return validIsoDate(value);

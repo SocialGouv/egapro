@@ -3,6 +3,8 @@ import {
 	computeWorkforceTotal,
 	proportionOf,
 	resolveGapRatio,
+	truncateGapRatio,
+	truncateRatio,
 	variablePayProportion,
 } from "~/modules/domain";
 import type { GipMdsRow } from "./gipMdsMapping";
@@ -81,7 +83,8 @@ function gapOrNull(
 	reference: GipGapReference | null,
 ): number | null {
 	if (women === null || men === null) return null;
-	return resolveGapRatio(women, men, reference);
+	const ratio = resolveGapRatio(women, men, reference);
+	return ratio === null ? null : truncateGapRatio(ratio);
 }
 
 /** Build the GIP reference for one indicator block, or `null` when no GIP row is available. */
@@ -112,8 +115,8 @@ function proportionFromCounts(
 	const total = computeWorkforceTotal(women, men);
 	if (total === 0) return { women: null, men: null };
 	return {
-		women: Math.round(proportionOf(women, total) * 10_000) / 10_000,
-		men: Math.round(proportionOf(men, total) * 10_000) / 10_000,
+		women: truncateRatio(proportionOf(women, total)),
+		men: truncateRatio(proportionOf(men, total)),
 	};
 }
 

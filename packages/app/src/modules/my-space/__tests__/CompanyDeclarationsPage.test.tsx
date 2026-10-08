@@ -68,6 +68,7 @@ function makeDeclaration(
 		cseRequired: false,
 		hasJointEvaluationFile: false,
 		hasPrefillData: false,
+		deadline: null,
 		notSubject: false,
 		...overrides,
 	};

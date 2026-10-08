@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+	civilLongDateParts,
 	computePercentage,
-	computeProportion,
+	formatCivilLongDate,
+	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
 	formatDays,
@@ -19,15 +21,16 @@ import {
 	formatPointsAbs,
 	formatPrecisePercentage,
 	formatRatioAsPercentage,
-	formatRoundedCount,
 	formatShortDate,
 	formatShortDateTime,
 	formatTime,
 	formatTotal,
+	formatTruncatedDecimal,
 	formatWholePercentage,
 	MISSING_VALUE,
 	NARROW_NBSP,
 } from "../shared/format";
+import { gapRatioToPercent, truncateGapRatio } from "../shared/gap";
 
 describe("formatGap", () => {
 	it("formats a gap with French decimal separator and two decimals", () => {
@@ -92,16 +95,6 @@ describe("formatGapCompact", () => {
 	});
 });
 
-describe("computeProportion", () => {
-	it("computes percentage from count and total", () => {
-		expect(computeProportion("25", 100)).toBe("25,0 %");
-	});
-
-	it("returns '- %' when total is zero", () => {
-		expect(computeProportion("10", 0)).toBe("- %");
-	});
-});
-
 describe("formatCurrency", () => {
 	it("formats a number with euro sign", () => {
 		expect(formatCurrency("1234.5")).toMatch(/1[\s\u202f]234,5 €/);
@@ -120,8 +113,17 @@ describe("formatCurrency", () => {
 });
 
 describe("computePercentage", () => {
-	it("computes percentage from count and total", () => {
-		expect(computePercentage(25, 100)).toBe("25,0 %");
+	it("computes percentage from count and total, two decimals always written", () => {
+		expect(computePercentage(25, 100)).toBe("25,00 %");
+	});
+
+	it("truncates to two decimals instead of rounding", () => {
+		expect(computePercentage(18, 35)).toBe("51,42 %");
+		expect(computePercentage(2, 3)).toBe("66,66 %");
+	});
+
+	it("does not lose a digit to floating-point noise", () => {
+		expect(computePercentage(29, 100)).toBe("29,00 %");
 	});
 
 	it("returns '- %' when total is zero", () => {
@@ -261,21 +263,6 @@ describe("formatCount", () => {
 	});
 });
 
-describe("formatRoundedCount", () => {
-	it("rounds an average headcount to the unit", () => {
-		expect(formatRoundedCount(249.6)).toBe("250");
-		expect(formatRoundedCount(249.4)).toBe("249");
-	});
-
-	it("groups the rounded value like any other count", () => {
-		expect(formatRoundedCount(2256.4)).toBe("2\u202f256");
-	});
-
-	it("marks a missing count rather than printing a zero", () => {
-		expect(formatRoundedCount(null)).toBe(MISSING_VALUE);
-	});
-});
-
 describe("formatPrecisePercentage", () => {
 	it("leaves a value already on the 0-100 scale alone", () => {
 		expect(formatPrecisePercentage(66.7)).toBe("66,7 %");
@@ -283,6 +270,11 @@ describe("formatPrecisePercentage", () => {
 
 	it("keeps at most two decimals", () => {
 		expect(formatPrecisePercentage(33.333)).toBe("33,33 %");
+	});
+
+	it("truncates the third decimal instead of rounding", () => {
+		expect(formatPrecisePercentage(66.666)).toBe("66,66 %");
+		expect(formatPrecisePercentage(-3.168)).toBe("-3,16 %");
 	});
 
 	it("writes a whole percentage without a decimal part", () => {
@@ -294,6 +286,18 @@ describe("formatPrecisePercentage", () => {
 	});
 });
 
+describe("formatTruncatedDecimal", () => {
+	it("truncates to two decimals and drops trailing zeros", () => {
+		expect(formatTruncatedDecimal(49.876)).toBe("49,87");
+		expect(formatTruncatedDecimal(49.8)).toBe("49,8");
+		expect(formatTruncatedDecimal(250)).toBe("250");
+	});
+
+	it("groups thousands", () => {
+		expect(formatTruncatedDecimal(12345.678)).toBe("12\u202f345,67");
+	});
+});
+
 describe("formatRatioAsPercentage", () => {
 	it("turns the stored 0-1 ratio into a percentage", () => {
 		expect(formatRatioAsPercentage(0.0717)).toBe("7,17 %");
@@ -301,6 +305,16 @@ describe("formatRatioAsPercentage", () => {
 
 	it("keeps the sign of a gap in favour of women", () => {
 		expect(formatRatioAsPercentage(-0.05)).toBe("-5 %");
+	});
+
+	it("truncates to two decimals instead of rounding", () => {
+		expect(formatRatioAsPercentage(0.07179)).toBe("7,17 %");
+		expect(formatRatioAsPercentage(-0.031679)).toBe("-3,16 %");
+	});
+
+	it("does not lose a digit to floating-point noise", () => {
+		expect(formatRatioAsPercentage(0.0029)).toBe("0,29 %");
+		expect(formatRatioAsPercentage(0.29)).toBe("29 %");
 	});
 
 	it("marks a missing ratio rather than printing a zero", () => {
@@ -404,6 +418,115 @@ describe("formatLongDate", () => {
 	it("gives the first of the month its French ordinal", () => {
 		expect(formatLongDate(new Date(2026, 5, 1))).toBe(
 			"1\u1d49\u02b3 juin 2026",
+		);
+	});
+
+	describe("on a timestamp", () => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("reads the day in the viewer's timezone", () => {
+			vi.stubEnv("TZ", "America/Cayenne");
+			expect(formatLongDate(new Date("2026-06-01T02:00:00Z"))).toBe(
+				"31 mai 2026",
+			);
+		});
+	});
+});
+
+const NEGATIVE_OFFSET_TIMEZONES = ["America/Cayenne", "Pacific/Tahiti"];
+
+describe("formatCivilLongDate", () => {
+	it("writes a civil date in full", () => {
+		expect(formatCivilLongDate(new Date("2026-06-12T00:00:00Z"))).toBe(
+			"12 juin 2026",
+		);
+	});
+
+	it("gives the first of the month its French ordinal", () => {
+		expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
+			"1\u1d49\u02b3 juin 2026",
+		);
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day instead of the day before", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(formatCivilLongDate(new Date("2026-06-01T00:00:00Z"))).toBe(
+				"1\u1d49\u02b3 juin 2026",
+			);
+		});
+	});
+});
+
+describe("formatCivilShortDate", () => {
+	it("formats a civil date in dd/mm/yyyy", () => {
+		expect(formatCivilShortDate(new Date("2026-03-01T00:00:00Z"))).toBe(
+			"01/03/2026",
+		);
+	});
+
+	it("returns dash for null", () => {
+		expect(formatCivilShortDate(null)).toBe(MISSING_VALUE);
+	});
+
+	it("returns dash for undefined", () => {
+		expect(formatCivilShortDate(undefined)).toBe(MISSING_VALUE);
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day instead of the day before", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(formatCivilShortDate(new Date("2026-03-01T00:00:00Z"))).toBe(
+				"01/03/2026",
+			);
+		});
+	});
+});
+
+describe("civilLongDateParts", () => {
+	it("splits a civil date into its day and its month and year", () => {
+		expect(civilLongDateParts(new Date("2026-03-01T00:00:00Z"))).toEqual({
+			day: 1,
+			monthYear: "mars 2026",
+		});
+	});
+
+	describe.each(NEGATIVE_OFFSET_TIMEZONES)("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("keeps the civil day and month", () => {
+			vi.stubEnv("TZ", timeZone);
+			expect(civilLongDateParts(new Date("2026-03-01T00:00:00Z"))).toEqual({
+				day: 1,
+				monthYear: "mars 2026",
+			});
+		});
+	});
+});
+
+describe("formatGap and truncateGapRatio agree on the same gap", () => {
+	it.each([
+		[1.29775, 0.0129775, "1,29 %"],
+		[4.79817, 0.0479817, "4,79 %"],
+		[-3.16795, -0.0316795, "-3,16 %"],
+		[50.495, 0.50495, "50,49 %"],
+		[8.3969, 0.083969, "8,39 %"],
+	])("reads the same truncated value whether displayed as a percentage or persisted as a ratio (%s)", (percent, ratio, expected) => {
+		expect(formatGap(percent)).toBe(expected);
+		expect(formatGap(gapRatioToPercent(truncateGapRatio(ratio)))).toBe(
+			expected,
 		);
 	});
 });

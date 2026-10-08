@@ -46,20 +46,21 @@ concurrency:
   group: e2e-grille
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   grille:
     name: "Recette grille"
     runs-on: ubuntu-22.04
     timeout-minutes: 130
+    # Same secret layout as the `shard` job of e2e.yaml (#4699), and for the same
+    # reasons: AUTH_SECRET generated per run, ProConnect and Weez scoped to Build and
+    # to the run itself, SUIT pointed at an unresolvable placeholder.
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
       NEXTAUTH_URL: http://localhost:3000/api/auth
-      EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
-      EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
-      EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-      EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
-      EGAPRO_SUIT_API_URL: ${{ secrets.EGAPRO_SUIT_API_URL }}
+      EGAPRO_SUIT_API_URL: https://suit.invalid
       EGAPRO_GATEWAY_SHARED_SECRET: dev-gateway-shared-secret-minimum-32-chars
       EGAPRO_E2E_CLOCK: "true"
       S3_ENDPOINT: http://localhost:9000
@@ -79,10 +80,16 @@ jobs:
       MAILDEV_URL: http://localhost:1080
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Generate a run-local AUTH_SECRET
+        run: |
+          set -euo pipefail
+          auth_secret=$(openssl rand -base64 32)
+          echo "::add-mask::$auth_secret"
+          echo "AUTH_SECRET=$auth_secret" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - name: Set up Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -149,6 +156,11 @@ jobs:
       - name: Start services
         run: docker compose up -d
       - name: Build
+        env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -156,6 +168,10 @@ jobs:
         id: run-grille
         continue-on-error: true
         env:
+          EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
+          EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
           ANNEE: ${{ github.event.inputs.annee || 'toutes' }}
           TRANCHE: ${{ github.event.inputs.tranche || 'toutes' }}
         run: |
@@ -185,30 +201,33 @@ jobs:
           fi
       - name: Générer le rapport de recette
         if: always()
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          REPORT_URL: ${{ format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
         run: |
           pnpm --filter app report:grille \
             --scope "${RECETTE_SCOPE:-tous les cas}" \
-            --commit "${{ github.sha }}" \
-            --report-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --commit "$COMMIT_SHA" \
+            --report-url "$REPORT_URL"
       - name: Stop services
         if: always()
         run: docker compose down
       - name: Upload rapport de recette
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: grille-recette
           path: packages/app/playwright-report/grille-recette.md
           retention-days: 30
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: playwright-grille-report
           path: packages/app/playwright-report/
           retention-days: 14
       - name: Upload Playwright traces
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: playwright-grille-traces

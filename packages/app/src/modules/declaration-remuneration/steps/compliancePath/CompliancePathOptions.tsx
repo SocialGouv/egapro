@@ -200,9 +200,7 @@ export function FirstRoundOptions({
 								données et éventuellement, sur la justification des écarts ≥ 5 %
 							</li>
 						)}
-						{cseOpinionRequired && (
-							<li>Transmettre l&apos;avis ou les avis du CSE</li>
-						)}
+						{cseOpinionRequired && <li>Déposer le ou les avis du CSE</li>}
 					</ul>
 					<p>
 						Si des écarts non justifiés persistent, vous devez engager une

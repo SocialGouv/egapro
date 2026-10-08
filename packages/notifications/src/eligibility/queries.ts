@@ -259,7 +259,7 @@ function buildCseOpinionVariantFilter(
 				d.first_declaration_path_choice = 'justify'
 				OR d.second_declaration_path_choice = 'justify'
 			`;
-		// MG_A — Actions correctives, 2e déclaration soumise et écarts corrigés.
+		// MG_A — Actions correctives, 2e déclaration transmise et écarts corrigés.
 		// The FSM transitions to 'awaiting_cse_opinion' once the second
 		// declaration lands and the gap is back below 5 %.
 		case "corrective":

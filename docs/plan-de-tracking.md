@@ -64,14 +64,14 @@ Clés d'étape : `step_1` Effectifs · `step_2` Écart de rémunération · `ste
 
 `storageKey` : `egapro:cse-funnel` · Dimensions : **année** · Émis par `FunnelStepTracker` sur `/avis-cse/etape/[step]` (start/step/abandon) et `FunnelCompleteTracker` sur `/avis-cse/confirmation` (complete).
 
-Clés d'étape : `step_1` Renseigner les avis émis par le CSE · `step_2` Importer / déposer l'avis du CSE.
+Clés d'étape : `step_1` Renseigner les informations du ou des avis du CSE · `step_2` Importer / déposer l'avis du CSE.
 
 | `action` | Déclencheur | `name` | `value` |
 |---|---|---|---|
 | `funnel_start` | Arrivée sur `/avis-cse/etape/1` | — | — |
 | `step_complete` | Passage `étape 1 → 2` | `step_1` | durée sur l'étape (s) |
 | `funnel_abandon` | `beforeunload` pendant le parcours | `step_<n courante>` | durée totale (s) |
-| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis soumis) | — | durée totale (s) |
+| `funnel_complete` | Affichage de `/avis-cse/confirmation` (avis transmis) | — | durée totale (s) |
 
 ### Funnel — Parcours-conformité (`compliance_path`)
 
@@ -90,8 +90,8 @@ Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2
 
 | `category` / `action` | Déclencheur | `name` | `value` | Émis par | KPI |
 |---|---|---|---|---|---|
-| `search` / `search_submit` | Soumission du formulaire de recherche entreprise (page d'accueil) | facettes utilisées (`query+region`…, sinon `empty`) | — | `home/HomeSearchForm.tsx` | K25, K24 |
-| `search` / `search_submit` | Soumission du formulaire de recherche de référents | facettes utilisées (`region+county`…, sinon `empty`) | — | `referents/shared/ReferentsSearchForm.tsx` | K25 |
+| `search` / `search_submit` | Envoi du formulaire de recherche entreprise (page d'accueil) | facettes utilisées (`query+region`…, sinon `empty`) | — | `home/HomeSearchForm.tsx` | K25, K24 |
+| `search` / `search_submit` | Envoi du formulaire de recherche de référents | facettes utilisées (`region+county`…, sinon `empty`) | — | `referents/shared/ReferentsSearchForm.tsx` | K25 |
 | `search` / `consultation_outbound` | Clic sur le lien « Observatoire » du header (vers le site de consultation) | — | — | `layout/shared/ConsultationNavLink.tsx` | K24 |
 | `help` / `faq_section_open` | Ouverture d'un accordéon FAQ (passage à `aria-expanded=true`, pas la fermeture) | id structurel `accordion-<section>-<sous-section>-<index>` | — | `faq/FaqAccordionGroup.tsx` | K21 |
 | `help` / `aide_resource_click` | Clic sur une carte ressource de `/aide` | id de la ressource (`indicateurs-remuneration`, `indicateurs-representation`) | — | `aide/AideResourceCards.tsx` | K21 |

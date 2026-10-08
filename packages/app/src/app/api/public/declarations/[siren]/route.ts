@@ -31,7 +31,7 @@ export async function GET(
 			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
 			status: "failure",
 			siren: null,
-			metadata: { rawSiren },
+			metadata: { invalidParam: "siren" },
 			errorMessage: "HTTP 400",
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,

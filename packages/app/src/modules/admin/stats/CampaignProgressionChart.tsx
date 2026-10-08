@@ -46,7 +46,7 @@ type MergedPoint = {
 };
 
 const CHART_CAPTION =
-	"Courbe de progression cumulative des déclarations soumises par année.";
+	"Courbe de progression cumulative des déclarations transmises par année.";
 
 // DSFR palette — pulled from design system tokens, not guessed.
 const EMPHASIS_COLOR = "var(--background-action-high-blue-france)";

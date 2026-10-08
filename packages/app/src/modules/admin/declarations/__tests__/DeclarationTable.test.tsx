@@ -66,7 +66,7 @@ describe("DeclarationTable", () => {
 		expect(screen.getByText("15/06/2024")).toBeInTheDocument();
 	});
 
-	it("places the Effectif column between Année and Statut", () => {
+	it("places the Effectif annuel moyen column between Année and Statut", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const headers = screen
@@ -76,7 +76,7 @@ describe("DeclarationTable", () => {
 			"SIREN",
 			"Entreprise",
 			"Année",
-			"Effectif",
+			"Effectif annuel moyen",
 			"Statut",
 			"Email déclarant",
 			"Date de dépôt",
@@ -104,7 +104,7 @@ describe("DeclarationTable", () => {
 		render(<DeclarationTable {...defaultProps} />);
 
 		const caption = document.querySelector("caption");
-		expect(caption?.textContent).toContain("effectif");
+		expect(caption?.textContent).toContain("effectif annuel moyen");
 		expect(caption?.textContent).toContain("GIP-MDS");
 	});
 
@@ -171,5 +171,26 @@ describe("DeclarationTable", () => {
 
 		expect(screen.getByText("Transmise")).toBeInTheDocument();
 		expect(screen.queryByText("Annulée")).not.toBeInTheDocument();
+	});
+
+	it("keeps the full company name as the link's accessible name and applies the visual truncation class", () => {
+		const longName =
+			"Société Démo des Établissements Industriels et Commerciaux Réunis de la Région Centre-Val de Loire";
+		render(
+			<DeclarationTable
+				{...defaultProps}
+				rows={[{ ...baseRow, companyName: longName }]}
+			/>,
+		);
+
+		const link = screen.getByRole("link", { name: longName });
+		expect(link).toHaveClass("companyLink");
+	});
+
+	it("renders a short company name as the full link text", () => {
+		render(<DeclarationTable {...defaultProps} />);
+
+		const link = screen.getByRole("link", { name: "ACME Corp" });
+		expect(link).toHaveTextContent(/^ACME Corp$/);
 	});
 });

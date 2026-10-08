@@ -58,7 +58,7 @@ const defaultProps = {
 	declarationSiren: "123456789",
 	declarationYear: 2026,
 	existingFile: null,
-	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
+	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
 };
 
 describe("JointEvaluationForm", () => {
@@ -90,7 +90,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: /évaluation conjointe des rémunérations/i,
+				name: "Dépôt du rapport de l'évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();

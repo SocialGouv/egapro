@@ -78,7 +78,10 @@ describe("GET /api/v1/files/:fileId", () => {
 			expect(mocks.auth).not.toHaveBeenCalled();
 			expect(mocks.fetchFileById).toHaveBeenCalledWith(SUIT_FILE_ID);
 			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
-				expect.objectContaining({ disposition: "attachment" }),
+				expect.objectContaining({
+					disposition: "attachment",
+					cacheControl: "private, no-store",
+				}),
 			);
 			expect(mocks.logAction).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -220,7 +223,10 @@ describe("GET /api/v1/files/:fileId", () => {
 			expect(mocks.fetchFileById).toHaveBeenCalledWith("file-1");
 			expect(mocks.fetchFileBySiren).not.toHaveBeenCalled();
 			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
-				expect.objectContaining({ disposition: "attachment" }),
+				expect.objectContaining({
+					disposition: "attachment",
+					cacheControl: "private, no-store",
+				}),
 			);
 			expect(mocks.logAction).toHaveBeenCalledWith(
 				expect.objectContaining({
