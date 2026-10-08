@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	getDeclarationProcessStepDeadline,
+	getDefaultCampaignDeadlines,
+} from "~/modules/domain";
+import {
 	buildDeclarationList,
 	type DbDeclaration,
 } from "../buildDeclarationList";
@@ -16,6 +20,8 @@ const EMPTY_DECLARATION = {
 	cseRequired: false,
 	hasJointEvaluationFile: false,
 	hasPrefillData: false,
+	// `demarche_completed` (makeDbDeclaration's default fsmStatus) closes with no deadline.
+	deadline: null,
 	notSubject: false,
 };
 
@@ -44,6 +50,13 @@ function placeholderRow(type: DeclarationType, year = 2026) {
 		currentStep: 0,
 		updatedAt: null,
 		...EMPTY_DECLARATION,
+		deadline:
+			type === "remuneration"
+				? getDeclarationProcessStepDeadline(
+						null,
+						getDefaultCampaignDeadlines(year),
+					)
+				: null,
 	};
 }
 
