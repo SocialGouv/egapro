@@ -27,7 +27,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 
 	const SIREN = "111222333";
 	const OTHER_SIREN = "444555666";
-	const USER_ID = "representation-integration-user";
+	const USER_ID = "a418710d-26ab-4cf4-80a6-89fe1ce08132";
 	const USER_EMAIL = "representation-integration@example.fr";
 	const OPEN_CAMPAIGN_YEAR = YEAR + 1;
 	const CLOSED_YEAR = 2030;

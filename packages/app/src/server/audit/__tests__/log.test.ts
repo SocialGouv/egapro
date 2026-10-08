@@ -24,8 +24,7 @@ vi.mock("../activityLog", async (importOriginal) => {
 	};
 });
 
-const { logAction, logActionInTransaction, AUDIT_ERROR_MESSAGE_MAX_LENGTH } =
-	await import("../log");
+const { logAction, logActionInTransaction } = await import("../log");
 const { AUDIT_ACTIONS } = await import("~/modules/audit");
 
 describe("logAction", () => {
@@ -36,10 +35,11 @@ describe("logAction", () => {
 	});
 
 	it("inserts a row with all provided fields and resolves the category from the action key", async () => {
+		const userId = "123e4567-e89b-12d3-a456-426614174000";
 		await logAction({
 			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
 			status: "success",
-			userId: "user-1",
+			userId,
 			userEmail: "test@example.com",
 			siren: "123456789",
 			metadata: { year: 2026 },
@@ -54,12 +54,12 @@ describe("logAction", () => {
 			action: "declaration.submit",
 			category: "mutation",
 			status: "success",
-			userId: "user-1",
-			userEmail: "test@example.com",
+			userId,
+			userEmail: null,
 			siren: "123456789",
 			metadata: { year: 2026 },
-			ipAddress: "1.2.3.4",
-			userAgent: "Mozilla",
+			ipAddress: "1.2.0.0",
+			userAgent: null,
 			durationMs: 42,
 		});
 	});
@@ -81,6 +81,247 @@ describe("logAction", () => {
 			ipAddress: null,
 			userAgent: null,
 			durationMs: null,
+		});
+	});
+
+	it("rejects free, nested and forged metadata from a direct call", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_SUBMIT,
+			status: "failure",
+			metadata: {
+				year: "2026<script>",
+				fileName: "private.pdf",
+				phone: "0612345678",
+				nested: { secret: "value" },
+			},
+			ipAddress: "203.0.113.4:1234",
+			errorMessage: "MY_PRIVATE_VALUE: secret",
+		});
+
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			metadata: null,
+			ipAddress: null,
+			errorMessage: "ERROR",
+		});
+	});
+
+	it("keeps only validated action metadata and truncates IPv6", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD,
+			status: "success",
+			metadata: {
+				year: "2026",
+				invalidYear: false,
+				fileName: "private.pdf",
+			},
+			ipAddress: "2001:db8:abcd:1234::1",
+		});
+
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			metadata: { year: 2026, invalidYear: false },
+			ipAddress: "2001:db8:abcd::",
+		});
+	});
+
+	it("keeps a technical resource UUID and rejects arbitrary resource text", async () => {
+		const id = "123e4567-e89b-12d3-a456-426614174000";
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "success",
+			resourceType: "declaration",
+			resourceId: id,
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			resourceType: "declaration",
+			resourceId: id,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "failure",
+			resourceType: "person@example.com",
+			resourceId: "private@example.com",
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
+			resourceType: null,
+			resourceId: null,
+		});
+	});
+
+	it("rejects free text in attribution fields", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_LOGIN,
+			status: "success",
+			userId: "person@example.com",
+			siren: "123456789 extra",
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			userId: null,
+			siren: null,
+		});
+	});
+
+	it("keeps only a validated file UUID for a download", async () => {
+		const fileId = "45becf58-fdd2-428f-9a55-582a86e88592";
+		await logAction({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			status: "success",
+			metadata: { fileId, fileName: "private.pdf" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({ fileId });
+
+		await logAction({
+			action: AUDIT_ACTIONS.USER_FILE_DOWNLOAD,
+			status: "failure",
+			metadata: { fileId: "private@example.com", fileName: "private.pdf" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
+	});
+
+	it("keeps the signed SUIT download target without its filename", async () => {
+		const fileId = "6b3573f8-8723-45c9-98a0-641431843ddd";
+		await logAction({
+			action: AUDIT_ACTIONS.EXPORT_API_FILES,
+			status: "success",
+			metadata: { fileId, fileName: "f.pdf", year: "2026" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			fileId,
+			year: 2026,
+		});
+	});
+
+	it("keeps the validated XLSX export format", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			status: "success",
+			metadata: { format: "xlsx", search: "private@example.com" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			format: "xlsx",
+		});
+	});
+
+	it("keeps bounded upload cleanup and security failure codes", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 422 virus_detected",
+			metadata: { s3Cleanup: "failed", virusName: "private" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			errorMessage: "HTTP_422_virus_detected",
+			metadata: { s3Cleanup: "failed" },
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 403 impersonation_read_only",
+			metadata: { s3Cleanup: "unexpected" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
+			errorMessage: "HTTP_403_impersonation_read_only",
+			metadata: null,
+		});
+	});
+
+	it("keeps the controlled values of audited settings changes", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
+			status: "success",
+			metadata: { siren: "123456789", hasCse: false, name: "private" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			siren: "123456789",
+			hasCse: false,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES,
+			status: "success",
+			metadata: {
+				year: 2026,
+				campaignStartDate: "",
+				publicDataReleaseDate: "2026-04-01",
+				decl1ModificationDeadline: "2026-05-01",
+				decl2CseOpinionDeadline: "2026-13-99",
+				freeText: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toEqual({
+			year: 2026,
+			decl1ModificationDeadline: "2026-05-01",
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR,
+			status: "success",
+			metadata: {
+				year: 2027,
+				campaignStartDate: "2027-03-15",
+				publicDataReleaseDate: "2028-01-15",
+				freeText: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[2]?.[0]?.metadata).toEqual({
+			year: 2027,
+			campaignStartDate: "2027-03-15",
+			publicDataReleaseDate: "2028-01-15",
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN,
+			status: "success",
+			metadata: {
+				year: 2026,
+				campaignStartDate: "2026-01-01",
+				campaignEndDate: "2026-12-31",
+				declarationDeadline: "2026-06-30",
+				secret: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[3]?.[0]?.metadata).toEqual({
+			year: 2026,
+			campaignStartDate: "2026-01-01",
+			campaignEndDate: "2026-12-31",
+			declarationDeadline: "2026-06-30",
+		});
+	});
+
+	it("keeps fixed NextAuth failure codes without error details", async () => {
+		for (const code of [
+			"JWT_SESSION_ERROR",
+			"OAUTH_CALLBACK_HANDLER_ERROR",
+			"OAUTH_PARSE_PROFILE_ERROR",
+		]) {
+			await logAction({
+				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
+				status: "failure",
+				errorMessage: `${code}: private@example.com`,
+			});
+		}
+		expect(
+			mockInsertValues.mock.calls.map(([row]) => row.errorMessage),
+		).toEqual([
+			"JWT_SESSION_ERROR",
+			"OAUTH_CALLBACK_HANDLER_ERROR",
+			"OAUTH_PARSE_PROFILE_ERROR",
+		]);
+	});
+
+	it("retains only the public-agent signal from role claims", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
+			status: "failure",
+			metadata: {
+				roles: ["private_role", "agent_public"],
+				publicAgentRequired: true,
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			roles: ["agent_public"],
+			publicAgentRequired: true,
 		});
 	});
 
@@ -224,12 +465,11 @@ describe("logAction", () => {
 				"fake-session-token-value",
 			);
 			expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
-				errorMessage:
-					"OAUTH_CALLBACK_ERROR: invalid_grant for code fake-session-token-value",
+				errorMessage: "OAUTH_CALLBACK_ERROR",
 			});
 		});
 
-		it("truncates a long errorMessage to AUDIT_ERROR_MESSAGE_MAX_LENGTH before inserting (#4526)", async () => {
+		it("reduces a long free-form error to a controlled code", async () => {
 			const longMessage = "a".repeat(2000);
 
 			await logAction({
@@ -239,16 +479,12 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
-			expect(row?.errorMessage).toBe(
-				longMessage.slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH),
-			);
+			expect(row?.errorMessage).toBe("ERROR");
 		});
 
-		it("never splits a surrogate pair straddling the truncation cut", async () => {
+		it("does not persist Unicode error content", async () => {
 			const surrogatePairEmoji = "😀";
-			const longMessage =
-				"a".repeat(AUDIT_ERROR_MESSAGE_MAX_LENGTH - 1) + surrogatePairEmoji;
+			const longMessage = "a".repeat(500) + surrogatePairEmoji;
 
 			await logAction({
 				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
@@ -257,13 +493,10 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toBe(longMessage);
-			expect([...(row?.errorMessage ?? "")]).toHaveLength(
-				AUDIT_ERROR_MESSAGE_MAX_LENGTH,
-			);
+			expect(row?.errorMessage).toBe("ERROR");
 		});
 
-		it("persists a short errorMessage unchanged", async () => {
+		it("persists only the code from a short errorMessage", async () => {
 			await logAction({
 				action: AUDIT_ACTIONS.AUTH_LOGIN_FAILED,
 				status: "failure",
@@ -271,10 +504,10 @@ describe("logAction", () => {
 			});
 
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toBe("BAD_REQUEST: invalid input");
+			expect(row?.errorMessage).toBe("BAD_REQUEST");
 		});
 
-		it("keeps deriving the stdout errorCode correctly and truncates the persisted row, for a long tRPC-shaped message", async () => {
+		it("uses the same short code for stdout and the database", async () => {
 			const longMessage = `BAD_REQUEST: ${"x".repeat(2000)}`;
 
 			await logAction({
@@ -287,7 +520,7 @@ describe("logAction", () => {
 				errorCode: "BAD_REQUEST",
 			});
 			const row = mockInsertValues.mock.calls[0]?.[0];
-			expect(row?.errorMessage).toHaveLength(AUDIT_ERROR_MESSAGE_MAX_LENGTH);
+			expect(row?.errorMessage).toBe("BAD_REQUEST");
 		});
 
 		// A failure while building or emitting the stdout line must never block the DB insert, nor make logAction reject.
@@ -331,7 +564,7 @@ describe("logActionInTransaction", () => {
 		await logActionInTransaction(tx, {
 			action: AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED,
 			status: "success",
-			userId: "user-1",
+			userId: "123e4567-e89b-42d3-a456-426614174000",
 			siren: "123456789",
 			metadata: { reason: "siret_changed" },
 		});
@@ -340,7 +573,7 @@ describe("logActionInTransaction", () => {
 		expect(txInsertValues.mock.calls[0]?.[0]).toMatchObject({
 			action: "auth.company_link_revoked",
 			category: "auth",
-			userId: "user-1",
+			userId: "123e4567-e89b-42d3-a456-426614174000",
 			siren: "123456789",
 			metadata: { reason: "siret_changed" },
 		});

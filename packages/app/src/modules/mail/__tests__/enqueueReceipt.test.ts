@@ -222,7 +222,7 @@ describe("enqueueReceipt", () => {
 		});
 	});
 
-	it("logs failure with errorMessage when publisher returns error", async () => {
+	it("logs a bounded code when publisher returns error", async () => {
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "error",
 			error: "connection refused",
@@ -234,7 +234,7 @@ describe("enqueueReceipt", () => {
 			expect.objectContaining({
 				action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 				status: "failure",
-				errorMessage: "connection refused",
+				errorMessage: "QUEUE_ERROR:",
 			}),
 		);
 	});
@@ -249,7 +249,7 @@ describe("enqueueReceipt", () => {
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "failure",
-				errorMessage: "queue_unavailable",
+				errorMessage: "QUEUE_UNAVAILABLE:",
 			}),
 		);
 	});
@@ -289,12 +289,10 @@ describe("enqueueReceipt", () => {
 		// has to be readable there and not only in the exception tracker.
 		expect(mocks.logAction).toHaveBeenCalledTimes(1);
 		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
-		// The reason is free text, so it goes in the dedicated column rather than
-		// in the jsonb, which a direct logAction call never sanitises.
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "success",
-				errorMessage: "pdf rendering failed",
+				errorMessage: "ATTACHMENT_DROPPED:",
 			}),
 		);
 	});
@@ -323,7 +321,7 @@ describe("enqueueReceipt", () => {
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "failure",
-				errorMessage: "connection refused",
+				errorMessage: "QUEUE_ERROR:",
 			}),
 		);
 		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
@@ -342,7 +340,7 @@ describe("enqueueReceipt", () => {
 		expect(captured.cause).toBe("pdf worker died");
 		expect(auditMetadataOf()).toMatchObject({ attachmentsDropped: true });
 		expect(mocks.logAction).toHaveBeenCalledWith(
-			expect.objectContaining({ errorMessage: "pdf worker died" }),
+			expect.objectContaining({ errorMessage: "ATTACHMENT_DROPPED:" }),
 		);
 	});
 
@@ -358,12 +356,12 @@ describe("enqueueReceipt", () => {
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "failure",
-				errorMessage: "Unknown error",
+				errorMessage: "RECEIPT_ENQUEUE_ERROR:",
 			}),
 		);
 	});
 
-	it("carries a thrown Error's message onto the audit row when the enqueue fails fatally", async () => {
+	it("uses a bounded code when enqueue throws an Error", async () => {
 		mocks.enqueueNotification.mockRejectedValueOnce(
 			new Error("redis connection lost"),
 		);
@@ -373,7 +371,7 @@ describe("enqueueReceipt", () => {
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				status: "failure",
-				errorMessage: "redis connection lost",
+				errorMessage: "RECEIPT_ENQUEUE_ERROR:",
 			}),
 		);
 	});

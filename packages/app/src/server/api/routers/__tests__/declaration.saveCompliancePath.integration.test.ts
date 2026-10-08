@@ -24,7 +24,7 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 	let sql!: ReturnType<typeof postgres>;
 
 	const SIREN = "555666777";
-	const USER_ID = "compliance-path-integration-user";
+	const USER_ID = "8d771ecb-b0a9-40e8-92ca-8f77b535de08";
 	const USER_EMAIL = "compliance-path-integration@example.fr";
 	const YEAR = getCurrentYear();
 

@@ -267,10 +267,12 @@ export async function enqueueReceipt(
 		// PDF, so the queue error wins the single error column when both happen.
 		const errorMessage =
 			result.status === "enqueued"
-				? droppedReason
+				? droppedReason === null
+					? null
+					: "ATTACHMENT_DROPPED:"
 				: result.status === "error"
-					? result.error
-					: "queue_unavailable";
+					? "QUEUE_ERROR:"
+					: "QUEUE_UNAVAILABLE:";
 
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
@@ -281,10 +283,8 @@ export async function enqueueReceipt(
 			...(result.status === "enqueued"
 				? { resourceType: "notification", resourceId: result.id }
 				: {}),
-			// Free text belongs in the dedicated column, not in `metadata`: a direct
-			// logAction call runs no sanitisation on the jsonb, so an exception
-			// message parked there would be one refactor away from carrying
-			// whatever a future throw site interpolates into it.
+			// Keep exception text out of metadata. logAction reduces this field
+			// to a controlled error code before the database insert.
 			...(errorMessage === null ? {} : { errorMessage }),
 			// A dropped attachment must not read as a clean send: the enqueue did
 			// succeed, so the row stays a success, but the degradation is stamped
@@ -300,7 +300,6 @@ export async function enqueueReceipt(
 			},
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
 		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
@@ -308,7 +307,7 @@ export async function enqueueReceipt(
 			userId,
 			userEmail: to,
 			siren,
-			errorMessage: message,
+			errorMessage: "RECEIPT_ENQUEUE_ERROR:",
 			metadata: { type, kind, year, isResend },
 		});
 	}
