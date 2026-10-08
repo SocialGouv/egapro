@@ -18,7 +18,6 @@ export function isAdminRoute(pathname: string | null): boolean {
 	return isUnderRoute(pathname, ADMIN);
 }
 
-// True for `/mon-espace` and every nested route (history pages included) — used by `Navigation` to hide the main nav bar there.
 export function isMySpaceRoute(pathname: string | null): boolean {
 	return isUnderRoute(pathname, MY_SPACE);
 }
