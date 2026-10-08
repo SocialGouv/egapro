@@ -31,6 +31,8 @@ describe("gapDirection", () => {
 
 	it("states a nil gap and a missing one differently", () => {
 		expect(gapDirection(0).prefix).toBe("Aucun écart constaté");
+		expect(gapDirection(0.00004).prefix).toBe("Aucun écart constaté");
+		expect(gapDirection(-0.00004).prefix).toBe("Aucun écart constaté");
 		expect(gapDirection(null).prefix).toBe("Donnée non disponible");
 	});
 });

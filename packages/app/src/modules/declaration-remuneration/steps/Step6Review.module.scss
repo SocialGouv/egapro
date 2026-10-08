@@ -57,17 +57,6 @@
 	align-self: stretch;
 }
 
-.gapCellStack {
-	display: flex;
-	flex-direction: column;
-}
-
-.gapCell {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
 .subSection {
 	display: flex;
 	gap: 1.5rem;

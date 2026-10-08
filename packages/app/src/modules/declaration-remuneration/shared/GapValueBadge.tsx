@@ -9,7 +9,7 @@ import {
 	gapLevel,
 	gapMagnitude,
 } from "~/modules/domain";
-import stepStyles from "../Step6Review.module.scss";
+import styles from "./GapValueBadge.module.scss";
 
 type Props = {
 	gap: number | null;
@@ -20,8 +20,8 @@ export function GapBadge({ gap }: Props) {
 	const level = gapLevel(gap);
 	const favoredSex = gapFavoredSex(gap);
 	return (
-		<span className={stepStyles.gapCellStack}>
-			<span className={`fr-text--sm ${stepStyles.gapCell}`}>
+		<span className={styles.gapCellStack}>
+			<span className={`fr-text--sm ${styles.gapCell}`}>
 				<strong>{formatGap(gapMagnitude(gap))}</strong>
 				{level === "high" && (
 					<span className={gapBadgeClass(level)}>

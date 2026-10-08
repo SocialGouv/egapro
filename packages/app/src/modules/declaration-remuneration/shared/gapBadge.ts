@@ -21,8 +21,7 @@ export function gapBadgeClass(level: GapLevel): string {
 		: `${base} fr-badge--warning`;
 }
 
-/** French mention of the sex favored by a gap, for display under its value. */
 export const GAP_FAVORED_SEX_MENTIONS: Record<"women" | "men", string> = {
 	women: "en faveur des femmes",
 	men: "en faveur des hommes",
-} as const;
+};

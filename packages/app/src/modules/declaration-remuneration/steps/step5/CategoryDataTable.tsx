@@ -16,9 +16,9 @@ import {
 	displayDecimal,
 	formatTotal,
 } from "~/modules/domain";
+import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
 import { workforceFieldLabel } from "../step1/workforceRows";
-import { GapBadge } from "../step6/GapBadge";
 import type { EmployeeCategory } from "./categorySerializer";
 import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
 import { CATEGORY_WORKFORCE_ROWS } from "./categoryWorkforceRows";

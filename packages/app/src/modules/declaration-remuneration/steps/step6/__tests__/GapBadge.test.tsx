@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GapBadge } from "../GapBadge";
+import { GapBadge } from "../../../shared/GapValueBadge";
 
 describe("GapBadge", () => {
 	it("shows the placeholder for a null gap", () => {

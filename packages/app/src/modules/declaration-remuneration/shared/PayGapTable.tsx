@@ -5,12 +5,12 @@ import {
 	padDecimalOnBlur,
 	resolveGap,
 } from "~/modules/domain";
-import { GapBadge } from "../steps/step6/GapBadge";
 import type { PayGapField, PayGapRow } from "../types";
 import common from "./common.module.scss";
 import { payGapFieldId } from "./formError/payGapErrors";
 import type { FieldError } from "./formError/types";
 import { describedByForField, findFieldError } from "./formError/types";
+import { GapBadge } from "./GapValueBadge";
 import { numericInputClassName } from "./numericInputClassName";
 import styles from "./PayGapTable.module.scss";
 
