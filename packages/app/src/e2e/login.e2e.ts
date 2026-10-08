@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
-import { HOME, LOGIN, MY_SPACE } from "~/modules/routes";
+import { HELP, HOME, LOGIN, MY_SPACE } from "~/modules/routes";
 import type { CompanyLocation } from "./helpers/db";
 import { getCompanyLocation, setCompanyLocation } from "./helpers/db";
 import { dismissCookieBanner, loginWithProConnect } from "./helpers/login";
@@ -232,6 +232,28 @@ test.describe("Mon espace — header entry point", () => {
 		await menu.getByRole("link", { name: "Mes démarches" }).click();
 
 		await page.waitForURL("**/mon-espace");
+	});
+
+	test("mon espace drops the main menu, which comes back on the help page", async ({
+		page,
+	}) => {
+		await page.goto(MY_SPACE);
+		await dismissCookieBanner(page);
+
+		const mainMenu = page.getByRole("navigation", {
+			name: "Menu principal",
+			includeHidden: true,
+		});
+		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+		await expect(mainMenu).toHaveCount(0);
+
+		await page.getByRole("banner").getByRole("link", { name: "Aide" }).click();
+
+		await page.waitForURL(urlGlob(HELP));
+		await expect(mainMenu.getByRole("link", { name: "Accueil" })).toBeVisible();
+		await expect(
+			mainMenu.getByRole("link", { name: "Observatoire" }),
+		).toBeVisible();
 	});
 
 	test("the removed mes-entreprises route is not found", async ({ page }) => {
