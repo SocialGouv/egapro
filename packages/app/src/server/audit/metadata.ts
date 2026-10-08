@@ -35,7 +35,10 @@ type MetadataField =
 	| "declarationId"
 	| "fileId"
 	| "siren"
-	| "flowType";
+	| "flowType"
+	| "s3Cleanup"
+	| "roles"
+	| "publicAgentRequired";
 
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -99,8 +102,6 @@ const FIELDS_BY_ACTION: Partial<
 	],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPSERT_DEADLINES]: [
 		"year",
-		"campaignStartDate",
-		"publicDataReleaseDate",
 		"decl1ModificationDeadline",
 		"decl1JustificationDeadline",
 		"decl1JointEvaluationDeadline",
@@ -108,6 +109,11 @@ const FIELDS_BY_ACTION: Partial<
 		"decl2JustificationDeadline",
 		"decl2JointEvaluationDeadline",
 		"decl2CseOpinionDeadline",
+	],
+	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR]: [
+		"year",
+		"campaignStartDate",
+		"publicDataReleaseDate",
 	],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN]: ["year"],
 	[AUDIT_ACTIONS.REPRESENTATION_GET]: ["year"],
@@ -134,7 +140,13 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: ["format"],
 	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: ["format"],
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: ["format"],
-	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: ["acr", "authTime", "testSeam"],
+	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: [
+		"acr",
+		"authTime",
+		"testSeam",
+		"roles",
+		"publicAgentRequired",
+	],
 	[AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT]: ["timeoutMinutes"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATION_GET_BY_ID]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_DECLARATIONS_GET_RECAP]: ["id"],
@@ -143,8 +155,12 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY]: ["siren"],
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
-	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType"],
-	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: ["fileId", "flowType"],
+	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType", "s3Cleanup"],
+	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+	],
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: ["fileId"],
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: ["fileId"],
 	[AUDIT_ACTIONS.NOTIFICATION_ENQUEUE]: [
@@ -172,7 +188,7 @@ function validIsoDate(value: unknown): string | undefined {
 function validValue(
 	field: MetadataField,
 	value: unknown,
-): string | number | boolean | number[] | null | undefined {
+): string | number | boolean | number[] | string[] | null | undefined {
 	switch (field) {
 		case "year": {
 			const year =
@@ -213,7 +229,18 @@ function validValue(
 				? value
 				: undefined;
 		case "hasCse":
+		case "publicAgentRequired":
 			return typeof value === "boolean" ? value : undefined;
+		case "roles":
+			return value === null
+				? null
+				: Array.isArray(value) &&
+						value.length <= 20 &&
+						value.every((role) => typeof role === "string")
+					? value.includes("agent_public")
+						? ["agent_public"]
+						: []
+					: undefined;
 		case "campaignStartDate":
 		case "publicDataReleaseDate":
 			return value === null || value === "" ? null : validIsoDate(value);
@@ -243,6 +270,8 @@ function validValue(
 			return value === "cse_opinion" || value === "joint_evaluation"
 				? value
 				: undefined;
+		case "s3Cleanup":
+			return value === "ok" || value === "failed" ? value : undefined;
 		case "date_begin":
 		case "date_end":
 			return validIsoDate(value);
@@ -264,7 +293,12 @@ function validValue(
 				? value
 				: undefined;
 		case "acr":
-			return value === "eidas1" || value === "eidas1-mfa" ? value : undefined;
+			return value === "eidas1" ||
+				value === "eidas1-mfa" ||
+				value === "eidas2" ||
+				value === "eidas3"
+				? value
+				: undefined;
 		case "authTime":
 			return typeof value === "number" &&
 				Number.isSafeInteger(value) &&

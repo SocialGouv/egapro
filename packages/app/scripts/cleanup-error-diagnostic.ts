@@ -1,10 +1,11 @@
-/** A bounded operational hint for cleanup stdout; never includes error text or paths. */
 export function cleanupErrorDiagnostic(error: unknown): string {
 	try {
 		let current = error;
 		for (let depth = 0; depth < 3; depth++) {
 			if (typeof current !== "object" || current === null) break;
 			const details = current as Record<string, unknown>;
+			if (details.code === "ECONNREFUSED") return "ECONNREFUSED";
+			if (details.code === "CONNECT_TIMEOUT") return "CONNECT_TIMEOUT";
 			if (
 				typeof details.code === "string" &&
 				/^[0-9A-Z]{5}$/.test(details.code)

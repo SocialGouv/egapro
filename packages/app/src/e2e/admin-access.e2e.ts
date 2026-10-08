@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
+import { getCurrentYear } from "~/modules/domain";
 import {
 	ADMIN,
 	ADMIN_DECLARATIONS,
@@ -17,6 +18,7 @@ import {
 	seedDeclarationForYear,
 	setGipWorkforce,
 } from "./helpers/db";
+import { deleteCampaignDeadlines } from "./helpers/db-campaign";
 
 // Merged from the former admin / admin-declarations / admin-referents specs,
 // and from admin-stats.e2e.ts (#4114).
@@ -40,42 +42,148 @@ test.describe("admin access", () => {
 	});
 
 	test("admin can reach /admin/parametres", async ({ page }) => {
-		await page.goto(ADMIN_SETTINGS);
-		await expect(
-			page.getByRole("heading", {
-				name: "Paramètres de la plateforme",
-				level: 1,
-			}),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Échéances de campagne", level: 2 }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Année de campagne active", level: 2 }),
-		).not.toBeVisible();
+		const currentYear = getCurrentYear();
+		const unconfiguredYear = currentYear + 10;
+		await deleteCampaignDeadlines(unconfiguredYear);
 
-		const firstRound = page.getByRole("group", {
-			name: "Première déclaration",
-		});
-		const secondRound = page.getByRole("group", {
-			name: "Deuxième déclaration",
-		});
-		for (const round of [firstRound, secondRound]) {
-			for (const label of [
-				"Échéance de modification",
-				"Échéance de justification",
-				"Échéance de dépôt du rapport d'évaluation conjointe",
-			]) {
-				await expect(round.getByLabel(label, { exact: true })).toBeVisible();
-			}
+		try {
+			await page.goto(ADMIN_SETTINGS);
+			await expect(
+				page.getByRole("heading", {
+					name: "Paramètres de la plateforme",
+					level: 1,
+				}),
+			).toBeVisible();
+
+			const yearSelector = page.getByLabel(/^Année de campagne/);
+			const common = page.getByRole("region", { name: "Paramètres communs" });
+			const remuneration = page.getByRole("region", {
+				name: "Démarche Rémunération",
+			});
+			const deadlines = remuneration.getByRole("region", {
+				name: /^Échéances de la campagne/,
+			});
+			const lock = remuneration.getByRole("region", {
+				name: "Verrou de déclaration",
+			});
+			const lockInput = lock.getByLabel(/^Délai d'expiration du verrou/);
+
+			await test.step("structure — sélecteur unique, communs puis démarches", async () => {
+				await expect(page.getByRole("combobox")).toHaveCount(1);
+				await expect(yearSelector).toHaveValue(String(currentYear));
+				await expect(
+					page.getByRole("heading", { level: 2 }).filter({
+						hasText:
+							/^(Paramètres communs|Démarche Rémunération|Démarche Représentation équilibrée)$/,
+					}),
+				).toHaveText([
+					"Paramètres communs",
+					"Démarche Rémunération",
+					"Démarche Représentation équilibrée",
+				]);
+				await expect(
+					common.getByRole("heading", {
+						name: `Calendrier de la campagne ${currentYear}`,
+						level: 3,
+					}),
+				).toBeVisible();
+				await expect(
+					page
+						.getByRole("region", { name: "Démarche Représentation équilibrée" })
+						.getByRole("heading", {
+							name: `Campagne ${currentYear}`,
+							level: 3,
+						}),
+				).toBeVisible();
+			});
+
+			await test.step("Rémunération — quatre groupes, choix du parcours calculés", async () => {
+				await expect(deadlines.getByRole("group")).toHaveText([
+					/^Déclaration des indicateurs/,
+					/^Parcours de mise en conformité — 1er tour/,
+					/^Parcours de mise en conformité — 2nd tour/,
+					/^Avis du CSE/,
+				]);
+				const firstRound = deadlines.getByRole("group", {
+					name: "Parcours de mise en conformité — 1er tour",
+				});
+				const secondRound = deadlines.getByRole("group", {
+					name: "Parcours de mise en conformité — 2nd tour",
+				});
+				await expect(
+					deadlines
+						.getByRole("group", { name: "Déclaration des indicateurs" })
+						.getByLabel("Échéance de déclaration", { exact: true }),
+				).toBeEditable();
+				await expect(
+					firstRound.getByLabel(
+						"Échéance de la seconde déclaration (actions correctives)",
+						{ exact: true },
+					),
+				).toBeEditable();
+				await expect(
+					deadlines
+						.getByRole("group", { name: "Avis du CSE" })
+						.getByLabel(/^Échéance de dépôt de l'avis du CSE/),
+				).toBeEditable();
+				for (const [round, value] of [
+					[firstRound, `${currentYear}-07-01`],
+					[secondRound, `${currentYear + 1}-01-01`],
+				] as const) {
+					const pathChoice = round.getByLabel(/^Échéance de choix du parcours/);
+					await expect(pathChoice).toHaveValue(value);
+					await expect(pathChoice).not.toBeEditable();
+				}
+				await expect(deadlines.locator("#lock-timeout-minutes")).toHaveCount(0);
+				await expect(page.getByText(/date limite/i)).toHaveCount(0);
+			});
+
+			await test.step("année non configurée — calendrier commun verrouillé jusqu'aux échéances Rémunération", async () => {
+				const lockValue = await lockInput.inputValue();
+				// A pick made before hydration is reverted: retry until the blocks follow the year.
+				await expect(async () => {
+					await yearSelector.selectOption(String(unconfiguredYear));
+					await expect(
+						deadlines.getByRole("heading", {
+							name: `Échéances de la campagne ${unconfiguredYear}`,
+						}),
+					).toBeVisible({ timeout: 1_000 });
+				}).toPass({ timeout: 30_000 });
+
+				await expect(
+					deadlines.getByText(
+						"Valeurs par défaut — aucune surcharge enregistrée pour cette année",
+					),
+				).toBeVisible();
+				const commonStart = common.getByLabel(
+					/^Date de démarrage de la campagne/,
+				);
+				await expect(
+					common.getByText(
+						`Enregistrez d'abord les échéances de la démarche Rémunération pour ${unconfiguredYear}.`,
+					),
+				).toBeVisible();
+				await expect(commonStart).toBeDisabled();
+				await expect(
+					common.getByRole("button", { name: "Enregistrer" }),
+				).toBeDisabled();
+				await expect(lockInput).toHaveValue(lockValue);
+
+				await deadlines.getByRole("button", { name: "Enregistrer" }).click();
+				await expect(
+					deadlines.getByText(
+						`Échéances enregistrées pour ${unconfiguredYear}.`,
+					),
+				).toBeVisible();
+				await expect(commonStart).toBeEnabled();
+				await expect(
+					common.getByRole("button", { name: "Enregistrer" }),
+				).toBeEnabled();
+				await expect(lockInput).toHaveValue(lockValue);
+			});
+		} finally {
+			await deleteCampaignDeadlines(unconfiguredYear);
 		}
-		await expect(
-			secondRound.getByLabel("Échéance de dépôt de l'avis du CSE", {
-				exact: true,
-			}),
-		).toBeVisible();
-		await expect(page.getByLabel("Échéance de déclaration")).toBeVisible();
-		await expect(page.getByText(/date limite/i)).toHaveCount(0);
 	});
 
 	test("admin can reach /admin/liste-referents", async ({ page }) => {

@@ -63,6 +63,28 @@ const DATABASE_ERROR_CODES = new Set([
 	"OAUTH_PARSE_PROFILE_ERROR",
 	"SIGNIN_OAUTH_ERROR",
 	"JWT_SESSION_ERROR",
+	"ATTACHMENT_DROPPED",
+	"QUEUE_ERROR",
+	"QUEUE_UNAVAILABLE",
+	"RECEIPT_ENQUEUE_ERROR",
+]);
+const HTTP_ERROR_SUFFIXES = new Set([
+	"impersonation_read_only",
+	"admin_mfa_expired",
+	"declaration_not_found",
+	"missing_filename",
+	"empty_body",
+	"wrong_content_type",
+	"invalid_filename",
+	"locked_by_other",
+	"virus_detected",
+	"antivirus_unavailable",
+	"client_aborted",
+	"server_error",
+	"too_large",
+	"wrong_type",
+	"max_files",
+	"empty_file",
 ]);
 const RESOURCE_TYPES = new Set(["declaration", "notification"]);
 const UUID_PATTERN =
@@ -89,6 +111,13 @@ function siren(value: string | null | undefined): string | null {
 }
 
 function databaseErrorCode(message: string | null | undefined): string | null {
+	const httpDetail = /^HTTP ([1-5]\d{2}) ([a-z_]+)(?:\b|:)/.exec(message ?? "");
+	if (
+		httpDetail?.[1] &&
+		httpDetail[2] &&
+		HTTP_ERROR_SUFFIXES.has(httpDetail[2])
+	)
+		return `HTTP_${httpDetail[1]}_${httpDetail[2]}`;
 	const code = deriveErrorCode(message);
 	if (!code) return null;
 	if (DATABASE_ERROR_CODES.has(code)) return code;

@@ -130,7 +130,6 @@ void logAction({
   userId: dbUser.id,
   siren: parseSiren(profileData.siret),
   ipAddress: requestContext.ipAddress,
-  userAgent: requestContext.userAgent,
 });
 ```
 
@@ -157,7 +156,9 @@ example, issue #3268).
   the route handler / helper that the cron calls.
 - **Out-of-band script**: self-audit via a raw `INSERT INTO audit.action_log`
   statement at the end of the script (success) and in a try/catch arm
-  (failure, outside the rolled-back transaction so the row survives).
+  (failure, outside the rolled-back transaction so the row survives). Apply
+  the same closed metadata and error-code policy at this SQL boundary; these
+  scripts do not pass through `logAction`.
 
 ---
 
@@ -288,8 +289,9 @@ type argument.
 
 ## Données conservées dans `audit.action_log`
 
-`logAction` est la dernière barrière avant l'insert, quel que soit l'appelant
-(tRPC, route ou appel direct). Il conserve l'action, la catégorie, le statut,
+`logAction` est la dernière barrière avant l'insert pour ses appelants
+(tRPC, route ou appel direct). Les scripts autonomes et le worker projettent
+leurs lignes à leur propre point d'insertion. Il conserve l'action, la catégorie, le statut,
 la date générée par la base, `user_id` et `siren` quand le contexte les
 fournit sous forme validée (UUID pour `user_id`, 9 chiffres pour `siren`).
 `user_email` et `user_agent` sont toujours `null`. `ip_address`

@@ -28,4 +28,13 @@ describe("cleanupErrorDiagnostic", () => {
 			}),
 		).toBe("UNKNOWN");
 	});
+
+	it("keeps bounded connection failure codes", () => {
+		expect(cleanupErrorDiagnostic({ code: "ECONNREFUSED" })).toBe(
+			"ECONNREFUSED",
+		);
+		expect(cleanupErrorDiagnostic({ code: "CONNECT_TIMEOUT" })).toBe(
+			"CONNECT_TIMEOUT",
+		);
+	});
 });

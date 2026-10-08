@@ -437,7 +437,7 @@ API publique (aucune authentification, OpenAPI documentée) :
 | `/admin/declarations/[id]` | Détail complet d'une déclaration, export CSV, déverrouillage manuel |
 | `/admin/liste-referents` | Annuaire admin (CRUD + import CSV) |
 | `/admin/impersonate` | Recherche d'entreprise pour impersonation |
-| `/admin/parametres` | Configuration des deadlines de campagne (par année) + délai d'expiration du verrou |
+| `/admin/parametres` | Paramètres de la plateforme sur une année de campagne partagée : **Paramètres communs** (calendrier de la campagne : publication GIP en lecture seule, démarrage, rendu public), **Démarche Rémunération** (échéances de la campagne en quatre groupes — déclaration, 1er tour, 2nd tour, avis du CSE — puis délai d'expiration du verrou, indépendant de l'année), **Démarche Représentation équilibrée** (campagne de l'année) |
 | `/admin/stats` | Tableau de bord statistiques en 3 sections : **Suivi de campagne** (courbes de progression par segment d'effectif, durées et décrochages par étape), **Comptes & engagement CSE** (utilisateurs par entreprise + confirmations de statut CSE), **Funnels de complétion** (Matomo) |
 
 **Modules** : `~/modules/admin/*`.
@@ -454,7 +454,7 @@ API publique (aucune authentification, OpenAPI documentée) :
 - **Déverrouillage manuel** : depuis le détail d'une déclaration, l'admin peut libérer le verrou d'édition détenu par un autre utilisateur via le bouton `UnlockDeclarationButton` (procédure `adminDeclarations.releaseLock`). La confirmation est demandée dans une modale.
 - **Délai d'expiration du verrou** : dans `/admin/parametres`, l'admin peut configurer la durée (en minutes) au-delà de laquelle un verrou inactif expire (procédures `adminSettings.getLockTimeout` / `adminSettings.updateLockTimeout`, valeur stockée dans `globalSettings.declarationLockTimeoutMinutes`, défaut `DEFAULT_LOCK_TIMEOUT_MINUTES = 30`).
 
-**Audit** : presque toutes les procédures admin sont auditées (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_SETTINGS_UPSERT_DEADLINES`, `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT`, `ADMIN_DECLARATION_RELEASE_LOCK`, etc.).
+**Audit** : presque toutes les procédures admin sont auditées (`ADMIN_DECLARATIONS_SEARCH`, `ADMIN_SETTINGS_UPSERT_DEADLINES`, `ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR`, `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT`, `ADMIN_DECLARATION_RELEASE_LOCK`, etc.).
 
 ---
 

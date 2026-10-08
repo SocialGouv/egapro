@@ -202,6 +202,30 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps bounded upload cleanup and security failure codes", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 422 virus_detected",
+			metadata: { s3Cleanup: "failed", virusName: "private" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			errorMessage: "HTTP_422_virus_detected",
+			metadata: { s3Cleanup: "failed" },
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 403 impersonation_read_only",
+			metadata: { s3Cleanup: "unexpected" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
+			errorMessage: "HTTP_403_impersonation_read_only",
+			metadata: null,
+		});
+	});
+
 	it("keeps the controlled values of audited settings changes", async () => {
 		await logAction({
 			action: AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE,
@@ -227,9 +251,23 @@ describe("logAction", () => {
 		});
 		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toEqual({
 			year: 2026,
-			campaignStartDate: null,
-			publicDataReleaseDate: "2026-04-01",
 			decl1ModificationDeadline: "2026-05-01",
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_COMMON_CALENDAR,
+			status: "success",
+			metadata: {
+				year: 2027,
+				campaignStartDate: "2027-03-15",
+				publicDataReleaseDate: "2028-01-15",
+				freeText: "private@example.com",
+			},
+		});
+		expect(mockInsertValues.mock.calls[2]?.[0]?.metadata).toEqual({
+			year: 2027,
+			campaignStartDate: "2027-03-15",
+			publicDataReleaseDate: "2028-01-15",
 		});
 
 		await logAction({
@@ -243,7 +281,7 @@ describe("logAction", () => {
 				secret: "private@example.com",
 			},
 		});
-		expect(mockInsertValues.mock.calls[2]?.[0]?.metadata).toEqual({
+		expect(mockInsertValues.mock.calls[3]?.[0]?.metadata).toEqual({
 			year: 2026,
 			campaignStartDate: "2026-01-01",
 			campaignEndDate: "2026-12-31",
@@ -270,6 +308,21 @@ describe("logAction", () => {
 			"OAUTH_CALLBACK_HANDLER_ERROR",
 			"OAUTH_PARSE_PROFILE_ERROR",
 		]);
+	});
+
+	it("retains only the public-agent signal from role claims", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
+			status: "failure",
+			metadata: {
+				roles: ["private_role", "agent_public"],
+				publicAgentRequired: true,
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			roles: ["agent_public"],
+			publicAgentRequired: true,
+		});
 	});
 
 	it("never throws even when the database insert fails", async () => {
