@@ -129,11 +129,11 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		campaignStartDate: null,
 		decl1ModificationDeadline: civilDate(year, 5, 1),
 		decl1JustificationDeadline: civilDate(year + 1, 2, 1),
-		decl1JointEvaluationDeadline: civilDate(year, 7, 1),
-		decl2ModificationDeadline: civilDate(year, 11, 1),
-		decl2JustificationDeadline: civilDate(year, 11, 1),
+		decl1JointEvaluationDeadline: civilDate(year, 8, 1),
+		decl2ModificationDeadline: civilDate(year + 1, 0, 1),
+		decl2JustificationDeadline: civilDate(year + 1, 2, 1),
 		decl2JointEvaluationDeadline: civilDate(year + 1, 0, 1),
-		decl2CseOpinionDeadline: civilDate(year + 1, 1, 1),
+		decl2CseOpinionDeadline: civilDate(year + 1, 2, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
 	};
@@ -145,7 +145,8 @@ export function getDefaultRepresentationCampaign(
 	return {
 		campaignStartDate: civilDate(campaignYear, 0, 1),
 		campaignEndDate: civilDate(campaignYear, 11, 31),
-		declarationDeadline: civilDate(campaignYear, 2, 1),
+		declarationDeadline:
+			getDefaultCampaignDeadlines(campaignYear).decl1ModificationDeadline,
 	};
 }
 

@@ -42,9 +42,9 @@ export function civilDateBefore(deadlineIso: string, days: number): string {
 // here for round 2).
 export type ReminderDeadlines = {
 	decl1Modification: string; // 1er juin
-	decl1JointEvaluation: string; // 1er août
-	decl2Modification: string; // 1er décembre
-	decl2JointEvaluation: string; // 1er février N+1
+	decl1JointEvaluation: string; // 1er septembre
+	decl2Modification: string; // 1er janvier N+1
+	decl2JointEvaluation: string; // 1er janvier N+1
 	pathChoiceRound1: string; // 1er juillet (round 1, not admin-configurable)
 	pathChoiceRound2: string; // 1er janvier N+1 (domain `pathChoiceDeadline`)
 };
@@ -54,9 +54,9 @@ export type ReminderDeadlines = {
 export function getDefaultReminderDeadlines(year: number): ReminderDeadlines {
 	return {
 		decl1Modification: toIsoDate(year, 6, 1),
-		decl1JointEvaluation: toIsoDate(year, 8, 1),
-		decl2Modification: toIsoDate(year, 12, 1),
-		decl2JointEvaluation: toIsoDate(year + 1, 2, 1),
+		decl1JointEvaluation: toIsoDate(year, 9, 1),
+		decl2Modification: toIsoDate(year + 1, 1, 1),
+		decl2JointEvaluation: toIsoDate(year + 1, 1, 1),
 		pathChoiceRound1: toIsoDate(year, 7, 1),
 		pathChoiceRound2: toIsoDate(year + 1, 1, 1),
 	};

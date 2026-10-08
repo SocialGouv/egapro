@@ -175,7 +175,7 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.publicDataReleaseDate).toBeNull();
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
 		expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
-		expect(result.decl2CseOpinionDeadline).toBe("2028-02-01");
+		expect(result.decl2CseOpinionDeadline).toBe("2028-03-01");
 		expect(result.pathChoiceRound1Deadline).toBe("2027-07-01");
 		expect(result.pathChoiceDeadline).toBe("2028-01-01");
 	});
@@ -421,7 +421,7 @@ describe("adminSettingsRouter — getRepresentationCampaignByYear", () => {
 			isDefault: true,
 			campaignStartDate: "2027-01-01",
 			campaignEndDate: "2027-12-31",
-			declarationDeadline: "2027-03-01",
+			declarationDeadline: "2027-06-01",
 		});
 	});
 
