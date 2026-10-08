@@ -234,6 +234,7 @@ export {
 	computeGapRatio,
 	computeTotal,
 	GAP_RATIO_DECIMALS,
+	gapFavoredSex,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,

@@ -22,9 +22,9 @@ import {
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
-import { GapBadge } from "../step6/GapBadge";
 import { parseEmployeeCategories } from "../step6/parseStep5Categories";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
