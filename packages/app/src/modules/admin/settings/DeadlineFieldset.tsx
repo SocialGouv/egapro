@@ -24,7 +24,7 @@ export function DeadlineFieldset({
 	return (
 		<fieldset className="fr-fieldset">
 			<legend className="fr-fieldset__legend">{group.legend}</legend>
-			<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+			<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
 				{group.pathChoiceKey && (
 					<div className="fr-col-12 fr-col-md-4">
 						<SettingsReadOnlyField
