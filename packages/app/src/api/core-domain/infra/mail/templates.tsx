@@ -11,8 +11,8 @@ const { renderToStaticMarkup } = require("react-dom/server");
 const MailHeader = () => (
   <header style={{ display: "flex", alignItems: "center", marginBottom: "20px", fontFamily: "arial, sans-serif" }}>
     <img
-      src={`${config.host}/logo-ministere.png`}
-      alt="Egapro Logo"
+      src={`${config.host}/logo-ministere.generated.png`}
+      alt="Ministère du Travail et des Solidarités"
       style={{ maxWidth: "150px", marginRight: "20px" }}
     />
     <div>

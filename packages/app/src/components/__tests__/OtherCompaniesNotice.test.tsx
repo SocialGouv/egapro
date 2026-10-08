@@ -1,3 +1,4 @@
+import Alert from "@codegouvfr/react-dsfr/Alert";
 import { render, screen } from "@testing-library/react";
 
 import { OtherCompaniesNotice } from "../OtherCompaniesNotice";
@@ -19,9 +20,20 @@ describe("OtherCompaniesNotice", () => {
     render(<OtherCompaniesNotice />);
 
     const link = screen.getByRole("link", { name: "votre profil ProConnect" });
-    expect(link).toHaveAttribute("href", "https://identite.proconnect.gouv.fr/users/start-sign-in");
+    expect(link).toHaveAttribute("href", "https://identite.proconnect.gouv.fr/manage-organizations");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
     expect(link).toHaveAttribute("title", "votre profil ProConnect - ouvre une nouvelle fenêtre");
+  });
+
+  it("keeps block notice content inside a block Alert description", () => {
+    const { container } = render(<Alert severity="info" description={<OtherCompaniesNotice />} />);
+
+    const alertDescription = container.querySelector(".fr-alert")?.children[0];
+    const list = alertDescription?.querySelector("ul");
+
+    expect(alertDescription?.tagName).toBe("DIV");
+    expect(list).not.toBeNull();
+    expect(list?.closest("p")).toBeNull();
   });
 });

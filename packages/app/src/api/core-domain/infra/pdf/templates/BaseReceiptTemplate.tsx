@@ -5,7 +5,7 @@ import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/
 import path from "path";
 
 let initialized = false;
-const logo = path.resolve("./public/logo-ministere.png");
+const logo = path.resolve("./public/logo-ministere.generated.png");
 
 if (!initialized) {
   initialized = true;
