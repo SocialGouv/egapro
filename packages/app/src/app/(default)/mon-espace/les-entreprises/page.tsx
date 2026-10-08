@@ -9,7 +9,7 @@ import { getServerSession } from "next-auth";
 import { getAllEmailsBySiren } from "../actions";
 import { AddOwnershipForm } from "../AddOwnershipForm";
 import { EmailOwnerList } from "../EmailOwnerList";
-import { MesEntreprisesInfoAlert } from "../mes-entreprises/page";
+import { EntreprisesInfoAlert } from "./EntreprisesInfoAlert";
 import { SirenInput } from "./SirenInput";
 
 const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "siren">) => {
@@ -24,7 +24,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       <MessageProvider>
         <Box mb="10w">
           <Heading as="h1" text="Les entreprises" />
-          <MesEntreprisesInfoAlert />
+          <EntreprisesInfoAlert />
           <Box mt="2w">
             <SirenInput />
           </Box>
@@ -40,7 +40,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
       <MessageProvider>
         <Box mb="10w">
           <Heading as="h1" text="Les entreprises" />
-          <MesEntreprisesInfoAlert />
+          <EntreprisesInfoAlert />
           <Box mt="2w">
             <SirenInput isImpersonating={isImpersonating} loadedSiren={selectedSiren} />
           </Box>
@@ -58,7 +58,7 @@ const MesEntreprisesPage = async ({ searchParams }: NextServerPageProps<never, "
         <MessageProvider>
           <Box mb="10w">
             <Heading as="h1" text="Les entreprises" />
-            <MesEntreprisesInfoAlert />
+            <EntreprisesInfoAlert />
             <Box mt="2w">
               <SirenInput />
             </Box>

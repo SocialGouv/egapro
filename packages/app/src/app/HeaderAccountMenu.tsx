@@ -37,13 +37,6 @@ export const HeaderAccountMenu = (props: {
                   </a>
                 </li>
               )}
-              {!props.staff && (
-                <li>
-                  <a className="fr-nav__link" href="/mon-espace/mes-entreprises" target="_self">
-                    Mes entreprises
-                  </a>
-                </li>
-              )}
               <li>
                 <a className="fr-nav__link" href="/mon-espace/mes-declarations" target="_self">
                   {staffLinkText} déclarations
