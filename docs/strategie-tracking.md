@@ -152,7 +152,7 @@ d'entreprise, ni de requête de recherche) :
 | Slot Matomo | Contenu | Pourquoi |
 |---|---|---|
 | 1 — `CAMPAIGN_YEAR` | Année de campagne | Comparer les campagnes entre elles |
-| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRange`) | Segmenter par taille d'entreprise (obligations < 50 / 50–99 / ≥ 100) |
+| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRangeForGip`, toujours émise — un effectif GIP inconnu vaut `<50`) | Segmenter par taille d'entreprise (obligations < 50 / 50–99 / ≥ 100) |
 
 ⚠️ **Les IDs de slot doivent être configurés à l'identique dans l'admin Matomo.**
 Un ID erroné fait silencieusement ignorer la dimension. Les IDs sont centralisés

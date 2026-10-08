@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
 	COMPANY_SIZE_RANGES,
 	type CompanySizeRange,
-	getOptionalCompanySizeRange,
+	getCompanySizeRangeForGip,
 } from "~/modules/domain";
 
 import {
@@ -61,15 +61,15 @@ describe("gipSizeRangeFilter", () => {
 		expect(params).toEqual([COMPANY_SIZE_RANGES["250+"].min]);
 	});
 
-	// Mirror of `getOptionalCompanySizeRange`: an unknown headcount belongs to no
-	// bracket. In SQL the NULL propagates through the comparison, so no
-	// `coalesce(workforce_ema, 0)` may creep in — it would fold "unknown" into
-	// the smallest bracket.
-	it("never coalesces an unknown headcount into a bracket", () => {
-		expect(getOptionalCompanySizeRange(null)).toBeUndefined();
+	// Mirror of `getCompanySizeRangeForGip`: an unknown headcount is of the
+	// voluntary tier, so it belongs to the smallest bracket. The `coalesce`
+	// keeps every bracket's predicate well-defined on a NULL headcount instead
+	// of letting it propagate out of the comparison.
+	it("coalesces an unknown headcount into the smallest bracket", () => {
+		expect(getCompanySizeRangeForGip(null)).toBe("<50");
 
 		for (const range of RANGE_KEYS) {
-			expect(dialect.sqlToQuery(gipSizeRangeFilter(range)).sql).not.toContain(
+			expect(dialect.sqlToQuery(gipSizeRangeFilter(range)).sql).toContain(
 				"coalesce",
 			);
 		}
