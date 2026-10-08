@@ -36,7 +36,7 @@ export function DevLoginForm({ callbackUrl }: Props) {
 	const [submitting, setSubmitting] = useState(false);
 
 	const form = useZodForm(devLoginSchema, {
-		defaultValues: { email: "", siret: "" },
+		defaultValues: { email: "", siret: "", isPublicAgent: true },
 	});
 
 	const target = safeCallbackUrl(callbackUrl);
@@ -47,6 +47,7 @@ export function DevLoginForm({ callbackUrl }: Props) {
 		const result = await signIn("dev-auth", {
 			callbackUrl: target,
 			email: values.email,
+			isPublicAgent: String(values.isPublicAgent),
 			redirect: false,
 			siret: values.siret,
 		});
@@ -113,6 +114,21 @@ export function DevLoginForm({ callbackUrl }: Props) {
 						{siretError}
 					</p>
 				)}
+			</div>
+
+			<div className="fr-checkbox-group fr-mb-3w">
+				<input
+					id="dev-login-is-public-agent"
+					type="checkbox"
+					{...form.register("isPublicAgent")}
+				/>
+				<label className="fr-label" htmlFor="dev-login-is-public-agent">
+					Agent public
+					<span className="fr-hint-text">
+						Décocher pour reproduire le refus d&apos;accès à
+						l&apos;administration
+					</span>
+				</label>
 			</div>
 
 			{serverError && (

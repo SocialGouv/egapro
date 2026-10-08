@@ -6,6 +6,7 @@ import {
 	isAdminMfaFresh,
 	isPublicAgent,
 	resolveAdminAccess,
+	resolveAdminGrant,
 } from "~/modules/domain";
 
 const AUTH_AT = Math.floor(Date.parse("2026-03-10T08:00:00.000Z") / 1000);
@@ -136,6 +137,68 @@ describe("isPublicAgent", () => {
 	});
 });
 
+describe("resolveAdminGrant", () => {
+	it("never mentions the backoffice to an unlisted account, public agent or not", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: false,
+				roles: ["agent_public"],
+				requirePublicAgent: true,
+			}),
+		).toEqual({ granted: false, refusal: null });
+	});
+
+	it("grants a listed public agent", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: true,
+				roles: ["agent_public"],
+				requirePublicAgent: true,
+			}),
+		).toEqual({ granted: true, refusal: null });
+	});
+
+	it("refuses a listed account with no public-agent role, carrying the roles it did receive", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: true,
+				roles: ["agent_public_etat"],
+				requirePublicAgent: true,
+			}),
+		).toEqual({ granted: false, refusal: { roles: ["agent_public_etat"] } });
+	});
+
+	it("refuses a listed account whose claim carried no role at all", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: true,
+				roles: [],
+				requirePublicAgent: true,
+			}),
+		).toEqual({ granted: false, refusal: { roles: [] } });
+	});
+
+	it("turns a missing roles claim into an empty list in the refusal, never null", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: true,
+				roles: null,
+				requirePublicAgent: true,
+			}),
+		).toEqual({ granted: false, refusal: { roles: [] } });
+	});
+
+	it("grants a listed non-public-agent when the flag lifts the requirement", () => {
+		expect(
+			resolveAdminGrant({
+				isListed: true,
+				roles: [],
+				requirePublicAgent: false,
+			}),
+		).toEqual({ granted: true, refusal: null });
+	});
+});
+
 describe("resolveAdminAccess", () => {
 	it.each([
 		["no session at all", null],
@@ -158,6 +221,25 @@ describe("resolveAdminAccess", () => {
 		// never mentioned to someone who has no business there.
 		expect(
 			resolveAdminAccess({ isAdmin: false, adminMfaAt: AUTH_AT }, at(0)),
+		).toEqual({ type: "monEspace" });
+	});
+
+	it("reports the public-agent refusal to a listed account that carries it", () => {
+		expect(
+			resolveAdminAccess(
+				{
+					isAdmin: false,
+					adminAccessRefusal: { roles: [], organizationLabel: "Société Démo" },
+				},
+				at(0),
+			),
+		).toEqual({ type: "notPublicAgent" });
+	});
+
+	it("keeps the silent Mon espace refusal when the refusal field is explicitly null", () => {
+		// A later grant clears the field instead of leaving a stale refusal behind.
+		expect(
+			resolveAdminAccess({ isAdmin: false, adminAccessRefusal: null }, at(0)),
 		).toEqual({ type: "monEspace" });
 	});
 

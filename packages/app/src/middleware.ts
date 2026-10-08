@@ -153,6 +153,9 @@ async function adminMiddleware(request: NextRequest, forward: Forward) {
 			);
 			return NextResponse.redirect(resumeUrl);
 		}
+		// No deep link to carry back: a step-up would not change the roles ProConnect returned.
+		case "notPublicAgent":
+			return NextResponse.redirect(new URL(ADMIN_MFA_RESUME, request.url));
 		case "allow":
 			return noStore(forward());
 		default:

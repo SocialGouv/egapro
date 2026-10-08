@@ -1,7 +1,12 @@
 // Types
 
 // Admin two-factor authentication — accepted levels and freshness window
-export type { AdminMfaFailure } from "./shared/adminMfa";
+export type {
+	AdminAccessRefusal,
+	AdminMfaFailure,
+	ResolveAdminGrantInput,
+	ResolveAdminGrantResult,
+} from "./shared/adminMfa";
 export {
 	ADMIN_MFA_ACR_VALUES,
 	ADMIN_MFA_WINDOW_SECONDS,
@@ -10,6 +15,7 @@ export {
 	isPublicAgent,
 	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
+	resolveAdminGrant,
 } from "./shared/adminMfa";
 // Campaign
 export {

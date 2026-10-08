@@ -109,6 +109,7 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		});
 
 		expect(result.isAdmin).toBe(true);
+		expect(result.adminAccessRefusal).toBeUndefined();
 	});
 
 	// S2
@@ -116,6 +117,10 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		const result = await signIn({ roles: [] });
 
 		expect(result.isAdmin).toBe(false);
+		expect(result.adminAccessRefusal).toEqual({
+			roles: [],
+			organizationLabel: null,
+		});
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				metadata: expect.objectContaining({ roles: [] }),
@@ -128,6 +133,11 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		const result = await signIn({ roles: undefined });
 
 		expect(result.isAdmin).toBe(false);
+		// The refusal always carries an array, even though the audited claim is null.
+		expect(result.adminAccessRefusal).toEqual({
+			roles: [],
+			organizationLabel: null,
+		});
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				metadata: expect.objectContaining({ roles: null }),
@@ -143,6 +153,8 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		});
 
 		expect(result.isAdmin).toBe(false);
+		// An unlisted account is never told the backoffice exists — not even via the refusal field.
+		expect(result.adminAccessRefusal).toBeUndefined();
 		expect(mockLogAction).not.toHaveBeenCalled();
 	});
 
@@ -151,6 +163,10 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		const result = await signIn({ roles: [], existingIsAdmin: true });
 
 		expect(result.isAdmin).toBe(false);
+		expect(result.adminAccessRefusal).toEqual({
+			roles: [],
+			organizationLabel: null,
+		});
 		expect(mockSet).toHaveBeenCalledWith({ isAdmin: false });
 	});
 
@@ -170,6 +186,7 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		const result = await signIn({ roles: [] });
 
 		expect(result.isAdmin).toBe(true);
+		expect(result.adminAccessRefusal).toBeUndefined();
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				metadata: expect.objectContaining({
