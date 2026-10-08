@@ -119,22 +119,11 @@ const RepresentationEquilibree = () => (
                 className: "fr-mb-4v",
                 content: (
                   <>
-                    <strong>À compter de 2023</strong>, les entreprises devront publier et déclarer leurs écarts
-                    éventuels de représentation femmes‑hommes pour les cadres dirigeants et les instances dirigeantes
-                    selon le même calendrier que l’Index de l’égalité professionnelle, à savoir au plus tard le 1er
-                    mars.
-                  </>
-                ),
-              },
-              {
-                className: "fr-mb-4v",
-                content: (
-                  <>
-                    <strong>À compter du 1er mars 2026</strong>, elles devront atteindre un objectif de 30% de femmes et
-                    d’hommes cadres dirigeants et de 30% de femmes et d’hommes membres d’instances dirigeantes. Les
-                    entreprises n’ayant pas atteint cet objectif devront définir des mesures adéquates et pertinentes de
-                    correction par accord collectif ou, à défaut, par décision unilatérale après consultation du comité
-                    social et économique.
+                    <strong>À compter du 1er mars 2026</strong>, les entreprises doivent atteindre un objectif de 30% de
+                    femmes et d’hommes cadres dirigeants et de 30% de femmes et d’hommes membres d’instances
+                    dirigeantes. Les entreprises n’ayant pas atteint cet objectif doivent définir des mesures adéquates
+                    et pertinentes de correction par accord collectif ou, à défaut, par décision unilatérale après
+                    consultation du comité social et économique.
                   </>
                 ),
               },
