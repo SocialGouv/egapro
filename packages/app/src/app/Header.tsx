@@ -20,7 +20,7 @@ export const Header = ({
       serviceTagline={serviceTagline}
       homeLinkProps={{
         href: "/",
-        title: "Accueil - Egapro - Ministère du Travail, de l’Emploi et de l’Insertion",
+        title: "Accueil - Egapro - Ministère du Travail et des Solidarités",
       }}
       navigation={navigation}
       quickAccessItems={

@@ -98,7 +98,7 @@ describe("CommencerPage", () => {
     expect(screen.getByText(/Vous devez déclarer pour d'autres entreprises/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "votre profil ProConnect" })).toHaveAttribute(
       "href",
-      "https://identite.proconnect.gouv.fr/users/start-sign-in",
+      "https://identite.proconnect.gouv.fr/manage-organizations",
     );
   });
 

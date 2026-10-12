@@ -120,18 +120,18 @@ export const Footer = () => (
     <div className="fr-container">
       <div className="fr-footer__body">
         <div className="fr-footer__brand fr-enlarge-link">
-          <a href="/" title="Accueil - Egapro - Ministère du Travail, de l'Emploi et de l'Insertion">
+          <a href="/" title="Accueil - Egapro - Ministère du Travail et des Solidarités">
             <p className="fr-logo">
               Ministère <br />
               du Travail
-              <br /> et de l'emploi
+              <br /> et des Solidarités
             </p>
           </a>
         </div>
         <div className="fr-footer__content">
           <p className="fr-footer__content-desc">
-            Index Egapro et Représentation équilibrée sont développés et maintenus par les équipes de la fabrique
-            numérique des ministères sociaux.
+            Egapro permet aux entreprises de déclarer leur index de l'égalité professionnelle et leurs écarts de
+            représentation équilibrée entre les femmes et les hommes.
           </p>
           <ul className="fr-footer__content-list">
             <li className="fr-footer__content-item">

@@ -12,7 +12,8 @@ const MailHeader = () => (
   <header style={{ display: "flex", alignItems: "center", marginBottom: "20px", fontFamily: "arial, sans-serif" }}>
     <img
       src={`${config.host}/logo-ministere.png`}
-      alt="Egapro Logo"
+      alt="Ministère du Travail et des Solidarités"
+      width={150}
       style={{ maxWidth: "150px", marginRight: "20px" }}
     />
     <div>

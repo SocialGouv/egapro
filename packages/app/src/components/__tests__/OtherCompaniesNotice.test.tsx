@@ -19,7 +19,7 @@ describe("OtherCompaniesNotice", () => {
     render(<OtherCompaniesNotice />);
 
     const link = screen.getByRole("link", { name: "votre profil ProConnect" });
-    expect(link).toHaveAttribute("href", "https://identite.proconnect.gouv.fr/users/start-sign-in");
+    expect(link).toHaveAttribute("href", "https://identite.proconnect.gouv.fr/manage-organizations");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
     expect(link).toHaveAttribute("title", "votre profil ProConnect - ouvre une nouvelle fenêtre");

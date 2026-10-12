@@ -13,7 +13,15 @@ describe("<Footer />", () => {
 
     // Check that the main sections are present
     expect(screen.getByText("Liens utiles")).toBeInTheDocument();
-    expect(screen.getByText(/Index Egapro et Représentation équilibrée/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Egapro permet aux entreprises de déclarer leur index de l'égalité professionnelle et leurs écarts de représentation équilibrée entre les femmes et les hommes.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ministère du Travail et des Solidarités" })).toHaveAttribute(
+      "title",
+      "Accueil - Egapro - Ministère du Travail et des Solidarités",
+    );
   });
 
   it("displays the correct accessibility status", () => {
