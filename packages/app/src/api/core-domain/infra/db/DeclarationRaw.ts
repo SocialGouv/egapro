@@ -1,5 +1,6 @@
 import { type CorrectiveMeasures } from "@common/core-domain/domain/valueObjects/declaration/declarationInfo/CorrectiveMeasures";
 import { type DeclarationSource } from "@common/core-domain/domain/valueObjects/declaration/DeclarationSource";
+import { type PopulationFavorable as DeclaredPopulationFavorable } from "@common/models/generated";
 
 import { type CodeDepartement } from "./CodeDepartement";
 import { type CodeNaf } from "./CodeNaf";
@@ -14,7 +15,8 @@ export interface BaseIndicateurNote {
   résultat?: number;
 }
 
-export type PopulationFavorable = "" | "femmes" | "hommes";
+// Historical declarations also persist equality as an empty string.
+export type PopulationFavorable = DeclaredPopulationFavorable | "";
 
 export type WithPopulationFavorable = {
   population_favorable?: PopulationFavorable;

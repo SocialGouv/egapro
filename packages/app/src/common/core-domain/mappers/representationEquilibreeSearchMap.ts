@@ -16,12 +16,15 @@ export const representationEquilibreeSearchMap: Required<
   },
 
   toPersistence(obj) {
+    const nafCode = obj.company.nafCode?.getValue();
+
     return {
       declared_at: obj.declaredAt,
       departement: obj.company.county?.getValue() ?? null,
       ft: obj.company.name,
       region: obj.company.region?.getValue() ?? null,
-      section_naf: obj.company.nafCode ? NAF[obj.company.nafCode.getValue()].section.code : "",
+      section_naf:
+        nafCode && Object.hasOwn(NAF, nafCode) ? NAF[nafCode as keyof typeof NAF].section.code : "",
       siren: obj.siren.getValue(),
       year: obj.year.getValue(),
     };

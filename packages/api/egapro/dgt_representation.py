@@ -4,12 +4,12 @@ import re
 from datetime import date
 
 import arrow
-from naf import DB as NAF
 from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from progressist import ProgressBar
 
 from egapro import config, constants, db
+from egapro.naf_utils import format_naf_code
 from egapro.utils import escape_xlsx_formula, flatten, remove_one_year
 
 
@@ -28,9 +28,7 @@ def isodate(val):
 
 
 def code_naf(code):
-    if not code or code not in NAF:
-        return code
-    return f"{code} - {NAF[code]}"
+    return format_naf_code(code)
 
 
 async def get_headers_columns():

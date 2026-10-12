@@ -601,6 +601,9 @@ export const COUNTRIES_ISO_TO_LIB: SimpleObject<string> = COUNTRIES.reduce(
 
 export { NAF, NAF_SECTIONS };
 
+export const getNafDescription = (code: string): string =>
+  Object.hasOwn(NAF, code) ? NAF[code as keyof typeof NAF]?.description ?? "inconnu" : "inconnu";
+
 const sort = (dict: SimpleObject<string>) => Object.entries(dict).sort((a, b) => a[1].localeCompare(b[1]));
 export const SORTED_COUNTIES = sort(COUNTIES);
 export const SORTED_REGIONS = sort(REGIONS);

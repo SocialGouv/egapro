@@ -1,5 +1,6 @@
 from typing import Literal, Union
-from naf import DB as NAF
+
+from egapro.naf_utils import format_naf_code
 
 from egapro.utils import delete_keypath
 
@@ -69,10 +70,7 @@ class Data(dict):
 
     @property
     def naf(self):
-        code = self.path("entreprise.code_naf")
-        if not code or code not in NAF:
-            return code
-        return f"{code} - {NAF[code]}"
+        return format_naf_code(self.path("entreprise.code_naf"))
 
     @property
     def company(self) -> str:

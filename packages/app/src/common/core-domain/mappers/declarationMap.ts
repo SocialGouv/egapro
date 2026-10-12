@@ -495,8 +495,7 @@ function toDeclarationDataRaw(data: Declaration, skipUndefined = false): Declara
     entreprise: {
       siren: data.company.siren.getValue(),
       adresse: data.company.address,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- "[NON-DIFFUSIBLE]" sentinel not in CodeNaf type
-      code_naf: (data.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]") as any,
+      code_naf: data.company.nafCode?.getValue() || "[NON-DIFFUSIBLE]",
       code_pays: data.company.countryCode?.getValue() as CodePays,
       code_postal: data.company.postalCode?.getValue(),
       commune: data.company.city,
