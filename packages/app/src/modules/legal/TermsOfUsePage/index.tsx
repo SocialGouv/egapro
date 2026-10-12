@@ -10,6 +10,11 @@ import {
 	type TermsOfUseVersion,
 } from "./termsOfUseVersions";
 
+export {
+	getCurrentTermsOfUseVersion,
+	resolveTermsOfUseVersion,
+} from "./termsOfUseVersions";
+
 type Props = {
 	version: TermsOfUseVersion;
 	isCurrent: boolean;
