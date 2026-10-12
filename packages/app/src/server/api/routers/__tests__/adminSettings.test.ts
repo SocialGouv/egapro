@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DEFAULT_LOCK_TIMEOUT_MINUTES } from "~/modules/domain";
 import { campaignDeadlines, representationCampaigns } from "~/server/db/schema";
@@ -175,9 +175,31 @@ describe("adminSettingsRouter — getDeadlinesByYear", () => {
 		expect(result.publicDataReleaseDate).toBeNull();
 		expect(result.decl1ModificationDeadline).toMatch(/^2027-06-01$/);
 		expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
-		expect(result.decl2CseOpinionDeadline).toBe("2028-02-01");
+		expect(result.decl2CseOpinionDeadline).toBe("2028-03-01");
 		expect(result.pathChoiceRound1Deadline).toBe("2027-07-01");
 		expect(result.pathChoiceDeadline).toBe("2028-01-01");
+	});
+
+	describe.each(["Europe/Paris", "Pacific/Tahiti"])("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("formats the defaults on their civil day", async () => {
+			vi.stubEnv("TZ", timeZone);
+			const db = buildDb();
+			db.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValue({
+					where: vi
+						.fn()
+						.mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+				}),
+			});
+			const caller = await buildCaller(db);
+			const result = await caller.getDeadlinesByYear({ year: 2027 });
+			expect(result.decl1ModificationDeadline).toBe("2027-06-01");
+			expect(result.decl2JointEvaluationDeadline).toBe("2028-01-01");
+		});
 	});
 });
 
@@ -399,7 +421,7 @@ describe("adminSettingsRouter — getRepresentationCampaignByYear", () => {
 			isDefault: true,
 			campaignStartDate: "2027-01-01",
 			campaignEndDate: "2027-12-31",
-			declarationDeadline: "2027-03-01",
+			declarationDeadline: "2027-06-01",
 		});
 	});
 

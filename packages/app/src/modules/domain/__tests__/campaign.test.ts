@@ -19,6 +19,7 @@ import {
 	selectJointEvaluationDeadline,
 	selectPathChoiceDeadline,
 } from "../shared/campaign";
+import { formatCivilLongDate } from "../shared/format";
 
 describe("getReferenceYearFor", () => {
 	it("returns the campaign year minus one", () => {
@@ -121,7 +122,7 @@ describe("getCurrentYear", () => {
 	});
 
 	it("returns the year from the system clock", () => {
-		vi.setSystemTime(new Date("2030-01-01"));
+		vi.setSystemTime(new Date("2030-01-01T12:00:00Z"));
 		expect(getCurrentYear()).toBe(2030);
 	});
 
@@ -212,22 +213,30 @@ describe("getWorkforceYear", () => {
 
 describe("getPathChoiceDeadline", () => {
 	it("returns January 1st of the following year", () => {
-		expect(getPathChoiceDeadline(2027)).toEqual(new Date(2027 + 1, 0, 1));
+		expect(getPathChoiceDeadline(2027)).toEqual(
+			new Date("2028-01-01T00:00:00Z"),
+		);
 	});
 
 	it("rolls over the year boundary", () => {
-		expect(getPathChoiceDeadline(2026)).toEqual(new Date(2027, 0, 1));
+		expect(getPathChoiceDeadline(2026)).toEqual(
+			new Date("2027-01-01T00:00:00Z"),
+		);
 	});
 });
 
 describe("getPathChoiceRound1Deadline", () => {
 	it("returns July 1st of the campaign year", () => {
-		expect(getPathChoiceRound1Deadline(2026)).toEqual(new Date(2026, 6, 1));
+		expect(getPathChoiceRound1Deadline(2026)).toEqual(
+			new Date("2026-07-01T00:00:00Z"),
+		);
 	});
 
 	it("stays within the campaign year, unlike the round-2 deadline", () => {
 		const year = 2027;
-		expect(getPathChoiceRound1Deadline(year)).toEqual(new Date(year, 6, 1));
+		expect(getPathChoiceRound1Deadline(year)).toEqual(
+			new Date("2027-07-01T00:00:00Z"),
+		);
 		expect(getPathChoiceRound1Deadline(year)).not.toEqual(
 			getPathChoiceDeadline(year),
 		);
@@ -235,8 +244,8 @@ describe("getPathChoiceRound1Deadline", () => {
 });
 
 describe("selectPathChoiceDeadline", () => {
-	const ROUND_1_DEADLINE = new Date("2027-05-15T00:00:00");
-	const ROUND_2_DEADLINE = new Date("2027-11-20T00:00:00");
+	const ROUND_1_DEADLINE = new Date("2027-05-15T00:00:00Z");
+	const ROUND_2_DEADLINE = new Date("2027-11-20T00:00:00Z");
 	// Values that differ from the derived defaults prove the selector reads the given deadlines instead of recomputing them.
 	const deadlines = {
 		...getDefaultCampaignDeadlines(2027),
@@ -254,8 +263,8 @@ describe("selectPathChoiceDeadline", () => {
 });
 
 describe("selectJointEvaluationDeadline", () => {
-	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00");
-	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00");
+	const ROUND_1_DEADLINE = new Date("2027-08-15T00:00:00Z");
+	const ROUND_2_DEADLINE = new Date("2028-03-20T00:00:00Z");
 	const deadlines = {
 		...getDefaultCampaignDeadlines(2027),
 		decl1JointEvaluationDeadline: ROUND_1_DEADLINE,
@@ -288,33 +297,72 @@ describe("selectJointEvaluationDeadline", () => {
 describe("getDefaultCampaignDeadlines", () => {
 	it("returns Date objects for a given year", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
-		expect(deadlines.decl1ModificationDeadline).toEqual(new Date(2027, 5, 1));
-		expect(deadlines.decl1JustificationDeadline).toEqual(new Date(2028, 2, 1));
+		expect(deadlines.decl1ModificationDeadline).toEqual(
+			new Date("2027-06-01T00:00:00Z"),
+		);
+		expect(deadlines.decl1JustificationDeadline).toEqual(
+			new Date("2028-03-01T00:00:00Z"),
+		);
 		expect(deadlines.decl1JointEvaluationDeadline).toEqual(
-			new Date(2027, 7, 1),
+			new Date("2027-09-01T00:00:00Z"),
 		);
-		expect(deadlines.decl2ModificationDeadline).toEqual(new Date(2027, 11, 1));
-		expect(deadlines.decl2JustificationDeadline).toEqual(new Date(2027, 11, 1));
+		expect(deadlines.decl2ModificationDeadline).toEqual(
+			new Date("2028-01-01T00:00:00Z"),
+		);
+		expect(deadlines.decl2JustificationDeadline).toEqual(
+			new Date("2028-03-01T00:00:00Z"),
+		);
 		expect(deadlines.decl2JointEvaluationDeadline).toEqual(
-			new Date(2028, 0, 1),
+			new Date("2028-01-01T00:00:00Z"),
 		);
-		expect(deadlines.decl2CseOpinionDeadline).toEqual(new Date(2028, 1, 1));
-	});
-
-	it("keeps the round-2 joint evaluation and CSE opinion deadlines one month apart", () => {
-		const deadlines = getDefaultCampaignDeadlines(2027);
-		expect(deadlines.decl2JointEvaluationDeadline).not.toEqual(
-			deadlines.decl2CseOpinionDeadline,
-		);
-		expect(deadlines.decl2JointEvaluationDeadline.getTime()).toBeLessThan(
-			deadlines.decl2CseOpinionDeadline.getTime(),
+		expect(deadlines.decl2CseOpinionDeadline).toEqual(
+			new Date("2028-03-01T00:00:00Z"),
 		);
 	});
 
 	it("exposes the derived path choice deadline at January 1st of year + 1", () => {
 		const deadlines = getDefaultCampaignDeadlines(2027);
 		expect(deadlines.pathChoiceDeadline).toEqual(getPathChoiceDeadline(2027));
-		expect(deadlines.pathChoiceDeadline).toEqual(new Date(2028, 0, 1));
+		expect(deadlines.pathChoiceDeadline).toEqual(
+			new Date("2028-01-01T00:00:00Z"),
+		);
+	});
+
+	describe.each([
+		"America/Cayenne",
+		"Pacific/Tahiti",
+	])("under %s", (timeZone) => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("builds every deadline at UTC midnight of its civil day", () => {
+			vi.stubEnv("TZ", timeZone);
+			const deadlines = getDefaultCampaignDeadlines(2027);
+			expect(deadlines.decl1ModificationDeadline.toISOString()).toBe(
+				"2027-06-01T00:00:00.000Z",
+			);
+			expect(deadlines.decl2CseOpinionDeadline.toISOString()).toBe(
+				"2028-03-01T00:00:00.000Z",
+			);
+			expect(deadlines.pathChoiceDeadline.toISOString()).toBe(
+				"2028-01-01T00:00:00.000Z",
+			);
+			expect(deadlines.pathChoiceRound1Deadline.toISOString()).toBe(
+				"2027-07-01T00:00:00.000Z",
+			);
+		});
+
+		it("keeps the deadline labels on their civil day", () => {
+			vi.stubEnv("TZ", timeZone);
+			const deadlines = getDefaultCampaignDeadlines(2027);
+			expect(formatCivilLongDate(deadlines.decl1ModificationDeadline)).toBe(
+				"1ᵉʳ juin 2027",
+			);
+			expect(formatCivilLongDate(deadlines.decl2ModificationDeadline)).toBe(
+				"1ᵉʳ janvier 2028",
+			);
+		});
 	});
 
 	it("leaves optional campaign dates null by default", () => {
@@ -324,24 +372,133 @@ describe("getDefaultCampaignDeadlines", () => {
 	});
 });
 
+// Each pair asserts that the later milestone falls on or after the one that opens it — bounds inclusive, since several of the spec's milestones share a day.
+describe("getDefaultCampaignDeadlines — ordering", () => {
+	const deadlines = getDefaultCampaignDeadlines(2027);
+
+	it.each<[string, Date, Date]>([
+		[
+			"round-1 path choice is at or after the first-declaration deadline",
+			deadlines.pathChoiceRound1Deadline,
+			deadlines.decl1ModificationDeadline,
+		],
+		[
+			"round-1 justification is at or after the round-1 path choice",
+			deadlines.decl1JustificationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"round-1 joint evaluation is at or after the round-1 path choice",
+			deadlines.decl1JointEvaluationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"the second declaration is at or after the round-1 path choice",
+			deadlines.decl2ModificationDeadline,
+			deadlines.pathChoiceRound1Deadline,
+		],
+		[
+			"round-2 path choice is at or after the second declaration",
+			deadlines.pathChoiceDeadline,
+			deadlines.decl2ModificationDeadline,
+		],
+		[
+			"round-2 justification is at or after the round-2 path choice",
+			deadlines.decl2JustificationDeadline,
+			deadlines.pathChoiceDeadline,
+		],
+		[
+			"round-2 joint evaluation is at or after the round-2 path choice",
+			deadlines.decl2JointEvaluationDeadline,
+			deadlines.pathChoiceDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-1 justification",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl1JustificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-1 joint evaluation",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl1JointEvaluationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the second declaration",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2ModificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-2 justification",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2JustificationDeadline,
+		],
+		[
+			"the CSE opinion is at or after the round-2 joint evaluation",
+			deadlines.decl2CseOpinionDeadline,
+			deadlines.decl2JointEvaluationDeadline,
+		],
+	])("%s", (_label, later, earlier) => {
+		expect(later.getTime()).toBeGreaterThanOrEqual(earlier.getTime());
+	});
+});
+
 describe("getDefaultRepresentationCampaign", () => {
 	it("opens on January 1st and closes on December 31st of the campaign year", () => {
 		const campaign = getDefaultRepresentationCampaign(2027);
-		expect(campaign.campaignStartDate).toEqual(new Date(2027, 0, 1));
-		expect(campaign.campaignEndDate).toEqual(new Date(2027, 11, 31));
+		expect(campaign.campaignStartDate).toEqual(
+			new Date("2027-01-01T00:00:00Z"),
+		);
+		expect(campaign.campaignEndDate).toEqual(new Date("2027-12-31T00:00:00Z"));
 	});
 
-	it("sets the declaration deadline on March 1st of the campaign year", () => {
+	it("derives the declaration deadline from the remuneration first-declaration default", () => {
 		expect(getDefaultRepresentationCampaign(2027).declarationDeadline).toEqual(
-			new Date(2027, 2, 1),
+			getDefaultCampaignDeadlines(2027).decl1ModificationDeadline,
 		);
+		expect(getDefaultRepresentationCampaign(2027).declarationDeadline).toEqual(
+			new Date("2027-06-01T00:00:00Z"),
+		);
+	});
+
+	describe("under a negative-offset timezone", () => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("builds the campaign dates at UTC midnight of their civil day", () => {
+			vi.stubEnv("TZ", "Pacific/Tahiti");
+			const campaign = getDefaultRepresentationCampaign(2027);
+			expect(campaign.campaignStartDate.toISOString()).toBe(
+				"2027-01-01T00:00:00.000Z",
+			);
+			expect(campaign.campaignEndDate.toISOString()).toBe(
+				"2027-12-31T00:00:00.000Z",
+			);
+			expect(campaign.declarationDeadline.toISOString()).toBe(
+				"2027-06-01T00:00:00.000Z",
+			);
+		});
 	});
 
 	it("follows the requested campaign year", () => {
 		const campaign = getDefaultRepresentationCampaign(2030);
-		expect(campaign.campaignStartDate).toEqual(new Date(2030, 0, 1));
-		expect(campaign.campaignEndDate).toEqual(new Date(2030, 11, 31));
-		expect(campaign.declarationDeadline).toEqual(new Date(2030, 2, 1));
+		expect(campaign.campaignStartDate).toEqual(
+			new Date("2030-01-01T00:00:00Z"),
+		);
+		expect(campaign.campaignEndDate).toEqual(new Date("2030-12-31T00:00:00Z"));
+		expect(campaign.declarationDeadline).toEqual(
+			new Date("2030-06-01T00:00:00Z"),
+		);
+	});
+
+	it("keeps the declaration deadline within the campaign window", () => {
+		const campaign = getDefaultRepresentationCampaign(2027);
+		expect(campaign.declarationDeadline.getTime()).toBeGreaterThanOrEqual(
+			campaign.campaignStartDate.getTime(),
+		);
+		expect(campaign.declarationDeadline.getTime()).toBeLessThanOrEqual(
+			campaign.campaignEndDate.getTime(),
+		);
 	});
 });
 
@@ -349,67 +506,73 @@ describe("isRepresentationCampaignOpen", () => {
 	const campaign = getDefaultRepresentationCampaign(2027);
 
 	it("returns false the day before the campaign starts", () => {
-		expect(isRepresentationCampaignOpen(campaign, new Date(2026, 11, 31))).toBe(
-			false,
-		);
+		expect(
+			isRepresentationCampaignOpen(campaign, new Date("2026-12-31T00:00:00Z")),
+		).toBe(false);
 	});
 
 	it("returns true on the first day of the campaign", () => {
-		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 0, 1))).toBe(
-			true,
-		);
+		expect(
+			isRepresentationCampaignOpen(campaign, new Date("2027-01-01T00:00:00Z")),
+		).toBe(true);
 	});
 
 	it("returns true in the middle of the campaign", () => {
-		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 5, 15))).toBe(
-			true,
-		);
+		expect(
+			isRepresentationCampaignOpen(campaign, new Date("2027-06-15T00:00:00Z")),
+		).toBe(true);
 	});
 
-	it("returns true on the campaign end boundary", () => {
-		expect(isRepresentationCampaignOpen(campaign, new Date(2027, 11, 31))).toBe(
-			true,
-		);
+	it.each([
+		["the first instant of the last day", "2027-12-31T00:00:00Z"],
+		["one minute into the last day", "2027-12-31T00:01:00Z"],
+		["the last minute of the last day", "2027-12-31T23:59:00Z"],
+		["the last millisecond of the last day", "2027-12-31T23:59:59.999Z"],
+	])("returns true at %s", (_label, now) => {
+		expect(isRepresentationCampaignOpen(campaign, new Date(now))).toBe(true);
 	});
 
-	it("returns false the day after the campaign ends", () => {
-		expect(isRepresentationCampaignOpen(campaign, new Date(2028, 0, 1))).toBe(
-			false,
-		);
+	it("returns false from the first instant of the day after the campaign ends", () => {
+		expect(
+			isRepresentationCampaignOpen(campaign, new Date("2028-01-01T00:00:00Z")),
+		).toBe(false);
 	});
 
 	it("honours the campaign dates over the default ones", () => {
 		const overridden = {
-			campaignStartDate: new Date(2027, 2, 1),
-			campaignEndDate: new Date(2027, 5, 30),
-			declarationDeadline: new Date(2027, 2, 1),
+			campaignStartDate: new Date("2027-03-01T00:00:00Z"),
+			campaignEndDate: new Date("2027-06-30T00:00:00Z"),
+			declarationDeadline: new Date("2027-03-01T00:00:00Z"),
 		};
 		expect(
-			isRepresentationCampaignOpen(overridden, new Date(2027, 0, 15)),
+			isRepresentationCampaignOpen(
+				overridden,
+				new Date("2027-01-15T00:00:00Z"),
+			),
 		).toBe(false);
 		expect(
-			isRepresentationCampaignOpen(overridden, new Date(2027, 3, 15)),
+			isRepresentationCampaignOpen(
+				overridden,
+				new Date("2027-04-15T00:00:00Z"),
+			),
 		).toBe(true);
 	});
 });
 
 describe("isDeadlinePassed", () => {
-	const deadline = new Date("2026-06-01T00:00:00");
+	const deadline = new Date("2026-06-01T00:00:00Z");
 
-	it("returns false when now is before the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-05-31T23:59:59"))).toBe(
-			false,
-		);
+	it.each([
+		["the day before", "2026-05-31T23:59:59Z"],
+		["the first instant of the deadline day", "2026-06-01T00:00:00Z"],
+		["one second into the deadline day", "2026-06-01T00:00:01Z"],
+		["the last millisecond of the deadline day", "2026-06-01T23:59:59.999Z"],
+	])("returns false at %s", (_label, now) => {
+		expect(isDeadlinePassed(deadline, new Date(now))).toBe(false);
 	});
 
-	it("returns false when now equals the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:00"))).toBe(
-			false,
-		);
-	});
-
-	it("returns true when now is after the deadline", () => {
-		expect(isDeadlinePassed(deadline, new Date("2026-06-01T00:00:01"))).toBe(
+	it("returns true from the first instant of the day after the deadline", () => {
+		expect(isDeadlinePassed(deadline, new Date("2026-06-02T00:00:00Z"))).toBe(
 			true,
 		);
 	});

@@ -23,7 +23,7 @@
  *   - This script is git-tracked (devTooling, not test fixture)
  */
 
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 import { buildMail } from "../src/mails/index.js";
 import {
 	CSE_OPINION_RECEIPT_VARIANTS,
@@ -136,7 +136,7 @@ function isNotificationType(value: string): value is NotificationType {
 }
 
 async function sendOne(
-	transporter: nodemailer.Transporter,
+	transporter: Transporter,
 	job: PreviewJob,
 ): Promise<void> {
 	const { subject, html, text } = await buildMail(job.type, job.payload);

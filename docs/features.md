@@ -266,7 +266,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Objectif de représentation** : `REPRESENTATION_TARGET_INITIAL = 30` % (chaque sexe), porté à `REPRESENTATION_TARGET_RAISED = 40` % à compter de la campagne `REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR = 2029` (`getRepresentationTarget(campaignYear)`). L'année de campagne = année de référence + 1 (`getRepresentationCampaignYear`).
 - **Verdict** (`computeRepresentationVerdict`) : `compliant` si `min(%femmes, %hommes) >= objectif`, `non_compliant` sinon, `not_applicable` si l'indicateur n'est pas calculable (aucun ou un seul cadre dirigeant ; aucune instance dirigeante). Les deux indicateurs (cadres dirigeants / instances dirigeantes) gardent des verdicts **indépendants** — aucun verdict agrégé n'existe. Sans objet pour une déclaration `not_subject` (aucun pourcentage saisi).
 - **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
-- **Campagne** : ouverte entre `campaignStartDate` et `campaignEndDate` (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
+- **Campagne** : ouverte de `campaignStartDate` jusqu'à la fin du jour `campaignEndDate` inclus (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
 - **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la transmission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations transmises (une déclaration `not_subject` n'a pas de PDF).
 - **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
 - **Reprise V1** : le kit ponctuel `scripts/migration-v1` reprend depuis un dump les déclarations historiques sans jamais écraser une déclaration saisie nativement en V2. La procédure d'exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
@@ -393,7 +393,7 @@ Téléchargement déclenché depuis :
 
 ### 11.2 Export Excel et API
 
-Export annuel XLSX, déclenché puis téléchargé :
+Export annuel XLSX, déclenché puis téléchargé. Les deux routes exigent le jeton `Authorization: Bearer` de `EGAPRO_EXPORT_API_TOKEN` (sealed-secret `export-api`) et répondent 401 sans lui, ou quand le jeton n'est pas configuré :
 
 | URL | Méthode | Format | Filtres |
 |---|---|---|---|
@@ -531,9 +531,11 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 2. Catégorie dans `AUDIT_ACTION_CATEGORIES`
 3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers) ou appel direct `logAction(...)` (auth / cron)
 
-Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
+Les nouvelles lignes conservent `user_id` et `siren` lorsqu'ils servent à attribuer une action. Elles n'enregistrent plus `user_email` ni `user_agent` ; l'IP est tronquée, les erreurs sont codées et `metadata` est limité à des valeurs autorisées et validées par action. Les écritures SQL directes du worker de notifications et des crons suivent cette politique. Les journaux restent soumis aux durées de conservation ci-dessus.
 
 **Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
+
+Vue d'ensemble de tous les journaux produits par l'application et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 13.3 Impersonation admin
 

@@ -1,11 +1,11 @@
 import "server-only";
 
-import { and, eq, gt, lte, or } from "drizzle-orm";
+import { and, eq, gt, inArray, lte, or } from "drizzle-orm";
 
 import { DECLARATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { resolveCurrentDeclarationId } from "~/server/db/declarationConditions";
-import { declarationLocks, users } from "~/server/db/schema";
+import { declarationLocks, declarations, users } from "~/server/db/schema";
 
 type Tx = Parameters<Parameters<DB["transaction"]>[0]>[0];
 
@@ -227,6 +227,42 @@ export async function releaseAllLocksForUser(
 	await db
 		.delete(declarationLocks)
 		.where(eq(declarationLocks.lockedByUserId, userId));
+}
+
+export type ReleasedLock = { declarationId: string; siren: string };
+
+export async function releaseLocksForUserOnSirens(
+	db: DbClient,
+	userId: string,
+	sirens: string[],
+): Promise<ReleasedLock[]> {
+	if (sirens.length === 0) return [];
+	const released = await db
+		.delete(declarationLocks)
+		.where(
+			and(
+				eq(declarationLocks.lockedByUserId, userId),
+				inArray(
+					declarationLocks.declarationId,
+					db
+						.select({ id: declarations.id })
+						.from(declarations)
+						.where(inArray(declarations.siren, sirens)),
+				),
+			),
+		)
+		.returning({ declarationId: declarationLocks.declarationId });
+	if (released.length === 0) return [];
+
+	return db
+		.select({ declarationId: declarations.id, siren: declarations.siren })
+		.from(declarations)
+		.where(
+			inArray(
+				declarations.id,
+				released.map((lock) => lock.declarationId),
+			),
+		);
 }
 
 // No ownership predicate: admin override, callers gate on the admin role.

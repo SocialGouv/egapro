@@ -41,7 +41,7 @@ vi.mock(
 );
 
 const mockPush = vi.fn();
-const cseDeadline = new Date("2028-02-01T00:00:00");
+const cseDeadline = new Date("2028-02-01T00:00:00Z");
 
 vi.mock("next/navigation", async () => ({
 	...(await vi.importActual("next/navigation")),

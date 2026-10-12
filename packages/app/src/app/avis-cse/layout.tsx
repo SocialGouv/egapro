@@ -4,7 +4,7 @@ import { getObligationWorkforce, isCseOpinionRequired } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { getLockReadState } from "~/server/services/declarationLockService";
 import { api } from "~/trpc/server";
@@ -20,7 +20,7 @@ export default async function CseOpinionRootLayout({
 		redirect(LOGIN);
 	}
 
-	const siren = getEffectiveSiren(session);
+	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) {
 		redirect("/");
 	}

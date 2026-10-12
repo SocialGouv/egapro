@@ -89,6 +89,35 @@ describe("GET /api/v1/files", () => {
 		expect(response.status).toBe(403);
 	});
 
+	it("audits the validated siren and year", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		await GET(
+			gatewayForwardedRequest(
+				"http://localhost/api/v1/files?siren=123456789&year=2027",
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				siren: "123456789",
+				metadata: { siren: "123456789", year: 2027 },
+			}),
+		);
+	});
+
+	it("audits an invalid year by name only, never the raw value", async () => {
+		const { GET } = await import("~/app/api/v1/files/route");
+		await GET(
+			new Request(
+				`http://localhost/api/v1/files?siren=123456789&year=${"x".repeat(5_000)}`,
+			),
+		);
+
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: "year" } }),
+		);
+	});
+
 	it("should return 400 when siren is missing", async () => {
 		const { GET } = await import("~/app/api/v1/files/route");
 		const request = gatewayForwardedRequest(
@@ -373,7 +402,7 @@ describe("GET /api/v1/files/:fileId — SUIT branch (gateway-forwarded)", () => 
 		expect(response.headers.get("Content-Disposition")).toBe(
 			`attachment; filename="avis-cse-evaluation.pdf"; filename*=UTF-8''avis-cse-evaluation.pdf`,
 		);
-		expect(response.headers.get("Cache-Control")).toBe("private, max-age=3600");
+		expect(response.headers.get("Cache-Control")).toBe("private, no-store");
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
 				action: "export.api_files",

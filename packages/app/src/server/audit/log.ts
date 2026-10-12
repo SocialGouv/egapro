@@ -9,7 +9,9 @@ import type {
 import { AUDIT_ACTION_CATEGORIES } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
-import { deriveErrorCode, emitActivityLog } from "./activityLog";
+import type { DbClient } from "~/server/services/declarationLockService";
+import { deriveErrorCode, emitActivityLog, truncateIp } from "./activityLog";
+import { projectAuditMetadata } from "./metadata";
 
 // Stdout-mirror-only fields, never persisted to audit.action_log.
 export type LogActionOrigin = {
@@ -38,18 +40,93 @@ export type LogActionInput = {
 	origin?: LogActionOrigin;
 };
 
-// Bounds audit.action_log.error_message (unbounded text()) against a caller-controlled message, e.g. a Zod error echoing attacker-chosen input; the stdout mirror keeps reading the untruncated message.
-export const AUDIT_ERROR_MESSAGE_MAX_LENGTH = 500;
+const DATABASE_ERROR_CODES = new Set([
+	"ERROR",
+	"BAD_REQUEST",
+	"UNAUTHORIZED",
+	"FORBIDDEN",
+	"NOT_FOUND",
+	"METHOD_NOT_SUPPORTED",
+	"TIMEOUT",
+	"CONFLICT",
+	"PRECONDITION_FAILED",
+	"PAYLOAD_TOO_LARGE",
+	"UNPROCESSABLE_CONTENT",
+	"TOO_MANY_REQUESTS",
+	"CLIENT_CLOSED_REQUEST",
+	"INTERNAL_SERVER_ERROR",
+	"NOT_IMPLEMENTED",
+	"BAD_GATEWAY",
+	"SERVICE_UNAVAILABLE",
+	"GATEWAY_TIMEOUT",
+	"OAUTH_CALLBACK_ERROR",
+	"OAUTH_CALLBACK_HANDLER_ERROR",
+	"OAUTH_PARSE_PROFILE_ERROR",
+	"SIGNIN_OAUTH_ERROR",
+	"JWT_SESSION_ERROR",
+	"ATTACHMENT_DROPPED",
+	"QUEUE_ERROR",
+	"QUEUE_UNAVAILABLE",
+	"RECEIPT_ENQUEUE_ERROR",
+]);
+const HTTP_ERROR_SUFFIXES = new Set([
+	"impersonation_read_only",
+	"admin_mfa_expired",
+	"declaration_not_found",
+	"missing_filename",
+	"empty_body",
+	"wrong_content_type",
+	"invalid_filename",
+	"locked_by_other",
+	"virus_detected",
+	"antivirus_unavailable",
+	"client_aborted",
+	"server_error",
+	"too_large",
+	"wrong_type",
+	"max_files",
+	"empty_file",
+]);
+const RESOURCE_TYPES = new Set(["declaration", "notification"]);
+const UUID_PATTERN =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SIREN_PATTERN = /^\d{9}$/;
 
-// Code-point aware so a surrogate pair straddling the cut is never split into an unpaired surrogate.
-function truncateErrorMessage(message: string): string {
-	return [...message].slice(0, AUDIT_ERROR_MESSAGE_MAX_LENGTH).join("");
+function resourceType(value: string | null | undefined): string | null {
+	return value && RESOURCE_TYPES.has(value) ? value : null;
 }
 
-// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
-export async function logAction(input: LogActionInput): Promise<void> {
-	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+function resourceId(
+	type: string | null,
+	value: string | null | undefined,
+): string | null {
+	return type && value && UUID_PATTERN.test(value) ? value : null;
+}
 
+function userId(value: string | null | undefined): string | null {
+	return value && UUID_PATTERN.test(value) ? value : null;
+}
+
+function siren(value: string | null | undefined): string | null {
+	return value && SIREN_PATTERN.test(value) ? value : null;
+}
+
+function databaseErrorCode(message: string | null | undefined): string | null {
+	const httpDetail = /^HTTP ([1-5]\d{2}) ([a-z_]+)(?:\b|:)/.exec(message ?? "");
+	if (
+		httpDetail?.[1] &&
+		httpDetail[2] &&
+		HTTP_ERROR_SUFFIXES.has(httpDetail[2])
+	)
+		return `HTTP_${httpDetail[1]}_${httpDetail[2]}`;
+	const code = deriveErrorCode(message);
+	if (!code) return null;
+	if (DATABASE_ERROR_CODES.has(code)) return code;
+	if (/^HTTP_[1-5]\d{2}$/.test(code)) return code;
+	return "ERROR";
+}
+
+function mirrorToStdout(input: LogActionInput, category: AuditCategory): void {
 	try {
 		// inputKeys must reflect the caller's real input, not the allowlisted/wrapped projection persisted as `metadata`.
 		const stdoutInput = input.origin?.rawInput ?? input.metadata;
@@ -74,30 +151,47 @@ export async function logAction(input: LogActionInput): Promise<void> {
 			error,
 		});
 	}
+}
+
+function toActionLogRow(input: LogActionInput, category: AuditCategory) {
+	return {
+		action: input.action,
+		category,
+		status: input.status,
+		userId: userId(input.userId),
+		userEmail: null,
+		siren: siren(input.siren),
+		resourceType: resourceType(input.resourceType),
+		resourceId: resourceId(resourceType(input.resourceType), input.resourceId),
+		errorMessage: databaseErrorCode(input.errorMessage),
+		metadata: projectAuditMetadata(input.action, input.metadata),
+		ipAddress: truncateIp(input.ipAddress),
+		userAgent: null,
+		durationMs: input.durationMs ?? null,
+	};
+}
+
+// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
+export async function logAction(input: LogActionInput): Promise<void> {
+	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+	mirrorToStdout(input, category);
 
 	try {
-		await db.insert(actionLogs).values({
-			action: input.action,
-			category,
-			status: input.status,
-			userId: input.userId ?? null,
-			userEmail: input.userEmail ?? null,
-			siren: input.siren ?? null,
-			resourceType: input.resourceType ?? null,
-			resourceId: input.resourceId ?? null,
-			errorMessage:
-				input.errorMessage != null
-					? truncateErrorMessage(input.errorMessage)
-					: null,
-			metadata: input.metadata ?? null,
-			ipAddress: input.ipAddress ?? null,
-			userAgent: input.userAgent ?? null,
-			durationMs: input.durationMs ?? null,
-		});
+		await db.insert(actionLogs).values(toActionLogRow(input, category));
 	} catch (error) {
 		console.error("[audit] Failed to write audit log entry", {
 			action: input.action,
 			error,
 		});
 	}
+}
+
+// Fail-closed, unlike `logAction`: the row commits or rolls back with the caller's transaction. Returns the stdout mirror, to run once that transaction has committed.
+export async function logActionInTransaction(
+	tx: DbClient,
+	input: LogActionInput,
+): Promise<() => void> {
+	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
+	await tx.insert(actionLogs).values(toActionLogRow(input, category));
+	return () => mirrorToStdout(input, category);
 }

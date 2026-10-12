@@ -7,8 +7,6 @@
  * same underscore-separated French style to stay consistent.
  */
 
-import { proportionOf } from "~/modules/domain";
-
 /** Indicator A — mean global remuneration. */
 export const INDICATOR_A_LABELS = {
 	annualWomen: "Rem_globale_annuelle_moyenne_F",
@@ -146,16 +144,3 @@ export const INDICATOR_F_HOURLY_MEN_COUNT_LABELS = [
 	"Quartile3_Taux_horaire_global_nb_H",
 	"Quartile4_Taux_horaire_global_nb_H",
 ] as const;
-
-/**
- * Compute the women/men proportion inside one indicator F quartile from the
- * declared headcounts. Returns `null` when data is missing or the quartile
- * has no one in it. Rounded to 4 decimals for parity with the GIP CSV format.
- */
-export function quartileProportion(
-	count: number | null,
-	totalCount: number | null,
-): number | null {
-	if (count === null || totalCount === null || totalCount === 0) return null;
-	return Math.round(proportionOf(count, totalCount) * 10_000) / 10_000;
-}

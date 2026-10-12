@@ -1,12 +1,17 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { env } from "~/env.js";
 import { API_V1_OPENAPI } from "~/modules/routes";
+import { isNonce, NONCE_HEADER } from "~/server/security/securityHeaders.js";
 
-export function GET() {
+export function GET(request: NextRequest) {
 	if (env.NEXT_PUBLIC_EGAPRO_ENV === "prod") {
 		return new NextResponse(null, { status: 404 });
 	}
+
+	// The value lands in raw HTML: anything but a nonce of ours is dropped.
+	const header = request.headers.get(NONCE_HEADER);
+	const nonce = isNonce(header) ? header : "";
 
 	const html = `<!doctype html>
 <html lang="fr">
@@ -18,9 +23,9 @@ export function GET() {
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="/swagger-ui/swagger-ui-bundle.js"></script>
-  <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
-  <script>
+  <script nonce="${nonce}" src="/swagger-ui/swagger-ui-bundle.js"></script>
+  <script nonce="${nonce}" src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
+  <script nonce="${nonce}">
     SwaggerUIBundle({
       url: "${API_V1_OPENAPI}?v=" + Date.now(),
       dom_id: "#swagger-ui",

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { push, mutate, mutateAsync } = vi.hoisted(() => ({
 	push: vi.fn(),
@@ -33,6 +33,7 @@ import { StepPageClient } from "~/modules/declaration-representation";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
+const DECLARATION_DEADLINE = new Date(2026, 2, 1);
 const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
 const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
@@ -48,6 +49,7 @@ function renderStep1({
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
+			declarationDeadline={DECLARATION_DEADLINE}
 			initialDraft={initialDraft}
 			step={1}
 			year={YEAR}
@@ -172,6 +174,38 @@ describe("Step1ReferencePeriod — auto-fill", () => {
 				"Date de début : 01/01/2025 renseignée automatiquement.",
 			),
 		).toBeInTheDocument();
+	});
+
+	describe("under a negative-offset timezone", () => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("announces the derived end date on its own day", () => {
+			vi.stubEnv("TZ", "Pacific/Tahiti");
+			renderStep1();
+
+			fillPeriod({ start: VALID_START });
+
+			expect(
+				screen.getByText(
+					"Date de fin : 31/12/2025 renseignée automatiquement.",
+				),
+			).toBeInTheDocument();
+		});
+
+		it("announces the derived start date on its own day", () => {
+			vi.stubEnv("TZ", "Pacific/Tahiti");
+			renderStep1();
+
+			fillPeriod({ end: VALID_END });
+
+			expect(
+				screen.getByText(
+					"Date de début : 01/01/2025 renseignée automatiquement.",
+				),
+			).toBeInTheDocument();
+		});
 	});
 
 	it("derives the day before the anniversary for a leap-day start", () => {

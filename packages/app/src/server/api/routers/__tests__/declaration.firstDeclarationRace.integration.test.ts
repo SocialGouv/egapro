@@ -7,6 +7,7 @@ import {
 } from "~/modules/domain";
 import { appRouter } from "~/server/api/root";
 import { db } from "~/server/db";
+import { runWhileDeclarationLockHeld } from "./helpers/declarationLockRace";
 
 describe("first-declaration writes racing a subsequent submission", () => {
 	let sql!: ReturnType<typeof postgres>;
@@ -88,55 +89,26 @@ describe("first-declaration writes racing a subsequent submission", () => {
 		return row?.total_women ?? null;
 	}
 
-	async function waitForBlockedBackend() {
-		for (let attempt = 0; attempt < 200; attempt++) {
-			const rows = await sql`
-				SELECT 1 FROM pg_stat_activity
-				WHERE datname = current_database() AND wait_event_type = 'Lock'
-			`;
-			if (rows.length > 0) return true;
-			await new Promise((resolve) => setTimeout(resolve, 25));
-		}
-		return false;
-	}
-
-	async function withDeclarationLockHeld<T>(
+	function withDeclarationLockHeld<T>(
 		declarationId: string,
 		concurrentWrite: () => Promise<T>,
 		options: { recordSubmission: boolean },
 	) {
-		let releaseSubmission!: () => void;
-		const submissionMayCommit = new Promise<void>((resolve) => {
-			releaseSubmission = resolve;
-		});
-		let submissionHasLock!: () => void;
-		const submissionLocked = new Promise<void>((resolve) => {
-			submissionHasLock = resolve;
-		});
-
-		const submission = holder.begin(async (tx) => {
-			await tx`SELECT pg_advisory_xact_lock(hashtextextended(${declarationId}, 0))`;
-			if (options.recordSubmission) {
+		return runWhileDeclarationLockHeld({
+			observer: sql,
+			holder,
+			declarationId,
+			underLock: async (tx) => {
+				if (!options.recordSubmission) return;
 				await tx`
 					INSERT INTO app_declaration_status_history
 						(id, declaration_id, event_type, round, actor_user_id, created_at)
 					VALUES
 						(${crypto.randomUUID()}, ${declarationId}, 'second_declaration_submit', 2, ${USER_ID}, NOW())
 				`;
-			}
-			submissionHasLock();
-			await submissionMayCommit;
+			},
+			request: concurrentWrite,
 		});
-
-		await submissionLocked;
-		const write = concurrentWrite().then(
-			(value) => ({ status: "fulfilled" as const, value }),
-			(reason: unknown) => ({ status: "rejected" as const, reason }),
-		);
-		const blocked = await waitForBlockedBackend();
-		releaseSubmission();
-		await submission;
-		return { blocked, outcome: await write };
 	}
 
 	async function cleanup() {
@@ -169,11 +141,16 @@ describe("first-declaration writes racing a subsequent submission", () => {
 			INSERT INTO app_company (siren, name) VALUES (${SIREN}, 'Société Démo')
 			ON CONFLICT DO NOTHING
 		`;
+		await sql`
+			INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN})
+			ON CONFLICT DO NOTHING
+		`;
 	});
 
 	afterAll(async () => {
 		if (!sql) return;
 		await cleanup();
+		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 		await holder.end();

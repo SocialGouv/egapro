@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatShortDate } from "~/modules/domain";
+import { formatIsoDate } from "~/modules/domain";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import {
 	computePeriodEnd,
@@ -65,7 +65,7 @@ export function Step1ReferencePeriod() {
 		setAnnouncement(
 			value === "" || computePeriodEnd(value) === undefined
 				? ""
-				: `Date de fin : ${formatShortDate(new Date(end))} renseignée automatiquement.`,
+				: `Date de fin : ${formatIsoDate(end)} renseignée automatiquement.`,
 		);
 	}
 
@@ -82,7 +82,7 @@ export function Step1ReferencePeriod() {
 		setAnnouncement(
 			value === "" || computePeriodStart(value) === undefined
 				? ""
-				: `Date de début : ${formatShortDate(new Date(start))} renseignée automatiquement.`,
+				: `Date de début : ${formatIsoDate(start)} renseignée automatiquement.`,
 		);
 	}
 

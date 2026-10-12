@@ -13,7 +13,9 @@ import { env } from "~/env.js";
 const MATOMO_URL = env.NEXT_PUBLIC_MATOMO_URL;
 const MATOMO_SITE_ID = env.NEXT_PUBLIC_MATOMO_SITE_ID;
 
-function MatomoTracker() {
+type Props = { nonce?: string };
+
+function MatomoTracker({ nonce }: Props) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
@@ -28,6 +30,7 @@ function MatomoTracker() {
 			// Drop query strings — a free-text search or OIDC callback can carry a
 			// SIREN, company name or email that must never reach Matomo.
 			cleanUrl: true,
+			nonce,
 			onInitialization: () => {
 				// Honour Do Not Track and keep heatmaps/session recording off
 				// (CNIL consent-exemption), before the first hit is sent.
@@ -35,17 +38,17 @@ function MatomoTracker() {
 				push(["HeatmapSessionRecording::disable"]);
 			},
 		});
-	}, [pathname, searchParams]);
+	}, [pathname, searchParams, nonce]);
 
 	return null;
 }
 
-export function MatomoAnalytics() {
+export function MatomoAnalytics({ nonce }: Props) {
 	if (!MATOMO_URL || !MATOMO_SITE_ID) return null;
 
 	return (
 		<Suspense fallback={null}>
-			<MatomoTracker />
+			<MatomoTracker nonce={nonce} />
 		</Suspense>
 	);
 }

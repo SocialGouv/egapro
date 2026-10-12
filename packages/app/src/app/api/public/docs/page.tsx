@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { SwaggerUI } from "~/modules/export";
 import { API_PUBLIC_OPENAPI } from "~/modules/routes";
+import { NONCE_HEADER } from "~/server/security/securityHeaders.js";
 
 export const metadata: Metadata = {
 	title: "Documentation de l’API publique",
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
 		"Documentation interactive de l’API publique des indicateurs EgaPro.",
 };
 
-export default function PublicApiDocsPage() {
+export default async function PublicApiDocsPage() {
+	const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
+
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-4w">
@@ -18,7 +22,7 @@ export default function PublicApiDocsPage() {
 					personnelles, les avis CSE et l’indicateur G sont exclus.
 				</p>
 			</div>
-			<SwaggerUI specUrl={API_PUBLIC_OPENAPI} />
+			<SwaggerUI nonce={nonce} specUrl={API_PUBLIC_OPENAPI} />
 		</main>
 	);
 }

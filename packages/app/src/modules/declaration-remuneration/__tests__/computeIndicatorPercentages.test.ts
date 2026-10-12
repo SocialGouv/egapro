@@ -240,8 +240,8 @@ describe("computeIndicatorPercentages", () => {
 		});
 	});
 
-	describe("rounding — F proportions rounded to 4 decimal places", () => {
-		it("proportion of 1/3 rounds to 0.3333", () => {
+	describe("truncation — F proportions truncated to 4 decimal places, like the display (#4633)", () => {
+		it("proportion of 1/3 truncates to 0.3333", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorFAnnualWomen1: 1,
@@ -250,22 +250,31 @@ describe("computeIndicatorPercentages", () => {
 			expect(result.annualQuartile1ProportionWomen).toBe(0.3333);
 		});
 
-		it("proportion of 2/3 rounds to 0.6667", () => {
+		it("proportion of 2/3 truncates to 0.6666, never rounds up to 0.6667", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorFAnnualWomen1: 1,
 				indicatorFAnnualMen1: 2,
 			});
-			expect(result.annualQuartile1ProportionMen).toBe(0.6667);
+			expect(result.annualQuartile1ProportionMen).toBe(0.6666);
 		});
 
-		it("rounds E proportions to 4 decimal places too", () => {
+		it("truncates E proportions to 4 decimal places too", () => {
 			const result = computeIndicatorPercentages({
 				...nominalRow,
 				indicatorEWomen: "1",
 				totalWomen: 3,
 			});
 			expect(result.variableProportionWomen).toBe(0.3333);
+		});
+
+		it("persists 18/35 as 0.5142, the ratio behind the displayed 51,42 %", () => {
+			const result = computeIndicatorPercentages({
+				...nominalRow,
+				indicatorEWomen: "18",
+				totalWomen: 35,
+			});
+			expect(result.variableProportionWomen).toBe(0.5142);
 		});
 	});
 

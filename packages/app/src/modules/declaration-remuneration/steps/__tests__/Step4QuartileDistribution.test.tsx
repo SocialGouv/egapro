@@ -420,7 +420,7 @@ describe("Step4QuartileDistribution", () => {
 			/>,
 		);
 		// Annual: total = 90 women + 117 men → 139/256 ≈ 54,3%
-		expect(screen.getAllByText(/66,7 %/).length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText(/66,66 %/).length).toBeGreaterThanOrEqual(1);
 	});
 
 	it("shows SavedIndicator when initialData has data", () => {

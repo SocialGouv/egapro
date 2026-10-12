@@ -63,6 +63,7 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 		await sql`DELETE FROM app_cse_opinion WHERE declaration_id = ${DECLARATION_ID}`;
 		await sql`DELETE FROM app_file WHERE id = ${FILE_ID}`;
 		await sql`DELETE FROM app_declaration WHERE id = ${DECLARATION_ID}`;
+		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
 		await sql`DELETE FROM app_user WHERE id = ${USER_ID}`;
 	}
@@ -88,6 +89,7 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 			INSERT INTO app_company (siren, name, workforce)
 			VALUES (${SIREN}, 'Entreprise Test CSE', 250)
 		`;
+		await sql`INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN})`;
 		await sql`
 			INSERT INTO app_declaration
 				(id, siren, year, declarant_id, status, created_at, updated_at)

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatRoundedCount, getReferenceYearFor } from "~/modules/domain";
+import { formatWorkforceEma, getReferenceYearFor } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout/Breadcrumb";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api";
 import type { AppHref } from "~/modules/routes";
@@ -68,7 +68,7 @@ export function CompanyHeader({
 		activity.push({
 			// The headcount reported for a campaign is the previous civil year's.
 			label: `Effectif annuel moyen en ${getReferenceYearFor(year)}`,
-			value: formatRoundedCount(workforceEma),
+			value: formatWorkforceEma(workforceEma),
 		});
 	}
 

@@ -1,13 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect, mockAuth, mockGetEffectiveSiren } = vi.hoisted(() => ({
-	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
-		throw new Error("NEXT_REDIRECT");
+const { mockRedirect, mockAuth, mockResolveAuthorizedSiren } = vi.hoisted(
+	() => ({
+		mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
+			throw new Error("NEXT_REDIRECT");
+		}),
+		mockAuth: vi.fn(),
+		mockResolveAuthorizedSiren: vi.fn(),
 	}),
-	mockAuth: vi.fn(),
-	mockGetEffectiveSiren: vi.fn(),
-}));
+);
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
@@ -22,8 +24,9 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
+vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/auth/companyAccess", () => ({
-	getEffectiveSiren: mockGetEffectiveSiren,
+	resolveAuthorizedSiren: mockResolveAuthorizedSiren,
 }));
 
 vi.mock("~/trpc/server", () => ({ api: { company: { get: vi.fn() } } }));
@@ -40,7 +43,7 @@ function renderLayout() {
 beforeEach(() => {
 	mockRedirect.mockClear();
 	mockAuth.mockReset();
-	mockGetEffectiveSiren.mockReset();
+	mockResolveAuthorizedSiren.mockReset();
 	vi.mocked(api.company.get).mockResolvedValue({
 		name: "Société Démo",
 		siren: SIREN,
@@ -60,7 +63,7 @@ describe("RepresentationFunnelLayout", () => {
 
 	it("explains the missing SIRET instead of serving the funnel", async () => {
 		mockAuth.mockResolvedValue({ user: { id: "u1" } });
-		mockGetEffectiveSiren.mockReturnValue(null);
+		mockResolveAuthorizedSiren.mockResolvedValue(null);
 
 		render(await renderLayout());
 
@@ -72,7 +75,7 @@ describe("RepresentationFunnelLayout", () => {
 
 	it("serves the funnel with the company of the session", async () => {
 		mockAuth.mockResolvedValue({ user: { id: "u1", siret: `${SIREN}00015` } });
-		mockGetEffectiveSiren.mockReturnValue(SIREN);
+		mockResolveAuthorizedSiren.mockResolvedValue(SIREN);
 
 		render(await renderLayout());
 

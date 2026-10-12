@@ -7,11 +7,17 @@ import { fileURLToPath } from "node:url";
 import "./src/env.js";
 
 import { withSentryConfig } from "@sentry/nextjs";
+import { buildSecurityHeaders } from "./src/server/security/securityHeaders.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
 	output: "standalone",
 	typedRoutes: true,
+	poweredByHeader: false,
+	// The Content-Security-Policy carries a per-request nonce, so `src/middleware.ts` sends it.
+	async headers() {
+		return buildSecurityHeaders();
+	},
 	async redirects() {
 		// Hash fragments are stripped by the browser before the request reaches the server.
 		return [

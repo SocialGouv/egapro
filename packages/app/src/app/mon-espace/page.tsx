@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { MonEspacePage } from "~/modules/my-space";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 
 export const metadata = { title: "Mon espace" };
@@ -18,7 +19,7 @@ export default async function Page() {
 	// When an admin is impersonating a company, use the impersonated SIREN.
 	// MonEspacePage expects a SIRET-length string for symmetric handling;
 	// passing the SIREN (9 chars) is fine since it only reads the first 9.
-	const effectiveSiret = getEffectiveSiren(session);
+	const effectiveSiret = await resolveAuthorizedSiren(db, session);
 
 	// The JWT only captures `phone` at sign-in, so `session.user.phone` goes
 	// stale as soon as the user saves a phone through the missing-info modal

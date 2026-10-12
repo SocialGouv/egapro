@@ -6,12 +6,16 @@ import {
 	type PrefillPdfData,
 	PrefillPdfDocument,
 } from "~/modules/declarationPdf/PrefillPdfDocument";
-import { getCurrentYear, parseCampaignYear } from "~/modules/domain";
+import { getCurrentYear } from "~/modules/domain";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { getSessionSiren } from "~/server/auth/sessionSiren";
 import { db } from "~/server/db";
 import { companies, gipMdsData } from "~/server/db/schema";
 import {
+	invalidYearResponse,
+	parseRequestedYear,
+	pdfErrorResponse,
 	pdfHeaders,
 	renderPdfAndCacheSize,
 	resolvePdfSize,
@@ -19,35 +23,15 @@ import {
 
 const ROUTE = "prefill-pdf";
 
-/**
- * Reads the `year` query parameter as a number the audit row can carry. The raw
- * string never leaves this function: an unbounded caller-supplied value written
- * to `audit.action_log` would let anyone inflate the trace, and the row is
- * written for refused requests too.
- */
-function readRequestedYear(request: Request): {
-	year: number | null;
-	invalid: boolean;
-} {
-	const raw = new URL(request.url).searchParams.get("year");
-	if (!raw) {
-		return { year: null, invalid: false };
-	}
-	const year = parseCampaignYear(raw);
-	return { year, invalid: year === null };
-}
-
 const resolveAuditContext = async (request: Request) => {
 	const { session, siren } = await getSessionSiren(request);
-	const requestedYear = readRequestedYear(request);
 	return {
 		userId: session?.user?.id ?? null,
 		userEmail: session?.user?.email ?? null,
 		siren,
-		metadata: {
-			year: requestedYear.year,
-			invalidYear: requestedYear.invalid,
-		},
+		metadata: auditQueryMetadata(parseRequestedYear(request), ({ year }) => ({
+			year,
+		})),
 	};
 };
 
@@ -60,16 +44,14 @@ async function resolvePrefillPdf(
 ): Promise<ResolvedPrefillPdf> {
 	const { siren } = await getSessionSiren(request);
 	if (!siren) {
-		return { error: new Response("Non autorisé", { status: 401 }) };
+		return { error: pdfErrorResponse("Non autorisé", 401) };
 	}
 
-	const requestedYear = readRequestedYear(request);
-	if (requestedYear.invalid) {
-		return {
-			error: new Response("Paramètre 'year' invalide", { status: 400 }),
-		};
+	const requestedYear = parseRequestedYear(request);
+	if (!requestedYear.success) {
+		return { error: invalidYearResponse() };
 	}
-	const year = requestedYear.year ?? getCurrentYear();
+	const year = requestedYear.data.year ?? getCurrentYear();
 
 	const [row] = await db
 		.select()
@@ -78,7 +60,7 @@ async function resolvePrefillPdf(
 		.limit(1);
 
 	if (!row) {
-		return { error: new Response("Aucune donnée préremplie", { status: 404 }) };
+		return { error: pdfErrorResponse("Aucune donnée préremplie", 404) };
 	}
 
 	const [company] = await db
@@ -118,7 +100,7 @@ export const GET = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[prefill-pdf]", error);
-			return new Response("Impossible de générer le PDF", { status: 500 });
+			return pdfErrorResponse("Impossible de générer le PDF", 500);
 		}
 	},
 );
@@ -132,7 +114,7 @@ export const HEAD = withAuditedRoute(
 		try {
 			const resolved = await resolvePrefillPdf(request);
 			if (resolved.error) {
-				return new Response(null, { status: resolved.error.status });
+				return pdfErrorResponse(null, resolved.error.status);
 			}
 
 			const size = await resolvePdfSize(ROUTE, resolved.data, () =>
@@ -144,7 +126,7 @@ export const HEAD = withAuditedRoute(
 			});
 		} catch (error) {
 			console.error("[prefill-pdf:head]", error);
-			return new Response(null, { status: 500 });
+			return pdfErrorResponse(null, 500);
 		}
 	},
 );

@@ -1,4 +1,4 @@
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate } from "~/modules/domain";
 import styles from "./AideCallout.module.scss";
 
 type Props = {
@@ -15,7 +15,7 @@ export function AideCallout({ year, deadline }: Props) {
 			<h2 className="fr-callout__title">Échéance de déclaration</h2>
 			<p className="fr-callout__text">
 				L'échéance de déclaration pour l'année {year} est fixée au{" "}
-				<strong>{formatLongDate(deadline)}</strong>.
+				<strong>{formatCivilLongDate(deadline)}</strong>.
 			</p>
 		</div>
 	);

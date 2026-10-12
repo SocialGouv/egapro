@@ -1,4 +1,9 @@
-import { EXPECTED_DECLARATION_TYPES } from "~/modules/domain";
+import type { CampaignDeadlines } from "~/modules/domain";
+import {
+	EXPECTED_DECLARATION_TYPES,
+	getDeclarationProcessStepDeadline,
+	getDefaultCampaignDeadlines,
+} from "~/modules/domain";
 
 import type {
 	DeclarationFsmStatus,
@@ -24,6 +29,7 @@ export type DbDeclaration = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	deadline: Date | null;
 	notSubject: boolean;
 };
 
@@ -33,6 +39,10 @@ export function buildDeclarationList(
 	currentYear: number,
 	yearsWithPrefill: Set<number> = new Set(),
 	representationVisible = true,
+	// Fallback when the caller has no year-specific deadlines.
+	currentYearDeadlines: CampaignDeadlines = getDefaultCampaignDeadlines(
+		currentYear,
+	),
 ): DeclarationItem[] {
 	const rows: DeclarationItem[] = [];
 
@@ -57,6 +67,7 @@ export function buildDeclarationList(
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				hasPrefillData: existing.hasPrefillData,
+				deadline: existing.deadline,
 				notSubject: existing.notSubject,
 			});
 		} else if (type !== "representation" || representationVisible) {
@@ -77,6 +88,10 @@ export function buildDeclarationList(
 				hasJointEvaluationFile: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
+				deadline:
+					type === "remuneration"
+						? getDeclarationProcessStepDeadline(null, currentYearDeadlines)
+						: null,
 				notSubject: false,
 			});
 		}
@@ -103,6 +118,7 @@ export function buildDeclarationList(
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			hasPrefillData: d.hasPrefillData,
+			deadline: d.deadline,
 			notSubject: d.notSubject,
 		});
 	}

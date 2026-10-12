@@ -6,9 +6,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("~/modules/public-api", async () => {
-	// The route pulls both the service and the input schema from the barrel;
-	// only the service is faked, the real schema keeps the contract honest.
-	const { publicRepresentationSearchInputSchema } = await import(
+	// The route pulls both the service and the input parser from the barrel;
+	// only the service is faked, the real parser keeps the contract honest.
+	const { parsePublicRepresentationSearchPage } = await import(
 		"~/modules/public-api/schemas"
 	);
 	const { PUBLIC_API_SEARCH_HEADERS } = await import(
@@ -16,7 +16,7 @@ vi.mock("~/modules/public-api", async () => {
 	);
 	return {
 		PUBLIC_API_SEARCH_HEADERS,
-		publicRepresentationSearchInputSchema,
+		parsePublicRepresentationSearchPage,
 		searchPublicRepresentations: mocks.searchPublicRepresentations,
 	};
 });
@@ -133,7 +133,7 @@ describe("GET /api/public/representations", () => {
 		errorSpy.mockRestore();
 	});
 
-	it("writes a success audit entry with the raw query params as metadata", async () => {
+	it("writes a success audit entry with the validated query params as metadata", async () => {
 		const { GET } = await import("../route");
 
 		await GET(request("?q=acme&region=11&departement=75&naf=62.01Z&year=2026"));
@@ -147,9 +147,26 @@ describe("GET /api/public/representations", () => {
 					region: ["11"],
 					departement: ["75"],
 					naf: ["62.01Z"],
-					year: "2026",
+					year: 2026,
 				},
 			}),
+		);
+	});
+
+	it.each([
+		["a non-numeric year", "?year=abc", "year"],
+		[
+			"too many facet values",
+			`?${Array.from({ length: 300 }, (_, index) => `naf=${index}`).join("&")}`,
+			"naf",
+		],
+	])("records only the invalid parameter's name for %s", async (_label, query, param) => {
+		const { GET } = await import("../route");
+
+		await GET(request(query));
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: param } }),
 		);
 	});
 

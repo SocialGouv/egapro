@@ -79,8 +79,8 @@ describe("VariablePaySection", () => {
 				)}
 			/>,
 		);
-		expect(screen.getByText("47,5 %")).toBeInTheDocument();
-		expect(screen.getByText("80,0 %")).toBeInTheDocument();
+		expect(screen.getByText("47,50 %")).toBeInTheDocument();
+		expect(screen.getByText("80,00 %")).toBeInTheDocument();
 	});
 
 	it("renders the '- %' placeholder when a beneficiary count is missing", () => {

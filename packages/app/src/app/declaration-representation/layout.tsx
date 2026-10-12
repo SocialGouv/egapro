@@ -5,7 +5,8 @@ import { DeclarationLayout } from "~/modules/declaration-representation";
 import { getCurrentYear } from "~/modules/domain";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 export default async function RepresentationFunnelLayout({
@@ -18,7 +19,7 @@ export default async function RepresentationFunnelLayout({
 		redirect(LOGIN);
 	}
 
-	const siren = getEffectiveSiren(session);
+	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) {
 		return <MissingSiret />;
 	}

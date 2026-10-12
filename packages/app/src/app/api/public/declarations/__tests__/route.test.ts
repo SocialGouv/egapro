@@ -133,7 +133,7 @@ describe("GET /api/public/declarations", () => {
 		errorSpy.mockRestore();
 	});
 
-	it("writes a success audit entry with the raw query params as metadata", async () => {
+	it("writes a success audit entry with the validated query params as metadata", async () => {
 		const { GET } = await import("../route");
 
 		await GET(request("?q=acme&region=11"));
@@ -155,7 +155,7 @@ describe("GET /api/public/declarations", () => {
 		);
 	});
 
-	it("records every raw query param in the audit metadata", async () => {
+	it("records every validated query param in the audit metadata", async () => {
 		const { GET } = await import("../route");
 
 		await GET(request("?q=acme&region=11&departement=75&naf=62.01Z&year=2023"));
@@ -169,9 +169,36 @@ describe("GET /api/public/declarations", () => {
 					departement: ["75"],
 					naf: ["62.01Z"],
 					sort: null,
-					year: "2023",
+					year: 2023,
 				},
 			}),
+		);
+	});
+
+	it("bounds a valid but long free-text value in the audit metadata", async () => {
+		const { GET } = await import("../route");
+
+		await GET(request(`?city=${"x".repeat(5_000)}`));
+
+		const metadata = mocks.logAction.mock.calls[0]?.[0]?.metadata;
+		expect(metadata.city).toHaveLength(200);
+	});
+
+	it.each([
+		["a non-numeric year", "?year=abc", "year"],
+		["an unknown sort", `?sort=${"x".repeat(5_000)}`, "sort"],
+		[
+			"too many facet values",
+			`?${Array.from({ length: 300 }, (_, index) => `region=${index}`).join("&")}`,
+			"region",
+		],
+	])("records only the invalid parameter's name for %s", async (_label, query, param) => {
+		const { GET } = await import("../route");
+
+		await GET(request(query));
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({ metadata: { invalidParam: param } }),
 		);
 	});
 

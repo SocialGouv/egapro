@@ -25,6 +25,8 @@ function buildRequest(path: string) {
 	return new Request(`http://localhost/api/public/declarations/${path}`);
 }
 
+const OVERSIZED_SIREN = "x".repeat(5_000);
+
 async function callGet(rawSiren: string, query = "") {
 	const { GET } = await import("../route");
 	return GET(buildRequest(`${rawSiren}${query}`), {
@@ -38,13 +40,29 @@ describe("GET /api/public/declarations/[siren]", () => {
 		mocks.logAction.mockReset();
 	});
 
-	it("returns 400 and logs a failure for an invalid siren", async () => {
-		const response = await callGet("abc");
+	it.each([
+		"123456789xyz",
+		"12345678901234",
+		"123456789 ",
+		" 123456789",
+	])("returns 400 for %j instead of truncating it to its first 9 digits", async (rawSiren) => {
+		const response = await callGet(rawSiren);
+
+		expect(response.status).toBe(400);
+		expect(mocks.getPublicDeclarationsBySiren).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 and logs a failure for an invalid siren, without the raw value", async () => {
+		const response = await callGet(OVERSIZED_SIREN);
 
 		expect(response.status).toBe(400);
 		expect(mocks.getPublicDeclarationsBySiren).not.toHaveBeenCalled();
 		expect(mocks.logAction).toHaveBeenCalledWith(
-			expect.objectContaining({ status: "failure", siren: null }),
+			expect.objectContaining({
+				status: "failure",
+				siren: null,
+				metadata: { invalidParam: "siren" },
+			}),
 		);
 	});
 

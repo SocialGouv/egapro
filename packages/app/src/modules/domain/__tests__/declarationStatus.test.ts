@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getCurrentDate, getCurrentYear } from "../shared/campaign";
+import { civilDate } from "../shared/civilDate";
 import {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
@@ -497,8 +498,8 @@ describe("applyDeclarationClosure", () => {
 		decl2JustificationDeadline: new Date(2026, 11, 1),
 		decl2JointEvaluationDeadline: new Date(2027, 0, 1),
 		decl2CseOpinionDeadline: new Date(2027, 1, 1),
-		pathChoiceDeadline: new Date(2027, 0, 1),
-		pathChoiceRound1Deadline: new Date(2026, 6, 1),
+		pathChoiceDeadline: civilDate(2027, 0, 1),
+		pathChoiceRound1Deadline: civilDate(2026, 6, 1),
 	};
 	const PAST_DEADLINE_NOW = new Date(CURRENT_YEAR, 0, 1);
 	const BEFORE_DEADLINE_NOW = new Date(ROW_YEAR, 0, 15);
@@ -628,7 +629,7 @@ describe("applyDeclarationClosure", () => {
 		const PINNED_ROW_YEAR = 2028;
 		const PINNED_DEADLINES: CampaignDeadlines = {
 			...DEADLINES,
-			decl1ModificationDeadline: new Date(PINNED_ROW_YEAR, 5, 1),
+			decl1ModificationDeadline: civilDate(PINNED_ROW_YEAR, 5, 1),
 		};
 
 		beforeEach(() => {

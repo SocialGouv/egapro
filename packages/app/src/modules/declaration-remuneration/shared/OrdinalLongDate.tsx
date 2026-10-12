@@ -1,10 +1,7 @@
+import { civilLongDateParts } from "~/modules/domain";
+
 export function OrdinalLongDate({ date }: { date: Date }) {
-	const day = date.getUTCDate();
-	const monthYear = new Intl.DateTimeFormat("fr-FR", {
-		month: "long",
-		year: "numeric",
-		timeZone: "UTC",
-	}).format(date);
+	const { day, monthYear } = civilLongDateParts(date);
 	return (
 		<>
 			{day}

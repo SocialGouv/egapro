@@ -434,10 +434,22 @@ describe("mock-gip-mds.csv", () => {
 
 			const csvWorkforce = Number.parseFloat(effectifRcd.replace(",", "."));
 			expect(
-				csvWorkforce,
-				`SIREN ${siren}: Effectif_RCD ${csvWorkforce} should match workforce ${company.workforce}`,
-			).toBeCloseTo(company.workforce, 0);
+				Math.floor(csvWorkforce),
+				`SIREN ${siren}: Effectif_RCD ${csvWorkforce} should floor to workforce ${company.workforce}`,
+			).toBe(company.workforce);
 		}
+	});
+
+	it("has a fractional Effectif_RCD with two decimals, like a real GIP annual average", () => {
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const rows = parseCsvRows(csv).filter((r) => r.length > 1);
+		const effectifs = rows.map((r) => r[1] ?? "");
+
+		for (const effectif of effectifs) {
+			expect(effectif, `Effectif_RCD ${effectif}`).toMatch(/^\d+,\d{2}$/);
+		}
+		const fractional = effectifs.filter((e) => !e.endsWith(",00"));
+		expect(fractional.length / effectifs.length).toBeGreaterThan(0.9);
 	});
 
 	it("has no SIREN with workforce below 50", () => {

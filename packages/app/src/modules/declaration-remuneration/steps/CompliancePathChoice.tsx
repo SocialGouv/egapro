@@ -14,7 +14,7 @@ import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/L
 import {
 	type CampaignDeadlines,
 	type CompliancePathValue,
-	formatLongDate,
+	formatCivilLongDate,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -180,7 +180,7 @@ export function CompliancePathChoice({
 							Échéance pour choisir un parcours de mise en conformité
 						</p>
 						<p className="fr-text--xl fr-text--bold fr-mb-0">
-							{formatLongDate(pathChoiceDeadline)}
+							{formatCivilLongDate(pathChoiceDeadline)}
 						</p>
 					</div>
 				</div>

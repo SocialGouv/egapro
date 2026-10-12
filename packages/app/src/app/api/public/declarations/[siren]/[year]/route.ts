@@ -1,5 +1,5 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { FIRST_DECLARATION_YEAR, parseSiren } from "~/modules/domain";
+import { FIRST_DECLARATION_YEAR, parseStrictSiren } from "~/modules/domain";
 import {
 	getPublicDeclarationBySirenYear,
 	PUBLIC_API_RESOURCE_HEADERS,
@@ -25,13 +25,13 @@ export async function GET(
 	const requestContext = buildRequestContext(request.headers);
 	const { siren: rawSiren, year: rawYear } = await params;
 
-	const siren = parseSiren(rawSiren);
+	const siren = parseStrictSiren(rawSiren);
 	if (!siren) {
 		void logAction({
 			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR,
 			status: "failure",
 			siren: null,
-			metadata: { rawSiren, rawYear },
+			metadata: { invalidParam: "siren" },
 			errorMessage: "HTTP 400",
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
@@ -49,7 +49,7 @@ export async function GET(
 			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR,
 			status: "failure",
 			siren,
-			metadata: { rawYear },
+			metadata: { invalidParam: "year" },
 			errorMessage: "HTTP 400",
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,

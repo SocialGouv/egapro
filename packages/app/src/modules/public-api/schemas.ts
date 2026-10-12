@@ -62,22 +62,51 @@ const publicSearchQueryParamsSchema = z.object({
 
 export const publicSearchInputSchema = publicSearchQueryParamsSchema;
 
-export function parsePublicSearchInput(searchParams: URLSearchParams) {
-	const workforceMin = searchParams.get("workforceMin");
-	const workforceMax = searchParams.get("workforceMax");
-	const year = searchParams.get("year");
-	return publicSearchInputSchema.safeParse({
+function optionalNumberParam(
+	searchParams: URLSearchParams,
+	name: string,
+): number | undefined {
+	const raw = searchParams.get(name);
+	return raw ? Number(raw) : undefined;
+}
+
+function readSearchFilters(searchParams: URLSearchParams) {
+	return {
 		q: searchParams.get("q") ?? undefined,
 		city: searchParams.get("city") ?? undefined,
 		region: searchParams.getAll("region"),
 		departement: searchParams.getAll("departement"),
 		naf: searchParams.getAll("naf"),
 		workforceRanges: searchParams.getAll("workforceRanges"),
-		workforceMin: workforceMin ? Number(workforceMin) : undefined,
-		workforceMax: workforceMax ? Number(workforceMax) : undefined,
-		year: year ? Number(year) : undefined,
+		workforceMin: optionalNumberParam(searchParams, "workforceMin"),
+		workforceMax: optionalNumberParam(searchParams, "workforceMax"),
+		year: optionalNumberParam(searchParams, "year"),
 		sort: searchParams.get("sort") ?? undefined,
-	});
+	};
+}
+
+function readSearchPage(searchParams: URLSearchParams) {
+	return {
+		...readSearchFilters(searchParams),
+		limit: optionalNumberParam(searchParams, "limit"),
+		offset: optionalNumberParam(searchParams, "offset"),
+	};
+}
+
+export function parsePublicSearchInput(searchParams: URLSearchParams) {
+	return publicSearchInputSchema.safeParse(readSearchFilters(searchParams));
+}
+
+export function parsePublicSearchPage(searchParams: URLSearchParams) {
+	return publicSearchInputSchema.safeParse(readSearchPage(searchParams));
+}
+
+export function parsePublicRepresentationSearchPage(
+	searchParams: URLSearchParams,
+) {
+	return publicRepresentationSearchInputSchema.safeParse(
+		readSearchPage(searchParams),
+	);
 }
 
 export type PublicSearchInput = z.infer<typeof publicSearchInputSchema>;

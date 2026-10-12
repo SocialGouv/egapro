@@ -12,9 +12,10 @@ import {
 import { LOGIN, MY_SPACE } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import {
-	getEffectiveSiren,
 	isImpersonating,
+	resolveAuthorizedSiren,
 } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 /**
@@ -35,7 +36,7 @@ export default async function WithBannerLayout({
 	const session = await auth();
 	if (!session?.user) redirect(LOGIN);
 
-	const siren = getEffectiveSiren(session);
+	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) return <MissingSiret />;
 
 	const [company, profile] = await Promise.all([

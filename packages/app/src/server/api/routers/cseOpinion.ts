@@ -18,7 +18,7 @@ import {
 	declarations,
 	files,
 } from "~/server/db/schema";
-import { applyAction, loadRules } from "~/server/rules/engine";
+import { loadRules } from "~/server/rules/engine";
 import {
 	contentTypeKey,
 	getRequiredContentTypes,
@@ -26,10 +26,14 @@ import {
 } from "~/server/services/cseRequiredContentTypes";
 import { deleteFile as deleteS3File, getFileSize } from "~/server/services/s3";
 import {
+	applyActionOrRefuse,
 	buildHistoryInserts,
 	computeProjectionUpdates,
-	lockDeclaration,
+	lockAndReadDeclaration,
 } from "./statusHistoryHelpers";
+
+const CSE_OPINION_UNAVAILABLE_ERROR =
+	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
 export const cseOpinionRouter = createTRPCRouter({
 	get: declarationProcedure.query(async ({ ctx }) => {
@@ -201,35 +205,29 @@ export const cseOpinionRouter = createTRPCRouter({
 		}),
 
 	finalize: declarationWriteProcedure.mutation(async ({ ctx }) => {
-		const [opinionCount, fileRows, declarationRow, existingAssociations] =
-			await Promise.all([
-				ctx.db
-					.select({ count: sql<number>`count(*)::int` })
-					.from(cseOpinions)
-					.where(eq(cseOpinions.declarationId, ctx.declarationId)),
-				ctx.db
-					.select({ id: files.id, fileName: files.fileName })
-					.from(files)
-					.where(
-						and(
-							eq(files.declarationId, ctx.declarationId),
-							eq(files.type, "cse_opinion"),
-						),
+		const [opinionCount, fileRows, existingAssociations] = await Promise.all([
+			ctx.db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(cseOpinions)
+				.where(eq(cseOpinions.declarationId, ctx.declarationId)),
+			ctx.db
+				.select({ id: files.id, fileName: files.fileName })
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, ctx.declarationId),
+						eq(files.type, "cse_opinion"),
 					),
-				ctx.db
-					.select()
-					.from(declarations)
-					.where(eq(declarations.id, ctx.declarationId))
-					.limit(1),
-				ctx.db
-					.select({
-						declarationNumber: cseOpinionFiles.declarationNumber,
-						type: cseOpinionFiles.type,
-						fileId: cseOpinionFiles.fileId,
-					})
-					.from(cseOpinionFiles)
-					.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
-			]);
+				),
+			ctx.db
+				.select({
+					declarationNumber: cseOpinionFiles.declarationNumber,
+					type: cseOpinionFiles.type,
+					fileId: cseOpinionFiles.fileId,
+				})
+				.from(cseOpinionFiles)
+				.where(eq(cseOpinionFiles.declarationId, ctx.declarationId)),
+		]);
 
 		if ((opinionCount[0]?.count ?? 0) === 0) {
 			throw new TRPCError({
@@ -241,14 +239,6 @@ export const cseOpinionRouter = createTRPCRouter({
 			throw new TRPCError({
 				code: "PRECONDITION_FAILED",
 				message: "Au moins un fichier d'avis CSE doit être transmis.",
-			});
-		}
-
-		const declaration = declarationRow[0];
-		if (!declaration) {
-			throw new TRPCError({
-				code: "NOT_FOUND",
-				message: "Déclaration introuvable",
 			});
 		}
 
@@ -294,37 +284,36 @@ export const cseOpinionRouter = createTRPCRouter({
 			});
 		}
 
-		const rules = loadRules(declaration.rulesVersion);
-		const facts = { currentState: declaration.status };
-		const { nextStatus, events } = applyAction(
-			facts,
-			"submit_cse_opinion",
-			rules,
-		);
-
-		const projection = computeProjectionUpdates(events, nextStatus);
-		const historyInserts = buildHistoryInserts(
-			ctx.declarationId,
-			events,
-			ctx.session.user.id,
-		);
-
 		await ctx.db.transaction(async (tx) => {
-			await lockDeclaration(tx, ctx.declarationId);
-			await tx.insert(declarationStatusHistory).values(historyInserts);
+			const declaration = await lockAndReadDeclaration(
+				tx,
+				ctx.declarationId,
+				ctx.siren,
+				getCurrentYear(),
+			);
+
+			const { nextStatus, events } = applyActionOrRefuse(
+				{ currentState: declaration.status },
+				"submit_cse_opinion",
+				loadRules(declaration.rulesVersion),
+				CSE_OPINION_UNAVAILABLE_ERROR,
+			);
+
+			await tx
+				.insert(declarationStatusHistory)
+				.values(
+					buildHistoryInserts(ctx.declarationId, events, ctx.session.user.id),
+				);
 			await tx
 				.update(declarations)
-				.set({ ...projection, updatedAt: new Date() })
+				.set({
+					...computeProjectionUpdates(events, nextStatus),
+					updatedAt: new Date(),
+				})
 				.where(eq(declarations.id, ctx.declarationId));
 
-			const [declRow] = await tx
-				.select()
-				.from(declarations)
-				.where(eq(declarations.id, ctx.declarationId))
-				.limit(1);
-
-			if (declRow?.draft) {
-				const current = declRow.draft as Record<string, unknown>;
+			if (declaration.draft) {
+				const current = declaration.draft as Record<string, unknown>;
 				const { cse: _removed, ...remaining } = current;
 				const isEmpty = Object.keys(remaining).length === 0;
 				await tx

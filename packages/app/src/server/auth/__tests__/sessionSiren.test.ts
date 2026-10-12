@@ -5,8 +5,12 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("~/server/audit/cachedAuth", () => ({ cachedAuth: mocks.cachedAuth }));
+vi.mock("~/server/db", () => ({ db: {} }));
 
+import { isUserLinkedToSiren } from "../companyLink";
 import { getSessionSiren } from "../sessionSiren";
+
+const mockIsUserLinkedToSiren = vi.mocked(isUserLinkedToSiren);
 
 const SIREN = "123456789";
 const SIRET = `${SIREN}00015`;
@@ -25,6 +29,8 @@ function signedIn(user: Record<string, unknown> | null) {
 describe("getSessionSiren", () => {
 	beforeEach(() => {
 		mocks.cachedAuth.mockReset();
+		mockIsUserLinkedToSiren.mockReset();
+		mockIsUserLinkedToSiren.mockResolvedValue(true);
 	});
 
 	it("resolves the siren from the session siret", async () => {
@@ -34,6 +40,35 @@ describe("getSessionSiren", () => {
 
 		expect(siren).toBe(SIREN);
 		expect(session?.user?.id).toBe("user-1");
+	});
+
+	it("checks the session siret against the user's company links", async () => {
+		signedIn({ id: "user-1", siret: SIRET });
+
+		await getSessionSiren(request());
+
+		expect(mockIsUserLinkedToSiren).toHaveBeenCalledWith(
+			expect.anything(),
+			"user-1",
+			SIREN,
+		);
+	});
+
+	it("yields no siren once the link to the session's company has been revoked", async () => {
+		mockIsUserLinkedToSiren.mockResolvedValue(false);
+		signedIn({ id: "user-1", siret: SIRET });
+
+		const { session, siren } = await getSessionSiren(request());
+
+		expect(siren).toBeNull();
+		expect(session?.user?.id).toBe("user-1");
+	});
+
+	it("propagates a database failure rather than granting the siren", async () => {
+		mockIsUserLinkedToSiren.mockRejectedValue(new Error("connection lost"));
+		signedIn({ id: "user-1", siret: SIRET });
+
+		await expect(getSessionSiren(request())).rejects.toThrow("connection lost");
 	});
 
 	it("returns no session and no siren when the caller is anonymous", async () => {
@@ -73,6 +108,7 @@ describe("getSessionSiren", () => {
 		const { siren } = await getSessionSiren(request());
 
 		expect(siren).toBe(IMPERSONATED_SIREN);
+		expect(mockIsUserLinkedToSiren).not.toHaveBeenCalled();
 	});
 
 	// Mimoquage is an administrator privilege: once the second-factor window

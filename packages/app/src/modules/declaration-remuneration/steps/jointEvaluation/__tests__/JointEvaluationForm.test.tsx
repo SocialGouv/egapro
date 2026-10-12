@@ -58,7 +58,7 @@ const defaultProps = {
 	declarationSiren: "123456789",
 	declarationYear: 2026,
 	existingFile: null,
-	jointEvaluationDeadline: new Date("2026-08-01T00:00:00"),
+	jointEvaluationDeadline: new Date("2026-08-01T00:00:00Z"),
 };
 
 describe("JointEvaluationForm", () => {

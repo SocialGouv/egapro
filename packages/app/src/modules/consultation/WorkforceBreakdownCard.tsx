@@ -1,4 +1,4 @@
-import { formatCount, formatWholePercentage } from "~/modules/domain";
+import { formatCount, formatPrecisePercentage } from "~/modules/domain";
 import type { PublicDeclarationDTO } from "~/modules/public-api";
 import { DataDetailsAccordion } from "~/modules/shared/DataDetailsAccordion";
 import { StackedGenderBar } from "~/modules/shared/GenderBar";
@@ -13,7 +13,7 @@ type Props = {
 };
 
 function legend(count: number | null, share: number | null) {
-	const percent = share === null ? null : formatWholePercentage(share);
+	const percent = share === null ? null : formatPrecisePercentage(share);
 	return percent === null
 		? formatCount(count)
 		: `${formatCount(count)} (${percent})`;

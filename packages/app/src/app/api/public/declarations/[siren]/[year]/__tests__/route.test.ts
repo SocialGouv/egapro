@@ -27,6 +27,8 @@ function buildRequest(siren: string, year: string) {
 	);
 }
 
+const OVERSIZED_SIREN = "x".repeat(5_000);
+
 async function callGet(rawSiren: string, rawYear: string) {
 	const { GET } = await import("../route");
 	return GET(buildRequest(rawSiren, rawYear), {
@@ -40,13 +42,41 @@ describe("GET /api/public/declarations/[siren]/[year]", () => {
 		mocks.logAction.mockReset();
 	});
 
-	it("returns 400 and logs a failure for an invalid siren", async () => {
-		const response = await callGet("abc", "2024");
+	it("logs an invalid year without the raw value", async () => {
+		await callGet(VALID_SIREN, "x".repeat(5_000));
+
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "failure",
+				siren: VALID_SIREN,
+				metadata: { invalidParam: "year" },
+			}),
+		);
+	});
+
+	it.each([
+		"123456789xyz",
+		"12345678901234",
+		"123456789 ",
+		" 123456789",
+	])("returns 400 for %j instead of truncating it to its first 9 digits", async (rawSiren) => {
+		const response = await callGet(rawSiren, "2024");
+
+		expect(response.status).toBe(400);
+		expect(mocks.getPublicDeclarationBySirenYear).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 and logs a failure for an invalid siren, without the raw value", async () => {
+		const response = await callGet(OVERSIZED_SIREN, "2024");
 
 		expect(response.status).toBe(400);
 		expect(mocks.getPublicDeclarationBySirenYear).not.toHaveBeenCalled();
 		expect(mocks.logAction).toHaveBeenCalledWith(
-			expect.objectContaining({ status: "failure", siren: null }),
+			expect.objectContaining({
+				status: "failure",
+				siren: null,
+				metadata: { invalidParam: "siren" },
+			}),
 		);
 	});
 

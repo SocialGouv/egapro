@@ -32,9 +32,7 @@ vi.mock("~/server/db/schema", () => ({
 		stoppedAt: "stoppedAt",
 	},
 }));
-vi.mock("~/server/services/weez", () => ({
-	fetchCompanyBySiren: vi.fn(),
-}));
+vi.mock("../companyLink", () => ({ syncUserCompanyLink: async () => [] }));
 
 const mockLogAction = vi.fn();
 vi.mock("~/server/audit/log", () => ({
@@ -205,9 +203,29 @@ describe("auth config — admin two-factor authentication", () => {
 					status: "success",
 					userId: "uuid-123",
 					userEmail: ADMIN_EMAIL,
-					metadata: { acr: "eidas1-mfa", authTime: AUTH_TIME },
+					metadata: {
+						acr: "eidas1-mfa",
+						authTime: AUTH_TIME,
+						roles: null,
+						publicAgentRequired: true,
+					},
 				}),
 			);
+		});
+
+		it("records a single login with the local user id, including a step-up", async () => {
+			await signInWith(
+				{ acr: "eidas1-mfa", auth_time: AUTH_TIME },
+				ADMIN_EMAIL,
+			);
+			const loginEntries = mockLogAction.mock.calls
+				.map(([entry]) => entry as Record<string, unknown>)
+				.filter((entry) => entry.action === "auth.login");
+			expect(loginEntries).toHaveLength(1);
+			expect(loginEntries[0]).toMatchObject({
+				userId: "uuid-123",
+				userEmail: ADMIN_EMAIL,
+			});
 		});
 
 		it("still records success when the level of an admin account carries no second factor — the sign-in itself did not fail", async () => {
@@ -217,7 +235,12 @@ describe("auth config — admin two-factor authentication", () => {
 				expect.objectContaining({
 					action: "auth.admin_mfa",
 					status: "success",
-					metadata: { acr: "eidas1", authTime: null },
+					metadata: {
+						acr: "eidas1",
+						authTime: null,
+						roles: null,
+						publicAgentRequired: true,
+					},
 				}),
 			);
 		});
@@ -231,7 +254,12 @@ describe("auth config — admin two-factor authentication", () => {
 			const [entry] = mockLogAction.mock.calls[0] as [
 				{ metadata: Record<string, unknown> },
 			];
-			expect(Object.keys(entry.metadata).sort()).toEqual(["acr", "authTime"]);
+			expect(Object.keys(entry.metadata).sort()).toEqual([
+				"acr",
+				"authTime",
+				"publicAgentRequired",
+				"roles",
+			]);
 			expect(JSON.stringify(entry)).not.toContain("header.");
 		});
 
@@ -246,10 +274,14 @@ describe("auth config — admin two-factor authentication", () => {
 			expect(entry).toHaveProperty("userAgent");
 		});
 
-		it("does not open an admin audit trail for a declarant sign-in", async () => {
+		it("does not open an admin MFA audit trail for a declarant sign-in", async () => {
 			await signInWith({ acr: "eidas1-mfa", auth_time: AUTH_TIME });
 
-			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mockLogAction).toHaveBeenCalledOnce();
+			expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+				action: "auth.login",
+				userId: "uuid-123",
+			});
 		});
 	});
 
@@ -297,9 +329,9 @@ describe("auth config — admin two-factor authentication", () => {
 			) as { authorization: { params: Record<string, unknown> } };
 		}
 
-		it("asks for the declarant scopes and nothing more", () => {
+		it("asks for the declarant scopes plus roles, and nothing more", () => {
 			expect(proconnectProvider().authorization.params).toEqual({
-				scope: "openid email given_name usual_name siret",
+				scope: "openid email given_name usual_name siret roles",
 			});
 		});
 

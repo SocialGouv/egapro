@@ -4,7 +4,9 @@ import Script from "next/script";
 import { useRef } from "react";
 import { API_V1_OPENAPI } from "~/modules/routes";
 
-export function SwaggerUI({ specUrl = API_V1_OPENAPI }: { specUrl?: string }) {
+type Props = { specUrl?: string; nonce?: string };
+
+export function SwaggerUI({ specUrl = API_V1_OPENAPI, nonce }: Props) {
 	const initializedRef = useRef(false);
 
 	const tryInit = () => {
@@ -28,11 +30,13 @@ export function SwaggerUI({ specUrl = API_V1_OPENAPI }: { specUrl?: string }) {
 		<>
 			<link href="/swagger-ui/swagger-ui.css" rel="stylesheet" />
 			<Script
+				nonce={nonce}
 				onLoad={tryInit}
 				src="/swagger-ui/swagger-ui-bundle.js"
 				strategy="afterInteractive"
 			/>
 			<Script
+				nonce={nonce}
 				onLoad={tryInit}
 				src="/swagger-ui/swagger-ui-standalone-preset.js"
 				strategy="afterInteractive"

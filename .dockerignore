@@ -29,8 +29,7 @@ LICENSE
 **/.nyc_output
 **/cypress/videos
 **/cypress/screenshots
-**/.env.local
-**/.env.*.local
+**/.env*
 **/.eslintcache
 **/.turbo
 

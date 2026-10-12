@@ -30,6 +30,7 @@ import {
 	STEP1_WORKFORCE,
 	STEP5_WORKFORCE_REMINDER,
 	submitFromStep6Recap,
+	submitIndicatorGStep,
 	submitStepsThroughPayGaps,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
@@ -409,7 +410,10 @@ test.describe("Declaration workflow", () => {
 
 	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit leaves declaration page", async ({ page }) => {
-		await goToStep(page, 6);
+		// The suite's company owes indicator G, and since #4757 the server refuses
+		// a declaration transmitted without it.
+		await goToStep(page, 5);
+		await submitIndicatorGStep(page, { hasGap: false });
 
 		await submitFromStep6Recap(page);
 
@@ -1277,7 +1281,7 @@ test.describe("Step 6 — quartile shares are written with a decimal comma (#296
 		await resetDeclarationToDraft();
 	});
 
-	test("the recap card writes 40,0 %, never 40.0 %", async ({ page }) => {
+	test("the recap card writes 40,00 %, never 40.0 %", async ({ page }) => {
 		test.slow();
 
 		await submitStepsThroughQuartiles(page);
@@ -1294,13 +1298,13 @@ test.describe("Step 6 — quartile shares are written with a decimal comma (#296
 			quartileCard.getByText("Aucune donnée renseignée."),
 		).toHaveCount(0);
 		// Both tables, both sexes, four quartiles: the card holds sixteen shares.
-		await expect(quartileCard.getByText(/^\d{1,3},\d %$/)).toHaveCount(16);
+		await expect(quartileCard.getByText(/^\d{1,3},\d{2} %$/)).toHaveCount(16);
 
 		// The 4th quartile is 2 women against 3 men on either table, so its women
 		// share is an exact 40 % — the value the old `.toFixed(1)` wrote "40.0 %".
-		await expect(quartileCard.getByText("40,0 %", { exact: true })).toHaveCount(
-			2,
-		);
+		await expect(
+			quartileCard.getByText("40,00 %", { exact: true }),
+		).toHaveCount(2);
 		await expect(quartileCard.getByText(/\d\.\d/)).toHaveCount(0);
 	});
 });

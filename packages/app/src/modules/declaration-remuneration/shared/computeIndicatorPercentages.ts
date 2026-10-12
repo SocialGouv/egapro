@@ -4,6 +4,7 @@ import {
 	proportionOf,
 	resolveGapRatio,
 	truncateGapRatio,
+	truncateRatio,
 	variablePayProportion,
 } from "~/modules/domain";
 import type { GipMdsRow } from "./gipMdsMapping";
@@ -114,8 +115,8 @@ function proportionFromCounts(
 	const total = computeWorkforceTotal(women, men);
 	if (total === 0) return { women: null, men: null };
 	return {
-		women: Math.round(proportionOf(women, total) * 10_000) / 10_000,
-		men: Math.round(proportionOf(men, total) * 10_000) / 10_000,
+		women: truncateRatio(proportionOf(women, total)),
+		men: truncateRatio(proportionOf(men, total)),
 	};
 }
 

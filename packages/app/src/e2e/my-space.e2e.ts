@@ -44,6 +44,13 @@ const PANEL_ID = "declaration-process-panel";
 const CURRENT_YEAR = getCurrentYear();
 const STEP3_TITLE = "Dépôt du ou des avis du CSE";
 
+function bannerSourceButton(page: Page) {
+	return page.getByRole("button", {
+		name: "Information sur la source des données",
+		includeHidden: true,
+	});
+}
+
 test.describe("Declaration process panel", () => {
 	test.describe.configure({ mode: "serial" });
 	test.setTimeout(90_000);
@@ -207,6 +214,25 @@ test.describe("Declaration process panel", () => {
 				await expect(panel.getByText(STEP2_TITLE)).toHaveCount(0);
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
 			});
+
+			test("the company banner sources its data to INSEE alone, revealed on click", async ({
+				page,
+			}) => {
+				await page.goto(MY_SPACE);
+				const sourceButton = bannerSourceButton(page);
+				await expect(sourceButton).toHaveAttribute(
+					"data-fr-js-tooltip-referent",
+					"true",
+				);
+				const tooltip = page.locator(
+					`#${await sourceButton.getAttribute("aria-describedby")}`,
+				);
+				await expect(tooltip).toHaveText("Source : INSEE.");
+				await expect(tooltip).not.toHaveClass(/fr-tooltip--shown/);
+
+				await sourceButton.click();
+				await expect(tooltip).toHaveClass(/fr-tooltip--shown/);
+			});
 		});
 
 		test.describe("after completion (démarche_completed, not subject)", () => {
@@ -307,6 +333,7 @@ test.describe("Declaration process panel", () => {
 				).toBeVisible();
 				await expect(panel.getByText(STEP2_TITLE)).toBeVisible();
 				await expect(panel.getByText(STEP3_TITLE)).toHaveCount(0);
+				await expect(bannerSourceButton(page)).toHaveCount(0);
 			});
 		});
 

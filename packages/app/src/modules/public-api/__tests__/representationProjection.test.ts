@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isPublicCompanyDiffusible } from "../projection";
 import {
+	maskNonDiffusibleRepresentation,
 	type PublicRepresentationCompanySource,
 	type PublicRepresentationSource,
 	publicRepresentationColumns,
@@ -52,6 +53,8 @@ const MASKED_COMPANY_FIELDS = [
 	"nafLabel",
 ] as const;
 
+const MASKED_PUBLICATION_FIELDS = ["publishUrl", "publishModalities"] as const;
+
 const FORBIDDEN_KEYS = [
 	"verdict",
 	"isCompliant",
@@ -93,6 +96,66 @@ describe("publicRepresentationColumns", () => {
 		expect(Object.keys(publicRepresentationColumns).sort()).toEqual(
 			declarationFields,
 		);
+	});
+});
+
+describe("maskNonDiffusibleRepresentation", () => {
+	const representation = {
+		siren: "123456789",
+		year: 2026,
+		name: "Société Démo",
+		region: "Île-de-France",
+		departmentCode: "75",
+		departmentLabel: "Paris",
+		nafCode: "62.01Z",
+		nafLabel: "Programmation informatique",
+		executiveWomenPercent: 35.5,
+		publishDate: "2026-02-15",
+		publishUrl: "https://exemple.fr/egalite-professionnelle",
+		publishModalities: "Affichage dans les locaux",
+	};
+
+	it("returns a diffusible representation untouched", () => {
+		expect(maskNonDiffusibleRepresentation(representation, true)).toBe(
+			representation,
+		);
+	});
+
+	it("masks identity and location with the label and nulls the publication channel", () => {
+		expect(maskNonDiffusibleRepresentation(representation, false)).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
+			executiveWomenPercent: 35.5,
+			publishDate: "2026-02-15",
+			publishUrl: null,
+			publishModalities: null,
+		});
+	});
+
+	it("masks the address only when the representation carries one", () => {
+		expect(
+			maskNonDiffusibleRepresentation(representation, false),
+		).not.toHaveProperty("address");
+		expect(
+			maskNonDiffusibleRepresentation(
+				{ ...representation, address: null },
+				false,
+			).address,
+		).toBe("Non-diffusible");
+	});
+
+	it("does not mutate its input", () => {
+		const input = { ...representation };
+
+		maskNonDiffusibleRepresentation(input, false);
+
+		expect(input).toEqual(representation);
 	});
 });
 
@@ -159,17 +222,40 @@ describe("toPublicRepresentation", () => {
 		expect(nonDiffusible.executiveWomenPercent).toBe(35.5);
 		expect(nonDiffusible.memberWomenPercent).toBe(42);
 
-		const keptKeys = EXPECTED_DTO_KEYS.filter(
-			(key) =>
-				!MASKED_COMPANY_FIELDS.includes(
-					key as (typeof MASKED_COMPANY_FIELDS)[number],
-				),
-		);
+		const maskedKeys = new Set<string>([
+			...MASKED_COMPANY_FIELDS,
+			...MASKED_PUBLICATION_FIELDS,
+		]);
+		const keptKeys = EXPECTED_DTO_KEYS.filter((key) => !maskedKeys.has(key));
 		for (const key of keptKeys) {
 			expect(nonDiffusible[key as keyof typeof nonDiffusible]).toEqual(
 				diffusible[key as keyof typeof diffusible],
 			);
 		}
+	});
+
+	it("hides the publication url and modalities of a non-diffusible company", () => {
+		const declaration = {
+			...declarationFixture,
+			publishModalities: "Affichage dans les locaux",
+		};
+		const diffusible = toPublicRepresentation(declaration, companyFixture);
+		const nonDiffusible = toPublicRepresentation(declaration, {
+			...companyFixture,
+			statutDiffusion: "N",
+		});
+
+		expect(diffusible.publishUrl).toBe(
+			"https://exemple.fr/egalite-professionnelle",
+		);
+		expect(diffusible.publishModalities).toBe("Affichage dans les locaux");
+		for (const field of MASKED_PUBLICATION_FIELDS) {
+			expect(nonDiffusible[field]).toBeNull();
+		}
+		expect(nonDiffusible.publishDate).toBe("2026-02-15");
+		expect(() =>
+			publicRepresentationDTOSchema.parse(nonDiffusible),
+		).not.toThrow();
 	});
 
 	it("uses the status and the legacy address fallback for masking", () => {
@@ -186,12 +272,74 @@ describe("toPublicRepresentation", () => {
 			);
 		}
 
-		const legacyNonDiffusible = toPublicRepresentation(declarationFixture, {
-			...companyFixture,
-			statutDiffusion: null,
-			address: null,
-		});
+		const legacyNonDiffusible = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			{ ...companyFixture, statutDiffusion: null, address: null },
+		);
 		expect(legacyNonDiffusible.name).toBe("Non-diffusible");
+		expect(legacyNonDiffusible.address).toBe("Non-diffusible");
+		expect(legacyNonDiffusible.publishUrl).toBeNull();
+		expect(legacyNonDiffusible.publishModalities).toBeNull();
+	});
+
+	it("produces exactly this DTO for a non-diffusible company", () => {
+		const dto = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			{ ...companyFixture, statutDiffusion: "N" },
+		);
+
+		expect(dto).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Non-diffusible",
+			address: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			nafCode: "Non-diffusible",
+			nafLabel: "Non-diffusible",
+			referencePeriodStart: "2025-01-01",
+			referencePeriodEnd: "2025-12-31",
+			executiveWomenPercent: 35.5,
+			executiveMenPercent: 64.5,
+			notComputableReasonExecutives: null,
+			memberWomenPercent: 42,
+			memberMenPercent: 58,
+			notComputableReasonMembers: null,
+			publishDate: "2026-02-15",
+			publishUrl: null,
+			publishModalities: null,
+		});
+	});
+
+	it("produces exactly this DTO for a diffusible company", () => {
+		const dto = toPublicRepresentation(
+			{ ...declarationFixture, publishModalities: "Affichage dans les locaux" },
+			companyFixture,
+		);
+
+		expect(dto).toEqual({
+			siren: "123456789",
+			year: 2026,
+			name: "Société Démo",
+			address: "1 rue de la Paix, 75002 Paris",
+			region: "Île-de-France",
+			departmentCode: "75",
+			departmentLabel: "Paris",
+			nafCode: "62.01Z",
+			nafLabel: "Programmation informatique",
+			referencePeriodStart: "2025-01-01",
+			referencePeriodEnd: "2025-12-31",
+			executiveWomenPercent: 35.5,
+			executiveMenPercent: 64.5,
+			notComputableReasonExecutives: null,
+			memberWomenPercent: 42,
+			memberMenPercent: 58,
+			notComputableReasonMembers: null,
+			publishDate: "2026-02-15",
+			publishUrl: "https://exemple.fr/egalite-professionnelle",
+			publishModalities: "Affichage dans les locaux",
+		});
 	});
 
 	it("converts the numeric percentage strings to numbers", () => {

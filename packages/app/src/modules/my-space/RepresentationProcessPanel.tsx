@@ -4,6 +4,7 @@ import { useRef } from "react";
 
 import type { RepresentationCampaign } from "~/modules/domain";
 import {
+	formatCivilLongDate,
 	formatLongDate,
 	isRepresentationCampaignOpen,
 	REPRESENTATION_TARGET_INITIAL,
@@ -284,7 +285,7 @@ function Step2Row({
 								className="fr-icon-calendar-line fr-icon--sm"
 							/>
 							<p className="fr-text--sm fr-text-mention--grey fr-mb-0">
-								Échéance : {formatLongDate(deadline)}
+								Échéance : {formatCivilLongDate(deadline)}
 							</p>
 						</div>
 					</>
