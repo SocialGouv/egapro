@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 	GAP_PERSISTS_CONDITION,
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
@@ -1841,7 +1840,6 @@ describe("GET /api/v1/export/declarations", () => {
 					Etat_cible: "demarche_completed",
 					Libelle: STAGE_LABELS.completion,
 				},
-				FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 			]);
 		});
 

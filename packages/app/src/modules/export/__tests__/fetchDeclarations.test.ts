@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import type { DeclarationFsmStatus } from "~/modules/domain";
+import type {
+	CompliancePathValue,
+	DeclarationFsmStatus,
+} from "~/modules/domain";
 import type { CseRow, IndicatorGEntry } from "../fetchDeclarations";
 import {
 	assembleDeclaration,
@@ -1660,8 +1663,12 @@ describe("assembleDeclaration — compliance flags", () => {
 
 describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 	// baseRow narrows status to its own literal; these cases walk the whole FSM.
-	type RowOverrides = Omit<Partial<typeof baseRow>, "status"> & {
+	type RowOverrides = Omit<
+		Partial<typeof baseRow>,
+		"status" | "firstDeclarationPathChoice"
+	> & {
 		status?: DeclarationFsmStatus;
+		firstDeclarationPathChoice?: CompliancePathValue | null;
 	};
 
 	function rowWith(overrides: RowOverrides) {
@@ -1804,7 +1811,6 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 				Etat_cible: "demarche_completed",
 				Libelle: STAGE_LABELS.completion,
 			},
-			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 		]);
 		expect(result.Parcours.Annulee).toBe(false);
 	});
@@ -1819,8 +1825,24 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 		// The engine still accepts the action (a company may gain a CSE after
 		// completing), but an unrequired opinion is not an expected next step.
 		expect(result.Parcours.Avis_CSE_requis).toBe(false);
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+	});
+
+	it("advertises the formal-notice deposit on a completed démarche reached through a justification", () => {
+		const result = assembleDeclaration(
+			rowWith({
+				status: "demarche_completed",
+				cseRequired: false,
+				firstDeclarationPathChoice: "justify",
+			}),
+			[],
+			[],
+		);
+		const { Condition: _unconditional, ...unconditionalStep } =
+			FORMAL_NOTICE_JOINT_EVALUATION_STEP;
+
 		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([
-			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
+			unconditionalStep,
 		]);
 	});
 

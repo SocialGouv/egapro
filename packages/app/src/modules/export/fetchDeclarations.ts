@@ -462,6 +462,8 @@ export function assembleDeclaration(
 				status: row.status,
 				rulesVersion: row.rulesVersion,
 				cseRequired: row.cseRequired,
+				firstDeclarationPathChoice: row.firstDeclarationPathChoice,
+				secondDeclarationPathChoice: row.secondDeclarationPathChoice,
 				cancelled,
 			}),
 		},

@@ -28,6 +28,8 @@ function stepsFor(overrides: Partial<PayloadInput> = {}) {
 		status: "awaiting_compliance_path_choice",
 		rulesVersion: "2027.1",
 		cseRequired: true,
+		firstDeclarationPathChoice: null,
+		secondDeclarationPathChoice: null,
 		cancelled: false,
 		...overrides,
 	});
@@ -130,8 +132,26 @@ describe("buildNextStepsPayload — ruleset 2027.1", () => {
 				Etat_cible: "demarche_completed",
 				Libelle: STAGE_LABELS.completion,
 			},
-			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 		]);
+	});
+
+	it("advertises the formal-notice deposit on a completed démarche only after a justification", () => {
+		const justified = stepsFor({
+			status: "demarche_completed",
+			firstDeclarationPathChoice: "justify",
+		});
+		const corrected = stepsFor({
+			status: "demarche_completed",
+			firstDeclarationPathChoice: "corrective_action",
+		});
+
+		expect(justified).toContainEqual(FORMAL_NOTICE_JOINT_EVALUATION_STEP);
+		expect(corrected).not.toContainEqual(
+			expect.objectContaining({
+				Identifiant_transition:
+					FORMAL_NOTICE_JOINT_EVALUATION_STEP.Identifiant_transition,
+			}),
+		);
 	});
 
 	it("renders a composite residual with a parenthesised composite child and a bare leaf", () => {
