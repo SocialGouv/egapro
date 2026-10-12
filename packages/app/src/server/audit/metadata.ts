@@ -37,12 +37,15 @@ type MetadataField =
 	| "siren"
 	| "flowType"
 	| "s3Cleanup"
+	| "virusName"
 	| "roles"
 	| "publicAgentRequired"
 	| "reason";
 
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const CLAMAV_SIGNATURE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:+/@-]{0,254}$/;
 
 const RECEIPT_TYPES = new Set([
 	"declaration_confirmation",
@@ -158,11 +161,17 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY]: ["siren"],
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
-	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType", "s3Cleanup"],
+	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+		"virusName",
+	],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
 		"fileId",
 		"flowType",
 		"s3Cleanup",
+		"virusName",
 	],
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: ["fileId"],
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: ["fileId"],
@@ -275,6 +284,10 @@ function validValue(
 				: undefined;
 		case "s3Cleanup":
 			return value === "ok" || value === "failed" ? value : undefined;
+		case "virusName":
+			return typeof value === "string" && CLAMAV_SIGNATURE_PATTERN.test(value)
+				? value
+				: undefined;
 		case "reason":
 			return value === "siret_changed" ||
 				value === "siret_missing" ||
