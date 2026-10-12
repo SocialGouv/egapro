@@ -7,6 +7,8 @@ export {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
+	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
 } from "./shared/adminMfa";
 // Campaign
@@ -241,6 +243,7 @@ export {
 	computeGapRatio,
 	computeTotal,
 	GAP_RATIO_DECIMALS,
+	gapFavoredSex,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -358,7 +361,12 @@ export {
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
 // SIREN utilities
-export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+export {
+	extractSiren,
+	formatSiren,
+	parseSiren,
+	parseStrictSiren,
+} from "./shared/siren";
 // Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {

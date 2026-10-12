@@ -38,9 +38,10 @@ spec:
                 - /bin/sh
                 - -ec
                 - |
+                  printf 'X-API-KEY: %s\n' "${DATA_GOUV_API_KEY}" | \
                   curl --request PUT \
                     "{{ .Values.global.dataGouv.apiUrl }}/datasets/{{ .Values.global.dataGouv.datasetId }}/resources/{{ .Values.global.dataGouv.resourceId }}/" \
-                    --header "X-API-KEY: ${DATA_GOUV_API_KEY}" \
+                    --header @- \
                     --header "Content-Type: application/json" \
                     --data '{"title":"Indicateurs EgaPro A à F","description":"Données publiques des indicateurs de rémunération A à F, mises à jour quotidiennement.","format":"csv","url":"https://{{ .Values.global.host }}/api/public/declarations/export?format=csv"}' \
                     --connect-timeout 10 \

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mockEnv, mockHeaders } = vi.hoisted(() => ({
 	mockEnv: {
 		ADMIN_EMAILS: "agent@example.fr",
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true as boolean,
 		EGAPRO_E2E_ADMIN_MFA: false as boolean,
 		EGAPRO_DEV_AUTH: false as boolean,
 		NODE_ENV: "production" as "development" | "test" | "production",
@@ -227,7 +228,19 @@ describe("auth config — E2E admin two-factor seam", () => {
 			const result = await signIn({ email: DECLARANT_EMAIL });
 
 			expect(result.isAdmin).toBe(false);
-			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mockLogAction).toHaveBeenCalledOnce();
+			expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+				action: "auth.login",
+				status: "success",
+				userId: "uuid-123",
+			});
+		});
+
+		it("grants no habilitation either to a listed account the seam dates but whose roles lack agent_public", async () => {
+			// The seam only stands in for the second factor; it never touches the roles claim.
+			const result = await signIn();
+
+			expect(result.isAdmin).toBe(false);
 		});
 
 		it("marks the audit row as a test seam rather than a real second factor", async () => {
@@ -237,7 +250,13 @@ describe("auth config — E2E admin two-factor seam", () => {
 				expect.objectContaining({
 					action: "auth.admin_mfa",
 					status: "success",
-					metadata: { acr: "eidas1", authTime: NOW_SECONDS, testSeam: true },
+					metadata: {
+						acr: "eidas1",
+						authTime: NOW_SECONDS,
+						roles: null,
+						publicAgentRequired: true,
+						testSeam: true,
+					},
 				}),
 			);
 		});
@@ -248,7 +267,12 @@ describe("auth config — E2E admin two-factor seam", () => {
 			const [entry] = mockLogAction.mock.calls[0] as [
 				{ metadata: Record<string, unknown> },
 			];
-			expect(Object.keys(entry.metadata).sort()).toEqual(["acr", "authTime"]);
+			expect(Object.keys(entry.metadata).sort()).toEqual([
+				"acr",
+				"authTime",
+				"publicAgentRequired",
+				"roles",
+			]);
 		});
 	});
 });

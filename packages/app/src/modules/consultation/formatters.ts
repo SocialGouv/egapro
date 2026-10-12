@@ -2,6 +2,8 @@ import {
 	ADDRESS_ROW_LABEL,
 	type CompanyLocationRow,
 	companyLocationRow,
+	gapFavoredSex,
+	gapRatioToPercent,
 	percentageOf,
 } from "~/modules/domain";
 import { NON_DIFFUSIBLE_LABEL } from "~/modules/public-api/constants";
@@ -94,7 +96,10 @@ export type GapDirection = {
  */
 export function gapDirection(ratio: number | null): GapDirection {
 	if (ratio === null) return { prefix: "Donnée non disponible", emphasis: "" };
-	if (ratio > 0) return { prefix: "Écart en faveur des ", emphasis: "hommes" };
-	if (ratio < 0) return { prefix: "Écart en faveur des ", emphasis: "femmes" };
+	const favoredSex = gapFavoredSex(gapRatioToPercent(ratio));
+	if (favoredSex === "men")
+		return { prefix: "Écart en faveur des ", emphasis: "hommes" };
+	if (favoredSex === "women")
+		return { prefix: "Écart en faveur des ", emphasis: "femmes" };
 	return { prefix: "Aucun écart constaté", emphasis: "" };
 }
