@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_PREFILL_PDF,
 	CSE_OPINION,
 	LAST_REMUNERATION_STEP,
 	MY_SPACE,
@@ -515,15 +516,25 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			const panel = await openDocumentsPanel(page);
 
 			await expect(documentsTrigger(page)).toHaveText("Documents (1)");
-			await expect(
-				panel.getByRole("link", { name: PREFILL_TITLE }),
-			).toBeVisible();
+
+			const prefillHref = `${API_PREFILL_PDF}?year=${CURRENT_YEAR}`;
+			const prefillLink = panel.getByRole("link", { name: PREFILL_TITLE });
+
+			await expect(prefillLink).toBeVisible();
+			await expect(prefillLink).toHaveAttribute("href", prefillHref);
 			await expect(
 				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
 			).toHaveCount(0);
 			await expect(
 				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
 			).toHaveCount(0);
+
+			// The route unit test mocks the DB and the renderer: only here does a real GIP row get rendered.
+			const response = await page.request.get(prefillHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${prefillHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 	});
 });
