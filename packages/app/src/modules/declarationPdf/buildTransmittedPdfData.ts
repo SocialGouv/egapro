@@ -36,6 +36,19 @@ export type TransmittedPdfData = {
 	formalNoticeJointEvaluationFile: TransmittedPdfFile | null;
 };
 
+function selectFilesOfType(
+	declarationId: string,
+	type: (typeof files.$inferSelect)["type"],
+) {
+	return db
+		.select({
+			fileName: files.fileName,
+			uploadedAt: files.uploadedAt,
+		})
+		.from(files)
+		.where(and(eq(files.declarationId, declarationId), eq(files.type, type)));
+}
+
 export async function buildTransmittedPdfData(
 	siren: string,
 	year: number,
@@ -72,44 +85,11 @@ export async function buildTransmittedPdfData(
 				})
 				.from(cseOpinions)
 				.where(eq(cseOpinions.declarationId, declaration.id)),
-			db
-				.select({
-					fileName: files.fileName,
-					uploadedAt: files.uploadedAt,
-				})
-				.from(files)
-				.where(
-					and(
-						eq(files.declarationId, declaration.id),
-						eq(files.type, "cse_opinion"),
-					),
-				),
-			db
-				.select({
-					fileName: files.fileName,
-					uploadedAt: files.uploadedAt,
-				})
-				.from(files)
-				.where(
-					and(
-						eq(files.declarationId, declaration.id),
-						eq(files.type, "joint_evaluation"),
-					),
-				)
-				.limit(1),
-			db
-				.select({
-					fileName: files.fileName,
-					uploadedAt: files.uploadedAt,
-				})
-				.from(files)
-				.where(
-					and(
-						eq(files.declarationId, declaration.id),
-						eq(files.type, "formal_notice_joint_evaluation"),
-					),
-				)
-				.limit(1),
+			selectFilesOfType(declaration.id, "cse_opinion"),
+			selectFilesOfType(declaration.id, "joint_evaluation").limit(1),
+			selectFilesOfType(declaration.id, "formal_notice_joint_evaluation").limit(
+				1,
+			),
 		]);
 
 	return {
