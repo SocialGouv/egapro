@@ -5,7 +5,7 @@ import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/
 import path from "path";
 
 let initialized = false;
-const logo = path.resolve("./public/logo-ministere.generated.png");
+const logo = path.resolve("./public/logo-ministere.png");
 
 if (!initialized) {
   initialized = true;
@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
   },
   logo: {
     maxWidth: "33mm",
-    marginLeft: "-2.3mm",
   },
   title: {
     marginLeft: "2mm",
@@ -154,14 +153,12 @@ export const BaseReceiptTemplate = ({
                     <Text>{row.value ?? "-"}</Text>
                   </View>
                 ) : (
-                  <>
-                    <View key={`section-${sectionIdx}-row-${rowIdx}`} style={styles.sectionRow}>
-                      <Text style={styles.sectionRowKey}>{row.key}</Text>
-                      <Text wrap hyphenationCallback={string => [string]} style={styles.sectionRowValue}>
-                        {row.value ?? "-"}
-                      </Text>
-                    </View>
-                  </>
+                  <View key={`section-${sectionIdx}-row-${rowIdx}`} style={styles.sectionRow}>
+                    <Text style={styles.sectionRowKey}>{row.key}</Text>
+                    <Text wrap hyphenationCallback={string => [string]} style={styles.sectionRowValue}>
+                      {row.value ?? "-"}
+                    </Text>
+                  </View>
                 ),
               )}
             </View>

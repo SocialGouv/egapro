@@ -5,6 +5,6 @@ describe("mail ministry branding", () => {
     const template = login_sendVerificationUrl("https://egapro.test/verify");
 
     expect(template.html).toContain('alt="Ministère du Travail et des Solidarités"');
-    expect(template.html).toContain("/logo-ministere.generated.png");
+    expect(template.html).toContain("/logo-ministere.png");
   });
 });
