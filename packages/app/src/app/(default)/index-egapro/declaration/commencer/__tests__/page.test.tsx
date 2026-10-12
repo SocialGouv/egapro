@@ -90,7 +90,16 @@ describe("CommencerPage", () => {
 
     expect(screen.getByTestId("stepper")).toHaveTextContent("commencer");
     expect(screen.getByTestId("form")).toBeInTheDocument();
-    expect(screen.getByText(/Si vous déclarez votre index en tant qu'unité économique et sociale/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/vous devez transmettre une seule déclaration\. L'entreprise qui réalise la démarche/),
+    ).toBeInTheDocument();
+    expect(screen.getByText("déclaration au titre d'une unité économique et sociale (UES)").tagName).toBe("STRONG");
+    expect(screen.queryByText(/visualiser ou modifier/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Vous devez déclarer pour d'autres entreprises/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "votre profil ProConnect" })).toHaveAttribute(
+      "href",
+      "https://identite.proconnect.gouv.fr/users/start-sign-in",
+    );
   });
 
   it("should render form for staff users even without companies", async () => {

@@ -51,15 +51,14 @@ describe("RepresentationEquilibree", () => {
     });
 
     // Timeline sections
-    expect(screen.getByText("À compter de 2023")).toBeInTheDocument();
-    expect(
-      screen.getByText(/les entreprises devront publier et déclarer leurs écarts éventuels/, { exact: false }),
-    ).toBeInTheDocument();
+    expect(screen.queryByText("À compter de 2023")).not.toBeInTheDocument();
+    expect(screen.queryByText(/les entreprises devront publier/)).not.toBeInTheDocument();
 
     expect(screen.getByText("À compter du 1er mars 2026")).toBeInTheDocument();
     expect(
-      screen.getByText(/elles devront atteindre un objectif de 30% de femmes et d’hommes/, { exact: false }),
+      screen.getByText(/les entreprises doivent atteindre un objectif de 30% de femmes et d’hommes/, { exact: false }),
     ).toBeInTheDocument();
+    expect(screen.getByText(/doivent définir des mesures adéquates/, { exact: false })).toBeInTheDocument();
 
     expect(screen.getByText("À compter du 1er mars 2029")).toBeInTheDocument();
     expect(

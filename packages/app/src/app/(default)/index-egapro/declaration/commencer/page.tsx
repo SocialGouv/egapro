@@ -2,6 +2,7 @@ import { authConfig } from "@api/core-domain/infra/auth/config";
 import { fr } from "@codegouvfr/react-dsfr";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 import { config } from "@common/config";
+import { OtherCompaniesNotice } from "@components/OtherCompaniesNotice";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -73,12 +74,12 @@ const CommencerPage = async () => {
         small={true}
         description={
           <>
-            Si vous déclarez votre index en tant qu'unité économique et sociale (UES), vous devez effectuer une seule
-            déclaration et l'entreprise déclarant pour le compte de l'UES doit être celle ayant effectué la déclaration
-            les années précédentes.
-            <span className="fr-mb-1w block" />
-            Si vous souhaitez visualiser ou modifier votre déclaration déjà transmise, veuillez saisir les informations
-            correspondantes à la déclaration.
+            <p className={fr.cx("fr-mb-2w")}>
+              Pour une <strong>déclaration au titre d'une unité économique et sociale (UES)</strong>, vous devez
+              transmettre une seule déclaration. L'entreprise qui réalise la démarche doit être la même que les années
+              précédentes afin de garantir le suivi de votre historique, sauf si celle-ci a fermé ou a quitté l'UES.
+            </p>
+            <OtherCompaniesNotice />
           </>
         }
         className={fr.cx("fr-mb-4w")}

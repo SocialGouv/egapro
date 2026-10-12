@@ -10,7 +10,7 @@ def departements():
 
 
 def naf():
-    return {"type": "string", "pattern": r"^\S+$"}
+    return {"type": "string", "pattern": r"^[0-9]{2}\.[0-9]{2}[A-Z](?![\s\S])"}
 
 
 def code_pays():

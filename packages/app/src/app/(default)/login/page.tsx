@@ -60,8 +60,8 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
             description={
               <>
                 <p>
-                  Egapro utilise le service d’identification ProConnect (anciennement MonComptePro) afin de garantir
-                  l’appartenance de ses utilisateurs aux entreprises déclarantes.
+                  Egapro utilise le service d’identification ProConnect afin de garantir l’appartenance de ses
+                  utilisateurs aux entreprises déclarantes.
                 </p>
                 <br />
                 <p>
@@ -73,25 +73,26 @@ const LoginPage = async ({ searchParams }: NextServerPageProps<never, "callbackU
                 <p>
                   <strong>
                     Les tiers déclarants (comptables...) ne sont pas autorisés à déclarer pour le compte de leur
-                    entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur
-                    Egapro.
+                    entreprise cliente. Cette dernière doit créer son propre compte ProConnect pour déclarer sur Egapro.
                   </strong>
                 </p>
                 <br />
                 <p className={"text-dsfr-error"}>
-                  Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre
-                  service informatique pour qu'il autorise les mails en provenance de ProConnect.
+                  Si vous utilisez une protection contre les spams (ex. MailInBlack), vous devez contacter votre service
+                  informatique pour qu'il autorise les mails en provenance de ProConnect.
                 </p>
                 <br />
                 <p className={"text-dsfr-error"}>
-                  Pour tout problème lié à ProConnect, vous devez contacter le support dédié via le centre d'aide{" "}
+                  Pour tout problème lié à ProConnect (création de compte, rattachement d'une entreprise, non réception
+                  du code de confirmation, etc.), vous devez contacter le support dédié via le centre d'aide{" "}
                   <Link href="https://proconnect.crisp.help/fr/" target={"_blank"}>
                     https://proconnect.crisp.help/fr/
                   </Link>
                 </p>
                 <br />
                 <p>
-                  Pour consulter l'aide,{" "}
+                  Pour consulter l'aide (comment s'identifier, comment rattacher une nouvelle entreprise à son compte,
+                  etc.),{" "}
                   <Link href={"/aide-proconnect"} target={"_blank"}>
                     cliquez ici
                   </Link>
