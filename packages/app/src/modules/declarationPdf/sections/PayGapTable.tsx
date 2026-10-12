@@ -1,8 +1,12 @@
 import { Text } from "@react-pdf/renderer";
+import type {
+	PayGapReferences,
+	Step2Data,
+} from "~/modules/declaration-remuneration";
 import type { GipGapReference } from "~/modules/domain";
 import { formatCurrency, resolveGap } from "~/modules/domain";
 import { styles } from "../recapPdfStyles";
-import { GapCell } from "./GapCell";
+import { GapCell, type GapCellVariant } from "./GapCell";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
 
@@ -14,7 +18,48 @@ type PayGapTableRow = {
 	reference?: GipGapReference;
 };
 
-function PayGapDataRow({ row }: { row: PayGapTableRow }) {
+export function step2PayGapRows({
+	step2Data,
+	step2Gaps,
+}: {
+	step2Data: Step2Data;
+	step2Gaps: PayGapReferences;
+}): PayGapTableRow[] {
+	return [
+		{
+			label: "Annuelle brute moyenne",
+			women: step2Data.indicatorAAnnualWomen,
+			men: step2Data.indicatorAAnnualMen,
+			reference: step2Gaps[0],
+		},
+		{
+			label: "Horaire brute moyenne",
+			women: step2Data.indicatorAHourlyWomen,
+			men: step2Data.indicatorAHourlyMen,
+			reference: step2Gaps[1],
+		},
+		{
+			label: "Annuelle brute médiane",
+			women: step2Data.indicatorCAnnualWomen,
+			men: step2Data.indicatorCAnnualMen,
+			reference: step2Gaps[2],
+		},
+		{
+			label: "Horaire brute médiane",
+			women: step2Data.indicatorCHourlyWomen,
+			men: step2Data.indicatorCHourlyMen,
+			reference: step2Gaps[3],
+		},
+	];
+}
+
+function PayGapDataRow({
+	row,
+	gapVariant,
+}: {
+	row: PayGapTableRow;
+	gapVariant?: GapCellVariant;
+}) {
 	return (
 		<Row>
 			<Cell bold text={row.label} width={PAY_TABLE.label} />
@@ -29,13 +74,22 @@ function PayGapDataRow({ row }: { row: PayGapTableRow }) {
 				width={PAY_TABLE.value}
 			/>
 			<Cell width={PAY_TABLE.gap}>
-				<GapCell gap={resolveGap(row.women, row.men, row.reference)} />
+				<GapCell
+					gap={resolveGap(row.women, row.men, row.reference)}
+					variant={gapVariant}
+				/>
 			</Cell>
 		</Row>
 	);
 }
 
-export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
+export function PayGapTable({
+	rows,
+	gapVariant,
+}: {
+	rows: PayGapTableRow[];
+	gapVariant?: GapCellVariant;
+}) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
 	if (allEmpty) {
 		return <Text style={styles.noData}>Aucune donnée renseignée.</Text>;
@@ -62,7 +116,7 @@ export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
 				/>
 			</Row>
 			{rows.map((row) => (
-				<PayGapDataRow key={row.label} row={row} />
+				<PayGapDataRow gapVariant={gapVariant} key={row.label} row={row} />
 			))}
 		</Table>
 	);

@@ -6,7 +6,6 @@ import {
 	formatCurrency,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
-import type { DeclarationPdfData } from "../types";
 import { SectionBanner, SubTitle } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
 import { QUARTILE_TABLE } from "./tableWidths";
@@ -160,7 +159,7 @@ function QuartileTable({
 	);
 }
 
-export function QuartileSection({ data }: { data: DeclarationPdfData }) {
+export function QuartileSection({ data }: { data: { step4Data: Step4Data } }) {
 	return (
 		<View>
 			<View wrap={false}>

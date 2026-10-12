@@ -1,18 +1,27 @@
 import { View } from "@react-pdf/renderer";
-import {
-	computeWorkforceTotal,
-	formatVariablePayProportion,
-} from "~/modules/domain";
-import type { DeclarationPdfData } from "../types";
+import type {
+	PayGapReferences,
+	Step3Data,
+} from "~/modules/declaration-remuneration";
+import { formatVariablePayProportion } from "~/modules/domain";
+import type { GapCellVariant } from "./GapCell";
 import { SectionBanner, SubTitle } from "./headings";
 import { PayGapTable } from "./PayGapTable";
 import { Cell, Row, Table } from "./tableParts";
 import { BENEFICIARY_TABLE } from "./tableWidths";
+import { formatHeadcount, formatHeadcountTotal } from "./WorkforceSection";
 
-function ProportionTable({ data }: { data: DeclarationPdfData }) {
+export type VariablePayData = {
+	totalWomen: number | null;
+	totalMen: number | null;
+	step3Data: Step3Data;
+	step3Gaps: PayGapReferences;
+};
+
+function ProportionTable({ data }: { data: VariablePayData }) {
 	const tWomen = data.totalWomen;
 	const tMen = data.totalMen;
-	const grandTotal = computeWorkforceTotal(tWomen, tMen);
+	const grandTotal = formatHeadcountTotal(tWomen, tMen);
 	const eWomen = Number.parseInt(data.step3Data.indicatorEWomen, 10);
 	const eMen = Number.parseInt(data.step3Data.indicatorEMen, 10);
 	return (
@@ -36,7 +45,7 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 				<Cell
 					align="right"
 					bold
-					text={String(tWomen)}
+					text={formatHeadcount(tWomen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
@@ -56,7 +65,7 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 				<Cell
 					align="right"
 					bold
-					text={String(tMen)}
+					text={formatHeadcount(tMen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
@@ -75,7 +84,13 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 	);
 }
 
-export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
+export function VariablePaySection({
+	data,
+	gapVariant,
+}: {
+	data: VariablePayData;
+	gapVariant?: GapCellVariant;
+}) {
 	const rows = [
 		{
 			label: "Annuelle brute moyenne",
@@ -107,7 +122,7 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 			<View wrap={false}>
 				<SectionBanner title="Écart de rémunération variable ou complémentaire" />
 				<SubTitle title="Rémunération variable ou complémentaire" />
-				<PayGapTable rows={rows} />
+				<PayGapTable gapVariant={gapVariant} rows={rows} />
 			</View>
 			<View wrap={false}>
 				<SubTitle title="Proportion de femmes et d'hommes bénéficiaires" />

@@ -1,19 +1,55 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { formatGap, gapLevel } from "~/modules/domain";
+import { GAP_FAVORED_SEX_MENTIONS } from "~/modules/declaration-remuneration";
+import {
+	formatGap,
+	gapFavoredSex,
+	gapLevel,
+	gapMagnitude,
+} from "~/modules/domain";
 
 import { styles } from "../recapPdfStyles";
 
-export function GapCell({ gap }: { gap: number | null }) {
+export type GapCellVariant = "signed" | "favoredSex";
+
+function HighBadge() {
+	return (
+		<View style={styles.badge}>
+			<Text style={styles.badgeText}>ÉLEVÉ</Text>
+		</View>
+	);
+}
+
+function FavoredSexGap({ gap }: { gap: number | null }) {
+	const favoredSex = gapFavoredSex(gap);
+	return (
+		<View>
+			<View style={styles.gapMagnitudeRow}>
+				<Text style={styles.gapMagnitude}>{formatGap(gapMagnitude(gap))}</Text>
+				{gapLevel(gap) === "high" ? <HighBadge /> : null}
+			</View>
+			{favoredSex ? (
+				<Text style={styles.gapFavoredSex}>
+					{GAP_FAVORED_SEX_MENTIONS[favoredSex]}
+				</Text>
+			) : null}
+		</View>
+	);
+}
+
+export function GapCell({
+	gap,
+	variant = "signed",
+}: {
+	gap: number | null;
+	variant?: GapCellVariant;
+}) {
+	if (variant === "favoredSex") return <FavoredSexGap gap={gap} />;
 	// No "faible" badge in the maquette — only "ÉLEVÉ", by absolute gap magnitude.
 	const isHigh = gapLevel(gap) === "high";
 	return (
 		<View style={styles.gapCell}>
-			{isHigh ? (
-				<View style={styles.badge}>
-					<Text style={styles.badgeText}>ÉLEVÉ</Text>
-				</View>
-			) : null}
+			{isHigh ? <HighBadge /> : null}
 			<Text style={styles.gapValue}>{formatGap(gap)}</Text>
 		</View>
 	);
