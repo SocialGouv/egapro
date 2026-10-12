@@ -39,7 +39,7 @@ fi
 #
 # Env (defaults shown):
 #   EPIC_LOOP_BUDGET_E2E      15     USD max for the e2e-dev Opus run
-#   E2E_DEV_TIMEOUT           3600   seconds max (60 min — dev server + full E2E suite)
+#   E2E_DEV_TIMEOUT           5400   seconds max (90 min — dev server + full E2E suite + recette grid when grille_scope.sh says play)
 #   E2E_WORKTREE_INDEX        <EPIC_MAX_PARALLEL or 5>   docker port index for the dedicated worktree
 #   EPIC_MAX_PARALLEL         5      used only to derive the default E2E_WORKTREE_INDEX
 
@@ -62,12 +62,12 @@ AID="e2e-dev-${EPIC_N}"
 BRANCH="epic/${EPIC_N}"
 
 BUDGET="${EPIC_LOOP_BUDGET_E2E:-15}"
-AGENT_TIMEOUT="${E2E_DEV_TIMEOUT:-3600}"
+AGENT_TIMEOUT="${E2E_DEV_TIMEOUT:-5400}"
 INDEX="${E2E_WORKTREE_INDEX:-${EPIC_MAX_PARALLEL:-5}}"
-# The dev server must bind :3000 — the ProConnect test gateway only registers
-# the http://localhost:3000 callback; any other port 404s at the authorize step
-# and auth.setup.ts cannot authenticate the suite. The docker stack keeps its
-# index-derived ports.
+# The dev server must bind :3000 — Charon, the OAuth proxy carrying the test
+# ProConnect login, only registers the http://localhost:3000 callback; any
+# other port 404s at the authorize step and auth.setup.ts cannot authenticate
+# the suite. The docker stack keeps its index-derived ports.
 PORT=3000
 WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC_N}-e2e"
 
@@ -165,11 +165,11 @@ L'orchestrateur a déjà :
 
 Suivre STRICTEMENT le workflow de .claude/agents/e2e-dev/AGENT.md :
 1. Lire le diff intégré (origin/alpha...HEAD) + le body de l'epic et de ses sous-tickets.
-2. Démarrer le dev server sur le port ${PORT} (PORT déjà forcé dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Le port 3000 est imposé : la passerelle ProConnect de test n'enregistre que le callback :3000 — ne le change pas.
-3. Lancer la suite E2E actuelle (pnpm --filter app test:e2e), trier les échecs (régression vs évolution légitime).
+2. Démarrer le dev server sur le port ${PORT} (PORT déjà forcé dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Le port 3000 est imposé : Charon, le proxy OAuth qui porte la connexion ProConnect de test, n'enregistre que le callback :3000 — ne le change pas.
+3. Lancer la suite E2E actuelle (pnpm --filter app test:e2e), puis la grille de recette selon l'étape 3 de AGENT.md (scripts/orchestration/grille_scope.sh origin/alpha), et trier les échecs selon l'étape 4.
 4. Sur >=1 régression réelle : commenter \`e2e-dev:\` sur l'epic #${EPIC_N}, NE RIEN corriger côté source, retourner {\"status\":\"regression\",...}.
 5. Sinon : corriger les E2E en échec légitime, puis décider de la couverture de la feature (imbriquer de préférence dans un scénario global existant ; nouveau fichier seulement pour un parcours/page réellement nouveaux).
-6. Relancer la suite -> tout vert. typecheck + lint verts.
+6. Relancer ce qui a été joué à l'étape 3, selon l'étape 9 de AGENT.md -> tout vert. typecheck + lint verts.
 7. Commit (\`test(e2e): epic-${EPIC_N} — <résumé>\`) puis PUSH avec : \`git push origin HEAD:${BRANCH}\` (le worktree est détaché — pousse explicitement vers ${BRANCH}).
 8. Retourner le JSON final.
 
@@ -181,8 +181,8 @@ REGLES STRICTES :
 - N'ouvre ni ne merge aucune PR. Ne bouge pas le board.
 
 Format de retour OBLIGATOIRE — un seul de :
-  {\"status\":\"validated\",\"scope\":\"epic\",\"id\":${EPIC_N},\"tests\":{\"mode\":\"nested|new|none\",\"files\":[...]},\"regressions_fixed\":<K>,\"commit\":\"<sha>|none\"}
-  {\"status\":\"regression\",\"scope\":\"epic\",\"id\":${EPIC_N},\"regressions\":[{\"test\":\"...\",\"expected\":\"...\",\"got\":\"...\",\"suspect\":\"...\"}]}
+  {\"status\":\"validated\",\"scope\":\"epic\",\"id\":${EPIC_N},\"tests\":{\"mode\":\"nested|new|none\",\"files\":[...],\"grille\":\"played|skipped\"},\"regressions_fixed\":<K>,\"commit\":\"<sha>|none\"}
+  {\"status\":\"regression\",\"scope\":\"epic\",\"id\":${EPIC_N},\"regressions\":[{\"source\":\"suite|grille\",\"test\":\"...\",\"expected\":\"...\",\"got\":\"...\",\"suspect\":\"...\"}]}
   {\"status\":\"rate_limited\",\"id\":${EPIC_N},\"retry_in\":<sec>}
   {\"status\":\"failed\",\"id\":${EPIC_N},\"reason\":\"...\"}
 
@@ -223,7 +223,9 @@ if [ -z "$RESULT_TEXT" ]; then
     exit 1
 fi
 
-RESULT_JSON=$(echo "$RESULT_TEXT" | grep -oE '\{"status":"[^"]+"[^}]*\}' | tail -1)
+# The verdict nests objects (`tests`, `regressions[]`), so it is read as the last
+# line that parses as JSON and carries a `status` — never by regex.
+RESULT_JSON=$(printf '%s\n' "$RESULT_TEXT" | jq -Rc 'fromjson? | select(type == "object" and has("status"))' 2>/dev/null | tail -1)
 if [ -z "$RESULT_JSON" ]; then
     bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "no_status_json"
     echo "WARN e2e-dev: agent did not return a status JSON — continuing without E2E coverage" >&2
@@ -237,8 +239,9 @@ case "$STATUS" in
         MODE=$(echo "$RESULT_JSON" | jq -r '.tests.mode // "?"' 2>/dev/null || echo "?")
         COMMIT=$(echo "$RESULT_JSON" | jq -r '.commit // "none"' 2>/dev/null || echo "none")
         FIXED=$(echo "$RESULT_JSON" | jq -r '.regressions_fixed // 0' 2>/dev/null || echo "0")
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "epic=$EPIC_N mode=$MODE fixed=$FIXED commit=$COMMIT"
-        echo "OK e2e-dev epic=$EPIC_N: validated (mode=$MODE, ${FIXED} E2E corrigés, commit=$COMMIT)"
+        GRILLE=$(echo "$RESULT_JSON" | jq -r '.tests.grille // "?"' 2>/dev/null || echo "?")
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" VALIDATED "epic=$EPIC_N mode=$MODE grille=$GRILLE fixed=$FIXED commit=$COMMIT"
+        echo "OK e2e-dev epic=$EPIC_N: validated (mode=$MODE, grille=$GRILLE, ${FIXED} E2E corrigés, commit=$COMMIT)"
         exit 0
         ;;
     regression)
