@@ -461,7 +461,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). Le middleware tRPC applique une **allowlist de métadonnées** (`METADATA_ALLOWED_KEYS`) sur les procédures `representationDeclaration.*` : seule la clé `year` de l'input brut est conservée dans `audit.action_log.metadata`, pour ne jamais y faire fuiter les pourcentages ou le texte libre du brouillon.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -602,7 +602,7 @@ id, user_id, user_email, siren, action, category, status,
 ip_address, user_agent, metadata (jsonb), error_message, created_at
 ```
 
-Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement.
+Les nouvelles lignes conservent les identifiants `user_id` et `siren` lorsqu'ils sont nécessaires à l'attribution d'une action. `user_email` et `user_agent` ne sont plus enregistrés. L'adresse IP est tronquée (IPv4 /16, IPv6 /48), le message d'erreur est réduit à un code contrôlé et `metadata` ne garde que des champs explicitement autorisés et validés pour chaque action. Le worker de notifications et les scripts de purge appliquent la même règle à leurs écritures SQL directes. Le schéma reste compatible avec les colonnes historiques ; la purge par catégorie reste inchangée.
 
 ### 9.3 Catégories et rétention
 

@@ -1,11 +1,12 @@
 import "server-only";
 
 import { TRPCError } from "@trpc/server";
-import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
+import type { AuditActionKey } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import { parseSiren } from "~/modules/domain";
 import { emitActivityLog } from "./activityLog";
 import { logAction } from "./log";
+import { projectAuditMetadata } from "./metadata";
 import { buildRequestContext } from "./requestContext";
 
 /**
@@ -125,19 +126,6 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"mail.resendReceipt": AUDIT_ACTIONS.MAIL_RECEIPT_RESEND,
 };
 
-/**
- * Per-path metadata allowlist. When a path is listed here, only these input
- * keys are kept in `audit.action_log.metadata` — everything else on the raw
- * input (percentages, free-text fields, etc.) is dropped before sanitization.
- * Paths not listed keep the default behavior (full sanitized input).
- */
-const METADATA_ALLOWED_KEYS: Partial<Record<string, readonly string[]>> = {
-	"representationDeclaration.get": ["year"],
-	"representationDeclaration.saveDraft": ["year"],
-	"representationDeclaration.submit": ["year"],
-	"representationDeclaration.declareNotSubject": ["year"],
-};
-
 type SessionLike = {
 	user?: {
 		id?: string | null;
@@ -209,7 +197,6 @@ export async function auditMiddleware<TResult>({
 	const userId = ctx.session?.user?.id ?? null;
 	const siren = parseSiren(ctx.session?.user?.siret);
 	const rawInput = await readRawInput(getRawInput);
-	const metadata = action ? sanitizeMetadata(rawInput, path) : null;
 
 	const record = (failure: MiddlewareFailure | null): void => {
 		const status = failure ? "failure" : "success";
@@ -240,7 +227,9 @@ export async function auditMiddleware<TResult>({
 			userId,
 			userEmail: ctx.session?.user?.email ?? null,
 			siren,
-			metadata,
+			// Raw input is read before Zod validation. A failed call must not
+			// attest any caller-provided value as a fact in the audit row.
+			metadata: failure ? null : projectAuditMetadata(action, rawInput),
 			errorMessage: failure?.errorMessage,
 			ipAddress: requestContext.ipAddress,
 			userAgent: requestContext.userAgent,
@@ -260,91 +249,3 @@ export async function auditMiddleware<TResult>({
 		throw error;
 	}
 }
-
-/**
- * Convert raw tRPC input into an AuditMetadata object suitable for jsonb
- * storage. Recursively walks objects and arrays to drop `undefined` fields
- * and strip obviously-technical sensitive keys at every depth.
- *
- * When `path` has an entry in {@link METADATA_ALLOWED_KEYS}, only those top-level
- * input keys are kept before sanitization.
- *
- * Wraps non-object scalars into `{ value }` so the column can stay typed as
- * `Record<string, unknown>`.
- */
-function sanitizeMetadata(
-	rawInput: unknown,
-	path: string,
-): AuditMetadata | null {
-	if (rawInput === undefined || rawInput === null) return null;
-
-	const allowedKeys = METADATA_ALLOWED_KEYS[path];
-	const scopedInput =
-		allowedKeys && typeof rawInput === "object" && !Array.isArray(rawInput)
-			? Object.fromEntries(
-					allowedKeys
-						.filter((key) => key in (rawInput as Record<string, unknown>))
-						.map((key) => [key, (rawInput as Record<string, unknown>)[key]]),
-				)
-			: rawInput;
-
-	const sanitized = sanitizeValue(scopedInput);
-	if (sanitized === undefined) return null;
-
-	if (
-		typeof sanitized === "object" &&
-		sanitized !== null &&
-		!Array.isArray(sanitized)
-	) {
-		const obj = sanitized as AuditMetadata;
-		return Object.keys(obj).length > 0 ? obj : null;
-	}
-
-	return { value: sanitized as AuditMetadata[string] };
-}
-
-/**
- * Recursive helper for {@link sanitizeMetadata}: returns `undefined` for
- * dropped values, the value itself otherwise.
- */
-function sanitizeValue(value: unknown): unknown {
-	if (value === undefined) return undefined;
-	if (value === null) return null;
-
-	if (Array.isArray(value)) {
-		return value.map((entry) => sanitizeValue(entry));
-	}
-
-	if (typeof value === "object") {
-		const result: AuditMetadata = {};
-		for (const [key, child] of Object.entries(value as AuditMetadata)) {
-			if (child === undefined) continue;
-			if (SENSITIVE_KEYS.has(key.toLowerCase())) continue;
-			const sanitizedChild = sanitizeValue(child);
-			if (sanitizedChild === undefined) continue;
-			result[key] = sanitizedChild;
-		}
-		return result;
-	}
-
-	return value;
-}
-
-const SENSITIVE_KEYS = new Set([
-	"password",
-	"token",
-	"refresh_token",
-	"secret",
-	"client_secret",
-	"authorization",
-	"apikey",
-	"api_key",
-	"accesskey",
-	"access_key",
-	"private_key",
-	"data",
-	// Identity PII: the row already carries user_email, and audit-logging.md
-	// forbids duplicating PII that is not the email or the siren.
-	"firstname",
-	"lastname",
-]);

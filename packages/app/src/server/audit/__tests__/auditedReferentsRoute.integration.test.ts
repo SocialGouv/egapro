@@ -106,8 +106,8 @@ describe("audited referents route (real Postgres)", () => {
 			action: AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 			category: "public_search",
 			status: "success",
-			ip_address: "203.0.113.7",
-			user_agent: "IntegrationAgent",
+			ip_address: "203.0.0.0",
+			user_agent: null,
 		});
 		expect(rows[0]?.metadata).toEqual({ format: "json" });
 		expect(rows[0]?.duration_ms).toBeGreaterThanOrEqual(0);

@@ -531,7 +531,7 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 2. Catégorie dans `AUDIT_ACTION_CATEGORIES`
 3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers) ou appel direct `logAction(...)` (auth / cron)
 
-Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
+Les nouvelles lignes conservent `user_id` et `siren` lorsqu'ils servent à attribuer une action. Elles n'enregistrent plus `user_email` ni `user_agent` ; l'IP est tronquée, les erreurs sont codées et `metadata` est limité à des valeurs autorisées et validées par action. Les écritures SQL directes du worker de notifications et des crons suivent cette politique. Les journaux restent soumis aux durées de conservation ci-dessus.
 
 **Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
 

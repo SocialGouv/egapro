@@ -30,6 +30,7 @@ import { GET } from "../route";
 // A SIRET whose first 9 digits form the admin's own SIREN scope.
 const ADMIN_SIRET = "98765432100010";
 const ADMIN_SIREN = "987654321";
+const SUIT_FILE_ID = "6b3573f8-8723-45c9-98a0-641431843ddd";
 // A file belonging to a company the admin is not a referent of.
 const OTHER_SIREN_FILE = {
 	filePath: "123456789/2027/f.pdf",
@@ -47,8 +48,8 @@ function buildRequest(headers: Record<string, string> = {}): Request {
 	return new Request("http://localhost/api/v1/files/file-1", { headers });
 }
 
-function callGet(request: Request) {
-	return GET(request, { params: Promise.resolve({ fileId: "file-1" }) });
+function callGet(request: Request, fileId = "file-1") {
+	return GET(request, { params: Promise.resolve({ fileId }) });
 }
 
 function mockStream(body = "content") {
@@ -71,11 +72,11 @@ describe("GET /api/v1/files/:fileId", () => {
 		it("serves the file by id without consulting the session, regardless of caller", async () => {
 			mocks.fetchFileById.mockResolvedValue(OTHER_SIREN_FILE);
 
-			const response = await callGet(gatewayRequest());
+			const response = await callGet(gatewayRequest(), SUIT_FILE_ID);
 
 			expect(response.status).toBe(200);
 			expect(mocks.auth).not.toHaveBeenCalled();
-			expect(mocks.fetchFileById).toHaveBeenCalledWith("file-1");
+			expect(mocks.fetchFileById).toHaveBeenCalledWith(SUIT_FILE_ID);
 			expect(mocks.streamStoredFile).toHaveBeenCalledWith(
 				expect.objectContaining({
 					disposition: "attachment",
@@ -86,6 +87,7 @@ describe("GET /api/v1/files/:fileId", () => {
 				expect.objectContaining({
 					action: "export.api_files",
 					status: "success",
+					metadata: { fileId: SUIT_FILE_ID, fileName: "f.pdf" },
 				}),
 			);
 		});

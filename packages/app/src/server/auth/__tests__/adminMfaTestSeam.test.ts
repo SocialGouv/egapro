@@ -227,7 +227,12 @@ describe("auth config — E2E admin two-factor seam", () => {
 			const result = await signIn({ email: DECLARANT_EMAIL });
 
 			expect(result.isAdmin).toBe(false);
-			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mockLogAction).toHaveBeenCalledOnce();
+			expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+				action: "auth.login",
+				status: "success",
+				userId: "uuid-123",
+			});
 		});
 
 		it("marks the audit row as a test seam rather than a real second factor", async () => {
