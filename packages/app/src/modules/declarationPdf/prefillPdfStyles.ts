@@ -1,7 +1,6 @@
 import { StyleSheet } from "@react-pdf/renderer";
 
-import { styles } from "./recapPdfStyles";
-import type { PdfStyles } from "./sections/pdfStylesContext";
+import { type PdfStyles, styles } from "./recapPdfStyles";
 
 const TEXT_LINE_HEIGHT = "15pt";
 

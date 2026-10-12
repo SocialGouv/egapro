@@ -1,4 +1,4 @@
-import { StyleSheet } from "@react-pdf/renderer";
+import { StyleSheet, type Styles } from "@react-pdf/renderer";
 
 import { PDF_FONT_FAMILY } from "./pdfFonts";
 
@@ -261,3 +261,5 @@ export const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 });
+
+export type PdfStyles = Record<keyof typeof styles, Styles[string]>;

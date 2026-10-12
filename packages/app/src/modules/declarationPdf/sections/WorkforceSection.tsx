@@ -1,5 +1,6 @@
 import { View } from "@react-pdf/renderer";
 import { computeWorkforceTotal } from "~/modules/domain";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 import { SectionBanner } from "./headings";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
@@ -23,7 +24,13 @@ export function formatHeadcountTotal(
 	return String(computeWorkforceTotal(women, men));
 }
 
-export function WorkforceSection({ data }: { data: WorkforceCounts }) {
+export function WorkforceSection({
+	data,
+	sheet = styles,
+}: {
+	data: WorkforceCounts;
+	sheet?: PdfStyles;
+}) {
 	const rows = [
 		{
 			label: "Rémunération annuelle",
@@ -39,30 +46,41 @@ export function WorkforceSection({ data }: { data: WorkforceCounts }) {
 
 	return (
 		<View wrap={false}>
-			<SectionBanner title="Effectifs physiques pris en compte pour le calcul des indicateurs" />
-			<Table>
+			<SectionBanner
+				sheet={sheet}
+				title="Effectifs physiques pris en compte pour le calcul des indicateurs"
+			/>
+			<Table sheet={sheet}>
 				<Row>
-					<Cell header text="Nombre de salariés" width={PAY_TABLE.label} />
-					<Cell header text="Femmes" width={PAY_TABLE.value} />
-					<Cell header text="Hommes" width={PAY_TABLE.value} />
-					<Cell header text="Total" width={PAY_TABLE.total} />
+					<Cell
+						header
+						sheet={sheet}
+						text="Nombre de salariés"
+						width={PAY_TABLE.label}
+					/>
+					<Cell header sheet={sheet} text="Femmes" width={PAY_TABLE.value} />
+					<Cell header sheet={sheet} text="Hommes" width={PAY_TABLE.value} />
+					<Cell header sheet={sheet} text="Total" width={PAY_TABLE.total} />
 				</Row>
 				{rows.map((row) => (
 					<Row key={row.label}>
-						<Cell bold text={row.label} width={PAY_TABLE.label} />
+						<Cell bold sheet={sheet} text={row.label} width={PAY_TABLE.label} />
 						<Cell
 							align="right"
+							sheet={sheet}
 							text={formatHeadcount(row.women)}
 							width={PAY_TABLE.value}
 						/>
 						<Cell
 							align="right"
+							sheet={sheet}
 							text={formatHeadcount(row.men)}
 							width={PAY_TABLE.value}
 						/>
 						<Cell
 							align="right"
 							bold
+							sheet={sheet}
 							text={formatHeadcountTotal(row.women, row.men)}
 							width={PAY_TABLE.total}
 						/>

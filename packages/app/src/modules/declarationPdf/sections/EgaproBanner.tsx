@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { Image, Text, View } from "@react-pdf/renderer";
 
-import { usePdfStyles } from "./pdfStylesContext";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
 const PICTOGRAM_FILES = {
 	documentSignature: "document-icon.png",
@@ -23,19 +23,20 @@ function pictogramPath(pictogram: EgaproBannerPictogram): string {
 
 export function EgaproBanner({
 	pictogram = "documentSignature",
+	sheet = styles,
 }: {
 	pictogram?: EgaproBannerPictogram;
+	sheet?: PdfStyles;
 }) {
-	const styles = usePdfStyles();
 	return (
-		<View style={styles.banner}>
+		<View style={sheet.banner}>
 			<View>
-				<Text style={styles.bannerTitle}>Egapro</Text>
-				<Text style={styles.bannerSubtitle}>
+				<Text style={sheet.bannerTitle}>Egapro</Text>
+				<Text style={sheet.bannerSubtitle}>
 					Indicateurs d&apos;égalité professionnelle femmes-hommes
 				</Text>
 			</View>
-			<Image src={pictogramPath(pictogram)} style={styles.bannerIcon} />
+			<Image src={pictogramPath(pictogram)} style={sheet.bannerIcon} />
 		</View>
 	);
 }

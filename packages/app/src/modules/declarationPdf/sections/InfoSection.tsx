@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { usePdfStyles } from "./pdfStylesContext";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 import { normalizeSpaces } from "./tableParts";
 
 type InfoRow = {
@@ -11,27 +11,28 @@ type InfoRow = {
 export function InfoSection({
 	title,
 	rows,
+	sheet = styles,
 }: {
 	title: string;
 	rows: InfoRow[];
+	sheet?: PdfStyles;
 }) {
-	const styles = usePdfStyles();
 	return (
 		<View wrap={false}>
-			<View style={styles.sectionBanner}>
-				<Text style={styles.sectionBannerText}>{title}</Text>
+			<View style={sheet.sectionBanner}>
+				<Text style={sheet.sectionBannerText}>{title}</Text>
 			</View>
-			<View style={styles.infoBody}>
-				<View style={styles.infoLabelColumn}>
+			<View style={sheet.infoBody}>
+				<View style={sheet.infoLabelColumn}>
 					{rows.map((row) => (
-						<Text key={row.label} style={styles.infoLabel}>
+						<Text key={row.label} style={sheet.infoLabel}>
 							{row.label}
 						</Text>
 					))}
 				</View>
-				<View style={styles.infoValueColumn}>
+				<View style={sheet.infoValueColumn}>
 					{rows.map((row) => (
-						<Text key={row.label} style={styles.infoValue}>
+						<Text key={row.label} style={sheet.infoValue}>
 							{normalizeSpaces(row.value)}
 						</Text>
 					))}

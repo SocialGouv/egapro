@@ -1,18 +1,22 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { usePdfStyles } from "./pdfStylesContext";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
-export function SectionBanner({ title }: { title: string }) {
-	const styles = usePdfStyles();
+export function SectionBanner({
+	title,
+	sheet = styles,
+}: {
+	title: string;
+	sheet?: PdfStyles;
+}) {
 	return (
-		<View style={styles.sectionBanner}>
-			<Text style={styles.sectionBannerText}>{title}</Text>
+		<View style={sheet.sectionBanner}>
+			<Text style={sheet.sectionBannerText}>{title}</Text>
 		</View>
 	);
 }
 
 export function CategoryBanner({ title }: { title: string }) {
-	const styles = usePdfStyles();
 	return (
 		<View style={styles.categoryBanner}>
 			<Text style={styles.categoryBannerText}>{title}</Text>
@@ -21,7 +25,6 @@ export function CategoryBanner({ title }: { title: string }) {
 }
 
 export function SubTitle({ title }: { title: string }) {
-	const styles = usePdfStyles();
 	return (
 		<Text minPresenceAhead={40} style={styles.subTitle}>
 			{title}
