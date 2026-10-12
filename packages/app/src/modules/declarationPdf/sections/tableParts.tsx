@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 
-import { styles } from "../recapPdfStyles";
+import { usePdfStyles } from "./pdfStylesContext";
 
 type Align = "left" | "right";
 
@@ -12,6 +12,7 @@ export function normalizeSpaces(value: string): string {
 }
 
 export function Table({ children }: { children: ReactNode }) {
+	const styles = usePdfStyles();
 	return (
 		<View style={styles.table} wrap={false}>
 			{children}
@@ -20,6 +21,7 @@ export function Table({ children }: { children: ReactNode }) {
 }
 
 export function Row({ children }: { children: ReactNode }) {
+	const styles = usePdfStyles();
 	return <View style={styles.row}>{children}</View>;
 }
 
@@ -44,6 +46,7 @@ export function Cell({
 	hint,
 	children,
 }: CellProps) {
+	const styles = usePdfStyles();
 	const sizing = width !== undefined ? { width } : { flex: flex ?? 1 };
 	const textStyle = bold || header ? styles.cellTextBold : styles.cellText;
 	const cellStyle = header

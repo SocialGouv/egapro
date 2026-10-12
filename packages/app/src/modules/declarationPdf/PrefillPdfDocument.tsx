@@ -4,13 +4,14 @@ import { formatSiren } from "~/modules/domain";
 
 import type { PrefillPdfData } from "./buildPrefillPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
-import { styles } from "./recapPdfStyles";
+import { prefillLayout, prefillStyles as styles } from "./prefillPdfStyles";
 import { EgaproBanner } from "./sections/EgaproBanner";
 import { SectionBanner } from "./sections/headings";
 import { InfoSection } from "./sections/InfoSection";
 import { PayGapTable, step2PayGapRows } from "./sections/PayGapTable";
 import { PdfPageFooter } from "./sections/PdfPageFooter";
 import { PdfPageHeader } from "./sections/PdfPageHeader";
+import { PdfStylesContext } from "./sections/pdfStylesContext";
 import { QuartileSection } from "./sections/QuartileSection";
 import { VariablePaySection } from "./sections/VariablePaySection";
 import { WorkforceSection } from "./sections/WorkforceSection";
@@ -41,42 +42,59 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 
 	return (
 		<Document>
-			<Page size="A4" style={styles.page} wrap>
-				<PdfPageHeader />
-				<PdfPageFooter label={`${title} - SIREN ${formatSiren(data.siren)}`} />
-
-				<EgaproBanner pictogram="document" />
-
-				<View style={styles.content}>
-					<View style={styles.titleBlock}>
-						<Text style={styles.title}>{title}</Text>
-						<Text style={styles.titleDate}>
-							Source : DSN (Déclarations Sociales Nominatives)
-						</Text>
-					</View>
-
-					<InfoSection
-						rows={companyRows(data)}
-						title="Informations entreprise"
+			<PdfStylesContext.Provider value={styles}>
+				<Page size="A4" style={styles.page} wrap>
+					<PdfPageHeader />
+					<PdfPageFooter
+						label={`${title} - SIREN ${formatSiren(data.siren)}`}
 					/>
-					{data.referencePeriod !== null && (
-						<InfoSection
-							rows={[
-								{ label: "Période de référence", value: data.referencePeriod },
-							]}
-							title="Information calcul"
-						/>
-					)}
 
-					<WorkforceSection data={data} />
-					<View wrap={false}>
-						<SectionBanner title="Écart de rémunération" />
-						<PayGapTable gapVariant="favoredSex" rows={step2PayGapRows(data)} />
+					<EgaproBanner pictogram="document" />
+
+					<View style={styles.content}>
+						<View style={styles.titleBlock}>
+							<Text style={styles.title}>{title}</Text>
+							<Text style={styles.titleDate}>
+								Source : DSN (Déclarations Sociales Nominatives)
+							</Text>
+						</View>
+
+						<InfoSection
+							rows={companyRows(data)}
+							title="Informations entreprise"
+						/>
+						<View style={prefillLayout.sectionGap} />
+						{data.referencePeriod !== null && (
+							<>
+								<InfoSection
+									rows={[
+										{
+											label: "Période de référence",
+											value: data.referencePeriod,
+										},
+									]}
+									title="Information calcul"
+								/>
+								<View style={prefillLayout.sectionGap} />
+							</>
+						)}
+
+						<WorkforceSection data={data} />
+						<View style={prefillLayout.sectionGap} />
+						<View wrap={false}>
+							<SectionBanner title="Écart de rémunération" />
+							<PayGapTable
+								gapVariant="favoredSex"
+								rows={step2PayGapRows(data)}
+							/>
+						</View>
+						<View style={prefillLayout.sectionGap} />
+						<VariablePaySection data={data} gapVariant="favoredSex" />
+						<View style={prefillLayout.sectionGap} />
+						<QuartileSection data={data} />
 					</View>
-					<VariablePaySection data={data} gapVariant="favoredSex" />
-					<QuartileSection data={data} />
-				</View>
-			</Page>
+				</Page>
+			</PdfStylesContext.Provider>
 		</Document>
 	);
 }

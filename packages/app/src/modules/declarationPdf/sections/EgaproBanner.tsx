@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { Image, Text, View } from "@react-pdf/renderer";
 
-import { styles } from "../recapPdfStyles";
+import { usePdfStyles } from "./pdfStylesContext";
 
 const PICTOGRAM_FILES = {
 	documentSignature: "document-icon.png",
@@ -26,6 +26,7 @@ export function EgaproBanner({
 }: {
 	pictogram?: EgaproBannerPictogram;
 }) {
+	const styles = usePdfStyles();
 	return (
 		<View style={styles.banner}>
 			<View>

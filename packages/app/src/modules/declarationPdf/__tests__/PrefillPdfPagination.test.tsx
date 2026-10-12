@@ -21,7 +21,7 @@ type LayoutNode = {
 	children?: LayoutNode[];
 };
 
-type PageText = { text: string; bottom: number };
+type PageText = { text: string; top: number; bottom: number };
 
 function textOf(node: LayoutNode): string {
 	if (node.type === "TEXT_INSTANCE") return node.value ?? "";
@@ -35,7 +35,11 @@ function collectPageTexts(
 ): void {
 	const top = parentTop + (node.box?.top ?? 0);
 	if (node.type === "TEXT" && node.box?.height !== undefined) {
-		out.push({ text: textOf(node).trim(), bottom: top + node.box.height });
+		out.push({
+			text: textOf(node).trim(),
+			top,
+			bottom: top + node.box.height,
+		});
 	}
 	for (const child of node.children ?? []) collectPageTexts(child, top, out);
 }
@@ -91,5 +95,60 @@ describe("PrefillPdfDocument pagination", () => {
 		});
 
 		expect(orphans).toEqual([]);
+	}, 30_000);
+
+	it("lays each block out at the maquette's vertical position", async () => {
+		const pages = await renderLayout();
+		// [page, text, top in pt] read off the Figma frames of the three pages.
+		const expected: [number, string, number][] = [
+			[
+				0,
+				"Données préremplies : Déclaration des indicateurs de rémunération 2027",
+				170,
+			],
+			[0, "Source : DSN (Déclarations Sociales Nominatives)", 200],
+			[0, "Informations entreprise", 229],
+			[0, "Raison sociale", 254],
+			[0, "Existence d'un CSE", 349],
+			[0, "Information calcul", 384],
+			[0, "Période de référence", 409],
+			[
+				0,
+				"Effectifs physiques pris en compte pour le calcul des indicateurs",
+				444,
+			],
+			[0, "Rémunération horaire", 521.5],
+			[0, "Écart de rémunération", 555],
+			[0, "Horaire brute médiane", 743.5],
+			[1, "Écart de rémunération variable ou complémentaire", 110],
+			[1, "Rémunération variable ou complémentaire", 135],
+			[1, "Proportion de femmes et d'hommes bénéficiaires", 348],
+			[
+				1,
+				"Proportion de femmes et d'hommes dans chaque quartile de rémunération",
+				465,
+			],
+			[1, "Rémunération annuelle brute moyenne", 490],
+			[2, "Rémunération horaire brute moyenne", 106],
+		];
+
+		const drifts = expected.flatMap(([page, text, top]) => {
+			const found = pages[page]?.find((entry) => entry.text === text);
+			const drift = found === undefined ? Number.NaN : found.top - top;
+			return Math.abs(drift) <= 1 ? [] : [{ page, text, drift }];
+		});
+
+		expect(drifts).toEqual([]);
+	}, 30_000);
+
+	it("gives every printed text, page counter included, a visible height", async () => {
+		const pages = await renderLayout();
+
+		const collapsed = pages
+			.flat()
+			.filter((entry) => entry.bottom <= entry.top)
+			.map((entry) => entry.text);
+
+		expect(collapsed).toEqual([]);
 	}, 30_000);
 });

@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { styles } from "../recapPdfStyles";
+import { usePdfStyles } from "./pdfStylesContext";
 import { normalizeSpaces } from "./tableParts";
 
 type InfoRow = {
@@ -15,6 +15,7 @@ export function InfoSection({
 	title: string;
 	rows: InfoRow[];
 }) {
+	const styles = usePdfStyles();
 	return (
 		<View wrap={false}>
 			<View style={styles.sectionBanner}>
