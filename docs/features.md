@@ -360,6 +360,8 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - `/donnees-personnelles` — politique de confidentialité (RGPD)
 - `/mentions-legales` — éditeur, hébergeur, sécurité
+- `/cgu` — conditions générales d'utilisation, version en vigueur
+- `/cgu/[version]` — archive d'une version antérieure des CGU
 - `/declaration-accessibilite` — déclaration RGAA + résultats des audits
 - `/gestion-des-cookies` — types de cookies, mécanismes d'opt-out
 - `/plan-du-site` — index des routes publiques
@@ -371,6 +373,15 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
 - L'accessibilité est auditée par ultra11y (agent `rgaa-auditor` + workflow `a11y.yaml`) ; Lighthouse en rapporte un score indicatif, en avertissement.
 - La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §13.8).
+- Les CGU ont un historique de versions (`~/modules/legal/TermsOfUsePage/termsOfUseVersions.ts`) : chaque entrée associe une date d'entrée en vigueur ISO à son texte figé. La première entrée est la version en vigueur, servie sur `/cgu` ; les suivantes sont des archives, servies sur `/cgu/AAAA-MM-JJ`. `/cgu/[version]` redirige vers `/cgu` pour la date en vigueur et répond 404 pour une date inconnue.
+
+**Publier une nouvelle version des CGU** :
+
+1. Copier le composant de la version en vigueur (`TermsOfUsePage/versions/TermsOfUse<AAAAMMJJ>.tsx`) sous un nouveau nom portant la date de la nouvelle version.
+2. Modifier le texte du nouveau composant.
+3. Ajouter son entrée en tête du registre `termsOfUseVersions.ts`, avec sa date d'entrée en vigueur.
+
+Une version publiée ne se modifie jamais : son composant est figé dès qu'une version plus récente existe.
 
 ---
 

@@ -41,6 +41,16 @@ const config = {
 				destination: "/api/public/declarations/:siren/:year",
 				permanent: true,
 			},
+			{
+				source: "/politique-de-confidentialite",
+				destination: "/donnees-personnelles",
+				permanent: true,
+			},
+			{
+				source: "/politique-de-confidentialite-v2",
+				destination: "/donnees-personnelles",
+				permanent: true,
+			},
 		];
 	},
 	cacheHandler: fileURLToPath(new URL("./cache-handler.cjs", import.meta.url)),
