@@ -498,7 +498,7 @@ describe("Step5EmployeeCategories", () => {
 			"50",
 		);
 
-		expect(screen.getByText("150 €")).toBeInTheDocument();
+		expect(screen.getByText("150,00 €")).toBeInTheDocument();
 	});
 
 	it("shows SavedIndicator when initial data exists", () => {

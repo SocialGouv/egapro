@@ -267,7 +267,7 @@ describe("CategoryRecapTable", () => {
 		expect(
 			screen.queryByText("Aucun écart à calculer"),
 		).not.toBeInTheDocument();
-		expect(screen.getAllByText("30 000 €")).toHaveLength(2);
+		expect(screen.getAllByText("30 000,00 €")).toHaveLength(2);
 	});
 
 	it("flags an 'élevé' badge when a salary gap reaches the 5% threshold", () => {

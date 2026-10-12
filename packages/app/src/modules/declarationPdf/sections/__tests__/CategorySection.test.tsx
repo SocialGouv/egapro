@@ -137,9 +137,9 @@ describe("CategorySection", () => {
 		// Effectif total: 10 + 15 = 25
 		expect(screen.getByText("25")).toBeInTheDocument();
 		// Women pay total: 40000 + 1000 = 41 000 €
-		expect(screen.getByText("41 000 €")).toBeInTheDocument();
+		expect(screen.getByText("41 000,00 €")).toBeInTheDocument();
 		// Men pay total: 42000 + 2000 = 44 000 €
-		expect(screen.getByText("44 000 €")).toBeInTheDocument();
+		expect(screen.getByText("44 000,00 €")).toBeInTheDocument();
 	});
 
 	it("shows a dash for a missing hourly headcount, never an invented 0 (#4368)", () => {
@@ -225,6 +225,6 @@ describe("CategorySection", () => {
 		expect(
 			screen.queryByText("Aucun écart à calculer"),
 		).not.toBeInTheDocument();
-		expect(screen.getAllByText("40 000 €")).toHaveLength(2);
+		expect(screen.getAllByText("40 000,00 €")).toHaveLength(2);
 	});
 });

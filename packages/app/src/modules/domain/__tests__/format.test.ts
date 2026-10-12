@@ -97,11 +97,24 @@ describe("formatGapCompact", () => {
 
 describe("formatCurrency", () => {
 	it("formats a number with euro sign", () => {
-		expect(formatCurrency("1234.5")).toMatch(/1[\s\u202f]234,5 €/);
+		expect(formatCurrency("1234.5")).toMatch(/^1[\s\u202f]234,50 €$/);
+	});
+
+	it("always writes exactly two decimals", () => {
+		expect(formatCurrency("35050.21")).toMatch(/^35[\s\u202f]050,21 €$/);
+		expect(formatCurrency("34110.90")).toMatch(/^34[\s\u202f]110,90 €$/);
+		expect(formatCurrency("34110.9")).toMatch(/^34[\s\u202f]110,90 €$/);
+		expect(formatCurrency("1200")).toMatch(/^1[\s\u202f]200,00 €$/);
+		expect(formatCurrency("0")).toBe("0,00 €");
+	});
+
+	it("rounds beyond two decimals", () => {
+		expect(formatCurrency("12.345")).toBe("12,35 €");
+		expect(formatCurrency("12.344")).toBe("12,34 €");
 	});
 
 	it("takes an arbitrary unit, for the hourly tranches of the recap", () => {
-		expect(formatCurrency("1234.5", "€/h")).toMatch(/1[\s\u202f]234,5 €\/h/);
+		expect(formatCurrency("1234.5", "€/h")).toMatch(/^1[\s\u202f]234,50 €\/h$/);
 	});
 
 	it("returns a bare dash for undefined, never an amount of zero euros", () => {
@@ -151,7 +164,12 @@ describe("formatPercentage", () => {
 
 describe("formatTotal", () => {
 	it("formats value with unit", () => {
-		expect(formatTotal(1234.5, "€")).toMatch(/1[\s\u202f]234,5 €/);
+		expect(formatTotal(1234.5, "€")).toMatch(/^1[\s\u202f]234,50 €$/);
+	});
+
+	it("always writes exactly two decimals", () => {
+		expect(formatTotal(1200, "€")).toMatch(/^1[\s\u202f]200,00 €$/);
+		expect(formatTotal(35050.21, "€")).toMatch(/^35[\s\u202f]050,21 €$/);
 	});
 
 	it("returns '- €' for null", () => {
