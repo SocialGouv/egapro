@@ -29,21 +29,23 @@ export function TermsOfUsePage({
 }: Props) {
 	const { Content, effectiveDate } = version;
 	const formattedDate = formatIsoDate(effectiveDate);
-	const breadcrumbItems = isCurrent
-		? [
-				{ label: "Accueil", href: "/" },
-				{ label: "Conditions générales d'utilisation" },
-			]
-		: [
-				{ label: "Accueil", href: "/" },
-				{ label: "Conditions générales d'utilisation", href: CGU },
-				{ label: `Version du ${formattedDate}` },
-			];
-
 	return (
 		<main id="content" tabIndex={-1}>
 			<div className="fr-container fr-py-6w">
-				<Breadcrumb items={breadcrumbItems} />
+				<Breadcrumb
+					items={
+						isCurrent
+							? [
+									{ label: "Accueil", href: "/" },
+									{ label: "Conditions générales d'utilisation" },
+								]
+							: [
+									{ label: "Accueil", href: "/" },
+									{ label: "Conditions générales d'utilisation", href: CGU },
+									{ label: `Version du ${formattedDate}` },
+								]
+					}
+				/>
 
 				<h1 className="fr-h1 fr-mt-4w">Conditions générales d'utilisation</h1>
 
