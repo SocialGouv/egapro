@@ -1,6 +1,6 @@
 # API EGAPRO — Équipe SUIT
 
-API REST sécurisée pour récupérer les déclarations transmises et les fichiers (avis CSE, évaluations conjointes).
+API REST sécurisée pour récupérer les déclarations transmises et les fichiers (avis CSE, évaluations conjointes, évaluations conjointes déposées suite à mise en demeure).
 
 L'authentification et le quota (rate limit) sont appliqués par la passerelle EGAPRO (APISIX) en amont de l'application. Côté client, il suffit donc d'un en-tête `Authorization: Bearer <clé>`.
 
@@ -58,7 +58,7 @@ Le `fileId` est renvoyé par l'endpoint `/files`.
 
 Cette section décrit comment lire les champs déduits du parcours de la déclaration (`Parcours`, exposé par `/export/declarations`). Elle ne concerne **pas** `/export/representations`, dont le payload est indépendant.
 
-Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Historique_statuts[]`, `Parcours_apres_declaration_1` / `_2`, les quatre `Type` / `type`, `Source_categories_emplois` — sont publiées dans [`SUIT-API-valeurs.md`](SUIT-API-valeurs.md), une page générée depuis le code et tenue à jour par la CI.
+Les valeurs possibles de chaque champ énuméré — `Parcours.Statut`, `Historique_statuts[]`, `Parcours_apres_declaration_1` / `_2`, les cinq `Type` / `type`, `Source_categories_emplois` — sont publiées dans [`SUIT-API-valeurs.md`](SUIT-API-valeurs.md), une page générée depuis le code et tenue à jour par la CI.
 
 ### Cycle de vie : les 8 états et leurs transitions
 
@@ -89,8 +89,9 @@ Le champ `Parcours.Statut` suit une machine à états (FSM) versionnée. La vers
 | `awaiting_cse_opinion` | `submit_cse_opinion` | `demarche_completed` | — |
 | `awaiting_cse_opinion` | `sync_cse_requirement` | `demarche_completed` | CSE non requis (le besoin d'avis CSE disparaît en cours de route) |
 | `demarche_completed` | `submit_cse_opinion` | `demarche_completed` | — |
+| `demarche_completed` | `submit_formal_notice_joint_evaluation` | `demarche_completed` | `formalNoticeExposure` : parcours « justification » choisi au dernier tour, et CSE non requis ou avis du CSE défavorable sur la justification de ce tour |
 
-⚠️ `demarche_completed` n'est **pas** un cul-de-sac : `submit_cse_opinion` y reste disponible sans garde, un avis CSE supplémentaire pouvant être déposé jusqu'à 4 fois par an même une fois la démarche finalisée.
+⚠️ `demarche_completed` n'est **pas** un cul-de-sac : `submit_cse_opinion` y reste disponible sans garde, un avis CSE supplémentaire pouvant être déposé jusqu'à 4 fois par an même une fois la démarche finalisée. De même, une entreprise exposée à une mise en demeure de la DREETS (`formalNoticeExposure` ci-dessus) peut y déposer un rapport d'évaluation conjointe (`submit_formal_notice_joint_evaluation`) : l'événement `formal_notice_joint_evaluation_submit` s'ajoute à `Historique_statuts`, le fichier est servi dans `Fichier_evaluation_conjointe_mise_en_demeure`, et `Parcours.Statut` reste `demarche_completed`.
 
 ### `Parcours.Prochaines_etapes_possibles`
 
@@ -105,6 +106,12 @@ Ce tableau liste les transitions offertes depuis `Parcours.Statut`, calculées �
 | `Condition` | N'apparaît que lorsqu'un fait n'est **pas encore connu** au moment de l'export (garde indécise) — décrit alors ce qui départagera les variantes. Absente quand la garde est déjà tranchée. |
 
 `Prochaines_etapes_possibles` vaut `[]` pour une déclaration annulée — aucune étape n'est proposée.
+
+Pour une démarche finalisée (`demarche_completed`), l'étape `submit_formal_notice_joint_evaluation` est proposée avec `"Condition": "si formalNoticeExposure"` : l'exposition à une mise en demeure (définie dans le tableau des transitions ci-dessus) n'est pas évaluée à l'export, la condition reprend le nom du calcul du ruleset, comme `phase2Required` pour l'étape de transmission. Elle peut donc apparaître pour une entreprise qui n'est pas concernée ; seule la présence de `Fichier_evaluation_conjointe_mise_en_demeure` atteste un dépôt.
+
+### Rapport d'évaluation conjointe suite à mise en demeure
+
+`Fichier_evaluation_conjointe_mise_en_demeure` a exactement la forme de `Fichier_evaluation_conjointe` (`Id`, `Type`, `Nom_fichier`, `Date_upload`, `URL_telechargement`) et porte le `Type` `formal_notice_joint_evaluation`. Il est absent si aucun rapport n'a été déposé suite à mise en demeure ; un nouveau dépôt remplace le précédent (cardinalité 1). Aucun champ `Date_…` dédié n'est ajouté à la racine : la date du dépôt se lit dans `Historique_statuts`, sur l'événement `formal_notice_joint_evaluation_submit` (libellé « Dépôt du rapport d'évaluation conjointe suite à mise en demeure »). `Fichier_evaluation_conjointe` et `Date_evaluation_conjointe` restent réservés au rapport déposé dans le parcours de mise en conformité. Côté `/files`, ce rapport est listé avec `type: "formal_notice_joint_evaluation"` et se télécharge, comme les autres, via `/files/<fileId>`.
 
 ### Sémantique de l'effectif
 
@@ -123,7 +130,7 @@ Quand l'effectif GIP est inconnu (entreprise absente du fichier GIP de l'année)
 
 ### Relier un fichier d'avis CSE à `Avis_CSE`
 
-Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` : la liste des `{ Numero_declaration, Type }` que ce fichier couvre, dans le même vocabulaire que `Avis_CSE` (`Numero_declaration` ∈ {1, 2}, `Type` ∈ {`accuracy`, `gap`}). `Fichiers_CSE` et `Avis_CSE` sont tous deux regroupés par déclaration : c'est la clé de jointure entre un PDF et l'avis qu'il porte — comparer `Fichiers_CSE[].Contenus[]` à `Avis_CSE[]` sur `(Numero_declaration, Type)` à l'intérieur d'une même entrée de `Declarations[]`. Un fichier peut couvrir plusieurs contenus (ex. un même PDF pour l'exactitude et la justification d'une même déclaration). `Contenus` vaut `[]` pour un fichier déposé mais pas encore associé — possible tant que l'étape 2 de l'avis CSE n'est pas finalisée, celle-ci refusant tout fichier orphelin. Côté `/files`, l'équivalent anglais est `contents: [{ declarationNumber, type }]`, présent uniquement sur les items `cse_opinion` (absent sur `joint_evaluation`, qui n'a pas de notion de contenu) ; `/files` résout, parmi les déclarations **transmises** pour `(siren, année)` (un brouillon en cours, par exemple une redéclaration après annulation, est ignoré), la déclaration active, ou à défaut la plus récente déclaration annulée par date de création — jamais un mélange des fichiers de deux déclarations. `declarationId` et `cancelledAt`, à la racine de la réponse `/files`, identifient la déclaration retenue (`cancelledAt` vaut `null` pour la déclaration active).
+Chaque entrée de `Fichiers_CSE` (type `cse_opinion`) porte un champ `Contenus` : la liste des `{ Numero_declaration, Type }` que ce fichier couvre, dans le même vocabulaire que `Avis_CSE` (`Numero_declaration` ∈ {1, 2}, `Type` ∈ {`accuracy`, `gap`}). `Fichiers_CSE` et `Avis_CSE` sont tous deux regroupés par déclaration : c'est la clé de jointure entre un PDF et l'avis qu'il porte — comparer `Fichiers_CSE[].Contenus[]` à `Avis_CSE[]` sur `(Numero_declaration, Type)` à l'intérieur d'une même entrée de `Declarations[]`. Un fichier peut couvrir plusieurs contenus (ex. un même PDF pour l'exactitude et la justification d'une même déclaration). `Contenus` vaut `[]` pour un fichier déposé mais pas encore associé — possible tant que l'étape 2 de l'avis CSE n'est pas finalisée, celle-ci refusant tout fichier orphelin. Côté `/files`, l'équivalent anglais est `contents: [{ declarationNumber, type }]`, présent uniquement sur les items `cse_opinion` (absent sur `joint_evaluation` et `formal_notice_joint_evaluation`, qui n'ont pas de notion de contenu) ; `/files` résout, parmi les déclarations **transmises** pour `(siren, année)` (un brouillon en cours, par exemple une redéclaration après annulation, est ignoré), la déclaration active, ou à défaut la plus récente déclaration annulée par date de création — jamais un mélange des fichiers de deux déclarations. `declarationId` et `cancelledAt`, à la racine de la réponse `/files`, identifient la déclaration retenue (`cancelledAt` vaut `null` pour la déclaration active).
 
 ### Flags d'obligation figés vs statut évolutif
 

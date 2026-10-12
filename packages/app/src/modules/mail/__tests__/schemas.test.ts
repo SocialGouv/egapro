@@ -18,6 +18,7 @@ describe("resendReceiptSchema", () => {
 
 	it.each([
 		"jointEvaluation",
+		"formalNoticeJointEvaluation",
 		"",
 		"Representation",
 	])("rejects the unsupported kind %s", (kind) => {

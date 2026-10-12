@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+	FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 	GAP_PERSISTS_CONDITION,
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
@@ -12,6 +13,7 @@ const mockFetchIndicatorG = vi.fn().mockResolvedValue(new Map());
 const mockFetchCse = vi.fn().mockResolvedValue(new Map());
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointEval = vi.fn().mockResolvedValue(new Map());
+const mockFetchFormalNoticeJointEval = vi.fn().mockResolvedValue(new Map());
 const mockLogAction = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("~/server/audit/log", () => ({
@@ -28,6 +30,8 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchCseFiles(...args),
 	fetchJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
 		mockFetchJointEval(...args),
+	fetchFormalNoticeJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
+		mockFetchFormalNoticeJointEval(...args),
 }));
 
 /**
@@ -170,6 +174,7 @@ describe("GET /api/v1/export/declarations", () => {
 		mockFetchCse.mockResolvedValue(new Map());
 		mockFetchCseFiles.mockResolvedValue(new Map());
 		mockFetchJointEval.mockResolvedValue(new Map());
+		mockFetchFormalNoticeJointEval.mockResolvedValue(new Map());
 	});
 
 	it("should return 403 when X-Gateway-Forwarded header is missing", async () => {
@@ -380,6 +385,10 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(mockFetchCse).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchCseFiles).toHaveBeenCalledWith(["decl-1", "decl-2"]);
 		expect(mockFetchJointEval).toHaveBeenCalledWith(["decl-1", "decl-2"]);
+		expect(mockFetchFormalNoticeJointEval).toHaveBeenCalledWith([
+			"decl-1",
+			"decl-2",
+		]);
 	});
 
 	it("should return assembled declarations with flat indicator columns", async () => {
@@ -453,6 +462,9 @@ describe("GET /api/v1/export/declarations", () => {
 		expect(decl).not.toHaveProperty("Avis_CSE");
 		expect(decl).not.toHaveProperty("Fichiers_CSE");
 		expect(decl).not.toHaveProperty("Fichier_evaluation_conjointe");
+		expect(decl).not.toHaveProperty(
+			"Fichier_evaluation_conjointe_mise_en_demeure",
+		);
 	});
 
 	it("should send the GIP annual average workforce as Effectif, not the Weez value (#3929)", async () => {
@@ -963,6 +975,107 @@ describe("GET /api/v1/export/declarations", () => {
 			Nom_fichier: "eval.pdf",
 			Date_upload: "2027-04-01T09:00:00.000Z",
 			URL_telechargement: "/api/v1/files/je-1",
+		});
+	});
+
+	it("exposes the formal notice report apart from the compliance-path joint evaluation report", async () => {
+		mockFetchSubmitted.mockResolvedValue([
+			{
+				declarationId: "decl-1",
+				siren: "123456789",
+				year: 2027,
+				status: "awaiting_compliance_path_choice",
+				firstDeclarationPathChoice: null,
+				secondDeclarationPathChoice: null,
+				totalWomen: 100,
+				totalMen: 150,
+				submittedAt: null,
+				firstDeclarationPathChoiceAt: null,
+				secondDeclarationPathChoiceAt: null,
+				secondDeclarationSubmittedAt: null,
+				jointEvaluationSubmittedAt: null,
+				cseOpinionCompletedAt: null,
+				demarcheCompletedAt: null,
+				complianceProcessRequired: false,
+				complianceProcessRevisionRequired: false,
+				cseRequired: false,
+				indicatorGRequired: false,
+				rulesVersion: "2027.1",
+				secondDeclReferencePeriodStart: null,
+				secondDeclReferencePeriodEnd: null,
+				createdAt: new Date("2027-03-15T10:00:00Z"),
+				updatedAt: new Date("2027-03-15T12:00:00Z"),
+				cancelledAt: null,
+				companyName: "ACME Corp",
+				workforceEma: "250.00",
+				nafCode: "62.02",
+				address: "1 rue test",
+				hasCse: true,
+				declarantFirstName: "Jean",
+				declarantLastName: "Dupont",
+				declarantEmail: "jean@acme.fr",
+				declarantPhone: "0612345678",
+				...nullIndicators,
+			},
+		]);
+		mockFetchJointEval.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "je-1",
+							declarationId: "decl-1",
+							fileName: "eval.pdf",
+							filePath: "/s3/je",
+							uploadedAt: new Date("2027-04-01T09:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		mockFetchFormalNoticeJointEval.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "fn-1",
+							declarationId: "decl-1",
+							fileName: "mise-en-demeure.pdf",
+							filePath: "/s3/fn",
+							uploadedAt: new Date("2028-02-01T09:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/export/declarations/route");
+		const request = gatewayForwardedRequest(
+			"http://localhost/api/v1/export/declarations?date_begin=2027-03-15",
+		);
+		const response = await GET(request);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchFormalNoticeJointEval).toHaveBeenCalledWith(["decl-1"]);
+		const body = await response.json();
+		expect(body.Declarations[0].Fichier_evaluation_conjointe).toEqual({
+			Id: "je-1",
+			Type: "joint_evaluation",
+			Nom_fichier: "eval.pdf",
+			Date_upload: "2027-04-01T09:00:00.000Z",
+			URL_telechargement: "/api/v1/files/je-1",
+		});
+		expect(
+			body.Declarations[0].Fichier_evaluation_conjointe_mise_en_demeure,
+		).toEqual({
+			Id: "fn-1",
+			Type: "formal_notice_joint_evaluation",
+			Nom_fichier: "mise-en-demeure.pdf",
+			Date_upload: "2028-02-01T09:00:00.000Z",
+			URL_telechargement: "/api/v1/files/fn-1",
 		});
 	});
 
@@ -1728,6 +1841,7 @@ describe("GET /api/v1/export/declarations", () => {
 					Etat_cible: "demarche_completed",
 					Libelle: STAGE_LABELS.completion,
 				},
+				FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 			]);
 		});
 

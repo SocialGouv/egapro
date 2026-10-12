@@ -19,6 +19,25 @@ describe("AUDIT_ACTIONS", () => {
 		expect(new Set(values).size).toBe(values.length);
 	});
 
+	it("maps the formal notice joint evaluation actions to their categories", () => {
+		expect(AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE).toBe(
+			"formal_notice_joint_evaluation.upload_file",
+		);
+		expect(AUDIT_ACTIONS.FORMAL_NOTICE_GET).toBe("formal_notice.get");
+		expect(AUDIT_ACTIONS.FORMAL_NOTICE_SUBMIT).toBe("formal_notice.submit");
+		expect(
+			AUDIT_ACTION_CATEGORIES[
+				AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE
+			],
+		).toBe("mutation");
+		expect(AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.FORMAL_NOTICE_GET]).toBe(
+			"read_sensitive",
+		);
+		expect(AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.FORMAL_NOTICE_SUBMIT]).toBe(
+			"mutation",
+		);
+	});
+
 	it("maps the lock-timeout admin setting update to a mutation", () => {
 		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT).toBe(
 			"admin_settings.update_lock_timeout",

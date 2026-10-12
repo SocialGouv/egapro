@@ -108,7 +108,7 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 | `export` | 365 jours |
 | `system` | 365 jours |
 
-Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
+Ne sont pas recopiées ici : les 93 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
 
 **Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts` · `packages/app/scripts/declaration-cleanup.ts`.
 

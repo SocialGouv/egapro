@@ -45,6 +45,11 @@ export const AUDIT_ACTIONS = {
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
 	JOINT_EVALUATION_GET_FILE: "joint_evaluation.get_file",
 
+	FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE:
+		"formal_notice_joint_evaluation.upload_file",
+	FORMAL_NOTICE_GET: "formal_notice.get",
+	FORMAL_NOTICE_SUBMIT: "formal_notice.submit",
+
 	// ── Company mutations ──────────────────────────────────
 	COMPANY_READ_GIP_DATA: "company.read_gip_data",
 	COMPANY_UPDATE_HAS_CSE: "company.update_has_cse",
@@ -190,6 +195,10 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE]: "read_sensitive",
+
+	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
+	[AUDIT_ACTIONS.FORMAL_NOTICE_GET]: "read_sensitive",
+	[AUDIT_ACTIONS.FORMAL_NOTICE_SUBMIT]: "mutation",
 
 	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",

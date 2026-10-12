@@ -174,6 +174,15 @@ export function CseOpinionsSection({
 	);
 }
 
+const FILE_TYPE_LABELS: Record<
+	DeclarationDetail["files"][number]["type"],
+	string
+> = {
+	cse_opinion: "Avis CSE",
+	joint_evaluation: "Évaluation conjointe",
+	formal_notice_joint_evaluation: "Évaluation conjointe (mise en demeure)",
+};
+
 export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 	return (
 		<>
@@ -191,11 +200,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 					{files.map((file) => (
 						<tr key={file.id}>
 							<td>{file.fileName}</td>
-							<td>
-								{file.type === "cse_opinion"
-									? "Avis CSE"
-									: "Évaluation conjointe"}
-							</td>
+							<td>{FILE_TYPE_LABELS[file.type]}</td>
 							<td>{formatShortDate(file.uploadedAt)}</td>
 							<td>
 								<a

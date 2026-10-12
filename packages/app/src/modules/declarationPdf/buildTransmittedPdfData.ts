@@ -33,6 +33,7 @@ export type TransmittedPdfData = {
 	opinions: TransmittedPdfOpinion[];
 	cseFiles: TransmittedPdfFile[];
 	jointEvaluationFile: TransmittedPdfFile | null;
+	formalNoticeJointEvaluationFile: TransmittedPdfFile | null;
 };
 
 export async function buildTransmittedPdfData(
@@ -59,43 +60,57 @@ export async function buildTransmittedPdfData(
 		throw new Error("Déclaration introuvable");
 	}
 
-	const [opinions, cseFiles, jointFiles] = await Promise.all([
-		db
-			.select({
-				declarationNumber: cseOpinions.declarationNumber,
-				type: cseOpinions.type,
-				opinion: cseOpinions.opinion,
-				opinionDate: cseOpinions.opinionDate,
-				gapConsulted: cseOpinions.gapConsulted,
-			})
-			.from(cseOpinions)
-			.where(eq(cseOpinions.declarationId, declaration.id)),
-		db
-			.select({
-				fileName: files.fileName,
-				uploadedAt: files.uploadedAt,
-			})
-			.from(files)
-			.where(
-				and(
-					eq(files.declarationId, declaration.id),
-					eq(files.type, "cse_opinion"),
+	const [opinions, cseFiles, jointFiles, formalNoticeJointFiles] =
+		await Promise.all([
+			db
+				.select({
+					declarationNumber: cseOpinions.declarationNumber,
+					type: cseOpinions.type,
+					opinion: cseOpinions.opinion,
+					opinionDate: cseOpinions.opinionDate,
+					gapConsulted: cseOpinions.gapConsulted,
+				})
+				.from(cseOpinions)
+				.where(eq(cseOpinions.declarationId, declaration.id)),
+			db
+				.select({
+					fileName: files.fileName,
+					uploadedAt: files.uploadedAt,
+				})
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, declaration.id),
+						eq(files.type, "cse_opinion"),
+					),
 				),
-			),
-		db
-			.select({
-				fileName: files.fileName,
-				uploadedAt: files.uploadedAt,
-			})
-			.from(files)
-			.where(
-				and(
-					eq(files.declarationId, declaration.id),
-					eq(files.type, "joint_evaluation"),
-				),
-			)
-			.limit(1),
-	]);
+			db
+				.select({
+					fileName: files.fileName,
+					uploadedAt: files.uploadedAt,
+				})
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, declaration.id),
+						eq(files.type, "joint_evaluation"),
+					),
+				)
+				.limit(1),
+			db
+				.select({
+					fileName: files.fileName,
+					uploadedAt: files.uploadedAt,
+				})
+				.from(files)
+				.where(
+					and(
+						eq(files.declarationId, declaration.id),
+						eq(files.type, "formal_notice_joint_evaluation"),
+					),
+				)
+				.limit(1),
+		]);
 
 	return {
 		companyName: company.name,
@@ -106,5 +121,6 @@ export async function buildTransmittedPdfData(
 		opinions,
 		cseFiles,
 		jointEvaluationFile: jointFiles[0] ?? null,
+		formalNoticeJointEvaluationFile: formalNoticeJointFiles[0] ?? null,
 	};
 }

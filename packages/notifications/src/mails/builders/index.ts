@@ -4,6 +4,7 @@ export { buildCseOpinionReminderMail } from "./cseOpinionReminder.js";
 export { buildCycleOpeningInfoMail } from "./cycleOpeningInfo.js";
 export { buildDeclarationConfirmationMail } from "./declarationConfirmation.js";
 export { buildDeclarationDeadlineReminderMail } from "./declarationDeadlineReminder.js";
+export { buildFormalNoticeJointEvaluationSubmittedMail } from "./formalNoticeJointEvaluationSubmitted.js";
 export { buildJointEvaluationReminderMail } from "./jointEvaluationReminder.js";
 export { buildJointEvaluationSubmittedMail } from "./jointEvaluationSubmitted.js";
 export { buildNextCycleHandoverMail } from "./nextCycleHandover.js";

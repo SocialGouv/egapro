@@ -1,5 +1,6 @@
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { isUploadFlowType } from "~/modules/shared/uploadConfig";
 
 type MetadataField =
 	| "year"
@@ -49,6 +50,7 @@ const RECEIPT_TYPES = new Set([
 	"second_declaration_confirmation",
 	"cse_opinion_receipt",
 	"joint_evaluation_submitted",
+	"formal_notice_joint_evaluation_submitted",
 	"representation_receipt",
 ]);
 const RECEIPT_KINDS = new Set([
@@ -56,6 +58,7 @@ const RECEIPT_KINDS = new Set([
 	"secondDeclaration",
 	"cseOpinion",
 	"jointEvaluation",
+	"formalNoticeJointEvaluation",
 	"representation",
 ]);
 const RECEIPT_VARIANTS = new Set([
@@ -160,6 +163,11 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
 	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType", "s3Cleanup"],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+	],
+	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: [
 		"fileId",
 		"flowType",
 		"s3Cleanup",
@@ -270,9 +278,7 @@ function validValue(
 			return /^\d{9}$/.test(siren) ? siren : undefined;
 		}
 		case "flowType":
-			return value === "cse_opinion" || value === "joint_evaluation"
-				? value
-				: undefined;
+			return isUploadFlowType(value) ? value : undefined;
 		case "s3Cleanup":
 			return value === "ok" || value === "failed" ? value : undefined;
 		case "reason":

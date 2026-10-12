@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+	FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 	GAP_PERSISTS_CONDITION,
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
@@ -129,6 +130,7 @@ describe("buildNextStepsPayload — ruleset 2027.1", () => {
 				Etat_cible: "demarche_completed",
 				Libelle: STAGE_LABELS.completion,
 			},
+			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 		]);
 	});
 

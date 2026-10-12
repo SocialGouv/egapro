@@ -147,4 +147,35 @@ describe("FilesSection", () => {
 		});
 		expect(link).toHaveAttribute("href", "/api/v1/files/file-1");
 	});
+
+	it("labels each file type, the formal notice report apart from the compliance-path one", () => {
+		render(
+			<FilesSection
+				files={[
+					{
+						id: "file-2",
+						fileName: "evaluation.pdf",
+						type: "joint_evaluation",
+						uploadedAt: new Date("2024-05-01T10:00:00Z"),
+					},
+					{
+						id: "file-3",
+						fileName: "mise-en-demeure.pdf",
+						type: "formal_notice_joint_evaluation",
+						uploadedAt: new Date("2025-02-01T10:00:00Z"),
+					},
+				]}
+			/>,
+		);
+
+		const jointRow = screen.getByText("evaluation.pdf").closest("tr");
+		const formalNoticeRow = screen
+			.getByText("mise-en-demeure.pdf")
+			.closest("tr");
+		expect(jointRow).toHaveTextContent("Évaluation conjointe");
+		expect(jointRow).not.toHaveTextContent("mise en demeure");
+		expect(formalNoticeRow).toHaveTextContent(
+			"Évaluation conjointe (mise en demeure)",
+		);
+	});
 });

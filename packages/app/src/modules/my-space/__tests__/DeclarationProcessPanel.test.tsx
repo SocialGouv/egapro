@@ -58,6 +58,7 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	formalNoticeAvailable: false,
 	siren: "532847196",
 	ctaHref: "/declaration-remuneration?siren=532847196",
 	lockedByOther: false,
@@ -390,6 +391,67 @@ describe("DeclarationProcessPanel", () => {
 			);
 			expect(modifyLinks.length).toBeGreaterThan(0);
 			expect(modifyLinks[0]).toHaveTextContent("Modifier");
+		});
+	});
+
+	describe("formal notice joint evaluation action", () => {
+		const FORMAL_NOTICE_TEXT =
+			"Si votre entreprise a été mise en demeure, par les services de l'inspection du travail, d'effectuer l'évaluation conjointe des rémunérations.";
+		const FORMAL_NOTICE_LINK_NAME =
+			"Dépôt du rapport de l’évaluation conjointe";
+
+		it("renders the text and the deposit link on a closed démarche exposed to a formal notice", () => {
+			const { panel } = renderPanel("closed", { formalNoticeAvailable: true });
+
+			expect(panel.getByText(FORMAL_NOTICE_TEXT)).toBeInTheDocument();
+			const link = panel.getByRole("link", {
+				name: FORMAL_NOTICE_LINK_NAME,
+				hidden: true,
+			});
+			expect(link).toHaveAttribute(
+				"href",
+				"/declaration-remuneration/mise-en-demeure",
+			);
+			expect(link).toHaveClass("fr-btn", "fr-btn--tertiary");
+		});
+
+		it("keeps the closed message alongside the formal notice action", () => {
+			const { panel } = renderPanel("closed", { formalNoticeAvailable: true });
+
+			expect(panel.getByText("Démarche close")).toBeInTheDocument();
+			expect(
+				panel.getByRole("link", { name: "Voir la déclaration", hidden: true }),
+			).toBeInTheDocument();
+		});
+
+		it("renders nothing on a closed démarche not exposed to a formal notice", () => {
+			const { panel } = renderPanel("closed");
+
+			expect(panel.queryByText(FORMAL_NOTICE_TEXT)).not.toBeInTheDocument();
+			expect(
+				panel.queryByRole("link", {
+					name: FORMAL_NOTICE_LINK_NAME,
+					hidden: true,
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it.each<PanelVariant>([
+			"start",
+			"compliance_choice",
+			"compliance",
+			"evaluation",
+			"cse",
+		])("renders nothing on the %s variant even when a formal notice is available", (variant) => {
+			const { panel } = renderPanel(variant, { formalNoticeAvailable: true });
+
+			expect(panel.queryByText(FORMAL_NOTICE_TEXT)).not.toBeInTheDocument();
+			expect(
+				panel.queryByRole("link", {
+					name: FORMAL_NOTICE_LINK_NAME,
+					hidden: true,
+				}),
+			).not.toBeInTheDocument();
 		});
 	});
 

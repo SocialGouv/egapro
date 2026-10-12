@@ -119,6 +119,9 @@ export function CompanyDeclarationsPage({
 				ctaHref={ctaHref}
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
+				formalNoticeAvailable={
+					currentDeclaration?.formalNoticeAvailable ?? false
+				}
 				hasPrefillData={currentDeclaration?.hasPrefillData ?? false}
 				hasSubmittedCseOpinion={
 					currentDeclaration?.hasSubmittedCseOpinion ?? false

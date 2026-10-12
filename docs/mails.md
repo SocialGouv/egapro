@@ -2,7 +2,7 @@
 
 Inventaire exhaustif des mails envoyés par la plateforme. Deux mécanismes :
 
-1. **Event-driven** (4 mails) — émis depuis une mutation tRPC ou un upload, via le wrapper [`enqueueReceipt`](../packages/app/src/modules/mail/enqueueReceipt.ts) côté `packages/app`.
+1. **Event-driven** (5 mails) — émis depuis une mutation tRPC ou un upload, via le wrapper [`enqueueReceipt`](../packages/app/src/modules/mail/enqueueReceipt.ts) côté `packages/app`.
 2. **Schedule-driven** (7 mails, 8 schedules cron pg-boss) — émis depuis le worker `packages/notifications` à intervalles réguliers (cron natif pg-boss avec `tz=Europe/Paris`). Le handler interroge l'app DB pour trouver les destinataires éligibles, déduplique via `notifications.reminder_sent_log`, puis enqueue un job sur la même queue `email-notification` que les mails event-driven.
 
 Tous les jobs transitent par le même pipeline **publisher → pg-boss → worker → SMTP**. La pile de rendu HTML est **React Email** (composants typés DSFR, inline CSS auto, fallback texte produit par `html-to-text`).
@@ -11,7 +11,7 @@ Tous les jobs transitent par le même pipeline **publisher → pg-boss → worke
 
 ---
 
-## Vue d'ensemble — 11 types · 8 schedules
+## Vue d'ensemble — 12 types · 8 schedules
 
 Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, corps complet, requête SQL d'éligibilité (pour les schedule-driven), bouton CTA et référence au flowchart BRD.
 
@@ -23,6 +23,7 @@ Chaque ligne pointe vers la **fiche détaillée** correspondante : sujet exact, 
 | 2 | `second_declaration_confirmation` | [`mails/second-declaration-confirmation.md`](mails/second-declaration-confirmation.md) | MSDc | tRPC `declaration.submitSecondDeclaration` |
 | 3 | `cse_opinion_receipt` | [`mails/cse-opinion-receipt.md`](mails/cse-opinion-receipt.md) | MH_* | `POST /api/upload` (`flowType=cse_opinion`) |
 | 4 | `joint_evaluation_submitted` | [`mails/joint-evaluation-submitted.md`](mails/joint-evaluation-submitted.md) | M_PE2 | `POST /api/upload` (`flowType=joint_evaluation`) |
+| 5 | `formal_notice_joint_evaluation_submitted` | [`mails/formal-notice-joint-evaluation-submitted.md`](mails/formal-notice-joint-evaluation-submitted.md) | — | tRPC `formalNotice.submit` (rapport déposé par `POST /api/upload`, `flowType=formal_notice_joint_evaluation`) |
 
 ### Schedule-driven (cron pg-boss, fuseau Europe/Paris)
 
@@ -30,13 +31,13 @@ Les six rappels liés à une échéance (déclaration, choix parcours R1/R2, 2�
 
 | # | Type pg-boss | Fiche détaillée | BRD | Cron / déclenchement | Variants |
 |---|---|---|---|---|---|
-| 5 | `cycle_opening_info` | [`mails/cycle-opening-info.md`](mails/cycle-opening-info.md) | MA | `0 8 1 3 *` (échéance affichée lue en admin) | — |
-| 6 | `declaration_deadline_reminder` | [`mails/declaration-deadline-reminder.md`](mails/declaration-deadline-reminder.md) | Rappel 1 | tick quotidien — J-30 / J-10 avant `decl1ModificationDeadline` | `daysRemaining: 30 \| 10` |
-| 7 | `compliance_path_choice_reminder` | [`mails/compliance-path-choice-reminder.md`](mails/compliance-path-choice-reminder.md) | Rappels 2 & 5 | tick quotidien — J-15 avant l'échéance choix parcours (R1 : 1er juillet ; R2 : `pathChoiceDeadline`, 1er janvier N+1) | `round: first \| second` |
-| 8 | `second_declaration_reminder` | [`mails/second-declaration-reminder.md`](mails/second-declaration-reminder.md) | Rappel 3 | tick quotidien — J-30 / J-15 avant `decl2ModificationDeadline` | `daysRemaining: 30 \| 15` |
-| 9 | `joint_evaluation_reminder` | [`mails/joint-evaluation-reminder.md`](mails/joint-evaluation-reminder.md) | Rappels 4 & 6 | tick quotidien — J-30 / J-15 avant `decl1JointEvaluationDeadline` (R1) / `decl2JointEvaluationDeadline` (R2) | `round: first \| second` |
-| 10 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | Rappel 7 | 5 schedules fixes (1er sept / 1er déc / 1er févr) | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` — **contenu unifié** |
-| 11 | `next_cycle_handover` | [`mails/next-cycle-handover.md`](mails/next-cycle-handover.md) | MI_* | `0 8 2 3 *` | — |
+| 6 | `cycle_opening_info` | [`mails/cycle-opening-info.md`](mails/cycle-opening-info.md) | MA | `0 8 1 3 *` (échéance affichée lue en admin) | — |
+| 7 | `declaration_deadline_reminder` | [`mails/declaration-deadline-reminder.md`](mails/declaration-deadline-reminder.md) | Rappel 1 | tick quotidien — J-30 / J-10 avant `decl1ModificationDeadline` | `daysRemaining: 30 \| 10` |
+| 8 | `compliance_path_choice_reminder` | [`mails/compliance-path-choice-reminder.md`](mails/compliance-path-choice-reminder.md) | Rappels 2 & 5 | tick quotidien — J-15 avant l'échéance choix parcours (R1 : 1er juillet ; R2 : `pathChoiceDeadline`, 1er janvier N+1) | `round: first \| second` |
+| 9 | `second_declaration_reminder` | [`mails/second-declaration-reminder.md`](mails/second-declaration-reminder.md) | Rappel 3 | tick quotidien — J-30 / J-15 avant `decl2ModificationDeadline` | `daysRemaining: 30 \| 15` |
+| 10 | `joint_evaluation_reminder` | [`mails/joint-evaluation-reminder.md`](mails/joint-evaluation-reminder.md) | Rappels 4 & 6 | tick quotidien — J-30 / J-15 avant `decl1JointEvaluationDeadline` (R1) / `decl2JointEvaluationDeadline` (R2) | `round: first \| second` |
+| 11 | `cse_opinion_reminder` | [`mails/cse-opinion-reminder.md`](mails/cse-opinion-reminder.md) | Rappel 7 | 5 schedules fixes (1er sept / 1er déc / 1er févr) | `variant: compliance \| justify_oct \| justify_dec \| corrective \| joint_eval` — **contenu unifié** |
+| 12 | `next_cycle_handover` | [`mails/next-cycle-handover.md`](mails/next-cycle-handover.md) | MI_* | `0 8 2 3 *` | — |
 
 **Destinataire** : tous les rappels sont envoyés au `declarations.declarantId → app_user.email` (le compte ProConnect qui a transmis la déclaration courante ou Y-1 selon le rappel). Pas de cc/bcc/groupé — un mail par déclaration, par variant.
 

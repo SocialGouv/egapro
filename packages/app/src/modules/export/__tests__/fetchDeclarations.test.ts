@@ -9,6 +9,7 @@ import {
 } from "../fetchDeclarations";
 import type { RawHistoryEntry } from "../queries";
 import {
+	FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 	GAP_PERSISTS_CONDITION,
 	GAP_RESOLVED_CONDITION,
 	STAGE_LABELS,
@@ -1032,6 +1033,105 @@ describe("assembleDeclaration", () => {
 		expect(result.Fichier_evaluation_conjointe?.Id).toBe("je-new");
 	});
 
+	describe("formal notice joint evaluation file", () => {
+		const jointEvaluationFile = {
+			id: "je-1",
+			declarationId: "decl-1",
+			fileName: "evaluation.pdf",
+			filePath: "/s3/je",
+			uploadedAt: new Date("2027-04-01T09:00:00Z"),
+		};
+		const formalNoticeFile = {
+			id: "fn-1",
+			declarationId: "decl-1",
+			fileName: "mise-en-demeure.pdf",
+			filePath: "/s3/fn",
+			uploadedAt: new Date("2028-02-01T09:00:00Z"),
+		};
+
+		it("exposes the formal notice report in its own block, without Contenus", () => {
+			const result = assembleDeclaration(
+				baseRow,
+				[],
+				[],
+				[],
+				[],
+				[formalNoticeFile],
+			);
+
+			expect(result.Fichier_evaluation_conjointe_mise_en_demeure).toEqual({
+				Id: "fn-1",
+				Type: "formal_notice_joint_evaluation",
+				Nom_fichier: "mise-en-demeure.pdf",
+				Date_upload: "2028-02-01T09:00:00.000Z",
+				URL_telechargement: "/api/v1/files/fn-1",
+			});
+			expect(result).not.toHaveProperty("Fichier_evaluation_conjointe");
+		});
+
+		it("keeps the most recent formal notice report when several exist", () => {
+			const older = {
+				...formalNoticeFile,
+				id: "fn-old",
+				uploadedAt: new Date("2028-01-01T09:00:00Z"),
+			};
+
+			const result = assembleDeclaration(
+				baseRow,
+				[],
+				[],
+				[],
+				[],
+				[older, formalNoticeFile],
+			);
+
+			expect(result.Fichier_evaluation_conjointe_mise_en_demeure?.Id).toBe(
+				"fn-1",
+			);
+		});
+
+		it("omits the block when no formal notice report was filed", () => {
+			const result = assembleDeclaration(baseRow, [], []);
+
+			expect(result).not.toHaveProperty(
+				"Fichier_evaluation_conjointe_mise_en_demeure",
+			);
+		});
+
+		it("keeps a compliance-path joint evaluation report typed joint_evaluation", () => {
+			const result = assembleDeclaration(
+				baseRow,
+				[],
+				[],
+				[],
+				[jointEvaluationFile],
+			);
+
+			expect(result.Fichier_evaluation_conjointe?.Type).toBe(
+				"joint_evaluation",
+			);
+			expect(result).not.toHaveProperty(
+				"Fichier_evaluation_conjointe_mise_en_demeure",
+			);
+		});
+
+		it("exposes both reports side by side when both were filed", () => {
+			const result = assembleDeclaration(
+				baseRow,
+				[],
+				[],
+				[],
+				[jointEvaluationFile],
+				[formalNoticeFile],
+			);
+
+			expect(result.Fichier_evaluation_conjointe?.Id).toBe("je-1");
+			expect(result.Fichier_evaluation_conjointe_mise_en_demeure?.Id).toBe(
+				"fn-1",
+			);
+		});
+	});
+
 	it("should handle null dates", () => {
 		const rowWithNullDates = { ...baseRow, createdAt: null, updatedAt: null };
 		const result = assembleDeclaration(rowWithNullDates, [], []);
@@ -1125,6 +1225,28 @@ describe("assembleDeclaration", () => {
 				Statut: "demarche_complete",
 				Libelle_statut: "Démarche terminée",
 				Date: "2027-10-15T14:00:00.456Z",
+			},
+		]);
+	});
+
+	it("labels the formal notice joint evaluation deposit in Historique_statuts", () => {
+		const row = withHistory([
+			{
+				eventType: "formal_notice_joint_evaluation_submit",
+				value: null,
+				round: null,
+				createdAt: "2028-02-01T09:00:00.000Z",
+			},
+		]);
+
+		const result = assembleDeclaration(row, [], []);
+
+		expect(result.Historique_statuts).toEqual([
+			{
+				Statut: "formal_notice_joint_evaluation_submit",
+				Libelle_statut:
+					"Dépôt du rapport d'évaluation conjointe suite à mise en demeure",
+				Date: "2028-02-01T09:00:00.000Z",
 			},
 		]);
 	});
@@ -1682,6 +1804,7 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 				Etat_cible: "demarche_completed",
 				Libelle: STAGE_LABELS.completion,
 			},
+			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
 		]);
 		expect(result.Parcours.Annulee).toBe(false);
 	});
@@ -1696,7 +1819,9 @@ describe("assembleDeclaration — Parcours.Prochaines_etapes_possibles", () => {
 		// The engine still accepts the action (a company may gain a CSE after
 		// completing), but an unrequired opinion is not an expected next step.
 		expect(result.Parcours.Avis_CSE_requis).toBe(false);
-		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([]);
+		expect(result.Parcours.Prochaines_etapes_possibles).toEqual([
+			FORMAL_NOTICE_JOINT_EVALUATION_STEP,
+		]);
 	});
 
 	// The column is NOT NULL in the schema, so only an unknown version reaches

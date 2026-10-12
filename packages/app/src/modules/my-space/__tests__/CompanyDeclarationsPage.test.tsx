@@ -67,6 +67,8 @@ function makeDeclaration(
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
+		formalNoticeAvailable: false,
+		hasSubmittedFormalNoticeJointEvaluation: false,
 		hasPrefillData: false,
 		deadline: null,
 		notSubject: false,
@@ -209,6 +211,44 @@ describe("CompanyDeclarationsPage", () => {
 			expect(
 				screen.queryAllByText(/Parcours de mise en conformité/),
 			).toHaveLength(1);
+		});
+	});
+
+	describe("formal notice joint evaluation action in the démarche panel", () => {
+		const FORMAL_NOTICE_LINK_TEXT =
+			"Dépôt du rapport de l’évaluation conjointe";
+
+		function closedDeclaration(formalNoticeAvailable: boolean) {
+			return makeDeclaration("remuneration", {
+				status: "done",
+				fsmStatus: "demarche_completed",
+				firstDeclarationPathChoice: "justify",
+				formalNoticeAvailable,
+			});
+		}
+
+		it("forwards the formal notice availability of the current declaration to the panel", () => {
+			renderPage({ declarations: [closedDeclaration(true)] });
+
+			expect(
+				screen.getByText(FORMAL_NOTICE_LINK_TEXT).closest("a"),
+			).toHaveAttribute("href", "/declaration-remuneration/mise-en-demeure");
+		});
+
+		it("hides the action when the current declaration is not exposed to a formal notice", () => {
+			renderPage({ declarations: [closedDeclaration(false)] });
+
+			expect(
+				screen.queryByText(FORMAL_NOTICE_LINK_TEXT),
+			).not.toBeInTheDocument();
+		});
+
+		it("hides the action when the company has no current declaration", () => {
+			renderPage({ declarations: [] });
+
+			expect(
+				screen.queryByText(FORMAL_NOTICE_LINK_TEXT),
+			).not.toBeInTheDocument();
 		});
 	});
 

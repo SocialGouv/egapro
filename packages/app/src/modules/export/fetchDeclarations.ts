@@ -8,6 +8,7 @@ export {
 	fetchCseOpinionsByDeclaration,
 	fetchFileById,
 	fetchFileBySiren,
+	fetchFormalNoticeJointEvaluationFilesByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,
@@ -30,6 +31,7 @@ import {
 	truncateGapRatio,
 } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
+import type { fileTypeEnum } from "~/server/db/schema";
 import type { DeclarationRow } from "./queries";
 import {
 	INDICATOR_A_GAP_LABELS,
@@ -356,21 +358,31 @@ export function buildCseFilePayload(file: FileRow) {
 	};
 }
 
-export function buildJointEvaluationFilePayload(file: FileRow) {
+type FileType = (typeof fileTypeEnum.enumValues)[number];
+
+function buildReportFilePayload<T extends Exclude<FileType, "cse_opinion">>(
+	file: FileRow,
+	type: T,
+) {
 	return {
 		id: file.id,
-		type: "joint_evaluation" as const,
+		type,
 		fileName: file.fileName,
 		uploadedAt: file.uploadedAt.toISOString(),
 		downloadUrl: apiV1FileHref(file.id),
 	};
 }
 
+export function buildJointEvaluationFilePayload(file: FileRow) {
+	return buildReportFilePayload(file, "joint_evaluation");
+}
+
+export function buildFormalNoticeJointEvaluationFilePayload(file: FileRow) {
+	return buildReportFilePayload(file, "formal_notice_joint_evaluation");
+}
+
 /** French-keyed payload for the SUIT declarations export. */
-function buildFichierPayload(
-	file: FileRow,
-	type: "cse_opinion" | "joint_evaluation",
-) {
+function buildFichierPayload(file: FileRow, type: FileType) {
 	return {
 		Id: file.id,
 		Type: type,
@@ -401,11 +413,15 @@ export function assembleDeclaration(
 	opinions: CseRow[],
 	cseFiles: FileRow[] = [],
 	jointEvaluationFiles: FileRow[] = [],
+	formalNoticeJointEvaluationFiles: FileRow[] = [],
 ) {
 	const { initial, correction } = buildIndicatorG(indicatorGEntries);
 
 	const hasCseFiles = cseFiles.length > 0;
 	const jointEvaluationFile = mostRecent(jointEvaluationFiles);
+	const formalNoticeJointEvaluationFile = mostRecent(
+		formalNoticeJointEvaluationFiles,
+	);
 
 	const flags = deriveExportFlags(row, indicatorGEntries);
 	const cancelled = isCancelled(row);
@@ -511,6 +527,12 @@ export function assembleDeclaration(
 			Fichier_evaluation_conjointe: buildFichierPayload(
 				jointEvaluationFile,
 				"joint_evaluation",
+			),
+		}),
+		...(formalNoticeJointEvaluationFile && {
+			Fichier_evaluation_conjointe_mise_en_demeure: buildFichierPayload(
+				formalNoticeJointEvaluationFile,
+				"formal_notice_joint_evaluation",
 			),
 		}),
 	};
