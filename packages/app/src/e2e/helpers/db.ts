@@ -382,15 +382,64 @@ export async function getLatestJointEvaluationFileIdForTestSiren(): Promise<
 	}
 }
 
-export async function deleteJointEvaluationFiles() {
+type JointEvaluationFileType =
+	| "joint_evaluation"
+	| "formal_notice_joint_evaluation";
+
+async function deleteFilesOfType(type: JointEvaluationFileType) {
 	const sql = createConnection();
 	try {
 		await sql`
 			DELETE FROM app_file
-			WHERE type = 'joint_evaluation'
+			WHERE type = ${type}
 			AND declaration_id IN (
 				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
 			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function deleteJointEvaluationFiles() {
+	await deleteFilesOfType("joint_evaluation");
+}
+
+export async function deleteFormalNoticeFiles() {
+	await deleteFilesOfType("formal_notice_joint_evaluation");
+}
+
+export async function countFormalNoticeFiles(): Promise<number> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ count: number }]>`
+			SELECT COUNT(*)::int AS count
+			FROM app_file f
+			INNER JOIN app_declaration d ON f.declaration_id = d.id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND f.type = 'formal_notice_joint_evaluation'
+		`;
+		return rows[0]?.count ?? 0;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function setGapCseOpinion(
+	year: number,
+	opinion: "favorable" | "unfavorable",
+) {
+	const sql = createConnection();
+	try {
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
+		`;
+		if (decl.length === 0) return;
+		await sql`
+			INSERT INTO app_cse_opinion (id, declaration_id, declaration_number, type, gap_consulted, opinion, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 1, 'gap', true, ${opinion}, NOW(), NOW())
+			ON CONFLICT (declaration_id, declaration_number, type)
+			DO UPDATE SET opinion = EXCLUDED.opinion, updated_at = NOW()
 		`;
 	} finally {
 		await sql.end();

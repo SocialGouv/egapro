@@ -336,11 +336,15 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 
 		expect(parcours.Statut).toBe(DEMARCHE_COMPLETED);
 		expect(parcours.Annulee).toBe(false);
-		// This company answered "no CSE", so nothing is owed from the terminal
-		// state. The ruleset still accepts submit_cse_opinion here — unguarded, to
-		// cover a company that gains a CSE later — but the export does not advertise
-		// an opinion to a control authority when none is required.
+		// A justified gap without a CSE leaves the formal-notice report deposit open, never a CSE opinion.
 		expect(parcours.Avis_CSE_requis).toBe(false);
-		expect(parcours.Prochaines_etapes_possibles).toEqual([]);
+		expect(parcours.Prochaines_etapes_possibles).toEqual([
+			{
+				Identifiant_transition: "submit_formal_notice_joint_evaluation",
+				Action: "submit_formal_notice_joint_evaluation",
+				Etat_cible: DEMARCHE_COMPLETED,
+				Libelle: "Finalisation - Démarche des indicateurs de rémunération",
+			},
+		]);
 	});
 });

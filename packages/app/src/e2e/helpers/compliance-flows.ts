@@ -20,7 +20,10 @@ import {
 } from "./declaration-flows";
 import { urlGlob } from "./routes";
 
-const DUMMY_PDF = path.join(import.meta.dirname, "../fixtures/dummy.pdf");
+export const DUMMY_PDF = path.join(
+	import.meta.dirname,
+	"../fixtures/dummy.pdf",
+);
 
 type CseStep1Options = {
 	hasSecondDeclaration?: boolean;
