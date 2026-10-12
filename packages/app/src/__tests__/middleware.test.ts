@@ -62,7 +62,7 @@ describe("middleware", () => {
   });
 
   it("redirects an anonymous user from a private route to login", async () => {
-    const res = await call("/mon-espace/mes-entreprises", null);
+    const res = await call("/mon-espace/mes-declarations", null);
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/login?callbackUrl=");
   });

@@ -79,7 +79,6 @@ export const config = {
           "/admin",
           "/mon-espace/mes-declarations",
           "/mon-espace/les-entreprises",
-          "/mon-espace/mes-entreprises",
           "/index-egapro/declaration/augmentations",
           "/index-egapro/declaration/augmentations-et-promotions",
           "/index-egapro/declaration/commencer",

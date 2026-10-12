@@ -173,6 +173,7 @@ export const CommencerForm = ({ session }: { session: Session }) => {
             />
           ) : (
             <Input
+              disabled
               label="Numéro Siren de l’entreprise"
               hintText="Entreprise sélectionnée lors de la connexion ProConnect."
               state={errors.siren && "error"}
