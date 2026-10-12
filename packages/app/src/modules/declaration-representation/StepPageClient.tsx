@@ -25,6 +25,7 @@ type StepPageClientProps = {
 	campaignYear: number;
 	initialDraft: RepresentationDraft;
 	campaignOpen: boolean;
+	declarationDeadline: Date;
 	isSubmitted?: boolean;
 };
 
@@ -47,6 +48,7 @@ export function StepPageClient({
 	campaignYear,
 	initialDraft,
 	campaignOpen,
+	declarationDeadline,
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
@@ -140,6 +142,7 @@ export function StepPageClient({
 				isReadOnly,
 				previousHref,
 				registerStepValidator,
+				declarationDeadline,
 			}}
 		>
 			<h1 className="fr-h4">

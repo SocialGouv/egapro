@@ -1,8 +1,40 @@
 import "server-only";
 
+import { parseCampaignYear } from "~/modules/domain";
+import type { QueryParseResult } from "~/server/audit/queryMetadata";
 import { getPdfSize, pdfSizeKey, setPdfSize } from "./pdfSizeCache";
 
 type RenderPdf = () => Promise<Buffer>;
+
+const NO_STORE = "private, no-store";
+
+// Shaped like a Zod `safeParse` so the audit row goes through `auditQueryMetadata`.
+export function parseRequestedYear(
+	request: Request,
+): QueryParseResult<{ year: number | null }> {
+	const raw = new URL(request.url).searchParams.get("year");
+	if (!raw) {
+		return { success: true, data: { year: null } };
+	}
+	const year = parseCampaignYear(raw);
+	return year === null
+		? { success: false, error: { issues: [{ path: ["year"] }] } }
+		: { success: true, data: { year } };
+}
+
+export function pdfErrorResponse(
+	body: string | null,
+	status: number,
+): Response {
+	return new Response(body, {
+		status,
+		headers: { "Cache-Control": NO_STORE },
+	});
+}
+
+export function invalidYearResponse(): Response {
+	return pdfErrorResponse("Paramètre 'year' invalide", 400);
+}
 
 export function pdfHeaders(
 	filename: string,
@@ -12,6 +44,7 @@ export function pdfHeaders(
 		"Content-Type": "application/pdf",
 		"Content-Disposition": `attachment; filename="${filename}"`,
 		"Content-Length": String(byteLength),
+		"Cache-Control": NO_STORE,
 	};
 }
 

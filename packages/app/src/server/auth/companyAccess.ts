@@ -2,6 +2,8 @@ import { TRPCError } from "@trpc/server";
 import type { Session } from "next-auth";
 
 import { isAdminMfaFresh, parseSiren } from "~/modules/domain";
+import type { DbClient } from "~/server/services/declarationLockService";
+import { isUserLinkedToSiren } from "./companyLink";
 
 type ActiveImpersonation = NonNullable<Session["user"]["impersonation"]>;
 
@@ -40,8 +42,7 @@ function activeImpersonation(
  * Parsing, never slicing: a malformed SIRET must not yield a nine-character
  * lookalike that then reaches the database as if it were a real SIREN.
  *
- * Shared across every page/layout and the tRPC company procedure so every
- * surface behaves identically during mimoquage (issue #3230).
+ * A claim, not an authorization: authorize through `resolveAuthorizedSiren`.
  */
 export function getEffectiveSiren(
 	session: Session | null,
@@ -54,23 +55,10 @@ export function getEffectiveSiren(
 }
 
 /**
- * Centralized rule for "can this authenticated user read/write data scoped
- * to the given company?".
- *
- * Two cases grant access:
- *   1. The user owns the SIREN via `app_user_company` (normal case — the
- *      caller still has to run the ownership query, this function only
- *      encodes the admin-impersonation short-circuit).
- *   2. The user is an admin whose impersonation is effective — inside the
- *      MFA window — and targets *exactly* this SIREN.
- *
- * Returning `true` here means the ownership check should be skipped; callers
- * must still run the query when this returns `false`. An admin out of window
- * therefore falls back to the ownership query and is refused a company they
- * are not a referent of, which is the intended outcome.
- *
- * The `siren` comparison is strict equality — an admin impersonating SIREN
- * A cannot read SIREN B "in passing".
+ * Is the session's admin impersonating *exactly* this SIREN, inside the MFA
+ * window? Strict equality: an admin impersonating SIREN A cannot read SIREN B
+ * "in passing". An admin out of window gets `false` and falls back to the
+ * ownership query like any declarant.
  */
 export function isImpersonatingSiren(
 	session: Session | null,
@@ -78,6 +66,28 @@ export function isImpersonatingSiren(
 	now: Date = new Date(),
 ): boolean {
 	return activeImpersonation(session, now)?.siren === siren;
+}
+
+// Read from the database, never the JWT: a link revoked by a sign-in on another device stops granting access on the next request.
+export async function canAccessCompany(
+	client: DbClient,
+	session: Session | null,
+	siren: string,
+	now: Date = new Date(),
+): Promise<boolean> {
+	if (!session?.user) return false;
+	if (isImpersonatingSiren(session, siren, now)) return true;
+	return isUserLinkedToSiren(client, session.user.id, siren);
+}
+
+export async function resolveAuthorizedSiren(
+	client: DbClient,
+	session: Session | null,
+	now: Date = new Date(),
+): Promise<string | null> {
+	const siren = getEffectiveSiren(session, now);
+	if (!siren) return null;
+	return (await canAccessCompany(client, session, siren, now)) ? siren : null;
 }
 
 /**

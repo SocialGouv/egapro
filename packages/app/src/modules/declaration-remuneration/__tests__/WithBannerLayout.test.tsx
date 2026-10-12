@@ -1,13 +1,15 @@
 import type React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockRedirect, mockAuth, mockGetEffectiveSiren } = vi.hoisted(() => ({
-	mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
-		throw new Error("NEXT_REDIRECT");
+const { mockRedirect, mockAuth, mockResolveAuthorizedSiren } = vi.hoisted(
+	() => ({
+		mockRedirect: vi.fn<(url: string) => never>().mockImplementation(() => {
+			throw new Error("NEXT_REDIRECT");
+		}),
+		mockAuth: vi.fn(),
+		mockResolveAuthorizedSiren: vi.fn(),
 	}),
-	mockAuth: vi.fn(),
-	mockGetEffectiveSiren: vi.fn(),
-}));
+);
 
 vi.mock("next/navigation", () => ({
 	usePathname: vi.fn(),
@@ -22,9 +24,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("~/server/auth", () => ({ auth: mockAuth }));
 
+vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/auth/companyAccess", async (importOriginal) => ({
 	...(await importOriginal<typeof import("~/server/auth/companyAccess")>()),
-	getEffectiveSiren: mockGetEffectiveSiren,
+	resolveAuthorizedSiren: mockResolveAuthorizedSiren,
 }));
 
 vi.mock("~/server/db/getCampaignDeadlines", async () => {
@@ -81,7 +84,7 @@ function mockLayout({
 	user?: Record<string, unknown>;
 } = {}) {
 	mockAuth.mockResolvedValue({ user });
-	mockGetEffectiveSiren.mockReturnValue(SIREN);
+	mockResolveAuthorizedSiren.mockResolvedValue(SIREN);
 	vi.mocked(api.company.get).mockResolvedValue({
 		name: "Société Démo",
 		siren: SIREN,
@@ -109,7 +112,7 @@ describe("WithBannerLayout", () => {
 	beforeEach(() => {
 		mockRedirect.mockClear();
 		mockAuth.mockReset();
-		mockGetEffectiveSiren.mockReset();
+		mockResolveAuthorizedSiren.mockReset();
 		vi.mocked(api.declaration.getOrCreate).mockClear();
 	});
 
@@ -122,7 +125,7 @@ describe("WithBannerLayout", () => {
 
 	it("renders the missing-SIRET screen when no company is in scope", async () => {
 		mockAuth.mockResolvedValue({ user: { id: "u1" } });
-		mockGetEffectiveSiren.mockReturnValue(null);
+		mockResolveAuthorizedSiren.mockResolvedValue(null);
 
 		await expect(renderLayout()).resolves.toBeDefined();
 		expect(mockRedirect).not.toHaveBeenCalled();

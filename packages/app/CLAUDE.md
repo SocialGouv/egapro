@@ -122,7 +122,7 @@ La progression de la déclaration — écran suivant, transitions, conditions �
 | Route handler `src/app/api/**/route.ts` | wrapper `withAuditedRoute(…)` + `cachedAuth(request)` |
 | Événement NextAuth, action cron / système | `logAction` direct |
 
-Trois points de câblage sont requis à chaque fois : la constante, la catégorie (qui décide le bucket de rétention CNIL), et le fil propre à la surface. Le `metadata` jsonb ne doit **jamais** contenir de secret ni d'adresse IP (il y a une colonne dédiée).
+Trois points de câblage sont requis à chaque fois : la constante, la catégorie (qui décide le bucket de rétention CNIL), et le fil propre à la surface. `logAction` projette `metadata` par action selon une liste de clés et de valeurs validées ; secrets, IP, fichiers et texte libre n'y sont pas conservés.
 
 > Playbook complet, snippets et checklist → `.claude/rules/audit-logging.md`
 

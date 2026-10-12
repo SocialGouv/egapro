@@ -47,3 +47,21 @@ updates:
         update-types:
           - "version-update:semver-patch"
           - "version-update:semver-minor"
+  # Image de base de packages/app/Dockerfile, épinglée par tag exact + digest :
+  # Dependabot remonte les deux ensemble. Les montées de majeure sont ignorées
+  # pour rester sur la ligne LTS 24 (une majeure se décide, elle ne se subit pas).
+  - package-ecosystem: docker
+    directory: "/packages/app"
+    target-branch: alpha
+    labels:
+      - bot
+      - dependencies
+    schedule:
+      interval: weekly
+      day: monday
+      time: "01:00"
+      timezone: Europe/Paris
+    ignore:
+      - dependency-name: "node"
+        update-types:
+          - "version-update:semver-major"

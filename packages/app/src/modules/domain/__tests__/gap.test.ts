@@ -8,6 +8,7 @@ import {
 	computeGapBetween,
 	computeGapRatio,
 	computeTotal,
+	gapFavoredSex,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -329,6 +330,36 @@ describe("gapMagnitude", () => {
 
 	it("returns null for null input", () => {
 		expect(gapMagnitude(null)).toBeNull();
+	});
+});
+
+describe("gapFavoredSex", () => {
+	it("favors men for a positive gap", () => {
+		expect(gapFavoredSex(10)).toBe("men");
+	});
+
+	it("favors women for a negative gap", () => {
+		expect(gapFavoredSex(-10)).toBe("women");
+	});
+
+	it("returns null for a null gap", () => {
+		expect(gapFavoredSex(null)).toBeNull();
+	});
+
+	it("returns null for an exact zero gap", () => {
+		expect(gapFavoredSex(0)).toBeNull();
+	});
+
+	it("returns null for a gap that truncates to zero (positive)", () => {
+		expect(gapFavoredSex(0.004)).toBeNull();
+	});
+
+	it("returns null for a gap that truncates to zero (negative)", () => {
+		expect(gapFavoredSex(-0.004)).toBeNull();
+	});
+
+	it("favors men once the gap truncates to a non-zero value", () => {
+		expect(gapFavoredSex(0.01)).toBe("men");
 	});
 });
 

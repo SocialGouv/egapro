@@ -7,6 +7,7 @@ import {
 	fetchCseFilesByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 } from "~/modules/export";
+import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
 import { resolveExportDeclarationId } from "~/server/db/declarationConditions";
@@ -30,10 +31,13 @@ export const GET = withAuditedRoute(
 			const siren = parseSiren(url.searchParams.get("siren"));
 			return {
 				siren,
-				metadata: {
-					siren,
-					year: url.searchParams.get("year") ?? null,
-				},
+				metadata: auditQueryMetadata(
+					exportFilesQuerySchema.safeParse({
+						siren: url.searchParams.get("siren") ?? undefined,
+						year: url.searchParams.get("year") ?? undefined,
+					}),
+					(query) => ({ siren: query.siren, year: query.year }),
+				),
 			};
 		},
 	},

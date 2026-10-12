@@ -7,6 +7,8 @@ export {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
+	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
 } from "./shared/adminMfa";
 // Campaign
@@ -74,6 +76,8 @@ export {
 	QUARTILE_THRESHOLD_COUNT,
 	V2_FIRST_CAMPAIGN_YEAR,
 } from "./shared/constants";
+// CSV export field escaping
+export { toCsvField } from "./shared/csv";
 // Display decimals — 2, truncated toward zero, for every percentage and average shown to the user
 export {
 	DISPLAY_DECIMALS,
@@ -232,6 +236,7 @@ export {
 	computeGapRatio,
 	computeTotal,
 	GAP_RATIO_DECIMALS,
+	gapFavoredSex,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -340,7 +345,12 @@ export {
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
 // SIREN utilities
-export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+export {
+	extractSiren,
+	formatSiren,
+	parseSiren,
+	parseStrictSiren,
+} from "./shared/siren";
 // Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {

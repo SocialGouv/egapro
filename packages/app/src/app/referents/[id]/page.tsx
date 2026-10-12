@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PublicReferentDetail } from "~/modules/referents";
+import { TooManyRequestsPage } from "~/modules/error";
+import {
+	PublicReferentDetail,
+	REFERENT_LOOKUP_RATE_LIMITED,
+	toReferentLookupFailure,
+} from "~/modules/referents";
 import { api } from "~/trpc/server";
 
 export const metadata: Metadata = {
@@ -17,8 +22,13 @@ type Props = {
 export default async function Page({ params }: Props) {
 	const { id } = await params;
 
-	const referent = await api.publicReferents.getById({ id }).catch(() => null);
+	const referent = await api.publicReferents
+		.getById({ id })
+		.catch(toReferentLookupFailure);
 
+	if (referent === REFERENT_LOOKUP_RATE_LIMITED) {
+		return <TooManyRequestsPage />;
+	}
 	if (!referent) {
 		notFound();
 	}

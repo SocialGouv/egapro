@@ -15,6 +15,11 @@ onlyBuiltDependencies:
 # drawn next to its letter instead of over it (#4017). Fixed upstream in 6.3.0
 # (diegomura/react-pdf#3384), which the transitive '^6.2.0' range already allows.
 # Pinned here so a re-resolution cannot fall back to 6.2.0.
+#
+# next-auth declares nodemailer as an optional peer for its Email provider,
+# which egapro does not use (ProConnect only). pnpm still installed the 7.x line,
+# flagged by several advisories; the peer is dropped instead of being resolved.
 overrides:
   '@react-pdf/textkit': '^6.3.0'
+  'next-auth>nodemailer': '-'
 

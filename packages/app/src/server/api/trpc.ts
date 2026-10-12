@@ -26,11 +26,17 @@ import { auditMiddleware as runAuditMiddleware } from "~/server/audit/trpcMiddle
 import { auth } from "~/server/auth";
 import {
 	assertNotImpersonating,
+	canAccessCompany,
 	getEffectiveSiren,
 } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { declarations } from "~/server/db/schema";
 import { getActiveLock } from "~/server/services/declarationLockService";
+import {
+	checkPublicApiRateLimit,
+	PUBLIC_API_INVALID_TOKEN_MESSAGE,
+	PUBLIC_API_RATE_LIMITED_MESSAGE,
+} from "~/server/services/publicApiRateLimit";
 
 /**
  * 1. CONTEXT
@@ -174,6 +180,26 @@ export const publicProcedure = t.procedure
 	.use(timingMiddleware)
 	.use(auditMiddleware);
 
+/** Shares the public REST API quota so tRPC cannot be used to bypass its throttling. */
+export const rateLimitedPublicProcedure = publicProcedure.use(
+	async ({ ctx, next }) => {
+		const verdict = await checkPublicApiRateLimit(ctx.headers);
+		if (verdict === "invalid_token") {
+			throw new TRPCError({
+				code: "UNAUTHORIZED",
+				message: PUBLIC_API_INVALID_TOKEN_MESSAGE,
+			});
+		}
+		if (verdict === "limited") {
+			throw new TRPCError({
+				code: "TOO_MANY_REQUESTS",
+				message: PUBLIC_API_RATE_LIMITED_MESSAGE,
+			});
+		}
+		return next();
+	},
+);
+
 /**
  * Protected (authenticated) procedure
  *
@@ -222,24 +248,30 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 /**
  * Company procedure — authenticated + SIREN extracted from session.
  *
- * Guarantees `ctx.siren` is a valid 9-digit SIREN.
+ * Guarantees `ctx.siren` is a valid 9-digit SIREN the caller may act on.
  * Use this for any procedure that operates on company-scoped data.
  */
-export const companyProcedure = protectedProcedure.use(({ ctx, next }) => {
-	// The impersonation short-circuit is not re-implemented here: it lives in
-	// `getEffectiveSiren`, which also holds the MFA-window condition (#4466).
-	// One module decides which company a session acts on, so a procedure can
-	// never keep resolving a foreign SIREN that the pages have already stopped
-	// resolving.
-	const siren = getEffectiveSiren(ctx.session);
-	if (!siren) {
-		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "SIRET manquant ou invalide dans la session",
-		});
-	}
-	return next({ ctx: { ...ctx, siren } });
-});
+export const companyProcedure = protectedProcedure.use(
+	async ({ ctx, next }) => {
+		// The impersonation short-circuit is not re-implemented here: it lives in
+		// `getEffectiveSiren` and `canAccessCompany`, which also hold the
+		// MFA-window condition (#4466).
+		const siren = getEffectiveSiren(ctx.session);
+		if (!siren) {
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "SIRET manquant ou invalide dans la session",
+			});
+		}
+		if (!(await canAccessCompany(ctx.db, ctx.session, siren))) {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Accès refusé à cette entreprise.",
+			});
+		}
+		return next({ ctx: { ...ctx, siren } });
+	},
+);
 
 /**
  * Company-scoped write procedure — same as {@link companyProcedure} plus the

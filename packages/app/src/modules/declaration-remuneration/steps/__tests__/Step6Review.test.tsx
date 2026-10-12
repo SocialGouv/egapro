@@ -301,6 +301,22 @@ describe("Step6Review", () => {
 		expect(alert).not.toHaveTextContent("No matching transition");
 	});
 
+	it("shows why the server refused the submission", () => {
+		mockSubmitState.error = {
+			message:
+				"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+			data: { code: "PRECONDITION_FAILED" },
+		};
+		renderSubmissionReview();
+		const modal = document.getElementById("submit-declaration-modal");
+		if (!modal) throw new Error("Submit modal not found");
+
+		const alert = within(modal).getByRole("alert", { hidden: true });
+		expect(alert).toHaveTextContent(
+			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+		);
+	});
+
 	it("closes the modal before navigating after a successful submission", () => {
 		renderSubmissionReview();
 

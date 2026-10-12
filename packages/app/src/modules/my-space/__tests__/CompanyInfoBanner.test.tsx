@@ -212,6 +212,104 @@ describe("CompanyInfoBanner", () => {
 		).not.toBeInTheDocument();
 	});
 
+	describe("info source tooltip", () => {
+		it("shows an info button describing the INSEE + DSN source between 50 and 99 employees", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+			);
+			expect(
+				screen.getByRole("button", {
+					description:
+						"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
+					name: "Information sur la source des données",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("shows an info button describing the INSEE-only source below 50 employees", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 37 }} />,
+			);
+			expect(
+				screen.getByRole("button", {
+					description: "Source : INSEE.",
+					name: "Information sur la source des données",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("shows an info button describing the INSEE-only source when absent from the GIP file", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: null }} />,
+			);
+			expect(
+				screen.getByRole("button", {
+					description: "Source : INSEE.",
+					name: "Information sur la source des données",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("describes the INSEE + DSN source just below the 100 threshold", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 99.97 }} />,
+			);
+			expect(
+				screen.getByRole("button", {
+					description:
+						"Source : INSEE et DSN (Déclarations Sociales Nominatives) pour l'effectif annuel moyen.",
+					name: "Information sur la source des données",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("describes the INSEE-only source just below the 50 threshold", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 49.99 }} />,
+			);
+			expect(
+				screen.getByRole("button", {
+					description: "Source : INSEE.",
+					name: "Information sur la source des données",
+				}),
+			).toBeInTheDocument();
+		});
+
+		it("hides the info button at or above the 100 threshold, leaving 'Modifier' in place", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 100 }} />,
+			);
+			expect(
+				screen.queryByRole("button", {
+					name: "Information sur la source des données",
+				}),
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: "Modifier" }),
+			).toBeInTheDocument();
+		});
+
+		it("hides the info button well above the 100 threshold", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 250 }} />,
+			);
+			expect(
+				screen.queryByRole("button", {
+					name: "Information sur la source des données",
+				}),
+			).not.toBeInTheDocument();
+		});
+
+		it("keeps the h1 accessible name as the exact company name when the info button is shown", () => {
+			render(
+				<CompanyInfoBanner company={{ ...baseCompany, gipWorkforce: 70 }} />,
+			);
+			expect(
+				screen.getByRole("heading", { level: 1, name: "Alpha Solutions" }),
+			).toBeInTheDocument();
+		});
+	});
+
 	describe("country row (#4279)", () => {
 		it("shows 'Pays : <libellé>' and no 'Adresse :' for a known foreign country, even with an address stored", () => {
 			render(

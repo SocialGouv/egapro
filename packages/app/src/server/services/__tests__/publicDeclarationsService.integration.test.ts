@@ -96,6 +96,7 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 				siren: SIREN_A,
 				name: "Alpha Industries",
 				address: "1 rue Alpha",
+				city: "Paris",
 				region: "11",
 				departmentCode: "75",
 				departmentLabel: "Paris",
@@ -229,6 +230,35 @@ describe("searchPublicDeclarations (real Postgres)", () => {
 			offset: 0,
 		});
 		expect(hiddenByName.data).toEqual([]);
+	});
+
+	it("reads LIKE wildcards in q and city as literal characters", async () => {
+		await db
+			.insert(declarations)
+			.values([
+				declarationRow({ siren: SIREN_A, year: 2100 }),
+				declarationRow({ siren: SIREN_C, year: 2100 }),
+			]);
+
+		const anyName = await searchPublicDeclarations({
+			q: "_",
+			limit: 10,
+			offset: 0,
+		});
+		const anyCity = await searchPublicDeclarations({
+			city: "%",
+			limit: 10,
+			offset: 0,
+		});
+		const literalCity = await searchPublicDeclarations({
+			city: "ari",
+			limit: 10,
+			offset: 0,
+		});
+
+		expect(literalCity.data.map((d) => d.siren)).toEqual([SIREN_A]);
+		expect(anyName.data).toEqual([]);
+		expect(anyCity.data).toEqual([]);
 	});
 
 	it("filters by region, department, naf and year", async () => {

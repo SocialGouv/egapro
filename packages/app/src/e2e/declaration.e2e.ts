@@ -30,6 +30,7 @@ import {
 	STEP1_WORKFORCE,
 	STEP5_WORKFORCE_REMINDER,
 	submitFromStep6Recap,
+	submitIndicatorGStep,
 	submitStepsThroughPayGaps,
 	submitStepsThroughQuartiles,
 } from "./helpers/declaration-flows";
@@ -409,7 +410,10 @@ test.describe("Declaration workflow", () => {
 
 	// Must be last — mutates declaration status to 'submitted'
 	test("step 6 submit leaves declaration page", async ({ page }) => {
-		await goToStep(page, 6);
+		// The suite's company owes indicator G, and since #4757 the server refuses
+		// a declaration transmitted without it.
+		await goToStep(page, 5);
+		await submitIndicatorGStep(page, { hasGap: false });
 
 		await submitFromStep6Recap(page);
 

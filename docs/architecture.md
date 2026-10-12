@@ -292,9 +292,13 @@ sequenceDiagram
 
 Le callback `jwt` (NextAuth) :
 
-1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id` et `isAdmin`.
-2. Injecte `userId`, `email`, `isAdmin` dans le token.
-3. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+1. À la connexion : upsert dans `users` (email, prénom, nom), récupère `id`.
+2. À la connexion : réaligne `app_user_company` sur le SIRET ProConnect (`syncUserCompanyLink`, `src/server/auth/companyLink.ts`). Une transaction, sérialisée par utilisateur, crée le lien courant et supprime les autres ; un SIRET absent ou invalide supprime tous les liens. Les verrous d'édition détenus sur un SIREN révoqué sont libérés. Chaque révocation (`auth.company_link_revoked`, motif `siret_changed` / `siret_missing`) et chaque verrou libéré (`declaration.lock_released`) est journalisé **dans la même transaction**. Base indisponible : la connexion échoue.
+3. Calcule `isAdmin` : l'email doit figurer dans `ADMIN_EMAILS` **et** le claim ProConnect `roles` doit contenir `agent_public` — sauf si `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` vaut `false`, qui lève seulement cette seconde condition. Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle, flag à `true`) a `isAdmin = false`. La colonne `users.is_admin` suit la même valeur.
+4. Injecte `userId`, `email`, `isAdmin`, `siret` dans le token.
+5. Si l'utilisateur est admin et qu'une **impersonation** est active (via `session.update({ siren })`), injecte `impersonation: { siren, startedAt }`.
+
+Le `siret` du token est une **déclaration**, pas une autorisation : un JWT ouvert sur un autre appareil le garde après une révocation. Toute surface qui agit pour une entreprise vérifie donc le lien en base à chaque requête : `canAccessCompany` / `resolveAuthorizedSiren` (`src/server/auth/companyAccess.ts`), utilisés par `companyProcedure`, les procédures qui reçoivent un `siren` en entrée, `getSessionSiren` (route handlers) et les pages. Seule exception, l'impersonation admin effective (fenêtre MFA ouverte), qui ne demande pas de lien sur le SIREN incarné. La requête porte sur la clé primaire `(user_id, siren)`.
 
 ### 5.4 Edge middleware (`src/middleware.ts`)
 
@@ -339,9 +343,15 @@ sequenceDiagram
 
 L'écriture est bloquée à **deux niveaux** : front (`useReadOnlyGuard`) et back (`companyWriteProcedure` rejette si impersonation). Tracé dans `adminImpersonationEvents` + audit log. Le verrou collaboratif est également désactivé en mode impersonation.
 
-### 5.7 Provenance de `ADMIN_EMAILS`
+### 5.7 Provenance de `ADMIN_EMAILS` et condition d'agent public
 
-`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) décide qui reçoit le rôle admin : synchronisation bidirectionnelle à chaque connexion, l'ajout promeut et le retrait rétrograde. Deux listes distinctes, chacune scellée avec le certificat de son propre cluster :
+`ADMIN_EMAILS` (liste d'emails séparés par des virgules, `src/env.js`) ne suffit plus seule : depuis #4560, `isAdmin` exige en plus que ProConnect reconnaisse le compte comme **agent public** (claim `roles` contenant `agent_public`, scope demandé par le provider ProConnect). Un compte « listé » (dans `ADMIN_EMAILS`) mais pas « accordé » (sans le rôle) n'est pas admin. Synchronisation bidirectionnelle à chaque connexion sur cette double condition : l'un ou l'autre côté qui change (liste, ou rôle ProConnect) promeut ou rétrograde dès la connexion suivante.
+
+Le flag `EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT` (`src/env.js`, `"true"`/`"false"`, défaut `"true"`) lève **seulement** l'exigence `agent_public` — jamais `ADMIN_EMAILS`, ni la double authentification (§5.5). Il vaut `"false"` sur les review apps et en preprod (`.kontinuous/env/{dev,preprod}/values.yaml`, sous `app.vars`), pour garder l'accès aux prestataires de l'équipe dont l'organisation ProConnect n'est pas publique. Rien en production, où le défaut s'applique.
+
+La ligne d'audit `auth.admin_mfa` (`AUDIT_ACTIONS.AUTH_ADMIN_MFA`) est écrite pour tout compte **listé**, accordé ou non, et porte `roles` (`string[]`, ou `null` si le claim n'est pas arrivé) ainsi que `publicAgentRequired` (la valeur du flag à cette connexion) — ce qui permet de distinguer un claim non activé côté ProConnect d'un compte simplement non public.
+
+Deux listes distinctes pour `ADMIN_EMAILS`, chacune scellée avec le certificat de son propre cluster :
 
 | Environnements | Manifeste(s) | Scope sealed-secret |
 |---|---|---|
@@ -390,7 +400,7 @@ Une procédure tRPC = un appel typé bout-en-bout (input Zod, output inféré). 
 |---|---|---|
 | `publicProcedure` | rien | Public (non authentifié) |
 | `protectedProcedure` | session valide | Utilisateur connecté |
-| `companyProcedure` | session + binding SIREN (depuis le contexte) | Utilisateur agissant pour une entreprise |
+| `companyProcedure` | session + binding SIREN (depuis le contexte) + lien `app_user_company` vérifié en base (sauf impersonation effective) | Utilisateur agissant pour une entreprise |
 | `companyWriteProcedure` | + read-only guard (refus si impersonation) | Utilisateur, écriture |
 | `declarationProcedure` | `companyProcedure` + résolution déclaration | Utilisateur, lecture déclaration |
 | `declarationWriteProcedure` | + read-only guard | Utilisateur, écriture déclaration |
@@ -458,7 +468,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS` (`~/modules/audit/shared/actionKeys.ts`). Le middleware tRPC applique une **allowlist de métadonnées** (`METADATA_ALLOWED_KEYS`) sur les procédures `representationDeclaration.*` : seule la clé `year` de l'input brut est conservée dans `audit.action_log.metadata`, pour ne jamais y faire fuiter les pourcentages ou le texte libre du brouillon.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -599,7 +609,7 @@ id, user_id, user_email, siren, action, category, status,
 ip_address, user_agent, metadata (jsonb), error_message, created_at
 ```
 
-Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement.
+Les nouvelles lignes conservent les identifiants `user_id` et `siren` lorsqu'ils sont nécessaires à l'attribution d'une action. `user_email` et `user_agent` ne sont plus enregistrés. L'adresse IP est tronquée (IPv4 /16, IPv6 /48), le message d'erreur est réduit à un code contrôlé et `metadata` ne garde que des champs explicitement autorisés et validés pour chaque action. Le worker de notifications et les scripts de purge appliquent la même règle à leurs écritures SQL directes. Le schéma reste compatible avec les colonnes historiques ; la purge par catégorie reste inchangée.
 
 ### 9.3 Catégories et rétention
 
@@ -615,6 +625,8 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | `system` | 365 j | Import GIP, crons de purge (audit + déclarations) |
 
 `AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`. La rétention **des déclarations** (distincte de celle du log d'audit) est pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**, voir §9.6).
+
+Vue d'ensemble de tous les journaux produits par l'application (pas seulement celui-ci) et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 9.4 Wire-up obligatoire
 
@@ -632,7 +644,7 @@ Toute nouvelle action audited requiert **3 points** :
 | Clé `AUDIT_ACTIONS` | Valeur en BDD | Catégorie | Surface |
 |---|---|---|---|
 | `DECLARATION_LOCK_ACQUIRED` | `declaration.lock_acquired` | `mutation` | `declarationLock.acquireLock` (tRPC, logAction direct) |
-| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) |
+| `DECLARATION_LOCK_RELEASED` | `declaration.lock_released` | `mutation` | `declarationLock.releaseLock` (tRPC) + `POST /api/declaration-lock/release` (withAuditedRoute) + libération forcée à la révocation d'un lien entreprise (connexion, `logActionInTransaction`, `metadata.reason = "company_link_revoked"`) |
 | `ADMIN_DECLARATION_RELEASE_LOCK` | `admin_declaration.release_lock` | `mutation` | `adminDeclarations.releaseLock` (tRPC, PROCEDURE_TO_ACTION) |
 | `DECLARATION_LOCK_STATE_READ` | `declaration.lock_state_read` | `read_sensitive` | `declarationLock.getLockState` (tRPC, PROCEDURE_TO_ACTION) |
 | `ADMIN_SETTINGS_UPDATE_LOCK_TIMEOUT` | `admin_settings.update_lock_timeout` | `mutation` | `adminSettings.updateLockTimeout` (tRPC, PROCEDURE_TO_ACTION) |
@@ -743,6 +755,17 @@ Déclarées et validées dans `src/env.js`. **Jamais lire `process.env` directem
 ### 10.5 Secrets
 
 Aucune valeur secrète **dans le repo**. Gérés via des [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) sous `.kontinuous/`. Les CronJobs récupèrent leurs credentials PostgreSQL et S3 via `secretKeyRef` / `secretRef` (jamais en clair dans les manifests).
+
+**Secrets de la CI E2E** (`e2e.yaml`, `e2e-grille.yaml`, job `a11y-pages` d'`a11y.yaml`) — ces jobs exécutent le code de la branche testée, scripts d'installation compris, donc aucun secret du dépôt n'y est posé au niveau du job (#4699) :
+
+| Variable | Source | Exposée à |
+|---|---|---|
+| `AUTH_SECRET` | générée à chaque run (`openssl rand`, masquée) — aucun secret GitHub | tout le job |
+| `EGAPRO_PROCONNECT_CLIENT_ID` / `_CLIENT_SECRET` / `_ISSUER` | secrets GitHub — la connexion E2E est une vraie connexion ProConnect (FIA1V2 via Charon) | steps `Build` (env.js refuse un build de production sans ProConnect) et exécution des tests |
+| `EGAPRO_WEEZ_API_URL` | secret GitHub — appelé à chaque connexion pour renseigner l'entreprise | idem |
+| `EGAPRO_SUIT_API_URL` | valeur factice `https://suit.invalid` — exigée par env.js, jamais jointe en CI (pas de certificat mTLS) | tout le job |
+
+Une nouvelle variable secrète nécessaire aux E2E se pose de la même façon : au niveau des steps qui lancent l'app, jamais du job.
 
 ### 10.6 Verrou collaboratif — sécurité IDOR
 

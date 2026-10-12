@@ -7,9 +7,10 @@ import { env } from "~/env";
 import { sirenSchema } from "~/modules/admin/schemas";
 import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
-	extractSiren,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
+	PUBLIC_AGENT_ROLE,
 	parseSiren,
 } from "~/modules/domain";
 import { devLoginSchema } from "~/modules/login/schemas";
@@ -17,15 +18,10 @@ import { LOGIN } from "~/modules/routes";
 import { logAction } from "~/server/audit/log";
 import { buildRequestContext, toHeaders } from "~/server/audit/requestContext";
 import { db } from "~/server/db";
-import { toCompanyInsertValues } from "~/server/db/companyInsert";
-import {
-	adminImpersonationEvents,
-	companies,
-	userCompanies,
-	users,
-} from "~/server/db/schema";
-import { fetchCompanyBySiren } from "~/server/services/weez";
+import { adminImpersonationEvents, companies, users } from "~/server/db/schema";
+import { syncUserCompanyLink } from "./companyLink";
 import { parseAdminEmails } from "./parseAdminEmails";
+import { resolveRedirectTarget } from "./redirectTarget";
 
 /** Cap on the `name` field of an impersonation payload — avoids oversized
  *  tokens if an admin forges a huge string in the `session.update` call. */
@@ -381,9 +377,22 @@ function devAuthProvider(): Provider {
 				siret,
 				firstName: localPart,
 				lastName: null,
+				// Stands in for a public agent so local /admin checks need no real ProConnect identity.
+				roles: [PUBLIC_AGENT_ROLE],
 			};
 		},
 	});
+}
+
+/** Narrows a ProConnect userinfo field to a string, discarding any other shape. */
+function stringField(value: unknown): string | null {
+	return typeof value === "string" ? value : null;
+}
+
+// Non-array (including absent) is null; an array keeps only string elements, even if empty — distinct from null for the audit trail.
+function parseRoles(raw: unknown): string[] | null {
+	if (!Array.isArray(raw)) return null;
+	return raw.filter((role): role is string => typeof role === "string");
 }
 
 function getProviders(): Provider[] {
@@ -403,7 +412,7 @@ function getProviders(): Provider[] {
 			clientSecret: env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 			authorization: {
 				params: {
-					scope: "openid email given_name usual_name siret",
+					scope: "openid email given_name usual_name siret roles",
 				},
 			},
 			idToken: true,
@@ -419,28 +428,29 @@ function getProviders(): Provider[] {
 					},
 				});
 				const body = await response.text();
-				let userinfo: Record<string, string>;
+				let userinfo: Record<string, unknown>;
 				if (body.startsWith("{")) {
-					userinfo = JSON.parse(body) as Record<string, string>;
+					userinfo = JSON.parse(body) as Record<string, unknown>;
 				} else {
 					const payload = body.split(".")[1];
 					if (!payload) throw new Error("Invalid JWT from userinfo");
 					userinfo = JSON.parse(
 						Buffer.from(payload, "base64url").toString("utf-8"),
-					) as Record<string, string>;
+					) as Record<string, unknown>;
 				}
 				return {
-					id: userinfo.sub ?? "",
+					id: stringField(userinfo.sub) ?? "",
 					name:
-						[userinfo.given_name, userinfo.usual_name]
+						[stringField(userinfo.given_name), stringField(userinfo.usual_name)]
 							.filter(Boolean)
 							.join(" ") ||
-						userinfo.email ||
+						stringField(userinfo.email) ||
 						"",
-					email: userinfo.email ?? "",
-					siret: userinfo.siret ?? null,
-					firstName: userinfo.given_name ?? null,
-					lastName: userinfo.usual_name ?? null,
+					email: stringField(userinfo.email) ?? "",
+					siret: stringField(userinfo.siret),
+					firstName: stringField(userinfo.given_name),
+					lastName: stringField(userinfo.usual_name),
+					roles: parseRoles(userinfo.roles),
 				};
 			},
 		});
@@ -475,16 +485,7 @@ export const authConfig = {
 	providers: getProviders(),
 	callbacks: {
 		redirect({ url, baseUrl }) {
-			if (url.startsWith(baseUrl)) {
-				const path = url.slice(baseUrl.length);
-				if (!path || path === "/") return `${baseUrl}/mon-espace`;
-				return url;
-			}
-			if (url.startsWith("/")) {
-				if (url === "/") return `${baseUrl}/mon-espace`;
-				return `${baseUrl}${url}`;
-			}
-			return `${baseUrl}/mon-espace`;
+			return resolveRedirectTarget(url, baseUrl);
 		},
 		async jwt({ token, user, account, trigger, session: sessionUpdate }) {
 			// Admin-triggered impersonation update. Guarded server-side: only
@@ -546,6 +547,7 @@ export const authConfig = {
 					siret?: string | null;
 					firstName?: string | null;
 					lastName?: string | null;
+					roles?: string[] | null;
 				};
 
 				// Find or create user by email (replaces DrizzleAdapter)
@@ -592,45 +594,25 @@ export const authConfig = {
 					}
 				}
 
-				// Link company (HTTP call outside transaction to avoid long locks)
-				if (profileData.siret) {
-					const siren = extractSiren(profileData.siret);
+				// ProConnect is the only source of the link: a user moved elsewhere loses the former company.
+				await syncUserCompanyLink(dbUser.id, profileData.siret, {
+					userEmail: email,
+					...(await safeRequestContext()),
+				});
 
-					let companyValues: ReturnType<typeof toCompanyInsertValues>;
-					try {
-						companyValues = toCompanyInsertValues(
-							siren,
-							await fetchCompanyBySiren(siren),
-						);
-					} catch {
-						companyValues = toCompanyInsertValues(siren, null);
-					}
-
-					await db.transaction(async (tx) => {
-						await tx
-							.insert(companies)
-							.values(companyValues)
-							.onConflictDoUpdate({
-								target: companies.siren,
-								set: { ...companyValues, updatedAt: new Date() },
-							});
-
-						await tx
-							.insert(userCompanies)
-							.values({ userId: dbUser.id, siren })
-							.onConflictDoNothing();
-					});
-				}
-
-				// Sync the admin flag with `ADMIN_EMAILS` on every login.
-				// Listing an email promotes the user; removing it demotes them.
-				const shouldBeAdmin = ADMIN_EMAILS.has(email.toLowerCase());
-				if (shouldBeAdmin !== dbUser.isAdmin) {
+				// isGranted (not merely isListed) is the one habilitation every downstream guard reads.
+				const isListed = ADMIN_EMAILS.has(email.toLowerCase());
+				const roles = profileData.roles ?? null;
+				const isGranted =
+					isListed &&
+					(isPublicAgent(roles) ||
+						env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT === false);
+				if (isGranted !== dbUser.isAdmin) {
 					await db
 						.update(users)
-						.set({ isAdmin: shouldBeAdmin })
+						.set({ isAdmin: isGranted })
 						.where(eq(users.id, dbUser.id));
-					dbUser = { ...dbUser, isAdmin: shouldBeAdmin };
+					dbUser = { ...dbUser, isAdmin: isGranted };
 				}
 
 				token.id = dbUser.id;
@@ -641,7 +623,7 @@ export const authConfig = {
 				token.siret = profileData.siret ?? null;
 				token.phone = dbUser.phone ?? null;
 				token.id_token = account?.id_token ?? null;
-				token.isAdmin = shouldBeAdmin;
+				token.isAdmin = isGranted;
 
 				// A sign-in — a step-up included — mints the token from scratch,
 				// so the mimoquage disappears on its own. The open row in the
@@ -650,7 +632,7 @@ export const authConfig = {
 				// it. That journal is a compliance trail, not a by-product of the
 				// banner (issue #4466, S14).
 				//
-				// Unconditional, and not gated on `shouldBeAdmin`: an account
+				// Unconditional, and not gated on `isGranted`: an account
 				// dropped from `ADMIN_EMAILS` between two sign-ins would otherwise
 				// leave its last row open for good. The statement is keyed on
 				// `adminUserId`, so for the declarants — who never have a row — it
@@ -682,10 +664,8 @@ export const authConfig = {
 					token.adminMfaAt = undefined;
 				}
 
-				// Only admin-eligible accounts produce a row: a declarant signing
-				// in at a level we never demanded is not a refused MFA. Neither
-				// token nor raw claim is logged.
-				if (shouldBeAdmin) {
+				// Every listed account is audited, granted or not — tells a missing claim apart from a non-public one.
+				if (isListed) {
 					const requestContext = await safeRequestContext();
 					await logAction({
 						action: AUDIT_ACTIONS.AUTH_ADMIN_MFA,
@@ -695,6 +675,8 @@ export const authConfig = {
 						metadata: {
 							acr,
 							authTime: token.adminMfaAt ?? null,
+							roles,
+							publicAgentRequired: env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
 							// Present only when the seam granted the passage, so a row
 							// never reads as a real second factor that did not happen.
 							...(testSeamGranted ? { testSeam: true } : {}),
@@ -703,6 +685,19 @@ export const authConfig = {
 						userAgent: requestContext.userAgent,
 					});
 				}
+
+				// NextAuth's signIn event receives the ProConnect subject, whereas
+				// the JWT branch has resolved the local user UUID (also on step-up).
+				const requestContext = await safeRequestContext();
+				void logAction({
+					action: AUDIT_ACTIONS.AUTH_LOGIN,
+					status: "success",
+					userId: dbUser.id,
+					userEmail: email,
+					siren: parseSiren(profileData.siret),
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
 			}
 
 			// Last, so it never doubles a close the branches above already made:
@@ -724,21 +719,6 @@ export const authConfig = {
 				adminMfaAt: token.adminMfaAt ?? null,
 			},
 		}),
-	},
-	events: {
-		async signIn({ user }) {
-			const requestContext = await safeRequestContext();
-			const profileData = user as typeof user & { siret?: string | null };
-			void logAction({
-				action: AUDIT_ACTIONS.AUTH_LOGIN,
-				status: "success",
-				userId: user.id ?? null,
-				userEmail: user.email ?? null,
-				siren: parseSiren(profileData.siret),
-				ipAddress: requestContext.ipAddress,
-				userAgent: requestContext.userAgent,
-			});
-		},
 	},
 	logger: {
 		// NextAuth v4 expects a synchronous `(code, metadata) => void` logger.

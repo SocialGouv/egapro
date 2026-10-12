@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { extractSiren, formatSiren, parseSiren } from "../shared/siren";
+import {
+	extractSiren,
+	formatSiren,
+	parseSiren,
+	parseStrictSiren,
+} from "../shared/siren";
 
 describe("extractSiren", () => {
 	it("extracts first 9 chars from a 14-digit SIRET", () => {
@@ -45,5 +50,26 @@ describe("parseSiren", () => {
 
 	it("returns null for non-numeric SIREN", () => {
 		expect(parseSiren("ABCDEFGHI")).toBeNull();
+	});
+});
+
+describe("parseStrictSiren", () => {
+	it("returns a 9-digit SIREN unchanged", () => {
+		expect(parseStrictSiren("532847196")).toBe("532847196");
+	});
+
+	it.each([
+		"532847196xyz",
+		"53284719600015",
+		"532847196 ",
+		" 532847196",
+		"532847196\n",
+		"53284719",
+		"ABCDEFGHI",
+		"",
+		null,
+		undefined,
+	])("returns null for %j instead of truncating it", (value) => {
+		expect(parseStrictSiren(value)).toBeNull();
 	});
 });

@@ -393,7 +393,7 @@ Téléchargement déclenché depuis :
 
 ### 11.2 Export Excel et API
 
-Export annuel XLSX, déclenché puis téléchargé :
+Export annuel XLSX, déclenché puis téléchargé. Les deux routes exigent le jeton `Authorization: Bearer` de `EGAPRO_EXPORT_API_TOKEN` (sealed-secret `export-api`) et répondent 401 sans lui, ou quand le jeton n'est pas configuré :
 
 | URL | Méthode | Format | Filtres |
 |---|---|---|---|
@@ -530,9 +530,11 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 2. Catégorie dans `AUDIT_ACTION_CATEGORIES`
 3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers) ou appel direct `logAction(...)` (auth / cron)
 
-Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
+Les nouvelles lignes conservent `user_id` et `siren` lorsqu'ils servent à attribuer une action. Elles n'enregistrent plus `user_email` ni `user_agent` ; l'IP est tronquée, les erreurs sont codées et `metadata` est limité à des valeurs autorisées et validées par action. Les écritures SQL directes du worker de notifications et des crons suivent cette politique. Les journaux restent soumis aux durées de conservation ci-dessus.
 
 **Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
+
+Vue d'ensemble de tous les journaux produits par l'application et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 13.3 Impersonation admin
 

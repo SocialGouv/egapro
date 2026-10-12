@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { NextResponse } from "next/server";
+import { env } from "~/env.js";
 
 /**
  * Mock GIP MDS API endpoint.
@@ -11,6 +12,10 @@ import { NextResponse } from "next/server";
  * in next.config.js — no Dockerfile change needed.
  */
 export async function GET() {
+	if (env.NEXT_PUBLIC_EGAPRO_ENV !== "dev") {
+		return new Response(null, { status: 404 });
+	}
+
 	const csv = await readFile(
 		join(process.cwd(), "data", "mock-gip-mds.csv"),
 		"utf-8",

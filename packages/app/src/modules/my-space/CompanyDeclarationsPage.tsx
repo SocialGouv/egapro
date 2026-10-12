@@ -14,7 +14,6 @@ import {
 } from "~/modules/domain";
 
 import { ArchivesSection } from "./ArchivesSection";
-import { hasArchives } from "./archivesAvailability";
 import { CompanyEditModal } from "./CompanyEditModal";
 import { CompanyInfoBanner } from "./CompanyInfoBanner";
 import { DeclarationProcessPanel } from "./DeclarationProcessPanel";
@@ -99,14 +98,13 @@ export function CompanyDeclarationsPage({
 			<WelcomeBanner />
 			<CompanyInfoBanner company={company} />
 			<DeclarationsSection
-				campaignDeadlines={campaignDeadlines}
 				cseApplicable={cseApplicable}
 				declarations={declarations}
 				hasCse={company.hasCse}
 				representationCampaign={representationCampaign}
 				userPhone={userPhone}
 			/>
-			{hasArchives && <ArchivesSection />}
+			<ArchivesSection />
 			<CompanyEditModal company={company} />
 			<MissingInfoModal
 				cseApplicable={cseApplicable}

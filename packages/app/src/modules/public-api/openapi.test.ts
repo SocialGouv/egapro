@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+
+import { formatCount } from "~/modules/domain";
 import {
 	DATA_GOUV_REMUNERATION_DATASET_URL,
 	DATA_GOUV_REPRESENTATION_DATASET_URL,
 } from "./constants";
+import { MAX_EXPORT_ROWS, MAX_XLSX_EXPORT_ROWS } from "./exportLimits";
 import { publicOpenApiSpec } from "./openapi";
 import { publicDeclarationDTOSchema } from "./schemas";
 
@@ -90,6 +93,16 @@ describe("publicOpenApiSpec", () => {
 			expect(operation.responses["400"]).toBeDefined();
 			expect(operation.responses["413"]).toBeDefined();
 			expect(operation.responses["500"]).toBeDefined();
+		});
+
+		it("documents the 413 caps of every format", () => {
+			const description = operation.responses["413"].description;
+			expect(description).toContain(formatCount(MAX_XLSX_EXPORT_ROWS));
+			expect(description).toContain(formatCount(MAX_EXPORT_ROWS));
+		});
+
+		it("documents the 503 of a busy pod and its Retry-After", () => {
+			expect(operation.responses["503"].description).toContain("Retry-After");
 		});
 	});
 

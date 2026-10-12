@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { MissingSiret } from "~/modules/declaration-remuneration";
 import { LOGIN } from "~/modules/routes";
 import { auth } from "~/server/auth";
-import { getEffectiveSiren } from "~/server/auth/companyAccess";
+import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
+import { db } from "~/server/db";
 
 /**
  * Shell layout for every page under `/declaration-remuneration/*`.
@@ -22,7 +23,7 @@ export default async function DeclarationRootLayout({
 		redirect(LOGIN);
 	}
 
-	const siren = getEffectiveSiren(session);
+	const siren = await resolveAuthorizedSiren(db, session);
 	if (!siren) {
 		return <MissingSiret />;
 	}
