@@ -191,7 +191,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
    | `failed` | propager l'erreur sans modifier le ticket ; pas d'e2e-dev | `## Code: FAILED` + raison technique |
 
-5bis. **Lancer `e2e-dev` en CLI foreground** (uniquement si le verdict terminal de `code-dev` est `validated`) — `code-dev` ne possède plus les E2E ; `e2e-dev` (toujours Opus) lance la suite E2E actuelle, et la grille de recette quand le diff touche le parcours (étape 3 de son `AGENT.md`), trie régression vs évolution légitime, puis décide d'imbriquer la nouvelle fonctionnalité dans un scénario E2E existant ou d'en créer un nouveau (et, pour un Bug, juge sa criticité). Il pousse ses commits de test sur **la branche de la PR** (ce qui re-déclenche la CI). Même worktree que `code-dev` (dev server + stack docker déjà debout) :
+5bis. **Lancer `e2e-dev` en CLI foreground** (uniquement si le verdict terminal de `code-dev` est `validated`) — `code-dev` ne possède plus les E2E ; `e2e-dev` (toujours Opus) tranche sa gate d'entrée puis lance la suite E2E actuelle, et la grille de recette quand le diff touche le parcours (étapes 1 et 3 de son `AGENT.md`, y compris sur `mode: "none"`), trie régression vs évolution légitime, puis décide d'imbriquer la nouvelle fonctionnalité dans un scénario E2E existant ou d'en créer un nouveau (et, pour un Bug, juge sa criticité). Il pousse ses commits de test sur **la branche de la PR** (ce qui re-déclenche la CI). Même worktree que `code-dev` (dev server + stack docker déjà debout) :
 
    ```bash
    env -u CLAUDECODE timeout 5400 claude \

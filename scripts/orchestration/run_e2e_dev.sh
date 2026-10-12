@@ -164,7 +164,7 @@ L'orchestrateur a déjà :
 - lancé setup-worktree.sh ${INDEX} (stack docker + .env.local avec PORT=${PORT} + migrations OK)
 
 Suivre STRICTEMENT le workflow de .claude/agents/e2e-dev/AGENT.md :
-1. Lire le diff intégré (origin/alpha...HEAD) + le body de l'epic et de ses sous-tickets.
+1. Lire le diff intégré (origin/alpha...HEAD) + le body de l'epic et de ses sous-tickets, puis trancher la gate d'entrée de l'étape 1 de AGENT.md. Sur mode none, elle dit si la grille se joue quand même (grille_scope.sh) et quelles étapes suivantes sont sans objet.
 2. Démarrer le dev server sur le port ${PORT} (PORT déjà forcé dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Le port 3000 est imposé : Charon, le proxy OAuth qui porte la connexion ProConnect de test, n'enregistre que le callback :3000 — ne le change pas.
 3. Lancer la suite E2E actuelle (pnpm --filter app test:e2e), puis la grille de recette selon l'étape 3 de AGENT.md (scripts/orchestration/grille_scope.sh origin/alpha), et trier les échecs selon l'étape 4.
 4. Sur >=1 régression réelle : commenter \`e2e-dev:\` sur l'epic #${EPIC_N}, NE RIEN corriger côté source, retourner {\"status\":\"regression\",...}.
