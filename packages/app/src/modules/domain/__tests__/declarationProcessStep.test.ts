@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { getDefaultCampaignDeadlines } from "../shared/campaign";
+import { civilDate } from "../shared/civilDate";
 import { getDeclarationProcessStepDeadline } from "../shared/declarationProcessStep";
 import type { DeclarationFsmStatus } from "../types";
 
 const YEAR = 2027;
-const deadlines = getDefaultCampaignDeadlines(YEAR);
+// decl2ModificationDeadline, pathChoiceDeadline and decl2JointEvaluationDeadline all default to January 1st N+1: give each a distinct date so a case below cannot pass by picking the wrong key.
+const deadlines = {
+	...getDefaultCampaignDeadlines(YEAR),
+	decl2ModificationDeadline: civilDate(YEAR + 1, 0, 2),
+	pathChoiceDeadline: civilDate(YEAR + 1, 0, 3),
+	decl2JointEvaluationDeadline: civilDate(YEAR + 1, 0, 4),
+};
 
 describe("getDeclarationProcessStepDeadline", () => {
 	it("returns decl1ModificationDeadline when fsmStatus is null", () => {
