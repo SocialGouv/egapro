@@ -107,7 +107,7 @@ Ce tableau liste les transitions offertes depuis `Parcours.Statut`, calculées �
 
 `Prochaines_etapes_possibles` vaut `[]` pour une déclaration annulée — aucune étape n'est proposée.
 
-Pour une démarche finalisée (`demarche_completed`), l'étape `submit_formal_notice_joint_evaluation` est proposée avec `"Condition": "si formalNoticeExposure"` : l'exposition à une mise en demeure (définie dans le tableau des transitions ci-dessus) n'est pas évaluée à l'export, la condition reprend le nom du calcul du ruleset, comme `phase2Required` pour l'étape de transmission. Elle peut donc apparaître pour une entreprise qui n'est pas concernée ; seule la présence de `Fichier_evaluation_conjointe_mise_en_demeure` atteste un dépôt.
+Pour une démarche finalisée (`demarche_completed`), l'étape `submit_formal_notice_joint_evaluation` n'est proposée qu'à une entreprise dont le parcours de conformité du dernier tour est « justification » : l'export transmet les choix de parcours au moteur, qui écarte l'étape dans tous les autres cas. Sans CSE requis, l'exposition est certaine et l'étape n'a pas de `Condition`. Avec un CSE, l'avis sur la justification n'est pas évalué à l'export : l'étape porte `"Condition": "si formalNoticeExposure"`, nom du calcul du ruleset, comme `phase2Required` pour l'étape de transmission. Seule la présence de `Fichier_evaluation_conjointe_mise_en_demeure` atteste un dépôt.
 
 ### Rapport d'évaluation conjointe suite à mise en demeure
 
