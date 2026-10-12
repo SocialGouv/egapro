@@ -42,6 +42,7 @@ import {
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import {
+	complianceProcessCompletedCondition,
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -237,7 +238,7 @@ export const adminStatsRouter = createTRPCRouter({
 				ctx.db
 					.select({
 						indicatorsSubmitted: sql<number>`count(distinct ${declarations.siren})::int`,
-						demarcheCompleted: sql<number>`(count(distinct ${declarations.siren}) filter (where ${eq(declarations.status, "demarche_completed")}))::int`,
+						demarcheCompleted: sql<number>`(count(distinct ${declarations.siren}) filter (where ${complianceProcessCompletedCondition()}))::int`,
 					})
 					.from(declarations)
 					.innerJoin(

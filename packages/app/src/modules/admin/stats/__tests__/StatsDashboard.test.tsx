@@ -281,7 +281,7 @@ describe("StatsDashboard — test-data notice and definitions", () => {
 			/fichier GIP-MDS 2026 avec un effectif d.au moins 50 salariés/,
 		);
 		expect(definition.textContent).toMatch(
-			/Le taux et l.écart avec l.année précédente portent sur les démarches terminées/,
+			/Le taux et l.écart avec l.année précédente portent sur les démarches terminées, chaque année étant rapportée à sa propre population assujettie \(au moins 100 salariés en 2025\)/,
 		);
 	});
 
@@ -312,6 +312,27 @@ describe("StatsDashboard — test-data notice and definitions", () => {
 			screen.getByText(/^Cumul des déclarations dont les indicateurs/)
 				.textContent,
 		).toMatch(/Les déclarations annulées ne sont pas comptées/);
+	});
+
+	it("states that the file only bounds the curve once a size range is selected", () => {
+		render(
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
+		);
+
+		const text = screen.getByText(
+			/^Cumul des déclarations dont les indicateurs/,
+		).textContent;
+		expect(text).toMatch(
+			/Sans filtre de tranche, les entreprises absentes du fichier GIP-MDS sont comptées/,
+		);
+		expect(text).toMatch(
+			/avec un filtre de tranche, seules celles dont l.effectif y figure le sont/,
+		);
+		expect(text).not.toMatch(/que l.entreprise figure ou non/);
 	});
 });
 

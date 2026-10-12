@@ -226,7 +226,10 @@ export function StatsDashboard({
 								est terminée quand les indicateurs sont transmis et, le cas
 								échéant, le parcours de conformité et l&apos;avis du CSE
 								déposés. Le taux et l&apos;écart avec l&apos;année précédente
-								portent sur les démarches terminées.
+								portent sur les démarches terminées, chaque année étant
+								rapportée à sa propre population assujettie (au moins{" "}
+								{getObligationWorkforceMin(activeYear - 1)} salariés en{" "}
+								{activeYear - 1}).
 							</p>
 						</div>
 					</div>
@@ -255,9 +258,11 @@ export function StatsDashboard({
 							)}
 							<p className="fr-text--sm fr-text-mention--grey fr-mt-2w fr-mb-0">
 								Cumul des déclarations dont les indicateurs ont été transmis,
-								quel que soit l&apos;avancement de la démarche ensuite et que
-								l&apos;entreprise figure ou non dans le fichier GIP-MDS. Les
-								déclarations annulées ne sont pas comptées.
+								quel que soit l&apos;avancement de la démarche ensuite. Sans
+								filtre de tranche, les entreprises absentes du fichier GIP-MDS
+								sont comptées ; avec un filtre de tranche, seules celles dont
+								l&apos;effectif y figure le sont. Les déclarations annulées ne
+								sont pas comptées.
 							</p>
 						</div>
 					</div>
