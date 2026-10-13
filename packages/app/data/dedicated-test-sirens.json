@@ -1,0 +1,178 @@
+[
+	{
+		"siren": "804975456",
+		"name": "KLC SERVICES",
+		"purpose": "ui",
+		"sizeRange": "<50",
+		"officialWorkforceCode": "12",
+		"workforce": null
+	},
+	{
+		"siren": "533591020",
+		"name": "CIRCET SERVICES",
+		"purpose": "ui",
+		"sizeRange": "<50",
+		"officialWorkforceCode": "12",
+		"workforce": null
+	},
+	{
+		"siren": "528810393",
+		"name": "ALTER SERVICES",
+		"purpose": "ui",
+		"sizeRange": "<50",
+		"officialWorkforceCode": "12",
+		"workforce": null
+	},
+	{
+		"siren": "918016577",
+		"name": "MENCO SERVICES",
+		"purpose": "ui",
+		"sizeRange": "50-99",
+		"workforce": 70,
+		"bucket": "medium-50"
+	},
+	{
+		"siren": "823821848",
+		"name": "TBS SERVICES",
+		"purpose": "ui",
+		"sizeRange": "50-99",
+		"workforce": 70,
+		"bucket": "medium-50"
+	},
+	{
+		"siren": "841180540",
+		"name": "RESIDENCES SERVICES",
+		"purpose": "ui",
+		"sizeRange": "50-99",
+		"workforce": 70,
+		"bucket": "medium-50"
+	},
+	{
+		"siren": "678501263",
+		"name": "EUROPE SERVICES",
+		"purpose": "ui",
+		"sizeRange": "100-149",
+		"workforce": 120,
+		"bucket": "medium-100"
+	},
+	{
+		"siren": "844192443",
+		"name": "TOTALENERGIES CHARGING SERVICES",
+		"purpose": "ui",
+		"sizeRange": "100-149",
+		"workforce": 120,
+		"bucket": "medium-100"
+	},
+	{
+		"siren": "381515857",
+		"name": "MONTRE SERVICE",
+		"purpose": "ui",
+		"sizeRange": "100-149",
+		"workforce": 120,
+		"bucket": "medium-100"
+	},
+	{
+		"siren": "480731769",
+		"name": "M ENERGIES SERVICE",
+		"purpose": "ui",
+		"sizeRange": "150-249",
+		"workforce": 200,
+		"bucket": "medium-150"
+	},
+	{
+		"siren": "841978380",
+		"name": "EBRA SERVICES",
+		"purpose": "ui",
+		"sizeRange": "150-249",
+		"workforce": 200,
+		"bucket": "medium-150"
+	},
+	{
+		"siren": "821145323",
+		"name": "BIOSANTE SERVICES",
+		"purpose": "ui",
+		"sizeRange": "150-249",
+		"workforce": 200,
+		"bucket": "medium-150"
+	},
+	{
+		"siren": "348415506",
+		"name": "SERVICES ET SANTE",
+		"purpose": "ui",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "722023728",
+		"name": "GROUPE MORGAN SERVICES (GROUPE MORGAN SERVICES)",
+		"purpose": "ui",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "304165962",
+		"name": "INTER-SERVICE",
+		"purpose": "ui",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "433957693",
+		"name": "SANTE RESTAURATION SERVICES (ANTHEMIS)",
+		"purpose": "ui",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "341810232",
+		"name": "TEXA SERVICES",
+		"purpose": "ui",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "353271067",
+		"name": "EUROFEU SERVICES (EUROFEU SOLUTIONS)",
+		"purpose": "ui",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "982198962",
+		"name": "ALMAVIVA SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "387867765",
+		"name": "ENYGEA SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "349743179",
+		"name": "PRECIA MOLEN SERVICE",
+		"purpose": "rgaa",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "795172519",
+		"name": "SAGS SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	}
+]

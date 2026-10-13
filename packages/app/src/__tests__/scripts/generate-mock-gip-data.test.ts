@@ -20,6 +20,16 @@ type Company = {
 	bucket: Bucket;
 };
 
+type DedicatedCompany = {
+	siren: string;
+	name: string;
+	purpose: "rgaa" | "ui";
+	sizeRange: "<50" | "50-99" | "100-149" | "150-249" | "250-999" | "1000+";
+	officialWorkforceCode?: string;
+	workforce: number | null;
+	bucket?: Bucket;
+};
+
 const BUCKET_WORKFORCE_RANGES: Record<Bucket, [number, number]> = {
 	"medium-50": [50, 99],
 	"medium-100": [100, 149],
@@ -41,6 +51,14 @@ const BUCKETS: Bucket[] = [
 function loadCompanies(): Company[] {
 	const raw = readFileSync(resolve(DATA_DIR, "companies.json"), "utf-8");
 	return JSON.parse(raw) as Company[];
+}
+
+function loadDedicatedCompanies(): DedicatedCompany[] {
+	const raw = readFileSync(
+		resolve(DATA_DIR, "dedicated-test-sirens.json"),
+		"utf-8",
+	);
+	return JSON.parse(raw) as DedicatedCompany[];
 }
 
 function parseCsvRows(csvContent: string): string[][] {
@@ -338,7 +356,92 @@ describe("companies.json", () => {
 	});
 });
 
+describe("dedicated-test-sirens.json", () => {
+	it("contains 22 distinct and correctly distributed SIRENs", () => {
+		const dedicated = loadDedicatedCompanies();
+		const sirens = dedicated.map(({ siren }) => siren);
+		const uiRanges = [
+			"<50",
+			"50-99",
+			"100-149",
+			"150-249",
+			"250-999",
+			"1000+",
+		] as const;
+		const bucketByRange: Record<
+			Exclude<DedicatedCompany["sizeRange"], "<50">,
+			Bucket
+		> = {
+			"50-99": "medium-50",
+			"100-149": "medium-100",
+			"150-249": "medium-150",
+			"250-999": "large-250",
+			"1000+": "large-1000",
+		};
+
+		expect(dedicated).toHaveLength(22);
+		expect(new Set(sirens).size).toBe(22);
+		for (const company of dedicated) {
+			expect(company.siren).toMatch(/^\d{9}$/);
+			if (company.sizeRange === "<50") {
+				expect(company.officialWorkforceCode).toBe("12");
+				expect(company.workforce).toBeNull();
+				expect(company.bucket).toBeUndefined();
+			} else {
+				expect(company.bucket).toBe(bucketByRange[company.sizeRange]);
+				const [min, max] = BUCKET_WORKFORCE_RANGES[company.bucket as Bucket];
+				expect(company.workforce).toBeGreaterThanOrEqual(min);
+				expect(company.workforce).toBeLessThanOrEqual(max);
+			}
+		}
+		for (const sizeRange of uiRanges) {
+			expect(
+				dedicated.filter(
+					(company) =>
+						company.purpose === "ui" && company.sizeRange === sizeRange,
+				),
+			).toHaveLength(3);
+		}
+		const rgaa = dedicated.filter(({ purpose }) => purpose === "rgaa");
+		expect(rgaa).toHaveLength(4);
+		for (const company of rgaa) {
+			expect(company.workforce).toBeGreaterThan(150);
+		}
+	});
+});
+
 describe("mock-gip-mds.csv", () => {
+	it("includes exactly the 19 eligible dedicated SIRENs and excludes the three below 50", () => {
+		const dedicated = loadDedicatedCompanies();
+		const dedicatedSirens = new Set(dedicated.map(({ siren }) => siren));
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const rows = parseCsvRows(csv).filter((row) => row.length > 1);
+		const rowsBySiren = new Map<string, string[]>();
+		for (const row of rows) {
+			const siren = row[0];
+			if (!siren) continue;
+			expect(rowsBySiren.has(siren), `duplicate SIREN ${siren}`).toBe(false);
+			rowsBySiren.set(siren, row);
+		}
+
+		expect(rows).toHaveLength(
+			loadCompanies().filter(({ siren }) => !dedicatedSirens.has(siren))
+				.length + 19,
+		);
+		expect(Number(csv.split("\n")[1]?.split(";")[5])).toBe(rows.length);
+		for (const company of dedicated) {
+			const row = rowsBySiren.get(company.siren);
+			if (company.sizeRange === "<50") {
+				expect(row).toBeUndefined();
+			} else {
+				expect(row).toBeDefined();
+				expect(Math.floor(toNum(row?.[1]) ?? Number.NaN)).toBe(
+					company.workforce,
+				);
+			}
+		}
+	});
+
 	it("is parseable and has data rows", () => {
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
 		const rows = parseCsvRows(csv);
