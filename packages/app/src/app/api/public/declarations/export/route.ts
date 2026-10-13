@@ -17,7 +17,6 @@ import {
 	parsePublicSearchInput,
 	publicDeclarationColumns,
 	toPublicDeclaration,
-	XLSX_HEADERS,
 } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
@@ -148,6 +147,51 @@ function toPublicDTO(row: ExportRow): PublicDeclarationDTO {
 
 	return toPublicDeclaration(row, companySource);
 }
+
+const XLSX_HEADERS: Array<keyof PublicDeclarationDTO> = [
+	"year",
+	"siren",
+	"name",
+	"address",
+	"city",
+	"regionCode",
+	"region",
+	"departmentCode",
+	"departmentLabel",
+	"countryCode",
+	"countryLabel",
+	"nafCode",
+	"nafLabel",
+	"workforceEma",
+	"totalWomen",
+	"totalMen",
+	"globalAnnualMeanGap",
+	"globalAnnualMedianGap",
+	"globalHourlyMeanGap",
+	"globalHourlyMedianGap",
+	"variableAnnualMeanGap",
+	"variableAnnualMedianGap",
+	"variableHourlyMeanGap",
+	"variableHourlyMedianGap",
+	"variableProportionWomen",
+	"variableProportionMen",
+	"annualQuartile1ProportionWomen",
+	"annualQuartile2ProportionWomen",
+	"annualQuartile3ProportionWomen",
+	"annualQuartile4ProportionWomen",
+	"annualQuartile1ProportionMen",
+	"annualQuartile2ProportionMen",
+	"annualQuartile3ProportionMen",
+	"annualQuartile4ProportionMen",
+	"hourlyQuartile1ProportionWomen",
+	"hourlyQuartile2ProportionWomen",
+	"hourlyQuartile3ProportionWomen",
+	"hourlyQuartile4ProportionWomen",
+	"hourlyQuartile1ProportionMen",
+	"hourlyQuartile2ProportionMen",
+	"hourlyQuartile3ProportionMen",
+	"hourlyQuartile4ProportionMen",
+];
 
 const FORMAT_SCHEMA = z.enum(["json", "csv", "xlsx"]).default("json");
 
