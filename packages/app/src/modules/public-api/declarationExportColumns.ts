@@ -24,70 +24,17 @@ const CSV_COLUMN_PAIRS = [
 	["variableHourlyMedianGap", "Taux_horaire_variable_median_ecart"],
 	["variableProportionWomen", "Proportion_variable_F"],
 	["variableProportionMen", "Proportion_variable_H"],
-	[
-		"annualQuartile1ProportionWomen",
-		"Quartile1_Rem_globale_annuelle_proportion_F",
-	],
-	[
-		"annualQuartile2ProportionWomen",
-		"Quartile2_Rem_globale_annuelle_proportion_F",
-	],
-	[
-		"annualQuartile3ProportionWomen",
-		"Quartile3_Rem_globale_annuelle_proportion_F",
-	],
-	[
-		"annualQuartile4ProportionWomen",
-		"Quartile4_Rem_globale_annuelle_proportion_F",
-	],
-	[
-		"annualQuartile1ProportionMen",
-		"Quartile1_Rem_globale_annuelle_proportion_H",
-	],
-	[
-		"annualQuartile2ProportionMen",
-		"Quartile2_Rem_globale_annuelle_proportion_H",
-	],
-	[
-		"annualQuartile3ProportionMen",
-		"Quartile3_Rem_globale_annuelle_proportion_H",
-	],
-	[
-		"annualQuartile4ProportionMen",
-		"Quartile4_Rem_globale_annuelle_proportion_H",
-	],
-	[
-		"hourlyQuartile1ProportionWomen",
-		"Quartile1_Taux_horaire_global_proportion_F",
-	],
-	[
-		"hourlyQuartile2ProportionWomen",
-		"Quartile2_Taux_horaire_global_proportion_F",
-	],
-	[
-		"hourlyQuartile3ProportionWomen",
-		"Quartile3_Taux_horaire_global_proportion_F",
-	],
-	[
-		"hourlyQuartile4ProportionWomen",
-		"Quartile4_Taux_horaire_global_proportion_F",
-	],
-	[
-		"hourlyQuartile1ProportionMen",
-		"Quartile1_Taux_horaire_global_proportion_H",
-	],
-	[
-		"hourlyQuartile2ProportionMen",
-		"Quartile2_Taux_horaire_global_proportion_H",
-	],
-	[
-		"hourlyQuartile3ProportionMen",
-		"Quartile3_Taux_horaire_global_proportion_H",
-	],
-	[
-		"hourlyQuartile4ProportionMen",
-		"Quartile4_Taux_horaire_global_proportion_H",
-	],
+	...(["annual", "hourly"] as const).flatMap((period) =>
+		(["Women", "Men"] as const).flatMap((gender) =>
+			([1, 2, 3, 4] as const).map(
+				(quartile) =>
+					[
+						`${period}Quartile${quartile}Proportion${gender}`,
+						`Quartile${quartile}_${period === "annual" ? "Rem_globale_annuelle" : "Taux_horaire_global"}_proportion_${gender === "Women" ? "F" : "H"}`,
+					] satisfies [keyof PublicDeclarationDTO, string],
+			),
+		),
+	),
 ] satisfies Array<[keyof PublicDeclarationDTO, string]>;
 
 export const CSV_COLUMNS = CSV_COLUMN_PAIRS.map(([key, header]) => ({
