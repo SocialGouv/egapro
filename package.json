@@ -34,7 +34,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@codegouvfr/react-dsfr@0.78.2": "patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch"
+      "@codegouvfr/react-dsfr@0.78.2": "patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch",
+      "@formkit/auto-animate@0.8.1": "patches/@formkit__auto-animate@0.8.1.patch"
     },
     "onlyBuiltDependencies": [
       "@sentry/cli",

@@ -1,0 +1,18 @@
+diff --git a/index.mjs b/index.mjs
+index b99c83218e49a6821b5d0077033b749517ce05f8..08149341451cfb8f336bc39d4f95029d4d7ed6b1 100644
+--- a/index.mjs
++++ b/index.mjs
+@@ -530,7 +530,12 @@ function remove(el) {
+         prev.parentNode.appendChild(el);
+     }
+     else {
+-        (_a = getTarget(el)) === null || _a === void 0 ? void 0 : _a.appendChild(el);
++        const target = getTarget(el);
++        // An animated parent observed before its own parent is its own target: it cannot be put back
++        // inside itself (or a descendant) for its exit animation, so it leaves without one.
++        if (!target || el.contains(target))
++            return cleanUp(el);
++        target.appendChild(el);
+     }
+     if (!isEnabled(el))
+         return cleanUp(el);

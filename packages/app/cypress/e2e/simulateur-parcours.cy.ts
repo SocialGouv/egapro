@@ -144,6 +144,21 @@ describe("Parcours du simulateur Index Egapro", () => {
     cy.selectByLabel("Remu moyenne - - 50: - Femmes").clear().type("38000");
     cy.selectByLabel("Remu moyenne - - 50: - Hommes").clear().type("40000");
 
+    // Alterner les modalités : le tableau suit le mode choisi et la saisie par niveaux est conservée
+    cy.contains("label", "Par catégorie socio-professionnelle").click();
+    cy.contains("Catégorie socio-professionnelle").should("be.visible");
+    cy.get('input[name="remunerations.0.name"]').should("not.exist");
+    cy.contains(
+      "label",
+      "Par niveau ou coefficient hiérarchique en application d'une autre méthode de cotation des postes",
+    ).click();
+    cy.contains(
+      "label",
+      "Par niveau ou coefficient hiérarchique en application de la classification de branche",
+    ).click();
+    cy.get('input[name="remunerations.0.name"]').should("have.value", "Niveau A");
+    cy.get('input[name="remunerations.1.name"]').should("have.value", "Niveau B");
+
     // Passer à l'étape suivante
     cy.contains("button", "Suivant").click();
 
