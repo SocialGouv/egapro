@@ -47,7 +47,7 @@ overrides:
 
 patchedDependencies:
   '@codegouvfr/react-dsfr@0.78.2':
-    hash: 03f8eef545296f0e42863745779b369b6a6a3eaf8a532afcdc93ee1dd0e92017
+    hash: f9d85b0c9e7dc240cfbd4154dc135cc4ad6df2e1e4e88ce6fdb4e9f729751b7a
     path: patches/@codegouvfr-react-dsfr-npm-0.78.2-9b92c7917d.patch
 
 importers:
@@ -74,7 +74,7 @@ importers:
     dependencies:
       '@codegouvfr/react-dsfr':
         specifier: 0.78.2
-        version: 0.78.2(patch_hash=03f8eef545296f0e42863745779b369b6a6a3eaf8a532afcdc93ee1dd0e92017)
+        version: 0.78.2(patch_hash=f9d85b0c9e7dc240cfbd4154dc135cc4ad6df2e1e4e88ce6fdb4e9f729751b7a)
       '@formkit/auto-animate':
         specifier: ^0.8.0
         version: 0.8.1
@@ -6251,7 +6251,7 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@codegouvfr/react-dsfr@0.78.2(patch_hash=03f8eef545296f0e42863745779b369b6a6a3eaf8a532afcdc93ee1dd0e92017)':
+  '@codegouvfr/react-dsfr@0.78.2(patch_hash=f9d85b0c9e7dc240cfbd4154dc135cc4ad6df2e1e4e88ce6fdb4e9f729751b7a)':
     dependencies:
       tsafe: 1.6.5
 
