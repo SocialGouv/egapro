@@ -152,4 +152,24 @@ describe("AdminDeclarationDetailPage", () => {
 			}),
 		).toBeInTheDocument();
 	});
+
+	it("shows the same favored-sex gap in the admin recap", () => {
+		const recap = recapProps();
+		vi.mocked(api.adminDeclarations.getRecap.useQuery).mockReturnValueOnce({
+			data: {
+				...recap,
+				step2Data: {
+					...recap.step2Data,
+					indicatorAAnnualWomen: "110",
+					indicatorAAnnualMen: "100",
+				},
+			},
+		} as unknown as ReturnType<typeof api.adminDeclarations.getRecap.useQuery>);
+
+		render(<AdminDeclarationDetailPage declarationId="decl-1" />);
+
+		expect(screen.getByText("10,00 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+		expect(screen.queryByText("-10,00 %")).not.toBeInTheDocument();
+	});
 });

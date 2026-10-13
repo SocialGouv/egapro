@@ -1,4 +1,5 @@
 import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
+import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
 import type {
 	Step2Data,
 	Step3Data,
@@ -9,9 +10,7 @@ import {
 	computePercentage,
 	computeWorkforceTotal,
 	formatCurrency,
-	formatGap,
 	formatVariablePayProportion,
-	gapLevel,
 	resolveGap,
 	sumQuartileWorkforce,
 } from "~/modules/domain";
@@ -38,20 +37,6 @@ type GapRow = {
 	/** Gap as persisted on the declaration, shown instead of recomputing it. */
 	reference?: GipGapReference;
 };
-
-function HighGapBadge() {
-	return <span className={styles.highBadge}>élevé</span>;
-}
-
-function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gapLevel(gap) === "high";
-	return (
-		<span className={styles.gapCell}>
-			<strong>{formatGap(gap)}</strong>
-			{isHigh && <HighGapBadge />}
-		</span>
-	);
-}
 
 function AccessiblePlaceholder({ label }: { label: string }) {
 	return (
@@ -113,7 +98,7 @@ function GapTable({
 												{formatCurrency(row.men)}
 											</td>
 											<td className={styles.gapNumeric}>
-												<GapCell gap={gap} />
+												<GapBadge gap={gap} />
 											</td>
 										</tr>
 									);

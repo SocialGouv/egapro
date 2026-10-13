@@ -257,6 +257,37 @@ describe("RecapitulatifPage", () => {
 		).toBeGreaterThanOrEqual(1);
 	});
 
+	it("shows absolute gaps with the favored sex in the transmitted recap", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				step2Data={{
+					...emptyStep2Data(),
+					indicatorAAnnualWomen: "110",
+					indicatorAAnnualMen: "100",
+					indicatorAHourlyWomen: "90",
+					indicatorAHourlyMen: "100",
+					indicatorCAnnualWomen: "100",
+					indicatorCAnnualMen: "100",
+				}}
+			/>,
+		);
+
+		const annual = screen.getAllByRole("rowheader", {
+			name: "Annuelle brute moyenne",
+		})[0]?.parentElement as HTMLElement;
+		const hourly = screen.getAllByRole("rowheader", {
+			name: "Horaire brute moyenne",
+		})[0]?.parentElement as HTMLElement;
+		expect(annual).toHaveTextContent("10,00 %");
+		expect(annual).toHaveTextContent("en faveur des femmes");
+		expect(annual).not.toHaveTextContent("-10,00 %");
+		expect(hourly).toHaveTextContent("10,00 %");
+		expect(hourly).toHaveTextContent("en faveur des hommes");
+		expect(screen.getByText("0,00 %")).toBeInTheDocument();
+		expect(screen.getAllByText("en faveur des femmes")).toHaveLength(1);
+	});
+
 	// The recap is a read-only surface: it must print the gap that was recorded
 	// and published, not a fresh recomputation that can drift from it.
 	it("shows the recorded GIP gap rather than recomputing it from the operands", () => {
@@ -277,6 +308,7 @@ describe("RecapitulatifPage", () => {
 		);
 
 		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
 		expect(screen.queryByText("0,00 %")).not.toBeInTheDocument();
 	});
 
