@@ -28,12 +28,12 @@ const CommencerPage = async () => {
 
       <Text
         text={
-          <p>
+          <>
             Une aide pour le calcul est disponible{" "}
             <Link href={`/aide-index`} target="_blank">
               ici
             </Link>
-          </p>
+          </>
         }
       />
 

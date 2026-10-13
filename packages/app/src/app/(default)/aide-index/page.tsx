@@ -391,23 +391,23 @@ const AideSimulation = () => {
               des indicateurs calculables de l’index dont la note maximale n’a
               pas été atteinte, leur permettant d’atteindre au moins 85 points.
             </p>
-            <p>
+            <p className={fr.cx("fr-mb-0")}>
               Les mesures de correction et les objectifs de progression sont
               définis :
-              <ul>
-                <li>
-                  dans le cadre de la négociation obligatoire sur l’égalité
-                  professionnelle
-                </li>
-                <li>
-                  ou à défaut d’accord, par décision unilatérale de l’employeur
-                  et après consultation du comité social et économique. Cette
-                  décision doit être déposée auprès des services de la DREETS.
-                  Elle peut être intégrée au plan d’action devant être établi à
-                  défaut d’accord relatif à l’égalité professionnelle.
-                </li>
-              </ul>
             </p>
+            <ul className={fr.cx("fr-mb-3w")}>
+              <li>
+                dans le cadre de la négociation obligatoire sur l’égalité
+                professionnelle
+              </li>
+              <li>
+                ou à défaut d’accord, par décision unilatérale de l’employeur
+                et après consultation du comité social et économique. Cette
+                décision doit être déposée auprès des services de la DREETS.
+                Elle peut être intégrée au plan d’action devant être établi à
+                défaut d’accord relatif à l’égalité professionnelle.
+              </li>
+            </ul>
             <AnchorLink as="h2" anchor="publication">
               Publication
             </AnchorLink>

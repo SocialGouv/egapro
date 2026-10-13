@@ -1,3 +1,4 @@
+import { expectToHydrateWithoutMismatch } from "@common/utils/__tests__/hydration";
 import { render } from "@testing-library/react";
 
 import AccessibilityStatement from "../page";
@@ -21,5 +22,9 @@ describe("<AccessibilityStatement />", () => {
     const { getByRole } = render(<AccessibilityStatement />);
     const title = getByRole("heading", { level: 1 });
     expect(title).toHaveTextContent("Déclaration d'accessibilité");
+  });
+
+  it("should hydrate the server markup without mismatch", async () => {
+    await expectToHydrateWithoutMismatch(<AccessibilityStatement />);
   });
 });

@@ -98,13 +98,13 @@ const PrivacyPolicy = () => {
               la réception de votre demande.
             </p>
             <h2>Qui va avoir accès aux données&nbsp;?</h2>
-            <p>
+            <p className="fr-mb-0">
               Les accès aux données sont strictement encadrés et juridiquement justifiés. Les personnes suivantes vont
               avoir accès aux données&nbsp;:
-              <ul className={"fr-mb-3w"}>
-                <li>Les membres de l’équipe d’Index Egapro.</li>
-              </ul>
             </p>
+            <ul className={"fr-mb-3w"}>
+              <li>Les membres de l’équipe d’Index Egapro.</li>
+            </ul>
             <h2>Qui nous aide à traiter vos données&nbsp;?</h2>
             <p>
               Certaines données sont envoyées à des sous-traitants. Nous nous sommes assurés qu’ils respectent les

@@ -133,10 +133,12 @@ const ResultsSection = async (searchParams: SearchConsultationDTO) => {
               small
               className="fr-mb-3w"
             />
-            <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
-              {/* @ts-ignore */}
-              <DisplayIndexResults {...searchParams} />
-            </Suspense>
+            <div>
+              <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
+                {/* @ts-ignore */}
+                <DisplayIndexResults {...searchParams} />
+              </Suspense>
+            </div>
           </ClientAnimate>
         </GridCol>
       </Grid>
