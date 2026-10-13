@@ -19,25 +19,57 @@ const sql = postgres(process.env.DATABASE_URL ?? "", {
 	onnotice: () => {},
 });
 const scope = "00000000-0000-4000-8000-000000000001";
+
+async function createIsolatedDatabase() {
+	const name = `upgrade_check_${randomUUID().replaceAll("-", "")}`;
+	await sql`CREATE DATABASE ${sql(name)}`;
+	const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
+	databaseUrl.pathname = `/${name}`;
+	const connection = postgres(databaseUrl.toString(), {
+		max: 1,
+		onnotice: () => {},
+	});
+	return {
+		connection,
+		async dispose() {
+			await connection.end();
+			await sql`DROP DATABASE ${sql(name)}`;
+		},
+	};
+}
+
 afterAll(async () => {
 	await sql.end();
 });
 
 describe("read-only capture against disposable PostgreSQL", () => {
 	it("compares the same migrated application on the integration version and PostgreSQL 18", async () => {
-		const before = await captureReport(sql, "application", scope);
-		const target = await new PostgreSqlContainer("postgres:18").start();
-		const targetSql = postgres(target.getConnectionUri(), {
-			max: 1,
-			onnotice: () => {},
-		});
+		// The shared DB can contain audit rows from other integration tests.
+		const source = await createIsolatedDatabase();
 		try {
-			await migrate(drizzle(targetSql), { migrationsFolder: "./drizzle" });
-			const after = await captureReport(targetSql, "application", scope);
-			expect(compareReports(before, after, 18)).toEqual([]);
+			await migrate(drizzle(source.connection), {
+				migrationsFolder: "./drizzle",
+			});
+			const before = await captureReport(
+				source.connection,
+				"application",
+				scope,
+			);
+			const target = await new PostgreSqlContainer("postgres:18").start();
+			const targetSql = postgres(target.getConnectionUri(), {
+				max: 1,
+				onnotice: () => {},
+			});
+			try {
+				await migrate(drizzle(targetSql), { migrationsFolder: "./drizzle" });
+				const after = await captureReport(targetSql, "application", scope);
+				expect(compareReports(before, after, 18)).toEqual([]);
+			} finally {
+				await targetSql.end();
+				await target.stop();
+			}
 		} finally {
-			await targetSql.end();
-			await target.stop();
+			await source.dispose();
 		}
 	}, 120_000);
 
@@ -136,14 +168,8 @@ describe("read-only capture against disposable PostgreSQL", () => {
 	it("captures only aggregate pg-boss state when explicitly selected", async () => {
 		// Other integration tests can start pg-boss on the shared application DB.
 		// Use a separate database so this fixture never collides with real jobs.
-		const databaseName = `upgrade_notifications_${randomUUID().replaceAll("-", "")}`;
-		await sql`CREATE DATABASE ${sql(databaseName)}`;
-		const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
-		databaseUrl.pathname = `/${databaseName}`;
-		const notificationsSql = postgres(databaseUrl.toString(), {
-			max: 1,
-			onnotice: () => {},
-		});
+		const notifications = await createIsolatedDatabase();
+		const notificationsSql = notifications.connection;
 		try {
 			await notificationsSql`CREATE SCHEMA pgboss`;
 			await notificationsSql`CREATE TABLE pgboss.version (version integer)`;
@@ -168,8 +194,7 @@ describe("read-only capture against disposable PostgreSQL", () => {
 				),
 			).toContain("Journal de migrations modifié.");
 		} finally {
-			await notificationsSql.end();
-			await sql`DROP DATABASE ${sql(databaseName)}`;
+			await notifications.dispose();
 		}
 	});
 	it("writes private reports, refuses overwrite and suppresses raw connection errors", async () => {
