@@ -63,12 +63,10 @@ export default withSearchParamsValidation(searchRepresentationEquilibreeDTOSchem
             <GridCol sm={12} md={10} xl={8}>
               <ClientAnimate>
                 {!searchParamsError && !isLanding && (
-                  <div>
-                    <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
-                      {/* @ts-ignore */}
-                      <DisplayRepeqResults {...searchParams} />
-                    </Suspense>
-                  </div>
+                  <Suspense fallback={<Text variant="lg" text="Chargement des résultats..." />}>
+                    {/* @ts-ignore */}
+                    <DisplayRepeqResults {...searchParams} />
+                  </Suspense>
                 )}
               </ClientAnimate>
               <DetailedDownload
