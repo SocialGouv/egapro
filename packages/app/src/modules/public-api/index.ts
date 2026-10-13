@@ -1,4 +1,5 @@
 export { NON_DIFFUSIBLE_LABEL } from "./constants";
+export { CSV_COLUMNS, XLSX_HEADERS } from "./declarationExportColumns";
 export {
 	getPublicDeclarationBySirenYear,
 	getPublicDeclarationsBySiren,

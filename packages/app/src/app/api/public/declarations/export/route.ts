@@ -11,11 +11,13 @@ import type {
 	PublicSearchInput,
 } from "~/modules/public-api";
 import {
+	CSV_COLUMNS,
 	fetchWithinExportLimit,
 	PUBLIC_API_EXPORT_HEADERS,
 	parsePublicSearchInput,
 	publicDeclarationColumns,
 	toPublicDeclaration,
+	XLSX_HEADERS,
 } from "~/modules/public-api";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
 import { db } from "~/server/db";
@@ -147,62 +149,20 @@ function toPublicDTO(row: ExportRow): PublicDeclarationDTO {
 	return toPublicDeclaration(row, companySource);
 }
 
-const CSV_HEADERS: Array<keyof PublicDeclarationDTO> = [
-	"year",
-	"siren",
-	"name",
-	"address",
-	"city",
-	"regionCode",
-	"region",
-	"departmentCode",
-	"departmentLabel",
-	"countryCode",
-	"countryLabel",
-	"nafCode",
-	"nafLabel",
-	"workforceEma",
-	"totalWomen",
-	"totalMen",
-	"globalAnnualMeanGap",
-	"globalAnnualMedianGap",
-	"globalHourlyMeanGap",
-	"globalHourlyMedianGap",
-	"variableAnnualMeanGap",
-	"variableAnnualMedianGap",
-	"variableHourlyMeanGap",
-	"variableHourlyMedianGap",
-	"variableProportionWomen",
-	"variableProportionMen",
-	"annualQuartile1ProportionWomen",
-	"annualQuartile2ProportionWomen",
-	"annualQuartile3ProportionWomen",
-	"annualQuartile4ProportionWomen",
-	"annualQuartile1ProportionMen",
-	"annualQuartile2ProportionMen",
-	"annualQuartile3ProportionMen",
-	"annualQuartile4ProportionMen",
-	"hourlyQuartile1ProportionWomen",
-	"hourlyQuartile2ProportionWomen",
-	"hourlyQuartile3ProportionWomen",
-	"hourlyQuartile4ProportionWomen",
-	"hourlyQuartile1ProportionMen",
-	"hourlyQuartile2ProportionMen",
-	"hourlyQuartile3ProportionMen",
-	"hourlyQuartile4ProportionMen",
-];
-
 const FORMAT_SCHEMA = z.enum(["json", "csv", "xlsx"]).default("json");
 
-function textExportResponse(format: "json" | "csv", body: string) {
+function textExportResponse(
+	format: "json" | "csv",
+	body: string,
+	year?: number,
+) {
 	return new NextResponse(body, {
 		headers:
 			format === "csv"
 				? {
 						...PUBLIC_API_EXPORT_HEADERS,
 						"Content-Type": "text/csv; charset=utf-8",
-						"Content-Disposition":
-							'attachment; filename="index-egapro-remunerations.csv"',
+						"Content-Disposition": `attachment; filename="${year === undefined ? "index-egapro-remunerations" : `Indicateurs_remuneration_${year}`}.csv"`,
 					}
 				: {
 						...PUBLIC_API_EXPORT_HEADERS,
@@ -212,9 +172,9 @@ function textExportResponse(format: "json" | "csv", body: string) {
 }
 
 function formatCsv(rows: PublicDeclarationDTO[]): string {
-	const header = CSV_HEADERS.map(toCsvField).join(";");
+	const header = CSV_COLUMNS.map(({ header }) => toCsvField(header)).join(";");
 	const dataRows = rows.map((row) =>
-		CSV_HEADERS.map((key) => toCsvField(row[key])).join(";"),
+		CSV_COLUMNS.map(({ key }) => toCsvField(row[key])).join(";"),
 	);
 	return [header, ...dataRows].join("\n");
 }
@@ -228,7 +188,7 @@ async function formatWorkbook(
 	const sheet = workbook.addWorksheet("Indicateurs A-F", {
 		views: [{ state: "frozen", ySplit: 1 }],
 	});
-	sheet.columns = CSV_HEADERS.map((key) => ({
+	sheet.columns = XLSX_HEADERS.map((key) => ({
 		header: key,
 		key,
 		width: key === "name" || key === "address" ? 30 : 18,
@@ -236,7 +196,7 @@ async function formatWorkbook(
 	for (const row of rows) sheet.addRow(row);
 	sheet.autoFilter = {
 		from: "A1",
-		to: `${sheet.getColumn(CSV_HEADERS.length).letter}1`,
+		to: `${sheet.getColumn(XLSX_HEADERS.length).letter}1`,
 	};
 	sheet.getRow(1).font = { bold: true };
 	const buffer = await workbook.xlsx.writeBuffer();
@@ -321,7 +281,9 @@ export const GET = withAuditedRoute(
 						: JSON.stringify({ data, count: data.length });
 				},
 			);
-			return body instanceof Response ? body : textExportResponse(format, body);
+			return body instanceof Response
+				? body
+				: textExportResponse(format, body, input.year);
 		} catch (error) {
 			console.error(
 				"[api/public/declarations/export]",
