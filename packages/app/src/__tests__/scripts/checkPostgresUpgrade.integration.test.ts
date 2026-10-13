@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -23,7 +24,7 @@ afterAll(async () => {
 });
 
 describe("read-only capture against disposable PostgreSQL", () => {
-	it("compares the same migrated application on PostgreSQL 16 and 18", async () => {
+	it("compares the same migrated application on the integration version and PostgreSQL 18", async () => {
 		const before = await captureReport(sql, "application", scope);
 		const target = await new PostgreSqlContainer("postgres:18").start();
 		const targetSql = postgres(target.getConnectionUri(), {
@@ -79,7 +80,7 @@ describe("read-only capture against disposable PostgreSQL", () => {
 				compareReports(
 					before,
 					await captureReport(sql, "application", scope),
-					16,
+					Math.floor(before.serverVersion / 10000),
 				),
 			).toContain("Structure modifiée : app_company.");
 		} finally {
@@ -102,7 +103,7 @@ describe("read-only capture against disposable PostgreSQL", () => {
 				compareReports(
 					before,
 					await captureReport(sql, "application", scope),
-					16,
+					Math.floor(before.serverVersion / 10000),
 				),
 			).toContain("Structure modifiée : app_declaration.");
 		} finally {
@@ -133,27 +134,42 @@ describe("read-only capture against disposable PostgreSQL", () => {
 		}
 	});
 	it("captures only aggregate pg-boss state when explicitly selected", async () => {
-		await sql`CREATE SCHEMA pgboss`;
-		await sql`CREATE TABLE pgboss.version (version integer)`;
-		await sql`INSERT INTO pgboss.version VALUES (30)`;
-		for (const name of ["job", "queue", "schedule", "subscription"])
-			await sql`CREATE TABLE ${sql(`pgboss.${name}`)} (payload text)`;
-		await sql`INSERT INTO pgboss.job VALUES ('private job content')`;
+		// Other integration tests can start pg-boss on the shared application DB.
+		// Use a separate database so this fixture never collides with real jobs.
+		const databaseName = `upgrade_notifications_${randomUUID().replaceAll("-", "")}`;
+		await sql`CREATE DATABASE ${sql(databaseName)}`;
+		const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
+		databaseUrl.pathname = `/${databaseName}`;
+		const notificationsSql = postgres(databaseUrl.toString(), {
+			max: 1,
+			onnotice: () => {},
+		});
 		try {
-			const result = await captureReport(sql, "notifications", scope);
+			await notificationsSql`CREATE SCHEMA pgboss`;
+			await notificationsSql`CREATE TABLE pgboss.version (version integer)`;
+			await notificationsSql`INSERT INTO pgboss.version VALUES (30)`;
+			for (const name of ["job", "queue", "schedule", "subscription"])
+				await notificationsSql`CREATE TABLE ${notificationsSql(`pgboss.${name}`)} (payload text)`;
+			await notificationsSql`INSERT INTO pgboss.job VALUES ('private job content')`;
+			const result = await captureReport(
+				notificationsSql,
+				"notifications",
+				scope,
+			);
 			expect(reportProblems(result)).toEqual([]);
 			expect(result.tables.job?.rows).toBe("1");
 			expect(JSON.stringify(result)).not.toContain("private job content");
-			await sql`UPDATE pgboss.version SET version = 31`;
+			await notificationsSql`UPDATE pgboss.version SET version = 31`;
 			expect(
 				compareReports(
 					result,
-					await captureReport(sql, "notifications", scope),
-					16,
+					await captureReport(notificationsSql, "notifications", scope),
+					Math.floor(result.serverVersion / 10000),
 				),
 			).toContain("Journal de migrations modifié.");
 		} finally {
-			await sql`DROP SCHEMA pgboss CASCADE`;
+			await notificationsSql.end();
+			await sql`DROP DATABASE ${sql(databaseName)}`;
 		}
 	});
 	it("writes private reports, refuses overwrite and suppresses raw connection errors", async () => {
