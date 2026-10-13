@@ -1,3 +1,4 @@
+import { expectToHydrateWithoutMismatch } from "@common/utils/__tests__/hydration";
 import { render, screen } from "@testing-library/react";
 
 import IndexEgapro from "../page";
@@ -67,5 +68,9 @@ describe("IndexEgapro", () => {
     expect(
       screen.getByText(/Les mesures de correction et les objectifs de progression de chacun des indicateurs/),
     ).toBeInTheDocument();
+  });
+
+  it("should hydrate the server markup without mismatch", async () => {
+    await expectToHydrateWithoutMismatch(<IndexEgapro />);
   });
 });

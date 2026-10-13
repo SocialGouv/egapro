@@ -151,20 +151,20 @@ const IndexEgapro = () => {
             title="Besoin d'aide ?"
             desc={
               <>
-                <p>
+                <span className="block fr-text--md">
                   Pour consulter l'aide du service d'identification <strong>ProConnect</strong> (comment s'identifier,
                   comment rattacher une nouvelle entreprise à son compte, comment contacter le support, etc.),{" "}
                   <Link href={"/aide-proconnect"} target="_blank">
                     cliquez ici
                   </Link>
-                </p>
-                <p>
+                </span>
+                <span className="block fr-text--md">
                   Pour consulter l'aide pour <strong>le calcul, la publication et la transmission de l'index</strong>,{" "}
                   <Link href={"/aide-index"} target="_blank">
                     cliquez ici
                   </Link>
-                </p>
-                <p>
+                </span>
+                <span className="block fr-text--md">
                   Pour consulter la <strong>FAQ</strong> sur le site internet du ministère chargé du travail,{" "}
                   <Link
                     href={
@@ -174,8 +174,8 @@ const IndexEgapro = () => {
                   >
                     cliquez ici
                   </Link>
-                </p>
-                <p>
+                </span>
+                <span className="block fr-text--md">
                   Pour contacter le <strong>référent égalité professionnelle</strong> au sein de votre DREETS,{" "}
                   <Link
                     href={"https://egapro.travail.gouv.fr/apiv2/public/referents_egalite_professionnelle.xlsx"}
@@ -183,7 +183,7 @@ const IndexEgapro = () => {
                   >
                     cliquez ici
                   </Link>
-                </p>
+                </span>
               </>
             }
           />

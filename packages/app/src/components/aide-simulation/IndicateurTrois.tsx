@@ -33,15 +33,13 @@ const CommentEstCalculéLIndicateur = () => (
     <ol>
       <li>
         <p className={fr.cx("fr-mb-0")}>Les salariés sont répartis par catégorie socio-professionnelle.</p>
-        <p>
-          Les catégories socio-professionnelles sont les suivantes :
-          <ul>
-            <li>ouvriers</li>
-            <li>employés</li>
-            <li>techniciens et agents de maîtrise</li>
-            <li>ingénieurs et cadres.</li>
-          </ul>
-        </p>
+        <p className={fr.cx("fr-mb-0")}>Les catégories socio-professionnelles sont les suivantes :</p>
+        <ul className={fr.cx("fr-mb-3w")}>
+          <li>ouvriers</li>
+          <li>employés</li>
+          <li>techniciens et agents de maîtrise</li>
+          <li>ingénieurs et cadres.</li>
+        </ul>
       </li>
       <li>
         <p>
