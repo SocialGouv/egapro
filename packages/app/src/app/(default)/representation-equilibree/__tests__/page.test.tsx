@@ -1,3 +1,4 @@
+import { expectToHydrateWithoutMismatch } from "@common/utils/__tests__/hydration";
 import { render, screen } from "@testing-library/react";
 
 import RepresentationEquilibree from "../page";
@@ -64,5 +65,9 @@ describe("RepresentationEquilibree", () => {
     expect(
       screen.getByText(/elles devront atteindre un objectif de 40% de femmes et d’hommes/, { exact: false }),
     ).toBeInTheDocument();
+  });
+
+  it("should hydrate the server markup without mismatch", async () => {
+    await expectToHydrateWithoutMismatch(await RepresentationEquilibree());
   });
 });

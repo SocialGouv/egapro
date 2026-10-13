@@ -68,15 +68,13 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
           <p className={fr.cx("fr-mb-0")}>
             Les salariés sont répartis en groupe, par tranche d’âge et par catégorie de postes équivalents.
           </p>
-          <p className={fr.cx("fr-m-0")}>
-            Les tranches d’âge sont les suivantes :
-            <ul>
-              <li>moins de 30 ans</li>
-              <li>de 30 à 39 ans</li>
-              <li>de 40 à 49 ans</li>
-              <li>50 ans et plus.</li>
-            </ul>
-          </p>
+          <p className={fr.cx("fr-m-0")}>Les tranches d’âge sont les suivantes :</p>
+          <ul>
+            <li>moins de 30 ans</li>
+            <li>de 30 à 39 ans</li>
+            <li>de 40 à 49 ans</li>
+            <li>50 ans et plus.</li>
+          </ul>
           <p className={fr.cx("fr-m-0")}>
             S’agissant des catégories de postes équivalents, l’employeur peut répartir les salariés, après consultation
             du comité social et économique, par niveau ou coefficient hiérarchique, en application de la classification
@@ -88,15 +86,13 @@ const CommentEstCalculéLIndicateur = ({ skipRemuDetails }: CommentEstCalculéLI
             méthode de répartition ne permet pas de calculer l’indicateur, il répartit les salariés par catégorie
             socio-professionnelle.
           </p>
-          <p className={fr.cx("fr-m-0")}>
-            Les catégories socio-professionnelles sont les suivantes :
-            <ul>
-              <li>ouvriers</li>
-              <li>employés</li>
-              <li>techniciens et agents de maîtrise</li>
-              <li>ingénieurs et cadres.</li>
-            </ul>
-          </p>
+          <p className={fr.cx("fr-m-0")}>Les catégories socio-professionnelles sont les suivantes :</p>
+          <ul>
+            <li>ouvriers</li>
+            <li>employés</li>
+            <li>techniciens et agents de maîtrise</li>
+            <li>ingénieurs et cadres.</li>
+          </ul>
         </li>
       )}
       <li>

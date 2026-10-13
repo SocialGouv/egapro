@@ -1,3 +1,4 @@
+import { expectToHydrateWithoutMismatch } from "@common/utils/__tests__/hydration";
 import { render, screen } from "@testing-library/react";
 
 import AideSimulation from "../page";
@@ -44,5 +45,9 @@ describe("<AideSimulation />", () => {
 
     const effectifsPrisEnCompteSection = screen.getByRole("heading", { name: "Effectifs pris en compte" });
     expect(effectifsPrisEnCompteSection).toBeInTheDocument();
+  });
+
+  it("should hydrate the server markup without mismatch", async () => {
+    await expectToHydrateWithoutMismatch(<AideSimulation />);
   });
 });
