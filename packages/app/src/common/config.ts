@@ -41,7 +41,9 @@ export const config = {
     };
   },
   proconnect: {
-    signinUrl: ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_SIGN_IN_URL, ""),
+    signinUrl:
+      ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_SIGN_IN_URL, "") ||
+      "https://identite.proconnect.gouv.fr/users/start-sign-in",
     manageOrganisationUrl: ensureNextEnvVar(process.env.EGAPRO_PROCONNECT_MANAGE_ORGANISATIONS_URL, ""),
   },
   api: {
