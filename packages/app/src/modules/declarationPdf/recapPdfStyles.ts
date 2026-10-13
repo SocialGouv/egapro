@@ -218,6 +218,9 @@ export const styles = StyleSheet.create({
 	},
 
 	gapCell: {
+		flexDirection: "column",
+	},
+	gapValueRow: {
 		flexDirection: "row",
 		alignItems: "center",
 	},
@@ -227,6 +230,12 @@ export const styles = StyleSheet.create({
 		fontWeight: BOLD,
 		color: TEXT_DEFAULT_GREY,
 		textAlign: "right",
+	},
+	gapDirection: {
+		fontSize: 8,
+		color: TEXT_DEFAULT_GREY,
+		textAlign: "right",
+		marginTop: 2,
 	},
 	badge: {
 		backgroundColor: BACKGROUND_CONTRAST_WARNING,
