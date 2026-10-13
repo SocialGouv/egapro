@@ -85,7 +85,7 @@ Trois grandes catégories de surface technique :
 | Styling | SCSS Modules + DSFR | sass | Mixins DSFR auto-injectés |
 | API interne | tRPC | ^11 | RPC typé bout-en-bout |
 | ORM | Drizzle | ^0.45 | SQL typé, migrations versionnées |
-| BDD | PostgreSQL | 14.17 | Local : Docker ; prod : managed |
+| BDD | PostgreSQL | 14.17 dans `docker-compose.yml` | Deux conteneurs locaux ; versions et hébergements V2 déployés à inventorier par environnement (voir §7) |
 | Auth | NextAuth | 4.x | Wrap ProConnect (OAuth/OIDC) |
 | Validation | Zod | ^4 | Schemas partagés front + back |
 | Lint / Format | Biome | ^2 | Remplace ESLint + Prettier |
@@ -442,6 +442,8 @@ Un middleware tRPC global lit la map `PROCEDURE_TO_ACTION` (dans `src/server/aud
 ---
 
 ## 7. Base de données (Drizzle + PostgreSQL)
+
+La stack locale utilise PostgreSQL 14.17 pour l’application et les notifications. Ce choix local ne permet pas de déduire la version ni l’hébergement de chaque environnement V2 déployé. Un constat limité au développement (`ovh-dev/egapro-alpha`, 13 octobre 2026) relève une image déclarée CloudNativePG/PostGIS 14 pour le cluster `pg` ; il ne vérifie ni la version mineure effectivement exécutée, ni la préproduction, ni la production. L’inventaire, la cible, les contrôles et les conditions de bascule sont suivis dans la [procédure de montée de version V2](postgresql-v2-upgrade.md) et la [Feature #4824](https://github.com/SocialGouv/egapro/issues/4824).
 
 ### 7.1 Schéma
 
@@ -888,8 +890,9 @@ Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta
 
 | Service | Image | Rôle |
 |---|---|---|
-| `db` | `postgres:14.17` | Base de données principale |
-| `migrate` | `node:22-slim` | Applique les migrations Drizzle au démarrage |
+| `db` | `postgres:14.17` | Base applicative locale |
+| `db-notifications` | `postgres:14.17` | Base locale dédiée au worker de notifications |
+| `migrate` | `node:22-slim` | Synchronise le schéma local avec `db:push` au démarrage |
 | `minio` | `minio/minio` | Stockage S3-compatible |
 | `mailpit` | `axllent/mailpit` | Capteur de mails dev (web UI sur :1080, SMTP :1025) |
 | `clamavd` | — | Antivirus pour l'upload de PDF |
