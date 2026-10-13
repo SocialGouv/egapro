@@ -231,9 +231,7 @@ export const Indic1Form = () => {
               {currentMode === RemunerationsMode.Enum.CSP ? (
                 <CSPModeTable computer={cspComputer} staff={session?.user.staff} />
               ) : (
-                <ClientAnimate>
-                  <OtherModesTable computer={otherComputer} defaultRemunerations={defaultRemunerationsOtherModes} />
-                </ClientAnimate>
+                <OtherModesTable computer={otherComputer} defaultRemunerations={defaultRemunerationsOtherModes} />
               )}
             </ClientAnimate>
           )}
