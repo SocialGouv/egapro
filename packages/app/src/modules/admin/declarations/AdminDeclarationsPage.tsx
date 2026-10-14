@@ -13,6 +13,9 @@ import { DEFAULT_PAGE_SIZE } from "./schemas";
 function DeclarationsContent() {
 	const searchParams = useSearchParams();
 
+	const { data: years, isLoading: isYearsLoading } =
+		api.adminDeclarations.listYears.useQuery();
+
 	const input = {
 		query: searchParams.get("query") ?? undefined,
 		email: searchParams.get("email") ?? undefined,
@@ -33,13 +36,13 @@ function DeclarationsContent() {
 
 	const { data, isLoading } = api.adminDeclarations.search.useQuery(input);
 
-	if (isLoading) {
+	if (isLoading || isYearsLoading) {
 		return <p>Chargement...</p>;
 	}
 
 	return (
 		<>
-			<SearchForm />
+			<SearchForm years={years ?? []} />
 			{data && (
 				<DeclarationTable
 					page={data.page}

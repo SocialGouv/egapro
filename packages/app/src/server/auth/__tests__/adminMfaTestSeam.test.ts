@@ -228,7 +228,19 @@ describe("auth config — E2E admin two-factor seam", () => {
 			const result = await signIn({ email: DECLARANT_EMAIL });
 
 			expect(result.isAdmin).toBe(false);
-			expect(mockLogAction).not.toHaveBeenCalled();
+			expect(mockLogAction).toHaveBeenCalledOnce();
+			expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+				action: "auth.login",
+				status: "success",
+				userId: "uuid-123",
+			});
+		});
+
+		it("grants no habilitation either to a listed account the seam dates but whose roles lack agent_public", async () => {
+			// The seam only stands in for the second factor; it never touches the roles claim.
+			const result = await signIn();
+
+			expect(result.isAdmin).toBe(false);
 		});
 
 		it("grants no habilitation either to a listed account the seam dates but whose roles lack agent_public", async () => {

@@ -47,7 +47,7 @@ flowchart LR
     subgraph "Externes"
       PC[ProConnect]
       GIP[GIP-MDS]
-      SI[INSEE Sirene]
+      SI[Weez / INSEE Sirene]
       ST[SUIT]
     end
 
@@ -451,7 +451,7 @@ Définition dans `src/server/db/`. Tables principales :
 |---|---|
 | `users` | Utilisateurs (email ProConnect, firstName, lastName, isAdmin) |
 | `userCompanies` | N-N user × siren (rattachement) |
-| `companies` | Entreprises (siren, name, nafCode, workforce, hasCse) |
+| `companies` | Entreprises (siren, name, nafCode, workforce, hasCse, region/department/country) |
 | `declarations` | Déclarations index (id, siren, year, status, currentStep, …) |
 | `declarationLocks` | Verrou collaboratif d'édition (un seul par déclaration) |
 | `jobCategories` | Catégories d'emploi (déclaration, optionnel) |
@@ -468,7 +468,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). Le middleware tRPC applique une **allowlist de métadonnées** (`METADATA_ALLOWED_KEYS`) sur les procédures `representationDeclaration.*` : seule la clé `year` de l'input brut est conservée dans `audit.action_log.metadata`, pour ne jamais y faire fuiter les pourcentages ou le texte libre du brouillon.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -609,7 +609,7 @@ id, user_id, user_email, siren, action, category, status,
 ip_address, user_agent, metadata (jsonb), error_message, created_at
 ```
 
-Le `metadata` jsonb est **automatiquement sanitizé** : les clés `password`, `token`, `refresh_token`, `secret`, `client_secret`, `authorization`, `apikey`, `api_key`, `accesskey`, `access_key`, `private_key` sont strippées récursivement.
+Les nouvelles lignes conservent les identifiants `user_id` et `siren` lorsqu'ils sont nécessaires à l'attribution d'une action. `user_email` et `user_agent` ne sont plus enregistrés. L'adresse IP est tronquée (IPv4 /16, IPv6 /48), le message d'erreur est réduit à un code contrôlé et `metadata` ne garde que des champs explicitement autorisés et validés pour chaque action. Le worker de notifications et les scripts de purge appliquent la même règle à leurs écritures SQL directes. Le schéma reste compatible avec les colonnes historiques ; la purge par catégorie reste inchangée.
 
 ### 9.3 Catégories et rétention
 
@@ -625,6 +625,8 @@ Définies dans `src/modules/audit/shared/constants.ts` :
 | `system` | 365 j | Import GIP, crons de purge (audit + déclarations) |
 
 `AUDIT_RETENTION_DAYS_SHORT = 180`, `AUDIT_RETENTION_DAYS_LONG = 365`. Surchargeables via les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` / `EGAPRO_AUDIT_RETENTION_LONG_DAYS`. La rétention **des déclarations** (distincte de celle du log d'audit) est pilotée par `EGAPRO_DECLARATION_RETENTION_YEARS` (défaut **6 ans**, voir §9.6).
+
+Vue d'ensemble de tous les journaux produits par l'application (pas seulement celui-ci) et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 9.4 Wire-up obligatoire
 
@@ -880,6 +882,8 @@ Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta
 
 **CronJobs** : les traitements planifiés (§9.6) sont déployés comme `kind: CronJob` sous `.kontinuous/templates/*-cron.yaml`. La purge de déclarations lit un override optionnel de la fenêtre de rétention via la ConfigMap `declaration-retention` (`optional: true` — non déployée = repli sur le défaut 6 ans).
 
+**Job post-déploiement** : `company-location-backfill` (`.kontinuous/templates/company-location-backfill-job.yaml`) est un `kind: Job` — pas un CronJob — câblé sur les hooks Helm `post-install,post-upgrade`, supprimé après succès (`hook-delete-policy`), et activé via le flag `global.companyLocationBackfillEnabled`. Il rejoue `scripts/backfill-company-region-department.ts` pour réparer en masse la ville, la région, le département et le pays des entreprises dont la géographie est incomplète — voir [`features.md` §13.9](features.md#139-résolution-du-pays-de-lentreprise-registre-weez).
+
 ### 14.3 Stack locale
 
 `docker-compose.yml` à la racine lance les services nécessaires au dev :
@@ -906,7 +910,7 @@ pnpm dev:app           # lance Next.js sur :3000
 |---|---|---|
 | **ProConnect** | SSO d'État (auth utilisateurs) | Oui (pas de fallback en prod) |
 | **GIP-MDS** | Calcul des indicateurs A–F (CSV importé chaque mars) | Non (déclaration possible sans pré-remplissage) |
-| **INSEE Sirene** | Identification des entreprises (raison sociale, NAF, effectif) | Lecture (cache) |
+| **Weez** (API exposant le registre INSEE Sirene) | Identification des entreprises (raison sociale, NAF, effectif, localisation, pays) — `EGAPRO_WEEZ_API_URL`, `~/server/services/weez.ts` | Lecture (cache 24h) |
 | **SUIT / Delphes** | Inspection du travail (consomme `/api/v1/*`) | Non (intégration sortante) |
 | **D@ccords** | Dépôt des accords collectifs | Non (lien externe) |
 | **AWS S3** (ou MinIO) | Stockage des PDF (upload + purge RGPD) | Oui pour l'upload CSE |

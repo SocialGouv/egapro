@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
 	logActionInTransaction: vi.fn(),
 	mirror: vi.fn(),
 	committed: false,
+	onConflictDoUpdate: vi.fn(),
 	releaseLocksForUserOnSirens: vi.fn(),
 	revokedRows: [] as { siren: string }[],
 }));
@@ -11,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 function fakeTx() {
 	const insertChain = {
 		values: () => ({
-			onConflictDoUpdate: async () => undefined,
+			onConflictDoUpdate: mocks.onConflictDoUpdate,
 			onConflictDoNothing: async () => undefined,
 		}),
 	};
@@ -55,12 +56,20 @@ const AUDIT = {
 describe("syncUserCompanyLink — audit trail", () => {
 	beforeEach(() => {
 		mocks.committed = false;
+		mocks.onConflictDoUpdate.mockReset();
 		mocks.mirror.mockReset();
 		mocks.logActionInTransaction.mockReset();
 		mocks.logActionInTransaction.mockResolvedValue(mocks.mirror);
 		mocks.releaseLocksForUserOnSirens.mockReset();
 		mocks.releaseLocksForUserOnSirens.mockResolvedValue([]);
 		mocks.revokedRows = [];
+	});
+
+	it("preserves a stored country when the registry returns no company", async () => {
+		await syncUserCompanyLink("user-1", "22222222200015", AUDIT);
+		const update = mocks.onConflictDoUpdate.mock.calls[0]?.[0];
+		expect(update.set).not.toHaveProperty("countryCode");
+		expect(update.set).not.toHaveProperty("countryLabel");
 	});
 
 	it("journals each revocation inside the transaction, with the reason and no other payload", async () => {

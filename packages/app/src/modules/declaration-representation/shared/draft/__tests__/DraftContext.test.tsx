@@ -17,6 +17,7 @@ const value: RepresentationDraftContextValue = {
 	isReadOnly: true,
 	previousHref: "/declaration-representation/etape/1",
 	registerStepValidator: vi.fn(),
+	declarationDeadline: new Date(2026, 2, 1),
 };
 
 function Consumer() {

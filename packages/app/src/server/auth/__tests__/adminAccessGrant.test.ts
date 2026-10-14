@@ -174,7 +174,7 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 	});
 
 	// S4
-	it("never grants an unlisted account, whatever roles ProConnect returns, and writes no audit row", async () => {
+	it("never grants an unlisted account, whatever roles ProConnect returns, and audits only the login", async () => {
 		const result = await signIn({
 			email: DECLARANT_EMAIL,
 			roles: ["agent_public"],
@@ -183,7 +183,9 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		expect(result.isAdmin).toBe(false);
 		// An unlisted account is never told the backoffice exists — not even via the refusal field.
 		expect(result.adminAccessRefusal).toBeUndefined();
-		expect(mockLogAction).not.toHaveBeenCalled();
+		expect(mockLogAction).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ action: "auth.login" }),
+		);
 	});
 
 	// S5
