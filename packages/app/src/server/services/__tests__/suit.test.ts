@@ -1,11 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const cache = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock("next/cache", () => ({
+	unstable_cache:
+		(fn: (siren: string) => Promise<boolean>) => async (siren: string) => {
+			if (cache.has(siren)) return cache.get(siren);
+			const result = await fn(siren);
+			cache.set(siren, result);
+			return result;
+		},
+}));
+
 import { fetchCseBySiren } from "../suit";
 
 describe("fetchCseBySiren", () => {
 	const fetchSpy = vi.fn();
 
 	beforeEach(() => {
+		cache.clear();
+		fetchSpy.mockReset();
 		vi.stubGlobal("fetch", fetchSpy);
 	});
 
@@ -53,6 +67,20 @@ describe("fetchCseBySiren", () => {
 		expect(result).toBeNull();
 		// Tells a missing endpoint apart from a certificate problem.
 		expect(warnSpy).toHaveBeenCalledWith("[suit] CSE lookup: HTTP 404");
+	});
+
+	it("does not cache a failed lookup", async () => {
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+		fetchSpy
+			.mockResolvedValueOnce({ ok: false, status: 404 })
+			.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({ siren: "123456789", CSE: true }),
+			});
+
+		expect(await fetchCseBySiren("123456789")).toBeNull();
+		expect(await fetchCseBySiren("123456789")).toBe(true);
+		expect(fetchSpy).toHaveBeenCalledTimes(2);
 	});
 
 	it("returns null and logs on network error", async () => {

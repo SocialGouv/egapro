@@ -5,7 +5,6 @@ import { Agent, fetch as undiciFetch } from "undici";
 import { env } from "~/env";
 
 const TIMEOUT_MS = 10_000;
-const REVALIDATE_SECONDS = 86_400;
 
 // Three-state memo: `undefined` = not resolved yet, `null` = no certificate
 // configured, `Agent` = certificate loaded. Avoids decoding the .p12 on every
@@ -46,10 +45,8 @@ function fetchSuit(url: string, init: RequestInit): Promise<Response> {
 	if (!agent) return fetch(url, init);
 
 	// Node's built-in fetch and Undici 8 use different dispatcher interfaces.
-	// The Next.js cache directive only applies to its patched global fetch.
-	const { next: _next, ...undiciInit } = init;
 	return undiciFetch(url, {
-		...undiciInit,
+		...init,
 		dispatcher: agent,
 	} as Parameters<typeof undiciFetch>[1]) as unknown as Promise<Response>;
 }
@@ -108,7 +105,6 @@ export function suitFetch(path: string): Promise<Response> {
 	return fetchSuit(`${baseUrl}${path}`, {
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(TIMEOUT_MS),
-		next: { revalidate: REVALIDATE_SECONDS },
 		redirect: "error",
 	});
 }
