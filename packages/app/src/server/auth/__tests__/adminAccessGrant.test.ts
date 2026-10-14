@@ -2,6 +2,8 @@ import type { Account, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AUDIT_ACTIONS } from "~/modules/audit";
+
 const { mockEnv } = vi.hoisted(() => ({
 	mockEnv: {
 		ADMIN_EMAILS: "agent@example.fr",
@@ -136,7 +138,7 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 	});
 
 	// S4
-	it("never grants an unlisted account, whatever roles ProConnect returns, and writes no admin audit row", async () => {
+	it("never grants an unlisted account, whatever roles ProConnect returns, and writes no admin-mfa audit row", async () => {
 		const result = await signIn({
 			email: DECLARANT_EMAIL,
 			roles: ["agent_public"],
@@ -145,6 +147,9 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		expect(result.isAdmin).toBe(false);
 		expect(mockLogAction).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({ action: "auth.login" }),
+		);
+		expect(mockLogAction).not.toHaveBeenCalledWith(
+			expect.objectContaining({ action: AUDIT_ACTIONS.AUTH_ADMIN_MFA }),
 		);
 	});
 
