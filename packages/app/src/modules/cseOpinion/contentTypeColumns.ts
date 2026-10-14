@@ -157,6 +157,19 @@ export function getUnassociatedFiles<T extends { id: string }>(
 	return files.filter((file) => !associatedFileIds.has(file.id));
 }
 
+// One required column caps the upload at one file, so the pairing is not a choice.
+export function getSingleChoiceAssociation(
+	columns: ContentTypeColumn[],
+	files: { id: string }[],
+): { columnId: string; fileId: string } | null {
+	const [column] = columns;
+	const [file] = files;
+	if (columns.length !== 1 || files.length !== 1 || !column || !file) {
+		return null;
+	}
+	return { columnId: column.id, fileId: file.id };
+}
+
 export function clearFileAssociations(
 	map: AssociationMap,
 	fileId: string,
