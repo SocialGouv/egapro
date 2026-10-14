@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { LOGIN, MY_SPACE } from "~/modules/routes";
-import { TEST_USER_EMAIL } from "../constants";
+import { TEST_LOGIN_EMAIL } from "../constants";
 import { urlGlob } from "./routes";
 
 export const AUTH_FILE = "test-results/.auth/user.json";
@@ -25,7 +25,7 @@ export async function loginWithProConnect(page: Page, retries = 2) {
 				.click();
 
 			// ProConnect FIA1V2 flow
-			await page.getByLabel("Email").fill(TEST_USER_EMAIL);
+			await page.getByLabel("Email").fill(TEST_LOGIN_EMAIL);
 			await page.getByRole("button", { name: /continuer|connexion/i }).click();
 			await page.getByRole("button", { name: "Se connecter" }).click();
 
