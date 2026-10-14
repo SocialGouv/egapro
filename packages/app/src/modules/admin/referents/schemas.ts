@@ -85,21 +85,31 @@ export const deleteReferentsSchema = z.object({
 	ids: z.array(z.string().uuid()).min(1).max(100),
 });
 
-const importReferentSchema = z.preprocess((value) => {
-	if (value === null || typeof value !== "object" || Array.isArray(value)) {
-		return value;
-	}
+const importReferentFields = {
+	...baseReferentFields,
+	county: baseReferentFields.county
+		.nullable()
+		.transform((value) => value ?? undefined),
+	substituteName: baseReferentFields.substituteName
+		.nullable()
+		.transform((value) => value ?? undefined),
+	substituteEmail: baseReferentFields.substituteEmail
+		.nullable()
+		.transform((value) => value ?? undefined),
+};
 
-	const referent = value as Record<string, unknown>;
-	return {
-		...referent,
-		county: referent.county === null ? undefined : referent.county,
-		substituteName:
-			referent.substituteName === null ? undefined : referent.substituteName,
-		substituteEmail:
-			referent.substituteEmail === null ? undefined : referent.substituteEmail,
-	};
-}, createReferentSchema);
+const importReferentSchema = z.discriminatedUnion("type", [
+	z.object({
+		...importReferentFields,
+		type: z.literal("email"),
+		value: z.string().email("L'email est invalide"),
+	}),
+	z.object({
+		...importReferentFields,
+		type: z.literal("url"),
+		value: z.string().url("L'URL est invalide"),
+	}),
+]);
 
 export const importReferentsSchema = z.array(importReferentSchema).min(1);
 

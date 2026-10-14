@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -23,6 +23,8 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const modalEpochRef = useRef(0);
+	const requestEpochRef = useRef(0);
 	const resetForm = useCallback(() => {
 		setFile(null);
 		setError("");
@@ -30,19 +32,29 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	}, []);
 	const importMutation = api.adminReferents.import.useMutation({
 		onSuccess: () => {
-			resetForm();
-			onClose();
 			onSuccess();
+			if (requestEpochRef.current === modalEpochRef.current) {
+				onClose();
+			}
 		},
 		onError: (err) => {
-			setError(err.message);
+			if (requestEpochRef.current === modalEpochRef.current) {
+				setError(err.message);
+			}
 		},
 	});
-	const handleClose = useCallback(() => {
-		resetForm();
-		importMutation.reset();
-		onClose();
-	}, [importMutation, onClose, resetForm]);
+
+	useEffect(() => {
+		const modal = modalRef.current;
+		if (!modal) return;
+		const handleConceal = () => {
+			modalEpochRef.current += 1;
+			resetForm();
+			if (!importMutation.isPending) importMutation.reset();
+		};
+		modal.addEventListener("dsfr.conceal", handleConceal);
+		return () => modal.removeEventListener("dsfr.conceal", handleConceal);
+	}, [importMutation, modalRef, resetForm]);
 
 	const handleFileChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,13 +65,15 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	);
 
 	const handleImport = useCallback(async () => {
-		if (!file) return;
+		if (!file || importMutation.isPending) return;
+		const submitEpoch = modalEpochRef.current;
 		setError("");
 
 		try {
 			const text = await file.text();
 			const json: unknown = JSON.parse(text);
 			const parsed = importReferentsSchema.safeParse(json);
+			if (submitEpoch !== modalEpochRef.current) return;
 
 			if (!parsed.success) {
 				setError(
@@ -68,9 +82,12 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 				return;
 			}
 
+			requestEpochRef.current = submitEpoch;
 			importMutation.mutate(parsed.data);
 		} catch {
-			setError("Le fichier n'est pas un JSON valide.");
+			if (submitEpoch === modalEpochRef.current) {
+				setError("Le fichier n'est pas un JSON valide.");
+			}
 		}
 	}, [file, importMutation]);
 
@@ -90,7 +107,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 								<button
 									aria-controls={MODAL_ID}
 									className="fr-btn--close fr-btn"
-									onClick={handleClose}
+									onClick={onClose}
 									title="Fermer"
 									type="button"
 								>
@@ -157,7 +174,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 									<li>
 										<button
 											className="fr-btn fr-btn--secondary"
-											onClick={handleClose}
+											onClick={onClose}
 											type="button"
 										>
 											Annuler
