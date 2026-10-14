@@ -108,6 +108,8 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 | `export` | 365 jours |
 | `system` | 365 jours |
 
+**Événements antivirus** : chaque fichier déposé (avis du CSE, évaluation conjointe) est analysé par ClamAV avant d'être conservé. Une détection écrit une ligne `failure` sur l'action d'upload avec le code `HTTP_422_virus_detected` et, dans les métadonnées, le nom de la signature ClamAV (`virusName`, ex. `Win.Test.EICAR_HDB-1`) ; une valeur qui n'a pas la forme d'une signature est écartée. Une indisponibilité de l'antivirus (connexion refusée, coupure en cours d'envoi, délai dépassé) écrit le code `HTTP_503_antivirus_unavailable`. Le nom du fichier n'est jamais conservé. En parallèle, la sortie standard reçoit une ligne `[antivirus]` (voir [4.3](#43-logs-applicatifs-stdout-et-stderr)) qui ne porte ni la signature ni le nom du fichier.
+
 Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
 
 **Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts` · `packages/app/scripts/declaration-cleanup.ts`.
@@ -126,9 +128,11 @@ En miroir de la table ci-dessus (jamais en remplacement), chaque appel applicati
 
 Messages et traces d'erreur de l'application et du worker de notifications, écrits sur la sortie standard et d'erreur. Si l'envoi est désactivé (`MAIL_ENABLED=false`), le worker trace l'e-mail du destinataire qui aurait reçu le message. En développement et en préproduction, `MAIL_ENABLED=true` dirige les envois vers Mailpit.
 
+L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antivirus]` : un avertissement `file rejected` avec `reason: "virus_detected"` à chaque détection, une erreur `scan unavailable` avec `reason: "antivirus_unavailable"`, l'étape (`send_chunk` ou `finish`) et l'erreur technique de connexion quand ClamAV ne répond pas. Une interruption de l'envoi par l'utilisateur n'en produit pas.
+
 **Durée** : non définie dans le dépôt — relève de la plateforme d'hébergement.
 
-**Sources** : `packages/notifications/src/worker/jobHandler.ts`.
+**Sources** : `packages/notifications/src/worker/jobHandler.ts` · `packages/app/src/server/services/fileUpload.ts`.
 
 ### 4.4 Sentry (erreurs, traces et sessions enregistrées)
 

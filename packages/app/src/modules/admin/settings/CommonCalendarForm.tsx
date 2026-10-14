@@ -109,7 +109,7 @@ export function CommonCalendarForm({ year }: Props) {
 					<legend className="fr-fieldset__legend">
 						Dates communes aux démarches
 					</legend>
-					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
 						<div className="fr-col-12 fr-col-md-4">
 							<SettingsReadOnlyField
 								hint="Lecture seule — valeur issue du fichier GIP récupéré depuis SUIT."

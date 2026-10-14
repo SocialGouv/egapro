@@ -34,7 +34,13 @@ export function setDefaultMocks(mocks: QueryMocks) {
 		isError: false,
 	});
 	mocks.statsUseQueryMock.mockReturnValue({
-		data: { totalObligated: 0, totalSubmitted: 0, submissionRate: 0 },
+		data: {
+			totalObligated: 0,
+			totalIndicatorsSubmitted: 0,
+			totalDemarcheCompleted: 0,
+			completionRate: 0,
+			previousYearRate: null,
+		},
 		isLoading: false,
 		isError: false,
 	});
