@@ -823,7 +823,7 @@ Trois entrées Sentry, une par runtime :
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo, non bloquant |
+| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo ou en manuel, non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
