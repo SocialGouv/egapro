@@ -3,6 +3,7 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+	complianceProcessCompletedCondition,
 	notCancelledCondition,
 	resolveCurrentDeclarationId,
 	resolveExportDeclarationId,
@@ -13,8 +14,9 @@ import {
 const dialect = new PgDialect({ casing: "snake_case" });
 
 // Parity guard: these Drizzle conditions are the SQL mirrors of the domain
-// predicates `isDeclarationSubmitted` / `isCancelled`. Assert the generated SQL
-// stays aligned with those definitions ("status" <> 'draft' and not cancelled).
+// predicates `isDeclarationSubmitted` / `isComplianceProcessCompleted` / `isCancelled`.
+// Assert the generated SQL stays aligned with those definitions ("status" <>
+// 'draft', "status" = 'demarche_completed' and not cancelled).
 
 describe("submittedDeclarationCondition", () => {
 	it("excludes draft declarations (mirror of isDeclarationSubmitted)", () => {
@@ -22,6 +24,16 @@ describe("submittedDeclarationCondition", () => {
 		expect(sql).toContain("status");
 		expect(sql).toMatch(/<>|!=/);
 		expect(params).toEqual(["draft"]);
+	});
+});
+
+describe("complianceProcessCompletedCondition", () => {
+	it("keeps only the terminal status (mirror of isComplianceProcessCompleted)", () => {
+		const { sql, params } = dialect.sqlToQuery(
+			complianceProcessCompletedCondition(),
+		);
+		expect(sql).toMatch(/"status" = \$1/);
+		expect(params).toEqual(["demarche_completed"]);
 	});
 });
 

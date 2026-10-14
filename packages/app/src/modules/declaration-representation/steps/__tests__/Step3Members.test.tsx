@@ -84,6 +84,7 @@ function Harness({
 				isReadOnly,
 				previousHref: "/declaration-representation/etape/2",
 				registerStepValidator,
+				declarationDeadline: new Date(2026, 2, 1),
 			}}
 		>
 			<Step3Members />

@@ -152,7 +152,16 @@ d'entreprise, ni de requête de recherche) :
 | Slot Matomo | Contenu | Pourquoi |
 |---|---|---|
 | 1 — `CAMPAIGN_YEAR` | Année de campagne | Comparer les campagnes entre elles |
-| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRange`) | Segmenter par taille d'entreprise (obligations < 50 / 50–99 / ≥ 100) |
+| 2 — `WORKFORCE_RANGE` | Tranche d'effectif (`getCompanySizeRangeForGip`, toujours émise — un effectif GIP inconnu vaut `<50`) | Segmenter par taille d'entreprise (obligations < 50 / 50–99 / ≥ 100) |
+
+Depuis ce changement, les événements du funnel de déclaration émettent
+`WORKFORCE_RANGE=<50` quand l'effectif GIP est inconnu. Les événements déjà
+enregistrés pendant la campagne sans dimension 2 restent sans dimension :
+Matomo ne les reclasse pas rétroactivement. Sur `/admin/stats`, le filtre de
+tranche `<50` du funnel Matomo exclut donc ces anciens événements, même si les
+graphiques calculés en base classent désormais les déclarations correspondantes
+en `<50`. Pendant cette campagne, comparer les deux séries filtrées demande de
+tenir compte de cette rupture de définition à la date de déploiement.
 
 ⚠️ **Les IDs de slot doivent être configurés à l'identique dans l'admin Matomo.**
 Un ID erroné fait silencieusement ignorer la dimension. Les IDs sont centralisés
