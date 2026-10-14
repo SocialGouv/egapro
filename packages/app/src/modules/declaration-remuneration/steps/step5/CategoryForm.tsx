@@ -9,6 +9,7 @@ import {
 	categoryCorrectionFormSchema,
 	categoryFormSchema,
 } from "~/modules/declaration-remuneration/schemas";
+import { coherenceErrorLabel } from "~/modules/declaration-remuneration/shared/coherenceErrorLabel";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
@@ -24,7 +25,6 @@ import {
 	findFieldError,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { StepTitleRow } from "~/modules/declaration-remuneration/shared/StepTitleRow";
-import { coherenceErrorLabel } from "~/modules/declaration-remuneration/steps/step4/quartileCoherence";
 import {
 	CATEGORY_SOURCES,
 	formatCategorySource,
@@ -504,7 +504,6 @@ export function CategoryForm({
 							table: row.basis,
 							field: sex,
 							expected: max,
-							total,
 						}),
 					});
 				}
