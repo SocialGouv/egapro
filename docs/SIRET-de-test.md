@@ -14,45 +14,44 @@
 
 ## SIREN dédiés aux tests UI et aux audits RGAA (#4724)
 
-Les **22 SIREN distincts** ci-dessous sont réservés au [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724) : 18 pour les tests UI (3 par tranche) et 4 pour les audits RGAA. Les SIRET indiqués sont ceux du siège, vérifiés le 2026-10-13 avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/). Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
+Les **24 SIREN distincts** ci-dessous sont réservés au [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724) : 20 pour les tests UI (4 dans chacune des cinq tranches d’effectif demandées) et 4 pour les audits RGAA. Les SIRET indiqués sont ceux du siège, vérifiés les 13 et 14 octobre 2026 avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/). Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
 
-Après fusion et promotion d’une release contenant la [PR #4833](https://github.com/SocialGouv/egapro/pull/4833), 19 SIREN auront une ligne dans le GIP mocké. Les 3 de la tranche **moins de 50** restent uniquement dans `packages/app/data/dedicated-test-sirens.json` : ils n’ont pas de ligne GIP et suivent le parcours volontaire après une première connexion ProConnect autorisée. Leur tranche officielle est 20–49 salariés (code 12). Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
+Après fusion et promotion d’une release contenant la [PR #4833](https://github.com/SocialGouv/egapro/pull/4833), les 24 SIREN auront une ligne dans le GIP mocké. Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
 
-### Tests UI — moins de 50 (3)
-
-- [ ] `80497545600190` — **KLC SERVICES** · SIREN `804975456` · hors GIP
-- [ ] `53359102000193` — **CIRCET SERVICES** · SIREN `533591020` · hors GIP
-- [ ] `52881039300017` — **ALTER SERVICES** · SIREN `528810393` · hors GIP
-
-### Tests UI — 50-99 (3)
+### Tests UI — 50-99 (4)
 
 - [ ] `91801657700036` — **MENCO SERVICES** · SIREN `918016577` · effectif GIP 70
 - [ ] `82382184800012` — **TBS SERVICES** · SIREN `823821848` · effectif GIP 70
 - [ ] `84118054000137` — **RESIDENCES SERVICES** · SIREN `841180540` · effectif GIP 70
+- [ ] `82317717500010` — **LE SERVICE FUNERAIRE** · SIREN `823177175` · effectif GIP 70
 
-### Tests UI — 100-149 (3)
+### Tests UI — 100-149 (4)
 
 - [ ] `67850126300019` — **EUROPE SERVICES** · SIREN `678501263` · effectif GIP 120
 - [ ] `84419244300027` — **TOTALENERGIES CHARGING SERVICES** · SIREN `844192443` · effectif GIP 120
 - [ ] `38151585700377` — **MONTRE SERVICE** · SIREN `381515857` · effectif GIP 120
+- [ ] `34038301700050` — **MAUFFREY SERVICES** · SIREN `340383017` · effectif GIP 120
 
-### Tests UI — 150-249 (3)
+### Tests UI — 150-249 (4)
 
 - [ ] `48073176900083` — **M ENERGIES SERVICE** · SIREN `480731769` · effectif GIP 200
 - [ ] `84197838000027` — **EBRA SERVICES** · SIREN `841978380` · effectif GIP 200
 - [ ] `82114532300050` — **BIOSANTE SERVICES** · SIREN `821145323` · effectif GIP 200
+- [ ] `95039507900078` — **EXPRESSO SERVICE** · SIREN `950395079` · effectif GIP 200
 
-### Tests UI — 250-999 (3)
+### Tests UI — 250-999 (4)
 
 - [ ] `34841550601311` — **SERVICES ET SANTE** · SIREN `348415506` · effectif GIP 375
 - [ ] `72202372800131` — **GROUPE MORGAN SERVICES (GROUPE MORGAN SERVICES)** · SIREN `722023728` · effectif GIP 375
 - [ ] `30416596200024` — **INTER-SERVICE** · SIREN `304165962` · effectif GIP 375
+- [ ] `33979661700308` — **SD SERVICES** · SIREN `339796617` · effectif GIP 375
 
-### Tests UI — 1 000 et plus (3)
+### Tests UI — 1 000 et plus (4)
 
 - [ ] `43395769300503` — **SANTE RESTAURATION SERVICES (ANTHEMIS)** · SIREN `433957693` · effectif GIP 1500
 - [ ] `34181023201765` — **TEXA SERVICES** · SIREN `341810232` · effectif GIP 1500
 - [ ] `35327106700087` — **EUROFEU SERVICES (EUROFEU SOLUTIONS)** · SIREN `353271067` · effectif GIP 1500
+- [ ] `41344839000067` — **HOME SERVICES** · SIREN `413448390` · effectif GIP 1500
 
 ### Audits RGAA — plus de 150 (4)
 

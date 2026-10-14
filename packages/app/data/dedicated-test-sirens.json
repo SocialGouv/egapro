@@ -1,29 +1,5 @@
 [
 	{
-		"siren": "804975456",
-		"name": "KLC SERVICES",
-		"purpose": "ui",
-		"sizeRange": "<50",
-		"officialWorkforceCode": "12",
-		"workforce": null
-	},
-	{
-		"siren": "533591020",
-		"name": "CIRCET SERVICES",
-		"purpose": "ui",
-		"sizeRange": "<50",
-		"officialWorkforceCode": "12",
-		"workforce": null
-	},
-	{
-		"siren": "528810393",
-		"name": "ALTER SERVICES",
-		"purpose": "ui",
-		"sizeRange": "<50",
-		"officialWorkforceCode": "12",
-		"workforce": null
-	},
-	{
 		"siren": "918016577",
 		"name": "MENCO SERVICES",
 		"purpose": "ui",
@@ -174,5 +150,45 @@
 		"sizeRange": "250-999",
 		"workforce": 375,
 		"bucket": "large-250"
+	},
+	{
+		"siren": "823177175",
+		"name": "LE SERVICE FUNERAIRE",
+		"purpose": "ui",
+		"sizeRange": "50-99",
+		"workforce": 70,
+		"bucket": "medium-50"
+	},
+	{
+		"siren": "340383017",
+		"name": "MAUFFREY SERVICES",
+		"purpose": "ui",
+		"sizeRange": "100-149",
+		"workforce": 120,
+		"bucket": "medium-100"
+	},
+	{
+		"siren": "950395079",
+		"name": "EXPRESSO SERVICE",
+		"purpose": "ui",
+		"sizeRange": "150-249",
+		"workforce": 200,
+		"bucket": "medium-150"
+	},
+	{
+		"siren": "339796617",
+		"name": "SD SERVICES",
+		"purpose": "ui",
+		"sizeRange": "250-999",
+		"workforce": 375,
+		"bucket": "large-250"
+	},
+	{
+		"siren": "413448390",
+		"name": "HOME SERVICES",
+		"purpose": "ui",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
 	}
 ]
