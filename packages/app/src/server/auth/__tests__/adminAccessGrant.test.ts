@@ -145,6 +145,9 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		});
 
 		expect(result.isAdmin).toBe(false);
+		expect(mockLogAction).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ action: "auth.login" }),
+		);
 		expect(mockLogAction).not.toHaveBeenCalledWith(
 			expect.objectContaining({ action: AUDIT_ACTIONS.AUTH_ADMIN_MFA }),
 		);
