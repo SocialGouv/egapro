@@ -65,6 +65,15 @@ const sortColumnMap = {
 } as const;
 
 export const adminDeclarationsRouter = createTRPCRouter({
+	listYears: adminProcedure.query(async ({ ctx }) => {
+		const rows = await ctx.db
+			.selectDistinct({ year: declarations.year })
+			.from(declarations)
+			.orderBy(desc(declarations.year));
+
+		return rows.map((row) => row.year);
+	}),
+
 	search: adminProcedure
 		.input(searchDeclarationsSchema)
 		.query(async ({ ctx, input }) => {
@@ -362,6 +371,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companySiren: companies.siren,
 					companyNafCode: companies.nafCode,
 					companyAddress: companies.address,
+					companyCountryCode: companies.countryCode,
+					companyCountryLabel: companies.countryLabel,
+					companyDepartmentLabel: companies.departmentLabel,
 					companyWorkforceEma: gipMdsData.workforceEma,
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
@@ -455,6 +467,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					siren: row.companySiren,
 					nafCode: row.companyNafCode,
 					address: row.companyAddress,
+					countryCode: row.companyCountryCode,
+					countryLabel: row.companyCountryLabel,
+					departmentLabel: row.companyDepartmentLabel,
 					gipWorkforce: parseGipWorkforce(row.companyWorkforceEma),
 				},
 				declarationYear: d.year,

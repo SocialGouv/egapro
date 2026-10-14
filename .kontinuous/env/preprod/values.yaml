@@ -1,3 +1,5 @@
 app:
   annotations:
     oblik.socialgouv.io/min-request-cpu: 500m
+  vars:
+    EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
