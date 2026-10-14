@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
-import { TEST_USER_EMAIL } from "../constants";
 import { type MailpitEmail, mailpitReachable, waitForEmail } from "./mailpit";
 import { isMailFlowEnabled } from "./notifications-worker";
+import { getTestUserEmail } from "./testUser";
 
 // #4293 — the three confirmation variants are only distinguishable this way:
 // `completed` owns a subject of its own, while `cse_to_deposit` and
@@ -43,12 +43,11 @@ export async function expectCompletionReceipt(options: {
 		options.round === "second"
 			? COMPLETED_SECOND_DECLARATION_SUBJECT
 			: COMPLETED_DECLARATION_SUBJECT;
-	const email = await waitForEmail(
-		TEST_USER_EMAIL,
-		(m) => m.subject === subject,
-		{ since: options.since },
-	);
-	expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+	const recipient = getTestUserEmail();
+	const email = await waitForEmail(recipient, (m) => m.subject === subject, {
+		since: options.since,
+	});
+	expect(email.to.some((r) => r.address === recipient)).toBe(true);
 	expect(email.html).toMatch(DEMARCHE_COMPLETED_WORDING);
 	expect(email.html).not.toMatch(PATH_TO_SELECT_WORDING);
 	return email;

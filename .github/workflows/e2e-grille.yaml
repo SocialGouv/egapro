@@ -70,7 +70,8 @@ jobs:
       S3_BUCKET_NAME: egapro-dev-app
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
-      ADMIN_EMAILS: test@fia1.fr
+      ADMIN_EMAILS: test@fia1.fr,ultimate@test.proconnect.gouv.fr
+      EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
       MAIL_ENABLED: "true"
       SMTP_HOST: localhost
@@ -160,7 +161,7 @@ jobs:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
           EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -171,7 +172,7 @@ jobs:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
           EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
           ANNEE: ${{ github.event.inputs.annee || 'toutes' }}
           TRANCHE: ${{ github.event.inputs.tranche || 'toutes' }}
         run: |

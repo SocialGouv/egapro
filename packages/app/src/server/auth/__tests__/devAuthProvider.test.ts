@@ -136,6 +136,7 @@ describe("dev-auth authorize", () => {
 			id: "declarant@example.fr",
 			lastName: null,
 			name: "declarant",
+			roles: ["agent_public"],
 			siret: "55210055400013",
 		});
 	});

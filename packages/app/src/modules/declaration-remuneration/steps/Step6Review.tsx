@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { trackFunnelComplete } from "~/modules/analytics";
 import type { DeclarationFsmStatus } from "~/modules/domain";
 import {
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
-	getOptionalCompanySizeRange,
 	hasGapsAboveThreshold,
 	isComplianceProcessRequired,
 	isCseOpinionRequired,
@@ -107,7 +107,7 @@ export function Step6Review({
 				DECLARATION_FUNNEL,
 				declarationFunnelDimensions(
 					declarationYear,
-					getOptionalCompanySizeRange(companyWorkforce),
+					getCompanySizeRangeForGip(companyWorkforce),
 				),
 			);
 		} catch {

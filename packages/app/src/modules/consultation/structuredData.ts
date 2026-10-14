@@ -15,12 +15,13 @@ type CompanyInput = {
 
 function postalAddress(company: CompanyInput): Record<string, unknown> | null {
 	const locality = company.city ?? company.departmentLabel;
-	if (!locality && !company.region && !company.countryLabel) return null;
+	const country = company.countryCode ?? company.countryLabel;
+	if (!locality && !company.region && !country) return null;
 	return {
 		"@type": "PostalAddress",
 		...(locality ? { addressLocality: locality } : {}),
 		...(company.region ? { addressRegion: company.region } : {}),
-		addressCountry: company.countryCode ?? company.countryLabel ?? "FR",
+		...(country ? { addressCountry: country } : {}),
 	};
 }
 
