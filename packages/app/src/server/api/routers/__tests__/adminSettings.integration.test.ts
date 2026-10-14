@@ -29,7 +29,7 @@ type CampaignDeadlineRow = {
 describe("adminSettings — each settings block only writes its own columns (real Postgres)", () => {
 	let sql!: ReturnType<typeof postgres>;
 
-	const ADMIN_ID = "admin-settings-integration-admin";
+	const ADMIN_ID = "123e4567-e89b-42d3-a456-426614174000";
 	const ADMIN_EMAIL = "admin-settings-integration@example.fr";
 	const CONFIGURED_YEAR = 2097;
 	const UNCONFIGURED_YEAR = 2098;

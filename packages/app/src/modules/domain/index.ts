@@ -7,6 +7,8 @@ export {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
+	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
 } from "./shared/adminMfa";
 // Campaign
