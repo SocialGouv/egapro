@@ -4,8 +4,6 @@
 export type {
 	AdminAccessRefusal,
 	AdminMfaFailure,
-	ResolveAdminGrantInput,
-	ResolveAdminGrantResult,
 } from "./shared/adminMfa";
 export {
 	ADMIN_MFA_ACR_VALUES,

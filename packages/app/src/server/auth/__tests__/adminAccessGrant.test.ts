@@ -67,10 +67,12 @@ function idToken(claims: Record<string, unknown>) {
 async function signIn({
 	email = ADMIN_EMAIL,
 	roles,
+	organizationLabel,
 	existingIsAdmin = false,
 }: {
 	email?: string;
 	roles?: string[] | null;
+	organizationLabel?: string | null;
 	existingIsAdmin?: boolean;
 }) {
 	mockFindFirst.mockResolvedValue({
@@ -83,8 +85,9 @@ async function signIn({
 
 	return callbacks.jwt({
 		token: { sub: "sub-123" } as JWT,
-		user: { id: "proconnect-sub", email, roles } as User & {
+		user: { id: "proconnect-sub", email, roles, organizationLabel } as User & {
 			roles?: string[] | null;
+			organizationLabel?: string | null;
 		},
 		account: {
 			id_token: idToken({ acr: "eidas1-mfa", auth_time: AUTH_TIME }),
@@ -110,6 +113,11 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 
 		expect(result.isAdmin).toBe(true);
 		expect(result.adminAccessRefusal).toBeUndefined();
+		expect(mockLogAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				metadata: expect.objectContaining({ granted: true }),
+			}),
+		);
 	});
 
 	// S2
@@ -123,9 +131,29 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		});
 		expect(mockLogAction).toHaveBeenCalledWith(
 			expect.objectContaining({
-				metadata: expect.objectContaining({ roles: [] }),
+				metadata: expect.objectContaining({ roles: [], granted: false }),
 			}),
 		);
+	});
+
+	it("carries the ProConnect organization label into the refusal and session", async () => {
+		const token = await signIn({
+			roles: [],
+			organizationLabel: "Société Démo",
+		});
+
+		expect(token.adminAccessRefusal).toEqual({
+			roles: [],
+			organizationLabel: "Société Démo",
+		});
+		const session = callbacks.session({
+			session: { user: {}, expires: "" },
+			token,
+		} as Parameters<typeof callbacks.session>[0]);
+		expect(session.user.adminAccessRefusal).toEqual({
+			roles: [],
+			organizationLabel: "Société Démo",
+		});
 	});
 
 	// S3

@@ -249,6 +249,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 						acr: "eidas1",
 						authTime: NOW_SECONDS,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 						testSeam: true,
 					},
@@ -265,6 +266,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 			expect(Object.keys(entry.metadata).sort()).toEqual([
 				"acr",
 				"authTime",
+				"granted",
 				"publicAgentRequired",
 				"roles",
 			]);

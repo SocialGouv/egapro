@@ -696,6 +696,7 @@ export const authConfig = {
 							acr,
 							authTime: token.adminMfaAt ?? null,
 							roles,
+							granted: grant.granted,
 							publicAgentRequired: env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
 							// Present only when the seam granted the passage, so a row
 							// never reads as a real second factor that did not happen.

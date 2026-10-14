@@ -207,6 +207,7 @@ describe("auth config — admin two-factor authentication", () => {
 						acr: "eidas1-mfa",
 						authTime: AUTH_TIME,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 					},
 				}),
@@ -224,6 +225,7 @@ describe("auth config — admin two-factor authentication", () => {
 						acr: "eidas1",
 						authTime: null,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 					},
 				}),
@@ -242,6 +244,7 @@ describe("auth config — admin two-factor authentication", () => {
 			expect(Object.keys(entry.metadata).sort()).toEqual([
 				"acr",
 				"authTime",
+				"granted",
 				"publicAgentRequired",
 				"roles",
 			]);
