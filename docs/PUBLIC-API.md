@@ -56,7 +56,20 @@ Contrairement à l'API SUIT (`/api/v1/openapi.json`, retournant 404 en productio
 
 ### Export complet (`GET /api/public/declarations/export`)
 
-Retourne l'intégralité des déclarations publiées, toutes années confondues. Le paramètre `format` accepte `json` (défaut), `csv` ou `xlsx`. Les filtres de la recherche (`q`, `region`, `departement`, `naf`, `year`…) peuvent être repris pour restreindre l'export ; `limit`, `offset` et `sort` sont ignorés.
+Retourne l'intégralité des déclarations publiées, toutes années confondues. Le paramètre `format` accepte `json` (défaut), `csv` ou `xlsx`. Les filtres suivants restreignent l'export :
+
+| Paramètre | Description |
+| --- | --- |
+| `q` | SIREN ou recherche partielle dans la raison sociale |
+| `city` | Recherche partielle dans la ville |
+| `region` | Code ou libellé de région |
+| `departement` | Code de département |
+| `naf` | Code NAF, nomenclature NAF rév. 2 |
+| `year` | Année de déclaration publiée |
+| `workforceMin`, `workforceMax` | Bornes inclusives de l'effectif moyen annuel (EMA) |
+| `workforceRanges` | Tranche d'effectif : `<50`, `50-99`, `100-249`, `250-999` ou `1000+` |
+
+`region`, `departement`, `naf` et `workforceRanges` peuvent être répétés : plusieurs valeurs d'un même filtre sont combinées par « ou », tandis que les différents filtres se cumulent. `workforceMin` et `workforceMax` se cumulent également avec `workforceRanges`. `limit`, `offset` et `sort` sont ignorés. La [documentation interactive](https://egapro.travail.gouv.fr/api/public/docs) détaille les paramètres et les réponses.
 
 ```sh
 # JSON

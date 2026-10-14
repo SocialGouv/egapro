@@ -4,8 +4,6 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 type MetadataField =
 	| "year"
 	| "years"
-	| "count"
-	| "limit"
 	| "format"
 	| "hasCse"
 	| "campaignStartDate"
@@ -213,8 +211,6 @@ function validValue(
 				)
 				? [...value]
 				: undefined;
-		case "count":
-		case "limit":
 		case "timeoutMinutes":
 			return typeof value === "number" &&
 				Number.isSafeInteger(value) &&
