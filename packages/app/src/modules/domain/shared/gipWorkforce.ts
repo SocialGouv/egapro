@@ -84,11 +84,7 @@ export function floorWorkforce(gipWorkforce: number | null): number | null {
 	return gipWorkforce === null ? null : Math.floor(gipWorkforce);
 }
 
-// A company absent from the GIP file is of the voluntary tier (see
-// `getObligationWorkforce`), so it belongs to the smallest bucket rather than
-// to none — the single source for every screen and export that segments by
-// size from a GIP headcount: the back-office filters, the statistics
-// dashboards, the SUIT export and the Matomo funnel dimension.
+// Absent from the GIP file means voluntary tier, so <50 rather than no bucket.
 export function getCompanySizeRangeForGip(
 	gipWorkforce: number | null,
 ): CompanySizeRange {

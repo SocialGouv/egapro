@@ -329,10 +329,8 @@ describe("adminStatsRouter.getCampaignProgression", () => {
 		);
 	});
 
-	// LEFT and not INNER: a company absent from the GIP file must fall out of
-	// the query's totals, not be dropped from them altogether. It still leaves
-	// a non-smallest bucket: `coalesce(…, 0)` only folds it into `<50`.
-	it("joins the GIP table on the left so an absent company only leaves the bucket", async () => {
+	// LEFT keeps an absent company in the totals; coalesce puts it in <50, outside 50-99.
+	it("keeps a company absent from GIP in the totals but outside the 50-99 bucket", async () => {
 		const db = buildDb([]);
 		const { adminStatsRouter } = await import("../adminStats");
 		const caller = adminStatsRouter.createCaller({

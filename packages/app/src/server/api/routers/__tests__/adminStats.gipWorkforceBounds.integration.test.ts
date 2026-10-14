@@ -151,6 +151,14 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 			workforceEma: null,
 			hasGipRow: false,
 		},
+		{
+			label: "GIP row with a NULL headcount and a Weez 300",
+			siren: "900000017",
+			year: BUCKET_YEAR,
+			weezWorkforce: 300,
+			workforceEma: null,
+			hasGipRow: true,
+		},
 	];
 
 	const ALL_FIXTURES = [...PARITY_FIXTURES, ...BUCKET_FIXTURES];
@@ -321,8 +329,8 @@ describe("adminStats — GIP workforce bounds (real Postgres, #4185)", () => {
 
 		// The variant that lets the NULL propagate instead would answer this one
 		// with 1: it would leave "headcount unknown" out of every bucket.
-		it("folds a company absent from the GIP file into the smallest bucket", async () => {
-			expect((await funnelCounts(BUCKET_YEAR, "<50")).total).toBe(2);
+		it("folds both a missing GIP row and a NULL headcount into the smallest bucket", async () => {
+			expect((await funnelCounts(BUCKET_YEAR, "<50")).total).toBe(3);
 		});
 
 		it("buckets on the GIP headcount and not on the Weez one", async () => {
