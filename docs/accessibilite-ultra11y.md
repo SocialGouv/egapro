@@ -15,18 +15,20 @@ SHA du commit de release avec un commentaire `# vX.Y.Z` :
 | Job | Quand | Ce qu'il fait |
 |---|---|---|
 | `a11y-gate` | **chaque PR** (bloquant) | Audit statique JSX/TSX de tout `src`. Gratuit, quelques secondes, aucun navigateur et aucun modèle. **C'est la seule gate du dispositif qui arrête un merge sur un constat** (`fail-on: blocking`) : SARIF, annotations, commentaire sticky `digest` et rapport `ultra11y-pr-static`. |
-| `a11y-pages` | **merge sur `alpha`** (`push`, filtré par `paths`) et manuel (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis transmet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure —, et un critère « à évaluer » non plus (`require-decided: false`). Bloquent : une panne, un rendu requis mais absent (`require-rendered`), un balayage amputé (`require-sample`). |
-| `a11y-bundle` | merge sur `alpha`, manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
+| `a11y-pages` | **cron hebdomadaire** (`schedule`, lundi 04:00 UTC, sur `alpha`) et manuel (`workflow_dispatch`) | La suite Playwright `src/e2e/a11y/` enregistre **39 pages** en épinglant l'état applicatif que chaque écran de tunnel exige — dont **37 sont effectivement capturées**, les 2 restantes étant gardées par un `test.skip` faute de données ; **24** seulement sont déclarées dans `.ultra11yrc.json`, et c'est ce sous-ensemble que `require-sample` tient. L'Action réaudite tout `src`, réingère les instantanés, rejoue le registre puis transmet seulement le reliquat à Claude CLI par lots de huit (`claude-sonnet-5`, effort `high`, sans plafond par lot). Produit LE rapport page par page. Les constats ne bloquent pas — on mesure —, et un critère « à évaluer » non plus (`require-decided: false`). Bloquent : une panne, un rendu requis mais absent (`require-rendered`), un balayage amputé (`require-sample`). |
+| `a11y-bundle` | cron, manuel | Fusionne les parties en un seul artefact `ultra11y-rgaa`. |
 
 **Deux moitiés, et elles ne paient pas la même chose.** `pull_request` ne lance que la gate
-statique — gratuite, sans modèle, bloquante. Un `push` sur `alpha` qui touche ce que l'audit
-regarde, ou un `workflow_dispatch`, lance la chaîne complète : balayage navigateur, critères de
+statique — gratuite, sans modèle, bloquante. Le cron hebdomadaire, ou un `workflow_dispatch`,
+lance la chaîne complète : balayage navigateur, critères de
 rendu, rejeu du registre puis adjudication IA du reliquat, livrable.
 
-### Pourquoi `push: alpha`, et plus de cron
+### Pourquoi un cron hebdomadaire, et pas un run à chaque merge
 
-Il y a eu un cron — lundi 04:00 UTC — choisi à l'époque plutôt qu'un `push: alpha` que
-`claude-code-action` aurait refusé. Il a été retiré pour le prix.
+Le cron du lundi 04:00 UTC a d'abord été choisi plutôt qu'un `push: alpha` que
+`claude-code-action` aurait refusé, puis retiré pour le prix (#4412), puis rétabli (#4822) :
+sans lui, une régression de rendu n'était rattrapée par personne tant que personne ne lançait le
+workflow — et aucun run complet n'a abouti entre le 1er septembre et le 14 octobre 2026.
 
 **ultra11y 5.36 a rendu le contrat d'automatisation exhaustif.** Un critère n'obtient un `C` par
 mesure que si son contrat de test démontre que *chaque* test numéroté a un instrument décisif.
@@ -40,30 +42,31 @@ autres exigent une adjudication. Mesuré sur ce dépôt, même commit et mêmes 
 
 Ce n'est pas une régression, c'est un durcissement, et il se défend : avant, un dépôt sans image
 marquait 100 % sur « chaque image a-t-elle une alternative pertinente ? ». Mais un run qui adjuge
-84 critères n'est plus une dépense de fond qu'on laisse tourner toutes les semaines, sur un code
-qui n'a parfois pas bougé.
+84 critères ne se paie pas à chaque merge.
 
-**Le refus de `push` a disparu entre-temps (#4822).** `adjudicate-runner: cli` fait lancer Claude
-par le moteur, en processus local, sans le parseur d'événements de `claude-code-action` : l'Action
-documente qu'il « works on `push` ». Seul le runner historique `action` saute encore les
-événements qu'il ne sait pas lire. Le run est donc branché sur ce qui le justifie :
+**Le refus de `push` a disparu entre-temps.** `adjudicate-runner: cli` fait lancer Claude par le
+moteur, en processus local, sans le parseur d'événements de `claude-code-action` : l'Action
+documente qu'il « works on `push` ». Un `push: alpha` filtré par `paths` a donc été envisagé
+(#4855), puis écarté : le filtre aurait laissé passer **251 des 271** commits d'`alpha` entre
+août et octobre 2026, soit un run payé à quasiment chaque merge, avec un registre qui n'était
+plus rafraîchi.
 
-- **un merge sur `alpha`, filtré par `paths`** — ce qui change la page rendue ou la grille ; la
-  liste, et pourquoi le registre de verdicts en est exclu, vivent dans `on.push` d'`a11y.yaml`.
-  Un merge de doc ou de CI ailleurs ne paie rien ;
-- **un seul run à la fois, jamais annulé** — `cancel-in-progress` reste réservé aux PR. GitHub
-  garde un run actif et un seul en attente par groupe, donc une rafale de merges coûte deux runs,
-  et le second audite le dernier commit ;
-- **le registre rejoué** — tant que le registre commité est à jour, un merge ne paie que le
+Le run tourne donc **une fois par semaine**, sur l'état courant d'`alpha` :
+
+- **`schedule` s'exécute sur la branche par défaut**, qui est `alpha` : le cron lit `a11y.yaml`
+  depuis `alpha` et audite son dernier commit ;
+- **jamais annulé** — `cancel-in-progress` reste réservé aux PR : un run complet est payé, et un
+  run annulé a dépensé sans rien produire ;
+- **le registre rejoué** — tant que le registre commité est à jour, un run ne paie que le
   reliquat dont l'évidence a bougé. Rien ne le commite à la place d'un humain : laissé périmé, il
   fait repayer ce qu'il ne couvre plus.
 
 `gh workflow run a11y.yaml --ref alpha` reste là pour un livrable daté, une autre branche, ou un
-merge que le filtre a écarté.
+contrôle après un changement d'UI significatif.
 
 **Ce que ça donne, et ce que ça ne donne pas :** une régression RGAA de rendu est rattrapée **au
-merge sur `alpha`**, pas avant. Ce qui la rattrape sur une PR reste l'audit statique, qui ne voit
-pas la page rendue ; et le run d'`alpha` ne bloque rien, il mesure et publie.
+plus tard le lundi suivant**. Ce qui la rattrape sur une PR reste l'audit statique, qui ne voit
+pas la page rendue ; et le run hebdomadaire ne bloque rien, il mesure et publie.
 
 `gate-adjudicated` reste à `false` : la gate ré-audite la **source**, donc le rouge/vert reste une fonction pure du commit, quoi qu'un modèle ait dit.
 
@@ -232,8 +235,8 @@ jq '.standard' audits/audit-latest.json    # doit dire "rgaa", jamais "wcag"
 ### Ce que coûte l'adjudication
 
 Le chiffre historique — **9,59 $** sur le run du 24/08/2026, 3 passes — a été mesuré quand la
-worklist faisait ~27 critères. Depuis 5.36 elle en fait ~84 (voir « Pourquoi `push: alpha`, et
-plus de cron »), donc ce chiffre n'est plus la référence : **un run à froid coûte plusieurs fois cela.**
+worklist faisait ~27 critères. Depuis 5.36 elle en fait ~84 (voir « Pourquoi un cron
+hebdomadaire, et pas un run à chaque merge »), donc ce chiffre n'est plus la référence : **un run à froid coûte plusieurs fois cela.**
 
 **`adjudicate-budget-usd` borne CHAQUE INVOCATION du CLI** — pas une passe, pas le run. Ce
 document a longtemps affirmé le contraire (« 0,70 $ borne une passe complète à 9,80 $ ») et

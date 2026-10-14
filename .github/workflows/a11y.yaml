@@ -17,10 +17,10 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #                           plus. Une panne, si ; un balayage amputé aussi.
 #   a11y-bundle  LIVRABLE — fusionne les parties en un seul artefact `ultra11y-rgaa`.
 #
-# Il n'y a plus de `a11y-report` hebdomadaire séparé, et plus de cron non plus : le merge sur
-# alpha et le déclenchement manuel lancent `a11y-pages`, qui produit le livrable AVEC le
-# navigateur. Le job statique ne tourne pas une seconde fois sur ces événements : l'Action du
-# tier rendu réaudite déjà tout `src`, et le doublon ne renforçait aucune porte.
+# Il n'y a plus de `a11y-report` hebdomadaire séparé : le cron hebdomadaire et le déclenchement
+# manuel lancent `a11y-pages`, qui produit le livrable AVEC le navigateur. Le job statique ne
+# tourne pas une seconde fois sur ces événements : l'Action du tier rendu réaudite déjà tout
+# `src`, et le doublon ne renforçait aucune porte.
 #
 # Le tier LIGHTHOUSE (score a11y 100 %) reste dans lighthouse.yaml.
 #
@@ -28,9 +28,8 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #
 #   pull_request       → `a11y-gate` SEUL. Statique, gratuit, quelques secondes, aucun modèle,
 #                        et BLOQUANT (`fail-on: blocking`).
-#   push alpha         → la chaîne complète. Balayage des pages, critères de rendu, rejeu du
-#                        registre puis adjudication IA du reliquat, livrable. Filtrée par
-#                        `paths` : un merge qui ne touche ni l'app ni le dispositif ne paie rien.
+#   schedule (hebdo)   → la chaîne complète, sur alpha. Balayage des pages, critères de rendu,
+#                        rejeu du registre puis adjudication IA du reliquat, livrable.
 #   workflow_dispatch  → la même chaîne, à la demande.
 #
 # La moitié chère ne peut pas tourner sur chaque PR : 40 à 90 minutes, une grille qui n'est pas
@@ -38,8 +37,7 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 # rien — c'est ce qui lui permet d'être la gate, et c'est le SEUL rouge de tout ce fichier qui
 # arrête un merge.
 #
-# POURQUOI `push: alpha` ET PAS UN CRON, alors qu'il y en a eu un (lundi 04:00 UTC), choisi à
-# l'époque plutôt qu'un `push: alpha` que `claude-code-action` aurait refusé.
+# POURQUOI UN CRON HEBDOMADAIRE, ET PAS UN RUN À CHAQUE MERGE SUR ALPHA.
 #
 # Parce que le prix d'un run a changé sous nos pieds. ultra11y 5.36 a rendu le contrat
 # d'automatisation EXHAUSTIF : un critère n'obtient un `C` par mesure que si son contrat démontre
@@ -50,19 +48,19 @@ name: "♿ Accessibilité (ultra11y RGAA)"
 #
 # Ce n'est pas une régression, c'est un durcissement, et il se défend : avant, un dépôt sans image
 # marquait 100 % sur « chaque image a-t-elle une alternative pertinente ? ». Mais un run qui adjuge
-# 84 critères n'est plus une dépense de fond qu'on laisse tourner toutes les semaines, sur un
-# code qui n'a parfois pas bougé.
+# 84 critères ne se paie pas à chaque merge. Un `push: alpha` filtré par `paths` a été
+# envisagé (#4822) : techniquement possible depuis que `adjudicate-runner: cli` lance Claude
+# lui-même, sans le parseur d'événements de `claude-code-action`. Mais le filtre aurait laissé
+# passer 251 des 271 commits d'alpha entre août et octobre 2026 — un run payé par merge, à
+# peu de chose près. Une fois par semaine, sur l'état courant d'alpha, suffit à dater un
+# livrable et à rattraper une régression.
 #
-# Le refus de `push` a disparu entre-temps : `adjudicate-runner: cli` fait lancer Claude par le
-# moteur, en processus local, sans le parseur d'événements de `claude-code-action` — l'Action
-# documente qu'il « works on `push` ». Le run est donc branché sur ce qui le justifie, un merge
-# sur alpha qui touche l'app ou le dispositif, et pas sur l'horloge. Tant que le registre
-# commité est à jour, un merge ne paie que le reliquat dont l'évidence a bougé ; un registre
-# laissé périmé fait repayer ce qu'il ne couvre plus.
+# `schedule` s'exécute sur la branche par défaut du dépôt, qui EST `alpha` : le cron lit ce
+# fichier depuis alpha et audite le dernier commit d'alpha.
 #
-# CE QUE ÇA DONNE : une régression RGAA de RENDU est rattrapée au merge sur alpha, pas avant.
+# CE QUE ÇA DONNE : une régression RGAA de RENDU est rattrapée au plus tard le lundi suivant.
 # Ce qui la rattrape sur une PR reste l'audit statique, qui ne voit pas la page rendue — et le
-# run d'alpha ne bloque rien, il mesure et publie.
+# run hebdomadaire ne bloque rien, il mesure et publie.
 #
 # LES CRITÈRES DE JUGEMENT SONT ADJUGÉS, TOUS, À CHAQUE RUN. Ceux que le moteur ne peut pas
 # trancher — pertinence des alt, intitulé de lien dans son contexte, ordre de lecture — passent
@@ -162,48 +160,20 @@ on:
   # LA GATE. Statique, gratuite, aucun modèle : elle peut se permettre de tourner sur chaque PR,
   # et c'est le seul endroit du dispositif qui BLOQUE un merge.
   pull_request:
-  # LE RUN COMPLET, AU MERGE SUR ALPHA — et seulement quand le merge touche ce qu'il audite.
-  #
-  # Il y avait ici un cron hebdomadaire (lundi 04:00 UTC), retiré pour le prix — voir l'en-tête.
-  # Un run est une décision, et elle est prise ici par le contenu du merge, pas par l'horloge.
-  #
-  # Le filtre `paths` couvre ce qui change la page rendue ou la grille : le code et les assets
-  # de l'app, sa config Next, la stack docker que le job démarre, la config ultra11y et ses
-  # dispenses, les configs Playwright qui balayent les pages, les dépendances qui fixent la
-  # version du moteur, et ce fichier. Un merge de doc ou de CI ailleurs ne paie rien.
-  #
-  # Le registre de verdicts (`.ultra11y/verdicts/`) en est exclu, délibérément : le commiter
-  # ne change ni le code audité ni la grille, seulement ce que le run SUIVANT rejoue au lieu de
-  # le payer. Le déclencher relancerait un run complet pour rejouer ce qu'il vient d'écrire.
-  #
-  # Des merges rapprochés ne paient pas chacun leur run : voir `concurrency` plus bas.
-  push:
-    branches: [alpha]
-    paths:
-      - "packages/app/src/**"
-      - "packages/app/public/**"
-      - "packages/app/next.config.js"
-      - "docker-compose.yml"
-      - "packages/app/.ultra11yrc.json"
-      - "packages/app/.ultra11y/undecidable.json"
-      - "packages/app/playwright.a11y.config.ts"
-      - "packages/app/playwright.config.ts"
-      - "packages/app/package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/a11y.yaml"
+  # LE RUN COMPLET, UNE FOIS PAR SEMAINE, sur alpha (branche par défaut) : lundi 04:00 UTC.
+  # Pourquoi l'horloge et pas le merge : voir l'en-tête.
+  schedule:
+    - cron: "0 4 * * 1"
   # LE MÊME RUN, À LA DEMANDE : un livrable RGAA daté, un run sur une autre branche, ou un
-  # audit après un merge que le filtre `paths` a écarté : `gh workflow run a11y.yaml
-  # --ref alpha`.
+  # contrôle après un changement d'UI significatif : `gh workflow run a11y.yaml --ref alpha`.
   workflow_dispatch:
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   # Une PR qui repousse annule son run précédent — il n'a plus rien à dire sur un code qui a
-  # changé. Un run complet (merge sur alpha ou manuel) est un LIVRABLE, et il est PAYÉ : il
-  # n'est jamais annulé, un run annulé ayant dépensé sans rien produire. GitHub garde au plus
-  # un run actif et UN en attente par groupe — un troisième merge remplace l'attente du
-  # deuxième. Une rafale de merges sur alpha coûte donc deux runs, et le second audite le
-  # dernier commit.
+  # changé. Un run complet (cron ou manuel) est un LIVRABLE, et il est PAYÉ : deux lancements
+  # coup sur coup ne doivent pas s'annuler l'un l'autre, un run annulé ayant dépensé sans rien
+  # produire.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -218,7 +188,7 @@ jobs:
   a11y-gate:
     name: "RGAA · audit statique du code"
     # Le run complet réaudite déjà tout `src` dans `a11y-pages`. Garder cette gate sur les PR
-    # seulement évite deux invocations identiques sur le push alpha et le dispatch.
+    # seulement évite deux invocations identiques sur le cron et le dispatch.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -286,7 +256,7 @@ jobs:
     # reproductible d'un run à l'autre. Sur une PR, la gate statique fait le travail.
     if: github.event_name != 'pull_request'
     # Ce tier a besoin de la stack complète — base, S3, ProConnect — et donc des secrets du
-    # dépôt. Hors PR (push alpha, `workflow_dispatch`) ils sont toujours exposés : la condition
+    # dépôt. Hors PR (`schedule`, `workflow_dispatch`) ils sont toujours exposés : la condition
     # qui excluait les PR de fork n'a plus d'objet, ce job ne tournant plus jamais sur une PR.
     #
     # Les CONSTATS d'accessibilité ne font pas rougir (`fail-on: ""`) ; ce qui rougit, c'est une
@@ -668,7 +638,7 @@ jobs:
           # survit pas à ce qu'elle excusait. Chacune est imprimée dans le log du job, donc
           # aucune ne s'oublie. C'est un renvoi nommé vers l'auditeur humain, pas un silence.
           undecidable-file: .ultra11y/undecidable.json
-          # PAS DE COMMENTAIRE : hors PR (push alpha, `workflow_dispatch`), il n'y a pas de PR
+          # PAS DE COMMENTAIRE : hors PR (`schedule`, `workflow_dispatch`), il n'y a pas de PR
           # où le poster.
           #
           # Le bilan page par page qu'il portait — une ligne par page avec sa base, ses C, ses NC
