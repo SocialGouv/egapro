@@ -1,18 +1,19 @@
 import "server-only";
 
 import { env } from "~/env";
-import { getLocationFromPostalCode } from "~/modules/domain";
+import {
+	getLocationFromPostalCode,
+	headOfficeCountry,
+	legalUnitCountry,
+	type RegistryCountry,
+	UNKNOWN_COUNTRY,
+} from "~/modules/domain";
 import { isCompanyDiffusible } from "~/modules/public-api";
 
 const NON_DIFFUSIBLE_NAME = "Entreprise non diffusible";
 
 const WEEZ_TIMEOUT_MS = 10_000;
 
-// Column widths of `companies.country_code` / `country_label`. The registry is
-// not bound by them, and neither insert path catches a Postgres overflow: one
-// over-long value would break a ProConnect login, or the whole GIP-MDS import.
-const COUNTRY_CODE_MAX_LENGTH = 5;
-const COUNTRY_LABEL_MAX_LENGTH = 255;
 const TWENTY_FOUR_HOURS = 86_400;
 
 // INSEE "tranche d'effectif salarié" code → lower bound of the size band, used
@@ -70,15 +71,6 @@ type WeezLegalEntity = {
 	statutdiffusionunitelegale: string | null;
 };
 
-// Head office of the legal unit, from `/public/v3/unitelegale/etablissementsiege`
-// (schema `EtabDocDtoV3`). INSEE carries the foreign-country fields on the
-// establishment only — `findbysiren` has no country key at all — and fills them
-// solely when the registered address is abroad.
-type WeezEstablishment = {
-	codepaysetrangeretablissement: string | null;
-	libellepaysetrangeretablissement: string | null;
-};
-
 type WeezPaginatedResponse<T> = {
 	content: T[];
 	pageNumber: number;
@@ -103,14 +95,6 @@ export type CompanyInfo = {
 	statutDiffusion: string | null;
 };
 
-/** France carries no COG code: the label alone marks the state. */
-const FRANCE_COUNTRY = { countryCode: null, countryLabel: "FRANCE" } as const;
-
-/** Neither France nor a known foreign country — repaired at the next refresh. */
-const UNKNOWN_COUNTRY = { countryCode: null, countryLabel: null } as const;
-
-type CompanyCountry = Pick<CompanyInfo, "countryCode" | "countryLabel">;
-
 function buildAddress(entity: WeezLegalEntity): string | null {
 	const streetParts = [
 		entity.numerovoie,
@@ -134,20 +118,7 @@ function weezUrl(path: string, siren: string): URL {
 	return url;
 }
 
-// The endpoint answers with the single head-office row. Both the bare object and
-// the paginated envelope used by the other v3 routes are accepted: reading only
-// one of the two shapes would leave the country column silently empty rather
-// than fail loudly.
-function readEstablishment(payload: unknown): WeezEstablishment | null {
-	if (!payload || typeof payload !== "object") return null;
-	const content = (payload as WeezPaginatedResponse<WeezEstablishment>).content;
-	if (Array.isArray(content)) return content[0] ?? null;
-	return payload as WeezEstablishment;
-}
-
-async function fetchHeadOffice(
-	siren: string,
-): Promise<WeezEstablishment | null> {
+async function fetchHeadOffice(siren: string): Promise<unknown> {
 	const response = await fetch(
 		weezUrl("/public/v3/unitelegale/etablissementsiege", siren),
 		{
@@ -163,7 +134,7 @@ async function fetchHeadOffice(
 		);
 	}
 
-	return readEstablishment(await response.json());
+	return response.json();
 }
 
 /**
@@ -178,53 +149,21 @@ async function fetchHeadOffice(
  * A failing or silent head office leaves the country unknown: it is never
  * guessed as France, and it never breaks the main lookup.
  */
-/**
- * Both halves or neither: a code without a label reads as an unnamed foreign
- * country, and a label without a code is France-shaped. Either would break the
- * tri-state for every consumer downstream.
- *
- * An over-long code is dropped rather than truncated — the code is an
- * identifier, and cutting it would persist a *different* country as
- * authoritative data. The label is a display string, so it degrades the way
- * `nafLabel` does.
- */
-function toCountry(
-	code: string | null,
-	label: string | null,
-): CompanyCountry | null {
-	if (!code || !label) return null;
-	if (code.length > COUNTRY_CODE_MAX_LENGTH) return null;
-	return {
-		countryCode: code,
-		countryLabel: label.slice(0, COUNTRY_LABEL_MAX_LENGTH),
-	};
-}
-
 async function resolveCountry(
 	siren: string,
 	postalCode: string | null,
 	declaredCode: string | null,
 	declaredLabel: string | null,
-): Promise<CompanyCountry> {
-	// A legal unit that names its own foreign country settles the question: the
-	// postal code it comes with can look French — a US ZIP is five digits too.
-	const declared = toCountry(declaredCode, declaredLabel);
-	if (declared) return declared;
-
-	// Half a foreign declaration is not France, it is unknown: labelling it
-	// FRANCE would contradict the geography this same record refuses to derive.
-	if (declaredCode || declaredLabel) return UNKNOWN_COUNTRY;
-
-	if (postalCode) return FRANCE_COUNTRY;
+): Promise<RegistryCountry> {
+	const fromLegalUnit = legalUnitCountry({
+		postalCode,
+		declaredCode,
+		declaredLabel,
+	});
+	if (fromLegalUnit) return fromLegalUnit;
 
 	try {
-		const establishment = await fetchHeadOffice(siren);
-		return (
-			toCountry(
-				establishment?.codepaysetrangeretablissement ?? null,
-				establishment?.libellepaysetrangeretablissement ?? null,
-			) ?? UNKNOWN_COUNTRY
-		);
+		return headOfficeCountry(await fetchHeadOffice(siren));
 	} catch {
 		return UNKNOWN_COUNTRY;
 	}

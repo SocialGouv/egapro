@@ -33,6 +33,7 @@ import { StepPageClient } from "~/modules/declaration-representation";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
+const DECLARATION_DEADLINE = new Date(2026, 2, 1);
 const STEP_2_HREF = "/declaration-representation/etape/2";
 const REQUIRED_MESSAGE = "Sélectionner une date de début ou une date de fin.";
 const REFERENCE_YEAR_MESSAGE = `La date sélectionnée ne correspond pas à l'année de référence ${YEAR}.`;
@@ -48,6 +49,7 @@ function renderStep1({
 		<StepPageClient
 			campaignOpen={campaignOpen}
 			campaignYear={CAMPAIGN_YEAR}
+			declarationDeadline={DECLARATION_DEADLINE}
 			initialDraft={initialDraft}
 			step={1}
 			year={YEAR}

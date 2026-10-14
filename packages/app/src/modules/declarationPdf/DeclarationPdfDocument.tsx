@@ -1,6 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
-import { formatSiren } from "~/modules/domain";
+import { companyLocationRow, formatSiren } from "~/modules/domain";
 
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./recapPdfStyles";
@@ -34,6 +34,12 @@ function formatNaf(nafCode: string | null, nafLabel: string | null): string {
 
 export function DeclarationPdfDocument({ data }: Props) {
 	ensurePdfFontsRegistered();
+	const location = companyLocationRow({
+		countryCode: data.company.countryCode ?? null,
+		countryLabel: data.company.countryLabel ?? null,
+		departmentLabel: data.company.departmentLabel ?? null,
+		domesticAddress: data.company.address,
+	});
 
 	const step2Rows = [
 		{
@@ -94,7 +100,7 @@ export function DeclarationPdfDocument({ data }: Props) {
 						rows={[
 							{ label: "Raison sociale", value: data.company.name },
 							{ label: "SIREN", value: formatSiren(data.company.siren) },
-							{ label: "Adresse", value: data.company.address },
+							...(location ? [location] : []),
 							{
 								label: "Code NAF",
 								value: formatNaf(data.company.nafCode, data.company.nafLabel),
