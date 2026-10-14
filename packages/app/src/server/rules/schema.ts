@@ -76,6 +76,17 @@ export const TransitionSchema = z.object({
 
 export type Transition = z.infer<typeof TransitionSchema>;
 
+export const ChoiceRevisionSchema = z.object({
+	id: z.string(),
+	description: z.string().optional(),
+	action: z.string(),
+	from: z.array(z.enum(DECLARATION_FSM_STATUSES)).min(1),
+	guard: PredicateSchema.optional(),
+	reopens: z.enum(DECLARATION_FSM_STATUSES),
+});
+
+export type ChoiceRevision = z.infer<typeof ChoiceRevisionSchema>;
+
 export const StageSchema = z.object({
 	id: z.number(),
 	name: z.string(),
@@ -126,6 +137,7 @@ export const RulesSchema = z.object({
 		.optional(),
 	computations: z.record(z.string(), ComputationNodeSchema).optional(),
 	transitions: z.array(TransitionSchema),
+	choiceRevisions: z.array(ChoiceRevisionSchema).optional(),
 });
 
 export type Rules = z.infer<typeof RulesSchema>;

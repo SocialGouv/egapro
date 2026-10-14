@@ -12,17 +12,18 @@ export function gipWorkforceJoinCondition(): SQL {
 	) as SQL;
 }
 
-// Mirrors `getOptionalCompanySizeRange` (domain) as a SQL predicate, on the GIP
-// headcount floored the way `floorWorkforce` (domain) floors it. An unknown
-// headcount belongs to no bucket: the NULL propagates through the comparison and
-// the row leaves the filter, rather than being folded into the smallest bucket.
+// Mirrors `getCompanySizeRangeForGip` (domain) as a SQL predicate, on the GIP
+// headcount floored the way `floorWorkforce` (domain) floors it. A company
+// absent from the GIP file, or present with no headcount, is of the voluntary
+// tier: `coalesce(…, 0)` folds the NULL into the smallest bucket instead of
+// letting it propagate out of the comparison.
 export function gipSizeRangeFilter(
 	sizeRange: CompanySizeRange | undefined,
 ): SQL {
 	if (!sizeRange) return sql`TRUE`;
 
 	const { min, max } = COMPANY_SIZE_RANGES[sizeRange];
-	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
+	const ema = sql<number>`coalesce(floor(${gipMdsData.workforceEma}), 0)`;
 	return max === null
 		? sql`${ema} >= ${min}`
 		: sql`${ema} BETWEEN ${min} AND ${max}`;

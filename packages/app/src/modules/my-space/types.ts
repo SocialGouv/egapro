@@ -19,6 +19,7 @@ export type CompanyDetail = {
 	nafLabel: string | null;
 	countryCode: string | null;
 	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
@@ -47,5 +48,6 @@ export type DeclarationItem = {
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	hasPrefillData: boolean;
+	deadline: Date | null;
 	notSubject: boolean;
 };

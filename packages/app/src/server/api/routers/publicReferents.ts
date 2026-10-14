@@ -4,7 +4,10 @@ import {
 	publicReferentIdSchema,
 	publicSearchReferentsSchema,
 } from "~/modules/referents/schemas";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+	createTRPCRouter,
+	rateLimitedPublicProcedure,
+} from "~/server/api/trpc";
 import { referents } from "~/server/db/schema";
 
 /**
@@ -16,7 +19,7 @@ import { referents } from "~/server/db/schema";
  * bulk from the public listing.
  */
 export const publicReferentsRouter = createTRPCRouter({
-	search: publicProcedure
+	search: rateLimitedPublicProcedure
 		.input(publicSearchReferentsSchema)
 		.query(async ({ ctx, input }) => {
 			const filters: SQL[] = [];
@@ -63,7 +66,7 @@ export const publicReferentsRouter = createTRPCRouter({
 			};
 		}),
 
-	getById: publicProcedure
+	getById: rateLimitedPublicProcedure
 		.input(publicReferentIdSchema)
 		.query(async ({ ctx, input }) => {
 			const [row] = await ctx.db

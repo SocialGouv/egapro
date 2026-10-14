@@ -1,5 +1,5 @@
 import { AUDIT_ACTIONS } from "~/modules/audit";
-import { parseSiren } from "~/modules/domain";
+import { parseStrictSiren } from "~/modules/domain";
 import {
 	getPublicRepresentationBySirenYear,
 	PUBLIC_API_RESOURCE_HEADERS,
@@ -28,7 +28,7 @@ export async function GET(
 	const requestContext = buildRequestContext(request.headers);
 	const { siren: rawSiren, year: rawYear } = await params;
 
-	const siren = parseSiren(rawSiren);
+	const siren = parseStrictSiren(rawSiren);
 	if (!siren) {
 		void logAction({
 			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR,

@@ -110,12 +110,11 @@ type FinalizeOptions = {
 //   1 middleware declaration-id lookup (.where().limit)
 //   2 opinionCount (.where)
 //   3 file rows id + name (.where)
-//   4 declarationRow (.where().limit)
-//   5 existingAssociations (.where)
-//   6 opinions with gapConsulted (.where)
-//   7 employee categories for the gap >= 5% gate (.innerJoin().where)
-//   8 second_declaration_submit event lookup (.where().limit)
-//   9 (inside tx) declRow for draft purge (.where().limit)
+//   4 existingAssociations (.where)
+//   5 opinions with gapConsulted (.where)
+//   6 employee categories for the gap >= 5% gate (.innerJoin().where)
+//   7 second_declaration_submit event lookup (.where().limit)
+//   8 (inside tx, under the declaration lock) declaration row (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
@@ -148,18 +147,17 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	limit.mockImplementation(() => {
 		const call = selectCallCount;
 		if (call === 1) return Promise.resolve([declarationLookupRow]);
-		if (call === 4) {
-			return Promise.resolve(declaration ? [declaration] : []);
-		}
-		if (call === 8) {
+		if (call === 7) {
 			return Promise.resolve(
 				secondDeclarationSubmitted
 					? [{ eventType: "second_declaration_submit" }]
 					: [],
 			);
 		}
-		if (call === 9 && txDraft !== null) {
-			return Promise.resolve([{ draft: txDraft }]);
+		if (call === 8) {
+			return Promise.resolve(
+				declaration ? [{ ...declaration, draft: txDraft }] : [],
+			);
 		}
 		return Promise.resolve([]);
 	});
@@ -175,13 +173,13 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		if (call === 3) {
 			return Object.assign(Promise.resolve(files), { limit });
 		}
-		if (call === 5) {
+		if (call === 4) {
 			return Object.assign(Promise.resolve(associationsWithFileId), { limit });
 		}
-		if (call === 6) {
+		if (call === 5) {
 			return Object.assign(Promise.resolve(opinions), { limit });
 		}
-		if (call === 7) {
+		if (call === 6) {
 			return Object.assign(Promise.resolve(categories), { limit });
 		}
 		return Object.assign(Promise.resolve([declarationLookupRow]), { limit });
@@ -344,6 +342,22 @@ describe("cseOpinionRouter.finalize", () => {
 		expect(ctx.updateSet).toHaveBeenCalledWith(
 			expect.objectContaining({ status: "demarche_completed" }),
 		);
+	});
+
+	it("refuses with PRECONDITION_FAILED from a state that awaits no CSE opinion, recording nothing", async () => {
+		const ctx = createMockDbForFinalize({
+			declaration: { ...DEFAULT_DECLARATION, status: "draft" },
+		});
+		const caller = await createCaller(ctx.db);
+
+		await expect(caller.finalize()).rejects.toMatchObject({
+			code: "PRECONDITION_FAILED",
+			message:
+				"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.",
+		});
+		expect(ctx.insertValues).not.toHaveBeenCalled();
+		expect(ctx.update).not.toHaveBeenCalled();
+		expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
 	});
 
 	it("throws PRECONDITION_FAILED when no opinions exist", async () => {

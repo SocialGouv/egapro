@@ -2,7 +2,6 @@ import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { COMPLIANCE_PATH, CSE_OPINION } from "~/modules/routes";
-import { TEST_USER_EMAIL } from "./constants";
 import {
 	associateCseContentTypes,
 	completeSecondDeclaration,
@@ -35,11 +34,12 @@ import {
 	expectCompletionReceipt,
 	PATH_TO_SELECT_WORDING,
 } from "./helpers/receipts";
+import { getTestUserEmail } from "./helpers/testUser";
 
 const CSE_OPINION_RECEIPT = /Dépôt d'avis CSE et fin de démarche/i;
 
 async function countCseOpinionReceipts(): Promise<number> {
-	const emails = await listEmailsTo(TEST_USER_EMAIL);
+	const emails = await listEmailsTo(getTestUserEmail());
 	return emails.filter((m) => CSE_OPINION_RECEIPT.test(m.subject)).length;
 }
 
@@ -81,13 +81,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await completeDeclaration(page, { hasGap: false });
 
 		const email = await waitForEmail(
-			TEST_USER_EMAIL,
+			getTestUserEmail(),
 			(m) => /Transmission de déclaration/i.test(m.subject),
 			{ since: startedAt },
 		);
 
 		expect(email.subject).toMatch(/Transmission de déclaration/i);
-		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+		expect(email.to.some((r) => r.address === getTestUserEmail())).toBe(true);
 		expect(email.html).toMatch(/accuse réception de cette transmission/i);
 	});
 
@@ -131,11 +131,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 			await submitCseOpinion(page);
 
 			const receipt = await waitForEmail(
-				TEST_USER_EMAIL,
+				getTestUserEmail(),
 				(m) => CSE_OPINION_RECEIPT.test(m.subject),
 				{ since: startedAt },
 			);
-			expect(receipt.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+			expect(receipt.to.some((r) => r.address === getTestUserEmail())).toBe(
+				true,
+			);
 			expect(receipt.html).toMatch(/démarche est désormais terminée/i);
 
 			// Any deposit-time receipt would have been queued before this one, so it
@@ -161,7 +163,7 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 
 		await test.step("first-declaration receipt states the round-1 path-choice deadline in French (#4207)", async () => {
 			const firstReceipt = await waitForEmail(
-				TEST_USER_EMAIL,
+				getTestUserEmail(),
 				(m) => m.subject === "Egapro - Transmission de la déclaration",
 				{ since: startedAt },
 			);
@@ -174,13 +176,13 @@ test.describe("notifications email flow (publisher → pg-boss → worker → SM
 		await completeSecondDeclaration(page, { hasGap: false });
 
 		const email = await waitForEmail(
-			TEST_USER_EMAIL,
+			getTestUserEmail(),
 			(m) => /Transmission de la seconde déclaration/i.test(m.subject),
 			{ since: startedAt },
 		);
 
 		expect(email.subject).toMatch(/Transmission de la seconde déclaration/i);
-		expect(email.to.some((r) => r.address === TEST_USER_EMAIL)).toBe(true);
+		expect(email.to.some((r) => r.address === getTestUserEmail())).toBe(true);
 		expect(email.html).toMatch(/seconde déclaration/i);
 		// #4293 — CAS-08: an avis CSE is still owed, so the receipt is the
 		// `cse_to_deposit` variant. It shares its subject with `path_to_select`,

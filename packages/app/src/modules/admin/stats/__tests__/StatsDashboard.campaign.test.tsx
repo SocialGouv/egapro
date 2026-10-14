@@ -118,7 +118,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(screen.getByTestId("progression-chart")).toBeInTheDocument();
 		expect(screen.getByTestId("progression-table")).toBeInTheDocument();
@@ -131,7 +135,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getAllByText(/chargement du graphique/i).length,
@@ -145,7 +153,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: true,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(
@@ -161,7 +173,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getAllByText(/chargement du graphique/i).length,
@@ -175,7 +191,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: true,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(
@@ -191,7 +211,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(screen.getByTestId("step-durations-chart")).toBeInTheDocument();
 		expect(screen.getByTestId("step-durations-table")).toBeInTheDocument();
@@ -204,7 +228,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getAllByText(/chargement du graphique/i).length,
@@ -218,7 +246,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: true,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(
 			screen.getByText(
@@ -234,7 +266,11 @@ describe("StatsDashboard — campaign section states", () => {
 			isError: false,
 		});
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		expect(screen.getByTestId("step-dropoff-chart")).toBeInTheDocument();
 		expect(screen.getByTestId("step-dropoff-table")).toBeInTheDocument();
@@ -253,7 +289,11 @@ describe("StatsDashboard — query options", () => {
 
 	it("passes placeholderData (prev) through for progression query", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		const options = progressionUseQueryMock.mock.calls[0]?.[1] as
 			| { placeholderData: (prev: unknown) => unknown }
@@ -263,7 +303,11 @@ describe("StatsDashboard — query options", () => {
 
 	it("passes placeholderData (prev) through for step durations query", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		const options = stepDurationsUseQueryMock.mock.calls[0]?.[1] as
 			| { placeholderData: (prev: unknown) => unknown }
@@ -273,7 +317,11 @@ describe("StatsDashboard — query options", () => {
 
 	it("passes placeholderData (prev) through for step dropoff query", () => {
 		render(
-			<StatsDashboard availableYears={[2026, 2025, 2024]} currentYear={2026} />,
+			<StatsDashboard
+				availableYears={[2026, 2025, 2024]}
+				currentYear={2026}
+				showTestDataNotice={false}
+			/>,
 		);
 		const options = stepDropoffUseQueryMock.mock.calls[0]?.[1] as
 			| { placeholderData: (prev: unknown) => unknown }

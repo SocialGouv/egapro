@@ -181,6 +181,31 @@ function runSanityChecks(rules: Rules): void {
 			checkComputeRefs(transition.guard, `transition.${transition.id}.guard`);
 		}
 	}
+
+	const offersAction = (state: string, action: string): boolean =>
+		rules.transitions.some(
+			(transition) =>
+				transition.action === action &&
+				transition.from.some((from) => from === state),
+		);
+
+	for (const revision of rules.choiceRevisions ?? []) {
+		if (!offersAction(revision.reopens, revision.action)) {
+			throw new Error(
+				`Choice revision "${revision.id}" reopens "${revision.reopens}", which offers no "${revision.action}" transition`,
+			);
+		}
+		for (const from of revision.from) {
+			if (offersAction(from, revision.action)) {
+				throw new Error(
+					`Choice revision "${revision.id}" starts from "${from}", which already offers "${revision.action}"`,
+				);
+			}
+		}
+		if (revision.guard) {
+			checkComputeRefs(revision.guard, `choiceRevision.${revision.id}.guard`);
+		}
+	}
 }
 
 const cache = new Map<string, Rules>();
@@ -212,17 +237,63 @@ export function loadRules(version: string): Rules {
 	return parsed;
 }
 
+export class NoMatchingTransitionError extends Error {
+	constructor(
+		readonly currentState: string | undefined,
+		readonly action: string,
+		facts: Facts,
+	) {
+		super(
+			`No matching transition for state="${currentState ?? "(none)"}" action="${action}". Facts: ${JSON.stringify(facts)}`,
+		);
+		this.name = "NoMatchingTransitionError";
+	}
+}
+
+function readCurrentState(facts: Facts): string | undefined {
+	return typeof facts.currentState === "string"
+		? facts.currentState
+		: undefined;
+}
+
+function resolveChoiceRevision(
+	facts: Facts,
+	action: string,
+	rules: Rules,
+	computations: Record<string, ComputationNode>,
+): string | undefined {
+	const storedState = readCurrentState(facts);
+	const revision = (rules.choiceRevisions ?? []).find(
+		(candidate) =>
+			candidate.action === action &&
+			candidate.from.some((from) => from === storedState) &&
+			(!candidate.guard ||
+				evaluatePredicate(
+					candidate.guard,
+					facts,
+					computations,
+					rules.thresholds,
+				)),
+	);
+	return revision?.reopens ?? storedState;
+}
+
 export function applyAction(
 	facts: Facts,
 	action: string,
 	rules: Rules,
 ): { nextStatus: DeclarationFsmStatus; events: RuleEvent[] } {
-	const currentState = facts.currentState as string | undefined;
 	const computations = (rules.computations ?? {}) as Record<
 		string,
 		ComputationNode
 	>;
 	const thresholds = rules.thresholds;
+	const currentState = resolveChoiceRevision(
+		facts,
+		action,
+		rules,
+		computations,
+	);
 
 	for (const transition of rules.transitions) {
 		if (transition.action !== action) continue;
@@ -242,9 +313,7 @@ export function applyAction(
 		return { nextStatus: transition.to, events: transition.events };
 	}
 
-	throw new Error(
-		`No matching transition for state="${currentState ?? "(none)"}" action="${action}". Facts: ${JSON.stringify(facts)}`,
-	);
+	throw new NoMatchingTransitionError(readCurrentState(facts), action, facts);
 }
 
 /** Evaluates a named computation of a ruleset against a facts object (parity locks between the versioned ruleset and the domain functions). */

@@ -10,6 +10,12 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/server/db/schema", () => ({
 	declarations: { id: "id", siren: "siren", year: "year" },
+	declarationStatusHistory: {
+		declarationId: "declarationId",
+		eventType: "eventType",
+		value: "value",
+		createdAt: "createdAt",
+	},
 	files: {
 		id: "id",
 		declarationId: "declarationId",
@@ -20,29 +26,17 @@ vi.mock("~/server/db/schema", () => ({
 	},
 }));
 
-const mockWhere = vi.fn();
-const mockFrom = vi.fn();
 const mockSelect = vi.fn();
-const mockLimit = vi.fn();
 
-// Track select call order: 1st = declaration lookup, 2nd+ = procedure queries
-let selectCallCount = 0;
-
+// Reads in order: the middleware declaration lookup, the latest departure from
+// the joint evaluation, then the report itself.
 function createMockDb(rows: unknown[] = []) {
-	selectCallCount = 0;
-
-	// Declaration lookup: always returns a valid declaration
-	const declarationResult = [{ id: "decl-1" }];
-
-	mockLimit.mockImplementation(() => {
-		return Promise.resolve(selectCallCount <= 1 ? declarationResult : rows);
+	const pending: unknown[][] = [[{ id: "decl-1" }], [{ at: null }], rows];
+	const where = vi.fn().mockImplementation(() => {
+		const result = Promise.resolve(pending.shift() ?? []);
+		return Object.assign(result, { limit: vi.fn().mockReturnValue(result) });
 	});
-	mockWhere.mockReturnValue({ limit: mockLimit });
-	mockFrom.mockReturnValue({ where: mockWhere });
-	mockSelect.mockImplementation(() => {
-		selectCallCount++;
-		return { from: mockFrom };
-	});
+	mockSelect.mockReturnValue({ from: vi.fn().mockReturnValue({ where }) });
 
 	return {
 		select: mockSelect,

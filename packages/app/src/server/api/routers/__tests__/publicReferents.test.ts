@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const mocks = vi.hoisted(() => ({ checkPublicApiRateLimit: vi.fn() }));
+
+vi.mock("~/server/services/publicApiRateLimit", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("~/server/services/publicApiRateLimit")
+	>()),
+	checkPublicApiRateLimit: mocks.checkPublicApiRateLimit,
+}));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/db/schema", () => ({
@@ -64,6 +72,7 @@ async function createCaller(mockDb: unknown) {
 describe("publicReferentsRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
+		mocks.checkPublicApiRateLimit.mockResolvedValue("allowed");
 		selectQueue = [];
 	});
 
@@ -166,6 +175,30 @@ describe("publicReferentsRouter", () => {
 			});
 
 			expect(result).toBeNull();
+		});
+	});
+
+	describe("rate limiting", () => {
+		it("throws TOO_MANY_REQUESTS on search once the client quota is spent, without querying the database", async () => {
+			mocks.checkPublicApiRateLimit.mockResolvedValue("limited");
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.search({ page: 1, pageSize: 20 }),
+			).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+			expect(mockDb.select).not.toHaveBeenCalled();
+		});
+
+		it("throws TOO_MANY_REQUESTS on getById once the client quota is spent, without querying the database", async () => {
+			mocks.checkPublicApiRateLimit.mockResolvedValue("limited");
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.getById({ id: "11111111-1111-4111-8111-111111111111" }),
+			).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+			expect(mockDb.select).not.toHaveBeenCalled();
 		});
 	});
 });

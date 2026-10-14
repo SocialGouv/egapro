@@ -1,8 +1,17 @@
+export { getPublicCompanyLocation } from "./companyLocationService";
 export { NON_DIFFUSIBLE_LABEL } from "./constants";
 export {
 	getPublicDeclarationBySirenYear,
 	getPublicDeclarationsBySiren,
 } from "./declarationsBySirenService";
+export {
+	fetchWithinExportLimit,
+	MAX_CONCURRENT_PUBLIC_EXPORTS,
+	MAX_EXPORT_ROWS,
+	MAX_XLSX_EXPORT_ROWS,
+	PUBLIC_EXPORT_BUSY_MESSAGE,
+	publicExportBusyResponse,
+} from "./exportLimits";
 export {
 	PUBLIC_API_EXPORT_HEADERS,
 	PUBLIC_API_OPENAPI_HEADERS,
@@ -11,6 +20,7 @@ export {
 } from "./httpHeaders";
 export { publicOpenApiSpec } from "./openapi";
 export type {
+	PublicCompanyLocation,
 	PublicCompanySource,
 	PublicDeclarationSource,
 } from "./projection";
@@ -18,6 +28,7 @@ export {
 	isCompanyDiffusible,
 	isPublicCompanyDiffusible,
 	publicDeclarationColumns,
+	toPublicCompanyLocation,
 	toPublicDeclaration,
 } from "./projection";
 export type {

@@ -1,81 +1,43 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
-import { createClient, type RedisClientType } from "redis";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "~/env";
 import { extractIpAddress } from "~/server/audit/requestContext";
+import { rateLimitValkey, withValkeyTimeout } from "./valkey";
 
 const WINDOW_SECONDS = 60;
 const REDIS_TIMEOUT_MS = 1_500;
 const MAX_MEMORY_BUCKETS = 50_000;
 const anonymousHits = new Map<string, { count: number; expiresAt: number }>();
-let redisClient: RedisClientType | null = null;
-let redisConnection: Promise<RedisClientType | null> | null = null;
 let lastMemorySweep = 0;
 
-function configuredTokens(): Set<string> {
-	return new Set(
-		(env.EGAPRO_PUBLIC_API_TOKENS ?? "")
-			.split(",")
-			.map((token) => token.trim())
-			.filter(Boolean),
-	);
+function configuredTokens(): string[] {
+	return (env.EGAPRO_PUBLIC_API_TOKENS ?? "")
+		.split(",")
+		.map((token) => token.trim())
+		.filter(Boolean);
 }
 
-async function getRedis(): Promise<RedisClientType | null> {
-	if (!env.VALKEY_URL) return null;
-	if (redisClient?.isReady) return redisClient;
-	if (redisConnection) return redisConnection;
-	redisConnection = (async () => {
-		let client: RedisClientType | null = null;
-		try {
-			client = createClient({
-				url: env.VALKEY_URL,
-				socket: { connectTimeout: REDIS_TIMEOUT_MS },
-			}) as RedisClientType;
-			client.on("error", () => undefined);
-			client.on("end", () => {
-				if (redisClient === client) redisClient = null;
-			});
-			await withTimeout(client.connect(), REDIS_TIMEOUT_MS);
-			redisClient = client;
-			return redisClient;
-		} catch {
-			client?.destroy();
-			return null;
-		} finally {
-			redisConnection = null;
-		}
-	})();
-	return redisConnection;
+function sha256(value: string): Buffer {
+	return createHash("sha256").update(value).digest();
 }
 
-async function withTimeout<T>(
-	promise: Promise<T>,
-	timeoutMs: number,
-): Promise<T> {
-	let timer: ReturnType<typeof setTimeout> | undefined;
-	try {
-		return await Promise.race([
-			promise,
-			new Promise<never>((_, reject) => {
-				timer = setTimeout(
-					() => reject(new Error("Valkey command timeout")),
-					timeoutMs,
-				);
-			}),
-		]);
-	} finally {
-		if (timer) clearTimeout(timer);
+// Fixed-length digests, every token compared, no early exit: timing reveals nothing about a near match.
+function isConfiguredToken(candidate: string): boolean {
+	const candidateDigest = sha256(candidate);
+	let matched = false;
+	for (const token of configuredTokens()) {
+		matched = timingSafeEqual(candidateDigest, sha256(token)) || matched;
 	}
+	return matched;
 }
 
 function fingerprint(value: string): string {
 	return createHash("sha256").update(value).digest("hex").slice(0, 24);
 }
 
-function clientAddress(request: Request): string {
-	return extractIpAddress(request.headers) ?? "unknown";
+function clientAddress(headers: Headers): string {
+	return extractIpAddress(headers) ?? "unknown";
 }
 
 function incrementMemory(key: string): number {
@@ -107,11 +69,11 @@ function incrementMemory(key: string): number {
 }
 
 async function increment(key: string): Promise<number> {
-	const redis = await getRedis();
+	const redis = await rateLimitValkey.client();
 	if (redis) {
 		try {
 			const redisKey = `public-api-rate:${key}`;
-			const count = await withTimeout(
+			const count = await withValkeyTimeout(
 				redis.eval(
 					"local count = redis.call('INCR', KEYS[1]); if count == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; return count",
 					{ keys: [redisKey], arguments: [String(WINDOW_SECONDS)] },
@@ -120,35 +82,46 @@ async function increment(key: string): Promise<number> {
 			);
 			return Number(count);
 		} catch {
-			if (redisClient === redis) redisClient = null;
-			redis.destroy();
+			rateLimitValkey.discard(redis);
 		}
 	}
 	return incrementMemory(key);
 }
 
+export const PUBLIC_API_INVALID_TOKEN_MESSAGE = "Jeton d’API invalide.";
+export const PUBLIC_API_RATE_LIMITED_MESSAGE =
+	"Quota d’appels dépassé. Réessayez dans une minute.";
+
+export type PublicApiRateLimitVerdict = "allowed" | "invalid_token" | "limited";
+
+export async function checkPublicApiRateLimit(
+	headers: Headers,
+): Promise<PublicApiRateLimitVerdict> {
+	const authorization = headers.get("authorization");
+	const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+	if (bearer && !isConfiguredToken(bearer)) return "invalid_token";
+	const quota = bearer ? 1_200 : 120;
+	const identity = bearer
+		? `token:${fingerprint(bearer)}`
+		: `ip:${fingerprint(clientAddress(headers))}`;
+	const bucket = Math.floor(Date.now() / (WINDOW_SECONDS * 1000));
+	const count = await increment(`${identity}:${bucket}`);
+	return count <= quota ? "allowed" : "limited";
+}
+
 export async function enforcePublicApiRateLimit(
 	request: Request,
 ): Promise<Response | null> {
-	const authorization = request.headers.get("authorization");
-	const bearer = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
-	const tokens = configuredTokens();
-	if (bearer && !tokens.has(bearer)) {
+	const verdict = await checkPublicApiRateLimit(request.headers);
+	if (verdict === "allowed") return null;
+	if (verdict === "invalid_token") {
 		return Response.json(
-			{ error: "Jeton d’API invalide." },
+			{ error: PUBLIC_API_INVALID_TOKEN_MESSAGE },
 			{ status: 401, headers: { "Access-Control-Allow-Origin": "*" } },
 		);
 	}
-	const authenticated = bearer !== undefined;
-	const quota = authenticated ? 1_200 : 120;
-	const identity = bearer
-		? `token:${fingerprint(bearer)}`
-		: `ip:${fingerprint(clientAddress(request))}`;
-	const bucket = Math.floor(Date.now() / (WINDOW_SECONDS * 1000));
-	const count = await increment(`${identity}:${bucket}`);
-	if (count <= quota) return null;
 	return Response.json(
-		{ error: "Quota d’appels dépassé. Réessayez dans une minute." },
+		{ error: PUBLIC_API_RATE_LIMITED_MESSAGE },
 		{
 			status: 429,
 			headers: {

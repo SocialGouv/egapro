@@ -102,6 +102,18 @@ export const POST_SUBMIT_DROPOFF_PHASES = [
 export type PostSubmitDropoffPhaseKey =
 	(typeof POST_SUBMIT_DROPOFF_PHASES)[number]["key"];
 
+export type PostSubmitDropoffPhaseStatus =
+	(typeof POST_SUBMIT_DROPOFF_PHASES)[number]["status"];
+
+export function getDropoffPhaseLabel(
+	status: PostSubmitDropoffPhaseStatus,
+): string {
+	return (
+		POST_SUBMIT_DROPOFF_PHASES.find((phase) => phase.status === status)
+			?.label ?? status
+	);
+}
+
 /**
  * Funnel jalons for KPI K19 « funnel de complétion ».
  *

@@ -9,6 +9,7 @@ import {
 	createMockDb,
 	FRESH_ADMIN_MFA,
 	installRouterTestEnv,
+	OPEN_CAMPAIGN,
 	SIREN,
 	whereParams,
 } from "./representationDeclarationHarness";
@@ -36,7 +37,22 @@ describe("representationDeclarationRouter.get", () => {
 
 		const result = await createCaller(mock.db).get({ year: YEAR });
 
-		expect(result).toEqual({ declaration: row, campaignOpen: true });
+		expect(result).toEqual({
+			declaration: row,
+			campaignOpen: true,
+			declarationDeadline: OPEN_CAMPAIGN.declarationDeadline,
+		});
+	});
+
+	it("exposes the campaign's declaration deadline alongside the declaration", async () => {
+		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+		const mock = createMockDb([]);
+
+		const result = await createCaller(mock.db).get({ year: YEAR });
+
+		expect(result.declarationDeadline).toEqual(
+			CLOSED_CAMPAIGN.declarationDeadline,
+		);
 	});
 
 	it("returns no declaration when the company has not started one", async () => {

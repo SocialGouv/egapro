@@ -6,7 +6,6 @@ import {
 	desc,
 	eq,
 	gte,
-	ilike,
 	inArray,
 	isNotNull,
 	isNull,
@@ -38,6 +37,7 @@ import {
 	gipWorkforceJoinCondition,
 	gipWorkforceSortKey,
 } from "~/server/db/gipWorkforceConditions";
+import { containsInsensitive } from "~/server/db/likeConditions";
 import {
 	companies,
 	cseOpinions,
@@ -65,16 +65,24 @@ const sortColumnMap = {
 } as const;
 
 export const adminDeclarationsRouter = createTRPCRouter({
+	listYears: adminProcedure.query(async ({ ctx }) => {
+		const rows = await ctx.db
+			.selectDistinct({ year: declarations.year })
+			.from(declarations)
+			.orderBy(desc(declarations.year));
+
+		return rows.map((row) => row.year);
+	}),
+
 	search: adminProcedure
 		.input(searchDeclarationsSchema)
 		.query(async ({ ctx, input }) => {
 			const filters: SQL[] = [];
 
 			if (input.query) {
-				const term = `%${input.query}%`;
 				const queryFilter = or(
-					ilike(companies.name, term),
-					ilike(declarations.siren, term),
+					containsInsensitive(companies.name, input.query),
+					containsInsensitive(declarations.siren, input.query),
 				);
 				if (queryFilter) {
 					filters.push(queryFilter);
@@ -82,7 +90,7 @@ export const adminDeclarationsRouter = createTRPCRouter({
 			}
 
 			if (input.email) {
-				filters.push(ilike(users.email, `%${input.email}%`));
+				filters.push(containsInsensitive(users.email, input.email));
 			}
 
 			if (input.year) {
@@ -363,6 +371,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					companySiren: companies.siren,
 					companyNafCode: companies.nafCode,
 					companyAddress: companies.address,
+					companyCountryCode: companies.countryCode,
+					companyCountryLabel: companies.countryLabel,
+					companyDepartmentLabel: companies.departmentLabel,
 					companyWorkforceEma: gipMdsData.workforceEma,
 					declarantEmail: users.email,
 					declarantFirstName: users.firstName,
@@ -456,6 +467,9 @@ export const adminDeclarationsRouter = createTRPCRouter({
 					siren: row.companySiren,
 					nafCode: row.companyNafCode,
 					address: row.companyAddress,
+					countryCode: row.companyCountryCode,
+					countryLabel: row.companyCountryLabel,
+					departmentLabel: row.companyDepartmentLabel,
 					gipWorkforce: parseGipWorkforce(row.companyWorkforceEma),
 				},
 				declarationYear: d.year,

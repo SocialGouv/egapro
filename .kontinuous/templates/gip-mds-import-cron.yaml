@@ -10,6 +10,7 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 900
       backoffLimit: 3
       template:
         metadata:
@@ -35,8 +36,9 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  curl -X POST "http://app:3000/api/gip-mds/import" \
-                    -H "Authorization: Bearer ${EGAPRO_GIP_MDS_API_TOKEN}" \
+                  printf 'Authorization: Bearer %s\n' "${EGAPRO_GIP_MDS_API_TOKEN}" | \
+                  curl -X POST "http://app/api/gip-mds/import" \
+                    -H @- \
                     --connect-timeout 10 \
                     --max-time 120 \
                     --fail \

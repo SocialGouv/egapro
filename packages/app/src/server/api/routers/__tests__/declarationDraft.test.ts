@@ -351,7 +351,7 @@ describe("declarationDraftRouter", () => {
 			expect(mocks.insert).not.toHaveBeenCalled();
 		});
 
-		it("emits DRAFT_SAVE audit log without slice data payload", async () => {
+		it("emits DRAFT_SAVE audit log with the target but without draft content", async () => {
 			const { auditMiddleware } = await import("~/server/audit/trpcMiddleware");
 
 			const input = {
@@ -376,16 +376,10 @@ describe("declarationDraftRouter", () => {
 				expect.objectContaining({
 					action: "declaration_draft.save",
 					status: "success",
+					userId: "user-1",
+					metadata: { siren: SIREN, year: YEAR },
 				}),
 			);
-
-			const callArg = mockLogAction.mock.calls[0]?.[0] as Record<
-				string,
-				unknown
-			>;
-			const metadata = callArg?.metadata as Record<string, unknown> | undefined;
-			const slice = metadata?.slice as Record<string, unknown> | undefined;
-			expect(slice).not.toHaveProperty("data");
 		});
 	});
 
