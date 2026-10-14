@@ -86,6 +86,7 @@ vi.mock("~/env", () => ({
 		EGAPRO_GATEWAY_SHARED_SECRET:
 			"test-gateway-shared-secret-at-least-32-chars",
 		NEXTAUTH_URL: "http://localhost:3000/api/auth",
+		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: true,
 		SUPPORT_JIRA_URL:
 			"https://jira-mcas.atlassian.net/servicedesk/customer/portal/97",
 	},
