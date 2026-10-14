@@ -13,4 +13,4 @@ export const TEST_GIP_WORKFORCE = 250;
 export const TEST_USER_PHONE = "0122334455";
 
 export const TEST_LOGIN_EMAIL = "test@fia1.fr";
-export const TEST_USER_EMAIL = "ultimate@test.proconnect.gouv.fr";
+export const TEST_USER_EMAIL_FILE = "test-results/.auth/email.txt";
