@@ -11,6 +11,7 @@ import {
 	ADMIN_DECLARATION_STATUS_FILTERS,
 	type SearchDeclarationsFormValues,
 	searchDeclarationsFormSchema,
+	searchDeclarationsSchema,
 } from "./schemas";
 import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
 
@@ -18,9 +19,17 @@ type Props = {
 	years: number[];
 };
 
+function withSelectedYear(years: number[], selected: string | null): number[] {
+	const parsed = searchDeclarationsSchema.shape.year.safeParse(selected);
+	if (!parsed.success || parsed.data === undefined) return years;
+	if (years.includes(parsed.data)) return years;
+	return [...years, parsed.data].sort((a, b) => b - a);
+}
+
 export function SearchForm({ years }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const yearOptions = withSelectedYear(years, searchParams.get("year"));
 
 	const { register, handleSubmit, reset, setValue, watch } = useZodForm(
 		searchDeclarationsFormSchema,
@@ -124,7 +133,7 @@ export function SearchForm({ years }: Props) {
 							{...register("year")}
 						>
 							<option value="">Toutes</option>
-							{years.map((year) => (
+							{yearOptions.map((year) => (
 								<option key={year} value={year}>
 									{year}
 								</option>

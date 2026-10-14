@@ -1,7 +1,7 @@
 "use client";
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
 	const actual =
@@ -57,11 +57,19 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
+import { useSearchParams } from "next/navigation";
+
 import { api } from "~/trpc/react";
 
 import { AdminDeclarationsPage } from "../AdminDeclarationsPage";
 
 describe("AdminDeclarationsPage", () => {
+	beforeEach(() => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams() as ReturnType<typeof useSearchParams>,
+		);
+	});
+
 	it("renders page title", () => {
 		render(<AdminDeclarationsPage />);
 		expect(
@@ -99,5 +107,22 @@ describe("AdminDeclarationsPage", () => {
 		expect(
 			screen.queryByRole("button", { name: "Rechercher" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("keeps the filtered year selected in the form when the list of years fails to load", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "2019" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+		vi.mocked(api.adminDeclarations.listYears.useQuery).mockReturnValueOnce({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		} as never);
+
+		render(<AdminDeclarationsPage />);
+
+		expect(screen.getByLabelText("Année")).toHaveValue("2019");
 	});
 });

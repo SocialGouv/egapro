@@ -1,3 +1,4 @@
+import { getDropoffPhaseLabel } from "~/modules/domain";
 import type { ADMIN_DECLARATION_STATUS_FILTERS } from "../schemas";
 
 export const WORKFORCE_LABEL = "Effectif annuel moyen";
@@ -7,7 +8,9 @@ export type AdminDeclarationStatusFilter =
 
 export const STATUS_LABELS: Record<AdminDeclarationStatusFilter, string> = {
 	draft: "Brouillon",
-	awaiting_compliance_path_choice: "Transmise",
+	awaiting_compliance_path_choice: getDropoffPhaseLabel(
+		"awaiting_compliance_path_choice",
+	),
 	corrective_actions_chosen: "Actions correctives choisies",
 	joint_evaluation_chosen: "Évaluation conjointe choisie",
 	awaiting_revision_choice: "Révision en attente",

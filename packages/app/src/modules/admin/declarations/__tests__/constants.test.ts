@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { getDropoffPhaseLabel } from "~/modules/domain";
 import { STATUS_LABELS, statusLabel } from "../shared/constants";
 
 describe("STATUS_LABELS", () => {
@@ -7,8 +8,13 @@ describe("STATUS_LABELS", () => {
 		expect(STATUS_LABELS.draft).toBe("Brouillon");
 	});
 
-	it("maps awaiting_compliance_path_choice to Transmise", () => {
-		expect(STATUS_LABELS.awaiting_compliance_path_choice).toBe("Transmise");
+	it("takes the awaiting_compliance_path_choice label from the domain dropoff phase", () => {
+		expect(STATUS_LABELS.awaiting_compliance_path_choice).toBe(
+			getDropoffPhaseLabel("awaiting_compliance_path_choice"),
+		);
+		expect(STATUS_LABELS.awaiting_compliance_path_choice).toBe(
+			"Choix parcours conformité",
+		);
 	});
 });
 

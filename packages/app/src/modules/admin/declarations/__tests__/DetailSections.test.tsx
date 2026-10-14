@@ -66,7 +66,7 @@ describe("DeclarationSummary", () => {
 
 		expect(screen.getByText("123456789")).toBeInTheDocument();
 		expect(screen.getByText("2024")).toBeInTheDocument();
-		expect(screen.getByText("Transmise")).toBeInTheDocument();
+		expect(screen.getByText("Choix parcours conformité")).toBeInTheDocument();
 		expect(screen.getByText("85")).toBeInTheDocument();
 	});
 

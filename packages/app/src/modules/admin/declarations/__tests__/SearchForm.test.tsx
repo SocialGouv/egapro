@@ -99,6 +99,72 @@ describe("SearchForm", () => {
 		expect(options).toEqual(["", ...TEST_YEARS.map(String)]);
 	});
 
+	it("adds the year carried by the URL to the options when the database has no such year", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "2019" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={TEST_YEARS} />);
+
+		const select = screen.getByLabelText<HTMLSelectElement>("Année");
+		const options = Array.from(select.querySelectorAll("option")).map(
+			(option) => option.value,
+		);
+
+		expect(options).toEqual(["", "2026", "2025", "2024", "2019"]);
+		expect(select).toHaveValue("2019");
+	});
+
+	it("keeps the URL year selectable when the list of years is empty", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "2019" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={[]} />);
+
+		expect(screen.getByLabelText("Année")).toHaveValue("2019");
+	});
+
+	it("does not duplicate a URL year already present in the options", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "2025" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={TEST_YEARS} />);
+
+		const options = Array.from(
+			screen
+				.getByLabelText<HTMLSelectElement>("Année")
+				.querySelectorAll("option"),
+		).map((option) => option.value);
+
+		expect(options).toEqual(["", ...TEST_YEARS.map(String)]);
+	});
+
+	it("ignores a non-numeric year in the URL", () => {
+		vi.mocked(useSearchParams).mockReturnValue(
+			new URLSearchParams({ year: "abc" }) as ReturnType<
+				typeof useSearchParams
+			>,
+		);
+
+		render(<SearchForm years={TEST_YEARS} />);
+
+		const options = Array.from(
+			screen
+				.getByLabelText<HTMLSelectElement>("Année")
+				.querySelectorAll("option"),
+		).map((option) => option.value);
+
+		expect(options).toEqual(["", ...TEST_YEARS.map(String)]);
+	});
+
 	it("offers every admin status filter with its label, plus the all-statuses option", () => {
 		render(<SearchForm years={TEST_YEARS} />);
 

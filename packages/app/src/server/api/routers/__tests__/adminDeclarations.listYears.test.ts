@@ -1,3 +1,4 @@
+import { desc } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,6 +9,8 @@ vi.mock("~/server/auth", () => ({
 vi.mock("~/server/db", () => ({
 	db: {},
 }));
+
+import { declarations } from "~/server/db/schema";
 
 const adminSession = {
 	user: {
@@ -63,6 +66,7 @@ describe("adminDeclarationsRouter — listYears", () => {
 		await caller.listYears();
 
 		expect(db.selectDistinct).toHaveBeenCalledTimes(1);
+		expect(db.__from).toHaveBeenCalledWith(declarations);
 	});
 
 	it("orders the years in descending order", async () => {
@@ -71,8 +75,9 @@ describe("adminDeclarationsRouter — listYears", () => {
 
 		await caller.listYears();
 
+		expect(db.__orderBy).toHaveBeenCalledTimes(1);
 		const orderBySql = renderSql(db.__orderBy.mock.calls[0]?.[0]);
-		expect(orderBySql).toContain("desc");
+		expect(orderBySql).toBe(renderSql(desc(declarations.year)));
 	});
 
 	it("rejects non-admin callers", async () => {
