@@ -207,11 +207,18 @@ describe("logAction", () => {
 			action: AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE,
 			status: "failure",
 			errorMessage: "HTTP 422 virus_detected",
-			metadata: { s3Cleanup: "failed", virusName: "private" },
+			metadata: {
+				s3Cleanup: "failed",
+				virusName: "Win.Test.EICAR_HDB-1",
+				fileName: "avis-cse-societe-demo.pdf",
+			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
 			errorMessage: "HTTP_422_virus_detected",
-			metadata: { s3Cleanup: "failed" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			s3Cleanup: "failed",
+			virusName: "Win.Test.EICAR_HDB-1",
 		});
 
 		await logAction({
@@ -223,6 +230,23 @@ describe("logAction", () => {
 		expect(mockInsertValues.mock.calls[1]?.[0]).toMatchObject({
 			errorMessage: "HTTP_403_impersonation_read_only",
 			metadata: null,
+		});
+	});
+
+	it.each([
+		["a free-text value", "Fichier de Société Démo"],
+		["an injected payload", "Eicar<script>"],
+		["an oversized value", `A${"x".repeat(255)}`],
+		["a non-string value", 42],
+	])("drops a virus signature that is %s", async (_label, virusName) => {
+		await logAction({
+			action: AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE,
+			status: "failure",
+			errorMessage: "HTTP 422 virus_detected",
+			metadata: { flowType: "joint_evaluation", virusName },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			flowType: "joint_evaluation",
 		});
 	});
 

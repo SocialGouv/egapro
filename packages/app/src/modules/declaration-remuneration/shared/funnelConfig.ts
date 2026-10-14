@@ -14,13 +14,10 @@ export const DECLARATION_FUNNEL: FunnelConfig = {
 
 export function declarationFunnelDimensions(
 	year: number,
-	sizeRange?: string,
+	sizeRange: string,
 ): Record<number, string> {
-	const dimensions: Record<number, string> = {
+	return {
 		[MATOMO_CUSTOM_DIMENSION.CAMPAIGN_YEAR]: String(year),
+		[MATOMO_CUSTOM_DIMENSION.WORKFORCE_RANGE]: sizeRange,
 	};
-	if (sizeRange) {
-		dimensions[MATOMO_CUSTOM_DIMENSION.WORKFORCE_RANGE] = sizeRange;
-	}
-	return dimensions;
 }

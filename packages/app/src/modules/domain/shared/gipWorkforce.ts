@@ -1,4 +1,5 @@
-import { classifyCompanySize } from "./companySize";
+import type { CompanySizeRange } from "../types";
+import { classifyCompanySize, getCompanySizeRange } from "./companySize";
 import { COMPANY_SIZE_VOLUNTARY_MAX } from "./constants";
 import { formatCount, formatTruncatedDecimal, MISSING_VALUE } from "./format";
 import { toNullableNumber } from "./number";
@@ -81,4 +82,13 @@ export function formatWorkforceEma(gipWorkforce: number | null): string {
  */
 export function floorWorkforce(gipWorkforce: number | null): number | null {
 	return gipWorkforce === null ? null : Math.floor(gipWorkforce);
+}
+
+// Absent from the GIP file means voluntary tier, so <50 rather than no bucket.
+export function getCompanySizeRangeForGip(
+	gipWorkforce: number | null,
+): CompanySizeRange {
+	return getCompanySizeRange(
+		getObligationWorkforce(floorWorkforce(gipWorkforce)),
+	);
 }

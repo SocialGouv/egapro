@@ -1,3 +1,4 @@
+export { getPublicCompanyLocation } from "./companyLocationService";
 export { NON_DIFFUSIBLE_LABEL } from "./constants";
 export { getPublicDeclarationsBySiren } from "./declarationsBySirenService";
 export {
@@ -14,6 +15,7 @@ export {
 } from "./httpHeaders";
 export { publicOpenApiSpec } from "./openapi";
 export type {
+	PublicCompanyLocation,
 	PublicCompanySource,
 	PublicDeclarationSource,
 } from "./projection";
@@ -21,6 +23,7 @@ export {
 	isCompanyDiffusible,
 	isPublicCompanyDiffusible,
 	publicDeclarationColumns,
+	toPublicCompanyLocation,
 	toPublicDeclaration,
 } from "./projection";
 export type {

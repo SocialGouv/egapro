@@ -35,12 +35,15 @@ type MetadataField =
 	| "siren"
 	| "flowType"
 	| "s3Cleanup"
+	| "virusName"
 	| "roles"
 	| "publicAgentRequired"
 	| "reason";
 
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const CLAMAV_SIGNATURE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:+/@-]{0,254}$/;
 
 const RECEIPT_TYPES = new Set([
 	"declaration_confirmation",
@@ -151,11 +154,17 @@ const FIELDS_BY_ACTION: Partial<
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: ["id"],
 	[AUDIT_ACTIONS.ADMIN_SEARCH_COMPANY]: ["siren"],
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: ["fileId"],
-	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: ["fileId", "flowType", "s3Cleanup"],
+	[AUDIT_ACTIONS.CSE_OPINION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+		"virusName",
+	],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
 		"fileId",
 		"flowType",
 		"s3Cleanup",
+		"virusName",
 	],
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: ["fileId"],
 	[AUDIT_ACTIONS.ADMIN_FILE_DOWNLOAD]: ["fileId"],
@@ -181,133 +190,121 @@ function validIsoDate(value: unknown): string | undefined {
 		: undefined;
 }
 
-function validValue(
-	field: MetadataField,
-	value: unknown,
-): string | number | boolean | number[] | string[] | null | undefined {
-	switch (field) {
-		case "year": {
-			const year =
-				typeof value === "string" && /^\d{4}$/.test(value)
-					? Number(value)
-					: value;
-			return typeof year === "number" &&
-				Number.isInteger(year) &&
-				year >= 2000 &&
-				year <= 2100
-				? year
-				: undefined;
-		}
-		case "years":
-			return Array.isArray(value) &&
-				value.length >= 1 &&
-				value.length <= 5 &&
-				value.every(
-					(year) =>
-						typeof year === "number" &&
-						Number.isInteger(year) &&
-						year >= 2000 &&
-						year <= 2100,
-				)
-				? [...value]
-				: undefined;
-		case "timeoutMinutes":
-			return typeof value === "number" &&
-				Number.isSafeInteger(value) &&
-				value >= 0 &&
-				value <= 1000000
-				? value
-				: undefined;
-		case "format":
-			return value === "json" || value === "csv" || value === "xlsx"
-				? value
-				: undefined;
-		case "hasCse":
-		case "publicAgentRequired":
-			return typeof value === "boolean" ? value : undefined;
-		case "roles":
-			return value === null
-				? null
-				: Array.isArray(value) &&
-						value.length <= 20 &&
-						value.every((role) => typeof role === "string")
-					? value.includes("agent_public")
-						? ["agent_public"]
-						: []
-					: undefined;
-		case "campaignStartDate":
-		case "publicDataReleaseDate":
-			return value === null || value === "" ? null : validIsoDate(value);
-		case "campaignEndDate":
-		case "declarationDeadline":
-		case "decl1ModificationDeadline":
-		case "decl1JustificationDeadline":
-		case "decl1JointEvaluationDeadline":
-		case "decl2ModificationDeadline":
-		case "decl2JustificationDeadline":
-		case "decl2JointEvaluationDeadline":
-		case "decl2CseOpinionDeadline":
-			return validIsoDate(value);
-		case "id":
-		case "declarationId":
-		case "fileId":
-			return typeof value === "string" && UUID_PATTERN.test(value)
-				? value
-				: undefined;
-		case "siren": {
-			if (typeof value !== "string") return undefined;
-			// Match sirenSchema's accepted display form, then store the canonical ID.
-			const siren = value.replace(/\s/g, "");
-			return /^\d{9}$/.test(siren) ? siren : undefined;
-		}
-		case "flowType":
-			return value === "cse_opinion" || value === "joint_evaluation"
-				? value
-				: undefined;
-		case "s3Cleanup":
-			return value === "ok" || value === "failed" ? value : undefined;
-		case "reason":
-			return value === "siret_changed" ||
-				value === "siret_missing" ||
-				value === "company_link_revoked"
-				? value
-				: undefined;
-		case "date_begin":
-		case "date_end":
-			return validIsoDate(value);
-		case "invalidYear":
-		case "testSeam":
-		case "isResend":
-		case "attachmentsDropped":
-			return typeof value === "boolean" ? value : undefined;
-		case "type":
-			return typeof value === "string" && RECEIPT_TYPES.has(value)
-				? value
-				: undefined;
-		case "kind":
-			return typeof value === "string" && RECEIPT_KINDS.has(value)
-				? value
-				: undefined;
-		case "variant":
-			return typeof value === "string" && RECEIPT_VARIANTS.has(value)
-				? value
-				: undefined;
-		case "acr":
-			return value === "eidas1" ||
-				value === "eidas1-mfa" ||
-				value === "eidas2" ||
-				value === "eidas3"
-				? value
-				: undefined;
-		case "authTime":
-			return typeof value === "number" &&
-				Number.isSafeInteger(value) &&
-				value >= 0 &&
-				value <= 4102444800
-				? value
-				: undefined;
-	}
+type MetadataValue = string | number | boolean | number[] | string[] | null;
+type Validator = (value: unknown) => MetadataValue | undefined;
+
+function isYear(value: unknown): value is number {
+	return (
+		typeof value === "number" &&
+		Number.isInteger(value) &&
+		value >= 2000 &&
+		value <= 2100
+	);
 }
+
+function boundedInteger(max: number): Validator {
+	return (value) =>
+		typeof value === "number" &&
+		Number.isSafeInteger(value) &&
+		value >= 0 &&
+		value <= max
+			? value
+			: undefined;
+}
+
+function oneOf(allowed: ReadonlySet<string>): Validator {
+	return (value) =>
+		typeof value === "string" && allowed.has(value) ? value : undefined;
+}
+
+function matching(pattern: RegExp): Validator {
+	return (value) =>
+		typeof value === "string" && pattern.test(value) ? value : undefined;
+}
+
+const validBoolean: Validator = (value) =>
+	typeof value === "boolean" ? value : undefined;
+
+const validOptionalIsoDate: Validator = (value) =>
+	value === null || value === "" ? null : validIsoDate(value);
+
+function validYear(value: unknown): number | undefined {
+	const year =
+		typeof value === "string" && /^\d{4}$/.test(value) ? Number(value) : value;
+	return isYear(year) ? year : undefined;
+}
+
+function validYears(value: unknown): number[] | undefined {
+	return Array.isArray(value) &&
+		value.length >= 1 &&
+		value.length <= 5 &&
+		value.every(isYear)
+		? [...value]
+		: undefined;
+}
+
+function validRoles(value: unknown): string[] | null | undefined {
+	if (value === null) return null;
+	if (
+		!Array.isArray(value) ||
+		value.length > 20 ||
+		!value.every((role) => typeof role === "string")
+	)
+		return undefined;
+	return value.includes("agent_public") ? ["agent_public"] : [];
+}
+
+function validSiren(value: unknown): string | undefined {
+	if (typeof value !== "string") return undefined;
+	// Match sirenSchema's accepted display form, then store the canonical ID.
+	const siren = value.replace(/\s/g, "");
+	return /^\d{9}$/.test(siren) ? siren : undefined;
+}
+
+const validUuid = matching(UUID_PATTERN);
+const validCount = boundedInteger(1000000);
+
+const VALIDATORS: Record<MetadataField, Validator> = {
+	year: validYear,
+	years: validYears,
+	timeoutMinutes: validCount,
+	format: oneOf(new Set(["json", "csv", "xlsx"])),
+	hasCse: validBoolean,
+	publicAgentRequired: validBoolean,
+	roles: validRoles,
+	campaignStartDate: validOptionalIsoDate,
+	publicDataReleaseDate: validOptionalIsoDate,
+	campaignEndDate: validIsoDate,
+	declarationDeadline: validIsoDate,
+	decl1ModificationDeadline: validIsoDate,
+	decl1JustificationDeadline: validIsoDate,
+	decl1JointEvaluationDeadline: validIsoDate,
+	decl2ModificationDeadline: validIsoDate,
+	decl2JustificationDeadline: validIsoDate,
+	decl2JointEvaluationDeadline: validIsoDate,
+	decl2CseOpinionDeadline: validIsoDate,
+	id: validUuid,
+	declarationId: validUuid,
+	fileId: validUuid,
+	siren: validSiren,
+	flowType: oneOf(new Set(["cse_opinion", "joint_evaluation"])),
+	s3Cleanup: oneOf(new Set(["ok", "failed"])),
+	virusName: matching(CLAMAV_SIGNATURE_PATTERN),
+	reason: oneOf(
+		new Set(["siret_changed", "siret_missing", "company_link_revoked"]),
+	),
+	date_begin: validIsoDate,
+	date_end: validIsoDate,
+	invalidYear: validBoolean,
+	testSeam: validBoolean,
+	isResend: validBoolean,
+	attachmentsDropped: validBoolean,
+	type: oneOf(RECEIPT_TYPES),
+	kind: oneOf(RECEIPT_KINDS),
+	variant: oneOf(RECEIPT_VARIANTS),
+	acr: oneOf(new Set(["eidas1", "eidas1-mfa", "eidas2", "eidas3"])),
+	authTime: boundedInteger(4102444800),
+};
 
 export function projectAuditMetadata(
 	action: AuditActionKey,
@@ -326,7 +323,7 @@ export function projectAuditMetadata(
 		const source = value as Record<string, unknown>;
 		const result: AuditMetadata = {};
 		for (const field of fields) {
-			const valid = validValue(field, source[field]);
+			const valid = VALIDATORS[field](source[field]);
 			if (valid !== undefined) result[field] = valid;
 		}
 		return Object.keys(result).length > 0 ? result : null;
