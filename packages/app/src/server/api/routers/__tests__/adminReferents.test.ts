@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { importReferentsSchema } from "~/modules/admin/referents/schemas";
+
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/db/schema", () => ({
@@ -271,6 +273,36 @@ describe("adminReferentsRouter", () => {
 	});
 
 	describe("exportAll", () => {
+		it("imports an exported row with nullable fields", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+			const rows: Awaited<ReturnType<typeof caller.exportAll>> = [
+				{
+					region: "11",
+					county: null,
+					name: "Jean",
+					type: "email",
+					value: "jean@gouv.fr",
+					principal: true,
+					substituteName: null,
+					substituteEmail: null,
+				},
+			];
+			selectQueue = [rows];
+
+			const exported = await caller.exportAll();
+			const result = await caller.import(importReferentsSchema.parse(exported));
+
+			expect(result).toEqual({ imported: 1 });
+			expect(mockInsertValues).toHaveBeenCalledWith(
+				expect.objectContaining({
+					county: undefined,
+					substituteName: undefined,
+					substituteEmail: undefined,
+				}),
+			);
+		});
+
 		it("returns all referents ordered by region then county", async () => {
 			const rows = [
 				{

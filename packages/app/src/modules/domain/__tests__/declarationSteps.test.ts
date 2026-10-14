@@ -11,6 +11,7 @@ import {
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
+	getDropoffPhaseLabel,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
@@ -27,6 +28,14 @@ describe("DECLARATION_STEPS", () => {
 	it("uses French labels with no empty strings", () => {
 		for (const entry of DECLARATION_STEPS) {
 			expect(entry.label.length).toBeGreaterThan(0);
+		}
+	});
+});
+
+describe("getDropoffPhaseLabel", () => {
+	it("returns the label of every post-submit dropoff phase from its status", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(getDropoffPhaseLabel(phase.status)).toBe(phase.label);
 		}
 	});
 });
