@@ -79,7 +79,7 @@
 		"postgres": "^3.4.9",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
-		"react-hook-form": "^7.72.1",
+		"react-hook-form": "^7.89.0",
 		"recharts": "^3.10.1",
 		"redis": "^5.11.0",
 		"server-only": "^0.0.1",
