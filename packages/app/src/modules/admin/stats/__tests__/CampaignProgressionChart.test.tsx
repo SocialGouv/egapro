@@ -180,10 +180,10 @@ describe("CampaignProgressionChart tooltip", () => {
 			],
 		});
 		expect(
-			screen.getByText(/7 842 déclarations \(100 % du total\)/),
+			screen.getByText(/7 842 déclarations transmises \(100 % du total\)/),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText(/2025 : 200 déclarations \(100 % du total\)/),
+			screen.getByText(/2025 : 200 déclarations transmises \(100 % du total\)/),
 		).toBeInTheDocument();
 	});
 
@@ -195,7 +195,7 @@ describe("CampaignProgressionChart tooltip", () => {
 			payload: [{ name: "2026", value: 30 }],
 		});
 		expect(
-			screen.getByText(/30 déclarations \(0 % du total\)/),
+			screen.getByText(/30 déclarations transmises \(0 % du total\)/),
 		).toBeInTheDocument();
 	});
 
@@ -206,7 +206,7 @@ describe("CampaignProgressionChart tooltip", () => {
 			payload: [{ name: "2099", value: 5 }],
 		});
 		expect(
-			screen.getByText(/5 déclarations \(0 % du total\)/),
+			screen.getByText(/5 déclarations transmises \(0 % du total\)/),
 		).toBeInTheDocument();
 	});
 
@@ -223,7 +223,7 @@ describe("CampaignProgressionChart tooltip", () => {
 			],
 		);
 		expect(
-			screen.getByText(/2025 : 4 déclarations \(0 % du total\)/),
+			screen.getByText(/2025 : 4 déclarations transmises \(0 % du total\)/),
 		).toBeInTheDocument();
 	});
 
@@ -239,6 +239,6 @@ describe("CampaignProgressionChart tooltip", () => {
 		const items = screen.getAllByRole("listitem");
 		expect(items).toHaveLength(1);
 		// \s matches the U+202F narrow-no-break-space the fr-FR locale emits
-		expect(items[0]?.textContent).toMatch(/7\s842 déclarations/);
+		expect(items[0]?.textContent).toMatch(/7\s842 déclarations transmises/);
 	});
 });

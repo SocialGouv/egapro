@@ -1,8 +1,13 @@
+import { companyLocationRow } from "~/modules/domain";
+
 type Props = {
 	company: {
 		siren: string;
 		name: string;
 		address: string | null;
+		countryCode: string | null;
+		countryLabel: string | null;
+		departmentLabel: string | null;
 		nafCode: string | null;
 		// Exact GIP headcount, `null` when the company is absent from the file of
 		// `workforceYear` — rendered as an absence, never as a bracketed tier.
@@ -16,6 +21,12 @@ type Props = {
  * want to impersonate it.
  */
 export function CompanyPreviewCard({ company }: Props) {
+	const location = companyLocationRow({
+		countryCode: company.countryCode ?? null,
+		countryLabel: company.countryLabel ?? null,
+		departmentLabel: company.departmentLabel ?? null,
+		domesticAddress: company.address,
+	});
 	return (
 		<div className="fr-card fr-mt-3w">
 			<div className="fr-card__body">
@@ -25,9 +36,9 @@ export function CompanyPreviewCard({ company }: Props) {
 						<p>
 							<strong>SIREN :</strong> {company.siren}
 						</p>
-						{company.address && (
+						{location && (
 							<p>
-								<strong>Adresse :</strong> {company.address}
+								<strong>{location.label} :</strong> {location.value}
 							</p>
 						)}
 						{company.nafCode && (

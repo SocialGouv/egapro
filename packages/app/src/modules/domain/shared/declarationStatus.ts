@@ -184,8 +184,8 @@ export function computeDeclarationStatus(
 
 // Second-pass projection composed on top of computeDeclarationStatus, rather than merged into
 // it, so that function's exhaustive FSM signature stays untouched. `year < currentYear` alone is
-// unsafe in Jan/Feb: the prior campaign's deadlines (e.g. decl2CseOpinionDeadline, Feb 1st) can
-// still be open, so closing also requires that row's own-year step deadline to have passed.
+// unsafe early in the following year: the prior campaign's deadlines (e.g. decl2CseOpinionDeadline,
+// March 1st N+1) can still be open, so closing also requires that row's own-year step deadline to have passed.
 export function applyDeclarationClosure(params: {
 	status: DeclarationStatus;
 	fsmStatus: DeclarationFsmStatus | null;

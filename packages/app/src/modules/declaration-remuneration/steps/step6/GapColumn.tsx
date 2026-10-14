@@ -1,5 +1,5 @@
+import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
-import { GapBadge } from "./GapBadge";
 
 type Props = {
 	title: string;
