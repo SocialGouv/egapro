@@ -195,10 +195,6 @@ test.describe("Mon espace — location row of the company banner", () => {
 	});
 });
 
-// #3867 removed the "mes entreprises" screen. Both header breakpoints render their own
-// entry (UserAccountMenu on desktop, MobileUserBlock inside the DSFR modal), so a single
-// viewport would leave half the change unasserted. Each test starts from "/" so landing
-// on /mon-espace is a real navigation rather than a URL that already matched.
 test.describe("Mon espace — header entry point", () => {
 	const MOBILE = { width: 375, height: 812 };
 
@@ -234,6 +230,14 @@ test.describe("Mon espace — header entry point", () => {
 		await page.waitForURL("**/mon-espace");
 	});
 
+	test("the removed mes-entreprises route is not found", async ({ page }) => {
+		const response = await page.goto("/mon-espace/mes-entreprises");
+
+		expect(response?.status()).toBe(404);
+	});
+});
+
+test.describe("Mon espace — menu principal", () => {
 	test("mon espace drops the main menu, which comes back on the help page", async ({
 		page,
 	}) => {
@@ -254,11 +258,5 @@ test.describe("Mon espace — header entry point", () => {
 		await expect(
 			mainMenu.getByRole("link", { name: "Observatoire" }),
 		).toBeVisible();
-	});
-
-	test("the removed mes-entreprises route is not found", async ({ page }) => {
-		const response = await page.goto("/mon-espace/mes-entreprises");
-
-		expect(response?.status()).toBe(404);
 	});
 });
