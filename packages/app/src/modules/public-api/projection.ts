@@ -121,6 +121,43 @@ function publicCompanyValue(
 	return diffusible ? (value ?? null) : NON_DIFFUSIBLE_LABEL;
 }
 
+export type PublicCompanyLocation = {
+	address: string | null;
+	city: string | null;
+	regionCode: string | null;
+	region: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+};
+
+export type PublicCompanyLocationSource = {
+	[Key in keyof PublicCompanyLocation]?: string | null;
+} & { statutDiffusion: string | null };
+
+export function toPublicCompanyLocation(
+	company: PublicCompanyLocationSource,
+): PublicCompanyLocation {
+	const diffusible = isPublicCompanyDiffusible(
+		company.statutDiffusion,
+		company.address ?? null,
+	);
+	return {
+		address: publicCompanyValue(company.address, diffusible),
+		city: publicCompanyValue(company.city, diffusible),
+		regionCode: publicCompanyValue(company.regionCode, diffusible),
+		region: publicCompanyValue(
+			company.countryCode ? null : company.region,
+			diffusible,
+		),
+		departmentCode: publicCompanyValue(company.departmentCode, diffusible),
+		departmentLabel: publicCompanyValue(company.departmentLabel, diffusible),
+		countryCode: publicCompanyValue(company.countryCode, diffusible),
+		countryLabel: publicCompanyValue(company.countryLabel, diffusible),
+	};
+}
+
 export function toPublicDeclaration(
 	declaration: PublicDeclarationSource,
 	company: PublicCompanySource,
@@ -134,17 +171,7 @@ export function toPublicDeclaration(
 		year: declaration.year,
 		siren: company.siren,
 		name: publicCompanyValue(company.name, diffusible),
-		address: publicCompanyValue(company.address, diffusible),
-		city: publicCompanyValue(company.city, diffusible),
-		regionCode: publicCompanyValue(company.regionCode, diffusible),
-		region: publicCompanyValue(
-			company.countryCode ? null : company.region,
-			diffusible,
-		),
-		departmentCode: publicCompanyValue(company.departmentCode, diffusible),
-		departmentLabel: publicCompanyValue(company.departmentLabel, diffusible),
-		countryCode: publicCompanyValue(company.countryCode, diffusible),
-		countryLabel: publicCompanyValue(company.countryLabel, diffusible),
+		...toPublicCompanyLocation(company),
 		nafCode: publicCompanyValue(company.nafCode, diffusible),
 		nafLabel: publicCompanyValue(company.nafLabel, diffusible),
 		workforceEma: toNullableNumber(company.workforceEma),

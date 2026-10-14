@@ -10,7 +10,7 @@ import {
 	mySpaceHistoryHref,
 } from "~/modules/routes";
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
-import { TEST_SIREN, TEST_USER_EMAIL, TEST_USER_PHONE } from "./constants";
+import { TEST_SIREN, TEST_USER_PHONE } from "./constants";
 import { DUMMY_PDF } from "./helpers/compliance-flows";
 import {
 	countFormalNoticeFiles,
@@ -33,6 +33,7 @@ import {
 import { openPanneauDemarche } from "./helpers/process-panel";
 import { mailChainAvailable } from "./helpers/receipts";
 import { urlGlob } from "./helpers/routes";
+import { getTestUserEmail } from "./helpers/testUser";
 
 const CURRENT_YEAR = getCurrentYear();
 const FORMAL_NOTICE_TEXT = /Si votre entreprise a été mise en demeure/;
@@ -145,7 +146,7 @@ test.describe("Formal notice — joint evaluation report deposit", () => {
 		if (notificationsWorker) {
 			await test.step("accusé de réception", async () => {
 				const email = await waitForEmail(
-					TEST_USER_EMAIL,
+					getTestUserEmail(),
 					(m) => m.subject === RECEIPT_SUBJECT,
 					{ since },
 				);

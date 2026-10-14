@@ -20,7 +20,7 @@ import {
 	computeGapRatio,
 	floorWorkforce,
 	GAP_RATIO_DECIMALS,
-	getCompanySizeRange,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
 	isCancelled,
 	isComplianceProcessRequired,
@@ -445,9 +445,7 @@ export function assembleDeclaration(
 		Parcours: {
 			Annee: row.year,
 			Effectif: flooredWorkforce,
-			Tranche_effectif: getCompanySizeRange(
-				getObligationWorkforce(flooredWorkforce),
-			),
+			Tranche_effectif: getCompanySizeRangeForGip(gipWorkforce),
 			Regime_obligations: classifyCompanySize(
 				getObligationWorkforce(gipWorkforce),
 			),

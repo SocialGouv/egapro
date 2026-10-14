@@ -67,6 +67,7 @@ vi.mock("~/trpc/server", () => ({
 					nafCode: "6201Z",
 					countryCode: null,
 					countryLabel: "FRANCE",
+					departmentLabel: null,
 					workforce: 150,
 					hasCse: true,
 				},
