@@ -55,7 +55,6 @@ export {
 	classifyCompanySize,
 	formatObservatoryWorkforce,
 	getCompanySizeRange,
-	getOptionalCompanySizeRange,
 	isCseRequired,
 	isObservatoryWorkforceRange,
 	OBSERVATORY_WORKFORCE_RANGE_KEYS,
@@ -257,6 +256,7 @@ export {
 	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
 	parseGipWorkforce,
 } from "./shared/gipWorkforce";
