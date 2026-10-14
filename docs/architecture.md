@@ -799,7 +799,7 @@ Activé via `data-fr-scheme="system"` sur `<html>`. Cookie `fr-theme` lu par un 
 
 ### 11.5 RGAA 4.1.2 / WCAG 2.2 AA
 
-Toute l'accessibilité passe par **ultra11y**, en deux surfaces : l'agent `rgaa-auditor`, qui lance le skill `review-a11y` sur le code sous changement, et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au cron hebdomadaire ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
+Toute l'accessibilité passe par **ultra11y**, en deux surfaces : l'agent `rgaa-auditor`, qui lance le skill `review-a11y` sur le code sous changement, et le workflow `.github/workflows/a11y.yaml` (Action `SocialGouv/ultra11y`) — gate statique bloquante sur chaque PR, plus — au merge sur `alpha` (filtré par `paths`) ou en manuel — un balayage Playwright des pages qui décide les critères au rendu et fait adjuger les critères de jugement par le runner CLI du moteur. Lighthouse rapporte un score d'accessibilité en avertissement, ce n'est pas une gate. Aucun système a11y parallèle. Règle canonique : `.claude/rules/rgaa.md`.
 
 ---
 
@@ -823,7 +823,7 @@ Trois entrées Sentry, une par runtime :
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo, non bloquant |
+| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au merge sur `alpha` ou en manuel, non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés
@@ -858,7 +858,7 @@ pnpm test:integration  # Tests intégration BDD (nécessite Docker)
 | `preproduction.yaml` | push branche `beta` | Déploiement preprod |
 | `production.yaml` | push tag | Déploiement prod |
 | `release.yml` | manuel | semantic-release (versionnement automatique) |
-| `a11y.yaml` | PR · cron lundi 04:00 UTC · manuel | 3 jobs ultra11y : `a11y-gate` (audit RGAA statique, **bloquante**, commentaire de PR sticky), `a11y-pages` (balayage Playwright + critères de rendu + adjudication, cron/manuel seulement, non bloquant), `a11y-bundle` (fusion en un artefact `ultra11y-rgaa`) |
+| `a11y.yaml` | PR · push `alpha` (filtré par `paths`) · manuel | 3 jobs ultra11y : `a11y-gate` (audit RGAA statique, **bloquante**, commentaire de PR sticky), `a11y-pages` (balayage Playwright + critères de rendu + adjudication, push `alpha`/manuel seulement, non bloquant), `a11y-bundle` (fusion en un artefact `ultra11y-rgaa`) |
 | `claude-question.yml` | issue/PR labels | Intégration IA (questions) |
 
 ### 14.2 Kontinuous (déploiement Kubernetes)

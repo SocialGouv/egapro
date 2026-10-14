@@ -127,7 +127,7 @@ La pipeline `/analyse` → `/implement` ajoute ses propres agents et gates par-d
 | Fichier | Déclencheur | Rôle |
 |---|---|---|
 | `ci.yaml` | chaque push | build · lint · format · typecheck · tests · cohérence des versions ultra11y |
-| `a11y.yaml` | PR, manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **manuel** : la chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante — le cron hebdo a été retiré, voir `.claude/rules/rgaa.md` |
+| `a11y.yaml` | PR, push `alpha` (filtré par `paths`), manuel | ultra11y. Sur **PR** : `a11y-gate` seul — audit statique de tout `src`, **bloquant**. Sur **push `alpha`** ou **manuel** : la chaîne complète (`a11y-pages` + `a11y-bundle`), non bloquante et payante — voir `.claude/rules/rgaa.md` |
 | `e2e.yaml` | PR → `alpha`, manuel | suite Playwright complète **et** les 185 coordonnées de la grille de recette, en 5 shards parallèles (2 + 3) ; le check requis « Test e2e » est le job agrégateur qui les rassemble |
 | `lighthouse.yaml` | `deployment_status` (success, hors env `build-*`) | audit Lighthouse sur l'URL déployée |
 | `review-auto.yaml` | push sur toute branche sauf `master` et `**-persist` (dependabot inclus) | déploiement des review apps |
