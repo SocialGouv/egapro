@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import "./src/env.js";
 
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { buildSecurityHeaders } from "./src/server/security/securityHeaders.js";
 
 /** @type {import("next").NextConfig} */
