@@ -54,12 +54,14 @@ const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
 const VALIDATED_STEP = 4;
 const NEXT_STEP_HREF = "/declaration-representation/etape/5";
+const DECLARATION_DEADLINE = new Date(2026, 2, 1);
 
 function renderStep() {
 	return render(
 		<StepPageClient
 			campaignOpen
 			campaignYear={CAMPAIGN_YEAR}
+			declarationDeadline={DECLARATION_DEADLINE}
 			initialDraft={{ currentStep: VALIDATED_STEP }}
 			step={VALIDATED_STEP}
 			year={YEAR}
