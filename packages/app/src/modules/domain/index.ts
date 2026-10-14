@@ -45,14 +45,16 @@ export {
 // Civil dates (calendar days held as UTC midnight) vs timestamps
 export { civilDate } from "./shared/civilDate";
 // Company obligation
-export { isObligatedForYear } from "./shared/companyObligation";
+export {
+	getObligationWorkforceMin,
+	isObligatedForYear,
+} from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	formatObservatoryWorkforce,
 	getCompanySizeRange,
-	getOptionalCompanySizeRange,
 	isCseRequired,
 	isObservatoryWorkforceRange,
 	OBSERVATORY_WORKFORCE_RANGE_KEYS,
@@ -159,6 +161,7 @@ export {
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
+	getDropoffPhaseLabel,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
@@ -253,6 +256,7 @@ export {
 	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
 	parseGipWorkforce,
 } from "./shared/gipWorkforce";

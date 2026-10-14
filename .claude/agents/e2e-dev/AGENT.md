@@ -33,7 +33,7 @@ Tu es invoqué à deux moments selon le type de ticket :
 
 ## Périmètre (strict)
 
-- **Tu possèdes** : les tests E2E Playwright = `src/e2e/**/*.e2e.ts` (+ `auth.setup.ts`, `global-setup.ts`, et les helpers `src/e2e/helpers/**` quand un nouveau flow réutilisable doit être extrait).
+- **Tu possèdes** : les tests E2E Playwright = `src/e2e/**/*.e2e.ts` (+ `auth.setup.ts`, `global-setup.ts`, et les helpers `src/e2e/helpers/**` quand un nouveau flow réutilisable doit être extrait), et la grille de recette `src/e2e/grille/**` (`coordinates.ts`, `scenarios.ts`, `grille.grille.ts`).
 - **Hors périmètre, tu n'y touches pas** : le code source (jamais), les TU / tests d'intégration vitest (`*.test.ts(x)`, `*.integration.test.ts` — c'est `code-dev`), la fidélité Figma, la config CI/Sonar.
 
 ## Philosophie E2E (différence clé avec les TU)
@@ -57,28 +57,36 @@ Là où les TU de `code-dev` visent **100 % de couverture** avec des tests cibl�
 
    **⛔ GATE D'ENTRÉE — tranche AVANT toute autre action.** À partir du seul diff et du spec, décide le `mode` (`nested` / `new` / `none`) et écris-le explicitement. Applique les critères de « Philosophie E2E » (pour un Bug : défaut `none` si le diff est CSS/SCSS/`className` seuls ; jamais `new`).
 
-   **Si le verdict est `none`, arrête-toi ici.** Ne démarre pas le dev server, ne prends pas le port 3000, ne lance pas la suite. Poste un commentaire `e2e-dev:` justifiant le `none` en une phrase, et retourne directement `{"status":"validated", …, "tests":{"mode":"none","files":[]}, "commit":"none"}`.
+   **Si le verdict est `none`, tranche d'abord la grille** — `bash scripts/orchestration/grille_scope.sh <base>`, avec la base ci-dessus sous sa forme remote-tracking complète (`origin/alpha`, `origin/epic/<EPIC_N>`) ; même règle qu'à l'étape 3 :
+   - **`skip`** → arrête-toi ici. Ne démarre pas le dev server, ne prends pas le port 3000, ne lance ni la suite ni la grille. Poste un commentaire `e2e-dev:` justifiant le `none` en une phrase (grille : non jouée, `grille_scope.sh` a répondu `skip`), et retourne directement `{"status":"validated", …, "tests":{"mode":"none","files":[],"grille":"skipped"}, "commit":"none"}`.
+   - **`play`** → aucune couverture à écrire, mais le parcours de déclaration a bougé : la grille passe avant tout `validated`. Enchaîne l'étape 2, l'étape 3 **pour la grille seule** (la suite, la CI la rejoue), puis l'étape 4 et la suite du workflow sur les coordonnées rouges (handback de l'étape 5, ou correction de l'étape 6) ; seules les étapes 7 et 8, la couverture nouvelle, sont sans objet. Le verdict porte `"tests":{"mode":"none","files":[],"grille":"played"}`.
 
-   Rationnel : en mode ticket, `code-dev` a **déjà ouvert la PR**, donc la CI (`e2e.yaml`, check « Test e2e ») rejoue déjà la suite complète sur la branche. Ton run local n'apporte de la valeur que si tu as une couverture à écrire ou une régression à trier. Le lancer pour finir sur `none` duplique la CI, monopolise le **port 3000** (ressource globale sérialisée pour tout le repo) et coûte des dizaines de minutes pour rien.
+   Rationnel : en mode ticket, `code-dev` a **déjà ouvert la PR**, donc la CI (`e2e.yaml`, check « Test e2e ») rejoue déjà la suite complète sur la branche. Ton run local n'apporte de la valeur que si tu as une couverture à écrire, une régression à trier ou une grille à jouer. Le lancer pour finir sur `none` duplique la CI, monopolise le **port 3000** (ressource globale sérialisée pour tout le repo) et coûte des dizaines de minutes pour rien.
 
    **Une recommandation de test présente dans l'analyse du bug ou dans ton brief ne lie pas ton jugement.** L'analyse propose, tu décides, et tu décides sur le **diff réel**. Si tu conclus `none` contre une recommandation amont, dis-le explicitement dans ton commentaire : c'est une information utile pour l'équipe, pas une désobéissance.
 
-2. **Démarrer le dev server sur le port 3000 — obligatoire.** *(Étape atteinte uniquement si la gate d'entrée de l'étape 1 a conclu à une couverture à produire ou à une suite à trier. Sur `mode: "none"`, tu as déjà rendu ton verdict et tu ne passes pas ici.)* Charon, le proxy OAuth de la Fabrique qui porte la connexion ProConnect de test, n'enregistre que le callback `http://localhost:3000/api/auth/callback/proconnect` : tout autre port échoue en 404 dès l'étape authorize, donc `auth.setup.ts` ne peut pas authentifier la suite. Concrètement :
+2. **Démarrer le dev server sur le port 3000 — obligatoire.** *(Étape atteinte uniquement si la gate d'entrée de l'étape 1 a conclu à une couverture à produire ou à une suite à trier, ou sur `mode: "none"` quand `grille_scope.sh` a répondu `play`. Sur `mode: "none"` avec `skip`, tu as déjà rendu ton verdict et tu ne passes pas ici.)* Charon, le proxy OAuth de la Fabrique qui porte la connexion ProConnect de test, n'enregistre que le callback `http://localhost:3000/api/auth/callback/proconnect` : tout autre port échoue en 404 dès l'étape authorize, donc `auth.setup.ts` ne peut pas authentifier la suite. Concrètement :
    - **Mode epic** : `run_e2e_dev.sh` a déjà forcé `PORT=3000` dans `packages/app/.env.local` (les ports docker restent index-dérivés). Lance simplement le serveur.
    - **Mode ticket** (worktree partagé avec `code-dev`) : vérifie d'abord que le port 3000 est libre (`lsof -nP -iTCP:3000 -sTCP:LISTEN`). S'il est occupé, retourne `{"status":"failed","reason":"port 3000 occupé — requis pour le callback ProConnect"}` sans préempter le process qui l'occupe. Sinon lance le serveur avec `PORT=3000` (override de la valeur du `.env.local`).
 
    Lancer le serveur en background (`pnpm --filter app dev` ou `pnpm dev:app`), attendre qu'il réponde, puis exporter `PLAYWRIGHT_BASE_URL=http://localhost:3000`. La stack docker (DB jetable, minio, maildev, valkey) + migrations ont déjà été provisionnées par `setup-worktree.sh` sur les ports index-dérivés.
 
-3. **Lancer la suite E2E actuelle** — `pnpm --filter app test:e2e` (Playwright, `workers:1`). Capturer précisément la liste des tests/projets en échec (`test-results/`, trace `retain-on-failure`).
+3. **Lancer la suite E2E actuelle** — `pnpm --filter app test:e2e` (Playwright, `workers:1`). Capturer précisément la liste des tests/projets en échec (`test-results/`, trace `retain-on-failure`). Sur `mode: "none"` (arrivé ici par `play`), ne lance pas la suite : seule la grille.
 
-4. **Trier chaque échec** — pour CHAQUE test rouge, déterminer la cause :
+   **Puis trancher la grille de recette** — `bash scripts/orchestration/grille_scope.sh <base>`, avec la base de l'étape 1 sous sa forme remote-tracking complète (`origin/alpha`, `origin/epic/<EPIC_N>`) ; si tu l'as déjà appelé à l'étape 1, réutilise sa réponse. Le script est la seule source de la règle : il imprime `play` quand le diff touche le parcours de déclaration que rejouent les 185 coordonnées (et liste sur stderr les fichiers qui l'ont décidé), `skip` sinon. Tu n'en juges pas toi-même et tu ne recopies pas sa liste de chemins.
+   - **`play`** → lancer aussi `pnpm --filter app test:e2e:grille` (même dev server, même `PLAYWRIGHT_BASE_URL` ; compter 20 à 30 min). Capturer les coordonnées rouges : leur identifiant est le premier crochet du titre, `[année-tranche-CASnn]`.
+   - **`skip`** → ne pas la lancer : la CI (`e2e.yaml`) la rejoue de toute façon sur la PR.
+
+4. **Trier chaque échec** — pour CHAQUE test rouge de la suite **et** chaque coordonnée rouge de la grille, déterminer la cause :
    - **Régression non souhaitée (side effect)** : le code intégré casse un parcours qui devait rester inchangé ; le test assertait un comportement légitime toujours attendu.
    - **Conséquence légitime de l'évolution** : le test assertait l'ancien comportement que la feature / le ticket change volontairement (nouvelle URL, libellé, étape ajoutée/retirée, redirection modifiée).
 
    Méthode : croiser l'assertion qui casse, le spec + scénarios, et le diff source. **En cas de doute → considérer comme régression** (fail-safe) et rendre la main.
 
+   Pour la grille, la ligne de partage est la même : une coordonnée est une **évolution légitime** seulement si le spec change **volontairement** la règle métier qu'elle rejoue (seuil, cas, écran d'arrivée). Elle se corrige alors dans `src/e2e/grille/coordinates.ts` (le résultat attendu) ou `src/e2e/grille/scenarios.ts` (le parcours). Toute autre coordonnée rouge est une **régression**.
+
 5. **Si ≥ 1 régression réelle → STOP, handback** :
-   - Poster un commentaire préfixé `e2e-dev:` (sur l'**epic** en mode Feature, sur le **ticket** en mode Task/Bug) listant chaque test en régression : `fichier:ligne`, le parcours/assertion qui casse, comportement attendu vs obtenu, et le fichier source suspecté.
+   - Poster un commentaire préfixé `e2e-dev:` (sur l'**epic** en mode Feature, sur le **ticket** en mode Task/Bug) listant chaque test en régression : `fichier:ligne` (ou, pour la grille, l'identifiant `[année-tranche-CASnn]`), le parcours/assertion qui casse, comportement attendu vs obtenu, et le fichier source suspecté.
    - **Ne corriger NI le test NI la source.** Retourner le verdict `regression`.
    - **La régression est BLOQUANTE.** En mode Feature, l'orchestrateur route ta régression vers l'agent `architect-rework` (il lit ton commentaire `e2e-dev:`, diagnostique, et crée des tickets Task de fix — ou escalade vers l'utilisateur sur un doute fonctionnel) ; la PR finale `epic/<N> → alpha` **n'est pas ouverte** tant que la gate E2E n'est pas verte (les tickets de fix sont reprocessés puis tu re-tournes). En mode Task/Bug, `/implement` route de même vers `architect-rework`. Ton commentaire doit donc être **assez précis pour qu'`architect-rework` spécifie le fix** sans re-deviner.
 
@@ -96,7 +104,7 @@ Là où les TU de `code-dev` visent **100 % de couverture** avec des tests cibl�
    - Lancer le test → il **doit être RED**. Sinon il ne reproduit pas le bug → le retravailler.
    - **Ré-appliquer** le fix (`git apply`), relancer → **GREEN**.
 
-9. **Relancer toute la suite E2E** → **tout vert** (`pnpm --filter app test:e2e`). Vérifier que tes fichiers passent `pnpm typecheck` et `pnpm lint:check` (l'auto-lint hook formate déjà à l'écriture).
+9. **Relancer ce qui a été joué à l'étape 3** → **tout vert** : la suite E2E entière (`pnpm --filter app test:e2e`) si elle a été jouée, et la grille si elle l'a été (`pnpm --filter app test:e2e:grille`). Vérifier que tes fichiers passent `pnpm typecheck` et `pnpm lint:check` (l'auto-lint hook formate déjà à l'écriture).
 
 10. **Commit + push** tes fichiers de test sur la branche de travail :
     - `git add src/e2e/ && git commit -m "test(e2e): <scope> — <résumé>"` (préfixe `test`, pas de `Co-Authored-By`, pas de `--no-verify`, pas de `--no-gpg-sign`).
@@ -122,13 +130,16 @@ Ton **dernier message** est **exactement un de ces JSON** — rien d'autre, pas 
 
 | Cas | JSON |
 |---|---|
-| Suite verte, couverture traitée (imbriquée / nouvelle / aucune justifiée), push fait | `{"status":"validated","scope":"epic\|ticket","id":<N>,"tests":{"mode":"nested\|new\|none","files":[...]},"regressions_fixed":<K>,"commit":"<sha>\|none"}` |
-| ≥ 1 régression réelle ; commentaire `e2e-dev:` posté ; main rendue | `{"status":"regression","scope":"epic\|ticket","id":<N>,"regressions":[{"test":"<fichier:ligne>","expected":"...","got":"...","suspect":"<fichier source>"}]}` |
+| Suite verte, couverture traitée (imbriquée / nouvelle / aucune justifiée), push fait | `{"status":"validated","scope":"epic\|ticket","id":<N>,"tests":{"mode":"nested\|new\|none","files":[...],"grille":"played\|skipped"},"regressions_fixed":<K>,"commit":"<sha>\|none"}` |
+| ≥ 1 régression réelle ; commentaire `e2e-dev:` posté ; main rendue | `{"status":"regression","scope":"epic\|ticket","id":<N>,"regressions":[{"source":"suite\|grille","test":"<fichier:ligne>\|[année-tranche-CASnn]","expected":"...","got":"...","suspect":"<fichier source>"}]}` |
 | Rate limit API Claude/GitHub persistant | `{"status":"rate_limited","id":<N>,"retry_in":<sec>}` |
 | Erreur technique (dev server ne démarre pas, stack docker KO, Playwright infra cassée) | `{"status":"failed","id":<N>,"reason":"<erreur>"}` |
 
-- **`validated`** — aucune régression ; E2E en échec légitime corrigés ; nouvelle couverture traitée selon le jugement (imbriquée, nouvelle, ou justifiée comme inutile) ; suite verte ; push fait (ou rien à pousser si `mode:none` sans correction). En mode Feature, `open_epic_final_pr.sh` peut ouvrir la PR finale. En mode Task/Bug, `/implement` affiche `## E2E: PASS`.
+- **`validated`** — aucune régression ; E2E en échec légitime corrigés ; nouvelle couverture traitée selon le jugement (imbriquée, nouvelle, ou justifiée comme inutile) ; ce qui a été joué (suite, grille) est vert ; push fait (ou rien à pousser si `mode:none` sans correction). En mode Feature, `open_epic_final_pr.sh` peut ouvrir la PR finale. En mode Task/Bug, `/implement` affiche `## E2E: PASS`.
 - **`regression`** — vraie régression détectée ; commentaire `e2e-dev:` posté ; pas de correction de source par toi. **Bloquant** : l'orchestrateur route vers `architect-rework` (création de tickets de fix, ou escalade utilisateur sur doute fonctionnel), et la PR finale n'est ouverte qu'une fois la gate E2E verte. En mode Task/Bug, `/implement` affiche `## E2E: REGRESSION` et invoque `architect-rework`.
 - **`failed`** — erreur technique non liée au code couvert (dev server, docker, infra Playwright). Le caller investigue (best-effort en mode Feature : ne bloque pas l'ouverture de la PR finale).
 
-Le diagnostic détaillé (tests en régression, parcours couverts) est posté **sur l'issue GitHub** via `gh issue comment`, pas dans le JSON. Le JSON est un canal de signalisation machine.
+- **`tests.grille`** — `played` si `grille_scope.sh` a répondu `play` et que la grille a tourné, `skipped` sinon.
+- **`regressions[].source`** — `suite` pour un spec `*.e2e.ts` (`test` = `fichier:ligne`), `grille` pour une coordonnée (`test` = `[année-tranche-CASnn]`, `suspect` = le fichier source, pas `grille.grille.ts`).
+
+Le diagnostic détaillé (tests en régression, parcours couverts) est posté **sur l'issue GitHub** via `gh issue comment`, pas dans le JSON. Le JSON est un canal de signalisation machine. Tout commentaire `e2e-dev:` dit si la grille a été **jouée ou non, et pourquoi** (la réponse de `grille_scope.sh` et les fichiers qui l'ont décidée, y compris sur `mode: "none"`).
