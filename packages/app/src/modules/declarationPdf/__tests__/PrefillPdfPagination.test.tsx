@@ -6,7 +6,7 @@ import { cloneElement, type ReactElement } from "react";
 import { describe, expect, it } from "vitest";
 
 import { PrefillPdfDocument } from "../PrefillPdfDocument";
-import { makePrefillData } from "./helpers/prefillFixtures";
+import { DEMO_COMPANY, makePrefillData } from "./helpers/prefillFixtures";
 import { registerPdfFonts } from "./helpers/registerPdfFonts";
 
 registerPdfFonts();
@@ -44,10 +44,10 @@ function collectPageTexts(
 	for (const child of node.children ?? []) collectPageTexts(child, top, out);
 }
 
-async function renderLayout(): Promise<PageText[][]> {
+async function renderLayout(data = makePrefillData()): Promise<PageText[][]> {
 	let layout: LayoutNode | undefined;
 	const document = cloneElement(
-		PrefillPdfDocument({ data: makePrefillData() }) as ReactElement<{
+		PrefillPdfDocument({ data }) as ReactElement<{
 			onRender?: (props: OnRenderProps) => void;
 		}>,
 		{
@@ -68,6 +68,51 @@ async function renderLayout(): Promise<PageText[][]> {
 }
 
 describe("PrefillPdfDocument pagination", () => {
+	it("keeps labels aligned with values after long company details wrap", async () => {
+		const pages = await renderLayout(
+			makePrefillData({
+				company: {
+					...DEMO_COMPANY,
+					name: "Société nationale de recherche et de développement des solutions environnementales et territoriales",
+					address:
+						"123 avenue des Entreprises et des Technologies Durables, bâtiment administratif de la recherche, 75001 Paris",
+				},
+			}),
+		);
+		const firstPage = pages[0];
+		if (!firstPage) throw new Error("PDF page missing");
+		const entry = (text: string) => {
+			const found = firstPage.find((item) => item.text === text);
+			if (!found) throw new Error(`PDF text missing: ${text}`);
+			return found;
+		};
+
+		expect(
+			entry(
+				"Société nationale de recherche et de développement des solutions environnementales et territoriales",
+			).bottom - entry("Raison sociale").top,
+		).toBeGreaterThan(15);
+		expect(
+			entry(
+				"123 avenue des Entreprises et des Technologies Durables, bâtiment administratif de la recherche, 75001 Paris",
+			).bottom - entry("Adresse").top,
+		).toBeGreaterThan(15);
+		for (const [label, value] of [
+			["SIREN", "123 456 789"],
+			["Code NAF", "62.02A - Conseil en systèmes et logiciels informatiques"],
+		] as const) {
+			expect(Math.abs(entry(label).top - entry(value).top)).toBeLessThanOrEqual(
+				1,
+			);
+		}
+		expect(entry("SIREN").top).toBeGreaterThan(entry("Raison sociale").bottom);
+		expect(entry("Code NAF").top).toBeGreaterThan(
+			entry(
+				"123 avenue des Entreprises et des Technologies Durables, bâtiment administratif de la recherche, 75001 Paris",
+			).bottom,
+		);
+	}, 30_000);
+
 	it("spreads a complete GIP row over several pages, each with its footer and counter", async () => {
 		const pages = await renderLayout();
 

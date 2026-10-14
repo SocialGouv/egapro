@@ -23,20 +23,16 @@ export function InfoSection({
 				<Text style={sheet.sectionBannerText}>{title}</Text>
 			</View>
 			<View style={sheet.infoBody}>
-				<View style={sheet.infoLabelColumn}>
-					{rows.map((row) => (
-						<Text key={row.label} style={sheet.infoLabel}>
+				{rows.map((row) => (
+					<View key={row.label} style={sheet.infoRow}>
+						<Text style={[sheet.infoLabelColumn, sheet.infoLabel]}>
 							{row.label}
 						</Text>
-					))}
-				</View>
-				<View style={sheet.infoValueColumn}>
-					{rows.map((row) => (
-						<Text key={row.label} style={sheet.infoValue}>
+						<Text style={[sheet.infoValueColumn, sheet.infoValue]}>
 							{normalizeSpaces(row.value)}
 						</Text>
-					))}
-				</View>
+					</View>
+				))}
 			</View>
 		</View>
 	);

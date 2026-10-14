@@ -3,7 +3,7 @@ import type {
 	PayGapReferences,
 	Step3Data,
 } from "~/modules/declaration-remuneration";
-import { formatVariablePayProportion } from "~/modules/domain";
+import { formatCurrency, formatVariablePayProportion } from "~/modules/domain";
 import { type PdfStyles, styles } from "../recapPdfStyles";
 import type { GapCellVariant } from "./GapCell";
 import { SectionBanner, SubTitle } from "./headings";
@@ -118,10 +118,12 @@ export function VariablePaySection({
 	data,
 	gapVariant,
 	sheet = styles,
+	formatAmount = formatCurrency,
 }: {
 	data: VariablePayData;
 	gapVariant?: GapCellVariant;
 	sheet?: PdfStyles;
+	formatAmount?: typeof formatCurrency;
 }) {
 	const rows = [
 		{
@@ -157,7 +159,12 @@ export function VariablePaySection({
 					title="Écart de rémunération variable ou complémentaire"
 				/>
 				<SubTitle title="Rémunération variable ou complémentaire" />
-				<PayGapTable gapVariant={gapVariant} rows={rows} sheet={sheet} />
+				<PayGapTable
+					formatAmount={formatAmount}
+					gapVariant={gapVariant}
+					rows={rows}
+					sheet={sheet}
+				/>
 			</View>
 			<View wrap={false}>
 				<SubTitle title="Proportion de femmes et d'hommes bénéficiaires" />

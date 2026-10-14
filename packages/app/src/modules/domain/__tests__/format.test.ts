@@ -7,6 +7,7 @@ import {
 	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
+	formatCurrencyFixedTwo,
 	formatDays,
 	formatDecimal,
 	formatFileSize,
@@ -97,15 +98,15 @@ describe("formatGapCompact", () => {
 
 describe("formatCurrency", () => {
 	it("formats a number with euro sign", () => {
-		expect(formatCurrency("1234.5")).toMatch(/^1[\s\u202f]234,50 €$/);
+		expect(formatCurrency("1234.5")).toMatch(/^1[\s\u202f]234,5 €$/);
 	});
 
-	it("always writes exactly two decimals", () => {
+	it("preserves the decimal precision on existing screens", () => {
 		expect(formatCurrency("35050.21")).toMatch(/^35[\s\u202f]050,21 €$/);
-		expect(formatCurrency("34110.90")).toMatch(/^34[\s\u202f]110,90 €$/);
-		expect(formatCurrency("34110.9")).toMatch(/^34[\s\u202f]110,90 €$/);
-		expect(formatCurrency("1200")).toMatch(/^1[\s\u202f]200,00 €$/);
-		expect(formatCurrency("0")).toBe("0,00 €");
+		expect(formatCurrency("34110.90")).toMatch(/^34[\s\u202f]110,9 €$/);
+		expect(formatCurrency("34110.9")).toMatch(/^34[\s\u202f]110,9 €$/);
+		expect(formatCurrency("1200")).toMatch(/^1[\s\u202f]200 €$/);
+		expect(formatCurrency("0")).toBe("0 €");
 	});
 
 	it("rounds beyond two decimals", () => {
@@ -114,7 +115,7 @@ describe("formatCurrency", () => {
 	});
 
 	it("takes an arbitrary unit, for the hourly tranches of the recap", () => {
-		expect(formatCurrency("1234.5", "€/h")).toMatch(/^1[\s\u202f]234,50 €\/h$/);
+		expect(formatCurrency("1234.5", "€/h")).toMatch(/^1[\s\u202f]234,5 €\/h$/);
 	});
 
 	it("returns a bare dash for undefined, never an amount of zero euros", () => {
@@ -122,6 +123,15 @@ describe("formatCurrency", () => {
 		expect(formatCurrency(undefined, "€/h")).toBe("-");
 		expect(formatCurrency("", "€/h")).toBe("-");
 		expect(formatCurrency("not-a-number")).toBe("-");
+	});
+});
+
+describe("formatCurrencyFixedTwo", () => {
+	it("writes two decimals for the prefill PDF", () => {
+		expect(formatCurrencyFixedTwo("1200")).toMatch(/^1[\s\u202f]200,00 €$/);
+		expect(formatCurrencyFixedTwo("34110.9")).toMatch(/^34[\s\u202f]110,90 €$/);
+		expect(formatCurrencyFixedTwo("12.345")).toBe("12,35 €");
+		expect(formatCurrencyFixedTwo(undefined)).toBe("-");
 	});
 });
 
@@ -164,11 +174,11 @@ describe("formatPercentage", () => {
 
 describe("formatTotal", () => {
 	it("formats value with unit", () => {
-		expect(formatTotal(1234.5, "€")).toMatch(/^1[\s\u202f]234,50 €$/);
+		expect(formatTotal(1234.5, "€")).toMatch(/^1[\s\u202f]234,5 €$/);
 	});
 
-	it("always writes exactly two decimals", () => {
-		expect(formatTotal(1200, "€")).toMatch(/^1[\s\u202f]200,00 €$/);
+	it("does not add decimal zeroes to whole amounts", () => {
+		expect(formatTotal(1200, "€")).toMatch(/^1[\s\u202f]200 €$/);
 		expect(formatTotal(35050.21, "€")).toMatch(/^35[\s\u202f]050,21 €$/);
 	});
 

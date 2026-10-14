@@ -148,13 +148,15 @@ export const styles = StyleSheet.create({
 	},
 
 	infoBody: {
-		flexDirection: "row",
 		paddingHorizontal: 8,
 		marginBottom: 6,
+		gap: 4,
+	},
+	infoRow: {
+		flexDirection: "row",
 	},
 	infoLabelColumn: {
 		width: 142,
-		gap: 4,
 	},
 	// « Source des catégories d'emplois » fills the 142pt column and would
 	// butt against its value; this row gets the room the other labels keep.
@@ -163,7 +165,6 @@ export const styles = StyleSheet.create({
 	},
 	infoValueColumn: {
 		flex: 1,
-		gap: 4,
 	},
 	infoLabel: {
 		fontSize: 9,

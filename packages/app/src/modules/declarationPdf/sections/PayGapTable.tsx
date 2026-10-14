@@ -57,10 +57,12 @@ function PayGapDataRow({
 	row,
 	gapVariant,
 	sheet,
+	formatAmount,
 }: {
 	row: PayGapTableRow;
 	gapVariant?: GapCellVariant;
 	sheet: PdfStyles;
+	formatAmount: typeof formatCurrency;
 }) {
 	return (
 		<Row>
@@ -68,13 +70,13 @@ function PayGapDataRow({
 			<Cell
 				align="right"
 				sheet={sheet}
-				text={formatCurrency(row.women)}
+				text={formatAmount(row.women)}
 				width={PAY_TABLE.value}
 			/>
 			<Cell
 				align="right"
 				sheet={sheet}
-				text={formatCurrency(row.men)}
+				text={formatAmount(row.men)}
 				width={PAY_TABLE.value}
 			/>
 			<Cell sheet={sheet} width={PAY_TABLE.gap}>
@@ -92,10 +94,12 @@ export function PayGapTable({
 	rows,
 	gapVariant,
 	sheet = styles,
+	formatAmount = formatCurrency,
 }: {
 	rows: PayGapTableRow[];
 	gapVariant?: GapCellVariant;
 	sheet?: PdfStyles;
+	formatAmount?: typeof formatCurrency;
 }) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
 	if (allEmpty) {
@@ -127,6 +131,7 @@ export function PayGapTable({
 			</Row>
 			{rows.map((row) => (
 				<PayGapDataRow
+					formatAmount={formatAmount}
 					gapVariant={gapVariant}
 					key={row.label}
 					row={row}

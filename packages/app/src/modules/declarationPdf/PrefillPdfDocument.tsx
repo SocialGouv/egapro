@@ -1,6 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 
-import { formatSiren } from "~/modules/domain";
+import { formatCurrencyFixedTwo, formatSiren } from "~/modules/domain";
 
 import type { PrefillPdfData } from "./buildPrefillPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
@@ -82,6 +82,7 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 					<View wrap={false}>
 						<SectionBanner sheet={styles} title="Écart de rémunération" />
 						<PayGapTable
+							formatAmount={formatCurrencyFixedTwo}
 							gapVariant="favoredSex"
 							rows={step2PayGapRows(data)}
 							sheet={styles}
@@ -90,11 +91,16 @@ export function PrefillPdfDocument({ data }: { data: PrefillPdfData }) {
 					<View style={prefillLayout.sectionGap} />
 					<VariablePaySection
 						data={data}
+						formatAmount={formatCurrencyFixedTwo}
 						gapVariant="favoredSex"
 						sheet={styles}
 					/>
 					<View style={prefillLayout.sectionGap} />
-					<QuartileSection data={data} sheet={styles} />
+					<QuartileSection
+						data={data}
+						formatAmount={formatCurrencyFixedTwo}
+						sheet={styles}
+					/>
 				</View>
 			</Page>
 		</Document>

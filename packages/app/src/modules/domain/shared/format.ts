@@ -82,7 +82,7 @@ export function formatGapCompact(gap: number | null): string {
 
 /**
  * Format a monetary amount held as a raw form string, with its unit:
- * `("1234.5", "€/h")` → `"1 234,50 €/h"`. An empty amount reads `"-"` alone —
+ * `("1234.5", "€/h")` → `"1 234,5 €/h"`. An empty amount reads `"-"` alone —
  * `formatTotal` would write `"- €"`, which reads as an amount of zero euros.
  */
 export function formatCurrency(value?: string | null, unit = "€"): string {
@@ -90,6 +90,16 @@ export function formatCurrency(value?: string | null, unit = "€"): string {
 	const n = Number.parseFloat(value);
 	if (Number.isNaN(n)) return "-";
 	return formatTotal(n, unit);
+}
+
+export function formatCurrencyFixedTwo(
+	value?: string | null,
+	unit = "€",
+): string {
+	if (!value) return "-";
+	const amount = Number.parseFloat(value);
+	if (Number.isNaN(amount)) return "-";
+	return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${unit}`;
 }
 
 /**
@@ -108,10 +118,10 @@ export function computePercentage(count: number, total: number): string {
 	return `${fixedTruncatedDecimals(percentageOf(count, total))} %`;
 }
 
-/** Format a monetary total, always at two decimals, with its unit suffix: `(1234.5, "€")` → `"1 234,50 €"`. */
+/** Format a numeric total with an arbitrary unit suffix: `(1234.5, "€")` → `"1 234,5 €"`. */
 export function formatTotal(value: number | null, unit: string): string {
 	if (value === null) return `- ${unit}`;
-	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${unit}`;
+	return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${unit}`;
 }
 
 /** Whole count, thousands grouped: `2256` → `"2 256"`. `null` reads as the missing-value dash. */

@@ -79,7 +79,7 @@ describe("QuartileSection", () => {
 		);
 		// "1er quartile" appears once per (annual + hourly) table.
 		expect(screen.getAllByText("1er quartile")).toHaveLength(2);
-		expect(screen.getAllByText("40 000,00 €").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("40 000 €").length).toBeGreaterThan(0);
 		// First quartile line total 10 + 15 = 25 → women 40,00 %
 		expect(screen.getByText("40,00 %")).toBeInTheDocument();
 		expect(screen.getAllByText("Tous les salariés")).toHaveLength(2);

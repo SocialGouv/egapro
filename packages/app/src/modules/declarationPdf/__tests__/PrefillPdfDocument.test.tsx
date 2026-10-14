@@ -76,6 +76,25 @@ function emptyGip(): Partial<GipPrefillData> {
 }
 
 describe("PrefillPdfDocument", () => {
+	it("uses two decimal places for prefilled monetary values", () => {
+		renderPrefill({
+			gip: {
+				step2: { ...makeGip().step2, annualMeanWomen: "1200" },
+				step3: { ...makeGip().step3, annualMeanWomen: "100" },
+				step4: {
+					...makeGip().step4,
+					annual: {
+						...makeGip().step4.annual,
+						thresholds: ["10000", "25750.99", "1734900.99"],
+					},
+				},
+			},
+		});
+		expect(screen.getByText("1 200,00 €")).toBeInTheDocument();
+		expect(screen.getByText("100,00 €")).toBeInTheDocument();
+		expect(screen.getAllByText("10 000,00 €").length).toBeGreaterThan(0);
+	});
+
 	it("lays out the maquette blocks from a complete GIP row", () => {
 		renderPrefill();
 

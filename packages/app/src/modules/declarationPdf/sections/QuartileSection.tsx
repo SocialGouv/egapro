@@ -18,9 +18,12 @@ const QUARTILE_LABELS = [
 	"4e quartile",
 ];
 
-function formatTranche(value: string | undefined): string {
+function formatTranche(
+	value: string | undefined,
+	formatAmount: typeof formatCurrency,
+): string {
 	if (!value) return "- €";
-	return formatCurrency(value);
+	return formatAmount(value);
 }
 
 function QuartileRow({
@@ -28,11 +31,13 @@ function QuartileRow({
 	previousThreshold,
 	label,
 	sheet,
+	formatAmount,
 }: {
 	quartile: Step4Data["annual"][number];
 	previousThreshold: string | undefined;
 	label: string | undefined;
 	sheet: PdfStyles;
+	formatAmount: typeof formatCurrency;
 }) {
 	const lineTotal = computeWorkforceTotal(
 		quartile.women ?? 0,
@@ -44,13 +49,13 @@ function QuartileRow({
 			<Cell
 				align="right"
 				sheet={sheet}
-				text={formatTranche(previousThreshold)}
+				text={formatTranche(previousThreshold, formatAmount)}
 				width={QUARTILE_TABLE.tranche}
 			/>
 			<Cell
 				align="right"
 				sheet={sheet}
-				text={formatTranche(quartile.threshold)}
+				text={formatTranche(quartile.threshold, formatAmount)}
 				width={QUARTILE_TABLE.tranche}
 			/>
 			<Cell
@@ -95,10 +100,12 @@ function QuartileTable({
 	quartiles,
 	trancheLabel,
 	sheet,
+	formatAmount,
 }: {
 	quartiles: Step4Data["annual"];
 	trancheLabel: string;
 	sheet: PdfStyles;
+	formatAmount: typeof formatCurrency;
 }) {
 	const totals = sumQuartileWorkforce(quartiles);
 	return (
@@ -138,6 +145,7 @@ function QuartileTable({
 			</Row>
 			{quartiles.map((q, i) => (
 				<QuartileRow
+					formatAmount={formatAmount}
 					key={QUARTILE_LABELS[i]}
 					label={QUARTILE_LABELS[i]}
 					previousThreshold={quartiles[i - 1]?.threshold}
@@ -196,9 +204,11 @@ function QuartileTable({
 export function QuartileSection({
 	data,
 	sheet = styles,
+	formatAmount = formatCurrency,
 }: {
 	data: { step4Data: Step4Data };
 	sheet?: PdfStyles;
+	formatAmount?: typeof formatCurrency;
 }) {
 	return (
 		<View>
@@ -209,6 +219,7 @@ export function QuartileSection({
 				/>
 				<SubTitle title="Rémunération annuelle brute moyenne" />
 				<QuartileTable
+					formatAmount={formatAmount}
 					quartiles={data.step4Data.annual}
 					sheet={sheet}
 					trancheLabel="annuelle brute"
@@ -217,6 +228,7 @@ export function QuartileSection({
 			<View wrap={false}>
 				<SubTitle title="Rémunération horaire brute moyenne" />
 				<QuartileTable
+					formatAmount={formatAmount}
 					quartiles={data.step4Data.hourly}
 					sheet={sheet}
 					trancheLabel="horaire brute"
