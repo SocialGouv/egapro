@@ -136,14 +136,20 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 	});
 
 	// S4
-	it("never grants an unlisted account, whatever roles ProConnect returns, and writes no audit row", async () => {
+	it("never grants an unlisted account, whatever roles ProConnect returns, and audits only the login", async () => {
 		const result = await signIn({
 			email: DECLARANT_EMAIL,
 			roles: ["agent_public"],
 		});
 
 		expect(result.isAdmin).toBe(false);
-		expect(mockLogAction).not.toHaveBeenCalled();
+		expect(mockLogAction).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				action: "auth.login",
+				status: "success",
+				userEmail: DECLARANT_EMAIL,
+			}),
+		);
 	});
 
 	// S5

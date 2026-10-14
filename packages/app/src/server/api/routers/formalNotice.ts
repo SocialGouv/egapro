@@ -1,6 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { getCurrentYear } from "~/modules/domain";
+import {
+	DECLARATION_LOCK_CONFLICT_MESSAGE,
+	getCurrentYear,
+} from "~/modules/domain";
 import {
 	createTRPCRouter,
 	declarationProcedure,
@@ -8,6 +11,7 @@ import {
 } from "~/server/api/trpc";
 import { declarationStatusHistory, declarations } from "~/server/db/schema";
 import { loadRules } from "~/server/rules/engine";
+import { getActiveLock } from "~/server/services/declarationLockService";
 import {
 	buildFormalNoticeFacts,
 	FORMAL_NOTICE_ACTION,
@@ -53,6 +57,13 @@ export const formalNoticeRouter = createTRPCRouter({
 				ctx.siren,
 				year,
 			);
+			const lock = await getActiveLock(tx, declaration.id);
+			if (lock && lock.userId !== ctx.session.user.id) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: DECLARATION_LOCK_CONFLICT_MESSAGE,
+				});
+			}
 
 			const { nextStatus, events } = applyActionOrRefuse(
 				buildFormalNoticeFacts(

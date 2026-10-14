@@ -11,6 +11,7 @@ import type { FormalNoticeDeclaration } from "~/server/services/formalNoticeExpo
 
 const mocks = vi.hoisted(() => ({
 	enqueueReceipt: vi.fn(),
+	getActiveLock: vi.fn(),
 }));
 
 vi.mock("~/server/auth", () => ({
@@ -23,6 +24,10 @@ vi.mock("~/server/db", () => ({
 
 vi.mock("~/modules/mail/server", () => ({
 	enqueueReceipt: mocks.enqueueReceipt,
+}));
+
+vi.mock("~/server/services/declarationLockService", () => ({
+	getActiveLock: mocks.getActiveLock,
 }));
 
 type GapOpinionRow = {
@@ -151,6 +156,7 @@ describe("formalNoticeRouter", () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 		mocks.enqueueReceipt.mockResolvedValue(undefined);
+		mocks.getActiveLock.mockResolvedValue(null);
 	});
 
 	afterEach(() => {
@@ -204,6 +210,35 @@ describe("formalNoticeRouter", () => {
 	});
 
 	describe("submit", () => {
+		it("allows submission when the current user owns the active lock", async () => {
+			const { db, historyValues } = createMockDb();
+			mocks.getActiveLock.mockResolvedValue({ userId: "user-1" });
+			const caller = await createCaller(db, { email: EMAIL });
+
+			expect(await caller.submit()).toEqual({ success: true });
+			expect(mocks.getActiveLock).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(historyValues).toHaveBeenCalledTimes(1);
+		});
+
+		it("rejects another user's active lock before writing or sending a receipt", async () => {
+			const { db, insert, update } = createMockDb();
+			mocks.getActiveLock.mockResolvedValue({ userId: "user-2" });
+			const caller = await createCaller(db, { email: EMAIL });
+
+			const error = await captureError(caller.submit());
+
+			expect(error.code).toBe("CONFLICT");
+			expect(error.message).toBe(
+				"Déclaration verrouillée par un autre utilisateur.",
+			);
+			expect(insert).not.toHaveBeenCalled();
+			expect(update).not.toHaveBeenCalled();
+			expect(mocks.enqueueReceipt).not.toHaveBeenCalled();
+		});
+
 		it("records the event, keeps the démarche closed and sends the receipt", async () => {
 			const { db, insert, historyValues, update, projectionSet } =
 				createMockDb();
