@@ -25,6 +25,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const modalEpochRef = useRef(0);
 	const requestEpochRef = useRef(0);
+	const submitInProgressRef = useRef(false);
 	const resetForm = useCallback(() => {
 		setFile(null);
 		setError("");
@@ -32,12 +33,14 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	}, []);
 	const importMutation = api.adminReferents.import.useMutation({
 		onSuccess: () => {
+			submitInProgressRef.current = false;
 			onSuccess();
 			if (requestEpochRef.current === modalEpochRef.current) {
 				onClose();
 			}
 		},
 		onError: (err) => {
+			submitInProgressRef.current = false;
 			if (requestEpochRef.current === modalEpochRef.current) {
 				setError(err.message);
 			}
@@ -65,7 +68,9 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	);
 
 	const handleImport = useCallback(async () => {
-		if (!file || importMutation.isPending) return;
+		if (!file || importMutation.isPending || submitInProgressRef.current)
+			return;
+		submitInProgressRef.current = true;
 		const submitEpoch = modalEpochRef.current;
 		setError("");
 
@@ -73,9 +78,13 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 			const text = await file.text();
 			const json: unknown = JSON.parse(text);
 			const parsed = importReferentsSchema.safeParse(json);
-			if (submitEpoch !== modalEpochRef.current) return;
+			if (submitEpoch !== modalEpochRef.current) {
+				submitInProgressRef.current = false;
+				return;
+			}
 
 			if (!parsed.success) {
+				submitInProgressRef.current = false;
 				setError(
 					`Format invalide : ${parsed.error.issues.map((i) => i.message).join(", ")}`,
 				);
@@ -85,6 +94,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 			requestEpochRef.current = submitEpoch;
 			importMutation.mutate(parsed.data);
 		} catch {
+			submitInProgressRef.current = false;
 			if (submitEpoch === modalEpochRef.current) {
 				setError("Le fichier n'est pas un JSON valide.");
 			}

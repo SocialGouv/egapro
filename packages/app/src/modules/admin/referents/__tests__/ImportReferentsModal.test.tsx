@@ -230,6 +230,24 @@ describe("ImportReferentsModal", () => {
 		});
 	});
 
+	it("starts only one import on rapid consecutive clicks", async () => {
+		renderModal();
+		selectFile(
+			"valid.json",
+			JSON.stringify([
+				{ region: "11", name: "Jean", type: "email", value: "jean@gouv.fr" },
+			]),
+		);
+		const importButton = screen.getByRole("button", {
+			name: "Importer",
+			hidden: true,
+		});
+		fireEvent.click(importButton);
+		fireEvent.click(importButton);
+
+		await waitFor(() => expect(importMutate).toHaveBeenCalledOnce());
+	});
+
 	it("surfaces a server error through the mutation onError hook", () => {
 		renderModal();
 		act(() => {
