@@ -161,7 +161,7 @@ jobs:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
           EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -172,7 +172,7 @@ jobs:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
           EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
           ANNEE: ${{ github.event.inputs.annee || 'toutes' }}
           TRANCHE: ${{ github.event.inputs.tranche || 'toutes' }}
         run: |

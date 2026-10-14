@@ -251,8 +251,8 @@ jobs:
         env:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
-          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER || 'https://proconnect.invalid' }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
         run: pnpm build
       - name: Apply database schema
         run: pnpm db:push
@@ -263,8 +263,8 @@ jobs:
         env:
           EGAPRO_PROCONNECT_CLIENT_ID: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_ID }}
           EGAPRO_PROCONNECT_CLIENT_SECRET: ${{ secrets.EGAPRO_PROCONNECT_CLIENT_SECRET }}
-          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER }}
-          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL }}
+          EGAPRO_PROCONNECT_ISSUER: ${{ secrets.EGAPRO_PROCONNECT_ISSUER || 'https://proconnect.invalid' }}
+          EGAPRO_WEEZ_API_URL: ${{ secrets.EGAPRO_WEEZ_API_URL || 'https://weez.invalid/api' }}
           PLAYWRIGHT_BLOB_OUTPUT_FILE: ${{ github.workspace }}/blob-report/${{ matrix.suite }}-${{ matrix.shard }}.zip
         run: pnpm --filter app ${{ matrix.script }} --reporter=blob,github --shard=${{ matrix.shard }}/${{ matrix.total }}
       - name: Stop services
