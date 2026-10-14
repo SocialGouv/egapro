@@ -52,6 +52,7 @@ export function renderReview({
 		isReadOnly,
 		previousHref: PREVIOUS_HREF,
 		registerStepValidator: vi.fn(),
+		declarationDeadline: new Date(2026, 2, 1),
 	};
 
 	return render(

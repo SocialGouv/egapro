@@ -57,23 +57,6 @@
 	align-self: stretch;
 }
 
-.inlineGap {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-// Bordered grid cell (étape 5): full-width flex so margin-auto pins the value right, badge at the far left.
-.gapCell {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.gapValue {
-	margin-left: auto;
-}
-
 .subSection {
 	display: flex;
 	gap: 1.5rem;

@@ -24,9 +24,7 @@ import type {
 	UsersPerCompany,
 } from "~/modules/admin/stats/types";
 import {
-	alignCampaignYear,
 	COMPANY_SIZE_ANNUAL_MIN,
-	COMPANY_SIZE_VOLUNTARY_MAX,
 	type CompanySizeRange,
 	computeRate,
 	DECLARATION_STEPS,
@@ -34,15 +32,20 @@ import {
 	FUNNEL_CSE_KEY_STEPS,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
+	getObligationWorkforceMin,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
 	type PostSubmitMilestoneKey,
 	percentageOf,
 	roundOneDecimal,
-	V2_FIRST_CAMPAIGN_YEAR,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import {
+	complianceProcessCompletedCondition,
+	notCancelledCondition,
+	submittedDeclarationCondition,
+} from "~/server/db/declarationConditions";
 import { gipSizeRangeFilter } from "~/server/db/gipWorkforceConditions";
 import {
 	companies,
@@ -101,11 +104,7 @@ function obligationWorkforceFilter(
 	year: number,
 	sizeRange: CompanySizeRange | undefined,
 ): SQL {
-	const ema = sql<number>`floor(${gipMdsData.workforceEma})`;
-	const baseObligation =
-		alignCampaignYear(year) >= V2_FIRST_CAMPAIGN_YEAR
-			? sql`${ema} >= ${COMPANY_SIZE_VOLUNTARY_MAX}`
-			: sql`${ema} >= ${COMPANY_SIZE_ANNUAL_MIN}`;
+	const baseObligation = sql`floor(${gipMdsData.workforceEma}) >= ${getObligationWorkforceMin(year)}`;
 
 	if (!sizeRange) return baseObligation;
 
@@ -115,9 +114,10 @@ function obligationWorkforceFilter(
 // The GIP file is the single source of the headcount across the admin layer, so
 // every workforce predicate below reads `workforce_ema` rather than the Weez /
 // INSEE `company.workforce`. LEFT on purpose: a company absent from the file has
-// no headcount, and letting the NULL propagate keeps it out of the workforce
-// filters without dropping it from the unfiltered totals, which an INNER JOIN
-// would do.
+// no headcount, and an INNER JOIN would drop it from the unfiltered totals too.
+// What happens to the NULL from there is up to each predicate: the obligation
+// filter lets it propagate out of the comparison, the size-bucket filter folds
+// it into the voluntary tier.
 const gipWorkforceJoin = sql`LEFT JOIN ${gipMdsData}
 				ON ${gipMdsData.siren} = ${declarations.siren}
 				AND ${gipMdsData.year} = ${declarations.year}`;
@@ -180,6 +180,7 @@ export const adminStatsRouter = createTRPCRouter({
 			const filters: SQL[] = [
 				eq(declarationStatusHistory.eventType, "submit"),
 				inArray(declarations.year, input.years),
+				notCancelledCondition(),
 			];
 
 			if (input.sizeRange) {
@@ -234,9 +235,12 @@ export const adminStatsRouter = createTRPCRouter({
 						),
 					);
 
-			const submittedQuery = (year: number) =>
+			const countsQuery = (year: number) =>
 				ctx.db
-					.select({ value: sql<number>`count(*)::int` })
+					.select({
+						indicatorsSubmitted: sql<number>`count(distinct ${declarations.siren})::int`,
+						demarcheCompleted: sql<number>`(count(distinct ${declarations.siren}) filter (where ${complianceProcessCompletedCondition()}))::int`,
+					})
 					.from(declarations)
 					.innerJoin(
 						gipMdsData,
@@ -248,38 +252,44 @@ export const adminStatsRouter = createTRPCRouter({
 					.where(
 						and(
 							eq(declarations.year, year),
-							eq(declarations.status, "demarche_completed"),
+							submittedDeclarationCondition(),
+							notCancelledCondition(),
 							obligationWorkforceFilter(year, input.sizeRange),
 						),
 					);
 
 			const [
 				obligatedRows,
-				submittedRows,
+				countRows,
 				previousObligatedRows,
-				previousSubmittedRows,
+				previousCountRows,
 			] = await Promise.all([
 				obligatedQuery(input.year),
-				submittedQuery(input.year),
+				countsQuery(input.year),
 				obligatedQuery(previousYear),
-				submittedQuery(previousYear),
+				countsQuery(previousYear),
 			]);
 
 			const totalObligated = obligatedRows[0]?.value ?? 0;
-			const totalSubmitted = submittedRows[0]?.value ?? 0;
+			const totalIndicatorsSubmitted = countRows[0]?.indicatorsSubmitted ?? 0;
+			const totalDemarcheCompleted = countRows[0]?.demarcheCompleted ?? 0;
 			const previousObligated = previousObligatedRows[0]?.value ?? 0;
-			const previousSubmitted = previousSubmittedRows[0]?.value ?? 0;
+			const previousCompleted = previousCountRows[0]?.demarcheCompleted ?? 0;
 
-			const submissionRate = computeRate(totalSubmitted, totalObligated);
+			const completionRate = computeRate(
+				totalDemarcheCompleted,
+				totalObligated,
+			);
 			const previousYearRate =
 				previousObligated === 0
 					? null
-					: computeRate(previousSubmitted, previousObligated);
+					: computeRate(previousCompleted, previousObligated);
 
 			return {
 				totalObligated,
-				totalSubmitted,
-				submissionRate,
+				totalIndicatorsSubmitted,
+				totalDemarcheCompleted,
+				completionRate,
 				previousYearRate,
 			};
 		}),
