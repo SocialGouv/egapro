@@ -194,6 +194,15 @@ export function CategoryForm({
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
 	const preserveLegacyPay = readOnly || disabled;
+	const pendingInitialNormalization = useRef(
+		!preserveLegacyPay &&
+			!!defaultValuesOverride?.categories.some((category) => {
+				const normalized = normalizeCategoryForForm(category, false);
+				return CATEGORY_PAY_FIELDS.some(
+					(field) => normalized[field] !== category[field],
+				);
+			}),
+	);
 
 	const initialCats =
 		initialCategories.length > 0
@@ -249,6 +258,11 @@ export function CategoryForm({
 			const values = form.getValues();
 			onValuesChange({ source: values.source, categories: values.categories });
 		});
+		if (pendingInitialNormalization.current) {
+			pendingInitialNormalization.current = false;
+			const values = form.getValues();
+			onValuesChange({ source: values.source, categories: values.categories });
+		}
 		return () => sub.unsubscribe();
 	}, [form, onValuesChange]);
 
