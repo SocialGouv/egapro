@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -18,25 +19,57 @@ const sql = postgres(process.env.DATABASE_URL ?? "", {
 	onnotice: () => {},
 });
 const scope = "00000000-0000-4000-8000-000000000001";
+
+async function createIsolatedDatabase() {
+	const name = `upgrade_check_${randomUUID().replaceAll("-", "")}`;
+	await sql`CREATE DATABASE ${sql(name)}`;
+	const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
+	databaseUrl.pathname = `/${name}`;
+	const connection = postgres(databaseUrl.toString(), {
+		max: 1,
+		onnotice: () => {},
+	});
+	return {
+		connection,
+		async dispose() {
+			await connection.end();
+			await sql`DROP DATABASE ${sql(name)}`;
+		},
+	};
+}
+
 afterAll(async () => {
 	await sql.end();
 });
 
 describe("read-only capture against disposable PostgreSQL", () => {
-	it("compares the same migrated application on PostgreSQL 16 and 18", async () => {
-		const before = await captureReport(sql, "application", scope);
-		const target = await new PostgreSqlContainer("postgres:18").start();
-		const targetSql = postgres(target.getConnectionUri(), {
-			max: 1,
-			onnotice: () => {},
-		});
+	it("compares the same migrated application on the integration version and PostgreSQL 18", async () => {
+		// The shared DB can contain audit rows from other integration tests.
+		const source = await createIsolatedDatabase();
 		try {
-			await migrate(drizzle(targetSql), { migrationsFolder: "./drizzle" });
-			const after = await captureReport(targetSql, "application", scope);
-			expect(compareReports(before, after, 18)).toEqual([]);
+			await migrate(drizzle(source.connection), {
+				migrationsFolder: "./drizzle",
+			});
+			const before = await captureReport(
+				source.connection,
+				"application",
+				scope,
+			);
+			const target = await new PostgreSqlContainer("postgres:18").start();
+			const targetSql = postgres(target.getConnectionUri(), {
+				max: 1,
+				onnotice: () => {},
+			});
+			try {
+				await migrate(drizzle(targetSql), { migrationsFolder: "./drizzle" });
+				const after = await captureReport(targetSql, "application", scope);
+				expect(compareReports(before, after, 18)).toEqual([]);
+			} finally {
+				await targetSql.end();
+				await target.stop();
+			}
 		} finally {
-			await targetSql.end();
-			await target.stop();
+			await source.dispose();
 		}
 	}, 120_000);
 
@@ -79,7 +112,7 @@ describe("read-only capture against disposable PostgreSQL", () => {
 				compareReports(
 					before,
 					await captureReport(sql, "application", scope),
-					16,
+					Math.floor(before.serverVersion / 10000),
 				),
 			).toContain("Structure modifiée : app_company.");
 		} finally {
@@ -102,7 +135,7 @@ describe("read-only capture against disposable PostgreSQL", () => {
 				compareReports(
 					before,
 					await captureReport(sql, "application", scope),
-					16,
+					Math.floor(before.serverVersion / 10000),
 				),
 			).toContain("Structure modifiée : app_declaration.");
 		} finally {
@@ -133,27 +166,35 @@ describe("read-only capture against disposable PostgreSQL", () => {
 		}
 	});
 	it("captures only aggregate pg-boss state when explicitly selected", async () => {
-		await sql`CREATE SCHEMA pgboss`;
-		await sql`CREATE TABLE pgboss.version (version integer)`;
-		await sql`INSERT INTO pgboss.version VALUES (30)`;
-		for (const name of ["job", "queue", "schedule", "subscription"])
-			await sql`CREATE TABLE ${sql(`pgboss.${name}`)} (payload text)`;
-		await sql`INSERT INTO pgboss.job VALUES ('private job content')`;
+		// Other integration tests can start pg-boss on the shared application DB.
+		// Use a separate database so this fixture never collides with real jobs.
+		const notifications = await createIsolatedDatabase();
+		const notificationsSql = notifications.connection;
 		try {
-			const result = await captureReport(sql, "notifications", scope);
+			await notificationsSql`CREATE SCHEMA pgboss`;
+			await notificationsSql`CREATE TABLE pgboss.version (version integer)`;
+			await notificationsSql`INSERT INTO pgboss.version VALUES (30)`;
+			for (const name of ["job", "queue", "schedule", "subscription"])
+				await notificationsSql`CREATE TABLE ${notificationsSql(`pgboss.${name}`)} (payload text)`;
+			await notificationsSql`INSERT INTO pgboss.job VALUES ('private job content')`;
+			const result = await captureReport(
+				notificationsSql,
+				"notifications",
+				scope,
+			);
 			expect(reportProblems(result)).toEqual([]);
 			expect(result.tables.job?.rows).toBe("1");
 			expect(JSON.stringify(result)).not.toContain("private job content");
-			await sql`UPDATE pgboss.version SET version = 31`;
+			await notificationsSql`UPDATE pgboss.version SET version = 31`;
 			expect(
 				compareReports(
 					result,
-					await captureReport(sql, "notifications", scope),
-					16,
+					await captureReport(notificationsSql, "notifications", scope),
+					Math.floor(result.serverVersion / 10000),
 				),
 			).toContain("Journal de migrations modifié.");
 		} finally {
-			await sql`DROP SCHEMA pgboss CASCADE`;
+			await notifications.dispose();
 		}
 	});
 	it("writes private reports, refuses overwrite and suppresses raw connection errors", async () => {

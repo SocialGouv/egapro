@@ -130,6 +130,8 @@ pnpm dev:app
 
 > `docker-compose.yml` est réservé au développement local : ses services portent des identifiants par défaut publics (ceux écrits dans le fichier) et ne publient leurs ports que sur `127.0.0.1`. Ne jamais l'utiliser tel quel sur une machine exposée.
 
+Les deux bases locales (`db` et `db-notifications`) utilisent PostgreSQL 17.11. Un volume créé par PostgreSQL 14 ne peut pas être ouvert directement par PostgreSQL 17 : avant de redémarrer ces services avec une nouvelle version majeure, sauvegarder puis restaurer les données locales à conserver, ou supprimer volontairement **le volume concerné** si ses données sont jetables. Vérifier séparément les volumes `pgdata` et `notifpgdata`. La configuration ne supprime aucun volume automatiquement.
+
 L'application est accessible sur [http://localhost:3000](http://localhost:3000).
 
 ### Connexion ProConnect (environnement de test)
