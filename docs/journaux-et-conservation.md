@@ -240,7 +240,7 @@ Table `app_user` (prénom, nom, e-mail, téléphone) et ses rattachements à une
 
 **Engagement public**, cité mot pour mot depuis la page `/donnees-personnelles` :
 
-> « À compter de la suppression par l'utilisateur ou 2 ans à compter de la dernière déclaration ou de l'inactivité du compte »
+> « À compter de la suppression par l'utilisateur ou 2 ans à compter de la dernière démarche ou de l'inactivité du compte »
 
 **Statut : Annoncée, non appliquée.** Aucune purge, aucune suppression de compte à l'initiative de l'utilisateur, et aucune colonne ne trace la date de dernière activité du compte — la durée promise n'a donc aucune donnée à partir de laquelle se calculer. [#4770](https://github.com/SocialGouv/egapro/issues/4770) propose de faire correspondre le code à cet engagement.
 
@@ -284,7 +284,7 @@ Reportés tels quels, sans les atténuer :
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
 4. **Tables jamais purgées** : le journal d'impersonation admin et le journal de dédoublonnage des relances n'ont aucun mécanisme de suppression. Suites : [#4768](https://github.com/SocialGouv/egapro/issues/4768) et [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Suites : [#4772](https://github.com/SocialGouv/egapro/issues/4772) et [#3669](https://github.com/SocialGouv/egapro/issues/3669).
+6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
 7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
@@ -297,7 +297,6 @@ Tickets ouverts qui changeront une ligne de cette page :
 | [#3706](https://github.com/SocialGouv/egapro/issues/3706) / PR [#4680](https://github.com/SocialGouv/egapro/pull/4680) | Minimise le journal d'audit : suppression de l'e-mail et de l'agent utilisateur, IP tronquée, code d'erreur à la place du message brut, `metadata` limité à une liste autorisée. Tant que cette PR n'est pas fusionnée, [4.1](#41-journal-daudit-des-actions) décrit le contenu actuel. |
 | [#4502](https://github.com/SocialGouv/egapro/issues/4502) | Purge de la représentation équilibrée après 6 ans |
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
-| [#3669](https://github.com/SocialGouv/egapro/issues/3669) | Nouvelle politique de confidentialité |
 | [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
 | [#4768](https://github.com/SocialGouv/egapro/issues/4768) | Purge du journal d'impersonation admin |
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |

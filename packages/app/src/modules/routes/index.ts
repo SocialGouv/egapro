@@ -99,6 +99,7 @@ export {
 export type { PublicPage } from "./shared/publicRoutes";
 export {
 	ACCESSIBILITY,
+	CGU,
 	CONTACT,
 	COOKIES,
 	CRAWLER_DISALLOWED_PREFIXES,
@@ -117,5 +118,6 @@ export {
 	referentHref,
 	SITE_MAP,
 	TEST_ERROR,
+	termsOfUseVersionHref,
 } from "./shared/publicRoutes";
 export { route, routeWithQuery, runtimeRoute } from "./shared/routeContract";

@@ -19,10 +19,10 @@ export function PrivacyRightsAndData() {
 					</thead>
 					<tbody>
 						<tr>
-							<td>Données des utilisateurs des Index Egapro</td>
+							<td>Données des utilisateurs d'Egapro</td>
 							<td>
 								À compter de la suppression par l'utilisateur ou 2 ans à compter
-								de la dernière déclaration ou de l'inactivité du compte
+								de la dernière démarche ou de l'inactivité du compte
 							</td>
 						</tr>
 					</tbody>
@@ -70,14 +70,18 @@ export function PrivacyRightsAndData() {
 				justifiés. Les personnes suivantes vont avoir accès aux données :
 			</p>
 			<ul>
-				<li>Les membres de l'équipe d'Index Egapro.</li>
+				<li>Les membres de l'équipe d'Egapro ;</li>
+				<li>
+					Les agents autorisés au sein de la Direction générale du travail.
+				</li>
 			</ul>
 
 			<h2 className="fr-h4">Qui nous aide à traiter vos données ?</h2>
 			<p>
 				Certaines données sont envoyées à des sous-traitants. Nous nous sommes
-				assurés qu'ils respectent les dispositions du RGPD et qu'ils apportent
-				des garanties suffisantes en matière de sécurité et de confidentialité.
+				assurés qu'ils respectent les dispositions du RGPD notamment l'article
+				28-3 et qu'ils apportent des garanties suffisantes en matière de
+				sécurité et de confidentialité.
 			</p>
 			<div className="fr-table">
 				<table>
@@ -97,11 +101,11 @@ export function PrivacyRightsAndData() {
 							<td>France</td>
 							<td>
 								<a
-									href="https://www.ovhcloud.com/fr/personal-data-protection/"
+									href="https://storage.gra.cloud.ovh.net/v1/AUTH_325716a587c64897acbef9a4a4726e38/contracts/9e74492-OVH_Data_Protection_Agreement-FR-6.0.pdf"
 									rel="noopener noreferrer"
 									target="_blank"
 								>
-									Protection des données OVH
+									Accord de protection des données d'OVH (PDF)
 									<NewTabNotice />
 								</a>
 							</td>
