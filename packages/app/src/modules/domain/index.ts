@@ -20,6 +20,7 @@ export {
 	getCurrentDate,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	getDefaultCampaignDeadlineColumns,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -240,6 +241,7 @@ export {
 	formatWholePercentage,
 	MISSING_VALUE,
 	NARROW_NBSP,
+	toPersistedIsoDate,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export type { GipGapReference } from "./shared/gap";

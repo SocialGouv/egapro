@@ -1,7 +1,7 @@
 import type { CampaignDeadlines, RepresentationCampaign } from "../types";
 import { readCampaignYearOverride } from "./campaignClock";
 import { civilDate, isCivilDayOver } from "./civilDate";
-import { formatIsoDate } from "./format";
+import { formatIsoDate, toPersistedIsoDate } from "./format";
 
 /** Returns the current campaign year: the E2E recette override when a grid run
  * pinned one (see campaignClock.ts — test-only, inert in production), the
@@ -136,6 +136,46 @@ export function getDefaultCampaignDeadlines(year: number): CampaignDeadlines {
 		decl2CseOpinionDeadline: civilDate(year + 1, 2, 1),
 		pathChoiceDeadline: getPathChoiceDeadline(year),
 		pathChoiceRound1Deadline: getPathChoiceRound1Deadline(year),
+	};
+}
+
+type CampaignDeadlineColumns = {
+	decl1ModificationDeadline: string;
+	decl1JustificationDeadline: string;
+	decl1JointEvaluationDeadline: string;
+	decl2ModificationDeadline: string;
+	decl2JustificationDeadline: string;
+	decl2JointEvaluationDeadline: string;
+	decl2CseOpinionDeadline: string;
+};
+
+// A `date` column wants `YYYY-MM-DD`; postgres.js would send a `Date` as a timestamptz instead.
+export function getDefaultCampaignDeadlineColumns(
+	year: number,
+): CampaignDeadlineColumns {
+	const defaults = getDefaultCampaignDeadlines(year);
+	return {
+		decl1ModificationDeadline: toPersistedIsoDate(
+			defaults.decl1ModificationDeadline,
+		),
+		decl1JustificationDeadline: toPersistedIsoDate(
+			defaults.decl1JustificationDeadline,
+		),
+		decl1JointEvaluationDeadline: toPersistedIsoDate(
+			defaults.decl1JointEvaluationDeadline,
+		),
+		decl2ModificationDeadline: toPersistedIsoDate(
+			defaults.decl2ModificationDeadline,
+		),
+		decl2JustificationDeadline: toPersistedIsoDate(
+			defaults.decl2JustificationDeadline,
+		),
+		decl2JointEvaluationDeadline: toPersistedIsoDate(
+			defaults.decl2JointEvaluationDeadline,
+		),
+		decl2CseOpinionDeadline: toPersistedIsoDate(
+			defaults.decl2CseOpinionDeadline,
+		),
 	};
 }
 
