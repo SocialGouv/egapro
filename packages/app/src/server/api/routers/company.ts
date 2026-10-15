@@ -43,6 +43,10 @@ import {
 	representationDeclarations,
 } from "~/server/db/schema";
 import { syncCseRequirement } from "~/server/services/cseRequirementSync";
+import {
+	isFormalNoticeAvailable,
+	loadGapCseOpinions,
+} from "~/server/services/formalNoticeExposure";
 import { fetchCseBySiren } from "~/server/services/suit";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
@@ -159,6 +163,7 @@ export const companyRouter = createTRPCRouter({
 						secondDeclarationPathChoice:
 							declarations.secondDeclarationPathChoice,
 						cseRequired: declarations.cseRequired,
+						rulesVersion: declarations.rulesVersion,
 					})
 					.from(declarations)
 					.where(
@@ -217,6 +222,10 @@ export const companyRouter = createTRPCRouter({
 					.limit(1),
 			]);
 
+			const gapOpinionsByDeclarationId = await loadGapCseOpinions(
+				ctx.db,
+				declarationRows.map((d) => d.id),
+			);
 			const yearsWithJointEval = new Set(jointEvalRows.map((r) => r.year));
 			const yearsWithPrefill = new Set(prefillRows.map((r) => r.year));
 			const eventsByDeclarationId = new Map<string, typeof eventRows>();
@@ -272,9 +281,8 @@ export const companyRouter = createTRPCRouter({
 					// Same clock as `currentYear`, so the deadline check agrees with the year guard.
 					now: getCurrentDate(),
 				});
-				const submissions = deriveSubsequentSubmissions(
-					eventsByDeclarationId.get(d.id) ?? [],
-				);
+				const declarationEvents = eventsByDeclarationId.get(d.id) ?? [];
+				const submissions = deriveSubsequentSubmissions(declarationEvents);
 				return {
 					type: "remuneration" as const,
 					year: d.year,
@@ -290,6 +298,17 @@ export const companyRouter = createTRPCRouter({
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
+					formalNoticeAvailable: isFormalNoticeAvailable(
+						d,
+						gapOpinionsByDeclarationId.get(d.id) ?? {
+							first: null,
+							second: null,
+						},
+					),
+					hasSubmittedFormalNoticeJointEvaluation: declarationEvents.some(
+						(event) =>
+							event.eventType === "formal_notice_joint_evaluation_submit",
+					),
 					hasPrefillData: yearsWithPrefill.has(d.year),
 					deadline: getDeclarationProcessStepDeadline(d.status, deadlines),
 					notSubject: false,
@@ -315,6 +334,8 @@ export const companyRouter = createTRPCRouter({
 					hasSubmittedCseOpinion: false,
 					cseRequired: false,
 					hasJointEvaluationFile: false,
+					formalNoticeAvailable: false,
+					hasSubmittedFormalNoticeJointEvaluation: false,
 					hasPrefillData: false,
 					// Representation deadlines come from `representationCampaign`.
 					deadline: null,

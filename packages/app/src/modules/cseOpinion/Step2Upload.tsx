@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
@@ -23,6 +23,7 @@ import {
 	buildAssociationMap,
 	clearFileAssociations,
 	getMissingColumns,
+	getSingleChoiceAssociation,
 	getUnassociatedFiles,
 	toAssociationPayload,
 } from "./contentTypeColumns";
@@ -136,6 +137,26 @@ export function Step2Upload({
 		},
 		[associations, dispatchNextAssociationWrite],
 	);
+
+	const singleChoice = useMemo(
+		() => getSingleChoiceAssociation(columns, existingFiles),
+		[columns, existingFiles],
+	);
+	const singleChoiceColumnId =
+		singleChoice && associations[singleChoice.columnId] === singleChoice.fileId
+			? singleChoice.columnId
+			: null;
+	const lockedColumnIds = useMemo(
+		() => (singleChoiceColumnId ? new Set([singleChoiceColumnId]) : undefined),
+		[singleChoiceColumnId],
+	);
+
+	useEffect(() => {
+		if (!singleChoice || isReadOnly || associationError) return;
+		if (deletedFileIdsRef.current.has(singleChoice.fileId)) return;
+		if (associations[singleChoice.columnId] === singleChoice.fileId) return;
+		handleToggle(singleChoice.columnId, singleChoice.fileId, true);
+	}, [singleChoice, isReadOnly, associationError, associations, handleToggle]);
 
 	const deleteMutation = api.cseOpinion.deleteFile.useMutation({
 		onSuccess: (_data, variables) => {
@@ -290,6 +311,7 @@ export function Step2Upload({
 							deletingFileId={deletingFileId}
 							disabled={isReadOnly}
 							files={existingFiles}
+							lockedColumnIds={lockedColumnIds}
 							onDelete={(fileId) => {
 								setDeletingFileId(fileId);
 								deleteMutation.mutate({ fileId });

@@ -88,6 +88,8 @@ vi.mock("~/trpc/server", () => ({
 						hasSubmittedCseOpinion: false,
 						cseRequired: false,
 						hasJointEvaluationFile: false,
+						formalNoticeAvailable: false,
+						hasSubmittedFormalNoticeJointEvaluation: false,
 						hasPrefillData: false,
 					},
 				],

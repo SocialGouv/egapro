@@ -106,6 +106,87 @@ describe("POST /api/upload", () => {
 		expect(mocks.runUploadPipeline).not.toHaveBeenCalled();
 	});
 
+	it("lists every accepted flow type in the missing X-Flow-Type error", async () => {
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "f.pdf",
+			}),
+		);
+
+		expect(await response.json()).toEqual({
+			error:
+				"En-tête X-Flow-Type manquant ou invalide (cse_opinion | joint_evaluation | formal_notice_joint_evaluation)",
+		});
+		expect(mocks.logAction).not.toHaveBeenCalled();
+	});
+
+	it("uploads a formal notice joint evaluation report under its own audit action", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: true,
+			fileId: "file-uuid",
+			fileName: "evaluation-mise-en-demeure.pdf",
+			filePath: "123456789/2027/file-uuid.pdf",
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "evaluation-mise-en-demeure.pdf",
+				"X-Flow-Type": "formal_notice_joint_evaluation",
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.runUploadPipeline).toHaveBeenCalledWith(
+			expect.objectContaining({ flowType: "formal_notice_joint_evaluation" }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "formal_notice_joint_evaluation.upload_file",
+				status: "success",
+				metadata: {
+					flowType: "formal_notice_joint_evaluation",
+					fileId: "file-uuid",
+					fileName: "evaluation-mise-en-demeure.pdf",
+				},
+			}),
+		);
+	});
+
+	it("returns 403 and audits the refusal when the formal notice deposit is not open", async () => {
+		validSession();
+		mocks.runUploadPipeline.mockResolvedValue({
+			ok: false,
+			reason: "formal_notice_unavailable",
+			error:
+				"Le dépôt du rapport de l'évaluation conjointe suite à une mise en demeure n'est pas ouvert pour cette démarche.",
+		});
+
+		const { POST } = await import("../route");
+		const response = await POST(
+			buildRequest({
+				"Content-Type": "application/pdf",
+				"X-Filename": "f.pdf",
+				"X-Flow-Type": "formal_notice_joint_evaluation",
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		const body = await response.json();
+		expect(body.reason).toBe("formal_notice_unavailable");
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "formal_notice_joint_evaluation.upload_file",
+				status: "failure",
+				errorMessage: "HTTP 403 formal_notice_unavailable",
+			}),
+		);
+	});
+
 	it("returns 400 when X-Flow-Type is not a known value", async () => {
 		const { POST } = await import("../route");
 		const response = await POST(

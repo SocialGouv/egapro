@@ -659,7 +659,12 @@ describe("Step5EmployeeCategories", () => {
 			.closest("section");
 		expect(definitions).not.toBeNull();
 		expect(
-			alert.compareDocumentPosition(definitions as HTMLElement) &
+			(definitions as HTMLElement).compareDocumentPosition(alert) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		const nextButton = screen.getByRole("button", { name: /suivant/i });
+		expect(
+			alert.compareDocumentPosition(nextButton) &
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 		expect(mockMutate).not.toHaveBeenCalled();
@@ -725,17 +730,17 @@ describe("Step5EmployeeCategories", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(
-			screen.getAllByText(/ne correspond pas à l'effectif déclaré/),
+			screen.getAllByText(/ne correspond pas au nombre indiqué/),
 		).not.toHaveLength(0);
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent("Données incohérentes");
+		expect(alert).toHaveTextContent("Nombre de salariés");
 		// Two simultaneous mismatches (women + men) render as two list items,
-		// each naming its own sex and totals, rather than one merged paragraph.
+		// each naming its own sex, rather than one merged paragraph.
 		const items = within(alert).getAllByRole("listitem");
 		expect(items).toHaveLength(2);
 		expect(items.map((item) => item.textContent)).toEqual([
-			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
-			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 10).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 20).",
 		]);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});
@@ -1167,9 +1172,9 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 
 		const alert = screen.getByRole("alert");
 		expect(alert).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (5).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 5).",
 		);
-		expect(alert).not.toHaveTextContent("« Rémunération annuelle »");
+		expect(alert).not.toHaveTextContent("nombre total annuel");
 		// A single inconsistency stays a plain paragraph, not a list.
 		expect(within(alert).queryAllByRole("listitem")).toHaveLength(0);
 		expect(alert.querySelector("p")).not.toBeNull();
@@ -1296,7 +1301,7 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		const alert = screen.getByRole("alert");
-		expect(alert).toHaveTextContent("Données incohérentes");
+		expect(alert).toHaveTextContent("Nombre de salariés");
 		const items = within(alert).getAllByRole("listitem");
 		expect(items).toHaveLength(4);
 
@@ -1304,37 +1309,29 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération annuelle") &&
-					text.includes("femmes") &&
-					text.includes("(5)") &&
-					text.includes("(10)"),
+					text.includes("de femmes") &&
+					text.includes("nombre total annuel : 10"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération annuelle") &&
-					text.includes("hommes") &&
-					text.includes("(15)") &&
-					text.includes("(20)"),
+					text.includes("d'hommes") &&
+					text.includes("nombre total annuel : 20"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération horaire") &&
-					text.includes("femmes") &&
-					text.includes("(4)") &&
-					text.includes("(7)"),
+					text.includes("de femmes") &&
+					text.includes("nombre total horaire : 7"),
 			),
 		).toBe(true);
 		expect(
 			texts.some(
 				(text) =>
-					text.includes("Rémunération horaire") &&
-					text.includes("hommes") &&
-					text.includes("(6)") &&
-					text.includes("(9)"),
+					text.includes("d'hommes") &&
+					text.includes("nombre total horaire : 9"),
 			),
 		).toBe(true);
 		expect(mockMutate).not.toHaveBeenCalled();
@@ -1374,28 +1371,26 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		await fillAllPayCells(user);
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
-		expect(screen.getByRole("alert")).toHaveTextContent("Données incohérentes");
+		expect(screen.getByRole("alert")).toHaveTextContent("Nombre de salariés");
 
 		await user.click(
 			screen.getByRole("button", { name: "Masquer le message" }),
 		);
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
-		const hidden = document.getElementById(
-			"step5-categories-error-inconsistent",
-		);
+		const hidden = document.getElementById("step5-categories-error-workforce");
 		expect(hidden).not.toBeNull();
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération annuelle » (5) ne correspond pas à l'effectif déclaré à l'étape 1 (10).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 10).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs hommes de la ligne « Rémunération annuelle » (15) ne correspond pas à l'effectif déclaré à l'étape 1 (20).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total annuel : 20).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs femmes de la ligne « Rémunération horaire » (4) ne correspond pas à l'effectif déclaré à l'étape 1 (7).",
+			"Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 7).",
 		);
 		expect(hidden).toHaveTextContent(
-			"Le total des effectifs hommes de la ligne « Rémunération horaire » (6) ne correspond pas à l'effectif déclaré à l'étape 1 (9).",
+			"Le nombre total d'hommes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : 9).",
 		);
 		expect(mockMutate).not.toHaveBeenCalled();
 	});

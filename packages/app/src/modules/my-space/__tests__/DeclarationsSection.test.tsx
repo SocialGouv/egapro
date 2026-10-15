@@ -34,6 +34,8 @@ const NO_COMPLIANCE = {
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
+	formalNoticeAvailable: false,
+	hasSubmittedFormalNoticeJointEvaluation: false,
 	hasPrefillData: false,
 	notSubject: false,
 } as const;

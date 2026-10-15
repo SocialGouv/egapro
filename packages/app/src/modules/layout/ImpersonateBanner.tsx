@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { ADMIN_IMPERSONATE } from "~/modules/routes";
 
 /**
  * Global banner shown on every page when an admin is currently
@@ -22,6 +23,7 @@ export function ImpersonateBanner() {
 
 	const onStop = async () => {
 		await session.update({ impersonation: null });
+		router.push(ADMIN_IMPERSONATE);
 		router.refresh();
 	};
 

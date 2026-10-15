@@ -12,9 +12,14 @@
 //   pnpm db:seed-observatory -- --year=2025
 //   pnpm db:seed-observatory -- --clean
 
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type { Sql, TransactionSql } from "postgres";
 import postgres from "postgres";
-import { truncateRatio } from "~/modules/domain";
+import {
+	getDefaultCampaignDeadlineColumns,
+	truncateRatio,
+} from "~/modules/domain";
 
 const args: Record<string, string | true> = Object.fromEntries(
 	process.argv
@@ -603,6 +608,36 @@ async function clean(sql: Sql) {
 	await sql.begin(cleanRows);
 }
 
+// Scans every row, not just this run's YEARS, so a review app booted off the `alpha` image also gets fixed on its next deploy.
+export async function resetStaleDefaultDeadlines(tx: TransactionSql) {
+	const rows = await tx<{ year: number }[]>`
+		SELECT year FROM app_campaign_deadline
+	`;
+	for (const { year } of rows) {
+		const jan1 = `${year}-01-01`;
+		const defaults = getDefaultCampaignDeadlineColumns(year);
+		await tx`
+			UPDATE app_campaign_deadline
+			SET
+				decl1_modification_deadline = ${defaults.decl1ModificationDeadline},
+				decl1_justification_deadline = ${defaults.decl1JustificationDeadline},
+				decl1_joint_evaluation_deadline = ${defaults.decl1JointEvaluationDeadline},
+				decl2_modification_deadline = ${defaults.decl2ModificationDeadline},
+				decl2_justification_deadline = ${defaults.decl2JustificationDeadline},
+				decl2_joint_evaluation_deadline = ${defaults.decl2JointEvaluationDeadline},
+				decl2_cse_opinion_deadline = ${defaults.decl2CseOpinionDeadline}
+			WHERE year = ${year}
+				AND decl1_modification_deadline = ${jan1}
+				AND decl1_justification_deadline = ${jan1}
+				AND decl1_joint_evaluation_deadline = ${jan1}
+				AND decl2_modification_deadline = ${jan1}
+				AND decl2_justification_deadline = ${jan1}
+				AND decl2_joint_evaluation_deadline = ${jan1}
+				AND decl2_cse_opinion_deadline = ${jan1}
+		`;
+	}
+}
+
 async function main() {
 	const sql = postgres(DATABASE_URL, { max: 1 });
 	try {
@@ -620,9 +655,11 @@ async function main() {
 				VALUES (${SEED_USER_ID}, ${SEED_USER_EMAIL}, 'Seed', 'Observatoire', false)
 			`;
 
+			await resetStaleDefaultDeadlines(tx);
+
 			for (const year of YEARS) {
-				const deadline = `${year}-01-01`;
 				const publicReleaseDate = "2000-01-01";
+				const defaults = getDefaultCampaignDeadlineColumns(year);
 				await tx`
 					INSERT INTO app_campaign_deadline (
 						year, public_data_release_date,
@@ -631,8 +668,14 @@ async function main() {
 						decl2_justification_deadline, decl2_joint_evaluation_deadline,
 						decl2_cse_opinion_deadline
 					) VALUES (
-						${year}, ${publicReleaseDate}, ${deadline}, ${deadline},
-						${deadline}, ${deadline}, ${deadline}, ${deadline}, ${deadline}
+						${year}, ${publicReleaseDate},
+						${defaults.decl1ModificationDeadline},
+						${defaults.decl1JustificationDeadline},
+						${defaults.decl1JointEvaluationDeadline},
+						${defaults.decl2ModificationDeadline},
+						${defaults.decl2JustificationDeadline},
+						${defaults.decl2JointEvaluationDeadline},
+						${defaults.decl2CseOpinionDeadline}
 					)
 					ON CONFLICT (year) DO NOTHING
 				`;
@@ -755,7 +798,19 @@ async function main() {
 	}
 }
 
-main().catch((error) => {
-	console.error("[seed-observatory] FAILED:", error);
-	process.exit(1);
-});
+const isMain = (() => {
+	const entry = process.argv[1];
+	if (!entry) return false;
+	try {
+		return fileURLToPath(import.meta.url) === realpathSync(entry);
+	} catch {
+		return false;
+	}
+})();
+
+if (isMain) {
+	main().catch((error) => {
+		console.error("[seed-observatory] FAILED:", error);
+		process.exit(1);
+	});
+}
