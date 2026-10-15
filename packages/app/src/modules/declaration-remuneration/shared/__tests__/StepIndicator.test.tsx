@@ -37,7 +37,7 @@ describe("StepIndicator", () => {
 
 		expect(screen.getByText("Étape 4 sur 6")).toBeInTheDocument();
 		expect(
-			screen.getByText("Écart de rémunération par catégories de salariés"),
+			screen.getByText("Écart de rémunération par catégorie de salariés"),
 		).toBeInTheDocument();
 		const steps = container.querySelector(".fr-stepper__steps");
 		expect(steps).toHaveAttribute("data-fr-current-step", "4");
@@ -54,7 +54,7 @@ describe("StepIndicator", () => {
 			screen.getByText("Récapitulatif de la déclaration"),
 		).toBeInTheDocument();
 		expect(
-			screen.queryByText("Écart de rémunération par catégories de salariés"),
+			screen.queryByText("Écart de rémunération par catégorie de salariés"),
 		).not.toBeInTheDocument();
 		const steps = container.querySelector(".fr-stepper__steps");
 		expect(steps).toHaveAttribute("data-fr-current-step", "4");

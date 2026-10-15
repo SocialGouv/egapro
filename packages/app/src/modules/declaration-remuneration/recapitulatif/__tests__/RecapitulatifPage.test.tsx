@@ -187,7 +187,7 @@ describe("RecapitulatifPage", () => {
 		);
 
 		const categoryHeading = screen.queryByRole("heading", {
-			name: "Indicateur par catégories de salariés",
+			name: "Indicateur par catégorie de salariés",
 		});
 		const categorySource = screen.queryByText(
 			/Source utilisée pour déterminer les catégories d.*emplois/,
@@ -218,7 +218,7 @@ describe("RecapitulatifPage", () => {
 
 		expect(
 			screen.queryByRole("heading", {
-				name: "Indicateur par catégories de salariés",
+				name: "Indicateur par catégorie de salariés",
 			}),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText(/Cadres/)).not.toBeInTheDocument();
