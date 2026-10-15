@@ -24,9 +24,16 @@ export async function loginWithProConnect(page: Page, retries = 4) {
 				.getByRole("button", { name: /s.identifier avec\s*proconnect/i })
 				.click();
 
-			// ProConnect FIA1V2 flow
-			await page.getByLabel("Email").fill(TEST_LOGIN_EMAIL);
+			// Route to the test identity provider, then provide a stable identity.
+			await page.getByLabel("Email").fill("egapro-e2e@test.proconnect.gouv.fr");
 			await page.getByRole("button", { name: /continuer|connexion/i }).click();
+			await page.getByLabel("email", { exact: true }).fill(TEST_LOGIN_EMAIL);
+			await page
+				.getByLabel("sub", { exact: true })
+				.fill("egapro-e2e-130025265");
+			await page
+				.getByLabel("siret", { exact: true })
+				.fill(`${TEST_SIREN}00013`);
 			await page.getByRole("button", { name: "Se connecter" }).click();
 
 			// Wait for redirect to mon espace (slow ProConnect in CI)
