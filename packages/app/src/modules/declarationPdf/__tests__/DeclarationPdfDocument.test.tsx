@@ -91,9 +91,12 @@ vi.mock("../sections/CategorySection", async () => {
 	};
 });
 
-vi.mock("../sections/PayGapTable", async () => {
+vi.mock("../sections/PayGapTable", async (importOriginal) => {
 	const React = await import("react");
+	const actual =
+		await importOriginal<typeof import("../sections/PayGapTable")>();
 	return {
+		step2PayGapRows: actual.step2PayGapRows,
 		PayGapTable: () => {
 			mocks.payGapTable();
 			return React.createElement("div", { "data-testid": "pay-gap-table" });

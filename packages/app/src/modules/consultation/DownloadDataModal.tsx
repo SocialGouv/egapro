@@ -6,25 +6,12 @@ import styles from "./DownloadDataModal.module.scss";
 const MODAL_ID = "consultation-download-modal";
 
 type Props = {
-	/** Export URLs already carrying the criteria applied to the result list. */
+	/** Export URL already carrying the criteria applied to the result list. */
 	declarationsHref: string;
-	representationsHref: string;
 };
 
-const DOWNLOADS = [
-	{ key: "declarations", label: "Écarts de rémunération" },
-	{ key: "representations", label: "Représentation équilibrée" },
-] as const;
-
-export function DownloadDataModal({
-	declarationsHref,
-	representationsHref,
-}: Props) {
+export function DownloadDataModal({ declarationsHref }: Props) {
 	const { modalRef, open, close } = useDsfrModal();
-	const hrefs: Record<(typeof DOWNLOADS)[number]["key"], string> = {
-		declarations: declarationsHref,
-		representations: representationsHref,
-	};
 
 	return (
 		<>
@@ -61,19 +48,20 @@ export function DownloadDataModal({
 									<h2 className="fr-modal__title" id={`${MODAL_ID}-title`}>
 										Télécharger les données
 									</h2>
-									<p>Sélectionnez les données à télécharger, au format CSV.</p>
+									<p>
+										Téléchargez les données correspondant à votre recherche, au
+										format CSV.
+									</p>
 									<div className={styles.links}>
-										{DOWNLOADS.map((download) => (
-											<div key={download.key}>
-												<FileDownloadLink
-													className="fr-link fr-icon-download-line fr-link--icon-right"
-													href={hrefs[download.key]}
-												>
-													{download.label}
-												</FileDownloadLink>
-												<p className={styles.format}>CSV</p>
-											</div>
-										))}
+										<div>
+											<FileDownloadLink
+												className="fr-link fr-icon-download-line fr-link--icon-right"
+												href={declarationsHref}
+											>
+												Écarts de rémunération
+											</FileDownloadLink>
+											<p className={styles.format}>CSV</p>
+										</div>
 									</div>
 								</div>
 							</div>

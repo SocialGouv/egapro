@@ -10,7 +10,11 @@ import type {
 	RemunerationStepRoute,
 	RepresentationStepRoute,
 } from "./declarationRoutes";
-import type { observatoryCompanyHref, referentHref } from "./publicRoutes";
+import type {
+	observatoryCompanyHref,
+	referentHref,
+	termsOfUseVersionHref,
+} from "./publicRoutes";
 
 // What a link-rendering component takes instead of `string`, so a path naming no
 // route stops at the component boundary rather than being laundered through it.
@@ -25,6 +29,7 @@ export type AppHref =
 	| CseOpinionStepRoute
 	| ReturnType<typeof observatoryCompanyHref>
 	| ReturnType<typeof referentHref>
+	| ReturnType<typeof termsOfUseVersionHref>
 	| ReturnType<typeof adminDeclarationHref>
 	| ReturnType<typeof mySpaceHistoryHref>
 	| ReturnType<typeof apiV1FileHref>;

@@ -17,6 +17,7 @@ type Props = {
 	onDelete: (fileId: string) => void;
 	deletingFileId: string | null;
 	disabled?: boolean;
+	lockedColumnIds?: ReadonlySet<string>;
 };
 
 function columnHeaderId(column: ContentTypeColumn): string {
@@ -46,6 +47,7 @@ export function ContentTypeMatrix({
 	onDelete,
 	deletingFileId,
 	disabled = false,
+	lockedColumnIds,
 }: Props) {
 	return (
 		<div className={`fr-table ${styles.matrix}`}>
@@ -121,6 +123,8 @@ export function ContentTypeMatrix({
 											{columns.map((column) => {
 												const associatedFileId =
 													associations[column.id] ?? null;
+												const isLocked =
+													lockedColumnIds?.has(column.id) ?? false;
 												const checked = associatedFileId === file.id;
 												const lockedByOther =
 													associatedFileId !== null &&
@@ -135,7 +139,7 @@ export function ContentTypeMatrix({
 														<div className="fr-checkbox-group fr-checkbox-group--sm">
 															<input
 																checked={checked}
-																disabled={disabled || lockedByOther}
+																disabled={disabled || lockedByOther || isLocked}
 																id={inputId}
 																onChange={(event) =>
 																	onToggle(

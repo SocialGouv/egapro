@@ -39,13 +39,9 @@ export {
 	API_DECLARATION_PDF,
 	API_E2E_CLOCK,
 	API_PREFILL_PDF,
-	API_PUBLIC_DECLARATIONS,
 	API_PUBLIC_DECLARATIONS_EXPORT,
 	API_PUBLIC_OPENAPI,
-	API_PUBLIC_REPRESENTATIONS,
-	API_PUBLIC_REPRESENTATIONS_EXPORT,
 	API_REPRESENTATION_PDF,
-	API_SEARCH,
 	API_TEST_SENTRY,
 	API_TRANSMITTED_PDF,
 	API_TRPC,
@@ -104,6 +100,7 @@ export {
 export type { PublicPage } from "./shared/publicRoutes";
 export {
 	ACCESSIBILITY,
+	CGU,
 	CONTACT,
 	COOKIES,
 	CRAWLER_DISALLOWED_PREFIXES,
@@ -122,5 +119,6 @@ export {
 	referentHref,
 	SITE_MAP,
 	TEST_ERROR,
+	termsOfUseVersionHref,
 } from "./shared/publicRoutes";
 export { route, routeWithQuery, runtimeRoute } from "./shared/routeContract";

@@ -34,14 +34,22 @@ export {
 	getPreviousStepHref,
 	INDICATOR_G_STEP,
 } from "./shared/funnelSteps";
-export { GAP_LEVEL_LABELS, gapBadgeClass } from "./shared/gapBadge";
+export {
+	GAP_FAVORED_SEX_MENTIONS,
+	GAP_LEVEL_LABELS,
+	gapBadgeClass,
+} from "./shared/gapBadge";
 export type {
 	GipMdsRow,
 	GipPrefillData,
 	GipQuartileData,
 } from "./shared/gipMdsMapping";
 export { CSV_TO_SCHEMA_MAP, mapGipToFormData } from "./shared/gipMdsMapping";
-export { getEffectiveGipPrefillData } from "./shared/gipToStepData";
+export {
+	getEffectiveGipPrefillData,
+	gipToStep2,
+	gipToStep3,
+} from "./shared/gipToStepData";
 export type { PayGapReferences } from "./shared/indicatorRowMapping";
 export { gipPayGapReferences } from "./shared/indicatorRowMapping";
 export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";
@@ -77,6 +85,7 @@ export {
 	SecondDeclarationStep3Review,
 	SecondDeclarationStepPage,
 } from "./steps/secondDeclaration";
+export { gipToQuartiles } from "./steps/step4/quartileFormHelpers";
 export { formatCategorySource } from "./steps/step5/sources";
 export { parseEmployeeCategories } from "./steps/step6";
 export type {
