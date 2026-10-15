@@ -193,7 +193,7 @@ describe("logAction", () => {
 
 	it("keeps the validated XLSX export format", async () => {
 		await logAction({
-			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
 			status: "success",
 			metadata: { format: "xlsx", search: "private@example.com" },
 		});
@@ -340,11 +340,13 @@ describe("logAction", () => {
 			status: "failure",
 			metadata: {
 				roles: ["private_role", "agent_public"],
+				granted: false,
 				publicAgentRequired: true,
 			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
 			roles: ["agent_public"],
+			granted: false,
 			publicAgentRequired: true,
 		});
 	});

@@ -468,7 +468,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -823,7 +823,7 @@ Trois entrées Sentry, une par runtime :
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo, non bloquant |
+| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo ou en manuel, non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés

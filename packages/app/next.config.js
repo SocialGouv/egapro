@@ -32,16 +32,6 @@ const config = {
 				permanent: false,
 			},
 			{
-				source: "/api/public/declaration/:siren",
-				destination: "/api/public/declarations/:siren",
-				permanent: true,
-			},
-			{
-				source: "/api/public/declaration/:siren/:year",
-				destination: "/api/public/declarations/:siren/:year",
-				permanent: true,
-			},
-			{
 				source: "/politique-de-confidentialite",
 				destination: "/donnees-personnelles",
 				permanent: true,

@@ -4,8 +4,6 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 type MetadataField =
 	| "year"
 	| "years"
-	| "count"
-	| "limit"
 	| "format"
 	| "hasCse"
 	| "campaignStartDate"
@@ -39,6 +37,7 @@ type MetadataField =
 	| "s3Cleanup"
 	| "virusName"
 	| "roles"
+	| "granted"
 	| "publicAgentRequired"
 	| "reason";
 
@@ -137,18 +136,14 @@ const FIELDS_BY_ACTION: Partial<
 		"date_end",
 	],
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: ["year", "fileId"],
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: ["count", "limit"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: ["count", "limit"],
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: ["year"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: ["year"],
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: ["format"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: ["format"],
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: ["format"],
 	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: [
 		"acr",
 		"authTime",
 		"testSeam",
 		"roles",
+		"granted",
 		"publicAgentRequired",
 	],
 	[AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED]: ["reason"],
@@ -274,12 +269,11 @@ const validCount = boundedInteger(1000000);
 const VALIDATORS: Record<MetadataField, Validator> = {
 	year: validYear,
 	years: validYears,
-	count: validCount,
-	limit: validCount,
 	timeoutMinutes: validCount,
 	format: oneOf(new Set(["json", "csv", "xlsx"])),
 	hasCse: validBoolean,
 	publicAgentRequired: validBoolean,
+	granted: validBoolean,
 	roles: validRoles,
 	campaignStartDate: validOptionalIsoDate,
 	publicDataReleaseDate: validOptionalIsoDate,
