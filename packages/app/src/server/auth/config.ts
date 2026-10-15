@@ -403,6 +403,11 @@ function parseRoles(raw: unknown): string[] | null {
 	return raw.filter((role): role is string => typeof role === "string");
 }
 
+function isPublicAgentRequirementEnabled(): boolean {
+	const value: unknown = env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT;
+	return value !== false && value !== "false";
+}
+
 function getProviders(): Provider[] {
 	const providers: Provider[] = [];
 
@@ -420,8 +425,9 @@ function getProviders(): Provider[] {
 			clientSecret: env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 			authorization: {
 				params: {
-					scope:
-						"openid email given_name usual_name siret roles organization_label",
+					scope: isPublicAgentRequirementEnabled()
+						? "openid email given_name usual_name siret roles organization_label"
+						: "openid email given_name usual_name siret organization_label",
 				},
 			},
 			idToken: true,
@@ -617,7 +623,7 @@ export const authConfig = {
 				const grant = resolveAdminGrant({
 					isListed,
 					roles,
-					requirePublicAgent: env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT !== false,
+					requirePublicAgent: isPublicAgentRequirementEnabled(),
 				});
 				const isGranted = grant.granted;
 				if (isGranted !== dbUser.isAdmin) {
@@ -697,7 +703,7 @@ export const authConfig = {
 							authTime: token.adminMfaAt ?? null,
 							roles,
 							granted: grant.granted,
-							publicAgentRequired: env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
+							publicAgentRequired: isPublicAgentRequirementEnabled(),
 							// Present only when the seam granted the passage, so a row
 							// never reads as a real second factor that did not happen.
 							...(testSeamGranted ? { testSeam: true } : {}),
