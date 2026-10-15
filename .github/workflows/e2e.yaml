@@ -122,9 +122,11 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Check concurrent E2E port allocation
+      - name: Check concurrent E2E port allocation and epic runner isolation
         if: matrix.suite == 'suite' && matrix.shard == 1
-        run: bash scripts/orchestration/e2e_port_pool.test.sh
+        run: |
+          bash scripts/orchestration/e2e_port_pool.test.sh
+          bash scripts/orchestration/run_e2e_dev.test.sh
       # Runs before the browser, the docker stack and the Next build: `--list` neither
       # starts the web server nor runs globalSetup, so an unbalanced shard graph is
       # caught in a minute instead of after a full provisioning.
