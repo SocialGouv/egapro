@@ -70,7 +70,7 @@ jobs:
       S3_BUCKET_NAME: egapro-dev-app
       CLAMAV_HOST: localhost
       CLAMAV_PORT: 3310
-      ADMIN_EMAILS: marie.durand@test.proconnect.gouv.fr
+      ADMIN_EMAILS: test@fia1.fr,ultimate@test.proconnect.gouv.fr
       EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5439/egapro_notifications
       MAIL_ENABLED: "true"

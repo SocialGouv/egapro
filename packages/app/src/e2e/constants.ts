@@ -2,8 +2,7 @@
 // sit here, pointing at `src/e2e/.auth/user.json` — a different path, imported by nothing, and
 // exactly the kind of decoy someone reaches for by autocomplete. Removed rather than aligned:
 // two constants for one file is how the sweep ends up authenticating against nothing.
-// SIREN of the company in the FIA1V2 identity returned for test@fia1.fr.
-export const TEST_SIREN = "210100020";
+export const TEST_SIREN = "130025265";
 
 // GIP-MDS annual average workforce of the test company. Every size-based rule reads this value,
 // so the suite baseline is a >= 250 company: 6-step funnel (indicator G required) + CSE field.
