@@ -340,11 +340,13 @@ describe("logAction", () => {
 			status: "failure",
 			metadata: {
 				roles: ["private_role", "agent_public"],
+				granted: false,
 				publicAgentRequired: true,
 			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
 			roles: ["agent_public"],
+			granted: false,
 			publicAgentRequired: true,
 		});
 	});

@@ -39,6 +39,7 @@ type MetadataField =
 	| "s3Cleanup"
 	| "virusName"
 	| "roles"
+	| "granted"
 	| "publicAgentRequired"
 	| "reason";
 
@@ -149,6 +150,7 @@ const FIELDS_BY_ACTION: Partial<
 		"authTime",
 		"testSeam",
 		"roles",
+		"granted",
 		"publicAgentRequired",
 	],
 	[AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED]: ["reason"],
@@ -280,6 +282,7 @@ const VALIDATORS: Record<MetadataField, Validator> = {
 	format: oneOf(new Set(["json", "csv", "xlsx"])),
 	hasCse: validBoolean,
 	publicAgentRequired: validBoolean,
+	granted: validBoolean,
 	roles: validRoles,
 	campaignStartDate: validOptionalIsoDate,
 	publicDataReleaseDate: validOptionalIsoDate,

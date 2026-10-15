@@ -339,6 +339,39 @@ describe("auth config — admin two-factor authentication", () => {
 			});
 		});
 
+		it("maps the organization label from ProConnect userinfo", async () => {
+			const provider = authConfig.providers.find(
+				(candidate) => (candidate as { id?: string }).id === "proconnect",
+			) as unknown as {
+				profile: (
+					profile: unknown,
+					tokens: { access_token: string },
+				) => Promise<{ organizationLabel: string | null }>;
+			};
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(
+					new Response(
+						JSON.stringify({
+							userinfo_endpoint: "https://example.fr/userinfo",
+						}),
+					),
+				)
+				.mockResolvedValueOnce(
+					new Response(JSON.stringify({ organization_label: "Société Démo" })),
+				);
+
+			try {
+				const profile = await provider.profile(
+					{},
+					{ access_token: "test-token" },
+				);
+				expect(profile.organizationLabel).toBe("Société Démo");
+			} finally {
+				fetchSpy.mockRestore();
+			}
+		});
+
 		it.each([
 			"claims",
 			"max_age",
