@@ -5,6 +5,7 @@ import {
 	buildCycleOpeningInfoMail,
 	buildDeclarationConfirmationMail,
 	buildDeclarationDeadlineReminderMail,
+	buildFormalNoticeJointEvaluationSubmittedMail,
 	buildJointEvaluationReminderMail,
 	buildJointEvaluationSubmittedMail,
 	buildNextCycleHandoverMail,
@@ -33,6 +34,8 @@ export const MAIL_BUILDERS: MailBuilderRegistry = {
 	cse_opinion_reminder: buildCseOpinionReminderMail,
 	next_cycle_handover: buildNextCycleHandoverMail,
 	representation_receipt: buildRepresentationReceiptMail,
+	formal_notice_joint_evaluation_submitted:
+		buildFormalNoticeJointEvaluationSubmittedMail,
 };
 
 export function isNotificationType(value: unknown): value is NotificationType {
@@ -53,14 +56,6 @@ export async function buildMail<T extends NotificationType>(
 	return builder(payload);
 }
 
-export {
-	type MailBuilderRegistry,
-	NOTIFICATION_TYPES,
-	type NotificationPayloadMap,
-	type NotificationType,
-	type RenderedMail,
-};
-
 // The link builders are re-exported so the app can assert that they still point
 // at its real routes: `packages/app/src/modules/routes/__tests__/notificationsParity.test.ts`.
 // The dependency only runs that way — this package cannot import `~/modules/routes`.
@@ -74,3 +69,10 @@ export {
 	getMySpaceUrl,
 	getPublicUrl,
 } from "./shared/urls.js";
+export {
+	type MailBuilderRegistry,
+	NOTIFICATION_TYPES,
+	type NotificationPayloadMap,
+	type NotificationType,
+	type RenderedMail,
+};

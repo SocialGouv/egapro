@@ -1,11 +1,11 @@
-import { StyleSheet } from "@react-pdf/renderer";
+import { StyleSheet, type Styles } from "@react-pdf/renderer";
 
 import { PDF_FONT_FAMILY } from "./pdfFonts";
 
 // @react-pdf/renderer cannot use CSS variables — hex values are required.
 // Each constant maps to a DSFR decision token read from the Figma maquette
 // (file axsrSDEVqsrFvHdWrZJIkQ). Kept separate from pdfStyles.ts, which stays
-// frozen for TransmittedPdfDocument / PrefillPdfDocument.
+// frozen for TransmittedPdfDocument / RepresentationPdfDocument.
 const TEXT_TITLE_GREY = "#161616"; // $text-title-grey
 const TEXT_DEFAULT_GREY = "#3A3A3A"; // $text-default-grey
 const BACKGROUND_ALT_GREY = "#F6F6F6"; // $background-alt-grey (header cells)
@@ -148,13 +148,15 @@ export const styles = StyleSheet.create({
 	},
 
 	infoBody: {
-		flexDirection: "row",
 		paddingHorizontal: 8,
 		marginBottom: 6,
+		gap: 4,
+	},
+	infoRow: {
+		flexDirection: "row",
 	},
 	infoLabelColumn: {
 		width: 142,
-		gap: 4,
 	},
 	// « Source des catégories d'emplois » fills the 142pt column and would
 	// butt against its value; this row gets the room the other labels keep.
@@ -163,7 +165,6 @@ export const styles = StyleSheet.create({
 	},
 	infoValueColumn: {
 		flex: 1,
-		gap: 4,
 	},
 	infoLabel: {
 		fontSize: 9,
@@ -218,8 +219,7 @@ export const styles = StyleSheet.create({
 	},
 
 	gapCell: {
-		flexDirection: "row",
-		alignItems: "center",
+		flexDirection: "column",
 	},
 	gapValue: {
 		flex: 1,
@@ -227,6 +227,20 @@ export const styles = StyleSheet.create({
 		fontWeight: BOLD,
 		color: TEXT_DEFAULT_GREY,
 		textAlign: "right",
+	},
+	gapMagnitudeRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		gap: 4,
+	},
+	gapMagnitude: {
+		fontSize: 9,
+		fontWeight: BOLD,
+		color: TEXT_DEFAULT_GREY,
+	},
+	gapFavoredSex: {
+		fontSize: 9,
+		color: TEXT_DEFAULT_GREY,
 	},
 	badge: {
 		backgroundColor: BACKGROUND_CONTRAST_WARNING,
@@ -247,3 +261,5 @@ export const styles = StyleSheet.create({
 		marginTop: 4,
 	},
 });
+
+export type PdfStyles = Record<keyof typeof styles, Styles[string]>;

@@ -34,7 +34,8 @@ Plusieurs champs du payload portent le même nom sans porter le même vocabulair
 | `Avis_CSE[].Type` | Objet de la consultation du CSE. |
 | `Fichiers_CSE[].Type` | Type du fichier d'avis CSE. |
 | `Fichier_evaluation_conjointe.Type` | Type du fichier d'évaluation conjointe. |
-| `files[].type` | Type de fichier servi par `GET /api/v1/files` — en minuscules, contrairement aux trois autres. |
+| `Fichier_evaluation_conjointe_mise_en_demeure.Type` | Type du fichier d'évaluation conjointe déposé suite à mise en demeure. |
+| `files[].type` | Type de fichier servi par `GET /api/v1/files` — en minuscules, contrairement aux quatre autres. |
 
 ### `Numero_declaration`
 
@@ -88,6 +89,7 @@ Type d'événement brut de la ligne d'historique. Ce n'est pas un état de la ma
 | `cse_opinion_submit` | Dépôt d'un avis CSE | Dépôt d'un avis du CSE. |
 | `cancel` | Annulation de la déclaration | Annulation de la déclaration. |
 | `demarche_complete` | Démarche terminée | Fin de la démarche. Ne pas confondre avec l'état `demarche_completed` de `Parcours.Statut`, qui ne diffère que d'une lettre. |
+| `formal_notice_joint_evaluation_submit` | Dépôt du rapport d'évaluation conjointe suite à mise en demeure | Dépôt du rapport d'évaluation conjointe suite à mise en demeure de la DREETS, après la fin de la démarche. `Parcours.Statut` reste `demarche_completed`. |
 
 ### `Historique_statuts[].Libelle_statut`
 
@@ -106,6 +108,7 @@ Libellé FR lisible de la ligne d'historique. La liste ci-dessous est exhaustive
 | `Dépôt d'un avis CSE` | Événement `cse_opinion_submit`. |
 | `Annulation de la déclaration` | Événement `cancel`. |
 | `Démarche terminée` | Événement `demarche_complete`. |
+| `Dépôt du rapport d'évaluation conjointe suite à mise en demeure` | Événement `formal_notice_joint_evaluation_submit`. |
 | `Choix du parcours — Justification de l'écart` | Événement `path_choice` portant la valeur `justify`. |
 | `Choix du parcours — Actions correctives` | Événement `path_choice` portant la valeur `corrective_action`. |
 | `Choix du parcours — Évaluation conjointe` | Événement `path_choice` portant la valeur `joint_evaluation`. |
@@ -213,6 +216,18 @@ Type du fichier d'évaluation conjointe.
 | --- | --- | --- |
 | `joint_evaluation` | Évaluation conjointe | PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise. |
 
+### `Fichier_evaluation_conjointe_mise_en_demeure.Type`
+
+Type du fichier d'évaluation conjointe déposé suite à mise en demeure.
+
+- **Endpoint** : `GET /api/v1/export/declarations`
+- **Présence** : Le bloc `Fichier_evaluation_conjointe_mise_en_demeure` est absent si aucun rapport n'a été déposé suite à mise en demeure.
+- **Source** : `file_type` (`server/db/schema.ts`)
+
+| Valeur | Libellé FR | Signification |
+| --- | --- | --- |
+| `formal_notice_joint_evaluation` | Évaluation conjointe (mise en demeure) | PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise mise en demeure par la DREETS, après la fin de sa démarche. Un seul fichier par déclaration : un nouveau dépôt remplace le précédent. |
+
 ### `files[].type`
 
 Type de fichier — nommé en minuscules, contrairement aux `Type` de l'export des déclarations.
@@ -225,6 +240,7 @@ Type de fichier — nommé en minuscules, contrairement aux `Type` de l'export d
 | --- | --- | --- |
 | `cse_opinion` | Avis du CSE | PDF d'avis du CSE déposé par l'entreprise (jusqu'à 4 par an, entreprises d'au moins 100 salariés). |
 | `joint_evaluation` | Évaluation conjointe | PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise. |
+| `formal_notice_joint_evaluation` | Évaluation conjointe (mise en demeure) | PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise mise en demeure par la DREETS, après la fin de sa démarche. Un seul fichier par déclaration : un nouveau dépôt remplace le précédent. |
 
 ### `Source_categories_emplois`
 

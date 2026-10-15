@@ -153,6 +153,7 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		id: "SUIT: Fichiers_CSE.Id",
 		file_name: "SUIT: Fichiers_CSE.Nom_fichier",
 		uploaded_at: "SUIT: Fichiers_CSE.Date_upload",
+		type: "SUIT: Fichiers_CSE.Type / Fichier_evaluation_conjointe.Type / Fichier_evaluation_conjointe_mise_en_demeure.Type — cse_opinion = avis du CSE ; joint_evaluation = rapport d'évaluation conjointe du parcours de mise en conformité ; formal_notice_joint_evaluation = rapport d'évaluation conjointe déposé suite à une mise en demeure de la DREETS (un seul par déclaration, remplacé à chaque dépôt).",
 	},
 	cse_opinion_file: {
 		declaration_number: "SUIT: Fichiers_CSE.Contenus.Numero_declaration",
@@ -165,7 +166,7 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		declaration_id:
 			"Référence vers la déclaration concernée. Append-only — chaque event capture une transition métier (submit / path_choice / *_submit / cse_opinion_submit / cancel / demarche_complete).",
 		event_type:
-			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4).",
+			"Type d'event métier. Source de vérité de la trajectoire FSM (la colonne app_declaration.status est une projection dérivée du dernier event). Inclut step_change pour les transitions du stepper Indicateurs A–F (alimente le KPI K4). Inclut formal_notice_joint_evaluation_submit pour la transmission du rapport d'évaluation conjointe suite à mise en demeure (démarche déjà close, état inchangé).",
 		value:
 			"Charge utile facultative selon le type d'event. Pour path_choice: 'justify' | 'corrective_action' | 'joint_evaluation'. Pour step_change: 'from:N|to:M' (N peut être 'null' à la création).",
 		round:

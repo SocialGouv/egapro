@@ -1,72 +1,111 @@
 import { View } from "@react-pdf/renderer";
-import {
-	computeWorkforceTotal,
-	formatVariablePayProportion,
-} from "~/modules/domain";
-import type { DeclarationPdfData } from "../types";
+import type {
+	PayGapReferences,
+	Step3Data,
+} from "~/modules/declaration-remuneration";
+import { formatCurrency, formatVariablePayProportion } from "~/modules/domain";
+import { type PdfStyles, styles } from "../recapPdfStyles";
+import type { GapCellVariant } from "./GapCell";
 import { SectionBanner, SubTitle } from "./headings";
 import { PayGapTable } from "./PayGapTable";
 import { Cell, Row, Table } from "./tableParts";
 import { BENEFICIARY_TABLE } from "./tableWidths";
+import { formatHeadcount, formatHeadcountTotal } from "./WorkforceSection";
 
-function ProportionTable({ data }: { data: DeclarationPdfData }) {
+export type VariablePayData = {
+	totalWomen: number | null;
+	totalMen: number | null;
+	step3Data: Step3Data;
+	step3Gaps: PayGapReferences;
+};
+
+function ProportionTable({
+	data,
+	sheet,
+}: {
+	data: VariablePayData;
+	sheet: PdfStyles;
+}) {
 	const tWomen = data.totalWomen;
 	const tMen = data.totalMen;
-	const grandTotal = computeWorkforceTotal(tWomen, tMen);
+	const grandTotal = formatHeadcountTotal(tWomen, tMen);
 	const eWomen = Number.parseInt(data.step3Data.indicatorEWomen, 10);
 	const eMen = Number.parseInt(data.step3Data.indicatorEMen, 10);
 	return (
-		<Table>
+		<Table sheet={sheet}>
 			<Row>
-				<Cell header width={BENEFICIARY_TABLE.label} />
+				<Cell header sheet={sheet} width={BENEFICIARY_TABLE.label} />
 				<Cell
 					header
+					sheet={sheet}
 					text={`Total de salariés : ${grandTotal}`}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
 					header
+					sheet={sheet}
 					text={"Bénéficiaires de composantes\nvariables ou complémentaires"}
 					width={BENEFICIARY_TABLE.wide}
 				/>
-				<Cell header text="Total" width={BENEFICIARY_TABLE.total} />
+				<Cell
+					header
+					sheet={sheet}
+					text="Total"
+					width={BENEFICIARY_TABLE.total}
+				/>
 			</Row>
 			<Row>
-				<Cell bold text="Femmes" width={BENEFICIARY_TABLE.label} />
+				<Cell
+					bold
+					sheet={sheet}
+					text="Femmes"
+					width={BENEFICIARY_TABLE.label}
+				/>
 				<Cell
 					align="right"
 					bold
-					text={String(tWomen)}
+					sheet={sheet}
+					text={formatHeadcount(tWomen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
 					align="right"
+					sheet={sheet}
 					text={Number.isNaN(eWomen) ? "-" : String(eWomen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
 					align="right"
 					bold
+					sheet={sheet}
 					text={formatVariablePayProportion(eWomen, tWomen)}
 					width={BENEFICIARY_TABLE.total}
 				/>
 			</Row>
 			<Row>
-				<Cell bold text="Hommes" width={BENEFICIARY_TABLE.label} />
+				<Cell
+					bold
+					sheet={sheet}
+					text="Hommes"
+					width={BENEFICIARY_TABLE.label}
+				/>
 				<Cell
 					align="right"
 					bold
-					text={String(tMen)}
+					sheet={sheet}
+					text={formatHeadcount(tMen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
 					align="right"
+					sheet={sheet}
 					text={Number.isNaN(eMen) ? "-" : String(eMen)}
 					width={BENEFICIARY_TABLE.wide}
 				/>
 				<Cell
 					align="right"
 					bold
+					sheet={sheet}
 					text={formatVariablePayProportion(eMen, tMen)}
 					width={BENEFICIARY_TABLE.total}
 				/>
@@ -75,7 +114,17 @@ function ProportionTable({ data }: { data: DeclarationPdfData }) {
 	);
 }
 
-export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
+export function VariablePaySection({
+	data,
+	gapVariant,
+	sheet = styles,
+	formatAmount = formatCurrency,
+}: {
+	data: VariablePayData;
+	gapVariant?: GapCellVariant;
+	sheet?: PdfStyles;
+	formatAmount?: typeof formatCurrency;
+}) {
 	const rows = [
 		{
 			label: "Annuelle brute moyenne",
@@ -105,13 +154,21 @@ export function VariablePaySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<View>
 			<View wrap={false}>
-				<SectionBanner title="Écart de rémunération variable ou complémentaire" />
+				<SectionBanner
+					sheet={sheet}
+					title="Écart de rémunération variable ou complémentaire"
+				/>
 				<SubTitle title="Rémunération variable ou complémentaire" />
-				<PayGapTable rows={rows} />
+				<PayGapTable
+					formatAmount={formatAmount}
+					gapVariant={gapVariant}
+					rows={rows}
+					sheet={sheet}
+				/>
 			</View>
 			<View wrap={false}>
 				<SubTitle title="Proportion de femmes et d'hommes bénéficiaires" />
-				<ProportionTable data={data} />
+				<ProportionTable data={data} sheet={sheet} />
 			</View>
 		</View>
 	);

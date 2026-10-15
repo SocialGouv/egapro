@@ -10,6 +10,9 @@ export const COMPLIANCE_JOINT_EVALUATION = route(
 export const COMPLIANCE_CONFIRMATION = route(
 	"/declaration-remuneration/parcours-conformite/confirmation",
 );
+export const FORMAL_NOTICE_JOINT_EVALUATION = route(
+	"/declaration-remuneration/mise-en-demeure",
+);
 
 export const COMPLIANCE_STEP_NUMBERS = [1, 2, 3] as const;
 

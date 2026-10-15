@@ -45,6 +45,11 @@ export const AUDIT_ACTIONS = {
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
 	JOINT_EVALUATION_GET_FILE: "joint_evaluation.get_file",
 
+	FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE:
+		"formal_notice_joint_evaluation.upload_file",
+	FORMAL_NOTICE_GET: "formal_notice.get",
+	FORMAL_NOTICE_SUBMIT: "formal_notice.submit",
+
 	// ── Company mutations ──────────────────────────────────
 	COMPANY_READ_GIP_DATA: "company.read_gip_data",
 	COMPANY_UPDATE_HAS_CSE: "company.update_has_cse",
@@ -133,19 +138,8 @@ export const AUDIT_ACTIONS = {
 	// ── Public searches ────────────────────────────────────
 	PUBLIC_REFERENT_SEARCH: "public_referents.search",
 	PUBLIC_REFERENT_VIEW: "public_referents.view",
-	PUBLIC_DECLARATIONS_SEARCH: "public_declarations.search",
 
 	PUBLIC_DECLARATIONS_EXPORT: "public_declarations.export",
-	PUBLIC_REPRESENTATIONS_EXPORT: "public_representations.export",
-
-	// ── Public declaration reads ───────────────────────────
-	PUBLIC_DECLARATIONS_BY_SIREN: "public_declarations.by_siren",
-	PUBLIC_DECLARATIONS_BY_SIREN_YEAR: "public_declarations.by_siren_year",
-
-	// ── Public representation reads ────────────────────────
-	PUBLIC_REPRESENTATIONS_SEARCH: "public_representations.search",
-	PUBLIC_REPRESENTATIONS_BY_SIREN: "public_representations.by_siren",
-	PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR: "public_representations.by_siren_year",
 
 	// ── System / cron-triggered ────────────────────────────
 	SYSTEM_AUDIT_CLEANUP: "system.audit_cleanup",
@@ -190,6 +184,10 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE]: "read_sensitive",
+
+	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
+	[AUDIT_ACTIONS.FORMAL_NOTICE_GET]: "read_sensitive",
+	[AUDIT_ACTIONS.FORMAL_NOTICE_SUBMIT]: "mutation",
 
 	[AUDIT_ACTIONS.COMPANY_READ_GIP_DATA]: "read_sensitive",
 	[AUDIT_ACTIONS.COMPANY_UPDATE_HAS_CSE]: "mutation",
@@ -252,17 +250,8 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: "public_search",
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW]: "public_search",
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_SEARCH]: "read_sensitive",
 
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: "export",
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: "export",
-
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: "read_sensitive",
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: "read_sensitive",
-
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_SEARCH]: "read_sensitive",
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: "read_sensitive",
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: "read_sensitive",
 
 	[AUDIT_ACTIONS.SYSTEM_AUDIT_CLEANUP]: "system",
 	[AUDIT_ACTIONS.SYSTEM_DECLARATION_CLEANUP]: "system",

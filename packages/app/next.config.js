@@ -32,13 +32,13 @@ const config = {
 				permanent: false,
 			},
 			{
-				source: "/api/public/declaration/:siren",
-				destination: "/api/public/declarations/:siren",
+				source: "/politique-de-confidentialite",
+				destination: "/donnees-personnelles",
 				permanent: true,
 			},
 			{
-				source: "/api/public/declaration/:siren/:year",
-				destination: "/api/public/declarations/:siren/:year",
+				source: "/politique-de-confidentialite-v2",
+				destination: "/donnees-personnelles",
 				permanent: true,
 			},
 		];

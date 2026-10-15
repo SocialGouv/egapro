@@ -93,6 +93,7 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	formalNoticeAvailable: false,
 	siren: "532847196",
 	ctaHref: DECLARATION_REMUNERATION,
 	lockedByOther: false,
