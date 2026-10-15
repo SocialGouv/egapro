@@ -101,7 +101,7 @@ function makeData(): DeclarationPdfData {
 				menCount: 20,
 				annualBaseWomen: "40000",
 				annualBaseMen: "42000",
-				annualVariableWomen: "1000",
+				annualVariableWomen: "4000",
 				annualVariableMen: "2000",
 			}),
 			makeCategory({ name: "Techniciens", womenCount: 5, menCount: 8 }),
@@ -142,6 +142,20 @@ async function renderWithFiller(fillerHeight: number): Promise<LayoutNode> {
 }
 
 describe("PDF category pagination", () => {
+	it("prints both favored-sex mentions in the paginated category tables", async () => {
+		const layout = await renderWithFiller(600);
+		const printed = (layout.children ?? []).flatMap((page) => {
+			const texts: PageText[] = [];
+			for (const child of page.children ?? [])
+				collectPageTexts(child, 0, texts);
+			return texts.map((entry) => entry.text);
+		});
+
+		expect(printed).toContain("en faveur des hommes");
+		expect(printed).toContain("en faveur des femmes");
+		expect(printed).toContain("100,00 %");
+	}, 120_000);
+
 	it("never leaves a category or section banner at the bottom of a page", async () => {
 		const offenders: { filler: number; banners: string[] }[] = [];
 

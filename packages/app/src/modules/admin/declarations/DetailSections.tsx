@@ -1,7 +1,7 @@
 import { formatShortDate, formatShortDateTime } from "~/modules/domain";
 import { apiV1FileHref } from "~/modules/routes";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
-import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
+import { statusLabel, WORKFORCE_LABEL } from "./shared/constants";
 import type { DeclarationDetail } from "./types";
 
 export function CancelledBadge({ cancelledAt }: { cancelledAt: Date }) {
@@ -30,9 +30,7 @@ export function DeclarationSummary({
 				</tr>
 				<tr>
 					<th scope="row">Statut</th>
-					<td>
-						{STATUS_LABELS[declaration.status ?? ""] ?? declaration.status}
-					</td>
+					<td>{statusLabel(declaration.status)}</td>
 				</tr>
 				<tr>
 					<th scope="row">Index de rémunération</th>
@@ -174,6 +172,15 @@ export function CseOpinionsSection({
 	);
 }
 
+const FILE_TYPE_LABELS: Record<
+	DeclarationDetail["files"][number]["type"],
+	string
+> = {
+	cse_opinion: "Avis CSE",
+	joint_evaluation: "Évaluation conjointe",
+	formal_notice_joint_evaluation: "Évaluation conjointe (mise en demeure)",
+};
+
 export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 	return (
 		<>
@@ -191,11 +198,7 @@ export function FilesSection({ files }: { files: DeclarationDetail["files"] }) {
 					{files.map((file) => (
 						<tr key={file.id}>
 							<td>{file.fileName}</td>
-							<td>
-								{file.type === "cse_opinion"
-									? "Avis CSE"
-									: "Évaluation conjointe"}
-							</td>
+							<td>{FILE_TYPE_LABELS[file.type]}</td>
 							<td>{formatShortDate(file.uploadedAt)}</td>
 							<td>
 								<a

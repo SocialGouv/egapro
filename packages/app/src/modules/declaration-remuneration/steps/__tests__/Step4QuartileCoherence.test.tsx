@@ -109,7 +109,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 	it("shows no coherence message when both tables match the step 1 headcount", () => {
 		renderStep4();
 		expect(screen.queryByText(ANNUAL_WOMEN_ERROR)).not.toBeInTheDocument();
-		expect(screen.queryByText("Données incohérentes")).not.toBeInTheDocument();
+		expect(screen.queryByText("Nombre de salariés")).not.toBeInTheDocument();
 	});
 
 	it("renders no coherence alert while both tables match", () => {
@@ -120,7 +120,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 	it("reports a diverging total on load, before any submission", () => {
 		renderStep4({ annual: quartiles([10, 10, 10, 11], MATCHING_MEN) });
 		expect(screen.getByText(ANNUAL_WOMEN_ERROR)).toBeInTheDocument();
-		expect(screen.getByText("Données incohérentes")).toBeInTheDocument();
+		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
 	});
 
 	it("controls the hourly table too, with no GIP prefill in play", () => {
@@ -179,7 +179,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			annual: quartiles([10, 10, 10, 11], MATCHING_MEN),
 			hourly: quartiles(HOURLY_MATCHING_WOMEN, [7, 7, 7, 5]),
 		});
-		expect(screen.getAllByText("Données incohérentes")).toHaveLength(2);
+		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
 		expect(screen.getAllByText(ANNUAL_WOMEN_ERROR)).toHaveLength(1);
 		expect(screen.getAllByText(HOURLY_MEN_ERROR)).toHaveLength(1);
 	});
@@ -243,7 +243,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
 		expect(screen.getAllByRole("alert")).toHaveLength(2);
-		expect(screen.getAllByText("Données incohérentes")).toHaveLength(2);
+		expect(screen.getAllByText("Nombre de salariés")).toHaveLength(2);
 	});
 
 	it("focuses the first diverging table's message on submit", async () => {
@@ -290,7 +290,7 @@ describe("Step4QuartileDistribution — headcount coherence control", () => {
 			maxMen: undefined,
 		});
 
-		expect(screen.queryByText("Données incohérentes")).not.toBeInTheDocument();
+		expect(screen.queryByText("Nombre de salariés")).not.toBeInTheDocument();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 

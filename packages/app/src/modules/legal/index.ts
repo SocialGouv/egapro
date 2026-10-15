@@ -6,4 +6,9 @@ export { PrivacyPolicyPage } from "./PrivacyPolicyPage";
 export { buildMetadataRobots, buildRobots } from "./robots";
 export { SitemapPage } from "./SitemapPage";
 export { buildSitemap, COMPANY_URLS_PER_SITEMAP } from "./sitemap";
+export {
+	getCurrentTermsOfUseVersion,
+	resolveTermsOfUseVersion,
+	TermsOfUsePage,
+} from "./TermsOfUsePage";
 export { escapeXml } from "./xml";

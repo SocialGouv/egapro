@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import { env } from "~/env.js";
 import { GAP_ALERT_THRESHOLD, getReferencePeriod } from "~/modules/domain";
 import {
+	getPublicCompanyLocation,
 	getPublicDeclarationsBySiren,
 	getPublicRepresentationsBySiren,
 	NON_DIFFUSIBLE_LABEL,
+	type PublicCompanyLocation,
 } from "~/modules/public-api";
 import { JsonLd } from "~/modules/shared/JsonLd";
 import { CompanyHeader } from "./CompanyHeader";
@@ -16,6 +18,17 @@ import { companyPageStructuredData } from "./structuredData";
 import { YearSelector } from "./YearSelector";
 
 type Props = { siren: string; selectedYear?: number; from?: string };
+
+const NO_LOCATION: PublicCompanyLocation = {
+	address: null,
+	city: null,
+	regionCode: null,
+	region: null,
+	departmentCode: null,
+	departmentLabel: null,
+	countryCode: null,
+	countryLabel: null,
+};
 
 const TABS = [
 	{ id: "remuneration", label: "Rémunération" },
@@ -53,16 +66,7 @@ export async function CompanyConsultationPage({
 	const identity = declaration ?? representation;
 	if (!identity) notFound();
 
-	// City and country live on the declaration only; a company does not move, so
-	// the latest one answers for a year that published a representation alone.
-	const located = declarations[0] ?? null;
-	const location = {
-		city: located?.city ?? null,
-		countryCode: located?.countryCode ?? null,
-		countryLabel: located?.countryLabel ?? null,
-		departmentLabel: identity.departmentLabel,
-		region: identity.region,
-	};
+	const location = (await getPublicCompanyLocation(siren)) ?? NO_LOCATION;
 
 	const referencePeriod =
 		representation?.referencePeriodStart && representation.referencePeriodEnd
@@ -74,7 +78,11 @@ export async function CompanyConsultationPage({
 			<JsonLd
 				data={companyPageStructuredData(
 					{
-						...location,
+						city: location.city,
+						countryCode: location.countryCode,
+						countryLabel: location.countryLabel,
+						departmentLabel: location.departmentLabel,
+						region: location.region,
 						name: identity.name,
 						nafLabel: identity.nafLabel,
 						siren,
@@ -86,7 +94,7 @@ export async function CompanyConsultationPage({
 				)}
 			/>
 			<CompanyHeader
-				address={identity.address}
+				address={location.address}
 				backHref={backToSearchHref(from)}
 				countryCode={location.countryCode}
 				countryLabel={location.countryLabel}

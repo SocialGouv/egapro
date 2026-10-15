@@ -51,6 +51,9 @@ const company = {
 	siren: "532847196",
 	name: "Alpha Solutions",
 	address: "12 rue des Innovateurs, 75011 Paris",
+	countryCode: null,
+	countryLabel: "FRANCE",
+	departmentLabel: "Paris",
 	nafCode: "6202A",
 	nafLabel: "Conseil en systèmes et logiciels informatiques",
 	gipWorkforce: 2256,
@@ -97,6 +100,17 @@ describe("CompanyEditModal", () => {
 		expect(container.textContent).toContain(
 			"6202A — Conseil en systèmes et logiciels informatiques",
 		);
+	});
+
+	it("shows the country instead of a street for a foreign company", () => {
+		const { container } = render(
+			<CompanyEditModal
+				company={{ ...company, countryCode: "99131", countryLabel: "BELGIQUE" }}
+			/>,
+		);
+		expect(container.textContent).toContain("Pays :");
+		expect(container.textContent).toContain("Belgique");
+		expect(container.textContent).not.toContain(company.address);
 	});
 
 	it("renders the requested wording", () => {

@@ -508,6 +508,26 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it.each([
+		["formalNotice.get", "query", "formal_notice.get"],
+		["formalNotice.submit", "mutation", "formal_notice.submit"],
+	] as const)("logs %s under its own action key", async (path, type, action) => {
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type,
+			path,
+			getRawInput: buildGetRawInput(undefined),
+			next: vi.fn(async () => okResult({ success: true })),
+		});
+
+		expect(mockLogAction).toHaveBeenCalledTimes(1);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action,
+			status: "success",
+			siren: "123456789",
+		});
+	});
+
 	it("logs the declaration lock state read (declarationLock.getActiveLockForCurrentDeclaration)", async () => {
 		const next = vi.fn(async () =>
 			okResult({ lockedByOther: true, holder: {} }),

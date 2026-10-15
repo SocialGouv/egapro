@@ -1,8 +1,12 @@
 import { Text } from "@react-pdf/renderer";
+import type {
+	PayGapReferences,
+	Step2Data,
+} from "~/modules/declaration-remuneration";
 import type { GipGapReference } from "~/modules/domain";
 import { formatCurrency, resolveGap } from "~/modules/domain";
-import { styles } from "../recapPdfStyles";
-import { GapCell } from "./GapCell";
+import { type PdfStyles, styles } from "../recapPdfStyles";
+import { GapCell, type GapCellVariant } from "./GapCell";
 import { Cell, Row, Table } from "./tableParts";
 import { PAY_TABLE } from "./tableWidths";
 
@@ -14,55 +18,125 @@ type PayGapTableRow = {
 	reference?: GipGapReference;
 };
 
-function PayGapDataRow({ row }: { row: PayGapTableRow }) {
+export function step2PayGapRows({
+	step2Data,
+	step2Gaps,
+}: {
+	step2Data: Step2Data;
+	step2Gaps: PayGapReferences;
+}): PayGapTableRow[] {
+	return [
+		{
+			label: "Annuelle brute moyenne",
+			women: step2Data.indicatorAAnnualWomen,
+			men: step2Data.indicatorAAnnualMen,
+			reference: step2Gaps[0],
+		},
+		{
+			label: "Horaire brute moyenne",
+			women: step2Data.indicatorAHourlyWomen,
+			men: step2Data.indicatorAHourlyMen,
+			reference: step2Gaps[1],
+		},
+		{
+			label: "Annuelle brute médiane",
+			women: step2Data.indicatorCAnnualWomen,
+			men: step2Data.indicatorCAnnualMen,
+			reference: step2Gaps[2],
+		},
+		{
+			label: "Horaire brute médiane",
+			women: step2Data.indicatorCHourlyWomen,
+			men: step2Data.indicatorCHourlyMen,
+			reference: step2Gaps[3],
+		},
+	];
+}
+
+function PayGapDataRow({
+	row,
+	gapVariant,
+	sheet,
+	formatAmount,
+}: {
+	row: PayGapTableRow;
+	gapVariant?: GapCellVariant;
+	sheet: PdfStyles;
+	formatAmount: typeof formatCurrency;
+}) {
 	return (
 		<Row>
-			<Cell bold text={row.label} width={PAY_TABLE.label} />
+			<Cell bold sheet={sheet} text={row.label} width={PAY_TABLE.label} />
 			<Cell
 				align="right"
-				text={formatCurrency(row.women)}
+				sheet={sheet}
+				text={formatAmount(row.women)}
 				width={PAY_TABLE.value}
 			/>
 			<Cell
 				align="right"
-				text={formatCurrency(row.men)}
+				sheet={sheet}
+				text={formatAmount(row.men)}
 				width={PAY_TABLE.value}
 			/>
-			<Cell width={PAY_TABLE.gap}>
-				<GapCell gap={resolveGap(row.women, row.men, row.reference)} />
+			<Cell sheet={sheet} width={PAY_TABLE.gap}>
+				<GapCell
+					gap={resolveGap(row.women, row.men, row.reference)}
+					sheet={sheet}
+					variant={gapVariant}
+				/>
 			</Cell>
 		</Row>
 	);
 }
 
-export function PayGapTable({ rows }: { rows: PayGapTableRow[] }) {
+export function PayGapTable({
+	rows,
+	gapVariant,
+	sheet = styles,
+	formatAmount = formatCurrency,
+}: {
+	rows: PayGapTableRow[];
+	gapVariant?: GapCellVariant;
+	sheet?: PdfStyles;
+	formatAmount?: typeof formatCurrency;
+}) {
 	const allEmpty = rows.every((r) => r.women === "" && r.men === "");
 	if (allEmpty) {
-		return <Text style={styles.noData}>Aucune donnée renseignée.</Text>;
+		return <Text style={sheet.noData}>Aucune donnée renseignée.</Text>;
 	}
 	return (
-		<Table>
+		<Table sheet={sheet}>
 			<Row>
-				<Cell header width={PAY_TABLE.label} />
+				<Cell header sheet={sheet} width={PAY_TABLE.label} />
 				<Cell
 					header
+					sheet={sheet}
 					text={"Rémunération\ndes femmes"}
 					width={PAY_TABLE.value}
 				/>
 				<Cell
 					header
+					sheet={sheet}
 					text={"Rémunération\ndes hommes"}
 					width={PAY_TABLE.value}
 				/>
 				<Cell
 					header
 					hint="Seuil réglementaire : 5%"
+					sheet={sheet}
 					text="Écart"
 					width={PAY_TABLE.gap}
 				/>
 			</Row>
 			{rows.map((row) => (
-				<PayGapDataRow key={row.label} row={row} />
+				<PayGapDataRow
+					formatAmount={formatAmount}
+					gapVariant={gapVariant}
+					key={row.label}
+					row={row}
+					sheet={sheet}
+				/>
 			))}
 		</Table>
 	);

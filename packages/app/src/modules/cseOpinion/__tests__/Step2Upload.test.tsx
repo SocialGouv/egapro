@@ -496,8 +496,11 @@ describe("Step2Upload", () => {
 	it("hides the missing-content error again once the required association is completed", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			initialAssociations: [
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
+			],
 		});
 
 		await user.click(screen.getByRole("button", { name: "Transmettre" }));
@@ -604,7 +607,7 @@ describe("Step2Upload", () => {
 	it("frees a content type and re-persists when its checkbox is unchecked (S6)", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
@@ -651,7 +654,7 @@ describe("Step2Upload", () => {
 	it("rolls back an optimistic check and blocks submission when persisting the association fails (#4102)", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 		});
 
@@ -691,12 +694,13 @@ describe("Step2Upload", () => {
 	it("blocks submission while an association save is still in flight, independently of click speed (#4102)", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 			// The matrix is otherwise complete: only the in-flight save should
 			// block submission here, not a missing association.
 			initialAssociations: [
 				{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				{ declarationNumber: 1, type: "gap", fileId: "file-1" },
 			],
 		});
 
@@ -852,7 +856,7 @@ describe("Step2Upload", () => {
 	it("does not let a save that resolves after its file was deleted resurrect that association as confirmed (#4102)", async () => {
 		const user = userEvent.setup();
 		renderStep({
-			columns: SINGLE_COLUMN,
+			columns: ACCURACY_AND_GAP_COLUMNS,
 			existingFiles: [makeFile("avis-1.pdf", "file-1")],
 		});
 
@@ -1110,6 +1114,101 @@ describe("Step2Upload", () => {
 				deleteMutationOptions.onError?.();
 			});
 		}).not.toThrow();
+	});
+
+	describe("single possible association (#4731)", () => {
+		it("pre-checks, persists and locks the only content type for the only file", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+
+			expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+			expect(setTypesMutateMock).toHaveBeenCalledWith({
+				associations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+			const checkbox = screen.getByRole("checkbox", {
+				name: "Exactitude — avis-1.pdf",
+			});
+			expect(checkbox).toBeChecked();
+			expect(checkbox).toBeDisabled();
+		});
+
+		it("locks a stored association on return without writing it again", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				initialAssociations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+
+			expect(setTypesMutateMock).not.toHaveBeenCalled();
+			expect(
+				screen.getByRole("checkbox", { name: "Exactitude — avis-1.pdf" }),
+			).toBeDisabled();
+		});
+
+		it("leaves the choice to the user when several content types are required", () => {
+			renderStep({
+				columns: ACCURACY_AND_GAP_COLUMNS,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+
+			expect(setTypesMutateMock).not.toHaveBeenCalled();
+			const checkbox = screen.getByRole("checkbox", {
+				name: "Exactitude — avis-1.pdf",
+			});
+			expect(checkbox).not.toBeChecked();
+			expect(checkbox).toBeEnabled();
+		});
+
+		it("writes nothing when the declaration is read-only", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: true,
+			});
+
+			expect(setTypesMutateMock).not.toHaveBeenCalled();
+		});
+
+		it("does not retry in a loop when the save fails, and unlocks the box so the user can retry", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+
+			act(() => {
+				setTypesMutationOptions.onError?.();
+			});
+
+			expect(setTypesMutateMock).toHaveBeenCalledTimes(1);
+			const checkbox = screen.getByRole("checkbox", {
+				name: "Exactitude — avis-1.pdf",
+			});
+			expect(checkbox).not.toBeChecked();
+			expect(checkbox).toBeEnabled();
+		});
+
+		it("does not re-associate a file that has just been deleted", () => {
+			renderStep({
+				columns: SINGLE_COLUMN,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				initialAssociations: [
+					{ declarationNumber: 1, type: "accuracy", fileId: "file-1" },
+				],
+			});
+
+			fireEvent.click(screen.getByRole("button", { name: /Supprimer/ }));
+			act(() => {
+				deleteMutationOptions.onSuccess?.(undefined, { fileId: "file-1" });
+			});
+
+			expect(setTypesMutateMock).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("declaration lock", () => {

@@ -15,6 +15,7 @@ import {
 	declarations,
 	employeeCategories,
 	files,
+	type fileTypeEnum,
 	gipMdsData,
 	jobCategories,
 	users,
@@ -366,7 +367,7 @@ export async function getDeclarationsWithIndicatorG(
 
 async function fetchFilesByDeclaration(
 	declarationIds: string[],
-	type: "cse_opinion" | "joint_evaluation",
+	type: (typeof fileTypeEnum.enumValues)[number],
 ): Promise<FileRow[]> {
 	if (declarationIds.length === 0) return [];
 	return db
@@ -423,6 +424,17 @@ export async function fetchJointEvaluationFilesByDeclaration(
 	const rows = await fetchFilesByDeclaration(
 		declarationIds,
 		"joint_evaluation",
+	);
+	return groupByKey(rows, (r) => r.declarationId);
+}
+
+export async function fetchFormalNoticeJointEvaluationFilesByDeclaration(
+	declarationIds: string[],
+): Promise<Map<string, FileRow[]>> {
+	if (declarationIds.length === 0) return new Map();
+	const rows = await fetchFilesByDeclaration(
+		declarationIds,
+		"formal_notice_joint_evaluation",
 	);
 	return groupByKey(rows, (r) => r.declarationId);
 }

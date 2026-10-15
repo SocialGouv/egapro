@@ -10,6 +10,7 @@ import {
 } from "~/modules/domain";
 import {
 	companies,
+	cseOpinions,
 	declarationStatusHistory,
 	declarations,
 	files,
@@ -85,12 +86,14 @@ function makeSelectMock(
 async function makeCaller({
 	declRows = [],
 	eventRows = [],
+	gapOpinionRows = [],
 	jointEvaluationFileRows = [],
 	representationDeclarationRows = [],
 	workforceEma = "100.00",
 }: {
 	declRows?: unknown[];
 	eventRows?: unknown[];
+	gapOpinionRows?: unknown[];
 	jointEvaluationFileRows?: unknown[];
 	representationDeclarationRows?: unknown[];
 	workforceEma?: string | null;
@@ -102,6 +105,7 @@ async function makeCaller({
 		[files, jointEvaluationFileRows],
 		[gipMdsData, []],
 		[declarationStatusHistory, eventRows],
+		[cseOpinions, gapOpinionRows],
 		[representationDeclarations, representationDeclarationRows],
 	]);
 	const mockDb = { select: makeSelectMock(rowsByTable, queries) } as unknown;
@@ -350,6 +354,143 @@ describe("companyRouter.getWithDeclarations", () => {
 			hasSubmittedSecondDeclaration: false,
 			hasSubmittedJointEvaluation: false,
 			hasSubmittedCseOpinion: false,
+			formalNoticeAvailable: false,
+			hasSubmittedFormalNoticeJointEvaluation: false,
+		});
+	});
+
+	describe("formal notice joint evaluation", () => {
+		function closedJustifiedRow(overrides: Record<string, unknown> = {}) {
+			return {
+				...makeDeclRow(getCurrentYear()),
+				status: "demarche_completed",
+				rulesVersion: "2027.1",
+				cseRequired: true,
+				firstDeclarationPathChoice: "justify",
+				...overrides,
+			};
+		}
+
+		function gapOpinion(opinion: string, declarationId = DECLARATION_ID) {
+			return { declarationId, declarationNumber: 1, opinion };
+		}
+
+		async function remunerationRow(options: {
+			declRows: unknown[];
+			gapOpinionRows?: unknown[];
+			eventRows?: unknown[];
+		}) {
+			const { caller } = await makeCaller(options);
+			const result = await caller.getWithDeclarations({ siren: SIREN });
+			return result.declarations.find((d) => d.type === "remuneration");
+		}
+
+		it("opens the deposit when the gap opinion on the justification is unfavorable", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow()],
+					gapOpinionRows: [gapOpinion("unfavorable")],
+				}),
+			).toMatchObject({
+				formalNoticeAvailable: true,
+				hasSubmittedFormalNoticeJointEvaluation: false,
+			});
+		});
+
+		it("opens the deposit for a company without CSE", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow({ cseRequired: false })],
+				}),
+			).toMatchObject({ formalNoticeAvailable: true });
+		});
+
+		it("keeps the deposit closed when the gap opinion is favorable", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow()],
+					gapOpinionRows: [gapOpinion("favorable")],
+				}),
+			).toMatchObject({ formalNoticeAvailable: false });
+		});
+
+		it("ignores the gap opinion of another declaration", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow()],
+					gapOpinionRows: [gapOpinion("unfavorable", "another-declaration")],
+				}),
+			).toMatchObject({ formalNoticeAvailable: false });
+		});
+
+		it("keeps the deposit closed for a row without a known rules version", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow({ rulesVersion: null })],
+					gapOpinionRows: [gapOpinion("unfavorable")],
+				}),
+			).toMatchObject({ formalNoticeAvailable: false });
+		});
+
+		it("flags the transmitted report from the status history", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [closedJustifiedRow()],
+					gapOpinionRows: [gapOpinion("unfavorable")],
+					eventRows: [
+						{
+							declarationId: DECLARATION_ID,
+							eventType: "formal_notice_joint_evaluation_submit",
+							round: null,
+						},
+					],
+				}),
+			).toMatchObject({
+				formalNoticeAvailable: true,
+				hasSubmittedFormalNoticeJointEvaluation: true,
+			});
+		});
+
+		it("does not flag the report transmitted for another declaration", async () => {
+			expect(
+				await remunerationRow({
+					declRows: [makeDeclRow(getCurrentYear())],
+					eventRows: [
+						{
+							declarationId: "another-declaration",
+							eventType: "formal_notice_joint_evaluation_submit",
+							round: null,
+						},
+					],
+				}),
+			).toMatchObject({
+				formalNoticeAvailable: false,
+				hasSubmittedFormalNoticeJointEvaluation: false,
+			});
+		});
+
+		it("reads every gap opinion in a single query", async () => {
+			const { caller, queries } = await makeCaller({
+				declRows: [closedJustifiedRow()],
+			});
+
+			await caller.getWithDeclarations({ siren: SIREN });
+
+			expect(queries.filter((q) => q.table === cseOpinions)).toHaveLength(1);
+		});
+
+		it("does not query the opinions when the company has no declaration", async () => {
+			const { caller, queries } = await makeCaller();
+
+			const result = await caller.getWithDeclarations({ siren: SIREN });
+
+			expect(queries.some((q) => q.table === cseOpinions)).toBe(false);
+			expect(
+				result.declarations.find((d) => d.type === "remuneration"),
+			).toMatchObject({
+				formalNoticeAvailable: false,
+				hasSubmittedFormalNoticeJointEvaluation: false,
+			});
 		});
 	});
 

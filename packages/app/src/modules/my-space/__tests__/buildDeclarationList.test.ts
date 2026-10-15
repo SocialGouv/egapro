@@ -19,6 +19,8 @@ const EMPTY_DECLARATION = {
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,
 	hasJointEvaluationFile: false,
+	formalNoticeAvailable: false,
+	hasSubmittedFormalNoticeJointEvaluation: false,
 	hasPrefillData: false,
 	// `demarche_completed` (makeDbDeclaration's default fsmStatus) closes with no deadline.
 	deadline: null,

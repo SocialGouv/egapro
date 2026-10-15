@@ -7,13 +7,29 @@ import type { CompanySizeRange } from "~/modules/domain";
 import { ADMIN_DECLARATIONS, routeWithQuery } from "~/modules/routes";
 import { CompanySizeFilter } from "~/modules/shared";
 import { useZodForm } from "~/modules/shared/useZodForm";
-import type { SearchDeclarationsFormValues } from "./schemas";
-import { searchDeclarationsFormSchema } from "./schemas";
-import { WORKFORCE_LABEL } from "./shared/constants";
+import {
+	ADMIN_DECLARATION_STATUS_FILTERS,
+	type SearchDeclarationsFormValues,
+	searchDeclarationsFormSchema,
+	searchDeclarationsSchema,
+} from "./schemas";
+import { STATUS_LABELS, WORKFORCE_LABEL } from "./shared/constants";
 
-export function SearchForm() {
+type Props = {
+	years: number[];
+};
+
+function withSelectedYear(years: number[], selected: string | null): number[] {
+	const parsed = searchDeclarationsSchema.shape.year.safeParse(selected);
+	if (!parsed.success || parsed.data === undefined) return years;
+	if (years.includes(parsed.data)) return years;
+	return [...years, parsed.data].sort((a, b) => b - a);
+}
+
+export function SearchForm({ years }: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const yearOptions = withSelectedYear(years, searchParams.get("year"));
 
 	const { register, handleSubmit, reset, setValue, watch } = useZodForm(
 		searchDeclarationsFormSchema,
@@ -107,16 +123,22 @@ export function SearchForm() {
 					</div>
 				</div>
 				<div className="fr-col-12 fr-col-md-4">
-					<div className="fr-input-group">
+					<div className="fr-select-group">
 						<label className="fr-label" htmlFor="search-year">
 							Année
 						</label>
-						<input
-							className="fr-input"
+						<select
+							className="fr-select"
 							id="search-year"
-							type="number"
 							{...register("year")}
-						/>
+						>
+							<option value="">Toutes</option>
+							{yearOptions.map((year) => (
+								<option key={year} value={year}>
+									{year}
+								</option>
+							))}
+						</select>
 					</div>
 				</div>
 			</div>
@@ -166,8 +188,11 @@ export function SearchForm() {
 							{...register("status")}
 						>
 							<option value="">Tous</option>
-							<option value="draft">Brouillon</option>
-							<option value="cancelled">Annulée</option>
+							{ADMIN_DECLARATION_STATUS_FILTERS.map((status) => (
+								<option key={status} value={status}>
+									{STATUS_LABELS[status]}
+								</option>
+							))}
 						</select>
 					</div>
 				</div>

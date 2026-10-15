@@ -7,11 +7,16 @@ import {
 	MAX_XLSX_EXPORT_ROWS,
 	PUBLIC_EXPORT_BUSY_MESSAGE,
 } from "~/modules/public-api";
+import { campaignDeadlines } from "~/server/db/schema";
 import { createFakeValkey } from "~/test/fakeValkey";
+
+const RELEASE_GATE_SENTINEL = "RELEASE_GATE_SENTINEL";
 
 const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	logAction: vi.fn(),
+	publiclyReleasedCampaignCondition: vi.fn(() => "RELEASE_GATE_SENTINEL"),
+	innerJoinCalls: [] as unknown[][],
 	getValkey: vi.fn(),
 	queryLimit: vi.fn(),
 	queryWhere: vi.fn(),
@@ -23,6 +28,11 @@ vi.mock("~/server/services/valkey", async () =>
 
 vi.mock("~/server/db", () => ({
 	db: { select: mocks.dbSelect },
+}));
+
+vi.mock("~/server/db/publicReleaseConditions", () => ({
+	publiclyReleasedCampaignCondition: mocks.publiclyReleasedCampaignCondition,
+	releasedRepresentationCampaignJoin: vi.fn(),
 }));
 
 vi.mock("~/server/db/schema", () => ({
@@ -61,6 +71,7 @@ vi.mock("drizzle-orm", () => ({
 	inArray: (a: unknown, b: unknown) => ({ inArray: [a, b] }),
 	or: (...args: unknown[]) => ({ or: args }),
 	sql: (strings: TemplateStringsArray) => ({ sql: strings.join("") }),
+	ilike: (a: unknown, b: unknown) => ({ ilike: [a, b] }),
 }));
 
 vi.mock("~/server/audit/log", () => ({
@@ -68,6 +79,7 @@ vi.mock("~/server/audit/log", () => ({
 }));
 
 function setRows(rows: unknown[]) {
+	mocks.innerJoinCalls.length = 0;
 	const ordered = Object.assign(Promise.resolve(rows), {
 		limit: (count: number) => {
 			mocks.queryLimit(count);
@@ -77,7 +89,10 @@ function setRows(rows: unknown[]) {
 	const chain = {
 		from: () => chain,
 		$dynamic: () => chain,
-		innerJoin: () => chain,
+		innerJoin: (...args: unknown[]) => {
+			mocks.innerJoinCalls.push(args);
+			return chain;
+		},
 		leftJoin: () => chain,
 		where: (condition: unknown) => {
 			mocks.queryWhere(condition);
@@ -577,6 +592,26 @@ describe("GET /api/public/declarations/export", () => {
 		const response = await callGet(search);
 
 		expect(response.status).toBe(200);
+	});
+
+	it.each([
+		["no filter", ""],
+		[
+			"with filters",
+			"?format=csv&year=2023&q=alpha&region=11&naf=C&workforceRanges=1000%2B",
+		],
+	])("gates the campaign-deadline join on the public release condition (%s)", async (_label, search) => {
+		setRows([buildRow()]);
+
+		const response = await callGet(search);
+		expect(response.status).toBe(200);
+
+		const campaignJoinCall = mocks.innerJoinCalls.find(
+			([table]) => table === campaignDeadlines,
+		);
+		expect(campaignJoinCall).toBeDefined();
+		const joinCondition = campaignJoinCall?.[1] as { and: unknown[] };
+		expect(joinCondition.and).toContain(RELEASE_GATE_SENTINEL);
 	});
 
 	it.each([

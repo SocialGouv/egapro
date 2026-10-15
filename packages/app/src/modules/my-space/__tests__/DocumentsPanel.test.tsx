@@ -57,6 +57,8 @@ function makeDeclaration({
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
+		formalNoticeAvailable: false,
+		hasSubmittedFormalNoticeJointEvaluation: false,
 		hasPrefillData: false,
 		deadline: null,
 		notSubject: false,
@@ -178,6 +180,14 @@ describe("getDocumentResourceCount", () => {
 		).toBe(2);
 	});
 
+	it("adds the transmitted-elements recap once a joint evaluation report has been transmitted after a formal notice", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({ hasSubmittedFormalNoticeJointEvaluation: true }),
+			),
+		).toBe(2);
+	});
+
 	it("counts only the prefill and the declaration recap while the compliance path choice is pending", () => {
 		expect(
 			getDocumentResourceCount(
@@ -279,6 +289,21 @@ describe("DocumentsPanel", () => {
 		]);
 	});
 
+	it("offers the transmitted-elements recap after a formal notice joint evaluation deposit", () => {
+		const { links } = renderPanel({
+			hasSubmittedFormalNoticeJointEvaluation: true,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([
+			RECAP_TITLE,
+			TRANSMITTED_TITLE,
+		]);
+		expect(links().at(-1)).toHaveAttribute(
+			"href",
+			`/api/transmitted-pdf?year=${DECLARATION_YEAR}`,
+		);
+	});
+
 	it("points each card at its own PDF route and dates it with the reference year", () => {
 		const { panel, links } = renderPanel({
 			hasPrefillData: true,
@@ -301,6 +326,10 @@ describe("DocumentsPanel", () => {
 	it.each<[string, Partial<Omit<DeclarationItem, "status">>]>([
 		["a CSE opinion alone", { hasSubmittedCseOpinion: true }],
 		["a joint evaluation file alone", { hasJointEvaluationFile: true }],
+		[
+			"a formal notice joint evaluation alone",
+			{ hasSubmittedFormalNoticeJointEvaluation: true },
+		],
 		[
 			"prefill data ahead of it",
 			{ hasPrefillData: true, hasSubmittedCseOpinion: true },

@@ -28,6 +28,8 @@ export type DbDeclaration = {
 	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
+	formalNoticeAvailable: boolean;
+	hasSubmittedFormalNoticeJointEvaluation: boolean;
 	hasPrefillData: boolean;
 	deadline: Date | null;
 	notSubject: boolean;
@@ -66,6 +68,9 @@ export function buildDeclarationList(
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
+				formalNoticeAvailable: existing.formalNoticeAvailable,
+				hasSubmittedFormalNoticeJointEvaluation:
+					existing.hasSubmittedFormalNoticeJointEvaluation,
 				hasPrefillData: existing.hasPrefillData,
 				deadline: existing.deadline,
 				notSubject: existing.notSubject,
@@ -86,6 +91,8 @@ export function buildDeclarationList(
 				hasSubmittedCseOpinion: false,
 				cseRequired: false,
 				hasJointEvaluationFile: false,
+				formalNoticeAvailable: false,
+				hasSubmittedFormalNoticeJointEvaluation: false,
 				hasPrefillData:
 					type === "remuneration" && yearsWithPrefill.has(currentYear),
 				deadline:
@@ -117,6 +124,9 @@ export function buildDeclarationList(
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
+			formalNoticeAvailable: d.formalNoticeAvailable,
+			hasSubmittedFormalNoticeJointEvaluation:
+				d.hasSubmittedFormalNoticeJointEvaluation,
 			hasPrefillData: d.hasPrefillData,
 			deadline: d.deadline,
 			notSubject: d.notSubject,

@@ -3,6 +3,7 @@ import {
 	isCompanyDiffusible,
 	type PublicCompanySource,
 	type PublicDeclarationSource,
+	toPublicCompanyLocation,
 	toPublicDeclaration,
 } from "./projection";
 import { publicDeclarationDTOSchema, publicSearchInputSchema } from "./schemas";
@@ -291,6 +292,70 @@ describe("toPublicDeclaration", () => {
 
 		expect(dto.totalWomen).toBeNull();
 		expect(dto.totalMen).toBeNull();
+	});
+});
+
+describe("toPublicCompanyLocation", () => {
+	const location = {
+		address: "1 rue de la Paix, 75002 Paris",
+		city: "Paris",
+		regionCode: "11",
+		region: "Île-de-France",
+		departmentCode: "75",
+		departmentLabel: "Paris",
+		countryCode: null,
+		countryLabel: "FRANCE",
+	};
+
+	it("returns the raw location of a diffusible company", () => {
+		expect(
+			toPublicCompanyLocation({ ...location, statutDiffusion: "O" }),
+		).toEqual(location);
+	});
+
+	it("masks the eight location fields of a non-diffusible company", () => {
+		expect(
+			toPublicCompanyLocation({ ...location, statutDiffusion: "N" }),
+		).toEqual({
+			address: "Non-diffusible",
+			city: "Non-diffusible",
+			regionCode: "Non-diffusible",
+			region: "Non-diffusible",
+			departmentCode: "Non-diffusible",
+			departmentLabel: "Non-diffusible",
+			countryCode: "Non-diffusible",
+			countryLabel: "Non-diffusible",
+		});
+	});
+
+	it("drops the French region of a company registered abroad", () => {
+		const result = toPublicCompanyLocation({
+			...location,
+			countryCode: "99131",
+			countryLabel: "BELGIQUE",
+			statutDiffusion: "O",
+		});
+
+		expect(result.region).toBeNull();
+		expect(result.countryLabel).toBe("BELGIQUE");
+	});
+
+	it("reads absent columns as null and decides diffusion from the address", () => {
+		expect(
+			toPublicCompanyLocation({ address: "1 rue", statutDiffusion: null }),
+		).toEqual({
+			address: "1 rue",
+			city: null,
+			regionCode: null,
+			region: null,
+			departmentCode: null,
+			departmentLabel: null,
+			countryCode: null,
+			countryLabel: null,
+		});
+		expect(toPublicCompanyLocation({ statutDiffusion: null }).address).toBe(
+			"Non-diffusible",
+		);
 	});
 });
 

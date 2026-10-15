@@ -161,6 +161,7 @@ export function PanelPlayground() {
 	const [jointEvaluationSubmitted, setJointEvaluationSubmitted] =
 		useState(false);
 	const [cseOpinionSubmitted, setCseOpinionSubmitted] = useState(false);
+	const [formalNoticeAvailable, setFormalNoticeAvailable] = useState(false);
 	const [revisedJointEvaluation, setRevisedJointEvaluation] = useState(false);
 	const [cseOpinionRequired, setCseOpinionRequired] = useState(true);
 	const [compliancePathApplicable, setCompliancePathApplicable] =
@@ -277,6 +278,13 @@ export function PanelPlayground() {
 					/>
 
 					<PlaygroundCheckbox
+						checked={formalNoticeAvailable}
+						id="formal-notice-available"
+						label="Mise en demeure possible (variante close)"
+						onChange={setFormalNoticeAvailable}
+					/>
+
+					<PlaygroundCheckbox
 						checked={revisedJointEvaluation}
 						id="revised-joint-evaluation"
 						label="Évaluation conjointe révisée choisie (variante évaluation)"
@@ -377,6 +385,7 @@ export function PanelPlayground() {
 					secondDeclarationPathChoice: null,
 					cseRequired: cseOpinionRequired,
 				})}
+				formalNoticeAvailable={formalNoticeAvailable}
 				hasPrefillData={hasPrefillData}
 				hasSubmittedCseOpinion={cseOpinionSubmitted}
 				hasSubmittedJointEvaluation={jointEvaluationSubmitted}

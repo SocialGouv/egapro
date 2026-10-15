@@ -4,6 +4,7 @@ import {
 	getCurrentDate,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	getDefaultCampaignDeadlineColumns,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -439,6 +440,29 @@ describe("getDefaultCampaignDeadlines — ordering", () => {
 		],
 	])("%s", (_label, later, earlier) => {
 		expect(later.getTime()).toBeGreaterThanOrEqual(earlier.getTime());
+	});
+});
+
+describe("getDefaultCampaignDeadlineColumns", () => {
+	it("formats every default deadline as its YYYY-MM-DD day, matching getDefaultCampaignDeadlines", () => {
+		const columns = getDefaultCampaignDeadlineColumns(2027);
+		expect(columns).toStrictEqual({
+			decl1ModificationDeadline: "2027-06-01",
+			decl1JustificationDeadline: "2028-03-01",
+			decl1JointEvaluationDeadline: "2027-09-01",
+			decl2ModificationDeadline: "2028-01-01",
+			decl2JustificationDeadline: "2028-03-01",
+			decl2JointEvaluationDeadline: "2028-01-01",
+			decl2CseOpinionDeadline: "2028-03-01",
+		});
+	});
+
+	it("stays on the same civil day regardless of the host time zone", () => {
+		vi.stubEnv("TZ", "Pacific/Tahiti");
+		expect(
+			getDefaultCampaignDeadlineColumns(2027).decl1ModificationDeadline,
+		).toBe("2027-06-01");
+		vi.unstubAllEnvs();
 	});
 });
 

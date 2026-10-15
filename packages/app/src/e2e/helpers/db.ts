@@ -382,15 +382,64 @@ export async function getLatestJointEvaluationFileIdForTestSiren(): Promise<
 	}
 }
 
-export async function deleteJointEvaluationFiles() {
+type JointEvaluationFileType =
+	| "joint_evaluation"
+	| "formal_notice_joint_evaluation";
+
+async function deleteFilesOfType(type: JointEvaluationFileType) {
 	const sql = createConnection();
 	try {
 		await sql`
 			DELETE FROM app_file
-			WHERE type = 'joint_evaluation'
+			WHERE type = ${type}
 			AND declaration_id IN (
 				SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN}
 			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function deleteJointEvaluationFiles() {
+	await deleteFilesOfType("joint_evaluation");
+}
+
+export async function deleteFormalNoticeFiles() {
+	await deleteFilesOfType("formal_notice_joint_evaluation");
+}
+
+export async function countFormalNoticeFiles(): Promise<number> {
+	const sql = createConnection();
+	try {
+		const rows = await sql<[{ count: number }]>`
+			SELECT COUNT(*)::int AS count
+			FROM app_file f
+			INNER JOIN app_declaration d ON f.declaration_id = d.id
+			WHERE d.siren = ${TEST_SIREN}
+			  AND f.type = 'formal_notice_joint_evaluation'
+		`;
+		return rows[0]?.count ?? 0;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function setGapCseOpinion(
+	year: number,
+	opinion: "favorable" | "unfavorable",
+) {
+	const sql = createConnection();
+	try {
+		const decl = await sql`
+			SELECT id FROM app_declaration WHERE siren = ${TEST_SIREN} AND year = ${year} LIMIT 1
+		`;
+		if (decl.length === 0) return;
+		await sql`
+			INSERT INTO app_cse_opinion (id, declaration_id, declaration_number, type, gap_consulted, opinion, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${decl[0]?.id}, 1, 'gap', true, ${opinion}, NOW(), NOW())
+			ON CONFLICT (declaration_id, declaration_number, type)
+			DO UPDATE SET opinion = EXCLUDED.opinion, updated_at = NOW()
 		`;
 	} finally {
 		await sql.end();
@@ -632,10 +681,15 @@ export type CompanyLocation = {
 	address: string | null;
 	countryCode: string | null;
 	countryLabel: string | null;
+	departmentCode: string | null;
+	departmentLabel: string | null;
+	regionCode: string | null;
+	region: string | null;
 };
 
 /**
- * Read the three columns that drive the location row of the Mon espace banner.
+ * Read the columns that drive the location row of the Mon espace banner and of
+ * the observatory.
  *
  * They are populated from the company registry at sign-in, so their value differs
  * between a local worktree (registry unreachable — everything null) and CI. A spec
@@ -645,15 +699,25 @@ export type CompanyLocation = {
 export async function getCompanyLocation(): Promise<CompanyLocation> {
 	const sql = createConnection();
 	try {
-		const rows = await sql`
-			SELECT address, country_code, country_label
+		const rows = await sql<CompanyLocation[]>`
+			SELECT address,
+			       country_code AS "countryCode",
+			       country_label AS "countryLabel",
+			       department_code AS "departmentCode",
+			       department_label AS "departmentLabel",
+			       region_code AS "regionCode",
+			       region
 			FROM app_company
 			WHERE siren = ${TEST_SIREN}
 		`;
 		return {
-			address: (rows[0]?.address as string | null) ?? null,
-			countryCode: (rows[0]?.country_code as string | null) ?? null,
-			countryLabel: (rows[0]?.country_label as string | null) ?? null,
+			address: rows[0]?.address ?? null,
+			countryCode: rows[0]?.countryCode ?? null,
+			countryLabel: rows[0]?.countryLabel ?? null,
+			departmentCode: rows[0]?.departmentCode ?? null,
+			departmentLabel: rows[0]?.departmentLabel ?? null,
+			regionCode: rows[0]?.regionCode ?? null,
+			region: rows[0]?.region ?? null,
 		};
 	} finally {
 		await sql.end();
@@ -667,7 +731,11 @@ export async function setCompanyLocation(location: CompanyLocation) {
 			UPDATE app_company
 			SET address = ${location.address},
 			    country_code = ${location.countryCode},
-			    country_label = ${location.countryLabel}
+			    country_label = ${location.countryLabel},
+			    department_code = ${location.departmentCode},
+			    department_label = ${location.departmentLabel},
+			    region_code = ${location.regionCode},
+			    region = ${location.region}
 			WHERE siren = ${TEST_SIREN}
 		`;
 	} finally {
