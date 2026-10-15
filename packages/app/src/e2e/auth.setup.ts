@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { test as setup } from "@playwright/test";
-import { TEST_USER_EMAIL_FILE, TEST_USER_PHONE } from "./constants";
+import { TEST_SIREN, TEST_USER_EMAIL_FILE, TEST_USER_PHONE } from "./constants";
 import {
 	resetGipWorkforce,
 	setCompanyHasCse,
@@ -14,13 +14,21 @@ setup("authenticate via ProConnect", async ({ page }) => {
 	await page.context().storageState({ path: AUTH_FILE });
 	const response = await page.request.get("/api/auth/session");
 	const session = (await response.json()) as {
-		user?: { email?: unknown; isAdmin?: unknown };
+		user?: { email?: unknown; isAdmin?: unknown; siret?: unknown };
 	};
 	if (typeof session.user?.email !== "string" || !session.user.email) {
 		throw new Error("ProConnect did not return an email for the test user");
 	}
 	if (session.user.isAdmin !== true) {
 		throw new Error("ProConnect test user did not receive admin access");
+	}
+	if (
+		typeof session.user.siret !== "string" ||
+		session.user.siret.slice(0, 9) !== TEST_SIREN
+	) {
+		throw new Error(
+			`ProConnect test user belongs to a different company than the E2E fixture (${TEST_SIREN})`,
+		);
 	}
 	await writeFile(TEST_USER_EMAIL_FILE, session.user.email);
 
