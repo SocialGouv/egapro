@@ -108,6 +108,8 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 | `export` | 365 jours |
 | `system` | 365 jours |
 
+Pour `AUTH_ADMIN_MFA`, les métadonnées conservées incluent `granted`, la décision booléenne d'accès à l'administration. Les rôles sont réduits au seul signal `agent_public`.
+
 **Événements antivirus** : chaque fichier déposé (avis du CSE, évaluation conjointe) est analysé par ClamAV avant d'être conservé. Une détection écrit une ligne `failure` sur l'action d'upload avec le code `HTTP_422_virus_detected` et, dans les métadonnées, le nom de la signature ClamAV (`virusName`, ex. `Win.Test.EICAR_HDB-1`) ; une valeur qui n'a pas la forme d'une signature est écartée. Une indisponibilité de l'antivirus (connexion refusée, coupure en cours d'envoi, délai dépassé) écrit le code `HTTP_503_antivirus_unavailable`. Le nom du fichier n'est jamais conservé. En parallèle, la sortie standard reçoit une ligne `[antivirus]` (voir [4.3](#43-logs-applicatifs-stdout-et-stderr)) qui ne porte ni la signature ni le nom du fichier.
 
 Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.

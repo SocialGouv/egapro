@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { signInMock, assignMock } = vi.hoisted(() => ({
@@ -41,6 +42,33 @@ describe("DevLoginForm", () => {
 		expect(screen.getByRole("button", { name: /se connecter/i })).toBeEnabled();
 	});
 
+	it("checks the public-agent box by default", () => {
+		render(<DevLoginForm />);
+		expect(
+			screen.getByRole("checkbox", { name: /agent public/i }),
+		).toBeChecked();
+	});
+
+	it("carries isPublicAgent=false when the box is unchecked", async () => {
+		signInMock.mockResolvedValue({ error: null });
+		render(<DevLoginForm callbackUrl="/admin" />);
+
+		await userEvent.click(
+			screen.getByRole("checkbox", { name: /agent public/i }),
+		);
+		fillAndSubmit("dev@example.fr", "12345678901234");
+
+		await waitFor(() => {
+			expect(signInMock).toHaveBeenCalledWith("dev-auth", {
+				callbackUrl: "/admin",
+				email: "dev@example.fr",
+				isPublicAgent: "false",
+				redirect: false,
+				siret: "12345678901234",
+			});
+		});
+	});
+
 	it("signs in through the dev-auth provider then navigates to the callback", async () => {
 		signInMock.mockResolvedValue({ error: null });
 		render(<DevLoginForm callbackUrl="/declaration-remuneration" />);
@@ -51,6 +79,7 @@ describe("DevLoginForm", () => {
 			expect(signInMock).toHaveBeenCalledWith("dev-auth", {
 				callbackUrl: "/declaration-remuneration",
 				email: "dev@example.fr",
+				isPublicAgent: "true",
 				redirect: false,
 				siret: "12345678901234",
 			});

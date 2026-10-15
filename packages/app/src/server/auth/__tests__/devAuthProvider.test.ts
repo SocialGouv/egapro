@@ -64,19 +64,6 @@ describe("dev-auth provider registration", () => {
 		vi.resetModules();
 	});
 
-	it.each([
-		[true, "openid email given_name usual_name siret roles"],
-		[false, "openid email given_name usual_name siret"],
-	])("requests roles only when public-agent access is required (%s)", async (required, scope) => {
-		const providers = await loadProviders({
-			EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: required,
-		});
-		const proconnect = providers
-			.map(resolveProvider)
-			.find((provider) => provider.id === "proconnect");
-		expect(proconnect?.authorization).toEqual({ params: { scope } });
-	});
-
 	it("is absent by default", async () => {
 		const providers = await loadProviders({
 			EGAPRO_DEV_AUTH: false,
@@ -149,9 +136,32 @@ describe("dev-auth authorize", () => {
 			id: "declarant@example.fr",
 			lastName: null,
 			name: "declarant",
+			organizationLabel: "Société Démo",
 			roles: ["agent_public"],
 			siret: "55210055400013",
 		});
+	});
+
+	it("carries an empty roles claim when isPublicAgent is set to false", async () => {
+		const authorize = await getAuthorize();
+		const user = await authorize(
+			{
+				email: "declarant@example.fr",
+				isPublicAgent: "false",
+				siret: "55210055400013",
+			},
+			LOCAL_REQ,
+		);
+		expect(user).toMatchObject({ roles: [] });
+	});
+
+	it("defaults to a public agent when isPublicAgent is omitted", async () => {
+		const authorize = await getAuthorize();
+		const user = await authorize(
+			{ email: "declarant@example.fr", siret: "55210055400013" },
+			LOCAL_REQ,
+		);
+		expect(user).toMatchObject({ roles: ["agent_public"] });
 	});
 
 	it("accepts a SIRET typed with spaces", async () => {
