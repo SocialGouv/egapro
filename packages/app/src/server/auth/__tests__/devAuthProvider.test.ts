@@ -64,6 +64,19 @@ describe("dev-auth provider registration", () => {
 		vi.resetModules();
 	});
 
+	it.each([
+		[true, "openid email given_name usual_name siret roles"],
+		[false, "openid email given_name usual_name siret"],
+	])("requests roles only when public-agent access is required (%s)", async (required, scope) => {
+		const providers = await loadProviders({
+			EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: required,
+		});
+		const proconnect = providers
+			.map(resolveProvider)
+			.find((provider) => provider.id === "proconnect");
+		expect(proconnect?.authorization).toEqual({ params: { scope } });
+	});
+
 	it("is absent by default", async () => {
 		const providers = await loadProviders({
 			EGAPRO_DEV_AUTH: false,

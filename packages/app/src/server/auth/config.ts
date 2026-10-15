@@ -412,7 +412,7 @@ function getProviders(): Provider[] {
 			clientSecret: env.EGAPRO_PROCONNECT_CLIENT_SECRET,
 			authorization: {
 				params: {
-					scope: "openid email given_name usual_name siret roles",
+					scope: `openid email given_name usual_name siret${env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT === true ? " roles" : ""}`,
 				},
 			},
 			idToken: true,
