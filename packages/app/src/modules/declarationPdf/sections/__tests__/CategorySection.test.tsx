@@ -142,6 +142,28 @@ describe("CategorySection", () => {
 		expect(screen.getByText("44 000 €")).toBeInTheDocument();
 	});
 
+	it("shows the magnitude and favored sex in both category pay tables", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							name: "Cadres",
+							annualBaseWomen: "40000",
+							annualBaseMen: "50000",
+							hourlyBaseWomen: "30",
+							hourlyBaseMen: "20",
+						}),
+					],
+				})}
+			/>,
+		);
+		expect(screen.getByText("20,00 %")).toBeInTheDocument();
+		expect(screen.getByText("50,00 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+
 	it("shows a dash for a missing hourly headcount, never an invented 0 (#4368)", () => {
 		render(
 			<CategorySection

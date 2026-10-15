@@ -1,6 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { GAP_FAVORED_SEX_MENTIONS } from "~/modules/declaration-remuneration";
+import { GAP_FAVORED_SEX_MENTIONS } from "~/modules/declaration-remuneration/shared/gapBadge";
 import {
 	formatGap,
 	gapFavoredSex,
@@ -45,7 +45,7 @@ function FavoredSexGap({
 
 export function GapCell({
 	gap,
-	variant = "signed",
+	variant = "favoredSex",
 	sheet = styles,
 }: {
 	gap: number | null;

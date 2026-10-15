@@ -219,8 +219,7 @@ export const styles = StyleSheet.create({
 	},
 
 	gapCell: {
-		flexDirection: "row",
-		alignItems: "center",
+		flexDirection: "column",
 	},
 	gapValue: {
 		flex: 1,

@@ -93,6 +93,7 @@ Conventions de notation :
 
 - L'**année de campagne** = année calendaire suivant l'année des données : `getCurrentYear()` retourne 2025 quand les données sont celles de 2024 (voir `~/modules/domain`).
 - Le **calcul des écarts** est centralisé dans `computeGap(womenPay, menPay)` (positif si les hommes gagnent plus, négatif sinon).
+- Les vues de saisie, le récapitulatif transmis et la fiche admin présentent les écarts de rémunération en **valeur absolue**, suivie de « en faveur des femmes » ou « en faveur des hommes » selon leur signe. Un écart nul ou absent ne désigne aucun sexe favorisé. Cette convention d'affichage ne modifie pas la valeur signée conservée dans les données.
 - **Seuil d'alerte** : `GAP_ALERT_THRESHOLD = 5%`. Au-delà, une **seconde déclaration** est obligatoire pour les entreprises ≥ 100 salariés (voir §5).
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
 - Une fois `submitted`, la déclaration reste modifiable tant qu'**aucune transmission ultérieure** ne l'a supplantée (seconde déclaration, évaluation conjointe ou avis du CSE) : seule la dernière transmission est modifiable. La modifiabilité est dite par l'événement qui la ferme (`isLockedBySubsequentSubmission`, `~/modules/domain/shared/declarationStatus.ts`, à partir de `deriveSubsequentSubmissions`) et non plus par une date ; `decl1ModificationDeadline` n'est plus un garde d'écriture, c'est une **échéance informative** (voir §12). Le serveur rejette une écriture sur une étape supplantée (`DECLARATION_SUPERSEDED_MESSAGE`).
@@ -295,6 +296,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - **Public, sans authentification**.
 - L'indicateur **G n'est jamais exposé** (catégories d'emploi confidentielles).
+- Les deux cartes d'écart de rémunération de l'observatoire affichent le pourcentage sans signe et indiquent le sexe favorisé en toutes lettres ; les proportions de bénéficiaires de rémunération variable gardent leur propre convention.
 - L'export Excel est conçu pour un usage analyste / journaliste (pagination, filtres par année).
 - **Affichage du pays** : la recherche, la fiche entreprise (`CompanyHeader`) et le bandeau Mon espace partagent une seule règle (`companyLocationRow`, `~/modules/domain/shared/companyLocationDisplay.ts`) à trois issues — pays étranger connu (ligne « Pays », libellé mis en forme via `formatInseeTitleCase`), France (ligne « Adresse »), ou pays **inconnu** (ligne « Pays : inconnu ») quand le registre n'a rien déclaré. Une entreprise non diffusible masque sa localisation en amont de cette règle (`NON_DIFFUSIBLE_LABEL`, `~/modules/public-api`).
 
@@ -397,6 +399,8 @@ L'application génère plusieurs documents officiels et expose une API publique 
 |---|---|---|
 | `DeclarationPdfDocument` | Pre-fill / aperçu | `~/modules/declarationPdf` |
 | `TransmittedPdfDocument` | Récapitulatif des avis CSE et de l'évaluation conjointe transmis | `~/modules/declarationPdf` |
+
+Dans le PDF de déclaration, les tableaux d'écart globaux et par catégorie indiquent la valeur absolue et le sexe favorisé dans chaque cellule concernée. La mention est sur une deuxième ligne ; aucun sexe n'est indiqué pour un écart nul ou absent. Les exports et API continuent de fournir les valeurs signées.
 
 Téléchargement déclenché depuis :
 

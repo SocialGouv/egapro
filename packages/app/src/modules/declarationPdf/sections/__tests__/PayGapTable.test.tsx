@@ -43,6 +43,25 @@ describe("PayGapTable", () => {
 		expect(screen.getByText("Seuil réglementaire : 5%")).toBeInTheDocument();
 		// (50000 - 45000) / 50000 * 100 = 10 %
 		expect(screen.getByText("10,00 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+	});
+
+	it("keeps the signed GIP reference when displayed amounts are equal", () => {
+		render(
+			<PayGapTable
+				rows={[
+					{
+						label: "Horaire brute moyenne",
+						women: "0.10",
+						men: "0.10",
+						reference: { women: "0.10", men: "0.10", gap: "-0.0719" },
+					},
+				]}
+			/>,
+		);
+		expect(screen.getByText("7,19 %")).toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+		expect(screen.getByText("ÉLEVÉ")).toBeInTheDocument();
 	});
 
 	it("badges a row whose gap reaches the threshold", () => {

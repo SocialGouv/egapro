@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -126,6 +126,68 @@ describe("RemunerationTab", () => {
 			0,
 		);
 		expect(screen.getAllByText("hommes").length).toBeGreaterThan(0);
+	});
+
+	it("shows unsigned percentages with the signed direction in both gap sections and periods", async () => {
+		const user = userEvent.setup();
+		renderTab({
+			globalHourlyMeanGap: -0.0717,
+			variableHourlyMeanGap: -0.207,
+			globalAnnualMeanGap: -0.005,
+			variableAnnualMeanGap: -0.1,
+		});
+
+		const global = within(
+			screen.getByRole("region", { name: "Écart de rémunération" }),
+		);
+		const variable = within(
+			screen.getByRole("region", {
+				name: "Écart de rémunération variable et complémentaire",
+			}),
+		);
+
+		expect(global.getByText("7,17 %")).toBeInTheDocument();
+		expect(variable.getByText("20,7 %")).toBeInTheDocument();
+		expect(global.queryByText("-7,17 %")).not.toBeInTheDocument();
+		expect(variable.queryByText("-20,7 %")).not.toBeInTheDocument();
+		expect(global.getByText("femmes")).toBeInTheDocument();
+		expect(variable.getByText("femmes")).toBeInTheDocument();
+		expect(global.getByText("hommes")).toBeInTheDocument();
+		expect(variable.getByText("hommes")).toBeInTheDocument();
+
+		for (const radio of screen.getAllByRole("radio", {
+			name: "Rémunération annuelle",
+		})) {
+			await user.click(radio);
+		}
+
+		expect(global.getByText("0,5 %")).toBeInTheDocument();
+		expect(variable.getByText("10 %")).toBeInTheDocument();
+		expect(global.queryByText("-0,5 %")).not.toBeInTheDocument();
+		expect(variable.queryByText("-10 %")).not.toBeInTheDocument();
+		expect(global.getByText("femmes")).toBeInTheDocument();
+		expect(variable.getByText("femmes")).toBeInTheDocument();
+	});
+
+	it("keeps the zero and missing gap labels", () => {
+		renderTab({
+			globalHourlyMeanGap: 0,
+			variableHourlyMeanGap: null,
+		});
+
+		const global = within(
+			screen.getByRole("region", { name: "Écart de rémunération" }),
+		);
+		const variable = within(
+			screen.getByRole("region", {
+				name: "Écart de rémunération variable et complémentaire",
+			}),
+		);
+
+		expect(global.getByText("0 %")).toBeInTheDocument();
+		expect(global.getByText("Aucun écart constaté")).toBeInTheDocument();
+		expect(variable.getByText("—")).toBeInTheDocument();
+		expect(variable.getByText("Donnée non disponible")).toBeInTheDocument();
 	});
 
 	it("adds the all-employees line the quartile cards need, derived from the totals", () => {
