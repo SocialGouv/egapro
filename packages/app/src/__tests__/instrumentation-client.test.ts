@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 vi.mock("@sentry/nextjs", () => ({
+	captureRouterTransitionStart: vi.fn(),
 	init: vi.fn(),
 	replayIntegration: vi.fn(),
 }));
