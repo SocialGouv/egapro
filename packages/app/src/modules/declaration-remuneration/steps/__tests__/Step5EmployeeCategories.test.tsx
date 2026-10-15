@@ -138,7 +138,7 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		const heading = screen.getByRole("heading", {
-			name: /Écart de rémunération par catégories de salariés/,
+			name: /Écart de rémunération par catégorie de salariés/,
 		});
 		expect(heading).toBeInTheDocument();
 		expect(heading.textContent).not.toMatch(/salaire de base et primes/i);

@@ -295,8 +295,10 @@ test.describe("Company location row — Mon espace banner and observatory", () =
 		await expectObservatoryLocation(page, "Pays : inconnu");
 		await expect(page.getByText(STREET_ONLY_ADDRESS)).toHaveCount(0);
 		await expect(
-			page.locator('script[type="application/ld+json"]'),
-		).not.toContainText("addressCountry");
+			page
+				.locator('script[type="application/ld+json"]')
+				.filter({ hasText: "addressCountry" }),
+		).toHaveCount(0);
 	});
 
 	test("reads a company with no country but a French département as French", async ({

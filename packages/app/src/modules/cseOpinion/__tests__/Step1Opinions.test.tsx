@@ -150,7 +150,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l'indicateur par catégories de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
 			),
 		).toBeInTheDocument();
 	});
@@ -167,7 +167,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.queryByText(
-				/Parcours de mise en conformité pour l'indicateur par catégories de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
 			),
 		).not.toBeInTheDocument();
 	});
@@ -292,7 +292,7 @@ describe("Step1Opinions", () => {
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				"Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégories de salariés",
+				"Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés",
 			),
 		).toBeInTheDocument();
 		expect(screen.getAllByText(/Justification des écarts/).length).toBe(1);

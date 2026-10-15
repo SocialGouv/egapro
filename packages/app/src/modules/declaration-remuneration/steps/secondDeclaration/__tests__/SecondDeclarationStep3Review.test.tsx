@@ -187,7 +187,7 @@ describe("SecondDeclarationStep3Review", () => {
 		renderStep3();
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégories de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
 			),
 		).toBeInTheDocument();
 		// Non-breaking space keeps "par catégorie" on the same line (Figma spec)
@@ -214,7 +214,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the card title without the base-and-bonus parenthetical", () => {
 		renderStep3();
 		expect(
-			screen.getByText("Écart de rémunération par catégories de salariés"),
+			screen.getByText("Écart de rémunération par catégorie de salariés"),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(/salaire de base et primes/),

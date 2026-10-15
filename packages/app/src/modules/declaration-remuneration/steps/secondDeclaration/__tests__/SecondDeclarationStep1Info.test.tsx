@@ -23,7 +23,7 @@ describe("SecondDeclarationStep1Info", () => {
 
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégories de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
 			),
 		).toBeInTheDocument();
 	});
@@ -125,7 +125,7 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(screen.getByText("actions correctives").tagName).toBe("STRONG");
 		expect(
 			screen.getByText(
-				/^seconde déclaration de l.indicateur par catégories de salariés$/,
+				/^seconde déclaration de l.indicateur par catégorie de salariés$/,
 			).tagName,
 		).toBe("STRONG");
 	});

@@ -177,10 +177,10 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.getByText("Indicateur par catégories de salariés"),
+			screen.getByText("Indicateur par catégorie de salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Écart de rémunération par catégories de salariés"),
+			screen.getByText("Écart de rémunération par catégorie de salariés"),
 		).toBeInTheDocument();
 	});
 
@@ -198,10 +198,10 @@ describe("IndicatorSections", () => {
 		);
 
 		expect(
-			screen.queryByText("Indicateur par catégories de salariés"),
+			screen.queryByText("Indicateur par catégorie de salariés"),
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByText("Écart de rémunération par catégories de salariés"),
+			screen.queryByText("Écart de rémunération par catégorie de salariés"),
 		).not.toBeInTheDocument();
 	});
 });
