@@ -84,7 +84,7 @@ describe("SiblingDeclarationsSection", () => {
 		);
 
 		const listitem = screen.getByRole("listitem");
-		expect(listitem).toHaveTextContent("Transmise");
+		expect(listitem).toHaveTextContent("Choix parcours conformité");
 	});
 
 	it("renders multiple siblings", () => {

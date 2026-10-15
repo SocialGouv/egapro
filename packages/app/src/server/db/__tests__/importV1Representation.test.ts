@@ -120,6 +120,8 @@ describe("mapCompanyFromV1", () => {
 			regionCode: "11",
 			departmentCode: "75",
 			departmentLabel: "Paris",
+			countryCode: null,
+			countryLabel: "FRANCE",
 			statutDiffusion: null,
 		});
 	});
@@ -157,6 +159,8 @@ describe("mapCompanyFromV1", () => {
 			regionCode: null,
 			departmentCode: null,
 			departmentLabel: null,
+			countryCode: null,
+			countryLabel: null,
 			statutDiffusion: null,
 		});
 	});
@@ -169,6 +173,8 @@ describe("mapCompanyFromV1", () => {
 			regionCode: null,
 			departmentCode: "999",
 			departmentLabel: null,
+			countryCode: null,
+			countryLabel: null,
 			statutDiffusion: null,
 		});
 	});

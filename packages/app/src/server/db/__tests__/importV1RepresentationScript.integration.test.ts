@@ -68,6 +68,8 @@ type DeclarationRow = {
 
 type CompanyRow = {
 	address: string | null;
+	country_code: string | null;
+	country_label: string | null;
 	department_code: string | null;
 	department_label: string | null;
 	naf_code: string | null;
@@ -177,7 +179,8 @@ describe("import-v1-representation.mjs (integration)", () => {
 
 	async function readCompany(siren: string) {
 		const [row] = await sql<CompanyRow[]>`
-			SELECT siren, name, address, naf_code, region, region_code, department_code, department_label, statut_diffusion
+			SELECT siren, name, address, naf_code, region, region_code, department_code, department_label,
+				country_code, country_label, statut_diffusion
 			FROM app_company WHERE siren = ${siren}
 		`;
 		return row;
@@ -287,7 +290,27 @@ describe("import-v1-representation.mjs (integration)", () => {
 			region_code: "11",
 			department_code: "75",
 			department_label: "Paris",
+			country_code: null,
+			country_label: "FRANCE",
 			statut_diffusion: null,
+		});
+	});
+
+	it("creates the company with an unknown country when the V1 department is unknown", async () => {
+		await seedLegacy({
+			siren: SIREN_A,
+			data: v1Data({
+				entreprise: v1Company({ siren: SIREN_A, département: "999" }),
+			}),
+		});
+
+		await runImport();
+
+		expect(await readCompany(SIREN_A)).toMatchObject({
+			department_code: "999",
+			department_label: null,
+			country_code: null,
+			country_label: null,
 		});
 	});
 
@@ -329,6 +352,7 @@ describe("import-v1-representation.mjs (integration)", () => {
 			naf_code: "01.11Z",
 			region: null,
 			department_code: null,
+			country_label: null,
 		});
 	});
 

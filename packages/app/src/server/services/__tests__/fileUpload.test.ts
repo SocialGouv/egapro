@@ -176,6 +176,54 @@ describe("fileUpload service", () => {
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 	});
 
+	it("logs a detection on stdout without the signature or the file name", async () => {
+		await setEnv();
+
+		mockClamd.finish.mockResolvedValueOnce({
+			clean: false,
+			virus: "Eicar-Signature",
+		});
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		await handleStreamingUpload(createReadableStream(PDF_HEADER), baseOptions);
+
+		expect(warnSpy).toHaveBeenCalledWith("[antivirus] file rejected", {
+			reason: "virus_detected",
+		});
+		const logged = JSON.stringify(warnSpy.mock.calls);
+		expect(logged).not.toContain("Eicar-Signature");
+		expect(logged).not.toContain(baseOptions.fileName);
+
+		warnSpy.mockRestore();
+	});
+
+	it("keeps the virus verdict when the S3 abort fails", async () => {
+		await setEnv();
+
+		mockClamd.finish.mockResolvedValueOnce({
+			clean: false,
+			virus: "Eicar-Signature",
+		});
+		mockS3Upload.abort.mockRejectedValueOnce(new Error("S3 AbortMultipart"));
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(
+			createReadableStream(PDF_HEADER),
+			baseOptions,
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			reason: "virus",
+			error: "Fichier rejeté : virus détecté",
+			virusName: "Eicar-Signature",
+		});
+
+		warnSpy.mockRestore();
+	});
+
 	it("rejects an empty file", async () => {
 		await setEnv();
 
@@ -217,6 +265,36 @@ describe("fileUpload service", () => {
 		}
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 		expect(mockS3Upload.complete).not.toHaveBeenCalled();
+		expect(consoleSpy).toHaveBeenCalledWith("[antivirus] scan unavailable", {
+			reason: "antivirus_unavailable",
+			stage: "finish",
+			cause: expect.any(Error),
+		});
+
+		consoleSpy.mockRestore();
+	});
+
+	it("does not report an antivirus failure when the request is aborted during the scan", async () => {
+		await setEnv();
+
+		const controller = new AbortController();
+		mockClamd.finish.mockImplementationOnce(() => {
+			controller.abort();
+			return Promise.reject(new Error("clamd connection aborted"));
+		});
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		const { handleStreamingUpload } = await import("../fileUpload");
+		const result = await handleStreamingUpload(
+			createReadableStream(PDF_HEADER),
+			{ ...baseOptions, signal: controller.signal },
+		);
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.reason).toBe("aborted");
+		}
+		expect(consoleSpy).not.toHaveBeenCalled();
 
 		consoleSpy.mockRestore();
 	});
@@ -248,6 +326,11 @@ describe("fileUpload service", () => {
 		expect(mockS3Upload.abort).toHaveBeenCalled();
 		expect(mockS3Upload.complete).not.toHaveBeenCalled();
 		expect(mockClamd.destroy).toHaveBeenCalled();
+		expect(consoleSpy).toHaveBeenCalledWith("[antivirus] scan unavailable", {
+			reason: "antivirus_unavailable",
+			stage: "send_chunk",
+			cause: expect.objectContaining({ code: "ECONNREFUSED" }),
+		});
 
 		consoleSpy.mockRestore();
 	});

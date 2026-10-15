@@ -58,6 +58,7 @@ Conventions de notation :
 - Les entreprises sont rattachées via la table `userCompanies` (relation N-N entre `users` et `companies`).
 - En environnement local, le fournisseur de test ProConnect est **FIA1V2** (compte `test@fia1.fr`).
 - À la **déconnexion**, tous les verrous de modification détenus par l'utilisateur sont libérés (voir §13.7).
+- **Pays de l'entreprise** : à chaque connexion, le pays de l'entreprise rattachée est résolu via le registre (voir [§13.9](#139-résolution-du-pays-de-lentreprise-registre-weez)) et affiché dans le bandeau `CompanyInfoBanner` (`~/modules/my-space`) — ligne « Pays » si l'entreprise est à l'étranger, « Adresse » si elle est en France.
 
 ---
 
@@ -268,7 +269,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
 - **Campagne** : ouverte de `campaignStartDate` jusqu'à la fin du jour `campaignEndDate` inclus (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
 - **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la transmission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations transmises (une déclaration `not_subject` n'a pas de PDF).
-- **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
+- **Consultation publique et export SUIT** : les données brutes déclarées sont exposées sur la fiche entreprise de l'observatoire et sur data.gouv.fr — aucune API publique ne les sert —, **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
 - **Reprise V1** : le kit ponctuel `scripts/migration-v1` reprend depuis un dump les déclarations historiques sans jamais écraser une déclaration saisie nativement en V2. La procédure d'exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
 
 **Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (transmise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
@@ -295,6 +296,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Public, sans authentification**.
 - L'indicateur **G n'est jamais exposé** (catégories d'emploi confidentielles).
 - L'export Excel est conçu pour un usage analyste / journaliste (pagination, filtres par année).
+- **Affichage du pays** : la recherche, la fiche entreprise (`CompanyHeader`) et le bandeau Mon espace partagent une seule règle (`companyLocationRow`, `~/modules/domain/shared/companyLocationDisplay.ts`) à trois issues — pays étranger connu (ligne « Pays », libellé mis en forme via `formatInseeTitleCase`), France (ligne « Adresse »), ou pays **inconnu** (ligne « Pays : inconnu ») quand le registre n'a rien déclaré. Une entreprise non diffusible masque sa localisation en amont de cette règle (`NON_DIFFUSIBLE_LABEL`, `~/modules/public-api`).
 
 ---
 
@@ -415,7 +417,6 @@ API publique (aucune authentification, OpenAPI documentée) :
 | URL | Format | Filtres |
 |---|---|---|
 | `/api/public/declarations/export` | CSV | mêmes facettes que la recherche |
-| `/api/public/representations/export` | CSV | mêmes facettes que la recherche |
 | `/api/public/docs` | Swagger UI | documentation interactive |
 
 **Module** : `~/modules/export`. **Audit** : `EXPORT_GENERATE`, `EXPORT_DOWNLOAD`, `EXPORT_API_DECLARATIONS`, `EXPORT_API_FILES` (catégorie `export`, rétention 365 jours).
@@ -433,7 +434,7 @@ API publique (aucune authentification, OpenAPI documentée) :
 | Route | Fonction |
 |---|---|
 | `/admin/` | Tableau de bord (raccourcis vers les sous-sections) |
-| `/admin/declarations` | Recherche multi-critères (SIREN, email, année, plage de dates, statut) |
+| `/admin/declarations` | Recherche multi-critères (SIREN, email, année, plage de dates, statut, filtre « Effectif » par tranche — une entreprise à effectif GIP inconnu est rangée dans « Moins de 50 salariés ») |
 | `/admin/declarations/[id]` | Détail complet d'une déclaration, export CSV, déverrouillage manuel |
 | `/admin/liste-referents` | Annuaire admin (CRUD + import CSV) |
 | `/admin/impersonate` | Recherche d'entreprise pour impersonation |
@@ -449,7 +450,7 @@ API publique (aucune authentification, OpenAPI documentée) :
 - L'accès admin est gardé par le **middleware Edge** (`src/middleware.ts`) qui redirige vers `/login` si `isAdmin` est faux.
 - L'**impersonation** est tracée dans `adminImpersonationEvents` (audit trail dédié, lecture par `admin.getLastImpersonated`). Le callback JWT NextAuth injecte un `impersonation: { siren, startedAt }` dans la session active.
 - Les **échéances** (anciennement « deadlines ») sont informatives et par année de campagne ; si aucune ligne n'existe en BDD pour l'année courante, des défauts viennent de `~/modules/domain` (`getDefaultCampaignDeadlines`).
-- Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`), sur l'effectif GIP-MDS de l'année (`gip_mds_data.workforce_ema`) — source unique de l'effectif, comme l'export et le back-office. Une entreprise absente du fichier GIP de l'année n'appartient à aucune tranche : elle reste comptée dans les totaux sans filtre, mais sort dès qu'une tranche est sélectionnée. Deux métriques d'engagement complètent les courbes : les **utilisateurs par entreprise** (agrégat BDD sur `user_company` — répartition mono/multi-utilisateurs, sans PII) et le **volume de confirmations du statut CSE** (event Matomo anonymisé `oui`/`non`, donc un comptage d'actions, pas d'entreprises distinctes).
+- Les **stats** segmentent les entreprises par effectif (`small / medium / large`, voir `COMPANY_SIZE_RANGES`), sur l'effectif GIP-MDS de l'année (`gip_mds_data.workforce_ema`) — source unique de l'effectif, comme l'export et le back-office. Une entreprise absente du fichier GIP de l'année (ou sans effectif renseigné) relève de « Moins de 50 » : elle reste comptée dans les totaux sans filtre, et apparaît dans la tranche la plus petite dès qu'une tranche est sélectionnée. Deux métriques d'engagement complètent les courbes : les **utilisateurs par entreprise** (agrégat BDD sur `user_company` — répartition mono/multi-utilisateurs, sans PII) et le **volume de confirmations du statut CSE** (event Matomo anonymisé `oui`/`non`, donc un comptage d'actions, pas d'entreprises distinctes).
 - L'**import GIP-MDS** est déclenché manuellement depuis la home admin (pas de cron en V2).
 - **Déverrouillage manuel** : depuis le détail d'une déclaration, l'admin peut libérer le verrou d'édition détenu par un autre utilisateur via le bouton `UnlockDeclarationButton` (procédure `adminDeclarations.releaseLock`). La confirmation est demandée dans une modale.
 - **Délai d'expiration du verrou** : dans `/admin/parametres`, l'admin peut configurer la durée (en minutes) au-delà de laquelle un verrou inactif expire (procédures `adminSettings.getLockTimeout` / `adminSettings.updateLockTimeout`, valeur stockée dans `globalSettings.declarationLockTimeoutMinutes`, défaut `DEFAULT_LOCK_TIMEOUT_MINUTES = 30`).
@@ -531,9 +532,11 @@ Les rétentions sont définies dans `~/modules/audit/shared/constants.ts` (`AUDI
 2. Catégorie dans `AUDIT_ACTION_CATEGORIES`
 3. Mapping dans `PROCEDURE_TO_ACTION` (pour tRPC) ou `withAuditedRoute(...)` (pour Route Handlers) ou appel direct `logAction(...)` (auth / cron)
 
-Les clés sensibles (`password`, `token`, `authorization`, etc.) sont **automatiquement strippées** du `metadata` JSONB par `logAction`.
+Les nouvelles lignes conservent `user_id` et `siren` lorsqu'ils servent à attribuer une action. Elles n'enregistrent plus `user_email` ni `user_agent` ; l'IP est tronquée, les erreurs sont codées et `metadata` est limité à des valeurs autorisées et validées par action. Les écritures SQL directes du worker de notifications et des crons suivent cette politique. Les journaux restent soumis aux durées de conservation ci-dessus.
 
 **Crons de purge** : deux tâches planifiées de catégorie `system` écrivent leur propre trace d'audit — `SYSTEM_AUDIT_CLEANUP` (`system.audit_cleanup`, purge du log d'audit lui-même, `packages/app/scripts/audit-cleanup.ts`) et `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, purge RGPD des déclarations, voir §13.8).
+
+Vue d'ensemble de tous les journaux produits par l'application et de leur durée de conservation, y compris celles non définies dans le dépôt : [`journaux-et-conservation.md`](journaux-et-conservation.md).
 
 ### 13.3 Impersonation admin
 
@@ -706,6 +709,23 @@ sequenceDiagram
 **Traçabilité** : chaque exécution écrit une ligne d'audit `SYSTEM_DECLARATION_CLEANUP` (`system.declaration_cleanup`, catégorie `system`) récapitulant les compteurs (`purgedDeclarations`, `purgedFiles`, `purgedS3Objects`, `failedS3Objects`, `retentionYears`, `cutoffYear`). Le traitement est **idempotent** : relancé sur un état déjà purgé, il ne supprime rien de plus.
 
 **Données concernées** : `declarations` (+ cascade sur `jobCategories`, `employeeCategories`, `cseOpinions`, `cseOpinionFiles`, `files`, `declarationStatusHistory`, `declarationLocks`), objets S3, `audit.action_log`.
+
+### 13.9 Résolution du pays de l'entreprise (registre Weez)
+
+**À quoi ça sert** : attribuer à chaque entreprise un des trois états — **France**, **pays étranger connu**, ou **inconnu** — à partir du registre national (API Weez, qui expose les données INSEE Sirene), sans jamais inventer une géographie.
+
+**Déclenché par** : la connexion ProConnect (`fetchCompanyBySiren`, `~/server/services/weez.ts`), l'import GIP-MDS (même fonction, en boucle sur plusieurs milliers de SIREN), et un Job Kubernetes de réparation post-déploiement (voir [`architecture.md` §14.2](architecture.md#142-kontinuous-déploiement-kubernetes)).
+
+**Règle de résolution** (`legalUnitCountry` puis, si besoin, `headOfficeCountry`, `~/modules/domain/shared/registryCountry.ts`) :
+
+1. le registre déclare un pays étranger pour l'établissement → ce pays est retenu ;
+2. sinon, s'il déclare un code ou un libellé de pays mais aucun des deux n'est exploitable → **inconnu** ;
+3. sinon, si un code postal est présent → **France** ;
+4. sinon → un second appel au registre (siège social) tranche, faute de quoi le pays reste **inconnu**.
+
+**Garde-fou** : une résolution qui échoue ou ne renvoie rien au login **n'écrase jamais** un pays déjà connu en base (`toCompanyRefreshValues`, `~/server/db/companyInsert.ts`) — seul un résultat positif remplace la valeur précédente.
+
+**Données persistées** : `companies.countryCode` / `companies.countryLabel` (voir [`architecture.md` §7.1](architecture.md#71-schéma)).
 
 ---
 

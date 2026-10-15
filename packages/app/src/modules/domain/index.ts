@@ -7,6 +7,8 @@ export {
 	ADMIN_MFA_WINDOW_SECONDS,
 	isAdminMfaAcr,
 	isAdminMfaFresh,
+	isPublicAgent,
+	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
 } from "./shared/adminMfa";
 // Campaign
@@ -42,15 +44,24 @@ export {
 } from "./shared/campaignClock";
 // Civil dates (calendar days held as UTC midnight) vs timestamps
 export { civilDate } from "./shared/civilDate";
+// Company location display
+export type { CompanyLocationRow } from "./shared/companyLocationDisplay";
+export {
+	ADDRESS_ROW_LABEL,
+	companyLocationRow,
+	formatInseeTitleCase,
+} from "./shared/companyLocationDisplay";
 // Company obligation
-export { isObligatedForYear } from "./shared/companyObligation";
+export {
+	getObligationWorkforceMin,
+	isObligatedForYear,
+} from "./shared/companyObligation";
 // Company size
 export {
 	COMPANY_SIZE_RANGES,
 	classifyCompanySize,
 	formatObservatoryWorkforce,
 	getCompanySizeRange,
-	getOptionalCompanySizeRange,
 	isCseRequired,
 	isObservatoryWorkforceRange,
 	OBSERVATORY_WORKFORCE_RANGE_KEYS,
@@ -157,6 +168,7 @@ export {
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
+	getDropoffPhaseLabel,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
@@ -234,6 +246,7 @@ export {
 	computeGapRatio,
 	computeTotal,
 	GAP_RATIO_DECIMALS,
+	gapFavoredSex,
 	gapLevel,
 	gapMagnitude,
 	gapRatioToPercent,
@@ -250,6 +263,7 @@ export {
 	formatWorkforceEma,
 	formatWorkforceForUser,
 	GIP_WORKFORCE_VOLUNTARY_DISPLAY,
+	getCompanySizeRangeForGip,
 	getObligationWorkforce,
 	parseGipWorkforce,
 } from "./shared/gipWorkforce";
@@ -315,6 +329,15 @@ export {
 	REGIONS,
 	REGIONS_TO_COUNTIES,
 } from "./shared/regions";
+// Registry country (tri-state: France, foreign, unknown)
+export type { RegistryCountry } from "./shared/registryCountry";
+export {
+	FRANCE_COUNTRY,
+	headOfficeCountry,
+	isUnknownCountry,
+	legalUnitCountry,
+	UNKNOWN_COUNTRY,
+} from "./shared/registryCountry";
 // Representation equilibrium (art. D. 1142-19)
 export type {
 	ExecutivesCount,
@@ -342,7 +365,12 @@ export {
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "./shared/representation";
 // SIREN utilities
-export { extractSiren, formatSiren, parseSiren } from "./shared/siren";
+export {
+	extractSiren,
+	formatSiren,
+	parseSiren,
+	parseStrictSiren,
+} from "./shared/siren";
 // Submission rate helpers (admin stats router and KPI tiles)
 export type { CampaignRateTileProps } from "./shared/submissionRate";
 export {

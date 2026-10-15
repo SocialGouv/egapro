@@ -82,7 +82,7 @@ test.describe("file upload + view access control", () => {
 	test("session user fetches their own file → 200 attachment (admin user)", async ({
 		page,
 	}) => {
-		// The E2E test user (test@fia1.fr) is in ADMIN_EMAILS, so the unified
+		// The E2E test user is in ADMIN_EMAILS, so the unified
 		// endpoint treats them as admin: attachment disposition, cached response.
 		expect(fileId).toBeTruthy();
 

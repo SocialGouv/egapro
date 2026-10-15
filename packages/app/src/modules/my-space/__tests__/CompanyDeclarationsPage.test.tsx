@@ -41,6 +41,7 @@ const company: CompanyDetail = {
 	nafLabel: null,
 	countryCode: null,
 	countryLabel: "FRANCE",
+	departmentLabel: null,
 	gipWorkforce: null,
 	hasCse: null,
 };
