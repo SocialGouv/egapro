@@ -31,6 +31,7 @@ export async function loginWithProConnect(page: Page, retries = 4) {
 			await page
 				.getByLabel("sub", { exact: true })
 				.fill("egapro-e2e-130025265");
+			await page.locator("#open-custom-configuration").click();
 			await page
 				.getByLabel("siret", { exact: true })
 				.fill(`${TEST_SIREN}00013`);
@@ -52,7 +53,7 @@ export async function loginWithProConnect(page: Page, retries = 4) {
 			}
 			return;
 		} catch (error) {
-			if (attempt === retries) throw error;
+			if (attempt === retries || page.isClosed()) throw error;
 			await page.context().clearCookies();
 		}
 	}
