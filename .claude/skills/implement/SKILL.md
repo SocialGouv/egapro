@@ -191,10 +191,10 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
    | `rate_limited` | proposer de retenter dans `retry_in` secondes ou abandonner | `## Code: RATE_LIMITED` + délai suggéré |
    | `failed` | propager l'erreur sans modifier le ticket ; pas d'e2e-dev | `## Code: FAILED` + raison technique |
 
-5bis. **Lancer `e2e-dev` en CLI foreground** (uniquement si le verdict terminal de `code-dev` est `validated`) — `code-dev` ne possède plus les E2E ; `e2e-dev` (toujours Opus) lance la suite E2E actuelle (triage régression vs évolution légitime), puis décide d'imbriquer la nouvelle fonctionnalité dans un scénario E2E existant ou d'en créer un nouveau (et, pour un Bug, juge sa criticité). Il pousse ses commits de test sur **la branche de la PR** (ce qui re-déclenche la CI). Même worktree que `code-dev` (dev server + stack docker déjà debout) :
+5bis. **Lancer `e2e-dev` en CLI foreground** (uniquement si le verdict terminal de `code-dev` est `validated`) — `code-dev` ne possède plus les E2E ; `e2e-dev` (toujours Opus) tranche sa gate d'entrée puis lance la suite E2E actuelle, et la grille de recette quand le diff touche le parcours (étapes 1 et 3 de son `AGENT.md`, y compris sur `mode: "none"`), trie régression vs évolution légitime, puis décide d'imbriquer la nouvelle fonctionnalité dans un scénario E2E existant ou d'en créer un nouveau (et, pour un Bug, juge sa criticité). Il pousse ses commits de test sur **la branche de la PR** (ce qui re-déclenche la CI). Même worktree que `code-dev` (dev server + stack docker déjà debout) :
 
    ```bash
-   env -u CLAUDECODE timeout 3600 claude \
+   env -u CLAUDECODE timeout 5400 claude \
      --agent e2e-dev --model opus --effort high \
      --print --output-format json \
      --dangerously-skip-permissions --max-budget-usd 15 \
@@ -206,8 +206,8 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
 
      | `.status` e2e-dev | Action skill | Markdown affiché |
      |---|---|---|
-     | `validated` | aucune (tests poussés sur la branche, CI re-déclenchée) | `## E2E: PASS` + mode (`nested`/`new`/`none`) + fichiers + note « CI re-déclenchée par le push » |
-     | `regression` | **bloquant** : invoquer `architect-rework` (CLI foreground) sur le ticket pour analyser la régression et créer le(s) ticket(s) de fix — ou escalader sur doute fonctionnel ; afficher les tickets créés / la question | `## E2E: REGRESSION` + tests en régression + fichier source suspecté + tickets de fix créés (next-step `/implement <fix>`) |
+     | `validated` | aucune (tests poussés sur la branche, CI re-déclenchée) | `## E2E: PASS` + mode (`nested`/`new`/`none`) + fichiers + grille (`tests.grille` : `played`/`skipped`) + note « CI re-déclenchée par le push » |
+     | `regression` | **bloquant** : invoquer `architect-rework` (CLI foreground) sur le ticket pour analyser la régression et créer le(s) ticket(s) de fix — ou escalader sur doute fonctionnel ; afficher les tickets créés / la question | `## E2E: REGRESSION` + tests en régression avec leur `source` (`suite` : `fichier:ligne` ; `grille` : `[année-tranche-CASnn]`) + fichier source suspecté + tickets de fix créés (next-step `/implement <fix>`) |
      | `rate_limited` | proposer de retenter ou de lancer `e2e-dev` plus tard | `## E2E: RATE_LIMITED` + délai |
      | `failed` | noter l'échec technique (dev server / infra), proposer de relancer | `## E2E: FAILED` + raison |
 

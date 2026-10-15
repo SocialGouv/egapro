@@ -52,6 +52,51 @@ describe("acces-backoffice page", () => {
 		expect(mockRedirect).toHaveBeenCalledWith("/mon-espace");
 	});
 
+	it("shows the public-agent refusal screen from the session, with the carried roles and organization", async () => {
+		mockAuth.mockResolvedValue({
+			user: {
+				id: "u1",
+				isAdmin: false,
+				siret: "12345678900012",
+				adminAccessRefusal: {
+					roles: [],
+					organizationLabel: "Société Démo",
+				},
+			},
+		});
+
+		render(await renderPage("/admin"));
+
+		expect(mockRedirect).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: "Accès à l'administration refusé",
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByText(/aucun/)).toBeInTheDocument();
+		expect(screen.getByText(/Société Démo/)).toBeInTheDocument();
+		expect(screen.getByText(/12345678900012/)).toBeInTheDocument();
+	});
+
+	it("falls back to « non communiqué » when the organization name and SIRET are both absent", async () => {
+		mockAuth.mockResolvedValue({
+			user: {
+				id: "u1",
+				isAdmin: false,
+				adminAccessRefusal: {
+					roles: ["agent_public_etat"],
+					organizationLabel: null,
+				},
+			},
+		});
+
+		render(await renderPage("/admin"));
+
+		expect(screen.getByText(/agent_public_etat/)).toBeInTheDocument();
+		expect(screen.getByText(/non communiqué/)).toBeInTheDocument();
+	});
+
 	it("sends an agent already authenticated inside the window straight in", async () => {
 		mockAuth.mockResolvedValue({
 			user: { id: "u1", isAdmin: true, adminMfaAt: nowSeconds() },

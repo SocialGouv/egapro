@@ -13,6 +13,7 @@ export const REFERENTS = route("/referents");
 export const OBSERVATORY_SEARCH = route("/index-egapro/recherche");
 export const SITE_MAP = route("/plan-du-site");
 export const LEGAL_NOTICE = route("/mentions-legales");
+export const CGU = route("/cgu");
 export const PRIVACY = route("/donnees-personnelles");
 export const COOKIES = route("/gestion-des-cookies");
 export const ACCESSIBILITY = route("/declaration-accessibilite");
@@ -23,6 +24,10 @@ export const TEST_ERROR = route("/test-error");
 
 export function referentHref(id: string) {
 	return route(`/referents/${id}` as const);
+}
+
+export function termsOfUseVersionHref(effectiveDate: string) {
+	return route(`/cgu/${effectiveDate}` as const);
 }
 
 export function observatoryCompanyHref(siren: string) {
@@ -117,6 +122,14 @@ export const PUBLIC_PAGES: readonly PublicPage[] = [
 	{
 		path: LEGAL_NOTICE,
 		label: "Mentions légales",
+		group: "legal",
+		indexable: true,
+		changeFrequency: "yearly",
+		priority: 0.3,
+	},
+	{
+		path: CGU,
+		label: "Conditions générales d'utilisation",
 		group: "legal",
 		indexable: true,
 		changeFrequency: "yearly",

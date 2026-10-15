@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
@@ -22,17 +22,42 @@ type Props = {
 export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState("");
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const modalEpochRef = useRef(0);
+	const requestEpochRef = useRef(0);
+	const submitInProgressRef = useRef(false);
+	const resetForm = useCallback(() => {
+		setFile(null);
+		setError("");
+		if (fileInputRef.current) fileInputRef.current.value = "";
+	}, []);
 	const importMutation = api.adminReferents.import.useMutation({
 		onSuccess: () => {
-			setFile(null);
-			setError("");
-			onClose();
+			submitInProgressRef.current = false;
 			onSuccess();
+			if (requestEpochRef.current === modalEpochRef.current) {
+				onClose();
+			}
 		},
 		onError: (err) => {
-			setError(err.message);
+			submitInProgressRef.current = false;
+			if (requestEpochRef.current === modalEpochRef.current) {
+				setError(err.message);
+			}
 		},
 	});
+
+	useEffect(() => {
+		const modal = modalRef.current;
+		if (!modal) return;
+		const handleConceal = () => {
+			modalEpochRef.current += 1;
+			resetForm();
+			if (!importMutation.isPending) importMutation.reset();
+		};
+		modal.addEventListener("dsfr.conceal", handleConceal);
+		return () => modal.removeEventListener("dsfr.conceal", handleConceal);
+	}, [importMutation, modalRef, resetForm]);
 
 	const handleFileChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,24 +68,36 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 	);
 
 	const handleImport = useCallback(async () => {
-		if (!file) return;
+		if (!file || importMutation.isPending || submitInProgressRef.current)
+			return;
+		submitInProgressRef.current = true;
+		const submitEpoch = modalEpochRef.current;
 		setError("");
 
 		try {
 			const text = await file.text();
 			const json: unknown = JSON.parse(text);
 			const parsed = importReferentsSchema.safeParse(json);
+			if (submitEpoch !== modalEpochRef.current) {
+				submitInProgressRef.current = false;
+				return;
+			}
 
 			if (!parsed.success) {
+				submitInProgressRef.current = false;
 				setError(
 					`Format invalide : ${parsed.error.issues.map((i) => i.message).join(", ")}`,
 				);
 				return;
 			}
 
+			requestEpochRef.current = submitEpoch;
 			importMutation.mutate(parsed.data);
 		} catch {
-			setError("Le fichier n'est pas un JSON valide.");
+			submitInProgressRef.current = false;
+			if (submitEpoch === modalEpochRef.current) {
+				setError("Le fichier n'est pas un JSON valide.");
+			}
 		}
 	}, [file, importMutation]);
 
@@ -111,6 +148,7 @@ export function ImportReferentsModal({ modalRef, onClose, onSuccess }: Props) {
 										disabled={importMutation.isPending}
 										id={`${MODAL_ID}-file`}
 										onChange={handleFileChange}
+										ref={fileInputRef}
 										type="file"
 									/>
 								</div>

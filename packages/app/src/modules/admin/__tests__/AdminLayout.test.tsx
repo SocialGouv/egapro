@@ -57,6 +57,20 @@ describe("AdminLayout", () => {
 		expect(mockRedirect).toHaveBeenCalledWith("/mon-espace");
 	});
 
+	it("sends a listed non-public-agent to the resume screen", async () => {
+		mockAuth.mockResolvedValue({
+			user: {
+				id: "u1",
+				isAdmin: false,
+				adminAccessRefusal: { roles: [], organizationLabel: "Société Démo" },
+			},
+		});
+		await expect(
+			AdminLayout({ children: "child" as unknown as React.ReactNode }),
+		).rejects.toThrow("NEXT_REDIRECT");
+		expect(mockRedirect).toHaveBeenCalledWith("/acces-backoffice");
+	});
+
 	it("sends an admin whose two-factor authentication is missing to the resume screen", async () => {
 		mockAuth.mockResolvedValue({ user: { id: "u1", isAdmin: true } });
 		await expect(

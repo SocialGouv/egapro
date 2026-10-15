@@ -175,6 +175,7 @@ describe("CommonCalendarForm", () => {
 		).toBeInTheDocument();
 		expect(startInput()).toBeDisabled();
 		expect(releaseInput()).toBeDisabled();
+		expect(releaseInput()).toHaveValue("");
 		expect(screen.getByRole("group")).toHaveAccessibleDescription(
 			/enregistrez d'abord les échéances/i,
 		);
