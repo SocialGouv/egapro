@@ -71,6 +71,8 @@ Retourne l'intégralité des déclarations publiées, toutes années confondues.
 
 `region`, `departement`, `naf` et `workforceRanges` peuvent être répétés : plusieurs valeurs d'un même filtre sont combinées par « ou », tandis que les différents filtres se cumulent. `workforceMin` et `workforceMax` se cumulent également avec `workforceRanges`. `limit`, `offset` et `sort` sont ignorés. La [documentation interactive](https://egapro.travail.gouv.fr/api/public/docs) détaille les paramètres et les réponses.
 
+Le CSV annuel porte le nom `Indicateurs_remuneration_<annee>.csv` ; le CSV multi-années conserve le nom `index-egapro-remunerations.csv`.
+
 ```sh
 # JSON
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export"
@@ -81,8 +83,10 @@ curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv" 
 
 # CSV d'une seule année
 curl "https://egapro.travail.gouv.fr/api/public/declarations/export?format=csv&year=2027" \
-  -o index-egapro-remunerations-2027.csv
+  -o Indicateurs_remuneration_2027.csv
 ```
+
+Le CSV DGT utilise `;`, place chaque champ entre guillemets et contient 39 colonnes. Après `Annee_declaration`, ses colonnes d'identité sont, dans l'ordre : `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Code_NAF`, `Libelle_NAF`, `Pays`. Les indicateurs suivent avec les noms métier (`Effectif_RCD`, effectifs femmes/hommes, écarts, proportions et quartiles). `city`, `regionCode` et `countryCode` restent disponibles en JSON et XLSX, mais ne figurent pas dans le CSV DGT. Une donnée inconnue donne une cellule vide ; `Non-diffusible` désigne une identité masquée.
 
 ### Plafonds, cache et calculs simultanés
 

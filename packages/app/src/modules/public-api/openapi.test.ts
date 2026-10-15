@@ -61,6 +61,18 @@ describe("publicOpenApiSpec", () => {
 			expect(content["text/csv"]).toBeDefined();
 		});
 
+		it("documents the annual and multi-year CSV names and DGT identity columns", () => {
+			expect(operation.description).toContain(
+				"Indicateurs_remuneration_<annee>.csv",
+			);
+			expect(operation.description).toContain("index-egapro-remunerations.csv");
+			const csv = operation.responses["200"].content["text/csv"].schema;
+			expect(csv.description).toContain("Annee_declaration");
+			expect(csv.description).toContain("Raison_sociale");
+			expect(csv.description).toContain("Pays");
+			expect(csv.description).toContain("39 colonnes DGT");
+		});
+
 		it("declares every filter as optional, without pagination or sort", () => {
 			expect(operation.parameters.map((p) => p.name).sort()).toEqual([
 				"city",

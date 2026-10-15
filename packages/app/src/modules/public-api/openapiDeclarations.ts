@@ -314,7 +314,7 @@ export const declarationsPaths = {
 			operationId: "exportPublicDeclarations",
 			summary: "Exporter toutes les déclarations publiées",
 			description:
-				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. Seul l'export complet, sans filtre, en JSON ou CSV est mis en cache 1 heure côté serveur.",
+				"Retourne les déclarations publiées (toutes les années dont la date de rendu public est atteinte) en JSON, CSV ou Excel. Les filtres de la recherche peuvent être repris. Le CSV avec `year` ne contient que cette année et se télécharge sous `Indicateurs_remuneration_<annee>.csv`. Sans `year`, le CSV reste multi-années sous `index-egapro-remunerations.csv`. Seul l'export complet, sans filtre, en JSON ou CSV est mis en cache 1 heure côté serveur.",
 			parameters: [
 				{
 					name: "format",
@@ -353,7 +353,7 @@ export const declarationsPaths = {
 							schema: {
 								type: "string",
 								description:
-									"Fichier CSV avec en-tête, séparateur `;`. Colonnes dans l'ordre de `PublicDeclaration`.",
+									"Fichier CSV avec en-tête, séparateur `;` et 39 colonnes DGT ordonnées : `Annee_declaration`, `SIREN`, `Raison_sociale`, `Adresse`, `Region`, `Code_departement`, `Departement`, `Code_NAF`, `Libelle_NAF`, `Pays`, puis `Effectif_RCD`, les effectifs F/H, les écarts, les proportions de rémunération variable et les quartiles. `city`, `regionCode` et `countryCode` restent dans le JSON et le XLSX, mais ne sont pas des colonnes du CSV DGT. Une donnée inconnue donne une cellule vide ; une identité masquée donne `Non-diffusible`.",
 							},
 						},
 						"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
