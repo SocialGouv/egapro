@@ -88,7 +88,7 @@ RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 ARG APP_VERSION
 ARG PR_NUMBER
 ARG SENTRY_RELEASE
-RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \
