@@ -22,8 +22,8 @@ function ExportButton() {
 
 	const handleExport = useCallback(
 		async (format: "json" | "csv") => {
-			const result = (await refetch()).data;
-			if (!result) return;
+			const { data: result, isSuccess } = await refetch();
+			if (!isSuccess || !result) return;
 
 			let content: string;
 			let mimeType: string;

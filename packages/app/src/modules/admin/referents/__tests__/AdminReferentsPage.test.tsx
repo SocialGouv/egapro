@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
@@ -71,7 +77,6 @@ vi.mock("~/trpc/react", () => ({
 			},
 			exportAll: {
 				useQuery: vi.fn().mockReturnValue({
-					data: null,
 					refetch: vi.fn(),
 					isFetching: false,
 				}),
@@ -134,8 +139,7 @@ describe("AdminReferentsPage", () => {
 			},
 		];
 		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
-			data: rows,
-			refetch: vi.fn().mockResolvedValue({ data: rows }),
+			refetch: vi.fn().mockResolvedValue({ data: rows, isSuccess: true }),
 			isFetching: false,
 		} as never);
 		vi.mocked(URL.createObjectURL).mockClear();
@@ -176,11 +180,10 @@ describe("AdminReferentsPage", () => {
 		};
 		const refetch = vi
 			.fn()
-			.mockResolvedValueOnce({ data: [previous] })
-			.mockResolvedValueOnce({ data: [updated] })
-			.mockResolvedValueOnce({ data: [updatedAgain] });
+			.mockResolvedValueOnce({ data: [previous], isSuccess: true })
+			.mockResolvedValueOnce({ data: [updated], isSuccess: true })
+			.mockResolvedValueOnce({ data: [updatedAgain], isSuccess: true });
 		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
-			data: [previous],
 			refetch,
 			isFetching: false,
 		} as never);
@@ -206,12 +209,18 @@ describe("AdminReferentsPage", () => {
 		expect(refetch).toHaveBeenCalledTimes(3);
 	});
 
-	it("does not download an export when fetching fails", async () => {
+	it("does not download stale cached data when refetch fails", async () => {
+		const previous = { substituteName: "Ancienne valeur" };
 		const refetch = vi
 			.fn()
-			.mockResolvedValue({ data: undefined, error: new Error() });
+			.mockResolvedValueOnce({ data: [previous], isSuccess: true })
+			.mockResolvedValueOnce({
+				data: [previous],
+				isSuccess: false,
+				isError: true,
+				status: "error",
+			});
 		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
-			data: [{ substituteName: "Ancienne valeur" }],
 			refetch,
 			isFetching: false,
 		} as never);
@@ -219,8 +228,12 @@ describe("AdminReferentsPage", () => {
 
 		render(<AdminReferentsPage />);
 		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledOnce());
+		await act(async () => {
+			fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		});
 
-		await waitFor(() => expect(refetch).toHaveBeenCalledOnce());
-		expect(URL.createObjectURL).not.toHaveBeenCalled();
+		expect(refetch).toHaveBeenCalledTimes(2);
+		expect(URL.createObjectURL).toHaveBeenCalledOnce();
 	});
 });
