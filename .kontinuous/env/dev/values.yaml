@@ -5,5 +5,10 @@ app:
   vars:
     EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: "false"
 
+pg:
+  cnpg-cluster:
+    image:
+      tag: "17"
+
 global:
   observatoryDemoSeedEnabled: true
