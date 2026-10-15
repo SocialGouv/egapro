@@ -35,6 +35,8 @@ jobs:
       - name: Load SocialGouv variables
         id: env
         uses: socialgouv/kontinuous/.github/actions/env@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
+        with:
+          branch: ${{ github.event.deployment.ref }}
       - name: Run Lighthouse CI
         run: pnpm test:lighthouse
         continue-on-error: true
