@@ -211,6 +211,7 @@ describe("auth config — admin two-factor authentication", () => {
 						acr: "eidas1-mfa",
 						authTime: AUTH_TIME,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 					},
 				}),
@@ -228,6 +229,7 @@ describe("auth config — admin two-factor authentication", () => {
 						acr: "eidas2",
 						authTime: AUTH_TIME,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 					},
 				}),
@@ -260,6 +262,7 @@ describe("auth config — admin two-factor authentication", () => {
 						acr: "eidas1",
 						authTime: null,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 					},
 				}),
@@ -278,6 +281,7 @@ describe("auth config — admin two-factor authentication", () => {
 			expect(Object.keys(entry.metadata).sort()).toEqual([
 				"acr",
 				"authTime",
+				"granted",
 				"publicAgentRequired",
 				"roles",
 			]);
@@ -350,10 +354,76 @@ describe("auth config — admin two-factor authentication", () => {
 			) as { authorization: { params: Record<string, unknown> } };
 		}
 
-		it("asks for the declarant scopes plus roles, and nothing more", () => {
+		it("asks for the declarant scopes plus roles and organization_label, and nothing more", () => {
 			expect(proconnectProvider().authorization.params).toEqual({
-				scope: "openid email given_name usual_name siret roles",
+				scope:
+					"openid email given_name usual_name siret roles organization_label",
 			});
+		});
+
+		it.each([
+			false,
+			"false",
+		])("omits roles when public-agent access is disabled as %s", async (flag) => {
+			vi.doMock("~/env", async (importOriginal) => {
+				const actual = await importOriginal<typeof import("~/env")>();
+				return {
+					...actual,
+					env: {
+						...actual.env,
+						EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT: flag,
+						EGAPRO_PROCONNECT_ISSUER: "https://proconnect.example.fr",
+						EGAPRO_PROCONNECT_CLIENT_ID: "test-client",
+						EGAPRO_PROCONNECT_CLIENT_SECRET: "test-secret",
+					},
+				};
+			});
+			vi.resetModules();
+			try {
+				const { authConfig: disabledAuthConfig } = await import("../config");
+				const provider = disabledAuthConfig.providers.find(
+					(candidate) => (candidate as { id?: string }).id === "proconnect",
+				) as { authorization: { params: Record<string, unknown> } };
+				expect(provider.authorization.params.scope).toBe(
+					"openid email given_name usual_name siret organization_label",
+				);
+			} finally {
+				vi.doUnmock("~/env");
+				vi.resetModules();
+			}
+		});
+
+		it("maps the organization label from ProConnect userinfo", async () => {
+			const provider = authConfig.providers.find(
+				(candidate) => (candidate as { id?: string }).id === "proconnect",
+			) as unknown as {
+				profile: (
+					profile: unknown,
+					tokens: { access_token: string },
+				) => Promise<{ organizationLabel: string | null }>;
+			};
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(
+					new Response(
+						JSON.stringify({
+							userinfo_endpoint: "https://example.fr/userinfo",
+						}),
+					),
+				)
+				.mockResolvedValueOnce(
+					new Response(JSON.stringify({ organization_label: "Société Démo" })),
+				);
+
+			try {
+				const profile = await provider.profile(
+					{},
+					{ access_token: "test-token" },
+				);
+				expect(profile.organizationLabel).toBe("Société Démo");
+			} finally {
+				fetchSpy.mockRestore();
+			}
 		});
 
 		it.each([

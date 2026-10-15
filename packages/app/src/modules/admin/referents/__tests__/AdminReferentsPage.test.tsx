@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", async () => {
@@ -71,7 +77,6 @@ vi.mock("~/trpc/react", () => ({
 			},
 			exportAll: {
 				useQuery: vi.fn().mockReturnValue({
-					data: null,
 					refetch: vi.fn(),
 					isFetching: false,
 				}),
@@ -121,20 +126,20 @@ describe("AdminReferentsPage", () => {
 	});
 
 	it("neutralises spreadsheet formulas in the CSV export", async () => {
+		const rows = [
+			{
+				region: "11",
+				county: "75",
+				name: "=1+1",
+				type: "email",
+				value: "email@example.fr",
+				principal: true,
+				substituteName: '@SUM("A1")',
+				substituteEmail: null,
+			},
+		];
 		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
-			data: [
-				{
-					region: "11",
-					county: "75",
-					name: "=1+1",
-					type: "email",
-					value: "email@example.fr",
-					principal: true,
-					substituteName: '@SUM("A1")',
-					substituteEmail: null,
-				},
-			],
-			refetch: vi.fn(),
+			refetch: vi.fn().mockResolvedValue({ data: rows, isSuccess: true }),
 			isFetching: false,
 		} as never);
 		vi.mocked(URL.createObjectURL).mockClear();
@@ -151,5 +156,84 @@ describe("AdminReferentsPage", () => {
 		expect(dataLine).toBe(
 			`"11";"75";"'=1+1";"email";"email@example.fr";"true";"'@SUM(""A1"")";""`,
 		);
+	});
+
+	it("exports fresh substitutes in both formats after a previous export", async () => {
+		const previous = {
+			region: "11",
+			county: "75",
+			name: "Référent de test",
+			type: "email",
+			value: "referent@example.fr",
+			principal: true,
+			substituteName: null,
+			substituteEmail: null,
+		};
+		const updated = {
+			...previous,
+			substituteName: "Suppléante de test",
+			substituteEmail: "suppleante@example.fr",
+		};
+		const updatedAgain = {
+			...updated,
+			substituteEmail: "nouvelle@example.fr",
+		};
+		const refetch = vi
+			.fn()
+			.mockResolvedValueOnce({ data: [previous], isSuccess: true })
+			.mockResolvedValueOnce({ data: [updated], isSuccess: true })
+			.mockResolvedValueOnce({ data: [updatedAgain], isSuccess: true });
+		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
+			refetch,
+			isFetching: false,
+		} as never);
+		vi.mocked(URL.createObjectURL).mockClear();
+
+		render(<AdminReferentsPage />);
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(1));
+		fireEvent.click(screen.getByRole("button", { name: "Export CSV" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(2));
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledTimes(3));
+
+		const firstBlob = vi.mocked(URL.createObjectURL).mock.calls[0]?.[0] as Blob;
+		const secondBlob = vi.mocked(URL.createObjectURL).mock
+			.calls[1]?.[0] as Blob;
+		const thirdBlob = vi.mocked(URL.createObjectURL).mock.calls[2]?.[0] as Blob;
+		expect(JSON.parse(await firstBlob.text())).toEqual([previous]);
+		expect(await secondBlob.text()).toContain(
+			'"Suppléante de test";"suppleante@example.fr"',
+		);
+		expect(JSON.parse(await thirdBlob.text())).toEqual([updatedAgain]);
+		expect(refetch).toHaveBeenCalledTimes(3);
+	});
+
+	it("does not download stale cached data when refetch fails", async () => {
+		const previous = { substituteName: "Ancienne valeur" };
+		const refetch = vi
+			.fn()
+			.mockResolvedValueOnce({ data: [previous], isSuccess: true })
+			.mockResolvedValueOnce({
+				data: [previous],
+				isSuccess: false,
+				isError: true,
+				status: "error",
+			});
+		vi.mocked(api.adminReferents.exportAll.useQuery).mockReturnValue({
+			refetch,
+			isFetching: false,
+		} as never);
+		vi.mocked(URL.createObjectURL).mockClear();
+
+		render(<AdminReferentsPage />);
+		fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledOnce());
+		await act(async () => {
+			fireEvent.click(screen.getByRole("button", { name: "Export JSON" }));
+		});
+
+		expect(refetch).toHaveBeenCalledTimes(2);
+		expect(URL.createObjectURL).toHaveBeenCalledOnce();
 	});
 });

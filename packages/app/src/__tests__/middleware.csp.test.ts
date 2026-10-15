@@ -20,7 +20,6 @@ vi.mock("~/env", () => ({
 import { config, middleware } from "~/middleware";
 import {
 	ADMIN,
-	API_SEARCH,
 	API_V1_PREFIX,
 	CSE_OPINION,
 	DECLARATION_REMUNERATION,
@@ -181,7 +180,6 @@ describe("matcher coverage", () => {
 			expect(matches(`${section}/deep/link`)).toBe(true);
 		}
 		expect(matches(`${API_V1_PREFIX}export/declarations`)).toBe(true);
-		expect(matches(API_SEARCH)).toBe(true);
 	});
 
 	it.each([

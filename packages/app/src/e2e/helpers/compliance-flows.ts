@@ -157,7 +157,8 @@ function cseCheckboxName(
 
 /**
  * Complete CSE step 2 through the real UI: upload the PDF, associate the required
- * content types via the matrix, then submit and certify. Exercises the matrix
+ * content types via the matrix (or, with a single required column, check that the
+ * page pre-associated and locked it), then submit and certify. Exercises the matrix
  * introduced by epic #3476 instead of injecting rows directly in the database.
  */
 export async function submitCseStep2(
@@ -176,22 +177,33 @@ export async function submitCseStep2(
 		// Phase A — selecting the file auto-uploads it (no intermediate "Importer"
 		// step), after which the page re-renders with the matrix.
 		await page.locator("#cse-file-upload").setInputFiles(DUMMY_PDF);
-		await expect(
-			page.getByRole("table", { name: /Associez chaque fichier déposé/ }),
-		).toBeVisible({ timeout: 30_000 });
+		const matrix = page.getByRole("table", {
+			name: /Associez chaque fichier déposé/,
+		});
+		await expect(matrix).toBeVisible({ timeout: 30_000 });
 
-		// Phase B — tick the required columns, letting each association mutation
-		// come back before the next click.
-		for (const column of columns) {
-			const persisted = page.waitForResponse((response) =>
-				response.url().includes("setFileContentTypes"),
-			);
-			await page
-				.getByRole("checkbox", {
-					name: cseCheckboxName(column, fileName, hasSecondDeclaration),
-				})
-				.check();
-			await persisted;
+		// Phase B — a single column is auto-associated before any listener could
+		// attach, so its save is awaited through the submit button instead.
+		const [onlyColumn] = columns;
+		if (columns.length === 1 && onlyColumn) {
+			const lockedCheckbox = matrix.getByRole("checkbox", {
+				name: cseCheckboxName(onlyColumn, fileName, hasSecondDeclaration),
+			});
+			await expect(matrix.getByRole("checkbox")).toHaveCount(1);
+			await expect(lockedCheckbox).toBeChecked();
+			await expect(lockedCheckbox).toBeDisabled();
+		} else {
+			for (const column of columns) {
+				const persisted = page.waitForResponse((response) =>
+					response.url().includes("setFileContentTypes"),
+				);
+				await page
+					.getByRole("checkbox", {
+						name: cseCheckboxName(column, fileName, hasSecondDeclaration),
+					})
+					.check();
+				await persisted;
+			}
 		}
 
 		// Phase C — submit, certify, validate, then wait for the confirmation page.

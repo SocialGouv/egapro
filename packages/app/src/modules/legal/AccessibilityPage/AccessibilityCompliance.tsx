@@ -35,6 +35,11 @@ export function AccessibilityCompliance() {
 					Certains formulaires n'ont pas de labels explicitement associés à
 					leurs champs.
 				</li>
+				<li>
+					Sur les pages de « Mon espace », seul le plan du site permet une
+					navigation transversale, alors que le critère 12.1 du RGAA requiert
+					deux moyens de navigation.
+				</li>
 			</ul>
 			<h3 className="fr-h6">Dérogations pour charge disproportionnée</h3>
 			<p>Aucune dérogation n'est revendiquée.</p>

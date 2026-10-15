@@ -222,6 +222,11 @@ export function formatOptionalIsoDate(value: string | undefined): string {
 	return value === undefined ? "—" : formatIsoDate(value);
 }
 
+/** Converts a civil date (UTC midnight) to its persisted `YYYY-MM-DD` string — the inverse of `civilDate()`. */
+export function toPersistedIsoDate(date: Date): string {
+	return date.toISOString().slice(0, 10);
+}
+
 /** Format a date with time in short French format: `new Date(…)` → `"10/03/2026 14:30"`. Returns `"—"` for nullish values. */
 export function formatShortDateTime(date: Date | null | undefined): string {
 	if (!date) return "—";

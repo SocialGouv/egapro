@@ -19,6 +19,7 @@ export type CompanyDetail = {
 	nafLabel: string | null;
 	countryCode: string | null;
 	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 	hasCse: boolean | null;
 };
