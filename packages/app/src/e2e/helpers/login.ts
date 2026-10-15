@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { LOGIN, MY_SPACE } from "~/modules/routes";
-import { TEST_LOGIN_EMAIL } from "../constants";
+import { TEST_LOGIN_EMAIL, TEST_SIREN } from "../constants";
 import { urlGlob } from "./routes";
 
 export const AUTH_FILE = "test-results/.auth/user.json";
@@ -14,7 +14,7 @@ export async function dismissCookieBanner(page: Page) {
 }
 
 /** Log in via ProConnect using the FIA1V2 test identity provider. */
-export async function loginWithProConnect(page: Page, retries = 2) {
+export async function loginWithProConnect(page: Page, retries = 4) {
 	for (let attempt = 0; attempt <= retries; attempt++) {
 		try {
 			await page.goto(LOGIN);
@@ -31,6 +31,18 @@ export async function loginWithProConnect(page: Page, retries = 2) {
 
 			// Wait for redirect to mon espace (slow ProConnect in CI)
 			await page.waitForURL(urlGlob(MY_SPACE), { timeout: 30_000 });
+			const response = await page.request.get("/api/auth/session");
+			const session = (await response.json()) as {
+				user?: { email?: string; siret?: string };
+			};
+			if (
+				session.user?.email?.toLowerCase() !== TEST_LOGIN_EMAIL ||
+				!session.user?.siret?.startsWith(TEST_SIREN)
+			) {
+				throw new Error(
+					`ProConnect returned a different test identity (${session.user?.email ?? "missing email"}, ${session.user?.siret ?? "missing SIRET"})`,
+				);
+			}
 			return;
 		} catch (error) {
 			if (attempt === retries) throw error;
