@@ -8,8 +8,8 @@ L’exploitation et l’équipe applicative remplissent et approuvent cette fich
 
 | Décision | Valeur approuvée / preuve | Responsable |
 | --- | --- | --- |
-| Environnements V2 concernés et ordre de passage | **À déterminer** ; le développement observé n’établit pas l’état de préproduction ou de production | Exploitation |
-| Pour chaque environnement : instance, base logique, hébergement, version effective `SHOW server_version`, extensions et volume | **À déterminer** ; `ovh-dev/egapro-alpha` déclare une image CloudNativePG/PostGIS 14, sans version mineure vérifiée | Exploitation |
+| Environnements V2 concernés et ordre de passage | **À déterminer** ; V2 observée sur `egapro-alpha` uniquement, V1 en production hors périmètre | Exploitation |
+| Pour chaque environnement : instance, base logique, hébergement, version effective `SHOW server_version`, extensions et volume | **À déterminer** ; `ovh-dev/egapro-alpha` exécutait PostgreSQL 14.18 le 15 octobre 2026 avec une image CloudNativePG/PostGIS 14 ; bases logiques, extensions et volume restent à inventorier | Exploitation |
 | Base pg-boss : dédiée, partagée avec l’application ou hors périmètre, pour chaque environnement | **À déterminer** ; absence de `pg-notifications` constatée uniquement dans le namespace de développement | Exploitation + application |
 | Version majeure cible, disponibilité de l’image/offre et horizon de support | **À déterminer** ; les essais locaux PostgreSQL 17/18 ne valent pas choix de cible | Exploitation + architecture |
 | Méthode de montée majeure adaptée à l’hébergement réel, aux extensions, à la volumétrie et à la durée d’arrêt | **À déterminer** ; procédure plateforme approuvée requise | Exploitation |
@@ -113,7 +113,7 @@ Surveiller état des pods et de la base, connexions, erreurs applicatives et de 
 
 ## 8. Clôture
 
-Pour chaque environnement, consigner la version réelle après intervention, les identifiants des preuves privées, les résultats des comparaisons, de la restauration et de la recette, les écarts et leur résolution, la décision de reprise, les heures de début/fin et le suivi de surveillance. Mettre à jour [l’architecture](architecture.md) avec un état de déploiement **vérifié** une fois les décisions approuvées et l’intervention effectuée. La version `postgres:14.17` de la stack locale ne prouve pas l’état de production V2.
+Pour chaque environnement, consigner la version réelle après intervention, les identifiants des preuves privées, les résultats des comparaisons, de la restauration et de la recette, les écarts et leur résolution, la décision de reprise, les heures de début/fin et le suivi de surveillance. Mettre à jour [l’architecture](architecture.md) avec un état de déploiement **vérifié** une fois les décisions approuvées et l’intervention effectuée. La version locale provisoire `postgres:17.11` ne constitue pas une décision de cible pour le cluster V2.
 
 ## Sources
 
