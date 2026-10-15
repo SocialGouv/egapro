@@ -1,5 +1,6 @@
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { isUploadFlowType } from "~/modules/shared/uploadConfig";
 
 type MetadataField =
 	| "year"
@@ -51,6 +52,7 @@ const RECEIPT_TYPES = new Set([
 	"second_declaration_confirmation",
 	"cse_opinion_receipt",
 	"joint_evaluation_submitted",
+	"formal_notice_joint_evaluation_submitted",
 	"representation_receipt",
 ]);
 const RECEIPT_KINDS = new Set([
@@ -58,6 +60,7 @@ const RECEIPT_KINDS = new Set([
 	"secondDeclaration",
 	"cseOpinion",
 	"jointEvaluation",
+	"formalNoticeJointEvaluation",
 	"representation",
 ]);
 const RECEIPT_VARIANTS = new Set([
@@ -163,6 +166,12 @@ const FIELDS_BY_ACTION: Partial<
 		"virusName",
 	],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+		"virusName",
+	],
+	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: [
 		"fileId",
 		"flowType",
 		"s3Cleanup",
@@ -290,7 +299,7 @@ const VALIDATORS: Record<MetadataField, Validator> = {
 	declarationId: validUuid,
 	fileId: validUuid,
 	siren: validSiren,
-	flowType: oneOf(new Set(["cse_opinion", "joint_evaluation"])),
+	flowType: (value) => (isUploadFlowType(value) ? value : undefined),
 	s3Cleanup: oneOf(new Set(["ok", "failed"])),
 	virusName: matching(CLAMAV_SIGNATURE_PATTERN),
 	reason: oneOf(

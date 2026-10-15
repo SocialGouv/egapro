@@ -80,6 +80,11 @@ const JOBS: PreviewJob[] = [
 		label: `joint_evaluation_submitted/${variant}`,
 		payload: { ...BASE, variant, raisonSociale: RAISON_SOCIALE },
 	})),
+	{
+		type: "formal_notice_joint_evaluation_submitted",
+		label: "formal_notice_joint_evaluation_submitted",
+		payload: { ...BASE, raisonSociale: RAISON_SOCIALE },
+	},
 	...CSE_OPINION_RECEIPT_VARIANTS.map((variant) => ({
 		type: "cse_opinion_receipt" as const,
 		label: `cse_opinion_receipt/${variant}`,

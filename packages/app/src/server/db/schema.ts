@@ -43,6 +43,7 @@ export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
 	"cancel",
 	"demarche_complete",
 	"step_change",
+	"formal_notice_joint_evaluation_submit",
 ]);
 
 export const users = createTable("user", (d) => ({
@@ -630,6 +631,7 @@ export const cseOpinionsRelations = relations(cseOpinions, ({ one }) => ({
 export const fileTypeEnum = pgEnum("file_type", [
 	"cse_opinion",
 	"joint_evaluation",
+	"formal_notice_joint_evaluation",
 ]);
 
 export const files = createTable(

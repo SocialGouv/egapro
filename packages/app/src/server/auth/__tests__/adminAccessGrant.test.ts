@@ -184,7 +184,11 @@ describe("auth config — admin access grant (listed vs. public agent)", () => {
 		// An unlisted account is never told the backoffice exists — not even via the refusal field.
 		expect(result.adminAccessRefusal).toBeUndefined();
 		expect(mockLogAction).toHaveBeenCalledExactlyOnceWith(
-			expect.objectContaining({ action: "auth.login" }),
+			expect.objectContaining({
+				action: "auth.login",
+				status: "success",
+				userEmail: DECLARANT_EMAIL,
+			}),
 		);
 	});
 

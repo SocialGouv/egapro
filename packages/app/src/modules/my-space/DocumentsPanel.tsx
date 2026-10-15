@@ -74,7 +74,8 @@ function getRemunerationResources(
 
 	if (
 		declaration.hasSubmittedCseOpinion ||
-		declaration.hasJointEvaluationFile
+		declaration.hasJointEvaluationFile ||
+		declaration.hasSubmittedFormalNoticeJointEvaluation
 	) {
 		resources.push({
 			title: "Télécharger le récapitulatif des éléments transmis",

@@ -4,11 +4,13 @@ export type { FileRow } from "./fetchDeclarations";
 export {
 	assembleDeclaration,
 	buildCseFilePayload,
+	buildFormalNoticeJointEvaluationFilePayload,
 	buildJointEvaluationFilePayload,
 	fetchCseFilesByDeclaration,
 	fetchCseOpinionsByDeclaration,
 	fetchFileById,
 	fetchFileBySiren,
+	fetchFormalNoticeJointEvaluationFilesByDeclaration,
 	fetchIndicatorGByDeclaration,
 	fetchJointEvaluationFilesByDeclaration,
 	fetchSubmittedDeclarations,

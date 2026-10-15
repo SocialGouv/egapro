@@ -47,6 +47,8 @@ export type DeclarationItem = {
 	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
+	formalNoticeAvailable: boolean;
+	hasSubmittedFormalNoticeJointEvaluation: boolean;
 	hasPrefillData: boolean;
 	deadline: Date | null;
 	notSubject: boolean;

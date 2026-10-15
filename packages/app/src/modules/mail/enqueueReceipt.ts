@@ -33,7 +33,8 @@ export type ReceiptKind =
 	| "secondDeclaration"
 	| "cseOpinion"
 	| "jointEvaluation"
-	| "representation";
+	| "representation"
+	| "formalNoticeJointEvaluation";
 
 export type EnqueueReceiptInput = {
 	kind: ReceiptKind;
@@ -50,6 +51,7 @@ const KIND_TO_TYPE = {
 	cseOpinion: "cse_opinion_receipt",
 	jointEvaluation: "joint_evaluation_submitted",
 	representation: "representation_receipt",
+	formalNoticeJointEvaluation: "formal_notice_joint_evaluation_submitted",
 } as const satisfies Record<ReceiptKind, NotificationType>;
 
 type ConfirmationType = (typeof KIND_TO_TYPE)[ReceiptKind];
@@ -161,7 +163,8 @@ async function buildConfirmationPayload(
 				}),
 			};
 		}
-		case "representation_receipt": {
+		case "representation_receipt":
+		case "formal_notice_joint_evaluation_submitted": {
 			return base;
 		}
 	}

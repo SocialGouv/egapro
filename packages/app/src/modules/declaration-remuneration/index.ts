@@ -68,6 +68,7 @@ export { useDeclarationLock } from "./shared/lock/useDeclarationLock";
 export { ComplianceConfirmation } from "./steps/ComplianceConfirmation";
 export { CompliancePathChoice } from "./steps/CompliancePathChoice";
 export { CompliancePathPage } from "./steps/CompliancePathPage";
+export { FormalNoticePage } from "./steps/formalNotice";
 export { JointEvaluationPage } from "./steps/jointEvaluation";
 export { Step1Workforce } from "./steps/Step1Workforce";
 export { Step2PayGap } from "./steps/Step2PayGap";

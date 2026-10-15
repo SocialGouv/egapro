@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
 	dbSelect: vi.fn(),
 	dbTransaction: vi.fn(),
 	getRequiredContentTypes: vi.fn(),
+	isFormalNoticeAvailableFor: vi.fn(),
 }));
 
 vi.mock("../fileUpload", () => ({
@@ -14,6 +15,10 @@ vi.mock("../fileUpload", () => ({
 
 vi.mock("../cseRequiredContentTypes", () => ({
 	getRequiredContentTypes: mocks.getRequiredContentTypes,
+}));
+
+vi.mock("../formalNoticeExposure", () => ({
+	isFormalNoticeAvailableFor: mocks.isFormalNoticeAvailableFor,
 }));
 
 vi.mock("../s3", () => ({
@@ -561,6 +566,180 @@ describe("runUploadPipeline", () => {
 			reason: "server_error",
 			error: "Erreur lors de l'enregistrement du fichier.",
 			s3Cleanup: "failed",
+		});
+	});
+
+	describe("formal_notice_joint_evaluation flow", () => {
+		function primeReplacementTransaction(existingRow: unknown[]) {
+			const insertValues = vi.fn().mockResolvedValue(undefined);
+			const insert = vi.fn().mockReturnValue({ values: insertValues });
+			const deleteWhere = vi.fn().mockResolvedValue(undefined);
+			const del = vi.fn().mockReturnValue({ where: deleteWhere });
+			const existingFileWhere = vi.fn().mockReturnValue({
+				limit: () => Promise.resolve(existingRow),
+			});
+			let txSelectCallCount = 0;
+			const txSelect = vi.fn().mockImplementation(() => {
+				txSelectCallCount++;
+				if (txSelectCallCount === 1) {
+					return {
+						from: () => ({
+							where: () => ({
+								for: () => ({
+									limit: () => Promise.resolve([{ id: "decl-1" }]),
+								}),
+							}),
+						}),
+					};
+				}
+				return { from: () => ({ where: existingFileWhere }) };
+			});
+			mocks.dbTransaction.mockImplementation(
+				async (fn: (tx: unknown) => unknown) =>
+					fn({ select: txSelect, insert, delete: del }),
+			);
+			return { insertValues, del, deleteWhere, existingFileWhere, txSelect };
+		}
+
+		const formalNoticeInput = {
+			...baseInput,
+			fileName: "evaluation-mise-en-demeure.pdf",
+			flowType: "formal_notice_joint_evaluation",
+		} as const;
+
+		it("refuses the upload before streaming when the démarche is not exposed", async () => {
+			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			mocks.isFormalNoticeAvailableFor.mockResolvedValue(false);
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...formalNoticeInput,
+				stream: createStream(),
+			});
+
+			expect(result).toEqual({
+				ok: false,
+				reason: "formal_notice_unavailable",
+				error:
+					"Le dépôt du rapport de l'évaluation conjointe suite à une mise en demeure n'est pas ouvert pour cette démarche.",
+			});
+			expect(mocks.isFormalNoticeAvailableFor).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mocks.handleStreamingUpload).not.toHaveBeenCalled();
+			expect(mocks.dbTransaction).not.toHaveBeenCalled();
+			expect(mocks.deleteFile).not.toHaveBeenCalled();
+		});
+
+		it("returns not_found before checking the exposure when no declaration exists", async () => {
+			primeDbSelect([{ kind: "declaration", id: undefined }]);
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...formalNoticeInput,
+				stream: createStream(),
+			});
+
+			expect(result.ok).toBe(false);
+			if (!result.ok) {
+				expect(result.reason).toBe("not_found");
+			}
+			expect(mocks.isFormalNoticeAvailableFor).not.toHaveBeenCalled();
+		});
+
+		it("replaces the previous report of the same type without entering the CSE quota", async () => {
+			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			mocks.isFormalNoticeAvailableFor.mockResolvedValue(true);
+			mocks.handleStreamingUpload.mockResolvedValue({
+				ok: true,
+				key: "123456789/2027/new-file.pdf",
+				fileId: "new-file",
+			});
+			mocks.deleteFile.mockResolvedValue(undefined);
+			const { insertValues, del, existingFileWhere } =
+				primeReplacementTransaction([
+					{ id: "old-file", filePath: "123456789/2027/old-file.pdf" },
+				]);
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...formalNoticeInput,
+				stream: createStream(),
+			});
+
+			expect(result).toEqual({
+				ok: true,
+				fileId: "new-file",
+				fileName: "evaluation-mise-en-demeure.pdf",
+				filePath: "123456789/2027/new-file.pdf",
+			});
+			expect(existingFileWhere).toHaveBeenCalledWith({
+				op: "and",
+				args: [
+					{ op: "eq", args: ["files.declarationId", "decl-1"] },
+					{
+						op: "eq",
+						args: ["files.type", "formal_notice_joint_evaluation"],
+					},
+				],
+			});
+			expect(del).toHaveBeenCalled();
+			expect(insertValues).toHaveBeenCalledWith({
+				id: "new-file",
+				declarationId: "decl-1",
+				fileName: "evaluation-mise-en-demeure.pdf",
+				filePath: "123456789/2027/new-file.pdf",
+				type: "formal_notice_joint_evaluation",
+			});
+			expect(mocks.getRequiredContentTypes).not.toHaveBeenCalled();
+			await vi.waitFor(() =>
+				expect(mocks.deleteFile).toHaveBeenCalledWith(
+					"123456789/2027/old-file.pdf",
+				),
+			);
+		});
+
+		it("inserts the first report without deleting anything", async () => {
+			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			mocks.isFormalNoticeAvailableFor.mockResolvedValue(true);
+			mocks.handleStreamingUpload.mockResolvedValue({
+				ok: true,
+				key: "123456789/2027/new-file.pdf",
+				fileId: "new-file",
+			});
+			const { insertValues, del } = primeReplacementTransaction([]);
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			const result = await runUploadPipeline({
+				...formalNoticeInput,
+				stream: createStream(),
+			});
+
+			expect(result.ok).toBe(true);
+			expect(del).not.toHaveBeenCalled();
+			expect(insertValues).toHaveBeenCalledWith(
+				expect.objectContaining({ type: "formal_notice_joint_evaluation" }),
+			);
+			expect(mocks.deleteFile).not.toHaveBeenCalled();
+		});
+
+		it("never checks the formal notice exposure for the other flows", async () => {
+			primeDbSelect([{ kind: "declaration", id: "decl-1" }]);
+			mocks.handleStreamingUpload.mockResolvedValue({
+				ok: false,
+				reason: "scan_unavailable",
+				error: "Antivirus indisponible",
+			});
+
+			const { runUploadPipeline } = await import("../uploadPipeline");
+			await runUploadPipeline({
+				...baseInput,
+				stream: createStream(),
+				flowType: "joint_evaluation",
+			});
+
+			expect(mocks.isFormalNoticeAvailableFor).not.toHaveBeenCalled();
 		});
 	});
 });

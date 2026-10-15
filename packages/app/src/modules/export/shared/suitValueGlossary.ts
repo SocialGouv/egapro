@@ -41,6 +41,8 @@ export const EVENT_TYPE_MEANINGS: Record<DeclarationEventType, string> = {
 	cancel: "Annulation de la déclaration.",
 	demarche_complete:
 		"Fin de la démarche. Ne pas confondre avec l'état `demarche_completed` de `Parcours.Statut`, qui ne diffère que d'une lettre.",
+	formal_notice_joint_evaluation_submit:
+		"Dépôt du rapport d'évaluation conjointe suite à mise en demeure de la DREETS, après la fin de la démarche. `Parcours.Statut` reste `demarche_completed`.",
 };
 
 export const COMPLIANCE_PATH_MEANINGS: Record<CompliancePathValue, string> = {
@@ -76,6 +78,7 @@ export const OPINION_TYPE_MEANINGS: Record<OpinionType, string> = {
 export const FILE_TYPE_LABELS: Record<FileType, string> = {
 	cse_opinion: "Avis du CSE",
 	joint_evaluation: "Évaluation conjointe",
+	formal_notice_joint_evaluation: "Évaluation conjointe (mise en demeure)",
 };
 
 export const FILE_TYPE_MEANINGS: Record<FileType, string> = {
@@ -83,6 +86,8 @@ export const FILE_TYPE_MEANINGS: Record<FileType, string> = {
 		"PDF d'avis du CSE déposé par l'entreprise (jusqu'à 4 par an, entreprises d'au moins 100 salariés).",
 	joint_evaluation:
 		"PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise.",
+	formal_notice_joint_evaluation:
+		"PDF du rapport d'évaluation conjointe des rémunérations déposé par l'entreprise mise en demeure par la DREETS, après la fin de sa démarche. Un seul fichier par déclaration : un nouveau dépôt remplace le précédent.",
 };
 
 export const ACTIVE_CATEGORY_SOURCE_MEANINGS: Record<
@@ -141,9 +146,14 @@ export const HOMONYMS: SuitHomonym[] = [
 				meaning: "Type du fichier d'évaluation conjointe.",
 			},
 			{
+				field: "`Fichier_evaluation_conjointe_mise_en_demeure.Type`",
+				meaning:
+					"Type du fichier d'évaluation conjointe déposé suite à mise en demeure.",
+			},
+			{
 				field: "`files[].type`",
 				meaning:
-					"Type de fichier servi par `GET /api/v1/files` — en minuscules, contrairement aux trois autres.",
+					"Type de fichier servi par `GET /api/v1/files` — en minuscules, contrairement aux quatre autres.",
 			},
 		],
 	},
