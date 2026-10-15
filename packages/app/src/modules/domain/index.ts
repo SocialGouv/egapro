@@ -220,6 +220,7 @@ export {
 	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
+	formatCurrencyFixedTwo,
 	formatDays,
 	formatDecimal,
 	formatFileSize,

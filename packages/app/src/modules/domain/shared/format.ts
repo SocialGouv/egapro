@@ -92,6 +92,16 @@ export function formatCurrency(value?: string | null, unit = "€"): string {
 	return formatTotal(n, unit);
 }
 
+export function formatCurrencyFixedTwo(
+	value?: string | null,
+	unit = "€",
+): string {
+	if (!value) return "-";
+	const amount = Number.parseFloat(value);
+	if (Number.isNaN(amount)) return "-";
+	return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${unit}`;
+}
+
 /**
  * Echo a percentage the user typed, at the one decimal its field accepts:
  * `35` → `"35 %"`, `12.5` → `"12,5 %"`. Returns `"—"` for nullish values.

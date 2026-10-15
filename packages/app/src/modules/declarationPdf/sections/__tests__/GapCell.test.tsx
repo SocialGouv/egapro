@@ -57,3 +57,39 @@ describe("GapCell", () => {
 		expect(screen.queryByText(/faible/i)).not.toBeInTheDocument();
 	});
 });
+
+describe("GapCell — favoredSex variant", () => {
+	it("prints the magnitude, the badge and the favored sex for a high gap favoring men", () => {
+		render(<GapCell gap={7.17} variant="favoredSex" />);
+		expect(screen.getByText("7,17 %")).toBeInTheDocument();
+		expect(screen.getByText(BADGE)).toBeInTheDocument();
+		expect(screen.getByText("en faveur des hommes")).toBeInTheDocument();
+	});
+
+	it("drops the sign of a gap favoring women and does not badge it below the threshold", () => {
+		render(<GapCell gap={-3.168} variant="favoredSex" />);
+		expect(screen.getByText("3,16 %")).toBeInTheDocument();
+		expect(screen.queryByText("-3,16 %")).not.toBeInTheDocument();
+		expect(screen.queryByText(BADGE)).not.toBeInTheDocument();
+		expect(screen.getByText("en faveur des femmes")).toBeInTheDocument();
+	});
+
+	it("prints no favored sex for a gap that displays as zero", () => {
+		render(<GapCell gap={0.001} variant="favoredSex" />);
+		expect(screen.getByText("0,00 %")).toBeInTheDocument();
+		expect(screen.queryByText(/en faveur des/)).not.toBeInTheDocument();
+	});
+
+	it("prints the placeholder and no favored sex for a missing gap", () => {
+		render(<GapCell gap={null} variant="favoredSex" />);
+		expect(screen.getByText("- %")).toBeInTheDocument();
+		expect(screen.queryByText(/en faveur des/)).not.toBeInTheDocument();
+		expect(screen.queryByText(BADGE)).not.toBeInTheDocument();
+	});
+
+	it("keeps the signed rendering when no variant is given", () => {
+		render(<GapCell gap={-3.168} />);
+		expect(screen.getByText("-3,16 %")).toBeInTheDocument();
+		expect(screen.queryByText(/en faveur des/)).not.toBeInTheDocument();
+	});
+});
