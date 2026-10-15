@@ -23,8 +23,11 @@ vi.mock("@react-pdf/renderer", async () => {
 vi.mock("../PayGapTable", async () => {
 	const React = await import("react");
 	return {
-		PayGapTable: () =>
-			React.createElement("div", { "data-testid": "pay-gap-table" }),
+		PayGapTable: ({ gapVariant }: { gapVariant?: string }) =>
+			React.createElement("div", {
+				"data-testid": "pay-gap-table",
+				"data-variant": gapVariant ?? "signed",
+			}),
 	};
 });
 
@@ -105,5 +108,41 @@ describe("VariablePaySection", () => {
 			/>,
 		);
 		expect(screen.getAllByText("- %")).toHaveLength(2);
+	});
+
+	it("prints dashes when the workforce totals are unknown", () => {
+		render(
+			<VariablePaySection
+				data={{
+					totalWomen: null,
+					totalMen: null,
+					step3Data: {
+						...emptyStep3Data(),
+						indicatorEWomen: "60",
+						indicatorEMen: "70",
+					},
+					step3Gaps: noPayGapReferences(),
+				}}
+			/>,
+		);
+		expect(screen.getByText("Total de salariés : -")).toBeInTheDocument();
+		expect(screen.getAllByText("- %")).toHaveLength(2);
+		expect(screen.queryByText(/null|NaN/)).not.toBeInTheDocument();
+	});
+
+	it("forwards the gap cell variant to the pay gap table", () => {
+		render(
+			<VariablePaySection
+				data={makeData(
+					{},
+					{ totalWomen: 1, totalMen: 1, hourlyWomen: 1, hourlyMen: 1 },
+				)}
+				gapVariant="favoredSex"
+			/>,
+		);
+		expect(screen.getByTestId("pay-gap-table")).toHaveAttribute(
+			"data-variant",
+			"favoredSex",
+		);
 	});
 });

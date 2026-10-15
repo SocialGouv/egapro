@@ -43,6 +43,25 @@ describe("FooterBottom", () => {
 		expect(versionIndex).toBe(labels.length - 1);
 	});
 
+	it("shows the terms of use link right after the legal notice", async () => {
+		const Comp = await withEnv({
+			NEXT_PUBLIC_APP_VERSION: undefined,
+			NEXT_PUBLIC_PR_NUMBER: undefined,
+		});
+		render(<Comp />);
+
+		const labels = bottomListLabels();
+		const legalNoticeIndex = labels.findIndex((label) =>
+			label.includes("Mentions légales"),
+		);
+		const termsOfUseIndex = labels.findIndex((label) =>
+			label.includes("Conditions générales d'utilisation"),
+		);
+
+		expect(legalNoticeIndex).toBeGreaterThanOrEqual(0);
+		expect(termsOfUseIndex).toBe(legalNoticeIndex + 1);
+	});
+
 	it("keeps the version out of the licence block", async () => {
 		const Comp = await withEnv({
 			NEXT_PUBLIC_APP_VERSION: "v4.0.0-alpha.1",

@@ -2,10 +2,12 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { and, eq } from "drizzle-orm";
 
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { mapGipToFormData } from "~/modules/declaration-remuneration";
 import {
+	buildPrefillPdfData,
 	type PrefillPdfData,
-	PrefillPdfDocument,
-} from "~/modules/declarationPdf/PrefillPdfDocument";
+} from "~/modules/declarationPdf/buildPrefillPdfData";
+import { PrefillPdfDocument } from "~/modules/declarationPdf/PrefillPdfDocument";
 import { getCurrentYear } from "~/modules/domain";
 import { auditQueryMetadata } from "~/server/audit/queryMetadata";
 import { withAuditedRoute } from "~/server/audit/withAuditedRoute";
@@ -59,24 +61,30 @@ async function resolvePrefillPdf(
 		.where(and(eq(gipMdsData.siren, siren), eq(gipMdsData.year, year)))
 		.limit(1);
 
-	if (!row) {
+	const gip = mapGipToFormData(row ?? null);
+	if (!row || !gip) {
 		return { error: pdfErrorResponse("Aucune donnée préremplie", 404) };
 	}
 
 	const [company] = await db
-		.select({ name: companies.name })
+		.select({
+			name: companies.name,
+			address: companies.address,
+			nafCode: companies.nafCode,
+			nafLabel: companies.nafLabel,
+			hasCse: companies.hasCse,
+		})
 		.from(companies)
 		.where(eq(companies.siren, siren))
 		.limit(1);
 
-	const data: PrefillPdfData = {
+	const data = buildPrefillPdfData({
 		siren,
-		companyName: company?.name ?? `Entreprise ${siren}`,
 		year,
-		periodStart: row.periodStart,
-		periodEnd: row.periodEnd,
-		row: row as unknown as Record<string, string | number | null>,
-	};
+		gip,
+		workforceEma: row.workforceEma,
+		company,
+	});
 
 	return { data, filename: `donnees-preremplies-${siren}-${year}.pdf` };
 }

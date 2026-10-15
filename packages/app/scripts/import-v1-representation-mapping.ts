@@ -1,4 +1,9 @@
-import { COUNTIES, REGIONS } from "~/modules/domain";
+import {
+	COUNTIES,
+	FRANCE_COUNTRY,
+	REGIONS,
+	UNKNOWN_COUNTRY,
+} from "~/modules/domain";
 
 export type V1Company = {
 	siren: string;
@@ -52,6 +57,8 @@ export type MappedCompany = {
 	regionCode: string | null;
 	departmentCode: string | null;
 	departmentLabel: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
 	statutDiffusion: string | null;
 };
 
@@ -115,6 +122,9 @@ export function computeReferencePeriodStart(
 export function mapCompanyFromV1(entreprise: V1Company): MappedCompany {
 	const regionCode = entreprise.région ?? null;
 	const departmentCode = entreprise.département ?? null;
+	const departmentLabel = departmentCode
+		? (DEPARTMENT_LABELS[departmentCode] ?? null)
+		: null;
 	return {
 		siren: entreprise.siren,
 		name: entreprise.raison_sociale,
@@ -129,9 +139,8 @@ export function mapCompanyFromV1(entreprise: V1Company): MappedCompany {
 		region: regionCode ? (REGION_LABELS[regionCode] ?? null) : null,
 		regionCode: regionCode && REGION_LABELS[regionCode] ? regionCode : null,
 		departmentCode,
-		departmentLabel: departmentCode
-			? (DEPARTMENT_LABELS[departmentCode] ?? null)
-			: null,
+		departmentLabel,
+		...(departmentLabel ? FRANCE_COUNTRY : UNKNOWN_COUNTRY),
 		statutDiffusion:
 			entreprise.raison_sociale === NON_DIFFUSIBLE_MARKER ? "N" : null,
 	};

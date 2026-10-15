@@ -39,17 +39,15 @@ export function PrivacyCookies() {
 				entendu au sens de l'article 6-1 a) du RGPD.
 			</p>
 			<p>
-				Index Egapro utilise notamment la solution de mesure d'audience « Matomo
-				» paramétrée en mode « exempté » et ne nécessitant pas le recueil de
-				votre consentement conformément aux recommandations de la CNIL. La durée
-				de vie du cookie n'excède pas 13 mois. Vous pouvez vous opposer à cette
-				mesure d'audience à tout moment depuis la page Gestion des
-				cookies&nbsp;; si votre navigateur émet le signal «&nbsp;Do Not
-				Track&nbsp;», il est respecté et aucune mesure n'est effectuée.
+				Egapro utilise notamment la solution de mesure d'audience « Matomo »
+				paramétrée en mode « exempté » et ne nécessitant pas le recueil de votre
+				consentement conformément aux recommandations de la CNIL. La durée de
+				vie du cookie n'excède pas 13 mois.
 			</p>
 			<p>
-				Pour en savoir plus sur la gestion des cookies, consultez notre page{" "}
-				<Link href={COOKIES}>Gestion des cookies</Link>.
+				Vous êtes suivis de manière anonyme. Décochez la case pour ne plus être
+				suivis même anonymement :{" "}
+				<Link href={COOKIES}>Gestion des cookies</Link>
 			</p>
 			<p>
 				À tout moment, vous pouvez refuser l'utilisation des cookies et

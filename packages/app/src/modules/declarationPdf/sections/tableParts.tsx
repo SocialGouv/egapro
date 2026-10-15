@@ -1,7 +1,7 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 
-import { styles } from "../recapPdfStyles";
+import { type PdfStyles, styles } from "../recapPdfStyles";
 
 type Align = "left" | "right";
 
@@ -11,9 +11,15 @@ export function normalizeSpaces(value: string): string {
 	return value.replace(/\u202F/g, "\u00A0");
 }
 
-export function Table({ children }: { children: ReactNode }) {
+export function Table({
+	children,
+	sheet = styles,
+}: {
+	children: ReactNode;
+	sheet?: PdfStyles;
+}) {
 	return (
-		<View style={styles.table} wrap={false}>
+		<View style={sheet.table} wrap={false}>
 			{children}
 		</View>
 	);
@@ -32,6 +38,7 @@ type CellProps = {
 	text?: string;
 	hint?: string;
 	children?: ReactNode;
+	sheet?: PdfStyles;
 };
 
 export function Cell({
@@ -43,12 +50,13 @@ export function Cell({
 	text,
 	hint,
 	children,
+	sheet = styles,
 }: CellProps) {
 	const sizing = width !== undefined ? { width } : { flex: flex ?? 1 };
-	const textStyle = bold || header ? styles.cellTextBold : styles.cellText;
+	const textStyle = bold || header ? sheet.cellTextBold : sheet.cellText;
 	const cellStyle = header
-		? [styles.cell, styles.headerCell, sizing]
-		: [styles.cell, sizing];
+		? [sheet.cell, sheet.headerCell, sizing]
+		: [sheet.cell, sizing];
 	return (
 		<View style={cellStyle}>
 			{text !== undefined ? (
@@ -57,7 +65,7 @@ export function Cell({
 				</Text>
 			) : null}
 			{hint !== undefined ? (
-				<Text style={styles.headerHint}>{normalizeSpaces(hint)}</Text>
+				<Text style={sheet.headerHint}>{normalizeSpaces(hint)}</Text>
 			) : null}
 			{children}
 		</View>
