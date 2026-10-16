@@ -140,11 +140,13 @@ En développement local, l'authentification utilise le fournisseur d'identité d
 2. Saisir l'email : `test@fia1.fr`
 3. Cliquer sur **Se connecter**
 
-#### Pourquoi le port 3000 est obligatoire
+#### Ports locaux autorisés par ProConnect
 
 L'application ne parle pas à ProConnect directement : elle passe par **Charon**, le proxy OAuth de la Fabrique (fournisseur `proconnecttest`). C'est l'URL renseignée dans `EGAPRO_PROCONNECT_ISSUER`, identique à celle des environnements déployés (`.kontinuous/env/*/templates/proconnect.configmap.yaml`).
 
-Charon tient la liste des adresses de retour autorisées pour egapro, et la seule adresse locale qu'elle contient est `http://localhost:3000`. Un serveur de dev sur un autre port mène donc à un échec de connexion — ce n'est ni une contrainte Next.js ni une contrainte Playwright. C'est aussi pour cette raison que `pnpm test:e2e` exige le port 3000, et que plusieurs serveurs de dev locaux ne peuvent pas se connecter en parallèle sans que cette liste soit élargie côté infra.
+La configuration egapro de Charon, dans `SocialGouv/infra-apps/charon/projects/charon-egapro/config-map.yaml`, autorise les callbacks locaux sur les ports 3000 à 3010 après son déploiement. Les worktrees applicatifs utilisent 3001 à 3005. Les gates E2E de fin d'epic réservent un index libre parmi 5 à 9, soit les ports 3006 à 3010, et peuvent ainsi tourner en parallèle. Si ces cinq créneaux sont occupés, le lancement échoue clairement. Le serveur, `NEXTAUTH_URL` et `PLAYWRIGHT_BASE_URL` doivent désigner le même port ; changer uniquement le port du serveur casse le callback OAuth.
+
+La suite locale sur un worktree peut être lancée avec `PLAYWRIGHT_BASE_URL=http://localhost:<port> pnpm test:e2e`. La commande racine respecte cette variable ; sans elle, elle utilise `SITE_URL`, puis le port 3000. Le déploiement de la configuration Charon est nécessaire avant de tester la connexion réelle sur les nouveaux ports.
 
 Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRET`) sont fournis par l'équipe et ne sont jamais commités.
 
@@ -158,7 +160,7 @@ Les identifiants (`EGAPRO_PROCONNECT_CLIENT_ID`, `EGAPRO_PROCONNECT_CLIENT_SECRE
 | `pnpm format:check` | Vérification du formatage |
 | `pnpm typecheck` | Vérification des types TypeScript |
 | `pnpm test` | Tests unitaires |
-| `pnpm test:e2e` | Tests E2E Playwright (nécessite le serveur sur le port 3000) |
+| `pnpm test:e2e` | Tests E2E Playwright (port du serveur via `PLAYWRIGHT_BASE_URL`) |
 | `pnpm test:lighthouse` | Audit Lighthouse (nécessite le serveur sur le port 3000) |
 | `pnpm db:migrate` | Migrations Drizzle |
 | `pnpm db:studio` | Drizzle Studio |
@@ -250,7 +252,7 @@ Chargees **automatiquement** selon le `paths:` de leur frontmatter. Trois n'en o
 | `audit-logging.md` | routeurs, route handlers, auth, audit | les 3 points de cablage d'une action auditee |
 | `demarche-state-machine.md` | parcours de declaration, Mon espace, regles serveur, E2E | l'autorite unique du graphe d'etats |
 | `testing.md` | `src/**/__tests__/**` | couverture, frontieres de mock, pieges rencontres |
-| `e2e.md` | `src/e2e/**` | peu de scenarios riches, couverture des pages, port 3000 |
+| `e2e.md` | `src/e2e/**` | peu de scenarios riches, couverture des pages, ports locaux autorisés par Charon |
 
 ### Pipeline (`.claude/pipeline/`)
 
