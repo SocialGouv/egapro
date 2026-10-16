@@ -17,7 +17,7 @@ import postgres from "postgres";
  *    the developer's dev database.
  *  - Each CI job gets a clean slate so assertions on row counts are reliable.
  *
- * Cost: starting a Postgres 16 container takes ~5–10 s. This runs once per
+ * Cost: starting a Postgres 17 container takes ~5–10 s. This runs once per
  * `vitest run --config vitest.integration.config.ts` invocation, not once
  * per test file.
  */
@@ -25,7 +25,7 @@ import postgres from "postgres";
 let container: StartedPostgreSqlContainer | undefined;
 
 export async function setup() {
-	container = await new PostgreSqlContainer("postgres:16").start();
+	container = await new PostgreSqlContainer("postgres:17.11").start();
 	const databaseUrl = container.getConnectionUri();
 
 	// Bypass Zod env validation — the integration tests only need DATABASE_URL,
