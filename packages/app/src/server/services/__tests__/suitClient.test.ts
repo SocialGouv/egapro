@@ -4,11 +4,13 @@ const P12_CONTENT = "fake-p12-bundle";
 const P12_BASE64 = Buffer.from(P12_CONTENT).toString("base64");
 
 const AgentMock = vi.fn();
+const undiciFetchSpy = vi.fn();
 
 async function loadSuitClient(certEnv: Record<string, string | undefined>) {
 	vi.resetModules();
 	AgentMock.mockClear();
-	vi.doMock("undici", () => ({ Agent: AgentMock }));
+	undiciFetchSpy.mockReset().mockResolvedValue({ ok: true });
+	vi.doMock("undici", () => ({ Agent: AgentMock, fetch: undiciFetchSpy }));
 	vi.doMock("~/env", () => ({
 		env: {
 			EGAPRO_SUIT_API_URL: "https://api.suit.example.com/",
@@ -20,7 +22,7 @@ async function loadSuitClient(certEnv: Record<string, string | undefined>) {
 	vi.stubGlobal("fetch", fetchSpy);
 
 	const { suitFetch, suitAwareFetch } = await import("../suitClient");
-	return { suitFetch, suitAwareFetch, fetchSpy };
+	return { suitFetch, suitAwareFetch, fetchSpy, undiciFetchSpy };
 }
 
 const WITH_CERT = {
@@ -48,7 +50,7 @@ describe("suitFetch", () => {
 	});
 
 	it("refuses to follow redirects, which would leak the certificate", async () => {
-		const { suitFetch, fetchSpy } = await loadSuitClient({
+		const { suitFetch, undiciFetchSpy } = await loadSuitClient({
 			EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: P12_BASE64,
 		});
 
@@ -56,7 +58,7 @@ describe("suitFetch", () => {
 
 		// A followed redirect re-uses the dispatcher, presenting the client
 		// certificate to whatever host the 3xx points at.
-		expect(fetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
+		expect(undiciFetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
 	});
 
 	it("calls without a client certificate when none is configured", async () => {
@@ -69,7 +71,7 @@ describe("suitFetch", () => {
 	});
 
 	it("presents the decoded certificate and its passphrase", async () => {
-		const { suitFetch, fetchSpy } = await loadSuitClient({
+		const { suitFetch, fetchSpy, undiciFetchSpy } = await loadSuitClient({
 			EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: P12_BASE64,
 			EGAPRO_SUIT_CLIENT_CERT_PASSWORD: "cert-password",
 		});
@@ -77,17 +79,21 @@ describe("suitFetch", () => {
 		await suitFetch("/suit/api/externe/portail/CSE/339787277");
 
 		expect(AgentMock).toHaveBeenCalledTimes(1);
+		expect(AgentMock.mock.calls[0]?.[0].allowH2).toBe(false);
 		const connect = AgentMock.mock.calls[0]?.[0].connect;
 		expect(connect.passphrase).toBe("cert-password");
 		expect(Buffer.isBuffer(connect.pfx)).toBe(true);
 		expect(connect.pfx.toString()).toBe(P12_CONTENT);
 
 		// The agent built from the certificate is the one actually used.
-		expect(fetchSpy.mock.calls[0]?.[1].dispatcher).toBeInstanceOf(AgentMock);
+		expect(undiciFetchSpy.mock.calls[0]?.[1].dispatcher).toBeInstanceOf(
+			AgentMock,
+		);
+		expect(fetchSpy).not.toHaveBeenCalled();
 	});
 
 	it("builds the agent once and reuses it across calls", async () => {
-		const { suitFetch, fetchSpy } = await loadSuitClient({
+		const { suitFetch, undiciFetchSpy } = await loadSuitClient({
 			EGAPRO_SUIT_CLIENT_CERT_P12_BASE64: P12_BASE64,
 			EGAPRO_SUIT_CLIENT_CERT_PASSWORD: "cert-password",
 		});
@@ -96,8 +102,8 @@ describe("suitFetch", () => {
 		await suitFetch("/suit/api/externe/portail/CSE/987654321");
 
 		expect(AgentMock).toHaveBeenCalledTimes(1);
-		expect(fetchSpy.mock.calls[0]?.[1].dispatcher).toBe(
-			fetchSpy.mock.calls[1]?.[1].dispatcher,
+		expect(undiciFetchSpy.mock.calls[0]?.[1].dispatcher).toBe(
+			undiciFetchSpy.mock.calls[1]?.[1].dispatcher,
 		);
 	});
 
@@ -130,13 +136,15 @@ describe("suitAwareFetch", () => {
 		"https://api.suit.example.com/suit/api/externe/egapro/gipmds/latest";
 
 	it("presents the certificate when the URL is on the SUIT origin", async () => {
-		const { suitAwareFetch, fetchSpy } = await loadSuitClient(WITH_CERT);
+		const { suitAwareFetch, undiciFetchSpy } = await loadSuitClient(WITH_CERT);
 
 		await suitAwareFetch(SUIT_GIP_URL);
 
-		expect(fetchSpy.mock.calls[0]?.[0]).toBe(SUIT_GIP_URL);
-		expect(fetchSpy.mock.calls[0]?.[1].dispatcher).toBeInstanceOf(AgentMock);
-		expect(fetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
+		expect(undiciFetchSpy.mock.calls[0]?.[0]).toBe(SUIT_GIP_URL);
+		expect(undiciFetchSpy.mock.calls[0]?.[1].dispatcher).toBeInstanceOf(
+			AgentMock,
+		);
+		expect(undiciFetchSpy.mock.calls[0]?.[1].redirect).toBe("error");
 	});
 
 	it("never presents the certificate to the internal GIP mock", async () => {
