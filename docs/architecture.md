@@ -85,7 +85,7 @@ Trois grandes catégories de surface technique :
 | Styling | SCSS Modules + DSFR | sass | Mixins DSFR auto-injectés |
 | API interne | tRPC | ^11 | RPC typé bout-en-bout |
 | ORM | Drizzle | ^0.45 | SQL typé, migrations versionnées |
-| BDD | PostgreSQL | 14.17 | Local : Docker ; prod : managed |
+| BDD | PostgreSQL | 17.11 dans `docker-compose.yml` (cible locale provisoire) | Deux conteneurs locaux ; version cible du cluster V2 à valider (voir §7) |
 | Auth | NextAuth | 4.x | Wrap ProConnect (OAuth/OIDC) |
 | Validation | Zod | ^4 | Schemas partagés front + back |
 | Lint / Format | Biome | ^2 | Remplace ESLint + Prettier |
@@ -442,6 +442,8 @@ Un middleware tRPC global lit la map `PROCEDURE_TO_ACTION` (dans `src/server/aud
 ---
 
 ## 7. Base de données (Drizzle + PostgreSQL)
+
+La stack locale utilise provisoirement PostgreSQL 17.11 pour l’application et les notifications ; ce choix ne fixe pas la cible du cluster V2. Le 15 octobre 2026, le cluster `pg` de développement (`ovh-dev/egapro-alpha`) exécutait PostgreSQL 14.18 avec l’image CloudNativePG/PostGIS 14. La V2 n’est pas encore en production ; les namespaces `egapro-preprod` et `egapro` observés correspondent à la V1. L’inventaire, la cible, les contrôles et les conditions de bascule V2 sont suivis dans la [procédure de montée de version V2](postgresql-v2-upgrade.md) et la [Feature #4824](https://github.com/SocialGouv/egapro/issues/4824).
 
 ### 7.1 Schéma
 
@@ -890,8 +892,9 @@ Trois environnements gérés : **dev** (review apps), **preprod** (branche `beta
 
 | Service | Image | Rôle |
 |---|---|---|
-| `db` | `postgres:14.17` | Base de données principale |
-| `migrate` | `node:22-slim` | Applique les migrations Drizzle au démarrage |
+| `db` | `postgres:17.11` | Base applicative locale (cible provisoire) |
+| `db-notifications` | `postgres:17.11` | Base locale dédiée au worker de notifications (cible provisoire) |
+| `migrate` | `node:22-slim` | Synchronise le schéma local avec `db:push` au démarrage |
 | `minio` | `minio/minio` | Stockage S3-compatible |
 | `mailpit` | `axllent/mailpit` | Capteur de mails dev (web UI sur :1080, SMTP :1025) |
 | `clamavd` | — | Antivirus pour l'upload de PDF |
