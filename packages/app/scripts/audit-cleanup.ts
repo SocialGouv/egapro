@@ -14,7 +14,7 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
  *    (high-volume access logs containing IP addresses)
  *  - long retention (365 d by default): every other category (security logs)
  *
- * The two DELETEs are atomic (single transaction). The success self-audit is
+ * The DELETEs are atomic (single transaction). The success self-audit is
  * appended after the transaction commits — a failure writing the audit row
  * must not roll back work we already accomplished. Cleanup failures go
  * through `logFailure`, which inserts outside any transaction so the record
@@ -24,6 +24,7 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
  *  - DATABASE_URL (or POSTGRES_* fallback, same convention as migrate.ts)
  *  - EGAPRO_AUDIT_RETENTION_SHORT_DAYS (optional, default 180)
  *  - EGAPRO_AUDIT_RETENTION_LONG_DAYS  (optional, default 365)
+ *  - EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS (optional, default 365)
  *
  * Issue: #3268 (cleanup jobs use direct DB access instead of HTTP endpoints).
  */
@@ -31,6 +32,7 @@ import { cleanupErrorDiagnostic } from "./cleanup-error-diagnostic";
 type CleanupResult = {
 	deletedShort: number;
 	deletedLong: number;
+	deletedImpersonation: number;
 	deletedTotal: number;
 };
 
@@ -38,6 +40,7 @@ type RunAuditCleanupArgs = {
 	sql: Sql;
 	shortRetentionDays: number;
 	longRetentionDays: number;
+	impersonationRetentionDays?: number;
 	now?: Date;
 };
 
@@ -48,6 +51,7 @@ const AUDIT_CLEANUP_FAILURE_CODE = "AUDIT_CLEANUP_FAILED";
 
 const DEFAULT_SHORT_RETENTION_DAYS = 180;
 const DEFAULT_LONG_RETENTION_DAYS = 365;
+const DEFAULT_IMPERSONATION_RETENTION_DAYS = 365;
 
 function getDatabaseUrl(): string {
 	if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
@@ -99,10 +103,12 @@ export async function runAuditCleanup({
 	sql,
 	shortRetentionDays,
 	longRetentionDays,
+	impersonationRetentionDays = DEFAULT_IMPERSONATION_RETENTION_DAYS,
 	now = new Date(),
 }: RunAuditCleanupArgs): Promise<CleanupResult> {
 	const shortThreshold = subtractDays(now, shortRetentionDays);
 	const longThreshold = subtractDays(now, longRetentionDays);
+	const impersonationThreshold = subtractDays(now, impersonationRetentionDays);
 
 	const summary = await sql.begin(async (tx) => {
 		const shortResult = await tx`
@@ -115,13 +121,19 @@ export async function runAuditCleanup({
 			WHERE category <> ALL(${SHORT_RETENTION_CATEGORIES})
 			AND created_at < ${longThreshold}
 		`;
+		const impersonationResult = await tx`
+			DELETE FROM app_admin_impersonation_event
+			WHERE started_at < ${impersonationThreshold}
+		`;
 
 		const deletedShort = Number(shortResult.count ?? 0);
 		const deletedLong = Number(longResult.count ?? 0);
+		const deletedImpersonation = Number(impersonationResult.count ?? 0);
 		return {
 			deletedShort,
 			deletedLong,
-			deletedTotal: deletedShort + deletedLong,
+			deletedImpersonation,
+			deletedTotal: deletedShort + deletedLong + deletedImpersonation,
 		};
 	});
 
@@ -144,9 +156,11 @@ export async function runAuditCleanup({
 				${sql.json({
 					deletedShort: summary.deletedShort,
 					deletedLong: summary.deletedLong,
+					deletedImpersonation: summary.deletedImpersonation,
 					deletedTotal: summary.deletedTotal,
 					shortRetentionDays,
 					longRetentionDays,
+					impersonationRetentionDays,
 				})}
 			)
 		`;
@@ -201,6 +215,10 @@ if (isMain) {
 		process.env.EGAPRO_AUDIT_RETENTION_LONG_DAYS,
 		DEFAULT_LONG_RETENTION_DAYS,
 	);
+	const impersonationRetentionDays = toPositiveInt(
+		process.env.EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS,
+		DEFAULT_IMPERSONATION_RETENTION_DAYS,
+	);
 
 	const sql = postgres(getDatabaseUrl(), { max: 1 });
 
@@ -209,9 +227,10 @@ if (isMain) {
 			sql,
 			shortRetentionDays,
 			longRetentionDays,
+			impersonationRetentionDays,
 		});
 		console.log(
-			`[audit-cleanup] Success — deletedShort=${result.deletedShort} deletedLong=${result.deletedLong} deletedTotal=${result.deletedTotal}`,
+			`[audit-cleanup] Success — deletedShort=${result.deletedShort} deletedLong=${result.deletedLong} deletedImpersonation=${result.deletedImpersonation} deletedTotal=${result.deletedTotal}`,
 		);
 		await sql.end();
 		process.exit(0);

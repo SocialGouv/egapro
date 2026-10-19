@@ -21,27 +21,54 @@ import {
 } from "#scripts/audit-cleanup";
 import { env } from "~/env.js";
 
+const ADMIN_ID = "audit-cleanup-impersonation-admin";
+const SIREN = "476800001";
+
 describe("audit-cleanup.mjs (integration)", () => {
 	// Definite-assignment assertion — initialized synchronously in `beforeAll`.
 	// If `beforeAll` throws, vitest skips the tests and reports the original
 	// error; any afterAll failure from an undefined `sql` is suppressed below.
 	let sql!: ReturnType<typeof postgres>;
 
-	beforeAll(() => {
+	beforeAll(async () => {
 		// DATABASE_URL is populated by `integration-setup.ts` before this file
 		// loads — env.js reads it from the same source.
 		sql = postgres(env.DATABASE_URL, { max: 1 });
+		await sql`
+			INSERT INTO app_user (id, email, is_admin)
+			VALUES (${ADMIN_ID}, 'audit-cleanup-admin@example.fr', true)
+		`;
+		await sql`
+			INSERT INTO app_company (siren, name)
+			VALUES (${SIREN}, 'Société Démo')
+		`;
 	});
 
 	afterAll(async () => {
 		if (!sql) return;
+		await sql`DELETE FROM app_admin_impersonation_event WHERE admin_user_id = ${ADMIN_ID}`;
 		await sql`DELETE FROM audit.action_log`;
+		await sql`DELETE FROM app_company WHERE siren = ${SIREN}`;
+		await sql`DELETE FROM app_user WHERE id = ${ADMIN_ID}`;
 		await sql.end();
 	});
 
 	beforeEach(async () => {
+		await sql`DELETE FROM app_admin_impersonation_event WHERE admin_user_id = ${ADMIN_ID}`;
 		await sql`DELETE FROM audit.action_log`;
 	});
+
+	async function insertImpersonation(startedAt: Date, stoppedAt?: Date) {
+		await sql`
+			INSERT INTO app_admin_impersonation_event (
+				id, admin_user_id, siren, started_at, stopped_at
+			)
+			VALUES (
+				${crypto.randomUUID()}, ${ADMIN_ID}, ${SIREN},
+				${startedAt}, ${stoppedAt ?? null}
+			)
+		`;
+	}
 
 	async function insertRow(row: {
 		createdAt: Date;
@@ -86,6 +113,7 @@ describe("audit-cleanup.mjs (integration)", () => {
 		expect(result).toEqual({
 			deletedShort: 0,
 			deletedLong: 0,
+			deletedImpersonation: 0,
 			deletedTotal: 0,
 		});
 		expect(await countWhere("system.audit_cleanup")).toBe(1);
@@ -202,8 +230,101 @@ describe("audit-cleanup.mjs (integration)", () => {
 		expect(result).toEqual({
 			deletedShort: 1,
 			deletedLong: 1,
+			deletedImpersonation: 0,
 			deletedTotal: 2,
 		});
+	});
+
+	it("deletes impersonation events strictly before the 365-day boundary", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertImpersonation(new Date("2024-12-31T23:59:59Z"));
+		await insertImpersonation(new Date("2025-01-01T00:00:00Z"));
+		await insertImpersonation(new Date("2025-01-02T00:00:00Z"), now);
+
+		const result = await runAuditCleanup({
+			sql,
+			shortRetentionDays: 180,
+			longRetentionDays: 365,
+			now,
+		});
+
+		expect(result.deletedImpersonation).toBe(1);
+		expect(result.deletedTotal).toBe(1);
+		const remaining = await sql<[{ started_at: Date }, { started_at: Date }]>`
+			SELECT started_at FROM app_admin_impersonation_event
+			WHERE admin_user_id = ${ADMIN_ID}
+			ORDER BY started_at
+		`;
+		expect(remaining.map((row) => row.started_at.toISOString())).toEqual([
+			"2025-01-01T00:00:00.000Z",
+			"2025-01-02T00:00:00.000Z",
+		]);
+	});
+
+	it("uses a dedicated impersonation retention override", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertImpersonation(new Date("2025-11-22T00:00:00Z"));
+		await insertImpersonation(new Date("2025-12-12T00:00:00Z"));
+
+		const result = await runAuditCleanup({
+			sql,
+			shortRetentionDays: 180,
+			longRetentionDays: 365,
+			impersonationRetentionDays: 30,
+			now,
+		});
+
+		expect(result.deletedImpersonation).toBe(1);
+		const remaining = await sql<[{ started_at: Date }]>`
+			SELECT started_at FROM app_admin_impersonation_event
+			WHERE admin_user_id = ${ADMIN_ID}
+		`;
+		expect(remaining[0]?.started_at.toISOString()).toBe(
+			"2025-12-12T00:00:00.000Z",
+		);
+	});
+
+	it("rolls back audit deletions when the impersonation deletion fails", async () => {
+		const now = new Date("2026-01-01T00:00:00Z");
+		await insertRow({
+			createdAt: new Date("2020-01-01T00:00:00Z"),
+			category: "read_sensitive",
+			action: "profile.read",
+		});
+		await insertImpersonation(new Date("2020-01-01T00:00:00Z"));
+		await sql`
+			CREATE FUNCTION audit_cleanup_fail_impersonation_delete()
+			RETURNS trigger LANGUAGE plpgsql AS $$
+			BEGIN
+				RAISE EXCEPTION 'simulated impersonation deletion failure';
+			END;
+			$$
+		`;
+		await sql`
+			CREATE TRIGGER audit_cleanup_fail_impersonation_delete
+			BEFORE DELETE ON app_admin_impersonation_event
+			FOR EACH STATEMENT
+			EXECUTE FUNCTION audit_cleanup_fail_impersonation_delete()
+		`;
+
+		try {
+			await expect(
+				runAuditCleanup({
+					sql,
+					shortRetentionDays: 180,
+					longRetentionDays: 365,
+					now,
+				}),
+			).rejects.toThrow("simulated impersonation deletion failure");
+			expect(await countWhere("profile.read")).toBe(1);
+			expect(await countWhere("system.audit_cleanup")).toBe(0);
+		} finally {
+			await sql`
+				DROP TRIGGER audit_cleanup_fail_impersonation_delete
+				ON app_admin_impersonation_event
+			`;
+			await sql`DROP FUNCTION audit_cleanup_fail_impersonation_delete()`;
+		}
 	});
 
 	it("writes a self-audit entry with the deletion counts in metadata", async () => {
@@ -218,6 +339,7 @@ describe("audit-cleanup.mjs (integration)", () => {
 			category: "mutation",
 			action: "declaration.submit",
 		});
+		await insertImpersonation(new Date("2024-11-27T00:00:00Z"));
 
 		await runAuditCleanup({
 			sql,
@@ -238,9 +360,11 @@ describe("audit-cleanup.mjs (integration)", () => {
 		expect(selfAudit[0]?.metadata).toEqual({
 			deletedShort: 1,
 			deletedLong: 1,
-			deletedTotal: 2,
+			deletedImpersonation: 1,
+			deletedTotal: 3,
 			shortRetentionDays: 180,
 			longRetentionDays: 365,
+			impersonationRetentionDays: 365,
 		});
 	});
 

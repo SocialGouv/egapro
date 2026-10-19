@@ -1,5 +1,5 @@
-import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
+import type { PayGapReferences } from "~/modules/declaration-remuneration/shared/indicatorRowMapping";
 import type {
 	Step2Data,
 	Step3Data,
