@@ -32,22 +32,27 @@ jobs:
             script: test:e2e
             shard: 1
             total: 2
+            port: 3000
           - suite: suite
             script: test:e2e
             shard: 2
             total: 2
+            port: 3006
           - suite: grille
             script: test:e2e:grille
             shard: 1
             total: 3
+            port: 3000
           - suite: grille
             script: test:e2e:grille
             shard: 2
             total: 3
+            port: 3000
           - suite: grille
             script: test:e2e:grille
             shard: 3
             total: 3
+            port: 3000
     # No repository secret at job level (#4699): every step of this job runs the
     # pull request's code, `pnpm install` lifecycle scripts included, and a job-level
     # secret is readable by all of them. AUTH_SECRET is generated per run in the
@@ -56,7 +61,9 @@ jobs:
     # refuses a production build without ProConnect) and Run E2E shard (the server).
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5438/egapro
-      NEXTAUTH_URL: http://localhost:3000/api/auth
+      PORT: ${{ matrix.port }}
+      NEXTAUTH_URL: http://localhost:${{ matrix.port }}/api/auth
+      PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
       # Required by env.js, never reached by the suite: the only SUIT call (CSE lookup)
       # needs an mTLS client certificate CI does not have, and already degrades to
       # "unknown". `.invalid` cannot resolve (RFC 6761), so nothing leaves the runner.
@@ -114,6 +121,11 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Check concurrent E2E port allocation and epic runner isolation
+        if: matrix.suite == 'suite' && matrix.shard == 1
+        run: |
+          bash scripts/orchestration/e2e_port_pool.test.sh
+          bash scripts/orchestration/run_e2e_dev.test.sh
       # Runs before the browser, the docker stack and the Next build: `--list` neither
       # starts the web server nor runs globalSetup, so an unbalanced shard graph is
       # caught in a minute instead of after a full provisioning.

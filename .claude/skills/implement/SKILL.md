@@ -201,7 +201,7 @@ Pour un single ticket (Task, Bug, ou sub-issue d'epic dispatchée manuellement),
      "$E2E_PROMPT" 2>&1 | tee "/tmp/e2e-dev-${ISSUE_N}.json"
    ```
 
-   - `$E2E_PROMPT` : unité = ticket `#<N>` (+ type Task/Bug), worktree path, index → ports docker de la stack ; **dev server port 3000 imposé** (Charon, le proxy OAuth de la Fabrique qui porte la connexion ProConnect de test, n'enregistre que le callback `:3000` — vérifier que le port est libre avant de lancer `e2e-dev`, sinon le signaler à l'utilisateur au lieu de préempter), base de comparaison `origin/...` (la même que `code-dev`), branche de la PR déjà checkout, « suivre STRICTEMENT `e2e-dev/AGENT.md` », push sur `HEAD` (la branche de la PR), retour JSON strict en dernier message. Pour un Bug, rappeler le critère de **criticité** (`e2e-dev` décide s'il vaut un E2E).
+   - `$E2E_PROMPT` : unité = ticket `#<N>` (+ type Task/Bug), worktree path, index → ports docker de la stack ; **dev server sur le port du worktree** (`3001 + index`, autorisé par Charon pour les indices 0–4 après déploiement de sa configuration). Vérifier que `PORT`, `NEXTAUTH_URL` et `PLAYWRIGHT_BASE_URL` portent ce même port et qu'il est libre ; ne pas préempter un autre serveur. Base de comparaison `origin/...` (la même que `code-dev`), branche de la PR déjà checkout, « suivre STRICTEMENT `e2e-dev/AGENT.md` », push sur `HEAD` (la branche de la PR), retour JSON strict en dernier message. Pour un Bug, rappeler le critère de **criticité** (`e2e-dev` décide s'il vaut un E2E).
    - **Récupérer le verdict JSON** (dernier objet `{"status":...}`) et l'afficher :
 
      | `.status` e2e-dev | Action skill | Markdown affiché |
