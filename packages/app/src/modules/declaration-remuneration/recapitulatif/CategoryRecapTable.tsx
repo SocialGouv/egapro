@@ -1,6 +1,6 @@
 import { useId } from "react";
-import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
+import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
 	computeGap,
