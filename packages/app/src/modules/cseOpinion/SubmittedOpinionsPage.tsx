@@ -93,7 +93,7 @@ export function SubmittedOpinionsPage({
 }: Props) {
 	const declarationNumbers = [
 		...new Set(opinions.map((row) => row.declarationNumber)),
-	].sort();
+	].sort((a, b) => a - b);
 	const files = [
 		...new Map(associations.map((row) => [row.fileId, row])).values(),
 	];

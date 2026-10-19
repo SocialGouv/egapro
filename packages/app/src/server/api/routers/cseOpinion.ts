@@ -39,6 +39,32 @@ import {
 const CSE_OPINION_UNAVAILABLE_ERROR =
 	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
+function assertRequiredContentTypesCovered(
+	requiredTypes: Awaited<ReturnType<typeof getRequiredContentTypes>>,
+	associations: Array<{ declarationNumber: number; type: string }>,
+) {
+	const coveredKeys = new Set(
+		associations.map((association) =>
+			contentTypeKey(association.declarationNumber, association.type),
+		),
+	);
+	for (const required of requiredTypes) {
+		const key = contentTypeKey(required.declarationNumber, required.type);
+		if (!coveredKeys.has(key)) {
+			const typeLabel =
+				required.type === "accuracy" ? "Exactitude" : "Justification";
+			const declLabel =
+				required.declarationNumber === 1
+					? "première déclaration"
+					: "deuxième déclaration";
+			throw new TRPCError({
+				code: "PRECONDITION_FAILED",
+				message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
+			});
+		}
+	}
+}
+
 export const cseOpinionRouter = createTRPCRouter({
 	getSubmittedView: declarationProcedure.query(async ({ ctx }) => {
 		// The revision marker and mutable opinion/file rows must come from one
@@ -404,27 +430,7 @@ export const cseOpinionRouter = createTRPCRouter({
 				ctx.declarationId,
 			);
 
-			const coveredKeys = new Set(
-				existingAssociations.map((a) =>
-					contentTypeKey(a.declarationNumber, a.type),
-				),
-			);
-
-			for (const required of requiredTypes) {
-				const key = contentTypeKey(required.declarationNumber, required.type);
-				if (!coveredKeys.has(key)) {
-					const typeLabel =
-						required.type === "accuracy" ? "Exactitude" : "Justification";
-					const declLabel =
-						required.declarationNumber === 1
-							? "première déclaration"
-							: "deuxième déclaration";
-					throw new TRPCError({
-						code: "PRECONDITION_FAILED",
-						message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
-					});
-				}
-			}
+			assertRequiredContentTypesCovered(requiredTypes, existingAssociations);
 
 			// Every uploaded file must carry at least one content type: a file row left
 			// with no checkbox checked is an orphan and blocks finalize. Checked after
