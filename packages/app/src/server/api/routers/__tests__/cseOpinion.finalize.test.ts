@@ -108,13 +108,13 @@ type FinalizeOptions = {
 
 // Select sequence of finalize():
 //   1 middleware declaration-id lookup (.where().limit)
-//   2 opinionCount (.where)
-//   3 file rows id + name (.where)
-//   4 existingAssociations (.where)
-//   5 opinions with gapConsulted (.where)
-//   6 employee categories for the gap >= 5% gate (.innerJoin().where)
-//   7 second_declaration_submit event lookup (.where().limit)
-//   8 (inside tx, under the declaration lock) declaration row (.where().limit)
+//   2 (inside tx, under the declaration lock) declaration row (.where().limit)
+//   3 opinionCount (.where)
+//   4 file rows id + name (.where)
+//   5 existingAssociations (.where)
+//   6 opinions with gapConsulted (.where)
+//   7 employee categories for the gap >= 5% gate (.innerJoin().where)
+//   8 second_declaration_submit event lookup (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	const {
 		opinionCount = 2,
@@ -147,14 +147,14 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	limit.mockImplementation(() => {
 		const call = selectCallCount;
 		if (call === 1) return Promise.resolve([declarationLookupRow]);
-		if (call === 7) {
+		if (call === 8) {
 			return Promise.resolve(
 				secondDeclarationSubmitted
 					? [{ eventType: "second_declaration_submit" }]
 					: [],
 			);
 		}
-		if (call === 8) {
+		if (call === 2) {
 			return Promise.resolve(
 				declaration ? [{ ...declaration, draft: txDraft }] : [],
 			);
@@ -164,22 +164,22 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 
 	where.mockImplementation(() => {
 		const call = selectCallCount;
-		if (call === 2) {
+		if (call === 3) {
 			return Object.assign(
 				Promise.resolve(emptyOpinionCountRow ? [] : [{ count: opinionCount }]),
 				{ limit },
 			);
 		}
-		if (call === 3) {
+		if (call === 4) {
 			return Object.assign(Promise.resolve(files), { limit });
 		}
-		if (call === 4) {
+		if (call === 5) {
 			return Object.assign(Promise.resolve(associationsWithFileId), { limit });
 		}
-		if (call === 5) {
+		if (call === 6) {
 			return Object.assign(Promise.resolve(opinions), { limit });
 		}
-		if (call === 6) {
+		if (call === 7) {
 			return Object.assign(Promise.resolve(categories), { limit });
 		}
 		return Object.assign(Promise.resolve([declarationLookupRow]), { limit });

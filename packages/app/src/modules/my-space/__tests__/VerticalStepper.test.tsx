@@ -12,6 +12,8 @@ import {
 	DECLARATION_REMUNERATION,
 	DECLARATION_REMUNERATION_RECAP,
 	DECLARATION_REMUNERATION_RECAP_CORRECTION,
+	MY_SPACE_CSE_OPINION_VIEW,
+	MY_SPACE_JOINT_EVALUATION_VIEW,
 } from "~/modules/routes";
 import type { PanelVariant } from "../DeclarationProcessPanel";
 import { DeclarationProcessPanel } from "../DeclarationProcessPanel";
@@ -93,6 +95,8 @@ const BASE_PROPS = {
 	hasSubmittedSecondDeclaration: false,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
+	jointEvaluationViewAvailable: undefined as boolean | undefined,
+	cseOpinionViewAvailable: undefined as boolean | undefined,
 	formalNoticeAvailable: false,
 	siren: "532847196",
 	ctaHref: DECLARATION_REMUNERATION,
@@ -122,6 +126,48 @@ function renderPanel(variant: PanelVariant, overrides: PanelOverrides = {}) {
 }
 
 describe("VerticalStepper — bouton œil (viewHref)", () => {
+	it("shows the joint evaluation view only after its transmission", () => {
+		const context = makeDisplayContext("joint_evaluation");
+		const before = renderPanel("cse", { displayContext: context });
+		expect(
+			before.dialog.querySelector(
+				`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`,
+			),
+		).not.toBeInTheDocument();
+		const after = renderPanel("cse", {
+			displayContext: context,
+			hasSubmittedJointEvaluation: true,
+		});
+		expect(
+			after.dialog.querySelector(`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`),
+		).toHaveAttribute("title", "Voir le rapport de l'évaluation conjointe");
+	});
+
+	it("shows the CSE view in the current stage after an opinion was transmitted", () => {
+		const { dialog } = renderPanel("cse", {
+			hasSubmittedCseOpinion: true,
+		});
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_CSE_OPINION_VIEW}"]`),
+		).toHaveAttribute("title", "Voir les avis du CSE");
+	});
+
+	it("hides submitted view links while their files or opinions are being revised", () => {
+		const { dialog } = renderPanel("cse", {
+			displayContext: makeDisplayContext("joint_evaluation"),
+			hasSubmittedJointEvaluation: true,
+			jointEvaluationViewAvailable: false,
+			hasSubmittedCseOpinion: true,
+			cseOpinionViewAvailable: false,
+		});
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_JOINT_EVALUATION_VIEW}"]`),
+		).not.toBeInTheDocument();
+		expect(
+			dialog.querySelector(`a[href="${MY_SPACE_CSE_OPINION_VIEW}"]`),
+		).not.toBeInTheDocument();
+	});
+
 	describe("1ère déclaration — deadline future", () => {
 		it("renders the view link with correct href", () => {
 			const { dialog } = renderPanel("compliance");

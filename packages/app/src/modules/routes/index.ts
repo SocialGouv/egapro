@@ -70,6 +70,8 @@ export {
 	complianceStepHref,
 	cseOpinionStepHref,
 	FORMAL_NOTICE_JOINT_EVALUATION,
+	MY_SPACE_CSE_OPINION_VIEW,
+	MY_SPACE_JOINT_EVALUATION_VIEW,
 	toComplianceStep,
 	toCseOpinionStep,
 } from "./shared/complianceRoutes";

@@ -17,6 +17,8 @@ import {
 	DECLARATION_REMUNERATION_RECAP,
 	DECLARATION_REMUNERATION_RECAP_CORRECTION,
 	FIRST_REMUNERATION_STEP,
+	MY_SPACE_CSE_OPINION_VIEW,
+	MY_SPACE_JOINT_EVALUATION_VIEW,
 	remunerationStepHref,
 } from "~/modules/routes";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -139,6 +141,8 @@ export function Step2Content({
 	declarationFsmStatus,
 	displayContext,
 	secondDeclarationSubmitted,
+	jointEvaluationSubmitted,
+	jointEvaluationViewAvailable,
 	status,
 	variant,
 }: {
@@ -146,6 +150,8 @@ export function Step2Content({
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
 	secondDeclarationSubmitted: boolean;
+	jointEvaluationSubmitted: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	status: StepStatus;
 	variant: PanelVariant;
 }) {
@@ -270,6 +276,12 @@ export function Step2Content({
 							? { href: COMPLIANCE_JOINT_EVALUATION }
 							: undefined
 					}
+					viewHref={
+						(jointEvaluationViewAvailable ?? jointEvaluationSubmitted)
+							? MY_SPACE_JOINT_EVALUATION_VIEW
+							: undefined
+					}
+					viewLabel="Voir le rapport de l'évaluation conjointe"
 				/>
 			)}
 			{displayContext.shouldShowGapJustification && (
@@ -283,10 +295,14 @@ export function Step2Content({
 
 export function Step3Content({
 	campaignDeadlines,
+	cseOpinionSubmitted,
+	cseOpinionViewAvailable,
 	status,
 	variant,
 }: {
 	campaignDeadlines: CampaignDeadlines;
+	cseOpinionSubmitted: boolean;
+	cseOpinionViewAvailable?: boolean;
 	status: StepStatus;
 	variant: PanelVariant;
 }) {
@@ -310,6 +326,12 @@ export function Step3Content({
 				<TransmittedRow
 					label="Vos avis du CSE ont été transmis"
 					modification={{ href: cseOpinionStepHref(2) }}
+					viewHref={
+						(cseOpinionViewAvailable ?? cseOpinionSubmitted)
+							? MY_SPACE_CSE_OPINION_VIEW
+							: undefined
+					}
+					viewLabel="Voir les avis du CSE"
 				/>
 			</div>
 		);
@@ -319,6 +341,17 @@ export function Step3Content({
 	return (
 		<div className={styles.stepContent}>
 			{title}
+			{cseOpinionSubmitted && (
+				<TransmittedRow
+					label="Vos avis du CSE ont été transmis"
+					viewHref={
+						(cseOpinionViewAvailable ?? cseOpinionSubmitted)
+							? MY_SPACE_CSE_OPINION_VIEW
+							: undefined
+					}
+					viewLabel="Voir les avis du CSE"
+				/>
+			)}
 			<DeadlineRow date={campaignDeadlines.decl2CseOpinionDeadline} />
 		</div>
 	);

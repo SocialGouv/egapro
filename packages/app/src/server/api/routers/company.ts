@@ -162,6 +162,7 @@ export const companyRouter = createTRPCRouter({
 						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 						secondDeclarationPathChoice:
 							declarations.secondDeclarationPathChoice,
+						cseOpinionDraftUpdatedAt: declarations.cseOpinionDraftUpdatedAt,
 						cseRequired: declarations.cseRequired,
 						rulesVersion: declarations.rulesVersion,
 					})
@@ -174,7 +175,11 @@ export const companyRouter = createTRPCRouter({
 					)
 					.orderBy(desc(declarations.year)),
 				ctx.db
-					.select({ year: declarations.year })
+					.select({
+						declarationId: declarations.id,
+						year: declarations.year,
+						uploadedAt: files.uploadedAt,
+					})
 					.from(files)
 					.innerJoin(declarations, eq(files.declarationId, declarations.id))
 					.where(
@@ -192,6 +197,8 @@ export const companyRouter = createTRPCRouter({
 						declarationId: declarationStatusHistory.declarationId,
 						eventType: declarationStatusHistory.eventType,
 						round: declarationStatusHistory.round,
+						createdAt: declarationStatusHistory.createdAt,
+						value: declarationStatusHistory.value,
 					})
 					.from(declarationStatusHistory)
 					.innerJoin(
@@ -283,6 +290,35 @@ export const companyRouter = createTRPCRouter({
 				});
 				const declarationEvents = eventsByDeclarationId.get(d.id) ?? [];
 				const submissions = deriveSubsequentSubmissions(declarationEvents);
+				const latestJointSubmit = declarationEvents
+					.filter((event) => event.eventType === "joint_evaluation_submit")
+					.reduce<Date | null>(
+						(latest, event) =>
+							!latest || event.createdAt > latest ? event.createdAt : latest,
+						null,
+					);
+				const latestJointDeparture = declarationEvents
+					.filter(
+						(event) =>
+							event.eventType === "second_declaration_submit" ||
+							(event.eventType === "path_choice" &&
+								event.value !== "joint_evaluation"),
+					)
+					.reduce<Date | null>(
+						(latest, event) =>
+							!latest || event.createdAt > latest ? event.createdAt : latest,
+						null,
+					);
+				const activeJointFile = jointEvalRows.find(
+					(file) => file.declarationId === d.id,
+				);
+				const jointEvaluationViewAvailable = Boolean(
+					latestJointSubmit &&
+						activeJointFile &&
+						activeJointFile.uploadedAt <= latestJointSubmit &&
+						(!latestJointDeparture ||
+							activeJointFile.uploadedAt > latestJointDeparture),
+				);
 				return {
 					type: "remuneration" as const,
 					year: d.year,
@@ -296,6 +332,9 @@ export const companyRouter = createTRPCRouter({
 						submissions.hasSubmittedSecondDeclaration,
 					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
+					cseOpinionViewAvailable:
+						submissions.hasSubmittedCseOpinion && !d.cseOpinionDraftUpdatedAt,
+					jointEvaluationViewAvailable,
 					cseRequired: d.cseRequired,
 					hasJointEvaluationFile: yearsWithJointEval.has(d.year),
 					formalNoticeAvailable: isFormalNoticeAvailable(
