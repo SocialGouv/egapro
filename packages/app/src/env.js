@@ -187,6 +187,8 @@ export const env = createEnv({
 			.enum(["dev", "preprod", "prod"])
 			.optional()
 			.default("dev"),
+		// Review apps only: rgaa/perf also build with NEXT_PUBLIC_EGAPRO_ENV=dev.
+		NEXT_PUBLIC_DEV_FILL_ENABLED: literalBooleanFlag(),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),
 		// Release identifier shown in the footer (git tag in prod, branch name on
@@ -249,6 +251,7 @@ export const env = createEnv({
 		EGAPRO_PUBLIC_API_TOKENS: process.env.EGAPRO_PUBLIC_API_TOKENS,
 		SUPPORT_JIRA_URL: process.env.SUPPORT_JIRA_URL,
 		NEXT_PUBLIC_EGAPRO_ENV: process.env.NEXT_PUBLIC_EGAPRO_ENV,
+		NEXT_PUBLIC_DEV_FILL_ENABLED: process.env.NEXT_PUBLIC_DEV_FILL_ENABLED,
 		NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 		NEXT_PUBLIC_SENTRY_RELEASE: process.env.NEXT_PUBLIC_SENTRY_RELEASE,
 		NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
