@@ -243,6 +243,13 @@ describe("auth config — E2E admin two-factor seam", () => {
 			expect(result.isAdmin).toBe(false);
 		});
 
+		it("grants no habilitation either to a listed account the seam dates but whose roles lack agent_public", async () => {
+			// The seam only stands in for the second factor; it never touches the roles claim.
+			const result = await signIn();
+
+			expect(result.isAdmin).toBe(false);
+		});
+
 		it("marks the audit row as a test seam rather than a real second factor", async () => {
 			await signIn();
 
@@ -254,6 +261,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 						acr: "eidas1",
 						authTime: NOW_SECONDS,
 						roles: null,
+						granted: false,
 						publicAgentRequired: true,
 						testSeam: true,
 					},
@@ -270,6 +278,7 @@ describe("auth config — E2E admin two-factor seam", () => {
 			expect(Object.keys(entry.metadata).sort()).toEqual([
 				"acr",
 				"authTime",
+				"granted",
 				"publicAgentRequired",
 				"roles",
 			]);

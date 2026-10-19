@@ -1,11 +1,18 @@
 import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
+	formatPrecisePercentage,
 	getReferenceYearFor,
 	getRepresentationTarget,
 	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
 } from "~/modules/domain";
-import { DECLARATION_REPRESENTATION, MY_SPACE } from "~/modules/routes";
+import {
+	API_PUBLIC_DECLARATIONS_EXPORT,
+	DECLARATION_REPRESENTATION,
+	MY_SPACE,
+	observatoryCompanyHref,
+	routeWithQuery,
+} from "~/modules/routes";
 // Leaf module, not the barrel: the Playwright runner cannot load the CSS
 // modules the barrel pulls in through its React components.
 import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
@@ -28,13 +35,13 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 /**
  * Balanced representation (« représentation équilibrée », loi Rixain) — the
  * whole journey introduced by epic #3702, from the Mon espace entry point to
- * the machine APIs that republish the submitted declaration.
+ * the public and machine surfaces that republish the submitted declaration.
  *
  * Component rendering is covered by declaration-representation/**\/__tests__;
  * what only a running server can prove is the chain this spec walks: the GIP
  * pre-filter that decides whether the démarche exists at all, the server-side
  * step guards, the debounced draft persisted across five real navigations, the
- * submit mutation, and the three read surfaces (PDF, public API, SUIT export)
+ * submit mutation, and the three read surfaces (PDF, public company page, SUIT export)
  * that read back what the funnel wrote.
  *
  * The last describe walks the second outcome of that same démarche (epic #4324):
@@ -70,6 +77,17 @@ async function expectOnStep(page: Page, step: number, title: string) {
 			name: new RegExp(`${title}.*Étape ${step} sur 5`, "s"),
 		}),
 	).toBeVisible();
+}
+
+async function openRepresentationTab(page: Page) {
+	const tab = page.getByRole("tab", { name: "Représentation", exact: true });
+	await expect(async () => {
+		await tab.click();
+		await expect(tab).toHaveAttribute("aria-selected", "true", {
+			timeout: 1_000,
+		});
+	}).toPass();
+	return page.getByRole("tabpanel", { name: "Représentation" });
 }
 
 async function goNext(page: Page) {
@@ -358,56 +376,93 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 		expect(response.headers()["content-type"]).toContain("application/pdf");
 	});
 
-	test("the public API serves the declaration only once its campaign is publicly released", async ({
+	test("the public company page shows the declaration only once its campaign is publicly released", async ({
 		browser,
 	}) => {
 		const releaseYear = referenceYear + 1;
 		const baseline = await getCampaignPublicRelease(releaseYear);
-		const detailUrl = `/api/public/representations/${TEST_SIREN}/${referenceYear}`;
-		const historyUrl = `/api/public/representations/${TEST_SIREN}`;
+		const companyUrl = routeWithQuery(
+			observatoryCompanyHref(TEST_SIREN),
+			new URLSearchParams({ year: String(referenceYear) }),
+		);
 		const anonCtx = await browser.newContext({ storageState: undefined });
+		const anonPage = await anonCtx.newPage();
 
-		async function historyYears(): Promise<number[]> {
-			const response = await anonCtx.request.get(historyUrl);
-			expect(response.status()).toBe(200);
-			const rows: { year: number }[] = await response.json();
-			return rows.map((row) => row.year);
+		async function expectRepresentationNotPublished() {
+			await anonPage.goto(companyUrl);
+			const unavailable = anonPage.getByRole("heading", {
+				level: 1,
+				name: "Résultats indisponibles",
+			});
+			await expect(
+				unavailable.or(
+					anonPage.getByRole("tab", { name: "Représentation", exact: true }),
+				),
+			).toBeVisible();
+			if (await unavailable.isVisible()) return;
+			const panel = await openRepresentationTab(anonPage);
+			await expect(
+				panel.getByRole("heading", {
+					name: /Aucune déclaration de représentation équilibrée/,
+				}),
+			).toBeVisible();
+			await expect(panel.locator("#representation-title")).toHaveCount(0);
 		}
 
 		try {
 			await test.step("no release date — the transmitted declaration stays private", async () => {
 				await setPublicDataReleaseDate(releaseYear, null);
-
-				expect((await anonCtx.request.get(detailUrl)).status()).toBe(404);
-				expect(await historyYears()).not.toContain(referenceYear);
+				await expectRepresentationNotPublished();
 			});
 
 			await test.step("a release date still to come — same answer", async () => {
 				await setPublicDataReleaseDate(releaseYear, await dbDateInDays(1));
-
-				expect((await anonCtx.request.get(detailUrl)).status()).toBe(404);
-				expect(await historyYears()).not.toContain(referenceYear);
+				await expectRepresentationNotPublished();
 			});
 
 			await test.step("the release date reached — the raw declared gaps, and no verdict", async () => {
 				await setPublicDataReleaseDate(releaseYear, await dbDateInDays(0));
 
-				const response = await anonCtx.request.get(detailUrl);
-				expect(response.status()).toBe(200);
+				const response = await anonPage.goto(companyUrl);
+				expect(response?.status()).toBe(200);
+				const panel = await openRepresentationTab(anonPage);
 
-				const body = await response.json();
-				expect(body.siren).toBe(TEST_SIREN);
-				expect(body.year).toBe(referenceYear);
-				expect(body.executiveWomenPercent).toBe(EXECUTIVE_WOMEN_PERCENT);
-				expect(body.memberMenPercent).toBe(100 - MEMBER_WOMEN_PERCENT);
-				expect(body.publishUrl).toBe(PUBLISH_URL);
-				expect(body.referencePeriodStart).toBe(`${referenceYear}-01-01`);
-				expect(await historyYears()).toContain(referenceYear);
+				await expect(
+					panel.getByRole("heading", { name: "Écarts de représentation" }),
+				).toBeVisible();
+				await expect(panel).toContainText(
+					`Période de référence : 01/01/${referenceYear} - 31/12/${referenceYear}`,
+				);
+				await expect(panel).toContainText(
+					`Femmes : ${formatPrecisePercentage(EXECUTIVE_WOMEN_PERCENT)}`,
+				);
+				await expect(panel).toContainText(
+					`Hommes : ${formatPrecisePercentage(100 - MEMBER_WOMEN_PERCENT)}`,
+				);
+				await expect(panel.getByText(/conforme|objectif/i)).toHaveCount(0);
+			});
 
-				// V2 product rule: the public API diffuses raw declared data only, never a compliance verdict nor a score.
-				for (const key of Object.keys(body)) {
-					expect(key).not.toMatch(/verdict|score|conformit|compliance/i);
+			await test.step("no public API serves the representation, only the remuneration export remains", async () => {
+				const retiredUrls = [
+					"/api/public/declarations",
+					`/api/public/declarations/${TEST_SIREN}`,
+					`/api/public/declarations/${TEST_SIREN}/${campaignYear}`,
+					"/api/public/representations",
+					`/api/public/representations/${TEST_SIREN}`,
+					`/api/public/representations/${TEST_SIREN}/${referenceYear}`,
+					"/api/public/representations/export?format=csv",
+					"/api/search?q=Demo",
+				];
+				for (const url of retiredUrls) {
+					const response = await anonCtx.request.get(url, { maxRedirects: 0 });
+					expect(response.status(), url).toBe(404);
 				}
+
+				const exportResponse = await anonCtx.request.get(
+					routeWithQuery(API_PUBLIC_DECLARATIONS_EXPORT, "format=csv"),
+				);
+				expect(exportResponse.status()).toBe(200);
+				expect(exportResponse.headers()["content-type"]).toContain("text/csv");
 			});
 		} finally {
 			if (baseline.exists) {

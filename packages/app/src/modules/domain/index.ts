@@ -1,7 +1,10 @@
 // Types
 
 // Admin two-factor authentication — accepted levels and freshness window
-export type { AdminMfaFailure } from "./shared/adminMfa";
+export type {
+	AdminAccessRefusal,
+	AdminMfaFailure,
+} from "./shared/adminMfa";
 export {
 	ADMIN_MFA_ACR_VALUES,
 	ADMIN_MFA_WINDOW_SECONDS,
@@ -10,12 +13,14 @@ export {
 	isPublicAgent,
 	PUBLIC_AGENT_ROLE,
 	resolveAdminAccess,
+	resolveAdminGrant,
 } from "./shared/adminMfa";
 // Campaign
 export {
 	getCurrentDate,
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	getDefaultCampaignDeadlineColumns,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
@@ -215,6 +220,7 @@ export {
 	formatCivilShortDate,
 	formatCount,
 	formatCurrency,
+	formatCurrencyFixedTwo,
 	formatDays,
 	formatDecimal,
 	formatFileSize,
@@ -236,6 +242,7 @@ export {
 	formatWholePercentage,
 	MISSING_VALUE,
 	NARROW_NBSP,
+	toPersistedIsoDate,
 } from "./shared/format";
 // Gap business rules (calculations & threshold classification)
 export type { GipGapReference } from "./shared/gap";

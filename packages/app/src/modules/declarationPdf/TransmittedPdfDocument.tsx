@@ -2,6 +2,7 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { formatLongDate } from "~/modules/domain";
 import type {
 	TransmittedPdfData,
+	TransmittedPdfFile,
 	TransmittedPdfOpinion,
 } from "./buildTransmittedPdfData";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
@@ -75,6 +76,26 @@ function OpinionSection({
 					</Text>
 				</View>
 			))}
+		</View>
+	);
+}
+
+function FormalNoticeJointEvaluationSection({
+	file,
+}: {
+	file: TransmittedPdfFile;
+}) {
+	return (
+		<View style={styles.card}>
+			<Text style={styles.cardTitle}>
+				Évaluation conjointe - mise en demeure
+			</Text>
+			<View style={styles.tableRow}>
+				<Text style={styles.tableCellLabel}>{file.fileName}</Text>
+				<Text style={styles.tableCellValue}>
+					Déposé le {formatLongDate(file.uploadedAt)}
+				</Text>
+			</View>
 		</View>
 	);
 }
@@ -153,6 +174,12 @@ export function TransmittedPdfDocument({ data }: Props) {
 						<Text style={styles.noData}>Aucun fichier déposé</Text>
 					)}
 				</View>
+
+				{data.formalNoticeJointEvaluationFile && (
+					<FormalNoticeJointEvaluationSection
+						file={data.formalNoticeJointEvaluationFile}
+					/>
+				)}
 
 				<Text style={styles.footer}>Document généré le {data.generatedAt}</Text>
 			</Page>

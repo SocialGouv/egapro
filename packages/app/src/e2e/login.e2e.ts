@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
+	HELP,
 	HOME,
 	LOGIN,
 	MY_SPACE,
@@ -294,8 +295,10 @@ test.describe("Company location row — Mon espace banner and observatory", () =
 		await expectObservatoryLocation(page, "Pays : inconnu");
 		await expect(page.getByText(STREET_ONLY_ADDRESS)).toHaveCount(0);
 		await expect(
-			page.locator('script[type="application/ld+json"]'),
-		).not.toContainText("addressCountry");
+			page
+				.locator('script[type="application/ld+json"]')
+				.filter({ hasText: "addressCountry" }),
+		).toHaveCount(0);
 	});
 
 	test("reads a company with no country but a French département as French", async ({
@@ -325,10 +328,6 @@ test.describe("Company location row — Mon espace banner and observatory", () =
 	});
 });
 
-// #3867 removed the "mes entreprises" screen. Both header breakpoints render their own
-// entry (UserAccountMenu on desktop, MobileUserBlock inside the DSFR modal), so a single
-// viewport would leave half the change unasserted. Each test starts from "/" so landing
-// on /mon-espace is a real navigation rather than a URL that already matched.
 test.describe("Mon espace — header entry point", () => {
 	const MOBILE = { width: 375, height: 812 };
 
@@ -368,5 +367,29 @@ test.describe("Mon espace — header entry point", () => {
 		const response = await page.goto("/mon-espace/mes-entreprises");
 
 		expect(response?.status()).toBe(404);
+	});
+});
+
+test.describe("Mon espace — menu principal", () => {
+	test("mon espace drops the main menu, which comes back on the help page", async ({
+		page,
+	}) => {
+		await page.goto(MY_SPACE);
+		await dismissCookieBanner(page);
+
+		const mainMenu = page.getByRole("navigation", {
+			name: "Menu principal",
+			includeHidden: true,
+		});
+		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+		await expect(mainMenu).toHaveCount(0);
+
+		await page.getByRole("banner").getByRole("link", { name: "Aide" }).click();
+
+		await page.waitForURL(urlGlob(HELP));
+		await expect(mainMenu.getByRole("link", { name: "Accueil" })).toBeVisible();
+		await expect(
+			mainMenu.getByRole("link", { name: "Observatoire" }),
+		).toBeVisible();
 	});
 });

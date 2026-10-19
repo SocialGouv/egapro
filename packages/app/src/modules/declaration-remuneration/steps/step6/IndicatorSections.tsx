@@ -214,7 +214,7 @@ export function IndicatorSections({
 			{indicatorGRequired && (
 				<div className={stepStyles.group}>
 					<h2 className="fr-h6 fr-mb-0">
-						Indicateur par catégories de salariés
+						Indicateur par catégorie de salariés
 					</h2>
 
 					{/* Card: Employee categories (Step 5) */}
@@ -222,7 +222,7 @@ export function IndicatorSections({
 						<CardTitle
 							tooltipId={withTooltips ? "tooltip-categories" : undefined}
 						>
-							Écart de rémunération par catégories de salariés
+							Écart de rémunération par catégorie de salariés
 						</CardTitle>
 						{step5Parsed.length > 0 ? (
 							step5Parsed.map((cat) => {

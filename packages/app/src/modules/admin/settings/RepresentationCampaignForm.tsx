@@ -102,7 +102,7 @@ export function RepresentationCampaignForm({ year }: Props) {
 					<legend className="fr-fieldset__legend">
 						Campagne représentation équilibrée
 					</legend>
-					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters">
+					<div className="fr-fieldset__content fr-grid-row fr-grid-row--gutters fr-grid-row--bottom">
 						{DATE_FIELDS.map((key) => (
 							<div className="fr-col-12 fr-col-md-4" key={key}>
 								<SettingsDateField

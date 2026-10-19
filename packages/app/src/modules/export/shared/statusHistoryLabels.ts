@@ -8,6 +8,8 @@ export const DECLARATION_EVENT_TYPE_LABELS = {
 	cse_opinion_submit: "Dépôt d'un avis CSE",
 	cancel: "Annulation de la déclaration",
 	demarche_complete: "Démarche terminée",
+	formal_notice_joint_evaluation_submit:
+		"Dépôt du rapport d'évaluation conjointe suite à mise en demeure",
 } as const;
 
 export const PATH_CHOICE_VALUE_LABELS: Record<CompliancePathValue, string> = {

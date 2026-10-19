@@ -56,7 +56,7 @@ test.describe("declaration review recaps at 320px", () => {
 				page.getByText("Écart de rémunération", { exact: true }),
 			).toBeVisible();
 			await expect(
-				page.getByText("Écart de rémunération par catégories de salariés", {
+				page.getByText("Écart de rémunération par catégorie de salariés", {
 					exact: true,
 				}),
 			).toBeVisible();

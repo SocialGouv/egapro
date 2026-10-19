@@ -140,7 +140,8 @@ function validatePayloadForType(
 				? null
 				: "payload.raisonSociale must be a non-empty string";
 		}
-		case "representation_receipt": {
+		case "representation_receipt":
+		case "formal_notice_joint_evaluation_submitted": {
 			if (!isCompanyScoped(p)) {
 				return "payload requires { siren: string, year: number }";
 			}

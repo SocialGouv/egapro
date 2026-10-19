@@ -18,7 +18,7 @@ Le système repose sur **7 indicateurs** d'égalité. Les 6 premiers sont calcul
 | D | Écart médian de rémunération variable | Écart médian sur la rémunération variable |
 | E | Proportion de bénéficiaires de rémunération variable | Part des salariés percevant une rémunération variable, par sexe |
 | F | Répartition par quartile | Distribution des effectifs dans les quartiles de rémunération |
-| **G** | **Écart par catégories de salariés** | **Écart de rémunération (base + variable) par catégorie d'emploi — calculé par l'entreprise** |
+| **G** | **Écart par catégorie de salariés** | **Écart de rémunération (base + variable) par catégorie d'emploi — calculé par l'entreprise** |
 
 ### Le 7e indicateur (indicateur G)
 

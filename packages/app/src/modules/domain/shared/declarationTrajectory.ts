@@ -5,7 +5,8 @@ export type DeclarationEventType =
 	| "joint_evaluation_submit"
 	| "cse_opinion_submit"
 	| "cancel"
-	| "demarche_complete";
+	| "demarche_complete"
+	| "formal_notice_joint_evaluation_submit";
 
 export type DeclarationStatusEvent = {
 	eventType: DeclarationEventType;

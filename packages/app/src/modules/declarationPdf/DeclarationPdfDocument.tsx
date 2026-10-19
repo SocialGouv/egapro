@@ -2,13 +2,14 @@ import { Document, Page, Text, View } from "@react-pdf/renderer";
 
 import { companyLocationRow, formatSiren } from "~/modules/domain";
 
+import { formatNaf } from "./formatNaf";
 import { ensurePdfFontsRegistered } from "./pdfFonts";
 import { styles } from "./recapPdfStyles";
 import { CategorySection } from "./sections/CategorySection";
 import { EgaproBanner } from "./sections/EgaproBanner";
 import { SectionBanner } from "./sections/headings";
 import { InfoSection } from "./sections/InfoSection";
-import { PayGapTable } from "./sections/PayGapTable";
+import { PayGapTable, step2PayGapRows } from "./sections/PayGapTable";
 import { PdfPageFooter } from "./sections/PdfPageFooter";
 import { PdfPageHeader } from "./sections/PdfPageHeader";
 import { QuartileSection } from "./sections/QuartileSection";
@@ -22,14 +23,8 @@ type Props = {
 
 function buildTitle(data: DeclarationPdfData): string {
 	return data.isSecondDeclaration
-		? `Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés ${data.year}`
+		? `Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés ${data.year}`
 		: `Récapitulatif de la déclaration des indicateurs de rémunération ${data.year}`;
-}
-
-function formatNaf(nafCode: string | null, nafLabel: string | null): string {
-	if (!nafCode && !nafLabel) return "-";
-	if (nafCode && nafLabel) return `${nafCode} - ${nafLabel}`;
-	return nafCode ?? nafLabel ?? "-";
 }
 
 export function DeclarationPdfDocument({ data }: Props) {
@@ -41,41 +36,12 @@ export function DeclarationPdfDocument({ data }: Props) {
 		domesticAddress: data.company.address,
 	});
 
-	const step2Rows = [
-		{
-			label: "Annuelle brute moyenne",
-			women: data.step2Data.indicatorAAnnualWomen,
-			men: data.step2Data.indicatorAAnnualMen,
-			reference: data.step2Gaps[0],
-		},
-		{
-			label: "Horaire brute moyenne",
-			women: data.step2Data.indicatorAHourlyWomen,
-			men: data.step2Data.indicatorAHourlyMen,
-			reference: data.step2Gaps[1],
-		},
-		{
-			label: "Annuelle brute médiane",
-			women: data.step2Data.indicatorCAnnualWomen,
-			men: data.step2Data.indicatorCAnnualMen,
-			reference: data.step2Gaps[2],
-		},
-		{
-			label: "Horaire brute médiane",
-			women: data.step2Data.indicatorCHourlyWomen,
-			men: data.step2Data.indicatorCHourlyMen,
-			reference: data.step2Gaps[3],
-		},
-	];
-
 	return (
 		<Document>
 			<Page size="A4" style={styles.page} wrap>
 				<PdfPageHeader />
 				<PdfPageFooter
-					siren={data.company.siren}
-					transmittedAt={data.transmittedAt}
-					year={data.year}
+					label={`Déclaration ${data.year} - SIREN ${formatSiren(data.company.siren)} - transmise le ${data.transmittedAt}`}
 				/>
 
 				<EgaproBanner />
@@ -124,7 +90,7 @@ export function DeclarationPdfDocument({ data }: Props) {
 							<WorkforceSection data={data} />
 							<View wrap={false}>
 								<SectionBanner title="Écart de rémunération" />
-								<PayGapTable rows={step2Rows} />
+								<PayGapTable rows={step2PayGapRows(data)} />
 							</View>
 							<VariablePaySection data={data} />
 							<QuartileSection data={data} />

@@ -8,7 +8,10 @@ import type {
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
 } from "~/modules/domain";
-import { mySpaceHistoryHref } from "~/modules/routes";
+import {
+	FORMAL_NOTICE_JOINT_EVALUATION,
+	mySpaceHistoryHref,
+} from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { LockHolderDisplay } from "./types";
 import {
@@ -45,6 +48,7 @@ type Props = {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	formalNoticeAvailable: boolean;
 	siren: string;
 	ctaHref: string;
 	lockedByOther: boolean;
@@ -65,6 +69,7 @@ export function DeclarationProcessPanel({
 	hasSubmittedSecondDeclaration,
 	hasSubmittedJointEvaluation,
 	hasSubmittedCseOpinion,
+	formalNoticeAvailable,
 	siren,
 	ctaHref,
 	lockedByOther,
@@ -133,6 +138,9 @@ export function DeclarationProcessPanel({
 									secondDeclaration: hasSubmittedSecondDeclaration,
 								})}
 							/>
+						)}
+						{variant === "closed" && formalNoticeAvailable && (
+							<FormalNoticeAction />
 						)}
 					</div>
 					<div>
@@ -271,6 +279,24 @@ function ClosedMessage({
 			<p className="fr-mb-0">
 				{getClosedMessage({ cseOpinionRequired, firstDeclarationModifiable })}
 			</p>
+		</div>
+	);
+}
+
+function FormalNoticeAction() {
+	return (
+		<div className={`fr-mt-4w ${styles.formalNoticeAction}`}>
+			<p className={`fr-mb-0 ${styles.formalNoticeText}`}>
+				Si votre entreprise a été mise en demeure, par les services de
+				l'inspection du travail, d'effectuer l'évaluation conjointe des
+				rémunérations.
+			</p>
+			<Link
+				className="fr-btn fr-btn--tertiary"
+				href={FORMAL_NOTICE_JOINT_EVALUATION}
+			>
+				Dépôt du rapport de l’évaluation conjointe
+			</Link>
 		</div>
 	);
 }

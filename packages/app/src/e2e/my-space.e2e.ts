@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_PREFILL_PDF,
 	CSE_OPINION,
 	LAST_REMUNERATION_STEP,
 	MY_SPACE,
@@ -173,7 +174,7 @@ test.describe("Declaration process panel", () => {
 	// inapplicable. Absence from the GIP file also means the indicators are not prefilled.
 	test.describe("voluntary company without CSE: compliance and CSE steps are hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -296,7 +297,7 @@ test.describe("Declaration process panel", () => {
 	// chosen (see `isCompliancePathStepApplicable`).
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégories de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -515,15 +516,25 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 			const panel = await openDocumentsPanel(page);
 
 			await expect(documentsTrigger(page)).toHaveText("Documents (1)");
-			await expect(
-				panel.getByRole("link", { name: PREFILL_TITLE }),
-			).toBeVisible();
+
+			const prefillHref = `${API_PREFILL_PDF}?year=${CURRENT_YEAR}`;
+			const prefillLink = panel.getByRole("link", { name: PREFILL_TITLE });
+
+			await expect(prefillLink).toBeVisible();
+			await expect(prefillLink).toHaveAttribute("href", prefillHref);
 			await expect(
 				panel.getByRole("link", { name: RECAP_INDICATORS_TITLE }),
 			).toHaveCount(0);
 			await expect(
 				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
 			).toHaveCount(0);
+
+			// The route unit test mocks the DB and the renderer: only here does a real GIP row get rendered.
+			const response = await page.request.get(prefillHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${prefillHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 	});
 });

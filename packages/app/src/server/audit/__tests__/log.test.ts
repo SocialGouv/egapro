@@ -193,7 +193,7 @@ describe("logAction", () => {
 
 	it("keeps the validated XLSX export format", async () => {
 		await logAction({
-			action: AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT,
+			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
 			status: "success",
 			metadata: { format: "xlsx", search: "private@example.com" },
 		});
@@ -231,6 +231,57 @@ describe("logAction", () => {
 			errorMessage: "HTTP_403_impersonation_read_only",
 			metadata: null,
 		});
+	});
+
+	it("keeps the formal notice upload flow type and rejects an unknown one", async () => {
+		const fileId = "0c7f9d1e-6a4b-4d2e-9f3a-1b2c3d4e5f60";
+		await logAction({
+			action: AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE,
+			status: "success",
+			metadata: {
+				fileId,
+				flowType: "formal_notice_joint_evaluation",
+				fileName: "private.pdf",
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			action: "formal_notice_joint_evaluation.upload_file",
+			category: "mutation",
+			metadata: { fileId, flowType: "formal_notice_joint_evaluation" },
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE,
+			status: "failure",
+			metadata: { flowType: "formal_notice" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
+	});
+
+	it("keeps the formal notice receipt type and kind of an enqueued notification", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "success",
+			metadata: {
+				type: "formal_notice_joint_evaluation_submitted",
+				kind: "formalNoticeJointEvaluation",
+				year: 2027,
+				isResend: false,
+			},
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
+			type: "formal_notice_joint_evaluation_submitted",
+			kind: "formalNoticeJointEvaluation",
+			year: 2027,
+			isResend: false,
+		});
+
+		await logAction({
+			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
+			status: "success",
+			metadata: { type: "formal_notice_submitted", kind: "formalNotice" },
+		});
+		expect(mockInsertValues.mock.calls[1]?.[0]?.metadata).toBeNull();
 	});
 
 	it.each([
@@ -340,11 +391,13 @@ describe("logAction", () => {
 			status: "failure",
 			metadata: {
 				roles: ["private_role", "agent_public"],
+				granted: false,
 				publicAgentRequired: true,
 			},
 		});
 		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
 			roles: ["agent_public"],
+			granted: false,
 			publicAgentRequired: true,
 		});
 	});

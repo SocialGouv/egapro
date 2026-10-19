@@ -100,7 +100,7 @@ export function Step1Content({
 					</BulletRow>
 					{indicatorGRequired && (
 						<BulletRow>
-							Indicateur de rémunération par catégories de salariés à remplir
+							Indicateur de rémunération par catégorie de salariés à remplir
 						</BulletRow>
 					)}
 				</BulletList>
@@ -151,8 +151,8 @@ export function Step2Content({
 }) {
 	const title = (
 		<StepTitle status={status}>
-			Parcours de mise en conformité pour l'indicateur par catégories de
-			salariés si écarts &ge; 5&nbsp;%
+			Parcours de mise en conformité pour l'indicateur par catégorie de salariés
+			si écarts &ge; 5&nbsp;%
 		</StepTitle>
 	);
 

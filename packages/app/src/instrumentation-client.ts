@@ -1,6 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+
 // Zod probes `new Function` to compile object parsers, which the CSP refuses and reports on every page.
 z.config({ jitless: true });
 

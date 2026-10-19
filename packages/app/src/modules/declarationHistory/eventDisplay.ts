@@ -5,6 +5,7 @@ import {
 	COMPLIANCE_PATH,
 	CSE_OPINION,
 	DECLARATION_REMUNERATION_RECAP,
+	FORMAL_NOTICE_JOINT_EVALUATION,
 	remunerationStepHref,
 	toRemunerationStep,
 } from "~/modules/routes";
@@ -71,6 +72,12 @@ export function getHistoryEventDisplay(event: HistoryEvent) {
 				label: "Dépôt de l'évaluation conjointe",
 				pageLabel: "Évaluation conjointe",
 				pageHref: COMPLIANCE_JOINT_EVALUATION,
+			};
+		case "formal_notice_joint_evaluation_submit":
+			return {
+				label: "Dépôt de l'évaluation conjointe (mise en demeure)",
+				pageLabel: "Évaluation conjointe - mise en demeure",
+				pageHref: FORMAL_NOTICE_JOINT_EVALUATION,
 			};
 		case "cse_opinion_submit":
 			return {

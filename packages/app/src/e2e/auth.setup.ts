@@ -9,7 +9,7 @@ import {
 import { AUTH_FILE, loginWithProConnect } from "./helpers/login";
 
 setup("authenticate via ProConnect", async ({ page }) => {
-	setup.setTimeout(60_000);
+	setup.setTimeout(180_000);
 	await loginWithProConnect(page);
 	await page.context().storageState({ path: AUTH_FILE });
 	const response = await page.request.get("/api/auth/session");

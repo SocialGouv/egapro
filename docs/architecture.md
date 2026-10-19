@@ -313,11 +313,11 @@ Deux responsabilités, deux scopes URL :
 
 ### 5.5 Double authentification admin (step-up ProConnect)
 
-`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Le niveau attendu de ProConnect est `eidas1-mfa` (`ADMIN_MFA_ACR_VALUES`) : eIDAS 1 plus un second facteur, orthogonal à `eidas2`/`eidas3` qui qualifient le niveau de vérification d'identité à l'enrôlement, pas la présence d'un second facteur à cette connexion.
+`isAdmin === true` ouvre la navigation dans `/admin/*`, mais pas les actions sensibles : celles-ci exigent en plus un second facteur récent (`adminMfaAt`, fenêtre de 8h — `ADMIN_MFA_WINDOW_SECONDS`, `src/modules/domain/shared/adminMfa.ts`). Les niveaux acceptés sont `eidas1-mfa`, `eidas2` et `eidas3` (`ADMIN_MFA_ACR_VALUES`) : ProConnect rapporte le niveau du pilier le plus faible, donc `eidas2`/`eidas3` ne sont jamais émis sans second facteur, au même titre que `eidas1-mfa`. Restent refusés `eidas0`, `eidas0-mfa` (identité ou rattachement déclaratif, insuffisant quel que soit le facteur), `eidas1` et `certification-dirigeant`. Bien que la documentation ProConnect recommande `eidas0-mfa` parmi les valeurs de double authentification, cette politique l'exclut : si le fournisseur d'identité d'un admin ne délivre que ce niveau, ProConnect refuse la demande de step-up et l'admin ne peut pas effectuer les actions sensibles.
 
 Un seul point d'entrée déclenche cette connexion renforcée, `triggerAdminStepUp()` (`src/modules/admin/access/adminStepUp.ts`), appelé par le bouton ProConnect du `/login` quand la destination cible le backoffice, par l'écran de reprise `/acces-backoffice`, et par le menu admin. Il attache deux paramètres à la requête d'autorisation OIDC :
 
-- `claims` avec `id_token.acr` et `auth_time` marqués `essential: true` — un `claims` essentiel est contraignant côté fournisseur, contrairement à `acr_values` qui n'est qu'une préférence qu'un fournisseur peut ignorer silencieusement ;
+- `claims` avec `id_token.acr` (sous forme `values`, l'ensemble complet de `ADMIN_MFA_ACR_VALUES`) et `auth_time` marqués `essential: true` — un `claims` essentiel est contraignant côté fournisseur, contrairement à `acr_values` qui n'est qu'une préférence qu'un fournisseur peut ignorer silencieusement ;
 - `max_age` borné à la fenêtre de fraîcheur (8h), pour qu'un fournisseur qui rejoue une session déjà ouverte renvoie un `auth_time` que la règle de fraîcheur refuse plutôt que de rouvrir une fenêtre sur une authentification ancienne.
 
 Le niveau réellement obtenu n'est jamais présumé côté client : `resolveAdminAccess` (le tableau de décision partagé par le middleware Edge, `src/app/admin/layout.tsx` et l'écran de reprise) ne date `adminMfaAt` qu'à partir de l'`id_token` que `openid-client` a déjà vérifié côté serveur (signature, émetteur, audience, nonce) au retour du callback ProConnect — jamais d'un paramètre de requête, d'un header, ni d'une mise à jour de session côté client.
@@ -468,7 +468,7 @@ Définition dans `src/server/db/`. Tables principales :
 | `representationDeclarations` (`representation_declaration`) | Déclaration de représentation équilibrée : une ligne par `(siren, year)` (index unique), pourcentages F/H cadres dirigeants et instances dirigeantes, motifs de non-calculabilité, infos de publication, `draft`/`status`/`currentStep`. `status` ∈ `draft` / `submitted` / `not_subject` (enum Postgres `representation_declaration_status`) |
 | `audit.action_log` | Log d'audit (schéma Postgres dédié `audit`) |
 
-**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS`, `PUBLIC_REPRESENTATIONS_SEARCH`/`BY_SIREN`/`BY_SIREN_YEAR`/`EXPORT` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
+**Audit — actions représentation équilibrée** : `REPRESENTATION_GET`/`REPRESENTATION_SAVE_DRAFT`/`REPRESENTATION_SUBMIT`/`REPRESENTATION_DECLARE_NOT_SUBJECT`, `ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN`/`ADMIN_SETTINGS_UPSERT_REPRESENTATION_CAMPAIGN`, `PDF_REPRESENTATION_DOWNLOAD`, `EXPORT_API_REPRESENTATIONS` (`~/modules/audit/shared/actionKeys.ts`). La projection de `audit.action_log.metadata` est fermée par défaut et autorise uniquement les champs validés pour chaque action. Les actions `representationDeclaration.*` ne conservent que l'année ; les pourcentages et le texte libre du brouillon sont écartés.
 
 **SUIT — export représentation** : `GET /api/v1/export/representations` (route `suit-export-representations` dans `.kontinuous/templates/apisix-suit.configmap.yaml`, même `plugin_config_id: suit-api` — `key-auth` + `X-Gateway-Forwarded` — que l'export `declarations` existant, voir §10.1). Contrairement aux canaux publics, cet export **ne filtre pas** la non-diffusion : SUIT est une autorité de contrôle, les champs d'identité/localisation sont renvoyés en clair même pour les entreprises non diffusibles.
 
@@ -823,7 +823,7 @@ Trois entrées Sentry, une par runtime :
 |---|---|---|---|
 | Unit | Vitest | `src/modules/**/__tests__/` | ≥ 75% global, **100%** sur `domain/` |
 | E2E | Playwright | `packages/app/src/e2e/` | Au moins une E2E par `page.tsx` |
-| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo, non bloquant |
+| RGAA / a11y | ultra11y (Action) | `.github/workflows/a11y.yaml` · `pnpm --filter app test:a11y` | Gate statique **bloquante** (`fail-on: blocking`) sur PR ; balayage page par page au cron hebdo ou en manuel, non bloquant |
 | Intégration BDD | Vitest + Docker | `*.integration.test.ts` | Obligatoire pour code touchant `audit.action_log` ou les scripts de purge (audit, déclarations) |
 
 ### 13.1 Mocks centralisés

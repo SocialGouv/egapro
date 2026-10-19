@@ -16,9 +16,6 @@ export const API_AUTH_LOGOUT = route("/api/auth/logout");
 // The route itself is `/api/trpc/[trpc]`; this is where the handler is mounted.
 export const API_TRPC = unroutedPath("/api/trpc");
 
-// Legacy entry point, redirected to the public API by the middleware.
-export const API_SEARCH = unroutedPath("/api/search");
-
 // The middleware matches this prefix to enforce the gateway shared secret; the
 // trailing slash is what keeps a hypothetical `/api/v1x` out of it.
 export const API_V1_PREFIX = unroutedPath("/api/v1/");
@@ -31,12 +28,7 @@ export function apiV1FileHref(fileId: string) {
 	return route(`/api/v1/files/${fileId}` as const);
 }
 
-export const API_PUBLIC_DECLARATIONS = route("/api/public/declarations");
 export const API_PUBLIC_DECLARATIONS_EXPORT = route(
 	"/api/public/declarations/export",
-);
-export const API_PUBLIC_REPRESENTATIONS = route("/api/public/representations");
-export const API_PUBLIC_REPRESENTATIONS_EXPORT = route(
-	"/api/public/representations/export",
 );
 export const API_PUBLIC_OPENAPI = route("/api/public/openapi.json");

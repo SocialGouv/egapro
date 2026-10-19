@@ -1,11 +1,10 @@
 import type { AuditActionKey, AuditMetadata } from "~/modules/audit";
 import { AUDIT_ACTIONS } from "~/modules/audit";
+import { isUploadFlowType } from "~/modules/shared/uploadConfig";
 
 type MetadataField =
 	| "year"
 	| "years"
-	| "count"
-	| "limit"
 	| "format"
 	| "hasCse"
 	| "campaignStartDate"
@@ -39,6 +38,7 @@ type MetadataField =
 	| "s3Cleanup"
 	| "virusName"
 	| "roles"
+	| "granted"
 	| "publicAgentRequired"
 	| "reason";
 
@@ -52,6 +52,7 @@ const RECEIPT_TYPES = new Set([
 	"second_declaration_confirmation",
 	"cse_opinion_receipt",
 	"joint_evaluation_submitted",
+	"formal_notice_joint_evaluation_submitted",
 	"representation_receipt",
 ]);
 const RECEIPT_KINDS = new Set([
@@ -59,6 +60,7 @@ const RECEIPT_KINDS = new Set([
 	"secondDeclaration",
 	"cseOpinion",
 	"jointEvaluation",
+	"formalNoticeJointEvaluation",
 	"representation",
 ]);
 const RECEIPT_VARIANTS = new Set([
@@ -137,18 +139,14 @@ const FIELDS_BY_ACTION: Partial<
 		"date_end",
 	],
 	[AUDIT_ACTIONS.EXPORT_API_FILES]: ["year", "fileId"],
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN]: ["count", "limit"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN]: ["count", "limit"],
-	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN_YEAR]: ["year"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR]: ["year"],
 	[AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT]: ["format"],
-	[AUDIT_ACTIONS.PUBLIC_REPRESENTATIONS_EXPORT]: ["format"],
 	[AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH]: ["format"],
 	[AUDIT_ACTIONS.AUTH_ADMIN_MFA]: [
 		"acr",
 		"authTime",
 		"testSeam",
 		"roles",
+		"granted",
 		"publicAgentRequired",
 	],
 	[AUDIT_ACTIONS.AUTH_COMPANY_LINK_REVOKED]: ["reason"],
@@ -168,6 +166,12 @@ const FIELDS_BY_ACTION: Partial<
 		"virusName",
 	],
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: [
+		"fileId",
+		"flowType",
+		"s3Cleanup",
+		"virusName",
+	],
+	[AUDIT_ACTIONS.FORMAL_NOTICE_JOINT_EVALUATION_UPLOAD_FILE]: [
 		"fileId",
 		"flowType",
 		"s3Cleanup",
@@ -274,12 +278,11 @@ const validCount = boundedInteger(1000000);
 const VALIDATORS: Record<MetadataField, Validator> = {
 	year: validYear,
 	years: validYears,
-	count: validCount,
-	limit: validCount,
 	timeoutMinutes: validCount,
 	format: oneOf(new Set(["json", "csv", "xlsx"])),
 	hasCse: validBoolean,
 	publicAgentRequired: validBoolean,
+	granted: validBoolean,
 	roles: validRoles,
 	campaignStartDate: validOptionalIsoDate,
 	publicDataReleaseDate: validOptionalIsoDate,
@@ -296,7 +299,7 @@ const VALIDATORS: Record<MetadataField, Validator> = {
 	declarationId: validUuid,
 	fileId: validUuid,
 	siren: validSiren,
-	flowType: oneOf(new Set(["cse_opinion", "joint_evaluation"])),
+	flowType: (value) => (isUploadFlowType(value) ? value : undefined),
 	s3Cleanup: oneOf(new Set(["ok", "failed"])),
 	virusName: matching(CLAMAV_SIGNATURE_PATTERN),
 	reason: oneOf(

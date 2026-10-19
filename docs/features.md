@@ -93,6 +93,7 @@ Conventions de notation :
 
 - L'**année de campagne** = année calendaire suivant l'année des données : `getCurrentYear()` retourne 2025 quand les données sont celles de 2024 (voir `~/modules/domain`).
 - Le **calcul des écarts** est centralisé dans `computeGap(womenPay, menPay)` (positif si les hommes gagnent plus, négatif sinon).
+- Les vues de saisie, le récapitulatif transmis et la fiche admin présentent les écarts de rémunération en **valeur absolue**, suivie de « en faveur des femmes » ou « en faveur des hommes » selon leur signe. Un écart nul ou absent ne désigne aucun sexe favorisé. Cette convention d'affichage ne modifie pas la valeur signée conservée dans les données.
 - **Seuil d'alerte** : `GAP_ALERT_THRESHOLD = 5%`. Au-delà, une **seconde déclaration** est obligatoire pour les entreprises ≥ 100 salariés (voir §5).
 - L'**indicateur G** est optionnel ; quand il est renseigné, l'entreprise définit ses propres catégories d'emploi (par accord ou décision unilatérale).
 - Une fois `submitted`, la déclaration reste modifiable tant qu'**aucune transmission ultérieure** ne l'a supplantée (seconde déclaration, évaluation conjointe ou avis du CSE) : seule la dernière transmission est modifiable. La modifiabilité est dite par l'événement qui la ferme (`isLockedBySubsequentSubmission`, `~/modules/domain/shared/declarationStatus.ts`, à partir de `deriveSubsequentSubmissions`) et non plus par une date ; `decl1ModificationDeadline` n'est plus un garde d'écriture, c'est une **échéance informative** (voir §12). Le serveur rejette une écriture sur une étape supplantée (`DECLARATION_SUPERSEDED_MESSAGE`).
@@ -269,7 +270,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - **Étape 4 (publication) conditionnelle** : requise (`isRepresentationPublicationRequired`) si `executivesCount === "two_or_more"` **ou** `hasManagementBody === true` ; sautée sinon dans les deux sens de navigation. La date de publication doit être **postérieure** à la fin de la période de référence.
 - **Campagne** : ouverte de `campaignStartDate` jusqu'à la fin du jour `campaignEndDate` inclus (`isRepresentationCampaignOpen`), sinon la déclaration est bloquée en écriture (`FORBIDDEN`) — y compris `declareNotSubject`. Le champ `declarationDeadline` est stocké et affiché mais **n'a pas d'effet bloquant** (contrairement aux deadlines de la déclaration index). Valeurs par défaut (`getDefaultRepresentationCampaign`) si aucune surcharge admin n'existe pour l'année (voir §12).
 - **Mail de confirmation** : un seul template (`representation_receipt`, sans variant), envoyé à la transmission (`submit` uniquement — `declareNotSubject` n'envoie aucun mail). Le PDF récapitulatif n'est **pas** joint à l'email — il est téléchargeable à la demande via `GET /api/representation-pdf?year=...` depuis Mon espace, uniquement pour les déclarations transmises (une déclaration `not_subject` n'a pas de PDF).
-- **API publique et export SUIT** : les données brutes déclarées sont exposées publiquement (`/api/public/representations/...`), **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
+- **Consultation publique et export SUIT** : les données brutes déclarées sont exposées sur la fiche entreprise de l'observatoire et sur data.gouv.fr — aucune API publique ne les sert —, **jamais le verdict ni le seuil calculé** — cohérent avec le choix produit V2 de ne diffuser aucun score. L'export SUIT (`/api/v1/export/representations`, même passerelle APISIX que l'export `declarations`) est le seul canal qui **ne filtre pas** la non-diffusion (les entreprises non diffusibles y apparaissent en clair, l'autorité de contrôle en ayant besoin) — voir §11.2 et [`architecture.md`](architecture.md#10-sécurité).
 - **Reprise V1** : le kit ponctuel `scripts/migration-v1` reprend depuis un dump les déclarations historiques sans jamais écraser une déclaration saisie nativement en V2. La procédure d'exploitation est détaillée dans [`reprise-donnees-v1.md`](reprise-donnees-v1.md).
 
 **Affichage dans Mon espace** (`~/modules/my-space`) : le panneau latéral (`RepresentationProcessPanel`) et le tableau des démarches (`DeclarationsSection`) distinguent 5 variantes — `start` (pas commencé), `draft` (en cours), `submitted` (transmise), `not_subject` (non-assujettie) et `closed` (campagne fermée). Pour `not_subject` : le libellé d'étape affiché est « Non-assujetti », la colonne échéance affiche `-`, le CTA du panneau redevient « Commencer » (renvoie vers l'écran d'assujettissement) et aucune ressource PDF n'apparaît dans `DocumentsPanel`.
@@ -295,6 +296,7 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - **Public, sans authentification**.
 - L'indicateur **G n'est jamais exposé** (catégories d'emploi confidentielles).
+- Les deux cartes d'écart de rémunération de l'observatoire affichent le pourcentage sans signe et indiquent le sexe favorisé en toutes lettres ; les proportions de bénéficiaires de rémunération variable gardent leur propre convention.
 - L'export Excel est conçu pour un usage analyste / journaliste (pagination, filtres par année).
 - **Affichage du pays** : la recherche, la fiche entreprise (`CompanyHeader`) et le bandeau Mon espace partagent une seule règle (`companyLocationRow`, `~/modules/domain/shared/companyLocationDisplay.ts`) à trois issues — pays étranger connu (ligne « Pays », libellé mis en forme via `formatInseeTitleCase`), France (ligne « Adresse »), ou pays **inconnu** (ligne « Pays : inconnu ») quand le registre n'a rien déclaré. Une entreprise non diffusible masque sa localisation en amont de cette règle (`NON_DIFFUSIBLE_LABEL`, `~/modules/public-api`).
 
@@ -362,6 +364,8 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 
 - `/donnees-personnelles` — politique de confidentialité (RGPD)
 - `/mentions-legales` — éditeur, hébergeur, sécurité
+- `/cgu` — conditions générales d'utilisation, version en vigueur
+- `/cgu/[version]` — archive d'une version antérieure des CGU
 - `/declaration-accessibilite` — déclaration RGAA + résultats des audits
 - `/gestion-des-cookies` — types de cookies, mécanismes d'opt-out
 - `/plan-du-site` — index des routes publiques
@@ -373,6 +377,15 @@ L'accès se fait depuis le panneau latéral de l'espace personnel via le lien **
 - Pages **statiques** (pas de BDD), contenu maintenu manuellement dans le code.
 - L'accessibilité est auditée par ultra11y (agent `rgaa-auditor` + workflow `a11y.yaml`) ; Lighthouse en rapporte un score indicatif, en avertissement.
 - La politique de confidentialité `/donnees-personnelles` correspond au dispositif de **conservation limitée** appliqué techniquement par la purge RGPD des déclarations (voir §13.8).
+- Les CGU ont un historique de versions (`~/modules/legal/TermsOfUsePage/termsOfUseVersions.ts`) : chaque entrée associe une date d'entrée en vigueur ISO à son texte figé. La première entrée est la version en vigueur, servie sur `/cgu` ; les suivantes sont des archives, servies sur `/cgu/AAAA-MM-JJ`. `/cgu/[version]` redirige vers `/cgu` pour la date en vigueur et répond 404 pour une date inconnue.
+
+**Publier une nouvelle version des CGU** :
+
+1. Copier le composant de la version en vigueur (`TermsOfUsePage/versions/TermsOfUse<AAAAMMJJ>.tsx`) sous un nouveau nom portant la date de la nouvelle version.
+2. Modifier le texte du nouveau composant.
+3. Ajouter son entrée en tête du registre `termsOfUseVersions.ts`, avec sa date d'entrée en vigueur.
+
+Une version publiée ne se modifie jamais : son composant est figé dès qu'une version plus récente existe.
 
 ---
 
@@ -386,6 +399,8 @@ L'application génère plusieurs documents officiels et expose une API publique 
 |---|---|---|
 | `DeclarationPdfDocument` | Pre-fill / aperçu | `~/modules/declarationPdf` |
 | `TransmittedPdfDocument` | Récapitulatif des avis CSE et de l'évaluation conjointe transmis | `~/modules/declarationPdf` |
+
+Dans le PDF de déclaration, les tableaux d'écart globaux et par catégorie indiquent la valeur absolue et le sexe favorisé dans chaque cellule concernée. La mention est sur une deuxième ligne ; aucun sexe n'est indiqué pour un écart nul ou absent. Les exports et API continuent de fournir les valeurs signées.
 
 Téléchargement déclenché depuis :
 
@@ -417,7 +432,6 @@ API publique (aucune authentification, OpenAPI documentée) :
 | URL | Format | Filtres |
 |---|---|---|
 | `/api/public/declarations/export` | CSV | mêmes facettes que la recherche |
-| `/api/public/representations/export` | CSV | mêmes facettes que la recherche |
 | `/api/public/docs` | Swagger UI | documentation interactive |
 
 **Module** : `~/modules/export`. **Audit** : `EXPORT_GENERATE`, `EXPORT_DOWNLOAD`, `EXPORT_API_DECLARATIONS`, `EXPORT_API_FILES` (catégorie `export`, rétention 365 jours).

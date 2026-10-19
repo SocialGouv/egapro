@@ -18,7 +18,11 @@ vi.mock("@react-pdf/renderer", async () => {
 			),
 		View: ({ children }: { children: React.ReactNode }) =>
 			React.createElement("div", null, children),
-		Image: () => React.createElement("div", { "data-testid": "pdf-image" }),
+		Image: ({ src }: { src: string }) =>
+			React.createElement("div", {
+				"data-testid": "pdf-image",
+				"data-src": src,
+			}),
 		StyleSheet: { create: <T,>(styles: T) => styles },
 	};
 });
@@ -31,11 +35,7 @@ import { PdfPageHeader } from "../PdfPageHeader";
 describe("PdfPageFooter", () => {
 	it("renders the footer line with formatted SIREN and the dynamic page counter", () => {
 		render(
-			<PdfPageFooter
-				siren="123456789"
-				transmittedAt="05/03/2026"
-				year={2026}
-			/>,
+			<PdfPageFooter label="Déclaration 2026 - SIREN 123 456 789 - transmise le 05/03/2026" />,
 		);
 		expect(
 			screen.getByText(
@@ -61,6 +61,22 @@ describe("EgaproBanner", () => {
 		expect(
 			screen.getByText(/Indicateurs d.égalité professionnelle/),
 		).toBeInTheDocument();
+	});
+});
+
+describe("EgaproBanner pictogram", () => {
+	it("keeps the document-signature pictogram by default", () => {
+		render(<EgaproBanner />);
+		expect(screen.getByTestId("pdf-image").dataset.src).toMatch(
+			/document-icon\.png$/,
+		);
+	});
+
+	it("renders the document pictogram on request", () => {
+		render(<EgaproBanner pictogram="document" />);
+		expect(screen.getByTestId("pdf-image").dataset.src).toMatch(
+			/document-pictogram\.png$/,
+		);
 	});
 });
 

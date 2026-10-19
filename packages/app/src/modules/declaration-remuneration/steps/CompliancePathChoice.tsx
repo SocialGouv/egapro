@@ -168,7 +168,7 @@ export function CompliancePathChoice({
 				) : null}
 
 				<h2 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégories
+					Parcours de mise en conformité pour l&apos;indicateur par catégorie
 					de&nbsp;salariés
 				</h2>
 
