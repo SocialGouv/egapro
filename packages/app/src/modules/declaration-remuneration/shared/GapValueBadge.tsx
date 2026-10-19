@@ -21,7 +21,7 @@ export function GapBadge({ gap }: Props) {
 	const favoredSex = gapFavoredSex(gap);
 	return (
 		<span className={styles.gapCellStack}>
-			<span className={`fr-text--sm ${styles.gapCell}`}>
+			<span className={`fr-text--sm fr-mb-0 ${styles.gapCell}`}>
 				<strong>{formatGap(gapMagnitude(gap))}</strong>
 				{level === "high" && (
 					<span className={gapBadgeClass(level)}>
@@ -30,7 +30,7 @@ export function GapBadge({ gap }: Props) {
 				)}
 			</span>
 			{favoredSex && (
-				<span className="fr-text--sm">
+				<span className="fr-text--sm fr-mb-0">
 					{GAP_FAVORED_SEX_MENTIONS[favoredSex]}
 				</span>
 			)}
