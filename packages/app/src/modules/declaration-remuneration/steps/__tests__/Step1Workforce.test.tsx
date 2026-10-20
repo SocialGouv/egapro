@@ -122,8 +122,12 @@ describe("Step1Workforce", () => {
 	it("renders one row per pay basis with empty inputs by default", () => {
 		renderStep1();
 		const table = screen.getByRole("table");
-		expect(within(table).getByText("Femmes")).toBeInTheDocument();
-		expect(within(table).getByText("Hommes")).toBeInTheDocument();
+		expect(
+			within(table).getByRole("columnheader", { name: "Nombre de femmes" }),
+		).toBeInTheDocument();
+		expect(
+			within(table).getByRole("columnheader", { name: "Nombre d'hommes" }),
+		).toBeInTheDocument();
 		expect(within(table).getByText("Total")).toBeInTheDocument();
 		for (const label of [ANNUAL_WOMEN, ANNUAL_MEN, HOURLY_WOMEN, HOURLY_MEN]) {
 			expect(screen.getByLabelText(label)).toHaveValue("");
@@ -136,14 +140,32 @@ describe("Step1Workforce", () => {
 			expect(header).toHaveAccessibleName();
 		}
 		expect(
-			screen.getByRole("columnheader", { name: "Nombre de salariés" }),
+			screen.getByRole("columnheader", { name: "Base de rémunération" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+			screen.getByRole("rowheader", { name: /^Rémunération annuelle/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
+			screen.getByRole("rowheader", { name: /^Rémunération horaire/ }),
 		).toBeInTheDocument();
+	});
+
+	it("explains on each pay basis row that the counts are the women and men taken into account", () => {
+		renderStep1();
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération annuelle",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération annuelle.",
+		);
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération horaire",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération horaire.",
+		);
 	});
 
 	it("renders reference period and mandatory fields notice", () => {
@@ -178,12 +200,12 @@ describe("Step1Workforce", () => {
 		expect(screen.getByLabelText(HOURLY_MEN)).toHaveValue("40");
 
 		const annualRow = screen
-			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.getByRole("rowheader", { name: /^Rémunération annuelle/ })
 			.closest("tr") as HTMLElement;
 		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("30");
 
 		const hourlyRow = screen
-			.getByRole("rowheader", { name: "Rémunération horaire" })
+			.getByRole("rowheader", { name: /^Rémunération horaire/ })
 			.closest("tr") as HTMLElement;
 		expect(within(hourlyRow).getAllByRole("cell")[2]).toHaveTextContent("70");
 	});
@@ -213,12 +235,12 @@ describe("Step1Workforce", () => {
 		await user.type(screen.getByLabelText(HOURLY_MEN), "5");
 
 		const annualRow = screen
-			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.getByRole("rowheader", { name: /^Rémunération annuelle/ })
 			.closest("tr") as HTMLElement;
 		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("40");
 
 		const hourlyRow = screen
-			.getByRole("rowheader", { name: "Rémunération horaire" })
+			.getByRole("rowheader", { name: /^Rémunération horaire/ })
 			.closest("tr") as HTMLElement;
 		expect(within(hourlyRow).getAllByRole("cell")[2]).toHaveTextContent("10");
 	});
@@ -239,7 +261,7 @@ describe("Step1Workforce", () => {
 
 		expect(womenInput).toHaveValue("10");
 		const annualRow = screen
-			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.getByRole("rowheader", { name: /^Rémunération annuelle/ })
 			.closest("tr") as HTMLElement;
 		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("30");
 	});
@@ -253,7 +275,7 @@ describe("Step1Workforce", () => {
 
 		expect(womenInput).toHaveValue("10");
 		const annualRow = screen
-			.getByRole("rowheader", { name: "Rémunération annuelle" })
+			.getByRole("rowheader", { name: /^Rémunération annuelle/ })
 			.closest("tr") as HTMLElement;
 		expect(within(annualRow).getAllByRole("cell")[2]).toHaveTextContent("30");
 	});

@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
+import { WorkforceTableHead } from "~/modules/declaration-remuneration/steps/step1/WorkforceTableHeaders";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
@@ -43,14 +44,7 @@ function CategoryEffectifTable({
 					<div className="fr-table__content">
 						<table>
 							<caption>{`${heading} – Effectifs physiques`}</caption>
-							<thead>
-								<tr>
-									<th scope="col">Nombre de salariés</th>
-									<th scope="col">Femmes</th>
-									<th scope="col">Hommes</th>
-									<th scope="col">Total</th>
-								</tr>
-							</thead>
+							<WorkforceTableHead />
 							<tbody>
 								{CATEGORY_WORKFORCE_ROWS.map((row) => {
 									const women = category[row.womenField];

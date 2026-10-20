@@ -31,6 +31,7 @@ import { StepTitleRow } from "../shared/StepTitleRow";
 import type { Step1Data } from "../types";
 import styles from "./Step1Workforce.module.scss";
 import { Step1WorkforceDefinition } from "./Step1WorkforceDefinition";
+import { WorkforceTableHead } from "./step1/WorkforceTableHeaders";
 import { WorkforceTableRow } from "./step1/WorkforceTableRow";
 import type { WorkforceField } from "./step1/workforceRows";
 import {
@@ -316,14 +317,7 @@ export function Step1Workforce({
 													<col className={styles.inputCol} />
 													<col className={styles.totalCol} />
 												</colgroup>
-												<thead>
-													<tr>
-														<th scope="col">Nombre de salariés</th>
-														<th scope="col">Femmes</th>
-														<th scope="col">Hommes</th>
-														<th scope="col">Total</th>
-													</tr>
-												</thead>
+												<WorkforceTableHead />
 												<tbody>
 													{WORKFORCE_ROWS.map((row) => (
 														<WorkforceTableRow

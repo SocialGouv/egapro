@@ -7,6 +7,7 @@ import {
 	findFieldError,
 } from "~/modules/declaration-remuneration/shared/formError/types";
 import { computeWorkforceTotal } from "~/modules/domain";
+import { WorkforceRowHeader } from "./WorkforceTableHeaders";
 import type { WorkforceField, WorkforceRowDefinition } from "./workforceRows";
 import { workforceFieldId, workforceFieldLabel } from "./workforceRows";
 
@@ -91,7 +92,7 @@ export function WorkforceTableRow({
 
 	return (
 		<tr>
-			<th scope="row">{row.label}</th>
+			<WorkforceRowHeader row={row} tooltipId={`tooltip-step1-${row.basis}`} />
 			<WorkforceCell
 				disabled={disabled}
 				error={findFieldError(errors, womenId)}
