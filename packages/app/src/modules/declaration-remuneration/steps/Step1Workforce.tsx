@@ -36,12 +36,14 @@ import type { WorkforceField } from "./step1/workforceRows";
 import {
 	WORKFORCE_FIELDS,
 	WORKFORCE_ROWS,
-	workforceFieldErrorMessage,
 	workforceFieldId,
 	workforceFieldIdFromField,
 } from "./step1/workforceRows";
-
-type RawValues = Record<WorkforceField, string>;
+import {
+	getInvalidRowErrors,
+	getMissingFieldErrors,
+	type RawValues,
+} from "./step1/workforceValidationErrors";
 
 type Step1WorkforceProps = {
 	declarationSiren: string;
@@ -181,9 +183,14 @@ export function Step1Workforce({
 		});
 
 	function handleFieldChange(field: WorkforceField, value: string) {
+		const changedFieldId = workforceFieldIdFromField(field);
+		const row = WORKFORCE_ROWS.find((row) => row.menField === field);
+		const rowErrorId = row && workforceFieldId(row, "women");
 		setFieldErrors((prev) =>
 			prev.filter(
-				(error) => error.fieldId !== workforceFieldIdFromField(field),
+				(error) =>
+					error.fieldId !== changedFieldId &&
+					!(error.category === "workforce" && error.fieldId === rowErrorId),
 			),
 		);
 		const parsed = parseIntegerInput(value);
@@ -212,36 +219,29 @@ export function Step1Workforce({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const onSubmit = form.handleSubmit((data) => {
-		setValidationAttempt((attempt) => attempt + 1);
-		const missing: FieldError[] = [];
-		for (const row of WORKFORCE_ROWS) {
-			if (raw[row.womenField] === "") {
-				missing.push({
-					fieldId: workforceFieldId(row, "women"),
-					category: "empty",
-					message: workforceFieldErrorMessage(row, "women"),
-				});
-			}
-			if (raw[row.menField] === "") {
-				missing.push({
-					fieldId: workforceFieldId(row, "men"),
-					category: "empty",
-					message: workforceFieldErrorMessage(row, "men"),
-				});
-			}
-		}
-		setFieldErrors(missing);
-		if (missing.length > 0) return;
+	const onSubmit = form.handleSubmit(
+		(data) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			const missing = getMissingFieldErrors(raw);
+			setFieldErrors(missing);
+			if (missing.length > 0) return;
 
-		setValidationError(null);
-		if (shouldConfirmReset) {
-			pendingSubmitData.current = data;
-			dialogRef.current?.showModal();
-			return;
-		}
-		mutation.mutate(data);
-	});
+			setValidationError(null);
+			if (shouldConfirmReset) {
+				pendingSubmitData.current = data;
+				dialogRef.current?.showModal();
+				return;
+			}
+			mutation.mutate(data);
+		},
+		(errors) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			setFieldErrors([
+				...getMissingFieldErrors(raw),
+				...getInvalidRowErrors(raw, errors),
+			]);
+		},
+	);
 
 	return (
 		<>

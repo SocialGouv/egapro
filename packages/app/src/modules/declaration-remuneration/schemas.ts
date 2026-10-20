@@ -12,12 +12,23 @@ export const CATEGORY_NAME_MAX_LENGTH = 250;
 const CATEGORY_NAME_LEGACY_MAX_LENGTH = 255;
 export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
 
-export const updateStep1Schema = z.object({
-	totalWomen: z.number().int().min(0),
-	totalMen: z.number().int().min(0),
-	hourlyWomen: z.number().int().min(0),
-	hourlyMen: z.number().int().min(0),
-});
+export const updateStep1Schema = z
+	.object({
+		totalWomen: z.number().int().min(0),
+		totalMen: z.number().int().min(0),
+		hourlyWomen: z.number().int().min(0),
+		hourlyMen: z.number().int().min(0),
+	})
+	.refine((data) => data.totalWomen + data.totalMen > 0, {
+		path: ["totalWomen"],
+		message:
+			"Le total des effectifs pour la rémunération annuelle doit être supérieur à 0.",
+	})
+	.refine((data) => data.hourlyWomen + data.hourlyMen > 0, {
+		path: ["hourlyWomen"],
+		message:
+			"Le total des effectifs pour la rémunération horaire doit être supérieur à 0.",
+	});
 
 export const updateStep2Schema = z.object({
 	indicatorAAnnualWomen: z.string().optional(),
