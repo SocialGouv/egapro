@@ -567,7 +567,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 		page
 			.getByRole("row")
 			.filter({
-				has: page.getByRole("rowheader", { exact: true, name: rowLabel }),
+				has: page.getByRole("rowheader", { name: new RegExp(`^${rowLabel}`) }),
 			})
 			.getByRole("cell")
 			.last();
