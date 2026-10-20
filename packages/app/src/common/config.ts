@@ -80,7 +80,6 @@ export const config = {
         privateRoutes: [
           "/admin",
           "/mon-espace/mes-declarations",
-          "/mon-espace/les-entreprises",
           "/index-egapro/declaration/augmentations",
           "/index-egapro/declaration/augmentations-et-promotions",
           "/index-egapro/declaration/commencer",
