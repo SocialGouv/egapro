@@ -11,9 +11,11 @@ paths:
 
 > Chargée sur les routeurs tRPC, les route handlers, l'auth et la couche audit. Vérifiée par `security-auditor` (A09) et `structural-auditor`.
 
-Every user-facing action that falls into one of the audit categories **must**
-produce a row in `audit.action_log`. Adding a new action without wiring the
-audit log is a bug, not a missing enhancement.
+Every protected user-facing action that falls into one of the audit categories
+**must** produce a row in `audit.action_log`. The three remaining public read
+actions (`PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW`,
+`PUBLIC_DECLARATIONS_EXPORT`) emit stdout activity only. Adding any other
+action without wiring the audit log is a bug, not a missing enhancement.
 
 Infrastructure lives in `~/modules/audit` + `~/server/audit` — see issue
 SocialGouv/egapro#3174 for the design notes.
@@ -184,7 +186,7 @@ false negative is a compliance gap.
 
 ## Route Handler coverage map (`src/app/api/**/route.ts`)
 
-Inventory refreshed by issue #3764 — **33 route files**, every one of them
+Inventory refreshed by issues #4664 and #4491 — **26 route files**, every one of them
 accounted for below. Re-run the inventory with:
 
 ```bash
@@ -196,7 +198,7 @@ listed as a named exemption. The only third state this table accepts is a route
 whose wiring is in flight in a named open PR, and it is listed apart from the
 counts — never inside them.
 
-### Audited through `withAuditedRoute` (15)
+### Instrumented through `withAuditedRoute` (12)
 
 | Route | Action key |
 |---|---|
@@ -205,16 +207,16 @@ counts — never inside them.
 | `export/download` | `EXPORT_DOWNLOAD` |
 | `export/generate` | `EXPORT_GENERATE` |
 | `gip-mds/import` | `GIP_MDS_IMPORT` |
-| `public/declarations` | `PUBLIC_DECLARATIONS_SEARCH` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
-| `public/representations` | `PUBLIC_REPRESENTATIONS_SEARCH` |
-| `public/representations/export` | `PUBLIC_REPRESENTATIONS_EXPORT` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
 | `transmitted-pdf` | `PDF_TRANSMITTED_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
 | `v1/files` | `EXPORT_API_FILES` |
+
+The two `public/*` rows above emit stdout only. The other routes still write
+`audit.action_log` as well as stdout.
 
 ### Wiring in flight (1)
 
@@ -230,7 +232,7 @@ action key, this row is what surfaces it.
 The other gap — `public/referents-egalite-professionnelle`, whose action key
 already existed but was only reachable through tRPC — is closed by #3764.
 
-### Audited through a direct `logAction` call (7)
+### Audited through a direct `logAction` call (3)
 
 These are audited, and audited correctly — the wrapper is a convenience, not
 the definition of compliance. Each one logs from inside the handler because it
@@ -239,10 +241,6 @@ needs something `resolveContext` cannot produce.
 | Route | Action key(s) | Why not the wrapper |
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
-| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch context computed *during* the handler; only validated counters survive the final metadata projection |
-| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
-| `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
-| `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
 | `upload` | `CSE_OPINION_UPLOAD_FILE`, `JOINT_EVALUATION_UPLOAD_FILE` | The action key depends on the parsed multipart body |
 | `v1/files/[fileId]` | `ADMIN_FILE_DOWNLOAD`, `USER_FILE_DOWNLOAD`, `EXPORT_API_FILES` | The action key depends on the caller's role, resolved mid-handler |
 
@@ -251,30 +249,6 @@ a parsed body, or the branch the handler took. Converting these seven to the
 wrapper would flatten one row per call and lose the per-branch audit context.
 The wrapper's route-context argument (see below) removes the
 *type-level* blocker; it does not make the conversion desirable.
-
-Since #3764, `withAuditedRoute` is generic over the handler's arguments *after*
-the request — a tuple, empty for a static route and `[{ params }]` for a dynamic
-one — so a dynamic segment survives the wrapper and its context stays required:
-
-```ts
-type RouteContext = { params: Promise<{ siren: string }> };
-
-export const GET = withAuditedRoute(
-  {
-    action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_BY_SIREN,
-    resolveContext: async (_request: Request, { params }: RouteContext) => ({
-      siren: (await params).siren,
-    }),
-  },
-  async (request: Request, { params }: RouteContext) => { /* … */ },
-);
-```
-
-The tuple is not cosmetic. An optional `routeContext?: TRouteContext` widens the
-parameter to `TRouteContext | undefined`, which a handler *requiring* its
-context — the signature Next gives a dynamic segment — cannot accept (TS2345).
-Inference reads the tuple off the handler, so neither shape needs an explicit
-type argument.
 
 ### Deliberate exemptions (10)
 
@@ -307,6 +281,11 @@ libre de l'exception. `resource_type` accepte uniquement `declaration`
 ou `notification` ; `resource_id` n'accepte qu'un UUID technique associé
 à un de ces types.
 
+Les actions `PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et
+`PUBLIC_DECLARATIONS_EXPORT` s'arrêtent après l'émission stdout de `logAction` :
+aucune nouvelle ligne n'est insérée dans `audit.action_log`. Les lignes
+historiques restent soumises à la purge ordinaire.
+
 `metadata` est fermé par défaut. `metadata.ts` déclare, **par action**, les
 clés utiles et leurs validateurs de valeur (année, compteur, booléen ou
 énumération, UUID technique de déclaration ou de fichier). `logAction` reprojette systématiquement les métadonnées avec
@@ -329,7 +308,8 @@ pour l'action sont persistés par `logAction` et `logActionInTransaction`.
 
 ## Miroir stdout (#3705)
 
-En complément — jamais en remplacement — de `audit.action_log`, `logAction`
+En complément de `audit.action_log` pour les actions protégées, et comme seule
+trace applicative pour les trois actions publiques listées ci-dessus, `logAction`
 et `auditMiddleware` (branche « chemin non mappé ») émettent chacun une ligne
 JSON sur stdout via `~/server/audit/activityLog::emitActivityLog`, collectée
 par la plateforme d'hébergement et affichée dans Grafana. Deux points d'appel
@@ -413,9 +393,9 @@ de dev et toute image déployée (`NODE_ENV` absent ou `production`) émettent
 normalement. Aucune nouvelle variable d'environnement.
 
 **Fail-safe** — `emitActivityLog` ne lève jamais (try/catch interne) ;
-`logAction` l'appelle dans son propre try/catch, avant l'insert en base : un
-échec de construction ou d'écriture de la ligne stdout n'empêche jamais
-l'insert, et un échec d'insert n'empêche jamais la ligne stdout (déjà émise).
+`logAction` l'appelle dans son propre try/catch, avant la décision de
+persistance : un échec de la ligne stdout ne change pas la décision. Pour une
+action protégée, un échec d'insert n'empêche jamais la ligne stdout déjà émise.
 
 **`error_message` en base** — `logAction` réduit le message libre à un
 code court de la liste contrôlée ou à `ERROR`. Le miroir stdout continue
