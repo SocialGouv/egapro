@@ -1,5 +1,10 @@
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
+import {
+	replayEventPrivacyIntegration,
+	sentryPrivacyOptions,
+	sentryReplayPrivacyOptions,
+} from "~/modules/observability";
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 
@@ -18,8 +23,13 @@ Sentry.init({
 	replaysSessionSampleRate: 0.1,
 	replaysOnErrorSampleRate: 1.0,
 
-	integrations: [Sentry.replayIntegration()],
+	integrations: [
+		Sentry.replayIntegration(sentryReplayPrivacyOptions),
+		replayEventPrivacyIntegration,
+	],
 
 	// Enable Sentry whenever a DSN is configured (dev + prod)
 	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+
+	...sentryPrivacyOptions,
 });

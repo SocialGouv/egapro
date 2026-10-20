@@ -19,4 +19,24 @@ describe("instrumentation-client", () => {
 
 		expect(z.config().jitless).toBe(true);
 	});
+
+	it("initializes Sentry with the privacy options and a fully masked replay", async () => {
+		vi.resetModules();
+		const { init, replayIntegration } = await import("@sentry/nextjs");
+		const {
+			replayEventPrivacyIntegration,
+			sentryPrivacyOptions,
+			sentryReplayPrivacyOptions,
+		} = await import("~/modules/observability");
+
+		await import("~/instrumentation-client");
+
+		expect(init).toHaveBeenCalledWith(
+			expect.objectContaining({
+				...sentryPrivacyOptions,
+				integrations: expect.arrayContaining([replayEventPrivacyIntegration]),
+			}),
+		);
+		expect(replayIntegration).toHaveBeenCalledWith(sentryReplayPrivacyOptions);
+	});
 });

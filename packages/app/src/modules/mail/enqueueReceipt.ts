@@ -186,7 +186,9 @@ async function buildAttachments(
  * Raises a receipt failure to Sentry and the server console, then returns the
  * human-readable reason. It writes no audit row itself — the caller is the one
  * that owns a row, and carries the returned reason into it so the failure stays
- * queryable per SIREN in `audit.action_log`.
+ * queryable per SIREN in `audit.action_log`. The context deliberately carries no
+ * SIREN: Sentry only ever receives scrubbed data, so per-SIREN triage goes
+ * through the audit row.
  *
  * A non-Error throw (a rejected string, a plain object) reaches Sentry as
  * "Non-Error exception captured" and groups unrelated failures together, so it
@@ -236,7 +238,6 @@ async function buildAttachmentsOrDrop(
 			droppedReason: reportReceiptFailure(error, {
 				stage: "attachments",
 				kind,
-				siren,
 				year,
 			}),
 		};
@@ -303,7 +304,7 @@ export async function enqueueReceipt(
 			},
 		});
 	} catch (error) {
-		reportReceiptFailure(error, { stage: "enqueue", kind, siren, year });
+		reportReceiptFailure(error, { stage: "enqueue", kind, year });
 		void logAction({
 			action: AUDIT_ACTIONS.NOTIFICATION_ENQUEUE,
 			status: "failure",
