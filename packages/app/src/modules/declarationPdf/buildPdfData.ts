@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { formatCategorySource } from "~/modules/declaration-remuneration";
 import {
@@ -13,13 +13,13 @@ import {
 } from "~/modules/domain";
 import {
 	activeDeclarationFilter,
+	findLatestStatusEvent,
 	mapToEmployeeCategoryRows,
 } from "~/server/api/routers/declarationHelpers";
 import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { db } from "~/server/db";
 import {
 	companies,
-	declarationStatusHistory,
 	declarations,
 	employeeCategories,
 	gipMdsData,
@@ -33,18 +33,8 @@ async function getLatestEventDate(
 	declarationId: string,
 	eventType: "submit" | "second_declaration_submit",
 ): Promise<Date | null> {
-	const [row] = await db
-		.select({ createdAt: declarationStatusHistory.createdAt })
-		.from(declarationStatusHistory)
-		.where(
-			and(
-				eq(declarationStatusHistory.declarationId, declarationId),
-				eq(declarationStatusHistory.eventType, eventType),
-			),
-		)
-		.orderBy(desc(declarationStatusHistory.createdAt))
-		.limit(1);
-	return row?.createdAt ?? null;
+	const event = await findLatestStatusEvent(db, declarationId, eventType);
+	return event?.createdAt ?? null;
 }
 
 async function resolveTransmittedDate(

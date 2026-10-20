@@ -54,6 +54,20 @@ describe("JointEvaluationView", () => {
 		).toBeInTheDocument();
 	});
 
+	it("downloads the joint evaluation recap PDF of the year from the heading button", () => {
+		render(<JointEvaluationView {...baseProps} />);
+
+		const button = screen.getByRole("link", {
+			name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations (PDF)",
+		});
+		expect(button).toHaveAttribute(
+			"href",
+			"/api/joint-evaluation-pdf?year=2027",
+		);
+		expect(button).toHaveClass("fr-btn--tertiary", "fr-icon-download-line");
+		expect(screen.getByText("PDF")).toHaveClass("fr-text--xs");
+	});
+
 	it("hides CSE status for companies with fewer than 100 employees", () => {
 		render(
 			<JointEvaluationView

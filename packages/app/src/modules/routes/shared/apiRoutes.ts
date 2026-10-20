@@ -5,6 +5,7 @@ export const API_DECLARATION_PDF = route("/api/declaration-pdf");
 export const API_REPRESENTATION_PDF = route("/api/representation-pdf");
 export const API_TRANSMITTED_PDF = route("/api/transmitted-pdf");
 export const API_PREFILL_PDF = route("/api/prefill-pdf");
+export const API_JOINT_EVALUATION_PDF = route("/api/joint-evaluation-pdf");
 
 export const API_DECLARATION_LOCK_RELEASE = route(
 	"/api/declaration-lock/release",

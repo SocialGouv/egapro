@@ -13,6 +13,7 @@ import {
 	getObligationWorkforce,
 	getReferenceYearFor,
 	isCseRequired,
+	isJointEvaluationFileTransmitted,
 	isPresumedSubjectToRepresentation,
 	isRepresentationNotSubject,
 	parseGipWorkforce,
@@ -312,13 +313,11 @@ export const companyRouter = createTRPCRouter({
 				const activeJointFile = jointEvalRows.find(
 					(file) => file.declarationId === d.id,
 				);
-				const jointEvaluationViewAvailable = Boolean(
-					latestJointSubmit &&
-						activeJointFile &&
-						activeJointFile.uploadedAt <= latestJointSubmit &&
-						(!latestJointDeparture ||
-							activeJointFile.uploadedAt > latestJointDeparture),
-				);
+				const jointEvaluationViewAvailable = isJointEvaluationFileTransmitted({
+					fileUploadedAt: activeJointFile?.uploadedAt ?? null,
+					latestSubmitAt: latestJointSubmit,
+					latestDepartureAt: latestJointDeparture,
+				});
 				return {
 					type: "remuneration" as const,
 					year: d.year,
