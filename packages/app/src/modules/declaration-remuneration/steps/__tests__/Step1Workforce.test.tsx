@@ -281,6 +281,60 @@ describe("Step1Workforce", () => {
 		});
 	});
 
+	it.each([
+		[
+			step1Data({ hourlyWomen: 10, hourlyMen: 20 }),
+			ANNUAL_WOMEN,
+			/rémunération annuelle/i,
+		],
+		[
+			step1Data({ totalWomen: 10, totalMen: 20 }),
+			HOURLY_WOMEN,
+			/rémunération horaire/i,
+		],
+	] as const)("blocks a row with two explicitly entered zero headcounts", async (values, invalidField, rowName) => {
+		const user = userEvent.setup();
+		renderStep1();
+		await fillAll(user, values);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(rowName);
+		expect(screen.getByLabelText(invalidField)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+	});
+
+	it("allows a zero headcount for only one sex in each row", async () => {
+		const user = userEvent.setup();
+		renderStep1();
+		const values = step1Data({ totalMen: 20, hourlyWomen: 10 });
+		await fillAll(user, values);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).toHaveBeenCalledWith(values);
+	});
+
+	it("clears the row error when the other headcount is corrected", async () => {
+		const user = userEvent.setup();
+		renderStep1();
+		await fillAll(user, step1Data({ hourlyWomen: 10, hourlyMen: 20 }));
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Le total des effectifs pour la rémunération annuelle doit être supérieur à 0.",
+		);
+
+		await user.clear(screen.getByLabelText(ANNUAL_MEN));
+		await user.type(screen.getByLabelText(ANNUAL_MEN), "5");
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(mockMutate).toHaveBeenCalledWith(
+			step1Data({ totalMen: 5, hourlyWomen: 10, hourlyMen: 20 }),
+		);
+	});
+
 	it("names every empty field in a single error alert on submit", async () => {
 		const user = userEvent.setup();
 		renderStep1();
