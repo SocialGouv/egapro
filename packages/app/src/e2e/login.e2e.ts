@@ -77,7 +77,7 @@ test.describe("ProConnect authentication flow", () => {
 
 		await page.waitForURL(urlGlob(MY_SPACE));
 		await expect(
-			page.getByRole("button", { name: "Mon espace" }),
+			page.getByRole("button", { name: "Mon profil" }),
 		).toBeVisible();
 
 		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
@@ -328,22 +328,28 @@ test.describe("Company location row — Mon espace banner and observatory", () =
 	});
 });
 
-test.describe("Mon espace — header entry point", () => {
+test.describe("Header account entry point", () => {
 	const MOBILE = { width: 375, height: 812 };
 
-	test("the desktop user menu leads to mon espace", async ({ page }) => {
+	test("the desktop user menu opens the profile modal", async ({ page }) => {
 		await page.goto("/");
 		await dismissCookieBanner(page);
 
-		await page.getByRole("button", { name: "Mon espace" }).click();
+		await page.getByRole("button", { name: "Mon profil" }).click();
 
 		await expect(
 			page.getByRole("menuitem", { name: "Mes entreprises" }),
 		).toHaveCount(0);
-		await page.getByRole("menuitem", { name: "Mes démarches" }).click();
-
-		await page.waitForURL("**/mon-espace");
-		await expect(page.getByText(/130.?025.?265/).first()).toBeVisible();
+		await expect(
+			page.getByRole("menuitem", { name: "Mes démarches" }),
+		).toHaveCount(0);
+		await page.getByRole("menuitem", { name: "Modifier mon profil" }).click();
+		await expect(
+			page.getByRole("dialog", { name: "Mon profil" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Mon profil" }),
+		).toHaveAttribute("aria-expanded", "false");
 	});
 
 	test("the mobile menu leads to mon espace", async ({ page }) => {
