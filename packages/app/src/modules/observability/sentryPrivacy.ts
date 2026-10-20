@@ -31,7 +31,22 @@ const SIREN_SIRET_PATTERN =
 
 const PERCENT_ENCODED_PATTERN = /(?:%[0-9A-Fa-f]{2})+/g;
 
-const IDENTIFIER_KEY_PATTERN = /(?:^|[._])(?:id|release)$|Id$/;
+// Exact SDK keys whose string values are hex correlation ids the SIREN pattern would otherwise mask.
+const IDENTIFIER_KEYS = new Set([
+	"trace_id",
+	"span_id",
+	"parent_span_id",
+	"profile_id",
+	"event_id",
+	"replay_id",
+	"replayId",
+	"release",
+	"sentry.release",
+	"sentry.segment.id",
+	"sentry.replay_id",
+	"sentry.profile_id",
+	"sentry.profiler_id",
+]);
 
 const URL_LIKE_PATTERN = /^(?:https?:\/\/|\/)/;
 
@@ -83,7 +98,7 @@ export function scrubValue<T>(
 		return Object.fromEntries(
 			Object.entries(value).map(([key, entry]) => [
 				key,
-				IDENTIFIER_KEY_PATTERN.test(key)
+				typeof entry === "string" && IDENTIFIER_KEYS.has(key)
 					? entry
 					: scrubValue(entry, scrubString),
 			]),

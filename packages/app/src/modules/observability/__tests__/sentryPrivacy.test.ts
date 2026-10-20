@@ -124,6 +124,30 @@ describe("scrubValue", () => {
 		});
 	});
 
+	it("scrubs a SIREN or an email under a generic id key, suffix included", () => {
+		expect(scrubValue({ id: SIREN, companyId: SIREN, userId: EMAIL })).toEqual({
+			id: "[siren]",
+			companyId: "[siren]",
+			userId: "[email]",
+		});
+	});
+
+	it("scrubs non-string values nested under identifier keys", () => {
+		expect(
+			scrubValue({
+				id: { email: EMAIL },
+				trace_id: { siren: SIREN },
+				span_id: [SIREN],
+				parent_span_id: 123456789,
+			}),
+		).toEqual({
+			id: { email: "[email]" },
+			trace_id: { siren: "[siren]" },
+			span_id: ["[siren]"],
+			parent_span_id: "[siren]",
+		});
+	});
+
 	it("keeps identifier keys intact so traces stay linked", () => {
 		const ids = {
 			trace_id: "1234567890abcdef123456789abcdef0",
