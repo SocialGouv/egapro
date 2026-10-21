@@ -209,7 +209,6 @@ describe("computeRepresentationCtaHref", () => {
 		).toBe(representationStepHref(1));
 	});
 
-	// The view button now opens the read-only consultation page, not the funnel's own recap step.
 	it("sends a transmitted démarche to its consultation page", () => {
 		expect(
 			computeRepresentationCtaHref(
@@ -240,7 +239,6 @@ describe("computeRepresentationCtaHref", () => {
 		).toBe(RECAP_HREF);
 	});
 
-	// A transmitted démarche keeps pointing at the consultation page once the campaign closes too.
 	it("sends a transmitted démarche to its consultation page once the campaign is closed", () => {
 		expect(
 			computeRepresentationCtaHref(

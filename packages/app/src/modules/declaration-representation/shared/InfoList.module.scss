@@ -1,4 +1,3 @@
-// Figma spec: label column fixed at 237px next to a fluid value column.
 :global(dl).definitionList {
 	display: grid;
 	grid-template-columns: 237px minmax(0, 1fr);

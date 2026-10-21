@@ -26,7 +26,6 @@ type PublicationDraft = Pick<
 	"publishDate" | "hasWebsite" | "publishUrl" | "publishModalities"
 >;
 
-// Shared by Step5Review and the "Mon espace" consultation page, both reading a `RepresentationDraft`.
 export function publicationInfoItems(draft: PublicationDraft): InfoItem[] {
 	const items: InfoItem[] = [
 		{

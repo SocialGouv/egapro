@@ -116,7 +116,7 @@ export function computeRepresentationCtaHref(
 	campaignOpen: boolean,
 	campaignYear: number,
 ) {
-	// A transmitted déclaration always reads from the consultation page, campaign open or closed.
+	// Checked before the campaign-closed branch: a transmitted declaration reads from the consultation page either way.
 	if (isRepresentationDeclarationTransmitted(declaration)) {
 		return mySpaceRepresentationHref(campaignYear);
 	}

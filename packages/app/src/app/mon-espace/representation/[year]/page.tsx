@@ -21,7 +21,6 @@ type Props = {
 	params: Promise<{ year: string }>;
 };
 
-// Accepted when the campaign year parses and its reference year clears `getRepresentationDeclarationSchema`.
 function parseValidCampaignYear(yearParam: string): number | null {
 	const campaignYear = parseCampaignYear(yearParam);
 	if (campaignYear === null) return null;
