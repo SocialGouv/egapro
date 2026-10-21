@@ -387,6 +387,62 @@ describe("enqueueReceipt", () => {
 		);
 	});
 
+	it("reports a dropped attachment without the siren in Sentry extra nor console", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		mocks.buildDeclarationAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+
+		try {
+			await enqueueReceipt({ ...baseInput, kind: "declaration" });
+		} finally {
+			consoleError.mockRestore();
+		}
+
+		const call = mocks.captureException.mock.calls[0] as unknown as
+			| [Error, { extra?: Record<string, unknown> }]
+			| undefined;
+		expect(call?.[1]?.extra).toMatchObject({
+			stage: "attachments",
+			kind: "declaration",
+			year: 2025,
+		});
+		expect(call?.[1]?.extra).not.toHaveProperty("siren");
+		expect(
+			consoleError.mock.calls.map((args) => args.join(" ")).join("\n"),
+		).not.toContain("552100554");
+	});
+
+	it("reports an enqueue failure without the siren in Sentry extra nor console", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		mocks.enqueueNotification.mockRejectedValueOnce(
+			new Error("redis connection lost"),
+		);
+
+		try {
+			await enqueueReceipt({ ...baseInput, kind: "declaration" });
+		} finally {
+			consoleError.mockRestore();
+		}
+
+		const call = mocks.captureException.mock.calls[0] as unknown as
+			| [Error, { extra?: Record<string, unknown> }]
+			| undefined;
+		expect(call?.[1]?.extra).toMatchObject({
+			stage: "enqueue",
+			kind: "declaration",
+			year: 2025,
+		});
+		expect(call?.[1]?.extra).not.toHaveProperty("siren");
+		expect(
+			consoleError.mock.calls.map((args) => args.join(" ")).join("\n"),
+		).not.toContain("552100554");
+	});
+
 	it("logs failure with a generic message when a non-Error value is thrown", async () => {
 		// The enqueue itself throwing is the remaining fatal path: unlike a
 		// missing attachment, there is no degraded send to fall back on.

@@ -817,6 +817,8 @@ Trois entrées Sentry, une par runtime :
 
 `src/app/global-error.tsx` capture les erreurs non gérées de l'arbre React et les remonte à Sentry.
 
+Les trois initialisations étalent les options du module `src/modules/observability`, qui anonymise ce qui part vers Sentry : collecte minimale côté SDK, filtrage des e-mails et SIREN/SIRET dans les erreurs, traces et breadcrumbs, et Session Replay entièrement masqué.
+
 ---
 
 ## 13. Tests

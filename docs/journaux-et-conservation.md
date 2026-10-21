@@ -54,7 +54,7 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 | Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant utilisateur, SIREN, IP tronquée, code d'erreur et métadonnées limitées | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
 | Ligne d'activité applicative | Diagnostic opérationnel, collectée par la plateforme d'hébergement | Identifiant utilisateur, SIREN, IP tronquée, certaines valeurs de champs des routes HTTP | Non définie dans le dépôt | Non définie dans le dépôt | [4.2](#42-ligne-dactivité-applicative) |
 | Logs applicatifs stdout/stderr | Diagnostic d'erreur | Messages et traces d'erreur ; e-mail du destinataire si l'envoi réel est désactivé | Non définie dans le dépôt | Non définie dans le dépôt | [4.3](#43-logs-applicatifs-stdout-et-stderr) |
-| Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs, sessions enregistrées | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
+| Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs et sessions enregistrées, anonymisés à l'émission (e-mails, SIREN et SIRET filtrés, replay masqué) | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
 | File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j à partir de la date de démarrage prévue (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
 | Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
 | Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
@@ -138,9 +138,16 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 Sentry capture les erreurs non gérées côté serveur et côté client, avec 100 % des traces échantillonnées. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
+**Anonymisation à l'émission** : les trois initialisations Sentry étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry.
+
+- La collecte côté SDK est coupée à la source (`dataCollection`) : informations d'utilisateur automatiques, cookies, en-têtes HTTP, corps de requête et de réponse, paramètres d'URL, variables locales des piles d'appels, paramètres des requêtes SQL et arguments des tâches en file.
+- Avant tout envoi d'erreur ou de span, un filtre parcourt le contenu — message d'erreur, valeurs d'exception, breadcrumbs, `extra`, `contexts`, `tags`, nom et attributs des spans — et remplace les adresses e-mail par `[email]` et les SIREN et SIRET (collés, espacés, encodés dans une URL ou numériques) par `[siren]`. Les chaînes de requête et fragments sont retirés des URL (requête, breadcrumbs de navigation et de `fetch`, spans), ce qui écarte aussi les entrées tRPC et les paramètres de retour ProConnect. L'objet utilisateur, les cookies, l'en-tête `Authorization` et le corps de requête sont supprimés de l'événement. Les piles d'appels et les identifiants de trace ne sont pas modifiés.
+- Le Session Replay masque la totalité du texte, des saisies et des médias (`maskAllText`, `maskAllInputs`, `blockAllMedia`), ainsi que les attributs `href` et `action` des liens et formulaires. Il ne capture aucun corps réseau. Les événements d'enregistrement personnalisés (breadcrumbs, navigations, requêtes) et l'événement qui accompagne chaque enregistrement (liste des URL visitées) passent par le même filtre, retrait des chaînes de requête compris.
+- **Limite connue** : l'URL de la page courante que l'enregistreur inscrit au début de chaque segment n'est pas interceptable par le SDK. Son chemin peut contenir un SIREN (`/mon-espace/historique/[siren]`, `/index-egapro/entreprise/[siren]`). Les réglages côté instance (*Data Scrubber*, champs sensibles) restent nécessaires.
+
 **Durée** : non définie dans le dépôt — c'est un réglage de l'instance Sentry de l'équipe, pas du code applicatif.
 
-**Sources** : `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
+**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
 
 ### 4.5 File de notification par e-mail
 

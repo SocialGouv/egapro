@@ -1,5 +1,5 @@
 {
-	"id": "e7b84367-32e0-442a-88b7-070faf96e132",
+	"id": "af098a12-f9ec-4f80-af06-89bdcbcbab16",
 	"prevId": "ce2a2d03-84f7-4d03-9e86-6d5bb85f4083",
 	"version": "7",
 	"dialect": "postgresql",
@@ -1207,12 +1207,6 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"cse_opinion_draft_updated_at": {
-					"name": "cse_opinion_draft_updated_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
 				"cse_required": {
 					"name": "cse_required",
 					"type": "boolean",
@@ -2215,12 +2209,6 @@
 					"primaryKey": true,
 					"notNull": true,
 					"default": 1
-				},
-				"active_campaign_year": {
-					"name": "active_campaign_year",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false
 				},
 				"declaration_lock_timeout_minutes": {
 					"name": "declaration_lock_timeout_minutes",
