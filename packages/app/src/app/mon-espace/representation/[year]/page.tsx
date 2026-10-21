@@ -61,17 +61,18 @@ export default async function RepresentationConsultationPage({
 
 	const referenceYear = getReferenceYearFor(campaignYear);
 
-	const [{ declaration }, company, declarant, workforceHistory] =
-		await Promise.all([
-			api.representationDeclaration.get({ year: referenceYear }),
-			api.company.get({ siren }),
-			api.profile.get(),
-			api.representationDeclaration.getWorkforceHistory({ campaignYear }),
-		]);
-
+	const { declaration } = await api.representationDeclaration.get({
+		year: referenceYear,
+	});
 	if (!isRepresentationDeclarationSubmitted(declaration?.status)) {
 		notFound();
 	}
+
+	const [company, declarant, workforceHistory] = await Promise.all([
+		api.company.get({ siren }),
+		api.profile.get(),
+		api.representationDeclaration.getWorkforceHistory({ campaignYear }),
+	]);
 
 	const draft = representationDraftFromDeclaration(
 		declaration,
