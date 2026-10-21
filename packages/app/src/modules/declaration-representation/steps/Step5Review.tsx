@@ -9,14 +9,14 @@ import {
 	formatPercentage,
 	getRepresentationCampaignYear,
 } from "~/modules/domain";
-import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { DECLARATION_REPRESENTATION_CONFIRMATION } from "~/modules/routes";
 import { SUBMIT_LABEL, useDsfrModal } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import { SubmitModal } from "../SubmitModal";
-import { toAbsoluteHttpUrl } from "../schemas";
 import { ComplianceBadge } from "../shared/ComplianceBadge";
 import { useRepresentationDraftContext } from "../shared/draft/DraftContext";
+import { InfoList } from "../shared/InfoList";
+import { publicationInfoItems } from "../shared/PublicationSummary";
 import type { RepresentationIndicatorSummary } from "../shared/reviewSummary";
 import {
 	buildRepresentationSubmitPayload,
@@ -27,23 +27,6 @@ import { Step5NextSteps } from "./Step5NextSteps";
 import styles from "./Step5Review.module.scss";
 
 const CONFIRMATION_HREF = DECLARATION_REPRESENTATION_CONFIRMATION;
-
-function PublicationUrl({ url }: { url: string | undefined }) {
-	if (url === undefined || url.trim() === "") return "—";
-	const href = toAbsoluteHttpUrl(url);
-	if (href === null) return url;
-	return (
-		<a
-			className="fr-link"
-			href={href}
-			rel="noopener noreferrer"
-			target="_blank"
-		>
-			{url}
-			<NewTabNotice />
-		</a>
-	);
-}
 
 function IndicatorCard({
 	indicator,
@@ -124,15 +107,15 @@ export function Step5Review() {
 				<h2 className="fr-text--lg fr-text--bold fr-mb-0">
 					Période de référence
 				</h2>
-				<dl className={`fr-text--md ${styles.definitionList}`}>
-					<dt>Année de référence</dt>
-					<dd>{year}</dd>
-					<dt>Période de référence</dt>
-					<dd>
-						{formatOptionalIsoDate(draft.referencePeriodStart)} -{" "}
-						{formatOptionalIsoDate(draft.referencePeriodEnd)}
-					</dd>
-				</dl>
+				<InfoList
+					items={[
+						{ label: "Année de référence", value: year },
+						{
+							label: "Période de référence",
+							value: `${formatOptionalIsoDate(draft.referencePeriodStart)} - ${formatOptionalIsoDate(draft.referencePeriodEnd)}`,
+						},
+					]}
+				/>
 			</section>
 
 			<section className={styles.section}>
@@ -149,25 +132,7 @@ export function Step5Review() {
 			{summary.publicationApplicable ? (
 				<section className={styles.section}>
 					<h2 className="fr-text--lg fr-text--bold fr-mb-0">Publication</h2>
-					<dl className={`fr-text--md ${styles.definitionList}`}>
-						<dt>Date de publication</dt>
-						<dd>{formatOptionalIsoDate(draft.publishDate)}</dd>
-						<dt>Site Internet de publication</dt>
-						<dd>{draft.hasWebsite === true ? "Oui" : "Non"}</dd>
-						{draft.hasWebsite === true ? (
-							<>
-								<dt>Adresse de la page (URL)</dt>
-								<dd>
-									<PublicationUrl url={draft.publishUrl} />
-								</dd>
-							</>
-						) : (
-							<>
-								<dt>Modalités de communication</dt>
-								<dd>{draft.publishModalities ?? "—"}</dd>
-							</>
-						)}
-					</dl>
+					<InfoList items={publicationInfoItems(draft)} />
 				</section>
 			) : null}
 

@@ -4,6 +4,7 @@ import { and, eq, sql } from "drizzle-orm";
 import {
 	declareRepresentationNotSubjectSchema,
 	getRepresentationDeclarationSchema,
+	getRepresentationWorkforceHistorySchema,
 	saveRepresentationDraftSchema,
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
@@ -22,6 +23,7 @@ import {
 	createTRPCRouter,
 } from "~/server/api/trpc";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
+import { getRepresentationWorkforceHistory } from "~/server/db/getRepresentationWorkforceHistory";
 import { representationDeclarations } from "~/server/db/schema";
 
 const CAMPAIGN_CLOSED_MESSAGE =
@@ -95,6 +97,12 @@ export const representationDeclarationRouter = createTRPCRouter({
 				declarationDeadline: campaign.declarationDeadline,
 			};
 		}),
+
+	getWorkforceHistory: companyProcedure
+		.input(getRepresentationWorkforceHistorySchema)
+		.query(({ ctx, input }) =>
+			getRepresentationWorkforceHistory(ctx.siren, input.campaignYear),
+		),
 
 	saveDraft: companyWriteProcedure
 		.input(saveRepresentationDraftSchema)

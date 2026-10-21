@@ -9,6 +9,7 @@ import {
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
 	representationStepHref,
 } from "~/modules/routes";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -113,12 +114,15 @@ export function computeRepresentationPanelVariant(
 export function computeRepresentationCtaHref(
 	declaration: DeclarationItem | undefined,
 	campaignOpen: boolean,
+	campaignYear: number,
 ) {
-	const recapHref = representationStepHref(LAST_REPRESENTATION_STEP);
-	if (!campaignOpen) return recapHref;
+	// A transmitted déclaration always reads from the consultation page, campaign open or closed.
+	if (isRepresentationDeclarationTransmitted(declaration)) {
+		return mySpaceRepresentationHref(campaignYear);
+	}
+	if (!campaignOpen) return representationStepHref(LAST_REPRESENTATION_STEP);
 	if (declaration?.notSubject) return DECLARATION_REPRESENTATION;
 	const progress = getRepresentationProgress(declaration);
-	if (progress === "submitted") return recapHref;
 	if (progress === "draft") {
 		return representationStepHref(
 			clampRepresentationStep(declaration?.currentStep ?? 1),
