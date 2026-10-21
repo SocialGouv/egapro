@@ -658,6 +658,40 @@ export async function resetRepresentationDeclaration() {
 }
 
 /**
+ * Pin a transmitted balanced-representation declaration for `referenceYear`,
+ * without replaying the funnel: one computable compliant indicator, one
+ * computable non compliant, published on a website.
+ */
+export async function seedSubmittedRepresentationDeclaration(
+	referenceYear: number,
+) {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_representation_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${referenceYear}
+		`;
+		await sql`
+			INSERT INTO app_representation_declaration (
+				id, siren, year, status, current_step, submitted_at,
+				reference_period_start, reference_period_end,
+				executive_women_percent, executive_men_percent,
+				member_women_percent, member_men_percent,
+				publish_date, publish_url, created_at, updated_at
+			) VALUES (
+				${crypto.randomUUID()}, ${TEST_SIREN}, ${referenceYear}, 'submitted', 5, NOW(),
+				${`${referenceYear}-01-01`}, ${`${referenceYear}-12-31`},
+				40, 60, 20, 80,
+				${`${referenceYear + 1}-02-15`}, 'https://example.fr/representation-equilibree',
+				NOW(), NOW()
+			)
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+/**
  * Seed the GIP workforce of the {@link REPRESENTATION_SUBJECTION_WINDOW_YEARS}
  * consecutive exercises the représentation pre-filter reads (#3898), ending on
  * `campaignYear`. Returns the seeded years so a spec can clear the ones that are
