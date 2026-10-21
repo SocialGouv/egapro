@@ -400,6 +400,20 @@
 			"when": 1791795512710,
 			"tag": "0056_chilly_pepper_potts",
 			"breakpoints": true
+		},
+		{
+			"idx": 57,
+			"version": "7",
+			"when": 1792483607678,
+			"tag": "0057_slim_magneto",
+			"breakpoints": true
+		},
+		{
+			"idx": 58,
+			"version": "7",
+			"when": 1792483626957,
+			"tag": "0058_ensure-global-setting-row",
+			"breakpoints": true
 		}
 	]
 }

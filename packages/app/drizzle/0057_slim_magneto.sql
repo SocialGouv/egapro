@@ -1,0 +1,1 @@
+ALTER TABLE "app_global_setting" DROP COLUMN "active_campaign_year";

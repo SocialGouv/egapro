@@ -137,6 +137,47 @@ describe("adminSettings — each settings block only writes its own columns (rea
 		await cleanUp();
 	});
 
+	it("persists the lock timeout when the singleton row is missing", async () => {
+		const original = await sql<
+			{
+				declaration_lock_timeout_minutes: number;
+				updated_at: Date;
+				updated_by: string | null;
+			}[]
+		>`
+			SELECT declaration_lock_timeout_minutes, updated_at, updated_by
+			FROM app_global_setting WHERE id = 1
+		`;
+		expect(original).toMatchObject([{ declaration_lock_timeout_minutes: 30 }]);
+
+		try {
+			await sql`DELETE FROM app_global_setting WHERE id = 1`;
+			const caller = createCaller();
+			expect(await caller.getLockTimeout()).toEqual({ timeoutMinutes: 30 });
+
+			expect(await caller.updateLockTimeout({ timeoutMinutes: 45 })).toEqual({
+				success: true,
+			});
+			expect(await caller.getLockTimeout()).toEqual({ timeoutMinutes: 45 });
+			expect(
+				await sql`
+				SELECT declaration_lock_timeout_minutes
+				FROM app_global_setting WHERE id = 1
+			`,
+			).toMatchObject([{ declaration_lock_timeout_minutes: 45 }]);
+		} finally {
+			await sql`DELETE FROM app_global_setting WHERE id = 1`;
+			if (original[0]) {
+				await sql`
+					INSERT INTO app_global_setting
+						(id, declaration_lock_timeout_minutes, updated_at, updated_by)
+					VALUES
+						(1, ${original[0].declaration_lock_timeout_minutes}, ${original[0].updated_at}, ${original[0].updated_by})
+				`;
+			}
+		}
+	});
+
 	it("saving the remuneration deadlines leaves the common calendar and the GIP date untouched", async () => {
 		await insertConfiguredYear();
 
