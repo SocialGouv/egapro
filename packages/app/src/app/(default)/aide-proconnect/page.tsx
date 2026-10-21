@@ -74,12 +74,12 @@ const AideProConnectPage = () => (
             situations :
           </p>
           <ul>
-            <li>
+            <li className="fr-mb-2w">
               Vous avez fait une erreur de saisie dans votre adresse e-mail
               <br />
               💡 <Link href="/login">Recréez un compte avec la bonne adresse</Link>
             </li>
-            <li>
+            <li className="fr-mb-2w">
               L'e-mail est arrivé dans vos courriers indésirables
               <br />
               💡 Vérifiez vos spams
