@@ -59,6 +59,6 @@ describe("HeaderQuickAccess", () => {
 
 		expect(
 			screen.getByRole("navigation", { name: "Accès rapides" }),
-		).toContainElement(screen.getByRole("button", { name: "Mon espace" }));
+		).toContainElement(screen.getByRole("button", { name: "Mon profil" }));
 	});
 });
