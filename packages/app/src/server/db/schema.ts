@@ -881,12 +881,11 @@ export const representationDeclarationLocksRelations = relations(
 /**
  * Global platform settings. Single-row table (`id = 1`).
  *
- * Values here are free of retention constraints: they drive campaign
- * behaviour (active year) rather than recording user actions.
+ * Values here configure platform-wide behaviour rather than recording user
+ * actions.
  */
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
-	activeCampaignYear: d.integer(),
 	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })
