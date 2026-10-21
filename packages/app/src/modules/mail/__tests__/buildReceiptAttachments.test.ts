@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
 	buildTransmittedPdfData: vi.fn(),
 	DeclarationPdfDocument: vi.fn(),
 	TransmittedPdfDocument: vi.fn(),
+	buildJointEvaluationRecapData: vi.fn(),
+	JointEvaluationPdfDocument: vi.fn(),
 }));
 
 vi.mock("@react-pdf/renderer", () => ({
@@ -20,6 +22,14 @@ vi.mock("~/modules/declarationPdf/buildTransmittedPdfData", () => ({
 	buildTransmittedPdfData: mocks.buildTransmittedPdfData,
 }));
 
+vi.mock("~/modules/declarationPdf/buildJointEvaluationRecapData", () => ({
+	buildJointEvaluationRecapData: mocks.buildJointEvaluationRecapData,
+}));
+
+vi.mock("~/modules/declarationPdf/JointEvaluationPdfDocument", () => ({
+	JointEvaluationPdfDocument: mocks.JointEvaluationPdfDocument,
+}));
+
 vi.mock("~/modules/declarationPdf/DeclarationPdfDocument", () => ({
 	DeclarationPdfDocument: mocks.DeclarationPdfDocument,
 }));
@@ -30,6 +40,7 @@ vi.mock("~/modules/declarationPdf/TransmittedPdfDocument", () => ({
 
 import {
 	buildDeclarationAttachments,
+	buildJointEvaluationAttachments,
 	buildSecondDeclarationAttachments,
 } from "../buildReceiptAttachments";
 
@@ -43,6 +54,8 @@ describe("buildReceiptAttachments", () => {
 		mocks.buildTransmittedPdfData.mockResolvedValue({ year: YEAR });
 		mocks.DeclarationPdfDocument.mockReturnValue("declaration-doc");
 		mocks.TransmittedPdfDocument.mockReturnValue("transmitted-doc");
+		mocks.buildJointEvaluationRecapData.mockResolvedValue({ year: YEAR });
+		mocks.JointEvaluationPdfDocument.mockReturnValue("joint-evaluation-doc");
 		mocks.renderToBuffer.mockImplementation((doc: unknown) =>
 			Promise.resolve(Buffer.from(String(doc))),
 		);
@@ -95,6 +108,41 @@ describe("buildReceiptAttachments", () => {
 				expect.any(Date),
 				"correction",
 			);
+		});
+	});
+
+	describe("buildJointEvaluationAttachments", () => {
+		it("attaches the joint evaluation recap under the route's file name", async () => {
+			const attachments = await buildJointEvaluationAttachments(SIREN, YEAR);
+
+			expect(attachments).toEqual([
+				{
+					filename: `evaluation-conjointe-${SIREN}-${YEAR}.pdf`,
+					content: Buffer.from("joint-evaluation-doc"),
+					contentType: "application/pdf",
+				},
+			]);
+		});
+
+		it("renders the recap from the shared builder", async () => {
+			await buildJointEvaluationAttachments(SIREN, YEAR);
+
+			expect(mocks.buildJointEvaluationRecapData).toHaveBeenCalledWith(
+				SIREN,
+				YEAR,
+			);
+			expect(mocks.JointEvaluationPdfDocument).toHaveBeenCalledWith({
+				data: { year: YEAR },
+			});
+			expect(mocks.buildPdfData).not.toHaveBeenCalled();
+		});
+
+		it("lets a rendering failure reach the caller", async () => {
+			mocks.renderToBuffer.mockRejectedValue(new Error("pdf worker died"));
+
+			await expect(
+				buildJointEvaluationAttachments(SIREN, YEAR),
+			).rejects.toThrow("pdf worker died");
 		});
 	});
 });

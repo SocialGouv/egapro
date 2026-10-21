@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
 	getCurrentYear,
 	getDeclarationReferencePeriod,
+	isJointEvaluationFileTransmitted,
 } from "~/modules/domain";
 import { auth } from "~/server/auth";
 import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
@@ -65,10 +66,15 @@ export async function JointEvaluationViewPage() {
 			.where(eq(users.id, declaration.declarantId))
 			.limit(1),
 	]);
-	// A later round can replace the single report row before it is transmitted.
-	// In that interval the previous submit event still exists, but belongs to
-	// the former file. Never present the new upload as a transmitted report.
-	if (!file || file.uploadedAt > submission.createdAt) notFound();
+	if (
+		!file ||
+		!isJointEvaluationFileTransmitted({
+			fileUploadedAt: file.uploadedAt,
+			latestSubmitAt: submission.createdAt,
+		})
+	) {
+		notFound();
+	}
 
 	const declarant = declarantRows[0];
 	return (

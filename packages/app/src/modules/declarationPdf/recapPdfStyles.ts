@@ -8,6 +8,7 @@ import { PDF_FONT_FAMILY } from "./pdfFonts";
 // frozen for TransmittedPdfDocument / RepresentationPdfDocument.
 const TEXT_TITLE_GREY = "#161616"; // $text-title-grey
 const TEXT_DEFAULT_GREY = "#3A3A3A"; // $text-default-grey
+const TEXT_MENTION_GREY = "#666666"; // $text-mention-grey (file meta)
 const BACKGROUND_ALT_GREY = "#F6F6F6"; // $background-alt-grey (header cells)
 const BACKGROUND_GREY_ACTIVE = "#EDEDED"; // $background-default-grey-active (section banners)
 const BACKGROUND_ALT_BLUE_FRANCE = "#F5F5FE"; // $background-alt-blue-france (egapro + category banners)
@@ -174,6 +175,11 @@ export const styles = StyleSheet.create({
 		fontSize: 9,
 		fontWeight: BOLD,
 		color: TEXT_TITLE_GREY,
+	},
+	infoDetail: {
+		fontSize: 9,
+		fontWeight: REGULAR,
+		color: TEXT_MENTION_GREY,
 	},
 
 	table: {

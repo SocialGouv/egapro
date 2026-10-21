@@ -81,6 +81,10 @@ vi.mock("~/server/db/schema", () => ({
 
 vi.mock("~/server/api/routers/declarationHelpers", () => ({
 	activeDeclarationFilter: (siren: string, year: number) => ({ siren, year }),
+	findLatestStatusEvent: async () => {
+		const [event] = (await settle("declarationStatusHistory")) as unknown[];
+		return event ?? null;
+	},
 	mapToStepData: (d: Record<string, unknown>) => ({
 		step2Data: {
 			indicatorAAnnualWomen: (d.indicatorAAnnualWomen as string) ?? "",

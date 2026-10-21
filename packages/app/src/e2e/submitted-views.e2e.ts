@@ -1,10 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_JOINT_EVALUATION_PDF,
 	MY_SPACE,
 	MY_SPACE_CSE_OPINION_VIEW,
 	MY_SPACE_JOINT_EVALUATION_VIEW,
 } from "~/modules/routes";
+import { TEST_SIREN } from "./constants";
 import {
 	deleteCseOpinions,
 	deleteJointEvaluationFiles,
@@ -23,6 +25,7 @@ import { insertJointEvaluationSubmission } from "./helpers/declaration-history";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 
 const YEAR = getCurrentYear();
+const JOINT_EVALUATION_RECAP_HREF = `${API_JOINT_EVALUATION_PDF}?year=${YEAR}`;
 
 test.describe("Submitted documents in Mon espace", () => {
 	test.describe.configure({ mode: "serial" });
@@ -49,6 +52,9 @@ test.describe("Submitted documents in Mon espace", () => {
 
 		const cseResponse = await page.goto(MY_SPACE_CSE_OPINION_VIEW);
 		expect(cseResponse?.status()).toBe(404);
+
+		const recapResponse = await page.request.get(JOINT_EVALUATION_RECAP_HREF);
+		expect(recapResponse.status()).toBe(404);
 	});
 
 	test("opens the submitted CSE opinions from the panel and the report directly", async ({
@@ -87,6 +93,19 @@ test.describe("Submitted documents in Mon espace", () => {
 				level: 1,
 			}),
 		).toBeVisible();
+		await expect(
+			page.getByRole("link", {
+				name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations (PDF)",
+			}),
+		).toHaveAttribute("href", JOINT_EVALUATION_RECAP_HREF);
+		const recapResponse = await page.request.get(JOINT_EVALUATION_RECAP_HREF, {
+			timeout: 30_000,
+		});
+		expect(recapResponse.status()).toBe(200);
+		expect(recapResponse.headers()["content-type"]).toContain("pdf");
+		expect(recapResponse.headers()["content-disposition"]).toContain(
+			`evaluation-conjointe-${TEST_SIREN}-${YEAR}.pdf`,
+		);
 
 		await page.goto(MY_SPACE_CSE_OPINION_VIEW);
 		await expect(
