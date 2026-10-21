@@ -10,6 +10,7 @@ import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
+import { useRepresentationLock } from "./shared/lock/RepresentationLockContext";
 import {
 	getNextStep,
 	getNextStepHref,
@@ -52,16 +53,18 @@ export function StepPageClient({
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
+	const lock = useRepresentationLock();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
-	const isReadOnly = !campaignOpen || isSubmitted;
+	const isReadOnly =
+		!campaignOpen || isSubmitted || lock.isReadOnly || lock.isLoading;
 
 	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
 		useRepresentationDraft({
 			year,
 			step,
 			initialDraft,
-			enabled: campaignOpen && !isSubmitted,
+			enabled: campaignOpen && !isSubmitted && !isReadOnly,
 		});
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
@@ -117,6 +120,10 @@ export function StepPageClient({
 			if (!isValid) return;
 		}
 		setNavigationError(null);
+		if (isReadOnly) {
+			router.push(representationStepHref(nextStep));
+			return;
+		}
 		setIsAdvancing(true);
 		try {
 			await saveProgress(nextStep);

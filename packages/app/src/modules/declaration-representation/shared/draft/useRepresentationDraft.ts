@@ -81,6 +81,20 @@ export function useRepresentationDraft({
 	flushRef.current = flush;
 
 	useEffect(() => {
+		if (enabled) return;
+		cancelTimers();
+		pendingRef.current = null;
+		setIsPendingSave(false);
+	}, [cancelTimers, enabled]);
+
+	useEffect(() => {
+		cancelTimers();
+		pendingRef.current = null;
+		draftRef.current = initialDraft;
+		setDraft(initialDraft);
+	}, [cancelTimers, initialDraft]);
+
+	useEffect(() => {
 		return () => {
 			flushRef.current();
 		};
