@@ -657,11 +657,6 @@ export async function resetRepresentationDeclaration() {
 	}
 }
 
-/**
- * Pin a transmitted balanced-representation declaration for `referenceYear`,
- * without replaying the funnel: one computable compliant indicator, one
- * computable non compliant, published on a website.
- */
 export async function seedSubmittedRepresentationDeclaration(
 	referenceYear: number,
 ) {
