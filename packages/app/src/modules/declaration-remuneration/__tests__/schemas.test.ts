@@ -37,20 +37,35 @@ describe("updateStep1Schema", () => {
 			{ totalWomen: 10, totalMen: 20, hourlyWomen: 0, hourlyMen: 0 },
 			"hourlyWomen",
 		],
-	])("rejects a workforce row with no employees", (values, field) => {
+		[{ totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 }, "both rows"],
+	])("rejects a workforce row with no employees (%s)", (values, field) => {
 		const result = updateStep1Schema.safeParse(values);
 		expect(result.success).toBe(false);
 		if (!result.success) {
-			expect(result.error.issues).toEqual(
-				expect.arrayContaining([expect.objectContaining({ path: [field] })]),
-			);
+			if (field === "both rows") {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({ path: ["totalWomen"] }),
+						expect.objectContaining({ path: ["hourlyWomen"] }),
+					]),
+				);
+			} else {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							path: [field],
+							message: expect.stringContaining("doit être supérieur à 0"),
+						}),
+					]),
+				);
+			}
 		}
 	});
 
 	it.each([
 		{ totalWomen: 0, totalMen: 20, hourlyWomen: 10, hourlyMen: 0 },
 		{ totalWomen: 10, totalMen: 0, hourlyWomen: 0, hourlyMen: 20 },
-	])("accepts zero for one sex in each row", (values) => {
+	])("accepts zero for one sex in each row (%s)", (values) => {
 		expect(updateStep1Schema.safeParse(values).success).toBe(true);
 	});
 });

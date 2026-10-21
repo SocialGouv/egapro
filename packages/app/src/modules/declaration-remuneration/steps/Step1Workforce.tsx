@@ -55,12 +55,14 @@ type Step1WorkforceProps = {
 
 const WORKFORCE_ALERT_ID = "step1-workforce-error";
 
-function toRaw(values: Step1Data): RawValues {
+function toRaw(values: Step1Data, preserveZero = false): RawValues {
+	const rawValue = (value: number) =>
+		value > 0 || preserveZero ? String(value) : "";
 	return {
-		totalWomen: values.totalWomen > 0 ? String(values.totalWomen) : "",
-		totalMen: values.totalMen > 0 ? String(values.totalMen) : "",
-		hourlyWomen: values.hourlyWomen > 0 ? String(values.hourlyWomen) : "",
-		hourlyMen: values.hourlyMen > 0 ? String(values.hourlyMen) : "",
+		totalWomen: rawValue(values.totalWomen),
+		totalMen: rawValue(values.totalMen),
+		hourlyWomen: rawValue(values.hourlyWomen),
+		hourlyMen: rawValue(values.hourlyMen),
 	};
 }
 
@@ -128,7 +130,9 @@ export function Step1Workforce({
 		hourlyMen: form.watch("hourlyMen"),
 	};
 
-	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
+	const [raw, setRaw] = useState<RawValues>(() =>
+		toRaw(initialData, hasInitialData),
+	);
 	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
 	const [validationAttempt, setValidationAttempt] = useState(0);
 
@@ -139,7 +143,7 @@ export function Step1Workforce({
 			form.setValue(field, value);
 			setRaw((prev) => ({
 				...prev,
-				[field]: value > 0 ? String(value) : "",
+				[field]: String(value),
 			}));
 		}
 	});
@@ -183,9 +187,13 @@ export function Step1Workforce({
 		});
 
 	function handleFieldChange(field: WorkforceField, value: string) {
+		setValidationError(null);
 		const changedFieldId = workforceFieldIdFromField(field);
-		const row = WORKFORCE_ROWS.find((row) => row.menField === field);
-		const rowErrorId = row && workforceFieldId(row, "women");
+		const matchingRow = WORKFORCE_ROWS.find(
+			(workforceRow) =>
+				workforceRow.womenField === field || workforceRow.menField === field,
+		);
+		const rowErrorId = matchingRow && workforceFieldId(matchingRow, "women");
 		setFieldErrors((prev) =>
 			prev.filter(
 				(error) =>
@@ -236,10 +244,16 @@ export function Step1Workforce({
 		},
 		(errors) => {
 			setValidationAttempt((attempt) => attempt + 1);
-			setFieldErrors([
+			const nextFieldErrors = [
 				...getMissingFieldErrors(raw),
 				...getInvalidRowErrors(raw, errors),
-			]);
+			];
+			setFieldErrors(nextFieldErrors);
+			setValidationError(
+				nextFieldErrors.length === 0
+					? "Les effectifs saisis ne sont pas valides. Vérifiez les champs et réessayez."
+					: null,
+			);
 		},
 	);
 

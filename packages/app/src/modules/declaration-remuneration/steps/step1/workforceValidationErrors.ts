@@ -32,16 +32,15 @@ export function getInvalidRowErrors(
 	errors: FieldErrors<Step1Data>,
 ): FieldError[] {
 	return WORKFORCE_ROWS.flatMap((row) => {
-		const message = errors[row.womenField]?.message;
+		const message =
+			errors[row.womenField]?.message ?? errors[row.menField]?.message;
 		if (!message || raw[row.womenField] === "" || raw[row.menField] === "") {
 			return [];
 		}
-		return [
-			{
-				fieldId: workforceFieldId(row, "women"),
-				category: "workforce" as const,
-				message,
-			},
-		];
+		return (["women", "men"] as const).map((sex) => ({
+			fieldId: workforceFieldId(row, sex),
+			category: "workforce" as const,
+			message,
+		}));
 	});
 }

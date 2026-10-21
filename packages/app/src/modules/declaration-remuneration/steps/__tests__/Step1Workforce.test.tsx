@@ -305,6 +305,23 @@ describe("Step1Workforce", () => {
 			"aria-invalid",
 			"true",
 		);
+		const otherField = invalidField === ANNUAL_WOMEN ? ANNUAL_MEN : HOURLY_MEN;
+		expect(screen.getByLabelText(otherField)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		expect(alert.textContent?.match(/doit être supérieur à 0\./g)).toHaveLength(
+			1,
+		);
+	});
+
+	it("preserves zero values when rendering saved data", () => {
+		renderStep1(
+			step1Data({ totalWomen: 10, totalMen: 0, hourlyWomen: 10, hourlyMen: 0 }),
+		);
+
+		expect(screen.getByLabelText(ANNUAL_MEN)).toHaveValue("0");
+		expect(screen.getByLabelText(HOURLY_MEN)).toHaveValue("0");
 	});
 
 	it("allows a zero headcount for only one sex in each row", async () => {
