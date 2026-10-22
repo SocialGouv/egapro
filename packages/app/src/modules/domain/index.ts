@@ -201,15 +201,20 @@ export {
 	hasSubmittedSecondDeclaration,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
-export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
+export type {
+	CategoryHeadcounts,
+	CategoryPayBasis,
+} from "./shared/employeeCategoryRemuneration";
 export {
 	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
+	shouldRetainCategoryPayBasisValues,
 	shouldRetainCategoryPayValues,
 } from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)

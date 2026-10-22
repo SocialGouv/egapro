@@ -22,6 +22,8 @@ type Props = {
 	disabled: boolean;
 	/** Whether this category can declare remuneration (#3678). */
 	payApplicable: boolean;
+	annualPayApplicable?: boolean;
+	hourlyPayApplicable?: boolean;
 	readOnly: boolean;
 	isExpanded: boolean;
 	readOnlyLabel: boolean;
@@ -62,6 +64,8 @@ export function CategoryAccordionItem({
 	category,
 	disabled,
 	payApplicable,
+	annualPayApplicable,
+	hourlyPayApplicable,
 	readOnly,
 	isExpanded,
 	readOnlyLabel,
@@ -86,6 +90,8 @@ export function CategoryAccordionItem({
 	// — cf. #4008.
 	const collapseId = `${baseId}-accordion-${fieldId}`;
 	const headingId = categoryAccordionHeadingId(baseId, fieldId);
+	const annualApplicable = annualPayApplicable ?? payApplicable;
+	const hourlyApplicable = hourlyPayApplicable ?? payApplicable;
 	const categoryNumber = `Catégorie d'emplois n°${index + 1}`;
 	const catName = category.name?.trim() ?? "";
 	const categoryLabel = catName
@@ -156,11 +162,13 @@ export function CategoryAccordionItem({
 						</div>
 					)}
 					<CategoryDataTable
+						annualPayApplicable={annualApplicable}
 						category={category}
 						categoryIndex={index}
 						disabled={disabled}
 						errorAlertId={errorAlertId}
 						errors={errors}
+						hourlyPayApplicable={hourlyApplicable}
 						onDecimalBlur={onDecimalBlur}
 						onHeadcountBlur={onHeadcountBlur}
 						onPositiveNumberChange={onPositiveNumberChange}

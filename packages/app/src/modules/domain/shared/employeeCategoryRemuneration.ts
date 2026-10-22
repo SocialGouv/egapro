@@ -54,6 +54,22 @@ export type CategoryHeadcounts = {
 	hourlyMenCount?: number | null;
 };
 
+export type CategoryPayBasis = (typeof CATEGORY_PAY_BASES)[number]["basis"];
+
+/** A basis is calculable only when both sexes have at least one employee.
+ *  Empty counts remain unknown so a new category can still be completed. */
+export function isCategoryPayBasisApplicable(
+	headcounts: CategoryHeadcounts,
+	basis: CategoryPayBasis,
+): boolean {
+	const definition = CATEGORY_PAY_BASES.find((item) => item.basis === basis);
+	if (!definition) return true;
+	return (
+		headcounts[definition.womenCountField] !== 0 &&
+		headcounts[definition.menCountField] !== 0
+	);
+}
+
 /** Whether a job category declares pay data at all. False only when one sex
  *  has an explicit 0 on both the annual and hourly rows: the category then has
  *  no gap to declare (#3678). */
@@ -80,5 +96,26 @@ export function shouldRetainCategoryPayValues(
 				const value = payValues[field];
 				return typeof value === "string" && value.trim() !== "";
 			}))
+	);
+}
+
+/** Whether a historical read-only declaration should retain one basis. */
+export function shouldRetainCategoryPayBasisValues(
+	headcounts: CategoryHeadcounts,
+	payValues: CategoryPayValues,
+	preserveLegacyPay: boolean,
+	basis: CategoryPayBasis,
+): boolean {
+	const definition = CATEGORY_PAY_BASES.find((item) => item.basis === basis);
+	if (!definition) return true;
+	return (
+		isCategoryPayBasisApplicable(headcounts, basis) ||
+		(preserveLegacyPay &&
+			[...definition.womenPayFields, ...definition.menPayFields].some(
+				(field) => {
+					const value = payValues[field];
+					return typeof value === "string" && value.trim() !== "";
+				},
+			))
 	);
 }
