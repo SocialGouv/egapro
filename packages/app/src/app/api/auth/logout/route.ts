@@ -11,6 +11,7 @@ import { isCrossSiteRequest } from "~/server/auth/requestProvenance";
 import { expireSessionCookies } from "~/server/auth/sessionCookie";
 import { db } from "~/server/db";
 import { releaseAllLocksForUser } from "~/server/services/declarationLockService";
+import { releaseAllRepresentationLocksForUser } from "~/server/services/representationDeclarationLockService";
 
 export async function GET(request: NextRequest) {
 	const baseUrl = new URL(env.NEXTAUTH_URL).origin;
@@ -51,6 +52,15 @@ export async function GET(request: NextRequest) {
 			} catch (error) {
 				// best-effort: lock release failure must not block logout
 				console.error("[logout] Failed to release locks for user", error);
+			}
+			try {
+				await releaseAllRepresentationLocksForUser(db, token.id);
+			} catch (error) {
+				// best-effort: lock release failure must not block logout
+				console.error(
+					"[logout] Failed to release representation locks for user",
+					error,
+				);
 			}
 		}
 	}

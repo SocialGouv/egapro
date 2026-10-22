@@ -11,6 +11,7 @@ import {
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
+import { useRepresentationLock } from "./shared/lock/RepresentationLockContext";
 import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
@@ -27,6 +28,7 @@ export function SubjectionScreen({
 	const router = useRouter();
 	const legendId = useId();
 	const messagesId = useId();
+	const { isReadOnly } = useRepresentationLock();
 
 	const form = useZodForm(subjectionSchema, {
 		defaultValues: { answer: initialAnswer ?? null },
@@ -42,6 +44,7 @@ export function SubjectionScreen({
 		});
 
 	const onSubmit = form.handleSubmit((data) => {
+		if (isReadOnly) return;
 		if (data.answer === "concerned") {
 			router.push(representationStepHref(FIRST_REPRESENTATION_STEP));
 			return;
@@ -81,6 +84,7 @@ export function SubjectionScreen({
 									? "fr-fieldset fr-fieldset--error"
 									: "fr-fieldset"
 							}
+							disabled={isReadOnly}
 						>
 							<legend className="fr-sr-only" id={legendId}>
 								Nombre de salariés de l'entreprise
@@ -174,7 +178,7 @@ export function SubjectionScreen({
 						<li>
 							<button
 								className="fr-btn"
-								disabled={declareNotSubjectMutation.isPending}
+								disabled={isReadOnly || declareNotSubjectMutation.isPending}
 								type="submit"
 							>
 								Valider
