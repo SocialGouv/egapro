@@ -53,6 +53,8 @@ export function VerticalStepper({
 	indicatorGRequired,
 	jointEvaluationSubmitted,
 	cseOpinionSubmitted,
+	cseOpinionViewAvailable,
+	jointEvaluationViewAvailable,
 	secondDeclarationSubmitted,
 	step1,
 	step2,
@@ -69,6 +71,8 @@ export function VerticalStepper({
 	indicatorGRequired: boolean;
 	jointEvaluationSubmitted: boolean;
 	cseOpinionSubmitted: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	secondDeclarationSubmitted: boolean;
 	step1: StepStatus;
 	step2: StepStatus;
@@ -103,6 +107,8 @@ export function VerticalStepper({
 						campaignDeadlines={campaignDeadlines}
 						declarationFsmStatus={declarationFsmStatus}
 						displayContext={displayContext}
+						jointEvaluationSubmitted={jointEvaluationSubmitted}
+						jointEvaluationViewAvailable={jointEvaluationViewAvailable}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}
 						status={step2}
 						variant={variant}
@@ -114,6 +120,8 @@ export function VerticalStepper({
 					<StepCircle number={step3Number} status={step3} />
 					<Step3Content
 						campaignDeadlines={campaignDeadlines}
+						cseOpinionSubmitted={cseOpinionSubmitted}
+						cseOpinionViewAvailable={cseOpinionViewAvailable}
 						status={step3}
 						variant={variant}
 					/>

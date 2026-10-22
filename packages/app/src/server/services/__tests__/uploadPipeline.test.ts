@@ -255,6 +255,9 @@ describe("runUploadPipeline", () => {
 
 		const insertValues = vi.fn().mockResolvedValue(undefined);
 		const insert = vi.fn().mockReturnValue({ values: insertValues });
+		const updateSet = vi
+			.fn()
+			.mockReturnValue({ where: () => Promise.resolve() });
 		// First tx.select() locks the declaration row via `.for("update").limit(1)`
 		// Second tx.select() counts existing CSE files via `.where(...)` directly.
 		let txSelectCallCount = 0;
@@ -277,7 +280,13 @@ describe("runUploadPipeline", () => {
 		});
 		mocks.dbTransaction.mockImplementation(
 			async (fn: (tx: unknown) => unknown) =>
-				fn({ select: txSelect, insert, delete: vi.fn() }),
+				fn({
+					execute: vi.fn().mockResolvedValue(undefined),
+					select: txSelect,
+					insert,
+					delete: vi.fn(),
+					update: () => ({ set: updateSet }),
+				}),
 		);
 
 		const { runUploadPipeline } = await import("../uploadPipeline");
@@ -302,6 +311,9 @@ describe("runUploadPipeline", () => {
 				type: "cse_opinion",
 			}),
 		);
+		expect(updateSet).toHaveBeenCalledWith({
+			cseOpinionDraftUpdatedAt: expect.any(Date),
+		});
 		expect(mocks.deleteFile).not.toHaveBeenCalled();
 	});
 
@@ -442,7 +454,12 @@ describe("runUploadPipeline", () => {
 		});
 		mocks.dbTransaction.mockImplementation(
 			async (fn: (tx: unknown) => unknown) =>
-				fn({ select: txSelect, insert, delete: vi.fn() }),
+				fn({
+					execute: vi.fn().mockResolvedValue(undefined),
+					select: txSelect,
+					insert,
+					delete: vi.fn(),
+				}),
 		);
 		mocks.deleteFile.mockResolvedValue(undefined);
 
@@ -519,7 +536,12 @@ describe("runUploadPipeline", () => {
 		});
 		mocks.dbTransaction.mockImplementation(
 			async (fn: (tx: unknown) => unknown) =>
-				fn({ select: txSelect, insert, delete: vi.fn() }),
+				fn({
+					execute: vi.fn().mockResolvedValue(undefined),
+					select: txSelect,
+					insert,
+					delete: vi.fn(),
+				}),
 		);
 		mocks.deleteFile.mockResolvedValue(undefined);
 

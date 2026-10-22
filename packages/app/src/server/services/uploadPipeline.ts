@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 
 import { MAX_CSE_FILES } from "~/modules/cseOpinion/types";
 import {
@@ -269,6 +269,13 @@ async function commitFileRow(
 	input: CommitFileInput,
 ): Promise<CommitFileResult> {
 	return db.transaction(async (tx) => {
+		// Serialize CSE uploads with opinion edits and finalization, which use
+		// the same transaction-scoped declaration advisory lock.
+		if (input.flowType === "cse_opinion") {
+			await tx.execute(
+				sql`SELECT pg_advisory_xact_lock(hashtextextended(${input.declarationId}, 0))`,
+			);
+		}
 		// Lock the declaration row for the duration of the transaction. Any
 		// concurrent upload targeting the same declaration blocks here until
 		// this tx commits — closing the TOCTOU race where two parallel CSE
@@ -331,6 +338,12 @@ async function commitFileRow(
 			filePath: input.filePath,
 			type: input.flowType,
 		});
+		if (input.flowType === "cse_opinion") {
+			await tx
+				.update(declarations)
+				.set({ cseOpinionDraftUpdatedAt: new Date() })
+				.where(eq(declarations.id, input.declarationId));
+		}
 
 		return { fileId: input.fileId, replacedFilePath };
 	});
