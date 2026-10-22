@@ -198,7 +198,7 @@ jobs:
           fetch-depth: 0
       - name: ultra11y — audit RGAA statique
         # Pin the 5.42.1 release commit; keep the version comment for the consistency check.
-        uses: SocialGouv/ultra11y@38d2a9ed15a94b2bd185c8bff7d56676af4ad77d # v5.42.1
+        uses: SocialGouv/ultra11y@9dc41ec57086a464de21879ca11a9934f4cd5546 # v5.43.0
         with:
           working-directory: packages/app
           # `src` et NON `src/**/*.tsx` : l'Action interpole `paths` sans quotes dans bash,
@@ -490,7 +490,7 @@ jobs:
       # page, crops de preuve, HTML.
       - name: ultra11y — audit, rapport page par page et adjudication
         # Same 5.42.1 release commit as the PR gate; never let the two tiers drift.
-        uses: SocialGouv/ultra11y@38d2a9ed15a94b2bd185c8bff7d56676af4ad77d # v5.42.1
+        uses: SocialGouv/ultra11y@9dc41ec57086a464de21879ca11a9934f4cd5546 # v5.43.0
         env:
           # Lu depuis l'ENV DU JOB, jamais depuis un input : c'est ce qui rend le tier
           # inoffensif sur une PR de fork, où les secrets ne sont pas exposés — il se
