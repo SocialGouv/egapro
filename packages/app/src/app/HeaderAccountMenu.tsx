@@ -28,13 +28,6 @@ export const HeaderAccountMenu = (props: {
           </button>
           <div className={cx(fr.cx("fr-collapse"), style["account-menu-list"])} id="account-menu-list">
             <ul className="fr-menu__list">
-              {props.staff && (
-                <li>
-                  <a className="fr-nav__link" href="/mon-espace/les-entreprises" target="_self">
-                    Les entreprises
-                  </a>
-                </li>
-              )}
               <li>
                 <a className="fr-nav__link" href="/mon-espace/mes-declarations" target="_self">
                   {staffLinkText} déclarations
