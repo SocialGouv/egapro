@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { Controller } from "react-hook-form";
+import { useReadOnlyGuard } from "~/modules/auth";
 import {
 	FIRST_REPRESENTATION_STEP,
 	MY_SPACE,
@@ -25,6 +26,8 @@ export function SubjectionScreen({
 	year,
 }: SubjectionScreenProps) {
 	const router = useRouter();
+	const readOnlyGuard = useReadOnlyGuard();
+	const { isReadOnly } = readOnlyGuard;
 	const legendId = useId();
 	const messagesId = useId();
 
@@ -42,6 +45,7 @@ export function SubjectionScreen({
 		});
 
 	const onSubmit = form.handleSubmit((data) => {
+		if (isReadOnly) return;
 		if (data.answer === "concerned") {
 			router.push(representationStepHref(FIRST_REPRESENTATION_STEP));
 			return;
@@ -89,6 +93,7 @@ export function SubjectionScreen({
 								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "concerned"}
+										disabled={isReadOnly}
 										id="subjection-concerned"
 										name={field.name}
 										onChange={() => field.onChange("concerned")}
@@ -112,6 +117,7 @@ export function SubjectionScreen({
 								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "not_concerned"}
+										disabled={isReadOnly}
 										id="subjection-not-concerned"
 										name={field.name}
 										onChange={() => field.onChange("not_concerned")}
@@ -172,22 +178,31 @@ export function SubjectionScreen({
 				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-right fr-btns-group--right fr-mt-4w">
 					{answer === "not_concerned" ? (
 						<li>
-							<button
-								className="fr-btn"
-								disabled={declareNotSubjectMutation.isPending}
-								type="submit"
-							>
-								Valider
-							</button>
+							<span>
+								<button
+									{...readOnlyGuard.buttonProps}
+									className="fr-btn"
+									disabled={declareNotSubjectMutation.isPending || isReadOnly}
+									type="submit"
+								>
+									Valider
+								</button>
+								{readOnlyGuard.tooltip}
+							</span>
 						</li>
 					) : (
 						<li>
-							<button
-								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								type="submit"
-							>
-								Suivant
-							</button>
+							<span>
+								<button
+									{...readOnlyGuard.buttonProps}
+									className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+									disabled={isReadOnly}
+									type="submit"
+								>
+									Suivant
+								</button>
+								{readOnlyGuard.tooltip}
+							</span>
 						</li>
 					)}
 				</ul>
