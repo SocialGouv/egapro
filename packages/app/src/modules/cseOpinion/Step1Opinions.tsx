@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 
-import { useReadOnlyGuard } from "~/modules/auth";
+import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getCurrentYear } from "~/modules/domain";
@@ -82,6 +82,7 @@ export function Step1Opinions({
 	const isSecondDeclarationJustification =
 		showSecondDeclarationGap && secondDeclarationPathChoice === "justify";
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
 
@@ -395,17 +396,26 @@ export function Step1Opinions({
 					>
 						Précédent
 					</Link>
-					<span>
-						<button
-							{...readOnlyGuard.buttonProps}
+					{isImpersonating && initialData ? (
+						<Link
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-							disabled={mutation.isPending || isReadOnly}
-							type="submit"
+							href={cseOpinionStepHref(2)}
 						>
-							{mutation.isPending ? "Enregistrement…" : "Suivant"}
-						</button>
-						{readOnlyGuard.tooltip}
-					</span>
+							Suivant
+						</Link>
+					) : (
+						<span>
+							<button
+								{...readOnlyGuard.buttonProps}
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								disabled={mutation.isPending || isReadOnly}
+								type="submit"
+							>
+								{mutation.isPending ? "Enregistrement…" : "Suivant"}
+							</button>
+							{readOnlyGuard.tooltip}
+						</span>
+					)}
 				</div>
 			</fieldset>
 		</form>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
+import { useIsImpersonating } from "~/modules/auth";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -52,16 +53,17 @@ export function StepPageClient({
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
-	const isReadOnly = !campaignOpen || isSubmitted;
+	const isReadOnly = !campaignOpen || isSubmitted || isImpersonating;
 
 	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
 		useRepresentationDraft({
 			year,
 			step,
 			initialDraft,
-			enabled: campaignOpen && !isSubmitted,
+			enabled: campaignOpen && !isSubmitted && !isImpersonating,
 		});
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
@@ -76,6 +78,9 @@ export function StepPageClient({
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step, skipPublicationStep);
 	const nextHref = getNextStepHref(step, skipPublicationStep);
+	const nextStep = getNextStep(step, skipPublicationStep);
+	const canNavigateNextInImpersonation =
+		isImpersonating && nextStep !== undefined && nextStep <= draft.currentStep;
 	const bypassHref = getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true);
 	const mustBypassPublicationStep =
 		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
@@ -182,7 +187,16 @@ export function StepPageClient({
 					>
 						Précédent
 					</Link>
-					{campaignOpen ? (
+					{isImpersonating ? (
+						canNavigateNextInImpersonation && nextHref ? (
+							<Link
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								href={nextHref}
+							>
+								Suivant
+							</Link>
+						) : null
+					) : campaignOpen ? (
 						<button
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
 							disabled={isAdvancing}
