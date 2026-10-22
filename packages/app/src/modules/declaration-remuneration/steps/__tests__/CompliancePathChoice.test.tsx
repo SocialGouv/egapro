@@ -8,6 +8,7 @@ import {
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { markDeclarationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompliancePathChoice } from "../CompliancePathChoice";
@@ -122,7 +123,8 @@ describe("CompliancePathChoice — mutation error surface", () => {
 });
 
 describe("CompliancePathChoice", () => {
-	it("renders the page title and success banner", () => {
+	it("renders the page title and success banner after a declaration transmission", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
@@ -336,6 +338,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("drops the modification sentence when the declaration is no longer modifiable", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ declarationModifiable: false }));
 		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
 		expect(
