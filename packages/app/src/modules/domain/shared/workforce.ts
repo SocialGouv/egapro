@@ -48,3 +48,7 @@ export function sumCategoryWorkforce(
 export function computeWorkforceTotal(women: number, men: number): number {
 	return women + men;
 }
+
+export function hasWorkforce(women: number, men: number): boolean {
+	return computeWorkforceTotal(women, men) > 0;
+}

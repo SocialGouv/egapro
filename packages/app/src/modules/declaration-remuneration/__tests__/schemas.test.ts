@@ -6,6 +6,7 @@ import {
 	categoryCorrectionFormSchema,
 	categoryFormSchema,
 	updateEmployeeCategoriesSchema,
+	updateStep1Schema,
 	updateStep4Schema,
 } from "../schemas";
 import type { QuartileData, QuartileTuple } from "../types";
@@ -25,6 +26,49 @@ const validTable = makeTable(
 	{ threshold: "30000", women: 6, men: 7 },
 	{ women: 8, men: 9 },
 );
+
+describe("updateStep1Schema", () => {
+	it.each([
+		[
+			{ totalWomen: 0, totalMen: 0, hourlyWomen: 10, hourlyMen: 20 },
+			"totalWomen",
+		],
+		[
+			{ totalWomen: 10, totalMen: 20, hourlyWomen: 0, hourlyMen: 0 },
+			"hourlyWomen",
+		],
+		[{ totalWomen: 0, totalMen: 0, hourlyWomen: 0, hourlyMen: 0 }, "both rows"],
+	])("rejects a workforce row with no employees (%s)", (values, field) => {
+		const result = updateStep1Schema.safeParse(values);
+		expect(result.success).toBe(false);
+		if (!result.success) {
+			if (field === "both rows") {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({ path: ["totalWomen"] }),
+						expect.objectContaining({ path: ["hourlyWomen"] }),
+					]),
+				);
+			} else {
+				expect(result.error.issues).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							path: [field],
+							message: expect.stringContaining("doit être supérieur à 0"),
+						}),
+					]),
+				);
+			}
+		}
+	});
+
+	it.each([
+		{ totalWomen: 0, totalMen: 20, hourlyWomen: 10, hourlyMen: 0 },
+		{ totalWomen: 10, totalMen: 0, hourlyWomen: 0, hourlyMen: 20 },
+	])("accepts zero for one sex in each row (%s)", (values) => {
+		expect(updateStep1Schema.safeParse(values).success).toBe(true);
+	});
+});
 
 describe("updateStep4Schema", () => {
 	it("accepts valid data with 3 strictly increasing thresholds and Q4 without threshold", () => {

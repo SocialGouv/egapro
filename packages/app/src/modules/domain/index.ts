@@ -393,6 +393,7 @@ export {
 // Workforce sums (quartiles, categories)
 export {
 	computeWorkforceTotal,
+	hasWorkforce,
 	sumCategoryWorkforce,
 	sumQuartileWorkforce,
 } from "./shared/workforce";

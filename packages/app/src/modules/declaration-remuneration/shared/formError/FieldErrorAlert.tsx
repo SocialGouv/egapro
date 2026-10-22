@@ -49,9 +49,14 @@ function ErrorBody({
 			</p>
 		);
 	}
+	const uniqueErrors = errors.filter(
+		(error, index) =>
+			errors.findIndex((candidate) => candidate.message === error.message) ===
+			index,
+	);
 	return (
 		<ul id={id}>
-			{errors.map((error) => (
+			{uniqueErrors.map((error) => (
 				<li key={`${error.fieldId}-${error.message}`}>
 					<ErrorMessage error={error} onAnchorClick={onAnchorClick} />
 				</li>
