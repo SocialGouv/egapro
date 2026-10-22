@@ -19,6 +19,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
 6. [Arbitrages métier (divergences résolues)](#6-arbitrages-métier-divergences-résolues)
 7. [Lancer la recette](#7-lancer-la-recette)
+8. [Recette en 2026 : le pont vers les règles de 2027](#8-recette-en-2026--le-pont-vers-les-règles-de-2027)
 
 ---
 
@@ -515,3 +516,47 @@ pnpm --filter app report:grille                          # le rapport de recette
 ```
 
 Le dev server doit tourner sur le port 3000 avec `EGAPRO_E2E_CLOCK=true` (actif dans `.github/workflows/e2e-grille.yaml` ; à passer manuellement en local).
+
+### Recette manuelle sur un environnement déployé
+
+Pour dérouler à la main une coordonnée d'une année de campagne future (2027 → 2033), on utilise un **environnement de recette épinglé sur une année** : toute l'application s'y comporte comme si la campagne en cours était cette année-là.
+
+#### Mise en place (par un développeur)
+
+1. Dans le dépôt GitHub, ouvrir **Actions → 🎯 Promote test env**, puis **Run workflow**.
+2. Renseigner la **release** à déployer, choisir la cible **`recette`**, et saisir l'année voulue dans **`campaign_year`** (par exemple `2030`). Laisser `campaign_year` vide revient à l'année civile réelle.
+3. Une fois le run terminé, son résumé indique l'adresse de l'environnement et l'année épinglée. Les données du GIP-MDS de test sont importées automatiquement à la fin du déploiement, sur l'année épinglée : il n'y a rien à lancer à la main.
+
+Changer d'année demande un nouveau déploiement (quelques minutes).
+
+#### Ce que voit le testeur
+
+- La campagne affichée est l'année épinglée, et la période de référence l'année précédente (environnement « 2030 » : campagne 2030, données 2029), sur toutes les pages : accueil, aide, Mon espace, parcours de déclaration.
+- Les règles appliquées sont celles de cette année : indicateurs exigés selon la tranche, obligations, libellés.
+- Les échéances par défaut de l'année épinglée sont dans le futur : une déclaration reste modifiable, sans réglage préalable dans l'administration.
+
+#### Choisir l'entreprise
+
+Prendre une entreprise de test dans la tranche d'effectif de la coordonnée jouée, dans [`docs/SIRET-de-test.md`](SIRET-de-test.md), en suivant la convention de réservation décrite en tête de ce document (cocher avant usage, décocher après).
+
+#### Limites
+
+- **L'année est la même pour tous les utilisateurs de l'environnement.** Jouer deux années en parallèle demande deux environnements, ou de se succéder sur le même.
+- **Les cas « échéance dépassée » ne sont pas jouables** : seule l'année est épinglée, pas la date du jour, et les échéances de l'année épinglée tombent toujours dans le futur.
+- **Les e-mails et les traitements planifiés** (relances, purges) restent calés sur la date réelle : ils ne voient pas l'année épinglée.
+
+---
+
+## 8. Recette en 2026 : le pont vers les règles de 2027
+
+Tant que l'horloge réelle est en 2026, la campagne 2026 applique déjà, pour deux règles, celles de la première campagne du nouveau dispositif (2027) — issue [#4240](https://github.com/SocialGouv/egapro/issues/4240) :
+
+- **l'assujettissement des 50-99 salariés**, qui déclarent chaque année ;
+- **l'exigence de l'indicateur G pour les 150-249 salariés**.
+
+Les parcours des coordonnées **2027** se jouent donc dès aujourd'hui sur n'importe quel environnement, sans année épinglée, avec deux réserves :
+
+- les écrans affichent « campagne 2026 » ;
+- les échéances par défaut de 2026 sont dépassées, ce qui rend une déclaration soumise immodifiable. Un administrateur peut les repousser dans **Administration → Paramètres**, de préférence **avant** l'import des données GIP-MDS, pour que la date de publication GIP reste enregistrée.
+
+Ce pont n'a d'effet que sur l'année 2026 : il devient sans effet au 1er janvier 2027. Un environnement épinglé sur une année (§7) n'en dépend pas.

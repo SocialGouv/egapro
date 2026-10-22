@@ -4,6 +4,7 @@ import { cache } from "react";
 import {
 	getCurrentYear,
 	getTodayInParisCivilDateString,
+	readCampaignYearOverride,
 } from "~/modules/domain";
 
 import { db } from ".";
@@ -20,13 +21,14 @@ export const GLOBAL_SETTINGS_ID = 1;
  * Falls back to the current calendar year when no campaign has started yet.
  * Wrapped in React `cache()` to deduplicate calls within a single request.
  *
- * Deliberately NOT rewired onto the E2E clock seam (issue #4022): its callers
- * are AidePage.tsx and the home page, both outside the declaration path, and
- * with no `campaignStartDate` configured it already falls back to
- * getCurrentYear() — which honours the override. Do not "fix" it to read
- * globalThis directly.
+ * A pinned campaign year (see campaignClock.ts) wins over the configured
+ * campaigns, so the home and help pages agree with every other screen of a
+ * recette environment.
  */
 export const getActiveCampaignYear = cache(async (): Promise<number> => {
+	const pinnedYear = readCampaignYearOverride();
+	if (pinnedYear !== null) return pinnedYear;
+
 	const today = getTodayInParisCivilDateString();
 
 	const rows = await db
