@@ -22,6 +22,7 @@ import {
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -78,6 +79,7 @@ export function SecondDeclarationStep3Review({
 	const completeSubmission = useCallback(() => {
 		closeModal();
 		if (gapsExist) {
+			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
 			router.push(getPostComplianceDestination(cseOpinionRequired));

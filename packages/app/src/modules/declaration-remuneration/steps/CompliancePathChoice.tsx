@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
@@ -29,6 +29,7 @@ import common from "../shared/common.module.scss";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
+import { consumeDeclarationTransmissionSuccess } from "../shared/declarationSuccessFlash";
 import styles from "./CompliancePathChoice.module.scss";
 import {
 	FirstRoundOptions,
@@ -66,6 +67,8 @@ export function CompliancePathChoice({
 	readOnlyReason,
 }: Props) {
 	const router = useRouter();
+	const consumedTransmissionSuccess = useRef(false);
+	const [showTransmissionSuccess, setShowTransmissionSuccess] = useState(false);
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly: isLockReadOnly } = useLockContext();
 	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
@@ -113,6 +116,12 @@ export function CompliancePathChoice({
 		}
 	}, [draftHydrated]);
 
+	useEffect(() => {
+		if (consumedTransmissionSuccess.current) return;
+		consumedTransmissionSuccess.current = true;
+		setShowTransmissionSuccess(consumeDeclarationTransmissionSuccess());
+	}, []);
+
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
@@ -155,13 +164,15 @@ export function CompliancePathChoice({
 					/>
 				</div>
 
-				<DeclarationSuccessBanner
-					declarationModifiable={declarationModifiable}
-					email={email}
-					isSecondDeclaration={isSecondRound}
-					pdfDownloadHref={pdfDownloadHref}
-					year={currentYear}
-				/>
+				{showTransmissionSuccess && (
+					<DeclarationSuccessBanner
+						declarationModifiable={declarationModifiable}
+						email={email}
+						isSecondDeclaration={isSecondRound}
+						pdfDownloadHref={pdfDownloadHref}
+						year={currentYear}
+					/>
+				)}
 
 				{readOnlyReason ? (
 					<CompliancePathReadOnlyAlert reason={readOnlyReason} />
