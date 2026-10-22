@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
+	shouldRetainCategoryPayBasisValues,
 	shouldRetainCategoryPayValues,
 } from "../shared/employeeCategoryRemuneration";
 
@@ -110,6 +112,36 @@ describe("isCategoryPayApplicable (#3678)", () => {
 	});
 });
 
+describe("isCategoryPayBasisApplicable (#4894)", () => {
+	it("disables only the annual basis when either annual headcount is zero", () => {
+		const headcounts = {
+			womenCount: 0,
+			menCount: 2,
+			hourlyWomenCount: 1,
+			hourlyMenCount: 2,
+		};
+
+		expect(isCategoryPayBasisApplicable(headcounts, "annual")).toBe(false);
+		expect(isCategoryPayBasisApplicable(headcounts, "hourly")).toBe(true);
+	});
+
+	it("disables only the hourly basis when either hourly headcount is zero", () => {
+		const headcounts = {
+			womenCount: 2,
+			menCount: 3,
+			hourlyWomenCount: 0,
+			hourlyMenCount: 3,
+		};
+
+		expect(isCategoryPayBasisApplicable(headcounts, "annual")).toBe(true);
+		expect(isCategoryPayBasisApplicable(headcounts, "hourly")).toBe(false);
+	});
+
+	it("keeps missing counts unknown rather than treating them as zero", () => {
+		expect(isCategoryPayBasisApplicable({}, "annual")).toBe(true);
+	});
+});
+
 describe("shouldRetainCategoryPayValues (#3678)", () => {
 	const nonApplicable = {
 		womenCount: 0,
@@ -150,5 +182,24 @@ describe("shouldRetainCategoryPayValues (#3678)", () => {
 				true,
 			),
 		).toBe(false);
+	});
+});
+
+describe("shouldRetainCategoryPayBasisValues (#4894)", () => {
+	it("retains legacy pay only for the basis that has stored values", () => {
+		const headcounts = {
+			womenCount: 0,
+			menCount: 2,
+			hourlyWomenCount: 1,
+			hourlyMenCount: 2,
+		};
+		const payValues = { annualBaseWomen: "30000" };
+
+		expect(
+			shouldRetainCategoryPayBasisValues(headcounts, payValues, true, "annual"),
+		).toBe(true);
+		expect(
+			shouldRetainCategoryPayBasisValues(headcounts, payValues, true, "hourly"),
+		).toBe(true);
 	});
 });

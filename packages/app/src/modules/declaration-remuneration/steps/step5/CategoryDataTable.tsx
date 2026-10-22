@@ -38,6 +38,8 @@ type Props = {
 	disabled?: boolean;
 	/** Whether this category can declare remuneration (#3678). */
 	payApplicable?: boolean;
+	annualPayApplicable?: boolean;
+	hourlyPayApplicable?: boolean;
 	readOnly?: boolean;
 	errorAlertId: string;
 	errors: readonly FieldError[];
@@ -406,6 +408,8 @@ export function CategoryDataTable({
 	onDecimalBlur: blur,
 	disabled = false,
 	payApplicable = true,
+	annualPayApplicable = true,
+	hourlyPayApplicable = true,
 	readOnly = false,
 	errorAlertId,
 	errors,
@@ -426,9 +430,12 @@ export function CategoryDataTable({
 				nextTarget instanceof HTMLElement &&
 				nextTarget.dataset.categoryPayInput === idPrefix;
 			const shouldRecoverFocus =
-				!payApplicable &&
+				(!annualPayApplicable || !hourlyPayApplicable) &&
 				tabbedHeadcountRef.current &&
-				(nextIsCategoryPayInput || nextTarget === null);
+				(nextTarget === null ||
+					(nextTarget instanceof HTMLInputElement &&
+						nextTarget.disabled &&
+						nextIsCategoryPayInput));
 
 			tabbedHeadcountRef.current = false;
 			const payWasCleared = onBlur(event) === true;
@@ -503,8 +510,8 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || !payApplicable}
-				emptyValues={!payApplicable}
+				disabled={disabled || !annualPayApplicable}
+				emptyValues={!annualPayApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={ANNUAL_FIELDS}
@@ -519,8 +526,8 @@ export function CategoryDataTable({
 				blur={blur}
 				cat={cat}
 				catIndex={catIndex}
-				disabled={disabled || !payApplicable}
-				emptyValues={!payApplicable}
+				disabled={disabled || !hourlyPayApplicable}
+				emptyValues={!hourlyPayApplicable}
 				errorAlertId={errorAlertId}
 				errors={errors}
 				fields={HOURLY_FIELDS}
