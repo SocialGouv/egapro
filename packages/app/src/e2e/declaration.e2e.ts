@@ -23,6 +23,7 @@ import {
 } from "./helpers/db";
 import {
 	categoryPayCells,
+	categoryPayBasisCells,
 	categoryPayInput,
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,
@@ -950,6 +951,20 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				await expect(status).toBeEmpty();
 			}
 		};
+		const expectPayBasis = async (
+			categoryIndex: number,
+			basis: "annual" | "hourly",
+			state: "enabled" | "disabled",
+		) => {
+			for (const cell of categoryPayBasisCells(page, categoryIndex, basis)) {
+				if (state === "enabled") {
+					await expect(cell).toBeEnabled();
+				} else {
+					await expect(cell).toBeDisabled();
+					await expect(cell).toHaveValue("");
+				}
+			}
+		};
 
 		await submitStepsThroughQuartiles(page);
 		await page.waitForURL("**/declaration-remuneration/etape/5");
@@ -971,7 +986,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 		});
 
-		await test.step("un 0 isolé ou deux 0 croisés laissent les rémunérations actives", async () => {
+		await test.step("un 0 désactive seulement le tableau de sa base", async () => {
 			await page.getByRole("button", { name: /Ajouter une catégorie/ }).click();
 			await page.locator("#cat-1-name").fill("Employés");
 			for (const basis of ["annual", "hourly"] as const) {
@@ -981,10 +996,12 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await expectPayCells(2, "enabled");
 
 			await count(2, "hourly", "women").fill("0");
-			await expectPayCells(2, "enabled");
+			await expectPayBasis(2, "hourly", "disabled");
+			await expectPayBasis(2, "annual", "enabled");
 
 			await count(2, "annual", "men").fill("0");
-			await expectPayCells(2, "enabled");
+			await expectPayBasis(2, "annual", "disabled");
+			await expectPayBasis(2, "hourly", "disabled");
 
 			await count(2, "annual", "men").fill(String(SECOND_CATEGORY_MEN));
 			await count(2, "hourly", "women").fill("3");
@@ -1003,8 +1020,9 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 				women: "900",
 			});
 			await count(2, "annual", "women").fill("0");
-			await expectPayCells(2, "enabled");
-			for (const cell of categoryPayCells(page, 2)) {
+			await expectPayBasis(2, "annual", "disabled");
+			await expectPayBasis(2, "hourly", "enabled");
+			for (const cell of categoryPayBasisCells(page, 2, "hourly")) {
 				await expect(cell).toHaveValue("900,00");
 			}
 
@@ -1012,7 +1030,9 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await expectPayCells(2, "disabled");
 
 			await count(2, "annual", "women").fill("3");
-			await expectPayCells(2, "enabled");
+			await count(2, "hourly", "women").fill("3");
+			await expectPayBasis(2, "annual", "enabled");
+			await expectPayBasis(2, "hourly", "enabled");
 			for (const cell of categoryPayCells(page, 2)) {
 				await expect(cell).toHaveValue("");
 			}
