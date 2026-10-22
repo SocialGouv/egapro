@@ -7,3 +7,7 @@ export const MY_SPACE = route("/mon-espace");
 export function mySpaceHistoryHref(siren: string, year: number) {
 	return route(`/mon-espace/historique/${siren}/${year}` as const);
 }
+
+export function mySpaceRepresentationHref(campaignYear: number) {
+	return route(`/mon-espace/representation/${campaignYear}` as const);
+}
