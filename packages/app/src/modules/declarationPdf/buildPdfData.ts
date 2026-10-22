@@ -9,6 +9,7 @@ import {
 	getDeclarationReferencePeriod,
 	getReferenceYearFor,
 	isDraft,
+	isIndicatorGRequiredForGip,
 	parseGipWorkforce,
 } from "~/modules/domain";
 import {
@@ -134,6 +135,7 @@ export async function buildPdfData(
 		mapToStepData(declaration);
 
 	const gipWorkforce = parseGipWorkforce(gip?.workforceEma);
+	const indicatorGRequired = isIndicatorGRequiredForGip(gipWorkforce, year);
 
 	const rawSource = jobs.sort((a, b) => a.categoryIndex - b.categoryIndex)[0]
 		?.source;
@@ -143,6 +145,7 @@ export async function buildPdfData(
 		year,
 		workforceYear: getReferenceYearFor(year),
 		isSecondDeclaration: declarationType === "correction",
+		indicatorGRequired,
 		transmittedAt: formatShortDate(transmittedDate),
 		referencePeriod: getDeclarationReferencePeriod(
 			year,

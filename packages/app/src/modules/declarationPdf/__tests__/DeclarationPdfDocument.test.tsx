@@ -114,6 +114,7 @@ function makeData(
 		year: 2026,
 		workforceYear: 2025,
 		isSecondDeclaration: false,
+		indicatorGRequired: true,
 		transmittedAt: "05/03/2026",
 		referencePeriod: "01/01/2025 - 31/12/2025",
 		declarant: {
