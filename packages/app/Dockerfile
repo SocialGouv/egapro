@@ -6,7 +6,7 @@ ARG PNPM_VERSION=10.8.1
 # Exact tag + digest, bumped by Dependabot (docker ecosystem). Never go below
 # 24.21.0: the global fetch() runs on the undici Node embeds, and 24.21.0 is the
 # first 24.x shipping undici >= 7.29.1.
-FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS builder
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS builder
 
 WORKDIR /app
 
@@ -100,7 +100,7 @@ RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/
 
 
 # Runner stage: minimal Node runtime, no pnpm/corepack
-FROM node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS runner
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS runner
 
 RUN apk --update --no-cache add ca-certificates && apk upgrade
 
