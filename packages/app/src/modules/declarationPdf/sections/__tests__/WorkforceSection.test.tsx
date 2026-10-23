@@ -38,7 +38,9 @@ describe("WorkforceSection", () => {
 		// 48 + 58 = 106
 		expect(screen.getByText("106")).toBeInTheDocument();
 
-		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(screen.getByText("Nombre de femmes")).toBeInTheDocument();
+		expect(screen.getByText("Nombre d'hommes")).toBeInTheDocument();
+		expect(screen.queryByText("Nombre de salariés")).toBeNull();
 	});
 });
 

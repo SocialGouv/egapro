@@ -18,6 +18,10 @@ import {
 } from "~/modules/domain";
 import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step5EmployeeCategories.module.scss";
+import {
+	WorkforceRowHeader,
+	WorkforceTableHead,
+} from "../step1/WorkforceTableHeaders";
 import { workforceFieldLabel } from "../step1/workforceRows";
 import type { EmployeeCategory } from "./categorySerializer";
 import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
@@ -388,7 +392,10 @@ function CategoryWorkforceRow({
 
 	return (
 		<tr className={stepStyles.dataRow}>
-			<th scope="row">{row.workforceRow.label}</th>
+			<WorkforceRowHeader
+				row={row.workforceRow}
+				tooltipId={`tooltip-cat-${catIndex}-${row.workforceRow.basis}`}
+			/>
 			{countCell(row.womenField, "women")}
 			{countCell(row.menField, "men")}
 			<td className={stepStyles.totalCell}>
@@ -464,14 +471,7 @@ export function CategoryDataTable({
 						<col className={stepStyles.colData} />
 						<col className={stepStyles.colData} />
 					</colgroup>
-					<thead>
-						<tr>
-							<th scope="col">Nombre de salariés</th>
-							<th scope="col">Femmes</th>
-							<th scope="col">Hommes</th>
-							<th scope="col">Total</th>
-						</tr>
-					</thead>
+					<WorkforceTableHead />
 					<tbody>
 						{CATEGORY_WORKFORCE_ROWS.map((row) => (
 							<CategoryWorkforceRow
