@@ -1,5 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import {
 	afterEach,
 	beforeEach,
@@ -11,7 +13,10 @@ import {
 } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
-import { LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
+import {
+	LOCK_HEARTBEAT_INTERVAL_MS,
+	REPRESENTATION_LOCK_CONFLICT_MESSAGE,
+} from "~/modules/domain";
 
 const acquireMutateAsync = vi.fn();
 const heartbeatMutateAsync = vi.fn();
@@ -31,7 +36,10 @@ vi.mock("~/trpc/react", () => ({
 	},
 }));
 
-import { useRepresentationLock } from "../RepresentationLockContext";
+import {
+	type PendingSaveFlush,
+	useRepresentationLock,
+} from "../RepresentationLockContext";
 import { RepresentationLockProvider } from "../RepresentationLockProvider";
 
 const useSessionMock = useSession as unknown as Mock;
@@ -113,23 +121,66 @@ function LockProbe() {
 	);
 }
 
+function PendingSaveProbe({ flush }: { flush: PendingSaveFlush }) {
+	const { registerPendingSave } = useRepresentationLock();
+	useEffect(() => registerPendingSave(flush), [flush, registerPendingSave]);
+	return null;
+}
+
 function renderProvider(
 	props: Partial<{
 		enabled: boolean;
 		campaignOpen: boolean;
 		isSubmitted: boolean;
+		pendingSave: PendingSaveFlush;
 	}> = {},
 ) {
-	return render(
-		<RepresentationLockProvider
-			campaignOpen={props.campaignOpen ?? true}
-			enabled={props.enabled ?? true}
-			isSubmitted={props.isSubmitted ?? false}
-			year={YEAR}
-		>
-			<LockProbe />
-		</RepresentationLockProvider>,
+	const queryClient = new QueryClient({
+		defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+	});
+	const rendered = render(
+		<QueryClientProvider client={queryClient}>
+			<RepresentationLockProvider
+				campaignOpen={props.campaignOpen ?? true}
+				enabled={props.enabled ?? true}
+				isSubmitted={props.isSubmitted ?? false}
+				year={YEAR}
+			>
+				<LockProbe />
+				{props.pendingSave ? (
+					<PendingSaveProbe flush={props.pendingSave} />
+				) : null}
+			</RepresentationLockProvider>
+		</QueryClientProvider>,
 	);
+	return { ...rendered, queryClient };
+}
+
+async function failMutation(queryClient: QueryClient, message: string) {
+	const mutation = queryClient.getMutationCache().build(queryClient, {
+		mutationFn: async () => {
+			throw new Error(message);
+		},
+	});
+	await act(async () => {
+		await mutation.execute(undefined).catch(() => undefined);
+		await vi.advanceTimersByTimeAsync(0);
+	});
+}
+
+function deferred<T>() {
+	let resolve: (value: T) => void = () => undefined;
+	const promise = new Promise<T>((settle) => {
+		resolve = settle;
+	});
+	return { promise, resolve };
+}
+
+async function settle(resolve: () => void) {
+	await act(async () => {
+		resolve();
+		await vi.advanceTimersByTimeAsync(0);
+	});
 }
 
 function probe(name: "readOnly" | "loading" | "unavailable" | "holder") {
@@ -270,6 +321,111 @@ describe("RepresentationLockProvider", () => {
 			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
 			expect(probe("readOnly")).toBe("true");
 			expect(probe("unavailable")).toBe("false");
+			expect(routerRefresh).toHaveBeenCalledTimes(1);
+		});
+
+		it("keeps editing blocked until the refreshed declaration has arrived", async () => {
+			const refresh = deferred<void>();
+			routerRefresh.mockReturnValue(refresh.promise);
+			acquireMutateAsync
+				.mockResolvedValueOnce({ acquired: false, holder: HOLDER })
+				.mockResolvedValue({ acquired: true, holder: HOLDER });
+
+			renderProvider();
+			await advance();
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+
+			expect(routerRefresh).toHaveBeenCalledTimes(1);
+			expect(probe("holder")).toBe("none");
+			expect(probe("readOnly")).toBe("true");
+
+			await settle(() => refresh.resolve());
+			expect(probe("readOnly")).toBe("false");
+		});
+
+		it("stays read-only when the lock is lost again before the refresh ends", async () => {
+			const refresh = deferred<void>();
+			routerRefresh.mockReturnValue(refresh.promise);
+			heartbeatMutateAsync.mockResolvedValue({ held: false });
+			acquireMutateAsync
+				.mockResolvedValueOnce({ acquired: false, holder: HOLDER })
+				.mockResolvedValueOnce({ acquired: true, holder: HOLDER })
+				.mockResolvedValue({ acquired: false, holder: HOLDER });
+
+			renderProvider();
+			await advance();
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+
+			await settle(() => refresh.resolve());
+			expect(probe("readOnly")).toBe("true");
+			expect(probe("holder")).toBe(HOLDER.email);
+		});
+
+		it("does not acquire from a hidden tab after a refusal", async () => {
+			acquireMutateAsync.mockResolvedValue({ acquired: false, holder: HOLDER });
+
+			renderProvider();
+			await advance();
+			setVisibility("hidden");
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS * 3);
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+
+			setVisibility("visible");
+			await advance();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+		});
+
+		it("releases and ignores an acquisition answered once the tab is hidden", async () => {
+			const answer = deferred<{ acquired: true; holder: typeof HOLDER }>();
+			acquireMutateAsync.mockReturnValueOnce(answer.promise);
+			heartbeatMutateAsync.mockResolvedValue({ held: true });
+
+			renderProvider();
+			await advance();
+			setVisibility("hidden");
+			await settle(() => answer.resolve({ acquired: true, holder: HOLDER }));
+
+			expect(beacon).toHaveBeenCalledTimes(1);
+			expect(probe("readOnly")).toBe("true");
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS * 2);
+			expect(heartbeatMutateAsync).not.toHaveBeenCalled();
+		});
+
+		it("keeps the lock of a newer attempt when an outdated acquisition answers late", async () => {
+			const first = deferred<{ acquired: true; holder: typeof HOLDER }>();
+			acquireMutateAsync
+				.mockReturnValueOnce(first.promise)
+				.mockResolvedValue({ acquired: true, holder: HOLDER });
+
+			renderProvider();
+			await advance();
+			setVisibility("hidden");
+			setVisibility("visible");
+			await advance();
+			await settle(() => first.resolve({ acquired: true, holder: HOLDER }));
+
+			expect(beacon).not.toHaveBeenCalled();
+			expect(probe("readOnly")).toBe("false");
+		});
+
+		it("releases a lock acquired after leaving the declaration flow", async () => {
+			const answer = deferred<{ acquired: true; holder: typeof HOLDER }>();
+			acquireMutateAsync.mockReturnValueOnce(answer.promise);
+
+			const { unmount } = renderProvider();
+			await advance();
+			unmount();
+			expect(beacon).not.toHaveBeenCalled();
+
+			await settle(() => answer.resolve({ acquired: true, holder: HOLDER }));
+
+			expect(beacon).toHaveBeenCalledWith(RELEASE_ENDPOINT, expect.any(Blob));
+			const body = beacon.mock.calls[0]?.[1] as Blob;
+			await expect(body.text().then(JSON.parse)).resolves.toEqual({
+				year: YEAR,
+			});
 		});
 	});
 
@@ -303,6 +459,50 @@ describe("RepresentationLockProvider", () => {
 			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
 			expect(probe("readOnly")).toBe("true");
 			expect(probe("holder")).toBe(HOLDER.email);
+		});
+
+		it("stops retrying once the heartbeat finds the declaration transmitted", async () => {
+			heartbeatMutateAsync.mockResolvedValue({ held: false });
+			acquireMutateAsync
+				.mockResolvedValueOnce({ acquired: true, holder: HOLDER })
+				.mockRejectedValue({ data: { code: "FORBIDDEN" } });
+
+			renderProvider();
+			await advance();
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS);
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS * 3);
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(heartbeatMutateAsync).toHaveBeenCalledTimes(1);
+			expect(probe("readOnly")).toBe("true");
+			expect(probe("unavailable")).toBe("false");
+			expect(routerRefresh).toHaveBeenCalledTimes(1);
+		});
+
+		it("re-checks the lock as soon as a write is rejected for a lost lock", async () => {
+			heartbeatMutateAsync.mockResolvedValue({ held: true });
+			acquireMutateAsync
+				.mockResolvedValueOnce({ acquired: true, holder: HOLDER })
+				.mockResolvedValue({ acquired: false, holder: HOLDER });
+
+			const { queryClient } = renderProvider();
+			await advance();
+			await failMutation(queryClient, REPRESENTATION_LOCK_CONFLICT_MESSAGE);
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(probe("readOnly")).toBe("true");
+			expect(probe("holder")).toBe(HOLDER.email);
+		});
+
+		it("ignores write failures unrelated to the lock", async () => {
+			heartbeatMutateAsync.mockResolvedValue({ held: true });
+
+			const { queryClient } = renderProvider();
+			await advance();
+			await failMutation(queryClient, "network");
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+			expect(probe("readOnly")).toBe("false");
 		});
 
 		it("falls back to read-only and retries when the heartbeat fails", async () => {
@@ -343,6 +543,38 @@ describe("RepresentationLockProvider", () => {
 			setVisibility("visible");
 			await advance();
 			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(probe("readOnly")).toBe("false");
+		});
+
+		it("saves the pending input before releasing the lock of a hidden tab", async () => {
+			const save = deferred<void>();
+			const pendingSave = vi.fn(() => save.promise);
+			renderProvider({ pendingSave });
+			await advance();
+
+			setVisibility("hidden");
+
+			expect(pendingSave).toHaveBeenCalledTimes(1);
+			expect(beacon).not.toHaveBeenCalled();
+			expect(probe("readOnly")).toBe("true");
+
+			await settle(() => save.resolve());
+			expect(beacon).toHaveBeenCalledTimes(1);
+		});
+
+		it("keeps the lock when the tab is shown again before the pending save settles", async () => {
+			const save = deferred<void>();
+			renderProvider({ pendingSave: () => save.promise });
+			await advance();
+
+			setVisibility("hidden");
+			setVisibility("visible");
+			await advance();
+			await settle(() => save.resolve());
+
+			expect(beacon).not.toHaveBeenCalled();
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(2);
+			expect(routerRefresh).not.toHaveBeenCalled();
 			expect(probe("readOnly")).toBe("false");
 		});
 

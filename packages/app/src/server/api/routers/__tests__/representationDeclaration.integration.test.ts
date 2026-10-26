@@ -86,6 +86,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 
 	afterAll(async () => {
 		if (!sql) return;
+		await sql`DELETE FROM app_representation_declaration_lock WHERE locked_by_user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_representation_declaration WHERE siren IN (${SIREN}, ${OTHER_SIREN})`;
 		await sql`DELETE FROM app_representation_campaign WHERE year IN (${OPEN_CAMPAIGN_YEAR}, ${CLOSED_CAMPAIGN_YEAR})`;
 		await sql`DELETE FROM app_user_company WHERE user_id = ${USER_ID}`;
@@ -96,6 +97,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	beforeEach(async () => {
+		await sql`DELETE FROM app_representation_declaration_lock WHERE locked_by_user_id = ${USER_ID}`;
 		await sql`DELETE FROM app_representation_declaration WHERE siren IN (${SIREN}, ${OTHER_SIREN})`;
 		await sql`DELETE FROM audit.action_log WHERE user_id = ${USER_ID}`;
 	});
@@ -331,6 +333,10 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	it("records every procedure in the audit log with its retention category", async () => {
 		const caller = await createCaller(SIREN, null);
 
+		await caller.getLockState({ year: YEAR });
+		await caller.acquireLock({ year: YEAR });
+		await caller.heartbeat({ year: YEAR });
+		await caller.releaseLock({ year: YEAR });
 		await caller.acquireLock({ year: YEAR });
 		await caller.declareNotSubject({ year: YEAR });
 		await caller.acquireLock({ year: YEAR });
@@ -351,6 +357,16 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 				{
 					action: "declaration.lock_acquired",
 					category: "mutation",
+					siren: SIREN,
+				},
+				{
+					action: "declaration.lock_released",
+					category: "mutation",
+					siren: SIREN,
+				},
+				{
+					action: "declaration.lock_state_read",
+					category: "read_sensitive",
 					siren: SIREN,
 				},
 				// The submission acknowledgement is enqueued by `submit` itself, so
@@ -379,6 +395,50 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 					action: "representation_declaration.submit",
 					category: "mutation",
 					siren: SIREN,
+				},
+			]);
+		}, 5_000);
+	});
+
+	it("traces the lock lifecycle on the representation resource with its year", async () => {
+		const caller = await createCaller(SIREN, null);
+
+		await caller.getLockState({ year: YEAR });
+		await caller.acquireLock({ year: YEAR });
+		await caller.releaseLock({ year: YEAR });
+		await caller.releaseLock({ year: YEAR });
+
+		await vi.waitFor(async () => {
+			const rows = await sql<
+				{
+					action: string;
+					resource_type: string | null;
+					resource_id: string | null;
+					metadata: unknown;
+				}[]
+			>`
+				SELECT action, resource_type, resource_id, metadata FROM audit.action_log
+				WHERE user_id = ${USER_ID}
+				ORDER BY action
+			`;
+			expect([...rows]).toEqual([
+				{
+					action: "declaration.lock_acquired",
+					resource_type: "representation_declaration",
+					resource_id: null,
+					metadata: { year: YEAR },
+				},
+				{
+					action: "declaration.lock_released",
+					resource_type: "representation_declaration",
+					resource_id: null,
+					metadata: { year: YEAR },
+				},
+				{
+					action: "declaration.lock_state_read",
+					resource_type: null,
+					resource_id: null,
+					metadata: { year: YEAR },
 				},
 			]);
 		}, 5_000);

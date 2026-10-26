@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import {
+	ignorePendingSave,
 	RepresentationLockContextProvider,
 	type RepresentationLockState,
 } from "../shared/lock/RepresentationLockContext";
@@ -10,6 +11,7 @@ export const LOCK_HELD: RepresentationLockState = {
 	isLoading: false,
 	isUnavailable: false,
 	holder: null,
+	registerPendingSave: ignorePendingSave,
 };
 
 export const LOCKED_BY_OTHER: RepresentationLockState = {
@@ -21,6 +23,7 @@ export const LOCKED_BY_OTHER: RepresentationLockState = {
 		lastName: "Martin",
 		email: "camille.martin@example.fr",
 	},
+	registerPendingSave: ignorePendingSave,
 };
 
 export function lockWrapper(state: RepresentationLockState = LOCK_HELD) {

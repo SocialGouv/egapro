@@ -49,7 +49,11 @@ import {
 	VALIDATION_MESSAGES,
 	WEBSITE_PUBLICATION,
 } from "./fixtures";
-import { LOCKED_BY_OTHER, lockWrapper } from "./representationLockHarness";
+import {
+	LOCK_HELD,
+	LOCKED_BY_OTHER,
+	lockWrapper,
+} from "./representationLockHarness";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
@@ -530,5 +534,64 @@ describe("StepPageClient — declaration locked by another user", () => {
 		await userEvent.click(nextButton());
 
 		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+});
+
+describe("StepPageClient — lock handover", () => {
+	it("re-reads the step fields when a reloaded draft arrives", () => {
+		const props = {
+			campaignOpen: true,
+			campaignYear: CAMPAIGN_YEAR,
+			declarationDeadline: DECLARATION_DEADLINE,
+			step: 1,
+			year: YEAR,
+		};
+		const { rerender } = render(
+			<StepPageClient
+				{...props}
+				initialDraft={{ currentStep: 1, ...VALID_REFERENCE_PERIOD }}
+			/>,
+			{ wrapper: lockWrapper() },
+		);
+		expect(screen.getByLabelText(/Date de début/)).toHaveValue(
+			VALID_REFERENCE_PERIOD.referencePeriodStart,
+		);
+
+		rerender(
+			<StepPageClient
+				{...props}
+				initialDraft={{
+					currentStep: 1,
+					referencePeriodStart: "2025-03-01",
+					referencePeriodEnd: "2026-02-28",
+				}}
+			/>,
+		);
+
+		expect(screen.getByLabelText(/Date de début/)).toHaveValue("2025-03-01");
+		expect(screen.getByLabelText(/Date de fin/)).toHaveValue("2026-02-28");
+	});
+
+	it("hands its pending input to the lock so it is saved before a release", async () => {
+		const flushes: Array<() => Promise<void>> = [];
+		const registerPendingSave = vi.fn((flush: () => Promise<void>) => {
+			flushes.push(flush);
+			return () => undefined;
+		});
+		renderStep({
+			step: 2,
+			lock: { ...LOCK_HELD, registerPendingSave },
+		});
+
+		await enterWomenPercent("60");
+		await act(async () => {
+			await flushes.at(-1)?.();
+		});
+
+		expect(mutateAsync).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: expect.objectContaining({ executiveWomenPercent: 60 }),
+			}),
+		);
 	});
 });

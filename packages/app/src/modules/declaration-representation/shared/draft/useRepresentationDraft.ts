@@ -22,6 +22,7 @@ type UseRepresentationDraftResult = {
 	isPendingSave: boolean;
 	saveError: string | null;
 	draftVersion: number;
+	flushPendingSave: () => Promise<void>;
 };
 
 export function useRepresentationDraft({
@@ -39,13 +40,11 @@ export function useRepresentationDraft({
 	const contextRef = useRef({
 		year,
 		enabled,
-		mutate: mutation.mutate,
 		mutateAsync: mutation.mutateAsync,
 	});
 	contextRef.current = {
 		year,
 		enabled,
-		mutate: mutation.mutate,
 		mutateAsync: mutation.mutateAsync,
 	};
 
@@ -67,30 +66,23 @@ export function useRepresentationDraft({
 		}
 	}, []);
 
-	const flush = useCallback(() => {
+	const flush = useCallback(async () => {
 		cancelTimers();
 		setIsPendingSave(false);
 		const pending = pendingRef.current;
 		pendingRef.current = null;
 		if (pending === null || !contextRef.current.enabled) return;
-		contextRef.current.mutate({
-			year: contextRef.current.year,
-			draft: pending,
-			currentStep: pending.currentStep,
-		});
+		await contextRef.current
+			.mutateAsync({
+				year: contextRef.current.year,
+				draft: pending,
+				currentStep: pending.currentStep,
+			})
+			.catch(() => undefined);
 	}, [cancelTimers]);
 
 	const flushRef = useRef(flush);
 	flushRef.current = flush;
-
-	useEffect(() => {
-		const handleVisibility = () => {
-			if (document.visibilityState === "hidden") flushRef.current();
-		};
-		document.addEventListener("visibilitychange", handleVisibility);
-		return () =>
-			document.removeEventListener("visibilitychange", handleVisibility);
-	}, []);
 
 	useEffect(() => {
 		if (enabled) return;
@@ -99,9 +91,13 @@ export function useRepresentationDraft({
 		setIsPendingSave(false);
 	}, [cancelTimers, enabled]);
 
+	const appliedInitialDraftRef = useRef(initialDraft);
 	useEffect(() => {
+		if (appliedInitialDraftRef.current === initialDraft) return;
+		appliedInitialDraftRef.current = initialDraft;
 		cancelTimers();
 		pendingRef.current = null;
+		setIsPendingSave(false);
 		draftRef.current = initialDraft;
 		setDraft(initialDraft);
 		setDraftVersion((version) => version + 1);
@@ -109,7 +105,7 @@ export function useRepresentationDraft({
 
 	useEffect(() => {
 		return () => {
-			flushRef.current();
+			void flushRef.current();
 		};
 	}, []);
 
@@ -131,7 +127,7 @@ export function useRepresentationDraft({
 			}, VISUAL_DELAY_MS);
 			timerRef.current = setTimeout(() => {
 				timerRef.current = null;
-				flushRef.current();
+				void flushRef.current();
 			}, DEBOUNCE_MS);
 		},
 		[cancelTimers, step],
@@ -163,9 +159,10 @@ export function useRepresentationDraft({
 		isPendingSave,
 		saveError: mutation.error
 			? mutation.error.data?.code === "CONFLICT"
-				? "Le verrou a été perdu avant l’enregistrement. Votre dernière saisie n’a pas été enregistrée. Copiez-la avant de recharger la page."
+				? "Le verrou a été perdu avant l’enregistrement : votre dernière saisie n’a pas été enregistrée."
 				: "L’enregistrement de votre saisie a échoué. Veuillez réessayer."
 			: null,
 		draftVersion,
+		flushPendingSave: flush,
 	};
 }

@@ -87,7 +87,11 @@ const HTTP_ERROR_SUFFIXES = new Set([
 	"max_files",
 	"empty_file",
 ]);
-const RESOURCE_TYPES = new Set(["declaration", "notification"]);
+const RESOURCE_TYPES = new Set([
+	"declaration",
+	"notification",
+	"representation_declaration",
+]);
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SIREN_PATTERN = /^\d{9}$/;

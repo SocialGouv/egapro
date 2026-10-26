@@ -8,12 +8,19 @@ export type RepresentationLockHolder = {
 	email: string | null;
 };
 
+export type PendingSaveFlush = () => Promise<void>;
+
 export type RepresentationLockState = {
 	isReadOnly: boolean;
 	isLoading: boolean;
 	isUnavailable: boolean;
 	holder: RepresentationLockHolder | null;
+	registerPendingSave: (flush: PendingSaveFlush) => () => void;
 };
+
+export function ignorePendingSave(): () => void {
+	return () => undefined;
+}
 
 const RepresentationLockContext = createContext<RepresentationLockState | null>(
 	null,

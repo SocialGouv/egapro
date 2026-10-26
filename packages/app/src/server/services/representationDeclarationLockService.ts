@@ -2,6 +2,7 @@ import "server-only";
 
 import { and, eq, gt, inArray, lte, or } from "drizzle-orm";
 
+import { REPRESENTATION_LOCK_CONFLICT_MESSAGE } from "~/modules/domain";
 import type { DB } from "~/server/db";
 import { representationDeclarationLocks, users } from "~/server/db/schema";
 
@@ -24,9 +25,7 @@ function expiryFrom(now: Date, timeoutMinutes: number): Date {
 
 export class RepresentationLockConflictError extends Error {
 	constructor() {
-		super(
-			"La déclaration de représentation est verrouillée par une autre personne ou le verrou a expiré.",
-		);
+		super(REPRESENTATION_LOCK_CONFLICT_MESSAGE);
 		this.name = "RepresentationLockConflictError";
 	}
 }

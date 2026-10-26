@@ -129,6 +129,7 @@ export {
 	DECLARATION_SUPERSEDED_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	LOCK_HEARTBEAT_INTERVAL_MS,
+	REPRESENTATION_LOCK_CONFLICT_MESSAGE,
 } from "./shared/declarationLock";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";

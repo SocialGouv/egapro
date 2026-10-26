@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -67,12 +67,19 @@ export function StepPageClient({
 		isPendingSave,
 		saveError,
 		draftVersion,
+		flushPendingSave,
 	} = useRepresentationDraft({
 		year,
 		step,
 		initialDraft,
 		enabled: campaignOpen && !isSubmitted && !isReadOnly,
 	});
+
+	const { registerPendingSave } = lock;
+	useEffect(
+		() => registerPendingSave(flushPendingSave),
+		[flushPendingSave, registerPendingSave],
+	);
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
 	const registerStepValidator = useCallback(

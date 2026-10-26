@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
-
+import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	declareRepresentationNotSubjectSchema,
 	getRepresentationDeclarationSchema,
@@ -22,6 +22,8 @@ import {
 	companyWriteProcedure,
 	createTRPCRouter,
 } from "~/server/api/trpc";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext } from "~/server/audit/requestContext";
 import type { DB } from "~/server/db";
 import { GLOBAL_SETTINGS_ID } from "~/server/db/getGlobalSettings";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
@@ -34,9 +36,6 @@ import {
 	refreshRepresentationLock,
 	releaseRepresentationLock,
 } from "~/server/services/representationDeclarationLockService";
-import { AUDIT_ACTIONS } from "~/modules/audit";
-import { logAction } from "~/server/audit/log";
-import { buildRequestContext } from "~/server/audit/requestContext";
 
 const CAMPAIGN_CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
@@ -142,7 +141,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 					userEmail: ctx.session.user.email,
 					siren: ctx.siren,
 					resourceType: "representation_declaration",
-					resourceId: `${ctx.siren}:${input.year}`,
+					metadata: { year: input.year },
 					ipAddress: requestContext.ipAddress,
 					userAgent: requestContext.userAgent,
 				});
@@ -189,7 +188,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 					userEmail: ctx.session.user.email,
 					siren: ctx.siren,
 					resourceType: "representation_declaration",
-					resourceId: `${ctx.siren}:${input.year}`,
+					metadata: { year: input.year },
 					ipAddress: requestContext.ipAddress,
 					userAgent: requestContext.userAgent,
 				});
