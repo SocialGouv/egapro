@@ -74,12 +74,12 @@ const AideProConnectPage = () => (
             situations :
           </p>
           <ul>
-            <li>
+            <li className="fr-mb-2w">
               Vous avez fait une erreur de saisie dans votre adresse e-mail
               <br />
               💡 <Link href="/login">Recréez un compte avec la bonne adresse</Link>
             </li>
-            <li>
+            <li className="fr-mb-2w">
               L'e-mail est arrivé dans vos courriers indésirables
               <br />
               💡 Vérifiez vos spams
@@ -112,39 +112,43 @@ const AideProConnectPage = () => (
           <AnchorLink as="h3" anchor="Vous-avez-un-compte-ProConnect">
             Vous avez un compte ProConnect
           </AnchorLink>
-          <p>Sur le portail Egapro, vous cliquez sur « Se connecter » en haut à droite de la page.</p>
-          <p>À la page « Connexion », vous cliquez sur « S'identifier avec ProConnect ».</p>
-          <p>
-            Vous êtes redirigé sur le portail ProConnect à la page « Se connecter ou s'inscrire à egapro ». Vous
-            saisissez votre adresse e-mail professionnelle utilisée lors de la création du compte ProConnect.
-          </p>
-          <p>
-            À la page suivante, vous saisissez le mot de passe que vous avez créé (vous allez recevoir un code de
-            confirmation sur votre adresse e-mail, attention ce code est à usage unique et il est valable 1 heure) ou
-            vous cliquez pour recevoir un lien de connexion par e-mail (attention ce lien est à usage unique et il est
-            valable 1 heure).
-          </p>
-          <p>Vous êtes ensuite redirigé sur le portail Egapro.</p>
+          <ul>
+            <li>Sur le portail Egapro, vous cliquez sur « Se connecter » en haut à droite de la page.</li>
+            <li>À la page « Connexion », vous cliquez sur « S'identifier avec ProConnect ».</li>
+            <li>
+              Vous êtes redirigé sur le portail ProConnect à la page « Se connecter ou s'inscrire à egapro ». Vous
+              saisissez votre adresse e-mail professionnelle utilisée lors de la création du compte ProConnect.
+            </li>
+            <li>
+              À la page suivante, vous saisissez le mot de passe que vous avez créé (vous allez recevoir un code de
+              confirmation sur votre adresse e-mail, attention ce code est à usage unique et il est valable 1 heure) ou
+              vous cliquez pour recevoir un lien de connexion par e-mail (attention ce lien est à usage unique et il est
+              valable 1 heure).
+            </li>
+            <li>Vous êtes ensuite redirigé sur le portail Egapro.</li>
+          </ul>
 
           <AnchorLink as="h3" anchor="Vous-n-avez-pas-encore-de-compte-ProConnect">
             Vous n'avez pas encore de compte ProConnect
           </AnchorLink>
-          <p>Sur le portail Egapro, vous cliquez sur « Se connecter » en haut à droite de la page.</p>
-          <p>À la page « Connexion », vous cliquez sur « S'identifier avec ProConnect ».</p>
-          <p>
-            Vous êtes redirigé sur le portail ProConnect à la page « Se connecter ou s'inscrire à egapro ». Vous
-            saisissez votre adresse e-mail professionnelle, celle-ci doit correspondre à la personne à contacter par les
-            services de l'inspection du travail en cas de besoin.
-          </p>
-          <p>
-            À la page suivante, vous pouvez soit choisir un mot de passe (vous allez recevoir un code de confirmation
-            sur votre adresse e-mail, attention ce code est à usage unique et il est valable 1 heure), soit recevoir un
-            lien de connexion sur votre adresse e-mail (attention ce lien est à usage unique et il est valable 1 heure).
-          </p>
-          <p>
-            À la page suivante « Rejoindre votre organisation », soit vous choisissez votre entreprise si une liste vous
-            est proposée, soit vous saisissez le numéro Siret du siège social de votre entreprise.
-          </p>
+          <ul>
+            <li>Sur le portail Egapro, vous cliquez sur « Se connecter » en haut à droite de la page.</li>
+            <li>À la page « Connexion », vous cliquez sur « S'identifier avec ProConnect ».</li>
+            <li>
+              Vous êtes redirigé sur le portail ProConnect à la page « Se connecter ou s'inscrire à egapro ». Vous
+              saisissez votre adresse e-mail professionnelle, celle-ci doit correspondre à la personne à contacter par
+              les services de l'inspection du travail en cas de besoin.
+            </li>
+            <li>
+              À la page suivante, vous pouvez soit choisir un mot de passe (vous allez recevoir un code de confirmation
+              sur votre adresse e-mail, attention ce code est à usage unique et il est valable 1 heure), soit recevoir un
+              lien de connexion sur votre adresse e-mail (attention ce lien est à usage unique et il est valable 1 heure).
+            </li>
+            <li>
+              À la page suivante « Rejoindre votre organisation », soit vous choisissez votre entreprise si une liste
+              vous est proposée, soit vous saisissez le numéro Siret du siège social de votre entreprise.
+            </li>
+          </ul>
           <p>
             Notez que la création et le rattachement de votre compte sur le portail ProConnect nécessitent le numéro
             SIRET du siège social de votre entreprise. En revanche, sur le portail Egapro, c'est le numéro SIREN qui
@@ -156,12 +160,14 @@ const AideProConnectPage = () => (
             pour le compte de l'UES. Pour assurer la continuité, cette entreprise doit être la même que les années
             précédentes, sauf si elle a fermé ou quitté l'UES.
           </p>
-          <p>
-            À la page suivante « Renseigner son identité », vous renseignez vos informations personnelles (nom, prénom,
-            numéro de téléphone professionnel et fonction au sein de votre entreprise), permettant d'authentifier votre
-            compte. Ces informations permettront également de préremplir les informations déclarant de la déclaration.
-          </p>
-          <p>Votre compte est créé et vous êtes redirigé sur le portail Egapro.</p>
+          <ul>
+            <li>
+              À la page suivante « Renseigner son identité », vous renseignez vos informations personnelles (nom, prénom,
+              numéro de téléphone professionnel et fonction au sein de votre entreprise), permettant d'authentifier votre
+              compte. Ces informations permettront également de préremplir les informations déclarant de la déclaration.
+            </li>
+            <li>Votre compte est créé et vous êtes redirigé sur le portail Egapro.</li>
+          </ul>
           <p>
             L'équipe ProConnect effectue parfois des vérifications avant d'activer un compte. Si c'est le cas pour le
             vôtre, un délai moyen d'un jour est à prévoir. Vous recevrez un e-mail dès que votre compte sera actif pour
