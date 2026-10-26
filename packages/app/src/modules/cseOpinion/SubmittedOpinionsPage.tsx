@@ -177,7 +177,7 @@ export function SubmittedOpinionsPage({
 								Informations
 							</h2>
 							<h3 className="fr-text--md fr-text--bold">Déclarant</h3>
-							<dl className="fr-grid-row fr-grid-row--gutters">
+							<dl className="fr-raw-list fr-grid-row fr-grid-row--gutters">
 								<div className="fr-col-12 fr-col-md-6">
 									<dt className="fr-text--bold">Nom Prénom</dt>
 									<dd>{declarantName || "Non renseigné"}</dd>
@@ -192,7 +192,7 @@ export function SubmittedOpinionsPage({
 								</div>
 							</dl>
 							<h3 className="fr-text--md fr-text--bold">Entreprise</h3>
-							<dl className="fr-grid-row fr-grid-row--gutters">
+							<dl className="fr-raw-list fr-grid-row fr-grid-row--gutters">
 								<div className="fr-col-12 fr-col-md-6">
 									<dt className="fr-text--bold">Raison sociale</dt>
 									<dd>{company.name}</dd>
@@ -241,7 +241,7 @@ export function SubmittedOpinionsPage({
 							<h2 className="fr-h6" id="cse-calcul">
 								Calcul
 							</h2>
-							<dl>
+							<dl className="fr-raw-list">
 								<div>
 									<dt className="fr-text--bold">
 										Période de référence
@@ -296,7 +296,7 @@ export function SubmittedOpinionsPage({
 									<h3 className="fr-text--md fr-text--bold">
 										{number === 1 ? "Première" : "Deuxième"} déclaration
 									</h3>
-									<dl className="fr-grid-row fr-grid-row--gutters">
+									<dl className="fr-raw-list fr-grid-row fr-grid-row--gutters">
 										{opinions
 											.filter((row) => row.declarationNumber === number)
 											.map((row) => (

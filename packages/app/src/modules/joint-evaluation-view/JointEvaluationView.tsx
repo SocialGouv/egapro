@@ -42,7 +42,7 @@ function InfoSection({ title, items }: { title: string; items: InfoItem[] }) {
 	return (
 		<div>
 			<h3 className="fr-text--md fr-text--bold fr-mb-2w">{title}</h3>
-			<dl className={styles.infoList}>
+			<dl className={`fr-raw-list ${styles.infoList}`}>
 				{items.map(({ label, value }) => (
 					<div className={styles.infoRow} key={label}>
 						<dt className={styles.infoLabel}>{label}</dt>
@@ -157,7 +157,7 @@ export function JointEvaluationView({
 							</section>
 							<section>
 								<h2 className="fr-h6 fr-mb-3w">Calcul</h2>
-								<dl className={styles.infoList}>
+								<dl className={`fr-raw-list ${styles.infoList}`}>
 									<div className={styles.infoRow}>
 										<dt className={styles.infoLabel}>Période de référence</dt>
 										<dd className={styles.infoValue}>{referencePeriod}</dd>
