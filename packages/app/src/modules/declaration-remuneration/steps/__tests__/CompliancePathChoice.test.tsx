@@ -134,6 +134,23 @@ describe("CompliancePathChoice", () => {
 		).toBeInTheDocument();
 	});
 
+	it("hides the success banner when the page is reached without a transmission", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the success banner only once per transmission", () => {
+		markDeclarationTransmissionSuccess();
+		const { unmount } = render(compliancePathChoice());
+		unmount();
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
+	});
+
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
 		render(compliancePathChoice());
 		expect(
@@ -331,6 +348,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("tells a modifiable declaration it stays modifiable until a later transmission, with no date", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Vous pouvez modifier votre déclaration jusqu'à ce que/),
@@ -376,6 +394,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the email in the success banner", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ email: "john@company.fr" }));
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});
