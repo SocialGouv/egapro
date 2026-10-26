@@ -187,7 +187,7 @@ export const env = createEnv({
 			.enum(["dev", "preprod", "prod"])
 			.optional()
 			.default("dev"),
-		// Review apps only: rgaa/perf also build with NEXT_PUBLIC_EGAPRO_ENV=dev.
+		// Opt-in per build: review apps, rgaa/perf persistent envs and local.
 		NEXT_PUBLIC_DEV_FILL_ENABLED: literalBooleanFlag(),
 		NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 		NEXT_PUBLIC_SENTRY_RELEASE: z.string().optional(),

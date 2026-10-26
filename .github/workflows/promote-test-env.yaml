@@ -117,6 +117,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_EGAPRO_ENV=dev
+            NEXT_PUBLIC_DEV_FILL_ENABLED=true
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_DEV }}
