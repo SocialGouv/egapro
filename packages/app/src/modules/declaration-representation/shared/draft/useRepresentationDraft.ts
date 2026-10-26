@@ -20,6 +20,7 @@ type UseRepresentationDraftResult = {
 	saveProgress: (currentStep: number) => Promise<void>;
 	isSaving: boolean;
 	isPendingSave: boolean;
+	saveError: string | null;
 };
 
 export function useRepresentationDraft({
@@ -157,5 +158,10 @@ export function useRepresentationDraft({
 		saveProgress,
 		isSaving: mutation.isPending,
 		isPendingSave,
+		saveError: mutation.error
+			? mutation.error.data?.code === "CONFLICT"
+				? "Le verrou a été perdu avant l’enregistrement. Votre dernière saisie n’a pas été enregistrée. Copiez-la avant de recharger la page."
+				: "L’enregistrement de votre saisie a échoué. Veuillez réessayer."
+			: null,
 	};
 }

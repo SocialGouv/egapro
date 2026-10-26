@@ -59,13 +59,19 @@ export function StepPageClient({
 	const isReadOnly =
 		!campaignOpen || isSubmitted || lock.isReadOnly || lock.isLoading;
 
-	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
-		useRepresentationDraft({
-			year,
-			step,
-			initialDraft,
-			enabled: campaignOpen && !isSubmitted && !isReadOnly,
-		});
+	const {
+		draft,
+		setDraftValues,
+		saveProgress,
+		isSaving,
+		isPendingSave,
+		saveError,
+	} = useRepresentationDraft({
+		year,
+		step,
+		initialDraft,
+		enabled: campaignOpen && !isSubmitted && !isReadOnly,
+	});
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
 	const registerStepValidator = useCallback(
@@ -171,6 +177,15 @@ export function StepPageClient({
 			<Stepper currentStep={step} />
 
 			<StepComponent />
+
+			{saveError ? (
+				<div
+					className="fr-alert fr-alert--error fr-alert--sm fr-mt-4w"
+					role="alert"
+				>
+					<p>{saveError}</p>
+				</div>
+			) : null}
 
 			{navigationError ? (
 				<div
