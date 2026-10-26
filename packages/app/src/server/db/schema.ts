@@ -180,6 +180,8 @@ export const declarations = createTable(
 		secondDeclarationStep: d.integer(),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		// Set by CSE edits after the last transmission; cleared atomically on submit.
+		cseOpinionDraftUpdatedAt: d.timestamp({ withTimezone: true }),
 		cseRequired: d.boolean().notNull().default(false),
 		rulesVersion: d
 			.varchar("rules_version")
@@ -829,12 +831,11 @@ export const representationDeclarationsRelations = relations(
 /**
  * Global platform settings. Single-row table (`id = 1`).
  *
- * Values here are free of retention constraints: they drive campaign
- * behaviour (active year) rather than recording user actions.
+ * Values here configure platform-wide behaviour rather than recording user
+ * actions.
  */
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
-	activeCampaignYear: d.integer(),
 	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })

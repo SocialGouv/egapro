@@ -5,3 +5,12 @@
 .receiptCard {
 	background: var(--background-default-grey);
 }
+
+// A plain block, as in DeclarationSuccessBanner: a flex item would get a single full-width underline.
+.download {
+	margin-top: 1rem;
+
+	> p:last-child {
+		margin-top: 0.25rem;
+	}
+}

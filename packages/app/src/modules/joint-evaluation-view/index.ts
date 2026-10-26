@@ -1,0 +1,1 @@
+export { JointEvaluationViewPage } from "./JointEvaluationViewPage";

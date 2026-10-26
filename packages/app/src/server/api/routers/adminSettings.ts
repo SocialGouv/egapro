@@ -20,6 +20,7 @@ import {
 	toPersistedIsoDate,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { GLOBAL_SETTINGS_ID } from "~/server/db/getGlobalSettings";
 import {
 	campaignDeadlines,
 	globalSettings,
@@ -110,7 +111,7 @@ export const adminSettingsRouter = createTRPCRouter({
 					globalSettings.declarationLockTimeoutMinutes,
 			})
 			.from(globalSettings)
-			.where(eq(globalSettings.id, 1))
+			.where(eq(globalSettings.id, GLOBAL_SETTINGS_ID))
 			.limit(1);
 
 		return {
@@ -122,14 +123,24 @@ export const adminSettingsRouter = createTRPCRouter({
 	updateLockTimeout: adminProcedure
 		.input(updateLockTimeoutSchema)
 		.mutation(async ({ ctx, input }) => {
+			const updatedAt = new Date();
+			const updatedBy = ctx.session.user.id;
 			await ctx.db
-				.update(globalSettings)
-				.set({
+				.insert(globalSettings)
+				.values({
+					id: GLOBAL_SETTINGS_ID,
 					declarationLockTimeoutMinutes: input.timeoutMinutes,
-					updatedAt: new Date(),
-					updatedBy: ctx.session.user.id,
+					updatedAt,
+					updatedBy,
 				})
-				.where(eq(globalSettings.id, 1));
+				.onConflictDoUpdate({
+					target: globalSettings.id,
+					set: {
+						declarationLockTimeoutMinutes: input.timeoutMinutes,
+						updatedAt,
+						updatedBy,
+					},
+				});
 
 			return { success: true as const };
 		}),

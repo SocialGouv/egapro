@@ -186,7 +186,7 @@ false negative is a compliance gap.
 
 ## Route Handler coverage map (`src/app/api/**/route.ts`)
 
-Inventory refreshed by issues #4664 and #4491 — **26 route files**, every one of them
+Inventory refreshed by issues #3764, #4664 and #4491 — **27 route files**, every one of them
 accounted for below. Re-run the inventory with:
 
 ```bash
@@ -198,7 +198,7 @@ listed as a named exemption. The only third state this table accepts is a route
 whose wiring is in flight in a named open PR, and it is listed apart from the
 counts — never inside them.
 
-### Instrumented through `withAuditedRoute` (12)
+### Instrumented through `withAuditedRoute` (14)
 
 | Route | Action key |
 |---|---|
@@ -207,6 +207,8 @@ counts — never inside them.
 | `export/download` | `EXPORT_DOWNLOAD` |
 | `export/generate` | `EXPORT_GENERATE` |
 | `gip-mds/import` | `GIP_MDS_IMPORT` |
+| `joint-evaluation-pdf` | `PDF_JOINT_EVALUATION_DOWNLOAD` |
+| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
@@ -218,18 +220,7 @@ counts — never inside them.
 The two `public/*` rows above emit stdout only. The other routes still write
 `audit.action_log` as well as stdout.
 
-### Wiring in flight (1)
-
-| Route | Action key | Status |
-|---|---|---|
-| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` | **pending #3189** — the handler writes no audit row at this commit |
-
-Deliberately outside the count above. Listing it as covered would hide a real
-compliance gap behind a complete-looking inventory: the next `find` would
-reconcile 33/33 and stop looking. If #3189 is abandoned, or lands with another
-action key, this row is what surfaces it.
-
-The other gap — `public/referents-egalite-professionnelle`, whose action key
+The gap on `public/referents-egalite-professionnelle`, whose action key
 already existed but was only reachable through tRPC — is closed by #3764.
 
 ### Audited through a direct `logAction` call (3)
@@ -245,7 +236,7 @@ needs something `resolveContext` cannot produce.
 | `v1/files/[fileId]` | `ADMIN_FILE_DOWNLOAD`, `USER_FILE_DOWNLOAD`, `EXPORT_API_FILES` | The action key depends on the caller's role, resolved mid-handler |
 
 `resolveContext` runs **before** the handler, so it cannot see a result count,
-a parsed body, or the branch the handler took. Converting these seven to the
+a parsed body, or the branch the handler took. Converting these three to the
 wrapper would flatten one row per call and lose the per-branch audit context.
 The wrapper's route-context argument (see below) removes the
 *type-level* blocker; it does not make the conversion desirable.

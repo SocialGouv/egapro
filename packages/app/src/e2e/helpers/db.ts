@@ -78,7 +78,8 @@ export async function resetDeclarationToDraft() {
 			    hourly_women = NULL,
 			    hourly_men = NULL,
 			    draft = NULL,
-			    draft_updated_at = NULL
+			    draft_updated_at = NULL,
+			    cse_opinion_draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
@@ -457,6 +458,41 @@ export async function insertCseOpinion(year: number) {
 			INSERT INTO app_cse_opinion (id, declaration_id, declaration_number, type, created_at, updated_at)
 			VALUES (gen_random_uuid(), ${decl[0]?.id}, 1, 'remuneration', NOW(), NOW())
 			ON CONFLICT DO NOTHING
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function insertCseOpinionFile(year: number) {
+	const sql = createConnection();
+	try {
+		const rows = await sql`
+			INSERT INTO app_file (id, declaration_id, file_name, file_path, uploaded_at, created_at, type)
+			SELECT gen_random_uuid(), id, 'avis-cse.pdf', '/tmp/avis-cse.pdf', NOW(), NOW(), 'cse_opinion'
+			FROM app_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+			RETURNING id, declaration_id
+		`;
+		const file = rows[0];
+		if (!file) return;
+		await sql`
+			INSERT INTO app_cse_opinion_file
+				(id, declaration_id, declaration_number, type, file_id, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${file.declaration_id}, 1, 'remuneration', ${file.id}, NOW(), NOW())
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function markCseOpinionDraftUpdated(year: number) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET cse_opinion_draft_updated_at = NOW()
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
 		`;
 	} finally {
 		await sql.end();

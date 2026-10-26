@@ -1,0 +1,57 @@
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.headingRow {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.sectionContent {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.infoList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+}
+
+.infoRow {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+
+	@include respond-from(md) {
+		flex-direction: row;
+		gap: 1rem;
+		align-items: baseline;
+	}
+}
+
+.infoLabel {
+	padding: 0;
+	color: var(--text-mention-grey);
+
+	@include respond-from(md) {
+		flex: 0 0 15rem;
+	}
+}
+
+.infoValue {
+	margin: 0;
+	padding: 0;
+}
+
+.bottomAction {
+	align-self: flex-end;
+}

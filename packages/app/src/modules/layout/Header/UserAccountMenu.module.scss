@@ -19,28 +19,25 @@
 	box-shadow: var(--overlap-shadow);
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 0.75rem;
-	padding: 0.75rem 0;
 	z-index: var(--overlap);
 	text-align: left;
 }
 
 .userInfo {
 	width: 100%;
-	padding: 0 1rem;
+	padding: 1rem;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
+	border-bottom: 1px solid var(--border-default-grey);
 }
 
-// role="menu" wrapper around the action groups: replicates the dropdown's
-// column flow so inserting it keeps the rendering pixel-identical.
+// Keep the static account details outside role="menu" while the actions
+// remain owned by it for keyboard navigation.
 .menu {
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
 }
 
 .userName {
@@ -69,7 +66,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	padding: 0.75rem 0.75rem 0.75rem 1rem;
+	padding: 0.75rem 1rem;
 	width: 100%;
 	font-size: 1rem;
 	line-height: 1.5em;
@@ -77,12 +74,8 @@
 	text-decoration: none;
 	background: none;
 	border: none;
-	border-top: 1px solid var(--border-default-grey);
+	border-bottom: 1px solid var(--border-default-grey);
 	cursor: pointer;
-
-	&:last-child {
-		border-bottom: 1px solid var(--border-default-grey);
-	}
 
 	&:hover {
 		background-color: var(--background-default-grey-hover);
@@ -91,7 +84,7 @@
 
 .logout {
 	width: 100%;
-	padding: 0 1rem;
+	padding: 0.75rem 1rem;
 }
 
 .logoutLink {
