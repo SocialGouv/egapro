@@ -15,6 +15,7 @@ const EMPTY_DECLARATION = {
 	firstDeclarationPathChoice: null,
 	secondDeclarationPathChoice: null,
 	hasSubmittedSecondDeclaration: false,
+	secondDeclarationStep: null,
 	hasSubmittedJointEvaluation: false,
 	hasSubmittedCseOpinion: false,
 	cseRequired: false,

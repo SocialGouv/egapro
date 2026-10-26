@@ -50,6 +50,8 @@ export {
 	gipToStep2,
 	gipToStep3,
 } from "./shared/gipToStepData";
+export type { ImpersonationEntryContext } from "./shared/impersonationEntry";
+export { getImpersonationEntryHref } from "./shared/impersonationEntry";
 export type { PayGapReferences } from "./shared/indicatorRowMapping";
 export { gipPayGapReferences } from "./shared/indicatorRowMapping";
 export { DeclarationLockAlert } from "./shared/lock/DeclarationLockAlert";

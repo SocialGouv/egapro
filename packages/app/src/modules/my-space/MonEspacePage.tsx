@@ -8,11 +8,16 @@ import { api } from "~/trpc/server";
 import { CompanyDeclarationsPage } from "./CompanyDeclarationsPage";
 
 type Props = {
+	isImpersonating: boolean;
 	siret: string | null;
 	userPhone: string | null;
 };
 
-export async function MonEspacePage({ siret, userPhone }: Props) {
+export async function MonEspacePage({
+	isImpersonating,
+	siret,
+	userPhone,
+}: Props) {
 	const siren = parseSiren(siret);
 	if (siren === null) {
 		return <MissingSiret />;
@@ -31,6 +36,7 @@ export async function MonEspacePage({ siret, userPhone }: Props) {
 			campaignDeadlines={campaignDeadlines}
 			company={data.company}
 			declarations={data.declarations}
+			isImpersonating={isImpersonating}
 			lockedByOther={lockState.lockedByOther}
 			lockHolder={lockState.holder}
 			representationCampaign={representationCampaign}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import type { CseOpinionOrigin } from "..";
 import {
 	CSE_OPINION_PREVIOUS_HREF,
@@ -6,6 +7,7 @@ import {
 	getCompliancePathPreviousHref,
 	getCseOpinionPreviousHref,
 	getCurrentStageHref,
+	getDemarcheResumeHref,
 	getDemarcheStageHref,
 	getPostComplianceDestination,
 	resolveCseOpinionOrigin,
@@ -45,6 +47,41 @@ describe("getDemarcheStageHref", () => {
 		expect(getDemarcheStageHref("demarche_completed", TERMINAL_SENTINEL)).toBe(
 			TERMINAL_SENTINEL,
 		);
+	});
+});
+
+describe("getDemarcheResumeHref", () => {
+	it("resumes corrective actions on their recap once corrected data is saved", () => {
+		expect(
+			getDemarcheResumeHref(
+				"corrective_actions_chosen",
+				TERMINAL_SENTINEL,
+				true,
+			),
+		).toBe(SECOND_DECLARATION_RECAP_PATH);
+	});
+
+	it("resumes corrective actions on their first step while nothing is saved", () => {
+		expect(
+			getDemarcheResumeHref(
+				"corrective_actions_chosen",
+				TERMINAL_SENTINEL,
+				false,
+			),
+		).toBe(CORRECTIVE_STEP1_PATH);
+	});
+
+	it.each(
+		DECLARATION_FSM_STATUSES.filter(
+			(status) => status !== "corrective_actions_chosen",
+		).flatMap((status) => [
+			[status, true],
+			[status, false],
+		]),
+	)("follows the stage table for %s (corrected data saved: %s)", (status, secondDeclarationSaved) => {
+		expect(
+			getDemarcheResumeHref(status, TERMINAL_SENTINEL, secondDeclarationSaved),
+		).toBe(getDemarcheStageHref(status, TERMINAL_SENTINEL));
 	});
 });
 

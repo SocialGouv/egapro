@@ -49,6 +49,17 @@ export function getDemarcheStageHref(
 	}
 }
 
+export function getDemarcheResumeHref(
+	status: DeclarationFsmStatus,
+	terminalHref: AppHref,
+	secondDeclarationSaved: boolean,
+): AppHref {
+	if (status === "corrective_actions_chosen" && secondDeclarationSaved) {
+		return SECOND_DECLARATION_RECAP;
+	}
+	return getDemarcheStageHref(status, terminalHref);
+}
+
 // Takes the decision, not its inputs: on `hasCse` alone this sent a company
 // under 100 salariés into /avis-cse, whose layout bounced it straight back here.
 export function getPostComplianceDestination(

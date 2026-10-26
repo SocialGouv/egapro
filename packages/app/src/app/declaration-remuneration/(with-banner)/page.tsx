@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getNextStepHref } from "~/modules/declaration-remuneration";
+import { getImpersonationEntryHref } from "~/modules/declaration-remuneration";
 import {
 	getObligationWorkforce,
 	isCseOpinionRequired,
 	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
-import { getCurrentStageHref } from "~/modules/navigation";
 import {
 	FIRST_REMUNERATION_STEP,
-	LAST_REMUNERATION_STEP,
 	remunerationStepHref,
 } from "~/modules/routes";
 import { auth } from "~/server/auth";
@@ -27,24 +25,20 @@ export default async function DeclarationPage() {
 
 	const { declaration } = await api.declaration.getOrCreate();
 	const company = await api.company.get({ siren: declaration.siren });
-	if (declaration.status === "draft") {
-		const currentStep = declaration.currentStep ?? 0;
-		const nextSavedStep = getNextStepHref(
-			currentStep,
-			isIndicatorGRequiredForGip(company.gipWorkforce, declaration.year),
-		);
-		redirect(
-			nextSavedStep ??
-				remunerationStepHref(
-					currentStep > 0 ? LAST_REMUNERATION_STEP : FIRST_REMUNERATION_STEP,
-				),
-		);
-	}
 
-	const cseOpinionRequired = isCseOpinionRequired({
-		workforce: getObligationWorkforce(company.gipWorkforce),
-		hasCse: company.hasCse,
-	});
-
-	redirect(getCurrentStageHref(declaration.status, cseOpinionRequired));
+	redirect(
+		getImpersonationEntryHref({
+			status: declaration.status,
+			currentStep: declaration.currentStep,
+			secondDeclarationStep: declaration.secondDeclarationStep,
+			indicatorGRequired: isIndicatorGRequiredForGip(
+				company.gipWorkforce,
+				declaration.year,
+			),
+			cseOpinionRequired: isCseOpinionRequired({
+				workforce: getObligationWorkforce(company.gipWorkforce),
+				hasCse: company.hasCse,
+			}),
+		}),
+	);
 }

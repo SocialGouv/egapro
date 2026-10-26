@@ -1,5 +1,8 @@
-import { isCseOpinionResolved } from "~/modules/domain";
-import { getDemarcheStageHref } from "~/modules/navigation";
+import {
+	hasSavedSecondDeclarationData,
+	isCseOpinionResolved,
+} from "~/modules/domain";
+import { getDemarcheResumeHref } from "~/modules/navigation";
 // `~/modules/routes` and `~/modules/navigation` are strings only, so their
 // barrels are safe here: unlike the declaration-representation barrel they drag
 // no server-touching tree into this client bundle.
@@ -60,15 +63,22 @@ export function computePanelVariant(
  * No `?siren=` is appended: these pages resolve the declaration from the session
  * (`companyProcedure` binds the SIREN), and none ever read the query.
  */
-export function computeCtaHref(declaration: DeclarationItem | undefined) {
+export function computeCtaHref(
+	declaration: DeclarationItem | undefined,
+	isImpersonating: boolean,
+) {
 	const fsmStatus = declaration?.fsmStatus ?? null;
 	if (fsmStatus === null) {
 		return DECLARATION_REMUNERATION;
 	}
 
-	return getDemarcheStageHref(
+	return getDemarcheResumeHref(
 		fsmStatus,
 		cseOpinionResolvedFor(declaration) ? DECLARATION_REMUNERATION : CSE_OPINION,
+		isImpersonating &&
+			hasSavedSecondDeclarationData({
+				secondDeclarationStep: declaration?.secondDeclarationStep ?? null,
+			}),
 	);
 }
 

@@ -14,6 +14,7 @@ export {
 	getCompliancePathPreviousHref,
 	getCseOpinionPreviousHref,
 	getCurrentStageHref,
+	getDemarcheResumeHref,
 	getDemarcheStageHref,
 	getPostComplianceDestination,
 	resolveCseOpinionOrigin,

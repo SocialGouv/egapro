@@ -43,6 +43,7 @@ export type DeclarationItem = {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
+	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
 	cseRequired: boolean;

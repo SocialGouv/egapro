@@ -63,6 +63,17 @@ export function hasStartedSecondDeclaration(declaration: {
 	);
 }
 
+const SECOND_DECLARATION_SAVED_STEP = 2;
+
+export function hasSavedSecondDeclarationData(declaration: {
+	secondDeclarationStep: number | null;
+}): boolean {
+	return (
+		declaration.secondDeclarationStep !== null &&
+		declaration.secondDeclarationStep >= SECOND_DECLARATION_SAVED_STEP
+	);
+}
+
 export type SubmissionLockTarget =
 	| "first_declaration"
 	| "path_choice_round_1"

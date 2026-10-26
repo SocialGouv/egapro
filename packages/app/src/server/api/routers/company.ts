@@ -162,6 +162,7 @@ export const companyRouter = createTRPCRouter({
 						firstDeclarationPathChoice: declarations.firstDeclarationPathChoice,
 						secondDeclarationPathChoice:
 							declarations.secondDeclarationPathChoice,
+						secondDeclarationStep: declarations.secondDeclarationStep,
 						cseRequired: declarations.cseRequired,
 						rulesVersion: declarations.rulesVersion,
 					})
@@ -294,6 +295,7 @@ export const companyRouter = createTRPCRouter({
 					secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 					hasSubmittedSecondDeclaration:
 						submissions.hasSubmittedSecondDeclaration,
+					secondDeclarationStep: d.secondDeclarationStep,
 					hasSubmittedJointEvaluation: submissions.hasSubmittedJointEvaluation,
 					hasSubmittedCseOpinion: submissions.hasSubmittedCseOpinion,
 					cseRequired: d.cseRequired,
@@ -330,6 +332,7 @@ export const companyRouter = createTRPCRouter({
 					firstDeclarationPathChoice: null,
 					secondDeclarationPathChoice: null,
 					hasSubmittedSecondDeclaration: false,
+					secondDeclarationStep: null,
 					hasSubmittedJointEvaluation: false,
 					hasSubmittedCseOpinion: false,
 					cseRequired: false,

@@ -15,6 +15,7 @@ import {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	PUBLICATION_STEP_NUMBER,
 } from "./steps";
@@ -78,9 +79,11 @@ export function StepPageClient({
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step, skipPublicationStep);
 	const nextHref = getNextStepHref(step, skipPublicationStep);
-	const nextStep = getNextStep(step, skipPublicationStep);
-	const canNavigateNextInImpersonation =
-		isImpersonating && nextStep !== undefined && nextStep <= draft.currentStep;
+	const reachedNextHref = getReachedNextStepHref(
+		step,
+		skipPublicationStep,
+		draft.currentStep,
+	);
 	const bypassHref = getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true);
 	const mustBypassPublicationStep =
 		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
@@ -188,10 +191,10 @@ export function StepPageClient({
 						Précédent
 					</Link>
 					{isImpersonating ? (
-						canNavigateNextInImpersonation && nextHref ? (
+						reachedNextHref ? (
 							<Link
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								href={nextHref}
+								href={reachedNextHref}
 							>
 								Suivant
 							</Link>

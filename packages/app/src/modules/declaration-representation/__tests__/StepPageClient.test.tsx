@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useSession } from "next-auth/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { push, replace, mutate, mutateAsync, submitMutate } = vi.hoisted(() => ({
 	push: vi.fn(),
@@ -483,5 +484,47 @@ describe("StepPageClient — closed campaign (S23)", () => {
 		renderStep();
 
 		expect(screen.queryByText(CLOSED_BANNER)).not.toBeInTheDocument();
+	});
+});
+
+describe("StepPageClient — impersonation", () => {
+	beforeEach(() => {
+		vi.mocked(useSession).mockReturnValue({
+			data: {
+				user: {
+					id: "admin-1",
+					impersonation: { siren: "123456789", name: "Acme" },
+				},
+				expires: "2099-01-01",
+			},
+			status: "authenticated",
+		} as unknown as ReturnType<typeof useSession>);
+	});
+
+	afterEach(() => {
+		vi.mocked(useSession).mockReset();
+	});
+
+	it("links to the next step once the declarant reached it", () => {
+		renderStep({ step: 2, currentStep: 3 });
+
+		expect(screen.getByRole("link", { name: "Suivant" })).toHaveAttribute(
+			"href",
+			STEP_3_HREF,
+		);
+		expect(
+			screen.queryByRole("button", { name: "Suivant" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("offers no way forward while the next step was not reached", () => {
+		renderStep({ step: 2, currentStep: 2 });
+
+		expect(
+			screen.queryByRole("link", { name: "Suivant" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Suivant" }),
+		).not.toBeInTheDocument();
 	});
 });

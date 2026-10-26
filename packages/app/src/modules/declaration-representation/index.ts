@@ -42,6 +42,7 @@ export {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	isValidStep,
 	PUBLICATION_STEP_NUMBER,
