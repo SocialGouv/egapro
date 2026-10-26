@@ -70,16 +70,12 @@ export function isCategoryPayBasisApplicable(
 	);
 }
 
-/** Whether a job category declares pay data at all. False only when one sex
- *  has an explicit 0 on both the annual and hourly rows: the category then has
- *  no gap to declare (#3678). */
 export function isCategoryPayApplicable(
 	headcounts: CategoryHeadcounts,
 ): boolean {
-	const hasNoWomen =
-		headcounts.womenCount === 0 && headcounts.hourlyWomenCount === 0;
-	const hasNoMen = headcounts.menCount === 0 && headcounts.hourlyMenCount === 0;
-	return !hasNoWomen && !hasNoMen;
+	return CATEGORY_PAY_BASES.some((base) =>
+		isCategoryPayBasisApplicable(headcounts, base.basis),
+	);
 }
 
 /** Whether pay values must survive normalization and be rendered as data.
@@ -89,13 +85,13 @@ export function shouldRetainCategoryPayValues(
 	payValues: CategoryPayValues,
 	preserveLegacyPay: boolean,
 ): boolean {
-	return (
-		isCategoryPayApplicable(headcounts) ||
-		(preserveLegacyPay &&
-			CATEGORY_PAY_FIELDS.some((field) => {
-				const value = payValues[field];
-				return typeof value === "string" && value.trim() !== "";
-			}))
+	return CATEGORY_PAY_BASES.some((base) =>
+		shouldRetainCategoryPayBasisValues(
+			headcounts,
+			payValues,
+			preserveLegacyPay,
+			base.basis,
+		),
 	);
 }
 

@@ -214,8 +214,8 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getAllByRole("table")).toHaveLength(2);
 	});
 
-	it("does not mark isolated or crossed zeroes as non-calculable", () => {
-		const { rerender } = render(
+	it("explains crossed zeroes that disable both pay bases", () => {
+		render(
 			<CategoryRecapTable
 				category={makeCategory({
 					womenCount: 0,
@@ -227,11 +227,12 @@ describe("CategoryRecapTable", () => {
 				index={0}
 			/>,
 		);
-		expect(
-			screen.queryByText("Aucun écart à calculer"),
-		).not.toBeInTheDocument();
 
-		rerender(
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
+	it("does not mark an isolated zero as non-calculable", () => {
+		render(
 			<CategoryRecapTable
 				category={makeCategory({
 					womenCount: 0,

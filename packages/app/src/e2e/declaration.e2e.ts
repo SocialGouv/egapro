@@ -22,8 +22,8 @@ import {
 	setGipWorkforce,
 } from "./helpers/db";
 import {
-	categoryPayCells,
 	categoryPayBasisCells,
+	categoryPayCells,
 	categoryPayInput,
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,

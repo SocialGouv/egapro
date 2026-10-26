@@ -87,6 +87,46 @@ describe("CategoryForm basis-specific pay applicability (#4894)", () => {
 		expect(hourly).toBeEnabled();
 		expect(hourly).toHaveValue("18,00");
 	});
+
+	it("announces no gap to calculate when crossed zeros disable both tables", () => {
+		renderForm([
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 0,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+			},
+		]);
+
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(screen.getByTestId("category-pay-status")).toHaveTextContent(
+			"Aucun écart à calculer",
+		);
+	});
+
+	it("does not announce it while one basis stays applicable", () => {
+		renderForm([
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 2,
+			},
+		]);
+
+		expect(screen.getByTestId("category-pay-status")).toBeEmptyDOMElement();
+	});
 });
 
 function importedCategory(

@@ -226,6 +226,46 @@ describe("CategorySection", () => {
 		).toBeInTheDocument();
 	});
 
+	it("explains crossed zeros that disable both pay bases", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							womenCount: 0,
+							menCount: 3,
+							hourlyWomenCount: 3,
+							hourlyMenCount: 0,
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(screen.getByText("Aucun écart à calculer")).toBeInTheDocument();
+	});
+
+	it("does not mark a category non-calculable while one basis stays applicable", () => {
+		render(
+			<CategorySection
+				data={makeData({
+					categories: [
+						makeCategory({
+							womenCount: 0,
+							menCount: 3,
+							hourlyWomenCount: 3,
+							hourlyMenCount: 2,
+						}),
+					],
+				})}
+			/>,
+		);
+
+		expect(
+			screen.queryByText("Aucun écart à calculer"),
+		).not.toBeInTheDocument();
+	});
+
 	it("preserves legacy pay in the PDF without marking it non-calculable (#3678)", () => {
 		render(
 			<CategorySection
