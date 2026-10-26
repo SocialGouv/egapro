@@ -164,10 +164,25 @@ function ManagedRepresentationLockProvider({
 				if (reacquired) router.refresh();
 				if (result.acquired) startHeartbeat();
 				else scheduleAcquire();
-			} catch {
+			} catch (error) {
 				if (cancelled || version !== acquireVersion) return;
 				ownsLockRef.current = false;
 				setIsReadOnly(true);
+				const errorData =
+					typeof error === "object" && error !== null && "data" in error
+						? error.data
+						: null;
+				if (
+					typeof errorData === "object" &&
+					errorData !== null &&
+					"code" in errorData &&
+					errorData.code === "FORBIDDEN"
+				) {
+					clearRetry();
+					setIsUnavailable(false);
+					setHolder(null);
+					return;
+				}
 				setIsUnavailable(true);
 				setHolder(null);
 				scheduleAcquire();

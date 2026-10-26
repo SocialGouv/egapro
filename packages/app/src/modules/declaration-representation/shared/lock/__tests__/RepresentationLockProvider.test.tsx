@@ -259,6 +259,18 @@ describe("RepresentationLockProvider", () => {
 			expect(probe("unavailable")).toBe("false");
 			expect(probe("readOnly")).toBe("false");
 		});
+
+		it("stops retrying without an unavailable alert when the declaration is already submitted", async () => {
+			acquireMutateAsync.mockRejectedValue({ data: { code: "FORBIDDEN" } });
+
+			renderProvider();
+			await advance();
+			await advance(LOCK_HEARTBEAT_INTERVAL_MS * 2);
+
+			expect(acquireMutateAsync).toHaveBeenCalledTimes(1);
+			expect(probe("readOnly")).toBe("true");
+			expect(probe("unavailable")).toBe("false");
+		});
 	});
 
 	describe("heartbeat", () => {
