@@ -80,7 +80,7 @@ async function expectComplianceOptions(
 }
 
 const ETAPE_PARCOURS_CONFORMITE =
-	"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+	"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 
 // #4291 — CAS-01 closes its démarche without ever opening the compliance path,
 // and the panel used to derive that step from the company characteristics alone
@@ -397,7 +397,7 @@ export const FICHE_SCENARIOS = {
 		).toBeVisible();
 		await expect(
 			page.getByRole("heading", {
-				name: "Indicateur par catégorie de salariés",
+				name: "Indicateur par catégorie d'emplois",
 			}),
 		).toBeVisible();
 		await submitFromStep6Recap(page);
@@ -455,7 +455,7 @@ export const FICHE_SCENARIOS = {
 			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
 			await expect(
 				page.getByRole("heading", {
-					name: /Écart de rémunération par catégorie de salariés/,
+					name: /Écart de rémunération par catégorie d'emplois/,
 				}),
 			).toBeVisible();
 		} else {

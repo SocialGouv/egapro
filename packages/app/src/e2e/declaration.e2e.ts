@@ -1097,7 +1097,7 @@ test.describe("Workforce comes from the GIP file, not the company registry", () 
 			await expect(page.getByText("Étape 5 sur 6")).toBeVisible();
 			await expect(
 				page.getByRole("heading", {
-					name: /Écart de rémunération par catégorie de salariés/,
+					name: /Écart de rémunération par catégorie d'emplois/,
 				}),
 			).toBeVisible();
 		});

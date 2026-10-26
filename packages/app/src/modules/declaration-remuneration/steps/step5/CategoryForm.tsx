@@ -180,7 +180,7 @@ export function CategoryForm({
 	submitError,
 	readOnlyLabel = false,
 	referencePeriodPicker,
-	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
+	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie d'emplois, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
 	readOnly = false,
 	nextHref,

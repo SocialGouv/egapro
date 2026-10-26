@@ -199,7 +199,7 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<>
 			<View minPresenceAhead={80} wrap={false}>
-				<SectionBanner title="Écart de rémunération par catégorie de salariés" />
+				<SectionBanner title="Écart de rémunération par catégorie d'emplois" />
 				{data.categories.length > 0 ? (
 					<View style={styles.infoBody}>
 						<View

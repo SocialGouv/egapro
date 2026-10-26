@@ -10,7 +10,7 @@ const DATA_YEAR = YEAR - 1;
 const DECLARATION_RECAP =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
 const SECOND_DECLARATION_RECAP =
-	"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés";
+	"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie d'emplois";
 const TRANSMITTED_RECAP = "Télécharger le récapitulatif des éléments transmis";
 
 function build({

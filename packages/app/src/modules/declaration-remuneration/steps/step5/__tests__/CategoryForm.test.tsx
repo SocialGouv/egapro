@@ -108,7 +108,7 @@ function renderForm(
 		previousHref: remunerationStepHref(4),
 		referenceYear: 2025,
 		stepper: null,
-		title: "Catégories de salariés",
+		title: "Catégories d'emplois",
 		tooltipPrefix: "test",
 		...overrides,
 	} satisfies ComponentProps<typeof CategoryForm>;
