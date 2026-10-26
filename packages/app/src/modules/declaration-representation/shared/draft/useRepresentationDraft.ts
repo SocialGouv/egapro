@@ -21,6 +21,7 @@ type UseRepresentationDraftResult = {
 	isSaving: boolean;
 	isPendingSave: boolean;
 	saveError: string | null;
+	draftVersion: number;
 };
 
 export function useRepresentationDraft({
@@ -30,6 +31,7 @@ export function useRepresentationDraft({
 	enabled = true,
 }: UseRepresentationDraftOptions): UseRepresentationDraftResult {
 	const [draft, setDraft] = useState<RepresentationDraft>(initialDraft);
+	const [draftVersion, setDraftVersion] = useState(0);
 	const [isPendingSave, setIsPendingSave] = useState(false);
 
 	const mutation = api.representationDeclaration.saveDraft.useMutation();
@@ -102,6 +104,7 @@ export function useRepresentationDraft({
 		pendingRef.current = null;
 		draftRef.current = initialDraft;
 		setDraft(initialDraft);
+		setDraftVersion((version) => version + 1);
 	}, [cancelTimers, initialDraft]);
 
 	useEffect(() => {
@@ -163,5 +166,6 @@ export function useRepresentationDraft({
 				? "Le verrou a été perdu avant l’enregistrement. Votre dernière saisie n’a pas été enregistrée. Copiez-la avant de recharger la page."
 				: "L’enregistrement de votre saisie a échoué. Veuillez réessayer."
 			: null,
+		draftVersion,
 	};
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import { LOCK_HEARTBEAT_INTERVAL_MS } from "~/modules/domain";
 import { api } from "~/trpc/react";
@@ -60,6 +60,8 @@ function ManagedRepresentationLockProvider({
 	const [isReadOnly, setIsReadOnly] = useState(true);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isUnavailable, setIsUnavailable] = useState(false);
+	const [isWaitingForRefresh, setIsWaitingForRefresh] = useState(false);
+	const [isRefreshing, startRefresh] = useTransition();
 	const [holder, setHolder] = useState<RepresentationLockHolder | null>(null);
 	const ownsLockRef = useRef(false);
 	const hasAttemptedRef = useRef(false);
@@ -71,6 +73,12 @@ function ManagedRepresentationLockProvider({
 	const heartbeatRef = useRef(heartbeatMutation.mutateAsync);
 	acquireRef.current = acquireMutation.mutateAsync;
 	heartbeatRef.current = heartbeatMutation.mutateAsync;
+
+	useEffect(() => {
+		if (!isWaitingForRefresh || isRefreshing) return;
+		setIsWaitingForRefresh(false);
+		setIsReadOnly(false);
+	}, [isRefreshing, isWaitingForRefresh]);
 
 	const releaseBeacon = useCallback(() => {
 		if (!ownsLockRef.current) return;
@@ -150,7 +158,7 @@ function ManagedRepresentationLockProvider({
 					result.acquired && hasAttemptedRef.current && !ownsLockRef.current;
 				hasAttemptedRef.current = true;
 				ownsLockRef.current = result.acquired;
-				setIsReadOnly(!result.acquired);
+				setIsReadOnly(!result.acquired || reacquired);
 				setIsUnavailable(false);
 				setHolder(
 					result.acquired
@@ -161,7 +169,10 @@ function ManagedRepresentationLockProvider({
 								email: result.holder.email,
 							},
 				);
-				if (reacquired) router.refresh();
+				if (reacquired) {
+					setIsWaitingForRefresh(true);
+					startRefresh(() => router.refresh());
+				}
 				if (result.acquired) startHeartbeat();
 				else scheduleAcquire();
 			} catch (error) {

@@ -66,6 +66,7 @@ export function StepPageClient({
 		isSaving,
 		isPendingSave,
 		saveError,
+		draftVersion,
 	} = useRepresentationDraft({
 		year,
 		step,
@@ -176,7 +177,7 @@ export function StepPageClient({
 
 			<Stepper currentStep={step} />
 
-			<StepComponent />
+			<StepComponent key={draftVersion} />
 
 			{saveError ? (
 				<div
