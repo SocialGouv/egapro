@@ -275,5 +275,18 @@ describe("RepresentationConsultation — lignes sans valeur omises", () => {
 		expect(definitionValue(`Effectif annuel moyen en ${REFERENCE_YEAR}`)).toBe(
 			formatWorkforceForUser(1200),
 		);
+		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
+	});
+
+	it("flags the declarant as not provided when no user is recorded on the declaration", () => {
+		renderPage({}, { declarant: null });
+
+		const declarantGroup = screen.getByRole("heading", {
+			level: 3,
+			name: "Déclarant",
+		}).parentElement;
+		expect(declarantGroup).toHaveTextContent("Non renseigné");
+		expect(declarantGroup?.querySelector("dl")).toBeNull();
+		expect(definitionValue("Raison sociale")).toBe(COMPANY.name);
 	});
 });

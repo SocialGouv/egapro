@@ -698,6 +698,32 @@ describe("auditMiddleware", () => {
 		});
 	});
 
+	it("logs the read of the representation declarant's contact as a sensitive query", async () => {
+		const next = vi.fn(async () =>
+			okResult({
+				firstName: "Jeanne",
+				lastName: "Dupont",
+				email: "email@example.fr",
+				phone: "0601020304",
+			}),
+		);
+		await auditMiddleware({
+			ctx: buildCtx(),
+			type: "query",
+			path: "representationDeclaration.getDeclarant",
+			getRawInput: buildGetRawInput({ year: 2025 }),
+			next,
+		});
+
+		expect(mockLogAction).toHaveBeenCalledTimes(1);
+		expect(mockLogAction.mock.calls[0]?.[0]).toMatchObject({
+			action: "representation_declaration.get_declarant",
+			status: "success",
+			siren: "123456789",
+			metadata: { year: 2025 },
+		});
+	});
+
 	it("returns null metadata when an allowlisted path carries none of its allowed keys", async () => {
 		const next = vi.fn(async () => okResult(undefined));
 		await auditMiddleware({

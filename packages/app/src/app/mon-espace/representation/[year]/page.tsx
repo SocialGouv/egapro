@@ -70,7 +70,7 @@ export default async function RepresentationConsultationPage({
 
 	const [company, declarant, workforceHistory] = await Promise.all([
 		api.company.get({ siren }),
-		api.profile.get(),
+		api.representationDeclaration.getDeclarant({ year: referenceYear }),
 		api.representationDeclaration.getWorkforceHistory({ campaignYear }),
 	]);
 

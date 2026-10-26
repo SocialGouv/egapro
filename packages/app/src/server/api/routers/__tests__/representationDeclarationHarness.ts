@@ -44,7 +44,8 @@ export function createMockDb(rows: unknown[] = []) {
 	const rowsChain = { limit, for: forLock };
 	forLock.mockReturnValue(rowsChain);
 	const where = vi.fn().mockReturnValue(rowsChain);
-	const from = vi.fn().mockReturnValue({ where });
+	const innerJoin = vi.fn().mockReturnValue({ where });
+	const from = vi.fn().mockReturnValue({ where, innerJoin });
 	const select = vi.fn().mockReturnValue({ from });
 	// `tx` reuses the very mocks exposed below, so the assertions read the same
 	// calls whether the router went through `db` directly or through a transaction.
@@ -60,6 +61,7 @@ export function createMockDb(rows: unknown[] = []) {
 		values,
 		onConflictDoUpdate,
 		where,
+		innerJoin,
 		forLock,
 		transaction,
 	};

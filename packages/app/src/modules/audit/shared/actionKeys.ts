@@ -103,6 +103,7 @@ export const AUDIT_ACTIONS = {
 
 	// ── Representation declaration ─────────────────────────
 	REPRESENTATION_GET: "representation_declaration.get",
+	REPRESENTATION_GET_DECLARANT: "representation_declaration.get_declarant",
 	REPRESENTATION_SAVE_DRAFT: "representation_declaration.save_draft",
 	REPRESENTATION_SUBMIT: "representation_declaration.submit",
 	REPRESENTATION_DECLARE_NOT_SUBJECT:
@@ -222,6 +223,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.DRAFT_SAVE]: "mutation",
 	[AUDIT_ACTIONS.DRAFT_CLEAR]: "mutation",
 	[AUDIT_ACTIONS.REPRESENTATION_GET]: "read_sensitive",
+	[AUDIT_ACTIONS.REPRESENTATION_GET_DECLARANT]: "read_sensitive",
 	[AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT]: "mutation",
 	[AUDIT_ACTIONS.REPRESENTATION_SUBMIT]: "mutation",
 	[AUDIT_ACTIONS.REPRESENTATION_DECLARE_NOT_SUBJECT]: "mutation",

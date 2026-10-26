@@ -43,10 +43,26 @@ type Props = {
 	referenceYear: number;
 	submittedAt: Date | null;
 	company: CompanyInfo;
-	declarant: DeclarantInfo;
+	declarant: DeclarantInfo | null;
 	workforceEma: number | null;
 	draft: RepresentationDraft;
 };
+
+function declarantInfoItems(declarant: DeclarantInfo | null): InfoItem[] {
+	if (!declarant) return [];
+	const items: InfoItem[] = [];
+	const name = [declarant.firstName, declarant.lastName]
+		.filter(Boolean)
+		.join(" ");
+	if (name) items.push({ label: "Nom Prénom", value: name });
+	if (declarant.email) {
+		items.push({ label: "Adresse email", value: declarant.email });
+	}
+	if (declarant.phone) {
+		items.push({ label: "Numéro de téléphone", value: declarant.phone });
+	}
+	return items;
+}
 
 export function RepresentationConsultation({
 	campaignYear,
@@ -60,22 +76,7 @@ export function RepresentationConsultation({
 	const summary = summarizeRepresentationReview(draft, campaignYear);
 	const title = `Démarche des indicateurs de représentation ${campaignYear}`;
 
-	const declarantName = [declarant.firstName, declarant.lastName]
-		.filter(Boolean)
-		.join(" ");
-	const declarantItems: InfoItem[] = [];
-	if (declarantName) {
-		declarantItems.push({ label: "Nom Prénom", value: declarantName });
-	}
-	if (declarant.email) {
-		declarantItems.push({ label: "Adresse email", value: declarant.email });
-	}
-	if (declarant.phone) {
-		declarantItems.push({
-			label: "Numéro de téléphone",
-			value: declarant.phone,
-		});
-	}
+	const declarantItems = declarantInfoItems(declarant);
 
 	const companyItems: InfoItem[] = [
 		{ label: "Raison sociale", value: company.name },
@@ -161,7 +162,11 @@ export function RepresentationConsultation({
 									<h3 className="fr-text--md fr-text--bold fr-mb-1w">
 										Déclarant
 									</h3>
-									<InfoList items={declarantItems} />
+									{declarantItems.length > 0 ? (
+										<InfoList items={declarantItems} />
+									) : (
+										<p className="fr-text--md fr-mb-0">Non renseigné</p>
+									)}
 								</div>
 								<div>
 									<h3 className="fr-text--md fr-text--bold fr-mb-1w">

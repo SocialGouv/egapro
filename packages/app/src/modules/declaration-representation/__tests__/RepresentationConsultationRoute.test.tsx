@@ -31,6 +31,7 @@ vi.mock("~/trpc/server", () => ({
 	api: {
 		representationDeclaration: {
 			get: vi.fn(),
+			getDeclarant: vi.fn(),
 			getWorkforceHistory: vi.fn(),
 		},
 		company: { get: vi.fn() },
@@ -69,6 +70,7 @@ const DECLARANT = {
 
 const getDeclaration = vi.mocked(api.representationDeclaration.get);
 const getCompany = vi.mocked(api.company.get);
+const getDeclarant = vi.mocked(api.representationDeclaration.getDeclarant);
 const getProfile = vi.mocked(api.profile.get);
 const getWorkforceHistory = vi.mocked(
 	api.representationDeclaration.getWorkforceHistory,
@@ -97,7 +99,13 @@ beforeEach(() => {
 	mockRedirect.mockClear();
 	getDeclaration.mockReset();
 	getCompany.mockReset().mockResolvedValue(COMPANY as never);
-	getProfile.mockReset().mockResolvedValue(DECLARANT as never);
+	getDeclarant.mockReset().mockResolvedValue(DECLARANT);
+	getProfile.mockReset().mockResolvedValue({
+		firstName: "Visiteur",
+		lastName: "Collègue",
+		email: "email@example.fr",
+		phone: "0700000000",
+	} as never);
 	getWorkforceHistory.mockReset().mockResolvedValue([]);
 	mockDeclaration();
 });
@@ -180,6 +188,28 @@ describe("RepresentationConsultationPage — S6 le SIREN vient de la session", (
 				name: `Démarche des indicateurs de représentation ${CAMPAIGN_YEAR}`,
 			}),
 		).toBeInTheDocument();
+	});
+
+	it("shows the user recorded on the declaration as declarant, not the visitor", async () => {
+		await renderPage(String(CAMPAIGN_YEAR));
+
+		expect(getDeclarant).toHaveBeenCalledWith({ year: REFERENCE_YEAR });
+		expect(getProfile).not.toHaveBeenCalled();
+		expect(
+			screen.getByText("Adresse email", { selector: "dt" }).nextElementSibling,
+		).toHaveTextContent(DECLARANT.email);
+		expect(screen.queryByText("email@example.fr")).not.toBeInTheDocument();
+	});
+
+	it("renders the page when no user is recorded on the declaration", async () => {
+		getDeclarant.mockResolvedValue(null);
+
+		await renderPage(String(CAMPAIGN_YEAR));
+
+		expect(screen.getByText("Non renseigné")).toBeInTheDocument();
+		expect(
+			screen.queryByText("Adresse email", { selector: "dt" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("picks the workforce history entry matching the campaign year", async () => {
