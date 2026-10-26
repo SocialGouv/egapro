@@ -5,6 +5,7 @@ import type {
 	DeclarationFsmStatus,
 } from "~/modules/domain";
 import {
+	getCurrentCompliancePath,
 	getReferenceYearFor,
 	isJointEvaluationWritable,
 	isSecondDeclarationWritable,
@@ -12,6 +13,7 @@ import {
 } from "~/modules/domain";
 import {
 	COMPLIANCE_JOINT_EVALUATION,
+	COMPLIANCE_PATH,
 	complianceStepHref,
 	cseOpinionStepHref,
 	DECLARATION_REMUNERATION_RECAP,
@@ -38,7 +40,7 @@ const COMPLIANCE_PATH_LABELS: Record<CompliancePath, string> = {
 	justify: "Justification des écarts de rémunération",
 };
 
-const FIRST_DECLARATION_MENTION =
+const NEXT_TRANSMISSION_MENTION =
 	"Modifiable jusqu'à votre prochaine transmission";
 const SECOND_DECLARATION_MENTION =
 	"Modifiable jusqu'au choix de votre nouveau parcours";
@@ -119,7 +121,7 @@ export function Step1Content({
 					label="Votre déclaration a été transmise"
 					mention={
 						firstDeclarationModifiable && variant !== "closed"
-							? FIRST_DECLARATION_MENTION
+							? NEXT_TRANSMISSION_MENTION
 							: undefined
 					}
 					modification={
@@ -140,6 +142,7 @@ export function Step2Content({
 	campaignDeadlines,
 	declarationFsmStatus,
 	displayContext,
+	pathChoiceModifiable,
 	secondDeclarationSubmitted,
 	jointEvaluationSubmitted,
 	jointEvaluationViewAvailable,
@@ -149,6 +152,7 @@ export function Step2Content({
 	campaignDeadlines: CampaignDeadlines;
 	declarationFsmStatus: DeclarationFsmStatus | null;
 	displayContext: DeclarationDisplayContext;
+	pathChoiceModifiable: boolean;
 	secondDeclarationSubmitted: boolean;
 	jointEvaluationSubmitted: boolean;
 	jointEvaluationViewAvailable?: boolean;
@@ -174,6 +178,13 @@ export function Step2Content({
 	const secondDeclarationMention = secondDeclarationModification
 		? SECOND_DECLARATION_MENTION
 		: undefined;
+	const pathChoiceRow = pathChoiceModifiable ? (
+		<TransmittedRow
+			label="Votre choix de parcours a été transmis"
+			mention={NEXT_TRANSMISSION_MENTION}
+			modification={{ href: COMPLIANCE_PATH }}
+		/>
+	) : null;
 
 	if (variant === "compliance_choice") {
 		const pathChoiceDeadline = selectPathChoiceDeadline(
@@ -204,6 +215,7 @@ export function Step2Content({
 		return (
 			<div className={styles.stepContent}>
 				{title}
+				{pathChoiceRow}
 				<BulletList>
 					<BulletRow>{COMPLIANCE_PATH_LABELS.corrective_action}</BulletRow>
 				</BulletList>
@@ -212,9 +224,7 @@ export function Step2Content({
 		);
 	}
 
-	const activeCompliancePath =
-		displayContext.secondDeclarationPathChoice ??
-		displayContext.firstDeclarationPathChoice;
+	const activeCompliancePath = getCurrentCompliancePath(displayContext);
 
 	if (variant === "evaluation") {
 		const jointEvaluationDeadline =
@@ -236,6 +246,7 @@ export function Step2Content({
 				<div className={styles.stepContent}>
 					{title}
 					{secondDeclTransmittedRow}
+					{pathChoiceRow}
 					<DeadlineRow date={campaignDeadlines.decl2JustificationDeadline} />
 				</div>
 			);
@@ -245,6 +256,7 @@ export function Step2Content({
 			<div className={styles.stepContent}>
 				{title}
 				{secondDeclTransmittedRow}
+				{pathChoiceRow}
 				<BulletList>
 					<BulletRow>{COMPLIANCE_PATH_LABELS.joint_evaluation}</BulletRow>
 				</BulletList>
@@ -284,6 +296,7 @@ export function Step2Content({
 					viewLabel="Voir le rapport de l'évaluation conjointe"
 				/>
 			)}
+			{pathChoiceRow}
 			{displayContext.shouldShowGapJustification && (
 				<BulletList>
 					<BulletRow>{COMPLIANCE_PATH_LABELS.justify}</BulletRow>
