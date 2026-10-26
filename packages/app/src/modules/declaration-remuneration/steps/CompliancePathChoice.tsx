@@ -19,10 +19,7 @@ import {
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import {
-	getCompliancePathHref,
-	getCompliancePathPreviousHref,
-} from "~/modules/navigation";
+import { getCompliancePathHref } from "~/modules/navigation";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
@@ -280,7 +277,6 @@ export function CompliancePathChoice({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref={getCompliancePathPreviousHref(isSecondRound)}
 				/>
 			</fieldset>
 		</form>

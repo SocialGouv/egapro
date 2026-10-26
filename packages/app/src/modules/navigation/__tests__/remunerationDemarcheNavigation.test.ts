@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
-import type { CseOpinionOrigin } from "..";
 import {
-	CSE_OPINION_PREVIOUS_HREF,
 	getCompliancePathHref,
-	getCompliancePathPreviousHref,
-	getCseOpinionPreviousHref,
 	getCurrentStageHref,
 	getDemarcheResumeHref,
 	getDemarcheStageHref,
 	getPostComplianceDestination,
-	resolveCseOpinionOrigin,
 } from "..";
 
 const CONFIRMATION_PATH =
@@ -21,7 +16,6 @@ const JOINT_EVALUATION_PATH =
 	"/declaration-remuneration/parcours-conformite/evaluation-conjointe";
 const CORRECTIVE_STEP1_PATH =
 	"/declaration-remuneration/parcours-conformite/etape/1";
-const FIRST_DECLARATION_RECAP_PATH = "/declaration-remuneration/etape/6";
 const SECOND_DECLARATION_RECAP_PATH =
 	"/declaration-remuneration/parcours-conformite/etape/3";
 const TUNNEL_ENTRY_PATH = "/declaration-remuneration";
@@ -157,194 +151,5 @@ describe("getCompliancePathHref", () => {
 
 	it("routes justify to the confirmation page when no opinion is due", () => {
 		expect(getCompliancePathHref("justify", false)).toBe(CONFIRMATION_PATH);
-	});
-});
-
-describe("resolveCseOpinionOrigin", () => {
-	it.each([
-		[
-			"direct submit (no gap, round 1)",
-			{
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			"submit_to_cse_opinion_directly",
-		],
-		[
-			"justify chosen in round 1",
-			{
-				firstDeclarationPathChoice: "justify",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			"choose_path_initial_justify_with_cse",
-		],
-		[
-			"joint evaluation submitted in round 1",
-			{
-				firstDeclarationPathChoice: "joint_evaluation",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			"submit_joint_evaluation_initial_with_cse",
-		],
-		[
-			"second declaration submitted with the gap resolved",
-			{
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: true,
-			},
-			"submit_second_declaration_resolved_with_cse",
-		],
-		[
-			"justify chosen in round 2",
-			{
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: "justify",
-				hasSubmittedSecondDeclaration: true,
-			},
-			"choose_path_revised_justify_with_cse",
-		],
-		[
-			"joint evaluation submitted in round 2",
-			{
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: "joint_evaluation",
-				hasSubmittedSecondDeclaration: true,
-			},
-			"submit_joint_evaluation_revised_with_cse",
-		],
-	] as const)("names %s as its engine transition", (_case, context, origin) => {
-		expect(resolveCseOpinionOrigin(context)).toBe(origin);
-	});
-
-	it("prefers the round-2 choice once the second declaration is submitted", () => {
-		expect(
-			resolveCseOpinionOrigin({
-				firstDeclarationPathChoice: "justify",
-				secondDeclarationPathChoice: "joint_evaluation",
-				hasSubmittedSecondDeclaration: true,
-			}),
-		).toBe("submit_joint_evaluation_revised_with_cse");
-	});
-
-	it("reaches every branch of the provenance table", () => {
-		const contexts = [
-			{
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			{
-				firstDeclarationPathChoice: "justify",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			{
-				firstDeclarationPathChoice: "joint_evaluation",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			},
-			{
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: true,
-			},
-			{
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: "justify",
-				hasSubmittedSecondDeclaration: true,
-			},
-			{
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: "joint_evaluation",
-				hasSubmittedSecondDeclaration: true,
-			},
-		] as const;
-		const reached = new Set<CseOpinionOrigin>(
-			contexts.map((context) => resolveCseOpinionOrigin(context)),
-		);
-
-		expect([...reached].sort()).toEqual(
-			Object.keys(CSE_OPINION_PREVIOUS_HREF).sort(),
-		);
-	});
-});
-
-describe("getCseOpinionPreviousHref", () => {
-	it("returns first-decl recap step when arriving from direct submit (no gap, round 1)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: null,
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			}),
-		).toBe(FIRST_DECLARATION_RECAP_PATH);
-	});
-
-	it("returns the compliance path choice when path = justify (round 1)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: "justify",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			}),
-		).toBe(COMPLIANCE_PATH_PATH);
-	});
-
-	it("returns the joint evaluation page when path = joint_evaluation (round 1)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: "joint_evaluation",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: false,
-			}),
-		).toBe(JOINT_EVALUATION_PATH);
-	});
-
-	it("returns second-decl recap step when second decl submitted with no revision (resolved)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: null,
-				hasSubmittedSecondDeclaration: true,
-			}),
-		).toBe(SECOND_DECLARATION_RECAP_PATH);
-	});
-
-	it("returns the compliance path choice when second-decl path = justify (round 2)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: "justify",
-				hasSubmittedSecondDeclaration: true,
-			}),
-		).toBe(COMPLIANCE_PATH_PATH);
-	});
-
-	it("returns the joint evaluation page when second-decl path = joint_evaluation (round 2)", () => {
-		expect(
-			getCseOpinionPreviousHref({
-				firstDeclarationPathChoice: "corrective_action",
-				secondDeclarationPathChoice: "joint_evaluation",
-				hasSubmittedSecondDeclaration: true,
-			}),
-		).toBe(JOINT_EVALUATION_PATH);
-	});
-});
-
-describe("getCompliancePathPreviousHref", () => {
-	it("returns the first-declaration recap when the path choice is still round 1", () => {
-		expect(getCompliancePathPreviousHref(false)).toBe(
-			FIRST_DECLARATION_RECAP_PATH,
-		);
-	});
-
-	it("returns the second-declaration recap when the path choice is round 2", () => {
-		expect(getCompliancePathPreviousHref(true)).toBe(
-			SECOND_DECLARATION_RECAP_PATH,
-		);
 	});
 });

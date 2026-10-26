@@ -422,32 +422,15 @@ describe("Step1Opinions", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders previous and next buttons", () => {
+	it("renders the next button without a previous link back to a transmitted step", () => {
 		render(
 			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
 		);
 
-		expect(screen.getByRole("link", { name: /Précédent/ })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/6",
-		);
+		expect(
+			screen.queryByRole("link", { name: /Précédent/ }),
+		).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /Suivant/ })).toBeInTheDocument();
-	});
-
-	it("uses the previousHref prop when provided", () => {
-		render(
-			<Step1Opinions
-				cseDeadline={cseDeadline}
-				previousHref="/declaration-remuneration/parcours-conformite"
-				siren="123456789"
-				year={2026}
-			/>,
-		);
-
-		expect(screen.getByRole("link", { name: /Précédent/ })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite",
-		);
 	});
 
 	it("shows validation error when submitting empty form", async () => {

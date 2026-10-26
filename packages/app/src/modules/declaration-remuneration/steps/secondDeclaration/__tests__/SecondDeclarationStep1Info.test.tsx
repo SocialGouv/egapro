@@ -70,13 +70,12 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders previous link to parcours-conformite and next to step 2", () => {
+	it("renders next to step 2 without a previous link back to the transmitted path choice", () => {
 		renderStep1();
 
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/parcours-conformite/etape/2",
@@ -134,7 +133,7 @@ describe("SecondDeclarationStep1Info", () => {
 		renderStep1();
 
 		expect(
-			screen.getByRole("link", { name: /précédent/i }).parentElement,
+			screen.getByRole("link", { name: /suivant/i }).parentElement,
 		).toHaveClass("fr-mt-0");
 	});
 });
