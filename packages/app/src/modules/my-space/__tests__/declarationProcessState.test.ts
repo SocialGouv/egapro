@@ -5,6 +5,7 @@ import {
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
 	representationStepHref,
 } from "~/modules/routes";
 import {
@@ -18,6 +19,8 @@ import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
 const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
+const CAMPAIGN_YEAR = 2026;
+const CONSULTATION_HREF = mySpaceRepresentationHref(CAMPAIGN_YEAR);
 const CAMPAIGN_OPEN = true;
 const CAMPAIGN_CLOSED = false;
 
@@ -171,14 +174,18 @@ describe("computeRepresentationPanelVariant", () => {
 
 describe("computeRepresentationCtaHref", () => {
 	it("sends a company with no démarche to the funnel entry point", () => {
-		expect(computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN)).toBe(
-			DECLARATION_REPRESENTATION,
-		);
+		expect(
+			computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN, CAMPAIGN_YEAR),
+		).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("sends a listed-but-unopened démarche to the funnel entry point", () => {
 		expect(
-			computeRepresentationCtaHref(makeRepresentation(), CAMPAIGN_OPEN),
+			computeRepresentationCtaHref(
+				makeRepresentation(),
+				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
+			),
 		).toBe(DECLARATION_REPRESENTATION);
 	});
 
@@ -187,6 +194,7 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "in_progress", currentStep: 3 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(representationStepHref(3));
 	});
@@ -196,17 +204,19 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "in_progress", currentStep: 0 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(representationStepHref(1));
 	});
 
-	it("sends a transmitted démarche to its recap", () => {
+	it("sends a transmitted démarche to its consultation page", () => {
 		expect(
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "done", currentStep: 5 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
-		).toBe(RECAP_HREF);
+		).toBe(CONSULTATION_HREF);
 	});
 
 	it("sends a non-subject démarche back to the funnel entry point, so it stays reversible", () => {
@@ -214,30 +224,45 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation(NOT_SUBJECT),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(DECLARATION_REPRESENTATION);
 	});
 
-	it("sends a non-subject démarche to the recap once the campaign is closed", () => {
+	it("sends a non-subject démarche to the funnel recap once the campaign is closed", () => {
 		expect(
 			computeRepresentationCtaHref(
 				makeRepresentation(NOT_SUBJECT),
 				CAMPAIGN_CLOSED,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(RECAP_HREF);
 	});
 
-	it("sends every démarche state to the recap once the campaign is closed", () => {
+	it("sends a transmitted démarche to its consultation page once the campaign is closed", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation({ status: "done", currentStep: 5 }),
+				CAMPAIGN_CLOSED,
+				CAMPAIGN_YEAR,
+			),
+		).toBe(CONSULTATION_HREF);
+	});
+
+	it("sends every non-transmitted démarche state to the funnel recap once the campaign is closed", () => {
 		const declarations = [
 			undefined,
 			makeRepresentation(),
 			makeRepresentation({ status: "in_progress", currentStep: 3 }),
-			makeRepresentation({ status: "done", currentStep: 5 }),
 		];
 		for (const declaration of declarations) {
-			expect(computeRepresentationCtaHref(declaration, CAMPAIGN_CLOSED)).toBe(
-				RECAP_HREF,
-			);
+			expect(
+				computeRepresentationCtaHref(
+					declaration,
+					CAMPAIGN_CLOSED,
+					CAMPAIGN_YEAR,
+				),
+			).toBe(RECAP_HREF);
 		}
 	});
 });

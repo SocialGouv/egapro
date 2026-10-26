@@ -31,6 +31,8 @@ function renderItem(
 		category?: EmployeeCategory & { id: number };
 		errors?: FieldError[];
 		payApplicable?: boolean;
+		annualPayApplicable?: boolean;
+		hourlyPayApplicable?: boolean;
 	} = {},
 ) {
 	const { category: categoryOverride, ...rest } = overrides;
@@ -39,15 +41,20 @@ function renderItem(
 
 function TestItem({
 	category: categoryOverride,
+	annualPayApplicable,
+	hourlyPayApplicable,
 	...overrides
 }: {
 	nameError?: string;
 	category?: EmployeeCategory & { id: number };
 	errors?: FieldError[];
 	payApplicable?: boolean;
+	annualPayApplicable?: boolean;
+	hourlyPayApplicable?: boolean;
 }) {
 	return (
 		<CategoryAccordionItem
+			annualPayApplicable={annualPayApplicable}
 			baseId="cat-form"
 			category={categoryOverride ?? category}
 			collapseRef={vi.fn()}
@@ -56,6 +63,7 @@ function TestItem({
 			errors={[]}
 			fieldId="field-1"
 			headerRef={vi.fn()}
+			hourlyPayApplicable={hourlyPayApplicable}
 			index={0}
 			isExpanded
 			nameProps={{}}

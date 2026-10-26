@@ -37,7 +37,7 @@ export function Breadcrumb({ items }: Props) {
 			<div className="fr-collapse" id={collapseId}>
 				<ol className="fr-breadcrumb__list">
 					{parentItems.map((item) => (
-						<li key={item.href ?? item.label}>
+						<li key={`${item.href ?? HOME}-${item.label}`}>
 							<Link className="fr-breadcrumb__link" href={item.href ?? HOME}>
 								{item.label}
 							</Link>

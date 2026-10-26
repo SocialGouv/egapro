@@ -8,6 +8,7 @@ import {
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { markDeclarationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompliancePathChoice } from "../CompliancePathChoice";
@@ -122,7 +123,8 @@ describe("CompliancePathChoice — mutation error surface", () => {
 });
 
 describe("CompliancePathChoice", () => {
-	it("renders the page title and success banner", () => {
+	it("renders the page title and success banner after a declaration transmission", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
@@ -130,6 +132,23 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByText("Votre déclaration a été transmise"),
 		).toBeInTheDocument();
+	});
+
+	it("hides the success banner when the page is reached without a transmission", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the success banner only once per transmission", () => {
+		markDeclarationTransmissionSuccess();
+		const { unmount } = render(compliancePathChoice());
+		unmount();
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
 	});
 
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
@@ -329,6 +348,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("tells a modifiable declaration it stays modifiable until a later transmission, with no date", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Vous pouvez modifier votre déclaration jusqu'à ce que/),
@@ -336,6 +356,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("drops the modification sentence when the declaration is no longer modifiable", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ declarationModifiable: false }));
 		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
 		expect(
@@ -373,6 +394,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("renders the email in the success banner", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ email: "john@company.fr" }));
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});

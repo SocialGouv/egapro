@@ -97,7 +97,7 @@ export function DeclarationPdfDocument({ data }: Props) {
 						</>
 					)}
 
-					<CategorySection data={data} />
+					{data.indicatorGRequired && <CategorySection data={data} />}
 				</View>
 			</Page>
 		</Document>

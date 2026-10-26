@@ -4,6 +4,7 @@ import { AUDIT_ACTIONS } from "~/modules/audit";
 import {
 	declareRepresentationNotSubjectSchema,
 	getRepresentationDeclarationSchema,
+	getRepresentationWorkforceHistorySchema,
 	saveRepresentationDraftSchema,
 	submitRepresentationDeclarationSchema,
 	submitRepresentationSchema,
@@ -12,6 +13,7 @@ import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation
 import {
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	deriveExecutivesNotComputableReason,
+	getCurrentDate,
 	getRepresentationCampaignYear,
 	isRepresentationCampaignOpen,
 	isRepresentationDeclarationSubmitted,
@@ -27,7 +29,12 @@ import { buildRequestContext } from "~/server/audit/requestContext";
 import type { DB } from "~/server/db";
 import { GLOBAL_SETTINGS_ID } from "~/server/db/getGlobalSettings";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
-import { globalSettings, representationDeclarations } from "~/server/db/schema";
+import { getRepresentationWorkforceHistory } from "~/server/db/getRepresentationWorkforceHistory";
+import {
+	globalSettings,
+	representationDeclarations,
+	users,
+} from "~/server/db/schema";
 import {
 	acquireOrRefreshRepresentationLock,
 	assertRepresentationLockHeld,
@@ -46,7 +53,7 @@ async function assertRepresentationCampaignOpen(year: number): Promise<void> {
 	const campaign = await getRepresentationCampaign(
 		getRepresentationCampaignYear(year),
 	);
-	if (!isRepresentationCampaignOpen(campaign, new Date())) {
+	if (!isRepresentationCampaignOpen(campaign, getCurrentDate())) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: CAMPAIGN_CLOSED_MESSAGE,
@@ -245,10 +252,40 @@ export const representationDeclarationRouter = createTRPCRouter({
 
 			return {
 				declaration: rows[0] ?? null,
-				campaignOpen: isRepresentationCampaignOpen(campaign, new Date()),
+				campaignOpen: isRepresentationCampaignOpen(campaign, getCurrentDate()),
 				declarationDeadline: campaign.declarationDeadline,
 			};
 		}),
+
+	getDeclarant: companyProcedure
+		.input(getRepresentationDeclarationSchema)
+		.query(async ({ ctx, input }) => {
+			const rows = await ctx.db
+				.select({
+					firstName: users.firstName,
+					lastName: users.lastName,
+					email: users.email,
+					phone: users.phone,
+				})
+				.from(representationDeclarations)
+				.innerJoin(users, eq(representationDeclarations.declarantId, users.id))
+				.where(
+					and(
+						eq(representationDeclarations.siren, ctx.siren),
+						eq(representationDeclarations.year, input.year),
+						eq(representationDeclarations.status, "submitted"),
+					),
+				)
+				.limit(1);
+
+			return rows[0] ?? null;
+		}),
+
+	getWorkforceHistory: companyProcedure
+		.input(getRepresentationWorkforceHistorySchema)
+		.query(({ ctx, input }) =>
+			getRepresentationWorkforceHistory(ctx.siren, input.campaignYear),
+		),
 
 	saveDraft: companyWriteProcedure
 		.input(saveRepresentationDraftSchema)

@@ -56,6 +56,79 @@ function row(name: string): EmployeeCategoryRow {
 	};
 }
 
+describe("CategoryForm basis-specific pay applicability (#4894)", () => {
+	it("disables and clears the annual table while preserving hourly pay", () => {
+		renderForm([
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 2,
+				hourlyWomenCount: 2,
+				hourlyMenCount: 2,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				annualVariableWomen: "5000",
+				annualVariableMen: "6000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+				hourlyVariableWomen: "3",
+				hourlyVariableMen: "4",
+			},
+		]);
+
+		const annual = screen.getByLabelText(
+			"Salaire de base annuel femmes, catégorie 1",
+		);
+		const hourly = screen.getByLabelText(
+			"Salaire de base horaire femmes, catégorie 1",
+		);
+		expect(annual).toBeDisabled();
+		expect(annual).toHaveValue("");
+		expect(hourly).toBeEnabled();
+		expect(hourly).toHaveValue("18,00");
+	});
+
+	it("announces no gap to calculate when crossed zeros disable both tables", () => {
+		renderForm([
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 0,
+				annualBaseWomen: "30000",
+				annualBaseMen: "32000",
+				hourlyBaseWomen: "18",
+				hourlyBaseMen: "19",
+			},
+		]);
+
+		expect(
+			screen.getByLabelText("Salaire de base annuel femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(
+			screen.getByLabelText("Salaire de base horaire femmes, catégorie 1"),
+		).toBeDisabled();
+		expect(screen.getByTestId("category-pay-status")).toHaveTextContent(
+			"Aucun écart à calculer",
+		);
+	});
+
+	it("does not announce it while one basis stays applicable", () => {
+		renderForm([
+			{
+				...row("Cadres"),
+				womenCount: 0,
+				menCount: 3,
+				hourlyWomenCount: 3,
+				hourlyMenCount: 2,
+			},
+		]);
+
+		expect(screen.getByTestId("category-pay-status")).toBeEmptyDOMElement();
+	});
+});
+
 function importedCategory(
 	id: number,
 	name: string,

@@ -6,6 +6,7 @@ import { env } from "~/env.js";
 import { MatomoAnalytics } from "~/modules/analytics";
 import { SessionProviderWrapper } from "~/modules/auth";
 import {
+	CampaignYearInitScript,
 	Header,
 	ImpersonateBanner,
 	PublicChrome,
@@ -38,6 +39,10 @@ export default async function RootLayout({
 				<Script id="dsfr-theme-init" nonce={nonce} strategy="beforeInteractive">
 					{`(function(){var c=document.cookie.match(/(?:^|; )fr-theme=([^;]*)/);if(c)document.documentElement.setAttribute('data-fr-scheme',decodeURIComponent(c[1]));})();`}
 				</Script>
+				<CampaignYearInitScript
+					nonce={nonce}
+					year={env.EGAPRO_RECETTE_CAMPAIGN_YEAR}
+				/>
 				<link href="/dsfr/dsfr.min.css" rel="stylesheet" />
 				<link href="/dsfr/utility/icons/icons.min.css" rel="stylesheet" />
 				<link href="/dsfr/utility/colors/colors.min.css" rel="stylesheet" />

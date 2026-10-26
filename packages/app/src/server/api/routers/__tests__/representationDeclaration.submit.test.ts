@@ -21,10 +21,12 @@ import {
 	VALIDATION_MESSAGES,
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import { writeCampaignYearOverride } from "~/modules/domain";
 import { RepresentationLockConflictError } from "~/server/services/representationDeclarationLockService";
 import {
 	buildSession,
 	CLOSED_CAMPAIGN,
+	CLOSED_CAMPAIGN_YEAR,
 	CLOSED_MESSAGE,
 	conflictSet,
 	createCaller,
@@ -255,6 +257,16 @@ describe("representationDeclarationRouter.submit", () => {
 			message: CLOSED_MESSAGE,
 		});
 		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	it("submits while the pinned campaign year falls inside the campaign window", async () => {
+		writeCampaignYearOverride(CLOSED_CAMPAIGN_YEAR);
+		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+		const mock = createMockDb();
+
+		await submit(mock, FULL_PAYLOAD);
+
+		expect(mock.insert).toHaveBeenCalledOnce();
 	});
 
 	it("refuses to write without holding the declaration lock", async () => {

@@ -4,6 +4,7 @@ export { Header } from "./Header";
 export { ImpersonateBanner } from "./ImpersonateBanner";
 export { PublicChrome } from "./PublicChrome";
 export { ResourceBanner } from "./ResourceBanner";
+export { CampaignYearInitScript } from "./shared/CampaignYearInitScript";
 export { DsfrPictogram } from "./shared/DsfrPictogram";
 export { NewTabNotice } from "./shared/NewTabNotice";
 export { RouteScrollReset } from "./shared/RouteScrollReset";
