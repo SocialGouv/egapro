@@ -233,13 +233,13 @@ describe("Step5EmployeeCategories", () => {
 			screen.getAllByRole("columnheader", { name: "Donnée" }),
 		).toHaveLength(2);
 		expect(
-			screen.getByRole("columnheader", { name: "Nombre de salariés" }),
+			screen.getByRole("columnheader", { name: "Base de rémunération" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+			screen.getByRole("rowheader", { name: /^Rémunération annuelle/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
+			screen.getByRole("rowheader", { name: /^Rémunération horaire/ }),
 		).toBeInTheDocument();
 		expect(
 			screen.getAllByRole("rowheader", { name: "Salaire de base" }),
@@ -256,10 +256,10 @@ describe("Step5EmployeeCategories", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("columnheader", { name: "Femmes" }),
+			screen.getByRole("columnheader", { name: "Nombre de femmes" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("columnheader", { name: "Hommes" }),
+			screen.getByRole("columnheader", { name: "Nombre d'hommes" }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("columnheader", { name: "Total" }),
@@ -270,6 +270,30 @@ describe("Step5EmployeeCategories", () => {
 		expect(
 			screen.getAllByText("Seuil réglementaire : 5%").length,
 		).toBeGreaterThanOrEqual(1);
+	});
+
+	it("explains on each headcount row that the counts are the women and men taken into account", () => {
+		render(
+			<Step5EmployeeCategories
+				declarationSiren="123456789"
+				declarationYear={2025}
+				indicatorGRequired
+			/>,
+		);
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération annuelle",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération annuelle.",
+		);
+		expect(
+			screen.getByRole("button", {
+				name: "Information sur l'effectif de la rémunération horaire",
+			}),
+		).toHaveAccessibleDescription(
+			"Nombre de femmes et d'hommes pris en compte pour le calcul de la rémunération horaire.",
+		);
 	});
 
 	it("keeps each category table in a reflowable frame", () => {
@@ -1005,7 +1029,9 @@ describe("Step5EmployeeCategories", () => {
 
 describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 	function workforceRow(label: string) {
-		const rowHeader = screen.getByRole("rowheader", { name: label });
+		const rowHeader = screen.getByRole("rowheader", {
+			name: new RegExp(`^${label}`),
+		});
 		const row = rowHeader.closest("tr");
 		if (!row) throw new Error(`No row for ${label}`);
 		return within(row as HTMLElement);

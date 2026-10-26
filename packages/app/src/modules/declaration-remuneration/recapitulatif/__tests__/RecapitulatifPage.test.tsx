@@ -179,7 +179,9 @@ describe("RecapitulatifPage", () => {
 				name: /Effectifs physiques pris en compte/,
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Nombre de salariés")).toBeInTheDocument();
+		expect(
+			screen.getByRole("columnheader", { name: "Base de rémunération" }),
+		).toBeInTheDocument();
 		// Workforce: 120 women + 130 men = 250 total. The same "250" also
 		// appears in the company info row, hence getAllByText.
 		expect(screen.getAllByText("250").length).toBeGreaterThanOrEqual(1);
