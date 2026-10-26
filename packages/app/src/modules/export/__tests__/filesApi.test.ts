@@ -3,6 +3,7 @@ import { db } from "~/server/db";
 
 const mockFetchCseFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchJointFiles = vi.fn().mockResolvedValue(new Map());
+const mockFetchFormalNoticeJointFiles = vi.fn().mockResolvedValue(new Map());
 const mockFetchFileById = vi.fn().mockResolvedValue(undefined);
 const mockFetchFileBySiren = vi.fn().mockResolvedValue(undefined);
 const mockResolveExportDeclarationId = vi
@@ -16,6 +17,8 @@ vi.mock("~/modules/export/queries", () => ({
 		mockFetchCseFiles(...args),
 	fetchJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
 		mockFetchJointFiles(...args),
+	fetchFormalNoticeJointEvaluationFilesByDeclaration: (...args: unknown[]) =>
+		mockFetchFormalNoticeJointFiles(...args),
 	fetchFileById: (...args: unknown[]) => mockFetchFileById(...args),
 	fetchFileBySiren: (...args: unknown[]) => mockFetchFileBySiren(...args),
 	fetchSubmittedDeclarations: vi.fn().mockResolvedValue([]),
@@ -73,6 +76,7 @@ describe("GET /api/v1/files", () => {
 		vi.clearAllMocks();
 		mockFetchCseFiles.mockResolvedValue(new Map());
 		mockFetchJointFiles.mockResolvedValue(new Map());
+		mockFetchFormalNoticeJointFiles.mockResolvedValue(new Map());
 		mockResolveExportDeclarationId.mockResolvedValue({
 			id: "decl-1",
 			cancelledAt: null,
@@ -232,6 +236,68 @@ describe("GET /api/v1/files", () => {
 			uploadedAt: "2027-03-12T09:00:00.000Z",
 			downloadUrl: "/api/v1/files/joint-1",
 		});
+	});
+
+	it("lists a formal notice report with its own type, apart from the compliance-path joint evaluation", async () => {
+		mockFetchJointFiles.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "joint-1",
+							declarationId: "decl-1",
+							fileName: "evaluation.pdf",
+							filePath: "123456789/2027/def.pdf",
+							uploadedAt: new Date("2027-03-12T09:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+		mockFetchFormalNoticeJointFiles.mockResolvedValue(
+			new Map([
+				[
+					"decl-1",
+					[
+						{
+							id: "formal-1",
+							declarationId: "decl-1",
+							fileName: "mise-en-demeure.pdf",
+							filePath: "123456789/2027/ghi.pdf",
+							uploadedAt: new Date("2028-02-01T09:00:00Z"),
+						},
+					],
+				],
+			]),
+		);
+
+		const { GET } = await import("~/app/api/v1/files/route");
+		const response = await GET(
+			gatewayForwardedRequest(
+				"http://localhost/api/v1/files?siren=123456789&year=2027",
+			),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mockFetchFormalNoticeJointFiles).toHaveBeenCalledWith(["decl-1"]);
+		const body = await response.json();
+		expect(body.files).toEqual([
+			{
+				id: "joint-1",
+				type: "joint_evaluation",
+				fileName: "evaluation.pdf",
+				uploadedAt: "2027-03-12T09:00:00.000Z",
+				downloadUrl: "/api/v1/files/joint-1",
+			},
+			{
+				id: "formal-1",
+				type: "formal_notice_joint_evaluation",
+				fileName: "mise-en-demeure.pdf",
+				uploadedAt: "2028-02-01T09:00:00.000Z",
+				downloadUrl: "/api/v1/files/formal-1",
+			},
+		]);
 	});
 
 	it("should expose a CSE file's contents, sorted by declaration number then accuracy before gap (#4535)", async () => {

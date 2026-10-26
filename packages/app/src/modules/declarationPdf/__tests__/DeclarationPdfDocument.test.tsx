@@ -91,9 +91,12 @@ vi.mock("../sections/CategorySection", async () => {
 	};
 });
 
-vi.mock("../sections/PayGapTable", async () => {
+vi.mock("../sections/PayGapTable", async (importOriginal) => {
 	const React = await import("react");
+	const actual =
+		await importOriginal<typeof import("../sections/PayGapTable")>();
 	return {
+		step2PayGapRows: actual.step2PayGapRows,
 		PayGapTable: () => {
 			mocks.payGapTable();
 			return React.createElement("div", { "data-testid": "pay-gap-table" });
@@ -194,7 +197,7 @@ describe("DeclarationPdfDocument", () => {
 		);
 		expect(
 			screen.getByText(
-				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégories de salariés 2026",
+				"Récapitulatif de la seconde déclaration des écarts de rémunération par catégorie de salariés 2026",
 			),
 		).toBeInTheDocument();
 

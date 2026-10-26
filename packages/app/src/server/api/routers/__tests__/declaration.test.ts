@@ -819,7 +819,7 @@ describe("declarationRouter", () => {
 
 	describe("submit — indicator G required by the same rule as the funnel's step 5 (#4757)", () => {
 		const INDICATOR_G_MISSING_ERROR =
-			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.";
+			"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.";
 
 		async function submitWith(options: {
 			gipWorkforceEma: string;
@@ -1832,6 +1832,20 @@ describe("declarationRouter", () => {
 	});
 
 	describe("updateStep1", () => {
+		it("rejects a zero workforce row before opening a transaction", async () => {
+			const caller = await createLockedCaller(createMockDb([mockDeclaration]));
+
+			await expect(
+				caller.updateStep1({
+					totalWomen: 0,
+					totalMen: 0,
+					hourlyWomen: 10,
+					hourlyMen: 0,
+				}),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(mockTransaction).not.toHaveBeenCalled();
+		});
+
 		it("updates totalWomen and totalMen", async () => {
 			const tx = createMockTx([mockDeclaration]);
 			mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>

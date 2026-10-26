@@ -53,6 +53,7 @@ describe("buildSuitValueTablesPage", () => {
 			"Avis_CSE[].Numero_declaration",
 			"Fichiers_CSE[].Type",
 			"Fichier_evaluation_conjointe.Type",
+			"Fichier_evaluation_conjointe_mise_en_demeure.Type",
 			"files[].type",
 			"Source_categories_emplois",
 			"Seconde_declaration.Statut",
@@ -141,6 +142,23 @@ describe("buildSuitValueTablesPage", () => {
 		expect(valuesOf("Fichier_evaluation_conjointe.Type")).toEqual([
 			"joint_evaluation",
 		]);
+		expect(
+			valuesOf("Fichier_evaluation_conjointe_mise_en_demeure.Type"),
+		).toEqual(["formal_notice_joint_evaluation"]);
+	});
+
+	it("labels the formal notice deposit with its validated wording", () => {
+		const row = tableFor("Historique_statuts[].Statut").rows.find(
+			(candidate) =>
+				candidate.value === "formal_notice_joint_evaluation_submit",
+		);
+
+		expect(row?.label).toBe(
+			"Dépôt du rapport d'évaluation conjointe suite à mise en demeure",
+		);
+		expect(valuesOf("Historique_statuts[].Libelle_statut")).toContain(
+			"Dépôt du rapport d'évaluation conjointe suite à mise en demeure",
+		);
 	});
 
 	it("keeps the four active job-category sources and the three historical ones", () => {

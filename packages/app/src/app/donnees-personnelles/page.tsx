@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { PrivacyPolicyPage } from "~/modules/legal";
 
 export const metadata: Metadata = {
-	title: "Données personnelles",
+	title: "Politique de confidentialité",
 	description:
-		"Politique de confidentialité d'Index Egapro : données collectées, finalités, droits des utilisateurs et cookies.",
+		"Politique de confidentialité d'Egapro : données collectées, finalités, droits des utilisateurs et cookies.",
 };
 
 export default function Page() {

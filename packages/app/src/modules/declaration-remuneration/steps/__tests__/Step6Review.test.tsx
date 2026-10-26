@@ -304,7 +304,7 @@ describe("Step6Review", () => {
 	it("shows why the server refused the submission", () => {
 		mockSubmitState.error = {
 			message:
-				"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+				"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.",
 			data: { code: "PRECONDITION_FAILED" },
 		};
 		renderSubmissionReview();
@@ -313,7 +313,7 @@ describe("Step6Review", () => {
 
 		const alert = within(modal).getByRole("alert", { hidden: true });
 		expect(alert).toHaveTextContent(
-			"L'indicateur par catégories de salariés doit être renseigné avant la transmission de la déclaration.",
+			"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.",
 		);
 	});
 
@@ -468,7 +468,7 @@ describe("Step6Review", () => {
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateur par catégories de salariés"),
+			screen.getByText("Indicateur par catégorie de salariés"),
 		).toBeInTheDocument();
 	});
 
@@ -516,7 +516,7 @@ describe("Step6Review", () => {
 			).length,
 		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getAllByText("Écart de rémunération par catégories de salariés")
+			screen.getAllByText("Écart de rémunération par catégorie de salariés")
 				.length,
 		).toBeGreaterThanOrEqual(1);
 	});

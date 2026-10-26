@@ -12,12 +12,15 @@ import {
 } from "~/modules/admin/settings/schemas";
 import {
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	getDefaultCampaignDeadlineColumns,
 	getDefaultCampaignDeadlines,
 	getDefaultRepresentationCampaign,
 	getPathChoiceDeadline,
 	getPathChoiceRound1Deadline,
+	toPersistedIsoDate,
 } from "~/modules/domain";
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
+import { GLOBAL_SETTINGS_ID } from "~/server/db/getGlobalSettings";
 import {
 	campaignDeadlines,
 	globalSettings,
@@ -63,10 +66,12 @@ export const adminSettingsRouter = createTRPCRouter({
 				.limit(1);
 
 			const pathChoiceDeadlines = {
-				pathChoiceRound1Deadline: toIsoDate(
+				pathChoiceRound1Deadline: toPersistedIsoDate(
 					getPathChoiceRound1Deadline(input.year),
 				),
-				pathChoiceDeadline: toIsoDate(getPathChoiceDeadline(input.year)),
+				pathChoiceDeadline: toPersistedIsoDate(
+					getPathChoiceDeadline(input.year),
+				),
 			};
 
 			if (row) {
@@ -95,25 +100,7 @@ export const adminSettingsRouter = createTRPCRouter({
 				gipPublicationDate: toNullableIsoDate(defaults.gipPublicationDate),
 				campaignStartDate: toNullableIsoDate(defaults.campaignStartDate),
 				publicDataReleaseDate: null,
-				decl1ModificationDeadline: toIsoDate(
-					defaults.decl1ModificationDeadline,
-				),
-				decl1JustificationDeadline: toIsoDate(
-					defaults.decl1JustificationDeadline,
-				),
-				decl1JointEvaluationDeadline: toIsoDate(
-					defaults.decl1JointEvaluationDeadline,
-				),
-				decl2ModificationDeadline: toIsoDate(
-					defaults.decl2ModificationDeadline,
-				),
-				decl2JustificationDeadline: toIsoDate(
-					defaults.decl2JustificationDeadline,
-				),
-				decl2JointEvaluationDeadline: toIsoDate(
-					defaults.decl2JointEvaluationDeadline,
-				),
-				decl2CseOpinionDeadline: toIsoDate(defaults.decl2CseOpinionDeadline),
+				...getDefaultCampaignDeadlineColumns(input.year),
 			};
 		}),
 
@@ -124,7 +111,7 @@ export const adminSettingsRouter = createTRPCRouter({
 					globalSettings.declarationLockTimeoutMinutes,
 			})
 			.from(globalSettings)
-			.where(eq(globalSettings.id, 1))
+			.where(eq(globalSettings.id, GLOBAL_SETTINGS_ID))
 			.limit(1);
 
 		return {
@@ -136,14 +123,24 @@ export const adminSettingsRouter = createTRPCRouter({
 	updateLockTimeout: adminProcedure
 		.input(updateLockTimeoutSchema)
 		.mutation(async ({ ctx, input }) => {
+			const updatedAt = new Date();
+			const updatedBy = ctx.session.user.id;
 			await ctx.db
-				.update(globalSettings)
-				.set({
+				.insert(globalSettings)
+				.values({
+					id: GLOBAL_SETTINGS_ID,
 					declarationLockTimeoutMinutes: input.timeoutMinutes,
-					updatedAt: new Date(),
-					updatedBy: ctx.session.user.id,
+					updatedAt,
+					updatedBy,
 				})
-				.where(eq(globalSettings.id, 1));
+				.onConflictDoUpdate({
+					target: globalSettings.id,
+					set: {
+						declarationLockTimeoutMinutes: input.timeoutMinutes,
+						updatedAt,
+						updatedBy,
+					},
+				});
 
 			return { success: true as const };
 		}),
@@ -209,9 +206,9 @@ export const adminSettingsRouter = createTRPCRouter({
 			return {
 				year: input.year,
 				isDefault: true as const,
-				campaignStartDate: toIsoDate(defaults.campaignStartDate),
-				campaignEndDate: toIsoDate(defaults.campaignEndDate),
-				declarationDeadline: toIsoDate(defaults.declarationDeadline),
+				campaignStartDate: toPersistedIsoDate(defaults.campaignStartDate),
+				campaignEndDate: toPersistedIsoDate(defaults.campaignEndDate),
+				declarationDeadline: toPersistedIsoDate(defaults.declarationDeadline),
 			};
 		}),
 
@@ -237,12 +234,6 @@ export const adminSettingsRouter = createTRPCRouter({
 		}),
 });
 
-/** Format a civil date (UTC midnight) as its YYYY-MM-DD string. */
-function toIsoDate(date: Date): string {
-	return date.toISOString().slice(0, 10);
-}
-
-/** Format an optional Date as a YYYY-MM-DD string or null. */
 function toNullableIsoDate(date: Date | null): string | null {
-	return date ? toIsoDate(date) : null;
+	return date ? toPersistedIsoDate(date) : null;
 }

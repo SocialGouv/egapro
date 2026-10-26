@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   build-app:
+    if: ${{ !startsWith(github.ref_name, 'dependabot/') }}
     permissions:
       contents: read
       id-token: write # OIDC identity for buildkit-operator /route auth
@@ -58,7 +59,7 @@ jobs:
 
       - name: 📌 Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ vars.REGISTRY_URL }}/${{ vars.PROJECT_NAME }}/${{ github.event.repository.name }}/app
           tags: |
@@ -93,6 +94,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_EGAPRO_ENV=dev
+            NEXT_PUBLIC_DEV_FILL_ENABLED=true
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID_DEV }}
@@ -114,4 +116,3 @@ jobs:
     name: "Deploy on Kubernetes 🐳"
     uses: socialgouv/workflows/.github/workflows/use-ks-gh-review-auto-atlas.yaml@1fd37c88ffc9b2db48746d815d03c73e5148f66b # v1.16.1
     secrets: inherit
-

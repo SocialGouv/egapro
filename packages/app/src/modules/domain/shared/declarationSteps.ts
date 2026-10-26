@@ -15,7 +15,7 @@ export const DECLARATION_STEPS = [
 	{ step: 2, label: "Écart de rémunération" },
 	{ step: 3, label: "Écart de rémunération variable" },
 	{ step: 4, label: "Quartiles de rémunération" },
-	{ step: 5, label: "Écart par catégories de salariés" },
+	{ step: 5, label: "Écart par catégorie de salariés" },
 	{ step: 6, label: "Récapitulatif" },
 ] as const;
 
@@ -101,6 +101,18 @@ export const POST_SUBMIT_DROPOFF_PHASES = [
 
 export type PostSubmitDropoffPhaseKey =
 	(typeof POST_SUBMIT_DROPOFF_PHASES)[number]["key"];
+
+export type PostSubmitDropoffPhaseStatus =
+	(typeof POST_SUBMIT_DROPOFF_PHASES)[number]["status"];
+
+export function getDropoffPhaseLabel(
+	status: PostSubmitDropoffPhaseStatus,
+): string {
+	return (
+		POST_SUBMIT_DROPOFF_PHASES.find((phase) => phase.status === status)
+			?.label ?? status
+	);
+}
 
 /**
  * Funnel jalons for KPI K19 « funnel de complétion ».

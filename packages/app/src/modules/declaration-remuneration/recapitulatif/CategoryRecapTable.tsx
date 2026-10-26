@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { GapBadge } from "~/modules/declaration-remuneration/shared/GapValueBadge";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration/types";
 import {
@@ -6,9 +7,7 @@ import {
 	computeTotal,
 	computeWorkforceTotal,
 	formatCurrency,
-	formatGap,
 	formatTotal,
-	gapLevel,
 	shouldRetainCategoryPayValues,
 } from "~/modules/domain";
 import styles from "./CategoryRecapTable.module.scss";
@@ -19,16 +18,6 @@ type Props = {
 	category: EmployeeCategoryRow;
 	declarationYear: number;
 };
-
-function GapCell({ gap }: { gap: number | null }) {
-	const isHigh = gapLevel(gap) === "high";
-	return (
-		<span className={indicatorStyles.gapCell}>
-			<strong>{formatGap(gap)}</strong>
-			{isHigh && <span className={indicatorStyles.highBadge}>élevé</span>}
-		</span>
-	);
-}
 
 /** An hourly headcount can be absent on categories entered before #4254 —
  *  never invent a 0 for it. */
@@ -231,7 +220,7 @@ export function CategoryRecapTable({
 												columnIds.gap,
 											)}
 										>
-											<GapCell gap={annualBaseGap} />
+											<GapBadge gap={annualBaseGap} />
 										</td>
 									</tr>
 									<tr className={styles.regularRow}>
@@ -268,7 +257,7 @@ export function CategoryRecapTable({
 												columnIds.gap,
 											)}
 										>
-											<GapCell gap={annualVarGap} />
+											<GapBadge gap={annualVarGap} />
 										</td>
 									</tr>
 									<tr className={styles.totalRow}>
@@ -344,7 +333,7 @@ export function CategoryRecapTable({
 												columnIds.gap,
 											)}
 										>
-											<GapCell gap={hourlyBaseGap} />
+											<GapBadge gap={hourlyBaseGap} />
 										</td>
 									</tr>
 									<tr className={styles.regularRow}>
@@ -381,7 +370,7 @@ export function CategoryRecapTable({
 												columnIds.gap,
 											)}
 										>
-											<GapCell gap={hourlyVarGap} />
+											<GapBadge gap={hourlyVarGap} />
 										</td>
 									</tr>
 									<tr className={styles.totalRow}>

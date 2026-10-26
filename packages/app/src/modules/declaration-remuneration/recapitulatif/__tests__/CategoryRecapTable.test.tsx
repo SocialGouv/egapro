@@ -284,6 +284,33 @@ describe("CategoryRecapTable", () => {
 		expect(screen.getAllByText("élevé").length).toBeGreaterThanOrEqual(1);
 	});
 
+	it("shows the magnitude and favored sex for both category gap directions", () => {
+		render(
+			<CategoryRecapTable
+				category={makeCategory({
+					annualBaseWomen: "110",
+					annualBaseMen: "100",
+					annualVariableWomen: "90",
+					annualVariableMen: "100",
+				})}
+				declarationYear={2025}
+				index={0}
+			/>,
+		);
+
+		const base = screen.getAllByRole("rowheader", {
+			name: "Salaire de base",
+		})[0]?.parentElement as HTMLElement;
+		const variable = screen.getAllByRole("rowheader", {
+			name: /Composantes variables/,
+		})[0]?.parentElement as HTMLElement;
+		expect(base).toHaveTextContent("10,00 %");
+		expect(base).toHaveTextContent("en faveur des femmes");
+		expect(base).not.toHaveTextContent("-10,00 %");
+		expect(variable).toHaveTextContent("10,00 %");
+		expect(variable).toHaveTextContent("en faveur des hommes");
+	});
+
 	it("renders no 'élevé' badge when all gaps stay below the threshold", () => {
 		render(
 			<CategoryRecapTable

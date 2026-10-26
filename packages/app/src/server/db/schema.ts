@@ -43,6 +43,7 @@ export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
 	"cancel",
 	"demarche_complete",
 	"step_change",
+	"formal_notice_joint_evaluation_submit",
 ]);
 
 export const users = createTable("user", (d) => ({
@@ -630,6 +631,7 @@ export const cseOpinionsRelations = relations(cseOpinions, ({ one }) => ({
 export const fileTypeEnum = pgEnum("file_type", [
 	"cse_opinion",
 	"joint_evaluation",
+	"formal_notice_joint_evaluation",
 ]);
 
 export const files = createTable(
@@ -827,12 +829,11 @@ export const representationDeclarationsRelations = relations(
 /**
  * Global platform settings. Single-row table (`id = 1`).
  *
- * Values here are free of retention constraints: they drive campaign
- * behaviour (active year) rather than recording user actions.
+ * Values here configure platform-wide behaviour rather than recording user
+ * actions.
  */
 export const globalSettings = createTable("global_setting", (d) => ({
 	id: d.integer().notNull().primaryKey().default(1),
-	activeCampaignYear: d.integer(),
 	declarationLockTimeoutMinutes: d.integer().notNull().default(30),
 	updatedAt: d
 		.timestamp({ withTimezone: true })

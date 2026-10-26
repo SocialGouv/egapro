@@ -1,22 +1,11 @@
 import { Text, View } from "@react-pdf/renderer";
 
-import { formatSiren } from "~/modules/domain";
-
 import { styles } from "../recapPdfStyles";
 
-type Props = {
-	year: number;
-	siren: string;
-	transmittedAt: string;
-};
-
-export function PdfPageFooter({ year, siren, transmittedAt }: Props) {
+export function PdfPageFooter({ label }: { label: string }) {
 	return (
 		<View fixed style={styles.footer}>
-			<Text style={styles.footerText}>
-				Déclaration {year} - SIREN {formatSiren(siren)} - transmise le{" "}
-				{transmittedAt}
-			</Text>
+			<Text style={styles.footerText}>{label}</Text>
 			<Text
 				render={({ pageNumber, totalPages }) =>
 					`Page ${pageNumber}/${totalPages}`

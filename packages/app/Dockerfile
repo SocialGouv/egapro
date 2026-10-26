@@ -41,6 +41,8 @@ ENV SKIP_ENV_VALIDATION=1
 # Build-time args for NEXT_PUBLIC_* variables (inlined by Next.js at build time)
 ARG NEXT_PUBLIC_EGAPRO_ENV
 ENV NEXT_PUBLIC_EGAPRO_ENV=$NEXT_PUBLIC_EGAPRO_ENV
+ARG NEXT_PUBLIC_DEV_FILL_ENABLED
+ENV NEXT_PUBLIC_DEV_FILL_ENABLED=$NEXT_PUBLIC_DEV_FILL_ENABLED
 ARG NEXT_PUBLIC_SENTRY_DSN
 ENV NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_MATOMO_URL
@@ -88,7 +90,7 @@ RUN pnpm --filter notifications deploy --prod --legacy /deploy/notifications
 ARG APP_VERSION
 ARG PR_NUMBER
 ARG SENTRY_RELEASE
-RUN --mount=type=cache,id=next-cache,target=/app/packages/app/.next/cache \
+RUN --mount=type=cache,id=next-cache-v2,sharing=locked,target=/app/packages/app/.next/cache \
     --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null) \
     NEXT_PUBLIC_SENTRY_RELEASE=$(echo "$SENTRY_RELEASE" | tr '/' '-') \

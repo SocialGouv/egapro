@@ -40,8 +40,7 @@ fi
 # Env (defaults shown):
 #   EPIC_LOOP_BUDGET_E2E      15     USD max for the e2e-dev Opus run
 #   E2E_DEV_TIMEOUT           5400   seconds max (90 min — dev server + full E2E suite + recette grid when grille_scope.sh says play)
-#   E2E_WORKTREE_INDEX        <EPIC_MAX_PARALLEL or 5>   docker port index for the dedicated worktree
-#   EPIC_MAX_PARALLEL         5      used only to derive the default E2E_WORKTREE_INDEX
+#   E2E_WORKTREE_INDEX        unset  optional reserved index (5..9)
 
 set -euo pipefail
 
@@ -63,12 +62,6 @@ BRANCH="epic/${EPIC_N}"
 
 BUDGET="${EPIC_LOOP_BUDGET_E2E:-15}"
 AGENT_TIMEOUT="${E2E_DEV_TIMEOUT:-5400}"
-INDEX="${E2E_WORKTREE_INDEX:-${EPIC_MAX_PARALLEL:-5}}"
-# The dev server must bind :3000 — Charon, the OAuth proxy carrying the test
-# ProConnect login, only registers the http://localhost:3000 callback; any
-# other port 404s at the authorize step and auth.setup.ts cannot authenticate
-# the suite. The docker stack keeps its index-derived ports.
-PORT=3000
 WT_PATH="${REPO_ROOT}/../egapro-epic${EPIC_N}-e2e"
 
 # ---- Pre-flight: the integration branch must exist on origin ----
@@ -80,28 +73,38 @@ if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
     exit 1
 fi
 
-# ---- Pre-flight: port 3000 must be free (ProConnect callback constraint) ----
-# Probe with whatever listener-inspection tool exists (lsof isn't guaranteed on
-# minimal Linux hosts). If none is available, skip the check rather than
-# fail-closed on the absence of tooling — the dev server boot would then surface
-# a bind error itself.
-port_in_use() {
-    local port="$1"
-    if command -v lsof >/dev/null 2>&1; then
-        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
-    elif command -v ss >/dev/null 2>&1; then
-        ss -ltnH "sport = :$port" 2>/dev/null | grep -q .
-    elif command -v nc >/dev/null 2>&1; then
-        nc -z 127.0.0.1 "$port" >/dev/null 2>&1
-    else
-        return 1
-    fi
-}
-if port_in_use "$PORT"; then
-    echo "ERROR: port $PORT is busy — the E2E dev server must bind :3000 (ProConnect callback). Stop the process holding it and re-run." >&2
-    bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "port_3000_busy"
+# ---- Reserve an isolated E2E slot before provisioning its docker stack ----
+source "$SCRIPT_DIR/e2e_port_pool.sh"
+E2E_SLOT_ROOT="${EGAPRO_E2E_SLOT_ROOT:-${TMPDIR:-/tmp}/egapro-e2e-slots}"
+EPIC_LOCK_ROOT="$E2E_SLOT_ROOT/epics"
+mkdir -p "$EPIC_LOCK_ROOT"
+EPIC_LOCK_DIR="$EPIC_LOCK_ROOT/$EPIC_N"
+if ! mkdir "$EPIC_LOCK_DIR" 2>/dev/null; then
+    echo "ERROR: e2e-dev is already running for epic $EPIC_N" >&2
     exit 1
 fi
+
+WORKTREE_OWNED=0
+STACK_OWNED=0
+cleanup_worktree() {
+    if [ "$STACK_OWNED" -eq 1 ] && [ -d "$WT_PATH" ]; then
+        bash "$SCRIPT_DIR/log_event.sh" "$AID" TEARDOWN "wt=$WT_PATH"
+        (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/teardown-worktree.sh") >/dev/null 2>&1 || true
+    fi
+    if [ "$WORKTREE_OWNED" -eq 1 ]; then
+        (cd "$REPO_ROOT" && git worktree remove --force "$WT_PATH") >/dev/null 2>&1 || true
+    fi
+    release_e2e_index || true
+    rmdir "$EPIC_LOCK_DIR" || true
+}
+trap cleanup_worktree EXIT
+
+if ! reserve_e2e_index; then
+    bash "$SCRIPT_DIR/log_event.sh" "$AID" FAILED "e2e_slot_unavailable"
+    exit 1
+fi
+INDEX="$E2E_INDEX"
+PORT="$E2E_PORT"
 
 bash "$SCRIPT_DIR/log_event.sh" "$AID" START "epic=$EPIC_N branch=$BRANCH index=$INDEX port=$PORT"
 
@@ -118,36 +121,19 @@ TIMEOUT_PREFIX=""
 # ---- Provision a dedicated worktree (detached on origin/epic/<N>) + stack ----
 # Detached because epic/<N> is held by the main worktree; the agent pushes back
 # with `git push origin HEAD:epic/<N>`.
-cleanup_worktree() {
-    if [ -d "$WT_PATH" ]; then
-        bash "$SCRIPT_DIR/log_event.sh" "$AID" TEARDOWN "wt=$WT_PATH"
-        (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/teardown-worktree.sh") >/dev/null 2>&1 || true
-        (cd "$REPO_ROOT" && git worktree remove --force "$WT_PATH") >/dev/null 2>&1 || true
-    fi
-}
-trap cleanup_worktree EXIT
+if [ -e "$WT_PATH" ] || [ -L "$WT_PATH" ]; then
+    echo "ERROR: existing E2E worktree at $WT_PATH; remove it before retrying" >&2
+    exit 1
+fi
+bash "$SCRIPT_DIR/log_event.sh" "$AID" WORKTREE_CREATE "path=$WT_PATH base=origin/$BRANCH"
+git worktree add --detach "$WT_PATH" "origin/$BRANCH" >/dev/null 2>&1 \
+    || { bash "$SCRIPT_DIR/log_event.sh" "$AID" WORKTREE_FAIL "git worktree add failed"; exit 1; }
+WORKTREE_OWNED=1
 
-if [ ! -d "$WT_PATH" ]; then
-    bash "$SCRIPT_DIR/log_event.sh" "$AID" WORKTREE_CREATE "path=$WT_PATH base=origin/$BRANCH"
-    git worktree add --detach "$WT_PATH" "origin/$BRANCH" >/dev/null 2>&1 \
-        || { bash "$SCRIPT_DIR/log_event.sh" "$AID" WORKTREE_FAIL "git worktree add failed"; exit 1; }
-fi
-
-if [ ! -f "$WT_PATH/packages/app/.env.local" ]; then
-    bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_SETUP "setup-worktree.sh $INDEX (pnpm install + docker compose + migrations)"
-    (cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX") >/dev/null 2>&1 \
-        || { bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_FAIL "setup-worktree.sh failed (index=$INDEX)"; exit 1; }
-fi
-# setup-worktree.sh writes PORT=3001+index; the E2E run overrides it to 3000
-# (ProConnect callback constraint). Rewrite the line if present, otherwise
-# append it — a silent no-op here would let the dev server bind the wrong port
-# and break ProConnect auth. Idempotent across re-runs.
-E2E_ENV_FILE="$WT_PATH/packages/app/.env.local"
-if grep -qE '^PORT=' "$E2E_ENV_FILE"; then
-    perl -pi -e "s/^PORT=.*/PORT=$PORT/" "$E2E_ENV_FILE"
-else
-    printf '\nPORT=%s\n' "$PORT" >> "$E2E_ENV_FILE"
-fi
+bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_SETUP "setup-worktree.sh $INDEX (pnpm install + docker compose + migrations)"
+STACK_OWNED=1
+(cd "$WT_PATH" && bash "$REPO_ROOT/scripts/setup-worktree.sh" "$INDEX") >/dev/null 2>&1 \
+    || { bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_FAIL "setup-worktree.sh failed (index=$INDEX)"; exit 1; }
 
 bash "$SCRIPT_DIR/log_event.sh" "$AID" STACK_READY "wt=$WT_PATH index=$INDEX port=$PORT"
 
@@ -156,16 +142,16 @@ PROMPT="Tu es invoqué par la pipeline d'orchestration en fin d'epic #${EPIC_N},
 
 Unité à couvrir : epic #${EPIC_N} (Feature)
 Worktree : ${WT_PATH} (détaché sur origin/${BRANCH})
-Worktree index : ${INDEX} (ports docker) — dev server port = ${PORT} (imposé par le callback ProConnect)
+Worktree index : ${INDEX} (ports docker) — dev server port = ${PORT}
 Base de comparaison : origin/alpha  (le diff de la feature = origin/alpha...HEAD)
 
 L'orchestrateur a déjà :
 - créé le worktree détaché sur origin/${BRANCH}
-- lancé setup-worktree.sh ${INDEX} (stack docker + .env.local avec PORT=${PORT} + migrations OK)
+- lancé setup-worktree.sh ${INDEX} (stack docker + .env.local avec PORT=${PORT} et NEXTAUTH_URL=http://localhost:${PORT}/api/auth + migrations OK)
 
 Suivre STRICTEMENT le workflow de .claude/agents/e2e-dev/AGENT.md :
 1. Lire le diff intégré (origin/alpha...HEAD) + le body de l'epic et de ses sous-tickets, puis trancher la gate d'entrée de l'étape 1 de AGENT.md. Sur mode none, elle dit si la grille se joue quand même (grille_scope.sh) et quelles étapes suivantes sont sans objet.
-2. Démarrer le dev server sur le port ${PORT} (PORT déjà forcé dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Le port 3000 est imposé : Charon, le proxy OAuth qui porte la connexion ProConnect de test, n'enregistre que le callback :3000 — ne le change pas.
+2. Démarrer le dev server sur le port ${PORT} (PORT et NEXTAUTH_URL sont déjà cohérents dans packages/app/.env.local) et exporter PLAYWRIGHT_BASE_URL=http://localhost:${PORT}. Ne change pas ce port réservé : Charon autorise explicitement les callbacks locaux sur :3000–:3010.
 3. Lancer la suite E2E actuelle (pnpm --filter app test:e2e), puis la grille de recette selon l'étape 3 de AGENT.md (scripts/orchestration/grille_scope.sh origin/alpha), et trier les échecs selon l'étape 4.
 4. Sur >=1 régression réelle : commenter \`e2e-dev:\` sur l'epic #${EPIC_N}, NE RIEN corriger côté source, retourner {\"status\":\"regression\",...}.
 5. Sinon : corriger les E2E en échec légitime, puis décider de la couverture de la feature (imbriquer de préférence dans un scénario global existant ; nouveau fichier seulement pour un parcours/page réellement nouveaux).

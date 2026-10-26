@@ -36,12 +36,14 @@ import type { WorkforceField } from "./step1/workforceRows";
 import {
 	WORKFORCE_FIELDS,
 	WORKFORCE_ROWS,
-	workforceFieldErrorMessage,
 	workforceFieldId,
 	workforceFieldIdFromField,
 } from "./step1/workforceRows";
-
-type RawValues = Record<WorkforceField, string>;
+import {
+	getInvalidRowErrors,
+	getMissingFieldErrors,
+	type RawValues,
+} from "./step1/workforceValidationErrors";
 
 type Step1WorkforceProps = {
 	declarationSiren: string;
@@ -53,12 +55,14 @@ type Step1WorkforceProps = {
 
 const WORKFORCE_ALERT_ID = "step1-workforce-error";
 
-function toRaw(values: Step1Data): RawValues {
+function toRaw(values: Step1Data, preserveZero = false): RawValues {
+	const rawValue = (value: number) =>
+		value > 0 || preserveZero ? String(value) : "";
 	return {
-		totalWomen: values.totalWomen > 0 ? String(values.totalWomen) : "",
-		totalMen: values.totalMen > 0 ? String(values.totalMen) : "",
-		hourlyWomen: values.hourlyWomen > 0 ? String(values.hourlyWomen) : "",
-		hourlyMen: values.hourlyMen > 0 ? String(values.hourlyMen) : "",
+		totalWomen: rawValue(values.totalWomen),
+		totalMen: rawValue(values.totalMen),
+		hourlyWomen: rawValue(values.hourlyWomen),
+		hourlyMen: rawValue(values.hourlyMen),
 	};
 }
 
@@ -126,7 +130,9 @@ export function Step1Workforce({
 		hourlyMen: form.watch("hourlyMen"),
 	};
 
-	const [raw, setRaw] = useState<RawValues>(() => toRaw(initialData));
+	const [raw, setRaw] = useState<RawValues>(() =>
+		toRaw(initialData, hasInitialData),
+	);
 	const [fieldErrors, setFieldErrors] = useState<FieldError[]>([]);
 	const [validationAttempt, setValidationAttempt] = useState(0);
 
@@ -137,7 +143,7 @@ export function Step1Workforce({
 			form.setValue(field, value);
 			setRaw((prev) => ({
 				...prev,
-				[field]: value > 0 ? String(value) : "",
+				[field]: String(value),
 			}));
 		}
 	});
@@ -181,9 +187,18 @@ export function Step1Workforce({
 		});
 
 	function handleFieldChange(field: WorkforceField, value: string) {
+		setValidationError(null);
+		const changedFieldId = workforceFieldIdFromField(field);
+		const matchingRow = WORKFORCE_ROWS.find(
+			(workforceRow) =>
+				workforceRow.womenField === field || workforceRow.menField === field,
+		);
+		const rowErrorId = matchingRow && workforceFieldId(matchingRow, "women");
 		setFieldErrors((prev) =>
 			prev.filter(
-				(error) => error.fieldId !== workforceFieldIdFromField(field),
+				(error) =>
+					error.fieldId !== changedFieldId &&
+					!(error.category === "workforce" && error.fieldId === rowErrorId),
 			),
 		);
 		const parsed = parseIntegerInput(value);
@@ -212,36 +227,35 @@ export function Step1Workforce({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const onSubmit = form.handleSubmit((data) => {
-		setValidationAttempt((attempt) => attempt + 1);
-		const missing: FieldError[] = [];
-		for (const row of WORKFORCE_ROWS) {
-			if (raw[row.womenField] === "") {
-				missing.push({
-					fieldId: workforceFieldId(row, "women"),
-					category: "empty",
-					message: workforceFieldErrorMessage(row, "women"),
-				});
-			}
-			if (raw[row.menField] === "") {
-				missing.push({
-					fieldId: workforceFieldId(row, "men"),
-					category: "empty",
-					message: workforceFieldErrorMessage(row, "men"),
-				});
-			}
-		}
-		setFieldErrors(missing);
-		if (missing.length > 0) return;
+	const onSubmit = form.handleSubmit(
+		(data) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			const missing = getMissingFieldErrors(raw);
+			setFieldErrors(missing);
+			if (missing.length > 0) return;
 
-		setValidationError(null);
-		if (shouldConfirmReset) {
-			pendingSubmitData.current = data;
-			dialogRef.current?.showModal();
-			return;
-		}
-		mutation.mutate(data);
-	});
+			setValidationError(null);
+			if (shouldConfirmReset) {
+				pendingSubmitData.current = data;
+				dialogRef.current?.showModal();
+				return;
+			}
+			mutation.mutate(data);
+		},
+		(errors) => {
+			setValidationAttempt((attempt) => attempt + 1);
+			const nextFieldErrors = [
+				...getMissingFieldErrors(raw),
+				...getInvalidRowErrors(raw, errors),
+			];
+			setFieldErrors(nextFieldErrors);
+			setValidationError(
+				nextFieldErrors.length === 0
+					? "Les effectifs saisis ne sont pas valides. Vérifiez les champs et réessayez."
+					: null,
+			);
+		},
+	);
 
 	return (
 		<>

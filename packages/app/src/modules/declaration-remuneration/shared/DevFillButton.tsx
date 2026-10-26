@@ -8,7 +8,8 @@ type Props = {
 };
 
 export function DevFillButton({ onFill, disabled = false }: Props) {
-	if (env.NEXT_PUBLIC_EGAPRO_ENV !== "dev") return null;
+	if (env.NEXT_PUBLIC_EGAPRO_ENV !== "dev" || !env.NEXT_PUBLIC_DEV_FILL_ENABLED)
+		return null;
 
 	return (
 		<button

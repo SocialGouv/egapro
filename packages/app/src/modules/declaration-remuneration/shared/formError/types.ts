@@ -3,7 +3,11 @@
  * title, the message names the field in full — the input itself only carries
  * the error state, never the text (#4235).
  */
-export type FieldErrorCategory = "empty" | "invalid" | "inconsistent";
+export type FieldErrorCategory =
+	| "empty"
+	| "invalid"
+	| "workforce"
+	| "inconsistent";
 
 export type FieldError = {
 	/** DOM id of the offending input, used for `aria-describedby` and anchoring. */
@@ -17,6 +21,7 @@ export type FieldError = {
 export const FIELD_ERROR_TITLES: Record<FieldErrorCategory, string> = {
 	empty: "Champ vide",
 	invalid: "Valeur invalide",
+	workforce: "Nombre de salariés",
 	inconsistent: "Données incohérentes",
 };
 

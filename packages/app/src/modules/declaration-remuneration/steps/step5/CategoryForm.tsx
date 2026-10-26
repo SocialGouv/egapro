@@ -9,6 +9,7 @@ import {
 	categoryCorrectionFormSchema,
 	categoryFormSchema,
 } from "~/modules/declaration-remuneration/schemas";
+import { coherenceErrorLabel } from "~/modules/declaration-remuneration/shared/coherenceErrorLabel";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { DefinitionAccordion } from "~/modules/declaration-remuneration/shared/DefinitionAccordion";
 import {
@@ -193,6 +194,15 @@ export function CategoryForm({
 	const baseId = useId();
 	const nextId = useRef(createIdGenerator()).current;
 	const preserveLegacyPay = readOnly || disabled;
+	const pendingInitialNormalization = useRef(
+		!preserveLegacyPay &&
+			!!defaultValuesOverride?.categories.some((category) => {
+				const normalized = normalizeCategoryForForm(category, false);
+				return CATEGORY_PAY_FIELDS.some(
+					(field) => normalized[field] !== category[field],
+				);
+			}),
+	);
 
 	const initialCats =
 		initialCategories.length > 0
@@ -248,6 +258,11 @@ export function CategoryForm({
 			const values = form.getValues();
 			onValuesChange({ source: values.source, categories: values.categories });
 		});
+		if (pendingInitialNormalization.current) {
+			pendingInitialNormalization.current = false;
+			const values = form.getValues();
+			onValuesChange({ source: values.source, categories: values.categories });
+		}
 		return () => sub.unsubscribe();
 	}, [form, onValuesChange]);
 
@@ -492,17 +507,18 @@ export function CategoryForm({
 			const sums = sumCategoryWorkforce(normalizedData.categories);
 			const workforceErrors: FieldError[] = [];
 			for (const row of WORKFORCE_ROWS) {
-				for (const [sex, sexLabel] of [
-					["women", "femmes"],
-					["men", "hommes"],
-				] as const) {
+				for (const sex of ["women", "men"] as const) {
 					const max = maxByBasis[row.basis][sex];
 					const total = sums[row.basis][sex];
 					if (max === undefined || total === max) continue;
 					workforceErrors.push({
 						fieldId: CATEGORY_FORM_FIELD_ID,
-						category: "inconsistent",
-						message: `Le total des effectifs ${sexLabel} de la ligne « ${row.label} » (${total}) ne correspond pas à l'effectif déclaré à l'étape 1 (${max}).`,
+						category: "workforce",
+						message: coherenceErrorLabel({
+							table: row.basis,
+							field: sex,
+							expected: max,
+						}),
 					});
 				}
 			}
@@ -782,13 +798,6 @@ export function CategoryForm({
 				</div>
 			</fieldset>
 
-			<FieldErrorAlert
-				errors={categoryErrors}
-				id={CATEGORY_ALERT_ID}
-				onErrorAnchorClick={handleErrorAnchorClick}
-				validationAttempt={validationAttempt}
-			/>
-
 			<DefinitionAccordion
 				id={accordionId}
 				title="Définitions et méthode de calcul"
@@ -819,6 +828,13 @@ export function CategoryForm({
 					</ul>
 				</div>
 			</DefinitionAccordion>
+
+			<FieldErrorAlert
+				errors={categoryErrors}
+				id={CATEGORY_ALERT_ID}
+				onErrorAnchorClick={handleErrorAnchorClick}
+				validationAttempt={validationAttempt}
+			/>
 
 			<FormErrors mutationError={submitError} />
 

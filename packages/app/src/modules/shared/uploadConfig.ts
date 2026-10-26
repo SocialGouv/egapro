@@ -33,7 +33,17 @@ export const S3_PART_MIN_SIZE = 5 * 1024 * 1024;
  * Upload flow dispatched by `/api/upload` via the `X-Flow-Type` header.
  * Mirrors the `files.type` enum on the server.
  */
-export type FlowType = "cse_opinion" | "joint_evaluation";
+export const UPLOAD_FLOW_TYPES = [
+	"cse_opinion",
+	"joint_evaluation",
+	"formal_notice_joint_evaluation",
+] as const;
+
+export type FlowType = (typeof UPLOAD_FLOW_TYPES)[number];
+
+export function isUploadFlowType(value: unknown): value is FlowType {
+	return (UPLOAD_FLOW_TYPES as readonly unknown[]).includes(value);
+}
 
 /** Renders a file's format and size as "PDF – 61,88 Ko", or the format alone. */
 export function formatFileMeta(format: string, bytes: number | null): string {

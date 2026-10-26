@@ -133,7 +133,7 @@ describe("StepDropoffTable", () => {
 					buildWizardRow({
 						key: "5",
 						step: 5,
-						label: "Écart par catégories de salariés",
+						label: "Écart par catégorie de salariés",
 						total: 0,
 						abandoned: 0,
 						dropoffRate: 0,

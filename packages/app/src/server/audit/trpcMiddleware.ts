@@ -49,6 +49,9 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	// ── joint evaluation sensitive read (exposes filed report) ─
 	"jointEvaluation.getFile": AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE,
 
+	"formalNotice.get": AUDIT_ACTIONS.FORMAL_NOTICE_GET,
+	"formalNotice.submit": AUDIT_ACTIONS.FORMAL_NOTICE_SUBMIT,
+
 	// ── company mutations ──────────────────────────────────
 	"company.get": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"company.getWithDeclarations": AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,

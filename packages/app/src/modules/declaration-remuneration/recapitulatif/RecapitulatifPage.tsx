@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+	companyLocationRow,
 	formatWorkforceForUser,
 	isIndicatorGRequiredForGip,
 } from "~/modules/domain";
@@ -23,6 +24,9 @@ type CompanyInfo = {
 	siren: string;
 	nafCode: string | null;
 	address: string | null;
+	countryCode: string | null;
+	countryLabel: string | null;
+	departmentLabel: string | null;
 	gipWorkforce: number | null;
 };
 
@@ -105,9 +109,13 @@ export function RecapitulatifPage({
 		{ label: "Raison sociale", value: company.name },
 		{ label: "SIREN", value: company.siren },
 	];
-	if (company.address) {
-		companyItems.push({ label: "Adresse", value: company.address });
-	}
+	const location = companyLocationRow({
+		countryCode: company.countryCode ?? null,
+		countryLabel: company.countryLabel ?? null,
+		departmentLabel: company.departmentLabel ?? null,
+		domesticAddress: company.address,
+	});
+	if (location) companyItems.push(location);
 	if (company.nafCode) {
 		companyItems.push({ label: "Code NAF", value: company.nafCode });
 	}
@@ -135,7 +143,7 @@ export function RecapitulatifPage({
 				<div className="fr-col">
 					<TitleTag className="fr-h4 fr-mb-0">
 						{isCorrection
-							? `Seconde déclaration des écarts de rémunération par catégories de salariés ${declarationYear}`
+							? `Seconde déclaration des écarts de rémunération par catégorie de salariés ${declarationYear}`
 							: `Déclaration des indicateurs de rémunération ${declarationYear}`}
 					</TitleTag>
 				</div>
@@ -188,7 +196,7 @@ export function RecapitulatifPage({
 			{indicatorGRequired && (
 				<section>
 					<h2 className={`fr-h6 fr-mb-3w ${styles.sectionHeading}`}>
-						Indicateur par catégories de salariés
+						Indicateur par catégorie de salariés
 					</h2>
 					{sourceLabel && (
 						<p className={`fr-mb-3w ${styles.sourceLine}`}>

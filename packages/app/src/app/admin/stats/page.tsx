@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { env } from "~/env.js";
 import { StatsDashboard } from "~/modules/admin/stats";
 import { FIRST_DECLARATION_YEAR, getCurrentYear } from "~/modules/domain";
 
@@ -11,6 +12,10 @@ export default function Page() {
 	for (let y = currentYear; y >= FIRST_DECLARATION_YEAR; y--)
 		availableYears.push(y);
 	return (
-		<StatsDashboard availableYears={availableYears} currentYear={currentYear} />
+		<StatsDashboard
+			availableYears={availableYears}
+			currentYear={currentYear}
+			showTestDataNotice={env.NEXT_PUBLIC_EGAPRO_ENV !== "prod"}
+		/>
 	);
 }

@@ -208,15 +208,58 @@ describe("enqueueReceipt", () => {
 		expect(call.attachments).toBeUndefined();
 	});
 
-	it("keeps the variant out of the audit row of a receipt that has none", async () => {
-		await enqueueReceipt({ ...baseInput, kind: "representation" });
+	it("maps formalNoticeJointEvaluation to formal_notice_joint_evaluation_submitted without attachments", async () => {
+		await enqueueReceipt({ ...baseInput, kind: "formalNoticeJointEvaluation" });
 
-		// The representation receipt is the only one with a variant-free payload:
-		// stamping `variant: undefined` on the jsonb would make it unqueryable.
+		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.buildSecondDeclarationAttachments).not.toHaveBeenCalled();
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "formal_notice_joint_evaluation_submitted",
+				recipientEmail: "user@example.com",
+				recipientUserId: "user-1",
+				siren: "552100554",
+				payload: {
+					siren: "552100554",
+					year: 2025,
+					raisonSociale: "Société Démo",
+				},
+			}),
+		);
+		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
+			attachments?: unknown;
+		};
+		expect(call.attachments).toBeUndefined();
+	});
+
+	it("names the company by its siren in the formal notice receipt when neither declaration nor company is found", async () => {
+		stubContext(null, null);
+
+		await enqueueReceipt({ ...baseInput, kind: "formalNoticeJointEvaluation" });
+
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "formal_notice_joint_evaluation_submitted",
+				payload: {
+					siren: "552100554",
+					year: 2025,
+					raisonSociale: "552100554",
+				},
+			}),
+		);
+	});
+
+	it.each([
+		["representation", "representation_receipt"],
+		["formalNoticeJointEvaluation", "formal_notice_joint_evaluation_submitted"],
+	] as const)("keeps the variant out of the audit row of the variant-free %s receipt", async (kind, type) => {
+		await enqueueReceipt({ ...baseInput, kind });
+
+		// Stamping `variant: undefined` on the jsonb would make the row unqueryable.
 		expect(auditMetadataOf()).not.toHaveProperty("variant");
 		expect(auditMetadataOf()).toMatchObject({
-			type: "representation_receipt",
-			kind: "representation",
+			type,
+			kind,
 			year: 2025,
 			isResend: false,
 		});
@@ -342,6 +385,62 @@ describe("enqueueReceipt", () => {
 		expect(mocks.logAction).toHaveBeenCalledWith(
 			expect.objectContaining({ errorMessage: "ATTACHMENT_DROPPED:" }),
 		);
+	});
+
+	it("reports a dropped attachment without the siren in Sentry extra nor console", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		mocks.buildDeclarationAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+
+		try {
+			await enqueueReceipt({ ...baseInput, kind: "declaration" });
+		} finally {
+			consoleError.mockRestore();
+		}
+
+		const call = mocks.captureException.mock.calls[0] as unknown as
+			| [Error, { extra?: Record<string, unknown> }]
+			| undefined;
+		expect(call?.[1]?.extra).toMatchObject({
+			stage: "attachments",
+			kind: "declaration",
+			year: 2025,
+		});
+		expect(call?.[1]?.extra).not.toHaveProperty("siren");
+		expect(
+			consoleError.mock.calls.map((args) => args.join(" ")).join("\n"),
+		).not.toContain("552100554");
+	});
+
+	it("reports an enqueue failure without the siren in Sentry extra nor console", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		mocks.enqueueNotification.mockRejectedValueOnce(
+			new Error("redis connection lost"),
+		);
+
+		try {
+			await enqueueReceipt({ ...baseInput, kind: "declaration" });
+		} finally {
+			consoleError.mockRestore();
+		}
+
+		const call = mocks.captureException.mock.calls[0] as unknown as
+			| [Error, { extra?: Record<string, unknown> }]
+			| undefined;
+		expect(call?.[1]?.extra).toMatchObject({
+			stage: "enqueue",
+			kind: "declaration",
+			year: 2025,
+		});
+		expect(call?.[1]?.extra).not.toHaveProperty("siren");
+		expect(
+			consoleError.mock.calls.map((args) => args.join(" ")).join("\n"),
+		).not.toContain("552100554");
 	});
 
 	it("logs failure with a generic message when a non-Error value is thrown", async () => {

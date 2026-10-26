@@ -52,6 +52,17 @@ describe("getHistoryEventDisplay", () => {
 		);
 	});
 
+	it("formal_notice_joint_evaluation_submit: links to the formal notice upload page", () => {
+		const result = getHistoryEventDisplay(
+			buildEvent("formal_notice_joint_evaluation_submit"),
+		);
+		expect(result.label).toBe(
+			"Dépôt de l'évaluation conjointe (mise en demeure)",
+		);
+		expect(result.pageLabel).toBe("Évaluation conjointe - mise en demeure");
+		expect(result.pageHref).toBe("/declaration-remuneration/mise-en-demeure");
+	});
+
 	it("cse_opinion_submit: returns non-empty label and CSE opinion link", () => {
 		const result = getHistoryEventDisplay(buildEvent("cse_opinion_submit"));
 		expect(result.label).toBe("Dépôt de l'avis CSE");
@@ -77,7 +88,7 @@ describe("getHistoryEventDisplay", () => {
 		const result = getHistoryEventDisplay(buildEvent("step_change", 5));
 		expect(result.label).toBe("Modification de la page");
 		expect(result.pageLabel).toBe(
-			"Écart de rémunération par catégories de salariés",
+			"Écart de rémunération par catégorie de salariés",
 		);
 		expect(result.pageHref).toBe("/declaration-remuneration/etape/5");
 	});
@@ -112,6 +123,7 @@ describe("getHistoryEventDisplay", () => {
 			"path_choice",
 			"second_declaration_submit",
 			"joint_evaluation_submit",
+			"formal_notice_joint_evaluation_submit",
 			"cse_opinion_submit",
 			"cancel",
 			"demarche_complete",

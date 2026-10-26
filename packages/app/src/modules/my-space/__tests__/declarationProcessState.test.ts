@@ -40,6 +40,8 @@ function makeDeclaration(
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
 		hasJointEvaluationFile: false,
+		formalNoticeAvailable: false,
+		hasSubmittedFormalNoticeJointEvaluation: false,
 		hasPrefillData: false,
 		deadline: null,
 		notSubject: false,

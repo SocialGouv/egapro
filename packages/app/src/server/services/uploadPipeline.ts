@@ -14,6 +14,7 @@ import { declarations, files } from "~/server/db/schema";
 
 import { getRequiredContentTypes } from "./cseRequiredContentTypes";
 import { handleStreamingUpload, type UploadFailureReason } from "./fileUpload";
+import { isFormalNoticeAvailableFor } from "./formalNoticeExposure";
 import { deleteFile as deleteS3File } from "./s3";
 
 export type { FlowType };
@@ -22,6 +23,7 @@ export type PipelineFailureReason =
 	| UploadFailureReason
 	| "not_found"
 	| "max_files"
+	| "formal_notice_unavailable"
 	| "server_error";
 
 type SuccessResult = {
@@ -99,6 +101,18 @@ export async function runUploadPipeline(
 
 	// Pre-validate flow-specific constraints BEFORE streaming. Cheap DB read
 	// that saves bandwidth when the constraint is already violated.
+	if (
+		input.flowType === "formal_notice_joint_evaluation" &&
+		!(await isFormalNoticeAvailableFor(db, declaration.id))
+	) {
+		return {
+			ok: false,
+			reason: "formal_notice_unavailable",
+			error:
+				"Le dépôt du rapport de l'évaluation conjointe suite à une mise en demeure n'est pas ouvert pour cette démarche.",
+		};
+	}
+
 	if (input.flowType === "cse_opinion") {
 		const [existingCount, quota] = await Promise.all([
 			countFilesByType(declaration.id, "cse_opinion"),
@@ -270,7 +284,7 @@ async function commitFileRow(
 
 		let replacedFilePath: string | null = null;
 
-		if (input.flowType === "joint_evaluation") {
+		if (input.flowType !== "cse_opinion") {
 			// Upsert: one file per declaration. Capture the previous path so the
 			// caller can best-effort delete it from S3 after the tx commits.
 			const existing = await tx
@@ -279,7 +293,7 @@ async function commitFileRow(
 				.where(
 					and(
 						eq(files.declarationId, input.declarationId),
-						eq(files.type, "joint_evaluation"),
+						eq(files.type, input.flowType),
 					),
 				)
 				.limit(1);

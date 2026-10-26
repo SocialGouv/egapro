@@ -51,14 +51,14 @@ Le vocabulaire de la colonne **Statut** est défini en [section 3](#3-vocabulair
 
 | Élément | Finalité | Données personnelles | Durée | Statut | Détail |
 |---|---|---|---|---|---|
-| Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant et e-mail de l'utilisateur, SIREN, adresse IP complète, agent utilisateur, métadonnées, message d'erreur | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
+| Journal d'audit des actions | Traçabilité CNIL/DGT des mutations et lectures sensibles | Identifiant utilisateur, SIREN, IP tronquée, code d'erreur et métadonnées limitées | 180 j (lectures sensibles et recherche publique) ou 365 j (le reste) | Appliquée par le code | [4.1](#41-journal-daudit-des-actions) |
 | Ligne d'activité applicative | Diagnostic opérationnel, collectée par la plateforme d'hébergement | Identifiant utilisateur, SIREN, IP tronquée, certaines valeurs de champs des routes HTTP | Non définie dans le dépôt | Non définie dans le dépôt | [4.2](#42-ligne-dactivité-applicative) |
 | Logs applicatifs stdout/stderr | Diagnostic d'erreur | Messages et traces d'erreur ; e-mail du destinataire si l'envoi réel est désactivé | Non définie dans le dépôt | Non définie dans le dépôt | [4.3](#43-logs-applicatifs-stdout-et-stderr) |
-| Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs, sessions enregistrées | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
+| Sentry (erreurs, traces, sessions) | Diagnostic d'erreur, rejeu de session | Contexte des erreurs et sessions enregistrées, anonymisés à l'émission (e-mails, SIREN et SIRET filtrés, replay masqué) | Non définie dans le dépôt | Non définie dans le dépôt | [4.4](#44-sentry-erreurs-traces-et-sessions-enregistrées) |
 | File de notification par e-mail | Fiabiliser l'envoi des e-mails transactionnels | E-mail du destinataire, identifiant utilisateur, SIREN, contenu du message, pièces jointes | 14 j à partir de la date de démarrage prévue (jobs non traités), 7 j après traitement | Appliquée par le code | [4.5](#45-file-de-notification-par-e-mail) |
 | Journal de dédoublonnage des relances | Éviter une relance envoyée deux fois | Aucune (type, SIREN, année, variante) | Illimitée de fait | Aucune purge | [4.6](#46-journal-de-dédoublonnage-des-relances) |
 | Historique des statuts de déclaration | Traçabilité du parcours de déclaration | Identifiant de l'auteur de l'action | Suit la déclaration (6 ans) | Prévue, non exécutée | [4.7](#47-historique-des-statuts-de-déclaration) |
-| Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | Illimitée de fait | Aucune purge | [4.8](#48-journal-dimpersonation-admin) |
+| Journal d'impersonation admin | Traçabilité des connexions « en tant que » une entreprise | Identifiant de l'admin, SIREN | 365 j par défaut | Appliquée par le code | [4.8](#48-journal-dimpersonation-admin) |
 | Matomo | Mesure d'audience exemptée CNIL | Logs de visite (IP anonymisée), cookie de mesure d'audience | 750 j (logs), 13 mois (cookie) | Paramétrée hors dépôt | [4.9](#49-matomo) |
 | Logs de la passerelle API SUIT | Sécurité et diagnostic de l'accès API | IP du client, requêtes | Non définie dans le dépôt | Non définie dans le dépôt | [4.10](#410-logs-de-la-passerelle-api-suit) |
 | Historique des CronJobs | Diagnostic d'exécution des traitements planifiés | Logs des scripts exécutés | 3 exécutions réussies et 3 en échec, par CronJob | Appliquée par le code | [4.11](#411-historique-des-cronjobs) |
@@ -93,11 +93,11 @@ Dans la colonne Durée, « Illimitée de fait » accompagne le statut « Aucune 
 
 ### 4.1 Journal d'audit des actions
 
-Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Colonnes actuelles sur `alpha` : identifiant et e-mail de l'utilisateur, SIREN, action, catégorie, statut, type et identifiant de la ressource visée, message d'erreur (tronqué à 500 caractères par `log.ts` seulement), métadonnées JSON, adresse IP complète, agent utilisateur, durée de traitement.
+Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrangère vers les tables applicatives, pour ne jamais bloquer une suppression RGPD d'utilisateur). Les écritures conservent l'action, la catégorie, le statut, la date et, quand ils sont nécessaires et valides, l'identifiant utilisateur, le SIREN et un identifiant technique de ressource. L'adresse IP est tronquée, le message d'erreur est remplacé par un code contrôlé et les métadonnées sont limitées aux champs autorisés. L'e-mail et l'agent utilisateur ne sont plus enregistrés.
 
-**Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`, qui enregistre l'e-mail du destinataire), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`).
+**Quatre points d'écriture** : l'application (`packages/app/src/server/audit/log.ts`), le worker de notifications (`packages/notifications/src/worker/auditLog.ts`), l'auto-audit de la purge quotidienne elle-même (`packages/app/scripts/audit-cleanup.ts`) et la purge des déclarations (`packages/app/scripts/declaration-cleanup.ts`). L'auto-audit quotidien conserve les nombres de lignes supprimées dans chaque journal et leur total, sans identifiant personnel.
 
-**Durée** : 180 jours pour les catégories `read_sensitive` et `public_search` (lectures à fort volume contenant une IP), 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — des ConfigMaps optionnelles (`audit-retention`) permettraient de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent.
+**Durée** : 180 jours pour les catégories `read_sensitive` et `public_search`, 365 jours pour les autres. Un CronJob quotidien (`audit-cleanup-daily`, 04:00 UTC) supprime les lignes expirées par une requête SQL directe. Les deux seuils sont surchargeables par les variables d'environnement `EGAPRO_AUDIT_RETENTION_SHORT_DAYS` et `EGAPRO_AUDIT_RETENTION_LONG_DAYS` — la ConfigMap optionnelle `audit-retention` permet de les fixer, mais aucune n'est définie dans le dépôt : ce sont donc les valeurs par défaut (180 / 365) qui s'appliquent.
 
 | Catégorie | Durée |
 |---|---|
@@ -108,13 +108,13 @@ Table Postgres `audit.action_log`, schéma dédié `audit` (pas de clé étrang�
 | `export` | 365 jours |
 | `system` | 365 jours |
 
-**Événements antivirus** : chaque fichier déposé (avis du CSE, évaluation conjointe) est analysé par ClamAV avant d'être conservé. Une détection écrit une ligne `failure` sur l'action d'upload avec le code `HTTP_422_virus_detected` et, dans les métadonnées, le nom de la signature ClamAV (`virusName`, ex. `Win.Test.EICAR_HDB-1`) ; une valeur qui n'a pas la forme d'une signature est écartée. Une indisponibilité de l'antivirus (connexion refusée, coupure en cours d'envoi, délai dépassé) écrit le code `HTTP_503_antivirus_unavailable`. Le nom du fichier n'est jamais conservé. En parallèle, la sortie standard reçoit une ligne `[antivirus]` (voir [4.3](#43-logs-applicatifs-stdout-et-stderr)) qui ne porte ni la signature ni le nom du fichier.
+Pour `AUTH_ADMIN_MFA`, les métadonnées conservées incluent `granted`, la décision booléenne d'accès à l'administration. Les rôles sont réduits au seul signal `agent_public`.
 
-Ne sont pas recopiées ici : les 89 clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
+**Événements antivirus** : chaque fichier déposé (avis du CSE, évaluation conjointe, rapport après mise en demeure) est analysé par ClamAV avant d'être conservé. Une détection écrit une ligne `failure` sur l'action d'upload avec le code `HTTP_422_virus_detected` et, dans les métadonnées, le nom de la signature ClamAV (`virusName`, ex. `Win.Test.EICAR_HDB-1`) ; une valeur qui n'a pas la forme d'une signature est écartée. Une indisponibilité de l'antivirus (connexion refusée, coupure en cours d'envoi, délai dépassé) écrit le code `HTTP_503_antivirus_unavailable`. Le nom du fichier n'est jamais conservé. En parallèle, la sortie standard reçoit une ligne `[antivirus]` (voir [4.3](#43-logs-applicatifs-stdout-et-stderr)) qui ne porte ni la signature ni le nom du fichier.
+
+Ne sont pas recopiées ici : les clés d'action ni le détail par catégorie au-delà du tableau catégorie → durée ci-dessus. Voir `packages/app/src/modules/audit/shared/actionKeys.ts` et [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) pour l'inventaire complet.
 
 **Sources** : `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml` · `packages/app/src/server/db/auditSchema.ts` · `packages/app/src/server/audit/log.ts` · `packages/notifications/src/worker/auditLog.ts` · `packages/app/scripts/declaration-cleanup.ts`.
-
-> **Cette section décrit `log.ts` tel qu'il est sur `alpha`** au moment de l'implémentation de cette page. Voir [section 8](#8-évolutions-en-cours) : une PR en cours change ce contenu.
 
 ### 4.2 Ligne d'activité applicative
 
@@ -138,9 +138,16 @@ L'analyse antivirus des fichiers déposés y écrit une ligne préfixée `[antiv
 
 Sentry capture les erreurs non gérées côté serveur et côté client, avec 100 % des traces échantillonnées. Côté client, l'enregistrement de session (Session Replay) est actif sur 10 % des sessions, et 100 % des sessions qui rencontrent une erreur.
 
+**Anonymisation à l'émission** : les trois initialisations Sentry étalent les options du module `packages/app/src/modules/observability/`, qui empêchent les données personnelles de partir vers Sentry.
+
+- La collecte côté SDK est coupée à la source (`dataCollection`) : informations d'utilisateur automatiques, cookies, en-têtes HTTP, corps de requête et de réponse, paramètres d'URL, variables locales des piles d'appels, paramètres des requêtes SQL et arguments des tâches en file.
+- Avant tout envoi d'erreur ou de span, un filtre parcourt le contenu — message d'erreur, valeurs d'exception, breadcrumbs, `extra`, `contexts`, `tags`, nom et attributs des spans — et remplace les adresses e-mail par `[email]` et les SIREN et SIRET (collés, espacés, encodés dans une URL ou numériques) par `[siren]`. Les chaînes de requête et fragments sont retirés des URL (requête, breadcrumbs de navigation et de `fetch`, spans), ce qui écarte aussi les entrées tRPC et les paramètres de retour ProConnect. L'objet utilisateur, les cookies, l'en-tête `Authorization` et le corps de requête sont supprimés de l'événement. Les piles d'appels et les identifiants de trace ne sont pas modifiés.
+- Le Session Replay masque la totalité du texte, des saisies et des médias (`maskAllText`, `maskAllInputs`, `blockAllMedia`), ainsi que les attributs `href` et `action` des liens et formulaires. Il ne capture aucun corps réseau. Les événements d'enregistrement personnalisés (breadcrumbs, navigations, requêtes) et l'événement qui accompagne chaque enregistrement (liste des URL visitées) passent par le même filtre, retrait des chaînes de requête compris.
+- **Limite connue** : l'URL de la page courante que l'enregistreur inscrit au début de chaque segment n'est pas interceptable par le SDK. Son chemin peut contenir un SIREN (`/mon-espace/historique/[siren]`, `/index-egapro/entreprise/[siren]`). Les réglages côté instance (*Data Scrubber*, champs sensibles) restent nécessaires.
+
 **Durée** : non définie dans le dépôt — c'est un réglage de l'instance Sentry de l'équipe, pas du code applicatif.
 
-**Sources** : `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
+**Sources** : `packages/app/src/modules/observability/` · `packages/app/src/sentry.server.config.ts` · `packages/app/src/sentry.edge.config.ts` · `packages/app/src/instrumentation-client.ts`.
 
 ### 4.5 File de notification par e-mail
 
@@ -172,9 +179,9 @@ Table `app_declaration_status_history` : chaque changement de statut d'une décl
 
 Table `app_admin_impersonation_event` : trace chaque session où un administrateur se connecte « en tant que » une entreprise (identifiant de l'admin, SIREN, début et fin de session).
 
-**Durée** : aucun mécanisme de suppression dans le dépôt.
+**Durée** : 365 jours par défaut à partir du début de la session (`started_at`), avec surcharge possible par `EGAPRO_ADMIN_IMPERSONATION_RETENTION_DAYS`. Le cron quotidien `audit-cleanup-daily` supprime les événements plus anciens que le seuil. La liste « récemment incarnées » ne présente que les événements encore conservés.
 
-**Sources** : `packages/app/src/server/db/schema.ts` · `packages/app/src/server/auth/config.ts`.
+**Sources** : `packages/app/src/server/db/schema.ts` · `packages/app/src/server/auth/config.ts` · `packages/app/scripts/audit-cleanup.ts` · `.kontinuous/templates/audit-cleanup-cron.yaml`.
 
 ### 4.9 Matomo
 
@@ -238,7 +245,7 @@ Table `app_user` (prénom, nom, e-mail, téléphone) et ses rattachements à une
 
 **Engagement public**, cité mot pour mot depuis la page `/donnees-personnelles` :
 
-> « À compter de la suppression par l'utilisateur ou 2 ans à compter de la dernière déclaration ou de l'inactivité du compte »
+> « À compter de la suppression par l'utilisateur ou 2 ans à compter de la dernière démarche ou de l'inactivité du compte »
 
 **Statut : Annoncée, non appliquée.** Aucune purge, aucune suppression de compte à l'initiative de l'utilisateur, et aucune colonne ne trace la date de dernière activité du compte — la durée promise n'a donc aucune donnée à partir de laquelle se calculer. [#4770](https://github.com/SocialGouv/egapro/issues/4770) propose de faire correspondre le code à cet engagement.
 
@@ -280,9 +287,9 @@ Reportés tels quels, sans les atténuer :
 1. **Comptes utilisateurs** : l'engagement public de 2 ans n'est appliqué par aucun mécanisme. Suite : [#4770](https://github.com/SocialGouv/egapro/issues/4770).
 2. **Purge des déclarations** : le script existe mais n'est pas embarqué dans l'image de production, donc jamais exécuté. Suite : [#4773](https://github.com/SocialGouv/egapro/issues/4773).
 3. **Représentation équilibrée** : aucune purge, alors que des lignes reprises de la V1 contiennent des coordonnées personnelles. Suite : [#4502](https://github.com/SocialGouv/egapro/issues/4502).
-4. **Tables jamais purgées** : le journal d'impersonation admin et le journal de dédoublonnage des relances n'ont aucun mécanisme de suppression. Suites : [#4768](https://github.com/SocialGouv/egapro/issues/4768) et [#4769](https://github.com/SocialGouv/egapro/issues/4769).
+4. **Table jamais purgée** : le journal de dédoublonnage des relances n'a aucun mécanisme de suppression. Suite : [#4769](https://github.com/SocialGouv/egapro/issues/4769).
 5. **Durées d'audit écrites deux fois** : une fois dans les constantes du module (lues uniquement par les tests), une fois en dur dans le script de purge qui les applique réellement. Suite : [#4771](https://github.com/SocialGouv/egapro/issues/4771).
-6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Suites : [#4772](https://github.com/SocialGouv/egapro/issues/4772) et [#3669](https://github.com/SocialGouv/egapro/issues/3669).
+6. **Sentry** : l'enregistrement de session et l'échantillonnage à 100 % des traces ne sont mentionnés ni dans la page `/donnees-personnelles` ni dans `/gestion-des-cookies`. Le docx fourni par la DGT pour la nouvelle politique de confidentialité ([#3669](https://github.com/SocialGouv/egapro/issues/3669)) ne couvre pas ce point, qui reste à traiter. Suite : [#4772](https://github.com/SocialGouv/egapro/issues/4772).
 
 7. **Préférence de thème** : la page `/gestion-des-cookies` annonce un cookie `fr-theme` d’un an, mais le dépôt ne contient aucun code qui le crée ou applique cette durée. Le thème DSFR est mémorisé dans `localStorage` (`scheme`). Suite : vérifier et corriger la page publique ou implémenter le cookie annoncé.
 
@@ -292,19 +299,16 @@ Tickets ouverts qui changeront une ligne de cette page :
 
 | Ticket | Portée |
 |---|---|
-| [#3706](https://github.com/SocialGouv/egapro/issues/3706) / PR [#4680](https://github.com/SocialGouv/egapro/pull/4680) | Minimise le journal d'audit : suppression de l'e-mail et de l'agent utilisateur, IP tronquée, code d'erreur à la place du message brut, `metadata` limité à une liste autorisée. Tant que cette PR n'est pas fusionnée, [4.1](#41-journal-daudit-des-actions) décrit le contenu actuel. |
 | [#4502](https://github.com/SocialGouv/egapro/issues/4502) | Purge de la représentation équilibrée après 6 ans |
 | [#4549](https://github.com/SocialGouv/egapro/issues/4549) | Journalisation des erreurs internes tRPC hors développement |
-| [#3669](https://github.com/SocialGouv/egapro/issues/3669) | Nouvelle politique de confidentialité |
 | [#2710](https://github.com/SocialGouv/egapro/issues/2710) | Supervision des traitements planifiés |
-| [#4768](https://github.com/SocialGouv/egapro/issues/4768) | Purge du journal d'impersonation admin |
 | [#4769](https://github.com/SocialGouv/egapro/issues/4769) | Purge du journal de dédoublonnage des relances |
 | [#4770](https://github.com/SocialGouv/egapro/issues/4770) | Appliquer aux comptes utilisateurs la durée annoncée |
 | [#4771](https://github.com/SocialGouv/egapro/issues/4771) | Une seule source pour les durées de conservation du journal d'audit |
 | [#4772](https://github.com/SocialGouv/egapro/issues/4772) | Sentry : réglage de l'enregistrement de session et de l'échantillonnage |
 | [#4773](https://github.com/SocialGouv/egapro/issues/4773) | Embarquer le script de purge des déclarations dans l'image de production |
 
-**Qui met cette page à jour** : si cette page est fusionnée avant la PR #4680, c'est cette dernière qui met à jour la [section 4.1](#41-journal-daudit-des-actions) — un commentaire le demande sur [#3706](https://github.com/SocialGouv/egapro/issues/3706). Si #4680 est fusionnée en premier, cette page a été écrite directement avec le contenu minimisé. Ensuite, la règle ajoutée dans [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) couvre toutes les modifications suivantes.
+La règle [`.claude/rules/audit-logging.md`](../.claude/rules/audit-logging.md) demande de mettre cette page à jour lors de toute modification du contenu ou de la durée d'`audit.action_log`.
 
 ## 9. Liens
 

@@ -11,6 +11,7 @@ import {
 	FUNNEL_DROP_ALERT_THRESHOLD,
 	FUNNEL_MAIN_KEY_STEPS,
 	FUNNEL_REVISION_KEY_STEPS,
+	getDropoffPhaseLabel,
 	getStepLabel,
 	POST_SUBMIT_DROPOFF_PHASES,
 	POST_SUBMIT_MILESTONES,
@@ -31,6 +32,14 @@ describe("DECLARATION_STEPS", () => {
 	});
 });
 
+describe("getDropoffPhaseLabel", () => {
+	it("returns the label of every post-submit dropoff phase from its status", () => {
+		for (const phase of POST_SUBMIT_DROPOFF_PHASES) {
+			expect(getDropoffPhaseLabel(phase.status)).toBe(phase.label);
+		}
+	});
+});
+
 describe("getStepLabel", () => {
 	it("returns the French label for a known step number", () => {
 		expect(getStepLabel(0)).toBe("Introduction");
@@ -38,7 +47,7 @@ describe("getStepLabel", () => {
 		expect(getStepLabel(2)).toBe("Écart de rémunération");
 		expect(getStepLabel(3)).toBe("Écart de rémunération variable");
 		expect(getStepLabel(4)).toBe("Quartiles de rémunération");
-		expect(getStepLabel(5)).toBe("Écart par catégories de salariés");
+		expect(getStepLabel(5)).toBe("Écart par catégorie de salariés");
 		expect(getStepLabel(6)).toBe("Récapitulatif");
 	});
 
