@@ -5,6 +5,7 @@ import {
 	VALID_REFERENCE_PERIOD,
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import { clearCampaignYearOverride } from "~/modules/domain";
 import { representationDeclarationRouter } from "~/server/api/routers/representationDeclaration";
 
 export const SIREN = "123456789";
@@ -32,6 +33,9 @@ export const CLOSED_CAMPAIGN = {
 	campaignEndDate: new Date("2027-12-31T00:00:00.000Z"),
 	declarationDeadline: new Date("2027-03-01T00:00:00.000Z"),
 };
+
+export const CLOSED_CAMPAIGN_YEAR =
+	CLOSED_CAMPAIGN.campaignStartDate.getUTCFullYear();
 
 export const DRAFT = { currentStep: 3, ...VALID_REFERENCE_PERIOD };
 
@@ -128,6 +132,7 @@ export function installRouterTestEnv(campaignMock: Mock) {
 	});
 
 	afterEach(() => {
+		clearCampaignYearOverride();
 		vi.useRealTimers();
 		vi.restoreAllMocks();
 	});

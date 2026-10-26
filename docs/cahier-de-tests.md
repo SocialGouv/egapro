@@ -531,9 +531,9 @@ Changer d'année demande un nouveau déploiement (quelques minutes).
 
 #### Ce que voit le testeur
 
-- La campagne affichée est l'année épinglée, et la période de référence l'année précédente (environnement « 2030 » : campagne 2030, données 2029), sur toutes les pages : accueil, aide, Mon espace, parcours de déclaration.
+- La campagne affichée est l'année épinglée, et la période de référence l'année précédente (environnement « 2030 » : campagne 2030, données 2029), sur toutes les pages : accueil, aide, Mon espace, démarches des écarts de rémunération et de représentation équilibrée.
 - Les règles appliquées sont celles de cette année : indicateurs exigés selon la tranche, obligations, libellés.
-- Les échéances par défaut de l'année épinglée sont dans le futur : une déclaration reste modifiable, sans réglage préalable dans l'administration.
+- La date du jour est transposée dans l'année épinglée (le 26 octobre 2026 devient le 26 octobre 2030) pour les contrôles de campagne et d'échéance : la campagne de représentation équilibrée, qui couvre toute l'année, est ouverte, et une déclaration de l'année épinglée reste modifiable sans réglage préalable dans l'administration.
 
 #### Choisir l'entreprise
 
@@ -542,7 +542,8 @@ Prendre une entreprise de test dans la tranche d'effectif de la coordonnée jou�
 #### Limites
 
 - **L'année est la même pour tous les utilisateurs de l'environnement.** Jouer deux années en parallèle demande deux environnements, ou de se succéder sur le même.
-- **Les cas « échéance dépassée » ne sont pas jouables** : seule l'année est épinglée, pas la date du jour, et les échéances de l'année épinglée tombent toujours dans le futur.
+- **Les cas « échéance dépassée » ne se choisissent pas** : seule l'année est épinglée, le jour et le mois restent ceux du calendrier réel.
+- **L'environnement doit être promu depuis une release qui connaît l'épinglage** : le workflow refuse `campaign_year` sur une release plus ancienne, qui ignorerait l'année demandée.
 - **Les e-mails et les traitements planifiés** (relances, purges) restent calés sur la date réelle : ils ne voient pas l'année épinglée.
 
 ---

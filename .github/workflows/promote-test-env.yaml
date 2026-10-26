@@ -61,9 +61,9 @@ jobs:
         run: |
           # Bounds mirror EGAPRO_RECETTE_CAMPAIGN_YEAR (env.js), pinned by env.test.ts.
           if [ -n "$CAMPAIGN_YEAR" ]; then
-            if ! printf '%s' "$CAMPAIGN_YEAR" | grep -Eq '^[0-9]{4}$' \
+            if ! [[ "$CAMPAIGN_YEAR" =~ ^[0-9]{4}$ ]] \
               || [ "$CAMPAIGN_YEAR" -lt 2027 ] || [ "$CAMPAIGN_YEAR" -gt 2100 ]; then
-              echo "::error::campaign_year '$CAMPAIGN_YEAR' must be a 4-digit year between 2027 and 2100"
+              echo "::error::campaign_year must be a 4-digit year between 2027 and 2100"
               exit 1
             fi
           fi
@@ -92,6 +92,16 @@ jobs:
           fi
           if [ "$IS_DRAFT" != "false" ]; then
             echo "::error::The GitHub release for '$TAG' is a draft — publish it first"
+            exit 1
+          fi
+
+      - name: ✅ Verify the release honours the pinned campaign year
+        if: inputs.campaign_year != ''
+        env:
+          TAG: ${{ inputs.release }}
+        run: |
+          if ! git grep -q EGAPRO_RECETTE_CAMPAIGN_YEAR "refs/tags/$TAG" -- packages/app/src/env.js; then
+            echo "::error::Release '$TAG' predates EGAPRO_RECETTE_CAMPAIGN_YEAR — promote a newer release or leave campaign_year empty"
             exit 1
           fi
 
