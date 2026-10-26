@@ -84,6 +84,15 @@ describe("AUDIT_ACTIONS", () => {
 		).toBe("mutation");
 	});
 
+	it("maps the representation declarant read to a sensitive read (declarant PII)", () => {
+		expect(AUDIT_ACTIONS.REPRESENTATION_GET_DECLARANT).toBe(
+			"representation_declaration.get_declarant",
+		);
+		expect(
+			AUDIT_ACTION_CATEGORIES[AUDIT_ACTIONS.REPRESENTATION_GET_DECLARANT],
+		).toBe("read_sensitive");
+	});
+
 	it("maps the representation campaign read to a sensitive read", () => {
 		expect(AUDIT_ACTIONS.ADMIN_SETTINGS_GET_REPRESENTATION_CAMPAIGN).toBe(
 			"admin_settings.get_representation_campaign",

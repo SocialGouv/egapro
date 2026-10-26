@@ -1,5 +1,8 @@
 import type { Route } from "next";
-import type { mySpaceHistoryHref } from "./accountRoutes";
+import type {
+	mySpaceHistoryHref,
+	mySpaceRepresentationHref,
+} from "./accountRoutes";
 import type { adminDeclarationHref } from "./adminRoutes";
 import type { apiV1FileHref } from "./apiRoutes";
 import type {
@@ -32,4 +35,5 @@ export type AppHref =
 	| ReturnType<typeof termsOfUseVersionHref>
 	| ReturnType<typeof adminDeclarationHref>
 	| ReturnType<typeof mySpaceHistoryHref>
+	| ReturnType<typeof mySpaceRepresentationHref>
 	| ReturnType<typeof apiV1FileHref>;

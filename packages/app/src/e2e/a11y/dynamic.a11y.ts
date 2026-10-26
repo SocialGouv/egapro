@@ -1,7 +1,16 @@
 import { test } from "@playwright/test";
-import { ADMIN_DECLARATIONS, REFERENTS } from "~/modules/routes";
+import { getReferenceYearFor } from "~/modules/domain";
+import {
+	ADMIN_DECLARATIONS,
+	mySpaceRepresentationHref,
+	REFERENTS,
+} from "~/modules/routes";
 import { TEST_SIREN } from "../constants";
-import { getCurrentDbYear } from "../helpers/db";
+import {
+	getCurrentDbYear,
+	resetRepresentationDeclaration,
+	seedSubmittedRepresentationDeclaration,
+} from "../helpers/db";
 import { snapshotCurrentPage, snapshotRoute } from "./snapshot";
 
 /**
@@ -25,6 +34,30 @@ test.describe("RGAA — pages à segment dynamique", () => {
 			auth: true,
 			notes: `Déclaration de l'entreprise de test pour l'année ${year}.`,
 		});
+	});
+
+	test("snapshot la consultation d'une déclaration de représentation", async ({
+		page,
+	}) => {
+		const campaignYear = await getCurrentDbYear();
+		const referenceYear = getReferenceYearFor(campaignYear);
+		await seedSubmittedRepresentationDeclaration(referenceYear);
+
+		try {
+			await snapshotRoute(page, {
+				path: mySpaceRepresentationHref(campaignYear),
+				id: "representation-consultation",
+				name: "Consultation d'une déclaration de représentation",
+				sources: [
+					"src/app/mon-espace/representation/[year]/page.tsx",
+					"src/modules/declaration-representation/RepresentationConsultation.tsx",
+				],
+				auth: true,
+				notes: `Déclaration de représentation transmise par l'entreprise de test pour la campagne ${campaignYear}.`,
+			});
+		} finally {
+			await resetRepresentationDeclaration();
+		}
 	});
 
 	test("snapshot le détail d'une déclaration au backoffice", async ({

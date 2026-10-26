@@ -19,6 +19,7 @@ export {
 	LOGIN,
 	MY_SPACE,
 	mySpaceHistoryHref,
+	mySpaceRepresentationHref,
 } from "./shared/accountRoutes";
 export {
 	ADMIN,
