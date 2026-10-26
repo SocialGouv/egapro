@@ -23,6 +23,7 @@
 	flex-direction: column;
 	gap: 0.5rem;
 	margin: 0;
+	padding: 0;
 }
 
 .infoRow {
@@ -38,6 +39,7 @@
 }
 
 .infoLabel {
+	padding: 0;
 	color: var(--text-mention-grey);
 
 	@include respond-from(md) {
@@ -47,6 +49,7 @@
 
 .infoValue {
 	margin: 0;
+	padding: 0;
 }
 
 .bottomAction {

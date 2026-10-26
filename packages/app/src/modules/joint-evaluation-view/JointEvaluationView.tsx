@@ -8,7 +8,12 @@ import {
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import { apiV1FileHref, MY_SPACE } from "~/modules/routes";
+import {
+	API_JOINT_EVALUATION_PDF,
+	apiV1FileHref,
+	MY_SPACE,
+} from "~/modules/routes";
+import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./JointEvaluationView.module.scss";
 
 type InfoItem = { label: string; value: string };
@@ -62,6 +67,7 @@ export function JointEvaluationView({
 	submittedAt,
 	year,
 }: Props) {
+	const recapHref = `${API_JOINT_EVALUATION_PDF}?year=${year}`;
 	const name = [declarant?.firstName, declarant?.lastName]
 		.filter(Boolean)
 		.join(" ");
@@ -142,13 +148,22 @@ export function JointEvaluationView({
 										{formatShortDate(submittedAt)}
 									</p>
 								</div>
-								<a
-									className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
-									download
-									href={apiV1FileHref(file.id)}
-								>
-									Télécharger
-								</a>
+								<div>
+									<FileDownloadLink
+										className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
+										href={recapHref}
+										pendingLabel="Génération du récapitulatif en cours…"
+									>
+										Télécharger{" "}
+										<span className="fr-sr-only">
+											le récapitulatif de l'évaluation conjointe des
+											rémunérations (PDF)
+										</span>
+									</FileDownloadLink>
+									<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
+										<FileFormatDetail href={recapHref} />
+									</p>
+								</div>
 							</div>
 							<section className={styles.sectionContent}>
 								<h2 className="fr-h6 fr-mb-0">Informations</h2>

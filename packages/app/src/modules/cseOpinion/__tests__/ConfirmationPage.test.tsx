@@ -10,11 +10,14 @@ vi.mock(
 const DECLARATION_YEAR = 2025;
 
 const TRANSMITTED_CARD = /récapitulatif des éléments transmis/;
+const JOINT_EVALUATION_CARD =
+	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 type Overrides = {
 	email?: string;
 	hasSecondDeclaration?: boolean;
 	hasTransmittedElements?: boolean;
+	hasTransmittedJointEvaluation?: boolean;
 };
 
 function renderConfirmation(overrides: Overrides = {}) {
@@ -47,6 +50,25 @@ describe("ConfirmationPage", () => {
 				`Votre parcours ${DECLARATION_YEAR} est désormais terminé`,
 			),
 		).toBeInTheDocument();
+	});
+
+	it("offers the joint evaluation recap once the joint evaluation is transmitted", () => {
+		renderConfirmation({ hasTransmittedJointEvaluation: true });
+
+		expect(
+			screen.getByRole("link", { name: JOINT_EVALUATION_CARD }),
+		).toHaveAttribute(
+			"href",
+			`/api/joint-evaluation-pdf?year=${DECLARATION_YEAR}`,
+		);
+	});
+
+	it("omits the joint evaluation recap by default", () => {
+		renderConfirmation();
+
+		expect(
+			screen.queryByRole("link", { name: JOINT_EVALUATION_CARD }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the default email in receipt card", () => {

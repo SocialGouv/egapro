@@ -3,11 +3,13 @@
 import { getReferenceYearFor, isDeclarationSubmitted } from "~/modules/domain";
 import {
 	API_DECLARATION_PDF,
+	API_JOINT_EVALUATION_PDF,
 	API_PREFILL_PDF,
 	API_REPRESENTATION_PDF,
 	API_TRANSMITTED_PDF,
 } from "~/modules/routes";
 import { DownloadCard, formatDocumentSubtitle } from "~/modules/shared";
+import { JOINT_EVALUATION_RECAP_TITLE } from "~/modules/shared/demarcheDocuments";
 import styles from "./DeclarationProcessPanel.module.scss";
 import type { DeclarationItem } from "./types";
 
@@ -69,6 +71,14 @@ function getRemunerationResources(
 			title: "Télécharger le récapitulatif de la seconde déclaration",
 			subtitle,
 			href: `${API_DECLARATION_PDF}?type=correction&year=${declaration.year}`,
+		});
+	}
+
+	if (declaration.jointEvaluationViewAvailable) {
+		resources.push({
+			title: JOINT_EVALUATION_RECAP_TITLE,
+			subtitle,
+			href: `${API_JOINT_EVALUATION_PDF}?year=${declaration.year}`,
 		});
 	}
 
