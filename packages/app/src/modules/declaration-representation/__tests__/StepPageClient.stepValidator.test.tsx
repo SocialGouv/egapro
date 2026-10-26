@@ -49,6 +49,7 @@ vi.mock("../steps/Step4Publication", async () => {
 });
 
 import { StepPageClient } from "~/modules/declaration-representation";
+import { lockWrapper } from "./representationLockHarness";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
@@ -66,6 +67,7 @@ function renderStep() {
 			step={VALIDATED_STEP}
 			year={YEAR}
 		/>,
+		{ wrapper: lockWrapper() },
 	);
 }
 

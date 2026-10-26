@@ -66,6 +66,7 @@ import RepresentationHomePage from "~/app/declaration-representation/page";
 import type { RepresentationDraft } from "~/modules/declaration-representation";
 import { getCurrentYear, getReferenceYearFor } from "~/modules/domain";
 import { api } from "~/trpc/server";
+import { lockWrapper } from "./representationLockHarness";
 
 const CAMPAIGN_YEAR = getCurrentYear();
 const YEAR = getReferenceYearFor(CAMPAIGN_YEAR);
@@ -129,7 +130,7 @@ describe("RepresentationHomePage", () => {
 	it("reads the declaration of the reference year", async () => {
 		mockFunnelState();
 
-		render(await RepresentationHomePage());
+		render(await RepresentationHomePage(), { wrapper: lockWrapper() });
 
 		expect(getDeclaration).toHaveBeenCalledWith({ year: YEAR });
 	});
@@ -137,7 +138,7 @@ describe("RepresentationHomePage", () => {
 	it("serves the subjection screen when no draft has been started", async () => {
 		mockFunnelState();
 
-		render(await RepresentationHomePage());
+		render(await RepresentationHomePage(), { wrapper: lockWrapper() });
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(
@@ -153,7 +154,7 @@ describe("RepresentationHomePage", () => {
 	it("keeps serving the entry screen when the draft has not reached a step yet", async () => {
 		mockFunnelState({ currentStep: 0 });
 
-		render(await RepresentationHomePage());
+		render(await RepresentationHomePage(), { wrapper: lockWrapper() });
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 	});
@@ -161,7 +162,7 @@ describe("RepresentationHomePage", () => {
 	it("pre-fills the subjection screen for a company already declared out of scope (T3-S2)", async () => {
 		mockFunnelState({ currentStep: 0, status: "not_subject" });
 
-		render(await RepresentationHomePage());
+		render(await RepresentationHomePage(), { wrapper: lockWrapper() });
 
 		expect(mockRedirect).not.toHaveBeenCalled();
 		expect(
@@ -180,7 +181,7 @@ describe("RepresentationHomePage", () => {
 	it("leaves the subjection screen blank for a draft that has not reached a step", async () => {
 		mockFunnelState({ currentStep: 0, status: "draft" });
 
-		render(await RepresentationHomePage());
+		render(await RepresentationHomePage(), { wrapper: lockWrapper() });
 
 		for (const radio of screen.getAllByRole("radio")) {
 			expect(radio).not.toBeChecked();

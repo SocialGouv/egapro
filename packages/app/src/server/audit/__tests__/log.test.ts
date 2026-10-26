@@ -148,6 +148,21 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps the representation lock resource with its year and drops a composite id", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "success",
+			resourceType: "representation_declaration",
+			resourceId: "123456789:2025",
+			metadata: { year: 2025, siren: "123456789" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			resourceType: "representation_declaration",
+			resourceId: null,
+			metadata: { year: 2025 },
+		});
+	});
+
 	it("rejects free text in attribution fields", async () => {
 		await logAction({
 			action: AUDIT_ACTIONS.AUTH_LOGIN,

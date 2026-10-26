@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -10,6 +10,7 @@ import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
+import { useRepresentationLock } from "./shared/lock/RepresentationLockContext";
 import {
 	getNextStep,
 	getNextStepHref,
@@ -52,17 +53,33 @@ export function StepPageClient({
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
+	const lock = useRepresentationLock();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
-	const isReadOnly = !campaignOpen || isSubmitted;
+	const isReadOnly =
+		!campaignOpen || isSubmitted || lock.isReadOnly || lock.isLoading;
 
-	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
-		useRepresentationDraft({
-			year,
-			step,
-			initialDraft,
-			enabled: campaignOpen && !isSubmitted,
-		});
+	const {
+		draft,
+		setDraftValues,
+		saveProgress,
+		isSaving,
+		isPendingSave,
+		saveError,
+		draftVersion,
+		flushPendingSave,
+	} = useRepresentationDraft({
+		year,
+		step,
+		initialDraft,
+		enabled: campaignOpen && !isSubmitted && !isReadOnly,
+	});
+
+	const { registerPendingSave } = lock;
+	useEffect(
+		() => registerPendingSave(flushPendingSave),
+		[flushPendingSave, registerPendingSave],
+	);
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
 	const registerStepValidator = useCallback(
@@ -117,6 +134,10 @@ export function StepPageClient({
 			if (!isValid) return;
 		}
 		setNavigationError(null);
+		if (isReadOnly) {
+			router.push(representationStepHref(nextStep));
+			return;
+		}
 		setIsAdvancing(true);
 		try {
 			await saveProgress(nextStep);
@@ -163,7 +184,16 @@ export function StepPageClient({
 
 			<Stepper currentStep={step} />
 
-			<StepComponent />
+			<StepComponent key={draftVersion} />
+
+			{saveError ? (
+				<div
+					className="fr-alert fr-alert--error fr-alert--sm fr-mt-4w"
+					role="alert"
+				>
+					<p>{saveError}</p>
+				</div>
+			) : null}
 
 			{navigationError ? (
 				<div

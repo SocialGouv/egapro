@@ -87,7 +87,11 @@ const HTTP_ERROR_SUFFIXES = new Set([
 	"max_files",
 	"empty_file",
 ]);
-const RESOURCE_TYPES = new Set(["declaration", "notification"]);
+const RESOURCE_TYPES = new Set([
+	"declaration",
+	"notification",
+	"representation_declaration",
+]);
 const PUBLIC_STDOUT_ONLY_ACTIONS = new Set<AuditActionKey>([
 	AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
 	AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,

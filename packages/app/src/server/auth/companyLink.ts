@@ -12,6 +12,7 @@ import {
 	type DbClient,
 	releaseLocksForUserOnSirens,
 } from "~/server/services/declarationLockService";
+import { releaseRepresentationLocksForUserOnSirens } from "~/server/services/representationDeclarationLockService";
 import { fetchCompanyBySiren } from "~/server/services/weez";
 
 export type CompanyLinkAuditContext = {
@@ -70,6 +71,7 @@ async function revokeLinks(
 		userId,
 		revokedSirens,
 	);
+	await releaseRepresentationLocksForUserOnSirens(tx, userId, revokedSirens);
 
 	const reason: RevocationReason = keptSiren
 		? "siret_changed"
