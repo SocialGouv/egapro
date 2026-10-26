@@ -12,11 +12,11 @@
 4. Choisir le **bucket** selon le scénario (CSE ≥ 100, triennal 50–99, grand effectif, etc.).
 
 
-## SIREN dédiés aux tests UI et aux audits RGAA (#4724)
+## SIREN dédiés aux tests UI et aux audits RGAA (#4724, #4875)
 
-Les **24 SIREN distincts** ci-dessous sont réservés au [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724) : 20 pour les tests UI (4 dans chacune des cinq tranches d’effectif demandées) et 4 pour les audits RGAA. Les SIRET indiqués sont ceux du siège, vérifiés les 13 et 14 octobre 2026 avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/). Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
+Les **30 SIREN distincts** ci-dessous sont réservés aux tests UI et aux audits RGAA : 20 pour les tests UI (4 dans chacune des cinq tranches d’effectif demandées, [ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)), 4 pour les audits RGAA de plus de 150 salariés ([ticket #4724](https://github.com/SocialGouv/egapro/issues/4724)) et 6 pour les audits RGAA de la représentation équilibrée, à 1 000 salariés et plus ([ticket #4875](https://github.com/SocialGouv/egapro/issues/4875)). Les SIRET indiqués sont ceux du siège, vérifiés avec l’[API Recherche d’Entreprises](https://recherche-entreprises.api.gouv.fr/) les 13 et 14 octobre 2026, puis le 26 octobre 2026 pour les 6 derniers. Les effectifs indiqués sont ceux **simulés dans le GIP mocké**.
 
-Après fusion et promotion d’une release contenant la [PR #4833](https://github.com/SocialGouv/egapro/pull/4833), les 24 SIREN auront une ligne dans le GIP mocké. Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
+Chaque SIREN a une ligne dans le GIP mocké, importée en recette après promotion d’une release qui la contient. Cocher une case lors de l’attribution du SIRET, puis la décocher après usage.
 
 ### Tests UI — 50-99 (4)
 
@@ -59,6 +59,17 @@ Après fusion et promotion d’une release contenant la [PR #4833](https://githu
 - [ ] `38786776500373` — **ENYGEA SERVICES** · SIREN `387867765` · effectif GIP 375
 - [ ] `34974317900203` — **PRECIA MOLEN SERVICE** · SIREN `349743179` · effectif GIP 375
 - [ ] `79517251900014` — **SAGS SERVICES** · SIREN `795172519` · effectif GIP 375
+
+### Audits RGAA — représentation équilibrée, 1 000 et plus (6)
+
+Effectif GIP supérieur ou égal au seuil de 1 000 salariés : ces entreprises sont assujetties à la déclaration de représentation équilibrée.
+
+- [ ] `44023310400668` — **CARRARD SERVICES** · SIREN `440233104` · effectif GIP 1500
+- [ ] `42470496300083` — **THALES GLOBAL SERVICES SAS** · SIREN `424704963` · effectif GIP 1500
+- [ ] `35352220400083` — **DAHER INDUSTRIAL SERVICES** · SIREN `353522204` · effectif GIP 1500
+- [ ] `70203444800564` — **SECURITAS TECHNOLOGY SERVICES SAS** · SIREN `702034448` · effectif GIP 1500
+- [ ] `42120607900020` — **ADEO SERVICES** · SIREN `421206079` · effectif GIP 1500
+- [ ] `50975010500108` — **MAGELLAN STRATEGIC SOLUTIONS & SERVICES FRANCE (MAGELLAN)** · SIREN `509750105` · effectif GIP 1500
 
 ## Utilisés sur env `rgaa-persist` (snapshot 2026-08-06)
 
