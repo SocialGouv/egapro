@@ -1,5 +1,5 @@
 {
-	"id": "7b8fb7e2-7a6d-4bce-9a76-3dcdcb923c33",
+	"id": "31fbe8a5-0939-4718-bc7f-34b6463f61af",
 	"prevId": "c015ea57-59e2-4e00-bba8-a51dea82aa63",
 	"version": "7",
 	"dialect": "postgresql",
@@ -1204,6 +1204,12 @@
 				"second_decl_reference_period_end": {
 					"name": "second_decl_reference_period_end",
 					"type": "varchar(10)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"cse_opinion_draft_updated_at": {
+					"name": "cse_opinion_draft_updated_at",
+					"type": "timestamp with time zone",
 					"primaryKey": false,
 					"notNull": false
 				},
@@ -2435,117 +2441,6 @@
 			},
 			"indexes": {},
 			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
-		"public.app_representation_declaration_lock": {
-			"name": "app_representation_declaration_lock",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "varchar(255)",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"siren": {
-					"name": "siren",
-					"type": "varchar(9)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"year": {
-					"name": "year",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"locked_by_user_id": {
-					"name": "locked_by_user_id",
-					"type": "varchar(255)",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"locked_at": {
-					"name": "locked_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"last_heartbeat_at": {
-					"name": "last_heartbeat_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"expires_at": {
-					"name": "expires_at",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": true
-				}
-			},
-			"indexes": {
-				"representation_declaration_lock_siren_year_unique": {
-					"name": "representation_declaration_lock_siren_year_unique",
-					"columns": [
-						{
-							"expression": "siren",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "year",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": true,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"representation_declaration_lock_expires_at_idx": {
-					"name": "representation_declaration_lock_expires_at_idx",
-					"columns": [
-						{
-							"expression": "expires_at",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {
-				"app_representation_declaration_lock_siren_app_company_siren_fk": {
-					"name": "app_representation_declaration_lock_siren_app_company_siren_fk",
-					"tableFrom": "app_representation_declaration_lock",
-					"tableTo": "app_company",
-					"columnsFrom": ["siren"],
-					"columnsTo": ["siren"],
-					"onDelete": "cascade",
-					"onUpdate": "no action"
-				},
-				"app_representation_declaration_lock_locked_by_user_id_app_user_id_fk": {
-					"name": "app_representation_declaration_lock_locked_by_user_id_app_user_id_fk",
-					"tableFrom": "app_representation_declaration_lock",
-					"tableTo": "app_user",
-					"columnsFrom": ["locked_by_user_id"],
-					"columnsTo": ["id"],
-					"onDelete": "no action",
-					"onUpdate": "no action"
-				}
-			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"policies": {},

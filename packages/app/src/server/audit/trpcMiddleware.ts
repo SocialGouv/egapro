@@ -45,6 +45,7 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 	"cseOpinion.deleteFile": AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE,
 	"cseOpinion.finalize": AUDIT_ACTIONS.CSE_OPINION_FINALIZE,
 	"cseOpinion.setFileContentTypes": AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES,
+	"cseOpinion.getSubmittedView": AUDIT_ACTIONS.CSE_OPINION_VIEW,
 
 	// ── joint evaluation sensitive read (exposes filed report) ─
 	"jointEvaluation.getFile": AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE,

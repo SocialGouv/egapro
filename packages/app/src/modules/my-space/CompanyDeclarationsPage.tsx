@@ -122,6 +122,7 @@ export function CompanyDeclarationsPage({
 				campaignDeadlines={campaignDeadlines}
 				compliancePathApplicable={compliancePathApplicable}
 				cseOpinionRequired={cseOpinionRequired}
+				cseOpinionViewAvailable={currentDeclaration?.cseOpinionViewAvailable}
 				ctaHref={ctaHref}
 				declarationFsmStatus={currentDeclaration?.fsmStatus ?? null}
 				displayContext={displayContext}
@@ -139,6 +140,9 @@ export function CompanyDeclarationsPage({
 					currentDeclaration?.hasSubmittedSecondDeclaration ?? false
 				}
 				indicatorGRequired={indicatorGRequired}
+				jointEvaluationViewAvailable={
+					currentDeclaration?.jointEvaluationViewAvailable
+				}
 				lastActionDate={lastActionDate}
 				lockedByOther={lockedByOther}
 				lockHolder={lockHolder}

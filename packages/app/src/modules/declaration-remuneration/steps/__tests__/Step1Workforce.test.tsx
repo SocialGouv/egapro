@@ -281,6 +281,77 @@ describe("Step1Workforce", () => {
 		});
 	});
 
+	it.each([
+		[
+			step1Data({ hourlyWomen: 10, hourlyMen: 20 }),
+			ANNUAL_WOMEN,
+			/rémunération annuelle/i,
+		],
+		[
+			step1Data({ totalWomen: 10, totalMen: 20 }),
+			HOURLY_WOMEN,
+			/rémunération horaire/i,
+		],
+	] as const)("blocks a row with two explicitly entered zero headcounts", async (values, invalidField, rowName) => {
+		const user = userEvent.setup();
+		renderStep1();
+		await fillAll(user, values);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).not.toHaveBeenCalled();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(rowName);
+		expect(screen.getByLabelText(invalidField)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		const otherField = invalidField === ANNUAL_WOMEN ? ANNUAL_MEN : HOURLY_MEN;
+		expect(screen.getByLabelText(otherField)).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+		expect(alert.textContent?.match(/doit être supérieur à 0\./g)).toHaveLength(
+			1,
+		);
+	});
+
+	it("preserves zero values when rendering saved data", () => {
+		renderStep1(
+			step1Data({ totalWomen: 10, totalMen: 0, hourlyWomen: 10, hourlyMen: 0 }),
+		);
+
+		expect(screen.getByLabelText(ANNUAL_MEN)).toHaveValue("0");
+		expect(screen.getByLabelText(HOURLY_MEN)).toHaveValue("0");
+	});
+
+	it("allows a zero headcount for only one sex in each row", async () => {
+		const user = userEvent.setup();
+		renderStep1();
+		const values = step1Data({ totalMen: 20, hourlyWomen: 10 });
+		await fillAll(user, values);
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(mockMutate).toHaveBeenCalledWith(values);
+	});
+
+	it("clears the row error when the other headcount is corrected", async () => {
+		const user = userEvent.setup();
+		renderStep1();
+		await fillAll(user, step1Data({ hourlyWomen: 10, hourlyMen: 20 }));
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Le total des effectifs pour la rémunération annuelle doit être supérieur à 0.",
+		);
+
+		await user.clear(screen.getByLabelText(ANNUAL_MEN));
+		await user.type(screen.getByLabelText(ANNUAL_MEN), "5");
+		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: /suivant/i }));
+		expect(mockMutate).toHaveBeenCalledWith(
+			step1Data({ totalMen: 5, hourlyWomen: 10, hourlyMen: 20 }),
+		);
+	});
+
 	it("names every empty field in a single error alert on submit", async () => {
 		const user = userEvent.setup();
 		renderStep1();

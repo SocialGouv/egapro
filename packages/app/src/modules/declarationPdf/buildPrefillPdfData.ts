@@ -18,6 +18,7 @@ import {
 	parseGipWorkforce,
 } from "~/modules/domain";
 
+import { formatCsePresence } from "./formatCsePresence";
 import { formatNaf } from "./formatNaf";
 
 export type PrefillPdfCompany = {
@@ -56,11 +57,6 @@ type PrefillPdfSource = {
 	workforceEma: string | number | null;
 	company: PrefillPdfCompany | undefined;
 };
-
-function formatCsePresence(hasCse: boolean | null): string {
-	if (hasCse === null) return "Non renseigné";
-	return hasCse ? "Oui" : "Non";
-}
 
 function formatPeriod(
 	start: string | null | undefined,

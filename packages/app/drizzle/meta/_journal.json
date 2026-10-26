@@ -418,8 +418,15 @@
 		{
 			"idx": 59,
 			"version": "7",
-			"when": 1792597838866,
-			"tag": "0059_collaborative-representation-lock",
+			"when": 1792597772097,
+			"tag": "0059_cse-opinion-draft-updated-at",
+			"breakpoints": true
+		},
+		{
+			"idx": 60,
+			"version": "7",
+			"when": 1793012530462,
+			"tag": "0060_collaborative-representation-lock",
 			"breakpoints": true
 		}
 	]

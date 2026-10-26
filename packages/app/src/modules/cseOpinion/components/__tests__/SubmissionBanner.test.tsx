@@ -29,6 +29,23 @@ describe("SubmissionBanner", () => {
 		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
 	});
 
+	it("offers the joint evaluation recap of the banner's year as a download", () => {
+		render(
+			<SubmissionBanner
+				deadline={new Date("2026-08-01T00:00:00Z")}
+				email="declarant@example.fr"
+				year={2027}
+			/>,
+		);
+
+		const link = screen.getByRole("link", {
+			name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations",
+		});
+		expect(link).toHaveAttribute("href", "/api/joint-evaluation-pdf?year=2027");
+		expect(link).toHaveClass("fr-icon-download-line");
+		expect(screen.getByText("PDF")).toHaveClass("fr-text-mention--grey");
+	});
+
 	it("uses the DSFR mention color for the fallback instruction", () => {
 		render(
 			<SubmissionBanner

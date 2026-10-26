@@ -36,8 +36,8 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 
 	// Called through the app router so the procedure paths — and therefore the
 	// audit `PROCEDURE_TO_ACTION` keys — are the production ones.
-	function createCaller(siren = SIREN) {
-		return appRouter.createCaller({
+	async function createCaller(siren = SIREN, lockYear: number | null = YEAR) {
+		const caller = appRouter.createCaller({
 			db,
 			session: {
 				user: {
@@ -51,6 +51,8 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 			},
 			headers: new Headers(),
 		} as never).representationDeclaration;
+		if (lockYear !== null) await caller.acquireLock({ year: lockYear });
+		return caller;
 	}
 
 	async function countDeclarations(siren = SIREN) {
@@ -99,7 +101,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("restores the draft and the current step saved earlier (S21)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		const { declaration, campaignOpen } = await caller.get({ year: YEAR });
@@ -117,7 +119,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 
 	// The explicit projection is the only guard against leaking the V1 import columns.
 	it("never exposes the V1 import columns to the client", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		const { declaration } = await caller.get({ year: YEAR });
@@ -128,7 +130,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("persists a submitted declaration with its derived columns (S19)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
 		const { declaration } = await caller.get({ year: YEAR });
@@ -153,7 +155,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("persists the not-computable motives as valid enum values", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: NOT_COMPUTABLE_PAYLOAD });
 		const { declaration } = await caller.get({ year: YEAR });
@@ -170,50 +172,52 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("replaces the previous submission instead of duplicating it (S22)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
-		await caller.submit({
-			year: YEAR,
-			payload: {
-				...VALID_REFERENCE_PERIOD,
-				...COMPUTABLE_EXECUTIVES,
-				...COMPUTABLE_MEMBERS,
-				...OFFLINE_PUBLICATION,
-			},
-		});
+		await expect(
+			caller.submit({
+				year: YEAR,
+				payload: {
+					...VALID_REFERENCE_PERIOD,
+					...COMPUTABLE_EXECUTIVES,
+					...COMPUTABLE_MEMBERS,
+					...OFFLINE_PUBLICATION,
+				},
+			}),
+		).rejects.toMatchObject({ code: "CONFLICT" });
 
 		const { declaration } = await caller.get({ year: YEAR });
 
 		expect(await countDeclarations()).toBe(1);
 		expect(declaration).toMatchObject({
 			status: "submitted",
-			publishUrl: null,
-			publishModalities: OFFLINE_PUBLICATION.publishModalities,
+			publishUrl: FULL_REPRESENTATION_PAYLOAD.publishUrl,
 		});
 	});
 
 	it("keeps the submitted status when a later draft is saved", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
 		const submittedAt = (await caller.get({ year: YEAR })).declaration
 			?.submittedAt;
 
-		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
+		await expect(
+			caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 }),
+		).rejects.toMatchObject({ code: "CONFLICT" });
 		const { declaration } = await caller.get({ year: YEAR });
 
 		expect(await countDeclarations()).toBe(1);
 		expect(declaration).toMatchObject({
 			status: "submitted",
 			submittedAt,
-			draft: DRAFT,
-			currentStep: 2,
+			draft: null,
 		});
 	});
 
 	it("closes the démarche as not subject and wipes the draft it replaces (S1)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		await caller.declareNotSubject({ year: YEAR });
@@ -233,7 +237,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("records the choice of a company that never opened the funnel (S1)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.declareNotSubject({ year: YEAR });
 		const { declaration } = await caller.get({ year: YEAR });
@@ -248,7 +252,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("refuses to bury a declaration that was already transmitted (S2)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
 		const submittedAt = (await caller.get({ year: YEAR })).declaration
@@ -269,9 +273,10 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	// The status guard is a SQL CASE evaluated by Postgres, so only a real driver
 	// round-trip proves the enum value it yields is the one the column accepts.
 	it("reopens a not-subject declaration as a draft when the funnel is walked again (S4)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.declareNotSubject({ year: YEAR });
+		await caller.acquireLock({ year: YEAR });
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		const { declaration } = await caller.get({ year: YEAR });
 
@@ -288,7 +293,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 			INSERT INTO app_representation_declaration (id, siren, year, status, publish_url)
 			VALUES ('other-company-row', ${OTHER_SIREN}, ${YEAR}, 'submitted', 'https://voisine.fr')
 		`;
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		const { declaration } = await caller.get({ year: YEAR });
@@ -299,7 +304,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("refuses any write once the campaign is closed (S23)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller(SIREN, null);
 
 		await expect(
 			caller.saveDraft({ year: CLOSED_YEAR, draft: DRAFT, currentStep: 2 }),
@@ -324,11 +329,14 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("records every procedure in the audit log with its retention category", async () => {
-		const caller = createCaller();
+		const caller = await createCaller(SIREN, null);
 
+		await caller.acquireLock({ year: YEAR });
 		await caller.declareNotSubject({ year: YEAR });
+		await caller.acquireLock({ year: YEAR });
 		await caller.saveDraft({ year: YEAR, draft: DRAFT, currentStep: 2 });
 		await caller.get({ year: YEAR });
+		await caller.acquireLock({ year: YEAR });
 		await caller.submit({ year: YEAR, payload: FULL_REPRESENTATION_PAYLOAD });
 
 		await vi.waitFor(async () => {
@@ -340,6 +348,11 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 				ORDER BY action
 			`;
 			expect([...rows]).toEqual([
+				{
+					action: "declaration.lock_acquired",
+					category: "mutation",
+					siren: SIREN,
+				},
 				// The submission acknowledgement is enqueued by `submit` itself, so
 				// its own audit row belongs to the same procedure run.
 				{
@@ -372,7 +385,7 @@ describe("representationDeclarationRouter against a real Postgres", () => {
 	});
 
 	it("logs the not-subject choice with the year alone as metadata (S7)", async () => {
-		const caller = createCaller();
+		const caller = await createCaller();
 
 		await caller.declareNotSubject({ year: YEAR });
 

@@ -182,6 +182,7 @@ export {
 export type {
 	DeclarationEventType,
 	DeclarationStatusEvent,
+	JointEvaluationTransmissionFacts,
 	SubmissionHistoryEvent,
 	SubsequentSubmissions,
 	TrajectoryEntry,
@@ -199,6 +200,7 @@ export {
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
+	isJointEvaluationFileTransmitted,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
 export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
@@ -393,6 +395,7 @@ export {
 // Workforce sums (quartiles, categories)
 export {
 	computeWorkforceTotal,
+	hasWorkforce,
 	sumCategoryWorkforce,
 	sumQuartileWorkforce,
 } from "./shared/workforce";

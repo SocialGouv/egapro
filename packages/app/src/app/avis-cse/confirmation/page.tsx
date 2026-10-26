@@ -8,7 +8,9 @@ import { isDeclarationSubmitted } from "~/modules/cseOpinion/confirmationHelpers
 import { getReferenceYearFor } from "~/modules/domain";
 import { MY_SPACE } from "~/modules/routes";
 import { offersTransmittedElements } from "~/modules/shared/demarcheDocuments";
+import { findTransmittedJointEvaluation } from "~/server/api/routers/declarationHelpers";
 import { auth } from "~/server/auth";
+import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 export const metadata = { title: "Confirmation de l'avis du CSE" };
@@ -23,6 +25,11 @@ export default async function CseOpinionConfirmationPage() {
 		redirect(MY_SPACE);
 	}
 
+	const transmittedJointEvaluation = await findTransmittedJointEvaluation(
+		db,
+		declarationData.declaration.id,
+	);
+
 	return (
 		<>
 			<FunnelCompleteTracker
@@ -35,6 +42,7 @@ export default async function CseOpinionConfirmationPage() {
 				email={session?.user?.email ?? undefined}
 				hasSecondDeclaration={declarationData.hasSubmittedSecondDeclaration}
 				hasTransmittedElements={offersTransmittedElements(declarationData)}
+				hasTransmittedJointEvaluation={transmittedJointEvaluation !== null}
 			/>
 		</>
 	);

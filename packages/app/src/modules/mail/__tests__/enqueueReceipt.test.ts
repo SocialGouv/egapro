@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
 	captureException: vi.fn(),
 	buildDeclarationAttachments: vi.fn(),
 	buildSecondDeclarationAttachments: vi.fn(),
+	buildJointEvaluationAttachments: vi.fn(),
 	getCampaignDeadlines: vi.fn(),
 	dbResults: [] as unknown[][],
 	limit: vi.fn(),
@@ -26,6 +27,7 @@ vi.mock("~/server/audit/log", () => ({
 vi.mock("../buildReceiptAttachments", () => ({
 	buildDeclarationAttachments: mocks.buildDeclarationAttachments,
 	buildSecondDeclarationAttachments: mocks.buildSecondDeclarationAttachments,
+	buildJointEvaluationAttachments: mocks.buildJointEvaluationAttachments,
 }));
 
 vi.mock("~/server/db/getCampaignDeadlines", () => ({
@@ -97,6 +99,7 @@ describe("enqueueReceipt", () => {
 		vi.clearAllMocks();
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
+		mocks.buildJointEvaluationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "enqueued",
@@ -173,18 +176,39 @@ describe("enqueueReceipt", () => {
 		expect(call.attachments).toBeUndefined();
 	});
 
-	it("maps jointEvaluation to joint_evaluation_submitted without attachments", async () => {
+	it("maps jointEvaluation to joint_evaluation_submitted with its recap attached", async () => {
 		await enqueueReceipt({ ...baseInput, kind: "jointEvaluation" });
 
+		expect(mocks.buildJointEvaluationAttachments).toHaveBeenCalledWith(
+			"552100554",
+			2025,
+		);
 		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.buildSecondDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
-			expect.objectContaining({ type: "joint_evaluation_submitted" }),
+			expect.objectContaining({
+				type: "joint_evaluation_submitted",
+				attachments: [PDF_ATTACHMENT],
+			}),
 		);
-		const call = mocks.enqueueNotification.mock.calls[0]?.[0] as {
-			attachments?: unknown;
-		};
-		expect(call.attachments).toBeUndefined();
+	});
+
+	it("still sends the joint evaluation receipt when its recap cannot be rendered", async () => {
+		mocks.buildJointEvaluationAttachments.mockRejectedValue(
+			new Error("pdf rendering failed"),
+		);
+
+		await enqueueReceipt({ ...baseInput, kind: "jointEvaluation" });
+
+		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
+			expect.not.objectContaining({ attachments: expect.anything() }),
+		);
+		expect(mocks.logAction).toHaveBeenCalledWith(
+			expect.objectContaining({
+				status: "success",
+				errorMessage: "ATTACHMENT_DROPPED:",
+			}),
+		);
 	});
 
 	it("maps representation to representation_receipt without attachments", async () => {
@@ -211,6 +235,7 @@ describe("enqueueReceipt", () => {
 	it("maps formalNoticeJointEvaluation to formal_notice_joint_evaluation_submitted without attachments", async () => {
 		await enqueueReceipt({ ...baseInput, kind: "formalNoticeJointEvaluation" });
 
+		expect(mocks.buildJointEvaluationAttachments).not.toHaveBeenCalled();
 		expect(mocks.buildDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.buildSecondDeclarationAttachments).not.toHaveBeenCalled();
 		expect(mocks.enqueueNotification).toHaveBeenCalledWith(
@@ -496,6 +521,7 @@ describe("enqueueReceipt — variant derivation", () => {
 		vi.clearAllMocks();
 		mocks.buildDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.buildSecondDeclarationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
+		mocks.buildJointEvaluationAttachments.mockResolvedValue([PDF_ATTACHMENT]);
 		mocks.getCampaignDeadlines.mockResolvedValue(CAMPAIGN_DEADLINES);
 		mocks.enqueueNotification.mockResolvedValue({
 			status: "enqueued",

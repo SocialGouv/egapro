@@ -114,7 +114,7 @@ async function expectPanneauDemarcheClose(page: Page): Promise<void> {
 	await test.step("panneau « Mon espace » d'une démarche close", async () => {
 		await openPanneauDemarche(page);
 
-		const readOnlyRows: Array<{ label: string; view?: string }> = [
+		const readOnlyRows: Array<{ label: string; view: string }> = [
 			{
 				label: "Votre déclaration a été transmise",
 				view: "Voir le récapitulatif de la déclaration",
@@ -123,8 +123,10 @@ async function expectPanneauDemarcheClose(page: Page): Promise<void> {
 				label: "Votre seconde déclaration a été transmise",
 				view: "Voir le récapitulatif de la seconde déclaration",
 			},
-			// No `view`: the joint evaluation row carries no affordance at all.
-			{ label: "Votre rapport de l'évaluation conjointe a été transmis" },
+			{
+				label: "Votre rapport de l'évaluation conjointe a été transmis",
+				view: "Voir le rapport de l'évaluation conjointe",
+			},
 		];
 
 		for (const { label, view } of readOnlyRows) {
@@ -132,11 +134,7 @@ async function expectPanneauDemarcheClose(page: Page): Promise<void> {
 			// Pin the row before the negative assertions below: a missing row would
 			// otherwise satisfy every toHaveCount(0) without proving anything.
 			await expect(row).toBeVisible();
-			if (view) {
-				await expect(row.getByRole("link", { name: view })).toBeVisible();
-			} else {
-				await expect(row.getByRole("link")).toHaveCount(0);
-			}
+			await expect(row.getByRole("link", { name: view })).toBeVisible();
 			await expect(
 				row.getByRole("link", { name: "Modifier", exact: true }),
 			).toHaveCount(0);
@@ -144,6 +142,9 @@ async function expectPanneauDemarcheClose(page: Page): Promise<void> {
 		}
 
 		const cseRow = transmittedRow(page, "Vos avis du CSE ont été transmis");
+		await expect(
+			cseRow.getByRole("link", { name: "Voir les avis du CSE" }),
+		).toBeVisible();
 		await expect(
 			cseRow.getByRole("link", { name: "Modifier", exact: true }),
 		).toBeVisible();

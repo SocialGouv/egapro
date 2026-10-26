@@ -1,5 +1,7 @@
 import { formatCivilLongDate } from "~/modules/domain";
 import { ResendReceiptButton } from "~/modules/mail";
+import { API_JOINT_EVALUATION_PDF } from "~/modules/routes";
+import { FileDownloadLink, FileFormatDetail } from "~/modules/shared";
 import styles from "./SubmissionBanner.module.scss";
 
 type Props = {
@@ -9,6 +11,7 @@ type Props = {
 };
 
 export function SubmissionBanner({ email, deadline, year }: Props) {
+	const recapHref = `${API_JOINT_EVALUATION_PDF}?year=${year}`;
 	return (
 		<div
 			className={`fr-grid-row fr-grid-row--gutters fr-p-4w ${styles.container}`}
@@ -29,6 +32,19 @@ export function SubmissionBanner({ email, deadline, year }: Props) {
 							Échéance pour transmettre l'avis ou les avis du CSE :{" "}
 							<strong>{formatCivilLongDate(deadline)}</strong>
 						</p>
+						<div className={styles.download}>
+							<FileDownloadLink
+								className="fr-link fr-icon-download-line fr-link--icon-right"
+								href={recapHref}
+								pendingLabel="Génération du récapitulatif en cours…"
+							>
+								Télécharger le récapitulatif de l'évaluation conjointe des
+								rémunérations
+							</FileDownloadLink>
+							<p className="fr-text--xs fr-text-mention--grey fr-mb-0">
+								<FileFormatDetail href={recapHref} />
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
