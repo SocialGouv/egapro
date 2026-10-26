@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
-import { DEFAULT_LOCK_TIMEOUT_MINUTES } from "~/modules/domain";
+import {
+	DEFAULT_LOCK_TIMEOUT_MINUTES,
+	writeCampaignYearOverride,
+} from "~/modules/domain";
 import {
 	ALREADY_SUBMITTED_MESSAGE,
 	CLOSED_CAMPAIGN,
+	CLOSED_CAMPAIGN_YEAR,
 	CLOSED_MESSAGE,
 	createCaller,
 	createMockDb,
@@ -229,6 +233,18 @@ describe("representationDeclarationRouter lock procedures", () => {
 
 			expect(result).toEqual({ held: false });
 			expect(lockMocks.refreshRepresentationLock).not.toHaveBeenCalled();
+		});
+
+		it("keeps the lock while the pinned campaign year falls inside the campaign window", async () => {
+			writeCampaignYearOverride(CLOSED_CAMPAIGN_YEAR);
+			mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+			lockMocks.refreshRepresentationLock.mockResolvedValue(true);
+
+			const result = await createCaller(createMockDb().db).heartbeat({
+				year: YEAR,
+			});
+
+			expect(result).toEqual({ held: true });
 		});
 	});
 

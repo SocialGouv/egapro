@@ -26,10 +26,10 @@ import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
+import { consumeDeclarationTransmissionSuccess } from "../shared/declarationSuccessFlash";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
-import { consumeDeclarationTransmissionSuccess } from "../shared/declarationSuccessFlash";
 import styles from "./CompliancePathChoice.module.scss";
 import {
 	FirstRoundOptions,

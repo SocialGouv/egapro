@@ -162,7 +162,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 			const campaign = await getRepresentationCampaign(
 				getRepresentationCampaignYear(input.year),
 			);
-			if (!isRepresentationCampaignOpen(campaign, new Date())) {
+			if (!isRepresentationCampaignOpen(campaign, getCurrentDate())) {
 				return { held: false };
 			}
 			const timeoutMinutes = await readLockTimeoutMinutes(ctx.db);
