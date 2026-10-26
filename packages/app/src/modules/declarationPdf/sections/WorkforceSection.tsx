@@ -1,4 +1,8 @@
 import { View } from "@react-pdf/renderer";
+import {
+	WORKFORCE_MEN_HEADER,
+	WORKFORCE_WOMEN_HEADER,
+} from "~/modules/declaration-remuneration/steps/step1/workforceRows";
 import { computeWorkforceTotal } from "~/modules/domain";
 import { type PdfStyles, styles } from "../recapPdfStyles";
 import { SectionBanner } from "./headings";
@@ -52,14 +56,19 @@ export function WorkforceSection({
 			/>
 			<Table sheet={sheet}>
 				<Row>
+					<Cell header sheet={sheet} width={PAY_TABLE.label} />
 					<Cell
 						header
 						sheet={sheet}
-						text="Nombre de salariés"
-						width={PAY_TABLE.label}
+						text={WORKFORCE_WOMEN_HEADER}
+						width={PAY_TABLE.value}
 					/>
-					<Cell header sheet={sheet} text="Femmes" width={PAY_TABLE.value} />
-					<Cell header sheet={sheet} text="Hommes" width={PAY_TABLE.value} />
+					<Cell
+						header
+						sheet={sheet}
+						text={WORKFORCE_MEN_HEADER}
+						width={PAY_TABLE.value}
+					/>
 					<Cell header sheet={sheet} text="Total" width={PAY_TABLE.total} />
 				</Row>
 				{rows.map((row) => (

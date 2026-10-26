@@ -46,6 +46,8 @@ export type DeclarationItem = {
 	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;

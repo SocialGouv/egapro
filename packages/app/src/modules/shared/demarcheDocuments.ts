@@ -1,4 +1,12 @@
-import { API_DECLARATION_PDF, API_TRANSMITTED_PDF } from "~/modules/routes";
+import {
+	API_DECLARATION_PDF,
+	API_JOINT_EVALUATION_PDF,
+	API_TRANSMITTED_PDF,
+} from "~/modules/routes";
+
+export const JOINT_EVALUATION_RECAP_TITLE =
+	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
+
 export type DemarcheDocument = {
 	dataYear: number;
 	href: string;
@@ -25,6 +33,7 @@ type RemunerationDocumentsInput = {
 	dataYear: number;
 	hasSecondDeclaration: boolean;
 	hasTransmittedElements: boolean;
+	hasTransmittedJointEvaluation: boolean;
 	year: number;
 };
 
@@ -32,6 +41,7 @@ export function buildRemunerationDocuments({
 	dataYear,
 	hasSecondDeclaration,
 	hasTransmittedElements,
+	hasTransmittedJointEvaluation,
 	year,
 }: RemunerationDocumentsInput): DemarcheDocument[] {
 	const documents: DemarcheDocument[] = [
@@ -49,6 +59,15 @@ export function buildRemunerationDocuments({
 			href: `${API_DECLARATION_PDF}?type=correction&year=${year}`,
 			title:
 				"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés",
+			year,
+		});
+	}
+
+	if (hasTransmittedJointEvaluation) {
+		documents.push({
+			dataYear,
+			href: `${API_JOINT_EVALUATION_PDF}?year=${year}`,
+			title: JOINT_EVALUATION_RECAP_TITLE,
 			year,
 		});
 	}

@@ -1,9 +1,9 @@
 import { z } from "zod";
-
 import {
 	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
 	COMPLIANCE_PATHS,
+	hasWorkforce,
 	isCategoryPayApplicable,
 	isSexRemunerationComplete,
 } from "~/modules/domain";
@@ -12,12 +12,23 @@ export const CATEGORY_NAME_MAX_LENGTH = 250;
 const CATEGORY_NAME_LEGACY_MAX_LENGTH = 255;
 export const CATEGORY_NAME_MAX_LENGTH_MESSAGE = `${CATEGORY_NAME_MAX_LENGTH} caractères maximum`;
 
-export const updateStep1Schema = z.object({
-	totalWomen: z.number().int().min(0),
-	totalMen: z.number().int().min(0),
-	hourlyWomen: z.number().int().min(0),
-	hourlyMen: z.number().int().min(0),
-});
+export const updateStep1Schema = z
+	.object({
+		totalWomen: z.number().int().min(0),
+		totalMen: z.number().int().min(0),
+		hourlyWomen: z.number().int().min(0),
+		hourlyMen: z.number().int().min(0),
+	})
+	.refine((data) => hasWorkforce(data.totalWomen, data.totalMen), {
+		path: ["totalWomen"],
+		message:
+			"Le total des effectifs pour la rémunération annuelle doit être supérieur à 0.",
+	})
+	.refine((data) => hasWorkforce(data.hourlyWomen, data.hourlyMen), {
+		path: ["hourlyWomen"],
+		message:
+			"Le total des effectifs pour la rémunération horaire doit être supérieur à 0.",
+	});
 
 export const updateStep2Schema = z.object({
 	indicatorAAnnualWomen: z.string().optional(),

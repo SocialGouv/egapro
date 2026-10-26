@@ -6,21 +6,33 @@ import { normalizeSpaces } from "./tableParts";
 type InfoRow = {
 	label: string;
 	value: string;
+	detail?: string;
 };
+
+type BannerTone = "section" | "category";
 
 export function InfoSection({
 	title,
 	rows,
 	sheet = styles,
+	tone = "section",
 }: {
 	title: string;
 	rows: InfoRow[];
 	sheet?: PdfStyles;
+	tone?: BannerTone;
 }) {
+	const isCategory = tone === "category";
 	return (
 		<View wrap={false}>
-			<View style={sheet.sectionBanner}>
-				<Text style={sheet.sectionBannerText}>{title}</Text>
+			<View style={isCategory ? sheet.categoryBanner : sheet.sectionBanner}>
+				<Text
+					style={
+						isCategory ? sheet.categoryBannerText : sheet.sectionBannerText
+					}
+				>
+					{title}
+				</Text>
 			</View>
 			<View style={sheet.infoBody}>
 				{rows.map((row) => (
@@ -30,6 +42,11 @@ export function InfoSection({
 						</Text>
 						<Text style={[sheet.infoValueColumn, sheet.infoValue]}>
 							{normalizeSpaces(row.value)}
+							{row.detail !== undefined && (
+								<Text style={sheet.infoDetail}>
+									{`\n${normalizeSpaces(row.detail)}`}
+								</Text>
+							)}
 						</Text>
 					</View>
 				))}

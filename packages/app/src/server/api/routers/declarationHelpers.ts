@@ -15,6 +15,10 @@ import { computeIndicatorPercentages } from "~/modules/declaration-remuneration/
 // type cycle that today only stays open because this import asks for one symbol.
 import type { GipMdsRow } from "~/modules/declaration-remuneration/shared/gipMdsMapping";
 import {
+	type DeclarationEventType,
+	isJointEvaluationFileTransmitted,
+} from "~/modules/domain";
+import {
 	notCancelledCondition,
 	submittedDeclarationCondition,
 } from "~/server/db/declarationConditions";
@@ -382,4 +386,47 @@ export async function findJointEvaluationFile(
 		)
 		.limit(1);
 	return file ?? null;
+}
+
+export async function findLatestStatusEvent(
+	database: DbOrTx,
+	declarationId: string,
+	eventType: DeclarationEventType,
+) {
+	const [event] = await database
+		.select({
+			createdAt: declarationStatusHistory.createdAt,
+			round: declarationStatusHistory.round,
+		})
+		.from(declarationStatusHistory)
+		.where(
+			and(
+				eq(declarationStatusHistory.declarationId, declarationId),
+				eq(declarationStatusHistory.eventType, eventType),
+			),
+		)
+		.orderBy(desc(declarationStatusHistory.createdAt))
+		.limit(1);
+	return event ?? null;
+}
+
+export async function findTransmittedJointEvaluation(
+	database: DbOrTx,
+	declarationId: string,
+) {
+	const [submission, file] = await Promise.all([
+		findLatestStatusEvent(database, declarationId, "joint_evaluation_submit"),
+		findJointEvaluationFile(database, declarationId),
+	]);
+	if (
+		!submission ||
+		!file ||
+		!isJointEvaluationFileTransmitted({
+			fileUploadedAt: file.uploadedAt,
+			latestSubmitAt: submission.createdAt,
+		})
+	) {
+		return null;
+	}
+	return { submission, file };
 }

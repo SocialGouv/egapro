@@ -27,6 +27,8 @@ export type DbDeclaration = {
 	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;
@@ -68,6 +70,8 @@ export function buildDeclarationList(
 				secondDeclarationStep: existing.secondDeclarationStep,
 				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
+				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
+				jointEvaluationViewAvailable: existing.jointEvaluationViewAvailable,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				formalNoticeAvailable: existing.formalNoticeAvailable,
@@ -126,6 +130,8 @@ export function buildDeclarationList(
 			secondDeclarationStep: d.secondDeclarationStep,
 			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
+			cseOpinionViewAvailable: d.cseOpinionViewAvailable,
+			jointEvaluationViewAvailable: d.jointEvaluationViewAvailable,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			formalNoticeAvailable: d.formalNoticeAvailable,

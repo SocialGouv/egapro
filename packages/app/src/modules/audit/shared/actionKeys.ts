@@ -40,6 +40,7 @@ export const AUDIT_ACTIONS = {
 	CSE_OPINION_DELETE_FILE: "cse_opinion.delete_file",
 	CSE_OPINION_FINALIZE: "cse_opinion.finalize",
 	CSE_OPINION_SET_FILE_TYPES: "cse_opinion.set_file_types",
+	CSE_OPINION_VIEW: "cse_opinion.view",
 
 	// ── Joint evaluation ───────────────────────────────────
 	JOINT_EVALUATION_UPLOAD_FILE: "joint_evaluation.upload_file",
@@ -117,6 +118,7 @@ export const AUDIT_ACTIONS = {
 	PDF_TRANSMITTED_DOWNLOAD: "pdf.transmitted_download",
 	PDF_REPRESENTATION_DOWNLOAD: "pdf.representation_download",
 	PDF_PREFILL_DOWNLOAD: "pdf.prefill_download",
+	PDF_JOINT_EVALUATION_DOWNLOAD: "pdf.joint_evaluation_download",
 	PDF_SIZE_PROBE: "pdf.size_probe",
 	USER_FILE_DOWNLOAD: "user.file_download",
 
@@ -181,6 +183,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.CSE_OPINION_DELETE_FILE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_FINALIZE]: "mutation",
 	[AUDIT_ACTIONS.CSE_OPINION_SET_FILE_TYPES]: "mutation",
+	[AUDIT_ACTIONS.CSE_OPINION_VIEW]: "read_sensitive",
 
 	[AUDIT_ACTIONS.JOINT_EVALUATION_UPLOAD_FILE]: "mutation",
 	[AUDIT_ACTIONS.JOINT_EVALUATION_GET_FILE]: "read_sensitive",
@@ -233,6 +236,7 @@ export const AUDIT_ACTION_CATEGORIES: Record<AuditActionKey, AuditCategory> = {
 	[AUDIT_ACTIONS.PDF_TRANSMITTED_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_REPRESENTATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_PREFILL_DOWNLOAD]: "read_sensitive",
+	[AUDIT_ACTIONS.PDF_JOINT_EVALUATION_DOWNLOAD]: "read_sensitive",
 	[AUDIT_ACTIONS.PDF_SIZE_PROBE]: "read_sensitive",
 	[AUDIT_ACTIONS.USER_FILE_DOWNLOAD]: "read_sensitive",
 

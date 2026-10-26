@@ -6,7 +6,7 @@ import type {
 	AuditMetadata,
 	AuditStatus,
 } from "~/modules/audit";
-import { AUDIT_ACTION_CATEGORIES } from "~/modules/audit";
+import { AUDIT_ACTION_CATEGORIES, AUDIT_ACTIONS } from "~/modules/audit";
 import { db } from "~/server/db";
 import { actionLogs } from "~/server/db/auditSchema";
 import type { DbClient } from "~/server/services/declarationLockService";
@@ -88,6 +88,11 @@ const HTTP_ERROR_SUFFIXES = new Set([
 	"empty_file",
 ]);
 const RESOURCE_TYPES = new Set(["declaration", "notification"]);
+const PUBLIC_STDOUT_ONLY_ACTIONS = new Set<AuditActionKey>([
+	AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
+	AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
+	AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+]);
 const UUID_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SIREN_PATTERN = /^\d{9}$/;
@@ -171,10 +176,10 @@ function toActionLogRow(input: LogActionInput, category: AuditCategory) {
 	};
 }
 
-// Fail-safe: every failure below is swallowed so the caller's promise always resolves; the stdout mirror runs first, in its own try/catch, and can never suppress the DB insert.
 export async function logAction(input: LogActionInput): Promise<void> {
 	const category = input.category ?? AUDIT_ACTION_CATEGORIES[input.action];
 	mirrorToStdout(input, category);
+	if (PUBLIC_STDOUT_ONLY_ACTIONS.has(input.action)) return;
 
 	try {
 		await db.insert(actionLogs).values(toActionLogRow(input, category));

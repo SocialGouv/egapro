@@ -29,6 +29,8 @@ const RECAP_TITLE =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
 const TRANSMITTED_TITLE = "Télécharger le récapitulatif des éléments transmis";
 const SECOND_TITLE = "Télécharger le récapitulatif de la seconde déclaration";
+const JOINT_EVALUATION_TITLE =
+	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 const REPRESENTATION_RECAP_TITLE =
 	"Télécharger le récapitulatif de la déclaration";
 
@@ -189,6 +191,28 @@ describe("getDocumentResourceCount", () => {
 		).toBe(2);
 	});
 
+	it("adds the joint evaluation recap once the joint evaluation is transmitted", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					hasJointEvaluationFile: true,
+					jointEvaluationViewAvailable: true,
+				}),
+			),
+		).toBe(3);
+	});
+
+	it("counts no joint evaluation recap for a report deposited but not transmitted", () => {
+		expect(
+			getDocumentResourceCount(
+				makeDeclaration({
+					hasJointEvaluationFile: true,
+					jointEvaluationViewAvailable: false,
+				}),
+			),
+		).toBe(2);
+	});
+
 	it("counts only the prefill and the declaration recap while the compliance path choice is pending", () => {
 		expect(
 			getDocumentResourceCount(
@@ -288,6 +312,36 @@ describe("DocumentsPanel", () => {
 			SECOND_TITLE,
 			TRANSMITTED_TITLE,
 		]);
+	});
+
+	it("places the joint evaluation recap between the second declaration and the transmitted elements", () => {
+		const { links } = renderPanel({
+			hasJointEvaluationFile: true,
+			hasSubmittedSecondDeclaration: true,
+			jointEvaluationViewAvailable: true,
+		});
+
+		expect(links().map((link) => link.textContent)).toEqual([
+			RECAP_TITLE,
+			SECOND_TITLE,
+			JOINT_EVALUATION_TITLE,
+			TRANSMITTED_TITLE,
+		]);
+		expect(links()[2]).toHaveAttribute(
+			"href",
+			`/api/joint-evaluation-pdf?year=${DECLARATION_YEAR}`,
+		);
+	});
+
+	it("offers no joint evaluation recap on the corrective actions path", () => {
+		const { links } = renderPanel({
+			firstDeclarationPathChoice: "corrective_action",
+			hasSubmittedSecondDeclaration: true,
+		});
+
+		expect(links().map((link) => link.textContent)).not.toContain(
+			JOINT_EVALUATION_TITLE,
+		);
 	});
 
 	it("offers the transmitted-elements recap after a formal notice joint evaluation deposit", () => {

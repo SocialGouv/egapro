@@ -19,6 +19,7 @@ import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { companies, declarations } from "~/server/db/schema";
 import {
 	buildDeclarationAttachments,
+	buildJointEvaluationAttachments,
 	buildSecondDeclarationAttachments,
 } from "./buildReceiptAttachments";
 import {
@@ -179,6 +180,9 @@ async function buildAttachments(
 	if (kind === "secondDeclaration") {
 		return buildSecondDeclarationAttachments(siren, year);
 	}
+	if (kind === "jointEvaluation") {
+		return buildJointEvaluationAttachments(siren, year);
+	}
 	return [];
 }
 
@@ -214,14 +218,7 @@ type AttachmentsOutcome = {
 	droppedReason: string | null;
 };
 
-/**
- * Only the declaration receipts carry a PDF, and that PDF is rendered on the
- * fly. A rendering failure used to sink the whole e-mail, which is exactly the
- * symptom reported in issue 3914 — the acknowledgement never arrives. Losing
- * the attachment is bad; losing the acknowledgement is worse, so the send goes
- * on without it and the reason travels back to the caller, which records it on
- * the audit row rather than letting the degradation pass for a clean send.
- */
+// Losing the PDF is bad, losing the receipt is worse: send without it and report why.
 async function buildAttachmentsOrDrop(
 	kind: ReceiptKind,
 	siren: string,

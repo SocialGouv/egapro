@@ -1,8 +1,13 @@
+import { and, desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecapitulatifPage } from "~/modules/declaration-remuneration/recapitulatif";
-import { getDeclarationReferencePeriod, isDraft } from "~/modules/domain";
+import {
+	formatShortDate,
+	getDeclarationReferencePeriod,
+	isDraft,
+} from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { MY_SPACE } from "~/modules/routes";
 import { mapToEmployeeCategoryRows } from "~/server/api/routers/declarationHelpers";
@@ -10,6 +15,7 @@ import { mapToStepData } from "~/server/api/routers/declarationStepMapping";
 import { auth } from "~/server/auth";
 import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
+import { declarationStatusHistory, users } from "~/server/db/schema";
 import { api } from "~/trpc/server";
 
 export const metadata: Metadata = {
@@ -51,6 +57,31 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 		if (isDraft(d.status)) notFound();
 	}
 
+	const eventType = isCorrection ? "second_declaration_submit" : "submit";
+	const [[transmission], [declarant]] = await Promise.all([
+		db
+			.select({ createdAt: declarationStatusHistory.createdAt })
+			.from(declarationStatusHistory)
+			.where(
+				and(
+					eq(declarationStatusHistory.declarationId, d.id),
+					eq(declarationStatusHistory.eventType, eventType),
+				),
+			)
+			.orderBy(desc(declarationStatusHistory.createdAt))
+			.limit(1),
+		db
+			.select({
+				firstName: users.firstName,
+				lastName: users.lastName,
+				email: users.email,
+				phone: users.phone,
+			})
+			.from(users)
+			.where(eq(users.id, d.declarantId))
+			.limit(1),
+	]);
+
 	const { step2Data, step3Data, step4Data, step2Gaps, step3Gaps } =
 		mapToStepData(d);
 
@@ -71,6 +102,7 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 			: [];
 
 	const step5Source = data.jobCategories[0]?.source ?? null;
+	const transmittedAt = transmission?.createdAt;
 
 	return (
 		<>
@@ -105,14 +137,19 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 								name: company.name,
 								siren: company.siren,
 								nafCode: company.nafCode,
+								nafLabel: company.nafLabel,
+								hasCse: company.hasCse,
 								address: company.address,
 								countryCode: company.countryCode,
 								countryLabel: company.countryLabel,
 								departmentLabel: company.departmentLabel,
 								gipWorkforce: company.gipWorkforce,
 							}}
-							declarantEmail={session.user.email ?? ""}
-							declarantName={session.user.name ?? ""}
+							declarantEmail={declarant?.email ?? ""}
+							declarantName={[declarant?.firstName, declarant?.lastName]
+								.filter(Boolean)
+								.join(" ")}
+							declarantPhone={declarant?.phone}
 							declarationYear={d.year}
 							hourlyMen={d.hourlyMen}
 							hourlyWomen={d.hourlyWomen}
@@ -127,6 +164,9 @@ export default async function RecapitulatifRoute({ searchParams }: Props) {
 							step5Source={step5Source}
 							totalMen={d.totalMen}
 							totalWomen={d.totalWomen}
+							transmittedAt={
+								transmittedAt ? formatShortDate(transmittedAt) : null
+							}
 						/>
 					</div>
 				</div>
