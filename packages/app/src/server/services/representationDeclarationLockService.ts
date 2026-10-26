@@ -140,8 +140,8 @@ export async function releaseRepresentationLock(
 	siren: string,
 	year: number,
 	userId: string,
-): Promise<void> {
-	await db
+): Promise<boolean> {
+	const rows = await db
 		.delete(representationDeclarationLocks)
 		.where(
 			and(
@@ -149,7 +149,9 @@ export async function releaseRepresentationLock(
 				eq(representationDeclarationLocks.year, year),
 				eq(representationDeclarationLocks.lockedByUserId, userId),
 			),
-		);
+		)
+		.returning({ id: representationDeclarationLocks.id });
+	return rows.length > 0;
 }
 
 export async function assertRepresentationLockHeld(

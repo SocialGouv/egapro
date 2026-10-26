@@ -81,6 +81,15 @@ export function useRepresentationDraft({
 	flushRef.current = flush;
 
 	useEffect(() => {
+		const handleVisibility = () => {
+			if (document.visibilityState === "hidden") flushRef.current();
+		};
+		document.addEventListener("visibilitychange", handleVisibility);
+		return () =>
+			document.removeEventListener("visibilitychange", handleVisibility);
+	}, []);
+
+	useEffect(() => {
 		if (enabled) return;
 		cancelTimers();
 		pendingRef.current = null;

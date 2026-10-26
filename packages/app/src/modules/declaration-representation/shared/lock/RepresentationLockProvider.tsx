@@ -93,6 +93,7 @@ function ManagedRepresentationLockProvider({
 		}
 
 		let cancelled = false;
+		let acquireVersion = 0;
 		let heartbeatId: ReturnType<typeof setInterval> | null = null;
 		let retryId: ReturnType<typeof setTimeout> | null = null;
 
@@ -135,9 +136,16 @@ function ManagedRepresentationLockProvider({
 
 		async function acquire() {
 			clearRetry();
+			const version = ++acquireVersion;
 			try {
 				const result = await acquireRef.current({ year });
-				if (cancelled) return;
+				if (cancelled || version !== acquireVersion) {
+					if (result.acquired) {
+						ownsLockRef.current = true;
+						releaseBeacon();
+					}
+					return;
+				}
 				const reacquired =
 					result.acquired && hasAttemptedRef.current && !ownsLockRef.current;
 				hasAttemptedRef.current = true;
@@ -157,7 +165,7 @@ function ManagedRepresentationLockProvider({
 				if (result.acquired) startHeartbeat();
 				else scheduleAcquire();
 			} catch {
-				if (cancelled) return;
+				if (cancelled || version !== acquireVersion) return;
 				ownsLockRef.current = false;
 				setIsReadOnly(true);
 				setIsUnavailable(true);
@@ -170,6 +178,8 @@ function ManagedRepresentationLockProvider({
 
 		const handleVisibility = () => {
 			if (document.visibilityState === "hidden") {
+				acquireVersion++;
+				clearRetry();
 				releaseBeacon();
 				setIsReadOnly(true);
 				setHolder(null);

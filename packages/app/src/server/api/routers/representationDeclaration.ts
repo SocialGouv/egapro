@@ -34,6 +34,9 @@ import {
 	refreshRepresentationLock,
 	releaseRepresentationLock,
 } from "~/server/services/representationDeclarationLockService";
+import { AUDIT_ACTIONS } from "~/modules/audit";
+import { logAction } from "~/server/audit/log";
+import { buildRequestContext } from "~/server/audit/requestContext";
 
 const CAMPAIGN_CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
@@ -123,13 +126,28 @@ export const representationDeclarationRouter = createTRPCRouter({
 				});
 			}
 			const timeoutMinutes = await readLockTimeoutMinutes(ctx.db);
-			return acquireOrRefreshRepresentationLock(
+			const result = await acquireOrRefreshRepresentationLock(
 				ctx.db,
 				ctx.siren,
 				input.year,
 				ctx.session.user.id,
 				timeoutMinutes,
 			);
+			if (result.acquired) {
+				const requestContext = buildRequestContext(ctx.headers);
+				void logAction({
+					action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+					status: "success",
+					userId: ctx.session.user.id,
+					userEmail: ctx.session.user.email,
+					siren: ctx.siren,
+					resourceType: "representation_declaration",
+					resourceId: `${ctx.siren}:${input.year}`,
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
+			}
+			return result;
 		}),
 
 	heartbeat: companyWriteProcedure
@@ -156,12 +174,26 @@ export const representationDeclarationRouter = createTRPCRouter({
 	releaseLock: companyWriteProcedure
 		.input(getRepresentationDeclarationSchema)
 		.mutation(async ({ ctx, input }) => {
-			await releaseRepresentationLock(
+			const released = await releaseRepresentationLock(
 				ctx.db,
 				ctx.siren,
 				input.year,
 				ctx.session.user.id,
 			);
+			if (released) {
+				const requestContext = buildRequestContext(ctx.headers);
+				void logAction({
+					action: AUDIT_ACTIONS.DECLARATION_LOCK_RELEASED,
+					status: "success",
+					userId: ctx.session.user.id,
+					userEmail: ctx.session.user.email,
+					siren: ctx.siren,
+					resourceType: "representation_declaration",
+					resourceId: `${ctx.siren}:${input.year}`,
+					ipAddress: requestContext.ipAddress,
+					userAgent: requestContext.userAgent,
+				});
+			}
 			return { released: true as const };
 		}),
 

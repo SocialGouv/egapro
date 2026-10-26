@@ -103,6 +103,7 @@ export function Step5Review() {
 		onSuccess: () => {
 			close();
 			router.push(CONFIRMATION_HREF);
+			router.refresh();
 		},
 	});
 
