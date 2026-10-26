@@ -238,8 +238,9 @@ needs something `resolveContext` cannot produce.
 `resolveContext` runs **before** the handler, so it cannot see a result count,
 a parsed body, or the branch the handler took. Converting these three to the
 wrapper would flatten one row per call and lose the per-branch audit context.
-The wrapper's route-context argument (see below) removes the
-*type-level* blocker; it does not make the conversion desirable.
+The wrapper forwards the route context (`{ params }`) to `resolveContext`,
+which removes the *type-level* blocker; it does not make the conversion
+desirable.
 
 ### Deliberate exemptions (10)
 
