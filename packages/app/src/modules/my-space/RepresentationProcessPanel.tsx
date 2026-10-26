@@ -6,15 +6,13 @@ import type { RepresentationCampaign } from "~/modules/domain";
 import {
 	formatCivilLongDate,
 	formatLongDate,
+	getCurrentDate,
 	isRepresentationCampaignOpen,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
-import {
-	LAST_REPRESENTATION_STEP,
-	representationStepHref,
-} from "~/modules/routes";
+import { mySpaceRepresentationHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import {
 	computeRepresentationCtaHref,
@@ -65,9 +63,13 @@ export function RepresentationProcessPanel({
 	declaration,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const campaignOpen = isRepresentationCampaignOpen(campaign, new Date());
+	const campaignOpen = isRepresentationCampaignOpen(campaign, getCurrentDate());
 	const variant = computeRepresentationPanelVariant(declaration, campaignOpen);
-	const ctaHref = computeRepresentationCtaHref(declaration, campaignOpen);
+	const ctaHref = computeRepresentationCtaHref(
+		declaration,
+		campaignOpen,
+		campaignYear,
+	);
 	const transmitted = isRepresentationDeclarationTransmitted(declaration);
 	const [step1, step2] = getStepStatuses(variant);
 	const lastActionDate = declaration?.updatedAt
@@ -104,6 +106,7 @@ export function RepresentationProcessPanel({
 							<Step1Row status={step1} />
 							{step2 !== null && (
 								<Step2Row
+									campaignYear={campaignYear}
 									deadline={campaign.declarationDeadline}
 									status={step2}
 									transmitted={transmitted}
@@ -248,10 +251,12 @@ const STEP2_ITEMS = [
 ];
 
 function Step2Row({
+	campaignYear,
 	deadline,
 	status,
 	transmitted,
 }: {
+	campaignYear: number;
 	deadline: Date;
 	status: StepStatus;
 	transmitted: boolean;
@@ -268,7 +273,7 @@ function Step2Row({
 				{transmitted ? (
 					<TransmittedRow
 						label="Votre déclaration a été transmise"
-						viewHref={representationStepHref(LAST_REPRESENTATION_STEP)}
+						viewHref={mySpaceRepresentationHref(campaignYear)}
 					/>
 				) : (
 					<>

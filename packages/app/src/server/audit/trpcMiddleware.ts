@@ -120,6 +120,10 @@ const PROCEDURE_TO_ACTION: Record<string, AuditActionKey> = {
 
 	// ── representation declaration ─────────────────────────
 	"representationDeclaration.get": AUDIT_ACTIONS.REPRESENTATION_GET,
+	"representationDeclaration.getDeclarant":
+		AUDIT_ACTIONS.REPRESENTATION_GET_DECLARANT,
+	"representationDeclaration.getWorkforceHistory":
+		AUDIT_ACTIONS.COMPANY_READ_GIP_DATA,
 	"representationDeclaration.saveDraft":
 		AUDIT_ACTIONS.REPRESENTATION_SAVE_DRAFT,
 	"representationDeclaration.submit": AUDIT_ACTIONS.REPRESENTATION_SUBMIT,

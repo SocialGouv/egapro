@@ -1,11 +1,16 @@
 import { render, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { RepresentationCampaign } from "~/modules/domain";
-import { civilDate } from "~/modules/domain";
+import {
+	civilDate,
+	clearCampaignYearOverride,
+	writeCampaignYearOverride,
+} from "~/modules/domain";
 import {
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
 	representationStepHref,
 } from "~/modules/routes";
 import { RepresentationProcessPanel } from "../RepresentationProcessPanel";
@@ -14,6 +19,7 @@ import type { DeclarationItem } from "../types";
 const SIREN = "532847196";
 const CAMPAIGN_YEAR = 2026;
 const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
+const CONSULTATION_HREF = mySpaceRepresentationHref(CAMPAIGN_YEAR);
 
 // The panel resolves the campaign window against the real clock, so the open
 // window is stretched wide enough to stay open whenever the suite runs.
@@ -253,11 +259,11 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("variant: submitted", () => {
-		it('renders a "Voir la déclaration" CTA pointing to the recap', () => {
+		it('renders a "Voir la déclaration" CTA pointing to the consultation page', () => {
 			const { dialog } = renderPanel({ declaration: SUBMITTED });
 			const cta = getCta(dialog);
 			expect(cta).toHaveTextContent(/^Voir la déclaration$/);
-			expect(cta).toHaveAttribute("href", RECAP_HREF);
+			expect(cta).toHaveAttribute("href", CONSULTATION_HREF);
 		});
 
 		it("marks both steps as done", () => {
@@ -286,12 +292,12 @@ describe("RepresentationProcessPanel", () => {
 			expect(panel.queryByText(/^Échéance :/)).not.toBeInTheDocument();
 		});
 
-		it("renders a view button to the recap, without a Modifier button or a modifiable-until mention", () => {
+		it("renders a view button to the consultation page, without a Modifier button or a modifiable-until mention", () => {
 			const { panel } = renderPanel({ declaration: SUBMITTED });
 			const viewButton = panel.getByTitle(
 				"Voir le récapitulatif de la déclaration",
 			);
-			expect(viewButton).toHaveAttribute("href", RECAP_HREF);
+			expect(viewButton).toHaveAttribute("href", CONSULTATION_HREF);
 			expect(panel.queryByText("Modifier")).not.toBeInTheDocument();
 			expect(panel.queryByText(/Modifiable jusqu'au/)).not.toBeInTheDocument();
 		});
@@ -335,15 +341,15 @@ describe("RepresentationProcessPanel", () => {
 	});
 
 	describe("campaign closed", () => {
-		const declarations: Array<[string, DeclarationItem | undefined]> = [
-			["no démarche", undefined],
-			["an untouched démarche", makeDeclaration()],
-			["a draft", DRAFT],
-			["a submitted démarche", SUBMITTED],
-			["a not-subject démarche", NOT_SUBJECT],
+		const declarations: Array<[string, DeclarationItem | undefined, string]> = [
+			["no démarche", undefined, RECAP_HREF],
+			["an untouched démarche", makeDeclaration(), RECAP_HREF],
+			["a draft", DRAFT, RECAP_HREF],
+			["a submitted démarche", SUBMITTED, CONSULTATION_HREF],
+			["a not-subject démarche", NOT_SUBJECT, RECAP_HREF],
 		];
 
-		for (const [label, declaration] of declarations) {
+		for (const [label, declaration, ctaHref] of declarations) {
 			it(`announces the démarche as closed with ${label}`, () => {
 				const { panel, dialog } = renderPanel({
 					campaign: CLOSED_CAMPAIGN,
@@ -356,9 +362,38 @@ describe("RepresentationProcessPanel", () => {
 				expect(panel.queryByText(NOT_SUBJECT_MESSAGE)).not.toBeInTheDocument();
 				const cta = getCta(dialog);
 				expect(cta).toHaveTextContent(/^Voir la déclaration$/);
-				expect(cta).toHaveAttribute("href", RECAP_HREF);
+				expect(cta).toHaveAttribute("href", ctaHref);
 			});
 		}
+	});
+
+	describe("pinned campaign year", () => {
+		const PINNED_YEAR = 2030;
+		const PINNED_CAMPAIGN: RepresentationCampaign = {
+			campaignStartDate: civilDate(PINNED_YEAR, 0, 1),
+			campaignEndDate: civilDate(PINNED_YEAR, 11, 31),
+			declarationDeadline: civilDate(PINNED_YEAR, 2, 1),
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date(2026, 5, 15, 10, 0));
+			writeCampaignYearOverride(PINNED_YEAR);
+		});
+
+		afterEach(() => {
+			clearCampaignYearOverride();
+			vi.useRealTimers();
+		});
+
+		it("keeps the démarche open while the pinned year falls inside the campaign window", () => {
+			const { panel, dialog } = renderPanel({
+				campaign: PINNED_CAMPAIGN,
+				declaration: DRAFT,
+			});
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+			expect(getCta(dialog)).toHaveTextContent(/^Reprendre$/);
+		});
 	});
 
 	describe("campaign closed — transmission line", () => {

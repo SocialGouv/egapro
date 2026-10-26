@@ -190,5 +190,53 @@
 		"sizeRange": "1000+",
 		"workforce": 1500,
 		"bucket": "large-1000"
+	},
+	{
+		"siren": "440233104",
+		"name": "CARRARD SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "424704963",
+		"name": "THALES GLOBAL SERVICES SAS",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "353522204",
+		"name": "DAHER INDUSTRIAL SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "702034448",
+		"name": "SECURITAS TECHNOLOGY SERVICES SAS",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "421206079",
+		"name": "ADEO SERVICES",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
+	},
+	{
+		"siren": "509750105",
+		"name": "MAGELLAN STRATEGIC SOLUTIONS & SERVICES FRANCE",
+		"purpose": "rgaa",
+		"sizeRange": "1000+",
+		"workforce": 1500,
+		"bucket": "large-1000"
 	}
 ]

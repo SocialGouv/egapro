@@ -2,6 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import {
+	isPresumedSubjectToRepresentation,
+	REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+} from "~/modules/domain";
+
 const APP_ROOT = resolve(import.meta.dirname, "..", "..", "..");
 const DATA_DIR = resolve(APP_ROOT, "data");
 
@@ -374,8 +379,8 @@ describe("dedicated-test-sirens.json", () => {
 			"1000+": "large-1000",
 		};
 
-		expect(dedicated).toHaveLength(24);
-		expect(new Set(sirens).size).toBe(24);
+		expect(dedicated).toHaveLength(30);
+		expect(new Set(sirens).size).toBe(30);
 		for (const company of dedicated) {
 			expect(company.siren).toMatch(/^\d{9}$/);
 			expect(company.bucket).toBe(bucketByRange[company.sizeRange]);
@@ -392,15 +397,20 @@ describe("dedicated-test-sirens.json", () => {
 			).toHaveLength(4);
 		}
 		const rgaa = dedicated.filter(({ purpose }) => purpose === "rgaa");
-		expect(rgaa).toHaveLength(4);
+		expect(rgaa).toHaveLength(10);
 		for (const company of rgaa) {
 			expect(company.workforce).toBeGreaterThan(150);
 		}
+		expect(
+			rgaa.filter(
+				({ workforce }) => workforce >= REPRESENTATION_SUBJECTION_WORKFORCE_MIN,
+			),
+		).toHaveLength(6);
 	});
 });
 
 describe("mock-gip-mds.csv", () => {
-	it("includes exactly the 24 dedicated SIRENs", () => {
+	it("includes exactly the 30 dedicated SIRENs", () => {
 		const dedicated = loadDedicatedCompanies();
 		const dedicatedSirens = new Set(dedicated.map(({ siren }) => siren));
 		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
@@ -415,13 +425,41 @@ describe("mock-gip-mds.csv", () => {
 
 		expect(rows).toHaveLength(
 			loadCompanies().filter(({ siren }) => !dedicatedSirens.has(siren))
-				.length + 24,
+				.length + 30,
 		);
 		expect(Number(csv.split("\n")[1]?.split(";")[5])).toBe(rows.length);
 		for (const company of dedicated) {
 			const row = rowsBySiren.get(company.siren);
 			expect(row).toBeDefined();
 			expect(Math.floor(toNum(row?.[1]) ?? Number.NaN)).toBe(company.workforce);
+		}
+	});
+
+	it("makes the 6 RGAA SIRENs of 1000+ employees presumed subject to balanced representation", () => {
+		const rgaaLarge = loadDedicatedCompanies().filter(
+			({ purpose, sizeRange }) => purpose === "rgaa" && sizeRange === "1000+",
+		);
+		const csv = readFileSync(resolve(DATA_DIR, "mock-gip-mds.csv"), "utf-8");
+		const workforceBySiren = new Map(
+			parseCsvRows(csv)
+				.filter((row) => row.length > 1)
+				.map((row) => [row[0], toNum(row[1])]),
+		);
+		const referenceYear = Number(
+			csv.split("\n")[1]?.split(";")[3]?.slice(0, 4),
+		);
+
+		expect(rgaaLarge).toHaveLength(6);
+		for (const { siren } of rgaaLarge) {
+			const workforceEma = workforceBySiren.get(siren);
+			expect(workforceEma, `SIREN ${siren} has no GIP row`).toBeDefined();
+			expect(
+				isPresumedSubjectToRepresentation(
+					[{ year: referenceYear, workforceEma: workforceEma ?? 0 }],
+					referenceYear,
+				),
+				`SIREN ${siren} should be subject to balanced representation`,
+			).toBe(true);
 		}
 	});
 

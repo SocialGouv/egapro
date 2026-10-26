@@ -54,16 +54,28 @@ export type CategoryHeadcounts = {
 	hourlyMenCount?: number | null;
 };
 
-/** Whether a job category declares pay data at all. False only when one sex
- *  has an explicit 0 on both the annual and hourly rows: the category then has
- *  no gap to declare (#3678). */
+export type CategoryPayBasis = (typeof CATEGORY_PAY_BASES)[number]["basis"];
+
+/** A basis is calculable only when both sexes have at least one employee.
+ *  Empty counts remain unknown so a new category can still be completed. */
+export function isCategoryPayBasisApplicable(
+	headcounts: CategoryHeadcounts,
+	basis: CategoryPayBasis,
+): boolean {
+	const definition = CATEGORY_PAY_BASES.find((item) => item.basis === basis);
+	if (!definition) return true;
+	return (
+		headcounts[definition.womenCountField] !== 0 &&
+		headcounts[definition.menCountField] !== 0
+	);
+}
+
 export function isCategoryPayApplicable(
 	headcounts: CategoryHeadcounts,
 ): boolean {
-	const hasNoWomen =
-		headcounts.womenCount === 0 && headcounts.hourlyWomenCount === 0;
-	const hasNoMen = headcounts.menCount === 0 && headcounts.hourlyMenCount === 0;
-	return !hasNoWomen && !hasNoMen;
+	return CATEGORY_PAY_BASES.some((base) =>
+		isCategoryPayBasisApplicable(headcounts, base.basis),
+	);
 }
 
 /** Whether pay values must survive normalization and be rendered as data.
@@ -73,12 +85,33 @@ export function shouldRetainCategoryPayValues(
 	payValues: CategoryPayValues,
 	preserveLegacyPay: boolean,
 ): boolean {
+	return CATEGORY_PAY_BASES.some((base) =>
+		shouldRetainCategoryPayBasisValues(
+			headcounts,
+			payValues,
+			preserveLegacyPay,
+			base.basis,
+		),
+	);
+}
+
+/** Whether a historical read-only declaration should retain one basis. */
+export function shouldRetainCategoryPayBasisValues(
+	headcounts: CategoryHeadcounts,
+	payValues: CategoryPayValues,
+	preserveLegacyPay: boolean,
+	basis: CategoryPayBasis,
+): boolean {
+	const definition = CATEGORY_PAY_BASES.find((item) => item.basis === basis);
+	if (!definition) return true;
 	return (
-		isCategoryPayApplicable(headcounts) ||
+		isCategoryPayBasisApplicable(headcounts, basis) ||
 		(preserveLegacyPay &&
-			CATEGORY_PAY_FIELDS.some((field) => {
-				const value = payValues[field];
-				return typeof value === "string" && value.trim() !== "";
-			}))
+			[...definition.womenPayFields, ...definition.menPayFields].some(
+				(field) => {
+					const value = payValues[field];
+					return typeof value === "string" && value.trim() !== "";
+				},
+			))
 	);
 }

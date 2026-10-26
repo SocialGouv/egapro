@@ -28,6 +28,7 @@ export type DeclarationPdfData = {
 	year: number;
 	workforceYear: number;
 	isSecondDeclaration: boolean;
+	indicatorGRequired: boolean;
 	transmittedAt: string;
 	referencePeriod: string;
 	declarant: DeclarationPdfDeclarant;

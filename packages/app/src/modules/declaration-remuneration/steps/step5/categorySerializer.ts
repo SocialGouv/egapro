@@ -3,9 +3,10 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
-	CATEGORY_PAY_FIELDS,
+	CATEGORY_PAY_BASES,
+	type CATEGORY_PAY_FIELDS,
 	type CategoryHeadcounts,
-	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	toStrictInt,
 } from "~/modules/domain";
 
@@ -101,17 +102,22 @@ export function toCategoryHeadcounts(
 	} satisfies CategoryHeadcounts;
 }
 
-/** Clear every pay value when one sex is absent from both workforce rows.
+/** Clear pay values for each basis where one sex has no workforce.
  *  The input is left untouched so this can normalize form defaults and imports. */
 export function withoutPayValuesWhenNotApplicable<
 	T extends CategoryCountFields & CategoryPayFields,
 >(category: T): T {
-	if (isCategoryPayApplicable(toCategoryHeadcounts(category))) return category;
+	const headcounts = toCategoryHeadcounts(category);
 	const cleared = { ...category };
-	for (const field of CATEGORY_PAY_FIELDS) {
-		Object.assign(cleared, { [field]: "" });
+	let changed = false;
+	for (const base of CATEGORY_PAY_BASES) {
+		if (isCategoryPayBasisApplicable(headcounts, base.basis)) continue;
+		for (const field of [...base.womenPayFields, ...base.menPayFields]) {
+			if (cleared[field] !== "") changed = true;
+			Object.assign(cleared, { [field]: "" });
+		}
 	}
-	return cleared;
+	return changed ? cleared : category;
 }
 
 export function toSubmitData(
@@ -122,29 +128,40 @@ export function toSubmitData(
 		source,
 		categories: categories.map((cat) => {
 			const headcounts = toCategoryHeadcounts(cat);
-			const payApplicable = isCategoryPayApplicable(headcounts);
+			const annualApplicable = isCategoryPayBasisApplicable(
+				headcounts,
+				"annual",
+			);
+			const hourlyApplicable = isCategoryPayBasisApplicable(
+				headcounts,
+				"hourly",
+			);
 			return {
 				name: cat.name,
 				data: {
 					...headcounts,
-					annualBaseWomen: payApplicable
+					annualBaseWomen: annualApplicable
 						? toStr(cat.annualBaseWomen)
 						: undefined,
-					annualBaseMen: payApplicable ? toStr(cat.annualBaseMen) : undefined,
-					annualVariableWomen: payApplicable
+					annualBaseMen: annualApplicable
+						? toStr(cat.annualBaseMen)
+						: undefined,
+					annualVariableWomen: annualApplicable
 						? toStr(cat.annualVariableWomen)
 						: undefined,
-					annualVariableMen: payApplicable
+					annualVariableMen: annualApplicable
 						? toStr(cat.annualVariableMen)
 						: undefined,
-					hourlyBaseWomen: payApplicable
+					hourlyBaseWomen: hourlyApplicable
 						? toStr(cat.hourlyBaseWomen)
 						: undefined,
-					hourlyBaseMen: payApplicable ? toStr(cat.hourlyBaseMen) : undefined,
-					hourlyVariableWomen: payApplicable
+					hourlyBaseMen: hourlyApplicable
+						? toStr(cat.hourlyBaseMen)
+						: undefined,
+					hourlyVariableWomen: hourlyApplicable
 						? toStr(cat.hourlyVariableWomen)
 						: undefined,
-					hourlyVariableMen: payApplicable
+					hourlyVariableMen: hourlyApplicable
 						? toStr(cat.hourlyVariableMen)
 						: undefined,
 				},

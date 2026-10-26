@@ -1,10 +1,9 @@
 import { z } from "zod";
 import {
 	CATEGORY_PAY_BASES,
-	CATEGORY_PAY_FIELDS,
 	COMPLIANCE_PATHS,
 	hasWorkforce,
-	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
 } from "~/modules/domain";
 
@@ -101,8 +100,7 @@ export const updateStep4Schema = z.object({
 
 /**
  * Each pay basis carries its own headcount and its own pay fields (#4254).
- * For an applicable category, a headcount only requires its basis' pay data;
- * the absence of one sex from both workforce rows (#3678) takes precedence.
+ * Each basis is disabled when either sex has no employees in that row.
  */
 const employeeCategoryDataSchema = z
 	.object({
@@ -121,26 +119,31 @@ const employeeCategoryDataSchema = z
 	})
 	.refine(
 		(data) =>
-			isCategoryPayApplicable(data) ||
-			CATEGORY_PAY_FIELDS.every((field) => !data[field]),
+			CATEGORY_PAY_BASES.every((base) =>
+				isCategoryPayBasisApplicable(data, base.basis)
+					? true
+					: [...base.womenPayFields, ...base.menPayFields].every(
+							(field) => !data[field],
+						),
+			),
 		{
 			message:
-				"Une catégorie d'emplois sans femmes ou sans hommes ne peut pas déclarer de rémunération.",
+				"Une base de rémunération sans femmes ou sans hommes ne peut pas être déclarée.",
 		},
 	)
 	.refine(
 		(data) =>
-			!isCategoryPayApplicable(data) ||
 			CATEGORY_PAY_BASES.every(
 				(base) =>
-					isSexRemunerationComplete(
+					!isCategoryPayBasisApplicable(data, base.basis) ||
+					(isSexRemunerationComplete(
 						data[base.womenCountField],
 						base.womenPayFields.map((field) => data[field]),
 					) &&
-					isSexRemunerationComplete(
-						data[base.menCountField],
-						base.menPayFields.map((field) => data[field]),
-					),
+						isSexRemunerationComplete(
+							data[base.menCountField],
+							base.menPayFields.map((field) => data[field]),
+						)),
 			),
 		{
 			message:
