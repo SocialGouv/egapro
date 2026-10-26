@@ -178,31 +178,27 @@ export function SubjectionScreen({
 				<ul className="fr-btns-group fr-btns-group--inline fr-btns-group--icon-right fr-btns-group--right fr-mt-4w">
 					{answer === "not_concerned" ? (
 						<li>
-							<span>
-								<button
-									{...readOnlyGuard.buttonProps}
-									className="fr-btn"
-									disabled={declareNotSubjectMutation.isPending || isReadOnly}
-									type="submit"
-								>
-									Valider
-								</button>
-								{readOnlyGuard.tooltip}
-							</span>
+							<button
+								{...readOnlyGuard.buttonProps}
+								className="fr-btn"
+								disabled={declareNotSubjectMutation.isPending || isReadOnly}
+								type="submit"
+							>
+								Valider
+							</button>
+							{readOnlyGuard.tooltip}
 						</li>
 					) : (
 						<li>
-							<span>
-								<button
-									{...readOnlyGuard.buttonProps}
-									className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-									disabled={isReadOnly}
-									type="submit"
-								>
-									Suivant
-								</button>
-								{readOnlyGuard.tooltip}
-							</span>
+							<button
+								{...readOnlyGuard.buttonProps}
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								disabled={isReadOnly}
+								type="submit"
+							>
+								Suivant
+							</button>
+							{readOnlyGuard.tooltip}
 						</li>
 					)}
 				</ul>
