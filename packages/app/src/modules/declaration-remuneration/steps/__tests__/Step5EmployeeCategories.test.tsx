@@ -1278,7 +1278,8 @@ describe("Step5EmployeeCategories — headcount per pay basis (#4254)", () => {
 		const hourlyBaseWomen = screen.getByLabelText(
 			"Salaire de base horaire femmes, catégorie 1",
 		);
-		expect(hourlyBaseWomen).not.toBeDisabled();
+		expect(hourlyBaseWomen).toBeDisabled();
+		expect(hourlyBaseWomen).toHaveValue("");
 		expect(hourlyBaseWomen).not.toHaveAttribute("aria-invalid");
 		expect(
 			screen.queryByText("Aucun écart à calculer"),
@@ -1526,13 +1527,27 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		["annuelle", "hommes"],
 		["horaire", "femmes"],
 		["horaire", "hommes"],
-	] as const)("keeps pay fields enabled for one isolated 0 on %s / %s", async (basis, sex) => {
+	] as const)("disables only the %s pay table for a 0 in %s", async (basis, sex) => {
 		const user = userEvent.setup();
 		renderStep();
 
 		await setCount(user, basis, sex, "0");
 
-		expectPayTablesEnabled();
+		const disabledLabels =
+			basis === "annuelle"
+				? PAY_CELL_LABELS.slice(0, 4)
+				: PAY_CELL_LABELS.slice(4);
+		const enabledLabels =
+			basis === "annuelle"
+				? PAY_CELL_LABELS.slice(4)
+				: PAY_CELL_LABELS.slice(0, 4);
+		for (const label of disabledLabels) {
+			expect(screen.getByLabelText(label)).toBeDisabled();
+			expect(screen.getByLabelText(label)).toHaveValue("");
+		}
+		for (const label of enabledLabels) {
+			expect(screen.getByLabelText(label)).not.toBeDisabled();
+		}
 	});
 
 	it("keeps pay fields enabled for crossed 0s", async () => {
@@ -1542,10 +1557,10 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		await setCount(user, "annuelle", "femmes", "0");
 		await setCount(user, "horaire", "hommes", "0");
 
-		expectPayTablesEnabled();
+		for (const cell of payCells()) expect(cell).toBeDisabled();
 	});
 
-	it("keeps both tables visible, clears their values and disables them for same-column 0s", async () => {
+	it("clears and disables only the table whose row has a zero", async () => {
 		const user = userEvent.setup();
 		renderStep();
 
@@ -1553,8 +1568,14 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		for (const cell of payCells()) expect(cell).not.toHaveValue("");
 
 		await setCount(user, "annuelle", "femmes", "0");
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).not.toHaveValue("");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
+		for (const cell of payCells().slice(4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("100,00");
+		}
 
 		await setCount(user, "horaire", "femmes", "0");
 		await user.tab();
@@ -1573,9 +1594,12 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		await user.tab();
 		expectPayTablesDisabledAndEmpty();
 
-		await setCount(user, "horaire", "femmes", "1");
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).toHaveValue("");
+		await setCount(user, "annuelle", "femmes", "1");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
+		for (const cell of payCells().slice(4)) expect(cell).toBeDisabled();
 
 		await user.click(screen.getByRole("button", { name: /suivant/i }));
 
@@ -1594,11 +1618,17 @@ describe("Step5EmployeeCategories — non-calculable category at 0 (#3678)", () 
 		const annualWomen = screen.getByLabelText(countLabel("annuelle", "femmes"));
 
 		fireEvent.change(annualWomen, { target: { value: "0" } });
-		expectPayTablesDisabledAndEmpty();
+		for (const cell of payCells()) {
+			expect(cell).toBeDisabled();
+			expect(cell).toHaveValue("");
+		}
 
 		fireEvent.change(annualWomen, { target: { value: "20" } });
-		expectPayTablesEnabled();
-		for (const cell of payCells()) expect(cell).toHaveValue("100,00");
+		for (const cell of payCells().slice(0, 4)) {
+			expect(cell).not.toBeDisabled();
+			expect(cell).toHaveValue("100,00");
+		}
+		for (const cell of payCells().slice(4)) expect(cell).toBeDisabled();
 	});
 
 	it("submits same-column 0s without requiring or persisting pay", async () => {
