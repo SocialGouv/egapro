@@ -98,12 +98,14 @@ async function goNext(page: Page) {
 
 /** DSFR draws a radio through its `<label>`, which covers the transparent input:
  * the hit-target check can never pass, so the click is forced and the resulting
- * state asserted instead. */
+ * state asserted instead. A forced click skips the enabled check too, and the
+ * funnel stays read-only until the declaration lock is acquired. */
 async function chooseRadio(page: Page, name: RegExp | string) {
 	const radio = page.getByRole("radio", {
 		name,
 		exact: typeof name === "string",
 	});
+	await expect(radio).toBeEnabled();
 	await radio.check({ force: true });
 	await expect(radio).toBeChecked();
 }

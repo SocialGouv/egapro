@@ -39,6 +39,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { StepPageClient } from "../StepPageClient";
+import type { RepresentationLockState } from "../shared/lock/RepresentationLockContext";
 import type { RepresentationDraft } from "../types";
 import {
 	COMPUTABLE_EXECUTIVES,
@@ -49,6 +50,11 @@ import {
 	VALIDATION_MESSAGES,
 	WEBSITE_PUBLICATION,
 } from "./fixtures";
+import {
+	LOCK_HELD,
+	LOCKED_BY_OTHER,
+	lockWrapper,
+} from "./representationLockHarness";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
@@ -79,6 +85,7 @@ type RenderStepOptions = {
 	currentStep?: number;
 	initialDraft?: RepresentationDraft;
 	isSubmitted?: boolean;
+	lock?: RepresentationLockState;
 };
 
 function renderStep({
@@ -87,6 +94,7 @@ function renderStep({
 	currentStep = 2,
 	initialDraft,
 	isSubmitted,
+	lock,
 }: RenderStepOptions = {}) {
 	return render(
 		<StepPageClient
@@ -98,6 +106,7 @@ function renderStep({
 			step={step}
 			year={YEAR}
 		/>,
+		{ wrapper: lockWrapper(lock) },
 	);
 }
 
@@ -484,6 +493,107 @@ describe("StepPageClient — closed campaign (S23)", () => {
 		renderStep();
 
 		expect(screen.queryByText(CLOSED_BANNER)).not.toBeInTheDocument();
+	});
+});
+
+describe("StepPageClient — declaration locked by another user", () => {
+	it("lets the user browse to the next step without saving anything", async () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: LOCKED_BY_OTHER,
+		});
+
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+
+	it("keeps the step fields read-only", () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: LOCKED_BY_OTHER,
+		});
+
+		expect(screen.getByRole("radio", { name: NONE })).toBeDisabled();
+	});
+
+	it("stays read-only while the lock is still being checked", async () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: {
+				...LOCKED_BY_OTHER,
+				isReadOnly: false,
+				isLoading: true,
+				holder: null,
+			},
+		});
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+});
+
+describe("StepPageClient — lock handover", () => {
+	it("re-reads the step fields when a reloaded draft arrives", () => {
+		const props = {
+			campaignOpen: true,
+			campaignYear: CAMPAIGN_YEAR,
+			declarationDeadline: DECLARATION_DEADLINE,
+			step: 1,
+			year: YEAR,
+		};
+		const { rerender } = render(
+			<StepPageClient
+				{...props}
+				initialDraft={{ currentStep: 1, ...VALID_REFERENCE_PERIOD }}
+			/>,
+			{ wrapper: lockWrapper() },
+		);
+		expect(screen.getByLabelText(/Date de début/)).toHaveValue(
+			VALID_REFERENCE_PERIOD.referencePeriodStart,
+		);
+
+		rerender(
+			<StepPageClient
+				{...props}
+				initialDraft={{
+					currentStep: 1,
+					referencePeriodStart: "2025-03-01",
+					referencePeriodEnd: "2026-02-28",
+				}}
+			/>,
+		);
+
+		expect(screen.getByLabelText(/Date de début/)).toHaveValue("2025-03-01");
+		expect(screen.getByLabelText(/Date de fin/)).toHaveValue("2026-02-28");
+	});
+
+	it("hands its pending input to the lock so it is saved before a release", async () => {
+		const flushes: Array<() => Promise<void>> = [];
+		const registerPendingSave = vi.fn((flush: () => Promise<void>) => {
+			flushes.push(flush);
+			return () => undefined;
+		});
+		renderStep({
+			step: 2,
+			lock: { ...LOCK_HELD, registerPendingSave },
+		});
+
+		await enterWomenPercent("60");
+		await act(async () => {
+			await flushes.at(-1)?.();
+		});
+
+		expect(mutateAsync).toHaveBeenCalledWith(
+			expect.objectContaining({
+				draft: expect.objectContaining({ executiveWomenPercent: 60 }),
+			}),
+		);
 	});
 });
 

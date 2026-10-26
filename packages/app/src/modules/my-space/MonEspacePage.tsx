@@ -1,7 +1,11 @@
 import "server-only";
 
 import { MissingSiret } from "~/modules/declaration-remuneration";
-import { getCurrentYear, parseSiren } from "~/modules/domain";
+import {
+	getCurrentYear,
+	getReferenceYearFor,
+	parseSiren,
+} from "~/modules/domain";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
 import { getRepresentationCampaign } from "~/server/db/getRepresentationCampaign";
 import { api } from "~/trpc/server";
@@ -23,13 +27,24 @@ export async function MonEspacePage({
 		return <MissingSiret />;
 	}
 	const currentYear = getCurrentYear();
-	const [data, campaignDeadlines, representationCampaign, lockState] =
-		await Promise.all([
-			api.company.getWithDeclarations({ siren }),
-			getCampaignDeadlines(currentYear),
-			getRepresentationCampaign(currentYear),
-			api.declarationLock.getActiveLockForCurrentDeclaration(),
-		]);
+	const representationYear = getReferenceYearFor(currentYear);
+	const getRepresentationLockState =
+		api.representationDeclaration?.getLockState;
+	const [
+		data,
+		campaignDeadlines,
+		representationCampaign,
+		lockState,
+		representationLock,
+	] = await Promise.all([
+		api.company.getWithDeclarations({ siren }),
+		getCampaignDeadlines(currentYear),
+		getRepresentationCampaign(currentYear),
+		api.declarationLock.getActiveLockForCurrentDeclaration(),
+		getRepresentationLockState
+			? getRepresentationLockState({ year: representationYear })
+			: Promise.resolve({ locked: false, isOwnLock: false, holder: null }),
+	]);
 
 	return (
 		<CompanyDeclarationsPage
@@ -40,6 +55,10 @@ export async function MonEspacePage({
 			lockedByOther={lockState.lockedByOther}
 			lockHolder={lockState.holder}
 			representationCampaign={representationCampaign}
+			representationLockedByOther={
+				representationLock.locked && !representationLock.isOwnLock
+			}
+			representationLockHolder={representationLock.holder}
 			userPhone={userPhone}
 		/>
 	);

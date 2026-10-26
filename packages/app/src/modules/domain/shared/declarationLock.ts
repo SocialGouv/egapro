@@ -11,5 +11,8 @@ export const LOCK_HEARTBEAT_INTERVAL_MS = 10_000;
 export const DECLARATION_LOCK_CONFLICT_MESSAGE =
 	"Déclaration verrouillée par un autre utilisateur.";
 
+export const REPRESENTATION_LOCK_CONFLICT_MESSAGE =
+	"La déclaration de représentation est verrouillée par une autre personne ou le verrou a expiré.";
+
 export const DECLARATION_SUPERSEDED_MESSAGE =
 	"Cette déclaration ne peut plus être modifiée : une étape suivante de la démarche a déjà été transmise.";

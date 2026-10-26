@@ -34,6 +34,8 @@ type Props = {
 	isImpersonating: boolean;
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
+	representationLockedByOther?: boolean;
+	representationLockHolder?: LockHolderDisplay | null;
 	representationCampaign: RepresentationCampaign;
 	userPhone: string | null;
 };
@@ -57,6 +59,8 @@ export function CompanyDeclarationsPage({
 	isImpersonating,
 	lockedByOther,
 	lockHolder,
+	representationLockedByOther = false,
+	representationLockHolder = null,
 	representationCampaign,
 	userPhone,
 }: Props) {
@@ -104,6 +108,8 @@ export function CompanyDeclarationsPage({
 				declarations={declarations}
 				hasCse={company.hasCse}
 				representationCampaign={representationCampaign}
+				representationLockedByOther={representationLockedByOther}
+				representationLockHolder={representationLockHolder}
 				userPhone={userPhone}
 			/>
 			<ArchivesSection />

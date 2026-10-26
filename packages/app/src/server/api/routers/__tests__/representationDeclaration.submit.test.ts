@@ -22,6 +22,7 @@ import {
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
 import { writeCampaignYearOverride } from "~/modules/domain";
+import { RepresentationLockConflictError } from "~/server/services/representationDeclarationLockService";
 import {
 	buildSession,
 	CLOSED_CAMPAIGN,
@@ -40,6 +41,20 @@ import {
 	USER_ID,
 } from "./representationDeclarationHarness";
 
+const lockMocks = vi.hoisted(() => ({
+	assertRepresentationLockHeld: vi.fn(),
+	releaseRepresentationLock: vi.fn(),
+}));
+vi.mock(
+	"~/server/services/representationDeclarationLockService",
+	async (importOriginal) => ({
+		...(await importOriginal<
+			typeof import("~/server/services/representationDeclarationLockService")
+		>()),
+		...lockMocks,
+	}),
+);
+
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
 }));
@@ -56,6 +71,15 @@ vi.mock("~/server/db/getRepresentationCampaign", () => ({
 
 describe("representationDeclarationRouter.submit", () => {
 	installRouterTestEnv(mockGetRepresentationCampaign);
+
+	beforeEach(() => {
+		lockMocks.assertRepresentationLockHeld
+			.mockReset()
+			.mockResolvedValue(undefined);
+		lockMocks.releaseRepresentationLock
+			.mockReset()
+			.mockResolvedValue(undefined);
+	});
 
 	async function submit(
 		mock: MockDb,
@@ -243,6 +267,44 @@ describe("representationDeclarationRouter.submit", () => {
 		await submit(mock, FULL_PAYLOAD);
 
 		expect(mock.insert).toHaveBeenCalledOnce();
+	});
+
+	it("refuses to write without holding the declaration lock", async () => {
+		lockMocks.assertRepresentationLockHeld.mockRejectedValue(
+			new RepresentationLockConflictError(),
+		);
+		const mock = createMockDb();
+
+		await expect(submit(mock, FULL_PAYLOAD)).rejects.toMatchObject({
+			code: "CONFLICT",
+		});
+		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	it("checks the lock of the session company, year and user", async () => {
+		const mock = createMockDb();
+
+		await submit(mock, FULL_PAYLOAD);
+
+		expect(lockMocks.assertRepresentationLockHeld).toHaveBeenCalledWith(
+			expect.anything(),
+			SIREN,
+			YEAR,
+			USER_ID,
+		);
+	});
+
+	it("releases the lock once the declaration is written", async () => {
+		const mock = createMockDb();
+
+		await submit(mock, FULL_PAYLOAD);
+
+		expect(lockMocks.releaseRepresentationLock).toHaveBeenCalledWith(
+			expect.anything(),
+			SIREN,
+			YEAR,
+			USER_ID,
+		);
 	});
 
 	it("refuses to submit while an admin mimics the company", async () => {

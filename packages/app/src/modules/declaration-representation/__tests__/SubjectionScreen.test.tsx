@@ -46,6 +46,8 @@ import {
 	REPRESENTATION_YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
 import { SubjectionScreen } from "../SubjectionScreen";
+import type { RepresentationLockState } from "../shared/lock/RepresentationLockContext";
+import { LOCKED_BY_OTHER, lockWrapper } from "./representationLockHarness";
 
 const STEP_1_HREF = "/declaration-representation/etape/1";
 const MY_SPACE_HREF = "/mon-espace";
@@ -56,13 +58,17 @@ const SUBJECTION_QUESTION =
 	/Indiquez si votre entreprise a employé au moins 1 000 salariés/;
 const SUBJECTION_FIELDSET_NAME = /Nombre de salariés de l'entreprise/;
 
-function renderScreen(initialAnswer?: "concerned" | "not_concerned") {
+function renderScreen(
+	initialAnswer?: "concerned" | "not_concerned",
+	lock?: RepresentationLockState,
+) {
 	return render(
 		<SubjectionScreen
 			campaignYear={REPRESENTATION_CAMPAIGN_YEAR}
 			initialAnswer={initialAnswer}
 			year={REPRESENTATION_YEAR}
 		/>,
+		{ wrapper: lockWrapper(lock) },
 	);
 }
 
@@ -340,5 +346,22 @@ describe("SubjectionScreen — returning declarant (T3-S2)", () => {
 
 		expect(concernedRadio()).not.toBeChecked();
 		expect(notConcernedRadio()).not.toBeChecked();
+	});
+});
+
+describe("SubjectionScreen — declaration locked by another user", () => {
+	it("disables the answers and the submission", () => {
+		renderScreen("not_concerned", LOCKED_BY_OTHER);
+
+		expect(notConcernedRadio()).toBeDisabled();
+		expect(validateButton()).toBeDisabled();
+	});
+
+	it("records nothing when the form is submitted anyway", async () => {
+		renderScreen("concerned", LOCKED_BY_OTHER);
+
+		await userEvent.click(nextButton());
+
+		expect(push).not.toHaveBeenCalled();
 	});
 });

@@ -269,9 +269,11 @@ fournit sous forme validée (UUID pour `user_id`, 9 chiffres pour `siren`).
 `user_email` et `user_agent` sont toujours `null`. `ip_address`
 utilise `truncateIp()` (IPv4 /16, IPv6 /48, invalide → `null`). Le champ
 `error_message` ne contient qu'un code connu ou `ERROR`, jamais le texte
-libre de l'exception. `resource_type` accepte uniquement `declaration`
-ou `notification` ; `resource_id` n'accepte qu'un UUID technique associé
-à un de ces types.
+libre de l'exception. `resource_type` accepte uniquement `declaration`,
+`notification` ou `representation_declaration` ; `resource_id` n'accepte
+qu'un UUID technique associé à un de ces types. Le verrou de représentation,
+porté par le couple SIREN + année, n'a pas d'UUID : son année passe par
+`metadata.year`.
 
 Les actions `PUBLIC_REFERENT_SEARCH`, `PUBLIC_REFERENT_VIEW` et
 `PUBLIC_DECLARATIONS_EXPORT` s'arrêtent après l'émission stdout de `logAction` :

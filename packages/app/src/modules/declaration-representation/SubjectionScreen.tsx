@@ -12,6 +12,7 @@ import {
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import { subjectionSchema } from "./schemas";
+import { useRepresentationLock } from "./shared/lock/RepresentationLockContext";
 import type { SubjectionAnswer } from "./types";
 
 type SubjectionScreenProps = {
@@ -26,10 +27,11 @@ export function SubjectionScreen({
 	year,
 }: SubjectionScreenProps) {
 	const router = useRouter();
-	const readOnlyGuard = useReadOnlyGuard();
-	const { isReadOnly } = readOnlyGuard;
 	const legendId = useId();
 	const messagesId = useId();
+	const lock = useRepresentationLock();
+	const readOnlyGuard = useReadOnlyGuard();
+	const isReadOnly = lock.isReadOnly || readOnlyGuard.isReadOnly;
 
 	const form = useZodForm(subjectionSchema, {
 		defaultValues: { answer: initialAnswer ?? null },
@@ -85,6 +87,7 @@ export function SubjectionScreen({
 									? "fr-fieldset fr-fieldset--error"
 									: "fr-fieldset"
 							}
+							disabled={isReadOnly}
 						>
 							<legend className="fr-sr-only" id={legendId}>
 								Nombre de salariés de l'entreprise
@@ -93,7 +96,6 @@ export function SubjectionScreen({
 								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "concerned"}
-										disabled={isReadOnly}
 										id="subjection-concerned"
 										name={field.name}
 										onChange={() => field.onChange("concerned")}
@@ -117,7 +119,6 @@ export function SubjectionScreen({
 								<div className="fr-radio-group fr-radio-rich">
 									<input
 										checked={field.value === "not_concerned"}
-										disabled={isReadOnly}
 										id="subjection-not-concerned"
 										name={field.name}
 										onChange={() => field.onChange("not_concerned")}
@@ -181,7 +182,7 @@ export function SubjectionScreen({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn"
-								disabled={declareNotSubjectMutation.isPending || isReadOnly}
+								disabled={isReadOnly || declareNotSubjectMutation.isPending}
 								type="submit"
 							>
 								Valider
@@ -193,7 +194,7 @@ export function SubjectionScreen({
 							<button
 								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
-								disabled={isReadOnly}
+								disabled={readOnlyGuard.isReadOnly}
 								type="submit"
 							>
 								Suivant
