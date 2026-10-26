@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
 import { RepresentationLockConflictError } from "~/server/services/representationDeclarationLockService";
 import {
+	ALREADY_SUBMITTED_MESSAGE,
 	CLOSED_CAMPAIGN,
 	CLOSED_MESSAGE,
 	conflictSet,
@@ -46,9 +47,6 @@ vi.mock("~/server/db/getRepresentationCampaign", () => ({
 	getRepresentationCampaign: (year: number) =>
 		mockGetRepresentationCampaign(year),
 }));
-
-const ALREADY_SUBMITTED_MESSAGE =
-	"La déclaration des écarts de représentation a déjà été transmise pour cette année.";
 
 const NOT_SUBJECT_COLUMNS = {
 	status: "not_subject",

@@ -20,6 +20,8 @@ export const CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
 export const IMPERSONATION_MESSAGE =
 	"Mode mimoquage actif : cette action est en lecture seule et ne peut pas être effectuée.";
+export const ALREADY_SUBMITTED_MESSAGE =
+	"La déclaration des écarts de représentation a déjà été transmise pour cette année.";
 
 export const OPEN_CAMPAIGN = {
 	campaignStartDate: new Date("2026-01-01T00:00:00.000Z"),
