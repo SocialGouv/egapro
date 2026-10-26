@@ -1,1 +1,1 @@
-ALTER TABLE "app_declaration" ADD COLUMN "cse_opinion_draft_updated_at" timestamp with time zone;
+ALTER TABLE "app_declaration" ADD COLUMN IF NOT EXISTS "cse_opinion_draft_updated_at" timestamp with time zone;
