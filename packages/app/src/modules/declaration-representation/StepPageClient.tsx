@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useIsImpersonating } from "~/modules/auth";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -15,6 +16,7 @@ import {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	PUBLICATION_STEP_NUMBER,
 } from "./steps";
@@ -53,11 +55,16 @@ export function StepPageClient({
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
 	const lock = useRepresentationLock();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
 	const isReadOnly =
-		!campaignOpen || isSubmitted || lock.isReadOnly || lock.isLoading;
+		!campaignOpen ||
+		isSubmitted ||
+		isImpersonating ||
+		lock.isReadOnly ||
+		lock.isLoading;
 
 	const {
 		draft,
@@ -93,6 +100,11 @@ export function StepPageClient({
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step, skipPublicationStep);
 	const nextHref = getNextStepHref(step, skipPublicationStep);
+	const reachedNextHref = getReachedNextStepHref(
+		step,
+		skipPublicationStep,
+		draft.currentStep,
+	);
 	const bypassHref = getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true);
 	const mustBypassPublicationStep =
 		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
@@ -212,7 +224,16 @@ export function StepPageClient({
 					>
 						Précédent
 					</Link>
-					{campaignOpen ? (
+					{isImpersonating ? (
+						reachedNextHref ? (
+							<Link
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								href={reachedNextHref}
+							>
+								Suivant
+							</Link>
+						) : null
+					) : campaignOpen ? (
 						<button
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
 							disabled={isAdvancing}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { Controller } from "react-hook-form";
+import { useReadOnlyGuard } from "~/modules/auth";
 import {
 	FIRST_REPRESENTATION_STEP,
 	MY_SPACE,
@@ -28,7 +29,9 @@ export function SubjectionScreen({
 	const router = useRouter();
 	const legendId = useId();
 	const messagesId = useId();
-	const { isReadOnly } = useRepresentationLock();
+	const lock = useRepresentationLock();
+	const readOnlyGuard = useReadOnlyGuard();
+	const isReadOnly = lock.isReadOnly || readOnlyGuard.isReadOnly;
 
 	const form = useZodForm(subjectionSchema, {
 		defaultValues: { answer: initialAnswer ?? null },
@@ -177,21 +180,26 @@ export function SubjectionScreen({
 					{answer === "not_concerned" ? (
 						<li>
 							<button
+								{...readOnlyGuard.buttonProps}
 								className="fr-btn"
 								disabled={isReadOnly || declareNotSubjectMutation.isPending}
 								type="submit"
 							>
 								Valider
 							</button>
+							{readOnlyGuard.tooltip}
 						</li>
 					) : (
 						<li>
 							<button
+								{...readOnlyGuard.buttonProps}
 								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								disabled={readOnlyGuard.isReadOnly}
 								type="submit"
 							>
 								Suivant
 							</button>
+							{readOnlyGuard.tooltip}
 						</li>
 					)}
 				</ul>

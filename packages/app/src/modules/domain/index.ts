@@ -141,6 +141,7 @@ export {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
+	hasSavedSecondDeclarationData,
 	hasStartedSecondDeclaration,
 	isCancelled,
 	isCompliancePathStepApplicable,

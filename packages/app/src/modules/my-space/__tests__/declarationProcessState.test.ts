@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
+	complianceStepHref,
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
@@ -19,6 +20,8 @@ import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
 const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
+const CORRECTIVE_STEP_1_HREF = complianceStepHref(1);
+const CORRECTIVE_RECAP_HREF = complianceStepHref(3);
 const CAMPAIGN_YEAR = 2026;
 const CONSULTATION_HREF = mySpaceRepresentationHref(CAMPAIGN_YEAR);
 const CAMPAIGN_OPEN = true;
@@ -38,6 +41,7 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
@@ -69,11 +73,11 @@ describe("computePanelVariant", () => {
 
 describe("computeCtaHref", () => {
 	it("returns declaration URL when no declaration", () => {
-		expect(computeCtaHref(undefined)).toBe(DECLARATION_REMUNERATION);
+		expect(computeCtaHref(undefined, false)).toBe(DECLARATION_REMUNERATION);
 	});
 
 	it("returns declaration URL when fsmStatus is null", () => {
-		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }))).toBe(
+		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }), false)).toBe(
 			DECLARATION_REMUNERATION,
 		);
 	});
@@ -84,8 +88,41 @@ describe("computeCtaHref", () => {
 	// one status at a time.
 	it("emits a bare path for every status — the pages read the SIREN from the session", () => {
 		for (const fsmStatus of DECLARATION_FSM_STATUSES) {
-			expect(computeCtaHref(makeDeclaration({ fsmStatus }))).not.toContain("?");
+			expect(
+				computeCtaHref(makeDeclaration({ fsmStatus }), false),
+			).not.toContain("?");
 		}
+	});
+
+	describe("corrective actions with saved corrected data", () => {
+		const savedCorrectiveActions = makeDeclaration({
+			fsmStatus: "corrective_actions_chosen",
+			secondDeclarationStep: 2,
+		});
+
+		it("resumes on the corrective recap while impersonating", () => {
+			expect(computeCtaHref(savedCorrectiveActions, true)).toBe(
+				CORRECTIVE_RECAP_HREF,
+			);
+		});
+
+		it("keeps the first corrective step outside impersonation", () => {
+			expect(computeCtaHref(savedCorrectiveActions, false)).toBe(
+				CORRECTIVE_STEP_1_HREF,
+			);
+		});
+	});
+
+	it("keeps the first corrective step while impersonating when nothing is saved", () => {
+		expect(
+			computeCtaHref(
+				makeDeclaration({
+					fsmStatus: "corrective_actions_chosen",
+					secondDeclarationStep: null,
+				}),
+				true,
+			),
+		).toBe(CORRECTIVE_STEP_1_HREF);
 	});
 });
 

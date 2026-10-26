@@ -31,6 +31,7 @@ type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	company: CompanyDetail;
 	declarations: DeclarationItem[];
+	isImpersonating: boolean;
 	lockedByOther: boolean;
 	lockHolder: LockHolderDisplay | null;
 	representationLockedByOther?: boolean;
@@ -55,6 +56,7 @@ export function CompanyDeclarationsPage({
 	campaignDeadlines,
 	company,
 	declarations,
+	isImpersonating,
 	lockedByOther,
 	lockHolder,
 	representationLockedByOther = false,
@@ -88,7 +90,7 @@ export function CompanyDeclarationsPage({
 				currentDeclaration?.secondDeclarationPathChoice ?? null,
 		});
 	const panelVariant = computePanelVariant(currentDeclaration);
-	const ctaHref = computeCtaHref(currentDeclaration);
+	const ctaHref = computeCtaHref(currentDeclaration, isImpersonating);
 	const displayContext = getDeclarationDisplayContext({
 		firstDeclarationPathChoice:
 			currentDeclaration?.firstDeclarationPathChoice ?? null,

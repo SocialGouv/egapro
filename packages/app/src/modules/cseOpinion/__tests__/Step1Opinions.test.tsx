@@ -1434,6 +1434,40 @@ describe("Step1Opinions", () => {
 			expect(screen.getByRole("button", { name: /Suivant/ })).toBeDisabled();
 		});
 
+		it("links to the upload step instead of submitting when opinions are recorded", () => {
+			mockImpersonating();
+
+			render(
+				<LockProvider isReadOnly={false}>
+					<Step1Opinions
+						cseDeadline={cseDeadline}
+						initialData={{
+							firstDeclAccuracyOpinion: "favorable",
+							firstDeclAccuracyDate: "2026-01-15",
+							firstDeclGapConsulted: false,
+							firstDeclGapOpinion: null,
+							firstDeclGapDate: null,
+							secondDeclAccuracyOpinion: null,
+							secondDeclAccuracyDate: null,
+							secondDeclGapConsulted: null,
+							secondDeclGapOpinion: null,
+							secondDeclGapDate: null,
+						}}
+						siren="123456789"
+						year={2026}
+					/>
+				</LockProvider>,
+			);
+
+			expect(screen.getByRole("link", { name: "Suivant" })).toHaveAttribute(
+				"href",
+				"/avis-cse/etape/2",
+			);
+			expect(
+				screen.queryByRole("button", { name: /Suivant/ }),
+			).not.toBeInTheDocument();
+		});
+
 		it("does not save a draft while impersonating", async () => {
 			mockImpersonating();
 			const user = userEvent.setup();

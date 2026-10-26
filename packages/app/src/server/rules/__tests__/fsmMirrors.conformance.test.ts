@@ -62,6 +62,7 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
@@ -175,7 +176,7 @@ describe("mirror conformance — engine states (non-terminal)", () => {
 		expect(getCurrentStageHref(state.id, false)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: state.id });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(computeCtaHref(decl)).toBe(expected.screen);
+		expect(computeCtaHref(decl, false)).toBe(expected.screen);
 	});
 });
 
@@ -204,7 +205,7 @@ describe("mirror conformance — engine transition destinations", () => {
 		expect(getCurrentStageHref(to, true)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: to });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(computeCtaHref(decl)).toBe(expected.screen);
+		expect(computeCtaHref(decl, false)).toBe(expected.screen);
 	});
 });
 
@@ -217,7 +218,7 @@ describe("exhaustiveness — every FSM status is covered by the table and the pa
 		expect(nav.length).toBeGreaterThan(0);
 		const decl = makeDeclaration({ fsmStatus: status });
 		expect(computePanelVariant(decl)).toBeDefined();
-		const cta = computeCtaHref(decl);
+		const cta = computeCtaHref(decl, false);
 		expect(typeof cta).toBe("string");
 		expect(cta.length).toBeGreaterThan(0);
 	});
@@ -234,7 +235,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 			cseRequired: true,
 		});
 		expect(computePanelVariant(decl)).toBe("cse");
-		expect(computeCtaHref(decl)).toBe(CSE);
+		expect(computeCtaHref(decl, false)).toBe(CSE);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
@@ -248,7 +249,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 		// re-submittable /avis-cse page (up to 4 opinions). Each mirror is correct
 		// for its own surface, so no coherence is asserted between them here.
 		expect(computePanelVariant(decl)).toBe("closed");
-		expect(computeCtaHref(decl)).toBe(ENTRY);
+		expect(computeCtaHref(decl, false)).toBe(ENTRY);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 

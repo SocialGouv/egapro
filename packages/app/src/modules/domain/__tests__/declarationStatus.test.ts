@@ -5,6 +5,7 @@ import {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
 	getCurrentCompliancePath,
+	hasSavedSecondDeclarationData,
 	hasStartedSecondDeclaration,
 	isCancelled,
 	isCompliancePathStepApplicable,
@@ -211,6 +212,29 @@ describe("isInComplianceProcess", () => {
 
 	it("returns false when status is null and no path chosen", () => {
 		expect(isInComplianceProcess({ status: null, ...noPath })).toBe(false);
+	});
+});
+
+describe("hasSavedSecondDeclarationData", () => {
+	it("returns false while no corrected data was saved", () => {
+		expect(hasSavedSecondDeclarationData({ secondDeclarationStep: null })).toBe(
+			false,
+		);
+		expect(hasSavedSecondDeclarationData({ secondDeclarationStep: 1 })).toBe(
+			false,
+		);
+	});
+
+	it("returns true once the corrected data step was saved", () => {
+		expect(hasSavedSecondDeclarationData({ secondDeclarationStep: 2 })).toBe(
+			true,
+		);
+	});
+
+	it("stays true once the second declaration was submitted", () => {
+		expect(hasSavedSecondDeclarationData({ secondDeclarationStep: 3 })).toBe(
+			true,
+		);
 	});
 });
 
