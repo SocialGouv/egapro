@@ -144,10 +144,18 @@ describe("RepresentationConsultation — S1 nominal", () => {
 		);
 	});
 
-	it("offers no download and no edit action", () => {
-		expect(
-			screen.queryByRole("link", { name: /Télécharger/ }),
-		).not.toBeInTheDocument();
+	it("offers the PDF download of the reference year", () => {
+		const link = screen.getByRole("link", {
+			name: "Télécharger la déclaration des indicateurs de représentation (PDF)",
+		});
+		expect(link).toHaveAttribute(
+			"href",
+			`/api/representation-pdf?year=${REFERENCE_YEAR}`,
+		);
+		expect(link).toHaveAttribute("download");
+	});
+
+	it("offers no edit action", () => {
 		expect(screen.queryByText("Modifier")).not.toBeInTheDocument();
 	});
 

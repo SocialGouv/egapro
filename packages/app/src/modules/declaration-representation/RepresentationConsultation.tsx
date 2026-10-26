@@ -10,7 +10,8 @@ import {
 } from "~/modules/domain";
 import { Breadcrumb } from "~/modules/layout";
 import { formatNafForDisplay } from "~/modules/my-space";
-import { MY_SPACE } from "~/modules/routes";
+import { API_REPRESENTATION_PDF, MY_SPACE } from "~/modules/routes";
+import { FileFormatDetail } from "~/modules/shared";
 import { DsfrTable } from "~/modules/shared/DsfrTable";
 import styles from "./RepresentationConsultation.module.scss";
 import { ComplianceBadge } from "./shared/ComplianceBadge";
@@ -101,6 +102,8 @@ export function RepresentationConsultation({
 		},
 	];
 
+	const pdfHref = `${API_REPRESENTATION_PDF}?year=${referenceYear}`;
+
 	const transmittedLabel =
 		submittedAt === null
 			? "La déclaration a été transmise."
@@ -131,9 +134,24 @@ export function RepresentationConsultation({
 			>
 				<div className="fr-grid-row fr-grid-row--center">
 					<div className={`fr-col-12 fr-col-lg-8 ${styles.page}`}>
-						<div>
-							<h1 className="fr-h4 fr-mb-1w">{title}</h1>
-							<p className="fr-text--md fr-mb-0">{transmittedLabel}</p>
+						<div className="fr-grid-row fr-grid-row--top fr-grid-row--gutters">
+							<div className="fr-col">
+								<h1 className="fr-h4 fr-mb-1w">{title}</h1>
+								<p className="fr-text--md fr-mb-0">{transmittedLabel}</p>
+							</div>
+							<div className="fr-col-auto">
+								<a
+									aria-label="Télécharger la déclaration des indicateurs de représentation (PDF)"
+									className="fr-btn fr-btn--tertiary fr-btn--icon-left fr-icon-download-line"
+									download
+									href={pdfHref}
+								>
+									Télécharger
+								</a>
+								<p className="fr-text--xs fr-text-mention--grey fr-mb-0 fr-mt-1v">
+									<FileFormatDetail href={pdfHref} />
+								</p>
+							</div>
 						</div>
 
 						<section className={styles.section}>

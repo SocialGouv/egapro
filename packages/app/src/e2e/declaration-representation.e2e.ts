@@ -605,8 +605,13 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			await expect(publicationLink).toHaveAttribute("target", "_blank");
 			await expect(main.getByText("Modalités de communication")).toHaveCount(0);
 
-			await expect(main.getByRole("link", { name: /Télécharger/ })).toHaveCount(
-				0,
+			await expect(
+				main.getByRole("link", {
+					name: "Télécharger la déclaration des indicateurs de représentation (PDF)",
+				}),
+			).toHaveAttribute(
+				"href",
+				`/api/representation-pdf?year=${referenceYear}`,
 			);
 			await expect(
 				main

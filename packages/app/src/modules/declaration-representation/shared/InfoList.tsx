@@ -5,7 +5,7 @@ export type InfoItem = { label: string; value: ReactNode };
 
 export function InfoList({ items }: { items: InfoItem[] }) {
 	return (
-		<dl className={`fr-text--md ${styles.definitionList}`}>
+		<dl className={`fr-raw-list fr-text--md ${styles.definitionList}`}>
 			{items.map((item) => (
 				<Fragment key={item.label}>
 					<dt>{item.label}</dt>
