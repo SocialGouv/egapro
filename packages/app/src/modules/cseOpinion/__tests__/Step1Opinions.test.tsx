@@ -376,6 +376,40 @@ describe("Step1Opinions", () => {
 		).toHaveClass("fr-btn--sm");
 	});
 
+	it("renders the submission banner when the joint evaluation was chosen at the second round", () => {
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="corrective_action"
+				hasSecondDeclaration
+				secondDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(
+			screen.getByText(
+				/Votre rapport de l'évaluation conjointe a été transmis/,
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: /Parcours de mise en conformité/,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Dépôt du ou des avis du CSE",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { level: 3, name: "Deuxième déclaration" }),
+		).toBeInTheDocument();
+	});
+
 	it("does not render the submission banner for other paths", () => {
 		render(
 			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,

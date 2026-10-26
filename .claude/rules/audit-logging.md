@@ -184,7 +184,7 @@ false negative is a compliance gap.
 
 ## Route Handler coverage map (`src/app/api/**/route.ts`)
 
-Inventory refreshed by issue #3764 — **33 route files**, every one of them
+Inventory refreshed by issue #3764, recounted since — **27 route files**, every one of them
 accounted for below. Re-run the inventory with:
 
 ```bash
@@ -196,7 +196,7 @@ listed as a named exemption. The only third state this table accepts is a route
 whose wiring is in flight in a named open PR, and it is listed apart from the
 counts — never inside them.
 
-### Audited through `withAuditedRoute` (15)
+### Audited through `withAuditedRoute` (14)
 
 | Route | Action key |
 |---|---|
@@ -205,32 +205,20 @@ counts — never inside them.
 | `export/download` | `EXPORT_DOWNLOAD` |
 | `export/generate` | `EXPORT_GENERATE` |
 | `gip-mds/import` | `GIP_MDS_IMPORT` |
-| `public/declarations` | `PUBLIC_DECLARATIONS_SEARCH` |
+| `joint-evaluation-pdf` | `PDF_JOINT_EVALUATION_DOWNLOAD` |
+| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` |
 | `public/declarations/export` | `PUBLIC_DECLARATIONS_EXPORT` |
 | `public/referents-egalite-professionnelle` | `PUBLIC_REFERENT_SEARCH` |
-| `public/representations` | `PUBLIC_REPRESENTATIONS_SEARCH` |
-| `public/representations/export` | `PUBLIC_REPRESENTATIONS_EXPORT` |
 | `representation-pdf` | `PDF_REPRESENTATION_DOWNLOAD` |
 | `transmitted-pdf` | `PDF_TRANSMITTED_DOWNLOAD` |
 | `v1/export/declarations` | `EXPORT_API_DECLARATIONS` |
 | `v1/export/representations` | `EXPORT_API_REPRESENTATIONS` |
 | `v1/files` | `EXPORT_API_FILES` |
 
-### Wiring in flight (1)
-
-| Route | Action key | Status |
-|---|---|---|
-| `prefill-pdf` | `PDF_PREFILL_DOWNLOAD` | **pending #3189** — the handler writes no audit row at this commit |
-
-Deliberately outside the count above. Listing it as covered would hide a real
-compliance gap behind a complete-looking inventory: the next `find` would
-reconcile 33/33 and stop looking. If #3189 is abandoned, or lands with another
-action key, this row is what surfaces it.
-
-The other gap — `public/referents-egalite-professionnelle`, whose action key
+The gap on `public/referents-egalite-professionnelle`, whose action key
 already existed but was only reachable through tRPC — is closed by #3764.
 
-### Audited through a direct `logAction` call (7)
+### Audited through a direct `logAction` call (3)
 
 These are audited, and audited correctly — the wrapper is a convenience, not
 the definition of compliance. Each one logs from inside the handler because it
@@ -239,15 +227,11 @@ needs something `resolveContext` cannot produce.
 | Route | Action key(s) | Why not the wrapper |
 |---|---|---|
 | `auth/logout` | `AUTH_LOGOUT` | Auth flow — pattern §4 above, reads the JWT rather than a session |
-| `public/declarations/[siren]` | `PUBLIC_DECLARATIONS_BY_SIREN` | Per-branch context computed *during* the handler; only validated counters survive the final metadata projection |
-| `public/declarations/[siren]/[year]` | `PUBLIC_DECLARATIONS_BY_SIREN_YEAR` | idem, plus `rawYear` |
-| `public/representations/[siren]` | `PUBLIC_REPRESENTATIONS_BY_SIREN` | idem |
-| `public/representations/[siren]/[year]` | `PUBLIC_REPRESENTATIONS_BY_SIREN_YEAR` | idem |
 | `upload` | `CSE_OPINION_UPLOAD_FILE`, `JOINT_EVALUATION_UPLOAD_FILE` | The action key depends on the parsed multipart body |
 | `v1/files/[fileId]` | `ADMIN_FILE_DOWNLOAD`, `USER_FILE_DOWNLOAD`, `EXPORT_API_FILES` | The action key depends on the caller's role, resolved mid-handler |
 
 `resolveContext` runs **before** the handler, so it cannot see a result count,
-a parsed body, or the branch the handler took. Converting these seven to the
+a parsed body, or the branch the handler took. Converting these three to the
 wrapper would flatten one row per call and lose the per-branch audit context.
 The wrapper's route-context argument (see below) removes the
 *type-level* blocker; it does not make the conversion desirable.

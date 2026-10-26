@@ -5,6 +5,7 @@ export { CSE_FUNNEL } from "./funnelConfig";
 export { mapOpinionsFromDb } from "./mapOpinionsFromDb";
 export { Step1Opinions } from "./Step1Opinions";
 export { Step2Upload } from "./Step2Upload";
+export { SubmittedOpinionsPage } from "./SubmittedOpinionsPage";
 export {
 	deleteFileSchema,
 	saveOpinionsSchema,

@@ -14,6 +14,7 @@ import {
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
+	isJointEvaluationFileTransmitted,
 } from "../shared/declarationTrajectory";
 
 const at = (iso: string) => new Date(iso);
@@ -283,5 +284,72 @@ describe("event-type-specific getters", () => {
 		);
 		expect(latest?.value).toBe("justify");
 		expect(getDeclarationTrajectory(events)).toHaveLength(3);
+	});
+});
+
+describe("isJointEvaluationFileTransmitted", () => {
+	const UPLOADED = at("2027-04-01T10:00:00Z");
+	const SUBMITTED = at("2027-04-03T12:00:00Z");
+
+	it("is true for a report the latest submit covers", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: UPLOADED,
+				latestSubmitAt: SUBMITTED,
+			}),
+		).toBe(true);
+	});
+
+	it("is true for a report uploaded at the very instant of the submit", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: SUBMITTED,
+				latestSubmitAt: SUBMITTED,
+			}),
+		).toBe(true);
+	});
+
+	it("is false without a report or without a submit", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: null,
+				latestSubmitAt: SUBMITTED,
+			}),
+		).toBe(false);
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: UPLOADED,
+				latestSubmitAt: null,
+			}),
+		).toBe(false);
+	});
+
+	it("is false for a replacement uploaded after the latest submit", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: at("2027-04-05T10:00:00Z"),
+				latestSubmitAt: SUBMITTED,
+			}),
+		).toBe(false);
+	});
+
+	it("is false for a report the company departed from since", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: UPLOADED,
+				latestSubmitAt: SUBMITTED,
+				latestDepartureAt: at("2027-04-02T10:00:00Z"),
+			}),
+		).toBe(false);
+	});
+
+	it("is true for a report uploaded after an earlier departure", () => {
+		expect(
+			isJointEvaluationFileTransmitted({
+				fileUploadedAt: UPLOADED,
+				latestSubmitAt: SUBMITTED,
+				latestDepartureAt: at("2027-03-20T10:00:00Z"),
+			}),
+		).toBe(true);
 	});
 });

@@ -656,3 +656,107 @@ describe("mapToStepData", () => {
 		expect(step2Gaps[0]?.women).toBeNull();
 	});
 });
+
+// Each `select()` resolves, whatever chain follows it, to the next queued result set.
+function queuedDatabase(resultSets: unknown[][]) {
+	const queue = [...resultSets];
+	const select = vi.fn(() => {
+		const result = queue.shift() ?? [];
+		const chain = Promise.resolve(result) as Promise<unknown[]> &
+			Record<string, unknown>;
+		for (const method of ["from", "where", "orderBy", "limit"]) {
+			chain[method] = () => chain;
+		}
+		return chain;
+	});
+	return { select } as never;
+}
+
+describe("findLatestStatusEvent", () => {
+	it("returns the date and round of the latest event of that type", async () => {
+		const { findLatestStatusEvent } = await import("../declarationHelpers");
+		const event = { createdAt: new Date("2027-04-03T12:00:00Z"), round: 2 };
+
+		await expect(
+			findLatestStatusEvent(
+				queuedDatabase([[event]]),
+				"decl-1",
+				"joint_evaluation_submit",
+			),
+		).resolves.toEqual(event);
+	});
+
+	it("returns null when the declaration never recorded that event", async () => {
+		const { findLatestStatusEvent } = await import("../declarationHelpers");
+
+		await expect(
+			findLatestStatusEvent(queuedDatabase([[]]), "decl-1", "submit"),
+		).resolves.toBeNull();
+	});
+});
+
+describe("findTransmittedJointEvaluation", () => {
+	const SUBMISSION = { createdAt: new Date("2027-04-03T12:00:00Z"), round: 1 };
+	const FILE = {
+		id: "file-1",
+		fileName: "rapport.pdf",
+		uploadedAt: new Date("2027-04-01T10:00:00Z"),
+	};
+	const NO_DEPARTURE = [{ at: null }];
+
+	it("returns the latest submission with the report it covers", async () => {
+		const { findTransmittedJointEvaluation } = await import(
+			"../declarationHelpers"
+		);
+
+		await expect(
+			findTransmittedJointEvaluation(
+				queuedDatabase([[SUBMISSION], NO_DEPARTURE, [FILE]]),
+				"decl-1",
+			),
+		).resolves.toEqual({ submission: SUBMISSION, file: FILE });
+	});
+
+	it("returns null before any submission", async () => {
+		const { findTransmittedJointEvaluation } = await import(
+			"../declarationHelpers"
+		);
+
+		await expect(
+			findTransmittedJointEvaluation(
+				queuedDatabase([[], NO_DEPARTURE, [FILE]]),
+				"decl-1",
+			),
+		).resolves.toBeNull();
+	});
+
+	it("returns null without an active report", async () => {
+		const { findTransmittedJointEvaluation } = await import(
+			"../declarationHelpers"
+		);
+
+		await expect(
+			findTransmittedJointEvaluation(
+				queuedDatabase([[SUBMISSION], NO_DEPARTURE, []]),
+				"decl-1",
+			),
+		).resolves.toBeNull();
+	});
+
+	it("returns null for a report uploaded after the latest submission", async () => {
+		const { findTransmittedJointEvaluation } = await import(
+			"../declarationHelpers"
+		);
+		const replacement = {
+			...FILE,
+			uploadedAt: new Date("2027-04-05T10:00:00Z"),
+		};
+
+		await expect(
+			findTransmittedJointEvaluation(
+				queuedDatabase([[SUBMISSION], NO_DEPARTURE, [replacement]]),
+				"decl-1",
+			),
+		).resolves.toBeNull();
+	});
+});

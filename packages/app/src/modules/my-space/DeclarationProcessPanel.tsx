@@ -48,6 +48,8 @@ type Props = {
 	hasSubmittedSecondDeclaration: boolean;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	formalNoticeAvailable: boolean;
 	siren: string;
 	ctaHref: string;
@@ -69,6 +71,8 @@ export function DeclarationProcessPanel({
 	hasSubmittedSecondDeclaration,
 	hasSubmittedJointEvaluation,
 	hasSubmittedCseOpinion,
+	cseOpinionViewAvailable,
+	jointEvaluationViewAvailable,
 	formalNoticeAvailable,
 	siren,
 	ctaHref,
@@ -117,11 +121,13 @@ export function DeclarationProcessPanel({
 							compliancePathApplicable={compliancePathApplicable}
 							cseOpinionRequired={cseOpinionRequired}
 							cseOpinionSubmitted={hasSubmittedCseOpinion}
+							cseOpinionViewAvailable={cseOpinionViewAvailable}
 							declarationFsmStatus={declarationFsmStatus}
 							displayContext={displayContext}
 							hasPrefillData={hasPrefillData}
 							indicatorGRequired={indicatorGRequired}
 							jointEvaluationSubmitted={hasSubmittedJointEvaluation}
+							jointEvaluationViewAvailable={jointEvaluationViewAvailable}
 							secondDeclarationSubmitted={hasSubmittedSecondDeclaration}
 							step1={step1}
 							step2={step2}

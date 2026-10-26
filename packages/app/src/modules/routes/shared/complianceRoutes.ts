@@ -7,6 +7,10 @@ export const COMPLIANCE_PATH = route(
 export const COMPLIANCE_JOINT_EVALUATION = route(
 	"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
 );
+export const MY_SPACE_JOINT_EVALUATION_VIEW = route(
+	"/mon-espace/evaluation-conjointe",
+);
+export const MY_SPACE_CSE_OPINION_VIEW = route("/mon-espace/avis-cse");
 export const COMPLIANCE_CONFIRMATION = route(
 	"/declaration-remuneration/parcours-conformite/confirmation",
 );

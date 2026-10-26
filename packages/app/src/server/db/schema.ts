@@ -180,6 +180,8 @@ export const declarations = createTable(
 		secondDeclarationStep: d.integer(),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		// Set by CSE edits after the last transmission; cleared atomically on submit.
+		cseOpinionDraftUpdatedAt: d.timestamp({ withTimezone: true }),
 		cseRequired: d.boolean().notNull().default(false),
 		rulesVersion: d
 			.varchar("rules_version")

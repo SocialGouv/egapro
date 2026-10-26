@@ -74,7 +74,9 @@ export function Step1Opinions({
 	secondDeclGapHigh = true,
 	secondDeclarationPathChoice,
 }: Props) {
-	const isJointEvaluation = firstDeclarationPathChoice === "joint_evaluation";
+	const isJointEvaluation =
+		firstDeclarationPathChoice === "joint_evaluation" ||
+		secondDeclarationPathChoice === "joint_evaluation";
 	const showFirstDeclarationGap = firstDeclGapHigh;
 	const isFirstDeclarationJustification =
 		showFirstDeclarationGap && firstDeclarationPathChoice === "justify";

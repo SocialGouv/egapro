@@ -79,6 +79,46 @@ describe("RecapitulatifPage", () => {
 		expect(screen.getByText("marie@acme.fr")).toBeInTheDocument();
 	});
 
+	it("shows the transmission date and the declaration's phone number", () => {
+		render(
+			<RecapitulatifPage
+				{...defaultProps()}
+				declarantPhone="01 02 03 04 05"
+				transmittedAt="10/01/2027"
+			/>,
+		);
+		expect(
+			screen.getByText("La déclaration a été transmise le 10/01/2027"),
+		).toBeInTheDocument();
+		expect(screen.getByText("Numéro de téléphone")).toBeInTheDocument();
+		expect(screen.getByText("01 02 03 04 05")).toBeInTheDocument();
+	});
+
+	it("shows NAF label and CSE only at the applicable workforce", () => {
+		const company = {
+			...defaultCompany(),
+			nafLabel: "Programmation informatique",
+			hasCse: false,
+		};
+		const { rerender } = render(
+			<RecapitulatifPage {...defaultProps()} company={company} />,
+		);
+		expect(
+			screen.getByText("6201Z — Programmation informatique"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Existence d’un CSE").parentElement,
+		).toHaveTextContent("Non");
+
+		rerender(
+			<RecapitulatifPage
+				{...defaultProps()}
+				company={{ ...company, gipWorkforce: 99 }}
+			/>,
+		);
+		expect(screen.queryByText("Existence d’un CSE")).not.toBeInTheDocument();
+	});
+
 	it("renders company info with all fields including workforce", () => {
 		render(<RecapitulatifPage {...defaultProps()} />);
 		expect(

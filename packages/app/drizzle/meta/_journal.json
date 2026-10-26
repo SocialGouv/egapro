@@ -414,6 +414,13 @@
 			"when": 1792483626957,
 			"tag": "0058_ensure-global-setting-row",
 			"breakpoints": true
+		},
+		{
+			"idx": 59,
+			"version": "7",
+			"when": 1792597772097,
+			"tag": "0059_cse-opinion-draft-updated-at",
+			"breakpoints": true
 		}
 	]
 }
