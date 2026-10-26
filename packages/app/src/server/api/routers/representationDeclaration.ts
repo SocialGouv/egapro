@@ -12,6 +12,7 @@ import {
 import { TOTAL_REPRESENTATION_STEPS } from "~/modules/declaration-representation/types";
 import {
 	deriveExecutivesNotComputableReason,
+	getCurrentDate,
 	getRepresentationCampaignYear,
 	isRepresentationCampaignOpen,
 	isRepresentationDeclarationSubmitted,
@@ -35,7 +36,7 @@ async function assertRepresentationCampaignOpen(year: number): Promise<void> {
 	const campaign = await getRepresentationCampaign(
 		getRepresentationCampaignYear(year),
 	);
-	if (!isRepresentationCampaignOpen(campaign, new Date())) {
+	if (!isRepresentationCampaignOpen(campaign, getCurrentDate())) {
 		throw new TRPCError({
 			code: "FORBIDDEN",
 			message: CAMPAIGN_CLOSED_MESSAGE,
@@ -93,7 +94,7 @@ export const representationDeclarationRouter = createTRPCRouter({
 
 			return {
 				declaration: rows[0] ?? null,
-				campaignOpen: isRepresentationCampaignOpen(campaign, new Date()),
+				campaignOpen: isRepresentationCampaignOpen(campaign, getCurrentDate()),
 				declarationDeadline: campaign.declarationDeadline,
 			};
 		}),

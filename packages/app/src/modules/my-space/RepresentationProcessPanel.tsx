@@ -6,6 +6,7 @@ import type { RepresentationCampaign } from "~/modules/domain";
 import {
 	formatCivilLongDate,
 	formatLongDate,
+	getCurrentDate,
 	isRepresentationCampaignOpen,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
@@ -62,7 +63,7 @@ export function RepresentationProcessPanel({
 	declaration,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const campaignOpen = isRepresentationCampaignOpen(campaign, new Date());
+	const campaignOpen = isRepresentationCampaignOpen(campaign, getCurrentDate());
 	const variant = computeRepresentationPanelVariant(declaration, campaignOpen);
 	const ctaHref = computeRepresentationCtaHref(
 		declaration,

@@ -1,8 +1,12 @@
 import { render, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { RepresentationCampaign } from "~/modules/domain";
-import { civilDate } from "~/modules/domain";
+import {
+	civilDate,
+	clearCampaignYearOverride,
+	writeCampaignYearOverride,
+} from "~/modules/domain";
 import {
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
@@ -360,6 +364,35 @@ describe("RepresentationProcessPanel", () => {
 				expect(cta).toHaveAttribute("href", ctaHref);
 			});
 		}
+	});
+
+	describe("pinned campaign year", () => {
+		const PINNED_YEAR = 2030;
+		const PINNED_CAMPAIGN: RepresentationCampaign = {
+			campaignStartDate: civilDate(PINNED_YEAR, 0, 1),
+			campaignEndDate: civilDate(PINNED_YEAR, 11, 31),
+			declarationDeadline: civilDate(PINNED_YEAR, 2, 1),
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers({ toFake: ["Date"] });
+			vi.setSystemTime(new Date(2026, 5, 15, 10, 0));
+			writeCampaignYearOverride(PINNED_YEAR);
+		});
+
+		afterEach(() => {
+			clearCampaignYearOverride();
+			vi.useRealTimers();
+		});
+
+		it("keeps the démarche open while the pinned year falls inside the campaign window", () => {
+			const { panel, dialog } = renderPanel({
+				campaign: PINNED_CAMPAIGN,
+				declaration: DRAFT,
+			});
+			expect(panel.queryByText("Démarche close")).not.toBeInTheDocument();
+			expect(getCta(dialog)).toHaveTextContent(/^Reprendre$/);
+		});
 	});
 
 	describe("campaign closed — transmission line", () => {

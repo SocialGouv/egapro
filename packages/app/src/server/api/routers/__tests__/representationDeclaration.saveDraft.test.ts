@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
+import { writeCampaignYearOverride } from "~/modules/domain";
 import {
 	CLOSED_CAMPAIGN,
+	CLOSED_CAMPAIGN_YEAR,
 	CLOSED_MESSAGE,
 	compileSql,
 	conflictSet,
@@ -111,6 +113,14 @@ describe("representationDeclarationRouter.saveDraft", () => {
 			message: CLOSED_MESSAGE,
 		});
 		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	it("saves while the pinned campaign year falls inside the campaign window", async () => {
+		writeCampaignYearOverride(CLOSED_CAMPAIGN_YEAR);
+		mockGetRepresentationCampaign.mockResolvedValue(CLOSED_CAMPAIGN);
+		const mock = createMockDb();
+
+		await expect(saveDraft(mock)).resolves.toEqual({ success: true });
 	});
 
 	it("refuses to save while an admin mimics the company", async () => {
