@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { REPRESENTATION_YEAR as YEAR } from "~/modules/declaration-representation/__tests__/fixtures";
+import { RepresentationLockConflictError } from "~/server/services/representationDeclarationLockService";
 import {
 	CLOSED_CAMPAIGN,
 	CLOSED_MESSAGE,
@@ -17,6 +18,20 @@ import {
 	USER_ID,
 	whereParams,
 } from "./representationDeclarationHarness";
+
+const lockMocks = vi.hoisted(() => ({
+	assertRepresentationLockHeld: vi.fn(),
+	releaseRepresentationLock: vi.fn(),
+}));
+vi.mock(
+	"~/server/services/representationDeclarationLockService",
+	async (importOriginal) => ({
+		...(await importOriginal<
+			typeof import("~/server/services/representationDeclarationLockService")
+		>()),
+		...lockMocks,
+	}),
+);
 
 vi.mock("~/server/auth", () => ({
 	auth: vi.fn(),
@@ -46,6 +61,15 @@ const NOT_SUBJECT_COLUMNS = {
 
 describe("representationDeclarationRouter.declareNotSubject", () => {
 	installRouterTestEnv(mockGetRepresentationCampaign);
+
+	beforeEach(() => {
+		lockMocks.assertRepresentationLockHeld
+			.mockReset()
+			.mockResolvedValue(undefined);
+		lockMocks.releaseRepresentationLock
+			.mockReset()
+			.mockResolvedValue(undefined);
+	});
 
 	async function declareNotSubject(
 		mock: MockDb,
@@ -137,6 +161,44 @@ describe("representationDeclarationRouter.declareNotSubject", () => {
 			message: CLOSED_MESSAGE,
 		});
 		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	it("refuses to write without holding the declaration lock", async () => {
+		lockMocks.assertRepresentationLockHeld.mockRejectedValue(
+			new RepresentationLockConflictError(),
+		);
+		const mock = createMockDb();
+
+		await expect(declareNotSubject(mock)).rejects.toMatchObject({
+			code: "CONFLICT",
+		});
+		expect(mock.insert).not.toHaveBeenCalled();
+	});
+
+	it("checks the lock of the session company, year and user", async () => {
+		const mock = createMockDb();
+
+		await declareNotSubject(mock);
+
+		expect(lockMocks.assertRepresentationLockHeld).toHaveBeenCalledWith(
+			expect.anything(),
+			SIREN,
+			YEAR,
+			USER_ID,
+		);
+	});
+
+	it("releases the lock once the declaration is written", async () => {
+		const mock = createMockDb();
+
+		await declareNotSubject(mock);
+
+		expect(lockMocks.releaseRepresentationLock).toHaveBeenCalledWith(
+			expect.anything(),
+			SIREN,
+			YEAR,
+			USER_ID,
+		);
 	});
 
 	it("refuses to record the choice while an admin mimics the company", async () => {

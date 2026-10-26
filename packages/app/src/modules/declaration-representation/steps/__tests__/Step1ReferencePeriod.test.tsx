@@ -30,6 +30,7 @@ vi.mock("~/trpc/react", () => ({
 
 import type { RepresentationDraft } from "~/modules/declaration-representation";
 import { StepPageClient } from "~/modules/declaration-representation";
+import { lockWrapper } from "../../__tests__/representationLockHarness";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
@@ -54,6 +55,7 @@ function renderStep1({
 			step={1}
 			year={YEAR}
 		/>,
+		{ wrapper: lockWrapper() },
 	);
 }
 

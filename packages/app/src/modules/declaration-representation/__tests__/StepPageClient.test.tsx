@@ -38,6 +38,7 @@ vi.mock("~/trpc/react", () => ({
 }));
 
 import { StepPageClient } from "../StepPageClient";
+import type { RepresentationLockState } from "../shared/lock/RepresentationLockContext";
 import type { RepresentationDraft } from "../types";
 import {
 	COMPUTABLE_EXECUTIVES,
@@ -48,6 +49,7 @@ import {
 	VALIDATION_MESSAGES,
 	WEBSITE_PUBLICATION,
 } from "./fixtures";
+import { LOCKED_BY_OTHER, lockWrapper } from "./representationLockHarness";
 
 const CAMPAIGN_YEAR = 2026;
 const YEAR = 2025;
@@ -78,6 +80,7 @@ type RenderStepOptions = {
 	currentStep?: number;
 	initialDraft?: RepresentationDraft;
 	isSubmitted?: boolean;
+	lock?: RepresentationLockState;
 };
 
 function renderStep({
@@ -86,6 +89,7 @@ function renderStep({
 	currentStep = 2,
 	initialDraft,
 	isSubmitted,
+	lock,
 }: RenderStepOptions = {}) {
 	return render(
 		<StepPageClient
@@ -97,6 +101,7 @@ function renderStep({
 			step={step}
 			year={YEAR}
 		/>,
+		{ wrapper: lockWrapper(lock) },
 	);
 }
 
@@ -483,5 +488,47 @@ describe("StepPageClient — closed campaign (S23)", () => {
 		renderStep();
 
 		expect(screen.queryByText(CLOSED_BANNER)).not.toBeInTheDocument();
+	});
+});
+
+describe("StepPageClient — declaration locked by another user", () => {
+	it("lets the user browse to the next step without saving anything", async () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: LOCKED_BY_OTHER,
+		});
+
+		await userEvent.click(nextButton());
+
+		expect(push).toHaveBeenCalledWith(STEP_3_HREF);
+		expect(mutateAsync).not.toHaveBeenCalled();
+	});
+
+	it("keeps the step fields read-only", () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: LOCKED_BY_OTHER,
+		});
+
+		expect(screen.getByRole("radio", { name: NONE })).toBeDisabled();
+	});
+
+	it("stays read-only while the lock is still being checked", async () => {
+		renderStep({
+			step: 2,
+			initialDraft: SAVED_NO_EXECUTIVES,
+			lock: {
+				...LOCKED_BY_OTHER,
+				isReadOnly: false,
+				isLoading: true,
+				holder: null,
+			},
+		});
+
+		await userEvent.click(nextButton());
+
+		expect(mutateAsync).not.toHaveBeenCalled();
 	});
 });
