@@ -10,12 +10,13 @@ import {
 	completeDeclaration,
 	reachStep6ComplianceRecap,
 } from "./helpers/declaration-flows";
+import { expectRecapNextSteps } from "./helpers/next-steps";
 
 /**
  * [#3945] CSE opinion mentions gated by the declared CSE existence.
  *
  * A company >= 100 that declared it has no CSE (hasCse false or null) must no longer
- * be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
+ * be told to deposit a CSE opinion: the recap end-of-page box and the
  * compliance-choice options drop every CSE-opinion mention, while the gap actions
  * and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
  *
@@ -50,25 +51,13 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		test.slow();
 		await reachStep6ComplianceRecap(page);
 
-		await expect(
-			page.getByRole("heading", { name: "Prochaines étapes" }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toHaveCount(0);
+		// The CSE block keeps only its button; the gap compliance block stays whole.
+		await expectRecapNextSteps(page, ["gap-compliance-process"]);
 		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toHaveCount(0);
 		await expect(
 			page.getByRole("link", { name: /Voir les modèles d.avis CSE/ }),
 		).toHaveCount(0);
 		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toHaveCount(0);
-
-		// Gap actions stay fully visible
-		await expect(
-			page.getByText("Écarts détectés", { exact: true }),
-		).toBeVisible();
-		await expect(
-			page.getByRole("heading", { name: "Actions à engager" }),
-		).toBeVisible();
 		// Escape hatch for a mis-declared CSE flag stays available
 		await expect(
 			page.getByRole("button", { name: UPDATE_CSE_BUTTON }),
@@ -107,19 +96,24 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		test.slow();
 		await reachStep6ComplianceRecap(page);
 
-		await expect(
-			page.getByRole("heading", { name: "Informer et consulter le CSE" }),
-		).toBeVisible();
+		await expectRecapNextSteps(page, [
+			"cse-inform-and-consult",
+			"gap-compliance-process",
+		]);
 		await expect(page.getByText(CSE_OPINION_RECAP_TEXT)).toBeVisible();
-		await expect(page.getByText(CSE_JUSTIFY_PARENTHESIS)).toBeVisible();
-
-		// First declaration renders both alternative paths, each prefixed "Soit"
 		await expect(
-			page.getByText(/Soit mettre en place des actions correctives/),
+			page.getByText(/informer et consulter le CSE sur cette justification/),
 		).toBeVisible();
 		await expect(
 			page.getByText(
-				"Soit réaliser une évaluation conjointe des rémunérations",
+				"Effectuer des actions correctives et une seconde déclaration dans un délai de 6 mois",
+				{ exact: true },
+			),
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				"Mettre en place une évaluation conjointe des rémunérations",
+				{ exact: true },
 			),
 		).toBeVisible();
 	});
