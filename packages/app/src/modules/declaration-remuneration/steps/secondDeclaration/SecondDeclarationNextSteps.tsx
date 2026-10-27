@@ -96,7 +96,7 @@ export function SecondDeclarationNextSteps({
 							</p>
 
 							<ul>
-								<li className="fr-mb-4v">
+								<li className="fr-mb-3v">
 									<strong>
 										En cas de justification d&apos;au moins un écart par des
 										critères objectifs et non fondés sur le sexe,
