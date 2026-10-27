@@ -499,7 +499,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
 		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
 		const CATEGORY_BULLET =
-			/Indicateur de rémunération par catégorie de salariés à remplir/;
+			/Indicateur de rémunération par catégorie d'emplois à remplir/;
 
 		it("renders both bullets on the start variant when indicator G applies", () => {
 			const { panel } = renderPanel("start", { indicatorGRequired: true });

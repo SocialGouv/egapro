@@ -14,7 +14,7 @@ describe("RecapitulatifPage — second declaration (isCorrection)", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 1,
-				name: "Seconde déclaration des écarts de rémunération par catégorie de salariés 2025",
+				name: "Seconde déclaration des écarts de rémunération par catégorie d'emplois 2025",
 			}),
 		).toBeInTheDocument();
 		expect(
@@ -86,7 +86,7 @@ describe("RecapitulatifPage — second declaration (isCorrection)", () => {
 		expect(
 			screen.getByRole("heading", {
 				level: 2,
-				name: "Indicateur par catégorie de salariés",
+				name: "Indicateur par catégorie d'emplois",
 			}),
 		).toBeInTheDocument();
 		expect(

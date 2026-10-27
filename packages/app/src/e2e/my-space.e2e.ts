@@ -178,7 +178,7 @@ test.describe("Declaration process panel", () => {
 	// inapplicable. Absence from the GIP file also means the indicators are not prefilled.
 	test.describe("voluntary company without CSE: compliance and CSE steps are hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -301,7 +301,7 @@ test.describe("Declaration process panel", () => {
 	// chosen (see `isCompliancePathStepApplicable`).
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();

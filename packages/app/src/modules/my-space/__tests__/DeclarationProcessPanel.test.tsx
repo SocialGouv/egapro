@@ -115,7 +115,7 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 			expect(
 				panel.getByText(
-					/Indicateur de rémunération par catégorie de salariés à remplir/,
+					/Indicateur de rémunération par catégorie d'emplois à remplir/,
 				),
 			).toBeInTheDocument();
 			const lists = panel.getAllByRole("list", { hidden: true });

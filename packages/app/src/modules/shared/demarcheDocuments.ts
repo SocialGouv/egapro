@@ -58,7 +58,7 @@ export function buildRemunerationDocuments({
 			dataYear,
 			href: `${API_DECLARATION_PDF}?type=correction&year=${year}`,
 			title:
-				"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés",
+				"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie d'emplois",
 			year,
 		});
 	}

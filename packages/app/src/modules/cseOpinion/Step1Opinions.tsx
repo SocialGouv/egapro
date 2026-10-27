@@ -222,7 +222,7 @@ export function Step1Opinions({
 						<div className="fr-col">
 							<h1 className="fr-h4 fr-mb-0">
 								Parcours de mise en conformité pour l'indicateur par catégorie
-								de salariés
+								d'emplois
 							</h1>
 						</div>
 					</div>
@@ -336,7 +336,7 @@ export function Step1Opinions({
 								}}
 								opinion={secondDeclOpinion ?? null}
 								readOnly={isReadOnly}
-								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés"
+								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois"
 							/>
 
 							{showSecondDeclarationGap && (

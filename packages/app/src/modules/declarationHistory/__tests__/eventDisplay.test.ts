@@ -88,7 +88,7 @@ describe("getHistoryEventDisplay", () => {
 		const result = getHistoryEventDisplay(buildEvent("step_change", 5));
 		expect(result.label).toBe("Modification de la page");
 		expect(result.pageLabel).toBe(
-			"Écart de rémunération par catégorie de salariés",
+			"Écart de rémunération par catégorie d'emplois",
 		);
 		expect(result.pageHref).toBe("/declaration-remuneration/etape/5");
 	});
