@@ -377,11 +377,15 @@ describe("DeclarationProcessPanel", () => {
 			).toBeInTheDocument();
 		});
 
-		it('renders "Voir la déclaration" CTA whose accessible name equals its visible label', () => {
-			const { dialog } = renderPanel("closed");
-			const footerCta = dialog.querySelector(".footer a.fr-btn") as HTMLElement;
-			expect(footerCta).toHaveAccessibleName("Voir la déclaration");
-			expect(footerCta.querySelector(".fr-sr-only")).toBeNull();
+		it("renders no link in the footer, keeping the help section above it", () => {
+			const { dialog, panel } = renderPanel("closed");
+			const footer = dialog.querySelector(".footer") as HTMLElement;
+			expect(footer).toBeInTheDocument();
+			expect(footer.querySelectorAll("a")).toHaveLength(0);
+			expect(
+				panel.queryByRole("link", { name: /Voir la déclaration/ }),
+			).not.toBeInTheDocument();
+			expect(panel.getByText("Pour vous aider")).toBeInTheDocument();
 		});
 
 		it("exposes a Modifier link for the CSE opinion step", () => {
@@ -391,6 +395,35 @@ describe("DeclarationProcessPanel", () => {
 			);
 			expect(modifyLinks.length).toBeGreaterThan(0);
 			expect(modifyLinks[0]).toHaveTextContent("Modifier");
+		});
+
+		it("keeps the step 1 recap link available for consultation", () => {
+			const { dialog } = renderPanel("closed");
+			expect(
+				dialog.querySelector(
+					'a[title="Voir le récapitulatif de la déclaration"]',
+				),
+			).toBeInTheDocument();
+		});
+
+		it("renders the lock alert without a footer or read-only link when locked by another co-declarant", () => {
+			const lockHolder = {
+				firstName: "Alice",
+				lastName: "Martin",
+				email: "alice.martin@example.fr",
+			};
+			const { dialog, panel } = renderPanel("closed", {
+				lockedByOther: true,
+				lockHolder,
+			});
+			const alert = dialog.querySelector('[role="alert"]');
+			expect(alert).toBeInTheDocument();
+			expect(alert).toHaveTextContent("Déclaration en cours de modification");
+			const footer = dialog.querySelector(".footer") as HTMLElement;
+			expect(footer.querySelectorAll("a")).toHaveLength(0);
+			expect(
+				panel.queryByRole("link", { name: /Consulter en lecture seule/ }),
+			).not.toBeInTheDocument();
 		});
 	});
 
@@ -415,13 +448,16 @@ describe("DeclarationProcessPanel", () => {
 			expect(link).toHaveClass("fr-btn", "fr-btn--tertiary");
 		});
 
-		it("keeps the closed message alongside the formal notice action", () => {
+		it("keeps the closed message alongside the formal notice action, without a footer link", () => {
 			const { panel } = renderPanel("closed", { formalNoticeAvailable: true });
 
 			expect(panel.getByText("Démarche close")).toBeInTheDocument();
 			expect(
-				panel.getByRole("link", { name: "Voir la déclaration", hidden: true }),
-			).toBeInTheDocument();
+				panel.queryByRole("link", {
+					name: "Voir la déclaration",
+					hidden: true,
+				}),
+			).not.toBeInTheDocument();
 		});
 
 		it("renders nothing on a closed démarche not exposed to a formal notice", () => {
