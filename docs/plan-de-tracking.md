@@ -77,7 +77,7 @@ Clés d'étape : `step_1` Renseigner les informations du ou des avis du CSE · `
 
 `storageKey` : `egapro:compliance-funnel` · Dimensions : **année** (étapes) / **aucune** (complete) · Émis par `FunnelStepTracker` dans `SecondDeclarationStepPage.tsx` (start/step/abandon) et `FunnelCompleteTracker` sur `/declaration-remuneration/parcours-conformite/confirmation` (complete).
 
-Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2` Seconde déclaration des écarts par catégorie · `step_3` Récapitulatif.
+Clés d'étape : `step_1` Actions correctives et seconde déclaration · `step_2` Seconde déclaration de l'indicateur par catégorie d'emplois · `step_3` Récapitulatif de la déclaration.
 
 | `action` | Déclencheur | `name` | `value` |
 |---|---|---|---|

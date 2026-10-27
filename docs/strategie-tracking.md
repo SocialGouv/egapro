@@ -130,8 +130,8 @@ Seconde déclaration / actions correctives jusqu'au récapitulatif.
 | Clé | Étape |
 |---|---|
 | `step_1` | Actions correctives et seconde déclaration |
-| `step_2` | Seconde déclaration des écarts par catégorie de salariés |
-| `step_3` | Récapitulatif de votre déclaration |
+| `step_2` | Seconde déclaration de l'indicateur par catégorie d'emplois |
+| `step_3` | Récapitulatif de la déclaration |
 
 | Événement | Déclencheur précis |
 |---|---|
