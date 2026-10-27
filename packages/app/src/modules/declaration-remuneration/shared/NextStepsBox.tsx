@@ -10,7 +10,6 @@ type Props = {
 	cseOpinionRequired: boolean;
 	hasGapsAboveThreshold: boolean;
 	siren: string;
-	isSecondDeclaration?: boolean;
 };
 
 /** Shared "Prochaines étapes" box with CSE consultation info and gap warnings */
@@ -19,7 +18,6 @@ export function NextStepsBox({
 	cseOpinionRequired,
 	hasGapsAboveThreshold,
 	siren,
-	isSecondDeclaration,
 }: Props) {
 	return (
 		<>
@@ -96,10 +94,9 @@ export function NextStepsBox({
 
 						<p className="fr-mb-0">
 							À la suite de l&apos;analyse de vos données de l&apos;indicateur
-							par catégorie d&apos;emplois, des écarts &ge; 5 % ont{" "}
-							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
-							. Vous devez engager un des parcours de mise en conformité
-							suivant&nbsp;:
+							par catégorie d&apos;emplois, des écarts &ge; 5 % ont été
+							identifiés. Vous devez engager un des parcours de mise en
+							conformité suivant&nbsp;:
 						</p>
 
 						<ul>
@@ -117,23 +114,18 @@ export function NextStepsBox({
 						</ul>
 						<p className="fr-mb-0">
 							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous{" "}
-							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
+							objectifs et non sexistes, vous pouvez&nbsp;:
 						</p>
 						<ul>
-							{!isSecondDeclaration && (
-								<li>
-									<strong>
-										Soit mettre en place des actions correctives et effectuer
-										une seconde déclaration dans un délai de 6 mois
-									</strong>
-								</li>
-							)}
 							<li>
 								<strong>
-									{isSecondDeclaration
-										? "Réaliser une évaluation conjointe des rémunérations"
-										: "Soit réaliser une évaluation conjointe des rémunérations"}
+									Soit mettre en place des actions correctives et effectuer une
+									seconde déclaration dans un délai de 6 mois
+								</strong>
+							</li>
+							<li>
+								<strong>
+									Soit réaliser une évaluation conjointe des rémunérations
 								</strong>
 							</li>
 						</ul>
