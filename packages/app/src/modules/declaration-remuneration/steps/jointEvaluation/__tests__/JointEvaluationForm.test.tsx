@@ -108,6 +108,8 @@ describe("JointEvaluationForm", () => {
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
+		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
+
 		expect(
 			screen.getByText(
 				"Échéance pour transmettre le rapport de l'évaluation conjointe",
@@ -212,19 +214,23 @@ describe("JointEvaluationForm", () => {
 		const { container } = render(<JointEvaluationForm {...defaultProps} />);
 
 		const texts = Array.from(
-			container.querySelectorAll("h2, h3, label, input[type='file']"),
+			container.querySelectorAll("h2, h3, label, p, input[type='file']"),
 		).map((el) => (el.tagName === "INPUT" ? "file-input" : el.textContent));
 
 		const reminderIndex = texts.findIndex((t) => t?.startsWith("Rappel"));
 		const labelIndex = texts.findIndex((t) =>
 			t?.startsWith("Veuillez déposer"),
 		);
+		const deadlineIndex = texts.indexOf(
+			"Échéance pour transmettre le rapport de l'évaluation conjointe",
+		);
 		const fileInputIndex = texts.indexOf("file-input");
 		const afterReportIndex = texts.indexOf("Après élaboration du rapport");
 
 		expect(reminderIndex).toBeGreaterThanOrEqual(0);
 		expect(labelIndex).toBeGreaterThan(reminderIndex);
-		expect(fileInputIndex).toBeGreaterThan(labelIndex);
+		expect(deadlineIndex).toBeGreaterThan(labelIndex);
+		expect(fileInputIndex).toBeGreaterThan(deadlineIndex);
 		expect(afterReportIndex).toBeGreaterThan(fileInputIndex);
 	});
 

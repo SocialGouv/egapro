@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { TrackedLink } from "~/modules/analytics";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref } from "~/modules/routes";
 import { FileUpload } from "~/modules/shared";
@@ -62,6 +62,19 @@ export function JointEvaluationReminder() {
 					Transmettre le rapport dans la zone de dépôt prévue sur cette page
 				</li>
 			</ul>
+		</div>
+	);
+}
+
+export function JointEvaluationDeadline({ deadline }: { deadline: Date }) {
+	return (
+		<div className="fr-highlight">
+			<p className="fr-mb-1w">
+				Échéance pour transmettre le rapport de l&apos;évaluation conjointe
+			</p>
+			<p className="fr-text--xl fr-text--bold fr-mb-0">
+				{formatCivilLongDate(deadline)}
+			</p>
 		</div>
 	);
 }

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { formatLongDate } from "~/modules/domain";
 import {
 	JointEvaluationAfterReport,
+	JointEvaluationDeadline,
 	JointEvaluationDepositInstructions,
 	JointEvaluationExistingReport,
 	JointEvaluationGuidance,
@@ -183,6 +184,24 @@ describe("JointEvaluationGuidance", () => {
 			"href",
 			"https://accords-depot.travail.gouv.fr/accueil",
 		);
+	});
+});
+
+describe("JointEvaluationDeadline", () => {
+	it("labels the deadline and shows its civil long date", () => {
+		render(
+			<JointEvaluationDeadline deadline={new Date("2027-08-01T12:00:00Z")} />,
+		);
+
+		expect(
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText(/août 2027/)).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
 	});
 });
 
