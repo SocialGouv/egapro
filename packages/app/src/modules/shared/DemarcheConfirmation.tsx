@@ -9,9 +9,11 @@ import { DownloadCard } from "./DownloadCard";
 import type { DemarcheDocument } from "./demarcheDocuments";
 import { formatDocumentSubtitle } from "./documentSubtitle";
 import { FeedbackBanner } from "./FeedbackBanner";
+import { ResultsPublicationNotice } from "./ResultsPublicationNotice";
 
 type Props = {
 	children?: ReactNode;
+	companyName: string;
 	documents: DemarcheDocument[];
 	documentsTitle?: string;
 	documentsTitleHidden?: boolean;
@@ -24,6 +26,7 @@ type Props = {
 
 export function DemarcheConfirmation({
 	children,
+	companyName,
 	documents,
 	documentsTitle = "Documents récapitulatifs de votre démarche",
 	documentsTitleHidden = false,
@@ -83,6 +86,8 @@ export function DemarcheConfirmation({
 					/>
 				))}
 			</div>
+
+			<ResultsPublicationNotice companyName={companyName} />
 
 			<FeedbackBanner />
 

@@ -8,12 +8,14 @@ vi.mock(
 );
 
 const DECLARATION_YEAR = 2025;
+const COMPANY_NAME = "Société Démo";
 
 const TRANSMITTED_CARD = /récapitulatif des éléments transmis/;
 const JOINT_EVALUATION_CARD =
 	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 type Overrides = {
+	companyName?: string;
 	email?: string;
 	hasSecondDeclaration?: boolean;
 	hasTransmittedElements?: boolean;
@@ -23,6 +25,7 @@ type Overrides = {
 function renderConfirmation(overrides: Overrides = {}) {
 	return render(
 		<ConfirmationPage
+			companyName={COMPANY_NAME}
 			dataYear={DECLARATION_YEAR - 1}
 			declarationYear={DECLARATION_YEAR}
 			{...overrides}
@@ -195,5 +198,11 @@ describe("ConfirmationPage", () => {
 		expect(
 			container.querySelector(".fr-artwork--green-emeraude"),
 		).toBeInTheDocument();
+	});
+
+	it("names the received company in the publication notice", () => {
+		renderConfirmation({ companyName: "Autre Société" });
+
+		expect(screen.getByText(/déclarés par Autre Société/)).toBeInTheDocument();
 	});
 });
