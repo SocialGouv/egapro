@@ -83,6 +83,14 @@ function normalizeCategoryForForm(
 		: withoutPayValuesWhenNotApplicable(category);
 }
 
+function withSharedWorkforce(category: FormCategory): FormCategory {
+	return {
+		...category,
+		hourlyWomenCount: category.womenCount,
+		hourlyMenCount: category.menCount,
+	};
+}
+
 function categoryPayApplicability(
 	category: FormCategory | undefined,
 	preserveLegacyPay: boolean,
@@ -113,9 +121,10 @@ function categoryPayApplicability(
 function toFormValues(
 	cats: EmployeeCategory[],
 	preserveLegacyPay: boolean,
+	sameWorkforceByPayBasis: boolean,
 ): FormCategory[] {
-	return cats.map((c) =>
-		normalizeCategoryForForm(
+	return cats.map((c) => {
+		const category = normalizeCategoryForForm(
 			{
 				name: c.name,
 				womenCount: c.womenCount,
@@ -132,19 +141,26 @@ function toFormValues(
 				hourlyVariableMen: padDecimalToTwo(c.hourlyVariableMen),
 			},
 			preserveLegacyPay,
-		),
-	);
+		);
+		return sameWorkforceByPayBasis
+			? withSharedWorkforce(category)
+			: category;
+	});
 }
 
 function normalizeFormValues(
 	values: CategoryFormValues,
 	preserveLegacyPay: boolean,
+	sameWorkforceByPayBasis: boolean,
 ): CategoryFormValues {
 	return {
 		source: values.source,
-		categories: values.categories.map((category) =>
-			normalizeCategoryForForm(category, preserveLegacyPay),
-		),
+		categories: values.categories.map((category) => {
+			const normalized = normalizeCategoryForForm(category, preserveLegacyPay);
+			return sameWorkforceByPayBasis
+				? withSharedWorkforce(normalized)
+				: normalized;
+		}),
 	};
 }
 
@@ -162,6 +178,7 @@ type Props = {
 	maxMen?: number;
 	hourlyMaxWomen?: number;
 	hourlyMaxMen?: number;
+	sameWorkforceByPayBasis?: boolean;
 	/** Reminder shown under the description on the first declaration only. */
 	reminderText?: string;
 	onSubmit: (data: EmployeeCategorySubmitData) => void;
@@ -200,6 +217,7 @@ export function CategoryForm({
 	maxMen,
 	hourlyMaxWomen,
 	hourlyMaxMen,
+	sameWorkforceByPayBasis = false,
 	reminderText,
 	onSubmit,
 	isSubmitting,
@@ -239,10 +257,18 @@ export function CategoryForm({
 		readOnlyLabel ? categoryCorrectionFormSchema : categoryFormSchema,
 		{
 			defaultValues: defaultValuesOverride
-				? normalizeFormValues(defaultValuesOverride, preserveLegacyPay)
+				? normalizeFormValues(
+						defaultValuesOverride,
+						preserveLegacyPay,
+						sameWorkforceByPayBasis,
+					)
 				: {
 						source: initialSource,
-						categories: toFormValues(initialCats, preserveLegacyPay),
+						categories: toFormValues(
+							initialCats,
+							preserveLegacyPay,
+							sameWorkforceByPayBasis,
+						),
 					},
 		},
 	);
@@ -357,6 +383,16 @@ export function CategoryForm({
 				if (Number.isNaN(n) || n < 0) return;
 			}
 			form.setValue(`categories.${index}.${formField}`, raw);
+			const sharedField = sameWorkforceByPayBasis
+				? field === "womenCount"
+					? "hourlyWomenCount"
+					: field === "menCount"
+						? "hourlyMenCount"
+						: undefined
+				: undefined;
+			if (sharedField) {
+				form.setValue(`categories.${index}.${sharedField}`, raw);
+			}
 			const updatedCategory = form.getValues(`categories.${index}`);
 			const updatedHeadcounts = toCategoryHeadcounts(updatedCategory);
 			const categoryPayApplicable = isCategoryPayApplicable(updatedHeadcounts);
@@ -387,7 +423,12 @@ export function CategoryForm({
 			}
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
-					if (error.fieldId === changedFieldId) return false;
+					if (
+						error.fieldId === changedFieldId ||
+						(sharedField &&
+							error.fieldId === categoryDataFieldId(index, sharedField))
+					)
+						return false;
 					if (error.fieldId === CATEGORY_FORM_FIELD_ID)
 						return error.category === "invalid";
 					if (!categoryPayFieldIds.has(error.fieldId)) return true;
@@ -426,7 +467,11 @@ export function CategoryForm({
 
 	function addCategory() {
 		const empty = createEmptyCategory(nextId());
-		const formEntry = toFormValues([empty], false)[0];
+		const formEntry = toFormValues(
+			[empty],
+			false,
+			sameWorkforceByPayBasis,
+		)[0];
 		if (formEntry) {
 			pendingFocusIndex.current = fields.length;
 			append(formEntry);
@@ -436,7 +481,7 @@ export function CategoryForm({
 	}
 
 	function handleImportCategories(imported: EmployeeCategory[]) {
-		replace(toFormValues(imported, false));
+		replace(toFormValues(imported, false, sameWorkforceByPayBasis));
 		setCategoryErrors([]);
 		setHasData(false);
 	}
@@ -648,7 +693,9 @@ export function CategoryForm({
 						annual: { women: maxWomen, men: maxMen },
 						hourly: { women: hourlyMaxWomen, men: hourlyMaxMen },
 					});
-					replace(toFormValues(devCats, false));
+					replace(
+						toFormValues(devCats, false, sameWorkforceByPayBasis),
+					);
 					form.setValue("source", DEV_STEP5_SOURCE);
 					setCategoryErrors([]);
 					setHasData(false);
@@ -787,6 +834,7 @@ export function CategoryForm({
 									accordionHeaderRefs.current[index] = node;
 								}}
 								hourlyPayApplicable={payApplicability.hourly}
+								sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 								index={index}
 								isExpanded={expandedByFieldId[field.id] ?? true}
 								key={field.id}

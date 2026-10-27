@@ -29,6 +29,7 @@ type Props = {
 	maxMen?: number;
 	hourlyMaxWomen?: number;
 	hourlyMaxMen?: number;
+	sameWorkforceByPayBasis?: boolean;
 };
 
 export function Step5EmployeeCategories({
@@ -41,6 +42,7 @@ export function Step5EmployeeCategories({
 	maxMen,
 	hourlyMaxWomen,
 	hourlyMaxMen,
+	sameWorkforceByPayBasis = false,
 }: Props) {
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
@@ -114,6 +116,7 @@ export function Step5EmployeeCategories({
 			initialCategories={initialCategories ?? []}
 			initialSource={initialSource}
 			instructionText="Renseignez les informations nécessaires pour le calcul de l'indicateur ou importez-les via le bouton ci-dessous"
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			isPendingSaveOverride={isPendingSave}
 			isSavingOverride={isSaving}
 			isSubmitting={mutation.isPending}

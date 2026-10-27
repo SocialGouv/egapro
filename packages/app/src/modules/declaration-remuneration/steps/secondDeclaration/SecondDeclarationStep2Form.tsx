@@ -27,6 +27,7 @@ type Props = {
 	initialSource?: string;
 	initialStartDate?: string;
 	initialEndDate?: string;
+	sameWorkforceByPayBasis?: boolean;
 	status: DeclarationFsmStatus | null;
 };
 
@@ -38,6 +39,7 @@ export function SecondDeclarationStep2Form({
 	initialSource,
 	initialStartDate = "",
 	initialEndDate = "",
+	sameWorkforceByPayBasis = false,
 	status,
 }: Props) {
 	const router = useRouter();
@@ -107,6 +109,7 @@ export function SecondDeclarationStep2Form({
 			isSubmitting={mutation.isPending}
 			mimoquageNextHref={mimoquageNextHref}
 			nextHref={nextHref}
+			sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 			onSubmit={(data) => {
 				if (!isWritable) return;
 				if (!startDate || !endDate) {

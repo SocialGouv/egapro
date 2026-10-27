@@ -152,6 +152,14 @@ export function StepPageClient({
 					<Step5EmployeeCategories
 						declarationSiren={declaration.siren}
 						declarationYear={declaration.year}
+						sameWorkforceByPayBasis={
+							declaration.totalWomen !== null &&
+							declaration.hourlyWomen !== null &&
+							declaration.totalWomen === declaration.hourlyWomen &&
+							declaration.totalMen !== null &&
+							declaration.hourlyMen !== null &&
+							declaration.totalMen === declaration.hourlyMen
+						}
 						hourlyMaxMen={declaration.hourlyMen ?? undefined}
 						hourlyMaxWomen={declaration.hourlyWomen ?? undefined}
 						indicatorGRequired={indicatorGRequired}
