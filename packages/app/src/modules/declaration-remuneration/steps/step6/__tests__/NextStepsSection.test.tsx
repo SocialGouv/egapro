@@ -119,8 +119,7 @@ describe("NextStepsSection", () => {
 		expect(screen.queryByText("Et après ?")).not.toBeInTheDocument();
 	});
 
-	// Points ouverts #1 (ticket #4925): no dedicated Figma frame for this case —
-	// falls back to the 6-indicator blocks.
+	// No dedicated Figma frame for this combination — falls back to the 6-indicator blocks.
 	it("50-99 with indicator G but no significant gap falls back to CSE-inform + afterward", () => {
 		renderSection({
 			hasSignificantIndicatorGGap: false,
@@ -187,8 +186,7 @@ describe("NextStepsSection", () => {
 				name: "Prochaines étapes : Actions à engager",
 			}),
 		).toBeInTheDocument();
-		// The sentence wraps "écarts ≥ 5 %" in a <strong>, so it spans two text
-		// nodes under the same <p> — assert each fragment, plus the bold emphasis.
+		// "écarts ≥ 5 %" is in a nested <strong>, so the sentence spans two text nodes — assert each fragment.
 		expect(
 			screen.getByText(
 				/À la suite de l'analyse de vos données de l'indicateur par catégorie d'emploi, des/,
@@ -232,8 +230,7 @@ describe("NextStepsSection", () => {
 			}),
 		).toBeInTheDocument();
 
-		// One divider between the CSE block and the compliance block, one more
-		// inside the compliance block before "Pour vous aider".
+		// One divider between the two top-level blocks, one more before "Pour vous aider".
 		expect(container.querySelectorAll("hr")).toHaveLength(2);
 	});
 

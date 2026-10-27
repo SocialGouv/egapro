@@ -47,8 +47,7 @@ describe("getNextStepsBlocks", () => {
 		).toEqual(["cse-inform", "gap-remediation"]);
 	});
 
-	// Points ouverts #1 (ticket #4925): no dedicated Figma frame for 50-99 with
-	// indicator G but no significant gap — falls back to the 6-indicator blocks.
+	// No dedicated Figma frame for this combination — falls back to the 6-indicator blocks.
 	it("falls back to CSE-inform + afterward for 50-99 with indicator G but no significant gap", () => {
 		expect(
 			getNextStepsBlocks({
@@ -90,8 +89,6 @@ describe("getNextStepsBlocks", () => {
 	});
 
 	it("ignores hasSignificantIndicatorGGap when indicator G does not apply this year", () => {
-		// A stale/irrelevant gap flag must not leak a remediation block when the
-		// declaration does not even carry indicator G this year.
 		expect(
 			getNextStepsBlocks({
 				workforce: 300,
@@ -101,10 +98,6 @@ describe("getNextStepsBlocks", () => {
 		).toEqual(["cse-inform-and-consult"]);
 	});
 
-	// Acceptance criteria (#4925): no year or threshold hardcoded in the SUT —
-	// composing the real year-based `isIndicatorGRequiredForGip` across every
-	// campaign year from 2026 (aligned onto 2027) through 2033 must still select
-	// the expected blocks for each obligation tier.
 	describe("composed with isIndicatorGRequiredForGip across campaign years", () => {
 		const YEARS = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
 

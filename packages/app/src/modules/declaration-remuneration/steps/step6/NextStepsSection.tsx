@@ -10,9 +10,7 @@ import styles from "./NextStepsSection.module.scss";
 
 const NEGOTIATION_LINK_HREF =
 	"https://travail-emploi.gouv.fr/la-negociation-collective-en-entreprise-en-faveur-de-legalite-professionnelle";
-// Placeholder destination shared by the three "Pour vous aider" links, same as
-// the second-declaration NextStepsBox: no dedicated URL exists yet for any of
-// the three topics (objective criteria, corrective actions, joint evaluation).
+// No dedicated URL exists yet for any of the three "Pour vous aider" topics, so all three share this placeholder.
 const COMPLIANCE_HELP_HREF =
 	"https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle";
 
@@ -26,12 +24,6 @@ type Props = {
 	siren: string;
 };
 
-/**
- * End-of-recap-page info boxes for the first declaration's review step
- * (`Step6Review`). Which blocks render is decided by the pure rule
- * `getNextStepsBlocks` (ticket #4925) — this component only renders whichever
- * blocks it returns, in order, separated by a divider.
- */
 export function NextStepsSection({
 	workforce,
 	indicatorGRequired,

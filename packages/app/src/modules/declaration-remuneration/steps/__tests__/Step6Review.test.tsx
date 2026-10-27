@@ -896,12 +896,8 @@ describe("Step6Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	// Exhaustive block-selection and block-content coverage lives in
-	// getNextStepsBlocks' own matrix tests and NextStepsSection.test.tsx
-	// (ticket #4925) — these integration tests only check that Step6Review
-	// wires the right props through (workforce, indicatorGRequired, the
-	// computed gap flag, siren) for one representative case per tier.
-	describe("next steps section (ticket #4925)", () => {
+	// Exhaustive block-selection coverage lives in getNextStepsBlocks' matrix tests and NextStepsSection.test.tsx.
+	describe("next steps section", () => {
 		it("< 50 employees: shows the afterward block", () => {
 			render(
 				<Step6Review
