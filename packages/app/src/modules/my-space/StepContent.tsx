@@ -97,13 +97,11 @@ export function Step1Content({
 				<BulletList>
 					<BulletRow>
 						{hasPrefillData
-							? "Indicateurs pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
+							? "Indicateurs pour l'ensemble des salariés pré-remplis à vérifier et à modifier si nécessaire (issus des données DSN)"
 							: "Indicateurs pour l'ensemble des salariés à remplir"}
 					</BulletRow>
 					{indicatorGRequired && (
-						<BulletRow>
-							Indicateur de rémunération par catégorie d'emplois à remplir
-						</BulletRow>
+						<BulletRow>Indicateur par catégorie d'emplois à remplir</BulletRow>
 					)}
 				</BulletList>
 				<DeadlineRow date={campaignDeadlines.decl1ModificationDeadline} />
@@ -307,7 +305,7 @@ export function Step3Content({
 	variant: PanelVariant;
 }) {
 	const title = (
-		<StepTitle status={status}>Dépôt du ou des avis du CSE</StepTitle>
+		<StepTitle status={status}>Transmission du ou des avis du CSE</StepTitle>
 	);
 
 	if (
