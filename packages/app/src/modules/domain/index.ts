@@ -301,6 +301,12 @@ export {
 	NAF_SECTION_DIVISIONS,
 	NAF_SECTIONS,
 } from "./shared/naf";
+// Next steps blocks (first declaration recap page, end-of-page info boxes)
+export type {
+	NextStepsBlock,
+	NextStepsBlocksInput,
+} from "./shared/nextStepsBlocks";
+export { getNextStepsBlocks } from "./shared/nextStepsBlocks";
 // Number parsing & normalization (French locale)
 export {
 	displayDecimal,

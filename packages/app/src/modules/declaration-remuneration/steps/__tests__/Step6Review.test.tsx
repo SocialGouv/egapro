@@ -896,256 +896,294 @@ describe("Step6Review", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("shows 'Prochaines étapes' callout when an indicator-G gap is at least 5%", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{
-					siren: "532847196",
-					status: null,
-				}}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "90",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "100",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
-		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
-		expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
-		expect(screen.getByText("Actions à engager")).toBeInTheDocument();
-		expect(
-			screen.getByText(/des écarts ≥ 5 % ont été identifiés/),
-		).toBeInTheDocument();
-		expect(
-			screen.queryByText(/ont encore été identifiés/),
-		).not.toBeInTheDocument();
-		expect(screen.getByText(/vous pouvez :/)).toBeInTheDocument();
-		expect(screen.queryByText(/vous devez :/)).not.toBeInTheDocument();
-		expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /critères objectifs/ }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /actions correctives/ }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", { name: /évaluation conjointe/ }),
-		).toBeInTheDocument();
-	});
+	// Exhaustive block-selection and block-content coverage lives in
+	// getNextStepsBlocks' own matrix tests and NextStepsSection.test.tsx
+	// (ticket #4925) — these integration tests only check that Step6Review
+	// wires the right props through (workforce, indicatorGRequired, the
+	// computed gap flag, siren) for one representative case per tier.
+	describe("next steps section (ticket #4925)", () => {
+		it("< 50 employees: shows the afterward block", () => {
+			render(
+				<Step6Review
+					companyWorkforce={30}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired
+					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+				/>,
+			);
+			expect(
+				screen.getByRole("heading", { name: "Et après ?" }),
+			).toBeInTheDocument();
+		});
 
-	it("does not show 'Prochaines étapes' for an A-F-only negative gap", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "110",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "100",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-			/>,
-		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
-	});
+		it("50-99 employees without a significant indicator-G gap: shows CSE-inform + afterward", () => {
+			render(
+				<Step6Review
+					companyWorkforce={60}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired={false}
+					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+				/>,
+			);
+			expect(
+				screen.getByRole("heading", { name: "Rappel : Informer le CSE" }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", { name: "Et après ?" }),
+			).toBeInTheDocument();
+		});
 
-	it("shows 'Prochaines étapes' when an indicator-G gap is unfavourable to men", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={emptyStep2Data()}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "110", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
+		it("50-99 employees with a significant indicator-G gap: shows the gap-remediation block, not afterward", () => {
+			render(
+				<Step6Review
+					companyWorkforce={60}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired
+					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(screen.queryByText("Et après ?")).not.toBeInTheDocument();
+		});
 
-		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
-	});
+		it("does not show the gap-remediation block for an A-F-only gap when G is below the threshold", () => {
+			render(
+				<Step6Review
+					companyWorkforce={60}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired
+					step2Data={{
+						indicatorAAnnualWomen: "90",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "100",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "100",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "100",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
 
-	it("does not show 'Prochaines étapes' callout when all gaps < 5%", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={emptyDeclaration()}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "98",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "99",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "97",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "99",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
-	});
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+		});
 
-	it("does not show 'Prochaines étapes' for an A-F-only gap when G is below the threshold", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "90",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "100",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
+		it("100-249 employees without indicator G: shows only the CSE-inform-and-consult block", () => {
+			render(
+				<Step6Review
+					companyWorkforce={150}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					hasCse
+					indicatorGRequired={false}
+					step2Data={emptyStep2Data()}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+				/>,
+			);
+			expect(
+				screen.getByRole("heading", {
+					name: "Rappel : Informer et consulter le CSE",
+				}),
+			).toBeInTheDocument();
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+		});
 
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
-	});
+		it(">= 100 employees with a significant indicator-G gap: shows the compliance-process block and help links", () => {
+			render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{
+						siren: "532847196",
+						status: null,
+					}}
+					declarationYear={2025}
+					hasCse
+					indicatorGRequired
+					step2Data={{
+						indicatorAAnnualWomen: "90",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "100",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "100",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "100",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+			expect(
+				screen.getByRole("heading", {
+					name: "Prochaines étapes : Actions à engager",
+				}),
+			).toBeInTheDocument();
+			expect(screen.getByText("Pour vous aider")).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: /critères objectifs/ }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: /actions correctives/ }),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("link", { name: /évaluation conjointe/ }),
+			).toBeInTheDocument();
+		});
 
-	it("does not show 'Prochaines étapes' callout below 100 employees even with a high gap", () => {
-		// Phase 2 is reserved to 100+ companies — a 50-99 firm never enters it.
-		render(
-			<Step6Review
-				companyWorkforce={80}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "90",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "100",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
-	});
+		it("does not show the compliance-process block for an A-F-only negative gap", () => {
+			render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired
+					step2Data={{
+						indicatorAAnnualWomen: "110",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "100",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "100",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "100",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+				/>,
+			);
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+		});
 
-	it("does not show 'Prochaines étapes' callout when indicator G is not part of the declaration", () => {
-		// Phase 2 requires indicator G — a 100+ firm that doesn't declare G stays out.
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired={false}
-				step2Data={{
-					indicatorAAnnualWomen: "90",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "100",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
-		expect(screen.queryByText("Prochaines étapes")).not.toBeInTheDocument();
-	});
+		it(">= 100 employees with indicator G but no significant gap: shows only the CSE-inform-and-consult block", () => {
+			render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={emptyDeclaration()}
+					declarationYear={2025}
+					indicatorGRequired
+					step2Data={{
+						indicatorAAnnualWomen: "98",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "99",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "97",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "99",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "98", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+		});
 
-	it("keys the callout off the indicator-G gap, not the A-F gaps", () => {
-		render(
-			<Step6Review
-				companyWorkforce={300}
-				declaration={{ siren: "532847196", status: null }}
-				declarationYear={2025}
-				indicatorGRequired
-				step2Data={{
-					indicatorAAnnualWomen: "98",
-					indicatorAAnnualMen: "100",
-					indicatorAHourlyWomen: "100",
-					indicatorAHourlyMen: "100",
-					indicatorCAnnualWomen: "90",
-					indicatorCAnnualMen: "100",
-					indicatorCHourlyWomen: "100",
-					indicatorCHourlyMen: "100",
-				}}
-				step2Gaps={noPayGapReferences()}
-				step3Data={emptyStep3Data()}
-				step3Gaps={noPayGapReferences()}
-				step4Data={emptyStep4Data()}
-				step5Categories={[
-					makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
-				]}
-			/>,
-		);
-		expect(screen.getByText("Prochaines étapes")).toBeInTheDocument();
+		it("does not show the compliance-process block when indicator G is not part of the declaration", () => {
+			// A >= 100 firm that doesn't declare G this year stays out of it.
+			render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					indicatorGRequired={false}
+					step2Data={{
+						indicatorAAnnualWomen: "90",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "100",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "100",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "100",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+			expect(screen.queryByText("Écarts détectés")).not.toBeInTheDocument();
+		});
+
+		it("keys the compliance-process block off the indicator-G gap, not the A-F gaps", () => {
+			render(
+				<Step6Review
+					companyWorkforce={300}
+					declaration={{ siren: "532847196", status: null }}
+					declarationYear={2025}
+					hasCse
+					indicatorGRequired
+					step2Data={{
+						indicatorAAnnualWomen: "98",
+						indicatorAAnnualMen: "100",
+						indicatorAHourlyWomen: "100",
+						indicatorAHourlyMen: "100",
+						indicatorCAnnualWomen: "90",
+						indicatorCAnnualMen: "100",
+						indicatorCHourlyWomen: "100",
+						indicatorCHourlyMen: "100",
+					}}
+					step2Gaps={noPayGapReferences()}
+					step3Data={emptyStep3Data()}
+					step3Gaps={noPayGapReferences()}
+					step4Data={emptyStep4Data()}
+					step5Categories={[
+						makeCategory({ annualBaseWomen: "90", annualBaseMen: "100" }),
+					]}
+				/>,
+			);
+			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
+		});
 	});
 
 	describe("CSE consultation section gating (issue #3945)", () => {
-		// An indicator-G gap of 10% at 300 employees → the "Prochaines étapes"
-		// callout renders; only the CSE consultation part is driven by hasCse.
+		// An indicator-G gap of 10% at 300 employees → the compliance-process
+		// block renders; only the CSE consultation text is driven by hasCse.
 		function renderWithHasCse(hasCse: boolean | null) {
 			return render(
 				<Step6Review
@@ -1169,12 +1207,12 @@ describe("Step6Review", () => {
 		it.each([
 			false,
 			null,
-		] as const)("hides the CSE consultation section but keeps gap actions and the CSE update button when hasCse is %s", (hasCse) => {
+		] as const)("hides the CSE consultation text but keeps gap actions and the CSE update button when hasCse is %s", (hasCse) => {
 			renderWithHasCse(hasCse);
 
 			expect(
 				screen.queryByRole("heading", {
-					name: "Informer et consulter le CSE",
+					name: "Rappel : Informer et consulter le CSE",
 				}),
 			).not.toBeInTheDocument();
 			expect(
@@ -1183,13 +1221,12 @@ describe("Step6Review", () => {
 			expect(
 				screen.queryByText(/L'avis du CSE devra être transmis/),
 			).not.toBeInTheDocument();
-			expect(
-				screen.queryByText(/avis à transmettre lors de la dernière étape/),
-			).not.toBeInTheDocument();
 
 			expect(screen.getByText("Écarts détectés")).toBeInTheDocument();
 			expect(
-				screen.getByRole("heading", { name: "Actions à engager" }),
+				screen.getByRole("heading", {
+					name: "Prochaines étapes : Actions à engager",
+				}),
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole("button", {
@@ -1198,50 +1235,47 @@ describe("Step6Review", () => {
 			).toBeInTheDocument();
 
 			expect(
-				screen.getByText(/À la suite de l'analyse de vos données/),
-			).toBeInTheDocument();
-			expect(
 				screen.getByText(
-					/vous devez informer et consulter le CSE sur cette justification/,
+					/vous devrez informer et consulter le CSE sur cette justification/,
 				),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/Soit mettre en place des actions correctives/),
+				screen.getByText(
+					"Effectuer des actions correctives et une seconde déclaration dans un délai de 6 mois",
+				),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(
-					"Soit réaliser une évaluation conjointe des rémunérations",
+					"Mettre en place une évaluation conjointe des rémunérations",
 				),
 			).toBeInTheDocument();
 		});
 
-		it("shows the CSE consultation section when hasCse is true", () => {
+		it("shows the CSE consultation text when hasCse is true", () => {
 			renderWithHasCse(true);
 
 			expect(
-				screen.getByRole("heading", { name: "Informer et consulter le CSE" }),
+				screen.getByRole("heading", {
+					name: "Rappel : Informer et consulter le CSE",
+				}),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(/L'avis du CSE devra être transmis/),
 			).toBeInTheDocument();
-			expect(
-				screen.getByText(/avis à transmettre lors de la dernière étape/),
-			).toBeInTheDocument();
 
 			expect(
-				screen.getByText(/À la suite de l'analyse de vos données/),
-			).toBeInTheDocument();
-			expect(
 				screen.getByText(
-					/vous devez informer et consulter le CSE sur cette justification/,
+					/vous devrez informer et consulter le CSE sur cette justification/,
 				),
 			).toBeInTheDocument();
 			expect(
-				screen.getByText(/Soit mettre en place des actions correctives/),
+				screen.getByText(
+					"Effectuer des actions correctives et une seconde déclaration dans un délai de 6 mois",
+				),
 			).toBeInTheDocument();
 			expect(
 				screen.getByText(
-					"Soit réaliser une évaluation conjointe des rémunérations",
+					"Mettre en place une évaluation conjointe des rémunérations",
 				),
 			).toBeInTheDocument();
 		});

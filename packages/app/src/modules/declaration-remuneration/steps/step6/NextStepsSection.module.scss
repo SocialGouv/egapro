@@ -1,0 +1,61 @@
+.nextSteps {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	padding: 2rem;
+	background: var(--background-alt-blue-france);
+	border-radius: 4px;
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	// Strip default browser <ul>/<ol> top/bottom margins so the section's
+	// flex gap is the only spacing between elements; otherwise the gap from
+	// the last bullet text to the next separator becomes 40px instead of 32px.
+	ul,
+	ol {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	// DSFR adds `padding-bottom: 0.25rem` (4px) on every <li> which leaks
+	// below the visible text and breaks the symmetric 32px gap to a sibling
+	// separator. Remove it on the last item only so the gap stays exact.
+	ul > li:last-child,
+	ol > li:last-child {
+		padding-bottom: 0;
+	}
+}
+
+.separator {
+	// DSFR styles <hr> via a 1px background-image gradient and adds
+	// `padding: var(--text-spacing)` which can leak from inherited body-text
+	// rules. Force a single clean 1px line by zeroing padding and dropping the
+	// border (the gradient stays for the visual line).
+	border: 0;
+	margin: 0;
+	padding: 0;
+	height: 1px;
+}
+
+// The unavailable templates message and the CSE update button stack in this group.
+.ctaGroup {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.alertHeader {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	align-items: flex-start;
+}
+
+.alertBadge {
+	text-transform: uppercase;
+}
