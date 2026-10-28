@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type RefObject, useEffect, useRef } from "react";
+import { COMPLIANCE_PATH, routeWithQuery } from "~/modules/routes";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 
 type CompliancePathScreen = "justification" | "path";
@@ -21,7 +22,6 @@ export function useCompliancePathScreen({
 	titleRef,
 }: Params) {
 	const router = useRouter();
-	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const renderedScreen = useRef<CompliancePathScreen | undefined>(undefined);
 	const hasPushedPathScreen = useRef(false);
@@ -42,9 +42,10 @@ export function useCompliancePathScreen({
 
 	const openPathScreen = () => {
 		hasPushedPathScreen.current = true;
-		router.push(`${pathname}?${SCREEN_PARAM}=${PATH_SCREEN}`, {
-			scroll: false,
-		});
+		router.push(
+			routeWithQuery(COMPLIANCE_PATH, `${SCREEN_PARAM}=${PATH_SCREEN}`),
+			{ scroll: false },
+		);
 	};
 
 	const backToJustificationScreen = () => {
@@ -53,7 +54,7 @@ export function useCompliancePathScreen({
 			router.back();
 			return;
 		}
-		router.replace(pathname, { scroll: false });
+		router.replace(COMPLIANCE_PATH, { scroll: false });
 	};
 
 	return { screen, openPathScreen, backToJustificationScreen };

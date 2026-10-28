@@ -43,8 +43,6 @@ export const useRouter = () => ({
 	back: mockBack,
 });
 
-export const usePathname = () => PAGE_PATH;
-
 export const useSearchParams = () =>
 	new URLSearchParams(
 		useSyncExternalStore(location.subscribe, location.getSearch),
