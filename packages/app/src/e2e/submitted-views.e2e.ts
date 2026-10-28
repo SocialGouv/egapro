@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_CSE_OPINION_PDF,
 	API_JOINT_EVALUATION_PDF,
 	MY_SPACE,
 	MY_SPACE_CSE_OPINION_VIEW,
@@ -26,6 +27,7 @@ import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 
 const YEAR = getCurrentYear();
 const JOINT_EVALUATION_RECAP_HREF = `${API_JOINT_EVALUATION_PDF}?year=${YEAR}`;
+const CSE_OPINION_RECAP_HREF = `${API_CSE_OPINION_PDF}?year=${YEAR}`;
 
 test.describe("Submitted documents in Mon espace", () => {
 	test.describe.configure({ mode: "serial" });
@@ -55,6 +57,9 @@ test.describe("Submitted documents in Mon espace", () => {
 
 		const recapResponse = await page.request.get(JOINT_EVALUATION_RECAP_HREF);
 		expect(recapResponse.status()).toBe(404);
+
+		const cseRecapResponse = await page.request.get(CSE_OPINION_RECAP_HREF);
+		expect(cseRecapResponse.status()).toBe(404);
 	});
 
 	test("opens the submitted CSE opinions from the panel and the report directly", async ({
@@ -109,12 +114,36 @@ test.describe("Submitted documents in Mon espace", () => {
 
 		await page.goto(MY_SPACE_CSE_OPINION_VIEW);
 		await expect(
-			page.getByRole("heading", { name: /Avis du CSE pour la déclaration/ }),
+			page.getByRole("heading", {
+				name: `Transmission du ou des avis du CSE ${YEAR}`,
+				level: 1,
+			}),
 		).toBeVisible();
-		await expect(page.getByText("Fichiers transmis")).toBeVisible();
 		await expect(
-			page.getByRole("link", { name: "Télécharger avis-cse.pdf" }),
+			page.getByRole("heading", { name: "Première déclaration" }),
 		).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Seconde déclaration" }),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole("columnheader", { name: "Fichier(s) déposé(s)" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: /^avis-cse\.pdf/ }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", {
+				name: "Télécharger le récapitulatif de la transmission du ou des avis du CSE (PDF)",
+			}),
+		).toHaveAttribute("href", CSE_OPINION_RECAP_HREF);
+		const cseRecapResponse = await page.request.get(CSE_OPINION_RECAP_HREF, {
+			timeout: 30_000,
+		});
+		expect(cseRecapResponse.status()).toBe(200);
+		expect(cseRecapResponse.headers()["content-type"]).toContain("pdf");
+		expect(cseRecapResponse.headers()["content-disposition"]).toContain(
+			`avis-cse-${TEST_SIREN}-${YEAR}.pdf`,
+		);
 		await page.getByRole("link", { name: "Mon espace" }).last().click();
 		await expect(page).toHaveURL(new RegExp(`${MY_SPACE}$`));
 	});
@@ -125,6 +154,8 @@ test.describe("Submitted documents in Mon espace", () => {
 		await markCseOpinionDraftUpdated(YEAR);
 		const response = await page.goto(MY_SPACE_CSE_OPINION_VIEW);
 		expect(response?.status()).toBe(404);
+		const recapResponse = await page.request.get(CSE_OPINION_RECAP_HREF);
+		expect(recapResponse.status()).toBe(404);
 
 		await page.goto(MY_SPACE);
 		await waitForDsfrModal(page, "declaration-process-panel");

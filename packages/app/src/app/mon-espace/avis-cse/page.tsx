@@ -6,7 +6,7 @@ import { resolveAuthorizedSiren } from "~/server/auth/companyAccess";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
-export const metadata = { title: "Avis du CSE transmis" };
+export const metadata = { title: "Transmission du ou des avis du CSE" };
 
 export default async function Page() {
 	const session = await auth();
@@ -25,6 +25,5 @@ export default async function Page() {
 				notFound();
 			throw error;
 		});
-	const company = await api.company.get({ siren });
-	return <SubmittedOpinionsPage {...data} company={company} />;
+	return <SubmittedOpinionsPage {...data} />;
 }

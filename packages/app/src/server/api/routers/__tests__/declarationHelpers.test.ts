@@ -664,7 +664,7 @@ function queuedDatabase(resultSets: unknown[][]) {
 		const result = queue.shift() ?? [];
 		const chain = Promise.resolve(result) as Promise<unknown[]> &
 			Record<string, unknown>;
-		for (const method of ["from", "where", "orderBy", "limit"]) {
+		for (const method of ["from", "where", "orderBy", "limit", "innerJoin"]) {
 			chain[method] = () => chain;
 		}
 		return chain;
@@ -757,6 +757,114 @@ describe("findTransmittedJointEvaluation", () => {
 				queuedDatabase([[SUBMISSION], NO_DEPARTURE, [replacement]]),
 				"decl-1",
 			),
+		).resolves.toBeNull();
+	});
+});
+
+describe("findTransmittedCseOpinions", () => {
+	const SUBMISSION = { createdAt: new Date("2027-02-10T10:00:00Z"), round: 1 };
+	const IDENTITY = {
+		year: 2027,
+		secondDeclReferencePeriodStart: null,
+		secondDeclReferencePeriodEnd: null,
+		cseOpinionDraftUpdatedAt: null,
+		company: { name: "Société Démo", siren: "123456789" },
+		declarant: { email: "email@example.fr" },
+	};
+	const OPINION = { declarationNumber: 1, type: "accuracy" };
+	const ASSOCIATION = { declarationNumber: 1, type: "accuracy", fileId: "f" };
+
+	function transactionalDatabase(resultSets: unknown[][]) {
+		const tx = queuedDatabase(resultSets);
+		const transaction = vi.fn(
+			(run: (inner: unknown) => unknown, _options: unknown) => run(tx),
+		);
+		return { database: { transaction } as never, transaction };
+	}
+
+	it("reads every row of the transmission from one repeatable-read snapshot", async () => {
+		const { findTransmittedCseOpinions } = await import(
+			"../declarationHelpers"
+		);
+		const { database, transaction } = transactionalDatabase([
+			[SUBMISSION],
+			[IDENTITY],
+			[OPINION],
+			[ASSOCIATION],
+			[SUBMISSION],
+			[{ workforceEma: "150.00" }],
+		]);
+
+		const { cseOpinionDraftUpdatedAt: _marker, ...identity } = IDENTITY;
+		await expect(
+			findTransmittedCseOpinions(database, "decl-1"),
+		).resolves.toEqual({
+			...identity,
+			submittedAt: SUBMISSION.createdAt,
+			workforceEma: "150.00",
+			hasSubmittedSecondDeclaration: true,
+			opinions: [OPINION],
+			associations: [ASSOCIATION],
+		});
+		expect(transaction).toHaveBeenCalledWith(expect.any(Function), {
+			isolationLevel: "repeatable read",
+		});
+	});
+
+	it("reports no second declaration nor workforce when none was recorded", async () => {
+		const { findTransmittedCseOpinions } = await import(
+			"../declarationHelpers"
+		);
+		const { database } = transactionalDatabase([
+			[SUBMISSION],
+			[IDENTITY],
+			[],
+			[],
+			[],
+			[],
+		]);
+
+		await expect(
+			findTransmittedCseOpinions(database, "decl-1"),
+		).resolves.toMatchObject({
+			hasSubmittedSecondDeclaration: false,
+			workforceEma: null,
+		});
+	});
+
+	it("returns null before any transmission", async () => {
+		const { findTransmittedCseOpinions } = await import(
+			"../declarationHelpers"
+		);
+		const { database } = transactionalDatabase([[]]);
+
+		await expect(
+			findTransmittedCseOpinions(database, "decl-1"),
+		).resolves.toBeNull();
+	});
+
+	it("returns null once the opinions were modified after their transmission", async () => {
+		const { findTransmittedCseOpinions } = await import(
+			"../declarationHelpers"
+		);
+		const { database } = transactionalDatabase([
+			[SUBMISSION],
+			[{ ...IDENTITY, cseOpinionDraftUpdatedAt: new Date() }],
+		]);
+
+		await expect(
+			findTransmittedCseOpinions(database, "decl-1"),
+		).resolves.toBeNull();
+	});
+
+	it("returns null when the declaration identity cannot be read", async () => {
+		const { findTransmittedCseOpinions } = await import(
+			"../declarationHelpers"
+		);
+		const { database } = transactionalDatabase([[SUBMISSION], []]);
+
+		await expect(
+			findTransmittedCseOpinions(database, "decl-1"),
 		).resolves.toBeNull();
 	});
 });
