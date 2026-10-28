@@ -203,7 +203,7 @@ export function SecondDeclarationStep3Review({
 				className="fr-mt-0"
 				nextHref={nextHref}
 				nextLabel={nextLabel}
-				previousHref={complianceStepHref(2)}
+				previousHref={isWritable ? complianceStepHref(2) : undefined}
 			/>
 
 			{showSubmitModal ? (

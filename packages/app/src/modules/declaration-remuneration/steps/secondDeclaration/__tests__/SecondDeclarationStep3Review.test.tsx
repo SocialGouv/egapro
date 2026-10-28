@@ -611,6 +611,21 @@ describe("SecondDeclarationStep3Review", () => {
 		).not.toBeInTheDocument();
 	});
 
+	it("keeps Précédent while the second declaration is still writable", () => {
+		renderStep3();
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/2",
+		);
+	});
+
+	it("hides Précédent once the second declaration is transmitted (#4834)", () => {
+		renderStep3({ status: "revised_joint_evaluation_chosen" });
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
+	});
+
 	it("keeps Transmettre while awaiting a revision choice", () => {
 		renderStep3({ status: "awaiting_revision_choice" });
 		expect(
