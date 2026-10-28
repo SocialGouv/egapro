@@ -11,6 +11,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 import {
 	type CampaignDeadlines,
 	type CompliancePathValue,
@@ -36,7 +37,6 @@ import {
 	SecondRoundOptions,
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
-import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
