@@ -1,5 +1,9 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { MAX_CAMPAIGN_YEAR, V2_FIRST_CAMPAIGN_YEAR } from "~/modules/domain";
 
 const REQUIRED_SERVER_ENV = {
 	AUTH_SECRET: "test-secret",
@@ -109,5 +113,102 @@ describe("EGAPRO_EXPORT_API_TOKEN", () => {
 
 	it("stays undefined when unset", async () => {
 		await expect(loadExportApiToken(undefined)).resolves.toBeUndefined();
+	});
+});
+
+describe("EGAPRO_RECETTE_CAMPAIGN_YEAR", () => {
+	async function loadDevEnvWithYear(
+		value: string | undefined,
+	): Promise<Record<string, unknown>> {
+		return loadEnvWith({
+			EGAPRO_RECETTE_CAMPAIGN_YEAR: value,
+			NEXT_PUBLIC_EGAPRO_ENV: "dev",
+		});
+	}
+
+	it("stays undefined when unset", async () => {
+		const env = await loadDevEnvWithYear(undefined);
+
+		expect(env.EGAPRO_RECETTE_CAMPAIGN_YEAR).toBeUndefined();
+	});
+
+	it("parses a year into a number", async () => {
+		const env = await loadDevEnvWithYear("2030");
+
+		expect(env.EGAPRO_RECETTE_CAMPAIGN_YEAR).toBe(2030);
+	});
+
+	it.each([
+		V2_FIRST_CAMPAIGN_YEAR,
+		MAX_CAMPAIGN_YEAR,
+	])("accepts the boundary year %i", async (year) => {
+		const env = await loadDevEnvWithYear(String(year));
+
+		expect(env.EGAPRO_RECETTE_CAMPAIGN_YEAR).toBe(year);
+	});
+
+	it("is bounded the same way by the promote-test-env workflow that sets it", () => {
+		const workflow = readFileSync(
+			join(
+				process.cwd(),
+				"..",
+				"..",
+				".github",
+				"workflows",
+				"promote-test-env.yaml",
+			),
+			"utf-8",
+		);
+
+		expect(workflow).toContain(
+			`[ "$CAMPAIGN_YEAR" -lt ${V2_FIRST_CAMPAIGN_YEAR} ]`,
+		);
+		expect(workflow).toContain(`[ "$CAMPAIGN_YEAR" -gt ${MAX_CAMPAIGN_YEAR} ]`);
+	});
+
+	it("rejects a year before the first V2 campaign", async () => {
+		await expect(
+			loadDevEnvWithYear(String(V2_FIRST_CAMPAIGN_YEAR - 1)),
+		).rejects.toThrow();
+	});
+
+	it("rejects a year past the last accepted campaign year", async () => {
+		await expect(
+			loadDevEnvWithYear(String(MAX_CAMPAIGN_YEAR + 1)),
+		).rejects.toThrow();
+	});
+
+	it.each([
+		"0x7EE",
+		"2030.0",
+		" 2030",
+		"20300",
+		"abcd",
+	])("rejects the non-year value %s", async (value) => {
+		await expect(loadDevEnvWithYear(value)).rejects.toThrow();
+	});
+
+	it.each([
+		"preprod",
+		"prod",
+	])("refuses to start when set on a %s build", async (target) => {
+		await expect(
+			loadEnvWith({
+				EGAPRO_RECETTE_CAMPAIGN_YEAR: "2030",
+				NEXT_PUBLIC_EGAPRO_ENV: target,
+			}),
+		).rejects.toThrow(/EGAPRO_RECETTE_CAMPAIGN_YEAR.*refusing to start/s);
+	});
+
+	it.each([
+		"preprod",
+		"prod",
+	])("lets a %s build start when unset", async (target) => {
+		const env = await loadEnvWith({
+			EGAPRO_RECETTE_CAMPAIGN_YEAR: undefined,
+			NEXT_PUBLIC_EGAPRO_ENV: target,
+		});
+
+		expect(env.NEXT_PUBLIC_EGAPRO_ENV).toBe(target);
 	});
 });

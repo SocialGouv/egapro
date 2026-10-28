@@ -81,6 +81,10 @@ vi.mock("~/server/db/schema", () => ({
 
 vi.mock("~/server/api/routers/declarationHelpers", () => ({
 	activeDeclarationFilter: (siren: string, year: number) => ({ siren, year }),
+	findLatestStatusEvent: async () => {
+		const [event] = (await settle("declarationStatusHistory")) as unknown[];
+		return event ?? null;
+	},
 	mapToStepData: (d: Record<string, unknown>) => ({
 		step2Data: {
 			indicatorAAnnualWomen: (d.indicatorAAnnualWomen as string) ?? "",
@@ -207,6 +211,7 @@ describe("buildPdfData", () => {
 		expect(result.year).toBe(2026);
 		expect(result.workforceYear).toBe(2025);
 		expect(result.isSecondDeclaration).toBe(false);
+		expect(result.indicatorGRequired).toBe(true);
 		expect(result.referencePeriod).toBe("01/01/2025 - 31/12/2025");
 		expect(result.transmittedAt).toBe("05/03/2026");
 
@@ -268,6 +273,7 @@ describe("buildPdfData", () => {
 		expect(result.company.workforceDisplay).toBe(
 			GIP_WORKFORCE_VOLUNTARY_DISPLAY,
 		);
+		expect(result.indicatorGRequired).toBe(true);
 		expect(result.company.address).toBe("");
 		expect(result.company.nafCode).toBeNull();
 		expect(result.declarant).toEqual({
@@ -352,6 +358,7 @@ describe("buildPdfData", () => {
 		const result = await buildPdfData("123456789", 2026, NOW, "correction");
 
 		expect(result.isSecondDeclaration).toBe(true);
+		expect(result.indicatorGRequired).toBe(false);
 		expect(result.transmittedAt).toBe("05/06/2026");
 		expect(result.referencePeriod).toBe("01/07/2025 - 30/06/2026");
 	});

@@ -130,6 +130,7 @@ function makeDeclRow(year: number) {
 		updatedAt: new Date(),
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
+		secondDeclarationStep: null,
 		secondDeclarationSubmittedAt: null,
 		demarcheCompletedAt: null,
 		cseOpinionCompletedAt: null,
@@ -249,6 +250,20 @@ describe("companyRouter.getWithDeclarations", () => {
 		).toMatchObject({ currentStep: 0 });
 	});
 
+	it("forwards the saved second-declaration step of the remuneration row", async () => {
+		const { caller } = await makeCaller({
+			declRows: [
+				{ ...makeDeclRow(getCurrentYear()), secondDeclarationStep: 2 },
+			],
+		});
+
+		const result = await caller.getWithDeclarations({ siren: SIREN });
+
+		expect(
+			result.declarations.find((d) => d.type === "remuneration"),
+		).toMatchObject({ secondDeclarationStep: 2 });
+	});
+
 	it("excludes cancelled declarations from the timeline", async () => {
 		const { caller } = await makeCaller({
 			declRows: [makeDeclRow(getCurrentYear())],
@@ -352,6 +367,7 @@ describe("companyRouter.getWithDeclarations", () => {
 			result.declarations.find((d) => d.type === "representation"),
 		).toMatchObject({
 			hasSubmittedSecondDeclaration: false,
+			secondDeclarationStep: null,
 			hasSubmittedJointEvaluation: false,
 			hasSubmittedCseOpinion: false,
 			formalNoticeAvailable: false,

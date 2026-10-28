@@ -2,6 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { getCurrentYear } from "~/modules/domain";
 import {
+	API_JOINT_EVALUATION_PDF,
 	API_PREFILL_PDF,
 	CSE_OPINION,
 	LAST_REMUNERATION_STEP,
@@ -32,7 +33,10 @@ import {
 	resetCampaignYear as resetCampaignYearData,
 	setCampaignDeadlines,
 } from "./helpers/db-campaign";
-import { insertHistoryEvents } from "./helpers/declaration-history";
+import {
+	insertHistoryEvents,
+	insertJointEvaluationSubmission,
+} from "./helpers/declaration-history";
 import { clickAndExpectDialogOpen, waitForDsfrModal } from "./helpers/dsfr";
 import { loginWithProConnect } from "./helpers/login";
 
@@ -174,7 +178,7 @@ test.describe("Declaration process panel", () => {
 	// inapplicable. Absence from the GIP file also means the indicators are not prefilled.
 	test.describe("voluntary company without CSE: compliance and CSE steps are hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -297,7 +301,7 @@ test.describe("Declaration process panel", () => {
 	// chosen (see `isCompliancePathStepApplicable`).
 	test.describe("GIP >= 100 without CSE: indicator-G step shown, CSE step hidden", () => {
 		const STEP2_TITLE =
-			"Parcours de mise en conformité pour l'indicateur par catégorie de salariés";
+			"Parcours de mise en conformité pour l'indicateur par catégorie d'emplois";
 
 		test.afterAll(async () => {
 			await resetDeclarationToDraft();
@@ -403,6 +407,8 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 		"Télécharger le récapitulatif de la déclaration des indicateurs";
 	const RECAP_TRANSMITTED_TITLE =
 		"Télécharger le récapitulatif des éléments transmis";
+	const RECAP_JOINT_EVALUATION_TITLE =
+		"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 	test.beforeAll(async () => {
 		await ensureCurrentYearDeclaration();
@@ -497,10 +503,35 @@ test.describe("Mon espace — Ressources cell of the rémunération row", () => 
 				panel.getByRole("link", { name: RECAP_TRANSMITTED_TITLE }),
 			).toHaveAttribute("href", transmittedHref);
 
+			await expect(
+				panel.getByRole("link", { name: RECAP_JOINT_EVALUATION_TITLE }),
+			).toHaveCount(0);
+
 			const response = await page.request.get(transmittedHref, {
 				timeout: 30_000,
 			});
 			expect(response.status(), `GET ${transmittedHref}`).toBe(200);
+			expect(response.headers()["content-type"]).toContain("pdf");
+		});
+
+		test("once the report is transmitted, its own recap is offered and its endpoint serves a PDF", async ({
+			page,
+		}) => {
+			await insertJointEvaluationSubmission(CURRENT_YEAR);
+			const panel = await openDocumentsPanel(page);
+
+			await expect(documentsTrigger(page)).toHaveText("Documents (4)");
+
+			const jointEvaluationHref = `${API_JOINT_EVALUATION_PDF}?year=${CURRENT_YEAR}`;
+
+			await expect(
+				panel.getByRole("link", { name: RECAP_JOINT_EVALUATION_TITLE }),
+			).toHaveAttribute("href", jointEvaluationHref);
+
+			const response = await page.request.get(jointEvaluationHref, {
+				timeout: 30_000,
+			});
+			expect(response.status(), `GET ${jointEvaluationHref}`).toBe(200);
 			expect(response.headers()["content-type"]).toContain("pdf");
 		});
 	});

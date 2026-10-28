@@ -181,7 +181,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 										</div>
 
 										<ImportDownloadCard
-											description="Écart de rémunération par catégorie de salariés"
+											description="Écart de rémunération par catégorie d'emplois"
 											format="CSV"
 											onDownload={handleDownloadTemplate}
 											sizeBytes={templateBlob.size}

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useIsImpersonating } from "~/modules/auth";
 import { isRepresentationPublicationRequired } from "~/modules/domain";
 import { representationStepHref } from "~/modules/routes";
 import styles from "./StepPageClient.module.scss";
@@ -10,10 +11,12 @@ import { Stepper } from "./Stepper";
 import type { StepValidator } from "./shared/draft/DraftContext";
 import { RepresentationDraftProvider } from "./shared/draft/DraftContext";
 import { useRepresentationDraft } from "./shared/draft/useRepresentationDraft";
+import { useRepresentationLock } from "./shared/lock/RepresentationLockContext";
 import {
 	getNextStep,
 	getNextStepHref,
 	getPreviousStepHref,
+	getReachedNextStepHref,
 	getStepDefinition,
 	PUBLICATION_STEP_NUMBER,
 } from "./steps";
@@ -52,17 +55,38 @@ export function StepPageClient({
 	isSubmitted = false,
 }: StepPageClientProps) {
 	const router = useRouter();
+	const isImpersonating = useIsImpersonating();
+	const lock = useRepresentationLock();
 	const [navigationError, setNavigationError] = useState<string | null>(null);
 	const [isAdvancing, setIsAdvancing] = useState(false);
-	const isReadOnly = !campaignOpen || isSubmitted;
+	const isReadOnly =
+		!campaignOpen ||
+		isSubmitted ||
+		isImpersonating ||
+		lock.isReadOnly ||
+		lock.isLoading;
 
-	const { draft, setDraftValues, saveProgress, isSaving, isPendingSave } =
-		useRepresentationDraft({
-			year,
-			step,
-			initialDraft,
-			enabled: campaignOpen && !isSubmitted,
-		});
+	const {
+		draft,
+		setDraftValues,
+		saveProgress,
+		isSaving,
+		isPendingSave,
+		saveError,
+		draftVersion,
+		flushPendingSave,
+	} = useRepresentationDraft({
+		year,
+		step,
+		initialDraft,
+		enabled: campaignOpen && !isSubmitted && !isReadOnly,
+	});
+
+	const { registerPendingSave } = lock;
+	useEffect(
+		() => registerPendingSave(flushPendingSave),
+		[flushPendingSave, registerPendingSave],
+	);
 
 	const stepValidatorRef = useRef<StepValidator | null>(null);
 	const registerStepValidator = useCallback(
@@ -76,6 +100,11 @@ export function StepPageClient({
 	const definition = getStepDefinition(step);
 	const previousHref = getPreviousStepHref(step, skipPublicationStep);
 	const nextHref = getNextStepHref(step, skipPublicationStep);
+	const reachedNextHref = getReachedNextStepHref(
+		step,
+		skipPublicationStep,
+		draft.currentStep,
+	);
 	const bypassHref = getNextStepHref(PUBLICATION_STEP_NUMBER - 1, true);
 	const mustBypassPublicationStep =
 		step === PUBLICATION_STEP_NUMBER && skipPublicationStep;
@@ -117,6 +146,10 @@ export function StepPageClient({
 			if (!isValid) return;
 		}
 		setNavigationError(null);
+		if (isReadOnly) {
+			router.push(representationStepHref(nextStep));
+			return;
+		}
 		setIsAdvancing(true);
 		try {
 			await saveProgress(nextStep);
@@ -163,7 +196,16 @@ export function StepPageClient({
 
 			<Stepper currentStep={step} />
 
-			<StepComponent />
+			<StepComponent key={draftVersion} />
+
+			{saveError ? (
+				<div
+					className="fr-alert fr-alert--error fr-alert--sm fr-mt-4w"
+					role="alert"
+				>
+					<p>{saveError}</p>
+				</div>
+			) : null}
 
 			{navigationError ? (
 				<div
@@ -182,7 +224,16 @@ export function StepPageClient({
 					>
 						Précédent
 					</Link>
-					{campaignOpen ? (
+					{isImpersonating ? (
+						reachedNextHref ? (
+							<Link
+								className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
+								href={reachedNextHref}
+							>
+								Suivant
+							</Link>
+						) : null
+					) : campaignOpen ? (
 						<button
 							className="fr-btn fr-icon-arrow-right-line fr-btn--icon-right"
 							disabled={isAdvancing}

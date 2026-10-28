@@ -38,6 +38,10 @@ const literalBooleanFlag = () =>
 		.default("false")
 		.transform((value) => value === "true");
 
+// Mirror V2_FIRST_CAMPAIGN_YEAR and MAX_CAMPAIGN_YEAR: next.config.js loads this file natively, so it cannot import the TS domain.
+const RECETTE_CAMPAIGN_YEAR_MIN = 2027;
+const RECETTE_CAMPAIGN_YEAR_MAX = 2100;
+
 export const env = createEnv({
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -122,6 +126,19 @@ export const env = createEnv({
 		// fails the build if that ever changes — and the seam additionally demands
 		// a loopback host, a barrier no configuration can grant a deployed pod.
 		EGAPRO_E2E_ADMIN_MFA: literalBooleanFlag(),
+		// Pins the campaign year of a manual recette environment; refused at boot outside dev builds (guard below).
+		EGAPRO_RECETTE_CAMPAIGN_YEAR: z
+			.string()
+			.regex(/^\d{4}$/)
+			.transform(Number)
+			.pipe(
+				z
+					.number()
+					.int()
+					.min(RECETTE_CAMPAIGN_YEAR_MIN)
+					.max(RECETTE_CAMPAIGN_YEAR_MAX),
+			)
+			.optional(),
 		/**
 		 * Comma-separated list of emails that should be granted the admin role
 		 * on login. The flag is then persisted in the `app_user.is_admin` column.
@@ -238,6 +255,7 @@ export const env = createEnv({
 		MATOMO_API_URL: process.env.MATOMO_API_URL,
 		EGAPRO_E2E_CLOCK: process.env.EGAPRO_E2E_CLOCK,
 		EGAPRO_E2E_ADMIN_MFA: process.env.EGAPRO_E2E_ADMIN_MFA,
+		EGAPRO_RECETTE_CAMPAIGN_YEAR: process.env.EGAPRO_RECETTE_CAMPAIGN_YEAR,
 		ADMIN_EMAILS: process.env.ADMIN_EMAILS,
 		EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT:
 			process.env.EGAPRO_ADMIN_REQUIRE_PUBLIC_AGENT,
@@ -306,4 +324,16 @@ if (
 				"Without it no user can sign in — refusing to start.",
 		);
 	}
+}
+
+if (
+	typeof window === "undefined" &&
+	!process.env.SKIP_ENV_VALIDATION &&
+	env.EGAPRO_RECETTE_CAMPAIGN_YEAR !== undefined &&
+	env.NEXT_PUBLIC_EGAPRO_ENV !== "dev"
+) {
+	throw new Error(
+		`EGAPRO_RECETTE_CAMPAIGN_YEAR is set on a "${env.NEXT_PUBLIC_EGAPRO_ENV}" build. ` +
+			"Pinning the campaign year is reserved to dev recette environments — refusing to start.",
+	);
 }

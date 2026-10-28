@@ -8,6 +8,7 @@ import {
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { markDeclarationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
 import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { CompliancePathChoice } from "../CompliancePathChoice";
@@ -122,7 +123,8 @@ describe("CompliancePathChoice — mutation error surface", () => {
 });
 
 describe("CompliancePathChoice", () => {
-	it("renders the page title and success banner", () => {
+	it("renders the page title and success banner after a declaration transmission", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Déclaration des indicateurs de rémunération/),
@@ -130,6 +132,23 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByText("Votre déclaration a été transmise"),
 		).toBeInTheDocument();
+	});
+
+	it("hides the success banner when the page is reached without a transmission", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows the success banner only once per transmission", () => {
+		markDeclarationTransmissionSuccess();
+		const { unmount } = render(compliancePathChoice());
+		unmount();
+		render(compliancePathChoice());
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
 	});
 
 	it("names the read-only fieldset with a screen-reader-only legend (RGAA 11.6/11.7)", () => {
@@ -329,6 +348,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("tells a modifiable declaration it stays modifiable until a later transmission, with no date", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice());
 		expect(
 			screen.getByText(/Vous pouvez modifier votre déclaration jusqu'à ce que/),
@@ -336,6 +356,7 @@ describe("CompliancePathChoice", () => {
 	});
 
 	it("drops the modification sentence when the declaration is no longer modifiable", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ declarationModifiable: false }));
 		expect(screen.queryByText(/Vous pouvez modifier/)).not.toBeInTheDocument();
 		expect(
@@ -349,30 +370,30 @@ describe("CompliancePathChoice", () => {
 		expect(screen.queryByText("1ᵉʳ juillet 2026")).not.toBeInTheDocument();
 	});
 
-	it("renders previous link pointing to step 6", () => {
+	it("renders no previous link back to the transmitted declaration", () => {
 		render(compliancePathChoice());
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/6",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions (issue #4141)", () => {
 		render(compliancePathChoice());
 		expect(
-			screen.getByRole("link", { name: /précédent/i }).parentElement,
+			screen.getByRole("button", { name: /suivant/i }).parentElement
+				?.parentElement,
 		).toHaveClass("fr-mt-0");
 	});
 
-	it("renders previous link pointing to the second-declaration recap in round 2", () => {
+	it("renders no previous link back to the transmitted second declaration in round 2", () => {
 		render(compliancePathChoice({ isSecondRound: true }));
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite/etape/3",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the email in the success banner", () => {
+		markDeclarationTransmissionSuccess();
 		render(compliancePathChoice({ email: "john@company.fr" }));
 		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});

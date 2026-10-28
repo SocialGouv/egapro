@@ -1,20 +1,18 @@
 "use client";
 
 import { useRef } from "react";
-
+import { DeclarationLockAlert } from "~/modules/declaration-remuneration/shared/lock/DeclarationLockAlert";
 import type { RepresentationCampaign } from "~/modules/domain";
 import {
 	formatCivilLongDate,
 	formatLongDate,
+	getCurrentDate,
 	isRepresentationCampaignOpen,
 	REPRESENTATION_TARGET_INITIAL,
 	REPRESENTATION_TARGET_RAISED,
 	REPRESENTATION_TARGET_RAISED_FROM_CAMPAIGN_YEAR,
 } from "~/modules/domain";
-import {
-	LAST_REPRESENTATION_STEP,
-	representationStepHref,
-} from "~/modules/routes";
+import { mySpaceRepresentationHref } from "~/modules/routes";
 import styles from "./DeclarationProcessPanel.module.scss";
 import {
 	computeRepresentationCtaHref,
@@ -23,7 +21,7 @@ import {
 	type RepresentationPanelVariant,
 } from "./declarationProcessState";
 import { BulletList, BulletRow, TransmittedRow } from "./StepRows";
-import type { DeclarationItem } from "./types";
+import type { DeclarationItem, LockHolderDisplay } from "./types";
 
 export const REPRESENTATION_PROCESS_PANEL_ID = "representation-process-panel";
 const PANEL_TITLE_ID = "representation-process-panel-title";
@@ -32,6 +30,8 @@ type Props = {
 	campaign: RepresentationCampaign;
 	campaignYear: number;
 	declaration: DeclarationItem | undefined;
+	lockedByOther?: boolean;
+	lockHolder?: LockHolderDisplay | null;
 };
 
 type StepStatus = "pending" | "current" | "complete";
@@ -63,11 +63,17 @@ export function RepresentationProcessPanel({
 	campaign,
 	campaignYear,
 	declaration,
+	lockedByOther = false,
+	lockHolder = null,
 }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
-	const campaignOpen = isRepresentationCampaignOpen(campaign, new Date());
+	const campaignOpen = isRepresentationCampaignOpen(campaign, getCurrentDate());
 	const variant = computeRepresentationPanelVariant(declaration, campaignOpen);
-	const ctaHref = computeRepresentationCtaHref(declaration, campaignOpen);
+	const ctaHref = computeRepresentationCtaHref(
+		declaration,
+		campaignOpen,
+		campaignYear,
+	);
 	const transmitted = isRepresentationDeclarationTransmitted(declaration);
 	const [step1, step2] = getStepStatuses(variant);
 	const lastActionDate = declaration?.updatedAt
@@ -99,11 +105,15 @@ export function RepresentationProcessPanel({
 							campaignYear={campaignYear}
 							lastActionDate={lastActionDate}
 						/>
+						{lockedByOther && lockHolder ? (
+							<DeclarationLockAlert holder={lockHolder} />
+						) : null}
 						{variant !== "not_subject" && <RixainAlert />}
 						<div className={`${styles.stepper} fr-mb-4w`}>
 							<Step1Row status={step1} />
 							{step2 !== null && (
 								<Step2Row
+									campaignYear={campaignYear}
 									deadline={campaign.declarationDeadline}
 									status={step2}
 									transmitted={transmitted}
@@ -121,7 +131,7 @@ export function RepresentationProcessPanel({
 								className="fr-btn"
 								href={ctaHref}
 							>
-								{getCtaLabel(variant)}
+								{lockedByOther ? "Voir la déclaration" : getCtaLabel(variant)}
 							</a>
 						</div>
 					</div>
@@ -248,10 +258,12 @@ const STEP2_ITEMS = [
 ];
 
 function Step2Row({
+	campaignYear,
 	deadline,
 	status,
 	transmitted,
 }: {
+	campaignYear: number;
 	deadline: Date;
 	status: StepStatus;
 	transmitted: boolean;
@@ -268,7 +280,7 @@ function Step2Row({
 				{transmitted ? (
 					<TransmittedRow
 						label="Votre déclaration a été transmise"
-						viewHref={representationStepHref(LAST_REPRESENTATION_STEP)}
+						viewHref={mySpaceRepresentationHref(campaignYear)}
 					/>
 				) : (
 					<>

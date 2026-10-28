@@ -3,7 +3,11 @@ import type {
 	DeclarationDisplayContext,
 	DeclarationFsmStatus,
 } from "~/modules/domain";
-import { isLockedBySubsequentSubmission } from "~/modules/domain";
+import {
+	getCompliancePathReadOnlyReason,
+	getCurrentCompliancePath,
+	isLockedBySubsequentSubmission,
+} from "~/modules/domain";
 import type { PanelVariant } from "./DeclarationProcessPanel";
 import styles from "./DeclarationProcessPanel.module.scss";
 import { Step1Content, Step2Content, Step3Content } from "./StepContent";
@@ -43,6 +47,32 @@ export function isFirstDeclarationModifiable(submitted: {
 	);
 }
 
+export function isPathChoiceModifiable({
+	declarationFsmStatus,
+	displayContext,
+	submitted,
+}: {
+	declarationFsmStatus: DeclarationFsmStatus | null;
+	displayContext: DeclarationDisplayContext;
+	submitted: {
+		secondDeclaration: boolean;
+		jointEvaluation: boolean;
+		cseOpinion: boolean;
+	};
+}): boolean {
+	const pathChoice = getCurrentCompliancePath(displayContext);
+	if (declarationFsmStatus === null || pathChoice === null) return false;
+	return (
+		getCompliancePathReadOnlyReason({
+			status: declarationFsmStatus,
+			pathChoice,
+			hasSubmittedSecondDeclaration: submitted.secondDeclaration,
+			hasSubmittedCseOpinion: submitted.cseOpinion,
+			hasSubmittedJointEvaluation: submitted.jointEvaluation,
+		}) === null
+	);
+}
+
 export function VerticalStepper({
 	campaignDeadlines,
 	compliancePathApplicable,
@@ -53,6 +83,8 @@ export function VerticalStepper({
 	indicatorGRequired,
 	jointEvaluationSubmitted,
 	cseOpinionSubmitted,
+	cseOpinionViewAvailable,
+	jointEvaluationViewAvailable,
 	secondDeclarationSubmitted,
 	step1,
 	step2,
@@ -69,6 +101,8 @@ export function VerticalStepper({
 	indicatorGRequired: boolean;
 	jointEvaluationSubmitted: boolean;
 	cseOpinionSubmitted: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	secondDeclarationSubmitted: boolean;
 	step1: StepStatus;
 	step2: StepStatus;
@@ -77,6 +111,11 @@ export function VerticalStepper({
 	year: number;
 }) {
 	const step3Number = compliancePathApplicable ? 3 : 2;
+	const submitted = {
+		cseOpinion: cseOpinionSubmitted,
+		jointEvaluation: jointEvaluationSubmitted,
+		secondDeclaration: secondDeclarationSubmitted,
+	};
 
 	return (
 		<div className={`${styles.stepper} fr-mb-4w`}>
@@ -84,11 +123,7 @@ export function VerticalStepper({
 				<StepCircle number={1} status={step1} />
 				<Step1Content
 					campaignDeadlines={campaignDeadlines}
-					firstDeclarationModifiable={isFirstDeclarationModifiable({
-						cseOpinion: cseOpinionSubmitted,
-						jointEvaluation: jointEvaluationSubmitted,
-						secondDeclaration: secondDeclarationSubmitted,
-					})}
+					firstDeclarationModifiable={isFirstDeclarationModifiable(submitted)}
 					hasPrefillData={hasPrefillData}
 					indicatorGRequired={indicatorGRequired}
 					status={step1}
@@ -103,6 +138,13 @@ export function VerticalStepper({
 						campaignDeadlines={campaignDeadlines}
 						declarationFsmStatus={declarationFsmStatus}
 						displayContext={displayContext}
+						jointEvaluationSubmitted={jointEvaluationSubmitted}
+						jointEvaluationViewAvailable={jointEvaluationViewAvailable}
+						pathChoiceModifiable={isPathChoiceModifiable({
+							declarationFsmStatus,
+							displayContext,
+							submitted,
+						})}
 						secondDeclarationSubmitted={secondDeclarationSubmitted}
 						status={step2}
 						variant={variant}
@@ -114,6 +156,8 @@ export function VerticalStepper({
 					<StepCircle number={step3Number} status={step3} />
 					<Step3Content
 						campaignDeadlines={campaignDeadlines}
+						cseOpinionSubmitted={cseOpinionSubmitted}
+						cseOpinionViewAvailable={cseOpinionViewAvailable}
 						status={step3}
 						variant={variant}
 					/>

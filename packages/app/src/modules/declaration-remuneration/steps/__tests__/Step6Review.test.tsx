@@ -304,7 +304,7 @@ describe("Step6Review", () => {
 	it("shows why the server refused the submission", () => {
 		mockSubmitState.error = {
 			message:
-				"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.",
+				"L'indicateur par catégorie d'emplois doit être renseigné avant la transmission de la déclaration.",
 			data: { code: "PRECONDITION_FAILED" },
 		};
 		renderSubmissionReview();
@@ -313,7 +313,7 @@ describe("Step6Review", () => {
 
 		const alert = within(modal).getByRole("alert", { hidden: true });
 		expect(alert).toHaveTextContent(
-			"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.",
+			"L'indicateur par catégorie d'emplois doit être renseigné avant la transmission de la déclaration.",
 		);
 	});
 
@@ -468,7 +468,7 @@ describe("Step6Review", () => {
 			screen.getByText("Indicateurs pour l'ensemble de vos salariés"),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Indicateur par catégorie de salariés"),
+			screen.getByText("Indicateur par catégorie d'emplois"),
 		).toBeInTheDocument();
 	});
 
@@ -516,7 +516,7 @@ describe("Step6Review", () => {
 			).length,
 		).toBeGreaterThanOrEqual(1);
 		expect(
-			screen.getAllByText("Écart de rémunération par catégorie de salariés")
+			screen.getAllByText("Écart de rémunération par catégorie d'emplois")
 				.length,
 		).toBeGreaterThanOrEqual(1);
 	});
@@ -851,7 +851,7 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
+	it("renders no previous link and a next link to compliance path when already submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
@@ -866,10 +866,9 @@ describe("Step6Review", () => {
 				step4Data={emptyStep4Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/5",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/parcours-conformite",

@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { DECLARATION_FSM_STATUSES } from "~/modules/domain";
 import {
+	complianceStepHref,
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
 	representationStepHref,
 } from "~/modules/routes";
 import {
@@ -18,6 +20,10 @@ import type { DeclarationItem } from "../types";
 
 const SIREN = "532847196";
 const RECAP_HREF = representationStepHref(LAST_REPRESENTATION_STEP);
+const CORRECTIVE_STEP_1_HREF = complianceStepHref(1);
+const CORRECTIVE_RECAP_HREF = complianceStepHref(3);
+const CAMPAIGN_YEAR = 2026;
+const CONSULTATION_HREF = mySpaceRepresentationHref(CAMPAIGN_YEAR);
 const CAMPAIGN_OPEN = true;
 const CAMPAIGN_CLOSED = false;
 
@@ -35,6 +41,7 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
@@ -66,11 +73,11 @@ describe("computePanelVariant", () => {
 
 describe("computeCtaHref", () => {
 	it("returns declaration URL when no declaration", () => {
-		expect(computeCtaHref(undefined)).toBe(DECLARATION_REMUNERATION);
+		expect(computeCtaHref(undefined, false)).toBe(DECLARATION_REMUNERATION);
 	});
 
 	it("returns declaration URL when fsmStatus is null", () => {
-		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }))).toBe(
+		expect(computeCtaHref(makeDeclaration({ fsmStatus: null }), false)).toBe(
 			DECLARATION_REMUNERATION,
 		);
 	});
@@ -81,8 +88,41 @@ describe("computeCtaHref", () => {
 	// one status at a time.
 	it("emits a bare path for every status — the pages read the SIREN from the session", () => {
 		for (const fsmStatus of DECLARATION_FSM_STATUSES) {
-			expect(computeCtaHref(makeDeclaration({ fsmStatus }))).not.toContain("?");
+			expect(
+				computeCtaHref(makeDeclaration({ fsmStatus }), false),
+			).not.toContain("?");
 		}
+	});
+
+	describe("corrective actions with saved corrected data", () => {
+		const savedCorrectiveActions = makeDeclaration({
+			fsmStatus: "corrective_actions_chosen",
+			secondDeclarationStep: 2,
+		});
+
+		it("resumes on the corrective recap while impersonating", () => {
+			expect(computeCtaHref(savedCorrectiveActions, true)).toBe(
+				CORRECTIVE_RECAP_HREF,
+			);
+		});
+
+		it("keeps the first corrective step outside impersonation", () => {
+			expect(computeCtaHref(savedCorrectiveActions, false)).toBe(
+				CORRECTIVE_STEP_1_HREF,
+			);
+		});
+	});
+
+	it("keeps the first corrective step while impersonating when nothing is saved", () => {
+		expect(
+			computeCtaHref(
+				makeDeclaration({
+					fsmStatus: "corrective_actions_chosen",
+					secondDeclarationStep: null,
+				}),
+				true,
+			),
+		).toBe(CORRECTIVE_STEP_1_HREF);
 	});
 });
 
@@ -171,14 +211,18 @@ describe("computeRepresentationPanelVariant", () => {
 
 describe("computeRepresentationCtaHref", () => {
 	it("sends a company with no démarche to the funnel entry point", () => {
-		expect(computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN)).toBe(
-			DECLARATION_REPRESENTATION,
-		);
+		expect(
+			computeRepresentationCtaHref(undefined, CAMPAIGN_OPEN, CAMPAIGN_YEAR),
+		).toBe(DECLARATION_REPRESENTATION);
 	});
 
 	it("sends a listed-but-unopened démarche to the funnel entry point", () => {
 		expect(
-			computeRepresentationCtaHref(makeRepresentation(), CAMPAIGN_OPEN),
+			computeRepresentationCtaHref(
+				makeRepresentation(),
+				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
+			),
 		).toBe(DECLARATION_REPRESENTATION);
 	});
 
@@ -187,6 +231,7 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "in_progress", currentStep: 3 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(representationStepHref(3));
 	});
@@ -196,17 +241,19 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "in_progress", currentStep: 0 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(representationStepHref(1));
 	});
 
-	it("sends a transmitted démarche to its recap", () => {
+	it("sends a transmitted démarche to its consultation page", () => {
 		expect(
 			computeRepresentationCtaHref(
 				makeRepresentation({ status: "done", currentStep: 5 }),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
-		).toBe(RECAP_HREF);
+		).toBe(CONSULTATION_HREF);
 	});
 
 	it("sends a non-subject démarche back to the funnel entry point, so it stays reversible", () => {
@@ -214,30 +261,45 @@ describe("computeRepresentationCtaHref", () => {
 			computeRepresentationCtaHref(
 				makeRepresentation(NOT_SUBJECT),
 				CAMPAIGN_OPEN,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(DECLARATION_REPRESENTATION);
 	});
 
-	it("sends a non-subject démarche to the recap once the campaign is closed", () => {
+	it("sends a non-subject démarche to the funnel recap once the campaign is closed", () => {
 		expect(
 			computeRepresentationCtaHref(
 				makeRepresentation(NOT_SUBJECT),
 				CAMPAIGN_CLOSED,
+				CAMPAIGN_YEAR,
 			),
 		).toBe(RECAP_HREF);
 	});
 
-	it("sends every démarche state to the recap once the campaign is closed", () => {
+	it("sends a transmitted démarche to its consultation page once the campaign is closed", () => {
+		expect(
+			computeRepresentationCtaHref(
+				makeRepresentation({ status: "done", currentStep: 5 }),
+				CAMPAIGN_CLOSED,
+				CAMPAIGN_YEAR,
+			),
+		).toBe(CONSULTATION_HREF);
+	});
+
+	it("sends every non-transmitted démarche state to the funnel recap once the campaign is closed", () => {
 		const declarations = [
 			undefined,
 			makeRepresentation(),
 			makeRepresentation({ status: "in_progress", currentStep: 3 }),
-			makeRepresentation({ status: "done", currentStep: 5 }),
 		];
 		for (const declaration of declarations) {
-			expect(computeRepresentationCtaHref(declaration, CAMPAIGN_CLOSED)).toBe(
-				RECAP_HREF,
-			);
+			expect(
+				computeRepresentationCtaHref(
+					declaration,
+					CAMPAIGN_CLOSED,
+					CAMPAIGN_YEAR,
+				),
+			).toBe(RECAP_HREF);
 		}
 	});
 });

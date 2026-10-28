@@ -6,7 +6,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { FormActions } from "~/modules/declaration-remuneration/shared/FormActions";
 import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { formatCivilLongDate } from "~/modules/domain";
-import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
+import { complianceStepHref } from "~/modules/routes";
 import styles from "./SecondDeclarationStep1Info.module.scss";
 import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator";
 
@@ -41,8 +41,8 @@ export function SecondDeclarationStep1Info({
 		<div className={common.flexColumnGap2}>
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie de
-					salariés
+					Parcours de mise en conformité pour l&apos;indicateur par catégorie
+					d&apos;emplois
 				</h1>
 				<SavedIndicator hasData={true} />
 			</div>
@@ -53,7 +53,7 @@ export function SecondDeclarationStep1Info({
 				Vous devez mettre en œuvre des <strong>actions correctives</strong> et
 				effectuer une{" "}
 				<strong>
-					seconde déclaration de l&apos;indicateur par catégorie de salariés
+					seconde déclaration de l&apos;indicateur par catégorie d&apos;emplois
 				</strong>
 				.
 			</p>
@@ -69,7 +69,6 @@ export function SecondDeclarationStep1Info({
 				className="fr-mt-0"
 				nextHref={complianceStepHref(2)}
 				nextLabel="Suivant"
-				previousHref={COMPLIANCE_PATH}
 			/>
 		</div>
 	);

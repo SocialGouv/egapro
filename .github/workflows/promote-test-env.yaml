@@ -2,12 +2,14 @@ name: 🎯 Promote test env
 
 # Deploys a published release (including `-alpha.N` prereleases) onto one of
 # the persistent test environments of the dev cluster (`rgaa-persist` /
-# `perf-persist`). The Docker image is built from the release tag and pushed
-# as `app:<version>`, then deployed straight to the target namespace with
+# `perf-persist` / `recette-persist`). The Docker image is built from the
+# release tag and pushed as `app:<version>`, then deployed straight to the target namespace with
 # kontinuous — the pods reference a version like production, not a sha.
 # Janitor never collects these namespaces: the deployed ref matches the
 # kontinuous persist convention (plugins/contrib/lib/persist-convention.js).
 # Promotion is manual only — these environments never track a branch.
+# `campaign_year` pins the campaign year of the deployed app for manual
+# recette (EGAPRO_RECETTE_CAMPAIGN_YEAR, refused at boot by non-dev builds).
 
 on:
   workflow_dispatch:
@@ -23,6 +25,12 @@ on:
         options:
           - rgaa
           - perf
+          - recette
+      campaign_year:
+        description: "Campaign year pinned for manual recette (e.g. 2030) — leave empty for the real calendar year"
+        required: false
+        type: string
+        default: ""
 
 # Concurrent promotions to the same target are serialized (not cancelled, not
 # deduplicated): runs execute in dispatch order, so the last dispatched release
@@ -46,6 +54,19 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+
+      - name: ✅ Verify the pinned campaign year
+        env:
+          CAMPAIGN_YEAR: ${{ inputs.campaign_year }}
+        run: |
+          # Bounds mirror EGAPRO_RECETTE_CAMPAIGN_YEAR (env.js), pinned by env.test.ts.
+          if [ -n "$CAMPAIGN_YEAR" ]; then
+            if ! [[ "$CAMPAIGN_YEAR" =~ ^[0-9]{4}$ ]] \
+              || [ "$CAMPAIGN_YEAR" -lt 2027 ] || [ "$CAMPAIGN_YEAR" -gt 2100 ]; then
+              echo "::error::campaign_year must be a 4-digit year between 2027 and 2100"
+              exit 1
+            fi
+          fi
 
       - name: ✅ Verify the tag is a published release
         env:
@@ -71,6 +92,16 @@ jobs:
           fi
           if [ "$IS_DRAFT" != "false" ]; then
             echo "::error::The GitHub release for '$TAG' is a draft — publish it first"
+            exit 1
+          fi
+
+      - name: ✅ Verify the release honours the pinned campaign year
+        if: inputs.campaign_year != ''
+        env:
+          TAG: ${{ inputs.release }}
+        run: |
+          if ! git grep -q EGAPRO_RECETTE_CAMPAIGN_YEAR "refs/tags/$TAG" -- packages/app/src/env.js; then
+            echo "::error::Release '$TAG' predates EGAPRO_RECETTE_CAMPAIGN_YEAR — promote a newer release or leave campaign_year empty"
             exit 1
           fi
 
@@ -156,7 +187,24 @@ jobs:
       # persist exemption — without any real git branch involved.
       # `inlineSet` is the final values override: it replaces the
       # `persist-<sha>` image tag computed by the kontinuous dev defaults
-      # with the version tag built above.
+      # with the version tag built above, and adds the pinned campaign year
+      # to the app container's `vars` when one was requested (quoted: the app
+      # chart renders each var through `tpl`, which needs a string).
+      - name: 🧩 Compute values override
+        id: values
+        env:
+          TAG: ${{ inputs.release }}
+          CAMPAIGN_YEAR: ${{ inputs.campaign_year }}
+        run: |
+          {
+            echo "inline_set<<EOF"
+            echo "global.imageTag: ${TAG}"
+            if [ -n "$CAMPAIGN_YEAR" ]; then
+              echo "app.vars.EGAPRO_RECETTE_CAMPAIGN_YEAR: \"${CAMPAIGN_YEAR}\""
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: 🐳 Deploy on Kubernetes
         uses: socialgouv/kontinuous/.github/actions/deploy-via-github@1198b39082008127fd639ddc1700eb9315bb8ff3 # v1.188.0
         env:
@@ -164,7 +212,7 @@ jobs:
         with:
           environment: dev
           kubeconfig: ${{ secrets.KUBECONFIG }}
-          inlineSet: "global.imageTag: ${{ inputs.release }}"
+          inlineSet: ${{ steps.values.outputs.inline_set }}
           sentryDSN: ${{ secrets.KS_SENTRY_DSN }}
           notifyWebhookUrl: ${{ secrets.KS_NOTIFY_MATTERMOST_WEBHOOK_URL }}
           projectName: ${{ vars.KS_PROJECT_NAME }}
@@ -181,6 +229,7 @@ jobs:
           TAG: ${{ inputs.release }}
           TARGET: ${{ inputs.target }}-persist
           SUBDOMAIN: ${{ steps.env.outputs.subdomain }}
+          CAMPAIGN_YEAR: ${{ inputs.campaign_year }}
         run: |
           {
             echo "## Promotion ${TAG} → ${TARGET}"
@@ -188,4 +237,9 @@ jobs:
             echo "- Release : [\`${TAG}\`](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG})"
             echo "- Image : \`app:${TAG}\`"
             echo "- URL : <https://${SUBDOMAIN}.ovh.fabrique.social.gouv.fr>"
+            if [ -n "$CAMPAIGN_YEAR" ]; then
+              echo "- Année de campagne épinglée : **${CAMPAIGN_YEAR}**"
+            else
+              echo "- Année de campagne : année civile réelle (aucun épinglage)"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

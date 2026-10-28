@@ -22,6 +22,7 @@ import {
 import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
+import { markDeclarationTransmissionSuccess } from "../../shared/declarationSuccessFlash";
 import { GapBadge } from "../../shared/GapValueBadge";
 import stepStyles from "../Step6Review.module.scss";
 import { CardTitle } from "../step6/CardTitle";
@@ -78,6 +79,7 @@ export function SecondDeclarationStep3Review({
 	const completeSubmission = useCallback(() => {
 		closeModal();
 		if (gapsExist) {
+			markDeclarationTransmissionSuccess();
 			router.push(COMPLIANCE_PATH);
 		} else {
 			router.push(getPostComplianceDestination(cseOpinionRequired));
@@ -126,7 +128,7 @@ export function SecondDeclarationStep3Review({
 			<div className={common.flexBetween}>
 				<h1 className="fr-h4 fr-mb-0">
 					Parcours de mise en conformité pour l&apos;indicateur
-					par&nbsp;catégorie de salariés
+					par&nbsp;catégorie d&apos;emplois
 				</h1>
 				<SavedIndicator hasData={true} />
 			</div>
@@ -136,14 +138,14 @@ export function SecondDeclarationStep3Review({
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
 				Vérifiez que toutes les informations ont été complétées avant de
 				transmettre votre seconde déclaration des écarts de rémunération par
-				catégorie de salariés aux services du ministère chargé du travail.
+				catégorie d&apos;emplois aux services du ministère chargé du travail.
 			</p>
 
-			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie de salariés</h2>
+			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>
 
 			<div className={stepStyles.card}>
 				<CardTitle tooltipId="tooltip-second-decl-categories">
-					Écart de rémunération par catégorie de salariés
+					Écart de rémunération par catégorie d&apos;emplois
 				</CardTitle>
 				{parsed.length > 0 ? (
 					parsed.map((cat) => (
@@ -201,7 +203,7 @@ export function SecondDeclarationStep3Review({
 				className="fr-mt-0"
 				nextHref={nextHref}
 				nextLabel={nextLabel}
-				previousHref={complianceStepHref(2)}
+				previousHref={isWritable ? complianceStepHref(2) : undefined}
 			/>
 
 			{showSubmitModal ? (

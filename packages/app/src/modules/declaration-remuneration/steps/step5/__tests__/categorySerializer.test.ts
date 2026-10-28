@@ -71,10 +71,18 @@ describe("toSubmitData", () => {
 
 	it("keeps pay for an isolated zero and produces a server-valid payload", () => {
 		const result = toSubmitData(
-			[category({ womenCount: "0", menCount: "5" })],
+			[
+				category({
+					womenCount: "0",
+					menCount: "5",
+					hourlyWomenCount: "2",
+				}),
+			],
 			"accord-entreprise",
 		);
-		expect(result.categories[0]?.data.annualBaseWomen).toBe("30000");
+		expect(result.categories[0]?.data.annualBaseWomen).toBeUndefined();
+		expect(result.categories[0]?.data.annualBaseMen).toBeUndefined();
+		expect(result.categories[0]?.data.hourlyBaseWomen).toBe("18");
 
 		expect(
 			updateEmployeeCategoriesSchema.safeParse({
@@ -82,6 +90,24 @@ describe("toSubmitData", () => {
 				...result,
 			}).success,
 		).toBe(true);
+	});
+
+	it("omits only the basis whose workforce row has a zero", () => {
+		const result = toSubmitData(
+			[
+				category({
+					womenCount: "3",
+					menCount: "2",
+					hourlyWomenCount: "0",
+				}),
+			],
+			"accord-entreprise",
+		);
+		const data = result.categories[0]?.data;
+
+		expect(data?.annualBaseWomen).toBe("30000");
+		expect(data?.hourlyBaseWomen).toBeUndefined();
+		expect(data?.hourlyBaseMen).toBeUndefined();
 	});
 });
 
@@ -140,11 +166,17 @@ describe("withoutPayValuesWhenNotApplicable", () => {
 		expect(input).toEqual(before);
 	});
 
-	it("returns an applicable category unchanged for isolated and crossed zeros", () => {
+	it("clears only the inapplicable basis for an isolated zero", () => {
 		const isolated = category({ womenCount: "0" });
 		const crossed = category({ womenCount: "0", hourlyMenCount: "0" });
 
-		expect(withoutPayValuesWhenNotApplicable(isolated)).toBe(isolated);
-		expect(withoutPayValuesWhenNotApplicable(crossed)).toBe(crossed);
+		const clearedIsolated = withoutPayValuesWhenNotApplicable(isolated);
+		for (const field of PAY_FIELDS.slice(0, 4))
+			expect(clearedIsolated[field]).toBe("");
+		for (const field of PAY_FIELDS.slice(4))
+			expect(clearedIsolated[field]).toBe(isolated[field]);
+
+		const clearedCrossed = withoutPayValuesWhenNotApplicable(crossed);
+		for (const field of PAY_FIELDS) expect(clearedCrossed[field]).toBe("");
 	});
 });

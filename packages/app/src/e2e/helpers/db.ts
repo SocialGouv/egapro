@@ -78,7 +78,8 @@ export async function resetDeclarationToDraft() {
 			    hourly_women = NULL,
 			    hourly_men = NULL,
 			    draft = NULL,
-			    draft_updated_at = NULL
+			    draft_updated_at = NULL,
+			    cse_opinion_draft_updated_at = NULL
 			WHERE siren = ${TEST_SIREN}
 		`;
 
@@ -463,6 +464,41 @@ export async function insertCseOpinion(year: number) {
 	}
 }
 
+export async function insertCseOpinionFile(year: number) {
+	const sql = createConnection();
+	try {
+		const rows = await sql`
+			INSERT INTO app_file (id, declaration_id, file_name, file_path, uploaded_at, created_at, type)
+			SELECT gen_random_uuid(), id, 'avis-cse.pdf', '/tmp/avis-cse.pdf', NOW(), NOW(), 'cse_opinion'
+			FROM app_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+			RETURNING id, declaration_id
+		`;
+		const file = rows[0];
+		if (!file) return;
+		await sql`
+			INSERT INTO app_cse_opinion_file
+				(id, declaration_id, declaration_number, type, file_id, created_at, updated_at)
+			VALUES (gen_random_uuid(), ${file.declaration_id}, 1, 'remuneration', ${file.id}, NOW(), NOW())
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function markCseOpinionDraftUpdated(year: number) {
+	const sql = createConnection();
+	try {
+		await sql`
+			UPDATE app_declaration
+			SET cse_opinion_draft_updated_at = NOW()
+			WHERE siren = ${TEST_SIREN} AND year = ${year} AND cancelled_at IS NULL
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
 export async function deleteCseOpinions() {
 	const sql = createConnection();
 	try {
@@ -651,6 +687,35 @@ export async function resetRepresentationDeclaration() {
 	try {
 		await sql`
 			DELETE FROM app_representation_declaration WHERE siren = ${TEST_SIREN}
+		`;
+	} finally {
+		await sql.end();
+	}
+}
+
+export async function seedSubmittedRepresentationDeclaration(
+	referenceYear: number,
+) {
+	const sql = createConnection();
+	try {
+		await sql`
+			DELETE FROM app_representation_declaration
+			WHERE siren = ${TEST_SIREN} AND year = ${referenceYear}
+		`;
+		await sql`
+			INSERT INTO app_representation_declaration (
+				id, siren, year, status, current_step, submitted_at,
+				reference_period_start, reference_period_end,
+				executive_women_percent, executive_men_percent,
+				member_women_percent, member_men_percent,
+				publish_date, publish_url, created_at, updated_at
+			) VALUES (
+				${crypto.randomUUID()}, ${TEST_SIREN}, ${referenceYear}, 'submitted', 5, NOW(),
+				${`${referenceYear}-01-01`}, ${`${referenceYear}-12-31`},
+				40, 60, 20, 80,
+				${`${referenceYear + 1}-02-15`}, 'https://example.fr/representation-equilibree',
+				NOW(), NOW()
+			)
 		`;
 	} finally {
 		await sql.end();

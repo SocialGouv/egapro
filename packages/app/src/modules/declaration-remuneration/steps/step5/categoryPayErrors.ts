@@ -3,6 +3,7 @@ import type { FieldError } from "~/modules/declaration-remuneration/shared/formE
 import {
 	CATEGORY_PAY_BASES,
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	type PAY_FIELDS_MEN,
 	type PAY_FIELDS_WOMEN,
 } from "~/modules/domain";
@@ -43,6 +44,11 @@ function missingPayErrors(
 ): FieldError[] {
 	const errors: FieldError[] = [];
 	for (const base of CATEGORY_PAY_BASES) {
+		if (
+			!isCategoryPayBasisApplicable(toCategoryHeadcounts(category), base.basis)
+		) {
+			continue;
+		}
 		for (const [countField, payFields] of [
 			[base.womenCountField, base.womenPayFields],
 			[base.menCountField, base.menPayFields],

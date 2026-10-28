@@ -64,6 +64,7 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
@@ -92,6 +93,7 @@ const BASE_PROPS = {
 	campaignDeadlines,
 	company,
 	declarations,
+	isImpersonating: false,
 	lockedByOther: false,
 	lockHolder: null as LockHolder | null,
 	representationCampaign: getDefaultRepresentationCampaign(currentYear),
@@ -154,6 +156,42 @@ describe("CompanyDeclarationsPage", () => {
 		expect(
 			screen.queryByText(/Parcours de mise en conformité/),
 		).not.toBeInTheDocument();
+	});
+
+	describe("process panel CTA on corrective actions with saved corrected data", () => {
+		const savedCorrectiveActions = [
+			makeDeclaration("remuneration", {
+				status: "in_progress",
+				fsmStatus: "corrective_actions_chosen",
+				secondDeclarationStep: 2,
+			}),
+			makeDeclaration("representation"),
+		];
+
+		function panelCtaHref() {
+			return document
+				.querySelector(
+					'a.fr-btn[aria-describedby="declaration-process-panel-title"]',
+				)
+				?.getAttribute("href");
+		}
+
+		it("resumes on the corrective recap while impersonating", () => {
+			renderPage({
+				declarations: savedCorrectiveActions,
+				isImpersonating: true,
+			});
+			expect(panelCtaHref()).toBe(
+				"/declaration-remuneration/parcours-conformite/etape/3",
+			);
+		});
+
+		it("keeps the first corrective step outside impersonation", () => {
+			renderPage({ declarations: savedCorrectiveActions });
+			expect(panelCtaHref()).toBe(
+				"/declaration-remuneration/parcours-conformite/etape/1",
+			);
+		});
 	});
 
 	describe("CAS-01 (#4291) — compliance-path step keyed off the declared trajectory, not company size alone", () => {

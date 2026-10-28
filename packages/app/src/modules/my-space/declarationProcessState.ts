@@ -1,5 +1,8 @@
-import { isCseOpinionResolved } from "~/modules/domain";
-import { getDemarcheStageHref } from "~/modules/navigation";
+import {
+	hasSavedSecondDeclarationData,
+	isCseOpinionResolved,
+} from "~/modules/domain";
+import { getDemarcheResumeHref } from "~/modules/navigation";
 // `~/modules/routes` and `~/modules/navigation` are strings only, so their
 // barrels are safe here: unlike the declaration-representation barrel they drag
 // no server-touching tree into this client bundle.
@@ -9,6 +12,7 @@ import {
 	DECLARATION_REMUNERATION,
 	DECLARATION_REPRESENTATION,
 	LAST_REPRESENTATION_STEP,
+	mySpaceRepresentationHref,
 	representationStepHref,
 } from "~/modules/routes";
 import type { PanelVariant } from "./DeclarationProcessPanel";
@@ -60,15 +64,22 @@ export function computePanelVariant(
  * No `?siren=` is appended: these pages resolve the declaration from the session
  * (`companyProcedure` binds the SIREN), and none ever read the query.
  */
-export function computeCtaHref(declaration: DeclarationItem | undefined) {
+export function computeCtaHref(
+	declaration: DeclarationItem | undefined,
+	isImpersonating: boolean,
+) {
 	const fsmStatus = declaration?.fsmStatus ?? null;
 	if (fsmStatus === null) {
 		return DECLARATION_REMUNERATION;
 	}
 
-	return getDemarcheStageHref(
+	return getDemarcheResumeHref(
 		fsmStatus,
 		cseOpinionResolvedFor(declaration) ? DECLARATION_REMUNERATION : CSE_OPINION,
+		isImpersonating &&
+			hasSavedSecondDeclarationData({
+				secondDeclarationStep: declaration?.secondDeclarationStep ?? null,
+			}),
 	);
 }
 
@@ -113,12 +124,15 @@ export function computeRepresentationPanelVariant(
 export function computeRepresentationCtaHref(
 	declaration: DeclarationItem | undefined,
 	campaignOpen: boolean,
+	campaignYear: number,
 ) {
-	const recapHref = representationStepHref(LAST_REPRESENTATION_STEP);
-	if (!campaignOpen) return recapHref;
+	// Checked before the campaign-closed branch: a transmitted declaration reads from the consultation page either way.
+	if (isRepresentationDeclarationTransmitted(declaration)) {
+		return mySpaceRepresentationHref(campaignYear);
+	}
+	if (!campaignOpen) return representationStepHref(LAST_REPRESENTATION_STEP);
 	if (declaration?.notSubject) return DECLARATION_REPRESENTATION;
 	const progress = getRepresentationProgress(declaration);
-	if (progress === "submitted") return recapHref;
 	if (progress === "draft") {
 		return representationStepHref(
 			clampRepresentationStep(declaration?.currentStep ?? 1),

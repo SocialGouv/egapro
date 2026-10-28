@@ -34,10 +34,13 @@ import type {
 	EmployeeCategorySubmitData,
 } from "~/modules/declaration-remuneration/types";
 import {
+	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	padDecimalOnBlur,
 	padDecimalToTwo,
+	shouldRetainCategoryPayBasisValues,
 	shouldRetainCategoryPayValues,
 	sumCategoryWorkforce,
 } from "~/modules/domain";
@@ -75,13 +78,36 @@ function normalizeCategoryForForm(
 	category: FormCategory,
 	preserveLegacyPay: boolean,
 ): FormCategory {
-	return shouldRetainCategoryPayValues(
-		toCategoryHeadcounts(category),
-		category,
-		preserveLegacyPay,
-	)
+	return preserveLegacyPay
 		? category
 		: withoutPayValuesWhenNotApplicable(category);
+}
+
+function categoryPayApplicability(
+	category: FormCategory | undefined,
+	preserveLegacyPay: boolean,
+) {
+	if (!category) return { category: true, annual: true, hourly: true };
+	const headcounts = toCategoryHeadcounts(category);
+	return {
+		category: shouldRetainCategoryPayValues(
+			headcounts,
+			category,
+			preserveLegacyPay,
+		),
+		annual: shouldRetainCategoryPayBasisValues(
+			headcounts,
+			category,
+			preserveLegacyPay,
+			"annual",
+		),
+		hourly: shouldRetainCategoryPayBasisValues(
+			headcounts,
+			category,
+			preserveLegacyPay,
+			"hourly",
+		),
+	};
 }
 
 function toFormValues(
@@ -180,7 +206,7 @@ export function CategoryForm({
 	submitError,
 	readOnlyLabel = false,
 	referencePeriodPicker,
-	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie de salariés, en distinguant le salaire de base des composantes variables ou complémentaires.",
+	descriptionText = "Cet indicateur permet de mesurer l'écart de rémunération entre les femmes et les hommes au sein de chaque catégorie d'emplois, en distinguant le salaire de base des composantes variables ou complémentaires.",
 	disabled = false,
 	readOnly = false,
 	nextHref,
@@ -223,18 +249,17 @@ export function CategoryForm({
 	const clearNonApplicableCategoryPay = useCallback(
 		(index: number) => {
 			const category = form.getValues(`categories.${index}`);
-			if (
-				!category ||
-				isCategoryPayApplicable(toCategoryHeadcounts(category))
-			) {
-				return false;
-			}
+			if (!category) return false;
+			const headcounts = toCategoryHeadcounts(category);
 			let cleared = false;
-			for (const payField of CATEGORY_PAY_FIELDS) {
-				const path = `categories.${index}.${payField}` as const;
-				if (form.getValues(path) !== "") {
-					form.setValue(path, "");
-					cleared = true;
+			for (const base of CATEGORY_PAY_BASES) {
+				if (isCategoryPayBasisApplicable(headcounts, base.basis)) continue;
+				for (const payField of [...base.womenPayFields, ...base.menPayFields]) {
+					const path = `categories.${index}.${payField}` as const;
+					if (form.getValues(path) !== "") {
+						form.setValue(path, "");
+						cleared = true;
+					}
 				}
 			}
 			return cleared;
@@ -326,22 +351,40 @@ export function CategoryForm({
 						)
 					: [],
 			);
-			const releasedPayFieldIds = new Set(
-				isCountField && (raw === "" || Number.parseInt(raw, 10) === 0)
-					? payFieldsForCountField(field).map((payField) =>
-							categoryDataFieldId(index, payField),
-						)
-					: [],
-			);
 			if (raw !== "") {
 				if (isInteger && /\D/.test(raw)) return;
 				const n = isInteger ? Number.parseInt(raw, 10) : Number.parseFloat(raw);
 				if (Number.isNaN(n) || n < 0) return;
 			}
 			form.setValue(`categories.${index}.${formField}`, raw);
-			const categoryPayApplicable = isCategoryPayApplicable(
-				toCategoryHeadcounts(form.getValues(`categories.${index}`)),
+			const updatedCategory = form.getValues(`categories.${index}`);
+			const updatedHeadcounts = toCategoryHeadcounts(updatedCategory);
+			const categoryPayApplicable = isCategoryPayApplicable(updatedHeadcounts);
+			const releasedPayFieldIds = new Set<string>();
+			const changedBasis = CATEGORY_PAY_BASES.find(
+				(base) =>
+					field === base.womenCountField || field === base.menCountField,
 			);
+			if (
+				isCountField &&
+				changedBasis &&
+				(raw === "" || Number.parseInt(raw, 10) === 0)
+			) {
+				const ownFields = payFieldsForCountField(field);
+				for (const payField of ownFields) {
+					releasedPayFieldIds.add(categoryDataFieldId(index, payField));
+				}
+				if (
+					!isCategoryPayBasisApplicable(updatedHeadcounts, changedBasis.basis)
+				) {
+					for (const payField of [
+						...changedBasis.womenPayFields,
+						...changedBasis.menPayFields,
+					]) {
+						releasedPayFieldIds.add(categoryDataFieldId(index, payField));
+					}
+				}
+			}
 			setCategoryErrors((errors) =>
 				errors.filter((error) => {
 					if (error.fieldId === changedFieldId) return false;
@@ -722,15 +765,13 @@ export function CategoryForm({
 						const cat = categories[index];
 						// Preserve the official values of legacy locked declarations that
 						// predate #3678; editable and newly saved categories are normalized.
-						const payApplicable = cat
-							? shouldRetainCategoryPayValues(
-									toCategoryHeadcounts(cat),
-									cat,
-									preserveLegacyPay,
-								)
-							: true;
+						const payApplicability = categoryPayApplicability(
+							cat,
+							preserveLegacyPay,
+						);
 						return (
 							<CategoryAccordionItem
+								annualPayApplicable={payApplicability.annual}
 								baseId={baseId}
 								category={
 									cat ? { id: index, ...cat } : createEmptyCategory(index)
@@ -745,6 +786,7 @@ export function CategoryForm({
 								headerRef={(node) => {
 									accordionHeaderRefs.current[index] = node;
 								}}
+								hourlyPayApplicable={payApplicability.hourly}
 								index={index}
 								isExpanded={expandedByFieldId[field.id] ?? true}
 								key={field.id}
@@ -772,7 +814,7 @@ export function CategoryForm({
 								onDecimalBlur={handleDecimalBlur}
 								onHeadcountBlur={handleHeadcountBlur}
 								onPositiveNumberChange={handlePositiveNumberChange}
-								payApplicable={payApplicable}
+								payApplicable={payApplicability.category}
 								readOnly={readOnly}
 								readOnlyLabel={readOnlyLabel}
 								showDelete={!readOnlyLabel && !readOnly && fields.length > 1}

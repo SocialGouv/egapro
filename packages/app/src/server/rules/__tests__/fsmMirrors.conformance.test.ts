@@ -7,11 +7,7 @@ import {
 	computePanelVariant,
 } from "~/modules/my-space/declarationProcessState";
 import type { DeclarationItem } from "~/modules/my-space/types";
-import {
-	CSE_OPINION_PREVIOUS_HREF,
-	getCurrentStageHref,
-	resolveCseOpinionOrigin,
-} from "~/modules/navigation";
+import { getCurrentStageHref } from "~/modules/navigation";
 import {
 	COMPLIANCE_CONFIRMATION,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -62,6 +58,7 @@ function makeDeclaration(
 		firstDeclarationPathChoice: null,
 		secondDeclarationPathChoice: null,
 		hasSubmittedSecondDeclaration: false,
+		secondDeclarationStep: null,
 		hasSubmittedJointEvaluation: false,
 		hasSubmittedCseOpinion: false,
 		cseRequired: false,
@@ -90,78 +87,6 @@ describe("engine conformance to the shared FSM vocabulary", () => {
 	});
 });
 
-// Provenance: every engine transition landing on `awaiting_cse_opinion` must have
-// a branch in the navigation table, so adding one without wiring "Précédent"
-// breaks here rather than sending the user to the wrong page.
-const CSE_OPINION_ORIGIN_CONTEXTS = [
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: "justify",
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: "joint_evaluation",
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: false,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: null,
-		hasSubmittedSecondDeclaration: true,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: "justify",
-		hasSubmittedSecondDeclaration: true,
-	},
-	{
-		firstDeclarationPathChoice: null,
-		secondDeclarationPathChoice: "joint_evaluation",
-		hasSubmittedSecondDeclaration: true,
-	},
-] as const;
-
-describe("provenance conformance — engine transitions into awaiting_cse_opinion", () => {
-	const incoming = rules.transitions.filter(
-		(transition) => transition.to === "awaiting_cse_opinion",
-	);
-
-	it("the engine has incoming transitions to check", () => {
-		expect(incoming.length).toBeGreaterThan(0);
-	});
-
-	it("the provenance table names exactly the engine transitions that land there", () => {
-		expect(Object.keys(CSE_OPINION_PREVIOUS_HREF).sort()).toEqual(
-			incoming.map((transition) => transition.id).sort(),
-		);
-	});
-
-	it.each(
-		incoming,
-	)("transition $id has a previous-page branch", (transition) => {
-		const href =
-			CSE_OPINION_PREVIOUS_HREF[
-				transition.id as keyof typeof CSE_OPINION_PREVIOUS_HREF
-			];
-		expect(href, `no provenance branch for ${transition.id}`).toBeDefined();
-		expect(href).not.toBe(CSE);
-	});
-
-	it("every engine transition is reachable from a stored démarche", () => {
-		const reached = CSE_OPINION_ORIGIN_CONTEXTS.map((context) =>
-			resolveCseOpinionOrigin(context),
-		);
-		expect([...new Set(reached)].sort()).toEqual(
-			incoming.map((transition) => transition.id).sort(),
-		);
-	});
-});
-
 describe("mirror conformance — engine states (non-terminal)", () => {
 	it.each(
 		rules.states.filter((s) => s.id !== "demarche_completed"),
@@ -175,7 +100,7 @@ describe("mirror conformance — engine states (non-terminal)", () => {
 		expect(getCurrentStageHref(state.id, false)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: state.id });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(computeCtaHref(decl)).toBe(expected.screen);
+		expect(computeCtaHref(decl, false)).toBe(expected.screen);
 	});
 });
 
@@ -204,7 +129,7 @@ describe("mirror conformance — engine transition destinations", () => {
 		expect(getCurrentStageHref(to, true)).toBe(expected.screen);
 		const decl = makeDeclaration({ fsmStatus: to });
 		expect(computePanelVariant(decl)).toBe(expected.variant);
-		expect(computeCtaHref(decl)).toBe(expected.screen);
+		expect(computeCtaHref(decl, false)).toBe(expected.screen);
 	});
 });
 
@@ -217,7 +142,7 @@ describe("exhaustiveness — every FSM status is covered by the table and the pa
 		expect(nav.length).toBeGreaterThan(0);
 		const decl = makeDeclaration({ fsmStatus: status });
 		expect(computePanelVariant(decl)).toBeDefined();
-		const cta = computeCtaHref(decl);
+		const cta = computeCtaHref(decl, false);
 		expect(typeof cta).toBe("string");
 		expect(cta.length).toBeGreaterThan(0);
 	});
@@ -234,7 +159,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 			cseRequired: true,
 		});
 		expect(computePanelVariant(decl)).toBe("cse");
-		expect(computeCtaHref(decl)).toBe(CSE);
+		expect(computeCtaHref(decl, false)).toBe(CSE);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 
@@ -248,7 +173,7 @@ describe("demarche_completed — mirror coherence × (cseOpinionRequired × hasS
 		// re-submittable /avis-cse page (up to 4 opinions). Each mirror is correct
 		// for its own surface, so no coherence is asserted between them here.
 		expect(computePanelVariant(decl)).toBe("closed");
-		expect(computeCtaHref(decl)).toBe(ENTRY);
+		expect(computeCtaHref(decl, false)).toBe(ENTRY);
 		expect(getCurrentStageHref("demarche_completed", true)).toBe(CSE);
 	});
 

@@ -10,17 +10,21 @@ const DATA_YEAR = YEAR - 1;
 const DECLARATION_RECAP =
 	"Télécharger le récapitulatif de la déclaration des indicateurs";
 const SECOND_DECLARATION_RECAP =
-	"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie de salariés";
+	"Télécharger le récapitulatif de la seconde déclaration de l'indicateur par catégorie d'emplois";
 const TRANSMITTED_RECAP = "Télécharger le récapitulatif des éléments transmis";
+const JOINT_EVALUATION_RECAP =
+	"Télécharger le récapitulatif de l'évaluation conjointe des rémunérations";
 
 function build({
 	hasSecondDeclaration = false,
 	hasTransmittedElements = false,
+	hasTransmittedJointEvaluation = false,
 } = {}) {
 	return buildRemunerationDocuments({
 		dataYear: DATA_YEAR,
 		hasSecondDeclaration,
 		hasTransmittedElements,
+		hasTransmittedJointEvaluation,
 		year: YEAR,
 	});
 }
@@ -53,6 +57,30 @@ describe("buildRemunerationDocuments", () => {
 			title: TRANSMITTED_RECAP,
 			year: YEAR,
 		});
+	});
+
+	it("adds the joint evaluation recap once the evaluation was transmitted", () => {
+		expect(build({ hasTransmittedJointEvaluation: true })).toContainEqual({
+			dataYear: DATA_YEAR,
+			href: `/api/joint-evaluation-pdf?year=${YEAR}`,
+			title: JOINT_EVALUATION_RECAP,
+			year: YEAR,
+		});
+	});
+
+	it("places the joint evaluation recap between the second declaration and the transmitted elements", () => {
+		const documents = build({
+			hasSecondDeclaration: true,
+			hasTransmittedElements: true,
+			hasTransmittedJointEvaluation: true,
+		});
+
+		expect(documents.map((document) => document.title)).toEqual([
+			DECLARATION_RECAP,
+			SECOND_DECLARATION_RECAP,
+			JOINT_EVALUATION_RECAP,
+			TRANSMITTED_RECAP,
+		]);
 	});
 
 	// Independent flags: a joint evaluation can be filed without a second declaration.

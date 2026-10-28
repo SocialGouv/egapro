@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+	clearCampaignYearOverride,
+	writeCampaignYearOverride,
+} from "~/modules/domain";
+
 const limitMock = vi.fn();
 const dbMock = {
 	select: vi.fn().mockReturnValue({
@@ -22,6 +27,7 @@ describe("getActiveCampaignYear", () => {
 	});
 	afterEach(() => {
 		vi.useRealTimers();
+		clearCampaignYearOverride();
 	});
 
 	it("returns the most recent year whose campaignStartDate is in the past", async () => {
@@ -30,6 +36,16 @@ describe("getActiveCampaignYear", () => {
 		vi.resetModules();
 		const { getActiveCampaignYear } = await import("../getGlobalSettings");
 		expect(await getActiveCampaignYear()).toBe(2027);
+	});
+
+	it("returns the pinned campaign year without reading the configured campaigns", async () => {
+		writeCampaignYearOverride(2031);
+		vi.setSystemTime(new Date("2026-10-22"));
+		vi.resetModules();
+		const { getActiveCampaignYear } = await import("../getGlobalSettings");
+
+		expect(await getActiveCampaignYear()).toBe(2031);
+		expect(limitMock).not.toHaveBeenCalled();
 	});
 
 	it("falls back to the current calendar year when no campaign has started", async () => {

@@ -209,12 +209,12 @@ describe("FirstRoundOptions", () => {
 		}
 	});
 
-	it("keeps « de salariés » on a single line with a non-breaking space", () => {
+	it("keeps « catégorie d'emplois » on a single line with a non-breaking space", () => {
 		renderFirstRoundOptions(true);
 
 		expect(
 			screen.getByText(/Vous souhaitez mettre en place des actions correctives/)
 				.textContent,
-		).toContain("par catégorie de\u00A0salariés");
+		).toContain("par catégorie\u00A0d'emplois");
 	});
 });

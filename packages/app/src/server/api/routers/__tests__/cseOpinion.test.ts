@@ -9,7 +9,25 @@ vi.mock("~/server/db", () => ({
 }));
 
 vi.mock("~/server/db/schema", () => ({
-	declarations: { id: "id", siren: "siren", year: "year" },
+	declarations: {
+		id: "id",
+		siren: "siren",
+		year: "year",
+		declarantId: "declarantId",
+	},
+	companies: { siren: "siren", name: "name" },
+	users: {
+		id: "id",
+		firstName: "firstName",
+		lastName: "lastName",
+		email: "email",
+		phone: "phone",
+	},
+	declarationStatusHistory: {
+		declarationId: "declarationId",
+		eventType: "eventType",
+		createdAt: "createdAt",
+	},
 	cseOpinions: {
 		id: "id",
 		declarationId: "declarationId",
@@ -66,27 +84,40 @@ const mockDeleteWhere = vi.fn();
 const mockInsert = vi.fn();
 const mockValues = vi.fn();
 const mockLimit = vi.fn();
+const mockOrderBy = vi.fn();
+const mockInnerJoin = vi.fn();
+const mockUpdate = vi.fn();
+const mockSet = vi.fn();
+const mockUpdateWhere = vi.fn();
 const mockTransaction = vi.fn();
 
 // Track select call order: 1st = declaration lookup, 2nd+ = procedure queries
 let selectCallCount = 0;
 
-function createMockDb(rows: unknown[] = []) {
+function createMockDb(rows: unknown[] = [], rowsBySelect?: unknown[][]) {
 	selectCallCount = 0;
 
 	// Declaration lookup: always returns a valid declaration
 	const declarationResult = [{ id: "decl-1" }];
 
+	const currentRows = () =>
+		rowsBySelect?.[selectCallCount - 1] ??
+		(selectCallCount <= 1 ? declarationResult : rows);
 	mockLimit.mockImplementation(() => {
 		// If this is the declaration lookup (first select chain), return declaration
 		// Otherwise return the test-specific rows
-		return Promise.resolve(selectCallCount <= 1 ? declarationResult : rows);
+		return Promise.resolve(currentRows());
 	});
 	mockWhere.mockImplementation(() => {
-		const result = selectCallCount <= 1 ? declarationResult : rows;
-		return Object.assign(Promise.resolve(result), { limit: mockLimit });
+		const result = currentRows();
+		return Object.assign(Promise.resolve(result), {
+			limit: mockLimit,
+			orderBy: mockOrderBy,
+		});
 	});
-	mockFrom.mockReturnValue({ where: mockWhere });
+	mockOrderBy.mockReturnValue({ limit: mockLimit });
+	mockInnerJoin.mockReturnValue({ innerJoin: mockInnerJoin, where: mockWhere });
+	mockFrom.mockReturnValue({ where: mockWhere, innerJoin: mockInnerJoin });
 	mockSelect.mockImplementation(() => {
 		selectCallCount++;
 		return { from: mockFrom };
@@ -94,15 +125,20 @@ function createMockDb(rows: unknown[] = []) {
 
 	mockDeleteWhere.mockResolvedValue(undefined);
 	mockDelete.mockReturnValue({ where: mockDeleteWhere });
+	mockUpdateWhere.mockResolvedValue(undefined);
+	mockSet.mockReturnValue({ where: mockUpdateWhere });
+	mockUpdate.mockReturnValue({ set: mockSet });
 
 	mockValues.mockResolvedValue(undefined);
 	mockInsert.mockReturnValue({ values: mockValues });
 
 	mockTransaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
 		fn({
+			execute: vi.fn().mockResolvedValue(undefined),
 			select: mockSelect,
 			delete: mockDelete,
 			insert: mockInsert,
+			update: mockUpdate,
 		}),
 	);
 
@@ -110,6 +146,7 @@ function createMockDb(rows: unknown[] = []) {
 		select: mockSelect,
 		delete: mockDelete,
 		insert: mockInsert,
+		update: mockUpdate,
 		transaction: mockTransaction,
 	} as unknown;
 }
@@ -186,6 +223,80 @@ describe("cseOpinionRouter", () => {
 			await expect(caller.get()).rejects.toThrow(
 				"SIRET manquant ou invalide dans la session",
 			);
+		});
+	});
+
+	describe("getSubmittedView", () => {
+		it("refuses access before the CSE transmission event", async () => {
+			const caller = await createCaller(createMockDb([]));
+
+			await expect(caller.getSubmittedView()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+			// The procedure must stop before reading declarant, opinions or file data.
+			expect(mockSelect).toHaveBeenCalledTimes(2);
+		});
+
+		it("hides mutable opinions while a revision is pending after transmission", async () => {
+			const caller = await createCaller(
+				createMockDb(
+					[],
+					[
+						[{ id: "decl-1" }],
+						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
+						[{ cseOpinionDraftUpdatedAt: new Date("2026-10-19T10:00:00Z") }],
+					],
+				),
+			);
+
+			await expect(caller.getSubmittedView()).rejects.toMatchObject({
+				code: "NOT_FOUND",
+			});
+			expect(mockSelect).toHaveBeenCalledTimes(3);
+			expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
+				isolationLevel: "repeatable read",
+			});
+		});
+
+		it("does not offer a joint report without its transmission event", async () => {
+			const caller = await createCaller(
+				createMockDb(
+					[],
+					[
+						[{ id: "decl-1" }],
+						[{ createdAt: new Date("2026-10-18T10:00:00Z") }],
+						[
+							{
+								companyName: "Entreprise exemple",
+								siren: "339787277",
+								declarationYear: 2026,
+								declarantFirstName: "Camille",
+								declarantLastName: "Martin",
+								declarantEmail: "camille@example.test",
+								declarantPhone: null,
+								secondDeclReferencePeriodStart: null,
+								secondDeclReferencePeriodEnd: null,
+								cseOpinionDraftUpdatedAt: null,
+							},
+						],
+						[], // no joint_evaluation_submit
+						[{ declarationNumber: 1, type: "accuracy", opinion: "favorable" }],
+						[
+							{
+								fileId: "file-1",
+								fileName: "avis.pdf",
+								declarationNumber: 1,
+								type: "accuracy",
+							},
+						],
+						[], // no second declaration
+					],
+				),
+			);
+
+			const result = await caller.getSubmittedView();
+			expect(result.hasSubmittedJointEvaluation).toBe(false);
+			expect(result.associations).toHaveLength(1);
 		});
 	});
 

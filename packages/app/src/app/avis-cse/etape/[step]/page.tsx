@@ -8,7 +8,6 @@ import {
 	Step2Upload,
 } from "~/modules/cseOpinion";
 import { computeGapHighFlags } from "~/modules/domain";
-import { getCseOpinionPreviousHref } from "~/modules/navigation";
 import { toCseOpinionStep } from "~/modules/routes";
 import { auth } from "~/server/auth";
 import { getCampaignDeadlines } from "~/server/db/getCampaignDeadlines";
@@ -42,13 +41,6 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 		const campaignDeadlines = await getCampaignDeadlines(
 			declarationData.declaration.year,
 		);
-		const previousHref = getCseOpinionPreviousHref({
-			firstDeclarationPathChoice:
-				declarationData.declaration.firstDeclarationPathChoice,
-			secondDeclarationPathChoice:
-				declarationData.declaration.secondDeclarationPathChoice,
-			hasSubmittedSecondDeclaration: hasSecondDeclaration,
-		});
 		return (
 			<>
 				<FunnelStepTracker
@@ -65,7 +57,6 @@ export default async function CseOpinionStepPage({ params }: StepPageProps) {
 					firstDeclGapHigh={firstDeclGapHigh}
 					hasSecondDeclaration={hasSecondDeclaration}
 					initialData={initialData}
-					previousHref={previousHref}
 					secondDeclarationPathChoice={
 						declarationData.declaration.secondDeclarationPathChoice
 					}

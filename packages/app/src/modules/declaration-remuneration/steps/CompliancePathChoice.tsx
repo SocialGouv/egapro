@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
 import { TrackedLink } from "~/modules/analytics";
 import { useIsImpersonating } from "~/modules/auth";
@@ -11,6 +11,7 @@ import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/d
 import { useDraftAutoSave } from "~/modules/declaration-remuneration/shared/draft/useDraftAutoSave";
 import { useDraftHydration } from "~/modules/declaration-remuneration/shared/draft/useDraftHydration";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 import {
 	type CampaignDeadlines,
 	type CompliancePathValue,
@@ -18,14 +19,12 @@ import {
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
-import {
-	getCompliancePathHref,
-	getCompliancePathPreviousHref,
-} from "~/modules/navigation";
+import { getCompliancePathHref } from "~/modules/navigation";
 import { scrollToTop } from "~/modules/shared/scrollToTop";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
+import { consumeDeclarationTransmissionSuccess } from "../shared/declarationSuccessFlash";
 import { FormActions } from "../shared/FormActions";
 import { FormErrors } from "../shared/FormErrors";
 import { SavedIndicator } from "../shared/SavedIndicator";
@@ -35,7 +34,6 @@ import {
 	SecondRoundOptions,
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
-import type { CompliancePathReadOnlyReason } from "./compliancePath/constants";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
 
 type Props = {
@@ -66,6 +64,8 @@ export function CompliancePathChoice({
 	readOnlyReason,
 }: Props) {
 	const router = useRouter();
+	const consumedTransmissionSuccess = useRef(false);
+	const [showTransmissionSuccess, setShowTransmissionSuccess] = useState(false);
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly: isLockReadOnly } = useLockContext();
 	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
@@ -113,6 +113,12 @@ export function CompliancePathChoice({
 		}
 	}, [draftHydrated]);
 
+	useEffect(() => {
+		if (consumedTransmissionSuccess.current) return;
+		consumedTransmissionSuccess.current = true;
+		setShowTransmissionSuccess(consumeDeclarationTransmissionSuccess());
+	}, []);
+
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
@@ -155,21 +161,23 @@ export function CompliancePathChoice({
 					/>
 				</div>
 
-				<DeclarationSuccessBanner
-					declarationModifiable={declarationModifiable}
-					email={email}
-					isSecondDeclaration={isSecondRound}
-					pdfDownloadHref={pdfDownloadHref}
-					year={currentYear}
-				/>
+				{showTransmissionSuccess && (
+					<DeclarationSuccessBanner
+						declarationModifiable={declarationModifiable}
+						email={email}
+						isSecondDeclaration={isSecondRound}
+						pdfDownloadHref={pdfDownloadHref}
+						year={currentYear}
+					/>
+				)}
 
 				{readOnlyReason ? (
 					<CompliancePathReadOnlyAlert reason={readOnlyReason} />
 				) : null}
 
 				<h2 className="fr-h4 fr-mb-0">
-					Parcours de mise en conformité pour l&apos;indicateur par catégorie
-					de&nbsp;salariés
+					Parcours de mise en conformité pour l&apos;indicateur par
+					catégorie&nbsp;d&apos;emplois
 				</h2>
 
 				<div className={common.flexColumnGap1}>
@@ -269,7 +277,6 @@ export function CompliancePathChoice({
 							: undefined
 					}
 					nextLabel="Suivant"
-					previousHref={getCompliancePathPreviousHref(isSecondRound)}
 				/>
 			</fieldset>
 		</form>

@@ -150,7 +150,7 @@ describe("SecondDeclarationStep2Form", () => {
 		renderStep2();
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégorie d'emplois/,
 			),
 		).toBeInTheDocument();
 		expect(screen.getByText("Étape 2 sur 3")).toBeInTheDocument();
@@ -369,10 +369,10 @@ describe("SecondDeclarationStep2Form — headcount per pay basis (#4254)", () =>
 		renderStep2();
 
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération annuelle" }),
+			screen.getByRole("rowheader", { name: /^Rémunération annuelle/ }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("rowheader", { name: "Rémunération horaire" }),
+			screen.getByRole("rowheader", { name: /^Rémunération horaire/ }),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(/Pour rappel, le nombre total de salariés/),

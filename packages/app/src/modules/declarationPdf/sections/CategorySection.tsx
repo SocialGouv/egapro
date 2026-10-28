@@ -1,5 +1,9 @@
 import { Text, View } from "@react-pdf/renderer";
 import type { EmployeeCategoryRow } from "~/modules/declaration-remuneration";
+import {
+	WORKFORCE_MEN_HEADER,
+	WORKFORCE_WOMEN_HEADER,
+} from "~/modules/declaration-remuneration/steps/step1/workforceRows";
 import { CATEGORY_WORKFORCE_ROWS } from "~/modules/declaration-remuneration/steps/step5/categoryWorkforceRows";
 import {
 	computeGap,
@@ -27,8 +31,8 @@ function EffectifTable({ category }: { category: EmployeeCategoryRow }) {
 		<Table>
 			<Row>
 				<Cell header width={PAY_TABLE.label} />
-				<Cell header text="Femmes" width={PAY_TABLE.value} />
-				<Cell header text="Hommes" width={PAY_TABLE.value} />
+				<Cell header text={WORKFORCE_WOMEN_HEADER} width={PAY_TABLE.value} />
+				<Cell header text={WORKFORCE_MEN_HEADER} width={PAY_TABLE.value} />
 				<Cell header text="Total" width={PAY_TABLE.total} />
 			</Row>
 			{CATEGORY_WORKFORCE_ROWS.map((row) => {
@@ -199,7 +203,7 @@ export function CategorySection({ data }: { data: DeclarationPdfData }) {
 	return (
 		<>
 			<View minPresenceAhead={80} wrap={false}>
-				<SectionBanner title="Écart de rémunération par catégorie de salariés" />
+				<SectionBanner title="Écart de rémunération par catégorie d'emplois" />
 				{data.categories.length > 0 ? (
 					<View style={styles.infoBody}>
 						<View

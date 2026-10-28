@@ -992,7 +992,7 @@ describe("adminStatsRouter.getStepDropoffRate", () => {
 			key: "5",
 			phase: "wizard",
 			step: 5,
-			label: "Écart par catégorie de salariés",
+			label: "Écart par catégorie d'emplois",
 			total: 0,
 			abandoned: 0,
 			dropoffRate: 0,

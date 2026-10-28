@@ -7,6 +7,7 @@ type Props = {
 	email?: string;
 	hasSecondDeclaration?: boolean;
 	hasTransmittedElements?: boolean;
+	hasTransmittedJointEvaluation?: boolean;
 };
 
 export function ConfirmationPage({
@@ -15,6 +16,7 @@ export function ConfirmationPage({
 	email,
 	hasSecondDeclaration = false,
 	hasTransmittedElements = false,
+	hasTransmittedJointEvaluation = false,
 }: Props) {
 	return (
 		<DemarcheConfirmation
@@ -22,6 +24,7 @@ export function ConfirmationPage({
 				dataYear,
 				hasSecondDeclaration,
 				hasTransmittedElements,
+				hasTransmittedJointEvaluation,
 				year: declarationYear,
 			})}
 			email={email ?? "adresse@exemple.fr"}

@@ -19,6 +19,7 @@ Audience : équipe métier / PO (référence d'acceptance et suivi des tests) et
 5. [Limites de l'automatisation](#5-limites-de-lautomatisation)
 6. [Arbitrages métier (divergences résolues)](#6-arbitrages-métier-divergences-résolues)
 7. [Lancer la recette](#7-lancer-la-recette)
+8. [Recette en 2026 : le pont vers les règles de 2027](#8-recette-en-2026--le-pont-vers-les-règles-de-2027)
 
 ---
 
@@ -460,7 +461,7 @@ Comportements testés en E2E qui ne figurent pas dans le fichier de Laetitia mai
 |---|---|---|
 | ANX-01 | Tâtonnement : changer de parcours de conformité avant toute action aval (le dernier choix gagne, les deux événements sont historisés) | `compliance.e2e.ts` — `[ANX-01] Path change before downstream action` |
 | ANX-02 | Démarche terminée → toute navigation vers le parcours de conformité redirige | `compliance.e2e.ts` — `[ANX-02] Path 12` |
-| ANX-03 | Bouton « Précédent » sur `/avis-cse` : retour contextuel selon l'état (récap étape 6, choix de parcours, récap 2ᵉ déclaration) | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
+| ANX-03 | Pas de bouton « Précédent » vers une étape déjà transmise : absent sur `/avis-cse` quel que soit l'état d'arrivée (récap étape 6, choix de parcours, récap 2ᵉ déclaration) et sur le récap étape 6 une fois la déclaration transmise | `compliance.e2e.ts` — `[ANX-03] Paths 13.a / 13.b / 13.c` |
 | ANX-04 | Tranche 100-149, année triennale ≥ 2030 : l'indicateur G redevient obligatoire, le funnel repasse à 6 étapes. Contre-branche de `CAS-01-6IND` / `CAS-02-6IND`, qui n'exerceraient sinon qu'une seule de leurs deux branches — et basculeraient silencieusement au rouge en 2030 | `compliance.e2e.ts` — `[ANX-04] Path 14bis` (effectif GIP 120, année épinglée 2030) |
 | ANX-05 | Tranche 50-99 : la composition du funnel suit l'année épinglée — étape catégories absente et inatteignable par URL directe en année « 6 indicateurs » (2029), présente en année triennale ≥ 2030 | `compliance.e2e.ts` — `[ANX-05] Path 13` (effectif GIP 75, années épinglées 2029 et 2030) |
 
@@ -515,3 +516,48 @@ pnpm --filter app report:grille                          # le rapport de recette
 ```
 
 Le dev server doit tourner sur le port 3000 avec `EGAPRO_E2E_CLOCK=true` (actif dans `.github/workflows/e2e-grille.yaml` ; à passer manuellement en local).
+
+### Recette manuelle sur un environnement déployé
+
+Pour dérouler à la main une coordonnée d'une année de campagne future (2027 → 2033), on utilise un **environnement de recette épinglé sur une année** : toute l'application s'y comporte comme si la campagne en cours était cette année-là.
+
+#### Mise en place (par un développeur)
+
+1. Dans le dépôt GitHub, ouvrir **Actions → 🎯 Promote test env**, puis **Run workflow**.
+2. Renseigner la **release** à déployer, choisir la cible **`recette`**, et saisir l'année voulue dans **`campaign_year`** (par exemple `2030`). Laisser `campaign_year` vide revient à l'année civile réelle.
+3. Une fois le run terminé, son résumé indique l'adresse de l'environnement et l'année épinglée. Les données du GIP-MDS de test sont importées automatiquement à la fin du déploiement, sur l'année épinglée : il n'y a rien à lancer à la main.
+
+Changer d'année demande un nouveau déploiement (quelques minutes).
+
+#### Ce que voit le testeur
+
+- La campagne affichée est l'année épinglée, et la période de référence l'année précédente (environnement « 2030 » : campagne 2030, données 2029), sur toutes les pages : accueil, aide, Mon espace, démarches des écarts de rémunération et de représentation équilibrée.
+- Les règles appliquées sont celles de cette année : indicateurs exigés selon la tranche, obligations, libellés.
+- La date du jour est transposée dans l'année épinglée (le 26 octobre 2026 devient le 26 octobre 2030) pour les contrôles de campagne et d'échéance : la campagne de représentation équilibrée, qui couvre toute l'année, est ouverte, et une déclaration de l'année épinglée reste modifiable sans réglage préalable dans l'administration.
+
+#### Choisir l'entreprise
+
+Prendre une entreprise de test dans la tranche d'effectif de la coordonnée jouée, dans [`docs/SIRET-de-test.md`](SIRET-de-test.md), en suivant la convention de réservation décrite en tête de ce document (cocher avant usage, décocher après).
+
+#### Limites
+
+- **L'année est la même pour tous les utilisateurs de l'environnement.** Jouer deux années en parallèle demande deux environnements, ou de se succéder sur le même.
+- **Les cas « échéance dépassée » ne se choisissent pas** : seule l'année est épinglée, le jour et le mois restent ceux du calendrier réel.
+- **L'environnement doit être promu depuis une release qui connaît l'épinglage** : le workflow refuse `campaign_year` sur une release plus ancienne, qui ignorerait l'année demandée.
+- **Les e-mails et les traitements planifiés** (relances, purges) restent calés sur la date réelle : ils ne voient pas l'année épinglée.
+
+---
+
+## 8. Recette en 2026 : le pont vers les règles de 2027
+
+Tant que l'horloge réelle est en 2026, la campagne 2026 applique déjà, pour deux règles, celles de la première campagne du nouveau dispositif (2027) — issue [#4240](https://github.com/SocialGouv/egapro/issues/4240) :
+
+- **l'assujettissement des 50-99 salariés**, qui déclarent chaque année ;
+- **l'exigence de l'indicateur G pour les 150-249 salariés**.
+
+Les parcours des coordonnées **2027** se jouent donc dès aujourd'hui sur n'importe quel environnement, sans année épinglée, avec deux réserves :
+
+- les écrans affichent « campagne 2026 » ;
+- les échéances par défaut de 2026 sont dépassées, ce qui rend une déclaration soumise immodifiable. Un administrateur peut les repousser dans **Administration → Paramètres**, de préférence **avant** l'import des données GIP-MDS, pour que la date de publication GIP reste enregistrée.
+
+Ce pont n'a d'effet que sur l'année 2026 : il devient sans effet au 1er janvier 2027. Un environnement épinglé sur une année (§7) n'en dépend pas.

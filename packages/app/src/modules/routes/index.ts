@@ -19,6 +19,7 @@ export {
 	LOGIN,
 	MY_SPACE,
 	mySpaceHistoryHref,
+	mySpaceRepresentationHref,
 } from "./shared/accountRoutes";
 export {
 	ADMIN,
@@ -38,6 +39,7 @@ export {
 	API_DECLARATION_LOCK_RELEASE,
 	API_DECLARATION_PDF,
 	API_E2E_CLOCK,
+	API_JOINT_EVALUATION_PDF,
 	API_PREFILL_PDF,
 	API_PUBLIC_DECLARATIONS_EXPORT,
 	API_PUBLIC_OPENAPI,
@@ -70,6 +72,8 @@ export {
 	complianceStepHref,
 	cseOpinionStepHref,
 	FORMAL_NOTICE_JOINT_EVALUATION,
+	MY_SPACE_CSE_OPINION_VIEW,
+	MY_SPACE_JOINT_EVALUATION_VIEW,
 	toComplianceStep,
 	toCseOpinionStep,
 } from "./shared/complianceRoutes";

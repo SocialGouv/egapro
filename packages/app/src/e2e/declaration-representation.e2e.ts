@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import {
+	formatPercentage,
 	formatPrecisePercentage,
 	getReferenceYearFor,
 	getRepresentationTarget,
@@ -10,6 +11,7 @@ import {
 	API_PUBLIC_DECLARATIONS_EXPORT,
 	DECLARATION_REPRESENTATION,
 	MY_SPACE,
+	mySpaceRepresentationHref,
 	observatoryCompanyHref,
 	routeWithQuery,
 } from "~/modules/routes";
@@ -96,12 +98,14 @@ async function goNext(page: Page) {
 
 /** DSFR draws a radio through its `<label>`, which covers the transparent input:
  * the hit-target check can never pass, so the click is forced and the resulting
- * state asserted instead. */
+ * state asserted instead. A forced click skips the enabled check too, and the
+ * funnel stays read-only until the declaration lock is acquired. */
 async function chooseRadio(page: Page, name: RegExp | string) {
 	const radio = page.getByRole("radio", {
 		name,
 		exact: typeof name === "string",
 	});
+	await expect(radio).toBeEnabled();
 	await radio.check({ force: true });
 	await expect(radio).toBeChecked();
 }
@@ -522,9 +526,10 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 			PANEL_ID,
 		);
 		const panel = page.locator(`#${PANEL_ID}`);
+		const consultationHref = mySpaceRepresentationHref(campaignYear);
 		await expect(
 			panel.getByRole("link", { name: "Voir la déclaration" }),
-		).toHaveAttribute("href", `${FUNNEL_ROOT}/etape/5`);
+		).toHaveAttribute("href", consultationHref);
 
 		await test.step("the declaration step announces the transmission instead of the work left to do", async () => {
 			await expect(
@@ -546,11 +551,78 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 				panel.getByRole("link", {
 					name: "Voir le récapitulatif de la déclaration",
 				}),
-			).toHaveAttribute("href", `${FUNNEL_ROOT}/etape/5`);
+			).toHaveAttribute("href", consultationHref);
 			await expect(panel.getByRole("link", { name: "Modifier" })).toHaveCount(
 				0,
 			);
 			await expect(panel.getByText(/Modifiable jusqu'au/)).toHaveCount(0);
+		});
+
+		await test.step("the view button opens the read-only consultation page", async () => {
+			await panel
+				.getByRole("link", { name: "Voir le récapitulatif de la déclaration" })
+				.click();
+			await page.waitForURL(urlGlob(consultationHref));
+
+			const main = page.getByRole("main");
+			await expect(
+				main.getByRole("heading", {
+					level: 1,
+					name: `Démarche des indicateurs de représentation ${campaignYear}`,
+				}),
+			).toBeVisible();
+			await expect(
+				main.getByText(
+					/^La déclaration a été transmise le \d{2}\/\d{2}\/\d{4}\.$/,
+				),
+			).toBeVisible();
+
+			for (const section of [
+				"Informations",
+				"Écarts de représentation",
+				"Publication",
+			]) {
+				await expect(
+					main.getByRole("heading", { level: 2, name: section }),
+				).toBeVisible();
+			}
+			await expect(main).toContainText(
+				`01/01/${referenceYear} - 31/12/${referenceYear}`,
+			);
+
+			const executives = main.getByRole("table", { name: /Cadres dirigeants/ });
+			await expect(executives).toContainText(
+				formatPercentage(EXECUTIVE_WOMEN_PERCENT),
+			);
+			await expect(executives).toContainText("Conforme");
+			const members = main.getByRole("table", {
+				name: /Membres des instances dirigeantes/,
+			});
+			await expect(members).toContainText(
+				formatPercentage(100 - MEMBER_WOMEN_PERCENT),
+			);
+			await expect(members).toContainText("Non conforme");
+
+			const publicationLink = main.getByRole("link", { name: PUBLISH_URL });
+			await expect(publicationLink).toHaveAttribute("target", "_blank");
+			await expect(main.getByText("Modalités de communication")).toHaveCount(0);
+
+			await expect(
+				main.getByRole("link", {
+					name: "Télécharger la déclaration des indicateurs de représentation (PDF)",
+				}),
+			).toHaveAttribute(
+				"href",
+				`/api/representation-pdf?year=${referenceYear}`,
+			);
+			await expect(
+				main
+					.getByRole("link", { name: /Modifier/ })
+					.or(main.getByRole("button", { name: /Modifier/ })),
+			).toHaveCount(0);
+
+			await main.getByRole("link", { name: "Mon espace", exact: true }).click();
+			await page.waitForURL(urlGlob(MY_SPACE));
 		});
 	});
 });
@@ -722,6 +794,11 @@ test.describe("Représentation équilibrée — parcours non-assujetti", () => {
 			`/api/representation-pdf?year=${referenceYear}`,
 		);
 		expect(pdf.status()).toBe(404);
+
+		const consultation = await page.goto(
+			mySpaceRepresentationHref(campaignYear),
+		);
+		expect(consultation?.status()).toBe(404);
 	});
 
 	test("the panel keeps the subjection step alone and offers to reopen the démarche", async ({

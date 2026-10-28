@@ -187,7 +187,7 @@ describe("SecondDeclarationStep3Review", () => {
 		renderStep3();
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l.indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l.indicateur par catégorie d'emplois/,
 			),
 		).toBeInTheDocument();
 		// Non-breaking space keeps "par catégorie" on the same line (Figma spec)
@@ -214,7 +214,7 @@ describe("SecondDeclarationStep3Review", () => {
 	it("renders the card title without the base-and-bonus parenthetical", () => {
 		renderStep3();
 		expect(
-			screen.getByText("Écart de rémunération par catégorie de salariés"),
+			screen.getByText("Écart de rémunération par catégorie d'emplois"),
 		).toBeInTheDocument();
 		expect(
 			screen.queryByText(/salaire de base et primes/),
@@ -608,6 +608,21 @@ describe("SecondDeclarationStep3Review", () => {
 		);
 		expect(
 			screen.queryByRole("button", { name: /transmettre/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps Précédent while the second declaration is still writable", () => {
+		renderStep3();
+		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
+			"href",
+			"/declaration-remuneration/parcours-conformite/etape/2",
+		);
+	});
+
+	it("hides Précédent once the second declaration is transmitted (#4834)", () => {
+		renderStep3({ status: "revised_joint_evaluation_chosen" });
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
 		).not.toBeInTheDocument();
 	});
 

@@ -129,17 +129,23 @@ export {
 	DECLARATION_SUPERSEDED_MESSAGE,
 	DEFAULT_LOCK_TIMEOUT_MINUTES,
 	LOCK_HEARTBEAT_INTERVAL_MS,
+	REPRESENTATION_LOCK_CONFLICT_MESSAGE,
 } from "./shared/declarationLock";
 // Declaration prerequisites
 export { hasRequiredDeclarationInfo } from "./shared/declarationPrerequisites";
 // Declaration process step deadline
 export { getDeclarationProcessStepDeadline } from "./shared/declarationProcessStep";
 // Declaration status
-export type { SubmissionLockTarget } from "./shared/declarationStatus";
+export type {
+	CompliancePathReadOnlyReason,
+	SubmissionLockTarget,
+} from "./shared/declarationStatus";
 export {
 	applyDeclarationClosure,
 	computeDeclarationStatus,
+	getCompliancePathReadOnlyReason,
 	getCurrentCompliancePath,
+	hasSavedSecondDeclarationData,
 	hasStartedSecondDeclaration,
 	isCancelled,
 	isCompliancePathStepApplicable,
@@ -182,6 +188,7 @@ export {
 export type {
 	DeclarationEventType,
 	DeclarationStatusEvent,
+	JointEvaluationTransmissionFacts,
 	SubmissionHistoryEvent,
 	SubsequentSubmissions,
 	TrajectoryEntry,
@@ -199,17 +206,23 @@ export {
 	getSubmittedAt,
 	hasEvent,
 	hasSubmittedSecondDeclaration,
+	isJointEvaluationFileTransmitted,
 	SUBSEQUENT_SUBMISSION_EVENT_TYPES,
 } from "./shared/declarationTrajectory";
-export type { CategoryHeadcounts } from "./shared/employeeCategoryRemuneration";
+export type {
+	CategoryHeadcounts,
+	CategoryPayBasis,
+} from "./shared/employeeCategoryRemuneration";
 export {
 	CATEGORY_PAY_BASES,
 	CATEGORY_PAY_FIELDS,
 	isCategoryPayApplicable,
+	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
 	MIN_HEADCOUNT_REQUIRING_PAY_DATA,
 	PAY_FIELDS_MEN,
 	PAY_FIELDS_WOMEN,
+	shouldRetainCategoryPayBasisValues,
 	shouldRetainCategoryPayValues,
 } from "./shared/employeeCategoryRemuneration";
 // Display formatting (%, €, units)

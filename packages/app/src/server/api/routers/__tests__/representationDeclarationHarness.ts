@@ -5,6 +5,7 @@ import {
 	VALID_REFERENCE_PERIOD,
 	REPRESENTATION_YEAR as YEAR,
 } from "~/modules/declaration-representation/__tests__/fixtures";
+import { clearCampaignYearOverride } from "~/modules/domain";
 import { representationDeclarationRouter } from "~/server/api/routers/representationDeclaration";
 
 export const SIREN = "123456789";
@@ -20,6 +21,8 @@ export const CLOSED_MESSAGE =
 	"La campagne de représentation équilibrée est close : la déclaration ne peut plus être modifiée.";
 export const IMPERSONATION_MESSAGE =
 	"Mode mimoquage actif : cette action est en lecture seule et ne peut pas être effectuée.";
+export const ALREADY_SUBMITTED_MESSAGE =
+	"La déclaration des écarts de représentation a déjà été transmise pour cette année.";
 
 export const OPEN_CAMPAIGN = {
 	campaignStartDate: new Date("2026-01-01T00:00:00.000Z"),
@@ -33,6 +36,9 @@ export const CLOSED_CAMPAIGN = {
 	declarationDeadline: new Date("2027-03-01T00:00:00.000Z"),
 };
 
+export const CLOSED_CAMPAIGN_YEAR =
+	CLOSED_CAMPAIGN.campaignStartDate.getUTCFullYear();
+
 export const DRAFT = { currentStep: 3, ...VALID_REFERENCE_PERIOD };
 
 export function createMockDb(rows: unknown[] = []) {
@@ -44,7 +50,8 @@ export function createMockDb(rows: unknown[] = []) {
 	const rowsChain = { limit, for: forLock };
 	forLock.mockReturnValue(rowsChain);
 	const where = vi.fn().mockReturnValue(rowsChain);
-	const from = vi.fn().mockReturnValue({ where });
+	const innerJoin = vi.fn().mockReturnValue({ where });
+	const from = vi.fn().mockReturnValue({ where, innerJoin });
 	const select = vi.fn().mockReturnValue({ from });
 	// `tx` reuses the very mocks exposed below, so the assertions read the same
 	// calls whether the router went through `db` directly or through a transaction.
@@ -60,6 +67,7 @@ export function createMockDb(rows: unknown[] = []) {
 		values,
 		onConflictDoUpdate,
 		where,
+		innerJoin,
 		forLock,
 		transaction,
 	};
@@ -128,6 +136,7 @@ export function installRouterTestEnv(campaignMock: Mock) {
 	});
 
 	afterEach(() => {
+		clearCampaignYearOverride();
 		vi.useRealTimers();
 		vi.restoreAllMocks();
 	});

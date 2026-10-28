@@ -24,8 +24,11 @@ export type DbDeclaration = {
 	firstDeclarationPathChoice: CompliancePath | null;
 	secondDeclarationPathChoice: CompliancePath | null;
 	hasSubmittedSecondDeclaration: boolean;
+	secondDeclarationStep: number | null;
 	hasSubmittedJointEvaluation: boolean;
 	hasSubmittedCseOpinion: boolean;
+	cseOpinionViewAvailable?: boolean;
+	jointEvaluationViewAvailable?: boolean;
 	cseRequired: boolean;
 	hasJointEvaluationFile: boolean;
 	formalNoticeAvailable: boolean;
@@ -64,8 +67,11 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: existing.firstDeclarationPathChoice,
 				secondDeclarationPathChoice: existing.secondDeclarationPathChoice,
 				hasSubmittedSecondDeclaration: existing.hasSubmittedSecondDeclaration,
+				secondDeclarationStep: existing.secondDeclarationStep,
 				hasSubmittedJointEvaluation: existing.hasSubmittedJointEvaluation,
 				hasSubmittedCseOpinion: existing.hasSubmittedCseOpinion,
+				cseOpinionViewAvailable: existing.cseOpinionViewAvailable,
+				jointEvaluationViewAvailable: existing.jointEvaluationViewAvailable,
 				cseRequired: existing.cseRequired,
 				hasJointEvaluationFile: existing.hasJointEvaluationFile,
 				formalNoticeAvailable: existing.formalNoticeAvailable,
@@ -87,6 +93,7 @@ export function buildDeclarationList(
 				firstDeclarationPathChoice: null,
 				secondDeclarationPathChoice: null,
 				hasSubmittedSecondDeclaration: false,
+				secondDeclarationStep: null,
 				hasSubmittedJointEvaluation: false,
 				hasSubmittedCseOpinion: false,
 				cseRequired: false,
@@ -120,8 +127,11 @@ export function buildDeclarationList(
 			firstDeclarationPathChoice: d.firstDeclarationPathChoice,
 			secondDeclarationPathChoice: d.secondDeclarationPathChoice,
 			hasSubmittedSecondDeclaration: d.hasSubmittedSecondDeclaration,
+			secondDeclarationStep: d.secondDeclarationStep,
 			hasSubmittedJointEvaluation: d.hasSubmittedJointEvaluation,
 			hasSubmittedCseOpinion: d.hasSubmittedCseOpinion,
+			cseOpinionViewAvailable: d.cseOpinionViewAvailable,
+			jointEvaluationViewAvailable: d.jointEvaluationViewAvailable,
 			cseRequired: d.cseRequired,
 			hasJointEvaluationFile: d.hasJointEvaluationFile,
 			formalNoticeAvailable: d.formalNoticeAvailable,

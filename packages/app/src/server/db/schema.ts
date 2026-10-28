@@ -180,6 +180,8 @@ export const declarations = createTable(
 		secondDeclarationStep: d.integer(),
 		secondDeclReferencePeriodStart: d.varchar({ length: 10 }),
 		secondDeclReferencePeriodEnd: d.varchar({ length: 10 }),
+		// Set by CSE edits after the last transmission; cleared atomically on submit.
+		cseOpinionDraftUpdatedAt: d.timestamp({ withTimezone: true }),
 		cseRequired: d.boolean().notNull().default(false),
 		rulesVersion: d
 			.varchar("rules_version")
@@ -820,6 +822,58 @@ export const representationDeclarationsRelations = relations(
 		company: one(companies, {
 			fields: [representationDeclarations.siren],
 			references: [companies.siren],
+		}),
+	}),
+);
+
+// ── Representation declaration edit lock ───────────────────────────
+
+export const representationDeclarationLocks = createTable(
+	"representation_declaration_lock",
+	(d) => ({
+		id: d
+			.varchar({ length: 255 })
+			.notNull()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		siren: d
+			.varchar({ length: 9 })
+			.notNull()
+			.references(() => companies.siren, { onDelete: "cascade" }),
+		year: d.integer().notNull(),
+		lockedByUserId: d
+			.varchar({ length: 255 })
+			.notNull()
+			.references(() => users.id),
+		lockedAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastHeartbeatAt: d
+			.timestamp({ withTimezone: true })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		expiresAt: d.timestamp({ withTimezone: true }).notNull(),
+	}),
+	(t) => [
+		uniqueIndex("representation_declaration_lock_siren_year_unique").on(
+			t.siren,
+			t.year,
+		),
+		index("representation_declaration_lock_expires_at_idx").on(t.expiresAt),
+	],
+);
+
+export const representationDeclarationLocksRelations = relations(
+	representationDeclarationLocks,
+	({ one }) => ({
+		company: one(companies, {
+			fields: [representationDeclarationLocks.siren],
+			references: [companies.siren],
+		}),
+		lockedBy: one(users, {
+			fields: [representationDeclarationLocks.lockedByUserId],
+			references: [users.id],
 		}),
 	}),
 );

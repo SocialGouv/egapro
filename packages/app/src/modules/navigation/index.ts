@@ -4,17 +4,10 @@
 // cannot import that feature's barrel without dragging its server-touching tree
 // into a client bundle — `__tests__/moduleBoundaries.test.ts` holds the line.
 
-export type {
-	CseOpinionOrigin,
-	CseOpinionOriginContext,
-} from "./shared/remunerationDemarcheNavigation";
 export {
-	CSE_OPINION_PREVIOUS_HREF,
 	getCompliancePathHref,
-	getCompliancePathPreviousHref,
-	getCseOpinionPreviousHref,
 	getCurrentStageHref,
+	getDemarcheResumeHref,
 	getDemarcheStageHref,
 	getPostComplianceDestination,
-	resolveCseOpinionOrigin,
 } from "./shared/remunerationDemarcheNavigation";

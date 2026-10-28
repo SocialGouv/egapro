@@ -3,6 +3,7 @@ import { urlGlob } from "~/e2e/helpers/routes";
 import { getCurrentYear } from "~/modules/domain";
 import {
 	ADMIN_SETTINGS,
+	API_JOINT_EVALUATION_PDF,
 	COMPLIANCE_JOINT_EVALUATION,
 	COMPLIANCE_PATH,
 	CSE_OPINION,
@@ -359,6 +360,14 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			await expect(
 				page.getByText(/Échéance pour transmettre l'avis ou les avis du CSE/),
 			).toBeVisible();
+			await expect(
+				page.getByRole("link", {
+					name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations",
+				}),
+			).toHaveAttribute(
+				"href",
+				`${API_JOINT_EVALUATION_PDF}?year=${testDeclarationYear}`,
+			);
 
 			await expectModifiable(page, FIRST_DECLARATION_ROW, {
 				modifiable: false,

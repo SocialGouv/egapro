@@ -150,7 +150,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.getByText(
-				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégorie d'emplois/,
 			),
 		).toBeInTheDocument();
 	});
@@ -167,7 +167,7 @@ describe("Step1Opinions", () => {
 
 		expect(
 			screen.queryByText(
-				/Parcours de mise en conformité pour l'indicateur par catégorie de salariés/,
+				/Parcours de mise en conformité pour l'indicateur par catégorie d'emplois/,
 			),
 		).not.toBeInTheDocument();
 	});
@@ -292,7 +292,7 @@ describe("Step1Opinions", () => {
 		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				"Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie de salariés",
+				"Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois",
 			),
 		).toBeInTheDocument();
 		expect(screen.getAllByText(/Justification des écarts/).length).toBe(1);
@@ -376,6 +376,40 @@ describe("Step1Opinions", () => {
 		).toHaveClass("fr-btn--sm");
 	});
 
+	it("renders the submission banner when the joint evaluation was chosen at the second round", () => {
+		render(
+			<Step1Opinions
+				cseDeadline={cseDeadline}
+				firstDeclarationPathChoice="corrective_action"
+				hasSecondDeclaration
+				secondDeclarationPathChoice="joint_evaluation"
+				siren="123456789"
+				year={2026}
+			/>,
+		);
+
+		expect(
+			screen.getByText(
+				/Votre rapport de l'évaluation conjointe a été transmis/,
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: /Parcours de mise en conformité/,
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 2,
+				name: "Dépôt du ou des avis du CSE",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { level: 3, name: "Deuxième déclaration" }),
+		).toBeInTheDocument();
+	});
+
 	it("does not render the submission banner for other paths", () => {
 		render(
 			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
@@ -388,32 +422,15 @@ describe("Step1Opinions", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("renders previous and next buttons", () => {
+	it("renders the next button without a previous link back to a transmitted step", () => {
 		render(
 			<Step1Opinions cseDeadline={cseDeadline} siren="123456789" year={2026} />,
 		);
 
-		expect(screen.getByRole("link", { name: /Précédent/ })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/6",
-		);
+		expect(
+			screen.queryByRole("link", { name: /Précédent/ }),
+		).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /Suivant/ })).toBeInTheDocument();
-	});
-
-	it("uses the previousHref prop when provided", () => {
-		render(
-			<Step1Opinions
-				cseDeadline={cseDeadline}
-				previousHref="/declaration-remuneration/parcours-conformite"
-				siren="123456789"
-				year={2026}
-			/>,
-		);
-
-		expect(screen.getByRole("link", { name: /Précédent/ })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/parcours-conformite",
-		);
 	});
 
 	it("shows validation error when submitting empty form", async () => {
@@ -1398,6 +1415,40 @@ describe("Step1Opinions", () => {
 				expect(radio).toBeDisabled();
 			}
 			expect(screen.getByRole("button", { name: /Suivant/ })).toBeDisabled();
+		});
+
+		it("links to the upload step instead of submitting when opinions are recorded", () => {
+			mockImpersonating();
+
+			render(
+				<LockProvider isReadOnly={false}>
+					<Step1Opinions
+						cseDeadline={cseDeadline}
+						initialData={{
+							firstDeclAccuracyOpinion: "favorable",
+							firstDeclAccuracyDate: "2026-01-15",
+							firstDeclGapConsulted: false,
+							firstDeclGapOpinion: null,
+							firstDeclGapDate: null,
+							secondDeclAccuracyOpinion: null,
+							secondDeclAccuracyDate: null,
+							secondDeclGapConsulted: null,
+							secondDeclGapOpinion: null,
+							secondDeclGapDate: null,
+						}}
+						siren="123456789"
+						year={2026}
+					/>
+				</LockProvider>,
+			);
+
+			expect(screen.getByRole("link", { name: "Suivant" })).toHaveAttribute(
+				"href",
+				"/avis-cse/etape/2",
+			);
+			expect(
+				screen.queryByRole("button", { name: /Suivant/ }),
+			).not.toBeInTheDocument();
 		});
 
 		it("does not save a draft while impersonating", async () => {

@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
+import type { CompliancePathReadOnlyReason } from "~/modules/domain";
 import { CompliancePathReadOnlyAlert } from "../compliancePath/CompliancePathReadOnlyAlert";
-import type { CompliancePathReadOnlyReason } from "../compliancePath/constants";
 
 const CASES: Array<[CompliancePathReadOnlyReason, RegExp]> = [
 	["demarche_completed", /Votre démarche est finalisée/],

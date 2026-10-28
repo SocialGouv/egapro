@@ -17,6 +17,7 @@ import { COMPLIANCE_PATH } from "~/modules/routes";
 import { getDsfrModal, SUBMIT_LABEL } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import common from "../shared/common.module.scss";
+import { markDeclarationTransmissionSuccess } from "../shared/declarationSuccessFlash";
 import { FormActions } from "../shared/FormActions";
 import {
 	DECLARATION_FUNNEL,
@@ -84,6 +85,12 @@ export function Step6Review({
 		workforce: getObligationWorkforce(companyWorkforce),
 		hasCse,
 	});
+	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
+	const complianceProcessRequired = isComplianceProcessRequired({
+		workforce: companyWorkforce,
+		hasIndicatorG: indicatorGRequired,
+		hasSignificantIndicatorGGap,
+	});
 
 	const openModal = useCallback(() => {
 		if (modalRef.current) {
@@ -113,8 +120,16 @@ export function Step6Review({
 		} catch {
 			// Tracking is best effort; the declaration is already submitted.
 		}
+		if (complianceProcessRequired) {
+			markDeclarationTransmissionSuccess();
+		}
 		finishSubmission();
-	}, [companyWorkforce, declarationYear, finishSubmission]);
+	}, [
+		companyWorkforce,
+		complianceProcessRequired,
+		declarationYear,
+		finishSubmission,
+	]);
 	const refreshAfterSubmissionError = useRefreshAfterSubmissionError();
 	const submitMutation = api.declaration.submit.useMutation({
 		networkMode: "always",
@@ -143,15 +158,6 @@ export function Step6Review({
 	// Kept mounted while a submission is pending or failed, so a refresh revealing it never removes an open dialog.
 	const showSubmitModal =
 		!isSubmitted || submitMutation.isError || submitMutation.isPending;
-
-	const hasSignificantIndicatorGGap = hasGapsAboveThreshold(step5Categories);
-
-	// Phase 2 gate — only significant indicator-G gaps require a compliance path.
-	const complianceProcessRequired = isComplianceProcessRequired({
-		workforce: companyWorkforce,
-		hasIndicatorG: indicatorGRequired,
-		hasSignificantIndicatorGGap,
-	});
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -224,7 +230,9 @@ export function Step6Review({
 							: undefined
 					}
 					nextLabel={isSubmitted ? "Suivant" : SUBMIT_LABEL}
-					previousHref={getPreviousStepHref(6, indicatorGRequired)}
+					previousHref={
+						isSubmitted ? undefined : getPreviousStepHref(6, indicatorGRequired)
+					}
 				/>
 
 				{showSubmitModal && (

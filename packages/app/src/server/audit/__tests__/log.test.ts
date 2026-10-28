@@ -148,6 +148,21 @@ describe("logAction", () => {
 		});
 	});
 
+	it("keeps the representation lock resource with its year and drops a composite id", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.DECLARATION_LOCK_ACQUIRED,
+			status: "success",
+			resourceType: "representation_declaration",
+			resourceId: "123456789:2025",
+			metadata: { year: 2025, siren: "123456789" },
+		});
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			resourceType: "representation_declaration",
+			resourceId: null,
+			metadata: { year: 2025 },
+		});
+	});
+
 	it("rejects free text in attribution fields", async () => {
 		await logAction({
 			action: AUDIT_ACTIONS.AUTH_LOGIN,
@@ -191,14 +206,62 @@ describe("logAction", () => {
 		});
 	});
 
-	it("keeps the validated XLSX export format", async () => {
+	it("keeps the public export format in stdout without persisting it", async () => {
 		await logAction({
 			action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
 			status: "success",
 			metadata: { format: "xlsx", search: "private@example.com" },
 		});
-		expect(mockInsertValues.mock.calls[0]?.[0]?.metadata).toEqual({
-			format: "xlsx",
+		expect(mockEmitActivityLog).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+				rawInput: { format: "xlsx", search: "private@example.com" },
+			}),
+		);
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		AUDIT_ACTIONS.PUBLIC_REFERENT_SEARCH,
+		AUDIT_ACTIONS.PUBLIC_REFERENT_VIEW,
+		AUDIT_ACTIONS.PUBLIC_DECLARATIONS_EXPORT,
+	])("emits only stdout for public action %s on success and failure", async (action) => {
+		for (const status of ["success", "failure"] as const) {
+			await logAction({
+				action,
+				status,
+				ipAddress: "203.0.113.45",
+			});
+		}
+
+		expect(mockEmitActivityLog).toHaveBeenCalledTimes(2);
+		expect(mockEmitActivityLog.mock.calls.map(([entry]) => entry)).toEqual([
+			expect.objectContaining({
+				action,
+				status: "success",
+				ip: "203.0.113.45",
+			}),
+			expect.objectContaining({
+				action,
+				status: "failure",
+				ip: "203.0.113.45",
+			}),
+		]);
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
+	it("keeps database auditing for a protected export", async () => {
+		await logAction({
+			action: AUDIT_ACTIONS.EXPORT_API_DECLARATIONS,
+			status: "success",
+			ipAddress: "203.0.113.45",
+		});
+
+		expect(mockEmitActivityLog).toHaveBeenCalledOnce();
+		expect(mockInsertValues).toHaveBeenCalledOnce();
+		expect(mockInsertValues.mock.calls[0]?.[0]).toMatchObject({
+			action: AUDIT_ACTIONS.EXPORT_API_DECLARATIONS,
+			ipAddress: "203.0.0.0",
 		});
 	});
 

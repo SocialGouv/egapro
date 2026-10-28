@@ -17,7 +17,7 @@ describe("getSubmissionErrorMessage", () => {
 		["CONFLICT", "Cette déclaration est en cours de modification."],
 		[
 			"PRECONDITION_FAILED",
-			"L'indicateur par catégorie de salariés doit être renseigné avant la transmission de la déclaration.",
+			"L'indicateur par catégorie d'emplois doit être renseigné avant la transmission de la déclaration.",
 		],
 	])("keeps the server message written for the user (%s)", (code, message) => {
 		expect(getSubmissionErrorMessage({ message, data: { code } })).toBe(
