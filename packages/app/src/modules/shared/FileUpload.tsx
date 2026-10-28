@@ -35,6 +35,12 @@ type Props = {
 	 * but the user cannot add files (e.g. during admin impersonation).
 	 */
 	disabled?: boolean;
+	/**
+	 * Accessible name of the file input. Leave unset when a visible <label>
+	 * targets `inputId`: the label then names the field, and an aria-label
+	 * would override it.
+	 */
+	ariaLabel?: string;
 };
 
 export function FileUpload({
@@ -47,6 +53,7 @@ export function FileUpload({
 	acceptLabel,
 	maxFileCount = 1,
 	disabled = false,
+	ariaLabel,
 }: Props) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const dropzoneRef = useRef<HTMLElement>(null);
@@ -211,7 +218,7 @@ export function FileUpload({
 				accept={accept}
 				aria-describedby={messagesId}
 				aria-invalid={error !== null}
-				aria-label="Sélectionner des fichiers"
+				aria-label={ariaLabel}
 				className="fr-sr-only"
 				disabled={!canAddMore}
 				id={inputId}
