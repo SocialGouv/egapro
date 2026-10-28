@@ -92,10 +92,11 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 		await sql`INSERT INTO app_user_company (user_id, siren) VALUES (${USER_ID}, ${SIREN})`;
 		await sql`
 			INSERT INTO app_declaration
-				(id, siren, year, declarant_id, status, created_at, updated_at)
+				(id, siren, year, declarant_id, status, first_declaration_path_choice,
+				 first_declaration_gap_justification, created_at, updated_at)
 			VALUES
 				(${DECLARATION_ID}, ${SIREN}, ${YEAR}, ${USER_ID}, 'awaiting_cse_opinion',
-				 '2025-05-01T08:00:00Z', '2025-05-01T10:00:00Z')
+				 'joint_evaluation', 'partial', '2025-05-01T08:00:00Z', '2025-05-01T10:00:00Z')
 		`;
 		await sql`
 			INSERT INTO app_job_category (id, declaration_id, category_index, name, source)
@@ -157,7 +158,6 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 			firstDeclaration: {
 				accuracyOpinion: "favorable",
 				accuracyDate: "2025-05-01",
-				gapConsulted: true,
 				gapOpinion: "favorable",
 				gapDate: "2025-05-01",
 			},
@@ -169,7 +169,6 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 			firstDeclaration: {
 				accuracyOpinion: "unfavorable",
 				accuracyDate: "2025-05-01",
-				gapConsulted: true,
 				gapOpinion: "favorable",
 				gapDate: "2025-05-01",
 			},
@@ -178,14 +177,13 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 		expect(await fetchAccuracyOpinion()).toBe("unfavorable");
 	});
 
-	it("drops the gap justification from the API when the CSE consultation is switched from yes to no and the declaration is submitted again", async () => {
+	it("drops the gap justification from the API when the gaps are requalified as not justifiable and the declaration is submitted again", async () => {
 		const caller = createCaller();
 
 		await caller.saveOpinions({
 			firstDeclaration: {
 				accuracyOpinion: "favorable",
 				accuracyDate: "2025-05-01",
-				gapConsulted: true,
 				gapOpinion: "favorable",
 				gapDate: "2025-05-01",
 			},
@@ -208,11 +206,11 @@ describe("GET /api/v1/export/declarations — CSE opinion updates (#4574)", () =
 			{ Numero_declaration: 1, Type: "gap" },
 		]);
 
+		await sql`UPDATE app_declaration SET first_declaration_gap_justification = 'none' WHERE id = ${DECLARATION_ID}`;
 		await caller.saveOpinions({
 			firstDeclaration: {
 				accuracyOpinion: "favorable",
 				accuracyDate: "2025-05-01",
-				gapConsulted: false,
 				gapOpinion: null,
 				gapDate: null,
 			},

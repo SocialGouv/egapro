@@ -14,8 +14,14 @@ export function compliancePathsForGapJustification(
 		: ["joint_evaluation"];
 }
 
-export function gapJustificationFromPath(
-	path: CompliancePathValue | undefined,
-): GapJustification | undefined {
-	return path === "justify" ? "all" : undefined;
+export function isCseJustificationOpinionRequired({
+	gapHigh,
+	gapJustification,
+}: {
+	gapHigh: boolean;
+	gapJustification: GapJustification | null;
+}): boolean {
+	return (
+		gapHigh && (gapJustification === "all" || gapJustification === "partial")
+	);
 }

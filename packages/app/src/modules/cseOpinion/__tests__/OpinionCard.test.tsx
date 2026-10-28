@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { AccuracyOpinionCard } from "../components/AccuracyOpinionCard";
+import { OpinionCard } from "../components/OpinionCard";
 
-describe("AccuracyOpinionCard", () => {
+describe("OpinionCard", () => {
 	const defaultProps = {
 		id: "test-accuracy",
 		title: "Exactitude des données",
@@ -14,7 +14,7 @@ describe("AccuracyOpinionCard", () => {
 	};
 
 	it("renders the title and radio options", () => {
-		render(<AccuracyOpinionCard {...defaultProps} />);
+		render(<OpinionCard {...defaultProps} />);
 
 		expect(screen.getByText("Exactitude des données")).toBeInTheDocument();
 		expect(screen.getByLabelText("Favorable")).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe("AccuracyOpinionCard", () => {
 	});
 
 	it("renders the date input with label", () => {
-		render(<AccuracyOpinionCard {...defaultProps} />);
+		render(<OpinionCard {...defaultProps} />);
 
 		expect(
 			screen.getByLabelText(/Date de l'avis rendu par le CSE/),
@@ -30,14 +30,14 @@ describe("AccuracyOpinionCard", () => {
 	});
 
 	it("checks the favorable radio when opinion is favorable", () => {
-		render(<AccuracyOpinionCard {...defaultProps} opinion="favorable" />);
+		render(<OpinionCard {...defaultProps} opinion="favorable" />);
 
 		expect(screen.getByLabelText("Favorable")).toBeChecked();
 		expect(screen.getByLabelText("Défavorable")).not.toBeChecked();
 	});
 
 	it("checks the unfavorable radio when opinion is unfavorable", () => {
-		render(<AccuracyOpinionCard {...defaultProps} opinion="unfavorable" />);
+		render(<OpinionCard {...defaultProps} opinion="unfavorable" />);
 
 		expect(screen.getByLabelText("Favorable")).not.toBeChecked();
 		expect(screen.getByLabelText("Défavorable")).toBeChecked();
@@ -47,12 +47,7 @@ describe("AccuracyOpinionCard", () => {
 		const onOpinionChange = vi.fn();
 		const user = userEvent.setup();
 
-		render(
-			<AccuracyOpinionCard
-				{...defaultProps}
-				onOpinionChange={onOpinionChange}
-			/>,
-		);
+		render(<OpinionCard {...defaultProps} onOpinionChange={onOpinionChange} />);
 
 		await user.click(screen.getByLabelText("Favorable"));
 		expect(onOpinionChange).toHaveBeenCalledWith("favorable");
@@ -62,9 +57,7 @@ describe("AccuracyOpinionCard", () => {
 		const onDateChange = vi.fn();
 		const user = userEvent.setup();
 
-		render(
-			<AccuracyOpinionCard {...defaultProps} onDateChange={onDateChange} />,
-		);
+		render(<OpinionCard {...defaultProps} onDateChange={onDateChange} />);
 
 		const dateInput = screen.getByLabelText(/Date de l'avis rendu par le CSE/);
 		await user.type(dateInput, "2026-01-15");
@@ -72,14 +65,14 @@ describe("AccuracyOpinionCard", () => {
 	});
 
 	it("displays the date value when provided", () => {
-		render(<AccuracyOpinionCard {...defaultProps} date="2026-01-15" />);
+		render(<OpinionCard {...defaultProps} date="2026-01-15" />);
 
 		const dateInput = screen.getByLabelText(/Date de l'avis rendu par le CSE/);
 		expect(dateInput).toHaveValue("2026-01-15");
 	});
 
 	it("has accessible fieldset with legend", () => {
-		render(<AccuracyOpinionCard {...defaultProps} />);
+		render(<OpinionCard {...defaultProps} />);
 
 		expect(screen.getByText("Quel est l'avis du CSE ?")).toBeInTheDocument();
 	});

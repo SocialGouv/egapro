@@ -1,18 +1,10 @@
-import type {
-	AssociationMap,
-	ContentTypeColumn,
-	DeclarationNumber,
-} from "../types";
+import { DECLARATION_HEADINGS } from "../contentTypeColumns";
+import type { AssociationMap, ContentTypeColumn } from "../types";
 import styles from "./OpinionSummaryBox.module.scss";
 
 type Props = {
 	columns: ContentTypeColumn[];
 	associations: AssociationMap;
-};
-
-const DECLARATION_HEADINGS: Record<DeclarationNumber, string> = {
-	1: "Première déclaration",
-	2: "Deuxième déclaration",
 };
 
 export function OpinionSummaryBox({ columns, associations }: Props) {
@@ -25,42 +17,44 @@ export function OpinionSummaryBox({ columns, associations }: Props) {
 
 	return (
 		<div className={`fr-p-4w ${styles.container}`}>
-			<p className="fr-text--bold fr-mb-2w">Avis CSE à transmettre :</p>
+			<p className="fr-text--bold fr-mb-4w">Avis CSE à transmettre</p>
 
-			{declarationNumbers.map((declarationNumber) => (
-				<div className="fr-mb-2w" key={declarationNumber}>
-					{showDeclarationHeadings && (
-						<p className="fr-text--bold fr-mb-1w">
-							{DECLARATION_HEADINGS[declarationNumber]}
-						</p>
-					)}
-					<ul className={`fr-mb-0 ${styles.list}`}>
-						{columns
-							.filter(
-								(column) => column.declarationNumber === declarationNumber,
-							)
-							.map((column) => {
-								const isJoined = Boolean(associations[column.id]);
-								return (
-									<li className={styles.item} key={column.id}>
-										{isJoined ? (
-											<span
-												className={`fr-icon-check-line fr-icon--sm ${styles.checkIcon}`}
-											>
-												<span className="fr-sr-only">Avis joint : </span>
-											</span>
-										) : (
-											<span aria-hidden="true" className={styles.bullet}>
-												•
-											</span>
-										)}
-										<span>{column.description}</span>
-									</li>
-								);
-							})}
-					</ul>
-				</div>
-			))}
+			<div className={styles.groups}>
+				{declarationNumbers.map((declarationNumber) => (
+					<div key={declarationNumber}>
+						{showDeclarationHeadings && (
+							<p className="fr-text--bold fr-mb-1w">
+								{DECLARATION_HEADINGS[declarationNumber]}
+							</p>
+						)}
+						<ul className={`fr-mb-0 ${styles.list}`}>
+							{columns
+								.filter(
+									(column) => column.declarationNumber === declarationNumber,
+								)
+								.map((column) => {
+									const isJoined = Boolean(associations[column.id]);
+									return (
+										<li className={styles.item} key={column.id}>
+											{isJoined ? (
+												<span
+													className={`fr-icon-check-line fr-icon--sm ${styles.checkIcon}`}
+												>
+													<span className="fr-sr-only">Avis joint : </span>
+												</span>
+											) : (
+												<span aria-hidden="true" className={styles.bullet}>
+													•
+												</span>
+											)}
+											<span>{column.description}</span>
+										</li>
+									);
+								})}
+						</ul>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }

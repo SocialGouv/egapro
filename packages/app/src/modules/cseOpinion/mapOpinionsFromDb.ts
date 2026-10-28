@@ -29,12 +29,10 @@ export function mapOpinionsFromDb(
 	return {
 		firstDeclAccuracyOpinion: asOpinionType(firstAccuracy?.opinion ?? null),
 		firstDeclAccuracyDate: firstAccuracy?.opinionDate ?? null,
-		firstDeclGapConsulted: firstGap?.gapConsulted ?? null,
 		firstDeclGapOpinion: asOpinionType(firstGap?.opinion ?? null),
 		firstDeclGapDate: firstGap?.opinionDate ?? null,
 		secondDeclAccuracyOpinion: asOpinionType(secondAccuracy?.opinion ?? null),
 		secondDeclAccuracyDate: secondAccuracy?.opinionDate ?? null,
-		secondDeclGapConsulted: secondGap?.gapConsulted ?? null,
 		secondDeclGapOpinion: asOpinionType(secondGap?.opinion ?? null),
 		secondDeclGapDate: secondGap?.opinionDate ?? null,
 	};

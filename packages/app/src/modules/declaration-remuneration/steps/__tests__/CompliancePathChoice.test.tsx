@@ -225,7 +225,10 @@ describe("CompliancePathChoice — round 1, qualification screen", () => {
 		submitForm();
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+			expect(mockMutate).toHaveBeenCalledWith({
+				gapJustification: "all",
+				path: "justify",
+			});
 		});
 		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
 	});
@@ -236,7 +239,10 @@ describe("CompliancePathChoice — round 1, qualification screen", () => {
 		submitForm();
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+			expect(mockMutate).toHaveBeenCalledWith({
+				gapJustification: "all",
+				path: "justify",
+			});
 		});
 		expect(mockPush).toHaveBeenCalledWith(
 			"/declaration-remuneration/parcours-conformite/confirmation",
@@ -252,18 +258,33 @@ describe("CompliancePathChoice — round 1, qualification screen", () => {
 	});
 
 	it("pre-checks all justifiable when justify was already saved", () => {
-		render(compliancePathChoice({ initialPath: "justify" }));
+		render(
+			compliancePathChoice({
+				initialGapJustification: "all",
+				initialPath: "justify",
+			}),
+		);
 		expect(screen.getByLabelText(ALL_TITLE)).toBeChecked();
 	});
 
 	it.each([
-		"corrective_action",
-		"joint_evaluation",
-	] as const)("pre-checks no qualification when %s was saved, the partial/none split being unknown", (initialPath) => {
-		render(compliancePathChoice({ initialPath }));
+		["corrective_action", "partial", PARTIAL_TITLE],
+		["joint_evaluation", "none", NONE_TITLE],
+	] as const)("pre-checks the stored qualification when %s was saved with %s", (initialPath, initialGapJustification, title) => {
+		render(compliancePathChoice({ initialGapJustification, initialPath }));
+		expect(screen.getByLabelText(title)).toBeChecked();
+	});
+
+	it("pre-checks no qualification when a path was saved without one", () => {
+		render(compliancePathChoice({ initialPath: "joint_evaluation" }));
 		for (const title of [ALL_TITLE, PARTIAL_TITLE, NONE_TITLE]) {
 			expect(screen.getByLabelText(title)).not.toBeChecked();
 		}
+	});
+
+	it("ignores a stored qualification when no path was saved", () => {
+		render(compliancePathChoice({ initialGapJustification: "partial" }));
+		expect(screen.getByLabelText(PARTIAL_TITLE)).not.toBeChecked();
 	});
 });
 
@@ -292,15 +313,18 @@ describe("CompliancePathChoice — round 2", () => {
 	});
 
 	it.each([
-		NONE_TITLE,
-		PARTIAL_TITLE,
-	])("saves joint_evaluation straight away for %s", async (title) => {
+		[NONE_TITLE, "none"],
+		[PARTIAL_TITLE, "partial"],
+	] as const)("saves joint_evaluation straight away for %s", async (title, gapJustification) => {
 		render(compliancePathChoice({ isSecondRound: true }));
 		fireEvent.click(screen.getByLabelText(title));
 		submitForm();
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
+			expect(mockMutate).toHaveBeenCalledWith({
+				gapJustification,
+				path: "joint_evaluation",
+			});
 		});
 		expect(mockPush).toHaveBeenCalledWith(JOINT_EVALUATION_HREF);
 		expect(
@@ -314,7 +338,10 @@ describe("CompliancePathChoice — round 2", () => {
 		submitForm();
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+			expect(mockMutate).toHaveBeenCalledWith({
+				gapJustification: "all",
+				path: "justify",
+			});
 		});
 	});
 
@@ -399,7 +426,10 @@ describe("CompliancePathChoice under a third-party lock", () => {
 	it("disables the radios without showing a read-only alert", () => {
 		const { container } = render(
 			<LockProvider isReadOnly>
-				{compliancePathChoice({ initialPath: "justify" })}
+				{compliancePathChoice({
+					initialGapJustification: "all",
+					initialPath: "justify",
+				})}
 			</LockProvider>,
 		);
 
@@ -410,7 +440,10 @@ describe("CompliancePathChoice under a third-party lock", () => {
 	it("renders Suivant as a link to the rest of the path when justify is saved", () => {
 		render(
 			<LockProvider isReadOnly>
-				{compliancePathChoice({ initialPath: "justify" })}
+				{compliancePathChoice({
+					initialGapJustification: "all",
+					initialPath: "justify",
+				})}
 			</LockProvider>,
 		);
 
@@ -456,6 +489,7 @@ describe("CompliancePathChoice read-only mode", () => {
 	it("renders the read-only alert and disables the radios", () => {
 		render(
 			compliancePathChoice({
+				initialGapJustification: "all",
 				initialPath: "justify",
 				readOnlyReason: "cse_opinion_submitted",
 			}),
@@ -469,6 +503,7 @@ describe("CompliancePathChoice read-only mode", () => {
 	it("renders Suivant as a navigation link instead of a submit button", () => {
 		render(
 			compliancePathChoice({
+				initialGapJustification: "all",
 				initialPath: "justify",
 				readOnlyReason: "cse_opinion_submitted",
 			}),
@@ -485,6 +520,7 @@ describe("CompliancePathChoice read-only mode", () => {
 	it("does not call the save mutation when the read-only form is submitted", async () => {
 		render(
 			compliancePathChoice({
+				initialGapJustification: "all",
 				initialPath: "justify",
 				readOnlyReason: "cse_opinion_submitted",
 			}),

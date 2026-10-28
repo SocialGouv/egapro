@@ -34,6 +34,12 @@ export const compliancePathEnum = pgEnum("compliance_path", [
 	"joint_evaluation",
 ]);
 
+export const gapJustificationEnum = pgEnum("gap_justification", [
+	"all",
+	"partial",
+	"none",
+]);
+
 export const declarationEventTypeEnum = pgEnum("declaration_event_type", [
 	"submit",
 	"path_choice",
@@ -97,6 +103,12 @@ export const declarations = createTable(
 		),
 		secondDeclarationPathChoice: compliancePathEnum(
 			"second_declaration_path_choice",
+		),
+		firstDeclarationGapJustification: gapJustificationEnum(
+			"first_declaration_gap_justification",
+		),
+		secondDeclarationGapJustification: gapJustificationEnum(
+			"second_declaration_gap_justification",
 		),
 		// ── Indicator A — Global remuneration gap (mean) ──
 		indicatorAAnnualWomen: d.numeric(),

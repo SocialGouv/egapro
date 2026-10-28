@@ -41,12 +41,10 @@ describe("mapOpinionsFromDb", () => {
 		expect(mapOpinionsFromDb(rows)).toEqual({
 			firstDeclAccuracyOpinion: "favorable",
 			firstDeclAccuracyDate: "2026-01-15",
-			firstDeclGapConsulted: true,
 			firstDeclGapOpinion: "unfavorable",
 			firstDeclGapDate: "2026-01-20",
 			secondDeclAccuracyOpinion: "unfavorable",
 			secondDeclAccuracyDate: "2026-02-01",
-			secondDeclGapConsulted: false,
 			secondDeclGapOpinion: null,
 			secondDeclGapDate: null,
 		});
@@ -65,7 +63,7 @@ describe("mapOpinionsFromDb", () => {
 
 		const result = mapOpinionsFromDb(rows);
 		expect(result?.firstDeclAccuracyOpinion).toBe("favorable");
-		expect(result?.firstDeclGapConsulted).toBeNull();
+		expect(result?.firstDeclGapOpinion).toBeNull();
 		expect(result?.secondDeclAccuracyOpinion).toBeNull();
 	});
 

@@ -1,6 +1,7 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
+import { NO_FILE_ALERT } from "~/modules/cseOpinion/contentTypeColumns";
 import {
 	API_TRANSMITTED_PDF,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -10,6 +11,7 @@ import {
 	cseOpinionStepHref,
 	remunerationStepHref,
 } from "~/modules/routes";
+import { SUBMIT_LABEL } from "~/modules/shared/submitLabels";
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
 import {
@@ -19,6 +21,7 @@ import {
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
+	uploadJointEvalPdf,
 } from "./helpers/compliance-flows";
 import {
 	countPathChoiceEventsRound1,
@@ -131,6 +134,61 @@ test.describe("[CAS-06] Path 4: gap + hasCse → joint evaluation → /avis-cse"
 	}) => {
 		test.slow();
 		await FICHE_SCENARIOS["CAS-06"]({ page, coordinate });
+	});
+
+	test.describe("no justifiable gap → accuracy opinion only", () => {
+		test.beforeAll(async () => {
+			await resetDeclarationToDraft();
+			await setCompanyHasCse(coordinate.hasCse);
+			await setCompanyWorkforce(coordinate.workforce);
+		});
+
+		test("joint evaluation banner, then a single accuracy opinion to transmit", async ({
+			page,
+		}) => {
+			test.slow();
+			await completeDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-joint", {
+				gapJustification: "none",
+			});
+			await uploadJointEvalPdf(page);
+			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
+				timeout: 15_000,
+			});
+
+			await test.step("le bandeau d'évaluation conjointe encadre l'étape 1", async () => {
+				await expect(
+					page.getByRole("heading", {
+						level: 1,
+						name: "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois",
+					}),
+				).toBeVisible();
+				await expect(
+					page.getByText(
+						"Votre évaluation conjointe des rémunérations a été transmise",
+					),
+				).toBeVisible();
+				await expect(
+					page.getByRole("heading", {
+						level: 2,
+						name: "Transmission du ou des avis du CSE",
+					}),
+				).toBeVisible();
+			});
+
+			await fillCseStep1(page);
+
+			await test.step("transmettre sans fichier affiche « Aucun avis déposé »", async () => {
+				await page
+					.getByRole("button", { exact: true, name: SUBMIT_LABEL })
+					.click();
+				await expect(
+					page.getByRole("heading", { name: NO_FILE_ALERT.title }),
+				).toBeVisible();
+			});
+
+			await submitCseStep2(page);
+		});
 	});
 });
 
@@ -306,6 +364,48 @@ test.describe("[CAS-12] Path 10: second round + joint evaluation + hasCse → /a
 		test.slow();
 		await FICHE_SCENARIOS["CAS-12"]({ page, coordinate });
 	});
+
+	test.describe("second declaration with no justifiable gap → justification on the first only", () => {
+		test.beforeAll(async () => {
+			await resetDeclarationToDraft();
+			await setCompanyHasCse(coordinate.hasCse);
+			await setCompanyWorkforce(coordinate.workforce);
+		});
+
+		test("first declaration asks both opinions, the second only accuracy", async ({
+			page,
+		}) => {
+			test.slow();
+			await completeDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-corrective");
+			await completeSecondDeclaration(page, { hasGap: true });
+			await selectCompliancePath(page, "path-joint", {
+				gapJustification: "none",
+			});
+			await uploadJointEvalPdf(page);
+			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
+				timeout: 15_000,
+			});
+
+			for (const name of ["Première déclaration", "Seconde déclaration"]) {
+				await expect(
+					page.getByRole("heading", { level: 3, name, exact: true }),
+				).toBeVisible();
+			}
+			await fillCseStep1(page, {
+				hasSecondDeclaration: true,
+				firstDeclJustification: true,
+			});
+			await submitCseStep2(page, {
+				hasSecondDeclaration: true,
+				columns: [
+					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 1, type: "gap" },
+					{ declarationNumber: 2, type: "accuracy" },
+				],
+			});
+		});
+	});
 });
 
 test.describe("[CAS-11] Path 11: second round + joint evaluation + no hasCse → /confirmation", () => {
@@ -406,7 +506,7 @@ test.describe("[ANX-02] Path 12: compliance already completed → redirect", () 
 		// Complete declaration without gap → auto-redirect to CSE → complete CSE
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapCardHidden: true });
+		await fillCseStep1(page);
 		await submitCseStep2(page);
 
 		// demarcheCompletedAt is now set — navigating back should redirect

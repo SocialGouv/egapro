@@ -1,3 +1,7 @@
+import {
+	type GapJustification,
+	isCseJustificationOpinionRequired,
+} from "~/modules/domain";
 import type {
 	AssociationMap,
 	ContentType,
@@ -9,15 +13,29 @@ import type {
 	StoredFileContentType,
 } from "./types";
 
-const ACCURACY_DESCRIPTIONS: Record<DeclarationNumber, string> = {
-	1: "Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs",
-	2: "Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois",
+const ACCURACY_OPINION_TITLES: Record<DeclarationNumber, string> = {
+	1: "Exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de chaque indicateur.",
+	2: "Exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de la seconde déclaration de l'indicateur par catégorie d'emplois.",
 };
 
-const GAP_DESCRIPTION =
-	"Justification des écarts ≥ 5 % par des critères objectifs et non sexistes de l'indicateur de rémunération par catégorie d'emplois";
+const JUSTIFICATION_OPINION_TITLE =
+	"Justification des écarts ≥ 5 % par des critères objectifs et non fondés sur le sexe de l'indicateur par catégorie d'emplois.";
 
-const TYPE_LABELS: Record<ContentType, string> = {
+export function getOpinionTitle(
+	declarationNumber: DeclarationNumber,
+	type: ContentType,
+): string {
+	return type === "accuracy"
+		? ACCURACY_OPINION_TITLES[declarationNumber]
+		: JUSTIFICATION_OPINION_TITLE;
+}
+
+export const DECLARATION_HEADINGS: Record<DeclarationNumber, string> = {
+	1: "Première déclaration",
+	2: "Seconde déclaration",
+};
+
+export const TYPE_LABELS: Record<ContentType, string> = {
 	accuracy: "Exactitude",
 	gap: "Justification",
 };
@@ -29,13 +47,63 @@ const DECLARATION_LABELS: Record<DeclarationNumber, string> = {
 
 const DECLARATION_ORDINALS: Record<DeclarationNumber, string> = {
 	1: "première",
-	2: "deuxième",
+	2: "seconde",
 };
 
 const TYPE_ERROR_PHRASES: Record<ContentType, string> = {
 	accuracy: "d'exactitude des données et des méthodes de calcul",
 	gap: "justifiant les écarts ≥ 5 %",
 };
+
+export const MISSING_OPINION_ALERT_TITLE = "Un avis CSE est manquant";
+
+export const NO_FILE_ALERT = {
+	title: "Aucun avis déposé",
+	message:
+		"Vous devez déposer le ou les avis de votre CSE au format PDF avant de transmettre.",
+} as const;
+
+export const UNASSOCIATED_FILE_ALERT = {
+	title: "Type d'avis non renseigné",
+	message:
+		"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
+} as const;
+
+export function getMissingOpinionMessage(
+	{ declarationNumber, type }: ContentTypeKey,
+	hasSecondDeclaration: boolean,
+): string {
+	const declarationPart = hasSecondDeclaration
+		? ` de la ${DECLARATION_ORDINALS[declarationNumber]} déclaration`
+		: "";
+	return `Ajoutez l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`;
+}
+
+export function computeJustificationRequirements({
+	firstDeclarationGapJustification,
+	secondDeclarationGapJustification,
+	firstDeclGapHigh,
+	secondDeclGapHigh,
+}: {
+	firstDeclarationGapJustification: GapJustification | null;
+	secondDeclarationGapJustification: GapJustification | null;
+	firstDeclGapHigh: boolean;
+	secondDeclGapHigh: boolean;
+}): Pick<
+	ContentTypeColumnsInput,
+	"firstDeclJustificationRequired" | "secondDeclJustificationRequired"
+> {
+	return {
+		firstDeclJustificationRequired: isCseJustificationOpinionRequired({
+			gapHigh: firstDeclGapHigh,
+			gapJustification: firstDeclarationGapJustification,
+		}),
+		secondDeclJustificationRequired: isCseJustificationOpinionRequired({
+			gapHigh: secondDeclGapHigh,
+			gapJustification: secondDeclarationGapJustification,
+		}),
+	};
+}
 
 export function buildColumnId(declarationNumber: number, type: string): string {
 	return `${declarationNumber}:${type}`;
@@ -46,14 +114,6 @@ function buildColumn(
 	type: ContentType,
 	hasSecondDeclaration: boolean,
 ): ContentTypeColumn {
-	const description =
-		type === "accuracy"
-			? ACCURACY_DESCRIPTIONS[declarationNumber]
-			: GAP_DESCRIPTION;
-	const declarationPart = hasSecondDeclaration
-		? ` de la ${DECLARATION_ORDINALS[declarationNumber]} déclaration`
-		: "";
-
 	return {
 		id: buildColumnId(declarationNumber, type),
 		declarationNumber,
@@ -62,32 +122,28 @@ function buildColumn(
 		declarationLabel: hasSecondDeclaration
 			? DECLARATION_LABELS[declarationNumber]
 			: null,
-		description,
-		missingMessage: `Ajoutez l'avis ${TYPE_ERROR_PHRASES[type]}${declarationPart}, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.`,
+		description: getOpinionTitle(declarationNumber, type),
+		missingMessage: getMissingOpinionMessage(
+			{ declarationNumber, type },
+			hasSecondDeclaration,
+		),
 	};
 }
 
-// Single source of truth for the content types the parcours requires. Justification
-// (gap) is required only when the declaration has a gap >= 5% AND the CSE was
-// consulted on justifying it (besoin epic-3476). Shared by the Step 2 matrix (UI)
-// and the finalize guard (server) so the displayed columns and the validated types
-// can never diverge.
 export function computeRequiredContentTypes({
 	hasSecondDeclaration,
-	firstDeclGapConsulted,
-	secondDeclGapConsulted,
-	firstDeclGapHigh,
-	secondDeclGapHigh,
+	firstDeclJustificationRequired,
+	secondDeclJustificationRequired,
 }: ContentTypeColumnsInput): ContentTypeKey[] {
 	const specs: ContentTypeKey[] = [{ declarationNumber: 1, type: "accuracy" }];
 
-	if (firstDeclGapHigh && firstDeclGapConsulted === true) {
+	if (firstDeclJustificationRequired) {
 		specs.push({ declarationNumber: 1, type: "gap" });
 	}
 
 	if (hasSecondDeclaration) {
 		specs.push({ declarationNumber: 2, type: "accuracy" });
-		if (secondDeclGapHigh && secondDeclGapConsulted === true) {
+		if (secondDeclJustificationRequired) {
 			specs.push({ declarationNumber: 2, type: "gap" });
 		}
 	}

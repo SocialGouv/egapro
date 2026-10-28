@@ -1,6 +1,9 @@
 export { ConfirmationPage } from "./ConfirmationPage";
 export { CseOpinionLayout } from "./CseOpinionLayout";
-export { computeContentTypeColumns } from "./contentTypeColumns";
+export {
+	computeContentTypeColumns,
+	computeJustificationRequirements,
+} from "./contentTypeColumns";
 export { CSE_FUNNEL } from "./funnelConfig";
 export { getImpersonationCseOpinionEntryHref } from "./impersonationEntry";
 export { mapOpinionsFromDb } from "./mapOpinionsFromDb";
@@ -12,6 +15,7 @@ export {
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
 } from "./schemas";
+export { getSubmissionBannerState } from "./submissionBanner";
 export type {
 	ContentTypeColumn,
 	CseOpinionStep1Data,

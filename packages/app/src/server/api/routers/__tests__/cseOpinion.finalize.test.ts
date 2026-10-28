@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { GapJustification } from "~/modules/domain";
 
 const mocks = vi.hoisted(() => ({
 	enqueueReceipt: vi.fn().mockResolvedValue(undefined),
@@ -30,11 +31,6 @@ const DEFAULT_DECLARATION = {
 	secondDeclarationStep: null,
 };
 
-type Opinion = {
-	declarationNumber: number;
-	type: string;
-	gapConsulted: boolean | null;
-};
 type Association = { declarationNumber: number; type: string; fileId?: string };
 type FileRow = { id: string; fileName: string };
 
@@ -45,12 +41,14 @@ const DEFAULT_FILES: FileRow[] = [
 	{ id: DEFAULT_FILE_ID, fileName: "avis-1.pdf" },
 ];
 
-const FIRST_GAP_CONSULTED: Opinion[] = [
-	{ declarationNumber: 1, type: "accuracy", gapConsulted: null },
-	{ declarationNumber: 1, type: "gap", gapConsulted: true },
-];
+type Justifications = {
+	first: GapJustification | null;
+	second: GapJustification | null;
+};
 
-// Covers every type required by FIRST_GAP_CONSULTED so finalize passes the guard.
+const FIRST_GAP_JUSTIFIED: Justifications = { first: "partial", second: null };
+
+// Covers every type required by FIRST_GAP_JUSTIFIED so finalize passes the guard.
 const ASSOCIATIONS_FIRST_GAP: Association[] = [
 	{ declarationNumber: 1, type: "accuracy" },
 	{ declarationNumber: 1, type: "gap" },
@@ -84,7 +82,7 @@ function gapCategory(declarationType: string): CategoryRow {
 }
 
 // Both declarations have a gap >= 5% by default, so the Justification gate turns
-// purely on gapConsulted in the pre-existing guard tests.
+// purely on the stored qualification in the guard tests.
 const DEFAULT_CATEGORIES: CategoryRow[] = [
 	gapCategory("initial"),
 	gapCategory("correction"),
@@ -95,7 +93,7 @@ type FinalizeOptions = {
 	files?: FileRow[];
 	declaration?: Record<string, unknown> | null;
 	txDraft?: Record<string, unknown> | null;
-	opinions?: Opinion[];
+	justifications?: Justifications;
 	associations?: Association[];
 	categories?: CategoryRow[];
 	// When true, the opinion count query resolves to [] so its row is undefined,
@@ -112,7 +110,7 @@ type FinalizeOptions = {
 //   3 opinionCount (.where)
 //   4 file rows id + name (.where)
 //   5 existingAssociations (.where)
-//   6 opinions with gapConsulted (.where)
+//   6 stored gap qualifications (.where().limit)
 //   7 employee categories for the gap >= 5% gate (.innerJoin().where)
 //   8 second_declaration_submit event lookup (.where().limit)
 function createMockDbForFinalize(options: FinalizeOptions = {}) {
@@ -121,7 +119,7 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		files = DEFAULT_FILES,
 		declaration = DEFAULT_DECLARATION,
 		txDraft = null,
-		opinions = FIRST_GAP_CONSULTED,
+		justifications = FIRST_GAP_JUSTIFIED,
 		associations = ASSOCIATIONS_FIRST_GAP,
 		categories = DEFAULT_CATEGORIES,
 		emptyOpinionCountRow = false,
@@ -147,6 +145,14 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 	limit.mockImplementation(() => {
 		const call = selectCallCount;
 		if (call === 1) return Promise.resolve([declarationLookupRow]);
+		if (call === 6) {
+			return Promise.resolve([
+				{
+					firstDeclarationGapJustification: justifications.first,
+					secondDeclarationGapJustification: justifications.second,
+				},
+			]);
+		}
 		if (call === 8) {
 			return Promise.resolve(
 				secondDeclarationSubmitted
@@ -175,9 +181,6 @@ function createMockDbForFinalize(options: FinalizeOptions = {}) {
 		}
 		if (call === 5) {
 			return Object.assign(Promise.resolve(associationsWithFileId), { limit });
-		}
-		if (call === 6) {
-			return Object.assign(Promise.resolve(opinions), { limit });
 		}
 		if (call === 7) {
 			return Object.assign(Promise.resolve(categories), { limit });
@@ -385,14 +388,14 @@ describe("cseOpinionRouter.finalize", () => {
 		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
-			"Au moins un fichier d'avis CSE doit être transmis.",
+			"Vous devez déposer le ou les avis de votre CSE au format PDF avant de transmettre.",
 		);
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
 
 	it("throws PRECONDITION_FAILED when a file row carries no content type", async () => {
 		const ctx = createMockDbForFinalize({
-			opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+			justifications: { first: "none", second: null },
 			// Only (1, accuracy) is required and file-1 covers it; file-2 is orphan.
 			associations: [{ declarationNumber: 1, type: "accuracy" }],
 			files: [
@@ -403,7 +406,7 @@ describe("cseOpinionRouter.finalize", () => {
 		const caller = await createCaller(ctx.db);
 
 		await expect(caller.finalize()).rejects.toThrow(
-			"Le fichier « avis-2.pdf » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.",
+			"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
 		);
 		expect(ctx.update).not.toHaveBeenCalled();
 	});
@@ -474,7 +477,7 @@ describe("cseOpinionRouter.finalize", () => {
 	describe("file-content-type association guard", () => {
 		it("passes when only (1, accuracy) is required and it is covered", async () => {
 			const ctx = createMockDbForFinalize({
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				justifications: { first: "none", second: null },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
@@ -484,26 +487,26 @@ describe("cseOpinionRouter.finalize", () => {
 
 		it("throws PRECONDITION_FAILED when (1, accuracy) is not covered", async () => {
 			const ctx = createMockDbForFinalize({
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				justifications: { first: "none", second: null },
 				associations: [],
 			});
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
-				"Le type de contenu « Exactitude » de la première déclaration doit être associé à un fichier avant validation.",
+				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			);
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
 
-		it("requires (1, gap) when first declaration gapConsulted is true", async () => {
+		it("requires (1, gap) when first declaration qualification is partial", async () => {
 			const ctx = createMockDbForFinalize({
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: true }],
+				justifications: { first: "partial", second: null },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
-				"Le type de contenu « Justification » de la première déclaration doit être associé à un fichier avant validation.",
+				"Ajoutez l'avis justifiant les écarts ≥ 5 %, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			);
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
@@ -511,16 +514,13 @@ describe("cseOpinionRouter.finalize", () => {
 		it("requires (2, accuracy) when a second declaration was submitted (second_declaration_submit event exists)", async () => {
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [
-					{ declarationNumber: 1, type: "gap", gapConsulted: false },
-					{ declarationNumber: 2, type: "gap", gapConsulted: false },
-				],
+				justifications: { first: "none", second: "none" },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
-				"Le type de contenu « Exactitude » de la deuxième déclaration doit être associé à un fichier avant validation.",
+				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la seconde déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			);
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
@@ -535,13 +535,13 @@ describe("cseOpinionRouter.finalize", () => {
 			// drift below what the matrix demands.
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				justifications: { first: "none", second: null },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
-				"Le type de contenu « Exactitude » de la deuxième déclaration doit être associé à un fichier avant validation.",
+				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la seconde déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			);
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
@@ -554,7 +554,7 @@ describe("cseOpinionRouter.finalize", () => {
 			// association the matrix never offers.
 			const ctx = createMockDbForFinalize({
 				declaration: { ...DEFAULT_DECLARATION, secondDeclarationStep: 2 },
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: false }],
+				justifications: { first: "none", second: null },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 			});
 			const caller = await createCaller(ctx.db);
@@ -562,13 +562,10 @@ describe("cseOpinionRouter.finalize", () => {
 			await expect(caller.finalize()).resolves.toEqual({ success: true });
 		});
 
-		it("requires (2, gap) when second declaration gapConsulted is true", async () => {
+		it("requires (2, gap) when second declaration qualification is partial", async () => {
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [
-					{ declarationNumber: 1, type: "gap", gapConsulted: false },
-					{ declarationNumber: 2, type: "gap", gapConsulted: true },
-				],
+				justifications: { first: "none", second: "partial" },
 				associations: [
 					{ declarationNumber: 1, type: "accuracy" },
 					{ declarationNumber: 2, type: "accuracy" },
@@ -577,7 +574,7 @@ describe("cseOpinionRouter.finalize", () => {
 			const caller = await createCaller(ctx.db);
 
 			await expect(caller.finalize()).rejects.toThrow(
-				"Le type de contenu « Justification » de la deuxième déclaration doit être associé à un fichier avant validation.",
+				"Ajoutez l'avis justifiant les écarts ≥ 5 % de la seconde déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			);
 			expect(ctx.update).not.toHaveBeenCalled();
 		});
@@ -585,10 +582,7 @@ describe("cseOpinionRouter.finalize", () => {
 		it("passes with a full two-declaration set when every required type is covered", async () => {
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [
-					{ declarationNumber: 1, type: "gap", gapConsulted: true },
-					{ declarationNumber: 2, type: "gap", gapConsulted: true },
-				],
+				justifications: { first: "partial", second: "partial" },
 				associations: [
 					{ declarationNumber: 1, type: "accuracy" },
 					{ declarationNumber: 1, type: "gap" },
@@ -601,13 +595,10 @@ describe("cseOpinionRouter.finalize", () => {
 			await expect(caller.finalize()).resolves.toEqual({ success: true });
 		});
 
-		it("does not require (2, gap) when second declaration gapConsulted is false", async () => {
+		it("does not require (2, gap) when second declaration qualification is none", async () => {
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [
-					{ declarationNumber: 1, type: "gap", gapConsulted: false },
-					{ declarationNumber: 2, type: "gap", gapConsulted: false },
-				],
+				justifications: { first: "none", second: "none" },
 				associations: [
 					{ declarationNumber: 1, type: "accuracy" },
 					{ declarationNumber: 2, type: "accuracy" },
@@ -618,9 +609,9 @@ describe("cseOpinionRouter.finalize", () => {
 			await expect(caller.finalize()).resolves.toEqual({ success: true });
 		});
 
-		it("does not require (1, gap) when gapConsulted is true but there is no gap >= 5%", async () => {
+		it("does not require (1, gap) when qualification is partial but there is no gap >= 5%", async () => {
 			const ctx = createMockDbForFinalize({
-				opinions: [{ declarationNumber: 1, type: "gap", gapConsulted: true }],
+				justifications: { first: "partial", second: null },
 				associations: [{ declarationNumber: 1, type: "accuracy" }],
 				categories: [],
 			});
@@ -629,13 +620,10 @@ describe("cseOpinionRouter.finalize", () => {
 			await expect(caller.finalize()).resolves.toEqual({ success: true });
 		});
 
-		it("does not require (2, gap) when gapConsulted is true but there is no gap >= 5% on the second declaration", async () => {
+		it("does not require (2, gap) when qualification is partial but there is no gap >= 5% on the second declaration", async () => {
 			const ctx = createMockDbForFinalize({
 				secondDeclarationSubmitted: true,
-				opinions: [
-					{ declarationNumber: 1, type: "gap", gapConsulted: false },
-					{ declarationNumber: 2, type: "gap", gapConsulted: true },
-				],
+				justifications: { first: "none", second: "partial" },
 				associations: [
 					{ declarationNumber: 1, type: "accuracy" },
 					{ declarationNumber: 2, type: "accuracy" },

@@ -21,6 +21,10 @@ export const SCHEMA_COLUMN_COMMENTS: SchemaColumnComments = {
 		status: "SUIT: Statut",
 		first_declaration_path_choice: "SUIT: Parcours_apres_declaration_1",
 		second_declaration_path_choice: "SUIT: Parcours_apres_declaration_2",
+		first_declaration_gap_justification:
+			"Qualification des écarts ≥ 5 % de la 1re déclaration au choix du parcours : 'all' (tous justifiables), 'partial' (une partie), 'none' (aucun). null = non qualifiée, compte comme 'none' pour les avis du CSE. Non exposé à SUIT.",
+		second_declaration_gap_justification:
+			"Qualification des écarts ≥ 5 % de la seconde déclaration au choix du parcours : 'all', 'partial' ou 'none'. null = non qualifiée, compte comme 'none' pour les avis du CSE. Non exposé à SUIT.",
 		cse_required: "SUIT: Avis_CSE_requis",
 		rules_version: "FSM ruleset pinned at submission; not exposed to SUIT",
 		total_women: "SUIT: Effectif_F_rem_annuelle_globale",

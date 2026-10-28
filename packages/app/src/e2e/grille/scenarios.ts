@@ -175,7 +175,7 @@ export const FICHE_SCENARIOS = {
 	"CAS-02": async ({ page }) => {
 		await completeDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { firstDeclGapCardHidden: true });
+		await fillCseStep1(page);
 		await submitCseStep2(page);
 		await finDeDemarche(page, { completed: true });
 	},
@@ -204,17 +204,7 @@ export const FICHE_SCENARIOS = {
 		await expectGapJustificationOptions(page, { round: 1 });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		// Pin the opinion fieldset — it only renders once consultation is truthy —
-		// before reading the negative assertion below: the loading placeholder
-		// would otherwise satisfy toHaveCount(0) without proving anything.
-		await expect(page.locator("#first-decl-gap-opinion-legend")).toBeVisible();
-		await expect(page.locator("#first-decl-gap-question-legend")).toHaveCount(
-			0,
-		);
-		await fillCseStep1(page, {
-			firstDeclGapConsultationImplicit: true,
-			opinion,
-		});
+		await fillCseStep1(page, { firstDeclJustification: true, opinion });
 		await submitCseStep2(page, {
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
@@ -239,8 +229,13 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page);
-		await submitCseStep2(page);
+		await fillCseStep1(page, { firstDeclJustification: true });
+		await submitCseStep2(page, {
+			columns: [
+				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
+			],
+		});
 		await finDeDemarche(page, { completed: true });
 	},
 
@@ -258,10 +253,7 @@ export const FICHE_SCENARIOS = {
 		});
 		await completeSecondDeclaration(page, { hasGap: false });
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, {
-			hasSecondDeclaration: true,
-			secondDeclGapCardHidden: true,
-		});
+		await fillCseStep1(page, { hasSecondDeclaration: true });
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
@@ -300,18 +292,16 @@ export const FICHE_SCENARIOS = {
 		await expectGapJustificationOptions(page, { round: 2 });
 		await selectCompliancePath(page, "path-justify");
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)), { timeout: 10_000 });
-		await expect(page.locator("#first-decl-gap-question-legend")).toBeVisible();
-		await expect(page.locator("#second-decl-gap-question-legend")).toHaveCount(
-			0,
-		);
 		await fillCseStep1(page, {
 			hasSecondDeclaration: true,
-			secondDeclGapConsultationImplicit: true,
+			firstDeclJustification: true,
+			secondDeclJustification: true,
 		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
 				{ declarationNumber: 2, type: "accuracy" },
 				{ declarationNumber: 2, type: "gap" },
 			],
@@ -337,12 +327,18 @@ export const FICHE_SCENARIOS = {
 		await selectCompliancePath(page, "path-joint");
 		await uploadJointEvalPdf(page);
 		await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 10_000 });
-		await fillCseStep1(page, { hasSecondDeclaration: true });
+		await fillCseStep1(page, {
+			hasSecondDeclaration: true,
+			firstDeclJustification: true,
+			secondDeclJustification: true,
+		});
 		await submitCseStep2(page, {
 			hasSecondDeclaration: true,
 			columns: [
 				{ declarationNumber: 1, type: "accuracy" },
+				{ declarationNumber: 1, type: "gap" },
 				{ declarationNumber: 2, type: "accuracy" },
+				{ declarationNumber: 2, type: "gap" },
 			],
 		});
 		await finDeDemarche(page, { completed: true });
@@ -383,7 +379,7 @@ export const FICHE_SCENARIOS = {
 				await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), {
 					timeout: 10_000,
 				});
-				await fillCseStep1(page, { firstDeclGapCardHidden: true });
+				await fillCseStep1(page);
 				await submitCseStep2(page);
 				await finDeDemarche(page, { completed: true });
 			},
@@ -441,7 +437,7 @@ export const FICHE_SCENARIOS = {
 		expect(new URL(page.url()).pathname).toBe(CONFIRMATION_PATH);
 		await expect(
 			page.getByRole("heading", {
-				name: "Dépôt du ou des avis du CSE",
+				name: "Transmission du ou des avis du CSE",
 			}),
 		).toHaveCount(0);
 		await expect(page.locator("#first-decl-accuracy-favorable")).toHaveCount(0);

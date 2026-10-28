@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
+import type { GapJustification } from "~/modules/domain";
 import {
 	buildAssociationMap,
 	buildColumnId,
 	clearFileAssociations,
 	computeContentTypeColumns,
+	computeJustificationRequirements,
+	computeRequiredContentTypes,
+	DECLARATION_HEADINGS,
 	getMissingColumns,
+	getMissingOpinionMessage,
+	getOpinionTitle,
 	getSingleChoiceAssociation,
 	getUnassociatedFiles,
 	toAssociationPayload,
@@ -22,14 +28,135 @@ describe("buildColumnId", () => {
 	});
 });
 
+type Parcours = {
+	case: number;
+	first: GapJustification | "no_gap";
+	second?: GapJustification | "no_gap";
+	expected: string[];
+};
+
+const PARCOURS: Parcours[] = [
+	{ case: 1, first: "no_gap", expected: ["1:accuracy"] },
+	{ case: 2, first: "all", expected: ["1:accuracy", "1:gap"] },
+	{ case: 3, first: "partial", expected: ["1:accuracy", "1:gap"] },
+	{ case: 4, first: "none", expected: ["1:accuracy"] },
+	{
+		case: 5,
+		first: "partial",
+		second: "no_gap",
+		expected: ["1:accuracy", "1:gap", "2:accuracy"],
+	},
+	{
+		case: 6,
+		first: "partial",
+		second: "all",
+		expected: ["1:accuracy", "1:gap", "2:accuracy", "2:gap"],
+	},
+	{
+		case: 7,
+		first: "partial",
+		second: "partial",
+		expected: ["1:accuracy", "1:gap", "2:accuracy", "2:gap"],
+	},
+	{
+		case: 8,
+		first: "partial",
+		second: "none",
+		expected: ["1:accuracy", "1:gap", "2:accuracy"],
+	},
+	{
+		case: 9,
+		first: "none",
+		second: "no_gap",
+		expected: ["1:accuracy", "2:accuracy"],
+	},
+	{
+		case: 10,
+		first: "none",
+		second: "all",
+		expected: ["1:accuracy", "2:accuracy", "2:gap"],
+	},
+	{
+		case: 11,
+		first: "none",
+		second: "partial",
+		expected: ["1:accuracy", "2:accuracy", "2:gap"],
+	},
+	{
+		case: 12,
+		first: "none",
+		second: "none",
+		expected: ["1:accuracy", "2:accuracy"],
+	},
+];
+
+function toDeclarationFacts(qualification: Parcours["first"] | undefined) {
+	if (qualification === undefined || qualification === "no_gap") {
+		return { gapHigh: false, gapJustification: null };
+	}
+	return { gapHigh: true, gapJustification: qualification };
+}
+
+describe("computeRequiredContentTypes — the 12 parcours of the ticket", () => {
+	it.each(PARCOURS)("requires exactly the opinions of case $case", ({
+		first,
+		second,
+		expected,
+	}) => {
+		const firstFacts = toDeclarationFacts(first);
+		const secondFacts = toDeclarationFacts(second);
+		const required = computeRequiredContentTypes({
+			hasSecondDeclaration: second !== undefined,
+			...computeJustificationRequirements({
+				firstDeclarationGapJustification: firstFacts.gapJustification,
+				secondDeclarationGapJustification: secondFacts.gapJustification,
+				firstDeclGapHigh: firstFacts.gapHigh,
+				secondDeclGapHigh: secondFacts.gapHigh,
+			}),
+		});
+
+		expect(
+			required.map((spec) => buildColumnId(spec.declarationNumber, spec.type)),
+		).toEqual(expected);
+	});
+});
+
+describe("computeJustificationRequirements", () => {
+	it("requires no justification when no qualification was stored", () => {
+		expect(
+			computeJustificationRequirements({
+				firstDeclarationGapJustification: null,
+				secondDeclarationGapJustification: null,
+				firstDeclGapHigh: true,
+				secondDeclGapHigh: true,
+			}),
+		).toEqual({
+			firstDeclJustificationRequired: false,
+			secondDeclJustificationRequired: false,
+		});
+	});
+
+	it("drops a qualification that survived the disappearance of the gap", () => {
+		expect(
+			computeJustificationRequirements({
+				firstDeclarationGapJustification: "all",
+				secondDeclarationGapJustification: "partial",
+				firstDeclGapHigh: false,
+				secondDeclGapHigh: true,
+			}),
+		).toEqual({
+			firstDeclJustificationRequired: false,
+			secondDeclJustificationRequired: true,
+		});
+	});
+});
+
 describe("computeContentTypeColumns", () => {
-	it("returns only the first-declaration accuracy column when there is a single declaration without consulted gap (S1)", () => {
+	it("returns only the first-declaration accuracy column without declaration label on a single declaration", () => {
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration: false,
-			firstDeclGapConsulted: false,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: false,
-			secondDeclGapHigh: false,
+			firstDeclJustificationRequired: false,
+			secondDeclJustificationRequired: false,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual(["1:accuracy"]);
@@ -37,152 +164,95 @@ describe("computeContentTypeColumns", () => {
 		expect(columns[0]?.declarationLabel).toBeNull();
 	});
 
-	it("adds the first-declaration gap column without declaration suffix when the gap was consulted on a single declaration (S2)", () => {
+	it("ignores the second-declaration requirement while there is no second declaration", () => {
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration: false,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: false,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: true,
 		});
 
 		expect(columns.map((column) => column.id)).toEqual(["1:accuracy", "1:gap"]);
-		expect(columns.every((column) => column.declarationLabel === null)).toBe(
-			true,
-		);
 		expect(columns[1]?.label).toBe("Justification");
 	});
 
-	it("builds the four columns with declaration suffixes when both declarations consulted their gap (S3)", () => {
+	it("labels each column with its declaration when there are two", () => {
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration: true,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: true,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: true,
 		});
 
-		expect(columns.map((column) => column.id)).toEqual([
-			"1:accuracy",
-			"1:gap",
-			"2:accuracy",
-			"2:gap",
-		]);
 		expect(columns[0]?.declarationLabel).toBe("1re déclaration");
 		expect(columns[2]?.declarationLabel).toBe("2e déclaration");
-	});
-
-	it("hides the second-declaration gap column when the second gap was not consulted (S4)", () => {
-		const columns = computeContentTypeColumns({
-			hasSecondDeclaration: true,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: false,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
-		});
-
-		expect(columns.map((column) => column.id)).toEqual([
-			"1:accuracy",
-			"1:gap",
-			"2:accuracy",
-		]);
-	});
-
-	it("hides the first-declaration gap column when consulted but there is no gap >= 5%", () => {
-		const columns = computeContentTypeColumns({
-			hasSecondDeclaration: false,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: false,
-			secondDeclGapHigh: false,
-		});
-
-		expect(columns.map((column) => column.id)).toEqual(["1:accuracy"]);
-	});
-
-	it("hides the second-declaration gap column when consulted but there is no gap >= 5% on the second declaration", () => {
-		const columns = computeContentTypeColumns({
-			hasSecondDeclaration: true,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: true,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: false,
-		});
-
-		expect(columns.map((column) => column.id)).toEqual([
-			"1:accuracy",
-			"1:gap",
-			"2:accuracy",
-		]);
-	});
-
-	it("hides the first-declaration gap column when the first gap was not consulted but the second was", () => {
-		const columns = computeContentTypeColumns({
-			hasSecondDeclaration: true,
-			firstDeclGapConsulted: false,
-			secondDeclGapConsulted: true,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
-		});
-
-		expect(columns.map((column) => column.id)).toEqual([
-			"1:accuracy",
-			"2:accuracy",
-			"2:gap",
-		]);
-	});
-
-	it("treats a null gapConsulted as not consulted", () => {
-		const columns = computeContentTypeColumns({
-			hasSecondDeclaration: true,
-			firstDeclGapConsulted: null,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
-		});
-
-		expect(columns.map((column) => column.id)).toEqual([
-			"1:accuracy",
-			"2:accuracy",
-		]);
 	});
 
 	it("includes the ordinal in the missing message only when a second declaration exists", () => {
 		const single = computeContentTypeColumns({
 			hasSecondDeclaration: false,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: false,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: false,
 		});
 		const dual = computeContentTypeColumns({
 			hasSecondDeclaration: true,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: true,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: true,
 		});
 
 		expect(single[0]?.missingMessage).toBe(
 			"Ajoutez l'avis d'exactitude des données et des méthodes de calcul, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 		);
 		expect(dual[3]?.missingMessage).toBe(
-			"Ajoutez l'avis justifiant les écarts ≥ 5 % de la deuxième déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
+			"Ajoutez l'avis justifiant les écarts ≥ 5 % de la seconde déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 		);
 	});
 
-	it("exposes a distinct description per accuracy column and a shared gap description", () => {
+	it("describes each column with the title of its step 1 card", () => {
 		const columns = computeContentTypeColumns({
 			hasSecondDeclaration: true,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: true,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: true,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: true,
 		});
 
-		expect(columns[0]?.description).toContain("l'ensemble des indicateurs");
-		expect(columns[2]?.description).toContain("la seconde déclaration");
-		expect(columns[1]?.description).toBe(columns[3]?.description);
+		expect(columns.map((column) => column.description)).toEqual([
+			getOpinionTitle(1, "accuracy"),
+			getOpinionTitle(1, "gap"),
+			getOpinionTitle(2, "accuracy"),
+			getOpinionTitle(2, "gap"),
+		]);
+	});
+});
+
+describe("getOpinionTitle", () => {
+	it("words each opinion as the mock-up does", () => {
+		expect(getOpinionTitle(1, "accuracy")).toBe(
+			"Exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de chaque indicateur.",
+		);
+		expect(getOpinionTitle(2, "accuracy")).toBe(
+			"Exactitude des données utilisées pour le calcul, la méthode de calcul et les résultats de la seconde déclaration de l'indicateur par catégorie d'emplois.",
+		);
+		expect(getOpinionTitle(2, "gap")).toBe(
+			"Justification des écarts ≥ 5 % par des critères objectifs et non fondés sur le sexe de l'indicateur par catégorie d'emplois.",
+		);
+	});
+
+	it("heads the declarations as first and second", () => {
+		expect(DECLARATION_HEADINGS).toEqual({
+			1: "Première déclaration",
+			2: "Seconde déclaration",
+		});
+	});
+});
+
+describe("getMissingOpinionMessage", () => {
+	it("names the second declaration as the seconde", () => {
+		expect(
+			getMissingOpinionMessage(
+				{ declarationNumber: 2, type: "accuracy" },
+				true,
+			),
+		).toBe(
+			"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la seconde déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
+		);
 	});
 });
 
@@ -333,10 +403,8 @@ describe("clearFileAssociations", () => {
 describe("getSingleChoiceAssociation", () => {
 	const singleDeclarationInput = {
 		hasSecondDeclaration: false,
-		firstDeclGapConsulted: false,
-		secondDeclGapConsulted: null,
-		firstDeclGapHigh: false,
-		secondDeclGapHigh: false,
+		firstDeclJustificationRequired: false,
+		secondDeclJustificationRequired: false,
 	};
 
 	it("pairs the only column with the only file when the parcours requires the first-declaration accuracy opinion alone", () => {
@@ -366,8 +434,7 @@ describe("getSingleChoiceAssociation", () => {
 	it("returns null when the first declaration also requires a gap justification", () => {
 		const columns = computeContentTypeColumns({
 			...singleDeclarationInput,
-			firstDeclGapHigh: true,
-			firstDeclGapConsulted: true,
+			firstDeclJustificationRequired: true,
 		});
 
 		expect(getSingleChoiceAssociation(columns, [{ id: "file-a" }])).toBeNull();

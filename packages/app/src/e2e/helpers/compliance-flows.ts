@@ -27,96 +27,73 @@ export const DUMMY_PDF = path.join(
 
 type CseStep1Options = {
 	hasSecondDeclaration?: boolean;
-	/** CSE consulted on justifying the first declaration's gaps ≥ 5% — adds the "Justification" column in step 2 when that declaration has a gap. */
-	firstDeclGapConsulted?: boolean;
+	/** The justification opinion is asked: gap ≥ 5 % qualified "all" or "partial" on the first declaration. */
+	firstDeclJustification?: boolean;
 	/** Same, for the corrective (second) declaration. */
-	secondDeclGapConsulted?: boolean;
-	/** The first-round justification choice already establishes consultation, so the yes/no radios are absent. */
-	firstDeclGapConsultationImplicit?: boolean;
-	/** The second-round justification choice already establishes consultation, so the yes/no radios are absent. */
-	secondDeclGapConsultationImplicit?: boolean;
-	/** No gap ≥ 5% on the first declaration: the whole justification card is absent. */
-	firstDeclGapCardHidden?: boolean;
-	/** No remaining gap ≥ 5% on the second declaration: the whole justification card is absent. */
-	secondDeclGapCardHidden?: boolean;
-	/** Opinion on accuracy (and on gap when consulted). Defaults to "favorable" so existing specs are unaffected. */
+	secondDeclJustification?: boolean;
+	/** Opinion on accuracy and justification. Defaults to "favorable" so existing specs are unaffected. */
 	opinion?: "favorable" | "unfavorable";
 };
 
-// Fill one GapConsultationCard: consulted yes/no, and when yes the opinion + date.
-async function fillGapConsultation(
+async function fillOpinionCard(
 	page: Page,
 	idPrefix: string,
-	consulted: boolean,
 	date: string,
-	opinion: "favorable" | "unfavorable" = "favorable",
-	consultationIsImplicit = false,
+	opinion: "favorable" | "unfavorable",
 ) {
 	await expect(page.locator(`#${idPrefix}-legend`)).toBeVisible();
-	if (!consulted) {
-		await page.locator(`label[for="${idPrefix}-no"]`).click();
-		return;
-	}
-	if (!consultationIsImplicit) {
-		await page.locator(`label[for="${idPrefix}-yes"]`).click();
-	}
+	// DSFR hides native radio inputs — click on the associated label instead
 	await page.locator(`label[for="${idPrefix}-${opinion}"]`).click();
 	await page.locator(`#${idPrefix}-date`).fill(date);
+}
+
+async function fillJustificationCard(
+	page: Page,
+	idPrefix: string,
+	required: boolean,
+	date: string,
+	opinion: "favorable" | "unfavorable",
+) {
+	if (!required) {
+		await expect(page.locator(`#${idPrefix}-legend`)).toHaveCount(0);
+		return;
+	}
+	await fillOpinionCard(page, idPrefix, date, opinion);
 }
 
 export async function fillCseStep1(page: Page, options: CseStep1Options = {}) {
 	const {
 		hasSecondDeclaration = false,
-		firstDeclGapConsulted = false,
-		secondDeclGapConsulted = false,
-		firstDeclGapConsultationImplicit = false,
-		secondDeclGapConsultationImplicit = false,
-		firstDeclGapCardHidden = false,
-		secondDeclGapCardHidden = false,
+		firstDeclJustification = false,
+		secondDeclJustification = false,
 		opinion = "favorable",
 	} = options;
 	await test.step("avis CSE — étape 1 : avis rendus", async () => {
 		await page.waitForURL(urlGlob(cseOpinionStepHref(1)));
-		// DSFR hides native radio inputs — click on the associated label instead
-		await page.locator(`label[for="first-decl-accuracy-${opinion}"]`).click();
-		await page.locator("#first-decl-accuracy-date").fill("2025-03-15");
-		if (firstDeclGapCardHidden) {
-			await expect(page.locator("#first-decl-gap-legend")).toHaveCount(0);
-		} else {
-			await fillGapConsultation(
-				page,
-				"first-decl-gap",
-				firstDeclGapConsulted || firstDeclGapConsultationImplicit,
-				"2025-03-15",
-				opinion,
-				firstDeclGapConsultationImplicit,
-			);
-		}
+		await fillOpinionCard(page, "first-decl-accuracy", "2025-03-15", opinion);
+		await fillJustificationCard(
+			page,
+			"first-decl-gap",
+			firstDeclJustification,
+			"2025-03-15",
+			opinion,
+		);
 		if (hasSecondDeclaration) {
-			await page
-				.locator(`label[for="second-decl-accuracy-${opinion}"]`)
-				.click();
-			await page.locator("#second-decl-accuracy-date").fill("2025-06-15");
-			if (secondDeclGapCardHidden) {
-				await expect(page.locator("#second-decl-gap-legend")).toHaveCount(0);
-			} else if (secondDeclGapConsultationImplicit) {
-				await fillGapConsultation(
-					page,
-					"second-decl-gap",
-					true,
-					"2025-06-15",
-					opinion,
-					true,
-				);
-			} else {
-				await fillGapConsultation(
-					page,
-					"second-decl-gap",
-					secondDeclGapConsulted,
-					"2025-06-15",
-					opinion,
-				);
-			}
+			await fillOpinionCard(
+				page,
+				"second-decl-accuracy",
+				"2025-06-15",
+				opinion,
+			);
+			await fillJustificationCard(
+				page,
+				"second-decl-gap",
+				secondDeclJustification,
+				"2025-06-15",
+				opinion,
+			);
+		} else {
+			await expect(page.locator("#second-decl-accuracy-legend")).toHaveCount(0);
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await page.waitForURL(urlGlob(cseOpinionStepHref(2)));

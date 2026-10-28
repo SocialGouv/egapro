@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import {
+	getMissingOpinionMessage,
+	NO_FILE_ALERT,
+	UNASSOCIATED_FILE_ALERT,
+} from "~/modules/cseOpinion/contentTypeColumns";
+import {
 	deleteFileSchema,
 	saveOpinionsSchema,
 	setFileContentTypesSchema,
@@ -23,6 +28,7 @@ import {
 import { loadRules } from "~/server/rules/engine";
 import {
 	contentTypeKey,
+	getJustificationRequirements,
 	getRequiredContentTypes,
 	pruneStaleContentTypeAssociations,
 } from "~/server/services/cseRequiredContentTypes";
@@ -39,6 +45,9 @@ import {
 const CSE_OPINION_UNAVAILABLE_ERROR =
 	"Les avis du CSE ne peuvent pas être transmis à cette étape de la démarche.";
 
+const JUSTIFICATION_OPINION_MISSING_ERROR =
+	"L'avis du CSE sur la justification des écarts et sa date doivent être renseignés.";
+
 function assertRequiredContentTypesCovered(
 	requiredTypes: Awaited<ReturnType<typeof getRequiredContentTypes>>,
 	associations: Array<{ declarationNumber: number; type: string }>,
@@ -48,21 +57,46 @@ function assertRequiredContentTypesCovered(
 			contentTypeKey(association.declarationNumber, association.type),
 		),
 	);
-	for (const required of requiredTypes) {
-		const key = contentTypeKey(required.declarationNumber, required.type);
-		if (!coveredKeys.has(key)) {
-			const typeLabel =
-				required.type === "accuracy" ? "Exactitude" : "Justification";
-			const declLabel =
-				required.declarationNumber === 1
-					? "première déclaration"
-					: "deuxième déclaration";
-			throw new TRPCError({
-				code: "PRECONDITION_FAILED",
-				message: `Le type de contenu « ${typeLabel} » de la ${declLabel} doit être associé à un fichier avant validation.`,
-			});
-		}
+	const hasSecondDeclaration = requiredTypes.some(
+		(required) => required.declarationNumber === 2,
+	);
+	const missing = requiredTypes.find(
+		(required) =>
+			!coveredKeys.has(
+				contentTypeKey(required.declarationNumber, required.type),
+			),
+	);
+	if (missing) {
+		throw new TRPCError({
+			code: "PRECONDITION_FAILED",
+			message: getMissingOpinionMessage(missing, hasSecondDeclaration),
+		});
 	}
+}
+
+type JustificationOpinionInput = {
+	gapOpinion: "favorable" | "unfavorable" | null;
+	gapDate: string | null;
+};
+
+function buildJustificationOpinion(
+	input: JustificationOpinionInput,
+	required: boolean,
+) {
+	if (!required) {
+		return { gapConsulted: false, opinion: null, opinionDate: null };
+	}
+	if (!input.gapOpinion || !input.gapDate) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: JUSTIFICATION_OPINION_MISSING_ERROR,
+		});
+	}
+	return {
+		gapConsulted: true,
+		opinion: input.gapOpinion,
+		opinionDate: input.gapDate,
+	};
 }
 
 export const cseOpinionRouter = createTRPCRouter({
@@ -222,6 +256,20 @@ export const cseOpinionRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			await ctx.db.transaction(async (tx) => {
 				await lockDeclaration(tx, ctx.declarationId);
+				const {
+					firstDeclJustificationRequired,
+					secondDeclJustificationRequired,
+				} = await getJustificationRequirements(tx, ctx.declarationId);
+				const firstJustification = buildJustificationOpinion(
+					input.firstDeclaration,
+					firstDeclJustificationRequired,
+				);
+				const secondJustification = input.secondDeclaration
+					? buildJustificationOpinion(
+							input.secondDeclaration,
+							secondDeclJustificationRequired,
+						)
+					: null;
 				await tx
 					.update(declarations)
 					.set({ cseOpinionDraftUpdatedAt: new Date() })
@@ -244,12 +292,10 @@ export const cseOpinionRouter = createTRPCRouter({
 					declarationId: ctx.declarationId,
 					declarationNumber: 1,
 					type: "gap",
-					gapConsulted: input.firstDeclaration.gapConsulted,
-					opinion: input.firstDeclaration.gapOpinion,
-					opinionDate: input.firstDeclaration.gapDate,
+					...firstJustification,
 				});
 
-				if (input.secondDeclaration) {
+				if (input.secondDeclaration && secondJustification) {
 					rows.push({
 						declarationId: ctx.declarationId,
 						declarationNumber: 2,
@@ -262,9 +308,7 @@ export const cseOpinionRouter = createTRPCRouter({
 						declarationId: ctx.declarationId,
 						declarationNumber: 2,
 						type: "gap",
-						gapConsulted: input.secondDeclaration.gapConsulted,
-						opinion: input.secondDeclaration.gapOpinion,
-						opinionDate: input.secondDeclaration.gapDate,
+						...secondJustification,
 					});
 				}
 
@@ -421,7 +465,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			if (fileRows.length === 0) {
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: "Au moins un fichier d'avis CSE doit être transmis.",
+					message: NO_FILE_ALERT.message,
 				});
 			}
 
@@ -445,7 +489,7 @@ export const cseOpinionRouter = createTRPCRouter({
 			if (orphanFile) {
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: `Le fichier « ${orphanFile.fileName} » n'est associé à aucun type de contenu. Cochez au moins un type, ou supprimez le fichier.`,
+					message: UNASSOCIATED_FILE_ALERT.message,
 				});
 			}
 

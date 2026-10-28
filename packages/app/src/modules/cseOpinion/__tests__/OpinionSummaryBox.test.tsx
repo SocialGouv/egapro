@@ -35,7 +35,7 @@ describe("OpinionSummaryBox", () => {
 	it("renders the section title", () => {
 		render(<OpinionSummaryBox associations={{}} columns={[accuracy1]} />);
 
-		expect(screen.getByText("Avis CSE à transmettre :")).toBeInTheDocument();
+		expect(screen.getByText("Avis CSE à transmettre")).toBeInTheDocument();
 	});
 
 	it("shows per-declaration headings only when two declarations are present", () => {
@@ -47,7 +47,7 @@ describe("OpinionSummaryBox", () => {
 		);
 
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
-		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
+		expect(screen.getByText("Seconde déclaration")).toBeInTheDocument();
 		expect(
 			screen.getByText("Exactitude première déclaration"),
 		).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe("OpinionSummaryBox", () => {
 		render(<OpinionSummaryBox associations={{}} columns={[accuracy1, gap1]} />);
 
 		expect(screen.queryByText("Première déclaration")).not.toBeInTheDocument();
-		expect(screen.queryByText("Deuxième déclaration")).not.toBeInTheDocument();
+		expect(screen.queryByText("Seconde déclaration")).not.toBeInTheDocument();
 		// The obligations themselves are still listed.
 		expect(
 			screen.getByText("Exactitude première déclaration"),
