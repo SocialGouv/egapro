@@ -54,7 +54,6 @@ const { uploadFile: uploadFileMock } = (await import(
 
 const defaultProps = {
 	cseOpinionRequired: false,
-	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
 	existingFile: null,
@@ -90,7 +89,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: "Dépôt du rapport de l'évaluation conjointe des rémunérations",
+				name: "Évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();
@@ -109,13 +108,17 @@ describe("JointEvaluationForm", () => {
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
-		expect(screen.getByText("Échéance")).toBeInTheDocument();
 		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
+
+		expect(
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+		).toBeInTheDocument();
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
-		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
-		expect(screen.getByText(/Déclaration effectuée le/)).toHaveClass(
-			"fr-text-mention--grey",
-		);
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows a titled error alert when submitting without a file", () => {
@@ -134,13 +137,121 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the info boxes", () => {
+	it("renders the reminder box above the deposit label", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		expect(
-			screen.getByText(/ce que vous devez faire dans un délai de 2 mois/i),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Rappel : Ce que vous devez faire dans un délai de 2 mois",
+			}),
 		).toBeInTheDocument();
-		expect(screen.getByText(/après dépôt du rapport/i)).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Transmettre le rapport dans la zone de dépôt prévue sur cette page",
+			),
+		).toBeInTheDocument();
+	});
+
+	it("renders the after-report box below the deposit zone, with the TéléAccords link", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Après élaboration du rapport",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("Négocier un accord collectif"),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("À défaut, mettre en place un plan d'action"),
+		).toBeInTheDocument();
+		const link = screen.getByRole("link", { name: /TéléAccords/ });
+		expect(link).toHaveAttribute(
+			"href",
+			"https://accords-depot.travail.gouv.fr/accueil",
+		);
+		expect(link).toHaveAttribute("target", "_blank");
+	});
+
+	it("does not render the removed wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.queryByText(
+				"Dépôt du rapport de l'évaluation conjointe des rémunérations",
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				/Vous devez déposer le rapport de l'évaluation conjointe, ci-dessous\./,
+			),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Après dépôt du rapport"),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Veuillez importer\/déposer/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				(text) => text === "Ce que vous devez faire dans un délai de 2 mois",
+			),
+		).not.toBeInTheDocument();
+	});
+
+	it("orders the reminder, deposit label, deadline, upload zone and after-report boxes", () => {
+		const { container } = render(<JointEvaluationForm {...defaultProps} />);
+
+		const texts = Array.from(
+			container.querySelectorAll("h2, h3, label, p, input[type='file']"),
+		).map((el) => (el.tagName === "INPUT" ? "file-input" : el.textContent));
+
+		const reminderIndex = texts.findIndex((t) => t?.startsWith("Rappel"));
+		const labelIndex = texts.findIndex((t) =>
+			t?.startsWith("Veuillez déposer"),
+		);
+		const deadlineIndex = texts.indexOf(
+			"Échéance pour transmettre le rapport de l'évaluation conjointe",
+		);
+		const fileInputIndex = texts.indexOf("file-input");
+		const afterReportIndex = texts.indexOf("Après élaboration du rapport");
+
+		expect(reminderIndex).toBeGreaterThanOrEqual(0);
+		expect(labelIndex).toBeGreaterThan(reminderIndex);
+		expect(deadlineIndex).toBeGreaterThan(labelIndex);
+		expect(fileInputIndex).toBeGreaterThan(deadlineIndex);
+		expect(afterReportIndex).toBeGreaterThan(fileInputIndex);
+	});
+
+	it("labels the deposit field with the shortened wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByLabelText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
+			),
+		).toBeInTheDocument();
+	});
+
+	it("links the learn-more text with the corrected wording", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		expect(
+			screen.getByRole("link", {
+				name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("links back to the compliance path choice page", () => {

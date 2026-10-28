@@ -8,17 +8,17 @@ import common from "~/modules/declaration-remuneration/shared/common.module.scss
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { FormErrors } from "~/modules/declaration-remuneration/shared/FormErrors";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { formatCivilLongDate } from "~/modules/domain";
 import { getPostComplianceDestination } from "~/modules/navigation";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
-	JointEvaluationDepositInstructions,
+	JointEvaluationAfterReport,
+	JointEvaluationDeadline,
 	type JointEvaluationExistingFile,
 	JointEvaluationExistingReport,
-	JointEvaluationGuidance,
 	JointEvaluationHeading,
+	JointEvaluationReminder,
 	JointEvaluationReportUpload,
 } from "./JointEvaluationReportBlocks";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
@@ -27,7 +27,6 @@ const EMPTY_DB_VALUES = {} as Record<string, never>;
 
 type Props = {
 	cseOpinionRequired: boolean;
-	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
 	existingFile: JointEvaluationExistingFile | null;
@@ -36,7 +35,6 @@ type Props = {
 
 export function JointEvaluationForm({
 	cseOpinionRequired,
-	declarationDate,
 	declarationSiren,
 	declarationYear,
 	existingFile,
@@ -105,25 +103,18 @@ export function JointEvaluationForm({
 						</h1>
 					</div>
 
-					<JointEvaluationHeading title="Dépôt du rapport de l'évaluation conjointe des rémunérations" />
+					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
 
-					<JointEvaluationDepositInstructions />
-
-					<div className="fr-highlight">
-						<p className="fr-mb-2v fr-text--md">Échéance</p>
-						<p className="fr-h6 fr-mb-2v">
-							{formatCivilLongDate(jointEvaluationDeadline)}
-						</p>
-						<p className="fr-mb-0 fr-text--sm fr-text-mention--grey">
-							Déclaration effectuée le {declarationDate}
-						</p>
-					</div>
+					<JointEvaluationReminder />
 
 					{existingFile && (
 						<JointEvaluationExistingReport file={existingFile} />
 					)}
 
 					<JointEvaluationReportUpload
+						beforeUpload={
+							<JointEvaluationDeadline deadline={jointEvaluationDeadline} />
+						}
 						disabled={isReadOnly}
 						error={uploadError}
 						hasMissingFile={hasMissingFile}
@@ -132,7 +123,7 @@ export function JointEvaluationForm({
 						selectedFiles={selectedFiles}
 					/>
 
-					<JointEvaluationGuidance todoTitle="Ce que vous devez faire dans un délai de 2 mois" />
+					<JointEvaluationAfterReport />
 
 					<FormErrors
 						mutationError={submitJointEvaluationMutation.error?.message}

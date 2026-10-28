@@ -1,10 +1,13 @@
+import type { ReactNode } from "react";
 import { TrackedLink } from "~/modules/analytics";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
-import { formatLongDate } from "~/modules/domain";
+import { formatCivilLongDate, formatLongDate } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
 import { apiV1FileHref } from "~/modules/routes";
 import { FileUpload } from "~/modules/shared";
 import styles from "./JointEvaluationReportBlocks.module.scss";
+
+const TELEACCORDS_URL = "https://accords-depot.travail.gouv.fr/accueil";
 
 export type JointEvaluationExistingFile = {
 	id: string;
@@ -24,7 +27,7 @@ export function JointEvaluationHeading({ title }: { title: string }) {
 					target="_blank"
 					trackingId="joint_evaluation"
 				>
-					En savoir plus sur évaluation conjointe des rémunérations
+					En savoir plus sur l&apos;évaluation conjointe des rémunérations
 					<NewTabNotice />
 				</TrackedLink>
 			</p>
@@ -42,6 +45,37 @@ export function JointEvaluationDepositInstructions() {
 			L&apos;accord ou le plan d&apos;action conclu doit être déposé sur
 			TéléAccord.
 		</p>
+	);
+}
+
+export function JointEvaluationReminder() {
+	return (
+		<div className={styles.panelBlue}>
+			<h3 className="fr-text--md fr-text--bold fr-mb-2w">
+				Rappel : Ce que vous devez faire dans un délai de 2 mois
+			</h3>
+			<ul className="fr-mb-0">
+				<li>
+					Réaliser l&apos;analyse conjointe et définir des actions correctrices
+				</li>
+				<li>
+					Transmettre le rapport dans la zone de dépôt prévue sur cette page
+				</li>
+			</ul>
+		</div>
+	);
+}
+
+export function JointEvaluationDeadline({ deadline }: { deadline: Date }) {
+	return (
+		<div className="fr-highlight">
+			<p className="fr-mb-1w">
+				Échéance pour transmettre le rapport de l&apos;évaluation conjointe
+			</p>
+			<p className="fr-text--xl fr-text--bold fr-mb-0">
+				{formatCivilLongDate(deadline)}
+			</p>
+		</div>
 	);
 }
 
@@ -74,6 +108,7 @@ export function JointEvaluationExistingReport({
 
 type ReportUploadProps = {
 	inputId: string;
+	beforeUpload?: ReactNode;
 	disabled: boolean;
 	error: string | null;
 	hasMissingFile: boolean;
@@ -83,6 +118,7 @@ type ReportUploadProps = {
 
 export function JointEvaluationReportUpload({
 	inputId,
+	beforeUpload,
 	disabled,
 	error,
 	hasMissingFile,
@@ -93,12 +129,14 @@ export function JointEvaluationReportUpload({
 		<>
 			<div>
 				<label className="fr-label" htmlFor={inputId}>
-					Veuillez importer/déposer le rapport de l&apos;évaluation conjointe.
+					Veuillez déposer le rapport de l&apos;évaluation conjointe.
 					<span className="fr-hint-text fr-mt-1v">
 						Taille maximale : 10 Mo. Format supporté : pdf.
 					</span>
 				</label>
 			</div>
+
+			{beforeUpload}
 
 			<FileUpload
 				accept=".pdf"
@@ -124,6 +162,32 @@ export function JointEvaluationReportUpload({
 				</div>
 			)}
 		</>
+	);
+}
+
+export function JointEvaluationAfterReport() {
+	return (
+		<div className={styles.panelWhite}>
+			<h3 className="fr-text--md fr-text--bold fr-mb-2w">
+				Après élaboration du rapport
+			</h3>
+			<ul className="fr-mb-2w">
+				<li>Négocier un accord collectif</li>
+				<li>À défaut, mettre en place un plan d&apos;action</li>
+			</ul>
+			<p className="fr-mb-0">
+				L&apos;accord collectif ou le plan d&apos;action doit être déposé sur{" "}
+				<a
+					className="fr-link"
+					href={TELEACCORDS_URL}
+					rel="noopener noreferrer"
+					target="_blank"
+				>
+					TéléAccords
+					<NewTabNotice />
+				</a>
+			</p>
+		</div>
 	);
 }
 
@@ -155,7 +219,7 @@ export function JointEvaluationGuidance({ todoTitle }: { todoTitle: string }) {
 					Les accords conclus devront être déposés sur{" "}
 					<a
 						className="fr-link"
-						href="https://www.teleaccord.travail.gouv.fr"
+						href={TELEACCORDS_URL}
 						rel="noopener noreferrer"
 						target="_blank"
 					>

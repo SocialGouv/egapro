@@ -33,18 +33,15 @@ vi.mock("~/trpc/server", () => ({
 vi.mock("../JointEvaluationForm", () => ({
 	JointEvaluationForm: ({
 		jointEvaluationDeadline,
-		declarationDate,
 		existingFile,
 	}: {
 		jointEvaluationDeadline: Date;
-		declarationDate: string;
 		existingFile: { fileName: string } | null;
 	}) => (
 		<div>
 			<span data-testid="joint-evaluation-deadline">
 				{jointEvaluationDeadline.toLocaleDateString("fr-FR")}
 			</span>
-			<span data-testid="declaration-date">{declarationDate}</span>
 			<span data-testid="existing-file">
 				{existingFile?.fileName ?? "none"}
 			</span>
@@ -53,7 +50,7 @@ vi.mock("../JointEvaluationForm", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { formatLongDate, getDefaultCampaignDeadlines } from "~/modules/domain";
+import { getDefaultCampaignDeadlines } from "~/modules/domain";
 import { api } from "~/trpc/server";
 import { JointEvaluationPage } from "../JointEvaluationPage";
 
@@ -150,31 +147,6 @@ describe("JointEvaluationPage", () => {
 			screen.getByTestId("joint-evaluation-deadline"),
 		).not.toHaveTextContent(
 			DEFAULT_DEADLINES.decl2CseOpinionDeadline.toLocaleDateString("fr-FR"),
-		);
-	});
-
-	it("formats declarationDate from updatedAt when available", async () => {
-		mockDeclaration(
-			{ firstDeclarationPathChoice: "joint_evaluation" },
-			new Date("2025-06-15"),
-		);
-
-		const page = await JointEvaluationPage();
-		render(page);
-
-		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			formatLongDate(new Date("2025-06-15")),
-		);
-	});
-
-	it("falls back to today's date when updatedAt is null", async () => {
-		mockDeclaration({ firstDeclarationPathChoice: "joint_evaluation" }, null);
-
-		const page = await JointEvaluationPage();
-		render(page);
-
-		expect(screen.getByTestId("declaration-date")).toHaveTextContent(
-			formatLongDate(new Date()),
 		);
 	});
 
