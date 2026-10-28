@@ -5,112 +5,45 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock(
+	"next/navigation",
+	async () => await import("./compliancePathChoiceMocks"),
+);
+vi.mock(
+	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
+	async () => await import("./compliancePathChoiceMocks"),
+);
+vi.mock(
+	"~/trpc/react",
+	async () => await import("./compliancePathChoiceMocks"),
+);
 
 import { markDeclarationTransmissionSuccess } from "~/modules/declaration-remuneration/shared/declarationSuccessFlash";
 import { LockProvider } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { getDefaultCampaignDeadlines } from "~/modules/domain";
-import { CompliancePathChoice } from "../CompliancePathChoice";
+import {
+	draftRef,
+	mockMutate,
+	mockPush,
+	mockSetField,
+	mutationErrorRef,
+	resetCompliancePathChoiceMocks,
+} from "./compliancePathChoiceMocks";
+import {
+	ALL_TITLE,
+	COMPLIANCE_TITLE,
+	CORRECTIVE_ACTION_HREF,
+	CORRECTIVE_ACTION_TITLE,
+	compliancePathChoice,
+	JOINT_EVALUATION_HREF,
+	JOINT_EVALUATION_TITLE,
+	NONE_TITLE,
+	PARTIAL_TITLE,
+	submitForm,
+} from "./compliancePathChoiceTestUtils";
 
-const campaignDeadlines = getDefaultCampaignDeadlines(2026);
-
-const DECLARATION_SIREN = "123456789";
-const DECLARATION_YEAR = 2026;
-
-const ALL_TITLE = "Tous les écarts de rémunération ≥ 5 % sont justifiables";
-const PARTIAL_TITLE =
-	"Une partie des écarts de rémunération ≥ 5 % est justifiable";
-const NONE_TITLE = "Aucun écart de rémunération ≥ 5 % n'est justifiable";
-const CORRECTIVE_ACTION_TITLE =
-	"Effectuer des actions correctives et une seconde déclaration";
-const JOINT_EVALUATION_TITLE =
-	"Mettre en place une évaluation conjointe des rémunérations";
-const COMPLIANCE_TITLE =
-	/^Parcours de mise en conformité pour l'indicateur par catégorie\u00a0d'emplois$/;
-
-const JOINT_EVALUATION_HREF =
-	"/declaration-remuneration/parcours-conformite/evaluation-conjointe";
-const CORRECTIVE_ACTION_HREF =
-	"/declaration-remuneration/parcours-conformite/etape/1";
-
-const mockMutate = vi.fn();
-const mockPush = vi.fn();
-
-const { mockSetField, draftRef, mutationErrorRef } = vi.hoisted(() => ({
-	mockSetField: vi.fn(),
-	draftRef: { current: {} as Record<string, unknown> },
-	mutationErrorRef: { current: null as { message: string } | null },
-}));
-
-vi.mock(
-	"~/modules/declaration-remuneration/shared/draft/useDeclarationDraft",
-	() => ({
-		useDeclarationDraft: () => ({
-			draft: draftRef.current,
-			setField: mockSetField,
-			clearDraft: vi.fn(),
-			hasDraft: false,
-			isLoadingDraft: false,
-			isSaving: false,
-			isPendingSave: false,
-		}),
-	}),
-);
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: mockPush }),
-	usePathname: () => "/declaration-remuneration/parcours-conformite",
-}));
-
-vi.mock("~/trpc/react", () => ({
-	api: {
-		declaration: {
-			saveCompliancePath: {
-				useMutation: (opts: {
-					onSuccess?: (data: unknown, variables: { path: string }) => void;
-				}) => ({
-					mutate: (args: { path: string }) => {
-						mockMutate(args);
-						opts.onSuccess?.(undefined, args);
-					},
-					isPending: false,
-					error: mutationErrorRef.current,
-				}),
-			},
-		},
-		mail: {
-			resendReceipt: {
-				useMutation: () => ({ mutate: vi.fn(), isPending: false }),
-			},
-		},
-	},
-}));
-
-function compliancePathChoice(
-	overrides: Partial<ComponentProps<typeof CompliancePathChoice>> = {},
-) {
-	return (
-		<CompliancePathChoice
-			campaignDeadlines={campaignDeadlines}
-			cseOpinionRequired={true}
-			currentYear={2026}
-			declarationModifiable={true}
-			declarationSiren={DECLARATION_SIREN}
-			declarationYear={DECLARATION_YEAR}
-			email="test@example.fr"
-			{...overrides}
-		/>
-	);
-}
-
-beforeEach(() => {
-	mockMutate.mockClear();
-	mockPush.mockClear();
-	mockSetField.mockClear();
-	draftRef.current = {};
-	mutationErrorRef.current = null;
-});
+beforeEach(resetCompliancePathChoiceMocks);
 
 // The save mutation had no error surface at all, so a server rejection (a
 // CONFLICT 409 from the lock) left the button inert with zero feedback.
@@ -134,13 +67,6 @@ describe("CompliancePathChoice — mutation error surface", () => {
 		expect(container.querySelector(".fr-alert--error")).not.toBeInTheDocument();
 	});
 });
-
-function submitForm() {
-	const form = screen
-		.getByRole("button", { name: /suivant/i })
-		.closest("form") as HTMLFormElement;
-	fireEvent.submit(form);
-}
 
 describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner after a declaration transmission", () => {
@@ -338,112 +264,6 @@ describe("CompliancePathChoice — round 1, qualification screen", () => {
 		for (const title of [ALL_TITLE, PARTIAL_TITLE, NONE_TITLE]) {
 			expect(screen.getByLabelText(title)).not.toBeChecked();
 		}
-	});
-});
-
-describe("CompliancePathChoice — round 1, path screen", () => {
-	it("opens the path screen for partially justifiable gaps, focused on its title", async () => {
-		markDeclarationTransmissionSuccess();
-		render(compliancePathChoice());
-		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
-		submitForm();
-
-		const title = await screen.findByRole("heading", {
-			level: 1,
-			name: COMPLIANCE_TITLE,
-		});
-		await waitFor(() => expect(title).toHaveFocus());
-		expect(
-			screen.getByRole("heading", { level: 2, name: PARTIAL_TITLE }),
-		).toBeInTheDocument();
-		expect(screen.getByLabelText(CORRECTIVE_ACTION_TITLE)).toHaveAttribute(
-			"id",
-			"path-corrective",
-		);
-		expect(screen.getByLabelText(JOINT_EVALUATION_TITLE)).toHaveAttribute(
-			"id",
-			"path-joint",
-		);
-		expect(
-			screen.getByRole("group", {
-				name: "Choix du parcours de mise en conformité",
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.queryByText("Votre déclaration a été transmise"),
-		).not.toBeInTheDocument();
-		expect(mockMutate).not.toHaveBeenCalled();
-	});
-
-	it("subtitles the path screen with the none qualification", async () => {
-		render(compliancePathChoice());
-		fireEvent.click(screen.getByLabelText(NONE_TITLE));
-		submitForm();
-
-		expect(
-			await screen.findByRole("heading", { level: 2, name: NONE_TITLE }),
-		).toBeInTheDocument();
-	});
-
-	it("goes back to the qualification screen with the choice kept and the focus on its title", async () => {
-		render(compliancePathChoice());
-		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
-		submitForm();
-		fireEvent.click(await screen.findByRole("button", { name: /précédent/i }));
-
-		expect(await screen.findByLabelText(PARTIAL_TITLE)).toBeChecked();
-		const title = screen.getByRole("heading", {
-			level: 1,
-			name: "Déclaration des indicateurs de rémunération 2026",
-		});
-		await waitFor(() => expect(title).toHaveFocus());
-	});
-
-	it("keeps Suivant disabled until a path is picked", async () => {
-		render(compliancePathChoice());
-		fireEvent.click(screen.getByLabelText(NONE_TITLE));
-		submitForm();
-
-		await screen.findByLabelText(JOINT_EVALUATION_TITLE);
-		const next = screen.getByRole("button", { name: /suivant/i });
-		expect(next).toBeDisabled();
-		fireEvent.click(screen.getByLabelText(JOINT_EVALUATION_TITLE));
-		expect(next).not.toBeDisabled();
-	});
-
-	it.each([
-		["joint_evaluation", JOINT_EVALUATION_TITLE, JOINT_EVALUATION_HREF],
-		["corrective_action", CORRECTIVE_ACTION_TITLE, CORRECTIVE_ACTION_HREF],
-	] as const)("saves %s and navigates to its first step", async (path, title, href) => {
-		render(compliancePathChoice());
-		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
-		submitForm();
-		fireEvent.click(await screen.findByLabelText(title));
-		submitForm();
-
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path });
-		});
-		expect(mockPush).toHaveBeenCalledWith(href);
-	});
-
-	it("pre-checks the saved path on the path screen", async () => {
-		render(compliancePathChoice({ initialPath: "corrective_action" }));
-		fireEvent.click(screen.getByLabelText(NONE_TITLE));
-		submitForm();
-
-		expect(await screen.findByLabelText(CORRECTIVE_ACTION_TITLE)).toBeChecked();
-	});
-
-	it("refuses to save a path the qualification does not offer", async () => {
-		draftRef.current = { gapJustification: "partial", path: "justify" };
-		render(compliancePathChoice());
-		submitForm();
-		await screen.findByLabelText(JOINT_EVALUATION_TITLE);
-
-		expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
-		submitForm();
-		expect(mockMutate).not.toHaveBeenCalled();
 	});
 });
 

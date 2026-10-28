@@ -40,6 +40,7 @@ import {
 } from "./compliancePath/CompliancePathOptions";
 import { CompliancePathReadOnlyAlert } from "./compliancePath/CompliancePathReadOnlyAlert";
 import { DeclarationSuccessBanner } from "./compliancePath/DeclarationSuccessBanner";
+import { useCompliancePathScreen } from "./compliancePath/useCompliancePathScreen";
 
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
@@ -54,8 +55,6 @@ type Props = {
 	pdfDownloadHref?: string;
 	readOnlyReason?: CompliancePathReadOnlyReason;
 };
-
-type Screen = "justification" | "path";
 
 const COMPLIANCE_TITLE = (
 	<>
@@ -80,9 +79,7 @@ export function CompliancePathChoice({
 	const router = useRouter();
 	const consumedTransmissionSuccess = useRef(false);
 	const [showTransmissionSuccess, setShowTransmissionSuccess] = useState(false);
-	const [screen, setScreen] = useState<Screen>("justification");
 	const titleRef = useRef<HTMLHeadingElement>(null);
-	const isTitleFocusPending = useRef(false);
 	const isImpersonating = useIsImpersonating();
 	const { isReadOnly: isLockReadOnly } = useLockContext();
 	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
@@ -134,6 +131,18 @@ export function CompliancePathChoice({
 	const selectedPath = form.watch("path");
 	const hasInitialData = !!initialPath;
 	const hasData = hasInitialData || hasDraft;
+	const offeredPaths = compliancePathsForGapJustification(
+		selectedJustification ?? initialJustification ?? "none",
+		round,
+	);
+	const { screen, openPathScreen, backToJustificationScreen } =
+		useCompliancePathScreen({
+			draftHydrated,
+			isPathScreenAvailable:
+				(selectedJustification !== undefined || isReadOnly) &&
+				offeredPaths.length > 1,
+			titleRef,
+		});
 
 	// RouteScrollReset is silent on first render, so a reload still needs this: the browser restores scroll on the short placeholder before the form grows.
 	useEffect(() => {
@@ -148,13 +157,6 @@ export function CompliancePathChoice({
 		setShowTransmissionSuccess(consumeDeclarationTransmissionSuccess());
 	}, []);
 
-	useEffect(() => {
-		if (!isTitleFocusPending.current) return;
-		isTitleFocusPending.current = false;
-		scrollToTop();
-		titleRef.current?.focus();
-	});
-
 	const mutation = api.declaration.saveCompliancePath.useMutation({
 		onSuccess: (_, { path }) => {
 			clearDraft();
@@ -164,18 +166,9 @@ export function CompliancePathChoice({
 
 	if (!draftHydrated) return <DraftLoadingState />;
 
-	const showScreen = (next: Screen) => {
-		isTitleFocusPending.current = true;
-		setScreen(next);
-	};
-
 	const savedPathHref = initialPath
 		? getCompliancePathHref(initialPath, cseOpinionRequired)
 		: undefined;
-	const offeredPaths = compliancePathsForGapJustification(
-		selectedJustification ?? initialJustification ?? "none",
-		round,
-	);
 	const readOnlyGoesThroughPathScreen =
 		screen === "justification" &&
 		initialPath !== undefined &&
@@ -190,7 +183,7 @@ export function CompliancePathChoice({
 			round,
 		);
 		if (screen === "justification" && paths.length > 1) {
-			showScreen("path");
+			openPathScreen();
 			return;
 		}
 		const path = paths.length === 1 ? paths[0] : data.path;
@@ -361,7 +354,7 @@ export function CompliancePathChoice({
 						nextLabel="Suivant"
 						onNext={
 							isReadOnly && readOnlyGoesThroughPathScreen
-								? () => showScreen("path")
+								? openPathScreen
 								: undefined
 						}
 					/>
@@ -377,7 +370,7 @@ export function CompliancePathChoice({
 						}
 						nextHref={isReadOnly ? savedPathHref : undefined}
 						nextLabel="Suivant"
-						onPrevious={() => showScreen("justification")}
+						onPrevious={backToJustificationScreen}
 					/>
 				)}
 			</fieldset>

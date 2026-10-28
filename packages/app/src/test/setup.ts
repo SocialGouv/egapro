@@ -23,6 +23,7 @@ vi.mock("next/navigation", () => ({
 		back: vi.fn(),
 		refresh: vi.fn(),
 	}),
+	useSearchParams: () => new URLSearchParams(),
 }));
 
 // Global mock for next/image — renders a plain <div> with role="img".
