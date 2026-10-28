@@ -34,6 +34,9 @@ export type PanelVariant =
 	| "cse"
 	| "closed";
 
+// The footer CTA never renders in "closed" (no action left to propose), so its label helpers can't be called with it.
+type CtaVariant = Exclude<PanelVariant, "closed">;
+
 type Props = {
 	campaignDeadlines: CampaignDeadlines;
 	compliancePathApplicable: boolean;
@@ -152,13 +155,15 @@ export function DeclarationProcessPanel({
 					<div>
 						<HelpSection />
 						<div className={styles.footer}>
-							<a
-								aria-describedby={PANEL_TITLE_ID}
-								className="fr-btn"
-								href={ctaHref}
-							>
-								<CtaLabel lockedByOther={lockedByOther} variant={variant} />
-							</a>
+							{variant !== "closed" && (
+								<a
+									aria-describedby={PANEL_TITLE_ID}
+									className="fr-btn"
+									href={ctaHref}
+								>
+									<CtaLabel lockedByOther={lockedByOther} variant={variant} />
+								</a>
+							)}
 						</div>
 					</div>
 				</div>
@@ -167,14 +172,12 @@ export function DeclarationProcessPanel({
 	);
 }
 
-function getCtaLabel(variant: PanelVariant): string {
-	if (variant === "closed") return "Voir la déclaration";
+function getCtaLabel(variant: CtaVariant): string {
 	if (variant === "start") return "Commencer";
 	return "Continuer";
 }
 
-function getCtaAccessibleSuffix(variant: PanelVariant): string | null {
-	if (variant === "closed") return null;
+function getCtaAccessibleSuffix(variant: CtaVariant): string | null {
 	if (variant === "start") return "la déclaration";
 	return DEMARCHE_SUFFIX;
 }
@@ -184,7 +187,7 @@ function CtaLabel({
 	variant,
 }: {
 	lockedByOther: boolean;
-	variant: PanelVariant;
+	variant: CtaVariant;
 }) {
 	if (lockedByOther) {
 		// Suffix trails the full visible label (not split mid-phrase) so it stays a contiguous prefix of the accessible name — WCAG 2.5.3 Label in Name.
