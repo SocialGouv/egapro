@@ -48,12 +48,8 @@ export function SecondDeclarationStep1Info({
 			<SecondDeclarationStepIndicator currentStep={1} />
 
 			<p className={`fr-mb-0 ${common.fontMedium} ${styles.introText}`}>
-				Vous devez mettre en œuvre des <strong>actions correctives</strong> et
-				effectuer une{" "}
-				<strong>
-					seconde déclaration de l&apos;indicateur par catégorie d&apos;emplois
-				</strong>
-				.
+				Vous devez mettre en œuvre des actions correctives et effectuer une
+				seconde déclaration de l&apos;indicateur par catégorie d&apos;emplois.
 			</p>
 
 			<DeadlineBlock deadline={modificationDeadline} />

@@ -239,7 +239,7 @@ export function CompliancePathChoice({
 				{screen === "justification" ? (
 					<>
 						{!isSecondRound && (
-							<h2 className="fr-h4 fr-mb-0">{COMPLIANCE_TITLE}</h2>
+							<h2 className="fr-h6 fr-mb-0">{COMPLIANCE_TITLE}</h2>
 						)}
 
 						<div className={common.flexColumnGap1}>

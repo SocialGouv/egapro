@@ -120,18 +120,15 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(title.parentElement).toHaveClass("fr-callout", SCOPED_CALLOUT_CLASS);
 	});
 
-	it("renders the intro paragraph in medium weight while keeping its emphasis", () => {
+	it("renders the intro paragraph in uniform medium weight", () => {
 		renderStep1();
 
-		expect(screen.getByText(/Vous devez mettre en œuvre des/)).toHaveClass(
-			SCOPED_FONT_MEDIUM_CLASS,
+		const intro = screen.getByText(/Vous devez mettre en œuvre des/);
+		expect(intro).toHaveClass(SCOPED_FONT_MEDIUM_CLASS);
+		expect(intro).toHaveTextContent(
+			"Vous devez mettre en œuvre des actions correctives et effectuer une seconde déclaration de l'indicateur par catégorie d'emplois.",
 		);
-		expect(screen.getByText("actions correctives").tagName).toBe("STRONG");
-		expect(
-			screen.getByText(
-				/^seconde déclaration de l.indicateur par catégorie d'emplois$/,
-			).tagName,
-		).toBe("STRONG");
+		expect(intro.querySelector("strong")).toBeNull();
 	});
 
 	it("neutralises the top margin of the form actions", () => {

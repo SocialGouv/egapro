@@ -19,7 +19,7 @@ export function JointEvaluationHeading({ title }: { title: string }) {
 			<h2 className="fr-h5 fr-mb-0">{title}</h2>
 			<p className="fr-mb-0">
 				<TrackedLink
-					className="fr-link"
+					className={`fr-link ${common.fontMedium}`}
 					href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
 					rel="noopener noreferrer"
 					target="_blank"
@@ -122,7 +122,7 @@ export function JointEvaluationReportUpload({
 export function JointEvaluationTodo({ title }: { title: string }) {
 	return (
 		<div className={styles.panelBlue}>
-			<h3 className="fr-h6 fr-mb-2w">{title}</h3>
+			<h3 className="fr-text--md fr-text--bold fr-mb-2w">{title}</h3>
 			<ul className="fr-mb-0">
 				<li>
 					Réaliser l&apos;analyse conjointe et définir des actions correctrices
@@ -138,7 +138,9 @@ export function JointEvaluationTodo({ title }: { title: string }) {
 export function JointEvaluationAfterReport() {
 	return (
 		<div className={styles.panelWhite}>
-			<h3 className="fr-h6 fr-mb-2w">Après élaboration du rapport</h3>
+			<h3 className="fr-text--md fr-text--bold fr-mb-2w">
+				Après élaboration du rapport
+			</h3>
 			<ul className="fr-mb-2w">
 				<li>Négocier un accord collectif</li>
 				<li>À défaut, mettre en place un plan d&apos;action</li>
@@ -146,7 +148,7 @@ export function JointEvaluationAfterReport() {
 			<p className="fr-mb-0">
 				L&apos;accord collectif ou le plan d&apos;action doit être déposé sur{" "}
 				<a
-					className="fr-link"
+					className={`fr-link ${common.fontMedium}`}
 					href="https://www.teleaccord.travail.gouv.fr"
 					rel="noopener noreferrer"
 					target="_blank"

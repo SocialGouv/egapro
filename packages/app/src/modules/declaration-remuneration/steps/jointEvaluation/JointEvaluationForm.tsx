@@ -116,7 +116,7 @@ export function JointEvaluationForm({
 									Échéance pour transmettre le rapport de l&apos;évaluation
 									conjointe
 								</p>
-								<p className="fr-h6 fr-mb-0">
+								<p className="fr-text--xl fr-text--bold fr-mb-0">
 									{formatCivilLongDate(jointEvaluationDeadline)}
 								</p>
 							</div>
