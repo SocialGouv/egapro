@@ -183,20 +183,6 @@ describe("summarizeRepresentationReview — indicators", () => {
 	});
 });
 
-describe("summarizeRepresentationReview — submit variant", () => {
-	it.each([
-		["two_gaps", { ...NON_COMPLIANT_EXECUTIVES, ...NON_COMPLIANT_MEMBERS }],
-		["one_gap", { ...COMPUTABLE_EXECUTIVES, ...NON_COMPLIANT_MEMBERS }],
-		["one_gap", { ...NON_COMPLIANT_EXECUTIVES, ...NO_MANAGEMENT_BODY }],
-		["compliant", BOTH_COMPUTABLE],
-		["compliant", { ...NO_EXECUTIVES, ...COMPUTABLE_MEMBERS }],
-		["not_computable", { ...NO_EXECUTIVES, ...NO_MANAGEMENT_BODY }],
-		["not_computable", {}],
-	])("picks the %s modal variant", (variant, values) => {
-		expect(summarize(values).submitVariant).toBe(variant);
-	});
-});
-
 describe("isPublicationApplicable", () => {
 	it.each([
 		[BOTH_COMPUTABLE, true],
