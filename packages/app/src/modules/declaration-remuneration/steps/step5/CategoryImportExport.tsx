@@ -161,6 +161,7 @@ export function CategoryImportExport({ onImport, disabled = false }: Props) {
 												accept=".xlsx,.csv"
 												acceptLabel="xlsx, csv"
 												allowedMimeTypes={ALLOWED_MIME_TYPES}
+												ariaLabel="Sélectionner des fichiers"
 												disabled={isImporting}
 												error={fileError}
 												inputId={uploadId}

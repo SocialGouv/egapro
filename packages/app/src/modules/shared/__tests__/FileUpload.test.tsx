@@ -515,4 +515,27 @@ describe("FileUpload filename validation", () => {
 			FILENAME_ERROR_MESSAGES.forbidden_char,
 		);
 	});
+
+	it("lets a visible label name the file input: no aria-label overrides it when ariaLabel is unset", () => {
+		render(
+			<>
+				<label htmlFor="test-upload">
+					Veuillez importer le rapport de l&apos;évaluation conjointe.
+				</label>
+				<FileUpload
+					{...baseProps}
+					error={null}
+					onFilesChange={vi.fn()}
+					selectedFiles={[]}
+				/>
+			</>,
+		);
+
+		expect(getInput()).not.toHaveAttribute("aria-label");
+		expect(
+			screen.getByLabelText(
+				"Veuillez importer le rapport de l'évaluation conjointe.",
+			),
+		).toBe(getInput());
+	});
 });
