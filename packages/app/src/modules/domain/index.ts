@@ -279,7 +279,7 @@ export {
 } from "./shared/gap";
 export {
 	compliancePathsForGapJustification,
-	gapJustificationFromPath,
+	isCseJustificationOpinionRequired,
 } from "./shared/gapJustification";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {

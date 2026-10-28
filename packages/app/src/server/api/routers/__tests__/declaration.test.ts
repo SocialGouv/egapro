@@ -1196,6 +1196,7 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(ctx.db);
 
 			const result = await caller.saveCompliancePath({
+				gapJustification: "partial",
 				path: "corrective_action",
 			});
 
@@ -1203,6 +1204,7 @@ describe("declarationRouter", () => {
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("corrective_actions_chosen");
 			expect(setCall.firstDeclarationPathChoice).toBe("corrective_action");
+			expect(setCall.firstDeclarationGapJustification).toBe("partial");
 			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
 				eventType: string;
 				value: string | null;
@@ -1225,7 +1227,10 @@ describe("declarationRouter", () => {
 			const ctx = createSimpleSelectDb(declaration);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "justify" });
+			await caller.saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			});
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
@@ -1240,7 +1245,10 @@ describe("declarationRouter", () => {
 			const ctx = createSimpleSelectDb(declaration);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "justify" });
+			await caller.saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			});
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("demarche_completed");
@@ -1266,11 +1274,16 @@ describe("declarationRouter", () => {
 			);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "justify" });
+			await caller.saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			});
 
 			const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 			expect(setCall.status).toBe("awaiting_cse_opinion");
 			expect(setCall.secondDeclarationPathChoice).toBe("justify");
+			expect(setCall.secondDeclarationGapJustification).toBe("all");
+			expect(setCall).not.toHaveProperty("firstDeclarationGapJustification");
 			const insertedEvents = ctx.insertValues.mock.calls[0]?.[0] as Array<{
 				eventType: string;
 				round: number | null;
@@ -1297,7 +1310,10 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
-				caller.saveCompliancePath({ path: "corrective_action" }),
+				caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "corrective_action",
+				}),
 			).rejects.toThrow(/action corrective/i);
 		});
 
@@ -1315,7 +1331,10 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
-				caller.saveCompliancePath({ path: "corrective_action" }),
+				caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "corrective_action",
+				}),
 			).rejects.toThrow(/parcours ne peut plus/i);
 		});
 
@@ -1334,8 +1353,30 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
-				caller.saveCompliancePath({ path: "joint_evaluation" }),
+				caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "joint_evaluation",
+				}),
 			).rejects.toThrow(/parcours ne peut plus/i);
+		});
+
+		it.each([
+			["all", "joint_evaluation"],
+			["all", "corrective_action"],
+			["partial", "justify"],
+			["none", "justify"],
+		] as const)("refuses the %s qualification with the %s path without writing anything", async (gapJustification, path) => {
+			const declaration = buildDeclaration({
+				status: "awaiting_compliance_path_choice",
+				cseRequired: true,
+			});
+			const ctx = createSimpleSelectDb(declaration);
+			const caller = await createLockedCaller(ctx.db);
+
+			await expect(
+				caller.saveCompliancePath({ gapJustification, path }),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(ctx.set).not.toHaveBeenCalled();
 		});
 
 		it("rejects invalid compliance path", async () => {
@@ -1347,7 +1388,10 @@ describe("declarationRouter", () => {
 			const caller = await createLockedCaller(ctx.db);
 
 			await expect(
-				caller.saveCompliancePath({ path: "invalid_path" as never }),
+				caller.saveCompliancePath({
+					gapJustification: "all",
+					path: "invalid_path" as never,
+				}),
 			).rejects.toThrow();
 		});
 
@@ -1369,9 +1413,12 @@ describe("declarationRouter", () => {
 					"user@example.com",
 				);
 
-				await expect(caller.saveCompliancePath({ path })).rejects.toMatchObject(
-					{ code: "PRECONDITION_FAILED" },
-				);
+				await expect(
+					caller.saveCompliancePath({
+						gapJustification: path === "justify" ? "all" : "partial",
+						path,
+					}),
+				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 				expect(ctx.insertValues).not.toHaveBeenCalled();
 				expect(ctx.set).not.toHaveBeenCalled();
 				expect(mockEnqueueReceipt).not.toHaveBeenCalled();
@@ -1387,7 +1434,10 @@ describe("declarationRouter", () => {
 				const caller = await createLockedCaller(ctx.db);
 
 				await expect(
-					caller.saveCompliancePath({ path: "corrective_action" }),
+					caller.saveCompliancePath({
+						gapJustification: "partial",
+						path: "corrective_action",
+					}),
 				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 				expect(ctx.insertValues).not.toHaveBeenCalled();
 			});
@@ -1401,7 +1451,10 @@ describe("declarationRouter", () => {
 				const caller = await createLockedCaller(ctx.db);
 
 				await expect(
-					caller.saveCompliancePath({ path: "justify" }),
+					caller.saveCompliancePath({
+						gapJustification: "all",
+						path: "justify",
+					}),
 				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 				expect(ctx.insertValues).not.toHaveBeenCalled();
 			});
@@ -1420,7 +1473,10 @@ describe("declarationRouter", () => {
 				const caller = await createLockedCaller(ctx.db);
 
 				await expect(
-					caller.saveCompliancePath({ path: "joint_evaluation" }),
+					caller.saveCompliancePath({
+						gapJustification: "partial",
+						path: "joint_evaluation",
+					}),
 				).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 				expect(ctx.insertValues).not.toHaveBeenCalled();
 			});
@@ -1434,7 +1490,10 @@ describe("declarationRouter", () => {
 				const ctx = createSimpleSelectDb(declaration);
 				const caller = await createLockedCaller(ctx.db);
 
-				await caller.saveCompliancePath({ path: "joint_evaluation" });
+				await caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "joint_evaluation",
+				});
 
 				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 				expect(setCall.status).toBe("joint_evaluation_chosen");
@@ -1457,7 +1516,10 @@ describe("declarationRouter", () => {
 				const ctx = createSimpleSelectDb(declaration);
 				const caller = await createLockedCaller(ctx.db);
 
-				await caller.saveCompliancePath({ path: "corrective_action" });
+				await caller.saveCompliancePath({
+					gapJustification: "partial",
+					path: "corrective_action",
+				});
 
 				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 				expect(setCall.status).toBe("corrective_actions_chosen");
@@ -1478,7 +1540,10 @@ describe("declarationRouter", () => {
 				);
 				const caller = await createLockedCaller(ctx.db);
 
-				await caller.saveCompliancePath({ path: "justify" });
+				await caller.saveCompliancePath({
+					gapJustification: "all",
+					path: "justify",
+				});
 
 				const setCall = ctx.set.mock.calls[0]?.[0] as Record<string, unknown>;
 				expect(setCall.status).toBe("awaiting_cse_opinion");
@@ -1501,7 +1566,10 @@ describe("declarationRouter", () => {
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "justify" });
+			await caller.saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			});
 
 			const setCalls = ctx.set.mock.calls.map(
 				(c) => c[0] as Record<string, unknown>,
@@ -1521,7 +1589,10 @@ describe("declarationRouter", () => {
 			const ctx = createSimpleSelectDb(declaration, [], [], [declaration]);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "justify" });
+			await caller.saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			});
 
 			const setCalls = ctx.set.mock.calls.map(
 				(c) => c[0] as Record<string, unknown>,
@@ -1549,7 +1620,7 @@ describe("declarationRouter", () => {
 			const caller = await createCaller(withLockMiddleware(ctx.db));
 
 			await expect(
-				caller.saveCompliancePath({ path: "justify" }),
+				caller.saveCompliancePath({ gapJustification: "all", path: "justify" }),
 			).resolves.toEqual({ success: true });
 		});
 	});
@@ -1796,7 +1867,10 @@ describe("declarationRouter", () => {
 			);
 			const caller = await createLockedCaller(ctx.db);
 
-			await caller.saveCompliancePath({ path: "corrective_action" });
+			await caller.saveCompliancePath({
+				gapJustification: "partial",
+				path: "corrective_action",
+			});
 
 			expect(ctx.steps[0]).toBe("lock");
 			expect(ctx.steps.filter((step) => step === "lock")).toHaveLength(1);

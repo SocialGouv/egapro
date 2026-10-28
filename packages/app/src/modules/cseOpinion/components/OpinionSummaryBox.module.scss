@@ -26,3 +26,9 @@
 	width: 1rem;
 	text-align: center;
 }
+
+.groups {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}

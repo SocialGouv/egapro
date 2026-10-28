@@ -131,7 +131,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		);
 		await acquireLock(declarationId);
 
-		await createCaller().saveCompliancePath({ path: "justify" });
+		await createCaller().saveCompliancePath({
+			gapJustification: "all",
+			path: "justify",
+		});
 
 		const rows = await waitForNotificationEnqueue();
 		expect(rows[0]?.metadata).toMatchObject({
@@ -145,7 +148,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		await markSecondDeclarationSubmitted(declarationId);
 		await acquireLock(declarationId);
 
-		await createCaller().saveCompliancePath({ path: "justify" });
+		await createCaller().saveCompliancePath({
+			gapJustification: "all",
+			path: "justify",
+		});
 
 		const rows = await waitForNotificationEnqueue();
 		expect(rows[0]?.metadata).toMatchObject({
@@ -164,7 +170,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		);
 		await acquireLock(declarationId);
 
-		await createCaller().saveCompliancePath({ path: "corrective_action" });
+		await createCaller().saveCompliancePath({
+			gapJustification: "partial",
+			path: "corrective_action",
+		});
 
 		// No positive event to await here — assert the absence stays stable
 		// rather than racing a `vi.waitFor` that would only prove impatience.
@@ -181,7 +190,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		await acquireLock(declarationId);
 
 		await expect(
-			createCaller().saveCompliancePath({ path: "justify" }),
+			createCaller().saveCompliancePath({
+				gapJustification: "all",
+				path: "justify",
+			}),
 		).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
 
 		const [declaration] = await sql<{ status: string }[]>`
@@ -204,7 +216,10 @@ describe("declaration.saveCompliancePath — démarche-complete receipt (#4293)"
 		const declarationId = await insertDeclaration("corrective_actions_chosen");
 		await acquireLock(declarationId);
 
-		await createCaller().saveCompliancePath({ path: "joint_evaluation" });
+		await createCaller().saveCompliancePath({
+			gapJustification: "partial",
+			path: "joint_evaluation",
+		});
 
 		const [declaration] = await sql<
 			{ status: string; first_declaration_path_choice: string }[]

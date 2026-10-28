@@ -2,8 +2,8 @@ import { formatIsoDate } from "~/modules/domain";
 
 import {
 	buildColumnId,
-	getContentTypeDescription,
 	getContentTypeHeader,
+	getOpinionTitle,
 } from "./contentTypeColumns";
 import {
 	type ContentType,
@@ -141,10 +141,7 @@ export function buildSubmittedDeclarations(
 			.sort(compareContentTypes)
 			.map((opinion) => ({
 				id: buildColumnId(opinion.declarationNumber, opinion.type),
-				title: getContentTypeDescription(
-					opinion.declarationNumber,
-					opinion.type,
-				),
+				title: getOpinionTitle(opinion.declarationNumber, opinion.type),
 				rows: buildSubmittedOpinionRows(opinion),
 			})),
 	}));

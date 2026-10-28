@@ -1,314 +1,255 @@
 import { describe, expect, it, vi } from "vitest";
+
 import {
 	buildOpinionsFormValues,
 	CLEARED_GAP_FIELDS,
 	hydrateOpinionsForm,
-	isGapConsultationIncomplete,
+	isJustificationOpinionIncomplete,
 	normalizeSubmittedOpinions,
 } from "../opinionsFormValues";
 import type { CseOpinionStep1Data } from "../types";
+
+const REQUIRED_BOTH = {
+	firstDeclJustificationRequired: true,
+	secondDeclJustificationRequired: true,
+};
+const REQUIRED_NONE = {
+	firstDeclJustificationRequired: false,
+	secondDeclJustificationRequired: false,
+};
 
 const initialData: CseOpinionStep1Data = {
 	firstDeclAccuracyOpinion: "favorable",
 	firstDeclAccuracyDate: "2026-01-15",
 	firstDeclGapConsulted: true,
-	firstDeclGapOpinion: "favorable",
-	firstDeclGapDate: "2026-01-20",
-	secondDeclAccuracyOpinion: "unfavorable",
-	secondDeclAccuracyDate: "2026-02-01",
-	secondDeclGapConsulted: true,
-	secondDeclGapOpinion: "unfavorable",
-	secondDeclGapDate: "2026-02-02",
+	firstDeclGapOpinion: "unfavorable",
+	firstDeclGapDate: "2026-01-16",
+	secondDeclAccuracyOpinion: "favorable",
+	secondDeclAccuracyDate: "2026-02-15",
+	secondDeclGapConsulted: false,
+	secondDeclGapOpinion: "favorable",
+	secondDeclGapDate: "2026-02-16",
+};
+
+const accuracy = {
+	accuracyOpinion: "favorable" as const,
+	accuracyDate: "2026-01-15",
 };
 
 describe("buildOpinionsFormValues", () => {
-	it("keeps second-declaration gap fields when a remaining gap ≥ 5% is present", () => {
-		const values = buildOpinionsFormValues(initialData, true, true);
+	it("keeps the stored justification opinions when they are required", () => {
+		const values = buildOpinionsFormValues(initialData, true, REQUIRED_BOTH);
 
-		expect(values.secondDeclaration?.gapConsulted).toBe(true);
-		expect(values.secondDeclaration?.gapOpinion).toBe("unfavorable");
-		expect(values.secondDeclaration?.gapDate).toBe("2026-02-02");
-	});
-
-	it("clears second-declaration gap fields when no remaining gap is ≥ 5%", () => {
-		const values = buildOpinionsFormValues(initialData, true, false);
-
-		expect(values.secondDeclaration).toMatchObject({
-			accuracyOpinion: "unfavorable",
-			accuracyDate: "2026-02-01",
-			...CLEARED_GAP_FIELDS,
-		});
-	});
-
-	it("forces gapConsulted true for the second-round justification path", () => {
-		const values = buildOpinionsFormValues(
-			{ ...initialData, secondDeclGapConsulted: false },
-			true,
-			true,
-			true,
-		);
-
-		expect(values.secondDeclaration?.gapConsulted).toBe(true);
-		expect(values.secondDeclaration?.gapOpinion).toBe("unfavorable");
-	});
-
-	it("clears gap fields even on the justification path when no remaining gap is ≥ 5%", () => {
-		const values = buildOpinionsFormValues(initialData, true, false, true);
-
-		expect(values.secondDeclaration).toMatchObject({
-			accuracyOpinion: "unfavorable",
-			accuracyDate: "2026-02-01",
-			...CLEARED_GAP_FIELDS,
-		});
-	});
-
-	it("forces gapConsulted true for the first-round justification path", () => {
-		const values = buildOpinionsFormValues(
-			{ ...initialData, firstDeclGapConsulted: false },
-			false,
-			false,
-			false,
-			true,
-		);
-
-		expect(values.firstDeclaration.gapConsulted).toBe(true);
-		expect(values.firstDeclaration.gapOpinion).toBe("favorable");
-	});
-
-	it("clears first-declaration gap fields when no gap is ≥ 5%", () => {
-		const values = buildOpinionsFormValues(
-			initialData,
-			false,
-			false,
-			false,
-			false,
-			false,
-		);
-
-		expect(values.firstDeclaration).toMatchObject({
+		expect(values.firstDeclaration).toEqual({
 			accuracyOpinion: "favorable",
 			accuracyDate: "2026-01-15",
+			gapOpinion: "unfavorable",
+			gapDate: "2026-01-16",
+		});
+		expect(values.secondDeclaration?.gapOpinion).toBe("favorable");
+		expect(values.secondDeclaration?.gapDate).toBe("2026-02-16");
+	});
+
+	it("keeps the justification opinion regardless of the stored consultation flag", () => {
+		const values = buildOpinionsFormValues(initialData, true, REQUIRED_BOTH);
+
+		expect(values.secondDeclaration).not.toHaveProperty("gapConsulted");
+		expect(values.secondDeclaration?.gapOpinion).toBe("favorable");
+	});
+
+	it("clears the justification fields that are not required", () => {
+		const values = buildOpinionsFormValues(initialData, true, REQUIRED_NONE);
+
+		expect(values.firstDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
+		expect(values.secondDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
+	});
+
+	it("omits the second declaration when there is none", () => {
+		const values = buildOpinionsFormValues(initialData, false, REQUIRED_BOTH);
+
+		expect(values.secondDeclaration).toBeUndefined();
+	});
+
+	it("starts empty without stored opinions", () => {
+		const values = buildOpinionsFormValues(undefined, true, REQUIRED_BOTH);
+
+		expect(values.firstDeclaration).toEqual({
+			accuracyOpinion: undefined,
+			accuracyDate: "",
+			gapOpinion: null,
+			gapDate: null,
+		});
+		expect(values.secondDeclaration).toEqual({
+			accuracyOpinion: undefined,
+			accuracyDate: "",
+			gapOpinion: null,
+			gapDate: null,
+		});
+	});
+});
+
+describe("normalizeSubmittedOpinions", () => {
+	const data = {
+		firstDeclaration: {
+			...accuracy,
+			gapOpinion: "favorable" as const,
+			gapDate: "2026-01-16",
+		},
+		secondDeclaration: {
+			...accuracy,
+			gapOpinion: "unfavorable" as const,
+			gapDate: "2026-02-16",
+		},
+	};
+
+	it("keeps the justification opinions that are required", () => {
+		expect(normalizeSubmittedOpinions(data, REQUIRED_BOTH)).toEqual(data);
+	});
+
+	it("clears only the justification opinion that is not required", () => {
+		const normalized = normalizeSubmittedOpinions(data, {
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: false,
+		});
+
+		expect(normalized.firstDeclaration).toEqual(data.firstDeclaration);
+		expect(normalized.secondDeclaration).toEqual({
+			...accuracy,
 			...CLEARED_GAP_FIELDS,
 		});
 	});
 
-	it("omits secondDeclaration when there is no second declaration", () => {
-		const values = buildOpinionsFormValues(initialData, false, false);
+	it("leaves the second declaration out when there is none", () => {
+		const normalized = normalizeSubmittedOpinions(
+			{ firstDeclaration: data.firstDeclaration },
+			REQUIRED_NONE,
+		);
 
-		expect(values.secondDeclaration).toBeUndefined();
-		expect(values.firstDeclaration.gapConsulted).toBe(true);
+		expect(normalized).toEqual({
+			firstDeclaration: { ...accuracy, ...CLEARED_GAP_FIELDS },
+			secondDeclaration: undefined,
+		});
 	});
 });
 
-const submitted = {
-	firstDeclaration: {
-		accuracyOpinion: "favorable" as const,
-		accuracyDate: "2026-01-15",
-		gapConsulted: false,
-		gapOpinion: null,
-		gapDate: null,
-	},
-	secondDeclaration: {
-		accuracyOpinion: "unfavorable" as const,
-		accuracyDate: "2026-02-01",
-		gapConsulted: true,
-		gapOpinion: "favorable" as const,
-		gapDate: "2026-02-02",
-	},
-};
-
-const consultedFirstDeclaration = {
-	...submitted,
-	firstDeclaration: {
-		...submitted.firstDeclaration,
-		gapConsulted: true,
-		gapOpinion: "favorable" as const,
-		gapDate: "2026-01-20",
-	},
-};
-
-describe("normalizeSubmittedOpinions", () => {
-	it("clears second-declaration gap fields when no remaining gap is ≥ 5%", () => {
-		expect(
-			normalizeSubmittedOpinions(submitted, false, false).secondDeclaration,
-		).toMatchObject(CLEARED_GAP_FIELDS);
+describe("isJustificationOpinionIncomplete", () => {
+	it.each([
+		[{ ...accuracy, gapOpinion: null, gapDate: "2026-01-16" }],
+		[{ ...accuracy, gapOpinion: "favorable" as const, gapDate: null }],
+		[undefined],
+	])("is true when a required opinion lacks its answer or date", (declaration) => {
+		expect(isJustificationOpinionIncomplete(declaration, true)).toBe(true);
 	});
 
-	it("forces gapConsulted true on the second-round justification path", () => {
+	it("is false when the required opinion is complete", () => {
 		expect(
-			normalizeSubmittedOpinions(
-				{
-					...submitted,
-					secondDeclaration: {
-						...submitted.secondDeclaration,
-						gapConsulted: false,
-					},
-				},
+			isJustificationOpinionIncomplete(
+				{ ...accuracy, gapOpinion: "favorable", gapDate: "2026-01-16" },
 				true,
-				true,
-			).secondDeclaration?.gapConsulted,
-		).toBe(true);
+			),
+		).toBe(false);
 	});
 
-	it("forces gapConsulted true on the first-round justification path", () => {
+	it("is false when the opinion is not required", () => {
 		expect(
-			normalizeSubmittedOpinions(submitted, true, false, true).firstDeclaration
-				.gapConsulted,
-		).toBe(true);
-	});
-
-	it("clears first-declaration gap fields when no gap is ≥ 5%", () => {
-		const result = normalizeSubmittedOpinions(
-			consultedFirstDeclaration,
-			true,
-			false,
-			false,
-			false,
-		);
-
-		expect(result.firstDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
-	});
-
-	it("clears first-declaration gap fields below threshold even on the justification path", () => {
-		const result = normalizeSubmittedOpinions(
-			consultedFirstDeclaration,
-			true,
-			false,
-			true,
-			false,
-		);
-
-		expect(result.firstDeclaration).toMatchObject(CLEARED_GAP_FIELDS);
-	});
-
-	it("leaves gap fields unchanged when a remaining gap is ≥ 5% outside the justification path", () => {
-		expect(
-			normalizeSubmittedOpinions(submitted, true, false).secondDeclaration,
-		).toEqual(submitted.secondDeclaration);
-	});
-});
-
-describe("isGapConsultationIncomplete", () => {
-	it("is true when consulted without opinion or date", () => {
-		expect(
-			isGapConsultationIncomplete({
-				...submitted.firstDeclaration,
-				gapConsulted: true,
-			}),
-		).toBe(true);
-	});
-
-	it("is false when consulted with opinion and date", () => {
-		expect(
-			isGapConsultationIncomplete({
-				...submitted.firstDeclaration,
-				gapConsulted: true,
-				gapOpinion: "favorable",
-				gapDate: "2026-01-20",
-			}),
+			isJustificationOpinionIncomplete(
+				{ ...accuracy, gapOpinion: null, gapDate: null },
+				false,
+			),
 		).toBe(false);
 	});
 });
 
 describe("hydrateOpinionsForm", () => {
-	it("ignores a stale first-declaration draft consultation on the justification path", () => {
-		const setValue = vi.fn() as unknown as Parameters<
-			typeof hydrateOpinionsForm
-		>[0];
-		hydrateOpinionsForm(
-			setValue,
-			{
-				firstDeclaration: {
-					accuracyOpinion: "favorable",
-					accuracyDate: "2026-01-15",
-					gapConsulted: false,
-					gapOpinion: "favorable",
-					gapDate: "2026-01-20",
-				},
-			},
-			false,
-			false,
-			false,
-			true,
-		);
+	const draft = {
+		firstDeclaration: {
+			accuracyOpinion: "unfavorable" as const,
+			accuracyDate: "2026-03-01",
+			gapOpinion: "favorable" as const,
+			gapDate: "2026-03-02",
+		},
+		secondDeclaration: {
+			accuracyOpinion: "favorable" as const,
+			accuracyDate: "2026-03-03",
+			gapOpinion: "unfavorable" as const,
+			gapDate: "2026-03-04",
+		},
+	};
 
-		expect(setValue).toHaveBeenCalledWith(
-			"firstDeclaration.gapConsulted",
-			true,
-		);
-		expect(setValue).not.toHaveBeenCalledWith(
-			"firstDeclaration.gapConsulted",
-			false,
-		);
-		expect(setValue).toHaveBeenCalledWith(
-			"firstDeclaration.gapOpinion",
-			"favorable",
-		);
+	it("restores every drafted field when the justifications are required", () => {
+		const setValue = vi.fn();
+
+		hydrateOpinionsForm(setValue, draft, true, REQUIRED_BOTH);
+
+		expect(setValue.mock.calls).toEqual([
+			["firstDeclaration.accuracyOpinion", "unfavorable"],
+			["firstDeclaration.accuracyDate", "2026-03-01"],
+			["firstDeclaration.gapOpinion", "favorable"],
+			["firstDeclaration.gapDate", "2026-03-02"],
+			["secondDeclaration.accuracyOpinion", "favorable"],
+			["secondDeclaration.accuracyDate", "2026-03-03"],
+			["secondDeclaration.gapOpinion", "unfavorable"],
+			["secondDeclaration.gapDate", "2026-03-04"],
+		]);
 	});
 
-	it("clears a stale first-declaration draft when no gap is ≥ 5%", () => {
-		const setValue = vi.fn() as unknown as Parameters<
-			typeof hydrateOpinionsForm
-		>[0];
-		hydrateOpinionsForm(
-			setValue,
-			{
-				firstDeclaration: {
-					accuracyOpinion: "favorable",
-					accuracyDate: "2026-01-15",
-					gapConsulted: true,
-					gapOpinion: "favorable",
-					gapDate: "2026-01-20",
-				},
-			},
-			false,
-			false,
-			false,
-			false,
-			false,
-		);
+	it("clears a stale drafted justification that is no longer required", () => {
+		const setValue = vi.fn();
 
-		expect(setValue).toHaveBeenCalledWith(
-			"firstDeclaration.gapConsulted",
-			false,
-		);
+		hydrateOpinionsForm(setValue, draft, true, {
+			firstDeclJustificationRequired: false,
+			secondDeclJustificationRequired: true,
+		});
+
 		expect(setValue).toHaveBeenCalledWith("firstDeclaration.gapOpinion", null);
 		expect(setValue).toHaveBeenCalledWith("firstDeclaration.gapDate", null);
 		expect(setValue).not.toHaveBeenCalledWith(
-			"firstDeclaration.gapConsulted",
-			true,
+			"firstDeclaration.gapOpinion",
+			"favorable",
+		);
+		expect(setValue).toHaveBeenCalledWith(
+			"secondDeclaration.gapOpinion",
+			"unfavorable",
 		);
 	});
 
-	it("clears a stale second-declaration draft when no remaining gap is ≥ 5%", () => {
-		const setValue = vi.fn() as unknown as Parameters<
-			typeof hydrateOpinionsForm
-		>[0];
-		hydrateOpinionsForm(
-			setValue,
-			{
-				secondDeclaration: {
-					accuracyOpinion: "unfavorable",
-					accuracyDate: "2026-02-01",
-					gapConsulted: true,
-					gapOpinion: "favorable",
-					gapDate: "2026-02-02",
-				},
-			},
-			true,
-			false,
-			false,
-		);
+	it("ignores a gapConsulted answer left in an older draft", () => {
+		const setValue = vi.fn();
+		const legacyDraft = {
+			firstDeclaration: { ...draft.firstDeclaration, gapConsulted: false },
+		};
 
-		expect(setValue).toHaveBeenCalledWith(
-			"secondDeclaration.gapConsulted",
-			false,
-		);
-		expect(setValue).toHaveBeenCalledWith("secondDeclaration.gapOpinion", null);
-		expect(setValue).toHaveBeenCalledWith("secondDeclaration.gapDate", null);
-		expect(setValue).not.toHaveBeenCalledWith(
-			"secondDeclaration.gapConsulted",
-			true,
-		);
+		hydrateOpinionsForm(setValue, legacyDraft, false, REQUIRED_BOTH);
+
+		expect(
+			setValue.mock.calls.some(([field]) =>
+				String(field).includes("Consulted"),
+			),
+		).toBe(false);
+	});
+
+	it("leaves the second declaration untouched when there is none", () => {
+		const setValue = vi.fn();
+
+		hydrateOpinionsForm(setValue, draft, false, REQUIRED_NONE);
+
+		expect(
+			setValue.mock.calls.some(([field]) =>
+				String(field).startsWith("secondDeclaration"),
+			),
+		).toBe(false);
+	});
+
+	it("only clears unrequired fields when nothing was drafted", () => {
+		const setValue = vi.fn();
+
+		hydrateOpinionsForm(setValue, {}, true, REQUIRED_NONE);
+
+		expect(setValue.mock.calls).toEqual([
+			["firstDeclaration.gapOpinion", null],
+			["firstDeclaration.gapDate", null],
+			["secondDeclaration.gapOpinion", null],
+			["secondDeclaration.gapDate", null],
+		]);
 	});
 });
