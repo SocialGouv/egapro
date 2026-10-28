@@ -6,10 +6,14 @@ import { SecondDeclarationStep1Info } from "../SecondDeclarationStep1Info";
 const SCOPED_CALLOUT_CLASS = "obligationsCallout";
 const SCOPED_FONT_MEDIUM_CLASS = "fontMedium";
 
-function renderStep1() {
+function renderStep1({
+	cseOpinionRequired = true,
+}: {
+	cseOpinionRequired?: boolean;
+} = {}) {
 	render(
 		<SecondDeclarationStep1Info
-			declarationDate="01/06/2027"
+			cseOpinionRequired={cseOpinionRequired}
 			declarationSiren="123456789"
 			declarationYear={2027}
 			modificationDeadline={new Date("2027-12-01T00:00:00Z")}
@@ -37,18 +41,16 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("displays the deadline", () => {
-		renderStep1();
-
-		expect(screen.getByText(/1ᵉʳ décembre 2027/)).toBeInTheDocument();
-	});
-
-	it("displays the declaration date", () => {
+	it("displays the deadline with its label and no declaration date mention", () => {
 		renderStep1();
 
 		expect(
-			screen.getByText(/Déclaration effectuée le 01\/06\/2027/),
+			screen.getByText("Échéance pour transmettre la seconde déclaration"),
 		).toBeInTheDocument();
+		expect(screen.getByText(/1ᵉʳ décembre 2027/)).toBeInTheDocument();
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders the obligations callout", () => {
@@ -62,12 +64,38 @@ describe("SecondDeclarationStep1Info", () => {
 		).toBeInTheDocument();
 	});
 
-	it("lists the CSE opinion deposit item in the obligations callout", () => {
-		renderStep1();
+	it("lists the actions correctives then the CSE bullet then the redéclaration bullet when the CSE opinion is required", () => {
+		renderStep1({ cseOpinionRequired: true });
 
+		const items = screen.getAllByRole("listitem");
+		expect(items).toHaveLength(3);
+		expect(items[0]).toHaveTextContent(
+			/Mettre en place des actions correctives/,
+		);
+		expect(items[1]).toHaveTextContent(
+			/Informer et consulter votre CSE.*≥ 5 %.*dernière étape de la démarche/,
+		);
+		expect(items[2]).toHaveTextContent(/Redéclarer l.indicateur/);
 		expect(
-			screen.getByText("Déposer le ou les avis du CSE"),
-		).toBeInTheDocument();
+			screen.queryByText("Déposer le ou les avis du CSE"),
+		).not.toBeInTheDocument();
+	});
+
+	it("lists only the actions correctives and redéclaration bullets when the CSE opinion is not required", () => {
+		renderStep1({ cseOpinionRequired: false });
+
+		const items = screen.getAllByRole("listitem");
+		expect(items).toHaveLength(2);
+		expect(items[0]).toHaveTextContent(
+			/Mettre en place des actions correctives/,
+		);
+		expect(items[1]).toHaveTextContent(/Redéclarer l.indicateur/);
+		expect(
+			screen.queryByText(/Informer et consulter votre CSE/),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByText("Déposer le ou les avis du CSE"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders previous link to parcours-conformite and next to step 2", () => {
@@ -86,7 +114,9 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline block as a DSFR highlight", () => {
 		renderStep1();
 
-		const deadlineBlock = screen.getByText("Échéance").parentElement;
+		const deadlineBlock = screen.getByText(
+			"Échéance pour transmettre la seconde déclaration",
+		).parentElement;
 		expect(deadlineBlock).toHaveClass("fr-highlight");
 		expect(deadlineBlock).not.toHaveClass("fr-pl-3w");
 	});
@@ -94,15 +124,13 @@ describe("SecondDeclarationStep1Info", () => {
 	it("renders the deadline lines with the expected DSFR typography", () => {
 		renderStep1();
 
-		expect(screen.getByText("Échéance")).not.toHaveClass("fr-text--sm");
+		expect(
+			screen.getByText("Échéance pour transmettre la seconde déclaration"),
+		).not.toHaveClass("fr-text--sm");
 
 		const deadlineDate = screen.getByText(/1ᵉʳ décembre 2027/);
 		expect(deadlineDate).toHaveClass("fr-text--lead", "fr-text--bold");
 		expect(deadlineDate).not.toHaveClass("fr-h5");
-
-		const declarationLine = screen.getByText(/Déclaration effectuée le/);
-		expect(declarationLine).toHaveClass("fr-text-mention--grey");
-		expect(declarationLine).not.toHaveClass("fr-text--sm");
 	});
 
 	it("renders the obligations callout with the scoped styling", () => {
@@ -116,18 +144,22 @@ describe("SecondDeclarationStep1Info", () => {
 		expect(title.parentElement).toHaveClass("fr-callout", SCOPED_CALLOUT_CLASS);
 	});
 
-	it("renders the intro paragraph in medium weight while keeping its emphasis", () => {
+	it("renders the intro paragraph in uniform medium weight without emphasis", () => {
 		renderStep1();
 
-		expect(screen.getByText(/Vous devez mettre en œuvre des/)).toHaveClass(
-			SCOPED_FONT_MEDIUM_CLASS,
-		);
-		expect(screen.getByText("actions correctives").tagName).toBe("STRONG");
+		const intro = screen.getByText(/Vous devez mettre en œuvre des/);
+		expect(intro).toHaveClass(SCOPED_FONT_MEDIUM_CLASS);
+		expect(intro.querySelector("strong")).toBeNull();
+	});
+
+	it("announces the next step in the stepper details", () => {
+		renderStep1();
+
 		expect(
 			screen.getByText(
-				/^seconde déclaration de l.indicateur par catégorie d'emplois$/,
-			).tagName,
-		).toBe("STRONG");
+				"Seconde déclaration de l'indicateur par catégorie d'emplois",
+			),
+		).toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions", () => {

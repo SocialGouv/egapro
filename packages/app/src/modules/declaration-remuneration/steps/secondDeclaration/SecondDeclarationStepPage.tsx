@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation";
 
 import { campaignYearDimension, FunnelStepTracker } from "~/modules/analytics";
 import {
-	formatShortDate,
 	getObligationWorkforce,
 	isCseOpinionRequired,
 	isCseRequired,
@@ -59,11 +58,10 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 
 	const initialSource = data.jobCategories[0]?.source;
 
-	const declarationDate = formatShortDate(
-		data.declaration.updatedAt
-			? new Date(data.declaration.updatedAt)
-			: new Date(),
-	);
+	const cseOpinionRequired = isCseOpinionRequired({
+		workforce: getObligationWorkforce(company.gipWorkforce),
+		hasCse: company.hasCse,
+	});
 
 	const stepTracker = (
 		<FunnelStepTracker
@@ -78,7 +76,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 			<>
 				{stepTracker}
 				<SecondDeclarationStep1Info
-					declarationDate={declarationDate}
+					cseOpinionRequired={cseOpinionRequired}
 					declarationSiren={data.declaration.siren}
 					declarationYear={currentYear}
 					modificationDeadline={campaignDeadlines.decl2ModificationDeadline}
@@ -125,10 +123,7 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 					cseApplicable={isCseRequired(
 						getObligationWorkforce(company.gipWorkforce),
 					)}
-					cseOpinionRequired={isCseOpinionRequired({
-						workforce: getObligationWorkforce(company.gipWorkforce),
-						hasCse: company.hasCse,
-					})}
+					cseOpinionRequired={cseOpinionRequired}
 					declarationYear={currentYear}
 					secondDeclarationCategories={reviewCategories}
 					secondDeclarationSubmissionCount={

@@ -208,7 +208,7 @@ describe("DraftLoadingGate", () => {
 		mockLoadingDraft();
 		render(
 			<SecondDeclarationStep1Info
-				declarationDate="01/01/2026"
+				cseOpinionRequired={true}
 				declarationSiren="123456789"
 				declarationYear={2026}
 				modificationDeadline={new Date("2026-09-01")}

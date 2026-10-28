@@ -1,6 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
-import { COMPLIANCE_PATH } from "~/modules/routes";
+import { COMPLIANCE_PATH, complianceStepHref } from "~/modules/routes";
+import { selectCompliancePath } from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
@@ -16,8 +17,9 @@ import {
  *
  * A company >= 100 that declared it has no CSE (hasCse false or null) must no longer
  * be told to deposit a CSE opinion: the recap "Prochaines étapes" box and the
- * compliance-choice options drop every CSE-opinion mention, while the gap actions
- * and the "Mettre à jour l'existence d'un CSE" escape hatch stay.
+ * compliance-choice options and the corrective-action step 1 obligations drop every
+ * CSE-opinion mention, while the gap actions and the "Mettre à jour l'existence d'un
+ * CSE" escape hatch stay.
  *
  * Only the `false` branch is reachable end to end. Since #3952 the funnel layout
  * intercepts a >= 100 company whose CSE answer is still null and sends it back to
@@ -34,6 +36,20 @@ const CSE_JUSTIFY_PARENTHESIS =
 	/avis à transmettre lors de la dernière étape de la démarche/;
 const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
 const CORRECTIVE_CSE_OPINION_BULLET = "Déposer le ou les avis du CSE";
+const STEP1_CORRECTIVE_BULLET = /^Mettre en place des actions correctives/;
+const STEP1_CSE_BULLET =
+	/^Informer et consulter votre CSE.*\(l.avis devra être transmis à la dernière étape de la démarche\)$/;
+const STEP1_REDECLARE_BULLET = /^Redéclarer l.indicateur/;
+
+async function expectStep1Obligations(page: Page, bullets: RegExp[]) {
+	await test.step("corrective path step 1 obligations", async () => {
+		await selectCompliancePath(page, "path-corrective");
+		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 15_000 });
+		await expect(page.locator(".fr-callout").getByRole("listitem")).toHaveText(
+			bullets,
+		);
+	});
+}
 
 test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
 	test.describe.configure({ mode: "serial" });
@@ -75,7 +91,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		).toBeVisible();
 	});
 
-	test("compliance choice page drops the CSE opinion bullets", async ({
+	test("compliance choice page and corrective step 1 drop the CSE opinion bullets", async ({
 		page,
 	}) => {
 		test.slow();
@@ -91,6 +107,11 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 			page.getByText("Transmettre l'avis du CSE", { exact: true }),
 		).toHaveCount(0);
 		await expect(page.getByText(CORRECTIVE_CSE_OPINION_BULLET)).toHaveCount(0);
+
+		await expectStep1Obligations(page, [
+			STEP1_CORRECTIVE_BULLET,
+			STEP1_REDECLARE_BULLET,
+		]);
 	});
 });
 
@@ -124,7 +145,7 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		).toBeVisible();
 	});
 
-	test("compliance choice page keeps the CSE opinion bullet", async ({
+	test("compliance choice page and corrective step 1 keep the CSE opinion bullet", async ({
 		page,
 	}) => {
 		test.slow();
@@ -137,5 +158,11 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		await expect(
 			page.getByText(CORRECTIVE_CSE_OPINION_BULLET, { exact: true }),
 		).toBeVisible();
+
+		await expectStep1Obligations(page, [
+			STEP1_CORRECTIVE_BULLET,
+			STEP1_CSE_BULLET,
+			STEP1_REDECLARE_BULLET,
+		]);
 	});
 });
