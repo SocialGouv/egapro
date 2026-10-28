@@ -52,12 +52,10 @@ export type AssociationMap = Record<string, string | null>;
 export type CseOpinionStep1Data = {
 	firstDeclAccuracyOpinion: OpinionType | null;
 	firstDeclAccuracyDate: string | null;
-	firstDeclGapConsulted: boolean | null;
 	firstDeclGapOpinion: OpinionType | null;
 	firstDeclGapDate: string | null;
 	secondDeclAccuracyOpinion: OpinionType | null;
 	secondDeclAccuracyDate: string | null;
-	secondDeclGapConsulted: boolean | null;
 	secondDeclGapOpinion: OpinionType | null;
 	secondDeclGapDate: string | null;
 };
