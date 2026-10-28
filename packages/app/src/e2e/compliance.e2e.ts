@@ -187,10 +187,25 @@ test.describe("[ANX-01] Path change before downstream action — tâtonnement su
 			await answerGapJustification(page, "none");
 			await expectPathScreen(page, "none");
 			await expect(title).toBeFocused();
-			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+			await expect(page).toHaveURL(
+				urlPattern(`${COMPLIANCE_PATH}?ecran=parcours`),
+			);
 
 			await page.getByRole("button", { name: "Précédent" }).click();
 			await expect(page.locator("#gap-justification-none")).toBeChecked();
+			await expect(title).toBeFocused();
+			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+			expect(await countPathChoiceEventsRound1()).toBe(0);
+		});
+
+		await test.step("le retour du navigateur depuis l'écran 2/2 revient à la qualification", async () => {
+			const title = page.getByRole("heading", { level: 1 });
+			await answerGapJustification(page, "partial");
+			await expectPathScreen(page, "partial");
+
+			await page.goBack();
+			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+			await expect(page.locator("#gap-justification-partial")).toBeChecked();
 			await expect(title).toBeFocused();
 			expect(await countPathChoiceEventsRound1()).toBe(0);
 		});

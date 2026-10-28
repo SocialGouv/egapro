@@ -327,7 +327,7 @@ const SECOND_ROUND_INTRO = /ont de nouveau été constatés/;
 
 /**
  * Answer the gap-justification screen (1/2) of the path choice. In round 1, a
- * "partial" or "none" answer opens the path screen (2/2) on the same URL; in
+ * "partial" or "none" answer opens the path screen (2/2) on `?ecran=parcours`; in
  * round 2, and for "all", "Suivant" saves the path straight away.
  */
 export async function answerGapJustification(
