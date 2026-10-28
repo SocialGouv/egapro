@@ -309,14 +309,81 @@ export async function uploadJointEvalPdf(page: Page) {
 	});
 }
 
+export type GapJustificationAnswer = "all" | "partial" | "none";
+
+export const GAP_JUSTIFICATION_TITLES: Record<GapJustificationAnswer, string> =
+	{
+		all: "Tous les écarts de rémunération ≥ 5 % sont justifiables",
+		partial: "Une partie des écarts de rémunération ≥ 5 % est justifiable",
+		none: "Aucun écart de rémunération ≥ 5 % n'est justifiable",
+	};
+
+export const CORRECTIVE_PATH_TITLE =
+	"Effectuer des actions correctives et une seconde déclaration";
+export const JOINT_PATH_TITLE =
+	"Mettre en place une évaluation conjointe des rémunérations";
+
+const SECOND_ROUND_INTRO = /ont de nouveau été constatés/;
+
+/**
+ * Answer the gap-justification screen (1/2) of the path choice. In round 1, a
+ * "partial" or "none" answer opens the path screen (2/2) on `?ecran=parcours`; in
+ * round 2, and for "all", "Suivant" saves the path straight away.
+ */
+export async function answerGapJustification(
+	page: Page,
+	answer: GapJustificationAnswer,
+) {
+	// DSFR hides native radio inputs — click on the associated label instead
+	await page.locator(`label[for="gap-justification-${answer}"]`).click();
+	await page.getByRole("button", { name: "Suivant" }).click();
+}
+
+/** The path screen (2/2) of round 1, reached from a "partial" or "none" answer. */
+export async function expectPathScreen(
+	page: Page,
+	answer: Exclude<GapJustificationAnswer, "all">,
+) {
+	await expect(
+		page.getByRole("heading", {
+			level: 2,
+			name: GAP_JUSTIFICATION_TITLES[answer],
+		}),
+	).toBeVisible();
+	await expect(page.locator('label[for="path-corrective"]')).toBeVisible();
+	await expect(page.locator('label[for="path-joint"]')).toBeVisible();
+	await expect(page.locator("#gap-justification-all")).toHaveCount(0);
+}
+
+/**
+ * Choose a compliance path through the two-step UI: qualify the gaps, then — in
+ * round 1 only, for a non-justified gap — pick the path. `gapJustification`
+ * selects which non-justified answer leads there; "all" is implied by justify.
+ */
 export async function selectCompliancePath(
 	page: Page,
 	pathId: "path-corrective" | "path-joint" | "path-justify",
+	options: { gapJustification?: "partial" | "none" } = {},
 ) {
+	const { gapJustification = "partial" } = options;
 	await test.step("choix du parcours de conformité", async () => {
 		await page.goto(COMPLIANCE_PATH);
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
-		// DSFR hides native radio inputs — click on the associated label instead
+		await expect(
+			page.locator('label[for="gap-justification-all"]'),
+		).toBeVisible();
+		if (pathId === "path-justify") {
+			await answerGapJustification(page, "all");
+			return;
+		}
+		const isSecondRound = await page.getByText(SECOND_ROUND_INTRO).isVisible();
+		if (isSecondRound) {
+			expect(pathId, "round 2 offers no corrective action").toBe("path-joint");
+			await answerGapJustification(page, gapJustification);
+			return;
+		}
+		await answerGapJustification(page, gapJustification);
+		await expectPathScreen(page, gapJustification);
 		await page.locator(`label[for="${pathId}"]`).click();
 		await page.getByRole("button", { name: "Suivant" }).click();
 	});

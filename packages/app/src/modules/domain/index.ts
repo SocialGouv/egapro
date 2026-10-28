@@ -277,6 +277,10 @@ export {
 	significantGapDirection,
 	truncateGapRatio,
 } from "./shared/gap";
+export {
+	compliancePathsForGapJustification,
+	gapJustificationFromPath,
+} from "./shared/gapJustification";
 // GIP annual average workforce — canonical headcount for obligations & display
 export {
 	floorWorkforce,
@@ -415,12 +419,18 @@ export type {
 	CompanySize,
 	CompanySizeRange,
 	CompliancePathValue,
+	ComplianceRound,
 	DeclarationFsmStatus,
 	DeclarationStatus,
 	DeclarationType,
 	GapDirection,
+	GapJustification,
 	GapLevel,
 	ObservatoryWorkforceRange,
 	RepresentationCampaign,
 } from "./types";
-export { COMPLIANCE_PATHS, DECLARATION_FSM_STATUSES } from "./types";
+export {
+	COMPLIANCE_PATHS,
+	DECLARATION_FSM_STATUSES,
+	GAP_JUSTIFICATIONS,
+} from "./types";

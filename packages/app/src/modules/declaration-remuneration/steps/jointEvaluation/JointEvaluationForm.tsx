@@ -12,12 +12,12 @@ import { getPostComplianceDestination } from "~/modules/navigation";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
-	JointEvaluationDepositInstructions,
+	JointEvaluationAfterReport,
 	type JointEvaluationExistingFile,
 	JointEvaluationExistingReport,
-	JointEvaluationGuidance,
 	JointEvaluationHeading,
 	JointEvaluationReportUpload,
+	JointEvaluationTodo,
 } from "./JointEvaluationReportBlocks";
 import { JointEvaluationSubmitModal } from "./JointEvaluationSubmitModal";
 
@@ -25,7 +25,6 @@ const EMPTY_DB_VALUES = {} as Record<string, never>;
 
 type Props = {
 	cseOpinionRequired: boolean;
-	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
 	existingFile: JointEvaluationExistingFile | null;
@@ -34,7 +33,6 @@ type Props = {
 
 export function JointEvaluationForm({
 	cseOpinionRequired,
-	declarationDate,
 	declarationSiren,
 	declarationYear,
 	existingFile,
@@ -103,25 +101,26 @@ export function JointEvaluationForm({
 						</h1>
 					</div>
 
-					<JointEvaluationHeading title="Dépôt du rapport de l'évaluation conjointe des rémunérations" />
+					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
 
-					<JointEvaluationDepositInstructions />
-
-					<div className="fr-highlight">
-						<p className="fr-mb-2v fr-text--md">Échéance</p>
-						<p className="fr-h6 fr-mb-2v">
-							{formatCivilLongDate(jointEvaluationDeadline)}
-						</p>
-						<p className="fr-mb-0 fr-text--sm fr-text-mention--grey">
-							Déclaration effectuée le {declarationDate}
-						</p>
-					</div>
+					<JointEvaluationTodo title="Rappel : Ce que vous devez faire dans un délai de 2 mois" />
 
 					{existingFile && (
 						<JointEvaluationExistingReport file={existingFile} />
 					)}
 
 					<JointEvaluationReportUpload
+						beforeDropzone={
+							<div className="fr-highlight">
+								<p className="fr-mb-2v fr-text--md">
+									Échéance pour transmettre le rapport de l&apos;évaluation
+									conjointe
+								</p>
+								<p className="fr-text--xl fr-text--bold fr-mb-0">
+									{formatCivilLongDate(jointEvaluationDeadline)}
+								</p>
+							</div>
+						}
 						disabled={isReadOnly}
 						error={uploadError}
 						hasMissingFile={hasMissingFile}
@@ -130,7 +129,7 @@ export function JointEvaluationForm({
 						selectedFiles={selectedFiles}
 					/>
 
-					<JointEvaluationGuidance todoTitle="Ce que vous devez faire dans un délai de 2 mois" />
+					<JointEvaluationAfterReport />
 
 					<FormErrors
 						mutationError={submitJointEvaluationMutation.error?.message}

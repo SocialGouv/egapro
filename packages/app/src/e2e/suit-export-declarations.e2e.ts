@@ -2,7 +2,11 @@ import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { COMPLIANCE_CONFIRMATION, COMPLIANCE_PATH } from "~/modules/routes";
 import { TEST_GIP_WORKFORCE } from "./constants";
-import { selectCompliancePath } from "./helpers/compliance-flows";
+import {
+	answerGapJustification,
+	expectPathScreen,
+	selectCompliancePath,
+} from "./helpers/compliance-flows";
 import {
 	resetDeclarationToDraft,
 	resetGipWorkforce,
@@ -185,10 +189,11 @@ test.describe("SUIT export declarations — machine contract (bugs #3950, epic #
 		browser,
 	}) => {
 		await page.goto(COMPLIANCE_PATH);
-		const offeredInUi = ["path-justify", "path-corrective", "path-joint"];
-		for (const optionId of offeredInUi) {
-			await expect(page.locator(`label[for="${optionId}"]`)).toBeVisible();
-		}
+		await expect(
+			page.locator('label[for="gap-justification-all"]'),
+		).toBeVisible();
+		await answerGapJustification(page, "partial");
+		await expectPathScreen(page, "partial");
 
 		const declaration = await fetchActiveSuitDeclaration(browser);
 		const parcours = declaration.Parcours;

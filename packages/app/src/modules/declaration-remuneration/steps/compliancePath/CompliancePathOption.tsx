@@ -14,7 +14,7 @@ type Props = {
 	onChange: (value: string) => void;
 	title: string;
 	children: ReactNode;
-	deadline: Date;
+	deadline?: { label: string; date: Date };
 	learnMoreHref?: AppHref;
 	learnMoreLabel?: string;
 	learnMoreTrackingId?: string;
@@ -56,13 +56,15 @@ export function CompliancePathOption({
 			</div>
 			<div className={`fr-mt-2w fr-pl-4w ${styles.body}`}>
 				{children}
-				<p className="fr-text--sm">
-					<span
-						aria-hidden="true"
-						className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
-					/>
-					Échéance au {formatCivilLongDate(deadline)}
-				</p>
+				{deadline && (
+					<p className="fr-text--sm">
+						<span
+							aria-hidden="true"
+							className="fr-icon-calendar-line fr-icon--sm fr-mr-1w"
+						/>
+						{deadline.label}&nbsp;: {formatCivilLongDate(deadline.date)}
+					</p>
+				)}
 				{learnMoreHref && (
 					<TrackedLink
 						className={`fr-link ${styles.learnMore}`}

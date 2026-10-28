@@ -2,6 +2,11 @@ import { expect, test } from "@playwright/test";
 import { urlGlob } from "~/e2e/helpers/routes";
 import { COMPLIANCE_PATH } from "~/modules/routes";
 import {
+	answerGapJustification,
+	expectPathScreen,
+	GAP_JUSTIFICATION_TITLES,
+} from "./helpers/compliance-flows";
+import {
 	resetDeclarationToDraft,
 	setCompanyHasCse,
 	setCompanyWorkforce,
@@ -33,7 +38,10 @@ const CSE_OPINION_RECAP_TEXT = /avis du CSE devra être transmis/;
 const CSE_JUSTIFY_PARENTHESIS =
 	/avis à transmettre lors de la dernière étape de la démarche/;
 const UPDATE_CSE_BUTTON = /Mettre à jour l.existence d.un CSE/;
-const CORRECTIVE_CSE_OPINION_BULLET = "Déposer le ou les avis du CSE";
+const JUSTIFY_CSE_OPINION_BULLET = "Transmettre l'avis du CSE";
+const CORRECTIVE_CSE_OPINION_BULLET = "Transmettre l'avis ou les avis du CSE";
+const NO_CSE_JUSTIFY_SENTENCE =
+	/En l.absence de CSE, aucun avis n.est à transmettre/;
 
 test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion mention", () => {
 	test.describe.configure({ mode: "serial" });
@@ -83,13 +91,18 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=false → no CSE opinion 
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
 		await expect(
-			page.getByText("Justifier les écarts de rémunération ≥ 5 %", {
-				exact: true,
-			}),
+			page.getByText(GAP_JUSTIFICATION_TITLES.all, { exact: true }),
 		).toBeVisible();
+		await expect(page.getByText(NO_CSE_JUSTIFY_SENTENCE)).toBeVisible();
 		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
+			page.getByText(JUSTIFY_CSE_OPINION_BULLET, { exact: true }),
 		).toHaveCount(0);
+		await expect(
+			page.getByText(/Pour les écarts justifiables, vous devrez/),
+		).toHaveCount(0);
+
+		await answerGapJustification(page, "partial");
+		await expectPathScreen(page, "partial");
 		await expect(page.getByText(CORRECTIVE_CSE_OPINION_BULLET)).toHaveCount(0);
 	});
 });
@@ -131,9 +144,14 @@ test.describe("[#3945] gap + workforce >= 100 + hasCse=true → CSE opinion stil
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
 
+		// Once in the "all" card, once for the justified share of the "partial" one.
 		await expect(
-			page.getByText("Transmettre l'avis du CSE", { exact: true }),
-		).toBeVisible();
+			page.getByText(JUSTIFY_CSE_OPINION_BULLET, { exact: true }),
+		).toHaveCount(2);
+		await expect(page.getByText(NO_CSE_JUSTIFY_SENTENCE)).toHaveCount(0);
+
+		await answerGapJustification(page, "partial");
+		await expectPathScreen(page, "partial");
 		await expect(
 			page.getByText(CORRECTIVE_CSE_OPINION_BULLET, { exact: true }),
 		).toBeVisible();
