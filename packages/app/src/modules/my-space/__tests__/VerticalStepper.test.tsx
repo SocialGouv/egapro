@@ -461,7 +461,7 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 
 	describe("rendu conditionnel des étapes selon le parcours (#3939)", () => {
 		const STEP2_TITLE = /Parcours de mise en conformité/;
-		const STEP3_TITLE = "Dépôt du ou des avis du CSE";
+		const STEP3_TITLE = "Transmission du ou des avis du CSE";
 		const STEP1_TITLE = "Déclaration des indicateurs de rémunération";
 
 		it("renders steps 2 and 3 when both compliancePathApplicable and cseOpinionRequired are true", () => {
@@ -499,9 +499,9 @@ describe("VerticalStepper — bouton œil (viewHref)", () => {
 	});
 
 	describe("puces de l'étape 1 selon indicatorGRequired (#4267)", () => {
-		const PREFILLED_BULLET = /Indicateurs pré-remplis à vérifier/;
-		const CATEGORY_BULLET =
-			/Indicateur de rémunération par catégorie d'emplois à remplir/;
+		const PREFILLED_BULLET =
+			/Indicateurs pour l'ensemble des salariés pré-remplis à vérifier/;
+		const CATEGORY_BULLET = /Indicateur par catégorie d'emplois à remplir/;
 
 		it("renders both bullets on the start variant when indicator G applies", () => {
 			const { panel } = renderPanel("start", { indicatorGRequired: true });
