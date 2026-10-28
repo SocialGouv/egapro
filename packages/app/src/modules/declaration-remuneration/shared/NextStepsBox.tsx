@@ -21,26 +21,24 @@ export function NextStepsBox({
 	siren,
 	isSecondDeclaration,
 }: Props) {
+	const SectionHeading = isSecondDeclaration ? "h3" : "h4";
+
 	return (
 		<>
 			<div className={styles.nextSteps}>
-				<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
+				{!isSecondDeclaration && (
+					<h3 className="fr-h4 fr-mb-0">Prochaines étapes</h3>
+				)}
 
 				{cseOpinionRequired && (
 					<div className={styles.section}>
-						<h4 className="fr-text--bold fr-text--md fr-mb-0">
-							Informer et consulter le CSE
-						</h4>
+						<SectionHeading className="fr-text--bold fr-text--md fr-mb-0">
+							{isSecondDeclaration
+								? "Rappel : informer et consulter le CSE"
+								: "Informer et consulter le CSE"}
+						</SectionHeading>
 
-						<p className="fr-mb-0">
-							Au cours du temps imparti pour réaliser votre déclaration, vous
-							devez{" "}
-							<strong>
-								obligatoirement informer et consulter le CSE sur
-								l&apos;exactitude des données déclarées
-							</strong>
-							.
-						</p>
+						<CseConsultationText isSecondDeclaration={isSecondDeclaration} />
 
 						<div className={styles.ctaGroup}>
 							<p className="fr-mb-0">
@@ -89,61 +87,29 @@ export function NextStepsBox({
 							>
 								Écarts détectés
 							</p>
-							<h4 className="fr-text--bold fr-text--md fr-mb-0">
-								Actions à engager
-							</h4>
+							<SectionHeading className="fr-text--bold fr-text--md fr-mb-0">
+								{isSecondDeclaration
+									? "Prochaines étapes"
+									: "Actions à engager"}
+							</SectionHeading>
 						</div>
 
-						<p className="fr-mb-0">
-							À la suite de l&apos;analyse de vos données de l&apos;indicateur
-							par catégorie d&apos;emplois, des écarts &ge; 5 % ont{" "}
-							{isSecondDeclaration ? "encore été identifiés" : "été identifiés"}
-							. Vous devez engager un des parcours de mise en conformité
-							suivant&nbsp;:
-						</p>
-
-						<ul>
-							<li>
-								<strong>
-									Justifier les écarts par des critères objectifs et non
-									sexistes.
-								</strong>{" "}
-								Si vous choisissez ce parcours, vous devez informer et consulter
-								le CSE sur cette justification
-								{cseOpinionRequired
-									? " (avis à transmettre lors de la dernière étape de la démarche)."
-									: "."}
-							</li>
-						</ul>
-						<p className="fr-mb-0">
-							Si la justification n&apos;est pas possible par des critères
-							objectifs et non sexistes, vous{" "}
-							{isSecondDeclaration ? "devez" : "pouvez"}&nbsp;:
-						</p>
-						<ul>
-							{!isSecondDeclaration && (
-								<li>
-									<strong>
-										Soit mettre en place des actions correctives et effectuer
-										une seconde déclaration dans un délai de 6 mois
-									</strong>
-								</li>
-							)}
-							<li>
-								<strong>
-									{isSecondDeclaration
-										? "Réaliser une évaluation conjointe des rémunérations"
-										: "Soit réaliser une évaluation conjointe des rémunérations"}
-								</strong>
-							</li>
-						</ul>
+						{isSecondDeclaration ? (
+							<SecondDeclarationGapActions />
+						) : (
+							<FirstDeclarationGapActions
+								cseOpinionRequired={cseOpinionRequired}
+							/>
+						)}
 					</div>
 				)}
 
 				<hr className={styles.separator} />
 
 				<div className={styles.section}>
-					<h4 className="fr-text--bold fr-text--md fr-mb-0">Pour vous aider</h4>
+					<SectionHeading className="fr-text--bold fr-text--md fr-mb-0">
+						Pour vous aider
+					</SectionHeading>
 					<ul className="fr-raw-list fr-links-group">
 						<li>
 							<TrackedLink
@@ -153,39 +119,147 @@ export function NextStepsBox({
 								target="_blank"
 								trackingId="objective_criteria"
 							>
-								Qu&apos;entend-on par critères objectifs et non sexistes ?
+								Qu&apos;entend-on par critères objectifs et non fondés sur le
+								sexe ?
 								<NewTabNotice />
 							</TrackedLink>
 						</li>
-						<li>
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="corrective_actions"
-							>
-								En savoir plus sur actions correctives et seconde déclaration
-								<NewTabNotice />
-							</TrackedLink>
-						</li>
-						<li>
-							<TrackedLink
-								className="fr-link"
-								href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
-								rel="noopener noreferrer"
-								target="_blank"
-								trackingId="joint_evaluation"
-							>
-								En savoir plus sur évaluation conjointe des rémunérations
-								<NewTabNotice />
-							</TrackedLink>
-						</li>
+						{!isSecondDeclaration && (
+							<li>
+								<TrackedLink
+									className="fr-link"
+									href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+									rel="noopener noreferrer"
+									target="_blank"
+									trackingId="corrective_actions"
+								>
+									En savoir plus sur actions correctives et seconde déclaration
+									<NewTabNotice />
+								</TrackedLink>
+							</li>
+						)}
+						{(!isSecondDeclaration || hasGapsAboveThreshold) && (
+							<li>
+								<TrackedLink
+									className="fr-link"
+									href="https://travail-emploi.gouv.fr/droit-du-travail/egalite-professionnelle"
+									rel="noopener noreferrer"
+									target="_blank"
+									trackingId="joint_evaluation"
+								>
+									En savoir plus sur l&apos;évaluation conjointe des
+									rémunérations
+									<NewTabNotice />
+								</TrackedLink>
+							</li>
+						)}
 					</ul>
 				</div>
 			</div>
 
 			<UpdateCseModal cseApplicable={cseApplicable} siren={siren} />
+		</>
+	);
+}
+
+function CseConsultationText({
+	isSecondDeclaration,
+}: {
+	isSecondDeclaration?: boolean;
+}) {
+	if (isSecondDeclaration) {
+		return (
+			<p className="fr-mb-0">
+				Avant de transmettre votre déclaration, vous devez{" "}
+				<strong>
+					obligatoirement informer et consulter le CSE sur l&apos;exactitude des
+					données utilisées pour le calcul, la méthode de calcul et les
+					résultats de chaque écart déclaré.
+				</strong>
+			</p>
+		);
+	}
+	return (
+		<p className="fr-mb-0">
+			Au cours du temps imparti pour réaliser votre déclaration, vous devez{" "}
+			<strong>
+				obligatoirement informer et consulter le CSE sur l&apos;exactitude des
+				données déclarées
+			</strong>
+			.
+		</p>
+	);
+}
+
+function SecondDeclarationGapActions() {
+	return (
+		<>
+			<p className="fr-mb-0">
+				À la suite de l&apos;analyse de vos données de l&apos;indicateur par
+				catégorie d&apos;emplois, des écarts &ge; 5 % ont été identifiés&nbsp;:
+			</p>
+			<ul>
+				<li>
+					<strong>
+						En cas de justification d&apos;au moins un écart par des critères
+						objectifs et non fondés sur le sexe,
+					</strong>{" "}
+					vous devez informer et consulter le CSE sur cette justification
+				</li>
+				<li className="fr-mt-3v">
+					<strong>
+						En cas d&apos;absence de justification d&apos;au moins un écart
+					</strong>
+					, vous devrez mettre en place une évaluation conjointe des
+					rémunérations
+				</li>
+			</ul>
+		</>
+	);
+}
+
+function FirstDeclarationGapActions({
+	cseOpinionRequired,
+}: {
+	cseOpinionRequired: boolean;
+}) {
+	return (
+		<>
+			<p className="fr-mb-0">
+				À la suite de l&apos;analyse de vos données de l&apos;indicateur par
+				catégorie d&apos;emplois, des écarts &ge; 5 % ont été identifiés. Vous
+				devez engager un des parcours de mise en conformité suivant&nbsp;:
+			</p>
+			<ul>
+				<li>
+					<strong>
+						Justifier les écarts par des critères objectifs et non fondés sur le
+						sexe.
+					</strong>{" "}
+					Si vous choisissez ce parcours, vous devez informer et consulter le
+					CSE sur cette justification
+					{cseOpinionRequired
+						? " (avis à transmettre lors de la dernière étape de la démarche)."
+						: "."}
+				</li>
+			</ul>
+			<p className="fr-mb-0">
+				Si la justification n&apos;est pas possible par des critères objectifs
+				et non fondés sur le sexe, vous pouvez&nbsp;:
+			</p>
+			<ul>
+				<li>
+					<strong>
+						Soit mettre en place des actions correctives et effectuer une
+						seconde déclaration dans un délai de 6 mois
+					</strong>
+				</li>
+				<li>
+					<strong>
+						Soit réaliser une évaluation conjointe des rémunérations
+					</strong>
+				</li>
+			</ul>
 		</>
 	);
 }

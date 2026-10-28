@@ -156,6 +156,15 @@ describe("SecondDeclarationStep2Form", () => {
 		expect(screen.getByText("Étape 2 sur 3")).toBeInTheDocument();
 	});
 
+	it("asks to amend the first declaration before validating the indicator", () => {
+		renderStep2();
+		expect(
+			screen.getByText(
+				"Modifiez les données de votre première déclaration avant de valider l'indicateur.",
+			),
+		).toBeInTheDocument();
+	});
+
 	it("keeps a historical 255-character label read-only and submits the correction", async () => {
 		const name = "a".repeat(255);
 		const user = userEvent.setup();

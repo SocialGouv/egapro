@@ -136,9 +136,9 @@ export function SecondDeclarationStep3Review({
 			<SecondDeclarationStepIndicator currentStep={3} />
 
 			<p className={`fr-mb-0 ${stepStyles.intro}`}>
-				Vérifiez que toutes les informations ont été complétées avant de
-				transmettre votre seconde déclaration des écarts de rémunération par
-				catégorie d&apos;emplois aux services du ministère chargé du travail.
+				Vérifiez que toutes les informations sont correctes avant de transmettre
+				votre seconde déclaration de l&apos;indicateur par catégorie
+				d&apos;emplois aux services du ministère chargé du travail.
 			</p>
 
 			<h2 className="fr-h5 fr-mb-0">Indicateur par catégorie d&apos;emplois</h2>

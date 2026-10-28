@@ -17,7 +17,7 @@ export function JointEvaluationSubmitModal({
 		<SubmitModal
 			certifyInputId="joint-evaluation-certify"
 			certifyLabel="Je certifie que le rapport transmis est conforme."
-			description="Vous allez transmettre aux services du ministère chargé du Travail le rapport de l'évaluation conjointe des rémunérations."
+			description="Vous allez transmettre aux services du ministère chargé du Travail le rapport préalable de l'évaluation conjointe."
 			modalId="joint-evaluation-submit-modal"
 			modalRef={modalRef}
 			onClose={onClose}

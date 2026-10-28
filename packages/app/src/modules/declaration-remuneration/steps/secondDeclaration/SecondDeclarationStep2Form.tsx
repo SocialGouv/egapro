@@ -103,7 +103,7 @@ export function SecondDeclarationStep2Form({
 			disabled={isFormDisabled}
 			initialCategories={sourceData}
 			initialSource={initialSource}
-			instructionText="Modifiez les données de votre première déclaration avant de valider votre indicateur."
+			instructionText="Modifiez les données de votre première déclaration avant de valider l'indicateur."
 			isSubmitting={mutation.isPending}
 			mimoquageNextHref={mimoquageNextHref}
 			nextHref={nextHref}

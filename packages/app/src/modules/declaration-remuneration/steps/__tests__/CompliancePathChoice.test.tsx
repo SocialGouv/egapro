@@ -18,8 +18,21 @@ const campaignDeadlines = getDefaultCampaignDeadlines(2026);
 const DECLARATION_SIREN = "123456789";
 const DECLARATION_YEAR = 2026;
 
+const ALL_TITLE = "Tous les écarts de rémunération ≥ 5 % sont justifiables";
+const PARTIAL_TITLE =
+	"Une partie des écarts de rémunération ≥ 5 % est justifiable";
+const NONE_TITLE = "Aucun écart de rémunération ≥ 5 % n'est justifiable";
 const CORRECTIVE_ACTION_TITLE =
 	"Effectuer des actions correctives et une seconde déclaration";
+const JOINT_EVALUATION_TITLE =
+	"Mettre en place une évaluation conjointe des rémunérations";
+const COMPLIANCE_TITLE =
+	/^Parcours de mise en conformité pour l'indicateur par catégorie\u00a0d'emplois$/;
+
+const JOINT_EVALUATION_HREF =
+	"/declaration-remuneration/parcours-conformite/evaluation-conjointe";
+const CORRECTIVE_ACTION_HREF =
+	"/declaration-remuneration/parcours-conformite/etape/1";
 
 const mockMutate = vi.fn();
 const mockPush = vi.fn();
@@ -122,6 +135,13 @@ describe("CompliancePathChoice — mutation error surface", () => {
 	});
 });
 
+function submitForm() {
+	const form = screen
+		.getByRole("button", { name: /suivant/i })
+		.closest("form") as HTMLFormElement;
+	fireEvent.submit(form);
+}
+
 describe("CompliancePathChoice", () => {
 	it("renders the page title and success banner after a declaration transmission", () => {
 		markDeclarationTransmissionSuccess();
@@ -156,195 +176,11 @@ describe("CompliancePathChoice", () => {
 		expect(
 			screen.getByRole("group", { name: "Choix du parcours de conformité" }),
 		).toBeInTheDocument();
-	});
-
-	it("renders all 3 compliance path options", () => {
-		render(compliancePathChoice());
 		expect(
-			screen.getByText("Justifier les écarts de rémunération ≥ 5 %"),
-		).toBeInTheDocument();
-		expect(screen.getByText(CORRECTIVE_ACTION_TITLE)).toBeInTheDocument();
-		expect(
-			screen.getByText(
-				"Mettre en place une évaluation conjointe des rémunérations",
-			),
-		).toBeInTheDocument();
-	});
-
-	it("disables next button when no path is selected", () => {
-		render(compliancePathChoice());
-		const nextButton = screen.getByRole("button", { name: /suivant/i });
-		expect(nextButton).toBeDisabled();
-	});
-
-	it("enables next button after selecting a path", () => {
-		render(compliancePathChoice());
-		const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
-		fireEvent.click(radio);
-		const nextButton = screen.getByRole("button", { name: /suivant/i });
-		expect(nextButton).not.toBeDisabled();
-	});
-
-	it("submits the selected path and navigates to evaluation-conjointe", async () => {
-		render(compliancePathChoice());
-		const radio = screen.getByLabelText(
-			"Mettre en place une évaluation conjointe des rémunérations",
-		);
-		fireEvent.click(radio);
-
-		const form = screen
-			.getByRole("button", { name: /suivant/i })
-			.closest("form") as HTMLFormElement;
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
-		});
-		expect(mockPush).toHaveBeenCalledWith(
-			"/declaration-remuneration/parcours-conformite/evaluation-conjointe",
-		);
-	});
-
-	it("navigates to second declaration when corrective_action is selected", async () => {
-		render(compliancePathChoice());
-		const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
-		fireEvent.click(radio);
-
-		const form = screen
-			.getByRole("button", { name: /suivant/i })
-			.closest("form") as HTMLFormElement;
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "corrective_action" });
-		});
-		expect(mockPush).toHaveBeenCalledWith(
-			"/declaration-remuneration/parcours-conformite/etape/1",
-		);
-	});
-
-	it("does not submit when no path is selected", () => {
-		render(compliancePathChoice());
-
-		const form = screen
-			.getByRole("button", { name: /suivant/i })
-			.closest("form") as HTMLFormElement;
-		fireEvent.submit(form);
-
-		expect(mockMutate).not.toHaveBeenCalled();
-		expect(mockPush).not.toHaveBeenCalled();
-	});
-
-	it("submits justify and navigates to the CSE opinion page", async () => {
-		render(compliancePathChoice());
-		const radio = screen.getByLabelText(
-			"Justifier les écarts de rémunération ≥ 5 %",
-		);
-		fireEvent.click(radio);
-
-		const form = screen
-			.getByRole("button", { name: /suivant/i })
-			.closest("form") as HTMLFormElement;
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
-		});
-		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
-	});
-
-	it("submits justify and navigates to the confirmation page when no CSE opinion is due", async () => {
-		render(compliancePathChoice({ cseOpinionRequired: false }));
-		const radio = screen.getByLabelText(
-			"Justifier les écarts de rémunération ≥ 5 %",
-		);
-		fireEvent.click(radio);
-
-		const form = screen
-			.getByRole("button", { name: /suivant/i })
-			.closest("form") as HTMLFormElement;
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
-		});
-		expect(mockPush).toHaveBeenCalledWith(
-			"/declaration-remuneration/parcours-conformite/confirmation",
-		);
-	});
-
-	it("pre-selects the initial path when provided", () => {
-		render(compliancePathChoice({ initialPath: "corrective_action" }));
-		const radio = screen.getByLabelText(
-			CORRECTIVE_ACTION_TITLE,
-		) as HTMLInputElement;
-		expect(radio.checked).toBe(true);
-	});
-
-	it("renders isSecondRound options when isSecondRound is set", () => {
-		render(compliancePathChoice({ isSecondRound: true }));
-		expect(
-			screen.getByText(
-				"Mettre en place une évaluation conjointe des rémunérations",
-			),
-		).toBeInTheDocument();
-		expect(screen.queryByText(CORRECTIVE_ACTION_TITLE)).not.toBeInTheDocument();
-	});
-
-	it("renders the first-round instruction phrase by default", () => {
-		render(compliancePathChoice());
-		expect(
-			screen.getByText(/Des écarts ≥ 5 % ont été constatés/),
-		).toBeInTheDocument();
-		expect(
-			screen.queryByText(/ont de nouveau été détectés/),
-		).not.toBeInTheDocument();
-	});
-
-	it("renders the second-round instruction phrase and intermediate heading", () => {
-		render(compliancePathChoice({ isSecondRound: true }));
-		expect(
-			screen.getByText(/Des écarts ≥ 5 % ont de nouveau été détectés/),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: "Si la justification n'est pas possible par des critères objectifs et non sexistes",
+			screen.getByRole("group", {
+				name: "Justification des écarts de rémunération ≥ 5 %",
 			}),
 		).toBeInTheDocument();
-	});
-
-	it("nests the section headings under the compliance-path subtitle", () => {
-		render(compliancePathChoice());
-		expect(
-			screen.getByRole("heading", {
-				level: 1,
-				name: /Déclaration des indicateurs/,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", {
-				level: 2,
-				name: /Parcours de mise en conformité pour l'indicateur/,
-			}),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("heading", {
-				level: 3,
-				name: "La justification est possible par des critères objectifs et non sexistes",
-			}),
-		).toBeInTheDocument();
-	});
-
-	it("renders the round-1 path choice deadline highlight block (July 1st of the campaign year)", () => {
-		render(compliancePathChoice());
-		expect(
-			screen.getByText(
-				"Échéance pour choisir un parcours de mise en conformité",
-			),
-		).toBeInTheDocument();
-		expect(screen.getByText("1ᵉʳ juillet 2026")).toBeInTheDocument();
-		expect(screen.queryByText("1ᵉʳ janvier 2027")).not.toBeInTheDocument();
 	});
 
 	it("tells a modifiable declaration it stays modifiable until a later transmission, with no date", () => {
@@ -364,17 +200,10 @@ describe("CompliancePathChoice", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders the round-2 path choice deadline (January 1st of the following year) when isSecondRound", () => {
-		render(compliancePathChoice({ isSecondRound: true }));
-		expect(screen.getByText("1ᵉʳ janvier 2027")).toBeInTheDocument();
-		expect(screen.queryByText("1ᵉʳ juillet 2026")).not.toBeInTheDocument();
-	});
-
-	it("renders no previous link back to the transmitted declaration", () => {
-		render(compliancePathChoice());
-		expect(
-			screen.queryByRole("link", { name: /précédent/i }),
-		).not.toBeInTheDocument();
+	it("renders the email in the success banner", () => {
+		markDeclarationTransmissionSuccess();
+		render(compliancePathChoice({ email: "john@company.fr" }));
+		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
 	});
 
 	it("neutralises the top margin of the form actions (issue #4141)", () => {
@@ -385,145 +214,367 @@ describe("CompliancePathChoice", () => {
 		).toHaveClass("fr-mt-0");
 	});
 
-	it("renders no previous link back to the transmitted second declaration in round 2", () => {
-		render(compliancePathChoice({ isSecondRound: true }));
+	it.each([
+		false,
+		true,
+	])("renders no previous control on the qualification screen (isSecondRound: %s)", (isSecondRound) => {
+		render(compliancePathChoice({ isSecondRound }));
 		expect(
 			screen.queryByRole("link", { name: /précédent/i }),
 		).not.toBeInTheDocument();
-	});
-
-	it("renders the email in the success banner", () => {
-		markDeclarationTransmissionSuccess();
-		render(compliancePathChoice({ email: "john@company.fr" }));
-		expect(screen.getByText("john@company.fr")).toBeInTheDocument();
-	});
-
-	describe("CSE consultation items gating (issue #3945)", () => {
-		it.each([
-			false,
-			true,
-		])("shows the justify CSE consultation items when a CSE opinion is required (isSecondRound: %s)", (isSecondRound) => {
-			render(compliancePathChoice({ cseOpinionRequired: true, isSecondRound }));
-
-			expect(
-				screen.getByText(
-					"Informer et consulter votre CSE sur cette justification",
-				),
-			).toBeInTheDocument();
-			expect(screen.getByText("Transmettre l'avis du CSE")).toBeInTheDocument();
-		});
-
-		it.each([
-			false,
-			true,
-		])("hides the justify CSE consultation items when no CSE opinion is required (isSecondRound: %s)", (isSecondRound) => {
-			render(
-				compliancePathChoice({
-					cseOpinionRequired: false,
-					isSecondRound,
-				}),
-			);
-
-			expect(
-				screen.queryByText(
-					"Informer et consulter votre CSE sur cette justification",
-				),
-			).not.toBeInTheDocument();
-			expect(
-				screen.queryByText("Transmettre l'avis du CSE"),
-			).not.toBeInTheDocument();
-		});
-
-		it("shows the corrective-action CSE consultation items when a CSE opinion is required", () => {
-			render(compliancePathChoice({ cseOpinionRequired: true }));
-
-			expect(
-				screen.getByText(/Informer et consulter votre CSE sur l'exactitude/),
-			).toBeInTheDocument();
-			expect(
-				screen.getByText("Déposer le ou les avis du CSE"),
-			).toBeInTheDocument();
-		});
-
-		it("hides the corrective-action CSE consultation items when no CSE opinion is required", () => {
-			render(compliancePathChoice({ cseOpinionRequired: false }));
-
-			expect(
-				screen.queryByText(/Informer et consulter votre CSE sur l'exactitude/),
-			).not.toBeInTheDocument();
-			expect(
-				screen.queryByText("Déposer le ou les avis du CSE"),
-			).not.toBeInTheDocument();
-		});
-
-		it("keeps the non-CSE corrective-action items when no CSE opinion is required", () => {
-			render(compliancePathChoice({ cseOpinionRequired: false }));
-
-			expect(
-				screen.getByText(
-					"Mettre en place des actions correctives par accord ou par plan d'action",
-				),
-			).toBeInTheDocument();
-			expect(
-				screen.getByText(
-					"Redéclarer l'indicateur dans un délai de 6 mois après votre première déclaration",
-				),
-			).toBeInTheDocument();
-		});
-	});
-
-	describe("draft autosave", () => {
-		it("hydrates the selected path from a persisted draft", () => {
-			draftRef.current = { path: "joint_evaluation" };
-
-			render(compliancePathChoice());
-
-			const radio = screen.getByLabelText(
-				"Mettre en place une évaluation conjointe des rémunérations",
-			) as HTMLInputElement;
-			expect(radio.checked).toBe(true);
-		});
-
-		it("saves a draft when a path is selected and the lock is inactive", async () => {
-			render(compliancePathChoice());
-
-			fireEvent.click(screen.getByLabelText(CORRECTIVE_ACTION_TITLE));
-
-			await waitFor(() => {
-				expect(mockSetField).toHaveBeenCalledWith({
-					path: "corrective_action",
-				});
-			});
-		});
-
-		it("does not save a draft when the declaration is locked read-only", async () => {
-			render(<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>);
-
-			const radio = screen.getByLabelText(CORRECTIVE_ACTION_TITLE);
-			fireEvent.click(radio);
-			fireEvent.change(radio, { target: { checked: true } });
-
-			expect(mockSetField).not.toHaveBeenCalled();
-		});
-
-		it("disables each control while keeping the fieldset enabled when the declaration is locked read-only", () => {
-			const { container } = render(
-				<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>,
-			);
-
-			// The outermost fieldset stays enabled so its content remains exposed
-			// to assistive technologies; each control is disabled individually.
-			expect(container.querySelector("fieldset")).not.toBeDisabled();
-			expect(screen.getByLabelText(CORRECTIVE_ACTION_TITLE)).toBeDisabled();
-			expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
-		});
+		expect(
+			screen.queryByRole("button", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 	});
 });
 
-// A third-party lock (or admin impersonation) freezes the controls without any
-// read-only *reason*: #4282 removed the only calendar one, so the alert must stay
-// absent here while the radios stay disabled. "Suivant" is then a link forward when
-// a path was already saved, and a disabled button when none was (#3230).
+describe("CompliancePathChoice — round 1, qualification screen", () => {
+	it("nests the compliance section under the declaration title", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: "Déclaration des indicateurs de rémunération 2026",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { level: 2, name: COMPLIANCE_TITLE }),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
+	});
+
+	it("asks whether the gaps can be justified, with the choice deadline and the criteria link", () => {
+		render(compliancePathChoice());
+		expect(
+			screen.getByText(
+				"Des écarts ≥ 5 % ont été constatés, indiquez si ces écarts peuvent être justifiés par des critères objectifs et non fondés sur le sexe.",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Date limite pour choisir l'un des parcours ci-dessous.",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("1ᵉʳ juillet 2026")).toBeInTheDocument();
+		expect(screen.queryByText("1ᵉʳ janvier 2027")).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("link", {
+				name: /Qu'entend-on par critères objectifs et non fondés sur le sexe \?/,
+			}),
+		).toHaveAttribute("target", "_blank");
+		expect(screen.queryByText(/non sexistes/)).not.toBeInTheDocument();
+	});
+
+	it("offers the three qualifications and no path yet", () => {
+		render(compliancePathChoice());
+		expect(screen.getByLabelText(ALL_TITLE)).toBeInTheDocument();
+		expect(screen.getByLabelText(PARTIAL_TITLE)).toBeInTheDocument();
+		expect(screen.getByLabelText(NONE_TITLE)).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText(CORRECTIVE_ACTION_TITLE),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByLabelText(JOINT_EVALUATION_TITLE),
+		).not.toBeInTheDocument();
+	});
+
+	it("keeps Suivant disabled until a qualification is picked", () => {
+		render(compliancePathChoice());
+		const next = screen.getByRole("button", { name: /suivant/i });
+		expect(next).toBeDisabled();
+		fireEvent.click(screen.getByLabelText(NONE_TITLE));
+		expect(next).not.toBeDisabled();
+	});
+
+	it("does not submit when no qualification is picked", () => {
+		render(compliancePathChoice());
+		submitForm();
+		expect(mockMutate).not.toHaveBeenCalled();
+		expect(mockPush).not.toHaveBeenCalled();
+	});
+
+	it("saves justify straight away when all gaps are justifiable", async () => {
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(ALL_TITLE));
+		submitForm();
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+		});
+		expect(mockPush).toHaveBeenCalledWith("/avis-cse");
+	});
+
+	it("saves justify and lands on the confirmation page when no CSE opinion is due", async () => {
+		render(compliancePathChoice({ cseOpinionRequired: false }));
+		fireEvent.click(screen.getByLabelText(ALL_TITLE));
+		submitForm();
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+		});
+		expect(mockPush).toHaveBeenCalledWith(
+			"/declaration-remuneration/parcours-conformite/confirmation",
+		);
+	});
+
+	it("shows no CSE step and keeps the closing sentence when no CSE opinion is due", () => {
+		render(compliancePathChoice({ cseOpinionRequired: false }));
+		expect(screen.queryByText(/votre CSE/)).not.toBeInTheDocument();
+		expect(
+			screen.getByText(/En l'absence de CSE, aucun avis n'est à transmettre/),
+		).toBeInTheDocument();
+	});
+
+	it("pre-checks all justifiable when justify was already saved", () => {
+		render(compliancePathChoice({ initialPath: "justify" }));
+		expect(screen.getByLabelText(ALL_TITLE)).toBeChecked();
+	});
+
+	it.each([
+		"corrective_action",
+		"joint_evaluation",
+	] as const)("pre-checks no qualification when %s was saved, the partial/none split being unknown", (initialPath) => {
+		render(compliancePathChoice({ initialPath }));
+		for (const title of [ALL_TITLE, PARTIAL_TITLE, NONE_TITLE]) {
+			expect(screen.getByLabelText(title)).not.toBeChecked();
+		}
+	});
+});
+
+describe("CompliancePathChoice — round 1, path screen", () => {
+	it("opens the path screen for partially justifiable gaps, focused on its title", async () => {
+		markDeclarationTransmissionSuccess();
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
+		submitForm();
+
+		const title = await screen.findByRole("heading", {
+			level: 1,
+			name: COMPLIANCE_TITLE,
+		});
+		await waitFor(() => expect(title).toHaveFocus());
+		expect(
+			screen.getByRole("heading", { level: 2, name: PARTIAL_TITLE }),
+		).toBeInTheDocument();
+		expect(screen.getByLabelText(CORRECTIVE_ACTION_TITLE)).toHaveAttribute(
+			"id",
+			"path-corrective",
+		);
+		expect(screen.getByLabelText(JOINT_EVALUATION_TITLE)).toHaveAttribute(
+			"id",
+			"path-joint",
+		);
+		expect(
+			screen.getByRole("group", {
+				name: "Choix du parcours de mise en conformité",
+			}),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText("Votre déclaration a été transmise"),
+		).not.toBeInTheDocument();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("subtitles the path screen with the none qualification", async () => {
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(NONE_TITLE));
+		submitForm();
+
+		expect(
+			await screen.findByRole("heading", { level: 2, name: NONE_TITLE }),
+		).toBeInTheDocument();
+	});
+
+	it("goes back to the qualification screen with the choice kept and the focus on its title", async () => {
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
+		submitForm();
+		fireEvent.click(await screen.findByRole("button", { name: /précédent/i }));
+
+		expect(await screen.findByLabelText(PARTIAL_TITLE)).toBeChecked();
+		const title = screen.getByRole("heading", {
+			level: 1,
+			name: "Déclaration des indicateurs de rémunération 2026",
+		});
+		await waitFor(() => expect(title).toHaveFocus());
+	});
+
+	it("keeps Suivant disabled until a path is picked", async () => {
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(NONE_TITLE));
+		submitForm();
+
+		await screen.findByLabelText(JOINT_EVALUATION_TITLE);
+		const next = screen.getByRole("button", { name: /suivant/i });
+		expect(next).toBeDisabled();
+		fireEvent.click(screen.getByLabelText(JOINT_EVALUATION_TITLE));
+		expect(next).not.toBeDisabled();
+	});
+
+	it.each([
+		["joint_evaluation", JOINT_EVALUATION_TITLE, JOINT_EVALUATION_HREF],
+		["corrective_action", CORRECTIVE_ACTION_TITLE, CORRECTIVE_ACTION_HREF],
+	] as const)("saves %s and navigates to its first step", async (path, title, href) => {
+		render(compliancePathChoice());
+		fireEvent.click(screen.getByLabelText(PARTIAL_TITLE));
+		submitForm();
+		fireEvent.click(await screen.findByLabelText(title));
+		submitForm();
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path });
+		});
+		expect(mockPush).toHaveBeenCalledWith(href);
+	});
+
+	it("pre-checks the saved path on the path screen", async () => {
+		render(compliancePathChoice({ initialPath: "corrective_action" }));
+		fireEvent.click(screen.getByLabelText(NONE_TITLE));
+		submitForm();
+
+		expect(await screen.findByLabelText(CORRECTIVE_ACTION_TITLE)).toBeChecked();
+	});
+
+	it("refuses to save a path the qualification does not offer", async () => {
+		draftRef.current = { gapJustification: "partial", path: "justify" };
+		render(compliancePathChoice());
+		submitForm();
+		await screen.findByLabelText(JOINT_EVALUATION_TITLE);
+
+		expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+		submitForm();
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
+});
+
+describe("CompliancePathChoice — round 2", () => {
+	it("titles the single screen with the compliance title and asks again", () => {
+		render(compliancePathChoice({ isSecondRound: true }));
+		expect(
+			screen.getByRole("heading", { level: 1, name: COMPLIANCE_TITLE }),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Des écarts ≥ 5 % ont de nouveau été constatés, indiquez si ces écarts peuvent être justifiés par des critères objectifs et non fondés sur le sexe.",
+			),
+		).toBeInTheDocument();
+		expect(screen.getByText("1ᵉʳ janvier 2027")).toBeInTheDocument();
+		expect(screen.queryByText("1ᵉʳ juillet 2026")).not.toBeInTheDocument();
+	});
+
+	it("keeps the second declaration success banner", () => {
+		markDeclarationTransmissionSuccess();
+		render(compliancePathChoice({ isSecondRound: true }));
+		expect(
+			screen.getByText("Votre seconde déclaration a été transmise"),
+		).toBeInTheDocument();
+	});
+
+	it.each([
+		NONE_TITLE,
+		PARTIAL_TITLE,
+	])("saves joint_evaluation straight away for %s", async (title) => {
+		render(compliancePathChoice({ isSecondRound: true }));
+		fireEvent.click(screen.getByLabelText(title));
+		submitForm();
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "joint_evaluation" });
+		});
+		expect(mockPush).toHaveBeenCalledWith(JOINT_EVALUATION_HREF);
+		expect(
+			screen.queryByLabelText(CORRECTIVE_ACTION_TITLE),
+		).not.toBeInTheDocument();
+	});
+
+	it("saves justify for all justifiable gaps", async () => {
+		render(compliancePathChoice({ isSecondRound: true }));
+		fireEvent.click(screen.getByLabelText(ALL_TITLE));
+		submitForm();
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledWith({ path: "justify" });
+		});
+	});
+
+	it("never offers corrective actions", () => {
+		render(compliancePathChoice({ isSecondRound: true }));
+		expect(
+			screen.queryByText(/actions correctives et une seconde déclaration/),
+		).not.toBeInTheDocument();
+		expect(screen.queryByText(/Soit /)).not.toBeInTheDocument();
+	});
+});
+
+describe("CompliancePathChoice — draft autosave", () => {
+	it("hydrates the qualification and the path from a persisted draft", async () => {
+		draftRef.current = {
+			gapJustification: "partial",
+			path: "joint_evaluation",
+		};
+		render(compliancePathChoice());
+
+		expect(screen.getByLabelText(PARTIAL_TITLE)).toBeChecked();
+		submitForm();
+		expect(await screen.findByLabelText(JOINT_EVALUATION_TITLE)).toBeChecked();
+	});
+
+	it("always reopens on the qualification screen", () => {
+		draftRef.current = {
+			gapJustification: "none",
+			path: "corrective_action",
+		};
+		render(compliancePathChoice());
+
+		expect(screen.getByLabelText(NONE_TITLE)).toBeChecked();
+		expect(
+			screen.queryByLabelText(CORRECTIVE_ACTION_TITLE),
+		).not.toBeInTheDocument();
+	});
+
+	it("saves the qualification and the path while the lock is inactive", async () => {
+		render(compliancePathChoice());
+
+		fireEvent.click(screen.getByLabelText(NONE_TITLE));
+		await waitFor(() => {
+			expect(mockSetField).toHaveBeenCalledWith({
+				gapJustification: "none",
+				path: undefined,
+			});
+		});
+
+		submitForm();
+		fireEvent.click(await screen.findByLabelText(CORRECTIVE_ACTION_TITLE));
+		await waitFor(() => {
+			expect(mockSetField).toHaveBeenCalledWith({
+				gapJustification: "none",
+				path: "corrective_action",
+			});
+		});
+	});
+
+	it("does not save a draft when the declaration is locked read-only", () => {
+		render(<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>);
+
+		const radio = screen.getByLabelText(NONE_TITLE);
+		fireEvent.click(radio);
+		fireEvent.change(radio, { target: { checked: true } });
+
+		expect(mockSetField).not.toHaveBeenCalled();
+	});
+
+	it("disables each control while keeping the fieldset enabled when the declaration is locked read-only", () => {
+		const { container } = render(
+			<LockProvider isReadOnly>{compliancePathChoice()}</LockProvider>,
+		);
+
+		expect(container.querySelector("fieldset")).not.toBeDisabled();
+		expect(screen.getByLabelText(NONE_TITLE)).toBeDisabled();
+		expect(screen.getByRole("button", { name: /suivant/i })).toBeDisabled();
+	});
+});
+
 describe("CompliancePathChoice under a third-party lock", () => {
 	it("disables the radios without showing a read-only alert", () => {
 		const { container } = render(
@@ -532,13 +583,11 @@ describe("CompliancePathChoice under a third-party lock", () => {
 			</LockProvider>,
 		);
 
-		expect(
-			screen.getByLabelText("Justifier les écarts de rémunération ≥ 5 %"),
-		).toBeDisabled();
+		expect(screen.getByLabelText(ALL_TITLE)).toBeDisabled();
 		expect(container.querySelector(".fr-alert--info")).not.toBeInTheDocument();
 	});
 
-	it("renders Suivant as a link to the rest of the path when a choice is saved", () => {
+	it("renders Suivant as a link to the rest of the path when justify is saved", () => {
 		render(
 			<LockProvider isReadOnly>
 				{compliancePathChoice({ initialPath: "justify" })}
@@ -562,6 +611,25 @@ describe("CompliancePathChoice under a third-party lock", () => {
 			screen.queryByRole("link", { name: /suivant/i }),
 		).not.toBeInTheDocument();
 	});
+
+	it("reaches a saved corrective-action path through the path screen", async () => {
+		render(
+			<LockProvider isReadOnly>
+				{compliancePathChoice({ initialPath: "corrective_action" })}
+			</LockProvider>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /suivant/i }));
+
+		const corrective = await screen.findByLabelText(CORRECTIVE_ACTION_TITLE);
+		expect(corrective).toBeChecked();
+		expect(corrective).toBeDisabled();
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			CORRECTIVE_ACTION_HREF,
+		);
+		expect(mockMutate).not.toHaveBeenCalled();
+	});
 });
 
 describe("CompliancePathChoice read-only mode", () => {
@@ -575,9 +643,7 @@ describe("CompliancePathChoice read-only mode", () => {
 		expect(
 			screen.getByText(/L'avis du CSE a déjà été transmis/),
 		).toBeInTheDocument();
-		expect(
-			screen.getByLabelText("Justifier les écarts de rémunération ≥ 5 %"),
-		).toBeDisabled();
+		expect(screen.getByLabelText(ALL_TITLE)).toBeDisabled();
 	});
 
 	it("renders Suivant as a navigation link instead of a submit button", () => {
@@ -610,5 +676,39 @@ describe("CompliancePathChoice read-only mode", () => {
 			fireEvent.submit(form);
 		});
 		expect(mockMutate).not.toHaveBeenCalled();
+	});
+
+	it("leads a saved corrective-action path to its first step through the path screen", async () => {
+		render(
+			compliancePathChoice({
+				initialPath: "corrective_action",
+				readOnlyReason: "second_declaration_submitted",
+			}),
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: /suivant/i }));
+
+		expect(await screen.findByLabelText(CORRECTIVE_ACTION_TITLE)).toBeChecked();
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			CORRECTIVE_ACTION_HREF,
+		);
+		fireEvent.click(screen.getByRole("button", { name: /précédent/i }));
+		expect(await screen.findByLabelText(ALL_TITLE)).toBeDisabled();
+	});
+
+	it("links a saved round-2 joint evaluation directly, with no path screen", () => {
+		render(
+			compliancePathChoice({
+				initialPath: "joint_evaluation",
+				isSecondRound: true,
+				readOnlyReason: "joint_evaluation_submitted",
+			}),
+		);
+
+		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
+			"href",
+			JOINT_EVALUATION_HREF,
+		);
 	});
 });

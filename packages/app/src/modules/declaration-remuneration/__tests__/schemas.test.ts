@@ -5,6 +5,7 @@ import {
 	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryCorrectionFormSchema,
 	categoryFormSchema,
+	compliancePathFormSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
 	updateStep4Schema,
@@ -572,5 +573,41 @@ describe("category name length cap (#3943)", () => {
 			false,
 		);
 		expect(parseCategoryForm("a".repeat(256), true).success).toBe(false);
+	});
+});
+
+describe("compliancePathFormSchema", () => {
+	it("accepts a qualification without a path yet", () => {
+		expect(
+			compliancePathFormSchema.safeParse({ gapJustification: "partial" })
+				.success,
+		).toBe(true);
+	});
+
+	it("accepts a qualification with its path", () => {
+		expect(
+			compliancePathFormSchema.safeParse({
+				gapJustification: "none",
+				path: "corrective_action",
+			}).success,
+		).toBe(true);
+	});
+
+	it("requires the qualification", () => {
+		expect(
+			compliancePathFormSchema.safeParse({ path: "joint_evaluation" }).success,
+		).toBe(false);
+	});
+
+	it("rejects an unknown qualification or path", () => {
+		expect(
+			compliancePathFormSchema.safeParse({ gapJustification: "most" }).success,
+		).toBe(false);
+		expect(
+			compliancePathFormSchema.safeParse({
+				gapJustification: "all",
+				path: "retired_path",
+			}).success,
+		).toBe(false);
 	});
 });

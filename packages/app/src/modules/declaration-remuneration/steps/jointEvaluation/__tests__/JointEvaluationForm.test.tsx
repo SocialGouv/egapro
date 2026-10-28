@@ -54,7 +54,6 @@ const { uploadFile: uploadFileMock } = (await import(
 
 const defaultProps = {
 	cseOpinionRequired: false,
-	declarationDate: "01/06/2026",
 	declarationSiren: "123456789",
 	declarationYear: 2026,
 	existingFile: null,
@@ -90,7 +89,7 @@ describe("JointEvaluationForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: "Dépôt du rapport de l'évaluation conjointe des rémunérations",
+				name: "Évaluation conjointe des rémunérations",
 				level: 2,
 			}),
 		).toBeInTheDocument();
@@ -109,13 +108,16 @@ describe("JointEvaluationForm", () => {
 	it("renders the deadline callout with the current year", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
-		expect(screen.getByText("Échéance")).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+		).toBeInTheDocument();
 		expect(screen.queryByText("Date limite")).not.toBeInTheDocument();
 		expect(screen.getByText(/août 2026/i)).toBeInTheDocument();
-		expect(screen.getByText(/01\/06\/2026/)).toBeInTheDocument();
-		expect(screen.getByText(/Déclaration effectuée le/)).toHaveClass(
-			"fr-text-mention--grey",
-		);
+		expect(
+			screen.queryByText(/Déclaration effectuée le/),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows a titled error alert when submitting without a file", () => {
@@ -138,9 +140,37 @@ describe("JointEvaluationForm", () => {
 		render(<JointEvaluationForm {...defaultProps} />);
 
 		expect(
-			screen.getByText(/ce que vous devez faire dans un délai de 2 mois/i),
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Rappel : Ce que vous devez faire dans un délai de 2 mois",
+			}),
 		).toBeInTheDocument();
-		expect(screen.getByText(/après dépôt du rapport/i)).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Après élaboration du rapport",
+			}),
+		).toBeInTheDocument();
+	});
+
+	it("orders the reminder, the instruction, the deadline, the drop zone and the follow-up as in the mock-up", () => {
+		render(<JointEvaluationForm {...defaultProps} />);
+
+		const sequence = [
+			screen.getByRole("heading", { name: /Rappel : Ce que vous devez faire/ }),
+			screen.getByText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
+			),
+			screen.getByText(
+				"Échéance pour transmettre le rapport de l'évaluation conjointe",
+			),
+			screen.getByRole("button", { name: /Sélectionner un fichier/ }),
+			screen.getByRole("heading", { name: "Après élaboration du rapport" }),
+		];
+		const allNodes = Array.from(document.body.querySelectorAll("*"));
+		const positions = sequence.map((node) => allNodes.indexOf(node));
+		expect(positions.every((position) => position >= 0)).toBe(true);
+		expect(positions).toEqual([...positions].sort((a, b) => a - b));
 	});
 
 	it("renders no previous link back to the transmitted path choice", () => {
@@ -180,6 +210,11 @@ describe("JointEvaluationForm", () => {
 			"dialog#joint-evaluation-submit-modal",
 		);
 		expect(dialog).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				"Vous allez transmettre aux services du ministère chargé du Travail le rapport préalable de l'évaluation conjointe.",
+			),
+		).toBeInTheDocument();
 		expect(screen.getByText(/je certifie/i)).toBeInTheDocument();
 	});
 

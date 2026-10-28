@@ -35,6 +35,12 @@ export const COMPLIANCE_PATHS = [
 
 export type CompliancePathValue = (typeof COMPLIANCE_PATHS)[number];
 
+export const GAP_JUSTIFICATIONS = ["all", "partial", "none"] as const;
+
+export type GapJustification = (typeof GAP_JUSTIFICATIONS)[number];
+
+export type ComplianceRound = 1 | 2;
+
 /** The two types of declarations a company must file each year. */
 export type DeclarationType = "remuneration" | "representation";
 

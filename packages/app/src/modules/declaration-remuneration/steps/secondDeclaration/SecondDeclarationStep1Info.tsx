@@ -13,14 +13,12 @@ import { SecondDeclarationStepIndicator } from "./SecondDeclarationStepIndicator
 const EMPTY_DB_VALUES = {} as Record<string, never>;
 
 type Props = {
-	declarationDate: string;
 	declarationSiren: string;
 	declarationYear: number;
 	modificationDeadline: Date;
 };
 
 export function SecondDeclarationStep1Info({
-	declarationDate,
 	declarationSiren,
 	declarationYear,
 	modificationDeadline,
@@ -58,10 +56,7 @@ export function SecondDeclarationStep1Info({
 				.
 			</p>
 
-			<DeadlineBlock
-				deadline={modificationDeadline}
-				declarationDate={declarationDate}
-			/>
+			<DeadlineBlock deadline={modificationDeadline} />
 
 			<ObligationsCallout />
 
@@ -74,21 +69,14 @@ export function SecondDeclarationStep1Info({
 	);
 }
 
-function DeadlineBlock({
-	deadline,
-	declarationDate,
-}: {
-	deadline: Date;
-	declarationDate: string;
-}) {
+function DeadlineBlock({ deadline }: { deadline: Date }) {
 	return (
 		<div className={`fr-highlight ${common.flexColumnGapHalf}`}>
-			<p className="fr-mb-0">Échéance</p>
+			<p className="fr-mb-0">
+				Échéance pour transmettre la seconde déclaration
+			</p>
 			<p className="fr-mb-0 fr-text--lead fr-text--bold">
 				{formatCivilLongDate(deadline)}
-			</p>
-			<p className="fr-mb-0 fr-text-mention--grey">
-				Déclaration effectuée le {declarationDate}
 			</p>
 		</div>
 	);
@@ -107,14 +95,14 @@ function ObligationsCallout() {
 						d&apos;action
 					</li>
 					<li>
+						Informer et consulter votre CSE sur l&apos;exactitude des données et
+						éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
+						(l&apos;avis devra être transmis à la dernière étape de la démarche)
+					</li>
+					<li>
 						Redéclarer l&apos;indicateur dans un délai de 6 mois après votre
 						première déclaration
 					</li>
-					<li>
-						Informer et consulter votre CSE sur l&apos;exactitude des données et
-						éventuellement sur la justification en cas d&apos;écarts ≥ 5 %
-					</li>
-					<li>Déposer le ou les avis du CSE</li>
 				</ul>
 			</div>
 		</div>

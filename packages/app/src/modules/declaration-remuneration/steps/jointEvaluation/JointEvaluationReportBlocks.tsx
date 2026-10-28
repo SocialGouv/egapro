@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { TrackedLink } from "~/modules/analytics";
 import common from "~/modules/declaration-remuneration/shared/common.module.scss";
 import { formatLongDate } from "~/modules/domain";
@@ -24,24 +25,11 @@ export function JointEvaluationHeading({ title }: { title: string }) {
 					target="_blank"
 					trackingId="joint_evaluation"
 				>
-					En savoir plus sur évaluation conjointe des rémunérations
+					En savoir plus sur l&apos;évaluation conjointe des rémunérations
 					<NewTabNotice />
 				</TrackedLink>
 			</p>
 		</div>
-	);
-}
-
-export function JointEvaluationDepositInstructions() {
-	return (
-		<p className="fr-mb-0">
-			Vous devez{" "}
-			<strong>
-				déposer le rapport de l&apos;évaluation conjointe, ci-dessous.
-			</strong>{" "}
-			L&apos;accord ou le plan d&apos;action conclu doit être déposé sur
-			TéléAccord.
-		</p>
 	);
 }
 
@@ -73,6 +61,7 @@ export function JointEvaluationExistingReport({
 }
 
 type ReportUploadProps = {
+	beforeDropzone?: ReactNode;
 	inputId: string;
 	disabled: boolean;
 	error: string | null;
@@ -82,6 +71,7 @@ type ReportUploadProps = {
 };
 
 export function JointEvaluationReportUpload({
+	beforeDropzone,
 	inputId,
 	disabled,
 	error,
@@ -93,12 +83,14 @@ export function JointEvaluationReportUpload({
 		<>
 			<div>
 				<label className="fr-label" htmlFor={inputId}>
-					Veuillez importer/déposer le rapport de l&apos;évaluation conjointe.
+					Veuillez déposer le rapport de l&apos;évaluation conjointe.
 					<span className="fr-hint-text fr-mt-1v">
 						Taille maximale : 10 Mo. Format supporté : pdf.
 					</span>
 				</label>
 			</div>
+
+			{beforeDropzone}
 
 			<FileUpload
 				accept=".pdf"
@@ -127,43 +119,42 @@ export function JointEvaluationReportUpload({
 	);
 }
 
-export function JointEvaluationGuidance({ todoTitle }: { todoTitle: string }) {
+export function JointEvaluationTodo({ title }: { title: string }) {
 	return (
-		<div>
-			<div className={styles.panelBlue}>
-				<h3 className="fr-h6 fr-mb-2w">{todoTitle}</h3>
-				<ul className="fr-mb-0">
-					<li>Élaboration du rapport</li>
-					<li>
-						Déposez le rapport dans la zone de dépôt prévue sur cette page
-					</li>
-				</ul>
-			</div>
-			<div className={styles.panelWhite}>
-				<h3 className="fr-h6 fr-mb-2w">Après dépôt du rapport</h3>
-				<ul className="fr-mb-2w">
-					<li>
-						Réaliser l&apos;analyse conjointe et définir des actions
-						correctrices
-					</li>
-					<li>
-						Mettre en place l&apos;accord collectif (ou à défaut un plan
-						d&apos;action)
-					</li>
-				</ul>
-				<p className="fr-mb-0">
-					Les accords conclus devront être déposés sur{" "}
-					<a
-						className="fr-link"
-						href="https://www.teleaccord.travail.gouv.fr"
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						TéléAccord
-						<NewTabNotice />
-					</a>
-				</p>
-			</div>
+		<div className={styles.panelBlue}>
+			<h3 className="fr-h6 fr-mb-2w">{title}</h3>
+			<ul className="fr-mb-0">
+				<li>
+					Réaliser l&apos;analyse conjointe et définir des actions correctrices
+				</li>
+				<li>
+					Transmettre le rapport dans la zone de dépôt prévue sur cette page
+				</li>
+			</ul>
+		</div>
+	);
+}
+
+export function JointEvaluationAfterReport() {
+	return (
+		<div className={styles.panelWhite}>
+			<h3 className="fr-h6 fr-mb-2w">Après élaboration du rapport</h3>
+			<ul className="fr-mb-2w">
+				<li>Négocier un accord collectif</li>
+				<li>À défaut, mettre en place un plan d&apos;action</li>
+			</ul>
+			<p className="fr-mb-0">
+				L&apos;accord collectif ou le plan d&apos;action doit être déposé sur{" "}
+				<a
+					className="fr-link"
+					href="https://www.teleaccord.travail.gouv.fr"
+					rel="noopener noreferrer"
+					target="_blank"
+				>
+					TéléAccords
+					<NewTabNotice />
+				</a>
+			</p>
 		</div>
 	);
 }

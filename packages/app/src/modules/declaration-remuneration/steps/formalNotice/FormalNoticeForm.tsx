@@ -11,12 +11,12 @@ import { MY_SPACE } from "~/modules/routes";
 import { SUBMIT_LABEL, useFileUploadForm } from "~/modules/shared";
 import { api } from "~/trpc/react";
 import {
-	JointEvaluationDepositInstructions,
+	JointEvaluationAfterReport,
 	type JointEvaluationExistingFile,
 	JointEvaluationExistingReport,
-	JointEvaluationGuidance,
 	JointEvaluationHeading,
 	JointEvaluationReportUpload,
+	JointEvaluationTodo,
 } from "../jointEvaluation/JointEvaluationReportBlocks";
 import { JointEvaluationSubmitModal } from "../jointEvaluation/JointEvaluationSubmitModal";
 
@@ -67,13 +67,10 @@ export function FormalNoticeForm({ existingFile }: Props) {
 
 					<JointEvaluationHeading title="Évaluation conjointe des rémunérations" />
 
-					<div>
-						<JointEvaluationDepositInstructions />
-						<p className="fr-mt-3w fr-mb-0 fr-text--bold">
-							Le délai de mise en conformité est indiqué dans la mise en demeure
-							notifiée par la DREETS.
-						</p>
-					</div>
+					<p className="fr-mb-0 fr-text--bold">
+						Le délai de mise en conformité est indiqué dans la mise en demeure
+						notifiée par la DREETS.
+					</p>
 
 					{existingFile && (
 						<JointEvaluationExistingReport file={existingFile} />
@@ -88,7 +85,10 @@ export function FormalNoticeForm({ existingFile }: Props) {
 						selectedFiles={selectedFiles}
 					/>
 
-					<JointEvaluationGuidance todoTitle="Ce que vous devez faire" />
+					<div>
+						<JointEvaluationTodo title="Ce que vous devez faire" />
+						<JointEvaluationAfterReport />
+					</div>
 
 					<FormErrors mutationError={submitMutation.error?.message} />
 

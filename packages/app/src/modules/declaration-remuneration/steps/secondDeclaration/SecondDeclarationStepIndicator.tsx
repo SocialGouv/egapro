@@ -1,3 +1,4 @@
+import { SUBMIT_LABEL } from "~/modules/shared";
 import {
 	SECOND_DECLARATION_STEP_TITLES,
 	SECOND_DECLARATION_TOTAL_STEPS,
@@ -12,7 +13,7 @@ export function SecondDeclarationStepIndicator({ currentStep }: Props) {
 	const nextTitle =
 		currentStep < SECOND_DECLARATION_TOTAL_STEPS
 			? SECOND_DECLARATION_STEP_TITLES[currentStep + 1]
-			: undefined;
+			: SUBMIT_LABEL;
 
 	return (
 		<div className="fr-stepper">
@@ -27,11 +28,9 @@ export function SecondDeclarationStepIndicator({ currentStep }: Props) {
 				data-fr-current-step={currentStep}
 				data-fr-steps={SECOND_DECLARATION_TOTAL_STEPS}
 			/>
-			{nextTitle && (
-				<p className="fr-stepper__details">
-					<span className="fr-text--bold">Étape suivante :</span> {nextTitle}
-				</p>
-			)}
+			<p className="fr-stepper__details">
+				<span className="fr-text--bold">Étape suivante :</span> {nextTitle}
+			</p>
 		</div>
 	);
 }
