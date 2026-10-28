@@ -1,6 +1,6 @@
 import type { ChildProcess } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { urlGlob } from "~/e2e/helpers/routes";
+import { urlGlob, urlPattern } from "~/e2e/helpers/routes";
 import {
 	API_TRANSMITTED_PDF,
 	COMPLIANCE_JOINT_EVALUATION,
@@ -13,7 +13,9 @@ import {
 import { buildGrid, pickCoordinate } from "./grille/coordinates";
 import { FICHE_SCENARIOS } from "./grille/scenarios";
 import {
+	answerGapJustification,
 	completeSecondDeclaration,
+	expectPathScreen,
 	fillCseStep1,
 	selectCompliancePath,
 	submitCseStep2,
@@ -176,6 +178,22 @@ test.describe("[ANX-01] Path change before downstream action — tâtonnement su
 	}) => {
 		await completeDeclaration(page, { hasGap: true });
 		await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 10_000 });
+
+		await test.step("l'écran 2/2 revient à la qualification sans rien enregistrer", async () => {
+			const title = page.getByRole("heading", { level: 1 });
+			await expect(page.getByRole("button", { name: "Précédent" })).toHaveCount(
+				0,
+			);
+			await answerGapJustification(page, "none");
+			await expectPathScreen(page, "none");
+			await expect(title).toBeFocused();
+			await expect(page).toHaveURL(urlPattern(COMPLIANCE_PATH));
+
+			await page.getByRole("button", { name: "Précédent" }).click();
+			await expect(page.locator("#gap-justification-none")).toBeChecked();
+			await expect(title).toBeFocused();
+			expect(await countPathChoiceEventsRound1()).toBe(0);
+		});
 
 		await selectCompliancePath(page, "path-corrective");
 		await page.waitForURL(urlGlob(complianceStepHref(1)), { timeout: 10_000 });
