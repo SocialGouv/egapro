@@ -367,6 +367,9 @@ test.describe("Représentation équilibrée — parcours déclaratif complet", (
 				"href",
 				`/api/representation-pdf?year=${referenceYear}`,
 			);
+			await expect(
+				page.getByRole("heading", { name: "Publication des résultats" }),
+			).toHaveCount(0);
 		});
 	});
 

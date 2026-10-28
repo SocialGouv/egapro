@@ -2,6 +2,7 @@ import { DemarcheConfirmation } from "~/modules/shared/DemarcheConfirmation";
 import { buildRemunerationDocuments } from "~/modules/shared/demarcheDocuments";
 
 type Props = {
+	companyName: string;
 	dataYear: number;
 	declarationYear: number;
 	email?: string;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function ConfirmationPage({
+	companyName,
 	dataYear,
 	declarationYear,
 	email,
@@ -20,6 +22,7 @@ export function ConfirmationPage({
 }: Props) {
 	return (
 		<DemarcheConfirmation
+			companyName={companyName}
 			documents={buildRemunerationDocuments({
 				dataYear,
 				hasSecondDeclaration,
