@@ -109,7 +109,7 @@ const FLEX_HOSTS = [
 	{
 		name: "seconde déclaration — étape 3",
 		path: complianceStepHref(3),
-		actionLabel: "Précédent",
+		actionLabel: "Suivant",
 	},
 ];
 
