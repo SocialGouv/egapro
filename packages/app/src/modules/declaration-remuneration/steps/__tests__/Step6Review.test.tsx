@@ -851,7 +851,7 @@ describe("Step6Review", () => {
 		);
 	});
 
-	it("renders previous link to step 5 and next link to compliance path when already submitted", () => {
+	it("renders no previous link and a next link to compliance path when already submitted", () => {
 		render(
 			<Step6Review
 				companyWorkforce={null}
@@ -866,10 +866,9 @@ describe("Step6Review", () => {
 				step4Data={emptyStep4Data()}
 			/>,
 		);
-		expect(screen.getByRole("link", { name: /précédent/i })).toHaveAttribute(
-			"href",
-			"/declaration-remuneration/etape/5",
-		);
+		expect(
+			screen.queryByRole("link", { name: /précédent/i }),
+		).not.toBeInTheDocument();
 		expect(screen.getByRole("link", { name: /suivant/i })).toHaveAttribute(
 			"href",
 			"/declaration-remuneration/parcours-conformite",
