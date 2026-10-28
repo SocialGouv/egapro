@@ -30,6 +30,7 @@ import {
 	NON_COMPLIANT_EXECUTIVES,
 	NON_COMPLIANT_MEMBERS,
 	OFFLINE_PUBLICATION,
+	REPRESENTATION_CAMPAIGN_YEAR,
 	REPRESENTATION_YEAR,
 	SINGLE_EXECUTIVE,
 	WEBSITE_PUBLICATION,
@@ -230,14 +231,6 @@ describe("Step5Review — écarts non calculables (S12)", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("tells the modal that nothing is computable", () => {
-		renderReview({ draft: NOTHING_COMPUTABLE });
-
-		expect(
-			screen.getByText(/Vos écarts de représentation ne sont pas calculables/),
-		).toBeInTheDocument();
-	});
-
 	it("shows the single-executive reason", () => {
 		renderReview({ draft: { ...SINGLE_EXECUTIVE, ...COMPUTABLE_MEMBERS } });
 
@@ -327,5 +320,41 @@ describe("Step5Review — prochaines étapes (S17)", () => {
 		expect(
 			screen.queryByRole("heading", { name: "Prochaines étapes" }),
 		).not.toBeInTheDocument();
+	});
+});
+
+describe("Step5Review — modale de transmission", () => {
+	const TWO_NON_COMPLIANT_GAPS = {
+		...NON_COMPLIANT_EXECUTIVES,
+		...NON_COMPLIANT_MEMBERS,
+		...WEBSITE_PUBLICATION,
+	};
+
+	it.each([
+		["two non-compliant gaps", TWO_NON_COMPLIANT_GAPS],
+		["one non-compliant gap", SINGLE_GAP],
+		["compliant gaps", FULLY_COMPLIANT],
+		["non-computable gaps", NOTHING_COMPUTABLE],
+	])("shows the same modal content regardless of the outcome (%s)", (_label, draft) => {
+		renderReview({ draft });
+
+		// The <dialog> stays closed in jsdom, so its content sits outside the accessibility tree.
+		const dialog = within(screen.getByRole("dialog", { hidden: true }));
+
+		expect(
+			dialog.getByRole("heading", {
+				hidden: true,
+				level: 2,
+				name: "Transmettre",
+			}),
+		).toBeInTheDocument();
+		expect(
+			dialog.getByText(
+				`Vous allez transmettre la déclaration des indicateurs de représentation ${REPRESENTATION_CAMPAIGN_YEAR} aux services du ministère chargé du travail.`,
+			),
+		).toBeInTheDocument();
+		expect(dialog.queryByText(/seuil réglementaire/)).not.toBeInTheDocument();
+		expect(dialog.queryByText(/TéléAccords/)).not.toBeInTheDocument();
+		expect(dialog.queryByText(/calculables/)).not.toBeInTheDocument();
 	});
 });

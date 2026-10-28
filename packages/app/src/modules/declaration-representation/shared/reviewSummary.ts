@@ -17,17 +17,10 @@ export type RepresentationIndicatorSummary = {
 	verdict: RepresentationComplianceVerdict;
 };
 
-export type RepresentationSubmitVariant =
-	| "two_gaps"
-	| "one_gap"
-	| "compliant"
-	| "not_computable";
-
 export type RepresentationReviewSummary = {
 	indicators: RepresentationIndicatorSummary[];
 	nonCompliantIndicators: RepresentationIndicatorSummary[];
 	publicationApplicable: boolean;
-	submitVariant: RepresentationSubmitVariant;
 };
 
 export const EXECUTIVES_TITLE = "Cadres dirigeants";
@@ -103,17 +96,6 @@ function summarizeMembers(
 	};
 }
 
-function pickSubmitVariant(
-	indicators: RepresentationIndicatorSummary[],
-	nonCompliantCount: number,
-): RepresentationSubmitVariant {
-	if (nonCompliantCount >= 2) return "two_gaps";
-	if (nonCompliantCount === 1) return "one_gap";
-	return indicators.some((indicator) => indicator.verdict === "compliant")
-		? "compliant"
-		: "not_computable";
-}
-
 export function summarizeRepresentationReview(
 	draft: RepresentationDraft,
 	campaignYear: number,
@@ -130,7 +112,6 @@ export function summarizeRepresentationReview(
 		indicators,
 		nonCompliantIndicators,
 		publicationApplicable: isPublicationApplicable(draft),
-		submitVariant: pickSubmitVariant(indicators, nonCompliantIndicators.length),
 	};
 }
 
