@@ -22,6 +22,7 @@ type Props = {
 	disabled: boolean;
 	/** Whether this category can declare remuneration (#3678). */
 	payApplicable: boolean;
+	sameWorkforceByPayBasis?: boolean;
 	annualPayApplicable?: boolean;
 	hourlyPayApplicable?: boolean;
 	readOnly: boolean;
@@ -64,6 +65,7 @@ export function CategoryAccordionItem({
 	category,
 	disabled,
 	payApplicable,
+	sameWorkforceByPayBasis = false,
 	annualPayApplicable,
 	hourlyPayApplicable,
 	readOnly,
@@ -174,6 +176,7 @@ export function CategoryAccordionItem({
 						onPositiveNumberChange={onPositiveNumberChange}
 						payApplicable={payApplicable}
 						readOnly={readOnly}
+						sameWorkforceByPayBasis={sameWorkforceByPayBasis}
 					/>
 					{showDelete && (
 						<div className={stepStyles.deleteRow}>

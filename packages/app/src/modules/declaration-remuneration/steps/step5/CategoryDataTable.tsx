@@ -25,7 +25,10 @@ import {
 import { workforceFieldLabel } from "../step1/workforceRows";
 import type { EmployeeCategory } from "./categorySerializer";
 import type { CategoryWorkforceRowDefinition } from "./categoryWorkforceRows";
-import { CATEGORY_WORKFORCE_ROWS } from "./categoryWorkforceRows";
+import {
+	CATEGORY_WORKFORCE_ROWS,
+	SHARED_WORKFORCE_ROW,
+} from "./categoryWorkforceRows";
 
 type Props = {
 	category: EmployeeCategory;
@@ -42,6 +45,7 @@ type Props = {
 	disabled?: boolean;
 	/** Whether this category can declare remuneration (#3678). */
 	payApplicable?: boolean;
+	sameWorkforceByPayBasis?: boolean;
 	annualPayApplicable?: boolean;
 	hourlyPayApplicable?: boolean;
 	readOnly?: boolean;
@@ -415,6 +419,7 @@ export function CategoryDataTable({
 	onDecimalBlur: blur,
 	disabled = false,
 	payApplicable = true,
+	sameWorkforceByPayBasis = false,
 	annualPayApplicable = true,
 	hourlyPayApplicable = true,
 	readOnly = false,
@@ -422,6 +427,9 @@ export function CategoryDataTable({
 	errors,
 }: Props) {
 	const idPrefix = `cat-${catIndex}`;
+	const workforceRows = sameWorkforceByPayBasis
+		? [SHARED_WORKFORCE_ROW]
+		: CATEGORY_WORKFORCE_ROWS;
 	const payStatusRef = useRef<HTMLDivElement>(null);
 	const tabbedHeadcountRef = useRef(false);
 	const handleHeadcountKeyDown = (
@@ -480,7 +488,7 @@ export function CategoryDataTable({
 					</colgroup>
 					<WorkforceTableHead />
 					<tbody>
-						{CATEGORY_WORKFORCE_ROWS.map((row) => (
+						{workforceRows.map((row) => (
 							<CategoryWorkforceRow
 								blur={handleHeadcountBlur}
 								cat={cat}
