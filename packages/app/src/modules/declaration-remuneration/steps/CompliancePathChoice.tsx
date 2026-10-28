@@ -308,7 +308,7 @@ export function CompliancePathChoice({
 				) : (
 					<div className={common.dataSection}>
 						{selectedJustification && (
-							<h2 className="fr-h4 fr-mb-0">
+							<h2 className="fr-h6 fr-mb-0">
 								{GAP_JUSTIFICATION_TITLES[selectedJustification]}
 							</h2>
 						)}
