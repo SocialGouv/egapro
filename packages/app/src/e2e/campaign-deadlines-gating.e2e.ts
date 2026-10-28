@@ -297,12 +297,14 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			});
 			await fillCseStep1(page, {
 				hasSecondDeclaration: true,
-				secondDeclGapConsultationImplicit: true,
+				firstDeclJustification: true,
+				secondDeclJustification: true,
 			});
 			await submitCseStep2(page, {
 				hasSecondDeclaration: true,
 				columns: [
 					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 1, type: "gap" },
 					{ declarationNumber: 2, type: "accuracy" },
 					{ declarationNumber: 2, type: "gap" },
 				],
@@ -354,7 +356,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 15_000 });
 			await expect(
 				page.getByText(
-					"Votre rapport de l'évaluation conjointe a été transmis",
+					"Votre évaluation conjointe des rémunérations a été transmise",
 				),
 			).toBeVisible();
 			await expect(
@@ -362,7 +364,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			).toBeVisible();
 			await expect(
 				page.getByRole("link", {
-					name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations",
+					name: `Télécharger le récapitulatif : Évaluation conjointe des rémunérations ${testDeclarationYear}`,
 				}),
 			).toHaveAttribute(
 				"href",
@@ -387,7 +389,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			});
 
 			await page.goto(cseOpinionStepHref(1));
-			await fillCseStep1(page, { firstDeclGapCardHidden: true });
+			await fillCseStep1(page);
 			await submitCseStep2(page);
 
 			await expectModifiable(page, FIRST_DECLARATION_ROW, {
