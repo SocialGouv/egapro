@@ -26,10 +26,8 @@ export type ContentTypeColumn = {
 
 export type ContentTypeColumnsInput = {
 	hasSecondDeclaration: boolean;
-	firstDeclGapConsulted: boolean | null;
-	secondDeclGapConsulted: boolean | null;
-	firstDeclGapHigh: boolean;
-	secondDeclGapHigh: boolean;
+	firstDeclJustificationRequired: boolean;
+	secondDeclJustificationRequired: boolean;
 };
 
 export type ContentTypeKey = {
@@ -70,6 +68,6 @@ export { MAX_CSE_FILES } from "~/modules/domain";
 export const TOTAL_STEPS = 2;
 
 export const STEP_TITLES: Record<number, string> = {
-	1: "Renseigner les informations du ou des avis du CSE",
-	2: "Importer/Déposer l'avis ou les avis du CSE",
+	1: "Renseigner les avis émis par le CSE",
+	2: "Déposer l'avis ou les avis du CSE",
 };

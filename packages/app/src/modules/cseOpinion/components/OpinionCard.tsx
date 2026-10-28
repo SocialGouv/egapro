@@ -11,7 +11,7 @@ type Props = {
 	readOnly?: boolean;
 };
 
-export function AccuracyOpinionCard({
+export function OpinionCard({
 	id,
 	title,
 	opinion,

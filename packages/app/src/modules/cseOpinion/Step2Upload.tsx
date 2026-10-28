@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
+import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { CSE_OPINION_CONFIRMATION, cseOpinionStepHref } from "~/modules/routes";
 import {
 	FileUpload,
@@ -25,9 +26,13 @@ import {
 	getMissingColumns,
 	getSingleChoiceAssociation,
 	getUnassociatedFiles,
+	MISSING_OPINION_ALERT_TITLE,
+	NO_FILE_ALERT,
 	toAssociationPayload,
+	UNASSOCIATED_FILE_ALERT,
 } from "./contentTypeColumns";
 import formStyles from "./shared/formActions.module.scss";
+import layoutStyles from "./shared/stepLayout.module.scss";
 import {
 	type AssociationMap,
 	type ContentTypeColumn,
@@ -222,7 +227,9 @@ export function Step2Upload({
 	const canSubmit = isComplete && !hasUnassociatedFiles;
 	// The validation errors are revealed only once the user has tried to submit
 	// (besoin epic-3476): loading files must never trigger them on their own.
-	const showMissingError = hasAttemptedSubmit && !isComplete;
+	const showNoFileError = hasAttemptedSubmit && !hasExistingFiles;
+	const showMissingError =
+		hasAttemptedSubmit && hasExistingFiles && !isComplete;
 	const showUnassociatedError = hasAttemptedSubmit && hasUnassociatedFiles;
 
 	const openFinalizeModal = useCallback(() => {
@@ -262,26 +269,33 @@ export function Step2Upload({
 
 	return (
 		<>
-			<form autoComplete="off" onSubmit={handleFormSubmit}>
-				<div className="fr-grid-row fr-grid-row--middle fr-mb-4w">
-					<div className="fr-col">
-						<h1 className="fr-h4 fr-mb-0">Dépôt du ou des avis du CSE</h1>
-					</div>
+			<form
+				autoComplete="off"
+				className={layoutStyles.screen}
+				onSubmit={handleFormSubmit}
+			>
+				<div className={layoutStyles.titleRow}>
+					<h1 className="fr-h4 fr-mb-0">Transmission du ou des avis du CSE</h1>
+					<SavedIndicator
+						hasData={hasExistingFiles}
+						isPendingSave={isUploadingFiles}
+						isSaving={hasPendingAssociationWrite}
+					/>
 				</div>
 
 				<CseStepIndicator currentStep={2} />
 
 				<div>
 					<label className="fr-label" htmlFor="cse-file-upload">
-						Veuillez importer/déposer le ou les avis émis par votre CSE et
-						renseigner le type d'avis correspondant.
+						Veuillez déposer le ou les avis émis par votre CSE et renseigner le
+						type d'avis correspondant.
 						<span className="fr-hint-text">
 							Taille maximale : 10 Mo par fichier. Format supporté : pdf.
 						</span>
 					</label>
 				</div>
 
-				<div className="fr-mt-4w">
+				<div>
 					<FileUpload
 						accept=".pdf"
 						acceptLabel="pdf"
@@ -293,83 +307,70 @@ export function Step2Upload({
 						onFilesChange={handleFilesChange}
 						selectedFiles={selectedFiles}
 					/>
-				</div>
-
-				<div aria-live="polite" className="fr-messages-group">
-					{isUploadingFiles && (
-						<p className="fr-message fr-message--info fr-mb-0">
-							Import du ou des fichiers en cours…
-						</p>
-					)}
+					<div aria-live="polite" className="fr-messages-group">
+						{isUploadingFiles && (
+							<p className="fr-message fr-message--info fr-mb-0">
+								Import du ou des fichiers en cours…
+							</p>
+						)}
+					</div>
 				</div>
 
 				{hasExistingFiles && (
-					<div className="fr-mt-4w">
-						<ContentTypeMatrix
-							associations={associations}
-							columns={columns}
-							deletingFileId={deletingFileId}
-							disabled={isReadOnly}
-							files={existingFiles}
-							lockedColumnIds={lockedColumnIds}
-							onDelete={(fileId) => {
-								setDeletingFileId(fileId);
-								deleteMutation.mutate({ fileId });
-							}}
-							onToggle={handleToggle}
-						/>
-					</div>
+					<ContentTypeMatrix
+						associations={associations}
+						columns={columns}
+						deletingFileId={deletingFileId}
+						disabled={isReadOnly}
+						files={existingFiles}
+						lockedColumnIds={lockedColumnIds}
+						onDelete={(fileId) => {
+							setDeletingFileId(fileId);
+							deleteMutation.mutate({ fileId });
+						}}
+						onToggle={handleToggle}
+					/>
 				)}
 
-				<div aria-live="polite">
+				<div aria-live="polite" className={layoutStyles.alerts}>
+					{showNoFileError && (
+						<div className="fr-alert fr-alert--error">
+							<h2 className="fr-alert__title">{NO_FILE_ALERT.title}</h2>
+							<p>{NO_FILE_ALERT.message}</p>
+						</div>
+					)}
 					{showMissingError && (
-						<div className="fr-alert fr-alert--error fr-mt-4w">
-							<h2 className="fr-alert__title">Un avis CSE est manquant</h2>
+						<div className="fr-alert fr-alert--error">
+							<h2 className="fr-alert__title">{MISSING_OPINION_ALERT_TITLE}</h2>
 							{missingColumns.map((column) => (
 								<p key={column.id}>{column.missingMessage}</p>
 							))}
 						</div>
 					)}
 					{showUnassociatedError && (
-						<div className="fr-alert fr-alert--error fr-mt-4w">
+						<div className="fr-alert fr-alert--error">
 							<h2 className="fr-alert__title">
-								Chaque fichier doit être associé à au moins un type de contenu
+								{UNASSOCIATED_FILE_ALERT.title}
 							</h2>
-							{unassociatedFiles.map((file) => (
-								<p key={file.id}>
-									Le fichier «&nbsp;{file.fileName}&nbsp;» n&apos;est associé à
-									aucun type de contenu. Cochez au moins un type, ou supprimez
-									le fichier.
-								</p>
-							))}
+							<p>{UNASSOCIATED_FILE_ALERT.message}</p>
 						</div>
 					)}
 					{associationError && (
-						<div className="fr-alert fr-alert--error fr-mt-4w">
+						<div className="fr-alert fr-alert--error">
 							<p>{associationError}</p>
 						</div>
 					)}
 				</div>
 
-				<div className="fr-mt-4w">
-					<OpinionSummaryBox associations={associations} columns={columns} />
-				</div>
+				<OpinionSummaryBox associations={associations} columns={columns} />
 
 				{finalizeError && (
-					<p className="fr-error-text fr-mt-2w" role="alert">
+					<p className="fr-error-text fr-mt-0" role="alert">
 						{finalizeError}
 					</p>
 				)}
 
-				<div aria-live="polite" className="fr-messages-group">
-					{hasPendingAssociationWrite && (
-						<p className="fr-message fr-message--info fr-mb-0">
-							Enregistrement des associations en cours…
-						</p>
-					)}
-				</div>
-
-				<div className={`fr-mt-4w ${formStyles.actions}`}>
+				<div className={formStyles.actions}>
 					<Link
 						className="fr-btn fr-btn--tertiary fr-icon-arrow-left-line fr-btn--icon-left"
 						href={cseOpinionStepHref(1)}

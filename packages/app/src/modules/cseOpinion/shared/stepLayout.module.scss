@@ -1,0 +1,22 @@
+.screen {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.titleRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.alerts {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+	&:empty {
+		position: absolute;
+	}
+}

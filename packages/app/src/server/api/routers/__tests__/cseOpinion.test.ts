@@ -55,6 +55,7 @@ vi.mock("~/server/db/schema", () => ({
 }));
 
 const mockPruneStaleContentTypeAssociations = vi.fn();
+const mockGetJustificationRequirements = vi.fn();
 
 vi.mock(
 	"~/server/services/cseRequiredContentTypes",
@@ -63,6 +64,8 @@ vi.mock(
 			typeof import("~/server/services/cseRequiredContentTypes")
 		>()),
 		getRequiredContentTypes: vi.fn(),
+		getJustificationRequirements: (...args: unknown[]) =>
+			mockGetJustificationRequirements(...args),
 		pruneStaleContentTypeAssociations: (...args: unknown[]) =>
 			mockPruneStaleContentTypeAssociations(...args),
 	}),
@@ -305,11 +308,109 @@ describe("cseOpinionRouter", () => {
 			firstDeclaration: {
 				accuracyOpinion: "favorable" as const,
 				accuracyDate: "2026-01-15",
-				gapConsulted: true,
 				gapOpinion: "unfavorable" as const,
 				gapDate: "2026-01-16",
 			},
 		};
+
+		function requireJustification(first: boolean, second = false) {
+			mockGetJustificationRequirements.mockResolvedValue({
+				firstDeclJustificationRequired: first,
+				secondDeclJustificationRequired: second,
+			});
+		}
+
+		beforeEach(() => {
+			requireJustification(true);
+		});
+
+		it("records the justification as consulted when the rule requires it, whatever the client sends", async () => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions({
+				firstDeclaration: {
+					...validInput.firstDeclaration,
+					gapConsulted: false,
+				},
+			} as never);
+
+			expect(mockGetJustificationRequirements).toHaveBeenCalledWith(
+				expect.anything(),
+				"decl-1",
+			);
+			expect(mockValues).toHaveBeenCalledWith(
+				expect.arrayContaining([
+					expect.objectContaining({
+						declarationNumber: 1,
+						type: "gap",
+						gapConsulted: true,
+						opinion: "unfavorable",
+						opinionDate: "2026-01-16",
+					}),
+				]),
+			);
+		});
+
+		it("clears a justification the rule does not require, whatever the client sends", async () => {
+			requireJustification(false);
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await caller.saveOpinions({
+				firstDeclaration: {
+					...validInput.firstDeclaration,
+					gapConsulted: true,
+				},
+			} as never);
+
+			expect(mockValues).toHaveBeenCalledWith(
+				expect.arrayContaining([
+					expect.objectContaining({
+						declarationNumber: 1,
+						type: "gap",
+						gapConsulted: false,
+						opinion: null,
+						opinionDate: null,
+					}),
+				]),
+			);
+		});
+
+		it.each([
+			["opinion", { gapOpinion: null }],
+			["date", { gapDate: null }],
+		] as const)("refuses a required justification without its %s, writing nothing", async (_missing, patch) => {
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.saveOpinions({
+					firstDeclaration: { ...validInput.firstDeclaration, ...patch },
+				}),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(mockInsert).not.toHaveBeenCalled();
+			expect(mockDelete).not.toHaveBeenCalled();
+		});
+
+		it("refuses a required second-declaration justification left empty", async () => {
+			requireJustification(false, true);
+			const mockDb = createMockDb();
+			const caller = await createCaller(mockDb);
+
+			await expect(
+				caller.saveOpinions({
+					...validInput,
+					secondDeclaration: {
+						accuracyOpinion: "favorable",
+						accuracyDate: "2026-02-01",
+						gapOpinion: null,
+						gapDate: null,
+					},
+				}),
+			).rejects.toMatchObject({ code: "BAD_REQUEST" });
+			expect(mockInsert).not.toHaveBeenCalled();
+		});
 
 		it("deletes existing opinions and inserts new ones in a transaction", async () => {
 			const mockDb = createMockDb();
@@ -341,6 +442,7 @@ describe("cseOpinionRouter", () => {
 		});
 
 		it("prunes content-type associations that are no longer required once the opinions are saved", async () => {
+			requireJustification(false);
 			const mockDb = createMockDb();
 			const caller = await createCaller(mockDb);
 
@@ -348,7 +450,6 @@ describe("cseOpinionRouter", () => {
 				firstDeclaration: {
 					accuracyOpinion: "favorable",
 					accuracyDate: "2026-01-15",
-					gapConsulted: false,
 					gapOpinion: null,
 					gapDate: null,
 				},
@@ -376,7 +477,6 @@ describe("cseOpinionRouter", () => {
 				secondDeclaration: {
 					accuracyOpinion: "unfavorable" as const,
 					accuracyDate: "2026-02-01",
-					gapConsulted: false,
 					gapOpinion: null,
 					gapDate: null,
 				},

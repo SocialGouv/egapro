@@ -1,3 +1,4 @@
+import { SUBMIT_LABEL } from "~/modules/shared";
 import { STEP_TITLES, TOTAL_STEPS } from "../types";
 
 type Props = {
@@ -7,10 +8,10 @@ type Props = {
 export function CseStepIndicator({ currentStep }: Props) {
 	const title = STEP_TITLES[currentStep] ?? "";
 	const nextTitle =
-		currentStep < TOTAL_STEPS ? STEP_TITLES[currentStep + 1] : undefined;
+		currentStep < TOTAL_STEPS ? STEP_TITLES[currentStep + 1] : SUBMIT_LABEL;
 
 	return (
-		<div className="fr-stepper fr-mb-4w">
+		<div className="fr-stepper fr-mb-0">
 			<h2 className="fr-stepper__title">
 				{title}
 				<span className="fr-stepper__state">
@@ -22,11 +23,9 @@ export function CseStepIndicator({ currentStep }: Props) {
 				data-fr-current-step={currentStep}
 				data-fr-steps={TOTAL_STEPS}
 			/>
-			{nextTitle && (
-				<p className="fr-stepper__details">
-					<span className="fr-text--bold">Étape suivante :</span> {nextTitle}
-				</p>
-			)}
+			<p className="fr-stepper__details">
+				<span className="fr-text--bold">Étape suivante :</span> {nextTitle}
+			</p>
 		</div>
 	);
 }
