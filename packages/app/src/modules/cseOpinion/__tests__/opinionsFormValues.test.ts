@@ -21,12 +21,10 @@ const REQUIRED_NONE = {
 const initialData: CseOpinionStep1Data = {
 	firstDeclAccuracyOpinion: "favorable",
 	firstDeclAccuracyDate: "2026-01-15",
-	firstDeclGapConsulted: true,
 	firstDeclGapOpinion: "unfavorable",
 	firstDeclGapDate: "2026-01-16",
 	secondDeclAccuracyOpinion: "favorable",
 	secondDeclAccuracyDate: "2026-02-15",
-	secondDeclGapConsulted: false,
 	secondDeclGapOpinion: "favorable",
 	secondDeclGapDate: "2026-02-16",
 };
