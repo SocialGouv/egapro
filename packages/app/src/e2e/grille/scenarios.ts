@@ -54,8 +54,7 @@ async function finDeDemarche(
 	});
 }
 
-// Screen 1/2 qualifies the gaps. Round 1 then offers both paths for an unjustified
-// gap; round 2 leads straight to the joint evaluation, so no corrective wording at all.
+// Round 2 leads straight to the joint evaluation, so no corrective wording at all.
 async function expectGapJustificationOptions(
 	page: Page,
 	options: { round: 1 | 2 },
