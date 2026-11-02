@@ -178,7 +178,7 @@ export function CategoryRecapTable({
 								</thead>
 								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} id={annualSectionId} scope="rowgroup">
+										<th colSpan={4} id={annualSectionId}>
 											Rémunération annuelle brute
 										</th>
 									</tr>
@@ -291,7 +291,7 @@ export function CategoryRecapTable({
 								</tbody>
 								<tbody>
 									<tr className={styles.sectionRow}>
-										<th colSpan={4} id={hourlySectionId} scope="rowgroup">
+										<th colSpan={4} id={hourlySectionId}>
 											Rémunération horaire brute
 										</th>
 									</tr>

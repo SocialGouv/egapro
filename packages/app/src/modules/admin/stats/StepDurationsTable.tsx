@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { formatCount, formatDays } from "~/modules/domain";
 import type { StepDurationRow } from "./types";
 
@@ -5,10 +6,82 @@ type Props = {
 	rows: StepDurationRow[];
 };
 
-const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
+type Phase = StepDurationRow["phase"];
+
+type ColumnIds = {
+	median: string;
+	p90: string;
+	sample: string;
+};
+
+const PHASE_HEADERS: Record<Phase, string> = {
 	wizard: "Parcours initial (wizard A–F)",
 	post_submit: "Démarche post-transmission",
 };
+
+const PHASE_HEADER_CLASSES: Record<Phase, string> = {
+	wizard: "fr-text--bold fr-background-alt--blue-france",
+	post_submit: "fr-text--bold fr-background-alt--red-marianne",
+};
+
+type DurationRowProps = {
+	row: StepDurationRow;
+	rowId: string;
+	phaseId: string;
+	columnIds: ColumnIds;
+};
+
+function DurationRow({ row, rowId, phaseId, columnIds }: DurationRowProps) {
+	const headers = (columnId: string) => `${phaseId} ${rowId} ${columnId}`;
+	return (
+		<tr>
+			<th id={rowId} scope="row">
+				{row.label}
+			</th>
+			<td headers={headers(columnIds.median)}>{formatDays(row.medianDays)}</td>
+			<td headers={headers(columnIds.p90)}>{formatDays(row.p90Days)}</td>
+			<td headers={headers(columnIds.sample)}>{formatCount(row.sampleSize)}</td>
+		</tr>
+	);
+}
+
+type PhaseRowGroupProps = {
+	phase: Phase;
+	rows: StepDurationRow[];
+	tableId: string;
+	columnIds: ColumnIds;
+};
+
+function PhaseRowGroup({
+	phase,
+	rows,
+	tableId,
+	columnIds,
+}: PhaseRowGroupProps) {
+	if (rows.length === 0) {
+		return null;
+	}
+
+	const phaseId = `${tableId}-phase-${phase}`;
+	return (
+		<tbody>
+			<tr>
+				<th className={PHASE_HEADER_CLASSES[phase]} colSpan={4} id={phaseId}>
+					{PHASE_HEADERS[phase]}
+				</th>
+			</tr>
+			{rows.map((row) => (
+				<DurationRow
+					columnIds={columnIds}
+					key={row.key}
+					phaseId={phaseId}
+					row={row}
+					rowId={`${tableId}-row-${row.key}`}
+				/>
+			))}
+		</tbody>
+	);
+}
 
 /**
  * Accessible alternative to `<StepDurationsChart>` — same K4 dataset rendered
@@ -16,10 +89,17 @@ const PHASE_HEADERS: Record<StepDurationRow["phase"], string> = {
  * Recharts SVG is not navigable by assistive tech.
  */
 export function StepDurationsTable({ rows }: Props) {
+	const tableId = useId();
+
 	if (rows.length === 0) {
 		return null;
 	}
 
+	const columnIds: ColumnIds = {
+		median: `${tableId}-median`,
+		p90: `${tableId}-p90`,
+		sample: `${tableId}-sample`,
+	};
 	const wizardRows = rows.filter((row) => row.phase === "wizard");
 	const postSubmitRows = rows.filter((row) => row.phase === "post_submit");
 
@@ -41,53 +121,29 @@ export function StepDurationsTable({ rows }: Props) {
 								<thead>
 									<tr>
 										<th scope="col">Étape ou jalon</th>
-										<th scope="col">Médiane (j)</th>
-										<th scope="col">p90 (j)</th>
-										<th scope="col">Échantillon</th>
+										<th id={columnIds.median} scope="col">
+											Médiane (j)
+										</th>
+										<th id={columnIds.p90} scope="col">
+											p90 (j)
+										</th>
+										<th id={columnIds.sample} scope="col">
+											Échantillon
+										</th>
 									</tr>
 								</thead>
-								{wizardRows.length > 0 && (
-									<tbody>
-										<tr>
-											<th
-												className="fr-text--bold fr-background-alt--blue-france"
-												colSpan={4}
-												scope="rowgroup"
-											>
-												{PHASE_HEADERS.wizard}
-											</th>
-										</tr>
-										{wizardRows.map((row) => (
-											<tr key={row.key}>
-												<th scope="row">{row.label}</th>
-												<td>{formatDays(row.medianDays)}</td>
-												<td>{formatDays(row.p90Days)}</td>
-												<td>{formatCount(row.sampleSize)}</td>
-											</tr>
-										))}
-									</tbody>
-								)}
-								{postSubmitRows.length > 0 && (
-									<tbody>
-										<tr>
-											<th
-												className="fr-text--bold fr-background-alt--red-marianne"
-												colSpan={4}
-												scope="rowgroup"
-											>
-												{PHASE_HEADERS.post_submit}
-											</th>
-										</tr>
-										{postSubmitRows.map((row) => (
-											<tr key={row.key}>
-												<th scope="row">{row.label}</th>
-												<td>{formatDays(row.medianDays)}</td>
-												<td>{formatDays(row.p90Days)}</td>
-												<td>{formatCount(row.sampleSize)}</td>
-											</tr>
-										))}
-									</tbody>
-								)}
+								<PhaseRowGroup
+									columnIds={columnIds}
+									phase="wizard"
+									rows={wizardRows}
+									tableId={tableId}
+								/>
+								<PhaseRowGroup
+									columnIds={columnIds}
+									phase="post_submit"
+									rows={postSubmitRows}
+									tableId={tableId}
+								/>
 							</table>
 						</div>
 					</div>
