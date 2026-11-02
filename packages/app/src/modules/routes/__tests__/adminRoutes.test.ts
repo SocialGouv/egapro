@@ -6,6 +6,7 @@ import {
 	ADMIN_NAV_LINKS,
 	ADMIN_REFERENTS,
 	ADMIN_SETTINGS,
+	ADMIN_SITEMAP,
 	ADMIN_STATS,
 	ADMIN_STATS_CAMPAIGN,
 	ADMIN_STATS_PLATFORM,
@@ -20,6 +21,7 @@ describe("admin routes", () => {
 		expect(ADMIN_REFERENTS).toBe("/admin/liste-referents");
 		expect(ADMIN_STATS).toBe("/admin/stats");
 		expect(ADMIN_SETTINGS).toBe("/admin/parametres");
+		expect(ADMIN_SITEMAP).toBe("/admin/plan");
 	});
 
 	it("keeps the legacy statistics anchors, which next.config.js redirects", () => {
@@ -48,6 +50,12 @@ describe("ADMIN_NAV_LINKS", () => {
 	it("lists each page once", () => {
 		const hrefs = ADMIN_NAV_LINKS.map((link) => link.href);
 		expect(new Set(hrefs).size).toBe(hrefs.length);
+	});
+
+	it("leaves the plan to its own link rather than the side menu", () => {
+		expect(ADMIN_NAV_LINKS.map((link) => link.href)).not.toContain(
+			ADMIN_SITEMAP,
+		);
 	});
 
 	it("covers every backoffice page", () => {

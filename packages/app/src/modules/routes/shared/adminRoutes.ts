@@ -6,6 +6,7 @@ export const ADMIN_IMPERSONATE = route("/admin/impersonate");
 export const ADMIN_REFERENTS = route("/admin/liste-referents");
 export const ADMIN_STATS = route("/admin/stats");
 export const ADMIN_SETTINGS = route("/admin/parametres");
+export const ADMIN_SITEMAP = route("/admin/plan");
 
 // The step-up screen lives outside `/admin/**`: the guard that redirects to it
 // must stay reachable when the backoffice itself is refused.
@@ -21,7 +22,8 @@ export function adminDeclarationHref(declarationId: string) {
 }
 
 // The side menu, in display order. One inventory, so a page added under
-// `src/app/admin/` is either reachable from it or deliberately not.
+// `src/app/admin/` is either reachable from it or deliberately not — the
+// backoffice plan (`ADMIN_SITEMAP`) renders from it too, behind its own link.
 export const ADMIN_NAV_LINKS = [
 	{ href: ADMIN, label: "Accueil" },
 	{ href: ADMIN_DECLARATIONS, label: "Déclarations" },
