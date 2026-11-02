@@ -189,6 +189,14 @@ export const STEP5_CATEGORY_NAME = "Catégorie test";
 
 export const STEP1_WORKFORCE = { women: 10, men: 15 } as const;
 
+// A step 1 identical on both bases merges the step 5 headcount rows into one.
+export const STEP1_DISTINCT_HOURLY_WORKFORCE = { women: 10, men: 14 } as const;
+
+const DISTINCT_HOURLY_QUARTILES: QuartileInputRow[] = [
+	...DEFAULT_HOURLY_QUARTILES.slice(0, 3),
+	{ ordinal: "4e", women: "2", men: "2" },
+];
+
 /**
  * Fill and submit steps 1 → 3, landing on the quartile step with the step 1
  * headcount saved. Callers that want the quartiles filled and submitted too use
@@ -196,23 +204,29 @@ export const STEP1_WORKFORCE = { women: 10, men: 15 } as const;
  */
 export async function submitStepsThroughPayGaps(
 	page: Page,
-	options: { annualMeanGap?: boolean } = {},
+	options: { annualMeanGap?: boolean; distinctHourlyWorkforce?: boolean } = {},
 ) {
 	await test.step("étape 1 — effectifs", async () => {
 		// Navigate to create/resume declaration → redirects to step 1
 		await page.goto(DECLARATION_REMUNERATION);
 		await page.waitForURL(urlGlob(remunerationStepHref(1)));
-		for (const basis of ["annuelle", "horaire"] as const) {
+		const hourly = options.distinctHourlyWorkforce
+			? STEP1_DISTINCT_HOURLY_WORKFORCE
+			: STEP1_WORKFORCE;
+		for (const [basis, counts] of [
+			["annuelle", STEP1_WORKFORCE],
+			["horaire", hourly],
+		] as const) {
 			await page
 				.getByRole("textbox", {
 					name: `Rémunération ${basis} — Nombre de femmes`,
 				})
-				.fill(String(STEP1_WORKFORCE.women));
+				.fill(String(counts.women));
 			await page
 				.getByRole("textbox", {
 					name: `Rémunération ${basis} — Nombre d'hommes`,
 				})
-				.fill(String(STEP1_WORKFORCE.men));
+				.fill(String(counts.men));
 		}
 		await page.getByRole("button", { name: "Suivant" }).click();
 		await confirmPrefillResetIfAsked(page);
@@ -243,12 +257,16 @@ export async function submitStepsThroughPayGaps(
  */
 export async function submitStepsThroughQuartiles(
 	page: Page,
-	options: { annualMeanGap?: boolean } = {},
+	options: { annualMeanGap?: boolean; distinctHourlyWorkforce?: boolean } = {},
 ) {
 	await submitStepsThroughPayGaps(page, options);
 
 	await test.step("étape 4 — répartition par quartile", async () => {
-		await fillStep4Quartiles(page);
+		await fillStep4Quartiles(page, {
+			hourlyThresholds: options.distinctHourlyWorkforce
+				? DISTINCT_HOURLY_QUARTILES
+				: undefined,
+		});
 		await page.getByRole("button", { name: "Suivant" }).click();
 	});
 }
@@ -260,6 +278,7 @@ export const STEP5_WORKFORCE_REMINDER =
 const CATEGORY_WORKFORCE_ROW_LABEL = {
 	annual: "Rémunération annuelle",
 	hourly: "Rémunération horaire",
+	shared: "Rémunération annuelle et horaire",
 } as const;
 
 type WorkforceCounts = { women: string; men: string };
@@ -280,31 +299,6 @@ export function categoryWorkforceInput(
 }
 
 /**
- * Fill both headcount rows of one indicator G category. Since #4254 a category
- * declares a physical headcount per pay basis, each held to its own step 1
- * total, so filling the annual row alone leaves the hourly sum at 0 and blocks
- * the step.
- */
-async function fillCategoryWorkforce(
-	page: Page,
-	options: {
-		categoryIndex?: number;
-		annual: WorkforceCounts;
-		hourly: WorkforceCounts;
-	},
-) {
-	const { categoryIndex, annual, hourly } = options;
-	for (const basis of ["annual", "hourly"] as const) {
-		const counts = basis === "annual" ? annual : hourly;
-		for (const sex of ["women", "men"] as const) {
-			await categoryWorkforceInput(page, { basis, categoryIndex, sex }).fill(
-				counts[sex],
-			);
-		}
-	}
-}
-
-/**
  * Fill step 5 employee categories so the computed indicator G gap lands above or
  * below the 5% alert threshold. women=1000, men=1100 → 9% gap (triggers
  * compliance); women=1000, men=1020 → 2% gap (no compliance).
@@ -322,12 +316,11 @@ async function fillStep5Categories(page: Page, options: { hasGap: boolean }) {
 		await page
 			.getByRole("textbox", { name: "Libellé" })
 			.fill(STEP5_CATEGORY_NAME);
-		// The single category carries the whole step 1 headcount, on both bases.
-		const counts = {
-			women: String(STEP1_WORKFORCE.women),
-			men: String(STEP1_WORKFORCE.men),
-		};
-		await fillCategoryWorkforce(page, { annual: counts, hourly: counts });
+		for (const sex of ["women", "men"] as const) {
+			await categoryWorkforceInput(page, { basis: "shared", sex }).fill(
+				String(STEP1_WORKFORCE[sex]),
+			);
+		}
 	}
 
 	// Fill salary data on category 1 (works for both fresh and pre-populated)
