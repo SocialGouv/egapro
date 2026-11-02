@@ -7,7 +7,7 @@ export {
 	CATEGORY_NAME_MAX_LENGTH_MESSAGE,
 	categoryFormEntrySchema,
 	categoryFormSchema,
-	saveCompliancePathSchema,
+	compliancePathFormSchema,
 	updateEmployeeCategoriesSchema,
 	updateStep1Schema,
 	updateStep2Schema,

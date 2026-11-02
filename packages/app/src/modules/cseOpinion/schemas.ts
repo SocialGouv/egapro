@@ -7,7 +7,6 @@ export const opinionTypeSchema = z.enum(["favorable", "unfavorable"]);
 const declarationOpinionSchema = z.object({
 	accuracyOpinion: opinionTypeSchema,
 	accuracyDate: z.string().min(1),
-	gapConsulted: z.boolean(),
 	gapOpinion: opinionTypeSchema.nullable(),
 	gapDate: z.string().nullable(),
 });

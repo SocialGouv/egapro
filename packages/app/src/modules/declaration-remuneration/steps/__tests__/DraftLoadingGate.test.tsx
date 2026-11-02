@@ -235,7 +235,6 @@ describe("DraftLoadingGate", () => {
 		const { container } = render(
 			<JointEvaluationForm
 				cseOpinionRequired={false}
-				declarationDate="01/01/2026"
 				declarationSiren="123456789"
 				declarationYear={2026}
 				existingFile={null}

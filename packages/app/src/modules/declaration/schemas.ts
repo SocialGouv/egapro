@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
 	COMPLIANCE_PATHS,
 	FIRST_DECLARATION_YEAR,
+	GAP_JUSTIFICATIONS,
 	getCurrentYear,
 } from "~/modules/domain";
 import { sirenInputSchema } from "~/modules/my-space/schemas";
@@ -15,6 +16,7 @@ export const e2eClockSchema = z.object({
 export type E2eClockInput = z.infer<typeof e2eClockSchema>;
 
 export const saveCompliancePathSchema = z.object({
+	gapJustification: z.enum(GAP_JUSTIFICATIONS),
 	path: z.enum(COMPLIANCE_PATHS),
 });
 

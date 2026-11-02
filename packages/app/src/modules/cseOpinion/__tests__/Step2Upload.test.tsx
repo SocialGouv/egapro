@@ -94,36 +94,28 @@ const { uploadFile: uploadFileMock } = (await import(
 
 const SINGLE_COLUMN = computeContentTypeColumns({
 	hasSecondDeclaration: false,
-	firstDeclGapConsulted: false,
-	secondDeclGapConsulted: null,
-	firstDeclGapHigh: false,
-	secondDeclGapHigh: false,
+	firstDeclJustificationRequired: false,
+	secondDeclJustificationRequired: false,
 });
 
 const TWO_ACCURACY_COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
-	firstDeclGapConsulted: false,
-	secondDeclGapConsulted: false,
-	firstDeclGapHigh: false,
-	secondDeclGapHigh: false,
+	firstDeclJustificationRequired: false,
+	secondDeclJustificationRequired: false,
 });
 
 const DUAL_COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
-	firstDeclGapConsulted: true,
-	secondDeclGapConsulted: true,
-	firstDeclGapHigh: true,
-	secondDeclGapHigh: true,
+	firstDeclJustificationRequired: true,
+	secondDeclJustificationRequired: true,
 });
 
 // Two distinct content types on a single declaration — used to race two
 // independent setFileContentTypes calls against each other (#4102).
 const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: false,
-	firstDeclGapConsulted: true,
-	secondDeclGapConsulted: null,
-	firstDeclGapHigh: true,
-	secondDeclGapHigh: false,
+	firstDeclJustificationRequired: true,
+	secondDeclJustificationRequired: false,
 });
 
 function getFileInput() {
@@ -190,7 +182,12 @@ describe("Step2Upload", () => {
 	it("renders the page title", () => {
 		renderStep();
 
-		expect(screen.getByText("Dépôt du ou des avis du CSE")).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 1,
+				name: "Transmission du ou des avis du CSE",
+			}),
+		).toBeInTheDocument();
 	});
 
 	it("renders the stepper at step 2", () => {
@@ -237,9 +234,9 @@ describe("Step2Upload", () => {
 	it("renders the opinion summary box", () => {
 		renderStep({ columns: DUAL_COLUMNS });
 
-		expect(screen.getByText("Avis CSE à transmettre :")).toBeInTheDocument();
+		expect(screen.getByText("Avis CSE à transmettre")).toBeInTheDocument();
 		expect(screen.getByText("Première déclaration")).toBeInTheDocument();
-		expect(screen.getByText("Deuxième déclaration")).toBeInTheDocument();
+		expect(screen.getByText("Seconde déclaration")).toBeInTheDocument();
 	});
 
 	it("renders previous link and submit button", () => {
@@ -535,13 +532,11 @@ describe("Step2Upload", () => {
 		expect(
 			screen.queryByText("Un avis CSE est manquant"),
 		).not.toBeInTheDocument();
+		expect(screen.getByText("Type d'avis non renseigné")).toBeInTheDocument();
 		expect(
 			screen.getByText(
-				"Chaque fichier doit être associé à au moins un type de contenu",
+				"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
 			),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(/Le fichier «\s*avis-2\.pdf\s*» n'est associé/),
 		).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
@@ -710,9 +705,10 @@ describe("Step2Upload", () => {
 
 		const submit = screen.getByRole("button", { name: SUBMIT_LABEL });
 		expect(submit).toBeDisabled();
+		expect(screen.getByRole("status")).toHaveTextContent("Enregistre");
 		expect(
-			screen.getByText("Enregistrement des associations en cours…"),
-		).toBeInTheDocument();
+			screen.queryByText("Enregistrement des associations en cours…"),
+		).not.toBeInTheDocument();
 
 		await user.click(submit);
 
@@ -731,6 +727,7 @@ describe("Step2Upload", () => {
 		});
 
 		expect(submit).toBeEnabled();
+		expect(screen.getByRole("status")).toHaveTextContent("Enregistré");
 	});
 
 	it("reconciles the display from the write that actually resolves last, not a ref an earlier failure can clobber (#4102)", async () => {
@@ -1283,6 +1280,80 @@ describe("Step2Upload", () => {
 				screen.getByRole("button", { name: "Transmettre" }),
 			).toBeDisabled();
 			expect(screen.getByRole("button", { name: /Supprimer/ })).toBeDisabled();
+		});
+	});
+
+	describe("refonte des écrans de dépôt", () => {
+		it("asks to deposit the opinions with the size hint", () => {
+			renderStep();
+
+			expect(
+				screen.getByText(
+					/Veuillez déposer le ou les avis émis par votre CSE et renseigner le type d'avis correspondant\./,
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Taille maximale : 10 Mo par fichier. Format supporté : pdf.",
+				),
+			).toBeInTheDocument();
+		});
+
+		it("names the step and announces the transmission as the next step", () => {
+			renderStep();
+
+			expect(
+				screen.getByRole("heading", {
+					level: 2,
+					name: /Déposer l'avis ou les avis du CSE/,
+				}),
+			).toHaveTextContent("Étape 2 sur 2");
+			expect(
+				screen.getByText("Étape suivante :").parentElement,
+			).toHaveTextContent(`Étape suivante : ${SUBMIT_LABEL}`);
+		});
+
+		it("shows no saved indicator before any file is deposited", () => {
+			renderStep();
+
+			expect(screen.queryByRole("status")).not.toBeInTheDocument();
+		});
+
+		it("shows the saved indicator once a file is deposited", () => {
+			renderStep({
+				columns: DUAL_COLUMNS,
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+			});
+
+			expect(screen.getByRole("status")).toHaveTextContent("Enregistré");
+		});
+
+		it("keeps the saved indicator idle in read-only mode", () => {
+			renderStep({
+				existingFiles: [makeFile("avis-1.pdf", "file-1")],
+				isReadOnly: true,
+			});
+
+			expect(screen.getByRole("status")).toHaveTextContent("Enregistré");
+			expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "false");
+		});
+
+		it("raises the single no-file alert when transmitting without any file", async () => {
+			const user = userEvent.setup();
+			renderStep({ columns: DUAL_COLUMNS });
+
+			await user.click(screen.getByRole("button", { name: SUBMIT_LABEL }));
+
+			expect(screen.getByText("Aucun avis déposé")).toBeInTheDocument();
+			expect(
+				screen.getByText(
+					"Vous devez déposer le ou les avis de votre CSE au format PDF avant de transmettre.",
+				),
+			).toBeInTheDocument();
+			expect(
+				screen.queryByText("Un avis CSE est manquant"),
+			).not.toBeInTheDocument();
+			expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -114,7 +114,7 @@ describe("FormalNoticeForm", () => {
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", {
-				name: /En savoir plus sur évaluation conjointe des rémunérations/,
+				name: /En savoir plus sur l'évaluation conjointe des rémunérations/,
 			}),
 		).toHaveAttribute("target", "_blank");
 		expect(screen.queryByText("Enregistré")).not.toBeInTheDocument();
@@ -124,8 +124,8 @@ describe("FormalNoticeForm", () => {
 		render(<FormalNoticeForm existingFile={null} />);
 
 		expect(
-			screen.getByText(
-				"déposer le rapport de l'évaluation conjointe, ci-dessous.",
+			screen.getByLabelText(
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
 			),
 		).toBeInTheDocument();
 		expect(
@@ -141,7 +141,7 @@ describe("FormalNoticeForm", () => {
 
 		expect(
 			screen.getByLabelText(
-				/Veuillez importer\/déposer le rapport de l'évaluation conjointe\./,
+				/Veuillez déposer le rapport de l'évaluation conjointe\./,
 			),
 		).toHaveAttribute("id", "formal-notice-joint-evaluation-file-upload");
 		expect(
@@ -162,7 +162,15 @@ describe("FormalNoticeForm", () => {
 			screen.queryByText(/dans un délai de 2 mois/),
 		).not.toBeInTheDocument();
 		expect(
-			screen.getByRole("heading", { level: 3, name: "Après dépôt du rapport" }),
+			screen.getByText(
+				"Réaliser l'analyse conjointe et définir des actions correctrices",
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", {
+				level: 3,
+				name: "Après élaboration du rapport",
+			}),
 		).toBeInTheDocument();
 	});
 

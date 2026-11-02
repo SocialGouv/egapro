@@ -11,10 +11,8 @@ import { ContentTypeMatrix } from "../ContentTypeMatrix";
 
 const COLUMNS = computeContentTypeColumns({
 	hasSecondDeclaration: true,
-	firstDeclGapConsulted: true,
-	secondDeclGapConsulted: true,
-	firstDeclGapHigh: true,
-	secondDeclGapHigh: true,
+	firstDeclJustificationRequired: true,
+	secondDeclJustificationRequired: true,
 });
 
 const SINGLE_FILE: UploadedFile = {
@@ -57,12 +55,12 @@ function renderMatrix(
 }
 
 describe("ContentTypeMatrix", () => {
-	it("names the file column header 'Fichier(s) importé(s)/déposé(s)' (wording regression guard, #4261)", () => {
+	it("names the file column header 'Fichier(s) déposé(s)' (wording regression guard)", () => {
 		renderMatrix();
 
 		expect(
 			screen.getByRole("columnheader", {
-				name: "Fichier(s) importé(s)/déposé(s)",
+				name: "Fichier(s) déposé(s)",
 			}),
 		).toBeInTheDocument();
 	});
@@ -245,10 +243,8 @@ describe("ContentTypeMatrix", () => {
 	it("omits the declaration sub-label when there is a single declaration", () => {
 		const singleColumns = computeContentTypeColumns({
 			hasSecondDeclaration: false,
-			firstDeclGapConsulted: true,
-			secondDeclGapConsulted: null,
-			firstDeclGapHigh: true,
-			secondDeclGapHigh: false,
+			firstDeclJustificationRequired: true,
+			secondDeclJustificationRequired: false,
 		});
 		const associations = singleColumns.reduce<AssociationMap>((map, column) => {
 			map[column.id] = null;

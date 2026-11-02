@@ -21,9 +21,9 @@ export function SubmitConfirmationModal({
 			certifyLabel="Je certifie que les avis transmis sont conformes."
 			description={
 				<>
-					Vous allez transmettre aux services du ministère chargé du Travail
-					l&apos;avis ou les avis de votre CSE relatifs à l&apos;ensemble de
-					votre démarche {declarationYear}.
+					Vous allez transmettre aux services du ministère chargé du Travail le
+					ou les avis de votre CSE relatifs à l&apos;ensemble de votre démarche{" "}
+					{declarationYear}.
 				</>
 			}
 			modalId="cse-submit-modal"

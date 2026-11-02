@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	getContentTypeDescription,
-	getContentTypeHeader,
-} from "../contentTypeColumns";
+import { getContentTypeHeader, getOpinionTitle } from "../contentTypeColumns";
 import {
 	buildSubmittedDeclarations,
 	buildSubmittedFileColumns,
@@ -100,8 +97,8 @@ describe("buildSubmittedDeclarations", () => {
 			"Seconde déclaration",
 		]);
 		expect(declarations[1]?.opinions.map((o) => o.title)).toEqual([
-			getContentTypeDescription(2, "accuracy"),
-			getContentTypeDescription(2, "gap"),
+			getOpinionTitle(2, "accuracy"),
+			getOpinionTitle(2, "gap"),
 		]);
 	});
 
@@ -160,7 +157,7 @@ describe("contentTypeColumns headers", () => {
 			label: "Justification",
 			declarationLabel: "2e déclaration",
 		});
-		expect(getContentTypeDescription(1, "gap")).toMatch(
+		expect(getOpinionTitle(1, "gap")).toMatch(
 			/^Justification des écarts ≥ 5 %/,
 		);
 	});

@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
 	CATEGORY_PAY_BASES,
 	COMPLIANCE_PATHS,
+	GAP_JUSTIFICATIONS,
 	hasWorkforce,
 	isCategoryPayBasisApplicable,
 	isSexRemunerationComplete,
@@ -217,6 +218,7 @@ export const categoryCorrectionFormSchema = categoryFormSchema.extend({
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
-export const saveCompliancePathSchema = z.object({
-	path: z.enum(COMPLIANCE_PATHS),
+export const compliancePathFormSchema = z.object({
+	gapJustification: z.enum(GAP_JUSTIFICATIONS),
+	path: z.enum(COMPLIANCE_PATHS).optional(),
 });

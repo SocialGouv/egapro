@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
 import {
-	formatLongDate,
 	getObligationWorkforce,
 	isCseOpinionRequired,
 	selectJointEvaluationDeadline,
@@ -29,11 +28,6 @@ export async function JointEvaluationPage() {
 	]);
 	const currentYear = data.declaration.year;
 	const campaignDeadlines = await getCampaignDeadlines(currentYear);
-	const declarationDate = formatLongDate(
-		data.declaration.updatedAt
-			? new Date(data.declaration.updatedAt)
-			: new Date(),
-	);
 
 	return (
 		<JointEvaluationForm
@@ -41,7 +35,6 @@ export async function JointEvaluationPage() {
 				workforce: getObligationWorkforce(company.gipWorkforce),
 				hasCse: company.hasCse,
 			})}
-			declarationDate={declarationDate}
 			declarationSiren={data.declaration.siren}
 			declarationYear={currentYear}
 			existingFile={existingFile}

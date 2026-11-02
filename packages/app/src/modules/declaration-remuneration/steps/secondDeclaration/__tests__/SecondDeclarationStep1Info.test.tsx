@@ -67,15 +67,12 @@ describe("SecondDeclarationStep1Info", () => {
 	it("lists the actions correctives then the CSE bullet then the redéclaration bullet when the CSE opinion is required", () => {
 		renderStep1({ cseOpinionRequired: true });
 
-		const items = screen.getAllByRole("listitem");
-		expect(items).toHaveLength(3);
-		expect(items[0]).toHaveTextContent(
-			/Mettre en place des actions correctives/,
-		);
-		expect(items[1]).toHaveTextContent(
-			/Informer et consulter votre CSE.*≥ 5 %.*dernière étape de la démarche/,
-		);
-		expect(items[2]).toHaveTextContent(/Redéclarer l.indicateur/);
+		const items = screen.getAllByRole("listitem").map((li) => li.textContent);
+		expect(items).toEqual([
+			"Mettre en place des actions correctives par accord ou plan d'action",
+			"Informer et consulter votre CSE sur l'exactitude des données et éventuellement sur la justification en cas d'écarts ≥ 5 % (l'avis devra être transmis à la dernière étape de la démarche)",
+			"Redéclarer l'indicateur dans un délai de 6 mois après votre première déclaration",
+		]);
 		expect(
 			screen.queryByText("Déposer le ou les avis du CSE"),
 		).not.toBeInTheDocument();
@@ -148,6 +145,9 @@ describe("SecondDeclarationStep1Info", () => {
 
 		const intro = screen.getByText(/Vous devez mettre en œuvre des/);
 		expect(intro).toHaveClass(SCOPED_FONT_MEDIUM_CLASS);
+		expect(intro).toHaveTextContent(
+			"Vous devez mettre en œuvre des actions correctives et effectuer une seconde déclaration de l'indicateur par catégorie d'emplois.",
+		);
 		expect(intro.querySelector("strong")).toBeNull();
 	});
 

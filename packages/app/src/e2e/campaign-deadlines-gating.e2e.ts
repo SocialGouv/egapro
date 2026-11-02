@@ -297,12 +297,14 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			});
 			await fillCseStep1(page, {
 				hasSecondDeclaration: true,
-				secondDeclGapConsultationImplicit: true,
+				firstDeclJustification: true,
+				secondDeclJustification: true,
 			});
 			await submitCseStep2(page, {
 				hasSecondDeclaration: true,
 				columns: [
 					{ declarationNumber: 1, type: "accuracy" },
+					{ declarationNumber: 1, type: "gap" },
 					{ declarationNumber: 2, type: "accuracy" },
 					{ declarationNumber: 2, type: "gap" },
 				],
@@ -354,7 +356,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			await page.waitForURL(urlGlob(`${CSE_OPINION}/**`), { timeout: 15_000 });
 			await expect(
 				page.getByText(
-					"Votre rapport de l'évaluation conjointe a été transmis",
+					"Votre évaluation conjointe des rémunérations a été transmise",
 				),
 			).toBeVisible();
 			await expect(
@@ -362,7 +364,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			).toBeVisible();
 			await expect(
 				page.getByRole("link", {
-					name: "Télécharger le récapitulatif de l'évaluation conjointe des rémunérations",
+					name: `Télécharger le récapitulatif : Évaluation conjointe des rémunérations ${testDeclarationYear}`,
 				}),
 			).toHaveAttribute(
 				"href",
@@ -387,7 +389,7 @@ test.describe("Campaign deadlines are informational; only the last submission is
 			});
 
 			await page.goto(cseOpinionStepHref(1));
-			await fillCseStep1(page, { firstDeclGapCardHidden: true });
+			await fillCseStep1(page);
 			await submitCseStep2(page);
 
 			await expectModifiable(page, FIRST_DECLARATION_ROW, {
@@ -426,15 +428,17 @@ test.describe("Path-choice deadline is informational, never a gate", () => {
 				await page.waitForURL(urlGlob(COMPLIANCE_PATH), { timeout: 15_000 });
 
 				await expect(page.getByText(READ_ONLY_TAIL)).toHaveCount(0);
-				await expect(page.locator("#path-corrective")).toBeEnabled();
-				await expect(page.locator("#path-justify")).toBeEnabled();
-				await expect(page.locator("#path-joint")).toBeEnabled();
+				for (const answer of ["all", "partial", "none"]) {
+					await expect(
+						page.locator(`#gap-justification-${answer}`),
+					).toBeEnabled();
+				}
 
 				// The milestone outlives the gate it used to drive: still rendered, still
 				// the round the company is in, now purely to nudge.
 				await expect(
 					page.getByText(
-						"Échéance pour choisir un parcours de mise en conformité",
+						"Date limite pour choisir l'un des parcours ci-dessous.",
 					),
 				).toBeVisible();
 				await expect(page.getByText(STALE_ROUND1_DEADLINE)).toBeVisible();

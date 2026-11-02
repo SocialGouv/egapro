@@ -3,35 +3,39 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
-import { Controller } from "react-hook-form";
 
 import { useIsImpersonating, useReadOnlyGuard } from "~/modules/auth";
 import { useDeclarationDraft } from "~/modules/declaration-remuneration/shared/draft/useDeclarationDraft";
 import { useLockContext } from "~/modules/declaration-remuneration/shared/lock/LockContext";
-import { getCurrentYear } from "~/modules/domain";
+import { SavedIndicator } from "~/modules/declaration-remuneration/shared/SavedIndicator";
 import { cseOpinionStepHref } from "~/modules/routes";
 import { useZodForm } from "~/modules/shared/useZodForm";
 import { api } from "~/trpc/react";
-import { AccuracyOpinionCard } from "./components/AccuracyOpinionCard";
 import { CseStepIndicator } from "./components/CseStepIndicator";
-import { GapConsultationCard } from "./components/GapConsultationCard";
+import { OpinionCard } from "./components/OpinionCard";
 import { SubmissionBanner } from "./components/SubmissionBanner";
+import { DECLARATION_HEADINGS, getOpinionTitle } from "./contentTypeColumns";
 import {
 	buildOpinionsFormValues,
 	hydrateOpinionsForm,
-	isGapConsultationIncomplete,
+	isJustificationOpinionIncomplete,
+	type JustificationRequirements,
 	normalizeSubmittedOpinions,
 } from "./opinionsFormValues";
 import styles from "./Step1Opinions.module.scss";
 import { saveOpinionsSchema } from "./schemas";
 import formStyles from "./shared/formActions.module.scss";
-import type { CseOpinionStep1Data, OpinionType } from "./types";
+import layoutStyles from "./shared/stepLayout.module.scss";
+import type { SubmissionBannerState } from "./submissionBanner";
+import type {
+	CseOpinionStep1Data,
+	DeclarationNumber,
+	OpinionType,
+} from "./types";
 
-// Looser than the form values on purpose: the draft only ever carries what the user entered.
 type DeclarationOpinionDraftValue = {
 	accuracyOpinion?: OpinionType;
 	accuracyDate?: string;
-	gapConsulted?: boolean;
 	gapOpinion?: OpinionType | null;
 	gapDate?: string | null;
 };
@@ -41,67 +45,64 @@ type OpinionsDraftValues = {
 	secondDeclaration?: DeclarationOpinionDraftValue;
 };
 
+type DeclarationKey = "firstDeclaration" | "secondDeclaration";
+
+const DECLARATION_KEYS: Record<DeclarationNumber, DeclarationKey> = {
+	1: "firstDeclaration",
+	2: "secondDeclaration",
+};
+
+const CARD_ID_PREFIXES: Record<DeclarationNumber, string> = {
+	1: "first-decl",
+	2: "second-decl",
+};
+
+const PAGE_TITLE = "Transmission du ou des avis du CSE";
+
 type Props = {
+	banner?: SubmissionBannerState;
 	cseDeadline: Date;
+	email?: string;
+	firstDeclJustificationRequired: boolean;
+	hasSecondDeclaration: boolean;
+	initialData?: CseOpinionStep1Data;
+	secondDeclJustificationRequired: boolean;
 	siren: string;
 	year: number;
-	initialData?: CseOpinionStep1Data;
-	email?: string;
-	// Defaults to true so the card keeps rendering for callers that don't compute it.
-	firstDeclGapHigh?: boolean;
-	firstDeclarationPathChoice?: string | null;
-	hasSecondDeclaration?: boolean;
-	secondDeclGapHigh?: boolean;
-	secondDeclarationPathChoice?: string | null;
 };
 
 export function Step1Opinions({
+	banner = null,
 	cseDeadline,
+	email,
+	firstDeclJustificationRequired,
+	hasSecondDeclaration,
+	initialData,
+	secondDeclJustificationRequired,
 	siren,
 	year,
-	initialData,
-	email,
-	firstDeclGapHigh = true,
-	firstDeclarationPathChoice,
-	hasSecondDeclaration = true,
-	secondDeclGapHigh = true,
-	secondDeclarationPathChoice,
 }: Props) {
-	const isJointEvaluation =
-		firstDeclarationPathChoice === "joint_evaluation" ||
-		secondDeclarationPathChoice === "joint_evaluation";
-	const showFirstDeclarationGap = firstDeclGapHigh;
-	const isFirstDeclarationJustification =
-		showFirstDeclarationGap && firstDeclarationPathChoice === "justify";
-	const showSecondDeclarationGap = hasSecondDeclaration && secondDeclGapHigh;
-	const isSecondDeclarationJustification =
-		showSecondDeclarationGap && secondDeclarationPathChoice === "justify";
 	const router = useRouter();
 	const isImpersonating = useIsImpersonating();
 	const readOnlyGuard = useReadOnlyGuard();
 	const { isReadOnly } = useLockContext();
 
+	const requirements = useMemo<JustificationRequirements>(
+		() => ({ firstDeclJustificationRequired, secondDeclJustificationRequired }),
+		[firstDeclJustificationRequired, secondDeclJustificationRequired],
+	);
+	const justificationRequired: Record<DeclarationNumber, boolean> = {
+		1: firstDeclJustificationRequired,
+		2: secondDeclJustificationRequired,
+	};
+
 	const initialFormValues = useMemo(
 		() =>
-			buildOpinionsFormValues(
-				initialData,
-				hasSecondDeclaration,
-				showSecondDeclarationGap,
-				isSecondDeclarationJustification,
-				isFirstDeclarationJustification,
-				showFirstDeclarationGap,
-			),
-		[
-			hasSecondDeclaration,
-			initialData,
-			isFirstDeclarationJustification,
-			isSecondDeclarationJustification,
-			showFirstDeclarationGap,
-			showSecondDeclarationGap,
-		],
+			buildOpinionsFormValues(initialData, hasSecondDeclaration, requirements),
+		[hasSecondDeclaration, initialData, requirements],
 	);
 
-	const { draft, setField, isLoadingDraft } =
+	const { draft, setField, hasDraft, isLoadingDraft, isSaving, isPendingSave } =
 		useDeclarationDraft<OpinionsDraftValues>({
 			siren,
 			year,
@@ -120,66 +121,38 @@ export function Step1Opinions({
 			form.setValue,
 			draft,
 			hasSecondDeclaration,
-			showSecondDeclarationGap,
-			isSecondDeclarationJustification,
-			isFirstDeclarationJustification,
-			showFirstDeclarationGap,
+			requirements,
 		);
-	}, [
-		isLoadingDraft,
-		draft,
-		form,
-		hasSecondDeclaration,
-		showFirstDeclarationGap,
-		showSecondDeclarationGap,
-		isFirstDeclarationJustification,
-		isSecondDeclarationJustification,
-	]);
+	}, [isLoadingDraft, draft, form, hasSecondDeclaration, requirements]);
 
 	const triggerDraftSave = useCallback(() => {
 		if (isReadOnly) return;
-		const values = form.getValues();
-		// Guarding the read side alone would leave the synthesized answer in the draft.
-		const firstDeclaration: DeclarationOpinionDraftValue =
-			showFirstDeclarationGap
-				? values.firstDeclaration
-				: {
-						accuracyOpinion: values.firstDeclaration.accuracyOpinion,
-						accuracyDate: values.firstDeclaration.accuracyDate,
-					};
+		const values = normalizeSubmittedOpinions(form.getValues(), requirements);
 		setField({
-			firstDeclaration,
+			firstDeclaration: values.firstDeclaration,
 			secondDeclaration: values.secondDeclaration,
 		});
-	}, [form, isReadOnly, setField, showFirstDeclarationGap]);
+	}, [form, isReadOnly, requirements, setField]);
 
 	const mutation = api.cseOpinion.saveOpinions.useMutation({
 		onSuccess: () => router.push(cseOpinionStepHref(2)),
 	});
 
+	const declarationNumbers: DeclarationNumber[] = hasSecondDeclaration
+		? [1, 2]
+		: [1];
+
 	const onSubmit = form.handleSubmit((data) => {
-		const submittedData = normalizeSubmittedOpinions(
-			data,
-			showSecondDeclarationGap,
-			isSecondDeclarationJustification,
-			isFirstDeclarationJustification,
-			showFirstDeclarationGap,
+		const submittedData = normalizeSubmittedOpinions(data, requirements);
+		const incomplete = declarationNumbers.find((declarationNumber) =>
+			isJustificationOpinionIncomplete(
+				submittedData[DECLARATION_KEYS[declarationNumber]],
+				justificationRequired[declarationNumber],
+			),
 		);
-		if (
-			showFirstDeclarationGap &&
-			isGapConsultationIncomplete(submittedData.firstDeclaration)
-		) {
-			form.setError("firstDeclaration.gapOpinion", {
-				message: "Veuillez remplir tous les champs de consultation.",
-			});
-			return;
-		}
-		if (
-			showSecondDeclarationGap &&
-			isGapConsultationIncomplete(submittedData.secondDeclaration)
-		) {
-			form.setError("secondDeclaration.gapOpinion", {
-				message: "Veuillez remplir tous les champs de consultation.",
+		if (incomplete) {
+			form.setError(`${DECLARATION_KEYS[incomplete]}.gapOpinion`, {
+				message: "Veuillez remplir tous les champs obligatoires.",
 			});
 			return;
 		}
@@ -187,204 +160,123 @@ export function Step1Opinions({
 		mutation.mutate(submittedData);
 	});
 
-	const firstDeclOpinion = form.watch("firstDeclaration.accuracyOpinion");
-	const firstDeclDate = form.watch("firstDeclaration.accuracyDate");
-	const firstDeclGapOpinion = form.watch("firstDeclaration.gapOpinion");
-	const firstDeclGapDate = form.watch("firstDeclaration.gapDate");
-	const secondDeclOpinion = form.watch("secondDeclaration.accuracyOpinion");
-	const secondDeclDate = form.watch("secondDeclaration.accuracyDate");
-	const secondDeclGapOpinion = form.watch("secondDeclaration.gapOpinion");
-	const secondDeclGapDate = form.watch("secondDeclaration.gapDate");
+	const values = form.watch();
 
 	if (isLoadingDraft) {
 		return <p>Chargement...</p>;
 	}
 
+	const DeclarationHeading = banner ? "h3" : "h2";
+
+	const renderCard = (
+		declarationNumber: DeclarationNumber,
+		type: "accuracy" | "gap",
+	) => {
+		const key = DECLARATION_KEYS[declarationNumber];
+		const declaration = values[key];
+		const isAccuracy = type === "accuracy";
+		return (
+			<OpinionCard
+				date={
+					(isAccuracy ? declaration?.accuracyDate : declaration?.gapDate) ?? ""
+				}
+				id={`${CARD_ID_PREFIXES[declarationNumber]}-${type}`}
+				key={type}
+				onDateChange={(value) => {
+					form.setValue(
+						isAccuracy ? `${key}.accuracyDate` : `${key}.gapDate`,
+						value,
+					);
+					triggerDraftSave();
+				}}
+				onOpinionChange={(value) => {
+					form.setValue(
+						isAccuracy ? `${key}.accuracyOpinion` : `${key}.gapOpinion`,
+						value,
+					);
+					triggerDraftSave();
+				}}
+				opinion={
+					(isAccuracy
+						? declaration?.accuracyOpinion
+						: declaration?.gapOpinion) ?? null
+				}
+				readOnly={isReadOnly}
+				title={getOpinionTitle(declarationNumber, type)}
+			/>
+		);
+	};
+
 	return (
 		<form autoComplete="off" noValidate onSubmit={onSubmit}>
-			{/* noValidate: the required radios expose the required state to
-			    assistive tech (RGAA 11.10) without native browser bubbles
-			    preempting the app's own zod + custom validation messages. */}
-			{/* Read-only mode is enforced per control (disabled radios, readOnly
-			    dates, disabled submit button): a fieldset-level `disabled` would
-			    hide the content from some assistive technologies (#3803). */}
-			<fieldset className={styles.readOnlyFieldset}>
+			<fieldset className={`${styles.readOnlyFieldset} ${layoutStyles.screen}`}>
 				<legend className="fr-sr-only">Avis du CSE</legend>
-				{isJointEvaluation && (
-					<div className="fr-grid-row fr-grid-row--middle fr-mb-3w">
-						<div className="fr-col">
-							<h1 className="fr-h4 fr-mb-0">
-								Parcours de mise en conformité pour l'indicateur par catégorie
-								d'emplois
-							</h1>
-						</div>
-					</div>
-				)}
-
-				{isJointEvaluation && (
-					<SubmissionBanner
-						deadline={cseDeadline}
-						email={email ?? "adresse@exemple.fr"}
-						year={getCurrentYear()}
+				<div className={layoutStyles.titleRow}>
+					<h1 className="fr-h4 fr-mb-0">
+						{banner
+							? "Parcours de mise en conformité pour l'indicateur par catégorie d'emplois"
+							: PAGE_TITLE}
+					</h1>
+					<SavedIndicator
+						hasData={hasDraft || initialData !== undefined}
+						isPendingSave={isPendingSave}
+						isSaving={isSaving}
 					/>
-				)}
+				</div>
 
-				{isJointEvaluation ? (
-					<h2 className="fr-h4 fr-mt-5w fr-mb-4w">
-						Dépôt du ou des avis du CSE
-					</h2>
-				) : (
-					<h1 className="fr-h4 fr-mb-4w">Dépôt du ou des avis du CSE</h1>
+				{banner && (
+					<>
+						<SubmissionBanner
+							deadline={cseDeadline}
+							depositModifiable={banner.depositModifiable}
+							email={email ?? "adresse@exemple.fr"}
+							variant={banner.variant}
+							year={year}
+						/>
+						<h2 className="fr-h6 fr-mb-0">{PAGE_TITLE}</h2>
+					</>
 				)}
 
 				<CseStepIndicator currentStep={1} />
 
-				<p className={`fr-text--md fr-mb-2w ${styles.introText}`}>
-					Renseignez les informations relatives à l'avis ou aux avis émis par
-					votre CSE.
-				</p>
-				<p className="fr-mb-4w fr-text-title--grey">
-					Tous les champs sont obligatoires.
-				</p>
-
-				{/* A single declaration has nothing to be told apart from, so the
-				    per-declaration headings only earn their place in pairs. */}
-				{hasSecondDeclaration &&
-					(isJointEvaluation ? (
-						<h3 className="fr-h6 fr-mb-3w">Première déclaration</h3>
-					) : (
-						<h2 className="fr-h6 fr-mb-3w">Première déclaration</h2>
-					))}
-
-				<div className={styles.cardStack}>
-					<AccuracyOpinionCard
-						date={firstDeclDate ?? ""}
-						id="first-decl-accuracy"
-						onDateChange={(v) => {
-							form.setValue("firstDeclaration.accuracyDate", v);
-							triggerDraftSave();
-						}}
-						onOpinionChange={(v) => {
-							form.setValue("firstDeclaration.accuracyOpinion", v);
-							triggerDraftSave();
-						}}
-						opinion={firstDeclOpinion ?? null}
-						readOnly={isReadOnly}
-						title="Exactitude des données et des méthodes de calcul de la déclaration de l'ensemble des indicateurs"
-					/>
-
-					{showFirstDeclarationGap && (
-						<Controller
-							control={form.control}
-							name="firstDeclaration.gapConsulted"
-							render={({ field }) => (
-								<GapConsultationCard
-									consulted={
-										isFirstDeclarationJustification
-											? true
-											: (field.value ?? null)
-									}
-									date={firstDeclGapDate ?? ""}
-									id="first-decl-gap"
-									onConsultedChange={(v) => {
-										field.onChange(v);
-										triggerDraftSave();
-									}}
-									onDateChange={(v) => {
-										form.setValue("firstDeclaration.gapDate", v);
-										triggerDraftSave();
-									}}
-									onOpinionChange={(v) => {
-										form.setValue("firstDeclaration.gapOpinion", v);
-										triggerDraftSave();
-									}}
-									opinion={firstDeclGapOpinion ?? null}
-									readOnly={isReadOnly}
-									showConsultationQuestion={!isFirstDeclarationJustification}
-								/>
-							)}
-						/>
-					)}
+				<div className={styles.intro}>
+					<p className={`fr-text--md fr-mb-0 ${styles.introText}`}>
+						Renseignez les informations relatives à l'avis ou aux avis émis par
+						votre CSE.
+					</p>
+					<p className="fr-mb-0 fr-text-title--grey">
+						Tous les champs sont obligatoires.
+					</p>
 				</div>
 
-				{hasSecondDeclaration && (
-					<>
-						{isJointEvaluation ? (
-							<h3 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h3>
-						) : (
-							<h2 className="fr-h6 fr-mt-5w fr-mb-3w">Deuxième déclaration</h2>
+				{declarationNumbers.map((declarationNumber) => (
+					<section className={styles.declaration} key={declarationNumber}>
+						{hasSecondDeclaration && (
+							<DeclarationHeading className="fr-h6 fr-mb-0">
+								{DECLARATION_HEADINGS[declarationNumber]}
+							</DeclarationHeading>
 						)}
+						{renderCard(declarationNumber, "accuracy")}
+						{justificationRequired[declarationNumber] &&
+							renderCard(declarationNumber, "gap")}
+					</section>
+				))}
 
-						<div className={styles.cardStack}>
-							<AccuracyOpinionCard
-								date={secondDeclDate ?? ""}
-								id="second-decl-accuracy"
-								onDateChange={(v) => {
-									form.setValue("secondDeclaration.accuracyDate", v);
-									triggerDraftSave();
-								}}
-								onOpinionChange={(v) => {
-									form.setValue("secondDeclaration.accuracyOpinion", v);
-									triggerDraftSave();
-								}}
-								opinion={secondDeclOpinion ?? null}
-								readOnly={isReadOnly}
-								title="Exactitude des données et des méthodes de calcul de la seconde déclaration de l'indicateur de rémunération par catégorie d'emplois"
-							/>
-
-							{showSecondDeclarationGap && (
-								<Controller
-									control={form.control}
-									name="secondDeclaration.gapConsulted"
-									render={({ field }) => (
-										<GapConsultationCard
-											consulted={
-												isSecondDeclarationJustification
-													? true
-													: (field.value ?? null)
-											}
-											date={secondDeclGapDate ?? ""}
-											id="second-decl-gap"
-											onConsultedChange={(v) => {
-												field.onChange(v);
-												triggerDraftSave();
-											}}
-											onDateChange={(v) => {
-												form.setValue("secondDeclaration.gapDate", v);
-												triggerDraftSave();
-											}}
-											onOpinionChange={(v) => {
-												form.setValue("secondDeclaration.gapOpinion", v);
-												triggerDraftSave();
-											}}
-											opinion={secondDeclGapOpinion ?? null}
-											readOnly={isReadOnly}
-											showConsultationQuestion={
-												!isSecondDeclarationJustification
-											}
-										/>
-									)}
-								/>
-							)}
-						</div>
-					</>
-				)}
-
-				<div aria-live="polite">
+				<div aria-live="polite" className={layoutStyles.alerts}>
 					{(form.formState.errors.firstDeclaration ||
 						form.formState.errors.secondDeclaration) && (
-						<div className="fr-alert fr-alert--error fr-mt-3w">
+						<div className="fr-alert fr-alert--error">
 							<p>Veuillez remplir tous les champs obligatoires.</p>
 						</div>
 					)}
 					{mutation.error && (
-						<div className="fr-alert fr-alert--error fr-mt-3w">
+						<div className="fr-alert fr-alert--error">
 							<p>{mutation.error.message}</p>
 						</div>
 					)}
 				</div>
 
-				<div className={`fr-mt-4w ${formStyles.actions}`}>
+				<div className={formStyles.actions}>
 					<span />
 					{isImpersonating && initialData ? (
 						<Link
