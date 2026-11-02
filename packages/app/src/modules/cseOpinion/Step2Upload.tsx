@@ -332,7 +332,7 @@ export function Step2Upload({
 					/>
 				)}
 
-				<div aria-live="polite" className={layoutStyles.alerts}>
+				<div className={layoutStyles.alerts} role="alert">
 					{showNoFileError && (
 						<div className="fr-alert fr-alert--error">
 							<h2 className="fr-alert__title">{NO_FILE_ALERT.title}</h2>

@@ -118,6 +118,16 @@ const ACCURACY_AND_GAP_COLUMNS = computeContentTypeColumns({
 	secondDeclJustificationRequired: false,
 });
 
+/**
+ * The alert region announcing a blocking error — `role="alert"` makes screen
+ * readers read it at once and in full (RGAA 7.5), unlike a polite region.
+ */
+function alertAnnouncing(text: string) {
+	return screen
+		.getAllByRole("alert")
+		.find((alert) => alert.textContent?.includes(text));
+}
+
 function getFileInput() {
 	return document.getElementById("cse-file-upload") as HTMLInputElement;
 }
@@ -299,6 +309,20 @@ describe("Step2Upload", () => {
 		expect(
 			screen.getByText("La taille du fichier ne doit pas dépasser 10 Mo."),
 		).toBeInTheDocument();
+	});
+
+	it("keeps the non-blocking upload progress message polite, outside any alert", async () => {
+		uploadFileMock.mockReturnValue(new Promise(() => undefined));
+		renderStep();
+
+		const file = new File(["content"], "avis.pdf", { type: "application/pdf" });
+		fireEvent.change(getFileInput(), { target: { files: [file] } });
+
+		const progress = await screen.findByText(
+			"Import du ou des fichiers en cours…",
+		);
+		expect(progress.closest('[aria-live="polite"]')).not.toBeNull();
+		expect(progress.closest('[role="alert"]')).toBeNull();
 	});
 
 	it("renders the confirmation modal dialog", () => {
@@ -487,6 +511,7 @@ describe("Step2Upload", () => {
 				"Ajoutez l'avis d'exactitude des données et des méthodes de calcul de la première déclaration, ou indiquez s'il est déjà inclus dans l'un des fichiers déposés.",
 			),
 		).toBeInTheDocument();
+		expect(alertAnnouncing("Un avis CSE est manquant")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
 
@@ -538,6 +563,7 @@ describe("Step2Upload", () => {
 				"Pour chaque fichier déposé, cochez le ou les types d'avis qu'il contient avant de transmettre.",
 			),
 		).toBeInTheDocument();
+		expect(alertAnnouncing("Type d'avis non renseigné")).toBeInTheDocument();
 		expect(finalizeMutateAsyncMock).not.toHaveBeenCalled();
 	});
 
@@ -1350,6 +1376,7 @@ describe("Step2Upload", () => {
 					"Vous devez déposer le ou les avis de votre CSE au format PDF avant de transmettre.",
 				),
 			).toBeInTheDocument();
+			expect(alertAnnouncing("Aucun avis déposé")).toBeInTheDocument();
 			expect(
 				screen.queryByText("Un avis CSE est manquant"),
 			).not.toBeInTheDocument();

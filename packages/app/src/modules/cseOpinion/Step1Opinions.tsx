@@ -262,7 +262,7 @@ export function Step1Opinions({
 					</section>
 				))}
 
-				<div aria-live="polite" className={layoutStyles.alerts}>
+				<div className={layoutStyles.alerts} role="alert">
 					{(form.formState.errors.firstDeclaration ||
 						form.formState.errors.secondDeclaration) && (
 						<div className="fr-alert fr-alert--error">
