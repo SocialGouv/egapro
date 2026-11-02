@@ -98,6 +98,14 @@ export async function SecondDeclarationStepPage({ step: rawStep }: Props) {
 						initialStartDate={
 							data.declaration.secondDeclReferencePeriodStart ?? undefined
 						}
+						sameWorkforceByPayBasis={
+							data.declaration.totalWomen !== null &&
+							data.declaration.hourlyWomen !== null &&
+							data.declaration.totalWomen === data.declaration.hourlyWomen &&
+							data.declaration.totalMen !== null &&
+							data.declaration.hourlyMen !== null &&
+							data.declaration.totalMen === data.declaration.hourlyMen
+						}
 						status={data.declaration.status}
 					/>
 				</HydrateClient>

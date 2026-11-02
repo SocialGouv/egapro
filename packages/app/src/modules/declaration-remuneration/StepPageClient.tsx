@@ -159,6 +159,14 @@ export function StepPageClient({
 						initialSource={initialSource}
 						maxMen={declaration.totalMen ?? undefined}
 						maxWomen={declaration.totalWomen ?? undefined}
+						sameWorkforceByPayBasis={
+							declaration.totalWomen !== null &&
+							declaration.hourlyWomen !== null &&
+							declaration.totalWomen === declaration.hourlyWomen &&
+							declaration.totalMen !== null &&
+							declaration.hourlyMen !== null &&
+							declaration.totalMen === declaration.hourlyMen
+						}
 					/>
 				);
 			case 6:

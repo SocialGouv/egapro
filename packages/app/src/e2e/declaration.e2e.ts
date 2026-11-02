@@ -28,6 +28,7 @@ import {
 	categoryWorkforceInput,
 	fillCategoryPayAmounts,
 	fillStep4Quartiles,
+	STEP1_DISTINCT_HOURLY_WORKFORCE,
 	STEP1_WORKFORCE,
 	STEP5_WORKFORCE_REMINDER,
 	submitFromStep6Recap,
@@ -600,7 +601,7 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 		const count = (basis: "annual" | "hourly", sex: "women" | "men") =>
 			categoryWorkforceInput(page, { basis, sex });
 
-		await submitStepsThroughQuartiles(page);
+		await submitStepsThroughQuartiles(page, { distinctHourlyWorkforce: true });
 		await page.waitForURL(urlGlob(remunerationStepHref(5)));
 
 		await test.step("le tableau des effectifs porte les deux bases, sous le rappel", async () => {
@@ -622,7 +623,9 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 
 			await count("annual", "women").fill(String(STEP1_WORKFORCE.women));
 			await count("annual", "men").fill(String(STEP1_WORKFORCE.men));
-			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("hourly", "women").fill(
+				String(STEP1_DISTINCT_HOURLY_WORKFORCE.women),
+			);
 
 			// The Total is computed per row: the hourly one has nothing to add up
 			// until both of its cells are entered.
@@ -631,21 +634,28 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			);
 			await expect(rowTotal(page, "Rémunération horaire")).toHaveText("-");
 
-			await count("hourly", "men").fill(String(STEP1_WORKFORCE.men));
+			await count("hourly", "men").fill(
+				String(STEP1_DISTINCT_HOURLY_WORKFORCE.men),
+			);
 			await expect(rowTotal(page, "Rémunération horaire")).toHaveText(
-				String(STEP1_WORKFORCE.women + STEP1_WORKFORCE.men),
+				String(
+					STEP1_DISTINCT_HOURLY_WORKFORCE.women +
+						STEP1_DISTINCT_HOURLY_WORKFORCE.men,
+				),
 			);
 		});
 
 		await test.step("la cohérence avec l'étape 1 nomme la ligne fautive", async () => {
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 
-			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women - 1));
+			await count("hourly", "women").fill(
+				String(STEP1_DISTINCT_HOURLY_WORKFORCE.women - 1),
+			);
 			await next.click();
 
 			await expect(page).toHaveURL(urlPattern(remunerationStepHref(5)));
 			await expect(workforceMismatch).toHaveText(
-				`Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : ${STEP1_WORKFORCE.women}).`,
+				`Le nombre total de femmes renseigné ne correspond pas au nombre indiqué dans le tableau « Effectifs physiques pris en compte pour le calcul des indicateurs » (nombre total horaire : ${STEP1_DISTINCT_HOURLY_WORKFORCE.women}).`,
 			);
 			await expect(
 				workforceAlert.getByRole("heading", { name: "Nombre de salariés" }),
@@ -676,7 +686,9 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 
 			// Same divergence on the other row: only the row at fault is named, so
 			// the two bases cannot be satisfied by one another.
-			await count("hourly", "women").fill(String(STEP1_WORKFORCE.women));
+			await count("hourly", "women").fill(
+				String(STEP1_DISTINCT_HOURLY_WORKFORCE.women),
+			);
 			await count("annual", "men").fill(String(STEP1_WORKFORCE.men - 1));
 			await next.click();
 
@@ -721,13 +733,12 @@ test.describe("Step 5 — one physical headcount per pay basis (#4254)", () => {
 			await page.waitForURL(urlGlob(remunerationStepHref(6)));
 
 			await page.goto(remunerationStepHref(5));
-			for (const basis of ["annual", "hourly"] as const) {
-				await expect(count(basis, "women")).toHaveValue(
-					String(STEP1_WORKFORCE.women),
-				);
-				await expect(count(basis, "men")).toHaveValue(
-					String(STEP1_WORKFORCE.men),
-				);
+			for (const [basis, counts] of [
+				["annual", STEP1_WORKFORCE],
+				["hourly", STEP1_DISTINCT_HOURLY_WORKFORCE],
+			] as const) {
+				await expect(count(basis, "women")).toHaveValue(String(counts.women));
+				await expect(count(basis, "men")).toHaveValue(String(counts.men));
 			}
 		});
 
@@ -904,8 +915,14 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 	// so both bases still reconcile and the step can be submitted.
 	const SECOND_CATEGORY_MEN = 5;
 	const FIRST_CATEGORY = {
-		women: STEP1_WORKFORCE.women,
-		men: STEP1_WORKFORCE.men - SECOND_CATEGORY_MEN,
+		annual: {
+			women: STEP1_WORKFORCE.women,
+			men: STEP1_WORKFORCE.men - SECOND_CATEGORY_MEN,
+		},
+		hourly: {
+			women: STEP1_DISTINCT_HOURLY_WORKFORCE.women,
+			men: STEP1_DISTINCT_HOURLY_WORKFORCE.men - SECOND_CATEGORY_MEN,
+		},
 	} as const;
 
 	test.beforeAll(async () => {
@@ -966,7 +983,7 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			}
 		};
 
-		await submitStepsThroughQuartiles(page);
+		await submitStepsThroughQuartiles(page, { distinctHourlyWorkforce: true });
 		await page.waitForURL("**/declaration-remuneration/etape/5");
 
 		await test.step("une catégorie neuve déclare ses rémunérations : vide n'est pas 0", async () => {
@@ -980,8 +997,10 @@ test.describe("Step 5 — a category at headcount 0 declares no remuneration (#3
 			await expectPayCells(1, "enabled");
 
 			for (const basis of ["annual", "hourly"] as const) {
-				await count(1, basis, "women").fill(String(FIRST_CATEGORY.women));
-				await count(1, basis, "men").fill(String(FIRST_CATEGORY.men));
+				await count(1, basis, "women").fill(
+					String(FIRST_CATEGORY[basis].women),
+				);
+				await count(1, basis, "men").fill(String(FIRST_CATEGORY[basis].men));
 			}
 			await fillCategoryPayAmounts(page, { men: "1000", women: "1000" });
 		});
