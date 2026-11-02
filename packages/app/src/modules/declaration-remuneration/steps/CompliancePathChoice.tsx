@@ -19,7 +19,6 @@ import {
 	compliancePathsForGapJustification,
 	formatCivilLongDate,
 	type GapJustification,
-	gapJustificationFromPath,
 	selectPathChoiceDeadline,
 } from "~/modules/domain";
 import { NewTabNotice } from "~/modules/layout/shared/NewTabNotice";
@@ -50,6 +49,7 @@ type Props = {
 	declarationYear: number;
 	cseOpinionRequired: boolean;
 	email: string;
+	initialGapJustification?: GapJustification;
 	initialPath?: CompliancePathValue;
 	isSecondRound?: boolean;
 	pdfDownloadHref?: string;
@@ -71,6 +71,7 @@ export function CompliancePathChoice({
 	declarationSiren,
 	declarationYear,
 	email,
+	initialGapJustification,
 	initialPath,
 	isSecondRound = false,
 	pdfDownloadHref,
@@ -84,7 +85,9 @@ export function CompliancePathChoice({
 	const { isReadOnly: isLockReadOnly } = useLockContext();
 	const isReadOnly = isLockReadOnly || readOnlyReason !== undefined;
 	const round: ComplianceRound = isSecondRound ? 2 : 1;
-	const initialJustification = gapJustificationFromPath(initialPath);
+	const initialJustification = initialPath
+		? initialGapJustification
+		: undefined;
 
 	const dbValues = useMemo(
 		() => ({ gapJustification: initialJustification, path: initialPath }),
@@ -188,7 +191,7 @@ export function CompliancePathChoice({
 		}
 		const path = paths.length === 1 ? paths[0] : data.path;
 		if (!path || !paths.includes(path)) return;
-		mutation.mutate({ path });
+		mutation.mutate({ gapJustification: data.gapJustification, path });
 	});
 
 	return (

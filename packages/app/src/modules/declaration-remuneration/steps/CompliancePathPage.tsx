@@ -108,6 +108,9 @@ export async function CompliancePathPage() {
 	const pathChoice = isSecondRound
 		? data.declaration.secondDeclarationPathChoice
 		: data.declaration.firstDeclarationPathChoice;
+	const gapJustification = isSecondRound
+		? data.declaration.secondDeclarationGapJustification
+		: data.declaration.firstDeclarationGapJustification;
 	const readOnlyReason = getCompliancePathReadOnlyReason({
 		status: data.declaration.status,
 		pathChoice,
@@ -132,6 +135,7 @@ export async function CompliancePathPage() {
 				declarationSiren={data.declaration.siren}
 				declarationYear={currentYear}
 				email={email}
+				initialGapJustification={gapJustification ?? undefined}
 				initialPath={pathChoice ?? undefined}
 				isSecondRound={isSecondRound}
 				pdfDownloadHref={

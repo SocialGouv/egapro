@@ -287,6 +287,7 @@ describe("compliance submissions re-read the démarche under the declaration loc
 			},
 			request: () =>
 				createCaller().declaration.saveCompliancePath({
+					gapJustification: "partial",
 					path: "corrective_action",
 				}),
 		});

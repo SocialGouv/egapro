@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { listCompliancePathsByRound } from "~/server/rules/compliancePaths";
 import {
 	compliancePathsForGapJustification,
-	gapJustificationFromPath,
+	isCseJustificationOpinionRequired,
 } from "../shared/gapJustification";
 import {
 	COMPLIANCE_PATHS,
@@ -55,16 +55,19 @@ describe("compliancePathsForGapJustification", () => {
 	});
 });
 
-describe("gapJustificationFromPath", () => {
-	it("reads a saved justify path back as all gaps justified", () => {
-		expect(gapJustificationFromPath("justify")).toBe("all");
-	});
-
+describe("isCseJustificationOpinionRequired", () => {
 	it.each([
-		"corrective_action",
-		"joint_evaluation",
-		undefined,
-	] as const)("cannot tell partial from none for %s", (path) => {
-		expect(gapJustificationFromPath(path)).toBeUndefined();
+		[true, "all", true],
+		[true, "partial", true],
+		[true, "none", false],
+		[true, null, false],
+		[false, "all", false],
+		[false, "partial", false],
+		[false, "none", false],
+		[false, null, false],
+	] as const)("gapHigh=%s with %s requires the opinion: %s", (gapHigh, gapJustification, expected) => {
+		expect(
+			isCseJustificationOpinionRequired({ gapHigh, gapJustification }),
+		).toBe(expected);
 	});
 });

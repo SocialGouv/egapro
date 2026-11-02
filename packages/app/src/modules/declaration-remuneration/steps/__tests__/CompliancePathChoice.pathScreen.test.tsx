@@ -193,7 +193,10 @@ describe("CompliancePathChoice — round 1, path screen", () => {
 		submitForm();
 
 		await waitFor(() => {
-			expect(mockMutate).toHaveBeenCalledWith({ path });
+			expect(mockMutate).toHaveBeenCalledWith({
+				gapJustification: "partial",
+				path,
+			});
 		});
 		expect(mockPush).toHaveBeenCalledWith(href);
 	});
