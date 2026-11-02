@@ -62,6 +62,7 @@ export function StatsBarChart<Row extends { label: string }>({
 			<div aria-label={caption} className={styles.chartContainer} role="img">
 				<ResponsiveContainer>
 					<BarChart
+						accessibilityLayer={false}
 						data={data}
 						layout="vertical"
 						margin={{ top: 16, right: 32, bottom: 24, left: 8 }}

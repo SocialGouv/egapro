@@ -153,7 +153,7 @@ export function CampaignProgressionChart({ series, currentYear }: Props) {
 				role="img"
 			>
 				<ResponsiveContainer>
-					<LineChart data={data}>
+					<LineChart accessibilityLayer={false} data={data}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis
 							dataKey="dayOfYear"
